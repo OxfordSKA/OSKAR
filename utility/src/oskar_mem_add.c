@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
             a->type != b->type ||
             a->type != c->type)
     {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_TYPE_MISMATCH;
     }
 
     /* Check number of elements. */
@@ -72,12 +72,8 @@ void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
             a->location != b->location ||
             a->location != c->location)
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_LOCATION_MISMATCH;
     }
-
-    /* Note that OSKAR_INT and OSKAR_CHAR types are not supported. */
-    if (a->type == OSKAR_INT || a->type == OSKAR_CHAR)
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Note that device memory is not supported. */
     if (a->location == OSKAR_LOCATION_GPU)
@@ -98,17 +94,19 @@ void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
 
     if (oskar_mem_is_double(a->type))
     {
-        for (i = 0; i < num_elements; ++i)
-        {
-            ((double*)a->data)[i] = ((double*)b->data)[i] + ((double*)c->data)[i];
-        }
+        double *aa, *bb, *cc;
+        aa = (double*)a->data;
+        bb = (double*)b->data;
+        cc = (double*)c->data;
+        for (i = 0; i < num_elements; ++i) aa[i] = bb[i] + cc[i];
     }
     else if (oskar_mem_is_single(a->type))
     {
-        for (i = 0; i < num_elements; ++i)
-        {
-            ((float*)a->data)[i] = ((float*)b->data)[i] + ((float*)c->data)[i];
-        }
+        float *aa, *bb, *cc;
+        aa = (float*)a->data;
+        bb = (float*)b->data;
+        cc = (float*)c->data;
+        for (i = 0; i < num_elements; ++i) aa[i] = bb[i] + cc[i];
     }
     else
     {

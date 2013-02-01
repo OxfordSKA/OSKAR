@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,10 +29,13 @@
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_realloc.h"
 
-#include <cuda_runtime_api.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#ifdef OSKAR_HAVE_CUDA
+#include <cuda_runtime_api.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -91,6 +94,7 @@ void oskar_mem_realloc(oskar_Mem* mem, int num_elements, int* status)
     }
     else if (mem->location == OSKAR_LOCATION_GPU)
     {
+#ifdef OSKAR_HAVE_CUDA
         /* Allocate and initialise a new block of memory. */
         size_t copy_size;
         void* mem_new = NULL;
@@ -108,6 +112,9 @@ void oskar_mem_realloc(oskar_Mem* mem, int num_elements, int* status)
         /* Set the new meta-data. */
         mem->data = mem_new;
         mem->num_elements = num_elements;
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
     else
     {

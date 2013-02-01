@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,23 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_add_gaussian_noise.h"
-#include "utility/oskar_vector_types.h"
-#include "math/oskar_random_gaussian.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
+#include "utility/oskar_mem_scale_real.h"
+#include "utility/oskar_mem_scale_real_cuda.h"
+#include "utility/oskar_mem_type_check.h"
+#include "utility/oskar_cuda_check_error.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
 #endif
-
-void oskar_mem_add_gaussian_noise(oskar_Mem* mem, double stddev, double mean,
-        int* status)
+void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status)
 {
-    int i;
-    double r1, r2;
+    int num_elements, i;
 
     /* Check all inputs. */
     if (!mem || !status)
@@ -54,51 +48,64 @@ void oskar_mem_add_gaussian_noise(oskar_Mem* mem, double stddev, double mean,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    if (mem->location != OSKAR_LOCATION_CPU)
-    {
-        *status = OSKAR_ERR_BAD_LOCATION;
-        return;
-    }
+    /* Get memory meta-data. */
+    num_elements = mem->num_elements;
 
-    if (mem->type == OSKAR_DOUBLE)
+    /* Check if elements are real, complex or matrix. */
+    if (oskar_mem_is_complex(mem->type))
+        num_elements *= 2;
+    if (oskar_mem_is_matrix(mem->type))
+        num_elements *= 4;
+
+    /* Scale the vector. */
+    if (oskar_mem_is_single(mem->type))
     {
-        for (i = 0; i < mem->num_elements; ++i)
+        if (mem->location == OSKAR_LOCATION_CPU)
         {
-            r1 = oskar_random_gaussian(NULL);
-            ((double*)mem->data)[i] += r1 * stddev + mean;
+            float *aa;
+            aa = (float*) mem->data;
+            for (i = 0; i < num_elements; ++i) aa[i] *= (float)value;
+        }
+        else if (mem->location == OSKAR_LOCATION_GPU)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            oskar_mem_scale_real_cuda_f(num_elements, (float)value,
+                    (float*)(mem->data));
+            oskar_cuda_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
+        else
+        {
+            *status = OSKAR_ERR_BAD_LOCATION;
         }
     }
-    else if (mem->type == OSKAR_DOUBLE_COMPLEX)
+    else if (oskar_mem_is_double(mem->type))
     {
-        for (i = 0; i < mem->num_elements; ++i)
+        if (mem->location == OSKAR_LOCATION_CPU)
         {
-            r1 = oskar_random_gaussian(&r2);
-            ((double2*)mem->data)[i].x += r1 * stddev + mean;
-            ((double2*)mem->data)[i].y += r2 * stddev + mean;
+            double *aa;
+            aa = (double*) mem->data;
+            for (i = 0; i < num_elements; ++i) aa[i] *= value;
         }
-    }
-    else if (mem->type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-    {
-        for (i = 0; i < mem->num_elements; ++i)
+        else if (mem->location == OSKAR_LOCATION_GPU)
         {
-            r1 = oskar_random_gaussian(&r2);
-            ((double4c*)mem->data)[i].a.x += r1 * stddev + mean;
-            ((double4c*)mem->data)[i].a.y += r2 * stddev + mean;
-            r1 = oskar_random_gaussian(&r2);
-            ((double4c*)mem->data)[i].b.x += r1 * stddev + mean;
-            ((double4c*)mem->data)[i].b.y += r2 * stddev + mean;
-            r1 = oskar_random_gaussian(&r2);
-            ((double4c*)mem->data)[i].c.x += r1 * stddev + mean;
-            ((double4c*)mem->data)[i].c.y += r2 * stddev + mean;
-            r1 = oskar_random_gaussian(&r2);
-            ((double4c*)mem->data)[i].d.x += r1 * stddev + mean;
-            ((double4c*)mem->data)[i].d.y += r2 * stddev + mean;
+#ifdef OSKAR_HAVE_CUDA
+            oskar_mem_scale_real_cuda_d(num_elements, value,
+                    (double*)(mem->data));
+            oskar_cuda_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
+        else
+        {
+            *status = OSKAR_ERR_BAD_LOCATION;
         }
     }
     else
+    {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+    }
 }
-
-#ifdef __cplusplus
-}
-#endif

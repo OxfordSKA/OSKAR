@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,10 @@
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_insert.h"
 
+#ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
+#endif
+
 #include <string.h>
 
 #ifdef __cplusplus
@@ -96,8 +99,12 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset,
     else if (location_src == OSKAR_LOCATION_CPU
             && location_dst == OSKAR_LOCATION_GPU)
     {
+#ifdef OSKAR_HAVE_CUDA
         cudaMemcpy(destination, src->data, bytes, cudaMemcpyHostToDevice);
         *status = cudaPeekAtLastError();
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
         return;
     }
 
@@ -105,8 +112,12 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset,
     else if (location_src == OSKAR_LOCATION_GPU
             && location_dst == OSKAR_LOCATION_CPU)
     {
+#ifdef OSKAR_HAVE_CUDA
         cudaMemcpy(destination, src->data, bytes, cudaMemcpyDeviceToHost);
         *status = cudaPeekAtLastError();
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
         return;
     }
 
@@ -114,8 +125,12 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset,
     else if (location_src == OSKAR_LOCATION_GPU
             && location_dst == OSKAR_LOCATION_GPU)
     {
+#ifdef OSKAR_HAVE_CUDA
         cudaMemcpy(destination, src->data, bytes, cudaMemcpyDeviceToDevice);
         *status = cudaPeekAtLastError();
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
         return;
     }
 

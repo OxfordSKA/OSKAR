@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,9 +29,11 @@
 #include "utility/oskar_mem_append_raw.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_Mem.h"
 
+#ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -76,17 +78,27 @@ void oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
         if (to->location == OSKAR_LOCATION_CPU)
             memcpy((char*)(to->data) + offset_bytes, from, mem_size);
         else
+        {
+#ifdef OSKAR_HAVE_CUDA
             cudaMemcpy((char*)(to->data) + offset_bytes, from,
                     mem_size, cudaMemcpyHostToDevice);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
     }
     else if (from_location == OSKAR_LOCATION_GPU)
     {
+#ifdef OSKAR_HAVE_CUDA
         if (to->location == OSKAR_LOCATION_CPU)
             cudaMemcpy((char*)(to->data) + offset_bytes, from,
                     mem_size, cudaMemcpyDeviceToHost);
         else
             cudaMemcpy((char*)(to->data) + offset_bytes, from,
                     mem_size, cudaMemcpyDeviceToDevice);
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
     else
     {

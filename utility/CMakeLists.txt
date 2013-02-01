@@ -18,14 +18,6 @@ set(utility_SRC
     src/oskar_binary_tag_index_free.c
     src/oskar_binary_tag_index_query.c
     src/oskar_blank_parentheses.c
-    src/oskar_cuda_check_error.c
-    src/oskar_cuda_device_info_scan.c
-    src/oskar_cuda_info_create.c
-    src/oskar_cuda_info_free.c
-    src/oskar_cuda_info_log.c
-    src/oskar_cuda_mem_log.c
-    src/oskar_curand_state_free.c
-    src/oskar_curand_state_init.cu
     src/oskar_endian.c
     src/oskar_file_exists.c
     src/oskar_get_data_type_string.c
@@ -43,7 +35,6 @@ set(utility_SRC
     src/oskar_log_warning.c
     src/oskar_log_write.c
     src/oskar_Log.cpp
-    src/oskar_mem_add_gaussian_noise.c
     src/oskar_mem_add.c
     src/oskar_mem_alloc.c
     src/oskar_mem_append_raw.c
@@ -58,15 +49,14 @@ set(utility_SRC
     src/oskar_mem_copy.c
     src/oskar_mem_different.c
     src/oskar_mem_element_size.c
-    src/oskar_mem_element_multiply_cuda.cu
     src/oskar_mem_element_multiply.c
     src/oskar_mem_free.c
     src/oskar_mem_get_pointer.c
     src/oskar_mem_init.c
     src/oskar_mem_insert.c
     src/oskar_mem_realloc.c
-    src/oskar_mem_scale_real.cu
-    src/oskar_mem_set_value_real.cu
+    src/oskar_mem_scale_real.c
+    src/oskar_mem_set_value_real.c
     src/oskar_Mem.cpp
     src/oskar_settings_free.c
     src/oskar_settings_init.c
@@ -75,6 +65,23 @@ set(utility_SRC
     src/oskar_system_clock_data.c
     src/oskar_system_clock_string.c
 )
+
+if (CUDA_FOUND)
+    list(APPEND utility_SRC
+        src/oskar_cuda_check_error.c
+        src/oskar_cuda_device_info_scan.c
+        src/oskar_cuda_info_create.c
+        src/oskar_cuda_info_free.c
+        src/oskar_cuda_info_log.c
+        src/oskar_cuda_mem_log.c
+        src/oskar_curand_state_free.c
+        src/oskar_curand_state_init.cu
+        src/oskar_mem_element_multiply_cuda.cu
+        src/oskar_mem_scale_real_cuda.cu
+        src/oskar_mem_set_value_real_cuda.cu
+    )
+endif()
+
 set(utility_SRC "${utility_SRC}" PARENT_SCOPE)
 
 # === Recurse into test directory.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,10 @@
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_cuda_check_error.h"
 
+#ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
+#endif
+
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -59,15 +62,13 @@ void oskar_mem_free(oskar_Mem* mem, int* status)
         }
         else if (mem->location == OSKAR_LOCATION_GPU)
         {
-
+#ifdef OSKAR_HAVE_CUDA
             /* Free GPU memory. */
             cudaFree(mem->data);
-            if (!(*status))
-            {
-                int cuda_error;
-                cuda_error = cudaPeekAtLastError();
-                if (cuda_error) *status = cuda_error;
-            }
+            oskar_cuda_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
         }
     }
     mem->data = NULL;

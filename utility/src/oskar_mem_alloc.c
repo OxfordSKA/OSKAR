@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,11 @@
 
 #include "utility/oskar_mem_alloc.h"
 #include "utility/oskar_mem_element_size.h"
+
+#ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
+#endif
+
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -85,10 +89,14 @@ void oskar_mem_alloc(oskar_Mem* mem, int* status)
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
+#ifdef OSKAR_HAVE_CUDA
         /* Allocate GPU memory. */
         cudaMalloc(&mem->data, bytes);
         cudaMemset(mem->data, 0, bytes);
         *status = cudaPeekAtLastError();
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
     else
     {

@@ -435,6 +435,9 @@ void oskar_mem_element_multiply(oskar_Mem* c, oskar_Mem* a, const oskar_Mem* b,
     }
     else if (c->location == OSKAR_LOCATION_CPU)
     {
+        if (a->location != OSKAR_LOCATION_CPU ||
+                b->location != OSKAR_LOCATION_CPU)
+            *status = OSKAR_ERR_LOCATION_MISMATCH;
         oskar_mem_element_multiply_select(c, a, b, num, status);
     }
 }

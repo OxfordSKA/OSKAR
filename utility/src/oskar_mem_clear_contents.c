@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,9 +28,11 @@
 
 #include "utility/oskar_mem_clear_contents.h"
 #include "utility/oskar_mem_element_size.h"
-#include "utility/oskar_Mem.h"
 
+#ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -62,8 +64,12 @@ void oskar_mem_clear_contents(oskar_Mem* mem, int* status)
     }
     else if (mem->location == OSKAR_LOCATION_GPU)
     {
+#ifdef OSKAR_HAVE_CUDA
         cudaMemset(mem->data, 0, size);
         *status = cudaPeekAtLastError();
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
     else
     {

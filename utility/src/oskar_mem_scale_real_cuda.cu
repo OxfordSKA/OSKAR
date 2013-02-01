@@ -26,53 +26,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_TEST_H_
-#define OSKAR_MEM_TEST_H_
+#include "utility/oskar_mem_scale_real_cuda.h"
 
-/**
- * @file Test_Mem.h
- */
+/* Kernel wrappers. ======================================================== */
 
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class Test_Mem : public CppUnit::TestFixture
+/* Single precision. */
+void oskar_mem_scale_real_cuda_f(int num, float value, float* a)
 {
-    public:
-        CPPUNIT_TEST_SUITE(Test_Mem);
-        CPPUNIT_TEST(test_alloc);
-        CPPUNIT_TEST(test_realloc);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_different);
-        CPPUNIT_TEST(test_type_check);
-        CPPUNIT_TEST(test_scale_real);
-        CPPUNIT_TEST(test_set_value_real);
-        CPPUNIT_TEST(test_add);
-        CPPUNIT_TEST(test_binary);
-        CPPUNIT_TEST(test_copy_gpu);
-        CPPUNIT_TEST_SUITE_END();
+    int num_blocks, num_threads = 256;
+    num_blocks = (num + num_threads - 1) / num_threads;
+    oskar_mem_scale_real_cudak_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num, value, a);
+}
 
-    public:
-        /// Test method.
-        void test_alloc();
-        void test_realloc();
-        void test_append();
-        void test_different();
-        void test_type_check();
-        void test_scale_real();
-        void test_set_value_real();
-        void test_add();
-        void test_binary();
-        void test_copy_gpu();
-};
+/* Double precision. */
+void oskar_mem_scale_real_cuda_d(int num, double value, double* a)
+{
+    int num_blocks, num_threads = 256;
+    num_blocks = (num + num_threads - 1) / num_threads;
+    oskar_mem_scale_real_cudak_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num, value, a);
+}
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_Mem);
+/* Kernels. ================================================================ */
 
-#endif // OSKAR_MEM_TEST_H_
+/* Single precision. */
+__global__
+void oskar_mem_scale_real_cudak_f(int num, float value, float* a)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < num)
+        a[i] *= value;
+}
+
+/* Double precision. */
+__global__
+void oskar_mem_scale_real_cudak_d(int num, double value, double* a)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < num)
+        a[i] *= value;
+}

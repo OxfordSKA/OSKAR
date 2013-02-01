@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,26 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_ADD_GAUSSIAN_NOISE_H_
-#define OSKAR_MEM_ADD_GAUSSIAN_NOISE_H_
+#ifndef OSKAR_MEM_SCALE_REAL_CUDA_H_
+#define OSKAR_MEM_SCALE_REAL_CUDA_H_
 
 /**
- * @file oskar_mem_add_gaussian_noise.h
+ * @file oskar_mem_scale_real_cuda.h
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/* Kernel wrappers. ======================================================== */
+
+/* Single precision. */
 OSKAR_EXPORT
-void oskar_mem_add_gaussian_noise(oskar_Mem* mem, double stddev, double mean,
-        int* status);
+void oskar_mem_scale_real_cuda_f(int num, float value, float* a);
+
+/* Double precision. */
+OSKAR_EXPORT
+void oskar_mem_scale_real_cuda_d(int num, double value, double* a);
+
+#ifdef __CUDACC__
+
+/* Kernels. ================================================================ */
+
+/* Single precision. */
+OSKAR_EXPORT
+__global__
+void oskar_mem_scale_real_cudak_f(int num, float value, float* a);
+
+/* Double precision. */
+OSKAR_EXPORT
+__global__
+void oskar_mem_scale_real_cudak_d(int num, double value, double* a);
+
+#endif /* __CUDACC__ */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_ADD_GAUSSIAN_NOISE_H_ */
+#endif /* OSKAR_MEM_SCALE_REAL_CUDA_H_ */
