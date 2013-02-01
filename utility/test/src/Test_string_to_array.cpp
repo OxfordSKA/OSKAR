@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,51 +32,161 @@
 #include <cstdio>
 #include <cstdlib>
 
+#define NUM_DOUBLES 6
+#define NUM_STRINGS 5
+
 void Test_string_to_array::test_method()
 {
-    double list[6];
-    int filled = 0, n = sizeof(list) / sizeof(double);
-
     // Test comma and space separated values with additional non-numeric fields.
-    char test1[] = "hello 1.0,2.0 3.0, there,4.0     5.0 6.0";
-    filled = oskar_string_to_array_d(test1, n, list);
-    CPPUNIT_ASSERT_EQUAL(6, filled);
-    for (int i = 0; i < filled; ++i)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL((double)(i+1), list[i], 1e-10);
+    {
+        double list[NUM_DOUBLES];
+        char test[] = "hello 1.0,2.0 3.0, there,4.0     5.0 6.0";
+        int filled = oskar_string_to_array_d(test, NUM_DOUBLES, list);
+        CPPUNIT_ASSERT_EQUAL(6, filled);
+        for (int i = 0; i < filled; ++i)
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)(i+1), list[i], 1e-10);
+    }
 
     // Test empty string.
-    char test2[] = "";
-    filled = oskar_string_to_array_d(test2, n, list);
-    CPPUNIT_ASSERT_EQUAL(0, filled);
+    {
+        double list[NUM_DOUBLES];
+        char test[] = "";
+        int filled = oskar_string_to_array_d(test, NUM_DOUBLES, list);
+        CPPUNIT_ASSERT_EQUAL(0, filled);
+    }
 
     // Test empty string.
-    char test3[] = " ";
-    filled = oskar_string_to_array_d(test3, n, list);
-    CPPUNIT_ASSERT_EQUAL(0, filled);
+    {
+        double list[NUM_DOUBLES];
+        char test[] = " ";
+        int filled = oskar_string_to_array_d(test, NUM_DOUBLES, list);
+        CPPUNIT_ASSERT_EQUAL(0, filled);
+    }
 
     // Test negative integers.
-    char test4[] = "-4,-3,-2 -1 0";
-    filled = oskar_string_to_array_d(test4, n, list);
-    CPPUNIT_ASSERT_EQUAL(5, filled);
-    for (int i = 0; i < filled; ++i)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL((double)(i-4), list[i], 1e-10);
+    {
+        double list[NUM_DOUBLES];
+        char test[] = "-4,-3,-2 -1 0";
+        int filled = oskar_string_to_array_d(test, NUM_DOUBLES, list);
+        CPPUNIT_ASSERT_EQUAL(5, filled);
+        for (int i = 0; i < filled; ++i)
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)(i-4), list[i], 1e-10);
+    }
 
     // Test non-matching string.
-    char test5[] = "nobody home";
-    filled = oskar_string_to_array_d(test5, n, list);
-    CPPUNIT_ASSERT_EQUAL(0, filled);
+    {
+        double list[NUM_DOUBLES];
+        char test[] = "nobody home";
+        int filled = oskar_string_to_array_d(test, NUM_DOUBLES, list);
+        CPPUNIT_ASSERT_EQUAL(0, filled);
+    }
 
     // Test too many items.
-    char test6[] = "0.1 0.2 0.3   ,  0.4 0.5 0.6 0.7 0.8 0.9 1.0";
-    filled = oskar_string_to_array_d(test6, n, list);
-    CPPUNIT_ASSERT_EQUAL(n, filled);
-    for (int i = 0; i < filled; ++i)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL((i+1)/10.0, list[i], 1e-10);
+    {
+        double list[NUM_DOUBLES];
+        char test[] = "0.1 0.2 0.3   ,  0.4 0.5 0.6 0.7 0.8 0.9 1.0";
+        int filled = oskar_string_to_array_d(test, NUM_DOUBLES, list);
+        CPPUNIT_ASSERT_EQUAL(NUM_DOUBLES, filled);
+        for (int i = 0; i < filled; ++i)
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((i+1)/10.0, list[i], 1e-10);
+    }
 
     // Test single item.
-    char test7[] = "   0.1 ";
-    double par;
-    filled = oskar_string_to_array_d(test7, 1, &par);
-    CPPUNIT_ASSERT_EQUAL(1, filled);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.1, par, 1e-10);
+    {
+        char test[] = "   0.1 ";
+        double par;
+        int filled = oskar_string_to_array_d(test, 1, &par);
+        CPPUNIT_ASSERT_EQUAL(1, filled);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.1, par, 1e-10);
+    }
+
+    // Test comment line.
+    {
+        double list[NUM_DOUBLES];
+        char test[] = "# This is a comment.";
+        int filled = oskar_string_to_array_d(test, NUM_DOUBLES, list);
+        CPPUNIT_ASSERT_EQUAL(0, filled);
+    }
+
+    // Test comment line with preceding space.
+    {
+        double list[NUM_DOUBLES];
+        char test[] = " # This is another comment.";
+        int filled = oskar_string_to_array_d(test, NUM_DOUBLES, list);
+        CPPUNIT_ASSERT_EQUAL(0, filled);
+    }
+
+    // Test line with comment at end.
+    {
+        double list[NUM_DOUBLES];
+        char test[] = " 1.0 1.1 1.2 1.3 # This is another comment.";
+        int filled = oskar_string_to_array_d(test, NUM_DOUBLES, list);
+        CPPUNIT_ASSERT_EQUAL(4, filled);
+        for (int i = 0; i < filled; ++i)
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)(i/10.0 + 1), list[i], 1e-10);
+    }
 }
+
+void Test_string_to_array::test_strings()
+{
+    // Test empty string.
+    {
+        char *list[NUM_STRINGS];
+        char test[] = " ";
+        int filled = oskar_string_to_array_s(test, NUM_STRINGS, list);
+        CPPUNIT_ASSERT_EQUAL(0, filled);
+    }
+
+    // Test empty string.
+    {
+        char *list[NUM_STRINGS];
+        char test[] = "";
+        int filled = oskar_string_to_array_s(test, NUM_STRINGS, list);
+        CPPUNIT_ASSERT_EQUAL(0, filled);
+    }
+
+    // Test normal use case.
+    {
+        char *list[NUM_STRINGS];
+        char test[] = "*, *, 10, 20, AZEL";
+        int filled = oskar_string_to_array_s(test, NUM_STRINGS, list);
+        CPPUNIT_ASSERT_EQUAL(5, filled);
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[0], "*"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[1], "*"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[2], "10"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[3], "20"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[4], "AZEL"));
+        CPPUNIT_ASSERT_EQUAL(list[0][0], '*');
+        CPPUNIT_ASSERT_EQUAL(list[1][0], '*');
+        CPPUNIT_ASSERT_EQUAL(list[4][0], 'A');
+    }
+
+    // Test comment line.
+    {
+        char *list[NUM_STRINGS];
+        char test[] = "# This is a comment.";
+        int filled = oskar_string_to_array_s(test, NUM_STRINGS, list);
+        CPPUNIT_ASSERT_EQUAL(0, filled);
+    }
+
+    // Test comment line with preceding space.
+    {
+        char *list[NUM_STRINGS];
+        char test[] = " # This is another comment.";
+        int filled = oskar_string_to_array_s(test, NUM_STRINGS, list);
+        CPPUNIT_ASSERT_EQUAL(0, filled);
+    }
+
+    // Test line with comment at end.
+    {
+        char *list[NUM_STRINGS];
+        char test[] = " 1.0 1.1 1.2 1.3 # This is another comment.";
+        int filled = oskar_string_to_array_s(test, NUM_STRINGS, list);
+        CPPUNIT_ASSERT_EQUAL(4, filled);
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[0], "1.0"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[1], "1.1"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[2], "1.2"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[3], "1.3"));
+    }
+}
+

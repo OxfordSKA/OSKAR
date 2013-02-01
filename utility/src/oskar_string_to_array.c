@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,16 +39,22 @@ extern "C" {
 #define strtok_r(s,d,p) strtok_s(s,d,p)
 #endif
 
+#define DELIMITERS ", "
+
 /* Single precision. */
 int oskar_string_to_array_f(char* str, int n, float* data)
 {
     int i = 0;
-    char *save_ptr, *token = strtok_r(str, " ,", &save_ptr);
-    while (token && i < n)
+    char *save_ptr, *token;
+    do
     {
+        token = strtok_r(str, DELIMITERS, &save_ptr);
+        str = NULL;
+        if (!token) break;
+        if (token[0] == '#') break;
         if (sscanf(token, "%f", &data[i]) > 0) i++;
-        token = strtok_r(NULL, " ,", &save_ptr);
     }
+    while (i < n);
     return i;
 }
 
@@ -56,11 +62,30 @@ int oskar_string_to_array_f(char* str, int n, float* data)
 int oskar_string_to_array_d(char* str, int n, double* data)
 {
     int i = 0;
-    char *save_ptr, *token = strtok_r(str, " ,", &save_ptr);
-    while (token && i < n)
+    char *save_ptr, *token;
+    do
     {
+        token = strtok_r(str, DELIMITERS, &save_ptr);
+        str = NULL;
+        if (!token) break;
+        if (token[0] == '#') break;
         if (sscanf(token, "%lf", &data[i]) > 0) i++;
-        token = strtok_r(NULL, " ,", &save_ptr);
+    }
+    while (i < n);
+    return i;
+}
+
+/* String array. */
+int oskar_string_to_array_s(char* str, int n, char** data)
+{
+    int i;
+    char *save_ptr;
+    for (i = 0; i < n; ++i)
+    {
+        data[i] = strtok_r(str, DELIMITERS, &save_ptr);
+        str = NULL;
+        if (!data[i]) break;
+        if (data[i][0] == '#') break;
     }
     return i;
 }

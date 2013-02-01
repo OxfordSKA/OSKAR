@@ -47,11 +47,13 @@ class Test_string_to_array : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(Test_string_to_array);
         CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST(test_strings);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         /// Test method.
         void test_method();
+        void test_strings();
 };
 
 // Register the test class.

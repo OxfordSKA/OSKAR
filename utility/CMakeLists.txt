@@ -58,7 +58,8 @@ set(utility_SRC
     src/oskar_mem_copy.c
     src/oskar_mem_different.c
     src/oskar_mem_element_size.c
-    src/oskar_mem_element_multiply.cu
+    src/oskar_mem_element_multiply_cuda.cu
+    src/oskar_mem_element_multiply.c
     src/oskar_mem_free.c
     src/oskar_mem_get_pointer.c
     src/oskar_mem_init.c

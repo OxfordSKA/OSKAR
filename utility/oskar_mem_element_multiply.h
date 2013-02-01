@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
+#include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,22 +49,64 @@ extern "C" {
  * This function multiplies each element of one array by each element in
  * another array.
  *
- * Using Matlab syntax, this can be expressed as C = A .* B
+ * Using Matlab syntax, this can be expressed as c = a .* b
  *
  * The arrays can be in either CPU or GPU memory, but will be copied to the GPU
  * if necessary before performing the multiplication.
  *
- * If C is NULL on input then the operation becomes A = A .* B.
+ * If c is NULL on input then the operation becomes a = a .* b.
  *
- * @param[out]    C   Output array.
- * @param[in,out] A   Input and/or output array.
- * @param[in]     B   Second input array.
+ * @param[out]    c   Output array.
+ * @param[in,out] a   Input and/or output array.
+ * @param[in]     b   Second input array.
  * @param[in]     num If >0, use only this number of elements from A and B.
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
+void oskar_mem_element_multiply(oskar_Mem* c, oskar_Mem* a, const oskar_Mem* b,
         int num, int* status);
+
+
+OSKAR_EXPORT
+void oskar_mem_element_multiply_rr_r_f(int num, float* c,
+        const float* a, const float* b);
+
+OSKAR_EXPORT
+void oskar_mem_element_multiply_cc_c_f(int num, float2* c,
+        const float2* a, const float2* b);
+
+OSKAR_EXPORT
+void oskar_mem_element_multiply_cc_m_f(int num, float4c* c,
+        const float2* a, const float2* b);
+
+OSKAR_EXPORT
+void oskar_mem_element_multiply_cm_m_f(int num, float4c* c,
+        const float2* a, const float4c* b);
+
+OSKAR_EXPORT
+void oskar_mem_element_multiply_mm_m_f(int num, float4c* c,
+        const float4c* a, const float4c* b);
+
+
+OSKAR_EXPORT
+void oskar_mem_element_multiply_rr_r_d(int num, double* c,
+        const double* a, const double* b);
+
+OSKAR_EXPORT
+void oskar_mem_element_multiply_cc_c_d(int num, double2* c,
+        const double2* a, const double2* b);
+
+OSKAR_EXPORT
+void oskar_mem_element_multiply_cc_m_d(int num, double4c* c,
+        const double2* a, const double2* b);
+
+OSKAR_EXPORT
+void oskar_mem_element_multiply_cm_m_d(int num, double4c* c,
+        const double2* a, const double4c* b);
+
+OSKAR_EXPORT
+void oskar_mem_element_multiply_mm_m_d(int num, double4c* c,
+        const double4c* a, const double4c* b);
 
 #ifdef __cplusplus
 }

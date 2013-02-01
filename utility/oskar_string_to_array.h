@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,10 +48,12 @@ extern "C" {
  *
  * <b>Note that the input string is corrupted on exit.</b>
  *
+ * Any data after a hash '#' symbol on the line is treated as a comment and
+ * ignored.
+ *
  * @param[in,out] str The input string to split.
  * @param[in] n The maximum number of values to return (size of array \p data).
  * @param[out] data The array of values returned.
- * @param[in] save_ptr A pointer to use between calls.
  *
  * @return The number of values matched (or number of array elements filled).
  */
@@ -67,15 +69,38 @@ int oskar_string_to_array_f(char* str, int n, float* data);
  *
  * <b>Note that the input string is corrupted on exit.</b>
  *
+ * Any data after a hash '#' symbol on the line is treated as a comment and
+ * ignored.
+ *
  * @param[in,out] str The input string to split.
  * @param[in] n The maximum number of values to return (size of array \p data).
  * @param[out] data The array of values returned.
- * @param[in] save_ptr A pointer to use between calls.
  *
  * @return The number of values matched (or number of array elements filled).
  */
 OSKAR_EXPORT
 int oskar_string_to_array_d(char* str, int n, double* data);
+
+/**
+ * @brief Splits a string into sub-strings.
+ *
+ * @details
+ * This function splits a string into an array of strings. Splitting is
+ * performed either using whitespace or a comma.
+ *
+ * <b>Note that the input string is corrupted on exit.</b>
+ *
+ * Any data after a hash '#' symbol on the line is treated as a comment and
+ * ignored.
+ *
+ * @param[in,out] str The input string to split.
+ * @param[in] n The maximum number of values to return (size of array \p data).
+ * @param[out] data The array of values returned.
+ *
+ * @return The number of values matched (or number of array elements filled).
+ */
+OSKAR_EXPORT
+int oskar_string_to_array_s(char* str, int n, char** data);
 
 #ifdef __cplusplus
 }
