@@ -74,6 +74,8 @@ int oskar_settings_init(oskar_Settings* settings)
     settings->ionosphere.num_TID_screens = 0;
     settings->ionosphere.TID_files = NULL;
     settings->ionosphere.TID = NULL;
+    settings->ionosphere.TECImage.fits_file = NULL;
+    settings->ionosphere.TECImage.img_file = NULL;
 
     /* Initialise pathname to settings file. */
     oskar_mem_init(&settings->settings_path, OSKAR_CHAR,

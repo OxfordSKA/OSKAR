@@ -92,7 +92,6 @@ void oskar_evaluate_TEC_TID(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
                 );
                 pp_tec += TEC0;
                 ((float*)tec->data)[j] += (float)pp_tec;
-                printf("pp_tec = %f %f\n", pp_tec, ((float*)tec->data)[j]);
             }
         } /* loop over directions */
     } /* loop over components. */

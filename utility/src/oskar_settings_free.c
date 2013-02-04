@@ -149,6 +149,10 @@ int oskar_settings_free(oskar_Settings* settings)
     settings->ionosphere.TID = NULL;
     free(settings->ionosphere.TID_files);
     settings->ionosphere.TID_files = NULL;
+    free(settings->ionosphere.TECImage.fits_file);
+    settings->ionosphere.TECImage.fits_file = NULL;
+    free(settings->ionosphere.TECImage.img_file);
+    settings->ionosphere.TECImage.img_file = NULL;
 
     /* Free pathname to settings file. */
     oskar_mem_free(&settings->settings_path, &err);

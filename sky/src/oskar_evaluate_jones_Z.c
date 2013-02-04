@@ -76,9 +76,6 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_SkyModel* sky,
     int type;
     oskar_SkyModel sky_cpu; /* Copy of the sky model on the CPU */
 
-    printf("%s\n", __PRETTY_FUNCTION__);
-    printf("wavelength = %f\n", telescope->wavelength_metres);
-
     oskar_sky_model_init(&sky_cpu, oskar_sky_model_type(sky),
             OSKAR_LOCATION_CPU, sky->num_sources, status);
     oskar_sky_model_copy(&sky_cpu, sky, status);
@@ -250,10 +247,6 @@ static void evaluate_jones_Z_station(oskar_Mem* Z_station,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    printf(">> %s %i %i|%i?\n", __PRETTY_FUNCTION__, type,
-            OSKAR_DOUBLE_COMPLEX,
-            OSKAR_SINGLE_COMPLEX);
-
     if (type == OSKAR_DOUBLE_COMPLEX)
     {
         double2* Z = (double2*)Z_station->data;
@@ -291,14 +284,9 @@ static void evaluate_jones_Z_station(oskar_Mem* Z_station,
 
             arg = wavelength * 25. * ((float*)TEC->data)[i];
 
-
-
             /* Z phase == exp(i * lambda * 25 * tec) */
             Z[i].x = cos(arg);
             Z[i].y = sin(arg);
-
-            printf("TEC = %f, (wavelength = %f, arg = %f), Phase: %.3f %.3f\n", ((float*)TEC->data)[i],
-                    wavelength, arg, Z[i].x, Z[i].y);
         }
     }
     else

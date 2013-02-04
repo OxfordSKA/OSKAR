@@ -51,7 +51,7 @@ struct OSKAR_EXPORT oskar_StationModel
     double altitude_m;           /**< Altitude of station above ellipsoid, in metres. */
     double beam_longitude_rad;   /**< Longitude of beam phase centre, in radians. */
     double beam_latitude_rad;    /**< Latitude of beam phase centre, in radians. */
-    int beam_coord_type;         /**< Enumerator describing beam coordinate type. */
+    int beam_coord_type;         /**< Enumerator describing beam coordinate type. FIXME enum values defined where ...? */
     oskar_SystemNoiseModel noise;
 
     /* Data used only for aperture array stations ---------------------------*/

@@ -724,6 +724,20 @@ void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s)
     LV("Minimum elevation (deg)", "%.3f%", s->ionosphere.min_elevation * 180./M_PI);
     LV("TEC0", "%.3f%", s->ionosphere.TEC0);
     LVI("Number of TID screens", s->ionosphere.num_TID_screens);
+
+    if (s->ionosphere.TECImage.fits_file || s->ionosphere.TECImage.img_file)
+    {
+        oskar_log_message(log, depth, "TEC image settings");
+        depth++;
+        LVI("Station index", s->ionosphere.TECImage.stationID);
+        LVI("Beam centred", s->ionosphere.TECImage.beam_centred);
+        LVI("Image size", s->ionosphere.TECImage.size);
+        LV("FOV (deg)", "%.3f", s->ionosphere.TECImage.fov_rad*(180./M_PI));
+        if (s->ionosphere.TECImage.fits_file)
+            LVS("FITS image", s->ionosphere.TECImage.fits_file);
+        if (s->ionosphere.TECImage.img_file)
+            LVB("OSKAR Image", s->ionosphere.TECImage.img_file);
+    }
 }
 
 

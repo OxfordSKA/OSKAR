@@ -52,6 +52,18 @@ struct OSKAR_EXPORT oskar_SettingsTIDscreen
 typedef struct oskar_SettingsTIDscreen oskar_SettingsTIDscreen;
 
 
+struct OSKAR_EXPORT oskar_SettingsTECImage
+{
+    int stationID;    /* Index of the station for which to evaluate the TEC image */
+    int beam_centred; /* Bool, centre the TEC image on the beam direction */
+    double fov_rad;   /* Image field of view, in radians */
+    int size;         /* Image size along one dimension */
+    char* fits_file;  /* File name for TEC image in FITS format */
+    char* img_file;   /* File name for TEC image in OSKAR format */
+};
+typedef struct oskar_SettingsTECImage oskar_SettingsTECImage;
+
+
 /**
  * @struct oskar_SettingsIonosphere
  *
@@ -70,6 +82,8 @@ struct OSKAR_EXPORT oskar_SettingsIonosphere
     int num_TID_screens;   /* Number of TID TEC screens evaluated. */
     char** TID_files;      /* TID settings files (one for each screen height). */
     oskar_SettingsTIDscreen* TID; /* Array of TID screen structures. */
+
+    oskar_SettingsTECImage TECImage;
 };
 typedef struct oskar_SettingsIonosphere oskar_SettingsIonosphere;
 

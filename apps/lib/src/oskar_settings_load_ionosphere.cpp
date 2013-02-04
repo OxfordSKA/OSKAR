@@ -69,6 +69,33 @@ int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
         oskar_load_TID_parameter_file(&settings->TID[i], settings->TID_files[i],
                 &status);
     }
+
+    s.beginGroup("TECImage");
+    settings->TECImage.beam_centred = s.value("beam_centred", true).toBool();
+    settings->TECImage.stationID = s.value("station_idx", 0).toInt();
+    settings->TECImage.fov_rad = s.value("fov_deg", 0.0).toDouble();
+    settings->TECImage.fov_rad *= (M_PI/180.);
+    settings->TECImage.size = s.value("size", 0).toInt();
+    temp = s.value("filename").toString();
+    temp += "_st_" + QString::number(settings->TECImage.stationID);
+    temp += (settings->TECImage.beam_centred) ? "_BC" : "_SC";
+    if (s.value("save_fits", true).toBool())
+    {
+        QString temp_fits = temp + ".fits";
+        t = temp_fits.toAscii();
+        settings->TECImage.fits_file = (char*)malloc(t.size() + 1);
+        strcpy(settings->TECImage.fits_file, t.constData());
+    }
+
+    if (s.value("save_img", false).toBool())
+    {
+        QString temp_img = temp + ".img";
+        t = temp_img.toAscii();
+        settings->TECImage.img_file = (char*)malloc(t.size() + 1);
+        strcpy(settings->TECImage.img_file, t.constData());
+    }
+
+    s.endGroup(); // TECImage
     s.endGroup(); // ionosphere
 
     return status;

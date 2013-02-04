@@ -1333,6 +1333,39 @@ void oskar_SettingsModelApps::init_settings_ionosphere()
             "parameter files.");
     setDependency(k, group+"/enable", true);
 
+    // TEC image settings.
+    {
+        group += "/TECImage";
+        setLabel(group, "TEC image settings");
+        setTooltip(group, "Settings for creating an image of the Ionospheric "
+                "TEC screen as defined by the Ionospheric model settings.");
+        k = group + "/station_idx";
+        declare(k, "Station index", oskar_SettingsItem::INT_UNSIGNED, 0);
+        setTooltip(k, "Station Index for which to calculate the TEC screen.");
+        k = group + "/beam_centred";
+        declare(k, "Centre TEC image on the beam direction",
+                oskar_SettingsItem::BOOL, true);
+        setTooltip(k, "Centre the TEC image on the station (primary) beam "
+                "direction. This is the direction defined by the observation "
+                "settings.");
+        k = group + "/fov_deg";
+        declare(k, "Image Field of view (deg)", oskar_SettingsItem::DOUBLE);
+        setTooltip(k, "Field of view of the TEC image, in degrees.");
+        k = group + "/size";
+        declare(k, "Image size (number of pixels)", oskar_SettingsItem::INT);
+        setTooltip(k, "Number of pixels along each dimension of the TEC image.");
+        k = group + "/filename";
+        declare(k, "Output file name", oskar_SettingsItem::OUTPUT_FILE_NAME);
+        setTooltip(k, "The output file name path of the TEC image produced. "
+                "In order for the image file to be produced at least one of "
+                "FITS or OSKAR image format selections must be enabled.");
+        k = group + "/save_fits";
+        declare(k, "Save image as FITS format", oskar_SettingsItem::BOOL, true);
+        setTooltip(k, "Save the TEC image in FITS format.");
+        k = group + "/save_img";
+        declare(k, "Save image as OSKAR format", oskar_SettingsItem::BOOL, false);
+        setTooltip(k, "Save the TEC image in OSKAR binary image format.");
+    }
 }
 
 
