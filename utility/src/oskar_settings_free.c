@@ -48,6 +48,10 @@ int oskar_settings_free(oskar_Settings* settings)
     free(settings->obs.dec0_rad);
     settings->obs.dec0_rad = NULL;
 
+    /* Free pointing file name. */
+    free(settings->obs.pointing_file);
+    settings->obs.pointing_file = NULL;
+
     /* Free FITS file names. */
     for (i = 0; i < settings->sky.num_fits_files; ++i)
     {

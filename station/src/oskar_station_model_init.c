@@ -97,7 +97,7 @@ void oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->altitude_m = 0.0;
     model->beam_longitude_rad = 0.0;
     model->beam_latitude_rad = 0.0;
-    model->beam_coord_type = 0;
+    model->beam_coord_type = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
     model->normalise_beam = OSKAR_FALSE;
     model->enable_array_pattern = OSKAR_TRUE;
 

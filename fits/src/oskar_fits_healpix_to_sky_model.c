@@ -193,7 +193,7 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
         lat = M_PI / 2.0 - lat;
 
         /* Convert spherical coordinates to RA, Dec values if required. */
-        if (settings->coord_sys == OSKAR_COORD_SYS_GALACTIC)
+        if (settings->coord_sys == OSKAR_SPHERICAL_TYPE_GALACTIC)
             oskar_galactic_to_fk5_d(1, &lon, &lat, &lon, &lat);
 
         /* Set source data into sky model. */

@@ -26,54 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_beam_horizontal_lmn.h"
-#include "sky/oskar_ra_dec_to_hor_lmn.h"
-#include <stdlib.h>
-#include <math.h>
+#ifndef OSKAR_STATION_MODEL_DIFFERENT_H_
+#define OSKAR_STATION_MODEL_DIFFERENT_H_
+
+/**
+ * @file oskar_station_model_different.h
+ */
+
+#include "oskar_global.h"
+#include "station/oskar_StationModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_evaluate_beam_horizontal_lmn(double* l, double* m, double* n,
-        const oskar_StationModel* station, const double gast, int* status)
-{
-    /* Check all inputs. */
-    if (!l || !m || !n || !station || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Convert equatorial to horizontal coordinates if necessary. */
-    if (station->beam_coord_type == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
-    {
-        /* Local apparent Sidereal Time, in radians. */
-        double last;
-        last = gast + station->longitude_rad;
-
-        oskar_ra_dec_to_hor_lmn_d(1, &station->beam_longitude_rad,
-                &station->beam_latitude_rad, last, station->latitude_rad,
-                l, m, n);
-    }
-    else if (station->beam_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)
-    {
-        /* Convert AZEL to direction cosines. */
-        double cos_lat;
-        cos_lat = cos(station->beam_latitude_rad);
-        *l = cos_lat * sin(station->beam_longitude_rad);
-        *m = cos_lat * cos(station->beam_longitude_rad);
-        *n = sin(station->beam_latitude_rad);
-    }
-    else
-    {
-        *status = OSKAR_ERR_SETTINGS;
-    }
-}
+/**
+ * @brief
+ * Compares the contents of two station models.
+ *
+ * @details
+ * This function compares the contents of two station models. It returns true
+ * if the station models are different, or false if they are the same.
+ *
+ * @param[in] a            Pointer to first station model.
+ * @param[in] b            Pointer to second station model.
+ * @param[in,out]  status  Status return code.
+ *
+ * @return
+ * Returns true if the station models are different, or false if they are
+ * the same.
+ */
+OSKAR_EXPORT
+int oskar_station_model_different(const oskar_StationModel* a,
+        const oskar_StationModel* b, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_STATION_MODEL_DIFFERENT_H_ */

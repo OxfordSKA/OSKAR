@@ -510,6 +510,11 @@ void oskar_SettingsModelApps::init_settings_observation()
     declare(k, "Phase centre Dec [deg]", oskar_SettingsItem::DOUBLE_CSV_LIST);
     setTooltip(k, "Declination of the observation pointing (phase centre), "
             "in degrees.");
+    k = group + "/pointing_file";
+    declare(k, "Station pointing file", oskar_SettingsItem::INPUT_FILE_NAME);
+    setTooltip(k, "Pathname to optional station pointing file, which can be "
+            "used to override the beam direction for specific beamforming "
+            "levels and/or detectors in all stations.");
     k = group + "/start_frequency_hz";
     declare(k, "Start frequency [Hz]",
             oskar_SettingsItem::DOUBLE, 0.0, true);

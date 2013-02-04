@@ -44,6 +44,7 @@ int oskar_settings_init(oskar_Settings* settings)
     settings->sim.cuda_device_ids = NULL;
     settings->obs.ra0_rad = NULL;
     settings->obs.dec0_rad = NULL;
+    settings->obs.pointing_file = NULL;
     settings->sky.num_sky_files = 0;
     settings->sky.input_sky_file = NULL;
     settings->sky.gsm_file = NULL;

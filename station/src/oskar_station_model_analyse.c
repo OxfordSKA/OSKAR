@@ -30,9 +30,8 @@
 #include "station/oskar_station_model_type.h"
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_StationModel.h"
+#include "utility/oskar_vector_types.h"
 #include <stdlib.h>
-
-#include <vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,7 +40,7 @@ extern "C" {
 void oskar_station_model_analyse(oskar_StationModel* station,
         int* finished_identical_station_check, int* status)
 {
-    int i, type, location;
+    int i, type;
 
     /* Check all inputs. */
     if (!station || !finished_identical_station_check || !status)
@@ -53,12 +52,11 @@ void oskar_station_model_analyse(oskar_StationModel* station,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Get type and location. */
+    /* Get type. */
     type = oskar_station_model_type(station);
-    location = oskar_station_model_location(station);
 
     /* Check station model is in CPU-accessible memory. */
-    if (location != OSKAR_LOCATION_CPU)
+    if (oskar_station_model_location(station) != OSKAR_LOCATION_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;

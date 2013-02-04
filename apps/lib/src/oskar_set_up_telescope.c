@@ -36,6 +36,7 @@
 #include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_telescope_model_analyse.h"
 #include "interferometry/oskar_telescope_model_config_override.h"
+#include "station/oskar_station_model_load_pointing_file.h"
 #include "utility/oskar_get_error_string.h"
 
 #include "utility/oskar_log_error.h"
@@ -44,7 +45,6 @@
 #include "utility/oskar_log_value.h"
 #include "utility/oskar_log_warning.h"
 
-#include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
 
@@ -86,6 +86,24 @@ void oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
             status);
     oskar_telescope_model_noise_load(telescope, log, settings, status);
 
+    /* Set telescope model meta-data, including global pointing settings. */
+    oskar_telescope_model_set_metadata(telescope, settings);
+
+    /* Apply pointing file override if set. */
+    if (settings->obs.pointing_file)
+    {
+        int i;
+
+        /* Load the same pointing file for every station. */
+        oskar_log_message(log, 0, "Loading station pointing file "
+                "override '%s'...", settings->obs.pointing_file);
+        for (i = 0; i < telescope->num_stations; ++i)
+        {
+            oskar_station_model_load_pointing_file(&telescope->station[i],
+                    settings->obs.pointing_file, status);
+        }
+    }
+
     switch (settings->telescope.station_type)
     {
         case OSKAR_STATION_TYPE_AA:
@@ -110,9 +128,6 @@ void oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
             break;
     }
     if (*status) return;
-
-    /* Set telescope model meta-data. */
-    oskar_telescope_model_set_metadata(telescope, settings);
 
     /* Print summary data. */
     oskar_log_message(log, 0, "Telescope model summary");

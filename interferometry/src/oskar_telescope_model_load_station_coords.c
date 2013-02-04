@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,14 +89,9 @@ void oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
         /* Declare parameter array. */
         double par[] = {0.0, 0.0, 0.0}; /* Horizon plane x, y, z */
         double x = 0.0, y = 0.0, z = 0.0; /* (Offset) geocentric x, y, z */
-        int read = 0;
-
-        /* Ignore comment lines (lines starting with '#'). */
-        if (line[0] == '#') continue;
 
         /* Load coordinates. */
-        read = oskar_string_to_array_d(line, 3, par);
-        if (read < 2) continue;
+        if (oskar_string_to_array_d(line, 3, par) < 2) continue;
 
         /* Resize the telescope model to hold the station data.
          * We can't resize to more than needed, since we would then lose track

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@ class Test_StationModel : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE(Test_StationModel);
         CPPUNIT_TEST(test_load_single);
         CPPUNIT_TEST(test_load_double);
+        CPPUNIT_TEST(test_load_pointing_file);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -63,6 +64,9 @@ class Test_StationModel : public CppUnit::TestFixture
 
         // Test method.
         void test_load_double();
+
+        // Test method.
+        void test_load_pointing_file();
 };
 
 // Register the test class.

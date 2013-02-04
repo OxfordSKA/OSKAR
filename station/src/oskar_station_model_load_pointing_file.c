@@ -26,29 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_load_config.h"
-#include "station/oskar_station_model_resize.h"
-#include "station/oskar_station_model_set_element_coords.h"
-#include "station/oskar_station_model_set_element_errors.h"
-#include "station/oskar_station_model_set_element_orientation.h"
-#include "station/oskar_station_model_set_element_weight.h"
+#include "station/oskar_station_model_load_pointing_file.h"
 #include "station/oskar_station_model_type.h"
 #include "utility/oskar_getline.h"
 #include "utility/oskar_string_to_array.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
+#ifndef M_PI
+#define M_PI  3.14159265358979323846264338327950288
+#endif
+
+#define DEG2RAD (M_PI / 180.0)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_station_model_load_config(oskar_StationModel* station,
+static void set_coords(oskar_StationModel* station, int current_depth,
+        int depth, int id, double lon, double lat, int coord_type,
+        int* status);
+
+void oskar_station_model_load_pointing_file(oskar_StationModel* station,
         const char* filename, int* status)
 {
     /* Declare the line buffer and counter. */
     char* line = NULL;
     size_t bufsize = 0;
-    int n = 0, type = 0;
+    int type = 0;
     FILE* file;
 
     /* Check all inputs. */
@@ -80,46 +86,84 @@ void oskar_station_model_load_config(oskar_StationModel* station,
     /* Loop over each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
-        /* Declare parameter array. */
-        /* x, y, z, delta_x, delta_y, delta_z, amp_gain, amp_error,
-         * phase_offset_deg, phase_error_deg, weight_re, weight_im,
-         * x_azimuth_deg, y_azimuth_deg */
-        double par[] = {0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 1., 0.,
-                90., 0.};
-        int num_par = sizeof(par) / sizeof(double);
+        char *par[] = {0, 0, 0, 0, 0};
+        int depth = 0, id = 0, coordsys = 0, num_par = 0;
+        double lon = 0.0, lat = 0.0;
 
-        /* Load element coordinates. */
-        if (oskar_string_to_array_d(line, num_par, par) < 2) continue;
+        /* Split into string array and check for required number of fields. */
+        num_par = sizeof(par) / sizeof(char*);
+        if (oskar_string_to_array_s(line, num_par, par) < num_par) continue;
 
-        /* Ensure enough space in arrays. */
-        if (n % 100 == 0)
-            oskar_station_model_resize(station, n + 100, status);
+        /* Get depth and station IDs, and check for '*' wildcards. */
+        if (!par[0] || par[0][0] == '*')
+            depth = -1;
+        else
+            sscanf(par[0], "%d", &depth);
+        if (!par[1] || par[1][0] == '*')
+            id = -1;
+        else
+            sscanf(par[1], "%d", &id);
 
-        /* Store the data. */
-        oskar_station_model_set_element_coords(station, n,
-                par[0], par[1], par[2], par[3], par[4], par[5], status);
-        oskar_station_model_set_element_errors(station, n,
-                par[6], par[7], par[8], par[9], status);
-        oskar_station_model_set_element_weight(station, n,
-                par[10], par[11], status);
-        oskar_station_model_set_element_orientation(station, n,
-                par[12], par[13], status);
+        /* Get longitude and latitude values. */
+        sscanf(par[2], "%lf", &lon);
+        sscanf(par[3], "%lf", &lat);
 
-        /* Increment element counter. */
-        ++n;
-    }
+        /* Get coordinate system type. */
+        if (!par[4] || (par[4][0] != 'A' && par[4][0] != 'a'))
+            coordsys = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
+        else
+            coordsys = OSKAR_SPHERICAL_TYPE_HORIZONTAL;
 
-    /* Record number of elements loaded, and set coordinate units to metres. */
-    if (!(*status))
-    {
-        station->num_elements = n;
-        station->coord_units = OSKAR_METRES;
+        /* Set the data into the station model. */
+        set_coords(station, 0, depth, id, lon * DEG2RAD, lat * DEG2RAD,
+                coordsys, status);
     }
 
     /* Free the line buffer and close the file. */
     if (line) free(line);
     fclose(file);
 }
+
+static void set_coords(oskar_StationModel* station, int current_depth,
+        int depth, int id, double lon, double lat, int coord_type, int* status)
+{
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    if (depth < 0 || current_depth == depth)
+    {
+        /* Set pointing data for this station. */
+        station->beam_coord_type = coord_type;
+        station->beam_longitude_rad = lon;
+        station->beam_latitude_rad = lat;
+    }
+
+    /* Check if we need to go deeper. */
+    if (station->child && (depth < 0 || current_depth < depth))
+    {
+        /* Descend deeper. */
+        int i, start, end;
+        start = id;
+        end = id;
+
+        if (start < 0 || end < 0)
+        {
+            start = 0;
+            end = station->num_elements - 1;
+        }
+
+        for (i = start; i <= end; ++i)
+        {
+            /* Range check! */
+            if (i < station->num_elements)
+            {
+                set_coords(&station->child[i], current_depth + 1,
+                        depth, id, lon, lat, coord_type, status);
+            }
+        }
+    }
+}
+
 
 #ifdef __cplusplus
 }

@@ -96,11 +96,6 @@ struct OSKAR_EXPORT oskar_SettingsSkyHealpixFits
 typedef struct oskar_SettingsSkyHealpixFits oskar_SettingsSkyHealpixFits;
 
 enum {
-    OSKAR_COORD_SYS_GALACTIC,
-    OSKAR_COORD_SYS_EQUATORIAL
-};
-
-enum {
     OSKAR_MAP_UNITS_JY,
     OSKAR_MAP_UNITS_K_PER_SR,
     OSKAR_MAP_UNITS_MK_PER_SR

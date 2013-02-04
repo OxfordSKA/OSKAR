@@ -89,6 +89,14 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
             obs->dec0_rad[i] = dec_list[i].toDouble() * M_PI / 180.0;
         }
 
+        // Get station pointing file.
+        t = s.value("pointing_file", "").toByteArray();
+        if (t.size() > 0)
+        {
+            obs->pointing_file = (char*)malloc(t.size() + 1);
+            strcpy(obs->pointing_file, t.constData());
+        }
+
         // Get frequency / channel data.
         obs->start_frequency_hz   = s.value("start_frequency_hz").toDouble();
         obs->num_channels         = s.value("num_channels", 1).toInt();

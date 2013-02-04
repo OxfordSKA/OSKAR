@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,9 +93,6 @@ void oskar_sky_model_load(oskar_SkyModel* sky, const char* filename,
             int num_required = 3;
             double par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
-            /* Ignore comment lines (lines starting with '#') */
-            if (line[0] == '#') continue;
-
             /* Load source parameters (require at least RA, Dec, Stokes I). */
             if (oskar_string_to_array_d(line, num_param, par) < num_required)
                 continue;
@@ -128,9 +125,6 @@ void oskar_sky_model_load(oskar_SkyModel* sky, const char* filename,
             int num_param = 11;
             int num_required = 3;
             float par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-
-            /* Ignore comment lines (lines starting with '#') */
-            if (line[0] == '#') continue;
 
             /* Load source parameters (require at least RA, Dec, Stokes I). */
             if (oskar_string_to_array_f(line, num_param, par) < num_required)

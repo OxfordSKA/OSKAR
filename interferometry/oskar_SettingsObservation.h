@@ -48,6 +48,7 @@ struct OSKAR_EXPORT oskar_SettingsObservation
     int num_pointing_levels;
     double* ra0_rad;
     double* dec0_rad;
+    char* pointing_file;
 
     double start_frequency_hz;
     int num_channels;

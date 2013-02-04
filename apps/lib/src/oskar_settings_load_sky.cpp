@@ -143,9 +143,9 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     // HEALPix FITS import settings.
     temp = s.value("coord_sys", "Galactic").toString();
     if (temp.startsWith('G', Qt::CaseInsensitive))
-        sky->healpix_fits.coord_sys = OSKAR_COORD_SYS_GALACTIC;
+        sky->healpix_fits.coord_sys = OSKAR_SPHERICAL_TYPE_GALACTIC;
     else
-        sky->healpix_fits.coord_sys = OSKAR_COORD_SYS_EQUATORIAL;
+        sky->healpix_fits.coord_sys = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
     temp = s.value("map_units", "mK/sr").toString();
     if (temp.startsWith("mK", Qt::CaseInsensitive))
         sky->healpix_fits.map_units = OSKAR_MAP_UNITS_MK_PER_SR;

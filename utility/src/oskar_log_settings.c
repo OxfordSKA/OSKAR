@@ -165,9 +165,9 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
                     s->sky.healpix_fits.file[i]);
         }
         --depth;
-        if (s->sky.healpix_fits.coord_sys == OSKAR_COORD_SYS_GALACTIC)
+        if (s->sky.healpix_fits.coord_sys == OSKAR_SPHERICAL_TYPE_GALACTIC)
             LVS("Coordinate system", "Galactic");
-        else if (s->sky.healpix_fits.coord_sys == OSKAR_COORD_SYS_EQUATORIAL)
+        else if (s->sky.healpix_fits.coord_sys == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
             LVS("Coordinate system", "Equatorial");
         else
             LVS("Coordinate system", "Unknown");
@@ -282,6 +282,10 @@ void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
             oskar_log_value(log, depth, w, "Phase centre Dec [deg]", "(%d) %.3f",
                     i, s->obs.dec0_rad[i] * R2D);
         }
+    }
+    if (s->obs.pointing_file)
+    {
+        LVS0("Station pointing file", s->obs.pointing_file);
     }
     LV("Start frequency [Hz]", "%.3e", s->obs.start_frequency_hz);
     LV("Num. frequency channels", "%d", s->obs.num_channels);
