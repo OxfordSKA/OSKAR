@@ -29,36 +29,28 @@
 #include "apps/lib/oskar_sim_tec_screen.h"
 
 #include "apps/lib/oskar_settings_load.h"
-#include "utility/oskar_settings_free.h"
+#include "apps/lib/oskar_set_up_telescope.h"
 
 #include <sky/oskar_evaluate_TEC_TID.h>
 #include <sky/oskar_SettingsIonosphere.h>
 #include <sky/oskar_mjd_to_gast_fast.h>
 #include <sky/oskar_ra_dec_to_hor_lmn.h>
-
+#include <utility/oskar_Settings.h>
 #include <utility/oskar_Mem.h>
 #include <utility/oskar_mem_init.h>
 #include <utility/oskar_mem_free.h>
 #include <utility/oskar_mem_set_value_real.h>
 #include <utility/oskar_mem_get_pointer.h>
 #include <utility/oskar_log_settings.h>
-
 #include <interferometry/oskar_TelescopeModel.h>
 #include <interferometry/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h>
-
-#include <apps/lib/oskar_set_up_telescope.h>
-
-#include <imaging/oskar_evaluate_image_lm_grid.h>
 #include <imaging/oskar_evaluate_image_lm_grid.h>
 #include <imaging/oskar_image_free.h>
 #include <imaging/oskar_image_init.h>
 #include <imaging/oskar_image_resize.h>
 #include <imaging/oskar_image_write.h>
-
 #include <fits/oskar_fits_image_write.h>
-
 #include <math/oskar_sph_from_lm.h>
-
 #include <station/oskar_StationModel.h>
 #include <station/oskar_evaluate_pierce_points.h>
 
@@ -83,6 +75,7 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
     oskar_Settings settings;
     oskar_settings_load(&settings, log, settings_file);
     oskar_SettingsIonosphere* MIM = &settings.ionosphere;
+    log->keep_file = settings.sim.keep_log_file;
 
     oskar_TelescopeModel telescope;
     oskar_set_up_telescope(&telescope, log, &settings, &status);
@@ -102,7 +95,7 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
 
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
-    int loc = OSKAR_LOCATION_CPU; /* FIXME CPU until GPU version is ready ... */
+    int loc = OSKAR_LOCATION_CPU;
 
     int owner = OSKAR_TRUE;
     double fov = settings.ionosphere.TECImage.fov_rad;
@@ -208,15 +201,13 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
 
 
 
-
-
 static void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
         int stationID, oskar_Settings* settings, oskar_TelescopeModel* telescope,
         int* status)
 {
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
-    int loc = OSKAR_LOCATION_CPU; /* FIXME CPU until GPU version is ready ... */
+    int loc = OSKAR_LOCATION_CPU;
     int owner = OSKAR_TRUE;
 
     oskar_StationModel* station = &telescope->station[stationID];
@@ -307,7 +298,7 @@ static void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
         *pp_lat0 = ((float*)m_pp_lat0.data)[0];
     }
 
-    printf("pp lon = %f, lat = %f\n", *pp_lon0*(180./M_PI),
-            *pp_lat0*(180./M_PI));
+//    printf("pp lon = %f, lat = %f\n", *pp_lon0*(180./M_PI),
+//            *pp_lat0*(180./M_PI));
 }
 

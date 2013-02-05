@@ -96,6 +96,14 @@ int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
     }
 
     s.endGroup(); // TECImage
+
+    s.beginGroup("pierce_points");
+    temp = s.value("filename").toString();
+    t = temp.toAscii();
+    settings->pierce_points.filename = (char*)malloc(t.size() + 1);
+    strcpy(settings->pierce_points.filename, t.constData());
+    s.endGroup(); // pierce_points
+
     s.endGroup(); // ionosphere
 
     return status;

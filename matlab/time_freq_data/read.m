@@ -1,8 +1,7 @@
-clear;
-clc;
+function data = read(filename)
 
 % Query the file to obtain a table describing the records
-records = oskar.binary_file.query('temp_pp.dat');
+records = oskar.binary_file.query(filename);
 
 % Get a list of groups from the group column of the table. 
 groups = cell2mat(records(2:end,3)); % list of group ids
@@ -75,7 +74,7 @@ for k = 1:num_idx
     
 end
 
-
+end
 
 % for t = 1:length(data)
 %     x = data(t).field(1).values.*(180./pi);

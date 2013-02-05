@@ -64,6 +64,12 @@ struct OSKAR_EXPORT oskar_SettingsTECImage
 typedef struct oskar_SettingsTECImage oskar_SettingsTECImage;
 
 
+struct OSKAR_EXPORT oskar_SettingsPiercePoints
+{
+    char* filename;
+};
+typedef struct oskar_SettingsPiercePoints oskar_SettingsPiercePoints;
+
 /**
  * @struct oskar_SettingsIonosphere
  *
@@ -84,6 +90,8 @@ struct OSKAR_EXPORT oskar_SettingsIonosphere
     oskar_SettingsTIDscreen* TID; /* Array of TID screen structures. */
 
     oskar_SettingsTECImage TECImage;
+
+    oskar_SettingsPiercePoints pierce_points;
 };
 typedef struct oskar_SettingsIonosphere oskar_SettingsIonosphere;
 

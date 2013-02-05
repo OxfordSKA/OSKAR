@@ -3,6 +3,7 @@
 #
 
 set(apps_SRC
+    src/oskar_evaluate_station_pierce_points.cpp
     src/oskar_imager.cpp
     src/oskar_remove_dir.cpp
     src/oskar_set_up_sky.cpp

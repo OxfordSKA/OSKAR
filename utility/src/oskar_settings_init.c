@@ -77,6 +77,7 @@ int oskar_settings_init(oskar_Settings* settings)
     settings->ionosphere.TID = NULL;
     settings->ionosphere.TECImage.fits_file = NULL;
     settings->ionosphere.TECImage.img_file = NULL;
+    settings->ionosphere.pierce_points.filename = NULL;
 
     /* Initialise pathname to settings file. */
     oskar_mem_init(&settings->settings_path, OSKAR_CHAR,

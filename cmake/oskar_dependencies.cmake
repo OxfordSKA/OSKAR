@@ -40,6 +40,7 @@ find_package(CasaCore QUIET) # liboskar_ms
 find_package(CFitsio QUIET)  # liboskar_fits
 find_package(Matlab QUIET)   # mex functions
 find_package(CppUnit QUIET)  # unit tests
+#find_package(PNG QUIET)      # For writing PNG images.
 
 # ==== Work out which libraries to build.
 if (NOT CUDA_FOUND)
@@ -145,16 +146,16 @@ if (CASACORE_FOUND)
 endif ()
 if (CFITSIO_FOUND AND CUDA_FOUND)
     message("-- INFO:   - liboskar_fits")
-    math(EXPR component_count '${component_count}+1')    
+    math(EXPR component_count '${component_count}+1')
 endif ()
 if (QT4_FOUND)
     message("-- INFO:   - liboskar_widgets")
-    math(EXPR component_count '${component_count}+1')    
+    math(EXPR component_count '${component_count}+1')
 endif ()
 if (QT4_FOUND AND CUDA_FOUND)
     message("-- INFO:   - liboskar_apps")
     message("-- INFO:   - OSKAR applications")
-    math(EXPR component_count '${component_count}+1')    
+    math(EXPR component_count '${component_count}+1')
 endif ()
 if ("${component_count}" EQUAL 0)
     message("===============================================================================")

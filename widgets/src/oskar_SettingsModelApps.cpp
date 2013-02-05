@@ -1371,6 +1371,16 @@ void oskar_SettingsModelApps::init_settings_ionosphere()
         declare(k, "Save image as OSKAR format", oskar_SettingsItem::BOOL, false);
         setTooltip(k, "Save the TEC image in OSKAR binary image format.");
     }
+
+    group = "ionosphere";
+    // Pierce point output settings
+    {
+        group += "/pierce_points";
+        setLabel(group, "Pierce point settings");
+
+        k = group + "/filename";
+        declare(k, "Pierce point file name", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    }
 }
 
 

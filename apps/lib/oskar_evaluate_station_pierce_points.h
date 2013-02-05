@@ -26,46 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_global.h>
 
-#include <utility/oskar_get_error_string.h>
-#include <utility/oskar_log_error.h>
-#include <utility/oskar_log_message.h>
+#ifndef OSKAR_EVALUATE_STATION_PIERCE_POINTS_H_
+#define OSKAR_EVALUATE_STATION_PIERCE_POINTS_H_
+
+/**
+ * @file oskar_evaluate_station_pierce_points.h
+ */
+
+#include <oskar_global.h>
 #include <utility/oskar_Log.h>
 
-#include <apps/lib/oskar_sim_tec_screen.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <cstdlib>
-#include <cstdio>
+/**
+ * @brief
+ * Function to evaluate pierce points for a specified station saving the
+ * data as OSKAR binary time-frequency scatter data format.
+ *
+ * @details
+ * This function acts as though it were a stand-alone executable.
+ *
+ * @param[in] settings_file Path to a settings file.
+ * @param[in,out] log  Pointer to a log structure to use.
+ */
+OSKAR_APPS_EXPORT
+int oskar_evaluate_station_pierce_points(const char* settings_file,
+        oskar_Log* log);
 
-int main(int argc, char** argv)
-{
-    int error = OSKAR_SUCCESS;
-
-    // Parse command line.
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: $ oskar_sim_tec_screen [settings file]\n");
-        return OSKAR_ERR_INVALID_ARGUMENT;
-    }
-
-    // Create the log.
-    oskar_Log log;
-    oskar_log_message(&log, 0, "Running binary %s", argv[0]);
-
-    try
-    {
-        // Run simulation.
-        error = oskar_sim_tec_screen(argv[1], &log);
-    }
-    catch (int code)
-    {
-        error = code;
-    }
-
-    // Check for errors.
-    if (error)
-        oskar_log_error(&log, "Run failed: %s.", oskar_get_error_string(error));
-
-    return error;
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_EVALUATE_STATION_PIERCE_POINTS_H_ */
