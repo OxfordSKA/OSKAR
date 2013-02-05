@@ -51,18 +51,6 @@ if (CUDA_FOUND)
     #endif ()
 endif ()
 
-# TODO work out what deps this has.
-set(name oskar_sim_tec_screen)
-oskar_app(${name} ${name}_main.cpp
-    EXTRA_LIBS oskar_apps
-    NO_INSTALL)
-
-# TODO work out what deps this has.
-set(name oskar_evaluate_pierce_points)
-oskar_app(${name} ${name}_main.cpp
-    EXTRA_LIBS oskar_apps
-    NO_INSTALL)
-
 if (QT4_FOUND AND CUDA_FOUND)
     # Build oskar_app library
     add_subdirectory(lib)
@@ -82,5 +70,26 @@ if (QT4_FOUND AND CUDA_FOUND)
     # BINARY: oskar_visibilities_to_ms
     set(name oskar_visibilities_to_ms)
     oskar_qt_app(${name} ${name}_main.cpp)
+
+    # BINARY: osakr_sim_tec_screen
+    set(name oskar_sim_tec_screen)
+    oskar_app(${name} ${name}_main.cpp
+        EXTRA_LIBS oskar_apps
+        NO_INSTALL)
+
+    # BINARY: osakr_evaluate_pierce_points
+    set(name oskar_evaluate_pierce_points)
+    oskar_app(${name} ${name}_main.cpp
+        EXTRA_LIBS oskar_apps
+        NO_INSTALL)
+endif ()
+
+if (CUDA_FOUND AND PNG_FOUND)
+    include_directories(${PNG_INCLUDE_DIRS})
+
+    set(name oskar_image_to_png)
+    oskar_app(${name} ${name}_main.cpp
+        EXTRA_LIBS ${PNG_LIBRARY}
+        NO_INSTALL)
 endif ()
 

@@ -40,7 +40,7 @@ find_package(CasaCore QUIET) # liboskar_ms
 find_package(CFitsio QUIET)  # liboskar_fits
 find_package(Matlab QUIET)   # mex functions
 find_package(CppUnit QUIET)  # unit tests
-#find_package(PNG QUIET)      # For writing PNG images.
+find_package(PNG QUIET)      # For writing PNG images.
 
 # ==== Work out which libraries to build.
 if (NOT CUDA_FOUND)
