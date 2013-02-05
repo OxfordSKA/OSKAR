@@ -31,6 +31,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #define NUM_DOUBLES 6
 #define NUM_STRINGS 5
