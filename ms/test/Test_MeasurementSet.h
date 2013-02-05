@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,8 +47,6 @@ class Test_MeasurementSet : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(Test_MeasurementSet);
         CPPUNIT_TEST(test_create_simple);
-        CPPUNIT_TEST(test_append_c);
-        CPPUNIT_TEST(test_append_large);
         CPPUNIT_TEST(test_multi_channel);
         CPPUNIT_TEST_SUITE_END();
 
@@ -62,12 +60,6 @@ class Test_MeasurementSet : public CppUnit::TestFixture
     public:
         /// Test method.
         void test_create_simple();
-
-        /// Test method.
-        void test_append_c();
-
-        /// Test method.
-        void test_append_large();
 
         /// Test method.
         void test_multi_channel();

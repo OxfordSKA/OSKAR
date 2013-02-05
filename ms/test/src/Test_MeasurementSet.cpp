@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,6 @@
 
 #include "ms/test/Test_MeasurementSet.h"
 #include "ms/oskar_MeasurementSet.h"
-#include "ms/oskar_ms_create_meta1.h"
-#include "ms/oskar_ms_append_vis1.h"
 #include <vector>
 #include <complex>
 
@@ -88,87 +86,6 @@ void Test_MeasurementSet::test_create_simple()
     int ant2[] = {1, 2, 2};
     int nv = sizeof(u) / sizeof(double);
     ms.addVisibilities(1, 1, nv, u, v, w, vis, ant1, ant2, 90, 90, times);
-}
-
-/**
- * @details
- * Tests appending to a measurement set using the C binding.
- */
-void Test_MeasurementSet::test_append_c()
-{
-    // Define filename and metadata.
-    const char filename[] = "append_c.ms";
-    double exposure = 90;
-    double interval = 90;
-    double ra = 0;
-    double dec = 1.570796;
-    double freq = 400e6;
-
-    // Define antenna positions.
-    double ax[] = {0, 0, 0};
-    double ay[] = {0, 0, 0};
-    double az[] = {0, 0, 0};
-    int na = sizeof(ax) / sizeof(double);
-
-    // Define visibilities.
-    double u[] = {1000.0, 2000.01, 156.03};
-    double v[] = {0.0, -241.02, 1678.04};
-    double w[] = {0.0, -56.0, 145.0};
-    double vis[] = {1.0, 0.0, 0.00, 0.0, 0.00, 0.0};
-    int ant1[] = {0, 0, 1};
-    int ant2[] = {1, 2, 2};
-    int nv = sizeof(u) / sizeof(double);
-
-    std::vector<double> times(nv, 0.0f);
-    for (int i = 0; i < nv; ++i)
-        times[i] = i * 0.01;
-
-    oskar_ms_create_meta1(filename, ra, dec, na, ax, ay, az, freq);
-    oskar_ms_append_vis1(filename, nv, u, v, w, vis, ant1, ant2,
-            exposure, interval, &times[0]);
-}
-
-/**
- * @details
- * Tests appending to a large measurement set using the C binding.
- */
-void Test_MeasurementSet::test_append_large()
-{
-    // Define filename and metadata.
-    const char filename[] = "append_large.ms";
-    double exposure = 90;
-    double interval = 90;
-    double ra = 0;
-    double dec = 1.570796;
-    double freq = 400e6;
-
-    // Define antenna positions.
-    double ax[] = {0, 0, 0};
-    double ay[] = {0, 0, 0};
-    double az[] = {0, 0, 0};
-    int na = sizeof(ax) / sizeof(double);
-
-    // Create the MS with the metadata
-    oskar_ms_create_meta1(filename, ra, dec, na, ax, ay, az, freq);
-
-    // Define visibilities.
-    int nv = 1000;
-    std::vector<double> u(nv, 0.0f), v(nv, 0.0f), w(nv, 0.0f);
-    std::vector<double> vis(2*nv, 0.0f);
-    std::vector<int> ant1(nv, 0), ant2(nv, 0);
-    std::vector<double> times(nv, 0.0f);
-    for (int i = 0; i < nv; ++i)
-        times[i] = i * 0.01;
-
-    // Append to MS.
-    TIMER_START
-    int blocks = 100;
-    for (int b = 0; b < blocks; ++b) {
-        oskar_ms_append_vis1(filename, nv, &u[0], &v[0], &w[0], &vis[0],
-                &ant1[0], &ant2[0], exposure, interval, &times[0]);
-    }
-    TIMER_STOP("Finished creating measurement set (%d visibilities)",
-            nv * blocks)
 }
 
 /**
