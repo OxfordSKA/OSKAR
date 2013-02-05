@@ -32,6 +32,7 @@
 #include "station/oskar_evaluate_array_pattern.h"
 #include "station/oskar_evaluate_array_pattern_hierarchical.h"
 #include "station/oskar_evaluate_array_pattern_dipoles.h"
+#include "station/oskar_evaluate_element_weights.h"
 #include "station/oskar_element_model_evaluate.h"
 #include "station/oskar_blank_below_horizon.h"
 
@@ -105,6 +106,9 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         int depth, int* status)
 {
     double beam_x, beam_y, beam_z;
+    oskar_Mem *weights, *weights_error;
+    weights = &work->weights;
+    weights_error = &work->weights_error;
 
     /* Check if safe to proceed. */
     if (*status) return;
@@ -143,11 +147,11 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
                 array = (oskar_mem_is_scalar(beam->type) ?
                         beam : &work->array_pattern);
 
-                /* Evaluate array pattern. */
-                oskar_evaluate_array_pattern(array, station,
-                        beam_x, beam_y, beam_z, num_points, x, y, z,
-                        &work->weights, &work->weights_error, curand_states,
-                        status);
+                /* Generate beamforming weights and evaluate array pattern. */
+                oskar_evaluate_element_weights(weights, weights_error, station,
+                        beam_x, beam_y, beam_z, curand_states, status);
+                oskar_evaluate_array_pattern(array, station, num_points,
+                        x, y, z, weights, status);
 
                 /* Normalise array response if required. */
                 if (station->normalise_beam)
@@ -200,10 +204,12 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             /* Check that there are no spline coefficients. */
             if (!station->element_pattern->theta_re_x.coeff.data)
             {
-                /* Evaluate beam from dipoles that are oriented differently. */
-                oskar_evaluate_array_pattern_dipoles(beam, station, beam_x,
-                        beam_y, beam_z, num_points, x, y, z, &work->weights,
-                        &work->weights_error, curand_states, status);
+                /* Generate beamforming weights and evaluate beam from
+                 * dipoles that are oriented differently. */
+                oskar_evaluate_element_weights(weights, weights_error, station,
+                        beam_x, beam_y, beam_z, curand_states, status);
+                oskar_evaluate_array_pattern_dipoles(beam, station, num_points,
+                        x, y, z, weights, status);
 
                 /* Normalise array response if required. */
                 if (station->normalise_beam)
@@ -217,7 +223,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             }
         }
 
-        /* Blank (zero) sources below the horizon. */
+        /* Blank (set to zero) points below the horizon. */
         oskar_blank_below_horizon(beam, z, num_points, status);
     }
 
@@ -240,25 +246,22 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         /* Loop over child stations. */
         for (i = 0; i < station->num_elements; ++i)
         {
-            oskar_StationModel* child;
-            oskar_Mem output;
-
             /* Set up the output buffer for this station. */
+            oskar_Mem output;
             oskar_mem_get_pointer(&output, signal, i * num_points,
                     num_points, status);
 
             /* Recursive call. */
-            child = &station->child[i];
-            oskar_evaluate_station_beam_aperture_array_private(&output, child,
-                    num_points, x, y, z, gast, work, curand_states, depth + 1,
-                    status);
+            oskar_evaluate_station_beam_aperture_array_private(&output,
+                    &station->child[i], num_points, x, y, z, gast, work,
+                    curand_states, depth + 1, status);
         }
 
-        /* Form beam from child stations. */
-        oskar_evaluate_array_pattern_hierarchical(beam, station,
-                beam_x, beam_y, beam_z, num_points, x, y, z,
-                signal, &work->weights, &work->weights_error, curand_states,
-                status);
+        /* Generate beamforming weights and form beam from child stations. */
+        oskar_evaluate_element_weights(weights, weights_error, station,
+                beam_x, beam_y, beam_z, curand_states, status);
+        oskar_evaluate_array_pattern_hierarchical(beam, station, num_points,
+                x, y, z, signal, weights, status);
 
         /* Normalise array response if required. */
         if (station->normalise_beam)

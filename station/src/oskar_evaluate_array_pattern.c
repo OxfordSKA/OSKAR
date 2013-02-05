@@ -28,8 +28,9 @@
 
 #include "math/oskar_dftw_o2c_2d_cuda.h"
 #include "math/oskar_dftw_o2c_3d_cuda.h"
+#include "math/oskar_dftw_o2c_2d_omp.h"
+#include "math/oskar_dftw_o2c_3d_omp.h"
 #include "station/oskar_evaluate_array_pattern.h"
-#include "station/oskar_evaluate_element_weights.h"
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_station_model_type.h"
 #include "utility/oskar_cuda_check_error.h"
@@ -41,16 +42,14 @@ extern "C" {
 #endif
 
 void oskar_evaluate_array_pattern(oskar_Mem* beam,
-        const oskar_StationModel* station, double beam_x, double beam_y,
-        double beam_z, int num_points, const oskar_Mem* x, const oskar_Mem* y,
-        const oskar_Mem* z, oskar_Mem* weights, oskar_Mem* weights_error,
-        oskar_CurandState* curand_state, int* status)
+        const oskar_StationModel* station, int num_points,
+        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        const oskar_Mem* weights, int* status)
 {
     int type, location;
 
     /* Check all inputs. */
-    if (!beam || !station || !x || !y || !z || !weights || !weights_error ||
-            !curand_state || !status)
+    if (!beam || !station || !x || !y || !z || !weights || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -68,32 +67,39 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
             x->location != location ||
             y->location != location ||
             z->location != location ||
-            weights->location != location ||
-            weights_error->location != location)
+            weights->location != location)
+    {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return;
+    }
 
     /* Check that the antenna coordinates are in radians. */
     if (station->coord_units != OSKAR_RADIANS)
+    {
         *status = OSKAR_ERR_BAD_UNITS;
+        return;
+    }
 
     /* Check for correct data types. */
     if (!oskar_mem_is_complex(beam->type) ||
             !oskar_mem_is_complex(weights->type) ||
             oskar_mem_is_matrix(beam->type) ||
             oskar_mem_is_matrix(weights->type))
+    {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
     if (x->type != type || y->type != type || z->type != type ||
             oskar_mem_base_type(beam->type) != type ||
             oskar_mem_base_type(weights->type) != type)
+    {
         *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
 
     /* Resize output array if required. */
     if (beam->num_elements < num_points)
         oskar_mem_realloc(beam, num_points, status);
-
-    /* Generate the beamforming weights. */
-    oskar_evaluate_element_weights(weights, weights_error, station,
-            beam_x, beam_y, beam_z, curand_state, status);
 
     /* Check if safe to proceed. */
     if (*status) return;
@@ -164,7 +170,60 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
     }
     else
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        if (type == OSKAR_DOUBLE)
+        {
+            if (station->array_is_3d)
+            {
+                oskar_dftw_o2c_3d_omp_d(station->num_elements,
+                        (const double*)station->x_signal.data,
+                        (const double*)station->y_signal.data,
+                        (const double*)station->z_signal.data,
+                        (const double2*)weights->data, num_points,
+                        (const double*)x->data,
+                        (const double*)y->data,
+                        (const double*)z->data,
+                        (double2*)beam->data);
+            }
+            else
+            {
+                oskar_dftw_o2c_2d_omp_d(station->num_elements,
+                        (const double*)station->x_signal.data,
+                        (const double*)station->y_signal.data,
+                        (const double2*)weights->data, num_points,
+                        (const double*)x->data,
+                        (const double*)y->data,
+                        (double2*)beam->data);
+            }
+        }
+        else if (type == OSKAR_SINGLE)
+        {
+            if (station->array_is_3d)
+            {
+                oskar_dftw_o2c_3d_omp_f(station->num_elements,
+                        (const float*)station->x_signal.data,
+                        (const float*)station->y_signal.data,
+                        (const float*)station->z_signal.data,
+                        (const float2*)weights->data, num_points,
+                        (const float*)x->data,
+                        (const float*)y->data,
+                        (const float*)z->data,
+                        (float2*)beam->data);
+            }
+            else
+            {
+                oskar_dftw_o2c_2d_omp_f(station->num_elements,
+                        (const float*)station->x_signal.data,
+                        (const float*)station->y_signal.data,
+                        (const float2*)weights->data, num_points,
+                        (const float*)x->data,
+                        (const float*)y->data,
+                        (float2*)beam->data);
+            }
+        }
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
 }
 

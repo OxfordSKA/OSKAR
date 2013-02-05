@@ -36,7 +36,6 @@
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
 #include "station/oskar_StationModel.h"
-#include "utility/oskar_CurandState.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -74,15 +73,11 @@ extern "C" {
  * Note:
  * - Station x,y,z coordinates used by this function are assumed to be in
  * radians (i.e. pre-multiplied by the wavenumber).
- * - The \p weights buffer must be allocated on the GPU of complex type
- * matching the same floating point precision as the rest of the memory
- * passed to the function.
+ * - The \p weights buffer must be of complex type matching the same floating
+ * point precision as the rest of the memory passed to the function.
  *
  * @param[out] beam          Array of output Jones matrices per source.
  * @param[in]  station       Station model structure.
- * @param[in]  beam_x        Beam phase centre component along x.
- * @param[in]  beam_y        Beam phase centre component along y.
- * @param[in]  beam_z        Beam phase centre component along z.
  * @param[in]  num_points    Number of points at which to evaluate beam.
  * @param[in]  x             Array of horizontal x direction components at
  *                           which the beam should be evaluated.
@@ -90,17 +85,14 @@ extern "C" {
  *                           which the beam should be evaluated.
  * @param[in]  z             Array of horizontal z direction components at
  *                           which the beam should be evaluated.
- * @param[in]  weights       Work buffer used to evaluate DFT weights.
- * @param[in]  weights_error Work buffer used to evaluate DFT weights errors.
- * @param[in]  curand_state  Structure holding a set of CURAND states.
+ * @param[in]  weights       Beamforming (element) weights vector.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
-        const oskar_StationModel* station, double beam_x, double beam_y,
-        double beam_z, int num_points, const oskar_Mem* x, const oskar_Mem* y,
-        const oskar_Mem* z, oskar_Mem* weights, oskar_Mem* weights_error,
-        oskar_CurandState* curand_state, int* status);
+        const oskar_StationModel* station, int num_points, const oskar_Mem* x,
+        const oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* weights,
+        int* status);
 
 #ifdef __cplusplus
 }

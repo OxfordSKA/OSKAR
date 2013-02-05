@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/test/cudak/test_curand_generate.h"
-#include <curand_kernel.h>
+#ifndef TEST_EVALUATE_ARRAY_PATTERN_H_
+#define TEST_EVALUATE_ARRAY_PATTERN_H_
 
-__global__
-void test_curand_generate(double* values, int num_values,
-        int num_per_thread, curandStateXORWOW* state, int num_states)
+/**
+ * @file Test_evaluate_array_pattern.h
+ */
+
+#include <cppunit/extensions/HelperMacros.h>
+
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Test_evaluate_array_pattern : public CppUnit::TestFixture
 {
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    public:
+        CPPUNIT_TEST_SUITE(Test_evaluate_array_pattern);
+        CPPUNIT_TEST(test);
+        CPPUNIT_TEST_SUITE_END();
 
-    if (tid >= num_states) return;
+    public:
+        void test();
+};
 
-    for (int i = 0; i < num_per_thread; ++i)
-    {
-        int idx = num_per_thread * tid + i;
-        if (idx >= num_values) continue;
-        values[idx] = curand_normal_double(&state[tid]);
-    }
-}
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_evaluate_array_pattern);
+
+#endif // TEST_EVALUATE_ARRAY_PATTERN_H_

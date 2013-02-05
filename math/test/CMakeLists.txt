@@ -2,8 +2,6 @@
 # src/math/test/CMakeLists.txt
 #
 
-add_subdirectory(cudak)
-
 # CppUnit
 if (CPPUNIT_FOUND)
 
@@ -31,7 +29,7 @@ if (CPPUNIT_FOUND)
     include_directories(${CUDA_INCLUDE_DIRS})
     list(APPEND CUDA_NVCC_FLAGS --compiler-options;${OpenMP_CXX_FLAGS};)
     cuda_add_executable(math_test ${math_test_SRC})
-    target_link_libraries(math_test oskar oskar_math_test_cudak
+    target_link_libraries(math_test oskar
         ${CPPUNIT_LIBRARIES} ${CUDA_LIBRARIES})
     if (OSKAR_USE_LAPACK)
         target_link_libraries(math_test ${OSKAR_LAPACK})

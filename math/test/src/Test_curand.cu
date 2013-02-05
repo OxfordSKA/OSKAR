@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,6 @@
 
 #include "math/test/Test_curand.h"
 
-#include "oskar_global.h"
-#include "math/test/cudak/test_curand_generate.h"
 #include "utility/oskar_curand_state_free.h"
 #include "utility/oskar_curand_state_init.h"
 #include "utility/oskar_get_error_string.h"
@@ -44,6 +42,26 @@
 #include <omp.h>
 
 using namespace std;
+
+#include <curand_kernel.h>
+
+// Test CURAND kernel.
+__global__
+void test_curand_generate(double* values, int num_values,
+        int num_per_thread, curandStateXORWOW* state, int num_states)
+{
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (tid >= num_states) return;
+
+    for (int i = 0; i < num_per_thread; ++i)
+    {
+        int idx = num_per_thread * tid + i;
+        if (idx >= num_values) continue;
+        values[idx] = curand_normal_double(&state[tid]);
+    }
+}
+
 
 void Test_curand::test()
 {

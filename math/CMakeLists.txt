@@ -9,12 +9,19 @@ set(math_SRC
     src/oskar_angular_distance.c
     src/oskar_cart2sph.c
     src/oskar_dft_c2r_2d_cuda.cu
+    src/oskar_dft_c2r_2d_omp.c
     src/oskar_dftw_c2c_2d_cuda.cu
+    src/oskar_dftw_c2c_2d_omp.c
     src/oskar_dftw_c2c_3d_cuda.cu
+    src/oskar_dftw_c2c_3d_omp.c
     src/oskar_dftw_m2m_2d_cuda.cu
+    src/oskar_dftw_m2m_2d_omp.c
     src/oskar_dftw_m2m_3d_cuda.cu
+    src/oskar_dftw_m2m_3d_omp.c
     src/oskar_dftw_o2c_2d_cuda.cu
+    src/oskar_dftw_o2c_2d_omp.c
     src/oskar_dftw_o2c_3d_cuda.cu
+    src/oskar_dftw_o2c_3d_omp.c
     src/oskar_dierckx_bispev_bicubic_cuda.cu
     src/oskar_dierckx_bispev_cuda.cu
     src/oskar_dierckx_bispev.c

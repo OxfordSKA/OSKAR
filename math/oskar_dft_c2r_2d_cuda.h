@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,18 +59,18 @@ extern "C" {
  * assumed to be completely real, so the conjugate copy of the input data
  * should not be supplied.
  *
- * @param[in] n_in         Number of input points.
+ * @param[in] num_in       Number of input points.
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
  * @param[in] data_in      Array of complex input data (length 2 * n_in).
- * @param[in] n_out        Number of output points.
+ * @param[in] num_out      Number of output points.
  * @param[in] x_out        Array of output 1/x positions.
  * @param[in] y_out        Array of output 1/y positions.
  * @param[out] output      Array of computed output points.
  */
 OSKAR_EXPORT
-void oskar_dft_c2r_2d_cuda_f(int n_in, const float* x_in, const float* y_in,
-        const float2* data_in, int n_out, const float* x_out,
+void oskar_dft_c2r_2d_cuda_f(int num_in, const float* x_in, const float* y_in,
+        const float2* data_in, int num_out, const float* x_out,
         const float* y_out, float* output);
 
 /**
@@ -92,18 +92,18 @@ void oskar_dft_c2r_2d_cuda_f(int n_in, const float* x_in, const float* y_in,
  * assumed to be completely real, so the conjugate copy of the input data
  * should not be supplied.
  *
- * @param[in] n_in         Number of input points.
+ * @param[in] num_in       Number of input points.
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
  * @param[in] data_in      Array of complex input data (length 2 * n_in).
- * @param[in] n_out        Number of output points.
+ * @param[in] num_out      Number of output points.
  * @param[in] x_out        Array of output 1/x positions.
  * @param[in] y_out        Array of output 1/y positions.
  * @param[out] output      Array of computed output points.
  */
 OSKAR_EXPORT
-void oskar_dft_c2r_2d_cuda_d(int n_in, const double* x_in, const double* y_in,
-        const double2* data_in, int n_out, const double* x_out,
+void oskar_dft_c2r_2d_cuda_d(int num_in, const double* x_in, const double* y_in,
+        const double2* data_in, int num_out, const double* x_out,
         const double* y_out, double* output);
 
 #ifdef __CUDACC__

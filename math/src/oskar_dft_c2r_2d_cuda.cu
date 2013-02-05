@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,61 +32,88 @@
 extern "C" {
 #endif
 
+/* Utility functions. */
+static int oskar_int_round_to_nearest_multiple(int num_to_round, int multiple)
+{
+   return (num_to_round + multiple - 1) / multiple * multiple;
+}
+
+static int oskar_int_range_clamp(int value, int minimum, int maximum)
+{
+   if (value < minimum)
+       return minimum;
+   if (value > maximum)
+       return maximum;
+   return value;
+}
+
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
-void oskar_dft_c2r_2d_cuda_f(int n_in, const float* x_in, const float* y_in,
-        const float2* data_in, int n_out, const float* x_out,
+void oskar_dft_c2r_2d_cuda_f(int num_in, const float* x_in, const float* y_in,
+        const float2* data_in, int num_out, const float* x_out,
         const float* y_out, float* output)
 {
-    int num_blocks, num_threads = 384;
-    int chunk_size, max_in_chunk, max_out_chunk, shared, start;
+    const int threads = 384;     /* Should be multiple of 32. */
+    const int max_in_size = 896; /* Should be multiple of 16. */
+    int out_size, max_out_size, blocks, shared_mem_size, start;
 
     /* Initialise. */
-    max_in_chunk = 896; /* Should be multiple of 16. */
-    max_out_chunk = 65536; /* Manageable output chunk size. */
-    shared = 2 * max_in_chunk * sizeof(float2);
+    shared_mem_size = 2 * max_in_size * sizeof(float2);
+
+    /* Compute the maximum manageable output chunk size. */
+    max_out_size = 65536 * 8192; /* Product of max output and input sizes. */
+    max_out_size /= num_in;
+    max_out_size = oskar_int_round_to_nearest_multiple(max_out_size, threads);
+    max_out_size = oskar_int_range_clamp(max_out_size,
+            2 * threads, 160 * threads);
 
     /* Loop over output chunks. */
-    for (start = 0; start < n_out; start += max_out_chunk)
+    for (start = 0; start < num_out; start += max_out_size)
     {
-        chunk_size = n_out - start;
-        if (chunk_size > max_out_chunk) chunk_size = max_out_chunk;
+        out_size = num_out - start;
+        if (out_size > max_out_size) out_size = max_out_size;
 
         /* Invoke kernel to compute the (partial) DFT on the device. */
-        num_blocks = (chunk_size + num_threads - 1) / num_threads;
+        blocks = (out_size + threads - 1) / threads;
         oskar_dft_c2r_2d_cudak_f
-        OSKAR_CUDAK_CONF(num_blocks, num_threads, shared) (n_in, x_in, y_in,
-                data_in, chunk_size, x_out + start, y_out + start,
-                max_in_chunk, output + start);
+        OSKAR_CUDAK_CONF(blocks, threads, shared_mem_size) (num_in, x_in, y_in,
+                data_in, out_size, x_out + start, y_out + start,
+                max_in_size, output + start);
     }
 }
 
 /* Double precision. */
-void oskar_dft_c2r_2d_cuda_d(int n_in, const double* x_in, const double* y_in,
-        const double2* data_in, int n_out, const double* x_out,
+void oskar_dft_c2r_2d_cuda_d(int num_in, const double* x_in, const double* y_in,
+        const double2* data_in, int num_out, const double* x_out,
         const double* y_out, double* output)
 {
-    int num_blocks, num_threads = 384;
-    int chunk_size, max_in_chunk, max_out_chunk, shared, start;
+    const int threads = 384;     /* Should be multiple of 32. */
+    const int max_in_size = 448; /* Should be multiple of 16. */
+    int out_size, max_out_size, blocks, shared_mem_size, start;
 
     /* Initialise. */
-    max_in_chunk = 448; /* Should be multiple of 16. */
-    max_out_chunk = 32768; /* Manageable output chunk size. */
-    shared = 2 * max_in_chunk * sizeof(double2);
+    shared_mem_size = 2 * max_in_size * sizeof(double2);
+
+    /* Compute the maximum manageable output chunk size. */
+    max_out_size = 32768 * 8192; /* Product of max output and input sizes. */
+    max_out_size /= num_in;
+    max_out_size = oskar_int_round_to_nearest_multiple(max_out_size, threads);
+    max_out_size = oskar_int_range_clamp(max_out_size,
+            2 * threads, 80 * threads);
 
     /* Loop over output chunks. */
-    for (start = 0; start < n_out; start += max_out_chunk)
+    for (start = 0; start < num_out; start += max_out_size)
     {
-        chunk_size = n_out - start;
-        if (chunk_size > max_out_chunk) chunk_size = max_out_chunk;
+        out_size = num_out - start;
+        if (out_size > max_out_size) out_size = max_out_size;
 
-        // Invoke kernel to compute the (partial) DFT on the device. */
-        num_blocks = (chunk_size + num_threads - 1) / num_threads;
+        /* Invoke kernel to compute the (partial) DFT on the device. */
+        blocks = (out_size + threads - 1) / threads;
         oskar_dft_c2r_2d_cudak_d
-        OSKAR_CUDAK_CONF(num_blocks, num_threads, shared) (n_in, x_in, y_in,
-                data_in, chunk_size, x_out + start, y_out + start,
-                max_in_chunk, output + start);
+        OSKAR_CUDAK_CONF(blocks, threads, shared_mem_size) (num_in, x_in, y_in,
+                data_in, out_size, x_out + start, y_out + start,
+                max_in_size, output + start);
     }
 }
 

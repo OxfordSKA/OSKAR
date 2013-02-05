@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_CURAND_GENERATE_H_
-#define TEST_CURAND_GENERATE_H_
+#include "station/test/Test_evaluate_array_pattern.h"
+#include "station/oskar_evaluate_array_pattern.h"
 
-/**
- * @file test_curand_generate.h
- */
+#define TIMER_ENABLE 1
+#include "utility/timer.h"
 
-#include "oskar_global.h"
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 
-/* Forward declaration. */
-struct curandStateXORWOW;
+using namespace std;
 
-__global__
-void test_curand_generate(double* values, int num_values,
-        int num_per_thread, curandStateXORWOW* state, int num_states);
+void Test_evaluate_array_pattern::test()
+{
+}
 
-#endif /* TEST_CURAND_GENERATE_H_ */
