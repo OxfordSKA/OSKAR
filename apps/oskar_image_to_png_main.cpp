@@ -222,7 +222,10 @@ int main(int argc, char** argv)
     {
         for (x = 0; x < img.width; x++)
         {
-            setRGB2(&row[x*3], img_data[y*img.width + x], red, blue);
+            //int idx = (img.height-y-1)*img.width + (img.width-x-1);
+            int idx = (img.height-y-1)*img.width + x;
+            setRGB2(&row[x*3], img_data[idx], red, blue);
+
 //            float flt = img_data[y*img.width + x];
 //            memcpy(&fltInt32, &flt, sizeof(float));
 //            fltInt16 = (fltInt32 & 0x00FFFFFF) >> 14;
