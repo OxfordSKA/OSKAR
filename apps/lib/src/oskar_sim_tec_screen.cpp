@@ -153,8 +153,8 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
     oskar_image_resize(&tec_image, im_size, im_size, 1, num_times,
             1, &status);
     tec_image.image_type = OSKAR_IMAGE_TYPE_BEAM_SCALAR;
-    tec_image.centre_ra_deg = pp_lon0;
-    tec_image.centre_dec_deg = pp_lat0;
+    tec_image.centre_ra_deg = pp_lon0  * (180.0/M_PI);
+    tec_image.centre_dec_deg = pp_lat0  * (180.0/M_PI);
     tec_image.fov_ra_deg = fov * (180.0/M_PI);
     tec_image.fov_dec_deg = fov * (180.0/M_PI);
     tec_image.freq_start_hz = 0.0;
