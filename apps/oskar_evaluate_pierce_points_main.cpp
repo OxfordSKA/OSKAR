@@ -34,28 +34,28 @@
 #include <utility/oskar_Log.h>
 
 #include <apps/lib/oskar_evaluate_station_pierce_points.h>
+#include <apps/lib/oskar_OptionParser.h>
 
 #include <cstdlib>
 #include <cstdio>
 
 int main(int argc, char** argv)
 {
-    int error = OSKAR_SUCCESS;
+    oskar_OptionParser opt("oskar_evaulate_pierce_points");
+    opt.addRequired("settings file");
+    if (!opt.check_options(argc, argv))
+        return OSKAR_FAIL;
 
-    // Parse command line.
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: $ oskar_evaluate_pierce_points [settings file]\n");
-        return OSKAR_ERR_INVALID_ARGUMENT;
-    }
+    const char* filename = opt.getArg();
 
     // Create the log.
     oskar_Log log;
     oskar_log_message(&log, 0, "Running binary %s", argv[0]);
 
+    int error = OSKAR_SUCCESS;
     try
     {
-        error = oskar_evaluate_station_pierce_points(argv[1], &log);
+        error = oskar_evaluate_station_pierce_points(filename, &log);
     }
     catch (int code)
     {

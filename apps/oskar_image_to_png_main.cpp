@@ -36,6 +36,8 @@
 #include <imaging/oskar_Image.h>
 #include <imaging/oskar_image_read.h>
 
+#include <apps/lib/oskar_OptionParser.h>
+
 #include <cstdio>
 #include <unistd.h>
 #include <cstdlib>
@@ -119,16 +121,13 @@ int main(int argc, char** argv)
 {
     int status = OSKAR_SUCCESS;
 
-    // Parse command line.
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: $ oskar_image_to_png [oskar image]\n");
-        return OSKAR_ERR_INVALID_ARGUMENT;
-    }
+    oskar_OptionParser opt("oskar_image_to_png");
+    opt.addRequired("OSKAR image");
+    if (!opt.check_options(argc, argv)) return OSKAR_FAIL;
 
     // Load OSKAR image
     oskar_Image img;
-    oskar_image_read(&img, argv[1], 0, &status);
+    oskar_image_read(&img, opt.getArg(), 0, &status);
     if (status)
     {
         oskar_log_error(0, oskar_get_error_string(status));

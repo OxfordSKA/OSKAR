@@ -39,6 +39,7 @@
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_append_raw.h"
 #include "utility/oskar_settings_init.h"
+#include "utility/oskar_file_exists.h"
 #include <string.h>
 
 #ifdef __cplusplus
@@ -49,6 +50,10 @@ int oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
         const char* filename)
 {
     int error;
+
+    /* Check if the settings file exists! */
+    if (!oskar_file_exists(filename))
+        return OSKAR_ERR_FILE_IO;
 
     /* Initialise the settings array. */
     error = oskar_settings_init(settings);

@@ -34,6 +34,7 @@
 #include <utility/oskar_Log.h>
 
 #include <apps/lib/oskar_sim_tec_screen.h>
+#include <apps/lib/oskar_OptionParser.h>
 
 #include <cstdlib>
 #include <cstdio>
@@ -42,12 +43,10 @@ int main(int argc, char** argv)
 {
     int error = OSKAR_SUCCESS;
 
-    // Parse command line.
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: $ oskar_sim_tec_screen [settings file]\n");
+    oskar_OptionParser opt("oskar_sim_tec_screen");
+    opt.addRequired("settings file");
+    if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;
-    }
 
     // Create the log.
     oskar_Log log;
@@ -56,7 +55,7 @@ int main(int argc, char** argv)
     try
     {
         // Run simulation.
-        error = oskar_sim_tec_screen(argv[1], &log);
+        error = oskar_sim_tec_screen(opt.getArg(0), &log);
     }
     catch (int code)
     {

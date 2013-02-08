@@ -31,7 +31,7 @@
 #include "utility/oskar_log_error.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_Log.h"
-
+#include <apps/lib/oskar_OptionParser.h>
 #include <cstdio>
 #include <cstdlib>
 
@@ -39,12 +39,9 @@ int main(int argc, char** argv)
 {
     int error = OSKAR_SUCCESS;
 
-    // Parse command line.
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: $ oskar_imager [settings file]\n");
-        return OSKAR_ERR_INVALID_ARGUMENT;
-    }
+    oskar_OptionParser opt("oskar_imager");
+    opt.addRequired("settings file");
+    if (!opt.check_options(argc, argv)) return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Create the log.
     oskar_Log log;

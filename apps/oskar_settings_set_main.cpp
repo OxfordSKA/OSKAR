@@ -29,20 +29,26 @@
 #include "oskar_global.h"
 #include <QtCore/QSettings>
 #include <cstdio>
+#include <apps/lib/oskar_OptionParser.h>
 
 int main(int argc, char** argv)
 {
-    // Parse command line.
-    if (argc != 4)
-    {
-        fprintf(stderr, "Usage: $ oskar_settings_set [settings file] [key] [value]\n");
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    oskar_OptionParser opt("oskar_settings_set");
+    opt.addRequired("settings file");
+    opt.addRequired("key");
+    opt.addRequired("value");
+    opt.addFlag("-q", "Suppress printing", false, "--quiet");
+    if (!opt.check_options(argc, argv)) return OSKAR_ERR_INVALID_ARGUMENT;
+
+    const char* filename = opt.getArg(0);
+    const char* key      = opt.getArg(1);
+    const char* value    = opt.getArg(2);
+    bool quiet = opt.isSet("-q") ? true : false;
+
+    if (!quiet) {
+        printf("File: %s\n", filename);
+        printf("    %s=%s\n", key, value);
     }
-    char* filename = argv[1];
-    char* key      = argv[2];
-    char* value    = argv[3];
-    printf("File: %s\n", filename);
-    printf("    %s=%s\n", key, value);
 
     // Set the value.
     QSettings settings(QString(filename), QSettings::IniFormat);

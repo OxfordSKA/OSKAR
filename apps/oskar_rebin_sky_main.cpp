@@ -39,6 +39,8 @@
 #include "utility/oskar_mem_clear_contents.h"
 #include "utility/oskar_log_error.h"
 
+#include <apps/lib/oskar_OptionParser.h>
+
 #include <cstdio>
 #include <cstdlib>
 
@@ -47,13 +49,11 @@ int main(int argc, char** argv)
     oskar_SkyModel input, output, input_gpu, output_gpu;
     int error = 0;
 
-    // Parse command line.
-    if (argc != 3)
-    {
-        fprintf(stderr, "Usage: $ oskar_rebin_sky [input sky file] "
-                "[output sky file]\n");
+    oskar_OptionParser opt("oskar_rebin_sky");
+    opt.addRequired("input sky file");
+    opt.addRequired("output sky file");
+    if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;
-    }
 
     // Initialise sky models.
     oskar_sky_model_init(&input, OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0, &error);

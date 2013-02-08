@@ -30,20 +30,22 @@
 #include "utility/oskar_binary_file_query.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_log_error.h"
+#include "apps/lib/oskar_OptionParser.h"
 #include <cstdio>
+#include <string>
 
 int main(int argc, char** argv)
 {
-    // Parse command line.
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: $ oskar_binary_file_query [binary file]\n");
-        return OSKAR_ERR_INVALID_ARGUMENT;
-    }
+    oskar_OptionParser opt("oskar_binary_file_query");
+    opt.setDescription("List a summary of the contents of an OSKAR binary file.");
+    opt.addRequired("binary file", "Path of an OSKAR binary file.");
+    if (!opt.check_options(argc, argv))
+        return OSKAR_FAIL;
+    const char* filename = opt.getArg();
 
     // Query the file.
-    int error = 0;
-    oskar_binary_file_query(0, argv[1], &error);
+    int error = OSKAR_SUCCESS;
+    oskar_binary_file_query(0, filename, &error);
     if (error)
     {
         oskar_log_error(0, oskar_get_error_string(error));

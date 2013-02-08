@@ -47,6 +47,8 @@
 
 #include "utility/oskar_get_data_type_string.h"
 
+#include <apps/lib/oskar_OptionParser.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -55,38 +57,16 @@ int main(int argc, char** argv)
 {
     int error = OSKAR_SUCCESS;
 
-    if (argc < 2)
-    {
-        fprintf(stderr, "Usage:\n");
-        fprintf(stderr, "  oskar_image_summary [OSKAR image] <display log>\n");
-        fprintf(stderr, "\n");
-        fprintf(stderr, "Arguments:\n");
-        fprintf(stderr, "  OSKAR image (required): Path of an OSKAR image file.\n");
-        fprintf(stderr, "  display log (optional, default: 'f'): display the simulation log associated\n");
-        fprintf(stderr, "        with the image, 't' or 'f'\n");
-
+    oskar_OptionParser opt("oskar_image_summary");
+    opt.addRequired("OSKAR image file");
+    opt.addFlag("-l", "Display the simulation log associated with the image.",
+            false, "--log");
+    if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;
-    }
 
-    const char* filename = argv[1];
-    bool verbose = false;
-    if (argc == 3)
-    {
-        if (strcmp(argv[2], "t") == 0)
-        {
-            verbose = true;
-        }
-        else if (strcmp(argv[2], "f") == 0)
-        {
-            verbose = false;
-        }
-        else
-        {
-            fprintf(stderr, "ERROR: Unrecognised value for argument 2, "
-                    "allowed values are 't' or 'f'\n");
-            return OSKAR_ERR_INVALID_ARGUMENT;
-        }
-    }
+    const char* filename = opt.getArg(0);
+    bool displayLog = opt.isSet("-l") ? true : false;
+
     try
     {
         // Load the image into memory.
@@ -153,7 +133,7 @@ int main(int argc, char** argv)
         printf("\n");
 
         // If verbose, print the run log.
-        if (verbose)
+        if (displayLog)
         {
             oskar_BinaryTagIndex* index = NULL;
             FILE* stream = fopen(filename, "rb");

@@ -33,40 +33,49 @@
 #include "sky/oskar_sky_model_save.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_log_error.h"
+#include "apps/lib/oskar_OptionParser.h"
 #include <cstdio>
 
 int main(int argc, char** argv)
 {
     // Check if built with FITS support.
 #ifndef OSKAR_NO_FITS
-    int error;
+    int error = OSKAR_SUCCESS;
+
+    oskar_OptionParser opt("oskar_fits_to_sky_model");
+    opt.setDescription("Converts a FITS image to an OSKAR sky model. A number "
+            "of options are provided to control how much of the image is used "
+            "to make the sky model.");
+    opt.addRequired("FITS file", "The FITS image to convert.");
+    opt.addRequired("sky model file", "The OSAKR sky model file name to convert to.");
+    opt.addFlag("-s", "Spectral index", 1, "0.0");
+    opt.addFlag("-f", "Minimum allowed fraction of image peak", 1, "0.0");
+    opt.addFlag("-d", "Downsample factor", 1, "0");
+    opt.addFlag("-n", "Noise floor", 1, "0.0");
+    if (!opt.check_options(argc, argv))
+        return OSKAR_FAIL;
 
     // Parse command line.
     double spectral_index = 0.0;
     double min_peak_fraction = 0.0;
     double noise_floor = 0.0;
     int downsample_factor = 0;
-    if (argc < 3)
-    {
-        fprintf(stderr,
-                "Usage: $ oskar_fits_to_sky_model [FITS file] [sky model file]\n"
-                "    [spectral index] [min peak fraction]\n"
-                "    [noise floor] [downsample factor]\n");
-        return OSKAR_ERR_INVALID_ARGUMENT;
-    }
+    opt.get("-d")->getInt(downsample_factor);
+    opt.get("-f")->getDouble(min_peak_fraction);
+    opt.get("-n")->getDouble(noise_floor);
+    opt.get("-s")->getDouble(spectral_index);
 
-    if (argc > 3)
-        spectral_index = strtod(argv[3], 0);
-    if (argc > 4)
-        min_peak_fraction = strtod(argv[4], 0);
-    if (argc > 5)
-        noise_floor = strtod(argv[5], 0);
-    if (argc > 6)
-        downsample_factor = (int)strtol(argv[6], 0, 0);
+//    printf("----\n");
+//    printf("fits  = %s\n", opt.getArg(0));
+//    printf("model = %s\n", opt.getArg(1));
+//    printf("f     = %f\n", min_peak_fraction);
+//    printf("n     = %f\n", noise_floor);
+//    printf("----\n");
+//    return 1;
 
     // Load the FITS file as a sky model.
     oskar_SkyModel sky;
-    error = oskar_fits_to_sky_model(0, argv[1], &sky, spectral_index,
+    error = oskar_fits_to_sky_model(0, opt.getArg(0), &sky, spectral_index,
             min_peak_fraction, noise_floor, downsample_factor);
     if (error)
     {
@@ -75,7 +84,7 @@ int main(int argc, char** argv)
     }
 
     // Write out the sky model.
-    oskar_sky_model_save(argv[2], &sky, &error);
+    oskar_sky_model_save(opt.getArg(1), &sky, &error);
     if (error)
     {
         oskar_log_error(0, oskar_get_error_string(error));

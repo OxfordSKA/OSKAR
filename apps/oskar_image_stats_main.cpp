@@ -48,17 +48,16 @@ using namespace std;
 
 // ----------------------------------------------------------------------------
 void set_options(oskar_OptionParser& opt);
-bool check_options(oskar_OptionParser& opt);
+bool check_options(oskar_OptionParser& opt, int argc, char** argv);
 void print_error(int status, const char* message);
 // ----------------------------------------------------------------------------
 
-int main(int argc, const char** argv)
+int main(int argc, char** argv)
 {
     // Register options =======================================================
-    oskar_OptionParser opt;
+    oskar_OptionParser opt("oskar_image_stats");
     set_options(opt);
-    opt.parse(argc, argv);
-    if (!check_options(opt))
+    if (!check_options(opt, argc, argv))
         return OSKAR_FAIL;
 
     // Retrieve options =======================================================
@@ -128,52 +127,20 @@ int main(int argc, const char** argv)
 
 void set_options(oskar_OptionParser& opt)
 {
-    opt.setOverview("Application to evaluate OSKAR binary image file statistics.");
-    opt.setSyntax("oskar_image_stats [OPTIONS] image_file(s)...");
+    opt.setDescription("Application to evaluate OSKAR binary image file statistics.");
+    opt.addRequired("Image file(s)...", "OSKAR image files to analyse.");
+    opt.addFlag("-c", "Channel index", 1, "0");
+    opt.addFlag("-p", "Polarisation index", 1, "0");
+    opt.addFlag("-t", "Time index", 1, "0");
     opt.addExample("oskar_image_stats file.img");
-    opt.addExample("oskar_image_stats *.img");
+    opt.addExample("oskar_image_stats -t 2 *.img");
     opt.addExample("oskar_image_stats *.img -c 1 -t 2 -p 3");
-
-    // add(default, required?, num args, delimiter, message, flag token(s), ...)
-    opt.add("", 0, 0, 0, "Display the OSKAR version.", "-v", "--version");
-    opt.add("0", 0, 1, 0, "Polaristation index (optional, default=0)", "-p",
-            "--polarisation");
-    opt.add("0", 0, 1, 0, "Time index (optional, default=0)", "-t", "--time");
-    opt.add("0", 0, 1, 0, "Channel index (optional, default=0)", "-c",
-            "--channel");
 }
 
 
-bool check_options(oskar_OptionParser& opt)
+bool check_options(oskar_OptionParser& opt, int argc, char** argv)
 {
-    if (opt.isSet("-h")) {
-        opt.printUsage();
-        return false;
-    }
-
-    if (opt.isSet("-v")) {
-         cout << "OSKAR version " <<OSKAR_VERSION_STR << endl;
-         return false;
-    }
-
-    std::vector<std::string> badOptions;
-    if(!opt.gotRequired(badOptions)) {
-        for(int i=0; i < (int)badOptions.size(); ++i)
-            cerr << "\nERROR: Missing required option " << badOptions[i] << ".\n\n";
-        opt.printUsage();
-        return false;
-    }
-
-    if(!opt.gotExpected(badOptions)) {
-        for(int i=0; i < (int)badOptions.size(); ++i)
-        {
-            cerr << "\nERROR: Got unexpected number of arguments for option ";
-            cerr << badOptions[i] << ".\n\n";
-        }
-        opt.printUsage();
-        return false;
-    }
-
+    if (!opt.check_options(argc, argv)) return false;
     int num_req = 1; // Number of image files required;
     bool visFirst = ((int)opt.firstArgs.size() >= (num_req+1)) &&
             ((int)opt.lastArgs.size() == 0);
@@ -184,7 +151,6 @@ bool check_options(oskar_OptionParser& opt)
         opt.printUsage();
         return false;
     }
-
     return true;
 }
 

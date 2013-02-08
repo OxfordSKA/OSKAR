@@ -32,6 +32,8 @@
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_Log.h"
 
+#include <apps/lib/oskar_OptionParser.h>
+
 #include <cstdlib>
 #include <cstdio>
 
@@ -39,12 +41,10 @@ int main(int argc, char** argv)
 {
     int error = OSKAR_SUCCESS;
 
-    // Parse command line.
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: $ oskar_sim_interferometer [settings file]\n");
+    oskar_OptionParser opt("oskar_sim_interferometer");
+    opt.addRequired("settings file");
+    if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;
-    }
 
     // Create the log.
     oskar_Log log;
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     try
     {
         // Run simulation.
-        error = oskar_sim_interferometer(argv[1], &log);
+        error = oskar_sim_interferometer(opt.getArg(0), &log);
     }
     catch (int code)
     {

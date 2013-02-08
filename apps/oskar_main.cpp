@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,12 +27,24 @@
  */
 
 #include "apps/oskar_MainWindow.h"
+
+#include "apps/lib/oskar_OptionParser.h"
+
 #include <QtGui/QApplication>
 #include <cstdlib>
 #include <cstdio>
 
 int main(int argc, char** argv)
 {
+    oskar_OptionParser opt("oskar");
+    opt.setDescription("GUI application providing an interface for editing "
+            "OSKAR settings files and launching OSKAR application binaries.");
+    opt.addOptional("settings file");
+    opt.addExample("oskar");
+    opt.addExample("oskar settings.ini");
+    if (!opt.check_options(argc, argv))
+        return OSKAR_FAIL;
+
     // Create the QApplication and initialise settings fields.
     QApplication app(argc, argv);
     app.setApplicationName("OSKAR2");

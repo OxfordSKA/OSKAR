@@ -33,16 +33,14 @@
 #include "utility/oskar_cuda_info_log.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_log_error.h"
+#include "apps/lib/oskar_OptionParser.h"
 #include <cstdio>
 
-int main(int argc, char** /*argv*/)
+int main(int argc, char** argv)
 {
-    // Parse command line.
-    if (argc != 1)
-    {
-        fprintf(stderr, "Usage: $ oskar_cuda_system_info\n");
-        return OSKAR_ERR_INVALID_ARGUMENT;
-    }
+    oskar_OptionParser opt("oskar_cuda_system_info");
+    opt.setDescription("Display a summary of the available CUDA capability");
+    if (!opt.check_options(argc, argv)) return OSKAR_FAIL;
 
     // Create the CUDA info structure.
     oskar_CudaInfo* info = NULL;

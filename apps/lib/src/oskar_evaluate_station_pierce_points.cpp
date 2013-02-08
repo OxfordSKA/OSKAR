@@ -82,8 +82,9 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
     };
 
     oskar_Settings settings;
-    oskar_settings_load(&settings, log, settings_file);
+    status = oskar_settings_load(&settings, log, settings_file);
     log->keep_file = settings.sim.keep_log_file;
+    if (status) return status;
 
     oskar_TelescopeModel telescope;
     oskar_set_up_telescope(&telescope, log, &settings, &status);

@@ -29,24 +29,22 @@
 #include "oskar_global.h"
 #include <QtCore/QtCore>
 #include <cstdio>
-
-static void usage();
+#include <apps/lib/oskar_OptionParser.h>
 
 int main(int argc, char** argv)
 {
-    // Parse command line.
-    if (argc != 3)
-    {
-        usage();
+    oskar_OptionParser opt("oskar_settings_get");
+    opt.addRequired("settings file");
+    opt.addRequired("key");
+    if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;
-    }
-    char* filename = argv[1];
-    char* key      = argv[2];
+
+    const char* filename = opt.getArg(0);
+    const char* key      = opt.getArg(1);
 
     if (!QFile::exists(filename))
     {
-        fprintf(stderr, "ERROR: Specified settings file '%s' not found.", filename);
-        usage();
+        opt.error("Specified settings file '%s' not found.", filename);
         return OSKAR_ERR_INVALID_ARGUMENT;
     }
 
@@ -55,12 +53,7 @@ int main(int argc, char** argv)
     QByteArray value = settings.value(QString(key)).toByteArray();
 
     // Print the value.
-    printf("    %s\n", value.constData());
+    printf("%s\n", value.constData());
 
     return OSKAR_SUCCESS;
-}
-
-static void usage()
-{
-    fprintf(stderr, "Usage: $ oskar_settings_get [settings file] [key]\n");
 }

@@ -44,11 +44,11 @@ if (CUDA_FOUND)
     set(name oskar_visibilities_add)
     oskar_app(${name} ${name}_main.cpp)
 
-    #if (CFITSIO_FOUND)
-    #    # BINARY: oskar_fits_to_sky_model
-    #    set(name oskar_fits_to_sky_model)
-    #    oskar_app(${name} ${name}_main.cpp EXTRA_LIBS oskar_fits)
-    #endif ()
+    if (CFITSIO_FOUND)
+        # BINARY: oskar_fits_to_sky_model
+        set(name oskar_fits_to_sky_model)
+        oskar_app(${name} ${name}_main.cpp EXTRA_LIBS oskar_fits)
+    endif ()
 endif ()
 
 if (QT4_FOUND AND CUDA_FOUND)

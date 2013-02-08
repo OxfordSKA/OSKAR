@@ -47,26 +47,25 @@ using namespace std;
 
 // -----------------------------------------------------------------------------
 void set_options(oskar_OptionParser& opt);
-bool check_options(oskar_OptionParser& opt);
+bool check_options(oskar_OptionParser& opt, int argc, char** argv);
 bool isCompatible(const oskar_Visibilities& vis1, const oskar_Visibilities& vis2);
 void add_visibilities(oskar_Visibilities& out, const oskar_Visibilities& in1,
         const oskar_Visibilities& in2);
 void print_error(int status, const char* message);
 // -----------------------------------------------------------------------------
 
-int main(int argc, const char** argv)
+int main(int argc, char** argv)
 {
     // Register options =======================================================
-    oskar_OptionParser opt;
+    oskar_OptionParser opt("oskar_visibilities_add");
     set_options(opt);
-    opt.parse(argc, argv);
-    if (!check_options(opt))
+    if (!check_options(opt, argc, argv))
         return OSKAR_FAIL;
 
     // Retrieve options ========================================================
     string out_path;
     opt.get("-o")->getString(out_path);
-    vector<string> in_files = opt.getInputFiles();
+    vector<string> in_files = opt.getInputFiles(2);
     bool verbose = opt.isSet("-q") ? false : true;
     if (verbose) {
         cout << "Output visibility file = " << out_path << endl;
@@ -192,60 +191,29 @@ bool isCompatible(const oskar_Visibilities& v1, const oskar_Visibilities& v2)
 
 void set_options(oskar_OptionParser& opt)
 {
-    opt.setOverview("Application to combine OSKAR binary visibility files.");
-    opt.setSyntax("oskar_visibilties_add [OPTIONS] input_file(s)...");
+    opt.setDescription("Application to combine OSKAR binary visibility files.");
+    opt.addRequired("OSKAR visibility files...");
+    opt.addFlag("-o", "Output visibility file name", 1, "out.vis", false, "--output");
+    opt.addFlag("-q", "Disable log messages", false, "--quiet");
     opt.addExample("oskar_visibilities_add file1.vis file2.vis");
     opt.addExample("oskar_visibilities_add file1.vis file2.vis -o combined.vis");
-    opt.addExample("oskar_visibilities_add file1.vis file2.vis file3.vis");
+    opt.addExample("oskar_visibilities_add -q file1.vis file2.vis file3.vis");
     opt.addExample("oskar_visibilities_add *.vis");
-    // add(default, required?, num args, delimiter, msg, flag token(s), ...)
-    opt.add("", 0, 0, 0, "Display the OSKAR version.",
-            "-v", "--version");
-    opt.add("out.vis", 0, 1, 0, "Output visibility filename (optional, default=out.vis).",
-            "-o", "--output");
-    opt.add("", 0, 0, 0, "Disable messages (optional).", "-q", "--quiet");
 }
 
-bool check_options(oskar_OptionParser& opt)
+bool check_options(oskar_OptionParser& opt, int argc, char** argv)
 {
-    if (opt.isSet("-h")) {
-        opt.printUsage();
+    if (!opt.check_options(argc, argv))
         return false;
-    }
-
-    if (opt.isSet("-v")) {
-         cout << "OSKAR version " <<OSKAR_VERSION_STR << endl;
-         return false;
-    }
-
-    std::vector<std::string> badOptions;
-    if(!opt.gotRequired(badOptions)) {
-        for(int i=0; i < (int)badOptions.size(); ++i)
-            cerr << "\nERROR: Missing required option " << badOptions[i] << ".\n\n";
-        opt.printUsage();
-        return false;
-    }
-
-    if(!opt.gotExpected(badOptions)) {
-        for(int i=0; i < (int)badOptions.size(); ++i)
-        {
-            cerr << "\nERROR: Got unexpected number of arguments for option ";
-            cerr << badOptions[i] << ".\n\n";
-        }
-        opt.printUsage();
-        return false;
-    }
-
     bool visFirst = ((int)opt.firstArgs.size() >= 3) &&
             ((int)opt.lastArgs.size() == 0);
     bool visEnd = ((int)opt.firstArgs.size() == 1) &&
             ((int)opt.lastArgs.size() >= 2);
-    if (!visFirst && !visEnd) {
-        cerr << "\nERROR: Please provide 2 or more visibility files to combine.\n\n";
-        opt.printUsage();
+    if (!visFirst && !visEnd)
+    {
+        opt.error("Please provide 2 or more visibility files to combine.");
         return false;
     }
-
     return true;
 }
 
