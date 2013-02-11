@@ -49,8 +49,16 @@ OSKAR_SET_MSVC_RUNTIME()
 
 enable_testing()
 
-# === Set the top level OSKAR source directory in the include path.
-include_directories(${OSKAR_SOURCE_DIR})
+# === Set the include path to include the top-level folder and sub-folders for main library.
+include_directories(
+    ${OSKAR_SOURCE_DIR}
+    ${OSKAR_SOURCE_DIR}/imaging
+    ${OSKAR_SOURCE_DIR}/interferometry
+    ${OSKAR_SOURCE_DIR}/math
+    ${OSKAR_SOURCE_DIR}/sky
+    ${OSKAR_SOURCE_DIR}/station
+    ${OSKAR_SOURCE_DIR}/utility
+)
 
 # === Build main OSKAR library.
 if (CUDA_FOUND)

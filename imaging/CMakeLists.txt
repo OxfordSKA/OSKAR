@@ -6,6 +6,7 @@
 
 # Add the source files in this directory.
 set(imaging_SRC
+    src/oskar_evaluate_image_lon_lat_grid.c
     src/oskar_evaluate_image_lm_grid.c
     src/oskar_evaluate_image_lmn_point.c
     src/oskar_get_image_vis_amps.cpp

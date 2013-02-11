@@ -35,10 +35,9 @@
 #include "interferometry/oskar_telescope_model_free.h"
 #include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_telescope_model_multiply_by_wavenumber.h"
-#include "imaging/oskar_evaluate_image_lm_grid.h"
+#include "imaging/oskar_evaluate_image_lon_lat_grid.h"
 #include "imaging/oskar_image_resize.h"
 #include "imaging/oskar_image_write.h"
-#include "math/oskar_sph_from_lm.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
 #include "sky/oskar_ra_dec_to_rel_lmn.h"
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
@@ -124,7 +123,6 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     int beam_pattern_data_type = type | OSKAR_COMPLEX;
     if (num_pols == 4)
         beam_pattern_data_type |= OSKAR_MATRIX;
-    double fov = settings.beam_pattern.fov_deg * M_PI / 180;
 
     // Check station ID is within range.
     if (station_id < 0 || station_id >= tel_cpu.num_stations)
@@ -137,39 +135,20 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     oskar_set_up_beam_pattern(&image_cube, &settings, &err);
     if (err) return err;
 
-    // Temporary CPU memory.
+    // Temporary CPU memory, used to re-order polarisation data.
     oskar_Mem beam_cpu(beam_pattern_data_type, OSKAR_LOCATION_CPU, num_pixels);
-
-    // Generate l,m grid and equatorial coordinates for beam pattern pixels.
-    oskar_Mem grid_l(type, OSKAR_LOCATION_CPU, num_pixels);
-    oskar_Mem grid_m(type, OSKAR_LOCATION_CPU, num_pixels);
-    oskar_Mem RA_cpu(type, OSKAR_LOCATION_CPU, num_pixels);
-    oskar_Mem Dec_cpu(type, OSKAR_LOCATION_CPU, num_pixels);
-    if (type == OSKAR_SINGLE)
-    {
-        oskar_evaluate_image_lm_grid_f(image_size, image_size, fov, fov,
-                grid_l, grid_m);
-        oskar_sph_from_lm_f(num_pixels, settings.obs.ra0_rad[0],
-                settings.obs.dec0_rad[0], grid_l, grid_m, RA_cpu, Dec_cpu);
-    }
-    else if (type == OSKAR_DOUBLE)
-    {
-        oskar_evaluate_image_lm_grid_d(image_size, image_size, fov, fov,
-                grid_l, grid_m);
-        oskar_sph_from_lm_d(num_pixels, settings.obs.ra0_rad[0],
-                settings.obs.dec0_rad[0], grid_l, grid_m, RA_cpu, Dec_cpu);
-    }
 
     // All GPU memory used within these braces.
     {
         oskar_Mem RA, Dec, beam_pattern, l, m, n;
         oskar_WorkStationBeam work;
 
-        // Copy RA and Dec to GPU.
+        // Generate equatorial coordinates for beam pattern pixels.
         oskar_mem_init(&RA, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
         oskar_mem_init(&Dec, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
-        oskar_mem_copy(&RA, &RA_cpu, &err);
-        oskar_mem_copy(&Dec, &Dec_cpu, &err);
+        oskar_evaluate_image_lon_lat_grid(&RA, &Dec, image_size,
+                settings.beam_pattern.fov_deg * M_PI / 180.0,
+                settings.obs.ra0_rad[0], settings.obs.dec0_rad[0], &err);
 
         // Initialise work array and GPU memory for a beam pattern.
         oskar_work_station_beam_init(&work, type, OSKAR_LOCATION_GPU, &err);
@@ -252,25 +231,25 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                     return OSKAR_ERR_SETTINGS_TELESCOPE;
                 }
 
-                // Copy beam pattern back to host memory.
-                oskar_mem_copy(&beam_cpu, &beam_pattern, &err);
-                if (err) continue;
-
                 // Save complex beam pattern data in the right order.
                 // Cube has dimension order (from slowest to fastest):
                 // Channel, Time, Polarisation, Declination, Right Ascension.
                 int offset = (t + c * num_times) * num_pols * num_pixels;
-                if (type == OSKAR_SINGLE)
+                if (oskar_mem_is_scalar(beam_pattern.type))
                 {
-                    float2* bp = (float2*)complex_cube.data + offset;
-                    if (oskar_mem_is_scalar(beam_cpu.type))
+                    oskar_mem_insert(&complex_cube.data, &beam_pattern,
+                            offset, &err);
+                }
+                else
+                {
+                    // Copy beam pattern back to host memory for re-ordering.
+                    oskar_mem_copy(&beam_cpu, &beam_pattern, &err);
+                    if (err) continue;
+
+                    // Re-order the polarisation data.
+                    if (type == OSKAR_SINGLE)
                     {
-                        float2* tc = (float2*)beam_cpu.data;
-                        for (int i = 0; i < num_pixels; ++i)
-                            bp[i] = tc[i];
-                    }
-                    else
-                    {
+                        float2* bp = (float2*)complex_cube.data.data + offset;
                         float4c* tc = (float4c*)beam_cpu.data;
                         for (int i = 0; i < num_pixels; ++i)
                         {
@@ -280,18 +259,9 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                             bp[i + 3 * num_pixels] = tc[i].d; // phi_Y
                         }
                     }
-                }
-                else if (type == OSKAR_DOUBLE)
-                {
-                    double2* bp = (double2*)complex_cube.data + offset;
-                    if (oskar_mem_is_scalar(beam_cpu.type))
+                    else if (type == OSKAR_DOUBLE)
                     {
-                        double2* tc = (double2*)beam_cpu.data;
-                        for (int i = 0; i < num_pixels; ++i)
-                            bp[i] = tc[i];
-                    }
-                    else
-                    {
+                        double2* bp = (double2*)complex_cube.data.data + offset;
                         double4c* tc = (double4c*)beam_cpu.data;
                         for (int i = 0; i < num_pixels; ++i)
                         {
