@@ -51,7 +51,7 @@ int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
 
     QSettings s(QString(filename), QSettings::IniFormat);
     s.beginGroup("ionosphere");
-    settings->enable = (int)s.value("enable", true).toBool();
+    settings->enable = (int)s.value("enable", false).toBool();
     settings->min_elevation = (double)s.value("min_elevation_deg", 0.0).toDouble();
     settings->min_elevation *= M_PI/180.0; // Convert to radians.
 

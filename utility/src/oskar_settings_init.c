@@ -72,6 +72,7 @@ int oskar_settings_init(oskar_Settings* settings)
     noise->value.t_sys.file = NULL;
     noise->value.area.file = NULL;
     noise->value.efficiency.file = NULL;
+    settings->ionosphere.enable = OSKAR_FALSE;
     settings->ionosphere.num_TID_screens = 0;
     settings->ionosphere.TID_files = NULL;
     settings->ionosphere.TID = NULL;
