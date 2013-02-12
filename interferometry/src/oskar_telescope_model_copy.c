@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,6 +74,7 @@ void oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     /* Copy the meta-data. */
     dst->num_stations = src->num_stations;
     dst->max_station_size = src->max_station_size;
+    dst->max_station_depth = src->max_station_depth;
     dst->coord_units = src->coord_units;
     dst->identical_stations = src->identical_stations;
     dst->use_common_sky = src->use_common_sky;

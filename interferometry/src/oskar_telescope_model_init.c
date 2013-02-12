@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@ void oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
     /* Initialise the meta-data. */
     telescope->num_stations = num_stations;
     telescope->max_station_size = 0;
+    telescope->max_station_depth = 1;
     telescope->coord_units = OSKAR_METRES;
     telescope->identical_stations = 0;
     telescope->use_common_sky = 1;

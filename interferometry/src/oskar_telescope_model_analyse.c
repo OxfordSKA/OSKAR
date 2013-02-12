@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,23 +34,26 @@
 extern "C" {
 #endif
 
-static void max_station_size(oskar_StationModel* s, int* max_elements)
+static void max_station_size_and_depth(oskar_StationModel* s,
+        int* max_elements, int* max_depth, int depth)
 {
     int i = 0;
     *max_elements = (s->num_elements > *max_elements) ?
             s->num_elements : *max_elements;
+    *max_depth = (depth > *max_depth) ? depth : *max_depth;
     if (s->child)
     {
         for (i = 0; i < s->num_elements; ++i)
         {
-            max_station_size(&s->child[i], max_elements);
+            max_station_size_and_depth(&s->child[i], max_elements,
+                    max_depth, depth + 1);
         }
     }
 }
 
 void oskar_telescope_model_analyse(oskar_TelescopeModel* model, int* status)
 {
-    int i, finished_identical_station_check, num_stations;
+    int i = 0, finished_identical_station_check = 0, num_stations;
 
     /* Check all inputs. */
     if (!model || !status)
@@ -64,14 +67,14 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model, int* status)
 
     /* Set default flags. */
     model->identical_stations = 1;
-    finished_identical_station_check = 0;
 
     /* Recursively find the maximum number of elements in any station. */
     num_stations = model->num_stations;
     model->max_station_size = 0;
     for (i = 0; i < num_stations; ++i)
     {
-        max_station_size(&model->station[i], &model->max_station_size);
+        max_station_size_and_depth(&model->station[i],
+                &model->max_station_size, &model->max_station_depth, 1);
     }
 
     /* Recursively analyse each station. */
@@ -84,7 +87,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model, int* status)
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check if we need to check every station. */
+    /* Check if we need to examine every station. */
     if (finished_identical_station_check)
     {
         model->identical_stations = 0;

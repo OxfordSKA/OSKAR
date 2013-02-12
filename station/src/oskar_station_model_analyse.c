@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -158,9 +158,6 @@ void oskar_station_model_analyse(oskar_StationModel* station,
     /* Recursively analyse all child stations. */
     if (station->child)
     {
-        /* Must force identical stations to false. */
-        *finished_identical_station_check = 1;
-
         for (i = 0; i < station->num_elements; ++i)
         {
             oskar_station_model_analyse(&station->child[i],

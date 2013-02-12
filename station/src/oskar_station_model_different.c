@@ -36,7 +36,7 @@ extern "C" {
 int oskar_station_model_different(const oskar_StationModel* a,
         const oskar_StationModel* b, int* status)
 {
-    int n;
+    int i, n;
     oskar_Mem *fname_a_x = 0, *fname_a_y = 0, *fname_b_x = 0, *fname_b_y = 0;
 
     /* Check all inputs. */
@@ -66,7 +66,7 @@ int oskar_station_model_different(const oskar_StationModel* a,
     }
 
     /* Check if child stations exist. */
-    if (a->child || b->child)
+    if ((a->child && !b->child) || (!a->child && b->child))
         return 1;
 
     /* Check if element patterns exist. */
@@ -127,6 +127,13 @@ int oskar_station_model_different(const oskar_StationModel* a,
     if (oskar_mem_different(&a->sin_orientation_y, &b->sin_orientation_y, n,
             status))
         return 1;
+
+    /* Recursively check child stations. */
+    for (i = 0; i < n; ++i)
+    {
+        if (oskar_station_model_different(&a->child[i], &b->child[i], status))
+            return 1;
+    }
 
     /* Stations must be the same! */
     return 0;

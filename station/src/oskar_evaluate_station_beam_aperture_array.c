@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,6 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         int* status)
 {
     int start;
-    oskar_Mem c_beam, c_x, c_y, c_z;
 
     /* Check all inputs. */
     if (!beam || !station || !x || !y || !z || !work || !curand_states ||
@@ -77,25 +76,36 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Split up list of input points into manageable chunks. */
-    for (start = 0; start < num_points; start += MAX_CHUNK_SIZE)
+    /* Evaluate beam immediately, without chunking, if there are no
+     * child stations. */
+    if (!station->child)
     {
-        int chunk_size;
+        oskar_evaluate_station_beam_aperture_array_private(beam, station,
+                num_points, x, y, z, gast, work, curand_states, 0, status);
+    }
+    else
+    {
+        /* Split up list of input points into manageable chunks. */
+        for (start = 0; start < num_points; start += MAX_CHUNK_SIZE)
+        {
+            int chunk_size;
+            oskar_Mem c_beam, c_x, c_y, c_z;
 
-        /* Get size of current chunk. */
-        chunk_size = num_points - start;
-        if (chunk_size > MAX_CHUNK_SIZE) chunk_size = MAX_CHUNK_SIZE;
+            /* Get size of current chunk. */
+            chunk_size = num_points - start;
+            if (chunk_size > MAX_CHUNK_SIZE) chunk_size = MAX_CHUNK_SIZE;
 
-        /* Get pointers to start of chunk input data. */
-        oskar_mem_get_pointer(&c_beam, beam, start, chunk_size, status);
-        oskar_mem_get_pointer(&c_x, x, start, chunk_size, status);
-        oskar_mem_get_pointer(&c_y, y, start, chunk_size, status);
-        oskar_mem_get_pointer(&c_z, z, start, chunk_size, status);
+            /* Get pointers to start of chunk input data. */
+            oskar_mem_get_pointer(&c_beam, beam, start, chunk_size, status);
+            oskar_mem_get_pointer(&c_x, x, start, chunk_size, status);
+            oskar_mem_get_pointer(&c_y, y, start, chunk_size, status);
+            oskar_mem_get_pointer(&c_z, z, start, chunk_size, status);
 
-        /* Start recursive call at depth 0. */
-        oskar_evaluate_station_beam_aperture_array_private(&c_beam, station,
-                chunk_size, &c_x, &c_y, &c_z, gast, work, curand_states, 0,
-                status);
+            /* Start recursive call at depth 0. */
+            oskar_evaluate_station_beam_aperture_array_private(&c_beam, station,
+                    chunk_size, &c_x, &c_y, &c_z, gast, work, curand_states, 0,
+                    status);
+        }
     }
 }
 
