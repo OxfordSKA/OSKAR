@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -135,6 +135,8 @@ void oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
             telescope->num_stations);
     oskar_log_value(log, 1, width, "Max station size", "%d",
             telescope->max_station_size);
+    oskar_log_value(log, 1, width, "Max station depth", "%d",
+            telescope->max_station_depth);
     oskar_log_value(log, 1, width, "Identical stations", "%s",
             telescope->identical_stations ? "true" : "false");
 
