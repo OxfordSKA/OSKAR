@@ -34,7 +34,6 @@
  */
 
 #include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_add_gaussian_noise.h"
 #include "utility/oskar_mem_add.h"
 #include "utility/oskar_mem_alloc.h"
 #include "utility/oskar_mem_append_raw.h"

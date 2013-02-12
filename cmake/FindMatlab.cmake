@@ -194,6 +194,7 @@ find_path(MATLAB_BINARY_DIR matlab
     /Applications/MATLAB_R2011a.app/bin
     /Applications/MATLAB_R2012a.app/bin
     /Applications/MATLAB_R2012b.app/bin
+    NO_DEFAULT_PATH
 )
 
 MARK_AS_ADVANCED(
