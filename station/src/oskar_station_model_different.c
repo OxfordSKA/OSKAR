@@ -129,10 +129,14 @@ int oskar_station_model_different(const oskar_StationModel* a,
         return 1;
 
     /* Recursively check child stations. */
-    for (i = 0; i < n; ++i)
+    if (a->child && b->child)
     {
-        if (oskar_station_model_different(&a->child[i], &b->child[i], status))
-            return 1;
+        for (i = 0; i < n; ++i)
+        {
+            if (oskar_station_model_different(&a->child[i], &b->child[i],
+                    status))
+                return 1;
+        }
     }
 
     /* Stations must be the same! */
