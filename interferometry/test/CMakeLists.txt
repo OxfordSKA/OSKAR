@@ -15,7 +15,7 @@ if (CPPUNIT_FOUND)
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
-    add_executable(interferometry_test ${interferometry_test_SRC})
+    cuda_add_executable(interferometry_test ${interferometry_test_SRC})
     target_link_libraries(interferometry_test oskar
         ${CPPUNIT_LIBRARIES} ${CUDA_LIBRARIES}
     )

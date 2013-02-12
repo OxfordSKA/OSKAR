@@ -31,12 +31,23 @@
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_cuda_device_info_scan.h"
 
+#include "interferometry/oskar_correlate.h"
+#include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_telescope_model_init.h"
+#include "sky/oskar_SkyModel.h"
+#include "sky/oskar_sky_model_init.h"
+#include "math/oskar_Jones.h"
+#include "math/oskar_jones_init.h"
+#include "utility/oskar_Mem.h"
+#include "utility/oskar_mem_init.h"
+#include "utility/oskar_get_error_string.h"
+
 #include <cmath>
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
 
-#define TIMER_ENABLE 1
+#define TIMER_ENABLE
 #include "utility/timer.h"
 
 /**
@@ -270,3 +281,70 @@ void Test_correlator::test_kernel_double()
     cudaFree(d_jones);
     cudaFree(d_vis);
 }
+
+
+void Test_correlator::benchmark()
+{
+    // =============
+    int num_stations = 100;
+    int num_sources = 10000;
+    int type = OSKAR_DOUBLE;
+    int jones_type = type | OSKAR_COMPLEX | OSKAR_MATRIX;
+    int use_extended = OSKAR_FALSE;
+    double time_ave = 0.0;
+    int niter = 1;
+    // =============
+
+    int status = OSKAR_SUCCESS;
+    int loc = OSKAR_LOCATION_GPU;
+    int num_vis = num_stations * (num_stations-1) / 2;
+    int num_vis_coords = num_stations;
+
+    // Setup a test telescope model.
+    oskar_TelescopeModel tel;
+    oskar_telescope_model_init(&tel, type, loc, num_stations, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status),
+            (int)OSKAR_SUCCESS, status);
+    tel.time_average_sec = time_ave;
+
+    oskar_SkyModel sky;
+    oskar_sky_model_init(&sky, type, loc, num_sources, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status),
+            (int)OSKAR_SUCCESS, status);
+    sky.use_extended = use_extended;
+
+    // Memory for the visibility slice being correlated.
+    oskar_Mem vis;
+    oskar_mem_init(&vis, jones_type, loc, num_vis, OSKAR_TRUE, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status),
+            (int)OSKAR_SUCCESS, status);
+
+    // Visibility coordinates.
+    oskar_Mem u, v;
+    oskar_mem_init(&u, type, loc, num_vis_coords, OSKAR_TRUE, &status);
+    oskar_mem_init(&v, type, loc, num_vis_coords, OSKAR_TRUE, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status),
+            (int)OSKAR_SUCCESS, status);
+
+    oskar_Jones J;
+    oskar_jones_init(&J, jones_type,
+            loc, num_stations, num_sources, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status),
+            (int)OSKAR_SUCCESS, status);
+
+    double gast = 0.0;
+    cudaDeviceSynchronize();
+    TIMER_START
+    {
+        for (int i = 0; i < niter; ++i)
+            oskar_correlate(&vis, &J, &tel, &sky, &u, &v, gast, &status);
+    }
+    TIMER_STOP("oskar_correlate");
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status),
+            (int)OSKAR_SUCCESS, status);
+
+    // Note: telescope, sky model, oskar_Mem, and oskar_Jones currently still
+    // have a C++ nature so free themselves!
+}
+

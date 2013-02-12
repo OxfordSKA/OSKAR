@@ -77,6 +77,8 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
             oskar_mem_base_type(J->data.type) != base_type ||
             u->type != base_type || v->type != base_type)
         *status = OSKAR_ERR_TYPE_MISMATCH;
+    if (vis->type != J->data.type)
+        *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* If neither single or double precision, return error. */
     if (base_type != OSKAR_SINGLE && base_type != OSKAR_DOUBLE)

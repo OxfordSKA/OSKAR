@@ -48,8 +48,9 @@ class Test_correlator : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(Test_correlator);
-        CPPUNIT_TEST(test_kernel_float);
-        CPPUNIT_TEST(test_kernel_double);
+        //CPPUNIT_TEST(test_kernel_float);
+        //CPPUNIT_TEST(test_kernel_double);
+        CPPUNIT_TEST(benchmark);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -57,11 +58,9 @@ class Test_correlator : public CppUnit::TestFixture
         ~Test_correlator();
 
     public:
-        // Test Methods
         void test_kernel_float();
-
-        // Test Methods
         void test_kernel_double();
+        void benchmark();
 
     private:
         oskar_CudaDeviceInfo* device_;
