@@ -39,11 +39,13 @@
 #include <utility/oskar_mem_init.h>
 #include <utility/oskar_mem_copy.h>
 #include <utility/oskar_get_error_string.h>
-#define TIMER_ENABLE
-#include <utility/timer.h>
 
+#include <apps/lib/oskar_OptionParser.h>
 #include <cuda_runtime_api.h>
 
+#ifndef _WIN32
+#   include <sys/time.h>
+#endif /* _WIN32 */
 #include <cstdlib>
 #include <cstdio>
 
@@ -51,23 +53,54 @@ int benchmark(int num_stations, int num_sources, int type,
         int jones_type, int use_extended, int use_time_ave, int niter,
         double* time_taken_sec);
 
-int main(int /*argc*/, char** /*argv*/)
+int main(int argc, char** argv)
 {
-    int num_stations = 100;
-    int num_sources = 10000;
-    int type = OSKAR_DOUBLE;
-    int jones_type = type | OSKAR_COMPLEX | OSKAR_MATRIX;
-    int use_extended = OSKAR_FALSE;
-    int use_time_ave = OSKAR_TRUE;
-    int niter = 1;
+    oskar_OptionParser opt("oskar_correlator_benchmark");
+    opt.addFlag("-nst", "Number of stations.", 1, "100", true);
+    opt.addFlag("-nsrc", "Number of sources.", 1, "10000", true);
+    opt.addFlag("-single", "Evaluate using single precision (default = "
+            "use double precision)");
+    opt.addFlag("-s", "Evaluate using scalar Jones terms (default = "
+            "use polarised Jones terms).");
+    opt.addFlag("-e", "Time with extended (Gaussian) sources (default = use "
+            "point sources).");
+    opt.addFlag("-t", "Time with analytical time averaging (default = no time "
+            "averaging).");
+    opt.addFlag("-n", "Number of iterations", 1, "1", false);
+    if (!opt.check_options(argc, argv))
+        return EXIT_FAILURE;
+
+    int num_stations, num_sources, niter;
+    opt.get("-nst")->getInt(num_stations);
+    opt.get("-nsrc")->getInt(num_sources);
+    int type = opt.isSet("-single") ? OSKAR_SINGLE : OSKAR_DOUBLE;
+    int jones_type = type | OSKAR_COMPLEX;
+    if (!opt.isSet("-s"))
+        jones_type |= OSKAR_MATRIX;
+    opt.get("-n")->getInt(niter);
+    int use_extended = opt.isSet("-e") ? OSKAR_TRUE : OSKAR_FALSE;
+    int use_time_ave = opt.isSet("-t") ? OSKAR_TRUE : OSKAR_FALSE;
+
+    printf("\n");
+    printf("- Number of stations = %i\n", num_stations);
+    printf("- Number of sources = %i\n", num_sources);
+    printf("- %s\n", (type == OSKAR_SINGLE) ? "Single precision" : "double precision");
+    printf("- %s\n", (opt.isSet("-s")) ? "Scalar" : "Matrix");
+    printf("- %s\n", (use_extended) ? "Extended sources" : "Point sources");
+    printf("- Analytical time smearing = %s\n", (use_time_ave) ? "true" : "false");
+    printf("- Number of iterations = %i\n", niter);
+    printf("\n");
+
     double time_taken_sec = 0.0;
 
     int status = benchmark(num_stations, num_sources, type, jones_type,
             use_extended, use_time_ave, niter, &time_taken_sec);
     if (status) {
-        printf("ERROR: correlator failed with code %i: %s\n", status,
+        fprintf(stderr, "ERROR: correlator failed with code %i: %s\n", status,
                 oskar_get_error_string(status));
     }
+    printf("==> Time taken = %f seconds.\n", time_taken_sec);
+    printf("\n");
 
     return EXIT_SUCCESS;
 }
@@ -110,15 +143,25 @@ int benchmark(int num_stations, int num_sources, int type,
 
     double gast = 0.0;
     cudaDeviceSynchronize();
-    TIMER_START
-    {
-        for (int i = 0; i < niter; ++i)
-            oskar_correlate(&vis, &J, &tel, &sky, &u, &v, gast, &status);
-    }
-    cudaDeviceSynchronize();
-    TIMER_STOP("oskar_correlate");
 
+#ifndef _WIN32
+    struct timeval t1_;
+    gettimeofday(&t1_, NULL);
+#endif
+
+    for (int i = 0; i < niter; ++i)
+        oskar_correlate(&vis, &J, &tel, &sky, &u, &v, gast, &status);
+    cudaDeviceSynchronize();
+
+#ifndef _WIN32
+    struct timeval t2_;
+    gettimeofday(&t2_, NULL);
+    double start_ = t1_.tv_sec + t1_.tv_usec * 1.0e-6;
+    double end_ = t2_.tv_sec + t2_.tv_usec * 1.0e-6;
+    *time_taken_sec = end_ - start_;
+#else
     *time_taken_sec = 0.0;
+#endif
 
     // Note: telescope, sky model, oskar_Mem, and oskar_Jones currently still
     // have a C++ nature so free themselves!
