@@ -26,4 +26,4 @@ endif()
 # Correlator benchmark binary.
 set(name oskar_correlator_benchmark)
 add_executable(${name} ${name}.cpp)
-target_link_libraries(${name} oskar)
+target_link_libraries(${name} oskar ${CUDA_LIBRARIES})
