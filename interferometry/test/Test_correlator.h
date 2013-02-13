@@ -63,6 +63,9 @@ class Test_correlator : public CppUnit::TestFixture
         void benchmark();
 
     private:
+        void benchmark_(int num_stations, int num_sources, int type,
+                int jones_type, int use_extended, int use_time_ave, int niter);
+
         oskar_CudaDeviceInfo* device_;
 };
 

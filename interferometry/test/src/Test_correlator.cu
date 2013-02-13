@@ -285,20 +285,38 @@ void Test_correlator::test_kernel_double()
 
 void Test_correlator::benchmark()
 {
-    // =============
     int num_stations = 100;
     int num_sources = 10000;
     int type = OSKAR_DOUBLE;
     int jones_type = type | OSKAR_COMPLEX | OSKAR_MATRIX;
     int use_extended = OSKAR_FALSE;
-    double time_ave = 0.0;
+    double use_time_ave = OSKAR_TRUE;
     int niter = 1;
-    // =============
 
+    benchmark_(num_stations, num_sources, type, jones_type, use_extended,
+                use_time_ave, niter);
+
+    use_time_ave = OSKAR_FALSE;
+    benchmark_(num_stations, num_sources, type, jones_type, use_extended,
+            use_time_ave, niter);
+
+    use_time_ave = OSKAR_TRUE;
+    use_extended = OSKAR_TRUE;
+    benchmark_(num_stations, num_sources, type, jones_type, use_extended,
+                use_time_ave, niter);
+}
+
+void Test_correlator::benchmark_(int num_stations, int num_sources,
+        int type, int jones_type, int use_extended, int use_time_ave, int niter)
+{
     int status = OSKAR_SUCCESS;
     int loc = OSKAR_LOCATION_GPU;
     int num_vis = num_stations * (num_stations-1) / 2;
     int num_vis_coords = num_stations;
+
+    double time_ave = 0.0;
+    if (use_time_ave)
+        time_ave = 1.0;
 
     // Setup a test telescope model.
     oskar_TelescopeModel tel;
@@ -347,4 +365,3 @@ void Test_correlator::benchmark()
     // Note: telescope, sky model, oskar_Mem, and oskar_Jones currently still
     // have a C++ nature so free themselves!
 }
-
