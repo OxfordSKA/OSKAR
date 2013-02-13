@@ -24,6 +24,7 @@ if (CPPUNIT_FOUND)
 endif()
 
 # Correlator benchmark binary.
+include_directories(${CUDA_INCLUDE_DIRS})
 set(name oskar_correlator_benchmark)
 add_executable(${name} ${name}.cpp)
 target_link_libraries(${name} oskar ${CUDA_LIBRARIES})
