@@ -20,11 +20,10 @@ if (CPPUNIT_FOUND)
         ${CPPUNIT_LIBRARIES} ${CUDA_LIBRARIES}
     )
 
-    # Correlator benchmark binary.
-    set(name oskar_correlator_benchmark)
-    add_executable(${name} ${name}.cpp)
-    target_link_libraries(${name} oskar)
-
     add_test(interferometry_test interferometry_test)
-
 endif()
+
+# Correlator benchmark binary.
+set(name oskar_correlator_benchmark)
+add_executable(${name} ${name}.cpp)
+target_link_libraries(${name} oskar)
