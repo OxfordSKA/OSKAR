@@ -8,7 +8,7 @@ if (CPPUNIT_FOUND)
         src/CppUnitMain.cpp
         src/Test_add_system_noise.cpp
         src/Test_evaluate_baselines.cpp
-        src/Test_correlator.cu
+        #src/Test_correlator.cu
         src/Test_station_coord_transforms.cpp
         src/Test_TelescopeModel.cpp
         src/Test_Visibilities.cpp
@@ -19,6 +19,11 @@ if (CPPUNIT_FOUND)
     target_link_libraries(interferometry_test oskar
         ${CPPUNIT_LIBRARIES} ${CUDA_LIBRARIES}
     )
+
+    # Correlator benchmark binary.
+    set(name oskar_correlator_benchmark)
+    add_executable(${name} ${name}.cpp)
+    target_link_libraries(${name} oskar)
 
     add_test(interferometry_test interferometry_test)
 
