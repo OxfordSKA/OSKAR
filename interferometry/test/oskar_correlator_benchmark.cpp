@@ -37,6 +37,7 @@
 #include <math/oskar_jones_init.h>
 #include <utility/oskar_Mem.h>
 #include <utility/oskar_mem_init.h>
+#include <utility/oskar_mem_copy.h>
 #include <utility/oskar_get_error_string.h>
 #define TIMER_ENABLE
 #include <utility/timer.h>
@@ -57,7 +58,7 @@ int main(int /*argc*/, char** /*argv*/)
     int type = OSKAR_DOUBLE;
     int jones_type = type | OSKAR_COMPLEX | OSKAR_MATRIX;
     int use_extended = OSKAR_FALSE;
-    double use_time_ave = OSKAR_TRUE;
+    int use_time_ave = OSKAR_TRUE;
     int niter = 1;
     double time_taken_sec = 0.0;
 
@@ -114,6 +115,7 @@ int benchmark(int num_stations, int num_sources, int type,
         for (int i = 0; i < niter; ++i)
             oskar_correlate(&vis, &J, &tel, &sky, &u, &v, gast, &status);
     }
+    cudaDeviceSynchronize();
     TIMER_STOP("oskar_correlate");
 
     *time_taken_sec = 0.0;
