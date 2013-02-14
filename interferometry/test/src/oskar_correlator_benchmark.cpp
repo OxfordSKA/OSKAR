@@ -98,6 +98,7 @@ int main(int argc, char** argv)
     if (status) {
         fprintf(stderr, "ERROR: correlator failed with code %i: %s\n", status,
                 oskar_get_error_string(status));
+        return EXIT_FAILURE;
     }
     if (opt.isSet("-v"))
     {
