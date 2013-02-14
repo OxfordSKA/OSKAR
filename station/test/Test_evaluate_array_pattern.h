@@ -35,6 +35,8 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
+#include "utility/oskar_Mem.h"
+
 /**
  * @brief Unit test class that uses CppUnit.
  *
@@ -51,6 +53,9 @@ class Test_evaluate_array_pattern : public CppUnit::TestFixture
 
     public:
         void test();
+
+    private:
+
 };
 
 // Register the test class.
