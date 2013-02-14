@@ -1332,6 +1332,7 @@ class ezOptionParser {
 public:
     // How to layout usage descriptions with the option flags.
     enum Layout { ALIGN, INTERLEAVE, STAGGER };
+    enum OptionType { ALL = 0, REQUIRED = 1, OPTIONAL = 2 };
 
     inline ~ezOptionParser();
 
@@ -1342,7 +1343,8 @@ public:
     inline bool exportFile(const char * filename, bool all=false);
     inline OptionGroup * get(const char * name);
     inline void getUsage(std::string & usage, int width=80, Layout layout=ALIGN);
-    inline void getUsageDescriptions(std::string & usage, int width=80, Layout layout=STAGGER);
+    inline void getUsageDescriptions(std::string & usage, int width=80,
+            Layout layout=STAGGER, OptionType type = ALL);
     inline bool gotExpected(std::vector<std::string> & badOptions);
     inline bool gotRequired(std::vector<std::string> & badOptions);
     inline bool gotValid(std::vector<std::string> & badOptions, std::vector<std::string> & badArgs);
@@ -1798,18 +1800,18 @@ void ezOptionParser::getUsage(std::string & usage, int width, Layout layout)
     //std::string line(80, '-');
     //usage.append(line);
 
-//    if (!title.empty()) {
-//        usage.append("\n");
-//        usage.append(title);
-//    }
-//    if (!title.empty() && !version.empty()) {
-//        usage.append(std::string(", version ") + version);
-//    }
+    //    if (!title.empty()) {
+    //        usage.append("\n");
+    //        usage.append(title);
+    //    }
+    //    if (!title.empty() && !version.empty()) {
+    //        usage.append(std::string(", version ") + version);
+    //    }
     if (!description.empty()) {
-//        if (title.empty())
-//            usage.append("\n");
-//        else
-//            usage.append("\n\n");
+        //        if (title.empty())
+        //            usage.append("\n");
+        //        else
+        //            usage.append("\n\n");
         usage.append("Description:");
         usage.append("\n");
         usage.append("  ");
@@ -1846,8 +1848,22 @@ void ezOptionParser::getUsage(std::string & usage, int width, Layout layout)
     usage.append("\n");
     usage.append("  ");
     usage.append(syntax);
-    usage.append("\n\nOptions:\n");
-    getUsageDescriptions(usage, width, layout);
+    usage.append("\n");
+    bool haveRequired = false;
+    for (int i = 0; i < (int)groups.size(); ++i)
+    {
+        if (groups[i]->isRequired) {
+            haveRequired = true;
+            break;
+        }
+    }
+    if (haveRequired) {
+        usage.append("\nOptions: [Required]\n");
+        getUsageDescriptions(usage, width, layout, REQUIRED);
+    }
+    usage.append("\nOptions:\n");
+    getUsageDescriptions(usage, width, layout, OPTIONAL);
+
 
     if (!example.empty()) {
         usage.append("\nExamples:\n");
@@ -1860,30 +1876,35 @@ void ezOptionParser::getUsage(std::string & usage, int width, Layout layout)
 }
 /* ################################################################### */
 // Creates 2 column formatted help descriptions for each option flag.
-void ezOptionParser::getUsageDescriptions(std::string & usage, int width, Layout layout) {
+void ezOptionParser::getUsageDescriptions(std::string & usage, int width,
+        Layout layout, OptionType type)
+{
     // Sort each flag list amongst each group.
     int i;
     // Store index of flag groups before sort for easy lookup later.
     std::map<std::string*, int> stringPtrToIndexMap;
     std::vector<std::string* > stringPtrs(groups.size());
 
-    for (i=0; i < (int)groups.size(); ++i) {
+    for (i = 0; i < (int)groups.size(); ++i)
+    {
         std::sort(groups[i]->flags.begin(), groups[i]->flags.end(), CmpOptStringPtr);
         stringPtrToIndexMap[groups[i]->flags[0]] = i;
         stringPtrs[i] = groups[i]->flags[0];
     }
-
     size_t j, k;
     std::string opts;
     std::vector<std::string> sortedOpts;
     // Sort first flag of each group with other groups.
     // NOTE temporarily removed.
     //std::sort(stringPtrs.begin(), stringPtrs.end(), CmpOptStringPtr);
-    for (i=0; i < (int)groups.size(); ++i) {
+    for (i = 0; i < (int)groups.size(); ++i)
+    {
         k = stringPtrToIndexMap[stringPtrs[i]];
+
         opts.clear();
         opts.append("  ");
-        for(j=0; j < groups[k]->flags.size()-1; ++j) {
+        for (j=0; j < groups[k]->flags.size()-1; ++j)
+        {
             opts.append(*groups[k]->flags[j]);
             opts.append(", ");
             if ((int)opts.size() > width)
@@ -1891,10 +1912,9 @@ void ezOptionParser::getUsageDescriptions(std::string & usage, int width, Layout
         }
         // The last flag. No need to append comma anymore.
         opts.append( *groups[k]->flags[j] );
-
-        if (groups[k]->expectArgs) {
+        if (groups[k]->expectArgs)
+        {
             opts.append(" ARG");
-
             if (groups[k]->delim) {
                 opts.append("1[");
                 opts.append(1, groups[k]->delim);
@@ -1903,7 +1923,6 @@ void ezOptionParser::getUsageDescriptions(std::string & usage, int width, Layout
         }
         sortedOpts.push_back(opts);
     }
-
     // Each option group will use this to build multiline help description.
     std::list<std::string*> desc;
     // Number of whitespaces from start of line to description (interleave layout) or
@@ -1912,8 +1931,10 @@ void ezOptionParser::getUsageDescriptions(std::string & usage, int width, Layout
 
     // Find longest opt flag string to set column start for help usage descriptions.
     int maxlen=0;
-    if (layout == ALIGN) {
-        for(i=0; i < (int)groups.size(); ++i) {
+    if (layout == ALIGN)
+    {
+        for(i=0; i < (int)groups.size(); ++i)
+        {
             if (maxlen < (int)sortedOpts[i].size())
                 maxlen = sortedOpts[i].size();
         }
@@ -1923,7 +1944,12 @@ void ezOptionParser::getUsageDescriptions(std::string & usage, int width, Layout
     int helpwidth;
     std::list<std::string*>::iterator cIter, insertionIter;
     size_t pos;
-    for(i=0; i < (int)groups.size(); ++i) {
+    for (i = 0; i < (int)groups.size(); ++i)
+    {
+        bool req = groups[i]->isRequired;
+        bool ok = ((!req && type == REQUIRED) || (req && type == OPTIONAL)) ?
+                false : true;
+
         k = stringPtrToIndexMap[stringPtrs[i]];
 
         if (layout == STAGGER)
@@ -1937,7 +1963,8 @@ void ezOptionParser::getUsageDescriptions(std::string & usage, int width, Layout
         // Split lines longer than allowable help width.
         for(insertionIter=desc.begin(), cIter=insertionIter++;
                 cIter != desc.end();
-                cIter=insertionIter++) {
+                cIter=insertionIter++)
+        {
             if ((int)(*cIter)->size() > helpwidth) {
                 // Get pointer to next string to insert new strings before it.
                 std::string *rem = *cIter;
@@ -1967,31 +1994,32 @@ void ezOptionParser::getUsageDescriptions(std::string & usage, int width, Layout
             }
         }
 
-        usage.append(sortedOpts[i]);
+        if (ok) usage.append(sortedOpts[i]);
         if (layout != INTERLEAVE)
+        {
             // Add whitespace between option names and description.
-            usage.append(pad - sortedOpts[i].size(), ' ');
+            if (ok) usage.append(pad - sortedOpts[i].size(), ' ');
+        }
         else {
-            usage.append("\n\n");
-            usage.append(gutter, ' ');
+            if (ok) usage.append("\n\n");
+            if (ok) usage.append(gutter, ' ');
         }
 
         // First line already padded above (before calling SplitDelim) after option flag names.
         cIter = desc.begin();
-        usage.append(**cIter);
-        usage.append("\n");
+        if (ok) usage.append(**cIter);
+        if (ok) usage.append("\n");
         // Now inject the pad for each line.
         for(++cIter; cIter != desc.end(); ++cIter) {
-            usage.append(pad, ' ');
-            usage.append(**cIter);
-            usage.append("\n");
+            if (ok) usage.append(pad, ' ');
+            if (ok) usage.append(**cIter);
+            if (ok) usage.append("\n");
         }
         //usage.append("\n");
 
         if (desc.size()) {
             for(cIter=desc.begin(); cIter != desc.end(); ++cIter)
                 delete *cIter;
-
             desc.clear();
         }
     }
@@ -2068,19 +2096,19 @@ void ezOptionParser::parse(int argc, char** argv)
 {
     if (argc < 1) return;
 
-//    std::map<std::string,int>::iterator it;
-//    for ( it=optionGroupIds.begin() ; it != optionGroupIds.end(); it++ )
-//        std::cout << (*it).first << " => " << (*it).second << std::endl;
+    //    std::map<std::string,int>::iterator it;
+    //    for ( it=optionGroupIds.begin() ; it != optionGroupIds.end(); it++ )
+    //        std::cout << (*it).first << " => " << (*it).second << std::endl;
 
     int i, k, firstOptIndex=0, lastOptIndex=0;
     std::string s;
     OptionGroup* g;
 
-//    for (i = 0; i < argc; ++i)
-//    {
-//        s = argv[i];
-//        printf("[%i] %s\n", i, s.c_str());
-//    }
+    //    for (i = 0; i < argc; ++i)
+    //    {
+    //        s = argv[i];
+    //        printf("[%i] %s\n", i, s.c_str());
+    //    }
 
     // TODO update option checker to catch for -f=xxx arguments
     // - split the arg by the '=' character
@@ -2093,7 +2121,7 @@ void ezOptionParser::parse(int argc, char** argv)
 
     firstOptIndex = i;
 
-//    printf("firstOptIndex = %i\n", firstOptIndex);
+    //    printf("firstOptIndex = %i\n", firstOptIndex);
     // TODO change the concept of first and last args adding a arg list for
     // non-flag variables.
 
@@ -2117,7 +2145,7 @@ void ezOptionParser::parse(int argc, char** argv)
     for (; i < argc; ++i)
     {
         s = argv[i];
-//        printf(">> %s\n", s.c_str());
+        //        printf(">> %s\n", s.c_str());
 
         if (optionGroupIds.count(s))
         {
@@ -2136,7 +2164,7 @@ void ezOptionParser::parse(int argc, char** argv)
                 std::vector<std::string*> aa;
                 aa = *(g->args[0]);
                 std::string ss = *aa[0];
-//                printf("  >> %s ==> %s\n", argv[i], ss.c_str());
+                //                printf("  >> %s ==> %s\n", argv[i], ss.c_str());
             }
             lastOptIndex = i;
         }

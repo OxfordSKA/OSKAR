@@ -88,13 +88,13 @@ public:
             add(defaults, required, expectedArgs, delim, help, flag1);
     }
 
-    // Wrapper to define flags with arguments.
+    // Wrapper to define flags with arguments with default values.
     void addFlag(const char* flag1, const char* help, int expectedArgs,
             const char* defaults = "", bool required = false, const char* flag2 = 0)
     {
         char delim = 0;
         std::string strHelp = help;
-        if (strlen(defaults) > 0 && expectedArgs == 1)
+        if (strlen(defaults) > 0 && expectedArgs == 1 && required == false)
             strHelp += " (default = " + std::string(defaults) + ")";
         if (flag2)
             add(defaults, required, expectedArgs, delim, strHelp.c_str(), flag1,
@@ -151,22 +151,25 @@ public:
             this->syntax += " <" + required_[i] + ">";
         for (int i = 0; i < (int)optional_.size(); ++i)
             this->syntax += " [" + optional_[i] + "]";
+
         // TODO overload here rather than editing the library header...!
         ez::ezOptionParser::getUsage(usage);
-    }
+
+    } // void getUsage(std::string& usage)
+
     int numArgs() const
     {
         return (((int)firstArgs.size()-1) + (int)lastArgs.size());
     }
     std::vector<std::string> getArgs() const
-            {
+                            {
         std::vector<std::string> args;
         for (int i = 1; i < (int)firstArgs.size(); ++i)
             args.push_back(*this->firstArgs[i]);
         for (int i = 0; i < (int)lastArgs.size(); ++i)
             args.push_back(*this->lastArgs[i]);
         return args;
-            }
+                            }
     const char* getArg(int i = 0) const
     {
         if ((int)firstArgs.size()-1 > i)
@@ -177,7 +180,7 @@ public:
         return 0;
     }
     std::vector<std::string> getInputFiles(int minRequired = 2) const
-            {
+                    {
         std::vector<std::string> files;
         // Note: minRequired+1 because firstArg[0] == binary name
         bool filesFirst = ((int)this->firstArgs.size() >= minRequired+1) &&
@@ -198,7 +201,7 @@ public:
             }
         }
         return files;
-            }
+                    }
     bool check_options(int argc, char** argv)
     {
         addFlag("--help", "Display usage instructions and exit.", false);
@@ -229,12 +232,11 @@ public:
                 return false;
             }
         }
-        //        std::cout << std::endl;
-        //        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        //        std::cout << "firstArgs.size() = " << firstArgs.size() << std::endl;
-        //        std::cout << "lastArgs.size()  = " << lastArgs.size() << std::endl;
-        //        std::cout << "firstArgs[0]     = " << *firstArgs[0] << std::endl;
-
+        // std::cout << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << std::endl;
+        // std::cout << "firstArgs.size() = " << firstArgs.size() << std::endl;
+        // std::cout << "lastArgs.size()  = " << lastArgs.size() << std::endl;
+        // std::cout << "firstArgs[0]     = " << *firstArgs[0] << std::endl;
         int numReqArgs = (int)required_.size();
         int numOptArgs = (int)optional_.size();
         if (numArgs() < numReqArgs || numArgs() > (numReqArgs +  numOptArgs))

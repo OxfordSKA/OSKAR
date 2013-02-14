@@ -56,17 +56,15 @@ int benchmark(int num_stations, int num_sources, int type,
 int main(int argc, char** argv)
 {
     oskar_OptionParser opt("oskar_correlator_benchmark");
-    opt.addFlag("-nst", "Number of stations.", 1, "100", true);
-    opt.addFlag("-nsrc", "Number of sources.", 1, "10000", true);
-    opt.addFlag("-single", "Evaluate using single precision (default = "
-            "use double precision)");
-    opt.addFlag("-s", "Evaluate using scalar Jones terms (default = "
-            "use polarised Jones terms).");
-    opt.addFlag("-e", "Time with extended (Gaussian) sources (default = use "
-            "point sources).");
-    opt.addFlag("-t", "Time with analytical time averaging (default = no time "
+    opt.addFlag("-nst", "Number of stations.", 1, "", true);
+    opt.addFlag("-nsrc", "Number of sources.", 1, "", true);
+    opt.addFlag("-sp", "Use single precision (default = double precision)");
+    opt.addFlag("-s", "Use scalar Jones terms (default = matrix/polarised).");
+    opt.addFlag("-e", "Use extended (Gaussian) sources (default = point sources).");
+    opt.addFlag("-t", "Use analytical time averaging (default = no time "
             "averaging).");
     opt.addFlag("-n", "Number of iterations", 1, "1", false);
+    opt.addFlag("-v", "Display verbose output.", false);
     if (!opt.check_options(argc, argv))
         return EXIT_FAILURE;
 
@@ -81,26 +79,35 @@ int main(int argc, char** argv)
     int use_extended = opt.isSet("-e") ? OSKAR_TRUE : OSKAR_FALSE;
     int use_time_ave = opt.isSet("-t") ? OSKAR_TRUE : OSKAR_FALSE;
 
-    printf("\n");
-    printf("- Number of stations = %i\n", num_stations);
-    printf("- Number of sources = %i\n", num_sources);
-    printf("- %s\n", (type == OSKAR_SINGLE) ? "Single precision" : "double precision");
-    printf("- %s\n", (opt.isSet("-s")) ? "Scalar" : "Matrix");
-    printf("- %s\n", (use_extended) ? "Extended sources" : "Point sources");
-    printf("- Analytical time smearing = %s\n", (use_time_ave) ? "true" : "false");
-    printf("- Number of iterations = %i\n", niter);
-    printf("\n");
+    if (opt.isSet("-v"))
+    {
+        printf("\n");
+        printf("- Number of stations = %i\n", num_stations);
+        printf("- Number of sources = %i\n", num_sources);
+        printf("- Precision: %s\n", (type == OSKAR_SINGLE) ? "single" : "double");
+        printf("- Jones type: %s\n", (opt.isSet("-s")) ? "Scalar" : "Matrix");
+        printf("- Extended sources: %s\n", (use_extended) ? "true" : "false");
+        printf("- Analytical time smearing = %s\n", (use_time_ave) ? "true" : "false");
+        printf("- Number of iterations = %i\n", niter);
+        printf("\n");
+    }
 
     double time_taken_sec = 0.0;
-
     int status = benchmark(num_stations, num_sources, type, jones_type,
             use_extended, use_time_ave, niter, &time_taken_sec);
     if (status) {
         fprintf(stderr, "ERROR: correlator failed with code %i: %s\n", status,
                 oskar_get_error_string(status));
     }
-    printf("==> Time taken = %f seconds.\n", time_taken_sec);
-    printf("\n");
+    if (opt.isSet("-v"))
+    {
+        printf("==> Total time taken = %f seconds.\n", time_taken_sec);
+        printf("==> Time taken per iteration = %f seconds.\n", time_taken_sec/niter);
+        printf("\n");
+    }
+    else {
+        printf("%f\n", time_taken_sec/niter);
+    }
 
     return EXIT_SUCCESS;
 }
