@@ -66,47 +66,47 @@ void oskar_dftw_m2m_2d_omp_f(const int n_in, const float* x_in,
         /* Loop over input points. */
         for (i = 0; i < n_in; ++i)
         {
-            float2 temp;
+            float2 weight;
 
             /* Calculate the DFT phase for the output position. */
             {
-                float a;
+                float t;
                 float2 w;
 
                 /* Phase. */
-                a = xp_out * x_in[i] + yp_out * y_in[i];
-                temp.x = cosf(a);
-                temp.y = sinf(a);
+                t = xp_out * x_in[i] + yp_out * y_in[i];
+                weight.x = cosf(t);
+                weight.y = sinf(t);
 
                 /* Multiply the supplied DFT weight by the computed phase. */
                 w = weights_in[i];
-                a = w.x; /* Copy the real part. */
-                w.x *= temp.x;
-                w.x += w.y * temp.y;
-                w.y *= temp.x;
-                w.y -= a * temp.y;
+                t = weight.x; /* Copy the real part. */
+                weight.x *= w.x;
+                weight.x += w.y * weight.y;
+                weight.y *= w.x;
+                weight.y -= w.y * t;
             }
 
             /* Complex multiply-accumulate input signal and weight. */
             {
                 float4c in;
                 in = data[i * n_out + i_out];
-                out.a.x += in.a.x * temp.x;
-                out.a.x -= in.a.y * temp.y;
-                out.a.y += in.a.y * temp.x;
-                out.a.y += in.a.x * temp.y;
-                out.b.x += in.b.x * temp.x;
-                out.b.x -= in.b.y * temp.y;
-                out.b.y += in.b.y * temp.x;
-                out.b.y += in.b.x * temp.y;
-                out.c.x += in.c.x * temp.x;
-                out.c.x -= in.c.y * temp.y;
-                out.c.y += in.c.y * temp.x;
-                out.c.y += in.c.x * temp.y;
-                out.d.x += in.d.x * temp.x;
-                out.d.x -= in.d.y * temp.y;
-                out.d.y += in.d.y * temp.x;
-                out.d.y += in.d.x * temp.y;
+                out.a.x += in.a.x * weight.x;
+                out.a.x -= in.a.y * weight.y;
+                out.a.y += in.a.y * weight.x;
+                out.a.y += in.a.x * weight.y;
+                out.b.x += in.b.x * weight.x;
+                out.b.x -= in.b.y * weight.y;
+                out.b.y += in.b.y * weight.x;
+                out.b.y += in.b.x * weight.y;
+                out.c.x += in.c.x * weight.x;
+                out.c.x -= in.c.y * weight.y;
+                out.c.y += in.c.y * weight.x;
+                out.c.y += in.c.x * weight.y;
+                out.d.x += in.d.x * weight.x;
+                out.d.x -= in.d.y * weight.y;
+                out.d.y += in.d.y * weight.x;
+                out.d.y += in.d.x * weight.y;
             }
         }
 
@@ -148,47 +148,47 @@ void oskar_dftw_m2m_2d_omp_d(const int n_in, const double* x_in,
         /* Loop over input points. */
         for (i = 0; i < n_in; ++i)
         {
-            double2 temp;
+            double2 weight;
 
             /* Calculate the DFT phase for the output position. */
             {
-                double a;
+                double t;
                 double2 w;
 
                 /* Phase. */
-                a = xp_out * x_in[i] + yp_out * y_in[i];
-                temp.x = cos(a);
-                temp.y = sin(a);
+                t = xp_out * x_in[i] + yp_out * y_in[i];
+                weight.x = cos(t);
+                weight.y = sin(t);
 
                 /* Multiply the supplied DFT weight by the computed phase. */
                 w = weights_in[i];
-                a = w.x; /* Copy the real part. */
-                w.x *= temp.x;
-                w.x += w.y * temp.y;
-                w.y *= temp.x;
-                w.y -= a * temp.y;
+                t = weight.x; /* Copy the real part. */
+                weight.x *= w.x;
+                weight.x += w.y * weight.y;
+                weight.y *= w.x;
+                weight.y -= w.y * t;
             }
 
             /* Complex multiply-accumulate input signal and weight. */
             {
                 double4c in;
                 in = data[i * n_out + i_out];
-                out.a.x += in.a.x * temp.x;
-                out.a.x -= in.a.y * temp.y;
-                out.a.y += in.a.y * temp.x;
-                out.a.y += in.a.x * temp.y;
-                out.b.x += in.b.x * temp.x;
-                out.b.x -= in.b.y * temp.y;
-                out.b.y += in.b.y * temp.x;
-                out.b.y += in.b.x * temp.y;
-                out.c.x += in.c.x * temp.x;
-                out.c.x -= in.c.y * temp.y;
-                out.c.y += in.c.y * temp.x;
-                out.c.y += in.c.x * temp.y;
-                out.d.x += in.d.x * temp.x;
-                out.d.x -= in.d.y * temp.y;
-                out.d.y += in.d.y * temp.x;
-                out.d.y += in.d.x * temp.y;
+                out.a.x += in.a.x * weight.x;
+                out.a.x -= in.a.y * weight.y;
+                out.a.y += in.a.y * weight.x;
+                out.a.y += in.a.x * weight.y;
+                out.b.x += in.b.x * weight.x;
+                out.b.x -= in.b.y * weight.y;
+                out.b.y += in.b.y * weight.x;
+                out.b.y += in.b.x * weight.y;
+                out.c.x += in.c.x * weight.x;
+                out.c.x -= in.c.y * weight.y;
+                out.c.y += in.c.y * weight.x;
+                out.c.y += in.c.x * weight.y;
+                out.d.x += in.d.x * weight.x;
+                out.d.x -= in.d.y * weight.y;
+                out.d.y += in.d.y * weight.x;
+                out.d.y += in.d.x * weight.y;
             }
         }
 
