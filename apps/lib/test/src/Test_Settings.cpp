@@ -44,9 +44,9 @@ void Test_Settings::test_read()
     // Construct test settings file
     {
         QSettings settings("./temp.ini", QSettings::IniFormat);
-//        settings.beginGroup("observation");
-//        settings.setValue("num_channels", 2);
-//        settings.endGroup();
+        settings.beginGroup("observation");
+        settings.setValue("num_channels", 2);
+        settings.endGroup();
     }
 
     // Read settings
