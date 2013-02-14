@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_system_noise_model_copy.h"
-#include "utility/oskar_mem_copy.h"
+#ifndef OSKAR_STATION_MODEL_RESIZE_ELEMENT_TYPES_H_
+#define OSKAR_STATION_MODEL_RESIZE_ELEMENT_TYPES_H_
+
+/**
+ * @file oskar_station_model_resize_element_types.h
+ */
+
+#include "oskar_global.h"
+#include "station/oskar_StationModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_system_noise_model_copy(oskar_SystemNoiseModel* dst,
-        const oskar_SystemNoiseModel* src, int* status)
-{
-    /* Check all inputs. */
-    if (!dst || !src || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    oskar_mem_copy(&dst->frequency, &src->frequency, status);
-    oskar_mem_copy(&dst->rms, &src->rms, status);
-}
+/**
+ * @brief
+ * Resizes the element model array within the station model.
+ *
+ * @details
+ * This function resizes the element model array in the station model,
+ * and stores the new number of element types.
+ *
+ * @param[in,out] model              Pointer to element model to modify.
+ * @param[in]     num_element_types  Number of element types to allocate.
+ * @param[in,out] status             Status return code.
+ */
+OSKAR_EXPORT
+void oskar_station_model_resize_element_types(oskar_StationModel* model,
+        int num_element_types, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_STATION_MODEL_RESIZE_ELEMENT_TYPES_H_ */

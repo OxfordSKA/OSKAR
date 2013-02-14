@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@ extern "C" {
 
 void oskar_station_model_free(oskar_StationModel* model, int* status)
 {
+    int i = 0;
+
     /* Check all inputs. */
     if (!model || !status)
     {
@@ -67,55 +69,65 @@ void oskar_station_model_free(oskar_StationModel* model, int* status)
     oskar_mem_free(&model->sin_orientation_x, status);
     oskar_mem_free(&model->cos_orientation_y, status);
     oskar_mem_free(&model->sin_orientation_y, status);
+    oskar_mem_free(&model->element_type, status);
 
-    /* Free the element pattern data if it exists. */
-    if (model->element_pattern)
-    {
-        oskar_element_model_free(model->element_pattern, status);
-
-        /* Free the structure pointer. */
-        free(model->element_pattern);
-        model->element_pattern = NULL;
-    }
-
-    /* Initialise variables. */
-    /* Do NOT set child or num_elements to 0 yet! */
+    /* Reset common variables. */
     model->station_type = OSKAR_STATION_TYPE_AA;
-    model->use_polarised_elements = OSKAR_TRUE;
-    model->array_is_3d = OSKAR_FALSE;
-    model->coord_units = OSKAR_METRES;
-    model->apply_element_errors = OSKAR_FALSE;
-    model->apply_element_weight = OSKAR_FALSE;
-    model->single_element_model = OSKAR_TRUE;
-    model->orientation_x = M_PI / 2.0;
-    model->orientation_y = 0.0;
-    model->element_pattern = NULL;
-
     model->longitude_rad = 0.0;
     model->latitude_rad = 0.0;
     model->altitude_m = 0.0;
     model->beam_longitude_rad = 0.0;
     model->beam_latitude_rad = 0.0;
     model->beam_coord_type = 0;
+
+    /* Free the noise model. */
+    oskar_system_noise_model_free(&model->noise, status);
+
+    /* Reset aperture array variables. */
+    /* Do not set child or num_elements or num_element_types to 0 yet! */
+    model->use_polarised_elements = OSKAR_TRUE;
     model->normalise_beam = OSKAR_FALSE;
     model->enable_array_pattern = OSKAR_TRUE;
+    model->single_element_model = OSKAR_TRUE;
+    model->array_is_3d = OSKAR_FALSE;
+    model->apply_element_errors = OSKAR_FALSE;
+    model->apply_element_weight = OSKAR_FALSE;
+    model->coord_units = OSKAR_METRES;
+    model->orientation_x = M_PI / 2.0;
+    model->orientation_y = 0.0;
+
+    /* Reset Gaussian station beam variables. */
+    model->gaussian_beam_fwhm_deg = 0.0;
+
+    /* Free the element pattern data if it exists. */
+    if (model->element_pattern)
+    {
+        for (i = 0; i < model->num_element_types; ++i)
+        {
+            oskar_element_model_free(&(model->element_pattern[i]), status);
+        }
+
+        /* Free the element model array. */
+        free(model->element_pattern);
+        model->element_pattern = NULL;
+    }
 
     /* Recursively free the child stations. */
     if (model->child)
     {
-        int i = 0;
         for (i = 0; i < model->num_elements; ++i)
         {
             oskar_station_model_free(&(model->child[i]), status);
         }
 
-        /* Free the array. */
+        /* Free the child station array. */
         free(model->child);
         model->child = NULL;
     }
 
-    /* Free the noise model. */
-    oskar_system_noise_model_free(&model->noise, status);
+    /* Reset array sizes. */
+    model->num_element_types = 0;
+    model->num_elements = 0;
 }
 
 #ifdef __cplusplus

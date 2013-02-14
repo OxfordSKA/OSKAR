@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,9 +30,17 @@
 #include "interferometry/oskar_telescope_model_load_station_coords.h"
 #include "interferometry/oskar_telescope_model_location.h"
 #include "interferometry/oskar_telescope_model_type.h"
+#include "station/oskar_station_model_copy.h"
 #include "station/oskar_station_model_type.h"
 #include "station/oskar_station_model_init.h"
+#include "station/oskar_station_model_init_child_stations.h"
+#include "station/oskar_station_model_resize.h"
+#include "station/oskar_station_model_resize_element_types.h"
 #include "station/oskar_station_model_load_config.h"
+#include "station/oskar_station_model_set_element_coords.h"
+#include "station/oskar_station_model_set_element_errors.h"
+#include "station/oskar_station_model_set_element_orientation.h"
+#include "station/oskar_station_model_set_element_weight.h"
 #include "utility/oskar_log_error.h"
 #include "utility/oskar_get_error_string.h"
 
@@ -51,15 +59,11 @@ static void load_directories(oskar_TelescopeModel* telescope,
         const oskar_SettingsTelescope* settings,
         const QDir& cwd, oskar_StationModel* station, int depth, int* status);
 
-static void load_layout(oskar_TelescopeModel* telescope,
-        const oskar_SettingsTelescope* settings, const QDir& dir,
-        int num_stations, int* status);
+static void load_interferometer_layout(oskar_TelescopeModel* telescope,
+        const oskar_SettingsTelescope* settings, const QDir& dir, int* status);
 
-static void load_config(oskar_StationModel* station, const QDir& dir,
+static void load_station_config(oskar_StationModel* station, const QDir& dir,
         int* status);
-
-static void allocate_children(oskar_StationModel* station,
-        int num_station_dirs, int type, int* status);
 //==============================================================================
 
 
@@ -101,7 +105,7 @@ void oskar_telescope_model_config_load(oskar_TelescopeModel* telescope,
     }
 }
 
-// Private functions
+// Private functions.
 
 static void load_directories(oskar_TelescopeModel* telescope,
         const oskar_SettingsTelescope* settings, const QDir& cwd,
@@ -113,45 +117,96 @@ static void load_directories(oskar_TelescopeModel* telescope,
     // Get a list of all (child) stations in this directory, sorted by name.
     QStringList children;
     children = cwd.entryList(QDir::AllDirs | QDir::NoDotAndDotDot, QDir::Name);
-    int num_children = children.count();
+    int num_dirs = children.size();
 
     // Load the interferometer layout if we're at depth 0 (top level directory).
     if (depth == 0)
     {
-        load_layout(telescope, settings, cwd, num_children, status);
+        load_interferometer_layout(telescope, settings, cwd, status);
+
+        // Check the number of station directories found at the top level.
+        if (num_dirs == 0)
+        {
+            // No directories. Set all "stations" to be a single dipole.
+            for (int i = 0; i < telescope->num_stations; ++i)
+            {
+                oskar_StationModel* station = &telescope->station[i];
+                oskar_station_model_resize(station, 1, status);
+                oskar_station_model_resize_element_types(station, 1, status);
+                oskar_station_model_set_element_coords(station, 0,
+                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
+                oskar_station_model_set_element_errors(station, 0,
+                        1.0, 0.0, 0.0, 0.0, status);
+                oskar_station_model_set_element_orientation(station, 0,
+                        90.0, 0.0, status);
+                oskar_station_model_set_element_weight(station, 0,
+                        1.0, 0.0, status);
+            }
+        }
+        else if (num_dirs == 1)
+        {
+            // One station directory. Load and copy it to all the others.
+            QDir child_dir(cwd.filePath(children[0]));
+
+            // Recursive call to load the station.
+            load_directories(telescope, settings, child_dir,
+                    &telescope->station[0], depth + 1, status);
+
+            // Copy station 0 to all the others.
+            for (int i = 1; i < telescope->num_stations; ++i)
+            {
+                oskar_station_model_copy(&telescope->station[i],
+                        &telescope->station[0], status);
+            }
+        }
+        else
+        {
+            // Consistency check.
+            if (num_dirs != telescope->num_stations)
+            {
+                *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_ENTRIES_MISMATCH;
+                return;
+            }
+
+            // Loop over and descend into all child stations.
+            for (int i = 0; i < num_dirs; ++i)
+            {
+                // Get the child directory.
+                QDir child_dir(cwd.filePath(children[i]));
+
+                // Recursive call to load this (child) station.
+                load_directories(telescope, settings, child_dir,
+                        &telescope->station[i], depth + 1, status);
+            }
+        } // End check on number of directories.
     }
-    // At some other depth in the directory tree, load the station config.txt
+    // At some other depth in the directory tree, load the station "config.txt".
     else
     {
-        load_config(station, cwd, status);
+        load_station_config(station, cwd, status);
 
-        // If any children exist, allocate storage for them in the model.
-        if (num_children > 0)
+        // If any children exist, allocate storage for them in the model,
+        // else if there are none, allocate storage for element model data.
+        if (num_dirs > 0)
+            oskar_station_model_init_child_stations(station, status);
+        else
+            oskar_station_model_resize_element_types(station, 1, status);
+
+        // Loop over and descend into all child stations.
+        for (int i = 0; i < num_dirs; ++i)
         {
-            int type = oskar_telescope_model_type(telescope);
-            allocate_children(station, num_children, type, status);
+            // Get the child directory.
+            QDir child_dir(cwd.filePath(children[i]));
+
+            // Recursive call to load this (child) station.
+            load_directories(telescope, settings, child_dir,
+                    &station->child[i], depth + 1, status);
         }
-    }
-    if (*status) return;
-
-    // Loop over and descend into all child stations.
-    for (int i = 0; i < num_children; ++i)
-    {
-        // Get a pointer to the child station.
-        oskar_StationModel* s;
-        s = (depth == 0) ? &telescope->station[i] : &station->child[i];
-
-        // Get the child directory.
-        QDir child_dir(cwd.filePath(children[i]));
-
-        // Load this (child) station.
-        load_directories(telescope, settings, child_dir, s, depth + 1, status);
     }
 }
 
-static void load_layout(oskar_TelescopeModel* telescope,
-        const oskar_SettingsTelescope* settings, const QDir& dir,
-        int num_stations, int* status)
+static void load_interferometer_layout(oskar_TelescopeModel* telescope,
+        const oskar_SettingsTelescope* settings, const QDir& dir, int* status)
 {
     // Check if safe to proceed.
     if (*status) return;
@@ -163,68 +218,26 @@ static void load_layout(oskar_TelescopeModel* telescope,
     else if (dir.exists(config_file))
         file = config_file;
     else
-    {
-        *status = OSKAR_ERR_SETUP_FAIL;
-        return;
-    }
-
-    // Get the full path to the file.
-    QByteArray path = dir.filePath(file).toAscii();
+        *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;
 
     // Load the station positions.
     oskar_telescope_model_load_station_coords(telescope,
-            path, settings->longitude_rad, settings->latitude_rad,
-            settings->altitude_m, status);
-    if (*status) return;
-
-    // Check that there are the right number of stations.
-    if (num_stations > 0)
-    {
-        if (num_stations != telescope->num_stations)
-            *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-    }
-    else
-    {
-        // TODO There are no station directories.
-        // Still need to set up the stations, though.
-        *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-    }
+            dir.filePath(file).toAscii(), settings->longitude_rad,
+            settings->latitude_rad, settings->altitude_m, status);
 }
 
-static void load_config(oskar_StationModel* station, const QDir& dir,
+static void load_station_config(oskar_StationModel* station, const QDir& dir,
         int* status)
-{
-    // Check for presence of "config.txt".
-    if (dir.exists(config_file))
-    {
-        QByteArray path = dir.filePath(config_file).toAscii();
-        oskar_station_model_load_config(station, path, status);
-    }
-    else
-        *status = OSKAR_ERR_SETUP_FAIL;
-}
-
-static void allocate_children(oskar_StationModel* station, int num_children,
-        int type, int* status)
 {
     // Check if safe to proceed.
     if (*status) return;
 
-    // Check that there are the right number of stations.
-    if (num_children != station->num_elements)
+    // Check for presence of "config.txt".
+    if (dir.exists(config_file))
     {
-        *status = OSKAR_ERR_SETUP_FAIL;
-        return;
+        oskar_station_model_load_config(station,
+                dir.filePath(config_file).toAscii(), status);
     }
-
-    // Allocate memory for child station array.
-    station->child = (oskar_StationModel*) malloc(num_children *
-            sizeof(oskar_StationModel));
-
-    // Initialise each child station.
-    for (int i = 0; i < num_children; ++i)
-    {
-        oskar_station_model_init(&station->child[i], type,
-                OSKAR_LOCATION_CPU, 0, status);
-    }
+    else
+        *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;
 }

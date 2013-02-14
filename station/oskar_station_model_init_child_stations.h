@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_system_noise_model_copy.h"
-#include "utility/oskar_mem_copy.h"
+#ifndef OSKAR_STATION_MODEL_INIT_CHILD_STATIONS_H_
+#define OSKAR_STATION_MODEL_INIT_CHILD_STATIONS_H_
+
+/**
+ * @file oskar_station_model_init_child_stations.h
+ */
+
+#include "oskar_global.h"
+#include "station/oskar_StationModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_system_noise_model_copy(oskar_SystemNoiseModel* dst,
-        const oskar_SystemNoiseModel* src, int* status)
-{
-    /* Check all inputs. */
-    if (!dst || !src || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    oskar_mem_copy(&dst->frequency, &src->frequency, status);
-    oskar_mem_copy(&dst->rms, &src->rms, status);
-}
+/**
+ * @brief
+ * Allocates and initialises all child stations in the station model.
+ *
+ * @details
+ * This function allocates memory for and initialises all child stations in
+ * the station model.
+ *
+ * Note that this function can be called only once for a given station model.
+ * If child stations have already been allocated, it will return an error.
+ *
+ * @param[in,out] model    Pointer to (parent) station model.
+ * @param[in,out] status   Status return code.
+ */
+OSKAR_EXPORT
+void oskar_station_model_init_child_stations(oskar_StationModel* model,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_STATION_MODEL_INIT_CHILD_STATIONS_H_ */

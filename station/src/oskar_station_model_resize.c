@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,7 @@ void oskar_station_model_resize(oskar_StationModel* station, int n_elements,
     oskar_mem_realloc(&station->sin_orientation_x, n_elements, status);
     oskar_mem_realloc(&station->cos_orientation_y, n_elements, status);
     oskar_mem_realloc(&station->sin_orientation_y, n_elements, status);
+    oskar_mem_realloc(&station->element_type, n_elements, status);
 }
 
 #ifdef __cplusplus

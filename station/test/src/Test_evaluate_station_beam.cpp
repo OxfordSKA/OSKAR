@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 #include "station/oskar_evaluate_station_beam_aperture_array.h"
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "station/oskar_station_model_save_config.h"
+#include "station/oskar_station_model_resize_element_types.h"
 #include "station/oskar_evaluate_station_beam_gaussian.h"
 #include "station/oskar_station_model_multiply_by_wavenumber.h"
 #include "utility/oskar_get_error_string.h"
@@ -85,6 +86,8 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     double station_size_m = 180.0;
     int num_antennas = station_dim * station_dim;
     oskar_StationModel station_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_antennas);
+    oskar_station_model_resize_element_types(&station_cpu, 1, &error);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Set the station coordinates.
     station_cpu.longitude_rad = 0.0;

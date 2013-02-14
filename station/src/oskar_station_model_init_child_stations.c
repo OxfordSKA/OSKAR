@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_system_noise_model_copy.h"
-#include "utility/oskar_mem_copy.h"
+#include "station/oskar_station_model_init_child_stations.h"
+#include "station/oskar_station_model_init.h"
+#include "station/oskar_station_model_location.h"
+#include "station/oskar_station_model_type.h"
+
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_system_noise_model_copy(oskar_SystemNoiseModel* dst,
-        const oskar_SystemNoiseModel* src, int* status)
+void oskar_station_model_init_child_stations(oskar_StationModel* station,
+        int* status)
 {
+    int i, type, location;
+
     /* Check all inputs. */
-    if (!dst || !src || !status)
+    if (!station || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -46,8 +52,29 @@ void oskar_system_noise_model_copy(oskar_SystemNoiseModel* dst,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    oskar_mem_copy(&dst->frequency, &src->frequency, status);
-    oskar_mem_copy(&dst->rms, &src->rms, status);
+    /* Check that the memory isn't already allocated. */
+    if (station->child)
+    {
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        return;
+    }
+
+    /* Allocate memory for child station array. */
+    station->child = (oskar_StationModel*) malloc(station->num_elements *
+            sizeof(oskar_StationModel));
+    if (!station->child)
+    {
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        return;
+    }
+
+    /* Initialise each child station. */
+    type = oskar_station_model_type(station);
+    location = oskar_station_model_location(station);
+    for (i = 0; i < station->num_elements; ++i)
+    {
+        oskar_station_model_init(&station->child[i], type, location, 0, status);
+    }
 }
 
 #ifdef __cplusplus

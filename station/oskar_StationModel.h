@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,11 +51,12 @@ struct OSKAR_EXPORT oskar_StationModel
     double altitude_m;           /**< Altitude of station above ellipsoid, in metres. */
     double beam_longitude_rad;   /**< Longitude of beam phase centre, in radians. */
     double beam_latitude_rad;    /**< Latitude of beam phase centre, in radians. */
-    int beam_coord_type;         /**< Enumerator describing beam coordinate type. FIXME enum values defined where ...? */
+    int beam_coord_type;         /**< Enumerator describing beam spherical coordinate type (from oskar_global.h). */
     oskar_SystemNoiseModel noise;
 
     /* Data used only for aperture array stations ---------------------------*/
     int num_elements;            /**< Number of antenna elements in the station (auto determined). */
+    int num_element_types;       /**< Number of element types (this is the size of element_pattern array). */
     int use_polarised_elements;  /**< True if station elements are polarised. */
     int normalise_beam;          /**< True if the station beam should be normalised by the number of antennas. */
     int enable_array_pattern;    /**< True if the array factor should be evaluated. */
@@ -81,11 +82,12 @@ struct OSKAR_EXPORT oskar_StationModel
     oskar_Mem sin_orientation_x; /**< Sine azimuth of x dipole axis (default 1.0) */
     oskar_Mem cos_orientation_y; /**< Cosine azimuth of y dipole axis (default 1.0) */
     oskar_Mem sin_orientation_y; /**< Sine azimuth of y dipole axis (default 0.0) */
-    oskar_StationModel* child;   /**< Pointer is NULL if there are no child stations. */
-    oskar_ElementModel* element_pattern;
+    oskar_Mem element_type;      /**< Integer array of element types (default 0). */
+    oskar_StationModel* child;   /**< Array of child stations (pointer is NULL if there are none). */
+    oskar_ElementModel* element_pattern; /**< Array of element models per element type (pointer is NULL if there are child stations). */
 
     /* Data used only for Gaussian beam stations  ---------------------------*/
-    double gaussian_beam_fwhm_deg; /**< FWHM of gaussian station beam, in degrees. */
+    double gaussian_beam_fwhm_deg; /**< FWHM of Gaussian station beam, in degrees. */
 
 #ifdef __cplusplus
     /* If C++, provide constructors and methods. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -196,6 +196,14 @@ enum {
 
     /* Indicates a failure to setup the telescope model */
     OSKAR_ERR_SETUP_FAIL_TELESCOPE     = -700,
+
+    /* Indicates that the number of directories in the telescope model is
+     * inconsistent with the number that are listed in the layout file. */
+    OSKAR_ERR_SETUP_FAIL_TELESCOPE_ENTRIES_MISMATCH = -701,
+
+    /* Indicates that a config file is missing from a directory in the
+     * telescope model. */
+    OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING = -702,
 
     /* Indicates a failure to setup the telescope model */
     OSKAR_ERR_SETUP_FAIL_SKY           = -800,

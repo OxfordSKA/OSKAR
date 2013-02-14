@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@
 #include "station/oskar_element_model_load_cst.h"
 #include "station/oskar_station_model_init.h"
 #include "station/oskar_station_model_load_config.h"
+#include "station/oskar_station_model_resize_element_types.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_log_error.h"
 #include "utility/oskar_get_error_string.h"
@@ -126,25 +127,25 @@ static void load_directories(oskar_TelescopeModel* telescope,
     // Get a list of the child stations.
     QStringList children;
     children = cwd.entryList(QDir::AllDirs | QDir::NoDotAndDotDot, QDir::Name);
-    int num_children = children.size();
+    int num_dirs = children.size();
 
     // If the station / child arrays haven't been allocated
     // (by oskar_telescope_load_config() for example), allocate them.
     if (depth == 0 && telescope->station == NULL)
     {
-        oskar_telescope_model_resize(telescope, num_children, status);
+        oskar_telescope_model_resize(telescope, num_dirs, status);
     }
-    else if (depth > 0 && num_children > 0 && station->child == NULL)
+    else if (depth > 0 && num_dirs > 0 && station->child == NULL)
     {
         int type = oskar_telescope_model_type(telescope);
-        station->child = (oskar_StationModel*) malloc(num_children *
+        station->child = (oskar_StationModel*) malloc(num_dirs *
                 sizeof(oskar_StationModel));
         if (!station->child)
         {
             *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
             return;
         }
-        for (int i = 0; i < num_children; ++i)
+        for (int i = 0; i < num_dirs; ++i)
         {
             oskar_station_model_init(&station->child[i], type,
                     OSKAR_LOCATION_CPU, 0, status);
@@ -152,7 +153,7 @@ static void load_directories(oskar_TelescopeModel* telescope,
     }
 
     // Loop over, and descend into the child stations.
-    for (int i = 0; i < num_children; ++i)
+    for (int i = 0; i < num_dirs; ++i)
     {
         // Get a pointer to the child station.
         oskar_StationModel* s;
@@ -168,8 +169,23 @@ static void load_directories(oskar_TelescopeModel* telescope,
 
     // If there are no children, load the element pattern data corresponding
     // to the deepest element file found in the tree.
-    if (num_children == 0)
-        load_element_patterns(log, settings, station, files, models, status);
+    if (num_dirs == 0)
+    {
+        if (station)
+        {
+            oskar_station_model_resize_element_types(station, 1, status);
+            load_element_patterns(log, settings, station, files, models, status);
+        }
+        else
+        {
+            for (int i = 0; i < telescope->num_stations; ++i)
+            {
+                oskar_StationModel* s = &telescope->station[i];
+                oskar_station_model_resize_element_types(s, 1, status);
+                load_element_patterns(log, settings, s, files, models, status);
+            }
+        }
+    }
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,10 @@
  */
 
 #include "utility/oskar_get_error_string.h"
+
+#ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,8 +40,10 @@ const char* oskar_get_error_string(int error)
 {
     /* If the error code is positive, get the CUDA error string
      * (OSKAR error codes are negative). */
+#ifdef OSKAR_HAVE_CUDA
     if (error > 0)
         return cudaGetErrorString((cudaError_t)error);
+#endif
 
     /* Return a string describing the OSKAR error code. */
     switch (error)
@@ -139,10 +144,18 @@ const char* oskar_get_error_string(int error)
             return "set-up failed";
 
         case OSKAR_ERR_SETUP_FAIL_TELESCOPE:
-            return "failed to setup telescope model";
+            return "failed to set up telescope model";
+
+        case OSKAR_ERR_SETUP_FAIL_TELESCOPE_ENTRIES_MISMATCH:
+            return "the number of station directories is inconsistent "
+                    "with the telescope layout file";
+
+        case OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING:
+            return "a configuration file is missing from the "
+                    "telescope model directory tree";
 
         case OSKAR_ERR_SETUP_FAIL_SKY:
-            return "failed to setup sky model";
+            return "failed to set up sky model";
 
         default:
             break;

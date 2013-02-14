@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,12 +27,12 @@
  */
 
 #include "station/oskar_element_model_copy.h"
-#include "station/oskar_element_model_init.h"
-#include "station/oskar_element_model_type.h"
 #include "station/oskar_station_model_copy.h"
 #include "station/oskar_station_model_init.h"
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_station_model_type.h"
+#include "station/oskar_station_model_resize_element_types.h"
+#include "station/oskar_system_noise_model_copy.h"
 #include "utility/oskar_mem_copy.h"
 #include <stdlib.h>
 #include <stddef.h>
@@ -57,28 +57,33 @@ void oskar_station_model_copy(oskar_StationModel* dst,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Copy the meta data. */
+    /* Copy common station parameters. */
     dst->station_type = src->station_type;
-    dst->num_elements = src->num_elements;
-    dst->use_polarised_elements = src->use_polarised_elements;
-    dst->array_is_3d = src->array_is_3d;
-    dst->coord_units = src->coord_units;
-    dst->apply_element_errors = src->apply_element_errors;
-    dst->apply_element_weight = src->apply_element_weight;
-    dst->single_element_model = src->single_element_model;
-    dst->orientation_x = src->orientation_x;
-    dst->orientation_y = src->orientation_y;
     dst->longitude_rad = src->longitude_rad;
     dst->latitude_rad = src->latitude_rad;
     dst->altitude_m = src->altitude_m;
     dst->beam_longitude_rad = src->beam_longitude_rad;
     dst->beam_latitude_rad = src->beam_latitude_rad;
     dst->beam_coord_type = src->beam_coord_type;
+    oskar_system_noise_model_copy(&dst->noise, &src->noise, status);
+
+    /* Copy aperture array data, except num_element_types (done later). */
+    dst->num_elements = src->num_elements;
+    dst->use_polarised_elements = src->use_polarised_elements;
     dst->normalise_beam = src->normalise_beam;
     dst->enable_array_pattern = src->enable_array_pattern;
+    dst->single_element_model = src->single_element_model;
+    dst->array_is_3d = src->array_is_3d;
+    dst->apply_element_errors = src->apply_element_errors;
+    dst->apply_element_weight = src->apply_element_weight;
+    dst->coord_units = src->coord_units;
+    dst->orientation_x = src->orientation_x;
+    dst->orientation_y = src->orientation_y;
+
+    /* Copy Gaussian station beam data. */
     dst->gaussian_beam_fwhm_deg = src->gaussian_beam_fwhm_deg;
 
-    /* Copy the memory blocks. */
+    /* Copy memory blocks. */
     oskar_mem_copy(&dst->x_signal, &src->x_signal, status);
     oskar_mem_copy(&dst->y_signal, &src->y_signal, status);
     oskar_mem_copy(&dst->z_signal, &src->z_signal, status);
@@ -94,6 +99,22 @@ void oskar_station_model_copy(oskar_StationModel* dst,
     oskar_mem_copy(&dst->sin_orientation_x, &src->sin_orientation_x, status);
     oskar_mem_copy(&dst->cos_orientation_y, &src->cos_orientation_y, status);
     oskar_mem_copy(&dst->sin_orientation_y, &src->sin_orientation_y, status);
+    oskar_mem_copy(&dst->element_type, &src->element_type, status);
+
+    /* Copy element models, if set. */
+    if (src->element_pattern)
+    {
+        /* Ensure enough space for element model data. */
+        oskar_station_model_resize_element_types(dst, src->num_element_types,
+                status);
+
+        /* Copy the element model data. */
+        for (i = 0; i < src->num_element_types; ++i)
+        {
+            oskar_element_model_copy(&dst->element_pattern[i],
+                    &src->element_pattern[i], status);
+        }
+    }
 
     /* Copy child stations. */
     if (src->child)
@@ -121,19 +142,6 @@ void oskar_station_model_copy(oskar_StationModel* dst,
         {
             oskar_station_model_copy(&dst->child[i], &src->child[i], status);
         }
-    }
-
-    /* TODO Work out how to deal with element pattern data properly! */
-    if (src->element_pattern)
-    {
-        /* Initialise the element model. */
-        oskar_element_model_init(dst->element_pattern,
-                oskar_element_model_type(src->element_pattern),
-                oskar_station_model_location(dst), status);
-
-        /* Copy the element model data. */
-        oskar_element_model_copy(dst->element_pattern,
-                src->element_pattern, status);
     }
 }
 

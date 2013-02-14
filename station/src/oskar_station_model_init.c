@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_element_model_init.h"
 #include "station/oskar_station_model_init.h"
 #include "station/oskar_system_noise_model_init.h"
 #include "utility/oskar_mem_init.h"
-#include <stdlib.h>
 #include <math.h>
-#include <stdio.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -72,36 +69,36 @@ void oskar_station_model_init(oskar_StationModel* model, int type, int location,
     oskar_mem_init(&model->sin_orientation_x, type, location, num_elements, 1, status);
     oskar_mem_init(&model->cos_orientation_y, type, location, num_elements, 1, status);
     oskar_mem_init(&model->sin_orientation_y, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->element_type, OSKAR_INT, location, num_elements, 1, status);
 
-    /* Initialise variables. */
+    /* Initialise common data. */
     model->station_type = OSKAR_STATION_TYPE_AA;
-    model->num_elements = num_elements;
-    model->use_polarised_elements = OSKAR_TRUE;
-    model->array_is_3d = OSKAR_FALSE;
-    model->coord_units = OSKAR_METRES;
-    model->apply_element_errors = OSKAR_FALSE;
-    model->apply_element_weight = OSKAR_FALSE;
-    model->single_element_model = OSKAR_TRUE;
-    model->orientation_x = M_PI / 2.0;
-    model->orientation_y = 0.0;
-    model->gaussian_beam_fwhm_deg = 0.0;
-    model->child = NULL;
-
-    /* Allocate memory for the element model structure and initialise it. */
-    model->element_pattern = (oskar_ElementModel*)
-            malloc(sizeof(oskar_ElementModel));
-    oskar_element_model_init(model->element_pattern, type, location, status);
-
     model->longitude_rad = 0.0;
     model->latitude_rad = 0.0;
     model->altitude_m = 0.0;
     model->beam_longitude_rad = 0.0;
     model->beam_latitude_rad = 0.0;
     model->beam_coord_type = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
+    oskar_system_noise_model_init(&model->noise, type, location, status);
+
+    /* Initialise aperture array data. */
+    model->num_elements = num_elements;
+    model->num_element_types = 0;
+    model->use_polarised_elements = OSKAR_TRUE;
     model->normalise_beam = OSKAR_FALSE;
     model->enable_array_pattern = OSKAR_TRUE;
+    model->single_element_model = OSKAR_TRUE;
+    model->array_is_3d = OSKAR_FALSE;
+    model->apply_element_errors = OSKAR_FALSE;
+    model->apply_element_weight = OSKAR_FALSE;
+    model->coord_units = OSKAR_METRES;
+    model->orientation_x = M_PI / 2.0;
+    model->orientation_y = 0.0;
+    model->child = 0;
+    model->element_pattern = 0;
 
-    oskar_system_noise_model_init(&model->noise, type, location, status);
+    /* Initialise Gaussian beam station data. */
+    model->gaussian_beam_fwhm_deg = 0.0;
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_system_noise_model_copy.h"
-#include "utility/oskar_mem_copy.h"
+#include "station/oskar_element_model_init.h"
+#include "station/oskar_station_model_resize_element_types.h"
+#include "station/oskar_station_model_type.h"
+#include "station/oskar_station_model_location.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_system_noise_model_copy(oskar_SystemNoiseModel* dst,
-        const oskar_SystemNoiseModel* src, int* status)
+void oskar_station_model_resize_element_types(oskar_StationModel* model,
+        int num_element_types, int* status)
 {
+    void* ptr_temp;
+    int i, num_element_types_old, type, location;
+
     /* Check all inputs. */
-    if (!dst || !src || !status)
+    if (!model || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -46,8 +52,32 @@ void oskar_system_noise_model_copy(oskar_SystemNoiseModel* dst,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    oskar_mem_copy(&dst->frequency, &src->frequency, status);
-    oskar_mem_copy(&dst->rms, &src->rms, status);
+    /* Store the new number of element types. */
+    if (model->num_element_types == num_element_types)
+        return;
+    num_element_types_old = model->num_element_types;
+    model->num_element_types = num_element_types;
+
+    /* Resize the element model array. */
+    ptr_temp = realloc(model->element_pattern,
+            num_element_types * sizeof(oskar_ElementModel));
+    if (num_element_types != 0 && !ptr_temp)
+    {
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        return;
+    }
+
+    /* Store the new pointer. */
+    model->element_pattern = (oskar_ElementModel*) ptr_temp;
+
+    /* Initialise any new element models. */
+    type = oskar_station_model_type(model);
+    location = oskar_station_model_location(model);
+    for (i = num_element_types_old; i < num_element_types; ++i)
+    {
+        oskar_element_model_init(&model->element_pattern[i], type, location,
+                status);
+    }
 }
 
 #ifdef __cplusplus

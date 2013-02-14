@@ -52,15 +52,19 @@ int oskar_station_model_different(const oskar_StationModel* a,
     /* Check if the meta-data are different. */
     n = a->num_elements;
     if (a->station_type != b->station_type ||
+            a->beam_coord_type != b->beam_coord_type ||
+            a->beam_longitude_rad != b->beam_longitude_rad ||
+            a->beam_latitude_rad != b->beam_latitude_rad ||
             a->num_elements != b->num_elements ||
+            a->num_element_types != b->num_element_types ||
             a->use_polarised_elements != b->use_polarised_elements ||
+            a->normalise_beam != b->normalise_beam ||
+            a->enable_array_pattern != b->enable_array_pattern ||
+            a->single_element_model != b->single_element_model ||
             a->array_is_3d != b->array_is_3d ||
             a->apply_element_errors != b->apply_element_errors ||
             a->apply_element_weight != b->apply_element_weight ||
-            a->single_element_model != b->single_element_model ||
-            a->beam_coord_type != b->beam_coord_type ||
-            a->beam_longitude_rad != b->beam_longitude_rad ||
-            a->beam_latitude_rad != b->beam_latitude_rad)
+            a->coord_units != b->coord_units)
     {
         return 1;
     }
@@ -74,7 +78,7 @@ int oskar_station_model_different(const oskar_StationModel* a,
             (!a->element_pattern && b->element_pattern) )
         return 1;
 
-    /* Check if element pattern filenames are different. */
+    /* FIXME Check if element pattern filenames are different (needs updating for multiple element types). */
     if (a->element_pattern)
     {
         fname_a_x = &a->element_pattern->filename_x;
@@ -126,6 +130,8 @@ int oskar_station_model_different(const oskar_StationModel* a,
         return 1;
     if (oskar_mem_different(&a->sin_orientation_y, &b->sin_orientation_y, n,
             status))
+        return 1;
+    if (oskar_mem_different(&a->element_type, &b->element_type, n, status))
         return 1;
 
     /* Recursively check child stations. */

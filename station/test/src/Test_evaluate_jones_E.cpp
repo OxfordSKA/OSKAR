@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@
 #include "math/oskar_SphericalPositions.h"
 #include "station/oskar_evaluate_jones_E.h"
 #include "station/oskar_station_model_copy.h"
+#include "station/oskar_station_model_resize_element_types.h"
 #include "station/oskar_station_model_multiply_by_wavenumber.h"
 #include "utility/oskar_curand_state_free.h"
 #include "utility/oskar_curand_state_init.h"
@@ -81,19 +82,23 @@ void Test_evaluate_jones_E::evaluate_e()
     double station_size_m = 180.0;
     int num_antennas = station_dim * station_dim;
     oskar_StationModel station_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_antennas);
+    oskar_station_model_resize_element_types(&station_cpu, 1, &error);
+
+    // Set the station meta-data.
     station_cpu.longitude_rad = 0.0;
     station_cpu.latitude_rad  = M_PI_2;
     station_cpu.altitude_m  = 0.0;
+    station_cpu.beam_longitude_rad  = 0.0;
+    station_cpu.beam_latitude_rad = M_PI_2;
     station_cpu.coord_units = OSKAR_METRES;
+    station_cpu.apply_element_errors = OSKAR_FALSE;
+    station_cpu.element_pattern->type = OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC;
+    station_cpu.use_polarised_elements = false;
     float* x_pos = (float*) malloc(station_dim * sizeof(float));
     oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
     oskar_meshgrid_f(station_cpu.x_weights, station_cpu.y_weights, x_pos, station_dim,
             x_pos, station_dim);
     free(x_pos);
-    station_cpu.beam_longitude_rad  = 0.0;
-    station_cpu.beam_latitude_rad = M_PI_2;
-
-    // Set the station meta-data.
 
     int num_stations = 2;
     oskar_TelescopeModel telescope_gpu(OSKAR_SINGLE, OSKAR_LOCATION_GPU, num_stations);
@@ -104,9 +109,6 @@ void Test_evaluate_jones_E::evaluate_e()
         oskar_station_model_multiply_by_wavenumber(&(telescope_gpu.station[i]),
                 frequency, &error);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-        telescope_gpu.station[i].apply_element_errors = OSKAR_FALSE;
-        telescope_gpu.station[i].element_pattern->type = OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC;
-        telescope_gpu.station[i].use_polarised_elements = false;
     }
     telescope_gpu.identical_stations = OSKAR_TRUE;
     telescope_gpu.use_common_sky = OSKAR_TRUE;
