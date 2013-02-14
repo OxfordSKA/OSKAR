@@ -37,6 +37,9 @@ if (CPPUNIT_FOUND)
     if (OSKAR_USE_CBLAS)
         target_link_libraries(math_test ${OSKAR_CBLAS})
     endif()
-
+    set_target_properties(math_test PROPERTIES
+        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+        LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+    
     add_test(math_test math_test)
 endif()
