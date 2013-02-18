@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -191,3 +191,70 @@ void Test_string_to_array::test_strings()
     }
 }
 
+void Test_string_to_array::test_strings_realloc()
+{
+    // Test lines with comments and blanks.
+    {
+        char **list = 0;
+        int n = 0, filled = 0;
+        char test1[] = "# This is a comment.";
+        char test2[] = " # This is another comment.";
+        char test3[] = "1, *, 10, 20, AZEL";
+        char test4[] = " ";
+        char test5[] = "2, 0, 3, 34.5, 67.8, RADEC";
+        char test6[] = "1, 2, 50, 60, AZEL # Another comment";
+
+        filled = oskar_string_to_array_realloc_s(test1, &n, &list);
+        CPPUNIT_ASSERT_EQUAL(0, filled);
+        CPPUNIT_ASSERT_EQUAL(0, n);
+
+        filled = oskar_string_to_array_realloc_s(test2, &n, &list);
+        CPPUNIT_ASSERT_EQUAL(0, filled);
+        CPPUNIT_ASSERT_EQUAL(0, n);
+
+        filled = oskar_string_to_array_realloc_s(test3, &n, &list);
+        CPPUNIT_ASSERT_EQUAL(5, filled);
+        CPPUNIT_ASSERT_EQUAL(5, n);
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[0], "1"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[1], "*"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[2], "10"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[3], "20"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[4], "AZEL"));
+        CPPUNIT_ASSERT_EQUAL(list[0][0], '1');
+        CPPUNIT_ASSERT_EQUAL(list[1][0], '*');
+        CPPUNIT_ASSERT_EQUAL(list[4][0], 'A');
+
+        filled = oskar_string_to_array_realloc_s(test4, &n, &list);
+        CPPUNIT_ASSERT_EQUAL(0, filled);
+        CPPUNIT_ASSERT_EQUAL(5, n);
+
+        filled = oskar_string_to_array_realloc_s(test5, &n, &list);
+        CPPUNIT_ASSERT_EQUAL(6, filled);
+        CPPUNIT_ASSERT_EQUAL(6, n);
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[0], "2"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[1], "0"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[2], "3"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[3], "34.5"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[4], "67.8"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[5], "RADEC"));
+        CPPUNIT_ASSERT_EQUAL(list[0][0], '2');
+        CPPUNIT_ASSERT_EQUAL(list[1][0], '0');
+        CPPUNIT_ASSERT_EQUAL(list[2][0], '3');
+        CPPUNIT_ASSERT_EQUAL(list[5][0], 'R');
+
+        filled = oskar_string_to_array_realloc_s(test6, &n, &list);
+        CPPUNIT_ASSERT_EQUAL(5, filled);
+        CPPUNIT_ASSERT_EQUAL(6, n);
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[0], "1"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[1], "2"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[2], "50"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[3], "60"));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp(list[4], "AZEL"));
+        CPPUNIT_ASSERT_EQUAL(list[0][0], '1');
+        CPPUNIT_ASSERT_EQUAL(list[1][0], '2');
+        CPPUNIT_ASSERT_EQUAL(list[4][0], 'A');
+
+        // Free the list array.
+        free(list);
+    }
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,12 +48,14 @@ class Test_string_to_array : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE(Test_string_to_array);
         CPPUNIT_TEST(test_method);
         CPPUNIT_TEST(test_strings);
+        CPPUNIT_TEST(test_strings_realloc);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         /// Test method.
         void test_method();
         void test_strings();
+        void test_strings_realloc();
 };
 
 // Register the test class.

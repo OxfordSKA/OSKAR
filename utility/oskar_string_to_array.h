@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,12 +95,55 @@ int oskar_string_to_array_d(char* str, int n, double* data);
  *
  * @param[in,out] str The input string to split.
  * @param[in] n The maximum number of values to return (size of array \p data).
- * @param[out] data The array of values returned.
+ * @param[out] data The array of strings returned.
  *
- * @return The number of values matched (or number of array elements filled).
+ * @return The number of array elements filled.
  */
 OSKAR_EXPORT
 int oskar_string_to_array_s(char* str, int n, char** data);
+
+/**
+ * @brief Splits a string into sub-strings, (re)allocating space as required.
+ *
+ * @details
+ * This function splits a string into an array of strings. Splitting is
+ * performed either using whitespace or a comma.
+ *
+ * The array to hold the strings is resized to be as large as necessary.
+ * On entry, the parameter \p n contains the initial size of the \p data array.
+ * On exit, the parameter \p n contains the final size of the \p data array.
+ *
+ * <b>Note that the input string is corrupted on exit.</b>
+ *
+ * Any data after a hash '#' symbol on the line is treated as a comment and
+ * ignored.
+ *
+ * WARNING: This function allocates memory for the list of string pointers,
+ * which must be freed by the caller when no longer needed.
+ *
+ * Example use:
+ * @code
+   char** list = 0;
+   int n = 0;
+   char line[] = "A text string to split.";
+   oskar_string_to_array_realloc_s(line, &n, &list);
+   // n == 5;
+   // strcmp(list[0], "A") == 0;
+   // strcmp(list[1], "text") == 0;
+   // strcmp(list[2], "string") == 0;
+   // strcmp(list[3], "to") == 0;
+   // strcmp(list[4], "split.") == 0;
+   free(list);
+   @endcode
+ *
+ * @param[in,out] str    The input string to split.
+ * @param[in,out] n      The initial/final size of array at \p data.
+ * @param[in,out] data   Pointer to the string array to resize.
+ *
+ * @return The number of array elements filled.
+ */
+OSKAR_EXPORT
+int oskar_string_to_array_realloc_s(char* str, int* n, char*** data);
 
 #ifdef __cplusplus
 }

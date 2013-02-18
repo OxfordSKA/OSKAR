@@ -36,7 +36,7 @@
 #include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_telescope_model_analyse.h"
 #include "interferometry/oskar_telescope_model_config_override.h"
-#include "station/oskar_station_model_load_pointing_file.h"
+#include "interferometry/oskar_telescope_model_load_pointing_file.h"
 #include "utility/oskar_get_error_string.h"
 
 #include "utility/oskar_log_error.h"
@@ -92,16 +92,10 @@ void oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
     /* Apply pointing file override if set. */
     if (settings->obs.pointing_file)
     {
-        int i;
-
-        /* Load the same pointing file for every station. */
         oskar_log_message(log, 0, "Loading station pointing file "
                 "override '%s'...", settings->obs.pointing_file);
-        for (i = 0; i < telescope->num_stations; ++i)
-        {
-            oskar_station_model_load_pointing_file(&telescope->station[i],
-                    settings->obs.pointing_file, status);
-        }
+        oskar_telescope_model_load_pointing_file(telescope,
+                settings->obs.pointing_file, status);
     }
 
     switch (settings->telescope.station_type)

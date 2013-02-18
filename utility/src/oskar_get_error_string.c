@@ -157,6 +157,10 @@ const char* oskar_get_error_string(int error)
         case OSKAR_ERR_SETUP_FAIL_SKY:
             return "failed to set up sky model";
 
+        case OSKAR_ERR_BAD_POINTING_FILE:
+            return "pointing file error: station index out of range or "
+                    "incorrectly specified";
+
         default:
             break;
     };

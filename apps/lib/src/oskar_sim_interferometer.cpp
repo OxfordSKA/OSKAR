@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,7 +117,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Set up the telescope model.
     oskar_TelescopeModel tel_cpu;
     oskar_set_up_telescope(&tel_cpu, log, &settings, &error);
-    if (error) return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
+    if (error) return error;
 
     // Set up the sky model array.
     oskar_SkyModel* sky_chunk_cpu = NULL;

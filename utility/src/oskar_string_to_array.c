@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,6 +86,32 @@ int oskar_string_to_array_s(char* str, int n, char** data)
         str = NULL;
         if (!data[i]) break;
         if (data[i][0] == '#') break;
+    }
+    return i;
+}
+
+/* String array. */
+int oskar_string_to_array_realloc_s(char* str, int* n, char*** data)
+{
+    int i;
+    char *save_ptr, *token;
+    for (i = 0; ; ++i)
+    {
+        token = strtok_r(str, DELIMITERS, &save_ptr);
+        str = NULL;
+        if (!token) break;
+        if (token[0] == '#') break;
+
+        /* Ensure array is big enough. */
+        if (*n <= i || !(*data))
+        {
+            void* t;
+            t = realloc(*data, ((*n) + 1) * sizeof(char*));
+            if (!t) break;
+            *data = t;
+            ++(*n);
+        }
+        (*data)[i] = token;
     }
     return i;
 }

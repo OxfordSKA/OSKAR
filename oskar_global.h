@@ -208,6 +208,9 @@ enum {
     /* Indicates a failure to setup the telescope model */
     OSKAR_ERR_SETUP_FAIL_SKY           = -800,
 
+    /* Indicates a badly formed pointing file. */
+    OSKAR_ERR_BAD_POINTING_FILE        = -900,
+
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN                  = -1000,
     OSKAR_FAIL                         = -1001

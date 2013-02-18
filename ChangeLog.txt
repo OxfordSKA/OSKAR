@@ -3,11 +3,16 @@
     * Improved robustness of random-power-law source generators.
 
     * Improved reported error message if visibility file cannot be opened.
+    
+    * Improved reported error messages if telescope model cannot be loaded.
 
     * Improved chunking of data for complex-to-real DFT, so CUDA kernels
       should no longer time-out when imaging large visibility files.
 
-    * Added support for a hierarchical beamforming mode, using nested stations.
+    * Added the ability to load a telescope model containing only one station
+      directory, which will be copied for all remaining stations.
+
+    * Added support for hierarchical beamforming modes, using nested stations.
 
     * Added support for a pointing file, which can be used to override station
       beam directions.
@@ -18,14 +23,14 @@
     * Added options to load HEALPix-format FITS files (with RING ordering)
       as a sky model component.
 
-    * Updated the mex function which reads OSKAR binary tag groups so that
-      it is possible to specify a user index from which to load the group.
-
     * Added (sky model) option to remove sources for which Gaussian width
       solutions have failed.
 
     * Added the ability to specify the amplitude of points when specifying
       generated HEALPix source grids.
+
+    * Updated the mex function which reads OSKAR binary tag groups so that
+      it is possible to specify a user index from which to load the group.
 
     * Changed minimum CMake version requirement from 2.8 to 2.6.
 

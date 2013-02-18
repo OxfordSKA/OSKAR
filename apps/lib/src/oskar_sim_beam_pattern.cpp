@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     // Get the telescope model.
     oskar_TelescopeModel tel_cpu;
     oskar_set_up_telescope(&tel_cpu, log, &settings, &err);
-    if (err) return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
+    if (err) return err;
 
     // Get the beam pattern settings.
     int station_id = settings.beam_pattern.station_id;
