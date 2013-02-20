@@ -183,7 +183,7 @@ set(VERBOSE ON)
 
 if (VERBOSE)
     message(STATUS "")
-    message(STATUS "Compliler:")
+    message(STATUS "Compiler:")
     message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
     message(STATUS "")
     message(STATUS "  C++ flags:")
