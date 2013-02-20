@@ -92,7 +92,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     oskar_log_settings_observation(log, &settings);
     oskar_log_settings_telescope(log, &settings);
     oskar_log_settings_interferometer(log, &settings);
-    oskar_log_settings_ionosphere(log, &settings);
+    //oskar_log_settings_ionosphere(log, &settings);
 
     if (settings.interferometer.image_interferometer_output)
         oskar_log_settings_image(log, &settings);

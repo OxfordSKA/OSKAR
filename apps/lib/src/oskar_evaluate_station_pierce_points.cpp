@@ -156,7 +156,7 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
     oskar_binary_stream_write_header(stream, &status);
     oskar_binary_stream_write_metadata(stream, &status);
 
-    double screen_height_m = settings.ionosphere.TID->height_km;
+    double screen_height_m = settings.ionosphere.TID->height_km * 1000.0;
 
 //    printf("Number of times    = %i\n", num_times);
 //    printf("Number of stations = %i\n", num_stations);

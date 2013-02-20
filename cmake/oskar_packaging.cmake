@@ -2,18 +2,18 @@
 # OSKAR CMAKE packaging script
 #
 # Description:
-# Adds tagets: 
+# Adds tagets:
 #   1. dist (build the source package with included version file)
-# 
+#
 #   2. package (binary package)
-#   3. package_source (source package) 
-# 
+#   3. package_source (source package)
+#
 # Notes:
 #
 # http://www.cmake.org/Wiki/CMake:CPackConfiguration
 #
 # http://www.cmake.org/Wiki/CMakeUserUseDebian
-# 
+#
 # info: dpkg -I oskar-lib-0.0.0-Linux.deb
 #
 # http://wiki.clug.org.za/wiki/How_do_I_install_a_.deb_file_I_downloaded_without_compromising_dependencies%3F
@@ -21,8 +21,19 @@
 # deb file:///home/debs /
 #
 
-# Find the Subversion revision.
-include(oskar_build_macros)
+# Macro to find the find the Subversion revision.
+macro(get_svn_revision dir variable)
+    find_program(SVN_EXECUTABLE svn DOC "subversion command line client")
+    if (SVN_EXECUTABLE AND EXISTS ${OSKAR_SOURCE_DIR}/.svn)
+        execute_process(COMMAND
+            ${SVN_EXECUTABLE} info ${dir}/oskar_global.h
+            OUTPUT_VARIABLE ${variable}
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+        string(REGEX REPLACE "^(.*\n)?Revision: ([^\n]+).*"
+            "\\2" ${variable} "${${variable}}")
+    endif()
+endmacro(get_svn_revision)
+
 get_svn_revision(${OSKAR_SOURCE_DIR} svn_revision)
 
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/readme.txt")
@@ -62,17 +73,17 @@ include(CPack)
 
 add_custom_target(write_version_file
     COMMAND ${CMAKE_COMMAND}
-    ARGS 
+    ARGS
     -DOSKAR_SOURCE_DIR=${OSKAR_SOURCE_DIR}
     -DVERSION=${CPACK_PACKAGE_VERSION}
     -P ${OSKAR_SOURCE_DIR}/cmake/oskar_write_version_file.cmake
     COMMENT "Writing version file"
     VERBATIM)
 
-add_custom_target(dist 
+add_custom_target(dist
     COMMAND ${CMAKE_MAKE_PROGRAM} package_source
     COMMENT "Packaging Source files"
     VERBATIM)
-    
+
 add_dependencies(dist write_version_file)
 

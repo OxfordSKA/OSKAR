@@ -39,7 +39,7 @@ oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
     init_settings_interferometer();
     init_settings_beampattern();
     init_settings_image();
-    init_settings_ionosphere();
+    //init_settings_ionosphere();
 
 #if 0
     // THESE ARE FOR TESTING ONLY - Remove this section.
@@ -1381,6 +1381,14 @@ void oskar_SettingsModelApps::init_settings_ionosphere()
         k = group + "/filename";
         declare(k, "Pierce point file name", oskar_SettingsItem::OUTPUT_FILE_NAME);
     }
+
+//    group = "KML";
+//    // Pierce point output settings
+//    {
+//        group += "/KML";
+//        setLabel(group, "KML settings");
+//        k = "/show_tec_image";
+//    }
 }
 
 

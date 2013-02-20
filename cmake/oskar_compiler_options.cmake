@@ -17,6 +17,22 @@ message("=======================================================================
 
 set(BUILD_SHARED_LIBS ON)
 
+
+# Set the include path to include the top-level folder and sub-folders for
+# main oskar library.
+# Note: the convension to omit sub-folders from the include path still
+# needs review so these includes are added for experimentation only!
+# ------------------------------------------------------------------------------
+include_directories(
+    ${OSKAR_SOURCE_DIR}
+    ${OSKAR_SOURCE_DIR}/imaging
+    ${OSKAR_SOURCE_DIR}/interferometry
+    ${OSKAR_SOURCE_DIR}/math
+    ${OSKAR_SOURCE_DIR}/sky
+    ${OSKAR_SOURCE_DIR}/station
+    ${OSKAR_SOURCE_DIR}/utility
+)
+
 # Set general compiler flags.
 # ------------------------------------------------------------------------------
 if (NOT WIN32)
@@ -207,3 +223,37 @@ if (MATLAB_FOUND)
     endif ()
 endif ()
 
+
+# Configure MSVC runtime.
+if (MSVC)
+    # Default to dynamically-linked runtime.
+    if ("${MSVC_RUNTIME}" STREQUAL "")
+        set (MSVC_RUNTIME "dynamic")
+    endif ()
+    # Set compiler options.
+    set(vars
+        CMAKE_C_FLAGS_DEBUG
+        CMAKE_C_FLAGS_MINSIZEREL
+        CMAKE_C_FLAGS_RELEASE
+        CMAKE_C_FLAGS_RELWITHDEBINFO
+        CMAKE_CXX_FLAGS_DEBUG
+        CMAKE_CXX_FLAGS_MINSIZEREL
+        CMAKE_CXX_FLAGS_RELEASE
+        CMAKE_CXX_FLAGS_RELWITHDEBINFO
+    )
+    if (${MSVC_RUNTIME} STREQUAL "static")
+        message(STATUS "MSVC: Using statically-linked runtime.")
+        foreach (var ${vars})
+            if (${var} MATCHES "/MD")
+                string(REGEX REPLACE "/MD" "/MT" ${var} "${${var}}")
+            endif ()
+        endforeach ()
+    else ()
+        message(STATUS "MSVC: Using dynamically-linked runtime.")
+        foreach (var ${vars})
+            if (${var} MATCHES "/MT")
+                string(REGEX REPLACE "/MT" "/MD" ${var} "${${var}}")
+            endif ()
+        endforeach ()
+    endif ()
+endif ()

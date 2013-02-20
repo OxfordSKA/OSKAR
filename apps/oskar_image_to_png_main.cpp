@@ -201,7 +201,6 @@ int main(int argc, char** argv)
 
     // Allocate memory for one row, 3 bytes per pixel - RGB.
     png_bytep row;
-    //row = (png_bytep) malloc(3 * img.width * sizeof(png_byte));
     row = (png_bytep) malloc(3 * img.width * sizeof(png_byte));
 
     float* img_data = (float*)img_slice.data;
@@ -215,8 +214,6 @@ int main(int argc, char** argv)
         blue = std::min(blue, img_data[i]);
         red = std::max(red, img_data[i]);
     }
-
-    printf("Image min = %f, max = %f\n", blue, red);
 
     for (y = 0; y < img.height; y++)
     {

@@ -75,8 +75,10 @@ int oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
     if (error) return error;
     error = oskar_settings_load_image(&settings->image, filename);
     if (error) return error;
-    error = oskar_settings_load_ionosphere(&settings->ionosphere, filename);
-    if (error) return error;
+    /*
+     * error = oskar_settings_load_ionosphere(&settings->ionosphere, filename);
+     * if (error) return error;
+     */
 
     /* Save the path to the settings file. */
     oskar_mem_append_raw(&settings->settings_path, filename,

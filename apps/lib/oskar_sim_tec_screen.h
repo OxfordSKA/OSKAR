@@ -33,8 +33,11 @@
  * @file oskar_sim_tec_screen.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Log.h"
+#include <oskar_global.h>
+
+#include <utility/oskar_Log.h>
+#include <imaging/oskar_Image.h>
+#include <utility/oskar_Settings.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,16 +45,17 @@ extern "C" {
 
 /**
  * @brief
- * Main OSKAR TEC screen simulation function.
+ * Function to simulate a TEC screen
  *
  * @details
- * This function acts as though it were a stand-alone executable.
  *
- * @param[in] settings_file Path to a settings file.
- * @param[in,out] log  Pointer to a log structure to use.
+ * @param TEC_screen Pointer to OSKAR image structure holding the TEC screen.
+ * @param settings   Pointer to settings.
+ * @param log        Pointer to a log structure to use.
  */
 OSKAR_APPS_EXPORT
-int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log);
+int oskar_sim_tec_screen(oskar_Image* TEC_screen, oskar_Settings* settings,
+        oskar_Log* log);
 
 #ifdef __cplusplus
 }

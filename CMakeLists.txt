@@ -19,9 +19,6 @@ set(OSKAR_VERSION_MINOR 1)
 set(OSKAR_VERSION_PATCH 1)
 set(OSKAR_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
 
-# === Append the src/cmake directory to the module path.
-list(INSERT CMAKE_MODULE_PATH 0 ${OSKAR_SOURCE_DIR}/cmake)
-
 # === Setup install directory paths
 # Note: the install directory prefix is set by -DCMAKE_INSTALL_PRFEIX=<path>
 if (NOT OSKAR_LIB_INSTALL_DIR)
@@ -38,33 +35,13 @@ if (NOT OSKAR_MATLAB_INSTALL_DIR)
 endif()
 
 # === Set dependencies and compiler options.
-include(oskar_dependencies)
-include(oskar_compiler_options)
-
-# === Include build macros used for apps and mex functions.
-include(oskar_build_macros)
-
-# Configure MSVC runtime. NOTE: should this not be in the compiler_options.cmake?
-OSKAR_SET_MSVC_RUNTIME()
+include(cmake/oskar_dependencies.cmake)
+include(cmake/oskar_compiler_options.cmake)
 
 enable_testing()
 
-# === Set the include path to include the top-level folder and sub-folders for main library.
-include_directories(
-    ${OSKAR_SOURCE_DIR}
-    ${OSKAR_SOURCE_DIR}/imaging
-    ${OSKAR_SOURCE_DIR}/interferometry
-    ${OSKAR_SOURCE_DIR}/math
-    ${OSKAR_SOURCE_DIR}/sky
-    ${OSKAR_SOURCE_DIR}/station
-    ${OSKAR_SOURCE_DIR}/utility
-)
-
 # === Build main OSKAR library.
 if (CUDA_FOUND)
-    include_directories(${OSKAR_SOURCE_DIR})
-    #set(CUDA_VERBOSE_BUILD ON)
-
     add_subdirectory(imaging)
     add_subdirectory(interferometry)
     add_subdirectory(math)
@@ -73,7 +50,6 @@ if (CUDA_FOUND)
     add_subdirectory(utility)
 
     set(libname oskar)
-
     foreach (file ${imaging_SRC})
         list(APPEND ${libname}_SRC imaging/${file})
     endforeach ()
@@ -93,11 +69,10 @@ if (CUDA_FOUND)
         list(APPEND ${libname}_SRC utility/${file})
     endforeach ()
 
-    set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${libname}.dir/src)
+    set(CUDA_GENERATED_OUTPUT_DIR
+        ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${libname}.dir/src)
     cuda_add_library(${libname} ${${libname}_SRC})
-    target_link_libraries(${libname}
-        ${CUDA_LIBRARIES}
-        ${CUDA_curand_LIBRARY})
+    target_link_libraries(${libname} ${CUDA_LIBRARIES} ${CUDA_curand_LIBRARY})
     if (OSKAR_USE_CBLAS)
         target_link_libraries(${libname} ${OSKAR_CBLAS})
     endif ()
@@ -109,17 +84,14 @@ if (CUDA_FOUND)
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
             INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
             INSTALL_RPATH_USE_LINK_PATH TRUE
-            SOVERSION ${OSKAR_VERSION}
-        )
+            SOVERSION ${OSKAR_VERSION})
     else ()
         set_target_properties(${libname} PROPERTIES
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
             LINK_FLAGS "${OpenMP_CXX_FLAGS}"
             INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
             INSTALL_RPATH_USE_LINK_PATH TRUE
-            SOVERSION ${OSKAR_VERSION}
-            VERSION ${OSKAR_VERSION}
-        )
+            SOVERSION ${OSKAR_VERSION} VERSION ${OSKAR_VERSION})
     endif()
     install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
     cuda_build_clean_target()
@@ -142,7 +114,6 @@ if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")
     else ()
         set(install_include_dir "${bin_dir}/${install_dir}/include")
     endif()
-    #message("== Excluding install include directory '${install_include_dir}'")
 else()
     set(install_include_dir "${CMAKE_INSTALL_PREFIX}/include")
 endif ()
@@ -162,5 +133,5 @@ install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
     PATTERN .svn EXCLUDE)
 
 # === Include packaging script.
-include(oskar_packaging)
+include(cmake/oskar_packaging.cmake)
 

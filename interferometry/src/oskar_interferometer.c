@@ -212,6 +212,7 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                     &curand_state, status);
             oskar_jones_join(&R, &E, &R, status);
 
+#if 0
             /* Evaluate ionospheric phase screen (Jones Z), and join */
             /* NOTE this is currently only a CPU implementation */
             /* This is currently only a problem for the sky model ...? */
@@ -221,6 +222,7 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                         &settings->ionosphere, &workJonesZ, status);
                 oskar_jones_join(&R, &Z, &R, status);
             }
+#endif
 
             for (k = 0; k < num_fringe_ave; ++k)
             {

@@ -28,7 +28,6 @@
 
 #include "apps/lib/oskar_sim_tec_screen.h"
 
-#include "apps/lib/oskar_settings_load.h"
 #include "apps/lib/oskar_set_up_telescope.h"
 
 #include <sky/oskar_evaluate_TEC_TID.h>
@@ -41,15 +40,13 @@
 #include <utility/oskar_mem_free.h>
 #include <utility/oskar_mem_set_value_real.h>
 #include <utility/oskar_mem_get_pointer.h>
-#include <utility/oskar_log_settings.h>
 #include <interferometry/oskar_TelescopeModel.h>
 #include <interferometry/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h>
 #include <imaging/oskar_evaluate_image_lm_grid.h>
 #include <imaging/oskar_image_free.h>
 #include <imaging/oskar_image_init.h>
 #include <imaging/oskar_image_resize.h>
-#include <imaging/oskar_image_write.h>
-#include <fits/oskar_fits_image_write.h>
+#include <imaging/oskar_evaluate_image_lon_lat_grid.h>
 #include <math/oskar_sph_from_lm.h>
 #include <station/oskar_StationModel.h>
 #include <station/oskar_evaluate_pierce_points.h>
@@ -58,54 +55,42 @@
 #include <cstdlib>
 #include <cstdio>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 static void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
         int stationID, oskar_Settings* settings,
         oskar_TelescopeModel* telescope, int* status);
 
 extern "C"
-int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
+int oskar_sim_tec_screen(oskar_Image* TEC_screen, oskar_Settings* settings,
+        oskar_Log* log)
 {
     int status = OSKAR_SUCCESS;
 
-    // Settings.
-    oskar_Settings settings;
-    oskar_settings_load(&settings, log, settings_file);
-    oskar_SettingsIonosphere* MIM = &settings.ionosphere;
-    log->keep_file = settings.sim.keep_log_file;
+    oskar_SettingsIonosphere* MIM = &settings->ionosphere;
 
-    oskar_TelescopeModel telescope;
-    oskar_set_up_telescope(&telescope, log, &settings, &status);
-
-    oskar_log_settings_telescope(log, &settings);
-    oskar_log_settings_observation(log, &settings);
-    oskar_log_settings_ionosphere(log, &settings);
-
-    if (!settings.ionosphere.TECImage.fits_file &&
-            !settings.ionosphere.TECImage.img_file)
+    if (!MIM->TECImage.fits_file && !MIM->TECImage.img_file)
     {
         return OSKAR_ERR_SETTINGS_IONOSPHERE;
     }
 
-    int im_size = settings.ionosphere.TECImage.size;
+    oskar_TelescopeModel telescope;
+    oskar_set_up_telescope(&telescope, log, settings, &status);
+
+    int im_size = MIM->TECImage.size;
     int num_pixels = im_size * im_size;
 
-    int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
     int loc = OSKAR_LOCATION_CPU;
 
     int owner = OSKAR_TRUE;
-    double fov = settings.ionosphere.TECImage.fov_rad;
+    double fov = MIM->TECImage.fov_rad;
 
     // Evaluate the p.p. coordinates of the beam phase centre.
     double pp_lon0, pp_lat0;
-    int st_idx = settings.ionosphere.TECImage.stationID;
-    if (settings.ionosphere.TECImage.beam_centred)
+    int st_idx = MIM->TECImage.stationID;
+    if (MIM->TECImage.beam_centred)
     {
-        evalaute_station_beam_pp(&pp_lon0, &pp_lat0, st_idx, &settings,
+        evalaute_station_beam_pp(&pp_lon0, &pp_lat0, st_idx, settings,
                 &telescope, &status);
     }
     else
@@ -114,53 +99,35 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
         pp_lat0 = telescope.station[st_idx].beam_latitude_rad;
     }
 
-    int num_times = settings.obs.num_time_steps;
-    double t0 = settings.obs.start_mjd_utc;
-    double tinc = settings.obs.dt_dump_days;
+    int num_times = settings->obs.num_time_steps;
+    double t0 = settings->obs.start_mjd_utc;
+    double tinc = settings->obs.dt_dump_days;
 
-    // Work out the lon, lat grid used for the tec values.
-    oskar_Mem grid_l, grid_m, pp_lon, pp_lat;
-    oskar_mem_init(&grid_l, type, loc, num_pixels, owner, &status);
-    oskar_mem_init(&grid_m, type, loc, num_pixels, owner, &status);
+    // Generate the lon, lat grid used for the TEC values.
+    oskar_Mem pp_lon, pp_lat;
     oskar_mem_init(&pp_lon, type, loc, num_pixels, owner, &status);
     oskar_mem_init(&pp_lat, type, loc, num_pixels, owner, &status);
+    oskar_evaluate_image_lon_lat_grid(&pp_lon, &pp_lat, im_size, fov,
+            pp_lon0, pp_lat0, &status);
 
-    if (type == OSKAR_DOUBLE)
-    {
-        oskar_evaluate_image_lm_grid_d(im_size, im_size, fov, fov,
-                (double*)(grid_l.data), (double*)(grid_m.data));
-        oskar_sph_from_lm_d(num_pixels, pp_lon0, pp_lat0,
-                (double*)(grid_l.data), (double*)(grid_m.data),
-                (double*)(pp_lon.data), (double*)(pp_lat.data));
-    }
-    else
-    {
-        oskar_evaluate_image_lm_grid_f(im_size, im_size, fov, fov,
-                (float*)(grid_l.data), (float*)(grid_m.data));
-        oskar_sph_from_lm_f(num_pixels, pp_lon0, pp_lat0,
-                (float*)(grid_l.data), (float*)(grid_m.data),
-                (float*)(pp_lon.data), (float*)(pp_lat.data));
-    }
-    // Relative path in direction of pp (1.0 here as we are not using
+    // Relative path in direction of p.p. (1.0 here as we are not using
     // any stations)
     oskar_Mem pp_rel_path;
     oskar_mem_init(&pp_rel_path, type, loc, num_pixels, owner, &status);
     oskar_mem_set_value_real(&pp_rel_path, 1.0, &status);
 
     // Initialise return values
-    oskar_Image tec_image;
-    oskar_image_init(&tec_image, type, loc, &status);
-    oskar_image_resize(&tec_image, im_size, im_size, 1, num_times,
-            1, &status);
-    tec_image.image_type = OSKAR_IMAGE_TYPE_BEAM_SCALAR;
-    tec_image.centre_ra_deg = pp_lon0  * (180.0/M_PI);
-    tec_image.centre_dec_deg = pp_lat0  * (180.0/M_PI);
-    tec_image.fov_ra_deg = fov * (180.0/M_PI);
-    tec_image.fov_dec_deg = fov * (180.0/M_PI);
-    tec_image.freq_start_hz = 0.0;
-    tec_image.freq_inc_hz = 0.0;
-    tec_image.time_inc_sec = tinc * 86400.;
-    tec_image.time_start_mjd_utc = t0;
+    oskar_image_init(TEC_screen, type, loc, &status);
+    oskar_image_resize(TEC_screen, im_size, im_size, 1, num_times, 1, &status);
+    TEC_screen->image_type = OSKAR_IMAGE_TYPE_BEAM_SCALAR;
+    TEC_screen->centre_ra_deg = pp_lon0  * (180.0/M_PI);
+    TEC_screen->centre_dec_deg = pp_lat0  * (180.0/M_PI);
+    TEC_screen->fov_ra_deg = fov * (180.0/M_PI);
+    TEC_screen->fov_dec_deg = fov * (180.0/M_PI);
+    TEC_screen->freq_start_hz = 0.0;
+    TEC_screen->freq_inc_hz = 0.0;
+    TEC_screen->time_inc_sec = tinc * 86400.;
+    TEC_screen->time_start_mjd_utc = t0;
 
     oskar_Mem tec_screen;
     oskar_mem_init(&tec_screen, type, loc, num_pixels, !owner, &status);
@@ -169,36 +136,18 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
     {
         double gast = t0 + tinc * (double)i;
         int offset = num_pixels * i;
-        oskar_mem_get_pointer(&tec_screen, &(tec_image.data), offset,
+        oskar_mem_get_pointer(&tec_screen, &(TEC_screen->data), offset,
                 num_pixels, &status);
-        oskar_evaluate_TEC_TID(&tec_screen, num_pixels,
-                &pp_lon, &pp_lat, &pp_rel_path, MIM->TEC0,
-                &(MIM->TID[0]), gast);
+        oskar_evaluate_TEC_TID(&tec_screen, num_pixels, &pp_lon, &pp_lat,
+                &pp_rel_path, MIM->TEC0, &(MIM->TID[0]), gast);
     }
 
-    if (!status)
-    {
-        // Write FITS image.
-        const char* fits_file = settings.ionosphere.TECImage.fits_file;
-        if (fits_file)
-            status = oskar_fits_image_write(&tec_image, log, fits_file);
-        const char* img_file = settings.ionosphere.TECImage.img_file;
-        if (img_file)
-            oskar_image_write(&tec_image, log, img_file, 0, &status);
-    }
-
-    oskar_mem_free(&grid_l, &status);
-    oskar_mem_free(&grid_m, &status);
     oskar_mem_free(&pp_lon, &status);
     oskar_mem_free(&pp_lat, &status);
     oskar_mem_free(&pp_rel_path, &status);
-    oskar_image_free(&tec_image, &status);
 
     return status;
 }
-
-
-
 
 
 static void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
@@ -218,7 +167,7 @@ static void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
     oskar_mem_init(&hor_y, type, loc, 1, owner, status);
     oskar_mem_init(&hor_z, type, loc, 1, owner, status);
 
-    /* Offset geocentric cartesian station position */
+    // Offset geocentric cartesian station position
     double st_x, st_y, st_z;
 
     // ECEF coordinates of the station for which the beam p.p. is being evaluated.
@@ -278,14 +227,10 @@ static void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
     oskar_mem_init(&m_pp_rel_path, type, loc, 1, owner, status);
 
     // Pierce point of the observation phase centre - i.e. beam direction
-    oskar_evaluate_pierce_points(
-            &m_pp_lon0, &m_pp_lat0, &m_pp_rel_path,
-            st_lon, st_lat, st_alt,
-            st_x_ecef, st_y_ecef, st_z_ecef,
-            settings->ionosphere.TID[0].height_km * 1000.,
-            1,
-            &hor_x, &hor_y, &hor_z,
-            status);
+    oskar_evaluate_pierce_points(&m_pp_lon0, &m_pp_lat0, &m_pp_rel_path,
+            st_lon, st_lat, st_alt, st_x_ecef, st_y_ecef, st_z_ecef,
+            settings->ionosphere.TID[0].height_km * 1000., 1, &hor_x, &hor_y,
+            &hor_z, status);
 
     if (type == OSKAR_DOUBLE)
     {
@@ -297,8 +242,5 @@ static void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
         *pp_lon0 = ((float*)m_pp_lon0.data)[0];
         *pp_lat0 = ((float*)m_pp_lat0.data)[0];
     }
-
-//    printf("pp lon = %f, lat = %f\n", *pp_lon0*(180./M_PI),
-//            *pp_lat0*(180./M_PI));
 }
 
