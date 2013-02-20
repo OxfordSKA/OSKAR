@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,7 +99,7 @@ void oskar_mem_realloc(oskar_Mem* mem, int num_elements, int* status)
         size_t copy_size;
         void* mem_new = NULL;
         cudaMalloc(&mem_new, new_size);
-        cudaMemset(mem_new, 0, new_size);
+        /*cudaMemset(mem_new, 0, new_size);*/ /* Shouldn't be needed. */
 
         /* Copy contents of old block to new block. */
         copy_size = (old_size > new_size) ? new_size : old_size;

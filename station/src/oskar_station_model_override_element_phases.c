@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,26 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_alloc.h"
-#include "utility/oskar_mem_element_size.h"
-
-#ifdef OSKAR_HAVE_CUDA
-#include <cuda_runtime_api.h>
-#endif
-
-#include <stdlib.h>
+#include "station/oskar_station_model_override_element_phases.h"
+#include "station/oskar_station_model_type.h"
+#include "station/oskar_station_model_location.h"
+#include "math/oskar_random_gaussian.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_mem_alloc(oskar_Mem* mem, int* status)
+void oskar_station_model_override_element_phases(oskar_StationModel* s,
+        double phase_std, int* status)
 {
-    int n_elements, location, type;
-    size_t element_size, bytes;
+    int i;
 
     /* Check all inputs. */
-    if (!mem || !status)
+    if (!s || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -54,53 +50,42 @@ void oskar_mem_alloc(oskar_Mem* mem, int* status)
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check if the structure owns the memory it points to. */
-    if (!mem->owner)
+    /* Check location. */
+    if (oskar_station_model_location(s) != OSKAR_LOCATION_CPU)
     {
-        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
 
-    /* Get the meta-data. */
-    n_elements = mem->num_elements;
-    location = mem->location;
-    type = mem->type;
-
-    /* Check if allocation should happen or not. */
-    if (n_elements == 0)
-        return;
-
-    /* Get the memory size. */
-    element_size = oskar_mem_element_size(type);
-    if (element_size == 0)
+    /* Check if there are child stations. */
+    if (s->child)
     {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
-    }
-    bytes = n_elements * element_size;
-
-    /* Check whether the memory should be on the host or the device. */
-    if (location == OSKAR_LOCATION_CPU)
-    {
-        /* Allocate host memory. */
-        mem->data = calloc(bytes, 1);
-        if (mem->data == NULL)
-            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    }
-    else if (location == OSKAR_LOCATION_GPU)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        /* Allocate GPU memory. */
-        cudaMalloc(&mem->data, bytes);
-        /*cudaMemset(mem->data, 0, bytes);*/ /* Shouldn't be needed. */
-        *status = cudaPeekAtLastError();
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
+        /* Recursive call to find the last level (i.e. the element data). */
+        for (i = 0; i < s->num_elements; ++i)
+        {
+            oskar_station_model_override_element_phases(&s->child[i],
+                    phase_std, status);
+        }
     }
     else
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        /* Override element data at last level. */
+        int type;
+        type = oskar_station_model_type(s);
+        if (type == OSKAR_DOUBLE)
+        {
+            double* phase;
+            phase = (double*)(s->phase_offset.data);
+            for (i = 0; i < s->num_elements; ++i)
+                phase[i] = phase_std * oskar_random_gaussian(0);
+        }
+        else if (type == OSKAR_SINGLE)
+        {
+            float* phase;
+            phase = (float*)(s->phase_offset.data);
+            for (i = 0; i < s->num_elements; ++i)
+                phase[i] = phase_std * oskar_random_gaussian(0);
+        }
     }
 }
 

@@ -44,6 +44,12 @@ set(station_SRC
     src/oskar_station_model_load_pointing_file.c
     src/oskar_station_model_location.c
     src/oskar_station_model_multiply_by_wavenumber.c
+    src/oskar_station_model_override_element_gains.c
+    src/oskar_station_model_override_element_orientations.c
+    src/oskar_station_model_override_element_phases.c
+    src/oskar_station_model_override_element_time_variable_gains.c
+    src/oskar_station_model_override_element_time_variable_phases.c
+    src/oskar_station_model_override_element_xy_position_errors.c
     src/oskar_station_model_resize_element_types.c
     src/oskar_station_model_resize.c
     src/oskar_station_model_save_config.c
