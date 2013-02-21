@@ -263,6 +263,7 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_jones_free(&R, status);
     oskar_jones_free(&E, status);
     oskar_jones_free(&K, status);
+    oskar_jones_free(&Z, status);
     oskar_sky_model_free(&local_sky, status);
     oskar_sky_model_free(&sky_gpu, status);
     oskar_telescope_model_free(&tel_gpu, status);
