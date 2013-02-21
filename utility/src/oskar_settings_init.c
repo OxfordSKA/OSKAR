@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,10 +58,10 @@ int oskar_settings_init(oskar_Settings* settings)
     settings->telescope.output_directory = NULL;
     settings->interferometer.ms_filename = NULL;
     settings->interferometer.oskar_vis_filename = NULL;
-    settings->beam_pattern.oskar_image_power = NULL;
+    settings->beam_pattern.oskar_image_voltage = NULL;
     settings->beam_pattern.oskar_image_phase = NULL;
     settings->beam_pattern.oskar_image_complex = NULL;
-    settings->beam_pattern.fits_image_power = NULL;
+    settings->beam_pattern.fits_image_voltage = NULL;
     settings->beam_pattern.fits_image_phase = NULL;
     settings->image.input_vis_data = NULL;
     settings->image.oskar_image = NULL;

@@ -92,10 +92,10 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     oskar_log_settings_beam_pattern(log, &settings);
 
     // Check that a data file has been specified.
-    if (!(settings.beam_pattern.oskar_image_power ||
+    if (!(settings.beam_pattern.oskar_image_voltage ||
             settings.beam_pattern.oskar_image_phase ||
             settings.beam_pattern.oskar_image_complex ||
-            settings.beam_pattern.fits_image_power ||
+            settings.beam_pattern.fits_image_voltage ||
             settings.beam_pattern.fits_image_phase))
     {
         oskar_log_error(log, "No output file(s) specified.");
@@ -307,8 +307,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     }
 
     // Write out power data if required.
-    if (settings.beam_pattern.oskar_image_power ||
-            settings.beam_pattern.fits_image_power)
+    if (settings.beam_pattern.oskar_image_voltage ||
+            settings.beam_pattern.fits_image_voltage)
     {
         // Convert complex values to power (amplitude of complex number).
         if (type == OSKAR_SINGLE)
@@ -335,18 +335,18 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         }
 
         // Write OSKAR image
-        if (settings.beam_pattern.oskar_image_power)
+        if (settings.beam_pattern.oskar_image_voltage)
         {
             oskar_image_write(&image_cube, log,
-                    settings.beam_pattern.oskar_image_power, 0, &err);
+                    settings.beam_pattern.oskar_image_voltage, 0, &err);
             if (err) return err;
         }
 #ifndef OSKAR_NO_FITS
         // Write FITS image.
-        if (settings.beam_pattern.fits_image_power)
+        if (settings.beam_pattern.fits_image_voltage)
         {
             err = oskar_fits_image_write(&image_cube, log,
-                    settings.beam_pattern.fits_image_power);
+                    settings.beam_pattern.fits_image_voltage);
             if (err) return err;
         }
 #endif

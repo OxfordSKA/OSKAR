@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -514,7 +514,7 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
             s->interferometer.use_common_sky);
 
     /* Noise */
-    LVB("Enabled system noise", n->enable);
+    LVB("System noise enabled", n->enable);
     depth++;
     if (n->enable)
     {
@@ -636,14 +636,14 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
     LV("Field-of-view [deg]", "%.3f", s->beam_pattern.fov_deg);
     LVI("Dimension [pixels]", s->beam_pattern.size);
     LVI("Station ID", s->beam_pattern.station_id);
-    oskar_log_message(log, depth, "Output OSKAR Image files:");
+    oskar_log_message(log, depth, "Output OSKAR image files:");
     ++depth;
-    LVS0("Power", s->beam_pattern.oskar_image_power);
+    LVS0("Voltage", s->beam_pattern.oskar_image_voltage);
     LVS0("Phase", s->beam_pattern.oskar_image_phase);
     LVS0("Complex", s->beam_pattern.oskar_image_complex);
     oskar_log_message(log, --depth, "Output FITS image files:");
     ++depth;
-    LVS0("Power", s->beam_pattern.fits_image_power);
+    LVS0("Voltage", s->beam_pattern.fits_image_voltage);
     LVS0("Phase", s->beam_pattern.fits_image_phase);
 }
 

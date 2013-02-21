@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -106,12 +106,12 @@ int oskar_settings_free(oskar_Settings* settings)
     settings->beam_pattern.oskar_image_complex = NULL;
     free(settings->beam_pattern.oskar_image_phase);
     settings->beam_pattern.oskar_image_phase = NULL;
-    free(settings->beam_pattern.oskar_image_power);
-    settings->beam_pattern.oskar_image_power = NULL;
+    free(settings->beam_pattern.oskar_image_voltage);
+    settings->beam_pattern.oskar_image_voltage = NULL;
     free(settings->beam_pattern.fits_image_phase);
     settings->beam_pattern.fits_image_phase = NULL;
-    free(settings->beam_pattern.fits_image_power);
-    settings->beam_pattern.fits_image_power = NULL;
+    free(settings->beam_pattern.fits_image_voltage);
+    settings->beam_pattern.fits_image_voltage = NULL;
 
     /* Free imager file names. */
     free(settings->image.input_vis_data);

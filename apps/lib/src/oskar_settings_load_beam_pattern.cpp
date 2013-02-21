@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,11 +57,11 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     {
         // OSKAR image files.
         s.beginGroup("oskar_image_file");
-        if (s.value("save_power", false).toBool())
+        if (s.value("save_voltage", false).toBool())
         {
-            t = QString(root + "_POWER.img").toAscii();
-            bp->oskar_image_power = (char*)malloc(t.size() + 1);
-            strcpy(bp->oskar_image_power, t.constData());
+            t = QString(root + "_VOLTAGE.img").toAscii();
+            bp->oskar_image_voltage = (char*)malloc(t.size() + 1);
+            strcpy(bp->oskar_image_voltage, t.constData());
         }
         if (s.value("save_phase", false).toBool())
         {
@@ -79,11 +79,11 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
 
         // FITS files.
         s.beginGroup("fits_file");
-        if (s.value("save_power", false).toBool())
+        if (s.value("save_voltage", false).toBool())
         {
-            t = QString(root + "_POWER.fits").toAscii();
-            bp->fits_image_power = (char*)malloc(t.size() + 1);
-            strcpy(bp->fits_image_power, t.constData());
+            t = QString(root + "_VOLTAGE.fits").toAscii();
+            bp->fits_image_voltage = (char*)malloc(t.size() + 1);
+            strcpy(bp->fits_image_voltage, t.constData());
         }
         if (s.value("save_phase", false).toBool())
         {

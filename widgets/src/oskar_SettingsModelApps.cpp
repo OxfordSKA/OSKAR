@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1148,10 +1148,11 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     // OSKAR image file options.
     k = group + "/oskar_image_file";
     setLabel(k, "OSKAR image file options");
-    k = group + "/oskar_image_file/save_power";
-    declare(k, "Power (amplitude) pattern", oskar_SettingsItem::BOOL, false);
-    setTooltip(k, "If true, save the amplitude power pattern in an OSKAR "
-            "image file.");
+    k = group + "/oskar_image_file/save_voltage";
+    declare(k, "Voltage pattern", oskar_SettingsItem::BOOL, false);
+    setTooltip(k, "If true, save the voltage amplitude pattern in an OSKAR "
+            "image file. (This is given by the square root of the sum of the "
+            "squares of the real and imaginary values.)");
     k = group + "/oskar_image_file/save_phase";
     declare(k, "Phase pattern", oskar_SettingsItem::BOOL, false);
     setTooltip(k, "If true, save the phase pattern in an OSKAR image file.");
@@ -1164,10 +1165,11 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     // FITS file options.
     k = group + "/fits_file";
     setLabel(k, "FITS file options");
-    k = group + "/fits_file/save_power";
-    declare(k, "Power (amplitude) pattern", oskar_SettingsItem::BOOL, false);
-    setTooltip(k, "If true, save the amplitude power pattern in a FITS "
-            "image file.");
+    k = group + "/fits_file/save_voltage";
+    declare(k, "Voltage pattern", oskar_SettingsItem::BOOL, false);
+    setTooltip(k, "If true, save the voltage amplitude pattern in a FITS "
+            "image file. (This is given by the square root of the sum of the "
+            "squares of the real and imaginary values.)");
     k = group + "/fits_file/save_phase";
     declare(k, "Phase pattern", oskar_SettingsItem::BOOL, false);
     setTooltip(k, "If true, save the phase pattern in a FITS image file.");
