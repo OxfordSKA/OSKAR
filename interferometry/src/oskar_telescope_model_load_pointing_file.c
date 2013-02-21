@@ -88,23 +88,18 @@ void oskar_telescope_model_load_pointing_file(oskar_TelescopeModel* telescope,
     /* Loop over each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
-        int coordsys, i = 0, j = 1, num_ids = 0, read = 0;
+        int coordsys, i = 0, num_ids = 0, read = 0;
         double lon = 0.0, lat = 0.0;
 
         /* Split into string array and check for required number of fields. */
         read = oskar_string_to_array_realloc_s(line, &num_par, &par);
-        if (read < 5) continue;
+        if (read < 4) continue;
 
         /* Get number of IDs. */
-        sscanf(par[0], "%d", &num_ids);
-        if (read != 4 + num_ids)
-        {
-            *status = OSKAR_ERR_BAD_POINTING_FILE;
-            break;
-        }
+        num_ids = read - 3;
 
         /* Get all IDs on the line. */
-        for (i = 0, j = 1; i < num_ids && i < num_par; ++i, ++j)
+        for (i = 0; i < num_ids && i < num_par; ++i)
         {
             /* Ensure enough space in ID array. */
             if (i >= size_id)
@@ -121,24 +116,24 @@ void oskar_telescope_model_load_pointing_file(oskar_TelescopeModel* telescope,
             }
 
             /* Store the ID, checking for '*' wildcard. */
-            if (!par[j] || par[j][0] == '*')
+            if (!par[i] || par[i][0] == '*')
                 id[i] = -1;
             else
-                sscanf(par[j], "%d", &(id[i]));
+                sscanf(par[i], "%d", &(id[i]));
         }
         if (*status) break;
 
         /* Get coordinate system type. */
-        if (!par[j] || (par[j][0] != 'A' && par[j][0] != 'a'))
+        if (!par[i] || (par[i][0] != 'A' && par[i][0] != 'a'))
             coordsys = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
         else
             coordsys = OSKAR_SPHERICAL_TYPE_HORIZONTAL;
 
         /* Get longitude and latitude values. */
-        ++j;
-        sscanf(par[j], "%lf", &lon);
-        ++j;
-        sscanf(par[j], "%lf", &lat);
+        ++i;
+        sscanf(par[i], "%lf", &lon);
+        ++i;
+        sscanf(par[i], "%lf", &lat);
 
         /* Set the data into the telescope model. */
         lon *= DEG2RAD;

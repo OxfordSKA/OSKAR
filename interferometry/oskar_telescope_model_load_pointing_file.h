@@ -48,13 +48,15 @@ extern "C" {
  *
  * @details
  * This function loads a text file specifying the direction of the required
- * beam for all stations in the telescope model.
+ * beam for any or all stations in the telescope model.
  *
- * The text file has multiple columns per row, which specify:
- * - The number of station indices required to specify the beam direction.
- * - The index of the station at the top level.
+ * The text file has multiple columns, which specify the address of the
+ * station(s) in the hierarchy (via multiple indices) and the beam direction
+ * to set for the station(s). The columns are:
+ *
+ * - The index of the top-level station.
  * - The index of the station at the next level down, if required.
- * - ... (and so on).
+ * - ... (and so on for further sub-stations).
  * - The coordinate system used for the beam specification.
  *   This is a string which may be either AZEL or RADEC to specify
  *   horizontal or equatorial coordinates.
@@ -64,18 +66,24 @@ extern "C" {
  * Wild-cards (an asterisk, *) may be used in the index columns to allow
  * the same direction for all stations at a given depth.
  *
- * For example, a file may contain the following two lines to specify different
- * phase centres for beams formed at the tile and station levels:
- *
- * 1, *, RADEC, 45.0, 60.0   # All stations (and their children) have tracking beams.
- * 2, *, *, AZEL, 60.0, 75.0 # All tiles in all stations have fixed beams.
- * 2, 1, *, AZEL, 60.1, 75.0 # All tiles in station 1 are offset from the rest.
+ * An entry in the file will set the beam direction for the station(s) at the
+ * last specified index, and recursively for all child stations.
  *
  * Note that the order in which lines appear in the file is important.
  * Entries that appear later override those that appear earlier.
- * An entry also sets the beam direction for all child stations.
  *
- * @param[in,out] station    Station model structure to modify.
+ * For example, a file may contain the following lines to specify different
+ * phase centres for beams formed at the tile and station levels:
+ *
+   @verbatim
+   *   RADEC 45.0 60.0 # All stations (and children) track (RA, Dec) = (45, 60).
+   3   RADEC 45.1 59.9 # Station 3 (and children) tracks (RA, Dec) = (45.1, 59.9).
+   * * AZEL  60.0 75.0 # All tiles in all stations have fixed beams.
+   0 * AZEL  60.1 75.0 # All tiles in station 0 are offset from the rest.
+   2 6 AZEL   0.0 90.0 # Tile 6 in station 2 is pointing at the zenith.
+   @endverbatim
+ *
+ * @param[in,out] telescope  Telescope model structure to modify.
  * @param[in] filename       File name path to a pointing file.
  * @param[in,out] status     Status return code.
  */
