@@ -81,13 +81,13 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     int complx, matrix, num_vis_dumps, num_vis_ave, num_fringe_ave;
     double t_dump, t_ave, t_fringe, dt_dump, dt_ave, dt_fringe, gast;
     double obs_start_mjd_utc;
-    oskar_Jones J, R, E, K, Z;
+    oskar_Jones J, R, E, K;
     oskar_Mem vis, u, v, w;
     oskar_SkyModel sky_gpu, local_sky;
     oskar_TelescopeModel tel_gpu;
     oskar_WorkStationBeam work;
     oskar_CurandState curand_state;
-    oskar_WorkJonesZ workJonesZ;
+    /*oskar_WorkJonesZ workJonesZ;*/
 
     /* Check all inputs. */
     if (!vis_amp || !sky || !telescope || !settings || !status)
@@ -147,7 +147,7 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_jones_init(&R, matrix, OSKAR_LOCATION_GPU, n_stations, n_src, status);
     oskar_jones_init(&E, matrix, OSKAR_LOCATION_GPU, n_stations, n_src, status);
     oskar_jones_init(&K, complx, OSKAR_LOCATION_GPU, n_stations, n_src, status);
-    oskar_jones_init(&Z, complx, OSKAR_LOCATION_CPU, n_stations, n_src, status);
+    /*oskar_jones_init(&Z, complx, OSKAR_LOCATION_CPU, n_stations, n_src, status);*/
     oskar_mem_init(&vis, matrix, OSKAR_LOCATION_GPU, n_baselines, 1, status);
     oskar_mem_init(&u, type, OSKAR_LOCATION_GPU, n_stations, 1, status);
     oskar_mem_init(&v, type, OSKAR_LOCATION_GPU, n_stations, 1, status);
@@ -157,7 +157,7 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_work_station_beam_init(&work, type, OSKAR_LOCATION_GPU, status);
 
     /* Initialise work buffer for Z Jones evaluation */
-    oskar_work_jones_z_init(&workJonesZ, type, OSKAR_LOCATION_CPU, status);
+    /*oskar_work_jones_z_init(&workJonesZ, type, OSKAR_LOCATION_CPU, status);*/
 
     /* Initialise the CUDA random number generator.
      * Note: This is reset to the same sequence per sky chunk and per channel.
@@ -270,11 +270,11 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_jones_free(&R, status);
     oskar_jones_free(&E, status);
     oskar_jones_free(&K, status);
-    oskar_jones_free(&Z, status);
+    /*oskar_jones_free(&Z, status);*/
     oskar_sky_model_free(&local_sky, status);
     oskar_sky_model_free(&sky_gpu, status);
     oskar_telescope_model_free(&tel_gpu, status);
-    oskar_work_jones_z_free(&workJonesZ, status);
+    /*oskar_work_jones_z_free(&workJonesZ, status);*/
 }
 
 #ifdef __cplusplus
