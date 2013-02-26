@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include "math/oskar_jones_set_size.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
 #include "sky/oskar_sky_model_copy.h"
+#include "sky/oskar_sky_model_filter_by_flux.h"
 #include "sky/oskar_sky_model_free.h"
 #include "sky/oskar_sky_model_horizon_clip.h"
 #include "sky/oskar_sky_model_init.h"
@@ -125,6 +126,12 @@ void oskar_interferometer_scalar(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_sky_model_init(&sky_gpu, type, OSKAR_LOCATION_GPU, n_src, status);
     oskar_sky_model_copy(&sky_gpu, sky, status);
     oskar_sky_model_scale_by_spectral_index(&sky_gpu, frequency, status);
+
+    /* Filter sky model by flux after frequency scaling. */
+    oskar_sky_model_filter_by_flux(&sky_gpu,
+            settings->sky.common_flux_filter_min_jy,
+            settings->sky.common_flux_filter_max_jy, status);
+    n_src = sky_gpu.num_sources;
 
     /* Initialise a local sky model of sufficient size for the horizon clip. */
     oskar_sky_model_init(&local_sky, type, OSKAR_LOCATION_GPU, n_src, status);

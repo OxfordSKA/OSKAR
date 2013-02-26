@@ -1,9 +1,16 @@
-2013-xx-yy  OSKAR-2.2.0-beta
+2013-02-xx  OSKAR-2.2.0
+
+    * Fixed incorrect 'power' filename suffix on voltage beam pattern images.
+
+    * Changed sky model input file settings to make better use of settings
+      groups.
+
+    * Changed minimum CMake version requirement from 2.8 to 2.6.
 
     * Improved robustness of random-power-law source generators.
 
     * Improved reported error message if visibility file cannot be opened.
-    
+
     * Improved reported error messages if telescope model cannot be loaded.
 
     * Improved chunking of data for complex-to-real DFT, so CUDA kernels
@@ -26,13 +33,14 @@
     * Added (sky model) option to remove sources for which Gaussian width
       solutions have failed.
 
+    * Added the ability to filter sky model source fluxes after the scale by
+      spectral index. This is done on a per-channel basis.
+
     * Added the ability to specify the amplitude of points when specifying
       generated HEALPix source grids.
 
     * Updated the mex function which reads OSKAR binary tag groups so that
       it is possible to specify a user index from which to load the group.
-
-    * Changed minimum CMake version requirement from 2.8 to 2.6.
 
 2012-11-20  OSKAR 2.1.1-beta
 

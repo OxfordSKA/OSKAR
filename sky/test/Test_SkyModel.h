@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,7 @@ class Test_SkyModel : public CppUnit::TestFixture
         CPPUNIT_TEST(test_horizon_clip);
         CPPUNIT_TEST(test_split);
         CPPUNIT_TEST(test_filter_by_radius);
+        CPPUNIT_TEST(test_filter_by_flux);
         CPPUNIT_TEST(test_gaussian_source);
         CPPUNIT_TEST(test_evaluate_gaussian_source_parameters);
         CPPUNIT_TEST(test_insert);
@@ -71,6 +72,7 @@ class Test_SkyModel : public CppUnit::TestFixture
         void test_horizon_clip();
         void test_split();
         void test_filter_by_radius();
+        void test_filter_by_flux();
         void test_gaussian_source();
         void test_evaluate_gaussian_source_parameters();
         void test_insert();

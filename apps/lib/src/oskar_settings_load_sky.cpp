@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,56 +74,52 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     }
 
     // Input OSKAR sky model files.
-    list = s.value("oskar_source_file").toStringList();
-    sky->num_sky_files = list.size();
-    sky->input_sky_file = (char**)malloc(sky->num_sky_files * sizeof(char*));
-    for (int i = 0; i < sky->num_sky_files; ++i)
+    s.beginGroup("oskar_sky_model");
+    list = s.value("file").toStringList();
+    sky->oskar_sky_model.num_files = list.size();
+    sky->oskar_sky_model.file = (char**)malloc(sky->oskar_sky_model.num_files *
+            sizeof(char*));
+    for (int i = 0; i < sky->oskar_sky_model.num_files; ++i)
     {
         t = list[i].toAscii();
-        sky->input_sky_file[i] = (char*)malloc(t.size() + 1);
-        strcpy(sky->input_sky_file[i], t.constData());
+        sky->oskar_sky_model.file[i] = (char*)malloc(t.size() + 1);
+        strcpy(sky->oskar_sky_model.file[i], t.constData());
     }
-
-    // Input OSKAR sky model filter.
-    s.beginGroup("oskar_source_file");
-    get_filter_params(s, &sky->input_sky_filter);
-    get_extended_params(s, &sky->input_sky_extended_sources);
+    get_filter_params(s, &sky->oskar_sky_model.filter);
+    get_extended_params(s, &sky->oskar_sky_model.extended_sources);
     s.endGroup();
 
     // GSM file.
-    t = s.value("gsm_file").toByteArray();
+    s.beginGroup("gsm");
+    t = s.value("file").toByteArray();
     if (t.size() > 0)
     {
-        sky->gsm_file = (char*)malloc(t.size() + 1);
-        strcpy(sky->gsm_file, t.constData());
+        sky->gsm.file = (char*)malloc(t.size() + 1);
+        strcpy(sky->gsm.file, t.constData());
     }
-
-    // GSM filter.
-    s.beginGroup("gsm_file");
-    get_filter_params(s, &sky->gsm_filter);
-    get_extended_params(s, &sky->gsm_extended_sources);
+    get_filter_params(s, &sky->gsm.filter);
+    get_extended_params(s, &sky->gsm.extended_sources);
     s.endGroup();
 
-    // Input FITS files.
-    list = s.value("fits_file").toStringList();
-    sky->num_fits_files = list.size();
-    sky->fits_file = (char**)malloc(sky->num_fits_files * sizeof(char*));
-    for (int i = 0; i < sky->num_fits_files; ++i)
+    // Input FITS image files.
+    s.beginGroup("fits_image");
+    list = s.value("file").toStringList();
+    sky->fits_image.num_files = list.size();
+    sky->fits_image.file = (char**)malloc(sky->fits_image.num_files *
+            sizeof(char*));
+    for (int i = 0; i < sky->fits_image.num_files; ++i)
     {
         t = list[i].toAscii();
-        sky->fits_file[i] = (char*)malloc(t.size() + 1);
-        strcpy(sky->fits_file[i], t.constData());
+        sky->fits_image.file[i] = (char*)malloc(t.size() + 1);
+        strcpy(sky->fits_image.file[i], t.constData());
     }
-
-    // FITS import settings.
-    s.beginGroup("fits_file");
-    sky->fits_file_settings.downsample_factor =
+    sky->fits_image.downsample_factor =
             s.value("downsample_factor", 1).toInt();
-    sky->fits_file_settings.min_peak_fraction =
+    sky->fits_image.min_peak_fraction =
             s.value("min_peak_fraction", 0.02).toDouble();
-    sky->fits_file_settings.noise_floor =
+    sky->fits_image.noise_floor =
             s.value("noise_floor", 0.0).toDouble();
-    sky->fits_file_settings.spectral_index =
+    sky->fits_image.spectral_index =
             s.value("spectral_index", 0.0).toDouble();
     s.endGroup();
 
@@ -139,8 +135,6 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
         sky->healpix_fits.file[i] = (char*)malloc(t.size() + 1);
         strcpy(sky->healpix_fits.file[i], t.constData());
     }
-
-    // HEALPix FITS import settings.
     temp = s.value("coord_sys", "Galactic").toString();
     if (temp.startsWith('G', Qt::CaseInsensitive))
         sky->healpix_fits.coord_sys = OSKAR_SPHERICAL_TYPE_GALACTIC;
@@ -153,7 +147,6 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
         sky->healpix_fits.map_units = OSKAR_MAP_UNITS_K_PER_SR;
     else
         sky->healpix_fits.map_units = OSKAR_MAP_UNITS_JY;
-    // HEALPix FITS file filter.
     get_filter_params(s, &sky->healpix_fits.filter);
     get_extended_params(s, &sky->healpix_fits.extended_sources);
     s.endGroup();
@@ -214,6 +207,21 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     sky->spectral_index.mean = s.value("mean", 0.0).toDouble();
     sky->spectral_index.std_dev = s.value("std_dev", 0.0).toDouble();
     sky->spectral_index.seed = get_seed(s.value("seed"));
+    s.endGroup();
+
+    // Common flux filtering settings, applied per-channel
+    // after spectral index scaling.
+    s.beginGroup("common_flux_filter");
+    temp = s.value("flux_min", "min").toString();
+    if (temp.compare("min", Qt::CaseInsensitive) == 0)
+        sky->common_flux_filter_min_jy = 0.0;
+    else
+        sky->common_flux_filter_min_jy = temp.toDouble();
+    temp = s.value("flux_max", "max").toString();
+    if (temp.compare("max", Qt::CaseInsensitive) == 0)
+        sky->common_flux_filter_max_jy = 0.0;
+    else
+        sky->common_flux_filter_max_jy = temp.toDouble();
     s.endGroup();
 
     sky->zero_failed_gaussians = s.value("advanced/zero_failed_gaussians", false).toBool();

@@ -46,11 +46,13 @@ void oskar_dftw_o2c_2d_omp_f(const int n_in, const float* x_in,
     {
         int i;
         float xp_out, yp_out;
-        float2 out;
+        float2 out, out_c, out_cnt, out_new;
 
         /* Clear output value. */
         out.x = 0.0f;
         out.y = 0.0f;
+        out_c.x = 0.0f;
+        out_c.y = 0.0f;
 
         /* Get the output position. */
         xp_out = x_out[i_out];
@@ -65,18 +67,24 @@ void oskar_dftw_o2c_2d_omp_f(const int n_in, const float* x_in,
             {
                 float a;
                 a = xp_out * x_in[i] + yp_out * y_in[i];
-                signal_x = cosf(a);
-                signal_y = sinf(a);
+                signal_x = cos(a);
+                signal_y = sin(a);
             }
 
-            /* Perform complex multiply-accumulate. */
+            /* Perform complex multiply-accumulate using Kahan summation. */
             {
-                float2 w;
+                float2 w, r;
                 w = weights_in[i];
-                out.x += signal_x * w.x;
-                out.y -= signal_y * w.x;
-                out.x += signal_y * w.y;
-                out.y += signal_x * w.y;
+                r.x = signal_x * w.x + signal_y * w.y;
+                r.y = signal_x * w.y - signal_y * w.x;
+                out_cnt.x = r.x - out_c.x;
+                out_new.x = out.x + out_cnt.x;
+                out_c.x = (out_new.x - out.x) - out_cnt.x;
+                out.x = out_new.x;
+                out_cnt.y = r.y - out_c.y;
+                out_new.y = out.y + out_cnt.y;
+                out_c.y = (out_new.y - out.y) - out_cnt.y;
+                out.y = out_new.y;
             }
         }
 

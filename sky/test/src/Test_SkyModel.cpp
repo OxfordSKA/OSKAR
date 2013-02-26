@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -514,6 +514,223 @@ void Test_SkyModel::test_filter_by_radius()
 //                ((const double*)sky.Dec)[i] * 180 / M_PI);
     }
 }
+
+
+void Test_SkyModel::test_filter_by_flux()
+{
+    int i, type, location, num_sources = 223, status = 0;
+    double flux_min = 5.0;
+    double flux_max = 10.0;
+
+    // Single precision.
+    type = OSKAR_SINGLE;
+    {
+        oskar_SkyModel sky_input, sky_cpu, sky_gpu, sky_gpu_temp;
+
+        // Create a test sky model.
+        oskar_sky_model_init(&sky_input, type, OSKAR_LOCATION_CPU, num_sources,
+                &status);
+        for (i = 0; i < num_sources; ++i)
+        {
+            oskar_sky_model_set_source(&sky_input, i,
+                    0.0, i * ((M_PI / 2) / (num_sources - 1)),
+                    0.05 * i, 0.10 * i, 0.15 * i, 0.20 * i,
+                    100.0 * i, 200.0 * i, 1000.0 * i, 2000.0 * i, 3000.0 * i,
+                    &status);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+        }
+
+        // Filter on CPU.
+        location = OSKAR_LOCATION_CPU;
+        oskar_sky_model_init(&sky_cpu, type, location, 0, &status);
+        oskar_sky_model_copy(&sky_cpu, &sky_input, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+        oskar_sky_model_filter_by_flux(&sky_cpu, flux_min, flux_max, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+
+        // Filter on GPU.
+        location = OSKAR_LOCATION_GPU;
+        oskar_sky_model_init(&sky_gpu, type, location, 0, &status);
+        oskar_sky_model_copy(&sky_gpu, &sky_input, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+        oskar_sky_model_filter_by_flux(&sky_gpu, flux_min, flux_max, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+
+        // Check filtered sky models are the same.
+        oskar_sky_model_init(&sky_gpu_temp, type, OSKAR_LOCATION_CPU, 0, &status);
+        oskar_sky_model_copy(&sky_gpu_temp, &sky_gpu, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+        CPPUNIT_ASSERT_EQUAL(sky_gpu.num_sources, sky_cpu.num_sources);
+        for (i = 0; i < sky_cpu.num_sources; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.RA.data)[i],
+                    ((float*)sky_gpu_temp.RA.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.Dec.data)[i],
+                    ((float*)sky_gpu_temp.Dec.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.I.data)[i],
+                    ((float*)sky_gpu_temp.I.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.Q.data)[i],
+                    ((float*)sky_gpu_temp.Q.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.U.data)[i],
+                    ((float*)sky_gpu_temp.U.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.V.data)[i],
+                    ((float*)sky_gpu_temp.V.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.reference_freq.data)[i],
+                    ((float*)sky_gpu_temp.reference_freq.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.spectral_index.data)[i],
+                    ((float*)sky_gpu_temp.spectral_index.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.rel_l.data)[i],
+                    ((float*)sky_gpu_temp.rel_l.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.rel_m.data)[i],
+                    ((float*)sky_gpu_temp.rel_m.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.rel_n.data)[i],
+                    ((float*)sky_gpu_temp.rel_n.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.FWHM_major.data)[i],
+                    ((float*)sky_gpu_temp.FWHM_major.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.FWHM_minor.data)[i],
+                    ((float*)sky_gpu_temp.FWHM_minor.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.position_angle.data)[i],
+                    ((float*)sky_gpu_temp.position_angle.data)[i], 1e-5);
+
+            // Check that there are no sources with fluxes outside the range.
+            if (((float*)sky_cpu.I.data)[i] < flux_min)
+            {
+                printf("Failed on CPU at index %d (min: %f, val: %f)\n", i,
+                        flux_min, ((float*)sky_cpu.I.data)[i]);
+                CPPUNIT_FAIL("Flux filtering failed.");
+            }
+            if (((float*)sky_cpu.I.data)[i] > flux_max)
+            {
+                printf("Failed on CPU at index %d (max: %f, val: %f)\n", i,
+                        flux_max, ((float*)sky_cpu.I.data)[i]);
+                CPPUNIT_FAIL("Flux filtering failed.");
+            }
+            if (((float*)sky_gpu_temp.I.data)[i] < flux_min)
+            {
+                printf("Failed on GPU at index %d (min: %f, val: %f)\n", i,
+                        flux_min, ((float*)sky_gpu_temp.I.data)[i]);
+                CPPUNIT_FAIL("Flux filtering failed.");
+            }
+            if (((float*)sky_gpu_temp.I.data)[i] > flux_max)
+            {
+                printf("Failed on GPU at index %d (max: %f, val: %f)\n", i,
+                        flux_max, ((float*)sky_gpu_temp.I.data)[i]);
+                CPPUNIT_FAIL("Flux filtering failed.");
+            }
+        }
+
+        // Free sky models.
+        oskar_sky_model_free(&sky_cpu, &status);
+        oskar_sky_model_free(&sky_gpu, &status);
+        oskar_sky_model_free(&sky_gpu_temp, &status);
+        oskar_sky_model_free(&sky_input, &status);
+    }
+
+    // Double precision.
+    type = OSKAR_DOUBLE;
+    {
+        oskar_SkyModel sky_input, sky_cpu, sky_gpu, sky_gpu_temp;
+
+        // Create a test sky model.
+        oskar_sky_model_init(&sky_input, type, OSKAR_LOCATION_CPU, num_sources,
+                &status);
+        for (i = 0; i < num_sources; ++i)
+        {
+            oskar_sky_model_set_source(&sky_input, i,
+                    0.0, i * ((M_PI / 2) / (num_sources - 1)),
+                    0.05 * i, 0.10 * i, 0.15 * i, 0.20 * i,
+                    100.0 * i, 200.0 * i, 1000.0 * i, 2000.0 * i, 3000.0 * i,
+                    &status);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+        }
+
+        // Filter on CPU.
+        location = OSKAR_LOCATION_CPU;
+        oskar_sky_model_init(&sky_cpu, type, location, 0, &status);
+        oskar_sky_model_copy(&sky_cpu, &sky_input, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+        oskar_sky_model_filter_by_flux(&sky_cpu, flux_min, flux_max, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+
+        // Filter on GPU.
+        location = OSKAR_LOCATION_GPU;
+        oskar_sky_model_init(&sky_gpu, type, location, 0, &status);
+        oskar_sky_model_copy(&sky_gpu, &sky_input, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+        oskar_sky_model_filter_by_flux(&sky_gpu, flux_min, flux_max, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+
+        // Check filtered sky models are the same.
+        oskar_sky_model_init(&sky_gpu_temp, type, OSKAR_LOCATION_CPU, 0, &status);
+        oskar_sky_model_copy(&sky_gpu_temp, &sky_gpu, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+        CPPUNIT_ASSERT_EQUAL(sky_gpu.num_sources, sky_cpu.num_sources);
+        for (i = 0; i < sky_cpu.num_sources; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.RA.data)[i],
+                    ((double*)sky_gpu_temp.RA.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.Dec.data)[i],
+                    ((double*)sky_gpu_temp.Dec.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.I.data)[i],
+                    ((double*)sky_gpu_temp.I.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.Q.data)[i],
+                    ((double*)sky_gpu_temp.Q.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.U.data)[i],
+                    ((double*)sky_gpu_temp.U.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.V.data)[i],
+                    ((double*)sky_gpu_temp.V.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.reference_freq.data)[i],
+                    ((double*)sky_gpu_temp.reference_freq.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.spectral_index.data)[i],
+                    ((double*)sky_gpu_temp.spectral_index.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.rel_l.data)[i],
+                    ((double*)sky_gpu_temp.rel_l.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.rel_m.data)[i],
+                    ((double*)sky_gpu_temp.rel_m.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.rel_n.data)[i],
+                    ((double*)sky_gpu_temp.rel_n.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.FWHM_major.data)[i],
+                    ((double*)sky_gpu_temp.FWHM_major.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.FWHM_minor.data)[i],
+                    ((double*)sky_gpu_temp.FWHM_minor.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.position_angle.data)[i],
+                    ((double*)sky_gpu_temp.position_angle.data)[i], 1e-5);
+
+            // Check that there are no sources with fluxes outside the range.
+            if (((double*)sky_cpu.I.data)[i] < flux_min)
+            {
+                printf("Failed on CPU at index %d (min: %f, val: %f)\n", i,
+                        flux_min, ((double*)sky_cpu.I.data)[i]);
+                CPPUNIT_FAIL("Flux filtering failed.");
+            }
+            if (((double*)sky_cpu.I.data)[i] > flux_max)
+            {
+                printf("Failed on CPU at index %d (max: %f, val: %f)\n", i,
+                        flux_max, ((double*)sky_cpu.I.data)[i]);
+                CPPUNIT_FAIL("Flux filtering failed.");
+            }
+            if (((double*)sky_gpu_temp.I.data)[i] < flux_min)
+            {
+                printf("Failed on GPU at index %d (min: %f, val: %f)\n", i,
+                        flux_min, ((double*)sky_gpu_temp.I.data)[i]);
+                CPPUNIT_FAIL("Flux filtering failed.");
+            }
+            if (((double*)sky_gpu_temp.I.data)[i] > flux_max)
+            {
+                printf("Failed on GPU at index %d (max: %f, val: %f)\n", i,
+                        flux_max, ((double*)sky_gpu_temp.I.data)[i]);
+                CPPUNIT_FAIL("Flux filtering failed.");
+            }
+        }
+
+        // Free sky models.
+        oskar_sky_model_free(&sky_cpu, &status);
+        oskar_sky_model_free(&sky_gpu, &status);
+        oskar_sky_model_free(&sky_gpu_temp, &status);
+        oskar_sky_model_free(&sky_input, &status);
+    }
+}
+
 
 void Test_SkyModel::test_gaussian_source()
 {

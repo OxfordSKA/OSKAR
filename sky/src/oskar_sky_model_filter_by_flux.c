@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
 #include "sky/oskar_sky_model_filter_by_flux.h"
+#include "sky/oskar_sky_model_filter_by_flux_cuda.h"
 #include "sky/oskar_sky_model_location.h"
 #include "sky/oskar_sky_model_type.h"
 
@@ -37,14 +37,14 @@
 extern "C" {
 #endif
 
-int oskar_sky_model_filter_by_flux(oskar_SkyModel* sky,
-        double min_I, double max_I)
+void oskar_sky_model_filter_by_flux(oskar_SkyModel* sky,
+        double min_I, double max_I, int* status)
 {
-    int err = 0, type, location;
+    int location;
 
     /* Return immediately if no filtering should be done. */
     if (min_I <= 0.0 && max_I <= 0.0)
-        return OSKAR_SUCCESS;
+        return;
 
     /* If only the lower limit is set */
     if (max_I <= 0.0 && min_I > 0.0)
@@ -55,15 +55,26 @@ int oskar_sky_model_filter_by_flux(oskar_SkyModel* sky,
         min_I = 0.0;
 
     if (max_I < min_I)
-        return OSKAR_ERR_SETUP_FAIL;
-
-    /* Get the type and location. */
-    type = oskar_sky_model_type(sky);
-    location = oskar_sky_model_location(sky);
-
-    if (location == OSKAR_LOCATION_CPU)
     {
-        int in, out;
+        *status = OSKAR_ERR_SETUP_FAIL;
+        return;
+    }
+
+    /* Get the location. */
+    location = oskar_sky_model_location(sky);
+    if (location == OSKAR_LOCATION_GPU)
+    {
+#ifdef OSKAR_HAVE_CUDA
+        oskar_sky_model_filter_by_flux_cuda(sky, min_I, max_I, status);
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+    }
+    else if (location == OSKAR_LOCATION_CPU)
+    {
+        int in, out, type;
+        type = oskar_sky_model_type(sky);
+
         if (type == OSKAR_SINGLE)
         {
             float *ra, *dec, *I, *Q, *U, *V, *ref_freq, *spix;
@@ -108,7 +119,6 @@ int oskar_sky_model_filter_by_flux(oskar_SkyModel* sky,
                 gaussian_a[out] = gaussian_a[in];
                 gaussian_b[out] = gaussian_b[in];
                 gaussian_c[out] = gaussian_c[in];
-
                 out++;
             }
         }
@@ -160,15 +170,14 @@ int oskar_sky_model_filter_by_flux(oskar_SkyModel* sky,
             }
         }
         else
-            return OSKAR_ERR_BAD_DATA_TYPE;
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
 
         /* Store the new number of sources in the sky model. */
         sky->num_sources = out;
     }
-    else
-        return OSKAR_ERR_BAD_LOCATION;
-
-    return err;
 }
 
 #ifdef __cplusplus

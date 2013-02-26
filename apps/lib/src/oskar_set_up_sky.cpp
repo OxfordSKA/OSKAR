@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,10 +89,10 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
      * source solution can be found. */
     int zero_failed_sources = settings->sky.zero_failed_gaussians;
 
-    /* Load OSKAR sky files. */
-    for (int i = 0; i < settings->sky.num_sky_files; ++i)
+    /* Load OSKAR sky model files. */
+    for (int i = 0; i < settings->sky.oskar_sky_model.num_files; ++i)
     {
-        filename = settings->sky.input_sky_file[i];
+        filename = settings->sky.oskar_sky_model.file[i];
         if (filename)
         {
             if (strlen(filename) > 0)
@@ -102,7 +102,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 /* Load into a temporary structure. */
                 binary_file_error = 0;
                 oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
-                oskar_log_message(log, 0, "Loading source file '%s' ...",
+                oskar_log_message(log, 0, "Loading OSKAR sky model file '%s' ...",
                         filename);
 
                 /* Try to read sky model as a binary file first. */
@@ -114,11 +114,12 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 if (error) return error;
 
                 /* Apply filters and extended source over-ride. */
-                error = set_up_filter(&temp, &settings->sky.input_sky_filter,
+                error = set_up_filter(&temp,
+                        &settings->sky.oskar_sky_model.filter,
                         settings->obs.ra0_rad[0], settings->obs.dec0_rad[0]);
                 if (error) return error;
                 error = set_up_extended(&temp,
-                        &settings->sky.input_sky_extended_sources, log,
+                        &settings->sky.oskar_sky_model.extended_sources, log,
                         settings->obs.ra0_rad[0], settings->obs.dec0_rad[0],
                         zero_failed_sources);
                 if (error) return error;
@@ -134,7 +135,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
     }
 
     /* GSM sky model file. */
-    filename = settings->sky.gsm_file;
+    filename = settings->sky.gsm.file;
     if (filename)
     {
         if (strlen(filename) > 0)
@@ -146,11 +147,11 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             if (error) return error;
 
             /* Apply filters and extended source over-ride. */
-            error = set_up_filter(&temp, &settings->sky.gsm_filter,
+            error = set_up_filter(&temp, &settings->sky.gsm.filter,
                     settings->obs.ra0_rad[0], settings->obs.dec0_rad[0]);
             if (error) return error;
             error = set_up_extended(&temp,
-                    &settings->sky.gsm_extended_sources, log,
+                    &settings->sky.gsm.extended_sources, log,
                     settings->obs.ra0_rad[0], settings->obs.dec0_rad[0],
                     zero_failed_sources);
             if (error) return error;
@@ -166,9 +167,9 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 
 #ifndef OSKAR_NO_FITS
     /* Load FITS image files. */
-    for (int i = 0; i < settings->sky.num_fits_files; ++i)
+    for (int i = 0; i < settings->sky.fits_image.num_files; ++i)
     {
-        filename = settings->sky.fits_file[i];
+        filename = settings->sky.fits_image.file[i];
         if (filename)
         {
             if (strlen(filename) > 0)
@@ -178,10 +179,10 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 oskar_log_message(log, 0, "Loading FITS file '%s' ...",
                         filename);
                 error = oskar_fits_to_sky_model(log, filename, &temp,
-                        settings->sky.fits_file_settings.spectral_index,
-                        settings->sky.fits_file_settings.min_peak_fraction,
-                        settings->sky.fits_file_settings.noise_floor,
-                        settings->sky.fits_file_settings.downsample_factor);
+                        settings->sky.fits_image.spectral_index,
+                        settings->sky.fits_image.min_peak_fraction,
+                        settings->sky.fits_image.noise_floor,
+                        settings->sky.fits_image.downsample_factor);
                 if (error) return error;
 
                 /* Append to chunks. */
@@ -460,7 +461,7 @@ static int set_up_filter(oskar_SkyModel* sky,
     outer = filter->radius_outer;
     flux_min = filter->flux_min;
     flux_max = filter->flux_max;
-    error = oskar_sky_model_filter_by_flux(sky, flux_min, flux_max);
+    oskar_sky_model_filter_by_flux(sky, flux_min, flux_max, &error);
     if (error) return error;
     error = oskar_sky_model_filter_by_radius(sky, inner, outer, ra0_rad,
             dec0_rad);

@@ -112,13 +112,16 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     group = "sky";
     setLabel(group, "Sky model settings");
 
-    k = group + "/oskar_source_file";
-    declare(k, "Input OSKAR source file", oskar_SettingsItem::INPUT_FILE_LIST);
+    group = "sky/oskar_sky_model";
+    setLabel(group, "OSKAR sky model file settings");
+
+    k = group + "/file";
+    declare(k, "OSKAR sky model file(s)", oskar_SettingsItem::INPUT_FILE_LIST);
     setTooltip(k, "Paths to one or more OSKAR sky model text or binary files. "
             "See the accompanying documentation for a description of an "
             "OSKAR sky model file.");
 
-    group = "sky/oskar_source_file/filter";
+    group = "sky/oskar_sky_model/filter";
     setLabel(group, "Filter settings");
     k = group + "/flux_min";
     declare(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE_MIN, "min");
@@ -136,7 +139,7 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "filter, in degrees.");
 
 #if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-    group = "sky/oskar_source_file/extended_sources";
+    group = "sky/oskar_sky_model/extended_sources";
     setLabel(group, "Extended source settings");
     k = group + "/FWHM_major";
     declare(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
@@ -153,14 +156,17 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "values in the file.");
 #endif
 
-    k ="sky/gsm_file";
-    declare(k, "Input Global Sky Model file", oskar_SettingsItem::INPUT_FILE_NAME);
+    group = "sky/gsm";
+    setLabel(group, "Global Sky Model (GSM) file settings");
+
+    k = group + "/file";
+    declare(k, "GSM file", oskar_SettingsItem::INPUT_FILE_NAME);
     setTooltip(k, "Path to a Global Sky Model file, pixellated using the "
             "HEALPix RING scheme. This option can be used to load a GSM data "
             "file produced from software written by Angelica de Oliveira, "
             "available at https://www.cfa.harvard.edu/~adeolive/gsm/");
 
-    group = "sky/gsm_file/filter";
+    group = "sky/gsm/filter";
     setLabel(group, "Filter settings");
     k = group + "/flux_min";
     declare(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE_MIN, "min");
@@ -178,7 +184,7 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "filter, in degrees.");
 
 #if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-    group = "sky/gsm_file/extended_sources";
+    group = "sky/gsm/extended_sources";
     setLabel(group, "Extended source settings");
     k = group + "/FWHM_major";
     declare(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
@@ -196,11 +202,11 @@ void oskar_SettingsModelApps::init_settings_sky_model()
 
 #ifndef OSKAR_NO_FITS
     // FITS file import settings.
-    k = "sky/fits_file";
-    declare(k, "Input FITS file", oskar_SettingsItem::INPUT_FILE_LIST);
+    group = "sky/fits_image";
+    setLabel(group, "FITS image file settings");
+    k = group + "/file";
+    declare(k, "Input FITS file(s)", oskar_SettingsItem::INPUT_FILE_LIST);
     setTooltip(k, "FITS file(s) to use as a sky model.");
-
-    group = "sky/fits_file";
     k = group + "/downsample_factor";
     declare(k, "Downsample factor", oskar_SettingsItem::INT_POSITIVE, 1);
     setTooltip(k, "The factor by which to downsample the pixel grid.");
@@ -470,17 +476,31 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     setTooltip(k, "Random number generator seed used for random distribution.");
     setDependency(k, spix_override_key, true);
 
+    // Output files.
     k = "sky/output_binary_file";
     declare(k, "Output OSKAR sky model binary file",
             oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Path used to save the final sky model structure as an "
             "OSKAR binary file. Leave blank if not required.");
-
     k = "sky/output_text_file";
     declare(k, "Output OSKAR sky model text file",
             oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Path used to save the final sky model structure as a "
             "text file (useful for debugging). Leave blank if not required.");
+
+    // Common flux filtering settings.
+    group = "sky/common_flux_filter";
+    setLabel(group, "Common source flux filtering settings");
+    k = group + "/flux_min";
+    declare(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE_MIN, "min");
+    setTooltip(k, "Minimum flux density allowed by the filter, in Jy. "
+            "<b>Note that this filter is applied on a per-channel basis after "
+            "scaling all source fluxes by the spectral index.</b>");
+    k = group + "/flux_max";
+    declare(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE_MAX, "max");
+    setTooltip(k, "Maximum flux density allowed by the filter, in Jy. "
+            "<b>Note that this filter is applied on a per-channel basis after "
+            "scaling all source flux values by the spectral index.</b>");
 
     k = "sky/advanced";
     setLabel(k, "Advanced settings");
@@ -489,7 +509,7 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     declare(k, "Remove failed Gaussian sources", oskar_SettingsItem::BOOL, false);
     setTooltip(k, "If <b>true</b>, remove (set to zero) sources for which "
             "Gaussian width parameter solutions have failed. This can occur "
-            "for sources very close to the horizon. If <b>false</b> (the "
+            "for sources very far from the phase centre. If <b>false</b> (the "
             "default), sources with failed Gaussian parameter solutions are "
             "modelled as point sources.");
 }
@@ -513,8 +533,9 @@ void oskar_SettingsModelApps::init_settings_observation()
     k = group + "/pointing_file";
     declare(k, "Station pointing file", oskar_SettingsItem::INPUT_FILE_NAME);
     setTooltip(k, "Pathname to optional station pointing file, which can be "
-            "used to override the beam direction for specific beamforming "
-            "levels and/or detectors in all stations.");
+            "used to override the beam direction for any or all stations in "
+            "the telescope model. See the accompanying documentation for a "
+            "description of a station pointing file.");
     k = group + "/start_frequency_hz";
     declare(k, "Start frequency [Hz]",
             oskar_SettingsItem::DOUBLE, 0.0, true);

@@ -102,54 +102,55 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
     int depth = 0, i = 0;
     oskar_log_message(log, depth, "Sky model settings");
 
-    /* Input OSKAR source file settings. */
+    /* Input OSKAR sky model file settings. */
     depth = 1;
-    if (s->sky.num_sky_files > 0)
+    if (s->sky.oskar_sky_model.num_files > 0)
     {
-        oskar_log_message(log, depth, "Input OSKAR source file(s)");
+        oskar_log_message(log, depth, "Input OSKAR sky model file(s)");
         ++depth;
         ++depth;
-        for (i = 0; i < s->sky.num_sky_files; ++i)
+        for (i = 0; i < s->sky.oskar_sky_model.num_files; ++i)
         {
             oskar_log_message(log, depth, "File %2d: %s", i,
-                    s->sky.input_sky_file[i]);
+                    s->sky.oskar_sky_model.file[i]);
         }
         --depth;
-        oskar_log_settings_sky_filter(log, depth, &s->sky.input_sky_filter);
+        oskar_log_settings_sky_filter(log, depth,
+                &s->sky.oskar_sky_model.filter);
         oskar_log_settings_sky_extended(log, depth,
-                &s->sky.input_sky_extended_sources);
+                &s->sky.oskar_sky_model.extended_sources);
     }
 
     /* GSM file settings. */
     depth = 1;
-    if (s->sky.gsm_file)
+    if (s->sky.gsm.file)
     {
-        LVS0("Input GSM file", s->sky.gsm_file);
+        LVS0("Input GSM file", s->sky.gsm.file);
         ++depth;
-        oskar_log_settings_sky_filter(log, depth, &s->sky.gsm_filter);
+        oskar_log_settings_sky_filter(log, depth, &s->sky.gsm.filter);
         oskar_log_settings_sky_extended(log, depth,
-                &s->sky.gsm_extended_sources);
+                &s->sky.gsm.extended_sources);
     }
 
     /* Input FITS file settings. */
     depth = 1;
-    if (s->sky.num_fits_files > 0)
+    if (s->sky.fits_image.num_files > 0)
     {
         oskar_log_message(log, depth, "Input FITS file(s)");
         ++depth;
         ++depth;
-        for (i = 0; i < s->sky.num_fits_files; ++i)
+        for (i = 0; i < s->sky.fits_image.num_files; ++i)
         {
             oskar_log_message(log, depth, "File %2d: %s", i,
-                    s->sky.fits_file[i]);
+                    s->sky.fits_image.file[i]);
         }
         --depth;
-        LVI("Downsample factor", s->sky.fits_file_settings.downsample_factor);
+        LVI("Downsample factor", s->sky.fits_image.downsample_factor);
         LV("Minimum fraction of peak", "%.2f",
-                s->sky.fits_file_settings.min_peak_fraction);
+                s->sky.fits_image.min_peak_fraction);
         LV("Noise floor [Jy/pixel]", "%.3e",
-                s->sky.fits_file_settings.noise_floor);
-        LV("Spectral index", "%.1f", s->sky.fits_file_settings.spectral_index);
+                s->sky.fits_image.noise_floor);
+        LV("Spectral index", "%.1f", s->sky.fits_image.spectral_index);
     }
 
     /* Input HEALPix FITS file settings. */
@@ -253,7 +254,17 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         LV("Spectral index standard deviation", "%.3f",
                 s->sky.spectral_index.std_dev);
         LVI("Random seed", s->sky.spectral_index.seed);
+    }
+
+    /* Common source flux filtering settings. */
+    depth = 1;
+    if (s->sky.common_flux_filter_min_jy != 0.0 ||
+            s->sky.common_flux_filter_max_jy != 0.0)
+    {
+        oskar_log_message(log, depth, "Common source flux filtering settings");
         ++depth;
+        LV("Filter flux min [Jy]", "%.3e", s->sky.common_flux_filter_min_jy);
+        LV("Filter flux max [Jy]", "%.3e", s->sky.common_flux_filter_max_jy);
     }
 
     /* Output OSKAR sky model file settings. */

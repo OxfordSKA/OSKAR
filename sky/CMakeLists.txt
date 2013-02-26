@@ -33,6 +33,7 @@ set(sky_SRC
     src/oskar_sky_model_compute_relative_lmn.c
     src/oskar_sky_model_copy.c
     src/oskar_sky_model_filter_by_flux.c
+    src/oskar_sky_model_filter_by_flux_cuda.cu
     src/oskar_sky_model_filter_by_radius.c
     src/oskar_sky_model_free.c
     src/oskar_sky_model_get_ptr.c

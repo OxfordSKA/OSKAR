@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,18 +66,47 @@ struct OSKAR_EXPORT oskar_SettingsSkyExtendedSources
 typedef struct oskar_SettingsSkyExtendedSources oskar_SettingsSkyExtendedSources;
 
 /**
- * @struct oskar_SettingsSkyFits
+ * @struct oskar_SettingsSkyOskar
  *
- * @brief Holds FITS file import parameters.
+ * @brief Holds OSKAR sky model import parameters.
  */
-struct OSKAR_EXPORT oskar_SettingsSkyFits
+struct OSKAR_EXPORT oskar_SettingsSkyOskar
 {
+    int num_files;  /**< Number of OSKAR sky model files to load. */
+    char** file;    /**< List of OSKAR sky model files. */
+    oskar_SettingsSkyFilter filter;
+    oskar_SettingsSkyExtendedSources extended_sources;
+};
+typedef struct oskar_SettingsSkyOskar oskar_SettingsSkyOskar;
+
+/**
+ * @struct oskar_SettingsSkyGsm
+ *
+ * @brief Holds GSM file import parameters.
+ */
+struct OSKAR_EXPORT oskar_SettingsSkyGsm
+{
+    char* file;    /**< Filename of GSM file to load. */
+    oskar_SettingsSkyFilter filter;
+    oskar_SettingsSkyExtendedSources extended_sources;
+};
+typedef struct oskar_SettingsSkyGsm oskar_SettingsSkyGsm;
+
+/**
+ * @struct oskar_SettingsSkyFitsImage
+ *
+ * @brief Holds FITS image file import parameters.
+ */
+struct OSKAR_EXPORT oskar_SettingsSkyFitsImage
+{
+    int num_files;            /**< Number of FITS image files to load. */
+    char** file;              /**< List of FITS image files. */
     double spectral_index;    /**< Spectral index value of pixels in file. */
     double noise_floor;       /**< Noise floor in Jy. */
     double min_peak_fraction; /**< Minimum fraction of peak value to accept. */
     int downsample_factor;    /**< Factor by which to downsample pixel grid. */
 };
-typedef struct oskar_SettingsSkyFits oskar_SettingsSkyFits;
+typedef struct oskar_SettingsSkyFitsImage oskar_SettingsSkyFitsImage;
 
 /**
  * @struct oskar_SettingsSkyHealpixFits
@@ -205,28 +234,17 @@ typedef struct oskar_SettingsSkySpectralIndex oskar_SettingsSkySpectralIndex;
  */
 struct OSKAR_EXPORT oskar_SettingsSky
 {
-    int num_sky_files;     /**< Number of sky model files to load. */
-    char** input_sky_file; /**< List of sky model files to load. */
-    oskar_SettingsSkyFilter input_sky_filter;
-    oskar_SettingsSkyExtendedSources input_sky_extended_sources;
-
-    char* gsm_file;        /**< Name of global sky model file to load. */
-    oskar_SettingsSkyFilter gsm_filter;
-    oskar_SettingsSkyExtendedSources gsm_extended_sources;
-
+    oskar_SettingsSkyOskar oskar_sky_model;
+    oskar_SettingsSkyGsm gsm;
+    oskar_SettingsSkyFitsImage fits_image;
+    oskar_SettingsSkyHealpixFits healpix_fits;
+    oskar_SettingsSkyGenerator generator; /**< All generator parameters. */
+    oskar_SettingsSkySpectralIndex spectral_index; /**< Spectral index overrides. */
     char* output_text_file; /**< Optional name of output sky model text file. */
     char* output_binary_file; /**< Optional name of output sky model binary file. */
-    oskar_SettingsSkyGenerator generator; /**< Generator parameters. */
-
-    oskar_SettingsSkySpectralIndex spectral_index; /**< Spectral index overrides. */
-
-    int num_fits_files;    /**< Number of FITS files to load. */
-    char** fits_file;      /**< List of FITS input sky model files. */
-    oskar_SettingsSkyFits fits_file_settings;
-
-    oskar_SettingsSkyHealpixFits healpix_fits;
-
-    int zero_failed_gaussians; /**< Zero (remove) sources with failed Gaussian with solutions */
+    double common_flux_filter_min_jy;
+    double common_flux_filter_max_jy;
+    int zero_failed_gaussians; /**< Zero (remove) sources with failed Gaussian width solutions. */
 };
 typedef struct oskar_SettingsSky oskar_SettingsSky;
 

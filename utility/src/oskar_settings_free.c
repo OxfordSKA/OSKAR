@@ -53,13 +53,13 @@ int oskar_settings_free(oskar_Settings* settings)
     settings->obs.pointing_file = NULL;
 
     /* Free FITS file names. */
-    for (i = 0; i < settings->sky.num_fits_files; ++i)
+    for (i = 0; i < settings->sky.fits_image.num_files; ++i)
     {
-        free(settings->sky.fits_file[i]);
-        settings->sky.fits_file[i] = NULL;
+        free(settings->sky.fits_image.file[i]);
+        settings->sky.fits_image.file[i] = NULL;
     }
-    free(settings->sky.fits_file);
-    settings->sky.fits_file = NULL;
+    free(settings->sky.fits_image.file);
+    settings->sky.fits_image.file = NULL;
 
     /* Free HEALPix FITS file names. */
     for (i = 0; i < settings->sky.healpix_fits.num_files; ++i)
@@ -71,17 +71,17 @@ int oskar_settings_free(oskar_Settings* settings)
     settings->sky.healpix_fits.file = NULL;
 
     /* Free GSM file name. */
-    free(settings->sky.gsm_file);
-    settings->sky.gsm_file = NULL;
+    free(settings->sky.gsm.file);
+    settings->sky.gsm.file = NULL;
 
     /* Free OSKAR sky model file names. */
-    for (i = 0; i < settings->sky.num_sky_files; ++i)
+    for (i = 0; i < settings->sky.oskar_sky_model.num_files; ++i)
     {
-        free(settings->sky.input_sky_file[i]);
-        settings->sky.input_sky_file[i] = NULL;
+        free(settings->sky.oskar_sky_model.file[i]);
+        settings->sky.oskar_sky_model.file[i] = NULL;
     }
-    free(settings->sky.input_sky_file);
-    settings->sky.input_sky_file = NULL;
+    free(settings->sky.oskar_sky_model.file);
+    settings->sky.oskar_sky_model.file = NULL;
 
     /* Free output sky model file names. */
     free(settings->sky.output_binary_file);

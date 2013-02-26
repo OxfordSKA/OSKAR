@@ -236,7 +236,7 @@ static void set_up_station1(oskar_StationModel* station, int num_x, int num_y,
 
     /* Set meta-data. */
     station->longitude_rad = 0.0;
-    station->latitude_rad = 50.0 * M_PI * 180.0;
+    station->latitude_rad = 70.0 * M_PI / 180.0;
     station->altitude_m = 0.0;
     station->beam_coord_type = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
     station->beam_longitude_rad = beam_ra_deg * M_PI / 180.0;
@@ -379,11 +379,11 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
 void Test_evaluate_array_pattern::test()
 {
     /* Inputs. */
-    int station_side = 20;
+    int station_side = 10;
     int image_side = 128;
     double ra_deg = 0.0;
-    double dec_deg = 60.0;
-    double fov_deg = 180.0;
+    double dec_deg = 80.0;
+    double fov_deg = 10.0;
     double freq_hz = 100e6;
     double gast = 0.0;
     double mjd = 0.0;
