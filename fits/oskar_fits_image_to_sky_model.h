@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FITS_TO_SKY_MODEL_H_
-#define OSKAR_FITS_TO_SKY_MODEL_H_
+#ifndef OSKAR_FITS_IMAGE_TO_SKY_MODEL_H_
+#define OSKAR_FITS_IMAGE_TO_SKY_MODEL_H_
 
 /**
- * @file oskar_fits_to_sky_model.h
+ * @file oskar_fits_image_to_sky_model.h
  */
 
 #include "oskar_global.h"
@@ -48,14 +48,19 @@ extern "C" {
  * @details
  * This function reads data from a FITS file into an OSKAR sky model structure.
  *
- * @param[in,out] log    Pointer to log structure to use.
- * @param[in] filename   File name of FITS image to write.
+ * @param[in,out] ptr    Pointer to log structure to use.
+ * @param[in] filename   File name of FITS image to read.
  * @param[out] sky       Pointer to sky model to fill.
+ * @param[in] spectral_index Spectral index for all output pixels.
+ * @param[in] min_peak_fraction Minimum allowed fraction of image peak.
+ * @param[in] noise_floor Ignore pixels in original image below this value.
+ * @param[in] downsample_factor Factor by which to downsample the image before
+ *                              performing the format conversion.
  *
  * @return An error code.
  */
 OSKAR_FITS_EXPORT
-int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
+int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
         oskar_SkyModel* sky, double spectral_index, double min_peak_fraction,
         double noise_floor, int downsample_factor);
 
@@ -63,4 +68,4 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
 }
 #endif
 
-#endif /* OSKAR_FITS_TO_SKY_MODEL_H_ */
+#endif /* OSKAR_FITS_IMAGE_TO_SKY_MODEL_H_ */

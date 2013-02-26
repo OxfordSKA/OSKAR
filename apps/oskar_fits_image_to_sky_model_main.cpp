@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
 #ifndef OSKAR_NO_FITS
-#include "fits/oskar_fits_to_sky_model.h"
+#include "fits/oskar_fits_image_to_sky_model.h"
 #endif
 #include "sky/oskar_sky_model_save.h"
 #include "utility/oskar_get_error_string.h"
@@ -46,12 +45,19 @@ int main(int argc, char** argv)
     opt.setDescription("Converts a FITS image to an OSKAR sky model. A number "
             "of options are provided to control how much of the image is used "
             "to make the sky model.");
-    opt.addRequired("FITS file", "The FITS image to convert.");
-    opt.addRequired("sky model file", "The OSAKR sky model file name to convert to.");
-    opt.addFlag("-s", "Spectral index", 1, "0.0");
-    opt.addFlag("-f", "Minimum allowed fraction of image peak", 1, "0.0");
-    opt.addFlag("-d", "Downsample factor", 1, "1");
-    opt.addFlag("-n", "Noise floor", 1, "0.0");
+    opt.addRequired("FITS file", "The input FITS image to convert.");
+    opt.addRequired("sky model file", "The output OSKAR sky model file name to save.");
+    opt.addFlag("-s", "Spectral index. This is the spectral index that will "
+            "be given to each pixel in the output sky model.", 1, "0.0");
+    opt.addFlag("-f", "Minimum allowed fraction of image peak. Pixel values "
+            "below this fraction will be ignored.", 1, "0.0");
+    opt.addFlag("-d", "Downsample factor. This is an integer that must "
+            "be >= 1, and is the factor by which the image is downsampled "
+            "before saving the regrouped pixel values in the sky model. "
+            "For example, a downsample factor of 2 would scale the image down "
+            "by 50% in both dimensions before the format conversion.", 1, "1");
+    opt.addFlag("-n", "Noise floor. Pixels below this value in the original "
+            "image will be ignored.", 1, "0.0");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
 
@@ -59,24 +65,16 @@ int main(int argc, char** argv)
     double spectral_index = 0.0;
     double min_peak_fraction = 0.0;
     double noise_floor = 0.0;
-    int downsample_factor = 0;
+    int downsample_factor = 1;
     opt.get("-d")->getInt(downsample_factor);
     opt.get("-f")->getDouble(min_peak_fraction);
     opt.get("-n")->getDouble(noise_floor);
     opt.get("-s")->getDouble(spectral_index);
 
-//    printf("----\n");
-//    printf("fits  = %s\n", opt.getArg(0));
-//    printf("model = %s\n", opt.getArg(1));
-//    printf("f     = %f\n", min_peak_fraction);
-//    printf("n     = %f\n", noise_floor);
-//    printf("----\n");
-//    return 1;
-
     // Load the FITS file as a sky model.
     oskar_SkyModel sky;
-    error = oskar_fits_to_sky_model(0, opt.getArg(0), &sky, spectral_index,
-            min_peak_fraction, noise_floor, downsample_factor);
+    error = oskar_fits_image_to_sky_model(0, opt.getArg(0), &sky,
+            spectral_index, min_peak_fraction, noise_floor, downsample_factor);
     if (error)
     {
         oskar_log_error(0, oskar_get_error_string(error));

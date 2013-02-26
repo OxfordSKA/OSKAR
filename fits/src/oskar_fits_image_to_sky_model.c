@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fits/oskar_fits_to_sky_model.h"
+#include "fits/oskar_fits_image_to_sky_model.h"
 #include "fits/oskar_fits_check_status.h"
 #include "math/oskar_sph_from_lm.h"
 #include "sky/oskar_sky_model_append.h"
@@ -56,7 +56,7 @@ extern "C" {
 #define MAX_AXES 10
 #define FACTOR (2.0*sqrt(2.0*log(2.0)))
 
-int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
+int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
         oskar_SkyModel* sky, double spectral_index, double min_peak_fraction,
         double noise_floor, int downsample_factor)
 {

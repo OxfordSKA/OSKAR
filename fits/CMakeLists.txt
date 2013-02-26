@@ -10,7 +10,7 @@ if (CFITSIO_FOUND AND CUDA_FOUND)
     set(fits_SRC
         src/oskar_fits_check_status.c
         src/oskar_fits_image_write.c
-        src/oskar_fits_to_sky_model.c
+        src/oskar_fits_image_to_sky_model.c
         src/oskar_fits_healpix_to_sky_model.c
         src/oskar_fits_write_axis_header.c
         src/oskar_fits_write.c

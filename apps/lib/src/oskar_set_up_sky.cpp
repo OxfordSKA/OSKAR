@@ -28,8 +28,8 @@
 
 #include "apps/lib/oskar_set_up_sky.h"
 #ifndef OSKAR_NO_FITS
-#   include "fits/oskar_fits_to_sky_model.h"
 #   include "fits/oskar_fits_healpix_to_sky_model.h"
+#   include "fits/oskar_fits_image_to_sky_model.h"
 #endif
 #include "math/oskar_healpix_nside_to_npix.h"
 #include "math/oskar_healpix_pix_to_angles_ring.h"
@@ -178,7 +178,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
                 oskar_log_message(log, 0, "Loading FITS file '%s' ...",
                         filename);
-                error = oskar_fits_to_sky_model(log, filename, &temp,
+                error = oskar_fits_image_to_sky_model(log, filename, &temp,
                         settings->sky.fits_image.spectral_index,
                         settings->sky.fits_image.min_peak_fraction,
                         settings->sky.fits_image.noise_floor,

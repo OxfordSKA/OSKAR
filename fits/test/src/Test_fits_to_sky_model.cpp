@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
  */
 
 #include "fits/test/Test_fits_to_sky_model.h"
-#include "fits/oskar_fits_to_sky_model.h"
+#include "fits/oskar_fits_image_to_sky_model.h"
 #include "fits/oskar_fits_image_write.h"
 #include "imaging/oskar_Image.h"
 #include "imaging/oskar_image_free.h"
@@ -113,7 +113,7 @@ void Test_fits_to_sky_model::test_method()
     // Load the sky model (no downsampling, no noise floor).
     {
         oskar_SkyModel sky_temp;
-        err = oskar_fits_to_sky_model(0, filename, &sky_temp, spectral_index,
+        err = oskar_fits_image_to_sky_model(0, filename, &sky_temp, spectral_index,
                 0.0, 0.0, 0);
         if (err) CPPUNIT_FAIL(oskar_get_error_string(err));
         CPPUNIT_ASSERT_EQUAL(rows * columns, sky_temp.num_sources);
@@ -138,7 +138,7 @@ void Test_fits_to_sky_model::test_method()
     // Load the sky model (with downsampling, with noise floor).
     {
         oskar_SkyModel sky_temp;
-        err = oskar_fits_to_sky_model(0, filename, &sky_temp, spectral_index,
+        err = oskar_fits_image_to_sky_model(0, filename, &sky_temp, spectral_index,
                 0.0, 0.01, downsample_factor);
         if (err) CPPUNIT_FAIL(oskar_get_error_string(err));
         CPPUNIT_ASSERT_EQUAL((columns / downsample_factor) *
@@ -186,7 +186,7 @@ void Test_fits_to_sky_model::test_method()
     // Load the sky model (with downsampling, no noise floor).
     {
         oskar_SkyModel sky_temp;
-        err = oskar_fits_to_sky_model(0, filename, &sky_temp, spectral_index,
+        err = oskar_fits_image_to_sky_model(0, filename, &sky_temp, spectral_index,
                 0.0, 0.0, downsample_factor);
         if (err) CPPUNIT_FAIL(oskar_get_error_string(err));
         CPPUNIT_ASSERT_EQUAL(((columns + downsample_factor - 1) / downsample_factor)
@@ -207,17 +207,17 @@ void Test_fits_to_sky_model::test_method()
         oskar_SkyModel sky_Cyg_A_4, sky_Cyg_A_3, sky_Cas_A_2;
 
         // Read Cyg A model.
-        oskar_fits_to_sky_model(0, "Cyg_A-P.model.FITS",
+        oskar_fits_image_to_sky_model(0, "Cyg_A-P.model.FITS",
                 &sky_Cyg_A_4, spectral_index, 0.02, 0.0, 4);
         oskar_sky_model_save("temp_test_Cyg_A_model_4.osm", &sky_Cyg_A_4, &err);
 
         // Read Cyg A model.
-        oskar_fits_to_sky_model(0, "Cyg_A-P.model.FITS",
+        oskar_fits_image_to_sky_model(0, "Cyg_A-P.model.FITS",
                 &sky_Cyg_A_3, spectral_index, 0.02, 0.0, 3);
         oskar_sky_model_save("temp_test_Cyg_A_model_3.osm", &sky_Cyg_A_3, &err);
 
         // Read Cas A model.
-        oskar_fits_to_sky_model(0, "Cas_A-P.models.FITS",
+        oskar_fits_image_to_sky_model(0, "Cas_A-P.models.FITS",
                 &sky_Cas_A_2, spectral_index, 0.02, 0.0, 2);
         oskar_sky_model_save("temp_test_Cas_A_model_2.osm", &sky_Cas_A_2, &err);
     }
@@ -225,12 +225,12 @@ void Test_fits_to_sky_model::test_method()
         oskar_SkyModel sky_Cyg_A, sky_Cas_A;
 
         // Read Cyg A model.
-        oskar_fits_to_sky_model(0, "Cyg_A-P.model.FITS",
+        oskar_fits_image_to_sky_model(0, "Cyg_A-P.model.FITS",
                 &sky_Cyg_A, spectral_index, 0.02, 0.0, 1);
         oskar_sky_model_save("temp_test_Cyg_A_model_1.osm", &sky_Cyg_A, &err);
 
         // Read Cas A model.
-        oskar_fits_to_sky_model(0, "Cas_A-P.models.FITS",
+        oskar_fits_image_to_sky_model(0, "Cas_A-P.models.FITS",
                 &sky_Cas_A, spectral_index, 0.02, 0.0, 1);
         oskar_sky_model_save("temp_test_Cas_A_model_1.osm", &sky_Cas_A, &err);
     }
