@@ -127,7 +127,9 @@ int main(int argc, char** argv)
 
 void set_options(oskar_OptionParser& opt)
 {
-    opt.setDescription("Application to evaluate OSKAR binary image file statistics.");
+    opt.setDescription("Application to evaluate OSKAR binary image file "
+            "statistics (min., max., mean, variance, standard deviation, and "
+            "RMS).");
     opt.addRequired("Image file(s)...", "OSKAR image files to analyse.");
     opt.addFlag("-c", "Channel index", 1, "0");
     opt.addFlag("-p", "Polarisation index", 1, "0");

@@ -31,6 +31,8 @@
 #include "apps/lib/oskar_visibilities_write_ms.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_log_error.h"
+#include <apps/lib/oskar_OptionParser.h>
+
 #include <cstdio>
 
 int main(int argc, char** argv)
@@ -39,16 +41,18 @@ int main(int argc, char** argv)
 #ifndef OSKAR_NO_MS
     int error = 0;
 
-    // Parse command line.
-    if (argc != 3)
-    {
-        fprintf(stderr, "Usage: $ oskar_visibilities_to_ms [binary file] [MS name]\n");
-        return OSKAR_ERR_INVALID_ARGUMENT;
-    }
+    oskar_OptionParser opt("oskar_visibilities_to_ms");
+    opt.addRequired("OSKAR binary file");
+    opt.addRequired("MS name");
+    if (!opt.check_options(argc, argv))
+        return OSKAR_FAIL;
+
+    const char* oskar_vis = opt.getArg(0);
+    const char* ms_name = opt.getArg(1);
 
     // Load the visibility file.
     oskar_Visibilities vis;
-    oskar_visibilities_read(&vis, argv[1], &error);
+    oskar_visibilities_read(&vis, oskar_vis, &error);
     if (error)
     {
         oskar_log_error(0, oskar_get_error_string(error));
@@ -56,7 +60,7 @@ int main(int argc, char** argv)
     }
 
     // Write out the visibilities as a Measurement Set.
-    error = oskar_visibilities_write_ms(&vis, 0, argv[2], 1);
+    error = oskar_visibilities_write_ms(&vis, 0, ms_name, 1);
     if (error)
     {
         oskar_log_error(0, oskar_get_error_string(error));
@@ -67,6 +71,6 @@ int main(int argc, char** argv)
 #else
     // No Measurement Set support.
     oskar_log_error(0, "OSKAR was not compiled with Measurement Set support.");
-    return -1;
+    return OSKAR_FAIL;
 #endif
 }
