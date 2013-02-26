@@ -28,25 +28,25 @@
 
 #include <mex.h>
 
-#include "oskar_global.h"
-
-#include "interferometry/oskar_Visibilities.h"
+#include <oskar_global.h>
+#include <interferometry/oskar_Visibilities.h>
+#include <utility/oskar_get_error_string.h>
+#include <interferometry/oskar_visibilities_free.h>
+#include <interferometry/oskar_visibilities_write.h>
+#include <interferometry/oskar_visibilities_init.h>
+#include <utility/oskar_Log.h>
+#include <utility/oskar_mem_init.h>
 
 #include "matlab/visibilities/lib/oskar_mex_vis_from_matlab_struct.h"
-
-#include "utility/oskar_get_error_string.h"
-#include "interferometry/oskar_visibilities_free.h"
-#include "interferometry/oskar_visibilities_write.h"
-#include "interferometry/oskar_visibilities_init.h"
-
-#include "utility/oskar_Log.h"
-#include "utility/oskar_mem_init.h"
+#include "matlab/common/oskar_matlab_common.h"
 
 void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
 {
     if (num_in != 2 || num_out > 0)
     {
-        mexErrMsgTxt("Usage: oskar.visibilities.write(filename, vis)");
+        oskar_matlab_usage(NULL, "visibilities", "write", "<file name>, <vis>",
+                "Writes an OSKAR visibilities binary file from the specified"
+                "OSKAR MATLAB visibilities structure.");
     }
 
     int status = OSKAR_SUCCESS;
@@ -59,14 +59,14 @@ void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
     oskar_visibilities_write(&vis, 0, filename, &status);
     if (status)
     {
-        mexErrMsgIdAndTxt("oskar:error", "ERROR: %s\n",
+        oskar_matlab_error("oskar_visibilities_write() failed: %s",
                 oskar_get_error_string(status));
     }
 
     oskar_visibilities_free(&vis, &status);
     if (status)
     {
-        mexErrMsgIdAndTxt("oskar:error", "ERROR: %s\n",
+        oskar_matlab_error("Faild to write visibilities file: %s",
                 oskar_get_error_string(status));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "matlab/common/oskar_matlab_common.h"
 
 #include <mex.h>
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_tag_index_query.h"
-#include "utility/oskar_binary_file_read.h"
-#include "utility/oskar_binary_tag_index_create.h"
-#include "utility/oskar_binary_tag_index_free.h"
-#include "utility/oskar_binary_stream_read.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_get_data_type_string.h"
-#include "utility/oskar_mem_type_check.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <utility/oskar_Mem.h>
+#include <utility/oskar_BinaryTag.h>
+#include <utility/oskar_binary_tag_index_query.h>
+#include <utility/oskar_binary_file_read.h>
+#include <utility/oskar_binary_tag_index_create.h>
+#include <utility/oskar_binary_tag_index_free.h>
+#include <utility/oskar_binary_stream_read.h>
+#include <utility/oskar_get_error_string.h>
+#include <utility/oskar_get_data_type_string.h>
+#include <utility/oskar_mem_type_check.h>
+#include <utility/oskar_vector_types.h>
 
 #include <string.h>
 
@@ -51,13 +52,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int err = 0;
     if (num_in < 2 || num_in > 3 || num_out > 1)
     {
-        mexErrMsgTxt("Usage: \n"
-                "   records = read_group(filename, group, [index])\n"
-                "\n"
-                "If [index] is specified, only that index is read from the "
-                "binary file. If [index] is not specified, all records "
-                "with the specified group are read irrespective of their user "
-                "index value.");
+        oskar_matlab_usage("[records]", "binary_file", "read_group",
+                "<filename>, <group>, [index]", "Reads one or more groups from "
+                "the specified OSKAR binary file. If [index] is specified, "
+                "only that index is read from the binary, otherwise, all "
+                "records in the specified group are read irrespective of "
+                "index. Note the <group> can be either string or scalar(int) "
+                "type.");
     }
 
     // Get input arguments.
@@ -79,9 +80,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Open the binary file for reading.
     FILE* file = fopen(filename, "r");
     if (file == NULL)
-    {
-        mexErrMsgIdAndTxt("OSKAR:ERROR", "Unable to open file (%s)\n.", filename);
-    }
+        oskar_matlab_error("Unable to open file: '%s'", filename);
 
     int read_idx = -1;
     if (num_in == 3)
@@ -92,8 +91,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_binary_tag_index_create(&index, file, &err);
     if (err)
     {
-        mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_tag_index_create() "
-                "failed with code %i: %s.\n", err, oskar_get_error_string(err));
+        oskar_matlab_error("oskar_binary_tag_index_create() failed with code "
+                "%i: %s.", err, oskar_get_error_string(err));
     }
 
     // Find out how many records are in the specified group.
@@ -207,7 +206,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 break;
             }
             default:
-                mexErrMsgTxt("Unknown OSKAR data type");
+                oskar_matlab_error("Unknown OSKAR data type");
                 break;
         };
         if (index->extended[i])
@@ -232,8 +231,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
         if (err)
         {
-            mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_file_read() "
-                    "failed with code %i: %s.\n", err, oskar_get_error_string(err));
+            oskar_matlab_error("oskar_binary_file_read() failed with code %i: "
+                    "%s", err, oskar_get_error_string(err));
         }
 
         // If the data is a char array convert to MATLAB string (16bit char format).

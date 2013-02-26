@@ -27,11 +27,13 @@
  */
 
 #include <mex.h>
-#include "sky/oskar_SkyModel.h"
-#include "sky/oskar_sky_model_free.h"
-#include "sky/oskar_sky_model_init.h"
-#include "sky/oskar_sky_model_read.h"
-#include "utility/oskar_get_error_string.h"
+#include <sky/oskar_SkyModel.h>
+#include <sky/oskar_sky_model_free.h>
+#include <sky/oskar_sky_model_init.h>
+#include <sky/oskar_sky_model_read.h>
+#include <utility/oskar_get_error_string.h>
+
+#include "matlab/common/oskar_matlab_common.h"
 #include "matlab/sky/lib/oskar_mex_sky_to_matlab_struct.h"
 
 #include <cstdio>
@@ -43,8 +45,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int status = 0;
     if (num_in != 1 || num_out > 1)
     {
-        mexErrMsgTxt("Reads a binary format OSKAR sky model file.\n\n"
-                "Usage: sky = oskar.sky.read(filename)");
+        oskar_matlab_usage("[sky]", "sky", "read", "<file name>",
+                "Reads an OSKAR sky model binary file.");
     }
 
     // Extract arguments from MATLAB maxArray objects.
@@ -55,9 +57,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_sky_model_read(&sky, filename, OSKAR_LOCATION_CPU, &status);
     if (status)
     {
-        mexErrMsgIdAndTxt("OSKAR:ERROR",
-                "Error reading OSKAR sky model file: '%s'.\nERROR: %s.",
-                filename, oskar_get_error_string(status));
+        oskar_matlab_error("Failed to read sky model file: %s (%s)", filename,
+                oskar_get_error_string(status));
     }
 
     out[0] = oskar_mex_sky_to_matlab_struct(&sky, filename);
@@ -65,8 +66,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_sky_model_free(&sky, &status);
     if (status)
     {
-        mexErrMsgIdAndTxt("OSKAR:ERROR",
-                "ERROR[%i]: %s.\n", status, oskar_get_error_string(status));
+        oskar_matlab_error("Read failed with code %i: %s", status,
+                oskar_get_error_string(status));
     }
 }
 

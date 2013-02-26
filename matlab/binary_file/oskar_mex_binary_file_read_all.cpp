@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,18 +27,20 @@
  */
 
 
+#include "matlab/common/oskar_matlab_common.h"
+
 #include <mex.h>
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_tag_index_query.h"
-#include "utility/oskar_binary_file_read.h"
-#include "utility/oskar_binary_tag_index_create.h"
-#include "utility/oskar_binary_tag_index_free.h"
-#include "utility/oskar_binary_stream_read.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_get_data_type_string.h"
-#include "utility/oskar_mem_type_check.h"
-#include "utility/oskar_vector_types.h"
+#include <utility/oskar_Mem.h>
+#include <utility/oskar_BinaryTag.h>
+#include <utility/oskar_binary_tag_index_query.h>
+#include <utility/oskar_binary_file_read.h>
+#include <utility/oskar_binary_tag_index_create.h>
+#include <utility/oskar_binary_tag_index_free.h>
+#include <utility/oskar_binary_stream_read.h>
+#include <utility/oskar_get_error_string.h>
+#include <utility/oskar_get_data_type_string.h>
+#include <utility/oskar_mem_type_check.h>
+#include <utility/oskar_vector_types.h>
 
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
@@ -46,7 +48,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int err = 0;
     if (num_in != 1 || num_out > 1)
     {
-        mexErrMsgTxt("Usage: records = read_all(filename)\n");
+        oskar_matlab_usage("[records]", "binary_file", "read_all", "<filename>",
+                "Reads the contents of an OSKAR binary file into an array of "
+                "record structures.");
     }
 
     // Get input args
@@ -54,18 +58,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mxGetString(in[0], filename, 100);
 
     FILE* file = fopen(filename, "r");
-    if (file == NULL)
-    {
-        mexErrMsgIdAndTxt("OSKAR:ERROR", "Unable to open file (%s)\n.", filename);
-    }
+    if (!file)
+        oskar_matlab_error("Unable to open file: '%s'", filename);
 
     oskar_BinaryTagIndex* index = NULL;
     oskar_binary_tag_index_create(&index, file, &err);
-    if (err)
-    {
-        mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_tag_index_create() "
-                "failed with code %i: %s.\n", err, oskar_get_error_string(err));
-    }
+    if (err) oskar_matlab_error("oskar_binary_tag_index_create() failed with "
+            "code %i: %s",err, oskar_get_error_string(err));
 
     mexPrintf("= Binary file header loaded (%i tags found).\n", index->num_tags);
 
@@ -152,7 +151,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 break;
             }
             default:
-                mexErrMsgTxt("Unknown OSKAR data type");
+                oskar_matlab_error("Unknown OSKAR data type");
                 break;
         };
         if (index->extended[i])
@@ -175,10 +174,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                     (size_t)index->data_size_bytes[i],
                     data, &err);
         }
-        if (err)
-        {
-            mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_file_read() "
-                    "failed with code %i: %s.\n", err, oskar_get_error_string(err));
+        if (err) {
+            oskar_matlab_error("oskar_binary_file_read() failed with code %i: "
+                    "%s.\n", err, oskar_get_error_string(err));
         }
         /* If the data is a char array convert to MATLAB string (16bit char format). */
         if (index->data_type[i] == OSKAR_CHAR)

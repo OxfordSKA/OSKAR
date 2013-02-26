@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,11 +28,13 @@
 
 #include <mex.h>
 
-#include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_telescope_model_load_station_coords.h"
-#include "interferometry/oskar_evaluate_uvw_baseline.h"
-#include "utility/oskar_get_error_string.h"
+#include "matlab/common/oskar_matlab_common.h"
+
+#include <oskar_global.h>
+#include <interferometry/oskar_TelescopeModel.h>
+#include <interferometry/oskar_telescope_model_load_station_coords.h>
+#include <interferometry/oskar_evaluate_uvw_baseline.h>
+#include <utility/oskar_get_error_string.h>
 
 #include <math.h>
 
@@ -42,20 +44,12 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Read options from MATLAB
     if (num_in != 9 || num_out > 1)
     {
-        mexErrMsgTxt(
-                "Usage:\n"
-                "\tuvw = oskar.visibilities.evaluate_baseline_uvw(...args...)\n\n"
-                "Arguments:\n"
-                "\t1) layout_file: OSKAR Station layout file.\n"
-                "\t2) lon:         Telescope longitude, in degrees.\n"
-                "\t3) lat:         Telescope latitude, in degrees.\n"
-                "\t4) alt:         Telescope altitude, in metres.\n"
-                "\t5) RA:          Observation Right Ascension, in degrees.\n"
-                "\t6) Dec:         Observation Declination, in degrees.\n"
-                "\t7) start time:  Observation start time, in MJD UTC.\n"
-                "\t8) num_times:   Number of time integration steps.\n"
-                "\t9) dt:          Integration length of each time step, in seconds.\n"
-                );
+        oskar_matlab_usage("[uvw]", "visibilities", "evaluate_baseline_uvw",
+                "<layout file>, <lon (deg.)>, <lat (deg.)>, <alt (m)>, "
+                "<RA (deg.)>, <Dec (deg.)>, <start time (MJD UTC)>, <no. times>,"
+                "<integration length (s)>",
+                "Function to evaluate baseline coordinates. Note: <integration "
+                "length> equates to the time step separation between snapshots.");
     }
 
     // Read inputs.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,31 +27,26 @@
  */
 
 #include <mex.h>
-
 #include <cuda_runtime_api.h>
 #include <vector_functions.h> // This has to be before the OSKAR headers
-
-#include "interferometry/oskar_Visibilities.h"
-
-#include "utility/oskar_Log.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_vector_types.h"
-#include "utility/oskar_get_error_string.h"
-
-#include "math/oskar_linspace.h"
-#include "math/oskar_meshgrid.h"
-
-#include "imaging/oskar_Image.h"
-#include "imaging/oskar_image_init.h"
-#include "imaging/oskar_image_resize.h"
-#include "imaging/oskar_make_image.h"
-#include "imaging/oskar_make_image_dft.h"
-#include "imaging/oskar_SettingsImage.h"
-#include "imaging/oskar_evaluate_image_lm_grid.h"
+#include <interferometry/oskar_Visibilities.h>
+#include <utility/oskar_Log.h>
+#include <utility/oskar_Mem.h>
+#include <utility/oskar_vector_types.h>
+#include <utility/oskar_get_error_string.h>
+#include <math/oskar_linspace.h>
+#include <math/oskar_meshgrid.h>
+#include <imaging/oskar_Image.h>
+#include <imaging/oskar_image_init.h>
+#include <imaging/oskar_image_resize.h>
+#include <imaging/oskar_make_image.h>
+#include <imaging/oskar_make_image_dft.h>
+#include <imaging/oskar_SettingsImage.h>
+#include <imaging/oskar_evaluate_image_lm_grid.h>
 
 #include "matlab/image/lib/oskar_mex_image_settings_from_matlab.h"
 #include "matlab/image/lib/oskar_mex_image_to_matlab_struct.h"
-
+#include "matlab/common/oskar_matlab_common.h"
 #include "matlab/visibilities/lib/oskar_mex_vis_from_matlab_struct.h"
 
 #include <cstdio>
@@ -94,11 +89,30 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
     else
     {
-        mexErrMsgTxt("Usage: \n"
-                "    image = oskar.image.make(vis, settings)\n"
-                "       or\n"
-                "    image = oskar.image.make(uu, vv, amp, frequency_hz, "
-                "num_pixels, field_of_view_deg)\n");
+        const char* rtns = "[image]";
+        const char* package = "image";
+        const char* function = "make";
+        const char* args1 = "<vis>, <settings>";
+        const char* args2 = "<uu>, <vv>, <amps>, <frequency in Hz>, "
+                "<no. pixels>, <FOV in deg>";
+        const char* desc = "Function to make an image or image cube from a set "
+                "of visibilities.";
+        mexErrMsgIdAndTxt("OSKAR:ERROR",
+                "\n"
+                "ERROR:\n\tInvalid arguments.\n"
+                "\n"
+                "Usage:\n"
+                "\t%s = oskar.%s.%s(%s)\n"
+                "\n"
+                "  or\n"
+                "\t%s = oskar.%s.%s(%s)\n"
+                "\n"
+                "Description:\n"
+                "\t%s\n"
+                "\n",
+                rtns, package, function, args1,
+                rtns, package, function, args2,
+                desc);
     }
 
     int err = OSKAR_SUCCESS;
@@ -132,9 +146,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         err = oskar_make_image(&image, 0, &vis, &settings);
         if (err)
         {
-            mexErrMsgIdAndTxt("OSKAR:ERROR",
-                    "\noskar.image.make() [oskar_make_image] "
-                    "failed with code %i: %s.\n",
+            oskar_matlab_error("oskar_make_image() failed with code %i: %s",
                     err, oskar_get_error_string(err));
         }
         mexEvalString("drawnow");
@@ -149,7 +161,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         // Make sure visibility data array is complex.
         if (!mxIsComplex(in[2]))
         {
-            mexErrMsgTxt("Input visibility amplitude array must be complex");
+            oskar_matlab_error("Input visibility amplitude array must be complex");
         }
 
         // Evaluate the and check consistency of data precision.
@@ -168,7 +180,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
         else
         {
-            mexErrMsgTxt("uu, vv and amplitudes must be of the same type");
+            oskar_matlab_error("uu, vv, and amplitudes must be of the same type");
         }
 
         // Retrieve input arguments.
@@ -185,7 +197,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 num_times != (int)mxGetN(in[1]) ||
                 num_times != (int)mxGetN(in[2]))
         {
-            mexErrMsgTxt("Dimension mismatch in input data.");
+            oskar_matlab_error("Dimension mismatch in input data.");
         }
 
         int num_samples = num_baselines * num_times;
@@ -248,9 +260,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         err = oskar_make_image_dft(&image.data, &uu, &vv, &amp, &l, &m, freq);
         if (err)
         {
-            mexErrMsgIdAndTxt("OSKAR:ERROR",
-                    "\noskar.image.make() [oskar_make_image_dft] "
-                    "failed with code %i: %s.\n",
+            oskar_matlab_error("oskar_make_image_dft() failed with code %i: %s",
                     err, oskar_get_error_string(err));
         }
         mexEvalString("drawnow");

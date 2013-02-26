@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "matlab/common/oskar_matlab_common.h"
 
 #include <mex.h>
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_tag_index_create.h"
-#include "utility/oskar_binary_tag_index_free.h"
-#include "utility/oskar_get_data_type_string.h"
-#include "utility/oskar_get_error_string.h"
+#include <utility/oskar_BinaryTag.h>
+#include <utility/oskar_binary_tag_index_create.h>
+#include <utility/oskar_binary_tag_index_free.h>
+#include <utility/oskar_get_data_type_string.h>
+#include <utility/oskar_get_error_string.h>
 
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
@@ -40,7 +41,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int err = 0;
     if (num_in != 1 || num_out > 2)
     {
-        mexErrMsgTxt("Usage: [index, headers] = oskar_binary_file_query(filename)\n");
+        oskar_matlab_usage("[index, headers]", "binary_file", "query",
+                "<filename>", "Queries the contents of an OSKAR binary file "
+                "returning a cell array of record indices and an array of "
+                "record header structures.");
     }
 
     // Get input args
@@ -52,28 +56,17 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mexCallMATLAB(0, NULL, 1, &arg, "format");
 
     FILE* file = fopen(filename, "r");
-    if (file == NULL)
-    {
-        mexErrMsgIdAndTxt("OSKAR:ERROR", "Unable to open file (%s)\n.", filename);
-    }
+    if (!file)
+        oskar_matlab_error("Unable to open file: '%s'", filename);
 
     oskar_BinaryTagIndex* index = NULL;
     oskar_binary_tag_index_create(&index, file, &err);
-    if (err)
-    {
-        mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_tag_index_create() "
-                "failed with code %i: %s.\n", err, oskar_get_error_string(err));
-    }
+    if (err) oskar_matlab_error("oskar_binary_tag_index_create() failed with "
+            "code %i: %s",err, oskar_get_error_string(err));
 
     mexPrintf("= Binary file header loaded (%i tags found).\n", index->num_tags);
     int num_fields = 5;
-    const char* fields[5] = {
-            "type",
-            "group",
-            "tag",
-            "index",
-            "data_size",
-    };
+    const char* fields[5] = { "type", "group", "tag", "index", "data_size"};
 
     int num_records = index->num_tags;
     out[0] = mxCreateCellMatrix(num_records + 1, 6);

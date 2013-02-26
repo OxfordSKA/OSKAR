@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,8 @@
 
 
 #include <mex.h>
-#include "sky/oskar_date_time_to_mjd.h"
+#include "matlab/common/oskar_matlab_common.h"
+#include <sky/oskar_date_time_to_mjd.h>
 
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
@@ -36,8 +37,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Parse Inputs.
     if (num_in != 4 || num_out < 1)
     {
-        mexErrMsgTxt("Usage: mjd_utc = oskar.sky.date_time_to_mjd(year, month, "
-                "day, day_fraction)");
+        oskar_matlab_usage("[mjd_utc]", "sky", "date_time_to_mjd",
+                "<year>, <month>, <day>, <day fraction>",
+                "Converts date and time to MJD UTC");
     }
 
     // Get MATLAB inputs.

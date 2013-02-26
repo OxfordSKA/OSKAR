@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,11 +27,11 @@
  */
 
 #include <mex.h>
-
-#include "imaging/oskar_image_read.h"
-#include "imaging/oskar_Image.h"
+#include <imaging/oskar_image_read.h>
+#include <imaging/oskar_Image.h>
+#include <utility/oskar_get_error_string.h>
 #include "matlab/image/lib/oskar_mex_image_to_matlab_struct.h"
-#include "utility/oskar_get_error_string.h"
+#include "matlab/common/oskar_matlab_common.h"
 
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
@@ -39,11 +39,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int err = 0;
     if (num_in < 1 || num_in > 2 || num_out > 1)
     {
-        mexErrMsgTxt("Usage: image = oskar.image.read(filename, [index = 0])");
+        oskar_matlab_usage("[image]", "image", "read", "<filename>, [index=0]",
+                "Function to read an OSKAR binary image file into a MATLAB "
+                "structure");
     }
 
     const char* filename = mxArrayToString(in[0]);
-    if (filename == NULL) mexErrMsgTxt("ERROR: invalid filename\n");
+    if (filename == NULL) oskar_matlab_error("invalid filename");
 
     int idx = 0;
     if (num_in == 2)
@@ -55,9 +57,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_image_read(&image, filename, idx, &err);
     if (err)
     {
-        mexErrMsgIdAndTxt("OSKAR:ERROR",
-                "ERROR: oskar_image_read() returned code %i: %s\n",
-                err, oskar_get_error_string(err));
+        oskar_matlab_error("oskar_image_read() returned code %i: %s", err,
+                oskar_get_error_string(err));
     }
 
     out[0] = oskar_mex_image_to_matlab_struct(&image, filename);

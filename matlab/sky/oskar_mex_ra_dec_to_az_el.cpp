@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,9 @@
 
 #include <mex.h>
 
-#include "utility/oskar_get_error_string.h"
-#include "sky/oskar_ra_dec_to_az_el_cuda.h"
+#include "matlab/common/oskar_matlab_common.h"
+#include <utility/oskar_get_error_string.h>
+#include <sky/oskar_ra_dec_to_az_el_cuda.h>
 
 #include <algorithm>
 #include <cmath>
@@ -42,8 +43,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     if (num_in != 4 || num_out > 2)
     {
-        mexErrMsgTxt("Usage: [az, el] = oskar.sky.ra_dec_to_az_el(ra, dec, lst, lat)\n"
-                "Note: all coordinates are in radians.");
+        oskar_matlab_usage("[az, el]", "sky", "ra_dec_to_az_el",
+                "<RA>, <Dec>, <LST>, <lat>",
+                "Converts RA, Dec coordinates to az, el coordinates. Note all "
+                "coordinates are assumed to be in radians.");
     }
 
     // Parse input data.
@@ -95,13 +98,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
     else
     {
-        mexErrMsgTxt("Invalid data class");
+        oskar_matlab_error("Invalid data class");
     }
 
     if (err)
     {
-        mexErrMsgIdAndTxt("OSKAR:error", "ERROR: oskar_ra_dec_to_az_el_d(). (%s)",
-                oskar_get_error_string(err));
+        oskar_matlab_error("oskar_ra_dec_to_az_el_d() failed with code %i: %s",
+                err, oskar_get_error_string(err));
     }
 }
 

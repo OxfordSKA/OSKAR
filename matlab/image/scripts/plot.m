@@ -10,7 +10,10 @@ function plot(Image, fov_deg, fig_title)
 % handle    : Handle to the figure.
 
 if (nargin < 2)
-    error('Usage: oskar.image.plot(data, fov_deg, [figure title])');
+    error('OSAKR:argChk', ...
+        '\nERROR:\n\t%s.\n\nUsage:\n\t%s.%s.%s(%s)\n',...
+        'Invalid arguments', 'oskar', 'image', 'plot', ...
+        '<data>, <FOV in deg>, [figure title]');
 end
 
 % Set the image title, if not already set.

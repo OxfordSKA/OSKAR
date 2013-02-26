@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,27 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+#include "matlab/common/oskar_matlab_common.h"
 #include <QtCore/QSettings>
 #include <QtCore/QString>
 #include <mex.h>
 
-//
 // oskar.settings.set(filename, key, value)
-//
 void mexFunction(int /*num_out*/, mxArray** /*out*/,
         int num_in, const mxArray** in)
 {
     // Parse inputs.
     if (num_in != 3)
     {
-        mexErrMsgTxt("Usage: oskar.settings.set(filename, key, value)");
+        oskar_matlab_usage(NULL, "settings", "set", "<file>, <key>, <value>",
+                "Set the value of the specified key in the specified file");
     }
 
     // Get inputs from MATLAB
     // Check: Key and value must be string type.
     if (!(mxIsChar(in[1]) && mxIsChar(in[2])))
     {
-        mexErrMsgTxt("ERROR: both key and value must be string type.");
+        oskar_matlab_error("Both the key and value must be of string type");
     }
     char* filename  = mxArrayToString(in[0]);
     char* key       = mxArrayToString(in[1]);

@@ -6,9 +6,11 @@
     #include <stdint.h>
 #endif
 
+#include "matlab/common/oskar_matlab_common.h"
+
 #include <mex.h>
-#include <string.h>
 #include <cuda_runtime_api.h>
+#include <cstring>
 #include <vector>
 
 // Cleanup function called when the mex function is unloaded. (i.e. 'clear mex')
@@ -23,7 +25,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** /*in*/)
     // Check for proper number of arguments.
     if (num_in != 0 || num_out > 1)
     {
-        mexErrMsgTxt("Usage: info = device_info()");
+        oskar_matlab_usage("[info]", "cuda", "device_info", "",
+                "Returns an array of structures containing very basic CUDA "
+                "device information for each device found");
     }
 
     int device_id = 0;

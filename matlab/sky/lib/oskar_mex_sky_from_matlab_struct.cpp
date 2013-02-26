@@ -27,8 +27,8 @@
  */
 
 #include "matlab/sky/lib/oskar_mex_sky_from_matlab_struct.h"
-#include "utility/oskar_get_error_string.h"
-#include "sky/oskar_sky_model_init.h"
+#include <utility/oskar_get_error_string.h>
+#include <sky/oskar_sky_model_init.h>
 #include <cstring>
 #include <cstdlib>
 

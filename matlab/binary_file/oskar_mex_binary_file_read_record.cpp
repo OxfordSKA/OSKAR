@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "matlab/common/oskar_matlab_common.h"
+
 #include <mex.h>
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_tag_index_query.h"
-#include "utility/oskar_binary_file_read.h"
-#include "utility/oskar_binary_tag_index_create.h"
-#include "utility/oskar_binary_tag_index_free.h"
-#include "utility/oskar_binary_stream_read.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_get_data_type_string.h"
-#include "utility/oskar_mem_type_check.h"
-#include "utility/oskar_vector_types.h"
+#include <utility/oskar_Mem.h>
+#include <utility/oskar_BinaryTag.h>
+#include <utility/oskar_binary_tag_index_query.h>
+#include <utility/oskar_binary_file_read.h>
+#include <utility/oskar_binary_tag_index_create.h>
+#include <utility/oskar_binary_tag_index_free.h>
+#include <utility/oskar_binary_stream_read.h>
+#include <utility/oskar_get_error_string.h>
+#include <utility/oskar_get_data_type_string.h>
+#include <utility/oskar_mem_type_check.h>
+#include <utility/oskar_vector_types.h>
 
 #include <string.h>
 
@@ -48,7 +50,12 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     if (num_in < 3 || num_in > 4 || num_out > 1)
     {
-        mexErrMsgTxt("Usage: record = read_record(filename, group, tag, [index = 0])\n");
+        oskar_matlab_usage("[record]", "binary_file", "read_record",
+                "<filename>, <group>, <tag>, [index=0]", "Reads the "
+                "specified record from an OSKAR binary file returning a "
+                "structure containing the records header and data fields."
+                "Note the <group> and <tag> arguments can be of either "
+                "string or scalar(int) type.");
     }
 
     int err = OSKAR_SUCCESS;
@@ -91,8 +98,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
     else
     {
-        mexErrMsgTxt("ERROR: Specified Group & Tag must be of the same type"
-                " (scalar or string).");
+        oskar_matlab_error("The specified Group & Tag must be of the same type "
+                "(i.e. scalar or string)");
     }
 
 
@@ -100,7 +107,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     FILE* file = fopen(filename, "r");
     if (file == NULL)
     {
-        mexErrMsgIdAndTxt("OSKAR:ERROR", "Unable to open file (%s)\n.", filename);
+        oskar_matlab_error("Unable to open file: '%s'", filename);
     }
 
     // Create an array of binary tag indices found in the file.
@@ -108,8 +115,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_binary_tag_index_create(&index, file, &err);
     if (err)
     {
-        mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_tag_index_create() "
-                "failed with code %i: %s.\n", err, oskar_get_error_string(err));
+        oskar_matlab_error("oskar_binary_tag_index_create() failed with code %i"
+                ":%s", err, oskar_get_error_string(err));
     }
 
     // Loop over indices to find the specified record.
@@ -138,9 +145,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
     }
 
-    if (idx == -1)
-        mexErrMsgTxt("ERROR: Specified group, tag and index not found in binary file\n");
-
+    if (idx == -1) {
+        oskar_matlab_error("Specified group, tag, and index not found in the "
+                "binary file.");
+    }
 
     // Construct a MATLAB structure holding the record.
     int num_fields = 5;
@@ -150,20 +158,15 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mxSetField(out[0], 0, fields[0], mxCreateString(data_name));
     if (index->extended[idx])
     {
-        mxSetField(out[0], 0, fields[1],
-                mxCreateString(index->name_group[idx]));
-        mxSetField(out[0], 0, fields[2],
-                mxCreateString(index->name_tag[idx]));
+        mxSetField(out[0], 0, fields[1], mxCreateString(index->name_group[idx]));
+        mxSetField(out[0], 0, fields[2], mxCreateString(index->name_tag[idx]));
     }
     else
     {
-        mxSetField(out[0], 0, fields[1],
-                mxCreateDoubleScalar((double)index->id_group[idx]));
-        mxSetField(out[0], 0, fields[2],
-                mxCreateDoubleScalar((double)index->id_tag[idx]));
+        mxSetField(out[0], 0, fields[1], mxCreateDoubleScalar((double)index->id_group[idx]));
+        mxSetField(out[0], 0, fields[2], mxCreateDoubleScalar((double)index->id_tag[idx]));
     }
-    mxSetField(out[0], 0, fields[3],
-            mxCreateDoubleScalar((double)index->user_index[idx]));
+    mxSetField(out[0], 0, fields[3], mxCreateDoubleScalar((double)index->user_index[idx]));
     mxArray* data_ = NULL;
     void* data = NULL;
     mwSize m = 0;
@@ -226,7 +229,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             break;
         }
         default:
-            mexErrMsgTxt("Unknown OSKAR data type");
+            oskar_matlab_error("Unknown OSKAR data type");
             break;
     };
 
@@ -248,8 +251,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
     if (err)
     {
-        mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_file_read() "
-                "failed with code %i: %s.\n", err, oskar_get_error_string(err));
+        oskar_matlab_error("oskar_binary_file_read() failed with code %i: %s",
+                err, oskar_get_error_string(err));
     }
 
     /* If the data is a char array convert to MATLAB string (16bit char format). */
@@ -320,7 +323,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_binary_tag_index_free(&index, &err);
     if (err)
     {
-        mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_tag_index_free() "
-                "failed with code %i: %s.\n", err, oskar_get_error_string(err));
+        oskar_matlab_error("oskar_binary_tag_index_free() failed with code %i"
+                ": %s", err, oskar_get_error_string(err));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,28 +28,32 @@
 
 #include <mex.h>
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
-#include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_visibilities_read.h"
-#include "interferometry/oskar_visibilities_free.h"
+#include <interferometry/oskar_Visibilities.h>
+#include <interferometry/oskar_visibilities_read.h>
+#include <interferometry/oskar_visibilities_free.h>
+
+#include <utility/oskar_Mem.h>
+#include <utility/oskar_vector_types.h>
+#include <utility/oskar_get_error_string.h>
+#include <utility/oskar_BinaryTag.h>
+#include <utility/oskar_mem_binary_file_read.h>
+#include <utility/oskar_binary_tag_index_free.h>
 
 #include "matlab/visibilities/lib/oskar_mex_vis_to_matlab_struct.h"
-
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_vector_types.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_mem_binary_file_read.h"
-#include "utility/oskar_binary_tag_index_free.h"
+#include "matlab/common/oskar_matlab_common.h"
 
 #include <cstdio>
 #include <cstdlib>
 
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    if (num_in != 1 || num_out > 1)
-        mexErrMsgTxt("Usage: vis = oskar.visibilities.read(filename)");
+    if (num_in != 1 || num_out > 1) {
+        oskar_matlab_usage("[vis]", "visibilities", "read", "<filename>",
+                "Reads an OSKAR visibilities binary data file into "
+                "a MATLAB structure");
+    }
 
     // Extract arguments from MATLAB mxArray objects.
     const char* filename = mxArrayToString(in[0]);
@@ -63,8 +67,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int exists = (int)mxGetScalar(file_exists);
     if (exists == 0)
     {
-        mexErrMsgIdAndTxt("OSKAR ERROR", "Specified visibility file (%s)"
-                " doesn't exist.\n", filename);
+        oskar_matlab_error("Specified visibility file (%s) doesn't exist.",
+                filename);
     }
 
     // Load the OSKAR visibilities structure from the specified file.
@@ -73,8 +77,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_visibilities_read(&vis, filename, &status);
     if (status != OSKAR_SUCCESS)
     {
-        mexErrMsgIdAndTxt("OSKAR ERROR",
-                "Error reading OSKAR visibilities data file: '%s'.\nERROR: %s.",
+        oskar_matlab_error("Failed reading OSKAR visibility data file: '%s' (%s)",
                 filename, oskar_get_error_string(status));
     }
 
@@ -87,7 +90,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_binary_tag_index_free(&index, &status);
     if (status)
     {
-        mexErrMsgTxt("ERROR: failed to read date field!\n");
+        oskar_matlab_error("Failed to read date field!");
     }
 
     out[0] = oskar_mex_vis_to_matlab_struct(&vis, &date, filename);
@@ -95,7 +98,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_visibilities_free(&vis, &status);
     if (status)
     {
-        mexErrMsgIdAndTxt("oskar:error", "ERROR: %s\n",
+        oskar_matlab_error("Failed reading OSKAR visibility file: %s",
                 oskar_get_error_string(status));
     }
 }

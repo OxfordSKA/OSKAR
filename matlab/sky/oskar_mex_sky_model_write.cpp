@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,11 +27,13 @@
  */
 
 #include <mex.h>
-#include "sky/oskar_SkyModel.h"
-#include "sky/oskar_sky_model_free.h"
-#include "sky/oskar_sky_model_init.h"
-#include "sky/oskar_sky_model_write.h"
-#include "utility/oskar_get_error_string.h"
+#include <sky/oskar_SkyModel.h>
+#include <sky/oskar_sky_model_free.h>
+#include <sky/oskar_sky_model_init.h>
+#include <sky/oskar_sky_model_write.h>
+#include <utility/oskar_get_error_string.h>
+
+#include "matlab/common/oskar_matlab_common.h"
 #include "matlab/sky/lib/oskar_mex_sky_from_matlab_struct.h"
 
 #include <cstdio>
@@ -43,13 +45,9 @@ void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
     int status = 0;
     if (num_in != 2 || num_out > 0)
     {
-        mexErrMsgTxt(
-                "Usage: \n"
-                "   oskar.sky.write(filename, sky)\n"
-                "\n"
-                "Description:\n"
-                "   Writes a MATLAB OSKAR sky model structure to an OSKAR sky "
-                "   model binary file");
+        oskar_matlab_usage(NULL, "sky", "write", "<file name>, <sky>",
+                "Writes a MATLAB OSKAR sky model structure to an OSKAR sky "
+                "model binary file");
     }
 
     // Extract arguments from MATLAB maxArray objects.
@@ -62,16 +60,15 @@ void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
     oskar_sky_model_write(filename, &sky, &status);
     if (status)
     {
-        mexErrMsgIdAndTxt("OSKAR:ERROR",
-                "Error saving OSKAR sky model file: '%s'.\nERROR: %s.",
+        oskar_matlab_error("Error saving OSKAR sky model file: '%s' (%s)",
                 filename, oskar_get_error_string(status));
     }
 
     oskar_sky_model_free(&sky, &status);
     if (status)
     {
-        mexErrMsgIdAndTxt("OSKAR:ERROR",
-                "ERROR[%i]: %s.\n", status, oskar_get_error_string(status));
+        oskar_matlab_error("Writing file failed with code %i: %s",
+                status, oskar_get_error_string(status));
     }
 }
 

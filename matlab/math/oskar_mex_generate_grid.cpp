@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,8 @@
 
 
 #include <mex.h>
-#include "math/oskar_GridPositions.h"
+#include <math/oskar_GridPositions.h>
+#include "matlab/common/oskar_matlab_common.h"
 
 static void error_field(const char* msg);
 
@@ -41,13 +42,13 @@ enum
 
 struct settings
 {
-        int type;
-        int num_points;
-        double radius;
-        double radius_inner;
-        double theta_start;
-        double num_revs;
-        double a;
+    int type;
+    int num_points;
+    double radius;
+    double radius_inner;
+    double theta_start;
+    double num_revs;
+    double a;
 };
 
 
@@ -56,33 +57,32 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     if (num_in != 1 || num_out < 2)
     {
-        mexErrMsgTxt("Usage: \n"
-                "    [x y] = oskar.math.generate_grid(settings)\n"
-                "\n"
-                "General settings:\n"
-                "- type\n"
-                "- num_points\n"
-                "- radius\n"
-                "Circular settings:\n"
-                "- x spacing\n"
-                "- y spacing\n"
-                "- x error (perturbation std.dev.)"
-                "- y error (perturbation std.dev.)"
-                "Sprial settings:\n"
-                "- num_revs\n"
-                "- theta_start\n"
-                "Archimedia sprial settings:\n"
-                "- a\n"
-                "Log sprial settings:\n"
-                "- radius_inner\n"
-        );
+        oskar_matlab_usage("[x, y]", "math", "generate_grid", "<settings structure>",
+                "Grid generation function.\n\n"
+                "Settings structure consists of the following fields:\n"
+                "[General settings]:\n"
+                "  - type (enum oskar.math.type)\n"
+                "  - num_points (int)\n"
+                "  - radius (double)\n"
+                "[Circular settings]:\n"
+                "  - x spacing (double)\n"
+                "  - y spacing (double)\n"
+                "  - x error, perturbation std.dev. (double)\n"
+                "  - y error, perturbation std.dev. (double)\n"
+                "[Spiral settings]:\n"
+                "  - num_revs (double)\n"
+                "  - theta_start (double)\n"
+                "[Archimedian Spiral settings]:\n"
+                "  - a (double)\n"
+                "[Log Spiral settings]:\n"
+                "  - radius_inner (double)\n"
+                );
     }
 
     // Parse input.
     if (!mxIsStruct(in[0]))
     {
-        mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR invalid argument. "
-                "Input must be a settings structure.\n");
+        oskar_matlab_error("Invalid argument, input must be a settings structure");
     }
 
     settings s;
@@ -92,8 +92,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     if (!type) error_field("type");
     if (!mxIsClass(type, "oskar.math.type"))
     {
-        mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR invalid settings structure. "
-                "The 'type' field must be a value from oskar.math.type .\n");
+        oskar_matlab_error("Invalid settings structure. The 'type' field "
+                "must have a value from oskar.math.type");
     }
     mxArray* typeId_ = mxCreateNumericMatrix(1,1,mxINT32_CLASS, mxREAL);
     mexCallMATLAB(1, &typeId_, 1, &type, "uint32");
@@ -111,7 +111,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Circular only settings.
     if (s.type == CIRCULAR)
     {
-        mexErrMsgIdAndTxt("OSKAR:ERROR", "Grid type unavailable.\n");
+        oskar_matlab_error("Grid type unavailable");
     }
     // Common spiral settings
     if (s.type == SPIRAL_ARCHIMEDEAN || s.type == SPIRAL_LOG)
@@ -148,7 +148,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         case CIRCULAR:
         {
-            mexErrMsgIdAndTxt("OSKAR:ERROR", "Grid type unavailable.\n");
+            oskar_matlab_error("Grid type unavailable");
             break;
         }
         case SPIRAL_ARCHIMEDEAN:
@@ -165,7 +165,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
         default:
         {
-            mexErrMsgIdAndTxt("OSKAR:ERROR", "Unknown type.\n");
+            oskar_matlab_error("Unknown type");
             break;
         }
     };
@@ -174,6 +174,5 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
 static void error_field(const char* msg)
 {
-    mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR invalid settings structure. "
-            "Missing field '%s'.\n", msg);
+    oskar_matlab_error("Invalid settings structure, missing field: '%s'", msg);
 }

@@ -35,8 +35,8 @@
  */
 
 #include <mex.h>
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
+#include <oskar_global.h>
+#include <sky/oskar_SkyModel.h>
 
 /**
  * @brief Constructs an oskar_SkyModel structure from its MATLAB structure
