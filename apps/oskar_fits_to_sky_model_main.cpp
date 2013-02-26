@@ -50,7 +50,7 @@ int main(int argc, char** argv)
     opt.addRequired("sky model file", "The OSAKR sky model file name to convert to.");
     opt.addFlag("-s", "Spectral index", 1, "0.0");
     opt.addFlag("-f", "Minimum allowed fraction of image peak", 1, "0.0");
-    opt.addFlag("-d", "Downsample factor", 1, "0");
+    opt.addFlag("-d", "Downsample factor", 1, "1");
     opt.addFlag("-n", "Noise floor", 1, "0.0");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
