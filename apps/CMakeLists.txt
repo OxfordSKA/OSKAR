@@ -40,8 +40,8 @@ if (CUDA_FOUND)
     oskar_app(${name} ${name}_main.cpp)
 
     # BINARY: oskar_rebin_sky
-    set(name oskar_rebin_sky)
-    oskar_app(${name} ${name}_main.cpp)
+    #set(name oskar_rebin_sky)
+    #oskar_app(${name} ${name}_main.cpp)
 
     # BINARY: oskar_visibilities_add
     set(name oskar_visibilities_add)
