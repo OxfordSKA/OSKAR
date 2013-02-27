@@ -185,22 +185,53 @@ static void load_directories(oskar_TelescopeModel* telescope,
     {
         load_station_config(station, cwd, status);
 
-        // If any children exist, allocate storage for them in the model,
-        // else if there are none, allocate storage for element model data.
-        if (num_dirs > 0)
-            oskar_station_model_init_child_stations(station, status);
-        else
-            oskar_station_model_resize_element_types(station, 1, status);
-
-        // Loop over and descend into all child stations.
-        for (int i = 0; i < num_dirs; ++i)
+        // Check if this is the last level.
+        if (num_dirs == 0)
         {
-            // Get the child directory.
-            QDir child_dir(cwd.filePath(children[i]));
+            // Allocate storage for element model data if no children.
+            oskar_station_model_resize_element_types(station, 1, status);
+        }
+        else
+        {
+            // Allocate storage for child stations.
+            oskar_station_model_init_child_stations(station, status);
 
-            // Recursive call to load this (child) station.
-            load_directories(telescope, settings, child_dir,
-                    &station->child[i], depth + 1, status);
+            if (num_dirs == 1)
+            {
+                // One station directory. Load and copy it to all the others.
+                QDir child_dir(cwd.filePath(children[0]));
+
+                // Recursive call to load the station.
+                load_directories(telescope, settings, child_dir,
+                        &station->child[0], depth + 1, status);
+
+                // Copy child station 0 to all the others.
+                for (int i = 1; i < station->num_elements; ++i)
+                {
+                    oskar_station_model_copy(&station->child[i],
+                            &station->child[0], status);
+                }
+            }
+            else
+            {
+                // Consistency check.
+                if (num_dirs != station->num_elements)
+                {
+                    *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_ENTRIES_MISMATCH;
+                    return;
+                }
+
+                // Loop over and descend into all child stations.
+                for (int i = 0; i < num_dirs; ++i)
+                {
+                    // Get the child directory.
+                    QDir child_dir(cwd.filePath(children[i]));
+
+                    // Recursive call to load this (child) station.
+                    load_directories(telescope, settings, child_dir,
+                            &station->child[i], depth + 1, status);
+                }
+            }
         }
     }
 }

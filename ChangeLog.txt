@@ -17,7 +17,8 @@
       should no longer time-out when imaging large visibility files.
 
     * Added the ability to load a telescope model containing only one station
-      directory, which will be copied for all remaining stations.
+      directory, which will be copied for all remaining stations. This also
+      applies recursively for sub-stations in sub-directories where relevant.
 
     * Added support for hierarchical beamforming modes, using nested stations.
 
