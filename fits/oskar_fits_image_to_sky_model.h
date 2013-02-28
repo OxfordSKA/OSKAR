@@ -53,7 +53,7 @@ extern "C" {
  * @param[out] sky       Pointer to sky model to fill.
  * @param[in] spectral_index Spectral index for all output pixels.
  * @param[in] min_peak_fraction Minimum allowed fraction of image peak.
- * @param[in] noise_floor Ignore pixels in original image below this value.
+ * @param[in] noise_floor Ignore pixels below this value (units are Jy/PIXEL).
  * @param[in] downsample_factor Factor by which to downsample the image before
  *                              performing the format conversion.
  *

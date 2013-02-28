@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 #ifndef OSKAR_NO_FITS
     int error = OSKAR_SUCCESS;
 
-    oskar_OptionParser opt("oskar_fits_to_sky_model");
+    oskar_OptionParser opt("oskar_fits_image_to_sky_model");
     opt.setDescription("Converts a FITS image to an OSKAR sky model. A number "
             "of options are provided to control how much of the image is used "
             "to make the sky model.");
@@ -56,8 +56,8 @@ int main(int argc, char** argv)
             "before saving the regrouped pixel values in the sky model. "
             "For example, a downsample factor of 2 would scale the image down "
             "by 50% in both dimensions before the format conversion.", 1, "1");
-    opt.addFlag("-n", "Noise floor. Pixels below this value in the original "
-            "image will be ignored.", 1, "0.0");
+    opt.addFlag("-n", "Noise floor in Jy/PIXEL. Pixels below this value "
+            "will be ignored.", 1, "0.0");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
 
