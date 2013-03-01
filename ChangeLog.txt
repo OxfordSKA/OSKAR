@@ -1,4 +1,7 @@
-2013-02-xx  OSKAR-2.2.0
+2013-03-xx  OSKAR-2.2.0
+
+    * Fixed a subtle bug that could cause element pattern data to be loaded
+      incorrectly for stations in some cases.
 
     * Fixed incorrect 'power' filename suffix on voltage beam pattern images.
 
