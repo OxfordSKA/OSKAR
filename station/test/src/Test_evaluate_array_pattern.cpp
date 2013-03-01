@@ -33,9 +33,12 @@
 #include "station/oskar_station_model_free.h"
 #include "station/oskar_station_model_init.h"
 #include "station/oskar_station_model_type.h"
-#include "station/oskar_station_model_load_config.h"
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_station_model_multiply_by_wavenumber.h"
+#include "station/oskar_station_model_set_element_coords.h"
+#include "station/oskar_station_model_set_element_errors.h"
+#include "station/oskar_station_model_set_element_orientation.h"
+#include "station/oskar_station_model_set_element_weight.h"
 #include "station/oskar_evaluate_array_pattern.h"
 #include "station/oskar_evaluate_array_pattern_hierarchical.h"
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
@@ -88,12 +91,14 @@ static void check_images(const oskar_Image* image1, const oskar_Image* image2)
         CPPUNIT_FAIL("Inconsistent frequency dimensions.");
         return;
     }
-    if (image1->data.type & OSKAR_COMPLEX != image2->data.type & OSKAR_COMPLEX)
+    if ((image1->data.type & OSKAR_COMPLEX) !=
+            (image2->data.type & OSKAR_COMPLEX))
     {
         CPPUNIT_FAIL("Inconsistent data types (complex flag).");
         return;
     }
-    if (image1->data.type & OSKAR_MATRIX != image2->data.type & OSKAR_MATRIX)
+    if ((image1->data.type & OSKAR_MATRIX) !=
+            (image2->data.type & OSKAR_MATRIX))
     {
         CPPUNIT_FAIL("Inconsistent data types (matrix flag).");
         return;
@@ -187,11 +192,13 @@ static void set_up_beam_pattern(oskar_Image* bp, int type, bool polarised,
     bp->time_start_mjd_utc = mjd;
 }
 
+#if 0
 static void set_up_image(oskar_Image* image, const oskar_Image* beam_pattern)
 {
     int type;
     type = oskar_mem_base_type(beam_pattern->data.type);
 }
+#endif
 
 static void set_up_station1(oskar_StationModel* station, int num_x, int num_y,
         int type, double beam_ra_deg, double beam_dec_deg, double freq_hz,
@@ -201,16 +208,9 @@ static void set_up_station1(oskar_StationModel* station, int num_x, int num_y,
     double sep_m = 1.0;
     int dummy = 0, ix, iy, i;
 
-    /* Open a temporary file for writing station coordinates. */
-    char filename[L_tmpnam];
-    tmpnam(filename);
-    FILE* file = fopen(filename, "w");
-    if (!file)
-    {
-        *status = OSKAR_ERR_FILE_IO;
-        CPPUNIT_FAIL("Could not create temporary station file.\n");
-        return;
-    }
+    /* Initialise the station model. */
+    oskar_station_model_init(station, type, OSKAR_LOCATION_CPU,
+            num_x * num_y, status);
 
     /* Generate a square station. */
     for (iy = 0, i = 0; iy < num_y; ++iy)
@@ -220,19 +220,27 @@ static void set_up_station1(oskar_StationModel* station, int num_x, int num_y,
             float x, y;
             x = ix * sep_m - (num_x - 1) * sep_m / 2;
             y = iy * sep_m - (num_y - 1) * sep_m / 2;
-            fprintf(file, "%f, %f\n", x, y);
+
+            oskar_station_model_set_element_coords(station, i,
+                    x, y, 0.0, 0.0, 0.0, 0.0, status);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
+            oskar_station_model_set_element_errors(station, i,
+                    1.0, 0.0, 0.0, 0.0, status);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
+            oskar_station_model_set_element_weight(station, i,
+                    1.0, 0.0, status);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
+            oskar_station_model_set_element_orientation(station, i,
+                    90.0, 0.0, status);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
         }
     }
-    fclose(file);
 
     /* Load the station file. */
-    oskar_station_model_init(station, type, OSKAR_LOCATION_CPU, 0, status);
-    oskar_station_model_load_config(station, filename, status);
     oskar_station_model_analyse(station, &dummy, status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
     oskar_station_model_multiply_by_wavenumber(station, freq_hz, status);
-
-    /* Remove the temporary file. */
-    remove(filename);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
 
     /* Set meta-data. */
     station->longitude_rad = 0.0;
@@ -418,6 +426,7 @@ void Test_evaluate_array_pattern::test()
             ra_deg, dec_deg, freq_hz, &status);
     set_up_station1(&station_cpu_d, station_side, station_side, OSKAR_DOUBLE,
             ra_deg, dec_deg, freq_hz, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     oskar_station_model_init(&station_gpu_f, OSKAR_SINGLE, OSKAR_LOCATION_GPU,
             0, &status);
     oskar_station_model_init(&station_gpu_d, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,

@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include "matlab/common/oskar_matlab_common.h"
 #include <QtCore/QSettings>
 #include <QtCore/QString>
+
+#include "matlab/common/oskar_matlab_common.h"
 #include <mex.h>
 
 // oskar.settings.set(filename, key, value)
