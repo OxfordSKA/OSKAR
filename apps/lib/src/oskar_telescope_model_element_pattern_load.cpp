@@ -56,7 +56,7 @@ static const char element_y_cst_file[] = "element_pattern_y_cst.txt";
 static void load_directories(oskar_TelescopeModel* telescope,
         oskar_Log* log, const oskar_SettingsTelescope* settings,
         const QDir& cwd, oskar_StationModel* station,
-        int depth, QHash<QString, QString>& files,
+        int depth, QHash<QString, QString> files,
         QHash<QString, oskar_ElementModel*>& models, int* status);
 static void load_element_patterns(oskar_Log* log,
         const oskar_SettingsTelescope* settings,
@@ -112,7 +112,7 @@ void oskar_telescope_model_element_pattern_load(oskar_TelescopeModel* telescope,
 static void load_directories(oskar_TelescopeModel* telescope,
         oskar_Log* log, const oskar_SettingsTelescope* settings,
         const QDir& cwd, oskar_StationModel* station,
-        int depth, QHash<QString, QString>& files,
+        int depth, QHash<QString, QString> files,
         QHash<QString, oskar_ElementModel*>& models, int* status)
 {
     // Check if safe to proceed.
