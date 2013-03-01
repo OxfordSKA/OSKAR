@@ -236,6 +236,7 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         ++depth;
         LVI("Nside", gen->nside);
         LVI("(Num. sources)", (12 * (gen->nside) * (gen->nside)));
+        LV("Amplitude [Jy]", "%.3e", gen->amplitude);
         ++depth;
         oskar_log_settings_sky_filter(log, depth, &gen->filter);
         oskar_log_settings_sky_extended(log, depth, &gen->extended_sources);
@@ -271,6 +272,12 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
     depth = 1;
     LVS0("Output OSKAR sky model text file", s->sky.output_text_file);
     LVS0("Output OSKAR sky model binary file", s->sky.output_binary_file);
+
+    /* Advanced settings. */
+    if (s->sky.zero_failed_gaussians)
+    {
+        LVB("Remove failed Gaussian sources", s->sky.zero_failed_gaussians);
+    }
 }
 
 void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
