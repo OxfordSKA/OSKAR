@@ -33,6 +33,7 @@
 extern "C" {
 #endif
 
+#if 0
 /* Single precision. */
 void oskar_dftw_o2c_2d_omp_f(const int n_in, const float* x_in,
         const float* y_in, const float2* weights_in, const int n_out,
@@ -85,6 +86,59 @@ void oskar_dftw_o2c_2d_omp_f(const int n_in, const float* x_in,
                 out_new.y = out.y + out_cnt.y;
                 out_c.y = (out_new.y - out.y) - out_cnt.y;
                 out.y = out_new.y;
+            }
+        }
+
+        /* Store the output point. */
+        output[i_out] = out;
+    }
+}
+#endif
+
+/* Single precision. */
+void oskar_dftw_o2c_2d_omp_f(const int n_in, const float* x_in,
+        const float* y_in, const float2* weights_in, const int n_out,
+        const float* x_out, const float* y_out, float2* output)
+{
+    int i_out = 0;
+
+    /* Loop over output points. */
+    #pragma omp parallel for private(i_out)
+    for (i_out = 0; i_out < n_out; ++i_out)
+    {
+        int i;
+        float xp_out, yp_out;
+        float2 out;
+
+        /* Clear output value. */
+        out.x = 0.0f;
+        out.y = 0.0f;
+
+        /* Get the output position. */
+        xp_out = x_out[i_out];
+        yp_out = y_out[i_out];
+
+        /* Loop over input points. */
+        for (i = 0; i < n_in; ++i)
+        {
+            float signal_x, signal_y;
+
+            /* Calculate the phase for the output position. */
+            {
+                float a;
+                a = xp_out * x_in[i] + yp_out * y_in[i];
+                signal_x = cosf(a);
+                signal_y = sinf(a);
+            }
+
+            /* Perform complex multiply-accumulate. */
+            {
+                float2 w;
+                w = weights_in[i];
+                out.x += signal_x * w.x;
+                out.y -= signal_y * w.x;
+                out.x += signal_y * w.y;
+                out.y += signal_x * w.y;
             }
         }
 
