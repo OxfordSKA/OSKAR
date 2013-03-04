@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -153,37 +153,5 @@ void Test_StationModel::test_load_double()
     }
 
     // Remove the test file.
-    remove(filename);
-}
-
-
-#include "station/oskar_station_model_load_pointing_file.h"
-
-/**
- * @details
- * Tests loading a pointing file.
- */
-void Test_StationModel::test_load_pointing_file()
-{
-    int status = 0;
-
-    // Create a telescope model.
-    oskar_StationModel station(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-
-    // Create a pointing file.
-    const char* filename = "temp_pointing.txt";
-    FILE* file = fopen(filename, "w");
-    fprintf(file, "# This is a comment.\n");
-    fprintf(file, "*, *, 10, 20.1, RADEC\n");
-    fprintf(file, "1, 2, 45.5, 60.5, AZEL\n");
-    fprintf(file, "1, 2, 45.5, 60.5, azel\n");
-    fprintf(file, "this is junk\n");
-    fprintf(file, "1, 3, 12.3\n");
-    fclose(file);
-
-    // Load the pointing file.
-    oskar_station_model_load_pointing_file(&station, filename, &status);
-
-    // Remove the pointing file.
     remove(filename);
 }

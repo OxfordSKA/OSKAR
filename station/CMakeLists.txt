@@ -41,7 +41,6 @@ set(station_SRC
     src/oskar_station_model_init_child_stations.c
     src/oskar_station_model_init.c
     src/oskar_station_model_load_config.c
-    src/oskar_station_model_load_pointing_file.c
     src/oskar_station_model_location.c
     src/oskar_station_model_multiply_by_wavenumber.c
     src/oskar_station_model_override_element_gains.c
