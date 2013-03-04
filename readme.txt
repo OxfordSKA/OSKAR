@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.1-beta                                  Last update: 23 October 2012 |
+| OSKAR 2.2                                          Last update: 4 March 2013 |
 +------------------------------------------------------------------------------+
 
 1. OSKAR: The Open Square Kilometre Array Radio Telescope Simulator

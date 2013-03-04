@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.1-beta                                  Last update: 23 October 2012 |
+| OSKAR 2.2                                          Last update: 4 March 2013 |
 +------------------------------------------------------------------------------+
 
 1. Introduction
@@ -56,7 +56,7 @@ OSKAR can be built by issuing the following commands:
 
     $ mkdir build
     $ cd build
-    $ cmake [OPTIONS] ../path/to/top/level/CMakeLists.txt
+    $ cmake [OPTIONS] ../path/to/top/level/source/folder
     $ make
 
 OSKAR can then be installed with:
