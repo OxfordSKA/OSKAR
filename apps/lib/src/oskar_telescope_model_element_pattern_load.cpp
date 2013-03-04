@@ -60,7 +60,7 @@ static void load_directories(oskar_TelescopeModel* telescope,
         QHash<QString, oskar_ElementModel*>& models, int* status);
 static void load_element_patterns(oskar_Log* log,
         const oskar_SettingsTelescope* settings,
-        oskar_StationModel* station, QHash<QString, QString>& data_files,
+        oskar_StationModel* station, const QHash<QString, QString>& data_files,
         QHash<QString, oskar_ElementModel*>& models, int* status);
 
 extern "C"
@@ -191,7 +191,7 @@ static void load_directories(oskar_TelescopeModel* telescope,
 
 static void load_element_patterns(oskar_Log* log,
         const oskar_SettingsTelescope* settings, oskar_StationModel* station,
-        QHash<QString, QString>& data_files,
+        const QHash<QString, QString>& data_files,
         QHash<QString, oskar_ElementModel*>& models, int* status)
 {
     // Check if safe to proceed.
