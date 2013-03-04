@@ -1,4 +1,4 @@
-2013-03-xx  OSKAR-2.2.0
+2013-03-04  OSKAR-2.2.0
 
     * Fixed a subtle bug that could cause element pattern data to be loaded
       incorrectly in some telescope configurations, where element pattern data
