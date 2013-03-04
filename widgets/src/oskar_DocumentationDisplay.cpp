@@ -35,6 +35,10 @@
 #include <QtGui/QTextBrowser>
 #include <QtGui/QVBoxLayout>
 
+static void add_doc(QString& html, const char* link, const char* title,
+        const char* desc);
+
+
 oskar_DocumentationDisplay::oskar_DocumentationDisplay(QWidget *parent)
 : QDialog(parent)
 {
@@ -63,40 +67,68 @@ oskar_DocumentationDisplay::oskar_DocumentationDisplay(QWidget *parent)
             "OSKAR-2 correspondence to the following email address:");
     html.append("<ul><li><a href=\"mailto:oskar@oerc.ox.ac.uk\">"
             "oskar@oerc.ox.ac.uk</a></li></ul>");
+
     html.append("</p>");
     html.append("<p>The following PDF documents are available:</p>");
     html.append("<ol>");
-    html.append("<p><li>Release Notes<ul>");
-    html.append("<li>Describes the features in the current release of "
-            "OSKAR-2, and addresses common questions about the release.</li>");
-    html.append("</ul></li></p>");
-    html.append("<p><li>Installation Guide<ul>");
-    html.append("<li>Describes how to build and install OSKAR-2.</li>");
-    html.append("</ul></li></p>");
-    html.append("<p><li>Example<ul>");
-    html.append("<li>Describes how to run an example simulation and test that "
-            "your version of OSKAR-2 is working as intended.</li>");
-    html.append("</ul></li></p>");
-    html.append("<p><li>Theory of Operation<ul>");
-    html.append("<li>Describes the theory of operation of OSKAR-2, its "
+
+    add_doc(html,
+            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Introduction.pdf",
+            "Introduction",
+            "An introduction to the OSKAR-2 documentation");
+    add_doc(html,
+            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Release-Notes-and-FAQ.pdf",
+            "Release Notes & FAQ",
+            "Describes the features of the current release of OSKAR-2 and "
+            "addresses common questions about the release");
+    add_doc(html,
+            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Install.pdf",
+            "Installation Guide",
+            "Describes how to build and install OSKAR-2");
+    add_doc(html,
+            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Example.pdf",
+            "Example",
+            "Describes how to run an example simulation and test that "
+            "your version of OSKAR-2 is working as intended");
+    add_doc(html,
+            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Theory.pdf",
+            "Theory of Operation",
+            "Describes the theory of operation of OSKAR-2, its "
             "implementation of the measurement equation and its treatment of "
             "polarisation. Please read this document to verify that OSKAR-2 "
-            "works as you expect.</li>");
-    html.append("</ul></li></p>");
-    html.append("<p><li>Apps<ul>");
-    html.append("<li>Describes the available OSKAR-2 applications and the "
-            "MATLAB interface.</li>");
-    html.append("</ul></li></p>");
-    html.append("<p><li>Sky Model<ul>");
-    html.append("<li>Describes the format of the OSKAR-2 sky model files.</li>");
-    html.append("</ul></li></p>");
-    html.append("<p><li>Telescope Model<ul>");
-    html.append("<li>Describes the format of the OSKAR-2 telescope model "
-            "files and directories.</li>");
-    html.append("</ul></li></p>");
-    html.append("<p><li>Settings Files<ul>");
-    html.append("<li>Describes the format of the OSKAR-2 settings files.</li>");
-    html.append("</ul></li></p>");
+            "works as you expect");
+    add_doc(html,
+            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Apps.pdf",
+            "Applications",
+            "Describes the available OSKAR-2 applications");
+    add_doc(html,
+            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Sky-Model.pdf",
+            "Sky Model",
+            "Describes the format of the OSKAR-2 sky model files");
+    add_doc(html,
+            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Telescope-Model.pdf",
+            "Telescope Model",
+            "Describes the format of the OSKAR-2 telescope model files and "
+            "directories");
+    add_doc(html,
+            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Pointing-File.pdf",
+            "Pointing File",
+            "Describes the format of OSKAR-2 pointing files");
+    add_doc(html,
+            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Settings-Files.pdf",
+            "Settings Files",
+            "Describes the format of the OSKAR-2 settings files");
+    add_doc(html,
+            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-MATLAB-Interface.pdf",
+            "MATLAB Interface",
+            "Describes an experimental interface for accessing OSKAR data types "
+            "and making images of visibility data in MATLAB");
+    add_doc(html,
+            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Binary-File-Format.pdf",
+            "Binary File Format",
+            "Describes the format of binary files written by OSKAR applications");
+
+
     html.append("</ol>");
     html.append("<p></p>");
     html.append("</body></html>");
@@ -117,3 +149,17 @@ oskar_DocumentationDisplay::oskar_DocumentationDisplay(QWidget *parent)
     connect(buttons, SIGNAL(accepted()), this, SLOT(accept()));
     vLayoutMain->addWidget(buttons);
 }
+
+static void add_doc(QString& html, const char* link, const char* title,
+        const char* desc)
+{
+    html.append("<p>");
+    html.append("<li>&nbsp;");
+    html.append(QString("<a href=\"%1\">%2</a>").arg(link).arg(title));
+    html.append("<ul>");
+    html.append(QString("<li>%1.</li>").arg(desc));
+    html.append("</ul>");
+    html.append("</li>");
+    html.append("</p>");
+}
+
