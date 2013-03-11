@@ -26,7 +26,7 @@ set(sky_SRC
     src/oskar_ra_dec_to_hor_lmn.c
     src/oskar_ra_dec_to_rel_lmn_cuda.cu
     src/oskar_ra_dec_to_rel_lmn.c
-    src/oskar_rebin_sky_cuda.cu
+    #src/oskar_rebin_sky_cuda.cu # Doesn't work on compute 1.3 architectures.
     src/oskar_sky_model_append_to_set.c
     src/oskar_sky_model_append.c
     src/oskar_sky_model_combine_set.c

@@ -1,3 +1,7 @@
+2013-03-11  OSKAR-2.2.1
+
+    * Fixed a problem that caused compilation to fail on CUDA 1.x architectures.
+
 2013-03-04  OSKAR-2.2.0
 
     * Fixed a subtle bug that could cause element pattern data to be loaded
