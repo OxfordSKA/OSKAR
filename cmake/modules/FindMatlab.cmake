@@ -79,15 +79,26 @@ else (WIN32)
 
     # HACK: find_library doesn't seem to be able to find versioned libraries... :(
     set(MATLAB_QT_LIBS QtCore QtXml QtGui)
-    foreach (lib ${LIB_NAMES})
-        string(TOUPPER ${lib} _LIB)
-        find_file(MATLAB_QT_${_LIB}_LIBRARY ${lib}
-            NAMES lib${lib}.so lib${lib}.so.4 lib${lib}.dylib lib${lib}.dylib.4
-            HINTS ${MATLAB_ROOT_HINTS}
-            PATHS ${MATLAB_ROOT_PATHS}
-            PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
-            NO_DEFAULT_PATH)
-    endforeach ()
+    if (APPLE)
+        foreach (lib ${MATLAB_QT_LIBS})
+            string(TOUPPER ${lib} _LIB)
+            find_library(MATLAB_QT_${_LIB}_LIBRARY ${lib}
+                HINTS ${MATLAB_ROOT_HINTS}
+                PATHS ${MATLAB_ROOT_PATHS}
+                PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
+                NO_DEFAULT_PATH)
+        endforeach ()
+    else()
+        foreach (lib ${MATLAB_QT_LIBS})
+            string(TOUPPER ${lib} _LIB)
+            find_file(MATLAB_QT_${_LIB}_LIBRARY ${lib}
+                NAMES lib${lib}.so lib${lib}.so.4 lib${lib}.dylib lib${lib}.dylib.4
+                HINTS ${MATLAB_ROOT_HINTS}
+                PATHS ${MATLAB_ROOT_PATHS}
+                PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
+                NO_DEFAULT_PATH)
+        endforeach ()
+    endif()
 
     find_path(MATLAB_INCLUDE_DIR "mex.h"
         HINTS ${MATLAB_ROOT_HINTS}
