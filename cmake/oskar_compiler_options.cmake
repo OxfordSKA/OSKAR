@@ -20,7 +20,8 @@ set(BUILD_SHARED_LIBS ON)
 
 # Set the include path to include the top-level folder and sub-folders for
 # main oskar library.
-# Note: the convension to omit sub-folders from the include path still
+# **NOTE**
+# The convension to omit sub-folders from the include path still
 # needs review so these includes are added for experimentation only!
 # ------------------------------------------------------------------------------
 include_directories(
@@ -36,16 +37,22 @@ include_directories(
 # Set general compiler flags.
 # ------------------------------------------------------------------------------
 if (NOT WIN32)
-    #set(CMAKE_CXX_FLAGS_RELEASE "-O2 -fPIC -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT -fvisibility=hidden")
-    #set(CMAKE_C_FLAGS_RELEASE   "-O2 -fPIC -DNDEBUG -fvisibility=hidden")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -fPIC -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    set(CMAKE_C_FLAGS_RELEASE   "-O2 -fPIC -DNDEBUG")
-
-    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -fPIC -g -Wall")
-    set(CMAKE_C_FLAGS_DEBUG   "-O0 -fPIC -g -Wall")
+    if (NOT APPLE)
+        set(CMAKE_CXX_FLAGS "-fPIC")
+        set(CMAKE_C_FLAGS "-fPIC")
+    endif ()
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
+    #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    set(CMAKE_C_FLAGS_RELEASE   "-O2 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-02 -g -Wall")
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "-02 -g -Wall")
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall")
+    set(CMAKE_C_FLAGS_DEBUG   "-O0 -g -Wall")
+    set(CMAKE_CXX_FLAGS_MINSIZEREL "-O1 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    set(CMAKE_C_FLAGS_MINSIZEREL "-O1 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
 
     if (CMAKE_COMPILER_IS_GNUCC)
-        #set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fvisibility=hidden")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wextra")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -pedantic")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wcast-align")
@@ -56,7 +63,6 @@ if (NOT WIN32)
     endif ()
 
     if (CMAKE_COMPILER_IS_GNUCXX)
-        #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fvisibility=hidden")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wextra")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pedantic")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-align")
@@ -93,7 +99,6 @@ elseif (MSVC)
     set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}     /wd4996")
 endif ()
 
-
 # Rpath settings for OS X
 # ------------------------------------------------------------------------------
 if (APPLE)
@@ -101,6 +106,8 @@ if (APPLE)
 endif (APPLE)
 
 # Set CUDA releated compiler flags.
+# --compiler-options or -Xcompiler: specify options directly to the compiler
+#                                   that nvcc encapsulates.
 # ------------------------------------------------------------------------------
 if (CUDA_FOUND)
     if (NOT WIN32)
@@ -108,33 +115,39 @@ if (CUDA_FOUND)
         set(CUDA_VERBOSE_BUILD OFF)
 
         # General NVCC compiler options.
-        list(APPEND CUDA_NVCC_FLAGS_RELEASE -O2;)
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG -O0;)
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG -g;)
+        set(CUDA_NVCC_FLAGS_RELEASE -O2)
+        set(CUDA_NVCC_FLAGS_DEBUG -O0;-g)
+        set(CUDA_NVCC_FLAGS_RELWIDTHDEBINFO "-02 -g")
+        set(CUDA_NVCC_FLAGS_MINSIZEREL -01)
 
         # Options passed to the compiler NVCC encapsulates.
-        list(APPEND CUDA_NVCC_FLAGS_RELEASE --compiler-options;-O2;)
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-O0;)
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-g;)
+        list(APPEND CUDA_NVCC_FLAGS_RELEASE -Xcompiler;-O2)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-O0)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-g)
+        list(APPEND CUDA_NVCC_FLAGS_RELWIDTHDEBINFO -Xcompiler;-02)
+        list(APPEND CUDA_NVCC_FLAGS_RELWIDTHDEBINFO -Xcompiler;-g)
+        list(APPEND CUDA_NVCC_FLAGS_MINSIZEREL -Xcompiler;-01)
 
         if (CMAKE_COMPILER_IS_GNUCC)
-            list(APPEND CUDA_NVCC_FLAGS_RELEASE --compiler-options;-fPIC;)
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-fPIC;)
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wall;)
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wextra;)
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-parameter;)
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-variadic-macros;)
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-long-long;)
+            if (NOT APPLE)
+                list(APPEND CUDA_NVCC_FLAGS_RELEASE -Xcompiler;-fPIC;)
+                list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-fPIC;)
+            endif()
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wall;)
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wextra;)
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-parameter;)
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-variadic-macros;)
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-long-long;)
             # Disable warning about missing initializers (for CUDA Thrust).
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-missing-field-initializers;)
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-missing-field-initializers;)
             # Disable warning about "unsigned int* __get_precalculated_matrix(int) defined but not used".
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-function;)
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-function;)
             # Ignore warnings from CUDA headers by specifying them as system headers.
             set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -isystem ${CUDA_INCLUDE_DIRS}")
             set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} -isystem ${CUDA_INCLUDE_DIRS}")
             if (NOT APPLE)
                 # Disable warning about "variable '__f' set but not used".
-                list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-but-set-variable;)
+                list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-but-set-variable;)
             endif ()
         endif()
 
@@ -179,51 +192,6 @@ if (CUDA_FOUND)
     add_definitions(-DCUDA_ARCH=${CUDA_ARCH})
 endif (CUDA_FOUND)
 
-set(VERBOSE ON)
-
-if (VERBOSE)
-    message(STATUS "")
-    message(STATUS "Compiler:")
-    message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
-    message(STATUS "")
-    message(STATUS "  C++ flags:")
-    message(STATUS "    all: ${CMAKE_CXX_FLAGS}")
-    message(STATUS "    Release: ${CMAKE_CXX_FLAGS_RELEASE}")
-    message(STATUS "    RelWithDebInfo: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-    message(STATUS "    debug: ${CMAKE_CXX_FLAGS_DEBUG}")
-    message(STATUS "")
-    message(STATUS "  C flags:")
-    message(STATUS "    all: ${CMAKE_C_FLAGS}")
-    message(STATUS "    Release: ${CMAKE_C_FLAGS_RELEASE}")
-    message(STATUS "    RelWithDebInfo: ${CMAKE_C_FLAGS_RELWITHDEBINFO}")
-    message(STATUS "    debug: ${CMAKE_C_FLAGS_DEBUG}")
-    message(STATUS "")
-    message(STATUS "  CUDA:")
-    message(STATUS "    all: ${CUDA_NVCC_FLAGS}")
-    message(STATUS "    Release: ${CUDA_NVCC_FLAGS_RELEASE}")
-    message(STATUS "    RelWithDebInfo: ${CUDA_NVCC_FLAGS_RELWITHDEBINFO}")
-    message(STATUS "    debug: ${CUDA_NVCCC_FLAGS_DEBUG}")
-    message(STATUS "")
-endif (VERBOSE)
-
-
-# Set MATLAB mex function compiler flags.
-# ------------------------------------------------------------------------------
-if (MATLAB_FOUND)
-    # TODO the MEXFILE extension should probably be set by FindMatlab.cmake...
-    if (APPLE)
-        set(MATLAB_MEXFILE_EXT mexmaci64)
-        # TODO ... find a way to avoid these link directories
-        link_directories(/usr/local/cuda/lib/)
-        link_directories(${MATLAB_BINARY_DIR}/maci64)
-        set(MATLAB_CXX_FLAGS "-DMATLAB_MEX_FILE -DMX_COMPAT_32 -pthread -flat_namespace -undefined suppress")
-    else ()
-        set(MATLAB_MEXFILE_EXT mexa64)
-        set(MATLAB_CXX_FLAGS "-DMATLAB_MEX_FILE -pthread")
-    endif ()
-endif ()
-
-
 # Configure MSVC runtime.
 if (MSVC)
     # Default to dynamically-linked runtime.
@@ -257,3 +225,32 @@ if (MSVC)
         endforeach ()
     endif ()
 endif ()
+
+if (BUILD_INFO)
+    message(STATUS "")
+    message(STATUS "****************************************************************************")
+    message(STATUS "Compiler Options:")
+    message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
+    message(STATUS "  C++ compiler: ${CMAKE_CXX_COMPILER}")
+    message(STATUS "  C compiler: ${CMAKE_C_COMPILER}")
+    if (${CMAKE_BUILD_TYPE} MATCHES release)
+        message(STATUS "  C++ flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+        message(STATUS "  C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
+        message(STATUS "  CUDA flags: ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_RELEASE}")
+    elseif (${CMAKE_BUILD_TYPE} MATCHES debug)
+        message(STATUS "  C++ flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
+        message(STATUS "  C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
+        message(STATUS "  CUDA flags: ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_DEBUG}")
+    elseif (${CMAKE_BUILD_TYPE} MATCHES relwithdebinfo)
+        message(STATUS "  C++ flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+        message(STATUS "  C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+        message(STATUS "  CUDA flags: ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_RELWITHDEBINFO}")
+    elseif (${CMAKE_BUILD_TYPE} MATCHES minsizerel)
+        message(STATUS "  C++ flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_MINSIZEREL}")
+        message(STATUS "  C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_MINSIZEREL}")
+        message(STATUS "  CUDA flags: ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_MINSIZEREL}")
+    endif ()
+    message(STATUS "****************************************************************************")
+    message(STATUS "")
+endif (BUILD_INFO)
+

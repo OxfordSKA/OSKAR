@@ -308,10 +308,10 @@ set(mex_function_def ${OSKAR_SOURCE_DIR}/matlab/mex_function.def)
 macro(OSKAR_MEX)
 
     parse_arguments(MEX   # prefix
-        "EXTRA_LIBS"      # arg names
-        ""                # option names
-        ${ARGN}
-    )
+        "LIBS"      # arg names
+        ""          # option names
+        ${ARGN})
+
     CAR(MEX_NAME ${MEX_DEFAULT_ARGS})
     CDR(MEX_SOURCES ${MEX_DEFAULT_ARGS})
 
@@ -323,20 +323,35 @@ macro(OSKAR_MEX)
         set(OSKAR_MEX_INSTALL_DIR ${OSKAR_MATLAB_INSTALL_DIR})
     endif()
 
+    # Over-ride compiler flags for mex functions
+    set(CMAKE_CXX_FLAGS "")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+
+    # OS specific options.
+    if (APPLE)
+        set(MATLAB_MEXFILE_EXT mexmaci64)
+        set(MATLAB_COMPILE_FLAGS "-DMATLAB_MEX_FILE -DMX_COMPAT_32 -fno-common -fexceptions")
+        set(MATLAB_LINK_FLAGS "")
+    else ()
+        set(MATLAB_MEXFILE_EXT mexa64)
+        set(CMAKE_CXX_FLAGS "-fPIC")
+        set(MATLAB_COMPILE_FLAGS "-DMATLAB_MEX_FILE -DMX_COMPAT_32")
+        set(MATLAB_LINK_FLAGS "")
+    endif(APPLE)
+
     # Get a unique build target name
     get_filename_component(target ${MEX_SOURCES} NAME_WE)
 
-    add_library(${target} SHARED ${MEX_SOURCES} ${mex_function_def})
-    target_link_libraries(${target}
-        oskar ${MATLAB_LIBRARIES}  # Default libraries
-        ${MEX_EXTRA_LIBS})         # Extra libraries
-
+    add_library(${target} MODULE ${MEX_SOURCES} ${mex_function_def})
+    target_link_libraries(${target} ${MATLAB_LIBRARIES} ${MEX_LIBS})
     set_target_properties(${target} PROPERTIES
         PREFIX        ""
-        OUTPUT_NAME   ${MEX_NAME}
+        OUTPUT_NAME   "${MEX_NAME}"
         SUFFIX        ".${MATLAB_MEXFILE_EXT}"
-        COMPILE_FLAGS ${MATLAB_CXX_FLAGS}
-        LINK_FLAGS    ${MATLAB_CXX_FLAGS}
+        COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS}"
+        LINK_FLAGS    "${MATLAB_LINK_FLAGS}"
         INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
         INSTALL_RPATH_USE_LINK_PATH TRUE
     )
