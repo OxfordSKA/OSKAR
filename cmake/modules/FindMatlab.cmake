@@ -77,40 +77,18 @@ else (WIN32)
             NO_DEFAULT_PATH)
     endforeach ()
 
-    # HACK: find_library doesnt seem to be able to find versioned libraries... :(
-    if (NOT APPLE)
-        find_library(MATLAB_QT_QTCORE_LIBRARY libQtCore.so.4
+    # HACK: find_library doesn't seem to be able to find versioned libraries... :(
+    set(MATLAB_QT_LIBS QtCore QtXml QtGui)
+    foreach (lib ${LIB_NAMES})
+        string(TOUPPER ${lib} _LIB)
+        find_file(MATLAB_QT_${_LIB}_LIBRARY ${lib}
+            NAMES lib${lib}.so lib${lib}.so.4 lib${lib}.dylib lib${lib}.dylib.4
             HINTS ${MATLAB_ROOT_HINTS}
             PATHS ${MATLAB_ROOT_PATHS}
             PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
             NO_DEFAULT_PATH)
-        find_library(MATLAB_QT_QTGUI_LIBRARY libQtGui.so.4
-            HINTS ${MATLAB_ROOT_HINTS}
-            PATHS ${MATLAB_ROOT_PATHS}
-            PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
-            NO_DEFAULT_PATH)
-        find_library(MATLAB_QT_QTXML_LIBRARY libQtXml.so.4
-            HINTS ${MATLAB_ROOT_HINTS}
-            PATHS ${MATLAB_ROOT_PATHS}
-            PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
-            NO_DEFAULT_PATH)
-    else ()
-        find_library(MATLAB_QT_QTCORE_LIBRARY QtCore
-            HINTS ${MATLAB_ROOT_HINTS}
-            PATHS ${MATLAB_ROOT_PATHS}
-            PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
-            NO_DEFAULT_PATH)
-        find_library(MATLAB_QT_QTGUI_LIBRARY QtGui
-            HINTS ${MATLAB_ROOT_HINTS}
-            PATHS ${MATLAB_ROOT_PATHS}
-            PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
-            NO_DEFAULT_PATH)
-        find_library(MATLAB_QT_QTXML_LIBRARY QtXml
-            HINTS ${MATLAB_ROOT_HINTS}
-            PATHS ${MATLAB_ROOT_PATHS}
-            PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
-            NO_DEFAULT_PATH)
-    endif()
+    endforeach ()
+
     find_path(MATLAB_INCLUDE_DIR "mex.h"
         HINTS ${MATLAB_ROOT_HINTS}
         PATHS ${MATLAB_ROOT_PATHS}
@@ -136,10 +114,7 @@ if(MATLAB_INCLUDE_DIR AND MATLAB_LIBRARIES AND MATLAB_BINARY_DIR)
 endif(MATLAB_INCLUDE_DIR AND MATLAB_LIBRARIES AND MATLAB_BINARY_DIR)
 
 if (MATLAB_FOUND)
-    message(STATUS "Found MATLAB")
-    message(STATUS "  * INCLUDE_DIR: ${MATLAB_INCLUDE_DIR}")
-    message(STATUS "  * LIBRARIES: ${MATLAB_LIBRARIES}")
-    message(STATUS "  * BINARY_DIR: ${MATLAB_BINARY_DIR}")
+    message(STATUS "MATLAB_LIBRARIES: ${MATLAB_LIBRARIES}")
 endif ()
 
 mark_as_advanced(
