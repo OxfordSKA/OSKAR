@@ -89,7 +89,7 @@ else (WIN32)
             PATHS ${MATLAB_ROOT_PATHS}
             PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
             NO_DEFAULT_PATH)
-        find_library(MATLAB_QT_QTCORE_LIBRARY libQtXml.so.4
+        find_library(MATLAB_QT_QTXML_LIBRARY libQtXml.so.4
             HINTS ${MATLAB_ROOT_HINTS}
             PATHS ${MATLAB_ROOT_PATHS}
             PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
@@ -105,7 +105,7 @@ else (WIN32)
             PATHS ${MATLAB_ROOT_PATHS}
             PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
             NO_DEFAULT_PATH)
-        find_library(MATLAB_QT_QTCORE_LIBRARY QtXml
+        find_library(MATLAB_QT_QTXML_LIBRARY QtXml
             HINTS ${MATLAB_ROOT_HINTS}
             PATHS ${MATLAB_ROOT_PATHS}
             PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
