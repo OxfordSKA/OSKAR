@@ -162,14 +162,14 @@ public:
         return (((int)firstArgs.size()-1) + (int)lastArgs.size());
     }
     std::vector<std::string> getArgs() const
-                            {
+    {
         std::vector<std::string> args;
         for (int i = 1; i < (int)firstArgs.size(); ++i)
             args.push_back(*this->firstArgs[i]);
         for (int i = 0; i < (int)lastArgs.size(); ++i)
             args.push_back(*this->lastArgs[i]);
         return args;
-                            }
+    }
     const char* getArg(int i = 0) const
     {
         if ((int)firstArgs.size()-1 > i)
@@ -180,11 +180,13 @@ public:
         return 0;
     }
     std::vector<std::string> getInputFiles(int minRequired = 2) const
-                    {
+    {
         std::vector<std::string> files;
         // Note: minRequired+1 because firstArg[0] == binary name
         bool filesFirst = ((int)this->firstArgs.size() >= minRequired+1) &&
                 ((int)this->lastArgs.size() == 0);
+        using namespace std;
+
         if (filesFirst)
         {
             // Note: starts at 1 as index 0 == the binary name.
@@ -201,7 +203,7 @@ public:
             }
         }
         return files;
-                    }
+    }
     bool check_options(int argc, char** argv)
     {
         addFlag("--help", "Display usage instructions and exit.", false);
@@ -232,24 +234,32 @@ public:
                 return false;
             }
         }
-        // std::cout << std::endl;
-        // std::cout << __PRETTY_FUNCTION__ << std::endl;
-        // std::cout << "firstArgs.size() = " << firstArgs.size() << std::endl;
-        // std::cout << "lastArgs.size()  = " << lastArgs.size() << std::endl;
-        // std::cout << "firstArgs[0]     = " << *firstArgs[0] << std::endl;
-        int numReqArgs = (int)required_.size();
-        int numOptArgs = (int)optional_.size();
-        if (numArgs() < numReqArgs || numArgs() > (numReqArgs +  numOptArgs))
-        {
-            if (numOptArgs > 0)
-                error("Expected %i to %i input argument(s), %i given.",
-                        numReqArgs, numReqArgs + numOptArgs, numArgs());
-            else
-                error("Expected %i input argument(s), %i given", numReqArgs,
-                        numArgs());
+        int minReqArgs = (int)required_.size();
+//        int minOptArgs = (int)optional_.size();
 
+//        using namespace std;
+
+//        cout << "numArgs    = " << numArgs() << endl;
+//        cout << "minReqArgs = " << minReqArgs << endl;
+//        cout << "minOptArgs = " << minOptArgs << endl;
+
+        if (numArgs() < minReqArgs)
+        {
+            error("Expected >= %i input argument(s), %i given", minReqArgs,
+                    numArgs());
             return false;
         }
+//        if (numArgs() < minReqArgs || numArgs() > (minReqArgs +  minOptArgs))
+//        {
+//            if (minOptArgs > 0)
+//                error("Expected %i to %i input argument(s), %i given.",
+//                        minReqArgs, minReqArgs + minOptArgs, numArgs());
+//            else
+//                error("Expected >= %i input argument(s), %i given", minReqArgs,
+//                        numArgs());
+//
+//            return false;
+//        }
         return true;
     }
 

@@ -240,7 +240,7 @@ static void load_noise_freqs(const oskar_Settings* s, oskar_Mem* freqs,
         {
             num_freqs = obs->num_channels;
             start = obs->start_frequency_hz;
-            inc = obs->frequency_inc_hz;;
+            inc = obs->frequency_inc_hz;
         }
         else if (noise->freq.specification == OSKAR_SYSTEM_NOISE_RANGE)
         {

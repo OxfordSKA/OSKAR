@@ -1238,9 +1238,11 @@ void oskar_SettingsModelApps::init_settings_image()
             "synthesis to stack the channels in the final image.");
     k = group + "/channel_start";
     declare(k, "Channel start", oskar_SettingsItem::INT_UNSIGNED);
+    setDependency(k, group + "/channel_snapshots", true);
     setTooltip(k, "The start channel index to include in the image or image cube.");
     k = group + "/channel_end";
     declare(k, "Channel end", oskar_SettingsItem::AXIS_RANGE, "max");
+    setDependency(k, group + "/channel_snapshots", true);
     setTooltip(k, "The end channel index to include in the image or image cube.");
     k = group + "/time_snapshots";
     declare(k, "Time snapshots", oskar_SettingsItem::BOOL, true);
@@ -1249,9 +1251,11 @@ void oskar_SettingsModelApps::init_settings_image()
             "the times in the final image.");
     k = group + "/time_start";
     declare(k, "Time start", oskar_SettingsItem::INT_UNSIGNED);
+    setDependency(k, group + "/time_snapshots", true);
     setTooltip(k, "The start time index to include in the image or image cube.");
     k = group + "/time_end";
     declare(k, "Time end", oskar_SettingsItem::AXIS_RANGE, "max");
+    setDependency(k, group + "/time_snapshots", true);
     setTooltip(k, "The end time index to include in the image or image cube.");
 
 #if 0

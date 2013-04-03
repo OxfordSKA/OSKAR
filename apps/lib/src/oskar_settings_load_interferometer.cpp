@@ -30,9 +30,6 @@
 #include "sky/oskar_date_time_to_mjd.h"
 #include "utility/oskar_log_error.h"
 
-#include <cmath>
-#include <cstdlib>
-#include <cstring>
 #include <QtCore/QSettings>
 #include <QtCore/QByteArray>
 #include <QtCore/QDateTime>
@@ -40,6 +37,10 @@
 #include <QtCore/QDate>
 #include <QtCore/QTime>
 #include <QtCore/QString>
+
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
 
 // local (private) methods
 static int load_noise(oskar_SettingsSystemNoise* noise, const char* filename);
@@ -229,12 +230,8 @@ static int load_noise_type(oskar_SettingsSystemNoiseType* type, QSettings& s,
     s.beginGroup(name);
     {
         get_filename(&type->file, s, "file");
-        s.beginGroup("range");
-        {
-            type->start  = s.value("start").toDouble();
-            type->end    = s.value("end").toDouble();
-        }
-        s.endGroup(); // range
+        type->start  = s.value("start").toDouble();
+        type->end    = s.value("end").toDouble();
     }
     s.endGroup();
 

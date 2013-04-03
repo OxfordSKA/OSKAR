@@ -1,3 +1,11 @@
+2013-xx-xx OSKAR-2.2.2
+
+    * Fixed a bug that caused certain visibility noise settings to be
+      ignored.
+
+    * Added a command line application (oskar_visibilities_add_noise) to
+      add uncorrelated noise to visibilities.
+
 2013-03-11  OSKAR-2.2.1
 
     * Fixed a problem that caused compilation to fail on CUDA 1.x architectures.

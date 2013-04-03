@@ -79,7 +79,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
 {
     int err = OSKAR_SUCCESS;
 
-    /* The location of temporary memory used by this function (needs to be CPU). */
+    /* Location of temporary memory used by this function (needs to be CPU). */
     int location = OSKAR_LOCATION_CPU;
 
     /* Local variables. */
@@ -123,6 +123,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
                 &work_uvw, &err);
     }
 
+    /* Initialise the OSKAR image cube */
     oskar_image_init(im, type, location, &err);
     if (err) return err;
 
@@ -295,6 +296,8 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
                     }
                 }
 
+                oskar_log_message(log, 2, "Number of visibilities %i", vis_im.num_elements);
+
                 /* Get pointer to slice of the image cube. */
                 int slice_offset = ((c * im_num_times + t) * num_pols + p) * num_pixels;
                 oskar_mem_get_pointer(&im_slice, &im->data, slice_offset,
@@ -326,7 +329,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
 
 
 /*
- * TODO make this a stand-alone function?
+ * TODO Make this a stand-alone function?
  *
  * Ref:
  * Cornwell, T.J., & Perley, R.A., 1992,

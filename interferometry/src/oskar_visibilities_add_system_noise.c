@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utility/oskar_vector_types.h"
 #include "interferometry/oskar_visibilities_add_system_noise.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "math/oskar_random_gaussian.h"
@@ -34,9 +35,9 @@
 #include "sky/oskar_ra_dec_to_hor_lmn.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_init.h"
-#include "utility/oskar_vector_types.h"
 #include "utility/oskar_mem_free.h"
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
@@ -57,7 +58,7 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
     int a1, a2;
     double vis_freq;
     int is1, is2;
-    double s1, s2, s;
+    double s1, s2, std;
     oskar_Mem* noise_freq;
     oskar_Mem* noise_rms;
     double mean = 0.0;
@@ -112,7 +113,7 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
 
                 /* Combine antenna std.devs. to evaluate the baseline std.dev.
                  * see (Wrobel & Walker 1999) */
-                s = sqrt(s1*s2);
+                std = sqrt(s1*s2);
 
                 /* Apply noise */
                 switch (vis->amplitude.type)
@@ -121,50 +122,50 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
                     {
                         float2* amps_ = (float2*)vis->amplitude.data;
                         r1 = oskar_random_gaussian(&r2);
-                        amps_[idx].x += r1 * s + mean;
-                        amps_[idx].y += r2 * s + mean;
+                        amps_[idx].x += r1 * std + mean;
+                        amps_[idx].y += r2 * std + mean;
                         break;
                     }
                     case OSKAR_SINGLE_COMPLEX_MATRIX:
                     {
                         float4c* amps_ = (float4c*)vis->amplitude.data;
                         r1 = oskar_random_gaussian(&r2);
-                        amps_[idx].a.x += r1 * s + mean;
-                        amps_[idx].a.y += r2 * s + mean;
+                        amps_[idx].a.x += r1 * std + mean;
+                        amps_[idx].a.y += r2 * std + mean;
                         r1 = oskar_random_gaussian(&r2);
-                        amps_[idx].b.x += r1 * s + mean;
-                        amps_[idx].b.y += r2 * s + mean;
+                        amps_[idx].b.x += r1 * std + mean;
+                        amps_[idx].b.y += r2 * std + mean;
                         r1 = oskar_random_gaussian(&r2);
-                        amps_[idx].c.x += r1 * s + mean;
-                        amps_[idx].c.y += r2 * s + mean;
+                        amps_[idx].c.x += r1 * std + mean;
+                        amps_[idx].c.y += r2 * std + mean;
                         r1 = oskar_random_gaussian(&r2);
-                        amps_[idx].d.x += r1 * s + mean;
-                        amps_[idx].d.y += r2 * s + mean;
+                        amps_[idx].d.x += r1 * std + mean;
+                        amps_[idx].d.y += r2 * std + mean;
                         break;
                     }
                     case  OSKAR_DOUBLE_COMPLEX:
                     {
                         double2* amps_ = (double2*)vis->amplitude.data;
                         r1 = oskar_random_gaussian(&r2);
-                        amps_[idx].x += r1 * s + mean;
-                        amps_[idx].y += r2 * s + mean;
+                        amps_[idx].x += r1 * std + mean;
+                        amps_[idx].y += r2 * std + mean;
                         break;
                     }
                     case OSKAR_DOUBLE_COMPLEX_MATRIX:
                     {
                         double4c* amps_ = (double4c*)vis->amplitude.data;
                         r1 = oskar_random_gaussian(&r2);
-                        amps_[idx].a.x += r1 * s + mean;
-                        amps_[idx].a.y += r2 * s + mean;
+                        amps_[idx].a.x += r1 * std + mean;
+                        amps_[idx].a.y += r2 * std + mean;
                         r1 = oskar_random_gaussian(&r2);
-                        amps_[idx].b.x += r1 * s + mean;
-                        amps_[idx].b.y += r2 * s + mean;
+                        amps_[idx].b.x += r1 * std + mean;
+                        amps_[idx].b.y += r2 * std + mean;
                         r1 = oskar_random_gaussian(&r2);
-                        amps_[idx].c.x += r1 * s + mean;
-                        amps_[idx].c.y += r2 * s + mean;
+                        amps_[idx].c.x += r1 * std + mean;
+                        amps_[idx].c.y += r2 * std + mean;
                         r1 = oskar_random_gaussian(&r2);
-                        amps_[idx].d.x += r1 * s + mean;
-                        amps_[idx].d.y += r2 * s + mean;
+                        amps_[idx].d.x += r1 * std + mean;
+                        amps_[idx].d.y += r2 * std + mean;
                         break;
                     }
                     default:

@@ -30,4 +30,7 @@ if (CPPUNIT_FOUND)
 
     add_test(apps_lib_test apps_lib_test)
 
+    # Binary to test the option parser.
+    add_executable(test_OptionParser src/Test_OptionParser.cpp)
+
 endif()

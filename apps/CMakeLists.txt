@@ -23,32 +23,22 @@ if (QT4_FOUND)
 endif ()
 
 if (CUDA_FOUND)
-    # BINARY: oskar_cuda_system_info
-    set(name oskar_cuda_system_info)
-    oskar_app(${name} ${name}_main.cpp)
+    macro(declare_oskar_apps)
+        foreach (name ${ARGN})
+            oskar_app(${name} ${name}_main.cpp)
+        endforeach()
+    endmacro(declare_oskar_apps)
 
-    # BINARY: oskar_binary_file_query
-    set(name oskar_binary_file_query)
-    oskar_app(${name} ${name}_main.cpp)
-
-    # BINARY: oskar_image_stats
-    set(name oskar_image_stats)
-    oskar_app(${name} ${name}_main.cpp)
-
-    # BINARY: oskar_image_summary
-    set(name oskar_image_summary)
-    oskar_app(${name} ${name}_main.cpp)
-
-    # BINARY: oskar_rebin_sky
-    #set(name oskar_rebin_sky)
-    #oskar_app(${name} ${name}_main.cpp)
-
-    # BINARY: oskar_visibilities_add
-    set(name oskar_visibilities_add)
-    oskar_app(${name} ${name}_main.cpp)
+    declare_oskar_apps(
+        oskar_cuda_system_info
+        oskar_binary_file_query
+        oskar_image_stats
+        oskar_image_summary
+        oskar_visibilities_add
+        #oskar_rebin_sky
+    )
 
     if (CFITSIO_FOUND)
-        # BINARY: oskar_fits_image_to_sky_model
         set(name oskar_fits_image_to_sky_model)
         oskar_app(${name} ${name}_main.cpp EXTRA_LIBS oskar_fits)
     endif ()
@@ -72,6 +62,10 @@ if (QT4_FOUND AND CUDA_FOUND)
 
     # BINARY: oskar_visibilities_to_ms
     set(name oskar_visibilities_to_ms)
+    oskar_qt_app(${name} ${name}_main.cpp)
+
+    # BINARY: oskar_visibilities_add_noise
+    set(name oskar_visibilities_add_noise)
     oskar_qt_app(${name} ${name}_main.cpp)
 
     # BINARY: osakr_sim_tec_screen
