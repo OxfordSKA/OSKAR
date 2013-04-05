@@ -141,18 +141,25 @@ static void load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
     // Get a list of the child stations.
     QStringList children;
     children = cwd.entryList(QDir::AllDirs | QDir::NoDotAndDotDot, QDir::Name);
-    int num_children = children.size();
+    int num_dirs = children.size();
+
+//    printf("num_dirs = %i, depth = %i\n", num_dirs, depth);
+    // XXX fails below here with several stations and:
+    // A) no station folders
+    // B) one station folder
 
     // If the station / child arrays haven't been allocated
     // (by oskar_telescope_load_config() for example), allocate them.
     if (depth == 0 && telescope->station == NULL)
     {
-        oskar_telescope_model_resize(telescope, num_children, status);
+//        printf("HERE A\n");
+        oskar_telescope_model_resize(telescope, num_dirs, status);
     }
-    else if (depth > 0 && num_children > 0 && station->child == NULL)
+    else if (depth > 0 && num_dirs > 0 && station->child == NULL)
     {
+//        printf("HERE B\n");
         int type = oskar_telescope_model_type(telescope);
-        station->child = (oskar_StationModel*) malloc(num_children *
+        station->child = (oskar_StationModel*) malloc(num_dirs *
                 sizeof(oskar_StationModel));
         if (!station->child)
         {
@@ -160,34 +167,42 @@ static void load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
             return;
         }
 
-        for (int i = 0; i < num_children; ++i)
+        for (int i = 0; i < num_dirs; ++i)
         {
             oskar_station_model_init(&station->child[i], type,
                     OSKAR_LOCATION_CPU, 0, status);
         }
     }
+//    printf("HERE C\n");
 
     // Load noise frequency values. (noise files can only be at depth 0).
     if (depth == 0)
     {
+//        printf("HERE D\n");
         // Load the values into the memory of station 0 and copy to
         // noise structures of other stations.
         oskar_Mem* freqs = &(telescope->station[0].noise.frequency);
         load_noise_freqs(settings, freqs, files[freq_file], status);
-        for (int i = 1; i < num_children; ++i)
+        for (int i = 1; i < num_dirs; ++i)
         {
             oskar_Mem* dst = &(telescope->station[i].noise.frequency);
             oskar_mem_copy(dst, freqs, status);
         }
     }
 
+//    printf("HERE E\n");
+
     // Noise files can't currently be deeper than depth 1 (stations).
-    if (num_children == 0 && depth <= 1)
+    if (num_dirs == 0 && depth <= 1)
         load_noise_rms(settings, &station->noise, files, loaded, status);
 
+//    printf("HERE F\n");
+
     // Loop over, and descend into the child stations.
-    for (int i = 0; i < num_children; ++i)
+    for (int i = 0; i < num_dirs; ++i)
     {
+//        printf("HERE G\n");
+
         // Get a pointer to the child station.
         oskar_StationModel* s;
         s = (depth == 0) ? &telescope->station[i] : &station->child[i];
