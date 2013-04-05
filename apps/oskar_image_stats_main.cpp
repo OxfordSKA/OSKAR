@@ -66,19 +66,22 @@ int main(int argc, char** argv)
     opt.get("-c")->getInt(channel);
     opt.get("-p")->getInt(pol);
     opt.get("-t")->getInt(time);
+    bool verbose = opt.isSet("-v") ? true : false;
     vector<string> files = opt.getInputFiles(1);
-    cout << "#"<< endl;
-    cout << "# Statistics for the following images:" << endl;
-    for (int i = 0; i < (int)files.size(); ++i) {
-        cout << "#  [" << setw(2) << i << "] " << files[i] << endl;
-    }
 
-    cout << "#" << endl;
-    cout << "# Data index:" << endl;
-    cout << "#   Channel .... = " << channel << endl;
-    cout << "#   Polarisation = " << pol << endl;
-    cout << "#   Time ....... = " << time << endl;
-    cout << "#" << endl;
+    if (verbose) {
+        cout << "#"<< endl;
+        cout << "# Statistics for the following images:" << endl;
+        for (int i = 0; i < (int)files.size(); ++i) {
+            cout << "#  [" << setw(2) << i << "] " << files[i] << endl;
+        }
+        cout << "#" << endl;
+        cout << "# Data index:" << endl;
+        cout << "#   Channel .... = " << channel << endl;
+        cout << "#   Polarisation = " << pol << endl;
+        cout << "#   Time ....... = " << time << endl;
+        cout << "#" << endl;
+    }
 
     // Generate the statistics ================================================
     int status = OSKAR_SUCCESS;
@@ -86,9 +89,11 @@ int main(int argc, char** argv)
     string sformat = "% -6.3e";
     string sep = ", ";
 
-    fprintf(out, "#\n");
-    fprintf(out, "# file index, minimum, maximum, mean, variance, standard deviation, RMS\n");
-    fprintf(out, "#\n");
+    if (verbose) {
+        fprintf(out, "#\n");
+        fprintf(out, "# file index, minimum, maximum, mean, variance, standard deviation, RMS\n");
+        fprintf(out, "#\n");
+    }
     for (int i = 0; i < (int)files.size(); ++i)
     {
         oskar_Image image;
@@ -131,6 +136,7 @@ void set_options(oskar_OptionParser& opt)
             "statistics (min., max., mean, variance, standard deviation, and "
             "RMS).");
     opt.addRequired("Image file(s)...", "OSKAR image files to analyse.");
+    opt.addFlag("-v", "Verbose");
     opt.addFlag("-c", "Channel index", 1, "0");
     opt.addFlag("-p", "Polarisation index", 1, "0");
     opt.addFlag("-t", "Time index", 1, "0");

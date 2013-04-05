@@ -61,11 +61,13 @@ int main(int argc, char** argv)
     opt.addRequired("OSKAR image file");
     opt.addFlag("-l", "Display the simulation log associated with the image.",
             false, "--log");
+    opt.addFlag("-s", "Display the image settings.", false, "--settings");
     if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     const char* filename = opt.getArg(0);
     bool displayLog = opt.isSet("-l") ? true : false;
+    bool displaySettings = opt.isSet("-s") ? true : false;
 
     try
     {
@@ -79,59 +81,61 @@ int main(int argc, char** argv)
             return error;
         }
 
-        printf("\n");
-        printf("- Image type .............. %s\n",
-                oskar_get_image_type_string(image.image_type));
-        printf("\n");
-        printf("- Data type ............... %s\n",
-                oskar_get_data_type_string(image.data.type));
-        printf("\n");
-        printf("- Field of view (degrees) . %f\n", image.fov_dec_deg);
-        printf("\n");
-        printf("- Image cube dimensions:\n");
-        printf("  - Order ................. ");
-        for (int i = 0; i < 5; ++i)
+        if (!(displayLog || displaySettings))
         {
-            switch (image.dimension_order[i])
+            printf("\n");
+            printf("- Image type .............. %s\n",
+                    oskar_get_image_type_string(image.image_type));
+            printf("\n");
+            printf("- Data type ............... %s\n",
+                    oskar_get_data_type_string(image.data.type));
+            printf("\n");
+            printf("- Field of view (degrees) . %f\n", image.fov_dec_deg);
+            printf("\n");
+            printf("- Image cube dimensions:\n");
+            printf("  - Order ................. ");
+            for (int i = 0; i < 5; ++i)
             {
-                case OSKAR_IMAGE_DIM_RA:
-                    printf("%s", "RA");
-                    break;
-                case OSKAR_IMAGE_DIM_DEC:
-                    printf("%s", "Dec");
-                    break;
-                case OSKAR_IMAGE_DIM_POL:
-                    printf("%s", "Pol");
-                    break;
-                case OSKAR_IMAGE_DIM_TIME:
-                    printf("%s", "Time");
-                    break;
-                case OSKAR_IMAGE_DIM_CHANNEL:
-                    printf("%s", "Channel");
-                    break;
-                default:
-                    fprintf(stderr, "\nERROR: Unrecognised dimension ID.\n");
-                    return OSKAR_FAIL;
-            };
-            if (i < 4) printf(", ");
+                switch (image.dimension_order[i])
+                {
+                    case OSKAR_IMAGE_DIM_RA:
+                        printf("%s", "RA");
+                        break;
+                    case OSKAR_IMAGE_DIM_DEC:
+                        printf("%s", "Dec");
+                        break;
+                    case OSKAR_IMAGE_DIM_POL:
+                        printf("%s", "Pol");
+                        break;
+                    case OSKAR_IMAGE_DIM_TIME:
+                        printf("%s", "Time");
+                        break;
+                    case OSKAR_IMAGE_DIM_CHANNEL:
+                        printf("%s", "Channel");
+                        break;
+                    default:
+                        fprintf(stderr, "\nERROR: Unrecognised dimension ID.\n");
+                        return OSKAR_FAIL;
+                };
+                if (i < 4) printf(", ");
+            }
+            printf("\n");
+            printf("  - Size RA, Dec. (pixels)  %i x %i\n", image.width, image.height);
+            printf("  - No. of polarisations .. %i\n", image.num_pols);
+            printf("  - No. of times .......... %i\n", image.num_times);
+            printf("  - No. of channels ....... %i\n", image.num_channels);
+            printf("\n");
+            printf("- Pointing centre:\n");
+            printf("  - RA (degrees) .......... %f\n", image.centre_ra_deg);
+            printf("  - Dec. (degrees) ........ %f\n", image.centre_dec_deg);
+            printf("\n");
+            printf("- Start time MJD UTC ...... %f\n", image.time_start_mjd_utc);
+            printf("- Time increment (seconds)  %f\n", image.time_inc_sec);
+            printf("\n");
+            printf("- Start frequency (Hz) .... %e\n", image.freq_start_hz);
+            printf("- Frequency increment (Hz)  %e\n", image.freq_inc_hz);
+            printf("\n");
         }
-        printf("\n");
-        printf("  - Size RA, Dec. (pixels)  %i x %i\n", image.width, image.height);
-        printf("  - No. of polarisations .. %i\n", image.num_pols);
-        printf("  - No. of times .......... %i\n", image.num_times);
-        printf("  - No. of channels ....... %i\n", image.num_channels);
-        printf("\n");
-        printf("- Pointing centre:\n");
-        printf("  - RA (degrees) .......... %f\n", image.centre_ra_deg);
-        printf("  - Dec. (degrees) ........ %f\n", image.centre_dec_deg);
-        printf("\n");
-        printf("- Start time MJD UTC ...... %f\n", image.time_start_mjd_utc);
-        printf("- Time increment (seconds)  %f\n", image.time_inc_sec);
-        printf("\n");
-        printf("- Start frequency (Hz) .... %e\n", image.freq_start_hz);
-        printf("- Frequency increment (Hz)  %e\n", image.freq_inc_hz);
-        printf("\n");
-
         // If verbose, print the run log.
         if (displayLog)
         {
@@ -154,7 +158,32 @@ int main(int argc, char** argv)
                 oskar_mem_realloc(&temp, temp.num_elements + 1, &error);
                 if (error) return OSKAR_FAIL;
                 ((char*)temp.data)[temp.num_elements - 1] = 0;
-                printf("- Run Log:\n");
+                printf("%s", (char*)(temp.data));
+            }
+            fclose(stream);
+            oskar_binary_tag_index_free(&index, &error);
+        }
+
+        if (displaySettings)
+        {
+            oskar_BinaryTagIndex* index = NULL;
+            FILE* stream = fopen(filename, "rb");
+            if (!stream)
+                return OSKAR_ERR_FILE_IO;
+            oskar_binary_tag_index_create(&index, stream, &error);
+            size_t data_size = 0;
+            long int data_offset = 0;
+            int tag_error = 0;
+            oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_SETTINGS,
+                    OSKAR_TAG_SETTINGS, 0, &data_size, &data_offset, &tag_error);
+            if (!tag_error)
+            {
+                oskar_Mem temp(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+                oskar_mem_binary_stream_read(&temp, stream, &index,
+                        OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &error);
+                oskar_mem_realloc(&temp, temp.num_elements + 1, &error);
+                if (error) return OSKAR_FAIL;
+                ((char*)temp.data)[temp.num_elements - 1] = 0;
                 printf("%s", (char*)(temp.data));
             }
             fclose(stream);
