@@ -6,6 +6,12 @@
     * Added a command line application (oskar_visibilities_add_noise) to
       add uncorrelated noise to visibilities.
 
+    * Added application to display a summary of meta-data from an OSKAR
+      visibility binary file (oskar_visibilities_summary).
+
+    * Update options of oskar_image_summary to give the option to display the
+      settings used to create the image.
+
 2013-03-11  OSKAR-2.2.1
 
     * Fixed a problem that caused compilation to fail on CUDA 1.x architectures.
