@@ -100,8 +100,8 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
     error = oskar_make_image(&image, log, &vis, &settings.image);
     if (error)
     {
-        oskar_log_error(log, "Failure in oskar_make_image() (%s).",
-                oskar_get_error_string(error));
+        oskar_log_error(log, "Failure in oskar_make_image() [code: %i] (%s).",
+                error, oskar_get_error_string(error));
         return error;
     }
     oskar_log_section(log, "Imaging completed in %.3f sec.", timer.elapsed()/1.0e3);
