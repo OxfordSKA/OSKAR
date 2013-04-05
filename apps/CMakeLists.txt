@@ -35,6 +35,7 @@ if (CUDA_FOUND)
         oskar_image_stats
         oskar_image_summary
         oskar_visibilities_add
+        oskar_visibilities_summary
         #oskar_rebin_sky
     )
 
