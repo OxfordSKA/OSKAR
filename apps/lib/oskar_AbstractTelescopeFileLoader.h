@@ -60,6 +60,7 @@ public:
      *
      * @param[in,out] telescope Pointer to telescope model.
      * @param[in] cwd Reference to the current working directory.
+     * @param[in] num_subdirs Number of subdirectories in the working directory.
      * @param[in,out] filemap Reference to file map to use for this level.
      *                        This should be updated for use at a deeper
      *                        level if necessary.
@@ -68,7 +69,8 @@ public:
      * @return Status code (zero means no error).
      */
     virtual int load(oskar_TelescopeModel* telescope, const QDir& cwd,
-            QHash<QString, QString>& filemap, const oskar_Settings* = 0) = 0;
+            int num_subdirs, QHash<QString, QString>& filemap,
+            const oskar_Settings* = 0) = 0;
 
     /**
      * @brief
@@ -77,8 +79,9 @@ public:
      * @details
      * Implement this function to load a data file into a station model.
      *
-     * @param[in,out] telescope Pointer to telescope model.
+     * @param[in,out] station Pointer to station model.
      * @param[in] cwd Reference to the current working directory.
+     * @param[in] num_subdirs Number of subdirectories in the working directory.
      * @param[in] depth Current depth index.
      * @param[in,out] filemap Reference to file map to use for this level.
      *                        This should be updated for use at a deeper
@@ -88,7 +91,7 @@ public:
      * @return Status code (zero means no error).
      */
     virtual int load(oskar_StationModel* station, const QDir& cwd,
-            int depth, QHash<QString, QString>& filemap,
+            int num_subdirs, int depth, QHash<QString, QString>& filemap,
             const oskar_Settings* = 0) = 0;
 };
 
