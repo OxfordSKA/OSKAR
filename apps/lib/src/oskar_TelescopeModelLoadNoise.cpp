@@ -69,7 +69,8 @@ void oskar_TelescopeModelLoadNoise::load(oskar_TelescopeModel* telescope,
         const QDir& cwd, int num_subdirs, QHash<QString, QString>& filemap,
         int* status)
 {
-    if (*status) return;
+    if (*status || !settings_->interferometer.noise.enable)
+        return;
 
     dataType_ = oskar_telescope_model_type(telescope);
 
@@ -80,7 +81,7 @@ void oskar_TelescopeModelLoadNoise::load(oskar_TelescopeModel* telescope,
     oskar_mem_init(&freqs_, dataType_, 0, 0, 1, status);
     getNoiseFreqs_(&freqs_, filemap[files_[FREQ]], status);
 
-    // No sub-directories (the other load funciton is never called)
+    // No sub-directories (the other load function is never called)
     if (num_subdirs == 0)
     {
         for (int i = 0; i < telescope->num_stations; ++i)
@@ -100,6 +101,9 @@ void oskar_TelescopeModelLoadNoise::load(oskar_StationModel* station,
         const QDir& cwd, int /*num_subdirs*/, int depth,
         QHash<QString, QString>& filemap, int* status)
 {
+    if (*status || !settings_->interferometer.noise.enable)
+        return;
+
     if (*status) return;
 
     // Ignore noise files defined deeper than at the station level (depth == 1)
