@@ -64,13 +64,10 @@ public:
      * @param[in,out] filemap Reference to file map to use for this level.
      *                        This should be updated for use at a deeper
      *                        level if necessary.
-     * @param[in] settings Optional pointer to settings structure.
-     *
-     * @return Status code (zero means no error).
+     * @param[in,out] status Status return code.
      */
     virtual int load(oskar_TelescopeModel* telescope, const QDir& cwd,
-            int num_subdirs, QHash<QString, QString>& filemap,
-            const oskar_Settings* = 0) = 0;
+            int num_subdirs, QHash<QString, QString>& filemap, int* status) = 0;
 
     /**
      * @brief
@@ -86,13 +83,11 @@ public:
      * @param[in,out] filemap Reference to file map to use for this level.
      *                        This should be updated for use at a deeper
      *                        level if necessary.
-     * @param[in] settings Optional pointer to settings structure.
-     *
-     * @return Status code (zero means no error).
+     * @param[in,out] status Status return code.
      */
     virtual int load(oskar_StationModel* station, const QDir& cwd,
             int num_subdirs, int depth, QHash<QString, QString>& filemap,
-            const oskar_Settings* = 0) = 0;
+            int* status) = 0;
 };
 
 #endif /* OSKAR_ABSTRACT_TELESCOPE_FILE_LOADER_H_ */
