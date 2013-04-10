@@ -57,8 +57,8 @@ oskar_TelescopeModelLoadNoise::oskar_TelescopeModelLoadNoise(
 oskar_TelescopeModelLoadNoise::~oskar_TelescopeModelLoadNoise()
 {
     int status = OSKAR_SUCCESS;
-    oskar_mem_free(freqs_, &status);
-    // NOTE status code ignored! ...
+    oskar_mem_free(&freqs_, &status);
+    // Note: status code ignored! ...
 }
 
 
@@ -66,7 +66,7 @@ oskar_TelescopeModelLoadNoise::~oskar_TelescopeModelLoadNoise()
 // - Set up frequency data as this is the same for all stations
 //   and if defined by files these have to be at depth 0.
 void oskar_TelescopeModelLoadNoise::load(oskar_TelescopeModel* telescope,
-        const QDir& cwd, int /*num_subdirs*/, QHash<QString, QString>& filemap,
+        const QDir& cwd, int num_subdirs, QHash<QString, QString>& filemap,
         int* status)
 {
     if (*status) return;
@@ -77,8 +77,20 @@ void oskar_TelescopeModelLoadNoise::load(oskar_TelescopeModel* telescope,
     updateFileMap_(filemap, cwd);
 
     // Set up noise frequency values (this only happens at depth = 0)
-    oskar_mem_init(freqs_, dataType_, 0, 0, 1, status);
-    getNoiseFreqs_(freqs_, filemap[files_[FREQ]], status);
+    oskar_mem_init(&freqs_, dataType_, 0, 0, 1, status);
+    getNoiseFreqs_(&freqs_, filemap[files_[FREQ]], status);
+
+    // No sub-directories (the other load funciton is never called)
+    if (num_subdirs == 0)
+    {
+        for (int i = 0; i < telescope->num_stations; ++i)
+        {
+            oskar_StationModel* station = &telescope->station[i];
+            oskar_mem_copy(&station->noise.frequency, &freqs_, status);
+            setNoiseRMS_(&station->noise, filemap, status);
+        }
+
+    }
 }
 
 
@@ -100,8 +112,10 @@ void oskar_TelescopeModelLoadNoise::load(oskar_StationModel* station,
     // Update the noise files for the current station directory.
     updateFileMap_(filemap, cwd);
 
+
     // Set the frequency noise data field of the station structure.
-    oskar_mem_copy(&station->noise.frequency, freqs_, status);
+    oskar_mem_copy(&station->noise.frequency, &freqs_, status);
+
 
     // Set the noise RMS based on files or settings.
     setNoiseRMS_(&station->noise, filemap, status);
@@ -189,7 +203,7 @@ void oskar_TelescopeModelLoadNoise::setNoiseRMS_(
     const oskar_SettingsSystemNoise& settings_noise = settings_->interferometer.noise;
     oskar_Mem* noise_rms = &noise_model->rms;
     int num_freqs = noise_model->frequency.num_elements;
-    // NOTE the previous noise loader implementation had integration time as
+    // Note: the previous noise loader implementation had integration time as
     // obs_length / number of snapshots which was wrong!
     double integration_time = settings_->interferometer.time_average_sec;
     double bandwidth = settings_->interferometer.channel_bandwidth_hz;

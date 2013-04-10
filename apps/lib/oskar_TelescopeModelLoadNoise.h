@@ -130,7 +130,7 @@ private:
     enum FileIds_ { FREQ, RMS, SENSITIVITY, TSYS, AREA, EFFICIENCY };
     int dataType_;
     QHash<FileIds_, QString> files_;
-    oskar_Mem* freqs_;
+    oskar_Mem freqs_;
     const oskar_Settings* settings_;
 };
 

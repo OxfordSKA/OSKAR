@@ -27,9 +27,7 @@
  */
 
 #include "apps/lib/oskar_set_up_telescope.h"
-#include "apps/lib/oskar_telescope_model_config_load.h"
-#include "apps/lib/oskar_telescope_model_element_pattern_load.h"
-#include "apps/lib/oskar_telescope_model_noise_load.h"
+#include "apps/lib/oskar_telescope_model_load.h"
 
 #include "apps/lib/oskar_telescope_model_save.h"
 
@@ -80,11 +78,8 @@ void oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
     oskar_telescope_model_init(telescope, type, OSKAR_LOCATION_CPU, 0, status);
 
     /* Load the layout and configuration, apply overrides, load noise data. */
-    oskar_telescope_model_config_load(telescope, log,
-            &settings->telescope, status);
-    oskar_telescope_model_config_override(telescope, &settings->telescope,
-            status);
-    oskar_telescope_model_noise_load(telescope, log, settings, status);
+    oskar_telescope_model_load(telescope, log, settings, status);
+    oskar_telescope_model_config_override(telescope, &settings->telescope, status);
 
     /* Set telescope model meta-data, including global pointing settings. */
     oskar_telescope_model_set_metadata(telescope, settings);
@@ -102,10 +97,6 @@ void oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
     {
         case OSKAR_STATION_TYPE_AA:
         {
-            /* Load element pattern data */
-            oskar_telescope_model_element_pattern_load(telescope, log,
-                    &settings->telescope, status);
-
             /* Analyse telescope model to determine whether stations are
              * identical, whether to apply element errors and/or weights. */
             oskar_telescope_model_analyse(telescope, status);
