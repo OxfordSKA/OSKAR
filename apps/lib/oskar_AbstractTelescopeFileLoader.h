@@ -66,7 +66,7 @@ public:
      *                        level if necessary.
      * @param[in,out] status Status return code.
      */
-    virtual int load(oskar_TelescopeModel* telescope, const QDir& cwd,
+    virtual void load(oskar_TelescopeModel* telescope, const QDir& cwd,
             int num_subdirs, QHash<QString, QString>& filemap, int* status) = 0;
 
     /**
@@ -85,7 +85,7 @@ public:
      *                        level if necessary.
      * @param[in,out] status Status return code.
      */
-    virtual int load(oskar_StationModel* station, const QDir& cwd,
+    virtual void load(oskar_StationModel* station, const QDir& cwd,
             int num_subdirs, int depth, QHash<QString, QString>& filemap,
             int* status) = 0;
 };
