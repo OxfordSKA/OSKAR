@@ -39,8 +39,8 @@
 
 #include <QtCore/QDir>
 
-const char oskar_ConfigFileLoader::config_file[] = "config.txt";
-const char oskar_ConfigFileLoader::layout_file[] = "layout.txt";
+const QString oskar_ConfigFileLoader::config_file = "config.txt";
+const QString oskar_ConfigFileLoader::layout_file = "layout.txt";
 
 oskar_ConfigFileLoader::oskar_ConfigFileLoader(const oskar_Settings* settings)
 {
@@ -56,7 +56,7 @@ void oskar_ConfigFileLoader::load(oskar_TelescopeModel* telescope,
         int* status)
 {
     // Check for presence of "config.txt".
-    const char* file = NULL;
+    QString file;
     if (cwd.exists(layout_file))
         file = layout_file;
     else if (cwd.exists(config_file))

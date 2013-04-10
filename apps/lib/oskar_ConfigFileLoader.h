@@ -91,8 +91,8 @@ public:
             int* status);
 
 private:
-    static const char config_file[];
-    static const char layout_file[];
+    static const QString config_file;
+    static const QString layout_file;
     const oskar_Settings* settings_;
 };
 

@@ -99,8 +99,8 @@ private:
     void update_map(QHash<QString, QString>& files, const QDir& cwd);
 
 private:
-    static const char element_x_cst_file[];
-    static const char element_y_cst_file[];
+    static const QString element_x_cst_file;
+    static const QString element_y_cst_file;
     QHash<QString, oskar_ElementModel*> models;
     const oskar_Settings* settings_;
     oskar_Log* log_;

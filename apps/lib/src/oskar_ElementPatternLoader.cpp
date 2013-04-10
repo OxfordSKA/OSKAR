@@ -34,8 +34,8 @@
 
 #include <QtCore/QDir>
 
-const char oskar_ElementPatternLoader::element_x_cst_file[] = "element_pattern_x_cst.txt";
-const char oskar_ElementPatternLoader::element_y_cst_file[] = "element_pattern_y_cst.txt";
+const QString oskar_ElementPatternLoader::element_x_cst_file = "element_pattern_x_cst.txt";
+const QString oskar_ElementPatternLoader::element_y_cst_file = "element_pattern_y_cst.txt";
 
 oskar_ElementPatternLoader::oskar_ElementPatternLoader(
         const oskar_Settings* settings, oskar_Log* log)
@@ -93,10 +93,10 @@ void oskar_ElementPatternLoader::load_element_patterns(oskar_Log* log,
 
     QString files;
     QByteArray element_x, element_y;
-    if (filemap.contains(QString(element_x_cst_file)))
-        element_x = filemap.value(QString(element_x_cst_file)).toAscii();
-    if (filemap.contains(QString(element_y_cst_file)))
-        element_y = filemap.value(QString(element_y_cst_file)).toAscii();
+    if (filemap.contains(element_x_cst_file))
+        element_x = filemap.value(element_x_cst_file).toAscii();
+    if (filemap.contains(element_y_cst_file))
+        element_y = filemap.value(element_y_cst_file).toAscii();
     files.append(element_x);
     files.append(element_y);
 
@@ -144,9 +144,7 @@ void oskar_ElementPatternLoader::update_map(QHash<QString, QString>& files,
 {
     // Update the dictionary of element files for the current directory.
     if (cwd.exists(element_x_cst_file))
-        files[QString(element_x_cst_file)] =
-                cwd.absoluteFilePath(element_x_cst_file);
+        files[element_x_cst_file] = cwd.absoluteFilePath(element_x_cst_file);
     if (cwd.exists(element_y_cst_file))
-        files[QString(element_y_cst_file)] =
-                cwd.absoluteFilePath(element_y_cst_file);
+        files[element_y_cst_file] = cwd.absoluteFilePath(element_y_cst_file);
 }
