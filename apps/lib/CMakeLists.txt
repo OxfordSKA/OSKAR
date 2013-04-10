@@ -3,6 +3,9 @@
 #
 
 set(apps_SRC
+    src/oskar_AbstractTelescopeFileLoader.cpp
+    src/oskar_ConfigFileLoader.cpp
+    src/oskar_ElementPatternLoader.cpp
     src/oskar_evaluate_station_pierce_points.cpp
     src/oskar_imager.cpp
     src/oskar_remove_dir.cpp
@@ -23,6 +26,7 @@ set(apps_SRC
     src/oskar_sim_tec_screen.cpp
     src/oskar_telescope_model_config_load.cpp
     src/oskar_telescope_model_element_pattern_load.cpp
+    src/oskar_telescope_model_load.cpp
     src/oskar_telescope_model_noise_load.cpp
     src/oskar_telescope_model_save.cpp
 )
