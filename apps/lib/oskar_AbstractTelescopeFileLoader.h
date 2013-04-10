@@ -46,9 +46,9 @@ class QDir;
 class OSKAR_APPS_EXPORT oskar_AbstractTelescopeFileLoader
 {
 public:
-    oskar_AbstractTelescopeFileLoader();
+    oskar_AbstractTelescopeFileLoader() {}
 
-    virtual ~oskar_AbstractTelescopeFileLoader();
+    virtual ~oskar_AbstractTelescopeFileLoader() {}
 
     /**
      * @brief

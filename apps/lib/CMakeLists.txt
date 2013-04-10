@@ -3,7 +3,6 @@
 #
 
 set(apps_SRC
-    src/oskar_AbstractTelescopeFileLoader.cpp
     src/oskar_ConfigFileLoader.cpp
     src/oskar_ElementPatternLoader.cpp
     src/oskar_evaluate_station_pierce_points.cpp
