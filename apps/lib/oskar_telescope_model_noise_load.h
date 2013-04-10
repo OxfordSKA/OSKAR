@@ -31,7 +31,6 @@
 
 /**
  * @file oskar_telescope_model_noise_load.h
- * TODO This isn't really just a loader... better function name?
  */
 
 #include "oskar_global.h"
@@ -45,10 +44,22 @@ extern "C" {
 
 /**
  * @brief
- * Populates the noise standard deviation of an OSKAR telescope model.
+ * Populates the oskar_SystemNoiseModel structures of stations in the telescope
+ * model.
  *
  * @details
- * Based on the settings and the files in the telescope model directory.
+ * Loads and/or evaluates lookup tables of RMS noise v.s. frequency for
+ * each station in the telescope model.
+ *
+ * Noise values are derived from settings in the oskar_Settings structure
+ * either directly or by reading files in the telescope model directory.
+ *
+ * The telescope model being populated must have already been allocated in
+ * CPU memory.
+ *
+ * Note that oskar_telescope_model_load_config() should have been called first
+ * to allocate the telescope model for the correct number of stations and/or
+ * child elements.
  *
  * @param[out]    telescope Telescope structure pointer.
  * @param[in,out] log       Pointer to log structure.

@@ -27,6 +27,7 @@ set(apps_SRC
     src/oskar_telescope_model_element_pattern_load.cpp
     src/oskar_telescope_model_load.cpp
     src/oskar_telescope_model_noise_load.cpp
+    src/oskar_TelescopeModelLoadNoise.cpp
     src/oskar_telescope_model_save.cpp
 )
 if(CASACORE_FOUND)

@@ -30,6 +30,7 @@
 #include "apps/lib/oskar_AbstractTelescopeFileLoader.h"
 #include "apps/lib/oskar_ConfigFileLoader.h"
 #include "apps/lib/oskar_ElementPatternLoader.h"
+#include "apps/lib/oskar_TelescopeModelLoadNoise.h"
 #include "interferometry/oskar_telescope_model_location.h"
 #include "station/oskar_station_model_copy.h"
 #include "utility/oskar_log_error.h"
@@ -83,6 +84,7 @@ void oskar_telescope_model_load(oskar_TelescopeModel* telescope,
     QList<oskar_AbstractTelescopeFileLoader*> loaders;
     loaders.push_back(new oskar_ConfigFileLoader(settings)); // Must be first!
     loaders.push_back(new oskar_ElementPatternLoader(settings, log));
+    loaders.push_back(new oskar_TelescopeModelLoadNoise(settings));
 
     // Load everything recursively from the telescope directory tree.
     QHash<QString, QString> filemap;

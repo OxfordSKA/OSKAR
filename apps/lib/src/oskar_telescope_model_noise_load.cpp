@@ -47,10 +47,6 @@
 #include <cmath>
 #include <cfloat>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // System noise filenames.
 static const char freq_file[]        = "noise_frequencies.txt";
 static const char rms_file[]         = "rms.txt";
@@ -78,6 +74,7 @@ static void t_sys_to_rms(oskar_Mem* rms, const oskar_Mem* t_sys,
 static void evaluate_range(oskar_Mem* values, int num_values, double start,
         double end, int* status);
 
+extern "C"
 void oskar_telescope_model_noise_load(oskar_TelescopeModel* telescope,
         oskar_Log* log, const oskar_Settings* settings, int* status)
 {
@@ -116,8 +113,12 @@ void oskar_telescope_model_noise_load(oskar_TelescopeModel* telescope,
     load_directories(telescope, log, settings, telescope_dir, NULL,
             0, files, loaded, status);
     if (*status)
+    {
         oskar_log_error(log, "Loading noise files (%s).",
                 oskar_get_error_string(*status));
+    }
+
+    printf("========> Load complete\n");
 }
 
 
@@ -143,7 +144,7 @@ static void load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
     children = cwd.entryList(QDir::AllDirs | QDir::NoDotAndDotDot, QDir::Name);
     int num_dirs = children.size();
 
-//    printf("num_dirs = %i, depth = %i\n", num_dirs, depth);
+    printf("num_dirs = %i, depth = %i\n", num_dirs, depth);
     // XXX fails below here with several stations and:
     // A) no station folders
     // B) one station folder
@@ -152,12 +153,12 @@ static void load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
     // (by oskar_telescope_load_config() for example), allocate them.
     if (depth == 0 && telescope->station == NULL)
     {
-//        printf("HERE A\n");
+        printf("HERE A\n");
         oskar_telescope_model_resize(telescope, num_dirs, status);
     }
     else if (depth > 0 && num_dirs > 0 && station->child == NULL)
     {
-//        printf("HERE B\n");
+        printf("HERE B\n");
         int type = oskar_telescope_model_type(telescope);
         station->child = (oskar_StationModel*) malloc(num_dirs *
                 sizeof(oskar_StationModel));
@@ -173,12 +174,12 @@ static void load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
                     OSKAR_LOCATION_CPU, 0, status);
         }
     }
-//    printf("HERE C\n");
+    printf("HERE C\n");
 
     // Load noise frequency values. (noise files can only be at depth 0).
     if (depth == 0)
     {
-//        printf("HERE D\n");
+        printf("HERE D\n");
         // Load the values into the memory of station 0 and copy to
         // noise structures of other stations.
         oskar_Mem* freqs = &(telescope->station[0].noise.frequency);
@@ -190,18 +191,18 @@ static void load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
         }
     }
 
-//    printf("HERE E\n");
+    printf("HERE E\n");
 
     // Noise files can't currently be deeper than depth 1 (stations).
     if (num_dirs == 0 && depth <= 1)
         load_noise_rms(settings, &station->noise, files, loaded, status);
 
-//    printf("HERE F\n");
+    printf("HERE F\n");
 
     // Loop over, and descend into the child stations.
     for (int i = 0; i < num_dirs; ++i)
     {
-//        printf("HERE G\n");
+        printf("HERE G\n");
 
         // Get a pointer to the child station.
         oskar_StationModel* s;
@@ -695,6 +696,3 @@ static void evaluate_range(oskar_Mem* values, int num_values, double start,
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 }
 
-#ifdef __cplusplus
-}
-#endif
