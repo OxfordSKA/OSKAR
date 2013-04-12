@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,8 @@ class oskar_SettingsView;
 class QAction;
 class QModelIndex;
 class QWidget;
+class QNetworkAccessManager;
+class QNetworkReply;
 
 class oskar_MainWindow : public QMainWindow
 {
@@ -56,13 +58,15 @@ public slots:
 private slots:
     void about();
     void binLocations();
+    void checkForUpdate();
     void cudaInfo();
     void helpDoc();
+    void openRecentFile();
+    void processNetworkReply(QNetworkReply*);
     void runBeamPattern();
     void runInterferometer();
     void runImager();
     void setHideUnsetItems(bool value);
-    void openRecentFile();
 
 private:
     void runButton();
@@ -88,6 +92,8 @@ private:
     QMenu* recentFileMenu_;
     QAction* separator_;
     QAction* recentFiles_[MaxRecentFiles];
+    QNetworkAccessManager* networkManager_;
+    QString version_url;
 
     // Binary path names.
     QString binary_interferometer_;

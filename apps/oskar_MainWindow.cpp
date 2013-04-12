@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,8 @@
 #include <QtCore/QTimer>
 #include <QtCore/QProcess>
 #include <QtGui/QCloseEvent>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
 
 oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 : QMainWindow(parent)
@@ -173,6 +175,12 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     toolbar->addAction(actRunImager);
     addToolBar(Qt::TopToolBarArea, toolbar);
 
+    // Create the network access manager to check the current version.
+    version_url = "http://www.oerc.ox.ac.uk/~ska/oskar2/current_version.txt";
+    networkManager_ = new QNetworkAccessManager(this);
+    connect(networkManager_, SIGNAL(finished(QNetworkReply*)),
+                this, SLOT(processNetworkReply(QNetworkReply*)));
+
     // Load the settings.
     QSettings settings;
     restoreGeometry(settings.value("main_window/geometry").toByteArray());
@@ -197,6 +205,10 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     // Restore the scroll bar position.
     // A single-shot timer is used to do this after the main event loop starts.
     QTimer::singleShot(0, view_, SLOT(restorePosition()));
+
+    // Check for updates.
+    // A single-shot timer is used to do this after the main event loop starts.
+    QTimer::singleShot(500, this, SLOT(checkForUpdate()));
 }
 
 void oskar_MainWindow::openSettings(QString filename)
@@ -371,6 +383,14 @@ void oskar_MainWindow::binLocations()
     }
 }
 
+void oskar_MainWindow::checkForUpdate()
+{
+    QNetworkRequest request;
+    request.setUrl(QUrl(version_url));
+    request.setRawHeader("User-Agent", "OSKAR " OSKAR_VERSION_STR);
+    networkManager_->get(request);
+}
+
 void oskar_MainWindow::cudaInfo()
 {
     // Check that the binary actually exists.
@@ -397,32 +417,6 @@ void oskar_MainWindow::helpDoc()
 {
     oskar_DocumentationDisplay helpDisplay(this);
     helpDisplay.exec();
-}
-
-void oskar_MainWindow::runBeamPattern()
-{
-    run_binary_ = binary_beam_pattern_;
-    runButton();
-}
-
-void oskar_MainWindow::runInterferometer()
-{
-    run_binary_ = binary_interferometer_;
-    runButton();
-}
-
-void oskar_MainWindow::runImager()
-{
-    run_binary_ = binary_imager_;
-    runButton();
-}
-
-void oskar_MainWindow::setHideUnsetItems(bool value)
-{
-    view_->saveExpanded();
-    modelProxy_->setHideUnsetItems(value);
-    view_->restoreExpanded();
-    view_->update();
 }
 
 void oskar_MainWindow::openRecentFile()
@@ -452,6 +446,63 @@ void oskar_MainWindow::openRecentFile()
             updateRecentFileActions();
         }
     }
+}
+
+void oskar_MainWindow::processNetworkReply(QNetworkReply* reply)
+{
+    // Check if we're receiving the current version file.
+    if (reply->request().url().toString() == version_url)
+    {
+        // Read the reply.
+        QByteArray data = reply->readLine();
+        if (data.endsWith('\n')) data.chop(1);
+        if (data.isEmpty() || reply->error() != QNetworkReply::NoError) return;
+
+        // Check if version is different.
+        if (data != OSKAR_VERSION_STR)
+        {
+            QMessageBox msgBox(this);
+            msgBox.setWindowTitle(mainTitle_);
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.setTextFormat(Qt::RichText);
+            msgBox.setText(QString("A newer version of OSKAR (%1) is "
+                    "<a href=\"http://www.oerc.ox.ac.uk/~ska/oskar2/\">"
+                    "available for download</a>.").arg(QString(data)));
+            msgBox.setInformativeText("Please update your installed version "
+                    "as soon as possible.");
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.exec();
+        }
+    }
+
+    // Mark the reply for deletion.
+    reply->deleteLater();
+}
+
+void oskar_MainWindow::runBeamPattern()
+{
+    run_binary_ = binary_beam_pattern_;
+    runButton();
+}
+
+void oskar_MainWindow::runInterferometer()
+{
+    run_binary_ = binary_interferometer_;
+    runButton();
+}
+
+void oskar_MainWindow::runImager()
+{
+    run_binary_ = binary_imager_;
+    runButton();
+}
+
+void oskar_MainWindow::setHideUnsetItems(bool value)
+{
+    view_->saveExpanded();
+    modelProxy_->setHideUnsetItems(value);
+    view_->restoreExpanded();
+    view_->update();
 }
 
 
