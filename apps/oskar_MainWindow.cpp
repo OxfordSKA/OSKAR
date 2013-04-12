@@ -245,7 +245,12 @@ void oskar_MainWindow::openSettings(QString filename)
         // Check the version of OSKAR that created the file, if it exists.
         if (QFile::exists(filename))
         {
-            if (model_->version().isEmpty())
+            QString ver = model_->version();
+            QStringList vers = ver.split('.');
+            int major = (vers.size() > 0) ? vers[0].toInt() : 0;
+            int minor = (vers.size() > 1) ? vers[1].toInt() : 0;
+
+            if (ver.isEmpty())
             {
                 QMessageBox msgBox(this);
                 msgBox.setWindowTitle(mainTitle_);
@@ -256,13 +261,14 @@ void oskar_MainWindow::openSettings(QString filename)
                         "as the keys may have changed.");
                 msgBox.exec();
             }
-            else if (model_->version() != OSKAR_VERSION_STR)
+            else if (major != ((OSKAR_VERSION & 0xFF0000) >> 16) ||
+                    minor != (OSKAR_VERSION & 0x00FF00) >> 8)
             {
                 QMessageBox msgBox(this);
                 msgBox.setWindowTitle(mainTitle_);
                 msgBox.setIcon(QMessageBox::Warning);
                 msgBox.setText(QString("This file was created by OSKAR %1.")
-                        .arg(model_->version()));
+                        .arg(ver));
                 msgBox.setInformativeText("Please check all settings carefully, "
                         "as the keys may have changed since that version.");
                 msgBox.exec();
