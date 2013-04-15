@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,9 +96,6 @@ void oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-
-    /* Write a log message. */
-    oskar_log_message(log, 0, "Writing OSKAR visibility file: '%s'", filename);
 
     /* Write the header and common metadata. */
     oskar_binary_stream_write_header(stream, status);

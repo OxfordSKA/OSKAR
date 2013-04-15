@@ -229,8 +229,9 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Write global visibilities to disk.
     if (settings.interferometer.oskar_vis_filename)
     {
-        oskar_visibilities_write(&vis_global, log,
-                settings.interferometer.oskar_vis_filename, &error);
+        const char* fname = settings.interferometer.oskar_vis_filename;
+        oskar_log_message(log, 0, "Writing OSKAR visibility file: '%s'", fname);
+        oskar_visibilities_write(&vis_global, log, fname, &error);
         if (error) return error;
     }
 
@@ -238,8 +239,9 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Write Measurement Set.
     if (settings.interferometer.ms_filename)
     {
-        error = oskar_visibilities_write_ms(&vis_global, log,
-                settings.interferometer.ms_filename, true);
+        const char* fname = settings.interferometer.ms_filename;
+        oskar_log_message(log, 0, "Writing Measurement Set: '%s'", fname);
+        oskar_visibilities_write_ms(&vis_global, fname, true, &error);
         if (error) return error;
     }
 #endif

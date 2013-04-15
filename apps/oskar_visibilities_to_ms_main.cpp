@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,17 +50,10 @@ int main(int argc, char** argv)
     const char* oskar_vis = opt.getArg(0);
     const char* ms_name = opt.getArg(1);
 
-    // Load the visibility file.
+    // Load the visibility file and write it out as a Measurement Set.
     oskar_Visibilities vis;
     oskar_visibilities_read(&vis, oskar_vis, &error);
-    if (error)
-    {
-        oskar_log_error(0, oskar_get_error_string(error));
-        return error;
-    }
-
-    // Write out the visibilities as a Measurement Set.
-    error = oskar_visibilities_write_ms(&vis, 0, ms_name, 1);
+    oskar_visibilities_write_ms(&vis, ms_name, 1, &error);
     if (error)
     {
         oskar_log_error(0, oskar_get_error_string(error));

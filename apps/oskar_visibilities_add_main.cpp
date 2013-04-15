@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,6 +133,8 @@ int main(int argc, char** argv)
     }
 
     // Write output data ======================================================
+    if (verbose)
+        cout << "Writing OSKAR visibility file: " << out_path << endl;
     oskar_visibilities_write(&out, 0, out_path.c_str(), &status);
     if (status != OSKAR_SUCCESS) {
         print_error(status, "Failed writing output visibility structure to file.");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,16 +57,10 @@ void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
     oskar_mex_vis_from_matlab_struct(&vis, in[1]);
 
     oskar_visibilities_write(&vis, 0, filename, &status);
-    if (status)
-    {
-        oskar_matlab_error("oskar_visibilities_write() failed: %s",
-                oskar_get_error_string(status));
-    }
-
     oskar_visibilities_free(&vis, &status);
     if (status)
     {
-        oskar_matlab_error("Faild to write visibilities file: %s",
+        oskar_matlab_error("Failed to write visibility file (%s)",
                 oskar_get_error_string(status));
     }
 }

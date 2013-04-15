@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@
 
 #include "apps/lib/oskar_remove_dir.h"
 #include "interferometry/oskar_Visibilities.h"
-#include "utility/oskar_log_message.h"
 #include "utility/oskar_mem_type_check.h"
 #include "utility/oskar_vector_types.h"
 #include "ms/oskar_MeasurementSet.h"
@@ -47,9 +46,19 @@
 #endif
 
 extern "C"
-int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
-        const char* ms_path, int overwrite)
+void oskar_visibilities_write_ms(const oskar_Visibilities* vis,
+        const char* ms_path, int overwrite, int* status)
 {
+    // Check all inputs.
+    if (!vis || !ms_path || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    // Check if safe to proceed.
+    if (*status) return;
+
     // Check if the Measurement Set already exists, and overwrite if specified.
     QDir dir;
     dir.setPath(QString(ms_path));
@@ -59,17 +68,18 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
         if (overwrite)
         {
             if (!oskar_remove_dir(ms_path))
-                return OSKAR_ERR_FILE_IO;
+            {
+                *status = OSKAR_ERR_FILE_IO;
+                return;
+            }
         }
         // No overwrite specified and directory already exists.
         else
         {
-            return OSKAR_ERR_UNKNOWN;
+            *status = OSKAR_ERR_UNKNOWN;
+            return;
         }
     }
-
-    // Write a log message.
-    oskar_log_message(log, 0, "Writing Measurement Set: '%s'", ms_path);
 
     // Get dimensions.
     int num_antennas   = vis->num_stations;
@@ -84,7 +94,10 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
      * these are in general different numbers */
     double chan_width  = vis->freq_inc_hz;
     if (num_antennas * (num_antennas - 1) / 2 != num_baselines)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+    {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
 
     // Set channel width to be greater than 0, if it isn't already.
     // This is required for the Measurement Set to be valid.
@@ -108,7 +121,8 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
     }
     else
     {
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
     }
 
     // Add the field data.
@@ -117,10 +131,7 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
 
     // Add polarisation and channel data.
     ms.addPolarisation(num_pols);
-    for (int i = 0; i < num_pols; ++i)
-    {
-        ms.addBand(i, num_channels, ref_freq, chan_width);
-    }
+    ms.addBand(0, num_channels, ref_freq, chan_width);
 
     // Evaluate baseline index arrays.
     int* baseline_ant_1 = (int*)malloc(vis->num_coords() * sizeof(int));
@@ -246,12 +257,10 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
     }
     else
     {
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
 
     // Cleanup.
     free(baseline_ant_1);
     free(baseline_ant_2);
-
-    return OSKAR_SUCCESS;
 }

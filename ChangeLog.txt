@@ -1,9 +1,15 @@
-2013-xx-xx OSKAR-2.2.2
+2013-xx-xx  OSKAR-2.2.2
 
     * Fixed a bug that caused certain visibility noise settings to be ignored.
 
     * Fixed telescope model loader to set element pattern and system noise data
       correctly if using a single common station directory.
+
+    * Fixed presence of multiple incorrect rows in DATA_DESCRIPTION and
+      SPECTRAL_WINDOW tables for Measurement Set output.
+
+    * Removed redundant CORRECTED_DATA and MODEL_DATA columns from
+      Measurement Set output.
 
     * Added check for updates when GUI starts.
 

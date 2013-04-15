@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,7 +100,8 @@ void Test_write_ms::test_write()
 
     const char* filename = "temp_test_write_ms.ms";
 
-    int error = oskar_visibilities_write_ms(&vis, NULL, filename, OSKAR_TRUE);
+    int error = 0;
+    oskar_visibilities_write_ms(&vis, filename, OSKAR_TRUE, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 }
 

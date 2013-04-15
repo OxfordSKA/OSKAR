@@ -137,6 +137,8 @@ int main(int argc, char** argv)
         oskar_visibilities_add_system_noise(&vis, &tel, seed);
         check_error(status);
 
+        if (verbose)
+            cout << "Writing visibility file: " << vis_filename_out[i] << endl;
         oskar_visibilities_write(&vis, 0, vis_filename_out[i].c_str(), &status);
         check_error(status);
     }

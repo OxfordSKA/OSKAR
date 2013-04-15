@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,13 +48,14 @@ extern "C" {
  * @details
  * This function writes visibility data to a CASA Measurement Set.
  *
- * @param[in] vis       Pointer to visibility structure to write.
- * @param[in] ms_path   Pathname of the Measurement Set to write.
- * @param[in] overwrite If true, then overwrite any existing Measurement Set.
+ * @param[in] vis        Pointer to visibility structure to write.
+ * @param[in] ms_path    Pathname of the Measurement Set to write.
+ * @param[in] overwrite  If true, then overwrite any existing Measurement Set.
+ * @param[in,out] status Status return code.
  */
 OSKAR_APPS_EXPORT
-int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
-        const char* ms_path, int overwrite);
+void oskar_visibilities_write_ms(const oskar_Visibilities* vis,
+        const char* ms_path, int overwrite, int* status);
 
 #ifdef __cplusplus
 }
