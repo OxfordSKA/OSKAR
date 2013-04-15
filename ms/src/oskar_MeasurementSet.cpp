@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -234,8 +234,6 @@ void oskar_MeasurementSet::addVisibilities(int n_pol, int n_chan, int n_row,
 
         // Add the visibilities.
         msmc_->data().put(row, vis_data);
-        msmc_->modelData().put(row, vis_data);
-        msmc_->correctedData().put(row, vis_data);
 
         // Add the antenna pairs.
         msmc_->antenna1().put(row, ant1[r]);
@@ -308,8 +306,6 @@ void oskar_MeasurementSet::addVisibilities(int n_pol, int n_chan, int n_row,
 
         // Add the visibilities.
         msmc_->data().put(row, vis_data);
-        msmc_->modelData().put(row, vis_data);
-        msmc_->correctedData().put(row, vis_data);
 
         // Add the antenna pairs.
         msmc_->antenna1().put(row, ant1[r]);
@@ -355,8 +351,6 @@ void oskar_MeasurementSet::create(const char* filename)
     // Create the table descriptor and use it to set up a new main table.
     TableDesc desc = MS::requiredTableDesc();
     MS::addColumnToDesc(desc, MS::DATA); // For visibilities.
-    MS::addColumnToDesc(desc, MS::MODEL_DATA);
-    MS::addColumnToDesc(desc, MS::CORRECTED_DATA);
     SetupNewTable newTab(filename, desc, Table::New);
 
     // Create the MeasurementSet.
