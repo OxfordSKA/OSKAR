@@ -48,10 +48,6 @@ oskar_MeasurementSet::oskar_MeasurementSet()
 
 oskar_MeasurementSet::~oskar_MeasurementSet()
 {
-    // Select all bands and channels for imager (not sure if this is required?).
-    Matrix<Int> selection(2, ms_->spectralWindow().nrow());
-    selection.row(0) = 0;
-    selection.row(1) = msc_->spectralWindow().numChan().getColumn();
     close();
 }
 
