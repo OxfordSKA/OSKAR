@@ -52,8 +52,6 @@ oskar_MeasurementSet::~oskar_MeasurementSet()
     Matrix<Int> selection(2, ms_->spectralWindow().nrow());
     selection.row(0) = 0;
     selection.row(1) = msc_->spectralWindow().numChan().getColumn();
-    ArrayColumn<Complex> mcd(*ms_, MS::columnName(MS::MODEL_DATA));
-    mcd.rwKeywordSet().define("CHANNEL_SELECTION", selection);
     close();
 }
 
