@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,11 +57,13 @@ void oskar_visibilities_copy(oskar_Visibilities* dst,
     dst->channel_bandwidth_hz = src->channel_bandwidth_hz;
     dst->time_start_mjd_utc = src->time_start_mjd_utc;
     dst->time_inc_seconds = src->time_inc_seconds;
+    dst->time_int_seconds = src->time_int_seconds;
     dst->phase_centre_ra_deg = src->phase_centre_ra_deg;
     dst->phase_centre_dec_deg = src->phase_centre_dec_deg;
 
     /* Copy the memory. */
     oskar_mem_copy(&dst->settings_path, &src->settings_path, status);
+    oskar_mem_copy(&dst->telescope_path, &src->telescope_path, status);
     oskar_mem_copy(&dst->x_metres, &src->x_metres, status);
     oskar_mem_copy(&dst->y_metres, &src->y_metres, status);
     oskar_mem_copy(&dst->z_metres, &src->z_metres, status);

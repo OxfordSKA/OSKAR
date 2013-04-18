@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,6 +70,7 @@
 struct OSKAR_EXPORT oskar_Visibilities
 {
     oskar_Mem settings_path;     /**< Path to settings file. */
+    oskar_Mem telescope_path;    /**< Path to telescope model. */
     int num_channels;            /**< Number of frequency channels. */
     int num_times;               /**< Number of time samples. */
     int num_stations;            /**< Number of interferometer stations. */
@@ -77,10 +78,11 @@ struct OSKAR_EXPORT oskar_Visibilities
     double freq_start_hz;        /**< Start Frequency, in Hz. */
     double freq_inc_hz;          /**< Frequency increment, in Hz. */
     double channel_bandwidth_hz; /**< Frequency channel bandwidth, in Hz */
-    double time_start_mjd_utc;   /**< Start time in MJD, UTC */
+    double time_start_mjd_utc;   /**< Start time in MJD, UTC. */
     double time_inc_seconds;     /**< Time increment, in seconds. */
-    double phase_centre_ra_deg;  /**< Pointing phase centre RA, in degrees*/
-    double phase_centre_dec_deg; /**< Pointing phase centre Dec, in degrees */
+    double time_int_seconds;     /**< Time integration, in seconds. */
+    double phase_centre_ra_deg;  /**< Pointing phase centre RA, in degrees. */
+    double phase_centre_dec_deg; /**< Pointing phase centre Dec, in degrees. */
 
     oskar_Mem x_metres;          /**< Station x coordinates, in metres. */
     oskar_Mem y_metres;          /**< Station y coordinates, in metres. */
@@ -191,7 +193,10 @@ enum {
     OSKAR_VIS_TAG_STATION_COORD_UNIT = 20,
     OSKAR_VIS_TAG_STATION_X = 21,
     OSKAR_VIS_TAG_STATION_Y = 22,
-    OSKAR_VIS_TAG_STATION_Z = 23
+    OSKAR_VIS_TAG_STATION_Z = 23,
+    OSKAR_VIS_TAG_CHANNEL_BANDWIDTH_HZ = 24,
+    OSKAR_VIS_TAG_TIME_INT_SEC = 25,
+    OSKAR_VIS_TAG_TELESCOPE_PATH = 26
 };
 
 /* Do not change the values below - these are merely dimension labels, not the

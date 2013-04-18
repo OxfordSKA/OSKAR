@@ -35,7 +35,6 @@ set(interferometry_SRC
     src/oskar_telescope_model_type.c
     src/oskar_TelescopeModel.cpp
     src/oskar_visibilities_add_system_noise.c
-    src/oskar_visibilities_clear_contents.c
     src/oskar_visibilities_copy.c
     src/oskar_visibilities_free.c
     src/oskar_visibilities_get_channel_amps.c

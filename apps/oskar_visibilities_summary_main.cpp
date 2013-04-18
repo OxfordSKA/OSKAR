@@ -26,8 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include <oskar_global.h>
 #include <interferometry/oskar_Visibilities.h>
 #include <interferometry/oskar_visibilities_read.h>
 #include <apps/lib/oskar_OptionParser.h>
@@ -69,7 +67,8 @@ int main(int argc, char **argv)
 
     oskar_Visibilities vis;
     oskar_visibilities_read(&vis, filename, &status);
-    if (status) {
+    if (status)
+    {
         fprintf(stderr, "ERROR: Unable to read the specified visibility file: %s\n",
                 filename);
         fprintf(stderr, "ERROR: [code %i] %s.\n", status, oskar_get_error_string(status));
@@ -99,7 +98,7 @@ int main(int argc, char **argv)
         printf("\n");
         printf("- Start time (MJD, UTC) ... %f\n", vis.time_start_mjd_utc);
         printf("- Time increment (s) ...... %f\n", vis.time_inc_seconds);
-        printf("- Integration time (s) .... XXXX TODO XXXX\n");
+        printf("- Integration time (s) .... %f\n", vis.time_int_seconds);
         printf("\n");
     }
 

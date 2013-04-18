@@ -34,7 +34,6 @@
  */
 
 #include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_visibilities_clear_contents.h"
 #include "interferometry/oskar_visibilities_copy.h"
 #include "interferometry/oskar_visibilities_free.h"
 #include "interferometry/oskar_visibilities_get_channel_amps.h"

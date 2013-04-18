@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,11 +71,13 @@ void oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location
     vis->channel_bandwidth_hz = 0.0;
     vis->time_start_mjd_utc = 0.0;
     vis->time_inc_seconds = 0.0;
+    vis->time_int_seconds = 0.0;
     vis->phase_centre_ra_deg = 0.0;
     vis->phase_centre_dec_deg = 0.0;
 
     /* Initialise memory. */
     oskar_mem_init(&vis->settings_path, OSKAR_CHAR, location, 0, 1, status);
+    oskar_mem_init(&vis->telescope_path, OSKAR_CHAR, location, 0, 1, status);
     oskar_mem_init(&vis->x_metres, type, location, num_stations, 1, status);
     oskar_mem_init(&vis->y_metres, type, location, num_stations, 1, status);
     oskar_mem_init(&vis->z_metres, type, location, num_stations, 1, status);

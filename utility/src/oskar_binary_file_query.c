@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -363,7 +363,14 @@ void oskar_binary_file_query(oskar_Log* log, const char* filename, int* status)
             }
             else if (group == OSKAR_TAG_GROUP_VISIBILITY)
             {
-                if (tag == OSKAR_VIS_TAG_NUM_CHANNELS)
+                if (tag == OSKAR_VIS_TAG_TELESCOPE_PATH)
+                {
+                    oskar_mem_binary_stream_read(&temp, stream, &index,
+                            group, tag, idx, status);
+                    oskar_log_message(log, depth, "Telescope model path: %s",
+                            (char*)(temp.data));
+                }
+                else if (tag == OSKAR_VIS_TAG_NUM_CHANNELS)
                 {
                     int val = 0;
                     oskar_binary_stream_read_int(stream, &index, group, tag,
@@ -414,6 +421,14 @@ void oskar_binary_file_query(oskar_Log* log, const char* filename, int* status)
                     oskar_log_message(log, depth,
                             "Frequency inc [Hz]: %.3e", val);
                 }
+                else if (tag == OSKAR_VIS_TAG_CHANNEL_BANDWIDTH_HZ)
+                {
+                    double val = 0;
+                    oskar_binary_stream_read_double(stream, &index, group, tag,
+                            idx, &val, status);
+                    oskar_log_message(log, depth,
+                            "Channel bandwidth [Hz]: %.3e", val);
+                }
                 else if (tag == OSKAR_VIS_TAG_TIME_START_MJD_UTC)
                 {
                     double val = 0;
@@ -428,6 +443,14 @@ void oskar_binary_file_query(oskar_Log* log, const char* filename, int* status)
                     oskar_binary_stream_read_double(stream, &index, group, tag,
                             idx, &val, status);
                     oskar_log_message(log, depth, "Time inc [s]: %.1f", val);
+                }
+                else if (tag == OSKAR_VIS_TAG_TIME_INT_SEC)
+                {
+                    double val = 0;
+                    oskar_binary_stream_read_double(stream, &index, group, tag,
+                            idx, &val, status);
+                    oskar_log_message(log, depth,
+                            "Time integration [s]: %.1f", val);
                 }
                 else if (tag == OSKAR_VIS_TAG_POL_TYPE)
                 {

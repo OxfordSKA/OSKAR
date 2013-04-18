@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_visibilities_init.h"
 #include "interferometry/oskar_visibilities_read.h"
@@ -102,6 +101,11 @@ void oskar_visibilities_read(oskar_Visibilities* vis, const char* filename,
     oskar_mem_binary_file_read(&vis->settings_path, filename, &index,
             OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0, &tag_error);
 
+    /* Optionally read the telescope model path (ignore the error code). */
+    tag_error = 0;
+    oskar_mem_binary_file_read(&vis->telescope_path, filename, &index,
+            grp, OSKAR_VIS_TAG_TELESCOPE_PATH, 0, &tag_error);
+
     /* Read visibility metadata. */
     oskar_binary_file_read_double(filename, &index, grp,
             OSKAR_VIS_TAG_FREQ_START_HZ, 0, &vis->freq_start_hz, status);
@@ -131,7 +135,7 @@ void oskar_visibilities_read(oskar_Visibilities* vis, const char* filename,
     oskar_mem_binary_file_read(&vis->amplitude, filename, &index, grp,
             OSKAR_VIS_TAG_AMPLITUDE, 0, status);
 
-    /* Optionally read station coordinates, (ignore the error code). */
+    /* Optionally read station coordinates (ignore the error code). */
     tag_error = 0;
     oskar_mem_binary_file_read(&vis->x_metres, filename, &index, grp,
             OSKAR_VIS_TAG_STATION_X, 0, &tag_error);
@@ -139,6 +143,17 @@ void oskar_visibilities_read(oskar_Visibilities* vis, const char* filename,
             OSKAR_VIS_TAG_STATION_Y, 0, &tag_error);
     oskar_mem_binary_file_read(&vis->z_metres, filename, &index, grp,
             OSKAR_VIS_TAG_STATION_Z, 0, &tag_error);
+
+    /* Optionally read the channel bandwidth value. */
+    tag_error = 0;
+    oskar_binary_file_read_double(filename, &index, grp,
+            OSKAR_VIS_TAG_CHANNEL_BANDWIDTH_HZ, 0, &vis->channel_bandwidth_hz,
+            &tag_error);
+
+    /* Optionally read the time integration value. */
+    tag_error = 0;
+    oskar_binary_file_read_double(filename, &index, grp,
+            OSKAR_VIS_TAG_TIME_INT_SEC, 0, &vis->time_int_seconds, &tag_error);
 
     /* Free the tag index. */
     oskar_binary_tag_index_free(&index, status);

@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_visibilities_write.h"
 #include "utility/oskar_binary_stream_write.h"
@@ -137,6 +136,10 @@ void oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
         free(log_data);
     }
 
+    /* Write the telescope model path. */
+    oskar_mem_binary_stream_write(&vis->telescope_path, stream,
+            grp, OSKAR_VIS_TAG_TELESCOPE_PATH, 0, 0, status);
+
     /* Write dimensions. */
     oskar_binary_stream_write_int(stream, grp,
             OSKAR_VIS_TAG_NUM_CHANNELS, 0, vis->num_channels, status);
@@ -186,6 +189,11 @@ void oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
     oskar_binary_stream_write_double(stream, grp,
             OSKAR_VIS_TAG_PHASE_CENTRE_DEC, 0, vis->phase_centre_dec_deg,
             status);
+    oskar_binary_stream_write_double(stream, grp,
+            OSKAR_VIS_TAG_CHANNEL_BANDWIDTH_HZ, 0, vis->channel_bandwidth_hz,
+            status);
+    oskar_binary_stream_write_double(stream, grp,
+            OSKAR_VIS_TAG_TIME_INT_SEC, 0, vis->time_int_seconds, status);
 
     /* Write the baseline coordinate arrays. */
     oskar_mem_binary_stream_write(&vis->uu_metres, stream,

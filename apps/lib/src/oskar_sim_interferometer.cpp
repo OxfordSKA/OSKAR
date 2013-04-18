@@ -191,7 +191,6 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
                     &(vis_temp[thread_id]), &error);
         }
 #pragma omp barrier
-        if (error) return error;
 
         // Accumulate each chunk into global vis structure for this channel.
         oskar_visibilities_get_channel_amps(&vis_amp, &vis_global, c, &error);

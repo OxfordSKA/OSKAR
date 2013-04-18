@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,11 +28,13 @@
 
 #include "apps/lib/oskar_set_up_visibilities.h"
 #include "interferometry/oskar_visibilities_init.h"
-#include "utility/oskar_mem_type_check.h"
+#include "utility/oskar_mem_append_raw.h"
 #include "utility/oskar_mem_copy.h"
+#include "utility/oskar_mem_type_check.h"
 
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -73,12 +75,19 @@ void oskar_set_up_visibilities(oskar_Visibilities* vis,
     vis->freq_inc_hz = settings->obs.frequency_inc_hz;
     vis->time_start_mjd_utc = settings->obs.start_mjd_utc;
     vis->time_inc_seconds = settings->obs.dt_dump_days * 86400.0;
-    vis->channel_bandwidth_hz = settings->obs.start_frequency_hz;
+    vis->time_int_seconds = settings->interferometer.time_average_sec;
+    vis->channel_bandwidth_hz = settings->interferometer.channel_bandwidth_hz;
     vis->phase_centre_ra_deg = settings->obs.ra0_rad[0] * 180.0 / M_PI;
     vis->phase_centre_dec_deg = settings->obs.dec0_rad[0] * 180.0 / M_PI;
 
     /* Add settings file path. */
     oskar_mem_copy(&vis->settings_path, &settings->settings_path, status);
+
+    /* Add telescope model path. */
+    oskar_mem_append_raw(&vis->telescope_path,
+            settings->telescope.input_directory, OSKAR_CHAR,
+            OSKAR_LOCATION_CPU, 1 + strlen(settings->telescope.input_directory),
+            status);
 
     /* Copy station coordinates from telescope model. */
     oskar_mem_copy(&vis->x_metres, &telescope->station_x, status);

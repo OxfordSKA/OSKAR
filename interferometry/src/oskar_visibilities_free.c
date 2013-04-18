@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,11 +53,13 @@ void oskar_visibilities_free(oskar_Visibilities* vis, int* status)
     vis->channel_bandwidth_hz = 0.0;
     vis->time_start_mjd_utc = 0.0;
     vis->time_inc_seconds = 0.0;
+    vis->time_int_seconds = 0.0;
     vis->phase_centre_ra_deg = 0.0;
     vis->phase_centre_dec_deg = 0.0;
 
     /* Free memory. */
     oskar_mem_free(&vis->settings_path, status);
+    oskar_mem_free(&vis->telescope_path, status);
     oskar_mem_free(&vis->x_metres, status);
     oskar_mem_free(&vis->y_metres, status);
     oskar_mem_free(&vis->z_metres, status);
