@@ -2,8 +2,6 @@
 
     * Fixed a bug that caused certain visibility noise settings to be ignored.
 
-    * Fixed a bug that set the channel bandwidth to an incorrect value.
-
     * Fixed telescope model loader to set element pattern and system noise data
       correctly if using a single common station directory.
 
