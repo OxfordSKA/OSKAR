@@ -150,13 +150,9 @@ static int load_noise_freqs(oskar_SettingsSystemNoiseFreq* freq,
     s.beginGroup("freq");
     {
         get_filename(&freq->file, s, "file");
-        s.beginGroup("range");
-        {
-            freq->number = s.value("number").toInt();
-            freq->start  = s.value("start").toDouble();
-            freq->inc    = s.value("inc").toDouble();
-        }
-        s.endGroup(); // range
+        freq->number = s.value("number").toInt();
+        freq->start  = s.value("start").toDouble();
+        freq->inc    = s.value("inc").toDouble();
     }
     s.endGroup(); // freq
 
