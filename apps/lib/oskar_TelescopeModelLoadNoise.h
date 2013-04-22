@@ -96,7 +96,7 @@ public:
 
 private:
     // Updates set of files to load.
-    void updateFileMap_(QHash<QString, QString> filemap, const QDir& cwd);
+    void updateFileMap_(QHash<QString, QString>& filemap, const QDir& cwd);
     // Obtains the array of noise frequencies.
     void getNoiseFreqs_(oskar_Mem* freqs, const QString& filepath, int* status);
     // Obtains the noise RMS values and sets then into the telescope model.
