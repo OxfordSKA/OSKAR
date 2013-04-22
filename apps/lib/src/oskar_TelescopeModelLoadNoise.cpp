@@ -129,7 +129,7 @@ void oskar_TelescopeModelLoadNoise::load(oskar_StationModel* station,
 // -- private functions -------------------------------------------------------
 
 void oskar_TelescopeModelLoadNoise::updateFileMap_(
-        QHash<QString, QString> filemap, const QDir& cwd)
+        QHash<QString, QString>& filemap, const QDir& cwd)
 {
     foreach(QString file, files_.values()) {
         filemap[file] = cwd.absoluteFilePath(file);
@@ -139,6 +139,8 @@ void oskar_TelescopeModelLoadNoise::updateFileMap_(
 void oskar_TelescopeModelLoadNoise::getNoiseFreqs_(oskar_Mem* freqs,
         const QString& filepath, int* status)
 {
+    if (*status) return;
+
     const oskar_SettingsSystemNoise& noise = settings_->interferometer.noise;
     const oskar_SettingsObservation& obs = settings_->obs;
 
@@ -181,6 +183,10 @@ void oskar_TelescopeModelLoadNoise::getNoiseFreqs_(oskar_Mem* freqs,
             num_freqs = noise.freq.number;
             start = noise.freq.start;
             inc = noise.freq.inc;
+        }
+        if (num_freqs == 0) {
+            *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+            return;
         }
         oskar_mem_realloc(freqs, num_freqs, status);
         if (*status) return;
@@ -263,9 +269,10 @@ void oskar_TelescopeModelLoadNoise::noiseSpecTelescopeModel_(oskar_Mem* noise_rm
     else if (QFile::exists(filemap[files_[SENSITIVITY]]))
     {
         oskar_Mem sens;
-        oskar_mem_init(&sens, dataType_, loc, num_freqs, 0, status);
+        oskar_mem_init(&sens, dataType_, loc, num_freqs, OSKAR_TRUE, status);
         filename = filemap[files_[SENSITIVITY]].toAscii();
-        oskar_system_noise_model_load(&sens, filename.constData(), status);
+        const char* file = filename.constData();
+        oskar_system_noise_model_load(&sens, file, status);
         sensitivity_to_rms_(noise_rms, &sens, num_freqs, bandwidth_hz,
                 integration_time_sec, status);
         oskar_mem_free(&sens, status);
