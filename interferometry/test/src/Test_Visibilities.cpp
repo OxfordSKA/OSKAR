@@ -35,6 +35,7 @@
 #include "interferometry/oskar_visibilities_resize.h"
 #include "interferometry/oskar_visibilities_write.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_mem_append_raw.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_Mem.h"
@@ -304,6 +305,9 @@ void Test_Visibilities::test_read_write()
         vis1.freq_inc_hz        = 10e6;
         vis1.time_start_mjd_utc = 10.0;
         vis1.time_inc_seconds   = 1.5;
+        const char* name = "dummy";
+        oskar_mem_append_raw(&vis1.telescope_path, name,
+                OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(name), &status);
 
         for (int i = 0, c = 0; c < vis1.num_channels; ++c)
         {
