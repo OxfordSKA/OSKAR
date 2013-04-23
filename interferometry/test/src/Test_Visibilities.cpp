@@ -40,6 +40,8 @@
 #include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_Mem.h"
 
+#include <cstring>
+
 void Test_Visibilities::test_create()
 {
     int num_channels  = 4;
