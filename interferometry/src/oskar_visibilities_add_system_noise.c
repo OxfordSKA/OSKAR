@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,16 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_vector_types.h"
 #include "interferometry/oskar_visibilities_add_system_noise.h"
-#include "interferometry/oskar_Visibilities.h"
 #include "math/oskar_random_gaussian.h"
 #include "math/oskar_find_closest_match.h"
-#include "sky/oskar_mjd_to_last_fast.h"
-#include "sky/oskar_ra_dec_to_hor_lmn.h"
-#include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_free.h"
+#include "utility/oskar_vector_types.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -48,32 +44,32 @@
 extern "C" {
 #endif
 
-int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
-        const oskar_TelescopeModel* telescope, unsigned seed)
+void oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
+        const oskar_TelescopeModel* telescope, unsigned seed, int* status)
 {
-    int err = 0;
-    int c, t, b;
     oskar_Mem ant1, ant2;
     int location = OSKAR_LOCATION_CPU;
-    int a1, a2;
-    double vis_freq;
-    int is1, is2;
-    double s1, s2, std;
-    oskar_Mem* noise_freq;
-    oskar_Mem* noise_rms;
-    double mean = 0.0;
-    double r1, r2;
-    int idx;
+    int a1, a2, c, t, b, is1, is2, idx;
+    double r1, r2, s1, s2, std, vis_freq, mean = 0.0;
+    oskar_Mem *noise_freq, *noise_rms;
 
-    if (vis == NULL || telescope == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!vis || !telescope || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Seed the random number generator */
     srand(seed);
 
-    /* Evaluate baseline antenna id's. Needed for lookup of station std.dev. */
-    oskar_mem_init(&ant1, OSKAR_INT, location, vis->num_baselines, OSKAR_TRUE, &err);
-    oskar_mem_init(&ant2, OSKAR_INT, location, vis->num_baselines, OSKAR_TRUE, &err);
-    if (err) return err;
+    /* Evaluate baseline antenna IDs. Needed for lookup of station std.dev. */
+    oskar_mem_init(&ant1, OSKAR_INT, location, vis->num_baselines, 1, status);
+    oskar_mem_init(&ant2, OSKAR_INT, location, vis->num_baselines, 1, status);
+    if (*status) return;
     for (b = 0, a1 = 0; a1 < telescope->num_stations; ++a1)
     {
         for (a2 = (a1 + 1); a2 < telescope->num_stations; ++a2)
@@ -96,7 +92,7 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
                 a1 = ((int*)ant1.data)[b];
                 noise_freq = &telescope->station[a1].noise.frequency;
                 noise_rms = &telescope->station[a1].noise.rms;
-                err = oskar_find_closest_match(&is1, vis_freq, noise_freq);
+                oskar_find_closest_match(&is1, vis_freq, noise_freq, status);
                 if (noise_freq->type == OSKAR_DOUBLE)
                     s1 = ((double*)noise_rms->data)[is1];
                 else
@@ -105,14 +101,14 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
                 a2 = ((int*)ant2.data)[b];
                 noise_freq = &telescope->station[a2].noise.frequency;
                 noise_rms = &telescope->station[a2].noise.rms;
-                err = oskar_find_closest_match(&is2, vis_freq, noise_freq);
+                oskar_find_closest_match(&is2, vis_freq, noise_freq, status);
                 if (noise_freq->type == OSKAR_DOUBLE)
                     s2 = ((double*)noise_rms->data)[is2];
                 else
                     s2 = ((float*)noise_rms->data)[is2];
 
                 /* Combine antenna std.devs. to evaluate the baseline std.dev.
-                 * see (Wrobel & Walker 1999) */
+                 * See Wrobel & Walker (1999) */
                 std = sqrt(s1*s2);
 
                 /* Apply noise */
@@ -143,7 +139,7 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
                         amps_[idx].d.y += r2 * std + mean;
                         break;
                     }
-                    case  OSKAR_DOUBLE_COMPLEX:
+                    case OSKAR_DOUBLE_COMPLEX:
                     {
                         double2* amps_ = (double2*)vis->amplitude.data;
                         r1 = oskar_random_gaussian(&r2);
@@ -170,7 +166,8 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
                     }
                     default:
                     {
-                        return OSKAR_ERR_BAD_DATA_TYPE;
+                        *status = OSKAR_ERR_BAD_DATA_TYPE;
+                        break;
                     }
                 };
                 ++idx;
@@ -178,12 +175,9 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
         }
     }
 
-    oskar_mem_free(&ant1, &err);
-    oskar_mem_free(&ant2, &err);
-
-    return err;
+    oskar_mem_free(&ant1, status);
+    oskar_mem_free(&ant2, status);
 }
-
 
 #ifdef __cplusplus
 }

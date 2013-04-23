@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -130,7 +130,7 @@ void Test_add_system_noise::test_rms()
     vis.phase_centre_dec_deg = telescope.dec0_rad * (180.0/M_PI);
     vis.num_stations = num_stations;
 
-    err = oskar_visibilities_add_system_noise(&vis, &telescope, seed);
+    oskar_visibilities_add_system_noise(&vis, &telescope, seed, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     // Evaluate baseline coordinates

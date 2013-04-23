@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_FIND_CLOSEST_MATCH_H_
 #define OSKAR_FIND_CLOSEST_MATCH_H_
 
@@ -45,12 +44,11 @@ extern "C" {
  * @param[out] match_index The index of the closest match.
  * @param[in]  value       The value to match
  * @param[in]  values      An array of values to match to
- *
- * @return An error code
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_find_closest_match(int* match_index, double value,
-        const oskar_Mem* values);
+void oskar_find_closest_match(int* match_index, double value,
+        const oskar_Mem* values, int* status);
 
 #ifdef __cplusplus
 }

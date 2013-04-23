@@ -134,7 +134,7 @@ int main(int argc, char** argv)
             cout << "  No. of channels: " << vis.num_channels << endl;
         }
         int seed = settings.interferometer.noise.seed;
-        oskar_visibilities_add_system_noise(&vis, &tel, seed);
+        oskar_visibilities_add_system_noise(&vis, &tel, seed, &status);
         check_error(status);
 
         if (verbose)

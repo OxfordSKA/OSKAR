@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,37 +53,38 @@ void Test_find_closest_match::test()
     int idx;
     double value = 0.7;
     const oskar_Mem* v = &values;
-    int err = oskar_find_closest_match(&idx, value, v);
+    int err = 0;
+    oskar_find_closest_match(&idx, value, v, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     CPPUNIT_ASSERT_EQUAL(2, idx);
 
     value = 0.749999;
-    err = oskar_find_closest_match(&idx, value, v);
+    oskar_find_closest_match(&idx, value, v, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     CPPUNIT_ASSERT_EQUAL(2, idx);
 
     value = 0.75;
-    err = oskar_find_closest_match(&idx, value, v);
+    oskar_find_closest_match(&idx, value, v, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     CPPUNIT_ASSERT_EQUAL(3, idx);
 
     value = 0.750001;
-    err = oskar_find_closest_match(&idx, value, v);
+    oskar_find_closest_match(&idx, value, v, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     CPPUNIT_ASSERT_EQUAL(3, idx);
 
     value = 100;
-    err = oskar_find_closest_match(&idx, value, v);
+    oskar_find_closest_match(&idx, value, v, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     CPPUNIT_ASSERT_EQUAL(9, idx);
 
     value = -100;
-    err = oskar_find_closest_match(&idx, value, v);
+    oskar_find_closest_match(&idx, value, v, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     CPPUNIT_ASSERT_EQUAL(0, idx);
 
     value = 0.3;
-    err = oskar_find_closest_match(&idx, value, v);
+    oskar_find_closest_match(&idx, value, v, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     CPPUNIT_ASSERT_EQUAL(1, idx);
 }

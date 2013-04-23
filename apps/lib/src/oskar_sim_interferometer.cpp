@@ -115,19 +115,19 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     if (device_count < num_devices) return OSKAR_ERR_CUDA_DEVICES;
 
     // Set up the telescope model.
-    oskar_TelescopeModel tel_cpu;
-    oskar_set_up_telescope(&tel_cpu, log, &settings, &error);
+    oskar_TelescopeModel tel;
+    oskar_set_up_telescope(&tel, log, &settings, &error);
     if (error) return error;
 
     // Set up the sky model array.
-    oskar_SkyModel* sky_chunk_cpu = NULL;
+    oskar_SkyModel* sky_chunks = NULL;
     int num_sky_chunks = 0;
-    error = oskar_set_up_sky(&num_sky_chunks, &sky_chunk_cpu, log, &settings);
+    error = oskar_set_up_sky(&num_sky_chunks, &sky_chunks, log, &settings);
 
     // Create the global visibility structure on the CPU.
     int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
     oskar_Visibilities vis_global;
-    oskar_set_up_visibilities(&vis_global, &settings, &tel_cpu, complex_matrix,
+    oskar_set_up_visibilities(&vis_global, &settings, &tel, complex_matrix,
             &error);
 
     // Create temporary and accumulation buffers to hold visibility amplitudes
@@ -135,7 +135,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // These are held in standard vectors so that the memory will be released
     // automatically if the function returns early, or is terminated.
     vector<oskar_Mem> vis_acc(num_devices), vis_temp(num_devices);
-    int time_baseline = tel_cpu.num_baselines() * settings.obs.num_time_steps;
+    int time_baseline = tel.num_baselines() * settings.obs.num_time_steps;
     for (int i = 0; i < num_devices; ++i)
     {
         oskar_mem_init(&vis_acc[i], complex_matrix, OSKAR_LOCATION_CPU,
@@ -162,7 +162,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 
         frequency = settings.obs.start_frequency_hz +
                 c * settings.obs.frequency_inc_hz;
-        tel_cpu.wavelength_metres = 299792458.0 / frequency;
+        tel.wavelength_metres = 299792458.0 / frequency;
 
         oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
                 c + 1, settings.obs.num_channels, frequency / 1e6);
@@ -184,7 +184,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 
             // Run simulation for this chunk.
             oskar_interferometer(&(vis_temp[thread_id]), log,
-                    &(sky_chunk_cpu[i]), &tel_cpu, &settings, frequency,
+                    &(sky_chunks[i]), &tel, &settings, frequency,
                     i, num_sky_chunks, &error);
 
             oskar_mem_add(&(vis_acc[thread_id]), &(vis_acc[thread_id]),
@@ -202,28 +202,33 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
             oskar_mem_clear_contents(&vis_acc[i], &error);
         }
     }
-    if (error) return error;
 
     // Add uncorrelated system noise to the visibilities.
     if (settings.interferometer.noise.enable)
     {
         int seed = settings.interferometer.noise.seed;
-        error = oskar_visibilities_add_system_noise(&vis_global, &tel_cpu, seed);
-        if (error) return error;
+        oskar_visibilities_add_system_noise(&vis_global, &tel, seed, &error);
     }
+
+    // Check for errors.
+    if (error) return error;
 
     oskar_log_section(log, "Simulation completed in %.3f sec.",
             timer.elapsed() / 1e3);
 
     // Compute baseline u,v,w coordinates for simulation.
-    oskar_Mem work_uvw(type, OSKAR_LOCATION_CPU, 3 * tel_cpu.num_stations);
-    oskar_evaluate_uvw_baseline(&vis_global.uu_metres, &vis_global.vv_metres,
-            &vis_global.ww_metres, tel_cpu.num_stations,
-            &tel_cpu.station_x, &tel_cpu.station_y, &tel_cpu.station_z,
-            tel_cpu.ra0_rad, tel_cpu.dec0_rad, settings.obs.num_time_steps,
-            settings.obs.start_mjd_utc, settings.obs.dt_dump_days,
-            &work_uvw, &error);
-    if (error) return error;
+    {
+        oskar_Mem work_uvw;
+        oskar_mem_init(&work_uvw, type, OSKAR_LOCATION_CPU,
+                3 * tel.num_stations, 1, &error);
+        oskar_evaluate_uvw_baseline(&vis_global.uu_metres,
+                &vis_global.vv_metres, &vis_global.ww_metres,
+                tel.num_stations, &tel.station_x, &tel.station_y,
+                &tel.station_z, tel.ra0_rad, tel.dec0_rad,
+                settings.obs.num_time_steps, settings.obs.start_mjd_utc,
+                settings.obs.dt_dump_days, &work_uvw, &error);
+        oskar_mem_free(&work_uvw, &error);
+    }
 
     // Write global visibilities to disk.
     if (settings.interferometer.oskar_vis_filename)
@@ -231,7 +236,6 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         const char* fname = settings.interferometer.oskar_vis_filename;
         oskar_log_message(log, 0, "Writing OSKAR visibility file: '%s'", fname);
         oskar_visibilities_write(&vis_global, log, fname, &error);
-        if (error) return error;
     }
 
 #ifndef OSKAR_NO_MS
@@ -241,9 +245,11 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         const char* fname = settings.interferometer.ms_filename;
         oskar_log_message(log, 0, "Writing Measurement Set: '%s'", fname);
         oskar_visibilities_write_ms(&vis_global, fname, true, &error);
-        if (error) return error;
     }
 #endif
+
+    // Check for errors.
+    if (error) return error;
 
     // Make image(s) of the simulated visibilities if required.
     if (settings.interferometer.image_interferometer_output)
@@ -287,9 +293,9 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Free sky chunks.
     for (int i = 0; i < num_sky_chunks; ++i)
     {
-        oskar_sky_model_free(&sky_chunk_cpu[i], &error);
+        oskar_sky_model_free(&sky_chunks[i], &error);
     }
-    free(sky_chunk_cpu);
+    free(sky_chunks);
 
     oskar_log_section(log, "Run complete.");
     return OSKAR_SUCCESS;

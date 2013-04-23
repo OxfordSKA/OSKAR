@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "math/oskar_find_closest_match.h"
 #include <float.h>
 #include <math.h>
@@ -35,13 +34,21 @@
 extern "C" {
 #endif
 
-int oskar_find_closest_match(int* match_index, double value,
-        const oskar_Mem* values)
+void oskar_find_closest_match(int* match_index, double value,
+        const oskar_Mem* values, int* status)
 {
     int i;
     double diff = DBL_MAX;
 
-    if (!values) return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!match_index || !values || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     if (values->type == OSKAR_DOUBLE)
     {
@@ -73,10 +80,8 @@ int oskar_find_closest_match(int* match_index, double value,
     }
     else
     {
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-
-    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

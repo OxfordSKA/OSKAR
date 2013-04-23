@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_VISIBILITIES_ADD_SYSTEM_NOISE_H_
 #define OSKAR_VISIBILITIES_ADD_SYSTEM_NOISE_H_
 
@@ -45,15 +44,14 @@ extern "C" {
 /**
  * @brief Add a random Gaussian noise component to the visibilities.
  *
- * @param[in/out] vis             Visibility structure to which to add noise.
- * @param[in]     telescope
+ * @param[in,out] vis             Visibility structure to which to add noise.
+ * @param[in]     telescope       Telescope model in use.
  * @param[in]     seed            Seed for the random number generator.
- *
- * @return An error code.
+ * @param[in,out] status          Status return code.
  */
 OSKAR_EXPORT
-int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
-        const oskar_TelescopeModel* telescope, unsigned seed);
+void oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
+        const oskar_TelescopeModel* telescope, unsigned seed, int* status);
 
 #ifdef __cplusplus
 }
