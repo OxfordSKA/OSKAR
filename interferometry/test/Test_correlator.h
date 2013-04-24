@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,8 +48,6 @@ class Test_correlator : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(Test_correlator);
-        //CPPUNIT_TEST(test_kernel_float);
-        //CPPUNIT_TEST(test_kernel_double);
         CPPUNIT_TEST(benchmark);
         CPPUNIT_TEST_SUITE_END();
 
@@ -58,13 +56,12 @@ class Test_correlator : public CppUnit::TestFixture
         ~Test_correlator();
 
     public:
-        void test_kernel_float();
-        void test_kernel_double();
         void benchmark();
 
     private:
-        void benchmark_(int num_stations, int num_sources, int type,
-                int jones_type, int use_extended, int use_time_ave, int niter);
+        void benchmark_(int num_stations, int num_sources, int jones_type,
+                int use_extended, int use_time_ave, int niter,
+                const char* message);
 
         oskar_CudaDeviceInfo* device_;
 };

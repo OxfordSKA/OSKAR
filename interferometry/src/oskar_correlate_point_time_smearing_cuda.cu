@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,69 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/cudak/oskar_cudak_correlator_time_smearing.h"
+#include "interferometry/oskar_correlate_point_time_smearing_cuda.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2c.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2h.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2c_conj_trans.h"
 #include "math/cudak/oskar_cudaf_sinc.h"
 #include <math.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Kernel wrappers. ======================================================== */
+
+/* Single precision. */
+void oskar_correlate_point_time_smearing_cuda_f(int num_sources,
+        int num_stations, const float4c* d_jones,
+        const float* d_source_I, const float* d_source_Q,
+        const float* d_source_U, const float* d_source_V,
+        const float* d_source_l, const float* d_source_m,
+        const float* d_source_n, const float* d_station_u,
+        const float* d_station_v, const float* d_station_x,
+        const float* d_station_y, float freq_hz, float bandwidth_hz,
+        float time_int_sec, float gha0_rad, float dec0_rad, float4c* d_vis)
+{
+    dim3 num_threads(128, 1);
+    dim3 num_blocks(num_stations, num_stations);
+    size_t shared_mem = num_threads.x * sizeof(float4c);
+    oskar_correlate_point_time_smearing_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
+            d_source_V, d_source_l, d_source_m, d_source_n, d_station_u,
+            d_station_v, d_station_x, d_station_y, freq_hz, bandwidth_hz,
+            time_int_sec, gha0_rad, dec0_rad, d_vis);
+}
+
+/* Double precision. */
+void oskar_correlate_point_time_smearing_cuda_d(int num_sources,
+        int num_stations, const double4c* d_jones,
+        const double* d_source_I, const double* d_source_Q,
+        const double* d_source_U, const double* d_source_V,
+        const double* d_source_l, const double* d_source_m,
+        const double* d_source_n, const double* d_station_u,
+        const double* d_station_v, const double* d_station_x,
+        const double* d_station_y, double freq_hz, double bandwidth_hz,
+        double time_int_sec, double gha0_rad, double dec0_rad, double4c* d_vis)
+{
+    dim3 num_threads(128, 1);
+    dim3 num_blocks(num_stations, num_stations);
+    size_t shared_mem = num_threads.x * sizeof(double4c);
+    oskar_correlate_point_time_smearing_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
+            d_source_V, d_source_l, d_source_m, d_source_n, d_station_u,
+            d_station_v, d_station_x, d_station_y, freq_hz, bandwidth_hz,
+            time_int_sec, gha0_rad, dec0_rad, d_vis);
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+
+/* Kernels. ================================================================ */
 
 #define ONE_OVER_2PI  0.159154943091895335768884   // 1 / (2 * pi)
 #define ONE_OVER_2PIf 0.159154943091895335768884f  // 1 / (2 * pi)
@@ -46,9 +103,9 @@
 extern __shared__ float4c  smem_f[];
 extern __shared__ double4c smem_d[];
 
-// Single precision.
+/* Single precision. */
 __global__
-void oskar_cudak_correlator_time_smearing_f(const int num_sources,
+void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         const int num_stations, const float4c* jones, const float* source_I,
         const float* source_Q, const float* source_U, const float* source_V,
         const float* source_l, const float* source_m, const float* source_n,
@@ -184,9 +241,9 @@ void oskar_cudak_correlator_time_smearing_f(const int num_sources,
     }
 }
 
-// Double precision.
+/* Double precision. */
 __global__
-void oskar_cudak_correlator_time_smearing_d(const int num_sources,
+void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
         const int num_stations, const double4c* jones, const double* source_I,
         const double* source_Q, const double* source_U, const double* source_V,
         const double* source_l, const double* source_m, const double* source_n,

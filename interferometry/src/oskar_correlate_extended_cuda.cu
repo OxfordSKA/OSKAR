@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,67 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/cudak/oskar_cudak_correlator_extended.h"
+#include "interferometry/oskar_correlate_extended_cuda.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2c.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2h.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2c_conj_trans.h"
 #include "math/cudak/oskar_cudaf_sinc.h"
 #include <math.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Kernel wrappers. ======================================================== */
+
+/* Single precision. */
+void oskar_correlate_extended_cuda_f(int num_sources,
+        int num_stations, const float4c* d_jones,
+        const float* d_source_I, const float* d_source_Q,
+        const float* d_source_U, const float* d_source_V,
+        const float* d_source_l, const float* d_source_m,
+        const float* d_source_a, const float* d_source_b,
+        const float* d_source_c, const float* d_station_u,
+        const float* d_station_v, float freq_hz, float bandwidth_hz,
+        float4c* d_vis)
+{
+    dim3 num_threads(128, 1);
+    dim3 num_blocks(num_stations, num_stations);
+    size_t shared_mem = num_threads.x * sizeof(float4c);
+    oskar_correlate_extended_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
+            d_source_V, d_source_l, d_source_m, d_source_a, d_source_b,
+            d_source_c, d_station_u, d_station_v, freq_hz, bandwidth_hz, d_vis);
+}
+
+/* Double precision. */
+void oskar_correlate_extended_cuda_d(int num_sources,
+        int num_stations, const double4c* d_jones,
+        const double* d_source_I, const double* d_source_Q,
+        const double* d_source_U, const double* d_source_V,
+        const double* d_source_l, const double* d_source_m,
+        const double* d_source_a, const double* d_source_b,
+        const double* d_source_c, const double* d_station_u,
+        const double* d_station_v, double freq_hz, double bandwidth_hz,
+        double4c* d_vis)
+{
+    dim3 num_threads(128, 1);
+    dim3 num_blocks(num_stations, num_stations);
+    size_t shared_mem = num_threads.x * sizeof(double4c);
+    oskar_correlate_extended_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
+            d_source_V, d_source_l, d_source_m, d_source_a, d_source_b,
+            d_source_c, d_station_u, d_station_v, freq_hz, bandwidth_hz, d_vis);
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+
+/* Kernels. ================================================================ */
 
 #define ONE_OVER_2PI  0.159154943091895335768884   // 1 / (2 * pi)
 #define ONE_OVER_2PIf 0.159154943091895335768884f  // 1 / (2 * pi)
@@ -51,14 +106,15 @@
 extern __shared__ float4c  smem_f[];
 extern __shared__ double4c smem_d[];
 
-// Single precision.
+/* Single precision. */
 __global__
-void oskar_cudak_correlator_extended_f(const int ns, const int na,
-        const float4c* jones, const float* source_I, const float* source_Q,
-        const float* source_U, const float* source_V, const float* u,
-        const float* v, const float* l, const float* m,
-        const float freq, const float bandwidth,
-        const float* a, const float* b, const float* c, float4c* vis)
+void oskar_correlate_extended_cudak_f(const int num_sources,
+        const int num_stations, const float4c* jones, const float* source_I,
+        const float* source_Q, const float* source_U, const float* source_V,
+        const float* source_l, const float* source_m,
+        const float* source_a, const float* source_b, const float* source_c,
+        const float* station_u, const float* station_v, const float freq_hz,
+        const float bandwidth_hz, float4c* vis)
 {
     // Return immediately if we're in the lower triangular half of the
     // visibility matrix.
@@ -69,8 +125,8 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
     if (threadIdx.x == 0)
     {
         // Baseline UV-distance, in wavelengths.
-        uu   = (u[AI] - u[AJ]) * ONE_OVER_2PIf;
-        vv   = (v[AI] - v[AJ]) * ONE_OVER_2PIf;
+        uu   = (station_u[AI] - station_u[AJ]) * ONE_OVER_2PIf;
+        vv   = (station_v[AI] - station_v[AJ]) * ONE_OVER_2PIf;
 
         // Quantities needed for evaluating source with gaussian term.
         uu2  = uu * uu;
@@ -79,14 +135,14 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
 
         // Modify the baseline UV-distance to include the common components
         // of the bandwidth smearing term.
-        uu *= M_PIf * bandwidth / freq;
-        vv *= M_PIf * bandwidth / freq;
+        uu *= M_PIf * bandwidth_hz / freq_hz;
+        vv *= M_PIf * bandwidth_hz / freq_hz;
     }
     __syncthreads();
 
     // Get pointers to both source vectors for station i and j.
-    const float4c* station_i = &jones[ns * AI];
-    const float4c* station_j = &jones[ns * AJ];
+    const float4c* station_i = &jones[num_sources * AI];
+    const float4c* station_j = &jones[num_sources * AJ];
 
     // Each thread loops over a subset of the sources.
     {
@@ -95,13 +151,14 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
         sum.b = make_float2(0.0f, 0.0f);
         sum.c = make_float2(0.0f, 0.0f);
         sum.d = make_float2(0.0f, 0.0f);
-        for (int t = threadIdx.x; t < ns; t += blockDim.x)
+        for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
         {
             // Compute bandwidth-smearing term first (register optimisation).
-            float rb = oskar_cudaf_sinc_f(uu * l[t] + vv * m[t]);
+            float rb = oskar_cudaf_sinc_f(uu * source_l[t] + vv * source_m[t]);
 
             // Evaluate gaussian source width term.
-            float f = expf(-(a[t] * uu2 + b[t] * uuvv + c[t] * vv2));
+            float f = expf(-(source_a[t] * uu2 +
+                    source_b[t] * uuvv + source_c[t] * vv2));
 
             rb *= f;
 
@@ -160,7 +217,7 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
         }
 
         // Determine 1D index.
-        int idx = AJ*(na-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
+        int idx = AJ*(num_stations-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
 
         // Modify existing visibility.
         vis[idx].a.x += sum.a.x;
@@ -174,14 +231,15 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
     }
 }
 
-// Double precision.
+/* Double precision. */
 __global__
-void oskar_cudak_correlator_extended_d(const int ns, const int na,
-        const double4c* jones, const double* source_I, const double* source_Q,
-        const double* source_U, const double* source_V, const double* u,
-        const double* v, const double* l, const double* m,
-        const double freq, const double bandwidth,
-        const double* a, const double* b, const double* c, double4c* vis)
+void oskar_correlate_extended_cudak_d(const int num_sources,
+        const int num_stations, const double4c* jones, const double* source_I,
+        const double* source_Q, const double* source_U, const double* source_V,
+        const double* source_l, const double* source_m,
+        const double* source_a, const double* source_b, const double* source_c,
+        const double* station_u, const double* station_v, const double freq_hz,
+        const double bandwidth_hz, double4c* vis)
 {
     // Return immediately if we're in the lower triangular half of the
     // visibility matrix.
@@ -192,8 +250,8 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
     if (threadIdx.x == 0)
     {
         // Baseline UV-distance, in wavelengths.
-        uu   = (u[AI] - u[AJ]) * ONE_OVER_2PI;
-        vv   = (v[AI] - v[AJ]) * ONE_OVER_2PI;
+        uu   = (station_u[AI] - station_u[AJ]) * ONE_OVER_2PI;
+        vv   = (station_v[AI] - station_v[AJ]) * ONE_OVER_2PI;
 
         // Quantities needed for evaluating source with gaussian term.
         uu2  = uu * uu;
@@ -202,14 +260,14 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
 
         // Modify the baseline UV-distance to include the common components
         // of the bandwidth smearing term.
-        uu *= M_PI * bandwidth / freq;
-        vv *= M_PI * bandwidth / freq;
+        uu *= M_PI * bandwidth_hz / freq_hz;
+        vv *= M_PI * bandwidth_hz / freq_hz;
     }
     __syncthreads();
 
     // Get pointers to both source vectors for station i and j.
-    const double4c* station_i = &jones[ns * AI];
-    const double4c* station_j = &jones[ns * AJ];
+    const double4c* station_i = &jones[num_sources * AI];
+    const double4c* station_j = &jones[num_sources * AJ];
 
     // Each thread loops over a subset of the sources.
     {
@@ -218,13 +276,13 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
         sum.b = make_double2(0.0, 0.0);
         sum.c = make_double2(0.0, 0.0);
         sum.d = make_double2(0.0, 0.0);
-        for (int t = threadIdx.x; t < ns; t += blockDim.x)
+        for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
         {
             // Compute bandwidth-smearing term first (register optimisation).
-            double rb = oskar_cudaf_sinc_d(uu * l[t] + vv * m[t]);
+            double rb = oskar_cudaf_sinc_d(uu * source_l[t] + vv * source_m[t]);
 
             // Evaluate gaussian source width term.
-            double f = exp(-(a[t] * uu2 + b[t] * uuvv + c[t] * vv2));
+            double f = exp(-(source_a[t] * uu2 + source_b[t] * uuvv + source_c[t] * vv2));
 
             rb *= f;
 
@@ -283,7 +341,7 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
         }
 
         // Determine 1D index.
-        int idx = AJ*(na-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
+        int idx = AJ*(num_stations-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
 
         // Modify existing visibility.
         vis[idx].a.x += sum.a.x;

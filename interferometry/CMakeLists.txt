@@ -4,7 +4,12 @@
 
 # Add the source files in this directory.
 set(interferometry_SRC
-    src/oskar_correlate.cu
+    src/oskar_correlate_extended_cuda.cu
+    src/oskar_correlate_extended_time_smearing_cuda.cu
+    src/oskar_correlate_point_cuda.cu
+    src/oskar_correlate_point_scalar_cuda.cu
+    src/oskar_correlate_point_time_smearing_cuda.cu
+    src/oskar_correlate.c
     src/oskar_evaluate_baselines.c
     src/oskar_evaluate_baselines_cuda.cu
     src/oskar_evaluate_jones_K.c
@@ -45,12 +50,6 @@ set(interferometry_SRC
     src/oskar_visibilities_write.c
     src/oskar_Visibilities.cpp
 )
-
-# Add the CUDA kernels.
-add_subdirectory(cudak)
-foreach (file ${interferometry_cuda_kernels_SRC})
-    list(APPEND interferometry_SRC cudak/${file})
-endforeach ()
 
 set(interferometry_SRC "${interferometry_SRC}" PARENT_SCOPE)
 

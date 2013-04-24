@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,62 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/cudak/oskar_cudak_correlator.h"
+#include "interferometry/oskar_correlate_point_cuda.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2c.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2h.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2c_conj_trans.h"
 #include "math/cudak/oskar_cudaf_sinc.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Kernel wrappers. ======================================================== */
+
+/* Single precision. */
+void oskar_correlate_point_cuda_f(int num_sources,
+        int num_stations, const float4c* d_jones,
+        const float* d_source_I, const float* d_source_Q,
+        const float* d_source_U, const float* d_source_V,
+        const float* d_source_l, const float* d_source_m,
+        const float* d_station_u, const float* d_station_v,
+        float lambda_bandwidth, float4c* d_vis)
+{
+    dim3 num_threads(128, 1);
+    dim3 num_blocks(num_stations, num_stations);
+    size_t shared_mem = num_threads.x * sizeof(float4c);
+    oskar_correlate_point_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
+            d_source_V, d_source_l, d_source_m, d_station_u,
+            d_station_v, lambda_bandwidth, d_vis);
+}
+
+/* Double precision. */
+void oskar_correlate_point_cuda_d(int num_sources,
+        int num_stations, const double4c* d_jones,
+        const double* d_source_I, const double* d_source_Q,
+        const double* d_source_U, const double* d_source_V,
+        const double* d_source_l, const double* d_source_m,
+        const double* d_station_u, const double* d_station_v,
+        double lambda_bandwidth, double4c* d_vis)
+{
+    dim3 num_threads(128, 1);
+    dim3 num_blocks(num_stations, num_stations);
+    size_t shared_mem = num_threads.x * sizeof(double4c);
+    oskar_correlate_point_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
+            d_source_V, d_source_l, d_source_m, d_station_u,
+            d_station_v, lambda_bandwidth, d_vis);
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+
+/* Kernels. ================================================================ */
 
 #define ONE_OVER_2C 1.66782047599076024788E-9   // 1 / (2c)
 #define ONE_OVER_2Cf 1.66782047599076024788E-9f // 1 / (2c)
@@ -43,13 +93,13 @@
 extern __shared__ float4c  smem_f[];
 extern __shared__ double4c smem_d[];
 
-// Single precision.
+/* Single precision. */
 __global__
-void oskar_cudak_correlator_f(const int ns, const int na,
-        const float4c* jones, const float* source_I, const float* source_Q,
-        const float* source_U, const float* source_V, const float* u,
-        const float* v, const float* l, const float* m,
-        const float lambda_bandwidth, float4c* vis)
+void oskar_correlate_point_cudak_f(const int num_sources,
+        const int num_stations, const float4c* jones, const float* source_I,
+        const float* source_Q, const float* source_U, const float* source_V,
+        const float* source_l, const float* source_m, const float* station_u,
+        const float* station_v, const float lambda_bandwidth, float4c* vis)
 {
     // Return immediately if we're in the lower triangular half of the
     // visibility matrix.
@@ -59,16 +109,16 @@ void oskar_cudak_correlator_f(const int ns, const int na,
     __device__ __shared__ float uu, vv;
     if (threadIdx.x == 0)
     {
-        // Determine UV-distance for baseline modified by the bandwidth smearing
-        // parameters.
-        uu = ONE_OVER_2Cf * lambda_bandwidth * (u[AI] - u[AJ]);
-        vv = ONE_OVER_2Cf * lambda_bandwidth * (v[AI] - v[AJ]);
+        // Determine UV-distance for baseline modified by the bandwidth
+        // smearing parameters.
+        uu = ONE_OVER_2Cf * lambda_bandwidth * (station_u[AI] - station_u[AJ]);
+        vv = ONE_OVER_2Cf * lambda_bandwidth * (station_v[AI] - station_v[AJ]);
     }
     __syncthreads();
 
     // Get pointers to both source vectors for station i and j.
-    const float4c* station_i = &jones[ns * AI];
-    const float4c* station_j = &jones[ns * AJ];
+    const float4c* station_i = &jones[num_sources * AI];
+    const float4c* station_j = &jones[num_sources * AJ];
 
     // Each thread loops over a subset of the sources.
     {
@@ -77,10 +127,10 @@ void oskar_cudak_correlator_f(const int ns, const int na,
         sum.b = make_float2(0.0f, 0.0f);
         sum.c = make_float2(0.0f, 0.0f);
         sum.d = make_float2(0.0f, 0.0f);
-        for (int t = threadIdx.x; t < ns; t += blockDim.x)
+        for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
         {
             // Compute bandwidth-smearing term first (register optimisation).
-            float rb = oskar_cudaf_sinc_f(uu * l[t] + vv * m[t]);
+            float rb = oskar_cudaf_sinc_f(uu * source_l[t] + vv * source_m[t]);
 
             // Construct source brightness matrix.
             float4c c_b;
@@ -137,7 +187,7 @@ void oskar_cudak_correlator_f(const int ns, const int na,
         }
 
         // Determine 1D index.
-        int idx = AJ*(na-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
+        int idx = AJ*(num_stations-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
 
         // Modify existing visibility.
         vis[idx].a.x += sum.a.x;
@@ -151,13 +201,13 @@ void oskar_cudak_correlator_f(const int ns, const int na,
     }
 }
 
-// Double precision.
+/* Double precision. */
 __global__
-void oskar_cudak_correlator_d(const int ns, const int na,
-        const double4c* jones, const double* source_I, const double* source_Q,
-        const double* source_U, const double* source_V, const double* u,
-        const double* v, const double* l, const double* m,
-        const double lambda_bandwidth, double4c* vis)
+void oskar_correlate_point_cudak_d(const int num_sources,
+        const int num_stations, const double4c* jones, const double* source_I,
+        const double* source_Q, const double* source_U, const double* source_V,
+        const double* source_l, const double* source_m, const double* station_u,
+        const double* station_v, const double lambda_bandwidth, double4c* vis)
 {
     // Return immediately if we're in the lower triangular half of the
     // visibility matrix.
@@ -167,15 +217,16 @@ void oskar_cudak_correlator_d(const int ns, const int na,
     __device__ __shared__ double uu, vv;
     if (threadIdx.x == 0)
     {
-        // Determine UV-distance for baseline (common per thread block).
-        uu = ONE_OVER_2C * lambda_bandwidth * (u[AI] - u[AJ]);
-        vv = ONE_OVER_2C * lambda_bandwidth * (v[AI] - v[AJ]);
+        // Determine UV-distance for baseline modified by the bandwidth
+        // smearing parameters.
+        uu = ONE_OVER_2C * lambda_bandwidth * (station_u[AI] - station_u[AJ]);
+        vv = ONE_OVER_2C * lambda_bandwidth * (station_v[AI] - station_v[AJ]);
     }
     __syncthreads();
 
     // Get pointers to both source vectors for station i and j.
-    const double4c* station_i = &jones[ns * AI];
-    const double4c* station_j = &jones[ns * AJ];
+    const double4c* station_i = &jones[num_sources * AI];
+    const double4c* station_j = &jones[num_sources * AJ];
 
     // Each thread loops over a subset of the sources.
     {
@@ -184,10 +235,10 @@ void oskar_cudak_correlator_d(const int ns, const int na,
         sum.b = make_double2(0.0, 0.0);
         sum.c = make_double2(0.0, 0.0);
         sum.d = make_double2(0.0, 0.0);
-        for (int t = threadIdx.x; t < ns; t += blockDim.x)
+        for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
         {
             // Compute bandwidth-smearing term first (register optimisation).
-            double rb = oskar_cudaf_sinc_d(uu * l[t] + vv * m[t]);
+            double rb = oskar_cudaf_sinc_d(uu * source_l[t] + vv * source_m[t]);
 
             // Construct source brightness matrix.
             double4c c_b;
@@ -244,7 +295,7 @@ void oskar_cudak_correlator_d(const int ns, const int na,
         }
 
         // Determine 1D index.
-        int idx = AJ*(na-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
+        int idx = AJ*(num_stations-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
 
         // Modify existing visibility.
         vis[idx].a.x += sum.a.x;
