@@ -66,18 +66,18 @@ static T fromString(const char* s) {
     return t;
 }
 /* ################################################################### */
-static bool isdigit(const std::string & s, int i=0) {
-    int n = s.length();
-    for(; i < n; ++i)
-        switch(s[i]) {
-            case '0': case '1': case '2':
-            case '3': case '4': case '5':
-            case '6': case '7': case '8': case '9': break;
-            default: return false;
-        }
-
-    return true;
-}
+//static bool isdigit(const std::string & s, int i=0) {
+//    int n = s.length();
+//    for(; i < n; ++i)
+//        switch(s[i]) {
+//            case '0': case '1': case '2':
+//            case '3': case '4': case '5':
+//            case '6': case '7': case '8': case '9': break;
+//            default: return false;
+//        }
+//
+//    return true;
+//}
 /* ################################################################### */
 static bool isdigit(const std::string * s, int i=0) {
     int n = s->length();
@@ -322,86 +322,86 @@ static void ToLowerASCII(std::string & s) {
     }
 }
 /* ################################################################### */
-static char** CommandLineToArgvA(const char* CmdLine, int* _argc) {
-    char** argv;
-    char*  _argv;
-    unsigned long   len;
-    unsigned long   argc;
-    char   a;
-    unsigned long   i, j;
-
-    bool  in_QM;
-    bool  in_TEXT;
-    bool  in_SPACE;
-
-    len = strlen(CmdLine);
-    i = ((len+2)/2)*sizeof(void*) + sizeof(void*);
-
-    argv = (char**)malloc(i + (len+2)*sizeof(char));
-
-    _argv = (char*)(((unsigned char*)argv)+i);
-
-    argc = 0;
-    argv[argc] = _argv;
-    in_QM = false;
-    in_TEXT = false;
-    in_SPACE = true;
-    i = 0;
-    j = 0;
-
-    while( (a = CmdLine[i]) ) {
-        if(in_QM) {
-            if( (a == '\"') ||
-                    (a == '\'')) // rsz. Added single quote.
-            {
-                in_QM = false;
-            } else {
-                _argv[j] = a;
-                j++;
-            }
-        } else {
-            switch(a) {
-                case '\"':
-                case '\'': // rsz. Added single quote.
-                    in_QM = true;
-                    in_TEXT = true;
-                    if(in_SPACE) {
-                        argv[argc] = _argv+j;
-                        argc++;
-                    }
-                    in_SPACE = false;
-                    break;
-                case ' ':
-                case '\t':
-                case '\n':
-                case '\r':
-                    if(in_TEXT) {
-                        _argv[j] = '\0';
-                        j++;
-                    }
-                    in_TEXT = false;
-                    in_SPACE = true;
-                    break;
-                default:
-                    in_TEXT = true;
-                    if(in_SPACE) {
-                        argv[argc] = _argv+j;
-                        argc++;
-                    }
-                    _argv[j] = a;
-                    j++;
-                    in_SPACE = false;
-                    break;
-            }
-        }
-        i++;
-    }
-    _argv[j] = '\0';
-    argv[argc] = NULL;
-
-    (*_argc) = argc;
-    return argv;
-}
+//static char** CommandLineToArgvA(const char* CmdLine, int* _argc) {
+//    char** argv;
+//    char*  _argv;
+//    unsigned long   len;
+//    unsigned long   argc;
+//    char   a;
+//    unsigned long   i, j;
+//
+//    bool  in_QM;
+//    bool  in_TEXT;
+//    bool  in_SPACE;
+//
+//    len = strlen(CmdLine);
+//    i = ((len+2)/2)*sizeof(void*) + sizeof(void*);
+//
+//    argv = (char**)malloc(i + (len+2)*sizeof(char));
+//
+//    _argv = (char*)(((unsigned char*)argv)+i);
+//
+//    argc = 0;
+//    argv[argc] = _argv;
+//    in_QM = false;
+//    in_TEXT = false;
+//    in_SPACE = true;
+//    i = 0;
+//    j = 0;
+//
+//    while( (a = CmdLine[i]) ) {
+//        if(in_QM) {
+//            if( (a == '\"') ||
+//                    (a == '\'')) // rsz. Added single quote.
+//            {
+//                in_QM = false;
+//            } else {
+//                _argv[j] = a;
+//                j++;
+//            }
+//        } else {
+//            switch(a) {
+//                case '\"':
+//                case '\'': // rsz. Added single quote.
+//                    in_QM = true;
+//                    in_TEXT = true;
+//                    if(in_SPACE) {
+//                        argv[argc] = _argv+j;
+//                        argc++;
+//                    }
+//                    in_SPACE = false;
+//                    break;
+//                case ' ':
+//                case '\t':
+//                case '\n':
+//                case '\r':
+//                    if(in_TEXT) {
+//                        _argv[j] = '\0';
+//                        j++;
+//                    }
+//                    in_TEXT = false;
+//                    in_SPACE = true;
+//                    break;
+//                default:
+//                    in_TEXT = true;
+//                    if(in_SPACE) {
+//                        argv[argc] = _argv+j;
+//                        argc++;
+//                    }
+//                    _argv[j] = a;
+//                    j++;
+//                    in_SPACE = false;
+//                    break;
+//            }
+//        }
+//        i++;
+//    }
+//    _argv[j] = '\0';
+//    argv[argc] = NULL;
+//
+//    (*_argc) = argc;
+//    return argv;
+//}
 /* ################################################################### */
 // Create unique ids with static and still allow single header that avoids multiple definitions linker error.
 class ezOptionParserIDGenerator {
