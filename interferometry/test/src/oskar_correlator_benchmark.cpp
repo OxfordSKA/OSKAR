@@ -71,7 +71,7 @@ int main(int argc, char** argv)
     int num_stations, num_sources, niter;
     opt.get("-nst")->getInt(num_stations);
     opt.get("-nsrc")->getInt(num_sources);
-    int type = opt.isSet("-single") ? OSKAR_SINGLE : OSKAR_DOUBLE;
+    int type = opt.isSet("-sp") ? OSKAR_SINGLE : OSKAR_DOUBLE;
     int jones_type = type | OSKAR_COMPLEX;
     if (!opt.isSet("-s"))
         jones_type |= OSKAR_MATRIX;
