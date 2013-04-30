@@ -29,15 +29,15 @@
 #include <oskar_global.h>
 
 #include <interferometry/oskar_correlate.h>
-#include <interferometry/oskar_TelescopeModel.h>
+#include <interferometry/oskar_telescope_model_free.h>
 #include <interferometry/oskar_telescope_model_init.h>
-#include <sky/oskar_SkyModel.h>
+#include <sky/oskar_sky_model_free.h>
 #include <sky/oskar_sky_model_init.h>
-#include <math/oskar_Jones.h>
+#include <math/oskar_jones_free.h>
 #include <math/oskar_jones_init.h>
-#include <utility/oskar_Mem.h>
-#include <utility/oskar_mem_init.h>
 #include <utility/oskar_mem_copy.h>
+#include <utility/oskar_mem_free.h>
+#include <utility/oskar_mem_init.h>
 #include <utility/oskar_get_error_string.h>
 
 #include <apps/lib/oskar_OptionParser.h>
@@ -46,12 +46,14 @@
 #ifndef _WIN32
 #   include <sys/time.h>
 #endif /* _WIN32 */
+#include <cmath>
 #include <cstdlib>
 #include <cstdio>
+#include <vector>
 
 int benchmark(int num_stations, int num_sources, int type,
         int jones_type, int use_extended, int use_time_ave, int niter,
-        double* time_taken_sec);
+        std::vector<double>& times);
 
 int main(int argc, char** argv)
 {
@@ -63,12 +65,16 @@ int main(int argc, char** argv)
     opt.addFlag("-e", "Use extended (Gaussian) sources (default = point sources).");
     opt.addFlag("-t", "Use analytical time averaging (default = no time "
             "averaging).");
+    opt.addFlag("-r", "Dump raw iteration data to this file.", 1);
+    opt.addFlag("-std", "Discard values greater than this number of standard "
+            "deviations from the mean.", 1);
     opt.addFlag("-n", "Number of iterations", 1, "1", false);
     opt.addFlag("-v", "Display verbose output.", false);
     if (!opt.check_options(argc, argv))
         return EXIT_FAILURE;
 
     int num_stations, num_sources, niter;
+    double max_std_dev = 0.0;
     opt.get("-nst")->getInt(num_stations);
     opt.get("-nsrc")->getInt(num_sources);
     int type = opt.isSet("-sp") ? OSKAR_SINGLE : OSKAR_DOUBLE;
@@ -78,36 +84,113 @@ int main(int argc, char** argv)
     opt.get("-n")->getInt(niter);
     int use_extended = opt.isSet("-e") ? OSKAR_TRUE : OSKAR_FALSE;
     int use_time_ave = opt.isSet("-t") ? OSKAR_TRUE : OSKAR_FALSE;
+    std::string raw_file;
+    if (opt.isSet("-r"))
+        opt.get("-r")->getString(raw_file);
+    if (opt.isSet("-std"))
+        opt.get("-std")->getDouble(max_std_dev);
 
     if (opt.isSet("-v"))
     {
         printf("\n");
-        printf("- Number of stations = %i\n", num_stations);
-        printf("- Number of sources = %i\n", num_sources);
+        printf("- Number of stations: %i\n", num_stations);
+        printf("- Number of sources: %i\n", num_sources);
         printf("- Precision: %s\n", (type == OSKAR_SINGLE) ? "single" : "double");
         printf("- Jones type: %s\n", (opt.isSet("-s")) ? "Scalar" : "Matrix");
         printf("- Extended sources: %s\n", (use_extended) ? "true" : "false");
-        printf("- Analytical time smearing = %s\n", (use_time_ave) ? "true" : "false");
-        printf("- Number of iterations = %i\n", niter);
+        printf("- Analytical time smearing: %s\n", (use_time_ave) ? "true" : "false");
+        printf("- Number of iterations: %i\n", niter);
+        if (max_std_dev > 0.0)
+            printf("- Max standard deviations: %f\n", max_std_dev);
+        if (!raw_file.empty())
+            printf("- Writing iteration data to: %s\n", raw_file.c_str());
         printf("\n");
     }
 
-    double time_taken_sec = 0.0;
+    // Run benchmarks.
+    double time_taken_sec = 0.0, average_time_sec = 0.0;
+    std::vector<double> times;
     int status = benchmark(num_stations, num_sources, type, jones_type,
-            use_extended, use_time_ave, niter, &time_taken_sec);
-    if (status) {
+            use_extended, use_time_ave, niter, times);
+
+    // Compute total time taken.
+    for (int i = 0; i < niter; ++i)
+    {
+        time_taken_sec += times[i];
+    }
+
+    // Dump raw data if requested.
+    if (!raw_file.empty())
+    {
+        FILE* raw_stream = 0;
+        raw_stream = fopen(raw_file.c_str(), "w");
+        if (raw_stream)
+        {
+            for (int i = 0; i < niter; ++i)
+            {
+                fprintf(raw_stream, "%.6f\n", times[i]);
+            }
+            fclose(raw_stream);
+        }
+    }
+
+    // Check for errors.
+    if (status)
+    {
         fprintf(stderr, "ERROR: correlator failed with code %i: %s\n", status,
                 oskar_get_error_string(status));
         return EXIT_FAILURE;
     }
+
+    // Compute average.
+    if (max_std_dev > 0.0)
+    {
+        double std_dev_sec = 0.0, old_time_average_sec;
+
+        // Compute standard deviation.
+        old_time_average_sec = time_taken_sec / niter;
+        for (int i = 0; i < niter; ++i)
+        {
+            std_dev_sec += pow(times[i] - old_time_average_sec, 2.0);
+        }
+        std_dev_sec /= niter;
+        std_dev_sec = sqrt(std_dev_sec);
+
+        // Compute new mean.
+        average_time_sec = 0.0;
+        int counter = 0;
+        for (int i = 0; i < niter; ++i)
+        {
+            if (fabs(times[i] - old_time_average_sec) <
+                    max_std_dev * std_dev_sec)
+            {
+                average_time_sec += times[i];
+                counter++;
+            }
+        }
+        if (counter)
+            average_time_sec /= counter;
+    }
+    else
+    {
+        average_time_sec = time_taken_sec / niter;
+    }
+
+    // Print average.
     if (opt.isSet("-v"))
     {
-        printf("==> Total time taken = %f seconds.\n", time_taken_sec);
-        printf("==> Time taken per iteration = %f seconds.\n", time_taken_sec/niter);
+        printf("==> Total time taken: %f seconds.\n", time_taken_sec);
+        printf("==> Time taken per iteration: %f seconds.\n", average_time_sec);
+        printf("==> Iteration values:\n");
+        for (int i = 0; i < niter; ++i)
+        {
+            printf("%.6f\n", times[i]);
+        }
         printf("\n");
     }
-    else {
-        printf("%f\n", time_taken_sec/niter);
+    else
+    {
+        printf("%f\n", average_time_sec);
     }
 
     return EXIT_SUCCESS;
@@ -115,7 +198,7 @@ int main(int argc, char** argv)
 
 int benchmark(int num_stations, int num_sources, int type,
         int jones_type, int use_extended, int use_time_ave, int niter,
-        double* time_taken_sec)
+        std::vector<double>& times)
 {
     int status = OSKAR_SUCCESS;
     int loc = OSKAR_LOCATION_GPU;
@@ -152,27 +235,36 @@ int benchmark(int num_stations, int num_sources, int type,
     double gast = 0.0;
     cudaDeviceSynchronize();
 
-#ifndef _WIN32
-    struct timeval t1_;
-    gettimeofday(&t1_, NULL);
-#endif
-
+    times.resize(niter);
     for (int i = 0; i < niter; ++i)
-        oskar_correlate(&vis, &J, &tel, &sky, &u, &v, gast, &status);
-    cudaDeviceSynchronize();
-
+    {
+        double time_taken_sec = 0.0;
 #ifndef _WIN32
-    struct timeval t2_;
-    gettimeofday(&t2_, NULL);
-    double start_ = t1_.tv_sec + t1_.tv_usec * 1.0e-6;
-    double end_ = t2_.tv_sec + t2_.tv_usec * 1.0e-6;
-    *time_taken_sec = end_ - start_;
+        double start_, end_;
+        struct timeval t1_, t2_;
+        gettimeofday(&t1_, NULL);
+#endif
+        oskar_correlate(&vis, &J, &tel, &sky, &u, &v, gast, &status);
+        cudaDeviceSynchronize();
+#ifndef _WIN32
+        gettimeofday(&t2_, NULL);
+        start_ = t1_.tv_sec + t1_.tv_usec * 1.0e-6;
+        end_   = t2_.tv_sec + t2_.tv_usec * 1.0e-6;
+        time_taken_sec = end_ - start_;
 #else
-    *time_taken_sec = 0.0;
+        time_taken_sec = 0.0;
 #endif
 
-    // Note: telescope, sky model, oskar_Mem, and oskar_Jones currently still
-    // have a C++ nature so free themselves!
+        // Store the time taken for this iteration.
+        times[i] = time_taken_sec;
+    }
 
+    // Free memory.
+    oskar_mem_free(&u, &status);
+    oskar_mem_free(&v, &status);
+    oskar_mem_free(&vis, &status);
+    oskar_jones_free(&J, &status);
+    oskar_sky_model_free(&sky, &status);
+    oskar_telescope_model_free(&tel, &status);
     return status;
 }
