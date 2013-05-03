@@ -39,12 +39,12 @@ find_package(OpenMP QUIET)   # liboskar
 #find_package(MKL QUIET)     # liboskar
 find_package(CBLAS QUIET)    # liboskar
 find_package(LAPACK QUIET)   # liboskar
-find_package(Qt4 4.6 QUIET)  # liboskar_apps, liboskar_widgets, apps
+find_package(Qt4 4.6 QUIET) # liboskar_apps, liboskar_widgets, apps
 find_package(CasaCore QUIET) # liboskar_ms
 find_package(CFitsio QUIET)  # liboskar_fits
 find_package(Matlab QUIET)   # mex functions
 find_package(CppUnit QUIET)  # unit tests
-#find_package(PNG QUIET)      # For writing PNG images.
+#find_package(PNG QUIET)     # For writing PNG images.
 
 # ==== Work out which libraries to build.
 if (NOT CUDA_FOUND)

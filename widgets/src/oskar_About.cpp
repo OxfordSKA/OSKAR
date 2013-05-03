@@ -62,7 +62,7 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
 
     // Create title.
     setWindowTitle("About OSKAR");
-    QLabel* title = new QLabel("OSKAR-2", this);
+    QLabel* title = new QLabel("OSKAR 2", this);
     title->setFont(QFont("Arial", 28));
     hLayout1->addWidget(title);
 
@@ -170,9 +170,9 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
     html.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" "
             "\"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
             "<html><head></head><body>\n");
-    html.append("<p>OSKAR-2 has been developed using hardware "
+    html.append("<p>OSKAR 2 has been developed using hardware "
             "donated by NVIDIA UK.</p>");
-    html.append("<p>OSKAR-2 directly links against or uses the following "
+    html.append("<p>OSKAR 2 directly links against or uses the following "
             "software libraries:</p>");
     html.append("<ul>");
     html.append("<li>NVIDIA CUDA "
@@ -204,9 +204,12 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
                 "(<a href=\"http://heasarc.gsfc.nasa.gov/fitsio/\">"
                 "http://heasarc.gsfc.nasa.gov/fitsio/</a>)</li>");
 #endif
+    html.append("<li>ezOptionParser "
+                "(<a href=\"http://sourceforge.net/projects/ezoptionparser/\">"
+                "http://sourceforge.net/projects/ezoptionparser/</a>)</li>");
     html.append("</ul>");
     html.append("<p>The following tools have been used during the development "
-            "of OSKAR-2:</p>");
+            "of OSKAR 2:</p>");
     html.append("<ul>");
     html.append("<li>The CMake cross-platform build system "
                 "(<a href=\"http://www.cmake.org/\">"
@@ -239,19 +242,20 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
     vLayoutAtt->addWidget(libs);
 
     // Create acknowledgement labels.
-    QLabel* ack1 = new QLabel("If OSKAR-2 has been helpful in your research, "
+    QLabel* ack1 = new QLabel("If OSKAR has been helpful in your research, "
             "please give the following acknowledgement:", this);
     vLayoutAtt->addWidget(ack1);
-    QLabel* ack2 = new QLabel("\"This research has made use of OSKAR-2, "
-            "developed at the University of Oxford.\"", this);
-    QFont italic = QApplication::font();
-    italic.setItalic(true);
-    ack2->setFont(italic);
+    QLabel* ack2 = new QLabel("<blockquote><i>\"This research has made use of OSKAR, "
+            "developed at the University of Oxford.\"</i></blockquote>", this);
+    ack2->setTextFormat(Qt::RichText);
     vLayoutAtt->addWidget(ack2);
     QLabel* ack3 = new QLabel("and/or reference the following publication:",
             this);
     vLayoutAtt->addWidget(ack3);
-    QLabel* ack4 = new QLabel("(Insert publication reference here...)", this);
+    QLabel* ack4 = new QLabel("<blockquote>Dulwich, F., Mort, B.J., Salvini, S., "
+            "\"<i>Using OSKAR to simulate data from radio interferometers\"</i>,<br>"
+            "MNRAS 2013 in preparation.</blockquote>", this);
+    ack4->setTextFormat(Qt::RichText);
     vLayoutAtt->addWidget(ack4);
 
     // Add attribution group.
