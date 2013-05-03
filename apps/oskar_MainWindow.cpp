@@ -176,7 +176,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     addToolBar(Qt::TopToolBarArea, toolbar);
 
     // Create the network access manager to check the current version.
-    version_url = "http://www.oerc.ox.ac.uk/~ska/oskar2/current_version.txt";
+    version_url_ = "http://www.oerc.ox.ac.uk/~ska/oskar/current_version.txt";
     networkManager_ = new QNetworkAccessManager(this);
     connect(networkManager_, SIGNAL(finished(QNetworkReply*)),
                 this, SLOT(processNetworkReply(QNetworkReply*)));
@@ -392,7 +392,7 @@ void oskar_MainWindow::binLocations()
 void oskar_MainWindow::checkForUpdate()
 {
     QNetworkRequest request;
-    request.setUrl(QUrl(version_url));
+    request.setUrl(QUrl(version_url_));
     request.setRawHeader("User-Agent", "OSKAR " OSKAR_VERSION_STR);
     networkManager_->get(request);
 }
@@ -457,7 +457,7 @@ void oskar_MainWindow::openRecentFile()
 void oskar_MainWindow::processNetworkReply(QNetworkReply* reply)
 {
     // Check if we're receiving the current version file.
-    if (reply->request().url().toString() == version_url)
+    if (reply->request().url().toString() == version_url_)
     {
         // Read the reply.
         QByteArray data = reply->readLine();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
 #include "widgets/oskar_DocumentationDisplay.h"
 
 #include <QtGui/QApplication>
@@ -35,7 +34,9 @@
 #include <QtGui/QTextBrowser>
 #include <QtGui/QVBoxLayout>
 
-static void add_doc(QString& html, const char* link, const char* title,
+static const char* root_url = "http://www.oerc.ox.ac.uk/~ska/oskar/";
+
+static void add_doc(QString& html, const char* doc_name, const char* title,
         const char* desc);
 
 
@@ -46,11 +47,6 @@ oskar_DocumentationDisplay::oskar_DocumentationDisplay(QWidget *parent)
     setWindowTitle("Documentation");
     QVBoxLayout* vLayoutMain = new QVBoxLayout(this);
 
-    // Create help group.
-    QGroupBox* grp = new QGroupBox("OSKAR Documentation", this);
-    grp->setMinimumSize(600, 300);
-    QVBoxLayout* vLayoutAtt = new QVBoxLayout(grp);
-
     // Create help document.
     QString html;
     html.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" "
@@ -59,12 +55,12 @@ oskar_DocumentationDisplay::oskar_DocumentationDisplay(QWidget *parent)
     html.append("<p>");
     html.append("For the current release of OSKAR and all related "
             "documentation, please point your web browser at:");
-    html.append("<ul><li><a href=\"http://www.oerc.ox.ac.uk/~ska/oskar2\">"
-            "http://www.oerc.ox.ac.uk/~ska/oskar2</a></li></ul>");
+    html.append(QString("<ul><li><a href=\"%1\">%2</a></li></ul>").
+            arg(root_url).arg(root_url));
     html.append("</p>");
     html.append("<p>");
     html.append("Please send all bug reports, feature requests, and general "
-            "OSKAR-2 correspondence to the following email address:");
+            "OSKAR correspondence to the following email address:");
     html.append("<ul><li><a href=\"mailto:oskar@oerc.ox.ac.uk\">"
             "oskar@oerc.ox.ac.uk</a></li></ul>");
 
@@ -72,62 +68,49 @@ oskar_DocumentationDisplay::oskar_DocumentationDisplay(QWidget *parent)
     html.append("<p>The following PDF documents are available:</p>");
     html.append("<ol>");
 
-    add_doc(html,
-            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Introduction.pdf",
+    add_doc(html, "OSKAR-Introduction.pdf",
             "Introduction",
-            "An introduction to the OSKAR-2 documentation");
-    add_doc(html,
-            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Release-Notes-and-FAQ.pdf",
+            "An introduction to the OSKAR documentation");
+    add_doc(html, "OSKAR-Release-Notes-and-FAQ.pdf",
             "Release Notes & FAQ",
-            "Describes the features of the current release of OSKAR-2 and "
+            "Describes the features of the current release of OSKAR and "
             "addresses common questions about the release");
-    add_doc(html,
-            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Install.pdf",
+    add_doc(html, "OSKAR-Install.pdf",
             "Installation Guide",
-            "Describes how to build and install OSKAR-2");
-    add_doc(html,
-            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Example.pdf",
+            "Describes how to build and install OSKAR");
+    add_doc(html, "OSKAR-Example.pdf",
             "Example",
             "Describes how to run an example simulation and test that "
-            "your version of OSKAR-2 is working as intended");
-    add_doc(html,
-            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Theory.pdf",
+            "your version of OSKAR is working as intended");
+    add_doc(html, "OSKAR-Theory.pdf",
             "Theory of Operation",
-            "Describes the theory of operation of OSKAR-2, its "
+            "Describes the theory of operation of OSKAR, its "
             "implementation of the measurement equation and its treatment of "
-            "polarisation. Please read this document to verify that OSKAR-2 "
+            "polarisation. Please read this document to verify that OSKAR "
             "works as you expect");
-    add_doc(html,
-            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Apps.pdf",
+    add_doc(html, "OSKAR-Apps.pdf",
             "Applications",
-            "Describes the available OSKAR-2 applications");
-    add_doc(html,
-            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Sky-Model.pdf",
+            "Describes the available OSKAR applications");
+    add_doc(html, "OSKAR-Sky-Model.pdf",
             "Sky Model",
-            "Describes the format of the OSKAR-2 sky model files");
-    add_doc(html,
-            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Telescope-Model.pdf",
+            "Describes the format of the OSKAR sky model files");
+    add_doc(html, "OSKAR-Telescope-Model.pdf",
             "Telescope Model",
-            "Describes the format of the OSKAR-2 telescope model files and "
+            "Describes the format of the OSKAR telescope model files and "
             "directories");
-    add_doc(html,
-            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Pointing-File.pdf",
+    add_doc(html, "OSKAR-Pointing-File.pdf",
             "Pointing File",
-            "Describes the format of OSKAR-2 pointing files");
-    add_doc(html,
-            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Settings-Files.pdf",
+            "Describes the format of OSKAR pointing files");
+    add_doc(html, "OSKAR-Settings-Files.pdf",
             "Settings Files",
-            "Describes the format of the OSKAR-2 settings files");
-    add_doc(html,
-            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-MATLAB-Interface.pdf",
+            "Describes the format of the OSKAR settings files");
+    add_doc(html, "OSKAR-MATLAB-Interface.pdf",
             "MATLAB Interface",
             "Describes an experimental interface for accessing OSKAR data types "
             "and making images of visibility data in MATLAB");
-    add_doc(html,
-            "http://www.oerc.ox.ac.uk/~ska/oskar2/OSKAR-Binary-File-Format.pdf",
+    add_doc(html, "OSKAR-Binary-File-Format.pdf",
             "Binary File Format",
             "Describes the format of binary files written by OSKAR applications");
-
 
     html.append("</ol>");
     html.append("<p></p>");
@@ -138,10 +121,10 @@ oskar_DocumentationDisplay::oskar_DocumentationDisplay(QWidget *parent)
     display->setHtml(html);
     display->setOpenExternalLinks(true);
     display->setReadOnly(true);
-    vLayoutAtt->addWidget(display);
+    display->setMinimumSize(600, 300);
 
     // Add help group.
-    vLayoutMain->addWidget(grp);
+    vLayoutMain->addWidget(display);
 
     // Create close button.
     QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok,
@@ -150,12 +133,13 @@ oskar_DocumentationDisplay::oskar_DocumentationDisplay(QWidget *parent)
     vLayoutMain->addWidget(buttons);
 }
 
-static void add_doc(QString& html, const char* link, const char* title,
+static void add_doc(QString& html, const char* doc_name, const char* title,
         const char* desc)
 {
     html.append("<p>");
     html.append("<li>&nbsp;");
-    html.append(QString("<a href=\"%1\">%2</a>").arg(link).arg(title));
+    html.append(QString("<a href=\"%1%2\">%3</a>").
+            arg(root_url).arg(doc_name).arg(title));
     html.append("<ul>");
     html.append(QString("<li>%1.</li>").arg(desc));
     html.append("</ul>");

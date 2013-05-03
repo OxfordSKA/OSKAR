@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
 #include "widgets/oskar_CudaInfoDisplay.h"
 
 #include <QtCore/QProcess>
@@ -45,14 +44,10 @@ oskar_CudaInfoDisplay::oskar_CudaInfoDisplay(QString processName,
     setWindowTitle("CUDA System Info");
     QVBoxLayout* vLayoutMain = new QVBoxLayout(this);
 
-    // Create system info group.
-    QGroupBox* grp = new QGroupBox("CUDA System Info", this);
-    grp->setMinimumSize(600, 300);
-    QVBoxLayout* vLayoutGrp = new QVBoxLayout(grp);
-
     // Create terminal output display.
     display_ = new QTextEdit(this);
     display_->setReadOnly(true);
+    display_->setMinimumSize(600, 300);
     QFont terminalFont;
 #ifdef Q_OS_WIN32
     terminalFont.setFamily("Lucida Console");
@@ -62,10 +57,7 @@ oskar_CudaInfoDisplay::oskar_CudaInfoDisplay(QString processName,
     terminalFont.setPointSize(10);
     terminalFont.setStyleHint(QFont::TypeWriter);
     display_->setFont(terminalFont);
-    vLayoutGrp->addWidget(display_);
-
-    // Add system info group.
-    vLayoutMain->addWidget(grp);
+    vLayoutMain->addWidget(display_);
 
     // Create close button.
     QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok,

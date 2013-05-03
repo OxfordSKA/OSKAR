@@ -93,7 +93,7 @@ private:
     QAction* separator_;
     QAction* recentFiles_[MaxRecentFiles];
     QNetworkAccessManager* networkManager_;
-    QString version_url;
+    QString version_url_;
 
     // Binary path names.
     QString binary_interferometer_;
