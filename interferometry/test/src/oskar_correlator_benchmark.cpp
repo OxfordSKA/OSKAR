@@ -205,6 +205,9 @@ int benchmark(int num_stations, int num_sources, int type,
     int num_vis = num_stations * (num_stations-1) / 2;
     int num_vis_coords = num_stations;
 
+    // Set device 0.
+    cudaSetDevice(0);
+
     double time_ave = 0.0;
     if (use_time_ave)
         time_ave = 1.0;
