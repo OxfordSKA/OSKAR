@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,8 +58,8 @@ void oskar_evaluate_element_weights_dft_f(float2* weights,
         phase =  cxi * x_beam;
         phase += cyi * y_beam;
         phase += czi * z_beam;
-        weight.x = cosf(phase);
-        weight.y = sinf(phase);
+        weight.x = cosf(-phase);
+        weight.y = sinf(-phase);
 
         /* Store result. */
         weights[i] = weight;
@@ -89,8 +89,8 @@ void oskar_evaluate_element_weights_dft_d(double2* weights,
         phase =  cxi * x_beam;
         phase += cyi * y_beam;
         phase += czi * z_beam;
-        weight.x = cos(phase);
-        weight.y = sin(phase);
+        weight.x = cos(-phase);
+        weight.y = sin(-phase);
 
         /* Store result. */
         weights[i] = weight;

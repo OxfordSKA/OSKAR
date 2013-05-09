@@ -73,9 +73,9 @@ void oskar_dftw_c2c_3d_omp_f(const int n_in, const float* x_in,
             w = weights_in[i];
             a = w.x;
             w.x *= temp.x;
-            w.x += w.y * temp.y;
+            w.x -= w.y * temp.y;
             w.y *= temp.x;
-            w.y -= a * temp.y;
+            w.y += a * temp.y;
 
             /* Perform complex multiply-accumulate. */
             temp = data[i * n_out + i_out];
@@ -130,9 +130,9 @@ void oskar_dftw_c2c_3d_omp_d(const int n_in, const double* x_in,
             w = weights_in[i];
             a = w.x;
             w.x *= temp.x;
-            w.x += w.y * temp.y;
+            w.x -= w.y * temp.y;
             w.y *= temp.x;
-            w.y -= a * temp.y;
+            w.y += a * temp.y;
 
             /* Perform complex multiply-accumulate. */
             temp = data[i * n_out + i_out];

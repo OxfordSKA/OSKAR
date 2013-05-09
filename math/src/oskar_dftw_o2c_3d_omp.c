@@ -76,8 +76,8 @@ void oskar_dftw_o2c_3d_omp_f(const int n_in, const float* x_in,
                 float2 w;
                 w = weights_in[i];
                 out.x += signal_x * w.x;
-                out.y -= signal_y * w.x;
-                out.x += signal_y * w.y;
+                out.x -= signal_y * w.y;
+                out.y += signal_y * w.x;
                 out.y += signal_x * w.y;
             }
         }
@@ -130,8 +130,8 @@ void oskar_dftw_o2c_3d_omp_d(const int n_in, const double* x_in,
                 double2 w;
                 w = weights_in[i];
                 out.x += signal_x * w.x;
-                out.y -= signal_y * w.x;
-                out.x += signal_y * w.y;
+                out.x -= signal_y * w.y;
+                out.y += signal_y * w.x;
                 out.y += signal_x * w.y;
             }
         }

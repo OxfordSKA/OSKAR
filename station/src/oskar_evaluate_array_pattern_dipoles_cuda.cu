@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -167,8 +167,8 @@ void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
 
             // Perform complex multiply.
             float2 t;
-            t.x = signal.x * w.x + signal.y * w.y;
-            t.y = signal.x * w.y - signal.y * w.x;
+            t.x = signal.x * w.x - signal.y * w.y;
+            t.y = signal.x * w.y + signal.y * w.x;
 
             // Accumulate.
             e_phi_a.x   += t.x * g_phi_a;
@@ -285,8 +285,8 @@ void oskar_evaluate_array_pattern_dipoles_cudak_d(const int num_antennas,
 
             // Perform complex multiply.
             double2 t;
-            t.x = signal.x * w.x + signal.y * w.y;
-            t.y = signal.x * w.y - signal.y * w.x;
+            t.x = signal.x * w.x - signal.y * w.y;
+            t.y = signal.x * w.y + signal.y * w.x;
 
             // Accumulate.
             e_phi_a.x   += t.x * g_phi_a;

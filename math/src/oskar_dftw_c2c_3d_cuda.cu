@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -136,9 +136,9 @@ void oskar_dftw_c2c_3d_cudak_f(const int n_in, const float* x_in,
                 float2 signal;
                 float2 in = data[(start + i) * n_out + i_out];
                 signal.x = in.x * temp.x;
-                signal.x += in.y * temp.y;
+                signal.x -= in.y * temp.y;
                 signal.y = in.y * temp.x;
-                signal.y -= in.x * temp.y;
+                signal.y += in.x * temp.y;
 
                 // Get the DFT weight.
                 temp = cw[i];
@@ -223,9 +223,9 @@ void oskar_dftw_c2c_3d_cudak_d(const int n_in, const double* x_in,
                 double2 signal;
                 double2 in = data[(start + i) * n_out + i_out];
                 signal.x = in.x * temp.x;
-                signal.x += in.y * temp.y;
+                signal.x -= in.y * temp.y;
                 signal.y = in.y * temp.x;
-                signal.y -= in.x * temp.y;
+                signal.y += in.x * temp.y;
 
                 // Get the DFT weight.
                 temp = cw[i];

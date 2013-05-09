@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,7 +84,7 @@ void oskar_evaluate_element_weights_dft_cudak_f(float2* weights,
     phase =  cxi * x_out;
     phase += cyi * y_out;
     phase += czi * z_out;
-    sincosf(phase, &weight.y, &weight.x);
+    sincosf(-phase, &weight.y, &weight.x);
 
     /* Write result to global memory. */
     weights[i] = weight;
@@ -113,7 +113,7 @@ void oskar_evaluate_element_weights_dft_cudak_d(double2* weights,
     phase =  cxi * x_out;
     phase += cyi * y_out;
     phase += czi * z_out;
-    sincos(phase, &weight.y, &weight.x);
+    sincos(-phase, &weight.y, &weight.x);
 
     /* Write result to global memory. */
     weights[i] = weight;

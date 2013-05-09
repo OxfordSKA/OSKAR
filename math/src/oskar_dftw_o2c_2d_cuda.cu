@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,8 +126,8 @@ void oskar_dftw_o2c_2d_cudak_f(const int n_in, const float* x_in,
 
             // Perform complex multiply-accumulate.
             out.x += signal.x * w.x;
-            out.y -= signal.y * w.x;
-            out.x += signal.y * w.y;
+            out.x -= signal.y * w.y;
+            out.y += signal.y * w.x;
             out.y += signal.x * w.y;
         }
 
@@ -194,8 +194,8 @@ void oskar_dftw_o2c_2d_cudak_d(const int n_in, const double* x_in,
 
             // Perform complex multiply-accumulate.
             out.x += signal.x * w.x;
-            out.y -= signal.y * w.x;
-            out.x += signal.y * w.y;
+            out.x -= signal.y * w.y;
+            out.y += signal.y * w.x;
             out.y += signal.x * w.y;
         }
 
