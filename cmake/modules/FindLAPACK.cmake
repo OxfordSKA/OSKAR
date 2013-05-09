@@ -13,6 +13,8 @@ find_library(LAPACK_LIBRARY
     PATHS
     /usr/lib64
     /usr/lib
+    /usr/lib64/atlas
+    /usr/lib/atlas
     /usr/local/lib64
     /usr/local/lib)
 
