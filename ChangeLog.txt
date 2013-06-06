@@ -1,5 +1,7 @@
 2013-xx-xx  OSKAR-2.2.2
 
+    * Fixed a printing bug for large data blocks in oskar_binary_file_query
+
     * Fixed incorrect beam pattern evaluation when using polarised elements
       in hierarchical stations.
 
