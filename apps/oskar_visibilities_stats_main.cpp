@@ -147,7 +147,7 @@ int main(int argc, char** argv)
                             double absI = std::sqrt(I.x * I.x + I.y * I.y);
                             if (absI < DBL_MIN)
                                 num_zero++;
-                            printf("%i (%e [%s] %e) %e %e => %e\n", i, xx.x, doubleToRawString(xx.x), xx.y, I.x, I.y, absI);
+                            //printf("%i (%e [%s] %e) %e %e => %e\n", i, xx.x, doubleToRawString(xx.x), xx.y, I.x, I.y, absI);
                             if (absI > max) max = absI;
                             if (absI < min) min = absI;
                             sum += absI;
