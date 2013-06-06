@@ -54,6 +54,13 @@ using namespace std;
 void set_options(oskar_OptionParser& opt);
 bool check_options(oskar_OptionParser& opt, int argc, char** argv);
 void check_error(int status);
+char *doubleToRawString(double x) {
+    // Assumes sizeof(long long) == 8.
+
+    char *buffer = new char[32];
+    sprintf(buffer, "%llx", *(unsigned long long *)&x);  // Evil!
+    return buffer;
+}
 //------------------------------------------------------------------------------
 
 int main(int argc, char** argv)
@@ -140,7 +147,7 @@ int main(int argc, char** argv)
                             double absI = std::sqrt(I.x * I.x + I.y * I.y);
                             if (absI < DBL_MIN)
                                 num_zero++;
-                            //printf("%i (%e %e) %e %e => %e\n", i, xx.x, xx.y, I.x, I.y, absI);
+                            printf("%i (%e [%s] %e) %e %e => %e\n", i, xx.x, doubleToRawString(xx.x), xx.y, I.x, I.y, absI);
                             if (absI > max) max = absI;
                             if (absI < min) min = absI;
                             sum += absI;
