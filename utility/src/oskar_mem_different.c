@@ -37,7 +37,8 @@ extern "C" {
 int oskar_mem_different(const oskar_Mem* one, const oskar_Mem* two,
         int num_elements, int* status)
 {
-    int type, bytes_to_check, i;
+    int type;
+    size_t bytes_to_check, i;
 
     /* Check all inputs. */
     if (!one || !two || !status)

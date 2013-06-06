@@ -43,7 +43,8 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset,
         int* status)
 {
     int n_elements_src, n_elements_dst, type_src, type_dst;
-    int location_src, location_dst, bytes, start;
+    int location_src, location_dst;
+    size_t bytes, start;
     void* destination;
 
     /* Check all inputs. */
