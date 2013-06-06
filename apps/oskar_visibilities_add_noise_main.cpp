@@ -148,7 +148,7 @@ int main(int argc, char** argv)
 
 void set_options(oskar_OptionParser& opt)
 {
-    opt.setDescription("Application of add noise to OSKAR binary visibility files.");
+    opt.setDescription("Application to add noise to OSKAR binary visibility files.");
     opt.addRequired("OSKAR visibility file(s)...");
     opt.addFlag("-s", "OSKAR settings file (noise settings).", 1, "", true);
     opt.addFlag("-i", "Add noise 'in-place'");

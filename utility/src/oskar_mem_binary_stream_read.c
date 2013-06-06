@@ -38,6 +38,7 @@
 
 #include <stdlib.h>
 #include <math.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,6 +49,7 @@ void oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
         unsigned char id_tag, int user_index, int* status)
 {
     int type, num_elements, element_size;
+    // FIXME num_elements == > size_t ?
     oskar_Mem temp;
     size_t size_bytes;
     oskar_Mem* data = NULL;

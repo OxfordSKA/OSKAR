@@ -69,6 +69,9 @@ if (QT4_FOUND AND CUDA_FOUND)
     set(name oskar_visibilities_add_noise)
     oskar_qt_app(${name} ${name}_main.cpp)
 
+    set(name oskar_visibility_stats)
+    oskar_qt_app(${name} ${name}_main.cpp)
+
     # BINARY: osakr_sim_tec_screen
     #set(name oskar_sim_tec_screen)
     #oskar_app(${name} ${name}_main.cpp

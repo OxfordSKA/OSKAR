@@ -152,7 +152,7 @@ void oskar_binary_file_query(oskar_Log* log, const char* filename, int* status)
             oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, 1, status);
 
             /* Display tag data. */
-            oskar_log_message(log, -1, "[%3d] %-23s %5d.%-3d : %-10d (%d bytes)",
+            oskar_log_message(log, -1, "[%3d] %-23s %5d.%-3d : %-10d (%ld bytes)",
                     i, oskar_get_data_type_string(type), group, tag, idx, bytes);
 
             /* Display more info if available. */

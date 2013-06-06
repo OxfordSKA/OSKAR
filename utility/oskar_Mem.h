@@ -58,7 +58,7 @@ struct OSKAR_EXPORT oskar_Mem
 {
     int type;         /**< Enumerated element type of memory block. */
     int location;     /**< Address space of data pointer. */
-    int num_elements; /**< Number of elements in memory block. */
+    int num_elements; /**< Number of elements in memory block. FIXME size_t ??*/
     int owner;        /**< Flag set if the structure owns the memory. */
     void* data;       /**< Data pointer. */
 
