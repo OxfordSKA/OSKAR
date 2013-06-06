@@ -124,7 +124,7 @@ int main(int argc, char** argv)
             }
             case OSKAR_DOUBLE_COMPLEX_MATRIX:
             {
-                double4c* amp = (double4c*)vis.amplitude.data;
+                DJones* amp = (DJones*)vis.amplitude.data;
                 int num_zero = 0;
                 for (int i = 0, c = 0; c < vis.num_channels; ++c)
                 {
@@ -132,15 +132,15 @@ int main(int argc, char** argv)
                     {
                         for (int b = 0; b < vis.num_baselines; ++b, ++i)
                         {
-                            double2 xx = amp[i].a;
-                            double2 yy = amp[i].d;
-                            double2 I;
+                            DComplex xx = amp[i].a;
+                            DComplex yy = amp[i].d;
+                            DComplex I;
                             I.x = 0.5 * (xx.x + yy.x);
                             I.y = 0.5 * (xx.y + yy.y);
                             double absI = std::sqrt(I.x * I.x + I.y * I.y);
                             if (absI < DBL_MIN)
                                 num_zero++;
-                            printf("%i (%e %e) %e %e => %e\n", i, xx.x, xx.y, I.x, I.y, absI);
+                            //printf("%i (%e %e) %e %e => %e\n", i, xx.x, xx.y, I.x, I.y, absI);
                             if (absI > max) max = absI;
                             if (absI < min) min = absI;
                             sum += absI;
@@ -156,6 +156,7 @@ int main(int argc, char** argv)
                 printf("min, max, mean, rms, std\n");
                 printf("%e, %e, %e, %e, %e\n", min, max, mean, rms, std);
                 printf("number of zero visibilities = %i\n", num_zero);
+                printf("number of non-zero visibilities = %i\n", num_vis-num_zero);
                 printf("percent zero visibilities = %f\n", (double)num_zero/num_vis * 100.0);
                 break;
             }
