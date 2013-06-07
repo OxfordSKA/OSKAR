@@ -42,8 +42,9 @@ void oskar_binary_stream_read(FILE* stream, oskar_BinaryTagIndex** index,
         unsigned char data_type, unsigned char id_group, unsigned char id_tag,
         int user_index, size_t data_size, void* data, int* status)
 {
-    size_t block_size = 0;
+    size_t block_size = 0, bytes = 0, chunk_size = 1 << 29;
     long block_offset = 0;
+    char* p;
 
     /* Check all inputs. */
     if (!stream || !index || !data || !status)
@@ -80,10 +81,19 @@ void oskar_binary_stream_read(FILE* stream, oskar_BinaryTagIndex** index,
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-    if (fread(data, 1, block_size, stream) != block_size)
+
+    /* Read the data in chunks of 2^29 bytes (512 MB). */
+    /* This works around a bug in some versions of fread() which are
+     * limited to reading a maximum of 2 GB at once. */
+    for (p = (char*)data, bytes = block_size; bytes > 0; p += chunk_size)
     {
-        *status = OSKAR_ERR_FILE_IO;
-        return;
+        if (bytes < chunk_size) chunk_size = bytes;
+        if (fread(p, 1, chunk_size, stream) != chunk_size)
+        {
+            *status = OSKAR_ERR_FILE_IO;
+            return;
+        }
+        bytes -= chunk_size;
     }
 }
 
@@ -107,8 +117,9 @@ void oskar_binary_stream_read_ext(FILE* stream, oskar_BinaryTagIndex** index,
         unsigned char data_type, const char* name_group, const char* name_tag,
         int user_index, size_t data_size, void* data, int* status)
 {
-    size_t block_size = 0;
+    size_t block_size = 0, bytes = 0, chunk_size = 1 << 29;
     long block_offset = 0;
+    char* p;
 
     /* Check all inputs. */
     if (!stream || !index || !data || !name_group || !name_tag || !status)
@@ -145,10 +156,19 @@ void oskar_binary_stream_read_ext(FILE* stream, oskar_BinaryTagIndex** index,
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-    if (fread(data, 1, block_size, stream) != block_size)
+
+    /* Read the data in chunks of 2^29 bytes (512 MB). */
+    /* This works around a bug in some versions of fread() which are
+     * limited to reading a maximum of 2 GB at once. */
+    for (p = (char*)data, bytes = block_size; bytes > 0; p += chunk_size)
     {
-        *status = OSKAR_ERR_FILE_IO;
-        return;
+        if (bytes < chunk_size) chunk_size = bytes;
+        if (fread(p, 1, chunk_size, stream) != chunk_size)
+        {
+            *status = OSKAR_ERR_FILE_IO;
+            return;
+        }
+        bytes -= chunk_size;
     }
 }
 
