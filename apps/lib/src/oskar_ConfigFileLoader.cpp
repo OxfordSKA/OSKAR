@@ -66,7 +66,7 @@ void oskar_ConfigFileLoader::load(oskar_TelescopeModel* telescope,
 
     // Load the interferometer layout.
     oskar_telescope_model_load_station_coords(telescope,
-            cwd.filePath(file).toAscii(), settings_->telescope.longitude_rad,
+            cwd.filePath(file).toLatin1(), settings_->telescope.longitude_rad,
             settings_->telescope.latitude_rad,
             settings_->telescope.altitude_m, status);
 
@@ -98,7 +98,7 @@ void oskar_ConfigFileLoader::load(oskar_StationModel* station, const QDir& cwd,
     if (cwd.exists(config_file))
     {
         oskar_station_model_load_config(station,
-                cwd.filePath(config_file).toAscii(), status);
+                cwd.filePath(config_file).toLatin1(), status);
     }
     else
         *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;

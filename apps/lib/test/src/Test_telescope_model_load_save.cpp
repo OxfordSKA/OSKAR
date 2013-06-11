@@ -388,7 +388,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_rms()
     oskar_Settings settings;
     oskar_settings_init(&settings);
     settings.sim.double_precision = (type == OSKAR_DOUBLE) ? OSKAR_TRUE : OSKAR_FALSE;
-    QByteArray path = root.toAscii();
+    QByteArray path = root.toLatin1();
     settings.telescope.input_directory = (char*)malloc(root.size() + 1);
     strcpy(settings.telescope.input_directory, path.constData());
     oskar_SettingsSystemNoise* noise = &settings.interferometer.noise;
@@ -474,7 +474,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_sensitivity()
     oskar_Settings settings;
     oskar_settings_init(&settings);
     settings.sim.double_precision = (type == OSKAR_DOUBLE) ? OSKAR_TRUE : OSKAR_FALSE;
-    QByteArray path = root.toAscii();
+    QByteArray path = root.toLatin1();
     settings.telescope.input_directory = (char*)malloc(root.size() + 1);
     strcpy(settings.telescope.input_directory, path.constData());
     oskar_SettingsSystemNoise* noise = &settings.interferometer.noise;
@@ -581,7 +581,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_t_sys()
     oskar_Settings settings;
     oskar_settings_init(&settings);
     settings.sim.double_precision = (type == OSKAR_DOUBLE) ? OSKAR_TRUE : OSKAR_FALSE;
-    QByteArray path = root.toAscii();
+    QByteArray path = root.toLatin1();
     settings.telescope.input_directory = (char*)malloc(root.size() + 1);
     strcpy(settings.telescope.input_directory, path.constData());
     oskar_SettingsSystemNoise* noise = &settings.interferometer.noise;
@@ -650,7 +650,7 @@ void Test_telescope_model_load_save::generate_noisy_telescope(
 
     if (root.exists())
     {
-        QByteArray name_ = dir.toAscii();
+        QByteArray name_ = dir.toLatin1();
         oskar_remove_dir(name_.data());
     }
 

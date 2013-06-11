@@ -63,7 +63,7 @@ int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
             settings->num_TID_screens*sizeof(oskar_SettingsTIDscreen));
     for (int i = 0; i < settings->num_TID_screens; ++i)
     {
-        t = list[i].toAscii();
+        t = list[i].toLatin1();
         settings->TID_files[i] = (char*)malloc(t.size() + 1);
         strcpy(settings->TID_files[i], t.constData());
         oskar_load_TID_parameter_file(&settings->TID[i], settings->TID_files[i],
@@ -82,7 +82,7 @@ int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
     if (s.value("save_fits", true).toBool())
     {
         QString temp_fits = temp + ".fits";
-        t = temp_fits.toAscii();
+        t = temp_fits.toLatin1();
         settings->TECImage.fits_file = (char*)malloc(t.size() + 1);
         strcpy(settings->TECImage.fits_file, t.constData());
     }
@@ -90,7 +90,7 @@ int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
     if (s.value("save_img", false).toBool())
     {
         QString temp_img = temp + ".img";
-        t = temp_img.toAscii();
+        t = temp_img.toLatin1();
         settings->TECImage.img_file = (char*)malloc(t.size() + 1);
         strcpy(settings->TECImage.img_file, t.constData());
     }
@@ -99,7 +99,7 @@ int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
 
     s.beginGroup("pierce_points");
     temp = s.value("filename").toString();
-    t = temp.toAscii();
+    t = temp.toLatin1();
     settings->pierce_points.filename = (char*)malloc(t.size() + 1);
     strcpy(settings->pierce_points.filename, t.constData());
     s.endGroup(); // pierce_points

@@ -81,7 +81,7 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
             sizeof(char*));
     for (int i = 0; i < sky->oskar_sky_model.num_files; ++i)
     {
-        t = list[i].toAscii();
+        t = list[i].toLatin1();
         sky->oskar_sky_model.file[i] = (char*)malloc(t.size() + 1);
         strcpy(sky->oskar_sky_model.file[i], t.constData());
     }
@@ -109,7 +109,7 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
             sizeof(char*));
     for (int i = 0; i < sky->fits_image.num_files; ++i)
     {
-        t = list[i].toAscii();
+        t = list[i].toLatin1();
         sky->fits_image.file[i] = (char*)malloc(t.size() + 1);
         strcpy(sky->fits_image.file[i], t.constData());
     }
@@ -131,7 +131,7 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
             sizeof(char*));
     for (int i = 0; i < sky->healpix_fits.num_files; ++i)
     {
-        t = list[i].toAscii();
+        t = list[i].toLatin1();
         sky->healpix_fits.file[i] = (char*)malloc(t.size() + 1);
         strcpy(sky->healpix_fits.file[i], t.constData());
     }

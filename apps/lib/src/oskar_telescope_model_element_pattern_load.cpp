@@ -202,12 +202,12 @@ static void load_element_patterns(oskar_Log* log,
 
     if (data_files.contains(QString(element_x_cst_file)))
     {
-        element_x = data_files.value(QString(element_x_cst_file)).toAscii();
+        element_x = data_files.value(QString(element_x_cst_file)).toLatin1();
         element_file_x = element_x.constData();
     }
     if (data_files.contains(QString(element_y_cst_file)))
     {
-        element_y = data_files.value(QString(element_y_cst_file)).toAscii();
+        element_y = data_files.value(QString(element_y_cst_file)).toLatin1();
         element_file_y = element_y.constData();
     }
 

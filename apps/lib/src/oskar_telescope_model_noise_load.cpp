@@ -334,14 +334,14 @@ static void load_noise_rms(const oskar_Settings* settings,
             // RMS
             if (QFile::exists(data_files[rms_file]))
             {
-                file = data_files[rms_file].toAscii();
+                file = data_files[rms_file].toLatin1();
                 oskar_system_noise_model_load(stddev, file.constData(), status);
             }
             // Sensitivity
             else if (QFile::exists(data_files[sensitivity_file]))
             {
                 oskar_Mem sensitivity(type, OSKAR_LOCATION_CPU, num_freqs);
-                file = data_files[sensitivity_file].toAscii();
+                file = data_files[sensitivity_file].toLatin1();
                 oskar_system_noise_model_load(&sensitivity, file.constData(),
                         status);
                 sensitivity_to_rms(&noise->rms, &sensitivity,
@@ -352,15 +352,15 @@ static void load_noise_rms(const oskar_Settings* settings,
                     QFile::exists(data_files[area_file]) &&
                     QFile::exists(data_files[efficiency_file]))
             {
-                file = data_files[t_sys_file].toAscii();
+                file = data_files[t_sys_file].toLatin1();
                 oskar_system_noise_model_load(&t_sys, file.constData(), status);
 
                 oskar_Mem area(type, OSKAR_LOCATION_CPU, num_freqs);
-                file = data_files[area_file].toAscii();
+                file = data_files[area_file].toLatin1();
                 oskar_system_noise_model_load(&area, file.constData(), status);
 
                 oskar_Mem efficiency(type, OSKAR_LOCATION_CPU, num_freqs);
-                file = data_files[efficiency_file].toAscii();
+                file = data_files[efficiency_file].toLatin1();
                 oskar_system_noise_model_load(&efficiency, file.constData(),
                         status);
 
@@ -382,7 +382,7 @@ static void load_noise_rms(const oskar_Settings* settings,
             {
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
-                    file = data_files[rms_file].toAscii();
+                    file = data_files[rms_file].toLatin1();
                     oskar_system_noise_model_load(stddev, file.constData(),
                             status);
                     break;
@@ -414,7 +414,7 @@ static void load_noise_rms(const oskar_Settings* settings,
             {
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
-                    file = data_files[sensitivity_file].toAscii();
+                    file = data_files[sensitivity_file].toLatin1();
                     oskar_system_noise_model_load(&sensitivity,
                             file.constData(), status);
                     break;
@@ -447,7 +447,7 @@ static void load_noise_rms(const oskar_Settings* settings,
             {
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
-                    file = data_files[sensitivity_file].toAscii();
+                    file = data_files[sensitivity_file].toLatin1();
                     oskar_system_noise_model_load(&t_sys, file.constData(),
                             status);
                     break;
@@ -475,7 +475,7 @@ static void load_noise_rms(const oskar_Settings* settings,
             {
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
-                    file = data_files[area_file].toAscii();
+                    file = data_files[area_file].toLatin1();
                     oskar_system_noise_model_load(&area, file.constData(),
                             status);
                     break;
@@ -503,7 +503,7 @@ static void load_noise_rms(const oskar_Settings* settings,
             {
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
-                    file = data_files[area_file].toAscii();
+                    file = data_files[area_file].toLatin1();
                     oskar_system_noise_model_load(&efficiency,
                             file.constData(), status);
                     break;

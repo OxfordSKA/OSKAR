@@ -48,7 +48,7 @@ bool oskar_remove_dir(const char* dir_name)
             if (info.isDir())
             {
                 // Recursive call to remove the directory.
-                QByteArray t = info.absoluteFilePath().toAscii();
+                QByteArray t = info.absoluteFilePath().toLatin1();
                 result = oskar_remove_dir(t);
             }
             else

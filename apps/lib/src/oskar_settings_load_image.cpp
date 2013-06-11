@@ -143,7 +143,7 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
                     test += ".fits";
                     if (!QFile::exists(QString(test)))
                     {
-                        filename = test.toAscii();
+                        filename = test.toLatin1();
                         break;
                     }
                     ++i;
@@ -169,7 +169,7 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
                     test += ".img";
                     if (!QFile::exists(QString(test)))
                     {
-                        filename = test.toAscii();
+                        filename = test.toLatin1();
                         break;
                     }
                     ++i;

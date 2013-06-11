@@ -84,7 +84,7 @@ static void oskar_telescope_model_save_private(
     if (depth == 0)
     {
         // Write the station coordinates.
-        QByteArray coord_path = dir.filePath(config_name).toAscii();
+        QByteArray coord_path = dir.filePath(config_name).toLatin1();
         oskar_telescope_model_save_station_coords(telescope, coord_path,
                 status);
 
@@ -94,7 +94,7 @@ static void oskar_telescope_model_save_private(
     else
     {
         // Write the station configuration.
-        QByteArray config_path = dir.filePath(config_name).toAscii();
+        QByteArray config_path = dir.filePath(config_name).toLatin1();
         oskar_station_model_save_config(config_path, station, status);
 
         // Get the number of stations.
@@ -107,7 +107,7 @@ static void oskar_telescope_model_save_private(
     {
         // Get the name of the station, and a pointer to the station to save.
         QByteArray station_name = dir.filePath(QString("level%1_%2").
-                arg(depth).arg(i, 3, 10, QChar('0'))).toAscii();
+                arg(depth).arg(i, 3, 10, QChar('0'))).toLatin1();
         oskar_StationModel* s;
         s = (depth == 0) ? &telescope->station[i] : &station->child[i];
 

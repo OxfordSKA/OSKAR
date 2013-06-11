@@ -94,9 +94,9 @@ void oskar_ElementPatternLoader::load_element_patterns(oskar_Log* log,
     QString files;
     QByteArray element_x, element_y;
     if (filemap.contains(element_x_cst_file))
-        element_x = filemap.value(element_x_cst_file).toAscii();
+        element_x = filemap.value(element_x_cst_file).toLatin1();
     if (filemap.contains(element_y_cst_file))
-        element_y = filemap.value(element_y_cst_file).toAscii();
+        element_y = filemap.value(element_y_cst_file).toLatin1();
     files.append(element_x);
     files.append(element_y);
 

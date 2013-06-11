@@ -116,7 +116,7 @@ void oskar_RunThread::executeProcess()
 
 void oskar_RunThread::run(int depth, QStringList outputFiles)
 {
-    QByteArray settings = settingsFile_.toAscii();
+    QByteArray settings = settingsFile_.toLatin1();
     QStringList iterationKeys = model_->data(QModelIndex(),
             oskar_SettingsModel::IterationKeysRole).toStringList();
     if (iterationKeys.size() == 0)
