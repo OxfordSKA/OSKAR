@@ -208,6 +208,11 @@ int benchmark(int num_stations, int num_sources, int type,
     // Set device 0.
     cudaSetDevice(0);
 
+    // Create the CUDA events for timing.
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
     double time_ave = 0.0;
     if (use_time_ave)
         time_ave = 1.0;
@@ -241,26 +246,20 @@ int benchmark(int num_stations, int num_sources, int type,
     times.resize(niter);
     for (int i = 0; i < niter; ++i)
     {
-        double time_taken_sec = 0.0;
-#ifndef _WIN32
-        double start_, end_;
-        struct timeval t1_, t2_;
-        gettimeofday(&t1_, NULL);
-#endif
+        float millisec = 0.0f;
+        cudaEventRecord(start);
         oskar_correlate(&vis, &J, &tel, &sky, &u, &v, gast, &status);
-        cudaDeviceSynchronize();
-#ifndef _WIN32
-        gettimeofday(&t2_, NULL);
-        start_ = t1_.tv_sec + t1_.tv_usec * 1.0e-6;
-        end_   = t2_.tv_sec + t2_.tv_usec * 1.0e-6;
-        time_taken_sec = end_ - start_;
-#else
-        time_taken_sec = 0.0;
-#endif
+        cudaEventRecord(stop);
+        cudaEventSynchronize(stop);
+        cudaEventElapsedTime(&millisec, start, stop);
 
         // Store the time taken for this iteration.
-        times[i] = time_taken_sec;
+        times[i] = millisec / 1000.0;
     }
+
+    // Destroy the timers.
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
 
     // Free memory.
     oskar_mem_free(&u, &status);

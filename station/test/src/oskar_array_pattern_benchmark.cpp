@@ -157,6 +157,11 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
 {
     int status = OSKAR_SUCCESS;
 
+    // Create the CUDA events for timing.
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+
     oskar_StationModel station;
     oskar_station_model_init(&station, precision, loc, num_elements, &status);
     if (status) return status;
@@ -177,29 +182,19 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
         oskar_mem_init(&beam, type, loc, num_directions, OSKAR_TRUE, &status);
         oskar_mem_init(&weights, type, loc, num_elements, OSKAR_TRUE, &status);
         if (status) return status;
-
         cudaDeviceSynchronize();
-#ifndef _WIN32
-        struct timeval t1_;
-        gettimeofday(&t1_, NULL);
-#endif
+
+        float millisec = 0.0f;
+        cudaEventRecord(start);
         for (int i = 0; i < niter; ++i)
         {
             oskar_evaluate_array_pattern(&beam, &station, num_directions, &x,
                     &y, &z, &weights, &status);
         }
-        cudaDeviceSynchronize();
-#ifndef _WIN32
-        struct timeval t2_;
-        gettimeofday(&t2_, NULL);
-        double start_ = t1_.tv_sec + t1_.tv_usec * 1.0e-6;
-        double end_ = t2_.tv_sec + t2_.tv_usec * 1.0e-6;
-        time_taken = end_ - start_;
-#else
-        time_taken = 0.0;
-#endif
-
-
+        cudaEventRecord(stop);
+        cudaEventSynchronize(stop);
+        cudaEventElapsedTime(&millisec, start, stop);
+        time_taken = millisec / 1000.0;
     }
     else if (op_type == C2C || op_type == M2M)
     {
@@ -207,7 +202,6 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
         int num_signals = num_directions * num_elements;
 
         oskar_mem_init(&weights, type, loc, num_elements, OSKAR_TRUE, &status);
-
         if (op_type == C2C)
         {
             oskar_mem_init(&beam, type, loc, num_directions, OSKAR_TRUE, &status);
@@ -217,33 +211,29 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
         {
             type |= OSKAR_MATRIX;
             oskar_mem_init(&beam, type, loc, num_directions, OSKAR_TRUE, &status);
-
             oskar_mem_init(&signal, type, loc, num_signals, OSKAR_TRUE, &status);
         }
         if (status) return status;
-
         cudaDeviceSynchronize();
-#ifndef _WIN32
-        struct timeval t1_;
-        gettimeofday(&t1_, NULL);
-#endif
+
+        float millisec = 0.0f;
+        cudaEventRecord(start);
         for (int i = 0; i < niter; ++i)
         {
             oskar_evaluate_array_pattern_hierarchical(&beam, &station,
                     num_directions, &x, &y, &z, &signal, &weights, &status);
         }
-        cudaDeviceSynchronize();
-#ifndef _WIN32
-        struct timeval t2_;
-        gettimeofday(&t2_, NULL);
-        double start_ = t1_.tv_sec + t1_.tv_usec * 1.0e-6;
-        double end_ = t2_.tv_sec + t2_.tv_usec * 1.0e-6;
-        time_taken = end_ - start_;
-#else
-        time_taken = 0.0;
-#endif
+        cudaEventRecord(stop);
+        cudaEventSynchronize(stop);
+        cudaEventElapsedTime(&millisec, start, stop);
+        time_taken = millisec / 1000.0;
     }
 
+    // Destroy the timers.
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
+
+    // Free memory.
     oskar_station_model_free(&station, &status);
     oskar_mem_free(&x, &status);
     oskar_mem_free(&y, &status);
