@@ -11,6 +11,7 @@ if (CPPUNIT_FOUND)
         src/Test_getline.cpp
         src/Test_Mem.cpp
         src/Test_string_to_array.cpp
+        src/Test_Timer.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})

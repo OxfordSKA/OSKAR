@@ -355,6 +355,7 @@ enum {
     #define OSKAR_CUDAK_CONF(...)
     #define OSKAR_HAVE_CUDA
     #define __CUDACC__
+    #define _OPENMP
 #else
     #define OSKAR_CUDAK_CONF(...) <<< __VA_ARGS__ >>>
 #endif

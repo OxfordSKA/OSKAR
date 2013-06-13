@@ -62,6 +62,7 @@
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_scale_real.h"
+#include "utility/oskar_timer_functions.h"
 
 #include "sky/oskar_evaluate_jones_Z.h"
 #include "sky/oskar_WorkJonesZ.h"
@@ -80,7 +81,7 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     int i, j, k, device_id = 0, type, n_stations, n_baselines, n_src;
     int complx, matrix, num_vis_dumps, num_vis_ave, num_fringe_ave;
     double t_dump, t_ave, t_fringe, dt_dump, dt_ave, dt_fringe, gast;
-    double obs_start_mjd_utc;
+    double obs_start_mjd_utc, elapsed, elapsed_correlate, elapsed_station_beam;
     oskar_Jones J, R, E, K;
     oskar_Mem vis, u, v, w;
     oskar_SkyModel sky_gpu, local_sky;
@@ -88,6 +89,7 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_WorkStationBeam work;
     oskar_CurandState curand_state;
     /*oskar_WorkJonesZ workJonesZ;*/
+    oskar_Timer tmr, tmr_correlate, tmr_station_beam;
 
     /* Check all inputs. */
     if (!vis_amp || !sky || !telescope || !settings || !status)
@@ -113,6 +115,12 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 "Measurement Equation evaluation.");
         return;
     }
+
+    /* Create timers. */
+    oskar_timer_create(&tmr_correlate, OSKAR_TIMER_CUDA);
+    oskar_timer_create(&tmr_station_beam, OSKAR_TIMER_CUDA);
+    oskar_timer_create(&tmr, OSKAR_TIMER_CUDA);
+    oskar_timer_start(&tmr);
 
     /* Get data type and dimensions. */
     type = oskar_sky_model_type(sky);
@@ -215,8 +223,10 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
             /* Evaluate parallactic angle (R), station beam (E), and join. */
             oskar_evaluate_jones_R(&R, &local_sky, &tel_gpu, gast, status);
+            oskar_timer_resume(&tmr_station_beam);
             oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast, &work,
                     &curand_state, status);
+            oskar_timer_pause(&tmr_station_beam);
             oskar_jones_join(&R, &E, &R, status);
 
 #if 0
@@ -246,8 +256,10 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 /* Evaluate interferometer phase (K), join Jones, correlate. */
                 oskar_evaluate_jones_K(&K, &local_sky, &u, &v, &w, status);
                 oskar_jones_join(&J, &K, &R, status);
+                oskar_timer_resume(&tmr_correlate);
                 oskar_correlate(&vis, &J, &tel_gpu, &local_sky, &u, &v, gast,
                         status);
+                oskar_timer_pause(&tmr_correlate);
             }
         }
 
@@ -258,6 +270,20 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
     /* Record GPU memory usage. */
     oskar_cuda_mem_log(log, 1, device_id);
+
+    /* Record time taken. */
+    elapsed = oskar_timer_elapsed(&tmr);
+    elapsed_correlate = oskar_timer_elapsed(&tmr_correlate);
+    elapsed_station_beam = oskar_timer_elapsed(&tmr_station_beam);
+    oskar_log_message(log, 1, "Chunk %d took %.3f seconds "
+            "[Station beam: %.1f%%] [Correlate: %.1f%%]", chunk_index+1,
+            elapsed, 100.0 * elapsed_station_beam / elapsed,
+            100.0 * elapsed_correlate / elapsed);
+
+    /* Destroy timers. */
+    oskar_timer_destroy(&tmr_correlate);
+    oskar_timer_destroy(&tmr_station_beam);
+    oskar_timer_destroy(&tmr);
 
     /* Free memory. */
     oskar_curand_state_free(&curand_state, status);

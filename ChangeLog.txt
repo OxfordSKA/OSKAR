@@ -1,11 +1,11 @@
 2013-xx-xx  OSKAR-2.2.2
 
     * Fixed a bug that prevented memory from being inserted correctly into
-      blocks greater than 2 GB in size.
+      blocks greater than 2 GiB in size.
 
-    * Fixed a printing bug for large data blocks in oskar_binary_file_query.
+    * Fixed display of large data blocks in oskar_binary_file_query.
 
-    * Fixed incorrect beam pattern evaluation when using polarised elements
+    * Fixed incorrect station beam evaluation when using polarised elements
       in hierarchical stations.
 
     * Fixed a bug that caused certain visibility noise settings to be ignored.
@@ -23,6 +23,9 @@
 
     * Added telescope model name, channel bandwidth and time integration
       values to visibility files.
+
+    * Added percentage time taken for station beam evaluation and correlation
+      stages to message log.
 
     * Added a command line application (oskar_visibilities_add_noise) to
       add uncorrelated noise to visibilities.
