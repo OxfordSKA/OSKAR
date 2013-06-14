@@ -59,13 +59,13 @@
 #include "utility/oskar_mem_add.h"
 #include "utility/oskar_Settings.h"
 #include "utility/oskar_settings_free.h"
+#include "utility/oskar_timer_functions.h"
+#include "utility/oskar_timers_functions.h"
 #include "imaging/oskar_make_image.h"
 #include "imaging/oskar_image_write.h"
 #ifndef OSKAR_NO_FITS
 #include "fits/oskar_fits_image_write.h"
 #endif
-
-#include <QtCore/QTime>
 
 #include <cstdlib>
 #include <cmath>
@@ -135,9 +135,11 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // These are held in standard vectors so that the memory will be released
     // automatically if the function returns early, or is terminated.
     vector<oskar_Mem> vis_acc(num_devices), vis_temp(num_devices);
+    vector<oskar_Timers> timers(num_devices);
     int time_baseline = tel.num_baselines() * settings.obs.num_time_steps;
     for (int i = 0; i < num_devices; ++i)
     {
+        oskar_timers_create(&timers[i], OSKAR_TIMER_CUDA);
         oskar_mem_init(&vis_acc[i], complex_matrix, OSKAR_LOCATION_CPU,
                 time_baseline, true, &error);
         oskar_mem_init(&vis_temp[i], complex_matrix, OSKAR_LOCATION_CPU,
@@ -153,8 +155,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 
     // Run the simulation.
     oskar_log_section(log, "Starting simulation...");
-    QTime timer;
-    timer.start();
+    oskar_timer_start(&timers[0].tmr);
     for (int c = 0; c < settings.obs.num_channels; ++c)
     {
         double frequency;
@@ -173,22 +174,19 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         {
             if (error) continue;
 
-            // Get thread ID for this chunk.
+            // Get thread ID for this chunk, and set device for this thread.
             int thread_id = omp_get_thread_num();
-
-            // Get device ID and device properties for this chunk.
-            int device_id = settings.sim.cuda_device_ids[thread_id];
-
-            // Set the device to use for the chunk.
-            error = cudaSetDevice(device_id);
+            error = cudaSetDevice(settings.sim.cuda_device_ids[thread_id]);
 
             // Run simulation for this chunk.
             oskar_interferometer(&(vis_temp[thread_id]), log,
-                    &(sky_chunks[i]), &tel, &settings, frequency,
-                    i, num_sky_chunks, &error);
+                    &timers[thread_id], &(sky_chunks[i]), &tel, &settings,
+                    frequency, i, num_sky_chunks, &error);
 
+            oskar_timer_resume(&timers[thread_id].tmr_init_copy);
             oskar_mem_add(&(vis_acc[thread_id]), &(vis_acc[thread_id]),
                     &(vis_temp[thread_id]), &error);
+            oskar_timer_pause(&timers[thread_id].tmr_init_copy);
         }
 #pragma omp barrier
 
@@ -196,10 +194,12 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         oskar_visibilities_get_channel_amps(&vis_amp, &vis_global, c, &error);
         for (int i = 0; i < num_devices; ++i)
         {
+            oskar_timer_resume(&timers[i].tmr_init_copy);
             oskar_mem_add(&vis_amp, &vis_amp, &vis_acc[i], &error);
 
             // Clear thread accumulation buffer.
             oskar_mem_clear_contents(&vis_acc[i], &error);
+            oskar_timer_pause(&timers[i].tmr_init_copy);
         }
     }
 
@@ -213,8 +213,38 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Check for errors.
     if (error) return error;
 
-    oskar_log_section(log, "Simulation completed in %.3f sec.",
-            timer.elapsed() / 1e3);
+    // Record time taken.
+    double elapsed = oskar_timer_elapsed(&timers[0].tmr);
+    oskar_log_section(log, "Simulation completed in %.3f sec.", elapsed);
+
+    // Record percentage times.
+    double t_init = 0.0, t_clip = 0.0, t_R = 0.0, t_E = 0.0, t_K = 0.0;
+    double t_join = 0.0, t_correlate = 0.0;
+    for (int i = 0; i < num_devices; ++i)
+    {
+        t_init += oskar_timer_elapsed(&timers[i].tmr_init_copy);
+        t_clip += oskar_timer_elapsed(&timers[i].tmr_clip);
+        t_R += oskar_timer_elapsed(&timers[i].tmr_R);
+        t_E += oskar_timer_elapsed(&timers[i].tmr_E);
+        t_K += oskar_timer_elapsed(&timers[i].tmr_K);
+        t_join += oskar_timer_elapsed(&timers[i].tmr_join);
+        t_correlate += oskar_timer_elapsed(&timers[i].tmr_correlate);
+    }
+    t_init *= (100.0 / (num_devices * elapsed));
+    t_clip *= (100.0 / (num_devices * elapsed));
+    t_R *= (100.0 / (num_devices * elapsed));
+    t_E *= (100.0 / (num_devices * elapsed));
+    t_K *= (100.0 / (num_devices * elapsed));
+    t_join *= (100.0 / (num_devices * elapsed));
+    t_correlate *= (100.0 / (num_devices * elapsed));
+    oskar_log_message(log, -1, "%4.1f%% Chunk copy & initialise.", t_init);
+    oskar_log_message(log, -1, "%4.1f%% Horizon clip.", t_clip);
+    oskar_log_message(log, -1, "%4.1f%% Jones R.", t_R);
+    oskar_log_message(log, -1, "%4.1f%% Jones E.", t_E);
+    oskar_log_message(log, -1, "%4.1f%% Jones K.", t_K);
+    oskar_log_message(log, -1, "%4.1f%% Jones join.", t_join);
+    oskar_log_message(log, -1, "%4.1f%% Jones correlate.", t_correlate);
+    oskar_log_message(log, -1, "");
 
     // Compute baseline u,v,w coordinates for simulation.
     {
@@ -258,9 +288,10 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         {
             oskar_Image image;
             oskar_log_section(log, "Starting OSKAR imager...");
-            timer.restart();
+            oskar_timer_start(&timers[0].tmr);
             error = oskar_make_image(&image, log, &vis_global, &settings.image);
-            oskar_log_section(log, "Imaging completed in %.3f sec.", timer.elapsed()/1.0e3);
+            oskar_log_section(log, "Imaging completed in %.3f sec.",
+                    oskar_timer_elapsed(&timers[0].tmr));
             if (error) return error;
             if (settings.image.oskar_image)
             {
@@ -286,6 +317,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Reset all CUDA devices.
     for (int i = 0; i < num_devices; ++i)
     {
+        oskar_timers_destroy(&timers[i]);
         cudaSetDevice(settings.sim.cuda_device_ids[i]);
         cudaDeviceReset();
     }

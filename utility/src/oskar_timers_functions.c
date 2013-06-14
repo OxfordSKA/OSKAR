@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,52 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETER_H_
-#define OSKAR_INTERFEROMETER_H_
-
-/**
- * @file oskar_interferometer.h
- */
-
-#include "oskar_global.h"
-#include "utility/oskar_Settings.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Log.h"
-#include "utility/oskar_Mem.h"
 #include "utility/oskar_timers_functions.h"
+#include "utility/oskar_timer_functions.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Main interferometer simulation function (full polarisation).
- *
- * @details
- * This function produces simulated visibilities from an interferometer.
- *
- * @param[out]    vis_amp        Output visibility amplitudes.
- * @param[in,out] log            Pointer to log structure to use.
- * @param[in,out] timers         Simulation timers.
- * @param[in]     sky            Sky model structure.
- * @param[in]     telescope      Telescope model structure.
- * @param[in]     settings       Simulation settings.
- * @param[in]     frequency      Observation frequency in Hz.
- * @param[in]     chunk_index    Sky chunk (index) to be processed.
- * @param[in]     num_sky_chunks Total number of sky chunks.
- * @param[in,out] status         Status return code.
- */
-OSKAR_EXPORT
-void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
-        oskar_Timers* timers, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const oskar_Settings* settings,
-        double frequency, int chunk_index, int num_sky_chunks, int* status);
+void oskar_timers_create(oskar_Timers* timers, int type)
+{
+    oskar_timer_create(&timers->tmr, type);
+    oskar_timer_create(&timers->tmr_init_copy, type);
+    oskar_timer_create(&timers->tmr_clip, type);
+    oskar_timer_create(&timers->tmr_R, type);
+    oskar_timer_create(&timers->tmr_E, type);
+    oskar_timer_create(&timers->tmr_K, type);
+    oskar_timer_create(&timers->tmr_join, type);
+    oskar_timer_create(&timers->tmr_correlate, type);
+}
+
+void oskar_timers_destroy(oskar_Timers* timers)
+{
+    oskar_timer_destroy(&timers->tmr);
+    oskar_timer_destroy(&timers->tmr_init_copy);
+    oskar_timer_destroy(&timers->tmr_clip);
+    oskar_timer_destroy(&timers->tmr_R);
+    oskar_timer_destroy(&timers->tmr_E);
+    oskar_timer_destroy(&timers->tmr_K);
+    oskar_timer_destroy(&timers->tmr_join);
+    oskar_timer_destroy(&timers->tmr_correlate);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_INTERFEROMETER_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,52 +26,75 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETER_H_
-#define OSKAR_INTERFEROMETER_H_
+#ifndef OSKAR_TIMERS_FUNCTIONS_H_
+#define OSKAR_TIMERS_FUNCTIONS_H_
 
 /**
- * @file oskar_interferometer.h
+ * @file oskar_timers_functions.h
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_Settings.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Log.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_timers_functions.h"
+#include "utility/oskar_timer_functions.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief
- * Main interferometer simulation function (full polarisation).
+ * @struct oskar_Timers
+ *
+ * @brief Structure to hold all simulation timers.
  *
  * @details
- * This function produces simulated visibilities from an interferometer.
+ * The structure holds all simulation timers.
+ */
+struct OSKAR_EXPORT oskar_Timers
+{
+    oskar_Timer tmr;
+    oskar_Timer tmr_init_copy;
+    oskar_Timer tmr_clip;
+    oskar_Timer tmr_correlate;
+    oskar_Timer tmr_join;
+    oskar_Timer tmr_R;
+    oskar_Timer tmr_E;
+    oskar_Timer tmr_K;
+};
+typedef struct oskar_Timers oskar_Timers;
+
+/**
+ * @brief Creates simulation timers.
  *
- * @param[out]    vis_amp        Output visibility amplitudes.
- * @param[in,out] log            Pointer to log structure to use.
- * @param[in,out] timers         Simulation timers.
- * @param[in]     sky            Sky model structure.
- * @param[in]     telescope      Telescope model structure.
- * @param[in]     settings       Simulation settings.
- * @param[in]     frequency      Observation frequency in Hz.
- * @param[in]     chunk_index    Sky chunk (index) to be processed.
- * @param[in]     num_sky_chunks Total number of sky chunks.
- * @param[in,out] status         Status return code.
+ * @details
+ * Creates all simulation timers. The timers are created in a paused state.
+ *
+ * The \p type parameter may take the values:
+ *
+ * - OSKAR_TIMER_CUDA
+ * - OSKAR_TIMER_OMP
+ * - OSKAR_TIMER_NATIVE
+ *
+ * These timers are the ones provided by, respectively, CUDA, OpenMP or the
+ * native system.
+ *
+ * @param[in,out] timer Pointer to timers.
+ * @param[in] type Type of timers to create.
  */
 OSKAR_EXPORT
-void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
-        oskar_Timers* timers, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const oskar_Settings* settings,
-        double frequency, int chunk_index, int num_sky_chunks, int* status);
+void oskar_timers_create(oskar_Timers* timer, int type);
+
+/**
+ * @brief Destroys simulation timers.
+ *
+ * @details
+ * Destroys all simulation timers.
+ *
+ * @param[in,out] timers Pointer to timers.
+ */
+OSKAR_EXPORT
+void oskar_timers_destroy(oskar_Timers* timers);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_INTERFEROMETER_H_ */
+#endif /* OSKAR_TIMERS_FUNCTIONS_H_ */
