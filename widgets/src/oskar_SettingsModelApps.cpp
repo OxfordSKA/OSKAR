@@ -1181,6 +1181,11 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     declare(k, "Complex (voltage) pattern", oskar_SettingsItem::BOOL, false);
     setTooltip(k, "If true, save the complex (real and imaginary) pattern "
             "in an OSKAR image file.");
+    k = group + "/oskar_image_file/save_total_intensity";
+    declare(k, "Total intensity pattern", oskar_SettingsItem::BOOL, false);
+    setTooltip(k, "If true, save the total intensity beam. This is evaluated as "
+            "the Stokes I response of the beam pattern auto-correlation. "
+            "<i>Note: This option is ignored for un-polarised beam patterns.</i>");
 
 #ifndef OSKAR_NO_FITS
     // FITS file options.
@@ -1194,6 +1199,11 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     k = group + "/fits_file/save_phase";
     declare(k, "Phase pattern", oskar_SettingsItem::BOOL, false);
     setTooltip(k, "If true, save the phase pattern in a FITS image file.");
+    k = group + "/fits_file/save_total_intensity";
+    declare(k, "Total intensity pattern", oskar_SettingsItem::BOOL, false);
+    setTooltip(k, "If true, save the total intensity beam. This is evaluated as "
+            "the Stokes-I response of the beam pattern auto-correlation. "
+            "<i>Note: This option is ignored for un-polarised beam patterns.</i>");
 #endif
 }
 

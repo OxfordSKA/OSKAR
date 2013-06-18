@@ -108,10 +108,14 @@ int oskar_settings_free(oskar_Settings* settings)
     settings->beam_pattern.oskar_image_phase = NULL;
     free(settings->beam_pattern.oskar_image_voltage);
     settings->beam_pattern.oskar_image_voltage = NULL;
+    free(settings->beam_pattern.oskar_image_total_intensity);
+    settings->beam_pattern.oskar_image_total_intensity = NULL;
     free(settings->beam_pattern.fits_image_phase);
     settings->beam_pattern.fits_image_phase = NULL;
     free(settings->beam_pattern.fits_image_voltage);
     settings->beam_pattern.fits_image_voltage = NULL;
+    free(settings->beam_pattern.fits_image_total_intensity);
+    settings->beam_pattern.fits_image_total_intensity = NULL;
 
     /* Free imager file names. */
     free(settings->image.input_vis_data);

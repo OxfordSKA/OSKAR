@@ -51,8 +51,10 @@ struct OSKAR_EXPORT oskar_SettingsBeamPattern
     char* oskar_image_voltage;
     char* oskar_image_phase;
     char* oskar_image_complex;
+    char* oskar_image_total_intensity;
     char* fits_image_voltage;
     char* fits_image_phase;
+    char* fits_image_total_intensity;
 };
 typedef struct oskar_SettingsBeamPattern oskar_SettingsBeamPattern;
 

@@ -69,7 +69,7 @@
 #endif
 
 static void oskar_set_up_beam_pattern(oskar_Image* image,
-        const oskar_Settings* settings, int* status);
+        const oskar_Settings* settings, int num_pols, int* status);
 
 extern "C"
 int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
@@ -95,8 +95,10 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     if (!(settings.beam_pattern.oskar_image_voltage ||
             settings.beam_pattern.oskar_image_phase ||
             settings.beam_pattern.oskar_image_complex ||
+            settings.beam_pattern.oskar_image_total_intensity ||
             settings.beam_pattern.fits_image_voltage ||
-            settings.beam_pattern.fits_image_phase))
+            settings.beam_pattern.fits_image_phase ||
+            settings.beam_pattern.fits_image_total_intensity))
     {
         oskar_log_error(log, "No output file(s) specified.");
         return OSKAR_ERR_SETTINGS;
@@ -131,8 +133,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     // Set up beam pattern hyper-cubes.
     oskar_Image complex_cube(type | OSKAR_COMPLEX, OSKAR_LOCATION_CPU);
     oskar_Image image_cube(type, OSKAR_LOCATION_CPU);
-    oskar_set_up_beam_pattern(&complex_cube, &settings, &err);
-    oskar_set_up_beam_pattern(&image_cube, &settings, &err);
+    oskar_set_up_beam_pattern(&complex_cube, &settings, num_pols, &err);
+    oskar_set_up_beam_pattern(&image_cube, &settings, num_pols, &err);
     if (err) return err;
 
     // Temporary CPU memory, used to re-order polarisation data.
@@ -394,19 +396,91 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 #endif
     }
 
+    // Write out total intensity data if required.
+    if ((settings.beam_pattern.oskar_image_total_intensity ||
+            settings.beam_pattern.fits_image_total_intensity) &&
+            oskar_mem_is_matrix(beam_pattern_data_type))
+    {
+        oskar_Image image_cube_I(type, OSKAR_LOCATION_CPU);
+        oskar_set_up_beam_pattern(&image_cube_I, &settings, 1, &err);
+        if (type == OSKAR_SINGLE)
+        {
+            float2* complex_data = (float2*)complex_cube.data;
+            float* image_data = (float*)image_cube_I.data;
+            for (int c = 0, idx = 0, islice = 0; c < num_channels; ++c)
+            {
+                for (int t = 0; t < num_times; ++t, ++islice)
+                {
+                    float* image_plane = &(image_data[islice * num_pixels]);
+                    for (int p = 0; p < num_pols; ++p)
+                    {
+                        for (int i = 0; i < num_pixels; ++i, ++idx)
+                        {
+                            float xx = complex_data[idx].x * complex_data[idx].x;
+                            float yy = complex_data[idx].y * complex_data[idx].y;
+                            image_plane[i] += xx + yy;
+                            if (p == 0)
+                                image_plane[i] *= 0.5;
+                        }
+                    }
+                }
+            }
+        }
+        else if (type == OSKAR_DOUBLE)
+        {
+            double2* complex_data = (double2*)complex_cube.data;
+            double* image_data = (double*)image_cube_I.data;
+            for (int c = 0, idx = 0, islice = 0; c < num_channels; ++c)
+            {
+                for (int t = 0; t < num_times; ++t, ++islice)
+                {
+                    double* image_plane = &(image_data[islice * num_pixels]);
+                    for (int p = 0; p < num_pols; ++p)
+                    {
+                        for (int i = 0; i < num_pixels; ++i, ++idx)
+                        {
+                            double xx = complex_data[idx].x * complex_data[idx].x;
+                            double yy = complex_data[idx].y * complex_data[idx].y;
+                            image_plane[i] += xx + yy;
+                            if (p == 0)
+                                image_plane[i] *= 0.5;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Write OSKAR image
+        if (settings.beam_pattern.oskar_image_total_intensity)
+        {
+            oskar_image_write(&image_cube_I, log,
+                    settings.beam_pattern.oskar_image_total_intensity, 0, &err);
+            if (err) return err;
+        }
+#ifndef OSKAR_NO_FITS
+        // Write FITS image.
+        if (settings.beam_pattern.fits_image_total_intensity)
+        {
+            err = oskar_fits_image_write(&image_cube_I, log,
+                    settings.beam_pattern.fits_image_total_intensity);
+            if (err) return err;
+        }
+#endif
+    }
+
     cudaDeviceReset();
     return OSKAR_SUCCESS;
 }
 
 static void oskar_set_up_beam_pattern(oskar_Image* image,
-        const oskar_Settings* settings, int* status)
+        const oskar_Settings* settings, int num_pols, int* status)
 {
-    int num_times, image_size, num_channels, num_pols;
+    int num_times, image_size, num_channels;
     num_times    = settings->obs.num_time_steps;
     image_size   = settings->beam_pattern.size;
     num_channels = settings->obs.num_channels;
-    num_pols     = settings->telescope.aperture_array.element_pattern.functional_type ==
-            OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC ? 1 : 4;
+//    num_pols     = settings->telescope.aperture_array.element_pattern.functional_type ==
+//            OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC ? 1 : 4;
 
     /* Resize image cube. */
     oskar_image_resize(image, image_size, image_size, num_pols, num_times,

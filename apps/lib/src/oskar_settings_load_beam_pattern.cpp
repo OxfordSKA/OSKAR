@@ -75,6 +75,12 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
             bp->oskar_image_complex = (char*)malloc(t.size() + 1);
             strcpy(bp->oskar_image_complex, t.constData());
         }
+        if (s.value("save_total_intensity", false).toBool())
+        {
+            t = QString(root + "_TOTAL_INTENSITY.img").toLatin1();
+            bp->oskar_image_total_intensity = (char*)malloc(t.size() + 1);
+            strcpy(bp->oskar_image_total_intensity, t.constData());
+        }
         s.endGroup();
 
         // FITS files.
@@ -90,6 +96,12 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
             t = QString(root + "_PHASE.fits").toLatin1();
             bp->fits_image_phase = (char*)malloc(t.size() + 1);
             strcpy(bp->fits_image_phase, t.constData());
+        }
+        if (s.value("save_total_intensity", false).toBool())
+        {
+            t = QString(root + "_TOTAL_INTENSITY.fits").toLatin1();
+            bp->fits_image_total_intensity = (char*)malloc(t.size() + 1);
+            strcpy(bp->fits_image_total_intensity, t.constData());
         }
         s.endGroup();
     }

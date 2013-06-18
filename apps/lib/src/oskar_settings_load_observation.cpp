@@ -33,6 +33,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <cfloat>
 #include <QtCore/QSettings>
 #include <QtCore/QByteArray>
 #include <QtCore/QDateTime>
@@ -98,7 +99,10 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
         }
 
         // Get frequency / channel data.
-        obs->start_frequency_hz   = s.value("start_frequency_hz").toDouble();
+        obs->start_frequency_hz = s.value("start_frequency_hz").toDouble();
+        if (obs->start_frequency_hz < DBL_MIN)
+            return OSKAR_ERR_SETTINGS_OBSERVATION;
+
         obs->num_channels         = s.value("num_channels", 1).toInt();
         obs->frequency_inc_hz     = s.value("frequency_inc_hz").toDouble();
 
