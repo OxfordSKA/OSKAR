@@ -442,7 +442,7 @@ void Test_evaluate_array_pattern::test()
     oskar_mem_init(&lon_gpu_f, type, OSKAR_LOCATION_GPU, num_pixels, 1, &status);
     oskar_mem_init(&lat_gpu_f, type, OSKAR_LOCATION_GPU, num_pixels, 1, &status);
     oskar_evaluate_image_lon_lat_grid(&lon_cpu_f, &lat_cpu_f, image_side,
-            fov_rad, ra_rad, dec_rad, &status);
+            image_side, fov_rad, fov_rad, ra_rad, dec_rad, &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     type = OSKAR_DOUBLE;
     oskar_mem_init(&lon_cpu_d, type, OSKAR_LOCATION_CPU, num_pixels, 1, &status);
@@ -450,7 +450,7 @@ void Test_evaluate_array_pattern::test()
     oskar_mem_init(&lon_gpu_d, type, OSKAR_LOCATION_GPU, num_pixels, 1, &status);
     oskar_mem_init(&lat_gpu_d, type, OSKAR_LOCATION_GPU, num_pixels, 1, &status);
     oskar_evaluate_image_lon_lat_grid(&lon_cpu_d, &lat_cpu_d, image_side,
-            fov_rad, ra_rad, dec_rad, &status);
+            image_side, fov_rad, fov_rad, ra_rad, dec_rad, &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     oskar_mem_copy(&lon_gpu_f, &lon_cpu_f, &status);
     oskar_mem_copy(&lat_gpu_f, &lat_cpu_f, &status);

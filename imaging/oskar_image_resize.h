@@ -40,6 +40,12 @@
 extern "C" {
 #endif
 
+/*
+ * NOTE consider reordering function arguments with slowest varying dimension
+ * first. as this is more conventional with multi-dimensional array
+ * dereferencing.
+ * i.e. array[m][n] would have m as the slowest varying dimension.
+ */
 /**
  * @brief
  * Resizes memory held by an image structure.

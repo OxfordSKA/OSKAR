@@ -35,6 +35,9 @@
 #include <QtCore/QSettings>
 #include <QtCore/QByteArray>
 #include <QtCore/QVariant>
+#include <QtCore/QStringList>
+
+#include <QtCore/QDebug>
 
 extern "C"
 int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
@@ -45,8 +48,29 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     s.beginGroup("beam_pattern");
 
     // Get image sizes.
-    bp->fov_deg = s.value("fov_deg", 2.0).toDouble();
-    bp->size    = s.value("size", 256).toUInt();
+    QStringList dimsList;
+    QVariant dims = s.value("fov_deg", "2.0,2.0");
+    qDebug() << dims.toString();
+    if (dims.type() == QVariant::StringList)
+        dimsList = dims.toStringList();
+    else if (dims.type() == QVariant::String)
+        dimsList = dims.toString().split(",");
+    else return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+    if (!(dimsList.size() == 1 || dimsList.size() == 2))
+        return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+    bp->fov_deg[0] = dimsList[0].toDouble();
+    bp->fov_deg[1] = (dimsList.size() == 2) ? dimsList[1].toDouble() : bp->fov_deg[0];
+
+    dims = s.value("size", "256,256");
+    if (dims.type() == QVariant::StringList)
+        dimsList = dims.toStringList();
+    else if (dims.type() == QVariant::String)
+        dimsList = dims.toString().split(",");
+    else return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+    if (!(dimsList.size() == 1 || dimsList.size() == 2))
+        return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+    bp->size[0] = dimsList[0].toUInt();
+    bp->size[1] = (dimsList.size() == 2) ? dimsList[1].toUInt() : bp->size[0];
 
     // Get station ID to use.
     bp->station_id  = s.value("station_id").toUInt();

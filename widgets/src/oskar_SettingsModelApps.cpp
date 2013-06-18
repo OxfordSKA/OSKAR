@@ -1145,21 +1145,41 @@ void oskar_SettingsModelApps::init_settings_interferometer()
 void oskar_SettingsModelApps::init_settings_beampattern()
 {
     QString k, group;
+    QStringList options;
 
     group = "beam_pattern";
     setLabel(group, "Beam pattern settings");
     k = group + "/fov_deg";
-    declare(k, "Field-of-view [deg]", oskar_SettingsItem::DOUBLE, 2.0);
-    setTooltip(k, "Total field of view in degrees (max 180.0).");
+    declare(k, "Field-of-view (RA,Dec) [deg]",
+            oskar_SettingsItem::DOUBLE_CSV_LIST, "2.0");
+    setTooltip(k, "Field-of-view (FOV) in degrees (max 180.0). If a single value "
+            "is specified, the image is assumed to have the same FOV along each "
+            "dimension.<br>"
+            "Example:"
+            "<ul>"
+            "<li>A value of \"2.0\" results in an image with a FOV of 2.0 "
+            "degrees in each dimension.</li>"
+            "<li>A value of \"2.0,1.0\" results in a image with a FOV of "
+            "2.0 degrees in Right Ascension, and 1.0 degrees in "
+            "Declination.</li>"
+            "</ul>");
     k = group + "/size";
-    declare(k, "Image dimension [pixels]", oskar_SettingsItem::INT_POSITIVE, 256);
-    setTooltip(k, "Image width in one dimension (e.g. a value of 256 would "
-            "give a 256 by 256 image).");
+    declare(k, "Image dimensions (RA,Dec) [pixels]",
+            oskar_SettingsItem::INT_CSV_LIST, "256");
+    setTooltip(k, "Image dimensions. If a single value is specified, the "
+            "image is assumed to have the same number of pixels along each "
+            "dimension.<br>"
+            "Example:"
+            "<ul>"
+            "<li>A value of \"256\" results in a square image of size 256 by "
+            "256 pixels.</li>"
+            "<li>A value of \"256,128\" results in a image of 256 by 128 pixels, "
+            "with 256 pixels along the Right Ascension direction.</li>"
+            "</ul>");
     k = group + "/station_id";
     declare(k, "Station ID", oskar_SettingsItem::INT_UNSIGNED);
     setTooltip(k, "The station ID number (zero based) to select from the "
             "telescope model when generating the beam pattern.");
-
     k = group + "/root_path";
     declare(k, "Output root path name", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Root path name of the generated data file. "

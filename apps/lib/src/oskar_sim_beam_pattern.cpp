@@ -116,11 +116,11 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 
     // Get the beam pattern settings.
     int station_id = settings.beam_pattern.station_id;
-    int image_size = settings.beam_pattern.size;
+    int* image_size = settings.beam_pattern.size;
     int num_channels = settings.obs.num_channels;
     int num_pols = settings.telescope.aperture_array.element_pattern.functional_type ==
             OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC ? 1 : 4;
-    int num_pixels = image_size * image_size;
+    int num_pixels = image_size[0] * image_size[1];
     int num_pixels_total = num_pixels * num_times * num_channels * num_pols;
     int beam_pattern_data_type = type | OSKAR_COMPLEX;
     if (num_pols == 4)
@@ -148,8 +148,9 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         // Generate equatorial coordinates for beam pattern pixels.
         oskar_mem_init(&RA, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
         oskar_mem_init(&Dec, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
-        oskar_evaluate_image_lon_lat_grid(&RA, &Dec, image_size,
-                settings.beam_pattern.fov_deg * M_PI / 180.0,
+        oskar_evaluate_image_lon_lat_grid(&RA, &Dec, image_size[0],
+                image_size[1], settings.beam_pattern.fov_deg[0] * (M_PI/180.0),
+                settings.beam_pattern.fov_deg[1] * (M_PI/180.0),
                 settings.obs.ra0_rad[0], settings.obs.dec0_rad[0], &err);
 
         // Initialise work array and GPU memory for a beam pattern.
@@ -475,15 +476,12 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 static void oskar_set_up_beam_pattern(oskar_Image* image,
         const oskar_Settings* settings, int num_pols, int* status)
 {
-    int num_times, image_size, num_channels;
-    num_times    = settings->obs.num_time_steps;
-    image_size   = settings->beam_pattern.size;
-    num_channels = settings->obs.num_channels;
-//    num_pols     = settings->telescope.aperture_array.element_pattern.functional_type ==
-//            OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC ? 1 : 4;
+    int num_channels = settings->obs.num_channels;
+    int num_times = settings->obs.num_time_steps;
+    const int* image_size = settings->beam_pattern.size;
 
     /* Resize image cube. */
-    oskar_image_resize(image, image_size, image_size, num_pols, num_times,
+    oskar_image_resize(image, image_size[0], image_size[1], num_pols, num_times,
             num_channels, status);
 
     /* Set beam pattern meta-data. */
@@ -491,8 +489,8 @@ static void oskar_set_up_beam_pattern(oskar_Image* image,
             OSKAR_IMAGE_TYPE_BEAM_SCALAR : OSKAR_IMAGE_TYPE_BEAM_POLARISED;
     image->centre_ra_deg      = settings->obs.ra0_rad[0] * 180.0 / M_PI;
     image->centre_dec_deg     = settings->obs.dec0_rad[0] * 180.0 / M_PI;
-    image->fov_ra_deg         = settings->beam_pattern.fov_deg;
-    image->fov_dec_deg        = settings->beam_pattern.fov_deg;
+    image->fov_ra_deg         = settings->beam_pattern.fov_deg[0];
+    image->fov_dec_deg        = settings->beam_pattern.fov_deg[1];
     image->freq_start_hz      = settings->obs.start_frequency_hz;
     image->freq_inc_hz        = settings->obs.frequency_inc_hz;
     image->time_inc_sec       = settings->obs.dt_dump_days * 86400.0;

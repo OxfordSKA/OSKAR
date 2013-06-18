@@ -45,8 +45,8 @@
  */
 struct OSKAR_EXPORT oskar_SettingsBeamPattern
 {
-    double fov_deg;
-    int size;
+    double fov_deg[2];
+    int size[2];
     int station_id;
     char* oskar_image_voltage;
     char* oskar_image_phase;

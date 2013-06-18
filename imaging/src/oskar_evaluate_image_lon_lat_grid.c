@@ -41,8 +41,8 @@ extern "C" {
 #endif
 
 void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
-        int image_size, double fov_rad, double lon_rad, double lat_rad,
-        int* status)
+        int image_size_l, int image_size_m, double fov_rad_lon,
+        double fov_rad_lat, double lon_rad, double lat_rad, int* status)
 {
     int num_pixels, type, location;
     oskar_Mem lon_cpu, lat_cpu;
@@ -57,7 +57,7 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
     /* Get meta-data. */
     type = lon->type;
     location = lon->location;
-    num_pixels = image_size * image_size;
+    num_pixels = image_size_l * image_size_m;
 
     /* Ensure enough space in output arrays. */
     if (lon->num_elements < num_pixels)
@@ -86,8 +86,8 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
         /* Evaluate pixel grid and convert to longitude, latitude values. */
         if (type == OSKAR_SINGLE)
         {
-            oskar_evaluate_image_lm_grid_f(image_size, image_size,
-                    fov_rad, fov_rad, (float*)lon_cpu.data,
+            oskar_evaluate_image_lm_grid_f(image_size_l, image_size_m,
+                    fov_rad_lon, fov_rad_lat, (float*)lon_cpu.data,
                     (float*)lat_cpu.data);
             oskar_sph_from_lm_f(num_pixels, lon_rad, lat_rad,
                     (const float*)lon_cpu.data, (const float*)lat_cpu.data,
@@ -95,8 +95,8 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_evaluate_image_lm_grid_d(image_size, image_size,
-                    fov_rad, fov_rad, (double*)lon_cpu.data,
+            oskar_evaluate_image_lm_grid_d(image_size_l, image_size_m,
+                    fov_rad_lon, fov_rad_lat, (double*)lon_cpu.data,
                     (double*)lat_cpu.data);
             oskar_sph_from_lm_d(num_pixels, lon_rad, lat_rad,
                     (const double*)lon_cpu.data, (const double*)lat_cpu.data,

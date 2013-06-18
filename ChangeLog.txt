@@ -19,7 +19,9 @@
     * Removed redundant CORRECTED_DATA and MODEL_DATA columns from
       Measurement Set output.
 
-    * Added a total intensity (Stokes-I autocorrelation) beam pattern output
+    * Added options to specify both dimensions when making beam patterns.
+
+    * Added a total intensity (Stokes I auto-correlation) beam pattern output
       mode.
 
     * Added check for updates when GUI starts.

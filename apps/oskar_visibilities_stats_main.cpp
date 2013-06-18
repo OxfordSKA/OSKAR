@@ -116,17 +116,17 @@ int main(int argc, char** argv)
         {
             case OSKAR_SINGLE_COMPLEX:
             {
-                Complex* amps = (Complex*)vis.amplitude.data;
+                //Complex* amps = (Complex*)vis.amplitude.data;
                 break;
             }
             case OSKAR_SINGLE_COMPLEX_MATRIX:
             {
-                Jones* amps = (Jones*)vis.amplitude.data;
+                //Jones* amps = (Jones*)vis.amplitude.data;
                 break;
             }
             case OSKAR_DOUBLE_COMPLEX:
             {
-                DComplex* amps = (DComplex*)vis.amplitude.data;
+                //DComplex* amps = (DComplex*)vis.amplitude.data;
                 break;
             }
             case OSKAR_DOUBLE_COMPLEX_MATRIX:

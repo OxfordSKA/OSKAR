@@ -38,6 +38,11 @@ void oskar_linspace_d(double* values, double a, double b, int n)
 {
     int i;
     double inc;
+    if (n <= 1)
+    {
+        values[0] = (a + b) / 2;
+        return;
+    }
     inc = (b - a) / (n - 1);
     for (i = 0; i < n; ++i)
     {
@@ -49,6 +54,11 @@ void oskar_linspace_f(float* values, float a, float b, int n)
 {
     int i;
     float inc;
+    if (n <= 1)
+    {
+        values[0] = (a + b) / 2;
+        return;
+    }
     inc = (b - a) / (n - 1);
     for (i = 0; i < n; ++i)
     {

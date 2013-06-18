@@ -107,8 +107,8 @@ int oskar_sim_tec_screen(oskar_Image* TEC_screen, oskar_Settings* settings,
     oskar_Mem pp_lon, pp_lat;
     oskar_mem_init(&pp_lon, type, loc, num_pixels, owner, &status);
     oskar_mem_init(&pp_lat, type, loc, num_pixels, owner, &status);
-    oskar_evaluate_image_lon_lat_grid(&pp_lon, &pp_lat, im_size, fov,
-            pp_lon0, pp_lat0, &status);
+    oskar_evaluate_image_lon_lat_grid(&pp_lon, &pp_lat, im_size, im_size, fov,
+            fov, pp_lon0, pp_lat0, &status);
 
     // Relative path in direction of p.p. (1.0 here as we are not using
     // any stations)

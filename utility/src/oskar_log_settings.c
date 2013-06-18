@@ -651,8 +651,10 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
     int depth = 0;
     oskar_log_message(log, depth, "Beam pattern settings");
     depth = 1;
-    LV("Field-of-view [deg]", "%.3f", s->beam_pattern.fov_deg);
-    LVI("Dimension [pixels]", s->beam_pattern.size);
+    oskar_log_value(log, depth, w, "Field-of-view [deg]", "%.3f,%.3f",
+            s->beam_pattern.fov_deg[0], s->beam_pattern.fov_deg[1]);
+    oskar_log_value(log, depth, w, "Dimensions [pixels]", "%i,%i",
+            s->beam_pattern.size[0], s->beam_pattern.size[1]);
     LVI("Station ID", s->beam_pattern.station_id);
     oskar_log_message(log, depth, "Output OSKAR image files:");
     ++depth;
