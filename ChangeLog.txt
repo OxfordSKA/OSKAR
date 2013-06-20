@@ -29,8 +29,8 @@
     * Added telescope model name, channel bandwidth and time integration
       values to visibility files.
 
-    * Added percentage time taken for station beam evaluation and correlation
-      stages to message log.
+    * Added percentage time taken for various stages of the simulation to
+      the message log.
 
     * Added a command line application (oskar_visibilities_add_noise) to
       add uncorrelated noise to visibilities.
