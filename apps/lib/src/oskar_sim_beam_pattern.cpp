@@ -419,9 +419,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                         {
                             float xx = complex_data[idx].x * complex_data[idx].x;
                             float yy = complex_data[idx].y * complex_data[idx].y;
-                            image_plane[i] += xx + yy;
-                            if (p == 0)
-                                image_plane[i] *= 0.5;
+                            image_plane[i] += 0.5 * (xx + yy);
                         }
                     }
                 }
@@ -442,9 +440,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                         {
                             double xx = complex_data[idx].x * complex_data[idx].x;
                             double yy = complex_data[idx].y * complex_data[idx].y;
-                            image_plane[i] += xx + yy;
-                            if (p == 0)
-                                image_plane[i] *= 0.5;
+                            image_plane[i] += 0.5 * (xx + yy);
                         }
                     }
                 }
