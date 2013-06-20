@@ -37,8 +37,6 @@
 #include <QtCore/QVariant>
 #include <QtCore/QStringList>
 
-#include <QtCore/QDebug>
-
 extern "C"
 int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
         const char* filename)
@@ -50,7 +48,6 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     // Get image sizes.
     QStringList dimsList;
     QVariant dims = s.value("fov_deg", "2.0,2.0");
-    qDebug() << dims.toString();
     if (dims.type() == QVariant::StringList)
         dimsList = dims.toStringList();
     else if (dims.type() == QVariant::String)

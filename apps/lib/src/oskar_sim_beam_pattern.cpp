@@ -62,7 +62,6 @@
 #include "utility/oskar_vector_types.h"
 
 #include <cmath>
-#include <iostream>
 #include <QtCore/QTime>
 
 #ifndef M_PI
@@ -456,7 +455,6 @@ static void save_total_intensity(const oskar_Image& complex_cube,
     // For polarised beams Stokes I is 0.5 * (XX + YY)
     // For scalar beams total intensity is voltage squared.
     double factor = (num_pols == 4) ? 0.5 : 1.0;
-    std::cout << "factor = " << factor << "\n";
 
     if (type == OSKAR_SINGLE)
     {
