@@ -62,6 +62,7 @@
 #include "utility/oskar_vector_types.h"
 
 #include <cmath>
+#include <iostream>
 #include <QtCore/QTime>
 
 #ifndef M_PI
@@ -70,6 +71,9 @@
 
 static void oskar_set_up_beam_pattern(oskar_Image* image,
         const oskar_Settings* settings, int num_pols, int* status);
+
+static void save_total_intensity(const oskar_Image& complex_cube,
+        const oskar_Settings& settings, int type, oskar_Log* log, int* status);
 
 extern "C"
 int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
@@ -397,73 +401,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 #endif
     }
 
-    // Write out total intensity data if required.
-    if ((settings.beam_pattern.oskar_image_total_intensity ||
-            settings.beam_pattern.fits_image_total_intensity) &&
-            oskar_mem_is_matrix(beam_pattern_data_type))
-    {
-        oskar_Image image_cube_I(type, OSKAR_LOCATION_CPU);
-        oskar_set_up_beam_pattern(&image_cube_I, &settings, 1, &err);
-        if (type == OSKAR_SINGLE)
-        {
-            float2* complex_data = (float2*)complex_cube.data;
-            float* image_data = (float*)image_cube_I.data;
-            for (int c = 0, idx = 0, islice = 0; c < num_channels; ++c)
-            {
-                for (int t = 0; t < num_times; ++t, ++islice)
-                {
-                    float* image_plane = &(image_data[islice * num_pixels]);
-                    for (int p = 0; p < num_pols; ++p)
-                    {
-                        for (int i = 0; i < num_pixels; ++i, ++idx)
-                        {
-                            float xx = complex_data[idx].x * complex_data[idx].x;
-                            float yy = complex_data[idx].y * complex_data[idx].y;
-                            image_plane[i] += 0.5 * (xx + yy);
-                        }
-                    }
-                }
-            }
-        }
-        else if (type == OSKAR_DOUBLE)
-        {
-            double2* complex_data = (double2*)complex_cube.data;
-            double* image_data = (double*)image_cube_I.data;
-            for (int c = 0, idx = 0, islice = 0; c < num_channels; ++c)
-            {
-                for (int t = 0; t < num_times; ++t, ++islice)
-                {
-                    double* image_plane = &(image_data[islice * num_pixels]);
-                    for (int p = 0; p < num_pols; ++p)
-                    {
-                        for (int i = 0; i < num_pixels; ++i, ++idx)
-                        {
-                            double xx = complex_data[idx].x * complex_data[idx].x;
-                            double yy = complex_data[idx].y * complex_data[idx].y;
-                            image_plane[i] += 0.5 * (xx + yy);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Write OSKAR image
-        if (settings.beam_pattern.oskar_image_total_intensity)
-        {
-            oskar_image_write(&image_cube_I, log,
-                    settings.beam_pattern.oskar_image_total_intensity, 0, &err);
-            if (err) return err;
-        }
-#ifndef OSKAR_NO_FITS
-        // Write FITS image.
-        if (settings.beam_pattern.fits_image_total_intensity)
-        {
-            err = oskar_fits_image_write(&image_cube_I, log,
-                    settings.beam_pattern.fits_image_total_intensity);
-            if (err) return err;
-        }
-#endif
-    }
+    // Save the beam pattern as a total intensity pattern (if requested).
+    save_total_intensity(complex_cube, settings, type, log, &err);
 
     cudaDeviceReset();
     return OSKAR_SUCCESS;
@@ -493,3 +432,90 @@ static void oskar_set_up_beam_pattern(oskar_Image* image,
     image->time_start_mjd_utc = settings->obs.start_mjd_utc;
     oskar_mem_copy(&image->settings_path, &settings->settings_path, status);
 }
+
+
+// complex_cube == voltage image cube
+static void save_total_intensity(const oskar_Image& complex_cube,
+        const oskar_Settings& settings, int type, oskar_Log* log, int* status)
+{
+    // Return if a total intensity beam pattern has not been specified.
+    if (!(settings.beam_pattern.oskar_image_total_intensity ||
+            settings.beam_pattern.fits_image_total_intensity))
+        return;
+
+    // Dimensions of input beam pattern image to be converted to total intensity.
+    int num_channels = complex_cube.num_channels;
+    int num_times = complex_cube.num_times;
+    int num_pols = complex_cube.num_pols;
+    int num_pixels = complex_cube.width * complex_cube.height;
+
+    // Allocate total intensity image cube to write into.
+    oskar_Image image_cube_I(type, OSKAR_LOCATION_CPU);
+    oskar_set_up_beam_pattern(&image_cube_I, &settings, 1, status);
+
+    // For polarised beams Stokes I is 0.5 * (XX + YY)
+    // For scalar beams total intensity is voltage squared.
+    double factor = (num_pols == 4) ? 0.5 : 1.0;
+    std::cout << "factor = " << factor << "\n";
+
+    if (type == OSKAR_SINGLE)
+    {
+        const float2* complex_data = (const float2*)complex_cube.data;
+        float* image_data = (float*)image_cube_I.data;
+        for (int c = 0, idx = 0, islice = 0; c < num_channels; ++c)
+        {
+            for (int t = 0; t < num_times; ++t, ++islice)
+            {
+                float* image_plane = &(image_data[islice * num_pixels]);
+                for (int p = 0; p < num_pols; ++p)
+                {
+                    for (int i = 0; i < num_pixels; ++i, ++idx)
+                    {
+                        float xx = complex_data[idx].x * complex_data[idx].x;
+                        float yy = complex_data[idx].y * complex_data[idx].y;
+                        image_plane[i] += factor * (xx + yy);
+                    }
+                }
+            }
+        }
+    }
+    else if (type == OSKAR_DOUBLE)
+    {
+        const double2* complex_data = (const double2*)complex_cube.data;
+        double* image_data = (double*)image_cube_I.data;
+        for (int c = 0, idx = 0, islice = 0; c < num_channels; ++c)
+        {
+            for (int t = 0; t < num_times; ++t, ++islice)
+            {
+                double* image_plane = &(image_data[islice * num_pixels]);
+                for (int p = 0; p < num_pols; ++p)
+                {
+                    for (int i = 0; i < num_pixels; ++i, ++idx)
+                    {
+                        double xx = complex_data[idx].x * complex_data[idx].x;
+                        double yy = complex_data[idx].y * complex_data[idx].y;
+                        image_plane[i] += factor * (xx + yy);
+                    }
+                }
+            }
+        }
+    }
+
+    // Write OSKAR image
+    if (settings.beam_pattern.oskar_image_total_intensity)
+    {
+        oskar_image_write(&image_cube_I, log,
+                settings.beam_pattern.oskar_image_total_intensity, 0, status);
+        if (*status != OSKAR_SUCCESS) return;
+    }
+#ifndef OSKAR_NO_FITS
+    // Write FITS image.
+    if (settings.beam_pattern.fits_image_total_intensity)
+    {
+        *status = oskar_fits_image_write(&image_cube_I, log,
+                settings.beam_pattern.fits_image_total_intensity);
+        if (*status != OSKAR_SUCCESS) return;
+    }
+#endif
+}
+

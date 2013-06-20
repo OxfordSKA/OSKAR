@@ -47,7 +47,7 @@
  * This macro expands to a string that specifies the OSKAR version number
  * (for example, "2.1.3").
  */
-#define OSKAR_VERSION_STR "2.2.2-trunk1"
+#define OSKAR_VERSION_STR "2.2.2-trunk2"
 
 /**
  * @brief
