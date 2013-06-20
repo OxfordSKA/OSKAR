@@ -456,29 +456,51 @@ void oskar_MainWindow::openRecentFile()
 
 void oskar_MainWindow::processNetworkReply(QNetworkReply* reply)
 {
-    // Check if we're receiving the current version file.
+    QString currentVerString;
+    // Obtain the current version of OSKAR from the server.
     if (reply->request().url().toString() == version_url_)
     {
-        // Read the reply.
         QByteArray data = reply->readLine();
         if (data.endsWith('\n')) data.chop(1);
-        if (data.isEmpty() || reply->error() != QNetworkReply::NoError) return;
+        if (data.isEmpty() || reply->error() != QNetworkReply::NoError)
+            return;
+        currentVerString = QString(data);
+    }
 
-        // Check if version is different.
-        if (data != OSKAR_VERSION_STR)
-        {
-            QMessageBox msgBox(this);
-            msgBox.setWindowTitle(mainTitle_);
-            msgBox.setIcon(QMessageBox::Information);
-            msgBox.setTextFormat(Qt::RichText);
-            msgBox.setText(QString("A newer version of OSKAR (%1) is "
-                    "<a href=\"http://www.oerc.ox.ac.uk/~ska/oskar2/\">"
-                    "available for download</a>.").arg(QString(data)));
-            msgBox.setInformativeText("Please update your installed version "
-                    "as soon as possible.");
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.exec();
-        }
+    // Split version strings into components.
+    QRegExp rx("\\.|-");
+    QStringList currentVer = currentVerString.split(rx);
+    QStringList thisVer = QString(OSKAR_VERSION_STR).split(rx);
+
+    // Version strings should be of the format major.minor.patch-flag
+    // where flag is optional. Therefore they will be of length 3 or 4 components.
+    bool validVer = currentVer.size() == 3 || currentVer.size() == 4;
+    validVer = validVer && (thisVer.size() == 3 || thisVer.size() == 4);
+    if (!validVer) return;
+
+    // If the server (current) version is flagged (i.e. has a hyphen tag after
+    // its version number) - *NEVER* prompt for an update.
+    // This avoids asking people to download release candidates, for example.
+    if (currentVer.size() == 4)
+        return;
+
+    // If the current version is newer than the version of this code
+    // notify of the update.
+    if (currentVer[0].toInt() > thisVer[0].toInt() ||
+            currentVer[1].toInt() > thisVer[1].toInt() ||
+            currentVer[2].toInt() > thisVer[2].toInt())
+    {
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle(mainTitle_);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setTextFormat(Qt::RichText);
+        msgBox.setText(QString("A newer version of OSKAR (%1) is "
+                "<a href=\"http://www.oerc.ox.ac.uk/~ska/oskar/\">"
+                "available for download</a>.").arg(currentVerString));
+        msgBox.setInformativeText("Please update your installed version "
+                "as soon as possible.");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
     }
 
     // Mark the reply for deletion.
