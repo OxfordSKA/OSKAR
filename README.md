@@ -1,5 +1,5 @@
-OSKAR-2
-=======
+OSKAR version 2
+===============
 
 Oxford SKA Radio Telescope Simulator
 
