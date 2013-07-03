@@ -38,6 +38,7 @@ int oskar_visibilities_is_location(const oskar_Visibilities* vis, int location)
     return (vis->x_metres.location == location &&
             vis->y_metres.location == location &&
             vis->z_metres.location == location &&
+            vis->receptor_angle.location == location &&
             vis->uu_metres.location == location &&
             vis->vv_metres.location == location &&
             vis->ww_metres.location == location &&

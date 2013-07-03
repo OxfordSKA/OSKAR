@@ -87,6 +87,7 @@ struct OSKAR_EXPORT oskar_Visibilities
     oskar_Mem x_metres;          /**< Station x coordinates, in metres. */
     oskar_Mem y_metres;          /**< Station y coordinates, in metres. */
     oskar_Mem z_metres;          /**< Station z coordinates, in metres. */
+    oskar_Mem receptor_angle;    /**< Station feed rotation angle, in radians */
     oskar_Mem uu_metres;         /**< Baseline coordinates, in metres. */
     oskar_Mem vv_metres;         /**< Baseline coordinates, in metres. */
     oskar_Mem ww_metres;         /**< Baseline coordinates, in metres. */
@@ -196,7 +197,8 @@ enum {
     OSKAR_VIS_TAG_STATION_Z = 23,
     OSKAR_VIS_TAG_CHANNEL_BANDWIDTH_HZ = 24,
     OSKAR_VIS_TAG_TIME_INT_SEC = 25,
-    OSKAR_VIS_TAG_TELESCOPE_PATH = 26
+    OSKAR_VIS_TAG_TELESCOPE_PATH = 26,
+    OSKAR_VIS_TAG_RECEPTOR_ANGLE = 27
 };
 
 /* Do not change the values below - these are merely dimension labels, not the

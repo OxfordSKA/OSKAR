@@ -60,6 +60,7 @@ void oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
     oskar_mem_realloc(&vis->x_metres, num_stations, status);
     oskar_mem_realloc(&vis->y_metres, num_stations, status);
     oskar_mem_realloc(&vis->z_metres, num_stations, status);
+    oskar_mem_realloc(&vis->receptor_angle, num_stations, status);
     oskar_mem_realloc(&vis->uu_metres, num_coords, status);
     oskar_mem_realloc(&vis->vv_metres, num_coords, status);
     oskar_mem_realloc(&vis->ww_metres, num_coords, status);

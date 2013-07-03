@@ -46,6 +46,7 @@ void Test_Settings::test_read()
         QSettings settings("./temp.ini", QSettings::IniFormat);
         settings.beginGroup("observation");
         settings.setValue("num_channels", 2);
+        settings.setValue("start_frequency_hz", 100e6);
         settings.endGroup();
     }
 

@@ -63,6 +63,7 @@ void oskar_visibilities_free(oskar_Visibilities* vis, int* status)
     oskar_mem_free(&vis->x_metres, status);
     oskar_mem_free(&vis->y_metres, status);
     oskar_mem_free(&vis->z_metres, status);
+    oskar_mem_free(&vis->receptor_angle, status);
     oskar_mem_free(&vis->uu_metres, status);
     oskar_mem_free(&vis->vv_metres, status);
     oskar_mem_free(&vis->ww_metres, status);

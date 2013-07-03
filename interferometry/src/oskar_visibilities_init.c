@@ -81,6 +81,7 @@ void oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location
     oskar_mem_init(&vis->x_metres, type, location, num_stations, 1, status);
     oskar_mem_init(&vis->y_metres, type, location, num_stations, 1, status);
     oskar_mem_init(&vis->z_metres, type, location, num_stations, 1, status);
+    oskar_mem_init(&vis->receptor_angle, type, location, num_stations, 1, status);
     oskar_mem_init(&vis->uu_metres, type, location, num_coords, 1, status);
     oskar_mem_init(&vis->vv_metres, type, location, num_coords, 1, status);
     oskar_mem_init(&vis->ww_metres, type, location, num_coords, 1, status);

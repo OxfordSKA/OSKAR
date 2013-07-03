@@ -67,6 +67,7 @@ void oskar_visibilities_copy(oskar_Visibilities* dst,
     oskar_mem_copy(&dst->x_metres, &src->x_metres, status);
     oskar_mem_copy(&dst->y_metres, &src->y_metres, status);
     oskar_mem_copy(&dst->z_metres, &src->z_metres, status);
+    oskar_mem_copy(&dst->receptor_angle, &src->receptor_angle, status);
     oskar_mem_copy(&dst->uu_metres, &src->uu_metres, status);
     oskar_mem_copy(&dst->vv_metres, &src->vv_metres, status);
     oskar_mem_copy(&dst->ww_metres, &src->ww_metres, status);

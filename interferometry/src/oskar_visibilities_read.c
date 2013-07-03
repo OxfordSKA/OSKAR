@@ -144,6 +144,11 @@ void oskar_visibilities_read(oskar_Visibilities* vis, const char* filename,
     oskar_mem_binary_file_read(&vis->z_metres, filename, &index, grp,
             OSKAR_VIS_TAG_STATION_Z, 0, &tag_error);
 
+    /* Optionally read receptor angle (ignore the error code). */
+    tag_error = 0;
+    oskar_mem_binary_file_read(&vis->receptor_angle, filename, &index, grp,
+            OSKAR_VIS_TAG_RECEPTOR_ANGLE, 0, &tag_error);
+
     /* Optionally read the channel bandwidth value. */
     tag_error = 0;
     oskar_binary_file_read_double(filename, &index, grp,

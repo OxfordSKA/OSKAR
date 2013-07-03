@@ -215,6 +215,9 @@ void oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
     oskar_mem_binary_stream_write(&vis->z_metres, stream,
             grp, OSKAR_VIS_TAG_STATION_Z, 0, 0, status);
 
+    oskar_mem_binary_stream_write(&vis->receptor_angle, stream, grp,
+            OSKAR_VIS_TAG_RECEPTOR_ANGLE, 0, 0, status);
+
     /* Close the file. */
     fclose(stream);
 }
