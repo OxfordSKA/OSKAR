@@ -33,6 +33,12 @@
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_type_check.h"
+#include <utility/oskar_BinaryTag.h>
+#include <utility/oskar_mem_realloc.h>
+#include <utility/oskar_mem_binary_stream_read.h>
+#include <utility/oskar_binary_tag_index_query.h>
+#include <utility/oskar_binary_tag_index_create.h>
+#include <utility/oskar_binary_tag_index_free.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -245,6 +251,8 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "filename",
                 "date",
                 "settings_path",
+                "settings",
+                "log",
                 "num_channels",
                 "num_times",
                 "num_stations",
@@ -274,7 +282,8 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "Q",
                 "U",
                 "V"};
-        v_out = mxCreateStructMatrix(1, 1, 32, fields);
+        int nFields = sizeof(fields)/sizeof(char*);
+        v_out = mxCreateStructMatrix(1, 1, nFields, fields);
     }
     else
     {
@@ -282,6 +291,8 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "filename",
                 "date",
                 "settings_path",
+                "settings",
+                "log",
                 "num_channels",
                 "num_times",
                 "num_stations",
@@ -304,11 +315,56 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "ww",
                 "axis_order",
                 "xx"};
-
-        v_out = mxCreateStructMatrix(1, 1, 25, fields);
+        int nFields = sizeof(fields)/sizeof(char*);
+        v_out = mxCreateStructMatrix(1, 1, nFields, fields);
     }
 
-    /* Populate structure TODO convert some of this to nested structure format */
+
+    // If possible, load the settings and log.
+    if (filename != NULL)
+    {
+        int status = OSKAR_SUCCESS;
+        oskar_BinaryTagIndex* index = NULL;
+        FILE* stream = fopen(filename, "rb");
+        if (!stream)
+            mexErrMsgTxt("ERROR: Failed reading settings from visibility file.\n");
+        oskar_binary_tag_index_create(&index, stream, &status);
+        size_t data_size = 0;
+        long int data_offset = 0;
+        int tag_error = 0;
+        // Extract the settings
+        oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_SETTINGS,
+                OSKAR_TAG_SETTINGS, 0, &data_size, &data_offset, &tag_error);
+        if (!tag_error)
+        {
+            oskar_Mem temp(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+            oskar_mem_binary_stream_read(&temp, stream, &index,
+                    OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
+            oskar_mem_realloc(&temp, temp.num_elements + 1, &status);
+            if (status)
+                mexErrMsgTxt("ERROR: Failed reading settings from visibility file.\n");
+            ((char*)temp.data)[temp.num_elements - 1] = 0;
+            mxSetField(v_out, 0, "settings", mxCreateString((char*)temp.data));
+        }
+        // Extract the log
+        oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
+                OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset, &tag_error);
+        if (!tag_error)
+        {
+            oskar_Mem temp(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+            oskar_mem_binary_stream_read(&temp, stream, &index,
+                    OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
+            oskar_mem_realloc(&temp, temp.num_elements + 1, &status);
+            if (status)
+                mexErrMsgTxt("ERROR: Failed reading log from visibility file.\n");
+            ((char*)temp.data)[temp.num_elements - 1] = 0;
+            mxSetField(v_out, 0, "log", mxCreateString((char*)temp.data));
+        }
+        fclose(stream);
+        oskar_binary_tag_index_free(&index, &status);
+    }
+
+    /* Populate structure TODO convert some of this to nested structure format? */
     if (filename != NULL)
         mxSetField(v_out, 0, "filename", mxCreateString(filename));
     mxSetField(v_out, 0, "date", mxCreateString((char*)date->data));
