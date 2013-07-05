@@ -36,7 +36,7 @@
 #include "interferometry/oskar_visibilities_read.h"
 #include "interferometry/oskar_visibilities_resize.h"
 #include "interferometry/oskar_visibilities_write.h"
-#include "interferometry/oskar_visibilities_rotate_polarisation.h"
+//#include "interferometry/oskar_visibilities_rotate_polarisation.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_append_raw.h"
 #include "utility/oskar_mem_element_size.h"
@@ -393,7 +393,7 @@ void Test_Visibilities::test_read_write()
     remove(filename);
 }
 
-
+#if 0
 void Test_Visibilities::test_rotate_polarisation()
 {
     using namespace std;
@@ -470,4 +470,4 @@ void Test_Visibilities::test_rotate_polarisation()
 //    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status),
 //            (int)OSKAR_SUCCESS, status);
 }
-
+#endif

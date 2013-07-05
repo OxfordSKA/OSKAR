@@ -46,12 +46,12 @@ class Test_Visibilities : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(Test_Visibilities);
-//        CPPUNIT_TEST(test_create);
-//        CPPUNIT_TEST(test_copy);
-//        CPPUNIT_TEST(test_resize);
-//        CPPUNIT_TEST(test_get_amps);
-//        CPPUNIT_TEST(test_read_write);
-        CPPUNIT_TEST(test_rotate_polarisation);
+        CPPUNIT_TEST(test_create);
+        CPPUNIT_TEST(test_copy);
+        CPPUNIT_TEST(test_resize);
+        CPPUNIT_TEST(test_get_amps);
+        CPPUNIT_TEST(test_read_write);
+//        CPPUNIT_TEST(test_rotate_polarisation);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -61,7 +61,7 @@ class Test_Visibilities : public CppUnit::TestFixture
         void test_resize();
         void test_get_amps();
         void test_read_write();
-        void test_rotate_polarisation();
+//        void test_rotate_polarisation();
 };
 
 // Register the test class.
