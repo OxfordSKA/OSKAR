@@ -47,6 +47,7 @@ set(interferometry_SRC
     src/oskar_visibilities_location.c
     src/oskar_visibilities_read.c
     src/oskar_visibilities_resize.c
+    src/oskar_visibilities_rotate_polarisation.c
     src/oskar_visibilities_write.c
     src/oskar_Visibilities.cpp
 )

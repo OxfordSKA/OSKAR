@@ -6,11 +6,11 @@ if (CPPUNIT_FOUND)
 
     set(interferometry_test_SRC
         src/CppUnitMain.cpp
-        src/Test_add_system_noise.cpp
-        src/Test_evaluate_baselines.cpp
-        src/Test_correlator.cpp
-        src/Test_station_coord_transforms.cpp
-        src/Test_TelescopeModel.cpp
+        #src/Test_add_system_noise.cpp
+        #src/Test_evaluate_baselines.cpp
+        #src/Test_correlator.cpp
+        #src/Test_station_coord_transforms.cpp
+        #src/Test_TelescopeModel.cpp
         src/Test_Visibilities.cpp
     )
 

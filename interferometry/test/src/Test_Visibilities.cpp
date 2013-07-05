@@ -29,11 +29,14 @@
 #include "utility/oskar_vector_types.h"
 #include "interferometry/test/Test_Visibilities.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_visibilities_init.h"
+#include "interferometry/oskar_visibilities_free.h"
 #include "interferometry/oskar_visibilities_get_channel_amps.h"
 #include "interferometry/oskar_visibilities_location.h"
 #include "interferometry/oskar_visibilities_read.h"
 #include "interferometry/oskar_visibilities_resize.h"
 #include "interferometry/oskar_visibilities_write.h"
+#include "interferometry/oskar_visibilities_rotate_polarisation.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_append_raw.h"
 #include "utility/oskar_mem_element_size.h"
@@ -41,6 +44,9 @@
 #include "utility/oskar_Mem.h"
 
 #include <cstring>
+#include <iostream>
+#include <cstdio>
+#include <cmath>
 
 void Test_Visibilities::test_create()
 {
@@ -385,5 +391,83 @@ void Test_Visibilities::test_read_write()
 
     // Delete temporary file.
     remove(filename);
+}
+
+
+void Test_Visibilities::test_rotate_polarisation()
+{
+    using namespace std;
+    oskar_Visibilities vis;
+    int status = OSKAR_SUCCESS;
+    int type = OSKAR_DOUBLE | OSKAR_COMPLEX | OSKAR_MATRIX;
+    int loc = OSKAR_LOCATION_CPU;
+    int num_stations = 2;
+    oskar_visibilities_init(&vis, type, loc, 1, 1, num_stations, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status),
+            (int)OSKAR_SUCCESS, status);
+
+    double* rec_ang = (double*)vis.receptor_angle.data;
+    double4c* vis_amp = (double4c*)vis.amplitude.data;
+
+    double azSignal = 90.0;
+    double azDipole1 = 0.0;
+    double azDipole2 = 0.0;
+
+    // 2 stations = 1 visibility amp, 2 rotation angles.
+    rec_ang[0] =  45.0*(M_PI/180.0);  // p
+    rec_ang[1] = -45.0*(M_PI/180.0); // q
+    double2 p, q;
+    p.x = 1.0/sqrt(2.0);
+    p.y = 1.0/sqrt(2.0);
+    q.x = 1.0/sqrt(2.0);
+    q.y = 1.0/sqrt(2.0);
+    vis_amp[0].a.x = p.x * q.x;
+    vis_amp[0].a.y = 0.0;
+    vis_amp[0].b.x = p.x * q.y;
+    vis_amp[0].b.y = 0.0;
+    vis_amp[0].c.x = p.y * q.x;
+    vis_amp[0].c.y = 0.0;
+    vis_amp[0].d.x = p.y * q.y;
+    vis_amp[0].d.y = 0.0;
+
+    // 2 stations = 1 visibility amp, 2 rotation angles.
+//    double2 p;
+//    double2 q;
+//    p.x = 1.0/sqrt(2.0);
+//    p.y = 1.0/sqrt(2.0);
+//    q.x = 1.0;
+//    q.y = 0.0;
+//    vis_amp[0].a.x = p.x * q.x;
+//    vis_amp[0].a.y = 0.0;
+//    vis_amp[0].b.x = p.x * q.y;
+//    vis_amp[0].b.y = 0.0;
+//    vis_amp[0].c.x = p.y * q.x;
+//    vis_amp[0].c.y = 0.0;
+//    vis_amp[0].d.x = p.y * q.y;
+//    vis_amp[0].d.y = 0.0;
+//    rec_ang[0] = 45.0*(M_PI/180.0);
+//    rec_ang[1] = 0.0*(M_PI/180.0);
+
+    cout << endl;
+    cout << "Before:\n";
+    printf("(%f,%f) (%f,%f)\n(%f,%f) (%f,%f)\n\n",
+            vis_amp[0].a.x, vis_amp[0].a.y, vis_amp[0].b.x, vis_amp[0].b.y,
+            vis_amp[0].c.x, vis_amp[0].c.y, vis_amp[0].d.x, vis_amp[0].d.y);
+    cout << endl;
+    cout << "rot[0] = " << rec_ang[0] << ", rot[1] = " << rec_ang[1] << endl;
+
+    oskar_visibilities_rotate_polarisation(&vis, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status),
+            (int)OSKAR_SUCCESS, status);
+
+    cout << endl;
+    cout << "After:\n";
+    printf("(%f,%f) (%f,%f)\n(%f,%f) (%f,%f)\n\n",
+            vis_amp[0].a.x, vis_amp[0].a.y, vis_amp[0].b.x, vis_amp[0].b.y,
+            vis_amp[0].c.x, vis_amp[0].c.y, vis_amp[0].d.x, vis_amp[0].d.y);
+
+//    oskar_visibilities_free(&vis, &status);
+//    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status),
+//            (int)OSKAR_SUCCESS, status);
 }
 
