@@ -65,6 +65,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     mwSize coord_dims[]   = { num_baselines, num_times};
     mwSize amp_dims[]     = {num_baselines, num_times, num_channels};
     mwSize station_dims[] = { num_stations };
+    mwSize baseline_dims[] = { num_baselines };
     mxClassID class_id    = (v_in->uu_metres.type == OSKAR_DOUBLE) ?
             mxDOUBLE_CLASS : mxSINGLE_CLASS;
     mxArray* x_  = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
@@ -73,6 +74,8 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     mxArray* uu_ = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
     mxArray* vv_ = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
     mxArray* ww_ = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
+    mxArray* stationIdxP_ = mxCreateNumericArray(1, baseline_dims, mxINT32_CLASS, mxREAL);
+    mxArray* stationIdxQ_ = mxCreateNumericArray(1, baseline_dims, mxINT32_CLASS, mxREAL);
     mxArray* xx_ = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
     mxArray *yy_ = NULL, *xy_ = NULL, *yx_ = NULL;
     mxArray *I_ = NULL, *Q_ = NULL, *U_ = NULL, *V_ = NULL;
@@ -94,6 +97,17 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     mxArray* frequency = mxCreateNumericArray(1, channel_dims, class_id, mxREAL);
 
     mexPrintf("= Loading %i visibility samples\n", v_in->num_times * v_in->num_baselines);
+
+    int* stIdxP = (int*)mxGetData(stationIdxP_);
+    int* stIdxQ = (int*)mxGetData(stationIdxQ_);
+    for (int j = 0, idx = 0; j < num_stations; ++j)
+    {
+        for (int i = j+1; i < num_stations; ++i, ++idx)
+        {
+            stIdxP[idx] = j+1;
+            stIdxQ[idx] = i+1;
+        }
+    }
 
     // Populate MATLAB arrays from the OSKAR visibilities structure.
     if (class_id == mxDOUBLE_CLASS)
@@ -253,6 +267,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "settings_path",
                 "settings",
                 "log",
+                "telescope",
                 "num_channels",
                 "num_times",
                 "num_stations",
@@ -273,6 +288,8 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "uu",
                 "vv",
                 "ww",
+                "stationIdxP",
+                "stationIdxQ",
                 "axis_order",
                 "xx",
                 "xy",
@@ -293,6 +310,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "settings_path",
                 "settings",
                 "log",
+                "telescope",
                 "num_channels",
                 "num_times",
                 "num_stations",
@@ -313,6 +331,8 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "uu",
                 "vv",
                 "ww",
+                "stationIdxP",
+                "stationIdxQ",
                 "axis_order",
                 "xx"};
         int nFields = sizeof(fields)/sizeof(char*);
@@ -370,6 +390,8 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     mxSetField(v_out, 0, "date", mxCreateString((char*)date->data));
     mxSetField(v_out, 0, "settings_path",
             mxCreateString((char*)v_in->settings_path.data));
+    mxSetField(v_out, 0, "telescope",
+            mxCreateString((char*)v_in->telescope_path.data));
     mxSetField(v_out, 0, "num_channels",
             mxCreateDoubleScalar((double)num_channels));
     mxSetField(v_out, 0, "num_times",
@@ -401,6 +423,8 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     mxSetField(v_out, 0, "uu", uu_);
     mxSetField(v_out, 0, "vv", vv_);
     mxSetField(v_out, 0, "ww", ww_);
+    mxSetField(v_out, 0, "stationIdxP", stationIdxP_);
+    mxSetField(v_out, 0, "stationIdxQ", stationIdxQ_);
     mxSetField(v_out, 0, "axis_order", mxCreateString("baseline x time x channel"));
     mxSetField(v_out, 0, "xx", xx_);
     if (num_pols == 4)

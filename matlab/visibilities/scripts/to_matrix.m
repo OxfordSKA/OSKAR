@@ -31,6 +31,8 @@ nCh = vis.num_channels;
 visM.uu = zeros(nSt,nSt,nTi);
 visM.vv = zeros(nSt,nSt,nTi);
 visM.ww = zeros(nSt,nSt,nTi);
+visM.stationIdxP = zeros(nSt,nSt);
+visM.stationIdxQ = zeros(nSt,nSt);
 
 for t=1:vis.num_times
     idx = 1;
@@ -43,6 +45,16 @@ for t=1:vis.num_times
         end
     end
 end
+
+idx = 1;
+for j=1:vis.num_stations
+    for i=(j+1):vis.num_stations
+        visM.stationIdxP(i,j) = vis.stationIdxP(idx); 
+        visM.stationIdxQ(i,j) = vis.stationIdxQ(idx);
+        idx = idx+1;
+    end
+end
+
 
 if (isfield(vis, 'xx'))
     visM.xx = zeros(nSt,nSt,nTi,nCh);
