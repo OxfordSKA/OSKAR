@@ -7,6 +7,7 @@ if (CPPUNIT_FOUND)
     set(station_test_SRC
         src/CppUnitMain.cpp
         #src/Test_dipole_pattern.cu
+        src/Test_dipole_orientation.cpp
         src/Test_element_weights_errors.cpp
         src/Test_evaluate_array_pattern.cpp
         src/Test_evaluate_jones_E.cpp

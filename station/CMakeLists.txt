@@ -33,6 +33,7 @@ set(station_SRC
     src/oskar_evaluate_flux_density.c
     src/oskar_evaluate_station_beam_aperture_array.c
     src/oskar_evaluate_station_beam_gaussian.c
+    src/oskar_evaluate_station_from_telescope_dipole_azimuth.c
     src/oskar_evaluate_source_horizontal_lmn.c
     src/oskar_station_model_analyse.c
     src/oskar_station_model_copy.c
