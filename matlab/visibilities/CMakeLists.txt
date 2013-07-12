@@ -12,8 +12,8 @@ set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+oskar/+visibilities")
 
 oskar_mex(read oskar_mex_visibilities_read.cpp
     LIBS oskar mex_visibilities)
-oskar_mex(write oskar_mex_visibilities_write.cpp
-    LIBS oskar mex_visibilities)
+#oskar_mex(write oskar_mex_visibilities_write.cpp
+#    LIBS oskar mex_visibilities)
 oskar_mex(evaluate_baseline_uvw oskar_mex_evaluate_baseline_uvw.cpp
     LIBS oskar mex_visibilities)
 
