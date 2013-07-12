@@ -26,12 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "interferometry/oskar_accumulate_baseline_visibility_for_source.h"
 #include "interferometry/oskar_correlate_extended_time_smearing_cuda.h"
-#include "math/cudak/oskar_cudaf_mul_mat2c_mat2c.h"
-#include "math/cudak/oskar_cudaf_mul_mat2c_mat2h.h"
-#include "math/cudak/oskar_cudaf_mul_mat2c_mat2c_conj_trans.h"
-#include "math/cudak/oskar_cudaf_sinc.h"
-#include <math.h>
+#include "math/oskar_sinc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -96,8 +93,8 @@ void oskar_correlate_extended_time_smearing_cuda_d(int num_sources,
 
 /* Kernels. ================================================================ */
 
-#define ONE_OVER_2PI  0.159154943091895335768884   // 1 / (2 * pi)
-#define ONE_OVER_2PIf 0.159154943091895335768884f  // 1 / (2 * pi)
+#define ONE_OVER_2PI  0.159154943091895335768884   /* 1 / (2 * pi) */
+#define ONE_OVER_2PIf 0.159154943091895335768884f  /* 1 / (2 * pi) */
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -107,12 +104,12 @@ void oskar_correlate_extended_time_smearing_cuda_d(int num_sources,
 #define M_PIf 3.14159265358979323846f
 #endif
 
-#define OMEGA_EARTH  7.272205217e-5  // radians/sec
-#define OMEGA_EARTHf 7.272205217e-5f // radians/sec
+#define OMEGA_EARTH  7.272205217e-5  /* radians/sec */
+#define OMEGA_EARTHf 7.272205217e-5f /* radians/sec */
 
-// Indices into the visibility/baseline matrix.
-#define SI blockIdx.x // Column index.
-#define SJ blockIdx.y // Row index.
+/* Indices into the visibility/baseline matrix. */
+#define SI blockIdx.x /* Column index. */
+#define SJ blockIdx.y /* Row index. */
 
 extern __shared__ float4c  smem_f[];
 extern __shared__ double4c smem_d[];
@@ -129,11 +126,10 @@ void oskar_correlate_extended_time_smearing_cudak_f(const int num_sources,
         const float bandwidth_hz, const float time_int_sec,
         const float gha0_rad, const float dec0_rad, float4c* vis)
 {
-    // Return immediately if we're in the lower triangular half of the
-    // visibility matrix.
+    /* Return immediately if in the wrong half of the visibility matrix. */
     if (SJ >= SI) return;
 
-    // Common things per thread block.
+    /* Common things per thread block. */
     __device__ __shared__ float uu, vv, uu2, vv2, uuvv;
     __device__ __shared__ float du_dt, dv_dt, dw_dt;
     if (threadIdx.x == 0)
@@ -141,24 +137,24 @@ void oskar_correlate_extended_time_smearing_cudak_f(const int num_sources,
         float xx, yy, rot_angle, temp;
         float fractional_bandwidth, sin_HA, cos_HA, sin_Dec, cos_Dec;
 
-        // Baseline distances, in wavelengths.
+        /* Baseline distances, in wavelengths. */
         uu = (station_u[SI] - station_u[SJ]) * ONE_OVER_2PIf;
         vv = (station_v[SI] - station_v[SJ]) * ONE_OVER_2PIf;
         xx = (station_x[SI] - station_x[SJ]) * 0.5f;
         yy = (station_y[SI] - station_y[SJ]) * 0.5f;
 
-        // Quantities needed for evaluating source with Gaussian term.
+        /* Quantities needed for evaluating source with Gaussian term. */
         uu2  = uu * uu;
         vv2  = vv * vv;
         uuvv = 2.0f * uu * vv;
 
-        // Modify the baseline distance to include the common components
-        // of the bandwidth smearing term.
+        /* Modify the baseline distance to include the common components
+         * of the bandwidth smearing term. */
         fractional_bandwidth = bandwidth_hz / freq_hz;
         uu *= M_PIf * fractional_bandwidth;
         vv *= M_PIf * fractional_bandwidth;
 
-        // Compute the derivatives for time-average smearing.
+        /* Compute the derivatives for time-average smearing. */
         rot_angle = OMEGA_EARTHf * time_int_sec;
         sin_HA = sinf(gha0_rad);
         cos_HA = cosf(gha0_rad);
@@ -171,73 +167,49 @@ void oskar_correlate_extended_time_smearing_cudak_f(const int num_sources,
     }
     __syncthreads();
 
-    // Get pointers to both source vectors for station i and j.
+    /* Get pointers to both source vectors for station i and j. */
     const float4c* station_i = &jones[num_sources * SI];
     const float4c* station_j = &jones[num_sources * SJ];
 
-    // Each thread loops over a subset of the sources.
+    /* Each thread loops over a subset of the sources. */
     {
-        float4c sum; // Partial sum per thread.
+        float4c sum; /* Partial sum per thread. */
         sum.a = make_float2(0.0f, 0.0f);
         sum.b = make_float2(0.0f, 0.0f);
         sum.c = make_float2(0.0f, 0.0f);
         sum.d = make_float2(0.0f, 0.0f);
         for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
         {
-            // Get source direction cosines.
+            /* Get source direction cosines. */
             float l = source_l[t];
             float m = source_m[t];
             float n = source_n[t];
 
-            // Compute bandwidth-smearing term first (register optimisation).
-            float rb = oskar_cudaf_sinc_f(uu * l + vv * m);
+            /* Compute bandwidth-smearing term. */
+            float rb = oskar_sinc_f(uu * l + vv * m);
 
-            // Compute time-smearing term.
-            float rt = oskar_cudaf_sinc_f(du_dt * l + dv_dt * m + dw_dt * n);
+            /* Compute time-smearing term. */
+            float rt = oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * n);
 
-            // Evaluate gaussian source width term.
+            /* Evaluate gaussian source width term. */
             float f = expf(-(source_a[t] * uu2 +
                     source_b[t] * uuvv + source_c[t] * vv2));
 
             rb *= rt * f;
 
-            // Construct source brightness matrix.
-            float4c c_b;
-            {
-                float s_I = source_I[t];
-                float s_Q = source_Q[t];
-                c_b.b.x = source_U[t];
-                c_b.b.y = source_V[t];
-                c_b.a.x = s_I + s_Q;
-                c_b.d.x = s_I - s_Q;
-            }
-
-            // Multiply first Jones matrix with source coherency matrix.
-            float4c c_a = station_i[t];
-            oskar_cudaf_mul_mat2c_mat2h_f(c_a, c_b);
-
-            // Multiply result with second (Hermitian transposed) Jones matrix.
-            c_b = station_j[t];
-            oskar_cudaf_mul_mat2c_mat2c_conj_trans_f(c_a, c_b);
-
-            // Multiply result by smearing term.
-            sum.a.x += c_a.a.x * rb;
-            sum.a.y += c_a.a.y * rb;
-            sum.b.x += c_a.b.x * rb;
-            sum.b.y += c_a.b.y * rb;
-            sum.c.x += c_a.c.x * rb;
-            sum.c.y += c_a.c.y * rb;
-            sum.d.x += c_a.d.x * rb;
-            sum.d.y += c_a.d.y * rb;
+            /* Accumulate baseline visibility response for source. */
+            oskar_accumulate_baseline_visibility_for_source_f(&sum, t,
+                    source_I, source_Q, source_U, source_V,
+                    station_i, station_j, rb);
         }
         smem_f[threadIdx.x] = sum;
     }
     __syncthreads();
 
-    // Accumulate contents of shared memory.
+    /* Accumulate contents of shared memory. */
     if (threadIdx.x == 0)
     {
-        // Sum over all sources for this baseline.
+        /* Sum over all sources for this baseline. */
         float4c sum;
         sum.a = make_float2(0.0f, 0.0f);
         sum.b = make_float2(0.0f, 0.0f);
@@ -255,10 +227,10 @@ void oskar_correlate_extended_time_smearing_cudak_f(const int num_sources,
             sum.d.y += smem_f[i].d.y;
         }
 
-        // Determine 1D index.
+        /* Determine 1D index. */
         int idx = SJ*(num_stations-1) - (SJ-1)*SJ/2 + SI - SJ - 1;
 
-        // Modify existing visibility.
+        /* Modify existing visibility. */
         vis[idx].a.x += sum.a.x;
         vis[idx].a.y += sum.a.y;
         vis[idx].b.x += sum.b.x;
@@ -282,11 +254,10 @@ void oskar_correlate_extended_time_smearing_cudak_d(const int num_sources,
         const double bandwidth_hz, const double time_int_sec,
         const double gha0_rad, const double dec0_rad, double4c* vis)
 {
-    // Return immediately if we're in the lower triangular half of the
-    // visibility matrix.
+    /* Return immediately if in the wrong half of the visibility matrix. */
     if (SJ >= SI) return;
 
-    // Common things per thread block.
+    /* Common things per thread block. */
     __device__ __shared__ double uu, vv, uu2, vv2, uuvv;
     __device__ __shared__ double du_dt, dv_dt, dw_dt;
     if (threadIdx.x == 0)
@@ -294,24 +265,24 @@ void oskar_correlate_extended_time_smearing_cudak_d(const int num_sources,
         double xx, yy, rot_angle, temp;
         double fractional_bandwidth, sin_HA, cos_HA, sin_Dec, cos_Dec;
 
-        // Baseline distances, in wavelengths.
+        /* Baseline distances, in wavelengths. */
         uu = (station_u[SI] - station_u[SJ]) * ONE_OVER_2PI;
         vv = (station_v[SI] - station_v[SJ]) * ONE_OVER_2PI;
         xx = (station_x[SI] - station_x[SJ]) * 0.5;
         yy = (station_y[SI] - station_y[SJ]) * 0.5;
 
-        // Quantities needed for evaluating source with Gaussian term.
+        /* Quantities needed for evaluating source with Gaussian term. */
         uu2  = uu * uu;
         vv2  = vv * vv;
         uuvv = 2.0 * uu * vv;
 
-        // Modify the baseline distance to include the common components
-        // of the bandwidth smearing term.
+        /* Modify the baseline distance to include the common components
+         * of the bandwidth smearing term. */
         fractional_bandwidth = bandwidth_hz / freq_hz;
         uu *= M_PI * fractional_bandwidth;
         vv *= M_PI * fractional_bandwidth;
 
-        // Compute the derivatives for time-average smearing.
+        /* Compute the derivatives for time-average smearing. */
         rot_angle = OMEGA_EARTH * time_int_sec;
         sin_HA = sin(gha0_rad);
         cos_HA = cos(gha0_rad);
@@ -324,73 +295,49 @@ void oskar_correlate_extended_time_smearing_cudak_d(const int num_sources,
     }
     __syncthreads();
 
-    // Get pointers to both source vectors for station i and j.
+    /* Get pointers to both source vectors for station i and j. */
     const double4c* station_i = &jones[num_sources * SI];
     const double4c* station_j = &jones[num_sources * SJ];
 
-    // Each thread loops over a subset of the sources.
+    /* Each thread loops over a subset of the sources. */
     {
-        double4c sum; // Partial sum per thread.
+        double4c sum; /* Partial sum per thread. */
         sum.a = make_double2(0.0, 0.0);
         sum.b = make_double2(0.0, 0.0);
         sum.c = make_double2(0.0, 0.0);
         sum.d = make_double2(0.0, 0.0);
         for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
         {
-            // Get source direction cosines.
+            /* Get source direction cosines. */
             double l = source_l[t];
             double m = source_m[t];
             double n = source_n[t];
 
-            // Compute bandwidth-smearing term first (register optimisation).
-            double rb = oskar_cudaf_sinc_d(uu * l + vv * m);
+            /* Compute bandwidth-smearing term. */
+            double rb = oskar_sinc_d(uu * l + vv * m);
 
-            // Compute time-smearing term.
-            double rt = oskar_cudaf_sinc_d(du_dt * l + dv_dt * m + dw_dt * n);
+            /* Compute time-smearing term. */
+            double rt = oskar_sinc_d(du_dt * l + dv_dt * m + dw_dt * n);
 
-            // Evaluate gaussian source width term.
+            /* Evaluate gaussian source width term. */
             double f = exp(-(source_a[t] * uu2 +
                     source_b[t] * uuvv + source_c[t] * vv2));
 
             rb *= rt * f;
 
-            // Construct source brightness matrix.
-            double4c c_b;
-            {
-                double s_I = source_I[t];
-                double s_Q = source_Q[t];
-                c_b.b.x = source_U[t];
-                c_b.b.y = source_V[t];
-                c_b.a.x = s_I + s_Q;
-                c_b.d.x = s_I - s_Q;
-            }
-
-            // Multiply first Jones matrix with source coherency matrix.
-            double4c c_a = station_i[t];
-            oskar_cudaf_mul_mat2c_mat2h_d(c_a, c_b);
-
-            // Multiply result with second (Hermitian transposed) Jones matrix.
-            c_b = station_j[t];
-            oskar_cudaf_mul_mat2c_mat2c_conj_trans_d(c_a, c_b);
-
-            // Multiply result by smearing term.
-            sum.a.x += c_a.a.x * rb;
-            sum.a.y += c_a.a.y * rb;
-            sum.b.x += c_a.b.x * rb;
-            sum.b.y += c_a.b.y * rb;
-            sum.c.x += c_a.c.x * rb;
-            sum.c.y += c_a.c.y * rb;
-            sum.d.x += c_a.d.x * rb;
-            sum.d.y += c_a.d.y * rb;
+            /* Accumulate baseline visibility response for source. */
+            oskar_accumulate_baseline_visibility_for_source_d(&sum, t,
+                    source_I, source_Q, source_U, source_V,
+                    station_i, station_j, rb);
         }
         smem_d[threadIdx.x] = sum;
     }
     __syncthreads();
 
-    // Accumulate contents of shared memory.
+    /* Accumulate contents of shared memory. */
     if (threadIdx.x == 0)
     {
-        // Sum over all sources for this baseline.
+        /* Sum over all sources for this baseline. */
         double4c sum;
         sum.a = make_double2(0.0, 0.0);
         sum.b = make_double2(0.0, 0.0);
@@ -408,10 +355,10 @@ void oskar_correlate_extended_time_smearing_cudak_d(const int num_sources,
             sum.d.y += smem_d[i].d.y;
         }
 
-        // Determine 1D index.
+        /* Determine 1D index. */
         int idx = SJ*(num_stations-1) - (SJ-1)*SJ/2 + SI - SJ - 1;
 
-        // Modify existing visibility.
+        /* Modify existing visibility. */
         vis[idx].a.x += sum.a.x;
         vis[idx].a.y += sum.a.y;
         vis[idx].b.x += sum.b.x;

@@ -344,6 +344,25 @@ enum {
     #define OSKAR_TLS __thread
 #endif
 
+/**
+ * @def OSKAR_INLINE
+ *
+ * @brief
+ * Macro used to define an inline function.
+ *
+ * @details
+ * This macro expands to compiler directives to indicate that a function
+ * should be inlined. In CUDA code, this is "__device__ __forceinline__", in
+ * C99 and C++ code, this is "inline", otherwise this is "static".
+ */
+#ifdef __CUDACC__
+    #define OSKAR_INLINE __host__ __device__ __forceinline__
+#elif __STDC_VERSION__ >= 199901L || defined(__cplusplus)
+    #define OSKAR_INLINE inline
+#else
+    #define OSKAR_INLINE static
+#endif
+
 /* Macros used to prevent Eclipse from complaining about unknown CUDA syntax. */
 #ifdef __CDT_PARSER__
     #define __global__

@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "math/oskar_multiply_inline.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
@@ -40,13 +41,6 @@ extern "C" {
 #endif
 
 /* Single precision. */
-static void oskar_complex_multiply_f(float2* c, const float2* a,
-        const float2* b)
-{
-    c->x = a->x * b->x - a->y * b->y; /* RE*RE - IM*IM */
-    c->y = a->y * b->x + a->x * b->y; /* IM*RE + RE*IM */
-}
-
 void oskar_mem_element_multiply_rr_r_f(int num, float* c,
         const float* a, const float* b)
 {
@@ -66,7 +60,7 @@ void oskar_mem_element_multiply_cc_c_f(int num, float2* c,
         float2 ac, bc, cc;
         ac = a[i];
         bc = b[i];
-        oskar_complex_multiply_f(&cc, &ac, &bc);
+        oskar_multiply_complex_f(&cc, &ac, &bc);
         c[i] = cc;
     }
 }
@@ -77,11 +71,9 @@ void oskar_mem_element_multiply_cc_m_f(int num, float4c* c,
     int i;
     for (i = 0; i < num; ++i)
     {
-        float2 ac, bc, cc;
+        float2 cc;
         float4c m;
-        ac = a[i];
-        bc = b[i];
-        oskar_complex_multiply_f(&cc, &ac, &bc);
+        oskar_multiply_complex_f(&cc, &a[i], &b[i]);
 
         /* Store result in a matrix. */
         m.a = cc;
@@ -101,14 +93,11 @@ void oskar_mem_element_multiply_cm_m_f(int num, float4c* c,
     for (i = 0; i < num; ++i)
     {
         float2 ac;
-        float4c bc, m;
+        float4c bc;
         ac = a[i];
         bc = b[i];
-        oskar_complex_multiply_f(&m.a, &ac, &bc.a);
-        oskar_complex_multiply_f(&m.b, &ac, &bc.b);
-        oskar_complex_multiply_f(&m.c, &ac, &bc.c);
-        oskar_complex_multiply_f(&m.d, &ac, &bc.d);
-        c[i] = m;
+        oskar_multiply_complex_matrix_complex_scalar_in_place_f(&bc, &ac);
+        c[i] = bc;
     }
 }
 
@@ -118,39 +107,16 @@ void oskar_mem_element_multiply_mm_m_f(int num, float4c* c,
     int i;
     for (i = 0; i < num; ++i)
     {
-        float4c ac, bc, m;
-        float2 t;
+        float4c ac, bc;
         ac = a[i];
         bc = b[i];
-        oskar_complex_multiply_f(&m.a, &ac.a, &bc.a);
-        oskar_complex_multiply_f(&t,   &ac.b, &bc.c);
-        m.a.x += t.x;
-        m.a.y += t.y;
-        oskar_complex_multiply_f(&m.b, &ac.a, &bc.b);
-        oskar_complex_multiply_f(&t,   &ac.b, &bc.d);
-        m.b.x += t.x;
-        m.b.y += t.y;
-        oskar_complex_multiply_f(&m.c, &ac.c, &bc.a);
-        oskar_complex_multiply_f(&t,   &ac.d, &bc.c);
-        m.c.x += t.x;
-        m.c.y += t.y;
-        oskar_complex_multiply_f(&m.d, &ac.c, &bc.b);
-        oskar_complex_multiply_f(&t,   &ac.d, &bc.d);
-        m.d.x += t.x;
-        m.d.y += t.y;
-        c[i] = m;
+        oskar_multiply_complex_matrix_in_place_f(&ac, &bc);
+        c[i] = ac;
     }
 }
 
 
 /* Double precision. */
-static void oskar_complex_multiply_d(double2* c, const double2* a,
-        const double2* b)
-{
-    c->x = a->x * b->x - a->y * b->y; /* RE*RE - IM*IM */
-    c->y = a->y * b->x + a->x * b->y; /* IM*RE + RE*IM */
-}
-
 void oskar_mem_element_multiply_rr_r_d(int num, double* c,
         const double* a, const double* b)
 {
@@ -170,7 +136,7 @@ void oskar_mem_element_multiply_cc_c_d(int num, double2* c,
         double2 ac, bc, cc;
         ac = a[i];
         bc = b[i];
-        oskar_complex_multiply_d(&cc, &ac, &bc);
+        oskar_multiply_complex_d(&cc, &ac, &bc);
         c[i] = cc;
     }
 }
@@ -181,11 +147,9 @@ void oskar_mem_element_multiply_cc_m_d(int num, double4c* c,
     int i;
     for (i = 0; i < num; ++i)
     {
-        double2 ac, bc, cc;
+        double2 cc;
         double4c m;
-        ac = a[i];
-        bc = b[i];
-        oskar_complex_multiply_d(&cc, &ac, &bc);
+        oskar_multiply_complex_d(&cc, &a[i], &b[i]);
 
         /* Store result in a matrix. */
         m.a = cc;
@@ -205,14 +169,11 @@ void oskar_mem_element_multiply_cm_m_d(int num, double4c* c,
     for (i = 0; i < num; ++i)
     {
         double2 ac;
-        double4c bc, m;
+        double4c bc;
         ac = a[i];
         bc = b[i];
-        oskar_complex_multiply_d(&m.a, &ac, &bc.a);
-        oskar_complex_multiply_d(&m.b, &ac, &bc.b);
-        oskar_complex_multiply_d(&m.c, &ac, &bc.c);
-        oskar_complex_multiply_d(&m.d, &ac, &bc.d);
-        c[i] = m;
+        oskar_multiply_complex_matrix_complex_scalar_in_place_d(&bc, &ac);
+        c[i] = bc;
     }
 }
 
@@ -222,27 +183,11 @@ void oskar_mem_element_multiply_mm_m_d(int num, double4c* c,
     int i;
     for (i = 0; i < num; ++i)
     {
-        double4c ac, bc, m;
-        double2 t;
+        double4c ac, bc;
         ac = a[i];
         bc = b[i];
-        oskar_complex_multiply_d(&m.a, &ac.a, &bc.a);
-        oskar_complex_multiply_d(&t,   &ac.b, &bc.c);
-        m.a.x += t.x;
-        m.a.y += t.y;
-        oskar_complex_multiply_d(&m.b, &ac.a, &bc.b);
-        oskar_complex_multiply_d(&t,   &ac.b, &bc.d);
-        m.b.x += t.x;
-        m.b.y += t.y;
-        oskar_complex_multiply_d(&m.c, &ac.c, &bc.a);
-        oskar_complex_multiply_d(&t,   &ac.d, &bc.c);
-        m.c.x += t.x;
-        m.c.y += t.y;
-        oskar_complex_multiply_d(&m.d, &ac.c, &bc.b);
-        oskar_complex_multiply_d(&t,   &ac.d, &bc.d);
-        m.d.x += t.x;
-        m.d.y += t.y;
-        c[i] = m;
+        oskar_multiply_complex_matrix_in_place_d(&ac, &bc);
+        c[i] = ac;
     }
 }
 

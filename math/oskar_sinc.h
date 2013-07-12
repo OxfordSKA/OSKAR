@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,58 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAF_MUL_C_MAT2C_H_
-#define OSKAR_CUDAF_MUL_C_MAT2C_H_
+#ifndef OSKAR_SINC_H_
+#define OSKAR_SINC_H_
 
 /**
- * @file oskar_cudaf_mul_c_mat2c.h
+ * @file oskar_sinc.h
  */
 
 #include "oskar_global.h"
-#include "math/cudak/oskar_cudaf_mul_c_c.h"
 
 /**
  * @brief
- * CUDA device function to multiply a complex 2x2 matrix and a complex scalar
- * (single precision).
+ * Function to evaluate sinc(x) (single precision).
  *
  * @details
- * This inline device function multiplies together a complex scalar number
- * and a complex 2x2 matrix to give a new complex 2x2 matrix.
+ * This function evaluates sinc(x) = sin(x) / x.
  *
- * @param[in] a The complex scalar number.
- * @param[in,out] m On input, the complex 2x2 matrix; on output, the result.
+ * @param[in] x Function argument.
  */
-__device__ __forceinline__ void oskar_cudaf_mul_c_mat2c_f(const float2& a,
-        float4c& m)
+OSKAR_INLINE
+float oskar_sinc_f(float a)
 {
-    // Multiply matrix by complex scalar.
-    oskar_cudaf_mul_c_c_f(m.a, a);
-    oskar_cudaf_mul_c_c_f(m.b, a);
-    oskar_cudaf_mul_c_c_f(m.c, a);
-    oskar_cudaf_mul_c_c_f(m.d, a);
+    return (a == 0.0f) ? 1.0f : sinf(a) / a;
 }
 
 /**
  * @brief
- * CUDA device function to multiply a complex 2x2 matrix and a complex scalar
- * (double precision).
+ * Function to evaluate sinc(x) (double precision).
  *
  * @details
- * This inline device function multiplies together a complex scalar number
- * and a complex 2x2 matrix to give a new complex 2x2 matrix.
+ * This function evaluates sinc(x) = sin(x) / x.
  *
- * @param[in] a The complex scalar number.
- * @param[in,out] m On input, the complex 2x2 matrix; on output, the result.
+ * @param[in] x Function argument.
  */
-__device__ __forceinline__ void oskar_cudaf_mul_c_mat2c_d(const double2& a,
-        double4c& m)
+OSKAR_INLINE
+double oskar_sinc_d(double a)
 {
-    // Multiply matrix by complex scalar.
-    oskar_cudaf_mul_c_c_d(m.a, a);
-    oskar_cudaf_mul_c_c_d(m.b, a);
-    oskar_cudaf_mul_c_c_d(m.c, a);
-    oskar_cudaf_mul_c_c_d(m.d, a);
+    return (a == 0.0) ? 1.0 : sin(a) / a;
 }
 
-#endif // OSKAR_CUDAF_MUL_C_MAT2C_H_
+#endif /* OSKAR_SINC_H_ */
