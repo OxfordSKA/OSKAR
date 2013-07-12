@@ -37,10 +37,11 @@ void mexFunction(int /*num_out*/, mxArray** /*out*/,
         int num_in, const mxArray** in)
 {
     // Parse inputs.
-    if (num_in != 3)
+    if (num_in < 3 || num_in > 4)
     {
-        oskar_matlab_usage(NULL, "settings", "set", "<file>, <key>, <value>",
-                "Set the value of the specified key in the specified file");
+        oskar_matlab_usage(NULL, "settings", "set", "<file>, <key>, <value>, "
+                "[verbose=false]", "Set the value of the specified key "
+                        "in the specified file.");
     }
 
     // Get inputs from MATLAB
@@ -52,8 +53,15 @@ void mexFunction(int /*num_out*/, mxArray** /*out*/,
     char* filename  = mxArrayToString(in[0]);
     char* key       = mxArrayToString(in[1]);
     char* value     = mxArrayToString(in[2]);
-    mexPrintf("File: %s\n", filename);
-    mexPrintf("    %s=%s\n", key, value);
+    bool verbose = false;
+    //mexPrintf("is bool? %s\n", mxIsLogical(in[3]) ? "true" : "false");
+    if (num_in == 4 && mxIsLogical(in[3])) {
+        verbose = mxGetLogicals(in[3])[0];
+    }
+    if (verbose) {
+        mexPrintf("File: %s\n", filename);
+        mexPrintf("    %s=%s\n", key, value);
+    }
 
     // Set the values.
     QSettings settings(QString(filename), QSettings::IniFormat);
