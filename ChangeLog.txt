@@ -1,5 +1,8 @@
 2013-xx-xx  OSKAR-2.2.2
 
+    * Fixed memory ordering in MATLAB OSKAR binary file interface for 
+      COMPLEX_MATRIX types.
+    
     * Fixed a bug that prevented memory from being inserted correctly into
       blocks greater than 2 GiB in size.
 
@@ -18,6 +21,10 @@
 
     * Removed redundant CORRECTED_DATA and MODEL_DATA columns from
       Measurement Set output.
+
+    * Added additional meta-data to the OSKAR visibility structure recording
+      telescope and station longitude and latitudes, as well as nominal station
+      receptor orientations. 
 
     * Added options to specify both dimensions when making beam patterns.
 
