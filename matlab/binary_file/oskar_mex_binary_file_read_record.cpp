@@ -48,10 +48,10 @@
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    if (num_in < 3 || num_in > 4 || num_out > 1)
+    if (num_in < 3 || num_in > 5 || num_out > 1)
     {
         oskar_matlab_usage("[record]", "binary_file", "read_record",
-                "<filename>, <group>, <tag>, [index=0]", "Reads the "
+                "<filename>, <group>, <tag>, [index=0], [verbose=false]", "Reads the "
                 "specified record from an OSKAR binary file returning a "
                 "structure containing the records header and data fields."
                 "Note the <group> and <tag> arguments can be of either "
@@ -63,11 +63,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Get input arguments.
     char filename[STR_LENGTH];
     mxGetString(in[0], filename, STR_LENGTH);
-
     int index_id = 0;
-    if (num_in == 4)
-    {
+    if (num_in == 4) {
         index_id = (int)mxGetScalar(in[3]);
+    }
+    bool verbose = false;
+    if (num_in == 5 && mxIsLogical(in[4])) {
+        verbose = mxGetLogicals(in[4])[0];
     }
 
     union { int id;  char name[STR_LENGTH]; } group, tag;
@@ -80,10 +82,12 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         is_extended = true;
         mxGetString(tag_, tag.name, STR_LENGTH);
         mxGetString(group_, group.name, STR_LENGTH);
-        mexPrintf("------------------------------------------------\n");
-        mexPrintf("= Reading record (group.tag.index) = %s.%s.%i\n",
-                group.name, tag.name, index_id);
-        mexPrintf("------------------------------------------------\n");
+        if (verbose) {
+            mexPrintf("------------------------------------------------\n");
+            mexPrintf("= Reading record (group.tag.index) = %s.%s.%i\n",
+                    group.name, tag.name, index_id);
+            mexPrintf("------------------------------------------------\n");
+        }
     }
     else if ((mxIsDouble(group_) || mxIsInt32(group_)) &&
             (mxIsDouble(tag_) || mxIsInt32(tag_)) )
@@ -91,10 +95,12 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         is_extended = false;
         tag.id = (int)mxGetScalar(tag_);
         group.id = (int)mxGetScalar(group_);
-        mexPrintf("------------------------------------------------\n");
-        mexPrintf("= Reading record (group.tag.index) = %i.%i.%i\n",
-                group.id, tag.id, index_id);
-        mexPrintf("------------------------------------------------\n");
+        if (verbose) {
+            mexPrintf("------------------------------------------------\n");
+            mexPrintf("= Reading record (group.tag.index) = %i.%i.%i\n",
+                    group.id, tag.id, index_id);
+            mexPrintf("------------------------------------------------\n");
+        }
     }
     else
     {
@@ -291,10 +297,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         {
             re[4*i+0] = ((float4c*)data)[i].a.x;
             im[4*i+0] = ((float4c*)data)[i].a.y;
-            re[4*i+1] = ((float4c*)data)[i].b.x;
-            im[4*i+1] = ((float4c*)data)[i].b.y;
-            re[4*i+2] = ((float4c*)data)[i].c.x;
-            im[4*i+2] = ((float4c*)data)[i].c.y;
+            re[4*i+1] = ((float4c*)data)[i].c.x;
+            im[4*i+1] = ((float4c*)data)[i].c.y;
+            re[4*i+2] = ((float4c*)data)[i].b.x;
+            im[4*i+2] = ((float4c*)data)[i].b.y;
             re[4*i+3] = ((float4c*)data)[i].d.x;
             im[4*i+3] = ((float4c*)data)[i].d.y;
         }
@@ -308,10 +314,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         {
             re[4*i+0] = ((double4c*)data)[i].a.x;
             im[4*i+0] = ((double4c*)data)[i].a.y;
-            re[4*i+1] = ((double4c*)data)[i].b.x;
-            im[4*i+1] = ((double4c*)data)[i].b.y;
-            re[4*i+2] = ((double4c*)data)[i].c.x;
-            im[4*i+2] = ((double4c*)data)[i].c.y;
+            re[4*i+1] = ((double4c*)data)[i].c.x;
+            im[4*i+1] = ((double4c*)data)[i].c.y;
+            re[4*i+2] = ((double4c*)data)[i].b.x;
+            im[4*i+2] = ((double4c*)data)[i].b.y;
             re[4*i+3] = ((double4c*)data)[i].d.x;
             im[4*i+3] = ((double4c*)data)[i].d.y;
         }

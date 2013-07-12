@@ -214,10 +214,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             {
                 re[4*j+0] = ((float4c*)data)[j].a.x;
                 im[4*j+0] = ((float4c*)data)[j].a.y;
-                re[4*j+1] = ((float4c*)data)[j].b.x;
-                im[4*j+1] = ((float4c*)data)[j].b.y;
-                re[4*j+2] = ((float4c*)data)[j].c.x;
-                im[4*j+2] = ((float4c*)data)[j].c.y;
+                re[4*j+1] = ((float4c*)data)[j].c.x;
+                im[4*j+1] = ((float4c*)data)[j].c.y;
+                re[4*j+2] = ((float4c*)data)[j].b.x;
+                im[4*j+2] = ((float4c*)data)[j].b.y;
                 re[4*j+3] = ((float4c*)data)[j].d.x;
                 im[4*j+3] = ((float4c*)data)[j].d.y;
             }
@@ -231,10 +231,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             {
                 re[4*j+0] = ((double4c*)data)[j].a.x;
                 im[4*j+0] = ((double4c*)data)[j].a.y;
-                re[4*j+1] = ((double4c*)data)[j].b.x;
-                im[4*j+1] = ((double4c*)data)[j].b.y;
-                re[4*j+2] = ((double4c*)data)[j].c.x;
-                im[4*j+2] = ((double4c*)data)[j].c.y;
+                re[4*j+1] = ((double4c*)data)[j].c.x;
+                im[4*j+1] = ((double4c*)data)[j].c.y;
+                re[4*j+2] = ((double4c*)data)[j].b.x;
+                im[4*j+2] = ((double4c*)data)[j].b.y;
                 re[4*j+3] = ((double4c*)data)[j].d.x;
                 im[4*j+3] = ((double4c*)data)[j].d.y;
             }
