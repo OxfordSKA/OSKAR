@@ -71,6 +71,10 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     mxArray* x_  = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
     mxArray* y_  = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
     mxArray* z_  = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
+    mxArray* stationLon_ = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
+    mxArray* stationLat_ = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
+    mxArray* stationOritentationX_ = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
+    mxArray* stationOritentationY_ = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
     mxArray* uu_ = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
     mxArray* vv_ = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
     mxArray* ww_ = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
@@ -96,7 +100,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     mwSize channel_dims[1] = { num_channels };
     mxArray* frequency = mxCreateNumericArray(1, channel_dims, class_id, mxREAL);
 
-    mexPrintf("= Loading %i visibility samples\n", v_in->num_times * v_in->num_baselines);
+    //mexPrintf("= Loading %i visibility samples\n", v_in->num_times * v_in->num_baselines);
 
     int* stIdxP = (int*)mxGetData(stationIdxP_);
     int* stIdxQ = (int*)mxGetData(stationIdxQ_);
@@ -140,6 +144,10 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
         memcpy(mxGetData(x_), v_in->x_metres.data, mem_size);
         memcpy(mxGetData(y_), v_in->y_metres.data, mem_size);
         memcpy(mxGetData(z_), v_in->z_metres.data, mem_size);
+        memcpy(mxGetData(stationLon_), v_in->station_lon.data, mem_size);
+        memcpy(mxGetData(stationLat_), v_in->station_lat.data, mem_size);
+        memcpy(mxGetData(stationOritentationX_), v_in->station_orientation_x.data, mem_size);
+        memcpy(mxGetData(stationOritentationY_), v_in->station_orientation_y.data, mem_size);
 
         for (int i = 0; i < num_channels * num_times * num_baselines; ++i)
         {
@@ -216,6 +224,10 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
         memcpy(mxGetData(x_), v_in->x_metres.data, mem_size);
         memcpy(mxGetData(y_), v_in->y_metres.data, mem_size);
         memcpy(mxGetData(z_), v_in->z_metres.data, mem_size);
+        memcpy(mxGetData(stationLon_), v_in->station_lon.data, mem_size);
+        memcpy(mxGetData(stationLat_), v_in->station_lat.data, mem_size);
+        memcpy(mxGetData(stationOritentationX_), v_in->station_orientation_x.data, mem_size);
+        memcpy(mxGetData(stationOritentationY_), v_in->station_orientation_y.data, mem_size);
 
         for (int i = 0; i < num_channels * num_times * num_baselines; ++i)
         {
@@ -281,15 +293,21 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "phase_centre_dec_deg",
                 "frequency",
                 "time",
+                "telescope_lon",
+                "telescope_lat",
                 "coord_units",
                 "station_x",
                 "station_y",
                 "station_z",
+                "station_lon",
+                "station_lat",
+                "station_orientation_x",
+                "station_orientation_y",
                 "uu",
                 "vv",
                 "ww",
-                "stationIdxP",
-                "stationIdxQ",
+                "station_index_p",
+                "station_index_q",
                 "axis_order",
                 "xx",
                 "xy",
@@ -324,15 +342,21 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "phase_centre_dec_deg",
                 "frequency",
                 "time",
+                "telescope_lon",
+                "telescope_lat",
                 "coord_units",
                 "station_x",
                 "station_y",
                 "station_z",
+                "station_lon",
+                "station_lat",
+                "station_orientation_x",
+                "station_orientation_y",
                 "uu",
                 "vv",
                 "ww",
-                "stationIdxP",
-                "stationIdxQ",
+                "station_index_p",
+                "station_index_q",
                 "axis_order",
                 "xx"};
         int nFields = sizeof(fields)/sizeof(char*);
@@ -401,30 +425,36 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     mxSetField(v_out, 0, "num_baselines",
             mxCreateDoubleScalar((double)num_baselines));
     mxSetField(v_out, 0, "freq_start_hz",
-            mxCreateDoubleScalar((double)v_in->freq_start_hz));
+            mxCreateDoubleScalar(v_in->freq_start_hz));
     mxSetField(v_out, 0, "freq_inc_hz",
-            mxCreateDoubleScalar((double)v_in->freq_inc_hz));
+            mxCreateDoubleScalar(v_in->freq_inc_hz));
     mxSetField(v_out, 0, "channel_bandwidth_hz",
-            mxCreateDoubleScalar((double)v_in->channel_bandwidth_hz));
+            mxCreateDoubleScalar(v_in->channel_bandwidth_hz));
     mxSetField(v_out, 0, "time_start_mjd_utc",
-            mxCreateDoubleScalar((double)v_in->time_start_mjd_utc));
+            mxCreateDoubleScalar(v_in->time_start_mjd_utc));
     mxSetField(v_out, 0, "time_inc_seconds",
-            mxCreateDoubleScalar((double)v_in->time_inc_seconds));
+            mxCreateDoubleScalar(v_in->time_inc_seconds));
     mxSetField(v_out, 0, "phase_centre_ra_deg",
-            mxCreateDoubleScalar((double)v_in->phase_centre_ra_deg));
+            mxCreateDoubleScalar(v_in->phase_centre_ra_deg));
     mxSetField(v_out, 0, "phase_centre_dec_deg",
-            mxCreateDoubleScalar((double)v_in->phase_centre_dec_deg));
+            mxCreateDoubleScalar(v_in->phase_centre_dec_deg));
     mxSetField(v_out, 0, "frequency", frequency);
     mxSetField(v_out, 0, "time", time);
+    mxSetField(v_out, 0, "telescope_lon", mxCreateDoubleScalar(v_in->telescope_lon_deg));
+    mxSetField(v_out, 0, "telescope_lat", mxCreateDoubleScalar(v_in->telescope_lat_deg));
     mxSetField(v_out, 0, "coord_units", mxCreateString("metres"));
     mxSetField(v_out, 0, "station_x", x_);
     mxSetField(v_out, 0, "station_y", y_);
     mxSetField(v_out, 0, "station_z", z_);
+    mxSetField(v_out, 0, "station_lon", stationLon_);
+    mxSetField(v_out, 0, "station_lat", stationLat_);
+    mxSetField(v_out, 0, "station_orientation_x", stationOritentationX_);
+    mxSetField(v_out, 0, "station_orientation_y", stationOritentationY_);
     mxSetField(v_out, 0, "uu", uu_);
     mxSetField(v_out, 0, "vv", vv_);
     mxSetField(v_out, 0, "ww", ww_);
-    mxSetField(v_out, 0, "stationIdxP", stationIdxP_);
-    mxSetField(v_out, 0, "stationIdxQ", stationIdxQ_);
+    mxSetField(v_out, 0, "station_index_p", stationIdxP_);
+    mxSetField(v_out, 0, "station_index_q", stationIdxQ_);
     mxSetField(v_out, 0, "axis_order", mxCreateString("baseline x time x channel"));
     mxSetField(v_out, 0, "xx", xx_);
     if (num_pols == 4)

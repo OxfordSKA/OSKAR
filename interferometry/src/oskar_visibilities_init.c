@@ -74,6 +74,8 @@ void oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location
     vis->time_int_seconds = 0.0;
     vis->phase_centre_ra_deg = 0.0;
     vis->phase_centre_dec_deg = 0.0;
+    vis->telescope_lon_deg = 0.0;
+    vis->telescope_lat_deg = 0.0;
 
     /* Initialise memory. */
     oskar_mem_init(&vis->settings_path, OSKAR_CHAR, location, 0, 1, status);
@@ -81,7 +83,10 @@ void oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location
     oskar_mem_init(&vis->x_metres, type, location, num_stations, 1, status);
     oskar_mem_init(&vis->y_metres, type, location, num_stations, 1, status);
     oskar_mem_init(&vis->z_metres, type, location, num_stations, 1, status);
-    oskar_mem_init(&vis->receptor_angle, type, location, num_stations, 1, status);
+    oskar_mem_init(&vis->station_lon, type, location, num_stations, 1, status);
+    oskar_mem_init(&vis->station_lat, type, location, num_stations, 1, status);
+    oskar_mem_init(&vis->station_orientation_x, type, location, num_stations, 1, status);
+    oskar_mem_init(&vis->station_orientation_y, type, location, num_stations, 1, status);
     oskar_mem_init(&vis->uu_metres, type, location, num_coords, 1, status);
     oskar_mem_init(&vis->vv_metres, type, location, num_coords, 1, status);
     oskar_mem_init(&vis->ww_metres, type, location, num_coords, 1, status);

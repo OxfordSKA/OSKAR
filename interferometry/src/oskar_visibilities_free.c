@@ -56,6 +56,8 @@ void oskar_visibilities_free(oskar_Visibilities* vis, int* status)
     vis->time_int_seconds = 0.0;
     vis->phase_centre_ra_deg = 0.0;
     vis->phase_centre_dec_deg = 0.0;
+    vis->telescope_lon_deg = 0.0;
+    vis->telescope_lat_deg = 0.0;
 
     /* Free memory. */
     oskar_mem_free(&vis->settings_path, status);
@@ -63,7 +65,10 @@ void oskar_visibilities_free(oskar_Visibilities* vis, int* status)
     oskar_mem_free(&vis->x_metres, status);
     oskar_mem_free(&vis->y_metres, status);
     oskar_mem_free(&vis->z_metres, status);
-    oskar_mem_free(&vis->receptor_angle, status);
+    oskar_mem_free(&vis->station_lon, status);
+    oskar_mem_free(&vis->station_lat, status);
+    oskar_mem_free(&vis->station_orientation_x, status);
+    oskar_mem_free(&vis->station_orientation_y, status);
     oskar_mem_free(&vis->uu_metres, status);
     oskar_mem_free(&vis->vv_metres, status);
     oskar_mem_free(&vis->ww_metres, status);

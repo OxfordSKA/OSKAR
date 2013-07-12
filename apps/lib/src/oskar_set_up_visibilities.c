@@ -37,7 +37,7 @@
 #include <string.h>
 
 #ifndef M_PI
-#define M_PI 3.14159265358979323846
+#define M_PI 3.14159265358979323846264338327950288
 #endif
 
 #ifdef __cplusplus
@@ -48,7 +48,8 @@ void oskar_set_up_visibilities(oskar_Visibilities* vis,
         const oskar_Settings* settings, const oskar_TelescopeModel* telescope,
         int type, int* status)
 {
-    int num_stations, num_channels;
+    int num_stations, num_channels, i;
+    double rad2deg = 180.0/M_PI;
 
     /* Check all inputs. */
     if (!vis || !settings || !telescope || !status)
@@ -77,8 +78,10 @@ void oskar_set_up_visibilities(oskar_Visibilities* vis,
     vis->time_inc_seconds = settings->obs.dt_dump_days * 86400.0;
     vis->time_int_seconds = settings->interferometer.time_average_sec;
     vis->channel_bandwidth_hz = settings->interferometer.channel_bandwidth_hz;
-    vis->phase_centre_ra_deg = settings->obs.ra0_rad[0] * 180.0 / M_PI;
-    vis->phase_centre_dec_deg = settings->obs.dec0_rad[0] * 180.0 / M_PI;
+    vis->phase_centre_ra_deg = settings->obs.ra0_rad[0] * rad2deg;
+    vis->phase_centre_dec_deg = settings->obs.dec0_rad[0] * rad2deg;
+    vis->telescope_lon_deg = telescope->longitude_rad * rad2deg;
+    vis->telescope_lon_deg = telescope->latitude_rad * rad2deg;
 
     /* Add settings file path. */
     oskar_mem_copy(&vis->settings_path, &settings->settings_path, status);
@@ -93,6 +96,41 @@ void oskar_set_up_visibilities(oskar_Visibilities* vis,
     oskar_mem_copy(&vis->x_metres, &telescope->station_x, status);
     oskar_mem_copy(&vis->y_metres, &telescope->station_y, status);
     oskar_mem_copy(&vis->z_metres, &telescope->station_z, status);
+
+    /* Copy station lon/lat and nominal receptor orientations */
+    if (vis->station_lon.type == OSKAR_DOUBLE)
+    {
+        double* lon = (double*)vis->station_lon.data;
+        double* lat = (double*)vis->station_lat.data;
+        double* orientation_x = (double*)vis->station_orientation_x.data;
+        double* orientation_y = (double*)vis->station_orientation_y.data;
+        for (i = 0; i < num_stations; ++i)
+        {
+            lon[i] = telescope->station[i].longitude_rad * rad2deg;
+            lat[i] = telescope->station[i].latitude_rad * rad2deg;
+            orientation_x[i] = telescope->station[i].orientation_x * rad2deg;
+            orientation_y[i] = telescope->station[i].orientation_y * rad2deg;
+        }
+    }
+    else if (vis->station_lon.type == OSKAR_SINGLE)
+    {
+        float* lon = (float*)vis->station_lon.data;
+        float* lat = (float*)vis->station_lat.data;
+        float* orientation_x = (float*)vis->station_orientation_x.data;
+        float* orientation_y = (float*)vis->station_orientation_y.data;
+        for (i = 0; i < num_stations; ++i)
+        {
+            lon[i] = telescope->station[i].longitude_rad * rad2deg;
+            lat[i] = telescope->station[i].latitude_rad * rad2deg;
+            orientation_x[i] = telescope->station[i].orientation_x * rad2deg;
+            orientation_y[i] = telescope->station[i].orientation_y * rad2deg;
+        }
+    }
+    else
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
 }
 
 #ifdef __cplusplus

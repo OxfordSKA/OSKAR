@@ -144,10 +144,24 @@ void oskar_visibilities_read(oskar_Visibilities* vis, const char* filename,
     oskar_mem_binary_file_read(&vis->z_metres, filename, &index, grp,
             OSKAR_VIS_TAG_STATION_Z, 0, &tag_error);
 
-    /* Optionally read receptor angle (ignore the error code). */
+    /* Optionally read station lon., lat. and orientation angles
+     * (ignore the error code). */
     tag_error = 0;
-    oskar_mem_binary_file_read(&vis->receptor_angle, filename, &index, grp,
-            OSKAR_VIS_TAG_RECEPTOR_ANGLE, 0, &tag_error);
+    oskar_mem_binary_file_read(&vis->station_lon, filename, &index, grp,
+            OSKAR_VIS_TAG_STATION_LON, 0, &tag_error);
+    oskar_mem_binary_file_read(&vis->station_lat, filename, &index, grp,
+            OSKAR_VIS_TAG_STATION_LAT, 0, &tag_error);
+    oskar_mem_binary_file_read(&vis->station_orientation_x, filename, &index,
+            grp, OSKAR_VIS_TAG_STATION_ORIENTATION_X, 0, &tag_error);
+    oskar_mem_binary_file_read(&vis->station_orientation_y, filename, &index,
+            grp, OSKAR_VIS_TAG_STATION_ORIENTATION_Y, 0, &tag_error);
+
+    /* Optionally read telescope lon., lat. (ignore the error code) */
+    tag_error = 0;
+    oskar_binary_file_read_double(filename, &index, grp,
+            OSKAR_VIS_TAG_TELESCOPE_LON, 0, &vis->telescope_lon_deg, &tag_error);
+    oskar_binary_file_read_double(filename, &index, grp,
+            OSKAR_VIS_TAG_TELESCOPE_LAT, 0, &vis->telescope_lat_deg, &tag_error);
 
     /* Optionally read the channel bandwidth value. */
     tag_error = 0;

@@ -83,11 +83,16 @@ struct OSKAR_EXPORT oskar_Visibilities
     double time_int_seconds;     /**< Time integration, in seconds. */
     double phase_centre_ra_deg;  /**< Pointing phase centre RA, in degrees. */
     double phase_centre_dec_deg; /**< Pointing phase centre Dec, in degrees. */
+    double telescope_lon_deg;    /**< Reference longitude of the telescope, in degrees */
+    double telescope_lat_deg;    /**< Reference latitude of the telescope, in degress */
 
     oskar_Mem x_metres;          /**< Station x coordinates, in metres. */
     oskar_Mem y_metres;          /**< Station y coordinates, in metres. */
     oskar_Mem z_metres;          /**< Station z coordinates, in metres. */
-    oskar_Mem receptor_angle;    /**< Station feed rotation angle, in radians */
+    oskar_Mem station_lon;       /**< Station longitudes, in degrees */
+    oskar_Mem station_lat;       /**< Station longitudes, in degrees */
+    oskar_Mem station_orientation_x; /**< Orientation azimuth of nominal station x dipole axis, in degrees */
+    oskar_Mem station_orientation_y; /**< Orientation azimuth of nominal station y dipole axis, in degrees */
     oskar_Mem uu_metres;         /**< Baseline coordinates, in metres. */
     oskar_Mem vv_metres;         /**< Baseline coordinates, in metres. */
     oskar_Mem ww_metres;         /**< Baseline coordinates, in metres. */
@@ -198,7 +203,12 @@ enum {
     OSKAR_VIS_TAG_CHANNEL_BANDWIDTH_HZ = 24,
     OSKAR_VIS_TAG_TIME_INT_SEC = 25,
     OSKAR_VIS_TAG_TELESCOPE_PATH = 26,
-    OSKAR_VIS_TAG_RECEPTOR_ANGLE = 27
+    OSKAR_VIS_TAG_STATION_LON = 27,
+    OSKAR_VIS_TAG_STATION_LAT = 28,
+    OSKAR_VIS_TAG_STATION_ORIENTATION_X = 29,
+    OSKAR_VIS_TAG_STATION_ORIENTATION_Y = 30,
+    OSKAR_VIS_TAG_TELESCOPE_LON = 31,
+    OSKAR_VIS_TAG_TELESCOPE_LAT = 32
 };
 
 /* Do not change the values below - these are merely dimension labels, not the

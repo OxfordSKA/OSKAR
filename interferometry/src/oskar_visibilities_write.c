@@ -194,6 +194,10 @@ void oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
             status);
     oskar_binary_stream_write_double(stream, grp,
             OSKAR_VIS_TAG_TIME_INT_SEC, 0, vis->time_int_seconds, status);
+    oskar_binary_stream_write_double(stream, grp,
+            OSKAR_VIS_TAG_TELESCOPE_LON, 0, vis->telescope_lat_deg, status);
+    oskar_binary_stream_write_double(stream, grp,
+            OSKAR_VIS_TAG_TELESCOPE_LAT, 0, vis->telescope_lon_deg, status);
 
     /* Write the baseline coordinate arrays. */
     oskar_mem_binary_stream_write(&vis->uu_metres, stream,
@@ -215,8 +219,14 @@ void oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
     oskar_mem_binary_stream_write(&vis->z_metres, stream,
             grp, OSKAR_VIS_TAG_STATION_Z, 0, 0, status);
 
-    oskar_mem_binary_stream_write(&vis->receptor_angle, stream, grp,
-            OSKAR_VIS_TAG_RECEPTOR_ANGLE, 0, 0, status);
+    oskar_mem_binary_stream_write(&vis->station_lon, stream, grp,
+            OSKAR_VIS_TAG_STATION_LON, 0, 0, status);
+    oskar_mem_binary_stream_write(&vis->station_lat, stream, grp,
+            OSKAR_VIS_TAG_STATION_LAT, 0, 0, status);
+    oskar_mem_binary_stream_write(&vis->station_orientation_x, stream, grp,
+            OSKAR_VIS_TAG_STATION_ORIENTATION_X, 0, 0, status);
+    oskar_mem_binary_stream_write(&vis->station_orientation_y, stream, grp,
+            OSKAR_VIS_TAG_STATION_ORIENTATION_Y, 0, 0, status);
 
     /* Close the file. */
     fclose(stream);

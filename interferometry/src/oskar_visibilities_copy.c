@@ -60,6 +60,8 @@ void oskar_visibilities_copy(oskar_Visibilities* dst,
     dst->time_int_seconds = src->time_int_seconds;
     dst->phase_centre_ra_deg = src->phase_centre_ra_deg;
     dst->phase_centre_dec_deg = src->phase_centre_dec_deg;
+    dst->telescope_lon_deg = src->telescope_lon_deg;
+    dst->telescope_lat_deg = src->telescope_lat_deg;
 
     /* Copy the memory. */
     oskar_mem_copy(&dst->settings_path, &src->settings_path, status);
@@ -67,7 +69,10 @@ void oskar_visibilities_copy(oskar_Visibilities* dst,
     oskar_mem_copy(&dst->x_metres, &src->x_metres, status);
     oskar_mem_copy(&dst->y_metres, &src->y_metres, status);
     oskar_mem_copy(&dst->z_metres, &src->z_metres, status);
-    oskar_mem_copy(&dst->receptor_angle, &src->receptor_angle, status);
+    oskar_mem_copy(&dst->station_lon, &src->station_lon, status);
+    oskar_mem_copy(&dst->station_lat, &src->station_lat, status);
+    oskar_mem_copy(&dst->station_orientation_x, &src->station_orientation_x, status);
+    oskar_mem_copy(&dst->station_orientation_y, &src->station_orientation_y, status);
     oskar_mem_copy(&dst->uu_metres, &src->uu_metres, status);
     oskar_mem_copy(&dst->vv_metres, &src->vv_metres, status);
     oskar_mem_copy(&dst->ww_metres, &src->ww_metres, status);
