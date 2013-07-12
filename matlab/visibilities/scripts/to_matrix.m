@@ -31,8 +31,8 @@ nCh = vis.num_channels;
 visM.uu = zeros(nSt,nSt,nTi);
 visM.vv = zeros(nSt,nSt,nTi);
 visM.ww = zeros(nSt,nSt,nTi);
-visM.stationIdxP = zeros(nSt,nSt);
-visM.stationIdxQ = zeros(nSt,nSt);
+visM.station_index_p = zeros(nSt,nSt);
+visM.station_index_q = zeros(nSt,nSt);
 
 for t=1:vis.num_times
     idx = 1;
@@ -49,8 +49,8 @@ end
 idx = 1;
 for j=1:vis.num_stations
     for i=(j+1):vis.num_stations
-        visM.stationIdxP(i,j) = vis.stationIdxP(idx); 
-        visM.stationIdxQ(i,j) = vis.stationIdxQ(idx);
+        visM.station_index_p(i,j) = vis.station_index_p(idx); 
+        visM.station_index_q(i,j) = vis.station_index_q(idx);
         idx = idx+1;
     end
 end
@@ -70,6 +70,7 @@ if (isfield(vis, 'yy'))
 end
 if (isfield(vis, 'xx') && isfield(vis, 'xy') && isfield(vis, 'yx') && isfield(vis,'yy'))
     visM.matrix = zeros(nSt*2,nSt*2,nTi,nCh);
+    visM.matrix_2 = zeros(2,2,nSt,nSt,nTi,nCh);
 end
 
 if (isfield(vis, 'I'))
@@ -93,18 +94,22 @@ for c=1:vis.num_channels
                 if (isfield(vis, 'xx'))
                     visM.xx(i,j,t,c) = vis.xx(idx,t,c);
                     visM.matrix((2*i)-1,(2*j)-1,t,c) = vis.xx(idx,t,c);
+                    visM.matrix_2(1,1,i,j,t,c) = vis.xx(idx,t,c);
                 end
                 if (isfield(vis, 'xy'))
                     visM.xy(i,j,t,c) = vis.xy(idx,t,c);
                     visM.matrix((2*i)-1,2*j,t,c) = vis.xy(idx,t,c);
+                    visM.matrix_2(1,2,i,j,t,c) = vis.xy(idx,t,c);
                 end
                 if (isfield(vis, 'yx'))
                     visM.yx(i,j,t,c) = vis.yx(idx,t,c);
                     visM.matrix(2*i,(2*j)-1,t,c) = vis.yx(idx,t,c);
+                    visM.matrix_2(2,1,i,j,t,c) = vis.yx(idx,t,c);
                 end
                 if (isfield(vis, 'yy'))
                     visM.yy(i,j,t,c) = vis.yy(idx,t,c);
                     visM.matrix(2*i,2*j,t,c) = vis.yy(idx,t,c);
+                    visM.matrix_2(2,2,i,j,t,c) = vis.yy(idx,t,c);
                 end
                
                 if (isfield(vis, 'I'))
