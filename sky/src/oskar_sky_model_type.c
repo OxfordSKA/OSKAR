@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,9 +44,9 @@ int oskar_sky_model_is_type(const oskar_SkyModel* sky, int type)
             sky->V.type == type &&
             sky->reference_freq.type == type &&
             sky->spectral_index.type == type &&
-            sky->rel_l.type == type &&
-            sky->rel_m.type == type &&
-            sky->rel_n.type == type &&
+            sky->l.type == type &&
+            sky->m.type == type &&
+            sky->n.type == type &&
             sky->FWHM_major.type == type &&
             sky->FWHM_minor.type == type &&
             sky->position_angle.type == type &&

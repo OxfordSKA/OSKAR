@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -258,7 +258,8 @@ void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
                 /* Evaluate interferometer phase (K), join Jones, correlate. */
                 oskar_timer_resume(&timers->tmr_K);
-                oskar_evaluate_jones_K(&K, &local_sky, &u, &v, &w, status);
+                oskar_evaluate_jones_K(&K, &local_sky.l, &local_sky.m,
+                        &local_sky.n, &u, &v, &w, status);
                 oskar_timer_pause(&timers->tmr_K);
                 oskar_timer_resume(&timers->tmr_join);
                 oskar_jones_join(&J, &K, &R, status);

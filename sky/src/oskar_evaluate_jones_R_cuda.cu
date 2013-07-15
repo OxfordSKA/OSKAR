@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include "sky/oskar_evaluate_jones_R_cuda.h"
+#include "sky/oskar_parallactic_angle.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,96 +76,38 @@ void oskar_evaluate_jones_R_cuda_d(double4c* d_jones, int num_sources,
 
 /* Kernels. ================================================================ */
 
-/**
- * @brief
- * CUDA device function to compute the parallactic angle at a position
- * (single precision)
- *
- * @details
- * This inline device function computes the parallactic angle at a position
- * on the sky, at a given latitude.
- *
- * @param[in] ha       The hour angle.
- * @param[in] dec      The declination.
- * @param[in] cos_lat  Cosine of the observer's latitude.
- * @param[in] sin_lat  Sine of the observer's latitude.
- */
-__device__ __forceinline__
-static float oskar_parallactic_angle_f(const float& ha,
-        const float& dec, const float& cos_lat, const float& sin_lat)
-{
-    float sin_dec, cos_dec, sin_a, cos_a;
-    sincosf(ha, &sin_a, &cos_a);
-    sincosf(dec, &sin_dec, &cos_dec);
-    float y = cos_lat * sin_a;
-    float x = sin_lat * cos_dec - cos_lat * sin_dec * cos_a;
-    return atan2f(y, x);
-}
-
-/**
- * @brief
- * CUDA device function to compute the parallactic angle at a position
- * (double precision)
- *
- * @details
- * This inline device function computes the parallactic angle at a position
- * on the sky, at a given latitude.
- *
- * @param[in] ha       The hour angle.
- * @param[in] dec      The declination.
- * @param[in] cos_lat  Cosine of the observer's latitude.
- * @param[in] sin_lat  Sine of the observer's latitude.
- */
-__device__ __forceinline__
-static double oskar_parallactic_angle_d(const double& ha,
-        const double& dec, const double& cos_lat, const double& sin_lat)
-{
-    double sin_dec, cos_dec, sin_a, cos_a;
-    sincos(ha, &sin_a, &cos_a);
-    sincos(dec, &sin_dec, &cos_dec);
-    double y = cos_lat * sin_a;
-    double x = sin_lat * cos_dec - cos_lat * sin_dec * cos_a;
-    return atan2(y, x);
-}
-
-
 /* Single precision. */
 __global__
 void oskar_evaluate_jones_R_cudak_f(float4c* jones, const int num_sources,
         const float* ra, const float* dec, const float cos_lat,
         const float sin_lat, const float lst_rad)
 {
+    float c_ha, c_dec, q, sin_q, cos_q;
+    float4c J;
+
     /* Get the source ID that this thread is working on. */
     const int s = blockDim.x * blockIdx.x + threadIdx.x;
+    if (s >= num_sources) return;
 
     /* Copy the data from global memory. */
-    float c_ha, c_dec;
-    if (s < num_sources)
-    {
-        c_ha = ra[s]; /* Source RA, but will be source hour angle. */
-        c_dec = dec[s];
-    }
+    c_ha = ra[s]; /* Source RA, but will be source hour angle. */
+    c_dec = dec[s];
 
     /* Compute the source hour angle. */
     c_ha = lst_rad - c_ha; /* HA = LST - RA. */
 
     /* Compute the source parallactic angle. */
-    float sin_a, cos_a;
-    {
-        float q = oskar_parallactic_angle_f(c_ha, c_dec, cos_lat, sin_lat);
-        sincosf(q, &sin_a, &cos_a);
-    }
+    q = oskar_parallactic_angle_f(c_ha, c_dec, cos_lat, sin_lat);
+    sincosf(q, &sin_q, &cos_q);
 
     /* Compute the Jones matrix. */
-    float4c J;
-    J.a = make_float2(cos_a, 0.0f);
-    J.b = make_float2(-sin_a, 0.0f);
-    J.c = make_float2(sin_a, 0.0f);
-    J.d = make_float2(cos_a, 0.0f);
+    J.a = make_float2(cos_q, 0.0f);
+    J.b = make_float2(-sin_q, 0.0f);
+    J.c = make_float2(sin_q, 0.0f);
+    J.d = make_float2(cos_q, 0.0f);
 
     /* Copy the Jones matrix to global memory. */
-    if (s < num_sources)
-        jones[s] = J;
+    jones[s] = J;
 }
 
 /* Double precision. */
@@ -173,35 +116,30 @@ void oskar_evaluate_jones_R_cudak_d(double4c* jones, int num_sources,
         const double* ra, const double* dec, const double cos_lat,
         const double sin_lat, const double lst_rad)
 {
+    double c_ha, c_dec, q, sin_q, cos_q;
+    double4c J;
+
     /* Get the source ID that this thread is working on. */
     const int s = blockDim.x * blockIdx.x + threadIdx.x;
+    if (s >= num_sources) return;
 
     /* Copy the data from global memory. */
-    double c_ha, c_dec;
-    if (s < num_sources)
-    {
-        c_ha = ra[s]; /* Source RA, but will be source hour angle. */
-        c_dec = dec[s];
-    }
+    c_ha = ra[s]; /* Source RA, but will be source hour angle. */
+    c_dec = dec[s];
 
     /* Compute the source hour angle. */
     c_ha = lst_rad - c_ha; /* HA = LST - RA. */
 
     /* Compute the source parallactic angle. */
-    double sin_a, cos_a;
-    {
-        double q = oskar_parallactic_angle_d(c_ha, c_dec, cos_lat, sin_lat);
-        sincos(q, &sin_a, &cos_a);
-    }
+    q = oskar_parallactic_angle_d(c_ha, c_dec, cos_lat, sin_lat);
+    sincos(q, &sin_q, &cos_q);
 
     /* Compute the Jones matrix. */
-    double4c J;
-    J.a = make_double2(cos_a, 0.0);
-    J.b = make_double2(-sin_a, 0.0);
-    J.c = make_double2(sin_a, 0.0);
-    J.d = make_double2(cos_a, 0.0);
+    J.a = make_double2(cos_q, 0.0);
+    J.b = make_double2(-sin_q, 0.0);
+    J.c = make_double2(sin_q, 0.0);
+    J.d = make_double2(cos_q, 0.0);
 
     /* Copy the Jones matrix to global memory. */
-    if (s < num_sources)
-        jones[s] = J;
+    jones[s] = J;
 }

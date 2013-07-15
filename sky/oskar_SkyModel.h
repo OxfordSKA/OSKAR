@@ -40,11 +40,10 @@
 /**
  * @struct oskar_SkyModel
  *
- * @brief Structure to hold a sky model used by the OSKAR simulator.
+ * @brief Structure to hold a sky model.
  *
  * @details
- * The structure holds source parameters for the global sky model used by the
- * OSKAR simulator.
+ * The structure holds source parameters for a sky model.
  */
 struct OSKAR_EXPORT oskar_SkyModel
 {
@@ -57,9 +56,9 @@ struct OSKAR_EXPORT oskar_SkyModel
     oskar_Mem V;              /**< Stokes-V, in Jy. */
     oskar_Mem reference_freq; /**< Reference frequency for the source flux, in Hz. */
     oskar_Mem spectral_index; /**< Spectral index. */
-    oskar_Mem rel_l;          /**< Phase centre relative direction-cosines. */
-    oskar_Mem rel_m;          /**< Phase centre relative direction-cosines. */
-    oskar_Mem rel_n;          /**< Phase centre relative direction-cosines. */
+    oskar_Mem l;              /**< Phase centre relative l-direction cosines. */
+    oskar_Mem m;              /**< Phase centre relative m-direction cosines. */
+    oskar_Mem n;              /**< Phase centre relative n-direction cosines. */
 
     int use_extended;         /**< Enable use of extended sources */
     oskar_Mem FWHM_major;     /**< Major axis FWHM for gaussian sources, in radians. */

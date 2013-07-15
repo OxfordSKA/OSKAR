@@ -301,9 +301,9 @@ void Test_SkyModel::test_compute_relative_lmn()
         float m = cos(dec0) * sin(dec[i]) -
                 sin(dec0) * cos(dec[i]) * cos(ra[i] - ra0);
         float p = sqrt(1.0 - l*l - m*m) - 1.0;
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(l, ((float*)sky_temp.rel_l.data)[i], 1e-3);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(m, ((float*)sky_temp.rel_m.data)[i], 1e-3);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(p, ((float*)sky_temp.rel_n.data)[i], 1e-3);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(l, ((float*)sky_temp.l.data)[i], 1e-3);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(m, ((float*)sky_temp.m.data)[i], 1e-3);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(p, ((float*)sky_temp.n.data)[i], 1e-3);
     }
 }
 
@@ -418,9 +418,9 @@ void Test_SkyModel::test_split()
         CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].V.num_elements);
         CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].reference_freq.num_elements);
         CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].spectral_index.num_elements);
-        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].rel_l.num_elements);
-        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].rel_m.num_elements);
-        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].rel_n.num_elements);
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].l.num_elements);
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].m.num_elements);
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].n.num_elements);
         CPPUNIT_ASSERT_EQUAL(0, sky_subset[i].RA.owner);
         CPPUNIT_ASSERT_EQUAL(0, sky_subset[i].Dec.owner);
         CPPUNIT_ASSERT_EQUAL(0, sky_subset[i].I.owner);
@@ -429,9 +429,9 @@ void Test_SkyModel::test_split()
         CPPUNIT_ASSERT_EQUAL(0, sky_subset[i].V.owner);
         CPPUNIT_ASSERT_EQUAL(0, sky_subset[i].reference_freq.owner);
         CPPUNIT_ASSERT_EQUAL(0, sky_subset[i].spectral_index.owner);
-        CPPUNIT_ASSERT_EQUAL(0, sky_subset[i].rel_l.owner);
-        CPPUNIT_ASSERT_EQUAL(0, sky_subset[i].rel_m.owner);
-        CPPUNIT_ASSERT_EQUAL(0, sky_subset[i].rel_n.owner);
+        CPPUNIT_ASSERT_EQUAL(0, sky_subset[i].l.owner);
+        CPPUNIT_ASSERT_EQUAL(0, sky_subset[i].m.owner);
+        CPPUNIT_ASSERT_EQUAL(0, sky_subset[i].n.owner);
     }
 
     // Copy subsets to the GPU.
@@ -452,10 +452,10 @@ void Test_SkyModel::test_split()
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, sky_subset_gpu[i].type());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, sky_subset_gpu[i].location());
         CPPUNIT_ASSERT_EQUAL(sky_subset_gpu[i].num_sources, sky_subset_gpu[i].RA.num_elements);
-        CPPUNIT_ASSERT_EQUAL(sky_subset_gpu[i].num_sources, sky_subset_gpu[i].rel_m.num_elements);
+        CPPUNIT_ASSERT_EQUAL(sky_subset_gpu[i].num_sources, sky_subset_gpu[i].m.num_elements);
         CPPUNIT_ASSERT_EQUAL(1, sky_subset_gpu[i].RA.owner);
         CPPUNIT_ASSERT_EQUAL(1, sky_subset_gpu[i].Q.owner);
-        CPPUNIT_ASSERT_EQUAL(1, sky_subset_gpu[i].rel_m.owner);
+        CPPUNIT_ASSERT_EQUAL(1, sky_subset_gpu[i].m.owner);
     }
 
     // Cleanup.
@@ -579,12 +579,12 @@ void Test_SkyModel::test_filter_by_flux()
                     ((float*)sky_gpu_temp.reference_freq.data)[i], 1e-5);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.spectral_index.data)[i],
                     ((float*)sky_gpu_temp.spectral_index.data)[i], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.rel_l.data)[i],
-                    ((float*)sky_gpu_temp.rel_l.data)[i], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.rel_m.data)[i],
-                    ((float*)sky_gpu_temp.rel_m.data)[i], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.rel_n.data)[i],
-                    ((float*)sky_gpu_temp.rel_n.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.l.data)[i],
+                    ((float*)sky_gpu_temp.l.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.m.data)[i],
+                    ((float*)sky_gpu_temp.m.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.n.data)[i],
+                    ((float*)sky_gpu_temp.n.data)[i], 1e-5);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.FWHM_major.data)[i],
                     ((float*)sky_gpu_temp.FWHM_major.data)[i], 1e-5);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)sky_cpu.FWHM_minor.data)[i],
@@ -683,12 +683,12 @@ void Test_SkyModel::test_filter_by_flux()
                     ((double*)sky_gpu_temp.reference_freq.data)[i], 1e-5);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.spectral_index.data)[i],
                     ((double*)sky_gpu_temp.spectral_index.data)[i], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.rel_l.data)[i],
-                    ((double*)sky_gpu_temp.rel_l.data)[i], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.rel_m.data)[i],
-                    ((double*)sky_gpu_temp.rel_m.data)[i], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.rel_n.data)[i],
-                    ((double*)sky_gpu_temp.rel_n.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.l.data)[i],
+                    ((double*)sky_gpu_temp.l.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.m.data)[i],
+                    ((double*)sky_gpu_temp.m.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.n.data)[i],
+                    ((double*)sky_gpu_temp.n.data)[i], 1e-5);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.FWHM_major.data)[i],
                     ((double*)sky_gpu_temp.FWHM_major.data)[i], 1e-5);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)sky_cpu.FWHM_minor.data)[i],
@@ -860,9 +860,9 @@ void Test_SkyModel::test_insert()
         ((double*)src.V.data)[i]              = (double)i + 0.5;
         ((double*)src.reference_freq.data)[i] = (double)i + 0.6;
         ((double*)src.spectral_index.data)[i] = (double)i + 0.7;
-        ((double*)src.rel_l.data)[i]          = (double)i + 0.8;
-        ((double*)src.rel_m.data)[i]          = (double)i * 2.0;
-        ((double*)src.rel_n.data)[i]          = (double)i * 3.0;
+        ((double*)src.l.data)[i]          = (double)i + 0.8;
+        ((double*)src.m.data)[i]          = (double)i * 2.0;
+        ((double*)src.n.data)[i]          = (double)i * 3.0;
         ((double*)src.FWHM_major.data)[i]     = (double)i * 4.0;
         ((double*)src.FWHM_minor.data)[i]     = (double)i * 5.0;
         ((double*)src.position_angle.data)[i] = (double)i * 6.0;
@@ -890,9 +890,9 @@ void Test_SkyModel::test_insert()
             CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.5, ((double*)src.V.data)[i], delta);
             CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.6, ((double*)src.reference_freq.data)[i], delta);
             CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.7, ((double*)src.spectral_index.data)[i], delta);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.8, ((double*)src.rel_l.data)[i], delta);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 2.0, ((double*)src.rel_m.data)[i], delta);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 3.0, ((double*)src.rel_n.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.8, ((double*)src.l.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 2.0, ((double*)src.m.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 3.0, ((double*)src.n.data)[i], delta);
             CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 4.0, ((double*)src.FWHM_major.data)[i], delta);
             CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 5.0, ((double*)src.FWHM_minor.data)[i], delta);
             CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 6.0, ((double*)src.position_angle.data)[i], delta);

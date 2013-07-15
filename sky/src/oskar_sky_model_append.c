@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,9 +84,9 @@ void oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src,
     dst->num_sources += src->num_sources;
 
     /* Resize arrays to hold the direction cosines. */
-    oskar_mem_realloc(&dst->rel_l, dst->num_sources, status);
-    oskar_mem_realloc(&dst->rel_m, dst->num_sources, status);
-    oskar_mem_realloc(&dst->rel_n, dst->num_sources, status);
+    oskar_mem_realloc(&dst->l, dst->num_sources, status);
+    oskar_mem_realloc(&dst->m, dst->num_sources, status);
+    oskar_mem_realloc(&dst->n, dst->num_sources, status);
 
     /* Resize arrays to hold gaussian source parameters */
     oskar_mem_realloc(&dst->gaussian_a, dst->num_sources, status);

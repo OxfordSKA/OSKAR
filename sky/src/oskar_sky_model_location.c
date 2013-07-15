@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,9 +44,9 @@ int oskar_sky_model_is_location(const oskar_SkyModel* sky, int location)
             sky->V.location == location &&
             sky->reference_freq.location == location &&
             sky->spectral_index.location == location &&
-            sky->rel_l.location == location &&
-            sky->rel_m.location == location &&
-            sky->rel_n.location == location &&
+            sky->l.location == location &&
+            sky->m.location == location &&
+            sky->n.location == location &&
             sky->FWHM_major.location == location &&
             sky->FWHM_major.location == location &&
             sky->position_angle.location == location &&

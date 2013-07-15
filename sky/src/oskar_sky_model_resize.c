@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,9 +56,9 @@ void oskar_sky_model_resize(oskar_SkyModel* sky, int num_sources, int* status)
     oskar_mem_realloc(&sky->V, num_sources, status);
     oskar_mem_realloc(&sky->reference_freq, num_sources, status);
     oskar_mem_realloc(&sky->spectral_index, num_sources, status);
-    oskar_mem_realloc(&sky->rel_l, num_sources, status);
-    oskar_mem_realloc(&sky->rel_m, num_sources, status);
-    oskar_mem_realloc(&sky->rel_n, num_sources, status);
+    oskar_mem_realloc(&sky->l, num_sources, status);
+    oskar_mem_realloc(&sky->m, num_sources, status);
+    oskar_mem_realloc(&sky->n, num_sources, status);
     oskar_mem_realloc(&sky->FWHM_major, num_sources, status);
     oskar_mem_realloc(&sky->FWHM_minor, num_sources, status);
     oskar_mem_realloc(&sky->position_angle, num_sources, status);

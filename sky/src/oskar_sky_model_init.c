@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,9 +66,9 @@ void oskar_sky_model_init(oskar_SkyModel* model, int type, int location,
     oskar_mem_init(&model->V, type, location, num_elements, owner, status);
     oskar_mem_init(&model->reference_freq, type, location, num_elements, owner, status);
     oskar_mem_init(&model->spectral_index, type, location, num_elements, owner, status);
-    oskar_mem_init(&model->rel_l, type, location, num_elements, owner, status);
-    oskar_mem_init(&model->rel_m, type, location, num_elements, owner, status);
-    oskar_mem_init(&model->rel_n, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->l, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->m, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->n, type, location, num_elements, owner, status);
     oskar_mem_init(&model->FWHM_major, type, location, num_elements, owner, status);
     oskar_mem_init(&model->FWHM_minor, type, location, num_elements, owner, status);
     oskar_mem_init(&model->position_angle, type, location, num_elements, owner, status);

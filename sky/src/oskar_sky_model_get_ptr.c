@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,11 +59,11 @@ int oskar_sky_model_get_ptr(oskar_SkyModel* sky_ptr, const oskar_SkyModel* sky,
             offset, num_sources, &err);
     oskar_mem_get_pointer(&sky_ptr->spectral_index, &sky->spectral_index,
             offset, num_sources, &err);
-    oskar_mem_get_pointer(&sky_ptr->rel_l, &sky->rel_l,
+    oskar_mem_get_pointer(&sky_ptr->l, &sky->l,
             offset, num_sources, &err);
-    oskar_mem_get_pointer(&sky_ptr->rel_m, &sky->rel_m,
+    oskar_mem_get_pointer(&sky_ptr->m, &sky->m,
             offset, num_sources, &err);
-    oskar_mem_get_pointer(&sky_ptr->rel_n, &sky->rel_n,
+    oskar_mem_get_pointer(&sky_ptr->n, &sky->n,
             offset, num_sources, &err);
     oskar_mem_get_pointer(&sky_ptr->FWHM_major, &sky->FWHM_major,
             offset, num_sources, &err);

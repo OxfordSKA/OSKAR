@@ -88,18 +88,18 @@ static void filter_source_data(oskar_SkyModel* output, T min_f, T max_f)
             device_pointer_cast((const T*)output->I.data),
             range_check);
     remove_if(
-            device_pointer_cast((T*)output->rel_l.data),
-            device_pointer_cast(((T*)output->rel_l.data) + n),
+            device_pointer_cast((T*)output->l.data),
+            device_pointer_cast(((T*)output->l.data) + n),
             device_pointer_cast((const T*)output->I.data),
             range_check);
     remove_if(
-            device_pointer_cast((T*)output->rel_m.data),
-            device_pointer_cast(((T*)output->rel_m.data) + n),
+            device_pointer_cast((T*)output->m.data),
+            device_pointer_cast(((T*)output->m.data) + n),
             device_pointer_cast((const T*)output->I.data),
             range_check);
     remove_if(
-            device_pointer_cast((T*)output->rel_n.data),
-            device_pointer_cast(((T*)output->rel_n.data) + n),
+            device_pointer_cast((T*)output->n.data),
+            device_pointer_cast(((T*)output->n.data) + n),
             device_pointer_cast((const T*)output->I.data),
             range_check);
 

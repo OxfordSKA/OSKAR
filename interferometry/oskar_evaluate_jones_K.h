@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,71 @@
 #include "sky/oskar_SkyModel.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "math/oskar_Jones.h"
+#include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief
+ * Evaluates the interferometer phase (K) Jones term (single precision).
+ *
+ * @details
+ * This function constructs a set of Jones matrices that correspond to the
+ * interferometer phase offset for each source and station, relative to the
+ * array centre.
+ *
+ * The output set of Jones matrices (K) are scalar complex values.
+ *
+ * Note:
+ * Station coordinates u,v,w should be specified in radians at the frequency
+ * for which K is evaluated.
+ *
+ * @param[out] jones        Output set of Jones matrices.
+ * @param[in]  num_stations Number of stations.
+ * @param[in]  u            Station u coordinates, in radians.
+ * @param[in]  v            Station v coordinates, in radians.
+ * @param[in]  w            Station w coordinates, in radians.
+ * @param[in]  num_sources  Number of sources.
+ * @param[in]  l            Source l-direction cosines.
+ * @param[in]  m            Source m-direction cosines.
+ * @param[in]  n            Source n-direction cosines.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_jones_K_f(float2* jones, int num_stations,
+        const float* u, const float* v, const float* w, int num_sources,
+        const float* l, const float* m, const float* n);
+
+/**
+ * @brief
+ * Evaluates the interferometer phase (K) Jones term (double precision).
+ *
+ * @details
+ * This function constructs a set of Jones matrices that correspond to the
+ * interferometer phase offset for each source and station, relative to the
+ * array centre.
+ *
+ * The output set of Jones matrices (K) are scalar complex values.
+ *
+ * Note:
+ * Station coordinates u,v,w should be specified in radians at the frequency
+ * for which K is evaluated.
+ *
+ * @param[out] jones        Output set of Jones matrices.
+ * @param[in]  num_stations Number of stations.
+ * @param[in]  u            Station u coordinates, in radians.
+ * @param[in]  v            Station v coordinates, in radians.
+ * @param[in]  w            Station w coordinates, in radians.
+ * @param[in]  num_sources  Number of sources.
+ * @param[in]  l            Source l-direction cosines.
+ * @param[in]  m            Source m-direction cosines.
+ * @param[in]  n            Source n-direction cosines.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_jones_K_d(double2* jones, int num_stations,
+        const double* u, const double* v, const double* w, int num_sources,
+        const double* l, const double* m, const double* n);
 
 /**
  * @brief
@@ -59,16 +120,18 @@ extern "C" {
  * for which K is evaluated.
  *
  * @param[out] K         Output set of Jones matrices.
- * @param[in]  sky       Input sky model.
+ * @param[in]  l         Source l-direction cosines.
+ * @param[in]  m         Source m-direction cosines.
+ * @param[in]  n         Source n-direction cosines.
  * @param[in]  u         Station u coordinates, in radians.
  * @param[in]  v         Station v coordinates, in radians.
  * @param[in]  w         Station w coordinates, in radians.
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
-        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w,
-        int* status);
+void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
+        const oskar_Mem* m, const oskar_Mem* n, const oskar_Mem* u,
+        const oskar_Mem* v, const oskar_Mem* w, int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,9 +56,9 @@ void oskar_sky_model_copy(oskar_SkyModel* dst, const oskar_SkyModel* src,
     oskar_mem_copy(&dst->V, &src->V, status);
     oskar_mem_copy(&dst->reference_freq, &src->reference_freq, status);
     oskar_mem_copy(&dst->spectral_index, &src->spectral_index, status);
-    oskar_mem_copy(&dst->rel_l, &src->rel_l, status);
-    oskar_mem_copy(&dst->rel_m, &src->rel_m, status);
-    oskar_mem_copy(&dst->rel_n, &src->rel_n, status);
+    oskar_mem_copy(&dst->l, &src->l, status);
+    oskar_mem_copy(&dst->m, &src->m, status);
+    oskar_mem_copy(&dst->n, &src->n, status);
     oskar_mem_copy(&dst->FWHM_major, &src->FWHM_major, status);
     oskar_mem_copy(&dst->FWHM_minor, &src->FWHM_minor, status);
     oskar_mem_copy(&dst->position_angle, &src->position_angle, status);

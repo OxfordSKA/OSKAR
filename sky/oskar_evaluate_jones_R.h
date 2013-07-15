@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,61 @@
 #include "sky/oskar_SkyModel.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "math/oskar_Jones.h"
+#include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief
+ * Function to construct matrices for parallactic angle rotation
+ * (single precision).
+ *
+ * @details
+ * This function constructs a set of Jones matrices that will transform the
+ * equatorial Stokes parameters into the local horizontal frame of each station.
+ * This corresponds to a rotation by the parallactic angle (q) for each source
+ * and station. The Jones matrix is:
+ *
+ * ( cos(q)  -sin(q) )
+ * ( sin(q)   cos(q) )
+ *
+ * @param[out] jones       Output set of Jones matrices.
+ * @param[in] num_sources  Number of source positions.
+ * @param[in] ra           Source Right Ascension coordinates, in radians.
+ * @param[in] dec          Source Declination coordinates, in radians.
+ * @param[in] latitude_rad The observer's latitude, in radians.
+ * @param[in] lst_rad      The Local Apparent Sidereal Time, in radians.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_jones_R_f(float4c* jones, int num_sources,
+        float* ra, float* dec, float latitude_rad, float lst_rad);
+
+/**
+ * @brief
+ * Function to construct matrices for parallactic angle rotation
+ * (double precision).
+ *
+ * @details
+ * This function constructs a set of Jones matrices that will transform the
+ * equatorial Stokes parameters into the local horizontal frame of each station.
+ * This corresponds to a rotation by the parallactic angle (q) for each source
+ * and station. The Jones matrix is:
+ *
+ * ( cos(q)  -sin(q) )
+ * ( sin(q)   cos(q) )
+ *
+ * @param[out] jones       Output set of Jones matrices.
+ * @param[in] num_sources  Number of source positions.
+ * @param[in] ra           Source Right Ascension coordinates, in radians.
+ * @param[in] dec          Source Declination coordinates, in radians.
+ * @param[in] latitude_rad The observer's latitude, in radians.
+ * @param[in] lst_rad      The Local Apparent Sidereal Time, in radians.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_jones_R_d(double4c* jones, int num_sources,
+        double* ra, double* dec, double latitude_rad, double lst_rad);
 
 /**
  * @brief

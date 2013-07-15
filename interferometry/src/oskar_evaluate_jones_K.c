@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,20 +30,93 @@
 #include "interferometry/oskar_evaluate_jones_K_cuda.h"
 #include "utility/oskar_cuda_check_error.h"
 #include "utility/oskar_mem_type_check.h"
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/* Single precision. */
+void oskar_evaluate_jones_K_f(float2* jones, int num_stations,
+        const float* u, const float* v, const float* w, int num_sources,
+        const float* l, const float* m, const float* n)
+{
+    int station, source;
+
+    /* Loop over stations. */
+    for (station = 0; station < num_stations; ++station)
+    {
+        float us, vs, ws;
+        float2* station_ptr;
+
+        /* Get the station data. */
+        station_ptr = &jones[station * num_sources];
+        us = u[station];
+        vs = v[station];
+        ws = w[station];
+
+        /* Loop over sources. */
+        for (source = 0; source < num_sources; ++source)
+        {
+            float phase;
+            float2 weight;
+
+            /* Calculate the source phase. */
+            phase = us * l[source] + vs * m[source] + ws * n[source];
+            weight.x = cosf(phase);
+            weight.y = sinf(phase);
+
+            /* Store the result. */
+            station_ptr[source] = weight;
+        }
+    }
+}
+
+/* Double precision. */
+void oskar_evaluate_jones_K_d(double2* jones, int num_stations,
+        const double* u, const double* v, const double* w, int num_sources,
+        const double* l, const double* m, const double* n)
+{
+    int station, source;
+
+    /* Loop over stations. */
+    for (station = 0; station < num_stations; ++station)
+    {
+        double us, vs, ws;
+        double2* station_ptr;
+
+        /* Get the station data. */
+        station_ptr = &jones[station * num_sources];
+        us = u[station];
+        vs = v[station];
+        ws = w[station];
+
+        /* Loop over sources. */
+        for (source = 0; source < num_sources; ++source)
+        {
+            double phase;
+            double2 weight;
+
+            /* Calculate the source phase. */
+            phase = us * l[source] + vs * m[source] + ws * n[source];
+            weight.x = cos(phase);
+            weight.y = sin(phase);
+
+            /* Store the result. */
+            station_ptr[source] = weight;
+        }
+    }
+}
+
 /* Wrapper. */
-void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
-        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w,
-        int* status)
+void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
+        const oskar_Mem* m, const oskar_Mem* n, const oskar_Mem* u,
+        const oskar_Mem* v, const oskar_Mem* w, int* status)
 {
     int num_sources, num_stations, jones_type, base_type, location;
 
     /* Check all inputs. */
-    if (!K || !sky || !u || !v || !w || !status)
+    if (!K || !l || !m || !n || !u || !v || !w || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -60,36 +133,47 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
     num_stations = K->num_stations;
 
     /* Check that the memory is not NULL. */
-    if (!K->data.data || !sky->rel_l.data || !sky->rel_m.data ||
-            !sky->rel_n.data || !u->data || !v->data || !w->data)
+    if (!K->data.data || !l->data || !m->data || !n->data ||
+            !u->data || !v->data || !w->data)
+    {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
 
     /* Check that the data dimensions are OK. */
-    if (K->num_sources != sky->num_sources ||
+    if (K->num_sources != l->num_elements ||
+            K->num_sources != m->num_elements ||
+            K->num_sources != n->num_elements ||
             K->num_stations != u->num_elements ||
             K->num_stations != v->num_elements ||
             K->num_stations != w->num_elements)
+    {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
 
     /* Check that the data is in the right location. */
-    if (sky->rel_l.location != location || sky->rel_m.location != location ||
-            sky->rel_n.location != location || u->location != location ||
+    if (l->location != location || m->location != location ||
+            n->location != location || u->location != location ||
             v->location != location || w->location != location)
-        *status = OSKAR_ERR_BAD_LOCATION;
+    {
+        *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return;
+    }
 
     /* Check that the data are of the right type. */
     if (!oskar_mem_is_complex(jones_type) || oskar_mem_is_matrix(jones_type))
+    {
         *status = OSKAR_ERR_BAD_JONES_TYPE;
-    if (base_type != sky->rel_l.type ||
-            base_type != sky->rel_m.type ||
-            base_type != sky->rel_n.type ||
-            base_type != u->type ||
-            base_type != v->type ||
-            base_type != w->type)
+        return;
+    }
+    if (base_type != l->type || base_type != m->type ||
+            base_type != n->type || base_type != u->type ||
+            base_type != v->type || base_type != w->type)
+    {
         *status = OSKAR_ERR_TYPE_MISMATCH;
-
-    /* Check if safe to proceed. */
-    if (*status) return;
+        return;
+    }
 
     /* Evaluate Jones matrices. */
     if (location == OSKAR_LOCATION_GPU)
@@ -103,9 +187,9 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
                     (const float*)(v->data),
                     (const float*)(w->data),
                     num_sources,
-                    (const float*)(sky->rel_l.data),
-                    (const float*)(sky->rel_m.data),
-                    (const float*)(sky->rel_n.data));
+                    (const float*)(l->data),
+                    (const float*)(m->data),
+                    (const float*)(n->data));
         }
         else if (jones_type == OSKAR_DOUBLE_COMPLEX)
         {
@@ -115,9 +199,9 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
                     (const double*)(v->data),
                     (const double*)(w->data),
                     num_sources,
-                    (const double*)(sky->rel_l.data),
-                    (const double*)(sky->rel_m.data),
-                    (const double*)(sky->rel_n.data));
+                    (const double*)(l->data),
+                    (const double*)(m->data),
+                    (const double*)(n->data));
         }
         oskar_cuda_check_error(status);
 #else
@@ -126,7 +210,30 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
     }
     else if (location == OSKAR_LOCATION_CPU)
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        if (jones_type == OSKAR_SINGLE_COMPLEX)
+        {
+            oskar_evaluate_jones_K_f((float2*)(K->data.data),
+                    num_stations,
+                    (const float*)(u->data),
+                    (const float*)(v->data),
+                    (const float*)(w->data),
+                    num_sources,
+                    (const float*)(l->data),
+                    (const float*)(m->data),
+                    (const float*)(n->data));
+        }
+        else if (jones_type == OSKAR_DOUBLE_COMPLEX)
+        {
+            oskar_evaluate_jones_K_d((double2*)(K->data.data),
+                    num_stations,
+                    (const double*)(u->data),
+                    (const double*)(v->data),
+                    (const double*)(w->data),
+                    num_sources,
+                    (const double*)(l->data),
+                    (const double*)(m->data),
+                    (const double*)(n->data));
+        }
     }
 }
 

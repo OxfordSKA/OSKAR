@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,9 +69,9 @@ int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
             V        = (float*)sky->V.data;
             ref_freq = (float*)sky->reference_freq.data;
             spix     = (float*)sky->spectral_index.data;
-            rel_l    = (float*)sky->rel_l.data;
-            rel_m    = (float*)sky->rel_m.data;
-            rel_n    = (float*)sky->rel_n.data;
+            rel_l    = (float*)sky->l.data;
+            rel_m    = (float*)sky->m.data;
+            rel_n    = (float*)sky->n.data;
             FWHM_major = (float*)sky->FWHM_major.data;
             FWHM_minor = (float*)sky->FWHM_minor.data;
             position_angle = (float*)sky->position_angle.data;
@@ -118,9 +118,9 @@ int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
             V        = (double*)sky->V.data;
             ref_freq = (double*)sky->reference_freq.data;
             spix     = (double*)sky->spectral_index.data;
-            rel_l    = (double*)sky->rel_l.data;
-            rel_m    = (double*)sky->rel_m.data;
-            rel_n    = (double*)sky->rel_n.data;
+            rel_l    = (double*)sky->l.data;
+            rel_m    = (double*)sky->m.data;
+            rel_n    = (double*)sky->n.data;
             FWHM_major = (double*)sky->FWHM_major.data;
             FWHM_minor = (double*)sky->FWHM_minor.data;
             position_angle = (double*)sky->position_angle.data;

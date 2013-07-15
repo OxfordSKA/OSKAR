@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,9 @@ void oskar_sky_model_free(oskar_SkyModel* model, int* status)
     oskar_mem_free(&model->V, status);
     oskar_mem_free(&model->reference_freq, status);
     oskar_mem_free(&model->spectral_index, status);
-    oskar_mem_free(&model->rel_l, status);
-    oskar_mem_free(&model->rel_m, status);
-    oskar_mem_free(&model->rel_n, status);
+    oskar_mem_free(&model->l, status);
+    oskar_mem_free(&model->m, status);
+    oskar_mem_free(&model->n, status);
     oskar_mem_free(&model->FWHM_major, status);
     oskar_mem_free(&model->FWHM_minor, status);
     oskar_mem_free(&model->position_angle, status);

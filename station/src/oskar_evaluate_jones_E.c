@@ -136,7 +136,7 @@ static void evaluate_E_common_sky_identical_stations(oskar_Jones* E,
     else if (station0->station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
     {
         oskar_evaluate_station_beam_gaussian(&E0, sky->num_sources,
-                &sky->rel_l, &sky->rel_m, &work->hor_z,
+                &sky->l, &sky->m, &work->hor_z,
                 station0->gaussian_beam_fwhm_deg, status);
     }
     else
@@ -190,7 +190,7 @@ static void evaluate_E_common_sky_different_stations(oskar_Jones* E,
         else if (station->station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
         {
             oskar_evaluate_station_beam_gaussian(&E_station, sky->num_sources,
-                    &sky->rel_l, &sky->rel_m, &work->hor_z,
+                    &sky->l, &sky->m, &work->hor_z,
                     station->gaussian_beam_fwhm_deg, status);
         }
         else
@@ -234,7 +234,7 @@ static void evaluate_E_different_sky(oskar_Jones* E,
         else if (station->station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
         {
             oskar_evaluate_station_beam_gaussian(&E_station, sky->num_sources,
-                    &sky->rel_l, &sky->rel_m, &work->hor_z,
+                    &sky->l, &sky->m, &work->hor_z,
                     station->gaussian_beam_fwhm_deg, status);
         }
         else

@@ -51,6 +51,7 @@
 #include "station/oskar_evaluate_jones_E.h"
 #include "station/oskar_work_station_beam_free.h"
 #include "station/oskar_work_station_beam_init.h"
+#include "utility/oskar_cuda_mem_log.h"
 #include "utility/oskar_curand_state_free.h"
 #include "utility/oskar_curand_state_init.h"
 #include "utility/oskar_log_message.h"
@@ -75,8 +76,6 @@ void oskar_interferometer_scalar(oskar_Mem* vis_amp, oskar_Log* log,
     int complx, num_vis_dumps, num_vis_ave, num_fringe_ave;
     double t_dump, t_ave, t_fringe, dt_dump, dt_ave, dt_fringe, gast;
     double obs_start_mjd_utc;
-    size_t mem_free = 0, mem_total = 0;
-    struct cudaDeviceProp device_prop;
     oskar_Jones E, K;
     oskar_Mem vis, u, v, w;
     oskar_SkyModel sky_gpu, local_sky;
@@ -216,7 +215,8 @@ void oskar_interferometer_scalar(oskar_Mem* vis_amp, oskar_Log* log,
                         gast, status);
 
                 /* Evaluate interferometer phase (K), join Jones, correlate. */
-                oskar_evaluate_jones_K(&K, &local_sky, &u, &v, &w, status);
+                oskar_evaluate_jones_K(&K, &local_sky.l, &local_sky.m,
+                        &local_sky.n, &u, &v, &w, status);
                 oskar_jones_join(&K, &K, &E, status);
                 oskar_correlate(&vis, &K, &tel_gpu, &local_sky, &u, &v, gast,
                         status);
@@ -229,11 +229,7 @@ void oskar_interferometer_scalar(oskar_Mem* vis_amp, oskar_Log* log,
     }
 
     /* Record GPU memory usage. */
-    cudaMemGetInfo(&mem_free, &mem_total);
-    cudaGetDeviceProperties(&device_prop, device_id);
-    oskar_log_message(log, 1, "Memory on device %d [%s] is %.1f%% used.",
-            device_id, device_prop.name,
-            100.0 * (1.0 - ((double)mem_free / (double)mem_total)));
+    oskar_cuda_mem_log(log, 1, device_id);
 
     /* Free memory. */
     oskar_curand_state_free(&curand_state, status);

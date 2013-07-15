@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ void oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
 
     /* Convert coordinates. */
     oskar_ra_dec_to_rel_lmn(sky->num_sources, &sky->RA, &sky->Dec, ra0, dec0,
-            &sky->rel_l, &sky->rel_m, &sky->rel_n, status);
+            &sky->l, &sky->m, &sky->n, status);
 }
 
 #ifdef __cplusplus

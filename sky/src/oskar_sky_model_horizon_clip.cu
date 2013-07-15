@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,20 +91,20 @@ static void copy_source_data(oskar_SkyModel* output, const oskar_SkyModel* input
             device_pointer_cast((const int*)mask),
             device_pointer_cast((T*)output->spectral_index), is_true());
     copy_if(
-            device_pointer_cast((const T*)input->rel_l),
-            device_pointer_cast(((const T*)input->rel_l) + n),
+            device_pointer_cast((const T*)input->l),
+            device_pointer_cast(((const T*)input->l) + n),
             device_pointer_cast((const int*)mask),
-            device_pointer_cast((T*)output->rel_l), is_true());
+            device_pointer_cast((T*)output->l), is_true());
     copy_if(
-            device_pointer_cast((const T*)input->rel_m),
-            device_pointer_cast(((const T*)input->rel_m) + n),
+            device_pointer_cast((const T*)input->m),
+            device_pointer_cast(((const T*)input->m) + n),
             device_pointer_cast((const int*)mask),
-            device_pointer_cast((T*)output->rel_m), is_true());
+            device_pointer_cast((T*)output->m), is_true());
     copy_if(
-            device_pointer_cast((const T*)input->rel_n),
-            device_pointer_cast(((const T*)input->rel_n) + n),
+            device_pointer_cast((const T*)input->n),
+            device_pointer_cast(((const T*)input->n) + n),
             device_pointer_cast((const int*)mask),
-            device_pointer_cast((T*)output->rel_n), is_true());
+            device_pointer_cast((T*)output->n), is_true());
 
     copy_if(
             device_pointer_cast((const T*)input->FWHM_major),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,7 @@ extern "C" {
  * @param[in]  d_u          Station u coordinates, in radians.
  * @param[in]  d_v          Station v coordinates, in radians.
  * @param[in]  d_w          Station w coordinates, in radians.
- * @param[in]  num_stations Number of sources.
+ * @param[in]  num_sources  Number of sources.
  * @param[in]  d_l          Source l-direction cosines.
  * @param[in]  d_m          Source m-direction cosines.
  * @param[in]  d_n          Source n-direction cosines.
@@ -92,7 +92,7 @@ void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_stations,
  * @param[in]  d_u          Station u coordinates, in radians.
  * @param[in]  d_v          Station v coordinates, in radians.
  * @param[in]  d_w          Station w coordinates, in radians.
- * @param[in]  num_stations Number of sources.
+ * @param[in]  num_sources  Number of sources.
  * @param[in]  d_l          Source l-direction cosines.
  * @param[in]  d_m          Source m-direction cosines.
  * @param[in]  d_n          Source n-direction cosines.
