@@ -104,6 +104,9 @@ add_subdirectory(matlab)
 add_subdirectory(ms)
 add_subdirectory(widgets)
 
+# === Build external libraries (gtest)
+add_subdirectory(extern)
+
 # === Install header tree.
 if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")
     string(REGEX MATCH "[^/|\\][a-zA-z0-9|_|-]+$" bin_dir ${CMAKE_BINARY_DIR})
