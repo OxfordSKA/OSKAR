@@ -141,12 +141,12 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
     }
 
     /* Check that the data dimensions are OK. */
-    if (K->num_sources != l->num_elements ||
-            K->num_sources != m->num_elements ||
-            K->num_sources != n->num_elements ||
-            K->num_stations != u->num_elements ||
-            K->num_stations != v->num_elements ||
-            K->num_stations != w->num_elements)
+    if (num_sources > l->num_elements ||
+            num_sources > m->num_elements ||
+            num_sources > n->num_elements ||
+            num_stations != u->num_elements ||
+            num_stations != v->num_elements ||
+            num_stations != w->num_elements)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
