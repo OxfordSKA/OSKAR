@@ -115,9 +115,9 @@ if (CUDA_FOUND)
         set(CUDA_VERBOSE_BUILD OFF)
 
         # General NVCC compiler options.
-        set(CUDA_NVCC_FLAGS_RELEASE -O2)
-        set(CUDA_NVCC_FLAGS_DEBUG -O0;-g)
-        set(CUDA_NVCC_FLAGS_RELWIDTHDEBINFO "-02 -g")
+        set(CUDA_NVCC_FLAGS_RELEASE "-O2")
+        set(CUDA_NVCC_FLAGS_DEBUG "-O0 -g --generate-line-info")
+        set(CUDA_NVCC_FLAGS_RELWIDTHDEBINFO "-02 -g --generate-line-info")
         set(CUDA_NVCC_FLAGS_MINSIZEREL -01)
 
         # Options passed to the compiler NVCC encapsulates.
