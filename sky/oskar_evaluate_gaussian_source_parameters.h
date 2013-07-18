@@ -48,7 +48,7 @@ extern "C" {
  * see http://en.wikipedia.org/wiki/Gaussian_function
  *
  * This is achieved by projecting the source ellipse as defined on the sky
- * to the l,m observation l,m plane.
+ * to the observation l,m plane.
  *
  * - Six points are evaluated on the circumference of the ellipse which defines
  *   the gaussian source
@@ -65,7 +65,6 @@ extern "C" {
  *
  * FIXME if zero failed sources stays in the code, it will need to be modified
  * to also take Q,U,V
- *
  *
  * @param log             OSKAR message log object
  * @param num_sources     Number of sources (length of source arrays)
