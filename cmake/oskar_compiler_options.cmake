@@ -8,11 +8,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 message("===============================================================================")
-if (CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
-    message("-- INFO: Building in release mode.")
-else ()
-    message("-- INFO: Building in debug mode.")
-endif()
+message("-- INFO: Building mode = ${CMAKE_BUILD_TYPE}.")
 message("===============================================================================")
 
 set(BUILD_SHARED_LIBS ON)
