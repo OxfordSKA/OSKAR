@@ -598,7 +598,7 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
         {
             case OSKAR_SYSTEM_NOISE_RMS:
             {
-                const char* override;
+                const char* override = NULL;
                 switch (n->value.rms.override)
                 {
                     case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
@@ -615,7 +615,7 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
             }
             case OSKAR_SYSTEM_NOISE_SENSITIVITY:
             {
-                const char* override;
+                const char* override = NULL;
                 switch (n->value.sensitivity.override)
                 {
                     case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:

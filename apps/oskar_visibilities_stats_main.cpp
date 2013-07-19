@@ -54,13 +54,13 @@ using namespace std;
 void set_options(oskar_OptionParser& opt);
 bool check_options(oskar_OptionParser& opt, int argc, char** argv);
 void check_error(int status);
-char *doubleToRawString(double x) {
-    // Assumes sizeof(long long) == 8.
-
-    char *buffer = new char[32];
-    sprintf(buffer, "%llx", *(unsigned long long *)&x);  // Evil!
-    return buffer;
-}
+//char *doubleToRawString(double x) {
+//    // Assumes sizeof(long long) == 8.
+//
+//    char *buffer = new char[32];
+//    sprintf(buffer, "%llx", *(unsigned long long *)&x);  // Evil!
+//    return buffer;
+//}
 //------------------------------------------------------------------------------
 
 int main(int argc, char** argv)

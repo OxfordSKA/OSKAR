@@ -92,7 +92,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
      * for the new pointing centre as well as a set of baseline coordinates
      * corresponding to the user specified imaging direction.
      */
-    double delta_l, delta_m, delta_n;
+    double delta_l = 0.0, delta_m = 0.0, delta_n = 0.0;
     oskar_Mem uu_rot, vv_rot, ww_rot;
     if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
     {

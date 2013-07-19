@@ -42,7 +42,7 @@ void oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
         const oskar_StationModel* station, double gast, int* status)
 {
     double last;
-    int type, loc;
+    int type = 0, loc;
 
     /* Check all inputs. */
     if (!RA || !Dec || !station || !l || !m || !n || !status)
