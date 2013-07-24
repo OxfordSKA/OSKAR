@@ -148,7 +148,7 @@ if (CUDA_FOUND)
         endif()
 
         # PTX compiler options
-        #list(APPEND CUDA_NVCC_FLAGS_DEBUG --ptxas-options=-v;)
+        list(APPEND CUDA_NVCC_FLAGS_RELEASE --ptxas-options=-v;)
     endif ()
 
     message("===============================================================================")

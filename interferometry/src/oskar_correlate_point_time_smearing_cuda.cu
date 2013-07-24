@@ -88,9 +88,6 @@ void oskar_correlate_point_time_smearing_cuda_d(int num_sources,
 
 /* Kernels. ================================================================ */
 
-#define ONE_OVER_2PI  0.159154943091895335768884   /* 1 / (2 * pi) */
-#define ONE_OVER_2PIf 0.159154943091895335768884f  /* 1 / (2 * pi) */
-
 #define OMEGA_EARTH  7.272205217e-5  /* radians/sec */
 #define OMEGA_EARTHf 7.272205217e-5f /* radians/sec */
 
@@ -112,82 +109,92 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         const float bandwidth_hz, const float time_int_sec,
         const float gha0_rad, const float dec0_rad, float4c* vis)
 {
+    /* Local variables. */
+    float4c sum;
+    float l, m, n, rb, rt;
+    int i;
+
+    /* Common values per thread block. */
+    __device__ __shared__ float uu, vv, du_dt, dv_dt, dw_dt;
+    __device__ __shared__ const float4c *station_i, *station_j;
+
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (SJ >= SI) return;
 
-    /* Common things per thread block. */
-    __device__ __shared__ float uu, vv;
-    __device__ __shared__ float du_dt, dv_dt, dw_dt;
+    /* Use thread 0 to set up the block. */
     if (threadIdx.x == 0)
     {
-        float xx, yy, rot_angle, temp;
-        float fractional_bandwidth, sin_HA, cos_HA, sin_Dec, cos_Dec;
+        float temp;
 
-        /* Baseline distances, in wavelengths. */
-        fractional_bandwidth = bandwidth_hz / freq_hz;
-        uu = (station_u[SI] - station_u[SJ]) * 0.5f * fractional_bandwidth;
-        vv = (station_v[SI] - station_v[SJ]) * 0.5f * fractional_bandwidth;
-        xx = (station_x[SI] - station_x[SJ]) * 0.5f;
-        yy = (station_y[SI] - station_y[SJ]) * 0.5f;
+        /* Baseline lengths. */
+        uu = (station_u[SI] - station_u[SJ]) * 0.5f;
+        vv = (station_v[SI] - station_v[SJ]) * 0.5f;
+
+        /* Modify the baseline distance to include the common components
+         * of the bandwidth smearing term. */
+        temp = bandwidth_hz / freq_hz; /* Fractional bandwidth */
+        uu *= temp;
+        vv *= temp;
 
         /* Compute the derivatives for time-average smearing. */
-        rot_angle = OMEGA_EARTHf * time_int_sec;
-        sin_HA = sinf(gha0_rad);
-        cos_HA = cosf(gha0_rad);
-        sin_Dec = sinf(dec0_rad);
-        cos_Dec = cosf(dec0_rad);
-        temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
-        du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
-        dv_dt = temp * sin_Dec;
-        dw_dt = -temp * cos_Dec;
+        {
+            float xx, yy, rot_angle;
+            float sin_HA, cos_HA, sin_Dec, cos_Dec;
+            sincosf(gha0_rad, &sin_HA, &cos_HA);
+            sincosf(dec0_rad, &sin_Dec, &cos_Dec);
+            xx = (station_x[SI] - station_x[SJ]) * 0.5f;
+            yy = (station_y[SI] - station_y[SJ]) * 0.5f;
+            rot_angle = OMEGA_EARTHf * time_int_sec;
+            temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
+            du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
+            dv_dt = temp * sin_Dec;
+            dw_dt = -temp * cos_Dec;
+        }
+
+        /* Get pointers to source vectors for both stations. */
+        station_i = &jones[num_sources * SI];
+        station_j = &jones[num_sources * SJ];
     }
     __syncthreads();
 
-    /* Get pointers to both source vectors for station i and j. */
-    const float4c* station_i = &jones[num_sources * SI];
-    const float4c* station_j = &jones[num_sources * SJ];
+    /* Partial sum per thread. */
+    sum.a = make_float2(0.0f, 0.0f);
+    sum.b = make_float2(0.0f, 0.0f);
+    sum.c = make_float2(0.0f, 0.0f);
+    sum.d = make_float2(0.0f, 0.0f);
 
     /* Each thread loops over a subset of the sources. */
+    for (i = threadIdx.x; i < num_sources; i += blockDim.x)
     {
-        float4c sum; /* Partial sum per thread. */
-        sum.a = make_float2(0.0f, 0.0f);
-        sum.b = make_float2(0.0f, 0.0f);
-        sum.c = make_float2(0.0f, 0.0f);
-        sum.d = make_float2(0.0f, 0.0f);
-        for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
-        {
-            /* Get source direction cosines. */
-            float l = source_l[t];
-            float m = source_m[t];
-            float n = source_n[t];
+        /* Get source direction cosines. */
+        l = source_l[i];
+        m = source_m[i];
+        n = source_n[i];
 
-            /* Compute bandwidth-smearing term. */
-            float rb = oskar_sinc_f(uu * l + vv * m);
+        /* Compute bandwidth- and time-smearing terms. */
+        rb = oskar_sinc_f(uu * l + vv * m);
+        rt = oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * n);
+        rb *= rt;
 
-            /* Compute time-smearing term. */
-            float rt = oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * n);
-
-            rb *= rt;
-
-            /* Accumulate baseline visibility response for source. */
-            oskar_accumulate_baseline_visibility_for_source_f(&sum, t,
-                    source_I, source_Q, source_U, source_V,
-                    station_i, station_j, rb);
-        }
-        smem_f[threadIdx.x] = sum;
+        /* Accumulate baseline visibility response for source. */
+        oskar_accumulate_baseline_visibility_for_source_f(&sum, i,
+                source_I, source_Q, source_U, source_V,
+                station_i, station_j, rb);
     }
+
+    /* Store partial sum for the thread in shared memory and synchronise. */
+    smem_f[threadIdx.x] = sum;
     __syncthreads();
 
     /* Accumulate contents of shared memory. */
     if (threadIdx.x == 0)
     {
         /* Sum over all sources for this baseline. */
-        float4c sum;
         sum.a = make_float2(0.0f, 0.0f);
         sum.b = make_float2(0.0f, 0.0f);
         sum.c = make_float2(0.0f, 0.0f);
         sum.d = make_float2(0.0f, 0.0f);
-        for (int i = 0; i < blockDim.x; ++i)
+        for (i = 0; i < blockDim.x; ++i)
         {
             sum.a.x += smem_f[i].a.x;
             sum.a.y += smem_f[i].a.y;
@@ -199,18 +206,18 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
             sum.d.y += smem_f[i].d.y;
         }
 
-        /* Determine 1D index. */
-        int idx = SJ*(num_stations-1) - (SJ-1)*SJ/2 + SI - SJ - 1;
+        /* Determine 1D visibility index for global memory store. */
+        i = SJ*(num_stations-1) - (SJ-1)*SJ/2 + SI - SJ - 1;
 
-        /* Modify existing visibility. */
-        vis[idx].a.x += sum.a.x;
-        vis[idx].a.y += sum.a.y;
-        vis[idx].b.x += sum.b.x;
-        vis[idx].b.y += sum.b.y;
-        vis[idx].c.x += sum.c.x;
-        vis[idx].c.y += sum.c.y;
-        vis[idx].d.x += sum.d.x;
-        vis[idx].d.y += sum.d.y;
+        /* Add result of this thread block to the baseline visibility. */
+        vis[i].a.x += sum.a.x;
+        vis[i].a.y += sum.a.y;
+        vis[i].b.x += sum.b.x;
+        vis[i].b.y += sum.b.y;
+        vis[i].c.x += sum.c.x;
+        vis[i].c.y += sum.c.y;
+        vis[i].d.x += sum.d.x;
+        vis[i].d.y += sum.d.y;
     }
 }
 
@@ -225,82 +232,92 @@ void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
         const double bandwidth_hz, const double time_int_sec,
         const double gha0_rad, const double dec0_rad, double4c* vis)
 {
+    /* Local variables. */
+    double4c sum;
+    double l, m, n, r1, r2;
+    int i;
+
+    /* Common values per thread block. */
+    __device__ __shared__ double uu, vv, du_dt, dv_dt, dw_dt;
+    __device__ __shared__ const double4c *station_i, *station_j;
+
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (SJ >= SI) return;
 
-    /* Common things per thread block. */
-    __device__ __shared__ double uu, vv;
-    __device__ __shared__ double du_dt, dv_dt, dw_dt;
+    /* Use thread 0 to set up the block. */
     if (threadIdx.x == 0)
     {
-        double xx, yy, rot_angle, temp;
-        double fractional_bandwidth, sin_HA, cos_HA, sin_Dec, cos_Dec;
+        double temp;
 
-        /* Baseline distances, in wavelengths. */
-        fractional_bandwidth = bandwidth_hz / freq_hz;
-        uu = (station_u[SI] - station_u[SJ]) * 0.5 * fractional_bandwidth;
-        vv = (station_v[SI] - station_v[SJ]) * 0.5 * fractional_bandwidth;
-        xx = (station_x[SI] - station_x[SJ]) * 0.5;
-        yy = (station_y[SI] - station_y[SJ]) * 0.5;
+        /* Baseline lengths. */
+        uu = (station_u[SI] - station_u[SJ]) * 0.5;
+        vv = (station_v[SI] - station_v[SJ]) * 0.5;
+
+        /* Modify the baseline distance to include the common components
+         * of the bandwidth smearing term. */
+        temp = bandwidth_hz / freq_hz; /* Fractional bandwidth */
+        uu *= temp;
+        vv *= temp;
 
         /* Compute the derivatives for time-average smearing. */
-        rot_angle = OMEGA_EARTH * time_int_sec;
-        sin_HA = sin(gha0_rad);
-        cos_HA = cos(gha0_rad);
-        sin_Dec = sin(dec0_rad);
-        cos_Dec = cos(dec0_rad);
-        temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
-        du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
-        dv_dt = temp * sin_Dec;
-        dw_dt = -temp * cos_Dec;
+        {
+            double xx, yy, rot_angle;
+            double sin_HA, cos_HA, sin_Dec, cos_Dec;
+            sincos(gha0_rad, &sin_HA, &cos_HA);
+            sincos(dec0_rad, &sin_Dec, &cos_Dec);
+            xx = (station_x[SI] - station_x[SJ]) * 0.5;
+            yy = (station_y[SI] - station_y[SJ]) * 0.5;
+            rot_angle = OMEGA_EARTH * time_int_sec;
+            temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
+            du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
+            dv_dt = temp * sin_Dec;
+            dw_dt = -temp * cos_Dec;
+        }
+
+        /* Get pointers to source vectors for both stations. */
+        station_i = &jones[num_sources * SI];
+        station_j = &jones[num_sources * SJ];
     }
     __syncthreads();
 
-    /* Get pointers to both source vectors for station i and j. */
-    const double4c* station_i = &jones[num_sources * SI];
-    const double4c* station_j = &jones[num_sources * SJ];
+    /* Partial sum per thread. */
+    sum.a = make_double2(0.0, 0.0);
+    sum.b = make_double2(0.0, 0.0);
+    sum.c = make_double2(0.0, 0.0);
+    sum.d = make_double2(0.0, 0.0);
 
     /* Each thread loops over a subset of the sources. */
+    for (i = threadIdx.x; i < num_sources; i += blockDim.x)
     {
-        double4c sum; /* Partial sum per thread. */
-        sum.a = make_double2(0.0, 0.0);
-        sum.b = make_double2(0.0, 0.0);
-        sum.c = make_double2(0.0, 0.0);
-        sum.d = make_double2(0.0, 0.0);
-        for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
-        {
-            /* Get source direction cosines. */
-            double l = source_l[t];
-            double m = source_m[t];
-            double n = source_n[t];
+        /* Get source direction cosines. */
+        l = source_l[i];
+        m = source_m[i];
+        n = source_n[i];
 
-            /* Compute bandwidth-smearing term. */
-            double rb = oskar_sinc_d(uu * l + vv * m);
+        /* Compute bandwidth- and time-smearing terms. */
+        r1 = oskar_sinc_d(uu * l + vv * m);
+        r2 = oskar_sinc_d(du_dt * l + dv_dt * m + dw_dt * n);
+        r1 *= r2;
 
-            /* Compute time-smearing term. */
-            double rt = oskar_sinc_d(du_dt * l + dv_dt * m + dw_dt * n);
-
-            rb *= rt;
-
-            /* Accumulate baseline visibility response for source. */
-            oskar_accumulate_baseline_visibility_for_source_d(&sum, t,
-                    source_I, source_Q, source_U, source_V,
-                    station_i, station_j, rb);
-        }
-        smem_d[threadIdx.x] = sum;
+        /* Accumulate baseline visibility response for source. */
+        oskar_accumulate_baseline_visibility_for_source_d(&sum, i,
+                source_I, source_Q, source_U, source_V,
+                station_i, station_j, r1);
     }
+
+    /* Store partial sum for the thread in shared memory and synchronise. */
+    smem_d[threadIdx.x] = sum;
     __syncthreads();
 
     /* Accumulate contents of shared memory. */
     if (threadIdx.x == 0)
     {
         /* Sum over all sources for this baseline. */
-        double4c sum;
         sum.a = make_double2(0.0, 0.0);
         sum.b = make_double2(0.0, 0.0);
         sum.c = make_double2(0.0, 0.0);
         sum.d = make_double2(0.0, 0.0);
-        for (int i = 0; i < blockDim.x; ++i)
+        for (i = 0; i < blockDim.x; ++i)
         {
             sum.a.x += smem_d[i].a.x;
             sum.a.y += smem_d[i].a.y;
@@ -312,17 +329,17 @@ void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
             sum.d.y += smem_d[i].d.y;
         }
 
-        /* Determine 1D index. */
-        int idx = SJ*(num_stations-1) - (SJ-1)*SJ/2 + SI - SJ - 1;
+        /* Determine 1D visibility index for global memory store. */
+        i = SJ*(num_stations-1) - (SJ-1)*SJ/2 + SI - SJ - 1;
 
-        /* Modify existing visibility. */
-        vis[idx].a.x += sum.a.x;
-        vis[idx].a.y += sum.a.y;
-        vis[idx].b.x += sum.b.x;
-        vis[idx].b.y += sum.b.y;
-        vis[idx].c.x += sum.c.x;
-        vis[idx].c.y += sum.c.y;
-        vis[idx].d.x += sum.d.x;
-        vis[idx].d.y += sum.d.y;
+        /* Add result of this thread block to the baseline visibility. */
+        vis[i].a.x += sum.a.x;
+        vis[i].a.y += sum.a.y;
+        vis[i].b.x += sum.b.x;
+        vis[i].b.y += sum.b.y;
+        vis[i].c.x += sum.c.x;
+        vis[i].c.y += sum.c.y;
+        vis[i].d.x += sum.d.x;
+        vis[i].d.y += sum.d.y;
     }
 }
