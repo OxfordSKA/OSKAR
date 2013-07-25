@@ -154,7 +154,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     omp_set_num_threads(num_devices);
 
     // Run the simulation.
-    cudaSetDevice(0);
+    cudaSetDevice(settings.sim.cuda_device_ids[0]);
     oskar_log_section(log, "Starting simulation...");
     oskar_timer_start(&timers[0].tmr);
     for (int c = 0; c < settings.obs.num_channels; ++c)
@@ -195,7 +195,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         oskar_visibilities_get_channel_amps(&vis_amp, &vis_global, c, &error);
         for (int i = 0; i < num_devices; ++i)
         {
-            cudaSetDevice(i);
+            cudaSetDevice(settings.sim.cuda_device_ids[i]);
             oskar_timer_resume(&timers[i].tmr_init_copy);
             oskar_mem_add(&vis_amp, &vis_amp, &vis_acc[i], &error);
 
@@ -216,7 +216,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     if (error) return error;
 
     // Record time taken.
-    cudaSetDevice(0);
+    cudaSetDevice(settings.sim.cuda_device_ids[0]);
     double elapsed = oskar_timer_elapsed(&timers[0].tmr);
     oskar_log_section(log, "Simulation completed in %.3f sec.", elapsed);
 
@@ -225,7 +225,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     double t_join = 0.0, t_correlate = 0.0;
     for (int i = 0; i < num_devices; ++i)
     {
-        cudaSetDevice(i);
+        cudaSetDevice(settings.sim.cuda_device_ids[i]);
         t_init += oskar_timer_elapsed(&timers[i].tmr_init_copy);
         t_clip += oskar_timer_elapsed(&timers[i].tmr_clip);
         t_R += oskar_timer_elapsed(&timers[i].tmr_R);
@@ -292,7 +292,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         {
             oskar_Image image;
             oskar_log_section(log, "Starting OSKAR imager...");
-            cudaSetDevice(0);
+            cudaSetDevice(settings.sim.cuda_device_ids[0]);
             oskar_timer_start(&timers[0].tmr);
             error = oskar_make_image(&image, log, &vis_global, &settings.image);
             oskar_log_section(log, "Imaging completed in %.3f sec.",
