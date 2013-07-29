@@ -72,7 +72,7 @@ void oskar_correlate_point_time_smearing_cuda_2_f(int num_sources,
         const float* d_station_y, float freq_hz, float bandwidth_hz,
         float time_int_sec, float gha0_rad, float dec0_rad, float4c* d_vis)
 {
-    dim3 num_threads(128, 1);
+    dim3 num_threads(256, 1);
     int block_size = STATION_BLOCK_SIZE;
     int max_station_blocks = (num_stations + block_size - 1) / block_size;
     dim3 num_blocks(num_stations, max_station_blocks);
@@ -275,7 +275,7 @@ void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
     int p = blockIdx.x;
 
     /* Pointers into dynamic shared memory */
-    float4c* __restrict__ Vpq_source = smem_f4c;
+    float4c* __restrict__ vis_src = smem_f4c;
 
     /* Loop in blocks of threadDim.x sources over each station pair and
      * accumulate forming visibilities. */
@@ -335,22 +335,31 @@ void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
                 m2.b.y = source_V[t];
                 m2.d.x = I - Q;
 
+                float4c vSrc;
+                vSrc.a = make_float2(0.0f, 0.0f);
+                vSrc.b = vSrc.a;
+                vSrc.c = vSrc.a;
+                vSrc.d = vSrc.a;
+
                 /* Multiply first Jones matrix with source brightness matrix. */
                 oskar_multiply_complex_matrix_hermitian_in_place_f(&m1, &m2);
 
                 /* Multiply result with second (Hermitian transposed) Jones matrix. */
                 m2 = stationQ[t];
-                oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&Vpq_source[threadIdx.x], &m2);
+                oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&vSrc, &m2);
 
                 /* multiply by the smearing term */
-                Vpq_source[threadIdx.x].a.x *= rb;
-                Vpq_source[threadIdx.x].a.y *= rb;
-                Vpq_source[threadIdx.x].b.x *= rb;
-                Vpq_source[threadIdx.x].b.y *= rb;
-                Vpq_source[threadIdx.x].c.x *= rb;
-                Vpq_source[threadIdx.x].c.y *= rb;
-                Vpq_source[threadIdx.x].d.x *= rb;
-                Vpq_source[threadIdx.x].d.y *= rb;
+                vSrc.a.x *= rb;
+                vSrc.a.y *= rb;
+                vSrc.b.x *= rb;
+                vSrc.b.y *= rb;
+                vSrc.c.x *= rb;
+                vSrc.c.y *= rb;
+                vSrc.d.x *= rb;
+                vSrc.d.y *= rb;
+
+                /* Save into shared memory */
+                vis_src[threadIdx.x] = vSrc;
             }
 
             /* Make sure all threads have finished for their source. */
@@ -364,14 +373,14 @@ void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
                 {
                     if ((block*num_sources) + s < num_sources)
                     {
-                        vis[iVpq].a.x += Vpq_source[s].a.x;
-                        vis[iVpq].a.y += Vpq_source[s].a.y;
-                        vis[iVpq].b.x += Vpq_source[s].b.x;
-                        vis[iVpq].b.y += Vpq_source[s].b.y;
-                        vis[iVpq].c.x += Vpq_source[s].c.x;
-                        vis[iVpq].c.y += Vpq_source[s].c.y;
-                        vis[iVpq].d.x += Vpq_source[s].d.x;
-                        vis[iVpq].d.y += Vpq_source[s].d.y;
+                        vis[iVpq].a.x += vis_src[s].a.x;
+                        vis[iVpq].a.y += vis_src[s].a.y;
+                        vis[iVpq].b.x += vis_src[s].b.x;
+                        vis[iVpq].b.y += vis_src[s].b.y;
+                        vis[iVpq].c.x += vis_src[s].c.x;
+                        vis[iVpq].c.y += vis_src[s].c.y;
+                        vis[iVpq].d.x += vis_src[s].d.x;
+                        vis[iVpq].d.y += vis_src[s].d.y;
                     }
                 }
             } /* Accumulate to baseline for the source chunk */
