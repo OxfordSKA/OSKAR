@@ -86,6 +86,17 @@ void oskar_correlate_point_time_smearing_cuda_f(int num_sources,
         const float* d_station_y, float freq_hz, float bandwidth_hz,
         float time_int_sec, float gha0_rad, float dec0_rad, float4c* d_vis);
 
+OSKAR_EXPORT
+void oskar_correlate_point_time_smearing_cuda_2_f(int num_sources,
+        int num_stations, const float4c* d_jones,
+        const float* d_source_I, const float* d_source_Q,
+        const float* d_source_U, const float* d_source_V,
+        const float* d_source_l, const float* d_source_m,
+        const float* d_source_n, const float* d_station_u,
+        const float* d_station_v, const float* d_station_x,
+        const float* d_station_y, float freq_hz, float bandwidth_hz,
+        float time_int_sec, float gha0_rad, float dec0_rad, float4c* d_vis);
+
 /**
  * @brief
  * CUDA correlate function for point sources with time-average smearing
@@ -173,6 +184,21 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         const float* source_l, const float* source_m, const float* source_n,
         const float* station_u, const float* station_v,
         const float* station_x, const float* station_y, const float freq_hz,
+        const float bandwidth_hz, const float time_int_sec,
+        const float gha0_rad, const float dec0_rad, float4c* vis);
+
+__global__
+void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
+        const int num_stations, const float4c* __restrict__ jones,
+        const float* __restrict__ source_I,
+        const float* __restrict__ source_Q,
+        const float* __restrict__ source_U,
+        const float* __restrict__ source_V,
+        const float* __restrict__ source_l,
+        const float* __restrict__ source_m, const float* __restrict__ source_n,
+        const float* __restrict__ station_u, const float* __restrict__ station_v,
+        const float* __restrict__ station_x,
+        const float* __restrict__ station_y, const float freq_hz,
         const float bandwidth_hz, const float time_int_sec,
         const float gha0_rad, const float dec0_rad, float4c* vis);
 

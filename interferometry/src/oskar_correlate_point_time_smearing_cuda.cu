@@ -31,6 +31,8 @@
 #include "math/oskar_sinc.h"
 #include <math.h>
 
+#define STATION_BLOCK_SIZE 8
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -58,6 +60,36 @@ void oskar_correlate_point_time_smearing_cuda_f(int num_sources,
             d_station_v, d_station_x, d_station_y, freq_hz, bandwidth_hz,
             time_int_sec, gha0_rad, dec0_rad, d_vis);
 }
+
+/* Single precision. */
+void oskar_correlate_point_time_smearing_cuda_2_f(int num_sources,
+        int num_stations, const float4c* d_jones,
+        const float* d_source_I, const float* d_source_Q,
+        const float* d_source_U, const float* d_source_V,
+        const float* d_source_l, const float* d_source_m,
+        const float* d_source_n, const float* d_station_u,
+        const float* d_station_v, const float* d_station_x,
+        const float* d_station_y, float freq_hz, float bandwidth_hz,
+        float time_int_sec, float gha0_rad, float dec0_rad, float4c* d_vis)
+{
+    dim3 num_threads(128, 1);
+    int block_size = STATION_BLOCK_SIZE;
+    int max_station_blocks = (num_stations + block_size - 1) / block_size;
+    dim3 num_blocks(num_stations, max_station_blocks);
+    size_t shared_mem = num_threads.x * sizeof(float4c); /* acc. buffer */
+    shared_mem += num_threads.x * sizeof(float4c);       /* Jones cache */
+    shared_mem += block_size * sizeof(float4c);          /* vis baseline buffer */
+    shared_mem += num_threads.x * sizeof(float) * 4;     /* Source brightness */
+    shared_mem += num_threads.x * sizeof(float) * 3;     /* Source coords */
+
+    oskar_correlate_point_time_smearing_cudak_2_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
+            d_source_V, d_source_l, d_source_m, d_source_n, d_station_u,
+            d_station_v, d_station_x, d_station_y, freq_hz, bandwidth_hz,
+            time_int_sec, gha0_rad, dec0_rad, d_vis);
+}
+
 
 /* Double precision. */
 void oskar_correlate_point_time_smearing_cuda_d(int num_sources,
@@ -95,8 +127,8 @@ void oskar_correlate_point_time_smearing_cuda_d(int num_sources,
 #define SI blockIdx.x /* Column index. */
 #define SJ blockIdx.y /* Row index. */
 
-extern __shared__ float4c  smem_f[];
-extern __shared__ double4c smem_d[];
+extern __shared__ float4c  smem_f4c[];
+extern __shared__ double4c smem_d4c[];
 
 /* Single precision. */
 __global__
@@ -183,7 +215,7 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
     }
 
     /* Store partial sum for the thread in shared memory and synchronise. */
-    smem_f[threadIdx.x] = sum;
+    smem_f4c[threadIdx.x] = sum;
     __syncthreads();
 
     /* Accumulate contents of shared memory. */
@@ -196,14 +228,14 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         sum.d = make_float2(0.0f, 0.0f);
         for (i = 0; i < blockDim.x; ++i)
         {
-            sum.a.x += smem_f[i].a.x;
-            sum.a.y += smem_f[i].a.y;
-            sum.b.x += smem_f[i].b.x;
-            sum.b.y += smem_f[i].b.y;
-            sum.c.x += smem_f[i].c.x;
-            sum.c.y += smem_f[i].c.y;
-            sum.d.x += smem_f[i].d.x;
-            sum.d.y += smem_f[i].d.y;
+            sum.a.x += smem_f4c[i].a.x;
+            sum.a.y += smem_f4c[i].a.y;
+            sum.b.x += smem_f4c[i].b.x;
+            sum.b.y += smem_f4c[i].b.y;
+            sum.c.x += smem_f4c[i].c.x;
+            sum.c.y += smem_f4c[i].c.y;
+            sum.d.x += smem_f4c[i].d.x;
+            sum.d.y += smem_f4c[i].d.y;
         }
 
         /* Determine 1D visibility index for global memory store. */
@@ -220,6 +252,193 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         vis[i].d.y += sum.d.y;
     }
 }
+
+
+/* Single precision. */
+__global__
+void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
+        const int num_stations, const float4c* __restrict__ jones,
+        const float* __restrict__ source_I,
+        const float* __restrict__ source_Q,
+        const float* __restrict__ source_U,
+        const float* __restrict__ source_V,
+        const float* __restrict__ source_l,
+        const float* __restrict__ source_m, const float* __restrict__ source_n,
+        const float* __restrict__ station_u, const float* __restrict__ station_v,
+        const float* __restrict__ station_x,
+        const float* __restrict__ station_y, const float freq_hz,
+        const float bandwidth_hz, const float time_int_sec,
+        const float gha0_rad, const float dec0_rad, float4c* vis)
+{
+    int sJ0 = blockIdx.x+1;
+
+    /* Return immediately if the whole block is outside the visibility matrix */
+    /* i.e. there is nothing to do! */
+    if (sJ0 + (blockIdx.y * STATION_BLOCK_SIZE) > num_stations)
+        return;
+
+    /* Pointers into dynamic shared memory */
+    float4c* __restrict__ stationI   = smem_f4c + 0;
+    float4c* __restrict__ Vpq_source = smem_f4c + blockDim.x;
+    float4c* __restrict__ Vpq_sum    = smem_f4c + (blockDim.x*2);
+    float* __restrict__ sourceI = (float*)(smem_f4c + (blockDim.x*2 + STATION_BLOCK_SIZE));
+    float* __restrict__ sourceQ = sourceI + blockDim.x;
+    float* __restrict__ sourceU = sourceQ + blockDim.x;
+    float* __restrict__ sourceV = sourceU + blockDim.x;
+    float* __restrict__ sourceL = sourceV + blockDim.x;
+    float* __restrict__ sourceM = sourceL + blockDim.x;
+    float* __restrict__ sourceN = sourceM + blockDim.x;
+
+    /* Per baseline variables */
+    __device__ __shared__ float uu[STATION_BLOCK_SIZE];
+    __device__ __shared__ float vv[STATION_BLOCK_SIZE];
+    __device__ __shared__ float du_dt[STATION_BLOCK_SIZE];
+    __device__ __shared__ float dv_dt[STATION_BLOCK_SIZE];
+    __device__ __shared__ float dw_dt[STATION_BLOCK_SIZE];
+    if (threadIdx.x < STATION_BLOCK_SIZE)
+    {
+        /* Station index J of baseline I,J */
+        int sJ = sJ0 + (blockIdx.y * STATION_BLOCK_SIZE) + threadIdx.x;
+
+        /* Initialise per baseline vis */
+        Vpq_sum[threadIdx.x].a = make_float2(0.0f, 0.0f);
+        Vpq_sum[threadIdx.x].b = make_float2(0.0f, 0.0f);
+        Vpq_sum[threadIdx.x].c = make_float2(0.0f, 0.0f);
+        Vpq_sum[threadIdx.x].d = make_float2(0.0f, 0.0f);
+
+        if (sJ < num_stations)
+        {
+            /* Baseline distances, in wavelengths. */
+            float fractional_bandwidth = bandwidth_hz / freq_hz;
+            uu[threadIdx.x] = (station_u[blockIdx.x] - station_u[sJ]) * 0.5f * fractional_bandwidth;
+            vv[threadIdx.x] = (station_v[blockIdx.x] - station_v[sJ]) * 0.5f * fractional_bandwidth;
+            float xx = (station_x[blockIdx.x] - station_x[sJ]) * 0.5f;
+            float yy = (station_y[blockIdx.x] - station_y[sJ]) * 0.5f;
+
+            /* Compute the derivatives for time-average smearing. */
+            float rot_angle = OMEGA_EARTHf * time_int_sec;
+            float sin_HA = sinf(gha0_rad);
+            float cos_HA = cosf(gha0_rad);
+            float sin_Dec = sinf(dec0_rad);
+            float cos_Dec = cosf(dec0_rad);
+            float temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
+            du_dt[threadIdx.x] = (xx * cos_HA - yy * sin_HA) * rot_angle;
+            dv_dt[threadIdx.x] = temp * sin_Dec;
+            dw_dt[threadIdx.x] = -temp * cos_Dec;
+        }
+    }
+    __syncthreads();
+
+
+    /* Loop in blocks of threadDim.x sources over each station pair and
+     * accumulate forming visibilities. */
+    int num_source_blocks = (num_sources + blockDim.x - 1) / blockDim.x;
+    for (int sb = 0; sb < num_source_blocks; ++sb)
+    {
+        /* global source index */
+        int t = sb * blockDim.x + threadIdx.x;
+
+        /* Cache common values: StationI Jones matrices & source parameters */
+        if (t < num_sources)
+        {
+            stationI[threadIdx.x] = jones[num_sources * blockIdx.x + t];
+            sourceI[threadIdx.x]  = source_I[t];
+            sourceQ[threadIdx.x]  = source_Q[t];
+            sourceU[threadIdx.x]  = source_U[t];
+            sourceV[threadIdx.x]  = source_V[t];
+            sourceL[threadIdx.x]  = source_l[t];
+            sourceM[threadIdx.x]  = source_m[t];
+            sourceN[threadIdx.x]  = source_n[t];
+        }
+
+        /* Loop over other that make up the baseline handled by this thread block */
+        for (int j = 0; j < STATION_BLOCK_SIZE; ++j)
+        {
+            /* global J station index */
+            int idxStationJ = sJ0 + (blockIdx.y * STATION_BLOCK_SIZE) + j;
+            if (idxStationJ < num_stations)
+            {
+                const float4c * __restrict__ stationJ = &jones[num_sources * idxStationJ];
+
+                float l = sourceL[threadIdx.x];
+                float m = sourceM[threadIdx.x];
+                float n = sourceN[threadIdx.x];
+
+                /* Compute bandwidth-smearing term. */
+                float rb = oskar_sinc_f(uu[j] * l + vv[j] * m);
+
+                /* Compute time-smearing term. */
+                float rt = oskar_sinc_f(du_dt[j] * l + dv_dt[j] * m + dw_dt[j] * n);
+
+                rb *= rt; /* smearing term */
+
+                /* Accumulate baseline visibility response for source. */
+                if (t < num_sources)
+                {
+                    float4c m1 = stationI[threadIdx.x];
+                    float4c m2;
+                    float I = sourceI[threadIdx.x];
+                    float Q = sourceQ[threadIdx.x];
+                    m2.a.x = I + Q;
+                    m2.b.x = sourceU[threadIdx.x];
+                    m2.b.y = sourceV[threadIdx.x];
+                    m2.d.x = I - Q;
+
+                    /* Multiply first Jones matrix with source brightness matrix. */
+                    oskar_multiply_complex_matrix_hermitian_in_place_f(&m1, &m2);
+
+                    /* Multiply result with second (Hermitian transposed) Jones matrix. */
+                    m2 = stationJ[t];
+                    oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&Vpq_source[threadIdx.x], &m2);
+
+                    /* multiply by the smearing term */
+                    Vpq_source[threadIdx.x].a.x *= rb;
+                    Vpq_source[threadIdx.x].a.y *= rb;
+                    Vpq_source[threadIdx.x].b.x *= rb;
+                    Vpq_source[threadIdx.x].b.y *= rb;
+                    Vpq_source[threadIdx.x].c.x *= rb;
+                    Vpq_source[threadIdx.x].c.y *= rb;
+                    Vpq_source[threadIdx.x].d.x *= rb;
+                    Vpq_source[threadIdx.x].d.y *= rb;
+                } /* Accumulate for the source */
+            } /* (idxStationJ < num_stations) */
+
+            /* Make sure all threads have finished for their source. */
+            __syncthreads();
+
+            /* Accumulate per source visibilities into per chunk visibilities */
+            if (threadIdx.x == 0 && idxStationJ < num_stations)
+            {
+                for (int i = 0; i < blockDim.x; ++i)
+                {
+                    int tacc = (sb*num_sources) + i;
+                    if (tacc < num_sources)
+                    {
+                        Vpq_sum[j].a.x += Vpq_source[i].a.x;
+                        Vpq_sum[j].a.y += Vpq_source[i].a.y;
+                        Vpq_sum[j].b.x += Vpq_source[i].b.x;
+                        Vpq_sum[j].b.y += Vpq_source[i].b.y;
+                        Vpq_sum[j].c.x += Vpq_source[i].c.x;
+                        Vpq_sum[j].c.y += Vpq_source[i].c.y;
+                        Vpq_sum[j].d.x += Vpq_source[i].d.x;
+                        Vpq_sum[j].d.y += Vpq_source[i].d.y;
+                    }
+                }
+            } /* Accumulate to baseline for the source chunk */
+        } /* Loop over other stations that make up the baseline (I-J) */
+    } /* Loop over blocks of sources */
+
+    /* Write final visibilities to global memory */
+    if (threadIdx.x < STATION_BLOCK_SIZE)
+    {
+        /* Index of baseline visibility */
+        int sJ = sJ0 + (blockIdx.y * STATION_BLOCK_SIZE) + threadIdx.x;
+        int idx = sJ * (num_stations-1) - (sJ-1) * sJ/2 + blockIdx.x - sJ -1;
+        /* Add result of this thread block to the baseline visibility. */
+        vis[idx] = Vpq_sum[threadIdx.x];
+    }
+} /* version 2 */
+
 
 /* Double precision. */
 __global__
@@ -306,7 +525,7 @@ void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
     }
 
     /* Store partial sum for the thread in shared memory and synchronise. */
-    smem_d[threadIdx.x] = sum;
+    smem_d4c[threadIdx.x] = sum;
     __syncthreads();
 
     /* Accumulate contents of shared memory. */
@@ -319,14 +538,14 @@ void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
         sum.d = make_double2(0.0, 0.0);
         for (i = 0; i < blockDim.x; ++i)
         {
-            sum.a.x += smem_d[i].a.x;
-            sum.a.y += smem_d[i].a.y;
-            sum.b.x += smem_d[i].b.x;
-            sum.b.y += smem_d[i].b.y;
-            sum.c.x += smem_d[i].c.x;
-            sum.c.y += smem_d[i].c.y;
-            sum.d.x += smem_d[i].d.x;
-            sum.d.y += smem_d[i].d.y;
+            sum.a.x += smem_d4c[i].a.x;
+            sum.a.y += smem_d4c[i].a.y;
+            sum.b.x += smem_d4c[i].b.x;
+            sum.b.y += smem_d4c[i].b.y;
+            sum.c.x += smem_d4c[i].c.x;
+            sum.c.y += smem_d4c[i].c.y;
+            sum.d.x += smem_d4c[i].d.x;
+            sum.d.y += smem_d4c[i].d.y;
         }
 
         /* Determine 1D visibility index for global memory store. */

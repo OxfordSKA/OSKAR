@@ -230,7 +230,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                     }
                     else
                     {
-                        oskar_correlate_point_time_smearing_cuda_f
+                        oskar_correlate_point_time_smearing_cuda_2_f
                         (n_sources, n_stations, (const float4c*)J->data.data,
                                 (const float*)sky->I.data,
                                 (const float*)sky->Q.data,
