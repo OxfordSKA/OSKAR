@@ -265,134 +265,113 @@ void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
         const float bandwidth_hz, const float time_int_sec,
         const float gha0_rad, const float dec0_rad, float4c* vis)
 {
-    int sJ0 = blockIdx.x+1;
+    int q0 = blockIdx.x+1;
 
     /* Return immediately if the whole block is outside the visibility matrix */
     /* i.e. there is nothing to do! */
-    if (sJ0 + (blockIdx.y * STATION_BLOCK_SIZE) > num_stations)
+    if (q0 + (blockIdx.y * STATION_BLOCK_SIZE) > num_stations)
         return;
+
+    int p = blockIdx.x;
 
     /* Pointers into dynamic shared memory */
     float4c* __restrict__ Vpq_source = smem_f4c;
 
-    /* Per baseline variables */
-    __device__ __shared__ float uu[STATION_BLOCK_SIZE];
-    __device__ __shared__ float vv[STATION_BLOCK_SIZE];
-    __device__ __shared__ float du_dt[STATION_BLOCK_SIZE];
-    __device__ __shared__ float dv_dt[STATION_BLOCK_SIZE];
-    __device__ __shared__ float dw_dt[STATION_BLOCK_SIZE];
-    if (threadIdx.x < STATION_BLOCK_SIZE)
-    {
-        /* Station index J of baseline I,J */
-        int sJ = sJ0 + (blockIdx.y * STATION_BLOCK_SIZE) + threadIdx.x;
-
-        if (sJ < num_stations)
-        {
-            /* Baseline distances, in wavelengths. */
-            float fractional_bandwidth = bandwidth_hz / freq_hz;
-            uu[threadIdx.x] = (station_u[blockIdx.x] - station_u[sJ]) * 0.5f * fractional_bandwidth;
-            vv[threadIdx.x] = (station_v[blockIdx.x] - station_v[sJ]) * 0.5f * fractional_bandwidth;
-            float xx = (station_x[blockIdx.x] - station_x[sJ]) * 0.5f;
-            float yy = (station_y[blockIdx.x] - station_y[sJ]) * 0.5f;
-
-            /* Compute the derivatives for time-average smearing. */
-            float rot_angle = OMEGA_EARTHf * time_int_sec;
-            float sin_HA = sinf(gha0_rad);
-            float cos_HA = cosf(gha0_rad);
-            float sin_Dec = sinf(dec0_rad);
-            float cos_Dec = cosf(dec0_rad);
-            float temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
-            du_dt[threadIdx.x] = (xx * cos_HA - yy * sin_HA) * rot_angle;
-            dv_dt[threadIdx.x] = temp * sin_Dec;
-            dw_dt[threadIdx.x] = -temp * cos_Dec;
-        }
-    }
-    __syncthreads();
-
-
     /* Loop in blocks of threadDim.x sources over each station pair and
      * accumulate forming visibilities. */
     int num_source_blocks = (num_sources + blockDim.x - 1) / blockDim.x;
-    for (int sb = 0; sb < num_source_blocks; ++sb)
+    for (int block = 0; block < num_source_blocks; ++block)
     {
         /* global source index */
-        int t = sb * blockDim.x + threadIdx.x;
+        int t = block * blockDim.x + threadIdx.x;
 
-        const float4c* __restrict__ stationI = &jones[num_sources * blockIdx.x];
+        const float4c* __restrict__ stationP = &jones[num_sources * p];
 
         /* Loop over other that make up the baseline handled by this thread block */
         for (int j = 0; j < STATION_BLOCK_SIZE; ++j)
         {
             /* global J station index */
-            int sJ = sJ0 + (blockIdx.y * STATION_BLOCK_SIZE) + j;
-            if (sJ < num_stations)
+            int q = q0 + (blockIdx.y * STATION_BLOCK_SIZE) + j;
+
+            if (q < num_stations && t < num_sources)
             {
-                const float4c * __restrict__ stationJ = &jones[num_sources * sJ];
+                float fractional_bandwidth = bandwidth_hz / freq_hz;
+                float uu = (station_u[p] - station_u[q]) * 0.5f * fractional_bandwidth;
+                float vv = (station_v[p] - station_v[q]) * 0.5f * fractional_bandwidth;
+                float xx = (station_x[p] - station_x[q]) * 0.5f;
+                float yy = (station_y[p] - station_y[q]) * 0.5f;
+                /* Compute the derivatives for time-average smearing. */
+                float rot_angle = OMEGA_EARTHf * time_int_sec;
+                float sin_HA = sinf(gha0_rad);
+                float cos_HA = cosf(gha0_rad);
+                float sin_Dec = sinf(dec0_rad);
+                float cos_Dec = cosf(dec0_rad);
+                float temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
+                float du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
+                float dv_dt = temp * sin_Dec;
+                float dw_dt = -temp * cos_Dec;
+
+                const float4c * __restrict__ stationQ = &jones[num_sources * q];
 
                 float l = source_l[t];
                 float m = source_m[t];
                 float n = source_n[t];
 
                 /* Compute bandwidth-smearing term. */
-                float rb = oskar_sinc_f(uu[j] * l + vv[j] * m);
+                float rb = oskar_sinc_f(uu * l + vv * m);
 
                 /* Compute time-smearing term. */
-                float rt = oskar_sinc_f(du_dt[j] * l + dv_dt[j] * m + dw_dt[j] * n);
+                float rt = oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * n);
 
                 rb *= rt; /* smearing term */
 
                 /* Accumulate baseline visibility response for source. */
-                if (t < num_sources)
-                {
-                    float4c m1 = stationI[t];
-                    float4c m2;
-                    float I = source_I[t];
-                    float Q = source_Q[t];
-                    m2.a.x = I + Q;
-                    m2.b.x = source_U[t];
-                    m2.b.y = source_V[t];
-                    m2.d.x = I - Q;
+                float4c m1 = stationP[t];
+                float4c m2;
+                float I = source_I[t];
+                float Q = source_Q[t];
+                m2.a.x = I + Q;
+                m2.b.x = source_U[t];
+                m2.b.y = source_V[t];
+                m2.d.x = I - Q;
 
-                    /* Multiply first Jones matrix with source brightness matrix. */
-                    oskar_multiply_complex_matrix_hermitian_in_place_f(&m1, &m2);
+                /* Multiply first Jones matrix with source brightness matrix. */
+                oskar_multiply_complex_matrix_hermitian_in_place_f(&m1, &m2);
 
-                    /* Multiply result with second (Hermitian transposed) Jones matrix. */
-                    m2 = stationJ[t];
-                    oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&Vpq_source[threadIdx.x], &m2);
+                /* Multiply result with second (Hermitian transposed) Jones matrix. */
+                m2 = stationQ[t];
+                oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&Vpq_source[threadIdx.x], &m2);
 
-                    /* multiply by the smearing term */
-                    Vpq_source[threadIdx.x].a.x *= rb;
-                    Vpq_source[threadIdx.x].a.y *= rb;
-                    Vpq_source[threadIdx.x].b.x *= rb;
-                    Vpq_source[threadIdx.x].b.y *= rb;
-                    Vpq_source[threadIdx.x].c.x *= rb;
-                    Vpq_source[threadIdx.x].c.y *= rb;
-                    Vpq_source[threadIdx.x].d.x *= rb;
-                    Vpq_source[threadIdx.x].d.y *= rb;
-                } /* Accumulate for the source */
-            } /* (idxStationJ < num_stations) */
+                /* multiply by the smearing term */
+                Vpq_source[threadIdx.x].a.x *= rb;
+                Vpq_source[threadIdx.x].a.y *= rb;
+                Vpq_source[threadIdx.x].b.x *= rb;
+                Vpq_source[threadIdx.x].b.y *= rb;
+                Vpq_source[threadIdx.x].c.x *= rb;
+                Vpq_source[threadIdx.x].c.y *= rb;
+                Vpq_source[threadIdx.x].d.x *= rb;
+                Vpq_source[threadIdx.x].d.y *= rb;
+            }
 
             /* Make sure all threads have finished for their source. */
             __syncthreads();
 
             /* Accumulate per source visibilities into per chunk visibilities */
-            if (threadIdx.x == 0 && sJ < num_stations)
+            if (threadIdx.x == 0 && q < num_stations)
             {
-                int idx = sJ * (num_stations-1) - (sJ-1) * sJ/2 + blockIdx.x - sJ -1;
-
-                for (int i = 0; i < blockDim.x; ++i)
+                int iVpq = q * (num_stations-1) - (q-1) * q/2 + p - q -1;
+                for (int s = 0; s < blockDim.x; ++s)
                 {
-                    int tacc = (sb*num_sources) + i;
-                    if (tacc < num_sources)
+                    if ((block*num_sources) + s < num_sources)
                     {
-                        vis[idx].a.x += Vpq_source[i].a.x;
-                        vis[idx].a.y += Vpq_source[i].a.y;
-                        vis[idx].b.x += Vpq_source[i].b.x;
-                        vis[idx].b.y += Vpq_source[i].b.y;
-                        vis[idx].c.x += Vpq_source[i].c.x;
-                        vis[idx].c.y += Vpq_source[i].c.y;
-                        vis[idx].d.x += Vpq_source[i].d.x;
-                        vis[idx].d.y += Vpq_source[i].d.y;
+                        vis[iVpq].a.x += Vpq_source[s].a.x;
+                        vis[iVpq].a.y += Vpq_source[s].a.y;
+                        vis[iVpq].b.x += Vpq_source[s].b.x;
+                        vis[iVpq].b.y += Vpq_source[s].b.y;
+                        vis[iVpq].c.x += Vpq_source[s].c.x;
+                        vis[iVpq].c.y += Vpq_source[s].c.y;
+                        vis[iVpq].d.x += Vpq_source[s].d.x;
+                        vis[iVpq].d.y += Vpq_source[s].d.y;
                     }
                 }
             } /* Accumulate to baseline for the source chunk */
