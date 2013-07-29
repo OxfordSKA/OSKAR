@@ -269,7 +269,8 @@ void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
 
     /* Return immediately if the whole block is outside the visibility matrix */
     /* i.e. there is nothing to do! */
-    if (q0 + (blockIdx.y * STATION_BLOCK_SIZE) > num_stations)
+    int qblock0 = q0 + (blockIdx.y * STATION_BLOCK_SIZE);
+    if (qblock0 > num_stations)
         return;
 
     int p = blockIdx.x;
@@ -345,17 +346,15 @@ void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
                 oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&vSrc, &m2);
 
                 /* multiply by the smearing term */
-                vSrc.a.x *= rb;
-                vSrc.a.y *= rb;
-                vSrc.b.x *= rb;
-                vSrc.b.y *= rb;
-                vSrc.c.x *= rb;
-                vSrc.c.y *= rb;
-                vSrc.d.x *= rb;
-                vSrc.d.y *= rb;
-
-                /* Save into shared memory */
-                vis_src[j*blockDim.x + threadIdx.x] = vSrc;
+                int idx = j*blockDim.x + threadIdx.x;
+                vis_src[idx].a.x += vSrc.a.x * rb;
+                vis_src[idx].a.y += vSrc.a.y * rb;
+                vis_src[idx].b.x += vSrc.b.x * rb;
+                vis_src[idx].b.y += vSrc.b.y * rb;
+                vis_src[idx].c.x += vSrc.c.x * rb;
+                vis_src[idx].c.y += vSrc.c.y * rb;
+                vis_src[idx].d.x += vSrc.d.x * rb;
+                vis_src[idx].d.y += vSrc.d.y * rb;
             }
         } /* Loop over other stations that make up the baseline (I-J) */
     } /* Loop over blocks of sources */
@@ -367,18 +366,18 @@ void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
     if (threadIdx.x < STATION_BLOCK_SIZE)
     {
         int q = q0 + (blockIdx.y * STATION_BLOCK_SIZE) + threadIdx.x;
-        int iVpq = q * (num_stations-1) - (q-1) * q/2 + p - q -1;
+        int ipq = q * (num_stations-1) - (q-1) * q/2 + p - q -1;
         for (int s = 0; s < blockDim.x; ++s)
         {
             int idx = threadIdx.x * blockDim.x + s;
-            vis[iVpq].a.x += vis_src[idx].a.x;
-            vis[iVpq].a.y += vis_src[idx].a.y;
-            vis[iVpq].b.x += vis_src[idx].b.x;
-            vis[iVpq].b.y += vis_src[idx].b.y;
-            vis[iVpq].c.x += vis_src[idx].c.x;
-            vis[iVpq].c.y += vis_src[idx].c.y;
-            vis[iVpq].d.x += vis_src[idx].d.x;
-            vis[iVpq].d.y += vis_src[idx].d.y;
+            vis[ipq].a.x += vis_src[idx].a.x;
+            vis[ipq].a.y += vis_src[idx].a.y;
+            vis[ipq].b.x += vis_src[idx].b.x;
+            vis[ipq].b.y += vis_src[idx].b.y;
+            vis[ipq].c.x += vis_src[idx].c.x;
+            vis[ipq].c.y += vis_src[idx].c.y;
+            vis[ipq].d.x += vis_src[idx].d.x;
+            vis[ipq].d.y += vis_src[idx].d.y;
         }
     } /* Accumulate to baseline for the source chunk */
 
