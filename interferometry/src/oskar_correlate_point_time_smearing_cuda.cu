@@ -31,7 +31,7 @@
 #include "math/oskar_sinc.h"
 #include <math.h>
 
-#define STATION_BLOCK_SIZE 8
+#define STATION_BLOCK_SIZE 2
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,7 +76,7 @@ void oskar_correlate_point_time_smearing_cuda_2_f(int num_sources,
     int block_size = STATION_BLOCK_SIZE;
     int max_station_blocks = (num_stations + block_size - 1) / block_size;
     dim3 num_blocks(num_stations, max_station_blocks);
-    size_t shared_mem = num_threads.x * sizeof(float4c); /* acc. buffer */
+    size_t shared_mem = num_threads.x * sizeof(float4c) * STATION_BLOCK_SIZE;
     oskar_correlate_point_time_smearing_cudak_2_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
@@ -279,12 +279,8 @@ void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
 
     /* Loop in blocks of threadDim.x sources over each station pair and
      * accumulate forming visibilities. */
-    int num_source_blocks = (num_sources + blockDim.x - 1) / blockDim.x;
-    for (int block = 0; block < num_source_blocks; ++block)
+    for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
     {
-        /* global source index */
-        int t = block * blockDim.x + threadIdx.x;
-
         const float4c* __restrict__ stationP = &jones[num_sources * p];
 
         /* Loop over other that make up the baseline handled by this thread block */
@@ -293,7 +289,7 @@ void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
             /* global J station index */
             int q = q0 + (blockIdx.y * STATION_BLOCK_SIZE) + j;
 
-            if (q < num_stations && t < num_sources)
+            if (q < num_stations)
             {
                 float fractional_bandwidth = bandwidth_hz / freq_hz;
                 float uu = (station_u[p] - station_u[q]) * 0.5f * fractional_bandwidth;
@@ -359,30 +355,32 @@ void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
                 vSrc.d.y *= rb;
 
                 /* Save into shared memory */
-                vis_src[threadIdx.x] = vSrc;
+                vis_src[j*blockDim.x + threadIdx.x] = vSrc;
             }
-
-            /* Make sure all threads have finished for their source. */
-            __syncthreads();
-
-            /* Accumulate per source visibilities into per chunk visibilities */
-            if (threadIdx.x == 0 && q < num_stations)
-            {
-                int iVpq = q * (num_stations-1) - (q-1) * q/2 + p - q -1;
-                for (int s = 0; s < blockDim.x; ++s)
-                {
-                    vis[iVpq].a.x += vis_src[s].a.x;
-                    vis[iVpq].a.y += vis_src[s].a.y;
-                    vis[iVpq].b.x += vis_src[s].b.x;
-                    vis[iVpq].b.y += vis_src[s].b.y;
-                    vis[iVpq].c.x += vis_src[s].c.x;
-                    vis[iVpq].c.y += vis_src[s].c.y;
-                    vis[iVpq].d.x += vis_src[s].d.x;
-                    vis[iVpq].d.y += vis_src[s].d.y;
-                }
-            } /* Accumulate to baseline for the source chunk */
         } /* Loop over other stations that make up the baseline (I-J) */
     } /* Loop over blocks of sources */
+
+    /* Make sure all threads have finished for their source. */
+    __syncthreads();
+
+    /* Accumulate per source visibilities into per chunk visibilities */
+    if (threadIdx.x < STATION_BLOCK_SIZE)
+    {
+        int q = q0 + (blockIdx.y * STATION_BLOCK_SIZE) + threadIdx.x;
+        int iVpq = q * (num_stations-1) - (q-1) * q/2 + p - q -1;
+        for (int s = 0; s < blockDim.x; ++s)
+        {
+            int idx = threadIdx.x * blockDim.x + s;
+            vis[iVpq].a.x += vis_src[idx].a.x;
+            vis[iVpq].a.y += vis_src[idx].a.y;
+            vis[iVpq].b.x += vis_src[idx].b.x;
+            vis[iVpq].b.y += vis_src[idx].b.y;
+            vis[iVpq].c.x += vis_src[idx].c.x;
+            vis[iVpq].c.y += vis_src[idx].c.y;
+            vis[iVpq].d.x += vis_src[idx].d.x;
+            vis[iVpq].d.y += vis_src[idx].d.y;
+        }
+    } /* Accumulate to baseline for the source chunk */
 
 } /* version 2 */
 
