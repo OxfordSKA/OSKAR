@@ -273,7 +273,7 @@ void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
         return;
 
     /* Pointers into dynamic shared memory */
-    float4c* __restrict__ Vpq_source = smem_f4c + blockDim.x;
+    float4c* __restrict__ Vpq_source = smem_f4c;
 
     /* Per baseline variables */
     __device__ __shared__ float uu[STATION_BLOCK_SIZE];
