@@ -72,7 +72,7 @@ void oskar_correlate_point_time_smearing_cuda_2_f(int num_sources,
         const float* d_station_y, float freq_hz, float bandwidth_hz,
         float time_int_sec, float gha0_rad, float dec0_rad, float4c* d_vis)
 {
-    dim3 num_threads(256, 1);
+    dim3 num_threads(128, 1);
     int block_size = STATION_BLOCK_SIZE;
     int max_station_blocks = (num_stations + block_size - 1) / block_size;
     dim3 num_blocks(num_stations, max_station_blocks);
@@ -371,17 +371,14 @@ void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
                 int iVpq = q * (num_stations-1) - (q-1) * q/2 + p - q -1;
                 for (int s = 0; s < blockDim.x; ++s)
                 {
-                    if ((block*num_sources) + s < num_sources)
-                    {
-                        vis[iVpq].a.x += vis_src[s].a.x;
-                        vis[iVpq].a.y += vis_src[s].a.y;
-                        vis[iVpq].b.x += vis_src[s].b.x;
-                        vis[iVpq].b.y += vis_src[s].b.y;
-                        vis[iVpq].c.x += vis_src[s].c.x;
-                        vis[iVpq].c.y += vis_src[s].c.y;
-                        vis[iVpq].d.x += vis_src[s].d.x;
-                        vis[iVpq].d.y += vis_src[s].d.y;
-                    }
+                    vis[iVpq].a.x += vis_src[s].a.x;
+                    vis[iVpq].a.y += vis_src[s].a.y;
+                    vis[iVpq].b.x += vis_src[s].b.x;
+                    vis[iVpq].b.y += vis_src[s].b.y;
+                    vis[iVpq].c.x += vis_src[s].c.x;
+                    vis[iVpq].c.y += vis_src[s].c.y;
+                    vis[iVpq].d.x += vis_src[s].d.x;
+                    vis[iVpq].d.y += vis_src[s].d.y;
                 }
             } /* Accumulate to baseline for the source chunk */
         } /* Loop over other stations that make up the baseline (I-J) */
