@@ -128,13 +128,20 @@ extern __shared__ double4c smem_d4c[];
 /* Single precision. */
 __global__
 void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
-        const int num_stations, const float4c* jones, const float* source_I,
-        const float* source_Q, const float* source_U, const float* source_V,
-        const float* source_l, const float* source_m, const float* source_n,
-        const float* station_u, const float* station_v,
-        const float* station_x, const float* station_y, const float freq_hz,
+        const int num_stations, const float4c* __restrict__ jones,
+        const float* __restrict__ source_I,
+        const float* __restrict__ source_Q,
+        const float* __restrict__ source_U,
+        const float* __restrict__ source_V,
+        const float* __restrict__ source_l,
+        const float* __restrict__ source_m,
+        const float* __restrict__ source_n,
+        const float* __restrict__ station_u,
+        const float* __restrict__ station_v,
+        const float* __restrict__ station_x,
+        const float* __restrict__ station_y, const float freq_hz,
         const float bandwidth_hz, const float time_int_sec,
-        const float gha0_rad, const float dec0_rad, float4c* vis)
+        const float gha0_rad, const float dec0_rad, float4c* __restrict__ vis)
 {
     /* Local variables. */
     float4c sum;
@@ -142,8 +149,9 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
     int i;
 
     /* Common values per thread block. */
-    __device__ __shared__ float uu, vv, du_dt, dv_dt, dw_dt;
-    __device__ __shared__ const float4c *station_i, *station_j;
+    __shared__ float uu, vv, du_dt, dv_dt, dw_dt;
+    __shared__ const float4c* __restrict__ station_i;
+    __shared__ const float4c* __restrict__ station_j;
 
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (SJ >= SI) return;
@@ -332,29 +340,23 @@ void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
                 m2.b.y = source_V[t];
                 m2.d.x = I - Q;
 
-                float4c vSrc;
-                vSrc.a = make_float2(0.0f, 0.0f);
-                vSrc.b = vSrc.a;
-                vSrc.c = vSrc.a;
-                vSrc.d = vSrc.a;
-
                 /* Multiply first Jones matrix with source brightness matrix. */
                 oskar_multiply_complex_matrix_hermitian_in_place_f(&m1, &m2);
 
                 /* Multiply result with second (Hermitian transposed) Jones matrix. */
                 m2 = stationQ[t];
-                oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&vSrc, &m2);
+                oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&m1, &m2);
 
                 /* multiply by the smearing term */
                 int idx = j*blockDim.x + threadIdx.x;
-                vis_src[idx].a.x += vSrc.a.x * rb;
-                vis_src[idx].a.y += vSrc.a.y * rb;
-                vis_src[idx].b.x += vSrc.b.x * rb;
-                vis_src[idx].b.y += vSrc.b.y * rb;
-                vis_src[idx].c.x += vSrc.c.x * rb;
-                vis_src[idx].c.y += vSrc.c.y * rb;
-                vis_src[idx].d.x += vSrc.d.x * rb;
-                vis_src[idx].d.y += vSrc.d.y * rb;
+                vis_src[idx].a.x += m1.a.x * rb;
+                vis_src[idx].a.y += m1.a.y * rb;
+                vis_src[idx].b.x += m1.b.x * rb;
+                vis_src[idx].b.y += m1.b.y * rb;
+                vis_src[idx].c.x += m1.c.x * rb;
+                vis_src[idx].c.y += m1.c.y * rb;
+                vis_src[idx].d.x += m1.d.x * rb;
+                vis_src[idx].d.y += m1.d.y * rb;
             }
         } /* Loop over other stations that make up the baseline (I-J) */
     } /* Loop over blocks of sources */
