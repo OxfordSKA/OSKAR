@@ -31,8 +31,6 @@
 #include "math/oskar_sinc.h"
 #include <math.h>
 
-#define STATION_BLOCK_SIZE 2
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -60,31 +58,6 @@ void oskar_correlate_point_time_smearing_cuda_f(int num_sources,
             d_station_v, d_station_x, d_station_y, freq_hz, bandwidth_hz,
             time_int_sec, gha0_rad, dec0_rad, d_vis);
 }
-
-/* Single precision. */
-void oskar_correlate_point_time_smearing_cuda_2_f(int num_sources,
-        int num_stations, const float4c* d_jones,
-        const float* d_source_I, const float* d_source_Q,
-        const float* d_source_U, const float* d_source_V,
-        const float* d_source_l, const float* d_source_m,
-        const float* d_source_n, const float* d_station_u,
-        const float* d_station_v, const float* d_station_x,
-        const float* d_station_y, float freq_hz, float bandwidth_hz,
-        float time_int_sec, float gha0_rad, float dec0_rad, float4c* d_vis)
-{
-    dim3 num_threads(128, 1);
-    int block_size = STATION_BLOCK_SIZE;
-    int max_station_blocks = (num_stations + block_size - 1) / block_size;
-    dim3 num_blocks(num_stations, max_station_blocks);
-    size_t shared_mem = num_threads.x * sizeof(float4c) * STATION_BLOCK_SIZE;
-    oskar_correlate_point_time_smearing_cudak_2_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
-            d_source_V, d_source_l, d_source_m, d_source_n, d_station_u,
-            d_station_v, d_station_x, d_station_y, freq_hz, bandwidth_hz,
-            time_int_sec, gha0_rad, dec0_rad, d_vis);
-}
-
 
 /* Double precision. */
 void oskar_correlate_point_time_smearing_cuda_d(int num_sources,
@@ -126,8 +99,9 @@ extern __shared__ float4c  smem_f4c[];
 extern __shared__ double4c smem_d4c[];
 
 /* Single precision. */
-__global__
-void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
+__global__ void
+__launch_bounds__(128)
+oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         const int num_stations, const float4c* __restrict__ jones,
         const float* __restrict__ source_I,
         const float* __restrict__ source_Q,
@@ -255,136 +229,6 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         vis[i].d.y += sum.d.y;
     }
 }
-
-
-/* Single precision. */
-__global__
-void oskar_correlate_point_time_smearing_cudak_2_f(const int num_sources,
-        const int num_stations, const float4c* __restrict__ jones,
-        const float* __restrict__ source_I,
-        const float* __restrict__ source_Q,
-        const float* __restrict__ source_U,
-        const float* __restrict__ source_V,
-        const float* __restrict__ source_l,
-        const float* __restrict__ source_m, const float* __restrict__ source_n,
-        const float* __restrict__ station_u, const float* __restrict__ station_v,
-        const float* __restrict__ station_x,
-        const float* __restrict__ station_y, const float freq_hz,
-        const float bandwidth_hz, const float time_int_sec,
-        const float gha0_rad, const float dec0_rad, float4c* vis)
-{
-    int q0 = blockIdx.x+1;
-
-    /* Return immediately if the whole block is outside the visibility matrix */
-    /* i.e. there is nothing to do! */
-    int qblock0 = q0 + (blockIdx.y * STATION_BLOCK_SIZE);
-    if (qblock0 > num_stations)
-        return;
-
-    int p = blockIdx.x;
-
-    /* Pointers into dynamic shared memory */
-    float4c* __restrict__ vis_src = smem_f4c;
-
-    /* Loop in blocks of threadDim.x sources over each station pair and
-     * accumulate forming visibilities. */
-    for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
-    {
-        const float4c* __restrict__ stationP = &jones[num_sources * p];
-
-        /* Loop over other that make up the baseline handled by this thread block */
-        for (int j = 0; j < STATION_BLOCK_SIZE; ++j)
-        {
-            /* global J station index */
-            int q = q0 + (blockIdx.y * STATION_BLOCK_SIZE) + j;
-
-            if (q < num_stations)
-            {
-                float fractional_bandwidth = bandwidth_hz / freq_hz;
-                float uu = (station_u[p] - station_u[q]) * 0.5f * fractional_bandwidth;
-                float vv = (station_v[p] - station_v[q]) * 0.5f * fractional_bandwidth;
-                float xx = (station_x[p] - station_x[q]) * 0.5f;
-                float yy = (station_y[p] - station_y[q]) * 0.5f;
-                /* Compute the derivatives for time-average smearing. */
-                float rot_angle = OMEGA_EARTHf * time_int_sec;
-                float sin_HA = sinf(gha0_rad);
-                float cos_HA = cosf(gha0_rad);
-                float sin_Dec = sinf(dec0_rad);
-                float cos_Dec = cosf(dec0_rad);
-                float temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
-                float du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
-                float dv_dt = temp * sin_Dec;
-                float dw_dt = -temp * cos_Dec;
-
-                const float4c * __restrict__ stationQ = &jones[num_sources * q];
-
-                float l = source_l[t];
-                float m = source_m[t];
-                float n = source_n[t];
-
-                /* Compute bandwidth-smearing term. */
-                float rb = oskar_sinc_f(uu * l + vv * m);
-
-                /* Compute time-smearing term. */
-                float rt = oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * n);
-
-                rb *= rt; /* smearing term */
-
-                /* Accumulate baseline visibility response for source. */
-                float4c m1 = stationP[t];
-                float4c m2;
-                float I = source_I[t];
-                float Q = source_Q[t];
-                m2.a.x = I + Q;
-                m2.b.x = source_U[t];
-                m2.b.y = source_V[t];
-                m2.d.x = I - Q;
-
-                /* Multiply first Jones matrix with source brightness matrix. */
-                oskar_multiply_complex_matrix_hermitian_in_place_f(&m1, &m2);
-
-                /* Multiply result with second (Hermitian transposed) Jones matrix. */
-                m2 = stationQ[t];
-                oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&m1, &m2);
-
-                /* multiply by the smearing term */
-                int idx = j*blockDim.x + threadIdx.x;
-                vis_src[idx].a.x += m1.a.x * rb;
-                vis_src[idx].a.y += m1.a.y * rb;
-                vis_src[idx].b.x += m1.b.x * rb;
-                vis_src[idx].b.y += m1.b.y * rb;
-                vis_src[idx].c.x += m1.c.x * rb;
-                vis_src[idx].c.y += m1.c.y * rb;
-                vis_src[idx].d.x += m1.d.x * rb;
-                vis_src[idx].d.y += m1.d.y * rb;
-            }
-        } /* Loop over other stations that make up the baseline (I-J) */
-    } /* Loop over blocks of sources */
-
-    /* Make sure all threads have finished for their source. */
-    __syncthreads();
-
-    /* Accumulate per source visibilities into per chunk visibilities */
-    if (threadIdx.x < STATION_BLOCK_SIZE)
-    {
-        int q = q0 + (blockIdx.y * STATION_BLOCK_SIZE) + threadIdx.x;
-        int ipq = q * (num_stations-1) - (q-1) * q/2 + p - q -1;
-        for (int s = 0; s < blockDim.x; ++s)
-        {
-            int idx = threadIdx.x * blockDim.x + s;
-            vis[ipq].a.x += vis_src[idx].a.x;
-            vis[ipq].a.y += vis_src[idx].a.y;
-            vis[ipq].b.x += vis_src[idx].b.x;
-            vis[ipq].b.y += vis_src[idx].b.y;
-            vis[ipq].c.x += vis_src[idx].c.x;
-            vis[ipq].c.y += vis_src[idx].c.y;
-            vis[ipq].d.x += vis_src[idx].d.x;
-            vis[ipq].d.y += vis_src[idx].d.y;
-        }
-    } /* Accumulate to baseline for the source chunk */
-
-} /* version 2 */
-
 
 /* Double precision. */
 __global__
