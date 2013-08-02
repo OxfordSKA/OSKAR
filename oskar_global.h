@@ -371,6 +371,7 @@ enum {
     #define __shared__
     #define __constant__
     #define __forceinline__
+    #define __launch_bounds__(...)
     #define OSKAR_CUDAK_CONF(...)
     #define OSKAR_HAVE_CUDA
     #define __CUDACC__
