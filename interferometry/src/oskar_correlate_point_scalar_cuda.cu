@@ -41,7 +41,7 @@ void oskar_correlate_point_scalar_cuda_f(int num_sources,
         int num_stations, const float2* d_jones,
         const float* d_source_I, const float* d_source_l,
         const float* d_source_m, const float* d_station_u,
-        const float* d_station_v, float lambda_bandwidth, float2* d_vis)
+        const float* d_station_v, float frac_bandwidth, float2* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
@@ -49,7 +49,7 @@ void oskar_correlate_point_scalar_cuda_f(int num_sources,
     oskar_correlate_point_scalar_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_l, d_source_m,
-            d_station_u, d_station_v, lambda_bandwidth, d_vis);
+            d_station_u, d_station_v, frac_bandwidth, d_vis);
 }
 
 /* Double precision. */
@@ -57,7 +57,7 @@ void oskar_correlate_point_scalar_cuda_d(int num_sources,
         int num_stations, const double2* d_jones,
         const double* d_source_I, const double* d_source_l,
         const double* d_source_m, const double* d_station_u,
-        const double* d_station_v, double lambda_bandwidth, double2* d_vis)
+        const double* d_station_v, double frac_bandwidth, double2* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
@@ -65,7 +65,7 @@ void oskar_correlate_point_scalar_cuda_d(int num_sources,
     oskar_correlate_point_scalar_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_l, d_source_m,
-            d_station_u, d_station_v, lambda_bandwidth, d_vis);
+            d_station_u, d_station_v, frac_bandwidth, d_vis);
 }
 
 #ifdef __cplusplus
@@ -74,9 +74,6 @@ void oskar_correlate_point_scalar_cuda_d(int num_sources,
 
 
 /* Kernels. ================================================================ */
-
-#define ONE_OVER_2C  1.66782047599076024788E-9  /* 1 / (2c) */
-#define ONE_OVER_2Cf 1.66782047599076024788E-9f /* 1 / (2c) */
 
 /* Indices into the visibility/baseline matrix. */
 #define AI blockIdx.x /* Column index. */
@@ -91,18 +88,18 @@ void oskar_correlate_point_scalar_cudak_f(const int num_sources,
         const int num_stations, const float2* jones, const float* source_I,
         const float* source_l, const float* source_m,
         const float* station_u, const float* station_v,
-        const float lambda_bandwidth, float2* vis)
+        const float frac_bandwidth, float2* vis)
 {
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (AJ >= AI) return;
 
-    /* Common things per thread block. */
-    __device__ __shared__ float uu, vv;
+    /* Common values per thread block. */
+    __shared__ float uu, vv;
     if (threadIdx.x == 0)
     {
         /* Determine UV-distance for baseline (common per thread block). */
-        uu = ONE_OVER_2Cf * lambda_bandwidth * (station_u[AI] - station_u[AJ]);
-        vv = ONE_OVER_2Cf * lambda_bandwidth * (station_v[AI] - station_v[AJ]);
+        uu = 0.5f * frac_bandwidth * (station_u[AI] - station_u[AJ]);
+        vv = 0.5f * frac_bandwidth * (station_v[AI] - station_v[AJ]);
     }
     __syncthreads();
 
@@ -162,18 +159,18 @@ void oskar_correlate_point_scalar_cudak_d(const int num_sources,
         const int num_stations, const double2* jones, const double* source_I,
         const double* source_l, const double* source_m,
         const double* station_u, const double* station_v,
-        const double lambda_bandwidth, double2* vis)
+        const double frac_bandwidth, double2* vis)
 {
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (AJ >= AI) return;
 
-    /* Common things per thread block. */
-    __device__ __shared__ double uu, vv;
+    /* Common values per thread block. */
+    __shared__ double uu, vv;
     if (threadIdx.x == 0)
     {
         /* Determine UV-distance for baseline (common per thread block). */
-        uu = ONE_OVER_2C * lambda_bandwidth * (station_u[AI] - station_u[AJ]);
-        vv = ONE_OVER_2C * lambda_bandwidth * (station_v[AI] - station_v[AJ]);
+        uu = 0.5 * frac_bandwidth * (station_u[AI] - station_u[AJ]);
+        vv = 0.5 * frac_bandwidth * (station_v[AI] - station_v[AJ]);
     }
     __syncthreads();
 

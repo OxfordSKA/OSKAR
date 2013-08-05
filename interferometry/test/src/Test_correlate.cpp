@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/cudak/oskar_cudak_update_horizon_mask.h"
+#include <gtest/gtest.h>
 
-// Single precision.
-__global__
-void oskar_cudak_update_horizon_mask_f(int ns, const float* condition,
-        int* mask)
+#include <oskar_correlate.h>
+#include <oskar_mem_init.h>
+#include <oskar_mem_free.h>
+#include <oskar_mem_copy.h>
+
+
+TEST(correlate, test1)
 {
-    // Get the position ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= ns) return;
-
-    mask[i] = mask[i] | (condition[i] > 0.0f);
-}
-
-// Double precision.
-__global__
-void oskar_cudak_update_horizon_mask_d(int ns, const double* condition,
-        int* mask)
-{
-    // Get the position ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= ns) return;
-
-    mask[i] = mask[i] | (condition[i] > 0.0);
 }

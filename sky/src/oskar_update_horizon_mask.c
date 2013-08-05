@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,39 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/cudak/oskar_cudak_scale_brightness_by_spectral_index.h"
+#include <oskar_update_horizon_mask.h>
 
-__global__
-void oskar_cudak_scale_brightness_by_spectral_index_f(const int num_sources,
-        const float frequency, const float* ref_frequency,
-        const float* spectral_index, float* I, float* Q, float* U, float* V)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Single precision. */
+void oskar_update_horizon_mask_f(int num_sources, int* mask,
+        const float* condition)
 {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-
-    if (i >= num_sources) return;
-
-    float scale = powf(frequency / ref_frequency[i], spectral_index[i]);
-    I[i] *= scale;
-    Q[i] *= scale;
-    U[i] *= scale;
-    V[i] *= scale;
+    int i;
+    for (i = 0; i < num_sources; ++i)
+    {
+        mask[i] = mask[i] | (condition[i] > 0.0f);
+    }
 }
 
-
-
-__global__
-void oskar_cudak_scale_brightness_by_spectral_index_d(const int num_sources,
-        const double frequency, const double* ref_frequency,
-        const double* spectral_index, double* I, double* Q, double* U, double* V)
+/* Double precision. */
+void oskar_update_horizon_mask_d(int num_sources, int* mask,
+        const double* condition)
 {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-
-    if (i >= num_sources) return;
-
-    double scale = pow(frequency / ref_frequency[i], spectral_index[i]);
-    I[i] *= scale;
-    Q[i] *= scale;
-    U[i] *= scale;
-    V[i] *= scale;
+    int i;
+    for (i = 0; i < num_sources; ++i)
+    {
+        mask[i] = mask[i] | (condition[i] > 0.0);
+    }
 }
 
+#ifdef __cplusplus
+}
+#endif

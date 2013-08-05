@@ -51,23 +51,23 @@ extern "C" {
  * Note that all pointers refer to device memory, and must not be dereferenced
  * in host code.
  *
- * @param[in] num_sources   Number of sources.
- * @param[in] num_stations  Number of stations.
- * @param[in] d_jones       Matrix of Jones matrices to correlate.
- * @param[in] d_source_I    Source Stokes I values, in Jy.
- * @param[in] d_source_l    Source l-direction cosines from phase centre.
- * @param[in] d_source_m    Source m-direction cosines from phase centre.
- * @param[in] d_station_u   Station u-coordinates multiplied by the wavenumber.
- * @param[in] d_station_v   Station v-coordinates multiplied by the wavenumber.
- * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
- * @param[in,out] d_vis     Modified output complex visibilities.
+ * @param[in] num_sources    Number of sources.
+ * @param[in] num_stations   Number of stations.
+ * @param[in] d_jones        Matrix of Jones matrices to correlate.
+ * @param[in] d_source_I     Source Stokes I values, in Jy.
+ * @param[in] d_source_l     Source l-direction cosines from phase centre.
+ * @param[in] d_source_m     Source m-direction cosines from phase centre.
+ * @param[in] d_station_u    Station u-coordinates multiplied by the wavenumber.
+ * @param[in] d_station_v    Station v-coordinates multiplied by the wavenumber.
+ * @param[in] frac_bandwidth Bandwidth divided by frequency.
+ * @param[in,out] d_vis      Modified output complex visibilities.
  */
 OSKAR_EXPORT
 void oskar_correlate_point_scalar_cuda_f(int num_sources,
         int num_stations, const float2* d_jones,
         const float* d_source_I, const float* d_source_l,
         const float* d_source_m, const float* d_station_u,
-        const float* d_station_v, float lambda_bandwidth, float2* d_vis);
+        const float* d_station_v, float frac_bandwidth, float2* d_vis);
 
 /**
  * @brief
@@ -80,23 +80,23 @@ void oskar_correlate_point_scalar_cuda_f(int num_sources,
  * Note that all pointers refer to device memory, and must not be dereferenced
  * in host code.
  *
- * @param[in] num_sources   Number of sources.
- * @param[in] num_stations  Number of stations.
- * @param[in] d_jones       Matrix of Jones matrices to correlate.
- * @param[in] d_source_I    Source Stokes I values, in Jy.
- * @param[in] d_source_l    Source l-direction cosines from phase centre.
- * @param[in] d_source_m    Source m-direction cosines from phase centre.
- * @param[in] d_station_u   Station u-coordinates multiplied by the wavenumber.
- * @param[in] d_station_v   Station v-coordinates multiplied by the wavenumber.
- * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
- * @param[in,out] d_vis     Modified output complex visibilities.
+ * @param[in] num_sources    Number of sources.
+ * @param[in] num_stations   Number of stations.
+ * @param[in] d_jones        Matrix of Jones matrices to correlate.
+ * @param[in] d_source_I     Source Stokes I values, in Jy.
+ * @param[in] d_source_l     Source l-direction cosines from phase centre.
+ * @param[in] d_source_m     Source m-direction cosines from phase centre.
+ * @param[in] d_station_u    Station u-coordinates multiplied by the wavenumber.
+ * @param[in] d_station_v    Station v-coordinates multiplied by the wavenumber.
+ * @param[in] frac_bandwidth Bandwidth divided by frequency.
+ * @param[in,out] d_vis      Modified output complex visibilities.
  */
 OSKAR_EXPORT
 void oskar_correlate_point_scalar_cuda_d(int num_sources,
         int num_stations, const double2* d_jones,
         const double* d_source_I, const double* d_source_l,
         const double* d_source_m, const double* d_station_u,
-        const double* d_station_v, double lambda_bandwidth, double2* d_vis);
+        const double* d_station_v, double frac_bandwidth, double2* d_vis);
 
 #ifdef __CUDACC__
 
@@ -108,23 +108,23 @@ void oskar_correlate_point_scalar_cuda_d(int num_sources,
  * Forms visibilities on all baselines by correlating Jones matrices for pairs
  * of stations and summing along the source dimension.
  *
- * @param[in] num_sources   Number of sources.
- * @param[in] num_stations  Number of stations.
- * @param[in] jones         Matrix of Jones matrices to correlate.
- * @param[in] source_I      Source Stokes I values, in Jy.
- * @param[in] source_l      Source l-direction cosines from phase centre.
- * @param[in] source_m      Source m-direction cosines from phase centre.
- * @param[in] station_u     Station u-coordinates multiplied by the wavenumber.
- * @param[in] station_v     Station v-coordinates multiplied by the wavenumber.
- * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
- * @param[in,out] vis       Modified output complex visibilities.
+ * @param[in] num_sources    Number of sources.
+ * @param[in] num_stations   Number of stations.
+ * @param[in] jones          Matrix of Jones matrices to correlate.
+ * @param[in] source_I       Source Stokes I values, in Jy.
+ * @param[in] source_l       Source l-direction cosines from phase centre.
+ * @param[in] source_m       Source m-direction cosines from phase centre.
+ * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
+ * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
+ * @param[in] frac_bandwidth Bandwidth divided by frequency.
+ * @param[in,out] vis        Modified output complex visibilities.
  */
 __global__
 void oskar_correlate_point_scalar_cudak_f(const int num_sources,
         const int num_stations, const float2* jones, const float* source_I,
         const float* source_l, const float* source_m,
         const float* station_u, const float* station_v,
-        const float lambda_bandwidth, float2* vis);
+        const float frac_bandwidth, float2* vis);
 
 /**
  * @brief
@@ -134,23 +134,23 @@ void oskar_correlate_point_scalar_cudak_f(const int num_sources,
  * Forms visibilities on all baselines by correlating Jones matrices for pairs
  * of stations and summing along the source dimension.
  *
- * @param[in] num_sources   Number of sources.
- * @param[in] num_stations  Number of stations.
- * @param[in] jones         Matrix of Jones matrices to correlate.
- * @param[in] source_I      Source Stokes I values, in Jy.
- * @param[in] source_l      Source l-direction cosines from phase centre.
- * @param[in] source_m      Source m-direction cosines from phase centre.
- * @param[in] station_u     Station u-coordinates multiplied by the wavenumber.
- * @param[in] station_v     Station v-coordinates multiplied by the wavenumber.
- * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
- * @param[in,out] vis       Modified output complex visibilities.
+ * @param[in] num_sources    Number of sources.
+ * @param[in] num_stations   Number of stations.
+ * @param[in] jones          Matrix of Jones matrices to correlate.
+ * @param[in] source_I       Source Stokes I values, in Jy.
+ * @param[in] source_l       Source l-direction cosines from phase centre.
+ * @param[in] source_m       Source m-direction cosines from phase centre.
+ * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
+ * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
+ * @param[in] frac_bandwidth Bandwidth divided by frequency.
+ * @param[in,out] vis        Modified output complex visibilities.
  */
 __global__
 void oskar_correlate_point_scalar_cudak_d(const int num_sources,
         const int num_stations, const double2* jones, const double* source_I,
         const double* source_l, const double* source_m,
         const double* station_u, const double* station_v,
-        const double lambda_bandwidth, double2* vis);
+        const double frac_bandwidth, double2* vis);
 
 #endif /* __CUDACC__ */
 

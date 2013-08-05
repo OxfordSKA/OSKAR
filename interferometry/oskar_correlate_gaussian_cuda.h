@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CORRELATE_POINT_CUDA_H_
-#define OSKAR_CORRELATE_POINT_CUDA_H_
+#ifndef OSKAR_CORRELATE_GAUSSIAN_CUDA_H_
+#define OSKAR_CORRELATE_GAUSSIAN_CUDA_H_
 
 /**
- * @file oskar_correlate_point_cuda.h
+ * @file oskar_correlate_gaussian_cuda.h
  */
 
 #include "oskar_global.h"
@@ -42,11 +42,14 @@ extern "C" {
 
 /**
  * @brief
- * CUDA correlate function for point sources (single precision).
+ * CUDA correlate function for extended Gaussian sources (single precision).
  *
  * @details
  * Forms visibilities on all baselines by correlating Jones matrices for pairs
  * of stations and summing along the source dimension.
+ *
+ * Gaussian parameters a, b, and c are assumed to be evaluated when the
+ * sky model is loaded.
  *
  * Note that all pointers refer to device memory, and must not be dereferenced
  * in host code.
@@ -60,27 +63,34 @@ extern "C" {
  * @param[in] d_source_V     Source Stokes V values, in Jy.
  * @param[in] d_source_l     Source l-direction cosines from phase centre.
  * @param[in] d_source_m     Source m-direction cosines from phase centre.
+ * @param[in] d_source_a     Source Gaussian parameter a.
+ * @param[in] d_source_b     Source Gaussian parameter b.
+ * @param[in] d_source_c     Source Gaussian parameter c.
  * @param[in] d_station_u    Station u-coordinates multiplied by the wavenumber.
  * @param[in] d_station_v    Station v-coordinates multiplied by the wavenumber.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] d_vis      Modified output complex visibilities.
  */
 OSKAR_EXPORT
-void oskar_correlate_point_cuda_f(int num_sources,
+void oskar_correlate_gaussian_cuda_f(int num_sources,
         int num_stations, const float4c* d_jones,
         const float* d_source_I, const float* d_source_Q,
         const float* d_source_U, const float* d_source_V,
         const float* d_source_l, const float* d_source_m,
-        const float* d_station_u, const float* d_station_v,
-        float frac_bandwidth, float4c* d_vis);
+        const float* d_source_a, const float* d_source_b,
+        const float* d_source_c, const float* d_station_u,
+        const float* d_station_v, float frac_bandwidth, float4c* d_vis);
 
 /**
  * @brief
- * CUDA correlate function for point sources (double precision).
+ * CUDA correlate function for extended Gaussian sources (double precision).
  *
  * @details
  * Forms visibilities on all baselines by correlating Jones matrices for pairs
  * of stations and summing along the source dimension.
+ *
+ * Gaussian parameters a, b, and c are assumed to be evaluated when the
+ * sky model is loaded.
  *
  * Note that all pointers refer to device memory, and must not be dereferenced
  * in host code.
@@ -94,29 +104,36 @@ void oskar_correlate_point_cuda_f(int num_sources,
  * @param[in] d_source_V     Source Stokes V values, in Jy.
  * @param[in] d_source_l     Source l-direction cosines from phase centre.
  * @param[in] d_source_m     Source m-direction cosines from phase centre.
+ * @param[in] d_source_a     Source Gaussian parameter a.
+ * @param[in] d_source_b     Source Gaussian parameter b.
+ * @param[in] d_source_c     Source Gaussian parameter c.
  * @param[in] d_station_u    Station u-coordinates multiplied by the wavenumber.
  * @param[in] d_station_v    Station v-coordinates multiplied by the wavenumber.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] d_vis      Modified output complex visibilities.
  */
 OSKAR_EXPORT
-void oskar_correlate_point_cuda_d(int num_sources,
+void oskar_correlate_gaussian_cuda_d(int num_sources,
         int num_stations, const double4c* d_jones,
         const double* d_source_I, const double* d_source_Q,
         const double* d_source_U, const double* d_source_V,
         const double* d_source_l, const double* d_source_m,
-        const double* d_station_u, const double* d_station_v,
-        double frac_bandwidth, double4c* d_vis);
+        const double* d_source_a, const double* d_source_b,
+        const double* d_source_c, const double* d_station_u,
+        const double* d_station_v, double frac_bandwidth, double4c* d_vis);
 
 #ifdef __CUDACC__
 
 /**
  * @brief
- * CUDA correlate kernel for point sources (single precision).
+ * CUDA correlate kernel for extended Gaussian sources (single precision).
  *
  * @details
  * Forms visibilities on all baselines by correlating Jones matrices for pairs
  * of stations and summing along the source dimension.
+ *
+ * Gaussian parameters a, b and c are assumed to be evaluated when the
+ * sky model is loaded.
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
@@ -127,25 +144,33 @@ void oskar_correlate_point_cuda_d(int num_sources,
  * @param[in] source_V       Source Stokes V values, in Jy.
  * @param[in] source_l       Source l-direction cosines from phase centre.
  * @param[in] source_m       Source m-direction cosines from phase centre.
+ * @param[in] source_a       Source Gaussian parameter a.
+ * @param[in] source_b       Source Gaussian parameter b.
+ * @param[in] source_c       Source Gaussian parameter c.
  * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
  * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] vis        Modified output complex visibilities.
  */
 __global__
-void oskar_correlate_point_cudak_f(const int num_sources,
+void oskar_correlate_gaussian_cudak_f(const int num_sources,
         const int num_stations, const float4c* jones, const float* source_I,
         const float* source_Q, const float* source_U, const float* source_V,
-        const float* source_l, const float* source_m, const float* station_u,
-        const float* station_v, const float frac_bandwidth, float4c* vis);
+        const float* source_l, const float* source_m,
+        const float* source_a, const float* source_b, const float* source_c,
+        const float* station_u, const float* station_v,
+        const float frac_bandwidth, float4c* vis);
 
 /**
  * @brief
- * CUDA correlate kernel for point sources (double precision).
+ * CUDA correlate kernel for extended Gaussian sources (double precision).
  *
  * @details
  * Forms visibilities on all baselines by correlating Jones matrices for pairs
  * of stations and summing along the source dimension.
+ *
+ * Gaussian parameters a, b and c are assumed to be evaluated when the
+ * sky model is loaded.
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
@@ -156,17 +181,22 @@ void oskar_correlate_point_cudak_f(const int num_sources,
  * @param[in] source_V       Source Stokes V values, in Jy.
  * @param[in] source_l       Source l-direction cosines from phase centre.
  * @param[in] source_m       Source m-direction cosines from phase centre.
+ * @param[in] source_a       Source Gaussian parameter a.
+ * @param[in] source_b       Source Gaussian parameter b.
+ * @param[in] source_c       Source Gaussian parameter c.
  * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
  * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] vis        Modified output complex visibilities.
  */
 __global__
-void oskar_correlate_point_cudak_d(const int num_sources,
+void oskar_correlate_gaussian_cudak_d(const int num_sources,
         const int num_stations, const double4c* jones, const double* source_I,
         const double* source_Q, const double* source_U, const double* source_V,
-        const double* source_l, const double* source_m, const double* station_u,
-        const double* station_v, const double frac_bandwidth, double4c* vis);
+        const double* source_l, const double* source_m,
+        const double* source_a, const double* source_b, const double* source_c,
+        const double* station_u, const double* station_v,
+        const double frac_bandwidth, double4c* vis);
 
 #endif /* __CUDACC__ */
 
@@ -174,4 +204,4 @@ void oskar_correlate_point_cudak_d(const int num_sources,
 }
 #endif
 
-#endif /* OSKAR_CORRELATE_POINT_CUDA_H_ */
+#endif /* OSKAR_CORRELATE_GAUSSIAN_CUDA_H_ */

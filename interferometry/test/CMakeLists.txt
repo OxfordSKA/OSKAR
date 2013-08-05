@@ -22,6 +22,15 @@ if (CPPUNIT_FOUND)
 endif()
 
 
+# New correlate test using gtest.
+include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
+add_executable(correlate_test
+    src/Test_correlate.cpp
+)
+target_link_libraries(correlate_test oskar gtest_main)
+add_test(correlate_test interferometry_test)
+
+
 # Google test binary
 set(name interferometry_test_2)
 include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)

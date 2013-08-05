@@ -27,7 +27,7 @@
  */
 
 #include "interferometry/oskar_accumulate_baseline_visibility_for_source.h"
-#include "interferometry/oskar_correlate_extended_cuda.h"
+#include "interferometry/oskar_correlate_gaussian_cuda.h"
 #include "math/oskar_sinc.h"
 #include <math.h>
 
@@ -38,45 +38,43 @@ extern "C" {
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
-void oskar_correlate_extended_cuda_f(int num_sources,
+void oskar_correlate_gaussian_cuda_f(int num_sources,
         int num_stations, const float4c* d_jones,
         const float* d_source_I, const float* d_source_Q,
         const float* d_source_U, const float* d_source_V,
         const float* d_source_l, const float* d_source_m,
         const float* d_source_a, const float* d_source_b,
         const float* d_source_c, const float* d_station_u,
-        const float* d_station_v, float freq_hz, float bandwidth_hz,
-        float4c* d_vis)
+        const float* d_station_v, float frac_bandwidth, float4c* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
     size_t shared_mem = num_threads.x * sizeof(float4c);
-    oskar_correlate_extended_cudak_f
+    oskar_correlate_gaussian_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_source_a, d_source_b,
-            d_source_c, d_station_u, d_station_v, freq_hz, bandwidth_hz, d_vis);
+            d_source_c, d_station_u, d_station_v, frac_bandwidth, d_vis);
 }
 
 /* Double precision. */
-void oskar_correlate_extended_cuda_d(int num_sources,
+void oskar_correlate_gaussian_cuda_d(int num_sources,
         int num_stations, const double4c* d_jones,
         const double* d_source_I, const double* d_source_Q,
         const double* d_source_U, const double* d_source_V,
         const double* d_source_l, const double* d_source_m,
         const double* d_source_a, const double* d_source_b,
         const double* d_source_c, const double* d_station_u,
-        const double* d_station_v, double freq_hz, double bandwidth_hz,
-        double4c* d_vis)
+        const double* d_station_v, double frac_bandwidth, double4c* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
     size_t shared_mem = num_threads.x * sizeof(double4c);
-    oskar_correlate_extended_cudak_d
+    oskar_correlate_gaussian_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_source_a, d_source_b,
-            d_source_c, d_station_u, d_station_v, freq_hz, bandwidth_hz, d_vis);
+            d_source_c, d_station_u, d_station_v, frac_bandwidth, d_vis);
 }
 
 #ifdef __cplusplus
@@ -107,19 +105,19 @@ extern __shared__ double4c smem_d[];
 
 /* Single precision. */
 __global__
-void oskar_correlate_extended_cudak_f(const int num_sources,
+void oskar_correlate_gaussian_cudak_f(const int num_sources,
         const int num_stations, const float4c* jones, const float* source_I,
         const float* source_Q, const float* source_U, const float* source_V,
         const float* source_l, const float* source_m,
         const float* source_a, const float* source_b, const float* source_c,
-        const float* station_u, const float* station_v, const float freq_hz,
-        const float bandwidth_hz, float4c* vis)
+        const float* station_u, const float* station_v,
+        const float frac_bandwidth, float4c* vis)
 {
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (AJ >= AI) return;
 
-    /* Common things per thread block. */
-    __device__ __shared__ float uu, vv, uu2, vv2, uuvv;
+    /* Common values per thread block. */
+    __shared__ float uu, vv, uu2, vv2, uuvv;
     if (threadIdx.x == 0)
     {
         /* Baseline UV-distance, in wavelengths. */
@@ -133,8 +131,8 @@ void oskar_correlate_extended_cudak_f(const int num_sources,
 
         /* Modify the baseline UV-distance to include the common components
          * of the bandwidth smearing term. */
-        uu *= M_PIf * bandwidth_hz / freq_hz;
-        vv *= M_PIf * bandwidth_hz / freq_hz;
+        uu *= M_PIf * frac_bandwidth;
+        vv *= M_PIf * frac_bandwidth;
     }
     __syncthreads();
 
@@ -207,19 +205,19 @@ void oskar_correlate_extended_cudak_f(const int num_sources,
 
 /* Double precision. */
 __global__
-void oskar_correlate_extended_cudak_d(const int num_sources,
+void oskar_correlate_gaussian_cudak_d(const int num_sources,
         const int num_stations, const double4c* jones, const double* source_I,
         const double* source_Q, const double* source_U, const double* source_V,
         const double* source_l, const double* source_m,
         const double* source_a, const double* source_b, const double* source_c,
-        const double* station_u, const double* station_v, const double freq_hz,
-        const double bandwidth_hz, double4c* vis)
+        const double* station_u, const double* station_v,
+        const double frac_bandwidth, double4c* vis)
 {
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (AJ >= AI) return;
 
-    /* Common things per thread block. */
-    __device__ __shared__ double uu, vv, uu2, vv2, uuvv;
+    /* Common values per thread block. */
+    __shared__ double uu, vv, uu2, vv2, uuvv;
     if (threadIdx.x == 0)
     {
         /* Baseline UV-distance, in wavelengths. */
@@ -233,8 +231,8 @@ void oskar_correlate_extended_cudak_d(const int num_sources,
 
         /* Modify the baseline UV-distance to include the common components
          * of the bandwidth smearing term. */
-        uu *= M_PI * bandwidth_hz / freq_hz;
-        vv *= M_PI * bandwidth_hz / freq_hz;
+        uu *= M_PI * frac_bandwidth;
+        vv *= M_PI * frac_bandwidth;
     }
     __syncthreads();
 

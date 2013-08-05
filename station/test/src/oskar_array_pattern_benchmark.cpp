@@ -58,13 +58,13 @@ int main(int argc, char** argv)
     oskar_OptionParser opt("oskar_array_pattern_benchmark");
     opt.addRequired("No. array elements");
     opt.addRequired("No. directions");
+    opt.addFlag("-sp", "Use single precision (default: double precision)");
+    opt.addFlag("-g", "Run on the GPU");
+    opt.addFlag("-c", "Run on the CPU");
     opt.addFlag("-o2c", "Single level beam pattern, phase only (real to complex DFT)");
     opt.addFlag("-c2c", "Beam pattern using complex inputs (complex to complex DFT)");
     opt.addFlag("-m2m", "Beam pattern using complex, polarised inputs (complex matrix to matrix DFT)");
-    opt.addFlag("-g", "Evaluate the array pattern on the GPU");
-    opt.addFlag("-c", "Evaluate the array pattern on the CPU");
-    opt.addFlag("-sp", "Use single precision (default = double precision)");
-    opt.addFlag("-2d", "Use a 2-dimensional phase term (default = 3d)");
+    opt.addFlag("-2d", "Use a 2-dimensional phase term (default: 3D)");
     opt.addFlag("-n", "Number of iterations", 1, "1");
     opt.addFlag("-v", "Display verbose output.");
 
@@ -108,15 +108,15 @@ int main(int argc, char** argv)
     opt.get("-n")->getInt(niter);
 
     if (op_type == UNDEF || op_type_count != 1) {
-        opt.error("Please selected one of the following flags: -o2c, -c2c, -m2m");
+        opt.error("Please select one of the following flags: -o2c, -c2c, -m2m");
         return EXIT_FAILURE;
     }
 
     if (opt.isSet("-v"))
     {
         printf("\n");
-        printf("- Number of elements = %i\n", num_elements);
-        printf("- Number of directions = %i\n", num_directions);
+        printf("- Number of elements: %i\n", num_elements);
+        printf("- Number of directions: %i\n", num_directions);
         printf("- Precision: %s\n", (precision == OSKAR_SINGLE) ? "single" : "double");
         printf("- %s\n", loc == OSKAR_LOCATION_CPU ? "CPU" : "GPU");
         printf("- %s\n", evaluate_2d ? "2D" : "3D");
@@ -125,7 +125,7 @@ int main(int argc, char** argv)
         else if (op_type == C2C) printf("c2c\n");
         else if (op_type == M2M) printf("m2m\n");
         else printf("Error undefined!\n");
-        printf("- Number of iterations = %i\n", niter);
+        printf("- Number of iterations: %i\n", niter);
         printf("\n");
     }
 
@@ -140,8 +140,8 @@ int main(int argc, char** argv)
     }
     if (opt.isSet("-v"))
     {
-        printf("==> Total time taken = %f seconds.\n", time_taken);
-        printf("==> Time taken per iteration = %f seconds.\n", time_taken/niter);
+        printf("==> Total time taken: %f seconds.\n", time_taken);
+        printf("==> Time taken per iteration: %f seconds.\n", time_taken/niter);
         printf("\n");
     }
     else {

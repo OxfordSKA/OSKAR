@@ -27,7 +27,7 @@
  */
 
 #include "interferometry/oskar_accumulate_baseline_visibility_for_source.h"
-#include "interferometry/oskar_correlate_extended_time_smearing_cuda.h"
+#include "interferometry/oskar_correlate_gaussian_time_smearing_cuda.h"
 #include "math/oskar_sinc.h"
 
 #ifdef __cplusplus
@@ -37,7 +37,7 @@ extern "C" {
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
-void oskar_correlate_extended_time_smearing_cuda_f(int num_sources,
+void oskar_correlate_gaussian_time_smearing_cuda_f(int num_sources,
         int num_stations, const float4c* d_jones,
         const float* d_source_I, const float* d_source_Q,
         const float* d_source_U, const float* d_source_V,
@@ -46,23 +46,23 @@ void oskar_correlate_extended_time_smearing_cuda_f(int num_sources,
         const float* d_source_b, const float* d_source_c,
         const float* d_station_u, const float* d_station_v,
         const float* d_station_x, const float* d_station_y,
-        float freq_hz, float bandwidth_hz, float time_int_sec,
+        float frac_bandwidth, float time_int_sec,
         float gha0_rad, float dec0_rad, float4c* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
     size_t shared_mem = num_threads.x * sizeof(float4c);
-    oskar_correlate_extended_time_smearing_cudak_f
+    oskar_correlate_gaussian_time_smearing_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_source_n, d_source_a,
             d_source_b, d_source_c, d_station_u, d_station_v, d_station_x,
-            d_station_y, freq_hz, bandwidth_hz, time_int_sec, gha0_rad,
+            d_station_y, frac_bandwidth, time_int_sec, gha0_rad,
             dec0_rad, d_vis);
 }
 
 /* Double precision. */
-void oskar_correlate_extended_time_smearing_cuda_d(int num_sources,
+void oskar_correlate_gaussian_time_smearing_cuda_d(int num_sources,
         int num_stations, const double4c* d_jones,
         const double* d_source_I, const double* d_source_Q,
         const double* d_source_U, const double* d_source_V,
@@ -71,18 +71,18 @@ void oskar_correlate_extended_time_smearing_cuda_d(int num_sources,
         const double* d_source_b, const double* d_source_c,
         const double* d_station_u, const double* d_station_v,
         const double* d_station_x, const double* d_station_y,
-        double freq_hz, double bandwidth_hz, double time_int_sec,
+        double frac_bandwidth, double time_int_sec,
         double gha0_rad, double dec0_rad, double4c* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
     size_t shared_mem = num_threads.x * sizeof(double4c);
-    oskar_correlate_extended_time_smearing_cudak_d
+    oskar_correlate_gaussian_time_smearing_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_source_n, d_source_a,
             d_source_b, d_source_c, d_station_u, d_station_v, d_station_x,
-            d_station_y, freq_hz, bandwidth_hz, time_int_sec, gha0_rad,
+            d_station_y, frac_bandwidth, time_int_sec, gha0_rad,
             dec0_rad, d_vis);
 }
 
@@ -116,14 +116,14 @@ extern __shared__ double4c smem_d[];
 
 /* Single precision. */
 __global__
-void oskar_correlate_extended_time_smearing_cudak_f(const int num_sources,
+void oskar_correlate_gaussian_time_smearing_cudak_f(const int num_sources,
         const int num_stations, const float4c* jones, const float* source_I,
         const float* source_Q, const float* source_U, const float* source_V,
         const float* source_l, const float* source_m, const float* source_n,
         const float* source_a, const float* source_b, const float* source_c,
         const float* station_u, const float* station_v,
-        const float* station_x, const float* station_y, const float freq_hz,
-        const float bandwidth_hz, const float time_int_sec,
+        const float* station_x, const float* station_y,
+        const float frac_bandwidth, const float time_int_sec,
         const float gha0_rad, const float dec0_rad, float4c* vis)
 {
     /* Local variables. */
@@ -132,8 +132,8 @@ void oskar_correlate_extended_time_smearing_cudak_f(const int num_sources,
     int i;
 
     /* Common values per thread block. */
-    __device__ __shared__ float uu, vv, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
-    __device__ __shared__ const float4c *station_i, *station_j;
+    __shared__ float uu, vv, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
+    __shared__ const float4c *station_i, *station_j;
 
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (SJ >= SI) return;
@@ -141,8 +141,6 @@ void oskar_correlate_extended_time_smearing_cudak_f(const int num_sources,
     /* Use thread 0 to set up the block. */
     if (threadIdx.x == 0)
     {
-        float temp;
-
         /* Baseline lengths. */
         uu = (station_u[SI] - station_u[SJ]) * ONE_OVER_2PIf;
         vv = (station_v[SI] - station_v[SJ]) * ONE_OVER_2PIf;
@@ -154,13 +152,12 @@ void oskar_correlate_extended_time_smearing_cudak_f(const int num_sources,
 
         /* Modify the baseline distance to include the common components
          * of the bandwidth smearing term. */
-        temp = bandwidth_hz / freq_hz; /* Fractional bandwidth */
-        uu *= M_PIf * temp;
-        vv *= M_PIf * temp;
+        uu *= M_PIf * frac_bandwidth;
+        vv *= M_PIf * frac_bandwidth;
 
         /* Compute the derivatives for time-average smearing. */
         {
-            float xx, yy, rot_angle;
+            float xx, yy, rot_angle, temp;
             float sin_HA, cos_HA, sin_Dec, cos_Dec;
             sincosf(gha0_rad, &sin_HA, &cos_HA);
             sincosf(dec0_rad, &sin_Dec, &cos_Dec);
@@ -250,14 +247,14 @@ void oskar_correlate_extended_time_smearing_cudak_f(const int num_sources,
 
 /* Double precision. */
 __global__
-void oskar_correlate_extended_time_smearing_cudak_d(const int num_sources,
+void oskar_correlate_gaussian_time_smearing_cudak_d(const int num_sources,
         const int num_stations, const double4c* jones, const double* source_I,
         const double* source_Q, const double* source_U, const double* source_V,
         const double* source_l, const double* source_m, const double* source_n,
         const double* source_a, const double* source_b, const double* source_c,
         const double* station_u, const double* station_v,
-        const double* station_x, const double* station_y, const double freq_hz,
-        const double bandwidth_hz, const double time_int_sec,
+        const double* station_x, const double* station_y,
+        const double frac_bandwidth, const double time_int_sec,
         const double gha0_rad, const double dec0_rad, double4c* vis)
 {
     /* Local variables. */
@@ -266,8 +263,8 @@ void oskar_correlate_extended_time_smearing_cudak_d(const int num_sources,
     int i;
 
     /* Common values per thread block. */
-    __device__ __shared__ double uu, vv, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
-    __device__ __shared__ const double4c *station_i, *station_j;
+    __shared__ double uu, vv, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
+    __shared__ const double4c *station_i, *station_j;
 
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (SJ >= SI) return;
@@ -275,8 +272,6 @@ void oskar_correlate_extended_time_smearing_cudak_d(const int num_sources,
     /* Use thread 0 to set up the block. */
     if (threadIdx.x == 0)
     {
-        double temp;
-
         /* Baseline lengths. */
         uu = (station_u[SI] - station_u[SJ]) * ONE_OVER_2PI;
         vv = (station_v[SI] - station_v[SJ]) * ONE_OVER_2PI;
@@ -288,13 +283,12 @@ void oskar_correlate_extended_time_smearing_cudak_d(const int num_sources,
 
         /* Modify the baseline distance to include the common components
          * of the bandwidth smearing term. */
-        temp = bandwidth_hz / freq_hz; /* Fractional bandwidth */
-        uu *= M_PI * temp;
-        vv *= M_PI * temp;
+        uu *= M_PI * frac_bandwidth;
+        vv *= M_PI * frac_bandwidth;
 
         /* Compute the derivatives for time-average smearing. */
         {
-            double xx, yy, rot_angle;
+            double xx, yy, rot_angle, temp;
             double sin_HA, cos_HA, sin_Dec, cos_Dec;
             sincos(gha0_rad, &sin_HA, &cos_HA);
             sincos(dec0_rad, &sin_Dec, &cos_Dec);

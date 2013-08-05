@@ -54,26 +54,25 @@ extern "C" {
  * Note that all pointers refer to device memory, and must not be dereferenced
  * in host code.
  *
- * @param[in] num_sources   Number of sources.
- * @param[in] num_stations  Number of stations.
- * @param[in] d_jones       Matrix of Jones matrices to correlate.
- * @param[in] d_source_I    Source Stokes I values, in Jy.
- * @param[in] d_source_Q    Source Stokes Q values, in Jy.
- * @param[in] d_source_U    Source Stokes U values, in Jy.
- * @param[in] d_source_V    Source Stokes V values, in Jy.
- * @param[in] d_source_l    Source l-direction cosines from phase centre.
- * @param[in] d_source_m    Source m-direction cosines from phase centre.
- * @param[in] d_source_n    Source n-direction cosines from phase centre.
- * @param[in] d_station_u   Station u-coordinates multiplied by the wavenumber.
- * @param[in] d_station_v   Station v-coordinates multiplied by the wavenumber.
- * @param[in] d_station_x   Station x-coordinates multiplied by the wavenumber.
- * @param[in] d_station_y   Station y-coordinates multiplied by the wavenumber.
- * @param[in] freq_hz       Frequency, in Hz.
- * @param[in] bandwidth_hz  Channel bandwidth, in Hz.
- * @param[in] time_int_sec  Time averaging interval, in seconds.
- * @param[in] gha0_rad      Greenwich Hour Angle of phase centre, in radians.
- * @param[in] dec0_rad      Declination of phase centre, in radians.
- * @param[in,out] d_vis     Modified output complex visibilities.
+ * @param[in] num_sources    Number of sources.
+ * @param[in] num_stations   Number of stations.
+ * @param[in] d_jones        Matrix of Jones matrices to correlate.
+ * @param[in] d_source_I     Source Stokes I values, in Jy.
+ * @param[in] d_source_Q     Source Stokes Q values, in Jy.
+ * @param[in] d_source_U     Source Stokes U values, in Jy.
+ * @param[in] d_source_V     Source Stokes V values, in Jy.
+ * @param[in] d_source_l     Source l-direction cosines from phase centre.
+ * @param[in] d_source_m     Source m-direction cosines from phase centre.
+ * @param[in] d_source_n     Source n-direction cosines from phase centre.
+ * @param[in] d_station_u    Station u-coordinates multiplied by the wavenumber.
+ * @param[in] d_station_v    Station v-coordinates multiplied by the wavenumber.
+ * @param[in] d_station_x    Station x-coordinates multiplied by the wavenumber.
+ * @param[in] d_station_y    Station y-coordinates multiplied by the wavenumber.
+ * @param[in] frac_bandwidth Bandwidth divided by frequency.
+ * @param[in] time_int_sec   Time averaging interval, in seconds.
+ * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
+ * @param[in] dec0_rad       Declination of phase centre, in radians.
+ * @param[in,out] d_vis      Modified output complex visibilities.
  */
 OSKAR_EXPORT
 void oskar_correlate_point_time_smearing_cuda_f(int num_sources,
@@ -83,7 +82,7 @@ void oskar_correlate_point_time_smearing_cuda_f(int num_sources,
         const float* d_source_l, const float* d_source_m,
         const float* d_source_n, const float* d_station_u,
         const float* d_station_v, const float* d_station_x,
-        const float* d_station_y, float freq_hz, float bandwidth_hz,
+        const float* d_station_y, float frac_bandwidth,
         float time_int_sec, float gha0_rad, float dec0_rad, float4c* d_vis);
 
 /**
@@ -100,26 +99,25 @@ void oskar_correlate_point_time_smearing_cuda_f(int num_sources,
  * Note that all pointers refer to device memory, and must not be dereferenced
  * in host code.
  *
- * @param[in] num_sources   Number of sources.
- * @param[in] num_stations  Number of stations.
- * @param[in] d_jones       Matrix of Jones matrices to correlate.
- * @param[in] d_source_I    Source Stokes I values, in Jy.
- * @param[in] d_source_Q    Source Stokes Q values, in Jy.
- * @param[in] d_source_U    Source Stokes U values, in Jy.
- * @param[in] d_source_V    Source Stokes V values, in Jy.
- * @param[in] d_source_l    Source l-direction cosines from phase centre.
- * @param[in] d_source_m    Source m-direction cosines from phase centre.
- * @param[in] d_source_n    Source n-direction cosines from phase centre.
- * @param[in] d_station_u   Station u-coordinates multiplied by the wavenumber.
- * @param[in] d_station_v   Station v-coordinates multiplied by the wavenumber.
- * @param[in] d_station_x   Station x-coordinates multiplied by the wavenumber.
- * @param[in] d_station_y   Station y-coordinates multiplied by the wavenumber.
- * @param[in] freq_hz       Frequency, in Hz.
- * @param[in] bandwidth_hz  Channel bandwidth, in Hz.
- * @param[in] time_int_sec  Time averaging interval, in seconds.
- * @param[in] gha0_rad      Greenwich Hour Angle of phase centre, in radians.
- * @param[in] dec0_rad      Declination of phase centre, in radians.
- * @param[in,out] d_vis     Modified output complex visibilities.
+ * @param[in] num_sources    Number of sources.
+ * @param[in] num_stations   Number of stations.
+ * @param[in] d_jones        Matrix of Jones matrices to correlate.
+ * @param[in] d_source_I     Source Stokes I values, in Jy.
+ * @param[in] d_source_Q     Source Stokes Q values, in Jy.
+ * @param[in] d_source_U     Source Stokes U values, in Jy.
+ * @param[in] d_source_V     Source Stokes V values, in Jy.
+ * @param[in] d_source_l     Source l-direction cosines from phase centre.
+ * @param[in] d_source_m     Source m-direction cosines from phase centre.
+ * @param[in] d_source_n     Source n-direction cosines from phase centre.
+ * @param[in] d_station_u    Station u-coordinates multiplied by the wavenumber.
+ * @param[in] d_station_v    Station v-coordinates multiplied by the wavenumber.
+ * @param[in] d_station_x    Station x-coordinates multiplied by the wavenumber.
+ * @param[in] d_station_y    Station y-coordinates multiplied by the wavenumber.
+ * @param[in] frac_bandwidth Bandwidth divided by frequency.
+ * @param[in] time_int_sec   Time averaging interval, in seconds.
+ * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
+ * @param[in] dec0_rad       Declination of phase centre, in radians.
+ * @param[in,out] d_vis      Modified output complex visibilities.
  */
 OSKAR_EXPORT
 void oskar_correlate_point_time_smearing_cuda_d(int num_sources,
@@ -129,7 +127,7 @@ void oskar_correlate_point_time_smearing_cuda_d(int num_sources,
         const double* d_source_l, const double* d_source_m,
         const double* d_source_n, const double* d_station_u,
         const double* d_station_v, const double* d_station_x,
-        const double* d_station_y, double freq_hz, double bandwidth_hz,
+        const double* d_station_y, double frac_bandwidth,
         double time_int_sec, double gha0_rad, double dec0_rad, double4c* d_vis);
 
 #ifdef __CUDACC__
@@ -145,26 +143,25 @@ void oskar_correlate_point_time_smearing_cuda_d(int num_sources,
  *
  * Note that the station x, y, z coordinates must be in the ECEF frame.
  *
- * @param[in] num_sources   Number of sources.
- * @param[in] num_stations  Number of stations.
- * @param[in] jones         Matrix of Jones matrices to correlate.
- * @param[in] source_I      Source Stokes I values, in Jy.
- * @param[in] source_Q      Source Stokes Q values, in Jy.
- * @param[in] source_U      Source Stokes U values, in Jy.
- * @param[in] source_V      Source Stokes V values, in Jy.
- * @param[in] source_l      Source l-direction cosines from phase centre.
- * @param[in] source_m      Source m-direction cosines from phase centre.
- * @param[in] source_n      Source n-direction cosines from phase centre.
- * @param[in] station_u     Station u-coordinates multiplied by the wavenumber.
- * @param[in] station_v     Station v-coordinates multiplied by the wavenumber.
- * @param[in] station_x     Station x-coordinates multiplied by the wavenumber.
- * @param[in] station_y     Station y-coordinates multiplied by the wavenumber.
- * @param[in] freq_hz       Frequency, in Hz.
- * @param[in] bandwidth_hz  Channel bandwidth, in Hz.
- * @param[in] time_int_sec  Time averaging interval, in seconds.
- * @param[in] gha0_rad      Greenwich Hour Angle of phase centre, in radians.
- * @param[in] dec0_rad      Declination of phase centre, in radians.
- * @param[in,out] vis       Modified output complex visibilities.
+ * @param[in] num_sources    Number of sources.
+ * @param[in] num_stations   Number of stations.
+ * @param[in] jones          Matrix of Jones matrices to correlate.
+ * @param[in] source_I       Source Stokes I values, in Jy.
+ * @param[in] source_Q       Source Stokes Q values, in Jy.
+ * @param[in] source_U       Source Stokes U values, in Jy.
+ * @param[in] source_V       Source Stokes V values, in Jy.
+ * @param[in] source_l       Source l-direction cosines from phase centre.
+ * @param[in] source_m       Source m-direction cosines from phase centre.
+ * @param[in] source_n       Source n-direction cosines from phase centre.
+ * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
+ * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
+ * @param[in] station_x      Station x-coordinates multiplied by the wavenumber.
+ * @param[in] station_y      Station y-coordinates multiplied by the wavenumber.
+ * @param[in] frac_bandwidth Bandwidth divided by frequency.
+ * @param[in] time_int_sec   Time averaging interval, in seconds.
+ * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
+ * @param[in] dec0_rad       Declination of phase centre, in radians.
+ * @param[in,out] vis        Modified output complex visibilities.
  */
 __global__
 void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
@@ -179,9 +176,9 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         const float* __restrict__ station_u,
         const float* __restrict__ station_v,
         const float* __restrict__ station_x,
-        const float* __restrict__ station_y, const float freq_hz,
-        const float bandwidth_hz, const float time_int_sec,
-        const float gha0_rad, const float dec0_rad, float4c* __restrict__ vis);
+        const float* __restrict__ station_y, const float frac_bandwidth,
+        const float time_int_sec, const float gha0_rad, const float dec0_rad,
+        float4c* __restrict__ vis);
 
 /**
  * @brief
@@ -194,26 +191,25 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
  *
  * Note that the station x, y, z coordinates must be in the ECEF frame.
  *
- * @param[in] num_sources   Number of sources.
- * @param[in] num_stations  Number of stations.
- * @param[in] jones         Matrix of Jones matrices to correlate.
- * @param[in] source_I      Source Stokes I values, in Jy.
- * @param[in] source_Q      Source Stokes Q values, in Jy.
- * @param[in] source_U      Source Stokes U values, in Jy.
- * @param[in] source_V      Source Stokes V values, in Jy.
- * @param[in] source_l      Source l-direction cosines from phase centre.
- * @param[in] source_m      Source m-direction cosines from phase centre.
- * @param[in] source_n      Source n-direction cosines from phase centre.
- * @param[in] station_u     Station u-coordinates multiplied by the wavenumber.
- * @param[in] station_v     Station v-coordinates multiplied by the wavenumber.
- * @param[in] station_x     Station x-coordinates multiplied by the wavenumber.
- * @param[in] station_y     Station y-coordinates multiplied by the wavenumber.
- * @param[in] freq_hz       Frequency, in Hz.
- * @param[in] bandwidth_hz  Channel bandwidth, in Hz.
- * @param[in] time_int_sec  Time averaging interval, in seconds.
- * @param[in] gha0_rad      Greenwich Hour Angle of phase centre, in radians.
- * @param[in] dec0_rad      Declination of phase centre, in radians.
- * @param[in,out] vis       Modified output complex visibilities.
+ * @param[in] num_sources    Number of sources.
+ * @param[in] num_stations   Number of stations.
+ * @param[in] jones          Matrix of Jones matrices to correlate.
+ * @param[in] source_I       Source Stokes I values, in Jy.
+ * @param[in] source_Q       Source Stokes Q values, in Jy.
+ * @param[in] source_U       Source Stokes U values, in Jy.
+ * @param[in] source_V       Source Stokes V values, in Jy.
+ * @param[in] source_l       Source l-direction cosines from phase centre.
+ * @param[in] source_m       Source m-direction cosines from phase centre.
+ * @param[in] source_n       Source n-direction cosines from phase centre.
+ * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
+ * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
+ * @param[in] station_x      Station x-coordinates multiplied by the wavenumber.
+ * @param[in] station_y      Station y-coordinates multiplied by the wavenumber.
+ * @param[in] frac_bandwidth Bandwidth divided by frequency.
+ * @param[in] time_int_sec   Time averaging interval, in seconds.
+ * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
+ * @param[in] dec0_rad       Declination of phase centre, in radians.
+ * @param[in,out] vis        Modified output complex visibilities.
  */
 __global__
 void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
@@ -221,8 +217,8 @@ void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
         const double* source_Q, const double* source_U, const double* source_V,
         const double* source_l, const double* source_m, const double* source_n,
         const double* station_u, const double* station_v,
-        const double* station_x, const double* station_y, const double freq_hz,
-        const double bandwidth_hz, const double time_int_sec,
+        const double* station_x, const double* station_y,
+        const double frac_bandwidth, const double time_int_sec,
         const double gha0_rad, const double dec0_rad, double4c* vis);
 
 #endif /* __CUDACC__ */

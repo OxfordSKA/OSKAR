@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,23 +26,63 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_SCALE_BRIGHTNESS_BY_SPECTRAL_INDEX_H_
-#define OSKAR_CUDAK_SCALE_BRIGHTNESS_BY_SPECTRAL_INDEX_H_
+#ifndef OSKAR_UPDATE_HORIZON_MASK_H_
+#define OSKAR_UPDATE_HORIZON_MASK_H_
 
 /**
- * @file oskar_cudak_scale_brightness_by_spectral_index.h
+ * @file oskar_update_horizon_mask.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
-__global__
-void oskar_cudak_scale_brightness_by_spectral_index_f(const int num_sources,
-        const float frequency, const float* ref_frequency,
-        const float* spectral_index, float* I, float* Q, float* U, float* V);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-__global__
-void oskar_cudak_scale_brightness_by_spectral_index_d(const int num_sources,
-        const double frequency, const double* ref_frequency,
-        const double* spectral_index, double* I, double* Q, double* U, double* V);
+/**
+ * @brief
+ * Updates the horizon mask based on the vertical direction cosine
+ * (single precision).
+ *
+ * @details
+ * This kernel updates the horizon mask to determine whether a source is
+ * visible from a particular station.
+ *
+ * The operation performed is simply:
+ *
+ * mask |= (condition > 0)
+ *
+ * @param[in] num_sources The number of source positions.
+ * @param[in,out] mask    The input and output mask vector.
+ * @param[in] condition   The vector of conditions to test.
+ */
+OSKAR_EXPORT
+void oskar_update_horizon_mask_f(int num_sources, int* mask,
+        const float* condition);
 
-#endif // OSKAR_CUDAK_SCALE_BRIGHTNESS_BY_SPECTRAL_INDEX_H_
+/**
+ * @brief
+ * Updates the horizon mask based on the vertical direction cosine
+ * (double precision).
+ *
+ * @details
+ * This kernel updates the horizon mask to determine whether a source is
+ * visible from a particular station.
+ *
+ * The operation performed is simply:
+ *
+ * mask |= (condition > 0)
+ *
+ * @param[in] num_sources The number of source positions.
+ * @param[in,out] mask    The input and output mask vector.
+ * @param[in] condition   The vector of conditions to test.
+ */
+OSKAR_EXPORT
+void oskar_update_horizon_mask_d(int num_sources, int* mask,
+        const double* condition);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_UPDATE_HORIZON_MASK_H_ */

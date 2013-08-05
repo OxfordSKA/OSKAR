@@ -29,14 +29,16 @@
 #include "sky/oskar_sky_model_location.h"
 #include "sky/oskar_sky_model_type.h"
 #include "interferometry/oskar_correlate.h"
-#include "interferometry/oskar_correlate_extended_cuda.h"
-#include "interferometry/oskar_correlate_extended_time_smearing_cuda.h"
+#include "interferometry/oskar_correlate_gaussian_cuda.h"
+#include "interferometry/oskar_correlate_gaussian_time_smearing_cuda.h"
+#include "interferometry/oskar_correlate_gaussian_time_smearing_omp.h"
 #include "interferometry/oskar_correlate_point_cuda.h"
+#include "interferometry/oskar_correlate_point_omp.h"
 #include "interferometry/oskar_correlate_point_scalar_cuda.h"
 #include "interferometry/oskar_correlate_point_time_smearing_cuda.h"
+#include "interferometry/oskar_correlate_point_time_smearing_omp.h"
 #include "utility/oskar_cuda_check_error.h"
 #include "utility/oskar_mem_type_check.h"
-#include <stdio.h>
 
 #define C_0 299792458.0
 
@@ -49,7 +51,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
         const oskar_Mem* u, const oskar_Mem* v, double gast, int* status)
 {
     int base_type, location, n_stations, n_sources;
-    double bandwidth, lambda_bandwidth, freq, time_avg, gha0;
+    double frac_bandwidth, time_avg, gha0;
 
     /* Check all inputs. */
     if (!vis || !J || !telescope || !sky || !u || !v || !status)
@@ -66,9 +68,8 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
     n_sources = sky->num_sources;
 
     /* Get bandwidth-smearing term. */
-    bandwidth = telescope->bandwidth_hz;
-    lambda_bandwidth = telescope->wavelength_metres * bandwidth;
-    freq = C_0 / telescope->wavelength_metres;
+    frac_bandwidth = telescope->wavelength_metres *
+            telescope->bandwidth_hz / C_0; /* bandwidth / freq */
 
     /* Get time-average smearing term and Greenwich hour angle. */
     time_avg = telescope->time_average_sec;
@@ -135,7 +136,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                 {
                     if (sky->use_extended)
                     {
-                        oskar_correlate_extended_time_smearing_cuda_d
+                        oskar_correlate_gaussian_time_smearing_cuda_d
                         (n_sources, n_stations, (const double4c*)J->data.data,
                                 (const double*)sky->I.data,
                                 (const double*)sky->Q.data,
@@ -150,7 +151,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                                 (const double*)u->data, (const double*)v->data,
                                 (const double*)telescope->station_x.data,
                                 (const double*)telescope->station_y.data,
-                                freq, bandwidth, time_avg, gha0,
+                                frac_bandwidth, time_avg, gha0,
                                 telescope->dec0_rad, (double4c*)vis->data);
                     }
                     else
@@ -167,7 +168,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                                 (const double*)u->data, (const double*)v->data,
                                 (const double*)telescope->station_x.data,
                                 (const double*)telescope->station_y.data,
-                                freq, bandwidth, time_avg, gha0,
+                                frac_bandwidth, time_avg, gha0,
                                 telescope->dec0_rad, (double4c*)vis->data);
                     }
                 }
@@ -175,7 +176,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                 {
                     if (sky->use_extended)
                     {
-                        oskar_correlate_extended_cuda_d
+                        oskar_correlate_gaussian_cuda_d
                         (n_sources, n_stations, (const double4c*)J->data.data,
                                 (const double*)sky->I.data,
                                 (const double*)sky->Q.data,
@@ -187,7 +188,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                                 (const double*)sky->gaussian_b.data,
                                 (const double*)sky->gaussian_c.data,
                                 (const double*)u->data, (const double*)v->data,
-                                freq, bandwidth, (double4c*)vis->data);
+                                frac_bandwidth, (double4c*)vis->data);
                     }
                     else
                     {
@@ -200,17 +201,17 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                                 (const double*)sky->l.data,
                                 (const double*)sky->m.data,
                                 (const double*)u->data, (const double*)v->data,
-                                lambda_bandwidth, (double4c*)vis->data);
+                                frac_bandwidth, (double4c*)vis->data);
                     }
                 }
             }
-            else if (base_type == OSKAR_SINGLE)
+            else /* Single precision. */
             {
                 if (time_avg > 0.0)
                 {
                     if (sky->use_extended)
                     {
-                        oskar_correlate_extended_time_smearing_cuda_f
+                        oskar_correlate_gaussian_time_smearing_cuda_f
                         (n_sources, n_stations, (const float4c*)J->data.data,
                                 (const float*)sky->I.data,
                                 (const float*)sky->Q.data,
@@ -225,7 +226,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                                 (const float*)u->data, (const float*)v->data,
                                 (const float*)telescope->station_x.data,
                                 (const float*)telescope->station_y.data,
-                                freq, bandwidth, time_avg, gha0,
+                                frac_bandwidth, time_avg, gha0,
                                 telescope->dec0_rad, (float4c*)vis->data);
                     }
                     else
@@ -242,7 +243,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                                 (const float*)u->data, (const float*)v->data,
                                 (const float*)telescope->station_x.data,
                                 (const float*)telescope->station_y.data,
-                                freq, bandwidth, time_avg, gha0,
+                                frac_bandwidth, time_avg, gha0,
                                 telescope->dec0_rad, (float4c*)vis->data);
                     }
                 }
@@ -250,7 +251,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                 {
                     if (sky->use_extended)
                     {
-                        oskar_correlate_extended_cuda_f
+                        oskar_correlate_gaussian_cuda_f
                         (n_sources, n_stations, (const float4c*)J->data.data,
                                 (const float*)sky->I.data,
                                 (const float*)sky->Q.data,
@@ -262,7 +263,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                                 (const float*)sky->gaussian_b.data,
                                 (const float*)sky->gaussian_c.data,
                                 (const float*)u->data, (const float*)v->data,
-                                freq, bandwidth, (float4c*)vis->data);
+                                frac_bandwidth, (float4c*)vis->data);
                     }
                     else
                     {
@@ -275,7 +276,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                                 (const float*)sky->l.data,
                                 (const float*)sky->m.data,
                                 (const float*)u->data, (const float*)v->data,
-                                lambda_bandwidth, (float4c*)vis->data);
+                                frac_bandwidth, (float4c*)vis->data);
                     }
                 }
             }
@@ -298,7 +299,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                         (const double*)sky->l.data,
                         (const double*)sky->m.data,
                         (const double*)u->data, (const double*)v->data,
-                        lambda_bandwidth, (double2*)vis->data);
+                        frac_bandwidth, (double2*)vis->data);
             }
             else if (base_type == OSKAR_SINGLE)
             {
@@ -308,7 +309,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                         (const float*)sky->l.data,
                         (const float*)sky->m.data,
                         (const float*)u->data, (const float*)v->data,
-                        lambda_bandwidth, (float2*)vis->data);
+                        frac_bandwidth, (float2*)vis->data);
             }
         }
 
@@ -321,7 +322,140 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
     /* Memory is on the host. */
     else
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        /* Check if Jones type is a matrix. */
+        if (oskar_mem_is_matrix(J->data.type) && oskar_mem_is_matrix(vis->type))
+        {
+            if (base_type == OSKAR_DOUBLE)
+            {
+                if (time_avg > 0.0)
+                {
+                    if (sky->use_extended)
+                    {
+                        oskar_correlate_gaussian_time_smearing_omp_d
+                        (n_sources, n_stations, (const double4c*)J->data.data,
+                                (const double*)sky->I.data,
+                                (const double*)sky->Q.data,
+                                (const double*)sky->U.data,
+                                (const double*)sky->V.data,
+                                (const double*)sky->l.data,
+                                (const double*)sky->m.data,
+                                (const double*)sky->n.data,
+                                (const double*)sky->gaussian_a.data,
+                                (const double*)sky->gaussian_b.data,
+                                (const double*)sky->gaussian_c.data,
+                                (const double*)u->data, (const double*)v->data,
+                                (const double*)telescope->station_x.data,
+                                (const double*)telescope->station_y.data,
+                                frac_bandwidth, time_avg, gha0,
+                                telescope->dec0_rad, (double4c*)vis->data);
+                    }
+                    else
+                    {
+                        oskar_correlate_point_time_smearing_omp_d
+                        (n_sources, n_stations, (const double4c*)J->data.data,
+                                (const double*)sky->I.data,
+                                (const double*)sky->Q.data,
+                                (const double*)sky->U.data,
+                                (const double*)sky->V.data,
+                                (const double*)sky->l.data,
+                                (const double*)sky->m.data,
+                                (const double*)sky->n.data,
+                                (const double*)u->data, (const double*)v->data,
+                                (const double*)telescope->station_x.data,
+                                (const double*)telescope->station_y.data,
+                                frac_bandwidth, time_avg, gha0,
+                                telescope->dec0_rad, (double4c*)vis->data);
+                    }
+                }
+                else
+                {
+                    if (sky->use_extended)
+                    {
+                        /* Non time smearing version here. */
+                    }
+                    else
+                    {
+                        oskar_correlate_point_omp_d
+                        (n_sources, n_stations, (const double4c*)J->data.data,
+                                (const double*)sky->I.data,
+                                (const double*)sky->Q.data,
+                                (const double*)sky->U.data,
+                                (const double*)sky->V.data,
+                                (const double*)sky->l.data,
+                                (const double*)sky->m.data,
+                                (const double*)u->data, (const double*)v->data,
+                                frac_bandwidth, (double4c*)vis->data);
+                    }
+                }
+            }
+            else /* Single precision. */
+            {
+                if (time_avg > 0.0)
+                {
+                    if (sky->use_extended)
+                    {
+                        oskar_correlate_gaussian_time_smearing_omp_f
+                        (n_sources, n_stations, (const float4c*)J->data.data,
+                                (const float*)sky->I.data,
+                                (const float*)sky->Q.data,
+                                (const float*)sky->U.data,
+                                (const float*)sky->V.data,
+                                (const float*)sky->l.data,
+                                (const float*)sky->m.data,
+                                (const float*)sky->n.data,
+                                (const float*)sky->gaussian_a.data,
+                                (const float*)sky->gaussian_b.data,
+                                (const float*)sky->gaussian_c.data,
+                                (const float*)u->data, (const float*)v->data,
+                                (const float*)telescope->station_x.data,
+                                (const float*)telescope->station_y.data,
+                                frac_bandwidth, time_avg, gha0,
+                                telescope->dec0_rad, (float4c*)vis->data);
+                    }
+                    else
+                    {
+                        oskar_correlate_point_time_smearing_omp_f
+                        (n_sources, n_stations, (const float4c*)J->data.data,
+                                (const float*)sky->I.data,
+                                (const float*)sky->Q.data,
+                                (const float*)sky->U.data,
+                                (const float*)sky->V.data,
+                                (const float*)sky->l.data,
+                                (const float*)sky->m.data,
+                                (const float*)sky->n.data,
+                                (const float*)u->data, (const float*)v->data,
+                                (const float*)telescope->station_x.data,
+                                (const float*)telescope->station_y.data,
+                                frac_bandwidth, time_avg, gha0,
+                                telescope->dec0_rad, (float4c*)vis->data);
+                    }
+                }
+                else
+                {
+                    if (sky->use_extended)
+                    {
+                        /* Non time smearing version here. */
+                    }
+                    else
+                    {
+                        oskar_correlate_point_omp_f
+                        (n_sources, n_stations, (const float4c*)J->data.data,
+                                (const float*)sky->I.data,
+                                (const float*)sky->Q.data,
+                                (const float*)sky->U.data,
+                                (const float*)sky->V.data,
+                                (const float*)sky->l.data,
+                                (const float*)sky->m.data,
+                                (const float*)u->data, (const float*)v->data,
+                                frac_bandwidth, (float4c*)vis->data);
+                    }
+                }
+            }
+        }
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
 }
 

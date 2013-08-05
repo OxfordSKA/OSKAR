@@ -26,13 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_sky_model_horizon_clip.h"
-#include "sky/oskar_sky_model_resize.h"
-#include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
-#include "sky/cudak/oskar_cudak_update_horizon_mask.h"
-#include "utility/oskar_cuda_check_error.h"
-#include "utility/oskar_mem_clear_contents.h"
-#include "utility/oskar_mem_realloc.h"
+#include <oskar_sky_model_horizon_clip.h>
+#include <oskar_sky_model_resize.h>
+#include <oskar_ra_dec_to_hor_lmn_cuda.h>
+#include <oskar_update_horizon_mask_cuda.h>
+#include <oskar_cuda_check_error.h>
+#include <oskar_mem_clear_contents.h>
+#include <oskar_mem_realloc.h>
 
 #include <thrust/device_vector.h> // Must be included before thrust/copy.h
 #include <thrust/copy.h>
@@ -195,10 +195,6 @@ void oskar_sky_model_horizon_clip(oskar_SkyModel* output,
 
     if (input->type() == OSKAR_SINGLE)
     {
-        /* Threads per block, blocks. */
-        int n_thd = 256;
-        int n_blk = (num_sources + n_thd - 1) / n_thd;
-
         /* Create the mask. */
         for (int i = 0; i < num_stations; ++i)
         {
@@ -210,11 +206,13 @@ void oskar_sky_model_horizon_clip(oskar_SkyModel* output,
 
             /* Evaluate source horizontal l,m,n direction cosines. */
             oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, input->RA,
-                    input->Dec, lst, latitude, work->hor_x, work->hor_y, work->hor_z);
+                    input->Dec, lst, latitude, work->hor_x, work->hor_y,
+                    work->hor_z);
 
             /* Update the mask. */
-            oskar_cudak_update_horizon_mask_f OSKAR_CUDAK_CONF(n_blk, n_thd)
-            (num_sources, work->hor_z, work->horizon_mask);
+            oskar_update_horizon_mask_cuda_f(num_sources,
+                    (int*)(work->horizon_mask.data),
+                    (const float*)(work->hor_z.data));
         }
 
         /* Copy out source data based on the mask values. */
@@ -223,10 +221,6 @@ void oskar_sky_model_horizon_clip(oskar_SkyModel* output,
     }
     else if (input->type() == OSKAR_DOUBLE)
     {
-        /* Threads per block, blocks. */
-        int n_thd = 256;
-        int n_blk = (num_sources + n_thd - 1) / n_thd;
-
         /* Create the mask. */
         for (int i = 0; i < num_stations; ++i)
         {
@@ -238,11 +232,13 @@ void oskar_sky_model_horizon_clip(oskar_SkyModel* output,
 
             /* Evaluate source horizontal l,m,n direction cosines. */
             oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, input->RA,
-                    input->Dec, lst, latitude, work->hor_x, work->hor_y, work->hor_z);
+                    input->Dec, lst, latitude, work->hor_x, work->hor_y,
+                    work->hor_z);
 
             /* Update the mask. */
-            oskar_cudak_update_horizon_mask_d OSKAR_CUDAK_CONF(n_blk, n_thd)
-            (num_sources, work->hor_z, work->horizon_mask);
+            oskar_update_horizon_mask_cuda_d(num_sources,
+                    (int*)(work->horizon_mask.data),
+                    (const double*)(work->hor_z.data));
         }
 
         /* Copy out source data based on the mask values. */

@@ -27,6 +27,8 @@ set(sky_SRC
     src/oskar_ra_dec_to_rel_lmn_cuda.cu
     src/oskar_ra_dec_to_rel_lmn.c
     #src/oskar_rebin_sky_cuda.cu # Doesn't work on compute 1.3 architectures.
+    src/oskar_scale_flux_by_spectral_index_cuda.cu
+    src/oskar_scale_flux_by_spectral_index.c
     src/oskar_sky_model_append_to_set.c
     src/oskar_sky_model_append.c
     src/oskar_sky_model_combine_set.c
@@ -47,7 +49,7 @@ set(sky_SRC
     src/oskar_sky_model_resize.c
     src/oskar_sky_model_rotate_to_position.c
     src/oskar_sky_model_save.c
-    src/oskar_sky_model_scale_by_spectral_index.cu
+    src/oskar_sky_model_scale_by_spectral_index.c
     src/oskar_sky_model_set_gaussian_parameters.c
     src/oskar_sky_model_set_source.c
     src/oskar_sky_model_set_spectral_index.c
@@ -56,6 +58,8 @@ set(sky_SRC
     src/oskar_sky_model_write.c
     src/oskar_SkyModel.cpp
     src/oskar_WorkJonesZ.c
+    src/oskar_update_horizon_mask_cuda.cu
+    src/oskar_update_horizon_mask.c
 )
 
 # Add the CUDA kernels.

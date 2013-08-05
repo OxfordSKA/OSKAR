@@ -26,22 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_global.h>
-
-#include <interferometry/oskar_correlate.h>
-#include <interferometry/oskar_telescope_model_free.h>
-#include <interferometry/oskar_telescope_model_init.h>
-#include <sky/oskar_sky_model_free.h>
-#include <sky/oskar_sky_model_init.h>
-#include <math/oskar_jones_free.h>
-#include <math/oskar_jones_init.h>
-#include <utility/oskar_mem_copy.h>
-#include <utility/oskar_mem_free.h>
-#include <utility/oskar_mem_init.h>
-#include <utility/oskar_get_error_string.h>
+#include <oskar_correlate.h>
+#include <oskar_telescope_model_free.h>
+#include <oskar_telescope_model_init.h>
+#include <oskar_sky_model_free.h>
+#include <oskar_sky_model_init.h>
+#include <oskar_jones_free.h>
+#include <oskar_jones_init.h>
+#include <oskar_mem_copy.h>
+#include <oskar_mem_free.h>
+#include <oskar_mem_init.h>
+#include <oskar_get_error_string.h>
+#include <oskar_timer_functions.h>
 
 #include <apps/lib/oskar_OptionParser.h>
-#include <cuda_runtime_api.h>
 
 #ifndef _WIN32
 #   include <sys/time.h>
@@ -52,7 +50,7 @@
 #include <vector>
 
 int benchmark(int num_stations, int num_sources, int type,
-        int jones_type, int use_extended, int use_time_ave, int niter,
+        int jones_type, int loc, int use_extended, int use_time_ave, int niter,
         std::vector<double>& times);
 
 int main(int argc, char** argv)
@@ -60,10 +58,12 @@ int main(int argc, char** argv)
     oskar_OptionParser opt("oskar_correlator_benchmark");
     opt.addFlag("-nst", "Number of stations.", 1, "", true);
     opt.addFlag("-nsrc", "Number of sources.", 1, "", true);
-    opt.addFlag("-sp", "Use single precision (default = double precision)");
-    opt.addFlag("-s", "Use scalar Jones terms (default = matrix/polarised).");
-    opt.addFlag("-e", "Use extended (Gaussian) sources (default = point sources).");
-    opt.addFlag("-t", "Use analytical time averaging (default = no time "
+    opt.addFlag("-sp", "Use single precision (default: double precision)");
+    opt.addFlag("-s", "Use scalar Jones terms (default: matrix/polarised).");
+    opt.addFlag("-g", "Run on the GPU");
+    opt.addFlag("-c", "Run on the CPU");
+    opt.addFlag("-e", "Use Gaussian sources (default: point sources).");
+    opt.addFlag("-t", "Use analytical time averaging (default: no time "
             "averaging).");
     opt.addFlag("-r", "Dump raw iteration data to this file.", 1);
     opt.addFlag("-std", "Discard values greater than this number of standard "
@@ -90,13 +90,24 @@ int main(int argc, char** argv)
     if (opt.isSet("-std"))
         opt.get("-std")->getDouble(max_std_dev);
 
+    int loc;
+    if (opt.isSet("-g"))
+        loc = OSKAR_LOCATION_GPU;
+    if (opt.isSet("-c"))
+        loc = OSKAR_LOCATION_CPU;
+    if (!(opt.isSet("-c") ^ opt.isSet("-g")))
+    {
+        opt.error("Please select one of -g or -c");
+        return EXIT_FAILURE;
+    }
+
     if (opt.isSet("-v"))
     {
         printf("\n");
         printf("- Number of stations: %i\n", num_stations);
         printf("- Number of sources: %i\n", num_sources);
         printf("- Precision: %s\n", (type == OSKAR_SINGLE) ? "single" : "double");
-        printf("- Jones type: %s\n", (opt.isSet("-s")) ? "Scalar" : "Matrix");
+        printf("- Jones type: %s\n", (opt.isSet("-s")) ? "scalar" : "matrix");
         printf("- Extended sources: %s\n", (use_extended) ? "true" : "false");
         printf("- Analytical time smearing: %s\n", (use_time_ave) ? "true" : "false");
         printf("- Number of iterations: %i\n", niter);
@@ -111,7 +122,7 @@ int main(int argc, char** argv)
     double time_taken_sec = 0.0, average_time_sec = 0.0;
     std::vector<double> times;
     int status = benchmark(num_stations, num_sources, type, jones_type,
-            use_extended, use_time_ave, niter, times);
+            loc, use_extended, use_time_ave, niter, times);
 
     // Compute total time taken.
     for (int i = 0; i < niter; ++i)
@@ -137,7 +148,7 @@ int main(int argc, char** argv)
     // Check for errors.
     if (status)
     {
-        fprintf(stderr, "ERROR: correlator failed with code %i: %s\n", status,
+        fprintf(stderr, "ERROR: correlate failed with code %i: %s\n", status,
                 oskar_get_error_string(status));
         return EXIT_FAILURE;
     }
@@ -197,76 +208,48 @@ int main(int argc, char** argv)
 }
 
 int benchmark(int num_stations, int num_sources, int type,
-        int jones_type, int use_extended, int use_time_ave, int niter,
+        int jones_type, int loc, int use_extended, int use_time_ave, int niter,
         std::vector<double>& times)
 {
-    int status = OSKAR_SUCCESS;
-    int loc = OSKAR_LOCATION_GPU;
+    int status = 0;
     int num_vis = num_stations * (num_stations-1) / 2;
-    int num_vis_coords = num_stations;
 
-    // Set device 0.
-    cudaSetDevice(0);
+    oskar_Timer timer;
+    oskar_timer_create(&timer, loc == OSKAR_LOCATION_GPU ?
+            OSKAR_TIMER_CUDA : OSKAR_TIMER_OMP);
 
-    // Create the CUDA events for timing.
-    cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-
-    double time_ave = 0.0;
-    if (use_time_ave)
-        time_ave = 1.0;
-
-    // Setup a test telescope model.
-    oskar_TelescopeModel tel;
-    oskar_telescope_model_init(&tel, type, loc, num_stations, &status);
-    tel.time_average_sec = time_ave;
-
+    // Set up a test sky model, telescope model and Jones matrices.
     oskar_SkyModel sky;
+    oskar_TelescopeModel tel;
+    oskar_Jones J;
     oskar_sky_model_init(&sky, type, loc, num_sources, &status);
+    oskar_telescope_model_init(&tel, type, loc, num_stations, &status);
+    oskar_jones_init(&J, jones_type, loc, num_stations, num_sources, &status);
+    tel.time_average_sec = (double) use_time_ave;
     sky.use_extended = use_extended;
 
-    // Memory for the visibility slice being correlated.
-    oskar_Mem vis;
-    oskar_mem_init(&vis, jones_type, loc, num_vis, OSKAR_TRUE, &status);
+    // Memory for visibility coordinates and output visibility slice.
+    oskar_Mem vis, u, v;
+    oskar_mem_init(&vis, jones_type, loc, num_vis, 1, &status);
+    oskar_mem_init(&u, type, loc, num_stations, 1, &status);
+    oskar_mem_init(&v, type, loc, num_stations, 1, &status);
 
-    // Visibility coordinates.
-    oskar_Mem u, v;
-    oskar_mem_init(&u, type, loc, num_vis_coords, OSKAR_TRUE, &status);
-    oskar_mem_init(&v, type, loc, num_vis_coords, OSKAR_TRUE, &status);
-
-    oskar_Jones J;
-    oskar_jones_init(&J, jones_type,
-            loc, num_stations, num_sources, &status);
-    if (status) return status;
-
-    double gast = 0.0;
-    cudaDeviceSynchronize();
-
+    // Run benchmark.
     times.resize(niter);
     for (int i = 0; i < niter; ++i)
     {
-        float millisec = 0.0f;
-        cudaEventRecord(start);
-        oskar_correlate(&vis, &J, &tel, &sky, &u, &v, gast, &status);
-        cudaEventRecord(stop);
-        cudaEventSynchronize(stop);
-        cudaEventElapsedTime(&millisec, start, stop);
-
-        // Store the time taken for this iteration.
-        times[i] = millisec / 1000.0;
+        oskar_timer_start(&timer);
+        oskar_correlate(&vis, &J, &tel, &sky, &u, &v, 0.0, &status);
+        times[i] = oskar_timer_elapsed(&timer);
     }
-
-    // Destroy the timers.
-    cudaEventDestroy(start);
-    cudaEventDestroy(stop);
 
     // Free memory.
     oskar_mem_free(&u, &status);
     oskar_mem_free(&v, &status);
     oskar_mem_free(&vis, &status);
     oskar_jones_free(&J, &status);
-    oskar_sky_model_free(&sky, &status);
     oskar_telescope_model_free(&tel, &status);
+    oskar_sky_model_free(&sky, &status);
+    oskar_timer_destroy(&timer);
     return status;
 }

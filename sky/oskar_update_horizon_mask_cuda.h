@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_UPDATE_HORIZON_MASK_H_
-#define OSKAR_CUDAK_UPDATE_HORIZON_MASK_H_
+#ifndef OSKAR_UPDATE_HORIZON_MASK_CUDA_H_
+#define OSKAR_UPDATE_HORIZON_MASK_CUDA_H_
 
 /**
- * @file oskar_cudak_update_horizon_mask.h
+ * @file oskar_update_horizon_mask_cuda.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief
@@ -48,13 +52,13 @@
  *
  * mask |= (condition > 0)
  *
- * @param[in] ns         The number of source positions.
- * @param[in] condition  The vector of conditions to test.
- * @param[in,out] mask   The input and output mask vector.
+ * @param[in] num_sources The number of source positions.
+ * @param[in,out] mask    The input and output mask vector.
+ * @param[in] condition   The vector of conditions to test.
  */
-__global__
-void oskar_cudak_update_horizon_mask_f(int ns, const float* condition,
-        int* mask);
+OSKAR_EXPORT
+void oskar_update_horizon_mask_cuda_f(int num_sources, int* mask,
+        const float* condition);
 
 /**
  * @brief
@@ -69,12 +73,62 @@ void oskar_cudak_update_horizon_mask_f(int ns, const float* condition,
  *
  * mask |= (condition > 0)
  *
- * @param[in] ns         The number of source positions.
- * @param[in] condition  The vector of conditions to test.
- * @param[in,out] mask   The input and output mask vector.
+ * @param[in] num_sources The number of source positions.
+ * @param[in,out] mask    The input and output mask vector.
+ * @param[in] condition   The vector of conditions to test.
+ */
+OSKAR_EXPORT
+void oskar_update_horizon_mask_cuda_d(int num_sources, int* mask,
+        const double* condition);
+
+#ifdef __CUDACC__
+
+/**
+ * @brief
+ * Updates the horizon mask based on the vertical direction cosine
+ * (single precision).
+ *
+ * @details
+ * This kernel updates the horizon mask to determine whether a source is
+ * visible from a particular station.
+ *
+ * The operation performed is simply:
+ *
+ * mask |= (condition > 0)
+ *
+ * @param[in] num_sources The number of source positions.
+ * @param[in,out] mask    The input and output mask vector.
+ * @param[in] condition   The vector of conditions to test.
  */
 __global__
-void oskar_cudak_update_horizon_mask_d(int ns, const double* condition,
-        int* mask);
+void oskar_update_horizon_mask_cudak_f(const int num_sources, int* mask,
+        const float* condition);
 
-#endif // OSKAR_CUDAK_UPDATE_HORIZON_MASK_H_
+/**
+ * @brief
+ * Updates the horizon mask based on the vertical direction cosine
+ * (double precision).
+ *
+ * @details
+ * This kernel updates the horizon mask to determine whether a source is
+ * visible from a particular station.
+ *
+ * The operation performed is simply:
+ *
+ * mask |= (condition > 0)
+ *
+ * @param[in] num_sources The number of source positions.
+ * @param[in,out] mask    The input and output mask vector.
+ * @param[in] condition   The vector of conditions to test.
+ */
+__global__
+void oskar_update_horizon_mask_cudak_d(const int num_sources, int* mask,
+        const double* condition);
+
+#endif /* __CUDACC__ */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_UPDATE_HORIZON_MASK_CUDA_H_ */
