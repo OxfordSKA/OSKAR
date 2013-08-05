@@ -5,6 +5,7 @@
 # Add the source files in this directory.
 set(interferometry_SRC
     src/oskar_correlate_gaussian_cuda.cu
+    src/oskar_correlate_gaussian_omp.c
     src/oskar_correlate_gaussian_time_smearing_cuda.cu
     src/oskar_correlate_gaussian_time_smearing_omp.c
     src/oskar_correlate_point_cuda.cu

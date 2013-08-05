@@ -30,6 +30,7 @@
 #include "sky/oskar_sky_model_type.h"
 #include "interferometry/oskar_correlate.h"
 #include "interferometry/oskar_correlate_gaussian_cuda.h"
+#include "interferometry/oskar_correlate_gaussian_omp.h"
 #include "interferometry/oskar_correlate_gaussian_time_smearing_cuda.h"
 #include "interferometry/oskar_correlate_gaussian_time_smearing_omp.h"
 #include "interferometry/oskar_correlate_point_cuda.h"
@@ -172,7 +173,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                                 telescope->dec0_rad, (double4c*)vis->data);
                     }
                 }
-                else
+                else /* Non-time-smearing. */
                 {
                     if (sky->use_extended)
                     {
@@ -247,7 +248,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                                 telescope->dec0_rad, (float4c*)vis->data);
                     }
                 }
-                else
+                else /* Non-time-smearing. */
                 {
                     if (sky->use_extended)
                     {
@@ -367,11 +368,23 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                                 telescope->dec0_rad, (double4c*)vis->data);
                     }
                 }
-                else
+                else /* Non-time-smearing. */
                 {
                     if (sky->use_extended)
                     {
-                        /* Non time smearing version here. */
+                        oskar_correlate_gaussian_omp_d
+                        (n_sources, n_stations, (const double4c*)J->data.data,
+                                (const double*)sky->I.data,
+                                (const double*)sky->Q.data,
+                                (const double*)sky->U.data,
+                                (const double*)sky->V.data,
+                                (const double*)sky->l.data,
+                                (const double*)sky->m.data,
+                                (const double*)sky->gaussian_a.data,
+                                (const double*)sky->gaussian_b.data,
+                                (const double*)sky->gaussian_c.data,
+                                (const double*)u->data, (const double*)v->data,
+                                frac_bandwidth, (double4c*)vis->data);
                     }
                     else
                     {
@@ -430,11 +443,23 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                                 telescope->dec0_rad, (float4c*)vis->data);
                     }
                 }
-                else
+                else /* Non-time-smearing. */
                 {
                     if (sky->use_extended)
                     {
-                        /* Non time smearing version here. */
+                        oskar_correlate_gaussian_omp_f
+                        (n_sources, n_stations, (const float4c*)J->data.data,
+                                (const float*)sky->I.data,
+                                (const float*)sky->Q.data,
+                                (const float*)sky->U.data,
+                                (const float*)sky->V.data,
+                                (const float*)sky->l.data,
+                                (const float*)sky->m.data,
+                                (const float*)sky->gaussian_a.data,
+                                (const float*)sky->gaussian_b.data,
+                                (const float*)sky->gaussian_c.data,
+                                (const float*)u->data, (const float*)v->data,
+                                frac_bandwidth, (float4c*)vis->data);
                     }
                     else
                     {
