@@ -28,6 +28,10 @@
 
 #include "utility/test/Test_Timer.h"
 #include "utility/oskar_timer_functions.h"
+#include <unistd.h> // Note: this is a GNU compiler only header and needed
+                    // for sleep() for some versions of g++ (tested with v 4.7)
+                    // On windows this function is defined in windows.h
+                    // with an argument in milliseconds rather than seconds.
 
 void Test_Timer::test()
 {
