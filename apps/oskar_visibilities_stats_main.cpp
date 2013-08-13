@@ -105,34 +105,49 @@ int main(int argc, char** argv)
         double min = DBL_MAX, max = -DBL_MAX;
         double mean = 0.0, rms = 0.0, var = 0.0, std = 0.0;
         double sum = 0.0, sumsq = 0.0;
+        int num_vis = 0, num_zero = 0;
         if (verbose)
         {
             cout << "  No. of baselines: " << vis.num_baselines << endl;
             cout << "  No. of times: " << vis.num_times << endl;
             cout << "  No. of channels: " << vis.num_channels << endl;
         }
-
         switch (vis.amplitude.type)
         {
-            case OSKAR_SINGLE_COMPLEX:
-            {
-                //Complex* amps = (Complex*)vis.amplitude.data;
-                break;
-            }
             case OSKAR_SINGLE_COMPLEX_MATRIX:
             {
-                //Jones* amps = (Jones*)vis.amplitude.data;
-                break;
-            }
-            case OSKAR_DOUBLE_COMPLEX:
-            {
-                //DComplex* amps = (DComplex*)vis.amplitude.data;
+                Jones* amp = (Jones*)vis.amplitude.data;
+                for (int i = 0, c = 0; c < vis.num_channels; ++c)
+                {
+                    for (int t = 0; t < vis.num_times; ++t)
+                    {
+                        for (int b = 0; b < vis.num_baselines; ++b, ++i)
+                        {
+                            Complex xx = amp[i].a;
+                            Complex yy = amp[i].d;
+                            Complex I;
+                            I.x = 0.5 * (xx.x + yy.x);
+                            I.y = 0.5 * (xx.y + yy.y);
+                            float absI = sqrtf(I.x*I.x + I.y*I.y);
+                            if (absI < DBL_MIN)
+                                num_zero++;
+                            if (absI > max) max = absI;
+                            if (absI < min) min = absI;
+                            sum += absI;
+                            sumsq += absI * absI;
+                        }
+                    }
+                }
+                num_vis = vis.amplitude.num_elements;
+                mean = sum / num_vis;
+                rms = sqrtf(sumsq / num_vis);
+                var = sumsq/num_vis - mean*mean;
+                std = sqrtf(var);
                 break;
             }
             case OSKAR_DOUBLE_COMPLEX_MATRIX:
             {
                 DJones* amp = (DJones*)vis.amplitude.data;
-                int num_zero = 0;
                 for (int i = 0, c = 0; c < vis.num_channels; ++c)
                 {
                     for (int t = 0; t < vis.num_times; ++t)
@@ -147,7 +162,6 @@ int main(int argc, char** argv)
                             double absI = std::sqrt(I.x * I.x + I.y * I.y);
                             if (absI < DBL_MIN)
                                 num_zero++;
-                            //printf("%i (%e [%s] %e) %e %e => %e\n", i, xx.x, doubleToRawString(xx.x), xx.y, I.x, I.y, absI);
                             if (absI > max) max = absI;
                             if (absI < min) min = absI;
                             sum += absI;
@@ -155,22 +169,25 @@ int main(int argc, char** argv)
                         }
                     }
                 }
-                int num_vis = vis.amplitude.num_elements;
+                num_vis = vis.amplitude.num_elements;
                 mean = sum / num_vis;
                 rms = std::sqrt(sumsq / num_vis);
                 var = sumsq/num_vis - mean*mean;
                 std = std::sqrt(var);
-                printf("min, max, mean, rms, std\n");
-                printf("%e, %e, %e, %e, %e\n", min, max, mean, rms, std);
-                printf("number of zero visibilities = %i\n", num_zero);
-                printf("number of non-zero visibilities = %i\n", num_vis-num_zero);
-                printf("percent zero visibilities = %f\n", (double)num_zero/num_vis * 100.0);
                 break;
             }
             default:
+            {
                 return OSKAR_ERR_BAD_DATA_TYPE;
                 break;
+            }
         } // switch (vis.amplitude.type)
+
+        printf("min, max, mean, rms, std\n");
+        printf("%e, %e, %e, %e, %e\n", min, max, mean, rms, std);
+        printf("number of zero visibilities = %i\n", num_zero);
+        printf("number of non-zero visibilities = %i\n", num_vis-num_zero);
+        printf("percent zero visibilities = %f\n", (double)num_zero/num_vis * 100.0);
 
     } // end of loop over visibility files
 
