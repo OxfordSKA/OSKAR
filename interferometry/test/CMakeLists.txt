@@ -32,14 +32,14 @@ add_test(correlate_test interferometry_test)
 
 
 # Google test binary
-set(name interferometry_test_2)
-include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
-cuda_add_executable(${name} src/Test_correlate_performance.cu)
-target_link_libraries(${name}
-    oskar
-    gtest_main
-    ${CUDA_LIBRARIES}
-    )
+#set(name interferometry_test_2)
+#include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
+#cuda_add_executable(${name} src/Test_correlate_performance.cu)
+#target_link_libraries(${name}
+#    oskar
+#    gtest_main
+#    ${CUDA_LIBRARIES}
+#    )
 
 if (NOT WIN32)
     # Correlator benchmark binary.
