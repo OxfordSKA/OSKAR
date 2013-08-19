@@ -2,9 +2,12 @@
 
     * Fixed memory ordering in MATLAB OSKAR binary file interface for 
       COMPLEX_MATRIX types.
-    
+
     * Fixed a bug that prevented memory from being inserted correctly into
       blocks greater than 2 GiB in size.
+
+    * Fixed a bug that prevented blocks of binary data larger than 2 GiB from
+      being loaded.
 
     * Fixed display of large data blocks in oskar_binary_file_query.
 

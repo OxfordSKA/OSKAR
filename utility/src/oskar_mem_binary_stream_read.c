@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_binary_stream_read.h"
-#include "utility/oskar_binary_tag_index_create.h"
-#include "utility/oskar_binary_tag_index_query.h"
-#include "utility/oskar_mem_binary_stream_read.h"
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_element_size.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_realloc.h"
+#include <oskar_binary_stream_read.h>
+#include <oskar_binary_tag_index_create.h>
+#include <oskar_binary_tag_index_query.h>
+#include <oskar_mem_binary_stream_read.h>
+#include <oskar_mem_copy.h>
+#include <oskar_mem_element_size.h>
+#include <oskar_mem_free.h>
+#include <oskar_mem_init.h>
+#include <oskar_mem_realloc.h>
 
 #include <stdlib.h>
 #include <math.h>
@@ -48,9 +48,9 @@ void oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
         oskar_BinaryTagIndex** index, unsigned char id_group,
         unsigned char id_tag, int user_index, int* status)
 {
-    int type, num_elements, element_size;
+    int type;
     oskar_Mem temp;
-    size_t size_bytes;
+    size_t size_bytes, num_elements, element_size;
     oskar_Mem* data = NULL;
 
     /* Check all inputs. */
@@ -83,9 +83,8 @@ void oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
     if (*status) return;
 
     /* Resize memory block if necessary, so that it can hold the data. */
-    num_elements = (int)ceil((double)size_bytes / (double)element_size);
-    oskar_mem_realloc(data, num_elements, status);
-    size_bytes = num_elements * element_size;
+    num_elements = size_bytes / element_size;
+    oskar_mem_realloc(data, (int)num_elements, status);
 
     /* Load the memory. */
     oskar_binary_stream_read(stream, index, (unsigned char)type,
@@ -103,9 +102,9 @@ void oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
         oskar_BinaryTagIndex** index, const char* name_group,
         const char* name_tag, int user_index, int* status)
 {
-    int type, num_elements, element_size;
+    int type;
     oskar_Mem temp;
-    size_t size_bytes;
+    size_t size_bytes, num_elements, element_size;
     oskar_Mem* data = NULL;
 
     /* Check all inputs. */
@@ -138,9 +137,8 @@ void oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
     if (*status) return;
 
     /* Resize memory block if necessary, so that it can hold the data. */
-    num_elements = (int)ceil((double)size_bytes / (double)element_size);
-    oskar_mem_realloc(data, num_elements, status);
-    size_bytes = num_elements * element_size;
+    num_elements = size_bytes / element_size;
+    oskar_mem_realloc(data, (int)num_elements, status);
 
     /* Load the memory. */
     oskar_binary_stream_read_ext(stream, index, (unsigned char)type,
