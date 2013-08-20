@@ -421,7 +421,6 @@ correlate_cudak_f(const int num_sources, const int num_stations,
 }
 
 
-
 void correlate_warpshuffle_f(int num_sources, int num_stations, const float4c* d_Jones,
         const float* d_I, const float* d_Q, const float* d_U, const float* d_V,
         const float* d_l, const float* d_m, const float* d_n, const float* d_u,
@@ -451,6 +450,7 @@ correlate_warpshuffle_cudak_f(const int num_sources, const int num_stations,
         const float bandwidth_hz, const float time_int_sec,
         const float gha0_rad, const float dec0_rad, float4c* d_vis)
 {
+#if __CUDA_ARCH__ >= 300
     /* Common values per thread block. */
     __shared__ float uu, vv, du_dt, dv_dt, dw_dt;
     __shared__ const float4c* __restrict__ station_i;
@@ -574,6 +574,7 @@ correlate_warpshuffle_cudak_f(const int num_sources, const int num_stations,
         d_vis[i].d.x += sum.d.x;
         d_vis[i].d.y += sum.d.y;
     }
+#endif /* __CUDA_ARCH__ >= 300 */
 }
 
 
@@ -613,6 +614,7 @@ correlate_warpshuffle_blocked_smem_cudak_f(const int num_sources, const int num_
         const float bandwidth_hz, const float time_int_sec,
         const float gha0_rad, const float dec0_rad, float4c* d_vis)
 {
+#if __CUDA_ARCH__ >= 300
     // This kernel evaluates baselines p-q for a single station p and a range
     // of stations q, determined by the BLOCK_SIZE
 
@@ -781,6 +783,7 @@ correlate_warpshuffle_blocked_smem_cudak_f(const int num_sources, const int num_
             d_vis[ipq].d.y += b_sum[threadIdx.x].d.y;
         }
     }
+#endif /* __CUDA_ARCH__ >= 300 */
 }
 
 void correlate_warpshuffle_blocked_f(int num_sources, int num_stations, const float4c* d_Jones,
@@ -813,6 +816,7 @@ correlate_warpshuffle_blocked_cudak_f(const int num_sources, const int num_stati
         const float bandwidth_hz, const float time_int_sec,
         const float gha0_rad, const float dec0_rad, float4c* d_vis)
 {
+#if __CUDA_ARCH__ >= 300
     // This kernel evaluates baselines p-q for a single station p and a range
     // of stations q, determined by the BLOCK_SIZE
 
@@ -979,6 +983,7 @@ correlate_warpshuffle_blocked_cudak_f(const int num_sources, const int num_stati
             d_vis[ipq].d.y += b_sum[threadIdx.x].d.y;
         }
     }
+#endif /* __CUDA_ARCH__ >= 300 */
 }
 
 
@@ -999,6 +1004,7 @@ correlate_warpshuffle_blocked_cudak_f(const int num_sources, const int num_stati
 //    d_warp_sum[0] = value;
 //}
 //
+
 
 void print_float4c(float4c value)
 {
