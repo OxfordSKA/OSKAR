@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,1139 +26,674 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/test/Test_Jones.h"
+#include <gtest/gtest.h>
 
-#include <vector_types.h>
-#include <vector_functions.h>
-#include <cuda_runtime_api.h>
-#include "math/oskar_jones_join.h"
-#include "math/oskar_jones_set_real_scalar.h"
-#include "math/oskar_Jones.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_vector_types.h"
-#include "utility/oskar_cuda_device_info_scan.h"
+#include <oskar_timer_functions.h>
 
-#define TIMER_ENABLE 1
-#include "utility/timer.h"
+#include <oskar_jones_copy.h>
+#include <oskar_jones_init.h>
+#include <oskar_jones_free.h>
+#include <oskar_jones_join.h>
+#include <oskar_jones_set_real_scalar.h>
+#include <oskar_get_error_string.h>
+#include <oskar_mem_evaluate_relative_error.h>
+#include <oskar_mem_random_fill.h>
+#include <oskar_mem_type_check.h>
+#include <oskar_vector_types.h>
 
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
 
-/**
- * @details
- * Constructor.
- */
-Test_Jones::Test_Jones()
+#define TOL_FLT 1e-6
+#define TOL_DBL 1e-12
+
+#define LC   OSKAR_LOCATION_CPU
+#define LG   OSKAR_LOCATION_GPU
+#define TSC  OSKAR_SINGLE_COMPLEX
+#define TSCM OSKAR_SINGLE_COMPLEX_MATRIX
+#define TDC  OSKAR_DOUBLE_COMPLEX
+#define TDCM OSKAR_DOUBLE_COMPLEX_MATRIX
+
+static void check_values(const oskar_Mem* approx, const oskar_Mem* accurate)
 {
-    device_ = new oskar_CudaDeviceInfo;
-    oskar_cuda_device_info_scan(device_, 0);
+    int status = 0;
+    double min_rel_error, max_rel_error, avg_rel_error, std_rel_error, tol;
+    oskar_mem_evaluate_relative_error(approx, accurate, &min_rel_error,
+            &max_rel_error, &avg_rel_error, &std_rel_error, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    tol = oskar_mem_is_double(approx->type) &&
+            oskar_mem_is_double(accurate->type) ? TOL_DBL : TOL_FLT;
+    EXPECT_LT(max_rel_error, tol) << std::setprecision(5) <<
+            "RELATIVE ERROR" <<
+            " MIN: " << min_rel_error << " MAX: " << max_rel_error <<
+            " AVG: " << avg_rel_error << " STD: " << std_rel_error;
+    EXPECT_LT(avg_rel_error, tol) << std::setprecision(5) <<
+            "RELATIVE ERROR" <<
+            " MIN: " << min_rel_error << " MAX: " << max_rel_error <<
+            " AVG: " << avg_rel_error << " STD: " << std_rel_error;
 }
 
-/**
- * @details
- * Destructor.
- */
-Test_Jones::~Test_Jones()
+static const int sources = 1000;
+static const int stations = 30;
+
+static void t_join(int out_typeA, int in_type1A, int in_type2A,
+        int out_locA, int in_loc1A, int in_loc2A,
+        int out_typeB, int in_type1B, int in_type2B,
+        int out_locB, int in_loc1B, int in_loc2B,
+        int expectedA, int expectedB)
 {
-    delete device_;
+    int status = 0;
+    oskar_Timer timerA, timerB;
+    double timeA, timeB;
+    oskar_Jones in1, in2, outA, outB;
+
+    // Create the timers.
+    oskar_timer_create(&timerA, out_locA == OSKAR_LOCATION_GPU ?
+            OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
+    oskar_timer_create(&timerB, out_locB == OSKAR_LOCATION_GPU ?
+            OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
+
+    // Create output blocks.
+    oskar_jones_init(&outA, out_typeA, out_locA, stations, sources, &status);
+    oskar_jones_init(&outB, out_typeB, out_locB, stations, sources, &status);
+
+    // Run test A.
+    oskar_jones_init(&in1, in_type1A, in_loc1A, stations, sources, &status);
+    oskar_jones_init(&in2, in_type2A, in_loc2A, stations, sources, &status);
+    srand(0);
+    oskar_mem_random_fill(&in1.data, 0.1, 100.0, &status);
+    oskar_mem_random_fill(&in2.data, 0.1, 100.0, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(&timerA);
+    oskar_jones_join(&outA, &in1, &in2, &status);
+    timeA = oskar_timer_elapsed(&timerA);
+    EXPECT_EQ(expectedA, status);
+    status = 0;
+    oskar_jones_free(&in1, &status);
+    oskar_jones_free(&in2, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+
+    // Run test B.
+    oskar_jones_init(&in1, in_type1B, in_loc1B, stations, sources, &status);
+    oskar_jones_init(&in2, in_type2B, in_loc2B, stations, sources, &status);
+    srand(0);
+    oskar_mem_random_fill(&in1.data, 0.1, 100.0, &status);
+    oskar_mem_random_fill(&in2.data, 0.1, 100.0, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(&timerB);
+    oskar_jones_join(&outB, &in1, &in2, &status);
+    timeB = oskar_timer_elapsed(&timerB);
+    EXPECT_EQ(expectedB, status);
+    status = 0;
+    oskar_jones_free(&in1, &status);
+    oskar_jones_free(&in2, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+
+    // Destroy the timers.
+    oskar_timer_destroy(&timerA);
+    oskar_timer_destroy(&timerB);
+
+    // Compare results.
+    check_values(&outA.data, &outB.data);
+
+    // Free memory.
+    oskar_jones_free(&outA, &status);
+    oskar_jones_free(&outB, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
-/**
- * @details
- * Tests inline multiplication of Jones matrices using CUDA.
- * Both matrices are on the device.
- */
-void Test_Jones::test_join_inline_mat_mat_device()
+static
+void t_join_in_place(int in_type1A, int in_type2A, int in_loc1A, int in_loc2A,
+        int in_type1B, int in_type2B, int in_loc1B, int in_loc2B,
+        int expectedA, int expectedB)
 {
-    // Set-up some test parameters.
-    int n_stat = 25, n_src = 10, status = 0;
+    int status = 0;
+    oskar_Timer timerA, timerB;
+    double timeA, timeB;
+    oskar_Jones in1A, in2A, in1B, in2B;
 
-    // Single precision test.
-    {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_device(OSKAR_SINGLE_COMPLEX_MATRIX,
-                n_stat, n_src, 1);
+    // Create the timers.
+    oskar_timer_create(&timerA, in_type1A == OSKAR_LOCATION_GPU ?
+            OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
+    oskar_timer_create(&timerB, in_type1B == OSKAR_LOCATION_GPU ?
+            OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
 
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    // Run test A.
+    oskar_jones_init(&in1A, in_type1A, in_loc1A, stations, sources, &status);
+    oskar_jones_init(&in2A, in_type2A, in_loc2A, stations, sources, &status);
+    srand(0);
+    oskar_mem_random_fill(&in1A.data, 0.1, 100.0, &status);
+    oskar_mem_random_fill(&in2A.data, 0.1, 100.0, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(&timerA);
+    oskar_jones_join(&in1A, &in1A, &in2A, &status);
+    timeA = oskar_timer_elapsed(&timerA);
+    EXPECT_EQ(expectedA, status);
+    status = 0;
+    oskar_jones_free(&in2A, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-        // Check result.
-        check_matrix_matrix(j1, 0, 1);
+    // Run test B.
+    oskar_jones_init(&in1B, in_type1B, in_loc1B, stations, sources, &status);
+    oskar_jones_init(&in2B, in_type2B, in_loc2B, stations, sources, &status);
+    srand(0);
+    oskar_mem_random_fill(&in1B.data, 0.1, 100.0, &status);
+    oskar_mem_random_fill(&in2B.data, 0.1, 100.0, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_timer_start(&timerB);
+    oskar_jones_join(&in1B, &in1B, &in2B, &status);
+    timeB = oskar_timer_elapsed(&timerB);
+    EXPECT_EQ(expectedB, status);
+    status = 0;
+    oskar_jones_free(&in2B, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
+    // Destroy the timers.
+    oskar_timer_destroy(&timerA);
+    oskar_timer_destroy(&timerB);
 
-    // Return if no double precision support.
-    if (!device_->supports_double) return;
+    // Compare results.
+    check_values(&in1A.data, &in1B.data);
 
-    // Double precision test.
-    {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_device(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_matrix_matrix(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
+    // Free memory.
+    oskar_jones_free(&in1A, &status);
+    oskar_jones_free(&in1B, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
-/**
- * @details
- * Tests inline multiplication of Jones matrices using CUDA.
- * One set of matrices is on the device, and the other on the host.
- */
-void Test_Jones::test_join_inline_mat_mat_device_host()
+
+// CPU only. //////////////////////////////////////////////////////////////////
+
+TEST(Jones, join_scal_scal_scal_singleCPU_doubleCPU)
 {
-    // Set-up some test parameters.
-    int n_stat = 25, n_src = 10, status = 0;
-
-    // Single precision test.
-    {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_SINGLE_COMPLEX_MATRIX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_matrix_matrix(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
-
-    // Return if no double precision support.
-    if (!device_->supports_double) return;
-
-    // Double precision test.
-    {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_matrix_matrix(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
+    t_join(TSC, TSC, TSC, LC, LC, LC,
+            TDC, TDC, TDC, LC, LC, LC, 0, 0);
 }
 
-/**
- * @details
- * Tests inline multiplication of Jones matrices using CUDA.
- * Both matrices are on the host.
- */
-void Test_Jones::test_join_inline_mat_mat_host()
+TEST(Jones, join_matx_scal_scal_singleCPU_doubleCPU)
 {
-    // Set-up some test parameters.
-    int n_stat = 25, n_src = 10, status = 0;
-
-    // Single precision test.
-    {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_SINGLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_SINGLE_COMPLEX_MATRIX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_matrix_matrix(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
-
-    // Return if no double precision support.
-    if (!device_->supports_double) return;
-
-    // Double precision test.
-    {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_matrix_matrix(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
+    t_join(TSCM, TSC, TSC, LC, LC, LC,
+            TDCM, TDC, TDC, LC, LC, LC, 0, 0);
 }
 
-/**
- * @details
- * Tests inline multiplication of Jones matrices using CUDA.
- * Both matrices are on the device.
- */
-void Test_Jones::test_join_inline_mat_sca_device()
+TEST(Jones, join_matx_scal_matx_singleCPU_doubleCPU)
 {
-    // Set-up some test parameters.
-    int n_stat = 25, n_src = 10, status = 0;
-
-    // Single precision test.
-    {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_device(OSKAR_SINGLE_COMPLEX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_matrix_scalar(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
-
-    // Return if no double precision support.
-    if (!device_->supports_double) return;
-
-    // Double precision test.
-    {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_device(OSKAR_DOUBLE_COMPLEX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_matrix_scalar(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
+    t_join(TSCM, TSC, TSCM, LC, LC, LC,
+            TDCM, TDC, TDCM, LC, LC, LC, 0, 0);
 }
 
-/**
- * @details
- * Tests inline multiplication of Jones matrices using CUDA.
- * One set of matrices is on the device, and the other on the host.
- */
-void Test_Jones::test_join_inline_mat_sca_device_host()
+TEST(Jones, join_matx_matx_matx_singleCPU_doubleCPU)
 {
-    // Set-up some test parameters.
-    int n_stat = 25, n_src = 10, status = 0;
-
-    // Single precision test.
-    {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_SINGLE_COMPLEX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_matrix_scalar(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
-
-    // Return if no double precision support.
-    if (!device_->supports_double) return;
-
-    // Double precision test.
-    {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_DOUBLE_COMPLEX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_matrix_scalar(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
+    t_join(TSCM, TSCM, TSCM, LC, LC, LC,
+            TDCM, TDCM, TDCM, LC, LC, LC, 0, 0);
 }
 
-/**
- * @details
- * Tests inline multiplication of Jones matrices using CUDA.
- * Both matrices are on the host.
- */
-void Test_Jones::test_join_inline_mat_sca_host()
+TEST(Jones, join_in_place_scal_scal_scal_singleCPU_doubleCPU)
 {
-    // Set-up some test parameters.
-    int n_stat = 25, n_src = 10, status = 0;
-
-    // Single precision test.
-    {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_SINGLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_SINGLE_COMPLEX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_matrix_scalar(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
-
-    // Return if no double precision support.
-    if (!device_->supports_double) return;
-
-    // Double precision test.
-    {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_DOUBLE_COMPLEX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_matrix_scalar(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
+    t_join_in_place(TSC, TSC, LC, LC,
+            TDC, TDC, LC, LC, 0, 0);
 }
 
-/**
- * @details
- * Tests inline multiplication of Jones matrices using CUDA.
- * Both matrices are on the device.
- */
-void Test_Jones::test_join_inline_sca_sca_device()
+TEST(Jones, join_in_place_matx_matx_scal_singleCPU_doubleCPU)
 {
-    // Set-up some test parameters.
-    int n_stat = 25, n_src = 10, status = 0;
-
-    // Single precision test.
-    {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_device(OSKAR_SINGLE_COMPLEX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_scalar_scalar(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
-
-    // Return if no double precision support.
-    if (!device_->supports_double) return;
-
-    // Double precision test.
-    {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_device(OSKAR_DOUBLE_COMPLEX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_scalar_scalar(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
+    t_join_in_place(TSCM, TSC, LC, LC,
+            TDCM, TDC, LC, LC, 0, 0);
 }
 
-/**
- * @details
- * Tests inline multiplication of Jones matrices using CUDA.
- * One set of matrices is on the device, and the other on the host.
- */
-void Test_Jones::test_join_inline_sca_sca_device_host()
+TEST(Jones, join_in_place_matx_matx_matx_singleCPU_doubleCPU)
 {
-    // Set-up some test parameters.
-    int n_stat = 25, n_src = 10, status = 0;
-
-    // Single precision test.
-    {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_SINGLE_COMPLEX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_scalar_scalar(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
-
-    // Return if no double precision support.
-    if (!device_->supports_double) return;
-
-    // Double precision test.
-    {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_DOUBLE_COMPLEX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_scalar_scalar(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
+    t_join_in_place(TSCM, TSCM, LC, LC,
+            TDCM, TDCM, LC, LC, 0, 0);
 }
 
-/**
- * @details
- * Tests inline multiplication of Jones matrices using CUDA.
- * Both matrices are on the host.
- */
-void Test_Jones::test_join_inline_sca_sca_host()
+#ifdef OSKAR_HAVE_CUDA
+
+
+// GPU only. //////////////////////////////////////////////////////////////////
+
+TEST(Jones, join_scal_scal_scal_singleGPU_doubleGPU)
 {
-    // Set-up some test parameters.
-    int n_stat = 25, n_src = 10, status = 0;
-
-    // Single precision test.
-    {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_SINGLE_COMPLEX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_SINGLE_COMPLEX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_scalar_scalar(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
-
-    // Return if no double precision support.
-    if (!device_->supports_double) return;
-
-    // Double precision test.
-    {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_DOUBLE_COMPLEX,
-                n_stat, n_src, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_DOUBLE_COMPLEX,
-                n_stat, n_src, 1);
-
-        // Call wrapper function.
-        oskar_jones_join(j1, j1, j2, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        check_scalar_scalar(j1, 0, 1);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
+    t_join(TSC, TSC, TSC, LG, LG, LG,
+            TDC, TDC, TDC, LG, LG, LG, 0, 0);
 }
 
-/**
- * @details
- * Tests setting the contents of the Jones matrices.
- * The data are on the device.
- */
-void Test_Jones::test_set_ones_device()
+TEST(Jones, join_matx_scal_scal_singleGPU_doubleGPU)
 {
-    // Set-up some test parameters.
-    int n_stat = 25, n_src = 100, status = 0;
-    int n = n_src * n_stat;
+    t_join(TSCM, TSC, TSC, LG, LG, LG,
+            TDCM, TDC, TDC, LG, LG, LG, 0, 0);
+}
 
-    // Single precision test.
+TEST(Jones, join_matx_scal_matx_singleGPU_doubleGPU)
+{
+    t_join(TSCM, TSC, TSCM, LG, LG, LG,
+            TDCM, TDC, TDCM, LG, LG, LG, 0, 0);
+}
+
+TEST(Jones, join_matx_matx_matx_singleGPU_doubleGPU)
+{
+    t_join(TSCM, TSCM, TSCM, LG, LG, LG,
+            TDCM, TDCM, TDCM, LG, LG, LG, 0, 0);
+}
+
+TEST(Jones, join_in_place_scal_scal_scal_singleGPU_doubleGPU)
+{
+    t_join_in_place(TSC, TSC, LG, LG,
+            TDC, TDC, LG, LG, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_scal_singleGPU_doubleGPU)
+{
+    t_join_in_place(TSCM, TSC, LG, LG,
+            TDCM, TDC, LG, LG, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_matx_singleGPU_doubleGPU)
+{
+    t_join_in_place(TSCM, TSCM, LG, LG,
+            TDCM, TDCM, LG, LG, 0, 0);
+}
+
+
+// Compare CPU and GPU. ///////////////////////////////////////////////////////
+
+// Single GPU, single CPU.
+TEST(Jones, join_scal_scal_scal_singleGPU_singleCPU)
+{
+    t_join(TSC, TSC, TSC, LG, LG, LG,
+            TSC, TSC, TSC, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_scal_singleGPU_singleCPU)
+{
+    t_join(TSCM, TSC, TSC, LG, LG, LG,
+            TSCM, TSC, TSC, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_matx_singleGPU_singleCPU)
+{
+    t_join(TSCM, TSC, TSCM, LG, LG, LG,
+            TSCM, TSC, TSCM, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_matx_matx_singleGPU_singleCPU)
+{
+    t_join(TSCM, TSCM, TSCM, LG, LG, LG,
+            TSCM, TSCM, TSCM, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_scal_scal_scal_singleGPU_singleCPU)
+{
+    t_join_in_place(TSC, TSC, LG, LG,
+            TSC, TSC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_scal_singleGPU_singleCPU)
+{
+    t_join_in_place(TSCM, TSC, LG, LG,
+            TSCM, TSC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_matx_singleGPU_singleCPU)
+{
+    t_join_in_place(TSCM, TSCM, LG, LG,
+            TSCM, TSCM, LC, LC, 0, 0);
+}
+
+// Double GPU, double CPU.
+TEST(Jones, join_scal_scal_scal_doubleGPU_doubleCPU)
+{
+    t_join(TDC, TDC, TDC, LG, LG, LG,
+            TDC, TDC, TDC, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_scal_doubleGPU_doubleCPU)
+{
+    t_join(TDCM, TDC, TDC, LG, LG, LG,
+            TDCM, TDC, TDC, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_matx_doubleGPU_doubleCPU)
+{
+    t_join(TDCM, TDC, TDCM, LG, LG, LG,
+            TDCM, TDC, TDCM, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_matx_matx_doubleGPU_doubleCPU)
+{
+    t_join(TDCM, TDCM, TDCM, LG, LG, LG,
+            TDCM, TDCM, TDCM, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_scal_scal_scal_doubleGPU_doubleCPU)
+{
+    t_join_in_place(TDC, TDC, LG, LG,
+            TDC, TDC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_scal_doubleGPU_doubleCPU)
+{
+    t_join_in_place(TDCM, TDC, LG, LG,
+            TDCM, TDC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_matx_doubleGPU_doubleCPU)
+{
+    t_join_in_place(TDCM, TDCM, LG, LG,
+            TDCM, TDCM, LC, LC, 0, 0);
+}
+
+// Single GPU, double CPU.
+TEST(Jones, join_scal_scal_scal_singleGPU_doubleCPU)
+{
+    t_join(TSC, TSC, TSC, LG, LG, LG,
+            TDC, TDC, TDC, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_scal_singleGPU_doubleCPU)
+{
+    t_join(TSCM, TSC, TSC, LG, LG, LG,
+            TDCM, TDC, TDC, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_matx_singleGPU_doubleCPU)
+{
+    t_join(TSCM, TSC, TSCM, LG, LG, LG,
+            TDCM, TDC, TDCM, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_matx_matx_singleGPU_doubleCPU)
+{
+    t_join(TSCM, TSCM, TSCM, LG, LG, LG,
+            TDCM, TDCM, TDCM, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_scal_scal_scal_singleGPU_doubleCPU)
+{
+    t_join_in_place(TSC, TSC, LG, LG,
+            TDC, TDC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_scal_singleGPU_doubleCPU)
+{
+    t_join_in_place(TSCM, TSC, LG, LG,
+            TDCM, TDC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_matx_singleGPU_doubleCPU)
+{
+    t_join_in_place(TSCM, TSCM, LG, LG,
+            TDCM, TDCM, LC, LC, 0, 0);
+}
+
+// Single CPU, double GPU.
+TEST(Jones, join_scal_scal_scal_singleCPU_doubleGPU)
+{
+    t_join(TSC, TSC, TSC, LC, LC, LC,
+            TDC, TDC, TDC, LG, LG, LG, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_scal_singleCPU_doubleGPU)
+{
+    t_join(TSCM, TSC, TSC, LC, LC, LC,
+            TDCM, TDC, TDC, LG, LG, LG, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_matx_singleCPU_doubleGPU)
+{
+    t_join(TSCM, TSC, TSCM, LC, LC, LC,
+            TDCM, TDC, TDCM, LG, LG, LG, 0, 0);
+}
+
+TEST(Jones, join_matx_matx_matx_singleCPU_doubleGPU)
+{
+    t_join(TSCM, TSCM, TSCM, LC, LC, LC,
+            TDCM, TDCM, TDCM, LG, LG, LG, 0, 0);
+}
+
+TEST(Jones, join_in_place_scal_scal_scal_singleCPU_doubleGPU)
+{
+    t_join_in_place(TSC, TSC, LC, LC,
+            TDC, TDC, LG, LG, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_scal_singleCPU_doubleGPU)
+{
+    t_join_in_place(TSCM, TSC, LC, LC,
+            TDCM, TDC, LG, LG, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_matx_singleCPU_doubleGPU)
+{
+    t_join_in_place(TSCM, TSCM, LC, LC,
+            TDCM, TDCM, LG, LG, 0, 0);
+}
+
+
+// Mixed CPU and GPU. /////////////////////////////////////////////////////////
+
+// Single mixed GPU/CPU, single CPU.
+TEST(Jones, join_scal_scal_scal_singleMix_singleCPU)
+{
+    t_join(TSC, TSC, TSC, LG, LC, LG,
+            TSC, TSC, TSC, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_scal_singleMix_singleCPU)
+{
+    t_join(TSCM, TSC, TSC, LG, LC, LG,
+            TSCM, TSC, TSC, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_matx_singleMix_singleCPU)
+{
+    t_join(TSCM, TSC, TSCM, LG, LC, LG,
+            TSCM, TSC, TSCM, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_matx_matx_singleMix_singleCPU)
+{
+    t_join(TSCM, TSCM, TSCM, LG, LC, LG,
+            TSCM, TSCM, TSCM, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_scal_scal_scal_singleMix_singleCPU)
+{
+    t_join_in_place(TSC, TSC, LG, LC,
+            TSC, TSC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_scal_singleMix_singleCPU)
+{
+    t_join_in_place(TSCM, TSC, LG, LC,
+            TSCM, TSC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_matx_singleMix_singleCPU)
+{
+    t_join_in_place(TSCM, TSCM, LG, LC,
+            TSCM, TSCM, LC, LC, 0, 0);
+}
+
+// Double mixed GPU/CPU, double CPU.
+TEST(Jones, join_scal_scal_scal_doubleMix_doubleCPU)
+{
+    t_join(TDC, TDC, TDC, LG, LC, LG,
+            TDC, TDC, TDC, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_scal_doubleMix_doubleCPU)
+{
+    t_join(TDCM, TDC, TDC, LG, LC, LG,
+            TDCM, TDC, TDC, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_scal_matx_doubleMix_doubleCPU)
+{
+    t_join(TDCM, TDC, TDCM, LG, LC, LG,
+            TDCM, TDC, TDCM, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_matx_matx_matx_doubleMix_doubleCPU)
+{
+    t_join(TDCM, TDCM, TDCM, LG, LC, LG,
+            TDCM, TDCM, TDCM, LC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_scal_scal_scal_doubleMix_doubleCPU)
+{
+    t_join_in_place(TDC, TDC, LG, LC,
+            TDC, TDC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_scal_doubleMix_doubleCPU)
+{
+    t_join_in_place(TDCM, TDC, LG, LC,
+            TDCM, TDC, LC, LC, 0, 0);
+}
+
+TEST(Jones, join_in_place_matx_matx_matx_doubleMix_doubleCPU)
+{
+    t_join_in_place(TDCM, TDCM, LG, LC,
+            TDCM, TDCM, LC, LC, 0, 0);
+}
+
+static void test_ones(int precision, int location)
+{
+    oskar_Jones jones, temp, *j_ptr;
+    int status = 0;
+
+    // Test scalar complex type.
+    j_ptr = &jones;
+    oskar_jones_init(j_ptr, precision | OSKAR_COMPLEX, location,
+            stations, sources, &status);
+    ASSERT_EQ(0, status);
+    oskar_jones_set_real_scalar(j_ptr, 1.0, &status);
+    EXPECT_EQ(0, status);
+
+    // Copy back to CPU memory if required.
+    if (location != OSKAR_LOCATION_CPU)
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
+        oskar_jones_init(&temp, jones.data.type, OSKAR_LOCATION_CPU, 0, 0,
+                &status);
+        oskar_jones_copy(&temp, j_ptr, &status);
+        ASSERT_EQ(0, status);
+        j_ptr = &temp;
+    }
 
-        // Call wrapper function.
-        oskar_jones_set_real_scalar(j1, 1.0, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Copy result to CPU.
-        oskar_Jones* t = new oskar_Jones(j1, 0);
-
-        // Check result.
-        float4c* ptr = (float4c*)t->data.data;
-        for (int i = 0; i < n; ++i)
+    // Check data.
+    if (precision == OSKAR_SINGLE)
+    {
+        float2* p = (float2*)(j_ptr->data.data);
+        for (int st = 0; st < j_ptr->num_stations; ++st)
         {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0f, ptr[i].a.x, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0f, ptr[i].a.y, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0f, ptr[i].b.x, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0f, ptr[i].b.y, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0f, ptr[i].c.x, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0f, ptr[i].c.y, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0f, ptr[i].d.x, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0f, ptr[i].d.y, 1e-5);
-        }
-
-        // Free memory.
-        delete t;
-        delete j1;
-    }
-
-    // Return if no double precision support.
-    if (!device_->supports_double) return;
-
-    // Double precision test.
-    {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-
-        // Call wrapper function.
-        oskar_jones_set_real_scalar(j1, 1.0, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Copy result to CPU.
-        oskar_Jones* t = new oskar_Jones(j1, 0);
-
-        // Check result.
-        double4c* ptr = (double4c*)t->data.data;
-        for (int i = 0; i < n; ++i)
-        {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, ptr[i].a.x, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ptr[i].a.y, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ptr[i].b.x, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ptr[i].b.y, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ptr[i].c.x, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ptr[i].c.y, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, ptr[i].d.x, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ptr[i].d.y, 1e-12);
-        }
-
-        // Free memory.
-        delete t;
-        delete j1;
-    }
-}
-
-/**
- * @details
- * Tests setting the contents of the Jones matrices.
- * The data are on the host.
- */
-void Test_Jones::test_set_ones_host()
-{
-    // Set-up some test parameters.
-    int n_stat = 25, n_src = 10, status = 0;
-    int n = n_src * n_stat;
-
-    // Single precision test.
-    {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_SINGLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-
-        // Call wrapper function.
-        oskar_jones_set_real_scalar(j1, 1.0, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        float4c* ptr = (float4c*)j1->data.data;
-        for (int i = 0; i < n; ++i)
-        {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0f, ptr[i].a.x, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0f, ptr[i].a.y, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0f, ptr[i].b.x, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0f, ptr[i].b.y, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0f, ptr[i].c.x, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0f, ptr[i].c.y, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0f, ptr[i].d.x, 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0f, ptr[i].d.y, 1e-5);
-        }
-
-        // Free memory.
-        delete j1;
-    }
-
-    // Return if no double precision support.
-    if (!device_->supports_double) return;
-
-    // Double precision test.
-    {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                n_stat, n_src, 0);
-
-        // Call wrapper function.
-        oskar_jones_set_real_scalar(j1, 1.0, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Check result.
-        double4c* ptr = (double4c*)j1->data.data;
-        for (int i = 0; i < n; ++i)
-        {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, ptr[i].a.x, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ptr[i].a.y, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ptr[i].b.x, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ptr[i].b.y, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ptr[i].c.x, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ptr[i].c.y, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, ptr[i].d.x, 1e-12);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ptr[i].d.y, 1e-12);
-        }
-
-        // Free memory.
-        delete j1;
-    }
-}
-
-/**
- * @details
- * Tests setting the contents of the Jones matrices.
- * The data are on the host.
- */
-void Test_Jones::test_performance()
-{
-    // Set-up some test parameters.
-    int n_stat = 25, n_src = 50000, status = 0;
-
-    // Single precision test.
-    {
-        oskar_Jones* j1 = new oskar_Jones(OSKAR_SINGLE_COMPLEX,
-                OSKAR_LOCATION_GPU, n_stat, n_src);
-        oskar_Jones* j2 = new oskar_Jones(OSKAR_SINGLE_COMPLEX_MATRIX,
-                OSKAR_LOCATION_GPU, n_stat, n_src);
-        oskar_Jones* j3 = new oskar_Jones(OSKAR_SINGLE_COMPLEX_MATRIX,
-                OSKAR_LOCATION_GPU, n_stat, n_src);
-
-        // Call wrapper function.
-        oskar_jones_set_real_scalar(j1, 1.0, &status);
-        oskar_jones_set_real_scalar(j2, 2.0, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Join J3 = J1 * J2.
-        TIMER_START
-        oskar_jones_join(j3, j1, j2, &status);
-        TIMER_STOP("Finished out-of-place join")
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-        delete j3;
-    }
-
-    // Single precision test.
-    {
-        oskar_Jones* j1 = new oskar_Jones(OSKAR_SINGLE_COMPLEX,
-                OSKAR_LOCATION_GPU, n_stat, n_src);
-        oskar_Jones* j2 = new oskar_Jones(OSKAR_SINGLE_COMPLEX_MATRIX,
-                OSKAR_LOCATION_GPU, n_stat, n_src);
-
-        // Call wrapper function.
-        oskar_jones_set_real_scalar(j1, 1.0, &status);
-        oskar_jones_set_real_scalar(j2, 2.0, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Join J2 = J1 * J2.
-        TIMER_START
-        oskar_jones_join(j2, j1, j2, &status);
-        TIMER_STOP("Finished in-place join")
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
-
-    // Return if no double precision support.
-    if (!device_->supports_double) return;
-
-    // Double precision test.
-    {
-        oskar_Jones* j1 = new oskar_Jones(OSKAR_DOUBLE_COMPLEX,
-                OSKAR_LOCATION_GPU, n_stat, n_src);
-        oskar_Jones* j2 = new oskar_Jones(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                OSKAR_LOCATION_GPU, n_stat, n_src);
-        oskar_Jones* j3 = new oskar_Jones(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                OSKAR_LOCATION_GPU, n_stat, n_src);
-
-        // Call wrapper function.
-        oskar_jones_set_real_scalar(j1, 1.0, &status);
-        oskar_jones_set_real_scalar(j2, 2.0, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Join J3 = J1 * J2.
-        TIMER_START
-        oskar_jones_join(j3, j1, j2, &status);
-        TIMER_STOP("Finished out-of-place join")
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-        delete j3;
-    }
-
-    // Double precision test.
-    {
-        oskar_Jones* j1 = new oskar_Jones(OSKAR_DOUBLE_COMPLEX,
-                OSKAR_LOCATION_GPU, n_stat, n_src);
-        oskar_Jones* j2 = new oskar_Jones(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                OSKAR_LOCATION_GPU, n_stat, n_src);
-
-        // Call wrapper function.
-        oskar_jones_set_real_scalar(j1, 1.0, &status);
-        oskar_jones_set_real_scalar(j2, 2.0, &status);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Join J2 = J1 * J2.
-        TIMER_START
-        oskar_jones_join(j2, j1, j2, &status);
-        TIMER_STOP("Finished in-place join")
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-        // Free memory.
-        delete j1;
-        delete j2;
-    }
-}
-
-/*=============================================================================
- * Private members
- *---------------------------------------------------------------------------*/
-
-/**
- * @details
- * Returns a single, populated Jones scalar.
- */
-void Test_Jones::construct_double2_input(int i, double2& m)
-{
-    m = make_double2(i, i);
-}
-
-/**
- * @details
- * Returns a single, populated Jones scalar.
- */
-void Test_Jones::construct_double2_output_scalar_scalar(int i, int j,
-        double2& m)
-{
-    // Get the input scalars.
-    double2 s1, s2;
-    construct_double2_input(i, s1);
-    construct_double2_input(j, s2);
-
-    // Compute s1*s2.
-    m = complex_mul(s1, s2);
-}
-
-/**
- * @details
- * Returns a single, populated 2x2 Jones matrix.
- */
-void Test_Jones::construct_double4c_input(int i, double4c& m)
-{
-    i *= 2;
-    m.a = make_double2(i + 0.0, i + 0.2);
-    m.b = make_double2(i + 0.4, i + 0.6);
-    m.c = make_double2(i + 0.8, i + 1.0);
-    m.d = make_double2(i + 1.2, i + 1.4);
-}
-
-/**
- * @details
- * Returns a single, populated 2x2 Jones matrix.
- */
-void Test_Jones::construct_double4c_output_matrix_matrix(int i, int j,
-        double4c& m)
-{
-    // Get the input matrix.
-    double4c p,q;
-    construct_double4c_input(i, p);
-    construct_double4c_input(j, q);
-
-    // Compute p*q.
-    m.a = complex_add(complex_mul(p.a, q.a), complex_mul(p.b, q.c));
-    m.b = complex_add(complex_mul(p.a, q.b), complex_mul(p.b, q.d));
-    m.c = complex_add(complex_mul(p.c, q.a), complex_mul(p.d, q.c));
-    m.d = complex_add(complex_mul(p.c, q.b), complex_mul(p.d, q.d));
-}
-
-/**
- * @details
- * Returns a single, populated 2x2 Jones matrix.
- */
-void Test_Jones::construct_double4c_output_matrix_scalar(int i, int j,
-        double4c& m)
-{
-    // Get the input matrix.
-    double4c p;
-    construct_double4c_input(i, p);
-
-    // Get the input scalar.
-    double2 s;
-    construct_double2_input(j, s);
-
-    // Compute p*s.
-    m.a = complex_mul(p.a, s);
-    m.b = complex_mul(p.b, s);
-    m.c = complex_mul(p.c, s);
-    m.d = complex_mul(p.d, s);
-}
-
-/**
- * @details
- * Returns a single, populated Jones scalar.
- */
-void Test_Jones::construct_float2_input(int i, float2& m)
-{
-    m = make_float2(i, i);
-}
-
-/**
- * @details
- * Returns a single, populated Jones scalar.
- */
-void Test_Jones::construct_float2_output_scalar_scalar(int i, int j,
-        float2& m)
-{
-    // Get the input scalars.
-    float2 s1, s2;
-    construct_float2_input(i, s1);
-    construct_float2_input(j, s2);
-
-    // Compute s1*s2.
-    m = complex_mul(s1, s2);
-}
-
-/**
- * @details
- * Returns a single, populated 2x2 Jones matrix.
- */
-void Test_Jones::construct_float4c_input(int i, float4c& m)
-{
-    i *= 2;
-    m.a = make_float2(i + 0.0, i + 0.2);
-    m.b = make_float2(i + 0.4, i + 0.6);
-    m.c = make_float2(i + 0.8, i + 1.0);
-    m.d = make_float2(i + 1.2, i + 1.4);
-}
-
-/**
- * @details
- * Returns a single, populated 2x2 Jones matrix.
- */
-void Test_Jones::construct_float4c_output_matrix_matrix(int i, int j,
-        float4c& m)
-{
-    // Get the input matrix.
-    float4c p,q;
-    construct_float4c_input(i, p);
-    construct_float4c_input(j, q);
-
-    // Compute p*q.
-    m.a = complex_add(complex_mul(p.a, q.a), complex_mul(p.b, q.c));
-    m.b = complex_add(complex_mul(p.a, q.b), complex_mul(p.b, q.d));
-    m.c = complex_add(complex_mul(p.c, q.a), complex_mul(p.d, q.c));
-    m.d = complex_add(complex_mul(p.c, q.b), complex_mul(p.d, q.d));
-}
-
-/**
- * @details
- * Returns a single, populated 2x2 Jones matrix.
- */
-void Test_Jones::construct_float4c_output_matrix_scalar(int i, int j,
-        float4c& m)
-{
-    // Get the input matrix.
-    float4c p;
-    construct_float4c_input(i, p);
-
-    // Get the input scalar.
-    float2 s;
-    construct_float2_input(j, s);
-
-    // Compute p*s.
-    m.a = complex_mul(p.a, s);
-    m.b = complex_mul(p.b, s);
-    m.c = complex_mul(p.c, s);
-    m.d = complex_mul(p.d, s);
-}
-
-/**
- * @details
- * Returns a populated Jones matrix in host memory.
- */
-oskar_Jones* Test_Jones::construct_jones_host(int type,
-        int n_stat, int n_src, int offset)
-{
-    oskar_Jones* m = new oskar_Jones(type, OSKAR_LOCATION_CPU, n_stat, n_src);
-    int n = n_src * n_stat;
-    if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
-    {
-        float4c* ptr = (float4c*)m->data.data;
-        for (int i = 0; i < n; ++i)
-            construct_float4c_input(i + offset, ptr[i]);
-    }
-    else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-    {
-        double4c* ptr = (double4c*)m->data.data;
-        for (int i = 0; i < n; ++i)
-            construct_double4c_input(i + offset, ptr[i]);
-    }
-    else if (type == OSKAR_SINGLE_COMPLEX)
-    {
-        float2* ptr = (float2*)m->data.data;
-        for (int i = 0; i < n; ++i)
-            construct_float2_input(i + offset, ptr[i]);
-    }
-    else if (type == OSKAR_DOUBLE_COMPLEX)
-    {
-        double2* ptr = (double2*)m->data.data;
-        for (int i = 0; i < n; ++i)
-            construct_double2_input(i + offset, ptr[i]);
-    }
-
-    // Return a pointer to the matrix structure.
-    return m;
-}
-
-/**
- * @details
- * Returns a populated Jones matrix in device memory.
- */
-oskar_Jones* Test_Jones::construct_jones_device(int type,
-        int n_stat, int n_src, int offset)
-{
-    // Get the matrix in host memory.
-    oskar_Jones* t = construct_jones_host(type, n_stat, n_src, offset);
-
-    // Copy the data to device memory.
-    oskar_Jones* m = new oskar_Jones(t, OSKAR_LOCATION_GPU);
-
-    // Delete the temporary and return the matrix structure.
-    delete t;
-    return m;
-}
-
-/**
- * @details
- * Checks result after performing matrix-matrix multiply.
- */
-void Test_Jones::check_matrix_matrix(const oskar_Jones* jones,
-        int offset1, int offset2)
-{
-    char msg[100]; // Message buffer.
-
-    // Copy result to temporary host buffer.
-    const oskar_Jones* temp = (jones->location() == 1) ?
-            new oskar_Jones(jones, 0) : jones;
-
-    // Check the contents of the host buffer.
-    int n = jones->num_sources * jones->num_stations;
-    if (jones->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
-    {
-        float4c* ptr = (float4c*)temp->data.data;
-        float4c t;
-        for (int i = 0; i < n; ++i)
-        {
-            construct_float4c_output_matrix_matrix(i + offset1,
-                    i + offset2, t);
-//            construct_double4c_output_matrix_matrix(i + offset1,
-//                    i + offset2, t);
-            sprintf(msg, "failed at index %i\n", i);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.a.x, ptr[i].a.x, fabs(t.a.x * 5.0e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.a.y, ptr[i].a.y, fabs(t.a.y * 5.0e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.b.x, ptr[i].b.x, fabs(t.b.x * 5.0e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.b.y, ptr[i].b.y, fabs(t.b.y * 5.0e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.c.x, ptr[i].c.x, fabs(t.c.x * 5.0e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.c.y, ptr[i].c.y, fabs(t.c.y * 5.0e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.d.x, ptr[i].d.x, fabs(t.d.x * 5.0e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.d.y, ptr[i].d.y, fabs(t.d.y * 5.0e-5));
+            for (int src = 0, i = 0; src < j_ptr->num_sources; ++src, ++i)
+            {
+                EXPECT_FLOAT_EQ(p[i].x, 1.0f);
+                EXPECT_FLOAT_EQ(p[i].y, 0.0f);
+            }
         }
     }
-    else if (jones->type() == OSKAR_DOUBLE_COMPLEX_MATRIX)
+    else
     {
-        double4c* ptr = (double4c*)temp->data.data;
-        double4c t;
-        for (int i = 0; i < n; ++i)
+        double2* p = (double2*)(j_ptr->data.data);
+        for (int st = 0; st < j_ptr->num_stations; ++st)
         {
-            construct_double4c_output_matrix_matrix(i + offset1,
-                    i + offset2, t);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.x, ptr[i].a.x, fabs(t.a.x * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.y, ptr[i].a.y, fabs(t.a.y * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.x, ptr[i].b.x, fabs(t.b.x * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.y, ptr[i].b.y, fabs(t.b.y * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.x, ptr[i].c.x, fabs(t.c.x * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.y, ptr[i].c.y, fabs(t.c.y * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.x, ptr[i].d.x, fabs(t.d.x * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.y, ptr[i].d.y, fabs(t.d.y * 1e-10));
+            for (int src = 0, i = 0; src < j_ptr->num_sources; ++src, ++i)
+            {
+                EXPECT_DOUBLE_EQ(p[i].x, 1.0);
+                EXPECT_DOUBLE_EQ(p[i].y, 0.0);
+            }
         }
     }
 
-    // Free temporary host buffer.
-    if (jones->location() == 1) delete temp;
+    // Free memory.
+    if (location != OSKAR_LOCATION_CPU)
+        oskar_jones_free(&temp, &status);
+    oskar_jones_free(&jones, &status);
+    ASSERT_EQ(0, status);
+
+    // Test matrix complex type.
+    j_ptr = &jones;
+    oskar_jones_init(j_ptr, precision | OSKAR_COMPLEX | OSKAR_MATRIX, location,
+            stations, sources, &status);
+    ASSERT_EQ(0, status);
+    oskar_jones_set_real_scalar(j_ptr, 1.0, &status);
+    EXPECT_EQ(0, status);
+
+    // Copy back to CPU memory if required.
+    if (location != OSKAR_LOCATION_CPU)
+    {
+        oskar_jones_init(&temp, jones.data.type, OSKAR_LOCATION_CPU, 0, 0,
+                &status);
+        oskar_jones_copy(&temp, j_ptr, &status);
+        ASSERT_EQ(0, status);
+        j_ptr = &temp;
+    }
+
+    // Check data.
+    if (precision == OSKAR_SINGLE)
+    {
+        float4c* p = (float4c*)(j_ptr->data.data);
+        for (int st = 0; st < j_ptr->num_stations; ++st)
+        {
+            for (int src = 0, i = 0; src < j_ptr->num_sources; ++src, ++i)
+            {
+                EXPECT_FLOAT_EQ(p[i].a.x, 1.0f);
+                EXPECT_FLOAT_EQ(p[i].a.y, 0.0f);
+                EXPECT_FLOAT_EQ(p[i].b.x, 0.0f);
+                EXPECT_FLOAT_EQ(p[i].b.y, 0.0f);
+                EXPECT_FLOAT_EQ(p[i].c.x, 0.0f);
+                EXPECT_FLOAT_EQ(p[i].c.y, 0.0f);
+                EXPECT_FLOAT_EQ(p[i].d.x, 1.0f);
+                EXPECT_FLOAT_EQ(p[i].d.y, 0.0f);
+            }
+        }
+    }
+    else
+    {
+        double4c* p = (double4c*)(j_ptr->data.data);
+        for (int st = 0; st < j_ptr->num_stations; ++st)
+        {
+            for (int src = 0, i = 0; src < j_ptr->num_sources; ++src, ++i)
+            {
+                EXPECT_DOUBLE_EQ(p[i].a.x, 1.0);
+                EXPECT_DOUBLE_EQ(p[i].a.y, 0.0);
+                EXPECT_DOUBLE_EQ(p[i].b.x, 0.0);
+                EXPECT_DOUBLE_EQ(p[i].b.y, 0.0);
+                EXPECT_DOUBLE_EQ(p[i].c.x, 0.0);
+                EXPECT_DOUBLE_EQ(p[i].c.y, 0.0);
+                EXPECT_DOUBLE_EQ(p[i].d.x, 1.0);
+                EXPECT_DOUBLE_EQ(p[i].d.y, 0.0);
+            }
+        }
+    }
+
+    // Free memory.
+    if (location != OSKAR_LOCATION_CPU)
+        oskar_jones_free(&temp, &status);
+    oskar_jones_free(&jones, &status);
+    ASSERT_EQ(0, status);
 }
 
-/**
- * @details
- * Checks result after performing matrix-scalar multiply.
- */
-void Test_Jones::check_matrix_scalar(const oskar_Jones* jones,
-        int offset1, int offset2)
+TEST(Jones, set_ones_singleCPU)
 {
-    // Copy result to temporary host buffer.
-    const oskar_Jones* temp = (jones->location() == 1) ?
-            new oskar_Jones(jones, 0) : jones;
-
-    // Check the contents of the host buffer.
-    int n = jones->num_sources * jones->num_stations;
-    if (jones->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
-    {
-        float4c* ptr = (float4c*)temp->data.data;
-        float4c t;
-        for (int i = 0; i < n; ++i)
-        {
-            construct_float4c_output_matrix_scalar(i + offset1,
-                    i + offset2, t);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.x, ptr[i].a.x, fabs(t.a.x * 2e-4));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.y, ptr[i].a.y, fabs(t.a.y * 2e-4));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.x, ptr[i].b.x, fabs(t.b.x * 2e-4));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.y, ptr[i].b.y, fabs(t.b.y * 2e-4));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.x, ptr[i].c.x, fabs(t.c.x * 2e-4));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.y, ptr[i].c.y, fabs(t.c.y * 2e-4));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.x, ptr[i].d.x, fabs(t.d.x * 2e-4));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.y, ptr[i].d.y, fabs(t.d.y * 2e-4));
-        }
-    }
-    else if (jones->type() == OSKAR_DOUBLE_COMPLEX_MATRIX)
-    {
-        double4c* ptr = (double4c*)temp->data.data;
-        double4c t;
-        for (int i = 0; i < n; ++i)
-        {
-            construct_double4c_output_matrix_scalar(i + offset1,
-                    i + offset2, t);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.x, ptr[i].a.x, fabs(t.a.x * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.y, ptr[i].a.y, fabs(t.a.y * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.x, ptr[i].b.x, fabs(t.b.x * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.y, ptr[i].b.y, fabs(t.b.y * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.x, ptr[i].c.x, fabs(t.c.x * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.y, ptr[i].c.y, fabs(t.c.y * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.x, ptr[i].d.x, fabs(t.d.x * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.y, ptr[i].d.y, fabs(t.d.y * 1e-10));
-        }
-    }
-
-    // Free temporary host buffer.
-    if (jones->location() == 1) delete temp;
+    test_ones(OSKAR_SINGLE, OSKAR_LOCATION_CPU);
 }
 
-/**
- * @details
- * Checks result after performing scalar-scalar multiply.
- */
-void Test_Jones::check_scalar_scalar(const oskar_Jones* jones,
-        int offset1, int offset2)
+TEST(Jones, set_ones_singleGPU)
 {
-    // Copy result to temporary host buffer.
-    const oskar_Jones* temp = (jones->location() == 1) ?
-            new oskar_Jones(jones, 0) : jones;
-
-    // Check the contents of the host buffer.
-    int n = jones->num_sources * jones->num_stations;
-    if (jones->type() == OSKAR_SINGLE_COMPLEX)
-    {
-        float2* ptr = (float2*)temp->data.data;
-        float2 t;
-        for (int i = 0; i < n; ++i)
-        {
-            construct_float2_output_scalar_scalar(i + offset1,
-                    i + offset2, t);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.x, ptr[i].x, fabs(t.x * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.y, ptr[i].y, fabs(t.y * 5e-5));
-        }
-    }
-    else if (jones->type() == OSKAR_DOUBLE_COMPLEX)
-    {
-        double2* ptr = (double2*)temp->data.data;
-        double2 t;
-        for (int i = 0; i < n; ++i)
-        {
-            construct_double2_output_scalar_scalar(i + offset1,
-                    i + offset2, t);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.x, ptr[i].x, fabs(t.x * 1e-10));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.y, ptr[i].y, fabs(t.y * 1e-10));
-        }
-    }
-
-    // Free temporary host buffer.
-    if (jones->location() == 1) delete temp;
+    test_ones(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
 }
+
+TEST(Jones, set_ones_doubleCPU)
+{
+    test_ones(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
+}
+
+TEST(Jones, set_ones_doubleGPU)
+{
+    test_ones(OSKAR_DOUBLE, OSKAR_LOCATION_GPU);
+}
+
+#endif

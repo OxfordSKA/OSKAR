@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,42 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_SPHERICAL_POSITIONS_H_
-#define TEST_SPHERICAL_POSITIONS_H_
+#ifndef OSKAR_TELESCOPE_MODEL_INIT_COPY_H_
+#define OSKAR_TELESCOPE_MODEL_INIT_COPY_H_
 
 /**
- * @file Test_SphericalPositions.h
+ * @file oskar_telescope_model_init_copy.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "interferometry/oskar_TelescopeModel.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief Initialise a telescope model structure at the specified location
+ * by copying data from another.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function initialises a telescope model structure at the specified
+ * location by copying data from another.
+ *
+ * It is equivalent to calling oskar_telescope_model_init()
+ * followed by oskar_telescope_model_copy().
+ *
+ * @param[in,out] dst    Pointer to the telescope model structure to initialise.
+ * @param[in] src        Pointer to the source structure from which to copy data.
+ * @param[in] location   Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCAITON_GPU).
+ * @param[in,out] status Status return code.
  */
-class Test_SphericalPositions : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(Test_SphericalPositions);
-        CPPUNIT_TEST(test_generate13x13);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+void oskar_telescope_model_init_copy(oskar_TelescopeModel* dst,
+        const oskar_TelescopeModel* src, int location, int* status);
 
-    public:
-        /// Set up context before running a test.
-        void setUp();
+#ifdef __cplusplus
+}
+#endif
 
-        /// Clean up after the test run.
-        void tearDown();
-
-    public:
-        /// Test generation of points.
-        void test_generate13x13();
-};
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_SphericalPositions);
-
-#endif // TEST_SPHERICAL_POSITIONS_H_
+#endif /* OSKAR_TELESCOPE_MODEL_INIT_COPY_H_ */

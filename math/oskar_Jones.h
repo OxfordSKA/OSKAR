@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,47 +53,6 @@ struct OSKAR_EXPORT oskar_Jones
     int cap_stations; /**< Slowest varying dimension. */
     int cap_sources;  /**< Fastest varying dimension. */
     oskar_Mem data;   /**< Pointer to the matrix data. */
-
-#ifdef __cplusplus
-    /* If C++, then provide constructors, a destructor and methods. */
-    /**
-     * @brief Constructs and allocates data for an oskar_Jones data structure.
-     *
-     * @details
-     * Constructs a new oskar_Jones data structure, allocating memory for it
-     * in the specified location.
-     *
-     * @param[in] type Enumerated data type of memory contents (magic number).
-     * @param[in] location Enumerated memory location (magic number).
-     * @param[in] num_stations Number of elements in the station dimension.
-     * @param[in] num_sources Number of elements in the source dimension.
-     */
-    oskar_Jones(int type = OSKAR_DOUBLE, int location = OSKAR_LOCATION_CPU,
-            int num_stations = 0, int num_sources = 0);
-
-    /**
-     * @brief Copies an oskar_Jones data structure.
-     *
-     * @details
-     * Constructs a copy of the given oskar_Jones data structure, allocating
-     * memory for it in the specified location.
-     *
-     * @param[in] other Pointer to the oskar_Jones structure to copy.
-     * @param[in] location Specify 0 for host memory, 1 for device memory.
-     */
-    oskar_Jones(const oskar_Jones* other, int location);
-
-    /**
-     * @brief Destroys the structure and frees memory held by it.
-     *
-     * @details
-     * Destroys the structure and frees memory held by it.
-     */
-    ~oskar_Jones();
-
-    int type() const {return data.type;}
-    int location() const {return data.location;}
-#endif
 };
 
 typedef struct oskar_Jones oskar_Jones;

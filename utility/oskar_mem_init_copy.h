@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,49 +26,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/test/Test_SphericalPositions.h"
-#include "math/oskar_SphericalPositions.h"
-#include <cmath>
-#include <vector>
+#ifndef OSKAR_MEM_INIT_COPY_H_
+#define OSKAR_MEM_INIT_COPY_H_
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
+/**
+ * @file oskar_mem_init_copy.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#define DEG2RAD (M_PI / 180.0)
-
-
-
 /**
+ * @brief
+ * Creates a copy of a memory block in the specified location.
+ *
  * @details
- * Sets up the context before running each test method.
+ * This function initialises an OSKAR memory block in the specified location,
+ * using the contents of another block.
+ *
+ * It is equivalent to calling oskar_mem_init() followed by oskar_mem_copy().
+ *
+ * @param[in,out]  dst      Pointer to destination data structure.
+ * @param[in]      src      Pointer to source data structure.
+ * @param[in]      location Location of the data.
+ * @param[in,out]  status   Status return code.
  */
-void Test_SphericalPositions::setUp()
-{
-}
+OSKAR_EXPORT
+void oskar_mem_init_copy(oskar_Mem* dst, const oskar_Mem* src, int location,
+        int* status);
 
-/**
- * @details
- * Clean up routine called after each test is run.
- */
-void Test_SphericalPositions::tearDown()
-{
+#ifdef __cplusplus
 }
+#endif
 
-/**
- * @details
- * Tests generation of points using parameters to generate a 13 x 13 grid.
- */
-void Test_SphericalPositions::test_generate13x13()
-{
-    oskar_SphericalPositions<float> posGen(0, 90 * DEG2RAD,
-            2 * DEG2RAD, 2 * DEG2RAD, // Half-widths
-            0.3 * DEG2RAD, 0.3 * DEG2RAD);
-
-    // Should have a 13 x 13 point grid.
-    unsigned points = posGen.generate(0 ,0);
-    CPPUNIT_ASSERT_EQUAL(169u, points);
-    std::vector<float> longitudes(points);
-    std::vector<float> latitudes(points);
-    posGen.generate(&longitudes[0], &latitudes[0]);
-}
+#endif /* OSKAR_MEM_INIT_COPY_H_ */

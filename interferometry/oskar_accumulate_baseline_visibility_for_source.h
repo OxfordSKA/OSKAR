@@ -35,6 +35,7 @@
 
 #include "oskar_global.h"
 #include "math/oskar_multiply_inline.h"
+#include "math/oskar_kahan_sum.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -74,12 +75,17 @@ extern "C" {
  * @param[in] J_p       Array of source Jones matrices for station p.
  * @param[in] J_q       Array of source Jones matrices for station q.
  * @param[in] smear     Smearing factor by which to modify source visibility.
+ * @param[in,out] guard Updated guard value used in Kahan summation.
  */
 OSKAR_INLINE
 void oskar_accumulate_baseline_visibility_for_source_f(float4c* V_pq,
         const int source_id, const float* I, const float* Q, const float* U,
         const float* V, const float4c* J_p, const float4c* J_q,
-        const float smear)
+        const float smear
+#ifndef __CUDACC__
+        , float4c* guard
+#endif
+        )
 {
     /* Construct source brightness matrix (ignoring c, as it's Hermitian). */
     float4c m1, m2;
@@ -101,6 +107,9 @@ void oskar_accumulate_baseline_visibility_for_source_f(float4c* V_pq,
     m2 = J_q[source_id];
     oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&m1, &m2);
 
+#ifndef __CUDACC__
+    oskar_kahan_sum_multiply_complex_matrix_f(V_pq, m1, smear, guard);
+#else
     /* Multiply result by smearing term and accumulate. */
     V_pq->a.x += m1.a.x * smear;
     V_pq->a.y += m1.a.y * smear;
@@ -110,6 +119,7 @@ void oskar_accumulate_baseline_visibility_for_source_f(float4c* V_pq,
     V_pq->c.y += m1.c.y * smear;
     V_pq->d.x += m1.d.x * smear;
     V_pq->d.y += m1.d.y * smear;
+#endif
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,35 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_CUDA_INFO_H_
-#define TEST_CUDA_INFO_H_
+#ifndef OSKAR_VISIBILITIES_INIT_COPY_H_
+#define OSKAR_VISIBILITIES_INIT_COPY_H_
 
 /**
- * @file Test_CudaInfo.h
+ * @file oskar_visibilities_init_copy.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "interferometry/oskar_Visibilities.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief Initialise a visibility data structure at the specified location
+ * by copying data from another.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function initialises a visibility data structure at the specified
+ * location by copying data from another.
+ *
+ * It is equivalent to calling oskar_visibilities_init()
+ * followed by oskar_visibilities_copy().
+ *
+ * This function will overwrite any memory currently in the visibility
+ * structure.
+ *
+ * @param[in,out] dst    Pointer to the visibility data structure to initialise.
+ * @param[in] src        Pointer to the source structure from which to copy data.
+ * @param[in] location   Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCAITON_GPU).
+ * @param[in,out] status Status return code.
  */
-class Test_CudaInfo : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(Test_CudaInfo);
-        CPPUNIT_TEST(test);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+void oskar_visibilities_init_copy(oskar_Visibilities* dst,
+        const oskar_Visibilities* src, int location, int* status);
 
-    public:
-        // Test methods.
-        void test();
-};
+#ifdef __cplusplus
+}
+#endif
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_CudaInfo);
-
-#endif // TEST_CUDA_INFO_H_
+#endif /* OSKAR_VISIBILITIES_INIT_COPY_H_ */

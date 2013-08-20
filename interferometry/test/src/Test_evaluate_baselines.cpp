@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/test/Test_evaluate_baselines.h"
-#include "interferometry/oskar_evaluate_baselines.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_get_error_string.h"
+#include <gtest/gtest.h>
 
-/**
- * @details
- * Tests baseline evaluation for 3 stations.
- */
-void Test_evaluate_baselines::test_small()
+#include <oskar_evaluate_baselines.h>
+#include <oskar_mem_init.h>
+#include <oskar_mem_init_copy.h>
+#include <oskar_mem_free.h>
+#include <oskar_get_error_string.h>
+
+TEST(evaluate_baselines, cpu_gpu)
 {
-    int status = 0;
-    int num_stations = 3;
-    int num_baselines = num_stations * (num_stations - 1) / 2;
+    oskar_Mem u, v, w, uu, vv, ww, uu2, vv2, ww2;
+    oskar_Mem u_gpu, v_gpu, w_gpu, uu_gpu, vv_gpu, ww_gpu;
+    int num_baselines, num_stations = 50, status = 0, type, location;
+    num_baselines = num_stations * (num_stations - 1) / 2;
+
+    type = OSKAR_DOUBLE;
 
     // Allocate host memory.
-    oskar_Mem u(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_stations);
-    oskar_Mem v(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_stations);
-    oskar_Mem w(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_stations);
-    oskar_Mem uu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_baselines);
-    oskar_Mem vv(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_baselines);
-    oskar_Mem ww(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_baselines);
+    location = OSKAR_LOCATION_CPU;
+    oskar_mem_init(&u, type, location, num_stations, 1, &status);
+    oskar_mem_init(&v, type, location, num_stations, 1, &status);
+    oskar_mem_init(&w, type, location, num_stations, 1, &status);
+    oskar_mem_init(&uu, type, location, num_baselines, 1, &status);
+    oskar_mem_init(&vv, type, location, num_baselines, 1, &status);
+    oskar_mem_init(&ww, type, location, num_baselines, 1, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Fill station coordinates with test data.
     for (int i = 0; i < num_stations; ++i)
@@ -59,122 +63,72 @@ void Test_evaluate_baselines::test_small()
 
     // Evaluate baseline coordinates on CPU.
     oskar_evaluate_baselines(&uu, &vv, &ww, &u, &v, &w, &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check results are correct.
-    for (int s1 = 0, b = 0; s1 < num_stations; ++s1)
     {
-        for (int s2 = s1 + 1; s2 < num_stations; ++s2, ++b)
+        double *pu, *pv, *pw, *puu, *pvv, *pww;
+        pu = (double*)u.data;
+        pv = (double*)v.data;
+        pw = (double*)w.data;
+        puu = (double*)uu.data;
+        pvv = (double*)vv.data;
+        pww = (double*)ww.data;
+        for (int s1 = 0, b = 0; s1 < num_stations; ++s1)
         {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL( ((double*)uu)[b],
-                    ((double*)u)[s2] - ((double*)u)[s1], 1e-10);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL( ((double*)vv)[b],
-                    ((double*)v)[s2] - ((double*)v)[s1], 1e-10);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL( ((double*)ww)[b],
-                    ((double*)w)[s2] - ((double*)w)[s1], 1e-10);
+            for (int s2 = s1 + 1; s2 < num_stations; ++s2, ++b)
+            {
+                EXPECT_DOUBLE_EQ(pu[s2] - pu[s1], puu[b]);
+                EXPECT_DOUBLE_EQ(pv[s2] - pv[s1], pvv[b]);
+                EXPECT_DOUBLE_EQ(pw[s2] - pw[s1], pww[b]);
+            }
         }
     }
 
     // Allocate device memory and copy input data.
-    oskar_Mem u_gpu(&u, OSKAR_LOCATION_GPU);
-    oskar_Mem v_gpu(&v, OSKAR_LOCATION_GPU);
-    oskar_Mem w_gpu(&w, OSKAR_LOCATION_GPU);
-    oskar_Mem uu_gpu(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_baselines);
-    oskar_Mem vv_gpu(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_baselines);
-    oskar_Mem ww_gpu(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_baselines);
+    location = OSKAR_LOCATION_GPU;
+    oskar_mem_init_copy(&u_gpu, &u, location, &status);
+    oskar_mem_init_copy(&v_gpu, &v, location, &status);
+    oskar_mem_init_copy(&w_gpu, &w, location, &status);
+    oskar_mem_init(&uu_gpu, type, location, num_baselines, 1, &status);
+    oskar_mem_init(&vv_gpu, type, location, num_baselines, 1, &status);
+    oskar_mem_init(&ww_gpu, type, location, num_baselines, 1, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Evaluate baseline coordinates on GPU.
     oskar_evaluate_baselines(&uu_gpu, &vv_gpu, &ww_gpu, &u_gpu, &v_gpu, &w_gpu,
             &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    // Copy results back.
-    oskar_Mem uu2(&uu_gpu, OSKAR_LOCATION_CPU);
-    oskar_Mem vv2(&vv_gpu, OSKAR_LOCATION_CPU);
-    oskar_Mem ww2(&ww_gpu, OSKAR_LOCATION_CPU);
+    // Copy results back to CPU.
+    oskar_mem_init_copy(&uu2, &uu, OSKAR_LOCATION_CPU, &status);
+    oskar_mem_init_copy(&vv2, &vv, OSKAR_LOCATION_CPU, &status);
+    oskar_mem_init_copy(&ww2, &ww, OSKAR_LOCATION_CPU, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    // Check results are correct.
+    // Check results are consistent.
     for (int i = 0; i < num_baselines; ++i)
     {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( ((double*)uu)[i], ((double*)uu2)[i],
-                1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( ((double*)vv)[i], ((double*)vv2)[i],
-                1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( ((double*)ww)[i], ((double*)ww2)[i],
-                1e-10);
-    }
-}
-
-/**
- * @details
- * Tests baseline evaluation for 50 stations.
- */
-void Test_evaluate_baselines::test_large()
-{
-    int status = 0;
-    int num_stations = 50;
-    int num_baselines = num_stations * (num_stations - 1) / 2;
-
-    // Allocate host memory.
-    oskar_Mem u(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_stations);
-    oskar_Mem v(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_stations);
-    oskar_Mem w(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_stations);
-    oskar_Mem uu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_baselines);
-    oskar_Mem vv(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_baselines);
-    oskar_Mem ww(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_baselines);
-
-    // Fill station coordinates with test data.
-    for (int i = 0; i < num_stations; ++i)
-    {
-        ((double*)u)[i] = (double)(i + 1);
-        ((double*)v)[i] = (double)(i + 2);
-        ((double*)w)[i] = (double)(i + 3);
+        EXPECT_NEAR( ((double*)uu.data)[i], ((double*)uu2.data)[i], 1e-10);
+        EXPECT_NEAR( ((double*)vv.data)[i], ((double*)vv2.data)[i], 1e-10);
+        EXPECT_NEAR( ((double*)ww.data)[i], ((double*)ww2.data)[i], 1e-10);
     }
 
-    // Evaluate baseline coordinates on CPU.
-    oskar_evaluate_baselines(&uu, &vv, &ww, &u, &v, &w, &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-    // Check results are correct.
-    for (int s1 = 0, b = 0; s1 < num_stations; ++s1)
-    {
-        for (int s2 = s1 + 1; s2 < num_stations; ++s2, ++b)
-        {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL( ((double*)uu)[b],
-                    ((double*)u)[s2] - ((double*)u)[s1], 1e-10);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL( ((double*)vv)[b],
-                    ((double*)v)[s2] - ((double*)v)[s1], 1e-10);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL( ((double*)ww)[b],
-                    ((double*)w)[s2] - ((double*)w)[s1], 1e-10);
-        }
-    }
-
-    // Allocate device memory and copy input data.
-    oskar_Mem u_gpu(&u, OSKAR_LOCATION_GPU);
-    oskar_Mem v_gpu(&v, OSKAR_LOCATION_GPU);
-    oskar_Mem w_gpu(&w, OSKAR_LOCATION_GPU);
-    oskar_Mem uu_gpu(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_baselines);
-    oskar_Mem vv_gpu(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_baselines);
-    oskar_Mem ww_gpu(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_baselines);
-
-    // Evaluate baseline coordinates on GPU.
-    oskar_evaluate_baselines(&uu_gpu, &vv_gpu, &ww_gpu, &u_gpu, &v_gpu, &w_gpu,
-            &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-
-    // Copy results back.
-    oskar_Mem uu2(&uu_gpu, OSKAR_LOCATION_CPU);
-    oskar_Mem vv2(&vv_gpu, OSKAR_LOCATION_CPU);
-    oskar_Mem ww2(&ww_gpu, OSKAR_LOCATION_CPU);
-
-    // Check results are correct.
-    for (int i = 0; i < num_baselines; ++i)
-    {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( ((double*)uu)[i], ((double*)uu2)[i],
-                1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( ((double*)vv)[i], ((double*)vv2)[i],
-                1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL( ((double*)ww)[i], ((double*)ww2)[i],
-                1e-10);
-    }
+    // Free memory.
+    oskar_mem_free(&u, &status);
+    oskar_mem_free(&v, &status);
+    oskar_mem_free(&w, &status);
+    oskar_mem_free(&uu, &status);
+    oskar_mem_free(&vv, &status);
+    oskar_mem_free(&ww, &status);
+    oskar_mem_free(&uu2, &status);
+    oskar_mem_free(&vv2, &status);
+    oskar_mem_free(&ww2, &status);
+    oskar_mem_free(&u_gpu, &status);
+    oskar_mem_free(&v_gpu, &status);
+    oskar_mem_free(&w_gpu, &status);
+    oskar_mem_free(&uu_gpu, &status);
+    oskar_mem_free(&vv_gpu, &status);
+    oskar_mem_free(&ww_gpu, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }

@@ -30,7 +30,9 @@
 
 #include "sky/oskar_sky_model_resize.h"
 #include "sky/oskar_sky_model_save.h"
-#include "math/oskar_Jones.h"
+#include "math/oskar_jones_copy.h"
+#include "math/oskar_jones_free.h"
+#include "math/oskar_jones_init.h"
 #include "math/oskar_jones_get_station_pointer.h"
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
@@ -150,8 +152,9 @@ void Test_evaluate_jones_E::evaluate_e()
     // Copy sky to the GPU
     oskar_SkyModel sky_gpu(&sky_cpu, OSKAR_LOCATION_GPU);
 
-    oskar_Jones E_gpu(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU, num_stations,
-            num_sources);
+    oskar_Jones E_gpu;
+    oskar_jones_init(&E_gpu, OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU,
+            num_stations, num_sources, &error);
 
     oskar_WorkStationBeam work_gpu(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
     oskar_evaluate_jones_E(&E_gpu, &sky_gpu, &telescope_gpu, gast,
@@ -159,7 +162,9 @@ void Test_evaluate_jones_E::evaluate_e()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Copy the Jones matrix back to the CPU.
-    oskar_Jones E_cpu(&E_gpu, OSKAR_LOCATION_CPU);
+    oskar_Jones E_cpu;
+    oskar_jones_init(&E_cpu, E_gpu.data.type, OSKAR_LOCATION_CPU, 0, 0, &error);
+    oskar_jones_copy(&E_cpu, &E_gpu, &error);
 
     // Save to file for plotting.
     oskar_Mem l(&work_gpu.hor_x, OSKAR_LOCATION_CPU);
@@ -201,6 +206,8 @@ void Test_evaluate_jones_E::evaluate_e()
         scatter3(l(:,station),m(:,station),n(:,station),2,amp(:,station));
      */
     oskar_curand_state_free(&curand_state, &error);
+    oskar_jones_free(&E_cpu, &error);
+    oskar_jones_free(&E_gpu, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 }
 

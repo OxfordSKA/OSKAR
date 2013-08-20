@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/test/Test_getline.h"
-#include "utility/oskar_getline.h"
+#include <gtest/gtest.h>
+
+#include <oskar_getline.h>
 
 #include <cstdio>
 #include <cstdlib>
 
-void Test_getline::test_method()
+TEST(getline, normal)
 {
     int num_lines = 1000, num_chars = 0, i = 0;
     char *line = NULL;
@@ -44,7 +45,7 @@ void Test_getline::test_method()
     const char* filename = "temp_lines.dat";
     file = fopen(filename, "w");
     if (file == NULL)
-    	CPPUNIT_FAIL("Unable to create test file");
+    	FAIL() << "Unable to create test file";
     for (i = 0; i < num_lines; ++i)
         fprintf(file, "%.12f,%.12f\n",
         		(double)i/num_lines, (double)i/(10*num_lines));
@@ -58,12 +59,12 @@ void Test_getline::test_method()
     	num_chars = oskar_getline(&line, &n, file);
 
     	// Assert that number of characters per line is correct.
-    	CPPUNIT_ASSERT_EQUAL(29, num_chars);
+    	ASSERT_EQ(29, num_chars);
 
         // Assert that the strings are the same.
         sprintf(temp, "%.12f,%.12f",
         		(double)i/num_lines, (double)i/(10*num_lines));
-    	CPPUNIT_ASSERT_EQUAL(0, strcmp(temp, line));
+        ASSERT_EQ(0, strcmp(temp, line));
     }
     free(line);
     fclose(file);
@@ -72,7 +73,7 @@ void Test_getline::test_method()
     remove(filename);
 }
 
-void Test_getline::test_no_final_return_character()
+TEST(getline, no_final_return)
 {
     int num_lines = 1000, num_chars = 0, i = 0;
     char *line = NULL;
@@ -84,7 +85,7 @@ void Test_getline::test_no_final_return_character()
     const char* filename = "temp_lines_no_final_return_character.dat";
     file = fopen(filename, "w");
     if (file == NULL)
-    	CPPUNIT_FAIL("Unable to create test file");
+        FAIL() << "Unable to create test file";
     for (i = 0; i < num_lines-1; ++i)
         fprintf(file, "%.12f,%.12f\n",
         		(double)i/num_lines, (double)i/(10*num_lines));
@@ -99,19 +100,19 @@ void Test_getline::test_no_final_return_character()
     while ((num_chars = oskar_getline(&line, &n, file)) != OSKAR_ERR_EOF)
     {
     	// Assert that number of characters per line is correct.
-    	CPPUNIT_ASSERT_EQUAL(29, num_chars);
+        ASSERT_EQ(29, num_chars);
 
         // Assert that the strings are the same.
     	sprintf(temp, "%.12f,%.12f",
     			(double)i/num_lines, (double)i/(10*num_lines));
-    	CPPUNIT_ASSERT_EQUAL(0, strcmp(temp, line));
+    	ASSERT_EQ(0, strcmp(temp, line));
 
     	// Increment line counter.
     	++i;
     }
 
     // Assert that the number of lines is the same.
-	CPPUNIT_ASSERT_EQUAL(num_lines, i);
+    ASSERT_EQ(num_lines, i);
 
     free(line);
     fclose(file);

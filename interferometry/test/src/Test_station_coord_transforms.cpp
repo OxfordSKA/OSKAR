@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/test/Test_station_coord_transforms.h"
-#include "interferometry/oskar_geocentric_cartesian_to_geodetic_spherical.h"
-#include "interferometry/oskar_geodetic_spherical_to_geocentric_cartesian.h"
+#include <gtest/gtest.h>
+
+#include <oskar_geocentric_cartesian_to_geodetic_spherical.h>
+#include <oskar_geodetic_spherical_to_geocentric_cartesian.h>
 
 #include <cmath>
 
-/**
- * @details
- * Tests conversion from geocentric cartesian to geodetic spherical coordinates.
- */
-void Test_station_coord_transforms::test_geocentric_cartesian_to_geodetic_spherical()
+TEST(station_coord_transforms, geocentric_cartesian_to_geodetic_spherical)
 {
     double lon[] = {0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0, 105.0,
             120.0, 135.0, 150.0, 165.0, 180.0, -15.0, -30.0, -45.0,
@@ -61,8 +58,8 @@ void Test_station_coord_transforms::test_geocentric_cartesian_to_geodetic_spheri
 
     for (int i = 0; i < n; ++i)
     {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(lon[i], lambda[i], 1e-8);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(lat[i], phi[i], 1e-8);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(alt[i], h[i], 1e-8);
+        EXPECT_NEAR(lon[i], lambda[i], 1e-8);
+        EXPECT_NEAR(lat[i], phi[i], 1e-8);
+        EXPECT_NEAR(alt[i], h[i], 1e-8);
     }
 }

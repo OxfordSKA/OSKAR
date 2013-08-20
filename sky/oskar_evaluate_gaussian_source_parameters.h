@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,9 +62,6 @@ extern "C" {
  * fitting.
  *
  * TODO better description of how this works... (see MATLAB code)
- *
- * FIXME if zero failed sources stays in the code, it will need to be modified
- * to also take Q,U,V
  *
  * @param log             OSKAR message log object
  * @param num_sources     Number of sources (length of source arrays)

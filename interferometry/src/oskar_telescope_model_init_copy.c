@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,19 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/test/Test_CudaInfo.h"
-#include "utility/oskar_CudaInfo.h"
-#include "utility/oskar_cuda_info_create.h"
-#include "utility/oskar_cuda_info_free.h"
-#include "utility/oskar_cuda_info_log.h"
+#include <oskar_telescope_model_init.h>
+#include <oskar_telescope_model_copy.h>
 
-#include <cstdio>
-#include <cstdlib>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void Test_CudaInfo::test()
+void oskar_telescope_model_init_copy(oskar_TelescopeModel* dst,
+        const oskar_TelescopeModel* src, int location, int* status)
 {
-    oskar_CudaInfo* info = NULL;
-    oskar_cuda_info_create(&info);
-    oskar_cuda_info_log(0, info);
-    oskar_cuda_info_free(&info);
+    oskar_telescope_model_init(dst, src->station_x.type, location,
+            src->num_stations, status);
+    oskar_telescope_model_copy(dst, src, status);
 }
+
+#ifdef __cplusplus
+}
+#endif

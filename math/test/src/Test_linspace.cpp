@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/test/Test_linspace.h"
-#include "math/oskar_linspace.h"
+#include <gtest/gtest.h>
+
+#include <oskar_linspace.h>
+
 #include <cstdlib>
-#include <cstdio>
 
-void Test_linspace::test_linspace()
+TEST(linspace, test)
 {
-    int num_values = 10;
-    double* values = (double*) malloc(num_values * sizeof(double));
-    oskar_linspace_d(values, 2.0, 7.0, num_values);
+    int i = 0, n = 10;
+    double a = 2.0, b = 7.0;
+    double* values = (double*) malloc(n * sizeof(double));
+    oskar_linspace_d(values, a, b, n);
 
-//    for (int i = 0; i < num_values; ++i)
-//    {
-//        printf("%f\n", values[i]);
-//    }
+    for (i = 0; i < n; ++i)
+    {
+        EXPECT_DOUBLE_EQ(a + (i * (b - a) / (n - 1)), values[i]);
+    }
     free(values);
 }
-
-

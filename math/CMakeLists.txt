@@ -51,7 +51,6 @@ set(math_SRC
     src/oskar_jones_join.c
     src/oskar_jones_set_size.c
     src/oskar_jones_set_real_scalar.c
-    src/oskar_Jones.cpp
     src/oskar_linspace.c
     src/oskar_matrix_multiply.c
     src/oskar_mean.c

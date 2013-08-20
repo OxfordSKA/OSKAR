@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,51 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_MATRIX3_H_
-#define TEST_MATRIX3_H_
+#include <oskar_mem_copy.h>
+#include <oskar_mem_init.h>
+#include <oskar_mem_init_copy.h>
 
-/**
- * @file Test_Matrix3.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class Test_Matrix3 : public CppUnit::TestFixture
+void oskar_mem_init_copy(oskar_Mem* dst, const oskar_Mem* src, int location,
+        int* status)
 {
-    public:
-        CPPUNIT_TEST_SUITE(Test_Matrix3);
-        CPPUNIT_TEST(test_identity);
-        CPPUNIT_TEST(test_multiply);
-        CPPUNIT_TEST(test_rotation);
-        CPPUNIT_TEST(test_scale);
-        CPPUNIT_TEST_SUITE_END();
+    oskar_mem_init(dst, src->type, location, src->num_elements, 1, status);
+    oskar_mem_copy(dst, src, status);
+}
 
-    public:
-        /// Set up context before running a test.
-        void setUp();
-
-        /// Clean up after the test run.
-        void tearDown();
-
-    public:
-        /// Test identity.
-        void test_identity();
-
-        /// Test multiply.
-        void test_multiply();
-
-        /// Test rotation.
-        void test_rotation();
-
-        /// Test scale.
-        void test_scale();
-};
-
-#endif // TEST_MATRIX3_H_
+#ifdef __cplusplus
+}
+#endif

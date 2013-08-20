@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,11 +47,13 @@
 #include "utility/oskar_mem_clear_contents.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_different.h"
-#include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_element_multiply.h"
+#include "utility/oskar_mem_element_size.h"
+#include "utility/oskar_mem_evaluate_relative_error.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_mem_init.h"
+#include "utility/oskar_mem_init_copy.h"
 #include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_scale_real.h"

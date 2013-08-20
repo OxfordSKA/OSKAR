@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,37 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/test/Test_sph2cart.h"
-#include "math/oskar_sph2cart.h"
-#include "math/oskar_cart2sph.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_get_error_string.h"
+#include <gtest/gtest.h>
+
+#include <oskar_sph2cart.h>
+#include <oskar_cart2sph.h>
+#include <oskar_mem_init.h>
+#include <oskar_mem_free.h>
+#include <oskar_get_error_string.h>
 
 #include <math.h>
 
-
-void Test_sph2cart::test()
+TEST(sph2cart, test)
 {
-    int n = 1;
-    oskar_Mem x(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
-    oskar_Mem y(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
-    oskar_Mem z(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+    oskar_Mem x, y, z, lon_in, lat_in, lon_out, lat_out;
+    int precision = OSKAR_DOUBLE, location = OSKAR_LOCATION_CPU;
+    int num = 1, status = 0;
+    double delta = 1e-8;
 
-    oskar_Mem lon_in(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
-    oskar_Mem lat_in(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
-    oskar_Mem lon_out(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
-    oskar_Mem lat_out(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+    oskar_mem_init(&x, precision, location, num, 1, &status);
+    oskar_mem_init(&y, precision, location, num, 1, &status);
+    oskar_mem_init(&z, precision, location, num, 1, &status);
+    oskar_mem_init(&lon_in, precision, location, num, 1, &status);
+    oskar_mem_init(&lat_in, precision, location, num, 1, &status);
+    oskar_mem_init(&lon_out, precision, location, num, 1, &status);
+    oskar_mem_init(&lat_out, precision, location, num, 1, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     ((double*)lon_in.data)[0] = 50.0 * M_PI/180.0;
     ((double*)lat_in.data)[0] = 30.0 * M_PI/180.0;
 
-    int err = oskar_sph2cart(n, &x, &y, &z, &lon_in, &lat_in);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
+    status = oskar_sph2cart(num, &x, &y, &z, &lon_in, &lat_in);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    err = oskar_cart2sph(n, &lon_out, &lat_out, &x, &y, &z);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
+    status = oskar_cart2sph(num, &lon_out, &lat_out, &x, &y, &z);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    double delta = 1e-8;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)lon_in.data)[0], ((double*)lon_out.data)[0], delta);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)lat_in.data)[0], ((double*)lat_out.data)[0], delta);
+    ASSERT_NEAR(((double*)lon_in.data)[0], ((double*)lon_out.data)[0], delta);
+    ASSERT_NEAR(((double*)lat_in.data)[0], ((double*)lat_out.data)[0], delta);
+
+    oskar_mem_free(&x, &status);
+    oskar_mem_free(&y, &status);
+    oskar_mem_free(&z, &status);
+    oskar_mem_free(&lon_in, &status);
+    oskar_mem_free(&lat_in, &status);
+    oskar_mem_free(&lon_out, &status);
+    oskar_mem_free(&lat_out, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }

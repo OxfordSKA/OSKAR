@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,34 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_SPH2CART_H_
-#define TEST_SPH2CART_H_
+#include <gtest/gtest.h>
 
-/**
- * @file Test_sph2cart.h
- */
+#include <oskar_get_error_string.h>
+#include <oskar_mem_copy.h>
+#include <oskar_mem_free.h>
+#include <oskar_mem_init.h>
+#include <oskar_mem_init_copy.h>
 
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class Test_sph2cart : public CppUnit::TestFixture
+TEST(Mem, copy_gpu)
 {
-    public:
-        CPPUNIT_TEST_SUITE(Test_sph2cart);
-        CPPUNIT_TEST(test);
-        CPPUNIT_TEST_SUITE_END();
+    int n = 100, status = 0;
+    oskar_Mem cpu, cpu2, gpu;
 
-    public:
-        void test();
-};
+    // Create test array and fill with data.
+    oskar_mem_init(&cpu, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n, 1, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    double* cpu_ = (double*)cpu.data;
+    for (int i = 0; i < n; ++i)
+    {
+        cpu_[i] = (double)i;
+    }
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_sph2cart);
+    // Copy to GPU.
+    oskar_mem_init_copy(&gpu, &cpu, OSKAR_LOCATION_GPU, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-#endif // TEST_SPH2CART_H_
+    // Copy back and check for equality.
+    oskar_mem_init_copy(&cpu2, &gpu, OSKAR_LOCATION_CPU, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    for (int i = 0; i < n; ++i)
+    {
+        EXPECT_DOUBLE_EQ(cpu_[i], ((double*)cpu2.data)[i]);
+    }
+
+    // Free memory.
+    oskar_mem_free(&cpu, &status);
+    oskar_mem_free(&cpu2, &status);
+    oskar_mem_free(&gpu, &status);
+}
+

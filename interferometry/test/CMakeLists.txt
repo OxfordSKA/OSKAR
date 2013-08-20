@@ -6,11 +6,6 @@ if (CPPUNIT_FOUND)
     set(interferometry_test_SRC
         src/CppUnitMain.cpp
         src/Test_add_system_noise.cpp
-        src/Test_evaluate_baselines.cpp
-        src/Test_correlator.cpp
-        src/Test_station_coord_transforms.cpp
-        src/Test_TelescopeModel.cpp
-        src/Test_Visibilities.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
@@ -22,24 +17,30 @@ if (CPPUNIT_FOUND)
 endif()
 
 
-# New correlate test using gtest.
+# New test using gtest.
+set(name interferometry_test2)
 include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
-add_executable(correlate_test
+set(${name}_SRC
     src/Test_correlate.cpp
+    src/Test_evaluate_baselines.cpp
+    src/Test_station_coord_transforms.cpp
+    src/Test_TelescopeModel.cpp
+    src/Test_Visibilities.cpp
 )
-target_link_libraries(correlate_test oskar gtest_main)
-add_test(correlate_test interferometry_test)
+add_executable(${name} ${${name}_SRC})
+target_link_libraries(${name} oskar gtest_main)
+set_target_properties(${name} PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+add_test(interferometry_test ${name})
 
 
-# Google test binary
-#set(name interferometry_test_2)
-#include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
-#cuda_add_executable(${name} src/Test_correlate_performance.cu)
-#target_link_libraries(${name}
-#    oskar
-#    gtest_main
-#    ${CUDA_LIBRARIES}
-#    )
+# Correlate kernel performance test.
+set(name correlate_performance_test)
+include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
+cuda_add_executable(${name} src/Test_correlate_performance.cu)
+target_link_libraries(${name} oskar gtest_main ${CUDA_LIBRARIES})
+
 
 if (NOT WIN32)
     # Correlator benchmark binary.

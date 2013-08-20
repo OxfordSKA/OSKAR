@@ -30,6 +30,7 @@
 #include "interferometry/oskar_accumulate_baseline_visibility_for_source.h"
 #include "interferometry/oskar_correlate_point_time_smearing_omp.h"
 #include "math/oskar_sinc.h"
+#include "math/oskar_kahan_sum.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +59,7 @@ void oskar_correlate_point_omp_f(int num_sources, int num_stations,
         for (station_p = station_q + 1; station_p < num_stations; ++station_p)
         {
             float uu, vv;
-            float4c sum;
+            float4c sum, guard;
             sum.a.x = 0.0f;
             sum.a.y = 0.0f;
             sum.b.x = 0.0f;
@@ -67,6 +68,14 @@ void oskar_correlate_point_omp_f(int num_sources, int num_stations,
             sum.c.y = 0.0f;
             sum.d.x = 0.0f;
             sum.d.y = 0.0f;
+            guard.a.x = 0.0f;
+            guard.a.y = 0.0f;
+            guard.b.x = 0.0f;
+            guard.b.y = 0.0f;
+            guard.c.x = 0.0f;
+            guard.c.y = 0.0f;
+            guard.d.x = 0.0f;
+            guard.d.y = 0.0f;
 
             /* Pointer to source vector for station p. */
             sp = &jones[station_p * num_sources];
@@ -95,7 +104,7 @@ void oskar_correlate_point_omp_f(int num_sources, int num_stations,
                 /* Accumulate baseline visibility response for source. */
                 oskar_accumulate_baseline_visibility_for_source_f(&sum, i,
                         source_I, source_Q, source_U, source_V,
-                        sp, sq, rb);
+                        sp, sq, rb, &guard);
             }
 
             /* Determine 1D visibility index. */

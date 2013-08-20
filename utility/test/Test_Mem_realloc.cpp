@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,37 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_EVALUATE_BASELINES_H_
-#define TEST_EVALUATE_BASELINES_H_
+#include <gtest/gtest.h>
 
-/**
- * @file Test_evaluate_baselines.h
- */
+#include <oskar_get_error_string.h>
+#include <oskar_mem_free.h>
+#include <oskar_mem_init.h>
+#include <oskar_mem_realloc.h>
 
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class Test_evaluate_baselines : public CppUnit::TestFixture
+TEST(Mem, realloc_gpu)
 {
-    public:
-        CPPUNIT_TEST_SUITE(Test_evaluate_baselines);
-        CPPUNIT_TEST(test_small);
-        CPPUNIT_TEST(test_large);
-        CPPUNIT_TEST_SUITE_END();
+    int status = 0;
+    oskar_Mem mem;
+    oskar_mem_init(&mem, OSKAR_DOUBLE, OSKAR_LOCATION_GPU, 0, 1, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_mem_realloc(&mem, 500, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    ASSERT_EQ(500, mem.num_elements);
+    ASSERT_EQ((int)OSKAR_DOUBLE, mem.type);
+    oskar_mem_free(&mem, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+}
 
-    public:
-        // Test Methods
-        void test_small();
-        void test_large();
-};
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_evaluate_baselines);
+TEST(Mem, realloc_cpu)
+{
+    int status = 0;
+    oskar_Mem mem;
+    oskar_mem_init(&mem, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 100, 1,
+            &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_mem_realloc(&mem, 1000, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    ASSERT_EQ(1000, mem.num_elements);
+    ASSERT_EQ((int)OSKAR_DOUBLE_COMPLEX, mem.type);
+    oskar_mem_free(&mem, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+}
 
-#endif // TEST_EVALUATE_BASELINES_H_

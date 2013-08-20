@@ -217,6 +217,9 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
     html.append("<li>The CppUnit unit-testing framework "
                 "(<a href=\"http://www.freedesktop.org/wiki/Software/cppunit\">"
                 "http://www.freedesktop.org/wiki/Software/cppunit</a>)</li>");
+    html.append("<li>The Google Test unit-testing framework "
+                "(<a href=\"http://code.google.com/p/googletest/\">"
+                "http://code.google.com/p/googletest/</a>)</li>");
     html.append("<li>The Eclipse source-code IDE "
                 "(<a href=\"http://www.eclipse.org/\">"
                 "http://www.eclipse.org/</a>)</li>");

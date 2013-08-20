@@ -26,65 +26,67 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/test/Test_find_closest_match.h"
-#include "math/oskar_find_closest_match.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_get_error_string.h"
+#include <gtest/gtest.h>
 
-void Test_find_closest_match::test()
+#include <oskar_find_closest_match.h>
+#include <oskar_mem_free.h>
+#include <oskar_mem_init.h>
+#include <oskar_get_error_string.h>
+
+TEST(find_closest_match, test)
 {
-    int type = OSKAR_DOUBLE;
-    int location = OSKAR_LOCATION_CPU;
-    int size = 10;
-    oskar_Mem values(type, location, size, OSKAR_TRUE);
+    int i = 0, size = 10, status = 0;
+    int type = OSKAR_DOUBLE, location = OSKAR_LOCATION_CPU;
+    double start = 0.0, inc = 0.3, value = 0.0, *values_;
+    oskar_Mem values;
 
-    double start = 0.0;
-    double inc = 0.3;
-
-    double* values_ = (double*)values.data;
-    for (int i = 0; i < size; ++i)
+    // Create array and fill with values.
+    oskar_mem_init(&values, type, location, size, OSKAR_TRUE, &status);
+    values_ = (double*)values.data;
+    for (i = 0; i < size; ++i)
     {
         values_[i] = start + inc * i;
     }
 
-    //  0   1   2   3   4   5   6   7   8   9
-    // 0.0 0.3 0.6 0.9 1.2 1.5 1.8 2.1 2.4 2.7
+    //  0    1    2    3    4    5    6    7    8    9
+    // 0.0  0.3  0.6  0.9  1.2  1.5  1.8  2.1  2.4  2.7
 
-    int idx;
-    double value = 0.7;
-    const oskar_Mem* v = &values;
-    int err = 0;
-    oskar_find_closest_match(&idx, value, v, &err);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-    CPPUNIT_ASSERT_EQUAL(2, idx);
+    value = 0.7;
+    oskar_find_closest_match(&i, value, &values, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    EXPECT_EQ(2, i);
 
     value = 0.749999;
-    oskar_find_closest_match(&idx, value, v, &err);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-    CPPUNIT_ASSERT_EQUAL(2, idx);
+    oskar_find_closest_match(&i, value, &values, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    EXPECT_EQ(2, i);
 
     value = 0.75;
-    oskar_find_closest_match(&idx, value, v, &err);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-    CPPUNIT_ASSERT_EQUAL(3, idx);
+    oskar_find_closest_match(&i, value, &values, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    EXPECT_EQ(3, i);
 
     value = 0.750001;
-    oskar_find_closest_match(&idx, value, v, &err);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-    CPPUNIT_ASSERT_EQUAL(3, idx);
+    oskar_find_closest_match(&i, value, &values, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    EXPECT_EQ(3, i);
 
     value = 100;
-    oskar_find_closest_match(&idx, value, v, &err);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-    CPPUNIT_ASSERT_EQUAL(9, idx);
+    oskar_find_closest_match(&i, value, &values, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    EXPECT_EQ(9, i);
 
     value = -100;
-    oskar_find_closest_match(&idx, value, v, &err);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-    CPPUNIT_ASSERT_EQUAL(0, idx);
+    oskar_find_closest_match(&i, value, &values, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    EXPECT_EQ(0, i);
 
     value = 0.3;
-    oskar_find_closest_match(&idx, value, v, &err);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-    CPPUNIT_ASSERT_EQUAL(1, idx);
+    oskar_find_closest_match(&i, value, &values, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    EXPECT_EQ(1, i);
+
+    // Free memory.
+    oskar_mem_free(&values, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }

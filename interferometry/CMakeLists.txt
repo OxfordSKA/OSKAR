@@ -33,6 +33,7 @@ set(interferometry_SRC
     src/oskar_telescope_model_copy.c
     src/oskar_telescope_model_free.c
     src/oskar_telescope_model_init.c
+    src/oskar_telescope_model_init_copy.c
     src/oskar_telescope_model_load_pointing_file.c
     src/oskar_telescope_model_load_station_coords.c
     src/oskar_telescope_model_location.c
@@ -48,6 +49,7 @@ set(interferometry_SRC
     src/oskar_visibilities_free.c
     src/oskar_visibilities_get_channel_amps.c
     src/oskar_visibilities_init.c
+    src/oskar_visibilities_init_copy.c
     src/oskar_visibilities_location.c
     src/oskar_visibilities_read.c
     src/oskar_visibilities_resize.c

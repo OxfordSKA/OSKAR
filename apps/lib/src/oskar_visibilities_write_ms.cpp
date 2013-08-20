@@ -87,6 +87,7 @@ void oskar_visibilities_write_ms(const oskar_Visibilities* vis,
     int num_pols       = vis->num_polarisations();
     int num_channels   = vis->num_channels;
     int num_times      = vis->num_times;
+    int num_coords     = num_times * num_baselines;
     double dt_vis_dump = vis->time_inc_seconds;
     double t_start_sec = vis->time_start_mjd_utc * DAYS_2_SEC + (dt_vis_dump / 2);
     double ref_freq    = vis->freq_start_hz;
@@ -134,8 +135,8 @@ void oskar_visibilities_write_ms(const oskar_Visibilities* vis,
     ms.addBand(0, num_channels, ref_freq, chan_width);
 
     // Evaluate baseline index arrays.
-    int* baseline_ant_1 = (int*)malloc(vis->num_coords() * sizeof(int));
-    int* baseline_ant_2 = (int*)malloc(vis->num_coords() * sizeof(int));
+    int* baseline_ant_1 = (int*)malloc(num_coords * sizeof(int));
+    int* baseline_ant_2 = (int*)malloc(num_coords * sizeof(int));
     for (int idx = 0, t = 0; t < num_times; ++t)
     {
         for (int a1 = 0; a1 < num_antennas; ++a1)

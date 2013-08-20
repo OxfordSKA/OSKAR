@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,37 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
-#include "apps/lib/test/Test_Settings.h"
+#include <oskar_visibilities_init.h>
+#include <oskar_visibilities_copy.h>
 
-#include "apps/lib/oskar_settings_load.h"
-#include "utility/oskar_get_error_string.h"
-#include "oskar_global.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <QtCore/QSettings>
-
-#include <cstdio>
-#include <cmath>
-
-
-void Test_Settings::test_read()
+void oskar_visibilities_init_copy(oskar_Visibilities* dst,
+        const oskar_Visibilities* src, int location, int* status)
 {
-    // Construct test settings file
-    {
-        QSettings settings("./temp.ini", QSettings::IniFormat);
-        settings.beginGroup("observation");
-        settings.setValue("num_channels", 2);
-        settings.setValue("start_frequency_hz", 100e6);
-        settings.endGroup();
-    }
-
-    // Read settings
-    {
-        oskar_Settings settings;
-        int err = oskar_settings_load(&settings, NULL, "./temp.ini");
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
-    }
-
-    remove("./temp.ini");
+    oskar_visibilities_init(dst, src->amplitude.type, location,
+            src->num_channels, src->num_times, src->num_stations, status);
+    oskar_visibilities_copy(dst, src, status);
 }
 
+#ifdef __cplusplus
+}
+#endif
