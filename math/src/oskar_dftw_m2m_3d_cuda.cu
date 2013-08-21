@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_dftw_m2m_3d_cuda.h"
+#include <oskar_dftw_m2m_3d_cuda.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,11 +75,18 @@ extern __shared__ double2 smem_d[];
 
 /* Single precision. */
 __global__
-void oskar_dftw_m2m_3d_cudak_f(const int n_in, const float* x_in,
-        const float* y_in, const float* z_in, const float2* weights_in,
-        const int n_out, const float* x_out, const float* y_out,
-        const float* z_out, const int max_in_chunk, const float4c* data,
-        float4c* output)
+void oskar_dftw_m2m_3d_cudak_f(const int n_in,
+        const float* __restrict__ x_in,
+        const float* __restrict__ y_in,
+        const float* __restrict__ z_in,
+        const float2* __restrict__ weights_in,
+        const int n_out,
+        const float* __restrict__ x_out,
+        const float* __restrict__ y_out,
+        const float* __restrict__ z_out,
+        const int max_in_chunk,
+        const float4c* __restrict__ data,
+        float4c* __restrict__ output)
 {
     // Get the output position (pixel) ID that this thread is working on.
     const int i_out = blockDim.x * blockIdx.x + threadIdx.x;
@@ -180,11 +187,18 @@ void oskar_dftw_m2m_3d_cudak_f(const int n_in, const float* x_in,
 
 /* Double precision. */
 __global__
-void oskar_dftw_m2m_3d_cudak_d(const int n_in, const double* x_in,
-        const double* y_in, const double* z_in, const double2* weights_in,
-        const int n_out, const double* x_out, const double* y_out,
-        const double* z_out, const int max_in_chunk, const double4c* data,
-        double4c* output)
+void oskar_dftw_m2m_3d_cudak_d(const int n_in,
+        const double* __restrict__ x_in,
+        const double* __restrict__ y_in,
+        const double* __restrict__ z_in,
+        const double2* __restrict__ weights_in,
+        const int n_out,
+        const double* __restrict__ x_out,
+        const double* __restrict__ y_out,
+        const double* __restrict__ z_out,
+        const int max_in_chunk,
+        const double4c* __restrict__ data,
+        double4c* __restrict__ output)
 {
     // Get the output position (pixel) ID that this thread is working on.
     const int i_out = blockDim.x * blockIdx.x + threadIdx.x;

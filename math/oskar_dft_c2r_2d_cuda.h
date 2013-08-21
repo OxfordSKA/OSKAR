@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -146,12 +146,16 @@ void oskar_dft_c2r_2d_cuda_d(int num_in, const double* x_in, const double* y_in,
  * @param[in] max_in_chunk Maximum input points per chunk.
  * @param[out] output      Array of computed output points.
  */
-OSKAR_EXPORT
 __global__
-void oskar_dft_c2r_2d_cudak_f(int n_in, const float* x_in,
-        const float* y_in, const float2* data_in, const int n_out,
-        const float* x_out, const float* y_out, const int max_in_chunk,
-        float* output);
+void oskar_dft_c2r_2d_cudak_f(int n_in,
+        const float* __restrict__ x_in,
+        const float* __restrict__ y_in,
+        const float2* __restrict__ data_in,
+        const int n_out,
+        const float* __restrict__ x_out,
+        const float* __restrict__ y_out,
+        const int max_in_chunk,
+        float* __restrict__ output);
 
 /**
  * @brief
@@ -191,12 +195,16 @@ void oskar_dft_c2r_2d_cudak_f(int n_in, const float* x_in,
  * @param[in] max_in_chunk Maximum input points per chunk.
  * @param[out] output      Array of computed output points.
  */
-OSKAR_EXPORT
 __global__
-void oskar_dft_c2r_2d_cudak_d(int n_in, const double* x_in,
-        const double* y_in, const double2* data_in, const int n_out,
-        const double* x_out, const double* y_out, const int max_in_chunk,
-        double* output);
+void oskar_dft_c2r_2d_cudak_d(int n_in,
+        const double* __restrict__ x_in,
+        const double* __restrict__ y_in,
+        const double2* __restrict__ data_in,
+        const int n_out,
+        const double* __restrict__ x_out,
+        const double* __restrict__ y_out,
+        const int max_in_chunk,
+        double* __restrict__ output);
 
 #endif /* __CUDACC__ */
 

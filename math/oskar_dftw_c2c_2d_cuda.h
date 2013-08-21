@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -150,12 +150,17 @@ void oskar_dftw_c2c_2d_cuda_d(int n_in, const double* d_x_in,
  * @param[in] data         Array of complex input data (size n_out * n_in).
  * @param[out] output      Array of computed output points (see note, above).
  */
-OSKAR_EXPORT
 __global__
-void oskar_dftw_c2c_2d_cudak_f(const int n_in, const float* x_in,
-        const float* y_in, const float2* weights_in, const int n_out,
-        const float* x_out, const float* y_out, const int max_in_chunk,
-        const float2* data, float2* output);
+void oskar_dftw_c2c_2d_cudak_f(const int n_in,
+        const float* __restrict__ x_in,
+        const float* __restrict__ y_in,
+        const float2* __restrict__ weights_in,
+        const int n_out,
+        const float* __restrict__ x_out,
+        const float* __restrict__ y_out,
+        const int max_in_chunk,
+        const float2* __restrict__ data,
+        float2* __restrict__ output);
 
 /**
  * @brief
@@ -191,12 +196,17 @@ void oskar_dftw_c2c_2d_cudak_f(const int n_in, const float* x_in,
  * @param[in] data         Array of complex input data (size n_out * n_in).
  * @param[out] output      Array of computed output points (see note, above).
  */
-OSKAR_EXPORT
 __global__
-void oskar_dftw_c2c_2d_cudak_d(const int n_in, const double* x_in,
-        const double* y_in, const double2* weights_in, const int n_out,
-        const double* x_out, const double* y_out, const int max_in_chunk,
-        const double2* data, double2* output);
+void oskar_dftw_c2c_2d_cudak_d(const int n_in,
+        const double* __restrict__ x_in,
+        const double* __restrict__ y_in,
+        const double2* __restrict__ weights_in,
+        const int n_out,
+        const double* __restrict__ x_out,
+        const double* __restrict__ y_out,
+        const int max_in_chunk,
+        const double2* __restrict__ data,
+        double2* __restrict__ output);
 
 #endif /* __CUDACC__ */
 
