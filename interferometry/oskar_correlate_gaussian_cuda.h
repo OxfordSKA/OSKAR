@@ -154,12 +154,19 @@ void oskar_correlate_gaussian_cuda_d(int num_sources,
  */
 __global__
 void oskar_correlate_gaussian_cudak_f(const int num_sources,
-        const int num_stations, const float4c* jones, const float* source_I,
-        const float* source_Q, const float* source_U, const float* source_V,
-        const float* source_l, const float* source_m,
-        const float* source_a, const float* source_b, const float* source_c,
-        const float* station_u, const float* station_v,
-        const float frac_bandwidth, float4c* vis);
+        const int num_stations, const float4c* __restrict__ jones,
+        const float* __restrict__ source_I,
+        const float* __restrict__ source_Q,
+        const float* __restrict__ source_U,
+        const float* __restrict__ source_V,
+        const float* __restrict__ source_l,
+        const float* __restrict__ source_m,
+        const float* __restrict__ source_a,
+        const float* __restrict__ source_b,
+        const float* __restrict__ source_c,
+        const float* __restrict__ station_u,
+        const float* __restrict__ station_v, const float frac_bandwidth,
+        float4c* __restrict__ vis);
 
 /**
  * @brief
@@ -191,12 +198,19 @@ void oskar_correlate_gaussian_cudak_f(const int num_sources,
  */
 __global__
 void oskar_correlate_gaussian_cudak_d(const int num_sources,
-        const int num_stations, const double4c* jones, const double* source_I,
-        const double* source_Q, const double* source_U, const double* source_V,
-        const double* source_l, const double* source_m,
-        const double* source_a, const double* source_b, const double* source_c,
-        const double* station_u, const double* station_v,
-        const double frac_bandwidth, double4c* vis);
+        const int num_stations, const double4c* __restrict__ jones,
+        const double* __restrict__ source_I,
+        const double* __restrict__ source_Q,
+        const double* __restrict__ source_U,
+        const double* __restrict__ source_V,
+        const double* __restrict__ source_l,
+        const double* __restrict__ source_m,
+        const double* __restrict__ source_a,
+        const double* __restrict__ source_b,
+        const double* __restrict__ source_c,
+        const double* __restrict__ station_u,
+        const double* __restrict__ station_v, const double frac_bandwidth,
+        double4c* __restrict__ vis);
 
 #endif /* __CUDACC__ */
 

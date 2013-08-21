@@ -26,9 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_accumulate_baseline_visibility_for_source.h"
-#include "interferometry/oskar_correlate_point_time_smearing_cuda.h"
-#include "math/oskar_sinc.h"
+#include <oskar_accumulate_baseline_visibility_for_source.h>
+#include <oskar_correlate_point_time_smearing_cuda.h>
+#include <oskar_sinc.h>
+
 #include <math.h>
 
 #ifdef __cplusplus
@@ -99,9 +100,8 @@ extern __shared__ float4c  smem_f4c[];
 extern __shared__ double4c smem_d4c[];
 
 /* Single precision. */
-__global__ void
-__launch_bounds__(128)
-oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
+__global__
+void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         const int num_stations, const float4c* __restrict__ jones,
         const float* __restrict__ source_I,
         const float* __restrict__ source_Q,
@@ -230,13 +230,20 @@ oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
 /* Double precision. */
 __global__
 void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
-        const int num_stations, const double4c* jones, const double* source_I,
-        const double* source_Q, const double* source_U, const double* source_V,
-        const double* source_l, const double* source_m, const double* source_n,
-        const double* station_u, const double* station_v,
-        const double* station_x, const double* station_y,
-        const double frac_bandwidth, const double time_int_sec,
-        const double gha0_rad, const double dec0_rad, double4c* vis)
+        const int num_stations, const double4c* __restrict__ jones,
+        const double* __restrict__ source_I,
+        const double* __restrict__ source_Q,
+        const double* __restrict__ source_U,
+        const double* __restrict__ source_V,
+        const double* __restrict__ source_l,
+        const double* __restrict__ source_m,
+        const double* __restrict__ source_n,
+        const double* __restrict__ station_u,
+        const double* __restrict__ station_v,
+        const double* __restrict__ station_x,
+        const double* __restrict__ station_y, const double frac_bandwidth,
+        const double time_int_sec, const double gha0_rad,
+        const double dec0_rad, double4c* __restrict__ vis)
 {
     /* Local variables. */
     double4c sum;
@@ -245,7 +252,8 @@ void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
 
     /* Common values per thread block. */
     __shared__ double uu, vv, du_dt, dv_dt, dw_dt;
-    __shared__ const double4c *station_i, *station_j;
+    __shared__ const double4c* __restrict__ station_i;
+    __shared__ const double4c* __restrict__ station_j;
 
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (SJ >= SI) return;

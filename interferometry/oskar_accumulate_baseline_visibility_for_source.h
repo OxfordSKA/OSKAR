@@ -87,8 +87,65 @@ void oskar_accumulate_baseline_visibility_for_source_f(float4c* V_pq,
 #endif
         )
 {
-    /* Construct source brightness matrix (ignoring c, as it's Hermitian). */
     float4c m1, m2;
+#if defined(__CUDACC__)
+#if __CUDA_ARCH__ >= 350
+    {
+        float s_I, s_Q;
+        s_I = I[source_id];
+        s_Q = Q[source_id];
+        m2.b.x = U[source_id];
+        m2.b.y = V[source_id];
+        m2.a.x = s_I + s_Q;
+        m2.d.x = s_I - s_Q;
+    }
+    
+    /* Multiply first Jones matrix with source brightness matrix. */
+    m1.a = __ldg(&(J_p[source_id].a));
+    m1.b = __ldg(&(J_p[source_id].b));
+    m1.c = __ldg(&(J_p[source_id].c));
+    m1.d = __ldg(&(J_p[source_id].d));
+    oskar_multiply_complex_matrix_hermitian_in_place_f(&m1, &m2);
+
+    /* Multiply result with second (Hermitian transposed) Jones matrix. */
+    m2.a = __ldg(&(J_q[source_id].a));
+    m2.b = __ldg(&(J_q[source_id].b));
+    m2.c = __ldg(&(J_q[source_id].c));
+    m2.d = __ldg(&(J_q[source_id].d));
+    oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&m1, &m2);
+#else
+    /* Construct source brightness matrix (ignoring c, as it's Hermitian). */
+    {
+        float s_I, s_Q;
+        s_I = I[source_id];
+        s_Q = Q[source_id];
+        m2.b.x = U[source_id];
+        m2.b.y = V[source_id];
+        m2.a.x = s_I + s_Q;
+        m2.d.x = s_I - s_Q;
+    }
+
+    /* Multiply first Jones matrix with source brightness matrix. */
+    m1 = J_p[source_id];
+    oskar_multiply_complex_matrix_hermitian_in_place_f(&m1, &m2);
+
+    /* Multiply result with second (Hermitian transposed) Jones matrix. */
+    m2 = J_q[source_id];
+    oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&m1, &m2);
+#endif /* __CUDA_ARCH__ >= 350 */
+
+    /* Multiply result by smearing term and accumulate. */
+    V_pq->a.x += m1.a.x * smear;
+    V_pq->a.y += m1.a.y * smear;
+    V_pq->b.x += m1.b.x * smear;
+    V_pq->b.y += m1.b.y * smear;
+    V_pq->c.x += m1.c.x * smear;
+    V_pq->c.y += m1.c.y * smear;
+    V_pq->d.x += m1.d.x * smear;
+    V_pq->d.y += m1.d.y * smear;
+#else /* ! __CUDACC__ */
+
+    /* Construct source brightness matrix (ignoring c, as it's Hermitian). */
     {
         float s_I, s_Q;
         s_I = I[source_id];
@@ -107,18 +164,7 @@ void oskar_accumulate_baseline_visibility_for_source_f(float4c* V_pq,
     m2 = J_q[source_id];
     oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&m1, &m2);
 
-#ifndef __CUDACC__
     oskar_kahan_sum_multiply_complex_matrix_f(V_pq, m1, smear, guard);
-#else
-    /* Multiply result by smearing term and accumulate. */
-    V_pq->a.x += m1.a.x * smear;
-    V_pq->a.y += m1.a.y * smear;
-    V_pq->b.x += m1.b.x * smear;
-    V_pq->b.y += m1.b.y * smear;
-    V_pq->c.x += m1.c.x * smear;
-    V_pq->c.y += m1.c.y * smear;
-    V_pq->d.x += m1.d.x * smear;
-    V_pq->d.y += m1.d.y * smear;
 #endif
 }
 
@@ -163,8 +209,36 @@ void oskar_accumulate_baseline_visibility_for_source_d(double4c* V_pq,
         const double* V, const double4c* J_p, const double4c* J_q,
         const double smear)
 {
-    /* Construct source brightness matrix (ignoring c, as it's Hermitian). */
     double4c m1, m2;
+#if defined(__CUDACC__) && __CUDA_ARCH__ >= 350
+    /* Uses __ldg() instruction for global load via texture cache. */
+    /* Available only from CUDA architecture 3.5. */
+    /* Construct source brightness matrix (ignoring c, as it's Hermitian). */
+    {
+        double s_I, s_Q;
+        s_I = I[source_id];
+        s_Q = Q[source_id];
+        m2.b.x = U[source_id];
+        m2.b.y = V[source_id];
+        m2.a.x = s_I + s_Q;
+        m2.d.x = s_I - s_Q;
+    }
+
+    /* Multiply first Jones matrix with source brightness matrix. */
+    m1.a = __ldg(&(J_p[source_id].a));
+    m1.b = __ldg(&(J_p[source_id].b));
+    m1.c = __ldg(&(J_p[source_id].c));
+    m1.d = __ldg(&(J_p[source_id].d));
+    oskar_multiply_complex_matrix_hermitian_in_place_d(&m1, &m2);
+
+    /* Multiply result with second (Hermitian transposed) Jones matrix. */
+    m2.a = __ldg(&(J_q[source_id].a));
+    m2.b = __ldg(&(J_q[source_id].b));
+    m2.c = __ldg(&(J_q[source_id].c));
+    m2.d = __ldg(&(J_q[source_id].d));
+    oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(&m1, &m2);
+#else
+    /* Construct source brightness matrix (ignoring c, as it's Hermitian). */
     {
         double s_I, s_Q;
         s_I = I[source_id];
@@ -182,6 +256,7 @@ void oskar_accumulate_baseline_visibility_for_source_d(double4c* V_pq,
     /* Multiply result with second (Hermitian transposed) Jones matrix. */
     m2 = J_q[source_id];
     oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(&m1, &m2);
+#endif
 
     /* Multiply result by smearing term and accumulate. */
     V_pq->a.x += m1.a.x * smear;

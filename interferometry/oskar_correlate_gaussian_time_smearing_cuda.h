@@ -187,14 +187,23 @@ void oskar_correlate_gaussian_time_smearing_cuda_d(int num_sources,
  */
 __global__
 void oskar_correlate_gaussian_time_smearing_cudak_f(const int num_sources,
-        const int num_stations, const float4c* jones, const float* source_I,
-        const float* source_Q, const float* source_U, const float* source_V,
-        const float* source_l, const float* source_m, const float* source_n,
-        const float* source_a, const float* source_b, const float* source_c,
-        const float* station_u, const float* station_v,
-        const float* station_x, const float* station_y,
-        const float frac_bandwidth, const float time_int_sec,
-        const float gha0_rad, const float dec0_rad, float4c* vis);
+        const int num_stations, const float4c* __restrict__ jones,
+        const float* __restrict__ source_I,
+        const float* __restrict__ source_Q,
+        const float* __restrict__ source_U,
+        const float* __restrict__ source_V,
+        const float* __restrict__ source_l,
+        const float* __restrict__ source_m,
+        const float* __restrict__ source_n,
+        const float* __restrict__ source_a,
+        const float* __restrict__ source_b,
+        const float* __restrict__ source_c,
+        const float* __restrict__ station_u,
+        const float* __restrict__ station_v,
+        const float* __restrict__ station_x,
+        const float* __restrict__ station_y, const float frac_bandwidth,
+        const float time_int_sec, const float gha0_rad, const float dec0_rad,
+        float4c* __restrict__ vis);
 
 /**
  * @brief
@@ -235,14 +244,23 @@ void oskar_correlate_gaussian_time_smearing_cudak_f(const int num_sources,
  */
 __global__
 void oskar_correlate_gaussian_time_smearing_cudak_d(const int num_sources,
-        const int num_stations, const double4c* jones, const double* source_I,
-        const double* source_Q, const double* source_U, const double* source_V,
-        const double* source_l, const double* source_m, const double* source_n,
-        const double* source_a, const double* source_b, const double* source_c,
-        const double* station_u, const double* station_v,
-        const double* station_x, const double* station_y,
-        const double frac_bandwidth, const double time_int_sec,
-        const double gha0_rad, const double dec0_rad, double4c* vis);
+        const int num_stations, const double4c* __restrict__ jones,
+        const double* __restrict__ source_I,
+        const double* __restrict__ source_Q,
+        const double* __restrict__ source_U,
+        const double* __restrict__ source_V,
+        const double* __restrict__ source_l, 
+        const double* __restrict__ source_m,
+        const double* __restrict__ source_n,
+        const double* __restrict__ source_a,
+        const double* __restrict__ source_b,
+        const double* __restrict__ source_c,
+        const double* __restrict__ station_u,
+        const double* __restrict__ station_v,
+        const double* __restrict__ station_x,
+        const double* __restrict__ station_y, const double frac_bandwidth,
+        const double time_int_sec, const double gha0_rad,
+        const double dec0_rad, double4c* __restrict__ vis);
 
 #endif /* __CUDACC__ */
 

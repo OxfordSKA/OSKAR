@@ -47,7 +47,7 @@
  * This macro expands to a string that specifies the OSKAR version number
  * (for example, "2.1.3").
  */
-#define OSKAR_VERSION_STR "2.2.2-trunk2"
+#define OSKAR_VERSION_STR "2.2.2-trunk3"
 
 /**
  * @brief
@@ -356,7 +356,7 @@ enum {
  * C99 and C++ code, this is "inline", otherwise this is "static".
  */
 #ifdef __CUDACC__
-    #define OSKAR_INLINE __host__ __device__ __forceinline__
+    #define OSKAR_INLINE __device__ __forceinline__
 #elif __STDC_VERSION__ >= 199901L || defined(__cplusplus)
     #define OSKAR_INLINE inline
 #else

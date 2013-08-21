@@ -213,13 +213,20 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
  */
 __global__
 void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
-        const int num_stations, const double4c* jones, const double* source_I,
-        const double* source_Q, const double* source_U, const double* source_V,
-        const double* source_l, const double* source_m, const double* source_n,
-        const double* station_u, const double* station_v,
-        const double* station_x, const double* station_y,
-        const double frac_bandwidth, const double time_int_sec,
-        const double gha0_rad, const double dec0_rad, double4c* vis);
+        const int num_stations, const double4c* __restrict__ jones,
+        const double* __restrict__ source_I,
+        const double* __restrict__ source_Q,
+        const double* __restrict__ source_U,
+        const double* __restrict__ source_V,
+        const double* __restrict__ source_l,
+        const double* __restrict__ source_m,
+        const double* __restrict__ source_n,
+        const double* __restrict__ station_u,
+        const double* __restrict__ station_v,
+        const double* __restrict__ station_x, 
+        const double* __restrict__ station_y, const double frac_bandwidth,
+        const double time_int_sec, const double gha0_rad,
+        const double dec0_rad, double4c* __restrict__ vis);
 
 #endif /* __CUDACC__ */
 
