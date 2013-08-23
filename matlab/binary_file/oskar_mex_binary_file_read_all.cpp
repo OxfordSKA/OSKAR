@@ -243,6 +243,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mxSetField(out[0], i, fields[4], data_);
     }
 
-    oskar_binary_tag_index_free(&index, &err);
+    oskar_binary_tag_index_free(index, &err);
     fclose(file);
 }

@@ -43,8 +43,10 @@ extern "C" {
  * the method of Donald Knuth in "The Art of Computer Programming"
  * vol 2, 3rd edition, page 232 */
 #define RUNNING_STATS_KNUTH \
-    if (rel_error > *max_rel_error) *max_rel_error = rel_error; \
-    if (rel_error < *min_rel_error) *min_rel_error = rel_error; \
+    if (max_rel_error && rel_error > *max_rel_error) \
+        *max_rel_error = rel_error; \
+    if (min_rel_error && rel_error < *min_rel_error) \
+        *min_rel_error = rel_error; \
     if (i == 0) \
     { \
         old_m = new_m = rel_error; \
@@ -92,8 +94,7 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     double old_m = 0.0, new_m = 0.0, old_s = 0.0, new_s = 0.0;
 
     /* Check all inputs. */
-    if (!val_approx || !val_accurate || !min_rel_error ||
-            !max_rel_error || !avg_rel_error || !std_rel_error || !status)
+    if (!val_approx || !val_accurate || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -103,10 +104,10 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     if (*status) return;
 
     /* Initialise outputs. */
-    *max_rel_error = -DBL_MAX;
-    *min_rel_error = DBL_MAX;
-    *avg_rel_error = DBL_MAX;
-    *std_rel_error = DBL_MAX;
+    if (max_rel_error) *max_rel_error = -DBL_MAX;
+    if (min_rel_error) *min_rel_error = DBL_MAX;
+    if (avg_rel_error) *avg_rel_error = DBL_MAX;
+    if (std_rel_error) *std_rel_error = DBL_MAX;
 
     /* Type and dimension check. */
     if (oskar_mem_is_matrix(val_approx->type) &&
@@ -119,11 +120,6 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
             !oskar_mem_is_complex(val_accurate->type))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
-        return;
-    }
-    if (val_approx->num_elements != val_accurate->num_elements)
-    {
-        *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
     }
 
@@ -144,7 +140,8 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     }
 
     /* Get number of elements to check. */
-    n = val_approx->num_elements;
+    n = val_approx->num_elements < val_accurate->num_elements ?
+            val_approx->num_elements : val_accurate->num_elements;
     if (oskar_mem_is_matrix(val_approx->type)) n *= 4;
 
     /* Copy input data to temporary CPU arrays if required. */
@@ -248,8 +245,8 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     }
 
     /* Set mean and standard deviation of relative error. */
-    *avg_rel_error = new_m;
-    *std_rel_error = (n > 1) ? sqrt(new_s / (n - 1)) : 0.0;
+    if (avg_rel_error) *avg_rel_error = new_m;
+    if (std_rel_error) *std_rel_error = (n > 1) ? sqrt(new_s / (n - 1)) : 0.0;
 
     /* Clean up temporaries if required. */
     if (val_approx->location != OSKAR_LOCATION_CPU)

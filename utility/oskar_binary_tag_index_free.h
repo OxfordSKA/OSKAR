@@ -49,7 +49,7 @@ extern "C" {
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_binary_tag_index_free(oskar_BinaryTagIndex** index, int* status);
+void oskar_binary_tag_index_free(oskar_BinaryTagIndex* index, int* status);
 
 #ifdef __cplusplus
 }

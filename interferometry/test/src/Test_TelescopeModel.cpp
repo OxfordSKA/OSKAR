@@ -35,6 +35,7 @@
 #include <oskar_telescope_model_load_station_coords.h>
 #include <oskar_station_model_load_config.h>
 #include <oskar_get_error_string.h>
+#include <oskar_mem_to_type.h>
 
 #include <cmath>
 #include <cstdio>
@@ -123,6 +124,10 @@ TEST(TelescopeModel, load_telescope_cpu)
             OSKAR_LOCATION_CPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
+    double* station_x = oskar_mem_to_double(&tel_cpu2.station_x, &status);
+    double* station_y = oskar_mem_to_double(&tel_cpu2.station_y, &status);
+    double* station_z = oskar_mem_to_double(&tel_cpu2.station_z, &status);
+
     // Check the contents of the CPU structure.
     for (int i = 0; i < n_stations; ++i)
     {
@@ -135,9 +140,13 @@ TEST(TelescopeModel, load_telescope_cpu)
         double x = 0.0, y = 0.0, z = 0.0;
         oskar_horizon_plane_to_offset_geocentric_cartesian_d(1,
                 &x_hor, &y_hor, &z_hor, longitude, latitude, &x, &y, &z);
-        EXPECT_NEAR(x, ((double*)(tel_cpu2.station_x))[i], 1e-5);
-        EXPECT_NEAR(y, ((double*)(tel_cpu2.station_y))[i], 1e-5);
-        EXPECT_NEAR(z, ((double*)(tel_cpu2.station_z))[i], 1e-5);
+        EXPECT_NEAR(x, station_x[i], 1e-5);
+        EXPECT_NEAR(y, station_y[i], 1e-5);
+        EXPECT_NEAR(z, station_z[i], 1e-5);
+
+        double* e_x = oskar_mem_to_double(&tel_cpu2.station[i].x_weights, &status);
+        double* e_y = oskar_mem_to_double(&tel_cpu2.station[i].y_weights, &status);
+        double* e_z = oskar_mem_to_double(&tel_cpu2.station[i].z_weights, &status);
 
         for (int j = 0; j < n_elements; ++j)
         {
@@ -145,9 +154,9 @@ TEST(TelescopeModel, load_telescope_cpu)
             double x = t / 5.0;
             double y = t / 6.0;
             double z = t / 7.0;
-            EXPECT_NEAR(x, ((double*)(tel_cpu2.station[i].x_weights))[j], 1e-5);
-            EXPECT_NEAR(y, ((double*)(tel_cpu2.station[i].y_weights))[j], 1e-5);
-            EXPECT_NEAR(z, ((double*)(tel_cpu2.station[i].z_weights))[j], 1e-5);
+            EXPECT_NEAR(x, e_x[j], 1e-5);
+            EXPECT_NEAR(y, e_y[j], 1e-5);
+            EXPECT_NEAR(z, e_z[j], 1e-5);
         }
     }
 

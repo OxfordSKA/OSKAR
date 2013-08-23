@@ -114,6 +114,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mxSetCell(out[0], 5 * (num_records + 1) + i + 1,
                 mxCreateDoubleScalar((double)index->data_size_bytes[i]));
     }
-    oskar_binary_tag_index_free(&index, &err);
+    oskar_binary_tag_index_free(index, &err);
     fclose(file);
 }

@@ -192,7 +192,7 @@ TEST(binary_file, test_stream)
     fclose(stream);
 
     // Free the tag index.
-    oskar_binary_tag_index_free(&idx, &status);
+    oskar_binary_tag_index_free(idx, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Remove the file.
@@ -310,7 +310,7 @@ TEST(binary_file, test_file)
     }
 
     // Free the tag index.
-    oskar_binary_tag_index_free(&idx, &status);
+    oskar_binary_tag_index_free(idx, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Remove the file.

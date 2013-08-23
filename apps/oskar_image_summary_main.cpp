@@ -161,7 +161,7 @@ int main(int argc, char** argv)
                 printf("%s", (char*)(temp.data));
             }
             fclose(stream);
-            oskar_binary_tag_index_free(&index, &error);
+            oskar_binary_tag_index_free(index, &error);
         }
 
         if (displaySettings)
@@ -187,7 +187,7 @@ int main(int argc, char** argv)
                 printf("%s", (char*)(temp.data));
             }
             fclose(stream);
-            oskar_binary_tag_index_free(&index, &error);
+            oskar_binary_tag_index_free(index, &error);
         }
     }
     catch (int code)

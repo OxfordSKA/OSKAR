@@ -405,7 +405,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
             mxSetField(v_out, 0, "log", mxCreateString((char*)temp.data));
         }
         fclose(stream);
-        oskar_binary_tag_index_free(&index, &status);
+        oskar_binary_tag_index_free(index, &status);
     }
 
     /* Populate structure TODO convert some of this to nested structure format? */

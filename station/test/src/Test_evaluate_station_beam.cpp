@@ -46,6 +46,7 @@
 #include "utility/oskar_curand_state_free.h"
 #include "utility/oskar_curand_state_init.h"
 #include "utility/oskar_mem_binary_file_write.h"
+#include "utility/oskar_mem_to_type.h"
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
 
@@ -96,8 +97,10 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     station_cpu.coord_units = OSKAR_METRES;
     float* x_pos = (float*) malloc(station_dim * sizeof(float));
     oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
-    oskar_meshgrid_f(station_cpu.x_weights, station_cpu.y_weights, x_pos, station_dim,
-            x_pos, station_dim);
+    oskar_meshgrid_f(
+            oskar_mem_to_float(&station_cpu.x_weights, &error),
+            oskar_mem_to_float(&station_cpu.y_weights, &error),
+            x_pos, station_dim, x_pos, station_dim);
     free(x_pos);
     station_cpu.num_elements = num_antennas;
 
@@ -130,7 +133,8 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     float* lm = (float*)malloc(image_size * sizeof(float));
     double lm_max = sin(fov_deg * M_PI / 180.0);
     oskar_linspace_f(lm, -lm_max, lm_max, image_size);
-    oskar_meshgrid_f(l_cpu, m_cpu, lm, image_size, lm, image_size);
+    oskar_meshgrid_f(oskar_mem_to_float(&l_cpu, &error),
+            oskar_mem_to_float(&m_cpu, &error), lm, image_size, lm, image_size);
     free(lm);
 
     // Copy horizontal lm coordinates to GPU.

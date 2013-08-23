@@ -326,7 +326,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mxSetField(out[0], 0, fields[4], data_);
 
     fclose(file);
-    oskar_binary_tag_index_free(&index, &err);
+    oskar_binary_tag_index_free(index, &err);
     if (err)
     {
         oskar_matlab_error("oskar_binary_tag_index_free() failed with code %i"

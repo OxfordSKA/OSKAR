@@ -56,6 +56,7 @@
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_insert.h"
+#include "utility/oskar_mem_to_type.h"
 #include "utility/oskar_mem_type_check.h"
 #include "utility/oskar_Settings.h"
 #include "utility/oskar_settings_free.h"
@@ -319,10 +320,11 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         // Convert complex values to power (amplitude of complex number).
         if (type == OSKAR_SINGLE)
         {
-            float x, y, *image_data = (float*)image_cube.data;
-            float2* complex_data = (float2*)complex_cube.data;
+            float* image_data = oskar_mem_to_float(&image_cube.data, &err);
+            float2* complex_data = oskar_mem_to_float2(&complex_cube.data, &err);
             for (int i = 0; i < num_pixels_total; ++i)
             {
+                float x, y;
                 x = complex_data[i].x;
                 y = complex_data[i].y;
                 image_data[i] = sqrt(x*x + y*y);
@@ -330,10 +332,11 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         }
         else if (type == OSKAR_DOUBLE)
         {
-            double x, y, *image_data = (double*)image_cube.data;
-            double2* complex_data = (double2*)complex_cube.data;
+            double* image_data = oskar_mem_to_double(&image_cube.data, &err);
+            double2* complex_data = oskar_mem_to_double2(&complex_cube.data, &err);
             for (int i = 0; i < num_pixels_total; ++i)
             {
+                double x, y;
                 x = complex_data[i].x;
                 y = complex_data[i].y;
                 image_data[i] = sqrt(x*x + y*y);
@@ -365,8 +368,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         // Convert complex values to phase.
         if (type == OSKAR_SINGLE)
         {
-            float* image_data = (float*)image_cube.data;
-            float2* complex_data = (float2*)complex_cube.data;
+            float* image_data = oskar_mem_to_float(&image_cube.data, &err);
+            float2* complex_data = oskar_mem_to_float2(&complex_cube.data, &err);
             for (int i = 0; i < num_pixels_total; ++i)
             {
                 image_data[i] = atan2(complex_data[i].y, complex_data[i].x);
@@ -374,8 +377,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         }
         else if (type == OSKAR_DOUBLE)
         {
-            double* image_data = (double*)image_cube.data;
-            double2* complex_data = (double2*)complex_cube.data;
+            double* image_data = oskar_mem_to_double(&image_cube.data, &err);
+            double2* complex_data = oskar_mem_to_double2(&complex_cube.data, &err);
             for (int i = 0; i < num_pixels_total; ++i)
             {
                 image_data[i] = atan2(complex_data[i].y, complex_data[i].x);
@@ -458,8 +461,9 @@ static void save_total_intensity(const oskar_Image& complex_cube,
 
     if (type == OSKAR_SINGLE)
     {
-        const float2* complex_data = (const float2*)complex_cube.data;
-        float* image_data = (float*)image_cube_I.data;
+        float* image_data = oskar_mem_to_float(&image_cube_I.data, status);
+        const float2* complex_data =
+                oskar_mem_to_const_float2(&complex_cube.data, status);
         for (int c = 0, idx = 0, islice = 0; c < num_channels; ++c)
         {
             for (int t = 0; t < num_times; ++t, ++islice)
@@ -479,8 +483,9 @@ static void save_total_intensity(const oskar_Image& complex_cube,
     }
     else if (type == OSKAR_DOUBLE)
     {
-        const double2* complex_data = (const double2*)complex_cube.data;
-        double* image_data = (double*)image_cube_I.data;
+        double* image_data = oskar_mem_to_double(&image_cube_I.data, status);
+        const double2* complex_data =
+                oskar_mem_to_const_double2(&complex_cube.data, status);
         for (int c = 0, idx = 0, islice = 0; c < num_channels; ++c)
         {
             for (int t = 0; t < num_times; ++t, ++islice)

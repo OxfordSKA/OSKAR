@@ -82,16 +82,16 @@ void Test_write_ms::test_write()
     {
         for (int b = 0; b < num_baselines; ++b, ++i)
         {
-            ((double*)vis.uu_metres)[i] = (double)t + 0.001;
-            ((double*)vis.vv_metres)[i] = (double)b + 0.002;
-            ((double*)vis.ww_metres)[i] = (double)i + 0.003;
+            ((double*)vis.uu_metres.data)[i] = (double)t + 0.001;
+            ((double*)vis.vv_metres.data)[i] = (double)b + 0.002;
+            ((double*)vis.ww_metres.data)[i] = (double)i + 0.003;
         }
     }
     for (int i = 0; i < num_antennas; ++i)
     {
-        ((double*)vis.x_metres)[i] = (double)i + 0.1;
-        ((double*)vis.y_metres)[i] = (double)i + 0.2;
-        ((double*)vis.z_metres)[i] = (double)i + 0.3;
+        ((double*)vis.x_metres.data)[i] = (double)i + 0.1;
+        ((double*)vis.y_metres.data)[i] = (double)i + 0.2;
+        ((double*)vis.z_metres.data)[i] = (double)i + 0.3;
     }
     vis.freq_start_hz      = 222.22e6;
     vis.freq_inc_hz        = 11.1e6;

@@ -88,7 +88,7 @@ void oskar_visibilities_read(oskar_Visibilities* vis, const char* filename,
     /* Check if safe to proceed. */
     if (*status)
     {
-        oskar_binary_tag_index_free(&index, status);
+        oskar_binary_tag_index_free(index, status);
         return;
     }
 
@@ -175,7 +175,7 @@ void oskar_visibilities_read(oskar_Visibilities* vis, const char* filename,
             OSKAR_VIS_TAG_TIME_INT_SEC, 0, &vis->time_int_seconds, &tag_error);
 
     /* Free the tag index. */
-    oskar_binary_tag_index_free(&index, status);
+    oskar_binary_tag_index_free(index, status);
 }
 
 #ifdef __cplusplus

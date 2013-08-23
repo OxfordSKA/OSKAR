@@ -44,6 +44,7 @@
 #include "station/oskar_station_model_set_element_coords.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_settings_init.h"
+#include <oskar_mem_evaluate_relative_error.h>
 
 #include <QtCore/QtCore>
 
@@ -159,24 +160,39 @@ void Test_telescope_model_load_save::test_1_level()
     CPPUNIT_ASSERT_DOUBLES_EQUAL(telescope.altitude_m,
             telescope2.altitude_m, 1e-10);
 
+    double max_, avg_;
+    oskar_mem_evaluate_relative_error(&telescope.station_x_hor,
+            &telescope2.station_x_hor, 0, &max_, &avg_, 0, &err);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    CPPUNIT_ASSERT(max_ < 1e-5);
+    CPPUNIT_ASSERT(avg_ < 1e-5);
+    oskar_mem_evaluate_relative_error(&telescope.station_y_hor,
+            &telescope2.station_y_hor, 0, &max_, &avg_, 0, &err);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    CPPUNIT_ASSERT(max_ < 1e-5);
+    CPPUNIT_ASSERT(avg_ < 1e-5);
+    oskar_mem_evaluate_relative_error(&telescope.station_z_hor,
+            &telescope2.station_z_hor, 0, &max_, &avg_, 0, &err);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    CPPUNIT_ASSERT(max_ < 1e-5);
+    CPPUNIT_ASSERT(avg_ < 1e-5);
     for (int i = 0; i < num_stations; ++i)
     {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station_x_hor)[i],
-                ((float*)telescope2.station_x_hor)[i], 1e-5);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station_y_hor)[i],
-                ((float*)telescope2.station_y_hor)[i], 1e-5);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station_z_hor)[i],
-                ((float*)telescope2.station_z_hor)[i], 1e-5);
-
-        for (int j = 0; j < num_elements; ++j)
-        {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].x_weights)[j],
-                    ((float*)telescope2.station[i].x_weights)[j], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].y_weights)[j],
-                    ((float*)telescope2.station[i].y_weights)[j], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].z_weights)[j],
-                    ((float*)telescope2.station[i].z_weights)[j], 1e-5);
-        }
+        oskar_mem_evaluate_relative_error(&telescope.station[i].x_weights,
+                &telescope2.station[i].x_weights, 0, &max_, &avg_, 0, &err);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+        CPPUNIT_ASSERT(max_ < 1e-5);
+        CPPUNIT_ASSERT(avg_ < 1e-5);
+        oskar_mem_evaluate_relative_error(&telescope.station[i].y_weights,
+                &telescope2.station[i].y_weights, 0, &max_, &avg_, 0, &err);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+        CPPUNIT_ASSERT(max_ < 1e-5);
+        CPPUNIT_ASSERT(avg_ < 1e-5);
+        oskar_mem_evaluate_relative_error(&telescope.station[i].z_weights,
+                &telescope2.station[i].z_weights, 0, &max_, &avg_, 0, &err);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+        CPPUNIT_ASSERT(max_ < 1e-5);
+        CPPUNIT_ASSERT(avg_ < 1e-5);
     }
 
     // Remove test directory.
@@ -264,33 +280,63 @@ void Test_telescope_model_load_save::test_2_level()
     CPPUNIT_ASSERT_DOUBLES_EQUAL(telescope.altitude_m,
             telescope2.altitude_m, 1e-10);
 
+    double max_, avg_ = 0.0;
+    oskar_mem_evaluate_relative_error(&telescope.station_x_hor,
+            &telescope2.station_x_hor, 0, &max_, &avg_, 0, &err);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    CPPUNIT_ASSERT(max_ < 1e-5);
+    CPPUNIT_ASSERT(avg_ < 1e-5);
+    oskar_mem_evaluate_relative_error(&telescope.station_y_hor,
+            &telescope2.station_y_hor, 0, &max_, &avg_, 0, &err);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    CPPUNIT_ASSERT(max_ < 1e-5);
+    CPPUNIT_ASSERT(avg_ < 1e-5);
+    oskar_mem_evaluate_relative_error(&telescope.station_z_hor,
+            &telescope2.station_z_hor, 0, &max_, &avg_, 0, &err);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    CPPUNIT_ASSERT(max_ < 1e-5);
+    CPPUNIT_ASSERT(avg_ < 1e-5);
     for (int i = 0; i < num_stations; ++i)
     {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station_x_hor)[i],
-                ((float*)telescope2.station_x_hor)[i], 1e-5);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station_y_hor)[i],
-                ((float*)telescope2.station_y_hor)[i], 1e-5);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station_z_hor)[i],
-                ((float*)telescope2.station_z_hor)[i], 1e-5);
+        oskar_mem_evaluate_relative_error(&telescope.station[i].x_weights,
+                &telescope2.station[i].x_weights, 0, &max_, &avg_, 0, &err);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+        CPPUNIT_ASSERT(max_ < 1e-5);
+        CPPUNIT_ASSERT(avg_ < 1e-5);
+        oskar_mem_evaluate_relative_error(&telescope.station[i].y_weights,
+                &telescope2.station[i].y_weights, 0, &max_, &avg_, 0, &err);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+        CPPUNIT_ASSERT(max_ < 1e-5);
+        CPPUNIT_ASSERT(avg_ < 1e-5);
+        oskar_mem_evaluate_relative_error(&telescope.station[i].z_weights,
+                &telescope2.station[i].z_weights, 0, &max_, &avg_, 0, &err);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+        CPPUNIT_ASSERT(max_ < 1e-5);
+        CPPUNIT_ASSERT(avg_ < 1e-5);
 
         for (int j = 0; j < num_tiles; ++j)
         {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].x_weights)[j],
-                    ((float*)telescope2.station[i].x_weights)[j], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].y_weights)[j],
-                    ((float*)telescope2.station[i].y_weights)[j], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].z_weights)[j],
-                    ((float*)telescope2.station[i].z_weights)[j], 1e-5);
-
-            for (int k = 0; k < num_elements; ++k)
-            {
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].child[j].x_weights)[k],
-                        ((float*)telescope2.station[i].child[j].x_weights)[k], 1e-5);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].child[j].y_weights)[k],
-                        ((float*)telescope2.station[i].child[j].y_weights)[k], 1e-5);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].child[j].z_weights)[k],
-                        ((float*)telescope2.station[i].child[j].z_weights)[k], 1e-5);
-            }
+            oskar_mem_evaluate_relative_error(
+                    &telescope.station[i].child[j].x_weights,
+                    &telescope2.station[i].child[j].x_weights,
+                    0, &max_, &avg_, 0, &err);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+            CPPUNIT_ASSERT(max_ < 1e-5);
+            CPPUNIT_ASSERT(avg_ < 1e-5);
+            oskar_mem_evaluate_relative_error(
+                    &telescope.station[i].child[j].y_weights,
+                    &telescope2.station[i].child[j].y_weights,
+                    0, &max_, &avg_, 0, &err);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+            CPPUNIT_ASSERT(max_ < 1e-5);
+            CPPUNIT_ASSERT(avg_ < 1e-5);
+            oskar_mem_evaluate_relative_error(
+                    &telescope.station[i].child[j].z_weights,
+                    &telescope2.station[i].child[j].z_weights,
+                    0, &max_, &avg_, 0, &err);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+            CPPUNIT_ASSERT(max_ < 1e-5);
+            CPPUNIT_ASSERT(avg_ < 1e-5);
         }
     }
 
@@ -311,35 +357,65 @@ void Test_telescope_model_load_save::test_2_level()
     CPPUNIT_ASSERT_DOUBLES_EQUAL(telescope.altitude_m,
             telescope3.altitude_m, 1e-10);
 
+    oskar_mem_evaluate_relative_error(&telescope.station_x_hor,
+            &telescope3.station_x_hor, 0, &max_, &avg_, 0, &err);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    CPPUNIT_ASSERT(max_ < 1e-5);
+    CPPUNIT_ASSERT(avg_ < 1e-5);
+    oskar_mem_evaluate_relative_error(&telescope.station_y_hor,
+            &telescope3.station_y_hor, 0, &max_, &avg_, 0, &err);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    CPPUNIT_ASSERT(max_ < 1e-5);
+    CPPUNIT_ASSERT(avg_ < 1e-5);
+    oskar_mem_evaluate_relative_error(&telescope.station_z_hor,
+            &telescope3.station_z_hor, 0, &max_, &avg_, 0, &err);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    CPPUNIT_ASSERT(max_ < 1e-5);
+    CPPUNIT_ASSERT(avg_ < 1e-5);
     for (int i = 0; i < num_stations; ++i)
     {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station_x_hor)[i],
-                ((float*)telescope3.station_x_hor)[i], 1e-5);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station_y_hor)[i],
-                ((float*)telescope3.station_y_hor)[i], 1e-5);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station_z_hor)[i],
-                ((float*)telescope3.station_z_hor)[i], 1e-5);
+        oskar_mem_evaluate_relative_error(&telescope.station[i].x_weights,
+                &telescope3.station[i].x_weights, 0, &max_, &avg_, 0, &err);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+        CPPUNIT_ASSERT(max_ < 1e-5);
+        CPPUNIT_ASSERT(avg_ < 1e-5);
+        oskar_mem_evaluate_relative_error(&telescope.station[i].y_weights,
+                &telescope3.station[i].y_weights, 0, &max_, &avg_, 0, &err);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+        CPPUNIT_ASSERT(max_ < 1e-5);
+        CPPUNIT_ASSERT(avg_ < 1e-5);
+        oskar_mem_evaluate_relative_error(&telescope.station[i].z_weights,
+                &telescope3.station[i].z_weights, 0, &max_, &avg_, 0, &err);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+        CPPUNIT_ASSERT(max_ < 1e-5);
+        CPPUNIT_ASSERT(avg_ < 1e-5);
 
         for (int j = 0; j < num_tiles; ++j)
         {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].x_weights)[j],
-                    ((float*)telescope3.station[i].x_weights)[j], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].y_weights)[j],
-                    ((float*)telescope3.station[i].y_weights)[j], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].z_weights)[j],
-                    ((float*)telescope3.station[i].z_weights)[j], 1e-5);
-
-            for (int k = 0; k < num_elements; ++k)
-            {
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].child[j].x_weights)[k],
-                        ((float*)telescope3.station[i].child[j].x_weights)[k], 1e-5);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].child[j].y_weights)[k],
-                        ((float*)telescope3.station[i].child[j].y_weights)[k], 1e-5);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].child[j].z_weights)[k],
-                        ((float*)telescope3.station[i].child[j].z_weights)[k], 1e-5);
-            }
+            oskar_mem_evaluate_relative_error(
+                    &telescope.station[i].child[j].x_weights,
+                    &telescope3.station[i].child[j].x_weights,
+                    0, &max_, &avg_, 0, &err);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+            CPPUNIT_ASSERT(max_ < 1e-5);
+            CPPUNIT_ASSERT(avg_ < 1e-5);
+            oskar_mem_evaluate_relative_error(
+                    &telescope.station[i].child[j].y_weights,
+                    &telescope3.station[i].child[j].y_weights,
+                    0, &max_, &avg_, 0, &err);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+            CPPUNIT_ASSERT(max_ < 1e-5);
+            CPPUNIT_ASSERT(avg_ < 1e-5);
+            oskar_mem_evaluate_relative_error(
+                    &telescope.station[i].child[j].z_weights,
+                    &telescope3.station[i].child[j].z_weights,
+                    0, &max_, &avg_, 0, &err);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+            CPPUNIT_ASSERT(max_ < 1e-5);
+            CPPUNIT_ASSERT(avg_ < 1e-5);
         }
     }
+
     oskar_telescope_model_free(&telescope3, &err);
 
     // Remove test directory.

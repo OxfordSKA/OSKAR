@@ -34,6 +34,7 @@
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"
+#include "utility/oskar_mem_to_type.h"
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
@@ -55,6 +56,7 @@ void Test_evaluate_station_beam_dipoles::test()
     int num_az = 360;
     int num_el = 90;
     int num_pixels = num_az * num_el;
+    int status = 0;
     oskar_Mem azimuth(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels);
     oskar_Mem elevation(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels);
     oskar_Mem l_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels);
@@ -62,8 +64,8 @@ void Test_evaluate_station_beam_dipoles::test()
     oskar_Mem n_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels);
 
     // Generate azimuth and elevation.
-    double* az = (double*)azimuth;
-    double* el = (double*)elevation;
+    double* az = oskar_mem_to_double(&azimuth, &status);
+    double* el = oskar_mem_to_double(&elevation, &status);
     for (int j = 0; j < num_el; ++j)
     {
         for (int i = 0; i < num_az; ++i)
@@ -81,9 +83,9 @@ void Test_evaluate_station_beam_dipoles::test()
         x = cos_el * sin(az[i]);
         y = cos_el * cos(az[i]);
         z = sin(el[i]);
-        ((double*)l_cpu)[i] = x;
-        ((double*)m_cpu)[i] = y;
-        ((double*)n_cpu)[i] = z;
+        ((double*)l_cpu.data)[i] = x;
+        ((double*)m_cpu.data)[i] = y;
+        ((double*)n_cpu.data)[i] = z;
     }
 
     // Copy to GPU.
@@ -116,15 +118,15 @@ void Test_evaluate_station_beam_dipoles::test()
             int i = y + x * num_antennas_side;
 
             // Antenna positions.
-            ((double*)antenna_x_cpu)[i] = x * sep - half_array_size;
-            ((double*)antenna_y_cpu)[i] = y * sep - half_array_size;
-            ((double*)antenna_z_cpu)[i] = 0.0;
+            ((double*)antenna_x_cpu.data)[i] = x * sep - half_array_size;
+            ((double*)antenna_y_cpu.data)[i] = y * sep - half_array_size;
+            ((double*)antenna_z_cpu.data)[i] = 0.0;
 
             // Antenna orientations.
-            ((double*)cos_orn_x_cpu)[i] = cos(90.0 * M_PI / 180);
-            ((double*)sin_orn_x_cpu)[i] = sin(90.0 * M_PI / 180);
-            ((double*)cos_orn_y_cpu)[i] = cos(0.0 * M_PI / 180);
-            ((double*)sin_orn_y_cpu)[i] = sin(0.0 * M_PI / 180);
+            ((double*)cos_orn_x_cpu.data)[i] = cos(90.0 * M_PI / 180);
+            ((double*)sin_orn_x_cpu.data)[i] = sin(90.0 * M_PI / 180);
+            ((double*)cos_orn_y_cpu.data)[i] = cos(0.0 * M_PI / 180);
+            ((double*)sin_orn_y_cpu.data)[i] = sin(0.0 * M_PI / 180);
         }
     }
 
@@ -143,12 +145,22 @@ void Test_evaluate_station_beam_dipoles::test()
     // Call the kernel.
     TIMER_START
     oskar_evaluate_array_pattern_dipoles_cuda_d (num_antennas,
-            antenna_x, antenna_y, antenna_z, cos_orientation_x,
-            sin_orientation_x, cos_orientation_y, sin_orientation_y,
-            weights, num_pixels, l, m, n, pattern);
+            oskar_mem_to_const_double(&antenna_x, &status),
+            oskar_mem_to_const_double(&antenna_y, &status),
+            oskar_mem_to_const_double(&antenna_z, &status),
+            oskar_mem_to_const_double(&cos_orientation_x, &status),
+            oskar_mem_to_const_double(&sin_orientation_x, &status),
+            oskar_mem_to_const_double(&cos_orientation_y, &status),
+            oskar_mem_to_const_double(&sin_orientation_y, &status),
+            oskar_mem_to_const_double2(&weights, &status), num_pixels,
+            oskar_mem_to_const_double(&l, &status),
+            oskar_mem_to_const_double(&m, &status),
+            oskar_mem_to_const_double(&n, &status),
+            oskar_mem_to_double4c(&pattern, &status));
     cudaDeviceSynchronize();
     TIMER_STOP("Finished station beam evaluation using dipoles (%d points)",
             num_pixels)
+    CPPUNIT_ASSERT_EQUAL(0, status);
 
     cudaError_t err = cudaPeekAtLastError();
     CPPUNIT_ASSERT_EQUAL(0, (int) err);
@@ -158,7 +170,7 @@ void Test_evaluate_station_beam_dipoles::test()
 
     const char filename[] = "cpp_unit_test_station_beam_dipoles.dat";
     FILE* file = fopen(filename, "w");
-    double4c* p = (double4c*)pattern_cpu;
+    double4c* p = oskar_mem_to_double4c(&pattern_cpu, &status);
     for (int i = 0; i < num_pixels; ++i)
     {
         fprintf(file, "%f %f %f %f %f %f %f %f %f %f\n", az[i], el[i],

@@ -113,24 +113,6 @@ struct OSKAR_EXPORT oskar_Mem
      * then the memory is also freed.
      */
     ~oskar_Mem();
-
-    /* Convenience pointer casts. */
-    operator char*() {return (char*)data;}
-    operator int*() {return (int*)data;}
-    operator float*() {return (float*)data;}
-    operator double*() {return (double*)data;}
-    operator float2*() {return (float2*)data;}
-    operator double2*() {return (double2*)data;}
-    operator float4c*() {return (float4c*)data;}
-    operator double4c*() {return (double4c*)data;}
-    operator const char*() const {return (const char*)data;}
-    operator const int*() const {return (const int*)data;}
-    operator const float*() const {return (const float*)data;}
-    operator const double*() const {return (const double*)data;}
-    operator const float2*() const {return (const float2*)data;}
-    operator const double2*() const {return (const double2*)data;}
-    operator const float4c*() const {return (const float4c*)data;}
-    operator const double4c*() const {return (const double4c*)data;}
 #endif
 };
 typedef struct oskar_Mem oskar_Mem;

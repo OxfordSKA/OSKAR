@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-void oskar_binary_tag_index_free(oskar_BinaryTagIndex** index, int* status)
+void oskar_binary_tag_index_free(oskar_BinaryTagIndex* index, int* status)
 {
     int i;
 
@@ -46,31 +46,30 @@ void oskar_binary_tag_index_free(oskar_BinaryTagIndex** index, int* status)
     }
 
     /* Check if index needs to be freed. */
-    if (*index == NULL)
+    if (index == NULL)
         return;
 
     /* Free string data. */
-    for (i = 0; i < (*index)->num_tags; ++i)
+    for (i = 0; i < index->num_tags; ++i)
     {
-        free((*index)->name_group[i]);
-        free((*index)->name_tag[i]);
+        free(index->name_group[i]);
+        free(index->name_tag[i]);
     }
 
     /* Free arrays. */
-    free((*index)->extended);
-    free((*index)->data_type);
-    free((*index)->id_group);
-    free((*index)->id_tag);
-    free((*index)->name_group);
-    free((*index)->name_tag);
-    free((*index)->user_index);
-    free((*index)->data_offset_bytes);
-    free((*index)->data_size_bytes);
-    free((*index)->block_size_bytes);
+    free(index->extended);
+    free(index->data_type);
+    free(index->id_group);
+    free(index->id_tag);
+    free(index->name_group);
+    free(index->name_tag);
+    free(index->user_index);
+    free(index->data_offset_bytes);
+    free(index->data_size_bytes);
+    free(index->block_size_bytes);
 
     /* Free the structure itself. */
-    free(*index);
-    *index = NULL;
+    free(index);
 }
 
 #ifdef __cplusplus

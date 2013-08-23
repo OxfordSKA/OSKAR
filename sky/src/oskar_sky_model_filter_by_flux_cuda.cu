@@ -142,7 +142,7 @@ static void filter_source_data(oskar_SkyModel* output, T min_f, T max_f)
             range_check);
 
     // Get the number of sources in the new sky model.
-    output->num_sources = out - device_pointer_cast((T*)output->RA);
+    output->num_sources = out - device_pointer_cast((T*)output->RA.data);
 }
 
 #ifdef __cplusplus

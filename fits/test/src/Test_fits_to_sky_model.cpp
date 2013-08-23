@@ -36,6 +36,7 @@
 #include "sky/oskar_sky_model_save.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_Mem.h"
+#include <oskar_mem_to_type.h>
 
 #include <fitsio.h>
 
@@ -78,7 +79,7 @@ void Test_fits_to_sky_model::test_method()
                 / (FACTOR * FACTOR * cdelt1 * cdelt1 * 3600.0 * 3600.0);
 
     // Define test input data.
-    double* d = (double*) image.data;
+    double* d = oskar_mem_to_double(&image.data, &err);
     for (int r = 0, i = 0; r < rows; ++r)
     {
         for (int c = 0; c < columns; ++c, ++i)

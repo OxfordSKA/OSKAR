@@ -33,6 +33,7 @@
 #include <oskar_mem_init.h>
 #include <oskar_mem_init_copy.h>
 #include <oskar_mem_set_value_real.h>
+#include <oskar_mem_to_type.h>
 #include <oskar_vector_types.h>
 
 
@@ -43,11 +44,12 @@ TEST(Mem, set_value_real_double)
     oskar_Mem mem;
     oskar_mem_init(&mem, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n, 1, &status);
     oskar_mem_set_value_real(&mem, 4.5, &status);
+    double* v = oskar_mem_to_double(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     for (int i = 0; i < n; ++i)
     {
-        EXPECT_DOUBLE_EQ(((double*)mem)[i], 4.5);
+        EXPECT_DOUBLE_EQ(v[i], 4.5);
     }
     oskar_mem_free(&mem, &status);
 }
@@ -63,12 +65,12 @@ TEST(Mem, set_value_real_double_complex)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_init_copy(&mem2, &mem, OSKAR_LOCATION_CPU, &status);
+    double2* v = oskar_mem_to_double2(&mem2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        double2 t = ((double2*)mem2)[i];
-        EXPECT_DOUBLE_EQ(t.x, 6.5);
-        EXPECT_DOUBLE_EQ(t.y, 0.0);
+        EXPECT_DOUBLE_EQ(v[i].x, 6.5);
+        EXPECT_DOUBLE_EQ(v[i].y, 0.0);
     }
     oskar_mem_free(&mem, &status);
     oskar_mem_free(&mem2, &status);
@@ -85,18 +87,18 @@ TEST(Mem, set_value_real_double_complex_matrix)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_init_copy(&mem2, &mem, OSKAR_LOCATION_CPU, &status);
+    double4c* v = oskar_mem_to_double4c(&mem2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        double4c t = ((double4c*)mem2)[i];
-        EXPECT_DOUBLE_EQ(t.a.x, 6.5);
-        EXPECT_DOUBLE_EQ(t.a.y, 0.0);
-        EXPECT_DOUBLE_EQ(t.b.x, 0.0);
-        EXPECT_DOUBLE_EQ(t.b.y, 0.0);
-        EXPECT_DOUBLE_EQ(t.c.x, 0.0);
-        EXPECT_DOUBLE_EQ(t.c.y, 0.0);
-        EXPECT_DOUBLE_EQ(t.d.x, 6.5);
-        EXPECT_DOUBLE_EQ(t.d.y, 0.0);
+        EXPECT_DOUBLE_EQ(v[i].a.x, 6.5);
+        EXPECT_DOUBLE_EQ(v[i].a.y, 0.0);
+        EXPECT_DOUBLE_EQ(v[i].b.x, 0.0);
+        EXPECT_DOUBLE_EQ(v[i].b.y, 0.0);
+        EXPECT_DOUBLE_EQ(v[i].c.x, 0.0);
+        EXPECT_DOUBLE_EQ(v[i].c.y, 0.0);
+        EXPECT_DOUBLE_EQ(v[i].d.x, 6.5);
+        EXPECT_DOUBLE_EQ(v[i].d.y, 0.0);
     }
     oskar_mem_free(&mem, &status);
     oskar_mem_free(&mem2, &status);
@@ -109,11 +111,12 @@ TEST(Mem, set_value_real_single)
     oskar_Mem mem;
     oskar_mem_init(&mem, OSKAR_SINGLE, OSKAR_LOCATION_CPU, n, 1, &status);
     oskar_mem_set_value_real(&mem, 4.5, &status);
+    float* v = oskar_mem_to_float(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     for (int i = 0; i < n; ++i)
     {
-        EXPECT_FLOAT_EQ(((float*)mem)[i], 4.5);
+        EXPECT_FLOAT_EQ(v[i], 4.5);
     }
     oskar_mem_free(&mem, &status);
 }
@@ -129,12 +132,12 @@ TEST(Mem, set_value_real_single_complex)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_init_copy(&mem2, &mem, OSKAR_LOCATION_CPU, &status);
+    float2* v = oskar_mem_to_float2(&mem2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        float2 t = ((float2*)mem2)[i];
-        EXPECT_FLOAT_EQ(t.x, 6.5);
-        EXPECT_FLOAT_EQ(t.y, 0.0);
+        EXPECT_FLOAT_EQ(v[i].x, 6.5);
+        EXPECT_FLOAT_EQ(v[i].y, 0.0);
     }
     oskar_mem_free(&mem, &status);
     oskar_mem_free(&mem2, &status);
@@ -151,18 +154,18 @@ TEST(Mem, set_value_real_single_complex_matrix)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_init_copy(&mem2, &mem, OSKAR_LOCATION_CPU, &status);
+    float4c* v = oskar_mem_to_float4c(&mem2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        float4c t = ((float4c*)mem2)[i];
-        EXPECT_FLOAT_EQ(t.a.x, 6.5);
-        EXPECT_FLOAT_EQ(t.a.y, 0.0);
-        EXPECT_FLOAT_EQ(t.b.x, 0.0);
-        EXPECT_FLOAT_EQ(t.b.y, 0.0);
-        EXPECT_FLOAT_EQ(t.c.x, 0.0);
-        EXPECT_FLOAT_EQ(t.c.y, 0.0);
-        EXPECT_FLOAT_EQ(t.d.x, 6.5);
-        EXPECT_FLOAT_EQ(t.d.y, 0.0);
+        EXPECT_FLOAT_EQ(v[i].a.x, 6.5);
+        EXPECT_FLOAT_EQ(v[i].a.y, 0.0);
+        EXPECT_FLOAT_EQ(v[i].b.x, 0.0);
+        EXPECT_FLOAT_EQ(v[i].b.y, 0.0);
+        EXPECT_FLOAT_EQ(v[i].c.x, 0.0);
+        EXPECT_FLOAT_EQ(v[i].c.y, 0.0);
+        EXPECT_FLOAT_EQ(v[i].d.x, 6.5);
+        EXPECT_FLOAT_EQ(v[i].d.y, 0.0);
     }
     oskar_mem_free(&mem, &status);
     oskar_mem_free(&mem2, &status);

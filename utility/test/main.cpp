@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,52 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fits/test/Test_fits_image_write.h"
-#include "fits/oskar_fits_image_write.h"
-#include "imaging/oskar_Image.h"
-#include "imaging/oskar_image_free.h"
-#include "imaging/oskar_image_init.h"
-#include "imaging/oskar_image_resize.h"
-#include <oskar_mem_to_type.h>
+#include <gtest/gtest.h>
+#ifdef OSKAR_HAVE_CUDA
+#include <cuda_runtime_api.h>
+#endif
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-
-void Test_fits_image_write::test_method()
+int main(int argc, char** argv)
 {
-    int columns = 10; // width
-    int rows = 20; // height
-    int err = 0;
-
-    // Create the image.
-    oskar_Image image(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-    oskar_image_resize(&image, columns, rows, 1, 1, 1, &err);
-    CPPUNIT_ASSERT_EQUAL(0, err);
-
-    // Add image meta-data.
-    image.centre_ra_deg = 10.0;
-    image.centre_dec_deg = 80.0;
-    image.fov_ra_deg = 1.0;
-    image.fov_dec_deg = 2.0;
-    image.freq_start_hz = 100e6;
-    image.freq_inc_hz = 1e5;
-
-    // Define test data.
-    double* d = oskar_mem_to_double(&image.data, &err);
-    CPPUNIT_ASSERT_EQUAL(0, err);
-    for (int r = 0, i = 0; r < rows; ++r)
-    {
-        for (int c = 0; c < columns; ++c, ++i)
-        {
-            d[i] = r + 2 * c;
-        }
-    }
-
-    // Write the data.
-    const char filename[] = "cpp_unit_test_image.fits";
-    oskar_fits_image_write(&image, NULL, filename);
-
-    // Free memory.
-    oskar_image_free(&image, &err);
+    ::testing::InitGoogleTest(&argc, argv);
+    int val = RUN_ALL_TESTS();
+#ifdef OSKAR_HAVE_CUDA
+    cudaDeviceReset();
+#endif
+    return val;
 }

@@ -112,13 +112,15 @@ void oskar_visibilities_write_ms(const oskar_Visibilities* vis,
     // Add the antenna positions.
     if (vis->x_metres.type == OSKAR_DOUBLE)
     {
-        ms.addAntennas(num_antennas, (const double*)vis->x_metres,
-                (const double*)vis->y_metres, (const double*)vis->z_metres);
+        ms.addAntennas(num_antennas, (const double*)vis->x_metres.data,
+                (const double*)vis->y_metres.data,
+                (const double*)vis->z_metres.data);
     }
     else if (vis->x_metres.type == OSKAR_SINGLE)
     {
-        ms.addAntennas(num_antennas, (const float*)vis->x_metres,
-                (const float*)vis->y_metres, (const float*)vis->z_metres);
+        ms.addAntennas(num_antennas, (const float*)vis->x_metres.data,
+                (const float*)vis->y_metres.data,
+                (const float*)vis->z_metres.data);
     }
     else
     {

@@ -67,7 +67,7 @@ void oskar_sky_model_read(oskar_SkyModel* sky, const char* filename,
      * Status flag will be set if binary read failed. */
     if (*status)
     {
-        oskar_binary_tag_index_free(&index, status);
+        oskar_binary_tag_index_free(index, status);
         return;
     }
 
@@ -99,7 +99,7 @@ void oskar_sky_model_read(oskar_SkyModel* sky, const char* filename,
             OSKAR_SKY_TAG_POSITION_ANGLE, idx, status);
 
     /* Free the tag index. */
-    oskar_binary_tag_index_free(&index, status);
+    oskar_binary_tag_index_free(index, status);
 }
 
 #ifdef __cplusplus

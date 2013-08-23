@@ -87,7 +87,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_mem_binary_file_read(&date, filename, &index,
             OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING, 0,
             &status);
-    oskar_binary_tag_index_free(&index, &status);
+    oskar_binary_tag_index_free(index, &status);
     if (status)
     {
         oskar_matlab_error("Failed to read date field!");

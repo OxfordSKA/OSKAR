@@ -75,7 +75,7 @@ void oskar_image_read(oskar_Image* image, const char* filename, int idx,
     /* Check if safe to proceed. */
     if (*status)
     {
-        oskar_binary_tag_index_free(&index, status);
+        oskar_binary_tag_index_free(index, status);
         fclose(stream);
         return;
     }
@@ -130,7 +130,7 @@ void oskar_image_read(oskar_Image* image, const char* filename, int idx,
             grp, OSKAR_IMAGE_TAG_IMAGE_DATA, idx, status);
 
     /* Free the index and close the stream. */
-    oskar_binary_tag_index_free(&index, status);
+    oskar_binary_tag_index_free(index, status);
     fclose(stream);
 }
 

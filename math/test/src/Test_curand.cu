@@ -31,6 +31,7 @@
 #include "utility/oskar_curand_state_free.h"
 #include "utility/oskar_curand_state_init.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_mem_to_type.h"
 #include "utility/oskar_Mem.h"
 
 #include <cuda.h>
@@ -151,12 +152,13 @@ void Test_curand::test_state_allocation()
     int num_per_thread = 1;
     int num_values = num_blocks * num_threads * num_per_thread;
     oskar_Mem d_values(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_values);
+    double* d_values_ = oskar_mem_to_double(&d_values, &status);
 
     for (int i = 0; i < num_iter; ++i)
     {
         test_curand_generate
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (d_values, num_values, num_per_thread, curand_state.state, num_states);
+        (d_values_, num_values, num_per_thread, curand_state.state, num_states);
 
         oskar_Mem h_values(&d_values, OSKAR_LOCATION_CPU);
 
@@ -207,6 +209,7 @@ void Test_curand::test_multi_device()
         int num_per_thread = 2;
         int num_values = num_blocks * num_threads * num_per_thread;
         oskar_Mem d_values(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_values);
+        double* d_values_ = oskar_mem_to_double(&d_values, &error);
 
         file = fopen(filename, "w");
 
@@ -214,7 +217,7 @@ void Test_curand::test_multi_device()
         {
             test_curand_generate
                 OSKAR_CUDAK_CONF(num_blocks, num_threads)
-                (d_values, num_values, num_per_thread, d_states.state, num_states);
+                (d_values_, num_values, num_per_thread, d_states.state, num_states);
 
             oskar_Mem h_values(&d_values, OSKAR_LOCATION_CPU);
 

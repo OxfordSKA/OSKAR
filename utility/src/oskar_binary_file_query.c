@@ -619,7 +619,7 @@ void oskar_binary_file_query(oskar_Log* log, const char* filename, int* status)
 
     /* Free the index. */
     fclose(stream);
-    oskar_binary_tag_index_free(&index, status);
+    oskar_binary_tag_index_free(index, status);
 }
 
 static const char* oskar_get_data_type_string(char data_type)

@@ -34,6 +34,8 @@
 #include "sky/oskar_sky_model_all_headers.h"
 #include "math/oskar_sph_to_lm.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_mem_evaluate_relative_error.h"
+#include "utility/oskar_mem_to_type.h"
 
 #define TIMER_ENABLE
 #include "utility/timer.h"
@@ -376,9 +378,10 @@ void Test_SkyModel::test_horizon_clip()
         // Check sky data.
         oskar_SkyModel* sky_temp = new oskar_SkyModel(&sky_out, OSKAR_LOCATION_CPU);
         CPPUNIT_ASSERT_EQUAL(n_sources / 2, sky_temp->num_sources);
+        const float* dec = oskar_mem_to_const_float(&sky_temp->Dec, &err);
         for (int i = 0, n = sky_temp->num_sources; i < n; ++i)
         {
-            CPPUNIT_ASSERT(((float*)(sky_temp->Dec))[i] > 0.0f);
+            CPPUNIT_ASSERT(dec[i] > 0.0f);
         }
 
         delete sky_temp;
@@ -482,18 +485,22 @@ void Test_SkyModel::test_filter_by_radius()
     CPPUNIT_ASSERT_EQUAL(num_sources, sky.num_sources);
     for (int i = 0; i < num_sources; ++i)
     {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ((const double*)sky.RA)[i], 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
+                oskar_mem_to_const_double(&sky.RA, &err)[i], 0.001);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(i * ((M_PI / 2) / (num_sources - 1)),
-                ((const double*)sky.Dec)[i], 0.001);
+                oskar_mem_to_const_double(&sky.Dec, &err)[i], 0.001);
         CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i,
-                ((const double*)sky.I)[i], 0.001);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, ((const double*)sky.Q)[i], 0.001);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, ((const double*)sky.U)[i], 0.001);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0, ((const double*)sky.V)[i], 0.001);
+                oskar_mem_to_const_double(&sky.I, &err)[i], 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0,
+                oskar_mem_to_const_double(&sky.Q, &err)[i], 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0,
+                oskar_mem_to_const_double(&sky.U, &err)[i], 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0,
+                oskar_mem_to_const_double(&sky.V, &err)[i], 0.001);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(i * 100,
-                ((const double*)sky.reference_freq)[i], 0.001);
+                oskar_mem_to_const_double(&sky.reference_freq, &err)[i], 0.001);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(i * 200,
-                ((const double*)sky.spectral_index)[i], 0.001);
+                oskar_mem_to_const_double(&sky.spectral_index, &err)[i], 0.001);
     }
 
     // Filter the data.
@@ -508,8 +515,8 @@ void Test_SkyModel::test_filter_by_radius()
     CPPUNIT_ASSERT_EQUAL(6, sky.num_sources);
     for (int i = 0; i < sky.num_sources; ++i)
     {
-        CPPUNIT_ASSERT(((const double*)sky.Dec)[i] > 79.5 * M_PI / 180.0);
-        CPPUNIT_ASSERT(((const double*)sky.Dec)[i] < 85.5 * M_PI / 180.0);
+        CPPUNIT_ASSERT(oskar_mem_to_const_double(&sky.Dec, &err)[i] > 79.5 * M_PI / 180.0);
+        CPPUNIT_ASSERT(oskar_mem_to_const_double(&sky.Dec, &err)[i] < 85.5 * M_PI / 180.0);
 //        printf("RA = %f, Dec = %f\n", ((const double*)sky.RA)[i],
 //                ((const double*)sky.Dec)[i] * 180 / M_PI);
     }
@@ -1003,31 +1010,51 @@ void Test_SkyModel::test_read_write()
 
     // Check the contents of the sky model.
     CPPUNIT_ASSERT_EQUAL(sky.num_sources, sky2.num_sources);
-    for (int i = 0; i < num_sources; ++i)
-    {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.RA.data))[i],
-                ((double*)(sky2.RA.data))[i], 1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.Dec.data))[i],
-                ((double*)(sky2.Dec.data))[i], 1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.I.data))[i],
-                ((double*)(sky2.I.data))[i], 1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.Q.data))[i],
-                ((double*)(sky2.Q.data))[i], 1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.U.data))[i],
-                ((double*)(sky2.U.data))[i], 1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.V.data))[i],
-                ((double*)(sky2.V.data))[i], 1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.reference_freq.data))[i],
-                ((double*)(sky2.reference_freq.data))[i], 1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.spectral_index.data))[i],
-                ((double*)(sky2.spectral_index.data))[i], 1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.FWHM_major.data))[i],
-                ((double*)(sky2.FWHM_major.data))[i], 1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.FWHM_minor.data))[i],
-                ((double*)(sky2.FWHM_minor.data))[i], 1e-10);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.position_angle.data))[i],
-                ((double*)(sky2.position_angle.data))[i], 1e-10);
-    }
+    double max_, avg_;
+    oskar_mem_evaluate_relative_error(&sky.RA, &sky2.RA,
+            0, &max_, &avg_, 0, &status);
+    CPPUNIT_ASSERT(max_ < 1e-10);
+    CPPUNIT_ASSERT(avg_ < 1e-10);
+    oskar_mem_evaluate_relative_error(&sky.Dec, &sky2.Dec,
+            0, &max_, &avg_, 0, &status);
+    CPPUNIT_ASSERT(max_ < 1e-10);
+    CPPUNIT_ASSERT(avg_ < 1e-10);
+    oskar_mem_evaluate_relative_error(&sky.I, &sky2.I,
+            0, &max_, &avg_, 0, &status);
+    CPPUNIT_ASSERT(max_ < 1e-10);
+    CPPUNIT_ASSERT(avg_ < 1e-10);
+    oskar_mem_evaluate_relative_error(&sky.Q, &sky2.Q,
+            0, &max_, &avg_, 0, &status);
+    CPPUNIT_ASSERT(max_ < 1e-10);
+    CPPUNIT_ASSERT(avg_ < 1e-10);
+    oskar_mem_evaluate_relative_error(&sky.U, &sky2.U,
+            0, &max_, &avg_, 0, &status);
+    CPPUNIT_ASSERT(max_ < 1e-10);
+    CPPUNIT_ASSERT(avg_ < 1e-10);
+    oskar_mem_evaluate_relative_error(&sky.V, &sky2.V,
+            0, &max_, &avg_, 0, &status);
+    CPPUNIT_ASSERT(max_ < 1e-10);
+    CPPUNIT_ASSERT(avg_ < 1e-10);
+    oskar_mem_evaluate_relative_error(&sky.reference_freq, &sky2.reference_freq,
+            0, &max_, &avg_, 0, &status);
+    CPPUNIT_ASSERT(max_ < 1e-10);
+    CPPUNIT_ASSERT(avg_ < 1e-10);
+    oskar_mem_evaluate_relative_error(&sky.spectral_index, &sky2.spectral_index,
+            0, &max_, &avg_, 0, &status);
+    CPPUNIT_ASSERT(max_ < 1e-10);
+    CPPUNIT_ASSERT(avg_ < 1e-10);
+    oskar_mem_evaluate_relative_error(&sky.FWHM_major, &sky2.FWHM_major,
+            0, &max_, &avg_, 0, &status);
+    CPPUNIT_ASSERT(max_ < 1e-10);
+    CPPUNIT_ASSERT(avg_ < 1e-10);
+    oskar_mem_evaluate_relative_error(&sky.FWHM_minor, &sky2.FWHM_minor,
+            0, &max_, &avg_, 0, &status);
+    CPPUNIT_ASSERT(max_ < 1e-10);
+    CPPUNIT_ASSERT(avg_ < 1e-10);
+    oskar_mem_evaluate_relative_error(&sky.position_angle, &sky2.position_angle,
+            0, &max_, &avg_, 0, &status);
+    CPPUNIT_ASSERT(max_ < 1e-10);
+    CPPUNIT_ASSERT(avg_ < 1e-10);
 
     // Free memory in both sky model structures.
     oskar_sky_model_free(&sky2, &status);

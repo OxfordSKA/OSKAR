@@ -98,8 +98,9 @@ void Test_evaluate_jones_E::evaluate_e()
     station_cpu.use_polarised_elements = false;
     float* x_pos = (float*) malloc(station_dim * sizeof(float));
     oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
-    oskar_meshgrid_f(station_cpu.x_weights, station_cpu.y_weights, x_pos, station_dim,
-            x_pos, station_dim);
+    oskar_meshgrid_f((float*)station_cpu.x_weights.data,
+            (float*)station_cpu.y_weights.data,
+            x_pos, station_dim, x_pos, station_dim);
     free(x_pos);
 
     int num_stations = 2;
@@ -144,7 +145,7 @@ void Test_evaluate_jones_E::evaluate_e()
     num_sources = positions.generate(0, 0);
     oskar_sky_model_resize(&sky_cpu, num_sources, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-    positions.generate(sky_cpu.RA, sky_cpu.Dec);
+    positions.generate((float*)sky_cpu.RA.data, (float*)sky_cpu.Dec.data);
 
 //    error = oskar_sky_model_write("temp_test_sky.txt", &sky_cpu);
 //    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);

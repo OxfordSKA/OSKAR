@@ -226,7 +226,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         // Setup imaging data.
         if (type == OSKAR_DOUBLE)
         {
-            oskar_evaluate_image_lm_grid_d(size, size, fov, fov, l, m);
+            oskar_evaluate_image_lm_grid_d(size, size, fov, fov,
+                    (double*)l.data, (double*)m.data);
             double* uu_ = (double*)mxGetData(in[0]);
             double* vv_ = (double*)mxGetData(in[1]);
             double* re_ = (double*)mxGetPr(in[2]);
@@ -240,7 +241,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
         else // (type == OSKAR_SINGLE)
         {
-            oskar_evaluate_image_lm_grid_f(size, size, fov, fov, l, m);
+            oskar_evaluate_image_lm_grid_f(size, size, fov, fov,
+                    (float*)l.data, (float*)m.data);
             float* uu_ = (float*)mxGetData(in[0]);
             float* vv_ = (float*)mxGetData(in[1]);
             float* re_ = (float*)mxGetPr(in[2]);
