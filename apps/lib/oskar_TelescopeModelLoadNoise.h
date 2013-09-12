@@ -58,7 +58,8 @@
  * The telescope model being populated must have already been allocated in CPU
  * memory.
  */
-class OSKAR_APPS_EXPORT oskar_TelescopeModelLoadNoise : public oskar_AbstractTelescopeFileLoader
+class OSKAR_APPS_EXPORT oskar_TelescopeModelLoadNoise
+: public oskar_AbstractTelescopeFileLoader
 {
 public:
     oskar_TelescopeModelLoadNoise(const oskar_Settings* settings);
@@ -128,7 +129,7 @@ private:
 
 private:
     enum FileIds_ { FREQ, RMS, SENSITIVITY, TSYS, AREA, EFFICIENCY };
-    int dataType_;
+    int dataType_;  // OSKAR data type of the telescope model being loaded.
     QHash<FileIds_, QString> files_;
     oskar_Mem freqs_;
     const oskar_Settings* settings_;

@@ -39,11 +39,12 @@
 #include <QtCore/QFile>
 
 #include <cfloat>
+#include <cassert>
 #include <cmath>
 
 oskar_TelescopeModelLoadNoise::oskar_TelescopeModelLoadNoise(
         const oskar_Settings* settings)
-: oskar_AbstractTelescopeFileLoader()
+: oskar_AbstractTelescopeFileLoader(), dataType_(0)
 {
     files_[FREQ] = "noise_frequencies.txt";
     files_[RMS]  = "rms.txt";
@@ -58,7 +59,8 @@ oskar_TelescopeModelLoadNoise::~oskar_TelescopeModelLoadNoise()
 {
     int status = OSKAR_SUCCESS;
     oskar_mem_free(&freqs_, &status);
-    // Note: status code ignored! ...
+    assert(status == OSKAR_SUCCESS);
+    // Note: status code ignored in release mode when NDEBUG is defined.
 }
 
 
@@ -81,7 +83,7 @@ void oskar_TelescopeModelLoadNoise::load(oskar_TelescopeModel* telescope,
     oskar_mem_init(&freqs_, dataType_, 0, 0, 1, status);
     getNoiseFreqs_(&freqs_, filemap[files_[FREQ]], status);
 
-    // No sub-directories (the other load function is never called)
+    // If no sub-directories (the station load function is never called)
     if (num_subdirs == 0)
     {
         for (int i = 0; i < telescope->num_stations; ++i)
@@ -90,10 +92,8 @@ void oskar_TelescopeModelLoadNoise::load(oskar_TelescopeModel* telescope,
             oskar_mem_copy(&station->noise.frequency, &freqs_, status);
             setNoiseRMS_(&station->noise, filemap, status);
         }
-
     }
 }
-
 
 
 // Depth > 0
@@ -116,10 +116,8 @@ void oskar_TelescopeModelLoadNoise::load(oskar_StationModel* station,
     // Update the noise files for the current station directory.
     updateFileMap_(filemap, cwd);
 
-
     // Set the frequency noise data field of the station structure.
     oskar_mem_copy(&station->noise.frequency, &freqs_, status);
-
 
     // Set the noise RMS based on files or settings.
     setNoiseRMS_(&station->noise, filemap, status);
@@ -132,7 +130,8 @@ void oskar_TelescopeModelLoadNoise::updateFileMap_(
         QHash<QString, QString>& filemap, const QDir& cwd)
 {
     foreach(QString file, files_.values()) {
-        filemap[file] = cwd.absoluteFilePath(file);
+        if (cwd.exists(file))
+            filemap[file] = cwd.absoluteFilePath(file);
     }
 }
 

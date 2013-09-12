@@ -21,8 +21,12 @@ using namespace std;
 #define NUM_THREADS 128
 #define BLOCK_SIZE 2 // Number of baselines in a block
 
-typedef const float* __restrict__ Array;
-typedef const float4c* __restrict__ MArray;
+typedef const float* __restrict__ rArray;
+typedef const float4c* __restrict__ rMArray;
+typedef const float*  Array;
+typedef const float4c*  MArray;
+//typedef Array rArray;
+//typedef MArray rMArray;
 
 extern __shared__ float4c  smem_f4c[];
 
@@ -34,7 +38,7 @@ void correlate_f(int num_sources, int num_stations, const float4c* d_Jones,
         float4c* d_vis);
 __global__
 void correlate_cudak_f(const int num_sources, const int num_stations,
-        MArray d_Jones, Array d_I, Array d_Q, Array d_U,
+        rMArray d_Jones, Array d_I, Array d_Q, Array d_U,
         Array d_V, Array d_l, Array d_m, Array d_n, Array d_u, Array d_v,
         Array d_x, Array d_y, const float freq_hz,
         const float bandwidth_hz, const float time_int_sec,
@@ -47,7 +51,7 @@ void correlate_warpshuffle_f(int num_sources, int num_stations, const float4c* d
         float4c* d_vis);
 __global__ void
 correlate_warpshuffle_cudak_f(const int num_sources, const int num_stations,
-        MArray d_Jones, Array d_I, Array d_Q, Array d_U,
+        rMArray d_Jones, Array d_I, Array d_Q, Array d_U,
         Array d_V, Array d_l, Array d_m, Array d_n, Array d_u, Array d_v,
         Array d_x, Array d_y, const float freq_hz,
         const float bandwidth_hz, const float time_int_sec,
@@ -60,20 +64,21 @@ void correlate_warpshuffle_blocked_f(int num_sources, int num_stations, const fl
         float4c* d_vis);
 __global__ void
 correlate_warpshuffle_blocked_cudak_f(const int num_sources, const int num_stations,
-        MArray d_Jones, Array d_I, Array d_Q, Array d_U,
+        rMArray d_Jones, Array d_I, Array d_Q, Array d_U,
         Array d_V, Array d_l, Array d_m, Array d_n, Array d_u, Array d_v,
         Array d_x, Array d_y, const float freq_hz,
         const float bandwidth_hz, const float time_int_sec,
         const float gha0_rad, const float dec0_rad, float4c* d_vis);
-void correlate_warpshuffle_blocked_smem_f(int num_sources, int num_stations, const float4c* d_Jones,
-        const float* d_I, const float* d_Q, const float* d_U, const float* d_V,
-        const float* d_l, const float* d_m, const float* d_n, const float* d_u,
+void correlate_warpshuffle_blocked_smem_f(int num_sources, int num_stations,
+        const float4c* d_Jones, const float* d_I, const float* d_Q,
+        const float* d_U, const float* d_V, const float* d_l, const float* d_m,
+        const float* d_n, const float* d_u,
         const float* d_v, const float* d_x, const float* d_y,
         float freq, float bandwidth, float time_int, float gha0, float dec0,
         float4c* d_vis);
 __global__ void
 correlate_warpshuffle_blocked_smem_cudak_f(const int num_sources, const int num_stations,
-        MArray d_Jones, Array d_I, Array d_Q, Array d_U,
+        rMArray d_Jones, Array d_I, Array d_Q, Array d_U,
         Array d_V, Array d_l, Array d_m, Array d_n, Array d_u, Array d_v,
         Array d_x, Array d_y, const float freq_hz,
         const float bandwidth_hz, const float time_int_sec,
@@ -92,7 +97,7 @@ void print_float4c_range(int i0, int i1, float4c* values);
 TEST(PerformanceTests, test01)
 {
     // ----------- Allocate host memory ----------------------------------------
-    int num_sources  = 128*100;
+    int num_sources  = 128*10;
     int num_stations = 100;
     float freq       = 100.0e6; // [Hz]
     float bandwidth  = 1.0e5;   // [Hz]
