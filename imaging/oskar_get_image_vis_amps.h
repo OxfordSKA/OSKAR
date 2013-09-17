@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,25 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_GET_IMAGE_VIS_AMPS_H_
 #define OSKAR_GET_IMAGE_VIS_AMPS_H_
 
 /**
- * @file oskar_get_image_amps.h
+ * @file oskar_get_image_vis_amps.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "imaging/oskar_SettingsImage.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
+#include <oskar_vis.h>
+#include <oskar_SettingsImage.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 OSKAR_EXPORT
-int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
+int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Vis* vis,
         const oskar_Mem* stokes, const oskar_SettingsImage* settings,
         int channel, int time, int polarisation);
 

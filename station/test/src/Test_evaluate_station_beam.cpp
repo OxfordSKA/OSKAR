@@ -30,23 +30,15 @@
 
 #include "station/test/Test_evaluate_station_beam.h"
 
-#include "oskar_global.h"
+#include <oskar_station.h>
 #include "station/oskar_evaluate_station_beam_aperture_array.h"
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
-#include "station/oskar_station_model_save_config.h"
-#include "station/oskar_station_model_resize_element_types.h"
 #include "station/oskar_evaluate_station_beam_gaussian.h"
-#include "station/oskar_station_model_multiply_by_wavenumber.h"
 #include "utility/oskar_get_error_string.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_vector_types.h"
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
-#include "utility/oskar_curand_state_free.h"
-#include "utility/oskar_curand_state_init.h"
+#include "utility/oskar_random_state.h"
 #include "utility/oskar_mem_binary_file_write.h"
-#include "utility/oskar_mem_to_type.h"
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
 
@@ -61,10 +53,6 @@ using namespace std;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
-#endif
-
-#ifndef M_PI_2
-#define M_PI_2 1.57079632679489661923
 #endif
 
 #ifndef c_0
@@ -86,40 +74,42 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     int station_dim = 100;
     double station_size_m = 180.0;
     int num_antennas = station_dim * station_dim;
-    oskar_StationModel station_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_antennas);
-    oskar_station_model_resize_element_types(&station_cpu, 1, &error);
+    oskar_Station* station = oskar_station_create(OSKAR_SINGLE,
+            OSKAR_LOCATION_CPU, num_antennas, &error);
+    oskar_station_resize_element_types(station, 1, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Set the station coordinates.
-    station_cpu.longitude_rad = 0.0;
-    station_cpu.latitude_rad  = M_PI_2;
-    station_cpu.altitude_m  = 0.0;
-    station_cpu.coord_units = OSKAR_METRES;
+    oskar_station_set_position(station, 0.0, M_PI / 2.0, 0.0);
     float* x_pos = (float*) malloc(station_dim * sizeof(float));
     oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
     oskar_meshgrid_f(
-            oskar_mem_to_float(&station_cpu.x_weights, &error),
-            oskar_mem_to_float(&station_cpu.y_weights, &error),
+            oskar_mem_float(oskar_station_element_x_weights(station), &error),
+            oskar_mem_float(oskar_station_element_y_weights(station), &error),
             x_pos, station_dim, x_pos, station_dim);
     free(x_pos);
-    station_cpu.num_elements = num_antennas;
 
     // Set the station beam direction.
-    station_cpu.beam_longitude_rad  = 0.0;
-    station_cpu.beam_latitude_rad = M_PI_2;
+    oskar_station_set_phase_centre(station,
+            OSKAR_SPHERICAL_TYPE_EQUATORIAL, 0.0, M_PI / 2.0);
 
     // Set the station meta-data.
-    station_cpu.element_pattern->type = OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC;
-    station_cpu.use_polarised_elements = false;
+    oskar_ElementModel* element = oskar_station_element(station, 0);
+    element->element_type = OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC;
+    oskar_station_set_use_polarised_elements(station, 0);
 
-    //    error = oskar_station_model_save_configuration("temp_test_station.txt", &station_cpu);
+    //    error = oskar_station_save_configuration("temp_test_station.txt", &station_cpu);
 //    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
-    // Copy the station structure to the gpu and scale the coordinates to wavenumbers.
-    oskar_StationModel station_gpu(&station_cpu, OSKAR_LOCATION_GPU);
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_METRES, station_gpu.coord_units);
-    oskar_station_model_multiply_by_wavenumber(&station_gpu, frequency, &error);
+    // Copy the station structure to the GPU, scale the coordinates to
+    // wavenumbers and free the original structure.
+    oskar_Station* station_gpu = oskar_station_create_copy(station,
+            OSKAR_LOCATION_GPU, &error);
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_METRES,
+            oskar_station_element_coord_units(station_gpu));
+    oskar_station_multiply_by_wavenumber(station_gpu, frequency, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    oskar_station_free(station, &error);
 
     // Evaluate horizontal l,m positions at which to generate the beam pattern.
     int image_size = 401;
@@ -133,8 +123,8 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     float* lm = (float*)malloc(image_size * sizeof(float));
     double lm_max = sin(fov_deg * M_PI / 180.0);
     oskar_linspace_f(lm, -lm_max, lm_max, image_size);
-    oskar_meshgrid_f(oskar_mem_to_float(&l_cpu, &error),
-            oskar_mem_to_float(&m_cpu, &error), lm, image_size, lm, image_size);
+    oskar_meshgrid_f(oskar_mem_float(&l_cpu, &error),
+            oskar_mem_float(&m_cpu, &error), lm, image_size, lm, image_size);
     free(lm);
 
     // Copy horizontal lm coordinates to GPU.
@@ -143,11 +133,10 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     oskar_Mem n_gpu(&n_cpu, OSKAR_LOCATION_GPU);
 
     // Initialise the random number generator.
-    oskar_CurandState curand_state;
     int seed = 0;
-    oskar_curand_state_init(&curand_state, num_antennas, seed, 0, 0, &error);
+    oskar_RandomState* random_state = oskar_random_state_create(num_antennas,
+            seed, 0, 0, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-    station_gpu.apply_element_errors = OSKAR_FALSE;
 
     // Allocate weights work array.
     oskar_WorkStationBeam work(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
@@ -155,22 +144,25 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     // Declare memory for the beam pattern.
     oskar_Mem beam_pattern(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU, num_pixels);
 
-    station_gpu.array_is_3d = 0;
+    CPPUNIT_ASSERT_EQUAL(0, oskar_station_array_is_3d(station_gpu));
     TIMER_START
-    oskar_evaluate_station_beam_aperture_array(&beam_pattern, &station_gpu,
-            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, &work, &curand_state,
+    oskar_evaluate_station_beam_aperture_array(&beam_pattern, station_gpu,
+            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, &work, random_state,
             &error);
     cudaDeviceSynchronize();
     TIMER_STOP("Finished aperture array station beam (2D)");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-    station_gpu.array_is_3d = 1;
+    oskar_station_set_element_coords(station_gpu, 0, 0., 0., 1., 0., 0., 0., &error);
+    oskar_station_set_element_coords(station_gpu, 0, 0., 0., 0., 0., 0., 0., &error);
+    CPPUNIT_ASSERT_EQUAL(1, oskar_station_array_is_3d(station_gpu));
     TIMER_START
-    oskar_evaluate_station_beam_aperture_array(&beam_pattern, &station_gpu,
-            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, &work, &curand_state,
+    oskar_evaluate_station_beam_aperture_array(&beam_pattern, station_gpu,
+            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, &work, random_state,
             &error);
     cudaDeviceSynchronize();
     TIMER_STOP("Finished aperture array station beam (3D)");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    oskar_station_free(station_gpu, &error);
 
     // Copy beam pattern back to CPU.
     oskar_Mem beam_pattern_cpu(&beam_pattern, OSKAR_LOCATION_CPU);
@@ -192,7 +184,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
         data = dlmread('temp_test_beam_pattern.txt');
         imagesc(log10(reshape(data(:,3), 401, 401).^2));
     --------------------------------------------------------------------------*/
-    oskar_curand_state_free(&curand_state, &error);
+    oskar_random_state_free(random_state, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 }
 
@@ -228,7 +220,7 @@ void Test_evaluate_station_beam::evaluate_gaussian_pattern()
         {
             const char* filename = "temp_beam_double_cpu.dat";
             remove(filename);
-            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, beam.num_elements, &err);
+            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, (int)oskar_mem_length(&beam), &err);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         }
     }
@@ -255,7 +247,7 @@ void Test_evaluate_station_beam::evaluate_gaussian_pattern()
         {
             const char* filename = "temp_beam_single_cpu.dat";
             remove(filename);
-            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, beam.num_elements, &err);
+            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, (int)oskar_mem_length(&beam), &err);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         }
     }
@@ -286,7 +278,7 @@ void Test_evaluate_station_beam::evaluate_gaussian_pattern()
         {
             const char* filename = "temp_beam_double_gpu.dat";
             remove(filename);
-            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, beam.num_elements, &err);
+            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, (int)oskar_mem_length(&beam), &err);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         }
     }
@@ -317,7 +309,7 @@ void Test_evaluate_station_beam::evaluate_gaussian_pattern()
         {
             const char* filename = "temp_beam_single_gpu.dat";
             remove(filename);
-            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, beam.num_elements, &err);
+            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, (int)oskar_mem_length(&beam), &err);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         }
     }

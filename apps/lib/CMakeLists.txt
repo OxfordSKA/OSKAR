@@ -8,7 +8,7 @@ set(apps_SRC
     src/oskar_evaluate_station_pierce_points.cpp
     src/oskar_imager.cpp
     src/oskar_remove_dir.cpp
-    src/oskar_set_up_sky.cpp
+    src/oskar_set_up_sky.c
     src/oskar_set_up_telescope.c
     src/oskar_set_up_visibilities.c
     src/oskar_settings_load_beam_pattern.cpp
@@ -23,15 +23,12 @@ set(apps_SRC
     src/oskar_sim_beam_pattern.cpp
     src/oskar_sim_interferometer.cpp
     src/oskar_sim_tec_screen.cpp
-    src/oskar_telescope_model_config_load.cpp
-    src/oskar_telescope_model_element_pattern_load.cpp
-    src/oskar_telescope_model_load.cpp
-    src/oskar_telescope_model_noise_load.cpp
+    src/oskar_telescope_load.cpp
     src/oskar_TelescopeModelLoadNoise.cpp
-    src/oskar_telescope_model_save.cpp
+    src/oskar_telescope_save.cpp
 )
 if(CASACORE_FOUND)
-    list(APPEND apps_SRC src/oskar_visibilities_write_ms.cpp)
+    list(APPEND apps_SRC src/oskar_vis_write_ms.cpp)
 endif()
 
 set(apps_SRC "${apps_SRC}" PARENT_SCOPE)

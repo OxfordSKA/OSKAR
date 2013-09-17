@@ -27,29 +27,19 @@
  */
 
 #include "apps/lib/oskar_set_up_telescope.h"
-#include "apps/lib/oskar_telescope_model_load.h"
+#include "apps/lib/oskar_telescope_load.h"
 
-#include "apps/lib/oskar_telescope_model_save.h"
+#include "apps/lib/oskar_telescope_save.h"
 
-#include "interferometry/oskar_telescope_model_init.h"
-#include "interferometry/oskar_telescope_model_analyse.h"
-#include "interferometry/oskar_telescope_model_config_override.h"
-#include "interferometry/oskar_telescope_model_load_pointing_file.h"
-#include "utility/oskar_get_error_string.h"
-
-#include "utility/oskar_log_error.h"
-#include "utility/oskar_log_message.h"
-#include "utility/oskar_log_section.h"
-#include "utility/oskar_log_value.h"
-#include "utility/oskar_log_warning.h"
-
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_init.h"
+#include <oskar_telescope.h>
+#include <oskar_get_error_string.h>
+#include <oskar_log.h>
 
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,148 +48,156 @@ extern "C" {
 static const int width = 45;
 
 /* Private functions. */
-static void oskar_telescope_model_set_metadata(oskar_TelescopeModel *telescope,
+static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
         const oskar_Settings* settings);
-static void set_station_data(oskar_StationModel* station,
-        const oskar_StationModel* parent, int depth,
+static void set_station_data(oskar_Station* station,
+        const oskar_Station* parent, int depth,
         const oskar_Settings* settings);
-static void save_telescope(oskar_TelescopeModel *telescope,
+static void save_telescope(oskar_Telescope *telescope,
         const oskar_SettingsTelescope* settings, oskar_Log* log,
         const char* dir, int* status);
 
-void oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
+oskar_Telescope* oskar_set_up_telescope(oskar_Log* log,
         const oskar_Settings* settings, int* status)
 {
     int type;
+    oskar_Telescope* telescope;
+
+    /* Check all inputs. */
+    if (!settings || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return 0;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return 0;
+
     oskar_log_section(log, "Telescope model");
 
     /* Initialise the structure in CPU memory. */
     type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    oskar_telescope_model_init(telescope, type, OSKAR_LOCATION_CPU, 0, status);
+    telescope = oskar_telescope_create(type, OSKAR_LOCATION_CPU, 0, status);
 
     /* Load the layout and configuration, apply overrides, load noise data. */
-    oskar_telescope_model_load(telescope, log, settings, status);
-    oskar_telescope_model_config_override(telescope, &settings->telescope, status);
+    oskar_telescope_load(telescope, log, settings, status);
+    oskar_telescope_config_override(telescope, &settings->telescope, status);
 
     /* Set telescope model meta-data, including global pointing settings. */
-    oskar_telescope_model_set_metadata(telescope, settings);
+    oskar_telescope_set_metadata(telescope, settings);
 
     /* Apply pointing file override if set. */
     if (settings->obs.pointing_file)
     {
         oskar_log_message(log, 0, "Loading station pointing file "
                 "override '%s'...", settings->obs.pointing_file);
-        oskar_telescope_model_load_pointing_file(telescope,
+        oskar_telescope_load_pointing_file(telescope,
                 settings->obs.pointing_file, status);
     }
 
-    switch (settings->telescope.station_type)
-    {
-        case OSKAR_STATION_TYPE_AA:
-        {
-            /* Analyse telescope model to determine whether stations are
-             * identical, whether to apply element errors and/or weights. */
-            oskar_telescope_model_analyse(telescope, status);
-            break;
-        }
-        case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
-        {
-            /* FIXME Not correct if FWHM files are used in station model. */
-            telescope->identical_stations = OSKAR_TRUE;
-            break;
-        }
-        default:
-            *status = OSKAR_ERR_SETTINGS_TELESCOPE;
-            break;
-    }
-    if (*status) return;
+    /* Analyse telescope model to determine whether stations are
+     * identical, whether to apply element errors and/or weights. */
+    oskar_telescope_analyse(telescope, status);
+    if (*status) return telescope;
 
     /* Print summary data. */
     oskar_log_message(log, 0, "Telescope model summary");
     oskar_log_value(log, 1, width, "Num. stations", "%d",
-            telescope->num_stations);
+            oskar_telescope_num_stations(telescope));
     oskar_log_value(log, 1, width, "Max station size", "%d",
-            telescope->max_station_size);
+            oskar_telescope_max_station_size(telescope));
     oskar_log_value(log, 1, width, "Max station depth", "%d",
-            telescope->max_station_depth);
+            oskar_telescope_max_station_depth(telescope));
     oskar_log_value(log, 1, width, "Identical stations", "%s",
-            telescope->identical_stations ? "true" : "false");
+            oskar_telescope_identical_stations(telescope) ?
+                    "true" : "false");
 
     /* Save the telescope configuration in a new directory, if required. */
     save_telescope(telescope, &settings->telescope, log,
             settings->telescope.output_directory, status);
+
+    return telescope;
 }
 
 
-static void oskar_telescope_model_set_metadata(oskar_TelescopeModel *telescope,
+static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
         const oskar_Settings* settings)
 {
-    int i, seed;
+    int i, num_stations;
     const oskar_SettingsApertureArray* aa = &settings->telescope.aperture_array;
-    telescope->ra0_rad        = settings->obs.ra0_rad[0];
-    telescope->dec0_rad       = settings->obs.dec0_rad[0];
-    telescope->use_common_sky = settings->interferometer.use_common_sky;
-    telescope->bandwidth_hz   = settings->interferometer.channel_bandwidth_hz;
-    telescope->time_average_sec = settings->interferometer.time_average_sec;
-    telescope->wavelength_metres = 0.0; /* This is set on a per-channel basis. */
-    seed = aa->array_pattern.element.seed_time_variable_errors;
-    telescope->seed_time_variable_station_element_errors = seed;
-    for (i = 0; i < telescope->num_stations; ++i)
+    oskar_telescope_set_phase_centre(telescope,
+            settings->obs.ra0_rad[0], settings->obs.dec0_rad[0]);
+    oskar_telescope_set_common_horizon(telescope,
+            settings->interferometer.use_common_sky);
+    oskar_telescope_set_smearing_values(telescope,
+            settings->interferometer.channel_bandwidth_hz,
+            settings->interferometer.time_average_sec);
+    oskar_telescope_set_random_seed(telescope,
+            aa->array_pattern.element.seed_time_variable_errors);
+    num_stations = oskar_telescope_num_stations(telescope);
+    for (i = 0; i < num_stations; ++i)
     {
+        oskar_Station* station;
+
         /* Set station data (recursively, for all child stations too). */
-        set_station_data(&telescope->station[i], NULL, 0, settings);
+        station = oskar_telescope_station(telescope, i);
+        set_station_data(station, NULL, 0, settings);
     }
 }
 
-static void set_station_data(oskar_StationModel* station,
-        const oskar_StationModel* parent, int depth,
+static void set_station_data(oskar_Station* station,
+        const oskar_Station* parent, int depth,
         const oskar_Settings* settings)
 {
     int i = 0;
     const oskar_SettingsApertureArray* aa = &settings->telescope.aperture_array;
-    station->station_type = settings->telescope.station_type;
+    oskar_station_set_station_type(station, settings->telescope.station_type);
     if (parent)
     {
-        station->longitude_rad = parent->longitude_rad;
-        station->latitude_rad = parent->latitude_rad;
-        station->altitude_m = parent->altitude_m;
+        oskar_station_set_position(station,
+                oskar_station_longitude_rad(parent),
+                oskar_station_latitude_rad(parent),
+                oskar_station_altitude_m(parent));
     }
-    station->enable_array_pattern = aa->array_pattern.enable;
-    station->normalise_beam = aa->array_pattern.normalise;
-    station->gaussian_beam_fwhm_deg =
-            settings->telescope.gaussian_beam.fwhm_deg;
-    station->use_polarised_elements =
+    oskar_station_set_enable_array_pattern(station, aa->array_pattern.enable);
+    oskar_station_set_normalise_beam(station, aa->array_pattern.normalise);
+    oskar_station_set_gaussian_beam_fwhm_rad(station,
+            settings->telescope.gaussian_beam.fwhm_deg * M_PI / 180.0);
+    oskar_station_set_use_polarised_elements(station,
             !(aa->element_pattern.functional_type ==
-                    OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC);
+                    OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC));
 
     /* Set element pattern data, if element structure exists. */
-    if (station->element_pattern)
+    if (oskar_station_has_element(station))
     {
-        station->element_pattern->type = aa->element_pattern.functional_type;
-        station->element_pattern->taper_type = aa->element_pattern.taper.type;
-        station->element_pattern->cos_power =
-                aa->element_pattern.taper.cosine_power;
-        station->element_pattern->gaussian_fwhm_rad =
-                aa->element_pattern.taper.gaussian_fwhm_rad;
+        oskar_ElementModel* element;
+        element = oskar_station_element(station, 0);
+        element->element_type = aa->element_pattern.functional_type;
+        element->taper_type = aa->element_pattern.taper.type;
+        element->cos_power = aa->element_pattern.taper.cosine_power;
+        element->gaussian_fwhm_rad = aa->element_pattern.taper.gaussian_fwhm_rad;
     }
 
     /* Set pointing data based on station depth in hierarchy. */
     i = (depth < settings->obs.num_pointing_levels) ? depth :
             settings->obs.num_pointing_levels - 1;
-    station->beam_longitude_rad = settings->obs.ra0_rad[i];
-    station->beam_latitude_rad = settings->obs.dec0_rad[i];
+    oskar_station_set_phase_centre(station, OSKAR_SPHERICAL_TYPE_EQUATORIAL,
+            settings->obs.ra0_rad[i], settings->obs.dec0_rad[i]);
 
     /* Recursively set data for child stations. */
-    if (station->child)
+    if (oskar_station_has_child(station))
     {
-        for (i = 0; i < station->num_elements; ++i)
+        int num_elements;
+        num_elements = oskar_station_num_elements(station);
+        for (i = 0; i < num_elements; ++i)
         {
-            set_station_data(&station->child[i], station, depth + 1, settings);
+            set_station_data(oskar_station_child(station, i), station,
+                    depth + 1, settings);
         }
     }
 }
 
-static void save_telescope(oskar_TelescopeModel *telescope,
+static void save_telescope(oskar_Telescope *telescope,
         const oskar_SettingsTelescope* settings, oskar_Log* log,
         const char* dir, int* status)
 {
@@ -217,7 +215,7 @@ static void save_telescope(oskar_TelescopeModel *telescope,
     }
 
     oskar_log_message(log, 1, "Writing telescope model to disk as: %s", dir);
-    oskar_telescope_model_save(telescope, dir, status);
+    oskar_telescope_save(telescope, dir, status);
     if (*status)
     {
         oskar_log_error(log, "Failed to save telescope "

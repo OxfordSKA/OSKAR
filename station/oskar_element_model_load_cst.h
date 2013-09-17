@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,10 @@
  * @file oskar_element_model_load_cst.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_ElementModel.h"
-#include "station/oskar_SettingsElementFit.h"
-#include "utility/oskar_Log.h"
+#include <oskar_global.h>
+#include <oskar_ElementModel.h>
+#include <oskar_SettingsElementFit.h>
+#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {

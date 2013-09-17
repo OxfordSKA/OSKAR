@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,25 +26,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_log_line.h"
-#include "utility/oskar_log_write.h"
+#include <private_log.h>
+#include <oskar_log.h>
 #include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_log_line(oskar_Log* log, char code)
+void oskar_log_line(oskar_Log* log, char code)
 {
-    int retval;
     va_list args;
 
     /* Write to standard output. */
     oskar_log_writev_stdout(code, -1000, 0, 0, 0, args);
 
     /* Write to log file. */
-    retval = oskar_log_writev(log, code, -1000, 0, 0, 0, args);
-    return retval;
+    oskar_log_writev(log, code, -1000, 0, 0, 0, args);
 }
 
 #ifdef __cplusplus

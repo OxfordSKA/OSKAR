@@ -27,7 +27,7 @@
  */
 
 #include "station/oskar_system_noise_model_init.h"
-#include "utility/oskar_mem_init.h"
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

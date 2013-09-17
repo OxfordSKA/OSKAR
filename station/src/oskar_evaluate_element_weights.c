@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_element_weights.h"
-#include "station/oskar_evaluate_element_weights_dft.h"
-#include "station/oskar_evaluate_element_weights_errors.h"
-#include "utility/oskar_mem_element_multiply.h"
-#include "utility/oskar_mem_realloc.h"
+#include <oskar_evaluate_element_weights.h>
+#include <oskar_evaluate_element_weights_dft.h>
+#include <oskar_evaluate_element_weights_errors.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void oskar_evaluate_element_weights(oskar_Mem* weights,
-        oskar_Mem* weights_error, const oskar_StationModel* station,
+        oskar_Mem* weights_error, const oskar_Station* station,
         double x_beam, double y_beam, double z_beam,
-        oskar_CurandState* curand_state, int* status)
+        oskar_RandomState* random_state, int* status)
 {
     int num_elements;
 
@@ -54,25 +52,29 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
     if (*status) return;
 
     /* Resize weights and weights error work arrays if required. */
-    num_elements = station->num_elements;
-    if (weights->num_elements < num_elements)
+    num_elements = oskar_station_num_elements(station);
+    if ((int)oskar_mem_length(weights) < num_elements)
         oskar_mem_realloc(weights, num_elements, status);
-    if (weights_error->num_elements < num_elements)
+    if ((int)oskar_mem_length(weights_error) < num_elements)
         oskar_mem_realloc(weights_error, num_elements, status);
 
     /* Generate DFT weights. */
     oskar_evaluate_element_weights_dft(weights, num_elements,
-            &station->x_weights, &station->y_weights, &station->z_weights,
+            oskar_station_element_x_weights_const(station),
+            oskar_station_element_y_weights_const(station),
+            oskar_station_element_z_weights_const(station),
             x_beam, y_beam, z_beam, status);
 
     /* Apply time-variable errors. */
-    if (station->apply_element_errors)
+    if (oskar_station_apply_element_errors(station))
     {
         /* Generate weights errors. */
-        oskar_evaluate_element_weights_errors(weights_error,
-                num_elements, &station->gain, &station->gain_error,
-                &station->phase_offset, &station->phase_error,
-                curand_state, status);
+        oskar_evaluate_element_weights_errors(weights_error, num_elements,
+                oskar_station_element_gain_const(station),
+                oskar_station_element_gain_error_const(station),
+                oskar_station_element_phase_offset_const(station),
+                oskar_station_element_phase_error_const(station),
+                random_state, status);
 
         /* Modify the weights (complex multiply with error vector). */
         oskar_mem_element_multiply(0, weights, weights_error,
@@ -80,9 +82,12 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
     }
 
     /* Modify the weights using the provided apodisation values. */
-    if (station->apply_element_weight)
-        oskar_mem_element_multiply(0, weights, &station->weight,
-                num_elements, status);
+    if (oskar_station_apply_element_weight(station))
+    {
+        oskar_mem_element_multiply(0, weights,
+                oskar_station_element_weight_const(station), num_elements,
+                status);
+    }
 }
 
 #ifdef __cplusplus

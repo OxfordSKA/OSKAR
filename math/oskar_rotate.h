@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_ROTATE_H_
 #define OSKAR_ROTATE_H_
 
@@ -34,76 +33,142 @@
  * @file oskar_rotate.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief rotate a set of points about the x axis.
- *
- * @param n         Number of points to rotate.
- * @param x         x coordinates.
- * @param y         y coordinates.
- * @param z         z coordinates.
- * @param angle     rotation angle, in radians.
- *
- * @return An error code.
- */
-OSKAR_EXPORT
-int oskar_rotate_x(int n, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
-        double angle);
-
 
 /**
- * @brief rotate a set of points about the y axis.
+ * @brief
+ * Rotate on a sphere by the specified longitude and latitude
+ * (single precision).
  *
- * @param n         Number of points to rotate.
- * @param x         x coordinates.
- * @param y         y coordinates.
- * @param z         z coordinates.
- * @param angle     rotation angle, in radians.
- *
- * @return An error code.
- */
-OSKAR_EXPORT
-int oskar_rotate_y(int n, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
-        double angle);
-
-
-/**
- * @brief rotate a set of points about the z axis.
- *
- * @param n         Number of points to rotate.
- * @param x         x coordinates.
- * @param y         y coordinates.
- * @param z         z coordinates.
- * @param angle     rotation angle, in radians.
- *
- * @return An error code.
- */
-OSKAR_EXPORT
-int oskar_rotate_z(int n, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
-        double angle);
-
-/**
- * @brief Rotate on the surface of a sphere by the specified longitude
+ * @details
+ * Rotates points on the surface of a sphere by the specified longitude
  * and latitude.
  *
- * @param n         Number of points to rotate.
- * @param x         x coordinates.
- * @param y         y coordinates.
- * @param z         z coordinates.
- * @param lon       East longitude rotation angle, in radians.
- * @param lat       North latitude rotation angle, in radians.
- *
- * @return An error code.
+ * @param[in] num_points   Number of points to rotate.
+ * @param[in,out] x        The x-coordinates.
+ * @param[in,out] y        The y-coordinates.
+ * @param[in,out] z        The z-coordinates.
+ * @param[in] lon          East-positive longitude rotation angle, in radians.
+ * @param[in] lat          North-positive latitude rotation angle, in radians.
  */
 OSKAR_EXPORT
-int oskar_rotate_sph(int n, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
+void oskar_rotate_sph_f(int num_points, float* x, float* y, float*z,
+        float lon, float lat);
+
+/**
+ * @brief
+ * Rotate on a sphere by the specified longitude and latitude
+ * (double precision).
+ *
+ * @details
+ * Rotates points on the surface of a sphere by the specified longitude
+ * and latitude.
+ *
+ * @param[in] num_points   Number of points to rotate.
+ * @param[in,out] x        The x-coordinates.
+ * @param[in,out] y        The y-coordinates.
+ * @param[in,out] z        The z-coordinates.
+ * @param[in] lon          East-positive longitude rotation angle, in radians.
+ * @param[in] lat          North-positive latitude rotation angle, in radians.
+ */
+OSKAR_EXPORT
+void oskar_rotate_sph_d(int num_points, double* x, double* y, double*z,
         double lon, double lat);
+
+/**
+ * @brief
+ * Rotates points around the the x-axis (single precision).
+ *
+ * @details
+ * Rotates a set of points by a given angle about the x-axis.
+ *
+ * @param[in] num_points Number of points to rotate.
+ * @param[in,out] y      The y-coordinates.
+ * @param[in,out] z      The z-coordinates.
+ * @param[in] angle      Rotation angle, in radians.
+ */
+OSKAR_EXPORT
+void oskar_rotate_x_f(int num_points, float* y, float* z, float angle);
+
+/**
+ * @brief
+ * Rotates points around the the y-axis (single precision).
+ *
+ * @details
+ * Rotates a set of points by a given angle about the y-axis.
+ *
+ * @param[in] num_points Number of points to rotate.
+ * @param[in,out] x      The x-coordinates.
+ * @param[in,out] z      The z-coordinates.
+ * @param[in] angle      Rotation angle, in radians.
+ */
+OSKAR_EXPORT
+void oskar_rotate_y_f(int num_points, float* x, float* z, float angle);
+
+/**
+ * @brief
+ * Rotates points around the the z-axis (single precision).
+ *
+ * @details
+ * Rotates a set of points by a given angle about the z-axis.
+ *
+ * @param[in] num_points Number of points to rotate.
+ * @param[in,out] x      The x-coordinates.
+ * @param[in,out] y      The y-coordinates.
+ * @param[in] angle      Rotation angle, in radians.
+ */
+OSKAR_EXPORT
+void oskar_rotate_z_f(int num_points, float* x, float* y, float angle);
+
+/**
+ * @brief
+ * Rotates points around the the x-axis (double precision).
+ *
+ * @details
+ * Rotates a set of points by a given angle about the x-axis.
+ *
+ * @param[in] num_points Number of points to rotate.
+ * @param[in,out] y      The y-coordinates.
+ * @param[in,out] z      The z-coordinates.
+ * @param[in] angle      Rotation angle, in radians.
+ */
+OSKAR_EXPORT
+void oskar_rotate_x_d(int num_points, double* y, double* z, double angle);
+
+/**
+ * @brief
+ * Rotates points around the the y-axis (double precision).
+ *
+ * @details
+ * Rotates a set of points by a given angle about the y-axis.
+ *
+ * @param[in] num_points Number of points to rotate.
+ * @param[in,out] x      The x-coordinates.
+ * @param[in,out] z      The z-coordinates.
+ * @param[in] angle      Rotation angle, in radians.
+ */
+OSKAR_EXPORT
+void oskar_rotate_y_d(int num_points, double* x, double* z, double angle);
+
+/**
+ * @brief
+ * Rotates points around the the z-axis (double precision).
+ *
+ * @details
+ * Rotates a set of points by a given angle about the z-axis.
+ *
+ * @param[in] num_points Number of points to rotate.
+ * @param[in,out] x      The x-coordinates.
+ * @param[in,out] y      The y-coordinates.
+ * @param[in] angle      Rotation angle, in radians.
+ */
+OSKAR_EXPORT
+void oskar_rotate_z_d(int num_points, double* x, double* y, double angle);
 
 #ifdef __cplusplus
 }

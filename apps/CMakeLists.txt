@@ -72,17 +72,17 @@ if (QT4_FOUND AND CUDA_FOUND)
     set(name oskar_visibilities_stats)
     oskar_qt_app(${name} ${name}_main.cpp)
 
-    # BINARY: osakr_sim_tec_screen
-    #set(name oskar_sim_tec_screen)
-    #oskar_app(${name} ${name}_main.cpp
-    #    EXTRA_LIBS oskar_apps
-    #    NO_INSTALL)
+    # BINARY: oskar_sim_tec_screen
+    set(name oskar_sim_tec_screen)
+    oskar_app(${name} ${name}_main.cpp
+        EXTRA_LIBS oskar_apps
+        NO_INSTALL)
 
-    # BINARY: osakr_evaluate_pierce_points
-    #set(name oskar_evaluate_pierce_points)
-    #oskar_app(${name} ${name}_main.cpp
-    #    EXTRA_LIBS oskar_apps
-    #    NO_INSTALL)
+    # BINARY: oskar_evaluate_pierce_points
+    set(name oskar_evaluate_pierce_points)
+    oskar_app(${name} ${name}_main.cpp
+        EXTRA_LIBS oskar_apps
+        NO_INSTALL)
 endif ()
 
 

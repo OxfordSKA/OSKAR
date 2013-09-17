@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_spline_data_evaluate.h"
-#include "station/oskar_apply_element_taper_cosine.h"
-#include "station/oskar_apply_element_taper_gaussian.h"
-#include "station/oskar_element_model_evaluate.h"
-#include "station/oskar_evaluate_dipole_pattern.h"
-#include "utility/oskar_mem_type_check.h"
-#include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_mem_set_value_real.h"
-#include "utility/oskar_cuda_check_error.h"
+#include <oskar_element_model_evaluate.h>
+
+#include <oskar_spline_data_evaluate.h>
+#include <oskar_apply_element_taper_cosine.h>
+#include <oskar_apply_element_taper_gaussian.h>
+#include <oskar_evaluate_dipole_pattern.h>
+#include <oskar_cuda_check_error.h>
 
 #define PIf 3.14159265358979323846f
 #define PI  3.14159265358979323846
@@ -143,8 +141,8 @@ void oskar_hor_lmn_to_modified_theta_phi(oskar_Mem* theta, oskar_Mem* phi,
     if (*status) return;
 
     /* Get data type and location. */
-    type = theta->type;
-    location = theta->location;
+    type = oskar_mem_type(theta);
+    location = oskar_mem_location(theta);
 
     /* Compute modified theta and phi coordinates. */
     if (location == OSKAR_LOCATION_GPU)
@@ -202,28 +200,28 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model,
             model->phi_re_y.coeff.data && model->phi_im_y.coeff.data;
 
     /* Check that the output array is complex. */
-    if (!oskar_mem_is_complex(output->type))
+    if (!oskar_mem_is_complex(output))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Ensure there is enough space in the theta and phi work arrays. */
-    if (theta->num_elements < num_points)
+    if ((int)oskar_mem_length(theta) < num_points)
         oskar_mem_realloc(theta, num_points, status);
-    if (phi->num_elements < num_points)
+    if ((int)oskar_mem_length(phi) < num_points)
         oskar_mem_realloc(phi, num_points, status);
 
     /* Resize output array if required. */
-    if (output->num_elements < num_points)
+    if ((int)oskar_mem_length(output) < num_points)
         oskar_mem_realloc(output, num_points, status);
 
     /* Check if safe to proceed. */
     if (*status) return;
 
     /* Check if element type is isotropic. */
-    if (model->type == OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC)
+    if (model->element_type == OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC)
         oskar_mem_set_value_real(output, 1.0, status);
 
     /* Evaluate polarised response if output array is matrix type. */
-    if (oskar_mem_is_matrix(output->type))
+    if (oskar_mem_is_matrix(output))
     {
         double delta_phi_x, delta_phi_y;
 
@@ -246,7 +244,7 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model,
             oskar_spline_data_evaluate(output, 3, 8, &model->phi_im_x,
                     num_points, theta, phi, status);
         }
-        else if (model->type == OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE)
+        else if (model->element_type == OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE)
         {
             /* Compute modified theta and phi coordinates for dipole X. */
             delta_phi_x = orientation_x - PI/2; /* TODO check the order. */
@@ -278,7 +276,7 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model,
             oskar_spline_data_evaluate(output, 7, 8, &model->phi_im_y,
                     num_points, theta, phi, status);
         }
-        else if (model->type == OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE)
+        else if (model->element_type == OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE)
         {
             /* Compute modified theta and phi coordinates for dipole X. */
             delta_phi_y = orientation_y - PI/2; /* TODO check the order. */

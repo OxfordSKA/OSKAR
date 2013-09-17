@@ -29,7 +29,7 @@
 #include "utility/oskar_BinaryTag.h"
 #include "utility/oskar_binary_stream_write.h"
 #include "utility/oskar_endian.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_mem.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

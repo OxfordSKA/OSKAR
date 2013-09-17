@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  * @file oskar_SplineData.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
 
 /**
  * @brief Structure to hold spline data.
@@ -43,7 +43,7 @@
  * This structure holds the data required to construct a surface from
  * splines.
  */
-struct OSKAR_EXPORT oskar_SplineData
+struct oskar_SplineData
 {
     int num_knots_x;      /**< Number of knots in x. */
     int num_knots_y;      /**< Number of knots in y. */

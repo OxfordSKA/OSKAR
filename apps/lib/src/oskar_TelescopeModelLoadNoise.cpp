@@ -26,15 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "apps/lib/oskar_TelescopeModelLoadNoise.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_realloc.h"
-#include "interferometry/oskar_telescope_model_type.h"
 
+#include <QtCore/QString>
+#include <QtCore/QHash>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 
@@ -67,14 +62,14 @@ oskar_TelescopeModelLoadNoise::~oskar_TelescopeModelLoadNoise()
 // Depth = 0
 // - Set up frequency data as this is the same for all stations
 //   and if defined by files these have to be at depth 0.
-void oskar_TelescopeModelLoadNoise::load(oskar_TelescopeModel* telescope,
+void oskar_TelescopeModelLoadNoise::load(oskar_Telescope* telescope,
         const QDir& cwd, int num_subdirs, QHash<QString, QString>& filemap,
         int* status)
 {
     if (*status || !settings_->interferometer.noise.enable)
         return;
 
-    dataType_ = oskar_telescope_model_type(telescope);
+    dataType_ = oskar_telescope_type(telescope);
 
     // Update the noise files for the current station directory.
     updateFileMap_(filemap, cwd);
@@ -86,41 +81,45 @@ void oskar_TelescopeModelLoadNoise::load(oskar_TelescopeModel* telescope,
     // If no sub-directories (the station load function is never called)
     if (num_subdirs == 0)
     {
-        for (int i = 0; i < telescope->num_stations; ++i)
+        int num_stations = oskar_telescope_num_stations(telescope);
+        for (int i = 0; i < num_stations; ++i)
         {
-            oskar_StationModel* station = &telescope->station[i];
-            oskar_mem_copy(&station->noise.frequency, &freqs_, status);
-            setNoiseRMS_(&station->noise, filemap, status);
+            oskar_Station* s = oskar_telescope_station(telescope, i);
+            oskar_SystemNoiseModel* noise = oskar_station_system_noise_model(s);
+            oskar_mem_copy(&noise->frequency, &freqs_, status);
+            setNoiseRMS_(noise, filemap, status);
         }
     }
 }
 
 
 // Depth > 0
-void oskar_TelescopeModelLoadNoise::load(oskar_StationModel* station,
+void oskar_TelescopeModelLoadNoise::load(oskar_Station* station,
         const QDir& cwd, int /*num_subdirs*/, int depth,
         QHash<QString, QString>& filemap, int* status)
 {
     if (*status || !settings_->interferometer.noise.enable)
         return;
 
-    if (*status) return;
-
     // Ignore noise files defined deeper than at the station level (depth == 1)
     // - Currently, noise is implemented as a additive term per station
     //   into the visibilities so using files at any other depth would be
     //   meaningless.
     if (depth > 1)
+    {
         *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+        return;
+    }
 
     // Update the noise files for the current station directory.
     updateFileMap_(filemap, cwd);
 
     // Set the frequency noise data field of the station structure.
-    oskar_mem_copy(&station->noise.frequency, &freqs_, status);
+    oskar_SystemNoiseModel* noise = oskar_station_system_noise_model(station);
+    oskar_mem_copy(&noise->frequency, &freqs_, status);
 
     // Set the noise RMS based on files or settings.
-    setNoiseRMS_(&station->noise, filemap, status);
+    setNoiseRMS_(noise, filemap, status);
 }
 
 
@@ -189,7 +188,7 @@ void oskar_TelescopeModelLoadNoise::getNoiseFreqs_(oskar_Mem* freqs,
         }
         oskar_mem_realloc(freqs, num_freqs, status);
         if (*status) return;
-        if (freqs->type == OSKAR_DOUBLE)
+        if (oskar_mem_type(freqs) == OSKAR_DOUBLE)
         {
             for (int i = 0; i < num_freqs; ++i)
                 ((double*)freqs->data)[i] = start + i * inc;
@@ -211,7 +210,7 @@ void oskar_TelescopeModelLoadNoise::setNoiseRMS_(
 
     const oskar_SettingsSystemNoise& settings_noise = settings_->interferometer.noise;
     oskar_Mem* noise_rms = &noise_model->rms;
-    int num_freqs = noise_model->frequency.num_elements;
+    int num_freqs = (int)oskar_mem_length(&noise_model->frequency);
     // Note: the previous noise loader implementation had integration time as
     // obs_length / number of snapshots which was wrong!
     double integration_time = settings_->interferometer.time_average_sec;
@@ -283,9 +282,9 @@ void oskar_TelescopeModelLoadNoise::noiseSpecTelescopeModel_(oskar_Mem* noise_rm
             QFile::exists(filemap[files_[EFFICIENCY]]))
     {
         oskar_Mem t_sys, area, efficiency;
-        oskar_mem_init(&t_sys, dataType_, loc, num_freqs, 0, status);
-        oskar_mem_init(&area, dataType_, loc, num_freqs, 0, status);
-        oskar_mem_init(&efficiency, dataType_, loc, num_freqs, 0, status);
+        oskar_mem_init(&t_sys, dataType_, loc, num_freqs, 1, status);
+        oskar_mem_init(&area, dataType_, loc, num_freqs, 1, status);
+        oskar_mem_init(&efficiency, dataType_, loc, num_freqs, 1, status);
         filename = filemap[files_[TSYS]].toLatin1();
         oskar_system_noise_model_load(&t_sys, filename.constData(), status);
         filename = filemap[files_[AREA]].toLatin1();
@@ -457,7 +456,7 @@ void oskar_TelescopeModelLoadNoise::sensitivity_to_rms_(oskar_Mem* rms,
 {
     if (*status) return;
 
-    if (rms->num_elements != num_freqs)
+    if ((int)oskar_mem_length(rms) != num_freqs)
     {
         oskar_mem_realloc(rms, num_freqs, status);
         if (*status) return;
@@ -493,19 +492,19 @@ void oskar_TelescopeModelLoadNoise::t_sys_to_rms_(oskar_Mem* rms,
     double k_B = 1.3806488e-23;
 
     /* Get type and check consistency. */
-    int type = rms->type;
-    if (t_sys->type != type || area->type != type || efficiency->type != type)
+    int type = oskar_mem_type(rms);
+    if (oskar_mem_type(t_sys) != type || oskar_mem_type(area) != type || oskar_mem_type(efficiency) != type)
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-    if (t_sys->num_elements != num_freqs || area->num_elements != num_freqs)
+    if ((int)oskar_mem_length(t_sys) != num_freqs || (int)oskar_mem_length(area) != num_freqs)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
     }
 
-    if (rms->num_elements != num_freqs)
+    if ((int)oskar_mem_length(rms) != num_freqs)
     {
         oskar_mem_realloc(rms, num_freqs, status);
         if (*status) return;
@@ -549,21 +548,21 @@ void oskar_TelescopeModelLoadNoise::evaluate_range_(oskar_Mem* values,
     if (*status) return;
 
     double inc = (end - start) / (double)num_values;
-    if (values->num_elements != num_values)
+    if ((int)oskar_mem_length(values) != num_values)
     {
         oskar_mem_realloc(values, num_values, status);
         if (*status) return;
     }
 
-    if (values->type == OSKAR_DOUBLE)
+    if (oskar_mem_type(values) == OSKAR_DOUBLE)
     {
-        double* values_ = (double*)values->data;
+        double* values_ = oskar_mem_double(values, status);
         for (int i = 0; i < num_values; ++i)
             values_[i] = start + i * inc;
     }
-    else if (values->type == OSKAR_SINGLE)
+    else if (oskar_mem_type(values) == OSKAR_SINGLE)
     {
-        float* values_ = (float*)values->data;
+        float* values_ = oskar_mem_float(values, status);
         for (int i = 0; i < num_values; ++i)
             values_[i] = start + i * inc;
     }

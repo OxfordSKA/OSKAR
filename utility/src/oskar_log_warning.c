@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_log_warning.h"
-#include "utility/oskar_log_write.h"
+#include <private_log.h>
+#include <oskar_log.h>
+
 #include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_log_warning(oskar_Log* log, const char* format, ...)
+void oskar_log_warning(oskar_Log* log, const char* format, ...)
 {
-    int retval;
     char code = 'W';
     const char* prefix = "WARNING";
     va_list args;
@@ -48,9 +48,8 @@ int oskar_log_warning(oskar_Log* log, const char* format, ...)
 
     /* Write to log file. */
     va_start(args, format);
-    retval = oskar_log_writev(log, code, -100, 0, prefix, format, args);
+    oskar_log_writev(log, code, -100, 0, prefix, format, args);
     va_end(args);
-    return retval;
 }
 
 #ifdef __cplusplus

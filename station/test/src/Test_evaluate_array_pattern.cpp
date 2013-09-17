@@ -28,35 +28,17 @@
 
 #include <cuda_runtime_api.h>
 #include "station/test/Test_evaluate_array_pattern.h"
-#include "station/oskar_station_model_analyse.h"
-#include "station/oskar_station_model_copy.h"
-#include "station/oskar_station_model_free.h"
-#include "station/oskar_station_model_init.h"
-#include "station/oskar_station_model_type.h"
-#include "station/oskar_station_model_location.h"
-#include "station/oskar_station_model_multiply_by_wavenumber.h"
-#include "station/oskar_station_model_set_element_coords.h"
-#include "station/oskar_station_model_set_element_errors.h"
-#include "station/oskar_station_model_set_element_orientation.h"
-#include "station/oskar_station_model_set_element_weight.h"
-#include "station/oskar_evaluate_array_pattern.h"
-#include "station/oskar_evaluate_array_pattern_hierarchical.h"
-#include "station/oskar_evaluate_beam_horizontal_lmn.h"
-#include "station/oskar_evaluate_source_horizontal_lmn.h"
-#include "station/oskar_evaluate_element_weights_dft.h"
-#include "imaging/oskar_evaluate_image_lon_lat_grid.h"
-#include "imaging/oskar_image_free.h"
-#include "imaging/oskar_image_init.h"
-#include "imaging/oskar_image_resize.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_get_pointer.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_insert.h"
-#include "utility/oskar_mem_set_value_real.h"
-#include "utility/oskar_mem_type_check.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_station.h>
+#include <oskar_evaluate_array_pattern.h>
+#include <oskar_evaluate_array_pattern_hierarchical.h>
+#include <oskar_evaluate_beam_horizontal_lmn.h>
+#include <oskar_evaluate_source_horizontal_lmn.h>
+#include <oskar_evaluate_element_weights_dft.h>
+#include <oskar_evaluate_image_lon_lat_grid.h>
+#include <oskar_image_free.h>
+#include <oskar_image_init.h>
+#include <oskar_image_resize.h>
+#include <oskar_get_error_string.h>
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
@@ -91,14 +73,14 @@ static void check_images(const oskar_Image* image1, const oskar_Image* image2)
         CPPUNIT_FAIL("Inconsistent frequency dimensions.");
         return;
     }
-    if ((image1->data.type & OSKAR_COMPLEX) !=
-            (image2->data.type & OSKAR_COMPLEX))
+    if ((oskar_mem_type(&image1->data) & OSKAR_COMPLEX) !=
+            (oskar_mem_type(&image2->data) & OSKAR_COMPLEX))
     {
         CPPUNIT_FAIL("Inconsistent data types (complex flag).");
         return;
     }
-    if ((image1->data.type & OSKAR_MATRIX) !=
-            (image2->data.type & OSKAR_MATRIX))
+    if ((oskar_mem_type(&image1->data) & OSKAR_MATRIX) !=
+            (oskar_mem_type(&image2->data) & OSKAR_MATRIX))
     {
         CPPUNIT_FAIL("Inconsistent data types (matrix flag).");
         return;
@@ -107,14 +89,14 @@ static void check_images(const oskar_Image* image1, const oskar_Image* image2)
     /* Get the total number of elements to check. */
     n = image1->width * image1->height * image1->num_pols *
             image1->num_times * image1->num_channels;
-    if (oskar_mem_is_complex(image1->data.type))
+    if (oskar_mem_is_complex(&image1->data))
         n *= 2;
-    if (oskar_mem_is_matrix(image1->data.type))
+    if (oskar_mem_is_matrix(&image1->data))
         n *= 4;
 
     /* Check image contents are the same, to appropriate precision. */
-    if (oskar_mem_base_type(image1->data.type) == OSKAR_SINGLE &&
-            oskar_mem_base_type(image2->data.type) == OSKAR_SINGLE)
+    if (oskar_mem_precision(&image1->data) == OSKAR_SINGLE &&
+            oskar_mem_precision(&image2->data) == OSKAR_SINGLE)
     {
         const float *d1, *d2;
         d1 = (const float*)(image1->data.data);
@@ -125,8 +107,8 @@ static void check_images(const oskar_Image* image1, const oskar_Image* image2)
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(d1[i], d2[i], 1e-4);
         }
     }
-    else if (oskar_mem_base_type(image1->data.type) == OSKAR_SINGLE &&
-            oskar_mem_base_type(image2->data.type) == OSKAR_DOUBLE)
+    else if (oskar_mem_precision(&image1->data) == OSKAR_SINGLE &&
+            oskar_mem_precision(&image2->data) == OSKAR_DOUBLE)
     {
         const float *d1;
         const double *d2;
@@ -138,8 +120,8 @@ static void check_images(const oskar_Image* image1, const oskar_Image* image2)
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(d1[i], d2[i], 1e-4);
         }
     }
-    else if (oskar_mem_base_type(image1->data.type) == OSKAR_DOUBLE &&
-            oskar_mem_base_type(image2->data.type) == OSKAR_SINGLE)
+    else if (oskar_mem_precision(&image1->data) == OSKAR_DOUBLE &&
+            oskar_mem_precision(&image2->data) == OSKAR_SINGLE)
     {
         const double *d1;
         const float *d2;
@@ -151,8 +133,8 @@ static void check_images(const oskar_Image* image1, const oskar_Image* image2)
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(d1[i], d2[i], 1e-4);
         }
     }
-    else if (oskar_mem_base_type(image1->data.type) == OSKAR_DOUBLE &&
-            oskar_mem_base_type(image2->data.type) == OSKAR_DOUBLE)
+    else if (oskar_mem_precision(&image1->data) == OSKAR_DOUBLE &&
+            oskar_mem_precision(&image2->data) == OSKAR_DOUBLE)
     {
         const double *d1, *d2;
         d1 = (const double*)(image1->data.data);
@@ -196,20 +178,22 @@ static void set_up_beam_pattern(oskar_Image* bp, int type, bool polarised,
 static void set_up_image(oskar_Image* image, const oskar_Image* beam_pattern)
 {
     int type;
-    type = oskar_mem_base_type(beam_pattern->data.type);
+    type = oskar_mem_precision(&beam_pattern->data);
 }
 #endif
 
-static void set_up_station1(oskar_StationModel* station, int num_x, int num_y,
+static oskar_Station* set_up_station1(int num_x, int num_y,
         int type, double beam_ra_deg, double beam_dec_deg, double freq_hz,
         int* status)
 {
+    oskar_Station* station;
+
     /* Generator parameters. */
     double sep_m = 1.0;
     int dummy = 0, ix, iy, i;
 
     /* Initialise the station model. */
-    oskar_station_model_init(station, type, OSKAR_LOCATION_CPU,
+    station = oskar_station_create(type, OSKAR_LOCATION_CPU,
             num_x * num_y, status);
 
     /* Generate a square station. */
@@ -221,72 +205,75 @@ static void set_up_station1(oskar_StationModel* station, int num_x, int num_y,
             x = ix * sep_m - (num_x - 1) * sep_m / 2;
             y = iy * sep_m - (num_y - 1) * sep_m / 2;
 
-            oskar_station_model_set_element_coords(station, i,
+            oskar_station_set_element_coords(station, i,
                     x, y, 0.0, 0.0, 0.0, 0.0, status);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
-            oskar_station_model_set_element_errors(station, i,
+            oskar_station_set_element_errors(station, i,
                     1.0, 0.0, 0.0, 0.0, status);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
-            oskar_station_model_set_element_weight(station, i,
+            oskar_station_set_element_weight(station, i,
                     1.0, 0.0, status);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
-            oskar_station_model_set_element_orientation(station, i,
+            oskar_station_set_element_orientation(station, i,
                     90.0, 0.0, status);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
         }
     }
 
     /* Load the station file. */
-    oskar_station_model_analyse(station, &dummy, status);
+    oskar_station_analyse(station, &dummy, status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
-    oskar_station_model_multiply_by_wavenumber(station, freq_hz, status);
+    oskar_station_multiply_by_wavenumber(station, freq_hz, status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
 
     /* Set meta-data. */
-    station->longitude_rad = 0.0;
-    station->latitude_rad = 70.0 * M_PI / 180.0;
-    station->altitude_m = 0.0;
-    station->beam_coord_type = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
-    station->beam_longitude_rad = beam_ra_deg * M_PI / 180.0;
-    station->beam_latitude_rad = beam_dec_deg * M_PI / 180.0;
+    oskar_station_set_position(station, 0.0, 70.0 * M_PI / 180.0, 0.0);
+    oskar_station_set_phase_centre(station, OSKAR_SPHERICAL_TYPE_EQUATORIAL,
+            beam_ra_deg * M_PI / 180.0, beam_dec_deg * M_PI / 180.0);
+    return station;
 }
 
 static void set_up_pointing(oskar_Mem* weights, oskar_Mem* x, oskar_Mem* y,
-        oskar_Mem* z, const oskar_StationModel* station, const oskar_Mem* lon,
+        oskar_Mem* z, const oskar_Station* station, const oskar_Mem* lon,
         const oskar_Mem* lat, double gast, int* status)
 {
-    double beam_x, beam_y, beam_z;
-    int type, location;
+    double beam_x, beam_y, beam_z, st_lat, last;
+    int type, location, num_elements;
 
-    type = oskar_station_model_type(station);
-    location = oskar_station_model_location(station);
+    type = oskar_station_type(station);
+    location = oskar_station_location(station);
+    num_elements = oskar_station_num_elements(station);
+    last = gast + oskar_station_longitude_rad(station);
+    st_lat = oskar_station_latitude_rad(station);
     oskar_mem_init(weights, type | OSKAR_COMPLEX, location,
-            station->num_elements, 1, status);
-    oskar_mem_init(x, type, location, lon->num_elements, 1, status);
-    oskar_mem_init(y, type, location, lon->num_elements, 1, status);
-    oskar_mem_init(z, type, location, lon->num_elements, 1, status);
+            num_elements, 1, status);
+    oskar_mem_init(x, type, location, (int)oskar_mem_length(lon), 1, status);
+    oskar_mem_init(y, type, location, (int)oskar_mem_length(lon), 1, status);
+    oskar_mem_init(z, type, location, (int)oskar_mem_length(lon), 1, status);
     oskar_evaluate_beam_horizontal_lmn(&beam_x, &beam_y, &beam_z, station,
             gast, status);
-    oskar_evaluate_source_horizontal_lmn(lon->num_elements, x, y, z, lon, lat,
-            station, gast, status);
-    oskar_evaluate_element_weights_dft(weights, station->num_elements,
-            &station->x_weights, &station->y_weights, &station->z_weights,
+    oskar_evaluate_source_horizontal_lmn((int)oskar_mem_length(lon), x, y, z,
+            lon, lat, last, st_lat, status);
+    oskar_evaluate_element_weights_dft(weights, num_elements,
+            oskar_station_element_x_weights_const(station),
+            oskar_station_element_y_weights_const(station),
+            oskar_station_element_z_weights_const(station),
             beam_x, beam_y, beam_z, status);
 }
 
 static void run_array_pattern(oskar_Image* bp,
-        const oskar_StationModel* station, const oskar_Mem* lon,
+        const oskar_Station* station, const oskar_Mem* lon,
         const oskar_Mem* lat, double gast, const char* message, int* status)
 {
     oskar_Mem w, x, y, z, pattern;
     int num_pixels, location;
 
     /* Get the meta-data. */
-    num_pixels = lon->num_elements;
-    location = oskar_station_model_location(station);
+    num_pixels = (int)oskar_mem_length(lon);
+    location = oskar_station_location(station);
 
     /* Initialise temporary arrays. */
-    oskar_mem_init(&pattern, bp->data.type, location, num_pixels, 1, status);
+    oskar_mem_init(&pattern, oskar_mem_type(&bp->data), location, num_pixels, 1, status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
     set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
@@ -306,22 +293,22 @@ static void run_array_pattern(oskar_Image* bp,
 }
 
 static void run_array_pattern_hierarchical(oskar_Image* bp,
-        const oskar_StationModel* station, const oskar_Mem* lon,
+        const oskar_Station* station, const oskar_Mem* lon,
         const oskar_Mem* lat, double gast, const char* message, int* status)
 {
     oskar_Mem w, x, y, z, ones, pattern;
     int num_pixels, location;
 
     /* Get the meta-data. */
-    num_pixels = lon->num_elements;
-    location = oskar_station_model_location(station);
+    num_pixels = (int)oskar_mem_length(lon);
+    location = oskar_station_location(station);
 
     /* Initialise temporary array. */
-    oskar_mem_init(&pattern, bp->data.type, location, num_pixels, 1, status);
+    oskar_mem_init(&pattern, oskar_mem_type(&bp->data), location, num_pixels, 1, status);
 
     /* Create a fake complex "signal" vector of ones. */
-    oskar_mem_init(&ones, bp->data.type, location,
-            num_pixels * station->num_elements, 1, status);
+    oskar_mem_init(&ones, oskar_mem_type(&bp->data), location,
+            num_pixels * oskar_station_num_elements(station), 1, status);
     oskar_mem_set_value_real(&ones, 1.0, status);
     set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, status);
     TIMER_START
@@ -335,7 +322,7 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
     oskar_mem_free(&z, status);
     oskar_mem_free(&ones, status);
 
-    if (oskar_mem_is_scalar(pattern.type))
+    if (oskar_mem_is_scalar(&pattern))
     {
         oskar_mem_insert(&bp->data, &pattern, 0, status);
     }
@@ -344,7 +331,7 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
         oskar_Mem pattern_temp;
 
         /* Copy beam pattern for re-ordering. */
-        oskar_mem_init(&pattern_temp, pattern.type, OSKAR_LOCATION_CPU,
+        oskar_mem_init(&pattern_temp, oskar_mem_type(&pattern), OSKAR_LOCATION_CPU,
                 num_pixels, 1, status);
         oskar_mem_copy(&pattern_temp, &pattern, status);
         if (*status)
@@ -354,7 +341,7 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
         }
 
         /* Re-order the polarisation data. */
-        if (oskar_mem_base_type(pattern.type) == OSKAR_SINGLE)
+        if (oskar_mem_precision(&pattern) == OSKAR_SINGLE)
         {
             float2* p = (float2*)bp->data.data;
             float4c* tc = (float4c*)pattern_temp.data;
@@ -366,7 +353,7 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
                 p[i + 3 * num_pixels] = tc[i].d; // phi_Y
             }
         }
-        else if (oskar_mem_base_type(pattern.type) == OSKAR_DOUBLE)
+        else if (oskar_mem_precision(&pattern) == OSKAR_DOUBLE)
         {
             double2* p = (double2*)bp->data.data;
             double4c* tc = (double4c*)pattern_temp.data;
@@ -398,8 +385,8 @@ void Test_evaluate_array_pattern::test()
 
     bool polarised;
     int status = 0, type = 0;
-    oskar_StationModel station_cpu_f, station_cpu_d;
-    oskar_StationModel station_gpu_f, station_gpu_d;
+    oskar_Station *station_cpu_f, *station_cpu_d;
+    oskar_Station *station_gpu_f, *station_gpu_d;
     oskar_Mem lon_cpu_f, lat_cpu_f, lon_cpu_d, lat_cpu_d;
     oskar_Mem lon_gpu_f, lat_gpu_f, lon_gpu_d, lat_gpu_d;
     oskar_Image bp_o2c_2d_cpu_f, bp_o2c_2d_cpu_d;
@@ -422,17 +409,15 @@ void Test_evaluate_array_pattern::test()
     int num_pixels = image_side * image_side;
 
     /* Set up station models. */
-    set_up_station1(&station_cpu_f, station_side, station_side, OSKAR_SINGLE,
+    station_cpu_f = set_up_station1(station_side, station_side, OSKAR_SINGLE,
             ra_deg, dec_deg, freq_hz, &status);
-    set_up_station1(&station_cpu_d, station_side, station_side, OSKAR_DOUBLE,
+    station_cpu_d = set_up_station1(station_side, station_side, OSKAR_DOUBLE,
             ra_deg, dec_deg, freq_hz, &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    oskar_station_model_init(&station_gpu_f, OSKAR_SINGLE, OSKAR_LOCATION_GPU,
-            0, &status);
-    oskar_station_model_init(&station_gpu_d, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            0, &status);
-    oskar_station_model_copy(&station_gpu_f, &station_cpu_f, &status);
-    oskar_station_model_copy(&station_gpu_d, &station_cpu_d, &status);
+    station_gpu_f = oskar_station_create_copy(station_cpu_f,
+            OSKAR_LOCATION_GPU, &status);
+    station_gpu_d = oskar_station_create_copy(station_cpu_d,
+            OSKAR_LOCATION_GPU, &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
     /* Set up longitude/latitude grids. */
@@ -518,80 +503,91 @@ void Test_evaluate_array_pattern::test()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
     /* Run the tests... */
-    station_cpu_f.array_is_3d = 0;
-    station_gpu_f.array_is_3d = 0;
-    run_array_pattern(&bp_o2c_2d_cpu_f, &station_cpu_f, &lon_cpu_f, &lat_cpu_f,
+    CPPUNIT_ASSERT_EQUAL(0, oskar_station_array_is_3d(station_cpu_f));
+    CPPUNIT_ASSERT_EQUAL(0, oskar_station_array_is_3d(station_gpu_f));
+    run_array_pattern(&bp_o2c_2d_cpu_f, station_cpu_f, &lon_cpu_f, &lat_cpu_f,
             gast, "Single, o2c, CPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern(&bp_o2c_2d_gpu_f, &station_gpu_f, &lon_gpu_f, &lat_gpu_f,
+    run_array_pattern(&bp_o2c_2d_gpu_f, station_gpu_f, &lon_gpu_f, &lat_gpu_f,
             gast, "Single, o2c, GPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern(&bp_o2c_2d_cpu_d, &station_cpu_d, &lon_cpu_d, &lat_cpu_d,
+    run_array_pattern(&bp_o2c_2d_cpu_d, station_cpu_d, &lon_cpu_d, &lat_cpu_d,
             gast, "Double, o2c, CPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern(&bp_o2c_2d_gpu_d, &station_gpu_d, &lon_gpu_d, &lat_gpu_d,
+    run_array_pattern(&bp_o2c_2d_gpu_d, station_gpu_d, &lon_gpu_d, &lat_gpu_d,
             gast, "Double, o2c, GPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_c2c_2d_cpu_f, &station_cpu_f,
+    run_array_pattern_hierarchical(&bp_c2c_2d_cpu_f, station_cpu_f,
             &lon_cpu_f, &lat_cpu_f, gast, "Single, c2c, CPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_c2c_2d_gpu_f, &station_gpu_f,
+    run_array_pattern_hierarchical(&bp_c2c_2d_gpu_f, station_gpu_f,
             &lon_gpu_f, &lat_gpu_f, gast, "Single, c2c, GPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_c2c_2d_cpu_d, &station_cpu_d,
+    run_array_pattern_hierarchical(&bp_c2c_2d_cpu_d, station_cpu_d,
             &lon_cpu_d, &lat_cpu_d, gast, "Double, c2c, CPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_c2c_2d_gpu_d, &station_gpu_d,
+    run_array_pattern_hierarchical(&bp_c2c_2d_gpu_d, station_gpu_d,
             &lon_gpu_d, &lat_gpu_d, gast, "Double, c2c, GPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_m2m_2d_cpu_f, &station_cpu_f,
+    run_array_pattern_hierarchical(&bp_m2m_2d_cpu_f, station_cpu_f,
             &lon_cpu_f, &lat_cpu_f, gast, "Single, m2m, CPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_m2m_2d_gpu_f, &station_gpu_f,
+    run_array_pattern_hierarchical(&bp_m2m_2d_gpu_f, station_gpu_f,
             &lon_gpu_f, &lat_gpu_f, gast, "Single, m2m, GPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_m2m_2d_cpu_d, &station_cpu_d,
+    run_array_pattern_hierarchical(&bp_m2m_2d_cpu_d, station_cpu_d,
             &lon_cpu_d, &lat_cpu_d, gast, "Double, m2m, CPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_m2m_2d_gpu_d, &station_gpu_d,
+    run_array_pattern_hierarchical(&bp_m2m_2d_gpu_d, station_gpu_d,
             &lon_gpu_d, &lat_gpu_d, gast, "Double, m2m, GPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    station_cpu_f.array_is_3d = 1;
-    station_gpu_f.array_is_3d = 1;
-    run_array_pattern(&bp_o2c_2d_cpu_f, &station_cpu_f, &lon_cpu_f, &lat_cpu_f,
+
+    /* Set 3D arrays. */
+    oskar_station_set_element_coords(station_cpu_f, 0,
+            0., 0., 1., 0., 0., 0., &status);
+    oskar_station_set_element_coords(station_gpu_f, 0,
+            0., 0., 1., 0., 0., 0., &status);
+    oskar_station_set_element_coords(station_cpu_f, 0,
+            0., 0., 0., 0., 0., 0., &status);
+    oskar_station_set_element_coords(station_gpu_f, 0,
+            0., 0., 0., 0., 0., 0., &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    CPPUNIT_ASSERT_EQUAL(1, oskar_station_array_is_3d(station_cpu_f));
+    CPPUNIT_ASSERT_EQUAL(1, oskar_station_array_is_3d(station_gpu_f));
+    run_array_pattern(&bp_o2c_2d_cpu_f, station_cpu_f, &lon_cpu_f, &lat_cpu_f,
             gast, "Single, o2c, CPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern(&bp_o2c_2d_gpu_f, &station_gpu_f, &lon_gpu_f, &lat_gpu_f,
+    run_array_pattern(&bp_o2c_2d_gpu_f, station_gpu_f, &lon_gpu_f, &lat_gpu_f,
             gast, "Single, o2c, GPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern(&bp_o2c_2d_cpu_d, &station_cpu_d, &lon_cpu_d, &lat_cpu_d,
+    run_array_pattern(&bp_o2c_2d_cpu_d, station_cpu_d, &lon_cpu_d, &lat_cpu_d,
             gast, "Double, o2c, CPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern(&bp_o2c_2d_gpu_d, &station_gpu_d, &lon_gpu_d, &lat_gpu_d,
+    run_array_pattern(&bp_o2c_2d_gpu_d, station_gpu_d, &lon_gpu_d, &lat_gpu_d,
             gast, "Double, o2c, GPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_c2c_2d_cpu_f, &station_cpu_f,
+    run_array_pattern_hierarchical(&bp_c2c_2d_cpu_f, station_cpu_f,
             &lon_cpu_f, &lat_cpu_f, gast, "Single, c2c, CPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_c2c_2d_gpu_f, &station_gpu_f,
+    run_array_pattern_hierarchical(&bp_c2c_2d_gpu_f, station_gpu_f,
             &lon_gpu_f, &lat_gpu_f, gast, "Single, c2c, GPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_c2c_2d_cpu_d, &station_cpu_d,
+    run_array_pattern_hierarchical(&bp_c2c_2d_cpu_d, station_cpu_d,
             &lon_cpu_d, &lat_cpu_d, gast, "Double, c2c, CPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_c2c_2d_gpu_d, &station_gpu_d,
+    run_array_pattern_hierarchical(&bp_c2c_2d_gpu_d, station_gpu_d,
             &lon_gpu_d, &lat_gpu_d, gast, "Double, c2c, GPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_m2m_2d_cpu_f, &station_cpu_f,
+    run_array_pattern_hierarchical(&bp_m2m_2d_cpu_f, station_cpu_f,
             &lon_cpu_f, &lat_cpu_f, gast, "Single, m2m, CPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_m2m_2d_gpu_f, &station_gpu_f,
+    run_array_pattern_hierarchical(&bp_m2m_2d_gpu_f, station_gpu_f,
             &lon_gpu_f, &lat_gpu_f, gast, "Single, m2m, GPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_m2m_2d_cpu_d, &station_cpu_d,
+    run_array_pattern_hierarchical(&bp_m2m_2d_cpu_d, station_cpu_d,
             &lon_cpu_d, &lat_cpu_d, gast, "Double, m2m, CPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    run_array_pattern_hierarchical(&bp_m2m_2d_gpu_d, &station_gpu_d,
+    run_array_pattern_hierarchical(&bp_m2m_2d_gpu_d, station_gpu_d,
             &lon_gpu_d, &lat_gpu_d, gast, "Double, m2m, GPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
@@ -662,9 +658,9 @@ void Test_evaluate_array_pattern::test()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
     /* Free station models. */
-    oskar_station_model_free(&station_gpu_f, &status);
-    oskar_station_model_free(&station_gpu_d, &status);
-    oskar_station_model_free(&station_cpu_f, &status);
-    oskar_station_model_free(&station_cpu_d, &status);
+    oskar_station_free(station_gpu_f, &status);
+    oskar_station_free(station_gpu_d, &status);
+    oskar_station_free(station_cpu_f, &status);
+    oskar_station_free(station_cpu_d, &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 }

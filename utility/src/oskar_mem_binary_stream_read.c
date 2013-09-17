@@ -26,15 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <private_mem.h>
+#include <oskar_mem.h>
+
 #include <oskar_binary_stream_read.h>
 #include <oskar_binary_tag_index_create.h>
 #include <oskar_binary_tag_index_query.h>
 #include <oskar_mem_binary_stream_read.h>
-#include <oskar_mem_copy.h>
-#include <oskar_mem_element_size.h>
-#include <oskar_mem_free.h>
-#include <oskar_mem_init.h>
-#include <oskar_mem_realloc.h>
 
 #include <stdlib.h>
 #include <math.h>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_blank_below_horizon.h"
-#include "station/oskar_blank_below_horizon_cuda.h"
-#include "utility/oskar_cuda_check_error.h"
+#include <oskar_blank_below_horizon.h>
+#include <oskar_blank_below_horizon_cuda.h>
+#include <oskar_cuda_check_error.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -126,23 +126,23 @@ void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
     if (*status) return;
 
     /* Check that all arrays are co-located. */
-    location = data->location;
-    if (mask->location != location)
+    location = oskar_mem_location(data);
+    if (oskar_mem_location(mask) != location)
         *status = OSKAR_ERR_LOCATION_MISMATCH;
 
     /* Check that the mask type is OK. */
-    if (mask->type != OSKAR_SINGLE && mask->type != OSKAR_DOUBLE)
+    if (oskar_mem_type(mask) != OSKAR_SINGLE && oskar_mem_type(mask) != OSKAR_DOUBLE)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that the dimensions are OK. */
-    if (data->num_elements < num_sources)
+    if ((int)oskar_mem_length(data) < num_sources)
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Check if safe to proceed. */
     if (*status) return;
 
     /* Zero the value of any positions below the horizon. */
-    type = data->type;
+    type = oskar_mem_type(data);
     if (location == OSKAR_LOCATION_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA

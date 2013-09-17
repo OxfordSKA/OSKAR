@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,16 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_binary_stream_read.h"
-#include "utility/oskar_binary_tag_index_create.h"
-#include "utility/oskar_binary_tag_index_query.h"
-#include "utility/oskar_mem_binary_file_read.h"
-#include "utility/oskar_mem_binary_stream_read.h"
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_element_size.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_realloc.h"
+#include <oskar_mem.h>
+#include <oskar_mem_binary_file_read.h>
+#include <oskar_mem_binary_stream_read.h>
 
 #include <stdlib.h>
 #include <math.h>

@@ -29,7 +29,7 @@
 #include "utility/oskar_binary_stream_read.h"
 #include "utility/oskar_binary_tag_index_create.h"
 #include "utility/oskar_binary_tag_index_query.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_mem.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

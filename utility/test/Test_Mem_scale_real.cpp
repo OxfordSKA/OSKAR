@@ -28,12 +28,8 @@
 
 #include <gtest/gtest.h>
 
+#include <oskar_mem.h>
 #include <oskar_get_error_string.h>
-#include <oskar_mem_free.h>
-#include <oskar_mem_init.h>
-#include <oskar_mem_init_copy.h>
-#include <oskar_mem_scale_real.h>
-#include <oskar_vector_types.h>
 
 
 TEST(Mem, scale_real_single)
@@ -44,10 +40,11 @@ TEST(Mem, scale_real_single)
 
     // Initialise.
     oskar_mem_init(&mem_cpu, OSKAR_SINGLE, OSKAR_LOCATION_CPU, n, 1, &status);
+    float* data = oskar_mem_float(&mem_cpu, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        ((float*)(mem_cpu.data))[i] = (float)i;
+        data[i] = (float)i;
     }
 
     // Scale and check contents.
@@ -55,7 +52,7 @@ TEST(Mem, scale_real_single)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        EXPECT_FLOAT_EQ(2.0f * i, ((float*)(mem_cpu.data))[i]);
+        EXPECT_FLOAT_EQ(2.0f * i, data[i]);
     }
 
     // Copy to GPU and scale again.
@@ -66,10 +63,11 @@ TEST(Mem, scale_real_single)
 
     // Copy back and check contents.
     oskar_mem_init_copy(&mem_cpu2, &mem_gpu, OSKAR_LOCATION_CPU, &status);
+    data = oskar_mem_float(&mem_cpu2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        EXPECT_FLOAT_EQ(4.0f * i, ((float*)(mem_cpu2.data))[i]);
+        EXPECT_FLOAT_EQ(4.0f * i, data[i]);
     }
 
     // Free memory.
@@ -88,11 +86,12 @@ TEST(Mem, scale_real_single_complex)
     // Initialise.
     oskar_mem_init(&mem_cpu, OSKAR_SINGLE_COMPLEX,
             OSKAR_LOCATION_CPU, n, 1, &status);
+    float2* data = oskar_mem_float2(&mem_cpu, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        ((float2*)(mem_cpu.data))[i].x = (float)i;
-        ((float2*)(mem_cpu.data))[i].y = (float)i + 0.2f;
+        data[i].x = (float)i;
+        data[i].y = (float)i + 0.2f;
     }
 
     // Scale and check contents.
@@ -100,7 +99,7 @@ TEST(Mem, scale_real_single_complex)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        float2 t = ((float2*)(mem_cpu.data))[i];
+        float2 t = data[i];
         EXPECT_FLOAT_EQ(2.0f * ((float)i), t.x);
         EXPECT_FLOAT_EQ(2.0f * ((float)i + 0.2f), t.y);
     }
@@ -113,10 +112,11 @@ TEST(Mem, scale_real_single_complex)
 
     // Copy back and check contents.
     oskar_mem_init_copy(&mem_cpu2, &mem_gpu, OSKAR_LOCATION_CPU, &status);
+    data = oskar_mem_float2(&mem_cpu2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        float2 t = ((float2*)(mem_cpu2.data))[i];
+        float2 t = data[i];
         EXPECT_FLOAT_EQ(4.0f * ((float)i), t.x);
         EXPECT_FLOAT_EQ(4.0f * ((float)i + 0.2f), t.y);
     }
@@ -137,17 +137,18 @@ TEST(Mem, scale_real_single_complex_matrix)
     // Initialise.
     oskar_mem_init(&mem_cpu, OSKAR_SINGLE_COMPLEX_MATRIX,
             OSKAR_LOCATION_CPU, n, 1, &status);
+    float4c* data = oskar_mem_float4c(&mem_cpu, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        ((float4c*)(mem_cpu.data))[i].a.x = (float)i;
-        ((float4c*)(mem_cpu.data))[i].a.y = (float)i + 0.2f;
-        ((float4c*)(mem_cpu.data))[i].b.x = (float)i + 0.4f;
-        ((float4c*)(mem_cpu.data))[i].b.y = (float)i + 0.6f;
-        ((float4c*)(mem_cpu.data))[i].c.x = (float)i + 0.8f;
-        ((float4c*)(mem_cpu.data))[i].c.y = (float)i + 1.0f;
-        ((float4c*)(mem_cpu.data))[i].d.x = (float)i + 1.2f;
-        ((float4c*)(mem_cpu.data))[i].d.y = (float)i + 1.4f;
+        data[i].a.x = (float)i;
+        data[i].a.y = (float)i + 0.2f;
+        data[i].b.x = (float)i + 0.4f;
+        data[i].b.y = (float)i + 0.6f;
+        data[i].c.x = (float)i + 0.8f;
+        data[i].c.y = (float)i + 1.0f;
+        data[i].d.x = (float)i + 1.2f;
+        data[i].d.y = (float)i + 1.4f;
     }
 
     // Scale and check contents.
@@ -155,7 +156,7 @@ TEST(Mem, scale_real_single_complex_matrix)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        float4c t = ((float4c*)(mem_cpu.data))[i];
+        float4c t = data[i];
         EXPECT_FLOAT_EQ(2.0f * ((float)i), t.a.x);
         EXPECT_FLOAT_EQ(2.0f * ((float)i + 0.2f), t.a.y);
         EXPECT_FLOAT_EQ(2.0f * ((float)i + 0.4f), t.b.x);
@@ -174,10 +175,11 @@ TEST(Mem, scale_real_single_complex_matrix)
 
     // Copy back and check contents.
     oskar_mem_init_copy(&mem_cpu2, &mem_gpu, OSKAR_LOCATION_CPU, &status);
+    data = oskar_mem_float4c(&mem_cpu2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        float4c t = ((float4c*)(mem_cpu2.data))[i];
+        float4c t = data[i];
         EXPECT_FLOAT_EQ(4.0f * ((float)i), t.a.x);
         EXPECT_FLOAT_EQ(4.0f * ((float)i + 0.2f), t.a.y);
         EXPECT_FLOAT_EQ(4.0f * ((float)i + 0.4f), t.b.x);
@@ -203,10 +205,11 @@ TEST(Mem, scale_real_double)
 
     // Initialise.
     oskar_mem_init(&mem_cpu, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n, 1, &status);
+    double* data = oskar_mem_double(&mem_cpu, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        ((double*)(mem_cpu.data))[i] = (double)i;
+        data[i] = (double)i;
     }
 
     // Scale and check contents.
@@ -214,7 +217,7 @@ TEST(Mem, scale_real_double)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        EXPECT_DOUBLE_EQ(2.0f * i, ((double*)(mem_cpu.data))[i]);
+        EXPECT_DOUBLE_EQ(2.0 * i, ((double*)(mem_cpu.data))[i]);
     }
 
     // Copy to GPU and scale again.
@@ -225,10 +228,11 @@ TEST(Mem, scale_real_double)
 
     // Copy back and check contents.
     oskar_mem_init_copy(&mem_cpu2, &mem_gpu, OSKAR_LOCATION_CPU, &status);
+    data = oskar_mem_double(&mem_cpu2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        EXPECT_DOUBLE_EQ(4.0f * i, ((double*)(mem_cpu2.data))[i]);
+        EXPECT_DOUBLE_EQ(4.0 * i, data[i]);
     }
 
     // Free memory.
@@ -247,11 +251,12 @@ TEST(Mem, scale_real_double_complex)
     // Initialise.
     oskar_mem_init(&mem_cpu, OSKAR_DOUBLE_COMPLEX,
             OSKAR_LOCATION_CPU, n, 1, &status);
+    double2* data = oskar_mem_double2(&mem_cpu, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        ((double2*)(mem_cpu.data))[i].x = (double)i;
-        ((double2*)(mem_cpu.data))[i].y = (double)i + 0.2f;
+        data[i].x = (double)i;
+        data[i].y = (double)i + 0.2;
     }
 
     // Scale and check contents.
@@ -259,9 +264,9 @@ TEST(Mem, scale_real_double_complex)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        double2 t = ((double2*)(mem_cpu.data))[i];
-        EXPECT_DOUBLE_EQ(2.0f * ((double)i), t.x);
-        EXPECT_DOUBLE_EQ(2.0f * ((double)i + 0.2f), t.y);
+        double2 t = data[i];
+        EXPECT_DOUBLE_EQ(2.0 * ((double)i), t.x);
+        EXPECT_DOUBLE_EQ(2.0 * ((double)i + 0.2), t.y);
     }
 
     // Copy to GPU and scale again.
@@ -272,12 +277,13 @@ TEST(Mem, scale_real_double_complex)
 
     // Copy back and check contents.
     oskar_mem_init_copy(&mem_cpu2, &mem_gpu, OSKAR_LOCATION_CPU, &status);
+    data = oskar_mem_double2(&mem_cpu2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        double2 t = ((double2*)(mem_cpu2.data))[i];
-        EXPECT_DOUBLE_EQ(4.0f * ((double)i), t.x);
-        EXPECT_DOUBLE_EQ(4.0f * ((double)i + 0.2f), t.y);
+        double2 t = data[i];
+        EXPECT_DOUBLE_EQ(4.0 * ((double)i), t.x);
+        EXPECT_DOUBLE_EQ(4.0 * ((double)i + 0.2), t.y);
     }
 
     // Free memory.
@@ -296,17 +302,18 @@ TEST(Mem, scale_real_double_complex_matrix)
     // Initialise.
     oskar_mem_init(&mem_cpu, OSKAR_DOUBLE_COMPLEX_MATRIX,
             OSKAR_LOCATION_CPU, n, 1, &status);
+    double4c* data = oskar_mem_double4c(&mem_cpu, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        ((double4c*)(mem_cpu.data))[i].a.x = (double)i;
-        ((double4c*)(mem_cpu.data))[i].a.y = (double)i + 0.2f;
-        ((double4c*)(mem_cpu.data))[i].b.x = (double)i + 0.4f;
-        ((double4c*)(mem_cpu.data))[i].b.y = (double)i + 0.6f;
-        ((double4c*)(mem_cpu.data))[i].c.x = (double)i + 0.8f;
-        ((double4c*)(mem_cpu.data))[i].c.y = (double)i + 1.0f;
-        ((double4c*)(mem_cpu.data))[i].d.x = (double)i + 1.2f;
-        ((double4c*)(mem_cpu.data))[i].d.y = (double)i + 1.4f;
+        data[i].a.x = (double)i;
+        data[i].a.y = (double)i + 0.2;
+        data[i].b.x = (double)i + 0.4;
+        data[i].b.y = (double)i + 0.6;
+        data[i].c.x = (double)i + 0.8;
+        data[i].c.y = (double)i + 1.0;
+        data[i].d.x = (double)i + 1.2;
+        data[i].d.y = (double)i + 1.4;
     }
 
     // Scale and check contents.
@@ -314,15 +321,15 @@ TEST(Mem, scale_real_double_complex_matrix)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        double4c t = ((double4c*)(mem_cpu.data))[i];
-        EXPECT_DOUBLE_EQ(2.0f * ((double)i), t.a.x);
-        EXPECT_DOUBLE_EQ(2.0f * ((double)i + 0.2f), t.a.y);
-        EXPECT_DOUBLE_EQ(2.0f * ((double)i + 0.4f), t.b.x);
-        EXPECT_DOUBLE_EQ(2.0f * ((double)i + 0.6f), t.b.y);
-        EXPECT_DOUBLE_EQ(2.0f * ((double)i + 0.8f), t.c.x);
-        EXPECT_DOUBLE_EQ(2.0f * ((double)i + 1.0f), t.c.y);
-        EXPECT_DOUBLE_EQ(2.0f * ((double)i + 1.2f), t.d.x);
-        EXPECT_DOUBLE_EQ(2.0f * ((double)i + 1.4f), t.d.y);
+        double4c t = data[i];
+        EXPECT_DOUBLE_EQ(2.0 * ((double)i), t.a.x);
+        EXPECT_DOUBLE_EQ(2.0 * ((double)i + 0.2), t.a.y);
+        EXPECT_DOUBLE_EQ(2.0 * ((double)i + 0.4), t.b.x);
+        EXPECT_DOUBLE_EQ(2.0 * ((double)i + 0.6), t.b.y);
+        EXPECT_DOUBLE_EQ(2.0 * ((double)i + 0.8), t.c.x);
+        EXPECT_DOUBLE_EQ(2.0 * ((double)i + 1.0), t.c.y);
+        EXPECT_DOUBLE_EQ(2.0 * ((double)i + 1.2), t.d.x);
+        EXPECT_DOUBLE_EQ(2.0 * ((double)i + 1.4), t.d.y);
     }
 
     // Copy to GPU and scale again.
@@ -333,18 +340,19 @@ TEST(Mem, scale_real_double_complex_matrix)
 
     // Copy back and check contents.
     oskar_mem_init_copy(&mem_cpu2, &mem_gpu, OSKAR_LOCATION_CPU, &status);
+    data = oskar_mem_double4c(&mem_cpu2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        double4c t = ((double4c*)(mem_cpu2.data))[i];
-        EXPECT_DOUBLE_EQ(4.0f * ((double)i), t.a.x);
-        EXPECT_DOUBLE_EQ(4.0f * ((double)i + 0.2f), t.a.y);
-        EXPECT_DOUBLE_EQ(4.0f * ((double)i + 0.4f), t.b.x);
-        EXPECT_DOUBLE_EQ(4.0f * ((double)i + 0.6f), t.b.y);
-        EXPECT_DOUBLE_EQ(4.0f * ((double)i + 0.8f), t.c.x);
-        EXPECT_DOUBLE_EQ(4.0f * ((double)i + 1.0f), t.c.y);
-        EXPECT_DOUBLE_EQ(4.0f * ((double)i + 1.2f), t.d.x);
-        EXPECT_DOUBLE_EQ(4.0f * ((double)i + 1.4f), t.d.y);
+        double4c t = data[i];
+        EXPECT_DOUBLE_EQ(4.0 * ((double)i), t.a.x);
+        EXPECT_DOUBLE_EQ(4.0 * ((double)i + 0.2), t.a.y);
+        EXPECT_DOUBLE_EQ(4.0 * ((double)i + 0.4), t.b.x);
+        EXPECT_DOUBLE_EQ(4.0 * ((double)i + 0.6), t.b.y);
+        EXPECT_DOUBLE_EQ(4.0 * ((double)i + 0.8), t.c.x);
+        EXPECT_DOUBLE_EQ(4.0 * ((double)i + 1.0), t.c.y);
+        EXPECT_DOUBLE_EQ(4.0 * ((double)i + 1.2), t.d.x);
+        EXPECT_DOUBLE_EQ(4.0 * ((double)i + 1.4), t.d.y);
     }
 
     // Free memory.

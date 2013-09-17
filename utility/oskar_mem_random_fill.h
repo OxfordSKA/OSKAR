@@ -33,8 +33,7 @@
  * @file oskar_mem_random_fill.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

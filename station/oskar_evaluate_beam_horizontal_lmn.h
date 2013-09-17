@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  * @file oskar_evaluate_beam_horizontal_lmn.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_StationModel.h"
+#include <oskar_global.h>
+#include <oskar_station.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,7 +59,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_evaluate_beam_horizontal_lmn(double* l, double* m, double* n,
-        const oskar_StationModel* station, const double gast, int* status);
+        const oskar_Station* station, const double gast, int* status);
 
 #ifdef __cplusplus
 }

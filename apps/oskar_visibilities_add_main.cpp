@@ -26,14 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_global.h>
-#include <interferometry/oskar_visibilities_read.h>
-#include <interferometry/oskar_visibilities_init.h>
-#include <interferometry/oskar_visibilities_write.h>
-#include <interferometry/oskar_visibilities_copy.h>
-#include <utility/oskar_get_error_string.h>
-#include <utility/oskar_mem_add.h>
-#include <utility/oskar_mem_clear_contents.h>
+#include <oskar_vis.h>
+#include <oskar_get_error_string.h>
 #include <apps/lib/oskar_OptionParser.h>
 
 #include <string>
@@ -46,12 +40,10 @@
 using namespace std;
 
 // -----------------------------------------------------------------------------
-void set_options(oskar_OptionParser& opt);
-bool check_options(oskar_OptionParser& opt, int argc, char** argv);
-bool isCompatible(const oskar_Visibilities& vis1, const oskar_Visibilities& vis2);
-void add_visibilities(oskar_Visibilities& out, const oskar_Visibilities& in1,
-        const oskar_Visibilities& in2);
-void print_error(int status, const char* message);
+static void set_options(oskar_OptionParser& opt);
+static bool check_options(oskar_OptionParser& opt, int argc, char** argv);
+static bool isCompatible(const oskar_Vis* vis1, const oskar_Vis* vis2);
+static void print_error(int status, const char* message);
 // -----------------------------------------------------------------------------
 
 int main(int argc, char** argv)
@@ -67,143 +59,124 @@ int main(int argc, char** argv)
     opt.get("-o")->getString(out_path);
     vector<string> in_files = opt.getInputFiles(2);
     bool verbose = opt.isSet("-q") ? false : true;
-    if (verbose) {
+    if (verbose)
+    {
         cout << "Output visibility file = " << out_path << endl;
         cout << "Combining the " << in_files.size() << " input files:" << endl;
-        for (int i = 0; i < (int)in_files.size(); ++i) {
+        for (int i = 0; i < (int)in_files.size(); ++i)
+        {
             cout << "  [" << setw(2) << i << "] " << in_files[i] << endl;
         }
     }
 
     // Add the data. ==========================================================
-    int status = OSKAR_SUCCESS;
+    int status = 0;
 
     // Load the first visibility structure.
-    oskar_Visibilities in1;
-    oskar_visibilities_read(&in1, in_files[0].c_str(), &status);
-    int amp_type = in1.amplitude.type;
-    int num_channels = in1.num_channels;
-    int num_times = in1.num_times;
-    int num_stations = in1.num_stations;
-    if (status != OSKAR_SUCCESS) {
+    oskar_Vis* out = oskar_vis_read(in_files[0].c_str(), &status);
+    if (status)
+    {
         string msg = "Failed to read visibility data file " + in_files[0];
         print_error(status, msg.c_str());
-        return status;
     }
-
-    // Create an output visibility data structure.
-    oskar_Visibilities out;
-    oskar_visibilities_init(&out, amp_type, OSKAR_LOCATION_CPU, num_channels,
-            num_times, num_stations, &status);
-    if (status != OSKAR_SUCCESS) {
-        print_error(status, "Failed to initialise output visibility structure.");
-        return status;
-    }
-
-    // Copy the first input visibility data file into the output data structure.
-    oskar_visibilities_copy(&out, &in1, &status);
-    oskar_mem_clear_contents(&out.settings_path, &status);
+    oskar_mem_clear_contents(oskar_vis_settings_path(out), &status);
     // TODO write some sort of tag into here to indicate this is an
     // accumulated visibility data set...
-    if (status != OSKAR_SUCCESS) {
-        print_error(status, "Failed to clear settings path.");
-        return status;
-    }
 
     // Loop over other visibility files and combine.
     for (int i = 1; i < (int)in_files.size(); ++i)
     {
-        oskar_Visibilities in2;
-        oskar_visibilities_read(&in2, in_files[i].c_str(), &status);
-        if (status != OSKAR_SUCCESS) {
+        if (status) break;
+
+        oskar_Vis* in = oskar_vis_read(in_files[i].c_str(), &status);
+        if (status)
+        {
             string msg = "Failed to read visibility data file " + in_files[i];
             print_error(status, msg.c_str());
-            return status;
+            break;
         }
-        if (!isCompatible(out, in2))
+        if (!isCompatible(out, in))
         {
             cerr << "ERROR: Input visibility data must match!" << endl;
-            return status;
+            status = OSKAR_ERR_TYPE_MISMATCH;
         }
-        add_visibilities(out, out, in2);
-    }
-    if (status != OSKAR_SUCCESS) {
-        print_error(status, "Failed to read visibility data files.");
-        return status;
+        oskar_mem_add(oskar_vis_amplitude(out), oskar_vis_amplitude_const(out),
+                oskar_vis_amplitude_const(in), &status);
+        if (status)
+            print_error(status, "Visibility amplitude addition failed.");
+        oskar_vis_free(in, &status);
     }
 
     // Write output data ======================================================
     if (verbose)
         cout << "Writing OSKAR visibility file: " << out_path << endl;
-    oskar_visibilities_write(&out, 0, out_path.c_str(), &status);
-    if (status != OSKAR_SUCCESS) {
+    oskar_vis_write(out, 0, out_path.c_str(), &status);
+    oskar_vis_free(out, &status);
+    if (status)
         print_error(status, "Failed writing output visibility structure to file.");
-        return status;
-    }
 
     return status;
 }
 
-void print_error(int status, const char* message)
+static void print_error(int status, const char* message)
 {
     cerr << "ERROR[" << status << "] " << message << endl;
     cerr << "REASON = " << oskar_get_error_string(status) << endl;
 }
 
-void add_visibilities(oskar_Visibilities& out, const oskar_Visibilities& in1,
-        const oskar_Visibilities& in2)
+
+static bool isCompatible(const oskar_Vis* v1, const oskar_Vis* v2)
 {
-    int status = OSKAR_SUCCESS;
-    oskar_mem_add(&out.amplitude, &in1.amplitude, &in2.amplitude, &status);
-    if (status != OSKAR_SUCCESS)
-        print_error(status, "Visibility amplitude addition failed.");
-}
-
-
-bool isCompatible(const oskar_Visibilities& v1, const oskar_Visibilities& v2)
-{
-    if (v1.num_channels != v2.num_channels)
+    if (oskar_vis_num_channels(v1) != oskar_vis_num_channels(v2))
         return false;
-    if (v1.num_times != v2.num_times)
+    if (oskar_vis_num_times(v1) != oskar_vis_num_times(v2))
         return false;
-    if (v1.num_stations != v2.num_stations)
+    if (oskar_vis_num_stations(v1) != oskar_vis_num_stations(v2))
         return false;
-    if (v1.num_baselines != v2.num_baselines)
+    if (oskar_vis_num_baselines(v1) != oskar_vis_num_baselines(v2))
         return false;
-    if (fabs(v1.freq_start_hz - v2.freq_start_hz) > DBL_EPSILON)
+    if (fabs(oskar_vis_freq_start_hz(v1) -
+            oskar_vis_freq_start_hz(v2)) > DBL_EPSILON)
         return false;
-    if (fabs(v1.freq_inc_hz - v2.freq_inc_hz) > DBL_EPSILON)
+    if (fabs(oskar_vis_freq_inc_hz(v1) -
+            oskar_vis_freq_inc_hz(v2)) > DBL_EPSILON)
         return false;
-    if (fabs(v1.channel_bandwidth_hz - v2.channel_bandwidth_hz) > DBL_EPSILON)
+    if (fabs(oskar_vis_channel_bandwidth_hz(v1) -
+            oskar_vis_channel_bandwidth_hz(v2)) > DBL_EPSILON)
         return false;
-    if (fabs(v1.time_start_mjd_utc - v2.time_start_mjd_utc) > DBL_EPSILON)
+    if (fabs(oskar_vis_time_start_mjd_utc(v1) -
+            oskar_vis_time_start_mjd_utc(v2)) > DBL_EPSILON)
         return false;
-    if (fabs(v1.time_inc_seconds - v2.time_inc_seconds) > DBL_EPSILON)
+    if (fabs(oskar_vis_time_inc_seconds(v1) -
+            oskar_vis_time_inc_seconds(v2)) > DBL_EPSILON)
         return false;
-    if (fabs(v1.phase_centre_ra_deg - v2.phase_centre_ra_deg) > DBL_EPSILON)
+    if (fabs(oskar_vis_phase_centre_ra_deg(v1) -
+            oskar_vis_phase_centre_ra_deg(v2)) > DBL_EPSILON)
         return false;
-    if (fabs(v1.phase_centre_dec_deg - v2.phase_centre_dec_deg) > DBL_EPSILON)
+    if (fabs(oskar_vis_phase_centre_dec_deg(v1) -
+            oskar_vis_phase_centre_dec_deg(v2)) > DBL_EPSILON)
         return false;
 
-    if (v1.amplitude.type != v2.amplitude.type)
+    if (oskar_mem_type(oskar_vis_amplitude_const(v1)) !=
+            oskar_mem_type(oskar_vis_amplitude_const(v2)))
         return false;
 
     return true;
 }
 
-void set_options(oskar_OptionParser& opt)
+static void set_options(oskar_OptionParser& opt)
 {
     opt.setDescription("Application to combine OSKAR binary visibility files.");
     opt.addRequired("OSKAR visibility files...");
     opt.addFlag("-o", "Output visibility file name", 1, "out.vis", false, "--output");
     opt.addFlag("-q", "Disable log messages", false, "--quiet");
-    opt.addExample("oskar_visibilities_add file1.vis file2.vis");
-    opt.addExample("oskar_visibilities_add file1.vis file2.vis -o combined.vis");
-    opt.addExample("oskar_visibilities_add -q file1.vis file2.vis file3.vis");
-    opt.addExample("oskar_visibilities_add *.vis");
+    opt.addExample("oskar_vis_add file1.vis file2.vis");
+    opt.addExample("oskar_vis_add file1.vis file2.vis -o combined.vis");
+    opt.addExample("oskar_vis_add -q file1.vis file2.vis file3.vis");
+    opt.addExample("oskar_vis_add *.vis");
 }
 
-bool check_options(oskar_OptionParser& opt, int argc, char** argv)
+static bool check_options(oskar_OptionParser& opt, int argc, char** argv)
 {
     if (!opt.check_options(argc, argv))
         return false;

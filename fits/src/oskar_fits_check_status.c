@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
  */
 
 #include "fits/oskar_fits_check_status.h"
-#include "utility/oskar_log_error.h"
+#include <oskar_log.h>
 
 #include <stdlib.h>
 #include <stdio.h>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_make_image_dft.h"
-#include "math/oskar_dft_c2r_2d_cuda.h"
-#include "utility/oskar_cuda_check_error.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_insert.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_scale_real.h"
+#include <oskar_make_image_dft.h>
+#include <oskar_dft_c2r_2d_cuda.h>
+#include <oskar_cuda_check_error.h>
 
 #include <math.h>
 #include <stdio.h>
@@ -57,25 +51,25 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     int err = 0, type, num_vis, num_pixels;
 
     /* Check types. */
-    type = image->type;
-    if (type != uu_metres->type || type != vv_metres->type ||
-            (type | OSKAR_COMPLEX) != amp->type ||
-            type != l->type || type != m->type)
+    type = oskar_mem_type(image);
+    if (type != oskar_mem_type(uu_metres) || type != oskar_mem_type(vv_metres) ||
+            (type | OSKAR_COMPLEX) != oskar_mem_type(amp) ||
+            type != oskar_mem_type(l) || type != oskar_mem_type(m))
         return OSKAR_ERR_TYPE_MISMATCH;
 
     /* Get dimension sizes. */
-    num_vis = amp->num_elements;
-    num_pixels = l->num_elements;
-    if (num_pixels != m->num_elements)
+    num_vis = (int)oskar_mem_length(amp);
+    num_pixels = (int)oskar_mem_length(l);
+    if (num_pixels != (int)oskar_mem_length(m))
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Initialise all temporary arrays (to zero length). */
-    oskar_mem_init(&u, uu_metres->type, OSKAR_LOCATION_GPU, 0, 1, &err);
-    oskar_mem_init(&v, vv_metres->type, OSKAR_LOCATION_GPU, 0, 1, &err);
-    oskar_mem_init(&t_l, l->type, OSKAR_LOCATION_GPU, 0, 1, &err);
-    oskar_mem_init(&t_m, m->type, OSKAR_LOCATION_GPU, 0, 1, &err);
-    oskar_mem_init(&t_amp, amp->type, OSKAR_LOCATION_GPU, 0, 1, &err);
-    oskar_mem_init(&t_image, image->type, OSKAR_LOCATION_GPU, 0, 1, &err);
+    oskar_mem_init(&u, oskar_mem_type(uu_metres), OSKAR_LOCATION_GPU, 0, 1, &err);
+    oskar_mem_init(&v, oskar_mem_type(vv_metres), OSKAR_LOCATION_GPU, 0, 1, &err);
+    oskar_mem_init(&t_l, oskar_mem_type(l), OSKAR_LOCATION_GPU, 0, 1, &err);
+    oskar_mem_init(&t_m, oskar_mem_type(m), OSKAR_LOCATION_GPU, 0, 1, &err);
+    oskar_mem_init(&t_amp, oskar_mem_type(amp), OSKAR_LOCATION_GPU, 0, 1, &err);
+    oskar_mem_init(&t_image, oskar_mem_type(image), OSKAR_LOCATION_GPU, 0, 1, &err);
 
     /* Copy the baselines to temporary GPU memory. */
     oskar_mem_copy(&u, uu_metres, &err);
@@ -88,37 +82,37 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
 
     /* Check location of the image array. */
     p_image = image;
-    if (image->location == OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(image) == OSKAR_LOCATION_CPU)
     {
-        oskar_mem_init(&t_image, image->type, OSKAR_LOCATION_GPU,
-                image->num_elements, 1, &err);
+        oskar_mem_init(&t_image, oskar_mem_type(image), OSKAR_LOCATION_GPU,
+                (int)oskar_mem_length(image), 1, &err);
         p_image = &t_image;
     }
 
     /* Check location of the l,m arrays. */
     p_l = l;
     p_m = m;
-    if (l->location == OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(l) == OSKAR_LOCATION_CPU)
     {
-        oskar_mem_init(&t_l, l->type, OSKAR_LOCATION_GPU,
-                l->num_elements, 1, &err);
+        oskar_mem_init(&t_l, oskar_mem_type(l), OSKAR_LOCATION_GPU,
+                (int)oskar_mem_length(l), 1, &err);
         oskar_mem_copy(&t_l, l, &err);
         p_l = &t_l;
     }
-    if (m->location == OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(m) == OSKAR_LOCATION_CPU)
     {
-        oskar_mem_init(&t_m, m->type, OSKAR_LOCATION_GPU,
-                m->num_elements, 1, &err);
+        oskar_mem_init(&t_m, oskar_mem_type(m), OSKAR_LOCATION_GPU,
+                (int)oskar_mem_length(m), 1, &err);
         oskar_mem_copy(&t_m, m, &err);
         p_m = &t_m;
     }
 
     /* Check location of the amplitude array. */
     p_amp = amp;
-    if (amp->location == OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(amp) == OSKAR_LOCATION_CPU)
     {
-        oskar_mem_init(&t_amp, amp->type, OSKAR_LOCATION_GPU,
-                amp->num_elements, 1, &err);
+        oskar_mem_init(&t_amp, oskar_mem_type(amp), OSKAR_LOCATION_GPU,
+                (int)oskar_mem_length(amp), 1, &err);
         oskar_mem_copy(&t_amp, amp, &err);
         p_amp = &t_amp;
     }
@@ -149,7 +143,7 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     oskar_mem_scale_real(p_image, 1.0 / num_vis, &err);
 
     /* Copy image back to host memory if required. */
-    if (image->location == OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(image) == OSKAR_LOCATION_CPU)
         oskar_mem_insert(image, &t_image, 0, &err);
 
     cleanup:

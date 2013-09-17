@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,35 +33,67 @@
  * @file oskar_fit_ellipse.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Log.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Fits a 2D ellipse to the locus of points specified by the arrays @p x
- * and @p y.
+ * @brief
+ * Fits an ellipse to the specified points (single precision).
  *
  * @details
- * Uses the LAPACK functions (D|S)GETRS and (D|S)GETRF
+ * This function fits a 2D ellipse to the locus of points in the arrays
+ * \p x and \p y.
  *
- * @param log          OSKAR message log object
- * @param gauss_maj    Major axis of the fitted ellipse
- * @param gauss_min    Minor axis of the fitted ellipse
- * @param gauss_phi    Position angle of the fitted ellipse
- * @param num_points   Number of points to fit
- * @param x            Array of x coordinates to fit the ellipse to
- * @param y            Array of y coordinates to fit the ellispe to
+ * There must be at least 5 points in the arrays for this function to work.
  *
- * @return An error code
+ * It requires the LAPACK functions SGETRS and SGETRF.
+ *
+ * @param[out] major               Major axis of the fitted ellipse.
+ * @param[out] minor               Minor axis of the fitted ellipse.
+ * @param[out] position_angle_rad  Position angle of the ellipse, in radians.
+ * @param[in] num_points           Number of points to fit.
+ * @param[in] x                    Array of point x coordinates.
+ * @param[in] y                    Array of point y coordinates.
+ * @param[in] work1_5_num_points   Work array of length 5 * num_points.
+ * @param[in] work2_5_num_points   Work array of length 5 * num_points.
+ * @param[in,out] status           Status return code.
  */
 OSKAR_EXPORT
-int oskar_fit_ellipse(oskar_Log* log, double* gauss_maj, double* gauss_min,
-        double* gauss_phi, int num_points, const oskar_Mem* x,
-        const oskar_Mem* y);
+void oskar_fit_ellipse_f(float* major, float* minor,
+        float* position_angle_rad, int num_points, const float* x,
+        const float* y, float* work1_5_num_points, float* work2_5_num_points,
+        int* status);
+
+/**
+ * @brief
+ * Fits an ellipse to the specified points (double precision).
+ *
+ * @details
+ * This function fits a 2D ellipse to the locus of points in the arrays
+ * \p x and \p y.
+ *
+ * There must be at least 5 points in the arrays for this function to work.
+ *
+ * It requires the LAPACK functions DGETRS and DGETRF.
+ *
+ * @param[out] major               Major axis of the fitted ellipse.
+ * @param[out] minor               Minor axis of the fitted ellipse.
+ * @param[out] position_angle_rad  Position angle of the ellipse, in radians.
+ * @param[in] num_points           Number of points to fit.
+ * @param[in] x                    Array of point x coordinates.
+ * @param[in] y                    Array of point y coordinates.
+ * @param[in] work1_5_num_points   Work array of length 5 * num_points.
+ * @param[in] work2_5_num_points   Work array of length 5 * num_points.
+ * @param[in,out] status           Status return code.
+ */
+OSKAR_EXPORT
+void oskar_fit_ellipse_d(double* major, double* minor,
+        double* position_angle_rad, int num_points, const double* x,
+        const double* y, double* work1_5_num_points, double* work2_5_num_points,
+        int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_evaluate_baselines.h"
-#include "interferometry/oskar_evaluate_baselines_cuda.h"
-#include "utility/oskar_cuda_check_error.h"
+#include <oskar_evaluate_baselines.h>
+#include <oskar_evaluate_baselines_cuda.h>
+#include <oskar_cuda_check_error.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -84,22 +84,22 @@ void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
     if (*status) return;
 
     /* Get data type, location and size. */
-    type = u->type;
-    location = u->location;
-    num_stations = u->num_elements;
+    type = oskar_mem_type(u);
+    location = oskar_mem_location(u);
+    num_stations = (int)oskar_mem_length(u);
     num_baselines = num_stations * (num_stations - 1) / 2;
 
     /* Check that the data types match. */
-    if (v->type != type || w->type != type ||
-            uu->type != type || vv->type != type || ww->type != type)
+    if (oskar_mem_type(v) != type || oskar_mem_type(w) != type ||
+            oskar_mem_type(uu) != type || oskar_mem_type(vv) != type || oskar_mem_type(ww) != type)
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Check that the data locations match. */
-    if (v->location != location ||
-            w->location != location ||
-            uu->location != location ||
-            vv->location != location ||
-            ww->location != location)
+    if (oskar_mem_location(v) != location ||
+            oskar_mem_location(w) != location ||
+            oskar_mem_location(uu) != location ||
+            oskar_mem_location(vv) != location ||
+            oskar_mem_location(ww) != location)
         *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Check that the memory is not NULL. */
@@ -108,11 +108,11 @@ void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Check that the data dimensions are OK. */
-    if (v->num_elements < num_stations ||
-            w->num_elements < num_stations ||
-            uu->num_elements < num_baselines ||
-            vv->num_elements < num_baselines ||
-            ww->num_elements < num_baselines)
+    if ((int)oskar_mem_length(v) < num_stations ||
+            (int)oskar_mem_length(w) < num_stations ||
+            (int)oskar_mem_length(uu) < num_baselines ||
+            (int)oskar_mem_length(vv) < num_baselines ||
+            (int)oskar_mem_length(ww) < num_baselines)
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Check if safe to proceed. */

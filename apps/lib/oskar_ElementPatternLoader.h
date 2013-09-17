@@ -33,14 +33,14 @@
  * @file oskar_ElementPatternLoader.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 #include "apps/lib/oskar_AbstractTelescopeFileLoader.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_StationModel.h"
-#include "utility/oskar_Settings.h"
-#include "utility/oskar_Log.h"
 
-#include <QtCore/QString>
+#include <oskar_telescope.h>
+#include <oskar_station.h>
+#include <oskar_Settings.h>
+#include <oskar_log.h>
+
 #include <QtCore/QHash>
 
 class QDir;
@@ -68,7 +68,7 @@ public:
      *                        level if necessary.
      * @param[in,out] status Status return code.
      */
-    virtual void load(oskar_TelescopeModel* telescope, const QDir& cwd,
+    virtual void load(oskar_Telescope* telescope, const QDir& cwd,
             int num_subdirs, QHash<QString, QString>& filemap, int* status);
 
     /**
@@ -87,13 +87,13 @@ public:
      *                        level if necessary.
      * @param[in,out] status Status return code.
      */
-    virtual void load(oskar_StationModel* station, const QDir& cwd,
+    virtual void load(oskar_Station* station, const QDir& cwd,
             int num_subdirs, int depth, QHash<QString, QString>& filemap,
             int* status);
 
 private:
     void load_element_patterns(oskar_Log* log,
-            const oskar_SettingsTelescope* settings, oskar_StationModel* station,
+            const oskar_SettingsTelescope* settings, oskar_Station* station,
             const QHash<QString, QString>& filemap, int* status);
 
     void update_map(QHash<QString, QString>& files, const QDir& cwd);

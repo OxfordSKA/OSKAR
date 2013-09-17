@@ -34,8 +34,8 @@
  * @file oskar_evaluate_pierce_points.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -37,6 +37,11 @@
 extern "C" {
 #endif
 
+#ifdef __CUDACC__
+/* Include the CUDA vector types header first, if we're compiling with nvcc. */
+#include <vector_types.h>
+#endif
+
 #if !defined(__align__)
 #if defined(__GNUC__)
 #define __align__(n) __attribute__((aligned(n)))

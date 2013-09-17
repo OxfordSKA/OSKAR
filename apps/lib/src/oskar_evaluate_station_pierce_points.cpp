@@ -33,26 +33,20 @@
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_set_up_sky.h"
 
-#include <utility/oskar_Settings.h>
-#include <utility/oskar_log_settings.h>
-#include <utility/oskar_Mem.h>
-#include <utility/oskar_mem_init.h>
-#include <utility/oskar_mem_free.h>
-#include <utility/oskar_mem_get_pointer.h>
-#include <utility/oskar_mem_element_size.h>
-#include <utility/oskar_binary_stream_write_header.h>
-#include <utility/oskar_binary_stream_write_metadata.h>
-#include <utility/oskar_binary_stream_write.h>
-#include <utility/oskar_mem_binary_stream_write.h>
-#include <utility/oskar_BinaryTag.h>
-#include <interferometry/oskar_TelescopeModel.h>
-#include <interferometry/oskar_telescope_model_free.h>
-#include <interferometry/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h>
-#include <sky/oskar_SkyModel.h>
-#include <sky/oskar_mjd_to_gast_fast.h>
-#include <sky/oskar_sky_model_free.h>
-#include <sky/oskar_ra_dec_to_hor_lmn.h>
-#include <station/oskar_evaluate_pierce_points.h>
+#include <oskar_log.h>
+#include <oskar_mem.h>
+#include <oskar_sky.h>
+#include <oskar_station.h>
+#include <oskar_telescope.h>
+#include <oskar_BinaryTag.h>
+#include <oskar_binary_stream_write_header.h>
+#include <oskar_binary_stream_write_metadata.h>
+#include <oskar_binary_stream_write.h>
+#include <oskar_mem_binary_stream_write.h>
+#include <oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h>
+#include <oskar_mjd_to_gast_fast.h>
+#include <oskar_ra_dec_to_hor_lmn.h>
+#include <oskar_evaluate_pierce_points.h>
 
 #include <cstdio>
 #include <string>
@@ -83,19 +77,19 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
 
     oskar_Settings settings;
     status = oskar_settings_load(&settings, log, settings_file);
-    log->keep_file = settings.sim.keep_log_file;
+    oskar_log_set_keep_file(log, settings.sim.keep_log_file);
     if (status) return status;
 
-    oskar_TelescopeModel telescope;
-    oskar_set_up_telescope(&telescope, log, &settings, &status);
+    oskar_Telescope* telescope = oskar_set_up_telescope(log, &settings,
+            &status);
 
     oskar_log_settings_telescope(log, &settings);
     oskar_log_settings_observation(log, &settings);
     oskar_log_settings_ionosphere(log, &settings);
 
-    oskar_SkyModel* sky = NULL;
+    oskar_Sky** sky = NULL;
     int num_sky_chunks = 0;
-    status = oskar_set_up_sky(&num_sky_chunks, &sky, log, &settings);
+    sky = oskar_set_up_sky(&num_sky_chunks, log, &settings, &status);
 
     // FIXME remove this restriction ... (loop over chunks)
     if (num_sky_chunks != 1)
@@ -108,8 +102,8 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     int loc = OSKAR_LOCATION_CPU;
 
-    oskar_SkyModel* chunk = &sky[0];
-    int num_sources = chunk->num_sources;
+    oskar_Sky* chunk = sky[0];
+    int num_sources = oskar_sky_num_sources(chunk);
     oskar_Mem hor_x, hor_y, hor_z;
     int owner = OSKAR_TRUE;
     oskar_mem_init(&hor_x, type, loc, num_sources, owner, &status);
@@ -117,7 +111,7 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
     oskar_mem_init(&hor_z, type, loc, num_sources, owner, &status);
 
     oskar_Mem pp_lon, pp_lat, pp_rel_path;
-    int num_stations = telescope.num_stations;
+    int num_stations = oskar_telescope_num_stations(telescope);
 
     int num_pp = num_stations * num_sources;
     oskar_mem_init(&pp_lon, type, loc, num_pp, owner, &status);
@@ -161,6 +155,11 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
 //    printf("Number of times    = %i\n", num_times);
 //    printf("Number of stations = %i\n", num_stations);
 
+    void *x_, *y_, *z_;
+    x_ = oskar_mem_void(oskar_telescope_station_x(telescope));
+    y_ = oskar_mem_void(oskar_telescope_station_y(telescope));
+    z_ = oskar_mem_void(oskar_telescope_station_z(telescope));
+
     for (int t = 0; t < num_times; ++t)
     {
         double t_dump = obs_start_mjd_utc + t * dt_dump; // MJD UTC
@@ -168,24 +167,25 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
 
         for (int i = 0; i < num_stations; ++i)
         {
-            oskar_StationModel* station = &telescope.station[i];
-            double lon = station->longitude_rad;
-            double lat = station->latitude_rad;
-            double alt = station->altitude_m;
+            const oskar_Station* station =
+                    oskar_telescope_station_const(telescope, i);
+            double lon = oskar_station_longitude_rad(station);
+            double lat = oskar_station_latitude_rad(station);
+            double alt = oskar_station_altitude_m(station);
             double x_ecef, y_ecef, z_ecef;
             double x_offset,y_offset,z_offset;
 
             if (type == OSKAR_DOUBLE)
             {
-                x_offset = ((double*)telescope.station_x.data)[i];
-                y_offset = ((double*)telescope.station_y.data)[i];
-                z_offset = ((double*)telescope.station_z.data)[i];
+                x_offset = ((double*)x_)[i];
+                y_offset = ((double*)y_)[i];
+                z_offset = ((double*)z_)[i];
             }
             else
             {
-                x_offset = (double)((float*)telescope.station_x.data)[i];
-                y_offset = (double)((float*)telescope.station_y.data)[i];
-                z_offset = (double)((float*)telescope.station_z.data)[i];
+                x_offset = (double)((float*)x_)[i];
+                y_offset = (double)((float*)y_)[i];
+                z_offset = (double)((float*)z_)[i];
             }
 
             oskar_offset_geocentric_cartesian_to_geocentric_cartesian(
@@ -195,15 +195,17 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
 
             if (type == OSKAR_DOUBLE)
             {
-                oskar_ra_dec_to_hor_lmn_d(chunk->num_sources,
-                        (double*)chunk->RA.data, (double*)chunk->Dec.data,
+                oskar_ra_dec_to_hor_lmn_d(num_sources,
+                        oskar_mem_double_const(oskar_sky_ra_const(chunk), &status),
+                        oskar_mem_double_const(oskar_sky_dec_const(chunk), &status),
                         last, lat, (double*)hor_x.data, (double*)hor_y.data,
                         (double*)hor_z.data);
             }
             else
             {
-                oskar_ra_dec_to_hor_lmn_f(chunk->num_sources,
-                        (float*)chunk->RA.data, (float*)chunk->Dec.data,
+                oskar_ra_dec_to_hor_lmn_f(num_sources,
+                        oskar_mem_float_const(oskar_sky_ra_const(chunk), &status),
+                        oskar_mem_float_const(oskar_sky_dec_const(chunk), &status),
                         last, lat, (float*)hor_x.data, (float*)hor_y.data,
                         (float*)hor_z.data);
             }
@@ -291,8 +293,8 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
     oskar_mem_free(&pp_st_lat, &status);
     oskar_mem_free(&pp_st_rel_path, &status);
     oskar_mem_free(&dims, &status);
-    //oskar_telescope_model_free(&telescope, &status);
-    oskar_sky_model_free(&sky[0], &status);
+    oskar_telescope_free(telescope, &status);
+    oskar_sky_free(sky[0], &status);
     free(sky);
 
     return status;

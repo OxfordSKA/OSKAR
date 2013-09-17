@@ -29,17 +29,16 @@
 #include "apps/lib/oskar_settings_load.h"
 #include "apps/lib/oskar_settings_load_beam_pattern.h"
 #include "apps/lib/oskar_settings_load_image.h"
-#include "apps/lib/oskar_settings_load_interferomter.h"
+#include "apps/lib/oskar_settings_load_interferometer.h"
 #include "apps/lib/oskar_settings_load_ionosphere.h"
 #include "apps/lib/oskar_settings_load_observation.h"
 #include "apps/lib/oskar_settings_load_simulator.h"
 #include "apps/lib/oskar_settings_load_sky.h"
 #include "apps/lib/oskar_settings_load_telescope.h"
-#include "utility/oskar_Log.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_append_raw.h"
-#include "utility/oskar_settings_init.h"
-#include "utility/oskar_file_exists.h"
+#include <oskar_log.h>
+#include <oskar_mem.h>
+#include <oskar_settings_init.h>
+#include <oskar_file_exists.h>
 #include <string.h>
 
 #ifdef __cplusplus

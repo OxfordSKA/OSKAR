@@ -33,14 +33,13 @@
  * @file oskar_interferometer.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Settings.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Log.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_timers_functions.h"
+#include <oskar_global.h>
+#include <oskar_Settings.h>
+#include <oskar_telescope.h>
+#include <oskar_vis.h>
+#include <oskar_sky.h>
+#include <oskar_log.h>
+#include <oskar_timers.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,8 +65,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
-        oskar_Timers* timers, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const oskar_Settings* settings,
+        oskar_Timers* timers, const oskar_Sky* sky,
+        const oskar_Telescope* telescope, const oskar_Settings* settings,
         double frequency, int chunk_index, int num_sky_chunks, int* status);
 
 #ifdef __cplusplus

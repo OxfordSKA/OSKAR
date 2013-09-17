@@ -27,11 +27,8 @@
  */
 
 #include <mex.h>
-#include <sky/oskar_SkyModel.h>
-#include <sky/oskar_sky_model_free.h>
-#include <sky/oskar_sky_model_init.h>
-#include <sky/oskar_sky_model_load.h>
-#include <utility/oskar_get_error_string.h>
+#include <oskar_sky.h>
+#include <oskar_get_error_string.h>
 
 #include "matlab/common/oskar_matlab_common.h"
 #include "matlab/sky/lib/oskar_mex_sky_to_matlab_struct.h"
@@ -53,22 +50,21 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     const char* filename = mxArrayToString(in[0]);
 
     // Load the OSKAR sky model structure from the specified file.
-    oskar_SkyModel sky;
-    oskar_sky_model_load(&sky, filename, &status);
+    oskar_Sky* sky = oskar_sky_create(OSKAR_DOUBLE,
+            OSKAR_LOCATION_CPU, 0, &status);
+    oskar_sky_load(sky, filename, &status);
     if (status)
     {
         oskar_matlab_error("Error reading OSKAR sky model file: '%s' (%s)",
                 filename, oskar_get_error_string(status));
     }
 
-    out[0] = oskar_mex_sky_to_matlab_struct(&sky, filename);
+    out[0] = oskar_mex_sky_to_matlab_struct(sky, filename);
 
-    oskar_sky_model_free(&sky, &status);
+    oskar_sky_free(sky, &status);
     if (status)
     {
         oskar_matlab_error("Load failed with code %i: %s", status,
                 oskar_get_error_string(status));
     }
 }
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,12 @@
  * @file oskar_evaluate_jones_E.h
  */
 
-#include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_Jones.h"
-#include "sky/oskar_SkyModel.h"
-#include "station/oskar_WorkStationBeam.h"
-#include "utility/oskar_CurandState.h"
+#include <oskar_global.h>
+#include <oskar_telescope.h>
+#include <oskar_jones.h>
+#include <oskar_sky.h>
+#include <oskar_WorkStationBeam.h>
+#include <oskar_random_state.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,13 +58,13 @@ extern "C" {
  * @param[in]  telescope    Input telescope model.
  * @param[in]  gast         The Greenwich Apparent Sidereal Time, in radians.
  * @param[in]  work         Pointer to structure holding work arrays.
- * @param[in]  curand_state Structure holding curand states.
+ * @param[in]  random_state Structure holding curand states.
  * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, double gast,
-        oskar_WorkStationBeam* work, oskar_CurandState* curand_state,
+void oskar_evaluate_jones_E(oskar_Jones* E, const oskar_Sky* sky,
+        const oskar_Telescope* telescope, double gast,
+        oskar_WorkStationBeam* work, oskar_RandomState* random_state,
         int* status);
 
 #ifdef __cplusplus

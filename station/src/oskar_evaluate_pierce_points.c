@@ -75,32 +75,32 @@ void oskar_evaluate_pierce_points(
         return;
     }
     /* Check memory location (CPU (host) memory current required) */
-    if (pierce_point_lat->location != OSKAR_LOCATION_CPU ||
-            pierce_point_lon->location != OSKAR_LOCATION_CPU ||
-            relative_path_length->location != OSKAR_LOCATION_CPU ||
-            hor_x->location != OSKAR_LOCATION_CPU ||
-            hor_y->location != OSKAR_LOCATION_CPU ||
-            hor_z->location != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(pierce_point_lat) != OSKAR_LOCATION_CPU ||
+            oskar_mem_location(pierce_point_lon) != OSKAR_LOCATION_CPU ||
+            oskar_mem_location(relative_path_length) != OSKAR_LOCATION_CPU ||
+            oskar_mem_location(hor_x) != OSKAR_LOCATION_CPU ||
+            oskar_mem_location(hor_y) != OSKAR_LOCATION_CPU ||
+            oskar_mem_location(hor_z) != OSKAR_LOCATION_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
     /* Check type consistency */
-    type = hor_x->type;
-    if (pierce_point_lat->type != type || pierce_point_lon->type != type ||
-            relative_path_length->type != type || hor_y->type != type ||
-            hor_z->type != type)
+    type = oskar_mem_type(hor_x);
+    if (oskar_mem_type(pierce_point_lat) != type || oskar_mem_type(pierce_point_lon) != type ||
+            oskar_mem_type(relative_path_length) != type || oskar_mem_type(hor_y) != type ||
+            oskar_mem_type(hor_z) != type)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
     /* Check array size consistency */
-    if (pierce_point_lat->num_elements != num_directions ||
-            pierce_point_lon->num_elements != num_directions ||
-            relative_path_length->num_elements != num_directions ||
-            hor_x->num_elements != num_directions ||
-            hor_y->num_elements != num_directions ||
-            hor_z->num_elements != num_directions)
+    if ((int)oskar_mem_length(pierce_point_lat) != num_directions ||
+            (int)oskar_mem_length(pierce_point_lon) != num_directions ||
+            (int)oskar_mem_length(relative_path_length) != num_directions ||
+            (int)oskar_mem_length(hor_x) != num_directions ||
+            (int)oskar_mem_length(hor_y) != num_directions ||
+            (int)oskar_mem_length(hor_z) != num_directions)
     {
     }
 

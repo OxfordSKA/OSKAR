@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@
 #include "utility/oskar_binary_stream_write_metadata.h"
 #include "utility/oskar_binary_stream_write.h"
 #include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_system_clock_string.h"
+#include <oskar_mem.h>
+#include <oskar_system_clock_string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

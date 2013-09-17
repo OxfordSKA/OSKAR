@@ -33,11 +33,11 @@
  * @file oskar_evaluate_jones_R.h
  */
 
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_Jones.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_sky.h>
+#include <oskar_telescope.h>
+#include <oskar_jones.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,7 +66,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_R_f(float4c* jones, int num_sources,
-        float* ra, float* dec, float latitude_rad, float lst_rad);
+        const float* ra, const float* dec, float latitude_rad,
+        float lst_rad);
 
 /**
  * @brief
@@ -91,7 +92,8 @@ void oskar_evaluate_jones_R_f(float4c* jones, int num_sources,
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_R_d(double4c* jones, int num_sources,
-        double* ra, double* dec, double latitude_rad, double lst_rad);
+        const double* ra, const double* dec, double latitude_rad,
+        double lst_rad);
 
 /**
  * @brief
@@ -115,8 +117,8 @@ void oskar_evaluate_jones_R_d(double4c* jones, int num_sources,
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, double gast, int* status);
+void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
+        const oskar_Telescope* telescope, double gast, int* status);
 
 #ifdef __cplusplus
 }

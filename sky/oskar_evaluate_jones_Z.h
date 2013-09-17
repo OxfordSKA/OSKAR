@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_EVALUATE_JONES_Z_H_
 #define OSKAR_EVALUATE_JONES_Z_H_
 
@@ -34,22 +33,22 @@
  * @file oskar_evaluate_jones_Z.h
  */
 
-#include "oskar_global.h"
-#include "math/oskar_Jones.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "sky/oskar_SkyModel.h"
-#include "sky/oskar_WorkJonesZ.h"
-#include "sky/oskar_SettingsIonosphere.h"
+#include <oskar_global.h>
+#include <oskar_jones.h>
+#include <oskar_telescope.h>
+#include <oskar_sky.h>
+#include <oskar_WorkJonesZ.h>
+#include <oskar_SettingsIonosphere.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 OSKAR_EXPORT
-void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, double gast,
-        const oskar_SettingsIonosphere* settings, oskar_WorkJonesZ* work,
-        int* status);
+void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
+        const oskar_Telescope* telescope,
+        const oskar_SettingsIonosphere* settings, double gast,
+        double frequency_hz, oskar_WorkJonesZ* work, int* status);
 
 #ifdef __cplusplus
 }

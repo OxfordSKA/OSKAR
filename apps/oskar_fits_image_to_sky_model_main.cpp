@@ -26,13 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/lib/oskar_OptionParser.h"
+
 #ifndef OSKAR_NO_FITS
 #include "fits/oskar_fits_image_to_sky_model.h"
 #endif
-#include "sky/oskar_sky_model_save.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_log_error.h"
-#include "apps/lib/oskar_OptionParser.h"
+
+#include <oskar_sky.h>
+#include <oskar_get_error_string.h>
+#include <oskar_log.h>
+
 #include <cstdio>
 
 int main(int argc, char** argv)
@@ -72,8 +75,9 @@ int main(int argc, char** argv)
     opt.get("-s")->getDouble(spectral_index);
 
     // Load the FITS file as a sky model.
-    oskar_SkyModel sky;
-    error = oskar_fits_image_to_sky_model(0, opt.getArg(0), &sky,
+    oskar_Sky* sky = oskar_sky_create(OSKAR_DOUBLE,
+            OSKAR_LOCATION_CPU, 0, &error);
+    error = oskar_fits_image_to_sky_model(0, opt.getArg(0), sky,
             spectral_index, min_peak_fraction, noise_floor, downsample_factor);
     if (error)
     {
@@ -82,12 +86,14 @@ int main(int argc, char** argv)
     }
 
     // Write out the sky model.
-    oskar_sky_model_save(opt.getArg(1), &sky, &error);
+    oskar_sky_save(opt.getArg(1), sky, &error);
     if (error)
     {
         oskar_log_error(0, oskar_get_error_string(error));
         return error;
     }
+
+    oskar_sky_free(sky, &error);
     return OSKAR_SUCCESS;
 
 #else

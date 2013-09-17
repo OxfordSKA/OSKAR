@@ -26,10 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_evaluate_jones_K.h"
-#include "interferometry/oskar_evaluate_jones_K_cuda.h"
-#include "utility/oskar_cuda_check_error.h"
-#include "utility/oskar_mem_type_check.h"
+#include <oskar_evaluate_jones_K.h>
+#include <oskar_evaluate_jones_K_cuda.h>
+#include <oskar_cuda_check_error.h>
 #include <math.h>
 
 #ifdef __cplusplus
@@ -126,50 +125,46 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
     if (*status) return;
 
     /* Get the Jones matrix block meta-data. */
-    jones_type = K->data.type;
-    base_type = oskar_mem_base_type(jones_type);
-    location = K->data.location;
-    num_sources = K->num_sources;
-    num_stations = K->num_stations;
-
-    /* Check that the memory is not NULL. */
-    if (!K->data.data || !l->data || !m->data || !n->data ||
-            !u->data || !v->data || !w->data)
-    {
-        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-        return;
-    }
+    jones_type = oskar_jones_type(K);
+    base_type = oskar_mem_type_precision(jones_type);
+    location = oskar_jones_location(K);
+    num_sources = oskar_jones_num_sources(K);
+    num_stations = oskar_jones_num_stations(K);
 
     /* Check that the data dimensions are OK. */
-    if (num_sources > l->num_elements ||
-            num_sources > m->num_elements ||
-            num_sources > n->num_elements ||
-            num_stations != u->num_elements ||
-            num_stations != v->num_elements ||
-            num_stations != w->num_elements)
+    if (num_sources > (int)oskar_mem_length(l) ||
+            num_sources > (int)oskar_mem_length(m) ||
+            num_sources > (int)oskar_mem_length(n) ||
+            num_stations != (int)oskar_mem_length(u) ||
+            num_stations != (int)oskar_mem_length(v) ||
+            num_stations != (int)oskar_mem_length(w))
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
     }
 
     /* Check that the data is in the right location. */
-    if (l->location != location || m->location != location ||
-            n->location != location || u->location != location ||
-            v->location != location || w->location != location)
+    if (oskar_mem_location(l) != location ||
+            oskar_mem_location(m) != location ||
+            oskar_mem_location(n) != location ||
+            oskar_mem_location(u) != location ||
+            oskar_mem_location(v) != location ||
+            oskar_mem_location(w) != location)
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
 
     /* Check that the data are of the right type. */
-    if (!oskar_mem_is_complex(jones_type) || oskar_mem_is_matrix(jones_type))
+    if (!oskar_mem_type_is_complex(jones_type) ||
+            oskar_mem_type_is_matrix(jones_type))
     {
         *status = OSKAR_ERR_BAD_JONES_TYPE;
         return;
     }
-    if (base_type != l->type || base_type != m->type ||
-            base_type != n->type || base_type != u->type ||
-            base_type != v->type || base_type != w->type)
+    if (base_type != oskar_mem_type(l) || base_type != oskar_mem_type(m) ||
+            base_type != oskar_mem_type(n) || base_type != oskar_mem_type(u) ||
+            base_type != oskar_mem_type(v) || base_type != oskar_mem_type(w))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
@@ -181,7 +176,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
 #ifdef OSKAR_HAVE_CUDA
         if (jones_type == OSKAR_SINGLE_COMPLEX)
         {
-            oskar_evaluate_jones_K_cuda_f((float2*)(K->data.data),
+            oskar_evaluate_jones_K_cuda_f(oskar_jones_float2(K, status),
                     num_stations,
                     (const float*)(u->data),
                     (const float*)(v->data),
@@ -193,7 +188,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
         }
         else if (jones_type == OSKAR_DOUBLE_COMPLEX)
         {
-            oskar_evaluate_jones_K_cuda_d((double2*)(K->data.data),
+            oskar_evaluate_jones_K_cuda_d(oskar_jones_double2(K, status),
                     num_stations,
                     (const double*)(u->data),
                     (const double*)(v->data),
@@ -212,7 +207,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
     {
         if (jones_type == OSKAR_SINGLE_COMPLEX)
         {
-            oskar_evaluate_jones_K_f((float2*)(K->data.data),
+            oskar_evaluate_jones_K_f(oskar_jones_float2(K, status),
                     num_stations,
                     (const float*)(u->data),
                     (const float*)(v->data),
@@ -224,7 +219,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
         }
         else if (jones_type == OSKAR_DOUBLE_COMPLEX)
         {
-            oskar_evaluate_jones_K_d((double2*)(K->data.data),
+            oskar_evaluate_jones_K_d(oskar_jones_double2(K, status),
                     num_stations,
                     (const double*)(u->data),
                     (const double*)(v->data),

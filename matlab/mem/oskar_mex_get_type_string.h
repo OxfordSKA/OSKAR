@@ -27,7 +27,7 @@
  */
 
 
-#include "utility/oskar_Mem.h"
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

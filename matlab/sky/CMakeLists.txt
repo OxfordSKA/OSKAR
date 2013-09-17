@@ -6,7 +6,7 @@
 add_library(mex_sky_model STATIC
     lib/oskar_mex_sky_from_matlab_struct.cpp
     lib/oskar_mex_sky_to_matlab_struct.cpp
-    )
+)
 
 set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+oskar/+sky")
 

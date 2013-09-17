@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,23 +33,21 @@
  * @file oskar_evaluate_source_horizontal_lmn.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_StationModel.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Evaluates horizontal direction cosines for specified sources at the
- * given time.
+ * @brief
+ * Evaluates horizontal direction cosines for sources at the given time.
  *
  * @details
  * This function converts source positions from equatorial (RA, Dec)
- * coordinates to horizontal direction cosines at the specified Greenwich
- * apparent sidereal time, using the longitude and latitude of the station
- * model.
+ * coordinates to horizontal direction cosines at the specified local
+ * apparent sidereal time and latitude.
  *
  * @param[in] num_sources The number of source positions to process.
  * @param[out] l          Source horizontal l direction cosines (x-components).
@@ -57,14 +55,14 @@ extern "C" {
  * @param[out] n          Source horizontal n direction cosines (z-components).
  * @param[in]  RA         Source Right Ascension values.
  * @param[in]  Dec        Source Declination values.
- * @param[in]  station    Pointer to station model.
- * @param[in]  gast       The Greenwich apparent sidereal time, in radians.
+ * @param[in]  last       The local apparent sidereal time, in radians.
+ * @param[in]  latitude   The observer's geodetic latitude, in radians.
  * @param[in,out]  status Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
         oskar_Mem* m, oskar_Mem* n, const oskar_Mem* RA, const oskar_Mem* Dec,
-        const oskar_StationModel* station, double gast, int* status);
+        double last, double latitude, int* status);
 
 #ifdef __cplusplus
 }

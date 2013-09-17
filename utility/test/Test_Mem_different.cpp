@@ -29,16 +29,13 @@
 #include <gtest/gtest.h>
 
 #include <oskar_get_error_string.h>
-#include <oskar_mem_different.h>
-#include <oskar_mem_set_value_real.h>
-#include <oskar_mem_free.h>
-#include <oskar_mem_init.h>
+#include <oskar_mem.h>
 
 
 TEST(Mem, different_none)
 {
     // Test two memory blocks that are the same.
-    int status = 0, value;
+    int status = 0;
     oskar_Mem one, two;
     oskar_mem_init(&one, OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, 1, &status);
     oskar_mem_init(&two, OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, 1, &status);
@@ -84,7 +81,7 @@ TEST(Mem, different_by_one)
     oskar_mem_set_value_real(&one, 1.0, &status);
     oskar_mem_set_value_real(&two, 1.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ((float*)(two.data))[4] = 1.1;
+    oskar_mem_float(&two, &status)[4] = 1.1;
     ASSERT_EQ((int)OSKAR_TRUE, oskar_mem_different(&one, &two, 0, &status));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_free(&one, &status);
@@ -105,7 +102,7 @@ TEST(Mem, different_up_to_a_point)
     oskar_mem_set_value_real(&one, 1.0, &status);
     oskar_mem_set_value_real(&two, 1.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ((float*)(two.data))[4] = 1.1;
+    oskar_mem_float(&two, &status)[4] = 1.1;
     ASSERT_EQ((int)OSKAR_FALSE, oskar_mem_different(&one, &two, 4, &status));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_free(&one, &status);

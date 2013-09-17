@@ -27,7 +27,7 @@
  */
 
 #include "math/oskar_spline_data_free.h"
-#include "utility/oskar_mem_free.h"
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

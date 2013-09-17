@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_jones_free.h"
-#include "utility/oskar_mem_free.h"
+#include <private_jones.h>
+
+#include <oskar_mem.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,11 +44,11 @@ void oskar_jones_free(oskar_Jones* jones, int* status)
         return;
     }
 
-    jones->num_stations = 0;
-    jones->num_sources = 0;
-    jones->cap_stations = 0;
-    jones->cap_sources = 0;
+    /* Free the memory held by the structure. */
     oskar_mem_free(&jones->data, status);
+
+    /* Free the structure itself. */
+    free(jones);
 }
 
 #ifdef __cplusplus

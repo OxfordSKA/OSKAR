@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_set_value_real_cuda.h"
+#include <oskar_mem_set_value_real_cuda.h>
 
 #ifdef __cplusplus
 extern "C" {

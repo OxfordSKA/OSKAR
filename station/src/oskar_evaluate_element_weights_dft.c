@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_element_weights_dft.h"
-#include "station/oskar_evaluate_element_weights_dft_cuda.h"
-#include "utility/oskar_mem_type_check.h"
+#include <oskar_evaluate_element_weights_dft.h>
+#include <oskar_evaluate_element_weights_dft_cuda.h>
+#include <oskar_cuda_check_error.h>
 #include <math.h>
 
 #ifdef __cplusplus
@@ -115,85 +115,93 @@ void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
     if (*status) return;
 
     /* Check array dimensions are OK. */
-    if (weights->num_elements < num_elements ||
-            x->num_elements < num_elements ||
-            y->num_elements < num_elements ||
-            z->num_elements < num_elements)
+    if ((int)oskar_mem_length(weights) < num_elements ||
+            (int)oskar_mem_length(x) < num_elements ||
+            (int)oskar_mem_length(y) < num_elements ||
+            (int)oskar_mem_length(z) < num_elements)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
     }
 
     /* Check for location mismatch. */
-    location = weights->location;
-    if (x->location != location ||
-            y->location != location ||
-            z->location != location)
+    location = oskar_mem_location(weights);
+    if (oskar_mem_location(x) != location ||
+            oskar_mem_location(y) != location ||
+            oskar_mem_location(z) != location)
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
 
     /* Check types. */
-    type = oskar_mem_base_type(weights->type);
-    if (!oskar_mem_is_complex(weights->type) ||
-            oskar_mem_is_matrix(weights->type))
+    type = oskar_mem_precision(weights);
+    if (!oskar_mem_is_complex(weights) || oskar_mem_is_matrix(weights))
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
-    if (x->type != type || y->type != type || z->type != type)
+    if (oskar_mem_type(x) != type || oskar_mem_type(y) != type ||
+            oskar_mem_type(z) != type)
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
 
-    /* Generate DFT weights. */
-    if (location == OSKAR_LOCATION_GPU)
+    /* Generate DFT weights: switch on type and location. */
+    if (type == OSKAR_DOUBLE)
     {
+        const double *x_, *y_, *z_;
+        double2* weights_;
+        x_ = oskar_mem_double_const(x, status);
+        y_ = oskar_mem_double_const(y, status);
+        z_ = oskar_mem_double_const(z, status);
+        weights_ = oskar_mem_double2(weights, status);
+
+        if (location == OSKAR_LOCATION_GPU)
+        {
 #ifdef OSKAR_HAVE_CUDA
-        if (type == OSKAR_DOUBLE)
-        {
-            oskar_evaluate_element_weights_dft_cuda_d
-            ((double2*)weights->data, num_elements, (double*)x->data,
-                    (double*)y->data, (double*)z->data, x_beam, y_beam,
-                    z_beam);
-        }
-        else if (type == OSKAR_SINGLE)
-        {
-            oskar_evaluate_element_weights_dft_cuda_f
-            ((float2*)weights->data, num_elements, (float*)x->data,
-                    (float*)y->data, (float*)z->data, x_beam, y_beam,
-                    z_beam);
-        }
-        else
-        {
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-        }
+            oskar_evaluate_element_weights_dft_cuda_d(weights_,
+                    num_elements, x_, y_, z_, x_beam, y_beam, z_beam);
+            oskar_cuda_check_error(status);
 #else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
+        }
+        else if (location == OSKAR_LOCATION_CPU)
+        {
+            oskar_evaluate_element_weights_dft_d(weights_,
+                    num_elements, x_, y_, z_, x_beam, y_beam, z_beam);
+        }
+    }
+    else if (type == OSKAR_SINGLE)
+    {
+        const float *x_, *y_, *z_;
+        float2* weights_;
+        x_ = oskar_mem_float_const(x, status);
+        y_ = oskar_mem_float_const(y, status);
+        z_ = oskar_mem_float_const(z, status);
+        weights_ = oskar_mem_float2(weights, status);
+
+        if (location == OSKAR_LOCATION_GPU)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            oskar_evaluate_element_weights_dft_cuda_f(weights_, num_elements,
+                    x_, y_, z_, (float)x_beam, (float)y_beam, (float)z_beam);
+            oskar_cuda_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
+        else if (location == OSKAR_LOCATION_CPU)
+        {
+            oskar_evaluate_element_weights_dft_f(weights_, num_elements,
+                    x_, y_, z_, (float)x_beam, (float)y_beam, (float)z_beam);
+        }
     }
     else
     {
-        if (type == OSKAR_DOUBLE)
-        {
-            oskar_evaluate_element_weights_dft_d
-            ((double2*)weights->data, num_elements, (double*)x->data,
-                    (double*)y->data, (double*)z->data, x_beam, y_beam,
-                    z_beam);
-        }
-        else if (type == OSKAR_SINGLE)
-        {
-            oskar_evaluate_element_weights_dft_f
-            ((float2*)weights->data, num_elements, (float*)x->data,
-                    (float*)y->data, (float*)z->data, x_beam, y_beam,
-                    z_beam);
-        }
-        else
-        {
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-        }
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
 }
 

@@ -28,12 +28,8 @@
 
 #include <gtest/gtest.h>
 
+#include <oskar_mem.h>
 #include <oskar_get_error_string.h>
-#include <oskar_mem_add.h>
-#include <oskar_mem_free.h>
-#include <oskar_mem_init.h>
-#include <oskar_mem_init_copy.h>
-#include <oskar_vector_types.h>
 
 
 TEST(Mem, add_matrix_cpu)
@@ -45,8 +41,8 @@ TEST(Mem, add_matrix_cpu)
             OSKAR_LOCATION_CPU, num_elements, 1, &status);
     oskar_mem_init(&mem_B, OSKAR_SINGLE_COMPLEX_MATRIX,
             OSKAR_LOCATION_CPU, num_elements, 1, &status);
-    float4c* A = (float4c*)mem_A.data;
-    float4c* B = (float4c*)mem_B.data;
+    float4c* A = oskar_mem_float4c(&mem_A, &status);
+    float4c* B = oskar_mem_float4c(&mem_B, &status);
 
     for (int i = 0; i < num_elements; ++i)
     {
@@ -73,7 +69,7 @@ TEST(Mem, add_matrix_cpu)
     oskar_mem_add(&mem_C, &mem_A, &mem_B, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    float4c* C = (float4c*)mem_C.data;
+    float4c* C = oskar_mem_float4c(&mem_C, &status);
     for (int i = 0; i < num_elements; ++i)
     {
         EXPECT_FLOAT_EQ(A[i].a.x + B[i].a.x , C[i].a.x);
@@ -100,8 +96,8 @@ TEST(Mem, add_in_place)
             OSKAR_LOCATION_CPU, num_elements, 1, &status);
     oskar_mem_init(&mem_B, OSKAR_SINGLE_COMPLEX_MATRIX,
             OSKAR_LOCATION_CPU, num_elements, 1, &status);
-    float4c* A = (float4c*)mem_A.data;
-    float4c* B = (float4c*)mem_B.data;
+    float4c* A = oskar_mem_float4c(&mem_A, &status);
+    float4c* B = oskar_mem_float4c(&mem_B, &status);
 
     for (int i = 0; i < num_elements; ++i)
     {

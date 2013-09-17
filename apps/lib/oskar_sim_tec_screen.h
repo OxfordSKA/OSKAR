@@ -35,9 +35,9 @@
 
 #include <oskar_global.h>
 
-#include <utility/oskar_Log.h>
-#include <imaging/oskar_Image.h>
-#include <utility/oskar_Settings.h>
+#include <oskar_log.h>
+#include <oskar_Image.h>
+#include <oskar_Settings.h>
 
 #ifdef __cplusplus
 extern "C" {

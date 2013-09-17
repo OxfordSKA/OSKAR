@@ -26,13 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_dierckx_bispev.h"
-#include "math/oskar_dierckx_bispev_bicubic_cuda.h"
-#include "math/oskar_spline_data_evaluate.h"
-#include "math/oskar_spline_data_location.h"
-#include "math/oskar_spline_data_type.h"
-#include "utility/oskar_mem_type_check.h"
-#include "utility/oskar_cuda_check_error.h"
+#include <oskar_dierckx_bispev.h>
+#include <oskar_dierckx_bispev_bicubic_cuda.h>
+#include <oskar_spline_data_evaluate.h>
+#include <oskar_spline_data_location.h>
+#include <oskar_spline_data_type.h>
+#include <oskar_cuda_check_error.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,14 +55,14 @@ void oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
 
     /* Check type. */
     type = oskar_spline_data_type(spline);
-    if (type != x->type || type != y->type)
+    if (type != oskar_mem_type(x) || type != oskar_mem_type(y))
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Check that all arrays are co-located. */
     location = oskar_spline_data_location(spline);
-    if (location != output->location ||
-            location != x->location ||
-            location != y->location)
+    if (location != oskar_mem_location(output) ||
+            location != oskar_mem_location(x) ||
+            location != oskar_mem_location(y))
         *status = OSKAR_ERR_LOCATION_MISMATCH;
 
     /* Check that the spline data has been set up. */

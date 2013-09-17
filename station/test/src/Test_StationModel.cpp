@@ -26,39 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/test/Test_StationModel.h"
-#include "station/oskar_station_model_load_config.h"
-#include "station/oskar_StationModel.h"
-#include "utility/oskar_vector_types.h"
-#include "utility/oskar_get_error_string.h"
+#include <gtest/gtest.h>
+
+#include <oskar_station.h>
+#include <oskar_get_error_string.h>
 
 #include <cmath>
 #include <cstdio>
 
-#define TIMER_ENABLE 1
-#include "utility/timer.h"
 
-/**
- * @details
- * Sets up the context before running each test method.
- */
-void Test_StationModel::setUp()
-{
-}
-
-/**
- * @details
- * Clean up routine called after each test is run.
- */
-void Test_StationModel::tearDown()
-{
-}
-
-/**
- * @details
- * Tests loading of station data.
- */
-void Test_StationModel::test_load_single()
+TEST(Station, test_load_single)
 {
     // Create the test file.
     int status = 0;
@@ -66,50 +43,51 @@ void Test_StationModel::test_load_single()
     FILE* file = fopen(filename, "w");
     int n_elements = 100;
     for (int i = 0; i < n_elements/2; ++i)
-        fprintf(file, "%.3f %.3f %.3f\n", i/10.0, i/20.0, i/30.0);
+        fprintf(file, "%.6f %.6f %.6f\n", i/10.0f, i/12.0f, i/14.0f);
     fprintf(file, "\n"); // Add a blank line halfway.
     for (int i = n_elements/2; i < n_elements; ++i)
-        fprintf(file, "%.3f,%.3f,%.3f\n", i/10.0, i/20.0, i/30.0);
+        fprintf(file, "%.6f,%.6f,%.6f\n", i/10.0f, i/12.0f, i/14.0f);
     fclose(file);
 
     // Load the data.
-    oskar_StationModel station_model(OSKAR_SINGLE, OSKAR_LOCATION_CPU);
-    oskar_station_model_load_config(&station_model, filename, &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    oskar_Station* station = oskar_station_create(OSKAR_SINGLE,
+            OSKAR_LOCATION_CPU, 0, &status);
+    oskar_station_load_config(station, filename, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check the coordinates.
-    CPPUNIT_ASSERT_EQUAL(n_elements, station_model.num_elements);
+    float tol = 1e-6;
+    ASSERT_EQ(n_elements, oskar_station_num_elements(station));
     for (int i = 0; i < n_elements; ++i)
     {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0,
-                ((float*)station_model.x_weights.data)[i], 1e-3);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0,
-                ((float*)station_model.y_weights.data)[i], 1e-3);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/30.0,
-                ((float*)station_model.z_weights.data)[i], 1e-3);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0,
-                ((float2*)station_model.weight.data)[i].x, 1e-3);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
-                ((float2*)station_model.weight.data)[i].y, 1e-3);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0,
-                ((float*)station_model.gain.data)[i], 1e-3);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
-                ((float*)station_model.gain_error.data)[i], 1e-3);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
-                ((float*)station_model.phase_offset.data)[i], 1e-3);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
-                ((float*)station_model.phase_error.data)[i], 1e-3);
+        EXPECT_NEAR(i/10.0f, oskar_mem_float(
+                oskar_station_element_x_weights(station), &status)[i], tol);
+        EXPECT_NEAR(i/12.0f, oskar_mem_float(
+                oskar_station_element_y_weights(station), &status)[i], tol);
+        EXPECT_NEAR(i/14.0f, oskar_mem_float(
+                oskar_station_element_z_weights(station), &status)[i], tol);
+        EXPECT_NEAR(1.0f, oskar_mem_float2(
+                oskar_station_element_weight(station), &status)[i].x, tol);
+        EXPECT_NEAR(0.0f, oskar_mem_float2(
+                oskar_station_element_weight(station), &status)[i].y, tol);
+        EXPECT_NEAR(1.0f, oskar_mem_float(
+                oskar_station_element_gain(station), &status)[i], tol);
+        EXPECT_NEAR(0.0f, oskar_mem_float(
+                oskar_station_element_gain_error(station), &status)[i], tol);
+        EXPECT_NEAR(0.0f, oskar_mem_float(
+                oskar_station_element_phase_offset(station), &status)[i], tol);
+        EXPECT_NEAR(0.0f, oskar_mem_float(
+                oskar_station_element_phase_error(station), &status)[i], tol);
     }
 
     // Remove the test file.
     remove(filename);
+
+    // Free memory.
+    oskar_station_free(station, &status);
 }
 
-/**
- * @details
- * Tests loading of station data.
- */
-void Test_StationModel::test_load_double()
+TEST(Station, test_load_double)
 {
     // Create the test file.
     int status = 0;
@@ -117,41 +95,47 @@ void Test_StationModel::test_load_double()
     FILE* file = fopen(filename, "w");
     int n_elements = 100;
     for (int i = 0; i < n_elements/2; ++i)
-        fprintf(file, "%.6f %.6f %.6f\n", i/10.0, i/20.0, i/30.0);
+        fprintf(file, "%.6f %.6f %.6f\n", i/10.0, i/12.0, i/14.0);
     fprintf(file, "\n"); // Add a blank line halfway.
     for (int i = n_elements/2; i < n_elements; ++i)
-        fprintf(file, "%.6f,%.6f,%.6f\n", i/10.0, i/20.0, i/30.0);
+        fprintf(file, "%.6f,%.6f,%.6f\n", i/10.0, i/12.0, i/14.0);
     fclose(file);
 
     // Load the data.
-    oskar_StationModel station_model(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-    oskar_station_model_load_config(&station_model, filename, &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    oskar_Station* station = oskar_station_create(OSKAR_DOUBLE,
+            OSKAR_LOCATION_CPU, 0, &status);
+    oskar_station_load_config(station, filename, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check the coordinates.
-    CPPUNIT_ASSERT_EQUAL(n_elements, station_model.num_elements);
+    double tol = 1e-6;
+    ASSERT_EQ(n_elements, oskar_station_num_elements(station));
     for (int i = 0; i < n_elements; ++i)
     {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0,
-                ((double*)station_model.x_weights.data)[i], 1e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0,
-                ((double*)station_model.y_weights.data)[i], 1e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/30.0,
-                ((double*)station_model.z_weights.data)[i], 1e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0,
-                ((double2*)station_model.weight.data)[i].x, 1e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
-                ((double2*)station_model.weight.data)[i].y, 1e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0,
-                ((double*)station_model.gain.data)[i], 1e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
-                ((double*)station_model.gain_error.data)[i], 1e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
-                ((double*)station_model.phase_offset.data)[i], 1e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
-                ((double*)station_model.phase_error.data)[i], 1e-6);
+        EXPECT_NEAR(i/10.0, oskar_mem_double(
+                oskar_station_element_x_weights(station), &status)[i], tol);
+        EXPECT_NEAR(i/12.0, oskar_mem_double(
+                oskar_station_element_y_weights(station), &status)[i], tol);
+        EXPECT_NEAR(i/14.0, oskar_mem_double(
+                oskar_station_element_z_weights(station), &status)[i], tol);
+        EXPECT_NEAR(1.0, oskar_mem_double2(
+                oskar_station_element_weight(station), &status)[i].x, tol);
+        EXPECT_NEAR(0.0, oskar_mem_double2(
+                oskar_station_element_weight(station), &status)[i].y, tol);
+        EXPECT_NEAR(1.0, oskar_mem_double(
+                oskar_station_element_gain(station), &status)[i], tol);
+        EXPECT_NEAR(0.0, oskar_mem_double(
+                oskar_station_element_gain_error(station), &status)[i], tol);
+        EXPECT_NEAR(0.0, oskar_mem_double(
+                oskar_station_element_phase_offset(station), &status)[i], tol);
+        EXPECT_NEAR(0.0, oskar_mem_double(
+                oskar_station_element_phase_error(station), &status)[i], tol);
     }
 
     // Remove the test file.
     remove(filename);
+
+    // Free memory.
+    oskar_station_free(station, &status);
 }
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@
 #include "imaging/oskar_get_image_vis_amps.h"
 #include "imaging/oskar_image_evaluate_ranges.h"
 
-#include "utility/oskar_mem_type_check.h"
 #include "utility/oskar_vector_types.h"
 #include <stdio.h>
 
@@ -39,13 +38,17 @@
 extern "C" {
 #endif
 
-int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
+int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Vis* vis,
         const oskar_Mem* stokes, const oskar_SettingsImage* settings,
         int vis_channel, int vis_time, int p)
 {
+    const oskar_Mem* v_ = oskar_vis_amplitude_const(vis);
+    int num_channels = oskar_vis_num_channels(vis);
+    int num_times = oskar_vis_num_times(vis);
+    int num_baselines = oskar_vis_num_baselines(vis);
+
     int err = OSKAR_SUCCESS;
-    int type = oskar_mem_is_double(vis->amplitude.type) ?
-            OSKAR_DOUBLE : OSKAR_SINGLE;
+    int type = oskar_mem_is_double(v_) ? OSKAR_DOUBLE : OSKAR_SINGLE;
     int pol = settings->image_type;
     int num_pols = (pol ==  OSKAR_IMAGE_TYPE_STOKES ||
             pol == OSKAR_IMAGE_TYPE_POL_LINEAR) ? 4 : 1;
@@ -53,11 +56,11 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
     // Data ranges for frequency and time synthesis.
     int vis_time_range[2];
     err = oskar_evaluate_image_data_range(vis_time_range, settings->time_range,
-            vis->num_times);
+            num_times);
     if (err) return err;
     int vis_chan_range[2];
     err = oskar_evaluate_image_data_range(vis_chan_range, settings->channel_range,
-            vis->num_channels);
+            num_channels);
     if (err) return err;
 
     /* ================================================================= */
@@ -68,16 +71,16 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
         /* ----------------------------------- TIME SNAPSHOTS, FREQ SNAPSHOTS */
         if (settings->time_snapshots && settings->channel_snapshots)
         {
-            int idx = (vis_channel * vis->num_times + vis_time) * vis->num_baselines;
+            int idx = (vis_channel * num_times + vis_time) * num_baselines;
             if (num_pols == 4)
             {
-                double4c* data;
+                const double4c* data;
                 if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
-                    data = (double4c*)vis->amplitude.data;
+                    data = oskar_mem_double4c_const(v_, &err);
                 else /* pol == OSKAR_IMAGE_TYPE_STOKES */
-                    data = (double4c*)stokes->data;
+                    data = (const double4c*)stokes->data;
 
-                for (int b = 0; b < vis->num_baselines; ++b)
+                for (int b = 0; b < num_baselines; ++b)
                 {
                     if (p == 0)
                     {
@@ -105,15 +108,15 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                         pol == OSKAR_IMAGE_TYPE_STOKES_V)
                 {
                     double2* data = (double2*)stokes->data;
-                    for (int b = 0; b < vis->num_baselines; ++b)
+                    for (int b = 0; b < num_baselines; ++b)
                     {
                         a_[b].x = data[idx+b].x; a_[b].y = data[idx+b].y;
                     }
                 }
                 else
                 {
-                    double4c* data = (double4c*)vis->amplitude.data;
-                    for (int b = 0; b < vis->num_baselines; ++b)
+                    const double4c* data = oskar_mem_double4c_const(v_, &err);
+                    for (int b = 0; b < num_baselines; ++b)
                     {
                         if (pol == OSKAR_IMAGE_TYPE_POL_XX)
                         {
@@ -143,15 +146,15 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
         {
             if (num_pols == 4)
             {
-                double4c* data;
+                const double4c* data;
                 if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
-                    data = (double4c*)vis->amplitude.data;
+                    data = oskar_mem_double4c_const(v_, &err);
                 else /* pol == OSKAR_IMAGE_TYPE_STOKES */
-                    data = (double4c*)stokes->data;
+                    data = (const double4c*)stokes->data;
                 for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
                 {
-                    int idx = (c*vis->num_times+vis_time)*vis->num_baselines;
-                    for (int b = 0; b < vis->num_baselines;++b, ++i)
+                    int idx = (c*num_times+vis_time)*num_baselines;
+                    for (int b = 0; b < num_baselines;++b, ++i)
                     {
                         if (p == 0)
                         {
@@ -182,8 +185,8 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                     double2* data = (double2*)stokes->data;
                     for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
                     {
-                        int idx = (c*vis->num_times+vis_time)*vis->num_baselines;
-                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        int idx = (c*num_times+vis_time)*num_baselines;
+                        for (int b = 0; b < num_baselines;++b, ++i)
                         {
                             a_[i].x=data[idx+b].x; a_[i].y=data[idx+b].y;
                         }
@@ -191,11 +194,11 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                 }
                 else
                 {
-                    double4c* data = (double4c*)vis->amplitude.data;
+                    const double4c* data = oskar_mem_double4c_const(v_, &err);
                     for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
                     {
-                        int idx = (c*vis->num_times+vis_time)*vis->num_baselines;
-                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        int idx = (c*num_times+vis_time)*num_baselines;
+                        for (int b = 0; b < num_baselines;++b, ++i)
                         {
                             if (pol == OSKAR_IMAGE_TYPE_POL_XX)
                             {
@@ -224,15 +227,15 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
         {
             if (num_pols == 4)
             {
-                double4c* data;
+                const double4c* data;
                 if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
-                    data = (double4c*)vis->amplitude.data;
+                    data = oskar_mem_double4c_const(v_, &err);
                 else /* pol == OSKAR_IMAGE_TYPE_STOKES */
-                    data = (double4c*)stokes->data;
+                    data = (const double4c*)stokes->data;
                 for (int i = 0, t = vis_time_range[0]; t <= vis_time_range[1]; ++t)
                 {
-                    int idx = (vis_channel*vis->num_times+t)*vis->num_baselines;
-                    for (int b = 0; b < vis->num_baselines;++b, ++i)
+                    int idx = (vis_channel*num_times+t)*num_baselines;
+                    for (int b = 0; b < num_baselines;++b, ++i)
                     {
                         if (p == 0)
                         {
@@ -263,8 +266,8 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                     double2* data = (double2*)stokes->data;
                     for (int i = 0, t = vis_time_range[0]; t <= vis_time_range[1]; ++t)
                     {
-                        int idx = (vis_channel*vis->num_times+t)*vis->num_baselines;
-                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        int idx = (vis_channel*num_times+t)*num_baselines;
+                        for (int b = 0; b < num_baselines;++b, ++i)
                         {
                             a_[i].x=data[idx+b].x; a_[i].y=data[idx+b].y;
                         }
@@ -272,11 +275,11 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                 }
                 else
                 {
-                    double4c* data = (double4c*)vis->amplitude.data;
+                    const double4c* data = oskar_mem_double4c_const(v_, &err);
                     for (int i = 0, t = vis_time_range[0]; t <= vis_time_range[1]; ++t)
                     {
-                        int idx = (vis_channel*vis->num_times+t)*vis->num_baselines;
-                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        int idx = (vis_channel*num_times+t)*num_baselines;
+                        for (int b = 0; b < num_baselines;++b, ++i)
                         {
                             if (pol == OSKAR_IMAGE_TYPE_POL_XX)
                             {
@@ -305,17 +308,17 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
         {
             if (num_pols == 4)
             {
-                double4c* data;
+                const double4c* data;
                 if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
-                    data = (double4c*)vis->amplitude.data;
+                    data = oskar_mem_double4c_const(v_, &err);
                 else /* pol == OSKAR_IMAGE_TYPE_STOKES */
-                    data = (double4c*)stokes->data;
+                    data = (const double4c*)stokes->data;
                 for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
                 {
                     for (int t = vis_time_range[0]; t <=vis_time_range[1]; ++t)
                     {
-                        int idx = (c*vis->num_times+t)*vis->num_baselines;
-                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        int idx = (c*num_times+t)*num_baselines;
+                        for (int b = 0; b < num_baselines;++b, ++i)
                         {
                             if (p == 0)
                             {
@@ -349,8 +352,8 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                     {
                         for (int t = vis_time_range[0]; t <=vis_time_range[1]; ++t)
                         {
-                            int idx = (c*vis->num_times+t)*vis->num_baselines;
-                            for (int b = 0; b < vis->num_baselines;++b, ++i)
+                            int idx = (c*num_times+t)*num_baselines;
+                            for (int b = 0; b < num_baselines;++b, ++i)
                             {
                                 a_[i].x=data[idx+b].x; a_[i].y=data[idx+b].y;
                             }
@@ -359,13 +362,13 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                 }
                 else
                 {
-                    double4c* data = (double4c*)vis->amplitude.data;
+                    const double4c* data = oskar_mem_double4c_const(v_, &err);
                     for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
                     {
                         for (int t = vis_time_range[0]; t <=vis_time_range[1]; ++t)
                         {
-                            int idx = (c*vis->num_times+t)*vis->num_baselines;
-                            for (int b = 0; b < vis->num_baselines;++b, ++i)
+                            int idx = (c*num_times+t)*num_baselines;
+                            for (int b = 0; b < num_baselines;++b, ++i)
                             {
                                 if (pol == OSKAR_IMAGE_TYPE_POL_XX)
                                 {
@@ -405,16 +408,16 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
         /* ----------------------------------- TIME SNAPSHOTS, FREQ SNAPSHOTS */
         if (settings->time_snapshots && settings->channel_snapshots)
         {
-            int idx = (vis_channel * vis->num_times + vis_time) * vis->num_baselines;
+            int idx = (vis_channel * num_times + vis_time) * num_baselines;
             if (num_pols == 4)
             {
-                float4c* data;
+                const float4c* data;
                 if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
-                    data = (float4c*)vis->amplitude.data;
+                    data = oskar_mem_float4c_const(v_, &err);
                 else /* pol == OSKAR_IMAGE_TYPE_STOKES */
-                    data = (float4c*)stokes->data;
+                    data = (const float4c*)stokes->data;
 
-                for (int b = 0; b < vis->num_baselines; ++b)
+                for (int b = 0; b < num_baselines; ++b)
                 {
                     if (p == 0)
                     {
@@ -442,15 +445,15 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                         pol == OSKAR_IMAGE_TYPE_STOKES_V)
                 {
                     float2* data = (float2*)stokes->data;
-                    for (int b = 0; b < vis->num_baselines; ++b)
+                    for (int b = 0; b < num_baselines; ++b)
                     {
                         a_[b].x = data[idx+b].x; a_[b].y = data[idx+b].y;
                     }
                 }
                 else
                 {
-                    float4c* data = (float4c*)vis->amplitude.data;
-                    for (int b = 0; b < vis->num_baselines; ++b)
+                    const float4c* data = oskar_mem_float4c_const(v_, &err);
+                    for (int b = 0; b < num_baselines; ++b)
                     {
                         if (pol == OSKAR_IMAGE_TYPE_POL_XX)
                         {
@@ -480,15 +483,15 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
         {
             if (num_pols == 4)
             {
-                float4c* data;
+                const float4c* data;
                 if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
-                    data = (float4c*)vis->amplitude.data;
+                    data = oskar_mem_float4c_const(v_, &err);
                 else /* pol == OSKAR_IMAGE_TYPE_STOKES */
-                    data = (float4c*)stokes->data;
+                    data = (const float4c*)stokes->data;
                 for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
                 {
-                    int idx = (c*vis->num_times+vis_time)*vis->num_baselines;
-                    for (int b = 0; b < vis->num_baselines;++b, ++i)
+                    int idx = (c*num_times+vis_time)*num_baselines;
+                    for (int b = 0; b < num_baselines;++b, ++i)
                     {
                         if (p == 0)
                         {
@@ -519,8 +522,8 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                     float2* data = (float2*)stokes->data;
                     for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
                     {
-                        int idx = (c*vis->num_times+vis_time)*vis->num_baselines;
-                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        int idx = (c*num_times+vis_time)*num_baselines;
+                        for (int b = 0; b < num_baselines;++b, ++i)
                         {
                             a_[i].x=data[idx+b].x; a_[i].y=data[idx+b].y;
                         }
@@ -528,11 +531,11 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                 }
                 else
                 {
-                    float4c* data = (float4c*)vis->amplitude.data;
+                    const float4c* data = oskar_mem_float4c_const(v_, &err);
                     for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
                     {
-                        int idx = (c*vis->num_times+vis_time)*vis->num_baselines;
-                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        int idx = (c*num_times+vis_time)*num_baselines;
+                        for (int b = 0; b < num_baselines;++b, ++i)
                         {
                             if (pol == OSKAR_IMAGE_TYPE_POL_XX)
                             {
@@ -561,15 +564,15 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
         {
             if (num_pols == 4)
             {
-                float4c* data;
+                const float4c* data;
                 if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
-                    data = (float4c*)vis->amplitude.data;
+                    data = oskar_mem_float4c_const(v_, &err);
                 else /* pol == OSKAR_IMAGE_TYPE_STOKES */
-                    data = (float4c*)stokes->data;
+                    data = (const float4c*)stokes->data;
                 for (int i = 0, t = vis_time_range[0]; t <= vis_time_range[1]; ++t)
                 {
-                    int idx = (vis_channel*vis->num_times+t)*vis->num_baselines;
-                    for (int b = 0; b < vis->num_baselines;++b, ++i)
+                    int idx = (vis_channel*num_times+t)*num_baselines;
+                    for (int b = 0; b < num_baselines;++b, ++i)
                     {
                         if (p == 0)
                         {
@@ -600,8 +603,8 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                     float2* data = (float2*)stokes->data;
                     for (int i = 0, t = vis_time_range[0]; t <= vis_time_range[1]; ++t)
                     {
-                        int idx = (vis_channel*vis->num_times+t)*vis->num_baselines;
-                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        int idx = (vis_channel*num_times+t)*num_baselines;
+                        for (int b = 0; b < num_baselines;++b, ++i)
                         {
                             a_[i].x=data[idx+b].x; a_[i].y=data[idx+b].y;
                         }
@@ -609,11 +612,11 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                 }
                 else
                 {
-                    float4c* data = (float4c*)vis->amplitude.data;
+                    const float4c* data = oskar_mem_float4c_const(v_, &err);
                     for (int i = 0, t = vis_time_range[0]; t <= vis_time_range[1]; ++t)
                     {
-                        int idx = (vis_channel*vis->num_times+t)*vis->num_baselines;
-                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        int idx = (vis_channel*num_times+t)*num_baselines;
+                        for (int b = 0; b < num_baselines;++b, ++i)
                         {
                             if (pol == OSKAR_IMAGE_TYPE_POL_XX)
                             {
@@ -642,17 +645,17 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
         {
             if (num_pols == 4)
             {
-                float4c* data;
+                const float4c* data;
                 if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
-                    data = (float4c*)vis->amplitude.data;
+                    data = oskar_mem_float4c_const(v_, &err);
                 else /* pol == OSKAR_IMAGE_TYPE_STOKES */
-                    data = (float4c*)stokes->data;
+                    data = (const float4c*)stokes->data;
                 for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
                 {
                     for (int t = vis_time_range[0]; t <=vis_time_range[1]; ++t)
                     {
-                        int idx = (c*vis->num_times+t)*vis->num_baselines;
-                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        int idx = (c*num_times+t)*num_baselines;
+                        for (int b = 0; b < num_baselines;++b, ++i)
                         {
                             if (p == 0)
                             {
@@ -686,8 +689,8 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                     {
                         for (int t = vis_time_range[0]; t <=vis_time_range[1]; ++t)
                         {
-                            int idx = (c*vis->num_times+t)*vis->num_baselines;
-                            for (int b = 0; b < vis->num_baselines;++b, ++i)
+                            int idx = (c*num_times+t)*num_baselines;
+                            for (int b = 0; b < num_baselines;++b, ++i)
                             {
                                 a_[i].x=data[idx+b].x; a_[i].y=data[idx+b].y;
                             }
@@ -696,13 +699,13 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                 }
                 else
                 {
-                    float4c* data = (float4c*)vis->amplitude.data;
+                    const float4c* data = oskar_mem_float4c_const(v_, &err);
                     for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
                     {
                         for (int t = vis_time_range[0]; t <=vis_time_range[1]; ++t)
                         {
-                            int idx = (c*vis->num_times+t)*vis->num_baselines;
-                            for (int b = 0; b < vis->num_baselines;++b, ++i)
+                            int idx = (c*num_times+t)*num_baselines;
+                            for (int b = 0; b < num_baselines;++b, ++i)
                             {
                                 if (pol == OSKAR_IMAGE_TYPE_POL_XX)
                                 {

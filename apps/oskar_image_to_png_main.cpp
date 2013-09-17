@@ -26,15 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <oskar_get_error_string.h>
+#include <oskar_log.h>
+#include <oskar_mem.h>
 
-#include <oskar_global.h>
-
-#include <utility/oskar_get_error_string.h>
-#include <utility/oskar_log_error.h>
-#include <utility/oskar_mem_get_pointer.h>
-
-#include <imaging/oskar_Image.h>
-#include <imaging/oskar_image_read.h>
+#include <oskar_image_read.h>
 
 #include <apps/lib/oskar_OptionParser.h>
 
@@ -203,7 +199,7 @@ int main(int argc, char** argv)
     png_bytep row;
     row = (png_bytep) malloc(3 * img.width * sizeof(png_byte));
 
-    float* img_data = (float*)img_slice.data;
+    float* img_data = oskar_mem_float(&img_slice, &status);
 
     //short fltInt16;
     //int fltInt32;

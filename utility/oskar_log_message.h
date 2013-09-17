@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,7 @@
  * @file oskar_log_message.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Log.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,11 +49,9 @@ extern "C" {
  * @param[in,out] log    Pointer to a log structure.
  * @param[in]     depth  Level of nesting of log message.
  * @param[in]     format Format string (for printf()).
- *
- * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_log_message(oskar_Log* log, int depth, const char* format, ...);
+void oskar_log_message(oskar_Log* log, int depth, const char* format, ...);
 
 #ifdef __cplusplus
 }

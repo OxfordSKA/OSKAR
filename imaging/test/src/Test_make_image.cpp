@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,13 +36,10 @@
 #include "imaging/oskar_evaluate_image_lm_grid.h"
 #include "imaging/oskar_image_evaluate_ranges.h"
 
-#include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_visibilities_init.h"
-
-#include "utility/oskar_vector_types.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_mem_binary_file_write.h"
-#include "utility/oskar_mem_binary_stream_write.h"
+#include <oskar_get_error_string.h>
+#include <oskar_vis.h>
+#include <oskar_mem_binary_file_write.h>
+#include <oskar_mem_binary_stream_write.h>
 
 #ifndef OSKAR_NO_FITS
 #include "fits/oskar_fits_image_write.h"
@@ -67,15 +64,14 @@ void Test_make_image::test()
     double freq       = C_0;
     //double lambda     = C_0 / freq;
 
-    oskar_Visibilities vis;
-    oskar_visibilities_init(&vis, amp_type, location, num_channels, num_times,
-            num_stations, &error);
-    double* uu_ = (double*)vis.uu_metres.data;
-    double* vv_ = (double*)vis.vv_metres.data;
-    double* ww_ = (double*)vis.ww_metres.data;
-    double4c* amp_ = (double4c*)vis.amplitude.data;
-    vis.freq_start_hz = freq;
-    vis.freq_inc_hz   = 10.0e6;
+    oskar_Vis* vis = oskar_vis_create(amp_type, location, num_channels,
+            num_times, num_stations, &error);
+    double* uu_ = oskar_mem_double(oskar_vis_baseline_uu_metres(vis), &error);
+    double* vv_ = oskar_mem_double(oskar_vis_baseline_vv_metres(vis), &error);
+    double* ww_ = oskar_mem_double(oskar_vis_baseline_ww_metres(vis), &error);
+    double4c* amp_ = oskar_mem_double4c(oskar_vis_amplitude(vis), &error);
+    oskar_vis_set_freq_start_hz(vis, freq);
+    oskar_vis_set_freq_inc_hz(vis, 10.0e6);
 
     // time 0, baseline 0
     uu_[0] =  100.0;
@@ -87,11 +83,12 @@ void Test_make_image::test()
     ww_[1] =  0.0;
 
     // channel 0, time 0, baseline 0
+    int num_baselines = oskar_vis_num_baselines(vis);
     for (int i = 0, c = 0; c < num_channels; ++c)
     {
         for (int t = 0; t < num_times; ++t)
         {
-            for (int b = 0; b < vis.num_baselines; ++b, ++i)
+            for (int b = 0; b < num_baselines; ++b, ++i)
             {
                 amp_[i].a.x = 0.0; amp_[i].a.y = 0.0;
                 amp_[i].b.x = 0.0; amp_[i].b.y = 4.0;
@@ -115,27 +112,35 @@ void Test_make_image::test()
     settings.transform_type = OSKAR_IMAGE_DFT_2D;
 
     oskar_Image image(OSKAR_DOUBLE);
-    error = oskar_make_image(&image, NULL, &vis, &settings);
+    error = oskar_make_image(&image, NULL, vis, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     int idx = 0;
-    oskar_image_write(&image, NULL, "temp_test_image.img", idx, &error);
+    const char* image_file = "temp_test_image.img";
+    oskar_image_write(&image, NULL, image_file, idx, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
 #ifndef OSKAR_NO_FITS
-    error = oskar_fits_image_write(&image, NULL, "temp_test_image.fits");
+    const char* fits_file = "temp_test_image.fits";
+    oskar_fits_image_write(&image, NULL, fits_file, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 #endif
 
-    const char* filename = "temp_test_make_image.dat";
-    oskar_mem_binary_file_write_ext(&vis.uu_metres, filename,
+    const char* vis_file = "temp_test_make_image.dat";
+    oskar_mem_binary_file_write_ext(oskar_vis_baseline_uu_metres(vis), vis_file,
             "mem", "uu_metres", 0, 0, &error);
-    oskar_mem_binary_file_write_ext(&vis.vv_metres, filename,
+    oskar_mem_binary_file_write_ext(oskar_vis_baseline_vv_metres(vis), vis_file,
             "mem", "vv_metres", 0, 0, &error);
-    oskar_mem_binary_file_write_ext(&vis.amplitude, filename,
+    oskar_mem_binary_file_write_ext(oskar_vis_amplitude(vis), vis_file,
             "mem", "vis_amp", 0, 0, &error);
-    oskar_mem_binary_file_write_ext(&image.data, filename,
+    oskar_mem_binary_file_write_ext(&image.data, vis_file,
             "mem", "image", 0, 0, &error);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+
+    oskar_vis_free(vis, &error);
+    remove(fits_file);
+    remove(image_file);
+    remove(vis_file);
 }
 
 void  Test_make_image::image_lm_grid()
@@ -159,9 +164,16 @@ void  Test_make_image::image_lm_grid()
     memcpy((double*)im.data.data + num_pixels, m.data, num_pixels * sizeof(double));
 
 #ifndef OSKAR_NO_FITS
-    oskar_fits_image_write(&im, NULL, "test_lm_grid.fits");
+    const char* fits_file = "test_lm_grid.fits";
+    oskar_fits_image_write(&im, NULL, fits_file, &error);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 #endif
-    oskar_image_write(&im, NULL, "test_lm_grid.img", 0, &error);
+    const char* image_file = "test_lm_grid.img";
+    oskar_image_write(&im, NULL, image_file, 0, &error);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+
+    remove(fits_file);
+    remove(image_file);
 }
 
 void Test_make_image::image_range()

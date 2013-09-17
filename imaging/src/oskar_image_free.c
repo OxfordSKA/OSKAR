@@ -28,7 +28,7 @@
 
 #include "imaging/oskar_image_init.h"
 #include "imaging/oskar_Image.h"
-#include "utility/oskar_mem_free.h"
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

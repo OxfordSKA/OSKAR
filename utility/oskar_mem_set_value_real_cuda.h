@@ -33,8 +33,8 @@
  * @file oskar_mem_set_value_real_cuda.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,34 +69,28 @@ void oskar_mem_set_value_real_cuda_m_d(int num, double4c* data, double value);
 /* Kernels. ================================================================ */
 
 /* Single precision. */
-OSKAR_EXPORT
 __global__
 void oskar_mem_set_value_real_cudak_r_f(const int num, float* data,
         const float value);
 
-OSKAR_EXPORT
 __global__
 void oskar_mem_set_value_real_cudak_c_f(const int num, float2* data,
         const float value);
 
-OSKAR_EXPORT
 __global__
 void oskar_mem_set_value_real_cudak_m_f(const int num, float4c* data,
         const float value);
 
 
 /* Double precision. */
-OSKAR_EXPORT
 __global__
 void oskar_mem_set_value_real_cudak_r_d(const int num, double* data,
         const double value);
 
-OSKAR_EXPORT
 __global__
 void oskar_mem_set_value_real_cudak_c_d(const int num, double2* data,
         const double value);
 
-OSKAR_EXPORT
 __global__
 void oskar_mem_set_value_real_cudak_m_d(const int num, double4c* data,
         const double value);

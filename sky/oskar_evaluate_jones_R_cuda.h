@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_R_cuda_f(float4c* d_jones, int num_sources,
-        float* d_ra, float* d_dec, float latitude_rad, float lst_rad);
+        const float* d_ra, const float* d_dec, float latitude_rad,
+        float lst_rad);
 
 /**
  * @brief
@@ -92,7 +93,8 @@ void oskar_evaluate_jones_R_cuda_f(float4c* d_jones, int num_sources,
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_R_cuda_d(double4c* d_jones, int num_sources,
-        double* d_ra, double* d_dec, double latitude_rad, double lst_rad);
+        const double* d_ra, const double* d_dec, double latitude_rad,
+        double lst_rad);
 
 #ifdef __CUDACC__
 

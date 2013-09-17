@@ -30,11 +30,7 @@
 #include "imaging/oskar_get_image_baseline_coords.h"
 #include "imaging/oskar_image_evaluate_ranges.h"
 
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_type_check.h"
-#include "utility/oskar_mem_get_pointer.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_element_size.h"
+#include <oskar_mem.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -66,7 +62,7 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
     if (err) return err;
 
     // Declare temporary pointers into visibility coordinate arrays.
-    int type = vis_uu->type;
+    int type = oskar_mem_type(vis_uu);
     oskar_Mem uu_ptr(type, location, num_baselines, OSKAR_FALSE);
     oskar_Mem vv_ptr(type, location, num_baselines, OSKAR_FALSE);
     oskar_Mem ww_ptr(type, location, num_baselines, OSKAR_FALSE);

@@ -33,15 +33,12 @@
  * @file oskar_AbstractTelescopeFileLoader.h
  */
 
-#include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_StationModel.h"
-#include "utility/oskar_Settings.h"
-
-#include <QtCore/QString>
-#include <QtCore/QHash>
+#include <oskar_global.h>
+#include <oskar_telescope.h>
+#include <oskar_Settings.h>
 
 class QDir;
+#include <QtCore/QHash>
 
 class OSKAR_APPS_EXPORT oskar_AbstractTelescopeFileLoader
 {
@@ -66,7 +63,7 @@ public:
      *                        level if necessary.
      * @param[in,out] status Status return code.
      */
-    virtual void load(oskar_TelescopeModel* telescope, const QDir& cwd,
+    virtual void load(oskar_Telescope* telescope, const QDir& cwd,
             int num_subdirs, QHash<QString, QString>& filemap, int* status) = 0;
 
     /**
@@ -85,7 +82,7 @@ public:
      *                        level if necessary.
      * @param[in,out] status Status return code.
      */
-    virtual void load(oskar_StationModel* station, const QDir& cwd,
+    virtual void load(oskar_Station* station, const QDir& cwd,
             int num_subdirs, int depth, QHash<QString, QString>& filemap,
             int* status) = 0;
 };

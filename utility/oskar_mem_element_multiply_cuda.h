@@ -33,9 +33,8 @@
  * @file oskar_mem_element_multiply_cuda.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {

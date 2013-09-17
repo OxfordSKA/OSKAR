@@ -28,7 +28,7 @@
 
 #include "apps/lib/oskar_settings_load_observation.h"
 #include "sky/oskar_date_time_to_mjd.h"
-#include "utility/oskar_log_error.h"
+#include <oskar_log.h>
 
 #include <cmath>
 #include <cstdlib>

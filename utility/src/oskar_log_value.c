@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_log_value.h"
-#include "utility/oskar_log_write.h"
+#include <private_log.h>
+#include <oskar_log.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -36,10 +37,9 @@
 extern "C" {
 #endif
 
-int oskar_log_value(oskar_Log* log, int depth, int width, const char* prefix,
+void oskar_log_value(oskar_Log* log, int depth, int width, const char* prefix,
         const char* format, ...)
 {
-    int retval;
     char code = ' ';
     va_list args;
 
@@ -50,9 +50,8 @@ int oskar_log_value(oskar_Log* log, int depth, int width, const char* prefix,
 
     /* Write to log file. */
     va_start(args, format);
-    retval = oskar_log_writev(log, code, depth, width, prefix, format, args);
+    oskar_log_writev(log, code, depth, width, prefix, format, args);
     va_end(args);
-    return retval;
 }
 
 #ifdef __cplusplus

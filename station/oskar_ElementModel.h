@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,9 @@
  * @file oskar_ElementModel.h
  */
 
-#include "oskar_global.h"
-#include "math/oskar_SplineData.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_global.h>
+#include <oskar_SplineData.h>
+#include <oskar_mem.h>
 
 /**
  * @brief Structure to hold antenna (embedded element) pattern data.
@@ -46,7 +46,7 @@
  */
 struct OSKAR_EXPORT oskar_ElementModel
 {
-    int type; /**< Geometric dipole or isotropic. */
+    int element_type; /**< Geometric dipole or isotropic. */
     int taper_type; /**< Tapering type. */
     double cos_power; /**< For a cosine taper, the power of the cosine. */
     double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */

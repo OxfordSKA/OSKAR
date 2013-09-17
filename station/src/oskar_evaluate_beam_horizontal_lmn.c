@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_beam_horizontal_lmn.h"
-#include "sky/oskar_ra_dec_to_hor_lmn.h"
+#include <oskar_evaluate_beam_horizontal_lmn.h>
+#include <oskar_ra_dec_to_hor_lmn.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -36,8 +36,11 @@ extern "C" {
 #endif
 
 void oskar_evaluate_beam_horizontal_lmn(double* l, double* m, double* n,
-        const oskar_StationModel* station, const double gast, int* status)
+        const oskar_Station* station, const double gast, int* status)
 {
+    int beam_coord_type;
+    double beam_lon, beam_lat;
+
     /* Check all inputs. */
     if (!l || !m || !n || !station || !status)
     {
@@ -49,24 +52,26 @@ void oskar_evaluate_beam_horizontal_lmn(double* l, double* m, double* n,
     if (*status) return;
 
     /* Convert equatorial to horizontal coordinates if necessary. */
-    if (station->beam_coord_type == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
-    {
-        /* Local apparent Sidereal Time, in radians. */
-        double last;
-        last = gast + station->longitude_rad;
+    beam_coord_type = oskar_station_beam_coord_type(station);
+    beam_lon = oskar_station_beam_longitude_rad(station);
+    beam_lat = oskar_station_beam_latitude_rad(station);
 
-        oskar_ra_dec_to_hor_lmn_d(1, &station->beam_longitude_rad,
-                &station->beam_latitude_rad, last, station->latitude_rad,
-                l, m, n);
+    if (beam_coord_type == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
+    {
+        double lon, lat, last;
+        lon = oskar_station_longitude_rad(station);
+        lat = oskar_station_latitude_rad(station);
+        last = gast + lon; /* Local Apparent Sidereal Time, in radians. */
+        oskar_ra_dec_to_hor_lmn_d(1, &beam_lon, &beam_lat, last, lat, l, m, n);
     }
-    else if (station->beam_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)
+    else if (beam_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)
     {
         /* Convert AZEL to direction cosines. */
         double cos_lat;
-        cos_lat = cos(station->beam_latitude_rad);
-        *l = cos_lat * sin(station->beam_longitude_rad);
-        *m = cos_lat * cos(station->beam_longitude_rad);
-        *n = sin(station->beam_latitude_rad);
+        cos_lat = cos(beam_lat);
+        *l = cos_lat * sin(beam_lon);
+        *m = cos_lat * cos(beam_lon);
+        *n = sin(beam_lat);
     }
     else
     {

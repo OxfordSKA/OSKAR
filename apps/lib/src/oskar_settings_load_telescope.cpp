@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
  */
 
 #include "apps/lib/oskar_settings_load_telescope.h"
-#include "station/oskar_StationModel.h"
+#include <oskar_station.h>
 #include "station/oskar_ElementModel.h"
 
 #include <cmath>

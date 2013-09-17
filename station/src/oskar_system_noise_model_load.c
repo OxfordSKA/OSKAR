@@ -26,12 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_system_noise_model_load.h"
-#include "utility/oskar_getline.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_system_noise_model_load.h>
+#include <oskar_getline.h>
+#include <oskar_mem.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -58,14 +55,15 @@ void oskar_system_noise_model_load(oskar_Mem* mem, const char* filename,
     if (*status) return;
 
     /* Check location */
-    if (mem->location != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
 
     /* Check the data type. */
-    if (!(mem->type == OSKAR_SINGLE || mem->type == OSKAR_DOUBLE))
+    if (!(oskar_mem_type(mem) == OSKAR_SINGLE ||
+            oskar_mem_type(mem) == OSKAR_DOUBLE))
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
@@ -84,6 +82,7 @@ void oskar_system_noise_model_load(oskar_Mem* mem, const char* filename,
     {
         int a;
         double value = 0.0;
+        void* data;
 
         /* Ignore comment lines (lines starting with '#'). */
         if (line[0] == '#') continue;
@@ -95,27 +94,27 @@ void oskar_system_noise_model_load(oskar_Mem* mem, const char* filename,
         if (a != 1) continue;
 
         /* Ensure enough space in the array. */
-        if (mem->num_elements <= n)
+        if ((int)oskar_mem_length(mem) <= n)
         {
             oskar_mem_realloc(mem, n + 1, status);
-            if (*status) goto cleanup;
+            if (*status) break;
         }
 
         /* Store the value. */
-        if (mem->type == OSKAR_SINGLE)
-            ((float*)mem->data)[n] = (float)value;
-        else if (mem->type == OSKAR_DOUBLE)
-            ((double*)mem->data)[n] = value;
+        data = oskar_mem_void(mem);
+        if (oskar_mem_type(mem) == OSKAR_SINGLE)
+            ((float*)data)[n] = (float)value;
+        else if (oskar_mem_type(mem) == OSKAR_DOUBLE)
+            ((double*)data)[n] = value;
 
         /* Increment the array pointer. */
         ++n;
     }
 
     /* Record the number of elements loaded. */
-    mem->num_elements = n;
+    oskar_mem_realloc(mem, n, status);
 
     /* Free the line buffer and close the file. */
-    cleanup:
     if (line) free(line);
     fclose(file);
 }

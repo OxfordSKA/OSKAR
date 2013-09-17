@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_MEX_SKY_TO_MATLAB_STRUCT_H_
 #define OSKAR_MEX_SKY_TO_MATLAB_STRUCT_H_
 
@@ -36,7 +35,7 @@
 
 #include <mex.h>
 #include <oskar_global.h>
-#include <sky/oskar_SkyModel.h>
+#include <oskar_sky.h>
 
 
 /**
@@ -46,9 +45,9 @@
  * @param sky
  * @param filename
  *
- * @return An mxArray containing a structure holding the oskar_SkyModel
+ * @return An mxArray containing a structure holding the oskar_Sky
  */
-mxArray* oskar_mex_sky_to_matlab_struct(const oskar_SkyModel* sky,
+mxArray* oskar_mex_sky_to_matlab_struct(const oskar_Sky* sky,
         const char* filename);
 
 #endif /* OSKAR_MEX_SKY_TO_MATLAB_STRUCT_H_ */

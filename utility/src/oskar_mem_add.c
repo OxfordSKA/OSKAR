@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_add.h"
-#include "utility/oskar_mem_type_check.h"
+#include <private_mem.h>
+#include <oskar_mem.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -84,15 +84,15 @@ void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
 
     /* Get the total number of elements. */
     num_elements = a->num_elements;
-    if (oskar_mem_is_matrix(a->type))
+    if (oskar_mem_type_is_matrix(a->type))
         num_elements *= 4;
-    if (oskar_mem_is_complex(a->type))
+    if (oskar_mem_type_is_complex(a->type))
         num_elements *= 2;
 
     /* Check if safe to proceed. */
     if (*status) return;
 
-    if (oskar_mem_is_double(a->type))
+    if (oskar_mem_type_is_double(a->type))
     {
         double *aa, *bb, *cc;
         aa = (double*)a->data;
@@ -100,7 +100,7 @@ void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
         cc = (double*)c->data;
         for (i = 0; i < num_elements; ++i) aa[i] = bb[i] + cc[i];
     }
-    else if (oskar_mem_is_single(a->type))
+    else if (oskar_mem_type_is_single(a->type))
     {
         float *aa, *bb, *cc;
         aa = (float*)a->data;

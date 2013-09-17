@@ -32,9 +32,7 @@
 #include "station/oskar_evaluate_pierce_points.h"
 #include "interferometry/oskar_geocentric_cartesian_to_geodetic_spherical.h"
 
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_free.h"
+#include <oskar_mem.h>
 
 #include <cmath>
 #include <cstdio>

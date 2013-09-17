@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_jones_set_size.h"
+#include <private_jones.h>
+
+#include <oskar_jones_set_size.h>
 
 #ifdef __cplusplus
 extern "C" {

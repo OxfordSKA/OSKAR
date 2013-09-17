@@ -26,23 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include <oskar_global.h>
-
 #include <apps/lib/oskar_settings_load.h>
 #include <apps/lib/oskar_set_up_telescope.h>
 #include <apps/lib/oskar_OptionParser.h>
 
-#include <utility/oskar_Log.h>
-#include <utility/oskar_log_settings.h>
-#include <utility/oskar_get_error_string.h>
+#include <oskar_log.h>
+#include <oskar_get_error_string.h>
 
-#include <interferometry/oskar_visibilities_read.h>
-#include <interferometry/oskar_visibilities_write.h>
-#include <interferometry/oskar_visibilities_init.h>
-#include <interferometry/oskar_visibilities_copy.h>
-#include <interferometry/oskar_visibilities_add_system_noise.h>
-#include <interferometry/oskar_TelescopeModel.h>
+#include <oskar_vis.h>
+#include <oskar_telescope.h>
 
 #include <string>
 #include <vector>
@@ -114,8 +106,7 @@ int main(int argc, char** argv)
         oskar_log_settings_interferometer(0, &settings);
     }
 
-    oskar_TelescopeModel tel;
-    oskar_set_up_telescope(&tel, 0, &settings, &status);
+    oskar_Telescope* tel = oskar_set_up_telescope(0, &settings, &status);
     check_error(status);
 
 
@@ -123,26 +114,27 @@ int main(int argc, char** argv)
     {
         if (verbose)
             cout << "Loading visibility file: " << vis_filename_in[i] << endl;
-        oskar_Visibilities vis;
-        oskar_visibilities_read(&vis, vis_filename_in[i].c_str(), &status);
+        oskar_Vis* vis = oskar_vis_read(vis_filename_in[i].c_str(), &status);
         check_error(status);
 
         if (verbose)
         {
-            cout << "  No. of baselines: " << vis.num_baselines << endl;
-            cout << "  No. of times: " << vis.num_times << endl;
-            cout << "  No. of channels: " << vis.num_channels << endl;
+            cout << "  No. of baselines: " << oskar_vis_num_baselines(vis) << endl;
+            cout << "  No. of times: " << oskar_vis_num_times(vis) << endl;
+            cout << "  No. of channels: " << oskar_vis_num_channels(vis) << endl;
         }
         int seed = settings.interferometer.noise.seed;
-        oskar_visibilities_add_system_noise(&vis, &tel, seed, &status);
+        oskar_vis_add_system_noise(vis, tel, seed, &status);
         check_error(status);
 
         if (verbose)
             cout << "Writing visibility file: " << vis_filename_out[i] << endl;
-        oskar_visibilities_write(&vis, 0, vis_filename_out[i].c_str(), &status);
+        oskar_vis_write(vis, 0, vis_filename_out[i].c_str(), &status);
+        oskar_vis_free(vis, &status);
         check_error(status);
     }
 
+    oskar_telescope_free(tel, &status);
     return status;
 }
 

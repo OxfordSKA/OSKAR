@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_CART2SPH_H_
 #define OSKAR_CART2SPH_H_
 
@@ -34,33 +33,47 @@
  * @file oskar_cart2sph.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
 /**
  * @brief
- * Transform cartesian coordinates to spheical.
+ * Transform Cartesian coordinates to spherical (single precision).
  *
  * @details
  * This function implicitly assumes the radius of the sphere is 1.
  *
- * @param n     Number of points
- * @param lon   Spherical longitude coordinate (phi), in radians.
- * @param lat   Spherical latitude coordinate (theta), in radians.
- * @param x     Cartesian x coordinate of points
- * @param y     Cartesian y coordinate of points
- * @param z     Cartesian z coordinate of points
- *
- * @return An error code.
+ * @param[in] num_points  Number of points.
+ * @param[out] lon        Spherical longitude coordinate (phi), in radians.
+ * @param[out] lat        Spherical latitude coordinate (theta), in radians.
+ * @param[in] x           Cartesian x coordinate of points.
+ * @param[in] y           Cartesian y coordinate of points.
+ * @param[in] z           Cartesian z coordinate of points.
  */
 OSKAR_EXPORT
-int oskar_cart2sph(int n, oskar_Mem* lon, oskar_Mem* lat,
-        oskar_Mem* x, oskar_Mem* y, oskar_Mem* z);
+void oskar_cart2sph_f(int num_points, float* lon, float* lat,
+        const float* x, const float* y, const float* z);
+
+/**
+ * @brief
+ * Transform Cartesian coordinates to spherical (double precision).
+ *
+ * @details
+ * This function implicitly assumes the radius of the sphere is 1.
+ *
+ * @param[in] num_points  Number of points.
+ * @param[out] lon        Spherical longitude coordinate (phi), in radians.
+ * @param[out] lat        Spherical latitude coordinate (theta), in radians.
+ * @param[in] x           Cartesian x coordinate of points.
+ * @param[in] y           Cartesian y coordinate of points.
+ * @param[in] z           Cartesian z coordinate of points.
+ */
+OSKAR_EXPORT
+void oskar_cart2sph_d(int num_points, double* lon, double* lat,
+        const double* x, const double* y, const double* z);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_element_model_load_cst.h"
-#include "utility/oskar_getline.h"
-#include "utility/oskar_mem_append_raw.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_realloc.h"
-#include "math/oskar_SettingsSpline.h"
-#include "math/oskar_SplineData.h"
-#include "math/oskar_spline_data_surfit.h"
-#include "math/oskar_spline_data_type.h"
-#include "math/oskar_spline_data_location.h"
+#include <oskar_element_model_load_cst.h>
+#include <oskar_getline.h>
+#include <oskar_mem.h>
+#include <oskar_SettingsSpline.h>
+#include <oskar_spline_data_surfit.h>
+#include <oskar_spline_data_type.h>
+#include <oskar_spline_data_location.h>
 
 #include <stdio.h>
 #include <stdlib.h>

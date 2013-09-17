@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,8 @@
 #include "fits/oskar_fits_healpix_to_sky_model.h"
 #include "math/oskar_healpix_pix_to_angles_ring.h"
 #include "sky/oskar_galactic_to_fk5.h"
-#include "sky/oskar_sky_model_append.h"
-#include "sky/oskar_sky_model_free.h"
-#include "sky/oskar_sky_model_init.h"
-#include "sky/oskar_sky_model_set_source.h"
-#include "utility/oskar_log_error.h"
-#include "utility/oskar_log_message.h"
+#include <oskar_log.h>
+#include <oskar_sky.h>
 
 #include <limits.h>
 #include <math.h>
@@ -54,7 +50,7 @@ extern "C" {
 static const double boltzmann = 1.3806488e-23; /* Boltzmann constant in J/K. */
 
 void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
-        const oskar_SettingsSkyHealpixFits* settings, oskar_SkyModel* sky,
+        const oskar_SettingsSkyHealpixFits* settings, oskar_Sky* sky,
         int* status)
 {
     void* data = 0;
@@ -64,7 +60,7 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
     fitsfile* fptr = 0;
     double lat = 0.0, lon = 0.0, val = 0.0;
     char card[FLEN_CARD];
-    oskar_SkyModel temp_sky;
+    oskar_Sky* temp_sky;
 
     /* Check inputs. */
     if (!filename || !sky || !status)
@@ -161,8 +157,8 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
     fits_close_file(fptr, status);
 
     /* Initialise the temporary sky model to hold all pixels in the table. */
-    oskar_sky_model_init(&temp_sky, sky->RA.type, OSKAR_LOCATION_CPU,
-            (int)nrows, status);
+    temp_sky = oskar_sky_create(oskar_sky_type(sky),
+            OSKAR_LOCATION_CPU, (int)nrows, status);
 
     /* Write contents of memory to temporary sky model. */
     for (i = 0; i < nrows; ++i)
@@ -198,17 +194,17 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
 
         /* Set source data into sky model. */
         /* (Filtering and other overrides can be done later.) */
-        oskar_sky_model_set_source(&temp_sky, i, lon, lat, val,
+        oskar_sky_set_source(temp_sky, i, lon, lat, val,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
     }
 
     /* Append temporary sky model to input data. */
-    oskar_sky_model_append(sky, &temp_sky, status);
+    oskar_sky_append(sky, temp_sky, status);
     oskar_log_message(ptr, 0, "Loaded %d pixels.", (int)nrows);
 
     /* Free memory. */
     if (data) free(data);
-    oskar_sky_model_free(&temp_sky, status);
+    oskar_sky_free(temp_sky, status);
 }
 
 #ifdef __cplusplus

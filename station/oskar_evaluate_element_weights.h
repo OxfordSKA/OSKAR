@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,9 @@
  * @file oskar_evaluate_element_weights.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_StationModel.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_CurandState.h"
+#include <oskar_global.h>
+#include <oskar_station.h>
+#include <oskar_random_state.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,13 +62,13 @@ extern "C" {
  * @param[in] x_beam            Beam direction cosine, horizontal x-component.
  * @param[in] y_beam            Beam direction cosine, horizontal y-component.
  * @param[in] z_beam            Beam direction cosine, horizontal z-component.
- * @param[in,out] curand_state  Random number generator states.
+ * @param[in,out] random_state  Random number generator states.
  * @param[in,out] status        Status return code.
  */
 void oskar_evaluate_element_weights(oskar_Mem* weights,
-        oskar_Mem* weights_error, const oskar_StationModel* station,
+        oskar_Mem* weights_error, const oskar_Station* station,
         double x_beam, double y_beam, double z_beam,
-        oskar_CurandState* curand_state, int* status);
+        oskar_RandomState* random_state, int* status);
 
 #ifdef __cplusplus
 }

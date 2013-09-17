@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_dipole_pattern_cuda.h"
-#include "utility/oskar_mem_type_check.h"
-#include "utility/oskar_cuda_check_error.h"
+#include <oskar_evaluate_dipole_pattern_cuda.h>
+#include <oskar_cuda_check_error.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,21 +51,21 @@ void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
     if (*status) return;
 
     /* Get the meta-data. */
-    location = pattern->location;
-    type = theta->type;
+    location = oskar_mem_location(pattern);
+    type = oskar_mem_type(theta);
 
     /* Check that all arrays are co-located. */
-    if (theta->location != location || phi->location != location)
+    if (oskar_mem_location(theta) != location || oskar_mem_location(phi) != location)
         *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Check that the pattern array is a complex matrix. */
-    if (!oskar_mem_is_complex(pattern->type) ||
-            !oskar_mem_is_matrix(pattern->type))
+    if (!oskar_mem_is_complex(pattern) ||
+            !oskar_mem_is_matrix(pattern))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that the dimensions are OK. */
-    if (theta->num_elements < num_points || phi->num_elements < num_points ||
-            pattern->num_elements < num_points)
+    if ((int)oskar_mem_length(theta) < num_points || (int)oskar_mem_length(phi) < num_points ||
+            (int)oskar_mem_length(pattern) < num_points)
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Check if safe to proceed. */

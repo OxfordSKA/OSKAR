@@ -26,11 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_binary_file_query.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_log_error.h"
 #include "apps/lib/oskar_OptionParser.h"
+
+#include <oskar_binary_file_query.h>
+#include <oskar_get_error_string.h>
+#include <oskar_log.h>
+
 #include <cstdio>
 #include <string>
 

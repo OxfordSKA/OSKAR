@@ -161,6 +161,9 @@ const char* oskar_get_error_string(int error)
             return "pointing file error: station index out of range or "
                     "incorrectly specified";
 
+        case OSKAR_ERR_BAD_GSM_FILE:
+            return "invalid Global Sky Model file";
+
         default:
             break;
     };

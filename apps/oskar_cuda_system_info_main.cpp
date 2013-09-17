@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_CudaInfo.h"
-#include "utility/oskar_cuda_info_create.h"
-#include "utility/oskar_cuda_info_free.h"
-#include "utility/oskar_cuda_info_log.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_log_error.h"
 #include "apps/lib/oskar_OptionParser.h"
+
+#include <oskar_cuda_info_create.h>
+#include <oskar_cuda_info_free.h>
+#include <oskar_cuda_info_log.h>
+#include <oskar_get_error_string.h>
+#include <oskar_log.h>
+
 #include <cstdio>
 
 int main(int argc, char** argv)

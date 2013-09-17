@@ -27,17 +27,12 @@
  */
 
 #include "apps/lib/oskar_ConfigFileLoader.h"
-#include "interferometry/oskar_telescope_model_load_station_coords.h"
-#include "station/oskar_station_model_init_child_stations.h"
-#include "station/oskar_station_model_load_config.h"
-#include "station/oskar_station_model_resize.h"
-#include "station/oskar_station_model_resize_element_types.h"
-#include "station/oskar_station_model_set_element_coords.h"
-#include "station/oskar_station_model_set_element_errors.h"
-#include "station/oskar_station_model_set_element_orientation.h"
-#include "station/oskar_station_model_set_element_weight.h"
+#include "interferometry/oskar_telescope_load_station_coords.h"
+#include <oskar_station.h>
 
 #include <QtCore/QDir>
+#include <QtCore/QString>
+#include <QtCore/QHash>
 
 const QString oskar_ConfigFileLoader::config_file = "config.txt";
 const QString oskar_ConfigFileLoader::layout_file = "layout.txt";
@@ -51,7 +46,7 @@ oskar_ConfigFileLoader::~oskar_ConfigFileLoader()
 {
 }
 
-void oskar_ConfigFileLoader::load(oskar_TelescopeModel* telescope,
+void oskar_ConfigFileLoader::load(oskar_Telescope* telescope,
         const QDir& cwd, int num_subdirs, QHash<QString, QString>& /*filemap*/,
         int* status)
 {
@@ -65,7 +60,7 @@ void oskar_ConfigFileLoader::load(oskar_TelescopeModel* telescope,
         *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;
 
     // Load the interferometer layout.
-    oskar_telescope_model_load_station_coords(telescope,
+    oskar_telescope_load_station_coords(telescope,
             cwd.filePath(file).toLatin1(), settings_->telescope.longitude_rad,
             settings_->telescope.latitude_rad,
             settings_->telescope.altitude_m, status);
@@ -73,31 +68,33 @@ void oskar_ConfigFileLoader::load(oskar_TelescopeModel* telescope,
     // If no subdirectories, set all "stations" to be a single dipole.
     if (num_subdirs == 0)
     {
-        for (int i = 0; i < telescope->num_stations; ++i)
+        int num_stations = oskar_telescope_num_stations(telescope);
+        for (int i = 0; i < num_stations; ++i)
         {
-            oskar_StationModel* station = &telescope->station[i];
-            oskar_station_model_resize(station, 1, status);
-            oskar_station_model_resize_element_types(station, 1, status);
-            oskar_station_model_set_element_coords(station, 0,
+            oskar_Station* station =
+                    oskar_telescope_station(telescope, i);
+            oskar_station_resize(station, 1, status);
+            oskar_station_resize_element_types(station, 1, status);
+            oskar_station_set_element_coords(station, 0,
                     0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
-            oskar_station_model_set_element_errors(station, 0,
+            oskar_station_set_element_errors(station, 0,
                     1.0, 0.0, 0.0, 0.0, status);
-            oskar_station_model_set_element_orientation(station, 0,
+            oskar_station_set_element_orientation(station, 0,
                     90.0, 0.0, status);
-            oskar_station_model_set_element_weight(station, 0,
+            oskar_station_set_element_weight(station, 0,
                     1.0, 0.0, status);
         }
     }
 }
 
-void oskar_ConfigFileLoader::load(oskar_StationModel* station, const QDir& cwd,
+void oskar_ConfigFileLoader::load(oskar_Station* station, const QDir& cwd,
         int num_subdirs, int /*depth*/, QHash<QString, QString>& /*filemap*/,
         int* status)
 {
     // Check for presence of "config.txt".
     if (cwd.exists(config_file))
     {
-        oskar_station_model_load_config(station,
+        oskar_station_load_config(station,
                 cwd.filePath(config_file).toLatin1(), status);
     }
     else
@@ -107,12 +104,12 @@ void oskar_ConfigFileLoader::load(oskar_StationModel* station, const QDir& cwd,
     if (num_subdirs > 0)
     {
         // Allocate storage for child stations.
-        oskar_station_model_init_child_stations(station, status);
+        oskar_station_create_child_stations(station, status);
     }
     else if (num_subdirs == 0)
     {
         // Allocate storage for element model data if no children.
-        oskar_station_model_resize_element_types(station, 1, status);
+        oskar_station_resize_element_types(station, 1, status);
     }
 }
 

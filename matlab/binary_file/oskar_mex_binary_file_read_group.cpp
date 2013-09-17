@@ -30,7 +30,7 @@
 
 #include <mex.h>
 #include <oskar_global.h>
-#include <utility/oskar_Mem.h>
+#include <utility/oskar_mem.h>
 #include <utility/oskar_BinaryTag.h>
 #include <utility/oskar_binary_tag_index_query.h>
 #include <utility/oskar_binary_file_read.h>
@@ -39,7 +39,6 @@
 #include <utility/oskar_binary_stream_read.h>
 #include <utility/oskar_get_error_string.h>
 #include <utility/oskar_get_data_type_string.h>
-#include <utility/oskar_mem_type_check.h>
 #include <utility/oskar_vector_types.h>
 
 #include <string.h>

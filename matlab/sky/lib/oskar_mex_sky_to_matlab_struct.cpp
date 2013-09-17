@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "matlab/sky/lib/oskar_mex_sky_to_matlab_struct.h"
+
+#include <oskar_mem.h>
+
 #include <cstring>
 #include <cstdlib>
 
 #include <matrix.h>
 
-mxArray* oskar_mex_sky_to_matlab_struct(const oskar_SkyModel* sky,
+mxArray* oskar_mex_sky_to_matlab_struct(const oskar_Sky* sky,
         const char* filename)
 {
     mxArray* mxSky = NULL;
@@ -44,9 +46,9 @@ mxArray* oskar_mex_sky_to_matlab_struct(const oskar_SkyModel* sky,
                 "invalid arguments.\n");
     }
 
-    int num_sources = sky->num_sources;
+    int num_sources = oskar_sky_num_sources(sky);
 
-    mxClassID classId = (sky->RA.type == OSKAR_DOUBLE) ?
+    mxClassID classId = (oskar_sky_type(sky) == OSKAR_DOUBLE) ?
             mxDOUBLE_CLASS : mxSINGLE_CLASS;
 
     mwSize m = num_sources;
@@ -66,17 +68,33 @@ mxArray* oskar_mex_sky_to_matlab_struct(const oskar_SkyModel* sky,
     size_t mem_size = num_sources;
     mem_size *= (classId == mxDOUBLE_CLASS) ? sizeof(double) : sizeof(float);
 
-    memcpy(mxGetData(mxRA), sky->RA.data, mem_size);
-    memcpy(mxGetData(mxDec), sky->Dec.data, mem_size);
-    memcpy(mxGetData(mxI), sky->I.data, mem_size);
-    memcpy(mxGetData(mxQ), sky->Q.data, mem_size);
-    memcpy(mxGetData(mxU), sky->U.data, mem_size);
-    memcpy(mxGetData(mxV), sky->V.data, mem_size);
-    memcpy(mxGetData(mxRefFreq), sky->reference_freq.data, mem_size);
-    memcpy(mxGetData(mxSPIX), sky->spectral_index.data, mem_size);
-    memcpy(mxGetData(mxFWHM_Maj), sky->FWHM_major.data, mem_size);
-    memcpy(mxGetData(mxFWHM_Min), sky->FWHM_minor.data, mem_size);
-    memcpy(mxGetData(mxPA), sky->position_angle.data, mem_size);
+    memcpy(mxGetData(mxRA),
+            oskar_mem_void_const(oskar_sky_ra_const(sky)), mem_size);
+    memcpy(mxGetData(mxDec),
+            oskar_mem_void_const(oskar_sky_dec_const(sky)), mem_size);
+    memcpy(mxGetData(mxI),
+            oskar_mem_void_const(oskar_sky_I_const(sky)), mem_size);
+    memcpy(mxGetData(mxQ),
+            oskar_mem_void_const(oskar_sky_Q_const(sky)), mem_size);
+    memcpy(mxGetData(mxU),
+            oskar_mem_void_const(oskar_sky_U_const(sky)), mem_size);
+    memcpy(mxGetData(mxV),
+            oskar_mem_void_const(oskar_sky_V_const(sky)), mem_size);
+    memcpy(mxGetData(mxRefFreq),
+            oskar_mem_void_const(oskar_sky_reference_freq_const(sky)),
+            mem_size);
+    memcpy(mxGetData(mxSPIX),
+            oskar_mem_void_const(oskar_sky_spectral_index_const(sky)),
+            mem_size);
+    memcpy(mxGetData(mxFWHM_Maj),
+            oskar_mem_void_const(oskar_sky_fwhm_major_const(sky)),
+            mem_size);
+    memcpy(mxGetData(mxFWHM_Min),
+            oskar_mem_void_const(oskar_sky_fwhm_minor_const(sky)),
+            mem_size);
+    memcpy(mxGetData(mxPA),
+            oskar_mem_void_const(oskar_sky_position_angle_const(sky)),
+            mem_size);
 
     const char* fields[] =
     {

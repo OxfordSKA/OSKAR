@@ -29,11 +29,7 @@
 #include <gtest/gtest.h>
 
 #include <oskar_get_error_string.h>
-#include <oskar_mem_clear_contents.h>
-#include <oskar_mem_free.h>
-#include <oskar_mem_init.h>
-#include <oskar_mem_set_value_real.h>
-#include <oskar_mem_to_type.h>
+#include <oskar_mem.h>
 
 
 TEST(Mem, to_char)
@@ -42,8 +38,7 @@ TEST(Mem, to_char)
     int status = 0, size = 100;
     oskar_mem_init(&mem, OSKAR_CHAR, OSKAR_LOCATION_CPU, size, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    char* data = oskar_mem_to_char(&mem, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    char* data = oskar_mem_char(&mem);
     for (int i = 0; i < size; ++i)
     {
         data[i] = char(i);
@@ -58,7 +53,7 @@ TEST(Mem, to_int)
     int status = 0, size = 100;
     oskar_mem_init(&mem, OSKAR_INT, OSKAR_LOCATION_CPU, size, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    int* data = oskar_mem_to_int(&mem, &status);
+    int* data = oskar_mem_int(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {
@@ -74,7 +69,7 @@ TEST(Mem, to_float)
     int status = 0, size = 100;
     oskar_mem_init(&mem, OSKAR_SINGLE, OSKAR_LOCATION_CPU, size, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    float* data = oskar_mem_to_float(&mem, &status);
+    float* data = oskar_mem_float(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {
@@ -91,7 +86,7 @@ TEST(Mem, to_float2)
     oskar_mem_init(&mem, OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU, size, 1,
             &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    float2* data = oskar_mem_to_float2(&mem, &status);
+    float2* data = oskar_mem_float2(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {
@@ -111,7 +106,7 @@ TEST(Mem, to_float4c)
     oskar_mem_init(&mem, OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
             size, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    float4c* data = oskar_mem_to_float4c(&mem, &status);
+    float4c* data = oskar_mem_float4c(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {
@@ -136,7 +131,7 @@ TEST(Mem, to_double)
     int status = 0, size = 100;
     oskar_mem_init(&mem, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, size, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    double* data = oskar_mem_to_double(&mem, &status);
+    double* data = oskar_mem_double(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {
@@ -153,7 +148,7 @@ TEST(Mem, to_double2)
     oskar_mem_init(&mem, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, size, 1,
             &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    double2* data = oskar_mem_to_double2(&mem, &status);
+    double2* data = oskar_mem_double2(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {
@@ -173,7 +168,7 @@ TEST(Mem, to_double4c)
     oskar_mem_init(&mem, OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
             size, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    double4c* data = oskar_mem_to_double4c(&mem, &status);
+    double4c* data = oskar_mem_double4c(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {
@@ -200,8 +195,7 @@ TEST(Mem, to_const_char)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_clear_contents(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    const char* data = oskar_mem_to_const_char(&mem, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    const char* data = oskar_mem_char_const(&mem);
     for (int i = 0; i < size; ++i)
     {
         ASSERT_EQ((char)0, data[i]);
@@ -217,7 +211,7 @@ TEST(Mem, to_const_int)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_clear_contents(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    const int* data = oskar_mem_to_const_int(&mem, &status);
+    const int* data = oskar_mem_int_const(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {
@@ -234,7 +228,7 @@ TEST(Mem, to_const_float)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(&mem, 2.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    const float* data = oskar_mem_to_const_float(&mem, &status);
+    const float* data = oskar_mem_float_const(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {
@@ -252,7 +246,7 @@ TEST(Mem, to_const_float2)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(&mem, 2.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    const float2* data = oskar_mem_to_const_float2(&mem, &status);
+    const float2* data = oskar_mem_float2_const(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {
@@ -271,7 +265,7 @@ TEST(Mem, to_const_float4c)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(&mem, 2.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    const float4c* data = oskar_mem_to_const_float4c(&mem, &status);
+    const float4c* data = oskar_mem_float4c_const(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {
@@ -295,7 +289,7 @@ TEST(Mem, to_const_double)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(&mem, 2.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    const double* data = oskar_mem_to_const_double(&mem, &status);
+    const double* data = oskar_mem_double_const(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {
@@ -313,7 +307,7 @@ TEST(Mem, to_const_double2)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(&mem, 2.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    const double2* data = oskar_mem_to_const_double2(&mem, &status);
+    const double2* data = oskar_mem_double2_const(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {
@@ -332,7 +326,7 @@ TEST(Mem, to_const_double4c)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(&mem, 2.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    const double4c* data = oskar_mem_to_const_double4c(&mem, &status);
+    const double4c* data = oskar_mem_double4c_const(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < size; ++i)
     {

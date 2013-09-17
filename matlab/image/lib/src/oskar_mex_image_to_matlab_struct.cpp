@@ -29,7 +29,7 @@
 
 #include "matlab/image/lib/oskar_mex_image_to_matlab_struct.h"
 #include "utility/oskar_vector_types.h"
-#include "utility/oskar_mem_type_check.h"
+#include <oskar_mem.h>
 #include <cstring>
 #include <cstdlib>
 
@@ -54,20 +54,20 @@ mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im_in,
 
     /* Construct a MATLAB array to store the image data cube */
     mxClassID class_id = mxDOUBLE_CLASS;
-    if (oskar_mem_is_double(im_in->data.type))
+    if (oskar_mem_is_double(&im_in->data))
         class_id = mxDOUBLE_CLASS;
-    else if (oskar_mem_is_single(im_in->data.type))
+    else if (oskar_mem_is_single(&im_in->data))
         class_id = mxSINGLE_CLASS;
     else
         mexErrMsgTxt("ERROR: image data type not supported (1).\n");
     mxComplexity flag;
-    if (oskar_mem_is_complex(im_in->data.type))
+    if (oskar_mem_is_complex(&im_in->data))
         flag = mxCOMPLEX;
-    else if (oskar_mem_is_real(im_in->data.type))
+    else if (oskar_mem_is_real(&im_in->data))
         flag = mxREAL;
     else
         mexErrMsgTxt("ERROR: image data type not supported (2).\n");
-    if (!oskar_mem_is_scalar(im_in->data.type))
+    if (!oskar_mem_is_scalar(&im_in->data))
         mexErrMsgTxt("ERROR: image data type not supported (3).\n");
     mwSize im_dims[5] = {
             im_in->width,
@@ -81,7 +81,7 @@ mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im_in,
     /* Copy the image data into the MATLAB data array */
     if (flag == mxREAL)
     {
-        size_t mem_size = im_in->data.num_elements;
+        size_t mem_size = (int)oskar_mem_length(&im_in->data);
         mem_size *= (class_id == mxDOUBLE_CLASS) ? sizeof(double) : sizeof(float);
         memcpy(mxGetData(data_), im_in->data.data, mem_size);
     }

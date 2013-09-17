@@ -29,9 +29,7 @@
 #include <gtest/gtest.h>
 
 #include <oskar_get_error_string.h>
-#include <oskar_mem_free.h>
-#include <oskar_mem_init.h>
-#include <oskar_mem_realloc.h>
+#include <oskar_mem.h>
 
 TEST(Mem, realloc_gpu)
 {
@@ -41,8 +39,8 @@ TEST(Mem, realloc_gpu)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_realloc(&mem, 500, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ(500, mem.num_elements);
-    ASSERT_EQ((int)OSKAR_DOUBLE, mem.type);
+    ASSERT_EQ(500, (int)oskar_mem_length(&mem));
+    ASSERT_EQ((int)OSKAR_DOUBLE, oskar_mem_type(&mem));
     oskar_mem_free(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
@@ -57,8 +55,8 @@ TEST(Mem, realloc_cpu)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_realloc(&mem, 1000, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ(1000, mem.num_elements);
-    ASSERT_EQ((int)OSKAR_DOUBLE_COMPLEX, mem.type);
+    ASSERT_EQ(1000, (int)oskar_mem_length(&mem));
+    ASSERT_EQ((int)OSKAR_DOUBLE_COMPLEX, oskar_mem_type(&mem));
     oskar_mem_free(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }

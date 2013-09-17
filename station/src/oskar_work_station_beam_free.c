@@ -27,7 +27,7 @@
  */
 
 #include "station/oskar_work_station_beam_free.h"
-#include "utility/oskar_mem_free.h"
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,10 @@
 #include "utility/oskar_binary_stream_write_header.h"
 #include "utility/oskar_binary_stream_write_metadata.h"
 #include "utility/oskar_file_exists.h"
-#include "utility/oskar_log_file_data.h"
-#include "utility/oskar_log_message.h"
+#include <oskar_log.h>
+#include <oskar_mem.h>
 #include "utility/oskar_mem_binary_stream_write.h"
 #include "utility/oskar_mem_binary_file_read_raw.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_init.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -68,12 +66,12 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
     if (*status) return;
 
     /* Get the metadata. */
-    type = image->data.type;
+    type = oskar_mem_type(&image->data);
 
     /* Check dimensions. */
     num = image->num_channels * image->num_times * image->num_pols *
             image->width * image->height;
-    if (num != image->data.num_elements)
+    if (num != (int)oskar_mem_length(&image->data))
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
@@ -86,9 +84,6 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-
-    /* Write a log message. */
-    oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
 
     /* Write the header and common metadata. */
     oskar_binary_stream_write_header(stream, status);

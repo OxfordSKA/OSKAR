@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,10 @@
  * @file oskar_set_up_sky.h
  */
 
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Log.h"
-#include "utility/oskar_Settings.h"
+#include <oskar_global.h>
+#include <oskar_sky.h>
+#include <oskar_log.h>
+#include <oskar_Settings.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,22 +44,24 @@ extern "C" {
 
 /**
  * @brief
- * Creates a sky model from the simulation settings.
+ * Creates an array of sky models from the simulation settings.
  *
  * @details
  * This function creates and returns an array of fully populated sky data
  * structures from the given settings object.
  *
- * The data in the structure that is returned resides in CPU memory.
+ * The data in the structures that are returned resides in CPU memory.
  *
- * @param[out] num_chunks The number of sky model chunks to use.
- * @param[out] sky_chunks Pointer to the array of source chunks.
+ * @param[out] num_chunks The number of sky model chunks in the array.
  * @param[in,out] log  A pointer to the log structure to use.
  * @param[in] settings A pointer to the settings structure.
+ * @param[in,out] status Status return code.
+ *
+ * @return A pointer to the array of sky model handles.
  */
 OSKAR_APPS_EXPORT
-int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
-        oskar_Log* log, const oskar_Settings* settings);
+oskar_Sky** oskar_set_up_sky(int* num_chunks, oskar_Log* log,
+        const oskar_Settings* settings, int* status);
 
 #ifdef __cplusplus
 }

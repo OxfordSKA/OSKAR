@@ -28,41 +28,41 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_timer_functions.h>
+#include <oskar_timer.h>
 #include <cstdlib>
 #include <unistd.h> // Needed for sleep() function.
 
 TEST(Timer, test_consistency)
 {
-    oskar_Timer t_cuda, t_omp, t_native;
-    oskar_timer_create(&t_native, OSKAR_TIMER_NATIVE);
-    oskar_timer_create(&t_cuda, OSKAR_TIMER_CUDA);
-    oskar_timer_create(&t_omp, OSKAR_TIMER_OMP);
+    oskar_Timer *t_cuda, *t_omp, *t_native;
+    t_native = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    t_cuda = oskar_timer_create(OSKAR_TIMER_CUDA);
+    t_omp = oskar_timer_create(OSKAR_TIMER_OMP);
 
     // Time a sleep(1).
-    oskar_timer_resume(&t_native);
-    oskar_timer_resume(&t_cuda);
-    oskar_timer_resume(&t_omp);
+    oskar_timer_resume(t_native);
+    oskar_timer_resume(t_cuda);
+    oskar_timer_resume(t_omp);
     sleep(1);
-    oskar_timer_pause(&t_native);
-    oskar_timer_pause(&t_cuda);
-    oskar_timer_pause(&t_omp);
+    oskar_timer_pause(t_native);
+    oskar_timer_pause(t_cuda);
+    oskar_timer_pause(t_omp);
 
     // Don't time this sleep.
     sleep(1);
 
     // Time another sleep(1).
-    oskar_timer_resume(&t_native);
-    oskar_timer_resume(&t_cuda);
-    oskar_timer_resume(&t_omp);
+    oskar_timer_resume(t_native);
+    oskar_timer_resume(t_cuda);
+    oskar_timer_resume(t_omp);
     sleep(1);
-    oskar_timer_pause(&t_native);
-    oskar_timer_pause(&t_cuda);
-    oskar_timer_pause(&t_omp);
+    oskar_timer_pause(t_native);
+    oskar_timer_pause(t_cuda);
+    oskar_timer_pause(t_omp);
 
-    double elapsed_native = oskar_timer_elapsed(&t_native);
-    double elapsed_cuda = oskar_timer_elapsed(&t_cuda);
-    double elapsed_omp = oskar_timer_elapsed(&t_omp);
+    double elapsed_native = oskar_timer_elapsed(t_native);
+    double elapsed_cuda = oskar_timer_elapsed(t_cuda);
+    double elapsed_omp = oskar_timer_elapsed(t_omp);
     EXPECT_NEAR(2.0, elapsed_native, 1e-2);
 #ifdef OSKAR_HAVE_CUDA
     EXPECT_NEAR(elapsed_native, elapsed_cuda, 5e-3);
@@ -73,27 +73,27 @@ TEST(Timer, test_consistency)
     EXPECT_NEAR(2.0, elapsed_omp, 1e-2);
 #endif
 
-    oskar_timer_destroy(&t_native);
-    oskar_timer_destroy(&t_cuda);
-    oskar_timer_destroy(&t_omp);
+    oskar_timer_free(t_native);
+    oskar_timer_free(t_cuda);
+    oskar_timer_free(t_omp);
 }
 
 static void time_timer(int type, const char* label)
 {
-    oskar_Timer tmr, t;
+    oskar_Timer *tmr, *t;
     int runs = 1000;
-    oskar_timer_create(&t, OSKAR_TIMER_NATIVE);
-    oskar_timer_create(&tmr, type);
-    oskar_timer_start(&t);
+    t = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    tmr = oskar_timer_create(type);
+    oskar_timer_start(t);
     for (int i = 0; i < runs; ++i)
     {
-        oskar_timer_resume(&tmr);
-        oskar_timer_pause(&tmr);
+        oskar_timer_resume(tmr);
+        oskar_timer_pause(tmr);
     }
     printf("%s timer overhead: %.4e s.\n", label,
-            oskar_timer_elapsed(&t) / runs);
-    oskar_timer_destroy(&t);
-    oskar_timer_destroy(&tmr);
+            oskar_timer_elapsed(t) / runs);
+    oskar_timer_free(t);
+    oskar_timer_free(tmr);
 }
 
 TEST(Timer, test_performance)

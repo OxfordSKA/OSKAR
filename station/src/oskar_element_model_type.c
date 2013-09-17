@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,8 @@
 
 #include "math/oskar_spline_data_type.h"
 #include "station/oskar_element_model_type.h"
-#include "station/oskar_StationModel.h"
-#include "utility/oskar_mem_type_check.h"
+#include "station/oskar_ElementModel.h"
+#include <oskar_mem.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus

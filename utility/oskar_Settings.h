@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,15 +29,15 @@
 #ifndef OSKAR_SETTINGS_H_
 #define OSKAR_SETTINGS_H_
 
-#include "imaging/oskar_SettingsImage.h"
-#include "sky/oskar_SettingsSky.h"
-#include "sky/oskar_SettingsIonosphere.h"
-#include "station/oskar_SettingsBeamPattern.h"
-#include "interferometry/oskar_SettingsObservation.h"
-#include "interferometry/oskar_SettingsTelescope.h"
-#include "interferometry/oskar_SettingsInterferometer.h"
-#include "utility/oskar_SettingsSimulator.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_SettingsImage.h>
+#include <oskar_SettingsSky.h>
+#include <oskar_SettingsIonosphere.h>
+#include <oskar_SettingsBeamPattern.h>
+#include <oskar_SettingsObservation.h>
+#include <oskar_SettingsTelescope.h>
+#include <oskar_SettingsInterferometer.h>
+#include <oskar_SettingsSimulator.h>
+#include <oskar_mem.h>
 
 /**
  * @struct oskar_Settings

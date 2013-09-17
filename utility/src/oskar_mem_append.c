@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_append.h"
-#include "utility/oskar_mem_append_raw.h"
-#include "utility/oskar_Mem.h"
+#include <private_mem.h>
+#include <oskar_mem_append_raw.h>
 
 #ifdef __cplusplus
 extern "C" {

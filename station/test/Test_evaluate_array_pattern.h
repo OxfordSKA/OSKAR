@@ -35,7 +35,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "utility/oskar_Mem.h"
+#include <oskar_mem.h>
 
 /**
  * @brief Unit test class that uses CppUnit.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,6 @@
  * @file oskar_log_write.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Log.h"
 #include <stdarg.h>
 
 #ifdef __cplusplus
@@ -54,11 +52,8 @@ extern "C" {
  * @param[in]     width  Minimum width of key description.
  * @param[in]     prefix Description of key (set blank or NULL if not required).
  * @param[in]     format Format string for printf().
- *
- * @return An error code.
  */
-OSKAR_EXPORT
-int oskar_log_write(oskar_Log* log, char code, int depth, int width,
+void oskar_log_write(oskar_Log* log, char code, int depth, int width,
         const char* prefix, const char* format, ...);
 
 /**
@@ -76,11 +71,8 @@ int oskar_log_write(oskar_Log* log, char code, int depth, int width,
  * @param[in]     width  Minimum width of key description.
  * @param[in]     prefix Description of key (set blank or NULL if not required).
  * @param[in]     args   Variable argument list for printf().
- *
- * @return An error code.
  */
-OSKAR_EXPORT
-int oskar_log_writev(oskar_Log* log, char code, int depth, int width,
+void oskar_log_writev(oskar_Log* log, char code, int depth, int width,
         const char* prefix, const char* format, va_list args);
 
 /**
@@ -97,10 +89,8 @@ int oskar_log_writev(oskar_Log* log, char code, int depth, int width,
  * @param[in]     width  Minimum width of key description.
  * @param[in]     prefix Description of key (set blank or NULL if not required).
  * @param[in]     args   Variable argument list for printf().
- *
- * @return An error code.
  */
-int oskar_log_writev_stderr(char code, int depth, int width,
+void oskar_log_writev_stderr(char code, int depth, int width,
         const char* prefix, const char* format, va_list args);
 
 /**
@@ -118,10 +108,8 @@ int oskar_log_writev_stderr(char code, int depth, int width,
  * @param[in]     width  Minimum width of key description.
  * @param[in]     prefix Description of key (set blank or NULL if not required).
  * @param[in]     args   Variable argument list for printf().
- *
- * @return An error code.
  */
-int oskar_log_writev_stdout(char code, int depth, int width,
+void oskar_log_writev_stdout(char code, int depth, int width,
         const char* prefix, const char* format, va_list args);
 
 #ifdef __cplusplus

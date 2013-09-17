@@ -29,11 +29,7 @@
 #include <gtest/gtest.h>
 
 #include <oskar_get_error_string.h>
-#include <oskar_mem_free.h>
-#include <oskar_mem_init.h>
-#include <oskar_mem_init_copy.h>
-#include <oskar_mem_set_value_real.h>
-#include <oskar_mem_to_type.h>
+#include <oskar_mem.h>
 #include <oskar_vector_types.h>
 
 
@@ -44,7 +40,7 @@ TEST(Mem, set_value_real_double)
     oskar_Mem mem;
     oskar_mem_init(&mem, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n, 1, &status);
     oskar_mem_set_value_real(&mem, 4.5, &status);
-    double* v = oskar_mem_to_double(&mem, &status);
+    double* v = oskar_mem_double(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     for (int i = 0; i < n; ++i)
@@ -65,7 +61,7 @@ TEST(Mem, set_value_real_double_complex)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_init_copy(&mem2, &mem, OSKAR_LOCATION_CPU, &status);
-    double2* v = oskar_mem_to_double2(&mem2, &status);
+    double2* v = oskar_mem_double2(&mem2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
@@ -87,7 +83,7 @@ TEST(Mem, set_value_real_double_complex_matrix)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_init_copy(&mem2, &mem, OSKAR_LOCATION_CPU, &status);
-    double4c* v = oskar_mem_to_double4c(&mem2, &status);
+    double4c* v = oskar_mem_double4c(&mem2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
@@ -111,7 +107,7 @@ TEST(Mem, set_value_real_single)
     oskar_Mem mem;
     oskar_mem_init(&mem, OSKAR_SINGLE, OSKAR_LOCATION_CPU, n, 1, &status);
     oskar_mem_set_value_real(&mem, 4.5, &status);
-    float* v = oskar_mem_to_float(&mem, &status);
+    float* v = oskar_mem_float(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     for (int i = 0; i < n; ++i)
@@ -132,7 +128,7 @@ TEST(Mem, set_value_real_single_complex)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_init_copy(&mem2, &mem, OSKAR_LOCATION_CPU, &status);
-    float2* v = oskar_mem_to_float2(&mem2, &status);
+    float2* v = oskar_mem_float2(&mem2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
@@ -154,7 +150,7 @@ TEST(Mem, set_value_real_single_complex_matrix)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_init_copy(&mem2, &mem, OSKAR_LOCATION_CPU, &status);
-    float4c* v = oskar_mem_to_float4c(&mem2, &status);
+    float4c* v = oskar_mem_float4c(&mem2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {

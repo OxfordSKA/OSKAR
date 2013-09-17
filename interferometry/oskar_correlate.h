@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,11 @@
  * @file oskar_correlate.h
  */
 
-#include "oskar_global.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_Jones.h"
-#include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_global.h>
+#include <oskar_telescope.h>
+#include <oskar_jones.h>
+#include <oskar_sky.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,21 +55,22 @@ extern "C" {
  * sources in the brightness matrix and the number of stations.
  *
  * Station u,v coordinates are specified in radians at the frequency of the
- * simulation (i.e. multipled by the wavenumber).
+ * simulation (i.e. multiplied by the wavenumber).
  *
- * @param[out] vis        Visibility amplitudes.
- * @param[in]  J          Set of Jones matrices/
- * @param[in]  telescope  OSKAR telescope model.
- * @param[in]  sky        OSKAR sky model.
- * @param[in]  u          Station u coordinates, in radians.
- * @param[in]  v          Station v coordinates, in radians.
- * @param[in]  gast       Greenwich apparent sidereal time, in radians.
- * @param[in,out] status  Status return code.
+ * @param[out] vis          Output visibility amplitudes.
+ * @param[in]  J            Set of Jones matrices.
+ * @param[in]  tel          OSKAR telescope model.
+ * @param[in]  sky          OSKAR sky model.
+ * @param[in]  u            Station u coordinates, in radians.
+ * @param[in]  v            Station v coordinates, in radians.
+ * @param[in]  gast         Greenwich apparent sidereal time, in radians.
+ * @param[in]  frequency_hz Current observation frequency, in Hz.
+ * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
 void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
-        const oskar_TelescopeModel* telescope, const oskar_SkyModel* sky,
-        const oskar_Mem* u, const oskar_Mem* v, double gast, int* status);
+        const oskar_Telescope* tel, const oskar_Sky* sky, const oskar_Mem* u,
+        const oskar_Mem* v, double gast, double frequency_hz, int* status);
 
 #ifdef __cplusplus
 }

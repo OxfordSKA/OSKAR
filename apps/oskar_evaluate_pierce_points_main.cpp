@@ -26,12 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_global.h>
-
-#include <utility/oskar_get_error_string.h>
-#include <utility/oskar_log_error.h>
-#include <utility/oskar_log_message.h>
-#include <utility/oskar_Log.h>
+#include <oskar_get_error_string.h>
+#include <oskar_log.h>
 
 #include <apps/lib/oskar_evaluate_station_pierce_points.h>
 #include <apps/lib/oskar_OptionParser.h>
@@ -49,13 +45,13 @@ int main(int argc, char** argv)
     const char* filename = opt.getArg();
 
     // Create the log.
-    oskar_Log log;
-    oskar_log_message(&log, 0, "Running binary %s", argv[0]);
+    oskar_Log* log = oskar_log_create();
+    oskar_log_message(log, 0, "Running binary %s", argv[0]);
 
     int error = OSKAR_SUCCESS;
     try
     {
-        error = oskar_evaluate_station_pierce_points(filename, &log);
+        error = oskar_evaluate_station_pierce_points(filename, log);
     }
     catch (int code)
     {
@@ -64,7 +60,8 @@ int main(int argc, char** argv)
 
     // Check for errors.
     if (error)
-        oskar_log_error(&log, "Run failed: %s.", oskar_get_error_string(error));
+        oskar_log_error(log, "Run failed: %s.", oskar_get_error_string(error));
+    oskar_log_free(log);
 
     return error;
 }

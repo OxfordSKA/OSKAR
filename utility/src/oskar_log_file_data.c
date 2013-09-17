@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_log_file_data.h"
+#include <private_log.h>
+#include <oskar_log.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -37,44 +39,41 @@ extern "C" {
 char* oskar_log_file_data(oskar_Log* log, long* size)
 {
     char* data = 0;
-    if (size == NULL) return 0;
+    if (!size || !log) return 0;
 
     /* If log exists, then write it out. */
-    if (log)
-    {
 #ifdef _OPENMP
-        /* Lock mutex. */
-        omp_set_lock(&log->mutex);
+    /* Lock mutex. */
+    omp_set_lock(&log->mutex);
 #endif
-        if (log->file)
-        {
-            /* Determine the current size of the file. */
-            fflush(log->file);
-            fseek(log->file, 0, SEEK_END);
-            *size = ftell(log->file);
+    if (log->file)
+    {
+        /* Determine the current size of the file. */
+        fflush(log->file);
+        fseek(log->file, 0, SEEK_END);
+        *size = ftell(log->file);
 
-            /* Read the file into memory. */
-            if (*size != 0)
+        /* Read the file into memory. */
+        if (*size != 0)
+        {
+            size_t bytes_read = 0;
+            data = (char*) malloc(*size * sizeof(char));
+            if (data != 0)
             {
-                size_t bytes_read = 0;
-                data = (char*) malloc(*size * sizeof(char));
-                if (data != 0)
+                rewind(log->file);
+                bytes_read = fread(data, 1, (size_t)(*size), log->file);
+                if (bytes_read != (size_t)(*size))
                 {
-                    rewind(log->file);
-                    bytes_read = fread(data, 1, (size_t)(*size), log->file);
-                    if (bytes_read != (size_t)(*size))
-                    {
-                        free(data);
-                        data = 0;
-                    }
+                    free(data);
+                    data = 0;
                 }
             }
         }
-#ifdef _OPENMP
-        /* Unlock mutex. */
-        omp_unset_lock(&log->mutex);
-#endif
     }
+#ifdef _OPENMP
+    /* Unlock mutex. */
+    omp_unset_lock(&log->mutex);
+#endif
 
     return data;
 }

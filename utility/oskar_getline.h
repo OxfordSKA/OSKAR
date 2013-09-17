@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_getline.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -50,7 +50,7 @@ extern "C" {
  * This function safely returns one line of text from an input stream.
  *
  * WARNING: This function allocates memory to hold the data, which must be
- * freed by the caller when no longer required.
+ * freed by the caller using free() when no longer required.
  *
  * Usage:
  * The following code will get a line of text from the stream:
@@ -65,7 +65,8 @@ extern "C" {
  * @param[out] n       The number of bytes allocated in the input buffer.
  * @param[out] stream  Pointer to the open input stream (a file handle).
  *
- * @return The number of characters read.
+ * @return The number of characters read, or -1 if the end of the file has
+ * been reached.
  */
 OSKAR_EXPORT
 int oskar_getline(char** lineptr, size_t* n, FILE* stream);

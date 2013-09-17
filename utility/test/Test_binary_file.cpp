@@ -41,7 +41,7 @@
 #include <oskar_endian.h>
 #include <oskar_file_exists.h>
 #include <oskar_get_error_string.h>
-#include <oskar_Mem.h>
+#include <oskar_mem.h>
 
 #include <cstdio>
 #include <cstdlib>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_element_weights_errors.h"
-#include "station/oskar_evaluate_element_weights_errors_cuda.h"
-#include "utility/oskar_mem_type_check.h"
+#include <private_random_state.h>
+#include <oskar_evaluate_element_weights_errors.h>
+#include <oskar_evaluate_element_weights_errors_cuda.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,13 +38,13 @@ extern "C" {
 void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         const oskar_Mem* gain, const oskar_Mem* gain_error,
         const oskar_Mem* phase, const oskar_Mem* phase_error,
-        oskar_CurandState* curand_states, int* status)
+        oskar_RandomState* random_states, int* status)
 {
     int type, location;
 
     /* Check all inputs. */
     if (!errors || !gain || !gain_error || !phase || !phase_error ||
-            !curand_states || !status)
+            !random_states || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -54,62 +54,88 @@ void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
     if (*status) return;
 
     /* Check array dimensions are OK. */
-    if (errors->num_elements < num_elements ||
-            gain->num_elements < num_elements ||
-            gain_error->num_elements < num_elements ||
-            phase->num_elements < num_elements ||
-            phase_error->num_elements < num_elements)
+    if ((int)oskar_mem_length(errors) < num_elements ||
+            (int)oskar_mem_length(gain) < num_elements ||
+            (int)oskar_mem_length(gain_error) < num_elements ||
+            (int)oskar_mem_length(phase) < num_elements ||
+            (int)oskar_mem_length(phase_error) < num_elements)
+    {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
 
     /* Check for location mismatch. */
-    location = errors->location;
-    if (gain->location != location ||
-            gain_error->location != location ||
-            phase->location != location ||
-            phase_error->location != location)
+    location = oskar_mem_location(errors);
+    if (oskar_mem_location(gain) != location ||
+            oskar_mem_location(gain_error) != location ||
+            oskar_mem_location(phase) != location ||
+            oskar_mem_location(phase_error) != location)
+    {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return;
+    }
 
     /* Check types. */
-    type = oskar_mem_base_type(errors->type);
-    if (!oskar_mem_is_complex(errors->type) ||
-            oskar_mem_is_matrix(errors->type))
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-    if (gain->type != type || phase->type != type ||
-            gain_error->type != type || phase_error->type != type)
-        *status = OSKAR_ERR_TYPE_MISMATCH;
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Generate weights errors. */
-    if (location == OSKAR_LOCATION_GPU)
+    type = oskar_mem_precision(errors);
+    if (!oskar_mem_is_complex(errors) || oskar_mem_is_matrix(errors))
     {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
+    if (oskar_mem_type(gain) != type || oskar_mem_type(phase) != type ||
+            oskar_mem_type(gain_error) != type ||
+            oskar_mem_type(phase_error) != type)
+    {
+        *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
+
+    /* Generate weights errors: switch on type and location. */
+    if (type == OSKAR_DOUBLE)
+    {
+        const double *gain_, *gain_error_, *phase_, *phase_error_;
+        double2* errors_;
+        gain_ = oskar_mem_double_const(gain, status);
+        gain_error_ = oskar_mem_double_const(gain_error, status);
+        phase_ = oskar_mem_double_const(phase, status);
+        phase_error_ = oskar_mem_double_const(phase_error, status);
+        errors_ = oskar_mem_double2(errors, status);
+
+        if (location == OSKAR_LOCATION_GPU)
+        {
 #ifdef OSKAR_HAVE_CUDA
-        if (type == OSKAR_DOUBLE)
-        {
-            oskar_evaluate_element_weights_errors_cuda_d
-            ((double2*)errors->data, num_elements, (double*)gain->data,
-                    (double*)gain_error->data, (double*)phase->data,
-                    (double*)phase_error->data, curand_states->state);
-        }
-        else if (type == OSKAR_SINGLE)
-        {
-            oskar_evaluate_element_weights_errors_cuda_f
-            ((float2*)errors->data, num_elements, (float*)gain->data,
-                    (float*)gain_error->data, (float*)phase->data,
-                    (float*)phase_error->data, curand_states->state);
-        }
-        else
-        {
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-        }
+            oskar_evaluate_element_weights_errors_cuda_d(errors_, num_elements,
+                    gain_, gain_error_, phase_, phase_error_,
+                    random_states->state);
 #else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
+        }
+    }
+    else if (type == OSKAR_SINGLE)
+    {
+        const float *gain_, *gain_error_, *phase_, *phase_error_;
+        float2* errors_;
+        gain_ = oskar_mem_float_const(gain, status);
+        gain_error_ = oskar_mem_float_const(gain_error, status);
+        phase_ = oskar_mem_float_const(phase, status);
+        phase_error_ = oskar_mem_float_const(phase_error, status);
+        errors_ = oskar_mem_float2(errors, status);
+
+        if (location == OSKAR_LOCATION_GPU)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            oskar_evaluate_element_weights_errors_cuda_f(errors_, num_elements,
+                    gain_, gain_error_, phase_, phase_error_,
+                    random_states->state);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
     }
     else
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
 }
 

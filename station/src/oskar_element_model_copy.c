@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 
 #include "station/oskar_element_model_copy.h"
 #include "math/oskar_spline_data_copy.h"
-#include "utility/oskar_mem_copy.h"
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,7 +47,7 @@ void oskar_element_model_copy(oskar_ElementModel* dst,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    dst->type = src->type;
+    dst->element_type = src->element_type;
     dst->taper_type = src->taper_type;
     dst->cos_power = src->cos_power;
     dst->gaussian_fwhm_rad = src->gaussian_fwhm_rad;

@@ -28,7 +28,7 @@
 
 #include "imaging/oskar_image_resize.h"
 #include "imaging/oskar_Image.h"
-#include "utility/oskar_mem_realloc.h"
+#include <oskar_mem.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus

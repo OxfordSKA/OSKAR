@@ -26,113 +26,95 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/test/Test_evaluate_jones_E.h"
+#include <gtest/gtest.h>
 
-#include "sky/oskar_sky_model_resize.h"
-#include "sky/oskar_sky_model_save.h"
-#include "math/oskar_jones_copy.h"
-#include "math/oskar_jones_free.h"
-#include "math/oskar_jones_init.h"
-#include "math/oskar_jones_get_station_pointer.h"
-#include "math/oskar_linspace.h"
-#include "math/oskar_meshgrid.h"
-#include "math/oskar_SphericalPositions.h"
-#include "station/oskar_evaluate_jones_E.h"
-#include "station/oskar_station_model_copy.h"
-#include "station/oskar_station_model_resize_element_types.h"
-#include "station/oskar_station_model_multiply_by_wavenumber.h"
-#include "utility/oskar_curand_state_free.h"
-#include "utility/oskar_curand_state_init.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_mem_get_pointer.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_sky.h>
+#include <oskar_telescope.h>
+#include <oskar_jones.h>
+#include <oskar_linspace.h>
+#include <oskar_meshgrid.h>
+#include <oskar_SphericalPositions.h>
+#include <oskar_evaluate_jones_E.h>
+#include <oskar_random_state.h>
+#include <oskar_get_error_string.h>
 
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-
-using namespace std;
+#include <vector>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
-#ifndef M_PI_2
-#define M_PI_2 1.57079632679489661923
-#endif
 
-#ifndef c_0
-#define c_0 299792458.0
-#endif
-
-void Test_evaluate_jones_E::test_fail_conditions()
+TEST(evaluate_jones_E, evaluate_e)
 {
-}
-
-void Test_evaluate_jones_E::evaluate_e()
-{
-    float deg2rad = M_PI / 180.0;
-
     int error = 0;
-
-    int gast = 0.0;
+    double gast = 0.0;
 
     // Construct telescope model.
-    // - construct a station model and load it into the telescope structure.
+    int num_stations = 2;
+    oskar_Telescope* tel_cpu = oskar_telescope_create(OSKAR_SINGLE,
+            OSKAR_LOCATION_CPU, num_stations, &error);
     double frequency = 30e6;
-    int station_dim = 100;
+    int station_dim = 20;
     double station_size_m = 180.0;
     int num_antennas = station_dim * station_dim;
-    oskar_StationModel station_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_antennas);
-    oskar_station_model_resize_element_types(&station_cpu, 1, &error);
-
-    // Set the station meta-data.
-    station_cpu.longitude_rad = 0.0;
-    station_cpu.latitude_rad  = M_PI_2;
-    station_cpu.altitude_m  = 0.0;
-    station_cpu.beam_longitude_rad  = 0.0;
-    station_cpu.beam_latitude_rad = M_PI_2;
-    station_cpu.coord_units = OSKAR_METRES;
-    station_cpu.apply_element_errors = OSKAR_FALSE;
-    station_cpu.element_pattern->type = OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC;
-    station_cpu.use_polarised_elements = false;
-    float* x_pos = (float*) malloc(station_dim * sizeof(float));
-    oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
-    oskar_meshgrid_f((float*)station_cpu.x_weights.data,
-            (float*)station_cpu.y_weights.data,
-            x_pos, station_dim, x_pos, station_dim);
-    free(x_pos);
-
-    int num_stations = 2;
-    oskar_TelescopeModel telescope_gpu(OSKAR_SINGLE, OSKAR_LOCATION_GPU, num_stations);
     for (int i = 0; i < num_stations; ++i)
     {
-        oskar_station_model_copy(&telescope_gpu.station[i], &station_cpu, &error);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-        oskar_station_model_multiply_by_wavenumber(&(telescope_gpu.station[i]),
-                frequency, &error);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+        oskar_Station* s = oskar_telescope_station(tel_cpu, i);
+        oskar_station_resize(s, num_antennas, &error);
+        oskar_station_resize_element_types(s, 1, &error);
+        ASSERT_EQ(0, error) << oskar_get_error_string(error);
+
+        // Set the station meta-data.
+        oskar_station_set_position(s, 0.0, M_PI / 2.0, 0.0);
+        oskar_station_set_phase_centre(s,
+                OSKAR_SPHERICAL_TYPE_EQUATORIAL, 0.0, M_PI/2.0);
+        oskar_ElementModel* element = oskar_station_element(s, 0);
+        element->element_type = OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC;
+        oskar_station_set_use_polarised_elements(s, 0);
+
+        // Generate the coordinates.
+        std::vector<float> x_pos(station_dim);
+        oskar_linspace_f(&x_pos[0], -station_size_m/2.0, station_size_m/2.0,
+                station_dim);
+        oskar_meshgrid_f(
+                oskar_mem_float(oskar_station_element_x_weights(s), &error),
+                oskar_mem_float(oskar_station_element_y_weights(s), &error),
+                &x_pos[0], station_dim, &x_pos[0], station_dim);
+
+        oskar_station_multiply_by_wavenumber(s, frequency, &error);
+        ASSERT_EQ(0, error) << oskar_get_error_string(error);
     }
-    telescope_gpu.identical_stations = OSKAR_TRUE;
-    telescope_gpu.use_common_sky = OSKAR_TRUE;
-    // Other fields of the telescope structure are not used for E?!
+    oskar_telescope_analyse(tel_cpu, &error);
+    oskar_telescope_set_common_horizon(tel_cpu, OSKAR_TRUE);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
+
+    // Copy telescope structure to the GPU, and free the CPU version.
+    oskar_Telescope* tel_gpu = oskar_telescope_create_copy(tel_cpu,
+            OSKAR_LOCATION_GPU, &error);
+    oskar_telescope_free(tel_cpu, &error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Initialise the random number generator.
-    oskar_CurandState curand_state;
-    int seed = 0;
-    oskar_curand_state_init(&curand_state, num_antennas, seed, 0, 0, &error);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    oskar_RandomState* random_state = oskar_random_state_create(num_antennas,
+            0, 0, 0, &error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Construct a sky model.
     int num_sources = 0;
-    oskar_SkyModel sky_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_sources);
-    float centre_long = 180.0 * deg2rad;
-    float centre_lat  = 0.0   * deg2rad;
-    float size_long   = 180.0 * deg2rad;
-    float size_lat    = 90.0  * deg2rad;
-    float sep_long    = 1.0   * deg2rad;
-    float sep_lat     = 1.0   * deg2rad;
-    float rho         = 0.0   * deg2rad;
+    oskar_Sky* sky_cpu = oskar_sky_create(OSKAR_SINGLE,
+            OSKAR_LOCATION_CPU, num_sources, &error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
+    float centre_long = 180.0 * M_PI / 180.0;
+    float centre_lat  = 0.0   * M_PI / 180.0;
+    float size_long   = 180.0 * M_PI / 180.0;
+    float size_lat    = 90.0  * M_PI / 180.0;
+    float sep_long    = 1.0   * M_PI / 180.0;
+    float sep_lat     = 1.0   * M_PI / 180.0;
+    float rho         = 0.0   * M_PI / 180.0;
     bool force_constant_sep = true;
     bool set_centre_after   = false;
     bool force_centre_point = true;
@@ -143,29 +125,35 @@ void Test_evaluate_jones_E::evaluate_e()
             set_centre_after, rho, force_centre_point, force_to_edges,
             projection_type);
     num_sources = positions.generate(0, 0);
-    oskar_sky_model_resize(&sky_cpu, num_sources, &error);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-    positions.generate((float*)sky_cpu.RA.data, (float*)sky_cpu.Dec.data);
+    oskar_sky_resize(sky_cpu, num_sources, &error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
+    positions.generate(oskar_mem_float(oskar_sky_ra(sky_cpu), &error),
+            oskar_mem_float(oskar_sky_dec(sky_cpu), &error));
 
-//    error = oskar_sky_model_write("temp_test_sky.txt", &sky_cpu);
-//    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+//    error = oskar_sky_write("temp_test_sky.txt", &sky_cpu);
+//    ASSERT_EQ(0, error) << oskar_get_error_string(error)
 
     // Copy sky to the GPU
-    oskar_SkyModel sky_gpu(&sky_cpu, OSKAR_LOCATION_GPU);
+    oskar_Sky* sky_gpu = oskar_sky_create_copy(sky_cpu,
+            OSKAR_LOCATION_GPU, &error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    oskar_Jones E_gpu;
-    oskar_jones_init(&E_gpu, OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU,
-            num_stations, num_sources, &error);
+    oskar_Jones* E_gpu = oskar_jones_create(OSKAR_SINGLE_COMPLEX,
+            OSKAR_LOCATION_GPU, num_stations, num_sources, &error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     oskar_WorkStationBeam work_gpu(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
-    oskar_evaluate_jones_E(&E_gpu, &sky_gpu, &telescope_gpu, gast,
-            &work_gpu, &curand_state, &error);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    oskar_evaluate_jones_E(E_gpu, sky_gpu, tel_gpu, gast,
+            &work_gpu, random_state, &error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
+
+    // Free the sky models.
+    oskar_sky_free(sky_cpu, &error);
+    oskar_sky_free(sky_gpu, &error);
 
     // Copy the Jones matrix back to the CPU.
-    oskar_Jones E_cpu;
-    oskar_jones_init(&E_cpu, E_gpu.data.type, OSKAR_LOCATION_CPU, 0, 0, &error);
-    oskar_jones_copy(&E_cpu, &E_gpu, &error);
+    oskar_Jones* E_cpu = oskar_jones_create_copy(E_gpu, OSKAR_LOCATION_CPU,
+            &error);
 
     // Save to file for plotting.
     oskar_Mem l(&work_gpu.hor_x, OSKAR_LOCATION_CPU);
@@ -176,8 +164,8 @@ void Test_evaluate_jones_E::evaluate_e()
     oskar_Mem E_station;
     for (int j = 0; j < num_stations; ++j)
     {
-        oskar_jones_get_station_pointer(&E_station, &E_cpu, j, &error);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+        oskar_jones_get_station_pointer(&E_station, E_cpu, j, &error);
+        ASSERT_EQ(0, error) << oskar_get_error_string(error);
         for (int i = 0; i < num_sources; ++i)
         {
             fprintf(file, "%10.3f,%10.3f,%10.3f,%10.3f,%10.3f\n",
@@ -206,13 +194,10 @@ void Test_evaluate_jones_E::evaluate_e()
         station = 1;
         scatter3(l(:,station),m(:,station),n(:,station),2,amp(:,station));
      */
-    oskar_curand_state_free(&curand_state, &error);
-    oskar_jones_free(&E_cpu, &error);
-    oskar_jones_free(&E_gpu, &error);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    oskar_random_state_free(random_state, &error);
+    oskar_jones_free(E_cpu, &error);
+    oskar_jones_free(E_gpu, &error);
+    oskar_telescope_free(tel_gpu, &error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 }
 
-
-void Test_evaluate_jones_E::performance_test()
-{
-}

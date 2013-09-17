@@ -26,12 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
-#include "interferometry/oskar_visibilities_read.h"
-#include "apps/lib/oskar_visibilities_write_ms.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_log_error.h"
+#include <apps/lib/oskar_vis_write_ms.h>
 #include <apps/lib/oskar_OptionParser.h>
+#include <oskar_get_error_string.h>
+#include <oskar_log.h>
+#include <oskar_vis.h>
 
 #include <cstdio>
 
@@ -41,7 +40,7 @@ int main(int argc, char** argv)
 #ifndef OSKAR_NO_MS
     int error = 0;
 
-    oskar_OptionParser opt("oskar_visibilities_to_ms");
+    oskar_OptionParser opt("oskar_vis_to_ms");
     opt.addRequired("OSKAR binary file");
     opt.addRequired("MS name");
     if (!opt.check_options(argc, argv))
@@ -51,15 +50,12 @@ int main(int argc, char** argv)
     const char* ms_name = opt.getArg(1);
 
     // Load the visibility file and write it out as a Measurement Set.
-    oskar_Visibilities vis;
-    oskar_visibilities_read(&vis, oskar_vis, &error);
-    oskar_visibilities_write_ms(&vis, ms_name, 1, &error);
+    oskar_Vis* vis = oskar_vis_read(oskar_vis, &error);
+    oskar_vis_write_ms(vis, ms_name, 1, &error);
     if (error)
-    {
         oskar_log_error(0, oskar_get_error_string(error));
-        return error;
-    }
-    return OSKAR_SUCCESS;
+    oskar_vis_free(vis, &error);
+    return error;
 
 #else
     // No Measurement Set support.

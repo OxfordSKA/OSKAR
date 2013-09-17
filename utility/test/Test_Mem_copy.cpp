@@ -29,10 +29,7 @@
 #include <gtest/gtest.h>
 
 #include <oskar_get_error_string.h>
-#include <oskar_mem_copy.h>
-#include <oskar_mem_free.h>
-#include <oskar_mem_init.h>
-#include <oskar_mem_init_copy.h>
+#include <oskar_mem.h>
 
 TEST(Mem, copy_gpu)
 {
@@ -42,7 +39,7 @@ TEST(Mem, copy_gpu)
     // Create test array and fill with data.
     oskar_mem_init(&cpu, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    double* cpu_ = (double*)cpu.data;
+    double* cpu_ = oskar_mem_double(&cpu, &status);
     for (int i = 0; i < n; ++i)
     {
         cpu_[i] = (double)i;
@@ -55,9 +52,10 @@ TEST(Mem, copy_gpu)
     // Copy back and check for equality.
     oskar_mem_init_copy(&cpu2, &gpu, OSKAR_LOCATION_CPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    double* cpu2_ = oskar_mem_double(&cpu2, &status);
     for (int i = 0; i < n; ++i)
     {
-        EXPECT_DOUBLE_EQ(cpu_[i], ((double*)cpu2.data)[i]);
+        EXPECT_DOUBLE_EQ(cpu_[i], cpu2_[i]);
     }
 
     // Free memory.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_jones_get_station_pointer.h"
-#include "utility/oskar_mem_get_pointer.h"
+#include <private_jones.h>
+
+#include <oskar_jones_get_station_pointer.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

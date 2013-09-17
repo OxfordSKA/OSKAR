@@ -29,15 +29,8 @@
 #include "fits/oskar_fits_image_to_sky_model.h"
 #include "fits/oskar_fits_check_status.h"
 #include "math/oskar_sph_from_lm.h"
-#include "sky/oskar_sky_model_append.h"
-#include "sky/oskar_sky_model_free.h"
-#include "sky/oskar_sky_model_init.h"
-#include "sky/oskar_sky_model_resize.h"
-#include "sky/oskar_sky_model_set_source.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_log_error.h"
-#include "utility/oskar_log_message.h"
-#include "utility/oskar_log_warning.h"
+#include <oskar_log.h>
+#include <oskar_sky.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -57,7 +50,7 @@ extern "C" {
 #define FACTOR (2.0*sqrt(2.0*log(2.0)))
 
 int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
-        oskar_SkyModel* sky, double spectral_index, double min_peak_fraction,
+        oskar_Sky* sky, double spectral_index, double min_peak_fraction,
         double noise_floor, int downsample_factor)
 {
     int err = 0, i = 0, j = 0, num_pix = 0, status = 0, status2 = 0;
@@ -70,15 +63,16 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
     double nul = 0.0, peak = 0.0, ref_freq = 0.0, val = 0.0, val_new = 0.0;
     double bmaj = 0.0, bmin = 0.0, barea = 0.0, barea_inv = 0.0;
     void* data = 0;
-    oskar_SkyModel temp_sky;
+    oskar_Sky* temp_sky;
 
     /* Check inputs. */
     if (filename == NULL || sky == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
     if (downsample_factor < 1) downsample_factor = 1;
 
-    /* Initialise the temporary sky model. */
-    oskar_sky_model_init(&temp_sky, sky->RA.type, OSKAR_LOCATION_CPU, 0, &err);
+    /* Create a temporary sky model. */
+    temp_sky = oskar_sky_create(oskar_sky_type(sky),
+            OSKAR_LOCATION_CPU, 0, &err);
 
     /* Open the FITS file. */
     fits_open_file(&fptr, filename, READONLY, &status);
@@ -322,8 +316,8 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
 
                     /* Store pixel data in sky model. */
                     if (j % 100 == 0)
-                        oskar_sky_model_resize(&temp_sky, j + 100, &err);
-                    oskar_sky_model_set_source(&temp_sky, j, ra, dec,
+                        oskar_sky_resize(temp_sky, j + 100, &err);
+                    oskar_sky_set_source(temp_sky, j, ra, dec,
                             val_new, 0.0, 0.0, 0.0, ref_freq, spectral_index,
                             0.0, 0.0, 0.0, &err);
                     if (err) goto cleanup;
@@ -367,8 +361,8 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
 
                     /* Store pixel data in sky model. */
                     if (j % 100 == 0)
-                        oskar_sky_model_resize(&temp_sky, j + 100, &err);
-                    oskar_sky_model_set_source(&temp_sky, j, ra, dec,
+                        oskar_sky_resize(temp_sky, j + 100, &err);
+                    oskar_sky_set_source(temp_sky, j, ra, dec,
                             val_new, 0.0, 0.0, 0.0, ref_freq, spectral_index,
                             0.0, 0.0, 0.0, &err);
                     if (err) goto cleanup;
@@ -378,16 +372,16 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
         }
     }
 
-    /* Record the number of elements loaded. */
-    temp_sky.num_sources = j;
-    oskar_sky_model_append(sky, &temp_sky, &err);
+    /* Set size to the number of elements loaded, and append to output. */
+    oskar_sky_resize(temp_sky, j, &err);
+    oskar_sky_append(sky, temp_sky, &err);
     oskar_log_message(ptr, 0, "Loaded %d pixels.", j);
 
     /* Close the FITS file and free memory. */
     cleanup:
     fits_close_file(fptr, &status);
     if (data) free(data);
-    oskar_sky_model_free(&temp_sky, &err);
+    oskar_sky_free(temp_sky, &err);
     if (status) return OSKAR_ERR_FITS_IO;
     return err;
 }

@@ -31,14 +31,11 @@
 #include "station/test/Test_evaluate_station_beam_dipoles.h"
 
 #include "station/oskar_evaluate_array_pattern_dipoles_cuda.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_mem.h>
 #include "utility/oskar_vector_types.h"
-#include "utility/oskar_mem_to_type.h"
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
-#include "oskar_global.h"
 
 #include <cmath>
 #include <cstdio>
@@ -64,8 +61,8 @@ void Test_evaluate_station_beam_dipoles::test()
     oskar_Mem n_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels);
 
     // Generate azimuth and elevation.
-    double* az = oskar_mem_to_double(&azimuth, &status);
-    double* el = oskar_mem_to_double(&elevation, &status);
+    double* az = oskar_mem_double(&azimuth, &status);
+    double* el = oskar_mem_double(&elevation, &status);
     for (int j = 0; j < num_el; ++j)
     {
         for (int i = 0; i < num_az; ++i)
@@ -145,18 +142,18 @@ void Test_evaluate_station_beam_dipoles::test()
     // Call the kernel.
     TIMER_START
     oskar_evaluate_array_pattern_dipoles_cuda_d (num_antennas,
-            oskar_mem_to_const_double(&antenna_x, &status),
-            oskar_mem_to_const_double(&antenna_y, &status),
-            oskar_mem_to_const_double(&antenna_z, &status),
-            oskar_mem_to_const_double(&cos_orientation_x, &status),
-            oskar_mem_to_const_double(&sin_orientation_x, &status),
-            oskar_mem_to_const_double(&cos_orientation_y, &status),
-            oskar_mem_to_const_double(&sin_orientation_y, &status),
-            oskar_mem_to_const_double2(&weights, &status), num_pixels,
-            oskar_mem_to_const_double(&l, &status),
-            oskar_mem_to_const_double(&m, &status),
-            oskar_mem_to_const_double(&n, &status),
-            oskar_mem_to_double4c(&pattern, &status));
+            oskar_mem_double_const(&antenna_x, &status),
+            oskar_mem_double_const(&antenna_y, &status),
+            oskar_mem_double_const(&antenna_z, &status),
+            oskar_mem_double_const(&cos_orientation_x, &status),
+            oskar_mem_double_const(&sin_orientation_x, &status),
+            oskar_mem_double_const(&cos_orientation_y, &status),
+            oskar_mem_double_const(&sin_orientation_y, &status),
+            oskar_mem_double2_const(&weights, &status), num_pixels,
+            oskar_mem_double_const(&l, &status),
+            oskar_mem_double_const(&m, &status),
+            oskar_mem_double_const(&n, &status),
+            oskar_mem_double4c(&pattern, &status));
     cudaDeviceSynchronize();
     TIMER_STOP("Finished station beam evaluation using dipoles (%d points)",
             num_pixels)
@@ -170,7 +167,7 @@ void Test_evaluate_station_beam_dipoles::test()
 
     const char filename[] = "cpp_unit_test_station_beam_dipoles.dat";
     FILE* file = fopen(filename, "w");
-    double4c* p = oskar_mem_to_double4c(&pattern_cpu, &status);
+    double4c* p = oskar_mem_double4c(&pattern_cpu, &status);
     for (int i = 0; i < num_pixels; ++i)
     {
         fprintf(file, "%f %f %f %f %f %f %f %f %f %f\n", az[i], el[i],

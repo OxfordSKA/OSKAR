@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,10 @@
  * @file oskar_fits_healpix_to_sky_model.h
  */
 
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "sky/oskar_SettingsSky.h"
-#include "utility/oskar_Log.h"
+#include <oskar_global.h>
+#include <oskar_sky.h>
+#include <oskar_SettingsSky.h>
+#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +57,7 @@ extern "C" {
  */
 OSKAR_FITS_EXPORT
 void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
-        const oskar_SettingsSkyHealpixFits* settings, oskar_SkyModel* sky,
+        const oskar_SettingsSkyHealpixFits* settings, oskar_Sky* sky,
         int* status);
 
 #ifdef __cplusplus

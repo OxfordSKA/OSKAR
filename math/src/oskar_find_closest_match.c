@@ -50,11 +50,11 @@ void oskar_find_closest_match(int* match_index, double value,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    if (values->type == OSKAR_DOUBLE)
+    if (oskar_mem_type(values) == OSKAR_DOUBLE)
     {
         double* values_ = (double*)values->data;
         *match_index = 0;
-        for (i = 0; i < values->num_elements; ++i)
+        for (i = 0; i < (int)oskar_mem_length(values); ++i)
         {
             double temp = fabs(values_[i] - value);
             if (temp < diff)
@@ -64,11 +64,11 @@ void oskar_find_closest_match(int* match_index, double value,
             }
         }
     }
-    else if (values->type == OSKAR_SINGLE)
+    else if (oskar_mem_type(values) == OSKAR_SINGLE)
     {
         float* values_ = (float*)values->data;
         *match_index = 0;
-        for (i = 0; i < values->num_elements; ++i)
+        for (i = 0; i < (int)oskar_mem_length(values); ++i)
         {
             float temp = fabsf(values_[i] - value);
             if (temp < diff)

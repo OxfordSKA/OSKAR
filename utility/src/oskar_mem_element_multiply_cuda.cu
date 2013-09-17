@@ -26,13 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_multiply_inline.h"
-#include "utility/oskar_cuda_check_error.h"
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_element_multiply_cuda.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_vector_types.h"
+#include <private_mem.h>
+#include <oskar_mem.h>
+
+#include <oskar_multiply_inline.h>
+#include <oskar_cuda_check_error.h>
 #include <stdio.h>
 #include <stdlib.h>
 

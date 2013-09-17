@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  * @file oskar_evaluate_station_beam_gaussian.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,13 +54,13 @@ extern "C" {
  * @param[in] l            Beam l-direction cosines.
  * @param[in] m            Beam m-direction cosines.
  * @param[in] horizon_mask Positions with mask values < 0 are zeroed in output.
- * @param[in] fwhm_deg     Gaussian FWHM of beam, in degrees.
+ * @param[in] fwhm_rad     Gaussian FWHM of beam, in degrees.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         int num_points, const oskar_Mem* l, const oskar_Mem* m,
-        const oskar_Mem* horizon_mask, double fwhm_deg, int* status);
+        const oskar_Mem* horizon_mask, double fwhm_rad, int* status);
 
 #ifdef __cplusplus
 }

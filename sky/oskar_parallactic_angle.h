@@ -33,7 +33,7 @@
  * @file oskar_parallactic_angle.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -2,34 +2,20 @@
 # src/apps/test/CMakeLists.txt
 #
 
-if (CPPUNIT_FOUND)
+set(name apps_lib_test)
+include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
+set(${name}_SRC
+    Test_telescope_model_load_save.cpp
+)
+if (CASACORE_FOUND)
+    list(APPEND ${name}_SRC Test_write_ms.cpp)
+endif ()
+add_executable(${name} ${${name}_SRC})
+target_link_libraries(${name} oskar_apps gtest_main ${QT_QTCORE_LIBRARIES})
+set_target_properties(${name} PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+add_test(apps_lib_test ${name})
 
-    include_directories(${CPPUNIT_INCLUDE_DIR})
-
-    set(apps_test_SRC
-        src/CppUnitMain.cpp
-        src/Test_telescope_model_load_save.cpp
-    )
-
-    if (CASACORE_FOUND)
-        list(APPEND apps_test_SRC src/Test_write_ms.cpp)
-    endif ()
-
-    add_executable(apps_lib_test ${apps_test_SRC})
-
-    set_target_properties(apps_lib_test PROPERTIES
-       COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-       LINK_FLAGS "${OpenMP_CXX_FLAGS}")
-
-    target_link_libraries(apps_lib_test
-        oskar_apps
-        ${CPPUNIT_LIBRARIES}
-        ${QT_QTCORE_LIBRARIES}
-    )
-
-    add_test(apps_lib_test apps_lib_test)
-
-    # Binary to test the option parser.
-    add_executable(test_OptionParser src/Test_OptionParser.cpp)
-
-endif()
+# Binary to test the option parser.
+add_executable(test_OptionParser Test_OptionParser.cpp)

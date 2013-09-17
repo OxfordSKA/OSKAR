@@ -28,11 +28,8 @@
 
 #include <gtest/gtest.h>
 
+#include <oskar_mem.h>
 #include <oskar_get_error_string.h>
-#include <oskar_mem_append_raw.h>
-#include <oskar_mem_free.h>
-#include <oskar_mem_init.h>
-#include <oskar_mem_init_copy.h>
 
 #include <vector>
 
@@ -56,12 +53,13 @@ TEST(Mem, append_cpu)
 
     // First check.
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ(num_values1, mem.num_elements);
-    ASSERT_EQ((int)OSKAR_LOCATION_CPU, mem.location);
-    ASSERT_EQ((int)OSKAR_DOUBLE, mem.type);
-    for (int i = 0; i < mem.num_elements; ++i)
+    ASSERT_EQ(num_values1, (int)oskar_mem_length(&mem));
+    ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_mem_location(&mem));
+    ASSERT_EQ((int)OSKAR_DOUBLE, oskar_mem_type(&mem));
+    double* data = oskar_mem_double(&mem, &status);
+    for (int i = 0; i < num_values1; ++i)
     {
-        EXPECT_DOUBLE_EQ(value1, ((double*)mem.data)[i]);
+        EXPECT_DOUBLE_EQ(value1, data[i]);
     }
 
     // Second append.
@@ -73,15 +71,16 @@ TEST(Mem, append_cpu)
 
     // Second check.
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ(num_values1 + num_values2, mem.num_elements);
-    ASSERT_EQ((int)OSKAR_LOCATION_CPU, mem.location);
-    ASSERT_EQ((int)OSKAR_DOUBLE, mem.type);
-    for (int i = 0; i < mem.num_elements; ++i)
+    ASSERT_EQ(num_values1 + num_values2, (int)oskar_mem_length(&mem));
+    ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_mem_location(&mem));
+    ASSERT_EQ((int)OSKAR_DOUBLE, oskar_mem_type(&mem));
+    data = oskar_mem_double(&mem, &status);
+    for (int i = 0; i < (int)oskar_mem_length(&mem); ++i)
     {
         if (i < num_values1)
-            EXPECT_DOUBLE_EQ(value1, ((double*)mem.data)[i]);
+            EXPECT_DOUBLE_EQ(value1, data[i]);
         else
-            EXPECT_DOUBLE_EQ(value2, ((double*)mem.data)[i]);
+            EXPECT_DOUBLE_EQ(value2, data[i]);
     }
 
     // Free memory.
@@ -93,7 +92,7 @@ TEST(Mem, append_cpu)
 TEST(Mem, append_gpu)
 {
     int status = 0;
-    oskar_Mem mem, temp;
+    oskar_Mem mem, temp, mem_temp;
 
     // Initialise.
     oskar_mem_init(&mem, OSKAR_SINGLE, OSKAR_LOCATION_GPU, 0, 1, &status);
@@ -108,13 +107,14 @@ TEST(Mem, append_gpu)
 
     // First check.
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ(num_values1, mem.num_elements);
-    ASSERT_EQ((int)OSKAR_LOCATION_GPU, mem.location);
-    ASSERT_EQ((int)OSKAR_SINGLE, mem.type);
-    oskar_Mem mem_temp(&mem, OSKAR_LOCATION_CPU);
-    for (int i = 0; i < mem.num_elements; ++i)
+    ASSERT_EQ(num_values1, (int)oskar_mem_length(&mem));
+    ASSERT_EQ((int)OSKAR_LOCATION_GPU, oskar_mem_location(&mem));
+    ASSERT_EQ((int)OSKAR_SINGLE, oskar_mem_type(&mem));
+    oskar_mem_init_copy(&mem_temp, &mem, OSKAR_LOCATION_CPU, &status);
+    float* data = oskar_mem_float(&mem_temp, &status);
+    for (int i = 0; i < num_values1; ++i)
     {
-        EXPECT_FLOAT_EQ(value1, ((float*)mem_temp.data)[i]);
+        EXPECT_FLOAT_EQ(value1, data[i]);
     }
 
     // Second append.
@@ -126,21 +126,23 @@ TEST(Mem, append_gpu)
 
     // Second check.
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ(num_values1 + num_values2, mem.num_elements);
-    ASSERT_EQ((int)OSKAR_LOCATION_GPU, mem.location);
-    ASSERT_EQ((int)OSKAR_SINGLE, mem.type);
+    ASSERT_EQ(num_values1 + num_values2, (int)oskar_mem_length(&mem));
+    ASSERT_EQ((int)OSKAR_LOCATION_GPU, oskar_mem_location(&mem));
+    ASSERT_EQ((int)OSKAR_SINGLE, oskar_mem_type(&mem));
     oskar_mem_init_copy(&temp, &mem, OSKAR_LOCATION_CPU, &status);
-    for (int i = 0; i < mem.num_elements; ++i)
+    data = oskar_mem_float(&temp, &status);
+    for (int i = 0; i < (int)oskar_mem_length(&mem); ++i)
     {
         if (i < num_values1)
-            EXPECT_FLOAT_EQ(value1, ((float*)temp.data)[i]);
+            EXPECT_FLOAT_EQ(value1, data[i]);
         else
-            EXPECT_FLOAT_EQ(value2, ((float*)temp.data)[i]);
+            EXPECT_FLOAT_EQ(value2, data[i]);
     }
 
     // Free memory.
     oskar_mem_free(&temp, &status);
     oskar_mem_free(&mem, &status);
+    oskar_mem_free(&mem_temp, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 

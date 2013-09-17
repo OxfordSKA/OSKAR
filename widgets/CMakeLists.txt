@@ -49,7 +49,4 @@ if (QT4_FOUND)
         VERSION ${OSKAR_VERSION})
     install(TARGETS oskar_widgets DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
-    # Tests
-    add_subdirectory(test)
-
 endif (QT4_FOUND)

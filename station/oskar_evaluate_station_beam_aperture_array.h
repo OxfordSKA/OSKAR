@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,10 @@
  * @file oskar_evaluate_station_beam_aperture_array.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_StationModel.h"
-#include "station/oskar_WorkStationBeam.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_CurandState.h"
+#include <oskar_global.h>
+#include <oskar_station.h>
+#include <oskar_WorkStationBeam.h>
+#include <oskar_random_state.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,7 +77,7 @@ extern "C" {
  * initialised.
  *
  * Notes:
- * - curand_states .. TODO how to set up this buffer
+ * - random_states .. TODO how to set up this buffer
  *
  * @param[out]    beam          Station beam evaluated at x,y,z positions.
  * @param[in]     station       Fully populated station model structure.
@@ -96,16 +95,16 @@ extern "C" {
  *                              conversion.
  * @param[in]     work          Initialised structure containing temporary work
  *                              buffers.
- * @param[in]     curand_states Initialised structure of CURAND random-number
+ * @param[in]     random_states Initialised structure of CURAND random-number
  *                              states used to model various errors at the
  *                              station-level.
  * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
-        const oskar_StationModel* station, int num_points, const oskar_Mem* x,
+        const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, double gast,
-        oskar_WorkStationBeam* work, oskar_CurandState* curand_states,
+        oskar_WorkStationBeam* work, oskar_RandomState* random_states,
         int* status);
 
 #ifdef __cplusplus

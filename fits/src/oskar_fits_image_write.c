@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fits/oskar_fits_image_write.h"
-#include "fits/oskar_fits_write.h"
-#include "fits/oskar_fits_write_axis_header.h"
-#include "fits/oskar_fits_check_status.h"
-#include "utility/oskar_getline.h"
-#include "utility/oskar_log_message.h"
-#include "utility/oskar_Mem.h"
+#include <fits/oskar_fits_image_write.h>
+#include <fits/oskar_fits_write.h>
+#include <fits/oskar_fits_write_axis_header.h>
+#include <oskar_getline.h>
+#include <oskar_log.h>
+#include <oskar_mem.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -50,26 +49,36 @@ extern "C" {
 
 #define MAX_DIM 10
 
-int oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
-        const char* filename)
+void oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
+        const char* filename, int* status)
 {
     char value[FLEN_VALUE];
-    int i, num_dimensions, status = 0, decimals = 10, type;
+    int i, num_dimensions, decimals = 10, type;
     long naxes[MAX_DIM];
     double crval[MAX_DIM], crpix[MAX_DIM], cdelt[MAX_DIM], crota[MAX_DIM];
     fitsfile* fptr = NULL;
     const char *label[MAX_DIM], *ctype[MAX_DIM];
 
+    /* Check all inputs. */
+    if (!image || !filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     /* Get the data type. */
-    type = image->data.type;
+    type = oskar_mem_type(&image->data);
 
     /* Get the number of dimensions. */
     num_dimensions = sizeof(image->dimension_order) / sizeof(int);
     if (num_dimensions > 10)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
-
-    /* Write a log message. */
-    oskar_log_message(log, 0, "Writing FITS image file: '%s'", filename);
+    {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
 
     /* Loop over axes. */
     for (i = 0; i < num_dimensions; ++i)
@@ -145,71 +154,58 @@ int oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
     }
 
     /* Write multi-dimensional image data. */
-    status = oskar_fits_write(log, filename, type, num_dimensions, naxes,
-            image->data.data, ctype, label, crval, cdelt, crpix, crota);
-    if (status) return OSKAR_ERR_FITS_IO;
+    oskar_fits_write(filename, type, num_dimensions, naxes,
+            image->data.data, ctype, label, crval, cdelt, crpix, crota, status);
+    if (*status) return;
 
     /* Open file for read/write access. */
-    fits_open_file(&fptr, filename, READWRITE, &status);
-    oskar_fits_check_status(log, status, "Opening FITS file.");
-    if (status) return OSKAR_ERR_FITS_IO;
+    fits_open_file(&fptr, filename, READWRITE, status);
 
     /* Write brightness unit keyword. */
     if (image->image_type < 10)
     {
         strcpy(value, "JY/BEAM");
-        fits_write_key_str(fptr, "BUNIT", value, "Units of flux", &status);
-        oskar_fits_check_status(log, status, "Writing key: BUNIT");
-        if (status) return OSKAR_ERR_FITS_IO;
+        fits_write_key_str(fptr, "BUNIT", value, "Units of flux", status);
     }
 
     /* Write time header keywords. */
     strcpy(value, "UTC");
-    fits_write_key_str(fptr, "TIMESYS", value, NULL, &status);
-    oskar_fits_check_status(log, status, "Writing key: TIMESYS");
-    if (status) return OSKAR_ERR_FITS_IO;
+    fits_write_key_str(fptr, "TIMESYS", value, NULL, status);
     strcpy(value, "s");
-    fits_write_key_str(fptr, "TIMEUNIT", value, "Time axis units", &status);
-    oskar_fits_check_status(log, status, "Writing key: TIMEUNIT");
-    if (status) return OSKAR_ERR_FITS_IO;
+    fits_write_key_str(fptr, "TIMEUNIT", value, "Time axis units", status);
     fits_write_key_dbl(fptr, "MJD-OBS", image->time_start_mjd_utc, decimals,
-            "Obs start time", &status);
-    oskar_fits_check_status(log, status, "Writing key: MJD-OBS");
-    if (status) return OSKAR_ERR_FITS_IO;
+            "Obs start time", status);
 
     /* Write pointing keywords. */
     fits_write_key_dbl(fptr, "OBSRA", image->centre_ra_deg, decimals,
-            "Pointing RA", &status);
-    oskar_fits_check_status(log, status, "Writing key: OBSRA");
-    if (status) return OSKAR_ERR_FITS_IO;
+            "Pointing RA", status);
     fits_write_key_dbl(fptr, "OBSDEC", image->centre_dec_deg, decimals,
-            "Pointing DEC", &status);
-    oskar_fits_check_status(log, status, "Writing key: OBSDEC");
-    if (status) return OSKAR_ERR_FITS_IO;
+            "Pointing DEC", status);
+    if (*status)
+    {
+        *status = OSKAR_ERR_FITS_IO;
+        return;
+    }
 
     /* Write log entries as FITS HISTORY keys. */
-    if (log)
+    if (log && oskar_log_file_handle(log))
     {
-        if (log->file)
+        char* buffer = NULL;
+        size_t buf_size = 0;
+        FILE* fhan = 0;
+        fhan = oskar_log_file_handle(log);
+        fseek(fhan, 0, SEEK_SET);
+        while (oskar_getline(&buffer, &buf_size, fhan) != OSKAR_ERR_EOF)
         {
-            char* log_line_buffer = NULL;
-            size_t buffer_size = 0;
-            fseek(log->file, 0, SEEK_SET);
-            while (oskar_getline(&log_line_buffer,
-                    &buffer_size, log->file) != OSKAR_ERR_EOF)
-            {
-                fits_write_history(fptr, log_line_buffer, &status);
-            }
-            if (log_line_buffer) free(log_line_buffer);
+            fits_write_history(fptr, buffer, status);
         }
+        if (buffer) free(buffer);
     }
 
     /* Close the FITS file. */
-    fits_close_file(fptr, &status);
-    oskar_fits_check_status(log, status, "Closing file");
-    if (status) return OSKAR_ERR_FITS_IO;
-
-    return OSKAR_SUCCESS;
+    fits_close_file(fptr, status);
+    if (*status)
+        *status = OSKAR_ERR_FITS_IO;
 }
 
 #ifdef __cplusplus

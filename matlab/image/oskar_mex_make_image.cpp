@@ -28,15 +28,11 @@
 
 #include <mex.h>
 #include <cuda_runtime_api.h>
-#include <vector_functions.h> // This has to be before the OSKAR headers
-#include <interferometry/oskar_Visibilities.h>
-#include <utility/oskar_Log.h>
-#include <utility/oskar_Mem.h>
-#include <utility/oskar_vector_types.h>
-#include <utility/oskar_get_error_string.h>
+#include <oskar_vis.h>
+#include <oskar_log.h>
+#include <oskar_get_error_string.h>
 #include <math/oskar_linspace.h>
 #include <math/oskar_meshgrid.h>
-#include <imaging/oskar_Image.h>
 #include <imaging/oskar_image_init.h>
 #include <imaging/oskar_image_resize.h>
 #include <imaging/oskar_make_image.h>
@@ -125,9 +121,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     if (cube_imager)
     {
         // Load visibilities from MATLAB structure into a oskar_Visibilties structure.
-        oskar_Visibilities vis;
         mexPrintf("= loading vis structure... ");
-        oskar_mex_vis_from_matlab_struct(&vis, in[0]);
+        oskar_Vis* vis = oskar_mex_vis_from_matlab_struct(in[0]);
         mexPrintf("done.\n");
 
         // Construct image settings structure.
@@ -143,12 +138,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         // Make image.
         mexPrintf("= Making image...\n");
         mexEvalString("drawnow"); // Force flush of matlab print buffer
-        err = oskar_make_image(&image, 0, &vis, &settings);
+        err = oskar_make_image(&image, 0, vis, &settings);
         if (err)
         {
             oskar_matlab_error("oskar_make_image() failed with code %i: %s",
                     err, oskar_get_error_string(err));
         }
+        oskar_vis_free(vis, &err);
         mexEvalString("drawnow");
         mexPrintf("= Make image complete\n");
     }
@@ -234,7 +230,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             double* im_ = (double*)mxGetPi(in[2]);
             for (int i = 0; i < num_samples; ++i)
             {
-                ((double2*)amp.data)[i] = make_double2(re_[i], im_[i]);
+                double2 t; t.x = re_[i]; t.y = im_[i];
+                ((double2*)amp.data)[i] = t;
                 ((double*)uu.data)[i] = uu_[i];
                 ((double*)vv.data)[i] = vv_[i];
             }
@@ -249,7 +246,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             float* im_ = (float*)mxGetPi(in[2]);
             for (int i = 0; i < num_samples; ++i)
             {
-                ((float2*)amp.data)[i] = make_float2(re_[i], im_[i]);
+                float2 t; t.x = re_[i]; t.y = im_[i];
+                ((float2*)amp.data)[i] = t;
                 ((float*)uu.data)[i] = uu_[i];
                 ((float*)vv.data)[i] = vv_[i];
             }

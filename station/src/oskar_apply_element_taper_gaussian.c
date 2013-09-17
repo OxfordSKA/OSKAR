@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_apply_element_taper_gaussian.h"
-#include "station/oskar_apply_element_taper_gaussian_cuda.h"
-#include "utility/oskar_cuda_check_error.h"
-#include "utility/oskar_mem_type_check.h"
+#include <oskar_apply_element_taper_gaussian.h>
+#include <oskar_apply_element_taper_gaussian_cuda.h>
+#include <oskar_cuda_check_error.h>
 #include <math.h>
 
 #define M_4LN2f 2.77258872223978123767f
@@ -142,16 +141,16 @@ void oskar_apply_element_taper_gaussian(oskar_Mem* jones, int num_sources,
     if (*status) return;
 
     /* Get the meta-data. */
-    base_type = oskar_mem_base_type(jones->type);
-    type = jones->type;
-    location = jones->location;
+    base_type = oskar_mem_precision(jones);
+    type = oskar_mem_type(jones);
+    location = oskar_mem_location(jones);
 
     /* Check arrays are co-located. */
-    if (theta->location != location)
+    if (oskar_mem_location(theta) != location)
         *status = OSKAR_ERR_LOCATION_MISMATCH;
 
     /* Check types for consistency. */
-    if (theta->type != base_type)
+    if (oskar_mem_type(theta) != base_type)
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Check if safe to proceed. */

@@ -35,9 +35,9 @@ extern "C" {
 int oskar_spline_data_location(const oskar_SplineData* data)
 {
     int location;
-    location = data->knots_x.location;
-    if (location != data->knots_y.location ||
-            location != data->coeff.location)
+    location = oskar_mem_location(&data->knots_x);
+    if (location != oskar_mem_location(&data->knots_y) ||
+            location != oskar_mem_location(&data->coeff))
         return OSKAR_ERR_BAD_LOCATION;
     return location;
 }

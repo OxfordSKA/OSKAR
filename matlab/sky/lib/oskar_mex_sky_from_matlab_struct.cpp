@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,8 +27,10 @@
  */
 
 #include "matlab/sky/lib/oskar_mex_sky_from_matlab_struct.h"
-#include <utility/oskar_get_error_string.h>
-#include <sky/oskar_sky_model_init.h>
+#include <oskar_get_error_string.h>
+#include <oskar_sky.h>
+#include <oskar_sky_init.h>
+#include <oskar_mem.h>
 #include <cstring>
 #include <cstdlib>
 
@@ -44,11 +46,12 @@ static void field_error(const char* msg)
             "(missing field: %s).\n", msg);
 }
 
-void oskar_mex_sky_from_matlab_struct(oskar_SkyModel* sky, const mxArray* mxSky)
+oskar_Sky* oskar_mex_sky_from_matlab_struct(const mxArray* mxSky)
 {
-    int status = OSKAR_SUCCESS;
+    oskar_Sky* sky = 0;
+    int status = 0;
 
-    if (!sky || !mxSky)
+    if (!mxSky)
     {
         mexErrMsgTxt("ERROR: oskar_mex_sky_from_matlab_struct(): "
                 "Invalid arguments.\n");
@@ -104,28 +107,37 @@ void oskar_mex_sky_from_matlab_struct(oskar_SkyModel* sky, const mxArray* mxSky)
     if (!mxPA) field_error(fields[12]);
 
     int num_sources = (int)mxGetScalar(mxNumSources);
-
     int type = mxIsDouble(mxRA) ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    int location = OSKAR_LOCATION_CPU;
-
-    oskar_sky_model_init(sky, type, location, num_sources, &status);
+    sky = oskar_sky_create(type, OSKAR_LOCATION_CPU, num_sources, &status);
     if (status)
     {
-        mexErrMsgIdAndTxt("oskar:error", "ERROR: oskar_sky_model_init() failed "
+        mexErrMsgIdAndTxt("oskar:error", "ERROR: oskar_sky_init() failed "
                 "with code %i: %s.\n", status, oskar_get_error_string(status));
     }
 
     size_t mem_size = num_sources;
     mem_size *= (type == OSKAR_DOUBLE) ? sizeof(double) : sizeof(float);
-    memcpy(sky->RA.data, mxGetData(mxRA), mem_size);
-    memcpy(sky->Dec.data, mxGetData(mxDec), mem_size);
-    memcpy(sky->I.data, mxGetData(mxI), mem_size);
-    memcpy(sky->Q.data, mxGetData(mxQ), mem_size);
-    memcpy(sky->U.data, mxGetData(mxU), mem_size);
-    memcpy(sky->V.data, mxGetData(mxV), mem_size);
-    memcpy(sky->reference_freq.data, mxGetData(mxRefFreq), mem_size);
-    memcpy(sky->spectral_index.data, mxGetData(mxSPIX), mem_size);
-    memcpy(sky->FWHM_major.data, mxGetData(mxFWHM_Maj), mem_size);
-    memcpy(sky->FWHM_minor.data, mxGetData(mxFWHM_Min), mem_size);
-    memcpy(sky->position_angle.data, mxGetData(mxPA), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_ra(sky)),
+            mxGetData(mxRA), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_dec(sky)),
+            mxGetData(mxDec), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_I(sky)),
+            mxGetData(mxI), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_Q(sky)),
+            mxGetData(mxQ), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_U(sky)),
+            mxGetData(mxU), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_V(sky)),
+            mxGetData(mxV), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_reference_freq(sky)),
+            mxGetData(mxRefFreq), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_spectral_index(sky)),
+            mxGetData(mxSPIX), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_fwhm_major(sky)),
+            mxGetData(mxFWHM_Maj), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_fwhm_minor(sky)),
+            mxGetData(mxFWHM_Min), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_position_angle(sky)),
+            mxGetData(mxPA), mem_size);
+    return sky;
 }

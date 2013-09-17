@@ -29,14 +29,12 @@
 #include "fits/test/Test_fits_to_sky_model.h"
 #include "fits/oskar_fits_image_to_sky_model.h"
 #include "fits/oskar_fits_image_write.h"
-#include "imaging/oskar_Image.h"
-#include "imaging/oskar_image_free.h"
-#include "imaging/oskar_image_init.h"
-#include "imaging/oskar_image_resize.h"
-#include "sky/oskar_sky_model_save.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_Mem.h"
-#include <oskar_mem_to_type.h>
+#include <oskar_image_free.h>
+#include <oskar_image_init.h>
+#include <oskar_image_resize.h>
+#include <oskar_sky.h>
+#include <oskar_get_error_string.h>
+#include <oskar_mem.h>
 
 #include <fitsio.h>
 
@@ -79,7 +77,7 @@ void Test_fits_to_sky_model::test_method()
                 / (FACTOR * FACTOR * cdelt1 * cdelt1 * 3600.0 * 3600.0);
 
     // Define test input data.
-    double* d = oskar_mem_to_double(&image.data, &err);
+    double* d = oskar_mem_double(&image.data, &err);
     for (int r = 0, i = 0; r < rows; ++r)
     {
         for (int c = 0; c < columns; ++c, ++i)
@@ -93,31 +91,34 @@ void Test_fits_to_sky_model::test_method()
     }
 
     // Write the data.
-    oskar_fits_image_write(&image, NULL, filename);
+    oskar_fits_image_write(&image, NULL, filename, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
     // Re-open the FITS file.
     fits_open_file(&fptr, filename, READWRITE, &status);
-    if (status) CPPUNIT_FAIL(oskar_get_error_string(OSKAR_ERR_FITS_IO));
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("FITS I/O error", 0, status);
 
     // Add a fake beam size.
     fits_write_key_dbl(fptr, "BMAJ", bmaj / 3600.0, 10,
             "Beam major axis (deg)", &status);
-    if (status) CPPUNIT_FAIL(oskar_get_error_string(OSKAR_ERR_FITS_IO));
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("FITS I/O error", 0, status);
     fits_write_key_dbl(fptr, "BMIN", bmin / 3600.0, 10,
             "Beam minor axis (deg)", &status);
-    if (status) CPPUNIT_FAIL(oskar_get_error_string(OSKAR_ERR_FITS_IO));
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("FITS I/O error", 0, status);
 
     // Close the FITS file.
     fits_close_file(fptr, &status);
-    if (status) CPPUNIT_FAIL(oskar_get_error_string(OSKAR_ERR_FITS_IO));
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("FITS I/O error", 0, status);
 
     // Load the sky model (no downsampling, no noise floor).
     {
-        oskar_SkyModel sky_temp;
-        err = oskar_fits_image_to_sky_model(0, filename, &sky_temp, spectral_index,
-                0.0, 0.0, 0);
-        if (err) CPPUNIT_FAIL(oskar_get_error_string(err));
-        CPPUNIT_ASSERT_EQUAL(rows * columns, sky_temp.num_sources);
+        oskar_Sky* sky = oskar_sky_create(OSKAR_DOUBLE,
+                OSKAR_LOCATION_CPU, 0, &err);
+        err = oskar_fits_image_to_sky_model(0, filename, sky,
+                spectral_index, 0.0, 0.0, 0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+        CPPUNIT_ASSERT_EQUAL(rows * columns, oskar_sky_num_sources(sky));
+        double* I_ = oskar_mem_double(oskar_sky_I(sky), &err);
 
         for (int r = 0, i = 0; r < rows; ++r)
         {
@@ -125,31 +126,33 @@ void Test_fits_to_sky_model::test_method()
             {
                 if ((c % downsample_factor == 1) &&
                         (r % downsample_factor == 1))
-                    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 / beam_area,
-                            ((double*)sky_temp.I.data)[i], 1e-5);
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 / beam_area, I_[i], 1e-5);
                 else
-                    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0001 / beam_area,
-                            ((double*)sky_temp.I.data)[i], 1e-5);
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0001 / beam_area, I_[i], 1e-5);
             }
         }
 
-        oskar_sky_model_save("test_grid.osm", &sky_temp, &err);
+        oskar_sky_save("test_grid.osm", sky, &err);
+        oskar_sky_free(sky, &err);
     }
 
     // Load the sky model (with downsampling, with noise floor).
     {
-        oskar_SkyModel sky_temp;
-        err = oskar_fits_image_to_sky_model(0, filename, &sky_temp, spectral_index,
-                0.0, 0.01, downsample_factor);
-        if (err) CPPUNIT_FAIL(oskar_get_error_string(err));
+        oskar_Sky* sky = oskar_sky_create(OSKAR_DOUBLE,
+                OSKAR_LOCATION_CPU, 0, &err);
+        err = oskar_fits_image_to_sky_model(0, filename, sky,
+                spectral_index, 0.0, 0.01, downsample_factor);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+        int num_sources = oskar_sky_num_sources(sky);
         CPPUNIT_ASSERT_EQUAL((columns / downsample_factor) *
-                (rows / downsample_factor), sky_temp.num_sources);
+                (rows / downsample_factor), num_sources);
+        double* I_ = oskar_mem_double(oskar_sky_I(sky), &err);
 
-        for (int i = 0; i < sky_temp.num_sources; ++i)
+        for (int i = 0; i < num_sources; ++i)
         {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 / beam_area,
-                    ((double*)sky_temp.I.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 / beam_area, I_[i], 1e-5);
         }
+        oskar_sky_free(sky, &err);
     }
 
     // Define test input data.
@@ -166,74 +169,97 @@ void Test_fits_to_sky_model::test_method()
     }
 
     // Write the data.
-    oskar_fits_image_write(&image, NULL, filename);
+    oskar_fits_image_write(&image, NULL, filename, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
     // Re-open the FITS file.
     fits_open_file(&fptr, filename, READWRITE, &status);
-    if (status) CPPUNIT_FAIL(oskar_get_error_string(OSKAR_ERR_FITS_IO));
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("FITS I/O error", 0, status);
 
     // Add a fake beam size.
     fits_write_key_dbl(fptr, "BMAJ", bmaj / 3600.0, 10,
             "Beam major axis (deg)", &status);
-    if (status) CPPUNIT_FAIL(oskar_get_error_string(OSKAR_ERR_FITS_IO));
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("FITS I/O error", 0, status);
     fits_write_key_dbl(fptr, "BMIN", bmin / 3600.0, 10,
             "Beam minor axis (deg)", &status);
-    if (status) CPPUNIT_FAIL(oskar_get_error_string(OSKAR_ERR_FITS_IO));
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("FITS I/O error", 0, status);
 
     // Close the FITS file.
     fits_close_file(fptr, &status);
-    if (status) CPPUNIT_FAIL(oskar_get_error_string(OSKAR_ERR_FITS_IO));
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("FITS I/O error", 0, status);
 
     // Load the sky model (with downsampling, no noise floor).
     {
-        oskar_SkyModel sky_temp;
-        err = oskar_fits_image_to_sky_model(0, filename, &sky_temp, spectral_index,
+        oskar_Sky* sky = oskar_sky_create(OSKAR_DOUBLE,
+                OSKAR_LOCATION_CPU, 0, &err);
+        err = oskar_fits_image_to_sky_model(0, filename, sky, spectral_index,
                 0.0, 0.0, downsample_factor);
-        if (err) CPPUNIT_FAIL(oskar_get_error_string(err));
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+        int num_sources = oskar_sky_num_sources(sky);
         CPPUNIT_ASSERT_EQUAL(((columns + downsample_factor - 1) / downsample_factor)
                 * ((rows + downsample_factor - 1) / downsample_factor),
-                sky_temp.num_sources);
+                num_sources);
+        double* I_ = oskar_mem_double(oskar_sky_I(sky), &err);
 
         double expected = ((downsample_factor * downsample_factor - 1) + 10.0)
                 / beam_area;
-        for (int i = 0; i < sky_temp.num_sources; ++i)
+        for (int i = 0; i < num_sources; ++i)
         {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(expected,
-                    ((double*)sky_temp.I.data)[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(expected, I_[i], 1e-5);
         }
+        oskar_sky_free(sky, &err);
     }
 
     // Test real astronomical FITS images.
     {
-        oskar_SkyModel sky_Cyg_A_4, sky_Cyg_A_3, sky_Cas_A_2;
+        oskar_Sky *sky_Cyg_A_4, *sky_Cyg_A_3, *sky_Cas_A_2;
 
         // Read Cyg A model.
+        sky_Cyg_A_4 = oskar_sky_create(OSKAR_DOUBLE,
+                OSKAR_LOCATION_CPU, 0, &err);
         oskar_fits_image_to_sky_model(0, "Cyg_A-P.model.FITS",
-                &sky_Cyg_A_4, spectral_index, 0.02, 0.0, 4);
-        oskar_sky_model_save("temp_test_Cyg_A_model_4.osm", &sky_Cyg_A_4, &err);
+                sky_Cyg_A_4, spectral_index, 0.02, 0.0, 4);
+        oskar_sky_save("temp_test_Cyg_A_model_4.osm", sky_Cyg_A_4, &err);
 
         // Read Cyg A model.
+        sky_Cyg_A_3 = oskar_sky_create(OSKAR_DOUBLE,
+                OSKAR_LOCATION_CPU, 0, &err);
         oskar_fits_image_to_sky_model(0, "Cyg_A-P.model.FITS",
-                &sky_Cyg_A_3, spectral_index, 0.02, 0.0, 3);
-        oskar_sky_model_save("temp_test_Cyg_A_model_3.osm", &sky_Cyg_A_3, &err);
+                sky_Cyg_A_3, spectral_index, 0.02, 0.0, 3);
+        oskar_sky_save("temp_test_Cyg_A_model_3.osm", sky_Cyg_A_3, &err);
 
         // Read Cas A model.
+        sky_Cas_A_2 = oskar_sky_create(OSKAR_DOUBLE,
+                OSKAR_LOCATION_CPU, 0, &err);
         oskar_fits_image_to_sky_model(0, "Cas_A-P.models.FITS",
-                &sky_Cas_A_2, spectral_index, 0.02, 0.0, 2);
-        oskar_sky_model_save("temp_test_Cas_A_model_2.osm", &sky_Cas_A_2, &err);
+                sky_Cas_A_2, spectral_index, 0.02, 0.0, 2);
+        oskar_sky_save("temp_test_Cas_A_model_2.osm", sky_Cas_A_2, &err);
+
+        // Free models.
+        oskar_sky_free(sky_Cyg_A_4, &err);
+        oskar_sky_free(sky_Cyg_A_3, &err);
+        oskar_sky_free(sky_Cas_A_2, &err);
     }
     {
-        oskar_SkyModel sky_Cyg_A, sky_Cas_A;
+        oskar_Sky *sky_Cyg_A, *sky_Cas_A;
 
         // Read Cyg A model.
+        sky_Cyg_A = oskar_sky_create(OSKAR_DOUBLE,
+                OSKAR_LOCATION_CPU, 0, &err);
         oskar_fits_image_to_sky_model(0, "Cyg_A-P.model.FITS",
-                &sky_Cyg_A, spectral_index, 0.02, 0.0, 1);
-        oskar_sky_model_save("temp_test_Cyg_A_model_1.osm", &sky_Cyg_A, &err);
+                sky_Cyg_A, spectral_index, 0.02, 0.0, 1);
+        oskar_sky_save("temp_test_Cyg_A_model_1.osm", sky_Cyg_A, &err);
 
         // Read Cas A model.
+        sky_Cas_A = oskar_sky_create(OSKAR_DOUBLE,
+                OSKAR_LOCATION_CPU, 0, &err);
         oskar_fits_image_to_sky_model(0, "Cas_A-P.models.FITS",
-                &sky_Cas_A, spectral_index, 0.02, 0.0, 1);
-        oskar_sky_model_save("temp_test_Cas_A_model_1.osm", &sky_Cas_A, &err);
+                sky_Cas_A, spectral_index, 0.02, 0.0, 1);
+        oskar_sky_save("temp_test_Cas_A_model_1.osm", sky_Cas_A, &err);
+
+        // Free models.
+        oskar_sky_free(sky_Cyg_A, &err);
+        oskar_sky_free(sky_Cas_A, &err);
     }
 
     // Free memory.

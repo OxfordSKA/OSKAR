@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,45 +29,44 @@
 
 #include "matlab/visibilities/lib/oskar_mex_vis_to_matlab_struct.h"
 
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_vector_types.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_mem_type_check.h"
-#include <utility/oskar_BinaryTag.h>
-#include <utility/oskar_mem_realloc.h>
-#include <utility/oskar_mem_binary_stream_read.h>
-#include <utility/oskar_binary_tag_index_query.h>
-#include <utility/oskar_binary_tag_index_create.h>
-#include <utility/oskar_binary_tag_index_free.h>
+#include <oskar_get_error_string.h>
+#include <oskar_BinaryTag.h>
+#include <oskar_mem_binary_stream_read.h>
+#include <oskar_binary_tag_index_query.h>
+#include <oskar_binary_tag_index_create.h>
+#include <oskar_binary_tag_index_free.h>
 
 #include <cstdlib>
 #include <cstring>
 
 #include <matrix.h>
 
-mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
+mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
         oskar_Mem* date, const char* filename)
 {
     mxArray* v_out = NULL;
+    int err = 0;
 
     if (v_in == NULL || date == NULL)
     {
         mexErrMsgTxt("ERROR: Invalid arguments.\n");
     }
 
-    int num_channels  = v_in->num_channels;
-    int num_times     = v_in->num_times;
-    int num_stations  = v_in->num_stations;
-    int num_baselines = v_in->num_baselines;
-    int num_pols      = oskar_mem_is_scalar(v_in->amplitude.type) ? 1 : 4;
+    size_t element_size = 0;
+    int num_channels  = oskar_vis_num_channels(v_in);
+    int num_times     = oskar_vis_num_times(v_in);
+    int num_stations  = oskar_vis_num_stations(v_in);
+    int num_baselines = oskar_vis_num_baselines(v_in);
+    int num_pols      = oskar_mem_is_scalar(
+            oskar_vis_amplitude_const(v_in)) ? 1 : 4;
 
     // Allocate memory returned to the MATLAB work-space.
     mwSize coord_dims[]   = { num_baselines, num_times};
     mwSize amp_dims[]     = {num_baselines, num_times, num_channels};
     mwSize station_dims[] = { num_stations };
     mwSize baseline_dims[] = { num_baselines };
-    mxClassID class_id    = (v_in->uu_metres.type == OSKAR_DOUBLE) ?
-            mxDOUBLE_CLASS : mxSINGLE_CLASS;
+    mxClassID class_id    = (oskar_mem_precision(oskar_vis_amplitude_const(v_in)) ==
+            OSKAR_DOUBLE) ? mxDOUBLE_CLASS : mxSINGLE_CLASS;
     mxArray* x_  = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
     mxArray* y_  = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
     mxArray* z_  = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
@@ -114,8 +113,11 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     }
 
     // Populate MATLAB arrays from the OSKAR visibilities structure.
+    const void* amp = oskar_mem_void_const(oskar_vis_amplitude_const(v_in));
     if (class_id == mxDOUBLE_CLASS)
     {
+        element_size = sizeof(double);
+
         double* xx_r = (double*)mxGetPr(xx_);
         double* xx_i = (double*)mxGetPi(xx_);
         double *xy_r = NULL, *xy_i = NULL;
@@ -135,31 +137,18 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
             U_r  = (double*)mxGetPr(U_);  U_i  = (double*)mxGetPi(U_);
             V_r  = (double*)mxGetPr(V_);  V_i  = (double*)mxGetPi(V_);
         }
-        size_t mem_size = num_times * num_baselines * sizeof(double);
-        memcpy(mxGetData(uu_), v_in->uu_metres.data, mem_size);
-        memcpy(mxGetData(vv_), v_in->vv_metres.data, mem_size);
-        memcpy(mxGetData(ww_), v_in->ww_metres.data, mem_size);
-
-        mem_size = num_stations * sizeof(double);
-        memcpy(mxGetData(x_), v_in->x_metres.data, mem_size);
-        memcpy(mxGetData(y_), v_in->y_metres.data, mem_size);
-        memcpy(mxGetData(z_), v_in->z_metres.data, mem_size);
-        memcpy(mxGetData(stationLon_), v_in->station_lon.data, mem_size);
-        memcpy(mxGetData(stationLat_), v_in->station_lat.data, mem_size);
-        memcpy(mxGetData(stationOritentationX_), v_in->station_orientation_x.data, mem_size);
-        memcpy(mxGetData(stationOritentationY_), v_in->station_orientation_y.data, mem_size);
 
         for (int i = 0; i < num_channels * num_times * num_baselines; ++i)
         {
 
             if (num_pols == 1)
             {
-                double2* amp_ = (double2*)v_in->amplitude.data;
+                const double2* amp_ = (const double2*) amp;
                 xx_r[i] = amp_[i].x; xx_i[i] = amp_[i].y;
             }
             else
             {
-                double4c* amp_ = ((double4c*)(v_in->amplitude.data));
+                const double4c* amp_ = (const double4c*) amp;
                 xx_r[i] = amp_[i].a.x; xx_i[i] = amp_[i].a.y;
                 xy_r[i] = amp_[i].b.x; xy_i[i] = amp_[i].b.y;
                 yx_r[i] = amp_[i].c.x; yx_i[i] = amp_[i].c.y;
@@ -180,8 +169,9 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
         }
 
         double* t_vis = (double*)mxGetData(time);
-        double interval = v_in->time_inc_seconds;
-        double start_time = v_in->time_start_mjd_utc * 86400.0  + interval / 2.0;
+        double interval = oskar_vis_time_inc_seconds(v_in);
+        double start_time = oskar_vis_time_start_mjd_utc(v_in) * 86400.0 +
+                interval / 2.0;
         for (int i = 0; i < num_times; ++i)
         {
             t_vis[i] = start_time + interval * i;
@@ -189,11 +179,14 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
         double* freq = (double*)mxGetData(frequency);
         for (int i = 0; i < num_channels; ++i)
         {
-            freq[i] = v_in->freq_start_hz + i * v_in->freq_inc_hz;
+            freq[i] = oskar_vis_freq_start_hz(v_in) +
+                    i * oskar_vis_freq_inc_hz(v_in);
         }
     }
     else /* (class_id == mxSINGLE_CLASS) */
     {
+        element_size = sizeof(float);
+
         float* xx_r = (float*)mxGetPr(xx_);
         float* xx_i = (float*)mxGetPi(xx_);
         float *xy_r = NULL, *xy_i = NULL;
@@ -215,31 +208,17 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
 
         }
 
-        size_t mem_size = num_times * num_baselines * sizeof(float);
-        memcpy(mxGetData(uu_), v_in->uu_metres.data, mem_size);
-        memcpy(mxGetData(vv_), v_in->vv_metres.data, mem_size);
-        memcpy(mxGetData(ww_), v_in->ww_metres.data, mem_size);
-
-        mem_size = num_stations * sizeof(float);
-        memcpy(mxGetData(x_), v_in->x_metres.data, mem_size);
-        memcpy(mxGetData(y_), v_in->y_metres.data, mem_size);
-        memcpy(mxGetData(z_), v_in->z_metres.data, mem_size);
-        memcpy(mxGetData(stationLon_), v_in->station_lon.data, mem_size);
-        memcpy(mxGetData(stationLat_), v_in->station_lat.data, mem_size);
-        memcpy(mxGetData(stationOritentationX_), v_in->station_orientation_x.data, mem_size);
-        memcpy(mxGetData(stationOritentationY_), v_in->station_orientation_y.data, mem_size);
-
         for (int i = 0; i < num_channels * num_times * num_baselines; ++i)
         {
 
             if (num_pols == 1)
             {
-                float2* amp_ = ((float2*)(v_in->amplitude.data));
+                const float2* amp_ = (const float2*) amp;
                 xx_r[i] = amp_[i].x; xx_i[i] = amp_[i].y;
             }
             else
             {
-                float4c* amp_ = ((float4c*)(v_in->amplitude.data));
+                const float4c* amp_ = (const float4c*) amp;
                 xx_r[i] = amp_[i].a.x; xx_i[i] = amp_[i].a.y;
                 xy_r[i] = amp_[i].b.x; xy_i[i] = amp_[i].b.y;
                 yx_r[i] = amp_[i].c.x; yx_i[i] = amp_[i].c.y;
@@ -259,8 +238,9 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
             }
         }
         float* t_vis = (float*)mxGetData(time);
-        float interval = v_in->time_inc_seconds;
-        float start_time = v_in->time_start_mjd_utc * 86400.0  + interval / 2.0;
+        float interval = oskar_vis_time_inc_seconds(v_in);
+        float start_time = oskar_vis_time_start_mjd_utc(v_in) * 86400.0 +
+                interval / 2.0;
         for (int i = 0; i < num_times; ++i)
         {
             t_vis[i] = start_time + interval * i;
@@ -268,10 +248,36 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
         float* freq = (float*)mxGetData(frequency);
         for (int i = 0; i < num_channels; ++i)
         {
-            freq[i] = v_in->freq_start_hz + i * v_in->freq_inc_hz;
+            freq[i] = oskar_vis_freq_start_hz(v_in) +
+                    i * oskar_vis_freq_inc_hz(v_in);
         }
     }
-    if (v_in->num_polarisations() == 4)
+
+    size_t mem_size = num_times * num_baselines * element_size;
+    memcpy(mxGetData(uu_), oskar_mem_void_const(
+            oskar_vis_baseline_uu_metres_const(v_in)), mem_size);
+    memcpy(mxGetData(vv_), oskar_mem_void_const(
+            oskar_vis_baseline_vv_metres_const(v_in)), mem_size);
+    memcpy(mxGetData(ww_), oskar_mem_void_const(
+            oskar_vis_baseline_ww_metres_const(v_in)), mem_size);
+
+    mem_size = num_stations * element_size;
+    memcpy(mxGetData(x_), oskar_mem_void_const(
+            oskar_vis_station_x_metres_const(v_in)), mem_size);
+    memcpy(mxGetData(y_), oskar_mem_void_const(
+            oskar_vis_station_y_metres_const(v_in)), mem_size);
+    memcpy(mxGetData(z_), oskar_mem_void_const(
+            oskar_vis_station_z_metres_const(v_in)), mem_size);
+    memcpy(mxGetData(stationLon_), oskar_mem_void_const(
+            oskar_vis_station_lon_deg_const(v_in)), mem_size);
+    memcpy(mxGetData(stationLat_), oskar_mem_void_const(
+            oskar_vis_station_lat_deg_const(v_in)), mem_size);
+    memcpy(mxGetData(stationOritentationX_), oskar_mem_void_const(
+            oskar_vis_station_orientation_x_deg_const(v_in)), mem_size);
+    memcpy(mxGetData(stationOritentationY_), oskar_mem_void_const(
+            oskar_vis_station_orientation_y_deg_const(v_in)), mem_size);
+
+    if (num_pols == 4)
     {
         const char* fields[] = {
                 "filename",
@@ -384,10 +390,10 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
             oskar_Mem temp(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
             oskar_mem_binary_stream_read(&temp, stream, &index,
                     OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
-            oskar_mem_realloc(&temp, temp.num_elements + 1, &status);
+            oskar_mem_realloc(&temp, (int)oskar_mem_length(&temp) + 1, &status);
             if (status)
                 mexErrMsgTxt("ERROR: Failed reading settings from visibility file.\n");
-            ((char*)temp.data)[temp.num_elements - 1] = 0;
+            ((char*)temp.data)[(int)oskar_mem_length(&temp) - 1] = 0;
             mxSetField(v_out, 0, "settings", mxCreateString((char*)temp.data));
         }
         // Extract the log
@@ -398,10 +404,10 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
             oskar_Mem temp(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
             oskar_mem_binary_stream_read(&temp, stream, &index,
                     OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
-            oskar_mem_realloc(&temp, temp.num_elements + 1, &status);
+            oskar_mem_realloc(&temp, (int)oskar_mem_length(&temp) + 1, &status);
             if (status)
                 mexErrMsgTxt("ERROR: Failed reading log from visibility file.\n");
-            ((char*)temp.data)[temp.num_elements - 1] = 0;
+            ((char*)temp.data)[(int)oskar_mem_length(&temp) - 1] = 0;
             mxSetField(v_out, 0, "log", mxCreateString((char*)temp.data));
         }
         fclose(stream);
@@ -412,10 +418,10 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     if (filename != NULL)
         mxSetField(v_out, 0, "filename", mxCreateString(filename));
     mxSetField(v_out, 0, "date", mxCreateString((char*)date->data));
-    mxSetField(v_out, 0, "settings_path",
-            mxCreateString((char*)v_in->settings_path.data));
-    mxSetField(v_out, 0, "telescope",
-            mxCreateString((char*)v_in->telescope_path.data));
+    mxSetField(v_out, 0, "settings_path", mxCreateString(
+            oskar_mem_char_const(oskar_vis_settings_path_const(v_in))));
+    mxSetField(v_out, 0, "telescope", mxCreateString(
+            oskar_mem_char_const(oskar_vis_telescope_path_const(v_in))));
     mxSetField(v_out, 0, "num_channels",
             mxCreateDoubleScalar((double)num_channels));
     mxSetField(v_out, 0, "num_times",
@@ -425,23 +431,25 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     mxSetField(v_out, 0, "num_baselines",
             mxCreateDoubleScalar((double)num_baselines));
     mxSetField(v_out, 0, "freq_start_hz",
-            mxCreateDoubleScalar(v_in->freq_start_hz));
+            mxCreateDoubleScalar(oskar_vis_freq_start_hz(v_in)));
     mxSetField(v_out, 0, "freq_inc_hz",
-            mxCreateDoubleScalar(v_in->freq_inc_hz));
+            mxCreateDoubleScalar(oskar_vis_freq_inc_hz(v_in)));
     mxSetField(v_out, 0, "channel_bandwidth_hz",
-            mxCreateDoubleScalar(v_in->channel_bandwidth_hz));
+            mxCreateDoubleScalar(oskar_vis_channel_bandwidth_hz(v_in)));
     mxSetField(v_out, 0, "time_start_mjd_utc",
-            mxCreateDoubleScalar(v_in->time_start_mjd_utc));
+            mxCreateDoubleScalar(oskar_vis_time_start_mjd_utc(v_in)));
     mxSetField(v_out, 0, "time_inc_seconds",
-            mxCreateDoubleScalar(v_in->time_inc_seconds));
+            mxCreateDoubleScalar(oskar_vis_time_inc_seconds(v_in)));
     mxSetField(v_out, 0, "phase_centre_ra_deg",
-            mxCreateDoubleScalar(v_in->phase_centre_ra_deg));
+            mxCreateDoubleScalar(oskar_vis_phase_centre_ra_deg(v_in)));
     mxSetField(v_out, 0, "phase_centre_dec_deg",
-            mxCreateDoubleScalar(v_in->phase_centre_dec_deg));
+            mxCreateDoubleScalar(oskar_vis_phase_centre_dec_deg(v_in)));
     mxSetField(v_out, 0, "frequency", frequency);
     mxSetField(v_out, 0, "time", time);
-    mxSetField(v_out, 0, "telescope_lon", mxCreateDoubleScalar(v_in->telescope_lon_deg));
-    mxSetField(v_out, 0, "telescope_lat", mxCreateDoubleScalar(v_in->telescope_lat_deg));
+    mxSetField(v_out, 0, "telescope_lon",
+            mxCreateDoubleScalar(oskar_vis_telescope_lon_deg(v_in)));
+    mxSetField(v_out, 0, "telescope_lat",
+            mxCreateDoubleScalar(oskar_vis_telescope_lat_deg(v_in)));
     mxSetField(v_out, 0, "coord_units", mxCreateString("metres"));
     mxSetField(v_out, 0, "station_x", x_);
     mxSetField(v_out, 0, "station_y", y_);

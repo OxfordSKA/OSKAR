@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_element_size.h"
-#include "utility/oskar_mem_insert.h"
-
 #ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
 #endif
+
+#include <private_mem.h>
+#include <oskar_mem.h>
 
 #include <string.h>
 

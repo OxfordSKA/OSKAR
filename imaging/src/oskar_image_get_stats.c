@@ -52,7 +52,7 @@ void oskar_image_get_stats(oskar_ImageStats* stats, const oskar_Image* image,
     if (*status) return;
 
     /* Check the image is in CPU memory. */
-    if (image->data.location != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(&image->data) != OSKAR_LOCATION_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -82,7 +82,7 @@ void oskar_image_get_stats(oskar_ImageStats* stats, const oskar_Image* image,
     stats->var = 0.0;
     stats->std = 0.0;
 
-    if (image->data.type == OSKAR_DOUBLE)
+    if (oskar_mem_type(&image->data) == OSKAR_DOUBLE)
     {
         int i = 0;
         double sum = 0.0, sum_squared = 0.0;
@@ -99,7 +99,7 @@ void oskar_image_get_stats(oskar_ImageStats* stats, const oskar_Image* image,
         stats->var = sum_squared/num_pixels - stats->mean*stats->mean;
         stats->std = sqrt(stats->var);
     }
-    else if (image->data.type == OSKAR_SINGLE)
+    else if (oskar_mem_type(&image->data) == OSKAR_SINGLE)
     {
         int i = 0;
         float* image_ = (float*)image->data.data + offset;

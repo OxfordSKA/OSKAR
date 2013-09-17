@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_dierckx_surfit.h"
-#include "math/oskar_spline_data_surfit.h"
-#include "math/oskar_spline_data_init.h"
-#include "utility/oskar_log_message.h"
-#include "utility/oskar_log_section.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_element_size.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_realloc.h"
+#include <oskar_dierckx_surfit.h>
+#include <oskar_spline_data_surfit.h>
+#include <oskar_spline_data_init.h>
+#include <oskar_log.h>
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>
@@ -48,7 +43,7 @@ static double oskar_mem_max_abs(const oskar_Mem* data, int n)
 {
     int i;
     double r = -DBL_MAX;
-    if (data->type == OSKAR_SINGLE)
+    if (oskar_mem_type(data) == OSKAR_SINGLE)
     {
         const float *p;
         p = (const float*)data->data;
@@ -57,7 +52,7 @@ static double oskar_mem_max_abs(const oskar_Mem* data, int n)
             if (fabsf(p[i]) > r) r = fabsf(p[i]);
         }
     }
-    else if (data->type == OSKAR_DOUBLE)
+    else if (oskar_mem_type(data) == OSKAR_DOUBLE)
     {
         const double *p;
         p = (const double*)data->data;
@@ -74,7 +69,7 @@ static double oskar_mem_max(const oskar_Mem* data, int n)
 {
     int i;
     double r = -DBL_MAX;
-    if (data->type == OSKAR_SINGLE)
+    if (oskar_mem_type(data) == OSKAR_SINGLE)
     {
         const float *p;
         p = (const float*)data->data;
@@ -83,7 +78,7 @@ static double oskar_mem_max(const oskar_Mem* data, int n)
             if (p[i] > r) r = p[i];
         }
     }
-    else if (data->type == OSKAR_DOUBLE)
+    else if (oskar_mem_type(data) == OSKAR_DOUBLE)
     {
         const double *p;
         p = (const double*)data->data;
@@ -100,7 +95,7 @@ static double oskar_mem_min(const oskar_Mem* data, int n)
 {
     int i;
     double r = DBL_MAX;
-    if (data->type == OSKAR_SINGLE)
+    if (oskar_mem_type(data) == OSKAR_SINGLE)
     {
         const float *p;
         p = (const float*)data->data;
@@ -109,7 +104,7 @@ static double oskar_mem_min(const oskar_Mem* data, int n)
             if (p[i] < r) r = p[i];
         }
     }
-    else if (data->type == OSKAR_DOUBLE)
+    else if (oskar_mem_type(data) == OSKAR_DOUBLE)
     {
         const double *p;
         p = (const double*)data->data;
@@ -153,16 +148,16 @@ void oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
         *status = OSKAR_ERR_SETTINGS;
 
     /* Get the data type. */
-    type = z->type;
+    type = oskar_mem_type(z);
     element_size = oskar_mem_element_size(type);
     if ((type != OSKAR_SINGLE) && (type != OSKAR_DOUBLE))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that input data is on the CPU. */
-    if (x->location != OSKAR_LOCATION_CPU ||
-            y->location != OSKAR_LOCATION_CPU ||
-            z->location != OSKAR_LOCATION_CPU ||
-            w->location != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(x) != OSKAR_LOCATION_CPU ||
+            oskar_mem_location(y) != OSKAR_LOCATION_CPU ||
+            oskar_mem_location(z) != OSKAR_LOCATION_CPU ||
+            oskar_mem_location(w) != OSKAR_LOCATION_CPU)
         *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Check if safe to proceed. */

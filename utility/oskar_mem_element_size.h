@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_mem_element_size.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus

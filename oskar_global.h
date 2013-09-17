@@ -47,7 +47,7 @@
  * This macro expands to a string that specifies the OSKAR version number
  * (for example, "2.1.3").
  */
-#define OSKAR_VERSION_STR "2.2.2-trunk3"
+#define OSKAR_VERSION_STR "2.2.2-trunk4"
 
 /**
  * @brief
@@ -211,6 +211,9 @@ enum {
     /* Indicates a badly formed pointing file. */
     OSKAR_ERR_BAD_POINTING_FILE        = -900,
 
+    /* Indicates a badly formed global sky model file. */
+    OSKAR_ERR_BAD_GSM_FILE             = -910,
+
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN                  = -1000,
     OSKAR_FAIL                         = -1001
@@ -355,7 +358,7 @@ enum {
  * should be inlined. In CUDA code, this is "__device__ __forceinline__", in
  * C99 and C++ code, this is "inline", otherwise this is "static".
  */
-#ifdef __CUDACC__
+#ifdef __CUDA_ARCH__
     #define OSKAR_INLINE __device__ __forceinline__
 #elif __STDC_VERSION__ >= 199901L || defined(__cplusplus)
     #define OSKAR_INLINE inline
@@ -381,13 +384,10 @@ enum {
 #endif
 
 
-/* Function to set the status to invalid argument if not already set */
-static void oskar_set_invalid_argument(int* status)
+/* Function to set the status to invalid argument if not already set. */
+OSKAR_INLINE void oskar_set_invalid_argument(int* status)
 {
-    if (status)
-    {
-        if (!(*status)) *status = OSKAR_ERR_INVALID_ARGUMENT;
-    }
+    if (status && !(*status)) *status = OSKAR_ERR_INVALID_ARGUMENT;
 }
 
 

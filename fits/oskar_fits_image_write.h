@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,9 @@
  * @file oskar_fits_image_write.h
  */
 
-#include "oskar_global.h"
-#include "imaging/oskar_Image.h"
-#include "utility/oskar_Log.h"
+#include <oskar_global.h>
+#include <oskar_Image.h>
+#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,11 +76,14 @@ extern "C" {
  *
  * The fastest varying dimension is along the RA axis.
  *
- * @return An error code.
+ * @param[in] image Pointer to image to write.
+ * @param[in] log Pointer to log structure.
+ * @param[in] filename Filename of output image.
+ * @param[in,out] status Status return code.
  */
 OSKAR_FITS_EXPORT
-int oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
-        const char* filename);
+void oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
+        const char* filename, int* status);
 
 #ifdef __cplusplus
 }

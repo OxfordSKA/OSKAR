@@ -34,37 +34,21 @@
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_set_up_visibilities.h"
 #include "apps/lib/oskar_sim_interferometer.h"
-#include "apps/lib/oskar_visibilities_write_ms.h"
-#include "interferometry/oskar_evaluate_uvw_baseline.h"
-#include "interferometry/oskar_interferometer.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SettingsTelescope.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_visibilities_get_channel_amps.h"
-#include "interferometry/oskar_visibilities_write.h"
-#include "interferometry/oskar_visibilities_add_system_noise.h"
-#include "sky/oskar_SkyModel.h"
-#include "sky/oskar_SettingsSky.h"
-#include "sky/oskar_sky_model_free.h"
-#include "utility/oskar_log_error.h"
-#include "utility/oskar_log_message.h"
-#include "utility/oskar_log_section.h"
-#include "utility/oskar_log_settings.h"
-#include "utility/oskar_log_warning.h"
-#include "utility/oskar_Log.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_clear_contents.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_add.h"
-#include "utility/oskar_Settings.h"
-#include "utility/oskar_settings_free.h"
-#include "utility/oskar_timer_functions.h"
-#include "utility/oskar_timers_functions.h"
-#include "imaging/oskar_make_image.h"
-#include "imaging/oskar_image_write.h"
+#include "apps/lib/oskar_vis_write_ms.h"
+
+#include <oskar_evaluate_uvw_baseline.h>
+#include <oskar_interferometer.h>
+#include <oskar_log.h>
+#include <oskar_sky.h>
+#include <oskar_settings_free.h>
+#include <oskar_telescope.h>
+#include <oskar_timers.h>
+#include <oskar_vis.h>
+#include <oskar_make_image.h>
+#include <oskar_image_write.h>
+#include <oskar_image_free.h>
 #ifndef OSKAR_NO_FITS
-#include "fits/oskar_fits_image_write.h"
+#include <fits/oskar_fits_image_write.h>
 #endif
 
 #include <cstdlib>
@@ -73,10 +57,17 @@
 
 using std::vector;
 
+static void make_image(const oskar_Vis* vis,
+        const oskar_SettingsImage* settings, oskar_Log* log, int* status);
+
+static void record_timing(int num_devices, int* cuda_device_ids,
+        oskar_Timers* timers, oskar_Log* log);
+
 extern "C"
 int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 {
     int error;
+    const char* fname;
 
     // Load the settings file.
     oskar_Settings settings;
@@ -86,7 +77,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
     // Log the relevant settings.
-    log->keep_file = settings.sim.keep_log_file;
+    oskar_log_set_keep_file(log, settings.sim.keep_log_file);
     oskar_log_settings_simulator(log, &settings);
     oskar_log_settings_sky(log, &settings);
     oskar_log_settings_observation(log, &settings);
@@ -107,47 +98,50 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         return OSKAR_ERR_SETTINGS;
     }
 
-    // Find out how many GPUs we have.
-    int device_count = 0;
-    int num_devices = settings.sim.num_cuda_devices;
+    // Find out how many GPUs we have, initialise and create timers for each.
+    int num_devices, device_count = 0;
+    num_devices = settings.sim.num_cuda_devices;
     error = (int)cudaGetDeviceCount(&device_count);
     if (error) return error;
     if (device_count < num_devices) return OSKAR_ERR_CUDA_DEVICES;
+    vector<oskar_Timers> timers(num_devices);
+    for (int i = 0; i < num_devices; ++i)
+    {
+        error = (int)cudaSetDevice(settings.sim.cuda_device_ids[i]);
+        if (error) return error;
+        cudaDeviceSynchronize();
+        oskar_timers_create(&timers[i], OSKAR_TIMER_CUDA);
+    }
 
     // Set up the telescope model.
-    oskar_TelescopeModel tel;
-    oskar_set_up_telescope(&tel, log, &settings, &error);
+    oskar_Telescope* tel = oskar_set_up_telescope(log, &settings, &error);
     if (error) return error;
 
     // Set up the sky model array.
-    oskar_SkyModel* sky_chunks = NULL;
     int num_sky_chunks = 0;
-    error = oskar_set_up_sky(&num_sky_chunks, &sky_chunks, log, &settings);
+    oskar_Sky** sky_chunks = oskar_set_up_sky(&num_sky_chunks, log,
+            &settings, &error);
+    if (error) return error;
 
     // Create the global visibility structure on the CPU.
     int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
-    oskar_Visibilities vis_global;
-    oskar_set_up_visibilities(&vis_global, &settings, &tel, complex_matrix,
+    oskar_Vis* vis = oskar_set_up_visibilities(&settings, tel, complex_matrix,
             &error);
+
+    // Must check for errors to ensure there are no null pointers.
+    if (error) return error;
 
     // Create temporary and accumulation buffers to hold visibility amplitudes
     // (one per thread/GPU).
-    // These are held in standard vectors so that the memory will be released
-    // automatically if the function returns early, or is terminated.
     vector<oskar_Mem> vis_acc(num_devices), vis_temp(num_devices);
-    vector<oskar_Timers> timers(num_devices);
-    int time_baseline = tel.num_baselines() * settings.obs.num_time_steps;
+    int time_baseline = oskar_telescope_num_baselines(tel) *
+            settings.obs.num_time_steps;
     for (int i = 0; i < num_devices; ++i)
     {
         oskar_mem_init(&vis_acc[i], complex_matrix, OSKAR_LOCATION_CPU,
                 time_baseline, true, &error);
         oskar_mem_init(&vis_temp[i], complex_matrix, OSKAR_LOCATION_CPU,
                 time_baseline, true, &error);
-        if (error) return error;
-        error = cudaSetDevice(settings.sim.cuda_device_ids[i]);
-        if (error) return error;
-        cudaDeviceSynchronize();
-        oskar_timers_create(&timers[i], OSKAR_TIMER_CUDA);
     }
 
     // Set the number of host threads to use (one per GPU).
@@ -156,7 +150,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Run the simulation.
     cudaSetDevice(settings.sim.cuda_device_ids[0]);
     oskar_log_section(log, "Starting simulation...");
-    oskar_timer_start(&timers[0].tmr);
+    oskar_timer_start(timers[0].tmr);
     for (int c = 0; c < settings.obs.num_channels; ++c)
     {
         double frequency;
@@ -164,7 +158,6 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 
         frequency = settings.obs.start_frequency_hz +
                 c * settings.obs.frequency_inc_hz;
-        tel.wavelength_metres = 299792458.0 / frequency;
 
         oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
                 c + 1, settings.obs.num_channels, frequency / 1e6);
@@ -181,27 +174,27 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 
             // Run simulation for this chunk.
             oskar_interferometer(&(vis_temp[thread_id]), log,
-                    &timers[thread_id], &(sky_chunks[i]), &tel, &settings,
+                    &timers[thread_id], sky_chunks[i], tel, &settings,
                     frequency, i, num_sky_chunks, &error);
 
-            oskar_timer_resume(&timers[thread_id].tmr_init_copy);
+            oskar_timer_resume(timers[thread_id].tmr_init_copy);
             oskar_mem_add(&(vis_acc[thread_id]), &(vis_acc[thread_id]),
                     &(vis_temp[thread_id]), &error);
-            oskar_timer_pause(&timers[thread_id].tmr_init_copy);
+            oskar_timer_pause(timers[thread_id].tmr_init_copy);
         }
 #pragma omp barrier
 
         // Accumulate each chunk into global vis structure for this channel.
-        oskar_visibilities_get_channel_amps(&vis_amp, &vis_global, c, &error);
+        oskar_vis_get_channel_amps(&vis_amp, vis, c, &error);
         for (int i = 0; i < num_devices; ++i)
         {
             cudaSetDevice(settings.sim.cuda_device_ids[i]);
-            oskar_timer_resume(&timers[i].tmr_init_copy);
+            oskar_timer_resume(timers[i].tmr_init_copy);
             oskar_mem_add(&vis_amp, &vis_amp, &vis_acc[i], &error);
 
             // Clear thread accumulation buffer.
             oskar_mem_clear_contents(&vis_acc[i], &error);
-            oskar_timer_pause(&timers[i].tmr_init_copy);
+            oskar_timer_pause(timers[i].tmr_init_copy);
         }
     }
 
@@ -209,30 +202,134 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     if (settings.interferometer.noise.enable)
     {
         int seed = settings.interferometer.noise.seed;
-        oskar_visibilities_add_system_noise(&vis_global, &tel, seed, &error);
+        oskar_vis_add_system_noise(vis, tel, seed, &error);
     }
 
-    // Check for errors.
-    if (error) return error;
+    // Free unneeded memory.
+    for (int i = 0; i < num_devices; ++i)
+    {
+        oskar_mem_free(&vis_acc[i], &error);
+        oskar_mem_free(&vis_temp[i], &error);
+    }
+    for (int i = 0; i < num_sky_chunks; ++i)
+    {
+        oskar_sky_free(sky_chunks[i], &error);
+    }
+    free(sky_chunks);
+    oskar_telescope_free(tel, &error);
 
-    // Record time taken.
-    cudaSetDevice(settings.sim.cuda_device_ids[0]);
-    double elapsed = oskar_timer_elapsed(&timers[0].tmr);
-    oskar_log_section(log, "Simulation completed in %.3f sec.", elapsed);
+    // Record times.
+    record_timing(num_devices, settings.sim.cuda_device_ids, &timers[0], log);
 
-    // Record percentage times.
-    double t_init = 0.0, t_clip = 0.0, t_R = 0.0, t_E = 0.0, t_K = 0.0;
-    double t_join = 0.0, t_correlate = 0.0;
+    // Write visibilities to disk.
+    fname = settings.interferometer.oskar_vis_filename;
+    if (fname && !error)
+    {
+        oskar_log_message(log, 0, "Writing OSKAR visibility file: '%s'", fname);
+        oskar_vis_write(vis, log, fname, &error);
+    }
+
+#ifndef OSKAR_NO_MS
+    // Write Measurement Set.
+    fname = settings.interferometer.ms_filename;
+    if (fname && !error)
+    {
+        oskar_log_message(log, 0, "Writing Measurement Set: '%s'", fname);
+        oskar_vis_write_ms(vis, fname, true, &error);
+    }
+#endif
+
+    // Make image(s) of the visibilities using first device, if required.
+    if (settings.interferometer.image_interferometer_output)
+    {
+        cudaSetDevice(settings.sim.cuda_device_ids[0]);
+        make_image(vis, &settings.image, log, &error);
+    }
+
+    // Free visibility data.
+    oskar_vis_free(vis, &error);
+
+    // Reset all CUDA devices and destroy timers.
     for (int i = 0; i < num_devices; ++i)
     {
         cudaSetDevice(settings.sim.cuda_device_ids[i]);
-        t_init += oskar_timer_elapsed(&timers[i].tmr_init_copy);
-        t_clip += oskar_timer_elapsed(&timers[i].tmr_clip);
-        t_R += oskar_timer_elapsed(&timers[i].tmr_R);
-        t_E += oskar_timer_elapsed(&timers[i].tmr_E);
-        t_K += oskar_timer_elapsed(&timers[i].tmr_K);
-        t_join += oskar_timer_elapsed(&timers[i].tmr_join);
-        t_correlate += oskar_timer_elapsed(&timers[i].tmr_correlate);
+        oskar_timers_free(&timers[i]);
+        cudaDeviceReset();
+    }
+
+    if (!error)
+        oskar_log_section(log, "Run complete.");
+    return error;
+}
+
+
+static void make_image(const oskar_Vis* vis,
+        const oskar_SettingsImage* settings, oskar_Log* log, int* status)
+{
+    oskar_Timer* tmr;
+    oskar_Image image;
+    const char* filename;
+
+    if (*status) return;
+
+    // Check filenames.
+    if (!settings->oskar_image && !settings->fits_image)
+    {
+        oskar_log_warning(log, "No image output name specified "
+                "(skipping OSKAR imager)");
+        return;
+    }
+
+    // Make image(s).
+    tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
+    oskar_log_section(log, "Starting OSKAR imager...");
+    oskar_timer_start(tmr);
+    *status = oskar_make_image(&image, log, vis, settings);
+    oskar_log_section(log, "Imaging completed in %.3f sec.",
+            oskar_timer_elapsed(tmr));
+    oskar_timer_free(tmr);
+
+    // Write image file(s).
+#ifndef OSKAR_NO_FITS
+    filename = settings->fits_image;
+    if (filename)
+    {
+        oskar_log_message(log, 0, "Writing FITS image file: '%s'", filename);
+        oskar_fits_image_write(&image, log, filename, status);
+    }
+#endif
+    filename = settings->oskar_image;
+    if (filename)
+    {
+        oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
+        oskar_image_write(&image, log, filename, 0, status);
+    }
+    oskar_image_free(&image, status);
+}
+
+
+static void record_timing(int num_devices, int* cuda_device_ids,
+        oskar_Timers* timers, oskar_Log* log)
+{
+    double elapsed, t_init = 0.0, t_clip = 0.0, t_R = 0.0, t_E = 0.0, t_K = 0.0;
+    double t_join = 0.0, t_correlate = 0.0;
+
+    // Record time taken.
+    cudaSetDevice(cuda_device_ids[0]);
+    elapsed = oskar_timer_elapsed(timers[0].tmr);
+    oskar_log_section(log, "Simulation completed in %.3f sec.", elapsed);
+
+    // Record percentage times.
+    for (int i = 0; i < num_devices; ++i)
+    {
+        cudaSetDevice(cuda_device_ids[i]);
+        t_init += oskar_timer_elapsed(timers[i].tmr_init_copy);
+        t_clip += oskar_timer_elapsed(timers[i].tmr_clip);
+        t_R += oskar_timer_elapsed(timers[i].tmr_R);
+        t_E += oskar_timer_elapsed(timers[i].tmr_E);
+        t_K += oskar_timer_elapsed(timers[i].tmr_K);
+        t_join += oskar_timer_elapsed(timers[i].tmr_join);
+        t_correlate += oskar_timer_elapsed(timers[i].tmr_correlate);
     }
     t_init *= (100.0 / (num_devices * elapsed));
     t_clip *= (100.0 / (num_devices * elapsed));
@@ -249,91 +346,4 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     oskar_log_message(log, -1, "%4.1f%% Jones join.", t_join);
     oskar_log_message(log, -1, "%4.1f%% Jones correlate.", t_correlate);
     oskar_log_message(log, -1, "");
-
-    // Compute baseline u,v,w coordinates for simulation.
-    {
-        oskar_Mem work_uvw;
-        oskar_mem_init(&work_uvw, type, OSKAR_LOCATION_CPU,
-                3 * tel.num_stations, 1, &error);
-        oskar_evaluate_uvw_baseline(&vis_global.uu_metres,
-                &vis_global.vv_metres, &vis_global.ww_metres,
-                tel.num_stations, &tel.station_x, &tel.station_y,
-                &tel.station_z, tel.ra0_rad, tel.dec0_rad,
-                settings.obs.num_time_steps, settings.obs.start_mjd_utc,
-                settings.obs.dt_dump_days, &work_uvw, &error);
-        oskar_mem_free(&work_uvw, &error);
-    }
-
-    // Write global visibilities to disk.
-    if (settings.interferometer.oskar_vis_filename)
-    {
-        const char* fname = settings.interferometer.oskar_vis_filename;
-        oskar_log_message(log, 0, "Writing OSKAR visibility file: '%s'", fname);
-        oskar_visibilities_write(&vis_global, log, fname, &error);
-    }
-
-#ifndef OSKAR_NO_MS
-    // Write Measurement Set.
-    if (settings.interferometer.ms_filename)
-    {
-        const char* fname = settings.interferometer.ms_filename;
-        oskar_log_message(log, 0, "Writing Measurement Set: '%s'", fname);
-        oskar_visibilities_write_ms(&vis_global, fname, true, &error);
-    }
-#endif
-
-    // Check for errors.
-    if (error) return error;
-
-    // Make image(s) of the simulated visibilities if required.
-    if (settings.interferometer.image_interferometer_output)
-    {
-        if (settings.image.oskar_image || settings.image.fits_image)
-        {
-            oskar_Image image;
-            oskar_log_section(log, "Starting OSKAR imager...");
-            cudaSetDevice(settings.sim.cuda_device_ids[0]);
-            oskar_timer_start(&timers[0].tmr);
-            error = oskar_make_image(&image, log, &vis_global, &settings.image);
-            oskar_log_section(log, "Imaging completed in %.3f sec.",
-                    oskar_timer_elapsed(&timers[0].tmr));
-            if (error) return error;
-            if (settings.image.oskar_image)
-            {
-                oskar_image_write(&image, log, settings.image.oskar_image, 0,
-                        &error);
-                if (error) return error;
-            }
-#ifndef OSKAR_NO_FITS
-            if (settings.image.fits_image)
-            {
-                error = oskar_fits_image_write(&image, log, settings.image.fits_image);
-                if (error) return error;
-            }
-#endif
-        }
-        else
-        {
-            oskar_log_warning(log, "No image output name specified "
-                    "(skipping OSKAR imager)");
-        }
-    }
-
-    // Reset all CUDA devices.
-    for (int i = 0; i < num_devices; ++i)
-    {
-        cudaSetDevice(settings.sim.cuda_device_ids[i]);
-        oskar_timers_destroy(&timers[i]);
-        cudaDeviceReset();
-    }
-
-    // Free sky chunks.
-    for (int i = 0; i < num_sky_chunks; ++i)
-    {
-        oskar_sky_model_free(&sky_chunks[i], &error);
-    }
-    free(sky_chunks);
-
-    oskar_log_section(log, "Run complete.");
-    return OSKAR_SUCCESS;
 }

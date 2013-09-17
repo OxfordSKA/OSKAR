@@ -27,10 +27,7 @@
  */
 
 #include <mex.h>
-#include <sky/oskar_SkyModel.h>
-#include <sky/oskar_sky_model_free.h>
-#include <sky/oskar_sky_model_init.h>
-#include <sky/oskar_sky_model_save.h>
+#include <oskar_sky.h>
 #include <utility/oskar_get_error_string.h>
 
 #include "matlab/common/oskar_matlab_common.h"
@@ -50,21 +47,19 @@ void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
                 "sky model structure.");
     }
 
-    // Extract arguments from MATLAB maxArray objects.
+    // Extract arguments from MATLAB mxArray objects.
     const char* filename = mxArrayToString(in[0]);
-    oskar_SkyModel sky;
-    oskar_mex_sky_from_matlab_struct(&sky, in[1]);
+    oskar_Sky* sky = oskar_mex_sky_from_matlab_struct(in[1]);
 
-
-    // Load the OSKAR sky model structure from the specified file.
-    oskar_sky_model_save(filename, &sky, &status);
+    // Save the OSKAR sky model structure to the specified file.
+    oskar_sky_save(filename, sky, &status);
     if (status)
     {
         oskar_matlab_error("Error saving OSKAR sky model file: '%s' (%s)",
                 filename, oskar_get_error_string(status));
     }
 
-    oskar_sky_model_free(&sky, &status);
+    oskar_sky_free(sky, &status);
     if (status)
     {
         oskar_matlab_error("Saving sky model failed with code %i: %s",

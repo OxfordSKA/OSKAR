@@ -26,22 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_station_beam_aperture_array.h"
+#include <oskar_evaluate_station_beam_aperture_array.h>
 
-#include "station/oskar_evaluate_beam_horizontal_lmn.h"
-#include "station/oskar_evaluate_array_pattern.h"
-#include "station/oskar_evaluate_array_pattern_hierarchical.h"
-#include "station/oskar_evaluate_array_pattern_dipoles.h"
-#include "station/oskar_evaluate_element_weights.h"
-#include "station/oskar_element_model_evaluate.h"
-#include "station/oskar_blank_below_horizon.h"
+#include <oskar_evaluate_beam_horizontal_lmn.h>
+#include <oskar_evaluate_array_pattern.h>
+#include <oskar_evaluate_array_pattern_hierarchical.h>
+#include <oskar_evaluate_array_pattern_dipoles.h>
+#include <oskar_evaluate_element_weights.h>
+#include <oskar_element_model_evaluate.h>
+#include <oskar_blank_below_horizon.h>
 
-#include "utility/oskar_mem_element_multiply.h"
-#include "utility/oskar_mem_get_pointer.h"
-#include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_mem_scale_real.h"
-#include "utility/oskar_mem_set_value_real.h"
-#include "utility/oskar_mem_type_check.h"
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,22 +46,22 @@ extern "C" {
 
 /* Private function, used for recursive calls. */
 static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
-        const oskar_StationModel* station, int num_points, const oskar_Mem* x,
+        const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, double gast,
-        oskar_WorkStationBeam* work, oskar_CurandState* curand_states,
+        oskar_WorkStationBeam* work, oskar_RandomState* random_states,
         int depth, int* status);
 
 
 void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
-        const oskar_StationModel* station, int num_points, const oskar_Mem* x,
+        const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, double gast,
-        oskar_WorkStationBeam* work, oskar_CurandState* curand_states,
+        oskar_WorkStationBeam* work, oskar_RandomState* random_states,
         int* status)
 {
     int start;
 
     /* Check all inputs. */
-    if (!beam || !station || !x || !y || !z || !work || !curand_states ||
+    if (!beam || !station || !x || !y || !z || !work || !random_states ||
             !status)
     {
         oskar_set_invalid_argument(status);
@@ -78,10 +73,10 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
 
     /* Evaluate beam immediately, without chunking, if there are no
      * child stations. */
-    if (!station->child)
+    if (!oskar_station_has_child(station))
     {
         oskar_evaluate_station_beam_aperture_array_private(beam, station,
-                num_points, x, y, z, gast, work, curand_states, 0, status);
+                num_points, x, y, z, gast, work, random_states, 0, status);
     }
     else
     {
@@ -103,20 +98,23 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
 
             /* Start recursive call at depth 0. */
             oskar_evaluate_station_beam_aperture_array_private(&c_beam, station,
-                    chunk_size, &c_x, &c_y, &c_z, gast, work, curand_states, 0,
+                    chunk_size, &c_x, &c_y, &c_z, gast, work, random_states, 0,
                     status);
         }
     }
 }
 
 static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
-        const oskar_StationModel* station, int num_points, const oskar_Mem* x,
+        const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, double gast,
-        oskar_WorkStationBeam* work, oskar_CurandState* curand_states,
+        oskar_WorkStationBeam* work, oskar_RandomState* random_states,
         int depth, int* status)
 {
     double beam_x, beam_y, beam_z;
     oskar_Mem *weights, *weights_error;
+    int num_elements;
+
+    num_elements = oskar_station_num_elements(station);
     weights = &work->weights;
     weights_error = &work->weights_error;
 
@@ -124,7 +122,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
     if (*status) return;
 
     /* Check the coordinate units. */
-    if (station->coord_units != OSKAR_RADIANS)
+    if (oskar_station_element_coord_units(station) != OSKAR_RADIANS)
     {
         *status = OSKAR_ERR_BAD_UNITS;
         return;
@@ -142,43 +140,43 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             gast, status);
 
     /* Check if there are no child stations. */
-    if (!station->child)
+    if (!oskar_station_has_child(station))
     {
         /* Common element model for all detectors in the station. */
-        if (station->single_element_model)
+        if (oskar_station_single_element_model(station))
         {
             /* Array pattern and element pattern are separable. */
             oskar_Mem *array = 0, *element = 0;
 
             /* Evaluate array pattern if required. */
-            if (station->enable_array_pattern)
+            if (oskar_station_enable_array_pattern(station))
             {
                 /* Get pointer to array pattern. */
-                array = (oskar_mem_is_scalar(beam->type) ?
+                array = (oskar_mem_is_scalar(beam) ?
                         beam : &work->array_pattern);
 
                 /* Generate beamforming weights and evaluate array pattern. */
                 oskar_evaluate_element_weights(weights, weights_error, station,
-                        beam_x, beam_y, beam_z, curand_states, status);
+                        beam_x, beam_y, beam_z, random_states, status);
                 oskar_evaluate_array_pattern(array, station, num_points,
                         x, y, z, weights, status);
 
                 /* Normalise array response if required. */
-                if (station->normalise_beam)
-                    oskar_mem_scale_real(array, 1.0/station->num_elements,
-                            status);
+                if (oskar_station_normalise_beam(station))
+                    oskar_mem_scale_real(array, 1.0 / num_elements, status);
             }
 
             /* Get pointer to element pattern. */
-            if (station->use_polarised_elements)
-                element = (oskar_mem_is_matrix(beam->type) ?
+            if (oskar_station_use_polarised_elements(station))
+                element = (oskar_mem_is_matrix(beam) ?
                         beam : &work->element_pattern_matrix);
             else
                 element = (!array ? beam : &work->element_pattern_scalar);
 
             /* Evaluate element pattern. */
-            oskar_element_model_evaluate(station->element_pattern,
-                    element, station->orientation_x, station->orientation_y,
+            oskar_element_model_evaluate(oskar_station_element_const(station, 0),
+                    element, oskar_station_element_orientation_x_rad(station),
+                    oskar_station_element_orientation_y_rad(station),
                     num_points, x, y, z, &work->theta_modified,
                     &work->phi_modified, status);
 
@@ -188,7 +186,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
                 oskar_mem_element_multiply(beam, array, element, num_points,
                         status);
             }
-            else if (array && oskar_mem_is_matrix(beam->type))
+            else if (array && oskar_mem_is_matrix(beam))
             {
                 /* Join array pattern with an identity matrix in output beam. */
                 oskar_mem_set_value_real(beam, 1.0, status);
@@ -200,31 +198,33 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         /* Can't separate array and element evaluation. */
         else
         {
+            const oskar_ElementModel* element;
+            element = oskar_station_element_const(station, 0);
+
             /* Must evaluate array pattern, so check that this is enabled. */
-            if (!station->enable_array_pattern)
+            if (!oskar_station_enable_array_pattern(station))
                 *status = OSKAR_ERR_SETTINGS;
 
             /* Can't use tapered elements here, for the moment. */
-            if (station->element_pattern->taper_type != OSKAR_ELEMENT_MODEL_TAPER_NONE)
+            if (element->taper_type != OSKAR_ELEMENT_MODEL_TAPER_NONE)
                 *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 
             /* Check if safe to proceed. */
             if (*status) return;
 
             /* Check that there are no spline coefficients. */
-            if (!station->element_pattern->theta_re_x.coeff.data)
+            if (!element->theta_re_x.coeff.data)
             {
                 /* Generate beamforming weights and evaluate beam from
                  * dipoles that are oriented differently. */
                 oskar_evaluate_element_weights(weights, weights_error, station,
-                        beam_x, beam_y, beam_z, curand_states, status);
+                        beam_x, beam_y, beam_z, random_states, status);
                 oskar_evaluate_array_pattern_dipoles(beam, station, num_points,
                         x, y, z, weights, status);
 
                 /* Normalise array response if required. */
-                if (station->normalise_beam)
-                    oskar_mem_scale_real(beam, 1.0/station->num_elements,
-                            status);
+                if (oskar_station_normalise_beam(station))
+                    oskar_mem_scale_real(beam, 1.0 / num_elements, status);
             }
             else
             {
@@ -244,17 +244,17 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         oskar_Mem* signal;
 
         /* Get pointer to a work array of the right type. */
-        signal = (oskar_mem_is_matrix(beam->type)) ?
+        signal = (oskar_mem_is_matrix(beam)) ?
                 &work->hierarchy_work_matrix[depth] :
                 &work->hierarchy_work_scalar[depth];
 
         /* Ensure enough space in the work array. */
-        work_size = station->num_elements * num_points;
-        if (signal->num_elements < work_size)
+        work_size = num_elements * num_points;
+        if ((int)oskar_mem_length(signal) < work_size)
             oskar_mem_realloc(signal, work_size, status);
 
         /* Loop over child stations. */
-        for (i = 0; i < station->num_elements; ++i)
+        for (i = 0; i < num_elements; ++i)
         {
             /* Set up the output buffer for this station. */
             oskar_Mem output;
@@ -263,19 +263,19 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
 
             /* Recursive call. */
             oskar_evaluate_station_beam_aperture_array_private(&output,
-                    &station->child[i], num_points, x, y, z, gast, work,
-                    curand_states, depth + 1, status);
+                    oskar_station_child_const(station, i), num_points, x, y, z,
+                    gast, work, random_states, depth + 1, status);
         }
 
         /* Generate beamforming weights and form beam from child stations. */
         oskar_evaluate_element_weights(weights, weights_error, station,
-                beam_x, beam_y, beam_z, curand_states, status);
+                beam_x, beam_y, beam_z, random_states, status);
         oskar_evaluate_array_pattern_hierarchical(beam, station, num_points,
                 x, y, z, signal, weights, status);
 
         /* Normalise array response if required. */
-        if (station->normalise_beam)
-            oskar_mem_scale_real(beam, 1.0/station->num_elements, status);
+        if (oskar_station_normalise_beam(station))
+            oskar_mem_scale_real(beam, 1.0 / num_elements, status);
     }
 }
 

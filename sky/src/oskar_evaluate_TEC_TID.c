@@ -28,9 +28,9 @@
 
 
 #include "sky/oskar_evaluate_TEC_TID.h"
-#include "utility/oskar_mem_set_value_real.h"
-#include "math.h"
-#include "stdio.h"
+#include <oskar_mem.h>
+#include <math.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,7 +50,7 @@ void oskar_evaluate_TEC_TID(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
     int status = OSKAR_SUCCESS;
 
     /* TODO check types, dimensions etc of memory */
-    type = tec->type;
+    type = oskar_mem_type(tec);
 
     oskar_mem_set_value_real(tec, 0.0, &status);
 

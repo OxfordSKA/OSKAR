@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,10 @@
  * @file oskar_set_up_visibilities.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Settings.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_Visibilities.h"
+#include <oskar_global.h>
+#include <oskar_Settings.h>
+#include <oskar_telescope.h>
+#include <oskar_vis.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,16 +50,14 @@ extern "C" {
  * This function initialises an empty visibility structure in CPU
  * memory, which is filled during the simulation.
  *
- * @param[in,out] vis    Pointer to empty or uninitialised visibility structure.
  * @param[in] settings   A pointer to the settings structure.
  * @param[in] telescope  A pointer to the telescope model.
  * @param[in] type       The type of the visibility data (must be complex type).
  * @param[in,out] status Status return code.
  */
 OSKAR_APPS_EXPORT
-void oskar_set_up_visibilities(oskar_Visibilities* vis,
-        const oskar_Settings* settings, const oskar_TelescopeModel* telescope,
-        int type, int* status);
+oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
+        const oskar_Telescope* telescope, int type, int* status);
 
 #ifdef __cplusplus
 }

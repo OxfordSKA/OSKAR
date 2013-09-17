@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,9 @@
  * @file oskar_evaluate_element_weights_errors.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_CurandState.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
+#include <oskar_random_state.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,7 +45,7 @@ OSKAR_EXPORT
 void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         const oskar_Mem* gain, const oskar_Mem* gain_error,
         const oskar_Mem* phase, const oskar_Mem* phase_error,
-        oskar_CurandState* states, int* status);
+        oskar_RandomState* states, int* status);
 
 #ifdef __cplusplus
 }

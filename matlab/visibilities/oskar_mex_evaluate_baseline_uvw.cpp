@@ -30,11 +30,10 @@
 
 #include "matlab/common/oskar_matlab_common.h"
 
-#include <oskar_global.h>
-#include <interferometry/oskar_TelescopeModel.h>
-#include <interferometry/oskar_telescope_model_load_station_coords.h>
-#include <interferometry/oskar_evaluate_uvw_baseline.h>
-#include <utility/oskar_get_error_string.h>
+#include <oskar_telescope.h>
+#include <oskar_evaluate_uvw_baseline.h>
+#include <oskar_get_error_string.h>
+#include <oskar_mem.h>
 
 #include <math.h>
 
@@ -72,8 +71,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     // Load the telescope model station layout file
     int err = OSKAR_SUCCESS;
-    oskar_TelescopeModel telescope(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0);
-    oskar_telescope_model_load_station_coords(&telescope, filename,
+    oskar_Telescope* telescope = oskar_telescope_create(OSKAR_DOUBLE,
+            OSKAR_LOCATION_CPU, 0, &err);
+    oskar_telescope_load_station_coords(telescope, filename,
             lon, lat, alt, &err);
     if (err)
     {
@@ -83,7 +83,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
     // Create data arrays to hold uvw baseline coordinates.
-    int num_baselines = telescope.num_baselines();
+    int num_stations = oskar_telescope_num_stations(telescope);
+    int num_baselines = oskar_telescope_num_baselines(telescope);
     mwSize dims[] = { num_baselines, num_times };
     int num_coords = num_baselines * num_times;
     mxArray* uu_ = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
@@ -97,12 +98,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     ww.data = mxGetData(ww_);
 
     // Allocate work array
-    oskar_Mem work_uvw(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 3 * telescope.num_stations, OSKAR_TRUE);
+    oskar_Mem work_uvw(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 3 * num_stations, OSKAR_TRUE);
 
-    oskar_evaluate_uvw_baseline(&uu, &vv, &ww, telescope.num_stations,
-            &telescope.station_x, &telescope.station_y, &telescope.station_z,
-            ra, dec, num_times, start_mjd_utc, dt, &work_uvw,
-            &err);
+    oskar_evaluate_uvw_baseline(&uu, &vv, &ww, num_stations,
+            oskar_telescope_station_x_const(telescope),
+            oskar_telescope_station_y_const(telescope),
+            oskar_telescope_station_z_const(telescope),
+            ra, dec, num_times, start_mjd_utc, dt, &work_uvw, &err);
     if (err)
     {
         mexErrMsgIdAndTxt("OSKAR:error",
@@ -116,5 +118,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mxSetField(out[0], 0, "uu", uu_);
     mxSetField(out[0], 0, "vv", vv_);
     mxSetField(out[0], 0, "ww", ww_);
+    oskar_telescope_free(telescope, &err);
 }
 

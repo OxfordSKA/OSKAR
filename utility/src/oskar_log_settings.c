@@ -26,10 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_log_message.h"
-#include "utility/oskar_log_value.h"
-#include "utility/oskar_log_settings.h"
-#include "station/oskar_StationModel.h"
+#include <private_log.h>
+#include <oskar_log.h>
+#include <oskar_station.h>
 
 #include <stdio.h>
 #include <math.h>

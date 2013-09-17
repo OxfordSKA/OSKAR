@@ -33,7 +33,7 @@
  * @file oskar_mem_scale_real_cuda.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,12 +54,10 @@ void oskar_mem_scale_real_cuda_d(int num, double value, double* a);
 /* Kernels. ================================================================ */
 
 /* Single precision. */
-OSKAR_EXPORT
 __global__
 void oskar_mem_scale_real_cudak_f(int num, float value, float* a);
 
 /* Double precision. */
-OSKAR_EXPORT
 __global__
 void oskar_mem_scale_real_cudak_d(int num, double value, double* a);
 

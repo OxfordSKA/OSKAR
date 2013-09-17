@@ -27,12 +27,14 @@
  */
 
 #include "apps/lib/oskar_ElementPatternLoader.h"
-#include "station/oskar_station_model_resize_element_types.h"
-#include "station/oskar_element_model_copy.h"
-#include "station/oskar_element_model_load_cst.h"
-#include "utility/oskar_log_message.h"
+#include <oskar_station.h>
+#include <oskar_element_model_copy.h>
+#include <oskar_element_model_load_cst.h>
+#include <oskar_log.h>
 
 #include <QtCore/QDir>
+#include <QtCore/QString>
+#include <QtCore/QHash>
 
 const QString oskar_ElementPatternLoader::element_x_cst_file = "element_pattern_x_cst.txt";
 const QString oskar_ElementPatternLoader::element_y_cst_file = "element_pattern_y_cst.txt";
@@ -48,7 +50,7 @@ oskar_ElementPatternLoader::~oskar_ElementPatternLoader()
 {
 }
 
-void oskar_ElementPatternLoader::load(oskar_TelescopeModel* telescope,
+void oskar_ElementPatternLoader::load(oskar_Telescope* telescope,
         const QDir& cwd, int num_subdirs, QHash<QString, QString>& filemap,
         int* status)
 {
@@ -56,17 +58,18 @@ void oskar_ElementPatternLoader::load(oskar_TelescopeModel* telescope,
 
     if (num_subdirs == 0)
     {
-        for (int i = 0; i < telescope->num_stations; ++i)
+        int num_stations = oskar_telescope_num_stations(telescope);
+        for (int i = 0; i < num_stations; ++i)
         {
-            oskar_StationModel* s = &telescope->station[i];
-            oskar_station_model_resize_element_types(s, 1, status);
+            oskar_Station* s = oskar_telescope_station(telescope, i);
+            oskar_station_resize_element_types(s, 1, status);
             load_element_patterns(log_, &settings_->telescope, s, filemap,
                     status);
         }
     }
 }
 
-void oskar_ElementPatternLoader::load(oskar_StationModel* station,
+void oskar_ElementPatternLoader::load(oskar_Station* station,
         const QDir& cwd, int num_subdirs, int /*depth*/,
         QHash<QString, QString>& filemap, int* status)
 {
@@ -74,14 +77,14 @@ void oskar_ElementPatternLoader::load(oskar_StationModel* station,
 
     if (num_subdirs == 0)
     {
-        oskar_station_model_resize_element_types(station, 1, status);
+        oskar_station_resize_element_types(station, 1, status);
         load_element_patterns(log_, &settings_->telescope, station, filemap,
                 status);
     }
 }
 
 void oskar_ElementPatternLoader::load_element_patterns(oskar_Log* log,
-        const oskar_SettingsTelescope* settings, oskar_StationModel* station,
+        const oskar_SettingsTelescope* settings, oskar_Station* station,
         const QHash<QString, QString>& filemap, int* status)
 {
     // Check if safe to proceed.
@@ -106,7 +109,7 @@ void oskar_ElementPatternLoader::load_element_patterns(oskar_Log* log,
         if (models.contains(files))
         {
             // Copy the element pattern data.
-            oskar_element_model_copy(station->element_pattern,
+            oskar_element_model_copy(oskar_station_element(station, 0),
                     models.value(files), status);
         }
         else
@@ -117,7 +120,7 @@ void oskar_ElementPatternLoader::load_element_patterns(oskar_Log* log,
                 oskar_log_message(log, 0, "Loading CST element "
                         "pattern data (X): %s", element_x.constData());
                 oskar_log_message(log, 0, "");
-                oskar_element_model_load_cst(station->element_pattern,
+                oskar_element_model_load_cst(oskar_station_element(station, 0),
                         log, 1, element_x.constData(),
                         &settings->aperture_array.element_pattern.fit,
                         status);
@@ -127,14 +130,14 @@ void oskar_ElementPatternLoader::load_element_patterns(oskar_Log* log,
                 oskar_log_message(log, 0, "Loading CST element "
                         "pattern data (Y): %s", element_y.constData());
                 oskar_log_message(log, 0, "");
-                oskar_element_model_load_cst(station->element_pattern,
+                oskar_element_model_load_cst(oskar_station_element(station, 0),
                         log, 2, element_y.constData(),
                         &settings->aperture_array.element_pattern.fit,
                         status);
             }
 
             // Store pointer to the element model for these files.
-            models.insert(files, station->element_pattern);
+            models.insert(files, oskar_station_element(station, 0));
         }
     }
 }

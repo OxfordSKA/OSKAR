@@ -30,7 +30,7 @@
 #include "utility/oskar_binary_stream_write.h"
 #include "utility/oskar_BinaryTag.h"
 #include "utility/oskar_CudaInfo.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_mem.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

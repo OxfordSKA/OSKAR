@@ -32,7 +32,7 @@
 #include "imaging/oskar_image_free.h"
 #include "imaging/oskar_image_init.h"
 #include "imaging/oskar_image_resize.h"
-#include <oskar_mem_to_type.h>
+#include <oskar_mem.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -58,7 +58,7 @@ void Test_fits_image_write::test_method()
     image.freq_inc_hz = 1e5;
 
     // Define test data.
-    double* d = oskar_mem_to_double(&image.data, &err);
+    double* d = oskar_mem_double(&image.data, &err);
     CPPUNIT_ASSERT_EQUAL(0, err);
     for (int r = 0, i = 0; r < rows; ++r)
     {
@@ -70,7 +70,7 @@ void Test_fits_image_write::test_method()
 
     // Write the data.
     const char filename[] = "cpp_unit_test_image.fits";
-    oskar_fits_image_write(&image, NULL, filename);
+    oskar_fits_image_write(&image, NULL, filename, &err);
 
     // Free memory.
     oskar_image_free(&image, &err);

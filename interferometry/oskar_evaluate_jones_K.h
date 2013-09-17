@@ -33,11 +33,10 @@
  * @file oskar_evaluate_jones_K.h
  */
 
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_Jones.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
+#include <oskar_jones.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {

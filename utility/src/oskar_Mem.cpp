@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_init.h"
+#include <private_mem.h>
+#include <oskar_mem_copy.h>
+#include <oskar_mem_free.h>
+#include <oskar_mem_init.h>
 
 oskar_Mem::oskar_Mem(int owner_)
 {

@@ -29,23 +29,18 @@
 #include "sky/oskar_evaluate_jones_Z.h"
 
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
-#include "math/oskar_jones_get_station_pointer.h"
 #include "interferometry/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h"
-#include "interferometry/oskar_telescope_model_type.h"
 #include "utility/oskar_vector_types.h"
 #include "station/oskar_evaluate_pierce_points.h"
-#include "utility/oskar_mem_add.h"
-#include "utility/oskar_mem_init.h"
 #include "sky/oskar_evaluate_TEC_TID.h"
-#include "sky/oskar_sky_model_type.h"
-#include "sky/oskar_sky_model_location.h"
-#include "sky/oskar_sky_model_init.h"
-#include "sky/oskar_sky_model_free.h"
-#include "sky/oskar_sky_model_copy.h"
-#include "utility/oskar_mem_set_value_real.h"
 
-#include "math.h"
-#include "stdio.h"
+#include <oskar_telescope.h>
+#include <oskar_sky.h>
+#include <oskar_jones.h>
+#include <oskar_mem.h>
+
+#include <math.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,28 +52,24 @@ static void oskar_evaluate_TEC(oskar_WorkJonesZ* work, int num_pp,
 
 static void evaluate_station_ECEF_coords(
         double* station_x, double* station_y, double* station_z,
-        int stationID, const oskar_TelescopeModel* telescope);
+        int stationID, const oskar_Telescope* telescope);
 
 static void evaluate_jones_Z_station(oskar_Mem* Z_station,
         double wavelength, const oskar_Mem* TEC, const oskar_Mem* hor_z,
         double min_elevation, int num_pp, int* status);
 
 
-void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, double gast,
-        const oskar_SettingsIonosphere* settings, oskar_WorkJonesZ* work,
-        int* status)
+void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
+        const oskar_Telescope* telescope,
+        const oskar_SettingsIonosphere* settings, double gast,
+        double frequency_hz, oskar_WorkJonesZ* work, int* status)
 {
-    int i;
+    int i, num_sources, num_stations;
     /* Station position in ECEF frame */
-    double station_x, station_y, station_z;
+    double station_x, station_y, station_z, wavelength;
     oskar_Mem Z_station;
     int type;
-    oskar_SkyModel sky_cpu; /* Copy of the sky model on the CPU */
-
-    oskar_sky_model_init(&sky_cpu, oskar_sky_model_type(sky),
-            OSKAR_LOCATION_CPU, sky->num_sources, status);
-    oskar_sky_model_copy(&sky_cpu, sky, status);
+    oskar_Sky* sky_cpu; /* Copy of the sky model on the CPU */
 
     /* Check all inputs. */
     if (!Z || !sky || !telescope || !settings || !work || !status)
@@ -90,74 +81,72 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_SkyModel* sky,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    if (!telescope->station || telescope->num_stations == 0)
-        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-
-    type = oskar_sky_model_type(&sky_cpu);
-    if (!oskar_telescope_model_is_type(telescope, type) ||
-            Z->data.type != (type | OSKAR_COMPLEX) ||
+    /* Check data types. */
+    type = oskar_sky_type(sky);
+    if (oskar_telescope_type(telescope) != type ||
+            oskar_jones_type(Z) != (type | OSKAR_COMPLEX) ||
             oskar_work_jones_z_type(work) != type)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
     }
 
     /* For now, this function requires data is on the CPU .. check this. */
-    if (!oskar_sky_model_is_location(&sky_cpu, OSKAR_LOCATION_CPU))
-        *status = OSKAR_ERR_BAD_LOCATION;
-    /* TODO check other memory for locations */
 
     /* Resize the work array (if needed) */
-    oskar_work_jones_z_resize(work, sky_cpu.num_sources, status);
+    num_stations = oskar_telescope_num_stations(telescope);
+    num_sources = oskar_sky_num_sources(sky_cpu);
+    oskar_work_jones_z_resize(work, num_sources, status);
 
+    /* Copy the sky model to the CPU. */
+    sky_cpu = oskar_sky_create_copy(sky, OSKAR_LOCATION_CPU, status);
 
-    /* Check if still safe to proceed now inputs have been checked. */
-    if (*status) return;
+    oskar_mem_init(&Z_station, oskar_jones_type(Z), OSKAR_LOCATION_CPU,
+            num_sources, OSKAR_FALSE, status);
+    wavelength = 299792458.0 / frequency_hz;
 
-    oskar_mem_init(&Z_station, Z->data.type, OSKAR_LOCATION_CPU,
-            sky_cpu.num_sources, OSKAR_FALSE, status);
-
-    /* Evaluate the Ionospheric phase screen for each station at each
+    /* Evaluate the ionospheric phase screen for each station at each
      * source pierce point. */
-    for (i = 0; i < telescope->num_stations; ++i)
+    for (i = 0; i < num_stations; ++i)
     {
-        oskar_StationModel* station = &telescope->station[i];
+        double last, lon, lat, alt;
+        const oskar_Station* station;
+        station = oskar_telescope_station_const(telescope, i);
+        lon = oskar_station_longitude_rad(station);
+        lat = oskar_station_latitude_rad(station);
+        alt = oskar_station_altitude_m(station);
+        last = gast + lon;
 
         /* Evaluate horizontal x,y,z source positions (for which to evaluate
          * pierce points) */
-        oskar_evaluate_source_horizontal_lmn(sky_cpu.num_sources, &work->hor_x,
-                &work->hor_y, &work->hor_z, &sky_cpu.RA, &sky_cpu.Dec,
-                station, gast, status);
-
-        if (*status) return;
+        oskar_evaluate_source_horizontal_lmn(num_sources, &work->hor_x,
+                &work->hor_y, &work->hor_z, oskar_sky_ra_const(sky_cpu),
+                oskar_sky_dec_const(sky_cpu), last, lat, status);
 
         /* Obtain station coordinates in the ECEF frame. */
         evaluate_station_ECEF_coords(&station_x, &station_y, &station_z, i,
                 telescope);
 
-        if (*status) return;
-
-        /* Obtain the pierce points */
+        /* Obtain the pierce points. */
         /* FIXME this is current hard-coded to TID height screen 0 */
         oskar_evaluate_pierce_points(&work->pp_lon, &work->pp_lat,
-                &work->pp_rel_path, station->latitude_rad,
-                station->latitude_rad, station->altitude_m, station_x,
-                station_y, station_z, settings->TID[0].height_km * 1000.,
-                sky_cpu.num_sources, &work->hor_x, &work->hor_y, &work->hor_z,
-                status);
+                &work->pp_rel_path, lon, lat, alt, station_x, station_y,
+                station_z, settings->TID[0].height_km * 1000., num_sources,
+                &work->hor_x, &work->hor_y, &work->hor_z, status);
 
         /* Evaluate TEC values for the pierce points */
-        oskar_evaluate_TEC(work, sky_cpu.num_sources, settings, gast, status);
+        oskar_evaluate_TEC(work, num_sources, settings, gast, status);
 
         /* Get a pointer to the Jones matrices for the station */
         oskar_jones_get_station_pointer(&Z_station, Z, i, status);
 
         /* Populate the Jones matrix with ionospheric phase */
-        evaluate_jones_Z_station(&Z_station, telescope->wavelength_metres,
+        evaluate_jones_Z_station(&Z_station, wavelength,
                 &work->total_TEC, &work->hor_z, settings->min_elevation,
-                sky_cpu.num_sources, status);
-    } /* Loop over stations */
+                num_sources, status);
+    }
 
-    oskar_sky_model_free(&sky_cpu, status);
+    oskar_sky_free(sky_cpu, status);
 }
 
 
@@ -201,26 +190,33 @@ static void oskar_evaluate_TEC(oskar_WorkJonesZ* work, int num_pp,
 
 static void evaluate_station_ECEF_coords(
         double* station_x, double* station_y, double* station_z,
-        int stationID, const oskar_TelescopeModel* telescope)
+        int stationID, const oskar_Telescope* telescope)
 {
     double st_x, st_y, st_z;
     double lon, lat, alt;
+    const oskar_Station* station;
+    const void *x_, *y_, *z_;
 
-    lon = telescope->station[stationID].longitude_rad;
-    lat = telescope->station[stationID].latitude_rad;
-    alt = telescope->station[stationID].altitude_m;
+    x_ = oskar_mem_void_const(oskar_telescope_station_x_const(telescope));
+    y_ = oskar_mem_void_const(oskar_telescope_station_y_const(telescope));
+    z_ = oskar_mem_void_const(oskar_telescope_station_z_const(telescope));
+    station = oskar_telescope_station_const(telescope, stationID);
+    lon = oskar_station_longitude_rad(station);
+    lat = oskar_station_latitude_rad(station);
+    alt = oskar_station_altitude_m(station);
 
-    if (telescope->station_x.type == OSKAR_DOUBLE)
+    if (oskar_mem_type(oskar_telescope_station_x_const(telescope)) ==
+            OSKAR_DOUBLE)
     {
-        st_x = ((double*)telescope->station_x.data)[stationID];
-        st_y = ((double*)telescope->station_y.data)[stationID];
-        st_z = ((double*)telescope->station_z.data)[stationID];
+        st_x = ((const double*)x_)[stationID];
+        st_y = ((const double*)y_)[stationID];
+        st_z = ((const double*)z_)[stationID];
     }
     else
     {
-        st_x = (double)((float*)telescope->station_x.data)[stationID];
-        st_y = (double)((float*)telescope->station_y.data)[stationID];
-        st_z = (double)((float*)telescope->station_z.data)[stationID];
+        st_x = (double)((const float*)x_)[stationID];
+        st_y = (double)((const float*)y_)[stationID];
+        st_z = (double)((const float*)z_)[stationID];
     }
 
     oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,
@@ -232,8 +228,7 @@ static void evaluate_jones_Z_station(oskar_Mem* Z_station,
         double wavelength, const oskar_Mem* TEC, const oskar_Mem* hor_z,
         double min_elevation, int num_pp, int* status)
 {
-    int i;
-    int type = Z_station->type;
+    int i, type;
     double arg;
 
     /* Check all inputs. */
@@ -243,10 +238,10 @@ static void evaluate_jones_Z_station(oskar_Mem* Z_station,
         return;
     }
 
-
     /* Check if safe to proceed. */
     if (*status) return;
 
+    type = oskar_mem_type(Z_station);
     if (type == OSKAR_DOUBLE_COMPLEX)
     {
         double2* Z = (double2*)Z_station->data;

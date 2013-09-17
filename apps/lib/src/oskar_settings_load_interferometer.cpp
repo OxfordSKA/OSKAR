@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_load_interferomter.h"
+#include "apps/lib/oskar_settings_load_interferometer.h"
 #include "sky/oskar_date_time_to_mjd.h"
-#include "utility/oskar_log_error.h"
+#include <oskar_log.h>
 
 #include <QtCore/QSettings>
 #include <QtCore/QByteArray>

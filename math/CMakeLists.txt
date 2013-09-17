@@ -44,16 +44,16 @@ set(math_SRC
     src/oskar_healpix_npix_to_nside.c
     src/oskar_healpix_nside_to_npix.c
     src/oskar_healpix_pix_to_angles_ring.c
-    src/oskar_jones_copy.c
+    src/oskar_jones_accessors.c
+    src/oskar_jones_create.c
+    src/oskar_jones_create_copy.c
     src/oskar_jones_free.c
     src/oskar_jones_get_station_pointer.c
-    src/oskar_jones_init.c
     src/oskar_jones_join.c
     src/oskar_jones_set_size.c
     src/oskar_jones_set_real_scalar.c
     src/oskar_linspace.c
     src/oskar_matrix_multiply.c
-    src/oskar_mean.c
     src/oskar_meshgrid.c
     src/oskar_random_broken_power_law.c
     src/oskar_random_gaussian.c
@@ -62,7 +62,6 @@ set(math_SRC
     src/oskar_rotate.c
     src/oskar_round_robin.c
     src/oskar_sph_from_lm.c
-    src/oskar_sph_rotate_points.c
     src/oskar_sph_rotate_to_position.c
     src/oskar_sph_to_lm.c
     src/oskar_sph2cart.c

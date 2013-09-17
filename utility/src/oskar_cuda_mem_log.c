@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_cuda_mem_log.h"
-#include "utility/oskar_log_message.h"
 #include <cuda_runtime_api.h>
+#include <oskar_cuda_mem_log.h>
+#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {

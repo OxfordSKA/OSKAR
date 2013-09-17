@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,9 @@
 #include "math/oskar_spline_data_init.h"
 #include "math/oskar_spline_data_surfit.h"
 #include "math/oskar_spline_data_evaluate.h"
-#include "utility/oskar_mem_all_headers.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_log_message.h"
+#include <oskar_mem.h>
+#include <oskar_get_error_string.h>
+#include <oskar_log.h>
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
@@ -79,7 +79,7 @@ static double oskar_mem_max_abs(const oskar_Mem* data, int n)
 {
     int i;
     double r = -DBL_MAX;
-    if (data->type == OSKAR_SINGLE)
+    if (oskar_mem_type(data) == OSKAR_SINGLE)
     {
         const float *p;
         p = (const float*)data->data;
@@ -88,7 +88,7 @@ static double oskar_mem_max_abs(const oskar_Mem* data, int n)
             if (fabsf(p[i]) > r) r = fabsf(p[i]);
         }
     }
-    else if (data->type == OSKAR_DOUBLE)
+    else if (oskar_mem_type(data) == OSKAR_DOUBLE)
     {
         const double *p;
         p = (const double*)data->data;
@@ -105,7 +105,7 @@ static double oskar_mem_max(const oskar_Mem* data, int n)
 {
     int i;
     double r = -DBL_MAX;
-    if (data->type == OSKAR_SINGLE)
+    if (oskar_mem_type(data) == OSKAR_SINGLE)
     {
         const float *p;
         p = (const float*)data->data;
@@ -114,7 +114,7 @@ static double oskar_mem_max(const oskar_Mem* data, int n)
             if (p[i] > r) r = p[i];
         }
     }
-    else if (data->type == OSKAR_DOUBLE)
+    else if (oskar_mem_type(data) == OSKAR_DOUBLE)
     {
         const double *p;
         p = (const double*)data->data;
@@ -131,7 +131,7 @@ static double oskar_mem_min(const oskar_Mem* data, int n)
 {
     int i;
     double r = DBL_MAX;
-    if (data->type == OSKAR_SINGLE)
+    if (oskar_mem_type(data) == OSKAR_SINGLE)
     {
         const float *p;
         p = (const float*)data->data;
@@ -140,7 +140,7 @@ static double oskar_mem_min(const oskar_Mem* data, int n)
             if (p[i] < r) r = p[i];
         }
     }
-    else if (data->type == OSKAR_DOUBLE)
+    else if (oskar_mem_type(data) == OSKAR_DOUBLE)
     {
         const double *p;
         p = (const double*)data->data;
@@ -184,16 +184,16 @@ void oskar_spline_data_surfit_fortran(oskar_SplineData* spline, oskar_Log* log,
         *status = OSKAR_ERR_SETTINGS;
 
     /* Get the data type. */
-    type = z->type;
+    type = oskar_mem_type(z);
     element_size = oskar_mem_element_size(type);
     if ((type != OSKAR_SINGLE) && (type != OSKAR_DOUBLE))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that input data is on the CPU. */
-    if (x->location != OSKAR_LOCATION_CPU ||
-            y->location != OSKAR_LOCATION_CPU ||
-            z->location != OSKAR_LOCATION_CPU ||
-            w->location != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(x) != OSKAR_LOCATION_CPU ||
+            oskar_mem_location(y) != OSKAR_LOCATION_CPU ||
+            oskar_mem_location(z) != OSKAR_LOCATION_CPU ||
+            oskar_mem_location(w) != OSKAR_LOCATION_CPU)
         *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Check if safe to proceed. */
@@ -330,22 +330,22 @@ static int oskar_spline_data_evaluate_fortran(oskar_Mem* output, int offset,
     int err = 0, nx, ny, num_points, type, location;
 
     /* Check arrays are consistent. */
-    num_points = x->num_elements;
-    if (y->num_elements != num_points)
+    num_points = (int)oskar_mem_length(x);
+    if ((int)oskar_mem_length(y) != num_points)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Check type. */
-    type = x->type;
-    if (type != y->type)
+    type = oskar_mem_type(x);
+    if (type != oskar_mem_type(y))
         return OSKAR_ERR_TYPE_MISMATCH;
 
     /* Check location. */
-    location = output->location;
-    if (location != spline->coeff.location ||
-            location != spline->knots_x.location ||
-            location != spline->knots_y.location ||
-            location != x->location ||
-            location != y->location)
+    location = oskar_mem_location(output);
+    if (location != oskar_mem_location(&spline->coeff) ||
+            location != oskar_mem_location(&spline->knots_x) ||
+            location != oskar_mem_location(&spline->knots_y) ||
+            location != oskar_mem_location(x) ||
+            location != oskar_mem_location(y))
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Check data type. */
@@ -450,7 +450,7 @@ void Test_dierckx::test_surfit()
     for (int i = 0; i < spline_data_c.num_knots_y; ++i)
         CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)spline_data_fortran.knots_y)[i],
                 ((float*)spline_data_c.knots_y)[i], delta);
-    for (int i = 0; i < spline_data_c.coeff.num_elements; ++i)
+    for (int i = 0; i < (int)oskar_mem_length(&spline_data_c.coeff); ++i)
         CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)spline_data_fortran.coeff)[i],
                 ((float*)spline_data_c.coeff)[i], delta);
 

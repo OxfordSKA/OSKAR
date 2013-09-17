@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_MEX_VIS_FROM_MATLAB_STRUCT_H_
 #define OSKAR_MEX_VIS_FROM_MATLAB_STRUCT_H_
 
@@ -35,18 +34,17 @@
  */
 
 #include <mex.h>
-#include "oskar_global.h"
-#include "interferometry/oskar_Visibilities.h"
+#include <oskar_vis.h>
 
 
 /**
- * @brief Convert an mxArray structure to an oskar_Visibilities structure.
+ * @brief Convert an mxArray structure to an oskar_Vis structure.
  *
- * @param v_out oskar_Visibilities structure to populate.
+ * @param v_out oskar_Vis structure to populate.
  * @param v_in  mxArray holding MATLAB workspace representation of an
  *              oskar_Visibility structure.
  */
-void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* v_in);
+oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in);
 
 
 #endif /* OSKAR_MEX_VIS_FROM_MATLAB_STRUCT_H_ */

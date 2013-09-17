@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,7 @@
  * @file oskar_fits_write.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Log.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,7 +76,6 @@ extern "C" {
  *
  * The fastest varying dimension is along the RA axis.
  *
- * @param[in,out] log    Pointer to log structure to use.
  * @param[in] filename   File name of FITS image to write.
  * @param[in] type       Data type (OSKAR_SINGLE or OSKAR_DOUBLE) of the array.
  * @param[in] naxis      The number of axes in the hyper-cube.
@@ -89,14 +87,13 @@ extern "C" {
  * @param[in] cdelt      Array of CDELT keyword (delta) values for each axis.
  * @param[in] crpix      Array of CRPIX keyword (reference pixel) values for each axis.
  * @param[in] crpix      Array of CROTA keyword (rotation) values for each axis.
- *
- * @return An error code.
+ * @param[in,out] status Status return code.
  */
 OSKAR_FITS_EXPORT
-int oskar_fits_write(oskar_Log* log, const char* filename, int type, int naxis,
+void oskar_fits_write(const char* filename, int type, int naxis,
         long* naxes, void* data, const char** ctype, const char** ctype_desc,
         const double* crval, const double* cdelt, const double* crpix,
-        const double* crota);
+        const double* crota, int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,24 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_array_pattern_dipoles.h"
-#include "station/oskar_evaluate_array_pattern_dipoles_cuda.h"
-#include "station/oskar_station_model_location.h"
-#include "station/oskar_station_model_type.h"
-#include "utility/oskar_cuda_check_error.h"
-#include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_mem_type_check.h"
+#include <oskar_evaluate_array_pattern_dipoles.h>
+#include <oskar_evaluate_array_pattern_dipoles_cuda.h>
+#include <oskar_cuda_check_error.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
-        const oskar_StationModel* station, int num_points, const oskar_Mem* x,
+        const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* weights,
         int* status)
 {
-    int type, location;
+    int type, location, num_elements;
 
     /* Check all inputs. */
     if (!beam || !station || !x || !y || !z || !weights || !status)
@@ -56,100 +52,137 @@ void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
     if (*status) return;
 
     /* Get meta-data. */
-    location = oskar_station_model_location(station);
-    type = oskar_station_model_type(station);
+    type = oskar_station_type(station);
+    location = oskar_station_location(station);
+    num_elements = oskar_station_num_elements(station);
 
     /* Check data are co-located. */
-    if (beam->location != location ||
-            x->location != location ||
-            y->location != location ||
-            z->location != location ||
-            weights->location != location)
+    if (oskar_mem_location(beam) != location ||
+            oskar_mem_location(x) != location ||
+            oskar_mem_location(y) != location ||
+            oskar_mem_location(z) != location ||
+            oskar_mem_location(weights) != location)
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
 
     /* Check that the antenna coordinates are in radians. */
-    if (station->coord_units != OSKAR_RADIANS)
+    if (oskar_station_element_coord_units(station) != OSKAR_RADIANS)
     {
         *status = OSKAR_ERR_BAD_UNITS;
         return;
     }
 
     /* Check for correct data types. */
-    if (!oskar_mem_is_complex(beam->type) ||
-            !oskar_mem_is_complex(weights->type) ||
-            !oskar_mem_is_matrix(beam->type) ||
-            oskar_mem_is_matrix(weights->type))
+    if (!oskar_mem_is_complex(beam) || !oskar_mem_is_complex(weights) ||
+            !oskar_mem_is_matrix(beam) || oskar_mem_is_matrix(weights))
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
-    if (x->type != type || y->type != type || z->type != type ||
-            oskar_mem_base_type(beam->type) != type ||
-            oskar_mem_base_type(weights->type) != type)
+    if (oskar_mem_type(x) != type || oskar_mem_type(y) != type ||
+            oskar_mem_type(z) != type ||
+            oskar_mem_precision(beam) != type ||
+            oskar_mem_precision(weights) != type)
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
 
     /* Resize output array if required. */
-    if (beam->num_elements < num_points)
+    if ((int)oskar_mem_length(beam) < num_points)
         oskar_mem_realloc(beam, num_points, status);
 
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check for data in GPU memory. */
-    if (location == OSKAR_LOCATION_GPU)
+    /* Switch on type. */
+    if (type == OSKAR_DOUBLE)
     {
+        const double *xs, *ys, *zs, *cx, *sx, *cy, *sy, *x_, *y_, *z_;
+        const double2 *weights_;
+        double4c* beam_;
+        xs = oskar_mem_double_const(
+                oskar_station_element_x_signal_const(station), status);
+        ys = oskar_mem_double_const(
+                oskar_station_element_y_signal_const(station), status);
+        zs = oskar_mem_double_const(
+                oskar_station_element_z_signal_const(station), status);
+        cx = oskar_mem_double_const(
+                oskar_station_element_cos_orientation_x_const(station), status);
+        sx = oskar_mem_double_const(
+                oskar_station_element_sin_orientation_x_const(station), status);
+        cy = oskar_mem_double_const(
+                oskar_station_element_cos_orientation_y_const(station), status);
+        sy = oskar_mem_double_const(
+                oskar_station_element_sin_orientation_y_const(station), status);
+        x_ = oskar_mem_double_const(x, status);
+        y_ = oskar_mem_double_const(y, status);
+        z_ = oskar_mem_double_const(z, status);
+        weights_ = oskar_mem_double2_const(weights, status);
+        beam_ = oskar_mem_double4c(beam, status);
+
+        if (location == OSKAR_LOCATION_GPU)
+        {
 #ifdef OSKAR_HAVE_CUDA
-        if (type == OSKAR_DOUBLE)
-        {
-            oskar_evaluate_array_pattern_dipoles_cuda_d(station->num_elements,
-                    (const double*)station->x_signal.data,
-                    (const double*)station->y_signal.data,
-                    (const double*)station->z_signal.data,
-                    (const double*)station->cos_orientation_x.data,
-                    (const double*)station->sin_orientation_x.data,
-                    (const double*)station->cos_orientation_y.data,
-                    (const double*)station->sin_orientation_y.data,
-                    (const double2*)weights->data, num_points,
-                    (const double*)x->data,
-                    (const double*)y->data,
-                    (const double*)z->data,
-                    (double4c*)beam->data);
+            oskar_evaluate_array_pattern_dipoles_cuda_d(num_elements,
+                    xs, ys, zs, cx, sx, cy, sy, weights_, num_points,
+                    x_, y_, z_, beam_);
             oskar_cuda_check_error(status);
-        }
-        else if (type == OSKAR_SINGLE)
-        {
-            oskar_evaluate_array_pattern_dipoles_cuda_f(station->num_elements,
-                    (const float*)station->x_signal.data,
-                    (const float*)station->y_signal.data,
-                    (const float*)station->z_signal.data,
-                    (const float*)station->cos_orientation_x.data,
-                    (const float*)station->sin_orientation_x.data,
-                    (const float*)station->cos_orientation_y.data,
-                    (const float*)station->sin_orientation_y.data,
-                    (const float2*)weights->data, num_points,
-                    (const float*)x->data,
-                    (const float*)y->data,
-                    (const float*)z->data,
-                    (float4c*)beam->data);
-            oskar_cuda_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
         }
         else
         {
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_LOCATION;
         }
+    }
+    else if (type == OSKAR_SINGLE)
+    {
+        const float *xs, *ys, *zs, *cx, *sx, *cy, *sy, *x_, *y_, *z_;
+        const float2 *weights_;
+        float4c* beam_;
+        xs = oskar_mem_float_const(
+                oskar_station_element_x_signal_const(station), status);
+        ys = oskar_mem_float_const(
+                oskar_station_element_y_signal_const(station), status);
+        zs = oskar_mem_float_const(
+                oskar_station_element_z_signal_const(station), status);
+        cx = oskar_mem_float_const(
+                oskar_station_element_cos_orientation_x_const(station), status);
+        sx = oskar_mem_float_const(
+                oskar_station_element_sin_orientation_x_const(station), status);
+        cy = oskar_mem_float_const(
+                oskar_station_element_cos_orientation_y_const(station), status);
+        sy = oskar_mem_float_const(
+                oskar_station_element_sin_orientation_y_const(station), status);
+        x_ = oskar_mem_float_const(x, status);
+        y_ = oskar_mem_float_const(y, status);
+        z_ = oskar_mem_float_const(z, status);
+        weights_ = oskar_mem_float2_const(weights, status);
+        beam_ = oskar_mem_float4c(beam, status);
+
+        if (location == OSKAR_LOCATION_GPU)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            oskar_evaluate_array_pattern_dipoles_cuda_f(num_elements,
+                    xs, ys, zs, cx, sx, cy, sy, weights_, num_points,
+                    x_, y_, z_, beam_);
+            oskar_cuda_check_error(status);
 #else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
+        }
+        else
+        {
+            *status = OSKAR_ERR_BAD_LOCATION;
+        }
     }
     else
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
 }
 

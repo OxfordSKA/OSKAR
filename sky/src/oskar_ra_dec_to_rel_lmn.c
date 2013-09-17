@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 #include "sky/oskar_ra_dec_to_rel_lmn_cuda.h"
 #include "math/oskar_sph_to_lm.h"
 #include "sky/oskar_lm_to_n.h"
-#include "utility/oskar_mem_realloc.h"
+#include <oskar_mem.h>
 #include "utility/oskar_cuda_check_error.h"
 #include <math.h>
 
@@ -80,19 +80,19 @@ void oskar_ra_dec_to_rel_lmn(int num_points, const oskar_Mem* ra,
     if (*status) return;
 
     /* Get the meta-data. */
-    type = ra->type;
-    location = ra->location;
+    type = oskar_mem_type(ra);
+    location = oskar_mem_location(ra);
 
     /* Check type consistency. */
-    if (dec->type != type || l->type != type || m->type != type ||
-            n->type != type)
+    if (oskar_mem_type(dec) != type || oskar_mem_type(l) != type || oskar_mem_type(m) != type ||
+            oskar_mem_type(n) != type)
         *status = OSKAR_ERR_TYPE_MISMATCH;
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check location consistency. */
-    if (dec->location != location || l->location != location ||
-            m->location != location || n->location != location)
+    if (oskar_mem_location(dec) != location || oskar_mem_location(l) != location ||
+            oskar_mem_location(m) != location || oskar_mem_location(n) != location)
         *status = OSKAR_ERR_LOCATION_MISMATCH;
 
     /* Check memory is allocated. */
@@ -100,15 +100,15 @@ void oskar_ra_dec_to_rel_lmn(int num_points, const oskar_Mem* ra,
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Check dimensions. */
-    if (ra->num_elements < num_points || dec->num_elements < num_points)
+    if ((int)oskar_mem_length(ra) < num_points || (int)oskar_mem_length(dec) < num_points)
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Resize output arrays if needed. */
-    if (l->num_elements < num_points)
+    if ((int)oskar_mem_length(l) < num_points)
         oskar_mem_realloc(l, num_points, status);
-    if (m->num_elements < num_points)
+    if ((int)oskar_mem_length(m) < num_points)
         oskar_mem_realloc(m, num_points, status);
-    if (n->num_elements < num_points)
+    if ((int)oskar_mem_length(n) < num_points)
         oskar_mem_realloc(n, num_points, status);
 
     /* Check if safe to proceed. */

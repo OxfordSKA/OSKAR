@@ -36,7 +36,7 @@
 
 #include "oskar_global.h"
 #include "apps/lib/oskar_AbstractTelescopeFileLoader.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_mem.h>
 #include "station/oskar_system_noise_model_load.h"
 #include "utility/oskar_Settings.h"
 
@@ -76,7 +76,7 @@ public:
      * @param[in,out] filemap     Reference to file map to use for this level.
      * @param[in,out] status      Status return code.
      */
-    void load(oskar_TelescopeModel* telescope, const QDir& cwd, int num_subdirs,
+    void load(oskar_Telescope* telescope, const QDir& cwd, int num_subdirs,
             QHash<QString, QString>& filemap, int* status);
 
     /**
@@ -91,7 +91,7 @@ public:
      * @param[in,out] filemap     Reference to file map to use for this level.
      * @param[in,out] status      Status return code.
      */
-    void load(oskar_StationModel* station, const QDir& cwd, int num_subdirs,
+    void load(oskar_Station* station, const QDir& cwd, int num_subdirs,
             int depth, QHash<QString, QString>& filemap,
             int* status);
 

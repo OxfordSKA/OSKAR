@@ -27,8 +27,8 @@
  */
 
 #include "imaging/oskar_Image.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "sky/oskar_SkyModel.h"
+#include <oskar_vis.h>
+#include <oskar_sky.h>
 #include "utility/oskar_binary_stream_read.h"
 #include "utility/oskar_binary_file_query.h"
 #include "utility/oskar_binary_stream_read_header.h"
@@ -38,14 +38,7 @@
 #include "utility/oskar_binary_tag_index_query.h"
 #include "utility/oskar_BinaryTag.h"
 #include "utility/oskar_mem_binary_stream_read.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_log_line.h"
-#include "utility/oskar_log_message.h"
-#include "utility/oskar_log_section.h"
-#include "utility/oskar_log_value.h"
+#include <oskar_log.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

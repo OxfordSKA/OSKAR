@@ -26,6 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <private_mem.h>
+
 #include <oskar_mem_copy.h>
 #include <oskar_mem_init.h>
 #include <oskar_mem_init_copy.h>

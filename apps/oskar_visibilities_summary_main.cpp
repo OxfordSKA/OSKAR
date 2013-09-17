@@ -26,20 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <interferometry/oskar_Visibilities.h>
-#include <interferometry/oskar_visibilities_read.h>
-#include <apps/lib/oskar_OptionParser.h>
-#include <utility/oskar_get_error_string.h>
-#include <utility/oskar_BinaryTag.h>
-#include <utility/oskar_BinaryHeader.h>
-#include <utility/oskar_mem_binary_stream_read.h>
-#include <utility/oskar_binary_tag_index_query.h>
-#include <utility/oskar_binary_tag_index_create.h>
-#include <utility/oskar_binary_tag_index_free.h>
-#include <utility/oskar_mem_realloc.h>
+#include <oskar_vis.h>
 
-#include <utility/oskar_get_data_type_string.h>
-#include <utility/oskar_mem_type_check.h>
+#include <apps/lib/oskar_OptionParser.h>
+#include <oskar_get_error_string.h>
+#include <oskar_get_data_type_string.h>
+#include <oskar_BinaryTag.h>
+#include <oskar_BinaryHeader.h>
+#include <oskar_mem_binary_stream_read.h>
+#include <oskar_binary_tag_index_query.h>
+#include <oskar_binary_tag_index_create.h>
+#include <oskar_binary_tag_index_free.h>
 
 #include <vector>
 #include <string>
@@ -65,11 +62,10 @@ int main(int argc, char **argv)
     bool displaySettings = opt.isSet("-s") ? true : false;
     const char* filename = opt.getArg(0);
 
-    oskar_Visibilities vis;
-    oskar_visibilities_read(&vis, filename, &status);
+    oskar_Vis* vis = oskar_vis_read(filename, &status);
     if (status)
     {
-        fprintf(stderr, "ERROR: Unable to read the specified visibility file: %s\n",
+        fprintf(stderr, "ERROR: Unable to read visibility file '%s'\n",
                 filename);
         fprintf(stderr, "ERROR: [code %i] %s.\n", status, oskar_get_error_string(status));
         return status;
@@ -78,29 +74,41 @@ int main(int argc, char **argv)
     if (!(displayLog || displaySettings))
     {
         printf("\n");
-        printf("- Precision ............... %s\n",
-                oskar_mem_is_double(vis.amplitude.type) ? "double" : "single");
-        printf("- Amplitude type .......... %s\n",
-                oskar_get_data_type_string(vis.amplitude.type));
+        printf("- Precision ............... %s\n", oskar_mem_is_double(
+                oskar_vis_amplitude_const(vis)) ? "double" : "single");
+        printf("- Amplitude type .......... %s\n", oskar_get_data_type_string(
+                oskar_mem_type(oskar_vis_amplitude_const(vis))));
         printf("\n");
-        printf("- Number of stations ...... %i\n", vis.num_stations);
+        printf("- Number of stations ...... %i\n", oskar_vis_num_stations(vis));
         printf("\n");
-        printf("- Number of channels ...... %i\n", vis.num_channels);
-        printf("- Number of times ......... %i\n", vis.num_times);
-        printf("- Number of baselines ..... %i\n", vis.num_baselines);
-        printf("- Number of polarisations . %i\n", vis.num_polarisations());
+        printf("- Number of channels ...... %i\n",
+                oskar_vis_num_channels(vis));
+        printf("- Number of times ......... %i\n",
+                oskar_vis_num_times(vis));
+        printf("- Number of baselines ..... %i\n",
+                oskar_vis_num_baselines(vis));
+        printf("- Number of polarisations . %i\n",
+                oskar_vis_num_polarisations(vis));
         printf("- Data order .............. %s\n",
                 "{channel, time, baseline, polarisation}");
         printf("\n");
-        printf("- Start frequency (MHz) ... %f\n", vis.freq_start_hz/1.e6);
-        printf("- Channel separation (Hz) . %f\n", vis.freq_inc_hz);
-        printf("- Channel bandwidth (Hz) .. %f\n", vis.channel_bandwidth_hz);
+        printf("- Start frequency (MHz) ... %f\n",
+                oskar_vis_freq_start_hz(vis)/1.e6);
+        printf("- Channel separation (Hz) . %f\n",
+                oskar_vis_freq_inc_hz(vis));
+        printf("- Channel bandwidth (Hz) .. %f\n",
+                oskar_vis_channel_bandwidth_hz(vis));
         printf("\n");
-        printf("- Start time (MJD, UTC) ... %f\n", vis.time_start_mjd_utc);
-        printf("- Time increment (s) ...... %f\n", vis.time_inc_seconds);
-        printf("- Integration time (s) .... %f\n", vis.time_int_seconds);
+        printf("- Start time (MJD, UTC) ... %f\n",
+                oskar_vis_time_start_mjd_utc(vis));
+        printf("- Time increment (s) ...... %f\n",
+                oskar_vis_time_inc_seconds(vis));
+        printf("- Integration time (s) .... %f\n",
+                oskar_vis_time_int_seconds(vis));
         printf("\n");
     }
+    oskar_vis_free(vis, &status);
+    vis = 0;
 
     if (displayLog)
     {
@@ -115,13 +123,15 @@ int main(int argc, char **argv)
                 OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset, &tag_error);
         if (!tag_error)
         {
-            oskar_Mem temp(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+            oskar_Mem temp;
+            oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &status);
             oskar_mem_binary_stream_read(&temp, stream, &index,
                     OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
-            oskar_mem_realloc(&temp, temp.num_elements + 1, &status);
+            oskar_mem_realloc(&temp, oskar_mem_length(&temp) + 1, &status);
             if (status) return status;
-            ((char*)temp.data)[temp.num_elements - 1] = 0;
-            printf("%s", (char*)(temp.data));
+            oskar_mem_char(&temp)[oskar_mem_length(&temp) - 1] = 0;
+            printf("%s", oskar_mem_char(&temp));
+            oskar_mem_free(&temp, &status);
         }
         fclose(stream);
         oskar_binary_tag_index_free(index, &status);
@@ -140,13 +150,15 @@ int main(int argc, char **argv)
                 OSKAR_TAG_SETTINGS, 0, &data_size, &data_offset, &tag_error);
         if (!tag_error)
         {
-            oskar_Mem temp(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+            oskar_Mem temp;
+            oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &status);
             oskar_mem_binary_stream_read(&temp, stream, &index,
                     OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
-            oskar_mem_realloc(&temp, temp.num_elements + 1, &status);
+            oskar_mem_realloc(&temp, oskar_mem_length(&temp) + 1, &status);
             if (status) return status;
-            ((char*)temp.data)[temp.num_elements - 1] = 0;
-            printf("%s", (char*)(temp.data));
+            oskar_mem_char(&temp)[oskar_mem_length(&temp) - 1] = 0;
+            printf("%s", oskar_mem_char(&temp));
+            oskar_mem_free(&temp, &status);
         }
         fclose(stream);
         oskar_binary_tag_index_free(index, &status);

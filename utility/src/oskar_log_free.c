@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_file_exists.h"
-#include "utility/oskar_log_free.h"
-#include "utility/oskar_log_section.h"
-#include "utility/oskar_log_write.h"
-#include "utility/oskar_system_clock_string.h"
+#include <oskar_file_exists.h>
+#include <private_log.h>
+#include <oskar_log.h>
+#include <oskar_system_clock_string.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-int oskar_log_free(oskar_Log* log)
+void oskar_log_free(oskar_Log* log)
 {
     /* Print closing message. */
     oskar_log_section(log, "OSKAR-%s ending at %s.",
@@ -64,16 +64,12 @@ int oskar_log_free(oskar_Log* log)
     if (log->length) free(log->length);
     if (log->timestamp) free(log->timestamp);
 
-    /* Reset meta-data. */
-    log->size = 0;
-    log->capacity = 0;
-    log->file = 0;
-    log->keep_file = 1;
-
 #ifdef _OPENMP
     omp_destroy_lock(&log->mutex);
 #endif
-    return OSKAR_SUCCESS;
+
+    /* Free the structure itself. */
+    free(log);
 }
 
 #ifdef __cplusplus

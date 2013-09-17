@@ -33,9 +33,9 @@
  * @file oskar_fits_image_to_sky_model.h
  */
 
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Log.h"
+#include <oskar_global.h>
+#include <oskar_sky.h>
+#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,7 +61,7 @@ extern "C" {
  */
 OSKAR_FITS_EXPORT
 int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
-        oskar_SkyModel* sky, double spectral_index, double min_peak_fraction,
+        oskar_Sky* sky, double spectral_index, double min_peak_fraction,
         double noise_floor, int downsample_factor);
 
 #ifdef __cplusplus

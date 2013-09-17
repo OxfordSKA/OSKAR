@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,31 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_getline.h"
+#include <oskar_getline.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
 int oskar_getline(char** lineptr, size_t* n, FILE* stream)
 {
     /* Initialise the byte counter. */
     size_t size = 0;
     int c;
 
-    /* Check for sane inputs. */
-    if (lineptr == NULL || n == NULL || stream == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
     /* Check if buffer is empty. */
-    if (*n == 0 || *lineptr == NULL)
+    if (*n == 0 || *lineptr == 0)
     {
         *n = 80;
         *lineptr = (char*)malloc(*n);
-        if (*lineptr == NULL)
+        if (*lineptr == 0)
             return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
     }
 
@@ -72,7 +69,7 @@ int oskar_getline(char** lineptr, size_t* n, FILE* stream)
             /* Double the length of the buffer. */
             *n = 2 * *n + 1;
             t = realloc(*lineptr, *n);
-            if (t == NULL)
+            if (!t)
                 return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
             *lineptr = (char*)t;
         }
@@ -89,3 +86,7 @@ int oskar_getline(char** lineptr, size_t* n, FILE* stream)
         return OSKAR_ERR_EOF;
     return size;
 }
+
+#ifdef __cplusplus
+}
+#endif

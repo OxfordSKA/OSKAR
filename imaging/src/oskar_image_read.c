@@ -32,9 +32,8 @@
 #include "utility/oskar_BinaryTag.h"
 #include "utility/oskar_binary_stream_read.h"
 #include "utility/oskar_binary_tag_index_free.h"
+#include <oskar_mem.h>
 #include "utility/oskar_mem_binary_stream_read.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_init.h"
 #include <math.h>
 #include <stdlib.h>
 

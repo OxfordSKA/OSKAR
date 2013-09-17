@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_imager.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_log_error.h"
-#include "utility/oskar_log_message.h"
-#include "utility/oskar_Log.h"
+#include <apps/lib/oskar_imager.h>
 #include <apps/lib/oskar_OptionParser.h>
+
+#include <oskar_get_error_string.h>
+#include <oskar_log.h>
 #include <cstdio>
 #include <cstdlib>
 
@@ -44,13 +43,13 @@ int main(int argc, char** argv)
     if (!opt.check_options(argc, argv)) return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Create the log.
-    oskar_Log log;
-    oskar_log_message(&log, 0, "Running binary %s", argv[0]);
+    oskar_Log* log = oskar_log_create();
+    oskar_log_message(log, 0, "Running binary %s", argv[0]);
 
     try
     {
         // Run the imager.
-        error = oskar_imager(argv[1], &log);
+        error = oskar_imager(argv[1], log);
     }
     catch (int code)
     {
@@ -59,7 +58,8 @@ int main(int argc, char** argv)
 
     // Check for errors.
     if (error)
-        oskar_log_error(&log, "Run failed: %s.", oskar_get_error_string(error));
+        oskar_log_error(log, "Run failed: %s.", oskar_get_error_string(error));
+    oskar_log_free(log);
 
     return error;
 }

@@ -30,36 +30,34 @@ set(station_SRC
     src/oskar_evaluate_element_weights_errors_cuda.cu
     src/oskar_evaluate_element_weights_errors.c
     src/oskar_evaluate_element_weights.c
-    src/oskar_evaluate_flux_density.c
     src/oskar_evaluate_station_beam_aperture_array.c
     src/oskar_evaluate_station_beam_gaussian.c
     src/oskar_evaluate_station_from_telescope_dipole_azimuth.c
     src/oskar_evaluate_source_horizontal_lmn.c
-    src/oskar_station_model_analyse.c
-    src/oskar_station_model_copy.c
-    src/oskar_station_model_different.c
-    src/oskar_station_model_free.c
-    src/oskar_station_model_init_child_stations.c
-    src/oskar_station_model_init.c
-    src/oskar_station_model_load_config.c
-    src/oskar_station_model_location.c
-    src/oskar_station_model_multiply_by_wavenumber.c
-    src/oskar_station_model_override_element_gains.c
-    src/oskar_station_model_override_element_orientations.c
-    src/oskar_station_model_override_element_phases.c
-    src/oskar_station_model_override_element_time_variable_gains.c
-    src/oskar_station_model_override_element_time_variable_phases.c
-    src/oskar_station_model_override_element_xy_position_errors.c
-    src/oskar_station_model_resize_element_types.c
-    src/oskar_station_model_resize.c
-    src/oskar_station_model_save_config.c
-    src/oskar_station_model_scale_coords.c
-    src/oskar_station_model_set_element_coords.c
-    src/oskar_station_model_set_element_errors.c
-    src/oskar_station_model_set_element_orientation.c
-    src/oskar_station_model_set_element_weight.c
-    src/oskar_station_model_type.c
-    src/oskar_StationModel.cpp
+    src/oskar_station_accessors.c
+    src/oskar_station_analyse.c
+    src/oskar_station_create_child_stations.c
+    src/oskar_station_create_copy.c
+    src/oskar_station_create.c
+    src/oskar_station_different.c
+    src/oskar_station_duplicate_first_child.c
+    src/oskar_station_free.c
+    src/oskar_station_load_config.c
+    src/oskar_station_multiply_by_wavenumber.c
+    src/oskar_station_override_element_gains.c
+    src/oskar_station_override_element_orientations.c
+    src/oskar_station_override_element_phases.c
+    src/oskar_station_override_element_time_variable_gains.c
+    src/oskar_station_override_element_time_variable_phases.c
+    src/oskar_station_override_element_xy_position_errors.c
+    src/oskar_station_resize_element_types.c
+    src/oskar_station_resize.c
+    src/oskar_station_save_config.c
+    src/oskar_station_scale_coords.c
+    src/oskar_station_set_element_coords.c
+    src/oskar_station_set_element_errors.c
+    src/oskar_station_set_element_orientation.c
+    src/oskar_station_set_element_weight.c
     src/oskar_system_noise_model_copy.c
     src/oskar_system_noise_model_free.c
     src/oskar_system_noise_model_init.c

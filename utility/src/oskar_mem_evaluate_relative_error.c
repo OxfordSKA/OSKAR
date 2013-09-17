@@ -26,12 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_mem_copy.h>
-#include <oskar_mem_evaluate_relative_error.h>
-#include <oskar_mem_free.h>
-#include <oskar_mem_init.h>
-#include <oskar_mem_type_check.h>
-#include <oskar_vector_types.h>
+#include <private_mem.h>
+#include <oskar_mem.h>
 #include <math.h>
 #include <float.h>
 
@@ -110,22 +106,22 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     if (std_rel_error) *std_rel_error = DBL_MAX;
 
     /* Type and dimension check. */
-    if (oskar_mem_is_matrix(val_approx->type) &&
-            !oskar_mem_is_matrix(val_accurate->type))
+    if (oskar_mem_type_is_matrix(val_approx->type) &&
+            !oskar_mem_type_is_matrix(val_accurate->type))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-    if (oskar_mem_is_complex(val_approx->type) &&
-            !oskar_mem_is_complex(val_accurate->type))
+    if (oskar_mem_type_is_complex(val_approx->type) &&
+            !oskar_mem_type_is_complex(val_accurate->type))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
 
     /* Get and check base types. */
-    base_type_approx = oskar_mem_base_type(val_approx->type);
-    base_type_accurate = oskar_mem_base_type(val_accurate->type);
+    base_type_approx = oskar_mem_type_precision(val_approx->type);
+    base_type_accurate = oskar_mem_type_precision(val_accurate->type);
     if (base_type_approx != OSKAR_SINGLE &&
             base_type_approx != OSKAR_DOUBLE)
     {
@@ -142,7 +138,7 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     /* Get number of elements to check. */
     n = val_approx->num_elements < val_accurate->num_elements ?
             val_approx->num_elements : val_accurate->num_elements;
-    if (oskar_mem_is_matrix(val_approx->type)) n *= 4;
+    if (oskar_mem_type_is_matrix(val_approx->type)) n *= 4;
 
     /* Copy input data to temporary CPU arrays if required. */
     app_ptr = val_approx;
@@ -169,7 +165,7 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     }
 
     /* Check numbers are the same, to appropriate precision. */
-    if (oskar_mem_is_complex(val_approx->type))
+    if (oskar_mem_type_is_complex(val_approx->type))
     {
         if (base_type_approx == OSKAR_SINGLE &&
                 base_type_accurate == OSKAR_SINGLE)

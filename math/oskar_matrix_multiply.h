@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_MATRIX_MULTIPLY_H_
 #define OSKAR_MATRIX_MULTIPLY_H_
 
@@ -34,34 +33,65 @@
  * @file oskar_matrix_multiply.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Matrix multiplication with optional transpose, C = A * B.
+ * @brief
+ * Provides matrix-matrix multiplication (single precision).
  *
  * @details
- * This is an interface to BLAS gemm.
+ * This function performs matrix-matrix multiplication, with C = A * B.
  *
- * @param C
- * @param M
- * @param N
- * @param K
- * @param transposeA
- * @param transposeB
- * @param A
- * @param B
+ * Matrices must be in row-major order (C-style memory ordering).
  *
- * @return An error code
+ * This function requires the CBLAS library function sgemm().
+ *
+ * @param[out] C         The output matrix.
+ * @param[in] rows_A     The number of rows in matrix A.
+ * @param[in] cols_A     The number of columns in matrix A.
+ * @param[in] rows_B     The number of rows in matrix B.
+ * @param[in] cols_B     The number of columns in matrix B.
+ * @param[in] transA     Flag specifying whether matrix A should be transposed.
+ * @param[in] transB     Flag specifying whether matrix B should be transposed.
+ * @param[in] A          The input matrix A.
+ * @param[in] B          The input matrix B.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_matrix_multiply(oskar_Mem* C,
+void oskar_matrix_multiply_f(float* C,
         int rows_A, int cols_A, int rows_B, int cols_B,
-        int transposeA, int transposeB, const oskar_Mem* A, const oskar_Mem* B);
+        int transA, int transB, const float* A, const float* B, int* status);
+
+/**
+ * @brief
+ * Provides matrix-matrix multiplication (double precision).
+ *
+ * @details
+ * This function performs matrix-matrix multiplication, with C = A * B.
+ *
+ * Matrices must be in row-major order (C-style memory ordering).
+ *
+ * This function requires the CBLAS library function dgemm().
+ *
+ * @param[out] C         The output matrix.
+ * @param[in] rows_A     The number of rows in matrix A.
+ * @param[in] cols_A     The number of columns in matrix A.
+ * @param[in] rows_B     The number of rows in matrix B.
+ * @param[in] cols_B     The number of columns in matrix B.
+ * @param[in] transA     Flag specifying whether matrix A should be transposed.
+ * @param[in] transB     Flag specifying whether matrix B should be transposed.
+ * @param[in] A          The input matrix A.
+ * @param[in] B          The input matrix B.
+ * @param[in,out] status Status return code.
+ */
+OSKAR_EXPORT
+void oskar_matrix_multiply_d(double* C,
+        int rows_A, int cols_A, int rows_B, int cols_B,
+        int transA, int transB, const double* A, const double* B, int* status);
 
 #ifdef __cplusplus
 }

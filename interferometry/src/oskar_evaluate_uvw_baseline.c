@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_evaluate_baselines.h"
-#include "interferometry/oskar_evaluate_uvw_baseline.h"
-#include "interferometry/oskar_evaluate_uvw_station.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_get_pointer.h"
-#include "sky/oskar_mjd_to_gast_fast.h"
+#include <oskar_evaluate_baselines.h>
+#include <oskar_evaluate_uvw_baseline.h>
+#include <oskar_evaluate_uvw_station.h>
+#include <oskar_mjd_to_gast_fast.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +55,7 @@ void oskar_evaluate_uvw_baseline(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
     if (*status) return;
 
     /* Get input data type and number of baselines. */
-    type = x->type;
+    type = oskar_mem_type(x);
     num_baselines = num_stations * (num_stations - 1) / 2;
 
     /* Check that the memory is not NULL. */
@@ -66,25 +64,25 @@ void oskar_evaluate_uvw_baseline(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Check that the data dimensions are OK. */
-    if (uu->num_elements < num_baselines * num_dumps ||
-            vv->num_elements < num_baselines * num_dumps ||
-            ww->num_elements < num_baselines * num_dumps ||
-            x->num_elements < num_stations ||
-            y->num_elements < num_stations ||
-            z->num_elements < num_stations ||
-            work->num_elements < 3 * num_stations)
+    if ((int)oskar_mem_length(uu) < num_baselines * num_dumps ||
+            (int)oskar_mem_length(vv) < num_baselines * num_dumps ||
+            (int)oskar_mem_length(ww) < num_baselines * num_dumps ||
+            (int)oskar_mem_length(x) < num_stations ||
+            (int)oskar_mem_length(y) < num_stations ||
+            (int)oskar_mem_length(z) < num_stations ||
+            (int)oskar_mem_length(work) < 3 * num_stations)
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Check that the data is of the right type. */
-    if (uu->type != type || vv->type != type || ww->type != type ||
-            y->type != type || z->type != type || work->type != type)
+    if (oskar_mem_type(uu) != type || oskar_mem_type(vv) != type || oskar_mem_type(ww) != type ||
+            oskar_mem_type(y) != type || oskar_mem_type(z) != type || oskar_mem_type(work) != type)
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Check that the data is in the right location. */
-    location = x->location;
-    if (y->location != location || z->location != location ||
-            uu->location != location || vv->location != location ||
-            ww->location != location)
+    location = oskar_mem_location(x);
+    if (oskar_mem_location(y) != location || oskar_mem_location(z) != location ||
+            oskar_mem_location(uu) != location || oskar_mem_location(vv) != location ||
+            oskar_mem_location(ww) != location)
         *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Get pointers from work buffer. */

@@ -26,11 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_mem_copy.h>
-#include <oskar_mem_free.h>
-#include <oskar_mem_init.h>
-#include <oskar_mem_random_fill.h>
-#include <oskar_mem_type_check.h>
+#include <private_mem.h>
+#include <oskar_mem.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -53,7 +50,7 @@ void oskar_mem_random_fill(oskar_Mem* mem, double lo, double hi, int* status)
     if (*status) return;
 
     /* Check type. */
-    base_type = oskar_mem_base_type(mem->type);
+    base_type = oskar_mem_type_precision(mem->type);
     if (base_type != OSKAR_SINGLE && base_type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -76,8 +73,8 @@ void oskar_mem_random_fill(oskar_Mem* mem, double lo, double hi, int* status)
 
     /* Get total number of elements. */
     num_elements = mem->num_elements;
-    if (oskar_mem_is_matrix(mem->type)) num_elements *= 4;
-    if (oskar_mem_is_complex(mem->type)) num_elements *= 2;
+    if (oskar_mem_type_is_matrix(mem->type)) num_elements *= 4;
+    if (oskar_mem_type_is_complex(mem->type)) num_elements *= 2;
 
     /* Fill memory with random numbers. */
     if (base_type == OSKAR_SINGLE)

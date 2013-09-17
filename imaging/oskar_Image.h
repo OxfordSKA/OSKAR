@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #ifndef OSKAR_IMAGE_H_
 #define OSKAR_IMAGE_H_
 
-#include "utility/oskar_Mem.h"
+#include <oskar_mem.h>
 
 /**
  * @struct oskar_Image

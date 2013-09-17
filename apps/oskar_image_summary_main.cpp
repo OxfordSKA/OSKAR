@@ -27,16 +27,12 @@
  */
 
 
-#include "oskar_global.h"
 #include "imaging/oskar_Image.h"
 #include "imaging/oskar_image_read.h"
 #include "imaging/oskar_get_image_type_string.h"
 
 #include "utility/oskar_get_error_string.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_realloc.h"
+#include <oskar_mem.h>
 
 #include "utility/oskar_BinaryTag.h"
 #include "utility/oskar_BinaryHeader.h"
@@ -88,7 +84,7 @@ int main(int argc, char** argv)
                     oskar_get_image_type_string(image.image_type));
             printf("\n");
             printf("- Data type ............... %s\n",
-                    oskar_get_data_type_string(image.data.type));
+                    oskar_get_data_type_string(oskar_mem_type(&image.data)));
             printf("\n");
             printf("- Field of view (degrees) . %f\n", image.fov_dec_deg);
             printf("\n");
@@ -152,13 +148,14 @@ int main(int argc, char** argv)
                     OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset, &tag_error);
             if (!tag_error)
             {
-                oskar_Mem temp(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+                oskar_Mem temp;
+                oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &error);
                 oskar_mem_binary_stream_read(&temp, stream, &index,
                         OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &error);
-                oskar_mem_realloc(&temp, temp.num_elements + 1, &error);
-                if (error) return OSKAR_FAIL;
-                ((char*)temp.data)[temp.num_elements - 1] = 0;
-                printf("%s", (char*)(temp.data));
+                oskar_mem_realloc(&temp, oskar_mem_length(&temp) + 1, &error);
+                if (error) return error;
+                oskar_mem_char(&temp)[oskar_mem_length(&temp) - 1] = 0;
+                printf("%s", oskar_mem_char(&temp));
             }
             fclose(stream);
             oskar_binary_tag_index_free(index, &error);
@@ -178,13 +175,14 @@ int main(int argc, char** argv)
                     OSKAR_TAG_SETTINGS, 0, &data_size, &data_offset, &tag_error);
             if (!tag_error)
             {
-                oskar_Mem temp(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+                oskar_Mem temp;
+                oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &error);
                 oskar_mem_binary_stream_read(&temp, stream, &index,
                         OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &error);
-                oskar_mem_realloc(&temp, temp.num_elements + 1, &error);
-                if (error) return OSKAR_FAIL;
-                ((char*)temp.data)[temp.num_elements - 1] = 0;
-                printf("%s", (char*)(temp.data));
+                oskar_mem_realloc(&temp, oskar_mem_length(&temp) + 1, &error);
+                if (error) return error;
+                oskar_mem_char(&temp)[oskar_mem_length(&temp) - 1] = 0;
+                printf("%s", oskar_mem_char(&temp));
             }
             fclose(stream);
             oskar_binary_tag_index_free(index, &error);

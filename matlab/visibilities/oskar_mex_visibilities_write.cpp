@@ -28,14 +28,9 @@
 
 #include <mex.h>
 
-#include <oskar_global.h>
-#include <interferometry/oskar_Visibilities.h>
-#include <utility/oskar_get_error_string.h>
-#include <interferometry/oskar_visibilities_free.h>
-#include <interferometry/oskar_visibilities_write.h>
-#include <interferometry/oskar_visibilities_init.h>
-#include <utility/oskar_Log.h>
-#include <utility/oskar_mem_init.h>
+#include <oskar_vis.h>
+#include <oskar_log.h>
+#include <oskar_get_error_string.h>
 
 #include "matlab/visibilities/lib/oskar_mex_vis_from_matlab_struct.h"
 #include "matlab/common/oskar_matlab_common.h"
@@ -53,11 +48,10 @@ void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
 
     // Extract arguments from MATLAB mxArray objects.
     const char* filename = mxArrayToString(in[0]);
-    oskar_Visibilities vis;
-    oskar_mex_vis_from_matlab_struct(&vis, in[1]);
+    oskar_Vis* vis = oskar_mex_vis_from_matlab_struct(in[1]);
 
-    oskar_visibilities_write(&vis, 0, filename, &status);
-    oskar_visibilities_free(&vis, &status);
+    oskar_vis_write(vis, 0, filename, &status);
+    oskar_vis_free(vis, &status);
     if (status)
     {
         oskar_matlab_error("Failed to write visibility file (%s)",

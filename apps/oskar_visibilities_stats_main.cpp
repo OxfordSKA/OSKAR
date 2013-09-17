@@ -26,20 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include <oskar_global.h>
-
 #include <apps/lib/oskar_OptionParser.h>
 
-#include "utility/oskar_vector_types.h"
-#include <utility/oskar_Log.h>
-#include <utility/oskar_log_settings.h>
-#include <utility/oskar_get_error_string.h>
-
-#include <interferometry/oskar_visibilities_read.h>
-#include <interferometry/oskar_visibilities_write.h>
-#include <interferometry/oskar_visibilities_init.h>
-#include <interferometry/oskar_visibilities_copy.h>
+#include <oskar_log.h>
+#include <oskar_get_error_string.h>
+#include <oskar_vis.h>
 
 #include <string>
 #include <vector>
@@ -54,22 +45,10 @@ using namespace std;
 void set_options(oskar_OptionParser& opt);
 bool check_options(oskar_OptionParser& opt, int argc, char** argv);
 void check_error(int status);
-//char *doubleToRawString(double x) {
-//    // Assumes sizeof(long long) == 8.
-//
-//    char *buffer = new char[32];
-//    sprintf(buffer, "%llx", *(unsigned long long *)&x);  // Evil!
-//    return buffer;
-//}
 //------------------------------------------------------------------------------
 
 int main(int argc, char** argv)
 {
-    typedef float2 Complex;
-    typedef double2 DComplex;
-    typedef float4c Jones;
-    typedef double4c DJones;
-
     int status = OSKAR_SUCCESS;
 
     // Register options ========================================================
@@ -99,8 +78,7 @@ int main(int argc, char** argv)
         if (verbose)
             cout << "Loading visibility file: " << vis_filename[i] << endl;
 
-        oskar_Visibilities vis;
-        oskar_visibilities_read(&vis, vis_filename[i].c_str(), &status);
+        oskar_Vis* vis = oskar_vis_read(vis_filename[i].c_str(), &status);
         check_error(status);
         double min = DBL_MAX, max = -DBL_MAX;
         double mean = 0.0, rms = 0.0, var = 0.0, std = 0.0;
@@ -108,80 +86,76 @@ int main(int argc, char** argv)
         int num_vis = 0, num_zero = 0;
         if (verbose)
         {
-            cout << "  No. of baselines: " << vis.num_baselines << endl;
-            cout << "  No. of times: " << vis.num_times << endl;
-            cout << "  No. of channels: " << vis.num_channels << endl;
+            cout << "  No. of baselines: " << oskar_vis_num_baselines(vis) << endl;
+            cout << "  No. of times: " << oskar_vis_num_times(vis) << endl;
+            cout << "  No. of channels: " << oskar_vis_num_channels(vis) << endl;
         }
-        switch (vis.amplitude.type)
+        if (oskar_mem_type(oskar_vis_amplitude(vis)) ==
+                OSKAR_SINGLE_COMPLEX_MATRIX)
         {
-            case OSKAR_SINGLE_COMPLEX_MATRIX:
+            float4c* amp = oskar_mem_float4c(oskar_vis_amplitude(vis), &status);
+            for (int i = 0, c = 0; c < oskar_vis_num_channels(vis); ++c)
             {
-                Jones* amp = (Jones*)vis.amplitude.data;
-                for (int i = 0, c = 0; c < vis.num_channels; ++c)
+                for (int t = 0; t < oskar_vis_num_times(vis); ++t)
                 {
-                    for (int t = 0; t < vis.num_times; ++t)
+                    for (int b = 0; b < oskar_vis_num_baselines(vis); ++b, ++i)
                     {
-                        for (int b = 0; b < vis.num_baselines; ++b, ++i)
-                        {
-                            Complex xx = amp[i].a;
-                            Complex yy = amp[i].d;
-                            Complex I;
-                            I.x = 0.5 * (xx.x + yy.x);
-                            I.y = 0.5 * (xx.y + yy.y);
-                            float absI = sqrtf(I.x*I.x + I.y*I.y);
-                            if (absI < DBL_MIN)
-                                num_zero++;
-                            if (absI > max) max = absI;
-                            if (absI < min) min = absI;
-                            sum += absI;
-                            sumsq += absI * absI;
-                        }
+                        float2 xx = amp[i].a;
+                        float2 yy = amp[i].d;
+                        float2 I;
+                        I.x = 0.5 * (xx.x + yy.x);
+                        I.y = 0.5 * (xx.y + yy.y);
+                        float absI = sqrtf(I.x*I.x + I.y*I.y);
+                        if (absI < DBL_MIN)
+                            num_zero++;
+                        if (absI > max) max = absI;
+                        if (absI < min) min = absI;
+                        sum += absI;
+                        sumsq += absI * absI;
                     }
                 }
-                num_vis = vis.amplitude.num_elements;
-                mean = sum / num_vis;
-                rms = sqrtf(sumsq / num_vis);
-                var = sumsq/num_vis - mean*mean;
-                std = sqrtf(var);
-                break;
             }
-            case OSKAR_DOUBLE_COMPLEX_MATRIX:
+            num_vis = (int)oskar_mem_length(oskar_vis_amplitude(vis));
+            mean = sum / num_vis;
+            rms = sqrtf(sumsq / num_vis);
+            var = sumsq/num_vis - mean*mean;
+            std = sqrtf(var);
+        }
+        else if (oskar_mem_type(oskar_vis_amplitude(vis)) ==
+                OSKAR_DOUBLE_COMPLEX_MATRIX)
+        {
+            double4c* amp = oskar_mem_double4c(oskar_vis_amplitude(vis), &status);
+            for (int i = 0, c = 0; c < oskar_vis_num_channels(vis); ++c)
             {
-                DJones* amp = (DJones*)vis.amplitude.data;
-                for (int i = 0, c = 0; c < vis.num_channels; ++c)
+                for (int t = 0; t < oskar_vis_num_times(vis); ++t)
                 {
-                    for (int t = 0; t < vis.num_times; ++t)
+                    for (int b = 0; b < oskar_vis_num_baselines(vis); ++b, ++i)
                     {
-                        for (int b = 0; b < vis.num_baselines; ++b, ++i)
-                        {
-                            DComplex xx = amp[i].a;
-                            DComplex yy = amp[i].d;
-                            DComplex I;
-                            I.x = 0.5 * (xx.x + yy.x);
-                            I.y = 0.5 * (xx.y + yy.y);
-                            double absI = std::sqrt(I.x * I.x + I.y * I.y);
-                            if (absI < DBL_MIN)
-                                num_zero++;
-                            if (absI > max) max = absI;
-                            if (absI < min) min = absI;
-                            sum += absI;
-                            sumsq += absI * absI;
-                        }
+                        double2 xx = amp[i].a;
+                        double2 yy = amp[i].d;
+                        double2 I;
+                        I.x = 0.5 * (xx.x + yy.x);
+                        I.y = 0.5 * (xx.y + yy.y);
+                        double absI = std::sqrt(I.x * I.x + I.y * I.y);
+                        if (absI < DBL_MIN)
+                            num_zero++;
+                        if (absI > max) max = absI;
+                        if (absI < min) min = absI;
+                        sum += absI;
+                        sumsq += absI * absI;
                     }
                 }
-                num_vis = vis.amplitude.num_elements;
-                mean = sum / num_vis;
-                rms = std::sqrt(sumsq / num_vis);
-                var = sumsq/num_vis - mean*mean;
-                std = std::sqrt(var);
-                break;
             }
-            default:
-            {
-                return OSKAR_ERR_BAD_DATA_TYPE;
-                break;
-            }
-        } // switch (vis.amplitude.type)
+            num_vis = (int)oskar_mem_length(oskar_vis_amplitude(vis));
+            mean = sum / num_vis;
+            rms = std::sqrt(sumsq / num_vis);
+            var = sumsq/num_vis - mean*mean;
+            std = std::sqrt(var);
+        }
+        else
+        {
+            return OSKAR_ERR_BAD_DATA_TYPE;
+        }
 
         printf("min, max, mean, rms, std\n");
         printf("%e, %e, %e, %e, %e\n", min, max, mean, rms, std);
@@ -189,10 +163,9 @@ int main(int argc, char** argv)
         printf("number of non-zero visibilities = %i\n", num_vis-num_zero);
         printf("percent zero visibilities = %f\n", (double)num_zero/num_vis * 100.0);
 
+        // Free visibility data.
+        oskar_vis_free(vis, &status);
     } // end of loop over visibility files
-
-
-    // XXX free memory visibilities structure...
 
     return status;
 }

@@ -29,7 +29,7 @@
 #include "station/oskar_ElementModel.h"
 #include "station/oskar_element_model_evaluate.h"
 #include "station/test/Test_dipole_pattern.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_mem.h>
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_vector_types.h"
 

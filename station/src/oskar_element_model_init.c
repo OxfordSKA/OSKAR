@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 
 #include "station/oskar_element_model_init.h"
 #include "math/oskar_spline_data_init.h"
-#include "utility/oskar_mem_init.h"
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,7 +45,7 @@ void oskar_element_model_init(oskar_ElementModel* data, int type, int location,
     }
 
     /* Initialise variables. */
-    data->type = OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE;
+    data->element_type = OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE;
     data->taper_type = OSKAR_ELEMENT_MODEL_TAPER_NONE;
     data->cos_power = 0.0;
     data->gaussian_fwhm_rad = 0.0;

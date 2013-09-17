@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_scale_real.h"
-#include "utility/oskar_mem_scale_real_cuda.h"
-#include "utility/oskar_mem_type_check.h"
-#include "utility/oskar_cuda_check_error.h"
+#include <private_mem.h>
+#include <oskar_mem.h>
+#include <oskar_cuda_check_error.h>
+#include <oskar_mem_scale_real_cuda.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -52,13 +52,13 @@ void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status)
     num_elements = mem->num_elements;
 
     /* Check if elements are real, complex or matrix. */
-    if (oskar_mem_is_complex(mem->type))
+    if (oskar_mem_type_is_complex(mem->type))
         num_elements *= 2;
-    if (oskar_mem_is_matrix(mem->type))
+    if (oskar_mem_type_is_matrix(mem->type))
         num_elements *= 4;
 
     /* Scale the vector. */
-    if (oskar_mem_is_single(mem->type))
+    if (oskar_mem_type_is_single(mem->type))
     {
         if (mem->location == OSKAR_LOCATION_CPU)
         {
@@ -81,7 +81,7 @@ void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status)
             *status = OSKAR_ERR_BAD_LOCATION;
         }
     }
-    else if (oskar_mem_is_double(mem->type))
+    else if (oskar_mem_type_is_double(mem->type))
     {
         if (mem->location == OSKAR_LOCATION_CPU)
         {

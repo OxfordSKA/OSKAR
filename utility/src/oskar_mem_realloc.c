@@ -26,16 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_element_size.h"
-#include "utility/oskar_mem_realloc.h"
+#ifdef OSKAR_HAVE_CUDA
+#include <cuda_runtime_api.h>
+#endif
+
+#include <private_mem.h>
+#include <oskar_mem.h>
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-#ifdef OSKAR_HAVE_CUDA
-#include <cuda_runtime_api.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {

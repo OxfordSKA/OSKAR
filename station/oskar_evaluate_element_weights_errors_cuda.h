@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  * @file oskar_evaluate_element_weights_errors_cuda.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 /* Forward declaration. */
 struct curandStateXORWOW;
@@ -57,14 +57,12 @@ void oskar_evaluate_element_weights_errors_cuda_d(double2* errors,
 
 #ifdef __CUDACC__
 
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_element_weights_errors_cudak_f(float2* errors, int n,
         const float* amp_gain, const float* amp_error,
         const float* phase_offset, const float* phase_error,
         struct curandStateXORWOW* state);
 
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_element_weights_errors_cudak_d(double2* errors, int n,
         const double* amp_gain, const double* amp_error,

@@ -33,9 +33,9 @@
  * @file oskar_evaluate_array_pattern_hierarchical.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
-#include "station/oskar_StationModel.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
+#include <oskar_station.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,7 +70,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_evaluate_array_pattern_hierarchical(oskar_Mem* beam,
-        const oskar_StationModel* station, int num_points, const oskar_Mem* x,
+        const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* signal,
         const oskar_Mem* weights, int* status);
 

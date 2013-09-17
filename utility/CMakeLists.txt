@@ -23,10 +23,11 @@ set(utility_SRC
     src/oskar_get_data_type_string.c
     src/oskar_get_error_string.c
     src/oskar_getline.c
+    src/oskar_log_accessors.c
+    src/oskar_log_create.c
     src/oskar_log_error.c
     src/oskar_log_file_data.c
     src/oskar_log_free.c
-    src/oskar_log_init.c
     src/oskar_log_line.c
     src/oskar_log_message.c
     src/oskar_log_section.c
@@ -34,7 +35,7 @@ set(utility_SRC
     src/oskar_log_value.c
     src/oskar_log_warning.c
     src/oskar_log_write.c
-    src/oskar_Log.cpp
+    src/oskar_mem_accessors.c
     src/oskar_mem_add.c
     src/oskar_mem_alloc.c
     src/oskar_mem_append_raw.c
@@ -47,6 +48,8 @@ set(utility_SRC
     src/oskar_mem_binary_stream_write.c
     src/oskar_mem_clear_contents.c
     src/oskar_mem_copy.c
+    src/oskar_mem_create_copy.c
+    src/oskar_mem_create.c
     src/oskar_mem_different.c
     src/oskar_mem_element_size.c
     src/oskar_mem_element_multiply.c
@@ -60,7 +63,6 @@ set(utility_SRC
     src/oskar_mem_realloc.c
     src/oskar_mem_scale_real.c
     src/oskar_mem_set_value_real.c
-    src/oskar_mem_to_type.c
     src/oskar_Mem.cpp
     src/oskar_settings_free.c
     src/oskar_settings_init.c
@@ -68,8 +70,8 @@ set(utility_SRC
     src/oskar_string_to_array.c
     src/oskar_system_clock_data.c
     src/oskar_system_clock_string.c
-    src/oskar_timer_functions.c
-    src/oskar_timers_functions.c
+    src/oskar_timer.c
+    src/oskar_timers.c
 )
 
 if (CUDA_FOUND)
@@ -80,11 +82,11 @@ if (CUDA_FOUND)
         src/oskar_cuda_info_free.c
         src/oskar_cuda_info_log.c
         src/oskar_cuda_mem_log.c
-        src/oskar_curand_state_free.c
-        src/oskar_curand_state_init.cu
         src/oskar_mem_element_multiply_cuda.cu
         src/oskar_mem_scale_real_cuda.cu
         src/oskar_mem_set_value_real_cuda.cu
+        src/oskar_random_state_create.cu
+        src/oskar_random_state_free.c
     )
 endif()
 

@@ -35,9 +35,9 @@
 
 #include <mex.h>
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
-#include "string.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
+#include <string.h>
 
 // FIXME Review matlab type/format strings
 // this will effect the oskar.Jones matlab class .

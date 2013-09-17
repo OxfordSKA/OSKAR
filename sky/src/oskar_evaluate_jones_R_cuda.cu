@@ -37,7 +37,8 @@ extern "C" {
 
 /* Single precision. */
 void oskar_evaluate_jones_R_cuda_f(float4c* d_jones, int num_sources,
-        float* d_ra, float* d_dec, float latitude_rad, float lst_rad)
+        const float* d_ra, const float* d_dec, float latitude_rad,
+        float lst_rad)
 {
     float cos_lat, sin_lat;
     int num_blocks, num_threads = 256;
@@ -54,7 +55,8 @@ void oskar_evaluate_jones_R_cuda_f(float4c* d_jones, int num_sources,
 
 /* Double precision. */
 void oskar_evaluate_jones_R_cuda_d(double4c* d_jones, int num_sources,
-        double* d_ra, double* d_dec, double latitude_rad, double lst_rad)
+        const double* d_ra, const double* d_dec, double latitude_rad,
+        double lst_rad)
 {
     double cos_lat, sin_lat;
     int num_blocks, num_threads = 256;

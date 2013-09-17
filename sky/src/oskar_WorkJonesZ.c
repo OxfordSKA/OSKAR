@@ -27,10 +27,8 @@
  */
 
 
-#include "sky/oskar_WorkJonesZ.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_realloc.h"
+#include <oskar_WorkJonesZ.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,25 +79,25 @@ void oskar_work_jones_z_free(oskar_WorkJonesZ* work, int* status)
 
 int oskar_work_jones_z_type(oskar_WorkJonesZ* work)
 {
-    if (work->hor_x.type == OSKAR_DOUBLE &&
-            work->hor_y.type == OSKAR_DOUBLE &&
-            work->hor_z.type == OSKAR_DOUBLE &&
-            work->pp_lon.type == OSKAR_DOUBLE &&
-            work->pp_lat.type == OSKAR_DOUBLE &&
-            work->pp_rel_path.type == OSKAR_DOUBLE &&
-            work->screen_TEC.type == OSKAR_DOUBLE &&
-            work->total_TEC.type == OSKAR_DOUBLE)
+    if (oskar_mem_type(&work->hor_x) == OSKAR_DOUBLE &&
+            oskar_mem_type(&work->hor_y) == OSKAR_DOUBLE &&
+            oskar_mem_type(&work->hor_z) == OSKAR_DOUBLE &&
+            oskar_mem_type(&work->pp_lon) == OSKAR_DOUBLE &&
+            oskar_mem_type(&work->pp_lat) == OSKAR_DOUBLE &&
+            oskar_mem_type(&work->pp_rel_path) == OSKAR_DOUBLE &&
+            oskar_mem_type(&work->screen_TEC) == OSKAR_DOUBLE &&
+            oskar_mem_type(&work->total_TEC) == OSKAR_DOUBLE)
     {
         return OSKAR_DOUBLE;
     }
-    else if (work->hor_x.type == OSKAR_SINGLE &&
-            work->hor_y.type == OSKAR_SINGLE &&
-            work->hor_z.type == OSKAR_SINGLE &&
-            work->pp_lon.type == OSKAR_SINGLE &&
-            work->pp_lat.type == OSKAR_SINGLE &&
-            work->pp_rel_path.type == OSKAR_SINGLE &&
-            work->screen_TEC.type == OSKAR_SINGLE &&
-            work->total_TEC.type == OSKAR_SINGLE)
+    else if (oskar_mem_type(&work->hor_x) == OSKAR_SINGLE &&
+            oskar_mem_type(&work->hor_y) == OSKAR_SINGLE &&
+            oskar_mem_type(&work->hor_z) == OSKAR_SINGLE &&
+            oskar_mem_type(&work->pp_lon) == OSKAR_SINGLE &&
+            oskar_mem_type(&work->pp_lat) == OSKAR_SINGLE &&
+            oskar_mem_type(&work->pp_rel_path) == OSKAR_SINGLE &&
+            oskar_mem_type(&work->screen_TEC) == OSKAR_SINGLE &&
+            oskar_mem_type(&work->total_TEC) == OSKAR_SINGLE)
     {
         return OSKAR_SINGLE;
     }

@@ -34,9 +34,9 @@
  * @file oskar_evaluate_TEC_TID.h
  */
 
-#include "oskar_global.h"
-#include "sky/oskar_SettingsIonosphere.h"
-#include "utility/oskar_Mem.h"
+#include <oskar_global.h>
+#include <oskar_SettingsIonosphere.h>
+#include <oskar_mem.h>
 
 
 #ifdef __cplusplus

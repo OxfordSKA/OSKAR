@@ -26,8 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_global.h>
-
 #include <apps/lib/oskar_OptionParser.h>
 
 #include <apps/lib/oskar_sim_tec_screen.h>
@@ -36,29 +34,20 @@
 #include <apps/lib/oskar_set_up_telescope.h>
 #include <apps/lib/oskar_set_up_sky.h>
 
-#include <interferometry/oskar_TelescopeModel.h>
-#include <interferometry/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h>
+#include <oskar_telescope.h>
+#include <oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h>
 
-#include <sky/oskar_SkyModel.h>
-#include <sky/oskar_mjd_to_gast_fast.h>
-#include <sky/oskar_ra_dec_to_hor_lmn.h>
-#include <sky/oskar_sky_model_free.h>
+#include <oskar_mjd_to_gast_fast.h>
+#include <oskar_ra_dec_to_hor_lmn.h>
+#include <oskar_sky.h>
 
-#include <utility/oskar_get_error_string.h>
-#include <utility/oskar_log_error.h>
-#include <utility/oskar_log_message.h>
-#include <utility/oskar_Log.h>
-#include <utility/oskar_log_settings.h>
-#include <utility/oskar_mem_get_pointer.h>
+#include <oskar_get_error_string.h>
+#include <oskar_log.h>
 
-#include <utility/oskar_mem_init.h>
-#include <utility/oskar_mem_free.h>
+#include <oskar_image_free.h>
+#include <oskar_evaluate_image_lon_lat_grid.h>
 
-#include <imaging/oskar_Image.h>
-#include <imaging/oskar_image_free.h>
-#include <imaging/oskar_evaluate_image_lon_lat_grid.h>
-
-#include <station/oskar_evaluate_pierce_points.h>
+#include <oskar_evaluate_pierce_points.h>
 
 #include <cstdlib>
 #include <cstdio>
@@ -77,7 +66,7 @@ int get_lon_lat_quad_coords(double* coords, oskar_Settings* settings,
         oskar_Log* log);
 void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
         int stationID, oskar_Settings* settings,
-        oskar_TelescopeModel* telescope, int* status);
+        oskar_Telescope* telescope, int* status);
 
 void write_kml(const char* kml_file, const char* image_file, double* coords,
         oskar_Mem& pp_lon, oskar_Mem& pp_lat);
@@ -113,26 +102,26 @@ int main(int argc, char** argv)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Create the log.
-    oskar_Log log;
-    oskar_log_message(&log, 0, "Running binary %s", argv[0]);
+    oskar_Log* log = oskar_log_create();
+    oskar_log_message(log, 0, "Running binary %s", argv[0]);
 
     const char* settings_file = opt.getArg(0);
     oskar_Settings settings;
-    oskar_settings_load(&settings, &log, settings_file);
-    log.keep_file = settings.sim.keep_log_file;
+    oskar_settings_load(&settings, log, settings_file);
+    oskar_log_set_keep_file(log, settings.sim.keep_log_file);
 
-    oskar_log_settings_telescope(&log, &settings);
-    oskar_log_settings_observation(&log, &settings);
-    oskar_log_settings_ionosphere(&log, &settings);
+    oskar_log_settings_telescope(log, &settings);
+    oskar_log_settings_observation(log, &settings);
+    oskar_log_settings_ionosphere(log, &settings);
 
     // Generate or load TEC screen image
     // -------------------------------------------------------------------------
     oskar_Image TEC_screen;
-    status = oskar_sim_tec_screen(&TEC_screen, &settings, &log);
+    status = oskar_sim_tec_screen(&TEC_screen, &settings, log);
 
     // Extract corner lon, lat values.
     double coords[8];
-    status = get_lon_lat_quad_coords(coords, &settings, &log);
+    status = get_lon_lat_quad_coords(coords, &settings, log);
     //    for (int i = 0; i < 8; i+=2)
     //        printf("%i) %f %f\n", i, coords[i], coords[i+1]);
 
@@ -144,9 +133,9 @@ int main(int argc, char** argv)
 
     // Generate or load pierce points
     // -------------------------------------------------------------------------
-    status = evaluate_pp(pp_lon, pp_lat, settings, &log);
+    status = evaluate_pp(pp_lon, pp_lat, settings, log);
     if (status != OSKAR_SUCCESS)
-        oskar_log_error(&log, "XXX: %s.", oskar_get_error_string(status));
+        oskar_log_error(log, "XXX: %s.", oskar_get_error_string(status));
 
     // Write out KML
     // -------------------------------------------------------------------------
@@ -156,6 +145,7 @@ int main(int argc, char** argv)
     oskar_image_free(&TEC_screen, &status);
     oskar_mem_free(&pp_lon, &status);
     oskar_mem_free(&pp_lat, &status);
+    oskar_log_free(log);
 }
 
 int evaluate_pp(oskar_Mem& pp_lon, oskar_Mem& pp_lat, oskar_Settings& settings,
@@ -163,12 +153,12 @@ int evaluate_pp(oskar_Mem& pp_lon, oskar_Mem& pp_lat, oskar_Settings& settings,
 {
     int status = OSKAR_SUCCESS;
 
-    oskar_TelescopeModel telescope;
-    oskar_set_up_telescope(&telescope, log, &settings, &status);
+    oskar_Telescope* telescope = oskar_set_up_telescope(log, &settings,
+            &status);
 
-    oskar_SkyModel* sky = NULL;
     int num_sky_chunks = 0;
-    status = oskar_set_up_sky(&num_sky_chunks, &sky, log, &settings);
+    oskar_Sky** sky = oskar_set_up_sky(&num_sky_chunks, log, &settings,
+            &status);
 
     // FIXME remove this restriction ... (loop over chunks)
     if (num_sky_chunks != 1)
@@ -181,7 +171,7 @@ int evaluate_pp(oskar_Mem& pp_lon, oskar_Mem& pp_lat, oskar_Settings& settings,
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     int loc = OSKAR_LOCATION_CPU;
 
-    oskar_SkyModel* chunk = &sky[0];
+    oskar_Sky* chunk = sky[0];
     int num_sources = chunk->num_sources;
     oskar_Mem hor_x, hor_y, hor_z;
     int owner = OSKAR_TRUE;
@@ -190,7 +180,7 @@ int evaluate_pp(oskar_Mem& pp_lon, oskar_Mem& pp_lat, oskar_Settings& settings,
     oskar_mem_init(&hor_z, type, loc, num_sources, owner, &status);
 
     oskar_Mem pp_rel_path;
-    int num_stations = telescope.num_stations;
+    int num_stations = oskar_telescope_num_stations(telescope);
 
     int num_pp = num_stations * num_sources;
     oskar_mem_init(&pp_lon, type, loc, num_pp, owner, &status);
@@ -208,6 +198,11 @@ int evaluate_pp(oskar_Mem& pp_lon, oskar_Mem& pp_lat, oskar_Settings& settings,
     double dt_dump = settings.obs.dt_dump_days;
     double screen_height_m = settings.ionosphere.TID->height_km * 1000.0;
 
+    void *x_, *y_, *z_;
+    x_ = oskar_mem_void(oskar_telescope_station_x(telescope));
+    y_ = oskar_mem_void(oskar_telescope_station_y(telescope));
+    z_ = oskar_mem_void(oskar_telescope_station_z(telescope));
+
     num_times = 1; // XXX restriction made to match image.
     for (int t = 0; t < num_times; ++t)
     {
@@ -216,24 +211,25 @@ int evaluate_pp(oskar_Mem& pp_lon, oskar_Mem& pp_lat, oskar_Settings& settings,
 
         for (int i = 0; i < num_stations; ++i)
         {
-            oskar_StationModel* station = &telescope.station[i];
-            double lon = station->longitude_rad;
-            double lat = station->latitude_rad;
-            double alt = station->altitude_m;
+            oskar_Station* station;
+            station = oskar_telescope_station(telescope, i);
+            double lon = oskar_station_longitude_rad(station);
+            double lat = oskar_station_latitude_rad(station);
+            double alt = oskar_station_altitude_m(station);
             double x_ecef, y_ecef, z_ecef;
             double x_offset,y_offset,z_offset;
 
             if (type == OSKAR_DOUBLE)
             {
-                x_offset = ((double*)telescope.station_x.data)[i];
-                y_offset = ((double*)telescope.station_y.data)[i];
-                z_offset = ((double*)telescope.station_z.data)[i];
+                x_offset = ((double*)x_)[i];
+                y_offset = ((double*)y_)[i];
+                z_offset = ((double*)z_)[i];
             }
             else
             {
-                x_offset = (double)((float*)telescope.station_x.data)[i];
-                y_offset = (double)((float*)telescope.station_y.data)[i];
-                z_offset = (double)((float*)telescope.station_z.data)[i];
+                x_offset = (double)((float*)x_)[i];
+                y_offset = (double)((float*)y_)[i];
+                z_offset = (double)((float*)z_)[i];
             }
 
             oskar_offset_geocentric_cartesian_to_geocentric_cartesian(
@@ -243,15 +239,17 @@ int evaluate_pp(oskar_Mem& pp_lon, oskar_Mem& pp_lat, oskar_Settings& settings,
 
             if (type == OSKAR_DOUBLE)
             {
-                oskar_ra_dec_to_hor_lmn_d(chunk->num_sources,
-                        (double*)chunk->RA.data, (double*)chunk->Dec.data,
+                oskar_ra_dec_to_hor_lmn_d(oskar_sky_num_sources(chunk),
+                        oskar_mem_double_const(oskar_sky_ra_const(chunk), &status),
+                        oskar_mem_double_const(oskar_sky_dec_const(chunk), &status),
                         last, lat, (double*)hor_x.data, (double*)hor_y.data,
                         (double*)hor_z.data);
             }
             else
             {
-                oskar_ra_dec_to_hor_lmn_f(chunk->num_sources,
-                        (float*)chunk->RA.data, (float*)chunk->Dec.data,
+                oskar_ra_dec_to_hor_lmn_f(oskar_sky_num_sources(chunk),
+                        oskar_mem_float_const(oskar_sky_ra_const(chunk), &status),
+                        oskar_mem_float_const(oskar_sky_dec_const(chunk), &status),
                         last, lat, (float*)hor_x.data, (float*)hor_y.data,
                         (float*)hor_z.data);
             }
@@ -280,7 +278,8 @@ int evaluate_pp(oskar_Mem& pp_lon, oskar_Mem& pp_lat, oskar_Settings& settings,
     oskar_mem_free(&pp_st_lon, &status);
     oskar_mem_free(&pp_st_lat, &status);
     oskar_mem_free(&pp_st_rel_path, &status);
-    oskar_sky_model_free(&sky[0], &status);
+    oskar_sky_free(sky[0], &status);
+    oskar_telescope_free(telescope, &status);
     free(sky);
 
     return status;
@@ -291,8 +290,7 @@ int get_lon_lat_quad_coords(double* coords, oskar_Settings* settings,
         oskar_Log* log)
 {
     int status = OSKAR_SUCCESS;
-    oskar_TelescopeModel telescope;
-    oskar_set_up_telescope(&telescope, log, settings, &status);
+    oskar_Telescope* telescope = oskar_set_up_telescope(log, settings, &status);
     double fov = settings->ionosphere.TECImage.fov_rad;
     oskar_Mem pp_lon, pp_lat;
     int loc = OSKAR_LOCATION_CPU;
@@ -305,12 +303,13 @@ int get_lon_lat_quad_coords(double* coords, oskar_Settings* settings,
     if (settings->ionosphere.TECImage.beam_centred)
     {
         evalaute_station_beam_pp(&pp_lon0, &pp_lat0, st_idx, settings,
-                &telescope, &status);
+                telescope, &status);
     }
     else
     {
-        pp_lon0 = telescope.station[st_idx].beam_longitude_rad;
-        pp_lat0 = telescope.station[st_idx].beam_latitude_rad;
+        oskar_Station* station = oskar_telescope_station(telescope, st_idx);
+        pp_lon0 = oskar_station_beam_longitude_rad(station);
+        pp_lat0 = oskar_station_beam_latitude_rad(station);
     }
     //printf("lon0, lat0: %f, %f\n", pp_lon0*180./M_PI, pp_lat0*180./M_PI);
 
@@ -357,11 +356,12 @@ int get_lon_lat_quad_coords(double* coords, oskar_Settings* settings,
 
     oskar_mem_free(&pp_lon, &status);
     oskar_mem_free(&pp_lat, &status);
+    oskar_telescope_free(telescope, &status);
     return status;
 }
 
 void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
-        int stationID, oskar_Settings* settings, oskar_TelescopeModel* telescope,
+        int stationID, oskar_Settings* settings, oskar_Telescope* telescope,
         int* status)
 {
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
@@ -369,7 +369,11 @@ void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
     int loc = OSKAR_LOCATION_CPU;
     int owner = OSKAR_TRUE;
 
-    oskar_StationModel* station = &telescope->station[stationID];
+    const oskar_Station* station = oskar_telescope_station(telescope,
+            stationID);
+    const oskar_Mem* station_x = oskar_telescope_station_x_const(telescope);
+    const oskar_Mem* station_y = oskar_telescope_station_y_const(telescope);
+    const oskar_Mem* station_z = oskar_telescope_station_z_const(telescope);
 
     // oskar_Mem holding beam p.p. horizontal coordinates.
     oskar_Mem hor_x, hor_y, hor_z;
@@ -383,9 +387,9 @@ void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
     // ECEF coordinates of the station for which the beam p.p. is being evaluated.
     double st_x_ecef, st_y_ecef, st_z_ecef;
 
-    double st_lon = station->longitude_rad;
-    double st_lat = station->latitude_rad;
-    double st_alt = station->altitude_m;
+    double st_lon = oskar_station_longitude_rad(station);
+    double st_lat = oskar_station_latitude_rad(station);
+    double st_alt = oskar_station_altitude_m(station);
 
     // Time at which beam p.p. is evaluated.
     int t = 0; // XXX
@@ -397,16 +401,16 @@ void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
 
     if (type == OSKAR_DOUBLE)
     {
-        st_x = ((double*)telescope->station_x.data)[stationID];
-        st_y = ((double*)telescope->station_y.data)[stationID];
-        st_z = ((double*)telescope->station_z.data)[stationID];
+        st_x = oskar_mem_double_const(station_x, status)[stationID];
+        st_y = oskar_mem_double_const(station_y, status)[stationID];
+        st_z = oskar_mem_double_const(station_z, status)[stationID];
 
         oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,
                 &st_x, &st_y, &st_z, st_lon, st_lat, st_alt, &st_x_ecef,
                 &st_y_ecef, &st_z_ecef);
 
-        double beam_ra = station->beam_longitude_rad;
-        double beam_dec = station->beam_latitude_rad;
+        double beam_ra = oskar_station_beam_longitude_rad(station);
+        double beam_dec = oskar_station_beam_latitude_rad(station);
 
         // Obtain horizontal coordinates of beam p.p.
         oskar_ra_dec_to_hor_lmn_d(1, &beam_ra, &beam_dec, last, st_lat,
@@ -414,16 +418,16 @@ void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
     }
     else // (type == OSKAR_SINGLE)
     {
-        st_x = (double)((float*)telescope->station_x.data)[stationID];
-        st_y = (double)((float*)telescope->station_y.data)[stationID];
-        st_z = (double)((float*)telescope->station_z.data)[stationID];
+        st_x = (double)oskar_mem_float_const(station_x, status)[stationID];
+        st_y = (double)oskar_mem_float_const(station_y, status)[stationID];
+        st_z = (double)oskar_mem_float_const(station_z, status)[stationID];
 
         oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,
                 &st_x, &st_y, &st_z, st_lon, st_lat, st_alt, &st_x_ecef,
                 &st_y_ecef, &st_z_ecef);
 
-        float beam_ra = (float)station->beam_longitude_rad;
-        float beam_dec = (float)station->beam_latitude_rad;
+        float beam_ra = (float)oskar_station_beam_longitude_rad(station);
+        float beam_dec = (float)oskar_station_beam_latitude_rad(station);
 
         // Obtain horizontal coordinates of beam p.p.
         oskar_ra_dec_to_hor_lmn_f(1, &beam_ra, &beam_dec, last, st_lat,
@@ -532,7 +536,7 @@ void write_kml_ground_overlay(FILE* file, const double* coords, const char* imag
 void write_kml_pp_scatter(FILE* file, oskar_Mem& pp_lon, oskar_Mem& pp_lat,
         double alt_m)
 {
-    int num_pp = pp_lon.num_elements;
+    int num_pp = (int)oskar_mem_length(&pp_lon);
 
     fprintf(file,
             "\n"
@@ -541,18 +545,20 @@ void write_kml_pp_scatter(FILE* file, oskar_Mem& pp_lon, oskar_Mem& pp_lat,
             "       <MultiGeometry>\n"
     );
     double rad2deg = 180./M_PI;
+    const void* lon_ = oskar_mem_void(&pp_lon);
+    const void* lat_ = oskar_mem_void(&pp_lat);
     for (int i = 0; i < num_pp;++i)
     {
         double lon, lat;
-        if (pp_lon.type == OSKAR_DOUBLE)
+        if (oskar_mem_type(&pp_lon) == OSKAR_DOUBLE)
         {
-            lon = ((double*)pp_lon.data)[i]*rad2deg;
-            lat = ((double*)pp_lat.data)[i]*rad2deg;
+            lon = ((const double*)lon_)[i]*rad2deg;
+            lat = ((const double*)lat_)[i]*rad2deg;
         }
         else
         {
-            lon = (double)((float*)pp_lon.data)[i]*rad2deg;
-            lat = (double)((float*)pp_lat.data)[i]*rad2deg;
+            lon = (double)((const float*)lon_)[i]*rad2deg;
+            lat = (double)((const float*)lat_)[i]*rad2deg;
         }
         fprintf(file,
                 "               <Point>\n"

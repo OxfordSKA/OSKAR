@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,252 +26,140 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include "math/oskar_rotate.h"
-#include <stdlib.h>
 #include <math.h>
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_rotate_x(int n, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
-        double angle)
+void oskar_rotate_sph_f(int num_points, float* x, float* y, float*z,
+        float lon, float lat)
 {
     int i;
-
-    if (x == NULL || y == NULL || z == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    if (x->location != OSKAR_LOCATION_CPU ||
-            y->location != OSKAR_LOCATION_CPU ||
-            z->location != OSKAR_LOCATION_CPU)
+    float cosLon, sinLon, cosLat, sinLat, x_, y_, z_;
+    cosLon = cosf(lon);
+    sinLon = sinf(lon);
+    cosLat = cosf(lat);
+    sinLat = sinf(lat);
+    for (i = 0; i < num_points; ++i)
     {
-        return OSKAR_ERR_BAD_LOCATION;
+        x_ = x[i];
+        y_ = y[i];
+        z_ = z[i];
+        x[i] = x_ * cosLon * cosLat - y_ * sinLon - z_ * cosLon*sinLat;
+        y[i] = x_ * cosLat * sinLon + y_ * cosLon - z_ * sinLon*sinLat;
+        z[i] = x_ * sinLat + z_ * cosLat;
     }
-
-    if (x->num_elements > n || y->num_elements > n || z->num_elements > n)
-    {
-        return OSKAR_ERR_DIMENSION_MISMATCH;
-    }
-
-    if (x->type == OSKAR_DOUBLE && y->type == OSKAR_DOUBLE &&
-            z->type == OSKAR_DOUBLE)
-    {
-        double cosAng, sinAng;
-        double y_, z_;
-        cosAng = cos(angle);
-        sinAng = sin(angle);
-        for (i = 0; i < n; ++i)
-        {
-            y_ = ((double*)y->data)[i];
-            z_ = ((double*)z->data)[i];
-            ((double*)y->data)[i] = y_ * cosAng - z_ * sinAng;
-            ((double*)z->data)[i] = y_ * sinAng + z_ * cosAng;
-        }
-    }
-    else if (x->type == OSKAR_SINGLE && y->type == OSKAR_SINGLE &&
-            z->type == OSKAR_SINGLE)
-    {
-        float cosAng, sinAng;
-        float y_, z_;
-        cosAng = cosf(angle);
-        sinAng = sinf(angle);
-        for (i = 0; i < n; ++i)
-        {
-            y_ = ((float*)y->data)[i];
-            z_ = ((float*)z->data)[i];
-            ((float*)y->data)[i] = y_ * cosAng - z_ * sinAng;
-            ((float*)z->data)[i] = y_ * sinAng + z_ * cosAng;
-        }
-    }
-    else
-        return OSKAR_ERR_BAD_DATA_TYPE;
-
-
-    return OSKAR_SUCCESS;
 }
 
-
-
-int oskar_rotate_y(int n, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
-        double angle)
-{
-    int i;
-
-    if (x == NULL || y == NULL || z == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    if (x->location != OSKAR_LOCATION_CPU ||
-            y->location != OSKAR_LOCATION_CPU ||
-            z->location != OSKAR_LOCATION_CPU)
-    {
-        return OSKAR_ERR_BAD_LOCATION;
-    }
-
-    if (x->num_elements > n || y->num_elements > n || z->num_elements > n)
-    {
-        return OSKAR_ERR_DIMENSION_MISMATCH;
-    }
-
-    if (x->type == OSKAR_DOUBLE && y->type == OSKAR_DOUBLE &&
-            z->type == OSKAR_DOUBLE)
-    {
-        double cosAng, sinAng;
-        double x_, z_;
-        cosAng = cos(angle);
-        sinAng = sin(angle);
-        for (i = 0; i < n; ++i)
-        {
-            x_ = ((double*)x->data)[i];
-            z_ = ((double*)z->data)[i];
-            ((double*)x->data)[i] =  x_ * cosAng + z_ * sinAng;
-            ((double*)z->data)[i] = -x_ * sinAng + z_ * cosAng;
-        }
-    }
-    else if (x->type == OSKAR_SINGLE && y->type == OSKAR_SINGLE &&
-            z->type == OSKAR_SINGLE)
-    {
-        float cosAng, sinAng;
-        float x_, z_;
-        cosAng = cosf(angle);
-        sinAng = sinf(angle);
-        for (i = 0; i < n; ++i)
-        {
-            x_ = ((float*)x->data)[i];
-            z_ = ((float*)z->data)[i];
-            ((float*)x->data)[i] =  x_ * cosAng + z_ * sinAng;
-            ((float*)z->data)[i] = -x_ * sinAng + z_ * cosAng;
-        }
-    }
-    else
-        return OSKAR_ERR_BAD_DATA_TYPE;
-
-    return OSKAR_SUCCESS;
-}
-
-
-
-int oskar_rotate_z(int n, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
-        double angle)
-{
-    int i;
-
-    if (x == NULL || y == NULL || z == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    if (x->location != OSKAR_LOCATION_CPU ||
-            y->location != OSKAR_LOCATION_CPU ||
-            z->location != OSKAR_LOCATION_CPU)
-    {
-        return OSKAR_ERR_BAD_LOCATION;
-    }
-
-    if (x->num_elements > n || y->num_elements > n || z->num_elements > n)
-    {
-        return OSKAR_ERR_DIMENSION_MISMATCH;
-    }
-
-    if (x->type == OSKAR_DOUBLE && y->type == OSKAR_DOUBLE &&
-            z->type == OSKAR_DOUBLE)
-    {
-        double cosAng, sinAng;
-        double x_, y_;
-        cosAng = cos(angle);
-        sinAng = sin(angle);
-        for (i = 0; i < n; ++i)
-        {
-            x_ = ((double*)x->data)[i];
-            y_ = ((double*)y->data)[i];
-            ((double*)x->data)[i] = x_ * cosAng - y_ * sinAng;
-            ((double*)y->data)[i] = x_ * sinAng + y_ * cosAng;
-        }
-    }
-    else if (x->type == OSKAR_SINGLE && y->type == OSKAR_SINGLE &&
-            z->type == OSKAR_SINGLE)
-    {
-        float cosAng, sinAng;
-        float x_, y_;
-        cosAng = cosf(angle);
-        sinAng = sinf(angle);
-        for (i = 0; i < n; ++i)
-        {
-            x_ = ((float*)x->data)[i];
-            y_ = ((float*)y->data)[i];
-            ((float*)x->data)[i] = x_ * cosAng - y_ * sinAng;
-            ((float*)y->data)[i] = x_ * sinAng + y_ * cosAng;
-        }
-    }
-    else
-        return OSKAR_ERR_BAD_DATA_TYPE;
-
-    return OSKAR_SUCCESS;
-}
-
-
-int oskar_rotate_sph(int n, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
+void oskar_rotate_sph_d(int num_points, double* x, double* y, double*z,
         double lon, double lat)
 {
     int i;
-
-    if (x == NULL || y == NULL || z == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    if (x->location != OSKAR_LOCATION_CPU ||
-            y->location != OSKAR_LOCATION_CPU ||
-            z->location != OSKAR_LOCATION_CPU)
+    double cosLon, sinLon, cosLat, sinLat, x_, y_, z_;
+    cosLon = cos(lon);
+    sinLon = sin(lon);
+    cosLat = cos(lat);
+    sinLat = sin(lat);
+    for (i = 0; i < num_points; ++i)
     {
-        return OSKAR_ERR_BAD_LOCATION;
+        x_ = x[i];
+        y_ = y[i];
+        z_ = z[i];
+        x[i] = x_ * cosLon * cosLat - y_ * sinLon - z_ * cosLon*sinLat;
+        y[i] = x_ * cosLat * sinLon + y_ * cosLon - z_ * sinLon*sinLat;
+        z[i] = x_ * sinLat + z_ * cosLat;
     }
+}
 
-    if (x->num_elements > n || y->num_elements > n || z->num_elements > n)
+void oskar_rotate_x_f(int num_points, float* y, float* z, float angle)
+{
+    int i;
+    float cosAng, sinAng, y_, z_;
+    cosAng = cosf(angle);
+    sinAng = sinf(angle);
+    for (i = 0; i < num_points; ++i)
     {
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+        y_ = y[i];
+        z_ = z[i];
+        y[i] = y_ * cosAng - z_ * sinAng;
+        z[i] = y_ * sinAng + z_ * cosAng;
     }
+}
 
-    if (x->type == OSKAR_DOUBLE && y->type == OSKAR_DOUBLE &&
-            z->type == OSKAR_DOUBLE)
+void oskar_rotate_y_f(int num_points, float* x, float* z, float angle)
+{
+    int i;
+    float cosAng, sinAng, x_, z_;
+    cosAng = cosf(angle);
+    sinAng = sinf(angle);
+    for (i = 0; i < num_points; ++i)
     {
-        double cosLon, sinLon, cosLat, sinLat;
-        double x_, y_, z_;
-        cosLon = cos(lon);
-        sinLon = sin(lon);
-        cosLat = cos(lat);
-        sinLat = sin(lat);
-        for (i = 0; i < n; ++i)
-        {
-            x_ = ((double*)x->data)[i];
-            y_ = ((double*)y->data)[i];
-            z_ = ((double*)z->data)[i];
-            ((double*)x->data)[i] = x_*cosLon*cosLat - y_*sinLon - z_*cosLon*sinLat;
-            ((double*)y->data)[i] = x_*cosLat*sinLon + y_*cosLon - z_*sinLon*sinLat;
-            ((double*)z->data)[i] = x_*sinLat + z_*cosLat;
-        }
+        x_ = x[i];
+        z_ = z[i];
+        x[i] =  x_ * cosAng + z_ * sinAng;
+        z[i] = -x_ * sinAng + z_ * cosAng;
     }
-    else if (x->type == OSKAR_SINGLE && y->type == OSKAR_SINGLE &&
-            z->type == OSKAR_SINGLE)
-    {
-        float cosLon, sinLon, cosLat, sinLat;
-        float x_, y_, z_;
-        cosLon = cosf(lon);
-        sinLon = sinf(lon);
-        cosLat = cosf(lat);
-        sinLat = sinf(lat);
-        for (i = 0; i < n; ++i)
-        {
-            x_ = ((float*)x->data)[i];
-            y_ = ((float*)y->data)[i];
-            z_ = ((float*)z->data)[i];
-            ((float*)x->data)[i] = x_*cosLon*cosLat - y_*sinLon - z_*cosLon*sinLat;
-            ((float*)y->data)[i] = x_*cosLat*sinLon + y_*cosLon - z_*sinLon*sinLat;
-            ((float*)z->data)[i] = x_*sinLat + z_*cosLat;
-        }
-    }
-    else
-        return OSKAR_ERR_BAD_DATA_TYPE;
+}
 
-    return OSKAR_SUCCESS;
+void oskar_rotate_z_f(int num_points, float* x, float* y, float angle)
+{
+    int i;
+    float cosAng, sinAng, x_, y_;
+    cosAng = cosf(angle);
+    sinAng = sinf(angle);
+    for (i = 0; i < num_points; ++i)
+    {
+        x_ = x[i];
+        y_ = y[i];
+        x[i] = x_ * cosAng - y_ * sinAng;
+        y[i] = x_ * sinAng + y_ * cosAng;
+    }
+}
+
+void oskar_rotate_x_d(int num_points, double* y, double* z, double angle)
+{
+    int i;
+    double cosAng, sinAng, y_, z_;
+    cosAng = cos(angle);
+    sinAng = sin(angle);
+    for (i = 0; i < num_points; ++i)
+    {
+        y_ = y[i];
+        z_ = z[i];
+        y[i] = y_ * cosAng - z_ * sinAng;
+        z[i] = y_ * sinAng + z_ * cosAng;
+    }
+}
+
+void oskar_rotate_y_d(int num_points, double* x, double* z, double angle)
+{
+    int i;
+    double cosAng, sinAng, x_, z_;
+    cosAng = cos(angle);
+    sinAng = sin(angle);
+    for (i = 0; i < num_points; ++i)
+    {
+        x_ = x[i];
+        z_ = z[i];
+        x[i] =  x_ * cosAng + z_ * sinAng;
+        z[i] = -x_ * sinAng + z_ * cosAng;
+    }
+}
+
+void oskar_rotate_z_d(int num_points, double* x, double* y, double angle)
+{
+    int i;
+    double cosAng, sinAng, x_, y_;
+    cosAng = cos(angle);
+    sinAng = sin(angle);
+    for (i = 0; i < num_points; ++i)
+    {
+        x_ = x[i];
+        y_ = y[i];
+        x[i] = x_ * cosAng - y_ * sinAng;
+        y[i] = x_ * sinAng + y_ * cosAng;
+    }
 }
 
 #ifdef __cplusplus

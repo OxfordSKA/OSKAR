@@ -26,19 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_global.h>
-
-#include <utility/oskar_get_error_string.h>
-#include <utility/oskar_log_error.h>
-#include <utility/oskar_log_message.h>
-#include <utility/oskar_Log.h>
-#include <utility/oskar_log_settings.h>
-#include <imaging/oskar_Image.h>
-#include <imaging/oskar_image_free.h>
-#include <imaging/oskar_image_write.h>
 #include <apps/lib/oskar_settings_load.h>
 #include <apps/lib/oskar_sim_tec_screen.h>
 #include <apps/lib/oskar_OptionParser.h>
+
+#include <oskar_get_error_string.h>
+#include <oskar_log.h>
+#include <oskar_image_free.h>
+#include <oskar_image_write.h>
 
 #include <fits/oskar_fits_image_write.h>
 
@@ -54,40 +49,46 @@ int main(int argc, char** argv)
     if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    oskar_Log log;
-    oskar_log_message(&log, 0, "Running binary %s", argv[0]);
+    oskar_Log* log = oskar_log_create();
+    oskar_log_message(log, 0, "Running binary %s", argv[0]);
 
     const char* settings_file = opt.getArg(0);
     oskar_Settings settings;
-    oskar_settings_load(&settings, &log, settings_file);
+    oskar_settings_load(&settings, log, settings_file);
+    oskar_log_set_keep_file(log, settings.sim.keep_log_file);
 
-    log.keep_file = settings.sim.keep_log_file;
-
-    oskar_log_settings_telescope(&log, &settings);
-    oskar_log_settings_observation(&log, &settings);
-    oskar_log_settings_ionosphere(&log, &settings);
+    oskar_log_settings_telescope(log, &settings);
+    oskar_log_settings_observation(log, &settings);
+    oskar_log_settings_ionosphere(log, &settings);
 
     oskar_Image TEC_screen;
 
     // Run simulation.
-    error = oskar_sim_tec_screen(&TEC_screen, &settings, &log);
+    error = oskar_sim_tec_screen(&TEC_screen, &settings, log);
 
     // Write TEC screen image.
     if (!error)
     {
-        const char* fits_file = settings.ionosphere.TECImage.fits_file;
-        if (fits_file)
-            error = oskar_fits_image_write(&TEC_screen, &log, fits_file);
-        const char* img_file = settings.ionosphere.TECImage.img_file;
-        if (img_file)
-            oskar_image_write(&TEC_screen, &log, img_file, 0, &error);
+        const char* fname;
+        fname = settings.ionosphere.TECImage.fits_file;
+        if (fname && !error)
+        {
+            oskar_log_message(log, 0, "Writing FITS image file: '%s'", fname);
+            oskar_fits_image_write(&TEC_screen, log, fname, &error);
+        }
+        fname = settings.ionosphere.TECImage.img_file;
+        if (fname && !error)
+        {
+            oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", fname);
+            oskar_image_write(&TEC_screen, log, fname, 0, &error);
+        }
     }
+    oskar_image_free(&TEC_screen, &error);
 
     // Check for errors.
     if (error)
-        oskar_log_error(&log, "Run failed: %s.", oskar_get_error_string(error));
-
-    oskar_image_free(&TEC_screen, &error);
+        oskar_log_error(log, "Run failed: %s.", oskar_get_error_string(error));
+    oskar_log_free(log);
 
     return error;
 }

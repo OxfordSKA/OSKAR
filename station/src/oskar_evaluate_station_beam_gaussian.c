@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "station/oskar_evaluate_station_beam_gaussian.h"
 #include "utility/oskar_vector_types.h"
 #include "station/oskar_blank_below_horizon.h"
-#include "station/oskar_evaluate_station_beam_gaussian.h"
 #include "math/oskar_gaussian.h"
 #include "math/oskar_gaussian_cuda.h"
-#include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_mem_type_check.h"
+#include <oskar_mem.h>
 #include "utility/oskar_cuda_check_error.h"
 
 #include <math.h>
@@ -48,7 +47,7 @@ extern "C" {
 
 void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         int num_points, const oskar_Mem* l, const oskar_Mem* m,
-        const oskar_Mem* horizon_mask, double fwhm_deg, int* status)
+        const oskar_Mem* horizon_mask, double fwhm_rad, int* status)
 {
     int type, location;
     double fwhm_lm, std;
@@ -64,45 +63,45 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
     if (*status) return;
 
     /* Get type and check consistency. */
-    type = oskar_mem_base_type(beam->type);
-    if (type != l->type || type != m->type)
+    type = oskar_mem_precision(beam);
+    if (type != oskar_mem_type(l) || type != oskar_mem_type(m))
         *status = OSKAR_ERR_TYPE_MISMATCH;
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
-    if (!oskar_mem_is_complex(beam->type))
+    if (!oskar_mem_is_complex(beam))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
-    if (fwhm_deg == 0.0)
+    if (fwhm_rad == 0.0)
     {
         *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         return;
     }
 
     /* Get location and check consistency. */
-    location = beam->location;
-    if (location != l->location || location != m->location)
+    location = oskar_mem_location(beam);
+    if (location != oskar_mem_location(l) || location != oskar_mem_location(m))
         *status = OSKAR_ERR_LOCATION_MISMATCH;
 
     /* Check that length of input arrays are consistent. */
-    if (l->num_elements < num_points || m->num_elements < num_points)
+    if ((int)oskar_mem_length(l) < num_points || (int)oskar_mem_length(m) < num_points)
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Resize output array if needed. */
-    if (beam->num_elements < num_points)
+    if ((int)oskar_mem_length(beam) < num_points)
         oskar_mem_realloc(beam, num_points, status);
 
     /* Check if safe to proceed. */
     if (*status) return;
 
     /* Compute Gaussian standard deviation from FWHM. */
-    fwhm_lm = sin(fwhm_deg * (M_PI / 180.0));
+    fwhm_lm = sin(fwhm_rad);
     std = fwhm_lm / (2.0 * sqrt(2.0 * log(2.0)));
 
     if (location == OSKAR_LOCATION_CPU)
     {
         if (type == OSKAR_DOUBLE)
         {
-            if (oskar_mem_is_scalar(beam->type))
+            if (oskar_mem_is_scalar(beam))
             {
                 oskar_gaussian_d((double2*)beam->data, num_points,
                         (const double*)l->data, (const double*)m->data, std);
@@ -115,7 +114,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         }
         else /* type == OSKAR_SINGLE */
         {
-            if (oskar_mem_is_scalar(beam->type))
+            if (oskar_mem_is_scalar(beam))
             {
                 oskar_gaussian_f((float2*)beam->data, num_points,
                         (const float*)l->data, (const float*)m->data,
@@ -134,7 +133,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
     {
         if (type == OSKAR_DOUBLE)
         {
-            if (oskar_mem_is_scalar(beam->type))
+            if (oskar_mem_is_scalar(beam))
             {
                 oskar_gaussian_cuda_d((double2*)beam->data, num_points,
                         (const double*)l->data, (const double*)m->data, std);
@@ -147,7 +146,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         }
         else /* type == OSKAR_SINGLE */
         {
-            if (oskar_mem_is_scalar(beam->type))
+            if (oskar_mem_is_scalar(beam))
             {
                 oskar_gaussian_cuda_f((float2*)beam->data, num_points,
                         (const float*)l->data, (const float*)m->data,

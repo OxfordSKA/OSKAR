@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,19 +40,9 @@
 #include "imaging/oskar_evaluate_image_lmn_point.h"
 #include "interferometry/oskar_evaluate_uvw_baseline.h"
 
-#include "utility/oskar_log_message.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_type_check.h"
-#include "utility/oskar_mem_get_pointer.h"
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_assign.h"
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_mem_set_value_real.h"
-#include "utility/oskar_vector_types.h"
-#include "utility/oskar_get_data_type_string.h"
+#include <oskar_log.h>
+#include <oskar_mem.h>
+#include <oskar_get_data_type_string.h>
 
 #include <math.h>
 #include <stddef.h>
@@ -75,18 +65,32 @@ extern "C" {
 #endif
 
 int oskar_make_image(oskar_Image* im, oskar_Log* log,
-        const oskar_Visibilities* vis, const oskar_SettingsImage* settings)
+        const oskar_Vis* vis, const oskar_SettingsImage* settings)
 {
     int err = OSKAR_SUCCESS;
 
     /* Location of temporary memory used by this function (needs to be CPU). */
     int location = OSKAR_LOCATION_CPU;
 
-    /* Local variables. */
     if (im == NULL || vis == NULL || settings == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
-    int type = (oskar_mem_is_double(vis->amplitude.type) &&
-            oskar_mem_is_double(im->data.type)) ? OSKAR_DOUBLE : OSKAR_SINGLE;
+
+    /* Local variables. */
+    int num_channels = oskar_vis_num_channels(vis);
+    int num_times = oskar_vis_num_times(vis);
+    int num_stations = oskar_vis_num_stations(vis);
+    int num_baselines = oskar_vis_num_baselines(vis);
+    double freq_start_hz = oskar_vis_freq_start_hz(vis);
+    double freq_inc_hz = oskar_vis_freq_inc_hz(vis);
+    const oskar_Mem *vis_uu_metres = oskar_vis_baseline_uu_metres_const(vis);
+    const oskar_Mem *vis_vv_metres = oskar_vis_baseline_vv_metres_const(vis);
+    const oskar_Mem *vis_ww_metres = oskar_vis_baseline_ww_metres_const(vis);
+    const oskar_Mem *vis_x_metres = oskar_vis_station_x_metres_const(vis);
+    const oskar_Mem *vis_y_metres = oskar_vis_station_y_metres_const(vis);
+    const oskar_Mem *vis_z_metres = oskar_vis_station_z_metres_const(vis);
+
+    int type = (oskar_mem_is_double(oskar_vis_amplitude_const(vis)) &&
+            oskar_mem_is_double(&im->data)) ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
     /* If imaging away from the beam direction, evaluate l0-l, m0-m, n0-n
      * for the new pointing centre as well as a set of baseline coordinates
@@ -98,10 +102,10 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     {
         double ra_rad = settings->ra_deg * DEG2RAD;
         double dec_rad = settings->dec_deg * DEG2RAD;
-        double ra0_rad = vis->phase_centre_ra_deg * DEG2RAD;
-        double dec0_rad = vis->phase_centre_dec_deg * DEG2RAD;
+        double ra0_rad = oskar_vis_phase_centre_ra_deg(vis) * DEG2RAD;
+        double dec0_rad = oskar_vis_phase_centre_dec_deg(vis) * DEG2RAD;
         double l1, m1, n1;
-        int num_elements = vis->num_baselines * vis->num_times;
+        int num_elements = num_baselines * num_times;
 
         oskar_evaluate_image_lmn_point(&l1, &m1, &n1, ra0_rad, dec0_rad,
                 ra_rad, dec_rad);
@@ -114,13 +118,11 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         oskar_mem_init(&ww_rot, type, location, num_elements, OSKAR_TRUE, &err);
 
         /* Work array for baseline evaluation. */
-        oskar_Mem work_uvw(type, location, 3 * vis->num_stations);
-        oskar_evaluate_uvw_baseline(&uu_rot, &vv_rot,
-                &ww_rot, vis->num_stations,
-                &vis->x_metres, &vis->y_metres, &vis->z_metres,
-                ra_rad, dec_rad, vis->num_times,
-                vis->time_start_mjd_utc, vis->time_inc_seconds * SEC2DAYS,
-                &work_uvw, &err);
+        oskar_Mem work_uvw(type, location, 3 * num_stations);
+        oskar_evaluate_uvw_baseline(&uu_rot, &vv_rot, &ww_rot, num_stations,
+                vis_x_metres, vis_y_metres, vis_z_metres, ra_rad, dec_rad,
+                num_times, oskar_vis_time_start_mjd_utc(vis),
+                oskar_vis_time_inc_seconds(vis) * SEC2DAYS, &work_uvw, &err);
     }
 
     /* Initialise the OSKAR image cube */
@@ -133,14 +135,14 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     /* Set the channel range for the image cube [output range]. */
     int im_chan_range[2];
     err = oskar_evaluate_image_range(im_chan_range, settings->channel_snapshots,
-            settings->channel_range, vis->num_channels);
+            settings->channel_range, num_channels);
     if (err) return err;
     int im_num_chan = im_chan_range[1] - im_chan_range[0] + 1;
 
     /* Set the time range for the image cube [output range]. */
     int im_time_range[2];
     err = oskar_evaluate_image_range(im_time_range, settings->time_snapshots,
-            settings->time_range, vis->num_times);
+            settings->time_range, num_times);
     if (err) return err;
     int im_num_times = im_time_range[1] - im_time_range[0] + 1;
 
@@ -166,8 +168,8 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     }
     else return OSKAR_ERR_BAD_DATA_TYPE;
 
-    int num_vis_pols = oskar_mem_is_matrix(vis->amplitude.type) ? 4 : 1;
-    if (im_num_times > vis->num_times || im_num_chan > vis->num_channels ||
+    int num_vis_pols = oskar_vis_num_polarisations(vis);
+    if (im_num_times > num_times || im_num_chan > num_channels ||
             num_pols > num_vis_pols)
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
@@ -185,22 +187,22 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
 
     int num_vis = 0;
     if (settings->time_snapshots && settings->channel_snapshots)
-        num_vis = vis->num_baselines;
+        num_vis = num_baselines;
     else if (settings->time_snapshots && !settings->channel_snapshots)
-        num_vis = vis->num_baselines * vis->num_channels;
+        num_vis = num_baselines * num_channels;
     else if (!settings->time_snapshots && settings->channel_snapshots)
-        num_vis = vis->num_baselines * vis->num_times;
+        num_vis = num_baselines * num_times;
     else /* Time and frequency synthesis */
-        num_vis = vis->num_baselines * vis->num_channels * vis->num_times;
+        num_vis = num_baselines * num_channels * num_times;
     oskar_Mem uu_im(type, location, num_vis);
     oskar_Mem vv_im(type, location, num_vis);
     oskar_Mem ww_im(type, location, num_vis);
-    oskar_Mem uu_temp, vv_temp, ww_temp;
+    oskar_Mem uu_tmp, vv_tmp, ww_tmp;
     if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
     {
-        oskar_mem_init(&uu_temp, type, location, num_vis, OSKAR_TRUE, &err);
-        oskar_mem_init(&vv_temp, type, location, num_vis, OSKAR_TRUE, &err);
-        oskar_mem_init(&ww_temp, type, location, num_vis, OSKAR_TRUE, &err);
+        oskar_mem_init(&uu_tmp, type, location, num_vis, OSKAR_TRUE, &err);
+        oskar_mem_init(&vv_tmp, type, location, num_vis, OSKAR_TRUE, &err);
+        oskar_mem_init(&ww_tmp, type, location, num_vis, OSKAR_TRUE, &err);
         if (err) return err;
     }
     oskar_Mem vis_im(type | OSKAR_COMPLEX, location, num_vis);
@@ -219,7 +221,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
                 (double*)m.data);
     }
 
-    /* Setup the image cube. */
+    /* Set up the image cube. */
     err = oskar_setup_image(im, vis, settings);
     if (err) return err;
 
@@ -242,28 +244,25 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
             if (settings->direction_type == OSKAR_IMAGE_DIRECTION_OBSERVATION)
             {
                 err = oskar_get_image_baseline_coords(&uu_im, &vv_im, &ww_im,
-                        &vis->uu_metres, &vis->vv_metres, &vis->ww_metres,
-                        vis->num_times, vis->num_baselines, vis->num_channels,
-                        vis->freq_start_hz, vis->freq_inc_hz,
-                        vis_time, im_freq, settings);
+                        vis_uu_metres, vis_vv_metres, vis_ww_metres, num_times,
+                        num_baselines, num_channels, freq_start_hz,
+                        freq_inc_hz, vis_time, im_freq, settings);
                 if (err) return err;
             }
             else if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
             {
                 /* Rotated coordinates (used for imaging) */
-                err = oskar_get_image_baseline_coords(&uu_im, &vv_im,
-                        &ww_im, &uu_rot, &vv_rot, &ww_rot, vis->num_times,
-                        vis->num_baselines, vis->num_channels,
-                        vis->freq_start_hz, vis->freq_inc_hz, vis_time,
-                        im_freq, settings);
+                err = oskar_get_image_baseline_coords(&uu_im, &vv_im, &ww_im,
+                        &uu_rot, &vv_rot, &ww_rot, num_times,
+                        num_baselines, num_channels, freq_start_hz,
+                        freq_inc_hz, vis_time, im_freq, settings);
                 if (err) return err;
 
                 /* Unrotated coordinates (used for phase rotation) */
-                err = oskar_get_image_baseline_coords(&uu_temp, &vv_temp,
-                        &ww_temp, &vis->uu_metres, &vis->vv_metres, &vis->ww_metres,
-                        vis->num_times, vis->num_baselines, vis->num_channels,
-                        vis->freq_start_hz, vis->freq_inc_hz, vis_time,
-                        im_freq, settings);
+                err = oskar_get_image_baseline_coords(&uu_tmp, &vv_tmp, &ww_tmp,
+                        vis_uu_metres, vis_vv_metres, vis_ww_metres, num_times,
+                        num_baselines, num_channels, freq_start_hz,
+                        freq_inc_hz, vis_time, im_freq, settings);
                 if (err) return err;
             }
             else
@@ -291,12 +290,12 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
                     if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
                     {
                         phase_rotate_vis_amps(&vis_im, num_vis, type,
-                                delta_l, delta_m, delta_n, &uu_temp, &vv_temp,
-                                &ww_temp, im_freq);
+                                delta_l, delta_m, delta_n, &uu_tmp, &vv_tmp,
+                                &ww_tmp, im_freq);
                     }
                 }
 
-                oskar_log_message(log, 2, "Number of visibilities %i", vis_im.num_elements);
+                oskar_log_message(log, 2, "Number of visibilities %i", (int)oskar_mem_length(&vis_im));
 
                 /* Get pointer to slice of the image cube. */
                 int slice_offset = ((c * im_num_times + t) * num_pols + p) * num_pixels;

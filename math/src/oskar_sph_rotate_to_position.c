@@ -43,10 +43,10 @@ int oskar_sph_rotate_to_position(int n, oskar_Mem* lon, oskar_Mem* lat,
     if (lon == NULL || lat == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (lon->location != OSKAR_LOCATION_CPU || lat->location != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(lon) != OSKAR_LOCATION_CPU || oskar_mem_location(lat) != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    if (lon->type == OSKAR_DOUBLE && lat->type == OSKAR_DOUBLE)
+    if (oskar_mem_type(lon) == OSKAR_DOUBLE && oskar_mem_type(lat) == OSKAR_DOUBLE)
     {
         /* Construct rotation matrix. */
         double cosLon, sinLon, cosLat, sinLat;
@@ -79,7 +79,7 @@ int oskar_sph_rotate_to_position(int n, oskar_Mem* lon, oskar_Mem* lat,
             ((double*)lat->data)[i] = atan2(c, sqrt(a*a + b*b));
         }
     }
-    else if (lon->type == OSKAR_SINGLE && lat->type == OSKAR_SINGLE)
+    else if (oskar_mem_type(lon) == OSKAR_SINGLE && oskar_mem_type(lat) == OSKAR_SINGLE)
     {
         /* Construct rotation matrix. */
         float cosLon, sinLon, cosLat, sinLat;

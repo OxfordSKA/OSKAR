@@ -29,11 +29,7 @@
 #include "imaging/oskar_evaluate_image_lm_grid.h"
 #include "imaging/oskar_evaluate_image_lon_lat_grid.h"
 #include "math/oskar_sph_from_lm.h"
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_get_pointer.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_realloc.h"
+#include <oskar_mem.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -55,14 +51,14 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
     }
 
     /* Get meta-data. */
-    type = lon->type;
-    location = lon->location;
+    type = oskar_mem_type(lon);
+    location = oskar_mem_location(lon);
     num_pixels = image_size_l * image_size_m;
 
     /* Ensure enough space in output arrays. */
-    if (lon->num_elements < num_pixels)
+    if ((int)oskar_mem_length(lon) < num_pixels)
         oskar_mem_realloc(lon, num_pixels, status);
-    if (lat->num_elements < num_pixels)
+    if ((int)oskar_mem_length(lat) < num_pixels)
         oskar_mem_realloc(lat, num_pixels, status);
 
     /* Check if safe to proceed. */

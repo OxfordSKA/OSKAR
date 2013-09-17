@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,10 +34,10 @@
  * @file oskar_setup_image.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 #include "imaging/oskar_Image.h"
 #include "imaging/oskar_SettingsImage.h"
-#include "interferometry/oskar_Visibilities.h"
+#include <oskar_vis.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,7 +53,7 @@ extern "C" {
  * @return
  */
 OSKAR_EXPORT
-int oskar_setup_image(oskar_Image* image, const oskar_Visibilities* vis,
+int oskar_setup_image(oskar_Image* image, const oskar_Vis* vis,
         const oskar_SettingsImage* settings);
 
 #ifdef __cplusplus

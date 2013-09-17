@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_log_write.h"
+#include <private_log.h>
+#include <oskar_log.h>
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -40,10 +42,9 @@ extern "C" {
 static void print_entry(FILE* stream, char code, int depth, int width,
         const char* prefix, const char* format, va_list args);
 
-int oskar_log_write(oskar_Log* log, char code, int depth, int width,
+void oskar_log_write(oskar_Log* log, char code, int depth, int width,
         const char* prefix, const char* format, ...)
 {
-    int retval;
     va_list args;
 
     /* Write to standard output. */
@@ -53,21 +54,20 @@ int oskar_log_write(oskar_Log* log, char code, int depth, int width,
 
     /* Write to log file. */
     va_start(args, format);
-    retval = oskar_log_writev(log, code, depth, width, prefix, format, args);
+    oskar_log_writev(log, code, depth, width, prefix, format, args);
     va_end(args);
-    return retval;
 }
 
-int oskar_log_writev(oskar_Log* log, char code, int depth, int width,
+void oskar_log_writev(oskar_Log* log, char code, int depth, int width,
         const char* prefix, const char* format, va_list args)
 {
     /* Catch if both strings are NULL. */
     if (!format && !prefix && depth > -10)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+        return;
 
     /* Return if no log is set. */
     if (!log)
-        return OSKAR_SUCCESS;
+        return;
 
 #ifdef _OPENMP
     /* Lock mutex. */
@@ -113,34 +113,28 @@ int oskar_log_writev(oskar_Log* log, char code, int depth, int width,
     /* Unlock mutex. */
     omp_unset_lock(&log->mutex);
 #endif
-
-    return OSKAR_SUCCESS;
 }
 
-int oskar_log_writev_stderr(char code, int depth, int width,
+void oskar_log_writev_stderr(char code, int depth, int width,
         const char* prefix, const char* format, va_list args)
 {
     /* Catch if both strings are NULL. */
-    if (!format && !prefix && depth > -10) return OSKAR_ERR_INVALID_ARGUMENT;
+    if (!format && !prefix && depth > -10) return;
 
     /* Print log entry to standard error. */
     print_entry(stderr, code, depth, width, prefix, format, args);
     fflush(stderr);
-
-    return OSKAR_SUCCESS;
 }
 
-int oskar_log_writev_stdout(char code, int depth, int width,
+void oskar_log_writev_stdout(char code, int depth, int width,
         const char* prefix, const char* format, va_list args)
 {
     /* Catch if both strings are NULL. */
-    if (!format && !prefix && depth > -10) return OSKAR_ERR_INVALID_ARGUMENT;
+    if (!format && !prefix && depth > -10) return;
 
     /* Print log entry to standard output. */
     print_entry(stdout, code, depth, width, prefix, format, args);
     fflush(stdout);
-
-    return OSKAR_SUCCESS;
 }
 
 static void print_entry(FILE* stream, char code, int depth, int width,
@@ -214,29 +208,22 @@ static void print_entry(FILE* stream, char code, int depth, int width,
     fprintf(stream, "%s ", sym);
 
     /* Check if a prefix string is present. */
-    if (prefix)
+    if (prefix && *prefix > 0)
     {
-        if (*prefix > 0)
-        {
-            /* Print prefix. */
-            fprintf(stream, "%s", prefix);
+        /* Print prefix. */
+        fprintf(stream, "%s", prefix);
 
-            /* Print trailing whitespace. */
-            n = abs(2 * depth + 4 + strlen(prefix));
-            for (i = 0; i < width - n; ++i) fprintf(stream, " ");
-            if (format)
-            {
-                if (*format > 0)
-                    fprintf(stream, ": ");
-            }
-        }
+        /* Print trailing whitespace. */
+        n = abs(2 * depth + 4 + strlen(prefix));
+        for (i = 0; i < width - n; ++i) fprintf(stream, " ");
+        if (format && *format > 0)
+            fprintf(stream, ": ");
     }
 
     /* Print main message from format string and arguments. */
-    if (format)
+    if (format && *format > 0)
     {
-        if (*format > 0)
-            vfprintf(stream, format, args);
+        vfprintf(stream, format, args);
     }
     fprintf(stream, "\n");
 
