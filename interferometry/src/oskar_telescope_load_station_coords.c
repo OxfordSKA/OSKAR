@@ -86,8 +86,7 @@ void oskar_telescope_load_station_coords(oskar_Telescope* telescope,
     /* Loop over each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
-        const oskar_Station* station;
-        double lon, lat, alt;
+        double lon = 0.0, lat = 0.0, alt = 0.0;
 
         /* Declare parameter array. */
         double par[] = {0.0, 0.0, 0.0}; /* Horizon plane x, y, z */
@@ -126,12 +125,10 @@ void oskar_telescope_load_station_coords(oskar_Telescope* telescope,
         /* Convert to ECEF, then to station longitude, latitude, altitude. */
         oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,
                 &x, &y, &z, longitude, latitude, altitude, &x, &y, &z);
-        station = oskar_telescope_station_const(telescope, n);
-        lon = oskar_station_longitude_rad(station);
-        lat = oskar_station_latitude_rad(station);
-        alt = oskar_station_altitude_m(station);
         oskar_geocentric_cartesian_to_geodetic_spherical(1, &x, &y, &z,
                 &lon, &lat, &alt);
+        oskar_station_set_position(oskar_telescope_station(telescope, n),
+                lon, lat, alt);
 
         /* Increment counter. */
         ++n;
