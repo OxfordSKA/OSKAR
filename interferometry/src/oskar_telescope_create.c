@@ -87,7 +87,7 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->altitude_m = 0.0;
     telescope->ra0_rad = 0.0;
     telescope->dec0_rad = 0.0;
-    telescope->wavelength_m = 0.0;
+    telescope->wavenumber = 0.0;
     telescope->bandwidth_hz = 0.0;
     telescope->time_average_sec = 0.0;
 

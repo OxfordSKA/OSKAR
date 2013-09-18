@@ -142,9 +142,10 @@ TEST(evaluate_jones_E, evaluate_e)
             OSKAR_LOCATION_GPU, num_stations, num_sources, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    oskar_WorkStationBeam work_gpu(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
-    oskar_evaluate_jones_E(E_gpu, sky_gpu, tel_gpu, gast,
-            &work_gpu, random_state, &error);
+    oskar_StationWork* work = oskar_station_work_create(OSKAR_SINGLE,
+            OSKAR_LOCATION_GPU, &error);
+    oskar_evaluate_jones_E(E_gpu, sky_gpu, tel_gpu, gast, work, random_state,
+            &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Free the sky models.
@@ -156,9 +157,9 @@ TEST(evaluate_jones_E, evaluate_e)
             &error);
 
     // Save to file for plotting.
-    oskar_Mem l(&work_gpu.hor_x, OSKAR_LOCATION_CPU);
-    oskar_Mem m(&work_gpu.hor_y, OSKAR_LOCATION_CPU);
-    oskar_Mem n(&work_gpu.hor_z, OSKAR_LOCATION_CPU);
+    oskar_Mem l(oskar_station_work_source_horizontal_x(work), OSKAR_LOCATION_CPU);
+    oskar_Mem m(oskar_station_work_source_horizontal_y(work), OSKAR_LOCATION_CPU);
+    oskar_Mem n(oskar_station_work_source_horizontal_z(work), OSKAR_LOCATION_CPU);
     const char* filename = "temp_test_E_jones.txt";
     FILE* file = fopen(filename, "w");
     oskar_Mem E_station;
@@ -198,6 +199,7 @@ TEST(evaluate_jones_E, evaluate_e)
     oskar_jones_free(E_cpu, &error);
     oskar_jones_free(E_gpu, &error);
     oskar_telescope_free(tel_gpu, &error);
+    oskar_station_work_free(work, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 }
 

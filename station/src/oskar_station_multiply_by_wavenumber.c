@@ -39,13 +39,13 @@
 extern "C" {
 #endif
 
-void oskar_station_multiply_by_wavenumber(oskar_Station* station,
+void oskar_station_multiply_by_wavenumber(oskar_Station* st,
         double frequency_hz, int* status)
 {
-    double wavenumber;
+    double wavelength, wavenumber, factor;
 
     /* Check all inputs. */
-    if (!station || !status)
+    if (!st || frequency_hz == 0.0 || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -54,28 +54,34 @@ void oskar_station_multiply_by_wavenumber(oskar_Station* station,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check and update current units. */
-    if (station->coord_units != OSKAR_METRES)
+    /* Multiply coordinates by wavenumber. */
+    wavelength = 299792458.0 / frequency_hz;
+    wavenumber = 2.0 * M_PI / wavelength;
+    factor = wavenumber;
+    if (st->coord_units == OSKAR_RADIANS)
     {
-        *status = OSKAR_ERR_BAD_UNITS;
-        return;
+        /* Also multiply by inverse of existing wavenumber, if already set. */
+        factor *= (1.0 / st->wavenumber);
     }
-    station->coord_units = OSKAR_RADIANS;
+    oskar_mem_scale_real(oskar_station_element_x_signal(st), factor, status);
+    oskar_mem_scale_real(oskar_station_element_y_signal(st), factor, status);
+    oskar_mem_scale_real(oskar_station_element_z_signal(st), factor, status);
+    oskar_mem_scale_real(oskar_station_element_x_weights(st), factor, status);
+    oskar_mem_scale_real(oskar_station_element_y_weights(st), factor, status);
+    oskar_mem_scale_real(oskar_station_element_z_weights(st), factor, status);
 
-    /* Scale metres to radians by multiplying by the wavenumber. */
-    wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
-    oskar_station_scale_coords(station, wavenumber, status);
+    /* Update units and wavenumber. */
+    st->wavenumber = wavenumber;
+    st->coord_units = OSKAR_RADIANS;
 
     /* Recursive call to scale all child stations. */
-    if (oskar_station_has_child(station))
+    if (oskar_station_has_child(st))
     {
         int i;
-        for (i = 0; i < station->num_elements; ++i)
+        for (i = 0; i < st->num_elements; ++i)
         {
-            oskar_Station* child;
-            child = oskar_station_child(station, i);
-            oskar_station_multiply_by_wavenumber(child, frequency_hz,
-                    status);
+            oskar_station_multiply_by_wavenumber(oskar_station_child(st, i),
+                    frequency_hz, status);
         }
     }
 }

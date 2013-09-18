@@ -35,7 +35,7 @@
 
 #include <oskar_global.h>
 #include <oskar_telescope.h>
-#include <oskar_WorkStationBeam.h>
+#include <oskar_station_work.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,7 +59,7 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_sky_horizon_clip(oskar_Sky* output,
         const oskar_Sky* input, const oskar_Telescope* telescope,
-        double gast, oskar_WorkStationBeam* work, int* status);
+        double gast, oskar_StationWork* work, int* status);
 
 #ifdef __cplusplus
 }

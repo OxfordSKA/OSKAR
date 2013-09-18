@@ -42,8 +42,7 @@
 #include <oskar_evaluate_source_horizontal_lmn.h>
 #include <oskar_evaluate_station_beam_aperture_array.h>
 #include <oskar_evaluate_station_beam_gaussian.h>
-#include <oskar_work_station_beam_free.h>
-#include <oskar_work_station_beam_init.h>
+#include <oskar_station_work.h>
 #include <oskar_cuda_mem_log.h>
 #include <oskar_random_state.h>
 #include <oskar_log.h>
@@ -134,7 +133,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     // All GPU memory used within these braces.
     {
         oskar_Mem RA, Dec, beam_pattern, l, m, n;
-        oskar_WorkStationBeam work;
+        oskar_StationWork* work;
+        oskar_Mem *hor_x, *hor_y, *hor_z;
         const oskar_Station* station;
         double ra0, dec0;
 
@@ -149,7 +149,10 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 &err);
 
         // Initialise work array and GPU memory for a beam pattern.
-        oskar_work_station_beam_init(&work, type, OSKAR_LOCATION_GPU, &err);
+        work = oskar_station_work_create(type, OSKAR_LOCATION_GPU, &err);
+        hor_x = oskar_station_work_source_horizontal_x(work);
+        hor_y = oskar_station_work_source_horizontal_y(work);
+        hor_z = oskar_station_work_source_horizontal_z(work);
         oskar_mem_init(&beam_pattern, beam_pattern_data_type,
                 OSKAR_LOCATION_GPU, num_pixels, 1, &err);
         oskar_mem_init(&l, type, OSKAR_LOCATION_GPU, 0, 1, &err);
@@ -209,22 +212,21 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 
                 // Evaluate horizontal x,y,z directions for source positions.
                 oskar_evaluate_source_horizontal_lmn(num_pixels,
-                        &work.hor_x, &work.hor_y, &work.hor_z, &RA, &Dec,
-                        last, lat, &err);
+                        hor_x, hor_y, hor_z, &RA, &Dec, last, lat, &err);
 
                 // Evaluate the station beam.
                 if (oskar_station_station_type(station) ==
                         OSKAR_STATION_TYPE_AA)
                 {
                     oskar_evaluate_station_beam_aperture_array(&beam_pattern,
-                            station, num_pixels, &work.hor_x, &work.hor_y,
-                            &work.hor_z, gast, &work, random_state, &err);
+                            station, num_pixels, hor_x, hor_y, hor_z, gast,
+                            work, random_state, &err);
                 }
                 else if (oskar_station_station_type(station) ==
                         OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
                 {
                     oskar_evaluate_station_beam_gaussian(&beam_pattern,
-                            num_pixels, &l, &m, &work.hor_z,
+                            num_pixels, &l, &m, hor_z,
                             oskar_station_gaussian_beam_fwhm_rad(station), &err);
                 }
                 else
@@ -290,7 +292,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         oskar_mem_free(&l, &err);
         oskar_mem_free(&m, &err);
         oskar_mem_free(&n, &err);
-        oskar_work_station_beam_free(&work, &err);
+        oskar_station_work_free(work, &err);
     } // GPU memory section
     oskar_log_section(log, "Simulation completed in %.3f sec.",
             timer.elapsed() / 1e3);

@@ -482,10 +482,11 @@ TEST(SkyModel, horizon_clip)
     }
 
     // Create a work buffer.
-    oskar_WorkStationBeam work(type, OSKAR_LOCATION_GPU);
+    oskar_StationWork* work = oskar_station_work_create(type,
+            OSKAR_LOCATION_GPU, &status);
 
     // Try horizon clip: should currently fail because it's in host memory.
-    oskar_sky_horizon_clip(sky_out, sky_cpu, telescope, 0.0, &work,
+    oskar_sky_horizon_clip(sky_out, sky_cpu, telescope, 0.0, work,
             &status);
     ASSERT_EQ((int)OSKAR_ERR_BAD_LOCATION, status);
     status = 0;
@@ -496,7 +497,7 @@ TEST(SkyModel, horizon_clip)
                 OSKAR_LOCATION_GPU, &status);
 
         // Horizon clip should now succeed.
-        oskar_sky_horizon_clip(sky_out, sky_gpu, telescope, 0.0, &work,
+        oskar_sky_horizon_clip(sky_out, sky_gpu, telescope, 0.0, work,
                 &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         ASSERT_EQ(n_sources / 2, oskar_sky_num_sources(sky_out));
@@ -519,6 +520,7 @@ TEST(SkyModel, horizon_clip)
     oskar_sky_free(sky_out, &status);
     oskar_sky_free(sky_cpu, &status);
     oskar_telescope_free(telescope, &status);
+    oskar_station_work_free(work, &status);
 }
 
 

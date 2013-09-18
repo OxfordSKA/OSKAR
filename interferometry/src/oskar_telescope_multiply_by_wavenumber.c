@@ -39,14 +39,14 @@
 extern "C" {
 #endif
 
-void oskar_telescope_multiply_by_wavenumber(oskar_Telescope* telescope,
+void oskar_telescope_multiply_by_wavenumber(oskar_Telescope* tel,
         double frequency_hz, int* status)
 {
     int i;
-    double wavenumber, wavelength;
+    double wavelength, wavenumber, factor;
 
     /* Check all inputs. */
-    if (!telescope || !status)
+    if (!tel || frequency_hz == 0.0 || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -55,24 +55,31 @@ void oskar_telescope_multiply_by_wavenumber(oskar_Telescope* telescope,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check and update current units of station positions. */
-    if (telescope->coord_units != OSKAR_METRES)
-    {
-        *status = OSKAR_ERR_BAD_UNITS;
-        return;
-    }
-    telescope->coord_units = OSKAR_RADIANS;
-
     /* Multiply station positions by wavenumber. */
     wavelength = 299792458.0 / frequency_hz;
     wavenumber = 2.0 * M_PI / wavelength;
-    oskar_telescope_scale_coords(telescope, wavenumber, status);
+    factor = wavenumber;
+    if (tel->coord_units == OSKAR_RADIANS)
+    {
+        /* Also multiply by inverse of existing wavenumber, if already set. */
+        factor *= (1.0 / tel->wavenumber);
+    }
+    oskar_mem_scale_real(oskar_telescope_station_x(tel), factor, status);
+    oskar_mem_scale_real(oskar_telescope_station_y(tel), factor, status);
+    oskar_mem_scale_real(oskar_telescope_station_z(tel), factor, status);
+    oskar_mem_scale_real(oskar_telescope_station_x_hor(tel), factor, status);
+    oskar_mem_scale_real(oskar_telescope_station_y_hor(tel), factor, status);
+    oskar_mem_scale_real(oskar_telescope_station_z_hor(tel), factor, status);
+
+    /* Update units and wavenumber. */
+    tel->wavenumber = wavenumber;
+    tel->coord_units = OSKAR_RADIANS;
 
     /* Multiply station element positions by wavenumber. */
-    for (i = 0; i < telescope->num_stations; ++i)
+    for (i = 0; i < tel->num_stations; ++i)
     {
         oskar_station_multiply_by_wavenumber(
-                oskar_telescope_station(telescope, i), frequency_hz, status);
+                oskar_telescope_station(tel, i), frequency_hz, status);
     }
 }
 

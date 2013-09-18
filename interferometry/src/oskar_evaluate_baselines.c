@@ -91,8 +91,12 @@ void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
 
     /* Check that the data types match. */
     if (oskar_mem_type(v) != type || oskar_mem_type(w) != type ||
-            oskar_mem_type(uu) != type || oskar_mem_type(vv) != type || oskar_mem_type(ww) != type)
+            oskar_mem_type(uu) != type || oskar_mem_type(vv) != type ||
+            oskar_mem_type(ww) != type)
+    {
         *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
 
     /* Check that the data locations match. */
     if (oskar_mem_location(v) != location ||
@@ -100,12 +104,18 @@ void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
             oskar_mem_location(uu) != location ||
             oskar_mem_location(vv) != location ||
             oskar_mem_location(ww) != location)
+    {
         *status = OSKAR_ERR_BAD_LOCATION;
+        return;
+    }
 
     /* Check that the memory is not NULL. */
     if (!uu->data || !vv->data || !ww->data ||
             !u->data || !v->data || !w->data)
+    {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
 
     /* Check that the data dimensions are OK. */
     if ((int)oskar_mem_length(v) < num_stations ||
@@ -113,24 +123,32 @@ void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
             (int)oskar_mem_length(uu) < num_baselines ||
             (int)oskar_mem_length(vv) < num_baselines ||
             (int)oskar_mem_length(ww) < num_baselines)
+    {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
-
-    /* Check if safe to proceed. */
-    if (*status) return;
+        return;
+    }
 
     if (location == OSKAR_LOCATION_CPU)
     {
         if (type == OSKAR_SINGLE)
         {
-            oskar_evaluate_baselines_f((float*)(uu->data), (float*)(vv->data),
-                    (float*)(ww->data), num_stations, (float*)(u->data),
-                    (float*)(v->data), (float*)(w->data));
+            oskar_evaluate_baselines_f(
+                    oskar_mem_float(uu, status),
+                    oskar_mem_float(vv, status),
+                    oskar_mem_float(ww, status), num_stations,
+                    oskar_mem_float_const(u, status),
+                    oskar_mem_float_const(v, status),
+                    oskar_mem_float_const(w, status));
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_evaluate_baselines_d((double*)(uu->data), (double*)(vv->data),
-                    (double*)(ww->data), num_stations, (double*)(u->data),
-                    (double*)(v->data), (double*)(w->data));
+            oskar_evaluate_baselines_d(
+                    oskar_mem_double(uu, status),
+                    oskar_mem_double(vv, status),
+                    oskar_mem_double(ww, status), num_stations,
+                    oskar_mem_double_const(u, status),
+                    oskar_mem_double_const(v, status),
+                    oskar_mem_double_const(w, status));
         }
         else
         {
@@ -142,22 +160,29 @@ void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
         {
-            oskar_evaluate_baselines_cuda_f((float*)(uu->data),
-                    (float*)(vv->data), (float*)(ww->data), num_stations,
-                    (float*)(u->data), (float*)(v->data), (float*)(w->data));
-            oskar_cuda_check_error(status);
+            oskar_evaluate_baselines_cuda_f(
+                    oskar_mem_float(uu, status),
+                    oskar_mem_float(vv, status),
+                    oskar_mem_float(ww, status), num_stations,
+                    oskar_mem_float_const(u, status),
+                    oskar_mem_float_const(v, status),
+                    oskar_mem_float_const(w, status));
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_evaluate_baselines_cuda_d((double*)(uu->data),
-                    (double*)(vv->data), (double*)(ww->data), num_stations,
-                    (double*)(u->data), (double*)(v->data), (double*)(w->data));
-            oskar_cuda_check_error(status);
+            oskar_evaluate_baselines_cuda_d(
+                    oskar_mem_double(uu, status),
+                    oskar_mem_double(vv, status),
+                    oskar_mem_double(ww, status), num_stations,
+                    oskar_mem_double_const(u, status),
+                    oskar_mem_double_const(v, status),
+                    oskar_mem_double_const(w, status));
         }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
+        oskar_cuda_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

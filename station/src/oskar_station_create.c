@@ -119,6 +119,7 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->apply_element_errors = OSKAR_FALSE;
     model->apply_element_weight = OSKAR_FALSE;
     model->coord_units = OSKAR_METRES;
+    model->wavenumber = 0.0;
     model->orientation_x = M_PI / 2.0;
     model->orientation_y = 0.0;
     model->child = 0;

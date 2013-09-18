@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_WORK_STATION_BEAM_INIT_H_
-#define OSKAR_WORK_STATION_BEAM_INIT_H_
+#ifndef OSKAR_STATION_WORK_H_
+#define OSKAR_STATION_WORK_H_
 
 /**
- * @file oskar_work_station_beam_init.h
+ * @file oskar_station_work.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_WorkStationBeam.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+struct oskar_StationWork;
+#ifndef OSKAR_WORK_STATION_BEAM_TYPEDEF_
+#define OSKAR_WORK_STATION_BEAM_TYPEDEF_
+typedef struct oskar_StationWork oskar_StationWork;
+#endif
+
 /**
- * @brief Initialises an oskar_WorkStationBeam structure.
+ * @brief Creates a station work buffer structure.
  *
  * @details
  * This function initialises a structure to hold work buffers that are
@@ -52,11 +58,56 @@ extern "C" {
  * @param[in]     location  OSKAR memory location ID.
  * @param[in,out]  status   Status return code.
  */
-void oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
-        int location, int* status);
+OSKAR_EXPORT
+oskar_StationWork* oskar_station_work_create(int type, int location,
+        int* status);
+
+/**
+ * @brief Frees memory in a station work buffer structure.
+ *
+ * @details
+ * This function frees memory in a data structure used to hold work buffers
+ * for calculating a station beam.
+ *
+ * @param[in,out]  work   Pointer to structure containing memory to free.
+ * @param[in,out]  status   Status return code.
+ */
+OSKAR_EXPORT
+void oskar_station_work_free(oskar_StationWork* work, int* status);
+
+
+/* Accessors. */
+
+OSKAR_EXPORT
+oskar_Mem* oskar_station_work_horizon_mask(oskar_StationWork* work);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_work_horizon_mask_const(
+        const oskar_StationWork* work);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_station_work_source_horizontal_x(oskar_StationWork* work);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_work_source_horizontal_x_const(
+        const oskar_StationWork* work);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_station_work_source_horizontal_y(oskar_StationWork* work);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_work_source_horizontal_y_const(
+        const oskar_StationWork* work);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_station_work_source_horizontal_z(oskar_StationWork* work);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_work_source_horizontal_z_const(
+        const oskar_StationWork* work);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_WORK_STATION_BEAM_INIT_H_ */
+#endif /* OSKAR_STATION_WORK_H_ */

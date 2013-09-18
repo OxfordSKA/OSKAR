@@ -35,7 +35,7 @@
 
 #include <oskar_global.h>
 #include <oskar_station.h>
-#include <oskar_WorkStationBeam.h>
+#include <oskar_station_work.h>
 #include <oskar_random_state.h>
 
 #ifdef __cplusplus
@@ -104,7 +104,7 @@ OSKAR_EXPORT
 void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, double gast,
-        oskar_WorkStationBeam* work, oskar_RandomState* random_states,
+        oskar_StationWork* work, oskar_RandomState* random_states,
         int* status);
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,24 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_work_station_beam_init.h"
-#include <oskar_mem.h>
+#include <oskar_station_work.h>
+#include <private_station_work.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
+oskar_StationWork* oskar_station_work_create(int type,
         int location, int* status)
 {
     int i, complex_matrix;
+    oskar_StationWork* work = 0;
 
     /* Check all inputs. */
-    if (!work || !status)
+    if (!status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return 0;
     }
+
+    /* Allocate memory for the structure. */
+    work = (oskar_StationWork*) malloc(sizeof(oskar_StationWork));
 
     /* Check the base type is correct. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
@@ -77,6 +81,85 @@ void oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
         oskar_mem_init(&work->hierarchy_work_scalar[i], (type | OSKAR_COMPLEX),
                 location, 0, 1, status);
     }
+
+    return work;
+}
+
+void oskar_station_work_free(oskar_StationWork* work, int* status)
+{
+    int i;
+
+    /* Check all inputs. */
+    if (!work || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    oskar_mem_free(&work->horizon_mask, status);
+    oskar_mem_free(&work->theta_modified, status);
+    oskar_mem_free(&work->phi_modified, status);
+    oskar_mem_free(&work->hor_x, status);
+    oskar_mem_free(&work->hor_y, status);
+    oskar_mem_free(&work->hor_z, status);
+    oskar_mem_free(&work->weights, status);
+    oskar_mem_free(&work->weights_error, status);
+    oskar_mem_free(&work->array_pattern, status);
+    oskar_mem_free(&work->element_pattern_matrix, status);
+    oskar_mem_free(&work->element_pattern_scalar, status);
+
+    for (i = 0; i < OSKAR_MAX_STATION_DEPTH; ++i)
+    {
+        oskar_mem_free(&work->hierarchy_work_matrix[i], status);
+        oskar_mem_free(&work->hierarchy_work_scalar[i], status);
+    }
+
+    /* Free the structure. */
+    free(work);
+}
+
+oskar_Mem* oskar_station_work_horizon_mask(oskar_StationWork* work)
+{
+    return &work->horizon_mask;
+}
+
+const oskar_Mem* oskar_station_work_horizon_mask_const(
+        const oskar_StationWork* work)
+{
+    return &work->horizon_mask;
+}
+
+oskar_Mem* oskar_station_work_source_horizontal_x(oskar_StationWork* work)
+{
+    return &work->hor_x;
+}
+
+const oskar_Mem* oskar_station_work_source_horizontal_x_const(
+        const oskar_StationWork* work)
+{
+    return &work->hor_x;
+}
+
+oskar_Mem* oskar_station_work_source_horizontal_y(oskar_StationWork* work)
+{
+    return &work->hor_y;
+}
+
+const oskar_Mem* oskar_station_work_source_horizontal_y_const(
+        const oskar_StationWork* work)
+{
+    return &work->hor_y;
+}
+
+oskar_Mem* oskar_station_work_source_horizontal_z(oskar_StationWork* work)
+{
+    return &work->hor_z;
+}
+
+const oskar_Mem* oskar_station_work_source_horizontal_z_const(
+        const oskar_StationWork* work)
+{
+    return &work->hor_z;
 }
 
 #ifdef __cplusplus

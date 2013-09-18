@@ -71,7 +71,7 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     telescope->altitude_m = src->altitude_m;
     telescope->ra0_rad = src->ra0_rad;
     telescope->dec0_rad = src->dec0_rad;
-    telescope->wavelength_m = src->wavelength_m;
+    telescope->wavenumber = src->wavenumber;
     telescope->bandwidth_hz = src->bandwidth_hz;
     telescope->time_average_sec = src->time_average_sec;
 

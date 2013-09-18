@@ -26,14 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_WORK_STATION_BEAM_H_
-#define OSKAR_WORK_STATION_BEAM_H_
+#ifndef OSKAR_PRIVATE_WORK_STATION_BEAM_H_
+#define OSKAR_PRIVATE_WORK_STATION_BEAM_H_
 
 /**
- * @file oskar_WorkStationBeam.h
+ * @file private_station_work.h
  */
 
-#include <oskar_global.h>
 #include <oskar_mem.h>
 
 #define OSKAR_MAX_STATION_DEPTH 3
@@ -57,7 +56,7 @@
  *
  * Depending on the mode of operation, not all of these arrays will be used.
  */
-struct OSKAR_EXPORT oskar_WorkStationBeam
+struct oskar_StationWork
 {
     oskar_Mem horizon_mask;            /* Integer. */
 
@@ -75,25 +74,11 @@ struct OSKAR_EXPORT oskar_WorkStationBeam
 
     oskar_Mem hierarchy_work_matrix[OSKAR_MAX_STATION_DEPTH]; /* Complex matrix. */
     oskar_Mem hierarchy_work_scalar[OSKAR_MAX_STATION_DEPTH]; /* Complex scalar. */
-
-#ifdef __cplusplus
-    /**
-     * @brief Constructor.
-     *
-     * @param[in] type     OSKAR memory type ID (Accepted values: OSKAR_SINGLE,
-     *                     OSKAR_DOUBLE).
-     * @param[in] location OSKAR memory location ID.
-     */
-    oskar_WorkStationBeam(int type = OSKAR_DOUBLE,
-            int location = OSKAR_LOCATION_GPU);
-
-    /**
-     * @brief Destructor.
-     */
-    ~oskar_WorkStationBeam();
-#endif
 };
 
-typedef struct oskar_WorkStationBeam oskar_WorkStationBeam;
+#ifndef OSKAR_WORK_STATION_BEAM_TYPEDEF_
+#define OSKAR_WORK_STATION_BEAM_TYPEDEF_
+typedef struct oskar_StationWork oskar_StationWork;
+#endif
 
-#endif /* OSKAR_WORK_STATION_BEAM_H_ */
+#endif /* OSKAR_PRIVATE_WORK_STATION_BEAM_H_ */

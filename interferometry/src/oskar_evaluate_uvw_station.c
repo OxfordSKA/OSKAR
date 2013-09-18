@@ -133,7 +133,10 @@ void oskar_evaluate_uvw_station(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
 
     /* Check that the memory is not NULL. */
     if (!u->data || !v->data || !w->data || !x->data || !y->data || !z->data)
+    {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
 
     /* Check that the data dimensions are OK. */
     if ((int)oskar_mem_length(u) < num_stations ||
@@ -142,7 +145,10 @@ void oskar_evaluate_uvw_station(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
             (int)oskar_mem_length(x) < num_stations ||
             (int)oskar_mem_length(y) < num_stations ||
             (int)oskar_mem_length(z) < num_stations)
+    {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
 
     /* Check that the data are in the right location. */
     if (oskar_mem_location(y) != location ||
@@ -150,15 +156,19 @@ void oskar_evaluate_uvw_station(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
             oskar_mem_location(u) != location ||
             oskar_mem_location(v) != location ||
             oskar_mem_location(w) != location)
+    {
         *status = OSKAR_ERR_BAD_LOCATION;
+        return;
+    }
 
     /* Check that the data is of the right type. */
     if (oskar_mem_type(y) != type || oskar_mem_type(z) != type ||
-            oskar_mem_type(u) != type || oskar_mem_type(v) != type || oskar_mem_type(w) != type)
+            oskar_mem_type(u) != type || oskar_mem_type(v) != type ||
+            oskar_mem_type(w) != type)
+    {
         *status = OSKAR_ERR_TYPE_MISMATCH;
-
-    /* Check if safe to proceed. */
-    if (*status) return;
+        return;
+    }
 
     /* Evaluate Greenwich Hour Angle of phase centre. */
     ha0_rad = gast - ra0_rad;
@@ -169,24 +179,31 @@ void oskar_evaluate_uvw_station(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
         {
-            oskar_evaluate_uvw_station_cuda_f((float*)(u->data),
-                    (float*)(v->data), (float*)(w->data), num_stations,
-                    (float*)(x->data), (float*)(y->data), (float*)(z->data),
+            oskar_evaluate_uvw_station_cuda_f(
+                    oskar_mem_float(u, status),
+                    oskar_mem_float(v, status),
+                    oskar_mem_float(w, status), num_stations,
+                    oskar_mem_float_const(x, status),
+                    oskar_mem_float_const(y, status),
+                    oskar_mem_float_const(z, status),
                     (float)ha0_rad, (float)dec0_rad);
-            oskar_cuda_check_error(status);
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_evaluate_uvw_station_cuda_d((double*)(u->data),
-                    (double*)(v->data), (double*)(w->data), num_stations,
-                    (double*)(x->data), (double*)(y->data), (double*)(z->data),
+            oskar_evaluate_uvw_station_cuda_d(
+                    oskar_mem_double(u, status),
+                    oskar_mem_double(v, status),
+                    oskar_mem_double(w, status), num_stations,
+                    oskar_mem_double_const(x, status),
+                    oskar_mem_double_const(y, status),
+                    oskar_mem_double_const(z, status),
                     ha0_rad, dec0_rad);
-            oskar_cuda_check_error(status);
         }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
+        oskar_cuda_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -195,16 +212,24 @@ void oskar_evaluate_uvw_station(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
     {
         if (type == OSKAR_SINGLE)
         {
-            oskar_evaluate_uvw_station_f((float*)(u->data),
-                    (float*)(v->data), (float*)(w->data), num_stations,
-                    (float*)(x->data), (float*)(y->data), (float*)(z->data),
+            oskar_evaluate_uvw_station_f(
+                    oskar_mem_float(u, status),
+                    oskar_mem_float(v, status),
+                    oskar_mem_float(w, status), num_stations,
+                    oskar_mem_float_const(x, status),
+                    oskar_mem_float_const(y, status),
+                    oskar_mem_float_const(z, status),
                     (float)ha0_rad, (float)dec0_rad);
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_evaluate_uvw_station_d((double*)(u->data),
-                    (double*)(v->data), (double*)(w->data), num_stations,
-                    (double*)(x->data), (double*)(y->data), (double*)(z->data),
+            oskar_evaluate_uvw_station_d(
+                    oskar_mem_double(u, status),
+                    oskar_mem_double(v, status),
+                    oskar_mem_double(w, status), num_stations,
+                    oskar_mem_double_const(x, status),
+                    oskar_mem_double_const(y, status),
+                    oskar_mem_double_const(z, status),
                     ha0_rad, dec0_rad);
         }
         else

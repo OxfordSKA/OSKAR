@@ -61,7 +61,6 @@ typedef struct oskar_Telescope oskar_Telescope;
 #include <oskar_telescope_multiply_by_wavenumber.h>
 #include <oskar_telescope_resize.h>
 #include <oskar_telescope_save_station_coords.h>
-#include <oskar_telescope_scale_coords.h>
 #include <oskar_telescope_set_station_coords.h>
 
 #endif /* OSKAR_TELESCOPE_H_ */

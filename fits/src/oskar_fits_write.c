@@ -44,7 +44,7 @@ void oskar_fits_write(const char* filename, int type, int naxis,
         const double* crval, const double* cdelt, const double* crpix,
         const double* crota, int* status)
 {
-    char key[FLEN_KEYWORD], value[FLEN_VALUE];
+    char value[FLEN_VALUE];
     int i, num_elements = 1;
     int datatype = TFLOAT, imagetype = FLOAT_IMG;
     fitsfile* fptr = NULL;
@@ -82,9 +82,8 @@ void oskar_fits_write(const char* filename, int type, int naxis,
     fits_write_date(fptr, status);
 
     /* Write telescope keyword. */
-    strcpy(key, "TELESCOP");
-    strcpy(value, "OSKAR-2 SIMULATOR");
-    fits_write_key_str(fptr,  key, value, NULL, status);
+    strcpy(value, "OSKAR " OSKAR_VERSION_STR);
+    fits_write_key_str(fptr, "TELESCOP", value, NULL, status);
 
     /* Axis description headers. */
     for (i = 0; i < naxis; ++i)
@@ -93,11 +92,11 @@ void oskar_fits_write(const char* filename, int type, int naxis,
                 crval[i], cdelt[i], crpix[i], crota[i]);
     }
 
-    /* Write a history line. */
+    /* Write a history line with the OSKAR version. */
     fits_write_history(fptr,
-            "This file was created using the OSKAR-2 simulator.", status);
+            "This file was created using OSKAR " OSKAR_VERSION_STR, status);
 
-    /* Write image data. */
+    /* Write image data into primary array. */
     for (i = 0; i < naxis; ++i)
     {
         num_elements *= naxes[i];

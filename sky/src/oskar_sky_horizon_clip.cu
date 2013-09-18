@@ -124,10 +124,11 @@ static void copy_source_data(oskar_Sky* output,
 extern "C"
 void oskar_sky_horizon_clip(oskar_Sky* output,
         const oskar_Sky* input, const oskar_Telescope* telescope,
-        double gast, oskar_WorkStationBeam* work, int* status)
+        double gast, oskar_StationWork* work, int* status)
 {
     int *mask, type;
     const oskar_Station* s;
+    oskar_Mem *horizon_mask, *hor_x, *hor_y, *hor_z;
 
     /* Check all inputs. */
     if (!output || !input || !telescope || !work || !status)
@@ -138,6 +139,12 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
 
     /* Check if safe to proceed. */
     if (*status) return;
+
+    /* Get pointers to work arrays. */
+    horizon_mask = oskar_station_work_horizon_mask(work);
+    hor_x = oskar_station_work_source_horizontal_x(work);
+    hor_y = oskar_station_work_source_horizontal_y(work);
+    hor_z = oskar_station_work_source_horizontal_z(work);
 
     /* Check that the types match. */
     type = oskar_sky_type(input);
@@ -150,7 +157,7 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
     /* Check for the correct location. */
     if (oskar_sky_location(output) != OSKAR_LOCATION_GPU ||
             oskar_sky_location(input) != OSKAR_LOCATION_GPU ||
-            oskar_mem_location(&work->hor_x) != OSKAR_LOCATION_GPU)
+            oskar_mem_location(hor_x) != OSKAR_LOCATION_GPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -169,18 +176,18 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
         oskar_sky_resize(output, num_sources, status);
 
     /* Resize the work buffers if necessary. */
-    if ((int)oskar_mem_length(&work->horizon_mask) < num_sources)
-        oskar_mem_realloc(&work->horizon_mask, num_sources, status);
-    if ((int)oskar_mem_length(&work->hor_x) < num_sources)
-        oskar_mem_realloc(&work->hor_x, num_sources, status);
-    if ((int)oskar_mem_length(&work->hor_y) < num_sources)
-        oskar_mem_realloc(&work->hor_y, num_sources, status);
-    if ((int)oskar_mem_length(&work->hor_z) < num_sources)
-        oskar_mem_realloc(&work->hor_z, num_sources, status);
+    if ((int)oskar_mem_length(horizon_mask) < num_sources)
+        oskar_mem_realloc(horizon_mask, num_sources, status);
+    if ((int)oskar_mem_length(hor_x) < num_sources)
+        oskar_mem_realloc(hor_x, num_sources, status);
+    if ((int)oskar_mem_length(hor_y) < num_sources)
+        oskar_mem_realloc(hor_y, num_sources, status);
+    if ((int)oskar_mem_length(hor_z) < num_sources)
+        oskar_mem_realloc(hor_z, num_sources, status);
 
     /* Clear horizon mask. */
-    oskar_mem_clear_contents(&work->horizon_mask, status);
-    mask = oskar_mem_int(&work->horizon_mask, status);
+    oskar_mem_clear_contents(horizon_mask, status);
+    mask = oskar_mem_int(horizon_mask, status);
 
     /* Check if safe to proceed. */
     if (*status) return;
@@ -191,9 +198,9 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
         float *x, *y, *z;
         ra   = oskar_mem_float_const(oskar_sky_ra_const(input), status);
         dec  = oskar_mem_float_const(oskar_sky_dec_const(input), status);
-        x    = oskar_mem_float(&work->hor_x, status);
-        y    = oskar_mem_float(&work->hor_y, status);
-        z    = oskar_mem_float(&work->hor_z, status);
+        x    = oskar_mem_float(hor_x, status);
+        y    = oskar_mem_float(hor_y, status);
+        z    = oskar_mem_float(hor_z, status);
 
         /* Create the mask. */
         for (int i = 0; i < num_stations; ++i)
@@ -215,7 +222,7 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
         }
 
         /* Copy out source data based on the mask values. */
-        copy_source_data<float>(output, input, &work->horizon_mask, status);
+        copy_source_data<float>(output, input, horizon_mask, status);
         oskar_cuda_check_error(status);
     }
     else if (type == OSKAR_DOUBLE)
@@ -224,9 +231,9 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
         double *x, *y, *z;
         ra   = oskar_mem_double_const(oskar_sky_ra_const(input), status);
         dec  = oskar_mem_double_const(oskar_sky_dec_const(input), status);
-        x    = oskar_mem_double(&work->hor_x, status);
-        y    = oskar_mem_double(&work->hor_y, status);
-        z    = oskar_mem_double(&work->hor_z, status);
+        x    = oskar_mem_double(hor_x, status);
+        y    = oskar_mem_double(hor_y, status);
+        z    = oskar_mem_double(hor_z, status);
 
         /* Create the mask. */
         for (int i = 0; i < num_stations; ++i)
@@ -248,7 +255,7 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
         }
 
         /* Copy out source data based on the mask values. */
-        copy_source_data<double>(output, input, &work->horizon_mask, status);
+        copy_source_data<double>(output, input, horizon_mask, status);
         oskar_cuda_check_error(status);
     }
     else

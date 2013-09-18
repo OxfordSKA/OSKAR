@@ -47,8 +47,7 @@ typedef struct oskar_Station oskar_Station;
 
 enum {
     OSKAR_STATION_TYPE_AA,
-    OSKAR_STATION_TYPE_GAUSSIAN_BEAM,
-    OSKAR_STATION_TYPE_DISH
+    OSKAR_STATION_TYPE_GAUSSIAN_BEAM
 };
 
 #ifdef __cplusplus
@@ -73,7 +72,6 @@ enum {
 #include <oskar_station_resize.h>
 #include <oskar_station_resize_element_types.h>
 #include <oskar_station_save_config.h>
-#include <oskar_station_scale_coords.h>
 #include <oskar_station_set_element_coords.h>
 #include <oskar_station_set_element_errors.h>
 #include <oskar_station_set_element_orientation.h>

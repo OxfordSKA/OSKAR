@@ -32,6 +32,8 @@
 #include <oskar_random_state.h>
 #include <oskar_cuda_check_error.h>
 
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -53,7 +53,6 @@ set(station_SRC
     src/oskar_station_resize_element_types.c
     src/oskar_station_resize.c
     src/oskar_station_save_config.c
-    src/oskar_station_scale_coords.c
     src/oskar_station_set_element_coords.c
     src/oskar_station_set_element_errors.c
     src/oskar_station_set_element_orientation.c
@@ -62,9 +61,7 @@ set(station_SRC
     src/oskar_system_noise_model_free.c
     src/oskar_system_noise_model_init.c
     src/oskar_system_noise_model_load.c
-    src/oskar_work_station_beam_free.c
-    src/oskar_work_station_beam_init.c
-    src/oskar_WorkStationBeam.cpp
+    src/oskar_station_work.c
 )
 
 set(station_SRC "${station_SRC}" PARENT_SCOPE)

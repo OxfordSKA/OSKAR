@@ -84,6 +84,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     model->apply_element_errors = src->apply_element_errors;
     model->apply_element_weight = src->apply_element_weight;
     model->coord_units = src->coord_units;
+    model->wavenumber = src->wavenumber;
     model->orientation_x = src->orientation_x;
     model->orientation_y = src->orientation_y;
 

@@ -35,6 +35,7 @@
 #include <oskar_evaluate_element_weights.h>
 #include <oskar_element_model_evaluate.h>
 #include <oskar_blank_below_horizon.h>
+#include <private_station_work.h>
 
 #include <oskar_mem.h>
 
@@ -48,14 +49,14 @@ extern "C" {
 static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, double gast,
-        oskar_WorkStationBeam* work, oskar_RandomState* random_states,
+        oskar_StationWork* work, oskar_RandomState* random_states,
         int depth, int* status);
 
 
 void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, double gast,
-        oskar_WorkStationBeam* work, oskar_RandomState* random_states,
+        oskar_StationWork* work, oskar_RandomState* random_states,
         int* status)
 {
     int start;
@@ -107,7 +108,7 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
 static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, double gast,
-        oskar_WorkStationBeam* work, oskar_RandomState* random_states,
+        oskar_StationWork* work, oskar_RandomState* random_states,
         int depth, int* status)
 {
     double beam_x, beam_y, beam_z;

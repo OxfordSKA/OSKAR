@@ -139,7 +139,8 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Allocate weights work array.
-    oskar_WorkStationBeam work(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
+    oskar_StationWork* work = oskar_station_work_create(OSKAR_SINGLE,
+            OSKAR_LOCATION_GPU, &error);
 
     // Declare memory for the beam pattern.
     oskar_Mem beam_pattern(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU, num_pixels);
@@ -147,7 +148,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     CPPUNIT_ASSERT_EQUAL(0, oskar_station_array_is_3d(station_gpu));
     TIMER_START
     oskar_evaluate_station_beam_aperture_array(&beam_pattern, station_gpu,
-            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, &work, random_state,
+            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, work, random_state,
             &error);
     cudaDeviceSynchronize();
     TIMER_STOP("Finished aperture array station beam (2D)");
@@ -157,7 +158,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     CPPUNIT_ASSERT_EQUAL(1, oskar_station_array_is_3d(station_gpu));
     TIMER_START
     oskar_evaluate_station_beam_aperture_array(&beam_pattern, station_gpu,
-            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, &work, random_state,
+            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, work, random_state,
             &error);
     cudaDeviceSynchronize();
     TIMER_STOP("Finished aperture array station beam (3D)");
@@ -185,6 +186,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
         imagesc(log10(reshape(data(:,3), 401, 401).^2));
     --------------------------------------------------------------------------*/
     oskar_random_state_free(random_state, &error);
+    oskar_station_work_free(work, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 }
 

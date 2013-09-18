@@ -53,7 +53,7 @@ struct oskar_Telescope
     double dec0_rad;             /**< Declination of phase centre, in radians. */
     double bandwidth_hz;         /**< Channel bandwidth, in Hz. */
     double time_average_sec;     /**< Time average smearing interval, in sec. */
-    double wavelength_m;         /* PRIVATE For internal use only. */
+    double wavenumber;           /**< Current wavenumber, if coordinates are in radians (private). */
 
     /* Station data. */
     int num_stations;            /**< Number of stations in the model. */
