@@ -33,8 +33,6 @@
  * @file oskar_SettingsSky.h
  */
 
-#include "oskar_global.h"
-
 /**
  * @struct oskar_SettingsSkyFilter
  *
@@ -43,7 +41,7 @@
  * @details
  * The structure holds parameters for a source filter.
  */
-struct OSKAR_EXPORT oskar_SettingsSkyFilter
+struct oskar_SettingsSkyFilter
 {
     double flux_min;
     double flux_max;
@@ -57,7 +55,7 @@ typedef struct oskar_SettingsSkyFilter oskar_SettingsSkyFilter;
  *
  * @brief Holds extended source settings which apply to all sources.
  */
-struct OSKAR_EXPORT oskar_SettingsSkyExtendedSources
+struct oskar_SettingsSkyExtendedSources
 {
     double FWHM_major;      /**< Major axis FWHM in radians. */
     double FWHM_minor;      /**< Minor axis FWHM in radians. */
@@ -70,7 +68,7 @@ typedef struct oskar_SettingsSkyExtendedSources oskar_SettingsSkyExtendedSources
  *
  * @brief Holds OSKAR sky model import parameters.
  */
-struct OSKAR_EXPORT oskar_SettingsSkyOskar
+struct oskar_SettingsSkyOskar
 {
     int num_files;  /**< Number of OSKAR sky model files to load. */
     char** file;    /**< List of OSKAR sky model files. */
@@ -84,7 +82,7 @@ typedef struct oskar_SettingsSkyOskar oskar_SettingsSkyOskar;
  *
  * @brief Holds GSM file import parameters.
  */
-struct OSKAR_EXPORT oskar_SettingsSkyGsm
+struct oskar_SettingsSkyGsm
 {
     char* file;    /**< Filename of GSM file to load. */
     oskar_SettingsSkyFilter filter;
@@ -97,7 +95,7 @@ typedef struct oskar_SettingsSkyGsm oskar_SettingsSkyGsm;
  *
  * @brief Holds FITS image file import parameters.
  */
-struct OSKAR_EXPORT oskar_SettingsSkyFitsImage
+struct oskar_SettingsSkyFitsImage
 {
     int num_files;            /**< Number of FITS image files to load. */
     char** file;              /**< List of FITS image files. */
@@ -113,7 +111,7 @@ typedef struct oskar_SettingsSkyFitsImage oskar_SettingsSkyFitsImage;
  *
  * @brief Holds FITS file import parameters.
  */
-struct OSKAR_EXPORT oskar_SettingsSkyHealpixFits
+struct oskar_SettingsSkyHealpixFits
 {
     int num_files;  /**< Number of HEALPix-FITS files to load. */
     char** file;    /**< List of HEALPix-FITS input sky model files. */
@@ -138,7 +136,7 @@ enum {
  * @details
  * The structure holds parameters for a sky model power-law generator.
  */
-struct OSKAR_EXPORT oskar_SettingsSkyGeneratorRandomPowerLaw
+struct oskar_SettingsSkyGeneratorRandomPowerLaw
 {
     oskar_SettingsSkyFilter filter;
     oskar_SettingsSkyExtendedSources extended_sources;
@@ -159,7 +157,7 @@ typedef struct oskar_SettingsSkyGeneratorRandomPowerLaw oskar_SettingsSkyGenerat
  * The structure holds parameters for a sky model random broken-power-law
  * generator.
  */
-struct OSKAR_EXPORT oskar_SettingsSkyGeneratorRandomBrokenPowerLaw
+struct oskar_SettingsSkyGeneratorRandomBrokenPowerLaw
 {
     oskar_SettingsSkyFilter filter;
     oskar_SettingsSkyExtendedSources extended_sources;
@@ -181,7 +179,7 @@ typedef struct oskar_SettingsSkyGeneratorRandomBrokenPowerLaw oskar_SettingsSkyG
  * @details
  * The structure holds parameters for a sky model HEALPix grid generator.
  */
-struct OSKAR_EXPORT oskar_SettingsSkyGeneratorHealpix
+struct oskar_SettingsSkyGeneratorHealpix
 {
     oskar_SettingsSkyFilter filter;
     oskar_SettingsSkyExtendedSources extended_sources;
@@ -198,7 +196,7 @@ typedef struct oskar_SettingsSkyGeneratorHealpix oskar_SettingsSkyGeneratorHealp
  * @details
  * The structure holds parameters for all the sky model generators.
  */
-struct OSKAR_EXPORT oskar_SettingsSkyGenerator
+struct oskar_SettingsSkyGenerator
 {
     oskar_SettingsSkyGeneratorHealpix healpix;
     oskar_SettingsSkyGeneratorRandomPowerLaw random_power_law;
@@ -214,7 +212,7 @@ typedef struct oskar_SettingsSkyGenerator oskar_SettingsSkyGenerator;
  * @details
  * The structure holds parameters for the sky model spectral index overrides.
  */
-struct OSKAR_EXPORT oskar_SettingsSkySpectralIndex
+struct oskar_SettingsSkySpectralIndex
 {
     int override;
     double ref_frequency_hz;
@@ -232,7 +230,7 @@ typedef struct oskar_SettingsSkySpectralIndex oskar_SettingsSkySpectralIndex;
  * @details
  * The structure holds parameters to construct a sky model.
  */
-struct OSKAR_EXPORT oskar_SettingsSky
+struct oskar_SettingsSky
 {
     oskar_SettingsSkyOskar oskar_sky_model;
     oskar_SettingsSkyGsm gsm;

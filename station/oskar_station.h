@@ -59,6 +59,7 @@ enum {
 #include <oskar_station_create_child_stations.h>
 #include <oskar_station_create_copy.h>
 #include <oskar_station_create.h>
+#include <oskar_station_different.h>
 #include <oskar_station_duplicate_first_child.h>
 #include <oskar_station_free.h>
 #include <oskar_station_load_config.h>

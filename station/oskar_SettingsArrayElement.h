@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,6 @@
  * @file oskar_SettingsArrayElement.h
  */
 
-#include "oskar_global.h"
-
 /**
  * @struct oskar_SettingsArrayElement
  *
@@ -44,7 +42,7 @@
  * The structure holds station element parameters that can be used to override
  * those in the station files.
  */
-struct OSKAR_EXPORT oskar_SettingsArrayElement
+struct oskar_SettingsArrayElement
 {
     int apodisation_type;
     double gain;

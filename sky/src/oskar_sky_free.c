@@ -27,6 +27,7 @@
  */
 
 #include <private_sky.h>
+#include <oskar_sky.h>
 #include <oskar_mem.h>
 #include <stdlib.h>
 

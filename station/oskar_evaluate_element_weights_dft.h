@@ -42,6 +42,50 @@ extern "C" {
 
 /**
  * @brief
+ * Function to compute DFT element phase weights (single precision).
+ *
+ * @details
+ * This function computes the DFT phase weights for each element.
+ *
+ * @param[out] weights       Output DFT phase weights per element.
+ * @param[in] num_elements   The number of elements in the array.
+ * @param[in] x              Element x positions, in radians.
+ * @param[in] y              Element y positions, in radians.
+ * @param[in] z              Element z positions, in radians.
+ * @param[in] x_beam         Beam x direction cosine.
+ * @param[in] y_beam         Beam y direction cosine.
+ * @param[in] z_beam         Beam z direction cosine.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_element_weights_dft_f(float2* weights,
+        const int num_elements, const float* x, const float* y,
+        const float* z, const float x_beam, const float y_beam,
+        const float z_beam);
+
+/**
+ * @brief
+ * Function to compute DFT element phase weights (double precision).
+ *
+ * @details
+ * This function computes the DFT phase weights for each element.
+ *
+ * @param[out] weights       Output DFT phase weights per element.
+ * @param[in] num_elements   The number of elements in the array.
+ * @param[in] x              Element x positions, in radians.
+ * @param[in] y              Element y positions, in radians.
+ * @param[in] z              Element z positions, in radians.
+ * @param[in] x_beam         Beam x direction cosine.
+ * @param[in] y_beam         Beam y direction cosine.
+ * @param[in] z_beam         Beam z direction cosine.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_element_weights_dft_d(double2* weights,
+        const int num_elements, const double* x, const double* y,
+        const double* z, const double x_beam, const double y_beam,
+        const double z_beam);
+
+/**
+ * @brief
  * Wrapper function to compute DFT element phase weights.
  *
  * @details

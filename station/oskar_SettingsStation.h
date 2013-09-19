@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,8 @@
  * @file oskar_SettingsStation.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_SettingsArrayElement.h"
-#include "station/oskar_SettingsElementFit.h"
+#include <oskar_SettingsArrayElement.h>
+#include <oskar_SettingsElementFit.h>
 
 /**
  * @struct oskar_SettingsStation
@@ -45,7 +44,7 @@
  * @details
  * The structure holds station model parameters.
  */
-struct OSKAR_EXPORT oskar_SettingsStation
+struct oskar_SettingsStation
 {
     int station_type;
     int use_polarised_elements;

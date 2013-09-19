@@ -27,7 +27,7 @@
  */
 
 #include <private_jones.h>
-
+#include <oskar_jones.h>
 #include <oskar_mem.h>
 
 #include <stdlib.h>

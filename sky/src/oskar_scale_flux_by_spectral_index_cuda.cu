@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_scale_flux_by_spectral_index_cuda.h"
+#include <oskar_scale_flux_by_spectral_index_cuda.h>
 
 #ifdef __cplusplus
 extern "C" {

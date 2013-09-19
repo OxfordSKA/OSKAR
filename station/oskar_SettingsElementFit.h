@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,7 @@
  * @file oskar_SettingsElementFit.h
  */
 
-#include "oskar_global.h"
-#include "math/oskar_SettingsSpline.h"
+#include <oskar_SettingsSpline.h>
 
 /**
  * @struct oskar_SettingsElementFit
@@ -45,7 +44,7 @@
  * The structure holds station element parameters that can be used to override
  * those in the station files.
  */
-struct OSKAR_EXPORT oskar_SettingsElementFit
+struct oskar_SettingsElementFit
 {
     double overlap_angle_rad;
     int ignore_data_below_horizon;

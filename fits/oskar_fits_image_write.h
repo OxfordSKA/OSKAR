@@ -76,13 +76,16 @@ extern "C" {
  *
  * The fastest varying dimension is along the RA axis.
  *
+ * Note that \p image is not passed as const, because the data is not marked
+ * as const for the function that writes the data in the CFITSIO header.
+ *
  * @param[in] image Pointer to image to write.
  * @param[in] log Pointer to log structure.
  * @param[in] filename Filename of output image.
  * @param[in,out] status Status return code.
  */
 OSKAR_FITS_EXPORT
-void oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
+void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
         const char* filename, int* status);
 
 #ifdef __cplusplus

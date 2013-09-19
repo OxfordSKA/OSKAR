@@ -63,6 +63,7 @@ macro(config_compiler_and_linker)
     set(cxx_no_rtti_flags "-GR-")
   elseif (CMAKE_COMPILER_IS_GNUCXX)
     set(cxx_base_flags "-Wall -Wshadow")
+    set(cxx_base_flags "${cxx_base_flags} -fvisibility=default")
     set(cxx_exception_flags "-fexceptions")
     set(cxx_no_exception_flags "-fno-exceptions")
     # Until version 4.3.2, GCC doesn't define a macro to indicate

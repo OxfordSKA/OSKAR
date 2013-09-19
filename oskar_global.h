@@ -286,6 +286,8 @@ enum {
 #ifndef OSKAR_DECL_EXPORT
 #    ifdef OSKAR_OS_WIN
 #        define OSKAR_DECL_EXPORT __declspec(dllexport)
+#    elif __GNUC__ >= 4
+#        define OSKAR_DECL_EXPORT __attribute__((visibility ("default")))
 #    else
 #        define OSKAR_DECL_EXPORT
 #    endif
@@ -293,6 +295,8 @@ enum {
 #ifndef OSKAR_DECL_IMPORT
 #    ifdef OSKAR_OS_WIN
 #        define OSKAR_DECL_IMPORT __declspec(dllimport)
+#    elif __GNUC__ >= 4
+#        define OSKAR_DECL_IMPORT __attribute__((visibility ("default")))
 #    else
 #        define OSKAR_DECL_IMPORT
 #    endif

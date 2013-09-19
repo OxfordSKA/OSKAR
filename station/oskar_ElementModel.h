@@ -33,7 +33,6 @@
  * @file oskar_ElementModel.h
  */
 
-#include <oskar_global.h>
 #include <oskar_SplineData.h>
 #include <oskar_mem.h>
 
@@ -44,7 +43,7 @@
  * This structure holds the spline coefficients and knot positions for
  * both polarisations of the antenna element.
  */
-struct OSKAR_EXPORT oskar_ElementModel
+struct oskar_ElementModel
 {
     int element_type; /**< Geometric dipole or isotropic. */
     int taper_type; /**< Tapering type. */
@@ -71,14 +70,6 @@ struct OSKAR_EXPORT oskar_ElementModel
      */
     oskar_ElementModel(int type = OSKAR_DOUBLE,
             int location = OSKAR_LOCATION_CPU);
-
-    /**
-     * @brief Constructs a copy of another element model structure.
-     *
-     * @details
-     * Copies an existing element model structure to the specified location.
-     */
-    oskar_ElementModel(const oskar_ElementModel* other, int location);
 
     /**
      * @brief Destroys the element model structure.

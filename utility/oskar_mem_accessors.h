@@ -189,6 +189,7 @@ int oskar_mem_is_scalar(const oskar_Mem* mem);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 void* oskar_mem_void(oskar_Mem* mem);
 
 /**
@@ -203,6 +204,7 @@ void* oskar_mem_void(oskar_Mem* mem);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 const void* oskar_mem_void_const(const oskar_Mem* mem);
 
 /**
@@ -217,6 +219,7 @@ const void* oskar_mem_void_const(const oskar_Mem* mem);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 char* oskar_mem_char(oskar_Mem* mem);
 
 /**
@@ -231,6 +234,7 @@ char* oskar_mem_char(oskar_Mem* mem);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 const char* oskar_mem_char_const(const oskar_Mem* mem);
 
 /**
@@ -249,6 +253,7 @@ const char* oskar_mem_char_const(const oskar_Mem* mem);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 int* oskar_mem_int(oskar_Mem* mem, int* status);
 
 /**
@@ -267,6 +272,7 @@ int* oskar_mem_int(oskar_Mem* mem, int* status);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 const int* oskar_mem_int_const(const oskar_Mem* mem, int* status);
 
 /**
@@ -285,6 +291,7 @@ const int* oskar_mem_int_const(const oskar_Mem* mem, int* status);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 float* oskar_mem_float(oskar_Mem* mem, int* status);
 
 /**
@@ -303,6 +310,7 @@ float* oskar_mem_float(oskar_Mem* mem, int* status);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 const float* oskar_mem_float_const(const oskar_Mem* mem, int* status);
 
 /**
@@ -321,6 +329,7 @@ const float* oskar_mem_float_const(const oskar_Mem* mem, int* status);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 float2* oskar_mem_float2(oskar_Mem* mem, int* status);
 
 /**
@@ -339,6 +348,7 @@ float2* oskar_mem_float2(oskar_Mem* mem, int* status);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 const float2* oskar_mem_float2_const(const oskar_Mem* mem, int* status);
 
 /**
@@ -357,6 +367,7 @@ const float2* oskar_mem_float2_const(const oskar_Mem* mem, int* status);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 float4c* oskar_mem_float4c(oskar_Mem* mem, int* status);
 
 /**
@@ -375,6 +386,7 @@ float4c* oskar_mem_float4c(oskar_Mem* mem, int* status);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 const float4c* oskar_mem_float4c_const(const oskar_Mem* mem, int* status);
 
 /**
@@ -393,6 +405,7 @@ const float4c* oskar_mem_float4c_const(const oskar_Mem* mem, int* status);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 double* oskar_mem_double(oskar_Mem* mem, int* status);
 
 /**
@@ -411,6 +424,7 @@ double* oskar_mem_double(oskar_Mem* mem, int* status);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 const double* oskar_mem_double_const(const oskar_Mem* mem, int* status);
 
 /**
@@ -429,6 +443,7 @@ const double* oskar_mem_double_const(const oskar_Mem* mem, int* status);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 double2* oskar_mem_double2(oskar_Mem* mem, int* status);
 
 /**
@@ -447,6 +462,7 @@ double2* oskar_mem_double2(oskar_Mem* mem, int* status);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 const double2* oskar_mem_double2_const(const oskar_Mem* mem, int* status);
 
 /**
@@ -465,6 +481,7 @@ const double2* oskar_mem_double2_const(const oskar_Mem* mem, int* status);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 double4c* oskar_mem_double4c(oskar_Mem* mem, int* status);
 
 /**
@@ -483,6 +500,7 @@ double4c* oskar_mem_double4c(oskar_Mem* mem, int* status);
  *
  * @return A pointer to access the data as the required type.
  */
+OSKAR_EXPORT
 const double4c* oskar_mem_double4c_const(const oskar_Mem* mem, int* status);
 
 #ifdef __cplusplus

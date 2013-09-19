@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,6 @@
  * @file oskar_SettingsSpline.h
  */
 
-#include "oskar_global.h"
-
 /**
  * @struct oskar_SettingsSpline
  *
@@ -44,7 +42,7 @@
  * The structure holds settings used to parameterise the spline surface fitting
  * procedure.
  */
-struct OSKAR_EXPORT oskar_SettingsSpline
+struct oskar_SettingsSpline
 {
     double eps_float; /**< Epsilon for single precision fit. */
     double eps_double; /**< Epsilon for double precision fit. */

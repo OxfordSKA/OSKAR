@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,7 @@
  * @file oskar_cuda_info.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_CudaDeviceInfo.h"
+#include <oskar_CudaDeviceInfo.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,7 +46,7 @@ extern "C" {
  * This structure holds information about the CUDA environment and
  * devices in the system.
  */
-struct OSKAR_EXPORT oskar_CudaInfo
+struct oskar_CudaInfo
 {
     int num_devices;              /**< Number of installed CUDA devices. */
     int driver_version;           /**< CUDA driver version. */

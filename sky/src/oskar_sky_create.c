@@ -27,7 +27,7 @@
  */
 
 #include <private_sky.h>
-
+#include <oskar_sky.h>
 #include <oskar_sky_init.h>
 
 #include <stdlib.h>

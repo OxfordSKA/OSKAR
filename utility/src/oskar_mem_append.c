@@ -27,7 +27,7 @@
  */
 
 #include <private_mem.h>
-#include <oskar_mem_append_raw.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

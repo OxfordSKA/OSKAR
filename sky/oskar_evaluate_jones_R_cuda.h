@@ -33,8 +33,8 @@
  * @file oskar_evaluate_jones_R_cuda.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -120,7 +120,6 @@ void oskar_evaluate_jones_R_cuda_d(double4c* d_jones, int num_sources,
  * @param[in] sin_lat     The sine of the geographic latitude.
  * @param[in] lst_rad     The local sidereal time in radians.
  */
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_jones_R_cudak_f(float4c* jones, const int num_sources,
         const float* ra, const float* dec, const float cos_lat,
@@ -148,7 +147,6 @@ void oskar_evaluate_jones_R_cudak_f(float4c* jones, const int num_sources,
  * @param[in] sin_lat     The sine of the geographic latitude.
  * @param[in] lst_rad     The local sidereal time in radians.
  */
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_jones_R_cudak_d(double4c* jones, int num_sources,
         const double* ra, const double* dec, const double cos_lat,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
  * @file oskar_angular_distance.h
  */
 
+#include <oskar_global.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -54,6 +56,7 @@ extern "C" {
  *
  * @return The angular distance in radians.
  */
+OSKAR_EXPORT
 double oskar_angular_distance(double l1, double l2, double b1, double b2);
 
 #ifdef __cplusplus

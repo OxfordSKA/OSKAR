@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_evaluate_uvw_station_cuda.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -108,7 +108,6 @@ void oskar_evaluate_uvw_station_cuda_d(double* d_u, double* d_v, double* d_w,
  * @param[in]  ha0_rad      The Hour Angle of the phase centre, in radians.
  * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
  */
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_uvw_station_cudak_f(float* u, float* v, float* w,
         int num_stations, const float* x, const float* y, const float* z,
@@ -133,7 +132,6 @@ void oskar_evaluate_uvw_station_cudak_f(float* u, float* v, float* w,
  * @param[in]  ha0_rad      The Hour Angle of the phase centre, in radians.
  * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
  */
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_uvw_station_cudak_d(double* u, double* v, double* w,
         int num_stations, const double* x, const double* y, const double* z,

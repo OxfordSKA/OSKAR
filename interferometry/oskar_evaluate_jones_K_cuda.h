@@ -33,8 +33,8 @@
  * @file oskar_evaluate_jones_K_cuda.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -128,7 +128,6 @@ void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_stations,
  * @param[in] z_out    Array of output 1/z positions.
  * @param[out] weights Matrix of complex DFT weights (n_in columns, n_out rows).
  */
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_jones_K_cudak_f(const int n_in, const float* x_in,
         const float* y_in, const float* z_in, const int n_out,
@@ -159,7 +158,6 @@ void oskar_evaluate_jones_K_cudak_f(const int n_in, const float* x_in,
  * @param[in] z_out    Array of output 1/z positions.
  * @param[out] weights Matrix of complex DFT weights (n_in columns, n_out rows).
  */
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_jones_K_cudak_d(const int n_in, const double* x_in,
         const double* y_in, const double* z_in, const int n_out,

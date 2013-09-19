@@ -33,7 +33,6 @@
  * @file oskar_SplineData.h
  */
 
-#include <oskar_global.h>
 #include <oskar_mem.h>
 
 /**

@@ -27,6 +27,7 @@
  */
 
 #include <oskar_sky.h>
+#include <oskar_sky_filter_by_flux_cuda.h>
 #include <oskar_mem.h>
 
 #include <thrust/device_vector.h>

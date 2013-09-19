@@ -30,7 +30,6 @@
 
 #include <oskar_jones_set_real_scalar.h>
 #include <oskar_mem.h>
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {

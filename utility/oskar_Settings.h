@@ -47,7 +47,7 @@
  * @details
  * The structure holds all settings parameters.
  */
-struct OSKAR_EXPORT oskar_Settings
+struct oskar_Settings
 {
     oskar_Mem settings_path;
     oskar_SettingsSimulator sim;
@@ -60,7 +60,10 @@ struct OSKAR_EXPORT oskar_Settings
     oskar_SettingsIonosphere ionosphere;
 
 #ifdef __cplusplus
+    OSKAR_EXPORT
     oskar_Settings();
+
+    OSKAR_EXPORT
     ~oskar_Settings();
 #endif
 };

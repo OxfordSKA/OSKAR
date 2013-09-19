@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  * @file oskar_evaluate_element_weights_dft_cuda.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -117,7 +117,6 @@ void oskar_evaluate_element_weights_dft_cuda_d(double2* d_weights,
  * @param[in] y_out    Output 1/y position.
  * @param[in] z_out    Output 1/z position.
  */
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_element_weights_dft_cudak_f(float2* weights,
         const int n_in, const float* x_in, const float* y_in,
@@ -145,7 +144,6 @@ void oskar_evaluate_element_weights_dft_cudak_f(float2* weights,
  * @param[in] y_out    Output 1/y position.
  * @param[in] z_out    Output 1/z position.
  */
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_element_weights_dft_cudak_d(double2* weights,
         const int n_in, const double* x_in, const double* y_in,

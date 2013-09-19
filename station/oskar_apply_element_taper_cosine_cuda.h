@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  * @file oskar_apply_element_taper_cosine_cuda.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -136,7 +136,6 @@ void oskar_apply_element_taper_cosine_matrix_cuda_d(double4c* d_jones,
  * @param[in] cos_power    Power of cosine(theta) function.
  * @param[in] theta        Array of source theta values, in radians.
  */
-OSKAR_EXPORT
 __global__
 void oskar_apply_element_taper_cosine_scalar_cudak_f(float2* jones,
         const int num_sources, const float cos_power, const float* theta);
@@ -155,7 +154,6 @@ void oskar_apply_element_taper_cosine_scalar_cudak_f(float2* jones,
  * @param[in] cos_power    Power of cosine(theta) function.
  * @param[in] theta        Array of source theta values, in radians.
  */
-OSKAR_EXPORT
 __global__
 void oskar_apply_element_taper_cosine_matrix_cudak_f(float4c* jones,
         const int num_sources, const float cos_power, const float* theta);
@@ -174,7 +172,6 @@ void oskar_apply_element_taper_cosine_matrix_cudak_f(float4c* jones,
  * @param[in] cos_power    Power of cosine(theta) function.
  * @param[in] theta        Array of source theta values, in radians.
  */
-OSKAR_EXPORT
 __global__
 void oskar_apply_element_taper_cosine_scalar_cudak_d(double2* jones,
         const int num_sources, const double cos_power, const double* theta);
@@ -193,7 +190,6 @@ void oskar_apply_element_taper_cosine_scalar_cudak_d(double2* jones,
  * @param[in] cos_power    Power of cosine(theta) function.
  * @param[in] theta        Array of source theta values, in radians.
  */
-OSKAR_EXPORT
 __global__
 void oskar_apply_element_taper_cosine_matrix_cudak_d(double4c* jones,
         const int num_sources, const double cos_power, const double* theta);

@@ -27,9 +27,7 @@
  */
 
 #include <private_jones.h>
-
-#include <oskar_mem.h>
-#include <stdlib.h>
+#include <oskar_jones.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,7 +40,7 @@ void oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2,
     int n_stations1, n_stations2, n_stations3;
 
     /* Check all inputs. */
-    if (j3 == NULL) j3 = j1;
+    if (!j3) j3 = j1;
     if (!j1 || !j2 || !status)
     {
         oskar_set_invalid_argument(status);

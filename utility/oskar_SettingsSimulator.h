@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,6 @@
  * @file oskar_SettingsSimulator.h
  */
 
-#include "oskar_global.h"
-
 /**
  * @struct oskar_SettingsSimulator
  *
@@ -43,7 +41,7 @@
  * @details
  * The structure holds parameters for the simulator.
  */
-struct OSKAR_EXPORT oskar_SettingsSimulator
+struct oskar_SettingsSimulator
 {
     int double_precision;
     int max_sources_per_chunk;

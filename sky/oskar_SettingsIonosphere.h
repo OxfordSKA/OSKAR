@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,17 +30,15 @@
 #define OSKAR_SETTINGS_IONOSHERE_H_
 
 /**
- * @file oskar_SettingsMIM.h
+ * @file oskar_SettingsIonosphere.h
  */
-
-#include "oskar_global.h"
 
 /**
  * @struct oskar_SettingsTID
  *
  * @brief Structure to hold travelling ionospheric disturbance (TID) settings.
  */
-struct OSKAR_EXPORT oskar_SettingsTIDscreen
+struct oskar_SettingsTIDscreen
 {
     double height_km;       /* Height of the TID screen, km */
     int num_components;     /* Number of TID components in the screen */
@@ -52,7 +50,7 @@ struct OSKAR_EXPORT oskar_SettingsTIDscreen
 typedef struct oskar_SettingsTIDscreen oskar_SettingsTIDscreen;
 
 
-struct OSKAR_EXPORT oskar_SettingsTECImage
+struct oskar_SettingsTECImage
 {
     int stationID;    /* Index of the station for which to evaluate the TEC image */
     int beam_centred; /* Bool, centre the TEC image on the beam direction */
@@ -64,7 +62,7 @@ struct OSKAR_EXPORT oskar_SettingsTECImage
 typedef struct oskar_SettingsTECImage oskar_SettingsTECImage;
 
 
-struct OSKAR_EXPORT oskar_SettingsPiercePoints
+struct oskar_SettingsPiercePoints
 {
     char* filename;
 };
@@ -78,7 +76,7 @@ typedef struct oskar_SettingsPiercePoints oskar_SettingsPiercePoints;
  * @details
  * The structure holds parameters for the ionospheric model.
  */
-struct OSKAR_EXPORT oskar_SettingsIonosphere
+struct oskar_SettingsIonosphere
 {
     int enable;            /* Flag to enable/disable MIM evaluation. */
     double min_elevation;  /* Minimum elevation for MIM evaluation, in radians. */

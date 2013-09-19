@@ -33,8 +33,6 @@
  * @file oskar_SettingsObservation.h
  */
 
-#include "oskar_global.h"
-
 /**
  * @struct oskar_SettingsObservation
  *
@@ -43,7 +41,7 @@
  * @details
  * The structure holds observation parameters.
  */
-struct OSKAR_EXPORT oskar_SettingsObservation
+struct oskar_SettingsObservation
 {
     int num_pointing_levels;
     double* ra0_rad;

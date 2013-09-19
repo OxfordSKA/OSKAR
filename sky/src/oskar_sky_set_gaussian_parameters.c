@@ -27,8 +27,7 @@
  */
 
 #include <private_sky.h>
-
-#include <oskar_mem.h>
+#include <oskar_sky.h>
 
 #ifdef __cplusplus
 extern "C" {

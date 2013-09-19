@@ -35,12 +35,10 @@ oskar_Image::oskar_Image(int type, int location)
 {
     int err = 0;
     oskar_image_init(this, type, location, &err);
-    if (err) throw err;
 }
 
 oskar_Image::~oskar_Image()
 {
     int err = 0;
     oskar_image_free(this, &err);
-    if (err) throw err;
 }

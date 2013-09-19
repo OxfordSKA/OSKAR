@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_dierckx_bispev_cuda.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -118,7 +118,6 @@ void oskar_dierckx_bispev_cuda_d(const double* d_tx, int nx,
  * @param[in] stride Memory stride of output values (use 1 for contiguous).
  * @param[out] z     Output surface values.
  */
-OSKAR_EXPORT
 __global__
 void oskar_dierckx_bispev_cudak_f(const float* tx, const int nx,
         const float* ty, const int ny, const float* c, const int kx,
@@ -146,7 +145,6 @@ void oskar_dierckx_bispev_cudak_f(const float* tx, const int nx,
  * @param[in] stride Memory stride of output values (use 1 for contiguous).
  * @param[out] z     Output surface values.
  */
-OSKAR_EXPORT
 __global__
 void oskar_dierckx_bispev_cudak_d(const double* tx, const int nx,
         const double* ty, const int ny, const double* c, const int kx,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,19 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_Settings.h"
-#include "utility/oskar_settings_free.h"
-#include "utility/oskar_settings_init.h"
+#include <oskar_Settings.h>
+#include <oskar_settings_free.h>
+#include <oskar_settings_init.h>
 #include <cstdlib>
 
 oskar_Settings::oskar_Settings()
 {
-	int err = oskar_settings_init(this);
-    if (err) throw err;
+	oskar_settings_init(this);
 }
 
 oskar_Settings::~oskar_Settings()
 {
-	int err = oskar_settings_free(this);
-    if (err) throw err;
+	oskar_settings_free(this);
 }

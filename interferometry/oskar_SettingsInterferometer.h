@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,13 +29,11 @@
 #ifndef OSKAR_SETTINGS_INTERFEROMETER_H_
 #define OSKAR_SETTINGS_INTERFEROMETER_H_
 
-#include "interferometry/oskar_SettingsSystemNoise.h"
-
 /**
  * @file oskar_SettingsInterferometer.h
  */
 
-#include "oskar_global.h"
+#include <oskar_SettingsSystemNoise.h>
 
 /**
  * @struct oskar_SettingsInterferometer
@@ -45,7 +43,7 @@
  * @details
  * This structure holds interferometer settings.
  */
-struct OSKAR_EXPORT oskar_SettingsInterferometer
+struct oskar_SettingsInterferometer
 {
     double channel_bandwidth_hz;
     double time_average_sec;

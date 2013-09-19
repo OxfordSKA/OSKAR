@@ -49,7 +49,7 @@ extern "C" {
 
 #define MAX_DIM 9
 
-void oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
+void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
         const char* filename, int* status)
 {
     char value[FLEN_VALUE];
@@ -246,7 +246,7 @@ void oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
         num_elements *= naxes[i];
     }
     fits_write_img(fptr, datatype, 1, num_elements,
-            (void*)oskar_mem_void_const(&image->data), status);
+            oskar_mem_void(&image->data), status);
 
     /* Update header keywords with the correct axis lengths.
      * Needs to be done here because CFITSIO doesn't let us write only the

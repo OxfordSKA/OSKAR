@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_image_init.h"
-#include "imaging/oskar_Image.h"
+#include <oskar_image_free.h>
 #include <oskar_mem.h>
 
 #ifdef __cplusplus

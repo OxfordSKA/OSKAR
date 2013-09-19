@@ -33,7 +33,7 @@
  * @file oskar_scale_flux_by_spectral_index_cuda.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

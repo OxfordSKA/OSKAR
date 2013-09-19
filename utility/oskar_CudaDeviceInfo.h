@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,6 @@
  * @file oskar_cuda_device_info.h
  */
 
-#include "oskar_global.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,7 +43,7 @@ extern "C" {
  * @details
  * This structure holds information about a CUDA device.
  */
-struct OSKAR_EXPORT oskar_CudaDeviceInfo
+struct oskar_CudaDeviceInfo
 {
     char name[256];            /**< String holding device name. */
     union {

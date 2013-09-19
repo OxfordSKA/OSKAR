@@ -65,6 +65,7 @@ extern "C" {
  * @param[in,out] random_state  Random number generator states.
  * @param[in,out] status        Status return code.
  */
+OSKAR_EXPORT
 void oskar_evaluate_element_weights(oskar_Mem* weights,
         oskar_Mem* weights_error, const oskar_Station* station,
         double x_beam, double y_beam, double z_beam,

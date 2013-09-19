@@ -39,7 +39,7 @@
  * @details
  * This structure holds data for a multi-dimensional image hyper-cube.
  */
-struct OSKAR_EXPORT oskar_Image
+struct oskar_Image
 {
     oskar_Mem data;
     oskar_Mem settings_path;
@@ -70,6 +70,7 @@ struct OSKAR_EXPORT oskar_Image
      * @param[in] type     Enumerated data type of memory contents (magic number).
      * @param[in] location Location of memory.
      */
+    OSKAR_EXPORT
     oskar_Image(int type = OSKAR_DOUBLE, int location = OSKAR_LOCATION_CPU);
 
     /**
@@ -78,6 +79,7 @@ struct OSKAR_EXPORT oskar_Image
      * @details
      * Destroys an oskar_Image data structure.
      */
+    OSKAR_EXPORT
     ~oskar_Image();
 #endif
 };

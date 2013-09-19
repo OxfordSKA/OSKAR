@@ -44,7 +44,7 @@
  *
  * @details
  */
-struct OSKAR_EXPORT oskar_WorkJonesZ
+struct oskar_WorkJonesZ
 {
     oskar_Mem hor_x;        /* Pierce point horizontal x coordinate */
     oskar_Mem hor_y;        /* Pierce point horizontal y coordinate */

@@ -27,7 +27,6 @@
  */
 
 #include <private_sky.h>
-
 #include <oskar_sky.h>
 
 #include <oskar_sky_get_ptr.h>

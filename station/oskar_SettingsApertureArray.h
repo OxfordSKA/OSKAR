@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,8 @@
  * @file oskar_SettingsApertureArray.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_SettingsArrayPattern.h"
-#include "station/oskar_SettingsElementPattern.h"
+#include <oskar_SettingsArrayPattern.h>
+#include <oskar_SettingsElementPattern.h>
 
 /**
  * @struct oskar_SettingsApertureArray
@@ -45,7 +44,7 @@
  * @details
  * The structure holds settings for aperture array stations.
  */
-struct OSKAR_EXPORT oskar_SettingsApertureArray
+struct oskar_SettingsApertureArray
 {
     oskar_SettingsArrayPattern array_pattern;
     oskar_SettingsElementPattern element_pattern;

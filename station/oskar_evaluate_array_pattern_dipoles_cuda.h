@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  * @file oskar_evaluate_array_pattern_dipoles_cuda.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -95,7 +95,6 @@ void oskar_evaluate_array_pattern_dipoles_cuda_d(int num_antennas,
  * @param[in] sin_orientation_y  The sine of the azimuth angle of nominal y dipole.
  * @param[out] pattern           Array of output Jones matrices per source.
  */
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
         const float* x, const float* y, const float* z,
@@ -140,7 +139,6 @@ void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
  * @param[in] sin_orientation_y  The sine of the azimuth angle of nominal y dipole.
  * @param[out] pattern           Array of output Jones matrices per source.
  */
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_array_pattern_dipoles_cudak_d(const int num_antennas,
         const double* x, const double* y, const double* z,

@@ -51,7 +51,6 @@ extern "C" {
  * @param[in] num_sources   Number of sources in the output sky model.
  * @param[in,out] status    Status return code.
  */
-OSKAR_EXPORT
 void oskar_sky_get_ptr(oskar_Sky* sky_ptr, const oskar_Sky* sky,
         int offset, int num_sources, int* status);
 

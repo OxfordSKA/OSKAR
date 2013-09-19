@@ -27,10 +27,7 @@
  */
 
 #include <private_jones.h>
-
-#include <oskar_jones_accessors.h>
-#include <oskar_jones_create.h>
-#include <oskar_mem.h>
+#include <oskar_jones.h>
 
 #ifdef __cplusplus
 extern "C" {

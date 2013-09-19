@@ -33,6 +33,8 @@
  * @file private_mem.h
  */
 
+#include <oskar_global.h>
+
 /**
  * @brief Structure to wrap a memory pointer either on the CPU or GPU.
  *
@@ -64,6 +66,7 @@ struct oskar_Mem
      * @param[in] owner_ Bool flag specifying if the structure should take
      *                   ownership of the memory (default = true).
      */
+    OSKAR_EXPORT
     oskar_Mem(int owner_ = 1);
 
     /**
@@ -79,6 +82,7 @@ struct oskar_Mem
      * @param[in] owner_       Bool flag specifying if the structure should take
      *                         ownership of the memory (default = true).
      */
+    OSKAR_EXPORT
     oskar_Mem(int mem_type, int mem_location, int size = 0, int owner_ = 1);
 
     /**
@@ -93,6 +97,7 @@ struct oskar_Mem
      * @param[in] owner_       Bool flag specifying if the structure should
      *                         take ownership of the memory (default = true).
      */
+    OSKAR_EXPORT
     oskar_Mem(const oskar_Mem* other, int mem_location, int owner_ = 1);
 
     /**
@@ -102,6 +107,7 @@ struct oskar_Mem
      * If the pointer is not NULL and the ownership flag is set to true,
      * then the memory is also freed.
      */
+    OSKAR_EXPORT
     ~oskar_Mem();
 #endif
 };

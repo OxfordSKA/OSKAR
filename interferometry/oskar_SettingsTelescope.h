@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,9 @@
  * @file oskar_SettingsTelescope.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_SettingsStation.h"
-#include "station/oskar_SettingsApertureArray.h"
-#include "station/oskar_SettingsGaussianBeam.h"
+#include <oskar_SettingsStation.h>
+#include <oskar_SettingsApertureArray.h>
+#include <oskar_SettingsGaussianBeam.h>
 
 /**
  * @struct oskar_SettingsTelescope
@@ -46,7 +45,7 @@
  * @details
  * The structure holds telescope model parameters.
  */
-struct OSKAR_EXPORT oskar_SettingsTelescope
+struct oskar_SettingsTelescope
 {
     char* input_directory;
     char* output_directory;

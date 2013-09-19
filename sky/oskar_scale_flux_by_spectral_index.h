@@ -33,7 +33,7 @@
  * @file oskar_scale_flux_by_spectral_index.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,6 +67,7 @@ extern "C" {
  * @param[in,out] ref_freq   Source reference frequency values, in Hz.
  * @param[in] sp_index       Source spectral index values.
  */
+OSKAR_EXPORT
 void oskar_scale_flux_by_spectral_index_f(int num_sources, float frequency,
         float* I, float* Q, float* U, float* V, float* ref_freq,
         const float* sp_index);
@@ -99,6 +100,7 @@ void oskar_scale_flux_by_spectral_index_f(int num_sources, float frequency,
  * @param[in,out] ref_freq   Source reference frequency values, in Hz.
  * @param[in] sp_index       Source spectral index values.
  */
+OSKAR_EXPORT
 void oskar_scale_flux_by_spectral_index_d(int num_sources, double frequency,
         double* I, double* Q, double* U, double* V, double* ref_freq,
         const double* sp_index);

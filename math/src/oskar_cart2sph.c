@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <oskar_cart2sph.h>
 #include <math.h>
 
 #ifdef __cplusplus

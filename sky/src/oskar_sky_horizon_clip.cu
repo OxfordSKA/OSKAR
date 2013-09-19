@@ -27,9 +27,8 @@
  */
 
 #include <private_sky.h>
-
-#include <oskar_sky_horizon_clip.h>
 #include <oskar_sky.h>
+
 #include <oskar_ra_dec_to_hor_lmn_cuda.h>
 #include <oskar_update_horizon_mask_cuda.h>
 #include <oskar_cuda_check_error.h>

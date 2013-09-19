@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  * @file oskar_gaussian_cuda.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,22 +58,18 @@ void oskar_gaussian_cuda_md(double4c* z, int n, const double* x,
 
 #ifdef __CUDACC__
 
-OSKAR_EXPORT
 __global__
 void oskar_gaussian_cudak_f(float2* z, const int n, const float* x,
         const float* y, const float inv_2_var);
 
-OSKAR_EXPORT
 __global__
 void oskar_gaussian_cudak_mf(float4c* z, const int n, const float* x,
         const float* y, const float inv_2_var);
 
-OSKAR_EXPORT
 __global__
 void oskar_gaussian_cudak_d(double2* z, const int n, const double* x,
         const double* y, const double inv_2_var);
 
-OSKAR_EXPORT
 __global__
 void oskar_gaussian_cudak_md(double4c* z, const int n, const double* x,
         const double* y, const double inv_2_var);

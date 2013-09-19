@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <oskar_evaluate_dipole_pattern.h>
 #include <oskar_evaluate_dipole_pattern_cuda.h>
 #include <oskar_cuda_check_error.h>
 

@@ -48,7 +48,7 @@ extern "C" {
  * @details
  * The structure holds all simulation timers.
  */
-struct OSKAR_EXPORT oskar_Timers
+struct oskar_Timers
 {
     oskar_Timer* tmr;
     oskar_Timer* tmr_init_copy;

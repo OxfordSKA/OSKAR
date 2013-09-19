@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
  * @file oskar_round_robin.h
  */
 
+#include <oskar_global.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -52,6 +54,7 @@ extern "C" {
  * @param[out] number    Pointer to the number of items assigned to this resource.
  * @param[out] start     Pointer to the start index assigned to this resource.
  */
+OSKAR_EXPORT
 void oskar_round_robin(int items, int resources, int rank, int* number,
         int* start);
 

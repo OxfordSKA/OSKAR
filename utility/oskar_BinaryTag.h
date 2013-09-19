@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,8 +32,6 @@
 /**
  * @file oskar_BinaryTag.h
  */
-
-#include "oskar_global.h"
 
 #ifdef __cplusplus
 #include <cstdlib>
@@ -82,7 +80,7 @@ extern "C" {
  * Note that the block size is the total number of bytes until the next tag,
  * including any extended tag names.
  */
-struct OSKAR_EXPORT oskar_BinaryTag
+struct oskar_BinaryTag
 {
     char magic[4];           /**< Magic number (ASCII "TAG"). */
     unsigned char flags;     /**< Bit 7 set indicates an extended tag. */
@@ -108,7 +106,7 @@ typedef struct oskar_BinaryTag oskar_BinaryTag;
  * and the offset in bytes from the start of the file of each data block.
  * It can be used to find an item of the required type.
  */
-struct OSKAR_EXPORT oskar_BinaryTagIndex
+struct oskar_BinaryTagIndex
 {
     int num_tags;             /**< Number of tags in the index. */
     int* extended;            /**< Array of flags (if true, tag is extended). */

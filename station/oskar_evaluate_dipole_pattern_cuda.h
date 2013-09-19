@@ -137,7 +137,6 @@ void oskar_evaluate_dipole_pattern_cuda_d(int num_points,
  * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
  * @param[out] pattern           Array of output Jones matrices per source.
  */
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_dipole_pattern_cudak_f(const int num_points,
         const float* theta, const float* phi, const int return_x_dipole,
@@ -169,7 +168,6 @@ void oskar_evaluate_dipole_pattern_cudak_f(const int num_points,
  * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
  * @param[out] pattern           Array of output Jones matrices per source.
  */
-OSKAR_EXPORT
 __global__
 void oskar_evaluate_dipole_pattern_cudak_d(const int num_points,
         const double* theta, const double* phi, const int return_x_dipole,
