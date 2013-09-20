@@ -35,6 +35,7 @@
 
 #include <oskar_global.h>
 #include <oskar_vector_types.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,7 +62,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_mem_element_multiply_cuda(oskar_Mem* c, const oskar_Mem* a,
-        const oskar_Mem* b, int num, int* status);
+        const oskar_Mem* b, size_t num, int* status);
 
 
 /* Kernel wrappers. */

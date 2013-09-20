@@ -33,9 +33,14 @@
 extern "C" {
 #endif
 
+int oskar_mem_allocated(const oskar_Mem* mem)
+{
+    return mem->data ? 1 : 0;
+}
+
 size_t oskar_mem_length(const oskar_Mem* mem)
 {
-    return (size_t) mem->num_elements;
+    return mem->num_elements;
 }
 
 int oskar_mem_location(const oskar_Mem* mem)

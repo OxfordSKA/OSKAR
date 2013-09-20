@@ -40,20 +40,20 @@ extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_mem_element_multiply_rr_r_f(int num, float* c,
+void oskar_mem_element_multiply_rr_r_f(size_t num, float* c,
         const float* a, const float* b)
 {
-    int i;
+    size_t i;
     for (i = 0; i < num; ++i)
     {
         c[i] = a[i] * b[i];
     }
 }
 
-void oskar_mem_element_multiply_cc_c_f(int num, float2* c,
+void oskar_mem_element_multiply_cc_c_f(size_t num, float2* c,
         const float2* a, const float2* b)
 {
-    int i;
+    size_t i;
     for (i = 0; i < num; ++i)
     {
         float2 ac, bc, cc;
@@ -64,10 +64,10 @@ void oskar_mem_element_multiply_cc_c_f(int num, float2* c,
     }
 }
 
-void oskar_mem_element_multiply_cc_m_f(int num, float4c* c,
+void oskar_mem_element_multiply_cc_m_f(size_t num, float4c* c,
         const float2* a, const float2* b)
 {
-    int i;
+    size_t i;
     for (i = 0; i < num; ++i)
     {
         float2 cc;
@@ -85,10 +85,10 @@ void oskar_mem_element_multiply_cc_m_f(int num, float4c* c,
     }
 }
 
-void oskar_mem_element_multiply_cm_m_f(int num, float4c* c,
+void oskar_mem_element_multiply_cm_m_f(size_t num, float4c* c,
         const float2* a, const float4c* b)
 {
-    int i;
+    size_t i;
     for (i = 0; i < num; ++i)
     {
         float2 ac;
@@ -100,10 +100,10 @@ void oskar_mem_element_multiply_cm_m_f(int num, float4c* c,
     }
 }
 
-void oskar_mem_element_multiply_mm_m_f(int num, float4c* c,
+void oskar_mem_element_multiply_mm_m_f(size_t num, float4c* c,
         const float4c* a, const float4c* b)
 {
-    int i;
+    size_t i;
     for (i = 0; i < num; ++i)
     {
         float4c ac, bc;
@@ -116,20 +116,20 @@ void oskar_mem_element_multiply_mm_m_f(int num, float4c* c,
 
 
 /* Double precision. */
-void oskar_mem_element_multiply_rr_r_d(int num, double* c,
+void oskar_mem_element_multiply_rr_r_d(size_t num, double* c,
         const double* a, const double* b)
 {
-    int i;
+    size_t i;
     for (i = 0; i < num; ++i)
     {
         c[i] = a[i] * b[i];
     }
 }
 
-void oskar_mem_element_multiply_cc_c_d(int num, double2* c,
+void oskar_mem_element_multiply_cc_c_d(size_t num, double2* c,
         const double2* a, const double2* b)
 {
-    int i;
+    size_t i;
     for (i = 0; i < num; ++i)
     {
         double2 ac, bc, cc;
@@ -140,10 +140,10 @@ void oskar_mem_element_multiply_cc_c_d(int num, double2* c,
     }
 }
 
-void oskar_mem_element_multiply_cc_m_d(int num, double4c* c,
+void oskar_mem_element_multiply_cc_m_d(size_t num, double4c* c,
         const double2* a, const double2* b)
 {
-    int i;
+    size_t i;
     for (i = 0; i < num; ++i)
     {
         double2 cc;
@@ -161,10 +161,10 @@ void oskar_mem_element_multiply_cc_m_d(int num, double4c* c,
     }
 }
 
-void oskar_mem_element_multiply_cm_m_d(int num, double4c* c,
+void oskar_mem_element_multiply_cm_m_d(size_t num, double4c* c,
         const double2* a, const double4c* b)
 {
-    int i;
+    size_t i;
     for (i = 0; i < num; ++i)
     {
         double2 ac;
@@ -176,10 +176,10 @@ void oskar_mem_element_multiply_cm_m_d(int num, double4c* c,
     }
 }
 
-void oskar_mem_element_multiply_mm_m_d(int num, double4c* c,
+void oskar_mem_element_multiply_mm_m_d(size_t num, double4c* c,
         const double4c* a, const double4c* b)
 {
-    int i;
+    size_t i;
     for (i = 0; i < num; ++i)
     {
         double4c ac, bc;
@@ -191,7 +191,7 @@ void oskar_mem_element_multiply_mm_m_d(int num, double4c* c,
 }
 
 static void oskar_mem_element_multiply_select(oskar_Mem* c,
-        const oskar_Mem* a, const oskar_Mem* b, int num, int* status)
+        const oskar_Mem* a, const oskar_Mem* b, size_t num, int* status)
 {
     int error = OSKAR_ERR_TYPE_MISMATCH; /* Set to type mismatch by default. */
 
@@ -338,7 +338,7 @@ static void oskar_mem_element_multiply_select(oskar_Mem* c,
 
 
 void oskar_mem_element_multiply(oskar_Mem* c, oskar_Mem* a, const oskar_Mem* b,
-        int num, int* status)
+        size_t num, int* status)
 {
     /* Check all inputs. */
     if (!c) c = a;

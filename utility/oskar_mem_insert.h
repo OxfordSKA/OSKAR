@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +58,7 @@ extern "C" {
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset,
+void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
         int* status);
 
 #ifdef __cplusplus

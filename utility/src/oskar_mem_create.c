@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-oskar_Mem* oskar_mem_create(int type, int location, int num_elements,
+oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
          int* status)
 {
     oskar_Mem* mem = 0;

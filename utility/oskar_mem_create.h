@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,7 +61,7 @@ extern "C" {
  * @return A handle to the memory block structure.
  */
 OSKAR_EXPORT
-oskar_Mem* oskar_mem_create(int type, int location, int num_elements,
+oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
         int* status);
 
 #ifdef __cplusplus

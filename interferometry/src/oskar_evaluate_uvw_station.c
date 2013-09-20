@@ -131,8 +131,10 @@ void oskar_evaluate_uvw_station(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
     type = oskar_mem_type(x);
     location = oskar_mem_location(x);
 
-    /* Check that the memory is not NULL. */
-    if (!u->data || !v->data || !w->data || !x->data || !y->data || !z->data)
+    /* Check that the memory is allocated. */
+    if (!oskar_mem_allocated(u) || !oskar_mem_allocated(v) ||
+            !oskar_mem_allocated(w) || !oskar_mem_allocated(x) ||
+            !oskar_mem_allocated(y) || !oskar_mem_allocated(z))
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
         return;

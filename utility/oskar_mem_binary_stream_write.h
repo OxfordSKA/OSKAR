@@ -34,12 +34,8 @@
  */
 
 #include <oskar_global.h>
-
-#ifdef __cplusplus
-#include <cstdio>
-#else
+#include <stddef.h>
 #include <stdio.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,7 +59,7 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        int num_to_write, int* status);
+        size_t num_to_write, int* status);
 
 /**
  * @brief
@@ -83,7 +79,7 @@ void oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
 OSKAR_EXPORT
 void oskar_mem_binary_stream_write_ext(const oskar_Mem* mem, FILE* stream,
         const char* name_group, const char* name_tag, int user_index,
-        int num_to_write, int* status);
+        size_t num_to_write, int* status);
 
 #ifdef __cplusplus
 }

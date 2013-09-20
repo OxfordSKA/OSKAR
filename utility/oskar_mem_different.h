@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,7 +65,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_mem_different(const oskar_Mem* one, const oskar_Mem* two,
-        int num_elements, int* status);
+        size_t num_elements, int* status);
 
 #ifdef __cplusplus
 }

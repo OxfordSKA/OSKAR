@@ -40,7 +40,7 @@ extern "C" {
 
 void oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        int num_to_write, int* status)
+        size_t num_to_write, int* status)
 {
     int type;
     oskar_Mem temp;
@@ -87,7 +87,7 @@ void oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
 
 void oskar_mem_binary_stream_write_ext(const oskar_Mem* mem, FILE* stream,
         const char* name_group, const char* name_tag, int user_index,
-        int num_to_write, int* status)
+        size_t num_to_write, int* status)
 {
     int type;
     oskar_Mem temp;

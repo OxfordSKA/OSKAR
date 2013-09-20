@@ -41,7 +41,7 @@ extern "C" {
 
 void oskar_mem_binary_file_write(const oskar_Mem* mem, const char* filename,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        int num_to_write, int* status)
+        size_t num_to_write, int* status)
 {
     int type;
     oskar_Mem temp;
@@ -88,7 +88,7 @@ void oskar_mem_binary_file_write(const oskar_Mem* mem, const char* filename,
 
 void oskar_mem_binary_file_write_ext(const oskar_Mem* mem, const char* filename,
         const char* name_group, const char* name_tag, int user_index,
-        int num_to_write, int* status)
+        size_t num_to_write, int* status)
 {
     int type;
     oskar_Mem temp;

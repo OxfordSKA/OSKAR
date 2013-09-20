@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +58,7 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_mem_binary_file_write(const oskar_Mem* mem, const char* filename,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        int num_to_write, int* status);
+        size_t num_to_write, int* status);
 
 /**
  * @brief
@@ -77,7 +78,7 @@ void oskar_mem_binary_file_write(const oskar_Mem* mem, const char* filename,
 OSKAR_EXPORT
 void oskar_mem_binary_file_write_ext(const oskar_Mem* mem, const char* filename,
         const char* name_group, const char* name_tag, int user_index,
-        int num_to_write, int* status);
+        size_t num_to_write, int* status);
 
 #ifdef __cplusplus
 }

@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <stddef.h> /* For size_t */
 
 /**
  * @brief Structure to wrap a memory pointer either on the CPU or GPU.
@@ -48,11 +49,11 @@
  */
 struct oskar_Mem
 {
-    int type;         /**< Enumerated element type of memory block. */
-    int location;     /**< Address space of data pointer. */
-    int num_elements; /**< Number of elements in memory block. */
-    int owner;        /**< Flag set if the structure owns the memory. */
-    void* data;       /**< Data pointer. */
+    int type;            /**< Enumerated element type of memory block. */
+    int location;        /**< Enumerated address space of data pointer. */
+    size_t num_elements; /**< Number of elements in memory block. */
+    int owner;           /**< Flag set if the structure owns the memory. */
+    void* data;          /**< Data pointer. */
 
     /* ALL THE FOLLOWING METHODS ARE DEPRECATED */
 #ifdef __cplusplus
@@ -83,7 +84,7 @@ struct oskar_Mem
      *                         ownership of the memory (default = true).
      */
     OSKAR_EXPORT
-    oskar_Mem(int mem_type, int mem_location, int size = 0, int owner_ = 1);
+    oskar_Mem(int mem_type, int mem_location, size_t size = 0, int owner_ = 1);
 
     /**
      * @brief Constructs and allocates data for an oskar_Mem data structure.

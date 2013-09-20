@@ -39,12 +39,11 @@
 extern "C" {
 #endif
 
-void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset,
+void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
         int* status)
 {
-    int n_elements_src, n_elements_dst, type_src, type_dst;
-    int location_src, location_dst;
-    size_t bytes, start;
+    int type_src, type_dst, location_src, location_dst;
+    size_t n_elements_src, n_elements_dst, bytes, start;
     void* destination;
 
     /* Check all inputs. */

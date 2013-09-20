@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,7 +60,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
-        int offset, int num_elements, int* status);
+        size_t offset, size_t num_elements, int* status);
 
 #ifdef __cplusplus
 }

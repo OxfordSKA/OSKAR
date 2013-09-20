@@ -46,8 +46,12 @@ extern "C" {
 void oskar_station_save_config(const char* filename,
         const oskar_Station* station, int* status)
 {
-    int i, location, type;
+    int i, location, type, num_elements;
     FILE* file;
+    const oskar_Mem *x_weights, *y_weights, *z_weights;
+    const oskar_Mem *x_signal, *y_signal, *z_signal;
+    const oskar_Mem *gain, *gain_error, *phase, *phase_error, *weight;
+    const oskar_Mem *cos_x, *cos_y, *sin_x, *sin_y;
 
     /* Check all inputs. */
     if (!filename || !station || !status)
@@ -62,6 +66,7 @@ void oskar_station_save_config(const char* filename,
     /* Check type and location. */
     type = oskar_station_type(station);
     location = oskar_station_location(station);
+    num_elements = oskar_station_num_elements(station);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -80,6 +85,23 @@ void oskar_station_save_config(const char* filename,
         return;
     }
 
+    /* Get pointers to the arrays. */
+    x_weights = oskar_station_element_x_weights_const(station);
+    y_weights = oskar_station_element_y_weights_const(station);
+    z_weights = oskar_station_element_z_weights_const(station);
+    x_signal = oskar_station_element_x_signal_const(station);
+    y_signal = oskar_station_element_y_signal_const(station);
+    z_signal = oskar_station_element_z_signal_const(station);
+    gain = oskar_station_element_gain_const(station);
+    gain_error = oskar_station_element_gain_error_const(station);
+    phase = oskar_station_element_phase_offset_const(station);
+    phase_error = oskar_station_element_phase_error_const(station);
+    weight = oskar_station_element_weight_const(station);
+    cos_x = oskar_station_element_cos_orientation_x_const(station);
+    cos_y = oskar_station_element_cos_orientation_y_const(station);
+    sin_x = oskar_station_element_sin_orientation_x_const(station);
+    sin_y = oskar_station_element_sin_orientation_y_const(station);
+
     /* Open the file. */
     file = fopen(filename, "w");
     if (!file)
@@ -89,7 +111,7 @@ void oskar_station_save_config(const char* filename,
     }
 
     /* Save the station data. */
-    fprintf(file, "# Number of elements  = %i\n", station->num_elements);
+    fprintf(file, "# Number of elements  = %i\n", num_elements);
     fprintf(file, "# Longitude [radians] = %f\n", station->longitude_rad);
     fprintf(file, "# Latitude [radians]  = %f\n", station->latitude_rad);
     fprintf(file, "# Altitude [metres]   = %f\n", station->altitude_m);
@@ -99,64 +121,74 @@ void oskar_station_save_config(const char* filename,
             "X dipole azimuth [deg], Y dipole azimuth [deg]\n");
     if (type == OSKAR_DOUBLE)
     {
-        double x, y, z, delta_x, delta_y, delta_z;
-        double gain, gain_error, phase_offset, phase_error;
-        double weight_re, weight_im, x_azimuth, y_azimuth;
-        for (i = 0; i < station->num_elements; ++i)
+        const double *x_, *y_, *z_, *xs_, *ys_, *zs_;
+        const double *gain_, *gain_error_, *phase_, *phase_error_;
+        const double2 *weight_;
+        const double *cos_x_, *cos_y_, *sin_x_, *sin_y_;
+        x_ = oskar_mem_double_const(x_weights, status);
+        y_ = oskar_mem_double_const(y_weights, status);
+        z_ = oskar_mem_double_const(z_weights, status);
+        xs_ = oskar_mem_double_const(x_signal, status);
+        ys_ = oskar_mem_double_const(y_signal, status);
+        zs_ = oskar_mem_double_const(z_signal, status);
+        gain_ = oskar_mem_double_const(gain, status);
+        gain_error_ = oskar_mem_double_const(gain_error, status);
+        phase_ = oskar_mem_double_const(phase, status);
+        phase_error_ = oskar_mem_double_const(phase_error, status);
+        weight_ = oskar_mem_double2_const(weight, status);
+        cos_x_ = oskar_mem_double_const(cos_x, status);
+        cos_y_ = oskar_mem_double_const(cos_y, status);
+        sin_x_ = oskar_mem_double_const(sin_x, status);
+        sin_y_ = oskar_mem_double_const(sin_y, status);
+
+        for (i = 0; i < num_elements; ++i)
         {
-            x = ((double*)station->x_weights.data)[i];
-            y = ((double*)station->y_weights.data)[i];
-            z = ((double*)station->z_weights.data)[i];
-            delta_x = ((double*)station->x_signal.data)[i] - x;
-            delta_y = ((double*)station->y_signal.data)[i] - y;
-            delta_z = ((double*)station->z_signal.data)[i] - z;
-            gain = ((double*)station->gain.data)[i];
-            gain_error = ((double*)station->gain_error.data)[i];
-            phase_offset = ((double*)station->phase_offset.data)[i] * R2D;
-            phase_error = ((double*)station->phase_error.data)[i] * R2D;
-            weight_re = ((double2*)station->weight.data)[i].x;
-            weight_im = ((double2*)station->weight.data)[i].y;
-            x_azimuth = atan2(((double*)station->sin_orientation_x.data)[i],
-                    ((double*)station->cos_orientation_x.data)[i]) * R2D;
-            y_azimuth = atan2(((double*)station->sin_orientation_y.data)[i],
-                    ((double*)station->cos_orientation_y.data)[i]) * R2D;
-            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f "
-                    "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f "
+            double x, y, z;
+            x = x_[i]; y = y_[i]; z = z_[i];
+            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f % 14.6f "
+                    "% 14.6f % 14.6f % 14.6f % 14.6f "
                     "% 14.6f % 14.6f % 14.6f % 14.6f\n",
-                    x, y, z, delta_x, delta_y, delta_z, gain, gain_error,
-                    phase_offset, phase_error, weight_re, weight_im,
-                    x_azimuth, y_azimuth);
+                    x, y, z, (xs_[i] - x), (ys_[i] - y), (zs_[i] - z),
+                    gain_[i], gain_error_[i], phase_[i], phase_error_[i],
+                    weight_[i].x, weight_[i].y,
+                    atan2(sin_x_[i], cos_x_[i]) * R2D,
+                    atan2(sin_y_[i], cos_y_[i]) * R2D);
         }
     }
     else if (type == OSKAR_SINGLE)
     {
-        float x, y, z, delta_x, delta_y, delta_z;
-        float gain, gain_error, phase_offset, phase_error;
-        float weight_re, weight_im, x_azimuth, y_azimuth;
-        for (i = 0; i < station->num_elements; ++i)
+        const float *x_, *y_, *z_, *xs_, *ys_, *zs_;
+        const float *gain_, *gain_error_, *phase_, *phase_error_;
+        const float2 *weight_;
+        const float *cos_x_, *cos_y_, *sin_x_, *sin_y_;
+        x_ = oskar_mem_float_const(x_weights, status);
+        y_ = oskar_mem_float_const(y_weights, status);
+        z_ = oskar_mem_float_const(z_weights, status);
+        xs_ = oskar_mem_float_const(x_signal, status);
+        ys_ = oskar_mem_float_const(y_signal, status);
+        zs_ = oskar_mem_float_const(z_signal, status);
+        gain_ = oskar_mem_float_const(gain, status);
+        gain_error_ = oskar_mem_float_const(gain_error, status);
+        phase_ = oskar_mem_float_const(phase, status);
+        phase_error_ = oskar_mem_float_const(phase_error, status);
+        weight_ = oskar_mem_float2_const(weight, status);
+        cos_x_ = oskar_mem_float_const(cos_x, status);
+        cos_y_ = oskar_mem_float_const(cos_y, status);
+        sin_x_ = oskar_mem_float_const(sin_x, status);
+        sin_y_ = oskar_mem_float_const(sin_y, status);
+
+        for (i = 0; i < num_elements; ++i)
         {
-            x = ((float*)station->x_weights.data)[i];
-            y = ((float*)station->y_weights.data)[i];
-            z = ((float*)station->z_weights.data)[i];
-            delta_x = ((float*)station->x_signal.data)[i] - x;
-            delta_y = ((float*)station->y_signal.data)[i] - y;
-            delta_z = ((float*)station->z_signal.data)[i] - z;
-            gain = ((float*)station->gain.data)[i];
-            gain_error = ((float*)station->gain_error.data)[i];
-            phase_offset = ((float*)station->phase_offset.data)[i] * R2D;
-            phase_error = ((float*)station->phase_error.data)[i] * R2D;
-            weight_re = ((float2*)station->weight.data)[i].x;
-            weight_im = ((float2*)station->weight.data)[i].y;
-            x_azimuth = atan2(((float*)station->sin_orientation_x.data)[i],
-                    ((float*)station->cos_orientation_x.data)[i]) * R2D;
-            y_azimuth = atan2(((float*)station->sin_orientation_y.data)[i],
-                    ((float*)station->cos_orientation_y.data)[i]) * R2D;
-            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f "
-                    "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f "
+            float x, y, z;
+            x = x_[i]; y = y_[i]; z = z_[i];
+            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f % 14.6f "
+                    "% 14.6f % 14.6f % 14.6f % 14.6f "
                     "% 14.6f % 14.6f % 14.6f % 14.6f\n",
-                    x, y, z, delta_x, delta_y, delta_z, gain, gain_error,
-                    phase_offset, phase_error, weight_re, weight_im,
-                    x_azimuth, y_azimuth);
+                    x, y, z, (xs_[i] - x), (ys_[i] - y), (zs_[i] - z),
+                    gain_[i], gain_error_[i], phase_[i], phase_error_[i],
+                    weight_[i].x, weight_[i].y,
+                    atan2(sin_x_[i], cos_x_[i]) * R2D,
+                    atan2(sin_y_[i], cos_y_[i]) * R2D);
         }
     }
 

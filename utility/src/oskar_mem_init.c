@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-void oskar_mem_init(oskar_Mem* mem, int type, int location, int num_elements,
+void oskar_mem_init(oskar_Mem* mem, int type, int location, size_t num_elements,
         int owner, int* status)
 {
     /* Check all inputs. */

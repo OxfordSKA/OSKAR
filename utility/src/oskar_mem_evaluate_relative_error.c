@@ -84,7 +84,8 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
         double* max_rel_error, double* avg_rel_error, double* std_rel_error,
         int* status)
 {
-    int base_type_approx, base_type_accurate, i, n;
+    int base_type_approx, base_type_accurate;
+    size_t i, n;
     const oskar_Mem *app_ptr, *acc_ptr;
     oskar_Mem approx_temp, accurate_temp;
     double old_m = 0.0, new_m = 0.0, old_s = 0.0, new_s = 0.0;

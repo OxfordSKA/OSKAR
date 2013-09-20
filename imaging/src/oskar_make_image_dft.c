@@ -52,7 +52,8 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
 
     /* Check types. */
     type = oskar_mem_type(image);
-    if (type != oskar_mem_type(uu_metres) || type != oskar_mem_type(vv_metres) ||
+    if (type != oskar_mem_type(uu_metres) ||
+            type != oskar_mem_type(vv_metres) ||
             (type | OSKAR_COMPLEX) != oskar_mem_type(amp) ||
             type != oskar_mem_type(l) || type != oskar_mem_type(m))
         return OSKAR_ERR_TYPE_MISMATCH;
@@ -118,35 +119,41 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     }
 
     /* Check if safe to proceed. */
-    if (err) goto cleanup;
-
-    if (type == OSKAR_DOUBLE)
+    if (!err)
     {
-        /* Call DFT. */
-        oskar_dft_c2r_2d_cuda_d(num_vis, (double*)(u.data), (double*)(v.data),
-                (const double2*)(p_amp->data), num_pixels,
-                (const double*)(p_l->data), (const double*)(p_m->data),
-                (double*)(p_image->data));
-        oskar_cuda_check_error(&err);
+        if (type == OSKAR_DOUBLE)
+        {
+            /* Call DFT. */
+            oskar_dft_c2r_2d_cuda_d(num_vis,
+                    oskar_mem_double_const(&u, &err),
+                    oskar_mem_double_const(&v, &err),
+                    oskar_mem_double2_const(p_amp, &err), num_pixels,
+                    oskar_mem_double_const(p_l, &err),
+                    oskar_mem_double_const(p_m, &err),
+                    oskar_mem_double(p_image, &err));
+            oskar_cuda_check_error(&err);
+        }
+        else if (type == OSKAR_SINGLE)
+        {
+            /* Call DFT. */
+            oskar_dft_c2r_2d_cuda_f(num_vis,
+                    oskar_mem_float_const(&u, &err),
+                    oskar_mem_float_const(&v, &err),
+                    oskar_mem_float2_const(p_amp, &err), num_pixels,
+                    oskar_mem_float_const(p_l, &err),
+                    oskar_mem_float_const(p_m, &err),
+                    oskar_mem_float(p_image, &err));
+            oskar_cuda_check_error(&err);
+        }
+
+        /* Scale image by inverse of number of visibilities. */
+        oskar_mem_scale_real(p_image, 1.0 / num_vis, &err);
+
+        /* Copy image back to host memory if required. */
+        if (oskar_mem_location(image) == OSKAR_LOCATION_CPU)
+            oskar_mem_insert(image, &t_image, 0, &err);
     }
-    else if (type == OSKAR_SINGLE)
-    {
-        /* Call DFT. */
-        oskar_dft_c2r_2d_cuda_f(num_vis, (float*)(u.data), (float*)(v.data),
-                (const float2*)(p_amp->data), num_pixels,
-                (const float*)(p_l->data), (const float*)(p_m->data),
-                (float*)(p_image->data));
-        oskar_cuda_check_error(&err);
-    }
 
-    /* Scale image by inverse of number of visibilities. */
-    oskar_mem_scale_real(p_image, 1.0 / num_vis, &err);
-
-    /* Copy image back to host memory if required. */
-    if (oskar_mem_location(image) == OSKAR_LOCATION_CPU)
-        oskar_mem_insert(image, &t_image, 0, &err);
-
-    cleanup:
     /* Free temporary memory. */
     oskar_mem_free(&u, &err);
     oskar_mem_free(&v, &err);

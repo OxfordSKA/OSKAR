@@ -63,48 +63,48 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_mem_element_multiply(oskar_Mem* c, oskar_Mem* a, const oskar_Mem* b,
-        int num, int* status);
+        size_t num, int* status);
 
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_rr_r_f(int num, float* c,
+void oskar_mem_element_multiply_rr_r_f(size_t num, float* c,
         const float* a, const float* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_cc_c_f(int num, float2* c,
+void oskar_mem_element_multiply_cc_c_f(size_t num, float2* c,
         const float2* a, const float2* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_cc_m_f(int num, float4c* c,
+void oskar_mem_element_multiply_cc_m_f(size_t num, float4c* c,
         const float2* a, const float2* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_cm_m_f(int num, float4c* c,
+void oskar_mem_element_multiply_cm_m_f(size_t num, float4c* c,
         const float2* a, const float4c* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_mm_m_f(int num, float4c* c,
+void oskar_mem_element_multiply_mm_m_f(size_t num, float4c* c,
         const float4c* a, const float4c* b);
 
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_rr_r_d(int num, double* c,
+void oskar_mem_element_multiply_rr_r_d(size_t num, double* c,
         const double* a, const double* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_cc_c_d(int num, double2* c,
+void oskar_mem_element_multiply_cc_c_d(size_t num, double2* c,
         const double2* a, const double2* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_cc_m_d(int num, double4c* c,
+void oskar_mem_element_multiply_cc_m_d(size_t num, double4c* c,
         const double2* a, const double2* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_cm_m_d(int num, double4c* c,
+void oskar_mem_element_multiply_cm_m_d(size_t num, double4c* c,
         const double2* a, const double4c* b);
 
 OSKAR_EXPORT
-void oskar_mem_element_multiply_mm_m_d(int num, double4c* c,
+void oskar_mem_element_multiply_mm_m_d(size_t num, double4c* c,
         const double4c* a, const double4c* b);
 
 #ifdef __cplusplus

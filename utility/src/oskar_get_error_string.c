@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_get_error_string.h"
+#include <oskar_get_error_string.h>
 
 #ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
@@ -66,7 +66,7 @@ const char* oskar_get_error_string(int error)
         case OSKAR_ERR_DIMENSION_MISMATCH:
             return "data dimension mismatch";
         case OSKAR_ERR_BAD_LOCATION:
-            return "unsupported pointer location";
+            return "unsupported memory location";
         case OSKAR_ERR_BAD_DATA_TYPE:
             return "unsupported data type";
         case OSKAR_ERR_BAD_JONES_TYPE:

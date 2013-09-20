@@ -58,10 +58,15 @@ void oskar_evaluate_uvw_baseline(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
     type = oskar_mem_type(x);
     num_baselines = num_stations * (num_stations - 1) / 2;
 
-    /* Check that the memory is not NULL. */
-    if (!uu->data || !vv->data || !ww->data || !x->data || !y->data ||
-            !z->data || !work->data)
+    /* Check that the memory is allocated. */
+    if (!oskar_mem_allocated(uu) || !oskar_mem_allocated(vv) ||
+            !oskar_mem_allocated(ww) || !oskar_mem_allocated(x) ||
+            !oskar_mem_allocated(y) || !oskar_mem_allocated(z) ||
+            !oskar_mem_allocated(work))
+    {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
 
     /* Check that the data dimensions are OK. */
     if ((int)oskar_mem_length(uu) < num_baselines * num_dumps ||
@@ -71,19 +76,31 @@ void oskar_evaluate_uvw_baseline(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
             (int)oskar_mem_length(y) < num_stations ||
             (int)oskar_mem_length(z) < num_stations ||
             (int)oskar_mem_length(work) < 3 * num_stations)
+    {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
 
     /* Check that the data is of the right type. */
-    if (oskar_mem_type(uu) != type || oskar_mem_type(vv) != type || oskar_mem_type(ww) != type ||
-            oskar_mem_type(y) != type || oskar_mem_type(z) != type || oskar_mem_type(work) != type)
+    if (oskar_mem_type(uu) != type || oskar_mem_type(vv) != type ||
+            oskar_mem_type(ww) != type || oskar_mem_type(y) != type ||
+            oskar_mem_type(z) != type || oskar_mem_type(work) != type)
+    {
         *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
 
     /* Check that the data is in the right location. */
     location = oskar_mem_location(x);
-    if (oskar_mem_location(y) != location || oskar_mem_location(z) != location ||
-            oskar_mem_location(uu) != location || oskar_mem_location(vv) != location ||
+    if (oskar_mem_location(y) != location ||
+            oskar_mem_location(z) != location ||
+            oskar_mem_location(uu) != location ||
+            oskar_mem_location(vv) != location ||
             oskar_mem_location(ww) != location)
-        *status = OSKAR_ERR_BAD_LOCATION;
+    {
+        *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return;
+    }
 
     /* Get pointers from work buffer. */
     oskar_mem_get_pointer(&u, work, 0, num_stations, status);

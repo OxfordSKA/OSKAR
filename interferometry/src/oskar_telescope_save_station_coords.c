@@ -40,7 +40,7 @@ void oskar_telescope_save_station_coords(
         const oskar_Telescope* telescope, const char* filename,
         int* status)
 {
-    int i, type, location;
+    int i, type, location, num_stations;
     FILE* file;
 
     /* Check all inputs. */
@@ -56,6 +56,7 @@ void oskar_telescope_save_station_coords(
     /* Check type and location. */
     type = oskar_telescope_type(telescope);
     location = oskar_telescope_location(telescope);
+    num_stations = oskar_telescope_num_stations(telescope);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -83,7 +84,7 @@ void oskar_telescope_save_station_coords(
     }
 
     /* Save the position of each station. */
-    fprintf(file, "# Number of stations  = %i\n", telescope->num_stations);
+    fprintf(file, "# Number of stations  = %i\n", num_stations);
     fprintf(file, "# Longitude [radians] = %f\n", telescope->longitude_rad);
     fprintf(file, "# Latitude [radians]  = %f\n", telescope->latitude_rad);
     fprintf(file, "# Altitude [metres]   = %f\n", telescope->altitude_m);
@@ -91,10 +92,13 @@ void oskar_telescope_save_station_coords(
     if (type == OSKAR_SINGLE)
     {
         const float *x_hor, *y_hor, *z_hor;
-        x_hor = (const float*)telescope->station_x_hor.data;
-        y_hor = (const float*)telescope->station_y_hor.data;
-        z_hor = (const float*)telescope->station_z_hor.data;
-        for (i = 0; i < telescope->num_stations; ++i)
+        x_hor = oskar_mem_float_const(
+                oskar_telescope_station_x_hor_const(telescope), status);
+        y_hor = oskar_mem_float_const(
+                oskar_telescope_station_y_hor_const(telescope), status);
+        z_hor = oskar_mem_float_const(
+                oskar_telescope_station_z_hor_const(telescope), status);
+        for (i = 0; i < num_stations; ++i)
         {
             fprintf(file, "% 14.6f % 14.6f % 14.6f\n",
                     x_hor[i], y_hor[i], z_hor[i]);
@@ -103,10 +107,13 @@ void oskar_telescope_save_station_coords(
     else if (type == OSKAR_DOUBLE)
     {
         const double *x_hor, *y_hor, *z_hor;
-        x_hor = (const double*)telescope->station_x_hor.data;
-        y_hor = (const double*)telescope->station_y_hor.data;
-        z_hor = (const double*)telescope->station_z_hor.data;
-        for (i = 0; i < telescope->num_stations; ++i)
+        x_hor = oskar_mem_double_const(
+                oskar_telescope_station_x_hor_const(telescope), status);
+        y_hor = oskar_mem_double_const(
+                oskar_telescope_station_y_hor_const(telescope), status);
+        z_hor = oskar_mem_double_const(
+                oskar_telescope_station_z_hor_const(telescope), status);
+        for (i = 0; i < num_stations; ++i)
         {
             fprintf(file, "% 14.6f % 14.6f % 14.6f\n",
                     x_hor[i], y_hor[i], z_hor[i]);

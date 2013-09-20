@@ -45,12 +45,28 @@ extern "C" {
 
 /**
  * @brief
+ * Returns true if the structure holds a valid pointer; false if not.
+ *
+ * @details
+ * Returns true if the structure holds a valid pointer; false if not.
+ *
+ * @param[in] mem Pointer to the memory block.
+ *
+ * @return True if the pointer is not NULL.
+ */
+OSKAR_EXPORT
+int oskar_mem_allocated(const oskar_Mem* mem);
+
+/**
+ * @brief
  * Returns the number of elements in the memory block.
  *
  * @details
  * This accessor function returns the number of elements in the memory block.
  *
  * @param[in] mem Pointer to the memory block.
+ *
+ * @return The number of elements.
  */
 OSKAR_EXPORT
 size_t oskar_mem_length(const oskar_Mem* mem);
@@ -63,6 +79,8 @@ size_t oskar_mem_length(const oskar_Mem* mem);
  * This accessor function returns the enumerated location of the memory block.
  *
  * @param[in] mem Pointer to the memory block.
+ *
+ * @return The memory location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
  */
 OSKAR_EXPORT
 int oskar_mem_location(const oskar_Mem* mem);
@@ -75,6 +93,8 @@ int oskar_mem_location(const oskar_Mem* mem);
  * This accessor function returns the enumerated type of the memory block.
  *
  * @param[in] mem Pointer to the memory block.
+ *
+ * @return The full enumerated memory element type.
  */
 OSKAR_EXPORT
 int oskar_mem_type(const oskar_Mem* mem);

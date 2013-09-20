@@ -36,7 +36,7 @@ extern "C" {
 #endif
 
 void oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
-        int offset, int num_elements, int* status)
+        size_t offset, size_t num_elements, int* status)
 {
     size_t element_size, offset_bytes;
 

@@ -37,7 +37,8 @@ extern "C" {
 void oskar_mem_random_fill(oskar_Mem* mem, double lo, double hi, int* status)
 {
     oskar_Mem t, *ptr;
-    int i, num_elements, base_type;
+    size_t i, num_elements;
+    int base_type;
 
     /* Check all inputs. */
     if (!mem || !status)

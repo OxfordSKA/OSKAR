@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 int oskar_mem_different(const oskar_Mem* one, const oskar_Mem* two,
-        int num_elements, int* status)
+        size_t num_elements, int* status)
 {
     int type;
     size_t bytes_to_check, i;

@@ -291,9 +291,14 @@ void oskar_mem_element_multiply_cuda_mm_m_d(int num, double4c* d_c,
 
 
 static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
-        const oskar_Mem* a, const oskar_Mem* b, int num, int* status)
+        const oskar_Mem* a, const oskar_Mem* b, size_t num, int* status)
 {
     int error = OSKAR_ERR_TYPE_MISMATCH; /* Set to type mismatch by default. */
+
+    /* Cast num to int. Yes, this is horrible, but if num is really that big,
+     * we'll exceed the maximum CUDA grid dimensions anyway. */
+    int n;
+    n = (int) num;
 
     /* Check if safe to proceed. */
     if (*status) return;
@@ -307,7 +312,7 @@ static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
             {
                 /* Real, real to real. */
                 error = 0;
-                oskar_mem_element_multiply_cuda_rr_r_d(num, (double*)c->data,
+                oskar_mem_element_multiply_cuda_rr_r_d(n, (double*)c->data,
                         (const double*)a->data, (const double*)b->data);
             }
         }
@@ -320,14 +325,14 @@ static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
             {
                 /* Complex scalar, complex scalar to complex scalar. */
                 error = 0;
-                oskar_mem_element_multiply_cuda_cc_c_d(num, (double2*)c->data,
+                oskar_mem_element_multiply_cuda_cc_c_d(n, (double2*)c->data,
                         (const double2*)a->data, (const double2*)b->data);
             }
             else if (c->type == OSKAR_DOUBLE_COMPLEX_MATRIX)
             {
                 /* Complex scalar, complex scalar to complex matrix. */
                 error = 0;
-                oskar_mem_element_multiply_cuda_cc_m_d(num, (double4c*)c->data,
+                oskar_mem_element_multiply_cuda_cc_m_d(n, (double4c*)c->data,
                         (const double2*)a->data, (const double2*)b->data);
             }
         }
@@ -337,7 +342,7 @@ static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
             {
                 /* Complex scalar, complex matrix to complex matrix. */
                 error = 0;
-                oskar_mem_element_multiply_cuda_cm_m_d(num, (double4c*)c->data,
+                oskar_mem_element_multiply_cuda_cm_m_d(n, (double4c*)c->data,
                         (const double2*)a->data, (const double4c*)b->data);
             }
         }
@@ -350,7 +355,7 @@ static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
             {
                 /* Complex matrix, complex scalar to complex matrix. */
                 error = 0;
-                oskar_mem_element_multiply_cuda_cm_m_d(num, (double4c*)c->data,
+                oskar_mem_element_multiply_cuda_cm_m_d(n, (double4c*)c->data,
                         (const double2*)b->data, (const double4c*)a->data);
             }
         }
@@ -360,7 +365,7 @@ static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
             {
                 /* Complex matrix, complex matrix to complex matrix. */
                 error = 0;
-                oskar_mem_element_multiply_cuda_mm_m_d(num, (double4c*)c->data,
+                oskar_mem_element_multiply_cuda_mm_m_d(n, (double4c*)c->data,
                         (const double4c*)a->data, (const double4c*)b->data);
             }
         }
@@ -373,7 +378,7 @@ static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
             {
                 /* Real, real to real. */
                 error = 0;
-                oskar_mem_element_multiply_cuda_rr_r_f(num, (float*)c->data,
+                oskar_mem_element_multiply_cuda_rr_r_f(n, (float*)c->data,
                         (const float*)a->data, (const float*)b->data);
             }
         }
@@ -386,14 +391,14 @@ static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
             {
                 /* Complex scalar, complex scalar to complex scalar. */
                 error = 0;
-                oskar_mem_element_multiply_cuda_cc_c_f(num, (float2*)c->data,
+                oskar_mem_element_multiply_cuda_cc_c_f(n, (float2*)c->data,
                         (const float2*)a->data, (const float2*)b->data);
             }
             else if (c->type == OSKAR_SINGLE_COMPLEX_MATRIX)
             {
                 /* Complex scalar, complex scalar to complex matrix. */
                 error = 0;
-                oskar_mem_element_multiply_cuda_cc_m_f(num, (float4c*)c->data,
+                oskar_mem_element_multiply_cuda_cc_m_f(n, (float4c*)c->data,
                         (const float2*)a->data, (const float2*)b->data);
             }
         }
@@ -403,7 +408,7 @@ static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
             {
                 /* Complex scalar, complex matrix to complex matrix. */
                 error = 0;
-                oskar_mem_element_multiply_cuda_cm_m_f(num, (float4c*)c->data,
+                oskar_mem_element_multiply_cuda_cm_m_f(n, (float4c*)c->data,
                         (const float2*)a->data, (const float4c*)b->data);
             }
         }
@@ -416,7 +421,7 @@ static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
             {
                 /* Complex matrix, complex scalar to complex matrix. */
                 error = 0;
-                oskar_mem_element_multiply_cuda_cm_m_f(num, (float4c*)c->data,
+                oskar_mem_element_multiply_cuda_cm_m_f(n, (float4c*)c->data,
                         (const float2*)b->data, (const float4c*)a->data);
             }
         }
@@ -426,7 +431,7 @@ static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
             {
                 /* Complex matrix, complex matrix to complex matrix. */
                 error = 0;
-                oskar_mem_element_multiply_cuda_mm_m_f(num, (float4c*)c->data,
+                oskar_mem_element_multiply_cuda_mm_m_f(n, (float4c*)c->data,
                         (const float4c*)a->data, (const float4c*)b->data);
             }
         }
@@ -439,7 +444,7 @@ static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
 
 
 void oskar_mem_element_multiply_cuda(oskar_Mem* C, const oskar_Mem* A,
-        const oskar_Mem* B, int num, int* status)
+        const oskar_Mem* B, size_t num, int* status)
 {
     oskar_Mem At, Bt;
     const oskar_Mem *Ap, *Bp;

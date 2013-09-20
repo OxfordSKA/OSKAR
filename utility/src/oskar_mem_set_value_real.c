@@ -37,7 +37,8 @@ extern "C" {
 
 void oskar_mem_set_value_real(oskar_Mem* mem, double val, int* status)
 {
-    int i, n, type, location;
+    size_t i, n;
+    int type, location;
 
     /* Check all inputs. */
     if (!mem || !status)

@@ -41,7 +41,7 @@
 extern "C" {
 #endif
 
-void oskar_mem_realloc(oskar_Mem* mem, int num_elements, int* status)
+void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
 {
     size_t element_size, new_size, old_size;
 

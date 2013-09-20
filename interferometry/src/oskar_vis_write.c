@@ -56,6 +56,7 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     FILE* stream;
     char* log_data = 0;
     long log_size = 0;
+    const char* settings_path;
 
     /* Check all inputs. */
     if (!vis || !filename || !status)
@@ -101,26 +102,23 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     if (*status) return;
 
     /* If settings path is set, write out the data. */
-    if (vis->settings_path.data)
+    settings_path = oskar_mem_char_const(oskar_vis_settings_path_const(vis));
+    if (settings_path && strlen(settings_path) > 0)
     {
-        if (strlen(vis->settings_path.data) > 0)
-        {
-            /* Write the settings path. */
-            oskar_mem_binary_stream_write(&vis->settings_path, stream,
-                    OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0, 0,
-                    status);
+        /* Write the settings path. */
+        oskar_mem_binary_stream_write(oskar_vis_settings_path_const(vis),
+                stream, OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0, 0,
+                status);
 
-            /* Check the file exists */
-            if (oskar_file_exists((const char*)vis->settings_path.data))
-            {
-                /* Write the settings file. */
-                oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, status);
-                oskar_mem_binary_file_read_raw(&temp,
-                        (const char*) vis->settings_path.data, status);
-                oskar_mem_binary_stream_write(&temp, stream,
-                        OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0, status);
-                oskar_mem_free(&temp, status);
-            }
+        /* Check the file exists */
+        if (oskar_file_exists(settings_path))
+        {
+            /* Write the settings file. */
+            oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, status);
+            oskar_mem_binary_file_read_raw(&temp, settings_path, status);
+            oskar_mem_binary_stream_write(&temp, stream,
+                    OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0, status);
+            oskar_mem_free(&temp, status);
         }
     }
     /* If log exists, then write it out. */

@@ -42,7 +42,7 @@ extern "C" {
 #endif
 
 void oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
-        int from_location, int num_elements, int* status)
+        int from_location, size_t num_elements, int* status)
 {
     size_t element_size, mem_size, offset_bytes;
 

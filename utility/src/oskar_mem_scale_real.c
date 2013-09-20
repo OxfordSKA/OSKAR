@@ -36,7 +36,7 @@ extern "C"
 #endif
 void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status)
 {
-    int num_elements, i;
+    size_t num_elements, i;
 
     /* Check all inputs. */
     if (!mem || !status)

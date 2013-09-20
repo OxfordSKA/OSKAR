@@ -178,25 +178,25 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
         {
             oskar_evaluate_jones_K_cuda_f(oskar_jones_float2(K, status),
                     num_stations,
-                    (const float*)(u->data),
-                    (const float*)(v->data),
-                    (const float*)(w->data),
+                    oskar_mem_float_const(u, status),
+                    oskar_mem_float_const(v, status),
+                    oskar_mem_float_const(w, status),
                     num_sources,
-                    (const float*)(l->data),
-                    (const float*)(m->data),
-                    (const float*)(n->data));
+                    oskar_mem_float_const(l, status),
+                    oskar_mem_float_const(m, status),
+                    oskar_mem_float_const(n, status));
         }
         else if (jones_type == OSKAR_DOUBLE_COMPLEX)
         {
             oskar_evaluate_jones_K_cuda_d(oskar_jones_double2(K, status),
                     num_stations,
-                    (const double*)(u->data),
-                    (const double*)(v->data),
-                    (const double*)(w->data),
+                    oskar_mem_double_const(u, status),
+                    oskar_mem_double_const(v, status),
+                    oskar_mem_double_const(w, status),
                     num_sources,
-                    (const double*)(l->data),
-                    (const double*)(m->data),
-                    (const double*)(n->data));
+                    oskar_mem_double_const(l, status),
+                    oskar_mem_double_const(m, status),
+                    oskar_mem_double_const(n, status));
         }
         oskar_cuda_check_error(status);
 #else
@@ -209,25 +209,25 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
         {
             oskar_evaluate_jones_K_f(oskar_jones_float2(K, status),
                     num_stations,
-                    (const float*)(u->data),
-                    (const float*)(v->data),
-                    (const float*)(w->data),
+                    oskar_mem_float_const(u, status),
+                    oskar_mem_float_const(v, status),
+                    oskar_mem_float_const(w, status),
                     num_sources,
-                    (const float*)(l->data),
-                    (const float*)(m->data),
-                    (const float*)(n->data));
+                    oskar_mem_float_const(l, status),
+                    oskar_mem_float_const(m, status),
+                    oskar_mem_float_const(n, status));
         }
         else if (jones_type == OSKAR_DOUBLE_COMPLEX)
         {
             oskar_evaluate_jones_K_d(oskar_jones_double2(K, status),
                     num_stations,
-                    (const double*)(u->data),
-                    (const double*)(v->data),
-                    (const double*)(w->data),
+                    oskar_mem_double_const(u, status),
+                    oskar_mem_double_const(v, status),
+                    oskar_mem_double_const(w, status),
                     num_sources,
-                    (const double*)(l->data),
-                    (const double*)(m->data),
-                    (const double*)(n->data));
+                    oskar_mem_double_const(l, status),
+                    oskar_mem_double_const(m, status),
+                    oskar_mem_double_const(n, status));
         }
     }
 }

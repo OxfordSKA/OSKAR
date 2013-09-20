@@ -39,7 +39,7 @@ extern "C" {
 void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
         int* status)
 {
-    int i, num_elements;
+    size_t i, num_elements;
 
     /* Check all inputs. */
     if (!a || !b || !c || !status)

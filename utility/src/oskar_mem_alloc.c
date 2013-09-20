@@ -41,8 +41,8 @@ extern "C" {
 
 void oskar_mem_alloc(oskar_Mem* mem, int* status)
 {
-    int n_elements, location, type;
-    size_t element_size, bytes;
+    int location, type;
+    size_t n_elements, element_size, bytes;
 
     /* Check all inputs. */
     if (!mem || !status)
