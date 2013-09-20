@@ -11,12 +11,11 @@ if (CASACORE_FOUND)
         src/oskar_ms_append_vis.cpp
         src/oskar_ms_create_meta.cpp
     )
-    set(ms_SRC "${ms_SRC}" PARENT_SCOPE)
 
     # Build and install the oskar_ms library.
-    include_directories(${CASACORE_INCLUDE_DIR}/casacore)
     add_library(oskar_ms ${ms_SRC})
-    set_target_properties(oskar_ms PROPERTIES COMPILE_FLAGS "-Wno-cast-qual")
+    set_target_properties(oskar_ms PROPERTIES 
+        COMPILE_FLAGS "-Wno-cast-qual -fvisibility=default")
     target_link_libraries(oskar_ms ${CASACORE_LIBRARIES})
     set_target_properties(oskar_ms PROPERTIES
         INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}

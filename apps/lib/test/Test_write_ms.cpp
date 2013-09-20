@@ -54,6 +54,7 @@ TEST(write_ms, test_write)
     // Create a visibility structure and fill in some data.
     oskar_Vis* vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX_MATRIX,
             OSKAR_LOCATION_CPU, num_channels, num_times, num_antennas, &status);
+    ASSERT_TRUE(vis);
     oskar_vis_set_phase_centre(vis, 160.0, 89.0);
     double4c* v_ = oskar_mem_double4c(oskar_vis_amplitude(vis), &status);
     double *uu, *vv, *ww, *x, *y, *z;
@@ -63,6 +64,8 @@ TEST(write_ms, test_write)
     x = oskar_mem_double(oskar_vis_station_x_metres(vis), &status);
     y = oskar_mem_double(oskar_vis_station_y_metres(vis), &status);
     z = oskar_mem_double(oskar_vis_station_z_metres(vis), &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+
     for (int i = 0, c = 0; c < num_channels; ++c)
     {
         for (int t = 0; t < num_times; ++t)
