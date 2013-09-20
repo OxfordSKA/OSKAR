@@ -122,7 +122,7 @@ else()
 endif ()
 install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
     DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
-    FILES_MATCHING PATTERN "*.h"
+    FILES_MATCHING PATTERN "oskar_*.h"
     PATTERN ${install_include_dir} EXCLUDE
     PATTERN build EXCLUDE
     PATTERN release EXCLUDE
@@ -133,6 +133,7 @@ install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
     PATTERN dierckx EXCLUDE
     PATTERN src  EXCLUDE
     PATTERN test EXCLUDE
+    PATTERN extern EXCLUDE
     PATTERN .svn EXCLUDE)
 
 # === Include packaging script.
