@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,48 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_TYPE_H_
-#define OSKAR_ELEMENT_MODEL_TYPE_H_
+#ifndef OSKAR_SPLINES_H_
+#define OSKAR_SPLINES_H_
 
 /**
- * @file oskar_element_model_type.h
+ * @file oskar_splines.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_ElementModel.h"
+/* Public interface. */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Checks if the OSKAR element model is of the specified type.
- *
- * @details
- * \p type should be an oskar_Mem data type.
- *
- * If the types are found to be inconsistent between all of the oskar_Mem
- * structures held in the element model the type check is considered false.
- *
- * @param element   Pointer to element model structure.
- * @param type  oskar_Mem data type to check against.
-
- * @return 1 (true) if the element model is of the specified type, 0 otherwise.
- */
-int oskar_element_model_is_type(const oskar_ElementModel* element, int type);
-
-/**
- * @brief Returns the oskar_Mem type ID for the element structure or an error
- * code if an invalid type is found.
- *
- * @param element Pointer to an OSKAR element model structure.
- *
- * @return oskar_Mem data type or error code.
- */
-int oskar_element_model_type(const oskar_ElementModel* element);
+struct oskar_Splines;
+#ifndef OSKAR_SPLINES_TYPEDEF_
+#define OSKAR_SPLINES_TYPEDEF_
+typedef struct oskar_Splines oskar_Splines;
+#endif /* OSKAR_SPLINES_TYPEDEF_ */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_ELEMENT_MODEL_TYPE_H_ */
+#include <oskar_splines_accessors.h>
+#include <oskar_splines_copy.h>
+#include <oskar_splines_create.h>
+#include <oskar_splines_evaluate.h>
+#include <oskar_splines_free.h>
+#include <oskar_splines_fit.h>
+
+#endif /* OSKAR_SPLINES_H_ */

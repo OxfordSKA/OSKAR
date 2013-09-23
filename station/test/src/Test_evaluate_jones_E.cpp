@@ -72,8 +72,8 @@ TEST(evaluate_jones_E, evaluate_e)
         oskar_station_set_position(s, 0.0, M_PI / 2.0, 0.0);
         oskar_station_set_phase_centre(s,
                 OSKAR_SPHERICAL_TYPE_EQUATORIAL, 0.0, M_PI/2.0);
-        oskar_ElementModel* element = oskar_station_element(s, 0);
-        element->element_type = OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC;
+        oskar_Element* element = oskar_station_element(s, 0);
+        oskar_element_set_element_type(element, OSKAR_ELEMENT_TYPE_ISOTROPIC);
         oskar_station_set_use_polarised_elements(s, 0);
 
         // Generate the coordinates.

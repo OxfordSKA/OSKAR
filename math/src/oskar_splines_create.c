@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SPLINE_DATA_TYPE_H_
-#define OSKAR_SPLINE_DATA_TYPE_H_
-
-/**
- * @file oskar_spline_data_type.h
- */
-
-#include "oskar_global.h"
-#include "math/oskar_SplineData.h"
+#include <private_splines.h>
+#include <oskar_splines.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Returns the type of a spherical spline data structure.
- *
- * @details
- * This function returns the type of memory held in a spherical spline data
- * structure.
- *
- * @param[in] data Pointer to data structure.
- *
- * @return
- * Enumerated type (OSKAR_SINGLE or OSKAR_DOUBLE) of memory.
- */
-OSKAR_EXPORT
-int oskar_spline_data_type(const oskar_SplineData* data);
+oskar_Splines* oskar_splines_create(int type, int location, int* status)
+{
+    oskar_Splines* data = 0;
+
+    /* Check all inputs. */
+    if (!status)
+    {
+        oskar_set_invalid_argument(status);
+        return 0;
+    }
+
+    /* Allocate and initialise the structure. */
+    data = (oskar_Splines*) malloc(sizeof(oskar_Splines));
+    if (!data)
+    {
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        return 0;
+    }
+
+    data->type = type;
+    data->location = location;
+    data->num_knots_x = 0;
+    data->num_knots_y = 0;
+    oskar_mem_init(&data->knots_x, type, location, 0, OSKAR_TRUE, status);
+    oskar_mem_init(&data->knots_y, type, location, 0, OSKAR_TRUE, status);
+    oskar_mem_init(&data->coeff, type, location, 0, OSKAR_TRUE, status);
+
+    /* Return pointer to the structure. */
+    return data;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SPLINE_DATA_TYPE_H_ */

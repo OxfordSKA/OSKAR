@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,37 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_COPY_H_
-#define OSKAR_ELEMENT_MODEL_COPY_H_
-
-/**
- * @file oskar_element_model_copy.h
- */
-
-#include "oskar_global.h"
-#include "station/oskar_ElementModel.h"
+#include <private_splines.h>
+#include <oskar_splines.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Copies the contents of one data structure to another data structure.
- *
- * @details
- * This function copies data held in one structure to another structure.
- *
- * @param[out] dst          Pointer to destination data structure to copy into.
- * @param[in]  src          Pointer to source data structure to copy from.
- * @param[in,out]  status   Status return code.
- */
-OSKAR_EXPORT
-void oskar_element_model_copy(oskar_ElementModel* dst,
-        const oskar_ElementModel* src, int* status);
+void oskar_splines_free(oskar_Splines* data, int* status)
+{
+    /* Check all inputs. */
+    if (!data || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Free the arrays. */
+    oskar_mem_free(&data->knots_x, status);
+    oskar_mem_free(&data->knots_y, status);
+    oskar_mem_free(&data->coeff, status);
+
+    /* Free the structure itself. */
+    free(data);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_ELEMENT_MODEL_COPY_H_ */

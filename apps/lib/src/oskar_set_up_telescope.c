@@ -165,17 +165,19 @@ static void set_station_data(oskar_Station* station,
             settings->telescope.gaussian_beam.fwhm_deg * M_PI / 180.0);
     oskar_station_set_use_polarised_elements(station,
             !(aa->element_pattern.functional_type ==
-                    OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC));
+                    OSKAR_ELEMENT_TYPE_ISOTROPIC));
 
     /* Set element pattern data, if element structure exists. */
     if (oskar_station_has_element(station))
     {
-        oskar_ElementModel* element;
+        const oskar_SettingsElementPattern* ep;
+        oskar_Element* element;
+        ep = &aa->element_pattern;
         element = oskar_station_element(station, 0);
-        element->element_type = aa->element_pattern.functional_type;
-        element->taper_type = aa->element_pattern.taper.type;
-        element->cos_power = aa->element_pattern.taper.cosine_power;
-        element->gaussian_fwhm_rad = aa->element_pattern.taper.gaussian_fwhm_rad;
+        oskar_element_set_element_type(element, ep->functional_type);
+        oskar_element_set_taper_type(element, ep->taper.type);
+        oskar_element_set_cos_power(element, ep->taper.cosine_power);
+        oskar_element_set_gaussian_fwhm_rad(element, ep->taper.gaussian_fwhm_rad);
     }
 
     /* Set pointing data based on station depth in hierarchy. */

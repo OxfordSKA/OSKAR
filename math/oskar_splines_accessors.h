@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,36 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_FREE_H_
-#define OSKAR_ELEMENT_MODEL_FREE_H_
+#ifndef OSKAR_SPLINES_ACCESSORS_H_
+#define OSKAR_SPLINES_ACCESSORS_H_
 
 /**
- * @file oskar_element_model_free.h
+ * @file oskar_splines_accessors.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_ElementModel.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Frees memory used for the embedded element pattern data.
- *
- * @details
- * This function frees memory that is used to hold the embedded element
- * pattern data.
- *
- * @param[in] data  Data structure.
- * @param[in,out]  status   Status return code.
- */
 OSKAR_EXPORT
-void oskar_element_model_free(oskar_ElementModel* data, int* status);
+int oskar_splines_type(const oskar_Splines* data);
+
+OSKAR_EXPORT
+int oskar_splines_location(const oskar_Splines* data);
+
+OSKAR_EXPORT
+int oskar_splines_has_coeffs(const oskar_Splines* data);
+
+OSKAR_EXPORT
+int oskar_splines_num_knots_x(const oskar_Splines* data);
+
+OSKAR_EXPORT
+int oskar_splines_num_knots_y(const oskar_Splines* data);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_splines_knots_x(oskar_Splines* data);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_splines_knots_x_const(const oskar_Splines* data);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_splines_knots_y(oskar_Splines* data);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_splines_knots_y_const(const oskar_Splines* data);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_splines_coeff(oskar_Splines* data);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_splines_coeff_const(const oskar_Splines* data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_ELEMENT_MODEL_FREE_H_ */
+#endif /* OSKAR_SPLINES_ACCESSORS_H_ */

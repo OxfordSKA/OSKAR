@@ -65,13 +65,12 @@ set(math_SRC
     src/oskar_sph_rotate_to_position.c
     src/oskar_sph_to_lm.c
     src/oskar_sph2cart.c
-    src/oskar_spline_data_copy.c
-    src/oskar_spline_data_evaluate.c
-    src/oskar_spline_data_free.c
-    src/oskar_spline_data_init.c
-    src/oskar_spline_data_location.c
-    src/oskar_spline_data_surfit.c
-    src/oskar_spline_data_type.c
+    src/oskar_splines_accessors.c
+    src/oskar_splines_copy.c
+    src/oskar_splines_create.c
+    src/oskar_splines_evaluate.c
+    src/oskar_splines_fit.c
+    src/oskar_splines_free.c
 )
 foreach (file ${math_cuda_kernels_SRC})
     list(APPEND math_SRC cudak/${file})

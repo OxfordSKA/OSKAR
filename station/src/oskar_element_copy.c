@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,46 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_MODEL_ELEMENT_PATTERN_LOAD_H_
-#define OSKAR_TELESCOPE_MODEL_ELEMENT_PATTERN_LOAD_H_
-
-/**
- * @file oskar_telescope_model_element_pattern_load.h
- */
-
-#include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SettingsTelescope.h"
-#include "utility/oskar_Log.h"
+#include <private_element.h>
+#include <oskar_element.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Loads the element_pattern_(x/y)_cst.txt files from a telescope model
- * directory, populating the relevant parts of an OSKAR telescope model
- * structure.
- *
- * @details
- * The telescope model must already be allocated in CPU memory.
- *
- * Note that oskar_telescope_model_load_config() should have been called first
- * to allocate the telescope model for the correct number of stations
- * and/or child elements.
- *
- * @param[out]    telescope  Pointer to empty telescope model structure to fill.
- * @param[in,out] log        Pointer to log structure to use.
- * @param[in]     settings   Pointer to telescope model settings.
- * @param[in,out] status     Status return code.
- */
-OSKAR_APPS_EXPORT
-void oskar_telescope_model_element_pattern_load(oskar_TelescopeModel* telescope,
-        oskar_Log* log, const oskar_SettingsTelescope* settings, int* status);
+void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
+        int* status)
+{
+    /* Check all inputs. */
+    if (!dst || !src || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+    dst->data_type = src->data_type;
+    dst->element_type = src->element_type;
+    dst->taper_type = src->taper_type;
+    dst->cos_power = src->cos_power;
+    dst->gaussian_fwhm_rad = src->gaussian_fwhm_rad;
+
+    oskar_mem_copy(&dst->filename_x, &src->filename_x, status);
+    oskar_mem_copy(&dst->filename_y, &src->filename_y, status);
+    oskar_splines_copy(dst->phi_re_x, src->phi_re_x, status);
+    oskar_splines_copy(dst->phi_im_x, src->phi_im_x, status);
+    oskar_splines_copy(dst->theta_re_x, src->theta_re_x, status);
+    oskar_splines_copy(dst->theta_im_x, src->theta_im_x, status);
+    oskar_splines_copy(dst->phi_re_y, src->phi_re_y, status);
+    oskar_splines_copy(dst->phi_im_y, src->phi_im_y, status);
+    oskar_splines_copy(dst->theta_re_y, src->theta_re_y, status);
+    oskar_splines_copy(dst->theta_im_y, src->theta_im_y, status);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_TELESCOPE_MODEL_ELEMENT_PATTERN_LOAD_H_ */

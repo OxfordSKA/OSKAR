@@ -329,29 +329,6 @@ enum {
 #endif
 
 /**
- * @def OSKAR_TLS
- *
- * @brief
- * Macro used to define a variable as having thread-local storage.
- *
- * @details
- * Macro used to specify a thread-local storage qualifier for a global variable.
- *
- * This macro expands to the __thread specifier on Linux/GCC platforms, and
- * __declspec(thread) on Windows.
- *
- * Usage examples:
- *   OSKAR_TLS int foo = 0;
- *   extern OSKAR_TLS struct state s;
- *   static OSKAR_TLS char *p;
- */
-#if (defined(_WIN32) || defined(__WIN32__))
-    #define OSKAR_TLS __declspec(thread)
-#else
-    #define OSKAR_TLS __thread
-#endif
-
-/**
  * @def OSKAR_INLINE
  *
  * @brief

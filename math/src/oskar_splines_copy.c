@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SPLINE_DATA_LOCATION_H_
-#define OSKAR_SPLINE_DATA_LOCATION_H_
-
-/**
- * @file oskar_spline_data_location.h
- */
-
-#include "oskar_global.h"
-#include "math/oskar_SplineData.h"
+#include <private_splines.h>
+#include <oskar_splines.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Returns the location of a spherical spline data structure.
- *
- * @details
- * This function returns the location of memory held in a spherical spline data
- * structure.
- *
- * @param[in] data Pointer to data structure.
- *
- * @return
- * Enumerated location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU) of memory.
- */
-OSKAR_EXPORT
-int oskar_spline_data_location(const oskar_SplineData* data);
+void oskar_splines_copy(oskar_Splines* dst, const oskar_Splines* src,
+        int* status)
+{
+    /* Check all inputs. */
+    if (!dst || !src || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    dst->type = src->type;
+    dst->num_knots_x = src->num_knots_x;
+    dst->num_knots_y = src->num_knots_y;
+    oskar_mem_copy(&dst->knots_x, &src->knots_x, status);
+    oskar_mem_copy(&dst->knots_y, &src->knots_y, status);
+    oskar_mem_copy(&dst->coeff, &src->coeff, status);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SPLINE_DATA_LOCATION_H_ */

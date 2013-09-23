@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,39 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_INIT_H_
-#define OSKAR_ELEMENT_MODEL_INIT_H_
-
-/**
- * @file oskar_element_model_init.h
- */
-
-#include "oskar_global.h"
-#include "station/oskar_ElementModel.h"
+#include <private_element.h>
+#include <oskar_element.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Initialises the embedded element pattern data structure.
- *
- * @details
- * This function initialises the embedded element pattern data structure.
- * All memory arrays will be empty (i.e. zero-sized).
- *
- * @param[in] data     Pointer to data structure.
- * @param[in] type     Type flag (valid types are OSKAR_SINGLE or OSKAR_DOUBLE).
- * @param[in] location Location flag (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
- * @param[in,out]  status   Status return code.
- */
-OSKAR_EXPORT
-void oskar_element_model_init(oskar_ElementModel* data, int type, int location,
-        int* status);
+void oskar_element_free(oskar_Element* data, int* status)
+{
+    /* Check all inputs. */
+    if (!data || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Free the memory contents. */
+    oskar_mem_free(&data->filename_x, status);
+    oskar_mem_free(&data->filename_y, status);
+    oskar_splines_free(data->phi_re_x, status);
+    oskar_splines_free(data->phi_im_x, status);
+    oskar_splines_free(data->theta_re_x, status);
+    oskar_splines_free(data->theta_im_x, status);
+    oskar_splines_free(data->phi_re_y, status);
+    oskar_splines_free(data->phi_im_y, status);
+    oskar_splines_free(data->theta_re_y, status);
+    oskar_splines_free(data->theta_im_y, status);
+
+    /* Free the structure itself. */
+    free(data);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_ELEMENT_MODEL_INIT_H_ */

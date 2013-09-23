@@ -35,7 +35,7 @@
 
 #include <oskar_global.h>
 #include <oskar_mem.h>
-#include <oskar_ElementModel.h>
+#include <oskar_element.h>
 #include <oskar_SystemNoiseModel.h>
 
 #ifdef __cplusplus
@@ -253,10 +253,10 @@ OSKAR_EXPORT
 int oskar_station_has_element(const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_ElementModel* oskar_station_element(oskar_Station* model, int i);
+oskar_Element* oskar_station_element(oskar_Station* model, int i);
 
 OSKAR_EXPORT
-const oskar_ElementModel* oskar_station_element_const(const oskar_Station* model, int i);
+const oskar_Element* oskar_station_element_const(const oskar_Station* model, int i);
 
 
 /* Setters. */

@@ -26,18 +26,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_ElementModel.h"
-#include "station/oskar_element_model_init.h"
-#include "station/oskar_element_model_free.h"
+#ifndef OSKAR_SPLINES_EVALUATE_H_
+#define OSKAR_SPLINES_EVALUATE_H_
 
-oskar_ElementModel::oskar_ElementModel(int type, int location)
-{
-    int err = 0;
-    oskar_element_model_init(this, type, location, &err);
-}
+/**
+ * @file oskar_splines_evaluate.h
+ */
 
-oskar_ElementModel::~oskar_ElementModel()
-{
-    int err = 0;
-    oskar_element_model_free(this, &err);
+#include <oskar_global.h>
+#include <oskar_mem.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Evaluates a surface fitted by splines at the given positions.
+ *
+ * @details
+ * This function evaluates a surface fitted by splines at the given
+ * positions.
+ *
+ * @param[out] output     Output values.
+ * @param[in] spline      Pointer to data structure.
+ * @param[in] x           List of x coordinates.
+ * @param[in] y           List of y coordinates.
+ * @param[in,out] status  Status return code.
+ */
+OSKAR_EXPORT
+void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
+        const oskar_Splines* spline, int num_points, const oskar_Mem* x,
+        const oskar_Mem* y, int* status);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_SPLINES_EVALUATE_H_ */

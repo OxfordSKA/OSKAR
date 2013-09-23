@@ -26,41 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_spline_data_type.h"
-#include "station/oskar_element_model_type.h"
-#include "station/oskar_ElementModel.h"
-#include <oskar_mem.h>
-#include <stdlib.h>
+#ifndef OSKAR_ELEMENT_FREE_H_
+#define OSKAR_ELEMENT_FREE_H_
+
+/**
+ * @file oskar_element_free.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_element_model_is_type(const oskar_ElementModel* element, int type)
-{
-    return (oskar_spline_data_type(&element->phi_re_x) == type &&
-            oskar_spline_data_type(&element->theta_re_x) == type &&
-            oskar_spline_data_type(&element->phi_re_y) == type &&
-            oskar_spline_data_type(&element->theta_re_y) == type &&
-            oskar_spline_data_type(&element->phi_im_x) == type &&
-            oskar_spline_data_type(&element->theta_im_x) == type &&
-            oskar_spline_data_type(&element->phi_im_y) == type &&
-            oskar_spline_data_type(&element->theta_im_y) == type);
-}
-
-int oskar_element_model_type(const oskar_ElementModel* element)
-{
-    if (element == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    if (oskar_element_model_is_type(element, OSKAR_DOUBLE))
-        return OSKAR_DOUBLE;
-    else if (oskar_element_model_is_type(element, OSKAR_SINGLE))
-        return OSKAR_SINGLE;
-    else
-        return OSKAR_ERR_BAD_DATA_TYPE;
-}
+/**
+ * @brief
+ * Frees memory used for the embedded element pattern data.
+ *
+ * @details
+ * This function frees memory that is used to hold the embedded element
+ * pattern data.
+ *
+ * @param[in] data  Data structure.
+ * @param[in,out]  status   Status return code.
+ */
+OSKAR_EXPORT
+void oskar_element_free(oskar_Element* data, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_ELEMENT_FREE_H_ */

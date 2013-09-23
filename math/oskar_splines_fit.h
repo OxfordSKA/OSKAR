@@ -26,47 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_element_model_init.h"
-#include "math/oskar_spline_data_init.h"
+#ifndef OSKAR_SPLINES_FIT_H_
+#define OSKAR_SPLINES_FIT_H_
+
+/**
+ * @file oskar_splines_fit.h
+ */
+
+#include <oskar_global.h>
 #include <oskar_mem.h>
+#include <oskar_SettingsSpline.h>
+#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_element_model_init(oskar_ElementModel* data, int type, int location,
-        int* status)
-{
-    /* Check all inputs. */
-    if (!data || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Initialise variables. */
-    data->element_type = OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE;
-    data->taper_type = OSKAR_ELEMENT_MODEL_TAPER_NONE;
-    data->cos_power = 0.0;
-    data->gaussian_fwhm_rad = 0.0;
-
-    /* Check type. */
-    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-
-    /* Initialise memory. */
-    oskar_mem_init(&data->filename_x, OSKAR_CHAR, location, 0, 1, status);
-    oskar_mem_init(&data->filename_y, OSKAR_CHAR, location, 0, 1, status);
-    oskar_spline_data_init(&data->phi_re_x, type, location, status);
-    oskar_spline_data_init(&data->phi_im_x, type, location, status);
-    oskar_spline_data_init(&data->theta_re_x, type, location, status);
-    oskar_spline_data_init(&data->theta_im_x, type, location, status);
-    oskar_spline_data_init(&data->phi_re_y, type, location, status);
-    oskar_spline_data_init(&data->phi_im_y, type, location, status);
-    oskar_spline_data_init(&data->theta_re_y, type, location, status);
-    oskar_spline_data_init(&data->theta_im_y, type, location, status);
-}
+/**
+ * @brief
+ * Computes spline data from a list of data points.
+ *
+ * @details
+ * This function constructs splines from a list of data points.
+ *
+ * @param[in,out] spline        Pointer to spline data structure.
+ * @param[in,out] log           Pointer to log structure to use.
+ * @param[in]     num_points    Number of data points in all arrays.
+ * @param[in]     x             Array of x positions.
+ * @param[in]     y             Array of y positions.
+ * @param[in]     z             Array of data points.
+ * @param[in]     w             Array of data point weights.
+ * @param[in]     settings      Fitting parameters.
+ * @param[in,out] status        Status return code.
+ */
+OSKAR_EXPORT
+void oskar_splines_fit(oskar_Splines* spline, oskar_Log* log,
+        int num_points, oskar_Mem* x, oskar_Mem* y, const oskar_Mem* z,
+        const oskar_Mem* w, const oskar_SettingsSpline* settings, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_SPLINES_FIT_H_ */

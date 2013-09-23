@@ -30,7 +30,6 @@
 #include <oskar_station.h>
 
 #include <oskar_system_noise_model_init.h>
-#include <oskar_mem.h>
 #include <math.h>
 
 #ifndef M_PI

@@ -56,8 +56,8 @@ extern "C" {
  * the same.
  */
 OSKAR_EXPORT
-int oskar_station_different(const oskar_Station* a,
-        const oskar_Station* b, int* status);
+int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
+        int* status);
 
 #ifdef __cplusplus
 }

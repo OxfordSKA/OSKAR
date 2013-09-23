@@ -456,10 +456,10 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
 
             switch (ep->functional_type)
             {
-            case OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC:
+            case OSKAR_ELEMENT_TYPE_ISOTROPIC:
                 LVS("Functional pattern type", "Isotropic");
                 break;
-            case OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE:
+            case OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE:
                 LVS("Functional pattern type", "Geometric dipole");
                 break;
             default:
@@ -473,16 +473,16 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
                 ++depth;
                 switch (ep->taper.type)
                 {
-                case OSKAR_ELEMENT_MODEL_TAPER_NONE:
+                case OSKAR_ELEMENT_TAPER_NONE:
                     LVS("Tapering type", "None");
                     break;
-                case OSKAR_ELEMENT_MODEL_TAPER_COSINE:
+                case OSKAR_ELEMENT_TAPER_COSINE:
                     LVS("Tapering type", "Cosine");
                     ++depth;
                     LV("Cosine power", "%.1f", ep->taper.cosine_power);
                     --depth;
                     break;
-                case OSKAR_ELEMENT_MODEL_TAPER_GAUSSIAN:
+                case OSKAR_ELEMENT_TAPER_GAUSSIAN:
                     LVS("Tapering type", "Gaussian");
                     ++depth;
                     LV("Gaussian FWHM [deg]", "%.1f",

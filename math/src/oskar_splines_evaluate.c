@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,17 +28,16 @@
 
 #include <oskar_dierckx_bispev.h>
 #include <oskar_dierckx_bispev_bicubic_cuda.h>
-#include <oskar_spline_data_evaluate.h>
-#include <oskar_spline_data_location.h>
-#include <oskar_spline_data_type.h>
+#include <private_splines.h>
+#include <oskar_splines.h>
 #include <oskar_cuda_check_error.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
-        const oskar_SplineData* spline, int num_points, const oskar_Mem* x,
+void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
+        const oskar_Splines* spline, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, int* status)
 {
     int nx, ny, type, location;
@@ -54,12 +53,12 @@ void oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
     if (*status) return;
 
     /* Check type. */
-    type = oskar_spline_data_type(spline);
+    type = oskar_splines_type(spline);
     if (type != oskar_mem_type(x) || type != oskar_mem_type(y))
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Check that all arrays are co-located. */
-    location = oskar_spline_data_location(spline);
+    location = oskar_splines_location(spline);
     if (location != oskar_mem_location(output) ||
             location != oskar_mem_location(x) ||
             location != oskar_mem_location(y))

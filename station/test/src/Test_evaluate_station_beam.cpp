@@ -94,8 +94,8 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
             OSKAR_SPHERICAL_TYPE_EQUATORIAL, 0.0, M_PI / 2.0);
 
     // Set the station meta-data.
-    oskar_ElementModel* element = oskar_station_element(station, 0);
-    element->element_type = OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC;
+    oskar_Element* element = oskar_station_element(station, 0);
+    oskar_element_set_element_type(element, OSKAR_ELEMENT_TYPE_ISOTROPIC);
     oskar_station_set_use_polarised_elements(station, 0);
 
     //    error = oskar_station_save_configuration("temp_test_station.txt", &station_cpu);

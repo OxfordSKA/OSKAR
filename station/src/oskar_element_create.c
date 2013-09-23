@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,31 +26,58 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_spline_data_copy.h"
-#include <oskar_mem.h>
+#include <private_element.h>
+#include <oskar_element.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_spline_data_copy(oskar_SplineData* dst, const oskar_SplineData* src,
-        int* status)
+oskar_Element* oskar_element_create(int type, int location, int* status)
 {
+    oskar_Element* data = 0;
+
     /* Check all inputs. */
-    if (!dst || !src || !status)
+    if (!status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return 0;
     }
 
-    /* Check if safe to proceed. */
-    if (*status) return;
+    /* Allocate and initialise the structure. */
+    data = (oskar_Element*) malloc(sizeof(oskar_Element));
+    if (!data)
+    {
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        return 0;
+    }
 
-    dst->num_knots_x = src->num_knots_x;
-    dst->num_knots_y = src->num_knots_y;
-    oskar_mem_copy(&dst->knots_x, &src->knots_x, status);
-    oskar_mem_copy(&dst->knots_y, &src->knots_y, status);
-    oskar_mem_copy(&dst->coeff, &src->coeff, status);
+    /* Initialise variables. */
+    data->data_type = type;
+    data->data_location = location;
+    data->element_type = OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE;
+    data->taper_type = OSKAR_ELEMENT_TAPER_NONE;
+    data->cos_power = 0.0;
+    data->gaussian_fwhm_rad = 0.0;
+
+    /* Check type. */
+    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+
+    /* Initialise memory. */
+    oskar_mem_init(&data->filename_x, OSKAR_CHAR, location, 0, 1, status);
+    oskar_mem_init(&data->filename_y, OSKAR_CHAR, location, 0, 1, status);
+    data->phi_re_x = oskar_splines_create(type, location, status);
+    data->phi_im_x = oskar_splines_create(type, location, status);
+    data->theta_re_x = oskar_splines_create(type, location, status);
+    data->theta_im_x = oskar_splines_create(type, location, status);
+    data->phi_re_y = oskar_splines_create(type, location, status);
+    data->phi_im_y = oskar_splines_create(type, location, status);
+    data->theta_re_y = oskar_splines_create(type, location, status);
+    data->theta_im_y = oskar_splines_create(type, location, status);
+
+    /* Return pointer to the structure. */
+    return data;
 }
 
 #ifdef __cplusplus

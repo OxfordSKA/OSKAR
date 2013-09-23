@@ -29,8 +29,6 @@
 #include <private_station.h>
 #include <oskar_station.h>
 
-#include <oskar_element_model_init.h>
-
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -40,8 +38,7 @@ extern "C" {
 void oskar_station_resize_element_types(oskar_Station* model,
         int num_element_types, int* status)
 {
-    void* ptr_temp;
-    int i, num_element_types_old, type, location;
+    int i, old_num_element_types;
 
     /* Check all inputs. */
     if (!model || !status)
@@ -53,31 +50,37 @@ void oskar_station_resize_element_types(oskar_Station* model,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Store the new number of element types. */
-    if (model->num_element_types == num_element_types)
-        return;
-    num_element_types_old = model->num_element_types;
+    /* Get the old size. */
+    old_num_element_types = model->num_element_types;
     model->num_element_types = num_element_types;
 
-    /* Resize the element model array. */
-    ptr_temp = realloc(model->element_pattern,
-            num_element_types * sizeof(oskar_ElementModel));
-    if (num_element_types != 0 && !ptr_temp)
+    /* Check if increasing or decreasing in size. */
+    if (num_element_types > old_num_element_types)
     {
-        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-        return;
+        /* Enlarge the element array and create new elements. */
+        model->element_pattern = realloc(model->element_pattern,
+                num_element_types * sizeof(oskar_Element*));
+        if (!model->element_pattern)
+        {
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            return;
+        }
+        for (i = old_num_element_types; i < num_element_types; ++i)
+        {
+            model->element_pattern[i] = oskar_element_create(
+                    oskar_station_type(model), oskar_station_location(model),
+                    status);
+        }
     }
-
-    /* Store the new pointer. */
-    model->element_pattern = (oskar_ElementModel*) ptr_temp;
-
-    /* Initialise any new element models. */
-    type = oskar_station_type(model);
-    location = oskar_station_location(model);
-    for (i = num_element_types_old; i < num_element_types; ++i)
+    else if (num_element_types < old_num_element_types)
     {
-        oskar_element_model_init(&model->element_pattern[i], type, location,
-                status);
+        /* Free old elements and shrink the element array. */
+        for (i = num_element_types; i < old_num_element_types; ++i)
+        {
+            oskar_element_free(oskar_station_element(model, i), status);
+        }
+        model->element_pattern = realloc(model->element_pattern,
+                num_element_types * sizeof(oskar_Element*));
     }
 }
 

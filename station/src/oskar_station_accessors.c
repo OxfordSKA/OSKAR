@@ -29,7 +29,6 @@
 #include <private_station.h>
 
 #include <oskar_station_accessors.h>
-#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -345,14 +344,14 @@ int oskar_station_has_element(const oskar_Station* model)
     return model->element_pattern ? 1 : 0;
 }
 
-oskar_ElementModel* oskar_station_element(oskar_Station* model, int i)
+oskar_Element* oskar_station_element(oskar_Station* model, int i)
 {
-    return &model->element_pattern[i];
+    return model->element_pattern[i];
 }
 
-const oskar_ElementModel* oskar_station_element_const(const oskar_Station* model, int i)
+const oskar_Element* oskar_station_element_const(const oskar_Station* model, int i)
 {
-    return &model->element_pattern[i];
+    return model->element_pattern[i];
 }
 
 

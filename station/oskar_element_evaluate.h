@@ -26,44 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_element_model_copy.h"
-#include "math/oskar_spline_data_copy.h"
+#ifndef OSKAR_ELEMENT_EVALUATE_H_
+#define OSKAR_ELEMENT_EVALUATE_H_
+
+/**
+ * @file oskar_element_evaluate.h
+ */
+
+#include <oskar_global.h>
 #include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_element_model_copy(oskar_ElementModel* dst,
-        const oskar_ElementModel* src, int* status)
-{
-    /* Check all inputs. */
-    if (!dst || !src || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    dst->element_type = src->element_type;
-    dst->taper_type = src->taper_type;
-    dst->cos_power = src->cos_power;
-    dst->gaussian_fwhm_rad = src->gaussian_fwhm_rad;
-
-    oskar_mem_copy(&dst->filename_x, &src->filename_x, status);
-    oskar_mem_copy(&dst->filename_y, &src->filename_y, status);
-    oskar_spline_data_copy(&dst->phi_re_x, &src->phi_re_x, status);
-    oskar_spline_data_copy(&dst->phi_im_x, &src->phi_im_x, status);
-    oskar_spline_data_copy(&dst->theta_re_x, &src->theta_re_x, status);
-    oskar_spline_data_copy(&dst->theta_im_x, &src->theta_im_x, status);
-    oskar_spline_data_copy(&dst->phi_re_y, &src->phi_re_y, status);
-    oskar_spline_data_copy(&dst->phi_im_y, &src->phi_im_y, status);
-    oskar_spline_data_copy(&dst->theta_re_y, &src->theta_re_y, status);
-    oskar_spline_data_copy(&dst->theta_im_y, &src->theta_im_y, status);
-}
+/**
+ * @brief
+ * Evaluates the element model at the given source positions.
+ *
+ * @details
+ * This function evaluates the element pattern model at the given source
+ * positions.
+ *
+ * @param[in] model      Pointer to element model structure.
+ * @param[in,out] output Pointer to memory into which to accumulate output data.
+ * @param[in] orientation_x Azimuth of X dipole in radians.
+ * @param[in] orientation_y Azimuth of Y dipole in radians.
+ * @param[in] num_points Number of points at which to evaluate beam.
+ * @param[in] l          Pointer to l-direction cosines.
+ * @param[in] m          Pointer to m-direction cosines.
+ * @param[in] n          Pointer to n-direction cosines.
+ * @param[out] theta     Pointer to work array for computing theta values.
+ * @param[out] phi       Pointer to work array for computing phi values.
+ * @param[in,out] status Status return code.
+ */
+OSKAR_EXPORT
+void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* G,
+        double orientation_x, double orientation_y, int num_points,
+        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
+        oskar_Mem* theta, oskar_Mem* phi, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_ELEMENT_EVALUATE_H_ */

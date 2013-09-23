@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,16 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_ElementModel.h"
-#include "station/oskar_element_model_evaluate.h"
 #include "station/test/Test_dipole_pattern.h"
+
+#include <oskar_element.h>
 #include <oskar_mem.h>
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_get_error_string.h>
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
-#include "oskar_global.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -109,10 +107,10 @@ void Test_dipole_pattern::test()
     oskar_Mem pattern_cpu(&pattern, OSKAR_LOCATION_CPU);
 
     // New evaluation.
-    oskar_ElementModel model;
+    oskar_Element* model = oskar_element_create();
     oskar_Mem theta(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_pixels);
     oskar_Mem phi(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_pixels);
-    int error = oskar_element_model_evaluate(&model, &pattern, 1, orientation_x,
+    int error = oskar_element_evaluate(model, &pattern, 1, orientation_x,
             orientation_y, num_pixels, &l, &m, &n, &theta, &phi);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
@@ -130,7 +128,7 @@ void Test_dipole_pattern::test()
         CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)pattern_cpu.data)[i].d.y, ((double4c*)pattern_cpu2.data)[i].d.y, 1e-6);
     }
 
-    const char filename[] = "cpp_unit_test_dipole_pattern.dat";
+    const char filename[] = "temp_test_dipole_pattern.dat";
     FILE* file = fopen(filename, "w");
     double4c* p = (double4c*)pattern_cpu;
     for (int i = 0; i < num_pixels; ++i)

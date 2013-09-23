@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,42 +26,68 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SPLINE_DATA_EVALUATE_H_
-#define OSKAR_SPLINE_DATA_EVALUATE_H_
-
-/**
- * @file oskar_spline_data_evaluate.h
- */
-
-#include <oskar_global.h>
-#include <oskar_mem.h>
-#include <oskar_SplineData.h>
+#include <private_splines.h>
+#include <oskar_splines.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Evaluates a surface fitted by splines at the given positions.
- *
- * @details
- * This function evaluates a surface fitted by splines at the given
- * positions.
- *
- * @param[out] output     Output values.
- * @param[in] spline      Pointer to data structure.
- * @param[in] x           List of x coordinates.
- * @param[in] y           List of y coordinates.
- * @param[in,out] status  Status return code.
- */
-OSKAR_EXPORT
-void oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
-        const oskar_SplineData* spline, int num_points, const oskar_Mem* x,
-        const oskar_Mem* y, int* status);
+int oskar_splines_type(const oskar_Splines* data)
+{
+    return data->type;
+}
+
+int oskar_splines_location(const oskar_Splines* data)
+{
+    return data->location;
+}
+
+int oskar_splines_has_coeffs(const oskar_Splines* data)
+{
+    return (data->num_knots_x) > 0 && (data->num_knots_y > 0);
+}
+
+int oskar_splines_num_knots_x(const oskar_Splines* data)
+{
+    return data->num_knots_x;
+}
+
+int oskar_splines_num_knots_y(const oskar_Splines* data)
+{
+    return data->num_knots_y;
+}
+
+oskar_Mem* oskar_splines_knots_x(oskar_Splines* data)
+{
+    return &data->knots_x;
+}
+
+const oskar_Mem* oskar_splines_knots_x_const(const oskar_Splines* data)
+{
+    return &data->knots_x;
+}
+
+oskar_Mem* oskar_splines_knots_y(oskar_Splines* data)
+{
+    return &data->knots_y;
+}
+
+const oskar_Mem* oskar_splines_knots_y_const(const oskar_Splines* data)
+{
+    return &data->knots_y;
+}
+
+oskar_Mem* oskar_splines_coeff(oskar_Splines* data)
+{
+    return &data->coeff;
+}
+
+const oskar_Mem* oskar_splines_coeff_const(const oskar_Splines* data)
+{
+    return &data->coeff;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SPLINE_DATA_EVALUATE_H_ */

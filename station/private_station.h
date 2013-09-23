@@ -34,7 +34,7 @@
  */
 
 #include <oskar_mem.h>
-#include <oskar_ElementModel.h>
+#include <oskar_element.h>
 #include <oskar_SystemNoiseModel.h>
 
 /* Forward declaration. */
@@ -95,7 +95,7 @@ struct oskar_Station
     oskar_Mem sin_orientation_y; /**< Sine azimuth of y dipole axis (default 0.0) */
     oskar_Mem element_type;      /**< Integer array of element types (default 0). */
     oskar_Station** child;       /**< Array of child station handles (pointer is NULL if there are none). */
-    oskar_ElementModel* element_pattern; /**< Array of element models per element type (pointer is NULL if there are child stations). */
+    oskar_Element** element_pattern; /**< Array of element models per element type (pointer is NULL if there are child stations). */
 };
 
 #endif /* OSKAR_PRIVATE_STATION_H_ */

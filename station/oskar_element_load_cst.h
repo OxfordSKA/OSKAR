@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,53 +26,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_EVALUATE_STATION_EFFECTIVE_AREA_H_
-#define OSKAR_EVALUATE_STATION_EFFECTIVE_AREA_H_
+#ifndef OSKAR_ELEMENT_LOAD_CST_H_
+#define OSKAR_ELEMENT_LOAD_CST_H_
 
 /**
- * @file oskar_evaluate_station_effective_area.h
+ * @file oskar_element_load_cst.h
  */
 
-#include "oskar_global.h"
-
+#include <oskar_global.h>
+#include <oskar_SettingsElementFit.h>
+#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Evaluates the approximate broadside effective area of an aperture
- * array station.
+ * @brief
+ * Loads an antenna pattern from an ASCII text file produced by CST.
  *
  * @details
- * See: SKA Memo 87
+ * This function loads antenna pattern data from a text file and fills the
+ * provided data structure.
  *
- * The effective area is evaluated according to the specified model.
+ * The data file must contain eight columns, in the following order:
+ * - <theta, deg>
+ * - <phi, deg>
+ * - <abs dir>
+ * - <abs theta>
+ * - <phase theta, deg>
+ * - <abs phi>
+ * - <phase phi, deg>
+ * - <ax. ratio>
  *
- * - OSKAR_EFFECTIVE_AREA_MODEL_SPARSE
- *      for arrays where: d > 2 * lambda
- *      A_eff ~ N * (lambda^2 / 2)
+ * This is the format exported by the CST (Computer Simulation Technology)
+ * package.
  *
- * - OSKAR_EFFECTIVE_AREA_MODEL_DENSE
- *      for arrays where: d < lambda/2
- *      A_eff ~ A_phy
+ * Amplitude values in dBi are detected, and converted to linear format
+ * on loading.
  *
+ * The theta dimension is assumed to be the fastest varying.
  *
- * @param[out] area          The station effective area, in m^2
- * @param[in] freq           Observation frequency, in Hz.
- * @param[in] num_antennas   Number of antenna elements in the AA.
- * @param[in] model          The effective area model to use. oskar_SettingsSky
- *                           enum: OSKAR_EFFECTIVE_AREA_MODEL_...
- *
- * @return An error code.
+ * @param[out] data      Pointer to element model data structure to fill.
+ * @param[in,out] log    Pointer to log structure to use.
+ * @param[in]  filename  Data file name.
+ * @param[in]  port      Port number to load: 1 for X dipole, 2 for Y dipole.
+ * @param[in]  settings  Pointer to settings structure used for surface fitting.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_station_effective_area(double* area, double freq,
-        int num_antennas, int model);
+void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
+        int port, const char* filename,
+        const oskar_SettingsElementFit* settings, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_STATION_EFFECTIVE_AREA_H_ */
+#endif /* OSKAR_ELEMENT_LOAD_CST_H_ */

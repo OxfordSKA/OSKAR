@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PRIVATE_WORK_STATION_BEAM_H_
-#define OSKAR_PRIVATE_WORK_STATION_BEAM_H_
+#ifndef OSKAR_PRIVATE_STATION_WORK_H_
+#define OSKAR_PRIVATE_STATION_WORK_H_
 
 /**
  * @file private_station_work.h
@@ -76,9 +76,9 @@ struct oskar_StationWork
     oskar_Mem hierarchy_work_scalar[OSKAR_MAX_STATION_DEPTH]; /* Complex scalar. */
 };
 
-#ifndef OSKAR_WORK_STATION_BEAM_TYPEDEF_
-#define OSKAR_WORK_STATION_BEAM_TYPEDEF_
+#ifndef OSKAR_STATION_WORK_TYPEDEF_
+#define OSKAR_STATION_WORK_TYPEDEF_
 typedef struct oskar_StationWork oskar_StationWork;
-#endif
+#endif /* OSKAR_STATION_WORK_TYPEDEF_ */
 
-#endif /* OSKAR_PRIVATE_WORK_STATION_BEAM_H_ */
+#endif /* OSKAR_PRIVATE_STATION_WORK_H_ */

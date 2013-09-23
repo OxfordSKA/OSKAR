@@ -29,7 +29,7 @@
 #include <private_station.h>
 #include <oskar_station.h>
 
-#include <oskar_element_model_copy.h>
+#include <oskar_element_copy.h>
 #include <oskar_system_noise_model_copy.h>
 
 #include <stdlib.h>
@@ -110,7 +110,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     oskar_mem_copy(&model->element_type, &src->element_type, status);
 
     /* Copy element models, if set. */
-    if (src->element_pattern)
+    if (oskar_station_has_element(src))
     {
         /* Ensure enough space for element model data. */
         oskar_station_resize_element_types(model, src->num_element_types,
@@ -119,8 +119,8 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
         /* Copy the element model data. */
         for (i = 0; i < src->num_element_types; ++i)
         {
-            oskar_element_model_copy(&model->element_pattern[i],
-                    &src->element_pattern[i], status);
+            oskar_element_copy(model->element_pattern[i],
+                    src->element_pattern[i], status);
         }
     }
 

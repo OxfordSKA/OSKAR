@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_spline_data_location.h"
+#ifndef OSKAR_ELEMENT_H_
+#define OSKAR_ELEMENT_H_
+
+/**
+ * @file oskar_element.h
+ */
+
+/* Public interface. */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_spline_data_location(const oskar_SplineData* data)
-{
-    int location;
-    location = oskar_mem_location(&data->knots_x);
-    if (location != oskar_mem_location(&data->knots_y) ||
-            location != oskar_mem_location(&data->coeff))
-        return OSKAR_ERR_BAD_LOCATION;
-    return location;
-}
+struct oskar_Element;
+#ifndef OSKAR_ELEMENT_TYPEDEF_
+#define OSKAR_ELEMENT_TYPEDEF_
+typedef struct oskar_Element oskar_Element;
+#endif /* OSKAR_ELEMENT_TYPEDEF_ */
+
+enum {
+    OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE,
+    OSKAR_ELEMENT_TYPE_ISOTROPIC
+};
+
+enum {
+    OSKAR_ELEMENT_TAPER_NONE,
+    OSKAR_ELEMENT_TAPER_COSINE,
+    OSKAR_ELEMENT_TAPER_GAUSSIAN
+};
 
 #ifdef __cplusplus
 }
 #endif
+
+#include <oskar_element_accessors.h>
+#include <oskar_element_copy.h>
+#include <oskar_element_create.h>
+#include <oskar_element_evaluate.h>
+#include <oskar_element_free.h>
+#include <oskar_element_load_cst.h>
+
+#endif /* OSKAR_ELEMENT_H_ */

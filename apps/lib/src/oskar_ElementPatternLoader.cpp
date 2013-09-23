@@ -28,8 +28,6 @@
 
 #include "apps/lib/oskar_ElementPatternLoader.h"
 #include <oskar_station.h>
-#include <oskar_element_model_copy.h>
-#include <oskar_element_model_load_cst.h>
 #include <oskar_log.h>
 
 #include <QtCore/QDir>
@@ -109,7 +107,7 @@ void oskar_ElementPatternLoader::load_element_patterns(oskar_Log* log,
         if (models.contains(files))
         {
             // Copy the element pattern data.
-            oskar_element_model_copy(oskar_station_element(station, 0),
+            oskar_element_copy(oskar_station_element(station, 0),
                     models.value(files), status);
         }
         else
@@ -120,7 +118,7 @@ void oskar_ElementPatternLoader::load_element_patterns(oskar_Log* log,
                 oskar_log_message(log, 0, "Loading CST element "
                         "pattern data (X): %s", element_x.constData());
                 oskar_log_message(log, 0, "");
-                oskar_element_model_load_cst(oskar_station_element(station, 0),
+                oskar_element_load_cst(oskar_station_element(station, 0),
                         log, 1, element_x.constData(),
                         &settings->aperture_array.element_pattern.fit,
                         status);
@@ -130,7 +128,7 @@ void oskar_ElementPatternLoader::load_element_patterns(oskar_Log* log,
                 oskar_log_message(log, 0, "Loading CST element "
                         "pattern data (Y): %s", element_y.constData());
                 oskar_log_message(log, 0, "");
-                oskar_element_model_load_cst(oskar_station_element(station, 0),
+                oskar_element_load_cst(oskar_station_element(station, 0),
                         log, 2, element_y.constData(),
                         &settings->aperture_array.element_pattern.fit,
                         status);

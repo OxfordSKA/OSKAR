@@ -26,18 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SPLINE_DATA_SURFIT_H_
-#define OSKAR_SPLINE_DATA_SURFIT_H_
+#ifndef OSKAR_SPLINES_CREATE_H_
+#define OSKAR_SPLINES_CREATE_H_
 
 /**
- * @file oskar_spline_data_surfit.h
+ * @file oskar_splines_create.h
  */
 
 #include <oskar_global.h>
-#include <oskar_mem.h>
-#include <oskar_SplineData.h>
-#include <oskar_SettingsSpline.h>
-#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,30 +41,26 @@ extern "C" {
 
 /**
  * @brief
- * Computes spline data from a list of data points.
+ * Creates and initialises a spline data structure.
  *
  * @details
- * This function constructs splines from a list of data points.
+ * This function creates and initialises a spline data structure,
+ * and returns a handle to it.
  *
- * @param[in,out] spline        Pointer to spline data structure.
- * @param[in,out] log           Pointer to log structure to use.
- * @param[in]     num_points    Number of data points in all arrays.
- * @param[in]     x             Array of x positions.
- * @param[in]     y             Array of y positions.
- * @param[in]     z             Array of data points.
- * @param[in]     w             Array of data point weights.
- * @param[in]     settings      Fitting parameters.
- * @param[in]     surface_name  Name of fitted surface (for log).
- * @param[in,out] status        Status return code.
+ * The data structure must be deallocated using oskar_splines_free() when it is
+ * no longer required.
+ *
+ * @param[in] type Enumerated type of data structure.
+ * @param[in] location Enumerated location of memory held in data structure.
+ * @param[in,out]  status   Status return code.
+ *
+ * @return A handle to the new data structure.
  */
 OSKAR_EXPORT
-void oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
-        int num_points, oskar_Mem* x, oskar_Mem* y, const oskar_Mem* z,
-        const oskar_Mem* w, const oskar_SettingsSpline* settings,
-        const char* surface_name, int* status);
+oskar_Splines* oskar_splines_create(int type, int location, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SPLINE_DATA_SURFIT_H_ */
+#endif /* OSKAR_SPLINES_CREATE_H_ */

@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#ifndef OSKAR_PRIVATE_ELEMENT_H_
+#define OSKAR_PRIVATE_ELEMENT_H_
 
 /**
- * @file oskar_ElementModel.h
+ * @file private_element.h
  */
 
-#include <oskar_SplineData.h>
+#include <oskar_splines.h>
 #include <oskar_mem.h>
 
 /**
@@ -43,54 +43,30 @@
  * This structure holds the spline coefficients and knot positions for
  * both polarisations of the antenna element.
  */
-struct oskar_ElementModel
+struct oskar_Element
 {
+    int data_type;
+    int data_location;
+
     int element_type; /**< Geometric dipole or isotropic. */
     int taper_type; /**< Tapering type. */
     double cos_power; /**< For a cosine taper, the power of the cosine. */
     double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
     oskar_Mem filename_x;
     oskar_Mem filename_y;
-    oskar_SplineData theta_re_x;
-    oskar_SplineData theta_im_x;
-    oskar_SplineData phi_re_x;
-    oskar_SplineData phi_im_x;
-    oskar_SplineData theta_re_y;
-    oskar_SplineData theta_im_y;
-    oskar_SplineData phi_re_y;
-    oskar_SplineData phi_im_y;
-
-#ifdef __cplusplus
-    /* If C++, provide constructors and methods. */
-    /**
-     * @brief Constructs an empty element model structure.
-     *
-     * @details
-     * Constructs an empty element model structure.
-     */
-    oskar_ElementModel(int type = OSKAR_DOUBLE,
-            int location = OSKAR_LOCATION_CPU);
-
-    /**
-     * @brief Destroys the element model structure.
-     *
-     * @details
-     * Destroys the element model structure, freeing any memory it uses.
-     */
-    ~oskar_ElementModel();
-#endif
-};
-typedef struct oskar_ElementModel oskar_ElementModel;
-
-enum {
-    OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE,
-    OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC
+    oskar_Splines* theta_re_x;
+    oskar_Splines* theta_im_x;
+    oskar_Splines* phi_re_x;
+    oskar_Splines* phi_im_x;
+    oskar_Splines* theta_re_y;
+    oskar_Splines* theta_im_y;
+    oskar_Splines* phi_re_y;
+    oskar_Splines* phi_im_y;
 };
 
-enum {
-    OSKAR_ELEMENT_MODEL_TAPER_NONE,
-    OSKAR_ELEMENT_MODEL_TAPER_COSINE,
-    OSKAR_ELEMENT_MODEL_TAPER_GAUSSIAN
-};
+#ifndef OSKAR_ELEMENT_TYPEDEF_
+#define OSKAR_ELEMENT_TYPEDEF_
+typedef struct oskar_Element oskar_Element;
+#endif /* OSKAR_ELEMENT_TYPEDEF_ */
 
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+#endif /* OSKAR_PRIVATE_ELEMENT_H_ */

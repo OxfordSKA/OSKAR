@@ -28,7 +28,6 @@
 
 #include "apps/lib/oskar_settings_load_telescope.h"
 #include <oskar_station.h>
-#include "station/oskar_ElementModel.h"
 
 #include <cmath>
 #include <cstdio>
@@ -181,9 +180,9 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
 
             temp = s.value("functional_type", "Geometric dipole").toString();
             if (temp.startsWith("G", Qt::CaseInsensitive))
-                ep->functional_type = OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE;
+                ep->functional_type = OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE;
             else if (temp.startsWith("I", Qt::CaseInsensitive))
-                ep->functional_type = OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC;
+                ep->functional_type = OSKAR_ELEMENT_TYPE_ISOTROPIC;
             else
                 return OSKAR_ERR_SETTINGS_TELESCOPE;
 
@@ -191,11 +190,11 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
             {
                 temp = s.value("type", "None").toString();
                 if (temp.startsWith("N", Qt::CaseInsensitive))
-                    ep->taper.type = OSKAR_ELEMENT_MODEL_TAPER_NONE;
+                    ep->taper.type = OSKAR_ELEMENT_TAPER_NONE;
                 else if (temp.startsWith("C", Qt::CaseInsensitive))
-                    ep->taper.type = OSKAR_ELEMENT_MODEL_TAPER_COSINE;
+                    ep->taper.type = OSKAR_ELEMENT_TAPER_COSINE;
                 else if (temp.startsWith("G", Qt::CaseInsensitive))
-                    ep->taper.type = OSKAR_ELEMENT_MODEL_TAPER_GAUSSIAN;
+                    ep->taper.type = OSKAR_ELEMENT_TAPER_GAUSSIAN;
                 else
                     return OSKAR_ERR_SETTINGS_TELESCOPE;
                 ep->taper.cosine_power =

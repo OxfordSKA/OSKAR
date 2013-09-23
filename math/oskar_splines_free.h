@@ -26,17 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_LOAD_CST_H_
-#define OSKAR_ELEMENT_MODEL_LOAD_CST_H_
+#ifndef OSKAR_SPLINES_FREE_H_
+#define OSKAR_SPLINES_FREE_H_
 
 /**
- * @file oskar_element_model_load_cst.h
+ * @file oskar_splines_free.h
  */
 
 #include <oskar_global.h>
-#include <oskar_ElementModel.h>
-#include <oskar_SettingsElementFit.h>
-#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,44 +41,19 @@ extern "C" {
 
 /**
  * @brief
- * Loads an antenna pattern from an ASCII text file produced by CST.
+ * Frees memory held by a spline data structure.
  *
  * @details
- * This function loads antenna pattern data from a text file and fills the
- * provided data structure.
+ * This function releases memory held by a spline data structure.
  *
- * The data file must contain eight columns, in the following order:
- * - <theta, deg>
- * - <phi, deg>
- * - <abs dir>
- * - <abs theta>
- * - <phase theta, deg>
- * - <abs phi>
- * - <phase phi, deg>
- * - <ax. ratio>
- *
- * This is the format exported by the CST (Computer Simulation Technology)
- * package.
- *
- * Amplitude values in dBi are detected, and converted to linear format
- * on loading.
- *
- * The theta dimension is assumed to be the fastest varying.
- *
- * @param[out] data      Pointer to element model data structure to fill.
- * @param[in,out] log    Pointer to log structure to use.
- * @param[in]  filename  Data file name.
- * @param[in]  port      Port number to load: 1 for X dipole, 2 for Y dipole.
- * @param[in]  settings  Pointer to settings structure used for surface fitting.
- * @param[in,out] status Status return code.
+ * @param[in,out] data Pointer to data structure.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
-        int port, const char* filename,
-        const oskar_SettingsElementFit* settings, int* status);
+void oskar_splines_free(oskar_Splines* data, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_ELEMENT_MODEL_LOAD_CST_H_ */
+#endif /* OSKAR_SPLINES_FREE_H_ */

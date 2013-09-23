@@ -41,10 +41,10 @@ extern "C" {
 #endif
 
 struct oskar_StationWork;
-#ifndef OSKAR_WORK_STATION_BEAM_TYPEDEF_
-#define OSKAR_WORK_STATION_BEAM_TYPEDEF_
+#ifndef OSKAR_STATION_WORK_TYPEDEF_
+#define OSKAR_STATION_WORK_TYPEDEF_
 typedef struct oskar_StationWork oskar_StationWork;
-#endif
+#endif /* OSKAR_STATION_WORK_TYPEDEF_ */
 
 /**
  * @brief Creates a station work buffer structure.

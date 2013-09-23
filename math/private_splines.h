@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,35 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SPLINE_DATA_FREE_H_
-#define OSKAR_SPLINE_DATA_FREE_H_
+#ifndef OSKAR_PRIVATE_SPLINES_H_
+#define OSKAR_PRIVATE_SPLINES_H_
 
 /**
- * @file oskar_spline_data_free.h
+ * @file private_splines.h
  */
 
-#include "oskar_global.h"
-#include "math/oskar_SplineData.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <oskar_mem.h>
 
 /**
- * @brief
- * Frees memory held by a spherical spline data structure.
+ * @brief Structure to hold spline data.
  *
  * @details
- * This function releases memory held by a spherical spline data structure.
- *
- * @param[in,out] data Pointer to data structure.
- * @param[in,out]  status   Status return code.
+ * This structure holds the data required to construct a surface from
+ * splines.
  */
-OSKAR_EXPORT
-void oskar_spline_data_free(oskar_SplineData* data, int* status);
+struct oskar_Splines
+{
+    int type;
+    int location;
+    int num_knots_x;      /**< Number of knots in x. */
+    int num_knots_y;      /**< Number of knots in y. */
+    oskar_Mem knots_x;    /**< Knot positions in x. */
+    oskar_Mem knots_y;    /**< Knot positions in y. */
+    oskar_Mem coeff;      /**< Spline coefficient array. */
+};
 
-#ifdef __cplusplus
-}
-#endif
+#ifndef OSKAR_SPLINES_TYPEDEF_
+#define OSKAR_SPLINES_TYPEDEF_
+typedef struct oskar_Splines oskar_Splines;
+#endif /* OSKAR_SPLINES_TYPEDEF_ */
 
-#endif /* OSKAR_SPLINE_DATA_FREE_H_ */
+#endif /* OSKAR_PRIVATE_SPLINES_H_ */

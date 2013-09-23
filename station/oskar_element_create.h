@@ -26,16 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_EVALUATE_H_
-#define OSKAR_ELEMENT_MODEL_EVALUATE_H_
+#ifndef OSKAR_ELEMENT_CREATE_H_
+#define OSKAR_ELEMENT_CREATE_H_
 
 /**
- * @file oskar_element_model_evaluate.h
+ * @file oskar_element_create.h
  */
 
 #include <oskar_global.h>
-#include <oskar_ElementModel.h>
-#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,32 +41,23 @@ extern "C" {
 
 /**
  * @brief
- * Evaluates the element model at the given source positions.
+ * Creates and initialises the element pattern data structure.
  *
  * @details
- * This function evaluates the element pattern model at the given source
- * positions.
+ * This function creates and initialises the element pattern data structure.
+ * All memory arrays will be empty (i.e. zero-sized).
  *
- * @param[in] model      Pointer to element model structure.
- * @param[in,out] output Pointer to memory into which to accumulate output data.
- * @param[in] orientation_x Azimuth of X dipole in radians.
- * @param[in] orientation_y Azimuth of Y dipole in radians.
- * @param[in] num_points Number of points at which to evaluate beam.
- * @param[in] l          Pointer to l-direction cosines.
- * @param[in] m          Pointer to m-direction cosines.
- * @param[in] n          Pointer to n-direction cosines.
- * @param[out] theta     Pointer to work array for computing theta values.
- * @param[out] phi       Pointer to work array for computing phi values.
- * @param[in,out] status Status return code.
+ * @param[in] type     Type flag (valid types are OSKAR_SINGLE or OSKAR_DOUBLE).
+ * @param[in] location Location flag (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+ * @param[in,out]  status   Status return code.
+ *
+ * @return A handle to the new data structure.
  */
 OSKAR_EXPORT
-void oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
-        double orientation_x, double orientation_y, int num_points,
-        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
-        oskar_Mem* theta, oskar_Mem* phi, int* status);
+oskar_Element* oskar_element_create(int type, int location, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_ELEMENT_MODEL_EVALUATE_H_ */
+#endif /* OSKAR_ELEMENT_CREATE_H_ */

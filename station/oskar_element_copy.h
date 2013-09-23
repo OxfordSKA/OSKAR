@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_spline_data_init.h"
-#include <oskar_mem.h>
+#ifndef OSKAR_ELEMENT_COPY_H_
+#define OSKAR_ELEMENT_COPY_H_
+
+/**
+ * @file oskar_element_copy.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_spline_data_init(oskar_SplineData* data, int type, int location,
-        int* status)
-{
-    /* Check all inputs. */
-    if (!data || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    data->num_knots_x = 0;
-    data->num_knots_y = 0;
-    oskar_mem_init(&data->knots_x, type, location, 0, OSKAR_TRUE, status);
-    oskar_mem_init(&data->knots_y, type, location, 0, OSKAR_TRUE, status);
-    oskar_mem_init(&data->coeff, type, location, 0, OSKAR_TRUE, status);
-}
+/**
+ * @brief
+ * Copies the contents of one data structure to another data structure.
+ *
+ * @details
+ * This function copies data held in one structure to another structure.
+ *
+ * @param[out] dst          Pointer to destination data structure to copy into.
+ * @param[in]  src          Pointer to source data structure to copy from.
+ * @param[in,out]  status   Status return code.
+ */
+OSKAR_EXPORT
+void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_ELEMENT_COPY_H_ */

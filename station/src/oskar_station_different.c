@@ -35,11 +35,12 @@
 extern "C" {
 #endif
 
-int oskar_station_different(const oskar_Station* a,
-        const oskar_Station* b, int* status)
+int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
+        int* status)
 {
     int i, n;
-    oskar_Mem *fname_a_x = 0, *fname_a_y = 0, *fname_b_x = 0, *fname_b_y = 0;
+    const oskar_Mem *fname_a_x = 0, *fname_a_y = 0;
+    const oskar_Mem *fname_b_x = 0, *fname_b_y = 0;
 
     /* Check all inputs. */
     if (!a || !b || !status)
@@ -78,20 +79,24 @@ int oskar_station_different(const oskar_Station* a,
         return 1;
 
     /* Check if element patterns exist. */
-    if ( (a->element_pattern && !b->element_pattern) ||
-            (!a->element_pattern && b->element_pattern) )
+    if ( (oskar_station_has_element(a) && !oskar_station_has_element(b)) ||
+            (!oskar_station_has_element(a) && oskar_station_has_element(b)) )
         return 1;
 
     /* FIXME Check if element pattern filenames are different (needs updating for multiple element types). */
-    if (a->element_pattern)
+    if (oskar_station_has_element(a))
     {
-        fname_a_x = &a->element_pattern->filename_x;
-        fname_a_y = &a->element_pattern->filename_y;
+        const oskar_Element* e;
+        e = oskar_station_element_const(a, 0);
+        fname_a_x = oskar_element_x_filename_const(e);
+        fname_a_y = oskar_element_y_filename_const(e);
     }
-    if (b->element_pattern)
+    if (oskar_station_has_element(b))
     {
-        fname_b_x = &b->element_pattern->filename_x;
-        fname_b_y = &b->element_pattern->filename_y;
+        const oskar_Element* e;
+        e = oskar_station_element_const(b, 0);
+        fname_a_x = oskar_element_x_filename_const(e);
+        fname_a_y = oskar_element_y_filename_const(e);
     }
     if (fname_a_x && fname_b_x)
     {

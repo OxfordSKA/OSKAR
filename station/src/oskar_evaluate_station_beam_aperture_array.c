@@ -33,7 +33,7 @@
 #include <oskar_evaluate_array_pattern_hierarchical.h>
 #include <oskar_evaluate_array_pattern_dipoles.h>
 #include <oskar_evaluate_element_weights.h>
-#include <oskar_element_model_evaluate.h>
+#include <oskar_element_evaluate.h>
 #include <oskar_blank_below_horizon.h>
 #include <private_station_work.h>
 
@@ -175,7 +175,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
                 element = (!array ? beam : &work->element_pattern_scalar);
 
             /* Evaluate element pattern. */
-            oskar_element_model_evaluate(oskar_station_element_const(station, 0),
+            oskar_element_evaluate(oskar_station_element_const(station, 0),
                     element, oskar_station_element_orientation_x_rad(station),
                     oskar_station_element_orientation_y_rad(station),
                     num_points, x, y, z, &work->theta_modified,
@@ -199,7 +199,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         /* Can't separate array and element evaluation. */
         else
         {
-            const oskar_ElementModel* element;
+            const oskar_Element* element;
             element = oskar_station_element_const(station, 0);
 
             /* Must evaluate array pattern, so check that this is enabled. */
@@ -207,14 +207,14 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
                 *status = OSKAR_ERR_SETTINGS;
 
             /* Can't use tapered elements here, for the moment. */
-            if (element->taper_type != OSKAR_ELEMENT_MODEL_TAPER_NONE)
+            if (oskar_element_taper_type(element) != OSKAR_ELEMENT_TAPER_NONE)
                 *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 
             /* Check if safe to proceed. */
             if (*status) return;
 
             /* Check that there are no spline coefficients. */
-            if (!element->theta_re_x.coeff.data)
+            if (!oskar_element_has_spline_data(element))
             {
                 /* Generate beamforming weights and evaluate beam from
                  * dipoles that are oriented differently. */

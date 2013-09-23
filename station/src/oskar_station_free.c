@@ -29,7 +29,7 @@
 #include <private_station.h>
 #include <oskar_station.h>
 
-#include <oskar_element_model_free.h>
+#include <oskar_element_free.h>
 #include <oskar_system_noise_model_free.h>
 
 #include <oskar_mem.h>
@@ -78,16 +78,15 @@ void oskar_station_free(oskar_Station* model, int* status)
     oskar_system_noise_model_free(&model->noise, status);
 
     /* Free the element pattern data if it exists. */
-    if (model->element_pattern)
+    if (oskar_station_has_element(model))
     {
         for (i = 0; i < model->num_element_types; ++i)
         {
-            oskar_element_model_free(&(model->element_pattern[i]), status);
+            oskar_element_free(oskar_station_element(model, i), status);
         }
 
-        /* Free the element model array. */
+        /* Free the element model handle array. */
         free(model->element_pattern);
-        model->element_pattern = NULL;
     }
 
     /* Recursively free the child stations. */
@@ -98,9 +97,8 @@ void oskar_station_free(oskar_Station* model, int* status)
             oskar_station_free(oskar_station_child(model, i), status);
         }
 
-        /* Free the child station array. */
+        /* Free the child station handle array. */
         free(model->child);
-        model->child = NULL;
     }
 
     /* Free the structure itself. */

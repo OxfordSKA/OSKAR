@@ -9,13 +9,12 @@ set(station_SRC
     src/oskar_apply_element_taper_gaussian.c
     src/oskar_blank_below_horizon_cuda.cu
     src/oskar_blank_below_horizon.c
-    src/oskar_element_model_copy.c
-    src/oskar_element_model_evaluate.cu
-    src/oskar_element_model_free.c
-    src/oskar_element_model_init.c
-    src/oskar_element_model_load_cst.c
-    src/oskar_element_model_type.c
-    src/oskar_ElementModel.cpp
+    src/oskar_element_accessors.c
+    src/oskar_element_copy.c
+    src/oskar_element_create.c
+    src/oskar_element_evaluate.cu
+    src/oskar_element_free.c
+    src/oskar_element_load_cst.c
     src/oskar_evaluate_array_pattern.c
     src/oskar_evaluate_array_pattern_dipoles_cuda.cu
     src/oskar_evaluate_array_pattern_dipoles.c
