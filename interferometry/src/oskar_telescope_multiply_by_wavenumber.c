@@ -30,6 +30,7 @@
 #include <oskar_telescope.h>
 
 #include <math.h>
+#include <float.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -55,12 +56,16 @@ void oskar_telescope_multiply_by_wavenumber(oskar_Telescope* tel,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Multiply station positions by wavenumber. */
+    /* Multiply station positions by wavenumber, if different from current. */
     wavelength = 299792458.0 / frequency_hz;
     wavenumber = 2.0 * M_PI / wavelength;
     factor = wavenumber;
     if (tel->coord_units == OSKAR_RADIANS)
     {
+        /* Return early if possible. */
+        if (fabs(wavenumber - tel->wavenumber) < 10.0 * DBL_EPSILON)
+            return;
+
         /* Also multiply by inverse of existing wavenumber, if already set. */
         factor *= (1.0 / tel->wavenumber);
     }
