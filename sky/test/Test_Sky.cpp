@@ -33,6 +33,7 @@
 #include <oskar_sph_to_lm.h>
 #include <oskar_get_error_string.h>
 #include <oskar_mem.h>
+#include <oskar_timer.h>
 
 #include <cstdlib>
 #include <cmath>
@@ -623,6 +624,85 @@ TEST(SkyModel, resize)
         oskar_sky_free(sky, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
     }
+}
+
+
+TEST(SkyModel, scale_by_spectral_index)
+{
+    int num_sources = 10000, status = 0;
+    oskar_Timer* timer;
+    double sec = 0.0;
+    double stokes_I = 10.0, stokes_Q = 1.0, stokes_U = 0.5, stokes_V = 0.1;
+    double spix = -0.7, freq_ref = 10.0e6, freq_new = 50.0e6;
+
+    // Create and fill a sky model.
+    oskar_Sky* sky = oskar_sky_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU,
+            num_sources, &status);
+    oskar_mem_set_value_real(oskar_sky_I(sky), stokes_I, &status);
+    oskar_mem_set_value_real(oskar_sky_Q(sky), stokes_Q, &status);
+    oskar_mem_set_value_real(oskar_sky_U(sky), stokes_U, &status);
+    oskar_mem_set_value_real(oskar_sky_V(sky), stokes_V, &status);
+    oskar_mem_set_value_real(oskar_sky_reference_freq(sky), freq_ref, &status);
+    oskar_mem_set_value_real(oskar_sky_spectral_index(sky), spix, &status);
+
+    // Copy to GPU.
+    oskar_Sky* sky_gpu = oskar_sky_create_copy(sky, OSKAR_LOCATION_GPU,
+            &status);
+
+    // Scale on CPU.
+    timer = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    oskar_timer_resume(timer);
+    oskar_sky_scale_by_spectral_index(sky, freq_new, &status);
+    sec = oskar_timer_elapsed(timer);
+    //printf("Scale by spectral index (CPU): %.6f\n", sec);
+    oskar_timer_free(timer);
+
+    // Scale on GPU.
+    timer = oskar_timer_create(OSKAR_TIMER_CUDA);
+    oskar_timer_resume(timer);
+    oskar_sky_scale_by_spectral_index(sky_gpu, freq_new, &status);
+    sec = oskar_timer_elapsed(timer);
+    //printf("Scale by spectral index (GPU): %.6f\n", sec);
+    oskar_timer_free(timer);
+
+    // Copy GPU data to CPU for check.
+    oskar_Sky* sky_cpu = oskar_sky_create_copy(sky_gpu, OSKAR_LOCATION_CPU,
+            &status);
+
+    // Check contents.
+    float* I_cpu = oskar_mem_float(oskar_sky_I(sky), &status);
+    float* Q_cpu = oskar_mem_float(oskar_sky_Q(sky), &status);
+    float* U_cpu = oskar_mem_float(oskar_sky_U(sky), &status);
+    float* V_cpu = oskar_mem_float(oskar_sky_V(sky), &status);
+    float* ref_cpu = oskar_mem_float(oskar_sky_reference_freq(sky), &status);
+    float* spx_cpu = oskar_mem_float(oskar_sky_spectral_index(sky), &status);
+    float* I_gpu = oskar_mem_float(oskar_sky_I(sky_cpu), &status);
+    float* Q_gpu = oskar_mem_float(oskar_sky_Q(sky_cpu), &status);
+    float* U_gpu = oskar_mem_float(oskar_sky_U(sky_cpu), &status);
+    float* V_gpu = oskar_mem_float(oskar_sky_V(sky_cpu), &status);
+    float* ref_gpu = oskar_mem_float(oskar_sky_reference_freq(sky_cpu), &status);
+    float* spx_gpu = oskar_mem_float(oskar_sky_spectral_index(sky_cpu), &status);
+
+    for (int i = 0; i < num_sources; ++i)
+    {
+        double factor = pow(freq_new / freq_ref, spix);
+        ASSERT_FLOAT_EQ(stokes_I * factor, I_cpu[i]);
+        ASSERT_FLOAT_EQ(stokes_I * factor, I_gpu[i]);
+        ASSERT_FLOAT_EQ(stokes_Q * factor, Q_cpu[i]);
+        ASSERT_FLOAT_EQ(stokes_Q * factor, Q_gpu[i]);
+        ASSERT_FLOAT_EQ(stokes_U * factor, U_cpu[i]);
+        ASSERT_FLOAT_EQ(stokes_U * factor, U_gpu[i]);
+        ASSERT_FLOAT_EQ(stokes_V * factor, V_cpu[i]);
+        ASSERT_FLOAT_EQ(stokes_V * factor, V_gpu[i]);
+        ASSERT_FLOAT_EQ(freq_new, ref_cpu[i]);
+        ASSERT_FLOAT_EQ(freq_new, ref_gpu[i]);
+        ASSERT_FLOAT_EQ(spix, spx_cpu[i]);
+        ASSERT_FLOAT_EQ(spix, spx_gpu[i]);
+    }
+
+    oskar_sky_free(sky, &status);
+    oskar_sky_free(sky_gpu, &status);
+    oskar_sky_free(sky_cpu, &status);
 }
 
 
