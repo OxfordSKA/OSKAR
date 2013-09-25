@@ -112,7 +112,7 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     group = "sky";
     setLabel(group, "Sky model settings");
 
-    group = "sky/oskar_sky";
+    group = "sky/oskar_sky_model";
     setLabel(group, "OSKAR sky model file settings");
 
     k = group + "/file";
@@ -121,7 +121,7 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "See the accompanying documentation for a description of an "
             "OSKAR sky model file.");
 
-    group = "sky/oskar_sky/filter";
+    group = "sky/oskar_sky_model/filter";
     setLabel(group, "Filter settings");
     k = group + "/flux_min";
     declare(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE_MIN, "min");
@@ -139,7 +139,7 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "filter, in degrees.");
 
 #if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-    group = "sky/oskar_sky/extended_sources";
+    group = "sky/oskar_sky_model/extended_sources";
     setLabel(group, "Extended source settings");
     k = group + "/FWHM_major";
     declare(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
