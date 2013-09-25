@@ -67,7 +67,6 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
             a->array_is_3d != b->array_is_3d ||
             a->apply_element_errors != b->apply_element_errors ||
             a->apply_element_weight != b->apply_element_weight ||
-            a->coord_units != b->coord_units ||
             a->gaussian_beam_fwhm_rad != b->gaussian_beam_fwhm_rad)
     {
         return 1;

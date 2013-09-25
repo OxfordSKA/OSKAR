@@ -33,8 +33,8 @@
  * @file oskar_correlate_point_time_smearing_omp.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,7 +49,7 @@ extern "C" {
  * Forms visibilities on all baselines by correlating Jones matrices for pairs
  * of stations and summing along the source dimension.
  *
- * Note that the station x, y, z coordinates must be in the ECEF frame.
+ * Note that the station x, y coordinates must be in the ECEF frame.
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
@@ -61,10 +61,11 @@ extern "C" {
  * @param[in] source_l       Source l-direction cosines from phase centre.
  * @param[in] source_m       Source m-direction cosines from phase centre.
  * @param[in] source_n       Source n-direction cosines from phase centre.
- * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
- * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
- * @param[in] station_x      Station x-coordinates multiplied by the wavenumber.
- * @param[in] station_y      Station y-coordinates multiplied by the wavenumber.
+ * @param[in] station_u      Station u-coordinates, in metres.
+ * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] station_x      Station x-coordinates, in metres.
+ * @param[in] station_y      Station y-coordinates, in metres.
+ * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in] time_int_sec   Time averaging interval, in seconds.
  * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
@@ -77,8 +78,9 @@ void oskar_correlate_point_time_smearing_omp_f(int num_sources,
         const float* source_Q, const float* source_U, const float* source_V,
         const float* source_l, const float* source_m, const float* source_n,
         const float* station_u, const float* station_v,
-        const float* station_x, const float* station_y, float frac_bandwidth,
-        float time_int_sec, float gha0_rad, float dec0_rad, float4c* vis);
+        const float* station_x, const float* station_y, float inv_wavelength,
+        float frac_bandwidth, float time_int_sec, float gha0_rad,
+        float dec0_rad, float4c* vis);
 
 /**
  * @brief
@@ -89,7 +91,7 @@ void oskar_correlate_point_time_smearing_omp_f(int num_sources,
  * Forms visibilities on all baselines by correlating Jones matrices for pairs
  * of stations and summing along the source dimension.
  *
- * Note that the station x, y, z coordinates must be in the ECEF frame.
+ * Note that the station x, y coordinates must be in the ECEF frame.
  *
  * @param[in] num_sources    Number of sources.
  * @param[in] num_stations   Number of stations.
@@ -101,10 +103,11 @@ void oskar_correlate_point_time_smearing_omp_f(int num_sources,
  * @param[in] source_l       Source l-direction cosines from phase centre.
  * @param[in] source_m       Source m-direction cosines from phase centre.
  * @param[in] source_n       Source n-direction cosines from phase centre.
- * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
- * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
- * @param[in] station_x      Station x-coordinates multiplied by the wavenumber.
- * @param[in] station_y      Station y-coordinates multiplied by the wavenumber.
+ * @param[in] station_u      Station u-coordinates, in metres.
+ * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] station_x      Station x-coordinates, in metres.
+ * @param[in] station_y      Station y-coordinates, in metres.
+ * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in] time_int_sec   Time averaging interval, in seconds.
  * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
@@ -117,8 +120,9 @@ void oskar_correlate_point_time_smearing_omp_d(int num_sources,
         const double* source_Q, const double* source_U, const double* source_V,
         const double* source_l, const double* source_m, const double* source_n,
         const double* station_u, const double* station_v,
-        const double* station_x, const double* station_y, double frac_bandwidth,
-        double time_int_sec, double gha0_rad, double dec0_rad, double4c* vis);
+        const double* station_x, const double* station_y, double inv_wavelength,
+        double frac_bandwidth, double time_int_sec, double gha0_rad,
+        double dec0_rad, double4c* vis);
 
 #ifdef __cplusplus
 }

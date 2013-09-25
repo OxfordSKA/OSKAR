@@ -36,8 +36,8 @@ extern "C" {
 
 /* Single precision. */
 void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_stations,
-        const float* d_u, const float* d_v, const float* d_w, int num_sources,
-        const float* d_l, const float* d_m, const float* d_n)
+        float wavenumber, const float* d_u, const float* d_v, const float* d_w,
+        int num_sources, const float* d_l, const float* d_m, const float* d_n)
 {
     /* Define block and grid sizes. */
     const dim3 num_threads(64, 4); /* Sources, stations. */
@@ -48,13 +48,15 @@ void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_stations,
     /* Compute DFT phase weights for K. */
     oskar_evaluate_jones_K_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads, s_mem)
-    (num_stations, d_u, d_v, d_w, num_sources, d_l, d_m, d_n, d_jones);
+    (num_stations, wavenumber, d_u, d_v, d_w, num_sources, d_l, d_m, d_n,
+            d_jones);
 }
 
 /* Double precision. */
 void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_stations,
-        const double* d_u, const double* d_v, const double* d_w, int num_sources,
-        const double* d_l, const double* d_m, const double* d_n)
+        double wavenumber, const double* d_u, const double* d_v,
+        const double* d_w, int num_sources, const double* d_l,
+        const double* d_m, const double* d_n)
 {
     /* Define block and grid sizes. */
     const dim3 num_threads(64, 4); /* Sources, stations. */
@@ -65,7 +67,8 @@ void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_stations,
     /* Compute DFT phase weights for K. */
     oskar_evaluate_jones_K_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads, s_mem)
-    (num_stations, d_u, d_v, d_w, num_sources, d_l, d_m, d_n, d_jones);
+    (num_stations, wavenumber, d_u, d_v, d_w, num_sources, d_l, d_m, d_n,
+            d_jones);
 }
 
 #ifdef __cplusplus
@@ -81,10 +84,10 @@ extern __shared__ double smem_d[];
 
 /* Single precision. */
 __global__
-void oskar_evaluate_jones_K_cudak_f(const int n_in, const float* x_in,
-        const float* y_in, const float* z_in, const int n_out,
-        const float* x_out, const float* y_out, const float* z_out,
-        float2* weights)
+void oskar_evaluate_jones_K_cudak_f(const int n_in, const float wavenumber,
+        const float* x_in, const float* y_in, const float* z_in,
+        const int n_out, const float* x_out, const float* y_out,
+        const float* z_out, float2* weights)
 {
     const int s = blockDim.x * blockIdx.x + threadIdx.x; /* Output index. */
     const int a = blockDim.y * blockIdx.y + threadIdx.y; /* Input index. */
@@ -104,9 +107,9 @@ void oskar_evaluate_jones_K_cudak_f(const int n_in, const float* x_in,
     }
     if (a < n_in && threadIdx.x == 0)
     {
-        cxi[threadIdx.y] = x_in[a];
-        cyi[threadIdx.y] = y_in[a];
-        czi[threadIdx.y] = z_in[a];
+        cxi[threadIdx.y] = wavenumber * x_in[a];
+        cyi[threadIdx.y] = wavenumber * y_in[a];
+        czi[threadIdx.y] = wavenumber * z_in[a];
     }
     __syncthreads();
 
@@ -128,10 +131,10 @@ void oskar_evaluate_jones_K_cudak_f(const int n_in, const float* x_in,
 
 /* Double precision. */
 __global__
-void oskar_evaluate_jones_K_cudak_d(const int n_in, const double* x_in,
-        const double* y_in, const double* z_in, const int n_out,
-        const double* x_out, const double* y_out, const double* z_out,
-        double2* weights)
+void oskar_evaluate_jones_K_cudak_d(const int n_in, const double wavenumber,
+        const double* x_in, const double* y_in, const double* z_in,
+        const int n_out, const double* x_out, const double* y_out,
+        const double* z_out, double2* weights)
 {
     const int s = blockDim.x * blockIdx.x + threadIdx.x; /* Output index. */
     const int a = blockDim.y * blockIdx.y + threadIdx.y; /* Input index. */
@@ -151,9 +154,9 @@ void oskar_evaluate_jones_K_cudak_d(const int n_in, const double* x_in,
     }
     if (a < n_in && threadIdx.x == 0)
     {
-        cxi[threadIdx.y] = x_in[a];
-        cyi[threadIdx.y] = y_in[a];
-        czi[threadIdx.y] = z_in[a];
+        cxi[threadIdx.y] = wavenumber * x_in[a];
+        cyi[threadIdx.y] = wavenumber * y_in[a];
+        czi[threadIdx.y] = wavenumber * z_in[a];
     }
     __syncthreads();
 

@@ -26,9 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_accumulate_baseline_visibility_for_source.h"
-#include "interferometry/oskar_correlate_gaussian_cuda.h"
-#include "math/oskar_sinc.h"
+#include <oskar_accumulate_baseline_visibility_for_source.h>
+#include <oskar_correlate_gaussian_cuda.h>
+#include <oskar_sinc.h>
+
 #include <math.h>
 
 #ifdef __cplusplus
@@ -45,7 +46,8 @@ void oskar_correlate_gaussian_cuda_f(int num_sources,
         const float* d_source_l, const float* d_source_m,
         const float* d_source_a, const float* d_source_b,
         const float* d_source_c, const float* d_station_u,
-        const float* d_station_v, float frac_bandwidth, float4c* d_vis)
+        const float* d_station_v, float inv_wavelength,
+        float frac_bandwidth, float4c* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
@@ -54,7 +56,8 @@ void oskar_correlate_gaussian_cuda_f(int num_sources,
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_source_a, d_source_b,
-            d_source_c, d_station_u, d_station_v, frac_bandwidth, d_vis);
+            d_source_c, d_station_u, d_station_v, inv_wavelength,
+            frac_bandwidth, d_vis);
 }
 
 /* Double precision. */
@@ -65,7 +68,8 @@ void oskar_correlate_gaussian_cuda_d(int num_sources,
         const double* d_source_l, const double* d_source_m,
         const double* d_source_a, const double* d_source_b,
         const double* d_source_c, const double* d_station_u,
-        const double* d_station_v, double frac_bandwidth, double4c* d_vis)
+        const double* d_station_v, double inv_wavelength,
+        double frac_bandwidth, double4c* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
@@ -74,7 +78,8 @@ void oskar_correlate_gaussian_cuda_d(int num_sources,
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_source_a, d_source_b,
-            d_source_c, d_station_u, d_station_v, frac_bandwidth, d_vis);
+            d_source_c, d_station_u, d_station_v, inv_wavelength,
+            frac_bandwidth, d_vis);
 }
 
 #ifdef __cplusplus
@@ -83,9 +88,6 @@ void oskar_correlate_gaussian_cuda_d(int num_sources,
 
 
 /* Kernels. ================================================================ */
-
-#define ONE_OVER_2PI  0.159154943091895335768884   /* 1 / (2 * pi) */
-#define ONE_OVER_2PIf 0.159154943091895335768884f  /* 1 / (2 * pi) */
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -117,8 +119,8 @@ void oskar_correlate_gaussian_cudak_f(const int num_sources,
         const float* __restrict__ source_b,
         const float* __restrict__ source_c,
         const float* __restrict__ station_u,
-        const float* __restrict__ station_v, const float frac_bandwidth,
-        float4c* __restrict__ vis)
+        const float* __restrict__ station_v, const float inv_wavelength,
+        const float frac_bandwidth, float4c* __restrict__ vis)
 {
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (AJ >= AI) return;
@@ -128,8 +130,8 @@ void oskar_correlate_gaussian_cudak_f(const int num_sources,
     if (threadIdx.x == 0)
     {
         /* Baseline UV-distance, in wavelengths. */
-        uu   = (station_u[AI] - station_u[AJ]) * ONE_OVER_2PIf;
-        vv   = (station_v[AI] - station_v[AJ]) * ONE_OVER_2PIf;
+        uu   = (station_u[AI] - station_u[AJ]) * inv_wavelength;
+        vv   = (station_v[AI] - station_v[AJ]) * inv_wavelength;
 
         /* Quantities needed for evaluating source with gaussian term. */
         uu2  = uu * uu;
@@ -224,8 +226,8 @@ void oskar_correlate_gaussian_cudak_d(const int num_sources,
         const double* __restrict__ source_b,
         const double* __restrict__ source_c,
         const double* __restrict__ station_u,
-        const double* __restrict__ station_v, const double frac_bandwidth,
-        double4c* __restrict__ vis)
+        const double* __restrict__ station_v, const double inv_wavelength,
+        const double frac_bandwidth, double4c* __restrict__ vis)
 {
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (AJ >= AI) return;
@@ -235,8 +237,8 @@ void oskar_correlate_gaussian_cudak_d(const int num_sources,
     if (threadIdx.x == 0)
     {
         /* Baseline UV-distance, in wavelengths. */
-        uu   = (station_u[AI] - station_u[AJ]) * ONE_OVER_2PI;
-        vv   = (station_v[AI] - station_v[AJ]) * ONE_OVER_2PI;
+        uu   = (station_u[AI] - station_u[AJ]) * inv_wavelength;
+        vv   = (station_v[AI] - station_v[AJ]) * inv_wavelength;
 
         /* Quantities needed for evaluating source with gaussian term. */
         uu2  = uu * uu;

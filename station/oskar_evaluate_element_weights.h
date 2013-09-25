@@ -58,6 +58,7 @@ extern "C" {
  *
  * @param[in,out] weights       Output array of beamforming weights.
  * @param[in,out] weights_error Work array, for calculating the weights error.
+ * @param[in] wavenumber        Wavenumber (2 pi / wavelength).
  * @param[in] station           Pointer to station model.
  * @param[in] x_beam            Beam direction cosine, horizontal x-component.
  * @param[in] y_beam            Beam direction cosine, horizontal y-component.
@@ -67,9 +68,9 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_evaluate_element_weights(oskar_Mem* weights,
-        oskar_Mem* weights_error, const oskar_Station* station,
-        double x_beam, double y_beam, double z_beam,
-        oskar_RandomState* random_state, int* status);
+        oskar_Mem* weights_error, double wavenumber,
+        const oskar_Station* station, double x_beam, double y_beam,
+        double z_beam, oskar_RandomState* random_state, int* status);
 
 #ifdef __cplusplus
 }

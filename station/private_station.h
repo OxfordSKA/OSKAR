@@ -74,8 +74,6 @@ struct oskar_Station
     int array_is_3d;             /**< True if array is 3-dimensional (auto determined; default false). */
     int apply_element_errors;    /**< True if element gain and phase errors should be applied (auto determined; default false). */
     int apply_element_weight;    /**< True if weights should be modified by user-supplied complex beamforming weights (auto determined; default false). */
-    int coord_units;             /**< Units of the x,y,z coordinates (auto determined). */
-    double wavenumber;           /**< Current wavenumber, if coordinates are in radians (private). */
     double orientation_x;        /**< Orientation azimuth of nominal x dipole axis, in radians. */
     double orientation_y;        /**< Orientation azimuth of nominal y dipole axis, in radians. */
     oskar_Mem x_signal;          /**< Tangent-plane x-position, toward the East. */

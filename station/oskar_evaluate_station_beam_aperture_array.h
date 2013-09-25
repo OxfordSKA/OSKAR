@@ -53,10 +53,7 @@ extern "C" {
  *
  * The supplied station model must be fully set-up on entry, and must include
  * the element positions, the required beam coordinates, and all associated
- * options and meta-data necessary for beamforming. In particular, element
- * coordinates within the station should be in radians (i.e. pre-multiplied
- * by the wavenumber). Checks are made to ensure that data are in the correct
- * form before being used.
+ * options and meta-data necessary for beamforming.
  *
  * The beam is evaluated at points defined by the horizontal Cartesian
  * direction cosines given in the vectors x,y,z. The output \p beam array
@@ -89,10 +86,8 @@ extern "C" {
  *                              evaluate the beam.
  * @param[in]     z             Array of horizontal z coordinates at which to
  *                              evaluate the beam.
- * @param[in]     gast          The Greenwich Apparent Sidereal Time (as MJD).
- *                              NOTE may soon be replaced with a structure for
- *                              more precise equatorial to horizontal coordinate
- *                              conversion.
+ * @param[in]     gast          The Greenwich Apparent Sidereal Time in radians.
+ * @param[in]     frequency_hz  The observing frequency, in Hz.
  * @param[in]     work          Initialised structure containing temporary work
  *                              buffers.
  * @param[in]     random_states Initialised structure of CURAND random-number
@@ -104,8 +99,8 @@ OSKAR_EXPORT
 void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, double gast,
-        oskar_StationWork* work, oskar_RandomState* random_states,
-        int* status);
+        double frequency_hz, oskar_StationWork* work,
+        oskar_RandomState* random_states, int* status);
 
 #ifdef __cplusplus
 }

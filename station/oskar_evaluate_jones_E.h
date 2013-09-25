@@ -57,15 +57,15 @@ extern "C" {
  * @param[in]  sky          Input sky model.
  * @param[in]  telescope    Input telescope model.
  * @param[in]  gast         The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in]  frequency_hz The observing frequency, in Hz.
  * @param[in]  work         Pointer to structure holding work arrays.
  * @param[in]  random_state Structure holding curand states.
  * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_E(oskar_Jones* E, const oskar_Sky* sky,
-        const oskar_Telescope* telescope, double gast,
-        oskar_StationWork* work, oskar_RandomState* random_state,
-        int* status);
+        const oskar_Telescope* telescope, double gast, double frequency_hz,
+        oskar_StationWork* work, oskar_RandomState* random_state, int* status);
 
 #ifdef __cplusplus
 }

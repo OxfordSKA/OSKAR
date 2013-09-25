@@ -35,7 +35,7 @@ extern "C" {
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
-void oskar_dftw_o2c_3d_cuda_f(int n_in, const float* d_x_in,
+void oskar_dftw_o2c_3d_cuda_f(int n_in, float wavenumber, const float* d_x_in,
         const float* d_y_in, const float* d_z_in, const float2* d_weights_in,
         int n_out, const float* d_x_out, const float* d_y_out,
         const float* d_z_out, float2* d_output)
@@ -45,13 +45,13 @@ void oskar_dftw_o2c_3d_cuda_f(int n_in, const float* d_x_in,
     num_blocks = (n_out + num_threads - 1) / num_threads;
     shared_mem = 5 * max_in_chunk * sizeof(float);
     oskar_dftw_o2c_3d_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (n_in,
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (n_in, wavenumber,
             d_x_in, d_y_in, d_z_in, d_weights_in, n_out, d_x_out, d_y_out,
             d_z_out, max_in_chunk, d_output);
 }
 
 /* Double precision. */
-void oskar_dftw_o2c_3d_cuda_d(int n_in, const double* d_x_in,
+void oskar_dftw_o2c_3d_cuda_d(int n_in, double wavenumber, const double* d_x_in,
         const double* d_y_in, const double* d_z_in, const double2* d_weights_in,
         int n_out, const double* d_x_out, const double* d_y_out,
         const double* d_z_out, double2* d_output)
@@ -61,7 +61,7 @@ void oskar_dftw_o2c_3d_cuda_d(int n_in, const double* d_x_in,
     num_blocks = (n_out + num_threads - 1) / num_threads;
     shared_mem = 5 * max_in_chunk * sizeof(double);
     oskar_dftw_o2c_3d_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (n_in,
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (n_in, wavenumber,
             d_x_in, d_y_in, d_z_in, d_weights_in, n_out, d_x_out, d_y_out,
             d_z_out, max_in_chunk, d_output);
 }
@@ -77,6 +77,7 @@ extern __shared__ double2 smem_d[];
 /* Value for max_in_chunk should be 800 in single precision. */
 __global__
 void oskar_dftw_o2c_3d_cudak_f(const int n_in,
+        const float wavenumber,
         const float* __restrict__ x_in,
         const float* __restrict__ y_in,
         const float* __restrict__ z_in,
@@ -97,9 +98,9 @@ void oskar_dftw_o2c_3d_cudak_f(const int n_in,
     float xp_out = 0.0f, yp_out = 0.0f, zp_out = 0.0f;
     if (i_out < n_out)
     {
-        xp_out = x_out[i_out];
-        yp_out = y_out[i_out];
-        zp_out = z_out[i_out];
+        xp_out = wavenumber * x_out[i_out];
+        yp_out = wavenumber * y_out[i_out];
+        zp_out = wavenumber * z_out[i_out];
     }
 
     // Initialise shared memory caches.
@@ -157,6 +158,7 @@ void oskar_dftw_o2c_3d_cudak_f(const int n_in,
 /* Value for max_in_chunk should be 384 in double precision. */
 __global__
 void oskar_dftw_o2c_3d_cudak_d(const int n_in,
+        const double wavenumber,
         const double* __restrict__ x_in,
         const double* __restrict__ y_in,
         const double* __restrict__ z_in,
@@ -177,9 +179,9 @@ void oskar_dftw_o2c_3d_cudak_d(const int n_in,
     double xp_out = 0.0, yp_out = 0.0, zp_out = 0.0;
     if (i_out < n_out)
     {
-        xp_out = x_out[i_out];
-        yp_out = y_out[i_out];
-        zp_out = z_out[i_out];
+        xp_out = wavenumber * x_out[i_out];
+        yp_out = wavenumber * y_out[i_out];
+        zp_out = wavenumber * z_out[i_out];
     }
 
     // Initialise shared memory caches.

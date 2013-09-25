@@ -53,7 +53,6 @@ struct oskar_Telescope
     double dec0_rad;             /**< Declination of phase centre, in radians. */
     double bandwidth_hz;         /**< Channel bandwidth, in Hz. */
     double time_average_sec;     /**< Time average smearing interval, in sec. */
-    double wavenumber;           /**< Current wavenumber, if coordinates are in radians (private). */
 
     /* Station data. */
     int num_stations;            /**< Number of stations in the model. */
@@ -66,7 +65,6 @@ struct oskar_Telescope
     oskar_Mem station_z_hor;     /**< Fixed z component of station coordinate (horizon plane). */
     int max_station_size;        /**< Maximum station size (number of elements) */
     int max_station_depth;       /**< Maximum station depth. */
-    int coord_units;             /**< Units of the x,y,z coordinates .*/
     int identical_stations;      /**< True if all stations are identical. */
     int use_common_sky;          /**< True if all stations should use common source positions. */
 

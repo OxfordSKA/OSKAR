@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
+void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam, double wavenumber,
         const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* weights,
         int* status)
@@ -64,13 +64,6 @@ void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
             oskar_mem_location(weights) != location)
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
-        return;
-    }
-
-    /* Check that the antenna coordinates are in radians. */
-    if (oskar_station_element_coord_units(station) != OSKAR_RADIANS)
-    {
-        *status = OSKAR_ERR_BAD_UNITS;
         return;
     }
 
@@ -127,8 +120,8 @@ void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_evaluate_array_pattern_dipoles_cuda_d(num_elements,
-                    xs, ys, zs, cx, sx, cy, sy, weights_, num_points,
-                    x_, y_, z_, beam_);
+                    wavenumber, xs, ys, zs, cx, sx, cy, sy, weights_,
+                    num_points, x_, y_, z_, beam_);
             oskar_cuda_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
@@ -136,6 +129,7 @@ void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
         }
         else
         {
+            /* TODO CPU version. */
             *status = OSKAR_ERR_BAD_LOCATION;
         }
     }
@@ -168,8 +162,8 @@ void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_evaluate_array_pattern_dipoles_cuda_f(num_elements,
-                    xs, ys, zs, cx, sx, cy, sy, weights_, num_points,
-                    x_, y_, z_, beam_);
+                    wavenumber, xs, ys, zs, cx, sx, cy, sy, weights_,
+                    num_points, x_, y_, z_, beam_);
             oskar_cuda_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
@@ -177,6 +171,7 @@ void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
         }
         else
         {
+            /* TODO CPU version. */
             *status = OSKAR_ERR_BAD_LOCATION;
         }
     }

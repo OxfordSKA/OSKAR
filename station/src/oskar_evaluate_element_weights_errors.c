@@ -111,6 +111,10 @@ void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
+        else if (location == OSKAR_LOCATION_CPU)
+        {
+            *status = OSKAR_ERR_BAD_LOCATION;
+        }
     }
     else if (type == OSKAR_SINGLE)
     {
@@ -131,6 +135,10 @@ void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
+        }
+        else if (location == OSKAR_LOCATION_CPU)
+        {
+            *status = OSKAR_ERR_BAD_LOCATION;
         }
     }
     else

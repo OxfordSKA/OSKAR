@@ -101,14 +101,9 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     //    error = oskar_station_save_configuration("temp_test_station.txt", &station_cpu);
 //    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
-    // Copy the station structure to the GPU, scale the coordinates to
-    // wavenumbers and free the original structure.
+    // Copy the station structure to the GPU and free the original structure.
     oskar_Station* station_gpu = oskar_station_create_copy(station,
             OSKAR_LOCATION_GPU, &error);
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_METRES,
-            oskar_station_element_coord_units(station_gpu));
-    oskar_station_multiply_by_wavenumber(station_gpu, frequency, &error);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
     oskar_station_free(station, &error);
 
     // Evaluate horizontal l,m positions at which to generate the beam pattern.
@@ -148,8 +143,8 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     CPPUNIT_ASSERT_EQUAL(0, oskar_station_array_is_3d(station_gpu));
     TIMER_START
     oskar_evaluate_station_beam_aperture_array(&beam_pattern, station_gpu,
-            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, work, random_state,
-            &error);
+            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, frequency, work,
+            random_state, &error);
     cudaDeviceSynchronize();
     TIMER_STOP("Finished aperture array station beam (2D)");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
@@ -158,8 +153,8 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     CPPUNIT_ASSERT_EQUAL(1, oskar_station_array_is_3d(station_gpu));
     TIMER_START
     oskar_evaluate_station_beam_aperture_array(&beam_pattern, station_gpu,
-            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, work, random_state,
-            &error);
+            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, frequency, work,
+            random_state, &error);
     cudaDeviceSynchronize();
     TIMER_STOP("Finished aperture array station beam (3D)");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);

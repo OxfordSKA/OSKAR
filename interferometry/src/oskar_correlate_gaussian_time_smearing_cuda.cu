@@ -46,7 +46,7 @@ void oskar_correlate_gaussian_time_smearing_cuda_f(int num_sources,
         const float* d_source_b, const float* d_source_c,
         const float* d_station_u, const float* d_station_v,
         const float* d_station_x, const float* d_station_y,
-        float frac_bandwidth, float time_int_sec,
+        float inv_wavelength, float frac_bandwidth, float time_int_sec,
         float gha0_rad, float dec0_rad, float4c* d_vis)
 {
     dim3 num_threads(128, 1);
@@ -57,8 +57,8 @@ void oskar_correlate_gaussian_time_smearing_cuda_f(int num_sources,
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_source_n, d_source_a,
             d_source_b, d_source_c, d_station_u, d_station_v, d_station_x,
-            d_station_y, frac_bandwidth, time_int_sec, gha0_rad,
-            dec0_rad, d_vis);
+            d_station_y, inv_wavelength, frac_bandwidth, time_int_sec,
+            gha0_rad, dec0_rad, d_vis);
 }
 
 /* Double precision. */
@@ -71,7 +71,7 @@ void oskar_correlate_gaussian_time_smearing_cuda_d(int num_sources,
         const double* d_source_b, const double* d_source_c,
         const double* d_station_u, const double* d_station_v,
         const double* d_station_x, const double* d_station_y,
-        double frac_bandwidth, double time_int_sec,
+        double inv_wavelength, double frac_bandwidth, double time_int_sec,
         double gha0_rad, double dec0_rad, double4c* d_vis)
 {
     dim3 num_threads(128, 1);
@@ -82,8 +82,8 @@ void oskar_correlate_gaussian_time_smearing_cuda_d(int num_sources,
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_source_n, d_source_a,
             d_source_b, d_source_c, d_station_u, d_station_v, d_station_x,
-            d_station_y, frac_bandwidth, time_int_sec, gha0_rad,
-            dec0_rad, d_vis);
+            d_station_y, inv_wavelength, frac_bandwidth, time_int_sec,
+            gha0_rad, dec0_rad, d_vis);
 }
 
 #ifdef __cplusplus
@@ -92,9 +92,6 @@ void oskar_correlate_gaussian_time_smearing_cuda_d(int num_sources,
 
 
 /* Kernels. ================================================================ */
-
-#define ONE_OVER_2PI  0.159154943091895335768884   /* 1 / (2 * pi) */
-#define ONE_OVER_2PIf 0.159154943091895335768884f  /* 1 / (2 * pi) */
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -131,8 +128,9 @@ void oskar_correlate_gaussian_time_smearing_cudak_f(const int num_sources,
         const float* __restrict__ station_u,
         const float* __restrict__ station_v,
         const float* __restrict__ station_x,
-        const float* __restrict__ station_y, const float frac_bandwidth,
-        const float time_int_sec, const float gha0_rad, const float dec0_rad,
+        const float* __restrict__ station_y, const float inv_wavelength,
+        const float frac_bandwidth, const float time_int_sec,
+        const float gha0_rad, const float dec0_rad,
         float4c* __restrict__ vis)
 {
     /* Local variables. */
@@ -152,8 +150,8 @@ void oskar_correlate_gaussian_time_smearing_cudak_f(const int num_sources,
     if (threadIdx.x == 0)
     {
         /* Baseline lengths. */
-        uu = (station_u[SI] - station_u[SJ]) * ONE_OVER_2PIf;
-        vv = (station_v[SI] - station_v[SJ]) * ONE_OVER_2PIf;
+        uu = (station_u[SI] - station_u[SJ]) * inv_wavelength;
+        vv = (station_v[SI] - station_v[SJ]) * inv_wavelength;
 
         /* Quantities needed for evaluating source with Gaussian term. */
         uu2  = uu * uu;
@@ -171,8 +169,8 @@ void oskar_correlate_gaussian_time_smearing_cudak_f(const int num_sources,
             float sin_HA, cos_HA, sin_Dec, cos_Dec;
             sincosf(gha0_rad, &sin_HA, &cos_HA);
             sincosf(dec0_rad, &sin_Dec, &cos_Dec);
-            xx = (station_x[SI] - station_x[SJ]) * 0.5f;
-            yy = (station_y[SI] - station_y[SJ]) * 0.5f;
+            xx = (station_x[SI] - station_x[SJ]) * M_PIf * inv_wavelength;
+            yy = (station_y[SI] - station_y[SJ]) * M_PIf * inv_wavelength;
             rot_angle = OMEGA_EARTHf * time_int_sec;
             temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
             du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
@@ -272,9 +270,10 @@ void oskar_correlate_gaussian_time_smearing_cudak_d(const int num_sources,
         const double* __restrict__ station_u,
         const double* __restrict__ station_v,
         const double* __restrict__ station_x,
-        const double* __restrict__ station_y, const double frac_bandwidth,
-        const double time_int_sec, const double gha0_rad,
-        const double dec0_rad, double4c* __restrict__ vis)
+        const double* __restrict__ station_y, const double inv_wavelength,
+        const double frac_bandwidth, const double time_int_sec,
+        const double gha0_rad, const double dec0_rad,
+        double4c* __restrict__ vis)
 {
     /* Local variables. */
     double4c sum;
@@ -293,8 +292,8 @@ void oskar_correlate_gaussian_time_smearing_cudak_d(const int num_sources,
     if (threadIdx.x == 0)
     {
         /* Baseline lengths. */
-        uu = (station_u[SI] - station_u[SJ]) * ONE_OVER_2PI;
-        vv = (station_v[SI] - station_v[SJ]) * ONE_OVER_2PI;
+        uu = (station_u[SI] - station_u[SJ]) * inv_wavelength;
+        vv = (station_v[SI] - station_v[SJ]) * inv_wavelength;
 
         /* Quantities needed for evaluating source with Gaussian term. */
         uu2  = uu * uu;
@@ -312,8 +311,8 @@ void oskar_correlate_gaussian_time_smearing_cudak_d(const int num_sources,
             double sin_HA, cos_HA, sin_Dec, cos_Dec;
             sincos(gha0_rad, &sin_HA, &cos_HA);
             sincos(dec0_rad, &sin_Dec, &cos_Dec);
-            xx = (station_x[SI] - station_x[SJ]) * 0.5;
-            yy = (station_y[SI] - station_y[SJ]) * 0.5;
+            xx = (station_x[SI] - station_x[SJ]) * M_PI * inv_wavelength;
+            yy = (station_y[SI] - station_y[SJ]) * M_PI * inv_wavelength;
             rot_angle = OMEGA_EARTH * time_int_sec;
             temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
             du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;

@@ -48,7 +48,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
 {
     int jones_type, base_type, location, matrix_type, n_stations, n_sources;
     int use_extended;
-    double frac_bandwidth, time_avg, gha0, dec0;
+    double inv_wavelength, frac_bandwidth, time_avg, gha0, dec0;
 
     /* Check all inputs. */
     if (!vis || !J || !tel || !sky || !u || !v || !status)
@@ -65,7 +65,8 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
     n_sources = oskar_sky_num_sources(sky);
     use_extended = oskar_sky_use_extended(sky);
 
-    /* Get bandwidth-smearing term. */
+    /* Get bandwidth-smearing terms. */
+    inv_wavelength = frequency_hz / 299792458.0;
     frac_bandwidth = oskar_telescope_bandwidth_hz(tel) / frequency_hz;
 
     /* Get time-average smearing term and Greenwich hour angle. */
@@ -165,14 +166,14 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                     {
                         oskar_correlate_gaussian_time_smearing_cuda_d
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, x_, y_,
+                                a_, b_, c_, u_, v_, x_, y_, inv_wavelength,
                                 frac_bandwidth, time_avg, gha0, dec0, vis_);
                     }
                     else
                     {
                         oskar_correlate_point_time_smearing_cuda_d
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                u_, v_, x_, y_,
+                                u_, v_, x_, y_, inv_wavelength,
                                 frac_bandwidth, time_avg, gha0, dec0, vis_);
                     }
                 }
@@ -182,13 +183,14 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                     {
                         oskar_correlate_gaussian_cuda_d
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_,
-                                a_, b_, c_, u_, v_, frac_bandwidth, vis_);
+                                a_, b_, c_, u_, v_, inv_wavelength,
+                                frac_bandwidth, vis_);
                     }
                     else
                     {
                         oskar_correlate_point_cuda_d
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_,
-                                u_, v_, frac_bandwidth, vis_);
+                                u_, v_, inv_wavelength, frac_bandwidth, vis_);
                     }
                 }
                 oskar_cuda_check_error(status);
@@ -204,14 +206,14 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                     {
                         oskar_correlate_gaussian_time_smearing_omp_d
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, x_, y_,
+                                a_, b_, c_, u_, v_, x_, y_, inv_wavelength,
                                 frac_bandwidth, time_avg, gha0, dec0, vis_);
                     }
                     else
                     {
                         oskar_correlate_point_time_smearing_omp_d
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                u_, v_, x_, y_,
+                                u_, v_, x_, y_, inv_wavelength,
                                 frac_bandwidth, time_avg, gha0, dec0, vis_);
                     }
                 }
@@ -221,13 +223,14 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                     {
                         oskar_correlate_gaussian_omp_d
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_,
-                                a_, b_, c_, u_, v_, frac_bandwidth, vis_);
+                                a_, b_, c_, u_, v_, inv_wavelength,
+                                frac_bandwidth, vis_);
                     }
                     else
                     {
                         oskar_correlate_point_omp_d
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_,
-                                u_, v_, frac_bandwidth, vis_);
+                                u_, v_, inv_wavelength, frac_bandwidth, vis_);
                     }
                 }
             }
@@ -244,7 +247,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
 #ifdef OSKAR_HAVE_CUDA
                 oskar_correlate_point_scalar_cuda_d
                 (n_sources, n_stations, J_, I_, l_, m_, u_, v_,
-                        frac_bandwidth, vis_);
+                        inv_wavelength, frac_bandwidth, vis_);
                 oskar_cuda_check_error(status);
 #else
                 *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
@@ -289,14 +292,14 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                     {
                         oskar_correlate_gaussian_time_smearing_cuda_f
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, x_, y_,
+                                a_, b_, c_, u_, v_, x_, y_, inv_wavelength,
                                 frac_bandwidth, time_avg, gha0, dec0, vis_);
                     }
                     else
                     {
                         oskar_correlate_point_time_smearing_cuda_f
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                u_, v_, x_, y_,
+                                u_, v_, x_, y_, inv_wavelength,
                                 frac_bandwidth, time_avg, gha0, dec0, vis_);
                     }
                 }
@@ -306,13 +309,14 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                     {
                         oskar_correlate_gaussian_cuda_f
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_,
-                                a_, b_, c_, u_, v_, frac_bandwidth, vis_);
+                                a_, b_, c_, u_, v_, inv_wavelength,
+                                frac_bandwidth, vis_);
                     }
                     else
                     {
                         oskar_correlate_point_cuda_f
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_,
-                                u_, v_, frac_bandwidth, vis_);
+                                u_, v_, inv_wavelength, frac_bandwidth, vis_);
                     }
                 }
                 oskar_cuda_check_error(status);
@@ -328,14 +332,14 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                     {
                         oskar_correlate_gaussian_time_smearing_omp_f
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                a_, b_, c_, u_, v_, x_, y_,
+                                a_, b_, c_, u_, v_, x_, y_, inv_wavelength,
                                 frac_bandwidth, time_avg, gha0, dec0, vis_);
                     }
                     else
                     {
                         oskar_correlate_point_time_smearing_omp_f
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_, n_,
-                                u_, v_, x_, y_,
+                                u_, v_, x_, y_, inv_wavelength,
                                 frac_bandwidth, time_avg, gha0, dec0, vis_);
                     }
                 }
@@ -345,13 +349,14 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                     {
                         oskar_correlate_gaussian_omp_f
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_,
-                                a_, b_, c_, u_, v_, frac_bandwidth, vis_);
+                                a_, b_, c_, u_, v_, inv_wavelength,
+                                frac_bandwidth, vis_);
                     }
                     else
                     {
                         oskar_correlate_point_omp_f
                         (n_sources, n_stations, J_, I_, Q_, U_, V_, l_, m_,
-                                u_, v_, frac_bandwidth, vis_);
+                                u_, v_, inv_wavelength, frac_bandwidth, vis_);
                     }
                 }
             }
@@ -368,7 +373,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
 #ifdef OSKAR_HAVE_CUDA
                 oskar_correlate_point_scalar_cuda_f
                 (n_sources, n_stations, J_, I_, l_, m_, u_, v_,
-                        frac_bandwidth, vis_);
+                        inv_wavelength, frac_bandwidth, vis_);
                 oskar_cuda_check_error(status);
 #else
                 *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;

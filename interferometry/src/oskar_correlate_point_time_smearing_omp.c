@@ -27,17 +27,25 @@
  */
 
 #include <math.h>
-#include "interferometry/oskar_accumulate_baseline_visibility_for_source.h"
-#include "interferometry/oskar_correlate_point_time_smearing_omp.h"
-#include "math/oskar_sinc.h"
+#include <oskar_accumulate_baseline_visibility_for_source.h>
+#include <oskar_correlate_point_time_smearing_omp.h>
+#include <oskar_sinc.h>
 
-#ifdef __cplusplus
-extern "C" {
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#ifndef M_PIf
+#define M_PIf 3.14159265358979323846f
 #endif
 
 #define OMEGA_EARTH  7.272205217e-5  /* radians/sec */
 #define OMEGA_EARTHf 7.272205217e-5f /* radians/sec */
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Single precision. */
 void oskar_correlate_point_time_smearing_omp_f(int num_sources,
@@ -45,8 +53,9 @@ void oskar_correlate_point_time_smearing_omp_f(int num_sources,
         const float* source_Q, const float* source_U, const float* source_V,
         const float* source_l, const float* source_m, const float* source_n,
         const float* station_u, const float* station_v,
-        const float* station_x, const float* station_y, float frac_bandwidth,
-        float time_int_sec, float gha0_rad, float dec0_rad, float4c* vis)
+        const float* station_x, const float* station_y, float inv_wavelength,
+        float frac_bandwidth, float time_int_sec, float gha0_rad,
+        float dec0_rad, float4c* vis)
 {
     int station_q;
 
@@ -63,7 +72,7 @@ void oskar_correlate_point_time_smearing_omp_f(int num_sources,
         /* Loop over baselines for this station. */
         for (station_p = station_q + 1; station_p < num_stations; ++station_p)
         {
-            float uu, vv, du_dt, dv_dt, dw_dt;
+            float uu, vv, du_dt, dv_dt, dw_dt, factor;
             float4c sum, guard;
             sum.a.x = 0.0f;
             sum.a.y = 0.0f;
@@ -86,8 +95,9 @@ void oskar_correlate_point_time_smearing_omp_f(int num_sources,
             sp = &jones[station_p * num_sources];
 
             /* Baseline lengths. */
-            uu = (station_u[station_p] - station_u[station_q]) * 0.5f;
-            vv = (station_v[station_p] - station_v[station_q]) * 0.5f;
+            factor = M_PIf * inv_wavelength;
+            uu = (station_u[station_p] - station_u[station_q]) * factor;
+            vv = (station_v[station_p] - station_v[station_q]) * factor;
 
             /* Modify the baseline distance to include the common components
              * of the bandwidth smearing term. */
@@ -102,8 +112,8 @@ void oskar_correlate_point_time_smearing_omp_f(int num_sources,
                 cos_HA = cosf(gha0_rad);
                 sin_Dec = sinf(dec0_rad);
                 cos_Dec = cosf(dec0_rad);
-                xx = (station_x[station_p] - station_x[station_q]) * 0.5f;
-                yy = (station_y[station_p] - station_y[station_q]) * 0.5f;
+                xx = (station_x[station_p] - station_x[station_q]) * factor;
+                yy = (station_y[station_p] - station_y[station_q]) * factor;
                 rot_angle = OMEGA_EARTHf * time_int_sec;
                 temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
                 du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
@@ -155,8 +165,9 @@ void oskar_correlate_point_time_smearing_omp_d(int num_sources,
         const double* source_Q, const double* source_U, const double* source_V,
         const double* source_l, const double* source_m, const double* source_n,
         const double* station_u, const double* station_v,
-        const double* station_x, const double* station_y, double frac_bandwidth,
-        double time_int_sec, double gha0_rad, double dec0_rad, double4c* vis)
+        const double* station_x, const double* station_y, double inv_wavelength,
+        double frac_bandwidth, double time_int_sec, double gha0_rad,
+        double dec0_rad, double4c* vis)
 {
     int station_q;
 
@@ -173,7 +184,7 @@ void oskar_correlate_point_time_smearing_omp_d(int num_sources,
         /* Loop over baselines for this station. */
         for (station_p = station_q + 1; station_p < num_stations; ++station_p)
         {
-            double uu, vv, du_dt, dv_dt, dw_dt;
+            double uu, vv, du_dt, dv_dt, dw_dt, factor;
             double4c sum;
             sum.a.x = 0.0;
             sum.a.y = 0.0;
@@ -188,8 +199,9 @@ void oskar_correlate_point_time_smearing_omp_d(int num_sources,
             sp = &jones[station_p * num_sources];
 
             /* Baseline lengths. */
-            uu = (station_u[station_p] - station_u[station_q]) * 0.5;
-            vv = (station_v[station_p] - station_v[station_q]) * 0.5;
+            factor = M_PI * inv_wavelength;
+            uu = (station_u[station_p] - station_u[station_q]) * factor;
+            vv = (station_v[station_p] - station_v[station_q]) * factor;
 
             /* Modify the baseline distance to include the common components
              * of the bandwidth smearing term. */
@@ -204,8 +216,8 @@ void oskar_correlate_point_time_smearing_omp_d(int num_sources,
                 cos_HA = cos(gha0_rad);
                 sin_Dec = sin(dec0_rad);
                 cos_Dec = cos(dec0_rad);
-                xx = (station_x[station_p] - station_x[station_q]) * 0.5;
-                yy = (station_y[station_p] - station_y[station_q]) * 0.5;
+                xx = (station_x[station_p] - station_x[station_q]) * factor;
+                yy = (station_y[station_p] - station_y[station_q]) * factor;
                 rot_angle = OMEGA_EARTH * time_int_sec;
                 temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
                 du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;

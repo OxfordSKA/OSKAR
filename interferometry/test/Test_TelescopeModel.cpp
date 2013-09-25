@@ -26,6 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cuda_runtime_api.h>
+
 #include <gtest/gtest.h>
 
 #include <oskar_horizon_plane_to_offset_geocentric_cartesian.h>
@@ -33,6 +35,7 @@
 #include <oskar_station_load_config.h>
 #include <oskar_get_error_string.h>
 #include <oskar_mem.h>
+#include <oskar_timer.h>
 
 #include <cmath>
 #include <cstdio>

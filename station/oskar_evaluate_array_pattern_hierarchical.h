@@ -48,14 +48,13 @@ extern "C" {
  *
  * @details
  * Note:
- * - Station x,y,z coordinates used by this function are assumed to be in
- * radians (i.e. pre-multiplied by the wavenumber).
  * - The \p weights buffer must be of complex type matching the same floating
  * point precision as the rest of the memory passed to the function.
  * - The \p signal buffer must hold the signals for every point in the sky and
  * every station. The source dimension is the fastest varying.
  *
  * @param[out] beam          Array of station complex beam amplitudes returned.
+ * @param[in]  wavenumber    Wavenumber (2 pi / wavelength).
  * @param[in]  station       Station model structure.
  * @param[in]  num_points    Number of points at which to evaluate beam.
  * @param[in]  x             Array of horizontal x direction components at
@@ -70,9 +69,9 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_evaluate_array_pattern_hierarchical(oskar_Mem* beam,
-        const oskar_Station* station, int num_points, const oskar_Mem* x,
-        const oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* signal,
-        const oskar_Mem* weights, int* status);
+        double wavenumber, const oskar_Station* station, int num_points,
+        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        const oskar_Mem* signal, const oskar_Mem* weights, int* status);
 
 #ifdef __cplusplus
 }

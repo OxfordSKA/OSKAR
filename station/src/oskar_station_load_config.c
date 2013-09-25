@@ -106,11 +106,10 @@ void oskar_station_load_config(oskar_Station* station,
         ++n;
     }
 
-    /* Record number of elements loaded, and set coordinate units to metres. */
+    /* Record number of elements loaded. */
     if (!(*status))
     {
         station->num_elements = n;
-        station->coord_units = OSKAR_METRES;
     }
 
     /* Free the line buffer and close the file. */

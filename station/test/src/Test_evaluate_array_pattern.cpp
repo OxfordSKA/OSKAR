@@ -183,8 +183,7 @@ static void set_up_image(oskar_Image* image, const oskar_Image* beam_pattern)
 #endif
 
 static oskar_Station* set_up_station1(int num_x, int num_y,
-        int type, double beam_ra_deg, double beam_dec_deg, double freq_hz,
-        int* status)
+        int type, double beam_ra_deg, double beam_dec_deg, int* status)
 {
     oskar_Station* station;
 
@@ -223,8 +222,6 @@ static oskar_Station* set_up_station1(int num_x, int num_y,
     /* Load the station file. */
     oskar_station_analyse(station, &dummy, status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
-    oskar_station_multiply_by_wavenumber(station, freq_hz, status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
 
     /* Set meta-data. */
     oskar_station_set_position(station, 0.0, 70.0 * M_PI / 180.0, 0.0);
@@ -235,14 +232,15 @@ static oskar_Station* set_up_station1(int num_x, int num_y,
 
 static void set_up_pointing(oskar_Mem* weights, oskar_Mem* x, oskar_Mem* y,
         oskar_Mem* z, const oskar_Station* station, const oskar_Mem* lon,
-        const oskar_Mem* lat, double gast, int* status)
+        const oskar_Mem* lat, double gast, double freq_hz, int* status)
 {
-    double beam_x, beam_y, beam_z, st_lat, last;
+    double beam_x, beam_y, beam_z, st_lat, last, wavenumber;
     int type, location, num_elements;
 
     type = oskar_station_type(station);
     location = oskar_station_location(station);
     num_elements = oskar_station_num_elements(station);
+    wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
     last = gast + oskar_station_longitude_rad(station);
     st_lat = oskar_station_latitude_rad(station);
     oskar_mem_init(weights, type | OSKAR_COMPLEX, location,
@@ -254,7 +252,7 @@ static void set_up_pointing(oskar_Mem* weights, oskar_Mem* x, oskar_Mem* y,
             gast, status);
     oskar_evaluate_source_horizontal_lmn((int)oskar_mem_length(lon), x, y, z,
             lon, lat, last, st_lat, status);
-    oskar_evaluate_element_weights_dft(weights, num_elements,
+    oskar_evaluate_element_weights_dft(weights, num_elements, wavenumber,
             oskar_station_element_x_weights_const(station),
             oskar_station_element_y_weights_const(station),
             oskar_station_element_z_weights_const(station),
@@ -263,22 +261,25 @@ static void set_up_pointing(oskar_Mem* weights, oskar_Mem* x, oskar_Mem* y,
 
 static void run_array_pattern(oskar_Image* bp,
         const oskar_Station* station, const oskar_Mem* lon,
-        const oskar_Mem* lat, double gast, const char* message, int* status)
+        const oskar_Mem* lat, double gast, double freq_hz,
+        const char* message, int* status)
 {
     oskar_Mem w, x, y, z, pattern;
     int num_pixels, location;
+    double wavenumber;
 
     /* Get the meta-data. */
     num_pixels = (int)oskar_mem_length(lon);
     location = oskar_station_location(station);
+    wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
 
     /* Initialise temporary arrays. */
     oskar_mem_init(&pattern, oskar_mem_type(&bp->data), location, num_pixels, 1, status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
-    set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, status);
+    set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, freq_hz, status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
     TIMER_START
-    oskar_evaluate_array_pattern(&pattern, station, num_pixels,
+    oskar_evaluate_array_pattern(&pattern, wavenumber, station, num_pixels,
             &x, &y, &z, &w, status);
     cudaDeviceSynchronize();
     TIMER_STOP("%s", message)
@@ -294,14 +295,17 @@ static void run_array_pattern(oskar_Image* bp,
 
 static void run_array_pattern_hierarchical(oskar_Image* bp,
         const oskar_Station* station, const oskar_Mem* lon,
-        const oskar_Mem* lat, double gast, const char* message, int* status)
+        const oskar_Mem* lat, double gast, double freq_hz,
+        const char* message, int* status)
 {
     oskar_Mem w, x, y, z, ones, pattern;
     int num_pixels, location;
+    double wavenumber;
 
     /* Get the meta-data. */
     num_pixels = (int)oskar_mem_length(lon);
     location = oskar_station_location(station);
+    wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
 
     /* Initialise temporary array. */
     oskar_mem_init(&pattern, oskar_mem_type(&bp->data), location, num_pixels, 1, status);
@@ -310,10 +314,10 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
     oskar_mem_init(&ones, oskar_mem_type(&bp->data), location,
             num_pixels * oskar_station_num_elements(station), 1, status);
     oskar_mem_set_value_real(&ones, 1.0, status);
-    set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, status);
+    set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, freq_hz, status);
     TIMER_START
-    oskar_evaluate_array_pattern_hierarchical(&pattern, station, num_pixels,
-            &x, &y, &z, &ones, &w, status);
+    oskar_evaluate_array_pattern_hierarchical(&pattern, wavenumber, station,
+            num_pixels, &x, &y, &z, &ones, &w, status);
     cudaDeviceSynchronize();
     TIMER_STOP("%s", message)
     oskar_mem_free(&w, status);
@@ -410,9 +414,9 @@ void Test_evaluate_array_pattern::test()
 
     /* Set up station models. */
     station_cpu_f = set_up_station1(station_side, station_side, OSKAR_SINGLE,
-            ra_deg, dec_deg, freq_hz, &status);
+            ra_deg, dec_deg, &status);
     station_cpu_d = set_up_station1(station_side, station_side, OSKAR_DOUBLE,
-            ra_deg, dec_deg, freq_hz, &status);
+            ra_deg, dec_deg, &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     station_gpu_f = oskar_station_create_copy(station_cpu_f,
             OSKAR_LOCATION_GPU, &status);
@@ -506,40 +510,40 @@ void Test_evaluate_array_pattern::test()
     CPPUNIT_ASSERT_EQUAL(0, oskar_station_array_is_3d(station_cpu_f));
     CPPUNIT_ASSERT_EQUAL(0, oskar_station_array_is_3d(station_gpu_f));
     run_array_pattern(&bp_o2c_2d_cpu_f, station_cpu_f, &lon_cpu_f, &lat_cpu_f,
-            gast, "Single, o2c, CPU, 2D", &status);
+            gast, freq_hz, "Single, o2c, CPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern(&bp_o2c_2d_gpu_f, station_gpu_f, &lon_gpu_f, &lat_gpu_f,
-            gast, "Single, o2c, GPU, 2D", &status);
+            gast, freq_hz, "Single, o2c, GPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern(&bp_o2c_2d_cpu_d, station_cpu_d, &lon_cpu_d, &lat_cpu_d,
-            gast, "Double, o2c, CPU, 2D", &status);
+            gast, freq_hz, "Double, o2c, CPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern(&bp_o2c_2d_gpu_d, station_gpu_d, &lon_gpu_d, &lat_gpu_d,
-            gast, "Double, o2c, GPU, 2D", &status);
+            gast, freq_hz, "Double, o2c, GPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_c2c_2d_cpu_f, station_cpu_f,
-            &lon_cpu_f, &lat_cpu_f, gast, "Single, c2c, CPU, 2D", &status);
+            &lon_cpu_f, &lat_cpu_f, gast, freq_hz, "Single, c2c, CPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_c2c_2d_gpu_f, station_gpu_f,
-            &lon_gpu_f, &lat_gpu_f, gast, "Single, c2c, GPU, 2D", &status);
+            &lon_gpu_f, &lat_gpu_f, gast, freq_hz, "Single, c2c, GPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_c2c_2d_cpu_d, station_cpu_d,
-            &lon_cpu_d, &lat_cpu_d, gast, "Double, c2c, CPU, 2D", &status);
+            &lon_cpu_d, &lat_cpu_d, gast, freq_hz, "Double, c2c, CPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_c2c_2d_gpu_d, station_gpu_d,
-            &lon_gpu_d, &lat_gpu_d, gast, "Double, c2c, GPU, 2D", &status);
+            &lon_gpu_d, &lat_gpu_d, gast, freq_hz, "Double, c2c, GPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_m2m_2d_cpu_f, station_cpu_f,
-            &lon_cpu_f, &lat_cpu_f, gast, "Single, m2m, CPU, 2D", &status);
+            &lon_cpu_f, &lat_cpu_f, gast, freq_hz, "Single, m2m, CPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_m2m_2d_gpu_f, station_gpu_f,
-            &lon_gpu_f, &lat_gpu_f, gast, "Single, m2m, GPU, 2D", &status);
+            &lon_gpu_f, &lat_gpu_f, gast, freq_hz, "Single, m2m, GPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_m2m_2d_cpu_d, station_cpu_d,
-            &lon_cpu_d, &lat_cpu_d, gast, "Double, m2m, CPU, 2D", &status);
+            &lon_cpu_d, &lat_cpu_d, gast, freq_hz, "Double, m2m, CPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_m2m_2d_gpu_d, station_gpu_d,
-            &lon_gpu_d, &lat_gpu_d, gast, "Double, m2m, GPU, 2D", &status);
+            &lon_gpu_d, &lat_gpu_d, gast, freq_hz, "Double, m2m, GPU, 2D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
     /* Set 3D arrays. */
@@ -555,40 +559,40 @@ void Test_evaluate_array_pattern::test()
     CPPUNIT_ASSERT_EQUAL(1, oskar_station_array_is_3d(station_cpu_f));
     CPPUNIT_ASSERT_EQUAL(1, oskar_station_array_is_3d(station_gpu_f));
     run_array_pattern(&bp_o2c_2d_cpu_f, station_cpu_f, &lon_cpu_f, &lat_cpu_f,
-            gast, "Single, o2c, CPU, 3D", &status);
+            gast, freq_hz, "Single, o2c, CPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern(&bp_o2c_2d_gpu_f, station_gpu_f, &lon_gpu_f, &lat_gpu_f,
-            gast, "Single, o2c, GPU, 3D", &status);
+            gast, freq_hz, "Single, o2c, GPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern(&bp_o2c_2d_cpu_d, station_cpu_d, &lon_cpu_d, &lat_cpu_d,
-            gast, "Double, o2c, CPU, 3D", &status);
+            gast, freq_hz, "Double, o2c, CPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern(&bp_o2c_2d_gpu_d, station_gpu_d, &lon_gpu_d, &lat_gpu_d,
-            gast, "Double, o2c, GPU, 3D", &status);
+            gast, freq_hz, "Double, o2c, GPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_c2c_2d_cpu_f, station_cpu_f,
-            &lon_cpu_f, &lat_cpu_f, gast, "Single, c2c, CPU, 3D", &status);
+            &lon_cpu_f, &lat_cpu_f, gast, freq_hz, "Single, c2c, CPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_c2c_2d_gpu_f, station_gpu_f,
-            &lon_gpu_f, &lat_gpu_f, gast, "Single, c2c, GPU, 3D", &status);
+            &lon_gpu_f, &lat_gpu_f, gast, freq_hz, "Single, c2c, GPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_c2c_2d_cpu_d, station_cpu_d,
-            &lon_cpu_d, &lat_cpu_d, gast, "Double, c2c, CPU, 3D", &status);
+            &lon_cpu_d, &lat_cpu_d, gast, freq_hz, "Double, c2c, CPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_c2c_2d_gpu_d, station_gpu_d,
-            &lon_gpu_d, &lat_gpu_d, gast, "Double, c2c, GPU, 3D", &status);
+            &lon_gpu_d, &lat_gpu_d, gast, freq_hz, "Double, c2c, GPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_m2m_2d_cpu_f, station_cpu_f,
-            &lon_cpu_f, &lat_cpu_f, gast, "Single, m2m, CPU, 3D", &status);
+            &lon_cpu_f, &lat_cpu_f, gast, freq_hz, "Single, m2m, CPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_m2m_2d_gpu_f, station_gpu_f,
-            &lon_gpu_f, &lat_gpu_f, gast, "Single, m2m, GPU, 3D", &status);
+            &lon_gpu_f, &lat_gpu_f, gast, freq_hz, "Single, m2m, GPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_m2m_2d_cpu_d, station_cpu_d,
-            &lon_cpu_d, &lat_cpu_d, gast, "Double, m2m, CPU, 3D", &status);
+            &lon_cpu_d, &lat_cpu_d, gast, freq_hz, "Double, m2m, CPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     run_array_pattern_hierarchical(&bp_m2m_2d_gpu_d, station_gpu_d,
-            &lon_gpu_d, &lat_gpu_d, gast, "Double, m2m, GPU, 3D", &status);
+            &lon_gpu_d, &lat_gpu_d, gast, freq_hz, "Double, m2m, GPU, 3D", &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
     /* Check for consistency. */

@@ -33,8 +33,8 @@
  * @file oskar_correlate_point_time_smearing_cuda.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,10 +64,11 @@ extern "C" {
  * @param[in] d_source_l     Source l-direction cosines from phase centre.
  * @param[in] d_source_m     Source m-direction cosines from phase centre.
  * @param[in] d_source_n     Source n-direction cosines from phase centre.
- * @param[in] d_station_u    Station u-coordinates multiplied by the wavenumber.
- * @param[in] d_station_v    Station v-coordinates multiplied by the wavenumber.
- * @param[in] d_station_x    Station x-coordinates multiplied by the wavenumber.
- * @param[in] d_station_y    Station y-coordinates multiplied by the wavenumber.
+ * @param[in] d_station_u    Station u-coordinates, in metres.
+ * @param[in] d_station_v    Station v-coordinates, in metres.
+ * @param[in] d_station_x    Station x-coordinates, in metres.
+ * @param[in] d_station_y    Station y-coordinates, in metres.
+ * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in] time_int_sec   Time averaging interval, in seconds.
  * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
@@ -82,7 +83,7 @@ void oskar_correlate_point_time_smearing_cuda_f(int num_sources,
         const float* d_source_l, const float* d_source_m,
         const float* d_source_n, const float* d_station_u,
         const float* d_station_v, const float* d_station_x,
-        const float* d_station_y, float frac_bandwidth,
+        const float* d_station_y, float inv_wavelength, float frac_bandwidth,
         float time_int_sec, float gha0_rad, float dec0_rad, float4c* d_vis);
 
 /**
@@ -109,10 +110,11 @@ void oskar_correlate_point_time_smearing_cuda_f(int num_sources,
  * @param[in] d_source_l     Source l-direction cosines from phase centre.
  * @param[in] d_source_m     Source m-direction cosines from phase centre.
  * @param[in] d_source_n     Source n-direction cosines from phase centre.
- * @param[in] d_station_u    Station u-coordinates multiplied by the wavenumber.
- * @param[in] d_station_v    Station v-coordinates multiplied by the wavenumber.
- * @param[in] d_station_x    Station x-coordinates multiplied by the wavenumber.
- * @param[in] d_station_y    Station y-coordinates multiplied by the wavenumber.
+ * @param[in] d_station_u    Station u-coordinates, in metres.
+ * @param[in] d_station_v    Station v-coordinates, in metres.
+ * @param[in] d_station_x    Station x-coordinates, in metres.
+ * @param[in] d_station_y    Station y-coordinates, in metres.
+ * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in] time_int_sec   Time averaging interval, in seconds.
  * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
@@ -127,7 +129,7 @@ void oskar_correlate_point_time_smearing_cuda_d(int num_sources,
         const double* d_source_l, const double* d_source_m,
         const double* d_source_n, const double* d_station_u,
         const double* d_station_v, const double* d_station_x,
-        const double* d_station_y, double frac_bandwidth,
+        const double* d_station_y, double inv_wavelength, double frac_bandwidth,
         double time_int_sec, double gha0_rad, double dec0_rad, double4c* d_vis);
 
 #ifdef __CUDACC__
@@ -153,10 +155,11 @@ void oskar_correlate_point_time_smearing_cuda_d(int num_sources,
  * @param[in] source_l       Source l-direction cosines from phase centre.
  * @param[in] source_m       Source m-direction cosines from phase centre.
  * @param[in] source_n       Source n-direction cosines from phase centre.
- * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
- * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
- * @param[in] station_x      Station x-coordinates multiplied by the wavenumber.
- * @param[in] station_y      Station y-coordinates multiplied by the wavenumber.
+ * @param[in] station_u      Station u-coordinates, in metres.
+ * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] station_x      Station x-coordinates, in metres.
+ * @param[in] station_y      Station y-coordinates, in metres.
+ * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in] time_int_sec   Time averaging interval, in seconds.
  * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
@@ -176,8 +179,9 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         const float* __restrict__ station_u,
         const float* __restrict__ station_v,
         const float* __restrict__ station_x,
-        const float* __restrict__ station_y, const float frac_bandwidth,
-        const float time_int_sec, const float gha0_rad, const float dec0_rad,
+        const float* __restrict__ station_y, const float inv_wavelength,
+        const float frac_bandwidth, const float time_int_sec,
+        const float gha0_rad, const float dec0_rad,
         float4c* __restrict__ vis);
 
 /**
@@ -201,10 +205,11 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
  * @param[in] source_l       Source l-direction cosines from phase centre.
  * @param[in] source_m       Source m-direction cosines from phase centre.
  * @param[in] source_n       Source n-direction cosines from phase centre.
- * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
- * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
- * @param[in] station_x      Station x-coordinates multiplied by the wavenumber.
- * @param[in] station_y      Station y-coordinates multiplied by the wavenumber.
+ * @param[in] station_u      Station u-coordinates, in metres.
+ * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] station_x      Station x-coordinates, in metres.
+ * @param[in] station_y      Station y-coordinates, in metres.
+ * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in] time_int_sec   Time averaging interval, in seconds.
  * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
@@ -224,9 +229,10 @@ void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
         const double* __restrict__ station_u,
         const double* __restrict__ station_v,
         const double* __restrict__ station_x, 
-        const double* __restrict__ station_y, const double frac_bandwidth,
-        const double time_int_sec, const double gha0_rad,
-        const double dec0_rad, double4c* __restrict__ vis);
+        const double* __restrict__ station_y, const double inv_wavelength,
+        const double frac_bandwidth, const double time_int_sec,
+        const double gha0_rad, const double dec0_rad,
+        double4c* __restrict__ vis);
 
 #endif /* __CUDACC__ */
 

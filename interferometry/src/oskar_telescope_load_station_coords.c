@@ -137,9 +137,6 @@ void oskar_telescope_load_station_coords(oskar_Telescope* telescope,
     /* Record the number of station positions loaded. */
     telescope->num_stations = n;
 
-    /* Set the coordinate units to metres. */
-    telescope->coord_units = OSKAR_METRES;
-
     /* Free the line buffer and close the file. */
     if (line) free(line);
     fclose(file);

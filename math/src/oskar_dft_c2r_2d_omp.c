@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_dft_c2r_2d_omp.h"
+#include <oskar_dft_c2r_2d_omp.h>
 #include <math.h>
 
 #ifdef __cplusplus
@@ -34,9 +34,10 @@ extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_dft_c2r_2d_omp_f(const int num_in, const float* x_in,
-        const float* y_in, const float2* data_in, const int num_out,
-        const float* x_out, const float* y_out, float* output)
+void oskar_dft_c2r_2d_omp_f(const int num_in, const float wavenumber,
+        const float* x_in, const float* y_in, const float2* data_in,
+        const int num_out, const float* x_out, const float* y_out,
+        float* output)
 {
     int i_out = 0;
 
@@ -48,8 +49,8 @@ void oskar_dft_c2r_2d_omp_f(const int num_in, const float* x_in,
         float xp_out, yp_out, out = 0.0f; /* Clear output value. */
 
         /* Get the output position. */
-        xp_out = x_out[i_out];
-        yp_out = y_out[i_out];
+        xp_out = wavenumber * x_out[i_out];
+        yp_out = wavenumber * y_out[i_out];
 
         /* Loop over input points. */
         for (i = 0; i < num_in; ++i)
@@ -72,9 +73,10 @@ void oskar_dft_c2r_2d_omp_f(const int num_in, const float* x_in,
 }
 
 /* Double precision. */
-void oskar_dft_c2r_2d_omp_d(const int num_in, const double* x_in,
-        const double* y_in, const double2* data_in, const int num_out,
-        const double* x_out, const double* y_out, double* output)
+void oskar_dft_c2r_2d_omp_d(const int num_in, const double wavenumber,
+        const double* x_in, const double* y_in, const double2* data_in,
+        const int num_out, const double* x_out, const double* y_out,
+        double* output)
 {
     int i_out = 0;
 
@@ -86,8 +88,8 @@ void oskar_dft_c2r_2d_omp_d(const int num_in, const double* x_in,
         double xp_out, yp_out, out = 0.0; /* Clear output value. */
 
         /* Get the output position. */
-        xp_out = x_out[i_out];
-        yp_out = y_out[i_out];
+        xp_out = wavenumber * x_out[i_out];
+        yp_out = wavenumber * y_out[i_out];
 
         /* Loop over input points. */
         for (i = 0; i < num_in; ++i)

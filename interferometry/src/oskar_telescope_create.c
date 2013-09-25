@@ -78,7 +78,6 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->num_stations = num_stations;
     telescope->max_station_size = 0;
     telescope->max_station_depth = 1;
-    telescope->coord_units = OSKAR_METRES;
     telescope->identical_stations = 0;
     telescope->use_common_sky = 1;
     telescope->seed_time_variable_station_element_errors = 0;
@@ -87,7 +86,6 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->altitude_m = 0.0;
     telescope->ra0_rad = 0.0;
     telescope->dec0_rad = 0.0;
-    telescope->wavenumber = 0.0;
     telescope->bandwidth_hz = 0.0;
     telescope->time_average_sec = 0.0;
 

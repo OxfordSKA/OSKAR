@@ -136,9 +136,6 @@ OSKAR_EXPORT
 int oskar_station_apply_element_weight(const oskar_Station* model);
 
 OSKAR_EXPORT
-int oskar_station_element_coord_units(const oskar_Station* model);
-
-OSKAR_EXPORT
 double oskar_station_element_orientation_x_rad(const oskar_Station* model);
 
 OSKAR_EXPORT

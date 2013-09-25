@@ -78,13 +78,6 @@ void oskar_station_save_config(const char* filename,
         return;
     }
 
-    /* Check coordinate units are in metres. */
-    if (station->coord_units != OSKAR_METRES)
-    {
-        *status = OSKAR_ERR_BAD_UNITS;
-        return;
-    }
-
     /* Get pointers to the arrays. */
     x_weights = oskar_station_element_x_weights_const(station);
     y_weights = oskar_station_element_y_weights_const(station);

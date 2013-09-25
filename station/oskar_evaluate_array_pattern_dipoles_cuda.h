@@ -42,7 +42,7 @@ extern "C" {
 
 OSKAR_EXPORT
 void oskar_evaluate_array_pattern_dipoles_cuda_f(int num_antennas,
-        const float* x, const float* y, const float* z,
+        float wavenumber, const float* x, const float* y, const float* z,
         const float* cos_orientation_x, const float* sin_orientation_x,
         const float* cos_orientation_y, const float* sin_orientation_y,
         const float2* weights, int num_sources, const float* l,
@@ -50,7 +50,7 @@ void oskar_evaluate_array_pattern_dipoles_cuda_f(int num_antennas,
 
 OSKAR_EXPORT
 void oskar_evaluate_array_pattern_dipoles_cuda_d(int num_antennas,
-        const double* x, const double* y, const double* z,
+        double wavenumber, const double* x, const double* y, const double* z,
         const double* cos_orientation_x, const double* sin_orientation_x,
         const double* cos_orientation_y, const double* sin_orientation_y,
         const double2* weights, int num_sources, const double* l,
@@ -86,6 +86,7 @@ void oskar_evaluate_array_pattern_dipoles_cuda_d(int num_antennas,
  * The station beam is evaluated using a DFT.
  *
  * @param[in] num_sources        Number of sources.
+ * @param[in] wavenumber         Wavenumber (2 pi / wavelength).
  * @param[in] l                  Source direction cosines in x.
  * @param[in] m                  Source direction cosines in y.
  * @param[in] n                  Source direction cosines in z.
@@ -97,7 +98,7 @@ void oskar_evaluate_array_pattern_dipoles_cuda_d(int num_antennas,
  */
 __global__
 void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
-        const float* x, const float* y, const float* z,
+        const float wavenumber, const float* x, const float* y, const float* z,
         const float* cos_orientation_x, const float* sin_orientation_x,
         const float* cos_orientation_y, const float* sin_orientation_y,
         const float2* weights, const int num_sources, const float* l,
@@ -130,6 +131,7 @@ void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
  * the azimuth orientation of 'b' should normally be 0 degrees.
  *
  * @param[in] num_sources        Number of sources.
+ * @param[in] wavenumber         Wavenumber (2 pi / wavelength).
  * @param[in] l                  Source direction cosines in x.
  * @param[in] m                  Source direction cosines in y.
  * @param[in] n                  Source direction cosines in z.
@@ -141,12 +143,12 @@ void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
  */
 __global__
 void oskar_evaluate_array_pattern_dipoles_cudak_d(const int num_antennas,
-        const double* x, const double* y, const double* z,
-        const double* cos_orientation_x, const double* sin_orientation_x,
-        const double* cos_orientation_y, const double* sin_orientation_y,
-        const double2* weights, const int num_sources, const double* l,
-        const double* m, const double* n, const int max_in_chunk,
-        double4c* pattern);
+        const double wavenumber, const double* x, const double* y,
+        const double* z, const double* cos_orientation_x,
+        const double* sin_orientation_x, const double* cos_orientation_y,
+        const double* sin_orientation_y, const double2* weights,
+        const int num_sources, const double* l, const double* m,
+        const double* n, const int max_in_chunk, double4c* pattern);
 
 #endif /* __CUDACC__ */
 

@@ -37,9 +37,9 @@ extern "C" {
 
 /* Single precision. */
 void oskar_evaluate_element_weights_dft_f(float2* weights,
-        const int num_elements, const float* x, const float* y,
-        const float* z, const float x_beam, const float y_beam,
-        const float z_beam)
+        const int num_elements, const float wavenumber, const float* x,
+        const float* y, const float* z, const float x_beam,
+        const float y_beam, const float z_beam)
 {
     int i;
 
@@ -50,9 +50,9 @@ void oskar_evaluate_element_weights_dft_f(float2* weights,
         float2 weight;
 
         /* Cache input data. */
-        cxi = x[i];
-        cyi = y[i];
-        czi = z[i];
+        cxi = wavenumber * x[i];
+        cyi = wavenumber * y[i];
+        czi = wavenumber * z[i];
 
         /* Compute the geometric phase of the output direction. */
         phase =  cxi * x_beam;
@@ -68,9 +68,9 @@ void oskar_evaluate_element_weights_dft_f(float2* weights,
 
 /* Double precision. */
 void oskar_evaluate_element_weights_dft_d(double2* weights,
-        const int num_elements, const double* x, const double* y,
-        const double* z, const double x_beam, const double y_beam,
-        const double z_beam)
+        const int num_elements, const double wavenumber, const double* x,
+        const double* y, const double* z, const double x_beam,
+        const double y_beam, const double z_beam)
 {
     int i;
 
@@ -81,9 +81,9 @@ void oskar_evaluate_element_weights_dft_d(double2* weights,
         double2 weight;
 
         /* Cache input data. */
-        cxi = x[i];
-        cyi = y[i];
-        czi = z[i];
+        cxi = wavenumber * x[i];
+        cyi = wavenumber * y[i];
+        czi = wavenumber * z[i];
 
         /* Compute the geometric phase of the output direction. */
         phase =  cxi * x_beam;
@@ -99,8 +99,9 @@ void oskar_evaluate_element_weights_dft_d(double2* weights,
 
 /* Wrapper. */
 void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        double x_beam, double y_beam, double z_beam, int* status)
+        double wavenumber, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, double x_beam, double y_beam, double z_beam,
+        int* status)
 {
     int type, location;
 
@@ -161,8 +162,8 @@ void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
         if (location == OSKAR_LOCATION_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_evaluate_element_weights_dft_cuda_d(weights_,
-                    num_elements, x_, y_, z_, x_beam, y_beam, z_beam);
+            oskar_evaluate_element_weights_dft_cuda_d(weights_, num_elements,
+                    wavenumber, x_, y_, z_, x_beam, y_beam, z_beam);
             oskar_cuda_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
@@ -170,8 +171,8 @@ void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
         }
         else if (location == OSKAR_LOCATION_CPU)
         {
-            oskar_evaluate_element_weights_dft_d(weights_,
-                    num_elements, x_, y_, z_, x_beam, y_beam, z_beam);
+            oskar_evaluate_element_weights_dft_d(weights_, num_elements,
+                    wavenumber, x_, y_, z_, x_beam, y_beam, z_beam);
         }
     }
     else if (type == OSKAR_SINGLE)
@@ -187,7 +188,8 @@ void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_evaluate_element_weights_dft_cuda_f(weights_, num_elements,
-                    x_, y_, z_, (float)x_beam, (float)y_beam, (float)z_beam);
+                    (float)wavenumber, x_, y_, z_, (float)x_beam,
+                    (float)y_beam, (float)z_beam);
             oskar_cuda_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
@@ -196,7 +198,8 @@ void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
         else if (location == OSKAR_LOCATION_CPU)
         {
             oskar_evaluate_element_weights_dft_f(weights_, num_elements,
-                    x_, y_, z_, (float)x_beam, (float)y_beam, (float)z_beam);
+                    (float)wavenumber, x_, y_, z_, (float)x_beam,
+                    (float)y_beam, (float)z_beam);
         }
     }
     else

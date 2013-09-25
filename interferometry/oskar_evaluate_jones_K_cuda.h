@@ -52,15 +52,12 @@ extern "C" {
  *
  * The output set of Jones matrices (K) are scalar complex values.
  *
- * Note:
- * Station coordinates u,v,w should be specified in radians at the frequency
- * for which K is evaluated.
- *
  * @param[out] d_jones      Output set of Jones matrices.
  * @param[in]  num_stations Number of stations.
- * @param[in]  d_u          Station u coordinates, in radians.
- * @param[in]  d_v          Station v coordinates, in radians.
- * @param[in]  d_w          Station w coordinates, in radians.
+ * @param[in]  wavenumber   Wavenumber (2 pi / wavelength).
+ * @param[in]  d_u          Station u coordinates, in metres.
+ * @param[in]  d_v          Station v coordinates, in metres.
+ * @param[in]  d_w          Station w coordinates, in metres.
  * @param[in]  num_sources  Number of sources.
  * @param[in]  d_l          Source l-direction cosines.
  * @param[in]  d_m          Source m-direction cosines.
@@ -68,8 +65,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_stations,
-        const float* d_u, const float* d_v, const float* d_w, int num_sources,
-        const float* d_l, const float* d_m, const float* d_n);
+        float wavenumber, const float* d_u, const float* d_v, const float* d_w,
+        int num_sources, const float* d_l, const float* d_m, const float* d_n);
 
 /**
  * @brief
@@ -83,15 +80,12 @@ void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_stations,
  *
  * The output set of Jones matrices (K) are scalar complex values.
  *
- * Note:
- * Station coordinates u,v,w should be specified in radians at the frequency
- * for which K is evaluated.
- *
  * @param[out] d_jones      Output set of Jones matrices.
  * @param[in]  num_stations Number of stations.
- * @param[in]  d_u          Station u coordinates, in radians.
- * @param[in]  d_v          Station v coordinates, in radians.
- * @param[in]  d_w          Station w coordinates, in radians.
+ * @param[in]  wavenumber   Wavenumber (2 pi / wavelength).
+ * @param[in]  d_u          Station u coordinates, in metres.
+ * @param[in]  d_v          Station v coordinates, in metres.
+ * @param[in]  d_w          Station w coordinates, in metres.
  * @param[in]  num_sources  Number of sources.
  * @param[in]  d_l          Source l-direction cosines.
  * @param[in]  d_m          Source m-direction cosines.
@@ -99,8 +93,9 @@ void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_stations,
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_stations,
-        const double* d_u, const double* d_v, const double* d_w, int num_sources,
-        const double* d_l, const double* d_m, const double* d_n);
+        double wavenumber, const double* d_u, const double* d_v,
+        const double* d_w, int num_sources, const double* d_l,
+        const double* d_m, const double* d_n);
 
 #ifdef __CUDACC__
 
@@ -119,6 +114,7 @@ void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_stations,
  * bytes of shared memory.
  *
  * @param[in] n_in     Number of input points.
+ * @param[in] wavenumber Wavenumber (2 pi / wavelength).
  * @param[in] x_in     Array of input x positions.
  * @param[in] y_in     Array of input y positions.
  * @param[in] z_in     Array of input z positions.
@@ -129,10 +125,10 @@ void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_stations,
  * @param[out] weights Matrix of complex DFT weights (n_in columns, n_out rows).
  */
 __global__
-void oskar_evaluate_jones_K_cudak_f(const int n_in, const float* x_in,
-        const float* y_in, const float* z_in, const int n_out,
-        const float* x_out, const float* y_out, const float* z_out,
-        float2* weights);
+void oskar_evaluate_jones_K_cudak_f(const int n_in, const float wavenumber,
+        const float* x_in, const float* y_in, const float* z_in,
+        const int n_out, const float* x_out, const float* y_out,
+        const float* z_out, float2* weights);
 
 /**
  * @brief
@@ -149,6 +145,7 @@ void oskar_evaluate_jones_K_cudak_f(const int n_in, const float* x_in,
  * bytes of shared memory.
  *
  * @param[in] n_in     Number of input points.
+ * @param[in] wavenumber Wavenumber (2 pi / wavelength).
  * @param[in] x_in     Array of input x positions.
  * @param[in] y_in     Array of input y positions.
  * @param[in] z_in     Array of input z positions.
@@ -159,10 +156,10 @@ void oskar_evaluate_jones_K_cudak_f(const int n_in, const float* x_in,
  * @param[out] weights Matrix of complex DFT weights (n_in columns, n_out rows).
  */
 __global__
-void oskar_evaluate_jones_K_cudak_d(const int n_in, const double* x_in,
-        const double* y_in, const double* z_in, const int n_out,
-        const double* x_out, const double* y_out, const double* z_out,
-        double2* weights);
+void oskar_evaluate_jones_K_cudak_d(const int n_in, const double wavenumber,
+        const double* x_in, const double* y_in, const double* z_in,
+        const int n_out, const double* x_out, const double* y_out,
+        const double* z_out, double2* weights);
 
 #endif /* __CUDACC__ */
 

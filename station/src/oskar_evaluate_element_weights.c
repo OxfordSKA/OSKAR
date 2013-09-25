@@ -35,9 +35,9 @@ extern "C" {
 #endif
 
 void oskar_evaluate_element_weights(oskar_Mem* weights,
-        oskar_Mem* weights_error, const oskar_Station* station,
-        double x_beam, double y_beam, double z_beam,
-        oskar_RandomState* random_state, int* status)
+        oskar_Mem* weights_error, double wavenumber,
+        const oskar_Station* station, double x_beam, double y_beam,
+        double z_beam, oskar_RandomState* random_state, int* status)
 {
     int num_elements;
 
@@ -59,7 +59,7 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
         oskar_mem_realloc(weights_error, num_elements, status);
 
     /* Generate DFT weights. */
-    oskar_evaluate_element_weights_dft(weights, num_elements,
+    oskar_evaluate_element_weights_dft(weights, num_elements, wavenumber,
             oskar_station_element_x_weights_const(station),
             oskar_station_element_y_weights_const(station),
             oskar_station_element_z_weights_const(station),

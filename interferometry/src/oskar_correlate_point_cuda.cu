@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_accumulate_baseline_visibility_for_source.h"
-#include "interferometry/oskar_correlate_point_cuda.h"
-#include "math/oskar_sinc.h"
+#include <oskar_accumulate_baseline_visibility_for_source.h>
+#include <oskar_correlate_point_cuda.h>
+#include <oskar_sinc.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +43,7 @@ void oskar_correlate_point_cuda_f(int num_sources,
         const float* d_source_U, const float* d_source_V,
         const float* d_source_l, const float* d_source_m,
         const float* d_station_u, const float* d_station_v,
-        float frac_bandwidth, float4c* d_vis)
+        float inv_wavelength, float frac_bandwidth, float4c* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
@@ -52,7 +52,7 @@ void oskar_correlate_point_cuda_f(int num_sources,
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_station_u,
-            d_station_v, frac_bandwidth, d_vis);
+            d_station_v, inv_wavelength, frac_bandwidth, d_vis);
 }
 
 /* Double precision. */
@@ -62,7 +62,7 @@ void oskar_correlate_point_cuda_d(int num_sources,
         const double* d_source_U, const double* d_source_V,
         const double* d_source_l, const double* d_source_m,
         const double* d_station_u, const double* d_station_v,
-        double frac_bandwidth, double4c* d_vis)
+        double inv_wavelength, double frac_bandwidth, double4c* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
@@ -71,7 +71,7 @@ void oskar_correlate_point_cuda_d(int num_sources,
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_station_u,
-            d_station_v, frac_bandwidth, d_vis);
+            d_station_v, inv_wavelength, frac_bandwidth, d_vis);
 }
 
 #ifdef __cplusplus
@@ -80,6 +80,14 @@ void oskar_correlate_point_cuda_d(int num_sources,
 
 
 /* Kernels. ================================================================ */
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#ifndef M_PIf
+#define M_PIf 3.14159265358979323846f
+#endif
 
 /* Indices into the visibility/baseline matrix. */
 #define AI blockIdx.x /* Column index. */
@@ -99,8 +107,8 @@ void oskar_correlate_point_cudak_f(const int num_sources,
         const float* __restrict__ source_l,
         const float* __restrict__ source_m,
         const float* __restrict__ station_u,
-        const float* __restrict__ station_v, const float frac_bandwidth,
-        float4c* __restrict__ vis)
+        const float* __restrict__ station_v, const float inv_wavelength,
+        const float frac_bandwidth, float4c* __restrict__ vis)
 {
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (AJ >= AI) return;
@@ -109,10 +117,13 @@ void oskar_correlate_point_cudak_f(const int num_sources,
     __shared__ float uu, vv;
     if (threadIdx.x == 0)
     {
+        float factor;
+
         /* Determine UV-distance for baseline modified by the bandwidth
          * smearing parameters. */
-        uu = 0.5f * frac_bandwidth * (station_u[AI] - station_u[AJ]);
-        vv = 0.5f * frac_bandwidth * (station_v[AI] - station_v[AJ]);
+        factor = frac_bandwidth * M_PIf * inv_wavelength;
+        uu = factor * (station_u[AI] - station_u[AJ]);
+        vv = factor * (station_v[AI] - station_v[AJ]);
     }
     __syncthreads();
 
@@ -188,8 +199,8 @@ void oskar_correlate_point_cudak_d(const int num_sources,
         const double* __restrict__ source_l,
         const double* __restrict__ source_m,
         const double* __restrict__ station_u,
-        const double* __restrict__ station_v, const double frac_bandwidth,
-        double4c* __restrict__ vis)
+        const double* __restrict__ station_v, const double inv_wavelength,
+        const double frac_bandwidth, double4c* __restrict__ vis)
 {
     /* Return immediately if in the wrong half of the visibility matrix. */
     if (AJ >= AI) return;
@@ -198,10 +209,13 @@ void oskar_correlate_point_cudak_d(const int num_sources,
     __shared__ double uu, vv;
     if (threadIdx.x == 0)
     {
+        double factor;
+
         /* Determine UV-distance for baseline modified by the bandwidth
          * smearing parameters. */
-        uu = 0.5 * frac_bandwidth * (station_u[AI] - station_u[AJ]);
-        vv = 0.5 * frac_bandwidth * (station_v[AI] - station_v[AJ]);
+        factor = frac_bandwidth * M_PI * inv_wavelength;
+        uu = factor * (station_u[AI] - station_u[AJ]);
+        vv = factor * (station_v[AI] - station_v[AJ]);
     }
     __syncthreads();
 

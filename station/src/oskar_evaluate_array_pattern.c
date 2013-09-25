@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-void oskar_evaluate_array_pattern(oskar_Mem* beam,
+void oskar_evaluate_array_pattern(oskar_Mem* beam, double wavenumber,
         const oskar_Station* station, int num_points,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
         const oskar_Mem* weights, int* status)
@@ -68,13 +68,6 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
             oskar_mem_location(weights) != location)
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
-        return;
-    }
-
-    /* Check that the antenna coordinates are in radians. */
-    if (oskar_station_element_coord_units(station) != OSKAR_RADIANS)
-    {
-        *status = OSKAR_ERR_BAD_UNITS;
         return;
     }
 
@@ -125,12 +118,12 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
 #ifdef OSKAR_HAVE_CUDA
             if (array_is_3d)
             {
-                oskar_dftw_o2c_3d_cuda_d(num_elements, xs, ys, zs,
+                oskar_dftw_o2c_3d_cuda_d(num_elements, wavenumber, xs, ys, zs,
                         weights_, num_points, x_, y_, z_, beam_);
             }
             else
             {
-                oskar_dftw_o2c_2d_cuda_d(num_elements, xs, ys,
+                oskar_dftw_o2c_2d_cuda_d(num_elements, wavenumber, xs, ys,
                         weights_, num_points, x_, y_, beam_);
             }
             oskar_cuda_check_error(status);
@@ -142,12 +135,12 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
         {
             if (array_is_3d)
             {
-                oskar_dftw_o2c_3d_omp_d(num_elements, xs, ys, zs,
+                oskar_dftw_o2c_3d_omp_d(num_elements, wavenumber, xs, ys, zs,
                         weights_, num_points, x_, y_, z_, beam_);
             }
             else
             {
-                oskar_dftw_o2c_2d_omp_d(num_elements, xs, ys,
+                oskar_dftw_o2c_2d_omp_d(num_elements, wavenumber, xs, ys,
                         weights_, num_points, x_, y_, beam_);
             }
         }
@@ -178,12 +171,12 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
 #ifdef OSKAR_HAVE_CUDA
             if (array_is_3d)
             {
-                oskar_dftw_o2c_3d_cuda_f(num_elements, xs, ys, zs,
+                oskar_dftw_o2c_3d_cuda_f(num_elements, wavenumber, xs, ys, zs,
                         weights_, num_points, x_, y_, z_, beam_);
             }
             else
             {
-                oskar_dftw_o2c_2d_cuda_f(num_elements, xs, ys,
+                oskar_dftw_o2c_2d_cuda_f(num_elements, wavenumber, xs, ys,
                         weights_, num_points, x_, y_, beam_);
             }
             oskar_cuda_check_error(status);
@@ -195,12 +188,12 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
         {
             if (array_is_3d)
             {
-                oskar_dftw_o2c_3d_omp_f(num_elements, xs, ys, zs,
+                oskar_dftw_o2c_3d_omp_f(num_elements, wavenumber, xs, ys, zs,
                         weights_, num_points, x_, y_, z_, beam_);
             }
             else
             {
-                oskar_dftw_o2c_2d_omp_f(num_elements, xs, ys,
+                oskar_dftw_o2c_2d_omp_f(num_elements, wavenumber, xs, ys,
                         weights_, num_points, x_, y_, beam_);
             }
         }

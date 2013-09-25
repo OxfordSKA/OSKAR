@@ -33,8 +33,8 @@
  * @file oskar_dft_c2r_2d_cuda.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,14 +52,17 @@ extern "C" {
  * in host code.
  *
  * This function must be supplied with the input x- and y-positions, and the
- * output x- and y-positions. The input positions must be pre-multiplied by a
- * factor k (= 2pi / lambda), and the output positions are direction cosines.
+ * output x- and y-positions. The output positions are direction cosines.
+ *
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
  *
  * The fastest-varying dimension in the output array is along x. The output is
  * assumed to be completely real, so the conjugate copy of the input data
  * should not be supplied.
  *
  * @param[in] num_in       Number of input points.
+ * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
  * @param[in] data_in      Array of complex input data (length 2 * n_in).
@@ -69,9 +72,9 @@ extern "C" {
  * @param[out] output      Array of computed output points.
  */
 OSKAR_EXPORT
-void oskar_dft_c2r_2d_cuda_f(int num_in, const float* x_in, const float* y_in,
-        const float2* data_in, int num_out, const float* x_out,
-        const float* y_out, float* output);
+void oskar_dft_c2r_2d_cuda_f(int num_in, float wavenumber, const float* x_in,
+        const float* y_in, const float2* data_in, int num_out,
+        const float* x_out, const float* y_out, float* output);
 
 /**
  * @brief
@@ -85,14 +88,17 @@ void oskar_dft_c2r_2d_cuda_f(int num_in, const float* x_in, const float* y_in,
  * in host code.
  *
  * This function must be supplied with the input x- and y-positions, and the
- * output x- and y-positions. The input positions must be pre-multiplied by a
- * factor k (= 2 pi / lambda), and the output positions are direction cosines.
+ * output x- and y-positions. The output positions are direction cosines.
+ *
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
  *
  * The fastest-varying dimension in the output array is along x. The output is
  * assumed to be completely real, so the conjugate copy of the input data
  * should not be supplied.
  *
  * @param[in] num_in       Number of input points.
+ * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
  * @param[in] data_in      Array of complex input data (length 2 * n_in).
@@ -102,9 +108,9 @@ void oskar_dft_c2r_2d_cuda_f(int num_in, const float* x_in, const float* y_in,
  * @param[out] output      Array of computed output points.
  */
 OSKAR_EXPORT
-void oskar_dft_c2r_2d_cuda_d(int num_in, const double* x_in, const double* y_in,
-        const double2* data_in, int num_out, const double* x_out,
-        const double* y_out, double* output);
+void oskar_dft_c2r_2d_cuda_d(int num_in, double wavenumber, const double* x_in,
+        const double* y_in, const double2* data_in, int num_out,
+        const double* x_out, const double* y_out, double* output);
 
 #ifdef __CUDACC__
 
@@ -121,7 +127,8 @@ void oskar_dft_c2r_2d_cuda_d(int num_in, const double* x_in, const double* y_in,
  * so the Hermitian copies should not be passed in the input data, and the
  * imaginary part of the output is not evaluated.
  *
- * The input positions must be pre-multiplied by a factor k (= 2pi / lambda).
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
  *
  * The computed points are returned in the \p output array, which must be
  * pre-sized to length n_out. The returned values are not normalised to the
@@ -137,6 +144,7 @@ void oskar_dft_c2r_2d_cuda_d(int num_in, const double* x_in, const double* y_in,
  * ============================================================================
  *
  * @param[in] n_in         Number of input points.
+ * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
  * @param[in] data_in      Array of complex input data.
@@ -148,6 +156,7 @@ void oskar_dft_c2r_2d_cuda_d(int num_in, const double* x_in, const double* y_in,
  */
 __global__
 void oskar_dft_c2r_2d_cudak_f(int n_in,
+        const float wavenumber,
         const float* __restrict__ x_in,
         const float* __restrict__ y_in,
         const float2* __restrict__ data_in,
@@ -170,7 +179,8 @@ void oskar_dft_c2r_2d_cudak_f(int n_in,
  * so the Hermitian copies should not be passed in the input data, and the
  * imaginary part of the output is not evaluated.
  *
- * The input positions must be pre-multiplied by a factor k (= 2pi / lambda).
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
  *
  * The computed points are returned in the \p output array, which must be
  * pre-sized to length n_out. The returned values are not normalised to the
@@ -186,6 +196,7 @@ void oskar_dft_c2r_2d_cudak_f(int n_in,
  * ============================================================================
  *
  * @param[in] n_in         Number of input points.
+ * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
  * @param[in] data_in      Array of complex input data.
@@ -197,6 +208,7 @@ void oskar_dft_c2r_2d_cudak_f(int n_in,
  */
 __global__
 void oskar_dft_c2r_2d_cudak_d(int n_in,
+        const double wavenumber,
         const double* __restrict__ x_in,
         const double* __restrict__ y_in,
         const double2* __restrict__ data_in,

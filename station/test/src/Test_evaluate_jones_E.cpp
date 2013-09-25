@@ -84,9 +84,6 @@ TEST(evaluate_jones_E, evaluate_e)
                 oskar_mem_float(oskar_station_element_x_weights(s), &error),
                 oskar_mem_float(oskar_station_element_y_weights(s), &error),
                 &x_pos[0], station_dim, &x_pos[0], station_dim);
-
-        oskar_station_multiply_by_wavenumber(s, frequency, &error);
-        ASSERT_EQ(0, error) << oskar_get_error_string(error);
     }
     oskar_telescope_analyse(tel_cpu, &error);
     oskar_telescope_set_common_horizon(tel_cpu, OSKAR_TRUE);
@@ -144,8 +141,8 @@ TEST(evaluate_jones_E, evaluate_e)
 
     oskar_StationWork* work = oskar_station_work_create(OSKAR_SINGLE,
             OSKAR_LOCATION_GPU, &error);
-    oskar_evaluate_jones_E(E_gpu, sky_gpu, tel_gpu, gast, work, random_state,
-            &error);
+    oskar_evaluate_jones_E(E_gpu, sky_gpu, tel_gpu, gast, frequency, work,
+            random_state, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Free the sky models.

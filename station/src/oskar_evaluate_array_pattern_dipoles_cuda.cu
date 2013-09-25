@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_array_pattern_dipoles_cuda.h"
+#include <oskar_evaluate_array_pattern_dipoles_cuda.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,7 +36,7 @@ extern "C" {
 
 /* Single precision. */
 void oskar_evaluate_array_pattern_dipoles_cuda_f(int num_antennas,
-        const float* x, const float* y, const float* z,
+        float wavenumber, const float* x, const float* y, const float* z,
         const float* cos_orientation_x, const float* sin_orientation_x,
         const float* cos_orientation_y, const float* sin_orientation_y,
         const float2* weights, int num_sources, const float* l,
@@ -47,14 +47,14 @@ void oskar_evaluate_array_pattern_dipoles_cuda_f(int num_antennas,
     shared_mem = 9 * max_in_chunk * sizeof(float);
     oskar_evaluate_array_pattern_dipoles_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (num_antennas,
-            x, y, z, cos_orientation_x, sin_orientation_x,
+            wavenumber, x, y, z, cos_orientation_x, sin_orientation_x,
             cos_orientation_y, sin_orientation_y,
             weights, num_sources, l, m, n, max_in_chunk, pattern);
 }
 
 /* Double precision. */
 void oskar_evaluate_array_pattern_dipoles_cuda_d(int num_antennas,
-        const double* x, const double* y, const double* z,
+        double wavenumber, const double* x, const double* y, const double* z,
         const double* cos_orientation_x, const double* sin_orientation_x,
         const double* cos_orientation_y, const double* sin_orientation_y,
         const double2* weights, int num_sources, const double* l,
@@ -65,7 +65,7 @@ void oskar_evaluate_array_pattern_dipoles_cuda_d(int num_antennas,
     shared_mem = 9 * max_in_chunk * sizeof(double);
     oskar_evaluate_array_pattern_dipoles_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (num_antennas,
-            x, y, z, cos_orientation_x, sin_orientation_x,
+            wavenumber, x, y, z, cos_orientation_x, sin_orientation_x,
             cos_orientation_y, sin_orientation_y,
             weights, num_sources, l, m, n, max_in_chunk, pattern);
 }
@@ -81,7 +81,7 @@ extern __shared__ double2 smem_d[];
 /* Value for max_in_chunk should be 448 in single precision. */
 __global__
 void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
-        const float* x, const float* y, const float* z,
+        const float wavenumber, const float* x, const float* y, const float* z,
         const float* cos_orientation_x, const float* sin_orientation_x,
         const float* cos_orientation_y, const float* sin_orientation_y,
         const float2* weights, const int num_sources, const float* l,
@@ -121,6 +121,11 @@ void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
     float2* cox = cp + max_in_chunk; // Cached orientation x data.
     float2* coy = cox + max_in_chunk; // Cached orientation y data.
     float* cz = (float*)(coy + max_in_chunk); // Cached z positions.
+
+    // Multiply direction cosines by wavenumber.
+    ll *= wavenumber;
+    lm *= wavenumber;
+    ln *= wavenumber;
 
     // Cache a chunk of input positions and weights into shared memory.
     for (int start = 0; start < num_antennas; start += max_in_chunk)
@@ -199,12 +204,12 @@ void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
 /* Value for max_in_chunk should be 224 in double precision. */
 __global__
 void oskar_evaluate_array_pattern_dipoles_cudak_d(const int num_antennas,
-        const double* x, const double* y, const double* z,
-        const double* cos_orientation_x, const double* sin_orientation_x,
-        const double* cos_orientation_y, const double* sin_orientation_y,
-        const double2* weights, const int num_sources, const double* l,
-        const double* m, const double* n, const int max_in_chunk,
-        double4c* pattern)
+        const double wavenumber, const double* x, const double* y,
+        const double* z, const double* cos_orientation_x,
+        const double* sin_orientation_x, const double* cos_orientation_y,
+        const double* sin_orientation_y, const double2* weights,
+        const int num_sources, const double* l, const double* m,
+        const double* n, const int max_in_chunk, double4c* pattern)
 {
     // Source index being processed by the thread.
     const int s = blockIdx.x * blockDim.x + threadIdx.x;
@@ -239,6 +244,11 @@ void oskar_evaluate_array_pattern_dipoles_cudak_d(const int num_antennas,
     double2* cox = cp + max_in_chunk; // Cached orientation x data.
     double2* coy = cox + max_in_chunk; // Cached orientation y data.
     double* cz = (double*)(coy + max_in_chunk); // Cached z positions.
+
+    // Multiply direction cosines by wavenumber.
+    ll *= wavenumber;
+    lm *= wavenumber;
+    ln *= wavenumber;
 
     // Cache a chunk of input positions and weights into shared memory.
     for (int start = 0; start < num_antennas; start += max_in_chunk)

@@ -38,6 +38,12 @@
 #include <private_station_work.h>
 
 #include <oskar_mem.h>
+#include <math.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,15 +55,15 @@ extern "C" {
 static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, double gast,
-        oskar_StationWork* work, oskar_RandomState* random_states,
-        int depth, int* status);
+        double frequency_hz, oskar_StationWork* work,
+        oskar_RandomState* random_states, int depth, int* status);
 
 
 void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, double gast,
-        oskar_StationWork* work, oskar_RandomState* random_states,
-        int* status)
+        double frequency_hz, oskar_StationWork* work,
+        oskar_RandomState* random_states, int* status)
 {
     int start;
 
@@ -77,7 +83,8 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
     if (!oskar_station_has_child(station))
     {
         oskar_evaluate_station_beam_aperture_array_private(beam, station,
-                num_points, x, y, z, gast, work, random_states, 0, status);
+                num_points, x, y, z, gast, frequency_hz, work, random_states,
+                0, status);
     }
     else
     {
@@ -99,8 +106,8 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
 
             /* Start recursive call at depth 0. */
             oskar_evaluate_station_beam_aperture_array_private(&c_beam, station,
-                    chunk_size, &c_x, &c_y, &c_z, gast, work, random_states, 0,
-                    status);
+                    chunk_size, &c_x, &c_y, &c_z, gast, frequency_hz, work,
+                    random_states, 0, status);
         }
     }
 }
@@ -108,26 +115,20 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
 static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, double gast,
-        oskar_StationWork* work, oskar_RandomState* random_states,
-        int depth, int* status)
+        double frequency_hz, oskar_StationWork* work,
+        oskar_RandomState* random_states, int depth, int* status)
 {
-    double beam_x, beam_y, beam_z;
+    double beam_x, beam_y, beam_z, wavenumber;
     oskar_Mem *weights, *weights_error;
     int num_elements;
 
     num_elements = oskar_station_num_elements(station);
     weights = &work->weights;
     weights_error = &work->weights_error;
+    wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
 
     /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Check the coordinate units. */
-    if (oskar_station_element_coord_units(station) != OSKAR_RADIANS)
-    {
-        *status = OSKAR_ERR_BAD_UNITS;
-        return;
-    }
 
     /* Check that the maximum depth in the hierarchy has not been exceeded. */
     if (depth >= OSKAR_MAX_STATION_DEPTH)
@@ -157,10 +158,11 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
                         beam : &work->array_pattern);
 
                 /* Generate beamforming weights and evaluate array pattern. */
-                oskar_evaluate_element_weights(weights, weights_error, station,
-                        beam_x, beam_y, beam_z, random_states, status);
-                oskar_evaluate_array_pattern(array, station, num_points,
-                        x, y, z, weights, status);
+                oskar_evaluate_element_weights(weights, weights_error,
+                        wavenumber, station, beam_x, beam_y, beam_z,
+                        random_states, status);
+                oskar_evaluate_array_pattern(array, wavenumber, station,
+                        num_points, x, y, z, weights, status);
 
                 /* Normalise array response if required. */
                 if (oskar_station_normalise_beam(station))
@@ -218,10 +220,11 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             {
                 /* Generate beamforming weights and evaluate beam from
                  * dipoles that are oriented differently. */
-                oskar_evaluate_element_weights(weights, weights_error, station,
-                        beam_x, beam_y, beam_z, random_states, status);
-                oskar_evaluate_array_pattern_dipoles(beam, station, num_points,
-                        x, y, z, weights, status);
+                oskar_evaluate_element_weights(weights, weights_error,
+                        wavenumber, station, beam_x, beam_y, beam_z,
+                        random_states, status);
+                oskar_evaluate_array_pattern_dipoles(beam, wavenumber, station,
+                        num_points, x, y, z, weights, status);
 
                 /* Normalise array response if required. */
                 if (oskar_station_normalise_beam(station))
@@ -265,14 +268,14 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             /* Recursive call. */
             oskar_evaluate_station_beam_aperture_array_private(&output,
                     oskar_station_child_const(station, i), num_points, x, y, z,
-                    gast, work, random_states, depth + 1, status);
+                    gast, frequency_hz, work, random_states, depth + 1, status);
         }
 
         /* Generate beamforming weights and form beam from child stations. */
-        oskar_evaluate_element_weights(weights, weights_error, station,
-                beam_x, beam_y, beam_z, random_states, status);
-        oskar_evaluate_array_pattern_hierarchical(beam, station, num_points,
-                x, y, z, signal, weights, status);
+        oskar_evaluate_element_weights(weights, weights_error, wavenumber,
+                station, beam_x, beam_y, beam_z, random_states, status);
+        oskar_evaluate_array_pattern_hierarchical(beam, wavenumber, station,
+                num_points, x, y, z, signal, weights, status);
 
         /* Normalise array response if required. */
         if (oskar_station_normalise_beam(station))

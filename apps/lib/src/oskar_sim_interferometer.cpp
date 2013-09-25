@@ -71,7 +71,7 @@ using std::vector;
 
 static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         oskar_Timers* timers, const oskar_Sky* sky,
-        oskar_Telescope* telescope, const oskar_Settings* settings,
+        const oskar_Telescope* telescope, const oskar_Settings* settings,
         double frequency, int chunk_index, int num_sky_chunks,
         oskar_Sky* local_sky, oskar_StationWork* work, int* status);
 
@@ -306,7 +306,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 
 static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         oskar_Timers* timers, const oskar_Sky* sky,
-        oskar_Telescope* telescope, const oskar_Settings* settings,
+        const oskar_Telescope* telescope, const oskar_Settings* settings,
         double frequency, int chunk_index, int num_sky_chunks,
         oskar_Sky* local_sky, oskar_StationWork* work, int* status)
 {
@@ -348,9 +348,6 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     n_baselines = n_stations * (n_stations - 1) / 2;
     complx = type | OSKAR_COMPLEX;
     matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
-
-    /* Scale telescope model by wavenumber. */
-    oskar_telescope_multiply_by_wavenumber(telescope, frequency, status);
 
     /* Copy sky model for frequency scaling. */
     sky_gpu = oskar_sky_create_copy(sky, OSKAR_LOCATION_GPU, status);
@@ -446,8 +443,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
             oskar_timer_pause(timers->tmr_R);
 
             oskar_timer_resume(timers->tmr_E);
-            oskar_evaluate_jones_E(E, local_sky, telescope, gast, work,
-                    random_state, status);
+            oskar_evaluate_jones_E(E, local_sky, telescope, gast, frequency,
+                    work, random_state, status);
             oskar_timer_pause(timers->tmr_E);
 
             oskar_timer_resume(timers->tmr_join);
@@ -478,7 +475,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
                 /* Evaluate interferometer phase (K), join Jones, correlate. */
                 oskar_timer_resume(timers->tmr_K);
-                oskar_evaluate_jones_K(K, oskar_sky_l_const(local_sky),
+                oskar_evaluate_jones_K(K, frequency,
+                        oskar_sky_l_const(local_sky),
                         oskar_sky_m_const(local_sky),
                         oskar_sky_n_const(local_sky), &u, &v, &w, status);
                 oskar_timer_pause(timers->tmr_K);

@@ -37,6 +37,11 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <cmath>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
 
 enum OpType { O2C, C2C, M2M, UNDEF };
 
@@ -155,7 +160,6 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
             num_elements, &status);
     if (status) return status;
     station->array_is_3d = (evaluate_2d) ? OSKAR_FALSE : OSKAR_TRUE;
-    station->coord_units = OSKAR_RADIANS;
 
     oskar_Mem x, y, z;
     oskar_mem_init(&x, precision, loc, num_directions, OSKAR_TRUE, &status);
@@ -175,8 +179,8 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
         oskar_timer_start(tmr);
         for (int i = 0; i < niter; ++i)
         {
-            oskar_evaluate_array_pattern(&beam, station, num_directions, &x,
-                    &y, &z, &weights, &status);
+            oskar_evaluate_array_pattern(&beam, 2.0 * M_PI, station,
+                    num_directions, &x, &y, &z, &weights, &status);
         }
         time_taken = oskar_timer_elapsed(tmr);
     }
@@ -202,7 +206,7 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
         oskar_timer_start(tmr);
         for (int i = 0; i < niter; ++i)
         {
-            oskar_evaluate_array_pattern_hierarchical(&beam, station,
+            oskar_evaluate_array_pattern_hierarchical(&beam, 2.0 * M_PI, station,
                     num_directions, &x, &y, &z, &signal, &weights, &status);
         }
         time_taken = oskar_timer_elapsed(tmr);

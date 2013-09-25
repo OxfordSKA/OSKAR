@@ -27,12 +27,9 @@
  */
 
 #include <math.h>
-#include "interferometry/oskar_accumulate_baseline_visibility_for_source.h"
-#include "interferometry/oskar_correlate_gaussian_time_smearing_omp.h"
-#include "math/oskar_sinc.h"
-
-#define ONE_OVER_2PI  0.159154943091895335768884   /* 1 / (2 * pi) */
-#define ONE_OVER_2PIf 0.159154943091895335768884f  /* 1 / (2 * pi) */
+#include <oskar_accumulate_baseline_visibility_for_source.h>
+#include <oskar_correlate_gaussian_time_smearing_omp.h>
+#include <oskar_sinc.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -58,7 +55,7 @@ void oskar_correlate_gaussian_time_smearing_omp_f(int num_sources,
         const float* source_a, const float* source_b, const float* source_c,
         const float* station_u, const float* station_v,
         const float* station_x, const float* station_y,
-        float frac_bandwidth, float time_int_sec,
+        float inv_wavelength, float frac_bandwidth, float time_int_sec,
         float gha0_rad, float dec0_rad, float4c* vis)
 {
     int station_q;
@@ -99,8 +96,8 @@ void oskar_correlate_gaussian_time_smearing_omp_f(int num_sources,
             sp = &jones[station_p * num_sources];
 
             /* Baseline lengths. */
-            uu = (station_u[station_p] - station_u[station_q]) * ONE_OVER_2PIf;
-            vv = (station_v[station_p] - station_v[station_q]) * ONE_OVER_2PIf;
+            uu = (station_u[station_p] - station_u[station_q]) * inv_wavelength;
+            vv = (station_v[station_p] - station_v[station_q]) * inv_wavelength;
 
             /* Quantities needed for evaluating source with Gaussian term. */
             uu2  = uu * uu;
@@ -120,8 +117,9 @@ void oskar_correlate_gaussian_time_smearing_omp_f(int num_sources,
                 cos_HA = cosf(gha0_rad);
                 sin_Dec = sinf(dec0_rad);
                 cos_Dec = cosf(dec0_rad);
-                xx = (station_x[station_p] - station_x[station_q]) * 0.5f;
-                yy = (station_y[station_p] - station_y[station_q]) * 0.5f;
+                temp = M_PIf * inv_wavelength;
+                xx = (station_x[station_p] - station_x[station_q]) * temp;
+                yy = (station_y[station_p] - station_y[station_q]) * temp;
                 rot_angle = OMEGA_EARTHf * time_int_sec;
                 temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
                 du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
@@ -180,7 +178,7 @@ void oskar_correlate_gaussian_time_smearing_omp_d(int num_sources,
         const double* source_a, const double* source_b, const double* source_c,
         const double* station_u, const double* station_v,
         const double* station_x, const double* station_y,
-        double frac_bandwidth, double time_int_sec,
+        double inv_wavelength, double frac_bandwidth, double time_int_sec,
         double gha0_rad, double dec0_rad, double4c* vis)
 {
     int station_q;
@@ -213,8 +211,8 @@ void oskar_correlate_gaussian_time_smearing_omp_d(int num_sources,
             sp = &jones[station_p * num_sources];
 
             /* Baseline lengths. */
-            uu = (station_u[station_p] - station_u[station_q]) * ONE_OVER_2PI;
-            vv = (station_v[station_p] - station_v[station_q]) * ONE_OVER_2PI;
+            uu = (station_u[station_p] - station_u[station_q]) * inv_wavelength;
+            vv = (station_v[station_p] - station_v[station_q]) * inv_wavelength;
 
             /* Quantities needed for evaluating source with Gaussian term. */
             uu2  = uu * uu;
@@ -234,8 +232,9 @@ void oskar_correlate_gaussian_time_smearing_omp_d(int num_sources,
                 cos_HA = cos(gha0_rad);
                 sin_Dec = sin(dec0_rad);
                 cos_Dec = cos(dec0_rad);
-                xx = (station_x[station_p] - station_x[station_q]) * 0.5;
-                yy = (station_y[station_p] - station_y[station_q]) * 0.5;
+                temp = M_PI * inv_wavelength;
+                xx = (station_x[station_p] - station_x[station_q]) * temp;
+                yy = (station_y[station_p] - station_y[station_q]) * temp;
                 rot_angle = OMEGA_EARTH * time_int_sec;
                 temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
                 du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;

@@ -56,21 +56,28 @@ void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
     type = oskar_mem_type(theta);
 
     /* Check that all arrays are co-located. */
-    if (oskar_mem_location(theta) != location || oskar_mem_location(phi) != location)
-        *status = OSKAR_ERR_BAD_LOCATION;
+    if (oskar_mem_location(theta) != location ||
+            oskar_mem_location(phi) != location)
+    {
+        *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return;
+    }
 
     /* Check that the pattern array is a complex matrix. */
-    if (!oskar_mem_is_complex(pattern) ||
-            !oskar_mem_is_matrix(pattern))
+    if (!oskar_mem_is_complex(pattern) || !oskar_mem_is_matrix(pattern))
+    {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
 
     /* Check that the dimensions are OK. */
-    if ((int)oskar_mem_length(theta) < num_points || (int)oskar_mem_length(phi) < num_points ||
+    if ((int)oskar_mem_length(theta) < num_points ||
+            (int)oskar_mem_length(phi) < num_points ||
             (int)oskar_mem_length(pattern) < num_points)
+    {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-
-    /* Check if safe to proceed. */
-    if (*status) return;
+        return;
+    }
 
     /* Check the location. */
     if (location == OSKAR_LOCATION_GPU)
@@ -79,14 +86,16 @@ void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
         if (type == OSKAR_SINGLE)
         {
             oskar_evaluate_dipole_pattern_cuda_f(num_points,
-                    (const float*)theta->data, (const float*)phi->data,
-                    return_x_dipole, (float4c*)pattern->data);
+                    oskar_mem_float_const(theta, status),
+                    oskar_mem_float_const(phi, status), return_x_dipole,
+                    oskar_mem_float4c(pattern, status));
         }
         else if (type == OSKAR_DOUBLE)
         {
             oskar_evaluate_dipole_pattern_cuda_d(num_points,
-                    (const double*)theta->data, (const double*)phi->data,
-                    return_x_dipole, (double4c*)pattern->data);
+                    oskar_mem_double_const(theta, status),
+                    oskar_mem_double_const(phi, status), return_x_dipole,
+                    oskar_mem_double4c(pattern, status));
         }
         oskar_cuda_check_error(status);
 #else
@@ -95,6 +104,7 @@ void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
     }
     else if (location == OSKAR_LOCATION_CPU)
     {
+        /* TODO CPU version. */
         *status = OSKAR_ERR_BAD_LOCATION;
     }
 }

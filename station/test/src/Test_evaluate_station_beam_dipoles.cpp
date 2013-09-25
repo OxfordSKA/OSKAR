@@ -140,8 +140,9 @@ void Test_evaluate_station_beam_dipoles::test()
     oskar_Mem sin_orientation_y(&sin_orn_y_cpu, OSKAR_LOCATION_GPU);
 
     // Call the kernel.
+    double wavenumber = 2.0 * M_PI * freq / 299792458.0;
     TIMER_START
-    oskar_evaluate_array_pattern_dipoles_cuda_d (num_antennas,
+    oskar_evaluate_array_pattern_dipoles_cuda_d (num_antennas, wavenumber,
             oskar_mem_double_const(&antenna_x, &status),
             oskar_mem_double_const(&antenna_y, &status),
             oskar_mem_double_const(&antenna_z, &status),

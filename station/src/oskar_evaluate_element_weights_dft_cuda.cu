@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_element_weights_dft_cuda.h"
+#include <oskar_evaluate_element_weights_dft_cuda.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,26 +36,28 @@ extern "C" {
 
 /* Single precision. */
 void oskar_evaluate_element_weights_dft_cuda_f(float2* d_weights,
-        int num_elements, const float* d_x, const float* d_y,
-        const float* d_z, float x_beam, float y_beam, float z_beam)
+        int num_elements, float wavenumber, const float* d_x,
+        const float* d_y, const float* d_z, float x_beam, float y_beam,
+        float z_beam)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_elements + num_threads - 1) / num_threads;
     oskar_evaluate_element_weights_dft_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_weights, num_elements,
-            d_x, d_y, d_z, x_beam, y_beam, z_beam);
+            wavenumber, d_x, d_y, d_z, x_beam, y_beam, z_beam);
 }
 
 /* Double precision. */
 void oskar_evaluate_element_weights_dft_cuda_d(double2* d_weights,
-        int num_elements, const double* d_x, const double* d_y,
-        const double* d_z, double x_beam, double y_beam, double z_beam)
+        int num_elements, double wavenumber, const double* d_x,
+        const double* d_y, const double* d_z, double x_beam, double y_beam,
+        double z_beam)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_elements + num_threads - 1) / num_threads;
     oskar_evaluate_element_weights_dft_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_weights, num_elements,
-            d_x, d_y, d_z, x_beam, y_beam, z_beam);
+            wavenumber, d_x, d_y, d_z, x_beam, y_beam, z_beam);
 }
 
 
@@ -64,9 +66,9 @@ void oskar_evaluate_element_weights_dft_cuda_d(double2* d_weights,
 /* Single precision. */
 __global__
 void oskar_evaluate_element_weights_dft_cudak_f(float2* weights,
-        const int n_in, const float* x_in, const float* y_in,
-        const float* z_in, const float x_out, const float y_out,
-        const float z_out)
+        const int n_in, const float wavenumber, const float* x_in,
+        const float* y_in, const float* z_in, const float x_out,
+        const float y_out, const float z_out)
 {
     float cxi, cyi, czi, phase;
     float2 weight;
@@ -76,9 +78,9 @@ void oskar_evaluate_element_weights_dft_cudak_f(float2* weights,
     if (i >= n_in) return;
 
     /* Cache input data from global memory. */
-    cxi = x_in[i];
-    cyi = y_in[i];
-    czi = z_in[i];
+    cxi = wavenumber * x_in[i];
+    cyi = wavenumber * y_in[i];
+    czi = wavenumber * z_in[i];
 
     /* Compute the geometric phase of the output direction. */
     phase =  cxi * x_out;
@@ -93,9 +95,9 @@ void oskar_evaluate_element_weights_dft_cudak_f(float2* weights,
 /* Double precision. */
 __global__
 void oskar_evaluate_element_weights_dft_cudak_d(double2* weights,
-        const int n_in, const double* x_in, const double* y_in,
-        const double* z_in, const double x_out, const double y_out,
-        const double z_out)
+        const int n_in, const double wavenumber, const double* x_in,
+        const double* y_in, const double* z_in, const double x_out,
+        const double y_out, const double z_out)
 {
     double cxi, cyi, czi, phase;
     double2 weight;
@@ -105,9 +107,9 @@ void oskar_evaluate_element_weights_dft_cudak_d(double2* weights,
     if (i >= n_in) return;
 
     /* Cache input data from global memory. */
-    cxi = x_in[i];
-    cyi = y_in[i];
-    czi = z_in[i];
+    cxi = wavenumber * x_in[i];
+    cyi = wavenumber * y_in[i];
+    czi = wavenumber * z_in[i];
 
     /* Compute the geometric phase of the output direction. */
     phase =  cxi * x_out;

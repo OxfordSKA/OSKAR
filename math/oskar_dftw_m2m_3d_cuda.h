@@ -33,8 +33,8 @@
  * @file oskar_dftw_m2m_3d_cuda.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,7 +49,8 @@ extern "C" {
  * This CUDA function performs a 3D complex-matrix-to-complex-matrix DFT using
  * the supplied complex weights and complex input data.
  *
- * The input positions must be pre-multiplied by a factor k (= 2pi / lambda).
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
  *
  * The input data must be supplied in an array of size \p n_out * \p n_in.
  * It is accessed in such a way that the output dimension must be the
@@ -62,6 +63,7 @@ extern "C" {
  * Note that all pointers refer to device memory.
  *
  * @param[in] n_in         Number of input points.
+ * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
  * @param[in] d_x_in       Array of input x positions.
  * @param[in] d_y_in       Array of input y positions.
  * @param[in] d_z_in       Array of input z positions.
@@ -74,7 +76,7 @@ extern "C" {
  * @param[out] d_output    Array of computed output points (see note, above).
  */
 OSKAR_EXPORT
-void oskar_dftw_m2m_3d_cuda_f(int n_in, const float* d_x_in,
+void oskar_dftw_m2m_3d_cuda_f(int n_in, float wavenumber, const float* d_x_in,
         const float* d_y_in, const float* d_z_in, const float2* d_weights_in,
         int n_out, const float* d_x_out, const float* d_y_out,
         const float* d_z_out, const float4c* d_data, float4c* d_output);
@@ -88,7 +90,8 @@ void oskar_dftw_m2m_3d_cuda_f(int n_in, const float* d_x_in,
  * This CUDA function performs a 3D complex-matrix-to-complex-matrix DFT using
  * the supplied complex weights and complex input data.
  *
- * The input positions must be pre-multiplied by a factor k (= 2pi / lambda).
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
  *
  * The input data must be supplied in an array of size \p n_out * \p n_in.
  * It is accessed in such a way that the output dimension must be the
@@ -101,6 +104,7 @@ void oskar_dftw_m2m_3d_cuda_f(int n_in, const float* d_x_in,
  * Note that all pointers refer to device memory.
  *
  * @param[in] n_in         Number of input points.
+ * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
  * @param[in] d_x_in       Array of input x positions.
  * @param[in] d_y_in       Array of input y positions.
  * @param[in] d_z_in       Array of input z positions.
@@ -113,7 +117,7 @@ void oskar_dftw_m2m_3d_cuda_f(int n_in, const float* d_x_in,
  * @param[out] d_output    Array of computed output points (see note, above).
  */
 OSKAR_EXPORT
-void oskar_dftw_m2m_3d_cuda_d(int n_in, const double* d_x_in,
+void oskar_dftw_m2m_3d_cuda_d(int n_in, double wavenumber, const double* d_x_in,
         const double* d_y_in, const double* d_z_in, const double2* d_weights_in,
         int n_out, const double* d_x_out, const double* d_y_out,
         const double* d_z_out, const double4c* d_data, double4c* d_output);
@@ -129,11 +133,12 @@ void oskar_dftw_m2m_3d_cuda_d(int n_in, const double* d_x_in,
  * This CUDA kernel performs a 3D complex-matrix-to-complex-matrix DFT using
  * the supplied complex weights and complex input data.
  *
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
+ *
  * Each thread evaluates a single output point, looping over all the input
  * points while performing a complex multiply-accumulate with the supplied
  * input DFT weights.
- *
- * The input positions must be pre-multiplied by a factor k (= 2pi / lambda).
  *
  * The input data must be supplied in an array of size \p n_out * \p n_in.
  * It is accessed in such a way that the output dimension must be the
@@ -144,6 +149,7 @@ void oskar_dftw_m2m_3d_cuda_d(int n_in, const double* d_x_in,
  * the complex values for each output position.
  *
  * @param[in] n_in         Number of input points.
+ * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
  * @param[in] z_in         Array of input z positions.
@@ -158,6 +164,7 @@ void oskar_dftw_m2m_3d_cuda_d(int n_in, const double* d_x_in,
  */
 __global__
 void oskar_dftw_m2m_3d_cudak_f(const int n_in,
+        const float wavenumber,
         const float* __restrict__ x_in,
         const float* __restrict__ y_in,
         const float* __restrict__ z_in,
@@ -179,11 +186,12 @@ void oskar_dftw_m2m_3d_cudak_f(const int n_in,
  * This CUDA kernel performs a 3D complex-matrix-to-complex-matrix DFT using
  * the supplied complex weights and complex input data.
  *
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
+ *
  * Each thread evaluates a single output point, looping over all the input
  * points while performing a complex multiply-accumulate with the supplied
  * input DFT weights.
- *
- * The input positions must be pre-multiplied by a factor k (= 2pi / lambda).
  *
  * The input data must be supplied in an array of size \p n_out * \p n_in.
  * It is accessed in such a way that the output dimension must be the
@@ -194,6 +202,7 @@ void oskar_dftw_m2m_3d_cudak_f(const int n_in,
  * the complex values for each output position.
  *
  * @param[in] n_in         Number of input points.
+ * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
  * @param[in] z_in         Array of input z positions.
@@ -208,6 +217,7 @@ void oskar_dftw_m2m_3d_cudak_f(const int n_in,
  */
 __global__
 void oskar_dftw_m2m_3d_cudak_d(const int n_in,
+        const double wavenumber,
         const double* __restrict__ x_in,
         const double* __restrict__ y_in,
         const double* __restrict__ z_in,

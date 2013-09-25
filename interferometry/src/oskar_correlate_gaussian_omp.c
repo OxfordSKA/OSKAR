@@ -27,12 +27,9 @@
  */
 
 #include <math.h>
-#include "interferometry/oskar_accumulate_baseline_visibility_for_source.h"
-#include "interferometry/oskar_correlate_gaussian_omp.h"
-#include "math/oskar_sinc.h"
-
-#define ONE_OVER_2PI  0.159154943091895335768884   /* 1 / (2 * pi) */
-#define ONE_OVER_2PIf 0.159154943091895335768884f  /* 1 / (2 * pi) */
+#include <oskar_accumulate_baseline_visibility_for_source.h>
+#include <oskar_correlate_gaussian_omp.h>
+#include <oskar_sinc.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -52,7 +49,7 @@ void oskar_correlate_gaussian_omp_f(int num_sources, int num_stations,
         const float* source_U, const float* source_V, const float* source_l,
         const float* source_m, const float* source_a, const float* source_b,
         const float* source_c, const float* station_u, const float* station_v,
-        float frac_bandwidth, float4c* vis)
+        float inv_wavelength, float frac_bandwidth, float4c* vis)
 {
     int station_q;
 
@@ -92,8 +89,8 @@ void oskar_correlate_gaussian_omp_f(int num_sources, int num_stations,
             sp = &jones[station_p * num_sources];
 
             /* Baseline lengths. */
-            uu = (station_u[station_p] - station_u[station_q]) * ONE_OVER_2PIf;
-            vv = (station_v[station_p] - station_v[station_q]) * ONE_OVER_2PIf;
+            uu = (station_u[station_p] - station_u[station_q]) * inv_wavelength;
+            vv = (station_v[station_p] - station_v[station_q]) * inv_wavelength;
 
             /* Quantities needed for evaluating source with Gaussian term. */
             uu2  = uu * uu;
@@ -151,7 +148,8 @@ void oskar_correlate_gaussian_omp_d(int num_sources, int num_stations,
         const double* source_U, const double* source_V, const double* source_l,
         const double* source_m, const double* source_a, const double* source_b,
         const double* source_c, const double* station_u,
-        const double* station_v, double frac_bandwidth, double4c* vis)
+        const double* station_v, double inv_wavelength, double frac_bandwidth,
+        double4c* vis)
 {
     int station_q;
 
@@ -183,8 +181,8 @@ void oskar_correlate_gaussian_omp_d(int num_sources, int num_stations,
             sp = &jones[station_p * num_sources];
 
             /* Baseline lengths. */
-            uu = (station_u[station_p] - station_u[station_q]) * ONE_OVER_2PI;
-            vv = (station_v[station_p] - station_v[station_q]) * ONE_OVER_2PI;
+            uu = (station_u[station_p] - station_u[station_q]) * inv_wavelength;
+            vv = (station_v[station_p] - station_v[station_q]) * inv_wavelength;
 
             /* Quantities needed for evaluating source with Gaussian term. */
             uu2  = uu * uu;

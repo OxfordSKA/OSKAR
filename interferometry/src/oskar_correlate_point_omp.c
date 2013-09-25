@@ -27,10 +27,17 @@
  */
 
 #include <math.h>
-#include "interferometry/oskar_accumulate_baseline_visibility_for_source.h"
-#include "interferometry/oskar_correlate_point_time_smearing_omp.h"
-#include "math/oskar_sinc.h"
-#include "math/oskar_kahan_sum.h"
+#include <oskar_accumulate_baseline_visibility_for_source.h>
+#include <oskar_correlate_point_time_smearing_omp.h>
+#include <oskar_sinc.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#ifndef M_PIf
+#define M_PIf 3.14159265358979323846f
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,7 +48,7 @@ void oskar_correlate_point_omp_f(int num_sources, int num_stations,
         const float4c* jones, const float* source_I, const float* source_Q,
         const float* source_U, const float* source_V, const float* source_l,
         const float* source_m, const float* station_u, const float* station_v,
-        float frac_bandwidth, float4c* vis)
+        float inv_wavelength, float frac_bandwidth, float4c* vis)
 {
     int station_q;
 
@@ -58,7 +65,7 @@ void oskar_correlate_point_omp_f(int num_sources, int num_stations,
         /* Loop over baselines for this station. */
         for (station_p = station_q + 1; station_p < num_stations; ++station_p)
         {
-            float uu, vv;
+            float uu, vv, factor;
             float4c sum, guard;
             sum.a.x = 0.0f;
             sum.a.y = 0.0f;
@@ -80,14 +87,11 @@ void oskar_correlate_point_omp_f(int num_sources, int num_stations,
             /* Pointer to source vector for station p. */
             sp = &jones[station_p * num_sources];
 
-            /* Baseline lengths. */
-            uu = (station_u[station_p] - station_u[station_q]) * 0.5f;
-            vv = (station_v[station_p] - station_v[station_q]) * 0.5f;
-
-            /* Modify the baseline distance to include the common components
-             * of the bandwidth smearing term. */
-            uu *= frac_bandwidth;
-            vv *= frac_bandwidth;
+            /* Determine UV-distance for baseline modified by the bandwidth
+             * smearing parameters. */
+            factor = frac_bandwidth * M_PIf * inv_wavelength;
+            uu = (station_u[station_p] - station_u[station_q]) * factor;
+            vv = (station_v[station_p] - station_v[station_q]) * factor;
 
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)
@@ -129,7 +133,8 @@ void oskar_correlate_point_omp_d(int num_sources, int num_stations,
         const double4c* jones, const double* source_I, const double* source_Q,
         const double* source_U, const double* source_V, const double* source_l,
         const double* source_m, const double* station_u,
-        const double* station_v, double frac_bandwidth, double4c* vis)
+        const double* station_v, double inv_wavelength, double frac_bandwidth,
+        double4c* vis)
 {
     int station_q;
 
@@ -146,7 +151,7 @@ void oskar_correlate_point_omp_d(int num_sources, int num_stations,
         /* Loop over baselines for this station. */
         for (station_p = station_q + 1; station_p < num_stations; ++station_p)
         {
-            double uu, vv;
+            double uu, vv, factor;
             double4c sum;
             sum.a.x = 0.0;
             sum.a.y = 0.0;
@@ -160,14 +165,11 @@ void oskar_correlate_point_omp_d(int num_sources, int num_stations,
             /* Pointer to source vector for station p. */
             sp = &jones[station_p * num_sources];
 
-            /* Baseline lengths. */
-            uu = (station_u[station_p] - station_u[station_q]) * 0.5;
-            vv = (station_v[station_p] - station_v[station_q]) * 0.5;
-
-            /* Modify the baseline distance to include the common components
-             * of the bandwidth smearing term. */
-            uu *= frac_bandwidth;
-            vv *= frac_bandwidth;
+            /* Determine UV-distance for baseline modified by the bandwidth
+             * smearing parameters. */
+            factor = frac_bandwidth * M_PI * inv_wavelength;
+            uu = (station_u[station_p] - station_u[station_q]) * factor;
+            vv = (station_v[station_p] - station_v[station_q]) * factor;
 
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)

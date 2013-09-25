@@ -53,15 +53,12 @@ extern "C" {
  *
  * The output set of Jones matrices (K) are scalar complex values.
  *
- * Note:
- * Station coordinates u,v,w should be specified in radians at the frequency
- * for which K is evaluated.
- *
  * @param[out] jones        Output set of Jones matrices.
  * @param[in]  num_stations Number of stations.
- * @param[in]  u            Station u coordinates, in radians.
- * @param[in]  v            Station v coordinates, in radians.
- * @param[in]  w            Station w coordinates, in radians.
+ * @param[in]  wavenumber   Wavenumber (2 pi / wavelength).
+ * @param[in]  u            Station u coordinates, in metres.
+ * @param[in]  v            Station v coordinates, in metres.
+ * @param[in]  w            Station w coordinates, in metres.
  * @param[in]  num_sources  Number of sources.
  * @param[in]  l            Source l-direction cosines.
  * @param[in]  m            Source m-direction cosines.
@@ -69,8 +66,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_K_f(float2* jones, int num_stations,
-        const float* u, const float* v, const float* w, int num_sources,
-        const float* l, const float* m, const float* n);
+        float wavenumber, const float* u, const float* v, const float* w,
+        int num_sources, const float* l, const float* m, const float* n);
 
 /**
  * @brief
@@ -83,15 +80,12 @@ void oskar_evaluate_jones_K_f(float2* jones, int num_stations,
  *
  * The output set of Jones matrices (K) are scalar complex values.
  *
- * Note:
- * Station coordinates u,v,w should be specified in radians at the frequency
- * for which K is evaluated.
- *
  * @param[out] jones        Output set of Jones matrices.
  * @param[in]  num_stations Number of stations.
- * @param[in]  u            Station u coordinates, in radians.
- * @param[in]  v            Station v coordinates, in radians.
- * @param[in]  w            Station w coordinates, in radians.
+ * @param[in]  wavenumber   Wavenumber (2 pi / wavelength).
+ * @param[in]  u            Station u coordinates, in metres.
+ * @param[in]  v            Station v coordinates, in metres.
+ * @param[in]  w            Station w coordinates, in metres.
  * @param[in]  num_sources  Number of sources.
  * @param[in]  l            Source l-direction cosines.
  * @param[in]  m            Source m-direction cosines.
@@ -99,8 +93,8 @@ void oskar_evaluate_jones_K_f(float2* jones, int num_stations,
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_K_d(double2* jones, int num_stations,
-        const double* u, const double* v, const double* w, int num_sources,
-        const double* l, const double* m, const double* n);
+        double wavenumber, const double* u, const double* v, const double* w,
+        int num_sources, const double* l, const double* m, const double* n);
 
 /**
  * @brief
@@ -114,23 +108,20 @@ void oskar_evaluate_jones_K_d(double2* jones, int num_stations,
  * The output set of Jones matrices (K) are scalar complex values.
  * This function will return an error if an incorrect type is used.
  *
- * Note:
- * Station coordinates u,v,w should be specified in radians at the frequency
- * for which K is evaluated.
- *
- * @param[out] K         Output set of Jones matrices.
- * @param[in]  l         Source l-direction cosines.
- * @param[in]  m         Source m-direction cosines.
- * @param[in]  n         Source n-direction cosines.
- * @param[in]  u         Station u coordinates, in radians.
- * @param[in]  v         Station v coordinates, in radians.
- * @param[in]  w         Station w coordinates, in radians.
- * @param[in,out] status Status return code.
+ * @param[out] K            Output set of Jones matrices.
+ * @param[in]  frequency_hz The current observing frequency, in Hz.
+ * @param[in]  l            Source l-direction cosines.
+ * @param[in]  m            Source m-direction cosines.
+ * @param[in]  n            Source n-direction cosines.
+ * @param[in]  u            Station u coordinates, in metres.
+ * @param[in]  v            Station v coordinates, in metres.
+ * @param[in]  w            Station w coordinates, in metres.
+ * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
-        const oskar_Mem* m, const oskar_Mem* n, const oskar_Mem* u,
-        const oskar_Mem* v, const oskar_Mem* w, int* status);
+void oskar_evaluate_jones_K(oskar_Jones* K, double frequency_hz,
+        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
+        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w, int* status);
 
 #ifdef __cplusplus
 }

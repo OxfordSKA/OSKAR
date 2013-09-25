@@ -50,9 +50,9 @@ static int oskar_int_range_clamp(int value, int minimum, int maximum)
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
-void oskar_dft_c2r_2d_cuda_f(int num_in, const float* x_in, const float* y_in,
-        const float2* data_in, int num_out, const float* x_out,
-        const float* y_out, float* output)
+void oskar_dft_c2r_2d_cuda_f(int num_in, float wavenumber, const float* x_in,
+        const float* y_in, const float2* data_in, int num_out,
+        const float* x_out, const float* y_out, float* output)
 {
     const int threads = 384;     /* Should be multiple of 32. */
     const int max_in_size = 896; /* Should be multiple of 16. */
@@ -77,16 +77,16 @@ void oskar_dft_c2r_2d_cuda_f(int num_in, const float* x_in, const float* y_in,
         /* Invoke kernel to compute the (partial) DFT on the device. */
         blocks = (out_size + threads - 1) / threads;
         oskar_dft_c2r_2d_cudak_f
-        OSKAR_CUDAK_CONF(blocks, threads, shared_mem_size) (num_in, x_in, y_in,
-                data_in, out_size, x_out + start, y_out + start,
+        OSKAR_CUDAK_CONF(blocks, threads, shared_mem_size) (num_in, wavenumber,
+                x_in, y_in, data_in, out_size, x_out + start, y_out + start,
                 max_in_size, output + start);
     }
 }
 
 /* Double precision. */
-void oskar_dft_c2r_2d_cuda_d(int num_in, const double* x_in, const double* y_in,
-        const double2* data_in, int num_out, const double* x_out,
-        const double* y_out, double* output)
+void oskar_dft_c2r_2d_cuda_d(int num_in, double wavenumber, const double* x_in,
+        const double* y_in, const double2* data_in, int num_out,
+        const double* x_out, const double* y_out, double* output)
 {
     const int threads = 384;     /* Should be multiple of 32. */
     const int max_in_size = 448; /* Should be multiple of 16. */
@@ -111,8 +111,8 @@ void oskar_dft_c2r_2d_cuda_d(int num_in, const double* x_in, const double* y_in,
         /* Invoke kernel to compute the (partial) DFT on the device. */
         blocks = (out_size + threads - 1) / threads;
         oskar_dft_c2r_2d_cudak_d
-        OSKAR_CUDAK_CONF(blocks, threads, shared_mem_size) (num_in, x_in, y_in,
-                data_in, out_size, x_out + start, y_out + start,
+        OSKAR_CUDAK_CONF(blocks, threads, shared_mem_size) (num_in, wavenumber,
+                x_in, y_in, data_in, out_size, x_out + start, y_out + start,
                 max_in_size, output + start);
     }
 }
@@ -127,6 +127,7 @@ extern __shared__ double4 smem_d[];
 /* Single precision. */
 __global__
 void oskar_dft_c2r_2d_cudak_f(int n_in,
+        const float wavenumber,
         const float* __restrict__ x_in,
         const float* __restrict__ y_in,
         const float2* __restrict__ data_in,
@@ -145,8 +146,8 @@ void oskar_dft_c2r_2d_cudak_f(int n_in,
     float xp_out = 0.0f, yp_out = 0.0f;
     if (i_out < n_out)
     {
-        xp_out = x_out[i_out];
-        yp_out = y_out[i_out];
+        xp_out = wavenumber * x_out[i_out];
+        yp_out = wavenumber * y_out[i_out];
     }
 
     // Cache a chunk of input data and positions into shared memory.
@@ -196,6 +197,7 @@ void oskar_dft_c2r_2d_cudak_f(int n_in,
 /* Double precision. */
 __global__
 void oskar_dft_c2r_2d_cudak_d(int n_in,
+        const double wavenumber,
         const double* __restrict__ x_in,
         const double* __restrict__ y_in,
         const double2* __restrict__ data_in,
@@ -214,8 +216,8 @@ void oskar_dft_c2r_2d_cudak_d(int n_in,
     double xp_out = 0.0, yp_out = 0.0;
     if (i_out < n_out)
     {
-        xp_out = x_out[i_out];
-        yp_out = y_out[i_out];
+        xp_out = wavenumber * x_out[i_out];
+        yp_out = wavenumber * y_out[i_out];
     }
 
     // Cache a chunk of input data and positions into shared memory.

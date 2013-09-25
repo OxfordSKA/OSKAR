@@ -56,13 +56,6 @@ void oskar_station_override_element_xy_position_errors(
         return;
     }
 
-    /* Check coordinate units are in metres. */
-    if (s->coord_units != OSKAR_METRES)
-    {
-        *status = OSKAR_ERR_BAD_UNITS;
-        return;
-    }
-
     /* Check if there are child stations. */
     if (oskar_station_has_child(s))
     {

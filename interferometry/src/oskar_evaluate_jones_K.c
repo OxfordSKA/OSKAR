@@ -31,14 +31,18 @@
 #include <oskar_cuda_check_error.h>
 #include <math.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Single precision. */
 void oskar_evaluate_jones_K_f(float2* jones, int num_stations,
-        const float* u, const float* v, const float* w, int num_sources,
-        const float* l, const float* m, const float* n)
+        float wavenumber, const float* u, const float* v, const float* w,
+        int num_sources, const float* l, const float* m, const float* n)
 {
     int station, source;
 
@@ -50,9 +54,9 @@ void oskar_evaluate_jones_K_f(float2* jones, int num_stations,
 
         /* Get the station data. */
         station_ptr = &jones[station * num_sources];
-        us = u[station];
-        vs = v[station];
-        ws = w[station];
+        us = wavenumber * u[station];
+        vs = wavenumber * v[station];
+        ws = wavenumber * w[station];
 
         /* Loop over sources. */
         for (source = 0; source < num_sources; ++source)
@@ -73,8 +77,8 @@ void oskar_evaluate_jones_K_f(float2* jones, int num_stations,
 
 /* Double precision. */
 void oskar_evaluate_jones_K_d(double2* jones, int num_stations,
-        const double* u, const double* v, const double* w, int num_sources,
-        const double* l, const double* m, const double* n)
+        double wavenumber, const double* u, const double* v, const double* w,
+        int num_sources, const double* l, const double* m, const double* n)
 {
     int station, source;
 
@@ -86,9 +90,9 @@ void oskar_evaluate_jones_K_d(double2* jones, int num_stations,
 
         /* Get the station data. */
         station_ptr = &jones[station * num_sources];
-        us = u[station];
-        vs = v[station];
-        ws = w[station];
+        us = wavenumber * u[station];
+        vs = wavenumber * v[station];
+        ws = wavenumber * w[station];
 
         /* Loop over sources. */
         for (source = 0; source < num_sources; ++source)
@@ -108,11 +112,12 @@ void oskar_evaluate_jones_K_d(double2* jones, int num_stations,
 }
 
 /* Wrapper. */
-void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
-        const oskar_Mem* m, const oskar_Mem* n, const oskar_Mem* u,
-        const oskar_Mem* v, const oskar_Mem* w, int* status)
+void oskar_evaluate_jones_K(oskar_Jones* K, double frequency_hz,
+        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
+        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w, int* status)
 {
     int num_sources, num_stations, jones_type, base_type, location;
+    double wavenumber;
 
     /* Check all inputs. */
     if (!K || !l || !m || !n || !u || !v || !w || !status)
@@ -130,6 +135,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
     location = oskar_jones_location(K);
     num_sources = oskar_jones_num_sources(K);
     num_stations = oskar_jones_num_stations(K);
+    wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
 
     /* Check that the data dimensions are OK. */
     if (num_sources > (int)oskar_mem_length(l) ||
@@ -177,7 +183,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
         if (jones_type == OSKAR_SINGLE_COMPLEX)
         {
             oskar_evaluate_jones_K_cuda_f(oskar_jones_float2(K, status),
-                    num_stations,
+                    num_stations, wavenumber,
                     oskar_mem_float_const(u, status),
                     oskar_mem_float_const(v, status),
                     oskar_mem_float_const(w, status),
@@ -189,7 +195,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
         else if (jones_type == OSKAR_DOUBLE_COMPLEX)
         {
             oskar_evaluate_jones_K_cuda_d(oskar_jones_double2(K, status),
-                    num_stations,
+                    num_stations, wavenumber,
                     oskar_mem_double_const(u, status),
                     oskar_mem_double_const(v, status),
                     oskar_mem_double_const(w, status),
@@ -208,7 +214,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
         if (jones_type == OSKAR_SINGLE_COMPLEX)
         {
             oskar_evaluate_jones_K_f(oskar_jones_float2(K, status),
-                    num_stations,
+                    num_stations, wavenumber,
                     oskar_mem_float_const(u, status),
                     oskar_mem_float_const(v, status),
                     oskar_mem_float_const(w, status),
@@ -220,7 +226,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_Mem* l,
         else if (jones_type == OSKAR_DOUBLE_COMPLEX)
         {
             oskar_evaluate_jones_K_d(oskar_jones_double2(K, status),
-                    num_stations,
+                    num_stations, wavenumber,
                     oskar_mem_double_const(u, status),
                     oskar_mem_double_const(v, status),
                     oskar_mem_double_const(w, status),

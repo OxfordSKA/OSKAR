@@ -33,8 +33,8 @@
  * @file oskar_correlate_point_cuda.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,8 +60,9 @@ extern "C" {
  * @param[in] d_source_V     Source Stokes V values, in Jy.
  * @param[in] d_source_l     Source l-direction cosines from phase centre.
  * @param[in] d_source_m     Source m-direction cosines from phase centre.
- * @param[in] d_station_u    Station u-coordinates multiplied by the wavenumber.
- * @param[in] d_station_v    Station v-coordinates multiplied by the wavenumber.
+ * @param[in] d_station_u    Station u-coordinates, in metres.
+ * @param[in] d_station_v    Station v-coordinates, in metres.
+ * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] d_vis      Modified output complex visibilities.
  */
@@ -72,7 +73,7 @@ void oskar_correlate_point_cuda_f(int num_sources,
         const float* d_source_U, const float* d_source_V,
         const float* d_source_l, const float* d_source_m,
         const float* d_station_u, const float* d_station_v,
-        float frac_bandwidth, float4c* d_vis);
+        float inv_wavelength, float frac_bandwidth, float4c* d_vis);
 
 /**
  * @brief
@@ -94,8 +95,9 @@ void oskar_correlate_point_cuda_f(int num_sources,
  * @param[in] d_source_V     Source Stokes V values, in Jy.
  * @param[in] d_source_l     Source l-direction cosines from phase centre.
  * @param[in] d_source_m     Source m-direction cosines from phase centre.
- * @param[in] d_station_u    Station u-coordinates multiplied by the wavenumber.
- * @param[in] d_station_v    Station v-coordinates multiplied by the wavenumber.
+ * @param[in] d_station_u    Station u-coordinates, in metres.
+ * @param[in] d_station_v    Station v-coordinates, in metres.
+ * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] d_vis      Modified output complex visibilities.
  */
@@ -106,7 +108,7 @@ void oskar_correlate_point_cuda_d(int num_sources,
         const double* d_source_U, const double* d_source_V,
         const double* d_source_l, const double* d_source_m,
         const double* d_station_u, const double* d_station_v,
-        double frac_bandwidth, double4c* d_vis);
+        double inv_wavelength, double frac_bandwidth, double4c* d_vis);
 
 #ifdef __CUDACC__
 
@@ -127,8 +129,9 @@ void oskar_correlate_point_cuda_d(int num_sources,
  * @param[in] source_V       Source Stokes V values, in Jy.
  * @param[in] source_l       Source l-direction cosines from phase centre.
  * @param[in] source_m       Source m-direction cosines from phase centre.
- * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
- * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
+ * @param[in] station_u      Station u-coordinates, in metres.
+ * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] vis        Modified output complex visibilities.
  */
@@ -142,8 +145,8 @@ void oskar_correlate_point_cudak_f(const int num_sources,
         const float* __restrict__ source_l,
         const float* __restrict__ source_m,
         const float* __restrict__ station_u,
-        const float* __restrict__ station_v, const float frac_bandwidth,
-        float4c* __restrict__ vis);
+        const float* __restrict__ station_v, const float inv_wavelength,
+        const float frac_bandwidth, float4c* __restrict__ vis);
 
 /**
  * @brief
@@ -162,8 +165,9 @@ void oskar_correlate_point_cudak_f(const int num_sources,
  * @param[in] source_V       Source Stokes V values, in Jy.
  * @param[in] source_l       Source l-direction cosines from phase centre.
  * @param[in] source_m       Source m-direction cosines from phase centre.
- * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
- * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
+ * @param[in] station_u      Station u-coordinates, in metres.
+ * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] vis        Modified output complex visibilities.
  */
@@ -177,8 +181,8 @@ void oskar_correlate_point_cudak_d(const int num_sources,
         const double* __restrict__ source_l,
         const double* __restrict__ source_m,
         const double* __restrict__ station_u,
-        const double* __restrict__ station_v, const double frac_bandwidth,
-        double4c* __restrict__ vis);
+        const double* __restrict__ station_v, const double inv_wavelength,
+        const double frac_bandwidth, double4c* __restrict__ vis);
 
 #endif /* __CUDACC__ */
 

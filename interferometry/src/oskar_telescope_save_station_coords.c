@@ -68,13 +68,6 @@ void oskar_telescope_save_station_coords(
         return;
     }
 
-    /* Check coordinate units are in metres. */
-    if (telescope->coord_units != OSKAR_METRES)
-    {
-        *status = OSKAR_ERR_BAD_UNITS;
-        return;
-    }
-
     /* Open the file. */
     file = fopen(filename, "w");
     if (!file)

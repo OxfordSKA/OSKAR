@@ -187,10 +187,9 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
             oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
                     c + 1, num_channels, frequency / 1e6);
 
-            // Copy the telescope model and scale coordinates to radians.
+            // Copy the telescope model.
             tel_gpu = oskar_telescope_create_copy(tel,
                     OSKAR_LOCATION_GPU, &err);
-            oskar_telescope_multiply_by_wavenumber(tel_gpu, frequency, &err);
             station = oskar_telescope_station_const(tel_gpu, station_id);
             lon = oskar_station_longitude_rad(station);
             lat = oskar_station_latitude_rad(station);
@@ -220,7 +219,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 {
                     oskar_evaluate_station_beam_aperture_array(&beam_pattern,
                             station, num_pixels, hor_x, hor_y, hor_z, gast,
-                            work, random_state, &err);
+                            frequency, work, random_state, &err);
                 }
                 else if (oskar_station_station_type(station) ==
                         OSKAR_STATION_TYPE_GAUSSIAN_BEAM)

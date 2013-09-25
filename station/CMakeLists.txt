@@ -42,7 +42,6 @@ set(station_SRC
     src/oskar_station_duplicate_first_child.c
     src/oskar_station_free.c
     src/oskar_station_load_config.c
-    src/oskar_station_multiply_by_wavenumber.c
     src/oskar_station_override_element_gains.c
     src/oskar_station_override_element_orientations.c
     src/oskar_station_override_element_phases.c

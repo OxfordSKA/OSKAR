@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_mem.h>
-#include "station/oskar_evaluate_dipole_pattern_cuda.h"
+#include <oskar_evaluate_dipole_pattern_cuda.h>
 
 #ifdef __cplusplus
 extern "C" {

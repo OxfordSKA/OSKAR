@@ -72,14 +72,10 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     oskar_mem_init(&t_amp, oskar_mem_type(amp), OSKAR_LOCATION_GPU, 0, 1, &err);
     oskar_mem_init(&t_image, oskar_mem_type(image), OSKAR_LOCATION_GPU, 0, 1, &err);
 
-    /* Copy the baselines to temporary GPU memory. */
+    /* Copy the baselines to temporary GPU memory and compute the wavenumber. */
     oskar_mem_copy(&u, uu_metres, &err);
     oskar_mem_copy(&v, vv_metres, &err);
-
-    /* Multiply baselines by the wavenumber. */
     wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
-    oskar_mem_scale_real(&u, wavenumber, &err);
-    oskar_mem_scale_real(&v, wavenumber, &err);
 
     /* Check location of the image array. */
     p_image = image;
@@ -124,7 +120,7 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
         if (type == OSKAR_DOUBLE)
         {
             /* Call DFT. */
-            oskar_dft_c2r_2d_cuda_d(num_vis,
+            oskar_dft_c2r_2d_cuda_d(num_vis, wavenumber,
                     oskar_mem_double_const(&u, &err),
                     oskar_mem_double_const(&v, &err),
                     oskar_mem_double2_const(p_amp, &err), num_pixels,
@@ -136,7 +132,7 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
         else if (type == OSKAR_SINGLE)
         {
             /* Call DFT. */
-            oskar_dft_c2r_2d_cuda_f(num_vis,
+            oskar_dft_c2r_2d_cuda_f(num_vis, wavenumber,
                     oskar_mem_float_const(&u, &err),
                     oskar_mem_float_const(&v, &err),
                     oskar_mem_float2_const(p_amp, &err), num_pixels,

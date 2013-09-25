@@ -48,24 +48,26 @@ extern "C" {
  * This function produces the complex DFT beamforming weights for the
  * given element positions and beam direction.
  *
- * Note that all element positions must be in radians (i.e. pre-multiplied
- * by the wavenumber).
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
  *
  * Note that all pointers refer to device memory.
  *
  * @param[out] weights      Array of complex DFT weights (length num_elements).
  * @param[in] num_elements  Number of antenna elements.
- * @param[in] d_x           Input element x positions, in radians.
- * @param[in] d_y           Input element y positions, in radians.
- * @param[in] d_y           Input element z positions, in radians.
+ * @param[in] wavenumber    Wavenumber (2 pi / wavelength).
+ * @param[in] d_x           Input element x positions.
+ * @param[in] d_y           Input element y positions.
+ * @param[in] d_y           Input element z positions.
  * @param[in] x_beam        Beam direction cosine x-component.
  * @param[in] y_beam        Beam direction cosine y-component.
  * @param[in] z_beam        Beam direction cosine z-component.
  */
 OSKAR_EXPORT
 void oskar_evaluate_element_weights_dft_cuda_f(float2* d_weights,
-        int num_elements, const float* d_x, const float* d_y,
-        const float* d_z, float x_beam, float y_beam, float z_beam);
+        int num_elements, float wavenumber, const float* d_x,
+        const float* d_y, const float* d_z, float x_beam, float y_beam,
+        float z_beam);
 
 /**
  * @brief
@@ -75,24 +77,26 @@ void oskar_evaluate_element_weights_dft_cuda_f(float2* d_weights,
  * This function produces the complex DFT beamforming weights for the
  * given element positions and beam direction.
  *
- * Note that all element positions must be in radians (i.e. pre-multiplied
- * by the wavenumber).
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
  *
  * Note that all pointers refer to device memory.
  *
  * @param[out] weights      Array of complex DFT weights (length num_elements).
  * @param[in] num_elements  Number of antenna elements.
- * @param[in] d_x           Input element x positions, in radians.
- * @param[in] d_y           Input element y positions, in radians.
- * @param[in] d_y           Input element z positions, in radians.
+ * @param[in] wavenumber    Wavenumber (2 pi / wavelength).
+ * @param[in] d_x           Input element x positions.
+ * @param[in] d_y           Input element y positions.
+ * @param[in] d_y           Input element z positions.
  * @param[in] x_beam        Beam direction cosine x-component.
  * @param[in] y_beam        Beam direction cosine y-component.
  * @param[in] z_beam        Beam direction cosine z-component.
  */
 OSKAR_EXPORT
 void oskar_evaluate_element_weights_dft_cuda_d(double2* d_weights,
-        int num_elements, const double* d_x, const double* d_y,
-        const double* d_z, double x_beam, double y_beam, double z_beam);
+        int num_elements, double wavenumber, const double* d_x,
+        const double* d_y, const double* d_z, double x_beam, double y_beam,
+        double z_beam);
 
 #ifdef __CUDACC__
 
@@ -104,24 +108,26 @@ void oskar_evaluate_element_weights_dft_cuda_d(double2* d_weights,
  * This CUDA kernel produces the complex 3D DFT weights for the
  * given inputs and output, and stores them in device memory.
  *
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
+ *
  * Each thread generates the complex weight for a single input.
  *
- * Note: input positions for spatial DFT weights should be in radians.
- *
- * @param[out] weights Vector of complex DFT weights (length n_in).
- * @param[in] n_in     Number of input points.
- * @param[in] x_in     Array of input x positions.
- * @param[in] y_in     Array of input y positions.
- * @param[in] z_in     Array of input z positions.
- * @param[in] x_out    Output 1/x position.
- * @param[in] y_out    Output 1/y position.
- * @param[in] z_out    Output 1/z position.
+ * @param[out] weights    Vector of complex DFT weights (length n_in).
+ * @param[in] n_in        Number of input points.
+ * @param[in] wavenumber  Wavenumber (2 pi / wavelength).
+ * @param[in] x_in        Array of input x positions.
+ * @param[in] y_in        Array of input y positions.
+ * @param[in] z_in        Array of input z positions.
+ * @param[in] x_out       Output 1/x position.
+ * @param[in] y_out       Output 1/y position.
+ * @param[in] z_out       Output 1/z position.
  */
 __global__
 void oskar_evaluate_element_weights_dft_cudak_f(float2* weights,
-        const int n_in, const float* x_in, const float* y_in,
-        const float* z_in, const float x_out, const float y_out,
-        const float z_out);
+        const int n_in, const float wavenumber, const float* x_in,
+        const float* y_in, const float* z_in, const float x_out,
+        const float y_out, const float z_out);
 
 /**
  * @brief
@@ -131,26 +137,28 @@ void oskar_evaluate_element_weights_dft_cudak_f(float2* weights,
  * This CUDA kernel produces the complex 3D DFT weights for the
  * given inputs and output, and stores them in device memory.
  *
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
+ *
  * Each thread generates the complex weight for a single input.
  *
- * Note: input positions for spatial DFT weights should be in radians.
- *
- * @param[out] weights Vector of complex DFT weights (length n_in).
- * @param[in] n_in     Number of input points.
- * @param[in] x_in     Array of input x positions.
- * @param[in] y_in     Array of input y positions.
- * @param[in] z_in     Array of input z positions.
- * @param[in] x_out    Output 1/x position.
- * @param[in] y_out    Output 1/y position.
- * @param[in] z_out    Output 1/z position.
+ * @param[out] weights    Vector of complex DFT weights (length n_in).
+ * @param[in] n_in        Number of input points.
+ * @param[in] wavenumber  Wavenumber (2 pi / wavelength).
+ * @param[in] x_in        Array of input x positions.
+ * @param[in] y_in        Array of input y positions.
+ * @param[in] z_in        Array of input z positions.
+ * @param[in] x_out       Output 1/x position.
+ * @param[in] y_out       Output 1/y position.
+ * @param[in] z_out       Output 1/z position.
  */
 __global__
 void oskar_evaluate_element_weights_dft_cudak_d(double2* weights,
-        const int n_in, const double* x_in, const double* y_in,
-        const double* z_in, const double x_out, const double y_out,
-        const double z_out);
+        const int n_in, const double wavenumber, const double* x_in,
+        const double* y_in, const double* z_in, const double x_out,
+        const double y_out, const double z_out);
 
-#endif
+#endif /* __CUDACC__ */
 
 #ifdef __cplusplus
 }

@@ -66,17 +66,12 @@ extern "C" {
  * The azimuth orientation of 'a' should normally be 90 degrees, and
  * the azimuth orientation of 'b' should normally be 0 degrees.
  *
- * The station beam amplitudes are evaluated using a DFT on the GPU, so
- * all memory passed to and returned from this function must be allocated
- * on the device.
- *
  * Note:
- * - Station x,y,z coordinates used by this function are assumed to be in
- * radians (i.e. pre-multiplied by the wavenumber).
  * - The \p weights buffer must be of complex type matching the same floating
  * point precision as the rest of the memory passed to the function.
  *
  * @param[out] beam          Array of output Jones matrices per source.
+ * @param[in]  wavenumber    Wavenumber (2 pi / wavelength).
  * @param[in]  station       Station model structure.
  * @param[in]  num_points    Number of points at which to evaluate beam.
  * @param[in]  x             Array of horizontal x direction components at
@@ -89,7 +84,7 @@ extern "C" {
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
+void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam, double wavenumber,
         const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* weights,
         int* status);

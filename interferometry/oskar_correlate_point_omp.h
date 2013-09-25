@@ -33,8 +33,8 @@
  * @file oskar_correlate_point_omp.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,8 +57,9 @@ extern "C" {
  * @param[in] source_V       Source Stokes V values, in Jy.
  * @param[in] source_l       Source l-direction cosines from phase centre.
  * @param[in] source_m       Source m-direction cosines from phase centre.
- * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
- * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
+ * @param[in] station_u      Station u-coordinates, in metres.
+ * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] vis        Modified output complex visibilities.
  */
@@ -67,7 +68,7 @@ void oskar_correlate_point_omp_f(int num_sources, int num_stations,
         const float4c* jones, const float* source_I, const float* source_Q,
         const float* source_U, const float* source_V, const float* source_l,
         const float* source_m, const float* station_u, const float* station_v,
-        float frac_bandwidth, float4c* vis);
+        float inv_wavelength, float frac_bandwidth, float4c* vis);
 
 /**
  * @brief
@@ -86,8 +87,9 @@ void oskar_correlate_point_omp_f(int num_sources, int num_stations,
  * @param[in] source_V       Source Stokes V values, in Jy.
  * @param[in] source_l       Source l-direction cosines from phase centre.
  * @param[in] source_m       Source m-direction cosines from phase centre.
- * @param[in] station_u      Station u-coordinates multiplied by the wavenumber.
- * @param[in] station_v      Station v-coordinates multiplied by the wavenumber.
+ * @param[in] station_u      Station u-coordinates, in metres.
+ * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] vis        Modified output complex visibilities.
  */
@@ -96,7 +98,8 @@ void oskar_correlate_point_omp_d(int num_sources, int num_stations,
         const double4c* jones, const double* source_I, const double* source_Q,
         const double* source_U, const double* source_V, const double* source_l,
         const double* source_m, const double* station_u,
-        const double* station_v, double frac_bandwidth, double4c* vis);
+        const double* station_v, double inv_wavelength, double frac_bandwidth,
+        double4c* vis);
 
 #ifdef __cplusplus
 }

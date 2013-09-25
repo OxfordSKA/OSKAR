@@ -33,8 +33,8 @@
  * @file oskar_dftw_o2c_3d_omp.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include <oskar_global.h>
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,17 +49,15 @@ extern "C" {
  * This function performs a 3D real-to-complex DFT, where all the input
  * signals are implicitly assumed to be of amplitude 1.0.
  *
- * Each thread evaluates a single output point, looping over all the input
- * points while performing a complex multiply-accumulate with the supplied
- * input DFT weights.
- *
- * The input positions must be pre-multiplied by a factor k (= 2pi / lambda).
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
  *
  * The computed points are returned in the \p output array, which must be
  * pre-sized to length n_out. The values in the \p output array are
  * the complex values for each output position.
  *
  * @param[in] n_in         Number of input points.
+ * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
  * @param[in] z_in         Array of input z positions.
@@ -71,10 +69,10 @@ extern "C" {
  * @param[out] output      Array of computed output points (see note, above).
  */
 OSKAR_EXPORT
-void oskar_dftw_o2c_3d_omp_f(const int n_in, const float* x_in,
-        const float* y_in, const float* z_in, const float2* weights_in,
-        const int n_out, const float* x_out, const float* y_out,
-        const float* z_out, float2* output);
+void oskar_dftw_o2c_3d_omp_f(const int n_in, const float wavenumber,
+        const float* x_in, const float* y_in, const float* z_in,
+        const float2* weights_in, const int n_out, const float* x_out,
+        const float* y_out, const float* z_out, float2* output);
 
 /**
  * @brief
@@ -85,17 +83,15 @@ void oskar_dftw_o2c_3d_omp_f(const int n_in, const float* x_in,
  * This function performs a 3D real-to-complex DFT, where all the input
  * signals are implicitly assumed to be of amplitude 1.0.
  *
- * Each thread evaluates a single output point, looping over all the input
- * points while performing a complex multiply-accumulate with the supplied
- * input DFT weights.
- *
- * The input positions must be pre-multiplied by a factor k (= 2pi / lambda).
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
  *
  * The computed points are returned in the \p output array, which must be
  * pre-sized to length n_out. The values in the \p output array are
  * the complex values for each output position.
  *
  * @param[in] n_in         Number of input points.
+ * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
  * @param[in] z_in         Array of input z positions.
@@ -107,10 +103,10 @@ void oskar_dftw_o2c_3d_omp_f(const int n_in, const float* x_in,
  * @param[out] output      Array of computed output points (see note, above).
  */
 OSKAR_EXPORT
-void oskar_dftw_o2c_3d_omp_d(const int n_in, const double* x_in,
-        const double* y_in, const double* z_in, const double2* weights_in,
-        const int n_out, const double* x_out, const double* y_out,
-        const double* z_out, double2* output);
+void oskar_dftw_o2c_3d_omp_d(const int n_in, const double wavenumber,
+        const double* x_in, const double* y_in, const double* z_in,
+        const double2* weights_in, const int n_out, const double* x_out,
+        const double* y_out, const double* z_out, double2* output);
 
 #ifdef __cplusplus
 }

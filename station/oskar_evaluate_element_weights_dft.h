@@ -47,20 +47,24 @@ extern "C" {
  * @details
  * This function computes the DFT phase weights for each element.
  *
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
+ *
  * @param[out] weights       Output DFT phase weights per element.
  * @param[in] num_elements   The number of elements in the array.
- * @param[in] x              Element x positions, in radians.
- * @param[in] y              Element y positions, in radians.
- * @param[in] z              Element z positions, in radians.
+ * @param[in] wavenumber     Wavenumber (2 pi / wavelength).
+ * @param[in] x              Element x positions.
+ * @param[in] y              Element y positions.
+ * @param[in] z              Element z positions.
  * @param[in] x_beam         Beam x direction cosine.
  * @param[in] y_beam         Beam y direction cosine.
  * @param[in] z_beam         Beam z direction cosine.
  */
 OSKAR_EXPORT
 void oskar_evaluate_element_weights_dft_f(float2* weights,
-        const int num_elements, const float* x, const float* y,
-        const float* z, const float x_beam, const float y_beam,
-        const float z_beam);
+        const int num_elements, const float wavenumber, const float* x,
+        const float* y, const float* z, const float x_beam,
+        const float y_beam, const float z_beam);
 
 /**
  * @brief
@@ -69,20 +73,24 @@ void oskar_evaluate_element_weights_dft_f(float2* weights,
  * @details
  * This function computes the DFT phase weights for each element.
  *
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
+ *
  * @param[out] weights       Output DFT phase weights per element.
  * @param[in] num_elements   The number of elements in the array.
- * @param[in] x              Element x positions, in radians.
- * @param[in] y              Element y positions, in radians.
- * @param[in] z              Element z positions, in radians.
+ * @param[in] wavenumber     Wavenumber (2 pi / wavelength).
+ * @param[in] x              Element x positions.
+ * @param[in] y              Element y positions.
+ * @param[in] z              Element z positions.
  * @param[in] x_beam         Beam x direction cosine.
  * @param[in] y_beam         Beam y direction cosine.
  * @param[in] z_beam         Beam z direction cosine.
  */
 OSKAR_EXPORT
 void oskar_evaluate_element_weights_dft_d(double2* weights,
-        const int num_elements, const double* x, const double* y,
-        const double* z, const double x_beam, const double y_beam,
-        const double z_beam);
+        const int num_elements, const double wavenumber, const double* x,
+        const double* y, const double* z, const double x_beam,
+        const double y_beam, const double z_beam);
 
 /**
  * @brief
@@ -91,19 +99,24 @@ void oskar_evaluate_element_weights_dft_d(double2* weights,
  * @details
  * This function computes the DFT phase weights for each element.
  *
+ * The wavelength used to compute the supplied wavenumber must be in the
+ * same units as the input positions.
+ *
  * @param[out] weights       Output DFT phase weights per element.
  * @param[in] num_elements   The number of elements in the array.
- * @param[in] x              Element x positions, in radians.
- * @param[in] y              Element y positions, in radians.
- * @param[in] z              Element z positions, in radians.
+ * @param[in] wavenumber     Wavenumber (2 pi / wavelength).
+ * @param[in] x              Element x positions.
+ * @param[in] y              Element y positions.
+ * @param[in] z              Element z positions.
  * @param[in] x_beam         Beam x direction cosine.
  * @param[in] y_beam         Beam y direction cosine.
  * @param[in] z_beam         Beam z direction cosine.
  */
 OSKAR_EXPORT
 void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        double x_beam, double y_beam, double z_beam, int* status);
+        double wavenumber, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, double x_beam, double y_beam, double z_beam,
+        int* status);
 
 #ifdef __cplusplus
 }

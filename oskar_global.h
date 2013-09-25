@@ -222,16 +222,6 @@ enum {
 
 /**
  * @brief
- * Enumerator to define units used by OSKAR.
- */
-enum {
-    OSKAR_METRES      = 0x6666,
-    OSKAR_RADIANS     = 0x7777
-};
-
-
-/**
- * @brief
  * Enumerator for use with bool flags.
  */
 enum {

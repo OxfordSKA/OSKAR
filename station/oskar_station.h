@@ -63,7 +63,6 @@ enum {
 #include <oskar_station_duplicate_first_child.h>
 #include <oskar_station_free.h>
 #include <oskar_station_load_config.h>
-#include <oskar_station_multiply_by_wavenumber.h>
 #include <oskar_station_override_element_gains.h>
 #include <oskar_station_override_element_orientations.h>
 #include <oskar_station_override_element_phases.h>

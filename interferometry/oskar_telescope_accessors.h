@@ -259,22 +259,6 @@ int oskar_telescope_max_station_depth(const oskar_Telescope* model);
 
 /**
  * @brief
- * Returns the coordinate units.
- *
- * @details
- * Returns the coordinate units.
- * This can be either OSKAR_METRES or OSKAR_RADIANS (for coordinates which
- * have been pre-multiplied by the wavenumber).
- *
- * @param[in] model   Pointer to telescope model.
- *
- * @return The coordinate units.
- */
-OSKAR_EXPORT
-int oskar_telescope_coord_units(const oskar_Telescope* model);
-
-/**
- * @brief
  * Returns the random seed for time-variable errors.
  *
  * @details

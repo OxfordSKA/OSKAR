@@ -113,11 +113,6 @@ int oskar_telescope_max_station_depth(const oskar_Telescope* model)
     return model->max_station_depth;
 }
 
-int oskar_telescope_coord_units(const oskar_Telescope* model)
-{
-    return model->coord_units;
-}
-
 int oskar_telescope_random_seed(const oskar_Telescope* model)
 {
     return model->seed_time_variable_station_element_errors;

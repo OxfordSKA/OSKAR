@@ -35,7 +35,6 @@ set(interferometry_SRC
     src/oskar_telescope_free.c
     src/oskar_telescope_load_pointing_file.c
     src/oskar_telescope_load_station_coords.c
-    src/oskar_telescope_multiply_by_wavenumber.c
     src/oskar_telescope_resize.c
     src/oskar_telescope_save_station_coords.c
     src/oskar_telescope_set_station_coords.c

@@ -149,11 +149,6 @@ int oskar_station_apply_element_weight(const oskar_Station* model)
     return model->apply_element_weight;
 }
 
-int oskar_station_element_coord_units(const oskar_Station* model)
-{
-    return model->coord_units;
-}
-
 double oskar_station_element_orientation_x_rad(const oskar_Station* model)
 {
     return model->orientation_x;
