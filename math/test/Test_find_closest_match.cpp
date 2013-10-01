@@ -41,7 +41,7 @@ TEST(find_closest_match, test)
 
     // Create array and fill with values.
     oskar_mem_init(&values, type, location, size, OSKAR_TRUE, &status);
-    values_ = (double*)values.data;
+    values_ = oskar_mem_double(&values, &status);
     for (i = 0; i < size; ++i)
     {
         values_[i] = start + inc * i;
@@ -51,37 +51,37 @@ TEST(find_closest_match, test)
     // 0.0  0.3  0.6  0.9  1.2  1.5  1.8  2.1  2.4  2.7
 
     value = 0.7;
-    oskar_find_closest_match(&i, value, &values, &status);
+    i = oskar_find_closest_match(value, &values, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     EXPECT_EQ(2, i);
 
     value = 0.749999;
-    oskar_find_closest_match(&i, value, &values, &status);
+    i = oskar_find_closest_match(value, &values, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     EXPECT_EQ(2, i);
 
     value = 0.75;
-    oskar_find_closest_match(&i, value, &values, &status);
+    i = oskar_find_closest_match(value, &values, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     EXPECT_EQ(3, i);
 
     value = 0.750001;
-    oskar_find_closest_match(&i, value, &values, &status);
+    i = oskar_find_closest_match(value, &values, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     EXPECT_EQ(3, i);
 
     value = 100;
-    oskar_find_closest_match(&i, value, &values, &status);
+    i = oskar_find_closest_match(value, &values, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     EXPECT_EQ(9, i);
 
     value = -100;
-    oskar_find_closest_match(&i, value, &values, &status);
+    i = oskar_find_closest_match(value, &values, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     EXPECT_EQ(0, i);
 
     value = 0.3;
-    oskar_find_closest_match(&i, value, &values, &status);
+    i = oskar_find_closest_match(value, &values, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     EXPECT_EQ(1, i);
 

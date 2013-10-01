@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,91 +26,74 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_find_closest_match.h>
-#include <float.h>
+#include <private_sky.h>
+#include <oskar_sky.h>
+
+#include <oskar_angular_distance.h>
 #include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Single precision. */
-int oskar_find_closest_match_f(float value, int num_values,
-        const float* values)
-{
-    int i, match_index = 0;
-    float temp, diff = FLT_MAX;
-    for (i = 0; i < num_values; ++i)
-    {
-        temp = fabsf(values[i] - value);
-        if (temp < diff)
-        {
-            diff = temp;
-            match_index = i;
-        }
-    }
-    return match_index;
-}
+#define RAD2ARCMIN (10800.0 / M_PI)
 
-/* Double precision. */
-int oskar_find_closest_match_d(double value, int num_values,
-        const double* values)
+void oskar_sky_compute_source_radius(oskar_Sky* sky, double ra0,
+        double dec0, int* status)
 {
-    int i, match_index = 0;
-    double temp, diff = DBL_MAX;
-    for (i = 0; i < num_values; ++i)
-    {
-        temp = fabs(values[i] - value);
-        if (temp < diff)
-        {
-            diff = temp;
-            match_index = i;
-        }
-    }
-    return match_index;
-}
-
-
-int oskar_find_closest_match(double value, const oskar_Mem* values,
-        int* status)
-{
-    int type, num_values, match_index = 0;
+    int i, num_sources, type;
+    oskar_Mem* radius;
 
     /* Check all inputs. */
-    if (!values || !status)
+    if (!sky || !status)
     {
         oskar_set_invalid_argument(status);
-        return 0;
+        return;
     }
 
     /* Check if safe to proceed. */
-    if (*status) return 0;
+    if (*status) return;
 
-    /* Check location. */
-    if (oskar_mem_location(values) != OSKAR_LOCATION_CPU)
+    /* Check type and location. */
+    type = oskar_sky_type(sky);
+    num_sources = oskar_sky_num_sources(sky);
+    if (oskar_sky_location(sky) != OSKAR_LOCATION_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
-        return 0;
+        return;
     }
 
-    /* Switch on type. */
-    type = oskar_mem_type(values);
-    num_values = (int)oskar_mem_length(values);
-    if (type == OSKAR_DOUBLE)
+    /* Check enough space in array. */
+    radius = oskar_sky_radius_arcmin(sky);
+    if ((int)oskar_mem_length(radius) < num_sources)
+        oskar_mem_realloc(radius, num_sources, status);
+
+    if (type == OSKAR_SINGLE)
     {
-        match_index = oskar_find_closest_match_d(value, num_values,
-                oskar_mem_double_const(values, status));
+        const float *ra_, *dec_;
+        float *r_;
+        ra_ = oskar_mem_float_const(oskar_sky_ra_const(sky), status);
+        dec_ = oskar_mem_float_const(oskar_sky_dec_const(sky), status);
+        r_ = oskar_mem_float(radius, status);
+        for (i = 0; i < num_sources; ++i)
+        {
+            r_[i] = oskar_angular_distance(ra_[i], ra0, dec_[i], dec0) *
+                    RAD2ARCMIN;
+        }
     }
-    else if (type == OSKAR_SINGLE)
+    else if (type == OSKAR_DOUBLE)
     {
-        match_index = oskar_find_closest_match_f(value, num_values,
-                oskar_mem_float_const(values, status));
+        const double *ra_, *dec_;
+        double *r_;
+        ra_ = oskar_mem_double_const(oskar_sky_ra_const(sky), status);
+        dec_ = oskar_mem_double_const(oskar_sky_dec_const(sky), status);
+        r_ = oskar_mem_double(radius, status);
+        for (i = 0; i < num_sources; ++i)
+        {
+            r_[i] = oskar_angular_distance(ra_[i], ra0, dec_[i], dec0) *
+                    RAD2ARCMIN;
+        }
     }
-    else
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-    }
-    return match_index;
 }
 
 #ifdef __cplusplus

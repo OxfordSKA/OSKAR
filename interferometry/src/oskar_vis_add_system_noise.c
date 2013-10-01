@@ -98,7 +98,7 @@ void oskar_vis_add_system_noise(oskar_Vis* vis,
                 noise = oskar_station_system_noise_model_const(st);
                 noise_freq = &noise->frequency;
                 noise_rms = &noise->rms;
-                oskar_find_closest_match(&is1, vis_freq, noise_freq, status);
+                is1 = oskar_find_closest_match(vis_freq, noise_freq, status);
                 if (oskar_mem_type(noise_freq) == OSKAR_DOUBLE)
                     s1 = oskar_mem_double_const(noise_rms, status)[is1];
                 else
@@ -108,7 +108,7 @@ void oskar_vis_add_system_noise(oskar_Vis* vis,
                 noise = oskar_station_system_noise_model_const(st);
                 noise_freq = &noise->frequency;
                 noise_rms = &noise->rms;
-                oskar_find_closest_match(&is2, vis_freq, noise_freq, status);
+                is2 = oskar_find_closest_match(vis_freq, noise_freq, status);
                 if (oskar_mem_type(noise_freq) == OSKAR_DOUBLE)
                     s2 = oskar_mem_double_const(noise_rms, status)[is2];
                 else

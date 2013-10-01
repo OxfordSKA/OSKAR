@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FIND_CLOSEST_MATCH_H_
-#define OSKAR_FIND_CLOSEST_MATCH_H_
+#ifndef OSKAR_SKY_COMPUTE_SOURCE_RADIUS_H_
+#define OSKAR_SKY_COMPUTE_SOURCE_RADIUS_H_
+
+/**
+ * @file oskar_sky_compute_source_radius.h
+ */
 
 #include <oskar_global.h>
-#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,57 +41,23 @@ extern "C" {
 
 /**
  * @brief
- * Finds the index of the closest match in an array of \p values to a
- * specified \p value (single precision).
+ * Computes angular distance of sources relative to phase centre.
  *
  * @details
+ * This function computes the angular distance of each source relative to the
+ * phase centre.
  *
- * @param[in]  value       The value to match.
- * @param[in]  values      An array of values to check.
- * @param[in,out] status   Status return code.
- *
- * @return The index of the closest match
+ * @param[in,out] sky Pointer to sky model structure.
+ * @param[in] ra0 Right Ascension of phase centre, in radians.
+ * @param[in] dec0 Declination of phase centre, in radians.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_find_closest_match_f(float value, int num_values,
-        const float* values);
-
-/**
- * @brief
- * Finds the index of the closest match in an array of \p values to a
- * specified \p value (double precision).
- *
- * @details
- *
- * @param[in]  value       The value to match.
- * @param[in]  values      An array of values to check.
- * @param[in,out] status   Status return code.
- *
- * @return The index of the closest match
- */
-OSKAR_EXPORT
-int oskar_find_closest_match_d(double value, int num_values,
-        const double* values);
-
-/**
- * @brief
- * Finds the index of the closest match in an array of \p values to a
- * specified \p value.
- *
- * @details
- *
- * @param[in]  value       The value to match.
- * @param[in]  values      An array of values to check.
- * @param[in,out] status   Status return code.
- *
- * @return The index of the closest match
- */
-OSKAR_EXPORT
-int oskar_find_closest_match(double value, const oskar_Mem* values,
-        int* status);
+void oskar_sky_compute_source_radius(oskar_Sky* sky, double ra0,
+        double dec0, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_FIND_CLOSEST_MATCH_H_ */
+#endif /* OSKAR_SKY_COMPUTE_SOURCE_RADIUS_H_ */

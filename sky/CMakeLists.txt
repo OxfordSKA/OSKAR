@@ -33,6 +33,7 @@ set(sky_SRC
     src/oskar_sky_append.c
     src/oskar_sky_combine_set.c
     src/oskar_sky_compute_relative_lmn.c
+    src/oskar_sky_compute_source_radius.c
     src/oskar_sky_create.c
     src/oskar_sky_create_copy.c
     src/oskar_sky_evaluate_gaussian_source_parameters.c

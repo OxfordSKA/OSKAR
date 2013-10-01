@@ -122,6 +122,12 @@ OSKAR_EXPORT
 const oskar_Mem* oskar_sky_n_const(const oskar_Sky* sky);
 
 OSKAR_EXPORT
+oskar_Mem* oskar_sky_radius_arcmin(oskar_Sky* sky);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_sky_radius_arcmin_const(const oskar_Sky* sky);
+
+OSKAR_EXPORT
 oskar_Mem* oskar_sky_fwhm_major(oskar_Sky* sky);
 
 OSKAR_EXPORT

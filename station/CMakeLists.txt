@@ -29,10 +29,12 @@ set(station_SRC
     src/oskar_evaluate_element_weights_errors_cuda.cu
     src/oskar_evaluate_element_weights_errors.c
     src/oskar_evaluate_element_weights.c
+    src/oskar_evaluate_source_horizontal_lmn.c
     src/oskar_evaluate_station_beam_aperture_array.c
     src/oskar_evaluate_station_beam_gaussian.c
     src/oskar_evaluate_station_from_telescope_dipole_azimuth.c
-    src/oskar_evaluate_source_horizontal_lmn.c
+    src/oskar_evaluate_vla_beam_pbcor_cuda.cu
+    src/oskar_evaluate_vla_beam_pbcor.c
     src/oskar_station_accessors.c
     src/oskar_station_analyse.c
     src/oskar_station_create_child_stations.c

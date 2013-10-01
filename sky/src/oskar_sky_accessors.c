@@ -113,6 +113,11 @@ oskar_Mem* oskar_sky_n(oskar_Sky* sky)
     return &sky->n;
 }
 
+oskar_Mem* oskar_sky_radius_arcmin(oskar_Sky* sky)
+{
+    return &sky->radius_arcmin;
+}
+
 oskar_Mem* oskar_sky_fwhm_major(oskar_Sky* sky)
 {
     return &sky->FWHM_major;
@@ -196,6 +201,11 @@ const oskar_Mem* oskar_sky_m_const(const oskar_Sky* sky)
 const oskar_Mem* oskar_sky_n_const(const oskar_Sky* sky)
 {
     return &sky->n;
+}
+
+const oskar_Mem* oskar_sky_radius_arcmin_const(const oskar_Sky* sky)
+{
+    return &sky->radius_arcmin;
 }
 
 const oskar_Mem* oskar_sky_fwhm_major_const(const oskar_Sky* sky)
