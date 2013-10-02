@@ -80,6 +80,8 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
         tel->station_type = OSKAR_STATION_TYPE_AA;
     else if (temp.startsWith("G", Qt::CaseInsensitive))
         tel->station_type = OSKAR_STATION_TYPE_GAUSSIAN_BEAM;
+    else if (temp.startsWith("VLA (PBCOR)", Qt::CaseInsensitive))
+        tel->station_type = OSKAR_STATION_TYPE_VLA_PBCOR;
     else
         return OSKAR_ERR_SETTINGS_TELESCOPE;
 

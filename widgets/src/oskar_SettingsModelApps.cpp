@@ -593,7 +593,8 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     setTooltip(k, "Telescope centre altitude, in metres.");
 
     k = root + "/station_type";
-    declare(k, "Station type", QStringList() << "Aperture array" << "Gaussian beam");
+    declare(k, "Station type", QStringList() << "Aperture array"
+            << "Gaussian beam" << "VLA (PBCOR)");
     setTooltip(k, "The type of each station in the interferometer. A simple, "
             "time-invariant Gaussian station beam can be used instead of an "
             "aperture array beam if required for testing.");

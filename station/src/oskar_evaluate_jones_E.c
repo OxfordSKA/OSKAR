@@ -32,6 +32,7 @@
 #include <oskar_evaluate_source_horizontal_lmn.h>
 #include <oskar_evaluate_station_beam_aperture_array.h>
 #include <oskar_evaluate_station_beam_gaussian.h>
+#include <oskar_evaluate_vla_beam_pbcor.h>
 
 
 #ifdef __cplusplus
@@ -146,6 +147,12 @@ static void evaluate_E_common_sky_identical_stations(oskar_Jones* E,
                 oskar_sky_l_const(sky), oskar_sky_m_const(sky), hor_z,
                 oskar_station_gaussian_beam_fwhm_rad(station0), status);
     }
+    else if (oskar_station_station_type(station0) ==
+            OSKAR_STATION_TYPE_VLA_PBCOR)
+    {
+        oskar_evaluate_vla_beam_pbcor(&E0, num_sources,
+                oskar_sky_radius_arcmin_const(sky), frequency_hz, status);
+    }
     else
     {
         *status = OSKAR_ERR_SETTINGS_TELESCOPE;
@@ -212,6 +219,12 @@ static void evaluate_E_common_sky_different_stations(oskar_Jones* E,
                     oskar_sky_l_const(sky), oskar_sky_m_const(sky), hor_z,
                     oskar_station_gaussian_beam_fwhm_rad(station), status);
         }
+        else if (oskar_station_station_type(station) ==
+                OSKAR_STATION_TYPE_VLA_PBCOR)
+        {
+            oskar_evaluate_vla_beam_pbcor(&E_station, num_sources,
+                    oskar_sky_radius_arcmin_const(sky), frequency_hz, status);
+        }
         else
         {
             *status = OSKAR_ERR_SETTINGS_TELESCOPE;
@@ -266,6 +279,12 @@ static void evaluate_E_different_sky(oskar_Jones* E,
             oskar_evaluate_station_beam_gaussian(&E_station, num_sources,
                     oskar_sky_l_const(sky), oskar_sky_m_const(sky), hor_z,
                     oskar_station_gaussian_beam_fwhm_rad(station), status);
+        }
+        else if (oskar_station_station_type(station) ==
+                OSKAR_STATION_TYPE_VLA_PBCOR)
+        {
+            oskar_evaluate_vla_beam_pbcor(&E_station, num_sources,
+                    oskar_sky_radius_arcmin_const(sky), frequency_hz, status);
         }
         else
         {

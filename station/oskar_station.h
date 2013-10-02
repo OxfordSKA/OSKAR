@@ -47,7 +47,8 @@ typedef struct oskar_Station oskar_Station;
 
 enum {
     OSKAR_STATION_TYPE_AA,
-    OSKAR_STATION_TYPE_GAUSSIAN_BEAM
+    OSKAR_STATION_TYPE_GAUSSIAN_BEAM,
+    OSKAR_STATION_TYPE_VLA_PBCOR
 };
 
 #ifdef __cplusplus
