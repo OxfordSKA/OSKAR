@@ -26,30 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_sky.h>
+#ifndef OSKAR_EVALUATE_SOURCE_RADIUS_H_
+#define OSKAR_EVALUATE_SOURCE_RADIUS_H_
 
-#include <oskar_evaluate_source_radius.h>
-#include <math.h>
+/**
+ * @file oskar_evaluate_source_radius.h
+ */
+
+#include <oskar_global.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_sky_compute_source_radius(oskar_Sky* sky, double ra0,
-        double dec0, int* status)
-{
-    /* Check all inputs. */
-    if (!sky || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    oskar_evaluate_source_radius(oskar_sky_radius_arcmin(sky),
-            oskar_sky_num_sources(sky), oskar_sky_ra_const(sky),
-            oskar_sky_dec_const(sky), ra0, dec0, status);
-}
+/**
+ * @brief
+ * Computes angular distance of sources relative to phase centre.
+ *
+ * @details
+ * This function computes the angular distance of each source relative to the
+ * phase centre.
+ *
+ * @param[out] radius_arcmin Output source radius in arcmin.
+ * @param[in] num_sources    Number of sources.
+ * @param[in] ra             Source Right Ascension, in radians.
+ * @param[in] dec            Source Declination, in radians.
+ * @param[in] ra0            Right Ascension of phase centre, in radians.
+ * @param[in] dec0           Declination of phase centre, in radians.
+ * @param[in,out] status     Status return code.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_source_radius(oskar_Mem* radius_arcmin, int num_sources,
+        const oskar_Mem* ra, const oskar_Mem* dec, double ra0, double dec0,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_EVALUATE_SOURCE_RADIUS_H_ */

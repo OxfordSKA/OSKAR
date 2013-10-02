@@ -9,6 +9,7 @@ set(sky_SRC
     src/oskar_evaluate_jones_R_cuda.cu
     src/oskar_evaluate_jones_R.c
     src/oskar_evaluate_jones_Z.c
+    src/oskar_evaluate_source_radius.c
     src/oskar_evaluate_TEC_TID.c
     src/oskar_galactic_to_fk5.c
     src/oskar_generate_random_coordinate.c
