@@ -51,6 +51,25 @@ static const double cutoff_freqs_ghz[] = {1.485, 4.885, 15.0, 22.5};
 static const double cutoff_radii_arcmin[] = {29.8, 9.13, 2.95, 1.97};
 
 
+OSKAR_INLINE float vla_pbcor_f(const float r_arcmin, const float freq_ghz,
+        const float p1, const float p2, const float p3)
+{
+    float t, X;
+    t = r_arcmin * freq_ghz;
+    X = t * t;
+    return 1.0f + X * (p1 * 1e-3f + X * (p2 * 1e-7f + X * p3 * 1e-10f));
+}
+
+OSKAR_INLINE double vla_pbcor_d(const double r_arcmin, const double freq_ghz,
+        const double p1, const double p2, const double p3)
+{
+    double t, X;
+    t = r_arcmin * freq_ghz;
+    X = t * t;
+    return 1.0 + X * (p1 * 1e-3 + X * (p2 * 1e-7 + X * p3 * 1e-10));
+}
+
+
 void oskar_evaluate_vla_beam_pbcor_f(float* beam, int num_sources,
         const float* radius_arcmin, const float freq_ghz, const float p1,
         const float p2, const float p3, const float cutoff_radius_arcmin)
@@ -58,18 +77,74 @@ void oskar_evaluate_vla_beam_pbcor_f(float* beam, int num_sources,
     int i;
     for (i = 0; i < num_sources; ++i)
     {
-        float r, t, X;
+        float r;
         r = radius_arcmin[i];
         if (r < cutoff_radius_arcmin)
         {
-            t = r * freq_ghz;
-            X = t * t;
-            beam[i] = 1.0f +
-                    X * (p1 * 1e-3f + X * (p2 * 1e-7f + X * p3 * 1e-10f));
+            beam[i] = vla_pbcor_f(r, freq_ghz, p1, p2, p3);
         }
         else
         {
             beam[i] = 0.0f;
+        }
+    }
+}
+
+
+void oskar_evaluate_vla_beam_pbcor_complex_f(float2* beam, int num_sources,
+        const float* radius_arcmin, const float freq_ghz, const float p1,
+        const float p2, const float p3, const float cutoff_radius_arcmin)
+{
+    int i;
+    for (i = 0; i < num_sources; ++i)
+    {
+        float r;
+        r = radius_arcmin[i];
+        if (r < cutoff_radius_arcmin)
+        {
+            beam[i].x = vla_pbcor_f(r, freq_ghz, p1, p2, p3);
+            beam[i].y = 0.0f;
+        }
+        else
+        {
+            beam[i].x = 0.0f;
+            beam[i].y = 0.0f;
+        }
+    }
+}
+
+
+void oskar_evaluate_vla_beam_pbcor_matrix_f(float4c* beam, int num_sources,
+        const float* radius_arcmin, const float freq_ghz, const float p1,
+        const float p2, const float p3, const float cutoff_radius_arcmin)
+{
+    int i;
+    for (i = 0; i < num_sources; ++i)
+    {
+        float r, t;
+        r = radius_arcmin[i];
+        if (r < cutoff_radius_arcmin)
+        {
+            t = vla_pbcor_f(r, freq_ghz, p1, p2, p3);
+            beam[i].a.x = t;
+            beam[i].a.y = 0.0f;
+            beam[i].b.x = 0.0f;
+            beam[i].b.y = 0.0f;
+            beam[i].c.x = 0.0f;
+            beam[i].c.y = 0.0f;
+            beam[i].d.x = t;
+            beam[i].d.y = 0.0f;
+        }
+        else
+        {
+            beam[i].a.x = 0.0f;
+            beam[i].a.y = 0.0f;
+            beam[i].b.x = 0.0f;
+            beam[i].b.y = 0.0f;
+            beam[i].c.x = 0.0f;
+            beam[i].c.y = 0.0f;
+            beam[i].d.x = 0.0f;
+            beam[i].d.y = 0.0f;
         }
     }
 }
@@ -82,13 +157,11 @@ void oskar_evaluate_vla_beam_pbcor_d(double* beam, int num_sources,
     int i;
     for (i = 0; i < num_sources; ++i)
     {
-        double r, t, X;
+        double r;
         r = radius_arcmin[i];
         if (r < cutoff_radius_arcmin)
         {
-            t = r * freq_ghz;
-            X = t * t;
-            beam[i] = 1.0 + X * (p1 * 1e-3 + X * (p2 * 1e-7 + X * p3 * 1e-10));
+            beam[i] = vla_pbcor_d(r, freq_ghz, p1, p2, p3);
         }
         else
         {
@@ -98,11 +171,70 @@ void oskar_evaluate_vla_beam_pbcor_d(double* beam, int num_sources,
 }
 
 
+void oskar_evaluate_vla_beam_pbcor_complex_d(double2* beam, int num_sources,
+        const double* radius_arcmin, const double freq_ghz, const double p1,
+        const double p2, const double p3, const double cutoff_radius_arcmin)
+{
+    int i;
+    for (i = 0; i < num_sources; ++i)
+    {
+        double r;
+        r = radius_arcmin[i];
+        if (r < cutoff_radius_arcmin)
+        {
+            beam[i].x = vla_pbcor_d(r, freq_ghz, p1, p2, p3);
+            beam[i].y = 0.0;
+        }
+        else
+        {
+            beam[i].x = 0.0;
+            beam[i].y = 0.0;
+        }
+    }
+}
+
+
+void oskar_evaluate_vla_beam_pbcor_matrix_d(double4c* beam, int num_sources,
+        const double* radius_arcmin, const double freq_ghz, const double p1,
+        const double p2, const double p3, const double cutoff_radius_arcmin)
+{
+    int i;
+    for (i = 0; i < num_sources; ++i)
+    {
+        double r, t;
+        r = radius_arcmin[i];
+        if (r < cutoff_radius_arcmin)
+        {
+            t = vla_pbcor_d(r, freq_ghz, p1, p2, p3);
+            beam[i].a.x = t;
+            beam[i].a.y = 0.0;
+            beam[i].b.x = 0.0;
+            beam[i].b.y = 0.0;
+            beam[i].c.x = 0.0;
+            beam[i].c.y = 0.0;
+            beam[i].d.x = t;
+            beam[i].d.y = 0.0;
+        }
+        else
+        {
+            beam[i].a.x = 0.0;
+            beam[i].a.y = 0.0;
+            beam[i].b.x = 0.0;
+            beam[i].b.y = 0.0;
+            beam[i].c.x = 0.0;
+            beam[i].c.y = 0.0;
+            beam[i].d.x = 0.0;
+            beam[i].d.y = 0.0;
+        }
+    }
+}
+
+
 void oskar_evaluate_vla_beam_pbcor(oskar_Mem* beam, int num_sources,
         const oskar_Mem* radius_arcmin, double frequency_hz, int* status)
 {
-    int index, type, location;
-    double f, p1, p2, p3, cutoff_radius;
+    int index, precision, type, location;
+    double f, p1, p2, p3, cutoff;
 
     /* Check all inputs. */
     if (!status)
@@ -115,9 +247,10 @@ void oskar_evaluate_vla_beam_pbcor(oskar_Mem* beam, int num_sources,
     if (*status) return;
 
     /* Check type and location. */
+    precision = oskar_mem_precision(beam);
     type = oskar_mem_type(beam);
     location = oskar_mem_location(beam);
-    if (type != oskar_mem_type(radius_arcmin))
+    if (precision != oskar_mem_type(radius_arcmin))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
@@ -139,21 +272,36 @@ void oskar_evaluate_vla_beam_pbcor(oskar_Mem* beam, int num_sources,
     /* Find the nearest cutoff radius for the given frequency. */
     index = oskar_find_closest_match_d(frequency_hz / 1.0e9,
             sizeof(cutoff_freqs_ghz) / sizeof(double), cutoff_freqs_ghz);
-    cutoff_radius = cutoff_radii_arcmin[index];
+    cutoff = cutoff_radii_arcmin[index];
 
-    /* Switch on type. */
-    if (type == OSKAR_SINGLE)
+    /* Switch on precision. */
+    if (precision == OSKAR_SINGLE)
     {
-        float* beam_;
         const float* radius_;
-        beam_ = oskar_mem_float(beam, status);
-        radius_ = oskar_mem_float_const(beam, status);
+        radius_ = oskar_mem_float_const(radius_arcmin, status);
 
         if (location == OSKAR_LOCATION_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_evaluate_vla_beam_pbcor_cuda_f(beam_, num_sources, radius_,
-                    f, p1, p2, p3, cutoff_radius);
+            if (type == OSKAR_SINGLE)
+            {
+                oskar_evaluate_vla_beam_pbcor_cuda_f(
+                        oskar_mem_float(beam, status),
+                        num_sources, radius_, f, p1, p2, p3, cutoff);
+            }
+            else if (type == OSKAR_SINGLE_COMPLEX)
+            {
+                oskar_evaluate_vla_beam_pbcor_complex_cuda_f(
+                        oskar_mem_float2(beam, status),
+                        num_sources, radius_, f, p1, p2, p3, cutoff);
+
+            }
+            else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+            {
+                oskar_evaluate_vla_beam_pbcor_matrix_cuda_f(
+                        oskar_mem_float4c(beam, status),
+                        num_sources, radius_, f, p1, p2, p3, cutoff);
+            }
             oskar_cuda_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
@@ -161,22 +309,54 @@ void oskar_evaluate_vla_beam_pbcor(oskar_Mem* beam, int num_sources,
         }
         else if (location == OSKAR_LOCATION_CPU)
         {
-            oskar_evaluate_vla_beam_pbcor_f(beam_, num_sources, radius_,
-                    f, p1, p2, p3, cutoff_radius);
+            if (type == OSKAR_SINGLE)
+            {
+                oskar_evaluate_vla_beam_pbcor_f(
+                        oskar_mem_float(beam, status),
+                        num_sources, radius_, f, p1, p2, p3, cutoff);
+            }
+            else if (type == OSKAR_SINGLE_COMPLEX)
+            {
+                oskar_evaluate_vla_beam_pbcor_complex_f(
+                        oskar_mem_float2(beam, status),
+                        num_sources, radius_, f, p1, p2, p3, cutoff);
+
+            }
+            else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+            {
+                oskar_evaluate_vla_beam_pbcor_matrix_f(
+                        oskar_mem_float4c(beam, status),
+                        num_sources, radius_, f, p1, p2, p3, cutoff);
+            }
         }
     }
-    else if (type == OSKAR_DOUBLE)
+    else if (precision == OSKAR_DOUBLE)
     {
-        double* beam_;
         const double* radius_;
-        beam_ = oskar_mem_double(beam, status);
-        radius_ = oskar_mem_double_const(beam, status);
+        radius_ = oskar_mem_double_const(radius_arcmin, status);
 
         if (location == OSKAR_LOCATION_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_evaluate_vla_beam_pbcor_cuda_d(beam_, num_sources, radius_,
-                    f, p1, p2, p3, cutoff_radius);
+            if (type == OSKAR_DOUBLE)
+            {
+                oskar_evaluate_vla_beam_pbcor_cuda_d(
+                        oskar_mem_double(beam, status),
+                        num_sources, radius_, f, p1, p2, p3, cutoff);
+            }
+            else if (type == OSKAR_DOUBLE_COMPLEX)
+            {
+                oskar_evaluate_vla_beam_pbcor_complex_cuda_d(
+                        oskar_mem_double2(beam, status),
+                        num_sources, radius_, f, p1, p2, p3, cutoff);
+
+            }
+            else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+            {
+                oskar_evaluate_vla_beam_pbcor_matrix_cuda_d(
+                        oskar_mem_double4c(beam, status),
+                        num_sources, radius_, f, p1, p2, p3, cutoff);
+            }
             oskar_cuda_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
@@ -184,8 +364,25 @@ void oskar_evaluate_vla_beam_pbcor(oskar_Mem* beam, int num_sources,
         }
         else if (location == OSKAR_LOCATION_CPU)
         {
-            oskar_evaluate_vla_beam_pbcor_d(beam_, num_sources, radius_,
-                    f, p1, p2, p3, cutoff_radius);
+            if (type == OSKAR_DOUBLE)
+            {
+                oskar_evaluate_vla_beam_pbcor_d(
+                        oskar_mem_double(beam, status),
+                        num_sources, radius_, f, p1, p2, p3, cutoff);
+            }
+            else if (type == OSKAR_DOUBLE_COMPLEX)
+            {
+                oskar_evaluate_vla_beam_pbcor_complex_d(
+                        oskar_mem_double2(beam, status),
+                        num_sources, radius_, f, p1, p2, p3, cutoff);
+
+            }
+            else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+            {
+                oskar_evaluate_vla_beam_pbcor_matrix_d(
+                        oskar_mem_double4c(beam, status),
+                        num_sources, radius_, f, p1, p2, p3, cutoff);
+            }
         }
     }
     else
