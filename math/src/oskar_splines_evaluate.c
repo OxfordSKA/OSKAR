@@ -55,33 +55,46 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
     /* Check type. */
     type = oskar_splines_type(spline);
     if (type != oskar_mem_type(x) || type != oskar_mem_type(y))
+    {
         *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
 
     /* Check that all arrays are co-located. */
     location = oskar_splines_location(spline);
     if (location != oskar_mem_location(output) ||
             location != oskar_mem_location(x) ||
             location != oskar_mem_location(y))
+    {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return;
+    }
 
     /* Check that the spline data has been set up. */
     nx = spline->num_knots_x;
     ny = spline->num_knots_y;
-    if (!spline->coeff.data || !spline->knots_x.data || !spline->knots_y.data)
+    if (!oskar_mem_allocated(oskar_splines_coeff_const(spline)) ||
+            !oskar_mem_allocated(oskar_splines_knots_x_const(spline)) ||
+            !oskar_mem_allocated(oskar_splines_knots_y_const(spline)))
+    {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-
-    /* Check if safe to proceed. */
-    if (*status) return;
+        return;
+    }
 
     /* Check data type. */
     if (type == OSKAR_SINGLE)
     {
-        const float *knots_x, *knots_y, *coeff;
+        const float *tx, *ty, *coeff, *x_, *y_;
         float *out;
-        knots_x = (const float*)spline->knots_x.data;
-        knots_y = (const float*)spline->knots_y.data;
-        coeff   = (const float*)spline->coeff.data;
-        out     = (float*)output->data + offset;
+        tx    = oskar_mem_float_const(
+                oskar_splines_knots_x_const(spline), status);
+        ty    = oskar_mem_float_const(
+                oskar_splines_knots_y_const(spline), status);
+        coeff = oskar_mem_float_const(
+                oskar_splines_coeff_const(spline), status);
+        x_    = oskar_mem_float_const(x, status);
+        y_    = oskar_mem_float_const(y, status);
+        out   = oskar_mem_float(output, status) + offset;
 
         /* Check if data are in CPU memory. */
         if (location == OSKAR_LOCATION_CPU)
@@ -93,11 +106,11 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
             /* Evaluate surface at the points. */
             for (i = 0; i < num_points; ++i)
             {
-                x1 = ((const float*)x->data)[i];
-                y1 = ((const float*)y->data)[i];
-                oskar_dierckx_bispev_f(knots_x, nx, knots_y, ny, coeff,
-                        3, 3, &x1, 1, &y1, 1, &out[i * stride],
-                        wrk, lwrk, iwrk1, kwrk1, &err);
+                x1 = x_[i];
+                y1 = y_[i];
+                oskar_dierckx_bispev_f(tx, nx, ty, ny, coeff, 3, 3, &x1, 1,
+                        &y1, 1, &out[i * stride], wrk, lwrk, iwrk1, kwrk1,
+                        &err);
                 if (err != 0)
                 {
                     *status = OSKAR_ERR_SPLINE_EVAL_FAIL;
@@ -108,10 +121,8 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
         else if (location == OSKAR_LOCATION_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_dierckx_bispev_bicubic_cuda_f(knots_x,
-                    nx, knots_y, ny, coeff, num_points,
-                    (const float*)x->data, (const float*)y->data,
-                    stride, out);
+            oskar_dierckx_bispev_bicubic_cuda_f(tx, nx, ty, ny, coeff,
+                    num_points, x_, y_, stride, out);
             oskar_cuda_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
@@ -122,12 +133,17 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
     }
     else if (type == OSKAR_DOUBLE)
     {
-        const double *knots_x, *knots_y, *coeff;
-        double* out;
-        knots_x = (const double*)spline->knots_x.data;
-        knots_y = (const double*)spline->knots_y.data;
-        coeff   = (const double*)spline->coeff.data;
-        out     = (double*)output->data + offset;
+        const double *tx, *ty, *coeff, *x_, *y_;
+        double *out;
+        tx    = oskar_mem_double_const(
+                oskar_splines_knots_x_const(spline), status);
+        ty    = oskar_mem_double_const(
+                oskar_splines_knots_y_const(spline), status);
+        coeff = oskar_mem_double_const(
+                oskar_splines_coeff_const(spline), status);
+        x_    = oskar_mem_double_const(x, status);
+        y_    = oskar_mem_double_const(y, status);
+        out   = oskar_mem_double(output, status) + offset;
 
         /* Check if data are in CPU memory. */
         if (location == OSKAR_LOCATION_CPU)
@@ -139,11 +155,11 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
             /* Evaluate surface at the points. */
             for (i = 0; i < num_points; ++i)
             {
-                x1 = ((const double*)x->data)[i];
-                y1 = ((const double*)y->data)[i];
-                oskar_dierckx_bispev_d(knots_x, nx, knots_y, ny, coeff,
-                        3, 3, &x1, 1, &y1, 1, &out[i * stride],
-                        wrk, lwrk, iwrk1, kwrk1, &err);
+                x1 = x_[i];
+                y1 = y_[i];
+                oskar_dierckx_bispev_d(tx, nx, ty, ny, coeff, 3, 3, &x1, 1,
+                        &y1, 1, &out[i * stride], wrk, lwrk, iwrk1, kwrk1,
+                        &err);
                 if (err != 0)
                 {
                     *status = OSKAR_ERR_SPLINE_EVAL_FAIL;
@@ -154,10 +170,8 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
         else if (location == OSKAR_LOCATION_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_dierckx_bispev_bicubic_cuda_d(knots_x,
-                    nx, knots_y, ny, coeff, num_points,
-                    (const double*)x->data, (const double*)y->data,
-                    stride, out);
+            oskar_dierckx_bispev_bicubic_cuda_d(tx, nx, ty, ny, coeff,
+                    num_points, x_, y_, stride, out);
             oskar_cuda_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
