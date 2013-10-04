@@ -26,9 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/test/Test_make_image.h"
+#include <gtest/gtest.h>
 
-#include "imaging/oskar_Image.h"
 #include "imaging/oskar_SettingsImage.h"
 #include "imaging/oskar_make_image.h"
 #include "imaging/oskar_image_write.h"
@@ -52,7 +51,7 @@
 
 #define C_0 299792458.0
 
-void Test_make_image::test()
+TEST(make_image, test)
 {
     int amp_type      = OSKAR_DOUBLE_COMPLEX_MATRIX;
     int location      = OSKAR_LOCATION_CPU;
@@ -113,17 +112,17 @@ void Test_make_image::test()
 
     oskar_Image image(OSKAR_DOUBLE);
     error = oskar_make_image(&image, NULL, vis, &settings);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     int idx = 0;
     const char* image_file = "temp_test_image.img";
     oskar_image_write(&image, NULL, image_file, idx, &error);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
 #ifndef OSKAR_NO_FITS
     const char* fits_file = "temp_test_image.fits";
     oskar_fits_image_write(&image, NULL, fits_file, &error);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 #endif
 
     const char* vis_file = "temp_test_make_image.dat";
@@ -135,7 +134,7 @@ void Test_make_image::test()
             "mem", "vis_amp", 0, 0, &error);
     oskar_mem_binary_file_write_ext(&image.data, vis_file,
             "mem", "image", 0, 0, &error);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     oskar_vis_free(vis, &error);
     remove(fits_file);
@@ -143,7 +142,7 @@ void Test_make_image::test()
     remove(vis_file);
 }
 
-void  Test_make_image::image_lm_grid()
+TEST(make_image, image_lm_grid)
 {
     // Fill image with lm grid.
     int error = 0;
@@ -166,17 +165,17 @@ void  Test_make_image::image_lm_grid()
 #ifndef OSKAR_NO_FITS
     const char* fits_file = "test_lm_grid.fits";
     oskar_fits_image_write(&im, NULL, fits_file, &error);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 #endif
     const char* image_file = "test_lm_grid.img";
     oskar_image_write(&im, NULL, image_file, 0, &error);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     remove(fits_file);
     remove(image_file);
 }
 
-void Test_make_image::image_range()
+TEST(make_image, image_range)
 {
     int range[2];
 
@@ -189,11 +188,10 @@ void Test_make_image::image_range()
 
         int err = oskar_evaluate_image_range(range, snapshots, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(2, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(2, range[1]);
     }
 
     // Use case: synth, 0->2, 5 vis times
@@ -205,11 +203,10 @@ void Test_make_image::image_range()
 
         int err = oskar_evaluate_image_range(range, snapshots, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(0, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(0, range[1]);
     }
 
     // Use case: snapshots, 0->2, 3 vis times
@@ -221,11 +218,10 @@ void Test_make_image::image_range()
 
         int err = oskar_evaluate_image_range(range, snapshots, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(2, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(2, range[1]);
     }
 
     // Use case: snapshots, 0->2, 2 vis times
@@ -237,8 +233,7 @@ void Test_make_image::image_range()
 
         int err = oskar_evaluate_image_range(range, snapshots, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_ERR_INVALID_RANGE, err);
+        ASSERT_EQ(OSKAR_ERR_INVALID_RANGE, err) << oskar_get_error_string(err);
     }
 
     // Use case: snapshots, 3->5, 6 vis times
@@ -250,11 +245,10 @@ void Test_make_image::image_range()
 
         int err = oskar_evaluate_image_range(range, snapshots, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(2, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(2, range[1]);
     }
 
     // Use case: synth, 3->5, 6 vis times
@@ -266,11 +260,10 @@ void Test_make_image::image_range()
 
         int err = oskar_evaluate_image_range(range, snapshots, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(0, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(0, range[1]);
     }
 
     // Use case: synth, -1->5, 6 vis times
@@ -282,11 +275,10 @@ void Test_make_image::image_range()
 
         int err = oskar_evaluate_image_range(range, snapshots, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(0, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(0, range[1]);
     }
 
     // Use case: synth, -1->-1, 6 vis times
@@ -298,11 +290,10 @@ void Test_make_image::image_range()
 
         int err = oskar_evaluate_image_range(range, snapshots, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(0, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(0, range[1]);
     }
 
     // Use case: snapshots, -1->-1, 6 vis times
@@ -314,11 +305,10 @@ void Test_make_image::image_range()
 
         int err = oskar_evaluate_image_range(range, snapshots, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(5, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(5, range[1]);
     }
 
     // Use case: snapshots, -1->3, 6 vis times
@@ -330,11 +320,10 @@ void Test_make_image::image_range()
 
         int err = oskar_evaluate_image_range(range, snapshots, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(3, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(3, range[1]);
     }
 
     // Use case: snapshots, 1->-1, 6 vis times
@@ -346,11 +335,10 @@ void Test_make_image::image_range()
 
         int err = oskar_evaluate_image_range(range, snapshots, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(4, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(4, range[1]);
     }
 
     // Use case: snapshots, 5->5, 6 vis times
@@ -362,11 +350,10 @@ void Test_make_image::image_range()
 
         int err = oskar_evaluate_image_range(range, snapshots, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(0, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(0, range[1]);
     }
 
     // Use case: snapshots, 5->2, 10 vis times
@@ -378,13 +365,11 @@ void Test_make_image::image_range()
 
         int err = oskar_evaluate_image_range(range, snapshots, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_ERR_INVALID_RANGE, err);
+        ASSERT_EQ(OSKAR_ERR_INVALID_RANGE, err) << oskar_get_error_string(err);
     }
-
 }
 
-void Test_make_image::data_range()
+TEST(make_image, data_range)
 {
     int range[2];
 
@@ -395,11 +380,10 @@ void Test_make_image::data_range()
         int settings_range[2] = {0, 2};
         int err = oskar_evaluate_image_data_range(range, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(2, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(2, range[1]);
     }
 
     // Use case: 2->5, 6 vis times
@@ -409,11 +393,10 @@ void Test_make_image::data_range()
         int settings_range[2] = {2, 5};
         int err = oskar_evaluate_image_data_range(range, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(2, range[0]);
-        CPPUNIT_ASSERT_EQUAL(5, range[1]);
+        ASSERT_EQ(2, range[0]);
+        ASSERT_EQ(5, range[1]);
     }
 
     // Use case: 2->-1, 6 vis times
@@ -423,11 +406,10 @@ void Test_make_image::data_range()
         int settings_range[2] = {2, -1};
         int err = oskar_evaluate_image_data_range(range, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(2, range[0]);
-        CPPUNIT_ASSERT_EQUAL(5, range[1]);
+        ASSERT_EQ(2, range[0]);
+        ASSERT_EQ(5, range[1]);
     }
 
     // Use case: -1->4, 6 vis times
@@ -437,11 +419,10 @@ void Test_make_image::data_range()
         int settings_range[2] = {-1, 4};
         int err = oskar_evaluate_image_data_range(range, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(4, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(4, range[1]);
     }
 
     // Use case: -1->-1, 6 vis times
@@ -451,11 +432,10 @@ void Test_make_image::data_range()
         int settings_range[2] = {-1, -1};
         int err = oskar_evaluate_image_data_range(range, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_SUCCESS, err);
+        ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-        CPPUNIT_ASSERT_EQUAL(0, range[0]);
-        CPPUNIT_ASSERT_EQUAL(5, range[1]);
+        ASSERT_EQ(0, range[0]);
+        ASSERT_EQ(5, range[1]);
     }
 
     // Use case: -1->5, 3 vis times
@@ -465,8 +445,7 @@ void Test_make_image::data_range()
         int settings_range[2] = {-1, 5};
         int err = oskar_evaluate_image_data_range(range, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_ERR_INVALID_RANGE, err);
+        ASSERT_EQ(OSKAR_ERR_INVALID_RANGE, err) << oskar_get_error_string(err);
     }
 
     // Use case: 5->-1, 3 vis times
@@ -476,8 +455,7 @@ void Test_make_image::data_range()
         int settings_range[2] = {5, -1};
         int err = oskar_evaluate_image_data_range(range, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_ERR_INVALID_RANGE, err);
+        ASSERT_EQ(OSKAR_ERR_INVALID_RANGE, err) << oskar_get_error_string(err);
     }
 
     // Use case: 5->2, 10 vis times
@@ -487,10 +465,7 @@ void Test_make_image::data_range()
         int settings_range[2] = {5, 2};
         int err = oskar_evaluate_image_data_range(range, settings_range,
                 num_vis_times);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
-                (int)OSKAR_ERR_INVALID_RANGE, err);
+        ASSERT_EQ(OSKAR_ERR_INVALID_RANGE, err) << oskar_get_error_string(err);
     }
 }
-
-
 

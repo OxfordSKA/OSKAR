@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,35 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_FITS_IMAGE_WRITE_H_
-#define TEST_FITS_IMAGE_WRITE_H_
+#include <gtest/gtest.h>
 
-/**
- * @file Test_fits_image_write.h
- */
+#include "fits/oskar_fits_image_write.h"
+#include "imaging/oskar_image_free.h"
+#include "imaging/oskar_image_init.h"
+#include "imaging/oskar_image_resize.h"
+#include <oskar_mem.h>
 
-#include <cppunit/extensions/HelperMacros.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class Test_fits_image_write : public CppUnit::TestFixture
+TEST(fits_image_write, test)
 {
-    public:
-        CPPUNIT_TEST_SUITE(Test_fits_image_write);
-        CPPUNIT_TEST(test_method);
-        CPPUNIT_TEST_SUITE_END();
+    int columns = 10; // width
+    int rows = 20; // height
+    int err = 0;
 
-    public:
-        // Test methods.
-        void test_method();
-};
+    // Create the image.
+    oskar_Image image(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
+    oskar_image_resize(&image, columns, rows, 1, 1, 1, &err);
+    ASSERT_EQ(0, err);
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_fits_image_write);
+    // Add image meta-data.
+    image.centre_ra_deg = 10.0;
+    image.centre_dec_deg = 80.0;
+    image.fov_ra_deg = 1.0;
+    image.fov_dec_deg = 2.0;
+    image.freq_start_hz = 100e6;
+    image.freq_inc_hz = 1e5;
 
-#endif // TEST_FITS_IMAGE_WRITE_H_
+    // Define test data.
+    double* d = oskar_mem_double(&image.data, &err);
+    ASSERT_EQ(0, err);
+    for (int r = 0, i = 0; r < rows; ++r)
+    {
+        for (int c = 0; c < columns; ++c, ++i)
+        {
+            d[i] = r + 2 * c;
+        }
+    }
+
+    // Write the data.
+    const char filename[] = "temp_test_image.fits";
+    oskar_fits_image_write(&image, NULL, filename, &err);
+
+    // Free memory.
+    oskar_image_free(&image, &err);
+}

@@ -128,7 +128,7 @@ void oskar_apply_element_taper_gaussian_matrix_d(double4c* jones,
 void oskar_apply_element_taper_gaussian(oskar_Mem* jones, int num_sources,
         double fwhm, const oskar_Mem* theta, int* status)
 {
-    int base_type, type, location;
+    int precision, type, location;
 
     /* Check all inputs. */
     if (!jones || !theta || !status)
@@ -141,87 +141,119 @@ void oskar_apply_element_taper_gaussian(oskar_Mem* jones, int num_sources,
     if (*status) return;
 
     /* Get the meta-data. */
-    base_type = oskar_mem_precision(jones);
+    precision = oskar_mem_precision(jones);
     type = oskar_mem_type(jones);
     location = oskar_mem_location(jones);
 
     /* Check arrays are co-located. */
     if (oskar_mem_location(theta) != location)
+    {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return;
+    }
 
     /* Check types for consistency. */
-    if (oskar_mem_type(theta) != base_type)
+    if (oskar_mem_type(theta) != precision)
+    {
         *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
 
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Check location. */
-    if (location == OSKAR_LOCATION_GPU)
+    /* Check precision. */
+    if (precision == OSKAR_SINGLE)
     {
+        const float* theta_;
+        theta_ = oskar_mem_float_const(theta, status);
+
+        if (location == OSKAR_LOCATION_GPU)
+        {
 #ifdef OSKAR_HAVE_CUDA
-        if (type == OSKAR_SINGLE_COMPLEX)
-        {
-            oskar_apply_element_taper_gaussian_scalar_cuda_f(
-                    (float2*)jones->data, num_sources, (float)fwhm,
-                    (const float*)theta->data);
-        }
-        else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
-        {
-            oskar_apply_element_taper_gaussian_matrix_cuda_f(
-                    (float4c*)jones->data, num_sources, (float)fwhm,
-                    (const float*)theta->data);
-        }
-        else if (type == OSKAR_DOUBLE_COMPLEX)
-        {
-            oskar_apply_element_taper_gaussian_scalar_cuda_d(
-                    (double2*)jones->data, num_sources, fwhm,
-                    (const double*)theta->data);
-        }
-        else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-        {
-            oskar_apply_element_taper_gaussian_matrix_cuda_d(
-                    (double4c*)jones->data, num_sources, fwhm,
-                    (const double*)theta->data);
-        }
-        else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-        oskar_cuda_check_error(status);
+            if (type == OSKAR_SINGLE_COMPLEX)
+            {
+                oskar_apply_element_taper_gaussian_scalar_cuda_f(
+                        oskar_mem_float2(jones, status), num_sources,
+                        (float)fwhm, theta_);
+            }
+            else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+            {
+                oskar_apply_element_taper_gaussian_matrix_cuda_f(
+                        oskar_mem_float4c(jones, status), num_sources,
+                        (float)fwhm, theta_);
+            }
+            else
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+            oskar_cuda_check_error(status);
 #else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
-    }
-    else if (location == OSKAR_LOCATION_CPU)
-    {
-        if (type == OSKAR_SINGLE_COMPLEX)
-        {
-            oskar_apply_element_taper_gaussian_scalar_f(
-                    (float2*)jones->data, num_sources, (float)fwhm,
-                    (const float*)theta->data);
         }
-        else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+        else if (location == OSKAR_LOCATION_CPU)
         {
-            oskar_apply_element_taper_gaussian_matrix_f(
-                    (float4c*)jones->data, num_sources, (float)fwhm,
-                    (const float*)theta->data);
-        }
-        else if (type == OSKAR_DOUBLE_COMPLEX)
-        {
-            oskar_apply_element_taper_gaussian_scalar_d(
-                    (double2*)jones->data, num_sources, fwhm,
-                    (const double*)theta->data);
-        }
-        else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-        {
-            oskar_apply_element_taper_gaussian_matrix_d(
-                    (double4c*)jones->data, num_sources, fwhm,
-                    (const double*)theta->data);
+            if (type == OSKAR_SINGLE_COMPLEX)
+            {
+                oskar_apply_element_taper_gaussian_scalar_f(
+                        oskar_mem_float2(jones, status), num_sources,
+                        (float)fwhm, theta_);
+            }
+            else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+            {
+                oskar_apply_element_taper_gaussian_matrix_f(
+                        oskar_mem_float4c(jones, status), num_sources,
+                        (float)fwhm, theta_);
+            }
+            else
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
         else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_LOCATION;
     }
-    else
-        *status = OSKAR_ERR_BAD_LOCATION;
+    else if (precision == OSKAR_DOUBLE)
+    {
+        const double* theta_;
+        theta_ = oskar_mem_double_const(theta, status);
+
+        if (location == OSKAR_LOCATION_GPU)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            if (type == OSKAR_DOUBLE_COMPLEX)
+            {
+                oskar_apply_element_taper_gaussian_scalar_cuda_d(
+                        oskar_mem_double2(jones, status), num_sources,
+                        fwhm, theta_);
+            }
+            else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+            {
+                oskar_apply_element_taper_gaussian_matrix_cuda_d(
+                        oskar_mem_double4c(jones, status), num_sources,
+                        fwhm, theta_);
+            }
+            else
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+            oskar_cuda_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
+        else if (location == OSKAR_LOCATION_CPU)
+        {
+            if (type == OSKAR_DOUBLE_COMPLEX)
+            {
+                oskar_apply_element_taper_gaussian_scalar_d(
+                        oskar_mem_double2(jones, status), num_sources,
+                        fwhm, theta_);
+            }
+            else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+            {
+                oskar_apply_element_taper_gaussian_matrix_d(
+                        oskar_mem_double4c(jones, status), num_sources,
+                        fwhm, theta_);
+            }
+            else
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
+        else
+            *status = OSKAR_ERR_BAD_LOCATION;
+    }
 }
 
 #ifdef __cplusplus

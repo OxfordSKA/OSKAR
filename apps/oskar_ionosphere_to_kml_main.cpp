@@ -700,7 +700,7 @@ void image_to_png(const char* filename, oskar_Image& img)
     png_bytep row;
     row = (png_bytep) malloc(3 * img.width * sizeof(png_byte));
 
-    float* img_data = (float*)img_slice.data;
+    float* img_data = oskar_mem_float(&img_slice, &status);
 
     float red = -FLT_MAX; // max
     float blue = FLT_MAX; // min

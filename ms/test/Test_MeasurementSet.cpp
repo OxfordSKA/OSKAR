@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ms/test/Test_MeasurementSet.h"
+#include <gtest/gtest.h>
+
 #include "ms/oskar_MeasurementSet.h"
 #include <vector>
 #include <complex>
 
-#define TIMER_ENABLE 1
-#include "utility/timer.h"
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_MeasurementSet);
-
-/**
- * @details
- * Sets up the context before running each test method.
- */
-void Test_MeasurementSet::setUp()
-{
-}
-
-/**
- * @details
- * Clean up routine called after each test is run.
- */
-void Test_MeasurementSet::tearDown()
-{
-}
-
-/**
- * @details
- * Tests creation of simple measurement set.
- */
-void Test_MeasurementSet::test_create_simple()
+TEST(MeasurementSet, test_create_simple)
 {
     // Create the Measurement Set.
     oskar_MeasurementSet ms;
@@ -88,11 +63,7 @@ void Test_MeasurementSet::test_create_simple()
     ms.addVisibilities(1, 1, nv, u, v, w, vis, ant1, ant2, 90, 90, times);
 }
 
-/**
- * @details
- * Tests writing multiple channels to a measurement set.
- */
-void Test_MeasurementSet::test_multi_channel()
+TEST(MeasurementSet, test_multi_channel)
 {
     // Define the data dimensions.
     int n_ant = 3;           // Number of antennas.
@@ -176,10 +147,7 @@ void Test_MeasurementSet::test_multi_channel()
         }
     }
 
-    TIMER_START
     ms.addVisibilities(n_pol, n_chan, n_rows, &u[0], &v[0], &w[0],
             (double*)(&vis_data[0]), &ant1[0], &ant2[0], exposure, interval,
             &times[0]);
-    TIMER_STOP("Finished creating measurement set (%d rows, %d visibilities)",
-            n_rows, n_pol * n_chan * n_rows)
 }

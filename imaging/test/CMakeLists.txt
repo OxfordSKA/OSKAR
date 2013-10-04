@@ -2,19 +2,19 @@
 # src/imaging/test/CMakeLists.txt
 #
 
-if (CPPUNIT_FOUND)
-
-    set(imaging_test_SRC
-        src/CppUnitMain.cpp
-        src/Test_make_image.cpp
+if (CUDA_FOUND)
+    set(name imaging_test)
+    include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
+    set(${name}_SRC
+        Test_make_image.cpp
     )
-
-    include_directories(${CPPUNIT_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
-    add_executable(imaging_test ${imaging_test_SRC})
-    target_link_libraries(imaging_test oskar ${CPPUNIT_LIBRARIES} ${CUDA_LIBRARIES})
+    add_executable(${name} ${${name}_SRC})
+    target_link_libraries(${name} oskar gtest_main)
     if(CFITSIO_FOUND)
-        target_link_libraries(imaging_test oskar_fits)
+        target_link_libraries(${name} oskar_fits)
     endif()
-    add_test(imaging_test imaging_test)
-
+    set_target_properties(${name} PROPERTIES
+        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+        LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+    add_test(imaging_test ${name})
 endif()

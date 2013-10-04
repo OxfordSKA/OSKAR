@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
 #include <oskar_mem.h>
 
 #include <oskar_binary_file_write.h>
@@ -59,19 +58,19 @@ void oskar_mem_binary_file_write(const oskar_Mem* mem, const char* filename,
     if (*status) return;
 
     /* Get the data type. */
-    type = mem->type;
+    type = oskar_mem_type(mem);
 
     /* Initialise temporary (to zero length). */
     oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
 
     /* Get the total number of bytes to write. */
-    if (num_to_write <= 0)
-        num_to_write = mem->num_elements;
+    if (num_to_write == 0)
+        num_to_write = oskar_mem_length(mem);
     size_bytes = num_to_write * oskar_mem_element_size(type);
 
     /* Check if data is in CPU or GPU memory. */
     data = mem;
-    if (mem->location == OSKAR_LOCATION_GPU)
+    if (oskar_mem_location(mem) == OSKAR_LOCATION_GPU)
     {
         /* Copy to temporary. */
         oskar_mem_copy(&temp, mem, status);
@@ -80,7 +79,8 @@ void oskar_mem_binary_file_write(const oskar_Mem* mem, const char* filename,
 
     /* Save the memory to a binary file. */
     oskar_binary_file_write(filename, (unsigned char)type,
-            id_group, id_tag, user_index, size_bytes, data->data, status);
+            id_group, id_tag, user_index, size_bytes,
+            oskar_mem_void_const(data), status);
 
     /* Free the temporary. */
     oskar_mem_free(&temp, status);
@@ -106,19 +106,19 @@ void oskar_mem_binary_file_write_ext(const oskar_Mem* mem, const char* filename,
     if (*status) return;
 
     /* Get the data type. */
-    type = mem->type;
+    type = oskar_mem_type(mem);
 
     /* Initialise temporary (to zero length). */
     oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
 
     /* Get the total number of bytes to write. */
-    if (num_to_write <= 0)
-        num_to_write = mem->num_elements;
+    if (num_to_write == 0)
+        num_to_write = oskar_mem_length(mem);
     size_bytes = num_to_write * oskar_mem_element_size(type);
 
     /* Check if data is in CPU or GPU memory. */
     data = mem;
-    if (mem->location == OSKAR_LOCATION_GPU)
+    if (oskar_mem_location(mem) == OSKAR_LOCATION_GPU)
     {
         /* Copy to temporary. */
         oskar_mem_copy(&temp, mem, status);
@@ -127,7 +127,8 @@ void oskar_mem_binary_file_write_ext(const oskar_Mem* mem, const char* filename,
 
     /* Save the memory to a binary file. */
     oskar_binary_file_write_ext(filename, (unsigned char)type,
-            name_group, name_tag, user_index, size_bytes, data->data, status);
+            name_group, name_tag, user_index, size_bytes,
+            oskar_mem_void_const(data), status);
 
     /* Free the temporary. */
     oskar_mem_free(&temp, status);

@@ -164,14 +164,14 @@ TEST(evaluate_jones_E, evaluate_e)
     {
         oskar_jones_get_station_pointer(&E_station, E_cpu, j, &error);
         ASSERT_EQ(0, error) << oskar_get_error_string(error);
+        float* l_ = oskar_mem_float(&l, &error);
+        float* m_ = oskar_mem_float(&m, &error);
+        float* n_ = oskar_mem_float(&n, &error);
+        float2* E_ = oskar_mem_float2(&E_station, &error);
         for (int i = 0; i < num_sources; ++i)
         {
             fprintf(file, "%10.3f,%10.3f,%10.3f,%10.3f,%10.3f\n",
-                    ((float*)l.data)[i],
-                    ((float*)m.data)[i],
-                    ((float*)n.data)[i],
-                    ((float2*)(E_station.data))[i].x,
-                    ((float2*)(E_station.data))[i].y);
+                    l_[i], m_[i], n_[i], E_[i].x, E_[i].y);
         }
     }
     fclose(file);

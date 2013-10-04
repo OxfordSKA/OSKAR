@@ -161,9 +161,10 @@ TEST(curand, test_state_allocation)
 
         if (file)
         {
+            double* v_ = oskar_mem_double(&h_values, &status);
             for (int i = 0; i < num_values; ++i)
             {
-                fprintf(file, "%i %f\n", i, ((double*)h_values.data)[i]);
+                fprintf(file, "%i %f\n", i, v_[i]);
             }
         }
     }
@@ -220,9 +221,10 @@ TEST(curand, test_multi_device)
 
             if (file)
             {
+                double* v_ = oskar_mem_double(&h_values, &error);
                 for (int i = 0; i < num_values; ++i)
                 {
-                    fprintf(file, "%i %f\n", i, ((double*)h_values.data)[i]);
+                    fprintf(file, "%i %f\n", i, v_[i]);
                 }
             }
         }

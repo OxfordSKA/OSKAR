@@ -148,7 +148,7 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     /* Write the dimension order. */
     if (*status) return;
     oskar_mem_init(&temp, OSKAR_INT, OSKAR_LOCATION_CPU, 4, 1, status);
-    dim = (int*) temp.data;
+    dim = oskar_mem_int(&temp, status);
     dim[0] = OSKAR_VIS_DIM_CHANNEL;
     dim[1] = OSKAR_VIS_DIM_TIME;
     dim[2] = OSKAR_VIS_DIM_BASELINE;

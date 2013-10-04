@@ -185,7 +185,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         double fov_deg = mxGetScalar(in[5]);
         double fov  = fov_deg * M_PI/180.0;
 
-        // Evaluate the number of visibility samples are in the data.
+        // Evaluate the number of visibility samples in the data.
         int num_baselines = mxGetM(in[0]);
         int num_times     = mxGetN(in[0]);
         if (num_baselines != (int)mxGetM(in[1]) ||
@@ -198,7 +198,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
         int num_samples = num_baselines * num_times;
 
-        // Setup the image cube.
+        // Set up the image cube.
         oskar_image_init(&image, type, location, &err);
         oskar_image_resize(&image, size, size, 1, 1, 1, &err);
         image.centre_ra_deg = 0.0;
@@ -219,37 +219,43 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         oskar_Mem l(type, location, num_pixels);
         oskar_Mem m(type, location, num_pixels);
 
-        // Setup imaging data.
+        // Set up imaging data.
         if (type == OSKAR_DOUBLE)
         {
             oskar_evaluate_image_lm_grid_d(size, size, fov, fov,
-                    (double*)l.data, (double*)m.data);
+                    oskar_mem_double(&l, &err), oskar_mem_double(&m, &err));
             double* uu_ = (double*)mxGetData(in[0]);
             double* vv_ = (double*)mxGetData(in[1]);
             double* re_ = (double*)mxGetPr(in[2]);
             double* im_ = (double*)mxGetPi(in[2]);
+            double* uuc = oskar_mem_double(&uu, &err);
+            double* vvc = oskar_mem_double(&vv, &err);
+            double2* amp_ = oskar_mem_double2(&amp, &err);
             for (int i = 0; i < num_samples; ++i)
             {
                 double2 t; t.x = re_[i]; t.y = im_[i];
-                ((double2*)amp.data)[i] = t;
-                ((double*)uu.data)[i] = uu_[i];
-                ((double*)vv.data)[i] = vv_[i];
+                amp_[i] = t;
+                uuc[i] = uu_[i];
+                vvc[i] = vv_[i];
             }
         }
         else // (type == OSKAR_SINGLE)
         {
             oskar_evaluate_image_lm_grid_f(size, size, fov, fov,
-                    (float*)l.data, (float*)m.data);
+                    oskar_mem_float(&l, &err), oskar_mem_float(&m, &err));
             float* uu_ = (float*)mxGetData(in[0]);
             float* vv_ = (float*)mxGetData(in[1]);
             float* re_ = (float*)mxGetPr(in[2]);
             float* im_ = (float*)mxGetPi(in[2]);
+            float* uuc = oskar_mem_float(&uu, &err);
+            float* vvc = oskar_mem_float(&vv, &err);
+            float2* amp_ = oskar_mem_float2(&amp, &err);
             for (int i = 0; i < num_samples; ++i)
             {
                 float2 t; t.x = re_[i]; t.y = im_[i];
-                ((float2*)amp.data)[i] = t;
-                ((float*)uu.data)[i] = uu_[i];
-                ((float*)vv.data)[i] = vv_[i];
+                amp_[i] = t;
+                uuc[i] = uu_[i];
+                vvc[i] = vv_[i];
             }
 
         }

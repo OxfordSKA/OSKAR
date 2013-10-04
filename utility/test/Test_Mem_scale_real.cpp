@@ -217,7 +217,7 @@ TEST(Mem, scale_real_double)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n; ++i)
     {
-        EXPECT_DOUBLE_EQ(2.0 * i, ((double*)(mem_cpu.data))[i]);
+        EXPECT_DOUBLE_EQ(2.0 * i, data[i]);
     }
 
     // Copy to GPU and scale again.

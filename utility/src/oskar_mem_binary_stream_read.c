@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
 #include <oskar_mem.h>
 
 #include <oskar_binary_stream_read.h>
@@ -62,13 +61,13 @@ void oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
     if (*status) return;
 
     /* Get the data type. */
-    type = mem->type;
+    type = oskar_mem_type(mem);
 
     /* Initialise temporary (to zero length). */
     oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
 
     /* Check if data is in CPU or GPU memory. */
-    data = (mem->location == OSKAR_LOCATION_CPU) ? mem : &temp;
+    data = (oskar_mem_location(mem) == OSKAR_LOCATION_CPU) ? mem : &temp;
 
     /* Create the tag index if it doesn't already exist. */
     if (*index == NULL)
@@ -86,10 +85,11 @@ void oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
 
     /* Load the memory. */
     oskar_binary_stream_read(stream, index, (unsigned char)type,
-            id_group, id_tag, user_index, size_bytes, data->data, status);
+            id_group, id_tag, user_index, size_bytes, oskar_mem_void(data),
+            status);
 
     /* Copy to GPU memory if required. */
-    if (mem->location == OSKAR_LOCATION_GPU)
+    if (oskar_mem_location(mem) == OSKAR_LOCATION_GPU)
         oskar_mem_copy(mem, &temp, status);
 
     /* Free the temporary. */
@@ -116,13 +116,13 @@ void oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
     if (*status) return;
 
     /* Get the data type. */
-    type = mem->type;
+    type = oskar_mem_type(mem);
 
     /* Initialise temporary (to zero length). */
     oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
 
     /* Check if data is in CPU or GPU memory. */
-    data = (mem->location == OSKAR_LOCATION_CPU) ? mem : &temp;
+    data = (oskar_mem_location(mem) == OSKAR_LOCATION_CPU) ? mem : &temp;
 
     /* Create the tag index if it doesn't already exist. */
     if (*index == NULL)
@@ -140,10 +140,11 @@ void oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
 
     /* Load the memory. */
     oskar_binary_stream_read_ext(stream, index, (unsigned char)type,
-            name_group, name_tag, user_index, size_bytes, data->data, status);
+            name_group, name_tag, user_index, size_bytes, oskar_mem_void(data),
+            status);
 
     /* Copy to GPU memory if required. */
-    if (mem->location == OSKAR_LOCATION_GPU)
+    if (oskar_mem_location(mem) == OSKAR_LOCATION_GPU)
         oskar_mem_copy(mem, &temp, status);
 
     /* Free the temporary. */

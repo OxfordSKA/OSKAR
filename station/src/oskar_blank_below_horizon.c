@@ -113,7 +113,7 @@ void oskar_blank_below_horizon_scalar_d(double2* jones, int num_sources,
 void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
         int num_sources, int* status)
 {
-    int type, location;
+    int precision, type, location;
 
     /* Check all inputs. */
     if (!mask || !data || !status)
@@ -128,77 +128,109 @@ void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
     /* Check that all arrays are co-located. */
     location = oskar_mem_location(data);
     if (oskar_mem_location(mask) != location)
+    {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return;
+    }
 
     /* Check that the mask type is OK. */
-    if (oskar_mem_type(mask) != OSKAR_SINGLE && oskar_mem_type(mask) != OSKAR_DOUBLE)
+    precision = oskar_mem_type(mask);
+    type = oskar_mem_type(data);
+    if (precision != OSKAR_SINGLE && precision != OSKAR_DOUBLE)
+    {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
 
     /* Check that the dimensions are OK. */
     if ((int)oskar_mem_length(data) < num_sources)
+    {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
-
-    /* Check if safe to proceed. */
-    if (*status) return;
+        return;
+    }
 
     /* Zero the value of any positions below the horizon. */
-    type = oskar_mem_type(data);
-    if (location == OSKAR_LOCATION_GPU)
+    if (precision == OSKAR_SINGLE)
     {
-#ifdef OSKAR_HAVE_CUDA
-        if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
-        {
-            oskar_blank_below_horizon_matrix_cuda_f
-            ((float4c*)data->data, num_sources, (const float*)mask->data);
-        }
-        else if (type == OSKAR_SINGLE_COMPLEX)
-        {
-            oskar_blank_below_horizon_scalar_cuda_f
-            ((float2*)data->data, num_sources, (const float*)mask->data);
-        }
-        else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-        {
-            oskar_blank_below_horizon_matrix_cuda_d
-            ((double4c*)data->data, num_sources, (const double*)mask->data);
-        }
-        else if (type == OSKAR_DOUBLE_COMPLEX)
-        {
-            oskar_blank_below_horizon_scalar_cuda_d
-            ((double2*)data->data, num_sources, (const double*)mask->data);
-        }
-        else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        const float* mask_;
+        mask_ = oskar_mem_float_const(mask, status);
 
-        /* Report any CUDA error. */
-        oskar_cuda_check_error(status);
+        if (location == OSKAR_LOCATION_GPU)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+            {
+                oskar_blank_below_horizon_matrix_cuda_f(
+                        oskar_mem_float4c(data, status), num_sources, mask_);
+            }
+            else if (type == OSKAR_SINGLE_COMPLEX)
+            {
+                oskar_blank_below_horizon_scalar_cuda_f(
+                        oskar_mem_float2(data, status), num_sources, mask_);
+            }
+            else
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+            oskar_cuda_check_error(status);
 #else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
-    }
-    else
-    {
-        if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
-        {
-            oskar_blank_below_horizon_matrix_f
-            ((float4c*)data->data, num_sources, (const float*)mask->data);
-        }
-        else if (type == OSKAR_SINGLE_COMPLEX)
-        {
-            oskar_blank_below_horizon_scalar_f
-            ((float2*)data->data, num_sources, (const float*)mask->data);
-        }
-        else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-        {
-            oskar_blank_below_horizon_matrix_d
-            ((double4c*)data->data, num_sources, (const double*)mask->data);
-        }
-        else if (type == OSKAR_DOUBLE_COMPLEX)
-        {
-            oskar_blank_below_horizon_scalar_d
-            ((double2*)data->data, num_sources, (const double*)mask->data);
         }
         else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        {
+            if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+            {
+                oskar_blank_below_horizon_matrix_f(
+                        oskar_mem_float4c(data, status), num_sources, mask_);
+            }
+            else if (type == OSKAR_SINGLE_COMPLEX)
+            {
+                oskar_blank_below_horizon_scalar_f(
+                        oskar_mem_float2(data, status), num_sources, mask_);
+            }
+            else
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
+    }
+    else if (precision == OSKAR_DOUBLE)
+    {
+        const double* mask_;
+        mask_ = oskar_mem_double_const(mask, status);
+
+        if (location == OSKAR_LOCATION_GPU)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+            {
+                oskar_blank_below_horizon_matrix_cuda_d(
+                        oskar_mem_double4c(data, status), num_sources, mask_);
+            }
+            else if (type == OSKAR_DOUBLE_COMPLEX)
+            {
+                oskar_blank_below_horizon_scalar_cuda_d(
+                        oskar_mem_double2(data, status), num_sources, mask_);
+            }
+            else
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+            oskar_cuda_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
+        else
+        {
+            if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+            {
+                oskar_blank_below_horizon_matrix_d(
+                        oskar_mem_double4c(data, status), num_sources, mask_);
+            }
+            else if (type == OSKAR_DOUBLE_COMPLEX)
+            {
+                oskar_blank_below_horizon_scalar_d(
+                        oskar_mem_double2(data, status), num_sources, mask_);
+            }
+            else
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
 }
 

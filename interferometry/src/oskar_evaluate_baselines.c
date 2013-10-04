@@ -109,9 +109,10 @@ void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
         return;
     }
 
-    /* Check that the memory is not NULL. */
-    if (!uu->data || !vv->data || !ww->data ||
-            !u->data || !v->data || !w->data)
+    /* Check that the memory is allocated. */
+    if (!oskar_mem_allocated(uu) || !oskar_mem_allocated(vv) ||
+            !oskar_mem_allocated(ww) || !oskar_mem_allocated(u) ||
+            !oskar_mem_allocated(v) || !oskar_mem_allocated(w))
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
         return;

@@ -190,13 +190,15 @@ void oskar_TelescopeModelLoadNoise::getNoiseFreqs_(oskar_Mem* freqs,
         if (*status) return;
         if (oskar_mem_type(freqs) == OSKAR_DOUBLE)
         {
+            double* f = oskar_mem_double(freqs, status);
             for (int i = 0; i < num_freqs; ++i)
-                ((double*)freqs->data)[i] = start + i * inc;
+                f[i] = start + i * inc;
         }
         else
         {
+            float* f = oskar_mem_float(freqs, status);
             for (int i = 0; i < num_freqs; ++i)
-                ((float*)freqs->data)[i] = start + i * inc;
+                f[i] = start + i * inc;
         }
 
     }
@@ -465,17 +467,17 @@ void oskar_TelescopeModelLoadNoise::sensitivity_to_rms_(oskar_Mem* rms,
     double factor = 1.0 / std::sqrt(2.0 * bandwidth_hz * integration_time_sec);
     if (dataType_ == OSKAR_DOUBLE)
     {
-        const double* sensitivity_ = (const double*)sensitivity->data;
-        double* stddev_ = (double*)rms->data;
+        const double* sens_ = oskar_mem_double_const(sensitivity, status);
+        double* stddev_ = oskar_mem_double(rms, status);
         for (int i = 0; i < num_freqs; ++i)
-            stddev_[i] = sensitivity_[i] * factor;
+            stddev_[i] = sens_[i] * factor;
     }
     else if (dataType_ == OSKAR_SINGLE)
     {
-        const float* sensitivity_ = (const float*)sensitivity->data;
-        float* stddev_ = (float*)rms->data;
+        const float* sens_ = oskar_mem_float_const(sensitivity, status);
+        float* stddev_ = oskar_mem_float(rms, status);
         for (int i = 0; i < num_freqs; ++i)
-            stddev_[i] = sensitivity_[i] * factor;
+            stddev_[i] = sens_[i] * factor;
     }
     else
         *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -513,21 +515,21 @@ void oskar_TelescopeModelLoadNoise::t_sys_to_rms_(oskar_Mem* rms,
     double factor = (2.0 * k_B * 1.0e26) / sqrt(2.0 * bandwidth * integration_time);
     if (type == OSKAR_DOUBLE)
     {
-        const double* t_sys_ = (const double*)t_sys->data;
-        const double* area_ = (const double*)area->data;
-        const double* efficiency_ = (const double*)efficiency->data;
-        double* rms_ = (double*)rms->data;
+        const double* t_sys_ = oskar_mem_double_const(t_sys, status);
+        const double* area_ = oskar_mem_double_const(area, status);
+        const double* eff_ = oskar_mem_double_const(efficiency, status);
+        double* rms_ = oskar_mem_double(rms, status);
         for (int i = 0; i < num_freqs; ++i)
-            rms_[i] = (t_sys_[i] / (area_[i] * efficiency_[i])) * factor;
+            rms_[i] = (t_sys_[i] / (area_[i] * eff_[i])) * factor;
     }
     else if (type == OSKAR_SINGLE)
     {
-        const float* t_sys_ = (const float*)t_sys->data;
-        const float* area_ = (const float*)area->data;
-        const float* efficiency_ = (const float*)efficiency->data;
-        float* rms_ = (float*)rms->data;
+        const float* t_sys_ = oskar_mem_float_const(t_sys, status);
+        const float* area_ = oskar_mem_float_const(area, status);
+        const float* eff_ = oskar_mem_float_const(efficiency, status);
+        float* rms_ = oskar_mem_float(rms, status);
         for (int i = 0; i < num_freqs; ++i)
-            rms_[i] = (t_sys_[i] / (area_[i] * efficiency_[i])) * factor;
+            rms_[i] = (t_sys_[i] / (area_[i] * eff_[i])) * factor;
     }
     else
         *status = OSKAR_ERR_BAD_DATA_TYPE;

@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
 #include <oskar_mem.h>
 #include <oskar_mem_binary_file_read_raw.h>
 #include <stdio.h>
@@ -40,10 +39,8 @@ extern "C" {
 void oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename,
         int* status)
 {
-    int num_elements, element_size;
-    oskar_Mem temp;
-    size_t size_bytes;
-    oskar_Mem* data = NULL;
+    size_t num_elements, element_size, size_bytes;
+    oskar_Mem temp, *data = NULL;
     FILE* stream;
 
     /* Check all inputs. */
@@ -57,10 +54,10 @@ void oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename,
     if (*status) return;
 
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, mem->type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
+    oskar_mem_init(&temp, oskar_mem_type(mem), OSKAR_LOCATION_CPU, 0, 1, status);
 
     /* Check if data is in CPU or GPU memory. */
-    data = (mem->location == OSKAR_LOCATION_CPU) ? mem : &temp;
+    data = (oskar_mem_location(mem) == OSKAR_LOCATION_CPU) ? mem : &temp;
 
     /* Open the input file. */
     stream = fopen(filename, "rb");
@@ -75,8 +72,8 @@ void oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename,
     size_bytes = ftell(stream);
 
     /* Resize memory block so that it can hold the data. */
-    element_size = oskar_mem_element_size(mem->type);
-    num_elements = (int)ceil(size_bytes / element_size);
+    element_size = oskar_mem_element_size(oskar_mem_type(mem));
+    num_elements = (size_t)ceil(size_bytes / element_size);
     oskar_mem_realloc(data, num_elements, status);
     if (*status)
     {
@@ -88,7 +85,7 @@ void oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename,
 
     /* Read the data. */
     fseek(stream, 0, SEEK_SET);
-    if (fread(data->data, 1, size_bytes, stream) != size_bytes)
+    if (fread(oskar_mem_void(data), 1, size_bytes, stream) != size_bytes)
     {
         oskar_mem_free(&temp, status);
         fclose(stream);
@@ -100,7 +97,7 @@ void oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename,
     fclose(stream);
 
     /* Copy to GPU memory if required. */
-    if (mem->location == OSKAR_LOCATION_GPU)
+    if (oskar_mem_location(mem) == OSKAR_LOCATION_GPU)
         oskar_mem_copy(mem, &temp, status);
 
     /* Free the temporary. */

@@ -531,19 +531,24 @@ TEST(telescope_model_load_save, test_load_telescope_noise_rms)
         oskar_Station* s = oskar_telescope_station(telescope, i);
         oskar_SystemNoiseModel* noise = oskar_station_system_noise_model(s);
         int num_values = (int)oskar_mem_length(&noise->frequency);
-        for (int j = 0; j < num_values; ++j)
+        if (type == OSKAR_DOUBLE)
         {
-            if (type == OSKAR_DOUBLE)
+            double* r = oskar_mem_double(&noise->rms, &err);
+            double* f = oskar_mem_double(&noise->frequency, &err);
+            for (int j = 0; j < num_values; ++j)
             {
-                EXPECT_NEAR(stddev[j], ((double*)noise->rms.data)[j], 1.0e-6);
-                EXPECT_NEAR(freq_values[j],((double*)noise->frequency.data)[j],
-                        1.0e-6);
+                EXPECT_NEAR(stddev[j], r[j], 1.0e-6);
+                EXPECT_NEAR(freq_values[j], f[j], 1.0e-6);
             }
-            else
+        }
+        else
+        {
+            float* r = oskar_mem_float(&noise->rms, &err);
+            float* f = oskar_mem_float(&noise->frequency, &err);
+            for (int j = 0; j < num_values; ++j)
             {
-                EXPECT_NEAR(stddev[j], ((float*)noise->rms.data)[j], 1.0e-5);
-                EXPECT_NEAR(freq_values[j], ((float*)noise->frequency.data)[j],
-                        1.0e-5);
+                EXPECT_NEAR(stddev[j], r[j], 1.0e-5);
+                EXPECT_NEAR(freq_values[j], f[j], 1.0e-5);
             }
         }
     }
@@ -615,25 +620,28 @@ TEST(telescope_model_load_save, test_load_telescope_noise_sensitivity)
         oskar_Station* s = oskar_telescope_station(telescope, i);
         oskar_SystemNoiseModel* noise = oskar_station_system_noise_model(s);
         int num_values = (int)oskar_mem_length(&noise->frequency);
-        for (int j = 0; j < num_values; ++j)
+        if (type == OSKAR_DOUBLE)
         {
-            if (type == OSKAR_DOUBLE)
+            double* r = oskar_mem_double(&noise->rms, &err);
+            double* f = oskar_mem_double(&noise->frequency, &err);
+            for (int j = 0; j < num_values; ++j)
             {
                 EXPECT_NEAR(
                         sensitivity[j] / sqrt(2.0 * bandwidth * integration_time),
-                        ((double*)noise->rms.data)[j],
-                        1.0e-6);
-                EXPECT_NEAR(freq_values[j],((double*)noise->frequency.data)[j],
-                        1.0e-6);
+                        r[j], 1.0e-6);
+                EXPECT_NEAR(freq_values[j], f[j], 1.0e-6);
             }
-            else
+        }
+        else
+        {
+            float* r = oskar_mem_float(&noise->rms, &err);
+            float* f = oskar_mem_float(&noise->frequency, &err);
+            for (int j = 0; j < num_values; ++j)
             {
                 EXPECT_NEAR(
                         sensitivity[j] / sqrtf(2.0 * bandwidth * integration_time),
-                        ((float*)noise->rms.data)[j],
-                        1.0e-5);
-                EXPECT_NEAR(freq_values[j],((float*)noise->frequency.data)[j],
-                        1.0e-5);
+                        r[j], 1.0e-5);
+                EXPECT_NEAR(freq_values[j], f[j], 1.0e-5);
             }
         }
     }
@@ -721,25 +729,29 @@ TEST(telescope_model_load_save, test_load_telescope_noise_t_sys)
         oskar_Station* s = oskar_telescope_station(telescope, i);
         oskar_SystemNoiseModel* noise = oskar_station_system_noise_model(s);
         int num_values = (int)oskar_mem_length(&noise->frequency);
-        for (int j = 0; j < num_values; ++j)
+
+        if (type == OSKAR_DOUBLE)
         {
-            if (type == OSKAR_DOUBLE)
+            double* r = oskar_mem_double(&noise->rms, &err);
+            double* f = oskar_mem_double(&noise->frequency, &err);
+            for (int j = 0; j < num_values; ++j)
             {
                 EXPECT_NEAR(
                         (t_sys[j] / (area_values[j] * efficiency_values[j])) * factor,
-                        ((double*)noise->rms.data)[j],
-                        1.0e-6);
-                EXPECT_NEAR(freq_values[j], ((double*)noise->frequency.data)[j],
-                        1.0e-6);
+                        r[j], 1.0e-6);
+                EXPECT_NEAR(freq_values[j], f[j], 1.0e-6);
             }
-            else
+        }
+        else
+        {
+            float* r = oskar_mem_float(&noise->rms, &err);
+            float* f = oskar_mem_float(&noise->frequency, &err);
+            for (int j = 0; j < num_values; ++j)
             {
                 EXPECT_NEAR(
                         (t_sys[j] / (area_values[j] * efficiency_values[j])) * factor,
-                        ((float*)noise->rms.data)[j],
-                        1.0e-5);
-                EXPECT_NEAR(freq_values[j], ((float*)noise->frequency.data)[j],
-                        1.0e-5);
+                        r[j], 1.0e-5);
+                EXPECT_NEAR(freq_values[j], f[j], 1.0e-5);
             }
         }
     }

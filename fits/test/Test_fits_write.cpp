@@ -26,7 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fits/test/Test_fits_write.h"
+#include <gtest/gtest.h>
+
 #include "fits/oskar_fits_write.h"
 #include <oskar_mem.h>
 
@@ -34,7 +35,7 @@
 #include <cstdlib>
 #include <cmath>
 
-void Test_fits_write::test_method()
+TEST(fits_write, test)
 {
     int status = 0;
     int columns = 10; // width
@@ -43,10 +44,10 @@ void Test_fits_write::test_method()
     int blocks = 4;
     int num_elements = columns * rows * planes * blocks;
     oskar_Mem data(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_elements);
-    const char filename[] = "cpp_unit_test_fits_write.fits";
+    const char filename[] = "temp_test_fits_write.fits";
 
     // Define test data.
-    double* d = (double*) data.data;
+    double* d = oskar_mem_double(&data, &status);
     int i = 0;
     for (int b = 0; b < blocks; ++b)
     {
@@ -127,6 +128,7 @@ void Test_fits_write::test_method()
     crota[3] = 0.0;
 
     /* Write multi-dimensional image data. */
-    oskar_fits_write(filename, oskar_mem_type(&data), 4, naxes, data.data, ctype,
-            ctype_comment, crval, cdelt, crpix, crota, &status);
+    oskar_fits_write(filename, oskar_mem_type(&data), 4, naxes,
+            oskar_mem_void(&data), ctype, ctype_comment,
+            crval, cdelt, crpix, crota, &status);
 }
