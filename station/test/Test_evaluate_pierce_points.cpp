@@ -26,24 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <gtest/gtest.h>
 
-#include "station/test/Test_evaluate_pierce_points.h"
-#include "interferometry/oskar_horizon_plane_to_geocentric_cartesian.h"
-#include "station/oskar_evaluate_pierce_points.h"
-#include "interferometry/oskar_geocentric_cartesian_to_geodetic_spherical.h"
+#include <oskar_horizon_plane_to_geocentric_cartesian.h>
+#include <oskar_evaluate_pierce_points.h>
+#include <oskar_geocentric_cartesian_to_geodetic_spherical.h>
 
 #include <oskar_mem.h>
 
 #include <cmath>
 #include <cstdio>
 
-void create_rot_matrix(double* M, double lon_rad, double lat_rad);
-void matrix_multiply(double* v_out, double* M, double *v_in);
+static void create_rot_matrix(double* M, double lon_rad, double lat_rad);
+static void matrix_multiply(double* v_out, double* M, double *v_in);
 
-void Test_evaluate_pierce_points::test1()
+TEST(evaluate_pierce_points, test1)
 {
-
-    printf("\n%s\n", __PRETTY_FUNCTION__);
     // ====== INPUTS =========================================================
 
     // Station lon/lat coordinates (for which pierce points are evaluated)
@@ -151,7 +149,7 @@ void Test_evaluate_pierce_points::test1()
 }
 
 
-void Test_evaluate_pierce_points::test2()
+TEST(evaluate_pierce_points, test2)
 {
     // >>>>>> Inputs. <<<<<<<<<
 
@@ -178,9 +176,7 @@ void Test_evaluate_pierce_points::test2()
 
     // Evaluate horizontal x,y,z of the pierce point.
     int n = 1;
-    oskar_Mem hor_x;
-    oskar_Mem hor_y;
-    oskar_Mem hor_z;
+    oskar_Mem hor_x, hor_y, hor_z;
     int type = OSKAR_DOUBLE;
     int location = OSKAR_LOCATION_CPU;
     int status = OSKAR_SUCCESS;
@@ -190,9 +186,9 @@ void Test_evaluate_pierce_points::test2()
     double x_ = cos(el) * sin(az);
     double y_ = cos(el) * cos(az);
     double z_ = sin(el);
-    ((double*)hor_x.data)[0] = x_;
-    ((double*)hor_y.data)[0] = y_;
-    ((double*)hor_z.data)[0] = z_;
+    oskar_mem_double(&hor_x, &status)[0] = x_;
+    oskar_mem_double(&hor_y, &status)[0] = y_;
+    oskar_mem_double(&hor_z, &status)[0] = z_;
 
     // Evaluate the pierce points.
     oskar_Mem pp_lon, pp_lat, pp_path;
@@ -202,18 +198,17 @@ void Test_evaluate_pierce_points::test2()
     oskar_evaluate_pierce_points(&pp_lon, &pp_lat, &pp_path, lon, lat, alt,
             x, y, z, height, n, &hor_x, &hor_y, &hor_z, &status);
 
-    printf("\n%s\n", __PRETTY_FUNCTION__);
     printf("pierce point [%i]:\n", 0);
     printf("  lon = %f, lat = %f [station]\n", lon*(180./M_PI), lat*(180./M_PI));
     printf("  x = %f, y = %f, z = %f [station]\n", x, y, z);
     printf("  hor_x = %f, hor_y = %f, hor_z = %f\n", x_, y_, z_);
     printf("  az = %f, el = %f\n", az*(180./M_PI), el*(180./M_PI));
     printf("  lon=%f, lat=%f, path=%f\n",
-            ((double*)pp_lon.data)[0]*(180./M_PI),
-            ((double*)pp_lat.data)[0]*(180./M_PI),
-            ((double*)pp_path.data)[0]);
+            oskar_mem_double(&pp_lon, &status)[0]*(180./M_PI),
+            oskar_mem_double(&pp_lat, &status)[0]*(180./M_PI),
+            oskar_mem_double(&pp_path, &status)[0]);
 
-    // Free up memory.
+    // Free memory.
     oskar_mem_free(&hor_x, &status);
     oskar_mem_free(&hor_y, &status);
     oskar_mem_free(&hor_z, &status);
@@ -223,7 +218,7 @@ void Test_evaluate_pierce_points::test2()
 }
 
 
-void create_rot_matrix(double* M, double lon_rad, double lat_rad)
+static void create_rot_matrix(double* M, double lon_rad, double lat_rad)
 {
     double cosl   = cos(lon_rad);
     double sinl   = sin(lon_rad);
@@ -252,7 +247,7 @@ void create_rot_matrix(double* M, double lon_rad, double lat_rad)
     M[8] = sinphi;
 }
 
-void matrix_multiply(double* v_out, double* M, double *v_in)
+static void matrix_multiply(double* v_out, double* M, double *v_in)
 {
     v_out[0] = (M[0] * v_in[0]) + (M[1] * v_in[1]) + (M[2] * v_in[2]);
     v_out[1] = (M[3] * v_in[0]) + (M[4] * v_in[1]) + (M[5] * v_in[2]);

@@ -137,7 +137,7 @@ TEST(curand, test_state_allocation)
     // Allocate a number of CURAND states.
     int offset = 0;
     int seed = 0;
-    int num_states = (int)2e5;
+    int num_states = (int)2e4; // FIXME This was 2e5 - OK to reduce for the test?
     int status = 0;
     oskar_RandomState* random_state = oskar_random_state_create(num_states,
             seed, offset, 0, &status);
@@ -195,7 +195,7 @@ TEST(curand, test_multi_device)
 
         // Allocate a number of curand states.
         int seed = 0;
-        int num_states = (int)2e5;
+        int num_states = (int)2e4; // FIXME This was 2e5 - OK to reduce for the test?
         oskar_RandomState* d_states = oskar_random_state_create(num_states,
                 seed, 0, 0, &error);
 

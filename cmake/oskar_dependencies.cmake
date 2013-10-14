@@ -13,7 +13,6 @@
 #   casacore        (oskar_ms)
 #   cfitsio         (oskar_fits)
 #   MATLAB          (for MATLAB interface fuctions)
-#   CppUnit         (unit test binaries)
 #
 # =============================================================================
 #
@@ -27,10 +26,6 @@ if (WIN32)
     # qwt5
     set(QWT_INCLUDES     ${CMAKE_SOURCE_DIR}/../include/qwt-5.2.2/)
     set(QWT_LIBRARY_DIR  ${CMAKE_SOURCE_DIR}/../lib/qwt-5.2.2/)
-
-    # cppunit
-    set(CPPUNIT_INCLUDES ${CMAKE_SOURCE_DIR}/../include/cppunit-1.12.1/)
-    set(CPPUNIT_LIB_DIR  ${CMAKE_SOURCE_DIR}/../lib/cppunit-1.12.1/)
 endif ()
 
 # ==== Find dependencies.
@@ -43,7 +38,6 @@ find_package(Qt4 4.6 QUIET) # liboskar_apps, liboskar_widgets, apps
 find_package(CasaCore QUIET) # liboskar_ms
 find_package(CFitsio QUIET)  # liboskar_fits
 find_package(Matlab QUIET)   # mex functions
-find_package(CppUnit QUIET)  # unit tests
 #find_package(PNG QUIET)     # For writing PNG images.
 
 # ==== Work out which libraries to build.
@@ -129,13 +123,6 @@ if (NOT MATLAB_FOUND)
     message("===============================================================================")
 endif()
 
-if (NOT CPPUNIT_FOUND)
-    message("===============================================================================")
-    message("-- WARNING: CppUnit not found: "
-           "Unable to build unit testing binaries.")
-    message("===============================================================================")
-endif()
-
 # Prints a message saying which libraries are being built.
 message("===============================================================================")
 message("-- INFO: The following OSKAR components will be built:")
@@ -169,9 +156,6 @@ if ("${component_count}" EQUAL 0)
 endif()
 if (MATLAB_FOUND AND CUDA_FOUND)
     message("-- INFO:   - OSKAR MATLAB interface functions")
-endif ()
-if (CPPUNIT_FOUND)
-    message("-- INFO:   - CppUnit unit test binaries (where available)")
 endif ()
 message("===============================================================================")
 

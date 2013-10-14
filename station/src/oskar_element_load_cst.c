@@ -271,36 +271,8 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
 #if 0
     /* Dump data to a new file. */
     file = fopen("element_data_debug_dump.txt", "w");
-    if (type == OSKAR_SINGLE)
-    {
-        int i;
-        for (i = 0; i < n; ++i)
-        {
-            fprintf(file, "%9.4f, %9.4f, %9.4f, %9.4f, %9.4f, %9.4f, %9.4f\n",
-                    ((float*)m_theta.data)[i],
-                    ((float*)m_phi.data)[i],
-                    ((float*)m_theta_re.data)[i],
-                    ((float*)m_theta_im.data)[i],
-                    ((float*)m_phi_re.data)[i],
-                    ((float*)m_phi_im.data)[i],
-                    ((float*)weight.data)[i]);
-        }
-    }
-    else if (type == OSKAR_DOUBLE)
-    {
-        int i;
-        for (i = 0; i < n; ++i)
-        {
-            fprintf(file, "%9.4f, %9.4f, %9.4f, %9.4f, %9.4f, %9.4f, %9.4f\n",
-                    ((double*)m_theta.data)[i],
-                    ((double*)m_phi.data)[i],
-                    ((double*)m_theta_re.data)[i],
-                    ((double*)m_theta_im.data)[i],
-                    ((double*)m_phi_re.data)[i],
-                    ((double*)m_phi_im.data)[i],
-                    ((double*)weight.data)[i]);
-        }
-    }
+    oskar_mem_write_ascii(file, 7, n, status, &m_theta, &m_phi,
+            &m_theta_re, &m_theta_im, &m_phi_re, &m_phi_im, &weight);
     fclose(file);
 #endif
 

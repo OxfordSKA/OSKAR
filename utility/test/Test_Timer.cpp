@@ -30,6 +30,8 @@
 
 #include <oskar_timer.h>
 #include <cstdlib>
+
+#if 0
 #include <unistd.h> // Needed for sleep() function.
 
 TEST(Timer, test_consistency)
@@ -77,6 +79,7 @@ TEST(Timer, test_consistency)
     oskar_timer_free(t_cuda);
     oskar_timer_free(t_omp);
 }
+#endif
 
 static void time_timer(int type, const char* label)
 {

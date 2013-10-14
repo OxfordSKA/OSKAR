@@ -214,9 +214,6 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
     html.append("<li>The CMake cross-platform build system "
                 "(<a href=\"http://www.cmake.org/\">"
                 "http://www.cmake.org/</a>)</li>");
-    html.append("<li>The CppUnit unit-testing framework "
-                "(<a href=\"http://www.freedesktop.org/wiki/Software/cppunit\">"
-                "http://www.freedesktop.org/wiki/Software/cppunit</a>)</li>");
     html.append("<li>The Google Test unit-testing framework "
                 "(<a href=\"http://code.google.com/p/googletest/\">"
                 "http://code.google.com/p/googletest/</a>)</li>");

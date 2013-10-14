@@ -163,7 +163,7 @@ TEST(add_system_noise, test_rms)
 
     oskar_Image image;
     settings.image.input_vis_data = NULL;
-    settings.image.size = 1024;
+    settings.image.size = 256;
     settings.image.fov_deg = 0.75;
     settings.image.image_type = OSKAR_IMAGE_TYPE_POL_XX;
     settings.image.channel_snapshots = OSKAR_TRUE;

@@ -107,10 +107,10 @@ TEST(evaluate_jones_E, evaluate_e)
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
     float centre_long = 180.0 * M_PI / 180.0;
     float centre_lat  = 0.0   * M_PI / 180.0;
-    float size_long   = 180.0 * M_PI / 180.0;
-    float size_lat    = 90.0  * M_PI / 180.0;
-    float sep_long    = 1.0   * M_PI / 180.0;
-    float sep_lat     = 1.0   * M_PI / 180.0;
+    float size_long   = 90.0  * M_PI / 180.0;
+    float size_lat    = 40.0  * M_PI / 180.0;
+    float sep_long    = 2.0   * M_PI / 180.0;
+    float sep_lat     = 2.0   * M_PI / 180.0;
     float rho         = 0.0   * M_PI / 180.0;
     bool force_constant_sep = true;
     bool set_centre_after   = false;
@@ -135,13 +135,13 @@ TEST(evaluate_jones_E, evaluate_e)
             OSKAR_LOCATION_GPU, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    oskar_Jones* E_gpu = oskar_jones_create(OSKAR_SINGLE_COMPLEX,
+    oskar_Jones* E = oskar_jones_create(OSKAR_SINGLE_COMPLEX,
             OSKAR_LOCATION_GPU, num_stations, num_sources, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     oskar_StationWork* work = oskar_station_work_create(OSKAR_SINGLE,
             OSKAR_LOCATION_GPU, &error);
-    oskar_evaluate_jones_E(E_gpu, sky_gpu, tel_gpu, gast, frequency, work,
+    oskar_evaluate_jones_E(E, sky_gpu, tel_gpu, gast, frequency, work,
             random_state, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
@@ -149,32 +149,22 @@ TEST(evaluate_jones_E, evaluate_e)
     oskar_sky_free(sky_cpu, &error);
     oskar_sky_free(sky_gpu, &error);
 
-    // Copy the Jones matrix back to the CPU.
-    oskar_Jones* E_cpu = oskar_jones_create_copy(E_gpu, OSKAR_LOCATION_CPU,
-            &error);
-
     // Save to file for plotting.
-    oskar_Mem l(oskar_station_work_source_horizontal_x(work), OSKAR_LOCATION_CPU);
-    oskar_Mem m(oskar_station_work_source_horizontal_y(work), OSKAR_LOCATION_CPU);
-    oskar_Mem n(oskar_station_work_source_horizontal_z(work), OSKAR_LOCATION_CPU);
     const char* filename = "temp_test_E_jones.txt";
     FILE* file = fopen(filename, "w");
     oskar_Mem E_station;
     for (int j = 0; j < num_stations; ++j)
     {
-        oskar_jones_get_station_pointer(&E_station, E_cpu, j, &error);
+        oskar_jones_get_station_pointer(&E_station, E, j, &error);
         ASSERT_EQ(0, error) << oskar_get_error_string(error);
-        float* l_ = oskar_mem_float(&l, &error);
-        float* m_ = oskar_mem_float(&m, &error);
-        float* n_ = oskar_mem_float(&n, &error);
-        float2* E_ = oskar_mem_float2(&E_station, &error);
-        for (int i = 0; i < num_sources; ++i)
-        {
-            fprintf(file, "%10.3f,%10.3f,%10.3f,%10.3f,%10.3f\n",
-                    l_[i], m_[i], n_[i], E_[i].x, E_[i].y);
-        }
+        oskar_mem_write_ascii(file, 4, num_sources, &error,
+                oskar_station_work_source_horizontal_x(work),
+                oskar_station_work_source_horizontal_y(work),
+                oskar_station_work_source_horizontal_z(work),
+                &E_station);
     }
     fclose(file);
+    remove(filename);
 
     /*
         data = dlmread('temp_test_E_jones.txt');
@@ -193,8 +183,7 @@ TEST(evaluate_jones_E, evaluate_e)
         scatter3(l(:,station),m(:,station),n(:,station),2,amp(:,station));
      */
     oskar_random_state_free(random_state, &error);
-    oskar_jones_free(E_cpu, &error);
-    oskar_jones_free(E_gpu, &error);
+    oskar_jones_free(E, &error);
     oskar_telescope_free(tel_gpu, &error);
     oskar_station_work_free(work, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);

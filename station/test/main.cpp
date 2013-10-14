@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,39 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_ELEMENT_WEIGHTS_ERRORS_H_
-#define TEST_ELEMENT_WEIGHTS_ERRORS_H_
+#include <gtest/gtest.h>
+#ifdef OSKAR_HAVE_CUDA
+#include <cuda_runtime_api.h>
+#endif
 
-/**
- * @file Test_element_weights_errors.h
- */
-
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class Test_element_weights_errors : public CppUnit::TestFixture
+int main(int argc, char** argv)
 {
-    public:
-        CPPUNIT_TEST_SUITE(Test_element_weights_errors);
-        CPPUNIT_TEST(test_evaluate);
-        CPPUNIT_TEST(test_apply);
-        CPPUNIT_TEST(test_reinit);
-        CPPUNIT_TEST_SUITE_END();
-
-    public:
-        /// Test method.
-        void test_evaluate();
-        void test_apply();
-        void test_reinit();
-};
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_element_weights_errors);
-
-#endif // TEST_ELEMENT_WEIGHTS_ERRORS_H_
+    ::testing::InitGoogleTest(&argc, argv);
+    int val = RUN_ALL_TESTS();
+#ifdef OSKAR_HAVE_CUDA
+    cudaDeviceReset();
+#endif
+    return val;
+}

@@ -18,6 +18,7 @@ set(${name}_SRC
     Test_Mem_set_value_real.cpp
     Test_Mem_to_type.cpp
     Test_Mem_type_check.cpp
+    Test_Mem_write_ascii.cpp
     Test_string_to_array.cpp
     Test_Timer.cpp
 )

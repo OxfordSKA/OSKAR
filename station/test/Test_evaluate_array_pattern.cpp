@@ -26,8 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <gtest/gtest.h>
+
 #include <cuda_runtime_api.h>
-#include "station/test/Test_evaluate_array_pattern.h"
+
 #include <oskar_station.h>
 #include <oskar_evaluate_array_pattern.h>
 #include <oskar_evaluate_array_pattern_hierarchical.h>
@@ -51,100 +53,50 @@ using namespace std;
 
 static void check_images(const oskar_Image* image1, const oskar_Image* image2)
 {
-    int i, n;
+    int status = 0;
 
     if (image1->width != image2->width || image1->height != image2->height)
     {
-        CPPUNIT_FAIL("Inconsistent image dimensions.");
+        FAIL() << "Inconsistent image dimensions.";
         return;
     }
     if (image1->num_pols != image2->num_pols)
     {
-        CPPUNIT_FAIL("Inconsistent polarisation dimensions.");
+        FAIL() << "Inconsistent polarisation dimensions.";
         return;
     }
     if (image1->num_times != image2->num_times)
     {
-        CPPUNIT_FAIL("Inconsistent time dimensions.");
+        FAIL() << "Inconsistent time dimensions.";
         return;
     }
     if (image1->num_channels != image2->num_channels)
     {
-        CPPUNIT_FAIL("Inconsistent frequency dimensions.");
+        FAIL() << "Inconsistent frequency dimensions.";
         return;
     }
     if ((oskar_mem_type(&image1->data) & OSKAR_COMPLEX) !=
             (oskar_mem_type(&image2->data) & OSKAR_COMPLEX))
     {
-        CPPUNIT_FAIL("Inconsistent data types (complex flag).");
+        FAIL() << "Inconsistent data types (complex flag).";
         return;
     }
     if ((oskar_mem_type(&image1->data) & OSKAR_MATRIX) !=
             (oskar_mem_type(&image2->data) & OSKAR_MATRIX))
     {
-        CPPUNIT_FAIL("Inconsistent data types (matrix flag).");
+        FAIL() << "Inconsistent data types (matrix flag).";
         return;
     }
 
-    /* Get the total number of elements to check. */
-    n = image1->width * image1->height * image1->num_pols *
-            image1->num_times * image1->num_channels;
-    if (oskar_mem_is_complex(&image1->data))
-        n *= 2;
-    if (oskar_mem_is_matrix(&image1->data))
-        n *= 4;
-
     /* Check image contents are the same, to appropriate precision. */
-    if (oskar_mem_precision(&image1->data) == OSKAR_SINGLE &&
-            oskar_mem_precision(&image2->data) == OSKAR_SINGLE)
-    {
-        const float *d1, *d2;
-        d1 = (const float*)(image1->data.data);
-        d2 = (const float*)(image2->data.data);
-        for (i = 0; i < n; ++i)
-        {
-            if (!isnan(d1[i]) && !isnan(d2[i]))
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(d1[i], d2[i], 1e-4);
-        }
-    }
-    else if (oskar_mem_precision(&image1->data) == OSKAR_SINGLE &&
-            oskar_mem_precision(&image2->data) == OSKAR_DOUBLE)
-    {
-        const float *d1;
-        const double *d2;
-        d1 = (const float*)(image1->data.data);
-        d2 = (const double*)(image2->data.data);
-        for (i = 0; i < n; ++i)
-        {
-            if (!isnan(d1[i]) && !isnan(d2[i]))
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(d1[i], d2[i], 1e-4);
-        }
-    }
-    else if (oskar_mem_precision(&image1->data) == OSKAR_DOUBLE &&
-            oskar_mem_precision(&image2->data) == OSKAR_SINGLE)
-    {
-        const double *d1;
-        const float *d2;
-        d1 = (const double*)(image1->data.data);
-        d2 = (const float*)(image2->data.data);
-        for (i = 0; i < n; ++i)
-        {
-            if (!isnan(d1[i]) && !isnan(d2[i]))
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(d1[i], d2[i], 1e-4);
-        }
-    }
-    else if (oskar_mem_precision(&image1->data) == OSKAR_DOUBLE &&
-            oskar_mem_precision(&image2->data) == OSKAR_DOUBLE)
-    {
-        const double *d1, *d2;
-        d1 = (const double*)(image1->data.data);
-        d2 = (const double*)(image2->data.data);
-        for (i = 0; i < n; ++i)
-        {
-            if (!isnan(d1[i]) && !isnan(d2[i]))
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(d1[i], d2[i], 1e-10);
-        }
-    }
+    double min_rel_error = 0., max_rel_error = 0.;
+    double avg_rel_error = 0., std_rel_error = 0.;
+    oskar_mem_evaluate_relative_error(&image1->data, &image2->data,
+            &min_rel_error, &max_rel_error, &avg_rel_error, &std_rel_error,
+            &status);
+    ASSERT_EQ(0, status);
+    EXPECT_LT(max_rel_error, 1e-5);
+    EXPECT_LT(avg_rel_error, 1e-5);
 }
 
 static void set_up_beam_pattern(oskar_Image* bp, int type, bool polarised,
@@ -174,14 +126,6 @@ static void set_up_beam_pattern(oskar_Image* bp, int type, bool polarised,
     bp->time_start_mjd_utc = mjd;
 }
 
-#if 0
-static void set_up_image(oskar_Image* image, const oskar_Image* beam_pattern)
-{
-    int type;
-    type = oskar_mem_precision(&beam_pattern->data);
-}
-#endif
-
 static oskar_Station* set_up_station1(int num_x, int num_y,
         int type, double beam_ra_deg, double beam_dec_deg, int* status)
 {
@@ -206,22 +150,17 @@ static oskar_Station* set_up_station1(int num_x, int num_y,
 
             oskar_station_set_element_coords(station, i,
                     x, y, 0.0, 0.0, 0.0, 0.0, status);
-            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
             oskar_station_set_element_errors(station, i,
                     1.0, 0.0, 0.0, 0.0, status);
-            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
             oskar_station_set_element_weight(station, i,
                     1.0, 0.0, status);
-            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
             oskar_station_set_element_orientation(station, i,
                     90.0, 0.0, status);
-            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
         }
     }
 
     /* Load the station file. */
     oskar_station_analyse(station, &dummy, status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
 
     /* Set meta-data. */
     oskar_station_set_position(station, 0.0, 70.0 * M_PI / 180.0, 0.0);
@@ -275,21 +214,21 @@ static void run_array_pattern(oskar_Image* bp,
 
     /* Initialise temporary arrays. */
     oskar_mem_init(&pattern, oskar_mem_type(&bp->data), location, num_pixels, 1, status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
+    ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
     set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, freq_hz, status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
+    ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
     TIMER_START
     oskar_evaluate_array_pattern(&pattern, wavenumber, station, num_pixels,
             &x, &y, &z, &w, status);
     cudaDeviceSynchronize();
     TIMER_STOP("%s", message)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
+    ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
     oskar_mem_free(&w, status);
     oskar_mem_free(&x, status);
     oskar_mem_free(&y, status);
     oskar_mem_free(&z, status);
     oskar_mem_insert(&bp->data, &pattern, 0, status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(*status), 0, *status);
+    ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
     oskar_mem_free(&pattern, status);
 }
 
@@ -338,11 +277,7 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
         oskar_mem_init(&pattern_temp, oskar_mem_type(&pattern), OSKAR_LOCATION_CPU,
                 num_pixels, 1, status);
         oskar_mem_copy(&pattern_temp, &pattern, status);
-        if (*status)
-        {
-            CPPUNIT_FAIL("Unknown error!");
-            return;
-        }
+        ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
 
         /* Re-order the polarisation data. */
         if (oskar_mem_precision(&pattern) == OSKAR_SINGLE)
@@ -375,10 +310,10 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
     oskar_mem_free(&pattern, status);
 }
 
-void Test_evaluate_array_pattern::test()
+TEST(evaluate_array_pattern, test)
 {
     /* Inputs. */
-    int station_side = 10;
+    int station_side = 8;
     int image_side = 128;
     double ra_deg = 0.0;
     double dec_deg = 80.0;
@@ -417,12 +352,12 @@ void Test_evaluate_array_pattern::test()
             ra_deg, dec_deg, &status);
     station_cpu_d = set_up_station1(station_side, station_side, OSKAR_DOUBLE,
             ra_deg, dec_deg, &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     station_gpu_f = oskar_station_create_copy(station_cpu_f,
             OSKAR_LOCATION_GPU, &status);
     station_gpu_d = oskar_station_create_copy(station_cpu_d,
             OSKAR_LOCATION_GPU, &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Set up longitude/latitude grids. */
     type = OSKAR_SINGLE;
@@ -432,7 +367,7 @@ void Test_evaluate_array_pattern::test()
     oskar_mem_init(&lat_gpu_f, type, OSKAR_LOCATION_GPU, num_pixels, 1, &status);
     oskar_evaluate_image_lon_lat_grid(&lon_cpu_f, &lat_cpu_f, image_side,
             image_side, fov_rad, fov_rad, ra_rad, dec_rad, &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     type = OSKAR_DOUBLE;
     oskar_mem_init(&lon_cpu_d, type, OSKAR_LOCATION_CPU, num_pixels, 1, &status);
     oskar_mem_init(&lat_cpu_d, type, OSKAR_LOCATION_CPU, num_pixels, 1, &status);
@@ -440,12 +375,12 @@ void Test_evaluate_array_pattern::test()
     oskar_mem_init(&lat_gpu_d, type, OSKAR_LOCATION_GPU, num_pixels, 1, &status);
     oskar_evaluate_image_lon_lat_grid(&lon_cpu_d, &lat_cpu_d, image_side,
             image_side, fov_rad, fov_rad, ra_rad, dec_rad, &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_copy(&lon_gpu_f, &lon_cpu_f, &status);
     oskar_mem_copy(&lat_gpu_f, &lat_cpu_f, &status);
     oskar_mem_copy(&lon_gpu_d, &lon_cpu_d, &status);
     oskar_mem_copy(&lat_gpu_d, &lat_cpu_d, &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Set up beam patterns. */
     type = OSKAR_SINGLE_COMPLEX;
@@ -504,47 +439,47 @@ void Test_evaluate_array_pattern::test()
             ra_deg, dec_deg, freq_hz, mjd, &status);
     set_up_beam_pattern(&bp_m2m_3d_gpu_d, type, polarised, image_side, fov_deg,
             ra_deg, dec_deg, freq_hz, mjd, &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Run the tests... */
-    CPPUNIT_ASSERT_EQUAL(0, oskar_station_array_is_3d(station_cpu_f));
-    CPPUNIT_ASSERT_EQUAL(0, oskar_station_array_is_3d(station_gpu_f));
+    ASSERT_EQ(0, oskar_station_array_is_3d(station_cpu_f));
+    ASSERT_EQ(0, oskar_station_array_is_3d(station_gpu_f));
     run_array_pattern(&bp_o2c_2d_cpu_f, station_cpu_f, &lon_cpu_f, &lat_cpu_f,
             gast, freq_hz, "Single, o2c, CPU, 2D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern(&bp_o2c_2d_gpu_f, station_gpu_f, &lon_gpu_f, &lat_gpu_f,
             gast, freq_hz, "Single, o2c, GPU, 2D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern(&bp_o2c_2d_cpu_d, station_cpu_d, &lon_cpu_d, &lat_cpu_d,
             gast, freq_hz, "Double, o2c, CPU, 2D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern(&bp_o2c_2d_gpu_d, station_gpu_d, &lon_gpu_d, &lat_gpu_d,
             gast, freq_hz, "Double, o2c, GPU, 2D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_c2c_2d_cpu_f, station_cpu_f,
             &lon_cpu_f, &lat_cpu_f, gast, freq_hz, "Single, c2c, CPU, 2D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_c2c_2d_gpu_f, station_gpu_f,
             &lon_gpu_f, &lat_gpu_f, gast, freq_hz, "Single, c2c, GPU, 2D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_c2c_2d_cpu_d, station_cpu_d,
             &lon_cpu_d, &lat_cpu_d, gast, freq_hz, "Double, c2c, CPU, 2D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_c2c_2d_gpu_d, station_gpu_d,
             &lon_gpu_d, &lat_gpu_d, gast, freq_hz, "Double, c2c, GPU, 2D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_m2m_2d_cpu_f, station_cpu_f,
             &lon_cpu_f, &lat_cpu_f, gast, freq_hz, "Single, m2m, CPU, 2D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_m2m_2d_gpu_f, station_gpu_f,
             &lon_gpu_f, &lat_gpu_f, gast, freq_hz, "Single, m2m, GPU, 2D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_m2m_2d_cpu_d, station_cpu_d,
             &lon_cpu_d, &lat_cpu_d, gast, freq_hz, "Double, m2m, CPU, 2D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_m2m_2d_gpu_d, station_gpu_d,
             &lon_gpu_d, &lat_gpu_d, gast, freq_hz, "Double, m2m, GPU, 2D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Set 3D arrays. */
     oskar_station_set_element_coords(station_cpu_f, 0,
@@ -555,45 +490,45 @@ void Test_evaluate_array_pattern::test()
             0., 0., 0., 0., 0., 0., &status);
     oskar_station_set_element_coords(station_gpu_f, 0,
             0., 0., 0., 0., 0., 0., &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    CPPUNIT_ASSERT_EQUAL(1, oskar_station_array_is_3d(station_cpu_f));
-    CPPUNIT_ASSERT_EQUAL(1, oskar_station_array_is_3d(station_gpu_f));
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    ASSERT_EQ(1, oskar_station_array_is_3d(station_cpu_f));
+    ASSERT_EQ(1, oskar_station_array_is_3d(station_gpu_f));
     run_array_pattern(&bp_o2c_2d_cpu_f, station_cpu_f, &lon_cpu_f, &lat_cpu_f,
             gast, freq_hz, "Single, o2c, CPU, 3D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern(&bp_o2c_2d_gpu_f, station_gpu_f, &lon_gpu_f, &lat_gpu_f,
             gast, freq_hz, "Single, o2c, GPU, 3D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern(&bp_o2c_2d_cpu_d, station_cpu_d, &lon_cpu_d, &lat_cpu_d,
             gast, freq_hz, "Double, o2c, CPU, 3D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern(&bp_o2c_2d_gpu_d, station_gpu_d, &lon_gpu_d, &lat_gpu_d,
             gast, freq_hz, "Double, o2c, GPU, 3D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_c2c_2d_cpu_f, station_cpu_f,
             &lon_cpu_f, &lat_cpu_f, gast, freq_hz, "Single, c2c, CPU, 3D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_c2c_2d_gpu_f, station_gpu_f,
             &lon_gpu_f, &lat_gpu_f, gast, freq_hz, "Single, c2c, GPU, 3D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_c2c_2d_cpu_d, station_cpu_d,
             &lon_cpu_d, &lat_cpu_d, gast, freq_hz, "Double, c2c, CPU, 3D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_c2c_2d_gpu_d, station_gpu_d,
             &lon_gpu_d, &lat_gpu_d, gast, freq_hz, "Double, c2c, GPU, 3D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_m2m_2d_cpu_f, station_cpu_f,
             &lon_cpu_f, &lat_cpu_f, gast, freq_hz, "Single, m2m, CPU, 3D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_m2m_2d_gpu_f, station_gpu_f,
             &lon_gpu_f, &lat_gpu_f, gast, freq_hz, "Single, m2m, GPU, 3D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_m2m_2d_cpu_d, station_cpu_d,
             &lon_cpu_d, &lat_cpu_d, gast, freq_hz, "Double, m2m, CPU, 3D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     run_array_pattern_hierarchical(&bp_m2m_2d_gpu_d, station_gpu_d,
             &lon_gpu_d, &lat_gpu_d, gast, freq_hz, "Double, m2m, GPU, 3D", &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Check for consistency. */
 //    check_images(&bp_o2c_2d_cpu_f, &bp_o2c_2d_gpu_f);
@@ -648,7 +583,7 @@ void Test_evaluate_array_pattern::test()
     oskar_image_free(&bp_m2m_2d_gpu_d, &status);
     oskar_image_free(&bp_m2m_3d_cpu_d, &status);
     oskar_image_free(&bp_m2m_3d_gpu_d, &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Free longitude/latitude points. */
     oskar_mem_free(&lon_cpu_f, &status);
@@ -659,12 +594,12 @@ void Test_evaluate_array_pattern::test()
     oskar_mem_free(&lat_cpu_d, &status);
     oskar_mem_free(&lon_gpu_d, &status);
     oskar_mem_free(&lat_gpu_d, &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Free station models. */
     oskar_station_free(station_gpu_f, &status);
     oskar_station_free(station_gpu_d, &status);
     oskar_station_free(station_cpu_f, &status);
     oskar_station_free(station_cpu_d, &status);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }

@@ -26,15 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* Must include this first to avoid type conflict. */
+#ifdef OSKAR_HAVE_CUDA
+/* Must include this first to avoid type conflict.*/
 #include <cuda_runtime_api.h>
+#define H2D cudaMemcpyHostToDevice
+#endif
 
 #include <stdlib.h>
 
 #include <private_telescope.h>
 #include <oskar_telescope.h>
-
-#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,6 +46,7 @@ void oskar_telescope_set_station_coords(oskar_Telescope* dst,
         double x_hor, double y_hor, double z_hor, int* status)
 {
     int type, location;
+    char *xw, *yw, *zw, *xh, *yh, *zh;
 
     /* Check all inputs. */
     if (!dst || !status)
@@ -67,48 +69,51 @@ void oskar_telescope_set_station_coords(oskar_Telescope* dst,
     type = oskar_telescope_type(dst);
     location = oskar_telescope_location(dst);
 
+    /* Get byte pointers. */
+    xw = oskar_mem_char(&dst->station_x);
+    yw = oskar_mem_char(&dst->station_y);
+    zw = oskar_mem_char(&dst->station_z);
+    xh = oskar_mem_char(&dst->station_x_hor);
+    yh = oskar_mem_char(&dst->station_y_hor);
+    zh = oskar_mem_char(&dst->station_z_hor);
+
     if (location == OSKAR_LOCATION_CPU)
     {
         if (type == OSKAR_DOUBLE)
         {
-            ((double*)dst->station_x.data)[index] = x;
-            ((double*)dst->station_y.data)[index] = y;
-            ((double*)dst->station_z.data)[index] = z;
-            ((double*)dst->station_x_hor.data)[index] = x_hor;
-            ((double*)dst->station_y_hor.data)[index] = y_hor;
-            ((double*)dst->station_z_hor.data)[index] = z_hor;
+            ((double*)xw)[index] = x;
+            ((double*)yw)[index] = y;
+            ((double*)zw)[index] = z;
+            ((double*)xh)[index] = x_hor;
+            ((double*)yh)[index] = y_hor;
+            ((double*)zh)[index] = z_hor;
         }
         else if (type == OSKAR_SINGLE)
         {
-            ((float*)dst->station_x.data)[index] = (float)x;
-            ((float*)dst->station_y.data)[index] = (float)y;
-            ((float*)dst->station_z.data)[index] = (float)z;
-            ((float*)dst->station_x_hor.data)[index] = (float)x_hor;
-            ((float*)dst->station_y_hor.data)[index] = (float)y_hor;
-            ((float*)dst->station_z_hor.data)[index] = (float)z_hor;
+            ((float*)xw)[index] = (float)x;
+            ((float*)yw)[index] = (float)y;
+            ((float*)zw)[index] = (float)z;
+            ((float*)xh)[index] = (float)x_hor;
+            ((float*)yh)[index] = (float)y_hor;
+            ((float*)zh)[index] = (float)z_hor;
         }
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
-        size_t element_size, offset_bytes;
-        element_size = oskar_mem_element_size(type);
-        offset_bytes = index * element_size;
+#ifdef OSKAR_HAVE_CUDA
+        size_t size, offset_bytes;
+        size = oskar_mem_element_size(type);
+        offset_bytes = index * size;
         if (type == OSKAR_DOUBLE)
         {
-            cudaMemcpy((char*)(dst->station_x.data) + offset_bytes, &x,
-                    element_size, cudaMemcpyHostToDevice);
-            cudaMemcpy((char*)(dst->station_y.data) + offset_bytes, &y,
-                    element_size, cudaMemcpyHostToDevice);
-            cudaMemcpy((char*)(dst->station_z.data) + offset_bytes, &z,
-                    element_size, cudaMemcpyHostToDevice);
-            cudaMemcpy((char*)(dst->station_x_hor.data) + offset_bytes, &x_hor,
-                    element_size, cudaMemcpyHostToDevice);
-            cudaMemcpy((char*)(dst->station_y_hor.data) + offset_bytes, &y_hor,
-                    element_size, cudaMemcpyHostToDevice);
-            cudaMemcpy((char*)(dst->station_z_hor.data) + offset_bytes, &z_hor,
-                    element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy(xw + offset_bytes, &x, size, H2D);
+            cudaMemcpy(yw + offset_bytes, &y, size, H2D);
+            cudaMemcpy(zw + offset_bytes, &z, size, H2D);
+            cudaMemcpy(xh + offset_bytes, &x_hor, size, H2D);
+            cudaMemcpy(yh + offset_bytes, &y_hor, size, H2D);
+            cudaMemcpy(zh + offset_bytes, &z_hor, size, H2D);
         }
         else if (type == OSKAR_SINGLE)
         {
@@ -119,21 +124,18 @@ void oskar_telescope_set_station_coords(oskar_Telescope* dst,
             tx_hor = (float) x_hor;
             ty_hor = (float) y_hor;
             tz_hor = (float) z_hor;
-            cudaMemcpy((char*)(dst->station_x.data) + offset_bytes, &tx,
-                    element_size, cudaMemcpyHostToDevice);
-            cudaMemcpy((char*)(dst->station_y.data) + offset_bytes, &ty,
-                    element_size, cudaMemcpyHostToDevice);
-            cudaMemcpy((char*)(dst->station_z.data) + offset_bytes, &tz,
-                    element_size, cudaMemcpyHostToDevice);
-            cudaMemcpy((char*)(dst->station_x_hor.data) + offset_bytes, &tx_hor,
-                    element_size, cudaMemcpyHostToDevice);
-            cudaMemcpy((char*)(dst->station_y_hor.data) + offset_bytes, &ty_hor,
-                    element_size, cudaMemcpyHostToDevice);
-            cudaMemcpy((char*)(dst->station_z_hor.data) + offset_bytes, &tz_hor,
-                    element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy(xw + offset_bytes, &tx, size, H2D);
+            cudaMemcpy(yw + offset_bytes, &ty, size, H2D);
+            cudaMemcpy(zw + offset_bytes, &tz, size, H2D);
+            cudaMemcpy(xh + offset_bytes, &tx_hor, size, H2D);
+            cudaMemcpy(yh + offset_bytes, &ty_hor, size, H2D);
+            cudaMemcpy(zh + offset_bytes, &tz_hor, size, H2D);
         }
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
     else
         *status = OSKAR_ERR_BAD_LOCATION;

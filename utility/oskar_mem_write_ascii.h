@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,35 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_DIPOLE_PATTERN_H_
-#define TEST_DIPOLE_PATTERN_H_
+#ifndef OSKAR_MEM_WRITE_ASCII_H_
+#define OSKAR_MEM_WRITE_ASCII_H_
 
 /**
- * @file Test_dipole_pattern.h
+ * @file oskar_mem_write_ascii.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include <oskar_global.h>
+#include <stdio.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief
+ * Writes the given blocks of memory to an ASCII table.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function writes the given blocks of memory to an ASCII table using the
+ * specified stream. It is mainly intended for use in tests.
+ *
+ * The variable argument list must contain pointers to oskar_Mem structures.
+ * Data within these structures may reside either in CPU or GPU memory.
+ * The number of structures passed is given by the \p num_mem parameter.
+ *
+ * All structures must contain at least the number of specified
+ * \p num_elements. Each array will form one (or more, if using complex types)
+ * columns of the output table, with the row corresponding to the element
+ * index.
+ *
+ * @param[in] file          Pointer to output stream.
+ * @param[in] num_mem       Number of arrays to write.
+ * @param[in] num_elements  Number of elements to write.
+ * @param[in,out]  status   Status return code.
  */
-class Test_dipole_pattern : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(Test_dipole_pattern);
-        CPPUNIT_TEST(test);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+void oskar_mem_write_ascii(FILE* file, size_t num_mem, size_t num_elements,
+        int* status, ...);
 
-    public:
-        /// Test method.
-        void test();
-};
+#ifdef __cplusplus
+}
+#endif
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_dipole_pattern);
-
-#endif // TEST_DIPOLE_PATTERN_H_
+#endif /* OSKAR_MEM_WRITE_ASCII_H_ */

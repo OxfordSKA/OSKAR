@@ -17,6 +17,7 @@ set(math_SRC
     src/oskar_dftw_m2m_2d_cuda.cu
     src/oskar_dftw_m2m_2d_omp.c
     src/oskar_dftw_m2m_3d_cuda.cu
+    src/oskar_dftw_m2m_3d_indexed_input_cuda.cu
     src/oskar_dftw_m2m_3d_omp.c
     src/oskar_dftw_o2c_2d_cuda.cu
     src/oskar_dftw_o2c_2d_omp.c

@@ -19,8 +19,6 @@ CFITSIO and casacore libraries must be present if FITS images and Measurement
 Sets are to be exported. The MATLAB interface will be built if MATLAB R2010b
 or later is found.
 
-The unit tests require the CppUnit testing framework.
-
 Please ensure that the required dependencies are installed before proceeding
 further.
 
@@ -44,8 +42,6 @@ possible according to the following dependencies being satisfied:
         - Optional for: liboskar_apps, Applications (for Measurement Set export)
     * MATLAB (>=R2010b)
         - Required for: MATLAB interface.
-    * CppUnit (1.12.1)
-        - Required for: Unit testing binaries.
     * CMake (>=2.8)
         - Required for: Makefile generation.
 
@@ -110,20 +106,6 @@ Advanced Build Options:
         of CFITSIO headers installed in system include path can't be used to
         build OSKAR.
 
-    * -DCPPUNIT_LIB_DIR=<path> (default: searches the system library paths)
-        Specifies a custom path in which to look for the CPPUNIT library
-        (libcppunit.so).
-        Note: This should only be used in special cases, where the version of
-        CPPUNIT installed in the system library path can't be used to build
-        OSKAR.
-
-    * -DCPPUNIT_INC_DIR=<path> (default: searches the system include paths)
-        Specifies a custom path in which to look for the CPPUNIT library headers.
-        This is the path to the top level cppunit include folder.
-        Note: This should only be used in special cases, where the version of
-        CPPUNIT headers installed in the system include path can't be used to
-        build OSKAR.
-
     * -DCASACORE_LIB_DIR=<path> (default: searches the system library paths)
         Specifies a custom path in which to look for the CasaCore libraries
         (libcasa_ms.so and others).
@@ -164,9 +146,8 @@ the system search path.
 
 4.1 Unit Tests
 --------------------------------------------------------------------------------
-If OSKAR has been built with the CppUnit dependency present, a number of unit
-test binaries will be created. These can be run by typing the following command
-from the build directory:
+The unit test binaries can be run by typing the following command from the
+build directory:
 
     $ make test
 

@@ -243,5 +243,6 @@ OSKAR_INLINE int oskar_mem_type_is_scalar(const int mem_type)
 #include <oskar_mem_realloc.h>
 #include <oskar_mem_scale_real.h>
 #include <oskar_mem_set_value_real.h>
+#include <oskar_mem_write_ascii.h>
 
 #endif /* OSKAR_MEM_H_ */
