@@ -26,13 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_station_beam_gaussian.h"
-#include "utility/oskar_vector_types.h"
-#include "station/oskar_blank_below_horizon.h"
-#include "math/oskar_gaussian.h"
-#include "math/oskar_gaussian_cuda.h"
+#include <oskar_evaluate_station_beam_gaussian.h>
+#include <oskar_blank_below_horizon.h>
+#include <oskar_gaussian.h>
+#include <oskar_gaussian_cuda.h>
 #include <oskar_mem.h>
-#include "utility/oskar_cuda_check_error.h"
+#include <oskar_cuda_check_error.h>
 
 #include <math.h>
 #include <stdio.h>
@@ -65,11 +64,20 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
     /* Get type and check consistency. */
     type = oskar_mem_precision(beam);
     if (type != oskar_mem_type(l) || type != oskar_mem_type(m))
+    {
         *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+    {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
     if (!oskar_mem_is_complex(beam))
+    {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
 
     if (fwhm_rad == 0.0)
     {
@@ -79,12 +87,20 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
 
     /* Get location and check consistency. */
     location = oskar_mem_location(beam);
-    if (location != oskar_mem_location(l) || location != oskar_mem_location(m))
+    if (location != oskar_mem_location(l) ||
+            location != oskar_mem_location(m))
+    {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return;
+    }
 
     /* Check that length of input arrays are consistent. */
-    if ((int)oskar_mem_length(l) < num_points || (int)oskar_mem_length(m) < num_points)
+    if ((int)oskar_mem_length(l) < num_points ||
+            (int)oskar_mem_length(m) < num_points)
+    {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
 
     /* Resize output array if needed. */
     if ((int)oskar_mem_length(beam) < num_points)
@@ -97,69 +113,73 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
     fwhm_lm = sin(fwhm_rad);
     std = fwhm_lm / (2.0 * sqrt(2.0 * log(2.0)));
 
-    if (location == OSKAR_LOCATION_CPU)
+    if (type == OSKAR_DOUBLE)
     {
-        if (type == OSKAR_DOUBLE)
+        const double *l_, *m_;
+        l_ = oskar_mem_double_const(l, status);
+        m_ = oskar_mem_double_const(m, status);
+
+        if (location == OSKAR_LOCATION_CPU)
         {
             if (oskar_mem_is_scalar(beam))
             {
-                oskar_gaussian_d((double2*)beam->data, num_points,
-                        (const double*)l->data, (const double*)m->data, std);
+                oskar_gaussian_d(oskar_mem_double2(beam, status),
+                        num_points, l_, m_, std);
             }
             else
             {
-                oskar_gaussian_md((double4c*)beam->data, num_points,
-                        (const double*)l->data, (const double*)m->data, std);
+                oskar_gaussian_md(oskar_mem_double4c(beam, status),
+                        num_points, l_, m_, std);
             }
         }
-        else /* type == OSKAR_SINGLE */
+        else
         {
             if (oskar_mem_is_scalar(beam))
             {
-                oskar_gaussian_f((float2*)beam->data, num_points,
-                        (const float*)l->data, (const float*)m->data,
-                        (float)std);
+                oskar_gaussian_cuda_d(oskar_mem_double2(beam, status),
+                        num_points, l_, m_, std);
             }
             else
             {
-                oskar_gaussian_mf((float4c*)beam->data, num_points,
-                        (const float*)l->data, (const float*)m->data,
-                        (float)std);
+                oskar_gaussian_cuda_md(oskar_mem_double4c(beam, status),
+                        num_points, l_, m_, std);
             }
+            oskar_cuda_check_error(status);
         }
     }
-    /* GPU version. */
-    else
+    else /* type == OSKAR_SINGLE */
     {
-        if (type == OSKAR_DOUBLE)
+        const float *l_, *m_;
+        l_ = oskar_mem_float_const(l, status);
+        m_ = oskar_mem_float_const(m, status);
+
+        if (location == OSKAR_LOCATION_CPU)
         {
             if (oskar_mem_is_scalar(beam))
             {
-                oskar_gaussian_cuda_d((double2*)beam->data, num_points,
-                        (const double*)l->data, (const double*)m->data, std);
+                oskar_gaussian_f(oskar_mem_float2(beam, status),
+                        num_points, l_, m_, (float)std);
             }
             else
             {
-                oskar_gaussian_cuda_md((double4c*)beam->data, num_points,
-                        (const double*)l->data, (const double*)m->data, std);
+                oskar_gaussian_mf(oskar_mem_float4c(beam, status),
+                        num_points, l_, m_, (float)std);
             }
         }
-        else /* type == OSKAR_SINGLE */
+        else
         {
             if (oskar_mem_is_scalar(beam))
             {
-                oskar_gaussian_cuda_f((float2*)beam->data, num_points,
-                        (const float*)l->data, (const float*)m->data,
-                        (float)std);
+                oskar_gaussian_cuda_f(oskar_mem_float2(beam, status),
+                        num_points, l_, m_, (float)std);
             }
             else
             {
-                oskar_gaussian_cuda_mf((float4c*)beam->data, num_points,
-                        (const float*)l->data, (const float*)m->data,
-                        (float)std);
+                oskar_gaussian_cuda_mf(oskar_mem_float4c(beam, status),
+                        num_points, l_, m_, (float)std);
             }
+            oskar_cuda_check_error(status);
         }
-        oskar_cuda_check_error(status);
     }
 
     /* Blank (zero) sources below the horizon. */
