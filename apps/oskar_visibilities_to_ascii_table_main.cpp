@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     opt.setDescription("Converts an OSKAR visibility binary file to an ASCII "
             "table format with the following columns:\n "
             "[1] index, [2] baseline-uu, [3] baseline-vv, [4] Real, [5] Imag., "
-            "[6] weight. The table is written out in baseline-time order where"
+            "[6] weight. The table is written out in baseline-time order where "
             "baseline is the fastest varying dimension");
     opt.addRequired("OSKAR visibility file");
     opt.addOptional("output file name");
