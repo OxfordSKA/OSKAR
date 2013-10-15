@@ -65,6 +65,10 @@ if (QT4_FOUND AND CUDA_FOUND)
     set(name oskar_visibilities_to_ms)
     oskar_qt_app(${name} ${name}_main.cpp)
 
+    # BINARY: oskar_visibilities_to_ascii_table
+    set(name oskar_visibilities_to_ascii_table)
+    oskar_qt_app(${name} ${name}_main.cpp)
+
     # BINARY: oskar_visibilities_add_noise
     set(name oskar_visibilities_add_noise)
     oskar_qt_app(${name} ${name}_main.cpp)
