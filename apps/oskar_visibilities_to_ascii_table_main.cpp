@@ -67,6 +67,8 @@ int main(int argc, char** argv)
     opt.addFlag("-h", "Write a summary header in the ASCII table. ");
     opt.addFlag("-v", "Verbose mode.");
     opt.addFlag("--csv", "Write in CSV format");
+    opt.addFlag("-s", "Write output table to standard output instead of to file.",
+            false, "--stdout");
 
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
@@ -122,8 +124,14 @@ int main(int argc, char** argv)
     }
 
 
-    FILE* out = fopen(txt_file.c_str(), "w");
-    if (out == NULL) return OSKAR_FAIL;
+    FILE* out;
+    if (!opt.isSet("-s")) {
+        out = fopen(txt_file.c_str(), "w");
+        if (out == NULL) return OSKAR_FAIL;
+    }
+    else {
+        out = stdout;
+    }
 
     const oskar_Mem* uu = oskar_vis_baseline_uu_metres_const(vis);
     const oskar_Mem* vv = oskar_vis_baseline_uu_metres_const(vis);
