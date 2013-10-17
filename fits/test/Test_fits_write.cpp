@@ -43,7 +43,9 @@ TEST(fits_write, test)
     int planes = 4;
     int blocks = 4;
     int num_elements = columns * rows * planes * blocks;
-    oskar_Mem data(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_elements);
+    oskar_Mem data;
+    oskar_mem_init(&data, OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+            num_elements, 1, &status);
     const char filename[] = "temp_test_fits_write.fits";
 
     // Define test data.
@@ -131,4 +133,5 @@ TEST(fits_write, test)
     oskar_fits_write(filename, oskar_mem_type(&data), 4, naxes,
             oskar_mem_void(&data), ctype, ctype_comment,
             crval, cdelt, crpix, crota, &status);
+    oskar_mem_free(&data, &status);
 }

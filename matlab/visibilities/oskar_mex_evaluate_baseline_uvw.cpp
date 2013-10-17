@@ -90,15 +90,16 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mxArray* uu_ = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
     mxArray* vv_ = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
     mxArray* ww_ = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
-    oskar_Mem uu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_coords, OSKAR_FALSE);
-    oskar_Mem vv(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_coords, OSKAR_FALSE);
-    oskar_Mem ww(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_coords, OSKAR_FALSE);
+    oskar_Mem uu, vv, ww, work_uvw;
+    oskar_mem_init(&uu, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_coords, OSKAR_FALSE, &err);
+    oskar_mem_init(&vv, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_coords, OSKAR_FALSE, &err);
+    oskar_mem_init(&ww, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_coords, OSKAR_FALSE, &err);
     uu.data = mxGetData(uu_);
     vv.data = mxGetData(vv_);
     ww.data = mxGetData(ww_);
 
     // Allocate work array
-    oskar_Mem work_uvw(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 3 * num_stations, OSKAR_TRUE);
+    oskar_mem_init(&work_uvw, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 3 * num_stations, OSKAR_TRUE, &err);
 
     oskar_evaluate_uvw_baseline(&uu, &vv, &ww, num_stations,
             oskar_telescope_station_x_const(telescope),
@@ -119,5 +120,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mxSetField(out[0], 0, "vv", vv_);
     mxSetField(out[0], 0, "ww", ww_);
     oskar_telescope_free(telescope, &err);
+    oskar_mem_free(&work_uvw, &err);
+    oskar_mem_free(&uu, &err);
+    oskar_mem_free(&vv, &err);
+    oskar_mem_free(&ww, &err);
 }
 

@@ -148,7 +148,9 @@ TEST(curand, test_state_allocation)
     int num_threads = 20;
     int num_per_thread = 1;
     int num_values = num_blocks * num_threads * num_per_thread;
-    oskar_Mem d_values(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_values);
+    oskar_Mem d_values;
+    oskar_mem_init(&d_values, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_values, 1, &status);
     double* d_values_ = oskar_mem_double(&d_values, &status);
 
     for (int i = 0; i < num_iter; ++i)
@@ -157,8 +159,8 @@ TEST(curand, test_state_allocation)
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
         (d_values_, num_values, num_per_thread, random_state->state, num_states);
 
-        oskar_Mem h_values(&d_values, OSKAR_LOCATION_CPU);
-
+        oskar_Mem h_values;
+        oskar_mem_init_copy(&h_values, &d_values, OSKAR_LOCATION_CPU, &status);
         if (file)
         {
             double* v_ = oskar_mem_double(&h_values, &status);
@@ -167,8 +169,10 @@ TEST(curand, test_state_allocation)
                 fprintf(file, "%i %f\n", i, v_[i]);
             }
         }
+        oskar_mem_free(&h_values, &status);
     }
     if (file) fclose(file);
+    oskar_mem_free(&d_values, &status);
     oskar_random_state_free(random_state, &status);
 }
 
@@ -198,7 +202,6 @@ TEST(curand, test_multi_device)
         int num_states = (int)2e4; // FIXME This was 2e5 - OK to reduce for the test?
         oskar_RandomState* d_states = oskar_random_state_create(num_states,
                 seed, 0, 0, &error);
-
         EXPECT_EQ(0, error) << oskar_get_error_string(error);
 
         int num_iter = 2;
@@ -206,7 +209,9 @@ TEST(curand, test_multi_device)
         int num_threads = 2;
         int num_per_thread = 2;
         int num_values = num_blocks * num_threads * num_per_thread;
-        oskar_Mem d_values(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_values);
+        oskar_Mem d_values;
+        oskar_mem_init(&d_values, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+                num_values, 1, &error);
         double* d_values_ = oskar_mem_double(&d_values, &error);
 
         file = fopen(filename, "w");
@@ -217,8 +222,9 @@ TEST(curand, test_multi_device)
                 OSKAR_CUDAK_CONF(num_blocks, num_threads)
                 (d_values_, num_values, num_per_thread, d_states->state, num_states);
 
-            oskar_Mem h_values(&d_values, OSKAR_LOCATION_CPU);
-
+            oskar_Mem h_values;
+            oskar_mem_init_copy(&h_values, &d_values, OSKAR_LOCATION_CPU,
+                    &error);
             if (file)
             {
                 double* v_ = oskar_mem_double(&h_values, &error);
@@ -227,9 +233,11 @@ TEST(curand, test_multi_device)
                     fprintf(file, "%i %f\n", i, v_[i]);
                 }
             }
+            oskar_mem_free(&h_values, &error);
         }
         fclose(file);
         oskar_random_state_free(d_states, &error);
+        oskar_mem_free(&d_values, &error);
         EXPECT_EQ(0, error) << oskar_get_error_string(error);
     }
 }

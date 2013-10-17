@@ -30,6 +30,8 @@
 
 #include "imaging/oskar_SettingsImage.h"
 #include "imaging/oskar_make_image.h"
+#include "imaging/oskar_image_init.h"
+#include "imaging/oskar_image_free.h"
 #include "imaging/oskar_image_write.h"
 #include "imaging/oskar_image_resize.h"
 #include "imaging/oskar_evaluate_image_lm_grid.h"
@@ -151,12 +153,14 @@ TEST(make_image, image_lm_grid)
     int size = 256;
     int num_pixels = size * size;
     double fov = 2.0 * M_PI/180.0;
-    oskar_Mem l(type, location, num_pixels);
-    oskar_Mem m(type, location, num_pixels);
+    oskar_Mem l, m;
+    oskar_mem_init(&l, type, location, num_pixels, 1, &error);
+    oskar_mem_init(&m, type, location, num_pixels, 1, &error);
     oskar_evaluate_image_lm_grid_d(size, size, fov, fov, (double*)l.data,
             (double*)m.data);
 
-    oskar_Image im(OSKAR_DOUBLE);
+    oskar_Image im;
+    oskar_image_init(&im, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, &error);
     oskar_image_resize(&im, size, size, 1, 1, 2, &error);
 
     memcpy(im.data.data, l.data, num_pixels * sizeof(double));
@@ -171,6 +175,9 @@ TEST(make_image, image_lm_grid)
     oskar_image_write(&im, NULL, image_file, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
+    oskar_image_free(&im, &error);
+    oskar_mem_free(&l, &error);
+    oskar_mem_free(&m, &error);
     remove(fits_file);
     remove(image_file);
 }

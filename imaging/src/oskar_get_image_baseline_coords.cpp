@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,34 +47,39 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
         double freq_start_hz, double freq_inc_hz,int vis_time, double im_freq,
         const oskar_SettingsImage* settings)
 {
-    int err = OSKAR_SUCCESS;
+    int type, err = 0;
     int location = OSKAR_LOCATION_CPU;
     int num_vis_coords = num_baselines;
+    int vis_time_range[2], vis_chan_range[2];
+    oskar_Mem uu_ptr, vv_ptr, ww_ptr;
 
     // Data ranges for frequency and time synthesis.
-    int vis_time_range[2];
     err = oskar_evaluate_image_data_range(vis_time_range, settings->time_range,
             num_times);
     if (err) return err;
-    int vis_chan_range[2];
     err = oskar_evaluate_image_data_range(vis_chan_range, settings->channel_range,
             num_channels);
     if (err) return err;
 
     // Declare temporary pointers into visibility coordinate arrays.
-    int type = oskar_mem_type(vis_uu);
-    oskar_Mem uu_ptr(type, location, num_baselines, OSKAR_FALSE);
-    oskar_Mem vv_ptr(type, location, num_baselines, OSKAR_FALSE);
-    oskar_Mem ww_ptr(type, location, num_baselines, OSKAR_FALSE);
+    type = oskar_mem_type(vis_uu);
+    oskar_mem_init(&uu_ptr, type, location, num_baselines, OSKAR_FALSE, &err);
+    oskar_mem_init(&vv_ptr, type, location, num_baselines, OSKAR_FALSE, &err);
+    oskar_mem_init(&ww_ptr, type, location, num_baselines, OSKAR_FALSE, &err);
+    if (err) return err;
 
     /* ========================================= TIME SNAPSHOTS, FREQ SNAPSHOTS */
     if (settings->time_snapshots && settings->channel_snapshots)
     {
-        int coord_offset = vis_time * num_baselines;
-        size_t element_size = oskar_mem_element_size(type);
-        memcpy(uu->data, (void*)((char*)vis_uu->data + element_size * coord_offset), element_size * num_baselines);
-        memcpy(vv->data, (void*)((char*)vis_vv->data + element_size * coord_offset), element_size * num_baselines);
-        memcpy(ww->data, (void*)((char*)vis_ww->data + element_size * coord_offset), element_size * num_baselines);
+        size_t byte_offset, data_size;
+        data_size = oskar_mem_element_size(type) * num_baselines;
+        byte_offset = data_size * vis_time;
+        memcpy(oskar_mem_void(uu), (const void*)(oskar_mem_char_const(vis_uu) +
+                byte_offset), data_size);
+        memcpy(oskar_mem_void(vv), (const void*)(oskar_mem_char_const(vis_vv) +
+                byte_offset), data_size);
+        memcpy(oskar_mem_void(ww), (const void*)(oskar_mem_char_const(vis_ww) +
+                byte_offset), data_size);
     }
 
     /* ======================================== TIME SNAPSHOTS, FREQ SYNTHESIS */
@@ -82,29 +87,47 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
     {
         int coord_offset = vis_time * num_baselines;
         oskar_mem_get_pointer(&uu_ptr, vis_uu, coord_offset, num_vis_coords, &err);
-        if (err) return err;
         oskar_mem_get_pointer(&vv_ptr, vis_vv, coord_offset, num_vis_coords, &err);
-        if (err) return err;
         oskar_mem_get_pointer(&ww_ptr, vis_ww, coord_offset, num_vis_coords, &err);
         if (err) return err;
 
-        for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
+        for (int c = vis_chan_range[0], i = 0; c <= vis_chan_range[1]; ++c)
         {
             double freq = freq_start_hz + c * freq_inc_hz;
             double scaling = freq/im_freq;
-            for (int b = 0; b < num_baselines; ++b, ++i)
+
+            if (type == OSKAR_DOUBLE)
             {
-                if (type == OSKAR_DOUBLE)
+                double *uu_, *vv_, *ww_;
+                const double *uu_ptr_, *vv_ptr_, *ww_ptr_;
+                uu_ = oskar_mem_double(uu, &err);
+                vv_ = oskar_mem_double(vv, &err);
+                ww_ = oskar_mem_double(ww, &err);
+                uu_ptr_ = oskar_mem_double_const(&uu_ptr, &err);
+                vv_ptr_ = oskar_mem_double_const(&vv_ptr, &err);
+                ww_ptr_ = oskar_mem_double_const(&ww_ptr, &err);
+                for (int b = 0; b < num_baselines; ++b, ++i)
                 {
-                    ((double*)uu->data)[i] = ((double*)uu_ptr.data)[b] * scaling;
-                    ((double*)vv->data)[i] = ((double*)vv_ptr.data)[b] * scaling;
-                    ((double*)ww->data)[i] = ((double*)ww_ptr.data)[b] * scaling;
+                    uu_[i] = uu_ptr_[b] * scaling;
+                    vv_[i] = vv_ptr_[b] * scaling;
+                    ww_[i] = ww_ptr_[b] * scaling;
                 }
-                else
+            }
+            else
+            {
+                float *uu_, *vv_, *ww_;
+                const float *uu_ptr_, *vv_ptr_, *ww_ptr_;
+                uu_ = oskar_mem_float(uu, &err);
+                vv_ = oskar_mem_float(vv, &err);
+                ww_ = oskar_mem_float(ww, &err);
+                uu_ptr_ = oskar_mem_float_const(&uu_ptr, &err);
+                vv_ptr_ = oskar_mem_float_const(&vv_ptr, &err);
+                ww_ptr_ = oskar_mem_float_const(&ww_ptr, &err);
+                for (int b = 0; b < num_baselines; ++b, ++i)
                 {
-                    ((float*)uu->data)[i] = ((float*)uu_ptr.data)[b] * scaling;
-                    ((float*)vv->data)[i] = ((float*)vv_ptr.data)[b] * scaling;
-                    ((float*)ww->data)[i] = ((float*)ww_ptr.data)[b] * scaling;
+                    uu_[i] = uu_ptr_[b] * scaling;
+                    vv_[i] = vv_ptr_[b] * scaling;
+                    ww_[i] = ww_ptr_[b] * scaling;
                 }
             }
         }
@@ -113,29 +136,47 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
     /* ======================================== TIME SYNTHESIS, FREQ SNAPSHOTS */
     else if (!settings->time_snapshots && settings->channel_snapshots)
     {
-        for (int i = 0, t = vis_time_range[0]; t <= vis_time_range[1]; ++t)
+        for (int t = vis_time_range[0], i = 0; t <= vis_time_range[1]; ++t)
         {
             int coord_offset = t * num_baselines;
             oskar_mem_get_pointer(&uu_ptr, vis_uu, coord_offset, num_vis_coords, &err);
-            if (err) return err;
             oskar_mem_get_pointer(&vv_ptr, vis_vv, coord_offset, num_vis_coords, &err);
-            if (err) return err;
             oskar_mem_get_pointer(&ww_ptr, vis_ww, coord_offset, num_vis_coords, &err);
             if (err) return err;
 
-            for (int b = 0; b < num_baselines; ++b, ++i)
+            if (type == OSKAR_DOUBLE)
             {
-                if (type == OSKAR_DOUBLE)
+                double *uu_, *vv_, *ww_;
+                const double *uu_ptr_, *vv_ptr_, *ww_ptr_;
+                uu_ = oskar_mem_double(uu, &err);
+                vv_ = oskar_mem_double(vv, &err);
+                ww_ = oskar_mem_double(ww, &err);
+                uu_ptr_ = oskar_mem_double_const(&uu_ptr, &err);
+                vv_ptr_ = oskar_mem_double_const(&vv_ptr, &err);
+                ww_ptr_ = oskar_mem_double_const(&ww_ptr, &err);
+                for (int b = 0; b < num_baselines; ++b, ++i)
                 {
-                    ((double*)uu->data)[i] = ((double*)uu_ptr.data)[b];
-                    ((double*)vv->data)[i] = ((double*)vv_ptr.data)[b];
-                    ((double*)ww->data)[i] = ((double*)ww_ptr.data)[b];
+                    uu_[i] = uu_ptr_[b];
+                    vv_[i] = vv_ptr_[b];
+                    ww_[i] = ww_ptr_[b];
                 }
-                else
+
+            }
+            else
+            {
+                float *uu_, *vv_, *ww_;
+                const float *uu_ptr_, *vv_ptr_, *ww_ptr_;
+                uu_ = oskar_mem_float(uu, &err);
+                vv_ = oskar_mem_float(vv, &err);
+                ww_ = oskar_mem_float(ww, &err);
+                uu_ptr_ = oskar_mem_float_const(&uu_ptr, &err);
+                vv_ptr_ = oskar_mem_float_const(&vv_ptr, &err);
+                ww_ptr_ = oskar_mem_float_const(&ww_ptr, &err);
+                for (int b = 0; b < num_baselines; ++b, ++i)
                 {
-                    ((float*)uu->data)[i] = ((float*)uu_ptr.data)[b];
-                    ((float*)vv->data)[i] = ((float*)vv_ptr.data)[b];
-                    ((float*)ww->data)[i] = ((float*)ww_ptr.data)[b];
+                    uu_[i] = uu_ptr_[b];
+                    vv_[i] = vv_ptr_[b];
+                    ww_[i] = ww_ptr_[b];
                 }
             }
         }
@@ -144,7 +185,7 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
     /* ======================================== TIME SYNTHESIS, FREQ SYNTHESIS */
     else
     {
-        for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
+        for (int c = vis_chan_range[0], i = 0; c <= vis_chan_range[1]; ++c)
         {
             double freq = freq_start_hz + c * freq_inc_hz;
             double scaling = freq/im_freq;
@@ -153,25 +194,42 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
             {
                 int coord_offset = t * num_baselines;
                 oskar_mem_get_pointer(&uu_ptr, vis_uu, coord_offset, num_vis_coords, &err);
-                if (err) return err;
                 oskar_mem_get_pointer(&vv_ptr, vis_vv, coord_offset, num_vis_coords, &err);
-                if (err) return err;
                 oskar_mem_get_pointer(&ww_ptr, vis_ww, coord_offset, num_vis_coords, &err);
                 if (err) return err;
 
-                for (int b = 0; b < num_baselines; ++b, ++i)
+                if (type == OSKAR_DOUBLE)
                 {
-                    if (type == OSKAR_DOUBLE)
+                    double *uu_, *vv_, *ww_;
+                    const double *uu_ptr_, *vv_ptr_, *ww_ptr_;
+                    uu_ = oskar_mem_double(uu, &err);
+                    vv_ = oskar_mem_double(vv, &err);
+                    ww_ = oskar_mem_double(ww, &err);
+                    uu_ptr_ = oskar_mem_double_const(&uu_ptr, &err);
+                    vv_ptr_ = oskar_mem_double_const(&vv_ptr, &err);
+                    ww_ptr_ = oskar_mem_double_const(&ww_ptr, &err);
+                    for (int b = 0; b < num_baselines; ++b, ++i)
                     {
-                        ((double*)uu->data)[i] = ((double*)uu_ptr.data)[b] * scaling;
-                        ((double*)vv->data)[i] = ((double*)vv_ptr.data)[b] * scaling;
-                        ((double*)ww->data)[i] = ((double*)ww_ptr.data)[b] * scaling;
+                        uu_[i] = uu_ptr_[b] * scaling;
+                        vv_[i] = vv_ptr_[b] * scaling;
+                        ww_[i] = ww_ptr_[b] * scaling;
                     }
-                    else
+                }
+                else
+                {
+                    float *uu_, *vv_, *ww_;
+                    const float *uu_ptr_, *vv_ptr_, *ww_ptr_;
+                    uu_ = oskar_mem_float(uu, &err);
+                    vv_ = oskar_mem_float(vv, &err);
+                    ww_ = oskar_mem_float(ww, &err);
+                    uu_ptr_ = oskar_mem_float_const(&uu_ptr, &err);
+                    vv_ptr_ = oskar_mem_float_const(&vv_ptr, &err);
+                    ww_ptr_ = oskar_mem_float_const(&ww_ptr, &err);
+                    for (int b = 0; b < num_baselines; ++b, ++i)
                     {
-                        ((float*)uu->data)[i] = ((float*)uu_ptr.data)[b] * scaling;
-                        ((float*)vv->data)[i] = ((float*)vv_ptr.data)[b] * scaling;
-                        ((float*)ww->data)[i] = ((float*)ww_ptr.data)[b] * scaling;
+                        uu_[i] = uu_ptr_[b] * scaling;
+                        vv_[i] = vv_ptr_[b] * scaling;
+                        ww_[i] = ww_ptr_[b] * scaling;
                     }
                 }
             }
@@ -180,7 +238,6 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
 
     return err;
 }
-
 
 #ifdef __cplusplus
 }

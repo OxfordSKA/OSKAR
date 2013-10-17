@@ -150,7 +150,9 @@ TEST(add_system_noise, test_rms)
     settings.obs.length_days = settings.obs.length_seconds / 86400.0;
     settings.obs.dt_dump_days = oskar_vis_time_inc_seconds(vis) / 86400.0;
 
-    oskar_Mem work_uvw(type, OSKAR_LOCATION_CPU, 3 * num_stations);
+    oskar_Mem work_uvw;
+    oskar_mem_init(&work_uvw, type, OSKAR_LOCATION_CPU, 3 * num_stations,
+            1, &err);
     oskar_evaluate_uvw_baseline(oskar_vis_baseline_uu_metres(vis),
             oskar_vis_baseline_vv_metres(vis),
             oskar_vis_baseline_ww_metres(vis), num_stations,
@@ -187,6 +189,7 @@ TEST(add_system_noise, test_rms)
 
     //check_image_stats(&image, telescope);
 
+    oskar_mem_free(&work_uvw, &err);
     oskar_telescope_free(telescope, &err);
     oskar_vis_free(vis, &err);
 }

@@ -105,13 +105,11 @@ TEST(evaluate_station_beam_dipoles, test)
     // Generate antenna array.
     int num_antennas_side = 100;
     int num_antennas = num_antennas_side * num_antennas_side;
-    oskar_Mem h_x(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
-    oskar_Mem h_y(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
-    oskar_Mem h_z(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
-    oskar_Mem h_cos_x(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
-    oskar_Mem h_sin_x(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
-    oskar_Mem h_cos_y(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
-    oskar_Mem h_sin_y(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
+    oskar_Mem h_x, h_y;
+    oskar_mem_init(&h_x, OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+            num_antennas, 1, &status);
+    oskar_mem_init(&h_y, OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+            num_antennas, 1, &status);
 
     // Generate square array of antennas.
     const float sep = 0.5; // Antenna separation, metres.
@@ -123,56 +121,76 @@ TEST(evaluate_station_beam_dipoles, test)
             int i = y + x * num_antennas_side;
 
             // Antenna positions.
-            ((double*)h_x.data)[i] = x * sep - half_array_size;
-            ((double*)h_y.data)[i] = y * sep - half_array_size;
-            ((double*)h_z.data)[i] = 0.0;
-
-            // Antenna orientations.
-            ((double*)h_cos_x.data)[i] = cos(90.0 * M_PI / 180);
-            ((double*)h_sin_x.data)[i] = sin(90.0 * M_PI / 180);
-            ((double*)h_cos_y.data)[i] = cos(0.0 * M_PI / 180);
-            ((double*)h_sin_y.data)[i] = sin(0.0 * M_PI / 180);
+            oskar_mem_double(&h_x, &status)[i] = x * sep - half_array_size;
+            oskar_mem_double(&h_y, &status)[i] = y * sep - half_array_size;
         }
     }
 
-    // TODO Generate the weights.
-    oskar_Mem weights(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, num_antennas);
-
-    // Copy all to GPU.
-    oskar_Mem d_x(&h_x, OSKAR_LOCATION_GPU);
-    oskar_Mem d_y(&h_y, OSKAR_LOCATION_GPU);
-    oskar_Mem d_z(&h_z, OSKAR_LOCATION_GPU);
-    oskar_Mem d_cos_x(&h_cos_x, OSKAR_LOCATION_GPU);
-    oskar_Mem d_sin_x(&h_sin_x, OSKAR_LOCATION_GPU);
-    oskar_Mem d_cos_y(&h_cos_y, OSKAR_LOCATION_GPU);
-    oskar_Mem d_sin_y(&h_sin_y, OSKAR_LOCATION_GPU);
+    // Copy to GPU and free host memory.
+    oskar_Mem d_x, d_y, d_z, cos_x, sin_x, cos_y, sin_y, weights, pattern;
+    oskar_mem_init(&d_z, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_antennas, 1, &status);
+    oskar_mem_init(&cos_x, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_antennas, 1, &status);
+    oskar_mem_init(&sin_x, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_antennas, 1, &status);
+    oskar_mem_init(&cos_y, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_antennas, 1, &status);
+    oskar_mem_init(&sin_y, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_antennas, 1, &status);
+    oskar_mem_init(&weights, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU,
+            num_antennas, 1, &status);
+    oskar_mem_init(&pattern, OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU,
+            num_pixels, 1, &status);
+    oskar_mem_set_value_real(&d_z, 0.0, &status);
+    oskar_mem_set_value_real(&cos_x, 0.0, &status);
+    oskar_mem_set_value_real(&sin_x, 1.0, &status);
+    oskar_mem_set_value_real(&cos_y, 1.0, &status);
+    oskar_mem_set_value_real(&sin_y, 0.0, &status);
+    oskar_mem_init_copy(&d_x, &h_x, OSKAR_LOCATION_GPU, &status);
+    oskar_mem_init_copy(&d_y, &h_y, OSKAR_LOCATION_GPU, &status);
+    oskar_mem_free(&h_x, &status);
+    oskar_mem_free(&h_y, &status);
 
     // Call the kernel.
     double wavenumber = 2.0 * M_PI * freq / 299792458.0;
-    oskar_Mem d_pattern;
-    oskar_mem_init(&d_pattern, OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU,
-            num_pixels, 1, &status);
     oskar_evaluate_array_pattern_dipoles_cuda_d (num_antennas, wavenumber,
             oskar_mem_double_const(&d_x, &status),
             oskar_mem_double_const(&d_y, &status),
             oskar_mem_double_const(&d_z, &status),
-            oskar_mem_double_const(&d_cos_x, &status),
-            oskar_mem_double_const(&d_sin_x, &status),
-            oskar_mem_double_const(&d_cos_y, &status),
-            oskar_mem_double_const(&d_sin_y, &status),
+            oskar_mem_double_const(&cos_x, &status),
+            oskar_mem_double_const(&sin_x, &status),
+            oskar_mem_double_const(&cos_y, &status),
+            oskar_mem_double_const(&sin_y, &status),
             oskar_mem_double2_const(&weights, &status), num_pixels,
             oskar_mem_double_const(&d_l, &status),
             oskar_mem_double_const(&d_m, &status),
             oskar_mem_double_const(&d_n, &status),
-            oskar_mem_double4c(&d_pattern, &status));
+            oskar_mem_double4c(&pattern, &status));
     oskar_cuda_check_error(&status);
     ASSERT_EQ(0, status);
 
     const char* filename = "temp_test_station_beam_dipoles.dat";
     FILE* file = fopen(filename, "w");
-    oskar_mem_write_ascii(file, 3, num_pixels, &status,
-            &h_az, &h_el, &d_pattern);
+    oskar_mem_write_ascii(file, 3, num_pixels, &status, &h_az, &h_el,
+            &pattern);
     fclose(file);
     remove(filename);
+
+    oskar_mem_free(&pattern, &status);
+    oskar_mem_free(&d_x, &status);
+    oskar_mem_free(&d_y, &status);
+    oskar_mem_free(&d_z, &status);
+    oskar_mem_free(&cos_x, &status);
+    oskar_mem_free(&sin_x, &status);
+    oskar_mem_free(&cos_y, &status);
+    oskar_mem_free(&sin_y, &status);
+    oskar_mem_free(&weights, &status);
+
+    oskar_mem_free(&h_az, &status);
+    oskar_mem_free(&h_el, &status);
+    oskar_mem_free(&d_l, &status);
+    oskar_mem_free(&d_m, &status);
+    oskar_mem_free(&d_n, &status);
 }
 

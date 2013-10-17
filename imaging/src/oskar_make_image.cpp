@@ -118,11 +118,13 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         oskar_mem_init(&ww_rot, type, location, num_elements, OSKAR_TRUE, &err);
 
         /* Work array for baseline evaluation. */
-        oskar_Mem work_uvw(type, location, 3 * num_stations);
+        oskar_Mem work_uvw;
+        oskar_mem_init(&work_uvw, type, location, 3 * num_stations, 1, &err);
         oskar_evaluate_uvw_baseline(&uu_rot, &vv_rot, &ww_rot, num_stations,
                 vis_x_metres, vis_y_metres, vis_z_metres, ra_rad, dec_rad,
                 num_times, oskar_vis_time_start_mjd_utc(vis),
                 oskar_vis_time_inc_seconds(vis) * SEC2DAYS, &work_uvw, &err);
+        oskar_mem_free(&work_uvw, &err);
     }
 
     /* Initialise the OSKAR image cube */
@@ -181,7 +183,8 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     }
 
     /* Evaluate Stokes parameters  (if required) */
-    oskar_Mem stokes(type, location, 0, OSKAR_FALSE);
+    oskar_Mem stokes;
+    oskar_mem_init(&stokes, type, location, 0, OSKAR_FALSE, &err);
     err = oskar_get_image_stokes(&stokes, vis, settings);
     if (err) return err;
 
@@ -194,31 +197,31 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         num_vis = num_baselines * num_times;
     else /* Time and frequency synthesis */
         num_vis = num_baselines * num_channels * num_times;
-    oskar_Mem uu_im(type, location, num_vis);
-    oskar_Mem vv_im(type, location, num_vis);
-    oskar_Mem ww_im(type, location, num_vis);
-    oskar_Mem uu_tmp, vv_tmp, ww_tmp;
+    oskar_Mem uu_im, vv_im, ww_im, vis_im, uu_tmp, vv_tmp, ww_tmp, l, m;
+    oskar_mem_init(&uu_im, type, location, num_vis, 1, &err);
+    oskar_mem_init(&vv_im, type, location, num_vis, 1, &err);
+    oskar_mem_init(&ww_im, type, location, num_vis, 1, &err);
+    oskar_mem_init(&vis_im, type | OSKAR_COMPLEX, location, num_vis, 1, &err);
     if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
     {
         oskar_mem_init(&uu_tmp, type, location, num_vis, OSKAR_TRUE, &err);
         oskar_mem_init(&vv_tmp, type, location, num_vis, OSKAR_TRUE, &err);
         oskar_mem_init(&ww_tmp, type, location, num_vis, OSKAR_TRUE, &err);
-        if (err) return err;
     }
-    oskar_Mem vis_im(type | OSKAR_COMPLEX, location, num_vis);
+    if (err) return err;
 
     /* Allocate pixel coordinate grid required for the DFT imager. */
-    oskar_Mem l(type, location, num_pixels);
-    oskar_Mem m(type, location, num_pixels);
+    oskar_mem_init(&l, type, location, num_pixels, 1, &err);
+    oskar_mem_init(&m, type, location, num_pixels, 1, &err);
     if (type == OSKAR_SINGLE)
     {
-        oskar_evaluate_image_lm_grid_f(size, size, fov, fov, (float*)l.data,
-                (float*)m.data);
+        oskar_evaluate_image_lm_grid_f(size, size, fov, fov,
+                oskar_mem_float(&l, &err), oskar_mem_float(&m, &err));
     }
     else
     {
-        oskar_evaluate_image_lm_grid_d(size, size, fov, fov, (double*)l.data,
-                (double*)m.data);
+        oskar_evaluate_image_lm_grid_d(size, size, fov, fov,
+                oskar_mem_double(&l, &err), oskar_mem_double(&m, &err));
     }
 
     /* Set up the image cube. */
@@ -226,7 +229,8 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     if (err) return err;
 
     /* Declare a pointer to the slice of the image cube being imaged. */
-    oskar_Mem im_slice(type, location, num_pixels, OSKAR_FALSE);
+    oskar_Mem im_slice;
+    oskar_mem_init(&im_slice, type, location, num_pixels, OSKAR_FALSE, &err);
 
     /* Construct the image cube. */
     for (int i = 0, c = 0; c < im_num_chan; ++c)
@@ -318,6 +322,20 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         }
     }
 
+    oskar_mem_free(&uu_rot, &err);
+    oskar_mem_free(&vv_rot, &err);
+    oskar_mem_free(&ww_rot, &err);
+    oskar_mem_free(&stokes, &err);
+    oskar_mem_free(&uu_tmp, &err);
+    oskar_mem_free(&vv_tmp, &err);
+    oskar_mem_free(&ww_tmp, &err);
+    oskar_mem_free(&uu_im, &err);
+    oskar_mem_free(&vv_im, &err);
+    oskar_mem_free(&ww_im, &err);
+    oskar_mem_free(&vis_im, &err);
+    oskar_mem_free(&l, &err);
+    oskar_mem_free(&m, &err);
+    oskar_mem_free(&im_slice, &err);
     return err;
 }
 

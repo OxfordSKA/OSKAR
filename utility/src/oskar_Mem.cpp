@@ -27,7 +27,6 @@
  */
 
 #include <private_mem.h>
-#include <oskar_mem_copy.h>
 #include <oskar_mem_free.h>
 #include <oskar_mem_init.h>
 
@@ -41,14 +40,6 @@ oskar_Mem::oskar_Mem(int mem_type, int mem_location, size_t size, int owner_)
 {
     int err = 0;
     oskar_mem_init(this, mem_type, mem_location, size, owner_, &err);
-}
-
-oskar_Mem::oskar_Mem(const oskar_Mem* other, int mem_location, int owner_)
-{
-    int err = 0;
-    oskar_mem_init(this, other->type, mem_location, other->num_elements,
-            owner_, &err);
-    oskar_mem_copy(this, other, &err); // Copy other to this.
 }
 
 oskar_Mem::~oskar_Mem()

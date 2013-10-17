@@ -87,21 +87,6 @@ struct oskar_Mem
     oskar_Mem(int mem_type, int mem_location, size_t size = 0, int owner_ = 1);
 
     /**
-     * @brief Constructs and allocates data for an oskar_Mem data structure.
-     *
-     * @details
-     * Constructs a new oskar_Mem data structure, allocating memory for it in
-     * the specified location.
-     *
-     * @param[in] other        Pointer to another oskar_Mem data structure.
-     * @param[in] mem_location Specify 0 for host memory, 1 for device memory.
-     * @param[in] owner_       Bool flag specifying if the structure should
-     *                         take ownership of the memory (default = true).
-     */
-    OSKAR_EXPORT
-    oskar_Mem(const oskar_Mem* other, int mem_location, int owner_ = 1);
-
-    /**
      * @brief Destroys the structure.
      *
      * @details

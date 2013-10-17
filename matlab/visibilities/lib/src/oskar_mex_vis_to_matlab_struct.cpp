@@ -387,28 +387,32 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
                 OSKAR_TAG_SETTINGS, 0, &data_size, &data_offset, &tag_error);
         if (!tag_error)
         {
-            oskar_Mem temp(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+            oskar_Mem temp;
+            oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &status);
             oskar_mem_binary_stream_read(&temp, stream, &index,
                     OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
             oskar_mem_realloc(&temp, (int)oskar_mem_length(&temp) + 1, &status);
             if (status)
                 mexErrMsgTxt("ERROR: Failed reading settings from visibility file.\n");
             ((char*)temp.data)[(int)oskar_mem_length(&temp) - 1] = 0;
-            mxSetField(v_out, 0, "settings", mxCreateString((char*)temp.data));
+            mxSetField(v_out, 0, "settings", mxCreateString(oskar_mem_char(&temp)));
+            oskar_mem_free(&temp, &status);
         }
         // Extract the log
         oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
                 OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset, &tag_error);
         if (!tag_error)
         {
-            oskar_Mem temp(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+            oskar_Mem temp;
+            oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &status);
             oskar_mem_binary_stream_read(&temp, stream, &index,
                     OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
             oskar_mem_realloc(&temp, (int)oskar_mem_length(&temp) + 1, &status);
             if (status)
                 mexErrMsgTxt("ERROR: Failed reading log from visibility file.\n");
             ((char*)temp.data)[(int)oskar_mem_length(&temp) - 1] = 0;
-            mxSetField(v_out, 0, "log", mxCreateString((char*)temp.data));
+            mxSetField(v_out, 0, "log", mxCreateString(oskar_mem_char(&temp)));
+            oskar_mem_free(&temp, &status);
         }
         fclose(stream);
         oskar_binary_tag_index_free(index, &status);

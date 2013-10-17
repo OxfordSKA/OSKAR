@@ -211,13 +211,14 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         image.freq_inc_hz = 0.0;
         image.image_type = 0;
 
-        oskar_Mem uu(type, location, num_samples);
-        oskar_Mem vv(type, location, num_samples);
-        oskar_Mem amp(type | OSKAR_COMPLEX, location, num_samples);
+        oskar_Mem uu, vv, amp, l, m;
+        oskar_mem_init(&uu, type, location, num_samples, 1, &err);
+        oskar_mem_init(&vv, type, location, num_samples, 1, &err);
+        oskar_mem_init(&amp, type | OSKAR_COMPLEX, location, num_samples, 1, &err);
 
         int num_pixels = size * size;
-        oskar_Mem l(type, location, num_pixels);
-        oskar_Mem m(type, location, num_pixels);
+        oskar_mem_init(&l, type, location, num_pixels, 1, &err);
+        oskar_mem_init(&m, type, location, num_pixels, 1, &err);
 
         // Set up imaging data.
         if (type == OSKAR_DOUBLE)
@@ -271,6 +272,11 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
         mexEvalString("drawnow");
         mexPrintf("= Make image complete\n");
+        oskar_mem_free(&uu, &err);
+        oskar_mem_free(&vv, &err);
+        oskar_mem_free(&amp, &err);
+        oskar_mem_free(&l, &err);
+        oskar_mem_free(&m, &err);
     }
 
     out[0] = oskar_mex_image_to_matlab_struct(&image, NULL);
