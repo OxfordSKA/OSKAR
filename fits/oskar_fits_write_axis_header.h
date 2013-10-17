@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_fits_write_axis_header.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 #include <fitsio.h>
 
 #ifdef __cplusplus
@@ -50,7 +50,7 @@ extern "C" {
 OSKAR_FITS_EXPORT
 void oskar_fits_write_axis_header(fitsfile* fits_file, int axis_id,
         const char* ctype, const char* ctype_comment, double crval,
-        double cdelt, double crpix, double crota);
+        double cdelt, double crpix, double crota, int* status);
 
 #ifdef __cplusplus
 }

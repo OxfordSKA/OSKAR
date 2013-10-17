@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fits/oskar_fits_write_axis_header.h"
+#include <fits/oskar_fits_write_axis_header.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -38,28 +38,27 @@ extern "C" {
 
 void oskar_fits_write_axis_header(fitsfile* fptr, int axis_id,
         const char* ctype, const char* ctype_comment, double crval,
-        double cdelt, double crpix, double crota)
+        double cdelt, double crpix, double crota, int* status)
 {
     char key[FLEN_KEYWORD], value[FLEN_VALUE], comment[FLEN_COMMENT];
-    int status = 0;
     int decimals = 10;
 
     strncpy(comment, ctype_comment, FLEN_COMMENT-1);
     strncpy(value, ctype, FLEN_VALUE-1);
-    fits_make_keyn("CTYPE", axis_id, key, &status);
-    fits_write_key_str(fptr, key, value, comment, &status);
+    fits_make_keyn("CTYPE", axis_id, key, status);
+    fits_write_key_str(fptr, key, value, comment, status);
 
-    fits_make_keyn("CRVAL", axis_id, key, &status);
-    fits_write_key_dbl(fptr, key, crval, decimals, NULL, &status);
+    fits_make_keyn("CRVAL", axis_id, key, status);
+    fits_write_key_dbl(fptr, key, crval, decimals, NULL, status);
 
-    fits_make_keyn("CDELT", axis_id, key, &status);
-    fits_write_key_dbl(fptr, key, cdelt, decimals, NULL, &status);
+    fits_make_keyn("CDELT", axis_id, key, status);
+    fits_write_key_dbl(fptr, key, cdelt, decimals, NULL, status);
 
-    fits_make_keyn("CRPIX", axis_id, key, &status);
-    fits_write_key_dbl(fptr, key, crpix, decimals, NULL, &status);
+    fits_make_keyn("CRPIX", axis_id, key, status);
+    fits_write_key_dbl(fptr, key, crpix, decimals, NULL, status);
 
-    fits_make_keyn("CROTA", axis_id, key, &status);
-    fits_write_key_dbl(fptr, key, crota, decimals, NULL, &status);
+    fits_make_keyn("CROTA", axis_id, key, status);
+    fits_write_key_dbl(fptr, key, crota, decimals, NULL, status);
 }
 
 #ifdef __cplusplus

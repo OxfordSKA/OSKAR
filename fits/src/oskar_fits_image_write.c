@@ -192,7 +192,7 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
     for (i = 0; i < num_dimensions; ++i)
     {
         oskar_fits_write_axis_header(fptr, i + 1, ctype[i], label[i],
-                crval[i], cdelt[i], crpix[i], crota[i]);
+                crval[i], cdelt[i], crpix[i], crota[i], status);
     }
 
     /* Write a history line with the OSKAR version. */
@@ -219,14 +219,9 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
             "Pointing RA", status);
     fits_write_key_dbl(fptr, "OBSDEC", image->centre_dec_deg, decimals,
             "Pointing DEC", status);
-    if (*status)
-    {
-        *status = OSKAR_ERR_FITS_IO;
-        return;
-    }
 
     /* Write log entries as FITS HISTORY keys. */
-    if (log && oskar_log_file_handle(log))
+    if (log && oskar_log_file_handle(log) && !(*status))
     {
         char* buffer = NULL;
         size_t buf_size = 0;

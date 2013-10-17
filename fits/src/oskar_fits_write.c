@@ -89,7 +89,7 @@ void oskar_fits_write(const char* filename, int type, int naxis,
     for (i = 0; i < naxis; ++i)
     {
         oskar_fits_write_axis_header(fptr, i + 1, ctype[i], ctype_desc[i],
-                crval[i], cdelt[i], crpix[i], crota[i]);
+                crval[i], cdelt[i], crpix[i], crota[i], status);
     }
 
     /* Write a history line with the OSKAR version. */
