@@ -28,9 +28,9 @@
 
 #include <private_telescope.h>
 
+#include <oskar_convert_ecef_to_horizon_xyz.h>
 #include <oskar_geocentric_cartesian_to_geodetic_spherical.h>
 #include <oskar_horizon_plane_to_offset_geocentric_cartesian.h>
-#include <oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h>
 #include <oskar_telescope.h>
 #include <oskar_getline.h>
 #include <oskar_string_to_array.h>

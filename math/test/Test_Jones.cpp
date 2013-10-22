@@ -79,7 +79,7 @@ static void t_join(int out_typeA, int in_type1A, int in_type2A,
 {
     int status = 0;
     oskar_Timer *timerA, *timerB;
-    double timeA, timeB;
+//    double timeA, timeB;
     oskar_Jones *in1, *in2, *outA, *outB;
 
     // Create the timers.
@@ -101,7 +101,7 @@ static void t_join(int out_typeA, int in_type1A, int in_type2A,
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_timer_start(timerA);
     oskar_jones_join(outA, in1, in2, &status);
-    timeA = oskar_timer_elapsed(timerA);
+//    timeA = oskar_timer_elapsed(timerA);
     EXPECT_EQ(expectedA, status);
     status = 0;
     oskar_jones_free(in1, &status);
@@ -117,7 +117,7 @@ static void t_join(int out_typeA, int in_type1A, int in_type2A,
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_timer_start(timerB);
     oskar_jones_join(outB, in1, in2, &status);
-    timeB = oskar_timer_elapsed(timerB);
+//    timeB = oskar_timer_elapsed(timerB);
     EXPECT_EQ(expectedB, status);
     status = 0;
     oskar_jones_free(in1, &status);
@@ -144,7 +144,7 @@ void t_join_in_place(int in_type1A, int in_type2A, int in_loc1A, int in_loc2A,
 {
     int status = 0;
     oskar_Timer *timerA, *timerB;
-    double timeA, timeB;
+//    double timeA, timeB;
     oskar_Jones *in1A, *in2A, *in1B, *in2B;
 
     // Create the timers.
@@ -162,7 +162,7 @@ void t_join_in_place(int in_type1A, int in_type2A, int in_loc1A, int in_loc2A,
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_timer_start(timerA);
     oskar_jones_join(in1A, in1A, in2A, &status);
-    timeA = oskar_timer_elapsed(timerA);
+//    timeA = oskar_timer_elapsed(timerA);
     EXPECT_EQ(expectedA, status);
     status = 0;
     oskar_jones_free(in2A, &status);
@@ -177,7 +177,7 @@ void t_join_in_place(int in_type1A, int in_type2A, int in_loc1A, int in_loc2A,
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_timer_start(timerB);
     oskar_jones_join(in1B, in1B, in2B, &status);
-    timeB = oskar_timer_elapsed(timerB);
+//    timeB = oskar_timer_elapsed(timerB);
     EXPECT_EQ(expectedB, status);
     status = 0;
     oskar_jones_free(in2B, &status);

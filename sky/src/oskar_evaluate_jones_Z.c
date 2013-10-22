@@ -95,7 +95,7 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
 
     /* Resize the work array (if needed) */
     num_stations = oskar_telescope_num_stations(telescope);
-    num_sources = oskar_sky_num_sources(sky_cpu);
+    num_sources = oskar_sky_num_sources(sky);
     oskar_work_jones_z_resize(work, num_sources, status);
 
     /* Copy the sky model to the CPU. */
