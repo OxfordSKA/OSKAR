@@ -91,7 +91,7 @@ void oskar_station_load_config(oskar_Station* station,
         /* Ensure the station model is big enough. */
         if (n % 100 == 0)
         {
-            if (oskar_station_num_elements(station) < n)
+            if (oskar_station_num_elements(station) < n + 100)
                 oskar_station_resize(station, n + 100, status);
         }
 
