@@ -102,7 +102,7 @@ TEST(TelescopeModel, load_telescope_cpu)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Fill the telescope structure.
-    oskar_telescope_load_station_coords(tel_cpu, telescope_file_name,
+    oskar_telescope_load_station_coords_horizon(tel_cpu, telescope_file_name,
             longitude, latitude, altitude, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n_stations; ++i)

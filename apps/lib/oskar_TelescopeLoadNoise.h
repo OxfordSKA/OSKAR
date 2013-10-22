@@ -31,14 +31,14 @@
 #define OSKAR_TELESCOPE_MODEL_LOAD_NOISE_H_
 
 /**
- * @file oskar_TelescopeModelLoadNoise.h
+ * @file oskar_TelescopeLoadNoise.h
  */
 
-#include "oskar_global.h"
-#include "apps/lib/oskar_AbstractTelescopeFileLoader.h"
+#include <oskar_global.h>
+#include "apps/lib/oskar_TelescopeLoadAbstract.h"
 #include <oskar_mem.h>
-#include "station/oskar_system_noise_model_load.h"
-#include "utility/oskar_Settings.h"
+#include <oskar_system_noise_model_load.h>
+#include <oskar_Settings.h>
 
 #include <QtCore/QString>
 #include <QtCore/QHash>
@@ -49,7 +49,7 @@
  * Implementation of the telescope model loader for uncorrelated system noise.
  *
  * @details
- * This class loads and/or evaluates lookup tables of RMS noise v.s. frequency
+ * This class loads and/or evaluates lookup tables of RMS noise vs. frequency
  * for each station in the telescope model.
  *
  * Noise values are derived from settings in the oskar_Settings structure
@@ -58,12 +58,12 @@
  * The telescope model being populated must have already been allocated in CPU
  * memory.
  */
-class OSKAR_APPS_EXPORT oskar_TelescopeModelLoadNoise
-: public oskar_AbstractTelescopeFileLoader
+class OSKAR_APPS_EXPORT oskar_TelescopeLoadNoise
+: public oskar_TelescopeLoadAbstract
 {
 public:
-    oskar_TelescopeModelLoadNoise(const oskar_Settings* settings);
-    ~oskar_TelescopeModelLoadNoise();
+    oskar_TelescopeLoadNoise(const oskar_Settings* settings);
+    ~oskar_TelescopeLoadNoise();
 
     /**
      * @brief

@@ -35,7 +35,8 @@
 extern "C" {
 #endif
 
-void oskar_mem_set_value_real(oskar_Mem* mem, double val, int* status)
+void oskar_mem_set_value_real(oskar_Mem* mem, double val,
+        size_t offset, size_t length, int* status)
 {
     size_t i, n;
     int type, location;
@@ -53,20 +54,24 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val, int* status)
     /* Get the data type, location, and number of elements. */
     type = mem->type;
     location = mem->location;
-    n = mem->num_elements;
+    n = length;
+    if (offset == 0 && length == 0)
+    {
+        n = mem->num_elements;
+    }
 
     if (location == OSKAR_LOCATION_CPU)
     {
         if (type == OSKAR_DOUBLE)
         {
             double *v;
-            v = (double*)(mem->data);
+            v = (double*)(mem->data) + offset;
             for (i = 0; i < n; ++i) v[i] = val;
         }
         else if (type == OSKAR_DOUBLE_COMPLEX)
         {
             double2 *v;
-            v = (double2*)(mem->data);
+            v = (double2*)(mem->data) + offset;
             for (i = 0; i < n; ++i)
             {
                 v[i].x = val;
@@ -77,7 +82,7 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val, int* status)
         {
             double4c d;
             double4c *v;
-            v = (double4c*)(mem->data);
+            v = (double4c*)(mem->data) + offset;
             for (i = 0; i < n; ++i)
             {
                 d.a.x = val;
@@ -94,16 +99,16 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val, int* status)
         else if (type == OSKAR_SINGLE)
         {
             float *v;
-            v = (float*)(mem->data);
-            for (i = 0; i < n; ++i) v[i] = val;
+            v = (float*)(mem->data) + offset;
+            for (i = 0; i < n; ++i) v[i] = (float)val;
         }
         else if (type == OSKAR_SINGLE_COMPLEX)
         {
             float2 *v;
-            v = (float2*)(mem->data);
+            v = (float2*)(mem->data) + offset;
             for (i = 0; i < n; ++i)
             {
-                v[i].x = val;
+                v[i].x = (float)val;
                 v[i].y = 0.0f;
             }
         }
@@ -111,16 +116,16 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val, int* status)
         {
             float4c d;
             float4c *v;
-            v = (float4c*)(mem->data);
+            v = (float4c*)(mem->data) + offset;
             for (i = 0; i < n; ++i)
             {
-                d.a.x = val;
+                d.a.x = (float)val;
                 d.a.y = 0.0f;
                 d.b.x = 0.0f;
                 d.b.y = 0.0f;
                 d.c.x = 0.0f;
                 d.c.y = 0.0f;
-                d.d.x = val;
+                d.d.x = (float)val;
                 d.d.y = 0.0f;
                 v[i] = d;
             }
@@ -133,30 +138,33 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val, int* status)
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_DOUBLE)
         {
-            oskar_mem_set_value_real_cuda_r_d(n, (double*)(mem->data), val);
+            oskar_mem_set_value_real_cuda_r_d(n,
+                    (double*)(mem->data) + offset, val);
         }
         else if (type == OSKAR_DOUBLE_COMPLEX)
         {
-            oskar_mem_set_value_real_cuda_c_d(n, (double2*)(mem->data), val);
+            oskar_mem_set_value_real_cuda_c_d(n,
+                    (double2*)(mem->data) + offset, val);
         }
         else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
         {
-            oskar_mem_set_value_real_cuda_m_d(n, (double4c*)(mem->data), val);
+            oskar_mem_set_value_real_cuda_m_d(n,
+                    (double4c*)(mem->data) + offset, val);
         }
         else if (type == OSKAR_SINGLE)
         {
-            oskar_mem_set_value_real_cuda_r_f(n, (float*)(mem->data),
-                    (float)val);
+            oskar_mem_set_value_real_cuda_r_f(n,
+                    (float*)(mem->data) + offset, (float)val);
         }
         else if (type == OSKAR_SINGLE_COMPLEX)
         {
-            oskar_mem_set_value_real_cuda_c_f(n, (float2*)(mem->data),
-                    (float)val);
+            oskar_mem_set_value_real_cuda_c_f(n,
+                    (float2*)(mem->data) + offset, (float)val);
         }
         else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
         {
-            oskar_mem_set_value_real_cuda_m_f(n, (float4c*)(mem->data),
-                    (float)val);
+            oskar_mem_set_value_real_cuda_m_f(n,
+                    (float4c*)(mem->data) + offset, (float)val);
         }
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;

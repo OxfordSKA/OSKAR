@@ -48,14 +48,14 @@ TEST(Mem, write_ascii)
     oskar_mem_init(&mem8, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, length, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    oskar_mem_set_value_real(&mem1, 1.0, &status);
-    oskar_mem_set_value_real(&mem2, 2.0, &status);
-    oskar_mem_set_value_real(&mem3, 3.0, &status);
-    oskar_mem_set_value_real(&mem4, 4.0, &status);
-    oskar_mem_set_value_real(&mem5, 5.0, &status);
-    oskar_mem_set_value_real(&mem6, 6.0, &status);
-    oskar_mem_set_value_real(&mem7, 7.0, &status);
-    oskar_mem_set_value_real(&mem8, 8.0, &status);
+    oskar_mem_set_value_real(&mem1, 1.0, 0, 0, &status);
+    oskar_mem_set_value_real(&mem2, 2.0, 0, 0, &status);
+    oskar_mem_set_value_real(&mem3, 3.0, 0, 0, &status);
+    oskar_mem_set_value_real(&mem4, 4.0, 0, 0, &status);
+    oskar_mem_set_value_real(&mem5, 5.0, 0, 0, &status);
+    oskar_mem_set_value_real(&mem6, 6.0, 0, 0, &status);
+    oskar_mem_set_value_real(&mem7, 7.0, 0, 0, &status);
+    oskar_mem_set_value_real(&mem8, 8.0, 0, 0, &status);
 
     const char* fname = "temp_test_wrtie_ascii.txt";
     FILE* f = fopen(fname, "w");

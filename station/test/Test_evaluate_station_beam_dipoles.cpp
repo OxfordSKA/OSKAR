@@ -142,11 +142,11 @@ TEST(evaluate_station_beam_dipoles, test)
             num_antennas, 1, &status);
     oskar_mem_init(&pattern, OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU,
             num_pixels, 1, &status);
-    oskar_mem_set_value_real(&d_z, 0.0, &status);
-    oskar_mem_set_value_real(&cos_x, 0.0, &status);
-    oskar_mem_set_value_real(&sin_x, 1.0, &status);
-    oskar_mem_set_value_real(&cos_y, 1.0, &status);
-    oskar_mem_set_value_real(&sin_y, 0.0, &status);
+    oskar_mem_set_value_real(&d_z, 0.0, 0, 0, &status);
+    oskar_mem_set_value_real(&cos_x, 0.0, 0, 0, &status);
+    oskar_mem_set_value_real(&sin_x, 1.0, 0, 0, &status);
+    oskar_mem_set_value_real(&cos_y, 1.0, 0, 0, &status);
+    oskar_mem_set_value_real(&sin_y, 0.0, 0, 0, &status);
     oskar_mem_init_copy(&d_x, &h_x, OSKAR_LOCATION_GPU, &status);
     oskar_mem_init_copy(&d_y, &h_y, OSKAR_LOCATION_GPU, &status);
     oskar_mem_free(&h_x, &status);

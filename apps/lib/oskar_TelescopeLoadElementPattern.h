@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_PATTERN_LOADER_H_
-#define OSKAR_ELEMENT_PATTERN_LOADER_H_
+#ifndef OSKAR_TELESCOPE_LOAD_ELEMENT_PATTERN_H_
+#define OSKAR_TELESCOPE_LOAD_ELEMENT_PATTERN_H_
 
 /**
- * @file oskar_ElementPatternLoader.h
+ * @file oskar_TelescopeLoadElementPattern.h
  */
 
 #include <oskar_global.h>
-#include "apps/lib/oskar_AbstractTelescopeFileLoader.h"
+#include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
 #include <oskar_telescope.h>
 #include <oskar_station.h>
@@ -45,12 +45,13 @@
 
 class QDir;
 
-class OSKAR_APPS_EXPORT oskar_ElementPatternLoader : public oskar_AbstractTelescopeFileLoader
+class OSKAR_APPS_EXPORT oskar_TelescopeLoadElementPattern
+: public oskar_TelescopeLoadAbstract
 {
 public:
-    oskar_ElementPatternLoader(const oskar_Settings* settings, oskar_Log* log);
+    oskar_TelescopeLoadElementPattern(const oskar_Settings* settings, oskar_Log* log);
 
-    virtual ~oskar_ElementPatternLoader();
+    virtual ~oskar_TelescopeLoadElementPattern();
 
     /**
      * @brief
@@ -106,4 +107,4 @@ private:
     oskar_Log* log_;
 };
 
-#endif /* OSKAR_ELEMENT_PATTERN_LOADER_H_ */
+#endif /* OSKAR_TELESCOPE_LOAD_ELEMENT_PATTERN_H_ */

@@ -3,8 +3,6 @@
 #
 
 set(apps_SRC
-    src/oskar_ConfigFileLoader.cpp
-    src/oskar_ElementPatternLoader.cpp
     src/oskar_evaluate_station_pierce_points.cpp
     src/oskar_imager.cpp
     src/oskar_remove_dir.cpp
@@ -24,7 +22,9 @@ set(apps_SRC
     src/oskar_sim_interferometer.cpp
     src/oskar_sim_tec_screen.cpp
     src/oskar_telescope_load.cpp
-    src/oskar_TelescopeModelLoadNoise.cpp
+    src/oskar_TelescopeLoadConfig.cpp
+    src/oskar_TelescopeLoadElementPattern.cpp
+    src/oskar_TelescopeLoadNoise.cpp
     src/oskar_telescope_save.cpp
 )
 if(CASACORE_FOUND)

@@ -252,7 +252,7 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
     /* Create a fake complex "signal" vector of ones. */
     oskar_mem_init(&ones, oskar_mem_type(&bp->data), location,
             num_pixels * oskar_station_num_elements(station), 1, status);
-    oskar_mem_set_value_real(&ones, 1.0, status);
+    oskar_mem_set_value_real(&ones, 1.0, 0, 0, status);
     set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, freq_hz, status);
     TIMER_START
     oskar_evaluate_array_pattern_hierarchical(&pattern, wavenumber, station,

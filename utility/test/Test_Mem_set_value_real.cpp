@@ -39,7 +39,7 @@ TEST(Mem, set_value_real_double)
     int n = 100, status = 0;
     oskar_Mem mem;
     oskar_mem_init(&mem, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n, 1, &status);
-    oskar_mem_set_value_real(&mem, 4.5, &status);
+    oskar_mem_set_value_real(&mem, 4.5, 0, 0, &status);
     double* v = oskar_mem_double(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
@@ -57,7 +57,7 @@ TEST(Mem, set_value_real_double_complex)
     oskar_Mem mem, mem2;
     oskar_mem_init(&mem, OSKAR_DOUBLE_COMPLEX,
             OSKAR_LOCATION_GPU, n, 1, &status);
-    oskar_mem_set_value_real(&mem, 6.5, &status);
+    oskar_mem_set_value_real(&mem, 6.5, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_init_copy(&mem2, &mem, OSKAR_LOCATION_CPU, &status);
@@ -79,7 +79,7 @@ TEST(Mem, set_value_real_double_complex_matrix)
     oskar_Mem mem, mem2;
     oskar_mem_init(&mem, OSKAR_DOUBLE_COMPLEX_MATRIX,
             OSKAR_LOCATION_GPU, n, 1, &status);
-    oskar_mem_set_value_real(&mem, 6.5, &status);
+    oskar_mem_set_value_real(&mem, 6.5, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_init_copy(&mem2, &mem, OSKAR_LOCATION_CPU, &status);
@@ -106,7 +106,7 @@ TEST(Mem, set_value_real_single)
     int n = 100, status = 0;
     oskar_Mem mem;
     oskar_mem_init(&mem, OSKAR_SINGLE, OSKAR_LOCATION_CPU, n, 1, &status);
-    oskar_mem_set_value_real(&mem, 4.5, &status);
+    oskar_mem_set_value_real(&mem, 4.5, 0, 0, &status);
     float* v = oskar_mem_float(&mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
@@ -124,7 +124,7 @@ TEST(Mem, set_value_real_single_complex)
     oskar_Mem mem, mem2;
     oskar_mem_init(&mem, OSKAR_SINGLE_COMPLEX,
             OSKAR_LOCATION_GPU, n, 1, &status);
-    oskar_mem_set_value_real(&mem, 6.5, &status);
+    oskar_mem_set_value_real(&mem, 6.5, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_init_copy(&mem2, &mem, OSKAR_LOCATION_CPU, &status);
@@ -146,7 +146,7 @@ TEST(Mem, set_value_real_single_complex_matrix)
     oskar_Mem mem, mem2;
     oskar_mem_init(&mem, OSKAR_SINGLE_COMPLEX_MATRIX,
             OSKAR_LOCATION_GPU, n, 1, &status);
-    oskar_mem_set_value_real(&mem, 6.5, &status);
+    oskar_mem_set_value_real(&mem, 6.5, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_init_copy(&mem2, &mem, OSKAR_LOCATION_CPU, &status);

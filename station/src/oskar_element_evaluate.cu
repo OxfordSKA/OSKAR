@@ -222,7 +222,7 @@ void oskar_element_evaluate(const oskar_Element* model,
 
     /* Check if element type is isotropic. */
     if (model->element_type == OSKAR_ELEMENT_TYPE_ISOTROPIC)
-        oskar_mem_set_value_real(output, 1.0, status);
+        oskar_mem_set_value_real(output, 1.0, 0, 0, status);
 
     /* Evaluate polarised response if output array is matrix type. */
     if (oskar_mem_is_matrix(output))

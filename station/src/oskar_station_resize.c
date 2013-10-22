@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-void oskar_station_resize(oskar_Station* station, int n_elements,
+void oskar_station_resize(oskar_Station* station, int num_elements,
         int* status)
 {
     /* Check all inputs. */
@@ -46,26 +46,44 @@ void oskar_station_resize(oskar_Station* station, int n_elements,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Set the new number of elements. */
-    station->num_elements = n_elements;
+    /* Resize arrays in the model. */
+    oskar_mem_realloc(&station->x_signal, num_elements, status);
+    oskar_mem_realloc(&station->y_signal, num_elements, status);
+    oskar_mem_realloc(&station->z_signal, num_elements, status);
+    oskar_mem_realloc(&station->x_weights, num_elements, status);
+    oskar_mem_realloc(&station->y_weights, num_elements, status);
+    oskar_mem_realloc(&station->z_weights, num_elements, status);
+    oskar_mem_realloc(&station->weight, num_elements, status);
+    oskar_mem_realloc(&station->gain, num_elements, status);
+    oskar_mem_realloc(&station->gain_error, num_elements, status);
+    oskar_mem_realloc(&station->phase_offset, num_elements, status);
+    oskar_mem_realloc(&station->phase_error, num_elements, status);
+    oskar_mem_realloc(&station->cos_orientation_x, num_elements, status);
+    oskar_mem_realloc(&station->sin_orientation_x, num_elements, status);
+    oskar_mem_realloc(&station->cos_orientation_y, num_elements, status);
+    oskar_mem_realloc(&station->sin_orientation_y, num_elements, status);
+    oskar_mem_realloc(&station->element_type, num_elements, status);
 
-    /* Resize the model data. */
-    oskar_mem_realloc(&station->x_signal, n_elements, status);
-    oskar_mem_realloc(&station->y_signal, n_elements, status);
-    oskar_mem_realloc(&station->z_signal, n_elements, status);
-    oskar_mem_realloc(&station->x_weights, n_elements, status);
-    oskar_mem_realloc(&station->y_weights, n_elements, status);
-    oskar_mem_realloc(&station->z_weights, n_elements, status);
-    oskar_mem_realloc(&station->weight, n_elements, status);
-    oskar_mem_realloc(&station->gain, n_elements, status);
-    oskar_mem_realloc(&station->gain_error, n_elements, status);
-    oskar_mem_realloc(&station->phase_offset, n_elements, status);
-    oskar_mem_realloc(&station->phase_error, n_elements, status);
-    oskar_mem_realloc(&station->cos_orientation_x, n_elements, status);
-    oskar_mem_realloc(&station->sin_orientation_x, n_elements, status);
-    oskar_mem_realloc(&station->cos_orientation_y, n_elements, status);
-    oskar_mem_realloc(&station->sin_orientation_y, n_elements, status);
-    oskar_mem_realloc(&station->element_type, n_elements, status);
+    /* Initialise any new elements with default values. */
+    if (num_elements > station->num_elements)
+    {
+        int offset, num_new;
+        offset = station->num_elements;
+        num_new = num_elements - offset;
+
+        /* Must set default element weight, gain and orientation. */
+        oskar_mem_set_value_real(&station->gain, 1.0,
+                offset, num_new, status);
+        oskar_mem_set_value_real(&station->sin_orientation_x, 1.0,
+                offset, num_new, status);
+        oskar_mem_set_value_real(&station->cos_orientation_y, 1.0,
+                offset, num_new, status);
+        oskar_mem_set_value_real(&station->weight, 1.0,
+                offset, num_new, status);
+    }
+
+    /* Set the new number of elements. */
+    station->num_elements = num_elements;
 }
 
 #ifdef __cplusplus

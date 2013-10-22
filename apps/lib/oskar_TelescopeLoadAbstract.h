@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ABSTRACT_TELESCOPE_FILE_LOADER_H_
-#define OSKAR_ABSTRACT_TELESCOPE_FILE_LOADER_H_
+#ifndef OSKAR_TELESCOPE_LOAD_ABSTRACT_H_
+#define OSKAR_TELESCOPE_LOAD_ABSTRACT_H_
 
 /**
- * @file oskar_AbstractTelescopeFileLoader.h
+ * @file oskar_TelescopeLoadAbstract.h
  */
 
 #include <oskar_global.h>
@@ -40,12 +40,12 @@
 class QDir;
 #include <QtCore/QHash>
 
-class OSKAR_APPS_EXPORT oskar_AbstractTelescopeFileLoader
+class OSKAR_APPS_EXPORT oskar_TelescopeLoadAbstract
 {
 public:
-    oskar_AbstractTelescopeFileLoader() {}
+    oskar_TelescopeLoadAbstract() {}
 
-    virtual ~oskar_AbstractTelescopeFileLoader() {}
+    virtual ~oskar_TelescopeLoadAbstract() {}
 
     /**
      * @brief
@@ -87,4 +87,4 @@ public:
             int* status) = 0;
 };
 
-#endif /* OSKAR_ABSTRACT_TELESCOPE_FILE_LOADER_H_ */
+#endif /* OSKAR_TELESCOPE_LOAD_ABSTRACT_H_ */

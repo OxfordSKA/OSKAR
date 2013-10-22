@@ -42,7 +42,7 @@
 extern "C" {
 #endif
 
-void oskar_telescope_load_station_coords(oskar_Telescope* telescope,
+void oskar_telescope_load_station_coords_horizon(oskar_Telescope* telescope,
         const char* filename, double longitude, double latitude,
         double altitude, int* status)
 {
@@ -102,11 +102,7 @@ void oskar_telescope_load_station_coords(oskar_Telescope* telescope,
         if (telescope->num_stations <= n)
         {
             oskar_telescope_resize(telescope, n + 1, status);
-            if (*status)
-            {
-                fclose(file);
-                return;
-            }
+            if (*status) break;
         }
 
         /* Convert horizon plane to offset geocentric cartesian coordinates. */
@@ -116,11 +112,7 @@ void oskar_telescope_load_station_coords(oskar_Telescope* telescope,
         /* Store the offset geocentric and horizon plane coordinates. */
         oskar_telescope_set_station_coords(telescope, n, x, y, z,
                 par[0], par[1], par[2], status);
-        if (*status)
-        {
-            fclose(file);
-            return;
-        }
+        if (*status) break;
 
         /* Convert to ECEF, then to station longitude, latitude, altitude. */
         oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,

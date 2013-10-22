@@ -45,7 +45,7 @@ void oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar, int* status)
     }
 
     /* Set the value. */
-    oskar_mem_set_value_real(&jones->data, scalar, status);
+    oskar_mem_set_value_real(&jones->data, scalar, 0, 0, status);
 }
 
 #ifdef __cplusplus

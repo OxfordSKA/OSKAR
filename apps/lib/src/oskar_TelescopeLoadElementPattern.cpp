@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_ElementPatternLoader.h"
+#include "apps/lib/oskar_TelescopeLoadElementPattern.h"
 #include <oskar_station.h>
 #include <oskar_log.h>
 
@@ -34,21 +34,21 @@
 #include <QtCore/QString>
 #include <QtCore/QHash>
 
-const QString oskar_ElementPatternLoader::element_x_cst_file = "element_pattern_x_cst.txt";
-const QString oskar_ElementPatternLoader::element_y_cst_file = "element_pattern_y_cst.txt";
+const QString oskar_TelescopeLoadElementPattern::element_x_cst_file = "element_pattern_x_cst.txt";
+const QString oskar_TelescopeLoadElementPattern::element_y_cst_file = "element_pattern_y_cst.txt";
 
-oskar_ElementPatternLoader::oskar_ElementPatternLoader(
+oskar_TelescopeLoadElementPattern::oskar_TelescopeLoadElementPattern(
         const oskar_Settings* settings, oskar_Log* log)
 {
     settings_ = settings;
     log_ = log;
 }
 
-oskar_ElementPatternLoader::~oskar_ElementPatternLoader()
+oskar_TelescopeLoadElementPattern::~oskar_TelescopeLoadElementPattern()
 {
 }
 
-void oskar_ElementPatternLoader::load(oskar_Telescope* telescope,
+void oskar_TelescopeLoadElementPattern::load(oskar_Telescope* telescope,
         const QDir& cwd, int num_subdirs, QHash<QString, QString>& filemap,
         int* status)
 {
@@ -67,7 +67,7 @@ void oskar_ElementPatternLoader::load(oskar_Telescope* telescope,
     }
 }
 
-void oskar_ElementPatternLoader::load(oskar_Station* station,
+void oskar_TelescopeLoadElementPattern::load(oskar_Station* station,
         const QDir& cwd, int num_subdirs, int /*depth*/,
         QHash<QString, QString>& filemap, int* status)
 {
@@ -81,7 +81,7 @@ void oskar_ElementPatternLoader::load(oskar_Station* station,
     }
 }
 
-void oskar_ElementPatternLoader::load_element_patterns(oskar_Log* log,
+void oskar_TelescopeLoadElementPattern::load_element_patterns(oskar_Log* log,
         const oskar_SettingsTelescope* settings, oskar_Station* station,
         const QHash<QString, QString>& filemap, int* status)
 {
@@ -140,7 +140,7 @@ void oskar_ElementPatternLoader::load_element_patterns(oskar_Log* log,
     }
 }
 
-void oskar_ElementPatternLoader::update_map(QHash<QString, QString>& files,
+void oskar_TelescopeLoadElementPattern::update_map(QHash<QString, QString>& files,
         const QDir& cwd)
 {
     // Update the dictionary of element files for the current directory.

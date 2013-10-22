@@ -59,11 +59,11 @@ TEST(element_weights_errors, test_evaluate)
             num_elements, 1, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    oskar_mem_set_value_real(&d_gain, element_gain, &error);
-    oskar_mem_set_value_real(&d_gain_error, element_gain_error, &error);
-    oskar_mem_set_value_real(&d_phase, element_phase, &error);
-    oskar_mem_set_value_real(&d_phase_error, element_phase_error, &error);
-    oskar_mem_set_value_real(&d_errors, 0.0, &error);
+    oskar_mem_set_value_real(&d_gain, element_gain, 0, 0, &error);
+    oskar_mem_set_value_real(&d_gain_error, element_gain_error, 0, 0, &error);
+    oskar_mem_set_value_real(&d_phase, element_phase, 0, 0, &error);
+    oskar_mem_set_value_real(&d_phase_error, element_phase_error, 0, 0, &error);
+    oskar_mem_set_value_real(&d_errors, 0.0, 0, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     oskar_RandomState* random_state = oskar_random_state_create(num_elements,
@@ -128,10 +128,10 @@ TEST(element_weights_errors, test_apply)
             num_elements, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    oskar_mem_set_value_real(&d_gain, gain, &status);
-    oskar_mem_set_value_real(&d_gain_error, gain_error, &status);
-    oskar_mem_set_value_real(&d_phase, phase, &status);
-    oskar_mem_set_value_real(&d_phase_error, phase_error, &status);
+    oskar_mem_set_value_real(&d_gain, gain, 0, 0, &status);
+    oskar_mem_set_value_real(&d_gain_error, gain_error, 0, 0, &status);
+    oskar_mem_set_value_real(&d_phase, phase, 0, 0, &status);
+    oskar_mem_set_value_real(&d_phase_error, phase_error, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     double2* h_weights_ = oskar_mem_double2(&h_weights, &status);
@@ -196,10 +196,10 @@ TEST(element_weights_errors, test_reinit)
             num_elements, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    oskar_mem_set_value_real(&d_gain, gain, &status);
-    oskar_mem_set_value_real(&d_gain_error, gain_error, &status);
-    oskar_mem_set_value_real(&d_phase, phase, &status);
-    oskar_mem_set_value_real(&d_phase_error, phase_error, &status);
+    oskar_mem_set_value_real(&d_gain, gain, 0, 0, &status);
+    oskar_mem_set_value_real(&d_gain_error, gain_error, 0, 0, &status);
+    oskar_mem_set_value_real(&d_phase, phase, 0, 0, &status);
+    oskar_mem_set_value_real(&d_phase_error, phase_error, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     int num_channels = 2;

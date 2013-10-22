@@ -27,10 +27,9 @@
  */
 
 #include "apps/lib/oskar_telescope_load.h"
-#include "apps/lib/oskar_AbstractTelescopeFileLoader.h"
-#include "apps/lib/oskar_ConfigFileLoader.h"
-#include "apps/lib/oskar_ElementPatternLoader.h"
-#include "apps/lib/oskar_TelescopeModelLoadNoise.h"
+#include "apps/lib/oskar_TelescopeLoadConfig.h"
+#include "apps/lib/oskar_TelescopeLoadElementPattern.h"
+#include "apps/lib/oskar_TelescopeLoadNoise.h"
 #include <oskar_log.h>
 #include <oskar_get_error_string.h>
 
@@ -45,7 +44,7 @@
 static void load_directories(oskar_Telescope* telescope,
         const oskar_Settings* settings, const QDir& cwd,
         oskar_Station* station, int depth,
-        const QList<oskar_AbstractTelescopeFileLoader*>& loaders,
+        const QList<oskar_TelescopeLoadAbstract*>& loaders,
         QHash<QString, QString> filemap, int* status);
 
 
@@ -79,10 +78,10 @@ void oskar_telescope_load(oskar_Telescope* telescope,
     }
 
     // Create the loaders.
-    QList<oskar_AbstractTelescopeFileLoader*> loaders;
-    loaders.push_back(new oskar_ConfigFileLoader(settings)); // Must be first!
-    loaders.push_back(new oskar_ElementPatternLoader(settings, log));
-    loaders.push_back(new oskar_TelescopeModelLoadNoise(settings));
+    QList<oskar_TelescopeLoadAbstract*> loaders;
+    loaders.push_back(new oskar_TelescopeLoadConfig(settings)); // Must be first!
+    loaders.push_back(new oskar_TelescopeLoadElementPattern(settings, log));
+    loaders.push_back(new oskar_TelescopeLoadNoise(settings));
 
     // Load everything recursively from the telescope directory tree.
     QHash<QString, QString> filemap;
@@ -106,7 +105,7 @@ void oskar_telescope_load(oskar_Telescope* telescope,
 static void load_directories(oskar_Telescope* telescope,
         const oskar_Settings* settings, const QDir& cwd,
         oskar_Station* station, int depth,
-        const QList<oskar_AbstractTelescopeFileLoader*>& loaders,
+        const QList<oskar_TelescopeLoadAbstract*>& loaders,
         QHash<QString, QString> filemap, int* status)
 {
     // Check if safe to proceed.

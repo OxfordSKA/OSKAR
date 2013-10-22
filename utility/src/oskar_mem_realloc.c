@@ -65,12 +65,16 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
     /* Get size of new and old memory blocks. */
     element_size = oskar_mem_element_size(mem->type);
     if (element_size == 0)
+    {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
     new_size = num_elements * element_size;
     old_size = mem->num_elements * element_size;
 
-    /* Check if safe to proceed. */
-    if (*status) return;
+    /* Do nothing if new size and old size are the same. */
+    if (new_size == old_size)
+        return;
 
     /* Check memory location. */
     if (mem->location == OSKAR_LOCATION_CPU)
@@ -78,7 +82,7 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         /* Reallocate the memory. */
         void* mem_new = NULL;
         mem_new = realloc(mem->data, new_size);
-        if (mem_new == NULL)
+        if (!mem_new)
         {
             *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
             return;
@@ -98,12 +102,19 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         /* Allocate and initialise a new block of memory. */
         size_t copy_size;
         void* mem_new = NULL;
-        cudaMalloc(&mem_new, new_size);
-        /*cudaMemset(mem_new, 0, new_size);*/ /* Shouldn't be needed. */
+        *status = cudaMalloc(&mem_new, new_size);
+        if (*status) return;
+        if (!mem_new)
+        {
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            return;
+        }
 
         /* Copy contents of old block to new block. */
         copy_size = (old_size > new_size) ? new_size : old_size;
-        cudaMemcpy(mem_new, mem->data, copy_size, cudaMemcpyDeviceToDevice);
+        *status = cudaMemcpy(mem_new, mem->data, copy_size,
+                cudaMemcpyDeviceToDevice);
+        if (*status) return;
 
         /* Free the old block. */
         cudaFree(mem->data);

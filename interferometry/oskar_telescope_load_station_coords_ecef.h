@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_STATION_COORDS_H_
-#define OSKAR_TELESCOPE_LOAD_STATION_COORDS_H_
+#ifndef OSKAR_TELESCOPE_LOAD_STATION_COORDS_ECEF_H_
+#define OSKAR_TELESCOPE_LOAD_STATION_COORDS_ECEF_H_
 
 /**
- * @file oskar_telescope_load_station_coords.h
+ * @file oskar_telescope_load_station_coords_ecef.h
  */
 
 #include <oskar_global.h>
@@ -42,21 +42,12 @@ extern "C" {
 /**
  * @brief
  * Loads a telescope coordinate file that specifies the station locations
- * with respect to the local tangent plane.
+ * with respect to the centre of the Earth.
  *
  * @details
- * A telescope station coordinate file is an ASCII text file containing two or
+ * A telescope station coordinate file is an ASCII text file containing
  * three columns of comma- or space-separated values that represent the station
- * (x,y,z) coordinates in the local tangent plane. Each line corresponds to the
- * position of one station, and the z coordinate is assumed to be zero if
- * omitted.
- *
- * The coordinate system (ENU, or East-North-Up) is aligned so that the x-axis
- * points to the local geographic East, the y-axis to local geographic North,
- * and the z-axis to the local zenith. The origin is the tangent point with the
- * Earth's ellipsoid.
- *
- * The geodetic longitude and latitude of the origin must also be supplied.
+ * (x,y,z) coordinates in the Earth-centred-Earth-fixed frame (ECEF).
  *
  * @param[in,out] telescope  Telescope model structure to be populated.
  * @param[in] filename       File name path to a telescope coordinate file.
@@ -66,7 +57,7 @@ extern "C" {
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_telescope_load_station_coords(oskar_Telescope* telescope,
+void oskar_telescope_load_station_coords_ecef(oskar_Telescope* telescope,
         const char* filename, double longitude, double latitude,
         double altitude, int* status);
 
@@ -74,4 +65,4 @@ void oskar_telescope_load_station_coords(oskar_Telescope* telescope,
 }
 #endif
 
-#endif /* OSKAR_TELESCOPE_LOAD_STATION_COORDS_H_ */
+#endif /* OSKAR_TELESCOPE_LOAD_STATION_COORDS_ECEF_H_ */

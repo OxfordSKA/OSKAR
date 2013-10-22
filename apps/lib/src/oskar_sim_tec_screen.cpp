@@ -111,7 +111,7 @@ int oskar_sim_tec_screen(oskar_Image* TEC_screen, oskar_Settings* settings,
     // any stations)
     oskar_Mem pp_rel_path;
     oskar_mem_init(&pp_rel_path, type, loc, num_pixels, owner, &status);
-    oskar_mem_set_value_real(&pp_rel_path, 1.0, &status);
+    oskar_mem_set_value_real(&pp_rel_path, 1.0, 0, 0, &status);
 
     // Initialise return values
     oskar_image_init(TEC_screen, type, loc, &status);

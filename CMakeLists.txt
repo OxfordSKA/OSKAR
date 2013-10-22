@@ -9,6 +9,14 @@ if (APPLE AND NOT CMAKE_CXX_COMPILER)
     set(CMAKE_C_COMPILER gcc)
 endif()
 
+if (DEFINED ENV{CMAKE_CXX_COMPILER})
+    set(CMAKE_CXX_COMPILER $ENV{CMAKE_CXX_COMPILER})
+endif()
+
+if (DEFINED ENV{CMAKE_C_COMPILER})
+    set(CMAKE_C_COMPILER $ENV{CMAKE_C_COMPILER})
+endif()
+
 # === Set the project name and specify the required CMAKE version.
 project(OSKAR CXX C)
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)

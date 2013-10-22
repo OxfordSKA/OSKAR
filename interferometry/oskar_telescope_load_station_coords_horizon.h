@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2011-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_SET_VALUE_REAL_H_
-#define OSKAR_MEM_SET_VALUE_REAL_H_
+#ifndef OSKAR_TELESCOPE_LOAD_STATION_COORDS_HORIZON_H_
+#define OSKAR_TELESCOPE_LOAD_STATION_COORDS_HORIZON_H_
 
 /**
- * @file oskar_mem_set_value_real.h
+ * @file oskar_telescope_load_station_coords_horizon.h
  */
 
 #include <oskar_global.h>
@@ -41,31 +41,37 @@ extern "C" {
 
 /**
  * @brief
- * Sets the value of all elements in a vector.
+ * Loads a telescope coordinate file that specifies the station locations
+ * with respect to the local tangent plane.
  *
  * @details
- * This function sets all the values in a block of memory to the same, real,
- * value. For complex types, the imaginary components are set to zero, and
- * for matrix types, the off-diagonal elements are set to zero.
+ * A telescope station coordinate file is an ASCII text file containing two or
+ * three columns of comma- or space-separated values that represent the station
+ * (x,y,z) coordinates in the local tangent plane. Each line corresponds to the
+ * position of one station, and the z coordinate is assumed to be zero if
+ * omitted.
  *
- * Note that a value of zero for both the \p offset and \p length parameters
- * will cause the entire array to be set.
+ * The coordinate system (ENU, or East-North-Up) is aligned so that the x-axis
+ * points to the local geographic East, the y-axis to local geographic North,
+ * and the z-axis to the local zenith. The origin is the tangent point with the
+ * Earth's ellipsoid.
  *
- * Integer types will cause an error code to be returned.
+ * The geodetic longitude and latitude of the origin must also be supplied.
  *
- * @param[in] mem Pointer to the block of memory to update.
- * @param[in] val All memory elements will be set to this value.
- * @param[in] offset Array index offset at which to start.
- * @param[in] length Number of array elements to set, starting at offset.
- *                   Note that 0 for both \p offset and \p length means all.
- * @param[in,out]  status   Status return code.
+ * @param[in,out] telescope  Telescope model structure to be populated.
+ * @param[in] filename       File name path to a telescope coordinate file.
+ * @param[in] longitude      Telescope centre longitude, in radians.
+ * @param[in] latitude       Telescope centre latitude, in radians.
+ * @param[in] altitude       Telescope centre altitude, in metres.
+ * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_set_value_real(oskar_Mem* mem, double val,
-        size_t offset, size_t length, int* status);
+void oskar_telescope_load_station_coords_horizon(oskar_Telescope* telescope,
+        const char* filename, double longitude, double latitude,
+        double altitude, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_SET_VALUE_REAL_H_ */
+#endif /* OSKAR_TELESCOPE_LOAD_STATION_COORDS_HORIZON_H_ */

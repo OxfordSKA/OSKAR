@@ -73,7 +73,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int err = OSKAR_SUCCESS;
     oskar_Telescope* telescope = oskar_telescope_create(OSKAR_DOUBLE,
             OSKAR_LOCATION_CPU, 0, &err);
-    oskar_telescope_load_station_coords(telescope, filename,
+    oskar_telescope_load_station_coords_horizon(telescope, filename,
             lon, lat, alt, &err);
     if (err)
     {

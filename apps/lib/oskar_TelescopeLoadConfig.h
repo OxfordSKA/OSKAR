@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONFIG_FILE_LOADER_H_
-#define OSKAR_CONFIG_FILE_LOADER_H_
+#ifndef OSKAR_TELESCOPE_LOAD_CONFIG_H_
+#define OSKAR_TELESCOPE_LOAD_CONFIG_H_
 
 /**
- * @file oskar_ConfigFileLoader.h
+ * @file oskar_TelescopeLoadConfig.h
  */
 
 #include <oskar_global.h>
-#include "apps/lib/oskar_AbstractTelescopeFileLoader.h"
+#include "apps/lib/oskar_TelescopeLoadAbstract.h"
 #include <oskar_Settings.h>
 
 #include <QtCore/QString>
@@ -42,12 +42,13 @@
 
 class QDir;
 
-class OSKAR_APPS_EXPORT oskar_ConfigFileLoader : public oskar_AbstractTelescopeFileLoader
+class OSKAR_APPS_EXPORT oskar_TelescopeLoadConfig
+: public oskar_TelescopeLoadAbstract
 {
 public:
-    oskar_ConfigFileLoader(const oskar_Settings* settings);
+    oskar_TelescopeLoadConfig(const oskar_Settings* settings);
 
-    virtual ~oskar_ConfigFileLoader();
+    virtual ~oskar_TelescopeLoadConfig();
 
     /**
      * @brief
@@ -94,4 +95,4 @@ private:
     const oskar_Settings* settings_;
 };
 
-#endif /* OSKAR_CONFIG_FILE_LOADER_H_ */
+#endif /* OSKAR_TELESCOPE_LOAD_CONFIG_H_ */

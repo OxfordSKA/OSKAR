@@ -40,8 +40,8 @@ TEST(Mem, different_none)
     oskar_mem_init(&one, OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, 1, &status);
     oskar_mem_init(&two, OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(&one, 4.4, &status);
-    oskar_mem_set_value_real(&two, 4.4, &status);
+    oskar_mem_set_value_real(&one, 4.4, 0, 0, &status);
+    oskar_mem_set_value_real(&two, 4.4, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     ASSERT_EQ((int)OSKAR_FALSE, oskar_mem_different(&one, &two, 0, &status));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -59,8 +59,8 @@ TEST(Mem, different_all)
     oskar_mem_init(&one, OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, 1, &status);
     oskar_mem_init(&two, OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(&one, 4.4, &status);
-    oskar_mem_set_value_real(&two, 4.2, &status);
+    oskar_mem_set_value_real(&one, 4.4, 0, 0, &status);
+    oskar_mem_set_value_real(&two, 4.2, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     ASSERT_EQ((int)OSKAR_TRUE, oskar_mem_different(&one, &two, 0, &status));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -78,8 +78,8 @@ TEST(Mem, different_by_one)
     oskar_mem_init(&one, OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, 1, &status);
     oskar_mem_init(&two, OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(&one, 1.0, &status);
-    oskar_mem_set_value_real(&two, 1.0, &status);
+    oskar_mem_set_value_real(&one, 1.0, 0, 0, &status);
+    oskar_mem_set_value_real(&two, 1.0, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_float(&two, &status)[4] = 1.1;
     ASSERT_EQ((int)OSKAR_TRUE, oskar_mem_different(&one, &two, 0, &status));
@@ -99,8 +99,8 @@ TEST(Mem, different_up_to_a_point)
     oskar_mem_init(&one, OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, 1, &status);
     oskar_mem_init(&two, OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, 1, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_set_value_real(&one, 1.0, &status);
-    oskar_mem_set_value_real(&two, 1.0, &status);
+    oskar_mem_set_value_real(&one, 1.0, 0, 0, &status);
+    oskar_mem_set_value_real(&two, 1.0, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_float(&two, &status)[4] = 1.1;
     ASSERT_EQ((int)OSKAR_FALSE, oskar_mem_different(&one, &two, 4, &status));

@@ -26,27 +26,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_ConfigFileLoader.h"
-#include "interferometry/oskar_telescope_load_station_coords.h"
-#include <oskar_station.h>
+#include "apps/lib/oskar_TelescopeLoadConfig.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QString>
 #include <QtCore/QHash>
 
-const QString oskar_ConfigFileLoader::config_file = "config.txt";
-const QString oskar_ConfigFileLoader::layout_file = "layout.txt";
+const QString oskar_TelescopeLoadConfig::config_file = "config.txt";
+const QString oskar_TelescopeLoadConfig::layout_file = "layout.txt";
 
-oskar_ConfigFileLoader::oskar_ConfigFileLoader(const oskar_Settings* settings)
+oskar_TelescopeLoadConfig::oskar_TelescopeLoadConfig(const oskar_Settings* settings)
 {
     settings_ = settings;
 }
 
-oskar_ConfigFileLoader::~oskar_ConfigFileLoader()
+oskar_TelescopeLoadConfig::~oskar_TelescopeLoadConfig()
 {
 }
 
-void oskar_ConfigFileLoader::load(oskar_Telescope* telescope,
+void oskar_TelescopeLoadConfig::load(oskar_Telescope* telescope,
         const QDir& cwd, int num_subdirs, QHash<QString, QString>& /*filemap*/,
         int* status)
 {
@@ -60,7 +58,7 @@ void oskar_ConfigFileLoader::load(oskar_Telescope* telescope,
         *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;
 
     // Load the interferometer layout.
-    oskar_telescope_load_station_coords(telescope,
+    oskar_telescope_load_station_coords_horizon(telescope,
             cwd.filePath(file).toLatin1(), settings_->telescope.longitude_rad,
             settings_->telescope.latitude_rad,
             settings_->telescope.altitude_m, status);
@@ -87,7 +85,7 @@ void oskar_ConfigFileLoader::load(oskar_Telescope* telescope,
     }
 }
 
-void oskar_ConfigFileLoader::load(oskar_Station* station, const QDir& cwd,
+void oskar_TelescopeLoadConfig::load(oskar_Station* station, const QDir& cwd,
         int num_subdirs, int /*depth*/, QHash<QString, QString>& /*filemap*/,
         int* status)
 {

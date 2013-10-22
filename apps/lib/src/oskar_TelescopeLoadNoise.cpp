@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_TelescopeModelLoadNoise.h"
+#include "apps/lib/oskar_TelescopeLoadNoise.h"
 
 #include <QtCore/QString>
 #include <QtCore/QHash>
@@ -37,9 +37,9 @@
 #include <cassert>
 #include <cmath>
 
-oskar_TelescopeModelLoadNoise::oskar_TelescopeModelLoadNoise(
+oskar_TelescopeLoadNoise::oskar_TelescopeLoadNoise(
         const oskar_Settings* settings)
-: oskar_AbstractTelescopeFileLoader(), dataType_(0)
+: oskar_TelescopeLoadAbstract(), dataType_(0)
 {
     files_[FREQ] = "noise_frequencies.txt";
     files_[RMS]  = "rms.txt";
@@ -50,7 +50,7 @@ oskar_TelescopeModelLoadNoise::oskar_TelescopeModelLoadNoise(
     settings_ = settings;
 }
 
-oskar_TelescopeModelLoadNoise::~oskar_TelescopeModelLoadNoise()
+oskar_TelescopeLoadNoise::~oskar_TelescopeLoadNoise()
 {
     int status = OSKAR_SUCCESS;
     oskar_mem_free(&freqs_, &status);
@@ -62,7 +62,7 @@ oskar_TelescopeModelLoadNoise::~oskar_TelescopeModelLoadNoise()
 // Depth = 0
 // - Set up frequency data as this is the same for all stations
 //   and if defined by files these have to be at depth 0.
-void oskar_TelescopeModelLoadNoise::load(oskar_Telescope* telescope,
+void oskar_TelescopeLoadNoise::load(oskar_Telescope* telescope,
         const QDir& cwd, int num_subdirs, QHash<QString, QString>& filemap,
         int* status)
 {
@@ -94,7 +94,7 @@ void oskar_TelescopeModelLoadNoise::load(oskar_Telescope* telescope,
 
 
 // Depth > 0
-void oskar_TelescopeModelLoadNoise::load(oskar_Station* station,
+void oskar_TelescopeLoadNoise::load(oskar_Station* station,
         const QDir& cwd, int /*num_subdirs*/, int depth,
         QHash<QString, QString>& filemap, int* status)
 {
@@ -125,7 +125,7 @@ void oskar_TelescopeModelLoadNoise::load(oskar_Station* station,
 
 // -- private functions -------------------------------------------------------
 
-void oskar_TelescopeModelLoadNoise::updateFileMap_(
+void oskar_TelescopeLoadNoise::updateFileMap_(
         QHash<QString, QString>& filemap, const QDir& cwd)
 {
     foreach(QString file, files_.values()) {
@@ -134,7 +134,7 @@ void oskar_TelescopeModelLoadNoise::updateFileMap_(
     }
 }
 
-void oskar_TelescopeModelLoadNoise::getNoiseFreqs_(oskar_Mem* freqs,
+void oskar_TelescopeLoadNoise::getNoiseFreqs_(oskar_Mem* freqs,
         const QString& filepath, int* status)
 {
     if (*status) return;
@@ -204,7 +204,7 @@ void oskar_TelescopeModelLoadNoise::getNoiseFreqs_(oskar_Mem* freqs,
     }
 }
 
-void oskar_TelescopeModelLoadNoise::setNoiseRMS_(
+void oskar_TelescopeLoadNoise::setNoiseRMS_(
         oskar_SystemNoiseModel* noise_model, const QHash<QString,
         QString>& filemap, int* status)
 {
@@ -249,7 +249,7 @@ void oskar_TelescopeModelLoadNoise::setNoiseRMS_(
 
 
 // Load noise files from the telescope model using default noise spec. priority.
-void oskar_TelescopeModelLoadNoise::noiseSpecTelescopeModel_(oskar_Mem* noise_rms,
+void oskar_TelescopeLoadNoise::noiseSpecTelescopeModel_(oskar_Mem* noise_rms,
         int num_freqs, double bandwidth_hz, double integration_time_sec,
         const QHash<QString, QString>& filemap, int* status)
 {
@@ -306,7 +306,7 @@ void oskar_TelescopeModelLoadNoise::noiseSpecTelescopeModel_(oskar_Mem* noise_rm
     }
 }
 
-void oskar_TelescopeModelLoadNoise::noiseSpecRMS_(oskar_Mem* rms, int num_freqs,
+void oskar_TelescopeLoadNoise::noiseSpecRMS_(oskar_Mem* rms, int num_freqs,
         const QHash<QString, QString>& filemap, int* status)
 {
     if (*status) return;
@@ -335,7 +335,7 @@ void oskar_TelescopeModelLoadNoise::noiseSpecRMS_(oskar_Mem* rms, int num_freqs,
 }
 
 
-void oskar_TelescopeModelLoadNoise::noiseSpecSensitivity_(oskar_Mem* rms,
+void oskar_TelescopeLoadNoise::noiseSpecSensitivity_(oskar_Mem* rms,
         int num_freqs, double bandwidth_hz, double integration_time_sec,
         QHash<QString, QString> filemap, int* status)
 {
@@ -368,7 +368,7 @@ void oskar_TelescopeModelLoadNoise::noiseSpecSensitivity_(oskar_Mem* rms,
     oskar_mem_free(&sens, status);
 }
 
-void oskar_TelescopeModelLoadNoise::noiseSpecTsys_(oskar_Mem* rms, int num_freqs,
+void oskar_TelescopeLoadNoise::noiseSpecTsys_(oskar_Mem* rms, int num_freqs,
         double bandwidth_hz, double integration_time_sec,
         QHash<QString, QString> filemap, int* status)
 {
@@ -452,7 +452,7 @@ void oskar_TelescopeModelLoadNoise::noiseSpecTsys_(oskar_Mem* rms, int num_freqs
     oskar_mem_free(&efficiency, status);
 }
 
-void oskar_TelescopeModelLoadNoise::sensitivity_to_rms_(oskar_Mem* rms,
+void oskar_TelescopeLoadNoise::sensitivity_to_rms_(oskar_Mem* rms,
         const oskar_Mem* sensitivity, int num_freqs, double bandwidth_hz,
         double integration_time_sec, int* status)
 {
@@ -484,7 +484,7 @@ void oskar_TelescopeModelLoadNoise::sensitivity_to_rms_(oskar_Mem* rms,
 }
 
 
-void oskar_TelescopeModelLoadNoise::t_sys_to_rms_(oskar_Mem* rms,
+void oskar_TelescopeLoadNoise::t_sys_to_rms_(oskar_Mem* rms,
         const oskar_Mem* t_sys, const oskar_Mem* area,
         const oskar_Mem* efficiency, int num_freqs, double bandwidth,
         double integration_time, int* status)
@@ -536,7 +536,7 @@ void oskar_TelescopeModelLoadNoise::t_sys_to_rms_(oskar_Mem* rms,
 }
 
 
-void oskar_TelescopeModelLoadNoise::evaluate_range_(oskar_Mem* values,
+void oskar_TelescopeLoadNoise::evaluate_range_(oskar_Mem* values,
         int num_values, double start, double end, int* status)
 {
     /* Check all inputs. */

@@ -85,12 +85,15 @@ void oskar_station_load_config(oskar_Station* station,
                 90., 0.};
         int num_par = sizeof(par) / sizeof(double);
 
-        /* Load element coordinates. */
+        /* Load element data. */
         if (oskar_string_to_array_d(line, num_par, par) < 2) continue;
 
-        /* Ensure enough space in arrays. */
+        /* Ensure the station model is big enough. */
         if (n % 100 == 0)
-            oskar_station_resize(station, n + 100, status);
+        {
+            if (oskar_station_num_elements(station) < n)
+                oskar_station_resize(station, n + 100, status);
+        }
 
         /* Store the data. */
         oskar_station_set_element_coords(station, n,

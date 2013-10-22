@@ -192,7 +192,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             else if (array && oskar_mem_is_matrix(beam))
             {
                 /* Join array pattern with an identity matrix in output beam. */
-                oskar_mem_set_value_real(beam, 1.0, status);
+                oskar_mem_set_value_real(beam, 1.0, 0, 0, status);
                 oskar_mem_element_multiply(0, beam, array, num_points, status);
             }
         }

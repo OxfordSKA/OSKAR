@@ -166,12 +166,12 @@ static void oskar_evaluate_TEC(oskar_WorkJonesZ* work, int num_pp,
     if (settings->num_TID_screens > 1)
         *status = OSKAR_ERR_SETTINGS_IONOSPHERE;
 
-    oskar_mem_set_value_real(&work->total_TEC, 0.0, status);
+    oskar_mem_set_value_real(&work->total_TEC, 0.0, 0, 0, status);
 
     /* Loop over TID screens to evaluate TEC values */
     for (i = 0; i < settings->num_TID_screens; ++i)
     {
-        oskar_mem_set_value_real(&work->screen_TEC, 0.0, status);
+        oskar_mem_set_value_real(&work->screen_TEC, 0.0, 0, 0, status);
 
         /* Evaluate TEC values for the screen */
         oskar_evaluate_TEC_TID(&work->screen_TEC, num_pp, &work->pp_lon,

@@ -638,12 +638,12 @@ TEST(SkyModel, scale_by_spectral_index)
     // Create and fill a sky model.
     oskar_Sky* sky = oskar_sky_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU,
             num_sources, &status);
-    oskar_mem_set_value_real(oskar_sky_I(sky), stokes_I, &status);
-    oskar_mem_set_value_real(oskar_sky_Q(sky), stokes_Q, &status);
-    oskar_mem_set_value_real(oskar_sky_U(sky), stokes_U, &status);
-    oskar_mem_set_value_real(oskar_sky_V(sky), stokes_V, &status);
-    oskar_mem_set_value_real(oskar_sky_reference_freq(sky), freq_ref, &status);
-    oskar_mem_set_value_real(oskar_sky_spectral_index(sky), spix, &status);
+    oskar_mem_set_value_real(oskar_sky_I(sky), stokes_I, 0, 0, &status);
+    oskar_mem_set_value_real(oskar_sky_Q(sky), stokes_Q, 0, 0, &status);
+    oskar_mem_set_value_real(oskar_sky_U(sky), stokes_U, 0, 0, &status);
+    oskar_mem_set_value_real(oskar_sky_V(sky), stokes_V, 0, 0, &status);
+    oskar_mem_set_value_real(oskar_sky_reference_freq(sky), freq_ref, 0, 0, &status);
+    oskar_mem_set_value_real(oskar_sky_spectral_index(sky), spix, 0, 0, &status);
 
     // Copy to GPU.
     oskar_Sky* sky_gpu = oskar_sky_create_copy(sky, OSKAR_LOCATION_GPU,
