@@ -1,5 +1,11 @@
 2013-xx-xx  OSKAR-2.2.2
 
+    * Renamed applications operating on OSKAR format visibiltity files
+      from oskar_visibilities_* to oskar_vis_*.
+
+    * Renambed MATLAB interface functions to OSKAR format visibiltity files 
+      from oskar.visibilties.* to oskar.vis.*  
+
     * Fixed memory ordering in MATLAB OSKAR binary file interface for 
       COMPLEX_MATRIX types.
 
