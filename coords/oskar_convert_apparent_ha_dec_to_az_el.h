@@ -34,7 +34,7 @@
  * @file oskar_convert_apparent_ha_dec_to_az_el.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

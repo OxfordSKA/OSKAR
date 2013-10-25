@@ -33,7 +33,7 @@
  * @file oskar_convert_galactic_to_fk5.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

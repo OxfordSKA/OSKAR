@@ -33,7 +33,7 @@
  * @file oskar_convert_lon_lat_to_tangent_plane_direction.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

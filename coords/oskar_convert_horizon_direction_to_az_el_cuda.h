@@ -34,7 +34,7 @@
  * @file oskar_convert_horizon_direction_to_az_el_cuda.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

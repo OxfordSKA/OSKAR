@@ -33,7 +33,7 @@
  * @file oskar_convert_apparent_ra_dec_to_tangent_plane_direction_cuda.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

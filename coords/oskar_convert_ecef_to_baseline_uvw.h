@@ -33,8 +33,8 @@
  * @file oskar_convert_ecef_to_baseline_uvw.h
  */
 
-#include "oskar_global.h"
-#include "oskar_Mem.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

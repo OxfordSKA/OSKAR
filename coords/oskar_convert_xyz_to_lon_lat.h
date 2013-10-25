@@ -33,7 +33,7 @@
  * @file oskar_convert_xyz_to_lon_lat.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

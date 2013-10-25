@@ -33,8 +33,8 @@
  * @file oskar_convert_apparent_ra_dec_to_tangent_plane_direction.h
  */
 
-#include "oskar_global.h"
-#include "oskar_Mem.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

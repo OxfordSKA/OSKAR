@@ -33,7 +33,7 @@
  * @file oskar_compute_tangent_plane_direction_z_cuda.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

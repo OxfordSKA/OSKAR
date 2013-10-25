@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_station_uvw_to_baseline_uvw.h"
+#include <oskar_convert_station_uvw_to_baseline_uvw.h>
 #include <oskar_convert_station_uvw_to_baseline_uvw_cuda.h>
 #include <oskar_cuda_check_error.h>
 

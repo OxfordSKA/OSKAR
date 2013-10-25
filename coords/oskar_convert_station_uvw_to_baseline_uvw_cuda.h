@@ -33,7 +33,7 @@
  * @file oskar_convert_station_uvw_to_baseline_uvw_cuda.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -85,7 +85,7 @@ void oskar_convert_station_uvw_to_baseline_uvw_cuda_f(float* d_uu, float* d_vv,
  * @param[in]  d_w            The station w-positions.
  */
 OSKAR_EXPORT
-void oskar_convert_station_uvw_to_basaeline_uvw_cuda_d(double* d_uu,
+void oskar_convert_station_uvw_to_baseline_uvw_cuda_d(double* d_uu,
         double* d_vv, double* d_ww, int num_stations, const double* d_u,
         const double* d_v, const double* d_w);
 

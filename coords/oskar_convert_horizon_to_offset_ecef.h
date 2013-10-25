@@ -33,7 +33,7 @@
  * @file oskar_convert_horizon_to_offset_ecef.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

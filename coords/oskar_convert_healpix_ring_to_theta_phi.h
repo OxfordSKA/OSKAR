@@ -33,7 +33,7 @@
  * @file oskar_convert_healpix_ring_to_theta_phi.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -33,7 +33,7 @@
  * @file oskar_convert_geodetic_spherical_to_ecef.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {

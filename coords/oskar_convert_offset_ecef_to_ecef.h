@@ -33,7 +33,7 @@
  * @file oskar_convert_offset_ecef_to_ecef.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
