@@ -28,9 +28,9 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_horizon_plane_to_geocentric_cartesian.h>
+#include <oskar_convert_horizon_to_ecef.h>
 #include <oskar_evaluate_pierce_points.h>
-#include <oskar_geocentric_cartesian_to_geodetic_spherical.h>
+#include <oskar_convert_ecef_to_geodetic_spherical.h>
 
 #include <oskar_mem.h>
 
@@ -74,9 +74,8 @@ TEST(evaluate_pierce_points, test1)
 
     // == Evaluate geo-centric station x,y,z coordinates.
     double st_x, st_y, st_z;
-    oskar_horizon_plane_to_geocentric_cartesian(1,
-            &st_hor_x, &st_hor_y, &st_hor_z, st_lon_rad, st_lat_rad,
-            st_alt_m, &st_x, &st_y, &st_z);
+    oskar_convert_horizon_to_ecef(1, &st_hor_x, &st_hor_y, &st_hor_z,
+            st_lon_rad, st_lat_rad, st_alt_m, &st_x, &st_y, &st_z);
     printf("  lon = %f, lat = %f [station]\n", st_lon_deg, st_lat_deg);
     printf("  az = %f, el = %f [station]\n", az_deg, el_deg);
     printf("  geocentric cartesian: x=%f, y=%f, z=%f\n", st_x, st_y, st_z);
@@ -136,8 +135,7 @@ TEST(evaluate_pierce_points, test1)
     double pp_z = st_z + (diff_vector_ITRF[2] * scale);
 
     double pp_lon, pp_lat, pp_alt;
-    oskar_geocentric_cartesian_to_geodetic_spherical(
-            1, &pp_x, &pp_y, &pp_z,
+    oskar_convert_ecef_to_geodetic_spherical(1, &pp_x, &pp_y, &pp_z,
             &pp_lon, &pp_lat, &pp_alt);
 
     printf("  pierce point: x=%f, y=%f, z=%f\n", pp_x, pp_y, pp_z);
@@ -170,8 +168,7 @@ TEST(evaluate_pierce_points, test2)
 
     // Obtain station ECEF coordinates (geocentric x,y,z coordinates of station)
     double x, y, z;
-    oskar_horizon_plane_to_geocentric_cartesian(1,
-            &st_hor_x, &st_hor_y, &st_hor_z, lon, lat,
+    oskar_convert_horizon_to_ecef(1, &st_hor_x, &st_hor_y, &st_hor_z, lon, lat,
             alt, &x, &y, &z);
 
     // Evaluate horizontal x,y,z of the pierce point.

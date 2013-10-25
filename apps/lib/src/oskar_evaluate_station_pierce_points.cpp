@@ -43,9 +43,9 @@
 #include <oskar_binary_stream_write_metadata.h>
 #include <oskar_binary_stream_write.h>
 #include <oskar_mem_binary_stream_write.h>
-#include <oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h>
+#include <oskar_convert_offset_ecef_to_ecef.h>
 #include <oskar_mjd_to_gast_fast.h>
-#include <oskar_ra_dec_to_hor_lmn.h>
+#include <oskar_convert_apparent_ra_dec_to_horizon_direction.h>
 #include <oskar_evaluate_pierce_points.h>
 
 #include <cstdio>
@@ -188,14 +188,13 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
                 z_offset = (double)((float*)z_)[i];
             }
 
-            oskar_offset_geocentric_cartesian_to_geocentric_cartesian(
-                    1, &x_offset, &y_offset, &z_offset, lon, lat,
-                    alt, &x_ecef, &y_ecef, &z_ecef);
+            oskar_convert_offset_ecef_to_ecef(1, &x_offset, &y_offset,
+                    &z_offset, lon, lat, alt, &x_ecef, &y_ecef, &z_ecef);
             double last = gast + lon;
 
             if (type == OSKAR_DOUBLE)
             {
-                oskar_ra_dec_to_hor_lmn_d(num_sources,
+                oskar_convert_apparent_ra_dec_to_horizon_direction_d(num_sources,
                         oskar_mem_double_const(oskar_sky_ra_const(chunk), &status),
                         oskar_mem_double_const(oskar_sky_dec_const(chunk), &status),
                         last, lat, (double*)hor_x.data, (double*)hor_y.data,
@@ -203,7 +202,7 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
             }
             else
             {
-                oskar_ra_dec_to_hor_lmn_f(num_sources,
+                oskar_convert_apparent_ra_dec_to_horizon_direction_f(num_sources,
                         oskar_mem_float_const(oskar_sky_ra_const(chunk), &status),
                         oskar_mem_float_const(oskar_sky_dec_const(chunk), &status),
                         last, lat, (float*)hor_x.data, (float*)hor_y.data,
@@ -215,8 +214,8 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
                     &status);
             oskar_mem_get_pointer(&pp_st_lat, &pp_lat, offset, num_sources,
                     &status);
-            oskar_mem_get_pointer(&pp_st_rel_path, &pp_rel_path, offset, num_sources,
-                    &status);
+            oskar_mem_get_pointer(&pp_st_rel_path, &pp_rel_path, offset,
+                    num_sources, &status);
             oskar_evaluate_pierce_points(&pp_st_lon, &pp_st_lat, &pp_st_rel_path,
                     lon, lat, alt, x_ecef, y_ecef, z_ecef, screen_height_m,
                     num_sources, &hor_x, &hor_y, &hor_z, &status);

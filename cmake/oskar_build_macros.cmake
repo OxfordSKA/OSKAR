@@ -262,8 +262,12 @@ macro(OSKAR_QT_APP)
 
     add_executable(${target} ${APP_SOURCES})
     target_link_libraries(${target}
-        oskar oskar_apps ${QT_QTCORE_LIBRARY} # default libs
-        ${APP_EXTRA_LIBS}                     # extra libs
+        # Defaults libs
+        oskar
+        oskar_apps
+        ${QT_QTCORE_LIBRARY}
+        # Extra libs
+        ${APP_EXTRA_LIBS}
     )
     # We do need the OpenMP flags here, otherwise programs will crash.
     if (MSVC)

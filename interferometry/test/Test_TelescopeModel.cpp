@@ -30,7 +30,7 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_horizon_plane_to_offset_geocentric_cartesian.h>
+#include <oskar_convert_horizon_to_offset_ecef.h>
 #include <oskar_telescope.h>
 #include <oskar_station_load_config.h>
 #include <oskar_get_error_string.h>
@@ -135,14 +135,14 @@ TEST(TelescopeModel, load_telescope_cpu)
         oskar_Station* s = oskar_telescope_station(tel_cpu2, i);
 
         // Define horizon coordinates.
-        double x_hor = i / 10.0;
-        double y_hor = i / 20.0;
-        double z_hor = i / 30.0;
+        double hor_x = i / 10.0;
+        double hor_y = i / 20.0;
+        double hor_z = i / 30.0;
 
         // Compute offset geocentric coordinates.
         double x = 0.0, y = 0.0, z = 0.0;
-        oskar_horizon_plane_to_offset_geocentric_cartesian_d(1,
-                &x_hor, &y_hor, &z_hor, longitude, latitude, &x, &y, &z);
+        oskar_convert_horizon_to_offset_ecef_d(1, &hor_x, &hor_y, &hor_z,
+                longitude, latitude, &x, &y, &z);
         EXPECT_NEAR(x, station_x[i], 1e-5);
         EXPECT_NEAR(y, station_y[i], 1e-5);
         EXPECT_NEAR(z, station_z[i], 1e-5);

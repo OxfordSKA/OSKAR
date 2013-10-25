@@ -33,17 +33,16 @@
 #include <oskar_evaluate_TEC_TID.h>
 #include <oskar_SettingsIonosphere.h>
 #include <oskar_mjd_to_gast_fast.h>
-#include <oskar_ra_dec_to_hor_lmn.h>
+#include <oskar_convert_apparent_ra_dec_to_horizon_direction.h>
 #include <oskar_Settings.h>
 #include <oskar_mem.h>
 #include <oskar_telescope.h>
-#include <oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h>
+#include <oskar_convert_offset_ecef_to_ecef.h>
 #include <oskar_evaluate_image_lm_grid.h>
 #include <oskar_image_free.h>
 #include <oskar_image_init.h>
 #include <oskar_image_resize.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
-#include <oskar_sph_from_lm.h>
 #include <oskar_evaluate_pierce_points.h>
 
 #include <cmath>
@@ -195,16 +194,16 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
         st_y = ((double*)y_)[stationID];
         st_z = ((double*)z_)[stationID];
 
-        oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,
-                &st_x, &st_y, &st_z, st_lon, st_lat, st_alt, &st_x_ecef,
-                &st_y_ecef, &st_z_ecef);
+        oskar_convert_offset_ecef_to_ecef(1, &st_x, &st_y, &st_z, st_lon,
+                st_lat, st_alt, &st_x_ecef, &st_y_ecef, &st_z_ecef);
 
         double beam_ra = oskar_station_beam_longitude_rad(station);
         double beam_dec = oskar_station_beam_latitude_rad(station);
 
         // Obtain horizontal coordinates of beam p.p.
-        oskar_ra_dec_to_hor_lmn_d(1, &beam_ra, &beam_dec, last, st_lat,
-                (double*)hor_x.data, (double*)hor_y.data, (double*)hor_z.data);
+        oskar_convert_apparent_ra_dec_to_horizon_direction_d(1, &beam_ra,
+                &beam_dec, last, st_lat, (double*)hor_x.data,
+                (double*)hor_y.data, (double*)hor_z.data);
     }
     else // (type == OSKAR_SINGLE)
     {
@@ -212,16 +211,16 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
         st_y = (double)((float*)y_)[stationID];
         st_z = (double)((float*)z_)[stationID];
 
-        oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,
-                &st_x, &st_y, &st_z, st_lon, st_lat, st_alt, &st_x_ecef,
-                &st_y_ecef, &st_z_ecef);
+        oskar_convert_offset_ecef_to_ecef(1, &st_x, &st_y, &st_z, st_lon,
+                st_lat, st_alt, &st_x_ecef, &st_y_ecef, &st_z_ecef);
 
         float beam_ra = (float)oskar_station_beam_longitude_rad(station);
         float beam_dec = (float)oskar_station_beam_latitude_rad(station);
 
         // Obtain horizontal coordinates of beam p.p.
-        oskar_ra_dec_to_hor_lmn_f(1, &beam_ra, &beam_dec, last, st_lat,
-                (float*)hor_x.data, (float*)hor_y.data, (float*)hor_z.data);
+        oskar_convert_apparent_ra_dec_to_horizon_direction_f(1, &beam_ra,
+                &beam_dec, last, st_lat, (float*)hor_x.data,
+                (float*)hor_y.data, (float*)hor_z.data);
     }
 
     // oskar_Mem functions holding the pp for the beam centre.

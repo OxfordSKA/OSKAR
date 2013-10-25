@@ -42,8 +42,7 @@
 #include <oskar_evaluate_jones_Z.h>
 #include <oskar_evaluate_jones_E.h>
 #include <oskar_evaluate_jones_K.h>
-#include <oskar_evaluate_uvw_station.h>
-#include <oskar_evaluate_uvw_baseline.h>
+#include <oskar_convert_ecef_to_station_uvw.h>
 #include <oskar_image_free.h>
 #include <oskar_image_write.h>
 #include <oskar_log.h>
@@ -470,8 +469,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 gast = oskar_mjd_to_gast_fast(t_fringe + dt_fringe / 2);
 
                 /* Evaluate station u,v,w coordinates. */
-                oskar_evaluate_uvw_station(&u, &v, &w, n_stations, x, y, z,
-                        ra0, dec0, gast, status);
+                oskar_convert_ecef_to_station_uvw(&u, &v, &w, n_stations, x, y,
+                        z, ra0, dec0, gast, status);
 
                 /* Evaluate interferometer phase (K), join Jones, correlate. */
                 oskar_timer_resume(timers->tmr_K);

@@ -28,7 +28,7 @@
 
 
 #include "station/oskar_evaluate_pierce_points.h"
-#include "interferometry/oskar_geocentric_cartesian_to_geodetic_spherical.h"
+#include "oskar_convert_ecef_to_geodetic_spherical.h"
 #include <math.h>
 #include <stdio.h>
 
@@ -168,8 +168,7 @@ void oskar_evaluate_pierce_points(
         pp_z = station_z_ecef + (diff_vector_ECEF[2] * scale);
 
         /* Convert ECEF x,y,z coordinates to long., lat. */
-        oskar_geocentric_cartesian_to_geodetic_spherical(
-                1, &pp_x, &pp_y, &pp_z,
+        oskar_convert_ecef_to_geodetic_spherical(1, &pp_x, &pp_y, &pp_z,
                 &pp_lon, &pp_lat, &pp_alt);
 
         if (type == OSKAR_DOUBLE)

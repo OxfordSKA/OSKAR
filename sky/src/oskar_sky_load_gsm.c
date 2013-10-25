@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_healpix_pix_to_angles_ring.h>
+#include <oskar_convert_healpix_ring_to_theta_phi.h>
 #include <oskar_healpix_npix_to_nside.h>
 #include <oskar_healpix_nside_to_npix.h>
-#include <oskar_galactic_to_fk5.h>
+#include <oskar_convert_galactic_to_fk5.h>
 #include <oskar_sky.h>
 #include <oskar_getline.h>
 #include <oskar_string_to_array.h>
@@ -147,11 +147,11 @@ void oskar_sky_load_gsm(oskar_Sky* sky, const char* filename,
         temp[i] = temp[i] * 2.0 * boltzmann * 1e26;
 
         /* Compute Galactic longitude and latitude from pixel index. */
-        oskar_healpix_pix_to_angles_ring(nside, i, &b, &l);
+        oskar_convert_healpix_ring_to_theta_phi(nside, i, &b, &l);
         b = (M_PI / 2.0) - b; /* Colatitude to latitude. */
 
         /* Compute RA and Dec. */
-        oskar_galactic_to_fk5_d(1, &l, &b, &ra, &dec);
+        oskar_convert_galactic_to_fk5_d(1, &l, &b, &ra, &dec);
 
         /* Store pixel data. */
         oskar_sky_set_source(temp_sky, i, ra, dec,

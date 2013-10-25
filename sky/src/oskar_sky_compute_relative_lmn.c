@@ -29,7 +29,7 @@
 #include <private_sky.h>
 #include <oskar_sky.h>
 
-#include <oskar_ra_dec_to_rel_lmn.h>
+#include "oskar_convert_apparent_ra_dec_to_tangent_plane_direction.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,8 +49,8 @@ void oskar_sky_compute_relative_lmn(oskar_Sky* sky, double ra0,
     if (*status) return;
 
     /* Convert coordinates. */
-    oskar_ra_dec_to_rel_lmn(sky->num_sources, &sky->RA, &sky->Dec, ra0, dec0,
-            &sky->l, &sky->m, &sky->n, status);
+    oskar_convert_apparent_ra_dec_to_tangent_plane_direction(sky->num_sources,
+            &sky->RA, &sky->Dec, ra0, dec0, &sky->l, &sky->m, &sky->n, status);
 }
 
 #ifdef __cplusplus

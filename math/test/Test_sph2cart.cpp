@@ -28,8 +28,8 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_sph2cart.h>
-#include <oskar_cart2sph.h>
+#include <oskar_convert_lon_lat_to_xyz.h>
+#include <oskar_convert_xyz_to_lon_lat.h>
 
 #include <vector>
 #include <cmath>
@@ -45,8 +45,10 @@ TEST(sph2cart, test)
     lon_in[0] = 50.0 * M_PI/180.0;
     lat_in[0] = 30.0 * M_PI/180.0;
 
-    oskar_sph2cart_d(num_pts, &x[0], &y[0], &z[0], &lon_in[0], &lat_in[0]);
-    oskar_cart2sph_d(num_pts, &lon_out[0], &lat_out[0], &x[0], &y[0], &z[0]);
+    oskar_convert_lon_lat_to_xyz_d(num_pts, &x[0], &y[0], &z[0], &lon_in[0],
+            &lat_in[0]);
+    oskar_convert_xyz_to_lon_lat_d(num_pts, &lon_out[0], &lat_out[0], &x[0],
+            &y[0], &z[0]);
 
     ASSERT_NEAR(lon_in[0], lon_out[0], delta);
     ASSERT_NEAR(lat_in[0], lat_out[0], delta);

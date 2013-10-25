@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/lib/oskar_sim_beam_pattern.h>
+#include <apps/lib/oskar_sim_beam_pattern_new.h>
 #include <apps/lib/oskar_OptionParser.h>
 
 #include <oskar_get_error_string.h>
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     try
     {
         // Run simulation.
-        error = oskar_sim_beam_pattern(opt.getArg(0), log);
+        error = oskar_sim_beam_pattern_new(opt.getArg(0), log);
     }
     catch (int code)
     {

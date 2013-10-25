@@ -29,7 +29,7 @@
 #include <private_sky.h>
 #include <oskar_sky.h>
 
-#include <oskar_ra_dec_to_hor_lmn_cuda.h>
+#include <oskar_convert_apparent_ra_dec_to_horizon_direction_cuda.h>
 #include <oskar_update_horizon_mask_cuda.h>
 #include <oskar_cuda_check_error.h>
 #include <oskar_mem.h>
@@ -212,8 +212,8 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
             lst = gast + longitude;
 
             /* Evaluate source horizontal x,y,z direction cosines. */
-            oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, ra, dec, lst, latitude,
-                    x, y, z);
+            oskar_convert_apparent_ra_dec_to_horizon_direction_cuda_f(
+                    num_sources, ra, dec, lst, latitude, x, y, z);
 
             /* Update the mask. */
             oskar_update_horizon_mask_cuda_f(num_sources, mask,
@@ -245,8 +245,8 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
             lst = gast + longitude;
 
             /* Evaluate source horizontal x,y,z direction cosines. */
-            oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, ra, dec, lst, latitude,
-                    x, y, z);
+            oskar_convert_apparent_ra_dec_to_horizon_direction_cuda_d(
+                    num_sources, ra, dec, lst, latitude, x, y, z);
 
             /* Update the mask. */
             oskar_update_horizon_mask_cuda_d(num_sources, mask,

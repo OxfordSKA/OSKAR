@@ -22,6 +22,7 @@ set(BUILD_SHARED_LIBS ON)
 # ------------------------------------------------------------------------------
 include_directories(
     ${OSKAR_SOURCE_DIR}
+    ${OSKAR_SOURCE_DIR}/coords
     ${OSKAR_SOURCE_DIR}/imaging
     ${OSKAR_SOURCE_DIR}/interferometry
     ${OSKAR_SOURCE_DIR}/math
@@ -163,6 +164,7 @@ if (CUDA_FOUND)
 
     message("===============================================================================")
     if (NOT DEFINED CUDA_ARCH)
+        # TODO change to a fail in the case device is not set?
         message("-- INFO: Building CUDA device code for architecture 2.0.")
         message("-- INFO: The target CUDA architecture can be changed by using the option:")
         message("-- INFO:   -DCUDA_ARCH=<arch>")

@@ -28,8 +28,9 @@
 
 #include "sky/oskar_evaluate_jones_Z.h"
 
-#include "station/oskar_evaluate_source_horizontal_lmn.h"
-#include "interferometry/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h"
+/*#include "station/oskar_evaluate_source_horizontal_lmn.h"*/
+#include "oskar_convert_apparent_ra_dec_to_horizon_direction.h"
+#include "oskar_convert_offset_ecef_to_ecef.h"
 #include "utility/oskar_vector_types.h"
 #include "station/oskar_evaluate_pierce_points.h"
 #include "sky/oskar_evaluate_TEC_TID.h"
@@ -119,9 +120,15 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
 
         /* Evaluate horizontal x,y,z source positions (for which to evaluate
          * pierce points) */
+        oskar_convert_apparent_ra_dec_to_horizon_direction(num_sources,
+                &work->hor_x, &work->hor_y, &work->hor_z,
+                oskar_sky_ra_const(sky_cpu), oskar_sky_dec_const(sky_cpu),
+                last, lat, status);
+        /*
         oskar_evaluate_source_horizontal_lmn(num_sources, &work->hor_x,
                 &work->hor_y, &work->hor_z, oskar_sky_ra_const(sky_cpu),
                 oskar_sky_dec_const(sky_cpu), last, lat, status);
+         */
 
         /* Obtain station coordinates in the ECEF frame. */
         evaluate_station_ECEF_coords(&station_x, &station_y, &station_z, i,
@@ -219,8 +226,7 @@ static void evaluate_station_ECEF_coords(
         st_z = (double)((const float*)z_)[stationID];
     }
 
-    oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,
-            &st_x, &st_y, &st_z, lon, lat, alt,
+    oskar_convert_offset_ecef_to_ecef(1, &st_x, &st_y, &st_z, lon, lat, alt,
             station_x, station_y, station_z);
 }
 

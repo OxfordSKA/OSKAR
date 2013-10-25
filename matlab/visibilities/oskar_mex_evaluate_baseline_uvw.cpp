@@ -31,7 +31,7 @@
 #include "matlab/common/oskar_matlab_common.h"
 
 #include <oskar_telescope.h>
-#include <oskar_evaluate_uvw_baseline.h>
+#include <oskar_convert_ecef_to_baseline_uvw.h>
 #include <oskar_get_error_string.h>
 #include <oskar_mem.h>
 
@@ -101,7 +101,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Allocate work array
     oskar_mem_init(&work_uvw, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 3 * num_stations, OSKAR_TRUE, &err);
 
-    oskar_evaluate_uvw_baseline(&uu, &vv, &ww, num_stations,
+    oskar_convert_ecef_to_baseline_uvw(&uu, &vv, &ww, num_stations,
             oskar_telescope_station_x_const(telescope),
             oskar_telescope_station_y_const(telescope),
             oskar_telescope_station_z_const(telescope),

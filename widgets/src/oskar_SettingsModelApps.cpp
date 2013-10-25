@@ -1150,6 +1150,22 @@ void oskar_SettingsModelApps::init_settings_beampattern()
 
     group = "beam_pattern";
     setLabel(group, "Beam pattern settings");
+
+    // XXX Horizon plane bool toggle instead/in addition to coordinate type.
+
+#if 0
+    k = group + "/coordinate_type";
+    options.clear();
+    options << "Phase centre relative"
+            << "Horizon plane"
+            << "HEALPix";
+            // XXX HEALPix can be both RA,Dec or horizon plane.
+            // << "Coordinate file (RA,Dec)";
+            // XXX a file mode could be useful for example to evaluate at a
+            // list of source positions.
+    declare(k, "Coordinate grid type", options, 0);
+#endif
+
     k = group + "/fov_deg";
     declare(k, "Field-of-view (RA,Dec) [deg]",
             oskar_SettingsItem::DOUBLE_CSV_LIST, "2.0");
@@ -1177,6 +1193,13 @@ void oskar_SettingsModelApps::init_settings_beampattern()
             "<li>A value of \"256,128\" results in a image of 256 by 128 pixels, "
             "with 256 pixels along the Right Ascension direction.</li>"
             "</ul>");
+
+#if 0
+    k = group + "/nside";
+    declare(k, "HEALPix nside", oskar_SettingsItem::INT_POSITIVE, 16);
+    // (12 * nside^2)
+#endif
+
     k = group + "/station_id";
     declare(k, "Station ID", oskar_SettingsItem::INT_UNSIGNED);
     setTooltip(k, "The station ID number (zero based) to select from the "

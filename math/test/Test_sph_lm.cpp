@@ -29,8 +29,8 @@
 #include <gtest/gtest.h>
 
 #include <oskar_linspace.h>
-#include <oskar_sph_from_lm.h>
-#include <oskar_sph_to_lm.h>
+#include <oskar_convert_tangent_plane_direction_to_lon_lat.h>
+#include <oskar_convert_lon_lat_to_tangent_plane_direction.h>
 #include <oskar_evaluate_image_lm_grid.h>
 
 #include <cmath>
@@ -58,13 +58,13 @@ TEST(sph_lm, test)
             fov_lat_deg * M_PI / 180.0, &grid_l[0], &grid_m[0]);
 
     // Convert from l,m grid to spherical coordinates.
-    oskar_sph_from_lm_d(num_points, lon0, lat0, &grid_l[0], &grid_m[0],
-            &grid_RA[0], &grid_Dec[0]);
+    oskar_convert_tangent_plane_direction_to_lon_lat_d(num_points, lon0, lat0,
+            &grid_l[0], &grid_m[0], &grid_RA[0], &grid_Dec[0]);
 
     // Check reverse direction.
     std::vector<double> temp_l(num_points), temp_m(num_points);
-    oskar_sph_to_lm_d(num_points, lon0, lat0, &grid_RA[0], &grid_Dec[0],
-            &temp_l[0], &temp_m[0]);
+    oskar_convert_lon_lat_to_tangent_plane_direction_d(num_points, lon0, lat0,
+            &grid_RA[0], &grid_Dec[0], &temp_l[0], &temp_m[0]);
 
     for (int i = 0; i < num_points; ++i)
     {

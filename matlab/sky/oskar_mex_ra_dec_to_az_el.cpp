@@ -31,11 +31,13 @@
 
 #include "matlab/common/oskar_matlab_common.h"
 #include <utility/oskar_get_error_string.h>
-#include <sky/oskar_ra_dec_to_az_el_cuda.h>
+#include <oskar_convert_apparent_ra_dec_to_az_el.h>
 
 #include <algorithm>
+#include <vector>
 #include <cmath>
 
+using std::vector;
 using std::max;
 
 // MATLAB Entry function.
@@ -68,13 +70,15 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     if (class_id == mxDOUBLE_CLASS)
     {
+        vector<double> work(num_sources);
         double* ra  = (double*)mxGetData(in[0]);
         double* dec = (double*)mxGetData(in[1]);
         out[0] = mxCreateNumericMatrix(num_sources, 1, mxDOUBLE_CLASS, mxREAL);
         out[1] = mxCreateNumericMatrix(num_sources, 1, mxDOUBLE_CLASS, mxREAL);
         double* az = (double*)mxGetData(out[0]);
         double* el = (double*)mxGetData(out[1]);
-        err = oskar_ra_dec_to_az_el_d(num_sources, ra, dec, lst, lat, az, el);
+        oskar_convert_apparent_ra_dec_to_az_el_d(num_sources, ra, dec,
+                lst, lat, &work[0], az, el);
 
 //        mexPrintf("num_sources = %i\n", (int)num_sources);
 //        mexPrintf("lst         = %f (%f)\n", lst, lst*(180.0/M_PI));
@@ -87,14 +91,15 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
     else if (class_id == mxSINGLE_CLASS)
     {
+        vector<float> work(num_sources);
         float* ra  = (float*)mxGetData(in[0]);
         float* dec = (float*)mxGetData(in[1]);
         out[0] = mxCreateNumericMatrix(num_sources, 1, mxSINGLE_CLASS, mxREAL);
         out[1] = mxCreateNumericMatrix(num_sources, 1, mxSINGLE_CLASS, mxREAL);
         float* az = (float*)mxGetData(out[0]);
         float* el = (float*)mxGetData(out[1]);
-        err = oskar_ra_dec_to_az_el_f(num_sources, ra, dec, (float)lst,
-                (float)lat, az, el);
+        oskar_convert_apparent_ra_dec_to_az_el_f(num_sources, ra, dec,
+                (float)lst, (float)lat, &work[0], az, el);
     }
     else
     {

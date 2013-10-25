@@ -37,8 +37,8 @@
 #include "imaging/oskar_setup_image.h"
 #include "imaging/oskar_image_init.h"
 #include "imaging/oskar_image_evaluate_ranges.h"
-#include "imaging/oskar_evaluate_image_lmn_point.h"
-#include "interferometry/oskar_evaluate_uvw_baseline.h"
+#include "oskar_convert_apparent_ra_dec_to_tangent_plane_direction.h"
+#include "oskar_convert_ecef_to_baseline_uvw.h"
 
 #include <oskar_log.h>
 #include <oskar_mem.h>
@@ -82,12 +82,12 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     int num_baselines = oskar_vis_num_baselines(vis);
     double freq_start_hz = oskar_vis_freq_start_hz(vis);
     double freq_inc_hz = oskar_vis_freq_inc_hz(vis);
-    const oskar_Mem *vis_uu_metres = oskar_vis_baseline_uu_metres_const(vis);
-    const oskar_Mem *vis_vv_metres = oskar_vis_baseline_vv_metres_const(vis);
-    const oskar_Mem *vis_ww_metres = oskar_vis_baseline_ww_metres_const(vis);
-    const oskar_Mem *vis_x_metres = oskar_vis_station_x_metres_const(vis);
-    const oskar_Mem *vis_y_metres = oskar_vis_station_y_metres_const(vis);
-    const oskar_Mem *vis_z_metres = oskar_vis_station_z_metres_const(vis);
+    const oskar_Mem *baseline_uu = oskar_vis_baseline_uu_metres_const(vis);
+    const oskar_Mem *baseline_vv = oskar_vis_baseline_vv_metres_const(vis);
+    const oskar_Mem *baseline_ww = oskar_vis_baseline_ww_metres_const(vis);
+    const oskar_Mem *station_ecef_x = oskar_vis_station_x_metres_const(vis);
+    const oskar_Mem *station_ecef_y = oskar_vis_station_y_metres_const(vis);
+    const oskar_Mem *station_ecef_z = oskar_vis_station_z_metres_const(vis);
 
     int type = (oskar_mem_is_double(oskar_vis_amplitude_const(vis)) &&
             oskar_mem_is_double(&im->data)) ? OSKAR_DOUBLE : OSKAR_SINGLE;
@@ -107,8 +107,8 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         double l1, m1, n1;
         int num_elements = num_baselines * num_times;
 
-        oskar_evaluate_image_lmn_point(&l1, &m1, &n1, ra0_rad, dec0_rad,
-                ra_rad, dec_rad);
+        oskar_convert_apparent_ra_dec_to_tangent_plane_direction_d(1,
+                &ra_rad, &dec_rad, ra0_rad, dec0_rad, &l1, &m1, &n1);
         delta_l = 0 - l1;
         delta_m = 0 - m1;
         delta_n = 1 - n1;
@@ -120,9 +120,9 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         /* Work array for baseline evaluation. */
         oskar_Mem work_uvw;
         oskar_mem_init(&work_uvw, type, location, 3 * num_stations, 1, &err);
-        oskar_evaluate_uvw_baseline(&uu_rot, &vv_rot, &ww_rot, num_stations,
-                vis_x_metres, vis_y_metres, vis_z_metres, ra_rad, dec_rad,
-                num_times, oskar_vis_time_start_mjd_utc(vis),
+        oskar_convert_ecef_to_baseline_uvw(&uu_rot, &vv_rot, &ww_rot,
+                num_stations, station_ecef_x, station_ecef_y, station_ecef_z,
+                ra_rad, dec_rad, num_times, oskar_vis_time_start_mjd_utc(vis),
                 oskar_vis_time_inc_seconds(vis) * SEC2DAYS, &work_uvw, &err);
         oskar_mem_free(&work_uvw, &err);
     }
@@ -248,7 +248,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
             if (settings->direction_type == OSKAR_IMAGE_DIRECTION_OBSERVATION)
             {
                 err = oskar_get_image_baseline_coords(&uu_im, &vv_im, &ww_im,
-                        vis_uu_metres, vis_vv_metres, vis_ww_metres, num_times,
+                        baseline_uu, baseline_vv, baseline_ww, num_times,
                         num_baselines, num_channels, freq_start_hz,
                         freq_inc_hz, vis_time, im_freq, settings);
                 if (err) return err;
@@ -264,7 +264,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
 
                 /* Unrotated coordinates (used for phase rotation) */
                 err = oskar_get_image_baseline_coords(&uu_tmp, &vv_tmp, &ww_tmp,
-                        vis_uu_metres, vis_vv_metres, vis_ww_metres, num_times,
+                        baseline_uu, baseline_vv, baseline_ww, num_times,
                         num_baselines, num_channels, freq_start_hz,
                         freq_inc_hz, vis_time, im_freq, settings);
                 if (err) return err;

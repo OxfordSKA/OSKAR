@@ -32,7 +32,7 @@
 #   include <fits/oskar_fits_image_to_sky_model.h>
 #endif
 #include <oskar_healpix_nside_to_npix.h>
-#include <oskar_healpix_pix_to_angles_ring.h>
+#include <oskar_convert_healpix_ring_to_theta_phi.h>
 #include <oskar_random_gaussian.h>
 #include <oskar_random_power_law.h>
 #include <oskar_random_broken_power_law.h>
@@ -383,7 +383,7 @@ static void set_up_gen_healpix(int* num_chunks, oskar_Sky*** sky_chunks,
     for (i = 0; i < npix; ++i)
     {
         double ra, dec;
-        oskar_healpix_pix_to_angles_ring(nside, i, &dec, &ra);
+        oskar_convert_healpix_ring_to_theta_phi(nside, i, &dec, &ra);
         dec = M_PI / 2.0 - dec;
         oskar_sky_set_source(temp, i, ra, dec, s->amplitude, 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);

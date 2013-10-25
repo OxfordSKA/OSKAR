@@ -35,10 +35,10 @@
 #include <apps/lib/oskar_set_up_sky.h>
 
 #include <oskar_telescope.h>
-#include <oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h>
+#include <oskar_convert_offset_ecef_to_ecef.h>
 
 #include <oskar_mjd_to_gast_fast.h>
-#include <oskar_ra_dec_to_hor_lmn.h>
+#include <oskar_convert_apparent_ra_dec_to_horizon_direction.h>
 #include <oskar_sky.h>
 
 #include <oskar_get_error_string.h>
@@ -232,14 +232,14 @@ int evaluate_pp(oskar_Mem& pp_lon, oskar_Mem& pp_lat, oskar_Settings& settings,
                 z_offset = (double)((float*)z_)[i];
             }
 
-            oskar_offset_geocentric_cartesian_to_geocentric_cartesian(
-                    1, &x_offset, &y_offset, &z_offset, lon, lat,
-                    alt, &x_ecef, &y_ecef, &z_ecef);
+            oskar_convert_offset_ecef_to_ecef(1, &x_offset, &y_offset,
+                    &z_offset, lon, lat, alt, &x_ecef, &y_ecef, &z_ecef);
             double last = gast + lon;
 
             if (type == OSKAR_DOUBLE)
             {
-                oskar_ra_dec_to_hor_lmn_d(oskar_sky_num_sources(chunk),
+                oskar_convert_apparent_ra_dec_to_horizon_direction_d(
+                        oskar_sky_num_sources(chunk),
                         oskar_mem_double_const(oskar_sky_ra_const(chunk), &status),
                         oskar_mem_double_const(oskar_sky_dec_const(chunk), &status),
                         last, lat, (double*)hor_x.data, (double*)hor_y.data,
@@ -247,7 +247,8 @@ int evaluate_pp(oskar_Mem& pp_lon, oskar_Mem& pp_lat, oskar_Settings& settings,
             }
             else
             {
-                oskar_ra_dec_to_hor_lmn_f(oskar_sky_num_sources(chunk),
+                oskar_convert_apparent_ra_dec_to_horizon_direction_f(
+                        oskar_sky_num_sources(chunk),
                         oskar_mem_float_const(oskar_sky_ra_const(chunk), &status),
                         oskar_mem_float_const(oskar_sky_dec_const(chunk), &status),
                         last, lat, (float*)hor_x.data, (float*)hor_y.data,

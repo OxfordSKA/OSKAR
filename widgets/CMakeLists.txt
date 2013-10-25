@@ -41,7 +41,8 @@ if (QT4_FOUND)
     add_library(oskar_widgets ${widgets_SRC} ${widgets_RCC_SRC})
     target_link_libraries(oskar_widgets
         ${QT_QTCORE_LIBRARY}
-        ${QT_QTGUI_LIBRARY})
+        ${QT_QTGUI_LIBRARY}
+    )
     set_target_properties(oskar_widgets PROPERTIES
         INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
         INSTALL_RPATH_USE_LINK_PATH TRUE

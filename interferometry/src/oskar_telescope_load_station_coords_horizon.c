@@ -28,9 +28,9 @@
 
 #include <private_telescope.h>
 
-#include <oskar_geocentric_cartesian_to_geodetic_spherical.h>
-#include <oskar_horizon_plane_to_offset_geocentric_cartesian.h>
-#include <oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h>
+#include <oskar_convert_ecef_to_geodetic_spherical.h>
+#include <oskar_convert_horizon_to_offset_ecef.h>
+#include <oskar_convert_offset_ecef_to_ecef.h>
 #include <oskar_telescope.h>
 #include <oskar_getline.h>
 #include <oskar_string_to_array.h>
@@ -106,8 +106,8 @@ void oskar_telescope_load_station_coords_horizon(oskar_Telescope* telescope,
         }
 
         /* Convert horizon plane to offset geocentric cartesian coordinates. */
-        oskar_horizon_plane_to_offset_geocentric_cartesian_d(1,
-                &par[0], &par[1], &par[2], longitude, latitude, &x, &y, &z);
+        oskar_convert_horizon_to_offset_ecef_d(1, &par[0], &par[1], &par[2],
+                longitude, latitude, &x, &y, &z);
 
         /* Store the offset geocentric and horizon plane coordinates. */
         oskar_telescope_set_station_coords(telescope, n, x, y, z,
@@ -115,10 +115,9 @@ void oskar_telescope_load_station_coords_horizon(oskar_Telescope* telescope,
         if (*status) break;
 
         /* Convert to ECEF, then to station longitude, latitude, altitude. */
-        oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,
-                &x, &y, &z, longitude, latitude, altitude, &x, &y, &z);
-        oskar_geocentric_cartesian_to_geodetic_spherical(1, &x, &y, &z,
-                &lon, &lat, &alt);
+        oskar_convert_offset_ecef_to_ecef(1, &x, &y, &z, longitude, latitude,
+                altitude, &x, &y, &z);
+        oskar_convert_ecef_to_geodetic_spherical(1, &x, &y, &z, &lon, &lat, &alt);
         oskar_station_set_position(oskar_telescope_station(telescope, n),
                 lon, lat, alt);
 

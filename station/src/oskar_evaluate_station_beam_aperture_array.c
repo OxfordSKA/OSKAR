@@ -28,7 +28,7 @@
 
 #include <oskar_evaluate_station_beam_aperture_array.h>
 
-#include <oskar_evaluate_beam_horizontal_lmn.h>
+#include <oskar_evaluate_beam_horizon_direction.h>
 #include <oskar_evaluate_array_pattern.h>
 #include <oskar_evaluate_array_pattern_hierarchical.h>
 #include <oskar_evaluate_array_pattern_dipoles.h>
@@ -138,7 +138,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
     }
 
     /* Compute direction cosines for the beam for this station. */
-    oskar_evaluate_beam_horizontal_lmn(&beam_x, &beam_y, &beam_z, station,
+    oskar_evaluate_beam_horizon_direction(&beam_x, &beam_y, &beam_z, station,
             gast, status);
 
     /* Check if there are no child stations. */

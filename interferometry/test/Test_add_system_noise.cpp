@@ -30,7 +30,7 @@
 
 #include <oskar_telescope.h>
 #include <oskar_vis.h>
-#include <oskar_evaluate_uvw_baseline.h>
+#include <oskar_convert_ecef_to_baseline_uvw.h>
 
 #include <oskar_mem.h>
 #include <oskar_get_error_string.h>
@@ -153,7 +153,7 @@ TEST(add_system_noise, test_rms)
     oskar_Mem work_uvw;
     oskar_mem_init(&work_uvw, type, OSKAR_LOCATION_CPU, 3 * num_stations,
             1, &err);
-    oskar_evaluate_uvw_baseline(oskar_vis_baseline_uu_metres(vis),
+    oskar_convert_ecef_to_baseline_uvw(oskar_vis_baseline_uu_metres(vis),
             oskar_vis_baseline_vv_metres(vis),
             oskar_vis_baseline_ww_metres(vis), num_stations,
             oskar_telescope_station_x_const(telescope),

@@ -27,8 +27,8 @@
  */
 
 #include "fits/oskar_fits_healpix_to_sky_model.h"
-#include "math/oskar_healpix_pix_to_angles_ring.h"
-#include "sky/oskar_galactic_to_fk5.h"
+#include <oskar_convert_healpix_ring_to_theta_phi.h>
+#include <oskar_convert_galactic_to_fk5.h>
 #include <oskar_log.h>
 #include <oskar_sky.h>
 
@@ -185,12 +185,12 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
         }
 
         /* Convert HEALPix index into spherical coordinates. */
-        oskar_healpix_pix_to_angles_ring(nside, i, &lat, &lon);
+        oskar_convert_healpix_ring_to_theta_phi(nside, i, &lat, &lon);
         lat = M_PI / 2.0 - lat;
 
         /* Convert spherical coordinates to RA, Dec values if required. */
         if (settings->coord_sys == OSKAR_SPHERICAL_TYPE_GALACTIC)
-            oskar_galactic_to_fk5_d(1, &lon, &lat, &lon, &lat);
+            oskar_convert_galactic_to_fk5_d(1, &lon, &lat, &lon, &lat);
 
         /* Set source data into sky model. */
         /* (Filtering and other overrides can be done later.) */

@@ -29,7 +29,7 @@
 #include <oskar_evaluate_jones_E.h>
 
 #include <oskar_jones_get_station_pointer.h>
-#include <oskar_evaluate_source_horizontal_lmn.h>
+#include <oskar_convert_apparent_ra_dec_to_horizon_direction.h>
 #include <oskar_evaluate_station_beam_aperture_array.h>
 #include <oskar_evaluate_station_beam_gaussian.h>
 #include <oskar_evaluate_vla_beam_pbcor.h>
@@ -129,8 +129,8 @@ static void evaluate_E_common_sky_identical_stations(oskar_Jones* E,
     num_sources = oskar_sky_num_sources(sky);
     last = gast + oskar_station_longitude_rad(station0);
     lat = oskar_station_latitude_rad(station0);
-    oskar_evaluate_source_horizontal_lmn(num_sources, hor_x, hor_y, hor_z,
-            oskar_sky_ra_const(sky), oskar_sky_dec_const(sky),
+    oskar_convert_apparent_ra_dec_to_horizon_direction(num_sources, hor_x,
+            hor_y, hor_z, oskar_sky_ra_const(sky), oskar_sky_dec_const(sky),
             last, lat, status);
     oskar_jones_get_station_pointer(&E0, E, 0, status);
 
@@ -196,8 +196,8 @@ static void evaluate_E_common_sky_different_stations(oskar_Jones* E,
     station = oskar_telescope_station_const(telescope, 0);
     last = gast + oskar_station_longitude_rad(station);
     lat = oskar_station_latitude_rad(station);
-    oskar_evaluate_source_horizontal_lmn(num_sources, hor_x, hor_y, hor_z,
-            oskar_sky_ra_const(sky), oskar_sky_dec_const(sky),
+    oskar_convert_apparent_ra_dec_to_horizon_direction(num_sources, hor_x,
+            hor_y, hor_z, oskar_sky_ra_const(sky), oskar_sky_dec_const(sky),
             last, lat, status);
 
     for (i = 0; i < num_stations; ++i)
@@ -262,8 +262,8 @@ static void evaluate_E_different_sky(oskar_Jones* E,
         last = gast + oskar_station_longitude_rad(station);
         lat = oskar_station_latitude_rad(station);
 
-        oskar_evaluate_source_horizontal_lmn(num_sources, hor_x, hor_y, hor_z,
-                oskar_sky_ra_const(sky), oskar_sky_dec_const(sky),
+        oskar_convert_apparent_ra_dec_to_horizon_direction(num_sources, hor_x,
+                hor_y, hor_z, oskar_sky_ra_const(sky), oskar_sky_dec_const(sky),
                 last, lat, status);
         oskar_jones_get_station_pointer(&E_station, E, i, status);
 

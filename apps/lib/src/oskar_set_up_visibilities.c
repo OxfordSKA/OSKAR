@@ -27,7 +27,7 @@
  */
 
 #include "apps/lib/oskar_set_up_visibilities.h"
-#include <oskar_evaluate_uvw_baseline.h>
+#include <oskar_convert_ecef_to_baseline_uvw.h>
 
 #include <stdlib.h>
 #include <math.h>
@@ -107,7 +107,7 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
         oskar_Mem work_uvw;
         oskar_mem_init(&work_uvw, oskar_mem_type_precision(type),
                 OSKAR_LOCATION_CPU, 3 * num_stations, 1, status);
-        oskar_evaluate_uvw_baseline(oskar_vis_baseline_uu_metres(vis),
+        oskar_convert_ecef_to_baseline_uvw(oskar_vis_baseline_uu_metres(vis),
                 oskar_vis_baseline_vv_metres(vis),
                 oskar_vis_baseline_ww_metres(vis),
                 oskar_telescope_num_stations(telescope),

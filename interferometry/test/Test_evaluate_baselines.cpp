@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_evaluate_baselines.h>
+#include <oskar_convert_station_uvw_to_baseline_uvw.h>
 #include <oskar_mem.h>
 #include <oskar_get_error_string.h>
 
@@ -68,7 +68,7 @@ TEST(evaluate_baselines, cpu_gpu)
     }
 
     // Evaluate baseline coordinates on CPU.
-    oskar_evaluate_baselines(&uu, &vv, &ww, &u, &v, &w, &status);
+    oskar_convert_station_uvw_to_baseline_uvw(&uu, &vv, &ww, &u, &v, &w, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check results are correct.
@@ -93,8 +93,8 @@ TEST(evaluate_baselines, cpu_gpu)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Evaluate baseline coordinates on GPU.
-    oskar_evaluate_baselines(&uu_gpu, &vv_gpu, &ww_gpu, &u_gpu, &v_gpu, &w_gpu,
-            &status);
+    oskar_convert_station_uvw_to_baseline_uvw(&uu_gpu, &vv_gpu, &ww_gpu, &u_gpu,
+            &v_gpu, &w_gpu, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check results are consistent.

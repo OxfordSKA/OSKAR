@@ -21,20 +21,25 @@
 # === Append the src/cmake directory to the module path.
 list(INSERT CMAKE_MODULE_PATH 0 ${OSKAR_SOURCE_DIR}/cmake/modules)
 
-# OS specific path settings.
-if (WIN32)
-    # qwt5
-    set(QWT_INCLUDES     ${CMAKE_SOURCE_DIR}/../include/qwt-5.2.2/)
-    set(QWT_LIBRARY_DIR  ${CMAKE_SOURCE_DIR}/../lib/qwt-5.2.2/)
-endif ()
-
 # ==== Find dependencies.
 find_package(CUDA 4.0 QUIET) # liboskar
 find_package(OpenMP QUIET)   # liboskar
 #find_package(MKL QUIET)     # liboskar
 find_package(CBLAS QUIET)    # liboskar
 find_package(LAPACK QUIET)   # liboskar
-find_package(Qt4 4.6 QUIET) # liboskar_apps, liboskar_widgets, apps
+find_package(Qt4 4.6 QUIET)  # liboskar_apps, liboskar_widgets, apps
+# HACK for using Qt4 frameworks on OS X. 
+# Avoids having to symlink headers and libraries from the Qt binary installer
+# into the system paths.
+if (APPLE AND QT_USE_FRAMEWORKS)
+    set(QT_QTCORE_LIBRARY ${QT_QTCORE_LIBRARY}/QtCore)
+    set(QT_QTGUI_LIBRARY ${QT_QTGUI_LIBRARY}/QtGui)
+    set(QT_QTNETWORK_LIBRARY ${QT_QTNETWORK_LIBRARY}/QtNetwork)
+endif()
+#if (NOT QT4_FOUND)
+#    find_package(Qt5Core)
+#    find_package(Qt5Core)
+#endif()
 find_package(CasaCore QUIET) # liboskar_ms
 find_package(CFitsio QUIET)  # liboskar_fits
 find_package(Matlab QUIET)   # mex functions

@@ -28,38 +28,36 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_geocentric_cartesian_to_geodetic_spherical.h>
-#include <oskar_geodetic_spherical_to_geocentric_cartesian.h>
+#include <oskar_convert_ecef_to_geodetic_spherical.h>
+#include <oskar_convert_geodetic_spherical_to_ecef.h>
 
-#include <cmath>
+#include <cmath> // for M_PI
 
 TEST(station_coord_transforms, geocentric_cartesian_to_geodetic_spherical)
 {
-    double lon[] = {0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0, 105.0,
+    double lon1[] = {0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0, 105.0,
             120.0, 135.0, 150.0, 165.0, 180.0, -15.0, -30.0, -45.0,
             -60.0, -75.0, -90.0};
-    double lat[] = {-90.0, -80.0, -70.0, -60.0, -50.0, -40.0, -30.0, -20.0,
+    double lat1[] = {-90.0, -80.0, -70.0, -60.0, -50.0, -40.0, -30.0, -20.0,
             -10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0};
-    double alt[] = {0.0, 5.0, 10.0, 50.0, 100.0, 200.0, 400.0, 500.0, 340.0,
+    double alt1[] = {0.0, 5.0, 10.0, 50.0, 100.0, 200.0, 400.0, 500.0, 340.0,
             84.5, 63.8, 34.8, 73.6, 67.4, 98.3, 12.4, 64.7, 88.6, 224.5};
 
-    const int n = sizeof(lon) / sizeof(double);
+    const int n = sizeof(lon1) / sizeof(double);
     for (int i = 0; i < n; ++i)
     {
-        lon[i] *= M_PI / 180;
-        lat[i] *= M_PI / 180;
+        lon1[i] *= M_PI / 180;
+        lat1[i] *= M_PI / 180;
     }
 
-    double x[n], y[n], z[n], lambda[n], phi[n], h[n];
-    oskar_geodetic_spherical_to_geocentric_cartesian(n, lon, lat, alt,
-            x, y, z);
-    oskar_geocentric_cartesian_to_geodetic_spherical(n, x, y, z,
-            lambda, phi, h);
+    double x[n], y[n], z[n], lon2[n], lat2[n], alt2[n];
+    oskar_convert_geodetic_spherical_to_ecef(n, lon1, lat1, alt1, x, y, z);
+    oskar_convert_ecef_to_geodetic_spherical(n, x, y, z, lon2, lat2, alt2);
 
     for (int i = 0; i < n; ++i)
     {
-        EXPECT_NEAR(lon[i], lambda[i], 1e-8);
-        EXPECT_NEAR(lat[i], phi[i], 1e-8);
-        EXPECT_NEAR(alt[i], h[i], 1e-8);
+        EXPECT_NEAR(lon1[i], lon2[i], 1e-8);
+        EXPECT_NEAR(lat1[i], lat2[i], 1e-8);
+        EXPECT_NEAR(alt1[i], alt2[i], 1e-8);
     }
 }
