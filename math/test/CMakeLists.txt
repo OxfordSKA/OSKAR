@@ -12,8 +12,6 @@ set(${name}_SRC
     Test_find_closest_match.cpp
     Test_linspace.cpp
     Test_Jones.cpp
-    Test_sph_lm.cpp
-    Test_sph2cart.cpp
 )
 if (OSKAR_USE_LAPACK AND OSKAR_USE_CBLAS)
     list(APPEND ${name}_SRC Test_fit_ellipse.cpp)

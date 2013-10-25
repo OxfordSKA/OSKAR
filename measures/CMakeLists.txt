@@ -54,4 +54,4 @@ set(${name}_SRC
 )
 set(${name}_SRC "${${name}_SRC}" PARENT_SCOPE)
 
-#add_subdirectory(test)
+add_subdirectory(test)
