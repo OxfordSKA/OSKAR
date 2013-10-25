@@ -50,17 +50,18 @@ enable_testing()
 
 # === Build main OSKAR library.
 if (CUDA_FOUND)
-    add_subdirectory(coords)
+
     add_subdirectory(imaging)
     add_subdirectory(interferometry)
     add_subdirectory(math)
+    add_subdirectory(measures)
     add_subdirectory(sky)
     add_subdirectory(station)
     add_subdirectory(utility)
 
     set(libname oskar)
-    foreach (file ${coords_SRC})
-        list(APPEND ${libname}_SRC coords/${file})
+    foreach (file ${measures_SRC})
+        list(APPEND ${libname}_SRC measures/${file})
     endforeach ()
     foreach (file ${imaging_SRC})
         list(APPEND ${libname}_SRC imaging/${file})

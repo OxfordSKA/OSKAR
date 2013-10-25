@@ -1,9 +1,10 @@
 #
-# src/coords/CMakeLists.txt
+# src/measures/CMakeLists.txt
 #
 
 # Add the source files in this directory.
-set(coords_SRC
+set(name measures)
+set(${name}_SRC
     src/oskar_compute_tangent_plane_direction_z_cuda.cu
     src/oskar_compute_tangent_plane_direction_z.c
 
@@ -51,6 +52,6 @@ set(coords_SRC
 
     src/oskar_convert_xyz_to_lon_lat.c
 )
-set(coords_SRC "${coords_SRC}" PARENT_SCOPE)
+set(${name}_SRC "${${name}_SRC}" PARENT_SCOPE)
 
 #add_subdirectory(test)

@@ -22,10 +22,10 @@ set(BUILD_SHARED_LIBS ON)
 # ------------------------------------------------------------------------------
 include_directories(
     ${OSKAR_SOURCE_DIR}
-    ${OSKAR_SOURCE_DIR}/coords
     ${OSKAR_SOURCE_DIR}/imaging
     ${OSKAR_SOURCE_DIR}/interferometry
     ${OSKAR_SOURCE_DIR}/math
+    ${OSKAR_SOURCE_DIR}/measures
     ${OSKAR_SOURCE_DIR}/sky
     ${OSKAR_SOURCE_DIR}/station
     ${OSKAR_SOURCE_DIR}/utility
