@@ -43,7 +43,7 @@
 #include "matlab/image/lib/oskar_mex_image_settings_from_matlab.h"
 #include "matlab/image/lib/oskar_mex_image_to_matlab_struct.h"
 #include "matlab/common/oskar_matlab_common.h"
-#include "matlab/visibilities/lib/oskar_mex_vis_from_matlab_struct.h"
+#include "matlab/vis/lib/oskar_mex_vis_from_matlab_struct.h"
 
 #include <cstdio>
 #include <cstdlib>

@@ -11,7 +11,7 @@ add_library(mex_image STATIC
 set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+oskar/+image")
 
 oskar_mex(read oskar_mex_image_read.cpp LIBS oskar mex_image)
-oskar_mex(make oskar_mex_make_image.cpp LIBS oskar mex_image mex_visibilities)
+oskar_mex(make oskar_mex_make_image.cpp LIBS oskar mex_image mex_vis)
 
 # Install scripts
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/"

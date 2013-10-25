@@ -35,7 +35,7 @@
 #include <oskar_mem_binary_file_read.h>
 #include <oskar_binary_tag_index_free.h>
 
-#include "matlab/visibilities/lib/oskar_mex_vis_to_matlab_struct.h"
+#include "matlab/vis/lib/oskar_mex_vis_to_matlab_struct.h"
 #include "matlab/common/oskar_matlab_common.h"
 
 #include <cstdio>
@@ -44,7 +44,7 @@
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     if (num_in != 1 || num_out > 1) {
-        oskar_matlab_usage("[vis]", "visibilities", "read", "<filename>",
+        oskar_matlab_usage("[vis]", "vis", "read", "<filename>",
                 "Reads an OSKAR visibilities binary data file into "
                 "a MATLAB structure");
     }

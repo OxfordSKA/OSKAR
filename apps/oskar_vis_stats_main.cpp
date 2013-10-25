@@ -52,7 +52,7 @@ int main(int argc, char** argv)
     int status = OSKAR_SUCCESS;
 
     // Register options ========================================================
-    oskar_OptionParser opt("oskar_visibility_stats");
+    oskar_OptionParser opt("oskar_vis_stats");
     set_options(opt);
     if (!check_options(opt, argc, argv))
         return OSKAR_FAIL;

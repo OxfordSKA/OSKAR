@@ -47,13 +47,13 @@ template <typename T1, typename T2> static void writeData_(int idx, T1 uu,
 int main(int argc, char** argv)
 {
     // ===== Declare options ==================================================
-    oskar_OptionParser opt("oskar_visibilties_to_ascii_table");
+    oskar_OptionParser opt("oskar_vis_to_ascii_table");
     opt.setDescription("Converts an OSKAR visibility binary file to an ASCII "
             "table format with the following columns:\n "
             "[1] index, [2] baseline-uu, [3] baseline-vv, [4] Real, [5] Imag., "
             "[6] weight. The table is written out in baseline-time order where "
             "baseline is the fastest varying dimension");
-    opt.addRequired("OSKAR visibility file");
+    opt.addRequired("OSKAR vis file");
     opt.addOptional("output file name");
     opt.addFlag("-c", "Channel index to write to file. (default = 0)", 1, "0",
             false, "--channel");

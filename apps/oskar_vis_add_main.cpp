@@ -49,7 +49,7 @@ static void print_error(int status, const char* message);
 int main(int argc, char** argv)
 {
     // Register options =======================================================
-    oskar_OptionParser opt("oskar_visibilities_add");
+    oskar_OptionParser opt("oskar_vis_add");
     set_options(opt);
     if (!check_options(opt, argc, argv))
         return OSKAR_FAIL;

@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     int status = OSKAR_SUCCESS;
 
     // Register options. ======================================================
-    oskar_OptionParser opt("oskar_visibilities_add_noise");
+    oskar_OptionParser opt("oskar_vis_add_noise");
     set_options(opt);
     if (!check_options(opt, argc, argv))
         return OSKAR_FAIL;

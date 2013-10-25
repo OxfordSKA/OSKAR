@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "matlab/visibilities/lib/oskar_mex_vis_from_matlab_struct.h"
+#include "matlab/vis/lib/oskar_mex_vis_from_matlab_struct.h"
 
 #include <oskar_get_error_string.h>
 

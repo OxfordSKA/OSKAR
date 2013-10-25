@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 {
     int status = OSKAR_SUCCESS;
 
-    oskar_OptionParser opt("oskar_visibilities_summary");
+    oskar_OptionParser opt("oskar_vis_summary");
     opt.addRequired("OSKAR visibility file");
     opt.addFlag("-l", "Display the simulation log.",
             false, "--log");

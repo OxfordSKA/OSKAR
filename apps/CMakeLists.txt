@@ -38,8 +38,8 @@ if (CUDA_FOUND)
         oskar_binary_file_query
         oskar_image_stats
         oskar_image_summary
-        oskar_visibilities_add
-        oskar_visibilities_summary
+        oskar_vis_add
+        oskar_vis_summary
         #oskar_rebin_sky
     )
 
@@ -65,19 +65,19 @@ if (QT4_FOUND AND CUDA_FOUND)
     set(name oskar_imager)
     oskar_qt_app(${name} ${name}_main.cpp)
 
-    # BINARY: oskar_visibilities_to_ms
-    set(name oskar_visibilities_to_ms)
+    # BINARY: oskar_vis_to_ms
+    set(name oskar_vis_to_ms)
     oskar_qt_app(${name} ${name}_main.cpp)
 
-    # BINARY: oskar_visibilities_to_ascii_table
-    set(name oskar_visibilities_to_ascii_table)
+    # BINARY: oskar_vis_to_ascii_table
+    set(name oskar_vis_to_ascii_table)
     oskar_qt_app(${name} ${name}_main.cpp)
 
-    # BINARY: oskar_visibilities_add_noise
-    set(name oskar_visibilities_add_noise)
+    # BINARY: oskar_vis_add_noise
+    set(name oskar_vis_add_noise)
     oskar_qt_app(${name} ${name}_main.cpp)
 
-    set(name oskar_visibilities_stats)
+    set(name oskar_vis_stats)
     oskar_qt_app(${name} ${name}_main.cpp)
 
     # BINARY: oskar_sim_tec_screen

@@ -13,7 +13,7 @@ if (MATLAB_FOUND AND CUDA_FOUND)
     add_subdirectory(settings)
     add_subdirectory(sky)
     #add_subdirectory(time_freq_data)
-    add_subdirectory(visibilities)
+    add_subdirectory(vis)
 
 endif (MATLAB_FOUND AND CUDA_FOUND)
 

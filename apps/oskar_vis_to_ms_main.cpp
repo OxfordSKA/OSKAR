@@ -40,8 +40,8 @@ int main(int argc, char** argv)
 #ifndef OSKAR_NO_MS
     int error = 0;
 
-    oskar_OptionParser opt("oskar_visibilities_to_ms");
-    opt.addRequired("OSKAR visibility file");
+    oskar_OptionParser opt("oskar_vis_to_ms");
+    opt.addRequired("OSKAR vis file");
     opt.addRequired("MS name");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;

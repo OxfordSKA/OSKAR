@@ -43,7 +43,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Read options from MATLAB
     if (num_in != 9 || num_out > 1)
     {
-        oskar_matlab_usage("[uvw]", "visibilities", "evaluate_baseline_uvw",
+        oskar_matlab_usage("[uvw]", "vis", "evaluate_baseline_uvw",
                 "<layout file>, <lon (deg.)>, <lat (deg.)>, <alt (m)>, "
                 "<RA (deg.)>, <Dec (deg.)>, <start time (MJD UTC)>, <no. times>,"
                 "<integration length (s)>",

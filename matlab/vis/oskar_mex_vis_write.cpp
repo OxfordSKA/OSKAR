@@ -32,14 +32,14 @@
 #include <oskar_log.h>
 #include <oskar_get_error_string.h>
 
-#include "matlab/visibilities/lib/oskar_mex_vis_from_matlab_struct.h"
+#include "matlab/vis/lib/oskar_mex_vis_from_matlab_struct.h"
 #include "matlab/common/oskar_matlab_common.h"
 
 void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
 {
     if (num_in != 2 || num_out > 0)
     {
-        oskar_matlab_usage(NULL, "visibilities", "write", "<file name>, <vis>",
+        oskar_matlab_usage(NULL, "vis", "write", "<file name>, <vis>",
                 "Writes an OSKAR visibilities binary file from the specified"
                 "OSKAR MATLAB visibilities structure.");
     }

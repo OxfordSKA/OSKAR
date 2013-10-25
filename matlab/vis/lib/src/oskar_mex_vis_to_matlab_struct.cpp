@@ -27,7 +27,7 @@
  */
 
 
-#include "matlab/visibilities/lib/oskar_mex_vis_to_matlab_struct.h"
+#include "matlab/vis/lib/oskar_mex_vis_to_matlab_struct.h"
 
 #include <oskar_get_error_string.h>
 #include <oskar_BinaryTag.h>
