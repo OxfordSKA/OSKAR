@@ -28,13 +28,20 @@
 
 #include <gtest/gtest.h>
 
+#include <oskar_linspace.h>
+#include <oskar_convert_tangent_plane_direction_to_lon_lat.h>
+#include <oskar_convert_lon_lat_to_tangent_plane_direction.h>
 #include <oskar_convert_lon_lat_to_xyz.h>
 #include <oskar_convert_xyz_to_lon_lat.h>
+#include <oskar_evaluate_image_lm_grid.h>
 
-#include <vector>
 #include <cmath>
+#include <cstdlib>
+#include <cstdio>
+#include <vector>
 
-TEST(sph2cart, test)
+
+TEST(coordinate_conversions, lon_lat_to_xyz)
 {
     int num_pts = 1;
     std::vector<double> x(num_pts), y(num_pts), z(num_pts);
@@ -52,4 +59,41 @@ TEST(sph2cart, test)
 
     ASSERT_NEAR(lon_in[0], lon_out[0], delta);
     ASSERT_NEAR(lat_in[0], lat_out[0], delta);
+}
+
+
+
+TEST(coordinate_conversions, lon_lat_to_tangent_plane_direction)
+{
+    // Image size.
+    int num_l = 10;
+    int num_m = 10;
+    double fov_lon_deg = 10.0;
+    double fov_lat_deg = 10.0;
+
+    // Set up the reference point.
+    double lon0 = 10.0 * M_PI / 180.0;
+    double lat0 = 50.0 * M_PI / 180.0;
+
+    // Set up the grid.
+    int num_points = num_l * num_m;
+    std::vector<double> grid_l(num_points), grid_m(num_points);
+    std::vector<double> grid_RA(num_points), grid_Dec(num_points);
+    oskar_evaluate_image_lm_grid_d(num_l, num_m, fov_lon_deg * M_PI / 180.0,
+            fov_lat_deg * M_PI / 180.0, &grid_l[0], &grid_m[0]);
+
+    // Convert from l,m grid to spherical coordinates.
+    oskar_convert_tangent_plane_direction_to_lon_lat_d(num_points, lon0, lat0,
+            &grid_l[0], &grid_m[0], &grid_RA[0], &grid_Dec[0]);
+
+    // Check reverse direction.
+    std::vector<double> temp_l(num_points), temp_m(num_points);
+    oskar_convert_lon_lat_to_tangent_plane_direction_d(num_points, lon0, lat0,
+            &grid_RA[0], &grid_Dec[0], &temp_l[0], &temp_m[0]);
+
+    for (int i = 0; i < num_points; ++i)
+    {
+        EXPECT_NEAR(grid_l[i], temp_l[i], 1e-15);
+        EXPECT_NEAR(grid_m[i], temp_m[i], 1e-15);
+    }
 }
