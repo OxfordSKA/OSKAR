@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/cudak/oskar_cudak_sph_to_lm.h"
+#include "oskar_convert_lon_lat_to_tangent_plane_direction_cuda.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Single precision.
 __global__
-void oskar_cudak_sph_to_lm_f(const int np, const float* lambda,
-        const float* phi, const float lambda0, const float cosPhi0,
-        const float sinPhi0, float* l, float* m)
+void oskar_convert_lon_lat_to_tangent_plane_direction_cudak_f(const int np,
+        const float* lon, const float* lat, const float lon0,
+        const float cosLat0, const float sinLat0, float* x, float* y)
 {
     // Get the position ID that this thread is working on.
     const int s = blockDim.x * blockIdx.x + threadIdx.x;
@@ -41,31 +45,31 @@ void oskar_cudak_sph_to_lm_f(const int np, const float* lambda,
     float cosPhi, sinPhi, sinLambda, cosLambda, relLambda, pphi;
     if (s < np)
     {
-        relLambda = lambda[s];
-        pphi = phi[s];
+        relLambda = lon[s];
+        pphi = lat[s];
     }
 
     // Convert from spherical to tangent-plane.
-    relLambda -= lambda0;
+    relLambda -= lon0;
     sincosf(relLambda, &sinLambda, &cosLambda);
     sincosf(pphi, &sinPhi, &cosPhi);
     float ll = cosPhi * sinLambda;
-    float mm = cosPhi0 * sinPhi;
-    mm -= sinPhi0 * cosPhi * cosLambda;
+    float mm = cosLat0 * sinPhi;
+    mm -= sinLat0 * cosPhi * cosLambda;
 
     // Output data.
     if (s < np)
     {
-        l[s] = ll;
-        m[s] = mm;
+        x[s] = ll;
+        y[s] = mm;
     }
 }
 
 // Double precision.
 __global__
-void oskar_cudak_sph_to_lm_d(const int np, const double* lambda,
-        const double* phi, const double lambda0, const double cosPhi0,
-        const double sinPhi0, double* l, double* m)
+void oskar_convert_lon_lat_to_tangent_plane_direction_cudak_d(const int np,
+        const double* lon, const double* lat, const double lon0,
+        const double cosLat0, const double sinLat0, double* x, double* y)
 {
     // Get the position ID that this thread is working on.
     const int s = blockDim.x * blockIdx.x + threadIdx.x;
@@ -74,22 +78,27 @@ void oskar_cudak_sph_to_lm_d(const int np, const double* lambda,
     double cosPhi, sinPhi, sinLambda, cosLambda, relLambda, pphi;
     if (s < np)
     {
-        relLambda = lambda[s];
-        pphi = phi[s];
+        relLambda = lon[s];
+        pphi = lat[s];
     }
 
     // Convert from spherical to tangent-plane.
-    relLambda -= lambda0;
+    relLambda -= lon0;
     sincos(relLambda, &sinLambda, &cosLambda);
     sincos(pphi, &sinPhi, &cosPhi);
     double ll = cosPhi * sinLambda;
-    double mm = cosPhi0 * sinPhi;
-    mm -= sinPhi0 * cosPhi * cosLambda;
+    double mm = cosLat0 * sinPhi;
+    mm -= sinLat0 * cosPhi * cosLambda;
 
     // Output data.
     if (s < np)
     {
-        l[s] = ll;
-        m[s] = mm;
+        x[s] = ll;
+        y[s] = mm;
     }
 }
+
+
+#ifdef __cplusplus
+}
+#endif

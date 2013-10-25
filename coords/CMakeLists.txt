@@ -36,6 +36,7 @@ set(coords_SRC
     src/oskar_convert_horizon_to_ecef.c
     src/oskar_convert_horizon_to_offset_ecef.c
 
+    src/oskar_convert_lon_lat_to_tangent_plane_direction_cuda.cu
     src/oskar_convert_lon_lat_to_tangent_plane_direction.c
     src/oskar_convert_lon_lat_to_xyz.c
 

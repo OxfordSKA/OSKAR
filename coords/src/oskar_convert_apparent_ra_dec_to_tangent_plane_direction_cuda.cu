@@ -30,7 +30,7 @@
 #include "oskar_convert_apparent_ra_dec_to_tangent_plane_direction_cuda.h"
 
 #include "oskar_compute_tangent_plane_direction_z_cuda.h"
-#include "math/cudak/oskar_cudak_sph_to_lm.h"
+#include "oskar_convert_lon_lat_to_tangent_plane_direction_cuda.h"
 
 #include <math.h>
 
@@ -46,12 +46,12 @@ void oskar_convert_apparent_ra_dec_to_tangent_plane_direction_cuda_f(
     float cosDec0, sinDec0;
     int num_blocks, num_threads = 256;
 
-    /* Compute l,m-direction-cosines of RA, Dec relative to reference point. */
+    /* Compute x,y-direction-cosines of RA, Dec relative to reference point. */
     num_blocks = (num_points + num_threads - 1) / num_threads;
     cosDec0 = cosf(dec0);
     sinDec0 = sinf(dec0);
-    // TODO --- add z evaluation to this function?
-    oskar_cudak_sph_to_lm_f OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+    oskar_convert_lon_lat_to_tangent_plane_direction_cudak_f
+            OSKAR_CUDAK_CONF(num_blocks, num_threads) (
             num_points, ra, dec, ra0, cosDec0, sinDec0, x, y);
 
     /* Compute z-direction-cosines of points from x and y. */
@@ -67,12 +67,12 @@ void oskar_convert_apparent_ra_dec_to_tangent_plane_direction_cuda_d(
     double cosDec0, sinDec0;
     int num_blocks, num_threads = 256;
 
-    /* Compute l,m-direction-cosines of RA, Dec relative to reference point. */
+    /* Compute x,y-direction-cosines of RA, Dec relative to reference point. */
     num_blocks = (num_points + num_threads - 1) / num_threads;
     cosDec0 = cos(dec0);
     sinDec0 = sin(dec0);
-    // TODO --- add z evaluation to this function?
-    oskar_cudak_sph_to_lm_d OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+    oskar_convert_lon_lat_to_tangent_plane_direction_cudak_d
+            OSKAR_CUDAK_CONF(num_blocks, num_threads) (
             num_points, ra, dec, ra0, cosDec0, sinDec0, x, y);
 
     /* Compute z-direction-cosines of points from x and y. */
