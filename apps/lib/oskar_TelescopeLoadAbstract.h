@@ -35,10 +35,11 @@
 
 #include <oskar_global.h>
 #include <oskar_telescope.h>
-#include <oskar_Settings.h>
 
-class QDir;
-#include <QtCore/QHash>
+#include <map>
+#include <string>
+
+class oskar_Dir;
 
 class OSKAR_APPS_EXPORT oskar_TelescopeLoadAbstract
 {
@@ -63,8 +64,9 @@ public:
      *                        level if necessary.
      * @param[in,out] status Status return code.
      */
-    virtual void load(oskar_Telescope* telescope, const QDir& cwd,
-            int num_subdirs, QHash<QString, QString>& filemap, int* status) = 0;
+    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
+            int num_subdirs, std::map<std::string, std::string>& filemap,
+            int* status) = 0;
 
     /**
      * @brief
@@ -82,9 +84,9 @@ public:
      *                        level if necessary.
      * @param[in,out] status Status return code.
      */
-    virtual void load(oskar_Station* station, const QDir& cwd,
-            int num_subdirs, int depth, QHash<QString, QString>& filemap,
-            int* status) = 0;
+    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
+            int num_subdirs, int depth,
+            std::map<std::string, std::string>& filemap, int* status) = 0;
 };
 
 #endif /* OSKAR_TELESCOPE_LOAD_ABSTRACT_H_ */

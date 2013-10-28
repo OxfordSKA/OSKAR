@@ -36,6 +36,8 @@ extern "C" {
 int oskar_file_exists(const char* filename)
 {
     FILE* stream;
+    if (!filename) return 0; /* Catch null pointer. */
+    if (!*filename) return 0; /* Catch empty string. */
     stream = fopen(filename, "r");
     if (stream)
     {

@@ -33,23 +33,19 @@
  * @file oskar_TelescopeLoadElementPattern.h
  */
 
-#include <oskar_global.h>
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-#include <oskar_telescope.h>
-#include <oskar_station.h>
 #include <oskar_Settings.h>
 #include <oskar_log.h>
 
-#include <QtCore/QHash>
-
-class QDir;
+class oskar_Dir;
 
 class OSKAR_APPS_EXPORT oskar_TelescopeLoadElementPattern
 : public oskar_TelescopeLoadAbstract
 {
 public:
-    oskar_TelescopeLoadElementPattern(const oskar_Settings* settings, oskar_Log* log);
+    oskar_TelescopeLoadElementPattern(const oskar_Settings* settings,
+            oskar_Log* log);
 
     virtual ~oskar_TelescopeLoadElementPattern();
 
@@ -69,8 +65,9 @@ public:
      *                        level if necessary.
      * @param[in,out] status Status return code.
      */
-    virtual void load(oskar_Telescope* telescope, const QDir& cwd,
-            int num_subdirs, QHash<QString, QString>& filemap, int* status);
+    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
+            int num_subdirs, std::map<std::string, std::string>& filemap,
+            int* status);
 
     /**
      * @brief
@@ -88,21 +85,22 @@ public:
      *                        level if necessary.
      * @param[in,out] status Status return code.
      */
-    virtual void load(oskar_Station* station, const QDir& cwd,
-            int num_subdirs, int depth, QHash<QString, QString>& filemap,
-            int* status);
+    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
+            int num_subdirs, int depth,
+            std::map<std::string, std::string>& filemap, int* status);
 
 private:
     void load_element_patterns(oskar_Log* log,
             const oskar_SettingsTelescope* settings, oskar_Station* station,
-            const QHash<QString, QString>& filemap, int* status);
+            const std::map<std::string, std::string>& filemap, int* status);
 
-    void update_map(QHash<QString, QString>& files, const QDir& cwd);
+    void update_map(std::map<std::string, std::string>& files,
+            const oskar_Dir& cwd);
 
 private:
-    static const QString element_x_cst_file;
-    static const QString element_y_cst_file;
-    QHash<QString, oskar_Element*> models;
+    static const std::string element_x_cst_file;
+    static const std::string element_y_cst_file;
+    std::map<std::string, oskar_Element*> models;
     const oskar_Settings* settings_;
     oskar_Log* log_;
 };

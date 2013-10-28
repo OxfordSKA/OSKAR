@@ -26,41 +26,68 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_H_
-#define OSKAR_TELESCOPE_LOAD_H_
+#include "apps/lib/oskar_Dir.h"
 
-/**
- * @file oskar_telescope_load.h
- */
+#include <QtCore/QDir>
+#include <QtCore/QString>
+#include <QtCore/QStringList>
 
-#include <oskar_global.h>
-#include <oskar_telescope.h>
-#include <oskar_Settings.h>
-#include <oskar_log.h>
+using std::string;
+using std::vector;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+class oskar_PrivateDir
+{
+public:
+    oskar_PrivateDir(const string& path)
+    {
+        dir = new QDir(QString::fromStdString(path));
+    }
+    ~oskar_PrivateDir()
+    {
+        delete dir;
+    }
+    QDir* dir;
+};
 
-/**
- * @brief
- * Loads the layout.txt and config.txt files from a telescope model directory,
- * populating the relevant parts of an OSKAR telescope model structure.
- *
- * @details
- * The telescope model must be initialised and in CPU memory.
- *
- * @param[out]    telescope  Pointer to empty telescope model structure to fill.
- * @param[in,out] log        Pointer to log structure to use.
- * @param[in]     settings   Pointer to an OSKAR settings structure.
- * @param[in,out] status     Status return code.
- */
-OSKAR_APPS_EXPORT
-void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
-        const oskar_Settings* settings, int* status);
-
-#ifdef __cplusplus
+oskar_Dir::oskar_Dir(const string path)
+{
+    p = new oskar_PrivateDir(path);
 }
-#endif
 
-#endif /* OSKAR_TELESCOPE_LOAD_H_ */
+oskar_Dir::~oskar_Dir()
+{
+    delete p;
+}
+
+string oskar_Dir::absoluteFilePath(const string& filename) const
+{
+    return p->dir->absoluteFilePath(QString::fromStdString(filename)).
+            toStdString();
+}
+
+vector<string> oskar_Dir::allSubDirs() const
+{
+    vector<string> r;
+    QStringList dirs = p->dir->entryList(QDir::AllDirs | QDir::NoDotAndDotDot,
+            QDir::Name);
+    for (int i = 0; i < dirs.size(); ++i)
+    {
+        r.push_back(dirs[i].toStdString());
+    }
+    return r;
+}
+
+bool oskar_Dir::exists(const string& filename) const
+{
+    return p->dir->exists(QString::fromStdString(filename));
+}
+
+bool oskar_Dir::exists() const
+{
+    return p->dir->exists();
+}
+
+string oskar_Dir::filePath(const string& filename) const
+{
+    return p->dir->filePath(QString::fromStdString(filename)).toStdString();
+}

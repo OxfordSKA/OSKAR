@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/lib/oskar_Dir.h"
 #include "apps/lib/oskar_telescope_load.h"
 #include "apps/lib/oskar_TelescopeLoadConfig.h"
 #include "apps/lib/oskar_TelescopeLoadElementPattern.h"
@@ -33,24 +34,26 @@
 #include <oskar_log.h>
 #include <oskar_get_error_string.h>
 
-#include <QtCore/QDir>
-#include <QtCore/QHash>
-#include <QtCore/QList>
-#include <QtCore/QStringList>
-
 #include <cstdlib>
+#include <map>
+#include <string>
+#include <vector>
+
+using std::map;
+using std::string;
+using std::vector;
 
 // Private function prototype.
 static void load_directories(oskar_Telescope* telescope,
-        const oskar_Settings* settings, const QDir& cwd,
+        const oskar_Settings* settings, const oskar_Dir& cwd,
         oskar_Station* station, int depth,
-        const QList<oskar_TelescopeLoadAbstract*>& loaders,
-        QHash<QString, QString> filemap, int* status);
+        const vector<oskar_TelescopeLoadAbstract*>& loaders,
+        map<string, string> filemap, int* status);
 
 
 extern "C"
-void oskar_telescope_load(oskar_Telescope* telescope,
-        oskar_Log* log, const oskar_Settings* settings, int* status)
+void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
+        const oskar_Settings* settings, int* status)
 {
     // Check all inputs.
     if (!telescope || !settings || !status)
@@ -63,7 +66,7 @@ void oskar_telescope_load(oskar_Telescope* telescope,
     if (*status) return;
 
     // Check that the directory exists.
-    QDir telescope_dir(settings->telescope.input_directory);
+    oskar_Dir telescope_dir(string(settings->telescope.input_directory));
     if (!telescope_dir.exists())
     {
         *status = OSKAR_ERR_FILE_IO;
@@ -78,13 +81,13 @@ void oskar_telescope_load(oskar_Telescope* telescope,
     }
 
     // Create the loaders.
-    QList<oskar_TelescopeLoadAbstract*> loaders;
+    vector<oskar_TelescopeLoadAbstract*> loaders;
     loaders.push_back(new oskar_TelescopeLoadConfig(settings)); // Must be first!
     loaders.push_back(new oskar_TelescopeLoadElementPattern(settings, log));
     loaders.push_back(new oskar_TelescopeLoadNoise(settings));
 
     // Load everything recursively from the telescope directory tree.
-    QHash<QString, QString> filemap;
+    map<string, string> filemap;
     load_directories(telescope, settings, telescope_dir, NULL, 0, loaders,
             filemap, status);
     if (*status)
@@ -103,17 +106,16 @@ void oskar_telescope_load(oskar_Telescope* telescope,
 // Private functions.
 
 static void load_directories(oskar_Telescope* telescope,
-        const oskar_Settings* settings, const QDir& cwd,
+        const oskar_Settings* settings, const oskar_Dir& cwd,
         oskar_Station* station, int depth,
-        const QList<oskar_TelescopeLoadAbstract*>& loaders,
-        QHash<QString, QString> filemap, int* status)
+        const vector<oskar_TelescopeLoadAbstract*>& loaders,
+        map<string, string> filemap, int* status)
 {
     // Check if safe to proceed.
     if (*status) return;
 
     // Get a list of all (child) stations in this directory, sorted by name.
-    QStringList children;
-    children = cwd.entryList(QDir::AllDirs | QDir::NoDotAndDotDot, QDir::Name);
+    vector<string> children = cwd.allSubDirs();
     int num_dirs = children.size();
 
     // Top-level depth.
@@ -129,7 +131,7 @@ static void load_directories(oskar_Telescope* telescope,
         if (num_dirs == 1)
         {
             // One station directory. Load and copy it to all the others.
-            QDir child_dir(cwd.filePath(children[0]));
+            oskar_Dir child_dir(cwd.filePath(children[0]));
 
             // Recursive call to load the station.
             load_directories(telescope, settings, child_dir,
@@ -152,7 +154,7 @@ static void load_directories(oskar_Telescope* telescope,
             for (int i = 0; i < num_dirs; ++i)
             {
                 // Get the child directory.
-                QDir child_dir(cwd.filePath(children[i]));
+                oskar_Dir child_dir(cwd.filePath(children[i]));
 
                 // Recursive call to load the station.
                 load_directories(telescope, settings, child_dir,
@@ -175,7 +177,7 @@ static void load_directories(oskar_Telescope* telescope,
         if (num_dirs == 1)
         {
             // One station directory. Load and copy it to all the others.
-            QDir child_dir(cwd.filePath(children[0]));
+            oskar_Dir child_dir(cwd.filePath(children[0]));
 
             // Recursive call to load the station.
             load_directories(telescope, settings, child_dir,
@@ -198,7 +200,7 @@ static void load_directories(oskar_Telescope* telescope,
             for (int i = 0; i < num_dirs; ++i)
             {
                 // Get the child directory.
-                QDir child_dir(cwd.filePath(children[i]));
+                oskar_Dir child_dir(cwd.filePath(children[i]));
 
                 // Recursive call to load the station.
                 load_directories(telescope, settings, child_dir,

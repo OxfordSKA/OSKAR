@@ -33,14 +33,10 @@
  * @file oskar_TelescopeLoadConfig.h
  */
 
-#include <oskar_global.h>
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 #include <oskar_Settings.h>
 
-#include <QtCore/QString>
-#include <QtCore/QHash>
-
-class QDir;
+class oskar_Dir;
 
 class OSKAR_APPS_EXPORT oskar_TelescopeLoadConfig
 : public oskar_TelescopeLoadAbstract
@@ -66,8 +62,9 @@ public:
      *                        level if necessary.
      * @param[in,out] status Status return code.
      */
-    virtual void load(oskar_Telescope* telescope, const QDir& cwd,
-            int num_subdirs, QHash<QString, QString>& filemap, int* status);
+    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
+            int num_subdirs, std::map<std::string, std::string>& filemap,
+            int* status);
 
     /**
      * @brief
@@ -85,13 +82,13 @@ public:
      *                        level if necessary.
      * @param[in,out] status Status return code.
      */
-    virtual void load(oskar_Station* station, const QDir& cwd,
-            int num_subdirs, int depth, QHash<QString, QString>& filemap,
-            int* status);
+    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
+            int num_subdirs, int depth,
+            std::map<std::string, std::string>& filemap, int* status);
 
 private:
-    static const QString config_file;
-    static const QString layout_file;
+    static const std::string config_file;
+    static const std::string layout_file;
     const oskar_Settings* settings_;
 };
 

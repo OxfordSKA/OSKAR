@@ -27,15 +27,15 @@
  */
 
 #include "apps/lib/oskar_TelescopeLoadElementPattern.h"
+#include "apps/lib/oskar_Dir.h"
 #include <oskar_station.h>
 #include <oskar_log.h>
 
-#include <QtCore/QDir>
-#include <QtCore/QString>
-#include <QtCore/QHash>
+using std::map;
+using std::string;
 
-const QString oskar_TelescopeLoadElementPattern::element_x_cst_file = "element_pattern_x_cst.txt";
-const QString oskar_TelescopeLoadElementPattern::element_y_cst_file = "element_pattern_y_cst.txt";
+const string oskar_TelescopeLoadElementPattern::element_x_cst_file = "element_pattern_x_cst.txt";
+const string oskar_TelescopeLoadElementPattern::element_y_cst_file = "element_pattern_y_cst.txt";
 
 oskar_TelescopeLoadElementPattern::oskar_TelescopeLoadElementPattern(
         const oskar_Settings* settings, oskar_Log* log)
@@ -49,7 +49,7 @@ oskar_TelescopeLoadElementPattern::~oskar_TelescopeLoadElementPattern()
 }
 
 void oskar_TelescopeLoadElementPattern::load(oskar_Telescope* telescope,
-        const QDir& cwd, int num_subdirs, QHash<QString, QString>& filemap,
+        const oskar_Dir& cwd, int num_subdirs, map<string, string>& filemap,
         int* status)
 {
     update_map(filemap, cwd);
@@ -68,8 +68,8 @@ void oskar_TelescopeLoadElementPattern::load(oskar_Telescope* telescope,
 }
 
 void oskar_TelescopeLoadElementPattern::load(oskar_Station* station,
-        const QDir& cwd, int num_subdirs, int /*depth*/,
-        QHash<QString, QString>& filemap, int* status)
+        const oskar_Dir& cwd, int num_subdirs, int /*depth*/,
+        map<string, string>& filemap, int* status)
 {
     update_map(filemap, cwd);
 
@@ -83,7 +83,7 @@ void oskar_TelescopeLoadElementPattern::load(oskar_Station* station,
 
 void oskar_TelescopeLoadElementPattern::load_element_patterns(oskar_Log* log,
         const oskar_SettingsTelescope* settings, oskar_Station* station,
-        const QHash<QString, QString>& filemap, int* status)
+        const map<string, string>& filemap, int* status)
 {
     // Check if safe to proceed.
     if (*status) return;
@@ -92,23 +92,22 @@ void oskar_TelescopeLoadElementPattern::load_element_patterns(oskar_Log* log,
     if (!settings->aperture_array.element_pattern.enable_numerical_patterns)
         return;
 
-    QString files;
-    QByteArray element_x, element_y;
-    if (filemap.contains(element_x_cst_file))
-        element_x = filemap.value(element_x_cst_file).toLatin1();
-    if (filemap.contains(element_y_cst_file))
-        element_y = filemap.value(element_y_cst_file).toLatin1();
+    string files, element_x, element_y;
+    if (filemap.count(element_x_cst_file))
+        element_x = filemap.at(element_x_cst_file);
+    if (filemap.count(element_y_cst_file))
+        element_y = filemap.at(element_y_cst_file);
     files.append(element_x);
     files.append(element_y);
 
     if (files.length() > 0)
     {
         // Check if this file combination has already been loaded.
-        if (models.contains(files))
+        if (models.count(files))
         {
             // Copy the element pattern data.
             oskar_element_copy(oskar_station_element(station, 0),
-                    models.value(files), status);
+                    models.at(files), status);
         }
         else
         {
@@ -116,32 +115,32 @@ void oskar_TelescopeLoadElementPattern::load_element_patterns(oskar_Log* log,
             if (element_x.length() > 0)
             {
                 oskar_log_message(log, 0, "Loading CST element "
-                        "pattern data (X): %s", element_x.constData());
+                        "pattern data (X): %s", element_x.c_str());
                 oskar_log_message(log, 0, "");
                 oskar_element_load_cst(oskar_station_element(station, 0),
-                        log, 1, element_x.constData(),
+                        log, 1, element_x.c_str(),
                         &settings->aperture_array.element_pattern.fit,
                         status);
             }
             if (element_y.length() > 0)
             {
                 oskar_log_message(log, 0, "Loading CST element "
-                        "pattern data (Y): %s", element_y.constData());
+                        "pattern data (Y): %s", element_y.c_str());
                 oskar_log_message(log, 0, "");
                 oskar_element_load_cst(oskar_station_element(station, 0),
-                        log, 2, element_y.constData(),
+                        log, 2, element_y.c_str(),
                         &settings->aperture_array.element_pattern.fit,
                         status);
             }
 
             // Store pointer to the element model for these files.
-            models.insert(files, oskar_station_element(station, 0));
+            models[files] = oskar_station_element(station, 0);
         }
     }
 }
 
-void oskar_TelescopeLoadElementPattern::update_map(QHash<QString, QString>& files,
-        const QDir& cwd)
+void oskar_TelescopeLoadElementPattern::update_map(map<string, string>& files,
+        const oskar_Dir& cwd)
 {
     // Update the dictionary of element files for the current directory.
     if (cwd.exists(element_x_cst_file))

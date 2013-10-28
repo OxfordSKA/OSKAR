@@ -27,13 +27,13 @@
  */
 
 #include "apps/lib/oskar_TelescopeLoadConfig.h"
+#include "apps/lib/oskar_Dir.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QString>
-#include <QtCore/QHash>
+using std::map;
+using std::string;
 
-const QString oskar_TelescopeLoadConfig::config_file = "config.txt";
-const QString oskar_TelescopeLoadConfig::layout_file = "layout.txt";
+const string oskar_TelescopeLoadConfig::config_file = "config.txt";
+const string oskar_TelescopeLoadConfig::layout_file = "layout.txt";
 
 oskar_TelescopeLoadConfig::oskar_TelescopeLoadConfig(const oskar_Settings* settings)
 {
@@ -45,11 +45,11 @@ oskar_TelescopeLoadConfig::~oskar_TelescopeLoadConfig()
 }
 
 void oskar_TelescopeLoadConfig::load(oskar_Telescope* telescope,
-        const QDir& cwd, int num_subdirs, QHash<QString, QString>& /*filemap*/,
-        int* status)
+        const oskar_Dir& cwd, int num_subdirs,
+        map<string, string>& /*filemap*/, int* status)
 {
     // Check for presence of "config.txt".
-    QString file;
+    string file;
     if (cwd.exists(layout_file))
         file = layout_file;
     else if (cwd.exists(config_file))
@@ -59,7 +59,7 @@ void oskar_TelescopeLoadConfig::load(oskar_Telescope* telescope,
 
     // Load the interferometer layout.
     oskar_telescope_load_station_coords_horizon(telescope,
-            cwd.filePath(file).toLatin1(), settings_->telescope.longitude_rad,
+            cwd.filePath(file).c_str(), settings_->telescope.longitude_rad,
             settings_->telescope.latitude_rad,
             settings_->telescope.altitude_m, status);
 
@@ -69,8 +69,7 @@ void oskar_TelescopeLoadConfig::load(oskar_Telescope* telescope,
         int num_stations = oskar_telescope_num_stations(telescope);
         for (int i = 0; i < num_stations; ++i)
         {
-            oskar_Station* station =
-                    oskar_telescope_station(telescope, i);
+            oskar_Station* station = oskar_telescope_station(telescope, i);
             oskar_station_resize(station, 1, status);
             oskar_station_resize_element_types(station, 1, status);
             oskar_station_set_element_coords(station, 0,
@@ -79,21 +78,20 @@ void oskar_TelescopeLoadConfig::load(oskar_Telescope* telescope,
                     1.0, 0.0, 0.0, 0.0, status);
             oskar_station_set_element_orientation(station, 0,
                     90.0, 0.0, status);
-            oskar_station_set_element_weight(station, 0,
-                    1.0, 0.0, status);
+            oskar_station_set_element_weight(station, 0, 1.0, 0.0, status);
         }
     }
 }
 
-void oskar_TelescopeLoadConfig::load(oskar_Station* station, const QDir& cwd,
-        int num_subdirs, int /*depth*/, QHash<QString, QString>& /*filemap*/,
-        int* status)
+void oskar_TelescopeLoadConfig::load(oskar_Station* station,
+        const oskar_Dir& cwd, int num_subdirs, int /*depth*/,
+        map<string, string>& /*filemap*/, int* status)
 {
     // Check for presence of "config.txt".
     if (cwd.exists(config_file))
     {
-        oskar_station_load_config(station,
-                cwd.filePath(config_file).toLatin1(), status);
+        oskar_station_load_config(station, cwd.filePath(config_file).c_str(),
+                status);
     }
     else
         *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;

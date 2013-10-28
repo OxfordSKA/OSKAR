@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_TELESCOPE_MODEL_LOAD_NOISE_H_
 #define OSKAR_TELESCOPE_MODEL_LOAD_NOISE_H_
 
@@ -34,15 +33,8 @@
  * @file oskar_TelescopeLoadNoise.h
  */
 
-#include <oskar_global.h>
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
-#include <oskar_mem.h>
-#include <oskar_system_noise_model_load.h>
 #include <oskar_Settings.h>
-
-#include <QtCore/QString>
-#include <QtCore/QHash>
-
 
 /**
  * @brief
@@ -76,8 +68,8 @@ public:
      * @param[in,out] filemap     Reference to file map to use for this level.
      * @param[in,out] status      Status return code.
      */
-    void load(oskar_Telescope* telescope, const QDir& cwd, int num_subdirs,
-            QHash<QString, QString>& filemap, int* status);
+    void load(oskar_Telescope* telescope, const oskar_Dir& cwd, int num_subdirs,
+            std::map<std::string, std::string>& filemap, int* status);
 
     /**
      * @brief
@@ -91,49 +83,59 @@ public:
      * @param[in,out] filemap     Reference to file map to use for this level.
      * @param[in,out] status      Status return code.
      */
-    void load(oskar_Station* station, const QDir& cwd, int num_subdirs,
-            int depth, QHash<QString, QString>& filemap,
+    void load(oskar_Station* station, const oskar_Dir& cwd, int num_subdirs,
+            int depth, std::map<std::string, std::string>& filemap,
             int* status);
 
 private:
     // Updates set of files to load.
-    void updateFileMap_(QHash<QString, QString>& filemap, const QDir& cwd);
+    void updateFileMap_(std::map<std::string, std::string>& filemap,
+            const oskar_Dir& cwd);
+
     // Obtains the array of noise frequencies.
-    void getNoiseFreqs_(oskar_Mem* freqs, const QString& filepath, int* status);
+    void getNoiseFreqs_(oskar_Mem* freqs, const std::string& filepath,
+            int* status);
+
     // Obtains the noise RMS values and sets then into the telescope model.
     void setNoiseRMS_(oskar_SystemNoiseModel* noise_model,
-            const QHash<QString, QString>& filemap, int* status);
+            const std::map<std::string, std::string>& filemap, int* status);
+
     // Obtains noise RMS values for telescope model priority loading.
     void noiseSpecTelescopeModel_(oskar_Mem* rms, int num_freqs,
             double bandwidth_hz, double integration_time_sec,
-            const QHash<QString, QString>& filemap, int* status);
+            const std::map<std::string, std::string>& filemap, int* status);
+
     // Obtains noise RMS values for RMS specification.
     void noiseSpecRMS_(oskar_Mem* rms, int num_freqs,
-            const QHash<QString, QString>& filemap, int* status);
+            const std::map<std::string, std::string>& filemap, int* status);
+
     // Obtains noise RMS values for sensitivity specification.
     void noiseSpecSensitivity_(oskar_Mem* rms, int num_freqs,
             double bandwidth_hz, double integration_time_sec,
-            QHash<QString, QString> filemap, int* status);
+            const std::map<std::string, std::string>& filemap, int* status);
+
     // Obtains noise RMS values for Tsys specification.
     void noiseSpecTsys_(oskar_Mem* rms, int num_freqs,
             double bandwidth_hz, double integration_time_sec,
-            QHash<QString, QString> filemap, int* status);
+            const std::map<std::string, std::string>& filemap, int* status);
+
     void sensitivity_to_rms_(oskar_Mem* rms, const oskar_Mem* sensitivity,
             int num_freqs, double bandwidth_hz, double integration_time_sec,
             int* status);
+
     void t_sys_to_rms_(oskar_Mem* rms, const oskar_Mem* t_sys,
             const oskar_Mem* area, const oskar_Mem* efficiency, int num_freqs,
             double bandwidth, double integration_time, int* status);
+
     void evaluate_range_(oskar_Mem* values, int num_values, double start,
             double end, int* status);
 
 private:
     enum FileIds_ { FREQ, RMS, SENSITIVITY, TSYS, AREA, EFFICIENCY };
     int dataType_;  // OSKAR data type of the telescope model being loaded.
-    QHash<FileIds_, QString> files_;
+    std::map<FileIds_, std::string> files_;
     oskar_Mem freqs_;
     const oskar_Settings* settings_;
 };
-
 
 #endif /* OSKAR_TELESCOPE_MODEL_LOAD_NOISE_H_ */
