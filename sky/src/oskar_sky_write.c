@@ -41,8 +41,7 @@
 extern "C" {
 #endif
 
-void oskar_sky_write(const char* filename, const oskar_Sky* sky,
-        int* status)
+void oskar_sky_write(const char* filename, const oskar_Sky* sky, int* status)
 {
     int type, num_sources, idx = 0;
     unsigned char group = OSKAR_TAG_GROUP_SKY_MODEL;
@@ -104,6 +103,9 @@ void oskar_sky_write(const char* filename, const oskar_Sky* sky,
             stream, group, OSKAR_SKY_TAG_FWHM_MINOR, idx, num_sources, status);
     oskar_mem_binary_stream_write(oskar_sky_position_angle_const(sky),
             stream, group, OSKAR_SKY_TAG_POSITION_ANGLE, idx, num_sources,
+            status);
+    oskar_mem_binary_stream_write(oskar_sky_rotation_measure_const(sky),
+            stream, group, OSKAR_SKY_TAG_ROTATION_MEASURE, idx, num_sources,
             status);
 
     /* Close the file. */

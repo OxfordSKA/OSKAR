@@ -60,7 +60,8 @@ enum {
     OSKAR_SKY_TAG_SPECTRAL_INDEX = 10,
     OSKAR_SKY_TAG_FWHM_MAJOR = 11,
     OSKAR_SKY_TAG_FWHM_MINOR = 12,
-    OSKAR_SKY_TAG_POSITION_ANGLE = 13
+    OSKAR_SKY_TAG_POSITION_ANGLE = 13,
+    OSKAR_SKY_TAG_ROTATION_MEASURE = 14
 };
 
 #ifdef __cplusplus
@@ -87,7 +88,7 @@ enum {
 #include <oskar_sky_resize.h>
 #include <oskar_sky_rotate_to_position.h>
 #include <oskar_sky_save.h>
-#include <oskar_sky_scale_by_spectral_index.h>
+#include <oskar_sky_scale_flux_with_frequency.h>
 #include <oskar_sky_set_gaussian_parameters.h>
 #include <oskar_sky_set_source.h>
 #include <oskar_sky_set_spectral_index.h>

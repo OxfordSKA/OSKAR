@@ -57,6 +57,7 @@ extern "C" {
  * @param[in] V                  Source Stokes V in Jy.
  * @param[in] ref_frequency_hz   Source reference frequency in Hz.
  * @param[in] spectral_index     Source spectral index.
+ * @param[in] rotation_measure   Source rotation measure in radians/m^2.
  * @param[in] fwhm_major_rad     Gaussian source major axis FWHM, in radians.
  * @param[in] fwhm_minor_rad     Gaussian source minor axis FWHM, in radians.
  * @param[in] position_angle_rad Gaussian source position angle, in radians.
@@ -65,8 +66,9 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
         double dec_rad, double I, double Q, double U, double V,
-        double ref_frequency_hz, double spectral_index, double fwhm_major_rad,
-        double fwhm_minor_rad, double position_angle_rad, int* status);
+        double ref_frequency_hz, double spectral_index, double rotation_measure,
+        double fwhm_major_rad, double fwhm_minor_rad, double position_angle_rad,
+        int* status);
 
 #ifdef __cplusplus
 }

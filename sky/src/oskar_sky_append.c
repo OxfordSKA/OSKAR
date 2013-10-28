@@ -57,9 +57,11 @@ void oskar_sky_append(oskar_Sky* dst, const oskar_Sky* src,
     oskar_mem_append(&dst->V, &src->V, status);
     oskar_mem_append(&dst->reference_freq, &src->reference_freq, status);
     oskar_mem_append(&dst->spectral_index, &src->spectral_index, status);
+    oskar_mem_append(&dst->RM, &src->RM, status);
     oskar_mem_append(&dst->FWHM_major, &src->FWHM_major, status);
     oskar_mem_append(&dst->FWHM_minor, &src->FWHM_minor, status);
     oskar_mem_append(&dst->position_angle, &src->position_angle, status);
+    oskar_mem_append(&dst->radius_arcmin, &src->radius_arcmin, status);
 
     /* Update the number of sources. */
     dst->num_sources += src->num_sources;

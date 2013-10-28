@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SCALE_FLUX_BY_SPECTRAL_INDEX_CUDA_H_
-#define OSKAR_SCALE_FLUX_BY_SPECTRAL_INDEX_CUDA_H_
+#ifndef OSKAR_SCALE_FLUX_WITH_FREQUENCY_CUDA_H_
+#define OSKAR_SCALE_FLUX_WITH_FREQUENCY_CUDA_H_
 
 /**
- * @file oskar_scale_flux_by_spectral_index_cuda.h
+ * @file oskar_scale_flux_with_frequency_cuda.h
  */
 
 #include <oskar_global.h>
@@ -46,8 +46,9 @@ extern "C" {
  *
  * @details
  * This function evaluates all fluxes (all Stokes parameters) at the specified
- * frequency using the spectral index of each source. The reference frequency
- * of each source is also updated to the specified frequency.
+ * frequency using the spectral index and rotation measure of each source.
+ * The reference frequency of each source is also updated to the specified
+ * frequency.
  *
  * Frequency scaling is performed using the expression:
  *
@@ -69,11 +70,12 @@ extern "C" {
  * @param[in,out] d_V        Source Stokes V values.
  * @param[in,out] d_ref_freq Source reference frequency values, in Hz.
  * @param[in] d_sp_index     Source spectral index values.
+ * @param[in] d_rm           Source rotation measure values, in rad/m^2.
  */
 OSKAR_EXPORT
-void oskar_scale_flux_by_spectral_index_cuda_f(int num_sources,
+void oskar_scale_flux_with_frequency_cuda_f(int num_sources,
         float frequency, float* d_I, float* d_Q, float* d_U, float* d_V,
-        float* d_ref_freq, const float* d_sp_index);
+        float* d_ref_freq, const float* d_sp_index, const float* d_rm);
 
 /**
  * @brief
@@ -82,8 +84,9 @@ void oskar_scale_flux_by_spectral_index_cuda_f(int num_sources,
  *
  * @details
  * This function evaluates all fluxes (all Stokes parameters) at the specified
- * frequency using the spectral index of each source. The reference frequency
- * of each source is also updated to the specified frequency.
+ * frequency using the spectral index and rotation measure of each source.
+ * The reference frequency of each source is also updated to the specified
+ * frequency.
  *
  * Frequency scaling is performed using the expression:
  *
@@ -105,11 +108,12 @@ void oskar_scale_flux_by_spectral_index_cuda_f(int num_sources,
  * @param[in,out] d_V        Source Stokes V values.
  * @param[in,out] d_ref_freq Source reference frequency values, in Hz.
  * @param[in] d_sp_index     Source spectral index values.
+ * @param[in] d_rm           Source rotation measure values, in rad/m^2.
  */
 OSKAR_EXPORT
-void oskar_scale_flux_by_spectral_index_cuda_d(int num_sources,
+void oskar_scale_flux_with_frequency_cuda_d(int num_sources,
         double frequency, double* d_I, double* d_Q, double* d_U, double* d_V,
-        double* d_ref_freq, const double* d_sp_index);
+        double* d_ref_freq, const double* d_sp_index, const double* d_rm);
 
 #ifdef __CUDACC__
 
@@ -120,8 +124,9 @@ void oskar_scale_flux_by_spectral_index_cuda_d(int num_sources,
  *
  * @details
  * This kernel evaluates all fluxes (all Stokes parameters) at the specified
- * frequency using the spectral index of each source. The reference frequency
- * of each source is also updated to the specified frequency.
+ * frequency using the spectral index and rotation measure of each source.
+ * The reference frequency of each source is also updated to the specified
+ * frequency.
  *
  * Frequency scaling is performed using the expression:
  *
@@ -140,11 +145,12 @@ void oskar_scale_flux_by_spectral_index_cuda_d(int num_sources,
  * @param[in,out] V          Source Stokes V values.
  * @param[in,out] ref_freq   Source reference frequency values, in Hz.
  * @param[in] sp_index       Source spectral index values.
+ * @param[in] rm             Source rotation measure values, in rad/m^2.
  */
 __global__
-void oskar_scale_flux_by_spectral_index_cudak_f(const int num_sources,
+void oskar_scale_flux_with_frequency_cudak_f(const int num_sources,
         const float frequency, float* I, float* Q, float* U, float* V,
-        float* ref_freq, const float* sp_index);
+        float* ref_freq, const float* sp_index, const float* rm);
 
 /**
  * @brief
@@ -153,8 +159,9 @@ void oskar_scale_flux_by_spectral_index_cudak_f(const int num_sources,
  *
  * @details
  * This kernel evaluates all fluxes (all Stokes parameters) at the specified
- * frequency using the spectral index of each source. The reference frequency
- * of each source is also updated to the specified frequency.
+ * frequency using the spectral index and rotation measure of each source.
+ * The reference frequency of each source is also updated to the specified
+ * frequency.
  *
  * Frequency scaling is performed using the expression:
  *
@@ -173,11 +180,12 @@ void oskar_scale_flux_by_spectral_index_cudak_f(const int num_sources,
  * @param[in,out] V          Source Stokes V values.
  * @param[in,out] ref_freq   Source reference frequency values, in Hz.
  * @param[in] sp_index       Source spectral index values.
+ * @param[in] rm             Source rotation measure values, in rad/m^2.
  */
 __global__
-void oskar_scale_flux_by_spectral_index_cudak_d(const int num_sources,
+void oskar_scale_flux_with_frequency_cudak_d(const int num_sources,
         const double frequency, double* I, double* Q, double* U, double* V,
-        double* ref_freq, const double* sp_index);
+        double* ref_freq, const double* sp_index, const double* rm);
 
 #endif /* __CUDACC__ */
 
@@ -185,4 +193,4 @@ void oskar_scale_flux_by_spectral_index_cudak_d(const int num_sources,
 }
 #endif
 
-#endif /* OSKAR_SCALE_FLUX_BY_SPECTRAL_INDEX_CUDA_H_ */
+#endif /* OSKAR_SCALE_FLUX_WITH_FREQUENCY_CUDA_H_ */

@@ -1,4 +1,4 @@
-2013-xx-xx  OSKAR-2.2.2
+2013-xx-xx  OSKAR-2.3.0
 
     * Renamed applications operating on OSKAR format visibiltity files
       from oskar_visibilities_* to oskar_vis_*.
@@ -30,6 +30,8 @@
 
     * Removed redundant CORRECTED_DATA and MODEL_DATA columns from
       Measurement Set output.
+
+    * Added per-source rotation measure to sky model.
 
     * Added additional meta-data to the OSKAR visibility structure recording
       telescope and station longitude and latitudes, as well as nominal station

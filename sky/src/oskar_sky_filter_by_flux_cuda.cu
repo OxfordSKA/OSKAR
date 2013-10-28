@@ -71,9 +71,11 @@ static void filter_source_data(oskar_Sky* output, T min_f, T max_f,
     DPT  V   = DPCT(oskar_sky_V(output));
     DPT  ref = DPCT(oskar_sky_reference_freq(output));
     DPT  sp  = DPCT(oskar_sky_spectral_index(output));
+    DPT  rm  = DPCT(oskar_sky_rotation_measure(output));
     DPT  l   = DPCT(oskar_sky_l(output));
     DPT  m   = DPCT(oskar_sky_m(output));
     DPT  n   = DPCT(oskar_sky_n(output));
+    DPT  rad = DPCT(oskar_sky_radius_arcmin(output));
     DPT  a   = DPCT(oskar_sky_gaussian_a(output));
     DPT  b   = DPCT(oskar_sky_gaussian_b(output));
     DPT  c   = DPCT(oskar_sky_gaussian_c(output));
@@ -89,9 +91,11 @@ static void filter_source_data(oskar_Sky* output, T min_f, T max_f,
     remove_if(V, V + num, Ic, range_check);
     remove_if(ref, ref + num, Ic, range_check);
     remove_if(sp, sp + num, Ic, range_check);
+    remove_if(rm, rm + num, Ic, range_check);
     remove_if(l, l + num, Ic, range_check);
     remove_if(m, m + num, Ic, range_check);
     remove_if(n, n + num, Ic, range_check);
+    remove_if(rad, rad + num, Ic, range_check);
     remove_if(a, a + num, Ic, range_check);
     remove_if(b, b + num, Ic, range_check);
     remove_if(c, c + num, Ic, range_check);

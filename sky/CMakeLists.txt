@@ -18,8 +18,8 @@ set(sky_SRC
     src/oskar_mjd_to_last_fast.c
     src/oskar_mjd_to_lmst.c
     #src/oskar_rebin_sky_cuda.cu # Doesn't work on compute 1.3 architectures.
-    src/oskar_scale_flux_by_spectral_index_cuda.cu
-    src/oskar_scale_flux_by_spectral_index.c
+    src/oskar_scale_flux_with_frequency_cuda.cu
+    src/oskar_scale_flux_with_frequency.c
     src/oskar_sky_accessors.c
     src/oskar_sky_append_to_set.c
     src/oskar_sky_append.c
@@ -43,7 +43,7 @@ set(sky_SRC
     src/oskar_sky_resize.c
     src/oskar_sky_rotate_to_position.c
     src/oskar_sky_save.c
-    src/oskar_sky_scale_by_spectral_index.c
+    src/oskar_sky_scale_flux_with_frequency.c
     src/oskar_sky_set_gaussian_parameters.c
     src/oskar_sky_set_source.c
     src/oskar_sky_set_spectral_index.c

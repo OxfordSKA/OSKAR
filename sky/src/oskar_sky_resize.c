@@ -58,9 +58,11 @@ void oskar_sky_resize(oskar_Sky* sky, int num_sources, int* status)
     oskar_mem_realloc(&sky->V, num_sources, status);
     oskar_mem_realloc(&sky->reference_freq, num_sources, status);
     oskar_mem_realloc(&sky->spectral_index, num_sources, status);
+    oskar_mem_realloc(&sky->RM, num_sources, status);
     oskar_mem_realloc(&sky->l, num_sources, status);
     oskar_mem_realloc(&sky->m, num_sources, status);
     oskar_mem_realloc(&sky->n, num_sources, status);
+    oskar_mem_realloc(&sky->radius_arcmin, num_sources, status);
     oskar_mem_realloc(&sky->FWHM_major, num_sources, status);
     oskar_mem_realloc(&sky->FWHM_minor, num_sources, status);
     oskar_mem_realloc(&sky->position_angle, num_sources, status);

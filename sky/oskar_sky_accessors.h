@@ -104,6 +104,12 @@ OSKAR_EXPORT
 const oskar_Mem* oskar_sky_spectral_index_const(const oskar_Sky* sky);
 
 OSKAR_EXPORT
+oskar_Mem* oskar_sky_rotation_measure(oskar_Sky* sky);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_sky_rotation_measure_const(const oskar_Sky* sky);
+
+OSKAR_EXPORT
 oskar_Mem* oskar_sky_l(oskar_Sky* sky);
 
 OSKAR_EXPORT

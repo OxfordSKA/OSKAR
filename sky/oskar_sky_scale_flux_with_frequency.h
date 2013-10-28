@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_SCALE_BY_SPECTRAL_INDEX_H_
-#define OSKAR_SKY_SCALE_BY_SPECTRAL_INDEX_H_
+#ifndef OSKAR_SKY_SCALE_FLUX_WITH_FREQUENCY_H_
+#define OSKAR_SKY_SCALE_FLUX_WITH_FREQUENCY_H_
 
 /**
- * @file oskar_sky_scale_by_spectral_index.h
+ * @file oskar_sky_scale_flux_with_frequency.h
  */
 
 #include <oskar_global.h>
@@ -48,19 +48,16 @@ extern "C" {
  * This function scales all the existing source brightnesses using the spectral
  * index and the given frequency.
  *
- * Note that the scaling is done relative to the current brightness, and should
- * therefore be performed only on a temporary copy of the original sky model.
- *
  * @param[in,out] model The sky model to re-scale.
- * @param[in] frequency The frequency, in Hz.
+ * @param[in] frequency The required frequency, in Hz.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_sky_scale_by_spectral_index(oskar_Sky* model,
-        double frequency, int* status);
+void oskar_sky_scale_flux_with_frequency(oskar_Sky* model, double frequency,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SKY_SCALE_BY_SPECTRAL_INDEX_H_ */
+#endif /* OSKAR_SKY_SCALE_FLUX_WITH_FREQUENCY_H_ */

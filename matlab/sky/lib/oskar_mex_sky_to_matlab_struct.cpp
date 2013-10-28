@@ -61,6 +61,7 @@ mxArray* oskar_mex_sky_to_matlab_struct(const oskar_Sky* sky,
     mxArray* mxV   = mxCreateNumericMatrix(m, n, classId, mxREAL);
     mxArray* mxRefFreq  = mxCreateNumericMatrix(m, n, classId, mxREAL);
     mxArray* mxSPIX     = mxCreateNumericMatrix(m, n, classId, mxREAL);
+    mxArray* mxRM       = mxCreateNumericMatrix(m, n, classId, mxREAL);
     mxArray* mxFWHM_Maj = mxCreateNumericMatrix(m, n, classId, mxREAL);
     mxArray* mxFWHM_Min = mxCreateNumericMatrix(m, n, classId, mxREAL);
     mxArray* mxPA       = mxCreateNumericMatrix(m, n, classId, mxREAL);
@@ -86,6 +87,9 @@ mxArray* oskar_mex_sky_to_matlab_struct(const oskar_Sky* sky,
     memcpy(mxGetData(mxSPIX),
             oskar_mem_void_const(oskar_sky_spectral_index_const(sky)),
             mem_size);
+    memcpy(mxGetData(mxRM),
+            oskar_mem_void_const(oskar_sky_rotation_measure_const(sky)),
+            mem_size);
     memcpy(mxGetData(mxFWHM_Maj),
             oskar_mem_void_const(oskar_sky_fwhm_major_const(sky)),
             mem_size);
@@ -108,11 +112,12 @@ mxArray* oskar_mex_sky_to_matlab_struct(const oskar_Sky* sky,
             "V",
             "reference_freq",
             "spectral_index",
+            "rotation_measure",
             "FWHM_Major",
             "FWHM_Minor",
             "position_angle"
     };
-    mxSky = mxCreateStructMatrix(1, 1, 13, fields);
+    mxSky = mxCreateStructMatrix(1, 1, 14, fields);
 
     if (filename)
     {
@@ -127,9 +132,10 @@ mxArray* oskar_mex_sky_to_matlab_struct(const oskar_Sky* sky,
     mxSetField(mxSky, 0, fields[7],  mxV);
     mxSetField(mxSky, 0, fields[8],  mxRefFreq);
     mxSetField(mxSky, 0, fields[9],  mxSPIX);
-    mxSetField(mxSky, 0, fields[10], mxFWHM_Maj);
-    mxSetField(mxSky, 0, fields[11], mxFWHM_Min);
-    mxSetField(mxSky, 0, fields[12], mxPA);
+    mxSetField(mxSky, 0, fields[10], mxRM);
+    mxSetField(mxSky, 0, fields[11], mxFWHM_Maj);
+    mxSetField(mxSky, 0, fields[12], mxFWHM_Min);
+    mxSetField(mxSky, 0, fields[13], mxPA);
 
     return mxSky;
 }

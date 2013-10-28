@@ -67,11 +67,15 @@ void oskar_sky_get_ptr(oskar_Sky* sky_ptr, const oskar_Sky* sky,
             offset, num_sources, status);
     oskar_mem_get_pointer(&sky_ptr->spectral_index, &sky->spectral_index,
             offset, num_sources, status);
+    oskar_mem_get_pointer(&sky_ptr->RM, &sky->RM,
+            offset, num_sources, status);
     oskar_mem_get_pointer(&sky_ptr->l, &sky->l,
             offset, num_sources, status);
     oskar_mem_get_pointer(&sky_ptr->m, &sky->m,
             offset, num_sources, status);
     oskar_mem_get_pointer(&sky_ptr->n, &sky->n,
+            offset, num_sources, status);
+    oskar_mem_get_pointer(&sky_ptr->radius_arcmin, &sky->radius_arcmin,
             offset, num_sources, status);
     oskar_mem_get_pointer(&sky_ptr->FWHM_major, &sky->FWHM_major,
             offset, num_sources, status);

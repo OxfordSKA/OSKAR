@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SCALE_FLUX_BY_SPECTRAL_INDEX_H_
-#define OSKAR_SCALE_FLUX_BY_SPECTRAL_INDEX_H_
+#ifndef OSKAR_SCALE_FLUX_WITH_FREQUENCY_H_
+#define OSKAR_SCALE_FLUX_WITH_FREQUENCY_H_
 
 /**
- * @file oskar_scale_flux_by_spectral_index.h
+ * @file oskar_scale_flux_with_frequency.h
  */
 
 #include <oskar_global.h>
@@ -66,11 +66,12 @@ extern "C" {
  * @param[in,out] V          Source Stokes V values.
  * @param[in,out] ref_freq   Source reference frequency values, in Hz.
  * @param[in] sp_index       Source spectral index values.
+ * @param[in] rm             Source rotation measure values, in rad/m^2.
  */
 OSKAR_EXPORT
-void oskar_scale_flux_by_spectral_index_f(int num_sources, float frequency,
+void oskar_scale_flux_with_frequency_f(int num_sources, float frequency,
         float* I, float* Q, float* U, float* V, float* ref_freq,
-        const float* sp_index);
+        const float* sp_index, const float* rm);
 
 /**
  * @brief
@@ -99,14 +100,15 @@ void oskar_scale_flux_by_spectral_index_f(int num_sources, float frequency,
  * @param[in,out] V          Source Stokes V values.
  * @param[in,out] ref_freq   Source reference frequency values, in Hz.
  * @param[in] sp_index       Source spectral index values.
+ * @param[in] rm             Source rotation measure values, in rad/m^2.
  */
 OSKAR_EXPORT
-void oskar_scale_flux_by_spectral_index_d(int num_sources, double frequency,
+void oskar_scale_flux_with_frequency_d(int num_sources, double frequency,
         double* I, double* Q, double* U, double* V, double* ref_freq,
-        const double* sp_index);
+        const double* sp_index, const double* rm);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SCALE_FLUX_BY_SPECTRAL_INDEX_H_ */
+#endif /* OSKAR_SCALE_FLUX_WITH_FREQUENCY_H_ */

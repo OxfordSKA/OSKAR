@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +58,7 @@ extern "C" {
  * @param[in] val All memory elements will be set to this value.
  * @param[in] offset Array index offset at which to start.
  * @param[in] length Number of array elements to set, starting at offset.
- *                   Note that 0 for both \p offset and \p length means all.
+ *                   Note that 0 for both \p offset and \p length means "all".
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT

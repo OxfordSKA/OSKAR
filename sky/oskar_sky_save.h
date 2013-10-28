@@ -55,8 +55,7 @@ extern "C" {
  * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-void oskar_sky_save(const char* filename, const oskar_Sky* sky,
-        int* status);
+void oskar_sky_save(const char* filename, const oskar_Sky* sky, int* status);
 
 #ifdef __cplusplus
 }

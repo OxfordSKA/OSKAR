@@ -29,7 +29,6 @@
 #include "matlab/sky/lib/oskar_mex_sky_from_matlab_struct.h"
 #include <oskar_get_error_string.h>
 #include <oskar_sky.h>
-#include <oskar_sky_init.h>
 #include <oskar_mem.h>
 #include <cstring>
 #include <cstdlib>
@@ -60,9 +59,9 @@ oskar_Sky* oskar_mex_sky_from_matlab_struct(const mxArray* mxSky)
 
     if (!mxIsStruct(mxSky)) struct_error("Input is not a structure!");
 
-    if (mxGetNumberOfFields(mxSky) < 13)
+    if (mxGetNumberOfFields(mxSky) < 14)
     {
-        struct_error("Incorrect number of fields, expecting >= 13");
+        struct_error("Incorrect number of fields, expecting >= 14");
     }
 
     const char* fields[] =
@@ -77,6 +76,7 @@ oskar_Sky* oskar_mex_sky_from_matlab_struct(const mxArray* mxSky)
             "V",
             "reference_freq",
             "spectral_index",
+            "rotation_measure",
             "FWHM_Major",
             "FWHM_Minor",
             "position_angle"
@@ -99,40 +99,38 @@ oskar_Sky* oskar_mex_sky_from_matlab_struct(const mxArray* mxSky)
     if (!mxRefFreq) field_error(fields[8]);
     mxArray* mxSPIX = mxGetField(mxSky, 0, fields[9]);
     if (!mxSPIX) field_error(fields[9]);
-    mxArray* mxFWHM_Maj = mxGetField(mxSky, 0, fields[10]);
-    if (!mxFWHM_Maj) field_error(fields[10]);
-    mxArray* mxFWHM_Min = mxGetField(mxSky, 0, fields[11]);
-    if (!mxFWHM_Min) field_error(fields[11]);
-    mxArray* mxPA = mxGetField(mxSky, 0, fields[12]);
-    if (!mxPA) field_error(fields[12]);
+    mxArray* mxRM = mxGetField(mxSky, 0, fields[10]);
+    if (!mxRM) field_error(fields[10]);
+    mxArray* mxFWHM_Maj = mxGetField(mxSky, 0, fields[11]);
+    if (!mxFWHM_Maj) field_error(fields[11]);
+    mxArray* mxFWHM_Min = mxGetField(mxSky, 0, fields[12]);
+    if (!mxFWHM_Min) field_error(fields[12]);
+    mxArray* mxPA = mxGetField(mxSky, 0, fields[13]);
+    if (!mxPA) field_error(fields[13]);
 
     int num_sources = (int)mxGetScalar(mxNumSources);
     int type = mxIsDouble(mxRA) ? OSKAR_DOUBLE : OSKAR_SINGLE;
     sky = oskar_sky_create(type, OSKAR_LOCATION_CPU, num_sources, &status);
     if (status)
     {
-        mexErrMsgIdAndTxt("oskar:error", "ERROR: oskar_sky_init() failed "
+        mexErrMsgIdAndTxt("oskar:error", "ERROR: oskar_sky_create() failed "
                 "with code %i: %s.\n", status, oskar_get_error_string(status));
     }
 
     size_t mem_size = num_sources;
     mem_size *= (type == OSKAR_DOUBLE) ? sizeof(double) : sizeof(float);
-    memcpy(oskar_mem_void(oskar_sky_ra(sky)),
-            mxGetData(mxRA), mem_size);
-    memcpy(oskar_mem_void(oskar_sky_dec(sky)),
-            mxGetData(mxDec), mem_size);
-    memcpy(oskar_mem_void(oskar_sky_I(sky)),
-            mxGetData(mxI), mem_size);
-    memcpy(oskar_mem_void(oskar_sky_Q(sky)),
-            mxGetData(mxQ), mem_size);
-    memcpy(oskar_mem_void(oskar_sky_U(sky)),
-            mxGetData(mxU), mem_size);
-    memcpy(oskar_mem_void(oskar_sky_V(sky)),
-            mxGetData(mxV), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_ra(sky)), mxGetData(mxRA), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_dec(sky)), mxGetData(mxDec), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_I(sky)), mxGetData(mxI), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_Q(sky)), mxGetData(mxQ), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_U(sky)), mxGetData(mxU), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_V(sky)), mxGetData(mxV), mem_size);
     memcpy(oskar_mem_void(oskar_sky_reference_freq(sky)),
             mxGetData(mxRefFreq), mem_size);
     memcpy(oskar_mem_void(oskar_sky_spectral_index(sky)),
             mxGetData(mxSPIX), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_rotation_measure(sky)),
+            mxGetData(mxRM), mem_size);
     memcpy(oskar_mem_void(oskar_sky_fwhm_major(sky)),
             mxGetData(mxFWHM_Maj), mem_size);
     memcpy(oskar_mem_void(oskar_sky_fwhm_minor(sky)),

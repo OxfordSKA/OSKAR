@@ -319,7 +319,7 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
                         oskar_sky_resize(temp_sky, j + 100, &err);
                     oskar_sky_set_source(temp_sky, j, ra, dec,
                             val_new, 0.0, 0.0, 0.0, ref_freq, spectral_index,
-                            0.0, 0.0, 0.0, &err);
+                            0.0, 0.0, 0.0, 0.0, &err);
                     if (err) goto cleanup;
                     ++j;
                 }
@@ -364,7 +364,7 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
                         oskar_sky_resize(temp_sky, j + 100, &err);
                     oskar_sky_set_source(temp_sky, j, ra, dec,
                             val_new, 0.0, 0.0, 0.0, ref_freq, spectral_index,
-                            0.0, 0.0, 0.0, &err);
+                            0.0, 0.0, 0.0, 0.0, &err);
                     if (err) goto cleanup;
                     ++j;
                 }

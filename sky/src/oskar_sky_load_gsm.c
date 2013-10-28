@@ -46,8 +46,7 @@ extern "C" {
 
 static const double boltzmann = 1.3806488e-23; /* Boltzmann constant in J/K. */
 
-void oskar_sky_load_gsm(oskar_Sky* sky, const char* filename,
-        int* status)
+void oskar_sky_load_gsm(oskar_Sky* sky, const char* filename, int* status)
 {
     int i, n = 0, nside, type;
     FILE* file;
@@ -155,7 +154,7 @@ void oskar_sky_load_gsm(oskar_Sky* sky, const char* filename,
 
         /* Store pixel data. */
         oskar_sky_set_source(temp_sky, i, ra, dec,
-                temp[i], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
+                temp[i], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
     }
 
     /* Append data to model and free temporary storage. */

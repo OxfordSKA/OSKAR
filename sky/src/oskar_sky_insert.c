@@ -35,8 +35,8 @@
 extern "C" {
 #endif
 
-void oskar_sky_insert(oskar_Sky* dst, const oskar_Sky* src,
-        int offset, int* status)
+void oskar_sky_insert(oskar_Sky* dst, const oskar_Sky* src, int offset,
+        int* status)
 {
     /* Check all inputs. */
     if (!src || !dst || !status)
@@ -56,9 +56,11 @@ void oskar_sky_insert(oskar_Sky* dst, const oskar_Sky* src,
     oskar_mem_insert(&dst->V, &src->V, offset, status);
     oskar_mem_insert(&dst->reference_freq, &src->reference_freq, offset, status);
     oskar_mem_insert(&dst->spectral_index, &src->spectral_index, offset, status);
+    oskar_mem_insert(&dst->RM, &src->RM, offset, status);
     oskar_mem_insert(&dst->l, &src->l, offset, status);
     oskar_mem_insert(&dst->m, &src->m, offset, status);
     oskar_mem_insert(&dst->n, &src->n, offset, status);
+    oskar_mem_insert(&dst->radius_arcmin, &src->radius_arcmin, offset, status);
     oskar_mem_insert(&dst->FWHM_major, &src->FWHM_major, offset, status);
     oskar_mem_insert(&dst->FWHM_minor, &src->FWHM_minor, offset, status);
     oskar_mem_insert(&dst->position_angle, &src->position_angle, offset, status);

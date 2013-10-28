@@ -40,14 +40,13 @@ extern "C" {
 static const double deg2rad = 1.74532925199432957692369e-2;
 static const double arcsec2rad = 4.84813681109535993589914e-6;
 
-void oskar_sky_load(oskar_Sky* sky, const char* filename,
-        int* status)
+void oskar_sky_load(oskar_Sky* sky, const char* filename, int* status)
 {
     int type, n = 0;
     FILE* file;
     char* line = 0;
     size_t bufsize = 0;
-    oskar_Sky* temp_sky;
+    oskar_Sky* temp;
 
     /* Check all inputs. */
     if (!sky || !filename || !status)
@@ -76,81 +75,70 @@ void oskar_sky_load(oskar_Sky* sky, const char* filename,
     }
 
     /* Initialise the temporary sky model. */
-    temp_sky = oskar_sky_create(type, OSKAR_LOCATION_CPU, 0, status);
+    temp = oskar_sky_create(type, OSKAR_LOCATION_CPU, 0, status);
 
-    if (type == OSKAR_DOUBLE)
+    /* Loop over lines in file. */
+    while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
-        while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
+        /* Set defaults. */
+        /* RA, Dec, I, Q, U, V, freq0, spix, RM, FWHM maj, FWHM min, PA */
+        double par[] = {0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
+        int num_param = sizeof(par) / sizeof(double);
+        int num_required = 3, num_read = 0;
+
+        /* Load source parameters (require at least RA, Dec, Stokes I). */
+        num_read = oskar_string_to_array_d(line, num_param, par);
+        if (num_read < num_required)
+            continue;
+
+        /* Ensure enough space in arrays. */
+        if (n % 100 == 0)
         {
-            /* Set defaults. */
-            /*  (RA, Dec, I, Q, U, V, freq0, spix, FWHM maj, FWHM min, PA) */
-            int num_param = 11;
-            int num_required = 3;
-            double par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-
-            /* Load source parameters (require at least RA, Dec, Stokes I). */
-            if (oskar_string_to_array_d(line, num_param, par) < num_required)
-                continue;
-
-            /* Ensure enough space in arrays. */
-            if (n % 100 == 0)
-            {
-                oskar_sky_resize(temp_sky, n + 100, status);
-                if (*status)
-                {
-                    oskar_sky_free(temp_sky, status);
-                    fclose(file);
-                    return;
-                }
-            }
-            oskar_sky_set_source(temp_sky, n,
-                    par[0] * deg2rad, par[1] * deg2rad,
-                    par[2], par[3], par[4], par[5], par[6], par[7],
-                    par[8] * arcsec2rad, par[9] * arcsec2rad, par[10] * deg2rad,
-                    status);
-            ++n;
+            oskar_sky_resize(temp, n + 100, status);
+            if (*status)
+                break;
         }
-    }
-    else if (type == OSKAR_SINGLE)
-    {
-        while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
+
+        if (num_read <= 9)
         {
-            /* Set defaults. */
-            /*  (RA, Dec, I, Q, U, V, freq0, spix, FWHM maj, FWHM min, PA) */
-            int num_param = 11;
-            int num_required = 3;
-            float par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-
-            /* Load source parameters (require at least RA, Dec, Stokes I). */
-            if (oskar_string_to_array_f(line, num_param, par) < num_required)
-                continue;
-
-            /* Ensure enough space in arrays. */
-            if (n % 100 == 0)
-            {
-                oskar_sky_resize(temp_sky, n + 100, status);
-                if (*status)
-                {
-                    oskar_sky_free(temp_sky, status);
-                    fclose(file);
-                    return;
-                }
-            }
-            oskar_sky_set_source(temp_sky, n,
-                    par[0] * deg2rad, par[1] * deg2rad,
-                    par[2], par[3], par[4], par[5], par[6], par[7],
-                    par[8] * arcsec2rad, par[9] * arcsec2rad, par[10] * deg2rad,
-                    status);
-            ++n;
+            /* RA, Dec, I, Q, U, V, freq0, spix, RM */
+            oskar_sky_set_source(temp, n, par[0] * deg2rad,
+                    par[1] * deg2rad, par[2], par[3], par[4], par[5],
+                    par[6], par[7], par[8], 0.0, 0.0, 0.0, status);
         }
+        else if (num_read == 11)
+        {
+            /* Old format, with no rotation measure. */
+            /* RA, Dec, I, Q, U, V, freq0, spix, FWHM maj, FWHM min, PA */
+            oskar_sky_set_source(temp, n, par[0] * deg2rad,
+                    par[1] * deg2rad, par[2], par[3], par[4], par[5],
+                    par[6], par[7], 0.0, par[8] * arcsec2rad,
+                    par[9] * arcsec2rad, par[10] * deg2rad, status);
+        }
+        else if (num_read == 12)
+        {
+            /* New format. */
+            /* RA, Dec, I, Q, U, V, freq0, spix, RM, FWHM maj, FWHM min, PA */
+            oskar_sky_set_source(temp, n, par[0] * deg2rad,
+                    par[1] * deg2rad, par[2], par[3], par[4], par[5],
+                    par[6], par[7], par[8], par[9] * arcsec2rad,
+                    par[10] * arcsec2rad, par[11] * deg2rad, status);
+        }
+        else
+        {
+            /* Error. */
+            *status = OSKAR_ERR_BAD_SKY_FILE;
+            break;
+        }
+        ++n;
     }
 
     /* Set the size to be the actual number of elements loaded. */
-    oskar_sky_resize(temp_sky, n, status);
+    oskar_sky_resize(temp, n, status);
 
     /* Append to output and free the temporary sky model. */
-    oskar_sky_append(sky, temp_sky, status);
-    oskar_sky_free(temp_sky, status);
+    oskar_sky_append(sky, temp, status);
+    oskar_sky_free(temp, status);
 
     /* Free the line buffer and close the file. */
     if (line) free(line);

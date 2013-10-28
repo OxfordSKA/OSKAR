@@ -67,10 +67,11 @@ void oskar_sky_init(oskar_Sky* model, int type, int location,
     oskar_mem_init(&model->V, type, location, num_elements, owner, status);
     oskar_mem_init(&model->reference_freq, type, location, num_elements, owner, status);
     oskar_mem_init(&model->spectral_index, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->RM, type, location, num_elements, owner, status);
     oskar_mem_init(&model->l, type, location, num_elements, owner, status);
     oskar_mem_init(&model->m, type, location, num_elements, owner, status);
     oskar_mem_init(&model->n, type, location, num_elements, owner, status);
-    oskar_mem_init(&model->radius_arcmin, type, location, 0, owner, status);
+    oskar_mem_init(&model->radius_arcmin, type, location, num_elements, owner, status);
     oskar_mem_init(&model->FWHM_major, type, location, num_elements, owner, status);
     oskar_mem_init(&model->FWHM_minor, type, location, num_elements, owner, status);
     oskar_mem_init(&model->position_angle, type, location, num_elements, owner, status);

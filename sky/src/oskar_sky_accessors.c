@@ -98,6 +98,11 @@ oskar_Mem* oskar_sky_spectral_index(oskar_Sky* sky)
     return &sky->spectral_index;
 }
 
+oskar_Mem* oskar_sky_rotation_measure(oskar_Sky* sky)
+{
+    return &sky->RM;
+}
+
 oskar_Mem* oskar_sky_l(oskar_Sky* sky)
 {
     return &sky->l;
@@ -186,6 +191,11 @@ const oskar_Mem* oskar_sky_reference_freq_const(const oskar_Sky* sky)
 const oskar_Mem* oskar_sky_spectral_index_const(const oskar_Sky* sky)
 {
     return &sky->spectral_index;
+}
+
+const oskar_Mem* oskar_sky_rotation_measure_const(const oskar_Sky* sky)
+{
+    return &sky->RM;
 }
 
 const oskar_Mem* oskar_sky_l_const(const oskar_Sky* sky)

@@ -41,8 +41,7 @@
 extern "C" {
 #endif
 
-void oskar_sky_save(const char* filename, const oskar_Sky* sky,
-        int* status)
+void oskar_sky_save(const char* filename, const oskar_Sky* sky, int* status)
 {
     int s, type, num_sources;
     FILE* file;
@@ -78,14 +77,14 @@ void oskar_sky_save(const char* filename, const oskar_Sky* sky,
 
     /* Print a helpful header. */
     fprintf(file, "# Number of sources: %i\n", num_sources);
-    fprintf(file, "# RA (deg), Dec (deg), I (Jy), Q (Jy), U (Jy), V (Jy),"
-            " Ref. freq. (Hz), Spectral index, FWHM major (arcsec), "
-            "FWHM minor (arcsec), Position angle (deg)\n");
+    fprintf(file, "# RA (deg), Dec (deg), I (Jy), Q (Jy), U (Jy), V (Jy), "
+            "Ref. freq. (Hz), Spectral index, Rotation measure (rad/m^2), "
+            "FWHM major (arcsec), FWHM minor (arcsec), Position angle (deg)\n");
 
     /* Print out sky model in ASCII format. */
     if (type == OSKAR_DOUBLE)
     {
-        const double *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *sp_;
+        const double *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *sp_, *rm_;
         const double *maj_, *min_, *pa_;
         ra_  = oskar_mem_double_const(oskar_sky_ra_const(sky), status);
         dec_ = oskar_mem_double_const(oskar_sky_dec_const(sky), status);
@@ -95,23 +94,24 @@ void oskar_sky_save(const char* filename, const oskar_Sky* sky,
         V_   = oskar_mem_double_const(oskar_sky_V_const(sky), status);
         ref_ = oskar_mem_double_const(oskar_sky_reference_freq_const(sky), status);
         sp_  = oskar_mem_double_const(oskar_sky_spectral_index_const(sky), status);
+        rm_  = oskar_mem_double_const(oskar_sky_rotation_measure_const(sky), status);
         maj_ = oskar_mem_double_const(oskar_sky_fwhm_major_const(sky), status);
         min_ = oskar_mem_double_const(oskar_sky_fwhm_minor_const(sky), status);
         pa_  = oskar_mem_double_const(oskar_sky_position_angle_const(sky), status);
 
         for (s = 0; s < num_sources; ++s)
         {
-            fprintf(file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,"
+            fprintf(file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,% 12.6e,"
                     "% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 11.6f\n",
                     ra_[s] * RAD2DEG, dec_[s] * RAD2DEG,
-                    I_[s], Q_[s], U_[s], V_[s], ref_[s], sp_[s],
+                    I_[s], Q_[s], U_[s], V_[s], ref_[s], sp_[s], rm_[s],
                     maj_[s] * RAD2ARCSEC, min_[s] * RAD2ARCSEC,
                     pa_[s] * RAD2DEG);
         }
     }
     else if (type == OSKAR_SINGLE)
     {
-        const float *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *sp_;
+        const float *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *sp_, *rm_;
         const float *maj_, *min_, *pa_;
         ra_  = oskar_mem_float_const(oskar_sky_ra_const(sky), status);
         dec_ = oskar_mem_float_const(oskar_sky_dec_const(sky), status);
@@ -121,16 +121,17 @@ void oskar_sky_save(const char* filename, const oskar_Sky* sky,
         V_   = oskar_mem_float_const(oskar_sky_V_const(sky), status);
         ref_ = oskar_mem_float_const(oskar_sky_reference_freq_const(sky), status);
         sp_  = oskar_mem_float_const(oskar_sky_spectral_index_const(sky), status);
+        rm_  = oskar_mem_float_const(oskar_sky_rotation_measure_const(sky), status);
         maj_ = oskar_mem_float_const(oskar_sky_fwhm_major_const(sky), status);
         min_ = oskar_mem_float_const(oskar_sky_fwhm_minor_const(sky), status);
         pa_  = oskar_mem_float_const(oskar_sky_position_angle_const(sky), status);
 
         for (s = 0; s < num_sources; ++s)
         {
-            fprintf(file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,"
+            fprintf(file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,% 12.6e,"
                     "% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 11.6f\n",
                     ra_[s] * RAD2DEG, dec_[s] * RAD2DEG,
-                    I_[s], Q_[s], U_[s], V_[s], ref_[s], sp_[s],
+                    I_[s], Q_[s], U_[s], V_[s], ref_[s], sp_[s], rm_[s],
                     maj_[s] * RAD2ARCSEC, min_[s] * RAD2ARCSEC,
                     pa_[s] * RAD2DEG);
         }

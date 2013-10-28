@@ -47,7 +47,7 @@
  * This macro expands to a string that specifies the OSKAR version number
  * (for example, "2.1.3").
  */
-#define OSKAR_VERSION_STR "2.2.2-trunk4"
+#define OSKAR_VERSION_STR "2.2.2-trunk5"
 
 /**
  * @brief
@@ -191,10 +191,10 @@ enum {
     /* Indicates an error relating to ionospheric model settings */
     OSKAR_ERR_SETTINGS_IONOSPHERE      = -509,
 
-    /* Indicates a failure to setup a model data structure */
+    /* Indicates a failure to set up a model data structure */
     OSKAR_ERR_SETUP_FAIL               = -600,
 
-    /* Indicates a failure to setup the telescope model */
+    /* Indicates a failure to set up the telescope model */
     OSKAR_ERR_SETUP_FAIL_TELESCOPE     = -700,
 
     /* Indicates that the number of directories in the telescope model is
@@ -205,7 +205,7 @@ enum {
      * telescope model. */
     OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING = -702,
 
-    /* Indicates a failure to setup the telescope model */
+    /* Indicates a failure to set up the sky model */
     OSKAR_ERR_SETUP_FAIL_SKY           = -800,
 
     /* Indicates a badly formed pointing file. */
@@ -213,6 +213,9 @@ enum {
 
     /* Indicates a badly formed global sky model file. */
     OSKAR_ERR_BAD_GSM_FILE             = -910,
+
+    /* Indicates a badly formed global sky model file. */
+    OSKAR_ERR_BAD_SKY_FILE             = -911,
 
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN                  = -1000,

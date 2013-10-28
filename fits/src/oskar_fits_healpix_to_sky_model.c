@@ -195,7 +195,7 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
         /* Set source data into sky model. */
         /* (Filtering and other overrides can be done later.) */
         oskar_sky_set_source(temp_sky, i, lon, lat, val,
-                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
     }
 
     /* Append temporary sky model to input data. */

@@ -95,6 +95,8 @@ void oskar_sky_read(oskar_Sky* sky, const char* filename,
             &index, group, OSKAR_SKY_TAG_FWHM_MINOR, idx, status);
     oskar_mem_binary_file_read(oskar_sky_position_angle(sky), filename,
             &index, group, OSKAR_SKY_TAG_POSITION_ANGLE, idx, status);
+    oskar_mem_binary_file_read(oskar_sky_rotation_measure(sky), filename,
+            &index, group, OSKAR_SKY_TAG_ROTATION_MEASURE, idx, status);
 
     /* Free the tag index. */
     oskar_binary_tag_index_free(index, status);

@@ -53,7 +53,7 @@ TEST(SkyModel, append)
         double value = (double)i;
         oskar_sky_set_source(sky1, i, value, value,
                 value, value, value, value,
-                value, value, 0.0, 0.0, 0.0, &status);
+                value, value, 0.0, 0.0, 0.0, 0.0, &status);
     }
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
@@ -67,7 +67,7 @@ TEST(SkyModel, append)
         double value = (double)i + 0.5;
         oskar_sky_set_source(sky2, i, value, value,
                 value, value, value, value,
-                value, value, 0.0, 0.0, 0.0, &status);
+                value, value, 0.0, 0.0, 0.0, 0.0, &status);
     }
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
@@ -131,7 +131,7 @@ TEST(SkyModel, compute_relative_lmn)
     for (int i = 0; i < n; ++i)
     {
         oskar_sky_set_source(sky1, i, ra[i], dec[i], 1.0, 2.0, 3.0, 4.0,
-                200.0e6, -0.7, 0.0, 0.0, 0.0, &status);
+                200.0e6, -0.7, 0.0, 0.0, 0.0, 0.0, &status);
     }
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
@@ -178,7 +178,7 @@ TEST(SkyModel, evaluate_gaussian_source_parameters)
     {
         oskar_sky_set_source(sky, i,
                 i * deg2rad * 2.0, i * deg2rad * 0.5,
-                0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                 20 * 60 * asec2rad, 10 * 60 * asec2rad, 30 * deg2rad, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
     }
@@ -202,7 +202,7 @@ TEST(SkyModel, filter_by_radius)
     {
         oskar_sky_set_source(sky, i,
                 0.0, i * ((M_PI / 2) / (num_sources - 1)),
-                1.0 * i, 1.0, 2.0, 3.0, i * 100.0, i * 200.0,
+                1.0 * i, 1.0, 2.0, 3.0, i * 100.0, i * 200.0, i * 300.0,
                 0.0, 0.0, 0.0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
     }
@@ -265,7 +265,8 @@ TEST(SkyModel, filter_by_flux)
             oskar_sky_set_source(sky_input, i,
                     0.0, i * ((M_PI / 2) / (num_sources - 1)),
                     0.05 * i, 0.10 * i, 0.15 * i, 0.20 * i,
-                    100.0 * i, 200.0 * i, 1000.0 * i, 2000.0 * i, 3000.0 * i,
+                    100.0 * i, 200.0 * i, 300.0 * i,
+                    1000.0 * i, 2000.0 * i, 3000.0 * i,
                     &status);
             ASSERT_EQ(0, status) << oskar_get_error_string(status);
         }
@@ -353,7 +354,8 @@ TEST(SkyModel, filter_by_flux)
             oskar_sky_set_source(sky_input, i,
                     0.0, i * ((M_PI / 2) / (num_sources - 1)),
                     0.05 * i, 0.10 * i, 0.15 * i, 0.20 * i,
-                    100.0 * i, 200.0 * i, 1000.0 * i, 2000.0 * i, 3000.0 * i,
+                    100.0 * i, 200.0 * i, 300.0 * i,
+                    1000.0 * i, 2000.0 * i, 3000.0 * i,
                     &status);
             ASSERT_EQ(0, status) << oskar_get_error_string(status);
         }
@@ -465,7 +467,8 @@ TEST(SkyModel, horizon_clip)
             double dec = lat_start + i * (lat_end - lat_start) / (n_lat - 1);
             oskar_sky_set_source(sky_cpu, k, ra * deg2rad, dec * deg2rad,
                     double(k), double(2*k), double(3*k), double(4*k),
-                    double(5*k), double(6*k), 0.0, 0.0, 0.0, &status);
+                    double(5*k), double(6*k), double(7*k), 0.0, 0.0, 0.0,
+                    &status);
             ASSERT_EQ(0, status) << oskar_get_error_string(status);
         }
     }
@@ -538,7 +541,7 @@ TEST(SkyModel, insert)
     {
         oskar_sky_set_source(src, i,
                 i + 0.0, i + 0.1, i + 0.2, i + 0.3, i + 0.4, i + 0.5,
-                i + 0.6, i + 0.7, i + 0.8, i + 0.9, i + 1.0, &status);
+                i + 0.6, i + 0.7, i + 0.8, i + 0.9, i + 1.0, i + 1.1, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
     }
 
@@ -557,6 +560,7 @@ TEST(SkyModel, insert)
     double* V    = oskar_mem_double(oskar_sky_V(dst), &status);
     double* ref  = oskar_mem_double(oskar_sky_reference_freq(dst), &status);
     double* spix = oskar_mem_double(oskar_sky_spectral_index(dst), &status);
+    double* rm   = oskar_mem_double(oskar_sky_rotation_measure(dst), &status);
     double* maj  = oskar_mem_double(oskar_sky_fwhm_major(dst), &status);
     double* min  = oskar_mem_double(oskar_sky_fwhm_minor(dst), &status);
     double* pa   = oskar_mem_double(oskar_sky_position_angle(dst), &status);
@@ -573,9 +577,10 @@ TEST(SkyModel, insert)
             EXPECT_DOUBLE_EQ(i + 0.5, V[s]);
             EXPECT_DOUBLE_EQ(i + 0.6, ref[s]);
             EXPECT_DOUBLE_EQ(i + 0.7, spix[s]);
-            EXPECT_DOUBLE_EQ(i + 0.8, maj[s]);
-            EXPECT_DOUBLE_EQ(i + 0.9, min[s]);
-            EXPECT_DOUBLE_EQ(i + 1.0, pa[s]);
+            EXPECT_DOUBLE_EQ(i + 0.8, rm[s]);
+            EXPECT_DOUBLE_EQ(i + 0.9, maj[s]);
+            EXPECT_DOUBLE_EQ(i + 1.0, min[s]);
+            EXPECT_DOUBLE_EQ(i + 1.1, pa[s]);
         }
     }
     oskar_sky_free(src, &status);
@@ -631,7 +636,7 @@ TEST(SkyModel, scale_by_spectral_index)
 {
     int num_sources = 10000, status = 0;
     oskar_Timer* timer;
-    double sec = 0.0;
+//    double sec = 0.0;
     double stokes_I = 10.0, stokes_Q = 1.0, stokes_U = 0.5, stokes_V = 0.1;
     double spix = -0.7, freq_ref = 10.0e6, freq_new = 50.0e6;
 
@@ -652,17 +657,17 @@ TEST(SkyModel, scale_by_spectral_index)
     // Scale on CPU.
     timer = oskar_timer_create(OSKAR_TIMER_NATIVE);
     oskar_timer_resume(timer);
-    oskar_sky_scale_by_spectral_index(sky, freq_new, &status);
-    sec = oskar_timer_elapsed(timer);
-    //printf("Scale by spectral index (CPU): %.6f\n", sec);
+    oskar_sky_scale_flux_with_frequency(sky, freq_new, &status);
+//    sec = oskar_timer_elapsed(timer);
+//    printf("Scale by spectral index (CPU): %.6f\n", sec);
     oskar_timer_free(timer);
 
     // Scale on GPU.
     timer = oskar_timer_create(OSKAR_TIMER_CUDA);
     oskar_timer_resume(timer);
-    oskar_sky_scale_by_spectral_index(sky_gpu, freq_new, &status);
-    sec = oskar_timer_elapsed(timer);
-    //printf("Scale by spectral index (GPU): %.6f\n", sec);
+    oskar_sky_scale_flux_with_frequency(sky_gpu, freq_new, &status);
+//    sec = oskar_timer_elapsed(timer);
+//    printf("Scale by spectral index (GPU): %.6f\n", sec);
     oskar_timer_free(timer);
 
     // Copy GPU data to CPU for check.
@@ -705,6 +710,148 @@ TEST(SkyModel, scale_by_spectral_index)
     oskar_sky_free(sky_cpu, &status);
 }
 
+TEST(SkyModel, rotation_measure)
+{
+    int num_sources = 10000, status = 0;
+    oskar_Timer* timer;
+//    double sec = 0.0;
+    double stokes_I = 10.0, stokes_Q = 1.0, stokes_U = 0.0, stokes_V = 0.1;
+    double spix = 0.0, freq_ref = 100.0e6, freq_new = 99e6, rm = 0.5;
+    double max_err, avg_err;
+
+    // Create and fill a sky model.
+    oskar_Sky* sky_ref = oskar_sky_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU,
+            num_sources, &status);
+    oskar_mem_set_value_real(oskar_sky_I(sky_ref), stokes_I, 0, 0, &status);
+    oskar_mem_set_value_real(oskar_sky_Q(sky_ref), stokes_Q, 0, 0, &status);
+    oskar_mem_set_value_real(oskar_sky_U(sky_ref), stokes_U, 0, 0, &status);
+    oskar_mem_set_value_real(oskar_sky_V(sky_ref), stokes_V, 0, 0, &status);
+    oskar_mem_set_value_real(oskar_sky_reference_freq(sky_ref), freq_ref, 0, 0, &status);
+    oskar_mem_set_value_real(oskar_sky_spectral_index(sky_ref), spix, 0, 0, &status);
+    oskar_mem_set_value_real(oskar_sky_rotation_measure(sky_ref), rm, 0, 0, &status);
+
+    // Copy to CPU.
+    oskar_Sky* sky_cpu = oskar_sky_create_copy(sky_ref, OSKAR_LOCATION_CPU,
+            &status);
+
+    // Copy to GPU.
+    oskar_Sky* sky_gpu = oskar_sky_create_copy(sky_ref, OSKAR_LOCATION_GPU,
+            &status);
+
+    // Scale on CPU.
+    timer = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    oskar_timer_resume(timer);
+    oskar_sky_scale_flux_with_frequency(sky_cpu, freq_new, &status);
+//    sec = oskar_timer_elapsed(timer);
+//    printf("Rotation measure scaling (CPU): %.6f\n", sec);
+    oskar_timer_free(timer);
+
+    // Scale on GPU.
+    timer = oskar_timer_create(OSKAR_TIMER_CUDA);
+    oskar_timer_resume(timer);
+    oskar_sky_scale_flux_with_frequency(sky_gpu, freq_new, &status);
+//    sec = oskar_timer_elapsed(timer);
+//    printf("Rotation measure scaling (GPU): %.6f\n", sec);
+    oskar_timer_free(timer);
+
+//    oskar_sky_save("sky1.osm", sky_cpu, &status);
+    EXPECT_EQ(0, status) << oskar_get_error_string(status);
+
+    // Check contents for consistency.
+    oskar_mem_evaluate_relative_error(oskar_sky_I(sky_gpu),
+            oskar_sky_I(sky_cpu), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+    oskar_mem_evaluate_relative_error(oskar_sky_Q(sky_gpu),
+            oskar_sky_Q(sky_cpu), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+    oskar_mem_evaluate_relative_error(oskar_sky_U(sky_gpu),
+            oskar_sky_U(sky_cpu), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+    oskar_mem_evaluate_relative_error(oskar_sky_V(sky_gpu),
+            oskar_sky_V(sky_cpu), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+    oskar_mem_evaluate_relative_error(oskar_sky_reference_freq(sky_gpu),
+            oskar_sky_reference_freq(sky_cpu), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+
+    // Scale back to reference frequency on CPU.
+    oskar_sky_scale_flux_with_frequency(sky_cpu, freq_ref, &status);
+
+    // Scale back to reference frequency on GPU.
+    oskar_sky_scale_flux_with_frequency(sky_gpu, freq_ref, &status);
+
+//    oskar_sky_save("sky2.osm", sky_cpu, &status);
+    EXPECT_EQ(0, status) << oskar_get_error_string(status);
+
+    // Check contents for consistency.
+    oskar_mem_evaluate_relative_error(oskar_sky_I(sky_gpu),
+            oskar_sky_I(sky_cpu), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+    oskar_mem_evaluate_relative_error(oskar_sky_Q(sky_gpu),
+            oskar_sky_Q(sky_cpu), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+    oskar_mem_evaluate_relative_error(oskar_sky_U(sky_gpu),
+            oskar_sky_U(sky_cpu), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+    oskar_mem_evaluate_relative_error(oskar_sky_V(sky_gpu),
+            oskar_sky_V(sky_cpu), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+    oskar_mem_evaluate_relative_error(oskar_sky_reference_freq(sky_gpu),
+            oskar_sky_reference_freq(sky_cpu), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+
+    // Check contents for consistency with original reference sky.
+    oskar_mem_evaluate_relative_error(oskar_sky_I(sky_cpu),
+            oskar_sky_I(sky_ref), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+    oskar_mem_evaluate_relative_error(oskar_sky_Q(sky_cpu),
+            oskar_sky_Q(sky_ref), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+    oskar_mem_evaluate_relative_error(oskar_sky_U(sky_cpu),
+            oskar_sky_U(sky_ref), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+    oskar_mem_evaluate_relative_error(oskar_sky_V(sky_cpu),
+            oskar_sky_V(sky_ref), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+    oskar_mem_evaluate_relative_error(oskar_sky_reference_freq(sky_cpu),
+            oskar_sky_reference_freq(sky_ref), 0, &max_err, &avg_err, 0, &status);
+    EXPECT_EQ(0, status);
+    EXPECT_LT(max_err, 1e-6);
+    EXPECT_LT(avg_err, 1e-6);
+
+    oskar_sky_free(sky_ref, &status);
+    oskar_sky_free(sky_gpu, &status);
+    oskar_sky_free(sky_cpu, &status);
+}
+
 
 TEST(SkyModel, set_source)
 {
@@ -719,7 +866,7 @@ TEST(SkyModel, set_source)
     // Try to set a source into the model - this should fail as the model is
     // still zero size.
     oskar_sky_set_source(sky, 0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0,
-            200.0e6, -0.7, 0.0, 0.0, 0.0, &status);
+            200.0e6, -0.7, 2.0, 0.0, 0.0, 0.0, &status);
     ASSERT_EQ((int)OSKAR_ERR_OUT_OF_RANGE, status);
     status = 0;
 
@@ -730,9 +877,9 @@ TEST(SkyModel, set_source)
 
     // Set values of these 2 sources.
     oskar_sky_set_source(sky, 0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0,
-            200.0e6, -0.7, 0.0, 0.0, 0.0, &status);
+            200.0e6, -0.7, 2.0, 0.0, 0.0, 0.0, &status);
     oskar_sky_set_source(sky, 1, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5,
-            250.0e6, -0.8, 0.0, 0.0, 0.0, &status);
+            250.0e6, -0.8, 2.5, 0.0, 0.0, 0.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_type(sky));
     ASSERT_EQ((int)OSKAR_LOCATION_GPU, oskar_sky_location(sky));
@@ -749,6 +896,8 @@ TEST(SkyModel, set_source)
             &status)[0]);
     EXPECT_FLOAT_EQ(4.5, oskar_mem_float(oskar_sky_Q(sky_temp), &status)[1]);
     EXPECT_FLOAT_EQ(-0.8, oskar_mem_float(oskar_sky_spectral_index(sky_temp),
+            &status)[1]);
+    EXPECT_FLOAT_EQ(2.5, oskar_mem_float(oskar_sky_rotation_measure(sky_temp),
             &status)[1]);
 
     // Free memory.
@@ -1048,11 +1197,12 @@ TEST(SkyModel, read_write)
         double V = 6.5 * i;
         double freq0 = 7.6 * i;
         double spix = 8.7 * i;
+        double rm = 8.9 * i;
         double maj = 9.8 * i;
         double min = 10.9 * i;
         double pa = 11.1 * i;
         oskar_sky_set_source(sky, i, ra, dec, I, Q, U, V,
-                freq0, spix, maj, min, pa, &status);
+                freq0, spix, rm, maj, min, pa, &status);
     }
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 

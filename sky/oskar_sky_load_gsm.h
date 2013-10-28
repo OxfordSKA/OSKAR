@@ -70,8 +70,7 @@ extern "C" {
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_sky_load_gsm(oskar_Sky* sky, const char* filename,
-        int* status);
+void oskar_sky_load_gsm(oskar_Sky* sky, const char* filename, int* status);
 
 #ifdef __cplusplus
 }

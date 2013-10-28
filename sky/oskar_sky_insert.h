@@ -52,8 +52,8 @@ extern "C" {
  * @param[in,out]  status   Status return code.
 */
 OSKAR_EXPORT
-void oskar_sky_insert(oskar_Sky* dst, const oskar_Sky* src,
-        int offset, int* status);
+void oskar_sky_insert(oskar_Sky* dst, const oskar_Sky* src, int offset,
+        int* status);
 
 #ifdef __cplusplus
 }

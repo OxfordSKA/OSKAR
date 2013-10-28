@@ -41,38 +41,55 @@ extern "C" {
 
 /**
  * @brief
- * Loads sources from a plain text source file into an OSKAR sky model
+ * Loads source data from a plain text source file into an OSKAR sky model
  * structure.
  *
  * @details
- * Source files are plain ASCII files consisting of the following 11 columns:
- * - RA (deg),
- * - Dec (deg),
- * - Stokes I (Jy),
- * - Stokes Q (Jy),
- * - Stokes U (Jy),
- * - Stokes V (Jy),
- * - Reference frequency (Hz),
- * - Spectral index,
- * - FWHM of major axis (arcseconds),
- * - FWHM of minor axis (arcseconds),
- * - Position angle of gaussian axis (deg)
+ * Sky model files are plain text files that may contain the following 12
+ * columns, in order:
+ * - RA (deg)
+ * - Dec (deg)
+ * - Stokes I (Jy)
+ * - Stokes Q (Jy)
+ * - Stokes U (Jy)
+ * - Stokes V (Jy)
+ * - Reference frequency at which flux values apply (Hz)
+ * - Spectral index
+ * - Rotation measure (rad/m^2)
+ * - FWHM of Gaussian source major axis (arcseconds)
+ * - FWHM of Gaussian source minor axis (arcseconds)
+ * - Position angle of Gaussian source major axis (deg)
  *
- * Columns 4 to 11 (Q, U, V, Reference frequency, Spectral index and
- * extended source parameters) are optional and default to zero if omitted.
+ * Columns 4 to 12 (Q, U, V, Reference frequency, Spectral index,
+ * Rotation measure and extended source parameters) are optional, and default
+ * to zero if omitted. Note, however, that a line intended to describe a
+ * Gaussian source must explicitly specify all three Gaussian parameters.
+ * This means that all columns must be present when using extended sources
+ * (but see footnote below).
  *
- * The columns must be space or comma separated.
+ * The columns may be space and/or comma separated.
  *
- * Lines beginning with a hash symbol (#) are treated as comments, and
- * therefore ignored.
+ * Text appearing on a line after a hash symbol (#) is treated as a comment,
+ * and is therefore ignored.
+ *
+ * Footnote: The rotation measure column has been introduced recently.
+ * To provide backwards compatibility with old sky model files, a check is made
+ * on the number of columns on the line:
+ *
+ * - Lines containing between 3 and 9 columns set the first 8 parameters
+ *   and the rotation measure.
+ * - Lines containing 11 columns set the first 8 parameters and the Gaussian
+ *   source data (old file format).
+ * - Lines containing 12 columns set all source parameters (new file format).
+ * - Lines containing 10 or 13 or more columns set the status flag to
+ *   indicate an error, and abort the load.
  *
  * @param[out] sky       Pointer to sky model structure to fill.
- * @param[in]  filename  Path to the a source list file.
+ * @param[in]  filename  Path to a source list text file.
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_sky_load(oskar_Sky* sky, const char* filename,
-        int* status);
+void oskar_sky_load(oskar_Sky* sky, const char* filename, int* status);
 
 #ifdef __cplusplus
 }

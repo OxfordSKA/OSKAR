@@ -386,7 +386,7 @@ static void set_up_gen_healpix(int* num_chunks, oskar_Sky*** sky_chunks,
         oskar_convert_healpix_ring_to_theta_phi(nside, i, &dec, &ra);
         dec = M_PI / 2.0 - dec;
         oskar_sky_set_source(temp, i, ra, dec, s->amplitude, 0.0, 0.0,
-                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
     }
 
     /* Apply filters and extended source over-ride. */
@@ -429,7 +429,7 @@ static void set_up_gen_rpl(int* num_chunks, oskar_Sky*** sky_chunks,
         oskar_generate_random_coordinate(&ra, &dec);
         b = oskar_random_power_law(s->flux_min, s->flux_max, s->power);
         oskar_sky_set_source(temp, i, ra, dec, b, 0.0, 0.0, 0.0,
-                0.0, 0.0, 0.0, 0.0, 0.0, status);
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
     }
 
     /* Apply filters and extended source over-ride. */
@@ -473,7 +473,7 @@ static void set_up_gen_rbpl(int* num_chunks, oskar_Sky*** sky_chunks,
         b = oskar_random_broken_power_law(s->flux_min, s->flux_max,
                 s->threshold, s->power1, s->power2);
         oskar_sky_set_source(temp, i, ra, dec, b, 0.0, 0.0, 0.0,
-                0.0, 0.0, 0.0, 0.0, 0.0, status);
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
     }
 
     /* Apply filters and extended source over-ride. */

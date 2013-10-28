@@ -164,6 +164,9 @@ const char* oskar_get_error_string(int error)
         case OSKAR_ERR_BAD_GSM_FILE:
             return "invalid Global Sky Model file";
 
+        case OSKAR_ERR_BAD_SKY_FILE:
+            return "invalid OSKAR sky model file";
+
         default:
             break;
     };

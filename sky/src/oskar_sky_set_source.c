@@ -40,11 +40,13 @@ extern "C" {
 
 void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
         double dec_rad, double I, double Q, double U, double V,
-        double ref_frequency_hz, double spectral_index, double fwhm_major_rad,
-        double fwhm_minor_rad, double position_angle_rad, int* status)
+        double ref_frequency_hz, double spectral_index, double rotation_measure,
+        double fwhm_major_rad, double fwhm_minor_rad, double position_angle_rad,
+        int* status)
 {
     int type, location;
-    char *ra_, *dec_, *i_, *q_, *u_, *v_, *ref_, *spix_, *maj_, *min_, *pa_;
+    char *ra_, *dec_, *i_, *q_, *u_, *v_, *ref_, *spix_, *rm_;
+    char *maj_, *min_, *pa_;
 
     /* Check all inputs. */
     if (!sky || !status)
@@ -75,6 +77,7 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
     v_ = oskar_mem_char(&sky->V);
     ref_ = oskar_mem_char(&sky->reference_freq);
     spix_ = oskar_mem_char(&sky->spectral_index);
+    rm_ = oskar_mem_char(&sky->RM);
     maj_ = oskar_mem_char(&sky->FWHM_major);
     min_ = oskar_mem_char(&sky->FWHM_minor);
     pa_ = oskar_mem_char(&sky->position_angle);
@@ -95,6 +98,7 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
             cudaMemcpy(v_ + offset_bytes, &V, size, H2D);
             cudaMemcpy(ref_ + offset_bytes, &ref_frequency_hz, size, H2D);
             cudaMemcpy(spix_ + offset_bytes, &spectral_index, size, H2D);
+            cudaMemcpy(rm_ + offset_bytes, &rotation_measure, size, H2D);
             cudaMemcpy(maj_ + offset_bytes, &fwhm_major_rad, size, H2D);
             cudaMemcpy(min_ + offset_bytes, &fwhm_minor_rad, size, H2D);
             cudaMemcpy(pa_ + offset_bytes, &position_angle_rad, size, H2D);
@@ -109,6 +113,7 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
             float t_V = (float)V;
             float t_ref_freq = (float)ref_frequency_hz;
             float t_spectral_index = (float)spectral_index;
+            float t_rotation_measure = (float)rotation_measure;
             float t_FWHM_major = (float)fwhm_major_rad;
             float t_FWHM_minor = (float)fwhm_minor_rad;
             float t_position_angle = (float)position_angle_rad;
@@ -120,6 +125,7 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
             cudaMemcpy(v_ + offset_bytes, &t_V, size, H2D);
             cudaMemcpy(ref_ + offset_bytes, &t_ref_freq, size, H2D);
             cudaMemcpy(spix_ + offset_bytes, &t_spectral_index, size, H2D);
+            cudaMemcpy(rm_ + offset_bytes, &t_rotation_measure, size, H2D);
             cudaMemcpy(maj_ + offset_bytes, &t_FWHM_major, size, H2D);
             cudaMemcpy(min_ + offset_bytes, &t_FWHM_minor, size, H2D);
             cudaMemcpy(pa_ + offset_bytes, &t_position_angle, size, H2D);
@@ -140,6 +146,7 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
             ((double*)v_)[index] = V;
             ((double*)ref_)[index] = ref_frequency_hz;
             ((double*)spix_)[index] = spectral_index;
+            ((double*)rm_)[index] = rotation_measure;
             ((double*)maj_)[index] = fwhm_major_rad;
             ((double*)min_)[index] = fwhm_minor_rad;
             ((double*)pa_)[index] = position_angle_rad;
@@ -155,6 +162,7 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
             ((float*)v_)[index] = (float)V;
             ((float*)ref_)[index] = (float)ref_frequency_hz;
             ((float*)spix_)[index] = (float)spectral_index;
+            ((float*)rm_)[index] = (float)rotation_measure;
             ((float*)maj_)[index] = (float)fwhm_major_rad;
             ((float*)min_)[index] = (float)fwhm_minor_rad;
             ((float*)pa_)[index] = (float)position_angle_rad;

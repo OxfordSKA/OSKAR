@@ -350,7 +350,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
     /* Copy sky model for frequency scaling. */
     sky_gpu = oskar_sky_create_copy(sky, OSKAR_LOCATION_GPU, status);
-    oskar_sky_scale_by_spectral_index(sky_gpu, frequency, status);
+    oskar_sky_scale_flux_with_frequency(sky_gpu, frequency, status);
 
     /* Filter sky model by flux after frequency scaling. */
     oskar_sky_filter_by_flux(sky_gpu,
