@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
 #include "widgets/oskar_SettingsItem.h"
 #include "widgets/oskar_SettingsModel.h"
 #include <QtCore/QEvent>
+#include <QtCore/QModelIndex>
 #include <QtGui/QMenu>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QFileDialog>
@@ -276,19 +277,11 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
         if (mouseEvent->button() == Qt::RightButton &&
                 type != oskar_SettingsItem::LABEL)
         {
-            // Get the iteration keys.
-            QStringList iterationKeys = mod->data(index,
-                    oskar_SettingsModel::IterationKeysRole).toStringList();
-
             // Set up the context menu.
             QMenu menu;
             QString strResetValue = "Reset";
             QString strDisable = "Toggle Default On";
             QString strEnable = "Toggle Default Off";
-            QString strClearIteration = "Clear Iteration";
-            QString strEditIteration = "Edit Iteration Parameters";
-            QString strIterate = QString("Iterate (Dimension %1)...").
-                    arg(iterationKeys.size() + 1);
 
             // Check if value is enabled.
             bool enabled = mod->data(index,
@@ -311,25 +304,6 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
                             oskar_SettingsModel::RequiredRole).toBool())
                         menu.addAction(strDisable);
                 }
-
-                // Add iteration actions.
-                if (type == oskar_SettingsItem::INT ||
-                        type == oskar_SettingsItem::INT_UNSIGNED ||
-                        type == oskar_SettingsItem::INT_POSITIVE ||
-                        type == oskar_SettingsItem::DOUBLE)
-                {
-                    QString key = mod->data(index,
-                            oskar_SettingsModel::KeyRole).toString();
-                    if (!menu.isEmpty())
-                        menu.addSeparator();
-                    if (iterationKeys.contains(key))
-                    {
-                        menu.addAction(strEditIteration);
-                        menu.addAction(strClearIteration);
-                    }
-                    else
-                        menu.addAction(strIterate);
-                }
             }
 
             // Return if the menu is empty.
@@ -351,11 +325,6 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
                     mod->setData(index, false, oskar_SettingsModel::EnabledRole);
                 else if (action->text() == strEnable)
                     mod->setData(index, true, oskar_SettingsModel::EnabledRole);
-                else if (action->text() == strIterate ||
-                        action->text() == strEditIteration)
-                    setIterations(mod, index);
-                else if (action->text() == strClearIteration)
-                    mod->setData(index, 0, oskar_SettingsModel::ClearIterationRole);
             }
             event->accept();
             return true;
@@ -565,76 +534,4 @@ void oskar_SettingsDelegate::commitAndCloseEditor(int /*index*/)
     QWidget* editor = static_cast<QWidget*>(sender());
     emit commitData(editor);
     closeEditor(editor);
-}
-
-// Private members.
-
-void oskar_SettingsDelegate::setIterations(QAbstractItemModel* model,
-        const QModelIndex& index)
-{
-    // Get the item type.
-    int type = model->data(index, oskar_SettingsModel::TypeRole).toInt();
-
-    // Set up the dialog.
-    QDialog* dialog = new QDialog(view_);
-    dialog->setWindowTitle("Iteration Parameters");
-    QFormLayout* layout = new QFormLayout(dialog);
-    QSpinBox* iterNum = new QSpinBox(dialog);
-    iterNum->setMinimum(1);
-    iterNum->setMaximum(INT_MAX);
-    layout->addRow("Iterations", iterNum);
-    QSpinBox* iterIncInt = NULL;
-    oskar_DoubleSpinBox* iterIncDbl = NULL;
-    if (type == oskar_SettingsItem::INT ||
-            type == oskar_SettingsItem::INT_UNSIGNED ||
-            type == oskar_SettingsItem::INT_POSITIVE)
-    {
-        iterIncInt = new QSpinBox(dialog);
-        iterIncInt->setRange(-INT_MAX, INT_MAX);
-        layout->addRow("Increment", iterIncInt);
-    }
-    else if (type == oskar_SettingsItem::DOUBLE)
-    {
-        iterIncDbl = new oskar_DoubleSpinBox(dialog);
-        iterIncDbl->setRange(-DBL_MAX, DBL_MAX);
-        layout->addRow("Increment", iterIncDbl);
-    }
-
-    // Add the buttons and connect them.
-    QDialogButtonBox* buttons = new QDialogButtonBox(
-            (QDialogButtonBox::Ok | QDialogButtonBox::Cancel),
-            Qt::Horizontal, dialog);
-    layout->setWidget(2, QFormLayout::SpanningRole, buttons);
-    connect(buttons, SIGNAL(accepted()), dialog, SLOT(accept()));
-    connect(buttons, SIGNAL(rejected()), dialog, SLOT(reject()));
-
-    // Fill the widget data from the item.
-    int num = model->data(index, oskar_SettingsModel::IterationNumRole).toInt();
-    QVariant inc = model->data(index, oskar_SettingsModel::IterationIncRole);
-    iterNum->setValue(num);
-    if (type == oskar_SettingsItem::INT ||
-            type == oskar_SettingsItem::INT_UNSIGNED ||
-            type == oskar_SettingsItem::INT_POSITIVE)
-        iterIncInt->setValue(inc.toInt());
-    else if (type == oskar_SettingsItem::DOUBLE)
-        iterIncDbl->setValue(inc.toDouble());
-
-    if (dialog->exec() == QDialog::Accepted)
-    {
-        // Set the iteration data.
-        model->setData(index, iterNum->value(),
-                oskar_SettingsModel::IterationNumRole);
-        if (type == oskar_SettingsItem::INT ||
-                type == oskar_SettingsItem::INT_UNSIGNED ||
-                type == oskar_SettingsItem::INT_POSITIVE)
-            model->setData(index, iterIncInt->value(),
-                    oskar_SettingsModel::IterationIncRole);
-        else if (type == oskar_SettingsItem::DOUBLE)
-            model->setData(index, iterIncDbl->value(),
-                    oskar_SettingsModel::IterationIncRole);
-
-        // Set the iteration flag.
-        model->setData(index, 0, oskar_SettingsModel::SetIterationRole);
-    }
-    delete dialog;
 }

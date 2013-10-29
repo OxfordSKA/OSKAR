@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,13 +33,13 @@
  * @file oskar_RunThread.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
-#include <QtCore/QProcess>
 #include <QtCore/QThread>
 #include <QtCore/QMutex>
 #include <QtCore/QStringList>
 
+class QProcess;
 class oskar_SettingsModel;
 
 class OSKAR_WIDGETS_EXPORT oskar_RunThread : public QThread
@@ -47,8 +47,8 @@ class OSKAR_WIDGETS_EXPORT oskar_RunThread : public QThread
     Q_OBJECT
 
 public:
-    oskar_RunThread(oskar_SettingsModel* model, QObject* parent = 0);
-    void start(QString binary_name, QString settings_file, QStringList outputs);
+    oskar_RunThread(QObject* parent = 0);
+    void start(QString binary_name, QString settings_file);
     void stop();
 
 signals:
@@ -68,10 +68,8 @@ private:
 private:
     bool abort_;
     QMutex mutex_;
-    oskar_SettingsModel* model_;
     QString binaryName_;
     QString settingsFile_;
-    QStringList outputFiles_;
     QProcess* process_;
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 #include "widgets/oskar_RunDialog.h"
 #include "widgets/oskar_RunThread.h"
 #include "utility/oskar_get_error_string.h"
@@ -45,15 +45,14 @@
 #include <QtGui/QTextEdit>
 #include <QtGui/QVBoxLayout>
 
-oskar_RunDialog::oskar_RunDialog(oskar_SettingsModel* model, QWidget *parent)
-: QDialog(parent)
+oskar_RunDialog::oskar_RunDialog(QWidget *parent) : QDialog(parent)
 {
     // Initialise members.
     failed_ = false;
     finished_ = false;
 
     // Set up the thread.
-    thread_ = new oskar_RunThread(model, this);
+    thread_ = new oskar_RunThread(this);
     connect(thread_, SIGNAL(aborted()), this, SLOT(runAborted()));
     connect(thread_, SIGNAL(completed()), this, SLOT(runCompleted()));
     connect(thread_, SIGNAL(crashed()), this, SLOT(runCrashed()));
@@ -118,12 +117,11 @@ oskar_RunDialog::~oskar_RunDialog()
 }
 
 void oskar_RunDialog::start(const QString& binary_name,
-        const QString& settings_file, QStringList outputs)
+        const QString& settings_file)
 {
     // Store variables.
     binaryName_ = binary_name;
     settingsFile_ = settings_file;
-    outputFiles_ = outputs;
 
     // Set text labels.
     QString commandString = binary_name + " ";
@@ -135,7 +133,7 @@ void oskar_RunDialog::start(const QString& binary_name,
     show();
 
     // Start the run in another thread.
-    thread_->start(binary_name, settings_file, outputs);
+    thread_->start(binary_name, settings_file);
 }
 
 // Protected methods.

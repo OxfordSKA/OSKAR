@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,16 +33,16 @@
  * @file oskar_SettingsModel.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 #include <QtCore/QAbstractItemModel>
+#include <QtCore/QDateTime>
 #include <QtCore/QHash>
-#include <QtCore/QList>
-#include <QtCore/QModelIndex>
-#include <QtCore/QSettings>
-#include <QtCore/QStringList>
-#include <QtCore/QVariant>
 #include <QtGui/QSortFilterProxyModel>
 
+class QModelIndex;
+class QStringList;
+class QSettings;
+class QVariant;
 class oskar_SettingsItem;
 
 class OSKAR_WIDGETS_EXPORT oskar_SettingsModel : public QAbstractItemModel
@@ -54,22 +54,16 @@ public:
         KeyRole = Qt::UserRole, // 32
         ValueRole,
         TypeRole,
-        RequiredRole, // 35
+        RequiredRole,
         VisibleRole,
         EnabledRole,
-        IterationNumRole,
-        IterationIncRole,
-        IterationKeysRole, // 40
-        SetIterationRole,
-        ClearIterationRole,
-        OutputKeysRole,
         LoadRole,
-        OptionsRole, // 45
+        OptionsRole,
         DefaultRole,
         DependencyKeyRole,
         DependencyValueRole,
         DependentKeyRole,
-        HiddenRole // 50
+        HiddenRole
     };
 
 public:
@@ -91,6 +85,7 @@ public:
             const QModelIndex& parent = QModelIndex()) const;
     QModelIndex index(const QString& key);
     bool isModified() const;
+    QDateTime lastModified() const;
     void loadSettingsFile(const QString& filename);
     QModelIndex parent(const QModelIndex& index) const;
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
@@ -123,9 +118,8 @@ private:
     QSettings* settings_;
     oskar_SettingsItem* rootItem_;
     QHash<QString, oskar_SettingsItem*> itemHash_;
-    QStringList iterationKeys_;
-    QStringList outputKeys_;
     QString version_;
+    QDateTime lastModified_;
 };
 
 class OSKAR_WIDGETS_EXPORT oskar_SettingsModelFilter : public QSortFilterProxyModel

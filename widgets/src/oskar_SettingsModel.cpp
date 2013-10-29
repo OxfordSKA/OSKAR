@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,16 +31,19 @@
 #include <QtGui/QApplication>
 #include <QtGui/QFontMetrics>
 #include <QtGui/QIcon>
+#include <QtCore/QModelIndex>
+#include <QtCore/QSettings>
 #include <QtCore/QSize>
+#include <QtCore/QStringList>
 #include <QtCore/QVariant>
 #include <cfloat>
-#include <QtCore/QDebug>
 
 oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 : QAbstractItemModel(parent),
   settings_(NULL),
   rootItem_(NULL),
-  version_(OSKAR_VERSION_STR)
+  version_(OSKAR_VERSION_STR),
+  lastModified_(QDateTime::currentDateTime())
 {
     // Set up the root item.
     rootItem_ = new oskar_SettingsItem(QString(), QString(),
@@ -62,46 +65,13 @@ int oskar_SettingsModel::columnCount(const QModelIndex& /*parent*/) const
 
 QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
 {
-    // Check for roles that do not depend on the index.
-    if (role == IterationKeysRole)
-    {
-        // Check if keys are actually enabled before returning the list.
-        QStringList keys;
-        for (int i = 0; i < iterationKeys_.size(); ++i)
-        {
-            if (getItem(iterationKeys_[i])->enabled())
-                keys.append(iterationKeys_[i]);
-        }
-        return keys;
-    }
-    else if (role == OutputKeysRole)
-    {
-        // Check if keys are actually enabled before returning the list.
-        QStringList keys;
-        for (int i = 0; i < outputKeys_.size(); ++i)
-        {
-            if (getItem(outputKeys_[i])->enabled())
-                keys.append(outputKeys_[i]);
-        }
-        return keys;
-    }
-
     // Get a pointer to the item.
     if (!index.isValid())
         return QVariant();
     oskar_SettingsItem* item = getItem(index);
 
     // Check for roles common to all columns.
-    if (role == Qt::FontRole)
-    {
-        if (iterationKeys_.contains(item->key()))
-        {
-            QFont font = QApplication::font();
-            font.setBold(true);
-            return font;
-        }
-    }
-    else if (role == Qt::ForegroundRole)
+    if (role == Qt::ForegroundRole)
     {
         if (item->hidden())
             return QColor(Qt::lightGray);
@@ -154,10 +124,6 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         return item->enabled();
     else if (role == OptionsRole)
         return item->options();
-    else if (role == IterationNumRole)
-        return item->iterationNum();
-    else if (role == IterationIncRole)
-        return item->iterationInc();
     // Note: Maybe icons should be disabled unless there is an icon
     // for everything. This would avoid indentation level problems with
     // option trees of depth greater than 1.
@@ -183,11 +149,7 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     {
         if (role == Qt::DisplayRole)
         {
-            QString label = item->label();
-            int iterIndex = iterationKeys_.indexOf(item->key());
-            if (iterIndex >= 0)
-                label.prepend(QString("[%1] ").arg(iterIndex + 1));
-            return label;
+            return item->label();
         }
     }
     else if (index.column() == 1)
@@ -262,10 +224,6 @@ void oskar_SettingsModel::declare(const QString& key, const QString& label,
     // Append the actual setting.
     append(key, keys.last(), type, label, required, defaultValue,
             QStringList(), parent);
-
-    // Check if this is an output file.
-    if (type == oskar_SettingsItem::OUTPUT_FILE_NAME)
-        outputKeys_.append(key);
 }
 
 void oskar_SettingsModel::declare(const QString& key, const QString& label,
@@ -388,6 +346,11 @@ bool oskar_SettingsModel::isModified() const
     return numModified(QModelIndex()) > 0;
 }
 
+QDateTime oskar_SettingsModel::lastModified() const
+{
+    return lastModified_;
+}
+
 void oskar_SettingsModel::loadSettingsFile(const QString& filename)
 {
     if (!filename.isEmpty())
@@ -403,9 +366,7 @@ void oskar_SettingsModel::loadSettingsFile(const QString& filename)
         settings_ = new QSettings(filename, QSettings::IniFormat);
 
         // Display the contents of the file.
-        beginResetModel();
         loadFromParentIndex(QModelIndex());
-        endResetModel();
     }
 }
 
@@ -511,47 +472,10 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
             else
                 settings_->remove(item->key());
             settings_->sync();
+            lastModified_ = QDateTime::currentDateTime();
         }
         emit dataChanged(topLeft, bottomRight);
         return true;
-    }
-    else if (role == IterationNumRole)
-    {
-        item->setIterationNum(value.toInt());
-        emit dataChanged(topLeft, bottomRight);
-        return true;
-    }
-    else if (role == IterationIncRole)
-    {
-        item->setIterationInc(value);
-        emit dataChanged(topLeft, bottomRight);
-        return true;
-    }
-    else if (role == SetIterationRole)
-    {
-        if (!iterationKeys_.contains(item->key()))
-        {
-            iterationKeys_.append(item->key());
-            emit dataChanged(topLeft, bottomRight);
-            return true;
-        }
-        return false;
-    }
-    else if (role == ClearIterationRole)
-    {
-        int i = iterationKeys_.indexOf(item->key());
-        if (i >= 0)
-        {
-            iterationKeys_.removeAt(i);
-            emit dataChanged(topLeft, bottomRight);
-            foreach (QString k, iterationKeys_)
-            {
-                QModelIndex idx = index(k);
-                emit dataChanged(idx, idx.sibling(idx.row(), columnCount()-1));
-            }
-            return true;
-        }
-        return false;
     }
     else if (role == Qt::EditRole || role == Qt::CheckStateRole ||
             role == LoadRole)
@@ -588,6 +512,7 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
                 }
                 settings_->sync();
             }
+            lastModified_ = QDateTime::currentDateTime();
 
             // Set the item data.
             item->setValue(data);

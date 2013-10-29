@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,6 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
 
     // Initialise user-defined, runtime values.
     critical_ = 0;
-    iterNum_ = 1;
     valueSet_ = 0;
     enabled_ = true;
     hidden_ = false;
@@ -141,16 +140,6 @@ bool oskar_SettingsItem::hidden() const
         return hidden_;
 }
 
-const QVariant& oskar_SettingsItem::iterationInc() const
-{
-    return iterInc_;
-}
-
-int oskar_SettingsItem::iterationNum() const
-{
-    return iterNum_;
-}
-
 const QString& oskar_SettingsItem::key() const
 {
     return key_;
@@ -193,16 +182,6 @@ void oskar_SettingsItem::setEnabled(bool value)
 void oskar_SettingsItem::setHidden(bool value)
 {
     hidden_ = value;
-}
-
-void oskar_SettingsItem::setIterationInc(const QVariant& value)
-{
-    iterInc_ = value;
-}
-
-void oskar_SettingsItem::setIterationNum(int value)
-{
-    iterNum_ = value;
 }
 
 void oskar_SettingsItem::setLabel(const QString& value)

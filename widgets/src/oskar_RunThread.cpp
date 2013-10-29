@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,23 +32,19 @@
 
 #include <QtCore/QProcess>
 
-oskar_RunThread::oskar_RunThread(oskar_SettingsModel* model, QObject* parent)
-: QThread(parent)
+oskar_RunThread::oskar_RunThread(QObject* parent) : QThread(parent)
 {
     abort_ = false;
     process_ = NULL;
-    model_ = model;
 }
 
 // Public methods.
 
-void oskar_RunThread::start(QString binary_name, QString settings_file,
-        QStringList outputs)
+void oskar_RunThread::start(QString binary_name, QString settings_file)
 {
     abort_ = false;
     binaryName_ = binary_name;
     settingsFile_ = settings_file;
-    outputFiles_ = outputs;
     QThread::start();
 }
 
@@ -65,8 +61,7 @@ void oskar_RunThread::stop()
 
 void oskar_RunThread::run()
 {
-    // Run recursively.
-    run(0, outputFiles_);
+    executeProcess();
     if (!abort_)
         emit completed();
 }
@@ -112,81 +107,4 @@ void oskar_RunThread::executeProcess()
     delete process_;
     process_ = NULL;
     mutex_.unlock();
-}
-
-void oskar_RunThread::run(int depth, QStringList outputFiles)
-{
-    QByteArray settings = settingsFile_.toLatin1();
-    QStringList iterationKeys = model_->data(QModelIndex(),
-            oskar_SettingsModel::IterationKeysRole).toStringList();
-    if (iterationKeys.size() == 0)
-    {
-        executeProcess();
-    }
-    else
-    {
-        QStringList outputKeys = model_->data(QModelIndex(),
-                oskar_SettingsModel::OutputKeysRole).toStringList();
-        QString key = iterationKeys[depth];
-        const oskar_SettingsItem* item = model_->getItem(key);
-        QVariant start = item->value();
-        QVariant inc = item->iterationInc();
-
-        // Modify all the output file names with the subkey name.
-        for (int i = 0; i < outputFiles.size(); ++i)
-        {
-            if (!outputFiles[i].isEmpty())
-            {
-                QString separator = (depth == 0) ? "__" : "_";
-                outputFiles[i].append(separator + item->subkey());
-            }
-        }
-        QStringList outputFilesStart = outputFiles;
-
-        for (int i = 0; i < item->iterationNum(); ++i)
-        {
-            // Set the settings file parameter.
-            QVariant val;
-            if (item->type() == oskar_SettingsItem::INT ||
-                    item->type() == oskar_SettingsItem::INT_UNSIGNED ||
-                    item->type() == oskar_SettingsItem::INT_POSITIVE)
-                val = QVariant(start.toInt() + i * inc.toInt());
-            else if (item->type() == oskar_SettingsItem::DOUBLE)
-                val = QVariant(start.toDouble() + i * inc.toDouble());
-            model_->setValue(key, val);
-
-            // Modify all the output file names with the parameter value.
-            for (int i = 0; i < outputFiles.size(); ++i)
-            {
-                if (!outputFiles[i].isEmpty())
-                {
-                    outputFiles[i].append("_" + val.toString());
-                    model_->setValue(outputKeys[i], outputFiles[i]);
-                }
-            }
-
-            // Check if thread should stop.
-            bool abort;
-            mutex_.lock();
-            abort = abort_;
-            mutex_.unlock();
-
-            // Check if recursion depth has been reached.
-            if (depth < iterationKeys.size() - 1 && !abort)
-            {
-                // If not, then call this function again.
-                run(depth + 1, outputFiles);
-            }
-            else if (!abort)
-            {
-                executeProcess();
-            }
-
-            // Restore the list of output file names.
-            outputFiles = outputFilesStart;
-        }
-
-        // Restore initial value.
-        model_->setValue(key, start);
-    }
 }

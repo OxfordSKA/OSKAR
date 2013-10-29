@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_SettingsItem.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 #include <QtCore/QList>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -85,8 +85,6 @@ public:
     const QList<QString>& dependentKeys() const;
     bool enabled() const;
     bool hidden() const;
-    const QVariant& iterationInc() const;
-    int iterationNum() const;
     const QString& key() const;
     const QString& label() const;
     const QStringList& options() const;
@@ -95,8 +93,6 @@ public:
     void setDefaultValue(const QVariant& value);
     void setEnabled(bool value);
     void setHidden(bool value);
-    void setIterationInc(const QVariant& value);
-    void setIterationNum(int value);
     void setLabel(const QString& value);
     void setTooltip(const QString& value);
     void setValue(const QVariant& value);
@@ -130,8 +126,6 @@ private:
     QVariant defaultValue_;
     QStringList options_;
     int critical_;
-    int iterNum_;
-    QVariant iterInc_;
     QString dependencyKey_;
     QVariant dependencyValue_;
     QList<QString> dependentKeys_;

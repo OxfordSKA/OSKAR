@@ -39,6 +39,7 @@
 
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
+#include <QtGui/QCloseEvent>
 #include <QtGui/QFileDialog>
 #include <QtGui/QFormLayout>
 #include <QtGui/QLineEdit>
@@ -49,9 +50,9 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QKeySequence>
 #include <QtCore/QModelIndex>
-#include <QtCore/QTimer>
 #include <QtCore/QProcess>
-#include <QtGui/QCloseEvent>
+#include <QtCore/QTimer>
+#include <QtCore/QSettings>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 
@@ -201,6 +202,12 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 
     // Optionally hide unset items.
     actHideUnset_->setChecked(settings.value("main_window/hide_unset_items").toBool());
+
+    // Set the focus policy.
+    setFocusPolicy(Qt::StrongFocus);
+    setFocus(Qt::ActiveWindowFocusReason);
+    connect(qApp, SIGNAL(focusChanged(QWidget*, QWidget*)),
+            this, SLOT(focusChanged(QWidget*, QWidget*)));
 
     // Restore the scroll bar position.
     // A single-shot timer is used to do this after the main event loop starts.
@@ -533,6 +540,31 @@ void oskar_MainWindow::setHideUnsetItems(bool value)
     view_->update();
 }
 
+void oskar_MainWindow::focusChanged(QWidget* old, QWidget* now)
+{
+    if (!old && now)
+    {
+        // OSKAR has gained focus.
+        // Check if the settings file has been modified more recently than the
+        // last known modification date.
+        QFileInfo fileInfo(settingsFile_);
+        if (fileInfo.lastModified() > model_->lastModified().addMSecs(200))
+        {
+            // Must re-load the file first to prevent infinite recursion!
+            model_->loadSettingsFile(settingsFile_);
+
+            // Notify the user.
+            QMessageBox msgBox(this);
+            msgBox.setWindowTitle(mainTitle_);
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.setText("The settings file was updated by another application.");
+            msgBox.setInformativeText("It has now been re-loaded.");
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.exec();
+        }
+    }
+}
+
 
 // =========================================================  Private methods.
 
@@ -563,27 +595,10 @@ void oskar_MainWindow::runButton()
         return;
     }
 
-    // Get the (list of) output file names.
-    QStringList outputFiles;
-    QStringList keys = model_->data(QModelIndex(),
-            oskar_SettingsModel::OutputKeysRole).toStringList();
-    for (int i = 0; i < keys.size(); ++i)
-    {
-        const oskar_SettingsItem* it = model_->getItem(keys[i]);
-        QString file = it->value().toString();
-        outputFiles.append(file);
-    }
-
-    // Run simulation recursively.
-    oskar_RunDialog dialog(model_, this);
-    dialog.start(run_binary_, settingsFile_, outputFiles);
+    // Run simulation.
+    oskar_RunDialog dialog(this);
+    dialog.start(run_binary_, settingsFile_);
     dialog.exec();
-
-    // Restore the output files.
-    for (int i = 0; i < keys.size(); ++i)
-    {
-        model_->setValue(keys[i], outputFiles[i]);
-    }
 }
 
 void oskar_MainWindow::createRecentFileActions()

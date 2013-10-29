@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  * @file oskar_RunDialog.h
  */
 
-#include "oskar_global.h"
-#include <QtCore/QStringList>
+#include <oskar_global.h>
+#include <QtCore/QString>
 #include <QtGui/QDialog>
 
 class QAbstractButton;
@@ -51,11 +51,10 @@ class OSKAR_WIDGETS_EXPORT oskar_RunDialog : public QDialog
     Q_OBJECT
 
 public:
-    oskar_RunDialog(oskar_SettingsModel* model, QWidget *parent);
+    oskar_RunDialog(QWidget *parent = 0);
     ~oskar_RunDialog();
 
-    void start(const QString& binary_name,
-            const QString& settings_file, QStringList outputs);
+    void start(const QString& binary_name, const QString& settings_file);
 
 protected:
     void closeEvent(QCloseEvent*);
@@ -82,7 +81,6 @@ private:
     QAbstractButton* cancelButton_;
     QString binaryName_;
     QString settingsFile_;
-    QStringList outputFiles_;
     oskar_RunThread* thread_;
 };
 
