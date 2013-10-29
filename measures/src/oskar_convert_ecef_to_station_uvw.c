@@ -182,7 +182,7 @@ void oskar_convert_ecef_to_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
         {
-            oskar_convert_ecef_to_station_uvw_f(
+            oskar_convert_ecef_to_station_uvw_cuda_f(
                     oskar_mem_float(u, status),
                     oskar_mem_float(v, status),
                     oskar_mem_float(w, status), num_stations,
@@ -193,7 +193,7 @@ void oskar_convert_ecef_to_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_convert_ecef_to_station_uvw_d(
+            oskar_convert_ecef_to_station_uvw_cuda_d(
                     oskar_mem_double(u, status),
                     oskar_mem_double(v, status),
                     oskar_mem_double(w, status), num_stations,
