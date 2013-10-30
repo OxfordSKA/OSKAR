@@ -57,7 +57,7 @@ void oskar_convert_apparent_ra_dec_to_direction_cosines_f(int n,
     sinLat0 = sinf(dec0);
     cosLat0 = cosf(dec0);
 
-    #pragma omp parallel for
+    #pragma omp parallel for private(i)
     for (i = 0; i < n; ++i)
     {
         float cosLat, sinLat, sinLon, cosLon, relLon, pLat, x_, y_, a;
@@ -72,7 +72,7 @@ void oskar_convert_apparent_ra_dec_to_direction_cosines_f(int n,
         y_ = cosLat0 * sinLat - sinLat0 * cosLat * cosLon;
         x[i] = x_;
         y[i] = y_;
-        a = 1.0f - x_*x_ * y_*y_;
+        a = 1.0f - x_*x_ - y_*y_;
         /* FIXME this is z-1 update this function AND use in calling functions. */
         if (a < 0.0f)
             z[i] = -1.0f;
@@ -99,7 +99,7 @@ void oskar_convert_apparent_ra_dec_to_direction_cosines_d(int n,
     sinLat0 = sin(dec0);
     cosLat0 = cos(dec0);
 
-    #pragma omp parallel for
+    #pragma omp parallel for private(i)
     for (i = 0; i < n; ++i)
     {
         double cosLat, sinLat, sinLon, cosLon, relLon, pLat, x_, y_, a;
@@ -114,12 +114,12 @@ void oskar_convert_apparent_ra_dec_to_direction_cosines_d(int n,
         y_ = cosLat0 * sinLat - sinLat0 * cosLat * cosLon;
         x[i] = x_;
         y[i] = y_;
-        a = 1.0f - x_*x_ * y_*y_;
+        a = 1.0 - x_*x_ - y_*y_;
         /* FIXME this is z-1 update this function AND use in calling functions. */
-        if (a < 0.0f)
-            z[i] = -1.0f;
+        if (a < 0.0)
+            z[i] = -1.0;
         else
-            z[i] = sqrt(a) - 1.0f;
+            z[i] = sqrt(a) - 1.0;
     }
 }
 
