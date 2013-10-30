@@ -33,7 +33,7 @@
 #include <oskar_evaluate_TEC_TID.h>
 #include <oskar_SettingsIonosphere.h>
 #include <oskar_mjd_to_gast_fast.h>
-#include <oskar_convert_apparent_ra_dec_to_horizon_direction.h>
+#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
 #include <oskar_Settings.h>
 #include <oskar_mem.h>
 #include <oskar_telescope.h>
@@ -201,7 +201,7 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
         double beam_dec = oskar_station_beam_latitude_rad(station);
 
         // Obtain horizontal coordinates of beam p.p.
-        oskar_convert_apparent_ra_dec_to_horizon_direction_d(1, &beam_ra,
+        oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(1, &beam_ra,
                 &beam_dec, last, st_lat, (double*)hor_x.data,
                 (double*)hor_y.data, (double*)hor_z.data);
     }
@@ -218,7 +218,7 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
         float beam_dec = (float)oskar_station_beam_latitude_rad(station);
 
         // Obtain horizontal coordinates of beam p.p.
-        oskar_convert_apparent_ra_dec_to_horizon_direction_f(1, &beam_ra,
+        oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(1, &beam_ra,
                 &beam_dec, last, st_lat, (float*)hor_x.data,
                 (float*)hor_y.data, (float*)hor_z.data);
     }

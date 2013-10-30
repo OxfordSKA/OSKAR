@@ -27,7 +27,7 @@
  */
 
 #include <oskar_evaluate_beam_horizon_direction.h>
-#include <oskar_convert_apparent_ra_dec_to_horizon_direction.h>
+#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -62,7 +62,7 @@ void oskar_evaluate_beam_horizon_direction(double* x, double* y, double* z,
         lon = oskar_station_longitude_rad(station);
         lat = oskar_station_latitude_rad(station);
         last = gast + lon; /* Local Apparent Sidereal Time, in radians. */
-        oskar_convert_apparent_ra_dec_to_horizon_direction_d(1, &beam_ra,
+        oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(1, &beam_ra,
                 &beam_dec, last, lat, x, y, z);
     }
     else if (beam_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)

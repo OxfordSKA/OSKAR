@@ -28,9 +28,9 @@
 
 #include <private_telescope.h>
 
-#include <oskar_convert_ecef_to_horizon.h>
+#include <oskar_convert_ecef_to_enu.h>
 #include <oskar_convert_ecef_to_geodetic_spherical.h>
-#include <oskar_convert_horizon_to_offset_ecef.h>
+#include <oskar_convert_enu_to_offset_ecef.h>
 #include <oskar_telescope.h>
 #include <oskar_getline.h>
 #include <oskar_string_to_array.h>
@@ -113,12 +113,12 @@ void oskar_telescope_load_station_coords_ecef(oskar_Telescope* telescope,
                 lon, lat, alt);
 
         /* Convert station ECEF to horizon plane coordinates. */
-        oskar_convert_ecef_to_horizon(1, &par[0], &par[1], &par[2],
+        oskar_convert_ecef_to_enu(1, &par[0], &par[1], &par[2],
                 longitude, latitude, altitude, &horizon_x, &horizon_y,
                 &horizon_z);
 
         /* Convert horizon plane to offset geocentric coordinates. */
-        oskar_convert_horizon_to_offset_ecef_d(1, &horizon_x, &horizon_y,
+        oskar_convert_enu_to_offset_ecef_d(1, &horizon_x, &horizon_y,
                 &horizon_z, longitude, latitude, &offset_x, &offset_y, &offset_z);
 
         /* Store the offset geocentric and horizon plane coordinates. */

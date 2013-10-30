@@ -32,13 +32,13 @@
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_sim_beam_pattern_new.h"
 
-#include <fits/oskar_fits_image_write.h>
 #include <oskar_telescope.h>
 #include <oskar_image_resize.h>
 #include <oskar_image_write.h>
+#include <oskar_evaluate_image_lm_grid.h>
 #include <oskar_mjd_to_gast_fast.h>
-#include <oskar_convert_apparent_ra_dec_to_tangent_plane_direction.h>
-#include <oskar_convert_apparent_ra_dec_to_horizon_direction.h>
+#include <oskar_convert_apparent_ra_dec_to_direction_cosines.h>
+#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
 #include <oskar_evaluate_station_beam_aperture_array.h>
 #include <oskar_evaluate_station_beam_gaussian.h>
@@ -47,10 +47,9 @@
 #include <oskar_random_state.h>
 #include <oskar_log.h>
 #include <oskar_settings_free.h>
-
-#include <imaging/oskar_evaluate_image_lm_grid.h>
-
 #include <oskar_mem_binary_file_write.h>
+
+#include <fits/oskar_fits_image_write.h>
 
 #include <cmath>
 #include <cstdio>      // for remove()
@@ -81,32 +80,29 @@ static void free_coords_3D(coords3D& coords, int* status);
 static void init_station_beam_coords(station_beam_coords& coords,
         int type, int location, size_t num_elements, int owner, int* status);
 static void free_station_beam_coords(station_beam_coords& coords, int* status);
-
 static int load_settings(oskar_Settings& settings, const char* filename,
         oskar_Log* log);
 static void set_up_beam_pattern(oskar_Image* image,
         const oskar_Settings* settings, int num_pols, int* status);
-
 static int evaluate_station_beam(oskar_Image& h_complex_cube,
         oskar_Settings& settings, int type, oskar_Telescope* h_tel,
         oskar_Log* log);
-static void evaluate_station_beam_coords(station_beam_coords& d_coords,
+static void get_beam_coords_(station_beam_coords& d_coords,
         oskar_Station& d_station, oskar_Settings& settings,
         double gast, int* status);
-static void evaluate_coords_beam_direction_relative(station_beam_coords& d_coords,
+static void coords_phase_centre_tangent_plane_direction_(
+        station_beam_coords& d_coords, oskar_Station& d_station,
+        oskar_Settings& settings, double gast, int* status);
+static void coords_horizon_direction(station_beam_coords& d_coords,
         oskar_Station& d_station, oskar_Settings& settings,
         double gast, int* status);
-static void evaluate_coords_horizon(station_beam_coords& d_coords,
-        oskar_Station& d_station, oskar_Settings& settings,
-        double gast, int* status);
-static void evaluate_station_beam_time_freq(oskar_Mem& d_beam_pattern,
+static void make_beam_(oskar_Mem& d_beam_pattern,
         oskar_Station& d_station, station_beam_coords& d_coords,
         oskar_StationWork& d_work, oskar_RandomState& rand_state,
         size_t num_pixels, double frequency, double gast, int* status);
-static int write_to_bp_cube(oskar_Image& complex_cube, oskar_Mem& beam_cpu,
+static void add_to_cube_(oskar_Image& complex_cube, oskar_Mem& beam_cpu,
         const oskar_Mem& beam_pattern, int num_times, int num_pols,
-        int num_pixels, int t, int c, int type);
-
+        int num_pixels, int t, int c, int type, int* status);
 static int save_output(const oskar_Image& complex_cube,
         const oskar_Settings& settings, int type, oskar_Log* log);
 static void save_complex(const oskar_Image& complex_cube,
@@ -121,7 +117,6 @@ static void save_phase(const oskar_Image& complex_cube,
 static void save_total_intensity(const oskar_Image& complex_cube,
         const oskar_Settings& settings, int type, oskar_Log* log, int* status);
 // ============================================================================
-
 
 extern "C"
 int oskar_sim_beam_pattern_new(const char* settings_file, oskar_Log* log)
@@ -158,17 +153,6 @@ int oskar_sim_beam_pattern_new(const char* settings_file, oskar_Log* log)
     return err;
 }
 
-
-
-
-
-
-
-
-// ============================================================================
-// ============================================================================
-// ============================================================================
-
 static int load_settings(oskar_Settings& settings, const char* filename,
         oskar_Log* log)
 {
@@ -200,7 +184,6 @@ static int load_settings(oskar_Settings& settings, const char* filename,
 
     return err;
 }
-
 
 static int evaluate_station_beam(oskar_Image& h_complex_cube,
         oskar_Settings& settings, int type, oskar_Telescope* h_tel,
@@ -280,19 +263,16 @@ static int evaluate_station_beam(oskar_Image& h_complex_cube,
                 double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
                 // Evaluate the station beam coordinates.
-                evaluate_station_beam_coords(d_coords, *d_station, settings,
-                        gast, &err);
+                get_beam_coords_(d_coords, *d_station, settings, gast, &err);
 
                 // Evaluate the station beam.
-                evaluate_station_beam_time_freq(d_beam_pattern, *d_station,
-                        d_coords, *d_work, *random_state, num_pixels, frequency,
+                make_beam_(d_beam_pattern, *d_station, d_coords,
+                        *d_work, *random_state, num_pixels, frequency,
                         gast, &err);
 
                 // Copy complex beam pattern data to host array with reordering.
-                // XXX can't use an image if the data is in HEALPix ?
-                err = write_to_bp_cube(h_complex_cube, h_beam_temp,
-                        d_beam_pattern, num_times, num_pols, num_pixels,
-                        t, c, type);
+                add_to_cube_(h_complex_cube, h_beam_temp, d_beam_pattern,
+                        num_times, num_pols, num_pixels, t, c, type, &err);
 
             } // End of time loop
 
@@ -313,7 +293,6 @@ static int evaluate_station_beam(oskar_Image& h_complex_cube,
 
     return err;
 }
-
 
 /**
  * @brief
@@ -348,7 +327,7 @@ static int evaluate_station_beam(oskar_Image& h_complex_cube,
  * @param gast
  * @param status
  */
-static void evaluate_station_beam_coords(station_beam_coords& d_coords,
+static void get_beam_coords_(station_beam_coords& d_coords,
         oskar_Station& d_station, oskar_Settings& settings, double gast,
         int* status)
 {
@@ -360,14 +339,14 @@ static void evaluate_station_beam_coords(station_beam_coords& d_coords,
         case 0: // Grid specified as FOV and number of pixels relative to phase
                 // centre.
         {
-            evaluate_coords_beam_direction_relative(d_coords, d_station,
+            coords_phase_centre_tangent_plane_direction_(d_coords, d_station,
                     settings, gast, status);
             break;
         }
         case 1: // Grid specified by a FOV and number of pixels relative to the
                 // local station zenith.
         {
-            evaluate_coords_horizon(d_coords, d_station, settings, gast, status);
+            coords_horizon_direction(d_coords, d_station, settings, gast, status);
             break;
         }
         case 2: // HEALPix grid.
@@ -380,50 +359,69 @@ static void evaluate_station_beam_coords(station_beam_coords& d_coords,
     };
 }
 
-// Evaluate station coordinates when specified as an image
-// relative to the beam direction.
-static void evaluate_coords_beam_direction_relative(
-        station_beam_coords& d_coords,
-        oskar_Station& d_station, oskar_Settings& settings,
-        double gast, int* status)
+/**
+ * @brief
+ * Evaluate beam coordinates for an output beam image specified
+ * as a tangent plane grid relative to the beam pointing direction.
+ *
+ * @details
+ * Generate coordinates required for each beam evaluation function when the
+ * beam image output coordinates are specified as a grid of pixels on a tangent
+ * plane relative to the beam phase centre.
+ *
+ * Note: Structures passed to this function with the prefix 'd_' are
+ *       assumed to be located in Device (GPU) memory.
+ *
+ * @param[out]    d_coords      Coordinates work array structure.
+ * @param[in]     d_station     Station structure.
+ * @param[in]     settings      Settings structure.
+ * @param[in]     gast          Greenwich apparent siderial time, in radians.
+ * @param[in/out] status        Error status code.
+ */
+static void coords_phase_centre_tangent_plane_direction_(
+        station_beam_coords& d_coords, oskar_Station& d_station,
+        oskar_Settings& settings, double gast, int* status)
 {
     if (!status || *status != OSKAR_SUCCESS) return;
 
-    double lat = oskar_station_latitude_rad(&d_station);
-    double lon = oskar_station_longitude_rad(&d_station);
-    double last = gast + lon;
-    double ra0 = oskar_station_beam_longitude_rad(&d_station);
-    double dec0 = oskar_station_beam_latitude_rad(&d_station);
+    // Local copies of settings.
+    double lat     = oskar_station_latitude_rad(&d_station);
+    double lon     = oskar_station_longitude_rad(&d_station);
+    double ra0     = oskar_station_beam_longitude_rad(&d_station);
+    double dec0    = oskar_station_beam_latitude_rad(&d_station);
     double fov_lon = settings.beam_pattern.fov_deg[0];
     double fov_lat = settings.beam_pattern.fov_deg[1];
-    int* image_size = settings.beam_pattern.size;
-    int num_pixels = image_size[0] * image_size[1];
+    int* size      = settings.beam_pattern.size;
+    double last    = gast + lon;
+    int num_pixels = size[0] * size[1];
 
-    // Generate coordinate grid (XXX only needs to be done once!)
+    // Generate coordinate grid (TODO only needs to be done once!)
+    // TODO Correct name for this function (lon_lat, ra_dec, theta_phi?)
     oskar_evaluate_image_lon_lat_grid(&d_coords.RA, &d_coords.Dec,
-            image_size[0], image_size[1], fov_lon, fov_lat, ra0, dec0,
-            status);
+            size[0], size[1], fov_lon, fov_lat, ra0, dec0, status);
 
     switch (oskar_station_station_type(&d_station))
     {
-        // Convert to horizontal x,y,z
         case OSKAR_STATION_TYPE_AA:
         {
-            oskar_convert_apparent_ra_dec_to_horizon_direction(num_pixels,
+            // Convert to horizontal x,y,z as the AA beam evaluation
+            // requires this coordinate system.
+            oskar_convert_apparent_ra_dec_to_enu_direction_cosines(num_pixels,
                     &d_coords.horizontal.x, &d_coords.horizontal.y,
                     &d_coords.horizontal.z, &d_coords.RA,
                     &d_coords.Dec, last, lat, status);
             break;
         }
 
-        // Convert to relative l,m,m and horizontal z (for horizon clip)
+        // Convert to relative x,y,z and horizontal z (for horizon clip)
         case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
         {
-            oskar_convert_apparent_ra_dec_to_horizon_direction(num_pixels,
+            // Need horizon directions for horizon (z) clip.
+            oskar_convert_apparent_ra_dec_to_enu_direction_cosines(num_pixels,
                     &d_coords.horizontal.x, &d_coords.horizontal.y,
                     &d_coords.horizontal.z, &d_coords.RA,
                     &d_coords.Dec, last, lat, status);
-            oskar_convert_apparent_ra_dec_to_tangent_plane_direction(num_pixels,
+            oskar_convert_apparent_ra_dec_to_direction_cosines(num_pixels,
                     &d_coords.RA, &d_coords.Dec, ra0, dec0,
                     &d_coords.relative.x, &d_coords.relative.y,
                     &d_coords.relative.z, status);
@@ -438,8 +436,7 @@ static void evaluate_coords_beam_direction_relative(
     };
 }
 
-
-static void evaluate_coords_horizon(station_beam_coords& d_coords,
+static void coords_horizon_direction(station_beam_coords& d_coords,
         oskar_Station& d_station, oskar_Settings& settings,
         double /*gast*/, int* status)
 {
@@ -467,7 +464,7 @@ static void evaluate_coords_horizon(station_beam_coords& d_coords,
         // Convert to horizontal x,y,z
         case OSKAR_STATION_TYPE_AA:
         {
-            oskar_convert_apparent_ra_dec_to_horizon_direction(num_pixels,
+            oskar_convert_apparent_ra_dec_to_enu_direction_cosines(num_pixels,
                     &d_coords.horizontal.x, &d_coords.horizontal.y,
                     &d_coords.horizontal.z, &d_coords.RA,
                     &d_coords.Dec, 0, dec0, status);
@@ -488,11 +485,8 @@ static void evaluate_coords_horizon(station_beam_coords& d_coords,
     };
 }
 
-
-
-
 // Note: this function assumes d_coords work array has been correctly populated!
-static void evaluate_station_beam_time_freq(oskar_Mem& d_beam_pattern,
+static void make_beam_(oskar_Mem& d_beam_pattern,
         oskar_Station& d_station, station_beam_coords& d_coords,
         oskar_StationWork& d_work, oskar_RandomState& rand_state,
         size_t num_pixels, double frequency, double gast, int* status)
@@ -528,7 +522,6 @@ static void evaluate_station_beam_time_freq(oskar_Mem& d_beam_pattern,
     };
 }
 
-
 /**
  * @brief Write the beam pattern contained in @p beam_pattern to @p complex_cube.
  *
@@ -554,11 +547,11 @@ static void evaluate_station_beam_time_freq(oskar_Mem& d_beam_pattern,
  *
  * @return An OSKAR error status code.
  */
-static int write_to_bp_cube(oskar_Image& complex_cube, oskar_Mem& beam_cpu,
+static void add_to_cube_(oskar_Image& complex_cube, oskar_Mem& beam_cpu,
         const oskar_Mem& beam_pattern, int num_times, int num_pols,
-        int num_pixels, int t, int c, int type)
+        int num_pixels, int t, int c, int type, int* status)
 {
-    int err = OSKAR_SUCCESS;
+    if (!status || *status != OSKAR_SUCCESS) return;
 
     // Save complex beam pattern data in the right order.
     // Cube has dimension order (from slowest to fastest):
@@ -566,13 +559,13 @@ static int write_to_bp_cube(oskar_Image& complex_cube, oskar_Mem& beam_cpu,
     int offset = (t + c * num_times) * num_pols * num_pixels;
     if (oskar_mem_is_scalar(&beam_pattern))
     {
-        oskar_mem_insert(&complex_cube.data, &beam_pattern, offset, &err);
+        oskar_mem_insert(&complex_cube.data, &beam_pattern, offset, status);
     }
     else
     {
         // Copy beam pattern back to host memory for re-ordering.
-        oskar_mem_copy(&beam_cpu, &beam_pattern, &err);
-        if (err) return err;
+        oskar_mem_copy(&beam_cpu, &beam_pattern, status);
+        if (*status != OSKAR_SUCCESS) return;
 
         // Re-order the polarisation data.
         if (type == OSKAR_SINGLE)
@@ -600,13 +593,7 @@ static int write_to_bp_cube(oskar_Image& complex_cube, oskar_Mem& beam_cpu,
             }
         }
     }
-
-    return err;
 }
-
-
-
-
 
 static void set_up_beam_pattern(oskar_Image* image,
         const oskar_Settings* settings, int num_pols, int* status)
@@ -632,8 +619,6 @@ static void set_up_beam_pattern(oskar_Image* image,
     image->time_start_mjd_utc = settings->obs.start_mjd_utc;
     oskar_mem_copy(&image->settings_path, &settings->settings_path, status);
 }
-
-
 
 /**
  * @brief Save beam patterns to file.
@@ -770,7 +755,6 @@ static void save_power(oskar_Image& image_cube,
     }
 }
 
-
 static void save_phase(const oskar_Image& complex_cube,
         oskar_Image& image_cube, const oskar_Settings& settings, int type,
         oskar_Log* log, int num_pixels_total, int* err)
@@ -819,7 +803,6 @@ static void save_phase(const oskar_Image& complex_cube,
 #endif
     }
 }
-
 
 // complex_cube == voltage image cube
 static void save_total_intensity(const oskar_Image& complex_cube,
@@ -910,20 +893,6 @@ static void save_total_intensity(const oskar_Image& complex_cube,
 #endif
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static void init_coords_3D(coords3D& coords, int type, int location,
         size_t num_elements, int owner, int* status)
 {
@@ -958,8 +927,3 @@ static void free_station_beam_coords(station_beam_coords& coords, int* status)
     oskar_mem_free(&coords.radius, status);
 
 }
-
-
-
-
-

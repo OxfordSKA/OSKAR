@@ -238,7 +238,7 @@ int evaluate_pp(oskar_Mem& pp_lon, oskar_Mem& pp_lat, oskar_Settings& settings,
 
             if (type == OSKAR_DOUBLE)
             {
-                oskar_convert_apparent_ra_dec_to_horizon_direction_d(
+                oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(
                         oskar_sky_num_sources(chunk),
                         oskar_mem_double_const(oskar_sky_ra_const(chunk), &status),
                         oskar_mem_double_const(oskar_sky_dec_const(chunk), &status),
@@ -247,7 +247,7 @@ int evaluate_pp(oskar_Mem& pp_lon, oskar_Mem& pp_lat, oskar_Settings& settings,
             }
             else
             {
-                oskar_convert_apparent_ra_dec_to_horizon_direction_f(
+                oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(
                         oskar_sky_num_sources(chunk),
                         oskar_mem_float_const(oskar_sky_ra_const(chunk), &status),
                         oskar_mem_float_const(oskar_sky_dec_const(chunk), &status),

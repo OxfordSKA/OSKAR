@@ -26,69 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_apparent_ra_dec_to_horizon_direction_cuda.h"
-#include "oskar_convert_apparent_ha_dec_to_horizon_direction_cuda.h"
-#include "math/cudak/oskar_cudak_vec_sub_sr.h"
+#include "oskar_convert_apparent_ha_dec_to_enu_direction_cosines_cuda.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Single precision.
-void oskar_convert_apparent_ra_dec_to_horizon_direction_cuda_f(int n,
-        const float* ra, const float* dec, float lst, float lat, float* x,
-        float* y, float* z)
-{
-    // Determine Hour Angles(HA = LST - RA).
-    float* ha = z; // Temporary.
-    const int n_thd = 256;
-    const int n_blk_in = (n + n_thd - 1) / n_thd;
-    oskar_cudak_vec_sub_sr_f <<< n_blk_in, n_thd >>> (n, lst, ra, ha);
-
-    // Determine horizontal x,y,z positions (destroys contents of ha).
-    float cosLat = cosf(lat);
-    float sinLat = sinf(lat);
-    oskar_convert_apparent_ha_dec_to_horizon_direction_cudak_f
-    OSKAR_CUDAK_CONF(n_blk_in, n_thd) (n, ha, dec, cosLat, sinLat, x, y, z);
-}
-
-// Double precision.
-void oskar_convert_apparent_ra_dec_to_horizon_direction_cuda_d(int n,
-        const double* ra, const double* dec, double lst, double lat, double* x,
-        double* y, double* z)
-{
-    // Determine source Hour Angles (HA = LST - RA).
-    double* ha = z; // Temporary.
-    const int n_thd = 256;
-    const int n_blk_in = (n + n_thd - 1) / n_thd;
-    oskar_cudak_vec_sub_sr_d <<< n_blk_in, n_thd >>> (n, lst, ra, ha);
-
-    // Determine horizontal l,m,n positions (destroys contents of ha).
-    double cosLat = cos(lat);
-    double sinLat = sin(lat);
-    oskar_convert_apparent_ha_dec_to_horizon_direction_cudak_d
-    <<< n_blk_in, n_thd >>> (n, ha, dec, cosLat, sinLat, x, y, z);
-}
-
-
-// Single precision.
+// Single precision
 __global__
-void oskar_convert_apparent_ra_dec_to_horizon_direction_cudak_f(int n,
-        const float* ra, const float* dec, float cosLat, float sinLat,
-        float lst, float* x, float* y, float* z)
+void oskar_convert_apparent_ha_dec_to_enu_direction_cosines_cudak_f(int n,
+        const float* ha, const float* dec, float cosLat, float sinLat, float* x,
+        float* y, float* z)
 {
     // Get the coordinate index that this thread is working on.
     const int idx = blockDim.x * blockIdx.x + threadIdx.x;
 
     // Copy local equatorial coordinates from global memory.
-    float sh, sd; // HA, Dec.
+    float sh, sd; // Source HA, Dec.
     if (idx < n)
     {
-        sh = ra[idx];
+        sh = ha[idx];
         sd = dec[idx];
     }
     __syncthreads(); // Coalesce memory accesses.
-    sh = lst - sh; // HA = LST - RA.
 
     // Find direction cosines.
     float cosDec, sinDec, cosHA, sinHA, t, X1, Y2;
@@ -111,9 +71,9 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction_cudak_f(int n,
 
 // Double precision.
 __global__
-void oskar_convert_apparent_ra_dec_to_horizon_direction_cudak_d(int n,
-        const double* ra, const double* dec, double cosLat, double sinLat,
-        double lst, double* x, double* y, double* z)
+void oskar_convert_apparent_ha_dec_to_enu_direction_cosines_cudak_d(int n,
+        const double* ha, const double* dec, double cosLat, double sinLat,
+        double* x, double* y, double* z)
 {
     // Get the coordinate index that this thread is working on.
     const int idx = blockDim.x * blockIdx.x + threadIdx.x;
@@ -122,11 +82,10 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction_cudak_d(int n,
     double sh, sd; // Source HA, Dec.
     if (idx < n)
     {
-        sh = ra[idx];
+        sh = ha[idx];
         sd = dec[idx];
     }
     __syncthreads(); // Coalesce memory accesses.
-    sh = lst - sh; // HA = LST - RA.
 
     // Find direction cosines.
     double cosDec, sinDec, cosHA, sinHA, t, X1, Y2;
@@ -146,7 +105,6 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction_cudak_d(int n,
         z[idx] = Y2; // Horizontal z-component.
     }
 }
-
 
 #ifdef __cplusplus
 }

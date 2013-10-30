@@ -34,7 +34,7 @@
 #include <oskar_evaluate_array_pattern.h>
 #include <oskar_evaluate_array_pattern_hierarchical.h>
 #include <oskar_evaluate_beam_horizon_direction.h>
-#include <oskar_convert_apparent_ra_dec_to_horizon_direction.h>
+#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
 #include <oskar_evaluate_element_weights_dft.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
 #include <oskar_image_free.h>
@@ -189,7 +189,7 @@ static void set_up_pointing(oskar_Mem* weights, oskar_Mem* x, oskar_Mem* y,
     oskar_mem_init(z, type, location, (int)oskar_mem_length(lon), 1, status);
     oskar_evaluate_beam_horizon_direction(&beam_x, &beam_y, &beam_z, station,
             gast, status);
-    oskar_convert_apparent_ra_dec_to_horizon_direction(
+    oskar_convert_apparent_ra_dec_to_enu_direction_cosines(
             (int)oskar_mem_length(lon), x, y, z, lon, lat, last, st_lat, status);
     oskar_evaluate_element_weights_dft(weights, num_elements, wavenumber,
             oskar_station_element_x_weights_const(station),

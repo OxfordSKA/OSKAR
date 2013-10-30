@@ -30,7 +30,7 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_convert_horizon_to_offset_ecef.h>
+#include <oskar_convert_enu_to_offset_ecef.h>
 #include <oskar_telescope.h>
 #include <oskar_station_load_config.h>
 #include <oskar_get_error_string.h>
@@ -83,7 +83,6 @@ static void delete_test_data()
         remove(station_name);
     }
 }
-
 
 TEST(TelescopeModel, load_telescope_cpu)
 {
@@ -141,7 +140,7 @@ TEST(TelescopeModel, load_telescope_cpu)
 
         // Compute offset geocentric coordinates.
         double x = 0.0, y = 0.0, z = 0.0;
-        oskar_convert_horizon_to_offset_ecef_d(1, &hor_x, &hor_y, &hor_z,
+        oskar_convert_enu_to_offset_ecef_d(1, &hor_x, &hor_y, &hor_z,
                 longitude, latitude, &x, &y, &z);
         EXPECT_NEAR(x, station_x[i], 1e-5);
         EXPECT_NEAR(y, station_y[i], 1e-5);

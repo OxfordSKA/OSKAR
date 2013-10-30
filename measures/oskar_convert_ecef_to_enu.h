@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_ECEF_TO_HORIZON_H_
-#define OSKAR_CONVERT_ECEF_TO_HORIZON_H_
+#ifndef OSKAR_CONVERT_ECEF_TO_ENU_H_
+#define OSKAR_CONVERT_ECEF_TO_ENU_H_
 
 /**
- * @file oskar_convert_ecef_to_horizon.h
+ * @file oskar_convert_ecef_to_enu.h
  */
 
 #include <oskar_global.h>
@@ -61,22 +61,21 @@ extern "C" {
  * would be unable to represent points accurately on the Earth's surface
  * (more than 7 decimal digits are required for sub-metre precision).
  *
- * @param[in]  n             Number of points.
- * @param[in]  ecef_x        Vector of ECEF x-positions, in metres.
- * @param[in]  ecef_y        Vector of ECEF y-positions, in metres.
- * @param[in]  ecef_z        Vector of ECEF z-positions, in metres.
- * @param[in]  longitude     Longitude of tangent point, in radians.
- * @param[in]  latitude      Latitude of tangent point, in radians.
- * @param[in]  altitude      Altitude above ellipsoid, in metres.
- * @param[out] horizon_x     Vector of horizontal x-positions, in metres.
- * @param[out] horizon_y     Vector of horizontal y-positions, in metres.
- * @param[out] horizon_z     Vector of horizontal z-positions, in metres.
+ * @param[in]  n         Number of points.
+ * @param[in]  ecef_x    ECEF x-positions, in metres.
+ * @param[in]  ecef_y    ECEF y-positions, in metres.
+ * @param[in]  ecef_z    ECEF z-positions, in metres.
+ * @param[in]  longitude Longitude of tangent point, in radians.
+ * @param[in]  latitude  Latitude of tangent point, in radians.
+ * @param[in]  altitude  Altitude above ellipsoid, in metres.
+ * @param[out] x         Horizontal x-positions (east), in metres.
+ * @param[out] y         Horizontal y-positions (north), in metres.
+ * @param[out] z         Horizontal z-positions (up), in metres.
  */
 OSKAR_EXPORT
-void oskar_convert_ecef_to_horizon(int n, const double* ecef_x,
+void oskar_convert_ecef_to_enu(int n, const double* ecef_x,
         const double* ecef_y, const double* ecef_z, double longitude,
-        double latitude, double altitude, double* horizon_x,
-        double* horizon_y, double* horizon_z);
+        double latitude, double altitude, double* x, double* y, double* z);
 
 #ifdef __cplusplus
 }

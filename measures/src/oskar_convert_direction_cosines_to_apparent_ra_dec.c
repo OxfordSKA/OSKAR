@@ -26,57 +26,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_compute_tangent_plane_direction_z_cuda.h"
+#include <oskar_convert_direction_cosines_to_apparent_ra_dec.h>
+
 #include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Single precision.
-__global__
-void oskar_compute_tangent_plane_direction_z_cudak_f(int n, const float* x,
-        const float* y, float* z)
+/* Single precision. */
+void oskar_convert_direction_cosines_to_apparent_ra_dec_f(int n,
+        float ra0, float dec0, const float* x, const float* y, float* ra,
+        float* dec)
 {
-    // Get the position ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
+    int i;
+    float sinLat0, cosLat0;
+    sinLat0 = sinf(dec0);
+    cosLat0 = cosf(dec0);
 
-    float x_ = x[i];
-    float y_ = y[i];
-    float a = 1.0f - x_*x_ - y_*y_;
-    if (a < 0.0f)
+    /* Loop over l, m positions and evaluate the longitude and latitude values. */
+    for (i = 0; i < n; ++i)
     {
-        z[i] = -1.0f;
-    }
-    else
-    {
-        z[i] = sqrtf(a) - 1.0f;
+        float x_, y_, z_;
+        x_ = x[i];
+        y_ = y[i];
+        z_ = sqrtf(1.0 - x_*x_ - y_*y_);
+        dec[i] = asinf(z_ * sinLat0 + y_ * cosLat0);
+        ra[i] = ra0 + atan2f(x_, cosLat0 * z_ - y_ * sinLat0);
     }
 }
 
-// Double precision.
-__global__
-void oskar_compute_tangent_plane_direction_z_cudak_d(int n, const double* x,
-        const double* y, double* z)
+/* Double precision. */
+void oskar_convert_direction_cosines_to_apparent_ra_dec_d(int n,
+        double ra0, double dec0, const double* x, const double* y, double* ra,
+        double* dec)
 {
-    // Get the position ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
+    int i;
+    double sinLat0, cosLat0;
+    sinLat0 = sin(dec0);
+    cosLat0 = cos(dec0);
 
-    double x_ = x[i];
-    double y_ = y[i];
-    double a = 1.0 - x_*x_ - y_*y_;
-    if (a < 0.0)
+    /* Loop over l, m positions and evaluate the longitude and latitude values. */
+    for (i = 0; i < n; ++i)
     {
-        z[i] = -1.0;
-    }
-    else
-    {
-        z[i] = sqrt(a) - 1.0;
+        double x_, y_, z_;
+        x_ = x[i];
+        y_ = y[i];
+        z_ = sqrt(1.0 - x_*x_ - y_*y_);
+        dec[i] = asin(z_ * sinLat0 + y_ * cosLat0);
+        ra[i] = ra0 + atan2(x_, cosLat0 * z_ - y_ * sinLat0);
     }
 }
-
 
 #ifdef __cplusplus
 }

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_apparent_ha_dec_to_horizon_direction.h"
+#include "oskar_convert_apparent_ha_dec_to_enu_direction_cosines.h"
 #include "math.h"
 
 #ifdef __cplusplus
@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_convert_apparent_ha_dec_to_horizon_direction_f(int n,
+void oskar_convert_apparent_ha_dec_to_enu_direction_cosines_f(int n,
         const float* ha, const float* dec, float lat, float* x, float* y,
         float* z)
 {
@@ -72,7 +72,7 @@ void oskar_convert_apparent_ha_dec_to_horizon_direction_f(int n,
 }
 
 /* Double precision. */
-void oskar_convert_apparent_ha_dec_to_horizon_direction_d(int n,
+void oskar_convert_apparent_ha_dec_to_enu_direction_cosines_d(int n,
         const double* ha, const double* dec, double lat, double* x, double* y,
         double* z)
 {

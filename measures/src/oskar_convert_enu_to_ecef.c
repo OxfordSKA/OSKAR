@@ -26,29 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_horizon_to_ecef.h"
+#include "oskar_convert_enu_to_ecef.h"
 
-#include "oskar_convert_horizon_to_offset_ecef.h"
+#include "oskar_convert_enu_to_offset_ecef.h"
 #include "oskar_convert_offset_ecef_to_ecef.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_convert_horizon_to_ecef(int n, const double* horizon_x,
-        const double* horizon_y, const double* horizon_z, double lon,
-        double lat, double alt, double* ecef_x, double* ecef_y, double* ecef_z)
+void oskar_convert_enu_to_ecef(int n, const double* x, const double* y,
+        const double* z, double lon, double lat, double alt, double* ecef_x,
+        double* ecef_y, double* ecef_z)
 {
     /* Horizon plane (ENU) to offset geocentric cartesian coordinates. */
-    oskar_convert_horizon_to_offset_ecef_d(n, horizon_x, horizon_y, horizon_z,
-            lon, lat, ecef_x, ecef_y, ecef_z);
+    oskar_convert_enu_to_offset_ecef_d(n, x, y, z, lon, lat, ecef_x,
+            ecef_y, ecef_z);
 
     /* Offset ECEF to ECEF coordinates. */
     oskar_convert_offset_ecef_to_ecef(n, ecef_x, ecef_y, ecef_z, lon, lat, alt,
             ecef_x, ecef_y, ecef_z);
 }
-
-
 
 #ifdef __cplusplus
 }

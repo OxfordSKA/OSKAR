@@ -27,7 +27,7 @@
  */
 
 #include "oskar_convert_apparent_ha_dec_to_az_el.h"
-#include "oskar_convert_apparent_ha_dec_to_horizon_direction.h"
+#include "oskar_convert_apparent_ha_dec_to_enu_direction_cosines.h"
 #include <math.h>
 
 #ifdef __cplusplus
@@ -39,7 +39,7 @@ void oskar_convert_apparent_ha_dec_to_az_el_f(int n, const float* ha,
         const float* dec, float lat, float* work, float* az, float* el)
 {
     int i;
-    oskar_convert_apparent_ha_dec_to_horizon_direction_f(n, ha, dec, lat,
+    oskar_convert_apparent_ha_dec_to_enu_direction_cosines_f(n, ha, dec, lat,
             work, az, el);
     for (i = 0; i < n; ++i)
     {
@@ -60,7 +60,7 @@ void oskar_convert_apparent_ha_dec_to_az_el_d(int n, const double* ha,
         const double* dec, double lat, double* work, double* az, double* el)
 {
     int i;
-    oskar_convert_apparent_ha_dec_to_horizon_direction_d(n, ha, dec, lat,
+    oskar_convert_apparent_ha_dec_to_enu_direction_cosines_d(n, ha, dec, lat,
             work, az, el);
     for (i = 0; i < n; ++i)
     {

@@ -28,7 +28,7 @@
 
 #include "fits/oskar_fits_image_to_sky_model.h"
 #include "fits/oskar_fits_check_status.h"
-#include "oskar_convert_tangent_plane_direction_to_lon_lat.h"
+#include "oskar_convert_direction_cosines_to_apparent_ra_dec.h"
 #include <oskar_log.h>
 #include <oskar_sky.h>
 
@@ -311,7 +311,7 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
                     /* Convert pixel positions to RA and Dec values. */
                     l = cdelt[0] * (x + 1 - crpix[0]);
                     m = cdelt[1] * (y + 1 - crpix[1]);
-                    oskar_convert_tangent_plane_direction_to_lon_lat_f(1,
+                    oskar_convert_direction_cosines_to_apparent_ra_dec_f(1,
                             crval[0], crval[1], &l, &m, &ra, &dec);
 
                     /* Store pixel data in sky model. */
@@ -356,7 +356,7 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
                     /* Convert pixel positions to RA and Dec values. */
                     l = cdelt[0] * (x + 1 - crpix[0]);
                     m = cdelt[1] * (y + 1 - crpix[1]);
-                    oskar_convert_tangent_plane_direction_to_lon_lat_d(1,
+                    oskar_convert_direction_cosines_to_apparent_ra_dec_d(1,
                             crval[0], crval[1], &l, &m, &ra, &dec);
 
                     /* Store pixel data in sky model. */

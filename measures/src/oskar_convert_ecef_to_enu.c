@@ -26,56 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_COMPUTE_TANGENT_PLANE_DIRECTION_Z_H_
-#define OSKAR_COMPUTE_TANGENT_PLANE_DIRECTION_Z_H_
+#include <oskar_convert_ecef_to_enu.h>
+#include <oskar_convert_geodetic_spherical_to_ecef.h>
 
-/**
- * @file oskar_compute_tangent_plane_direction_z.h
- */
-
-#include <oskar_global.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Compute z-direction cosines from x and y (single precision).
- *
- * @details
- * This function computes z-direction cosines from x,y-direction cosines,
- * using the relation z = sqrt(1 - x*x - y*y) - 1.
- *
- * @param[in]  n The number of points.
- * @param[out] x The x-direction-cosines.
- * @param[out] y The y-direction-cosines.
- * @param[out] z The z-direction-cosines.
- */
-OSKAR_EXPORT
-void oskar_compute_tangent_plane_direction_z_f(int n, const float* x,
-        const float* y, float* z);
+void oskar_convert_ecef_to_enu(int n, const double* ecef_x,
+        const double* ecef_y, const double* ecef_z, double lon, double lat,
+        double alt, double* x, double* y, double* z)
+{
+    int i;
+    double x0, y0, z0, a, b, c, d;
+    double sin_lon, cos_lon, sin_lat, cos_lat;
 
-/**
- * @brief
- * Compute z-direction cosines from x and y (double precision).
- *
- * @details
- * This function computes z-direction cosines from x,y-direction cosines,
- * using the relation z = sqrt(1 - x*x - y*y) - 1.
- *
- * @param[in]  n The number of points.
- * @param[out] x The x-direction-cosines.
- * @param[out] y The y-direction-cosines.
- * @param[out] z The z-direction-cosines.
- */
-OSKAR_EXPORT
-void oskar_compute_tangent_plane_direction_z_d(int n, const double* x,
-        const double* y, double* z);
+    /* Get ECEF coordinates of reference position. */
+    oskar_convert_geodetic_spherical_to_ecef(1, &lon, &lat, &alt, &x0, &y0, &z0);
 
+    /* Get rotation matrix elements. */
+    sin_lon = sin(lon);
+    cos_lon = cos(lon);
+    sin_lat = sin(lat);
+    cos_lat = cos(lat);
+    a = -sin_lat * cos_lon;
+    b = -sin_lat * sin_lon;
+    c = cos_lat * cos_lon;
+    d = cos_lat * sin_lon;
+
+    /* Loop over points. */
+    for (i = 0; i < n; ++i)
+    {
+        /* Get deltas from reference point. */
+        double dx, dy, dz;
+        dx = ecef_x[i] - x0;
+        dy = ecef_y[i] - y0;
+        dz = ecef_z[i] - z0;
+
+        /* Get horizon coordinates. */
+        x[i] = -sin_lon * dx + cos_lon * dy;
+        y[i] = a * dx + b * dy + cos_lat * dz;
+        z[i] = c * dx + d * dy + sin_lat * dz;
+    }
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_COMPUTE_TANGENT_PLANE_DIRECTION_Z_H_ */

@@ -26,12 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_CONVERT_APPARENT_RA_DEC_TO_HORIZON_DIRECTION_CUDA_H_
-#define OSKAR_CONVERT_APPARENT_RA_DEC_TO_HORIZON_DIRECTION_CUDA_H_
+#ifndef OSKAR_CONVERT_APPARENT_RA_DEC_TO_ENU_DIRECTION_COSINES_CUDA_H_
+#define OSKAR_CONVERT_APPARENT_RA_DEC_TO_ENU_DIRECTION_COSINES_CUDA_H_
 
 /**
- * @file oskar_convert_apparent_ra_dec_to_horizon_direction_cuda.h
+ * @file oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda.h
  */
 
 #include <oskar_global.h>
@@ -61,7 +60,7 @@ extern "C" {
  * @param[out] z   z-direction-cosines in the horizontal system.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_horizon_direction_cuda_f(int n,
+void oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda_f(int n,
         const float* ra, const float* dec, float lst, float lat, float* x,
         float* y, float* z);
 
@@ -85,7 +84,7 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction_cuda_f(int n,
  * @param[out] z   z-direction-cosines in the horizontal system.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_horizon_direction_cuda_d(int n,
+void oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda_d(int n,
         const double* ra, const double* dec, double lst, double lat, double* x,
         double* y, double* z);
 
@@ -120,7 +119,7 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction_cuda_d(int n,
  * @param[out] z      z-direction-cosines.
  */
 __global__
-void oskar_convert_apparent_ra_dec_to_horizon_direction_cudak_f(int n,
+void oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cudak_f(int n,
         const float* ra, const float* dec, float cosLat, float sinLat,
         float lst, float* x, float* y, float* z);
 
@@ -153,7 +152,7 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction_cudak_f(int n,
  * @param[out] z      z-direction-cosines.
  */
 __global__
-void oskar_convert_apparent_ra_dec_to_horizon_direction_cudak_d(int n,
+void oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cudak_d(int n,
         const double* ra, const double* dec, double cosLat, double sinLat,
         double lst, double* x, double* y, double* z);
 
@@ -163,4 +162,4 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction_cudak_d(int n,
 }
 #endif
 
-#endif /* OSKAR_CONVERT_APPARENT_RA_DEC_TO_HORIZON_DIRECTION_CUDA_H_ */
+#endif /* OSKAR_CONVERT_APPARENT_RA_DEC_TO_ENU_DIRECTION_COSINES_CUDA_H_ */

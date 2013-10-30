@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_APPARENT_HA_DEC_TO_HORIZON_DIRECTION_H_
-#define OSKAR_CONVERT_APPARENT_HA_DEC_TO_HORIZON_DIRECTION_H_
+#ifndef OSKAR_CONVERT_APPARENT_HA_DEC_TO_ENU_DIRECTION_COSINES_H_
+#define OSKAR_CONVERT_APPARENT_HA_DEC_TO_ENU_DIRECTION_COSINES_H_
 
 /**
- * @file oskar_convert_apparent_ha_dec_to_horizon_direction_xyz.h
+ * @file oskar_convert_apparent_ha_dec_to_enu_direction_cosines.h
  */
 
 #include <oskar_global.h>
@@ -58,7 +58,7 @@ extern "C" {
  * @param[out] z   The z-direction-cosines in the horizontal system.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ha_dec_to_horizon_direction_f(int n,
+void oskar_convert_apparent_ha_dec_to_enu_direction_cosines_f(int n,
         const float* ha, const float* dec, float lat, float* x, float* y,
         float* z);
 
@@ -81,7 +81,7 @@ void oskar_convert_apparent_ha_dec_to_horizon_direction_f(int n,
  * @param[out] z   The z-direction-cosines in the horizontal system.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ha_dec_to_horizon_direction_d(int n,
+void oskar_convert_apparent_ha_dec_to_enu_direction_cosines_d(int n,
         const double* ha, const double* dec, double lat, double* x, double* y,
         double* z);
 
@@ -89,4 +89,4 @@ void oskar_convert_apparent_ha_dec_to_horizon_direction_d(int n,
 }
 #endif
 
-#endif /* OSKAR_CONVERT_APPARENT_HA_DEC_TO_HORIZON_DIRECTION_H_ */
+#endif /* OSKAR_CONVERT_APPARENT_HA_DEC_TO_ENU_DIRECTION_COSINES_H_ */

@@ -28,7 +28,7 @@
 
 #include "imaging/oskar_evaluate_image_lm_grid.h"
 #include "imaging/oskar_evaluate_image_lon_lat_grid.h"
-#include "oskar_convert_tangent_plane_direction_to_lon_lat.h"
+#include "oskar_convert_direction_cosines_to_apparent_ra_dec.h"
 #include <oskar_mem.h>
 #include <stdlib.h>
 
@@ -85,7 +85,7 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
             oskar_evaluate_image_lm_grid_f(image_size_l, image_size_m,
                     fov_rad_lon, fov_rad_lat, (float*)lon_cpu.data,
                     (float*)lat_cpu.data);
-            oskar_convert_tangent_plane_direction_to_lon_lat_f(num_pixels,
+            oskar_convert_direction_cosines_to_apparent_ra_dec_f(num_pixels,
                     lon_rad, lat_rad, (const float*)lon_cpu.data,
                     (const float*)lat_cpu.data, (float*)lon_cpu.data,
                     (float*)lat_cpu.data);
@@ -95,7 +95,7 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
             oskar_evaluate_image_lm_grid_d(image_size_l, image_size_m,
                     fov_rad_lon, fov_rad_lat, (double*)lon_cpu.data,
                     (double*)lat_cpu.data);
-            oskar_convert_tangent_plane_direction_to_lon_lat_d(num_pixels,
+            oskar_convert_direction_cosines_to_apparent_ra_dec_d(num_pixels,
                     lon_rad, lat_rad, (const double*)lon_cpu.data,
                     (const double*)lat_cpu.data, (double*)lon_cpu.data,
                     (double*)lat_cpu.data);

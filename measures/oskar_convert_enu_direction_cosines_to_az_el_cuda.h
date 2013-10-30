@@ -27,11 +27,11 @@
  */
 
 
-#ifndef OSKAR_CONVERT_HORIZON_DIRECTION_TO_AZ_EL_H_
-#define OSKAR_CONVERT_HORIZON_DIRECTION_TO_AZ_EL_H_
+#ifndef OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_AZ_EL_CUDA_H_
+#define OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_AZ_EL_CUDA_H_
 
 /**
- * @file oskar_convert_horizon_direction_to_az_el.h
+ * @file oskar_convert_enu_direction_cosines_to_az_el_cuda.h
  */
 
 #include <oskar_global.h>
@@ -40,58 +40,63 @@
 extern "C" {
 #endif
 
-/**
- * @brief
- * Function to compute azimuth and elevation from horizontal direction
- * cosines (single precision).
- *
- * @details
- * Computes the azimuth and elevation from the given horizontal direction
- * cosines.
- *
- * The directions are:
- * <li> x - pointing East, </li>
- * <li> y - pointing North, </li>
- * <li> z - pointing to the zenith. </li>
- *
- * @param[in]  n  The number of points.
- * @param[in]  x  The x-direction-cosines.
- * @param[in]  y  The y-direction-cosines.
- * @param[in]  z  The z-direction-cosines.
- * @param[out] az The azimuths, in radians.
- * @param[out] el The elevations, in radians.
- */
-OSKAR_EXPORT
-void oskar_convert_horizon_direction_to_az_el_f(int n, const float* x,
-        const float* y, const float* z, float* az, float* el);
+#ifdef __CUDACC__
 
 /**
  * @brief
- * Function to compute azimuth and elevation from horizontal direction
- * cosines (double precision).
+ * CUDA kernel to compute azimuth and elevation from horizontal direction
+ * cosines (single precision).
  *
  * @details
- * Computes the azimuth and elevation from the given horizontal direction
- * cosines.
+ * This CUDA kernel computes the azimuth and elevation from the given
+ * horizontal direction cosines.
  *
  * The directions are:
  * <li> x - pointing East, </li>
  * <li> y - pointing North, </li>
  * <li> z - pointing to the zenith. </li>
  *
- * @param[in]  n  The number of points.
- * @param[in]  x  The x-direction-cosines.
- * @param[in]  y  The y-direction-cosines.
- * @param[in]  z  The z-direction-cosines.
- * @param[out] az The azimuths, in radians.
- * @param[out] el The elevations, in radians.
+ * @param[in]  n   The number of points.
+ * @param[in]  x   The x-direction-cosines.
+ * @param[in]  y   The y-direction-cosines.
+ * @param[in]  z   The z-direction-cosines.
+ * @param[out] az  The azimuths, in radians.
+ * @param[out] el  The elevations, in radians.
  */
-OSKAR_EXPORT
-void oskar_convert_horizon_direction_to_az_el_d(int n, const double* x,
-        const double* y, const double* z, double* az, double* el);
+__global__
+void oskar_convert_enu_direction_cosines_to_az_el_cudak_f(int n,
+        const float* x, const float* y, const float* z, float* az, float* el);
+
+/**
+ * @brief
+ * CUDA kernel to compute azimuth and elevation from horizontal direction
+ * cosines (double precision).
+ *
+ * @details
+ * This CUDA kernel computes the azimuth and elevation from the given
+ * horizontal direction cosines.
+ *
+ * The directions are:
+ * <li> x - pointing East, </li>
+ * <li> y - pointing North, </li>
+ * <li> z - pointing to the zenith. </li>
+ *
+ * @param[in]  n   The number of points.
+ * @param[in]  x   The x-direction-cosines.
+ * @param[in]  y   The y-direction-cosines.
+ * @param[in]  z   The z-direction-cosines.
+ * @param[out] az  The azimuths, in radians.
+ * @param[out] el  The elevations, in radians.
+ */
+__global__
+void oskar_convert_enu_direction_cosines_to_az_el_cudak_d(int n,
+        const double* x, const double* y, const double* z, double* az,
+        double* el);
+
+#endif /* __CUDACC__ */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CONVERT_HORIZON_DIRECTION_TO_AZ_EL_H_ */
+#endif /* OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_AZ_EL_CUDA_H_ */

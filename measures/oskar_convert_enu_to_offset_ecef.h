@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_HORIZON_TO_OFFSET_ECEF_H_
-#define OSKAR_CONVERT_HORIZON_TO_OFFSET_ECEF_H_
+#ifndef OSKAR_CONVERT_ENU_TO_OFFSET_ECEF_H_
+#define OSKAR_CONVERT_ENU_TO_OFFSET_ECEF_H_
 
 /**
- * @file oskar_convert_horizon_to_offset_ecef.h
+ * @file oskar_convert_enu_to_offset_ecef.h
  */
 
 #include <oskar_global.h>
@@ -61,9 +61,9 @@ extern "C" {
  * degrees East, and the z-axis to the North Celestial Pole.
  *
  * @param[in]  n             Number of points.
- * @param[in]  horizon_x     Vector of horizontal x-positions, in metres.
- * @param[in]  horizon_y     Vector of horizontal y-positions, in metres.
- * @param[in]  horizon_z     Vector of horizontal z-positions, in metres.
+ * @param[in]  x             Horizontal x-positions (east), in metres.
+ * @param[in]  y             Horizontal y-positions (north), in metres.
+ * @param[in]  z             Horizontal z-positions (up), in metres.
  * @param[in]  lon           Longitude of tangent point, in radians.
  * @param[in]  lat           Latitude of tangent point, in radians.
  * @param[out] offset_ecef_x Vector of output x-positions, in metres.
@@ -71,10 +71,9 @@ extern "C" {
  * @param[out] offset_ecef_z Vector of output z-positions, in metres.
  */
 OSKAR_EXPORT
-void oskar_convert_horizon_to_offset_ecef_d(int n, const double* horizon_x,
-        const double* horizon_y, const double* horizon_z, double lon,
-        double lat, double* offset_ecef_x, double* offset_ecef_y,
-        double* offset_ecef_z);
+void oskar_convert_enu_to_offset_ecef_d(int n, const double* x,
+        const double* y, const double* z, double lon, double lat,
+        double* offset_ecef_x, double* offset_ecef_y, double* offset_ecef_z);
 
 /**
  * @brief
@@ -98,9 +97,9 @@ void oskar_convert_horizon_to_offset_ecef_d(int n, const double* horizon_x,
  * degrees East, and the z-axis to the North Celestial Pole.
  *
  * @param[in]  n             Number of points.
- * @param[in]  horizon_x     Vector of horizontal x-positions, in metres.
- * @param[in]  horizon_y     Vector of horizontal y-positions, in metres.
- * @param[in]  horizon_z     Vector of horizontal z-positions, in metres.
+ * @param[in]  x             Horizontal x-positions (east), in metres.
+ * @param[in]  y             Horizontal y-positions (north), in metres.
+ * @param[in]  z             Horizontal z-positions (up), in metres.
  * @param[in]  lon           Longitude of tangent point, in radians.
  * @param[in]  lat           Latitude of tangent point, in radians.
  * @param[out] offset_ecef_x Vector of output x-positions, in metres.
@@ -108,8 +107,8 @@ void oskar_convert_horizon_to_offset_ecef_d(int n, const double* horizon_x,
  * @param[out] offset_ecef_z Vector of output z-positions, in metres.
  */
 OSKAR_EXPORT
-void oskar_convert_horizon_to_offset_ecef_f(int n, const float* horizon_x,
-        const float* horizon_y, const float* horizon_z, float lon, float lat,
+void oskar_convert_enu_to_offset_ecef_f(int n, const float* x,
+        const float* y, const float* z, float lon, float lat,
         float* offset_ecef_x, float* offset_ecef_y, float* offset_ecef_z);
 
 
@@ -117,4 +116,4 @@ void oskar_convert_horizon_to_offset_ecef_f(int n, const float* horizon_x,
 }
 #endif
 
-#endif /* OSKAR_CONVERT_HORIZON_TO_OFFSET_ECEF_H_ */
+#endif /* OSKAR_CONVERT_ENU_TO_OFFSET_ECEF_H_ */

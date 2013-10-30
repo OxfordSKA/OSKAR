@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_APPARENT_HA_DEC_TO_HORIZON_DIRECTION_CUDA_H_
-#define OSKAR_CONVERT_APPARENT_HA_DEC_TO_HORIZON_DIRECTION_CUDA_H_
+#ifndef OSKAR_CONVERT_APPARENT_HA_DEC_TO_ENU_DIRECTION_COSINES_CUDA_H_
+#define OSKAR_CONVERT_APPARENT_HA_DEC_TO_ENU_DIRECTION_COSINES_CUDA_H_
 
 /**
- * @file oskar_convert_apparent_ha_dec_to_horizon_direction_cuda.h
+ * @file oskar_convert_apparent_ha_dec_to_enu_direction_cosines_cuda.h
  */
 
 #include <oskar_global.h>
@@ -65,11 +65,11 @@ extern "C" {
  * @param[in]  sinLat The sine of the geodetic latitude of the origin of the
  *                    horizon frame.
  * @param[out] x      x direction cosines.
- * @param[out] y      y direction cosines
+- * @param[out] y      y direction cosines
  * @param[out] z      z direction cosines
  */
 __global__
-void oskar_convert_apparent_ha_dec_to_horizon_direction_cudak_f(int n,
+void oskar_convert_apparent_ha_dec_to_enu_direction_cosines_cudak_f(int n,
         const float* ha, const float* dec, float cosLat, float sinLat,
         float* x, float* y, float* z);
 
@@ -101,7 +101,7 @@ void oskar_convert_apparent_ha_dec_to_horizon_direction_cudak_f(int n,
  * @param[out] z      z direction cosines
  */
 __global__
-void oskar_convert_apparent_ha_dec_to_horizon_direction_cudak_d(int n,
+void oskar_convert_apparent_ha_dec_to_enu_direction_cosines_cudak_d(int n,
         const double* ha, const double* dec, double cosLat, double sinLat,
         double* x, double* y, double* z);
 
@@ -111,4 +111,4 @@ void oskar_convert_apparent_ha_dec_to_horizon_direction_cudak_d(int n,
 }
 #endif
 
-#endif /* OSKAR_CONVERT_APPARENT_HA_DEC_TO_HORIZON_DIRECTION_CUDA_H_ */
+#endif /* OSKAR_CONVERT_APPARENT_HA_DEC_TO_ENU_DIRECTION_COSINES_CUDA_H_ */

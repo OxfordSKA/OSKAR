@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_horizon_to_offset_ecef.h"
+#include "oskar_convert_enu_to_offset_ecef.h"
 
 #include <math.h>
 
@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 /* Double precision. */
-void oskar_convert_horizon_to_offset_ecef_d(int n, const double* horizon_x,
+void oskar_convert_enu_to_offset_ecef_d(int n, const double* horizon_x,
         const double* horizon_y, const double* horizon_z, double lon, double lat,
         double* offset_ecef_x, double* offset_ecef_y, double* offset_ecef_z)
 {
@@ -70,7 +70,7 @@ void oskar_convert_horizon_to_offset_ecef_d(int n, const double* horizon_x,
 }
 
 /* Single precision. */
-void oskar_convert_horizon_to_offset_ecef_f(int n, const float* horizon_x,
+void oskar_convert_enu_to_offset_ecef_f(int n, const float* horizon_x,
         const float* horizon_y, const float* horizon_z, float lon, float lat,
         float* offset_ecef_x, float* offset_ecef_y, float* offsec_ecef_z)
 {

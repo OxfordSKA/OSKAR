@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_APPARENT_RA_DEC_TO_TANGENT_PLANE_DIRECTION_H_
-#define OSKAR_CONVERT_APPARENT_RA_DEC_TO_TANGENT_PLANE_DIRECTION_H_
+#ifndef OSKAR_CONVERT_APPARENT_RA_DEC_TO_DIRECTION_COSINES_H_
+#define OSKAR_CONVERT_APPARENT_RA_DEC_TO_DIRECTION_COSINES_H_
 
 /**
- * @file oskar_convert_apparent_ra_dec_to_tangent_plane_direction.h
+ * @file oskar_convert_apparent_ra_dec_to_direction_cosines.h
  */
 
 #include <oskar_global.h>
@@ -50,18 +50,18 @@ extern "C" {
  *
  * Note that the z-positions are given by sqrt(1 - x*x - y*y) - 1.
  *
- * @param[in]  num_points Number of points.
- * @param[in]  ra         Input position Right Ascensions in radians.
- * @param[in]  dec        Input position Declinations in radians.
- * @param[in]  ra0_rad    Right Ascension of the reference point in radians.
- * @param[in]  dec0_rad   Declination of the reference point in radians.
- * @param[out] x          x-direction-cosines relative to the reference point.
- * @param[out] y          y-direction-cosines relative to the reference point.
- * @param[out] z          z-direction-cosines relative to the reference point.
+ * @param[in]  n    Number of points.
+ * @param[in]  ra   Input position Right Ascensions in radians.
+ * @param[in]  dec  Input position Declinations in radians.
+ * @param[in]  ra0  Right Ascension of the reference point in radians.
+ * @param[in]  dec0 Declination of the reference point in radians.
+ * @param[out] x    x-direction-cosines relative to the reference point.
+ * @param[out] y    y-direction-cosines relative to the reference point.
+ * @param[out] z    z-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_tangent_plane_direction_f(int num_points,
-        const float* ra, const float* dec, float ra0_rad, float dec0_rad,
+void oskar_convert_apparent_ra_dec_to_direction_cosines_f(int n,
+        const float* ra, const float* dec, float ra0, float dec0,
         float* x, float* y, float* z);
 
 /**
@@ -74,19 +74,19 @@ void oskar_convert_apparent_ra_dec_to_tangent_plane_direction_f(int num_points,
  *
  * Note that the n-positions are given by sqrt(1 - x*x - y*y) - 1.
  *
- * @param[in]  num_points Number of points.
- * @param[in]  ra         Input position Right Ascensions in radians.
- * @param[in]  dec        Input position Declinations in radians.
- * @param[in]  ra0_rad    Right Ascension of the reference point in radians.
- * @param[in]  dec0_rad   Declination of the reference point in radians.
- * @param[out] x          x-direction-cosines relative to the reference point.
- * @param[out] y          y-direction-cosines relative to the reference point.
- * @param[out] z          z-direction-cosines relative to the reference point.
+ * @param[in]  n    Number of points.
+ * @param[in]  ra   Input position Right Ascensions in radians.
+ * @param[in]  dec  Input position Declinations in radians.
+ * @param[in]  ra0  Right Ascension of the reference point in radians.
+ * @param[in]  dec0 Declination of the reference point in radians.
+ * @param[out] x    x-direction-cosines relative to the reference point.
+ * @param[out] y    y-direction-cosines relative to the reference point.
+ * @param[out] z    z-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_tangent_plane_direction_d(int num_points,
-        const double* ra, const double* dec, double ra0_rad,
-        double dec0_rad, double* x, double* y, double* z);
+void oskar_convert_apparent_ra_dec_to_direction_cosines_d(int n,
+        const double* ra, const double* dec, double ra0,
+        double dec0, double* x, double* y, double* z);
 
 /**
  * @brief
@@ -108,7 +108,7 @@ void oskar_convert_apparent_ra_dec_to_tangent_plane_direction_d(int num_points,
  * @param[out] z          z-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_tangent_plane_direction(int num_points,
+void oskar_convert_apparent_ra_dec_to_direction_cosines(int num_points,
         const oskar_Mem* ra, const oskar_Mem* dec, double ra0_rad,
         double dec0_rad, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int* status);
 
@@ -117,4 +117,4 @@ void oskar_convert_apparent_ra_dec_to_tangent_plane_direction(int num_points,
 }
 #endif
 
-#endif /* OSKAR_CONVERT_APPARENT_RA_DEC_TO_TANGENT_PLANE_DIRECTION_H_ */
+#endif /* OSKAR_CONVERT_APPARENT_RA_DEC_TO_DIRECTION_COSINES_H_ */

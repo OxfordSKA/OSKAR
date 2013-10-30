@@ -26,51 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_horizon_direction_to_az_el.h"
-#include <math.h>
+#include "oskar_convert_enu_direction_cosines_to_az_el_cuda.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-OSKAR_EXPORT
-void oskar_convert_horizon_direction_to_az_el_f(int n, const float* x,
+// Single precision.
+__global__
+void oskar_convert_enu_direction_cosines_to_az_el_cudak_f(int n, const float* x,
         const float* y, const float* z, float* az, float* el)
 {
-    int i = 0;
-    float x_, y_, z_, a;
-    for (i = 0; i < n; ++i)
-    {
-        x_ = x[i];
-        y_ = y[i];
-        z_ = z[i];
-        a = atan2f(x_, y_); /* Azimuth */
-        x_ = sqrtf(x_*x_ + y_*y_);
-        y_ = atan2f(z_, x_); /* Elevation. */
-        az[i] = a;
-        el[i] = y_;
-    }
+    // Get the position ID that this thread is working on.
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
+
+    // Get the data.
+    float x_ = x[i];
+    float y_ = y[i];
+    float z_ = z[i];
+
+    // Cartesian to spherical.
+    float a = atan2f(x_, y_); // Azimuth.
+    x_ = sqrtf(x_*x_ + y_*y_);
+    y_ = atan2f(z_, x_); // Elevation.
+    az[i] = a;
+    el[i] = y_;
 }
 
-OSKAR_EXPORT
-void oskar_convert_horizon_direction_to_az_el_d(int n, const double* x,
+// Double precision.
+__global__
+void oskar_convert_enu_direction_cosines_to_az_el_cudak_d(int n, const double* x,
         const double* y, const double* z, double* az, double* el)
 {
-    int i = 0;
-    double x_, y_, z_, a;
-    for (i = 0; i < n; ++i)
-    {
-        x_ = x[i];
-        y_ = y[i];
-        z_ = z[i];
-        a = atan2(x_, y_); /* Azimuth */
-        x_ = sqrt(x_*x_ + y_*y_);
-        y_ = atan2(z_, x_); /* Elevation. */
-        az[i] = a;
-        el[i] = y_;
-    }
-}
+    // Get the position ID that this thread is working on.
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
 
+    // Get the data.
+    double x_ = x[i];
+    double y_ = y[i];
+    double z_ = z[i];
+
+    // Cartesian to spherical.
+    double a = atan2(x_, y_); // Azimuth.
+    x_ = sqrt(x_*x_ + y_*y_);
+    y_ = atan2(z_, x_); // Elevation.
+    az[i] = a;
+    el[i] = y_;
+}
 
 #ifdef __cplusplus
 }

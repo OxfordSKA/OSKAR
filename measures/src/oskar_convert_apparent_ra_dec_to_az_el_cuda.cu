@@ -26,18 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "oskar_convert_apparent_ra_dec_to_az_el_cuda.h"
 
-#include "oskar_convert_apparent_ra_dec_to_horizon_direction_cuda.h"
-#include "oskar_convert_horizon_direction_to_az_el_cuda.h"
+#include "oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda.h"
+#include "oskar_convert_enu_direction_cosines_to_az_el_cuda.h"
 
 #include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 // Single precision.
 int oskar_convert_apparent_ra_dec_to_az_el_cuda_f(int n, const float* d_ra,
@@ -49,15 +47,14 @@ int oskar_convert_apparent_ra_dec_to_az_el_cuda_f(int n, const float* d_ra,
     const int n_blk = (n + n_thd - 1) / n_thd;
     float cosLat = cosf(lat);
     float sinLat = sinf(lat);
-    oskar_convert_apparent_ra_dec_to_horizon_direction_cudak_f
+    oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cudak_f
     OSKAR_CUDAK_CONF(n_blk, n_thd) (n, d_ra, d_dec, cosLat, sinLat, lst,
             d_az, d_el, d_work);
-    oskar_convert_horizon_direction_to_az_el_cudak_f
+    oskar_convert_enu_direction_cosines_to_az_el_cudak_f
     OSKAR_CUDAK_CONF(n_blk, n_thd) (n, d_az, d_el, d_work, d_az, d_el);
     cudaDeviceSynchronize();
     return (int)cudaPeekAtLastError();
 }
-
 
 // Double precision.
 int oskar_convert_apparent_ra_dec_to_az_el_cuda_d(int n, const double* d_ra,
@@ -69,15 +66,14 @@ int oskar_convert_apparent_ra_dec_to_az_el_cuda_d(int n, const double* d_ra,
     const int n_blk = (n + n_thd - 1) / n_thd;
     double cosLat = cos(lat);
     double sinLat = sin(lat);
-    oskar_convert_apparent_ra_dec_to_horizon_direction_cudak_d
+    oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cudak_d
     OSKAR_CUDAK_CONF(n_blk, n_thd) (n, d_ra, d_dec, cosLat, sinLat, lst,
             d_az, d_el, d_work);
-    oskar_convert_horizon_direction_to_az_el_cudak_d
+    oskar_convert_enu_direction_cosines_to_az_el_cudak_d
     OSKAR_CUDAK_CONF(n_blk, n_thd) (n, d_az, d_el, d_work, d_az, d_el);
     cudaDeviceSynchronize();
     return (int)cudaPeekAtLastError();
 }
-
 
 #ifdef __cplusplus
 }

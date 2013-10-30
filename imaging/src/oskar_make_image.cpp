@@ -37,7 +37,7 @@
 #include "imaging/oskar_setup_image.h"
 #include "imaging/oskar_image_init.h"
 #include "imaging/oskar_image_evaluate_ranges.h"
-#include "oskar_convert_apparent_ra_dec_to_tangent_plane_direction.h"
+#include "oskar_convert_apparent_ra_dec_to_direction_cosines.h"
 #include "oskar_convert_ecef_to_baseline_uvw.h"
 
 #include <oskar_log.h>
@@ -107,7 +107,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         double l1, m1, n1;
         int num_elements = num_baselines * num_times;
 
-        oskar_convert_apparent_ra_dec_to_tangent_plane_direction_d(1,
+        oskar_convert_apparent_ra_dec_to_direction_cosines_d(1,
                 &ra_rad, &dec_rad, ra0_rad, dec0_rad, &l1, &m1, &n1);
         delta_l = 0 - l1;
         delta_m = 0 - m1;

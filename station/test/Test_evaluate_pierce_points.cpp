@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_convert_horizon_to_ecef.h>
+#include <oskar_convert_enu_to_ecef.h>
 #include <oskar_evaluate_pierce_points.h>
 #include <oskar_convert_ecef_to_geodetic_spherical.h>
 
@@ -74,7 +74,7 @@ TEST(evaluate_pierce_points, test1)
 
     // == Evaluate geo-centric station x,y,z coordinates.
     double st_x, st_y, st_z;
-    oskar_convert_horizon_to_ecef(1, &st_hor_x, &st_hor_y, &st_hor_z,
+    oskar_convert_enu_to_ecef(1, &st_hor_x, &st_hor_y, &st_hor_z,
             st_lon_rad, st_lat_rad, st_alt_m, &st_x, &st_y, &st_z);
     printf("  lon = %f, lat = %f [station]\n", st_lon_deg, st_lat_deg);
     printf("  az = %f, el = %f [station]\n", az_deg, el_deg);
@@ -168,7 +168,7 @@ TEST(evaluate_pierce_points, test2)
 
     // Obtain station ECEF coordinates (geocentric x,y,z coordinates of station)
     double x, y, z;
-    oskar_convert_horizon_to_ecef(1, &st_hor_x, &st_hor_y, &st_hor_z, lon, lat,
+    oskar_convert_enu_to_ecef(1, &st_hor_x, &st_hor_y, &st_hor_z, lon, lat,
             alt, &x, &y, &z);
 
     // Evaluate horizontal x,y,z of the pierce point.

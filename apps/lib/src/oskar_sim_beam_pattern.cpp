@@ -37,8 +37,8 @@
 #include <oskar_image_resize.h>
 #include <oskar_image_write.h>
 #include <oskar_mjd_to_gast_fast.h>
-#include <oskar_convert_apparent_ra_dec_to_tangent_plane_direction.h>
-#include <oskar_convert_apparent_ra_dec_to_horizon_direction.h>
+#include <oskar_convert_apparent_ra_dec_to_direction_cosines.h>
+#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
 #include <oskar_evaluate_station_beam_aperture_array.h>
 #include <oskar_evaluate_station_beam_gaussian.h>
@@ -163,7 +163,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         station = oskar_telescope_station_const(tel, station_id);
         if (oskar_station_station_type(station) != OSKAR_STATION_TYPE_AA)
         {
-            oskar_convert_apparent_ra_dec_to_tangent_plane_direction(num_pixels,
+            oskar_convert_apparent_ra_dec_to_direction_cosines(num_pixels,
                     &RA, &Dec, ra0, dec0, &l, &m, &n, &err);
         }
 
@@ -210,7 +210,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 last = gast + lon;
 
                 // Evaluate horizontal x,y,z directions for source positions.
-                oskar_convert_apparent_ra_dec_to_horizon_direction(num_pixels,
+                oskar_convert_apparent_ra_dec_to_enu_direction_cosines(num_pixels,
                         hor_x, hor_y, hor_z, &RA, &Dec, last, lat, &err);
 
                 // Evaluate the station beam.

@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_apparent_ra_dec_to_horizon_direction.h"
+#include "oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h"
 
-#include "oskar_convert_apparent_ha_dec_to_horizon_direction.h"
-#include "oskar_convert_apparent_ra_dec_to_horizon_direction_cuda.h"
+#include "oskar_convert_apparent_ha_dec_to_enu_direction_cosines.h"
+#include "oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda.h"
 #include "oskar_cuda_check_error.h"
 
 #ifdef __cplusplus
@@ -37,7 +37,7 @@ extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_convert_apparent_ra_dec_to_horizon_direction_f(int n,
+void oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(int n,
         const float* ra, const float* dec, float lst, float lat, float* x,
         float* y, float* z)
 {
@@ -50,11 +50,11 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction_f(int n,
     }
 
     /* Determine horizontal x,y,z directions (destroys contents of ha). */
-    oskar_convert_apparent_ha_dec_to_horizon_direction_f(n, ha, dec, lat, x, y, z);
+    oskar_convert_apparent_ha_dec_to_enu_direction_cosines_f(n, ha, dec, lat, x, y, z);
 }
 
 /* Double precision. */
-void oskar_convert_apparent_ra_dec_to_horizon_direction_d(int n,
+void oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(int n,
         const double* ra, const double* dec, double lst, double lat,
         double* x, double* y, double* z)
 {
@@ -67,12 +67,12 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction_d(int n,
     }
 
     /* Determine horizontal x,y,z directions (destroys contents of ha). */
-    oskar_convert_apparent_ha_dec_to_horizon_direction_d(n, ha, dec, lat, x, y, z);
+    oskar_convert_apparent_ha_dec_to_enu_direction_cosines_d(n, ha, dec, lat, x, y, z);
 }
 
-
+/* oskar_Mem wrapper */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_horizon_direction(int n, oskar_Mem* x,
+void oskar_convert_apparent_ra_dec_to_enu_direction_cosines(int n, oskar_Mem* x,
         oskar_Mem* y, oskar_Mem* z, const oskar_Mem* ra, const oskar_Mem* dec,
         double last, double lat, int* status)
 {
@@ -149,7 +149,7 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction(int n, oskar_Mem* x,
         if (location == OSKAR_LOCATION_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_convert_apparent_ra_dec_to_horizon_direction_cuda_d(
+            oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda_d(
                     n, ra_, dec_, last, lat, x_, y_, z_);
             oskar_cuda_check_error(status);
 #else
@@ -158,7 +158,7 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction(int n, oskar_Mem* x,
         }
         else
         {
-            oskar_convert_apparent_ra_dec_to_horizon_direction_d(n,
+            oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(n,
                     ra_, dec_, last, lat, x_, y_, z_);
         }
     }
@@ -175,7 +175,7 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction(int n, oskar_Mem* x,
         if (location == OSKAR_LOCATION_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_convert_apparent_ra_dec_to_horizon_direction_cuda_f(
+            oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda_f(
                     n, ra_, dec_, (float)last, (float)lat,
                     x_, y_, z_);
             oskar_cuda_check_error(status);
@@ -185,7 +185,7 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction(int n, oskar_Mem* x,
         }
         else
         {
-            oskar_convert_apparent_ra_dec_to_horizon_direction_f(n,
+            oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(n,
                     ra_, dec_, (float)last, (float)lat, x_, y_, z_);
         }
     }

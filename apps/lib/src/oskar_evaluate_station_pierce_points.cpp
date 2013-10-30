@@ -45,7 +45,7 @@
 #include <oskar_mem_binary_stream_write.h>
 #include <oskar_convert_offset_ecef_to_ecef.h>
 #include <oskar_mjd_to_gast_fast.h>
-#include <oskar_convert_apparent_ra_dec_to_horizon_direction.h>
+#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
 #include <oskar_evaluate_pierce_points.h>
 
 #include <cstdio>
@@ -194,7 +194,7 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
 
             if (type == OSKAR_DOUBLE)
             {
-                oskar_convert_apparent_ra_dec_to_horizon_direction_d(num_sources,
+                oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(num_sources,
                         oskar_mem_double_const(oskar_sky_ra_const(chunk), &status),
                         oskar_mem_double_const(oskar_sky_dec_const(chunk), &status),
                         last, lat, (double*)hor_x.data, (double*)hor_y.data,
@@ -202,7 +202,7 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
             }
             else
             {
-                oskar_convert_apparent_ra_dec_to_horizon_direction_f(num_sources,
+                oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(num_sources,
                         oskar_mem_float_const(oskar_sky_ra_const(chunk), &status),
                         oskar_mem_float_const(oskar_sky_dec_const(chunk), &status),
                         last, lat, (float*)hor_x.data, (float*)hor_y.data,

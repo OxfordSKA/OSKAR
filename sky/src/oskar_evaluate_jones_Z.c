@@ -29,7 +29,7 @@
 #include "sky/oskar_evaluate_jones_Z.h"
 
 /*#include "station/oskar_evaluate_source_horizontal_lmn.h"*/
-#include "oskar_convert_apparent_ra_dec_to_horizon_direction.h"
+#include "oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h"
 #include "oskar_convert_offset_ecef_to_ecef.h"
 #include "utility/oskar_vector_types.h"
 #include "station/oskar_evaluate_pierce_points.h"
@@ -120,7 +120,7 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
 
         /* Evaluate horizontal x,y,z source positions (for which to evaluate
          * pierce points) */
-        oskar_convert_apparent_ra_dec_to_horizon_direction(num_sources,
+        oskar_convert_apparent_ra_dec_to_enu_direction_cosines(num_sources,
                 &work->hor_x, &work->hor_y, &work->hor_z,
                 oskar_sky_ra_const(sky_cpu), oskar_sky_dec_const(sky_cpu),
                 last, lat, status);

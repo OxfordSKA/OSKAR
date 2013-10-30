@@ -27,11 +27,11 @@
  */
 
 
-#ifndef OSKAR_CONVERT_APPARENT_RA_DEC_TO_HORIZON_DIRECTION_H_
-#define OSKAR_CONVERT_APPARENT_RA_DEC_TO_HORIZON_DIRECTION_H_
+#ifndef OSKAR_CONVERT_APPARENT_RA_DEC_TO_ENU_DIRECTION_COSINES_H_
+#define OSKAR_CONVERT_APPARENT_RA_DEC_TO_ENU_DIRECTION_COSINES_H_
 
 /**
- * @file oskar_convert_apparent_ra_dec_to_horizon_direction.h
+ * @file oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h
  */
 
 #include <oskar_global.h>
@@ -61,7 +61,7 @@ extern "C" {
  * @param[out] z   z-direction-cosines in the horizontal system.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_horizon_direction_f(int n,
+void oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(int n,
         const float* ra, const float* dec, float lst, float lat, float* x,
         float* y, float* z);
 
@@ -85,10 +85,9 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction_f(int n,
  * @param[out] z   z-direction-cosines in the horizontal system.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_horizon_direction_d(int n,
+void oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(int n,
         const double* ra, const double* dec, double lst, double lat, double* x,
         double* y, double* z);
-
 
 /**
  * @brief
@@ -111,7 +110,7 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction_d(int n,
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_horizon_direction(int n, oskar_Mem* x,
+void oskar_convert_apparent_ra_dec_to_enu_direction_cosines(int n, oskar_Mem* x,
         oskar_Mem* y, oskar_Mem* z, const oskar_Mem* ra, const oskar_Mem* dec,
         double last, double lat, int* status);
 
@@ -119,4 +118,4 @@ void oskar_convert_apparent_ra_dec_to_horizon_direction(int n, oskar_Mem* x,
 }
 #endif
 
-#endif /* OSKAR_CONVERT_APPARENT_RA_DEC_TO_HORIZON_DIRECTION_H_ */
+#endif /* OSKAR_CONVERT_APPARENT_RA_DEC_TO_ENU_DIRECTION_COSINES_H_ */
