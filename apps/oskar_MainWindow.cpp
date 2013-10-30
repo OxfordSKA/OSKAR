@@ -90,6 +90,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     view_->setModel(modelProxy_);
     view_->setItemDelegate(delegate);
     view_->resizeColumnToContents(0);
+    connect(model_, SIGNAL(fileReloaded()), view_, SLOT(fileReloaded()));
     v_layout->addWidget(view_);
 
     // Create and set up the actions.
@@ -206,8 +207,6 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     // Set the focus policy.
     setFocusPolicy(Qt::StrongFocus);
     setFocus(Qt::ActiveWindowFocusReason);
-    connect(qApp, SIGNAL(focusChanged(QWidget*, QWidget*)),
-            this, SLOT(focusChanged(QWidget*, QWidget*)));
 
     // Restore the scroll bar position.
     // A single-shot timer is used to do this after the main event loop starts.
@@ -538,31 +537,6 @@ void oskar_MainWindow::setHideUnsetItems(bool value)
     modelProxy_->setHideUnsetItems(value);
     view_->restoreExpanded();
     view_->update();
-}
-
-void oskar_MainWindow::focusChanged(QWidget* old, QWidget* now)
-{
-    if (!old && now)
-    {
-        // OSKAR has gained focus.
-        // Check if the settings file has been modified more recently than the
-        // last known modification date.
-        QFileInfo fileInfo(settingsFile_);
-        if (fileInfo.lastModified() > model_->lastModified().addMSecs(200))
-        {
-            // Must re-load the file first to prevent infinite recursion!
-            model_->loadSettingsFile(settingsFile_);
-
-            // Notify the user.
-            QMessageBox msgBox(this);
-            msgBox.setWindowTitle(mainTitle_);
-            msgBox.setIcon(QMessageBox::Information);
-            msgBox.setText("The settings file was updated by another application.");
-            msgBox.setInformativeText("It has now been re-loaded.");
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.exec();
-        }
-    }
 }
 
 

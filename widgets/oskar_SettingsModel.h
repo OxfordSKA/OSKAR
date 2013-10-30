@@ -63,7 +63,8 @@ public:
         DependencyKeyRole,
         DependencyValueRole,
         DependentKeyRole,
-        HiddenRole
+        HiddenRole,
+        CheckExternalChangesRole
     };
 
 public:
@@ -85,7 +86,6 @@ public:
             const QModelIndex& parent = QModelIndex()) const;
     QModelIndex index(const QString& key);
     bool isModified() const;
-    QDateTime lastModified() const;
     void loadSettingsFile(const QString& filename);
     QModelIndex parent(const QModelIndex& index) const;
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
@@ -101,6 +101,9 @@ public:
     //QHash<QString, QVariant> settings() const;
     QString version() const;
     void setVersion(const QString& value = QString(OSKAR_VERSION_STR));
+
+signals:
+    void fileReloaded();
 
 private:
     void append(const QString& key, const QString& subkey, int type,
@@ -119,6 +122,7 @@ private:
     oskar_SettingsItem* rootItem_;
     QHash<QString, oskar_SettingsItem*> itemHash_;
     QString version_;
+    QString filename_;
     QDateTime lastModified_;
 };
 

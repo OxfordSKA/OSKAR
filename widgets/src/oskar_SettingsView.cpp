@@ -28,7 +28,9 @@
 
 #include "widgets/oskar_SettingsView.h"
 #include "widgets/oskar_SettingsModel.h"
+#include <QtGui/QApplication>
 #include <QtGui/QScrollBar>
+#include <QtGui/QMessageBox>
 #include <QtCore/QSettings>
 
 oskar_SettingsView::oskar_SettingsView(QWidget* parent)
@@ -38,6 +40,8 @@ oskar_SettingsView::oskar_SettingsView(QWidget* parent)
             this, SLOT(resizeAfterExpand(const QModelIndex&)));
     connect(this, SIGNAL(collapsed(const QModelIndex&)),
             this, SLOT(updateAfterCollapsed(const QModelIndex&)));
+    connect(qApp, SIGNAL(focusChanged(QWidget*, QWidget*)),
+            this, SLOT(focusChanged(QWidget*, QWidget*)));
     setAlternatingRowColors(true);
     setUniformRowHeights(true);
 }
@@ -97,6 +101,28 @@ void oskar_SettingsView::updateAfterCollapsed(const QModelIndex& /*index*/)
     update();
 }
 
+void oskar_SettingsView::focusChanged(QWidget* old, QWidget* now)
+{
+    if (!old && now)
+    {
+        // OSKAR has gained focus.
+        // Check if the settings file has been modified more recently than the
+        // last known modification date.
+        model()->setData(QModelIndex(), QVariant(),
+                oskar_SettingsModel::CheckExternalChangesRole);
+    }
+}
+
+void oskar_SettingsView::fileReloaded()
+{
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle(parentWidget()->windowTitle());
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setText("The settings file was updated by another application.");
+    msgBox.setInformativeText("It has now been re-loaded.");
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.exec();
+}
 
 void oskar_SettingsView::saveRestoreExpanded(const QModelIndex& parent,
         QStringList& list, int restore)

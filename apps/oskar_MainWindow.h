@@ -67,7 +67,6 @@ private slots:
     void runInterferometer();
     void runImager();
     void setHideUnsetItems(bool value);
-    void focusChanged(QWidget* old, QWidget* now);
 
 private:
     void runButton();

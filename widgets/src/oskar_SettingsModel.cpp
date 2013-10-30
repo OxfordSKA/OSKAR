@@ -31,6 +31,8 @@
 #include <QtGui/QApplication>
 #include <QtGui/QFontMetrics>
 #include <QtGui/QIcon>
+#include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 #include <QtCore/QModelIndex>
 #include <QtCore/QSettings>
 #include <QtCore/QSize>
@@ -346,15 +348,12 @@ bool oskar_SettingsModel::isModified() const
     return numModified(QModelIndex()) > 0;
 }
 
-QDateTime oskar_SettingsModel::lastModified() const
-{
-    return lastModified_;
-}
-
 void oskar_SettingsModel::loadSettingsFile(const QString& filename)
 {
-    if (!filename.isEmpty())
+    if (!filename.isEmpty() && QFile::exists(filename))
     {
+        filename_ = filename;
+
         // Check if any settings are currently disabled, and enable them if so.
         restoreAll();
 
@@ -393,6 +392,8 @@ void oskar_SettingsModel::saveSettingsFile(const QString& filename)
 {
     if (!filename.isEmpty())
     {
+        filename_ = filename;
+
         // Check if any settings are currently disabled, and enable them if so.
         restoreAll();
 
@@ -412,6 +413,20 @@ void oskar_SettingsModel::saveSettingsFile(const QString& filename)
 bool oskar_SettingsModel::setData(const QModelIndex& idx,
         const QVariant& value, int role)
 {
+    // Check for roles that do not depend on the index.
+    if (role == CheckExternalChangesRole)
+    {
+        if (!QFile::exists(filename_))
+            return false;
+        QFileInfo fileInfo(filename_);
+        if (fileInfo.lastModified() > lastModified_.addMSecs(200))
+        {
+            loadSettingsFile(filename_);
+            emit fileReloaded();
+        }
+        return true;
+    }
+
     if (!idx.isValid())
         return false;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_SettingsView.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 #include <QtGui/QTreeView>
 
 class OSKAR_WIDGETS_EXPORT oskar_SettingsView : public QTreeView
@@ -54,6 +54,8 @@ public slots:
 private slots:
     void resizeAfterExpand(const QModelIndex& index);
     void updateAfterCollapsed(const QModelIndex& index);
+    void focusChanged(QWidget* old, QWidget* now);
+    void fileReloaded();
 
 private:
     void saveRestoreExpanded(const QModelIndex& parent, QStringList& list,
