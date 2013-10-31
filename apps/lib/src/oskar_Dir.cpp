@@ -35,23 +35,15 @@
 using std::string;
 using std::vector;
 
-class oskar_PrivateDir
+struct oskar_Dir::oskar_DirPrivate
 {
-public:
-    oskar_PrivateDir(const string& path)
-    {
-        dir = new QDir(QString::fromStdString(path));
-    }
-    ~oskar_PrivateDir()
-    {
-        delete dir;
-    }
-    QDir* dir;
+    oskar_DirPrivate(const string& path) : dir(QString::fromStdString(path)) {}
+    QDir dir;
 };
 
 oskar_Dir::oskar_Dir(const string path)
 {
-    p = new oskar_PrivateDir(path);
+    p = new oskar_DirPrivate(path);
 }
 
 oskar_Dir::~oskar_Dir()
@@ -61,14 +53,14 @@ oskar_Dir::~oskar_Dir()
 
 string oskar_Dir::absoluteFilePath(const string& filename) const
 {
-    return p->dir->absoluteFilePath(QString::fromStdString(filename)).
+    return p->dir.absoluteFilePath(QString::fromStdString(filename)).
             toStdString();
 }
 
 vector<string> oskar_Dir::allSubDirs() const
 {
     vector<string> r;
-    QStringList dirs = p->dir->entryList(QDir::AllDirs | QDir::NoDotAndDotDot,
+    QStringList dirs = p->dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot,
             QDir::Name);
     for (int i = 0; i < dirs.size(); ++i)
     {
@@ -79,15 +71,15 @@ vector<string> oskar_Dir::allSubDirs() const
 
 bool oskar_Dir::exists(const string& filename) const
 {
-    return p->dir->exists(QString::fromStdString(filename));
+    return p->dir.exists(QString::fromStdString(filename));
 }
 
 bool oskar_Dir::exists() const
 {
-    return p->dir->exists();
+    return p->dir.exists();
 }
 
 string oskar_Dir::filePath(const string& filename) const
 {
-    return p->dir->filePath(QString::fromStdString(filename)).toStdString();
+    return p->dir.filePath(QString::fromStdString(filename)).toStdString();
 }

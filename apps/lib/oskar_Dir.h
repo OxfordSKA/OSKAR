@@ -37,8 +37,6 @@
 #include <string>
 #include <vector>
 
-class oskar_PrivateDir;
-
 /**
  * @brief Provides an abstraction for working with a directory hierarchy.
  *
@@ -112,7 +110,8 @@ public:
     std::string filePath(const std::string& filename) const;
 
 private:
-    oskar_PrivateDir* p;
+    struct oskar_DirPrivate;
+    oskar_DirPrivate* p;
 };
 
 #endif /* OSKAR_DIR_H_ */
