@@ -29,8 +29,8 @@
 #include <gtest/gtest.h>
 
 #include <oskar_linspace.h>
-#include <oskar_convert_direction_cosines_to_apparent_ra_dec.h>
-#include <oskar_convert_apparent_ra_dec_to_direction_cosines.h>
+#include <oskar_convert_relative_direction_cosines_to_apparent_ra_dec.h>
+#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
 #include <oskar_convert_lon_lat_to_xyz.h>
 #include <oskar_convert_xyz_to_lon_lat.h>
 #include <oskar_evaluate_image_lm_grid.h>
@@ -82,19 +82,18 @@ TEST(coordinate_conversions, ra_dec_to_direction_cosines)
             fov_lat_deg * M_PI / 180.0, &l_1[0], &m_1[0]);
 
     // Convert from l,m grid to spherical coordinates.
-    oskar_convert_direction_cosines_to_apparent_ra_dec_d(num_points, ra0, dec0,
+    oskar_convert_relative_direction_cosines_to_apparent_ra_dec_d(num_points, ra0, dec0,
             &l_1[0], &m_1[0], &ra[0], &dec[0]);
 
     // Check reverse direction.
     vector<double> l_2(num_points), m_2(num_points), n_2(num_points);
-    oskar_convert_apparent_ra_dec_to_direction_cosines_d(num_points,
+    oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(num_points,
             &ra[0], &dec[0], ra0, dec0, &l_2[0], &m_2[0], &n_2[0]);
 
     for (int i = 0; i < num_points; ++i)
     {
         ASSERT_NEAR(l_1[i], l_2[i], 1e-15);
         ASSERT_NEAR(m_1[i], m_2[i], 1e-15);
-        // FIXME this is n-1,
         double n_1 = sqrt(1.0 - l_1[i]*l_1[i] - m_1[i]*m_1[i]) - 1;
         ASSERT_NEAR(n_1, n_2[i], 1e-15);
     }

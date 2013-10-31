@@ -26,16 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_theta_phi_to_healpix_ring.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#include <oskar_convert_theta_phi_to_healpix_ring.h>
 #include <math.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327950288
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 void oskar_convert_theta_phi_to_healpix_ring(long nside, double theta,

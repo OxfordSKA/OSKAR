@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_DIRECTION_COSINES_TO_APPARENT_RA_DEC_H_
-#define OSKAR_CONVERT_DIRECTION_COSINES_TO_APPARENT_RA_DEC_H_
+#ifndef OSKAR_CONVERT_RELATIVE_DIRECTION_COSINES_TO_APPARENT_RA_DEC_H_
+#define OSKAR_CONVERT_RELATIVE_DIRECTION_COSINES_TO_APPARENT_RA_DEC_H_
 
 /**
- * @file oskar_convert_direction_cosines_to_apparent_ra_dec.h
+ * @file oskar_convert_relative_direction_cosines_to_apparent_ra_dec.h
  */
 
 #include <oskar_global.h>
@@ -45,21 +45,21 @@ extern "C" {
  *
  * @details
  * Returns the Right Ascension (longitude) and Declination (latitude) of the
- * supplied array of direction cosines (x and y).
+ * supplied array of direction cosines (l and m).
  *
  * Note: This is a a general direction_cosines to lon_lat conversion.
  *
- * @param[in]  n    Number of positions to evaluate.
+ * @param[in]  np   Number of positions to evaluate.
  * @param[in]  ra0  Right Ascension of the field centre, in radians.
  * @param[in]  dec0 Declination of the field centre, in radians.
- * @param[in]  x    Array of x-positions in cosine space.
- * @param[in]  y    Array of y-positions in cosine space.
+ * @param[in]  l    Array of x-positions in cosine space.
+ * @param[in]  m    Array of y-positions in cosine space.
  * @param[out] ra   Array of Right Ascensions values, in radians.
  * @param[out] dec  Array of Declinations values, in radians.
  */
 OSKAR_EXPORT
-void oskar_convert_direction_cosines_to_apparent_ra_dec_f(int n,
-        float ra0, float dec0, const float* x, const float* y, float* ra,
+void oskar_convert_relative_direction_cosines_to_apparent_ra_dec_f(int np,
+        float ra0, float dec0, const float* l, const float* m, float* ra,
         float* dec);
 
 /**
@@ -68,25 +68,25 @@ void oskar_convert_direction_cosines_to_apparent_ra_dec_f(int n,
  *
  * @details
  * Returns the Right Ascension (longitude) and Declination (latitude) of the
- * supplied array of direction cosines (x and y).
+ * supplied array of direction cosines (l and m).
  *
  * Note: This is a a general direction_cosines to lon_lat conversion.
  *
- * @param[in]  n    Number of positions to evaluate.
+ * @param[in]  np   Number of positions to evaluate.
  * @param[in]  ra0  Right Ascension of the field centre, in radians.
  * @param[in]  dec0 Declination of the field centre, in radians.
- * @param[in]  x    Array of x-positions in cosine space.
- * @param[in]  y    Array of y-positions in cosine space.
+ * @param[in]  l    Array of x-positions in cosine space.
+ * @param[in]  m    Array of y-positions in cosine space.
  * @param[out] ra   Array of Right Ascensions values, in radians.
  * @param[out] dec  Array of Declinations values, in radians.
  */
 OSKAR_EXPORT
-void oskar_convert_direction_cosines_to_apparent_ra_dec_d(int n,
-        double ra0, double dec0, const double* x, const double* y, double* ra,
+void oskar_convert_relative_direction_cosines_to_apparent_ra_dec_d(int np,
+        double ra0, double dec0, const double* l, const double* m, double* ra,
         double* dec);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CONVERT_DIRECTION_COSINES_TO_APPARENT_RA_DEC_H_ */
+#endif /* OSKAR_CONVERT_RELATIVE_DIRECTION_COSINES_TO_APPARENT_RA_DEC_H_ */

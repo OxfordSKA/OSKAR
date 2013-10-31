@@ -75,7 +75,6 @@ OSKAR_EXPORT
 void oskar_convert_lon_lat_to_xyz_d(int num_points, double* x, double* y, double* z,
         const double* lon, const double* lat);
 
-
 #ifdef __cplusplus
 }
 #endif

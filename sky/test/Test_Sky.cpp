@@ -30,7 +30,7 @@
 
 #include <oskar_telescope.h>
 #include <oskar_sky.h>
-#include <oskar_convert_apparent_ra_dec_to_direction_cosines.h>
+#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
 #include <oskar_get_error_string.h>
 #include <oskar_mem.h>
 #include <oskar_timer.h>
@@ -1025,8 +1025,8 @@ TEST(SkyModel, test_gaussian_source)
 
     double l[4], m[4], n[4];
 
-    oskar_convert_apparent_ra_dec_to_direction_cosines_d(4, lon, lat, ra0, dec0,
-            l, m, n);
+    oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(4, lon, lat,
+            ra0, dec0, l, m, n);
 
     printf("\n");
     printf("ra0, dec0              = %f, %f\n", ra0*(180.0/M_PI), dec0*(180.0/M_PI));

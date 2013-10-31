@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_apparent_ha_dec_to_enu_direction_cosines.h"
-#include "math.h"
+#include <oskar_convert_apparent_ha_dec_to_enu_direction_cosines.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -108,7 +108,6 @@ void oskar_convert_apparent_ha_dec_to_enu_direction_cosines_d(int n,
         z[i] = Y2; /* Horizontal z-component. */
     }
 }
-
 
 #ifdef __cplusplus
 }

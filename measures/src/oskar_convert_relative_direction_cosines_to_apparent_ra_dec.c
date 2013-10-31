@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_direction_cosines_to_apparent_ra_dec.h>
-
+#include <oskar_convert_relative_direction_cosines_to_apparent_ra_dec.h>
 #include <math.h>
 
 #ifdef __cplusplus
@@ -35,8 +34,8 @@ extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_convert_direction_cosines_to_apparent_ra_dec_f(int n,
-        float ra0, float dec0, const float* x, const float* y, float* ra,
+void oskar_convert_relative_direction_cosines_to_apparent_ra_dec_f(int np,
+        float ra0, float dec0, const float* l, const float* m, float* ra,
         float* dec)
 {
     int i;
@@ -44,21 +43,21 @@ void oskar_convert_direction_cosines_to_apparent_ra_dec_f(int n,
     sinLat0 = sinf(dec0);
     cosLat0 = cosf(dec0);
 
-    /* Loop over l, m positions and evaluate the longitude and latitude values. */
-    for (i = 0; i < n; ++i)
+    /* Loop over positions and evaluate the longitude and latitude values. */
+    for (i = 0; i < np; ++i)
     {
-        float x_, y_, z_;
-        x_ = x[i];
-        y_ = y[i];
-        z_ = sqrtf(1.0 - x_*x_ - y_*y_);
-        dec[i] = asinf(z_ * sinLat0 + y_ * cosLat0);
-        ra[i] = ra0 + atan2f(x_, cosLat0 * z_ - y_ * sinLat0);
+        float l_, m_, n_;
+        l_ = l[i];
+        m_ = m[i];
+        n_ = sqrtf(1.0 - l_*l_ - m_*m_);
+        dec[i] = asinf(n_ * sinLat0 + m_ * cosLat0);
+        ra[i] = ra0 + atan2f(l_, cosLat0 * n_ - m_ * sinLat0);
     }
 }
 
 /* Double precision. */
-void oskar_convert_direction_cosines_to_apparent_ra_dec_d(int n,
-        double ra0, double dec0, const double* x, const double* y, double* ra,
+void oskar_convert_relative_direction_cosines_to_apparent_ra_dec_d(int np,
+        double ra0, double dec0, const double* l, const double* m, double* ra,
         double* dec)
 {
     int i;
@@ -67,14 +66,14 @@ void oskar_convert_direction_cosines_to_apparent_ra_dec_d(int n,
     cosLat0 = cos(dec0);
 
     /* Loop over l, m positions and evaluate the longitude and latitude values. */
-    for (i = 0; i < n; ++i)
+    for (i = 0; i < np; ++i)
     {
-        double x_, y_, z_;
-        x_ = x[i];
-        y_ = y[i];
-        z_ = sqrt(1.0 - x_*x_ - y_*y_);
-        dec[i] = asin(z_ * sinLat0 + y_ * cosLat0);
-        ra[i] = ra0 + atan2(x_, cosLat0 * z_ - y_ * sinLat0);
+        double l_, m_, n_;
+        l_ = l[i];
+        m_ = m[i];
+        n_ = sqrt(1.0 - l_*l_ - m_*m_);
+        dec[i] = asin(n_ * sinLat0 + m_ * cosLat0);
+        ra[i] = ra0 + atan2(l_, cosLat0 * n_ - m_ * sinLat0);
     }
 }
 

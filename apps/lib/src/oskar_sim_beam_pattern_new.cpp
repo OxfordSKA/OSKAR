@@ -37,7 +37,7 @@
 #include <oskar_image_write.h>
 #include <oskar_evaluate_image_lm_grid.h>
 #include <oskar_mjd_to_gast_fast.h>
-#include <oskar_convert_apparent_ra_dec_to_direction_cosines.h>
+#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
 #include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
 #include <oskar_evaluate_station_beam_aperture_array.h>
@@ -421,7 +421,7 @@ static void coords_phase_centre_tangent_plane_direction_(
                     &d_coords.horizontal.x, &d_coords.horizontal.y,
                     &d_coords.horizontal.z, &d_coords.RA,
                     &d_coords.Dec, last, lat, status);
-            oskar_convert_apparent_ra_dec_to_direction_cosines(num_pixels,
+            oskar_convert_apparent_ra_dec_to_relative_direction_cosines(num_pixels,
                     &d_coords.RA, &d_coords.Dec, ra0, dec0,
                     &d_coords.relative.x, &d_coords.relative.y,
                     &d_coords.relative.z, status);

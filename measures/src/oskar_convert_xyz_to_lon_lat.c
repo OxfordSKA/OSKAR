@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_xyz_to_lon_lat.h"
+#include <oskar_convert_xyz_to_lon_lat.h>
 #include <math.h>
 
 #ifdef __cplusplus

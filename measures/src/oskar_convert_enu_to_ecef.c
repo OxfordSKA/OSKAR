@@ -26,10 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_enu_to_ecef.h"
-
-#include "oskar_convert_enu_to_offset_ecef.h"
-#include "oskar_convert_offset_ecef_to_ecef.h"
+#include <oskar_convert_enu_to_ecef.h>
+#include <oskar_convert_enu_to_offset_ecef.h>
+#include <oskar_convert_offset_ecef_to_ecef.h>
 
 #ifdef __cplusplus
 extern "C" {

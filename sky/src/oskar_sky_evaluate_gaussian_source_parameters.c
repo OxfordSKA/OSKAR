@@ -30,8 +30,8 @@
 
 #include <oskar_fit_ellipse.h>
 #include <oskar_rotate.h>
-#include <oskar_convert_apparent_ra_dec_to_direction_cosines.h>
-#include <oskar_convert_direction_cosines_to_apparent_ra_dec.h>
+#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
+#include <oskar_convert_relative_direction_cosines_to_apparent_ra_dec.h>
 #include <oskar_convert_lon_lat_to_xyz.h>
 #include <oskar_convert_xyz_to_lon_lat.h>
 
@@ -126,7 +126,7 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
                 l[j] = ellipse_a*cos(t)*sin_pa + ellipse_b*sin(t)*cos_pa;
                 m[j] = ellipse_a*cos(t)*cos_pa - ellipse_b*sin(t)*sin_pa;
             }
-            oskar_convert_direction_cosines_to_apparent_ra_dec_d(ELLIPSE_PTS,
+            oskar_convert_relative_direction_cosines_to_apparent_ra_dec_d(ELLIPSE_PTS,
                     0.0, 0.0, l, m, lon, lat);
 
             /* Rotate on the sphere. */
@@ -134,7 +134,7 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
             oskar_rotate_sph_d(ELLIPSE_PTS, x, y, z, ra_[i], dec_[i]);
             oskar_convert_xyz_to_lon_lat_d(ELLIPSE_PTS, lon, lat, x, y, z);
 
-            oskar_convert_apparent_ra_dec_to_direction_cosines_d(ELLIPSE_PTS,
+            oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(ELLIPSE_PTS,
                     lon, lat, ra0, dec0, l, m, n);
 
             /* Get new major and minor axes and position angle. */
@@ -212,7 +212,7 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
                 l[j] = ellipse_a*cos(t)*sin_pa + ellipse_b*sin(t)*cos_pa;
                 m[j] = ellipse_a*cos(t)*cos_pa - ellipse_b*sin(t)*sin_pa;
             }
-            oskar_convert_direction_cosines_to_apparent_ra_dec_f(ELLIPSE_PTS,
+            oskar_convert_relative_direction_cosines_to_apparent_ra_dec_f(ELLIPSE_PTS,
                     0.0, 0.0, l, m, lon, lat);
 
             /* Rotate on the sphere. */
@@ -220,7 +220,7 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
             oskar_rotate_sph_f(ELLIPSE_PTS, x, y, z, ra_[i], dec_[i]);
             oskar_convert_xyz_to_lon_lat_f(ELLIPSE_PTS, lon, lat, x, y, z);
 
-            oskar_convert_apparent_ra_dec_to_direction_cosines_f(ELLIPSE_PTS,
+            oskar_convert_apparent_ra_dec_to_relative_direction_cosines_f(ELLIPSE_PTS,
                     lon, lat, (float)ra0, (float)dec0, l, m, n);
 
             /* Get new major and minor axes and position angle. */

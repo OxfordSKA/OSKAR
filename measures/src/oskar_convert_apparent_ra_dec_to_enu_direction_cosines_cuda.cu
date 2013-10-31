@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda.h"
-#include "oskar_convert_apparent_ha_dec_to_enu_direction_cosines_cuda.h"
-#include "math/cudak/oskar_cudak_vec_sub_sr.h"
+#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda.h>
+#include <oskar_convert_apparent_ha_dec_to_enu_direction_cosines_cuda.h>
+#include <math/cudak/oskar_cudak_vec_sub_sr.h>
 
 #ifdef __cplusplus
 extern "C" {

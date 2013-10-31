@@ -26,9 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_ecef_to_station_uvw.h"
-
-#include "oskar_convert_ecef_to_station_uvw_cuda.h"
+#include <oskar_convert_ecef_to_station_uvw.h>
+#include <oskar_convert_ecef_to_station_uvw_cuda.h>
 #include <oskar_cuda_check_error.h>
 
 #include <math.h>

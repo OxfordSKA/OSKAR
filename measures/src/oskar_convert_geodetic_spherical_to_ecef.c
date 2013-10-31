@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_geodetic_spherical_to_ecef.h"
-
+#include <oskar_convert_geodetic_spherical_to_ecef.h>
 #include <math.h>
 
 #ifdef __cplusplus

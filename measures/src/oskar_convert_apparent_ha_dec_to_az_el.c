@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_apparent_ha_dec_to_az_el.h"
-#include "oskar_convert_apparent_ha_dec_to_enu_direction_cosines.h"
+#include <oskar_convert_apparent_ha_dec_to_az_el.h>
+#include <oskar_convert_apparent_ha_dec_to_enu_direction_cosines.h>
 #include <math.h>
 
 #ifdef __cplusplus

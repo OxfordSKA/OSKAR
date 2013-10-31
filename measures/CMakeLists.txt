@@ -11,12 +11,12 @@ set(${name}_SRC
 
     src/oskar_convert_apparent_ra_dec_to_az_el_cuda.cu
     src/oskar_convert_apparent_ra_dec_to_az_el.c
-    src/oskar_convert_apparent_ra_dec_to_direction_cosines_cuda.cu
-    src/oskar_convert_apparent_ra_dec_to_direction_cosines.c
+    src/oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda.cu
+    src/oskar_convert_apparent_ra_dec_to_relative_direction_cosines.c
     src/oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda.cu
     src/oskar_convert_apparent_ra_dec_to_enu_direction_cosines.c
 
-    src/oskar_convert_direction_cosines_to_apparent_ra_dec.c
+    src/oskar_convert_relative_direction_cosines_to_apparent_ra_dec.c
 
     src/oskar_convert_ecef_to_baseline_uvw.c
     src/oskar_convert_ecef_to_enu.c

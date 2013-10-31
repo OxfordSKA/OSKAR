@@ -57,7 +57,6 @@ OSKAR_EXPORT
 void oskar_convert_healpix_ring_to_theta_phi(long nside, long ipix,
         double* theta, double* phi);
 
-
 #ifdef __cplusplus
 }
 #endif

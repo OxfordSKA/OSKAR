@@ -27,7 +27,6 @@
  */
 
 #include "oskar_convert_ecef_to_baseline_uvw.h"
-
 #include <oskar_convert_station_uvw_to_baseline_uvw.h>
 #include <oskar_convert_ecef_to_station_uvw.h>
 #include <oskar_mjd_to_gast_fast.h>

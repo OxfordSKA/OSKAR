@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_enu_direction_cosines_to_az_el.h"
+#include <oskar_convert_enu_direction_cosines_to_az_el.h>
 #include <math.h>
 
 #ifdef __cplusplus

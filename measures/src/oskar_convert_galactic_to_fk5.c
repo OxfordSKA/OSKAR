@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_galactic_to_fk5.h"
+#include <oskar_convert_galactic_to_fk5.h>
 #include <math.h>
 
 #ifdef __cplusplus

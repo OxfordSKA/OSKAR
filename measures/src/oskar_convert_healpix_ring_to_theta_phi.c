@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_healpix_ring_to_theta_phi.h"
+#include <oskar_convert_healpix_ring_to_theta_phi.h>
 #include <math.h>
 
 #ifdef __cplusplus

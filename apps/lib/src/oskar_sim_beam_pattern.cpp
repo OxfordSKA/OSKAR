@@ -37,7 +37,7 @@
 #include <oskar_image_resize.h>
 #include <oskar_image_write.h>
 #include <oskar_mjd_to_gast_fast.h>
-#include <oskar_convert_apparent_ra_dec_to_direction_cosines.h>
+#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
 #include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
 #include <oskar_evaluate_station_beam_aperture_array.h>
@@ -163,7 +163,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         station = oskar_telescope_station_const(tel, station_id);
         if (oskar_station_station_type(station) != OSKAR_STATION_TYPE_AA)
         {
-            oskar_convert_apparent_ra_dec_to_direction_cosines(num_pixels,
+            oskar_convert_apparent_ra_dec_to_relative_direction_cosines(num_pixels,
                     &RA, &Dec, ra0, dec0, &l, &m, &n, &err);
         }
 
@@ -430,7 +430,6 @@ static void oskar_set_up_beam_pattern(oskar_Image* image,
     image->time_start_mjd_utc = settings->obs.start_mjd_utc;
     oskar_mem_copy(&image->settings_path, &settings->settings_path, status);
 }
-
 
 // complex_cube == voltage image cube
 static void save_total_intensity(const oskar_Image& complex_cube,

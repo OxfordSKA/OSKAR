@@ -34,7 +34,6 @@
 extern "C" {
 #endif
 
-
 /* Single precision. */
 void oskar_convert_station_uvw_to_baseline_uvw_f(float* uu, float* vv,
         float* ww, int num_stations, const float* u, const float* v,
@@ -192,7 +191,6 @@ void oskar_convert_station_uvw_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
 #endif
     }
 }
-
 
 #ifdef __cplusplus
 }
