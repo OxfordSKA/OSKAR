@@ -103,8 +103,6 @@ macro(QT_APP)
     )
     set_target_properties(${target} PROPERTIES
         OUTPUT_NAME   ${APP_NAME}
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-        INSTALL_RPATH_USE_LINK_PATH TRUE
     )
 
     # FIXME hack for now to only build the oskar.app (make this an option?)
@@ -128,8 +126,6 @@ macro(QT_APP)
         )
         set_target_properties(${target} PROPERTIES
             OUTPUT_NAME   ${APP_NAME}
-            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-            INSTALL_RPATH_USE_LINK_PATH TRUE
         )
     endif (APPLE AND OSX_APP)
 
@@ -186,16 +182,12 @@ macro(OSKAR_APP)
         set_target_properties(${target} PROPERTIES
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
             OUTPUT_NAME   "${APP_NAME}"
-            INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
-            INSTALL_RPATH_USE_LINK_PATH TRUE
         )
     else ()
         set_target_properties(${target} PROPERTIES
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
             LINK_FLAGS    "${OpenMP_CXX_FLAGS}"
             OUTPUT_NAME   "${APP_NAME}"
-            INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
-            INSTALL_RPATH_USE_LINK_PATH TRUE
         )
     endif()
 
@@ -274,16 +266,12 @@ macro(OSKAR_QT_APP)
         set_target_properties(${target} PROPERTIES
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
             OUTPUT_NAME   "${APP_NAME}"
-            INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
-            INSTALL_RPATH_USE_LINK_PATH TRUE
         )
     else ()
         set_target_properties(${target} PROPERTIES
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
             LINK_FLAGS    "${OpenMP_CXX_FLAGS}"
             OUTPUT_NAME   "${APP_NAME}"
-            INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
-            INSTALL_RPATH_USE_LINK_PATH TRUE
         )
     endif ()
 
@@ -356,8 +344,6 @@ macro(OSKAR_MEX)
         SUFFIX        ".${MATLAB_MEXFILE_EXT}"
         COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS}"
         LINK_FLAGS    "${MATLAB_LINK_FLAGS}"
-        INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
-        INSTALL_RPATH_USE_LINK_PATH TRUE
     )
 
     # Install target for mex function.

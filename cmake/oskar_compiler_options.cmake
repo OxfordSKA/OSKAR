@@ -13,6 +13,11 @@ message("=======================================================================
 
 set(BUILD_SHARED_LIBS ON)
 
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+# when building, use the install RPATH already
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
 
 # Set the include path to include the top-level folder and sub-folders for
 # main oskar library.
