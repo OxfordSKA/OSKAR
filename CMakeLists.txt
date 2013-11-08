@@ -92,21 +92,17 @@ if (CUDA_FOUND)
     if (OSKAR_USE_LAPACK)
         target_link_libraries(${libname} ${OSKAR_LAPACK})
     endif ()
+    install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
     if (MSVC)
         set_target_properties(${libname} PROPERTIES
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-            INSTALL_RPATH_USE_LINK_PATH TRUE
             SOVERSION ${OSKAR_VERSION})
     else ()
         set_target_properties(${libname} PROPERTIES
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
             LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-            INSTALL_RPATH_USE_LINK_PATH TRUE
             SOVERSION ${OSKAR_VERSION} VERSION ${OSKAR_VERSION})
     endif()
-    install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
     cuda_build_clean_target()
 endif (CUDA_FOUND)
 
