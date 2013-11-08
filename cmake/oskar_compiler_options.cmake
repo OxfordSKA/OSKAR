@@ -13,11 +13,12 @@ message("=======================================================================
 
 set(BUILD_SHARED_LIBS ON)
 
-# use, i.e. don't skip the full RPATH for the build tree
-SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-
-# when building, use the install RPATH already
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
+if (APPLE)
+    # Temporary work around to rpath problems on OS X.
+    # Either as a result of changes in cmake 2.8.12 or using homebrew g++-4.6 
+    # or install_name_tool from xcode 5.
+    set(CMAKE_SKIP_RPATH ON)
+endif ()
 
 # Set the include path to include the top-level folder and sub-folders for
 # main oskar library.
