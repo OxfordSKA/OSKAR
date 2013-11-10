@@ -106,7 +106,6 @@ if (CUDA_FOUND)
             LINK_FLAGS "${OpenMP_CXX_FLAGS}"
             SOVERSION ${OSKAR_VERSION} 
             VERSION ${OSKAR_VERSION})
-
     endif()
     install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
     cuda_build_clean_target()
