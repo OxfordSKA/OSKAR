@@ -3,6 +3,7 @@
 #
 
 # Add the source files in this directory.
+# FIXME Append CUDA source files only if CUDA found.
 set(name measures)
 set(${name}_SRC
     src/oskar_convert_apparent_ha_dec_to_az_el.c
@@ -38,6 +39,9 @@ set(${name}_SRC
     src/oskar_convert_lon_lat_to_xyz.c
 
     src/oskar_convert_offset_ecef_to_ecef.c
+
+    src/oskar_convert_relative_direction_cosines_to_enu_direction_cosines.c
+    src/oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda.cu
 
     src/oskar_convert_station_uvw_to_baseline_uvw.c
     src/oskar_convert_station_uvw_to_baseline_uvw_cuda.cu
