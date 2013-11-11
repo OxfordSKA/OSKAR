@@ -28,9 +28,13 @@
 
 #include "apps/lib/oskar_Dir.h"
 #include "apps/lib/oskar_telescope_load.h"
+#include "apps/lib/oskar_TelescopeLoadApodisation.h"
 #include "apps/lib/oskar_TelescopeLoadConfig.h"
 #include "apps/lib/oskar_TelescopeLoadElementPattern.h"
+#include "apps/lib/oskar_TelescopeLoadGainPhase.h"
+#include "apps/lib/oskar_TelescopeLoadLayout.h"
 #include "apps/lib/oskar_TelescopeLoadNoise.h"
+#include "apps/lib/oskar_TelescopeLoadOrientation.h"
 #include <oskar_log.h>
 #include <oskar_get_error_string.h>
 
@@ -48,7 +52,7 @@ static void load_directories(oskar_Telescope* telescope,
         const oskar_Settings* settings, const oskar_Dir& cwd,
         oskar_Station* station, int depth,
         const vector<oskar_TelescopeLoadAbstract*>& loaders,
-        map<string, string> filemap, int* status);
+        map<string, string> filemap, oskar_Log* log, int* status);
 
 
 extern "C"
@@ -82,14 +86,20 @@ void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
 
     // Create the loaders.
     vector<oskar_TelescopeLoadAbstract*> loaders;
-    loaders.push_back(new oskar_TelescopeLoadConfig(settings)); // Must be first!
+    // The config loader is now deprecated (but it must appear first!).
+    loaders.push_back(new oskar_TelescopeLoadConfig(settings));
+    // The layout loader must be the first after the config loader.
+    loaders.push_back(new oskar_TelescopeLoadLayout(settings));
+    loaders.push_back(new oskar_TelescopeLoadGainPhase);
+    loaders.push_back(new oskar_TelescopeLoadApodisation);
+    loaders.push_back(new oskar_TelescopeLoadOrientation);
     loaders.push_back(new oskar_TelescopeLoadElementPattern(settings, log));
     loaders.push_back(new oskar_TelescopeLoadNoise(settings));
 
     // Load everything recursively from the telescope directory tree.
     map<string, string> filemap;
     load_directories(telescope, settings, telescope_dir, NULL, 0, loaders,
-            filemap, status);
+            filemap, log, status);
     if (*status)
     {
         oskar_log_error(log, "Failed to load telescope model (%s).",
@@ -97,7 +107,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
     }
 
     // Delete all the loaders.
-    for (int i = 0; i < loaders.size(); ++i)
+    for (size_t i = 0; i < loaders.size(); ++i)
     {
         delete loaders[i];
     }
@@ -109,7 +119,7 @@ static void load_directories(oskar_Telescope* telescope,
         const oskar_Settings* settings, const oskar_Dir& cwd,
         oskar_Station* station, int depth,
         const vector<oskar_TelescopeLoadAbstract*>& loaders,
-        map<string, string> filemap, int* status)
+        map<string, string> filemap, oskar_Log* log, int* status)
 {
     // Check if safe to proceed.
     if (*status) return;
@@ -122,10 +132,16 @@ static void load_directories(oskar_Telescope* telescope,
     if (depth == 0)
     {
         // Load everything at this level.
-        for (int i = 0; i < loaders.size(); ++i)
+        for (size_t i = 0; i < loaders.size(); ++i)
         {
             loaders[i]->load(telescope, cwd, num_dirs, filemap, status);
-            if (*status) return;
+            if (*status)
+            {
+                string s = string("Error in ") + loaders[i]->name() +
+                        string(" in '") + cwd.absolutePath() + string("'.");
+                oskar_log_error(log, "%s", s.c_str());
+                return;
+            }
         }
 
         if (num_dirs == 1)
@@ -136,7 +152,7 @@ static void load_directories(oskar_Telescope* telescope,
             // Recursive call to load the station.
             load_directories(telescope, settings, child_dir,
                     oskar_telescope_station(telescope, 0), depth + 1,
-                    loaders, filemap, status);
+                    loaders, filemap, log, status);
 
             // Copy station 0 to all the others.
             oskar_telescope_duplicate_first_station(telescope, status);
@@ -159,7 +175,7 @@ static void load_directories(oskar_Telescope* telescope,
                 // Recursive call to load the station.
                 load_directories(telescope, settings, child_dir,
                         oskar_telescope_station(telescope, i), depth + 1,
-                        loaders, filemap, status);
+                        loaders, filemap, log, status);
             }
         } // End check on number of directories.
     }
@@ -168,10 +184,16 @@ static void load_directories(oskar_Telescope* telescope,
     else
     {
         // Load everything at this level.
-        for (int i = 0; i < loaders.size(); ++i)
+        for (size_t i = 0; i < loaders.size(); ++i)
         {
             loaders[i]->load(station, cwd, num_dirs, depth, filemap, status);
-            if (*status) return;
+            if (*status)
+            {
+                string s = string("Error in ") + loaders[i]->name() +
+                        string(" in '") + cwd.absolutePath() + string("'.");
+                oskar_log_error(log, "%s", s.c_str());
+                return;
+            }
         }
 
         if (num_dirs == 1)
@@ -182,7 +204,7 @@ static void load_directories(oskar_Telescope* telescope,
             // Recursive call to load the station.
             load_directories(telescope, settings, child_dir,
                     oskar_station_child(station, 0), depth + 1, loaders,
-                    filemap, status);
+                    filemap, log, status);
 
             // Copy station 0 to all the others.
             oskar_station_duplicate_first_child(station, status);
@@ -205,7 +227,7 @@ static void load_directories(oskar_Telescope* telescope,
                 // Recursive call to load the station.
                 load_directories(telescope, settings, child_dir,
                         oskar_station_child(station, i), depth + 1, loaders,
-                        filemap, status);
+                        filemap, log, status);
             }
         } // End check on number of directories.
     } // End check on depth.

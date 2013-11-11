@@ -26,65 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/lib/oskar_TelescopeLoadGainPhase.h"
 #include "apps/lib/oskar_Dir.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-
+using std::map;
 using std::string;
-using std::vector;
 
-struct oskar_Dir::oskar_DirPrivate
-{
-    oskar_DirPrivate(const string& path) : dir(QString::fromStdString(path)) {}
-    QDir dir;
-};
+const string oskar_TelescopeLoadGainPhase::gain_phase_file = "gain_phase.txt";
 
-oskar_Dir::oskar_Dir(const string path)
+oskar_TelescopeLoadGainPhase::oskar_TelescopeLoadGainPhase()
 {
-    p = new oskar_DirPrivate(path);
 }
 
-oskar_Dir::~oskar_Dir()
+oskar_TelescopeLoadGainPhase::~oskar_TelescopeLoadGainPhase()
 {
-    delete p;
 }
 
-string oskar_Dir::absoluteFilePath(const string& filename) const
+void oskar_TelescopeLoadGainPhase::load(oskar_Telescope* /*telescope*/,
+        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
+        map<string, string>& /*filemap*/, int* /*status*/)
 {
-    return p->dir.absoluteFilePath(QString::fromStdString(filename)).
-            toStdString();
+    // Nothing to do at the telescope level.
 }
 
-string oskar_Dir::absolutePath() const
+void oskar_TelescopeLoadGainPhase::load(oskar_Station* station,
+        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
+        map<string, string>& /*filemap*/, int* status)
 {
-    return p->dir.absolutePath().toStdString();
-}
-
-vector<string> oskar_Dir::allSubDirs() const
-{
-    vector<string> r;
-    QStringList dirs = p->dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot,
-            QDir::Name);
-    for (int i = 0; i < dirs.size(); ++i)
+    // Check for presence of "gain_phase.txt".
+    if (cwd.exists(gain_phase_file))
     {
-        r.push_back(dirs[i].toStdString());
+        oskar_station_load_gain_phase(station,
+                cwd.filePath(gain_phase_file).c_str(), status);
     }
-    return r;
 }
 
-bool oskar_Dir::exists(const string& filename) const
+string oskar_TelescopeLoadGainPhase::name() const
 {
-    return p->dir.exists(QString::fromStdString(filename));
-}
-
-bool oskar_Dir::exists() const
-{
-    return p->dir.exists();
-}
-
-string oskar_Dir::filePath(const string& filename) const
-{
-    return p->dir.filePath(QString::fromStdString(filename)).toStdString();
+    return string("element gain and phase file loader");
 }

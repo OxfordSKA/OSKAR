@@ -87,6 +87,12 @@ public:
     virtual void load(oskar_Station* station, const oskar_Dir& cwd,
             int num_subdirs, int depth,
             std::map<std::string, std::string>& filemap, int* status) = 0;
+
+    /**
+     * @brief
+     * Returns a readable name for the loader.
+     */
+    virtual std::string name() const = 0;
 };
 
 #endif /* OSKAR_TELESCOPE_LOAD_ABSTRACT_H_ */

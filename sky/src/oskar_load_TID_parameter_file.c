@@ -76,7 +76,7 @@ void oskar_load_TID_parameter_file(oskar_SettingsTIDscreen* TID,
     /* Loop over each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
-        int read = 0;
+        size_t read = 0;
 
         /* Ignore comment lines (lines starting with '#'). */
         if (line[0] == '#') continue;

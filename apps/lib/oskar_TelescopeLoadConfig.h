@@ -36,8 +36,6 @@
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 #include <oskar_Settings.h>
 
-class oskar_Dir;
-
 class OSKAR_APPS_EXPORT oskar_TelescopeLoadConfig
 : public oskar_TelescopeLoadAbstract
 {
@@ -86,9 +84,14 @@ public:
             int num_subdirs, int depth,
             std::map<std::string, std::string>& filemap, int* status);
 
+    /**
+     * @brief
+     * Returns a readable name for the loader.
+     */
+    virtual std::string name() const;
+
 private:
     static const std::string config_file;
-    static const std::string layout_file;
     const oskar_Settings* settings_;
 };
 

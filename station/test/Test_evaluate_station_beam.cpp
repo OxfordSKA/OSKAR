@@ -39,7 +39,6 @@
 #include <oskar_random_state.h>
 #include <oskar_mem_binary_file_write.h>
 #include <oskar_cuda_check_error.h>
-#include <oskar_mem_write_ascii.h>
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
@@ -154,7 +153,7 @@ TEST(evaluate_station_beam, test_array_pattern)
     // Save beam to file for plotting.
     const char* filename = "temp_test_beam_pattern.txt";
     FILE* file = fopen(filename, "w");
-    oskar_mem_write_ascii(file, 3, num_pixels, &error, &h_l, &h_m, &beam_pattern);
+    oskar_mem_save_ascii(file, 3, num_pixels, &error, &h_l, &h_m, &beam_pattern);
     fclose(file);
     remove(filename);
 

@@ -59,11 +59,13 @@ set(utility_SRC
     src/oskar_mem_init.c
     src/oskar_mem_init_copy.c
     src/oskar_mem_insert.c
+    src/oskar_mem_load_ascii.c
     src/oskar_mem_random_fill.c
     src/oskar_mem_realloc.c
+    src/oskar_mem_save_ascii.c
     src/oskar_mem_scale_real.c
     src/oskar_mem_set_value_real.c
-    src/oskar_mem_write_ascii.c
+    src/oskar_mem_stats.c
     src/oskar_Mem.cpp
     src/oskar_settings_free.c
     src/oskar_settings_init.c

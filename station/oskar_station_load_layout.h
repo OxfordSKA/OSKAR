@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_WRITE_ASCII_H_
-#define OSKAR_MEM_WRITE_ASCII_H_
+#ifndef OSKAR_STATION_LOAD_LAYOUT_H_
+#define OSKAR_STATION_LOAD_LAYOUT_H_
 
 /**
- * @file oskar_mem_write_ascii.h
+ * @file oskar_station_load_layout.h
  */
 
 #include <oskar_global.h>
-#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,32 +41,37 @@ extern "C" {
 
 /**
  * @brief
- * Writes the given blocks of memory to an ASCII table.
+ * Loads station element layout data from a text file.
  *
  * @details
- * This function writes the given blocks of memory to an ASCII table using the
- * specified stream. It is mainly intended for use in tests.
+ * This function loads a station layout from a comma- or
+ * space-separated text file. Each line contains position data for one element
+ * of the station.
  *
- * The variable argument list must contain pointers to oskar_Mem structures.
- * Data within these structures may reside either in CPU or GPU memory.
- * The number of structures passed is given by the \p num_mem parameter.
+ * The file may have the following columns, in the following order:
+ * - Element x-position, in metres.
+ * - Element y-position, in metres.
+ * - Element z-position, in metres (default 0).
+ * - Element x-position error, in metres (default 0).
+ * - Element y-position error, in metres (default 0).
+ * - Element z-position error, in metres (default 0).
  *
- * All structures must contain at least the number of specified
- * \p num_elements. Each array will form one (or more, if using complex types)
- * columns of the output table, with the row corresponding to the element
- * index.
+ * Only the first two columns are required to be present.
  *
- * @param[in] file          Pointer to output stream.
- * @param[in] num_mem       Number of arrays to write.
- * @param[in] num_elements  Number of elements to write.
- * @param[in,out]  status   Status return code.
+ * The coordinate system (ENU, or East-North-Up) is aligned so that the
+ * x-axis points to the local geographic East, the y-axis to local
+ * geographic North, and the z-axis to the local zenith.
+ *
+ * @param[out] station   Pointer to destination data structure to fill.
+ * @param[in] filename   Name of the data file to load.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_write_ascii(FILE* file, size_t num_mem, size_t num_elements,
-        int* status, ...);
+void oskar_station_load_layout(oskar_Station* station, const char* filename,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_WRITE_ASCII_H_ */
+#endif /* OSKAR_STATION_LOAD_LAYOUT_H_ */

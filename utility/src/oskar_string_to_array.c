@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_string_to_array.h"
+#include <oskar_string_to_array.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,9 +42,9 @@ extern "C" {
 #define DELIMITERS ", "
 
 /* Single precision. */
-int oskar_string_to_array_f(char* str, int n, float* data)
+size_t oskar_string_to_array_f(char* str, size_t n, float* data)
 {
-    int i = 0;
+    size_t i = 0;
     char *save_ptr, *token;
     do
     {
@@ -59,9 +59,9 @@ int oskar_string_to_array_f(char* str, int n, float* data)
 }
 
 /* Double precision. */
-int oskar_string_to_array_d(char* str, int n, double* data)
+size_t oskar_string_to_array_d(char* str, size_t n, double* data)
 {
-    int i = 0;
+    size_t i = 0;
     char *save_ptr, *token;
     do
     {
@@ -76,9 +76,9 @@ int oskar_string_to_array_d(char* str, int n, double* data)
 }
 
 /* String array. */
-int oskar_string_to_array_s(char* str, int n, char** data)
+size_t oskar_string_to_array_s(char* str, size_t n, char** data)
 {
-    int i;
+    size_t i;
     char *save_ptr;
     for (i = 0; i < n; ++i)
     {
@@ -91,9 +91,9 @@ int oskar_string_to_array_s(char* str, int n, char** data)
 }
 
 /* String array. */
-int oskar_string_to_array_realloc_s(char* str, int* n, char*** data)
+size_t oskar_string_to_array_realloc_s(char* str, size_t* n, char*** data)
 {
-    int i;
+    size_t i;
     char *save_ptr, *token;
     for (i = 0; ; ++i)
     {

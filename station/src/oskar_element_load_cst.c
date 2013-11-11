@@ -271,7 +271,7 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
 #if 0
     /* Dump data to a new file. */
     file = fopen("element_data_debug_dump.txt", "w");
-    oskar_mem_write_ascii(file, 7, n, status, &m_theta, &m_phi,
+    oskar_mem_save_ascii(file, 7, n, status, &m_theta, &m_phi,
             &m_theta_re, &m_theta_im, &m_phi_re, &m_phi_im, &weight);
     fclose(file);
 #endif

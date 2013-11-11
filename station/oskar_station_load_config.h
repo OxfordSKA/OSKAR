@@ -75,8 +75,8 @@ extern "C" {
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_load_config(oskar_Station* station,
-        const char* filename, int* status);
+void oskar_station_load_config(oskar_Station* station, const char* filename,
+        int* status);
 
 #ifdef __cplusplus
 }

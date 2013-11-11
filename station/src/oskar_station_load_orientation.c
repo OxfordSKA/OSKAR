@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_station.h>
 #include <oskar_station.h>
 
 #include <oskar_getline.h>
@@ -34,18 +33,18 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_station_load_config(oskar_Station* station, const char* filename,
-        int* status)
+void oskar_station_load_orientation(oskar_Station* station,
+        const char* filename, int* status)
 {
+    /* Declare the line buffer and counter. */
     char* line = NULL;
     size_t bufsize = 0;
-    int n = 0, type = 0;
+    int n = 0, type = 0, old_size = 0;
     FILE* file;
 
     /* Check all inputs. */
@@ -74,19 +73,19 @@ void oskar_station_load_config(oskar_Station* station, const char* filename,
         return;
     }
 
+    /* Get the size of the station before loading the data. */
+    old_size = oskar_station_num_elements(station);
+
     /* Loop over each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
         /* Declare parameter array. */
-        /* x, y, z, delta_x, delta_y, delta_z, amp_gain, amp_error,
-         * phase_offset_deg, phase_error_deg, weight_re, weight_im,
-         * x_azimuth_deg, y_azimuth_deg */
-        double par[] = {0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 1., 0.,
-                90., 0.};
+        /* x_azimuth_deg, y_azimuth_deg */
+        double par[] = {90., 0.};
         size_t num_par = sizeof(par) / sizeof(double);
 
         /* Load element data. */
-        if (oskar_string_to_array_d(line, num_par, par) < 2) continue;
+        if (oskar_string_to_array_d(line, num_par, par) < 1) continue;
 
         /* Ensure the station model is big enough. */
         if (oskar_station_num_elements(station) <= n)
@@ -96,21 +95,17 @@ void oskar_station_load_config(oskar_Station* station, const char* filename,
         }
 
         /* Store the data. */
-        oskar_station_set_element_coords(station, n,
-                par[0], par[1], par[2], par[3], par[4], par[5], status);
-        oskar_station_set_element_errors(station, n,
-                par[6], par[7], par[8], par[9], status);
-        oskar_station_set_element_weight(station, n,
-                par[10], par[11], status);
-        oskar_station_set_element_orientation(station, n,
-                par[12], par[13], status);
+        oskar_station_set_element_orientation(station, n, par[0], par[1],
+                status);
 
         /* Increment element counter. */
         ++n;
     }
 
-    /* Record the number of elements loaded. */
-    oskar_station_resize(station, n, status);
+    /* Consistency check with previous station size (should be the same as
+     * the number of elements loaded). */
+    if (!*status && n != old_size)
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Free the line buffer and close the file. */
     if (line) free(line);

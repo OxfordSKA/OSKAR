@@ -24,9 +24,13 @@ set(apps_SRC
     src/oskar_sim_interferometer.cpp
     src/oskar_sim_tec_screen.cpp
     src/oskar_telescope_load.cpp
+    src/oskar_TelescopeLoadApodisation.cpp
     src/oskar_TelescopeLoadConfig.cpp
     src/oskar_TelescopeLoadElementPattern.cpp
+    src/oskar_TelescopeLoadGainPhase.cpp
+    src/oskar_TelescopeLoadLayout.cpp
     src/oskar_TelescopeLoadNoise.cpp
+    src/oskar_TelescopeLoadOrientation.cpp
     src/oskar_telescope_save.cpp
 )
 if(CASACORE_FOUND)

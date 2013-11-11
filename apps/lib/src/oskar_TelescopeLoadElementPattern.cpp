@@ -81,6 +81,11 @@ void oskar_TelescopeLoadElementPattern::load(oskar_Station* station,
     }
 }
 
+string oskar_TelescopeLoadElementPattern::name() const
+{
+    return string("element pattern loader");
+}
+
 void oskar_TelescopeLoadElementPattern::load_element_patterns(oskar_Log* log,
         const oskar_SettingsTelescope* settings, oskar_Station* station,
         const map<string, string>& filemap, int* status)

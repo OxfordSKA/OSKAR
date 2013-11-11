@@ -29,6 +29,7 @@
 #include "apps/lib/oskar_TelescopeLoadNoise.h"
 #include "apps/lib/oskar_Dir.h"
 
+#include <oskar_Settings.h>
 #include <oskar_system_noise_model_load.h>
 #include <oskar_file_exists.h>
 
@@ -124,6 +125,10 @@ void oskar_TelescopeLoadNoise::load(oskar_Station* station,
     setNoiseRMS_(noise, filemap, status);
 }
 
+string oskar_TelescopeLoadNoise::name() const
+{
+    return string("noise loader");
+}
 
 // -- private functions -------------------------------------------------------
 

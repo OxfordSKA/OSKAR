@@ -232,7 +232,7 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
 
     /* Set mean and standard deviation of relative error. */
     if (avg_rel_error) *avg_rel_error = new_m;
-    if (std_rel_error) *std_rel_error = (n > 1) ? sqrt(new_s / (n - 1)) : 0.0;
+    if (std_rel_error) *std_rel_error = (n > 0) ? sqrt(new_s / n) : 0.0;
 
     /* Clean up temporaries if required. */
     if (oskar_mem_location(val_approx) != OSKAR_LOCATION_CPU)

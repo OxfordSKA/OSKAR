@@ -83,8 +83,8 @@ void oskar_sky_load(oskar_Sky* sky, const char* filename, int* status)
         /* Set defaults. */
         /* RA, Dec, I, Q, U, V, freq0, spix, RM, FWHM maj, FWHM min, PA */
         double par[] = {0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
-        int num_param = sizeof(par) / sizeof(double);
-        int num_required = 3, num_read = 0;
+        size_t num_param = sizeof(par) / sizeof(double);
+        size_t num_required = 3, num_read = 0;
 
         /* Load source parameters (require at least RA, Dec, Stokes I). */
         num_read = oskar_string_to_array_d(line, num_param, par);
@@ -92,7 +92,7 @@ void oskar_sky_load(oskar_Sky* sky, const char* filename, int* status)
             continue;
 
         /* Ensure enough space in arrays. */
-        if (n % 100 == 0)
+        if (oskar_sky_num_sources(sky) <= n)
         {
             oskar_sky_resize(temp, n + 100, status);
             if (*status)

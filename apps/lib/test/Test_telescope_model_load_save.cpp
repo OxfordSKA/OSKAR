@@ -58,19 +58,20 @@ TEST(telescope_model_load_save, test_0_level)
 
     {
         int num_stations = 10;
-        //int num_elements = 1;
 
-        // Create a telescope model.
-        oskar_Telescope* telescope = oskar_telescope_create(OSKAR_DOUBLE,
-                OSKAR_LOCATION_CPU, num_stations, &err);
-        oskar_telescope_set_position(telescope,
-                longitude_rad, latitude_rad, altitude_m);
+        // Create a telescope model directory.
+        QDir cwd;
+        cwd.mkdir(path);
+        cwd.cd(path);
 
-        // TODO Populate the telescope model.
-
-        oskar_telescope_save(telescope, path, &err);
-        ASSERT_EQ(0, err) << oskar_get_error_string(err);
-        oskar_telescope_free(telescope, &err);
+        // Write the top-level layout file only.
+        QFile file(cwd.absoluteFilePath("layout.txt"));
+        file.open(QFile::WriteOnly);
+        QTextStream stream(&file);
+        for (int i = 0; i < num_stations; ++i)
+        {
+            stream << i * 10.0 << "," << i * 20.0 << "," << i * 30.0 << endl;
+        }
     }
 
     // Load it back again.
@@ -85,8 +86,7 @@ TEST(telescope_model_load_save, test_0_level)
         settings.interferometer.noise.enable = false;
         strcpy(settings.telescope.input_directory, path);
 
-        oskar_Telescope* telescope =
-                oskar_telescope_create(OSKAR_DOUBLE,
+        oskar_Telescope* telescope = oskar_telescope_create(OSKAR_DOUBLE,
                         OSKAR_LOCATION_CPU, 0, &err);
         oskar_telescope_load(telescope, NULL, &settings, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
@@ -290,6 +290,7 @@ TEST(telescope_model_load_save, test_2_level)
     oskar_Telescope* telescope2 =
             oskar_telescope_create(OSKAR_SINGLE,
                     OSKAR_LOCATION_CPU, 0, &err);
+    ASSERT_EQ(0, err) << oskar_get_error_string(err);
     oskar_telescope_load(telescope2, NULL, &settings, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
     oskar_settings_free(&settings);

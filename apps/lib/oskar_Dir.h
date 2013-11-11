@@ -70,6 +70,15 @@ public:
 
     /**
      * @brief
+     * Returns the absolute path of the directory.
+     *
+     * @details
+     * Returns the absolute path of the directory.
+     */
+    std::string absolutePath() const;
+
+    /**
+     * @brief
      * Returns the names of all the directories in the current directory.
      *
      * @details

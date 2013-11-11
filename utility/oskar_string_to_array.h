@@ -33,7 +33,8 @@
  * @file oskar_string_to_array.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
+#include <stddef.h> /* For size_t */
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +59,7 @@ extern "C" {
  * @return The number of values matched (or number of array elements filled).
  */
 OSKAR_EXPORT
-int oskar_string_to_array_f(char* str, int n, float* data);
+size_t oskar_string_to_array_f(char* str, size_t n, float* data);
 
 /**
  * @brief Splits a string into numeric fields (double precision).
@@ -79,7 +80,7 @@ int oskar_string_to_array_f(char* str, int n, float* data);
  * @return The number of values matched (or number of array elements filled).
  */
 OSKAR_EXPORT
-int oskar_string_to_array_d(char* str, int n, double* data);
+size_t oskar_string_to_array_d(char* str, size_t n, double* data);
 
 /**
  * @brief Splits a string into sub-strings.
@@ -100,7 +101,7 @@ int oskar_string_to_array_d(char* str, int n, double* data);
  * @return The number of array elements filled.
  */
 OSKAR_EXPORT
-int oskar_string_to_array_s(char* str, int n, char** data);
+size_t oskar_string_to_array_s(char* str, size_t n, char** data);
 
 /**
  * @brief Splits a string into sub-strings, (re)allocating space as required.
@@ -143,7 +144,7 @@ int oskar_string_to_array_s(char* str, int n, char** data);
  * @return The number of array elements filled.
  */
 OSKAR_EXPORT
-int oskar_string_to_array_realloc_s(char* str, int* n, char*** data);
+size_t oskar_string_to_array_realloc_s(char* str, size_t* n, char*** data);
 
 #ifdef __cplusplus
 }

@@ -26,65 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_Dir.h"
+#ifndef OSKAR_MEM_LOAD_ASCII_H_
+#define OSKAR_MEM_LOAD_ASCII_H_
 
-#include <QtCore/QDir>
-#include <QtCore/QString>
-#include <QtCore/QStringList>
+/**
+ * @file oskar_mem_load_ascii.h
+ */
 
-using std::string;
-using std::vector;
+#include <oskar_global.h>
+#include <stddef.h>
+#include <stdio.h>
 
-struct oskar_Dir::oskar_DirPrivate
-{
-    oskar_DirPrivate(const string& path) : dir(QString::fromStdString(path)) {}
-    QDir dir;
-};
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-oskar_Dir::oskar_Dir(const string path)
-{
-    p = new oskar_DirPrivate(path);
+/**
+ * @brief
+ * Loads an ASCII table from file to populate the given blocks of memory.
+ *
+ * @details
+ * This function reads an ASCII table and populates the supplied arrays
+ * from columns in the table.
+ *
+ * The variable argument list must contain, for each array, a pointer to an
+ * oskar_Mem structure, and a string containing the default value for elements
+ * in that array. These parameters alternate throughout the list, so they would
+ * appear as: oskar_Mem*, const char*, oskar_Mem*, const char* ...
+ *
+ * If the default is a blank string, then it is a required column.
+ *
+ * Data within oskar_Mem structures may reside either in CPU or GPU memory.
+ * The number of structures passed is given by the \p num_mem parameter.
+ *
+ * @param[in] file          Pointer to input stream.
+ * @param[in] num_mem       Number of arrays passed to this function.
+ * @param[in,out]  status   Status return code.
+ *
+ * @return The number of rows read from the file.
+ */
+OSKAR_EXPORT
+size_t oskar_mem_load_ascii(FILE* file, size_t num_mem, int* status, ...);
+
+#ifdef __cplusplus
 }
+#endif
 
-oskar_Dir::~oskar_Dir()
-{
-    delete p;
-}
-
-string oskar_Dir::absoluteFilePath(const string& filename) const
-{
-    return p->dir.absoluteFilePath(QString::fromStdString(filename)).
-            toStdString();
-}
-
-string oskar_Dir::absolutePath() const
-{
-    return p->dir.absolutePath().toStdString();
-}
-
-vector<string> oskar_Dir::allSubDirs() const
-{
-    vector<string> r;
-    QStringList dirs = p->dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot,
-            QDir::Name);
-    for (int i = 0; i < dirs.size(); ++i)
-    {
-        r.push_back(dirs[i].toStdString());
-    }
-    return r;
-}
-
-bool oskar_Dir::exists(const string& filename) const
-{
-    return p->dir.exists(QString::fromStdString(filename));
-}
-
-bool oskar_Dir::exists() const
-{
-    return p->dir.exists();
-}
-
-string oskar_Dir::filePath(const string& filename) const
-{
-    return p->dir.filePath(QString::fromStdString(filename)).toStdString();
-}
+#endif /* OSKAR_MEM_LOAD_ASCII_H_ */

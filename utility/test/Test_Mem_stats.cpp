@@ -26,65 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_Dir.h"
+#include <gtest/gtest.h>
 
-#include <QtCore/QDir>
-#include <QtCore/QString>
-#include <QtCore/QStringList>
+#include <oskar_mem.h>
+#include <oskar_get_error_string.h>
+#include <cmath>
 
-using std::string;
-using std::vector;
-
-struct oskar_Dir::oskar_DirPrivate
+TEST(Mem, stats)
 {
-    oskar_DirPrivate(const string& path) : dir(QString::fromStdString(path)) {}
-    QDir dir;
-};
+    int status = 0;
+    oskar_Mem* values;
+    values = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 5, &status);
 
-oskar_Dir::oskar_Dir(const string path)
-{
-    p = new oskar_DirPrivate(path);
+    // Fill an array with the values 1, 2, 3, 4, 5.
+    double *v = oskar_mem_double(values, &status);
+    v[0] = 1.0;
+    v[1] = 2.0;
+    v[2] = 3.0;
+    v[3] = 4.0;
+    v[4] = 5.0;
+
+    // Compute minimum, maximum, mean and population standard deviation.
+    double min, max, mean, std_dev;
+    oskar_mem_stats(values, &min, &max, &mean, &std_dev, &status);
+
+    // Check values are correct.
+    ASSERT_DOUBLE_EQ(3.0, mean);
+    ASSERT_DOUBLE_EQ(1.0, min);
+    ASSERT_DOUBLE_EQ(5.0, max);
+    ASSERT_DOUBLE_EQ(sqrt(2.0), std_dev);
+
+    // Free memory.
+    oskar_mem_free(values, &status);
+    free(values); // FIXME Remove after updating oskar_mem_free().
 }
 
-oskar_Dir::~oskar_Dir()
-{
-    delete p;
-}
-
-string oskar_Dir::absoluteFilePath(const string& filename) const
-{
-    return p->dir.absoluteFilePath(QString::fromStdString(filename)).
-            toStdString();
-}
-
-string oskar_Dir::absolutePath() const
-{
-    return p->dir.absolutePath().toStdString();
-}
-
-vector<string> oskar_Dir::allSubDirs() const
-{
-    vector<string> r;
-    QStringList dirs = p->dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot,
-            QDir::Name);
-    for (int i = 0; i < dirs.size(); ++i)
-    {
-        r.push_back(dirs[i].toStdString());
-    }
-    return r;
-}
-
-bool oskar_Dir::exists(const string& filename) const
-{
-    return p->dir.exists(QString::fromStdString(filename));
-}
-
-bool oskar_Dir::exists() const
-{
-    return p->dir.exists();
-}
-
-string oskar_Dir::filePath(const string& filename) const
-{
-    return p->dir.filePath(QString::fromStdString(filename)).toStdString();
-}

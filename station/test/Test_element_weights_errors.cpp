@@ -79,7 +79,7 @@ TEST(element_weights_errors, test_evaluate)
     // Write memory to file for inspection.
     const char* fname = "temp_test_element_errors.dat";
     FILE* file = fopen(fname, "w");
-    oskar_mem_write_ascii(file, 5, num_elements, &error,
+    oskar_mem_save_ascii(file, 5, num_elements, &error,
             &d_gain, &d_gain_error, &d_phase, &d_phase_error, &d_errors);
     fclose(file);
     remove(fname);
@@ -154,7 +154,7 @@ TEST(element_weights_errors, test_apply)
     // Write memory to file for inspection.
     const char* fname = "temp_test_weights.dat";
     FILE* file = fopen(fname, "w");
-    oskar_mem_write_ascii(file, 7, num_elements, &status,
+    oskar_mem_save_ascii(file, 7, num_elements, &status,
             &d_gain, &d_gain_error, &d_phase, &d_phase_error, &d_errors,
             &h_weights, &d_weights);
     fclose(file);

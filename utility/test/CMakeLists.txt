@@ -10,15 +10,16 @@ set(${name}_SRC
     Test_getline.cpp
     Test_Mem_add.cpp
     Test_Mem_append.cpp
+    Test_Mem_ascii.cpp
     Test_Mem_binary.cpp
     Test_Mem_copy.cpp
     Test_Mem_different.cpp
     Test_Mem_realloc.cpp
     Test_Mem_scale_real.cpp
     Test_Mem_set_value_real.cpp
+    Test_Mem_stats.cpp
     Test_Mem_to_type.cpp
     Test_Mem_type_check.cpp
-    Test_Mem_write_ascii.cpp
     Test_string_to_array.cpp
     Test_Timer.cpp
 )

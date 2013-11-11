@@ -26,65 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_Dir.h"
+#ifndef OSKAR_MEM_SAVE_ASCII_H_
+#define OSKAR_MEM_SAVE_ASCII_H_
 
-#include <QtCore/QDir>
-#include <QtCore/QString>
-#include <QtCore/QStringList>
+/**
+ * @file oskar_mem_save_ascii.h
+ */
 
-using std::string;
-using std::vector;
+#include <oskar_global.h>
+#include <stdio.h>
 
-struct oskar_Dir::oskar_DirPrivate
-{
-    oskar_DirPrivate(const string& path) : dir(QString::fromStdString(path)) {}
-    QDir dir;
-};
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-oskar_Dir::oskar_Dir(const string path)
-{
-    p = new oskar_DirPrivate(path);
+/**
+ * @brief
+ * Saves the given blocks of memory to an ASCII table.
+ *
+ * @details
+ * This function saves the given blocks of memory to an ASCII table using the
+ * specified stream.
+ *
+ * The variable argument list must contain pointers to oskar_Mem structures.
+ * Data within these structures may reside either in CPU or GPU memory.
+ * The number of structures passed is given by the \p num_mem parameter.
+ *
+ * All structures must contain at least the number of specified
+ * \p num_elements. Each array will form one (or more, if using complex types)
+ * columns of the output table, with the row corresponding to the element
+ * index.
+ *
+ * @param[in] file          Pointer to output stream.
+ * @param[in] num_mem       Number of arrays to write.
+ * @param[in] num_elements  Number of elements to write.
+ * @param[in,out]  status   Status return code.
+ */
+OSKAR_EXPORT
+void oskar_mem_save_ascii(FILE* file, size_t num_mem, size_t num_elements,
+        int* status, ...);
+
+#ifdef __cplusplus
 }
+#endif
 
-oskar_Dir::~oskar_Dir()
-{
-    delete p;
-}
-
-string oskar_Dir::absoluteFilePath(const string& filename) const
-{
-    return p->dir.absoluteFilePath(QString::fromStdString(filename)).
-            toStdString();
-}
-
-string oskar_Dir::absolutePath() const
-{
-    return p->dir.absolutePath().toStdString();
-}
-
-vector<string> oskar_Dir::allSubDirs() const
-{
-    vector<string> r;
-    QStringList dirs = p->dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot,
-            QDir::Name);
-    for (int i = 0; i < dirs.size(); ++i)
-    {
-        r.push_back(dirs[i].toStdString());
-    }
-    return r;
-}
-
-bool oskar_Dir::exists(const string& filename) const
-{
-    return p->dir.exists(QString::fromStdString(filename));
-}
-
-bool oskar_Dir::exists() const
-{
-    return p->dir.exists();
-}
-
-string oskar_Dir::filePath(const string& filename) const
-{
-    return p->dir.filePath(QString::fromStdString(filename)).toStdString();
-}
+#endif /* OSKAR_MEM_SAVE_ASCII_H_ */

@@ -157,7 +157,7 @@ TEST(evaluate_jones_E, evaluate_e)
     {
         oskar_jones_get_station_pointer(&E_station, E, j, &error);
         ASSERT_EQ(0, error) << oskar_get_error_string(error);
-        oskar_mem_write_ascii(file, 4, num_sources, &error,
+        oskar_mem_save_ascii(file, 4, num_sources, &error,
                 oskar_station_work_source_horizontal_x(work),
                 oskar_station_work_source_horizontal_y(work),
                 oskar_station_work_source_horizontal_z(work),

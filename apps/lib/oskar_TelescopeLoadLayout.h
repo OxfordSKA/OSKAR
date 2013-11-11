@@ -26,26 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_ELEMENT_PATTERN_H_
-#define OSKAR_TELESCOPE_LOAD_ELEMENT_PATTERN_H_
+#ifndef OSKAR_TELESCOPE_LOAD_LAYOUT_H_
+#define OSKAR_TELESCOPE_LOAD_LAYOUT_H_
 
 /**
- * @file oskar_TelescopeLoadElementPattern.h
+ * @file oskar_TelescopeLoadLayout.h
  */
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
 struct oskar_Settings;
-struct oskar_Log;
 
-class OSKAR_APPS_EXPORT oskar_TelescopeLoadElementPattern
+class OSKAR_APPS_EXPORT oskar_TelescopeLoadLayout
 : public oskar_TelescopeLoadAbstract
 {
 public:
-    oskar_TelescopeLoadElementPattern(const oskar_Settings* settings,
-            oskar_Log* log);
+    oskar_TelescopeLoadLayout(const oskar_Settings* settings);
 
-    virtual ~oskar_TelescopeLoadElementPattern();
+    virtual ~oskar_TelescopeLoadLayout();
 
     /**
      * @brief
@@ -94,19 +92,9 @@ public:
     virtual std::string name() const;
 
 private:
-    void load_element_patterns(oskar_Log* log,
-            const oskar_SettingsTelescope* settings, oskar_Station* station,
-            const std::map<std::string, std::string>& filemap, int* status);
-
-    void update_map(std::map<std::string, std::string>& files,
-            const oskar_Dir& cwd);
-
-private:
-    static const std::string element_x_cst_file;
-    static const std::string element_y_cst_file;
-    std::map<std::string, oskar_Element*> models;
+    static const std::string layout_file;
+    static const std::string layout_ecef_file;
     const oskar_Settings* settings_;
-    oskar_Log* log_;
 };
 
-#endif /* OSKAR_TELESCOPE_LOAD_ELEMENT_PATTERN_H_ */
+#endif /* OSKAR_TELESCOPE_LOAD_LAYOUT_H_ */

@@ -46,7 +46,7 @@ extern "C" {
 #endif
 
 static void set_coords(oskar_Station* station, int set_recursive,
-        int current_depth, int num_sub_ids, int* sub_ids, int coord_type,
+        size_t current_depth, size_t num_sub_ids, int* sub_ids, int coord_type,
         double lon, double lat, int* status);
 
 void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
@@ -54,8 +54,8 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
 {
     /* Declare the line buffer and counter. */
     char* line = NULL;
-    size_t bufsize = 0;
-    int size_id = 0, num_par = 0, type = 0;
+    size_t bufsize = 0, size_id = 0, num_par = 0;
+    int type = 0;
     FILE* file;
     char** par = 0;
     int* id = 0;
@@ -89,7 +89,8 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
     /* Loop over each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
-        int coordsys, i = 0, num_ids = 0, read = 0;
+        int coordsys;
+        size_t i = 0, num_ids = 0, read = 0;
         double lon = 0.0, lat = 0.0;
 
         /* Split into string array and check for required number of fields. */
@@ -146,7 +147,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
             if (id[0] < 0)
             {
                 /* Loop over stations. */
-                for (i = 0; i < telescope->num_stations; ++i)
+                for (i = 0; i < (size_t)telescope->num_stations; ++i)
                 {
                     set_coords(oskar_telescope_station(telescope, i), 0, 0,
                             num_ids - 1, sub_id, coordsys, lon, lat, status);
@@ -179,7 +180,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
 }
 
 static void set_coords(oskar_Station* station, int set_recursive,
-        int current_depth, int num_sub_ids, int* sub_ids, int coord_type,
+        size_t current_depth, size_t num_sub_ids, int* sub_ids, int coord_type,
         double lon, double lat, int* status)
 {
     /* Check if safe to proceed. */
@@ -193,8 +194,8 @@ static void set_coords(oskar_Station* station, int set_recursive,
         /* Set pointing data recursively for all child stations. */
         if (oskar_station_has_child(station))
         {
-            int i, num_elements;
-            num_elements = oskar_station_num_elements(station);
+            size_t i, num_elements;
+            num_elements = (size_t)oskar_station_num_elements(station);
             for (i = 0; i < num_elements; ++i)
             {
                 set_coords(oskar_station_child(station, i), 1,
@@ -226,8 +227,8 @@ static void set_coords(oskar_Station* station, int set_recursive,
 
             if (id < 0)
             {
-                int i, num_elements;
-                num_elements = oskar_station_num_elements(station);
+                size_t i, num_elements;
+                num_elements = (size_t)oskar_station_num_elements(station);
                 for (i = 0; i < num_elements; ++i)
                 {
                     set_coords(oskar_station_child(station, i), 0,

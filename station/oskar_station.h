@@ -63,7 +63,11 @@ enum {
 #include <oskar_station_different.h>
 #include <oskar_station_duplicate_first_child.h>
 #include <oskar_station_free.h>
+#include <oskar_station_load_apodisation.h>
 #include <oskar_station_load_config.h>
+#include <oskar_station_load_gain_phase.h>
+#include <oskar_station_load_layout.h>
+#include <oskar_station_load_orientation.h>
 #include <oskar_station_override_element_gains.h>
 #include <oskar_station_override_element_orientations.h>
 #include <oskar_station_override_element_phases.h>

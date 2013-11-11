@@ -34,7 +34,8 @@
  */
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
-#include <oskar_Settings.h>
+
+struct oskar_Settings;
 
 /**
  * @brief
@@ -86,6 +87,12 @@ public:
     void load(oskar_Station* station, const oskar_Dir& cwd, int num_subdirs,
             int depth, std::map<std::string, std::string>& filemap,
             int* status);
+
+    /**
+     * @brief
+     * Returns a readable name for the loader.
+     */
+    virtual std::string name() const;
 
 private:
     // Updates set of files to load.

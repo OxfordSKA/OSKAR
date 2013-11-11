@@ -42,7 +42,11 @@ set(station_SRC
     src/oskar_station_different.c
     src/oskar_station_duplicate_first_child.c
     src/oskar_station_free.c
+    src/oskar_station_load_apodisation.c
     src/oskar_station_load_config.c
+    src/oskar_station_load_gain_phase.c
+    src/oskar_station_load_layout.c
+    src/oskar_station_load_orientation.c
     src/oskar_station_override_element_gains.c
     src/oskar_station_override_element_orientations.c
     src/oskar_station_override_element_phases.c

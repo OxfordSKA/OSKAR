@@ -172,7 +172,7 @@ TEST(evaluate_station_beam_dipoles, test)
 
     const char* filename = "temp_test_station_beam_dipoles.dat";
     FILE* file = fopen(filename, "w");
-    oskar_mem_write_ascii(file, 3, num_pixels, &status, &h_az, &h_el,
+    oskar_mem_save_ascii(file, 3, num_pixels, &status, &h_az, &h_el,
             &pattern);
     fclose(file);
     remove(filename);

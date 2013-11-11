@@ -28,7 +28,7 @@
 
 #include <private_mem.h>
 #include <oskar_mem.h>
-#include <oskar_mem_write_ascii.h>
+#include <oskar_mem_save_ascii.h>
 
 #include <stdarg.h>
 
@@ -39,7 +39,7 @@ extern "C" {
 #define SDF "% .6e "
 #define SDD "% .12e "
 
-void oskar_mem_write_ascii(FILE* file, size_t num_mem, size_t num_elements,
+void oskar_mem_save_ascii(FILE* file, size_t num_mem, size_t num_elements,
         int* status, ...)
 {
     int type;

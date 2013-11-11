@@ -46,8 +46,8 @@ extern "C" {
  *
  * @details
  * This function computes statistics to return the minimum, maximum,
- * average and standard deviation of the relative error between elements of
- * two floating-point arrays.
+ * average and population standard deviation of the relative error between
+ * elements of two floating-point arrays.
  *
  * Data in GPU memory are copied back to the host first, if necessary.
  *
@@ -68,7 +68,7 @@ extern "C" {
  * @param[out] min_rel_error Minimum relative error.
  * @param[out] max_rel_error Maximum relative error.
  * @param[out] avg_rel_error Mean relative error.
- * @param[out] std_rel_error Standard deviation of relative error.
+ * @param[out] std_rel_error Population standard deviation of relative error.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT

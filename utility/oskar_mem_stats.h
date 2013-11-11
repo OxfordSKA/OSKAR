@@ -26,65 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_Dir.h"
+#ifndef OSKAR_MEM_STATS_H_
+#define OSKAR_MEM_STATS_H_
 
-#include <QtCore/QDir>
-#include <QtCore/QString>
-#include <QtCore/QStringList>
+/**
+ * @file oskar_mem_stats.h
+ */
 
-using std::string;
-using std::vector;
+#include <oskar_global.h>
 
-struct oskar_Dir::oskar_DirPrivate
-{
-    oskar_DirPrivate(const string& path) : dir(QString::fromStdString(path)) {}
-    QDir dir;
-};
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-oskar_Dir::oskar_Dir(const string path)
-{
-    p = new oskar_DirPrivate(path);
+/**
+ * @brief
+ * Analyses values in a block of memory and reports statistics on them.
+ *
+ * @details
+ * This function analyses values in a block of memory and reports
+ * statistics on them.
+ *
+ * An error is returned if the data type of the memory block is unsupported.
+ *
+ * @param[in] mem         Pointer to memory block to analyse.
+ * @param[out] min        The minimum value in the array.
+ * @param[out] max        The maximum value in the array.
+ * @param[out] mean       The mean value of elements the array.
+ * @param[out] std_dev    The population standard deviation of values the array.
+ * @param[in,out]  status Status return code.
+ */
+OSKAR_EXPORT
+void oskar_mem_stats(const oskar_Mem* mem, double* min, double* max,
+        double* mean, double* std_dev, int* status);
+
+#ifdef __cplusplus
 }
+#endif
 
-oskar_Dir::~oskar_Dir()
-{
-    delete p;
-}
-
-string oskar_Dir::absoluteFilePath(const string& filename) const
-{
-    return p->dir.absoluteFilePath(QString::fromStdString(filename)).
-            toStdString();
-}
-
-string oskar_Dir::absolutePath() const
-{
-    return p->dir.absolutePath().toStdString();
-}
-
-vector<string> oskar_Dir::allSubDirs() const
-{
-    vector<string> r;
-    QStringList dirs = p->dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot,
-            QDir::Name);
-    for (int i = 0; i < dirs.size(); ++i)
-    {
-        r.push_back(dirs[i].toStdString());
-    }
-    return r;
-}
-
-bool oskar_Dir::exists(const string& filename) const
-{
-    return p->dir.exists(QString::fromStdString(filename));
-}
-
-bool oskar_Dir::exists() const
-{
-    return p->dir.exists();
-}
-
-string oskar_Dir::filePath(const string& filename) const
-{
-    return p->dir.filePath(QString::fromStdString(filename)).toStdString();
-}
+#endif /* OSKAR_MEM_STATS_H_ */
