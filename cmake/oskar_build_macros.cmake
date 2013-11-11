@@ -185,6 +185,8 @@ macro(OSKAR_APP)
         )
     else ()
         set_target_properties(${target} PROPERTIES
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            INSTALL_RPATH_USE_LINK_PATH TRUE
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
             LINK_FLAGS    "${OpenMP_CXX_FLAGS}"
             OUTPUT_NAME   "${APP_NAME}"
@@ -269,6 +271,8 @@ macro(OSKAR_QT_APP)
         )
     else ()
         set_target_properties(${target} PROPERTIES
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            INSTALL_RPATH_USE_LINK_PATH TRUE
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
             LINK_FLAGS    "${OpenMP_CXX_FLAGS}"
             OUTPUT_NAME   "${APP_NAME}"
@@ -339,6 +343,7 @@ macro(OSKAR_MEX)
     add_library(${target} MODULE ${MEX_SOURCES} ${mex_function_def})
     target_link_libraries(${target} ${MATLAB_LIBRARIES} ${MEX_LIBS})
     set_target_properties(${target} PROPERTIES
+        INSTALL_RPATH_USE_LINK_PATH TRUE
         PREFIX        ""
         OUTPUT_NAME   "${MEX_NAME}"
         SUFFIX        ".${MATLAB_MEXFILE_EXT}"

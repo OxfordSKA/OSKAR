@@ -100,7 +100,7 @@ if (CUDA_FOUND)
             SOVERSION ${OSKAR_VERSION})
     else ()
         set_target_properties(${libname} PROPERTIES
-            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSAKR_LIB_INSTALL_DIR}
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
             INSTALL_RPATH_USE_LINK_PATH TRUE
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
             LINK_FLAGS "${OpenMP_CXX_FLAGS}"
