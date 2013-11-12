@@ -1,10 +1,10 @@
 2013-xx-xx  OSKAR-2.3.0
 
-    * Renamed applications operating on OSKAR format visibiltity files
+    * Renamed applications operating on OSKAR format visibility files
       from oskar_visibilities_* to oskar_vis_*.
 
-    * Renambed MATLAB interface functions to OSKAR format visibiltity files 
-      from oskar.visibilties.* to oskar.vis.*  
+    * Renamed MATLAB interface functions to OSKAR format visibility files 
+      from oskar.visibilities.* to oskar.vis.*  
 
     * Fixed memory ordering in MATLAB OSKAR binary file interface for 
       COMPLEX_MATRIX types.
@@ -33,16 +33,19 @@
 
     * Added per-source rotation measure to sky model.
 
-    * Added additional meta-data to the OSKAR visibility structure recording
-      telescope and station longitude and latitudes, as well as nominal station
-      receptor orientations. 
+    * Added additional meta-data to the OSKAR visibility structure to record
+      telescope and station longitudes and latitudes, as well as nominal
+      station receptor orientations. 
 
-    * Added options to specify both dimensions when making beam patterns.
+    * Added options to specify both image dimensions when making beam patterns.
 
     * Added a total intensity (Stokes I auto-correlation) beam pattern output
       mode.
 
     * Added check for updates when GUI starts.
+
+    * Added warning message if settings file has been edited elsewhere
+      while simultaneously open in the GUI.
 
     * Added telescope model name, channel bandwidth and time integration
       values to visibility files.
@@ -50,20 +53,26 @@
     * Added percentage time taken for various stages of the simulation to
       the message log.
 
-    * Added a command line application (oskar_visibilities_add_noise) to
+    * Added a command line application (oskar_vis_add_noise) to
       add uncorrelated noise to visibilities.
 
     * Added application to display a summary of meta-data from an OSKAR
-      visibility binary file (oskar_visibilities_summary).
+      visibility binary file (oskar_vis_summary).
+
+    * Added the ability to use separate files to specify station element
+      positions, gain and phase values, apodisation weights and orientations
+      in the telescope model.
+
+    * Added the ability to use station positions in Earth-centred coordinates.
+
+    * Added station type for analytical scalar JVLA dishes, based on the AIPS
+      task PBCOR. (http://www.aips.nrao.edu/cgi-bin/ZXHLP2.PL?PBCOR)
 
     * Updated options of oskar_image_summary to give the option to display the
       settings used to create the image.
 
     * Updated settings for beam pattern generation in order to support the 
       future addition of new beam pattern types.
-
-    * Added station type for analytical JVLA dishes, based on the AIPS task
-      PBCOR (http://www.aips.nrao.edu/cgi-bin/ZXHLP2.PL?PBCOR)
 
 2013-03-11  OSKAR-2.2.1
 
