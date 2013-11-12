@@ -116,22 +116,34 @@ void oskar_evaluate_vla_beam_pbcor_matrix_cuda_d(double4c* beam,
 #define RAD2ARCMIN  3437.74677078493951
 #define RAD2ARCMINf 3437.74677078493951f
 
-OSKAR_INLINE float vla_pbcor_f(const float r_arcmin, const float freq_ghz,
-        const float p1, const float p2, const float p3)
+OSKAR_INLINE float vla_pbcor_f(const float l, const float m,
+        const float cutoff_arcmin, const float freq_ghz, const float p1,
+        const float p2, const float p3)
 {
-    float t, X;
-    t = r_arcmin * freq_ghz;
-    X = t * t;
-    return 1.0f + X * (p1 * 1e-3f + X * (p2 * 1e-7f + X * p3 * 1e-10f));
+    float r, t, X;
+    r = asinf(sqrtf(l * l + m * m)) * RAD2ARCMINf;
+    if (r < cutoff_arcmin)
+    {
+        t = r * freq_ghz;
+        X = t * t;
+        return 1.0f + X * (p1 * 1e-3f + X * (p2 * 1e-7f + X * p3 * 1e-10f));
+    }
+    return 0.0f;
 }
 
-OSKAR_INLINE double vla_pbcor_d(const double r_arcmin, const double freq_ghz,
-        const double p1, const double p2, const double p3)
+OSKAR_INLINE double vla_pbcor_d(const double l, const double m,
+        const double cutoff_arcmin, const double freq_ghz, const double p1,
+        const double p2, const double p3)
 {
-    double t, X;
-    t = r_arcmin * freq_ghz;
-    X = t * t;
-    return 1.0 + X * (p1 * 1e-3 + X * (p2 * 1e-7 + X * p3 * 1e-10));
+    double r, t, X;
+    r = asin(sqrt(l * l + m * m)) * RAD2ARCMIN;
+    if (r < cutoff_arcmin)
+    {
+        t = r * freq_ghz;
+        X = t * t;
+        return 1.0 + X * (p1 * 1e-3 + X * (p2 * 1e-7 + X * p3 * 1e-10));
+    }
+    return 0.0;
 }
 
 
@@ -141,21 +153,11 @@ void oskar_evaluate_vla_beam_pbcor_cudak_f(float* beam, int num_sources,
         const float* l, const float* m, const float freq_ghz, const float p1,
         const float p2, const float p3, const float cutoff_radius_arcmin)
 {
-    float l_, m_, r;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    l_ = l[i];
-    m_ = m[i];
-    r = asinf(sqrtf(l_*l_ + m_*m_)) * RAD2ARCMINf;
-    if (r < cutoff_radius_arcmin)
-    {
-        beam[i] = vla_pbcor_f(r, freq_ghz, p1, p2, p3);
-    }
-    else
-    {
-        beam[i] = 0.0f;
-    }
+    beam[i] = vla_pbcor_f(l[i], m[i], cutoff_radius_arcmin,
+            freq_ghz, p1, p2, p3);
 }
 
 
@@ -165,23 +167,12 @@ void oskar_evaluate_vla_beam_pbcor_complex_cudak_f(float2* beam,
         const float p1, const float p2, const float p3,
         const float cutoff_radius_arcmin)
 {
-    float l_, m_, r;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    l_ = l[i];
-    m_ = m[i];
-    r = asinf(sqrtf(l_*l_ + m_*m_)) * RAD2ARCMINf;
-    if (r < cutoff_radius_arcmin)
-    {
-        beam[i].x = vla_pbcor_f(r, freq_ghz, p1, p2, p3);
-        beam[i].y = 0.0f;
-    }
-    else
-    {
-        beam[i].x = 0.0f;
-        beam[i].y = 0.0f;
-    }
+    beam[i].x = vla_pbcor_f(l[i], m[i], cutoff_radius_arcmin,
+            freq_ghz, p1, p2, p3);
+    beam[i].y = 0.0f;
 }
 
 
@@ -191,36 +182,19 @@ void oskar_evaluate_vla_beam_pbcor_matrix_cudak_f(float4c* beam,
         const float p1, const float p2, const float p3,
         const float cutoff_radius_arcmin)
 {
-    float l_, m_, r, t;
+    float t;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    l_ = l[i];
-    m_ = m[i];
-    r = asinf(sqrtf(l_*l_ + m_*m_)) * RAD2ARCMINf;
-    if (r < cutoff_radius_arcmin)
-    {
-        t = vla_pbcor_f(r, freq_ghz, p1, p2, p3);
-        beam[i].a.x = t;
-        beam[i].a.y = 0.0f;
-        beam[i].b.x = 0.0f;
-        beam[i].b.y = 0.0f;
-        beam[i].c.x = 0.0f;
-        beam[i].c.y = 0.0f;
-        beam[i].d.x = t;
-        beam[i].d.y = 0.0f;
-    }
-    else
-    {
-        beam[i].a.x = 0.0f;
-        beam[i].a.y = 0.0f;
-        beam[i].b.x = 0.0f;
-        beam[i].b.y = 0.0f;
-        beam[i].c.x = 0.0f;
-        beam[i].c.y = 0.0f;
-        beam[i].d.x = 0.0f;
-        beam[i].d.y = 0.0f;
-    }
+    t = vla_pbcor_f(l[i], m[i], cutoff_radius_arcmin, freq_ghz, p1, p2, p3);
+    beam[i].a.x = t;
+    beam[i].a.y = 0.0f;
+    beam[i].b.x = 0.0f;
+    beam[i].b.y = 0.0f;
+    beam[i].c.x = 0.0f;
+    beam[i].c.y = 0.0f;
+    beam[i].d.x = t;
+    beam[i].d.y = 0.0f;
 }
 
 
@@ -231,21 +205,11 @@ void oskar_evaluate_vla_beam_pbcor_cudak_d(double* beam, int num_sources,
         const double p1, const double p2, const double p3,
         const double cutoff_radius_arcmin)
 {
-    double l_, m_, r;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    l_ = l[i];
-    m_ = m[i];
-    r = asin(sqrt(l_*l_ + m_*m_)) * RAD2ARCMIN;
-    if (r < cutoff_radius_arcmin)
-    {
-        beam[i] = vla_pbcor_d(r, freq_ghz, p1, p2, p3);
-    }
-    else
-    {
-        beam[i] = 0.0;
-    }
+    beam[i] = vla_pbcor_d(l[i], m[i], cutoff_radius_arcmin,
+            freq_ghz, p1, p2, p3);
 }
 
 
@@ -255,23 +219,12 @@ void oskar_evaluate_vla_beam_pbcor_complex_cudak_d(double2* beam,
         const double freq_ghz, const double p1, const double p2,
         const double p3, const double cutoff_radius_arcmin)
 {
-    double l_, m_, r;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    l_ = l[i];
-    m_ = m[i];
-    r = asin(sqrt(l_*l_ + m_*m_)) * RAD2ARCMIN;
-    if (r < cutoff_radius_arcmin)
-    {
-        beam[i].x = vla_pbcor_d(r, freq_ghz, p1, p2, p3);
-        beam[i].y = 0.0;
-    }
-    else
-    {
-        beam[i].x = 0.0;
-        beam[i].y = 0.0;
-    }
+    beam[i].x = vla_pbcor_d(l[i], m[i], cutoff_radius_arcmin,
+            freq_ghz, p1, p2, p3);
+    beam[i].y = 0.0;
 }
 
 
@@ -281,35 +234,18 @@ void oskar_evaluate_vla_beam_pbcor_matrix_cudak_d(double4c* beam,
         const double freq_ghz, const double p1, const double p2,
         const double p3, const double cutoff_radius_arcmin)
 {
-    double l_, m_, r, t;
+    double t;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    l_ = l[i];
-    m_ = m[i];
-    r = asin(sqrt(l_*l_ + m_*m_)) * RAD2ARCMIN;
-    if (r < cutoff_radius_arcmin)
-    {
-        t = vla_pbcor_d(r, freq_ghz, p1, p2, p3);
-        beam[i].a.x = t;
-        beam[i].a.y = 0.0;
-        beam[i].b.x = 0.0;
-        beam[i].b.y = 0.0;
-        beam[i].c.x = 0.0;
-        beam[i].c.y = 0.0;
-        beam[i].d.x = t;
-        beam[i].d.y = 0.0;
-    }
-    else
-    {
-        beam[i].a.x = 0.0;
-        beam[i].a.y = 0.0;
-        beam[i].b.x = 0.0;
-        beam[i].b.y = 0.0;
-        beam[i].c.x = 0.0;
-        beam[i].c.y = 0.0;
-        beam[i].d.x = 0.0;
-        beam[i].d.y = 0.0;
-    }
+    t = vla_pbcor_d(l[i], m[i], cutoff_radius_arcmin, freq_ghz, p1, p2, p3);
+    beam[i].a.x = t;
+    beam[i].a.y = 0.0;
+    beam[i].b.x = 0.0;
+    beam[i].b.y = 0.0;
+    beam[i].c.x = 0.0;
+    beam[i].c.y = 0.0;
+    beam[i].d.x = t;
+    beam[i].d.y = 0.0;
 }
 
