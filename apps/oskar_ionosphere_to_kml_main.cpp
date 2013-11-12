@@ -38,7 +38,7 @@
 #include <oskar_convert_offset_ecef_to_ecef.h>
 
 #include <oskar_mjd_to_gast_fast.h>
-#include <oskar_convert_apparent_ra_dec_to_horizon_direction.h>
+#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
 #include <oskar_sky.h>
 
 #include <oskar_get_error_string.h>
@@ -61,13 +61,11 @@
 #include <png.h>
 #include <cfloat>
 
-
 int get_lon_lat_quad_coords(double* coords, oskar_Settings* settings,
         oskar_Log* log);
 void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
         int stationID, oskar_Settings* settings,
         oskar_Telescope* telescope, int* status);
-
 void write_kml(const char* kml_file, const char* image_file, double* coords,
         oskar_Mem& pp_lon, oskar_Mem& pp_lat);
 void write_kml_ground_overlay(FILE* file, const double* coords, const char* image);
@@ -79,7 +77,6 @@ void abort_(const char* s, ...);
 void image_to_png(const char* filename, oskar_Image& image);
 int evaluate_pp(oskar_Mem& pp_lon, oskar_Mem& pp_lat, oskar_Settings& settings,
         oskar_Log* log);
-
 
 // Add a KML settings group into the ionosphere settings ??
 // KML
@@ -316,8 +313,8 @@ int get_lon_lat_quad_coords(double* coords, oskar_Settings* settings,
 
     oskar_mem_init(&pp_lon, type, loc, num_pixels, owner, &status);
     oskar_mem_init(&pp_lat, type, loc, num_pixels, owner, &status);
-    oskar_evaluate_image_lon_lat_grid(&pp_lon, &pp_lat, im_size, fov,
-            pp_lon0, pp_lat0, &status);
+    oskar_evaluate_image_lon_lat_grid(&pp_lon, &pp_lat, im_size, im_size, fov,
+            fov, pp_lon0, pp_lat0, &status);
     double rad2deg = 180.0/M_PI;
     if (type == OSKAR_DOUBLE)
     {
@@ -393,7 +390,7 @@ void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
     double st_alt = oskar_station_altitude_m(station);
 
     // Time at which beam p.p. is evaluated.
-    int t = 0; // XXX
+    int t = 0;
     double obs_start_mjd_utc = settings->obs.start_mjd_utc;
     double dt_dump = settings->obs.dt_dump_days;
     double t_dump = obs_start_mjd_utc + t * dt_dump; // MJD UTC
@@ -406,16 +403,16 @@ void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
         st_y = oskar_mem_double_const(station_y, status)[stationID];
         st_z = oskar_mem_double_const(station_z, status)[stationID];
 
-        oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,
-                &st_x, &st_y, &st_z, st_lon, st_lat, st_alt, &st_x_ecef,
-                &st_y_ecef, &st_z_ecef);
+        oskar_convert_offset_ecef_to_ecef(1, &st_x, &st_y, &st_z, st_lon,
+                st_lat, st_alt, &st_x_ecef, &st_y_ecef, &st_z_ecef);
 
         double beam_ra = oskar_station_beam_longitude_rad(station);
         double beam_dec = oskar_station_beam_latitude_rad(station);
 
         // Obtain horizontal coordinates of beam p.p.
-        oskar_ra_dec_to_hor_lmn_d(1, &beam_ra, &beam_dec, last, st_lat,
-                (double*)hor_x.data, (double*)hor_y.data, (double*)hor_z.data);
+        oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(1,
+                &beam_ra, &beam_dec, last, st_lat, (double*)hor_x.data,
+                (double*)hor_y.data, (double*)hor_z.data);
     }
     else // (type == OSKAR_SINGLE)
     {
@@ -423,16 +420,16 @@ void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
         st_y = (double)oskar_mem_float_const(station_y, status)[stationID];
         st_z = (double)oskar_mem_float_const(station_z, status)[stationID];
 
-        oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,
-                &st_x, &st_y, &st_z, st_lon, st_lat, st_alt, &st_x_ecef,
-                &st_y_ecef, &st_z_ecef);
+        oskar_convert_offset_ecef_to_ecef(1, &st_x, &st_y, &st_z, st_lon,
+                st_lat, st_alt, &st_x_ecef, &st_y_ecef, &st_z_ecef);
 
         float beam_ra = (float)oskar_station_beam_longitude_rad(station);
         float beam_dec = (float)oskar_station_beam_latitude_rad(station);
 
         // Obtain horizontal coordinates of beam p.p.
-        oskar_ra_dec_to_hor_lmn_f(1, &beam_ra, &beam_dec, last, st_lat,
-                (float*)hor_x.data, (float*)hor_y.data, (float*)hor_z.data);
+        oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(1,
+                &beam_ra, &beam_dec, last, st_lat, (float*)hor_x.data,
+                (float*)hor_y.data, (float*)hor_z.data);
     }
 
     // oskar_Mem functions holding the pp for the beam centre.
@@ -458,7 +455,6 @@ void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
         *pp_lat0 = ((float*)m_pp_lat0.data)[0];
     }
 }
-
 
 void write_kml(const char* kml_file, const char* image_file, double* coords,
         oskar_Mem& pp_lon, oskar_Mem& pp_lat)
@@ -629,7 +625,6 @@ inline void setRGB(png_byte *ptr, float val, float red_val, float blue_val)
         ptr[2] = 255;
     }
 }
-
 
 void abort_(const char* s, ...)
 {

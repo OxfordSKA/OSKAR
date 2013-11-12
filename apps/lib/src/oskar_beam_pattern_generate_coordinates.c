@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,43 +26,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/lib/oskar_sim_beam_pattern_new.h>
-/*#include <apps/lib/oskar_sim_beam_pattern.h>*/
-#include <apps/lib/oskar_OptionParser.h>
+#include <apps/lib/oskar_beam_pattern_generate_coordinates.h>
+#include <oskar_evaluate_image_lm_grid.h>
+#include <math.h>
 
-#include <oskar_get_error_string.h>
-#include <oskar_log.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <cstdlib>
-#include <cstdio>
-
-int main(int argc, char** argv)
+void oskar_beam_pattern_generate_coordinates(oskar_Mem* x, oskar_Mem* y,
+        oskar_Mem* z, int* coord_type, const oskar_SettingsBeamPattern* settings,
+        int* status)
 {
-    int error = OSKAR_SUCCESS;
-
-    oskar_OptionParser opt("oskar_sim_beam_pattern");
-    opt.addRequired("settings file");
-    if (!opt.check_options(argc, argv))
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    // Create the log.
-    oskar_Log* log = oskar_log_create();
-    oskar_log_message(log, 0, "Running binary %s", argv[0]);
-
-    try
-    {
-        // Run simulation.
-        oskar_sim_beam_pattern_new(opt.getArg(0), log, &error);
-    }
-    catch (int code)
-    {
-        error = code;
+    if (!status || *status != OSKAR_SUCCESS) return;
+    if (!x || !y || !z || !coord_type || !settings) {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
     }
 
-    // Check for errors.
-    if (error)
-        oskar_log_error(log, "Run failed: %s.", oskar_get_error_string(error));
-    oskar_log_free(log);
-
-    return error;
+    switch (settings->coord_type)
+    {
+        case OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE:
+        {
+            oskar_evaluate_image_lm_grid(x, y, settings->size[0],
+                    settings->size[1], settings->fov_deg[0]*(M_PI/180.0),
+                    settings->fov_deg[1]*(M_PI/180.0), status);
+            *coord_type = OSKAR_RELATIVE_DIRECTION_COSINES;
+            break;
+        }
+        case OSKAR_BEAM_PATTERN_COORDS_HEALPIX:
+            /* TODO Implement this mode... */
+            *status = OSKAR_FAIL;
+            break;
+        default:
+            *status = OSKAR_FAIL;
+            break;
+    };
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -90,6 +90,48 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(int np,
 
 /**
  * @brief
+ * Equatorial to relative 2D direction cosines (single precision).
+ *
+ * @details
+ * This function computes the direction cosines of the specified points
+ * relative to the reference point.
+ *
+ * @param[in]  np   Number of points.
+ * @param[in]  ra   Input position Right Ascensions in radians.
+ * @param[in]  dec  Input position Declinations in radians.
+ * @param[in]  ra0  Right Ascension of the reference point in radians.
+ * @param[in]  dec0 Declination of the reference point in radians.
+ * @param[out] l    l-direction-cosines relative to the reference point.
+ * @param[out] m    m-direction-cosines relative to the reference point.
+ */
+OSKAR_EXPORT
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_f(int np,
+        const float* ra, const float* dec, float ra0, float dec0,
+        float* l, float* m);
+
+/**
+ * @brief
+ * Equatorial to relative 2D direction cosines (double precision).
+ *
+ * @details
+ * This function computes the direction cosines of the specified points
+ * relative to the reference point.
+ *
+ * @param[in]  np   Number of points.
+ * @param[in]  ra   Input position Right Ascensions in radians.
+ * @param[in]  dec  Input position Declinations in radians.
+ * @param[in]  ra0  Right Ascension of the reference point in radians.
+ * @param[in]  dec0 Declination of the reference point in radians.
+ * @param[out] l    l-direction-cosines relative to the reference point.
+ * @param[out] m    m-direction-cosines relative to the reference point.
+ */
+OSKAR_EXPORT
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_d(int np,
+        const double* ra, const double* dec, double ra0,
+        double dec0, double* l, double* m);
+
+/**
+ * @brief
  * Equatorial to relative 3D direction cosines (wrapper function).
  *
  * @details

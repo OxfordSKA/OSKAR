@@ -150,9 +150,9 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 
         // Initialise work array and GPU memory for a beam pattern.
         work = oskar_station_work_create(type, OSKAR_LOCATION_GPU, &err);
-        hor_x = oskar_station_work_source_horizontal_x(work);
-        hor_y = oskar_station_work_source_horizontal_y(work);
-        hor_z = oskar_station_work_source_horizontal_z(work);
+        hor_x = oskar_station_work_enu_direction_x(work);
+        hor_y = oskar_station_work_enu_direction_y(work);
+        hor_z = oskar_station_work_enu_direction_z(work);
         oskar_mem_init(&beam_pattern, beam_pattern_data_type,
                 OSKAR_LOCATION_GPU, num_pixels, 1, &err);
         oskar_mem_init(&l, type, OSKAR_LOCATION_GPU, 0, 1, &err);

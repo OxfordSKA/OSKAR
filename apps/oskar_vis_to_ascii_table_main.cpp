@@ -157,7 +157,7 @@ int main(int argc, char** argv)
 #endif
     }
 
-    // TODO write header if specified
+    // Write header if specified
     if (write_header)
     {
         write_header_(out, total_vis, num_chan, num_times, num_baselines,

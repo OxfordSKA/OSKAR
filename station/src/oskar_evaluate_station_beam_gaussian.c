@@ -157,13 +157,13 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         {
             if (oskar_mem_is_scalar(beam))
             {
-                oskar_gaussian_f(oskar_mem_float2(beam, status),
-                        num_points, l_, m_, (float)std);
+                oskar_gaussian_f(oskar_mem_float2(beam, status), num_points,
+                        l_, m_, (float)std);
             }
             else
             {
-                oskar_gaussian_mf(oskar_mem_float4c(beam, status),
-                        num_points, l_, m_, (float)std);
+                oskar_gaussian_mf(oskar_mem_float4c(beam, status), num_points,
+                        l_, m_, (float)std);
             }
         }
         else

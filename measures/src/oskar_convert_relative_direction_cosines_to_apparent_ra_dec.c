@@ -39,9 +39,9 @@ void oskar_convert_relative_direction_cosines_to_apparent_ra_dec_f(int np,
         float* dec)
 {
     int i;
-    float sinLat0, cosLat0;
-    sinLat0 = sinf(dec0);
-    cosLat0 = cosf(dec0);
+    float sinDec0, cosDec0;
+    sinDec0 = sinf(dec0);
+    cosDec0 = cosf(dec0);
 
     /* Loop over positions and evaluate the longitude and latitude values. */
     for (i = 0; i < np; ++i)
@@ -50,8 +50,8 @@ void oskar_convert_relative_direction_cosines_to_apparent_ra_dec_f(int np,
         l_ = l[i];
         m_ = m[i];
         n_ = sqrtf(1.0 - l_*l_ - m_*m_);
-        dec[i] = asinf(n_ * sinLat0 + m_ * cosLat0);
-        ra[i] = ra0 + atan2f(l_, cosLat0 * n_ - m_ * sinLat0);
+        dec[i] = asinf(n_ * sinDec0 + m_ * cosDec0);
+        ra[i] = ra0 + atan2f(l_, cosDec0 * n_ - m_ * sinDec0);
     }
 }
 

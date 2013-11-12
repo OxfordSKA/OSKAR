@@ -26,14 +26,84 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_evaluate_image_lm_grid.h"
-#include "math/oskar_linspace.h"
+#include <imaging/oskar_evaluate_image_lm_grid.h>
+#include <math/oskar_linspace.h>
 #include <math.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* oskar_Mem wrapper */
+void oskar_evaluate_image_lm_grid(oskar_Mem* l, oskar_Mem* m, int nl, int nm,
+        double fov_lon, double fov_lat, int* status)
+{
+    int type, loc;
+
+    if (!status || *status != OSKAR_SUCCESS)
+        return;
+
+    if (!l || !m) {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    type = oskar_mem_type(l);
+    if (oskar_mem_type(m) != type) {
+        *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
+    loc = oskar_mem_location(l);
+    if (oskar_mem_location(m) != loc) {
+        *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return;
+    }
+
+    if (loc == OSKAR_LOCATION_CPU)
+    {
+        if (type == OSKAR_DOUBLE)
+        {
+            double* l_ = oskar_mem_double(l, status);
+            double* m_ = oskar_mem_double(m, status);
+            oskar_evaluate_image_lm_grid_d(nl, nm, fov_lon, fov_lat, l_, m_);
+        }
+        else if (type == OSKAR_SINGLE)
+        {
+            float* l_ = oskar_mem_float(l, status);
+            float* m_ = oskar_mem_float(m, status);
+            oskar_evaluate_image_lm_grid_f(nl, nm, (float)fov_lon,
+                    (float)fov_lat, l_, m_);
+        }
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+    }
+    else if (loc == OSKAR_LOCATION_GPU)
+    {
+        /* TODO CUDA VERSION */
+        *status = OSKAR_ERR_BAD_LOCATION;
+        return;
+        if (type == OSKAR_DOUBLE)
+        {
+        }
+        else if (type == OSKAR_SINGLE)
+        {
+        }
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+            return;
+        }
+    }
+    else
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+        return;
+    }
+}
 
 /* Single precision. */
 void oskar_evaluate_image_lm_grid_f(int num_l, int num_m,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,43 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/lib/oskar_sim_beam_pattern_new.h>
-/*#include <apps/lib/oskar_sim_beam_pattern.h>*/
-#include <apps/lib/oskar_OptionParser.h>
+#ifndef OSKAR_BEAM_PATTERN_WRITE_H_
+#define OSKAR_BEAM_PATTERN_WRITE_H_
 
-#include <oskar_get_error_string.h>
-#include <oskar_log.h>
+/**
+ * @file oskar_beam_pattern_write.h
+ */
 
-#include <cstdlib>
-#include <cstdio>
+#include <oskar_global.h>
+#include <oskar_Image.h>
+#include <oskar_Settings.h>
+#include <oskar_Log.h>
 
-int main(int argc, char** argv)
-{
-    int error = OSKAR_SUCCESS;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    oskar_OptionParser opt("oskar_sim_beam_pattern");
-    opt.addRequired("settings file");
-    if (!opt.check_options(argc, argv))
-        return OSKAR_ERR_INVALID_ARGUMENT;
+/**
+ * @brief
+ * @details
+ */
+OSKAR_EXPORT
+void oskar_beam_pattern_write(const oskar_Image* complex_cube,
+        oskar_Settings* settings, int type, oskar_Log* log, int* status);
 
-    // Create the log.
-    oskar_Log* log = oskar_log_create();
-    oskar_log_message(log, 0, "Running binary %s", argv[0]);
-
-    try
-    {
-        // Run simulation.
-        oskar_sim_beam_pattern_new(opt.getArg(0), log, &error);
-    }
-    catch (int code)
-    {
-        error = code;
-    }
-
-    // Check for errors.
-    if (error)
-        oskar_log_error(log, "Run failed: %s.", oskar_get_error_string(error));
-    oskar_log_free(log);
-
-    return error;
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_BEAM_PATTERN_WRITE_H_ */

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_image_init.h"
-#include "imaging/oskar_Image.h"
+#include <imaging/oskar_image_init.h>
+#include <imaging/oskar_Image.h>
 #include <oskar_mem.h>
 
 #ifdef __cplusplus

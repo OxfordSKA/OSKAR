@@ -144,9 +144,9 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
 
     /* Get pointers to work arrays. */
     horizon_mask = oskar_station_work_horizon_mask(work);
-    hor_x = oskar_station_work_source_horizontal_x(work);
-    hor_y = oskar_station_work_source_horizontal_y(work);
-    hor_z = oskar_station_work_source_horizontal_z(work);
+    hor_x = oskar_station_work_enu_direction_x(work);
+    hor_y = oskar_station_work_enu_direction_y(work);
+    hor_z = oskar_station_work_enu_direction_z(work);
 
     /* Check that the types match. */
     type = oskar_sky_type(input);

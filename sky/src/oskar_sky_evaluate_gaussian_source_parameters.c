@@ -89,7 +89,7 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
         double *I_, *Q_, *U_, *V_, *a_, *b_, *c_;
         double cos_pa_2, sin_pa_2, sin_2pa, inv_std_min_2, inv_std_maj_2;
         double ellipse_a, ellipse_b, maj, min, pa, cos_pa, sin_pa, t;
-        double l[ELLIPSE_PTS], m[ELLIPSE_PTS], n[ELLIPSE_PTS];
+        double l[ELLIPSE_PTS], m[ELLIPSE_PTS];
         double work1[5 * ELLIPSE_PTS], work2[5 * ELLIPSE_PTS];
         double lon[ELLIPSE_PTS], lat[ELLIPSE_PTS];
         double x[ELLIPSE_PTS], y[ELLIPSE_PTS], z[ELLIPSE_PTS];
@@ -134,8 +134,8 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
             oskar_rotate_sph_d(ELLIPSE_PTS, x, y, z, ra_[i], dec_[i]);
             oskar_convert_xyz_to_lon_lat_d(ELLIPSE_PTS, lon, lat, x, y, z);
 
-            oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(ELLIPSE_PTS,
-                    lon, lat, ra0, dec0, l, m, n);
+            oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_d(
+                    ELLIPSE_PTS, lon, lat, ra0, dec0, l, m);
 
             /* Get new major and minor axes and position angle. */
             oskar_fit_ellipse_d(&maj, &min, &pa, ELLIPSE_PTS, l, m, work1,
@@ -175,7 +175,7 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
         float *I_, *Q_, *U_, *V_, *a_, *b_, *c_;
         float cos_pa_2, sin_pa_2, sin_2pa, inv_std_min_2, inv_std_maj_2;
         float ellipse_a, ellipse_b, maj, min, pa, cos_pa, sin_pa, t;
-        float l[ELLIPSE_PTS], m[ELLIPSE_PTS], n[ELLIPSE_PTS];
+        float l[ELLIPSE_PTS], m[ELLIPSE_PTS];
         float work1[5 * ELLIPSE_PTS], work2[5 * ELLIPSE_PTS];
         float lon[ELLIPSE_PTS], lat[ELLIPSE_PTS];
         float x[ELLIPSE_PTS], y[ELLIPSE_PTS], z[ELLIPSE_PTS];
@@ -220,8 +220,8 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
             oskar_rotate_sph_f(ELLIPSE_PTS, x, y, z, ra_[i], dec_[i]);
             oskar_convert_xyz_to_lon_lat_f(ELLIPSE_PTS, lon, lat, x, y, z);
 
-            oskar_convert_apparent_ra_dec_to_relative_direction_cosines_f(ELLIPSE_PTS,
-                    lon, lat, (float)ra0, (float)dec0, l, m, n);
+            oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_f(
+                    ELLIPSE_PTS, lon, lat, (float)ra0, (float)dec0, l, m);
 
             /* Get new major and minor axes and position angle. */
             oskar_fit_ellipse_f(&maj, &min, &pa, ELLIPSE_PTS, l, m, work1,

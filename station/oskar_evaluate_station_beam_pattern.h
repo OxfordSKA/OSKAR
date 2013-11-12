@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SIM_BEAM_PATTERN_NEW_H_
-#define OSKAR_SIM_BEAM_PATTERN_NEW_H_
+#ifndef OSKAR_EVALUATE_STATION_BEAM_PATTERN_H_
+#define OSKAR_EVALUATE_STATION_BEAM_PATTERN_H_
 
 /**
- * @file oskar_sim_beam_pattern_new.h
+ * @file oskar_evaluate_station_beam_pattern.h
  */
 
 #include <oskar_global.h>
-#include <oskar_log.h>
+#include <oskar_station.h>
+#include <oskar_mem.h>
+#include <oskar_station_work.h>
+#include <oskar_random_state.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,20 +45,50 @@ extern "C" {
 
 /**
  * @brief
- * Main OSKAR beam pattern simulation function.
+ * Evaluate the beam pattern for a station.
  *
  * @details
- * This function acts as though it were a stand-alone executable.
  *
- * @param[in] settings_file Path to a settings file.
- * @param[in,out] log  Pointer to a log structure to use.
  */
-OSKAR_APPS_EXPORT
-void oskar_sim_beam_pattern_new(const char* settings_file, oskar_Log* log,
+OSKAR_EXPORT
+void oskar_evaluate_station_beam_pattern(oskar_Mem* beam_pattern,
+        int np, const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        int coord_type, const oskar_Station* station, oskar_StationWork* work,
+        oskar_RandomState* rand_state, double frequency, double GAST,
         int* status);
+
+/**
+ * @brief
+ * Evaluate the beam pattern for a station with the beam coordinates defined
+ * as relative direction cosines.
+ *
+ * @details
+ */
+OSKAR_EXPORT
+void oskar_evaluate_station_beam_pattern_relative_directions(
+        oskar_Mem* beam_pattern, int np, const oskar_Mem* l, const oskar_Mem* m,
+        const oskar_Mem* n, const oskar_Station* station,
+        oskar_StationWork* work, oskar_RandomState* rand_state,
+        double frequency, double GAST, int* status);
+
+#if 0
+/**
+ * @brief
+ * Evaluate the beam pattern for a station with the beam coordinates defined
+ * as ENU direction cosines.
+ *
+ * @details
+ */
+OSKAR_EXPORT
+void oskar_evaluate_station_beam_pattern_enu_directions(oskar_Mem* beam_pattern,
+        int np, const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        const oskar_Station* station, oskar_StationWork* work,
+        oskar_RandomState* rand_state, double frequency, double GAST,
+        int* status);
+#endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SIM_BEAM_PATTERN_NEW_H_ */
+#endif /* OSKAR_EVALUATE_STATION_BEAM_PATTERN_NEW_H_ */

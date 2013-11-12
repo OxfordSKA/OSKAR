@@ -33,6 +33,29 @@
  * @file oskar_SettingsBeamPattern.h
  */
 
+
+/**
+ * @brief
+ * Enum describing the coordinates at which the beam pattern is evaluated.
+ */
+enum {
+    OSKAR_BEAM_PATTERN_COORDS_UNDEF,
+    OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE,
+    OSKAR_BEAM_PATTERN_COORDS_HEALPIX
+};
+
+/**
+ * @brief
+ * Enum describing the type HEALPix coordinates used when evaluating HEALPix
+ * beams
+ */
+enum {
+    OSKAR_HEALPIX_UNDEF,
+    OSKAR_HEALPIX_EQUATORIAL,
+    OSKAR_HEALPIX_HORIZON
+};
+
+
 /**
  * @struct oskar_SettingsBeamPattern
  *
@@ -43,9 +66,19 @@
  */
 struct oskar_SettingsBeamPattern
 {
+    int station_id;
+
+    int coord_type; /* The type of beam pattern coordinates */
+
+    /* Beam pattern image settings */
     double fov_deg[2];
     int size[2];
-    int station_id;
+
+    int healpix_coord_type;
+    int nside;
+
+    int horizon_clip;   /* Bool, to toggle horizon clip of the beam pattern */
+
     char* oskar_image_voltage;
     char* oskar_image_phase;
     char* oskar_image_complex;

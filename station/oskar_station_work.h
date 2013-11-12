@@ -86,25 +86,64 @@ const oskar_Mem* oskar_station_work_horizon_mask_const(
         const oskar_StationWork* work);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_work_source_horizontal_x(oskar_StationWork* work);
+oskar_Mem* oskar_station_work_enu_direction_x(oskar_StationWork* work);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_work_source_horizontal_x_const(
+const oskar_Mem* oskar_station_work_enu_direction_x_const(
         const oskar_StationWork* work);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_work_source_horizontal_y(oskar_StationWork* work);
+oskar_Mem* oskar_station_work_enu_direction_y(oskar_StationWork* work);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_work_source_horizontal_y_const(
+const oskar_Mem* oskar_station_work_enu_direction_y_const(
         const oskar_StationWork* work);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_work_source_horizontal_z(oskar_StationWork* work);
+oskar_Mem* oskar_station_work_enu_direction_z(oskar_StationWork* work);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_work_source_horizontal_z_const(
+const oskar_Mem* oskar_station_work_enu_direction_z_const(
         const oskar_StationWork* work);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_station_work_relative_direction_l(oskar_StationWork* work);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_work_relative_direction_l_const(
+        const oskar_StationWork* work);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_station_work_relative_direction_m(oskar_StationWork* work);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_work_relative_direction_m_const(
+        const oskar_StationWork* work);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_station_work_relative_direction_n(oskar_StationWork* work);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_work_relative_direction_n_const(
+        const oskar_StationWork* work);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_station_work_ra(oskar_StationWork* work);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_work_ra_const(const oskar_StationWork* work);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_station_work_dec(oskar_StationWork* work);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_work_dec_const(const oskar_StationWork* work);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_station_work_radius(oskar_StationWork* work);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_work_radius_const(const oskar_StationWork* work);
 
 #ifdef __cplusplus
 }

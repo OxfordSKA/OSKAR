@@ -62,7 +62,6 @@ int main(int argc, char** argv)
 
     // Retrieve options =======================================================
     int channel, pol, time;
-    // TODO allow comma separated lists for channel, pol, time index...?
     opt.get("-c")->getInt(channel);
     opt.get("-p")->getInt(pol);
     opt.get("-t")->getInt(time);

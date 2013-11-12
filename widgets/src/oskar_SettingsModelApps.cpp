@@ -75,11 +75,9 @@ oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
 #endif
 }
 
-
 oskar_SettingsModelApps::~oskar_SettingsModelApps()
 {
 }
-
 
 void oskar_SettingsModelApps::init_settings_simulator()
 {
@@ -103,7 +101,6 @@ void oskar_SettingsModelApps::init_settings_simulator()
     setTooltip(k, "A comma-separated string containing device (GPU) IDs to "
             "use on a multi-GPU system, or 'all' to use all devices.");
 }
-
 
 void oskar_SettingsModelApps::init_settings_sky_model()
 {
@@ -514,7 +511,6 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "modelled as point sources.");
 }
 
-
 void oskar_SettingsModelApps::init_settings_observation()
 {
     QString k, group;
@@ -565,7 +561,6 @@ void oskar_SettingsModelApps::init_settings_observation()
             "correlator dumps for interferometer simulations, and the "
             "number of beam pattern snapshots for beam pattern simulations.");
 }
-
 
 void oskar_SettingsModelApps::init_settings_telescope_model()
 {
@@ -805,7 +800,6 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
             "excluding any element pattern data (useful for debugging). "
             "Leave blank if not required.");
 }
-
 
 void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& root)
 {
@@ -1090,7 +1084,6 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
     } // [ System noise group ]
 }
 
-
 void oskar_SettingsModelApps::init_settings_interferometer()
 {
     QString k, group;
@@ -1151,21 +1144,66 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     group = "beam_pattern";
     setLabel(group, "Beam pattern settings");
 
-    // XXX Horizon plane bool toggle instead/in addition to coordinate type.
+    k = group + "/station_id";
+    declare(k, "Station ID", oskar_SettingsItem::INT_UNSIGNED);
+    setTooltip(k, "The station ID number (zero based) to select from the "
+            "telescope model when generating the beam pattern.");
 
-#if 0
     k = group + "/coordinate_type";
     options.clear();
-    options << "Phase centre relative"
-            << "Horizon plane"
+    options << "Beam image"
             << "HEALPix";
-            // XXX HEALPix can be both RA,Dec or horizon plane.
-            // << "Coordinate file (RA,Dec)";
-            // XXX a file mode could be useful for example to evaluate at a
-            // list of source positions.
-    declare(k, "Coordinate grid type", options, 0);
-#endif
+    declare(k, "Coordinate type", options, 0);
 
+    k = group + "/beam_image";
+    setLabel(k, "Beam image settings");
+    setDependency(k , group + "/coordinate_type", "Beam image");
+    setTooltip(k, "Image of the beam, centred on the beam direction.");
+    k = group + "/beam_image/size";
+    declare(k, "Image dimensions [pixels]", oskar_SettingsItem::INT_CSV_LIST,
+            "256");
+    setTooltip(k, "Image dimensions. If a single value is specified, the "
+            "image is assumed to have the same number of pixels along each "
+            "dimension.<br>"
+            "Example:"
+            "<ul>"
+            "<li>A value of \"256\" results in a square image of size 256 by "
+            "256 pixels.</li>"
+            "<li>A value of \"256,128\" results in a image of 256 by 128 "
+            "pixels, with 256 pixels along the Right Ascension direction.</li>"
+            "</ul>");
+    k = group + "/beam_image/fov_deg";
+    declare(k, "Field-of-view [deg]", oskar_SettingsItem::DOUBLE_CSV_LIST, "2.0");
+    setTooltip(k, "Field-of-view (FOV) in degrees (max 180.0). If a single value "
+            "is specified, the image is assumed to have the same FOV along each "
+            "dimension. <br>"
+            "Example:"
+            "<ul>"
+            "<li>A value of \"2.0\" results in an image with a FOV of 2.0 "
+            "degrees in each dimension.</li>"
+            "<li>A value of \"2.0,1.0\" results in a image with a FOV of "
+            "2.0 degrees in Right Ascension, and 1.0 degrees in "
+            "Declination.</li>"
+            "</ul>");
+
+    k = group + "/healpix";
+    setLabel(k, "HEALPix settings");
+    setDependency(k , group + "/coordinate_type", "HEALPix");
+    k = group + "/healpix/coord_type";
+    options.clear();
+    options << "Equatorial"
+            << "Horizon";
+    declare(k, "Coordinate type", options, 0);
+    k = group + "/healpix/nside";
+    declare(k, "Nside", oskar_SettingsItem::INT_UNSIGNED, "0");
+    setTooltip(k, "HEALPix Nside parameter. The total number of points is "
+            "12 * Nside * Nside");
+
+    k = group + "/horizon_clip";
+    declare(k, "Horizon clip", oskar_SettingsItem::BOOL, "True");
+    setTooltip(k, "Zero the beam pattern below the horizon");
+
+#if 0
     k = group + "/fov_deg";
     declare(k, "Field-of-view (RA,Dec) [deg]",
             oskar_SettingsItem::DOUBLE_CSV_LIST, "2.0");
@@ -1193,17 +1231,8 @@ void oskar_SettingsModelApps::init_settings_beampattern()
             "<li>A value of \"256,128\" results in a image of 256 by 128 pixels, "
             "with 256 pixels along the Right Ascension direction.</li>"
             "</ul>");
-
-#if 0
-    k = group + "/nside";
-    declare(k, "HEALPix nside", oskar_SettingsItem::INT_POSITIVE, 16);
-    // (12 * nside^2)
 #endif
 
-    k = group + "/station_id";
-    declare(k, "Station ID", oskar_SettingsItem::INT_UNSIGNED);
-    setTooltip(k, "The station ID number (zero based) to select from the "
-            "telescope model when generating the beam pattern.");
     k = group + "/root_path";
     declare(k, "Output root path name", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Root path name of the generated data file. "
@@ -1248,7 +1277,6 @@ void oskar_SettingsModelApps::init_settings_beampattern()
             "the Stokes-I response of the beam pattern auto-correlation. ");
 #endif
 }
-
 
 void oskar_SettingsModelApps::init_settings_image()
 {
@@ -1469,5 +1497,3 @@ void oskar_SettingsModelApps::init_settings_ionosphere()
 //        k = "/show_tec_image";
 //    }
 }
-
-

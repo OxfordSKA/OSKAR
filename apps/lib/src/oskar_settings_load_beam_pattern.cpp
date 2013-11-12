@@ -37,6 +37,8 @@
 #include <QtCore/QVariant>
 #include <QtCore/QStringList>
 
+#include <iostream>
+
 extern "C"
 int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
         const char* filename)
@@ -45,32 +47,62 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     QSettings s(QString(filename), QSettings::IniFormat);
     s.beginGroup("beam_pattern");
 
-    // Get image sizes.
-    QStringList dimsList;
-    QVariant dims = s.value("fov_deg", "2.0,2.0");
-    if (dims.type() == QVariant::StringList)
-        dimsList = dims.toStringList();
-    else if (dims.type() == QVariant::String)
-        dimsList = dims.toString().split(",");
-    else return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
-    if (!(dimsList.size() == 1 || dimsList.size() == 2))
-        return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
-    bp->fov_deg[0] = dimsList[0].toDouble();
-    bp->fov_deg[1] = (dimsList.size() == 2) ? dimsList[1].toDouble() : bp->fov_deg[0];
-
-    dims = s.value("size", "256,256");
-    if (dims.type() == QVariant::StringList)
-        dimsList = dims.toStringList();
-    else if (dims.type() == QVariant::String)
-        dimsList = dims.toString().split(",");
-    else return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
-    if (!(dimsList.size() == 1 || dimsList.size() == 2))
-        return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
-    bp->size[0] = dimsList[0].toUInt();
-    bp->size[1] = (dimsList.size() == 2) ? dimsList[1].toUInt() : bp->size[0];
-
     // Get station ID to use.
     bp->station_id  = s.value("station_id").toUInt();
+
+    QString temp = s.value("coordinate_type", "Beam image").toString().toUpper();
+    if (temp.startsWith("BEAM")) {
+        bp->coord_type = OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE;
+    }
+    else if (temp.startsWith("HEALPIX"))
+        bp->coord_type = OSKAR_BEAM_PATTERN_COORDS_HEALPIX;
+    else
+        return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+
+    if (bp->coord_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
+    {
+        s.beginGroup("beam_image");
+        QStringList dimsList;
+        QVariant dims = s.value("size", "256,256");
+        if (dims.type() == QVariant::StringList)
+            dimsList = dims.toStringList();
+        else if (dims.type() == QVariant::String)
+            dimsList = dims.toString().split(",");
+        else return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        if (!(dimsList.size() == 1 || dimsList.size() == 2))
+            return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        bp->size[0] = dimsList[0].toUInt();
+        bp->size[1] = (dimsList.size() == 2) ? dimsList[1].toUInt() : bp->size[0];
+        dims = s.value("fov_deg", "2.0,2.0");
+        if (dims.type() == QVariant::StringList)
+            dimsList = dims.toStringList();
+        else if (dims.type() == QVariant::String)
+            dimsList = dims.toString().split(",");
+        else return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        if (!(dimsList.size() == 1 || dimsList.size() == 2))
+            return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        bp->fov_deg[0] = dimsList[0].toDouble();
+        bp->fov_deg[1] = (dimsList.size() == 2) ?
+                dimsList[1].toDouble() : bp->fov_deg[0];
+        s.endGroup();
+    }
+    else if (bp->coord_type == OSKAR_BEAM_PATTERN_COORDS_HEALPIX)
+    {
+        s.beginGroup("healpix");
+        temp = s.value("coordinate_type", "Galactic").toString().toUpper();
+        if (temp.startsWith("EQUATORIAL"))
+            bp->healpix_coord_type = OSKAR_HEALPIX_EQUATORIAL;
+        else if (temp.startsWith("HORIZON"))
+            bp->healpix_coord_type = OSKAR_HEALPIX_HORIZON;
+        else
+            return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        bp->nside = s.value("nside", 0).toInt();
+        s.endGroup();
+    }
+    else
+        return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+
+    bp->horizon_clip = s.value("horizon_clip").toBool();
 
     // Construct output file-names.
     QString root = s.value("root_path", "").toString();

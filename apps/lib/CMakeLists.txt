@@ -3,6 +3,8 @@
 #
 
 set(apps_SRC
+    src/oskar_beam_pattern_generate_coordinates.c
+    src/oskar_beam_pattern_write.c
     src/oskar_Dir.cpp
     src/oskar_evaluate_station_pierce_points.cpp
     src/oskar_imager.cpp

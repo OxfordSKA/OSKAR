@@ -31,6 +31,7 @@ set(station_SRC
     src/oskar_evaluate_element_weights.c
     src/oskar_evaluate_station_beam_aperture_array.c
     src/oskar_evaluate_station_beam_gaussian.c
+    src/oskar_evaluate_station_beam_pattern.c
     src/oskar_evaluate_station_from_telescope_dipole_azimuth.c
     src/oskar_evaluate_vla_beam_pbcor_cuda.cu
     src/oskar_evaluate_vla_beam_pbcor.c

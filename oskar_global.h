@@ -244,6 +244,17 @@ enum {
     OSKAR_SPHERICAL_TYPE_GALACTIC
 };
 
+/**
+ * @brief
+ * Enumerator to define type of direction cosines.
+ *
+ * Used in beam pattern evaluation.
+ */
+enum {
+    OSKAR_ENU_DIRECTION_COSINES,
+    OSKAR_RELATIVE_DIRECTION_COSINES
+};
+
 
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
 #    define OSKAR_OS_WIN32

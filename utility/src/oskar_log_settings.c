@@ -650,20 +650,47 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
     int depth = 0;
     oskar_log_message(log, depth, "Beam pattern settings");
     depth = 1;
-    oskar_log_value(log, depth, w, "Field-of-view [deg]", "%.3f,%.3f",
-            s->beam_pattern.fov_deg[0], s->beam_pattern.fov_deg[1]);
-    oskar_log_value(log, depth, w, "Dimensions [pixels]", "%i,%i",
-            s->beam_pattern.size[0], s->beam_pattern.size[1]);
     LVI("Station ID", s->beam_pattern.station_id);
-    oskar_log_message(log, depth, "Output OSKAR image files:");
+    switch (s->beam_pattern.coord_type) {
+        case OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE:
+        {
+            LVS("Coordinate type", "Beam image");
+            oskar_log_value(log, ++depth, w, "Dimensions [pixels]", "%i, %i",
+                    s->beam_pattern.size[0], s->beam_pattern.size[1]);
+            oskar_log_value(log, depth, w, "Field-of-view [deg]", "%.3f, %.3f",
+                    s->beam_pattern.fov_deg[0], s->beam_pattern.fov_deg[1]);
+            break;
+        }
+        case OSKAR_BEAM_PATTERN_COORDS_HEALPIX:
+        {
+            LVS("Coordinate type", "HEALPix");
+            ++depth;
+            break;
+        }
+    };
+
+    if (s->beam_pattern.oskar_image_voltage || s->beam_pattern.oskar_image_phase ||
+            s->beam_pattern.oskar_image_complex)
+    {
+        oskar_log_message(log, --depth, "Output OSKAR image files:");
+    }
     ++depth;
-    LVS0("Voltage", s->beam_pattern.oskar_image_voltage);
-    LVS0("Phase", s->beam_pattern.oskar_image_phase);
-    LVS0("Complex", s->beam_pattern.oskar_image_complex);
-    oskar_log_message(log, --depth, "Output FITS image files:");
+    if (s->beam_pattern.oskar_image_voltage)
+        LVS0("Voltage", s->beam_pattern.oskar_image_voltage);
+    if (s->beam_pattern.oskar_image_phase)
+        LVS0("Phase", s->beam_pattern.oskar_image_phase);
+    if (s->beam_pattern.oskar_image_complex)
+        LVS0("Complex", s->beam_pattern.oskar_image_complex);
+
+    if (s->beam_pattern.fits_image_voltage || s->beam_pattern.fits_image_phase)
+    {
+        oskar_log_message(log, --depth, "Output FITS image files:");
+    }
     ++depth;
-    LVS0("Voltage", s->beam_pattern.fits_image_voltage);
-    LVS0("Phase", s->beam_pattern.fits_image_phase);
+    if (s->beam_pattern.fits_image_voltage)
+        LVS0("Voltage", s->beam_pattern.fits_image_voltage);
+    if (s->beam_pattern.fits_image_phase)
+        LVS0("Phase", s->beam_pattern.fits_image_phase);
 }
 
 void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s)

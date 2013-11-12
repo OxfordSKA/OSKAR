@@ -160,8 +160,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
                 time_baseline, 1, &error);
     }
 
-    // Copy the telescope model and create station beam work arrays on
-    // each GPU.
+    // Copy the telescope model and create station beam work arrays on each GPU.
     oskar_Telescope** tel_gpu = (oskar_Telescope**) malloc(
             num_devices * sizeof(oskar_Telescope*));
     oskar_Sky** local_sky = (oskar_Sky**) malloc(

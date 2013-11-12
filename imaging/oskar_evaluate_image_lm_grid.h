@@ -33,11 +33,50 @@
  * @file oskar_evaluate_image_lm_grid.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief
+ * Generate a grid on the tangent plane suitable for use with a FITS image
+ * (single precision).
+ *
+ * @details
+ * This function computes (orthographic) tangent-plane positions on a grid
+ * that can be used to make a FITS image.
+ *
+ * Note that FITS images conventionally have the <b>largest</b> value of
+ * RA (=longitude) and the <b>smallest</b> value of DEC (=latitude) at the
+ * lowest memory address, so therefore the grid l-values must start off
+ * positive and go negative, while the grid m-values start off negative
+ * and go positive.
+ *
+ * The fastest-varying dimension is along l (longitude axis) and the slowest
+ * varying is along m (latitude axis).
+ *
+ * The output arrays \p grid_l and \p grid_m must each be pre-sized large
+ * enough to hold \p num_l * \p num_m points.
+ *
+ * The axes l and m are towards the East and North (in the same direction as
+ * baseline dimensions u and v), respectively: see "Interferometry and
+ * Synthesis in Radio Astronomy" figure 4.1 (1986 edition) or
+ * figure 3.2 (2001 edition); "l and m are the direction cosines measured with
+ * respect to the axes u and v." (page 71, 2001 edition).
+ *
+ * @param[out] l       The output list of l-direction cosines.
+ * @param[out] m       The output list of m-direction cosines.
+ * @param[in]  nl      Number of required grid points in the longitude dimension.
+ * @param[in]  nm      Number of required grid points in the latitude dimension.
+ * @param[in]  fov_lon The field of view in longitude (image width) in radians.
+ * @param[in]  fov_lat The field of view in latitude (image height) in radians.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_image_lm_grid(oskar_Mem* l, oskar_Mem* m, int nl, int nm,
+        double fov_lon, double fov_lat, int* status);
 
 /**
  * @brief

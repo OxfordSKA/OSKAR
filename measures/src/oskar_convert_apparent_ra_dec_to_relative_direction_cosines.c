@@ -103,6 +103,62 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(int np,
     }
 }
 
+/* Single precision. */
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_f(int np,
+        const float* ra, const float* dec, float ra0, float dec0,
+        float* l, float* m)
+{
+    int i;
+    float sinLat0, cosLat0;
+    sinLat0 = sinf(dec0);
+    cosLat0 = cosf(dec0);
+
+    #pragma omp parallel for private(i)
+    for (i = 0; i < np; ++i)
+    {
+        float cosLat, sinLat, sinLon, cosLon, relLon, pLat, l_, m_;
+        pLat = dec[i];
+        relLon = ra[i];
+        relLon -= ra0;
+        sinLon = sinf(relLon);
+        cosLon = cosf(relLon);
+        sinLat = sinf(pLat);
+        cosLat = cosf(pLat);
+        l_ = cosLat * sinLon;
+        m_ = cosLat0 * sinLat - sinLat0 * cosLat * cosLon;
+        l[i] = l_;
+        m[i] = m_;
+    }
+}
+
+/* Double precision. */
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_d(int np,
+        const double* ra, const double* dec, double ra0, double dec0,
+        double* l, double* m)
+{
+    int i;
+    double sinLat0, cosLat0;
+    sinLat0 = sin(dec0);
+    cosLat0 = cos(dec0);
+
+    #pragma omp parallel for private(i)
+    for (i = 0; i < np; ++i)
+    {
+        double cosLat, sinLat, sinLon, cosLon, relLon, pLat, l_, m_;
+        pLat = dec[i];
+        relLon = ra[i];
+        relLon -= ra0;
+        sinLon = sin(relLon);
+        cosLon = cos(relLon);
+        sinLat = sin(pLat);
+        cosLat = cos(pLat);
+        l_ = cosLat * sinLon;
+        m_ = cosLat0 * sinLat - sinLat0 * cosLat * cosLon;
+        l[i] = l_;
+        m[i] = m_;
+    }
+}
+
 /* Wrapper. */
 void oskar_convert_apparent_ra_dec_to_relative_direction_cosines(int np,
         const oskar_Mem* ra, const oskar_Mem* dec, double ra0_rad,
@@ -208,7 +264,6 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines(int np,
         *status = OSKAR_ERR_BAD_LOCATION;
     }
 }
-
 
 #ifdef __cplusplus
 }
