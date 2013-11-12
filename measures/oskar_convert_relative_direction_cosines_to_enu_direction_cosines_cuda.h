@@ -77,7 +77,7 @@ extern "C" {
  *
  * Note that the relative direction cosines should be supplied in the
  * conventional way for radio astronomy, where
- * \f$ n = \sqrt{1 - l^2 + m^2} - 1 \f$.
+ * \f$ n = \sqrt{1 - l^2 - m^2} - 1 \f$.
  *
  * @param[out] x          ENU direction cosines (East).
  * @param[out] y          ENU direction cosines (North).
@@ -135,7 +135,7 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_f(
  *
  * Note that the relative direction cosines should be supplied in the
  * conventional way for radio astronomy, where
- * \f$ n = \sqrt{1 - l^2 + m^2} - 1 \f$.
+ * \f$ n = \sqrt{1 - l^2 - m^2} - 1 \f$.
  *
  * @param[out] x          ENU direction cosines (East).
  * @param[out] y          ENU direction cosines (North).
