@@ -45,6 +45,39 @@ extern "C" {
  * (single precision, GPU version).
  *
  * @details
+ * This function transforms the given \f$(l, m, n)\f$ directions in the
+ * equatorial frame to \f$(x, y, z)\f$ directions in the horizontal frame.
+ *
+ * It is equivalent to the product of matrix transformations as follows:
+ *
+   \f[
+    \begin{bmatrix}
+    x \\
+    y \\
+    z \\
+    1
+    \end{bmatrix}
+
+        = R_x(\phi) \cdot R_y(-H_0) \cdot R_x(-\delta_0) \cdot
+          T\left(\left[ 0, 0, 1 \right]\right) \cdot
+
+    \begin{bmatrix}
+    l \\
+    m \\
+    n \\
+    1
+    \end{bmatrix}
+   \f]
+ *
+ * Here, \f$ T \f$ is a translation matrix, and \f$ R_x \f$ and \f$ R_y \f$
+ * correspond to rotations around the \f$x\f$- and \f$y\f$-axes, respectively.
+ * The angles \f$ \phi \f$, \f$ H_0 \f$ and \f$ \delta_0 \f$ correspond to
+ * the observer's geodetic latitude, the hour angle and the declination of
+ * the phase centre.
+ *
+ * Note that the relative direction cosines should be supplied in the
+ * conventional way for radio astronomy, where
+ * \f$ n = \sqrt{l^2 + m^2} - 1 \f$.
  *
  * @param[out] x          ENU direction cosines (East).
  * @param[out] y          ENU direction cosines (North).
@@ -70,6 +103,39 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_f(
  * (double precision, GPU version).
  *
  * @details
+ * This function transforms the given \f$(l, m, n)\f$ directions in the
+ * equatorial frame to \f$(x, y, z)\f$ directions in the horizontal frame.
+ *
+ * It is equivalent to the product of matrix transformations as follows:
+ *
+   \f[
+    \begin{bmatrix}
+    x \\
+    y \\
+    z \\
+    1
+    \end{bmatrix}
+
+        = R_x(\phi) \cdot R_y(-H_0) \cdot R_x(-\delta_0) \cdot
+          T\left(\left[ 0, 0, 1 \right]\right) \cdot
+
+    \begin{bmatrix}
+    l \\
+    m \\
+    n \\
+    1
+    \end{bmatrix}
+   \f]
+ *
+ * Here, \f$ T \f$ is a translation matrix, and \f$ R_x \f$ and \f$ R_y \f$
+ * correspond to rotations around the \f$x\f$- and \f$y\f$-axes, respectively.
+ * The angles \f$ \phi \f$, \f$ H_0 \f$ and \f$ \delta_0 \f$ correspond to
+ * the observer's geodetic latitude, the hour angle and the declination of
+ * the phase centre.
+ *
+ * Note that the relative direction cosines should be supplied in the
+ * conventional way for radio astronomy, where
+ * \f$ n = \sqrt{l^2 + m^2} - 1 \f$.
  *
  * @param[out] x          ENU direction cosines (East).
  * @param[out] y          ENU direction cosines (North).
