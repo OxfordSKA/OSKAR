@@ -37,73 +37,72 @@ extern "C" {
 /* Single precision. */
 void oskar_evaluate_vla_beam_pbcor_cuda_f(float* beam, int num_sources,
         const float* l, const float* m, const float freq_ghz, const float p1,
-        const float p2, const float p3, const float cutoff_radius_arcmin)
+        const float p2, const float p3)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
     oskar_evaluate_vla_beam_pbcor_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (beam, num_sources,
-            l, m, freq_ghz, p1, p2, p3, cutoff_radius_arcmin);
+            l, m, freq_ghz, p1, p2, p3);
 }
 
 void oskar_evaluate_vla_beam_pbcor_complex_cuda_f(float2* beam, int num_sources,
         const float* l, const float* m, const float freq_ghz, const float p1,
-        const float p2, const float p3, const float cutoff_radius_arcmin)
+        const float p2, const float p3)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
     oskar_evaluate_vla_beam_pbcor_complex_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (beam, num_sources,
-            l, m, freq_ghz, p1, p2, p3, cutoff_radius_arcmin);
+            l, m, freq_ghz, p1, p2, p3);
 }
 
 void oskar_evaluate_vla_beam_pbcor_matrix_cuda_f(float4c* beam, int num_sources,
         const float* l, const float* m, const float freq_ghz, const float p1,
-        const float p2, const float p3, const float cutoff_radius_arcmin)
+        const float p2, const float p3)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
     oskar_evaluate_vla_beam_pbcor_matrix_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (beam, num_sources,
-            l, m, freq_ghz, p1, p2, p3, cutoff_radius_arcmin);
+            l, m, freq_ghz, p1, p2, p3);
 }
 
 
 /* Double precision. */
 void oskar_evaluate_vla_beam_pbcor_cuda_d(double* beam, int num_sources,
         const double* l, const double* m, const double freq_ghz,
-        const double p1, const double p2, const double p3,
-        const double cutoff_radius_arcmin)
+        const double p1, const double p2, const double p3)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
     oskar_evaluate_vla_beam_pbcor_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (beam, num_sources,
-            l, m, freq_ghz, p1, p2, p3, cutoff_radius_arcmin);
+            l, m, freq_ghz, p1, p2, p3);
 }
 
 void oskar_evaluate_vla_beam_pbcor_complex_cuda_d(double2* beam,
         int num_sources, const double* l, const double* m,
         const double freq_ghz, const double p1, const double p2,
-        const double p3, const double cutoff_radius_arcmin)
+        const double p3)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
     oskar_evaluate_vla_beam_pbcor_complex_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (beam, num_sources,
-            l, m, freq_ghz, p1, p2, p3, cutoff_radius_arcmin);
+            l, m, freq_ghz, p1, p2, p3);
 }
 
 void oskar_evaluate_vla_beam_pbcor_matrix_cuda_d(double4c* beam,
         int num_sources, const double* l, const double* m,
         const double freq_ghz, const double p1, const double p2,
-        const double p3, const double cutoff_radius_arcmin)
+        const double p3)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_sources + num_threads - 1) / num_threads;
     oskar_evaluate_vla_beam_pbcor_matrix_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (beam, num_sources,
-            l, m, freq_ghz, p1, p2, p3, cutoff_radius_arcmin);
+            l, m, freq_ghz, p1, p2, p3);
 }
 
 #ifdef __cplusplus
@@ -117,10 +116,11 @@ void oskar_evaluate_vla_beam_pbcor_matrix_cuda_d(double4c* beam,
 #define RAD2ARCMINf 3437.74677078493951f
 
 OSKAR_INLINE float vla_pbcor_f(const float l, const float m,
-        const float cutoff_arcmin, const float freq_ghz, const float p1,
-        const float p2, const float p3)
+        const float freq_ghz, const float p1, const float p2,
+        const float p3)
 {
-    float r, t, X;
+    float r, t, X, cutoff_arcmin;
+    cutoff_arcmin = 44.376293f / freq_ghz;
     r = asinf(sqrtf(l * l + m * m)) * RAD2ARCMINf;
     if (r < cutoff_arcmin)
     {
@@ -132,10 +132,11 @@ OSKAR_INLINE float vla_pbcor_f(const float l, const float m,
 }
 
 OSKAR_INLINE double vla_pbcor_d(const double l, const double m,
-        const double cutoff_arcmin, const double freq_ghz, const double p1,
-        const double p2, const double p3)
+        const double freq_ghz, const double p1, const double p2,
+        const double p3)
 {
-    double r, t, X;
+    double r, t, X, cutoff_arcmin;
+    cutoff_arcmin = 44.376293 / freq_ghz;
     r = asin(sqrt(l * l + m * m)) * RAD2ARCMIN;
     if (r < cutoff_arcmin)
     {
@@ -151,27 +152,24 @@ OSKAR_INLINE double vla_pbcor_d(const double l, const double m,
 __global__
 void oskar_evaluate_vla_beam_pbcor_cudak_f(float* beam, int num_sources,
         const float* l, const float* m, const float freq_ghz, const float p1,
-        const float p2, const float p3, const float cutoff_radius_arcmin)
+        const float p2, const float p3)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    beam[i] = vla_pbcor_f(l[i], m[i], cutoff_radius_arcmin,
-            freq_ghz, p1, p2, p3);
+    beam[i] = vla_pbcor_f(l[i], m[i], freq_ghz, p1, p2, p3);
 }
 
 
 __global__
 void oskar_evaluate_vla_beam_pbcor_complex_cudak_f(float2* beam,
         int num_sources, const float* l, const float* m, const float freq_ghz,
-        const float p1, const float p2, const float p3,
-        const float cutoff_radius_arcmin)
+        const float p1, const float p2, const float p3)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    beam[i].x = vla_pbcor_f(l[i], m[i], cutoff_radius_arcmin,
-            freq_ghz, p1, p2, p3);
+    beam[i].x = vla_pbcor_f(l[i], m[i], freq_ghz, p1, p2, p3);
     beam[i].y = 0.0f;
 }
 
@@ -179,14 +177,13 @@ void oskar_evaluate_vla_beam_pbcor_complex_cudak_f(float2* beam,
 __global__
 void oskar_evaluate_vla_beam_pbcor_matrix_cudak_f(float4c* beam,
         int num_sources, const float* l, const float* m, const float freq_ghz,
-        const float p1, const float p2, const float p3,
-        const float cutoff_radius_arcmin)
+        const float p1, const float p2, const float p3)
 {
     float t;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    t = vla_pbcor_f(l[i], m[i], cutoff_radius_arcmin, freq_ghz, p1, p2, p3);
+    t = vla_pbcor_f(l[i], m[i], freq_ghz, p1, p2, p3);
     beam[i].a.x = t;
     beam[i].a.y = 0.0f;
     beam[i].b.x = 0.0f;
@@ -202,14 +199,12 @@ void oskar_evaluate_vla_beam_pbcor_matrix_cudak_f(float4c* beam,
 __global__
 void oskar_evaluate_vla_beam_pbcor_cudak_d(double* beam, int num_sources,
         const double* l, const double* m, const double freq_ghz,
-        const double p1, const double p2, const double p3,
-        const double cutoff_radius_arcmin)
+        const double p1, const double p2, const double p3)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    beam[i] = vla_pbcor_d(l[i], m[i], cutoff_radius_arcmin,
-            freq_ghz, p1, p2, p3);
+    beam[i] = vla_pbcor_d(l[i], m[i], freq_ghz, p1, p2, p3);
 }
 
 
@@ -217,13 +212,12 @@ __global__
 void oskar_evaluate_vla_beam_pbcor_complex_cudak_d(double2* beam,
         int num_sources, const double* l, const double* m,
         const double freq_ghz, const double p1, const double p2,
-        const double p3, const double cutoff_radius_arcmin)
+        const double p3)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    beam[i].x = vla_pbcor_d(l[i], m[i], cutoff_radius_arcmin,
-            freq_ghz, p1, p2, p3);
+    beam[i].x = vla_pbcor_d(l[i], m[i], freq_ghz, p1, p2, p3);
     beam[i].y = 0.0;
 }
 
@@ -232,13 +226,13 @@ __global__
 void oskar_evaluate_vla_beam_pbcor_matrix_cudak_d(double4c* beam,
         int num_sources, const double* l, const double* m,
         const double freq_ghz, const double p1, const double p2,
-        const double p3, const double cutoff_radius_arcmin)
+        const double p3)
 {
     double t;
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    t = vla_pbcor_d(l[i], m[i], cutoff_radius_arcmin, freq_ghz, p1, p2, p3);
+    t = vla_pbcor_d(l[i], m[i], freq_ghz, p1, p2, p3);
     beam[i].a.x = t;
     beam[i].a.y = 0.0;
     beam[i].b.x = 0.0;
