@@ -59,6 +59,12 @@
     * Updated options of oskar_image_summary to give the option to display the
       settings used to create the image.
 
+    * Updated settings for beam pattern generation in order to support the 
+      future addition of new beam pattern types.
+
+    * Added station type for analytical JVLA dishes, based on the AIPS task
+      PBCOR (http://www.aips.nrao.edu/cgi-bin/ZXHLP2.PL?PBCOR)
+
 2013-03-11  OSKAR-2.2.1
 
     * Fixed a problem that caused compilation to fail on CUDA 1.x architectures.

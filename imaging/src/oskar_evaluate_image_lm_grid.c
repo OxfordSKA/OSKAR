@@ -83,20 +83,9 @@ void oskar_evaluate_image_lm_grid(oskar_Mem* l, oskar_Mem* m, int nl, int nm,
     }
     else if (loc == OSKAR_LOCATION_GPU)
     {
-        /* TODO CUDA VERSION */
+        /* There is currently no need for a GPU version of this function */
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
-        if (type == OSKAR_DOUBLE)
-        {
-        }
-        else if (type == OSKAR_SINGLE)
-        {
-        }
-        else
-        {
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            return;
-        }
     }
     else
     {
