@@ -46,19 +46,24 @@ extern "C" {
 
 /**
  * @brief
- * Generates coordinates for use in evaluating beam patterns.
+ * Generate coordinates for use in evaluating beam patterns.
  *
  * @details
- * Coordinates are generated according to the specification in the
- * supplied settings structure and written into the appropriate field of the
- * supplied coordinate work structure.
+ * Coordinates are generated according to the settings provided in the
+ * oskar_SettingsBeamPattern structure and output as either horizontal (ENU)
+ * direction cosines or phase centre relative direction cosines according to
+ * the value of @p coord_type.
  *
- * Note work buffer is provided to this function as initialised but unallocated.
- * It is allocated on first use.
- *
- * TODO 1) try to avoid passing station, 2) sort out settings passed to this function.
- * TODO work out what to do with the work structure.
- *
+ * @param[out]    x           Array of x direction cosines.
+ * @param[out]    y           Array of y direction cosines.
+ * @param[out]    z           Array of z direction cosines.
+ * @param[out]    coord_type  Coordinate type of the returned direction cosines.
+ *                            Possible values are:
+ *                            OSKAR_RELATIVE_DIRECTION_COSINES or
+ *                            OSKAR_ENU_DIRECTION_COSINES
+ * @param[in]     settings    Settings structure describing the specification
+ *                            of coordinates to be generated.
+ * @param[in/out] status      Error status code.
  */
 OSKAR_EXPORT
 void oskar_beam_pattern_generate_coordinates(oskar_Mem* x, oskar_Mem* y,
