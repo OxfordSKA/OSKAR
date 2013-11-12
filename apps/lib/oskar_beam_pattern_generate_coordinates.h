@@ -36,7 +36,7 @@
 #include <oskar_global.h>
 #include <oskar_mem.h>
 #include <oskar_Settings.h>
-#include <oskar_Station.h>
+#include <oskar_station.h>
 #include <oskar_station_work.h>
 #include <oskar_SettingsBeamPattern.h>
 
