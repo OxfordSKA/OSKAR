@@ -28,385 +28,287 @@
 
 #include <cuda_runtime_api.h>
 
-#include "apps/lib/oskar_settings_load.h"
-#include "apps/lib/oskar_set_up_telescope.h"
-#include "apps/lib/oskar_sim_beam_pattern.h"
+#include <apps/lib/oskar_sim_beam_pattern.h>
+#include <apps/lib/oskar_settings_load.h>
+#include <apps/lib/oskar_set_up_telescope.h>
 
-#include <fits/oskar_fits_image_write.h>
+#include <apps/lib/oskar_beam_pattern_generate_coordinates.h>
+#include <oskar_evaluate_station_beam_pattern.h>
+#include <apps/lib/oskar_beam_pattern_write.h>
+
 #include <oskar_telescope.h>
 #include <oskar_image_resize.h>
-#include <oskar_image_write.h>
 #include <oskar_mjd_to_gast_fast.h>
-#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
-#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
-#include <oskar_evaluate_image_lon_lat_grid.h>
-#include <oskar_evaluate_station_beam_aperture_array.h>
-#include <oskar_evaluate_station_beam_gaussian.h>
 #include <oskar_station_work.h>
 #include <oskar_cuda_mem_log.h>
 #include <oskar_random_state.h>
 #include <oskar_log.h>
+
 #include <oskar_settings_free.h>
 
-#include <cmath>
 #include <QtCore/QTime>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+#include <cmath>
+#include <cstdio>      // for remove()
 
-static void oskar_set_up_beam_pattern(oskar_Image* image,
+// ============================================================================
+static void load_settings_(oskar_Settings* settings, const char* filename,
+        oskar_Log* log, int* status);
+static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
+        oskar_Settings* settings, int type, oskar_Telescope* tel,
+        oskar_Log* log, int* status);
+static void add_beam_pattern_to_complex_cube_(oskar_Image* beam_pattern_cube,
+        oskar_Mem* beam_temp, const oskar_Mem* beam_pattern, int num_times,
+        int num_pols, int num_pixels, int t, int c, int* status);
+static void init_beam_pattern_cube_(oskar_Image* image,
         const oskar_Settings* settings, int num_pols, int* status);
-
-static void save_total_intensity(const oskar_Image& complex_cube,
-        const oskar_Settings& settings, int type, oskar_Log* log, int* status);
+// ============================================================================
 
 extern "C"
-int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
+void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log, int* status)
 {
-    int err = 0;
-    const char* filename;
-    QTime timer;
-
-    // Load the settings file.
+    // Load settings and telescope model.
     oskar_Settings settings;
-    oskar_log_section(log, "Loading settings file '%s'", settings_file);
-    err = oskar_settings_load(&settings, log, settings_file);
-    if (err) return err;
+    load_settings_(&settings, settings_file, log, status);
+    oskar_Telescope* tel = oskar_set_up_telescope(log, &settings, status);
+
+    // Compute the beam pattern cube and write to file.
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    oskar_Image beam_pattern(type | OSKAR_COMPLEX, OSKAR_LOCATION_CPU);
+    QTime timer;
+    timer.start();
+    simulate_beam_pattern_cube_(&beam_pattern, &settings, type, tel, log, status);
+    double elapsed = timer.elapsed()/1.0e3;
+    oskar_log_section(log, "Simulation completed in %.3f sec.", elapsed);
+    oskar_beam_pattern_write(&beam_pattern, &settings, type, log, status);
 
-    // Log the relevant settings.
-    oskar_log_set_keep_file(log, settings.sim.keep_log_file);
-    oskar_log_settings_simulator(log, &settings);
-    oskar_log_settings_observation(log, &settings);
-    oskar_log_settings_telescope(log, &settings);
-    oskar_log_settings_beam_pattern(log, &settings);
+    // Free memory.
+    oskar_telescope_free(tel, status);
 
-    // Check that a data file has been specified.
-    if (!(settings.beam_pattern.oskar_image_voltage ||
-            settings.beam_pattern.oskar_image_phase ||
-            settings.beam_pattern.oskar_image_complex ||
-            settings.beam_pattern.oskar_image_total_intensity ||
-            settings.beam_pattern.fits_image_voltage ||
-            settings.beam_pattern.fits_image_phase ||
-            settings.beam_pattern.fits_image_total_intensity))
-    {
-        oskar_log_error(log, "No output file(s) specified.");
-        return OSKAR_ERR_SETTINGS;
+    cudaDeviceReset();
+}
+
+static void load_settings_(oskar_Settings* settings, const char* filename,
+        oskar_Log* log, int* status)
+{
+    if (!status || *status != OSKAR_SUCCESS)
+        return;
+    if (!settings || !filename) {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
     }
 
-    // Get time data.
-    int num_times            = settings.obs.num_time_steps;
-    double obs_start_mjd_utc = settings.obs.start_mjd_utc;
-    double dt_dump           = settings.obs.dt_dump_days;
+    oskar_log_section(log, "Loading settings file '%s'", filename);
+    *status = oskar_settings_load(settings, log, filename);
 
-    // Get the telescope model.
-    oskar_Telescope* tel = oskar_set_up_telescope(log, &settings, &err);
-    if (err) return err;
+    // Log the relevant settings.
+    oskar_log_set_keep_file(log, settings->sim.keep_log_file);
+    oskar_log_settings_simulator(log, settings);
+    oskar_log_settings_observation(log, settings);
+    oskar_log_settings_telescope(log, settings);
+    oskar_log_settings_beam_pattern(log, settings);
 
-    // Get the beam pattern settings.
-    int station_id = settings.beam_pattern.station_id;
-    int* image_size = settings.beam_pattern.size;
-    int num_channels = settings.obs.num_channels;
-    int num_pols = settings.telescope.aperture_array.element_pattern.functional_type ==
+    // Check that an output data file has been specified.
+    if (!(settings->beam_pattern.oskar_image_voltage ||
+            settings->beam_pattern.oskar_image_phase ||
+            settings->beam_pattern.oskar_image_complex ||
+            settings->beam_pattern.oskar_image_total_intensity ||
+            settings->beam_pattern.fits_image_voltage ||
+            settings->beam_pattern.fits_image_phase ||
+            settings->beam_pattern.fits_image_total_intensity))
+    {
+        oskar_log_error(log, "No output file(s) specified.");
+        return;
+    }
+}
+
+static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
+        oskar_Settings* settings, int type, oskar_Telescope* tel,
+        oskar_Log* log, int* status)
+{
+    // Make local copies of settings.
+    int num_times = settings->obs.num_time_steps;
+    double obs_start_mjd_utc = settings->obs.start_mjd_utc;
+    double dt_dump = settings->obs.dt_dump_days;
+    int station_id = settings->beam_pattern.station_id;
+    int* image_size = settings->beam_pattern.size;
+    int num_channels = settings->obs.num_channels;
+    int num_pols = settings->telescope.aperture_array.element_pattern.functional_type ==
             OSKAR_ELEMENT_TYPE_ISOTROPIC ? 1 : 4;
     int num_pixels = image_size[0] * image_size[1];
-    int num_pixels_total = num_pixels * num_times * num_channels * num_pols;
     int beam_pattern_data_type = type | OSKAR_COMPLEX;
-    if (num_pols == 4)
-        beam_pattern_data_type |= OSKAR_MATRIX;
+    if (num_pols == 4) beam_pattern_data_type |= OSKAR_MATRIX;
 
-    // Check station ID is within range.
-    if (station_id < 0 || station_id >= oskar_telescope_num_stations(tel))
-        return OSKAR_ERR_OUT_OF_RANGE;
+    // Check the station ID is valid.
+    if (station_id < 0 || station_id >= oskar_telescope_num_stations(tel)) {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
 
-    // Set up beam pattern hyper-cubes.
-    oskar_Image complex_cube(type | OSKAR_COMPLEX, OSKAR_LOCATION_CPU);
-    oskar_Image image_cube(type, OSKAR_LOCATION_CPU);
-    oskar_set_up_beam_pattern(&complex_cube, &settings, num_pols, &err);
-    oskar_set_up_beam_pattern(&image_cube, &settings, num_pols, &err);
-    if (err) return err;
+    // Initialise the beam pattern (complex) image cube.
+    init_beam_pattern_cube_(beam_pattern_cube, settings, num_pols, status);
 
-    // Temporary CPU memory, used to re-order polarisation data.
-    oskar_Mem beam_cpu(beam_pattern_data_type, OSKAR_LOCATION_CPU, num_pixels);
+    // Initialise temporary array, used to re-order polarisation.
+    oskar_Mem beam_tmp;
+    oskar_mem_init(&beam_tmp, beam_pattern_data_type, OSKAR_LOCATION_CPU,
+            num_pixels, OSKAR_TRUE, status);
+
+    // Generate coordinates at which beam the beam pattern is evaluated.
+    // This is currently done on the CPU as it is only done once.
+    int coord_type = 0;
+    oskar_Mem* x = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
+    oskar_Mem* y = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
+    oskar_Mem* z = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
+    oskar_beam_pattern_generate_coordinates(x, y, z, &coord_type,
+            &settings->beam_pattern, status);
 
     // All GPU memory used within these braces.
     {
-        oskar_Mem RA, Dec, beam_pattern, l, m, n;
-        oskar_StationWork* work;
-        oskar_Mem *hor_x, *hor_y, *hor_z;
-        const oskar_Station* station;
-        double ra0, dec0;
+        const int GPU = OSKAR_LOCATION_GPU;
 
-        // Generate equatorial coordinates for beam pattern pixels.
-        ra0 = oskar_telescope_ra0_rad(tel);
-        dec0 = oskar_telescope_dec0_rad(tel);
-        oskar_mem_init(&RA, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
-        oskar_mem_init(&Dec, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
-        oskar_evaluate_image_lon_lat_grid(&RA, &Dec, image_size[0],
-                image_size[1], settings.beam_pattern.fov_deg[0] * (M_PI/180.0),
-                settings.beam_pattern.fov_deg[1] * (M_PI/180.0), ra0, dec0,
-                &err);
+        // Set up GPU memory for beam pattern, work array, and coordiantes.
+        oskar_StationWork* d_work = oskar_station_work_create(type, GPU, status);
+        oskar_Mem d_beam_pattern;
+        oskar_mem_init(&d_beam_pattern, beam_pattern_data_type, GPU, num_pixels,
+                OSKAR_TRUE, status);
+        const oskar_Station* station = oskar_telescope_station_const(tel, station_id);
+        oskar_Station* d_station = oskar_station_create_copy(station, GPU, status);
+        oskar_Mem* d_x = oskar_mem_create_copy(x, GPU, status);
+        oskar_Mem* d_y = oskar_mem_create_copy(y, GPU, status);
+        oskar_Mem* d_z = oskar_mem_create_copy(z, GPU, status);
 
-        // Initialise work array and GPU memory for a beam pattern.
-        work = oskar_station_work_create(type, OSKAR_LOCATION_GPU, &err);
-        hor_x = oskar_station_work_enu_direction_x(work);
-        hor_y = oskar_station_work_enu_direction_y(work);
-        hor_z = oskar_station_work_enu_direction_z(work);
-        oskar_mem_init(&beam_pattern, beam_pattern_data_type,
-                OSKAR_LOCATION_GPU, num_pixels, 1, &err);
-        oskar_mem_init(&l, type, OSKAR_LOCATION_GPU, 0, 1, &err);
-        oskar_mem_init(&m, type, OSKAR_LOCATION_GPU, 0, 1, &err);
-        oskar_mem_init(&n, type, OSKAR_LOCATION_GPU, 0, 1, &err);
-
-        // Evaluate source relative l,m,n values if not an aperture array.
-        station = oskar_telescope_station_const(tel, station_id);
-        if (oskar_station_station_type(station) != OSKAR_STATION_TYPE_AA)
-        {
-            oskar_convert_apparent_ra_dec_to_relative_direction_cosines(num_pixels,
-                    &RA, &Dec, ra0, dec0, &l, &m, &n, &err);
-        }
-
-        // Loop over channels.
+        // Begin beam pattern evaluation...
         oskar_log_section(log, "Starting simulation...");
-        timer.start();
         for (int c = 0; c < num_channels; ++c)
         {
-            oskar_RandomState* random_state;
-            oskar_Telescope* tel_gpu;
-            double frequency, lon, lat;
+            double frequency = settings->obs.start_frequency_hz +
+                    c * settings->obs.frequency_inc_hz;
 
-            // Initialise local data structures.
-            random_state = oskar_random_state_create(
-                    oskar_telescope_max_station_size(tel),
-                    oskar_telescope_random_seed(tel), 0, 0, &err);
-
-            // Get the channel frequency.
-            frequency = settings.obs.start_frequency_hz +
-                    c * settings.obs.frequency_inc_hz;
             oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
                     c + 1, num_channels, frequency / 1e6);
 
-            // Copy the telescope model.
-            tel_gpu = oskar_telescope_create_copy(tel,
-                    OSKAR_LOCATION_GPU, &err);
-            station = oskar_telescope_station_const(tel_gpu, station_id);
-            lon = oskar_station_longitude_rad(station);
-            lat = oskar_station_latitude_rad(station);
+            oskar_RandomState* rand_state = oskar_random_state_create(
+                    oskar_telescope_max_station_size(tel),
+                    oskar_telescope_random_seed(tel), 0, 0, status);
 
-            // Loop over times.
             for (int t = 0; t < num_times; ++t)
             {
-                double t_dump, gast, last;
+                if (*status != OSKAR_SUCCESS) continue;
 
-                // Check error code.
-                if (err) continue;
+                /* Start time for the data dump, in MJD(UTC). */
+                oskar_log_message(log, 1, "Snapshot %4d/%d", t+1, num_times);
 
-                // Start time for the data dump, in MJD(UTC).
-                oskar_log_message(log, 1, "Snapshot %4d/%d",
-                        t+1, num_times);
-                t_dump = obs_start_mjd_utc + t * dt_dump;
-                gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
-                last = gast + lon;
+                double t_dump = obs_start_mjd_utc + t * dt_dump;
+                double GAST = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
-                // Evaluate horizontal x,y,z directions for source positions.
-                oskar_convert_apparent_ra_dec_to_enu_direction_cosines(num_pixels,
-                        hor_x, hor_y, hor_z, &RA, &Dec, last, lat, &err);
+                oskar_evaluate_station_beam_pattern(&d_beam_pattern, num_pixels,
+                        d_x, d_y, d_z, coord_type, d_station, d_work, rand_state,
+                        frequency, GAST, status);
 
-                // Evaluate the station beam.
-                if (oskar_station_station_type(station) ==
-                        OSKAR_STATION_TYPE_AA)
-                {
-                    oskar_evaluate_station_beam_aperture_array(&beam_pattern,
-                            station, num_pixels, hor_x, hor_y, hor_z, gast,
-                            frequency, work, random_state, &err);
-                }
-                else if (oskar_station_station_type(station) ==
-                        OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
-                {
-                    oskar_evaluate_station_beam_gaussian(&beam_pattern,
-                            num_pixels, &l, &m, hor_z,
-                            oskar_station_gaussian_beam_fwhm_rad(station), &err);
-                }
-                else
-                {
-                    return OSKAR_ERR_SETTINGS_TELESCOPE;
-                }
+                add_beam_pattern_to_complex_cube_(beam_pattern_cube, &beam_tmp,
+                        &d_beam_pattern, num_times, num_pols, num_pixels, t, c,
+                        status);
 
-                // Save complex beam pattern data in the right order.
-                // Cube has dimension order (from slowest to fastest):
-                // Channel, Time, Polarisation, Declination, Right Ascension.
-                int offset = (t + c * num_times) * num_pols * num_pixels;
-                if (oskar_mem_is_scalar(&beam_pattern))
-                {
-                    oskar_mem_insert(&complex_cube.data, &beam_pattern,
-                            offset, &err);
-                }
-                else
-                {
-                    // Copy beam pattern back to host memory for re-ordering.
-                    oskar_mem_copy(&beam_cpu, &beam_pattern, &err);
-                    if (err) continue;
-
-                    // Re-order the polarisation data.
-                    if (type == OSKAR_SINGLE)
-                    {
-                        float2* bp = (float2*)complex_cube.data.data + offset;
-                        float4c* tc = (float4c*)beam_cpu.data;
-                        for (int i = 0; i < num_pixels; ++i)
-                        {
-                            bp[i]                  = tc[i].a; // theta_X
-                            bp[i +     num_pixels] = tc[i].b; // phi_X
-                            bp[i + 2 * num_pixels] = tc[i].c; // theta_Y
-                            bp[i + 3 * num_pixels] = tc[i].d; // phi_Y
-                        }
-                    }
-                    else if (type == OSKAR_DOUBLE)
-                    {
-                        double2* bp = (double2*)complex_cube.data.data + offset;
-                        double4c* tc = (double4c*)beam_cpu.data;
-                        for (int i = 0; i < num_pixels; ++i)
-                        {
-                            bp[i]                  = tc[i].a; // theta_X
-                            bp[i +     num_pixels] = tc[i].b; // phi_X
-                            bp[i + 2 * num_pixels] = tc[i].c; // theta_Y
-                            bp[i + 3 * num_pixels] = tc[i].d; // phi_Y
-                        }
-                    }
-                }
-            } // Time loop
+            } // End of time loop
 
             // Record GPU memory usage.
             oskar_cuda_mem_log(log, 1, 0);
 
-            // Free memory.
-            oskar_random_state_free(random_state, &err);
-            oskar_telescope_free(tel_gpu, &err);
-        } // Channel loop
-
-        // Free memory.
-        oskar_mem_free(&RA, &err);
-        oskar_mem_free(&Dec, &err);
-        oskar_mem_free(&beam_pattern, &err);
-        oskar_mem_free(&l, &err);
-        oskar_mem_free(&m, &err);
-        oskar_mem_free(&n, &err);
-        oskar_station_work_free(work, &err);
+            oskar_random_state_free(rand_state, status);
+        } // End of channel loop.
+        oskar_station_work_free(d_work, status);
+        oskar_mem_free(&d_beam_pattern, status);
+        oskar_station_free(d_station, status);
+        oskar_mem_free(d_x, status);
+        oskar_mem_free(d_y, status);
+        oskar_mem_free(d_z, status);
     } // GPU memory section
-    oskar_log_section(log, "Simulation completed in %.3f sec.",
-            timer.elapsed() / 1e3);
 
-    oskar_telescope_free(tel, &err);
-
-    // Write out complex data if required.
-    filename = settings.beam_pattern.oskar_image_complex;
-    if (filename && !err)
-    {
-        oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
-        oskar_image_write(&complex_cube, log, filename, 0, &err);
-    }
-
-    // Check error code.
-    if (err) return err;
-
-    // Write out power data if required.
-    if (settings.beam_pattern.oskar_image_voltage ||
-            settings.beam_pattern.fits_image_voltage)
-    {
-        // Convert complex values to power (amplitude of complex number).
-        if (type == OSKAR_SINGLE)
-        {
-            float* image_data = oskar_mem_float(&image_cube.data, &err);
-            float2* complex_data = oskar_mem_float2(&complex_cube.data, &err);
-            for (int i = 0; i < num_pixels_total; ++i)
-            {
-                float x, y;
-                x = complex_data[i].x;
-                y = complex_data[i].y;
-                image_data[i] = sqrt(x*x + y*y);
-            }
-        }
-        else if (type == OSKAR_DOUBLE)
-        {
-            double* image_data = oskar_mem_double(&image_cube.data, &err);
-            double2* complex_data = oskar_mem_double2(&complex_cube.data, &err);
-            for (int i = 0; i < num_pixels_total; ++i)
-            {
-                double x, y;
-                x = complex_data[i].x;
-                y = complex_data[i].y;
-                image_data[i] = sqrt(x*x + y*y);
-            }
-        }
-
-        // Write OSKAR image.
-        filename = settings.beam_pattern.oskar_image_voltage;
-        if (filename && !err)
-        {
-            oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
-            oskar_image_write(&image_cube, log, filename, 0, &err);
-        }
-#ifndef OSKAR_NO_FITS
-        // Write FITS image.
-        filename = settings.beam_pattern.fits_image_voltage;
-        if (filename && !err)
-        {
-            oskar_log_message(log, 0, "Writing FITS image file: '%s'", filename);
-            oskar_fits_image_write(&image_cube, log, filename, &err);
-        }
-#endif
-    }
-
-    // Write out phase data if required.
-    if (settings.beam_pattern.oskar_image_phase ||
-            settings.beam_pattern.fits_image_phase)
-    {
-        // Convert complex values to phase.
-        if (type == OSKAR_SINGLE)
-        {
-            float* image_data = oskar_mem_float(&image_cube.data, &err);
-            float2* complex_data = oskar_mem_float2(&complex_cube.data, &err);
-            for (int i = 0; i < num_pixels_total; ++i)
-            {
-                image_data[i] = atan2(complex_data[i].y, complex_data[i].x);
-            }
-        }
-        else if (type == OSKAR_DOUBLE)
-        {
-            double* image_data = oskar_mem_double(&image_cube.data, &err);
-            double2* complex_data = oskar_mem_double2(&complex_cube.data, &err);
-            for (int i = 0; i < num_pixels_total; ++i)
-            {
-                image_data[i] = atan2(complex_data[i].y, complex_data[i].x);
-            }
-        }
-
-        // Write OSKAR image.
-        filename = settings.beam_pattern.oskar_image_phase;
-        if (filename && !err)
-        {
-            oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
-            oskar_image_write(&image_cube, log, filename, 0, &err);
-        }
-#ifndef OSKAR_NO_FITS
-        // Write FITS image.
-        filename = settings.beam_pattern.fits_image_phase;
-        if (filename && !err)
-        {
-            oskar_log_message(log, 0, "Writing FITS image file: '%s'", filename);
-            oskar_fits_image_write(&image_cube, log, filename, &err);
-        }
-#endif
-    }
-
-    // Save the beam pattern as a total intensity pattern (if requested).
-    save_total_intensity(complex_cube, settings, type, log, &err);
-
-    cudaDeviceReset();
-    return err;
+    oskar_mem_free(&beam_tmp, status);
+    oskar_mem_free(x, status);
+    oskar_mem_free(y, status);
+    oskar_mem_free(z, status);
 }
 
-static void oskar_set_up_beam_pattern(oskar_Image* image,
+/**
+ * @brief
+ * Write the single channel & time beam pattern image contained in
+ * @p beam_pattern to @p beam_pattern_cube.
+ *
+ * @details
+ * The memory @p beam_cpu is a CPU work array used for re-ordering the beam
+ * pattern if needed.
+ *
+ * Data order in the cube is:
+ *
+ * [Channel, Time, Polarisation, Declination (y), Right Ascension (x)]
+ *
+ * Where channel is the slowest varying index.
+ *
+ * @param beam_pattern_cube Beam pattern image cube.
+ * @param beam_temp         Temporary array used for reordering polarisation.
+ * @param beam_pattern      Complex beam pattern for a single time / channel.
+ * @param num_times         Total number of times in the beam pattern cube.
+ * @param num_pols          Total number of polarisations in the beam pattern cube.
+ * @param num_pixels        Number of pixels in one image of the beam pattern cube
+ * @param t                 The time index of the beam pattern to add.
+ * @param c                 The channel index of the beam pattern to add.
+ * @param type              The OSKAR data type of the beam pattern.
+ *
+ * @return An OSKAR error status code.
+ */
+static void add_beam_pattern_to_complex_cube_(oskar_Image* beam_pattern_cube,
+        oskar_Mem* beam_temp, const oskar_Mem* beam_pattern, int num_times,
+        int num_pols, int num_pixels, int t, int c, int* status)
+{
+    if (!status || *status != OSKAR_SUCCESS)
+        return;
+
+    int type = oskar_mem_is_double(beam_pattern) ? OSKAR_DOUBLE : OSKAR_SINGLE;
+
+    // Save complex beam pattern data in the right order.
+    // Cube has dimension order (from slowest to fastest):
+    // Channel, Time, Polarisation, Declination, Right Ascension.
+    int offset = (t + c * num_times) * num_pols * num_pixels;
+    if (oskar_mem_is_scalar(beam_pattern))
+    {
+        oskar_mem_insert(&beam_pattern_cube->data, beam_pattern, offset, status);
+    }
+    else
+    {
+        // Copy beam pattern back to host memory for re-ordering.
+        oskar_mem_copy(beam_temp, beam_pattern, status);
+        if (*status != OSKAR_SUCCESS) return;
+
+        // Re-order the polarisation data.
+        if (type == OSKAR_SINGLE)
+        {
+            float2* bp = (float2*)beam_pattern_cube->data.data + offset;
+            float4c* tc = (float4c*)beam_temp->data;
+            for (int i = 0; i < num_pixels; ++i)
+            {
+                bp[i]                  = tc[i].a; // theta_X
+                bp[i +     num_pixels] = tc[i].b; // phi_X
+                bp[i + 2 * num_pixels] = tc[i].c; // theta_Y
+                bp[i + 3 * num_pixels] = tc[i].d; // phi_Y
+            }
+        }
+        else /* (type == OSKAR_DOUBLE) */
+        {
+            double2* bp = (double2*)beam_pattern_cube->data.data + offset;
+            double4c* tc = (double4c*)beam_temp->data;
+            for (int i = 0; i < num_pixels; ++i)
+            {
+                bp[i]                  = tc[i].a; // theta_X
+                bp[i +     num_pixels] = tc[i].b; // phi_X
+                bp[i + 2 * num_pixels] = tc[i].c; // theta_Y
+                bp[i + 3 * num_pixels] = tc[i].d; // phi_Y
+            }
+        }
+    }
+}
+
+static void init_beam_pattern_cube_(oskar_Image* image,
         const oskar_Settings* settings, int num_pols, int* status)
 {
     int num_channels = settings->obs.num_channels;
@@ -429,94 +331,5 @@ static void oskar_set_up_beam_pattern(oskar_Image* image,
     image->time_inc_sec       = settings->obs.dt_dump_days * 86400.0;
     image->time_start_mjd_utc = settings->obs.start_mjd_utc;
     oskar_mem_copy(&image->settings_path, &settings->settings_path, status);
-}
-
-// complex_cube == voltage image cube
-static void save_total_intensity(const oskar_Image& complex_cube,
-        const oskar_Settings& settings, int type, oskar_Log* log, int* status)
-{
-    const char* filename;
-    if (*status) return;
-
-    // Return if a total intensity beam pattern has not been specified.
-    if (!(settings.beam_pattern.oskar_image_total_intensity ||
-            settings.beam_pattern.fits_image_total_intensity))
-        return;
-
-    // Dimensions of input beam pattern image to be converted to total intensity.
-    int num_channels = complex_cube.num_channels;
-    int num_times = complex_cube.num_times;
-    int num_pols = complex_cube.num_pols;
-    int num_pixels = complex_cube.width * complex_cube.height;
-
-    // Allocate total intensity image cube to write into.
-    oskar_Image image_cube_I(type, OSKAR_LOCATION_CPU);
-    oskar_set_up_beam_pattern(&image_cube_I, &settings, 1, status);
-
-    // For polarised beams Stokes I is 0.5 * (XX + YY)
-    // For scalar beams total intensity is voltage squared.
-    double factor = (num_pols == 4) ? 0.5 : 1.0;
-
-    if (type == OSKAR_SINGLE)
-    {
-        float* image_data = oskar_mem_float(&image_cube_I.data, status);
-        const float2* complex_data =
-                oskar_mem_float2_const(&complex_cube.data, status);
-        for (int c = 0, idx = 0, islice = 0; c < num_channels; ++c)
-        {
-            for (int t = 0; t < num_times; ++t, ++islice)
-            {
-                float* image_plane = &(image_data[islice * num_pixels]);
-                for (int p = 0; p < num_pols; ++p)
-                {
-                    for (int i = 0; i < num_pixels; ++i, ++idx)
-                    {
-                        float xx = complex_data[idx].x * complex_data[idx].x;
-                        float yy = complex_data[idx].y * complex_data[idx].y;
-                        image_plane[i] += factor * (xx + yy);
-                    }
-                }
-            }
-        }
-    }
-    else if (type == OSKAR_DOUBLE)
-    {
-        double* image_data = oskar_mem_double(&image_cube_I.data, status);
-        const double2* complex_data =
-                oskar_mem_double2_const(&complex_cube.data, status);
-        for (int c = 0, idx = 0, islice = 0; c < num_channels; ++c)
-        {
-            for (int t = 0; t < num_times; ++t, ++islice)
-            {
-                double* image_plane = &(image_data[islice * num_pixels]);
-                for (int p = 0; p < num_pols; ++p)
-                {
-                    for (int i = 0; i < num_pixels; ++i, ++idx)
-                    {
-                        double xx = complex_data[idx].x * complex_data[idx].x;
-                        double yy = complex_data[idx].y * complex_data[idx].y;
-                        image_plane[i] += factor * (xx + yy);
-                    }
-                }
-            }
-        }
-    }
-
-    // Write OSKAR image.
-    filename = settings.beam_pattern.oskar_image_total_intensity;
-    if (filename && !*status)
-    {
-        oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
-        oskar_image_write(&image_cube_I, log, filename, 0, status);
-    }
-#ifndef OSKAR_NO_FITS
-    // Write FITS image.
-    filename = settings.beam_pattern.fits_image_total_intensity;
-    if (filename && !*status)
-    {
-        oskar_log_message(log, 0, "Writing FITS image file: '%s'", filename);
-        oskar_fits_image_write(&image_cube_I, log, filename, status);
-    }
-#endif
 }
 

@@ -47,11 +47,13 @@ extern "C" {
  * @details
  * This function acts as though it were a stand-alone executable.
  *
- * @param[in] settings_file Path to a settings file.
- * @param[in,out] log  Pointer to a log structure to use.
+ * @param[in]     settings_file Path to a settings file.
+ * @param[in,out] log           Pointer to a log structure to use.
+ * @param[in,out] status        Error status code.
  */
 OSKAR_APPS_EXPORT
-int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log);
+void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
+        int* status);
 
 #ifdef __cplusplus
 }

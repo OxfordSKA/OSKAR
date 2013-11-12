@@ -63,12 +63,6 @@ struct oskar_StationWork
     oskar_Mem enu_direction_x;         /* Real scalar. ENU direction cosine. */
     oskar_Mem enu_direction_y;         /* Real scalar. ENU direction cosine.*/
     oskar_Mem enu_direction_z;         /* Real scalar. ENU direction cosine. */
-    oskar_Mem relative_direction_l;    /* Real scalar. relative direction cosine. */
-    oskar_Mem relative_direction_m;    /* Real scalar. relative direction cosine.*/
-    oskar_Mem relative_direction_n;    /* Real scalar. relative direction cosine. */
-    oskar_Mem ra;                      /* Real scalar. */
-    oskar_Mem dec;                     /* Real scalar. */
-    oskar_Mem radius;                  /* Real scalar. */
 
     oskar_Mem theta_modified;          /* Real scalar. */
     oskar_Mem phi_modified;            /* Real scalar. */
