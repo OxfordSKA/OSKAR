@@ -72,7 +72,6 @@ oskar_Sky* oskar_sky_create_copy(const oskar_Sky* src, int location,
     oskar_mem_copy(&model->l, &src->l, status);
     oskar_mem_copy(&model->m, &src->m, status);
     oskar_mem_copy(&model->n, &src->n, status);
-    oskar_mem_copy(&model->radius_arcmin, &src->radius_arcmin, status);
     oskar_mem_copy(&model->FWHM_major, &src->FWHM_major, status);
     oskar_mem_copy(&model->FWHM_minor, &src->FWHM_minor, status);
     oskar_mem_copy(&model->position_angle, &src->position_angle, status);

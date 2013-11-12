@@ -53,7 +53,8 @@ extern "C" {
  *
  * @param[out] beam          VLA beam evaluated at source positions.
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
- * @param[in]  radius_arcmin Radius of each source from phase centre, in arcmin.
+ * @param[in]  l             Direction cosine of each source from phase centre.
+ * @param[in]  m             Direction cosine of each source from phase centre.
  * @param[in]  frequency_ghz Current observing frequency in GHz.
  * @param[in]  p1            Value of PBPARM(3) for this frequency.
  * @param[in]  p2            Value of PBPARM(4) for this frequency.
@@ -62,7 +63,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_evaluate_vla_beam_pbcor_f(float* beam, int num_sources,
-        const float* radius_arcmin, const float freq_ghz, const float p1,
+        const float* l, const float* m, const float freq_ghz, const float p1,
         const float p2, const float p3, const float cutoff_radius_arcmin);
 
 /**
@@ -78,7 +79,8 @@ void oskar_evaluate_vla_beam_pbcor_f(float* beam, int num_sources,
  *
  * @param[out] beam          VLA beam evaluated at source positions.
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
- * @param[in]  radius_arcmin Radius of each source from phase centre, in arcmin.
+ * @param[in]  l             Direction cosine of each source from phase centre.
+ * @param[in]  m             Direction cosine of each source from phase centre.
  * @param[in]  frequency_ghz Current observing frequency in GHz.
  * @param[in]  p1            Value of PBPARM(3) for this frequency.
  * @param[in]  p2            Value of PBPARM(4) for this frequency.
@@ -87,7 +89,7 @@ void oskar_evaluate_vla_beam_pbcor_f(float* beam, int num_sources,
  */
 OSKAR_EXPORT
 void oskar_evaluate_vla_beam_pbcor_complex_f(float2* beam, int num_sources,
-        const float* radius_arcmin, const float freq_ghz, const float p1,
+        const float* l, const float* m, const float freq_ghz, const float p1,
         const float p2, const float p3, const float cutoff_radius_arcmin);
 
 /**
@@ -103,7 +105,8 @@ void oskar_evaluate_vla_beam_pbcor_complex_f(float2* beam, int num_sources,
  *
  * @param[out] beam          VLA beam evaluated at source positions.
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
- * @param[in]  radius_arcmin Radius of each source from phase centre, in arcmin.
+ * @param[in]  l             Direction cosine of each source from phase centre.
+ * @param[in]  m             Direction cosine of each source from phase centre.
  * @param[in]  frequency_ghz Current observing frequency in GHz.
  * @param[in]  p1            Value of PBPARM(3) for this frequency.
  * @param[in]  p2            Value of PBPARM(4) for this frequency.
@@ -112,7 +115,7 @@ void oskar_evaluate_vla_beam_pbcor_complex_f(float2* beam, int num_sources,
  */
 OSKAR_EXPORT
 void oskar_evaluate_vla_beam_pbcor_matrix_f(float4c* beam, int num_sources,
-        const float* radius_arcmin, const float freq_ghz, const float p1,
+        const float* l, const float* m, const float freq_ghz, const float p1,
         const float p2, const float p3, const float cutoff_radius_arcmin);
 
 /**
@@ -128,7 +131,8 @@ void oskar_evaluate_vla_beam_pbcor_matrix_f(float4c* beam, int num_sources,
  *
  * @param[out] beam          VLA beam evaluated at source positions.
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
- * @param[in]  radius_arcmin Radius of each source from phase centre, in arcmin.
+ * @param[in]  l             Direction cosine of each source from phase centre.
+ * @param[in]  m             Direction cosine of each source from phase centre.
  * @param[in]  frequency_ghz Current observing frequency in GHz.
  * @param[in]  p1            Value of PBPARM(3) for this frequency.
  * @param[in]  p2            Value of PBPARM(4) for this frequency.
@@ -137,8 +141,9 @@ void oskar_evaluate_vla_beam_pbcor_matrix_f(float4c* beam, int num_sources,
  */
 OSKAR_EXPORT
 void oskar_evaluate_vla_beam_pbcor_d(double* beam, int num_sources,
-        const double* radius_arcmin, const double freq_ghz, const double p1,
-        const double p2, const double p3, const double cutoff_radius_arcmin);
+        const double* l, const double* m, const double freq_ghz,
+        const double p1, const double p2, const double p3,
+        const double cutoff_radius_arcmin);
 
 /**
  * @brief
@@ -153,7 +158,8 @@ void oskar_evaluate_vla_beam_pbcor_d(double* beam, int num_sources,
  *
  * @param[out] beam          VLA beam evaluated at source positions.
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
- * @param[in]  radius_arcmin Radius of each source from phase centre, in arcmin.
+ * @param[in]  l             Direction cosine of each source from phase centre.
+ * @param[in]  m             Direction cosine of each source from phase centre.
  * @param[in]  frequency_ghz Current observing frequency in GHz.
  * @param[in]  p1            Value of PBPARM(3) for this frequency.
  * @param[in]  p2            Value of PBPARM(4) for this frequency.
@@ -162,8 +168,9 @@ void oskar_evaluate_vla_beam_pbcor_d(double* beam, int num_sources,
  */
 OSKAR_EXPORT
 void oskar_evaluate_vla_beam_pbcor_complex_d(double2* beam, int num_sources,
-        const double* radius_arcmin, const double freq_ghz, const double p1,
-        const double p2, const double p3, const double cutoff_radius_arcmin);
+        const double* l, const double* m, const double freq_ghz,
+        const double p1, const double p2, const double p3,
+        const double cutoff_radius_arcmin);
 
 /**
  * @brief
@@ -178,7 +185,8 @@ void oskar_evaluate_vla_beam_pbcor_complex_d(double2* beam, int num_sources,
  *
  * @param[out] beam          VLA beam evaluated at source positions.
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
- * @param[in]  radius_arcmin Radius of each source from phase centre, in arcmin.
+ * @param[in]  l             Direction cosine of each source from phase centre.
+ * @param[in]  m             Direction cosine of each source from phase centre.
  * @param[in]  frequency_ghz Current observing frequency in GHz.
  * @param[in]  p1            Value of PBPARM(3) for this frequency.
  * @param[in]  p2            Value of PBPARM(4) for this frequency.
@@ -187,8 +195,9 @@ void oskar_evaluate_vla_beam_pbcor_complex_d(double2* beam, int num_sources,
  */
 OSKAR_EXPORT
 void oskar_evaluate_vla_beam_pbcor_matrix_d(double4c* beam, int num_sources,
-        const double* radius_arcmin, const double freq_ghz, const double p1,
-        const double p2, const double p3, const double cutoff_radius_arcmin);
+        const double* l, const double* m, const double freq_ghz,
+        const double p1, const double p2, const double p3,
+        const double cutoff_radius_arcmin);
 
 /**
  * @brief
@@ -202,13 +211,15 @@ void oskar_evaluate_vla_beam_pbcor_matrix_d(double4c* beam, int num_sources,
  *
  * @param[out] beam          VLA beam evaluated at source positions.
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
- * @param[in]  radius_arcmin Radius of each source from phase centre, in arcmin.
+ * @param[in]  l             Direction cosine of each source from phase centre.
+ * @param[in]  m             Direction cosine of each source from phase centre.
  * @param[in]  frequency_hz  Current observing frequency in Hz.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_vla_beam_pbcor(oskar_Mem* beam, int num_sources,
-        const oskar_Mem* radius_arcmin, double frequency_hz, int* status);
+        const oskar_Mem* l, const oskar_Mem* m, double frequency_hz,
+        int* status);
 
 #ifdef __cplusplus
 }

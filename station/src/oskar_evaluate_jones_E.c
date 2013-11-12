@@ -150,8 +150,8 @@ static void evaluate_E_common_sky_identical_stations(oskar_Jones* E,
     else if (oskar_station_station_type(station0) ==
             OSKAR_STATION_TYPE_VLA_PBCOR)
     {
-        oskar_evaluate_vla_beam_pbcor(&E0, num_sources,
-                oskar_sky_radius_arcmin_const(sky), frequency_hz, status);
+        oskar_evaluate_vla_beam_pbcor(&E0, num_sources, oskar_sky_l_const(sky),
+                oskar_sky_m_const(sky), frequency_hz, status);
     }
     else
     {
@@ -223,7 +223,8 @@ static void evaluate_E_common_sky_different_stations(oskar_Jones* E,
                 OSKAR_STATION_TYPE_VLA_PBCOR)
         {
             oskar_evaluate_vla_beam_pbcor(&E_station, num_sources,
-                    oskar_sky_radius_arcmin_const(sky), frequency_hz, status);
+                    oskar_sky_l_const(sky), oskar_sky_m_const(sky),
+                    frequency_hz, status);
         }
         else
         {
@@ -284,7 +285,8 @@ static void evaluate_E_different_sky(oskar_Jones* E,
                 OSKAR_STATION_TYPE_VLA_PBCOR)
         {
             oskar_evaluate_vla_beam_pbcor(&E_station, num_sources,
-                    oskar_sky_radius_arcmin_const(sky), frequency_hz, status);
+                    oskar_sky_l_const(sky), oskar_sky_m_const(sky),
+                    frequency_hz, status);
         }
         else
         {

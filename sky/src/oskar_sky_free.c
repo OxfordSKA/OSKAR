@@ -57,7 +57,6 @@ void oskar_sky_free(oskar_Sky* model, int* status)
     oskar_mem_free(&model->l, status);
     oskar_mem_free(&model->m, status);
     oskar_mem_free(&model->n, status);
-    oskar_mem_free(&model->radius_arcmin, status);
     oskar_mem_free(&model->FWHM_major, status);
     oskar_mem_free(&model->FWHM_minor, status);
     oskar_mem_free(&model->position_angle, status);

@@ -60,7 +60,6 @@ void oskar_sky_insert(oskar_Sky* dst, const oskar_Sky* src, int offset,
     oskar_mem_insert(&dst->l, &src->l, offset, status);
     oskar_mem_insert(&dst->m, &src->m, offset, status);
     oskar_mem_insert(&dst->n, &src->n, offset, status);
-    oskar_mem_insert(&dst->radius_arcmin, &src->radius_arcmin, offset, status);
     oskar_mem_insert(&dst->FWHM_major, &src->FWHM_major, offset, status);
     oskar_mem_insert(&dst->FWHM_minor, &src->FWHM_minor, offset, status);
     oskar_mem_insert(&dst->position_angle, &src->position_angle, offset, status);

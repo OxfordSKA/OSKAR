@@ -61,7 +61,6 @@ struct oskar_Sky
     oskar_Mem l;              /**< Phase centre relative l-direction cosines. */
     oskar_Mem m;              /**< Phase centre relative m-direction cosines. */
     oskar_Mem n;              /**< Phase centre relative n-direction cosines. */
-    oskar_Mem radius_arcmin;  /**< Radius of source from phase centre, in arcmin. */
 
     int use_extended;         /**< Enable use of extended sources */
     oskar_Mem FWHM_major;     /**< Major axis FWHM for gaussian sources, in radians. */

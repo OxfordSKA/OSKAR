@@ -70,7 +70,7 @@ void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
         if (type == OSKAR_SINGLE)
         {
             float *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *spix_, *rm_;
-            float *l_, *m_, *n_, *rad_, *maj_, *min_, *pa_, *a_, *b_, *c_, dist;
+            float *l_, *m_, *n_, *maj_, *min_, *pa_, *a_, *b_, *c_, dist;
             ra_   = oskar_mem_float(oskar_sky_ra(sky), status);
             dec_  = oskar_mem_float(oskar_sky_dec(sky), status);
             I_    = oskar_mem_float(oskar_sky_I(sky), status);
@@ -83,7 +83,6 @@ void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
             l_    = oskar_mem_float(oskar_sky_l(sky), status);
             m_    = oskar_mem_float(oskar_sky_m(sky), status);
             n_    = oskar_mem_float(oskar_sky_n(sky), status);
-            rad_  = oskar_mem_float(oskar_sky_radius_arcmin(sky), status);
             maj_  = oskar_mem_float(oskar_sky_fwhm_major(sky), status);
             min_  = oskar_mem_float(oskar_sky_fwhm_minor(sky), status);
             pa_   = oskar_mem_float(oskar_sky_position_angle(sky), status);
@@ -108,7 +107,6 @@ void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
                 l_[out]    = l_[in];
                 m_[out]    = m_[in];
                 n_[out]    = n_[in];
-                rad_[out]  = rad_[in];
                 maj_[out]  = maj_[in];
                 min_[out]  = min_[in];
                 pa_[out]   = pa_[in];
@@ -121,7 +119,7 @@ void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
         else
         {
             double *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *spix_, *rm_;
-            double *l_, *m_, *n_, *rad_, *maj_, *min_, *pa_, *a_, *b_, *c_, dist;
+            double *l_, *m_, *n_, *maj_, *min_, *pa_, *a_, *b_, *c_, dist;
             ra_   = oskar_mem_double(oskar_sky_ra(sky), status);
             dec_  = oskar_mem_double(oskar_sky_dec(sky), status);
             I_    = oskar_mem_double(oskar_sky_I(sky), status);
@@ -134,7 +132,6 @@ void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
             l_    = oskar_mem_double(oskar_sky_l(sky), status);
             m_    = oskar_mem_double(oskar_sky_m(sky), status);
             n_    = oskar_mem_double(oskar_sky_n(sky), status);
-            rad_  = oskar_mem_double(oskar_sky_radius_arcmin(sky), status);
             maj_  = oskar_mem_double(oskar_sky_fwhm_major(sky), status);
             min_  = oskar_mem_double(oskar_sky_fwhm_minor(sky), status);
             pa_   = oskar_mem_double(oskar_sky_position_angle(sky), status);
@@ -158,7 +155,6 @@ void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
                 l_[out]    = l_[in];
                 m_[out]    = m_[in];
                 n_[out]    = n_[in];
-                rad_[out]  = rad_[in];
                 maj_[out]  = maj_[in];
                 min_[out]  = min_[in];
                 pa_[out]   = pa_[in];

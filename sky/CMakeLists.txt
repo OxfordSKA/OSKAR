@@ -9,7 +9,6 @@ set(sky_SRC
     src/oskar_evaluate_jones_R_cuda.cu
     src/oskar_evaluate_jones_R.c
     src/oskar_evaluate_jones_Z.c
-    src/oskar_evaluate_source_radius.c
     src/oskar_evaluate_TEC_TID.c
     src/oskar_generate_random_coordinate.c
     src/oskar_load_TID_parameter_file.c
@@ -25,7 +24,6 @@ set(sky_SRC
     src/oskar_sky_append.c
     src/oskar_sky_combine_set.c
     src/oskar_sky_compute_relative_lmn.c
-    src/oskar_sky_compute_source_radius.c
     src/oskar_sky_create.c
     src/oskar_sky_create_copy.c
     src/oskar_sky_evaluate_gaussian_source_parameters.c

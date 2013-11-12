@@ -73,7 +73,6 @@ enum {
 #include <oskar_sky_append.h>
 #include <oskar_sky_combine_set.h>
 #include <oskar_sky_compute_relative_lmn.h>
-#include <oskar_sky_compute_source_radius.h>
 #include <oskar_sky_create.h>
 #include <oskar_sky_create_copy.h>
 #include <oskar_sky_evaluate_gaussian_source_parameters.h>

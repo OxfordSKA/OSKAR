@@ -83,8 +83,6 @@ static void copy_source_data(oskar_Sky* output,
     DPT  m_out   = DPCT(oskar_sky_m(output));
     DPTC n_in    = DPCTC(oskar_sky_n_const(input));
     DPT  n_out   = DPCT(oskar_sky_n(output));
-    DPTC rad_in  = DPCTC(oskar_sky_radius_arcmin_const(input));
-    DPT  rad_out = DPCT(oskar_sky_radius_arcmin(output));
     DPTC a_in    = DPCTC(oskar_sky_gaussian_a_const(input));
     DPT  a_out   = DPCT(oskar_sky_gaussian_a(output));
     DPTC b_in    = DPCTC(oskar_sky_gaussian_b_const(input));
@@ -113,7 +111,6 @@ static void copy_source_data(oskar_Sky* output,
     copy_if(l_in, l_in + num, m, l_out, is_true());
     copy_if(m_in, m_in + num, m, m_out, is_true());
     copy_if(n_in, n_in + num, m, n_out, is_true());
-    copy_if(rad_in, rad_in + num, m, rad_out, is_true());
     copy_if(a_in, a_in + num, m, a_out, is_true());
     copy_if(b_in, b_in + num, m, b_out, is_true());
     copy_if(c_in, c_in + num, m, c_out, is_true());
