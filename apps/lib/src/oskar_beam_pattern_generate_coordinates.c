@@ -55,8 +55,8 @@ void oskar_beam_pattern_generate_coordinates(oskar_Mem* x, oskar_Mem* y,
             break;
         }
         case OSKAR_BEAM_PATTERN_COORDS_HEALPIX:
-            /* TODO Implement this mode... */
-            *status = OSKAR_FAIL;
+            /* Proposed 2.4.x feature, not yet implemented */
+            *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
             break;
         default:
             *status = OSKAR_FAIL;
