@@ -1149,11 +1149,24 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     setTooltip(k, "The station ID number (zero based) to select from the "
             "telescope model when generating the beam pattern.");
 
+#if 1
     k = group + "/coordinate_type";
     options.clear();
-    options << "Beam image"
+    options << "Beam image";
+    declare(k, "Coordinate type", options, 0);
+    setTooltip(k, "Specification of coordinates at which to evaluate the beam "
+            "pattern."
+            "<ul>"
+            "<li><b>Beam image: </b> Tangent plane image, centred on the "
+            "beam pointing direction.</li>"
+            "</ul>");
+#else // Proposed 2.4.x settings
+    k = group + "/coordinate_type";
+    options.clear();
+    options << "Beam image";
             << "HEALPix";
     declare(k, "Coordinate type", options, 0);
+#endif
 
     k = group + "/beam_image";
     setLabel(k, "Beam image settings");
@@ -1186,6 +1199,7 @@ void oskar_SettingsModelApps::init_settings_beampattern()
             "Declination.</li>"
             "</ul>");
 
+#if 0 // Proposed OSKAR 2.4.x features
     k = group + "/healpix";
     setLabel(k, "HEALPix settings");
     setDependency(k , group + "/coordinate_type", "HEALPix");
@@ -1200,8 +1214,9 @@ void oskar_SettingsModelApps::init_settings_beampattern()
             "12 * Nside * Nside");
 
     k = group + "/horizon_clip";
-    declare(k, "Horizon clip", oskar_SettingsItem::BOOL, "True");
+    declare(k, "Horizon clip", oskar_SettingsItem::BOOL, "true");
     setTooltip(k, "Zero the beam pattern below the horizon");
+#endif
 
 #if 0
     k = group + "/fov_deg";
