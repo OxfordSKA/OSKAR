@@ -55,7 +55,7 @@ extern "C" {
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
  * @param[in]  l             Direction cosine of each source from phase centre.
  * @param[in]  m             Direction cosine of each source from phase centre.
- * @param[in]  frequency_ghz Current observing frequency in GHz.
+ * @param[in]  freq_ghz      Current observing frequency in GHz.
  * @param[in]  p1            Value of PBPARM(3) for this frequency.
  * @param[in]  p2            Value of PBPARM(4) for this frequency.
  * @param[in]  p3            Value of PBPARM(5) for this frequency.
@@ -80,7 +80,7 @@ void oskar_evaluate_vla_beam_pbcor_cuda_f(float* beam, int num_sources,
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
  * @param[in]  l             Direction cosine of each source from phase centre.
  * @param[in]  m             Direction cosine of each source from phase centre.
- * @param[in]  frequency_ghz Current observing frequency in GHz.
+ * @param[in]  freq_ghz      Current observing frequency in GHz.
  * @param[in]  p1            Value of PBPARM(3) for this frequency.
  * @param[in]  p2            Value of PBPARM(4) for this frequency.
  * @param[in]  p3            Value of PBPARM(5) for this frequency.
@@ -105,7 +105,7 @@ void oskar_evaluate_vla_beam_pbcor_complex_cuda_f(float2* beam, int num_sources,
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
  * @param[in]  l             Direction cosine of each source from phase centre.
  * @param[in]  m             Direction cosine of each source from phase centre.
- * @param[in]  frequency_ghz Current observing frequency in GHz.
+ * @param[in]  freq_ghz      Current observing frequency in GHz.
  * @param[in]  p1            Value of PBPARM(3) for this frequency.
  * @param[in]  p2            Value of PBPARM(4) for this frequency.
  * @param[in]  p3            Value of PBPARM(5) for this frequency.
@@ -130,7 +130,7 @@ void oskar_evaluate_vla_beam_pbcor_matrix_cuda_f(float4c* beam, int num_sources,
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
  * @param[in]  l             Direction cosine of each source from phase centre.
  * @param[in]  m             Direction cosine of each source from phase centre.
- * @param[in]  frequency_ghz Current observing frequency in GHz.
+ * @param[in]  freq_ghz      Current observing frequency in GHz.
  * @param[in]  p1            Value of PBPARM(3) for this frequency.
  * @param[in]  p2            Value of PBPARM(4) for this frequency.
  * @param[in]  p3            Value of PBPARM(5) for this frequency.
@@ -155,7 +155,7 @@ void oskar_evaluate_vla_beam_pbcor_cuda_d(double* beam, int num_sources,
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
  * @param[in]  l             Direction cosine of each source from phase centre.
  * @param[in]  m             Direction cosine of each source from phase centre.
- * @param[in]  frequency_ghz Current observing frequency in GHz.
+ * @param[in]  freq_ghz      Current observing frequency in GHz.
  * @param[in]  p1            Value of PBPARM(3) for this frequency.
  * @param[in]  p2            Value of PBPARM(4) for this frequency.
  * @param[in]  p3            Value of PBPARM(5) for this frequency.
@@ -181,7 +181,7 @@ void oskar_evaluate_vla_beam_pbcor_complex_cuda_d(double2* beam,
  * @param[in]  num_sources   Number of sources at which to evaluate the beam.
  * @param[in]  l             Direction cosine of each source from phase centre.
  * @param[in]  m             Direction cosine of each source from phase centre.
- * @param[in]  frequency_ghz Current observing frequency in GHz.
+ * @param[in]  freq_ghz      Current observing frequency in GHz.
  * @param[in]  p1            Value of PBPARM(3) for this frequency.
  * @param[in]  p2            Value of PBPARM(4) for this frequency.
  * @param[in]  p3            Value of PBPARM(5) for this frequency.
