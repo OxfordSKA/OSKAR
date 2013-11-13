@@ -6,10 +6,11 @@ if (CUDA_FOUND)
     set(name imaging_test)
     include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
     set(${name}_SRC
+        main.cpp
         Test_make_image.cpp
     )
     add_executable(${name} ${${name}_SRC})
-    target_link_libraries(${name} oskar gtest_main)
+    target_link_libraries(${name} oskar gtest)
     if(CFITSIO_FOUND)
         target_link_libraries(${name} oskar_fits)
     endif()

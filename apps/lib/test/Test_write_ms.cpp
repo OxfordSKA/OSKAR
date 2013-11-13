@@ -111,6 +111,7 @@ TEST(write_ms, test_write)
     const char* filename = "temp_test_write_ms.ms";
 
     oskar_vis_write_ms(vis, filename, OSKAR_TRUE, &status);
+    oskar_vis_free(vis, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_remove_dir(filename);
 }

@@ -79,4 +79,10 @@ TEST(TID_parameter_file, load)
     EXPECT_DOUBLE_EQ(8.1, TID.wavelength[1]);
 
     remove(filename);
+
+    // Free memory in structure.
+    free(TID.amp);
+    free(TID.speed);
+    free(TID.theta);
+    free(TID.wavelength);
 }

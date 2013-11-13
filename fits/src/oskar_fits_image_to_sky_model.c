@@ -63,16 +63,12 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
     double nul = 0.0, peak = 0.0, ref_freq = 0.0, val = 0.0, val_new = 0.0;
     double bmaj = 0.0, bmin = 0.0, barea = 0.0, barea_inv = 0.0;
     void* data = 0;
-    oskar_Sky* temp_sky;
+    oskar_Sky* temp_sky = 0;
 
     /* Check inputs. */
     if (filename == NULL || sky == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
     if (downsample_factor < 1) downsample_factor = 1;
-
-    /* Create a temporary sky model. */
-    temp_sky = oskar_sky_create(oskar_sky_type(sky),
-            OSKAR_LOCATION_CPU, 0, &err);
 
     /* Open the FITS file. */
     fits_open_file(&fptr, filename, READONLY, &status);
@@ -236,6 +232,10 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
     oskar_fits_check_status(ptr, status, "Reading image data");
     if (status) goto cleanup;
 
+    /* Create a temporary sky model. */
+    temp_sky = oskar_sky_create(oskar_sky_type(sky),
+            OSKAR_LOCATION_CPU, 0, &err);
+
     /* Divide pixel values by beam area if required, blank any below noise
      * floor, and find peak value. */
     barea_inv = (jy_beam) ? (1.0 / barea) : 1.0;
@@ -381,7 +381,7 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
     cleanup:
     fits_close_file(fptr, &status);
     if (data) free(data);
-    oskar_sky_free(temp_sky, &err);
+    if (temp_sky) oskar_sky_free(temp_sky, &err);
     if (status) return OSKAR_ERR_FITS_IO;
     return err;
 }
