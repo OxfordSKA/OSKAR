@@ -86,8 +86,8 @@ if (CUDA_FOUND)
         ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${libname}.dir/src)
 
     cuda_add_library(${libname} ${${libname}_SRC})
+    target_link_libraries(${libname} ${CUDA_curand_LIBRARY})
 
-    target_link_libraries(${libname} ${CUDA_LIBRARIES} ${CUDA_curand_LIBRARY})
     if (OSKAR_USE_CBLAS)
         target_link_libraries(${libname} ${OSKAR_CBLAS})
     endif ()
@@ -99,15 +99,35 @@ if (CUDA_FOUND)
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
             SOVERSION ${OSKAR_VERSION})
     else ()
-        set_target_properties(${libname} PROPERTIES
-            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-            INSTALL_RPATH_USE_LINK_PATH TRUE
-            COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-            LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-            SOVERSION ${OSKAR_VERSION} 
-            VERSION ${OSKAR_VERSION})
+        if (APPLE)
+            set_target_properties(${libname} PROPERTIES
+                INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+                INSTALL_RPATH_USE_LINK_PATH TRUE
+                COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+                LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+                SOVERSION ${OSKAR_VERSION} 
+                VERSION ${OSKAR_VERSION})
+        else()
+            set_target_properties(${libname} PROPERTIES
+                INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+                INSTALL_RPATH_USE_LINK_PATH TRUE
+                COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+                LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+                SOVERSION ${OSKAR_VERSION} 
+                VERSION ${OSKAR_VERSION})
+                endif()
     endif()
+    
+#    set(props
+#        LINK_LIBRARIES
+#    )
+#    foreach (p ${props})
+#        get_target_property(TEMP ${libname} ${p})
+#        message(">>>>>> ${p} = ${TEMP}")
+#    endforeach()
+
     install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+
     cuda_build_clean_target()
 endif (CUDA_FOUND)
 

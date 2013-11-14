@@ -70,27 +70,31 @@ if (QT4_FOUND AND CUDA_FOUND)
     oskar_qt_app(${name} ${name}_main.cpp)
 
     # BINARY: oskar_vis_to_ascii_table
-    set(name oskar_vis_to_ascii_table)
-    oskar_qt_app(${name} ${name}_main.cpp)
+    #set(name oskar_vis_to_ascii_table)
+    #oskar_qt_app(${name} ${name}_main.cpp)
 
     # BINARY: oskar_vis_add_noise
     set(name oskar_vis_add_noise)
     oskar_qt_app(${name} ${name}_main.cpp)
 
-    set(name oskar_vis_stats)
-    oskar_qt_app(${name} ${name}_main.cpp)
+    # BINARY: oskar_vis_stats
+    #set(name oskar_vis_stats)
+    #oskar_qt_app(${name} ${name}_main.cpp)
 
-    # BINARY: oskar_sim_tec_screen
-    set(name oskar_sim_tec_screen)
-    oskar_app(${name} ${name}_main.cpp
-        EXTRA_LIBS oskar_apps
-        NO_INSTALL)
+    set(IONOSPHERE_TESTING OFF)
+    if (IONOSPHERE_TESTING)
+        # BINARY: oskar_sim_tec_screen
+        set(name oskar_sim_tec_screen)
+        oskar_app(${name} ${name}_main.cpp
+            EXTRA_LIBS oskar_apps
+            NO_INSTALL)
 
-    # BINARY: oskar_evaluate_pierce_points
-    set(name oskar_evaluate_pierce_points)
-    oskar_app(${name} ${name}_main.cpp
-        EXTRA_LIBS oskar_apps
-        NO_INSTALL)
+        # BINARY: oskar_evaluate_pierce_points
+        set(name oskar_evaluate_pierce_points)
+        oskar_app(${name} ${name}_main.cpp
+            EXTRA_LIBS oskar_apps
+            NO_INSTALL)
+    endif()
 endif ()
 
 

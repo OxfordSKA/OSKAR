@@ -67,13 +67,23 @@ if (MSVC)
         SOVERSION ${OSKAR_VERSION}
         VERSION ${OSKAR_VERSION})
 else ()
-    set_target_properties(oskar_apps PROPERTIES
-        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-        LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-        INSTALL_RPATH_USE_LINK_PATH TRUE
-        SOVERSION ${OSKAR_VERSION}
-        VERSION ${OSKAR_VERSION})
+    if (APPLE)
+        set_target_properties(oskar_apps PROPERTIES
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            INSTALL_RPATH_USE_LINK_PATH TRUE
+            COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+            LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+            SOVERSION ${OSKAR_VERSION}
+            VERSION ${OSKAR_VERSION})
+    else()
+        set_target_properties(oskar_apps PROPERTIES
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            INSTALL_RPATH_USE_LINK_PATH TRUE
+            COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+            LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+            SOVERSION ${OSKAR_VERSION}
+            VERSION ${OSKAR_VERSION})
+    endif()
 endif()
 
 # Install target for the apps library.
