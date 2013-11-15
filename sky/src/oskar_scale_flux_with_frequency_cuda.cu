@@ -86,6 +86,8 @@ void oskar_scale_flux_with_frequency_cudak_f(const int num_sources,
     freq0_ = ref_freq[i];
     spix_ = sp_index[i];
     rm_ = rm[i];
+    if (freq0_ == 0.0f)
+        return;
 
     /* Compute rotation factors, sin(2 beta) and cos(2 beta). */
     {
@@ -143,6 +145,8 @@ void oskar_scale_flux_with_frequency_cudak_d(const int num_sources,
     freq0_ = ref_freq[i];
     spix_ = sp_index[i];
     rm_ = rm[i];
+    if (freq0_ == 0.0)
+        return;
 
     /* Compute rotation factors, sin(2 beta) and cos(2 beta). */
     {

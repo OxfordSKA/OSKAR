@@ -52,6 +52,8 @@ void oskar_scale_flux_with_frequency_f(int num_sources, float frequency,
         freq0_ = ref_freq[i];
         spix_ = sp_index[i];
         rm_ = rm[i];
+        if (freq0_ == 0.0f)
+            continue;
 
         /* Compute rotation factors, sin(2 beta) and cos(2 beta). */
         {
@@ -109,6 +111,8 @@ void oskar_scale_flux_with_frequency_d(int num_sources, double frequency,
         freq0_ = ref_freq[i];
         spix_ = sp_index[i];
         rm_ = rm[i];
+        if (freq0_ == 0.0)
+            continue;
 
         /* Compute rotation factors, sin(2 beta) and cos(2 beta). */
         {
