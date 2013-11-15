@@ -70,7 +70,7 @@ void oskar_station_override_element_phases(oskar_Station* s,
     {
         /* Override element data at last level. */
         int type;
-        type = oskar_station_type(s);
+        type = oskar_station_precision(s);
         if (type == OSKAR_DOUBLE)
         {
             double* phase;

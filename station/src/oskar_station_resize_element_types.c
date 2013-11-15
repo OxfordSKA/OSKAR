@@ -68,7 +68,7 @@ void oskar_station_resize_element_types(oskar_Station* model,
         for (i = old_num_element_types; i < num_element_types; ++i)
         {
             model->element_pattern[i] = oskar_element_create(
-                    oskar_station_type(model), oskar_station_location(model),
+                    oskar_station_precision(model), oskar_station_location(model),
                     status);
         }
     }

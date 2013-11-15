@@ -78,7 +78,7 @@ void oskar_station_override_element_orientations(oskar_Station* s,
         /* Get pointers to the X or Y element orientation data. */
         mem_cos = x_pol ? &s->cos_orientation_x : &s->cos_orientation_y;
         mem_sin = x_pol ? &s->sin_orientation_x : &s->sin_orientation_y;
-        type = oskar_station_type(s);
+        type = oskar_station_precision(s);
         if (type == OSKAR_DOUBLE)
         {
             double *cos_x, *sin_x;

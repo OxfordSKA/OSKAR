@@ -59,7 +59,7 @@ void oskar_station_load_config(oskar_Station* station, const char* filename,
     if (*status) return;
 
     /* Check type. */
-    type = oskar_station_type(station);
+    type = oskar_station_precision(station);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;

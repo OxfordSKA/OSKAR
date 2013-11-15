@@ -58,7 +58,7 @@ void oskar_station_analyse(oskar_Station* station,
     }
 
     /* Get type. */
-    type = oskar_station_type(station);
+    type = oskar_station_precision(station);
 
     /* Set default station flags. */
     station->array_is_3d = 0;

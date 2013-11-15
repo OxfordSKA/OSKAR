@@ -98,8 +98,7 @@ void oskar_evaluate_station_beam_pattern_relative_directions(
     z = oskar_station_work_enu_direction_z(work);
     compute_enu_directions_(x, y, z, np, l, m, n, station, GAST, status);
 
-    /* FIXME: function name of station type is horrible */
-    switch (oskar_station_station_type(station))
+    switch (oskar_station_type(station))
     {
         case OSKAR_STATION_TYPE_AA:
         {
@@ -144,8 +143,7 @@ void oskar_evaluate_station_beam_pattern_enu_directions(oskar_Mem* beam_pattern,
     *status = OSKAR_FAIL;
     return;
 
-    /* FIXME: function name of station type is horrible */
-    switch (oskar_station_station_type(station))
+    switch (oskar_station_type(station))
     {
         case OSKAR_STATION_TYPE_AA:
         {

@@ -71,7 +71,7 @@ void oskar_station_override_element_xy_position_errors(
         /* Override element data at last level. */
         int type;
         double delta_x, delta_y;
-        type = oskar_station_type(s);
+        type = oskar_station_precision(s);
         if (type == OSKAR_DOUBLE)
         {
             double *xs, *ys, *xw, *yw;

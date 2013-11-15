@@ -64,7 +64,7 @@ void oskar_station_save_config(const char* filename,
     if (*status) return;
 
     /* Check type and location. */
-    type = oskar_station_type(station);
+    type = oskar_station_precision(station);
     location = oskar_station_location(station);
     num_elements = oskar_station_num_elements(station);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)

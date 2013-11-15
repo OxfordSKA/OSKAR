@@ -56,7 +56,7 @@ extern "C" {
  * @return The data type (OSKAR_SINGLE or OSKAR_DOUBLE).
  */
 OSKAR_EXPORT
-int oskar_station_type(const oskar_Station* model);
+int oskar_station_precision(const oskar_Station* model);
 
 /**
  * @brief
@@ -73,7 +73,7 @@ OSKAR_EXPORT
 int oskar_station_location(const oskar_Station* model);
 
 OSKAR_EXPORT
-int oskar_station_station_type(const oskar_Station* model);
+int oskar_station_type(const oskar_Station* model);
 
 OSKAR_EXPORT
 double oskar_station_longitude_rad(const oskar_Station* model);

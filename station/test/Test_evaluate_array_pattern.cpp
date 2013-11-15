@@ -176,7 +176,7 @@ static void set_up_pointing(oskar_Mem* weights, oskar_Mem* x, oskar_Mem* y,
     double beam_x, beam_y, beam_z, st_lat, last, wavenumber;
     int type, location, num_elements;
 
-    type = oskar_station_type(station);
+    type = oskar_station_precision(station);
     location = oskar_station_location(station);
     num_elements = oskar_station_num_elements(station);
     wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;

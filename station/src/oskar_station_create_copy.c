@@ -57,7 +57,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     if (*status) return model;
 
     /* Create the new model. */
-    model = oskar_station_create(oskar_station_type(src), location,
+    model = oskar_station_create(oskar_station_precision(src), location,
             oskar_station_num_elements(src), status);
 
     /* Set meta-data. */

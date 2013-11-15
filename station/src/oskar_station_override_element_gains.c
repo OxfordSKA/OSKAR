@@ -70,7 +70,7 @@ void oskar_station_override_element_gains(oskar_Station* s,
     {
         /* Override element data at last level. */
         int type;
-        type = oskar_station_type(s);
+        type = oskar_station_precision(s);
         if (gain_mean <= 0.0) gain_mean = 1.0;
         if (type == OSKAR_DOUBLE)
         {

@@ -67,7 +67,7 @@ void oskar_station_set_element_coords(oskar_Station* dst,
     }
 
     /* Get the data type and location. */
-    type = oskar_station_type(dst);
+    type = oskar_station_precision(dst);
     location = oskar_station_location(dst);
 
     /* Check if z or delta_z is nonzero, and set 3D flag if so. */

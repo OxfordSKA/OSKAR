@@ -37,8 +37,7 @@ extern "C" {
 
 /* Data common to all station types. */
 
-/* Refactor to precision. */
-int oskar_station_type(const oskar_Station* model)
+int oskar_station_precision(const oskar_Station* model)
 {
     return model->precision;
 }
@@ -48,7 +47,7 @@ int oskar_station_location(const oskar_Station* model)
     return model->location;
 }
 
-int oskar_station_station_type(const oskar_Station* model)
+int oskar_station_type(const oskar_Station* model)
 {
     return model->station_type;
 }

@@ -55,7 +55,7 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam, double wavenumber,
     if (*status) return;
 
     /* Get meta-data. */
-    type = oskar_station_type(station);
+    type = oskar_station_precision(station);
     location = oskar_station_location(station);
     num_elements = oskar_station_num_elements(station);
     array_is_3d = oskar_station_array_is_3d(station);
