@@ -350,7 +350,7 @@ bool oskar_SettingsModel::isModified() const
 
 void oskar_SettingsModel::loadSettingsFile(const QString& filename)
 {
-    if (!filename.isEmpty() && QFile::exists(filename))
+    if (!filename.isEmpty())
     {
         filename_ = filename;
 
