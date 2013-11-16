@@ -42,7 +42,7 @@ static void write_header_(FILE* out, int total_vis, int num_chan, int num_times,
         int num_baselines, int num_pol, int num_stations, int num_vis_out,
         int c, double freq_hz, double lambda_m, int p, int t, bool metres);
 template <typename T1, typename T2> static void writeData_(int idx, T1 uu,
-        T1 vv, T2& a, T1 weight, bool csv, FILE* out);
+        T1 vv, T1 ww, T2& a, bool csv, FILE* out);
 
 int main(int argc, char** argv)
 {
@@ -50,9 +50,10 @@ int main(int argc, char** argv)
     oskar_OptionParser opt("oskar_vis_to_ascii_table");
     opt.setDescription("Converts an OSKAR visibility binary file to an ASCII "
             "table format with the following columns:\n "
-            "[1] index, [2] baseline-uu, [3] baseline-vv, [4] Real, [5] Imag., "
-            "[6] weight. The table is written out in baseline-time order where "
-            "baseline is the fastest varying dimension");
+            "[1] index, [2] baseline-uu, [3] baseline-vv, [4] baseline-ww "
+            "[5] Real, [6] Imag. "
+            "The table is written out in baseline-time order where baseline "
+            "is the fastest varying dimension");
     opt.addRequired("OSKAR vis file");
     opt.addOptional("output file name");
     opt.addFlag("-c", "Channel index to write to file. (default = 0)", 1, "0",
@@ -99,7 +100,8 @@ int main(int argc, char** argv)
     int status = OSKAR_SUCCESS;
     oskar_Vis* vis = oskar_vis_read(vis_file, &status);
     if (status != OSKAR_SUCCESS) {
-        fprintf(stderr, "ERROR: Unable to read specified visibility file: %s\n", vis_file);
+        fprintf(stderr, "ERROR: Unable to read specified visibility file: %s\n",
+                vis_file);
         return status;
     }
 
@@ -134,7 +136,8 @@ int main(int argc, char** argv)
     }
 
     const oskar_Mem* uu = oskar_vis_baseline_uu_metres_const(vis);
-    const oskar_Mem* vv = oskar_vis_baseline_uu_metres_const(vis);
+    const oskar_Mem* vv = oskar_vis_baseline_vv_metres_const(vis);
+    const oskar_Mem* ww = oskar_vis_baseline_ww_metres_const(vis);
     const oskar_Mem* amp = oskar_vis_amplitude_const(vis);
     // amplitudes dims: channel x times x baselines x pol
     int amp_offset = c * num_times * num_baselines;
@@ -165,16 +168,16 @@ int main(int argc, char** argv)
                 metres);
         char pre = '#';
         fprintf(out, "%c\n", pre);
-        fprintf(out, "%c %s %-15s %-15s %-15s %-15s %-15s\n",
-                pre, "Idx", "  uu", "  vv", "  Amp. Re.", "  Amp. Im.", "  weight");
+        fprintf(out, "%c %s %-14s %-15s %-15s %-23s %-15s\n",
+                pre, "Idx", " uu", "  vv", "  ww", "  Amp. Re.", "  Amp. Im.");
     }
 
     if (type == OSKAR_DOUBLE)
     {
         const double* uu_ = oskar_mem_double_const(uu, &status);
         const double* vv_ = oskar_mem_double_const(vv, &status);
+        const double* ww_ = oskar_mem_double_const(ww, &status);
         const double4c* amp_ = oskar_mem_double4c_const(amp, &status);
-        double weight = 1.0;
         int aIdx = amp_offset;
         int bIdx = baseline_offset;
         for (int i = 0; i < num_vis_out; ++i, ++bIdx, ++aIdx)
@@ -182,15 +185,16 @@ int main(int argc, char** argv)
             double2 a = getPolAmp_<double2, double4c>(amp_[aIdx], p);
             double buu = (metres)? uu_[bIdx] : uu_[bIdx]/lambda_m;
             double bvv = (metres)? vv_[bIdx] : vv_[bIdx]/lambda_m;
-            writeData_<double, double2>(i, buu, bvv, a, weight, csv, out);
+            double bww = (metres)? ww_[bIdx] : ww_[bIdx]/lambda_m;
+            writeData_<double, double2>(i, buu, bvv, bww, a, csv, out);
         }
     }
     else // OSKAR_SINGLE
     {
         const float* uu_ = oskar_mem_float_const(uu, &status);
         const float* vv_ = oskar_mem_float_const(vv, &status);
+        const float* ww_ = oskar_mem_float_const(ww, &status);
         const float4c* amp_ = oskar_mem_float4c_const(amp, &status);
-        float weight = 1.0f;
         int aIdx = amp_offset;
         int bIdx = baseline_offset;
         for (int i = 0; i < num_vis_out; ++i, ++bIdx, ++aIdx)
@@ -198,7 +202,8 @@ int main(int argc, char** argv)
             float2 a = getPolAmp_<float2, float4c>(amp_[aIdx], p);
             float buu = (metres)? uu_[bIdx] : uu_[bIdx]/lambda_m;
             float bvv = (metres)? vv_[bIdx] : vv_[bIdx]/lambda_m;
-            writeData_<float, float2>(i, buu, bvv, a, weight, csv, out);
+            float bww = (metres)? ww_[bIdx] : ww_[bIdx]/lambda_m;
+            writeData_<float, float2>(i, buu, bvv, bww, a, csv, out);
         }
     }
 
@@ -209,7 +214,7 @@ int main(int argc, char** argv)
 }
 
 template <typename T1, typename T2> static void writeData_(int idx, T1 uu,
-        T1 vv, T2& a, T1 weight, bool csv, FILE* out)
+        T1 vv, T1 ww, T2& a, bool csv, FILE* out)
 {
     // index, u, v, Re, Im, weight
     if (csv)
@@ -218,9 +223,9 @@ template <typename T1, typename T2> static void writeData_(int idx, T1 uu,
         fprintf(out, "%i", idx);
         fprintf(out, "%c%.8e", sep, uu);
         fprintf(out, "%c%.8e", sep, vv);
-        fprintf(out, "%c%.8e", sep, a.x);
-        fprintf(out, "%c%.8e", sep, a.y);
-        fprintf(out, "%c%.8e", sep, weight);
+        fprintf(out, "%c%.8e", sep, ww);
+        fprintf(out, "%c%.16e", sep, a.x);
+        fprintf(out, "%c%.16e", sep, a.y);
         fprintf(out, "\n");
     }
     else
@@ -229,15 +234,12 @@ template <typename T1, typename T2> static void writeData_(int idx, T1 uu,
         fprintf(out, "%-5i", idx);
         fprintf(out, "%c% -.8e", sep, uu);
         fprintf(out, "%c% -.8e", sep, vv);
-        fprintf(out, "%c% -.8e", sep, a.x);
-        fprintf(out, "%c% -.8e", sep, a.y);
-        fprintf(out, "%c% -.8e", sep, weight);
+        fprintf(out, "%c% -.8e", sep, ww);
+        fprintf(out, "%c% -.16e", sep, a.x);
+        fprintf(out, "%c% -.16e", sep, a.y);
         fprintf(out, "\n");
     }
 }
-
-
-
 
 template <typename T, typename T2> static T getPolAmp_(T2 amp, int pol_type)
 {
@@ -301,7 +303,6 @@ template <typename T, typename T2> static T getPolAmp_(T2 amp, int pol_type)
     };
     return a;
 }
-
 
 static const char* polStr_(int pol_type)
 {
