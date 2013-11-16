@@ -610,9 +610,12 @@ if(APPLE)
   else()
     get_filename_component(_cuda_path_to_cudart "${CUDA_CUDART_LIBRARY}" PATH)
   endif()
-  if(_cuda_path_to_cudart)
-    list(APPEND CUDA_LIBRARIES -Wl,-rpath "-Wl,${_cuda_path_to_cudart}")
-  endif()
+  # 
+  # EDIT 16/11/13 Removed in an attempt to fix install since XCode 5.0.x
+  #if(_cuda_path_to_cudart)
+  #  list(APPEND CUDA_LIBRARIES -Wl,-rpath "-Wl,${_cuda_path_to_cudart}")
+  #endif()
+  #
 endif()
 
 # 1.1 toolkit on linux doesn't appear to have a separate library on
