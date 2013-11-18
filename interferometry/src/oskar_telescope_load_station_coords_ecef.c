@@ -94,7 +94,7 @@ void oskar_telescope_load_station_coords_ecef(oskar_Telescope* telescope,
         double offset_x = 0.0, offset_y = 0.0, offset_z = 0.0;
 
         /* Load coordinates. */
-        if (oskar_string_to_array_d(line, 3, par) < 2) continue;
+        if (oskar_string_to_array_d(line, 3, par) < 3) continue;
 
         /* Resize the telescope model to hold the station data.
          * We can't resize to more than needed, since we would then lose track
