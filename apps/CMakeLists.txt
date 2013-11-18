@@ -70,16 +70,16 @@ if (QT4_FOUND AND CUDA_FOUND)
     oskar_qt_app(${name} ${name}_main.cpp)
 
     # BINARY: oskar_vis_to_ascii_table
-    #set(name oskar_vis_to_ascii_table)
-    #oskar_qt_app(${name} ${name}_main.cpp)
+    set(name oskar_vis_to_ascii_table)
+    oskar_qt_app(${name} ${name}_main.cpp)
 
     # BINARY: oskar_vis_add_noise
     set(name oskar_vis_add_noise)
     oskar_qt_app(${name} ${name}_main.cpp)
 
     # BINARY: oskar_vis_stats
-    #set(name oskar_vis_stats)
-    #oskar_qt_app(${name} ${name}_main.cpp)
+    set(name oskar_vis_stats)
+    oskar_qt_app(${name} ${name}_main.cpp)
 
     set(IONOSPHERE_TESTING OFF)
     if (IONOSPHERE_TESTING)

@@ -189,7 +189,7 @@ static void compute_enu_directions_(oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
     if (*status) return;
 
     ra0  = oskar_station_beam_longitude_rad(station);
-    LAST = GAST - oskar_station_longitude_rad(station);
+    LAST = GAST + oskar_station_longitude_rad(station);
     lat  = oskar_station_latitude_rad(station);
     ha0  = LAST - ra0;
 
