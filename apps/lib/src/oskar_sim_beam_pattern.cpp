@@ -222,12 +222,18 @@ static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
         oskar_mem_free(d_x, status);
         oskar_mem_free(d_y, status);
         oskar_mem_free(d_z, status);
+        free(d_x); // FIXME Remove after updating oskar_mem_free().
+        free(d_y); // FIXME Remove after updating oskar_mem_free().
+        free(d_z); // FIXME Remove after updating oskar_mem_free().
     } // GPU memory section
 
     oskar_mem_free(&beam_tmp, status);
     oskar_mem_free(x, status);
     oskar_mem_free(y, status);
     oskar_mem_free(z, status);
+    free(x); // FIXME Remove after updating oskar_mem_free().
+    free(y); // FIXME Remove after updating oskar_mem_free().
+    free(z); // FIXME Remove after updating oskar_mem_free().
 }
 
 /**

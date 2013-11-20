@@ -82,6 +82,8 @@ TEST(beam_pattern_coordinates, generate_lon_lat_grid)
     // Clean up.
     oskar_mem_free(lon, &status);
     oskar_mem_free(lat, &status);
+    free(lon); // FIXME Remove after updating oskar_mem_free().
+    free(lat); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(OSKAR_SUCCESS, status);
 }
 
@@ -128,6 +130,11 @@ TEST(beam_pattern_coordinates, HEALPix_horizontal)
     oskar_mem_free(l, &status);
     oskar_mem_free(RA, &status);
     oskar_mem_free(Dec, &status);
+    ASSERT_EQ(0, status);
+    free(b); // FIXME Remove after updating oskar_mem_free().
+    free(l); // FIXME Remove after updating oskar_mem_free().
+    free(RA); // FIXME Remove after updating oskar_mem_free().
+    free(Dec); // FIXME Remove after updating oskar_mem_free().
 }
 
 
