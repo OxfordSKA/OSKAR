@@ -31,6 +31,8 @@
 
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
+#include <oskar_version_string.h>
+
 #include <cstdio>
 #include <cstdlib>
 
@@ -38,7 +40,7 @@ int main(int argc, char** argv)
 {
     int error = OSKAR_SUCCESS;
 
-    oskar_OptionParser opt("oskar_imager");
+    oskar_OptionParser opt("oskar_imager", oskar_version_string());
     opt.addRequired("settings file");
     if (!opt.check_options(argc, argv)) return OSKAR_ERR_INVALID_ARGUMENT;
 

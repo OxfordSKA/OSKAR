@@ -31,8 +31,9 @@
 #include <imaging/oskar_ImageStats.h>
 #include <imaging/oskar_image_get_stats.h>
 #include <imaging/oskar_image_read.h>
-#include <utility/oskar_get_error_string.h>
 #include <apps/lib/oskar_OptionParser.h>
+#include <oskar_get_error_string.h>
+#include <oskar_version_string.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -55,7 +56,7 @@ void print_error(int status, const char* message);
 int main(int argc, char** argv)
 {
     // Register options =======================================================
-    oskar_OptionParser opt("oskar_image_stats");
+    oskar_OptionParser opt("oskar_image_stats", oskar_version_string());
     set_options(opt);
     if (!check_options(opt, argc, argv))
         return OSKAR_FAIL;

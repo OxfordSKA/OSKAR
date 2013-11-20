@@ -34,7 +34,7 @@
  * @file oskar_OptionParser.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 #include "extern/ezOptionParser-0.2.0/ezOptionParser.hpp"
 #include <vector>
 #include <string>
@@ -61,16 +61,16 @@
 class OSKAR_EXPORT oskar_OptionParser : public ez::ezOptionParser
 {
 public:
-    oskar_OptionParser(const char* title = "")
+    oskar_OptionParser(const char* title, const char* ver = OSKAR_VERSION_STR)
     {
         this->footer =
                 "\n"
                 "" + std::string(80, '-') + "\n"
-                "OSKAR (version " + OSKAR_VERSION_STR + ")\n"
+                "OSKAR (version " + ver + ")\n"
                 "Copyright (C) 2013, The University of Oxford.\n"
                 "This program is free and without warranty.\n"
                 "" + std::string(80, '-') + "\n";
-        setVersion(OSKAR_VERSION_STR, false);
+        setVersion(ver, false);
         setTitle(title);
     }
     virtual ~oskar_OptionParser() {}

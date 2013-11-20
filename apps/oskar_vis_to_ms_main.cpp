@@ -31,6 +31,7 @@
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
 #include <oskar_vis.h>
+#include <oskar_version_string.h>
 
 #include <cstdio>
 
@@ -40,7 +41,7 @@ int main(int argc, char** argv)
 #ifndef OSKAR_NO_MS
     int error = 0;
 
-    oskar_OptionParser opt("oskar_vis_to_ms");
+    oskar_OptionParser opt("oskar_vis_to_ms", oskar_version_string());
     opt.addRequired("OSKAR vis file");
     opt.addRequired("MS name");
     if (!opt.check_options(argc, argv))

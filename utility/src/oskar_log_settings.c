@@ -367,27 +367,27 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
                         break;
                     }
                     if (ae->gain > 0.0)
-                        LV("Element gain", "%.3f", ae->gain);
+                        LV("Element gain", "%.3e", ae->gain);
                     if (ae->gain_error_fixed > 0.0)
-                        LV("Element gain std.dev. (systematic)", "%.3f",
+                        LV("Element gain std.dev. (systematic)", "%.3e",
                                 ae->gain_error_fixed);
                     if (ae->gain_error_time > 0.0)
-                        LV("Element gain std.dev. (time-variable)", "%.3f",
+                        LV("Element gain std.dev. (time-variable)", "%.3e",
                                 ae->gain_error_time);
                     if (ae->phase_error_fixed_rad > 0.0)
-                        LV("Element phase std.dev. (systematic) [deg]", "%.3f",
+                        LV("Element phase std.dev. (systematic) [deg]", "%.3e",
                                 ae->phase_error_fixed_rad * R2D);
                     if (ae->phase_error_time_rad > 0.0)
-                        LV("Element phase std.dev. (time-variable) [deg]","%.3f",
+                        LV("Element phase std.dev. (time-variable) [deg]","%.3e",
                                 ae->phase_error_time_rad * R2D);
                     if (ae->position_error_xy_m > 0.0)
-                        LV("Element (x,y) position std.dev [m]", "%.3f",
+                        LV("Element (x,y) position std.dev [m]", "%.3e",
                                 ae->position_error_xy_m);
                     if (ae->x_orientation_error_rad > 0.0)
-                        LV("Element X-dipole orientation std.dev [deg]", "%.3f",
+                        LV("Element X-dipole orientation std.dev [deg]", "%.3e",
                                 ae->x_orientation_error_rad * R2D);
                     if (ae->y_orientation_error_rad > 0.0)
-                        LV("Element Y-dipole orientation std.dev [deg]", "%.3f",
+                        LV("Element Y-dipole orientation std.dev [deg]", "%.3e",
                                 ae->y_orientation_error_rad * R2D);
                     if (ae->gain > 0.0 || ae->gain_error_fixed > 0.0)
                         LVI("Random seed (systematic gain errors)",

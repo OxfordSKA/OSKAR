@@ -34,6 +34,7 @@
 #include <oskar_log.h>
 #include <oskar_image_free.h>
 #include <oskar_image_write.h>
+#include <oskar_version_string.h>
 
 #include <fits/oskar_fits_image_write.h>
 
@@ -44,7 +45,7 @@ int main(int argc, char** argv)
 {
     int error = OSKAR_SUCCESS;
 
-    oskar_OptionParser opt("oskar_sim_tec_screen");
+    oskar_OptionParser opt("oskar_sim_tec_screen", oskar_version_string());
     opt.addRequired("settings file");
     if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;

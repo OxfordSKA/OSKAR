@@ -37,6 +37,7 @@
 #include <oskar_binary_tag_index_query.h>
 #include <oskar_binary_tag_index_create.h>
 #include <oskar_binary_tag_index_free.h>
+#include <oskar_version_string.h>
 
 #include <vector>
 #include <string>
@@ -49,7 +50,7 @@ int main(int argc, char **argv)
 {
     int status = OSKAR_SUCCESS;
 
-    oskar_OptionParser opt("oskar_vis_summary");
+    oskar_OptionParser opt("oskar_vis_summary", oskar_version_string());
     opt.addRequired("OSKAR visibility file");
     opt.addFlag("-l", "Display the simulation log.",
             false, "--log");

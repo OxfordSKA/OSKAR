@@ -31,13 +31,14 @@
 #include <oskar_binary_file_query.h>
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
+#include <oskar_version_string.h>
 
 #include <cstdio>
 #include <string>
 
 int main(int argc, char** argv)
 {
-    oskar_OptionParser opt("oskar_binary_file_query");
+    oskar_OptionParser opt("oskar_binary_file_query", oskar_version_string());
     opt.setDescription("List a summary of the contents of an OSKAR binary file.");
     opt.addRequired("binary file", "Path of an OSKAR binary file.");
     if (!opt.check_options(argc, argv))

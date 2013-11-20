@@ -48,6 +48,7 @@
 #include <oskar_evaluate_image_lon_lat_grid.h>
 
 #include <oskar_evaluate_pierce_points.h>
+#include <oskar_version_string.h>
 
 #include <cstdlib>
 #include <cstdio>
@@ -93,7 +94,7 @@ int main(int argc, char** argv)
 {
     int status = OSKAR_SUCCESS;
 
-    oskar_OptionParser opt("oskar_sim_tec_screen");
+    oskar_OptionParser opt("oskar_sim_tec_screen", oskar_version_string());
     opt.addRequired("settings file");
     if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;

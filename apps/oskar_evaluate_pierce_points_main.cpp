@@ -28,6 +28,7 @@
 
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
+#include <oskar_version_string.h>
 
 #include <apps/lib/oskar_evaluate_station_pierce_points.h>
 #include <apps/lib/oskar_OptionParser.h>
@@ -37,7 +38,8 @@
 
 int main(int argc, char** argv)
 {
-    oskar_OptionParser opt("oskar_evaulate_pierce_points");
+    oskar_OptionParser opt("oskar_evaulate_pierce_points",
+            oskar_version_string());
     opt.addRequired("settings file");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;

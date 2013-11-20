@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,36 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_OptionParser.h"
-
-#include <oskar_cuda_info_create.h>
-#include <oskar_cuda_info_free.h>
-#include <oskar_cuda_info_log.h>
-#include <oskar_get_error_string.h>
-#include <oskar_log.h>
 #include <oskar_version_string.h>
 
-#include <cstdio>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int main(int argc, char** argv)
+const char* oskar_version_string()
 {
-    oskar_OptionParser opt("oskar_cuda_system_info", oskar_version_string());
-    opt.setDescription("Display a summary of the available CUDA capability");
-    if (!opt.check_options(argc, argv)) return OSKAR_FAIL;
-
-    // Create the CUDA info structure.
-    oskar_CudaInfo* info = NULL;
-    int error = oskar_cuda_info_create(&info);
-    if (error)
-    {
-        oskar_log_error(0, "Could not determine CUDA system information (%s)",
-                oskar_get_error_string(error));
-        oskar_cuda_info_free(&info);
-        return error;
-    }
-
-    // Log the CUDA system info.
-    oskar_cuda_info_log(NULL, info);
-    oskar_cuda_info_free(&info);
-    return OSKAR_SUCCESS;
+    return OSKAR_VERSION_STR;
 }
+
+#ifdef __cplusplus
+}
+#endif

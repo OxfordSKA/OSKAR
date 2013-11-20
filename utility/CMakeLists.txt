@@ -75,6 +75,7 @@ set(utility_SRC
     src/oskar_system_clock_string.c
     src/oskar_timer.c
     src/oskar_timers.c
+    src/oskar_version_string.c
 )
 
 if (CUDA_FOUND)

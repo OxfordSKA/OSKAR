@@ -31,6 +31,7 @@
 #include <oskar_log.h>
 #include <oskar_get_error_string.h>
 #include <oskar_vis.h>
+#include <oskar_version_string.h>
 
 #include <string>
 #include <vector>
@@ -52,7 +53,7 @@ int main(int argc, char** argv)
     int status = OSKAR_SUCCESS;
 
     // Register options ========================================================
-    oskar_OptionParser opt("oskar_vis_stats");
+    oskar_OptionParser opt("oskar_vis_stats", oskar_version_string());
     set_options(opt);
     if (!check_options(opt, argc, argv))
         return OSKAR_FAIL;

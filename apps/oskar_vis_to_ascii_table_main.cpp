@@ -31,6 +31,7 @@
 #include <oskar_get_error_string.h>
 #include <oskar_vis.h>
 #include <oskar_vector_types.h>
+#include <oskar_version_string.h>
 #include <string>
 #include <cstdio>
 #include <sstream>
@@ -47,7 +48,7 @@ template <typename T1, typename T2> static void writeData_(int idx, T1 uu,
 int main(int argc, char** argv)
 {
     // ===== Declare options ==================================================
-    oskar_OptionParser opt("oskar_vis_to_ascii_table");
+    oskar_OptionParser opt("oskar_vis_to_ascii_table", oskar_version_string());
     opt.setDescription("Converts an OSKAR visibility binary file to an ASCII "
             "table format with the following columns:\n "
             "[1] index, [2] baseline-uu, [3] baseline-vv, [4] baseline-ww "

@@ -35,6 +35,7 @@
 #include <oskar_sky.h>
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
+#include <oskar_version_string.h>
 
 #include <cstdio>
 
@@ -44,7 +45,8 @@ int main(int argc, char** argv)
 #ifndef OSKAR_NO_FITS
     int error = OSKAR_SUCCESS;
 
-    oskar_OptionParser opt("oskar_fits_image_to_sky_model");
+    oskar_OptionParser opt("oskar_fits_image_to_sky_model",
+            oskar_version_string());
     opt.setDescription("Converts a FITS image to an OSKAR sky model. A number "
             "of options are provided to control how much of the image is used "
             "to make the sky model.");

@@ -31,8 +31,10 @@
 #include "imaging/oskar_image_read.h"
 #include "imaging/oskar_get_image_type_string.h"
 
-#include "utility/oskar_get_error_string.h"
+#include <oskar_get_data_type_string.h>
+#include <oskar_get_error_string.h>
 #include <oskar_mem.h>
+#include <oskar_version_string.h>
 
 #include "utility/oskar_BinaryTag.h"
 #include "utility/oskar_BinaryHeader.h"
@@ -40,8 +42,6 @@
 #include "utility/oskar_binary_tag_index_query.h"
 #include "utility/oskar_binary_tag_index_create.h"
 #include "utility/oskar_binary_tag_index_free.h"
-
-#include "utility/oskar_get_data_type_string.h"
 
 #include <apps/lib/oskar_OptionParser.h>
 
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 {
     int error = OSKAR_SUCCESS;
 
-    oskar_OptionParser opt("oskar_image_summary");
+    oskar_OptionParser opt("oskar_image_summary", oskar_version_string());
     opt.addRequired("OSKAR image file");
     opt.addFlag("-l", "Display the simulation log associated with the image.",
             false, "--log");

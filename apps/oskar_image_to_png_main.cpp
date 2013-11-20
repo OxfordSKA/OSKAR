@@ -29,6 +29,7 @@
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
 #include <oskar_mem.h>
+#include <oskar_version_string.h>
 
 #include <oskar_image_read.h>
 
@@ -117,7 +118,7 @@ int main(int argc, char** argv)
 {
     int status = OSKAR_SUCCESS;
 
-    oskar_OptionParser opt("oskar_image_to_png");
+    oskar_OptionParser opt("oskar_image_to_png", oskar_version_string());
     opt.addRequired("OSKAR image");
     if (!opt.check_options(argc, argv)) return OSKAR_FAIL;
 
