@@ -30,16 +30,10 @@
 #include <oskar_mem_free.h>
 #include <oskar_mem_init.h>
 
-oskar_Mem::oskar_Mem(int owner_)
+oskar_Mem::oskar_Mem()
 {
     int err = 0;
-    oskar_mem_init(this, 0, 0, 0, owner_, &err);
-}
-
-oskar_Mem::oskar_Mem(int mem_type, int mem_location, size_t size, int owner_)
-{
-    int err = 0;
-    oskar_mem_init(this, mem_type, mem_location, size, owner_, &err);
+    oskar_mem_init(this, 0, 0, 0, 1, &err);
 }
 
 oskar_Mem::~oskar_Mem()

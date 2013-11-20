@@ -63,28 +63,9 @@ struct oskar_Mem
      * @details
      * Constructs a new oskar_Mem data structure.
      * The pointer and data types are all set to 0.
-     *
-     * @param[in] owner_ Bool flag specifying if the structure should take
-     *                   ownership of the memory (default = true).
      */
     OSKAR_EXPORT
-    oskar_Mem(int owner_ = 1);
-
-    /**
-     * @brief Constructs and allocates data for an oskar_Mem data structure.
-     *
-     * @details
-     * Constructs a new oskar_Mem data structure, allocating memory for it in
-     * the specified location.
-     *
-     * @param[in] mem_type     Enumerated data type of memory contents (magic number).
-     * @param[in] mem_location Specify 0 for host memory, 1 for device memory.
-     * @param[in] size         Number of elements of type \p type in the array.
-     * @param[in] owner_       Bool flag specifying if the structure should take
-     *                         ownership of the memory (default = true).
-     */
-    OSKAR_EXPORT
-    oskar_Mem(int mem_type, int mem_location, size_t size = 0, int owner_ = 1);
+    oskar_Mem();
 
     /**
      * @brief Destroys the structure.
