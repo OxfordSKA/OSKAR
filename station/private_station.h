@@ -53,7 +53,7 @@ struct oskar_Station
 
     /* Data common to all station types -------------------------------------*/
     int station_type;            /**< Type of the station (enumerator). */
-    double longitude_rad;        /**< Geodetic longitude of station, in radians. */
+    double longitude_rad;        /**< Geodetic east longitude of station, in radians. */
     double latitude_rad;         /**< Geodetic latitude of station, in radians. */
     double altitude_m;           /**< Altitude of station above ellipsoid, in metres. */
     double beam_longitude_rad;   /**< Longitude of beam phase centre, in radians. */
