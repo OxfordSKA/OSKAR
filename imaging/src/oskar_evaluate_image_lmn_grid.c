@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <imaging/oskar_evaluate_image_lm_grid.h>
+#include <imaging/oskar_evaluate_image_lmn_grid.h>
 #include <math/oskar_linspace.h>
 #include <math.h>
 #include <stdlib.h>
@@ -36,8 +36,8 @@ extern "C" {
 #endif
 
 /* oskar_Mem wrapper */
-void oskar_evaluate_image_lm_grid(oskar_Mem* l, oskar_Mem* m, int nl, int nm,
-        double fov_lon, double fov_lat, int* status)
+void oskar_evaluate_image_lmn_grid(oskar_Mem* l, oskar_Mem* m, oskar_Mem* n,
+        int nl, int nm, double fov_lon, double fov_lat, int* status)
 {
     int type, loc;
 
@@ -66,14 +66,16 @@ void oskar_evaluate_image_lm_grid(oskar_Mem* l, oskar_Mem* m, int nl, int nm,
         {
             double* l_ = oskar_mem_double(l, status);
             double* m_ = oskar_mem_double(m, status);
-            oskar_evaluate_image_lm_grid_d(nl, nm, fov_lon, fov_lat, l_, m_);
+            double* n_ = oskar_mem_double(n, status);
+            oskar_evaluate_image_lmn_grid_d(nl, nm, fov_lon, fov_lat, l_, m_, n_);
         }
         else if (type == OSKAR_SINGLE)
         {
             float* l_ = oskar_mem_float(l, status);
             float* m_ = oskar_mem_float(m, status);
-            oskar_evaluate_image_lm_grid_f(nl, nm, (float)fov_lon,
-                    (float)fov_lat, l_, m_);
+            float* n_ = oskar_mem_float(n, status);
+            oskar_evaluate_image_lmn_grid_f(nl, nm, (float)fov_lon,
+                    (float)fov_lat, l_, m_, n_);
         }
         else
         {
@@ -95,8 +97,8 @@ void oskar_evaluate_image_lm_grid(oskar_Mem* l, oskar_Mem* m, int nl, int nm,
 }
 
 /* Single precision. */
-void oskar_evaluate_image_lm_grid_f(int num_l, int num_m,
-        float fov_lon, float fov_lat, float* grid_l, float* grid_m)
+void oskar_evaluate_image_lmn_grid_f(int num_l, int num_m,
+        float fov_lon, float fov_lat, float* grid_l, float* grid_m, float* grid_n)
 {
     int i, j, p;
     float l_max, m_max, *l, *m, r;
@@ -123,10 +125,12 @@ void oskar_evaluate_image_lm_grid_f(int num_l, int num_m,
             {
                 grid_l[p] = NAN;
                 grid_m[p] = NAN;
+                grid_n[p] = NAN;
             }
             else {
                 grid_l[p] = l[i];
                 grid_m[p] = m[j];
+                grid_n[p] = sqrtf(1.0f-l[i]*l[i]-m[j]*m[j])-1.0;
             }
         }
     }
@@ -137,8 +141,9 @@ void oskar_evaluate_image_lm_grid_f(int num_l, int num_m,
 }
 
 /* Double precision. */
-void oskar_evaluate_image_lm_grid_d(int num_l, int num_m,
-        double fov_lon, double fov_lat, double* grid_l, double* grid_m)
+void oskar_evaluate_image_lmn_grid_d(int num_l, int num_m,
+        double fov_lon, double fov_lat, double* grid_l, double* grid_m,
+        double* grid_n)
 {
     int i, j, p;
     double l_max, m_max, *l, *m, r;
@@ -165,10 +170,12 @@ void oskar_evaluate_image_lm_grid_d(int num_l, int num_m,
             {
                 grid_l[p] = NAN;
                 grid_m[p] = NAN;
+                grid_n[p] = NAN;
             }
             else {
                 grid_l[p] = l[i];
                 grid_m[p] = m[j];
+                grid_n[p] = sqrt(1.0-l[i]*l[i]-m[j]*m[j])-1.0;
             }
         }
     }

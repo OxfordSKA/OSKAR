@@ -255,14 +255,12 @@ static void save_total_intensity_(const oskar_Image* complex_cube,
     num_pixels = complex_cube->width * complex_cube->height;
     size = settings->beam_pattern.size;
 
-
     /* Allocate total intensity image cube to write into. */
     oskar_image_init(&image, type, OSKAR_LOCATION_CPU, status);
     /* Set the beam pattern image cube */
-    oskar_image_resize(&image, size[0], size[1], num_pols, num_times,
+    oskar_image_resize(&image, size[0], size[1], 1, num_times,
             num_channels, status);
-    image.image_type         = (num_pols == 1) ?
-            OSKAR_IMAGE_TYPE_BEAM_SCALAR : OSKAR_IMAGE_TYPE_BEAM_POLARISED;
+    image.image_type         = OSKAR_IMAGE_TYPE_BEAM_SCALAR;
     image.centre_ra_deg      = settings->obs.ra0_rad[0] * 180.0 / M_PI;
     image.centre_dec_deg     = settings->obs.dec0_rad[0] * 180.0 / M_PI;
     image.fov_ra_deg         = settings->beam_pattern.fov_deg[0];

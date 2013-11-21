@@ -210,6 +210,7 @@ static void compute_enu_directions_(oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
         *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         return;
     }
+
     /* Convert from lmn to ENU directions */
     oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
             x, y, z, np, l, m, n, ha0, dec0, lat, status);

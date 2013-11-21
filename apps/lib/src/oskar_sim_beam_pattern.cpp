@@ -208,7 +208,6 @@ static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
                 add_beam_pattern_to_complex_cube_(beam_pattern_cube, &beam_tmp,
                         &d_beam_pattern, num_times, num_pols, num_pixels, t, c,
                         status);
-
             } // End of time loop
 
             // Record GPU memory usage.
@@ -289,8 +288,8 @@ static void add_beam_pattern_to_complex_cube_(oskar_Image* beam_pattern_cube,
         // Re-order the polarisation data.
         if (type == OSKAR_SINGLE)
         {
-            float2* bp = (float2*)beam_pattern_cube->data.data + offset;
-            float4c* tc = (float4c*)beam_temp->data;
+            float2* bp = oskar_mem_float2(&beam_pattern_cube->data, status) + offset;
+            float4c* tc = oskar_mem_float4c(beam_temp, status);
             for (int i = 0; i < num_pixels; ++i)
             {
                 bp[i]                  = tc[i].a; // theta_X
@@ -301,8 +300,8 @@ static void add_beam_pattern_to_complex_cube_(oskar_Image* beam_pattern_cube,
         }
         else /* (type == OSKAR_DOUBLE) */
         {
-            double2* bp = (double2*)beam_pattern_cube->data.data + offset;
-            double4c* tc = (double4c*)beam_temp->data;
+            double2* bp = oskar_mem_double2(&beam_pattern_cube->data, status) + offset;
+            double4c* tc = oskar_mem_double4c(beam_temp, status);
             for (int i = 0; i < num_pixels; ++i)
             {
                 bp[i]                  = tc[i].a; // theta_X

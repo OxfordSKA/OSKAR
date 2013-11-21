@@ -27,7 +27,7 @@
  */
 
 #include <apps/lib/oskar_beam_pattern_generate_coordinates.h>
-#include <oskar_evaluate_image_lm_grid.h>
+#include <oskar_evaluate_image_lmn_grid.h>
 #include <math.h>
 
 #ifdef __cplusplus
@@ -48,7 +48,7 @@ void oskar_beam_pattern_generate_coordinates(oskar_Mem* x, oskar_Mem* y,
     {
         case OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE:
         {
-            oskar_evaluate_image_lm_grid(x, y, settings->size[0],
+            oskar_evaluate_image_lmn_grid(x, y, z, settings->size[0],
                     settings->size[1], settings->fov_deg[0]*(M_PI/180.0),
                     settings->fov_deg[1]*(M_PI/180.0), status);
             *coord_type = OSKAR_RELATIVE_DIRECTION_COSINES;

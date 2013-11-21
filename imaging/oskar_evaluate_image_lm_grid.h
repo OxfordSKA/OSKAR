@@ -42,8 +42,7 @@ extern "C" {
 
 /**
  * @brief
- * Generate a grid on the tangent plane suitable for use with a FITS image
- * (single precision).
+ * Generate a grid on the tangent plane suitable for use with a FITS image.
  *
  * @details
  * This function computes (orthographic) tangent-plane positions on a grid

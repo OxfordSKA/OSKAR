@@ -49,7 +49,7 @@ int oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
     // Get the simulator settings.
     sim->double_precision = s.value("double_precision", true).toBool();
     sim->max_sources_per_chunk = s.value("max_sources_per_chunk", 10000).toInt();
-    sim->keep_log_file = s.value("keep_log_file", true).toBool();
+    sim->keep_log_file = s.value("keep_log_file", false).toBool();
 
     // Get the device IDs to use.
     QStringList devsList;

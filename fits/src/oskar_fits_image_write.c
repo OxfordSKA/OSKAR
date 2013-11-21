@@ -240,6 +240,7 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
     {
         num_elements *= naxes[i];
     }
+
     fits_write_img(fptr, datatype, 1, num_elements,
             oskar_mem_void(&image->data), status);
 
