@@ -40,15 +40,12 @@ void oskar_convert_apparent_ha_dec_to_enu_direction_cosines_cudak_f(int n,
 {
     // Get the coordinate index that this thread is working on.
     const int idx = blockDim.x * blockIdx.x + threadIdx.x;
+    if (idx >= n) return;
 
     // Copy local equatorial coordinates from global memory.
     float sh, sd; // Source HA, Dec.
-    if (idx < n)
-    {
-        sh = ha[idx];
-        sd = dec[idx];
-    }
-    __syncthreads(); // Coalesce memory accesses.
+    sh = ha[idx];
+    sd = dec[idx];
 
     // Find direction cosines.
     float cosDec, sinDec, cosHA, sinHA, t, X1, Y2;
@@ -60,13 +57,9 @@ void oskar_convert_apparent_ha_dec_to_enu_direction_cosines_cudak_f(int n,
     t = -cosDec * sinHA;
 
     // Copy direction cosines into global memory.
-    __syncthreads(); // Coalesce memory accesses.
-    if (idx < n)
-    {
-        x[idx] = t;  // Horizontal x-component.
-        y[idx] = X1; // Horizontal y-component.
-        z[idx] = Y2; // Horizontal z-component.
-    }
+    x[idx] = t;  // Horizontal x-component.
+    y[idx] = X1; // Horizontal y-component.
+    z[idx] = Y2; // Horizontal z-component.
 }
 
 // Double precision.
@@ -77,15 +70,12 @@ void oskar_convert_apparent_ha_dec_to_enu_direction_cosines_cudak_d(int n,
 {
     // Get the coordinate index that this thread is working on.
     const int idx = blockDim.x * blockIdx.x + threadIdx.x;
+    if (idx >= n) return;
 
     // Copy local equatorial coordinates from global memory.
     double sh, sd; // Source HA, Dec.
-    if (idx < n)
-    {
-        sh = ha[idx];
-        sd = dec[idx];
-    }
-    __syncthreads(); // Coalesce memory accesses.
+    sh = ha[idx];
+    sd = dec[idx];
 
     // Find direction cosines.
     double cosDec, sinDec, cosHA, sinHA, t, X1, Y2;
@@ -97,13 +87,9 @@ void oskar_convert_apparent_ha_dec_to_enu_direction_cosines_cudak_d(int n,
     t = -cosDec * sinHA;
 
     // Copy direction cosines into global memory.
-    __syncthreads(); // Coalesce memory accesses.
-    if (idx < n)
-    {
-        x[idx] = t;  // Horizontal x-component.
-        y[idx] = X1; // Horizontal y-component.
-        z[idx] = Y2; // Horizontal z-component.
-    }
+    x[idx] = t;  // Horizontal x-component.
+    y[idx] = X1; // Horizontal y-component.
+    z[idx] = Y2; // Horizontal z-component.
 }
 
 #ifdef __cplusplus
