@@ -136,7 +136,7 @@ TEST(SkyModel, compute_relative_lmn)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Compute direction cosines.
-    oskar_sky_compute_relative_lmn(sky1, ra0, dec0, &status);
+    oskar_sky_evaluate_relative_direction_cosines(sky1, ra0, dec0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy data back to CPU.
@@ -152,7 +152,7 @@ TEST(SkyModel, compute_relative_lmn)
         float l = sin(ra[i] - ra0) * cos(dec[i]);
         float m = cos(dec0) * sin(dec[i]) -
                 sin(dec0) * cos(dec[i]) * cos(ra[i] - ra0);
-        float p = sqrt(1.0 - l*l - m*m) - 1.0;
+        float p = sqrt(1.0 - l*l - m*m);
         EXPECT_NEAR(l, oskar_mem_float(oskar_sky_l(sky2), &status)[i], tol);
         EXPECT_NEAR(m, oskar_mem_float(oskar_sky_m(sky2), &status)[i], tol);
         EXPECT_NEAR(p, oskar_mem_float(oskar_sky_n(sky2), &status)[i], tol);
@@ -439,10 +439,8 @@ TEST(SkyModel, horizon_clip)
     // Create sky models.
     int status = 0;
     int type = OSKAR_SINGLE;
-    oskar_Sky* sky_cpu = oskar_sky_create(type,
-            OSKAR_LOCATION_CPU, 0, &status);
-    oskar_Sky* sky_out = oskar_sky_create(type,
-            OSKAR_LOCATION_GPU, 0, &status);
+    oskar_Sky* sky_cpu = oskar_sky_create(type, OSKAR_LOCATION_CPU, 0, &status);
+    oskar_Sky* sky_out = oskar_sky_create(type, OSKAR_LOCATION_GPU, 0, &status);
 
     // Constants.
     const double deg2rad = M_PI / 180.0;
@@ -489,9 +487,11 @@ TEST(SkyModel, horizon_clip)
     oskar_StationWork* work = oskar_station_work_create(type,
             OSKAR_LOCATION_GPU, &status);
 
+    // Evaluate relative direction cosines.
+    oskar_sky_evaluate_relative_direction_cosines(sky_cpu, 0.0, M_PI/2, &status);
+
     // Try horizon clip: should currently fail because it's in host memory.
-    oskar_sky_horizon_clip(sky_out, sky_cpu, telescope, 0.0, work,
-            &status);
+    oskar_sky_horizon_clip(sky_out, sky_cpu, telescope, 0.0, work, &status);
     ASSERT_EQ((int)OSKAR_ERR_BAD_LOCATION, status);
     status = 0;
 
@@ -599,7 +599,7 @@ TEST(SkyModel, resize)
         oskar_Sky* sky = oskar_sky_create(OSKAR_SINGLE,
                 OSKAR_LOCATION_GPU, 10, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_type(sky));
+        ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_precision(sky));
         ASSERT_EQ((int)OSKAR_LOCATION_GPU, oskar_sky_location(sky));
         ASSERT_EQ(10, oskar_sky_num_sources(sky));
         oskar_sky_resize(sky, 1, &status);
@@ -617,7 +617,7 @@ TEST(SkyModel, resize)
         oskar_Sky* sky = oskar_sky_create(OSKAR_DOUBLE,
                 OSKAR_LOCATION_CPU, 10, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ((int)OSKAR_DOUBLE, oskar_sky_type(sky));
+        ASSERT_EQ((int)OSKAR_DOUBLE, oskar_sky_precision(sky));
         ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_sky_location(sky));
         ASSERT_EQ(10, oskar_sky_num_sources(sky));
         oskar_sky_resize(sky, 1, &status);
@@ -881,7 +881,7 @@ TEST(SkyModel, set_source)
     oskar_sky_set_source(sky, 1, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5,
             250.0e6, -0.8, 2.5, 0.0, 0.0, 0.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_type(sky));
+    ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_precision(sky));
     ASSERT_EQ((int)OSKAR_LOCATION_GPU, oskar_sky_location(sky));
 
     // Copy back into temp. structure on the CPU to check the values were set
@@ -889,7 +889,7 @@ TEST(SkyModel, set_source)
     oskar_Sky* sky_temp = oskar_sky_create_copy(sky,
             OSKAR_LOCATION_CPU, &status);
     ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_sky_location(sky_temp));
-    ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_type(sky_temp));
+    ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_precision(sky_temp));
     ASSERT_EQ(2, oskar_sky_num_sources(sky_temp));
     EXPECT_FLOAT_EQ(1.0, oskar_mem_float(oskar_sky_ra(sky_temp), &status)[0]);
     EXPECT_FLOAT_EQ(200e6, oskar_mem_float(oskar_sky_reference_freq(sky_temp),
@@ -1097,7 +1097,7 @@ TEST(SkyModel, load_ascii)
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_sky_load(sky, filename, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_type(sky));
+        ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_precision(sky));
         ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_sky_location(sky));
         ASSERT_EQ(num_sources, oskar_sky_num_sources(sky));
 
@@ -1142,7 +1142,7 @@ TEST(SkyModel, load_ascii)
         oskar_sky_load(sky_gpu, filename, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-        ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_type(sky_gpu));
+        ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_precision(sky_gpu));
         ASSERT_EQ((int)OSKAR_LOCATION_GPU, oskar_sky_location(sky_gpu));
         ASSERT_EQ(num_sources, oskar_sky_num_sources(sky_gpu));
 

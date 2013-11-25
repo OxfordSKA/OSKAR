@@ -54,7 +54,7 @@ void oskar_telescope_save_station_coords(
     if (*status) return;
 
     /* Check type and location. */
-    type = oskar_telescope_type(telescope);
+    type = oskar_telescope_precision(telescope);
     location = oskar_telescope_location(telescope);
     num_stations = oskar_telescope_num_stations(telescope);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)

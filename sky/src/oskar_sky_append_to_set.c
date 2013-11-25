@@ -62,7 +62,7 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
     if (*status) return;
 
     /* Get type and location. */
-    type     = oskar_sky_type(model);
+    type     = oskar_sky_precision(model);
     location = oskar_sky_location(model);
     if (location != OSKAR_LOCATION_CPU)
     {

@@ -41,7 +41,7 @@ extern "C" {
 #endif
 
 OSKAR_EXPORT
-int oskar_sky_type(const oskar_Sky* sky);
+int oskar_sky_precision(const oskar_Sky* sky);
 
 OSKAR_EXPORT
 int oskar_sky_location(const oskar_Sky* sky);
@@ -54,6 +54,12 @@ int oskar_sky_use_extended(const oskar_Sky* sky);
 
 OSKAR_EXPORT
 void oskar_sky_set_use_extended(oskar_Sky* sky, int value);
+
+OSKAR_EXPORT
+double oskar_sky_ra0(const oskar_Sky* sky);
+
+OSKAR_EXPORT
+double oskar_sky_dec0(const oskar_Sky* sky);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_sky_ra(oskar_Sky* sky);

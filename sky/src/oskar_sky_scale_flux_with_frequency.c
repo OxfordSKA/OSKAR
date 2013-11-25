@@ -51,7 +51,7 @@ void oskar_sky_scale_flux_with_frequency(oskar_Sky* model, double frequency,
     if (*status) return;
 
     /* Get the type, location and dimensions. */
-    type = oskar_sky_type(model);
+    type = oskar_sky_precision(model);
     location = oskar_sky_location(model);
     num_sources = oskar_sky_num_sources(model);
 

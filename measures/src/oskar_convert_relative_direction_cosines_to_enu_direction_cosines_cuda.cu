@@ -100,7 +100,7 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cudak_f(
 
     l_ = l[i];
     m_ = m[i];
-    n_ = n[i] + 1.0f; /* Shift back to origin (correct for convention). */
+    n_ = n[i];
     x_ = l_ * cos_ha0 + m_ * sin_ha0 * sin_dec0 - n_ * sin_ha0 * cos_dec0;
     t = sin_lat * cos_ha0;
     y_ = -l_ * sin_lat * sin_ha0 +
@@ -128,7 +128,7 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cudak_d(
 
     l_ = l[i];
     m_ = m[i];
-    n_ = n[i] + 1.0; /* Shift back to origin (correct for convention). */
+    n_ = n[i];
     x_ = l_ * cos_ha0 + m_ * sin_ha0 * sin_dec0 - n_ * sin_ha0 * cos_dec0;
     t = sin_lat * cos_ha0;
     y_ = -l_ * sin_lat * sin_ha0 +

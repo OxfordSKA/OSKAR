@@ -72,7 +72,7 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky,
     else if (location == OSKAR_LOCATION_CPU)
     {
         int in, out, type, num_sources;
-        type = oskar_sky_type(sky);
+        type = oskar_sky_precision(sky);
         num_sources = oskar_sky_num_sources(sky);
 
         if (type == OSKAR_SINGLE)

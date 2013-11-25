@@ -55,7 +55,7 @@ extern "C" {
  * @return The data type (OSKAR_SINGLE or OSKAR_DOUBLE).
  */
 OSKAR_EXPORT
-int oskar_telescope_type(const oskar_Telescope* model);
+int oskar_telescope_precision(const oskar_Telescope* model);
 
 /**
  * @brief

@@ -34,7 +34,8 @@
 #include <oskar_evaluate_array_pattern.h>
 #include <oskar_evaluate_array_pattern_hierarchical.h>
 #include <oskar_evaluate_beam_horizon_direction.h>
-#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
+#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
+#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines.h>
 #include <oskar_evaluate_element_weights_dft.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
 #include <oskar_image_free.h>
@@ -174,28 +175,38 @@ static void set_up_pointing(oskar_Mem* weights, oskar_Mem* x, oskar_Mem* y,
         const oskar_Mem* lat, double gast, double freq_hz, int* status)
 {
     double beam_x, beam_y, beam_z, st_lat, last, wavenumber;
-    int type, location, num_elements;
+    int type, location, num_elements, num_points;
+    oskar_Mem l, m, n;
 
     type = oskar_station_precision(station);
     location = oskar_station_location(station);
     num_elements = oskar_station_num_elements(station);
+    num_points = oskar_mem_length(lon);
     wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
     last = gast + oskar_station_longitude_rad(station);
     st_lat = oskar_station_latitude_rad(station);
     oskar_mem_init(weights, type | OSKAR_COMPLEX, location,
             num_elements, 1, status);
-    oskar_mem_init(x, type, location, (int)oskar_mem_length(lon), 1, status);
-    oskar_mem_init(y, type, location, (int)oskar_mem_length(lon), 1, status);
-    oskar_mem_init(z, type, location, (int)oskar_mem_length(lon), 1, status);
+    oskar_mem_init(x, type, location, num_points, 1, status);
+    oskar_mem_init(y, type, location, num_points, 1, status);
+    oskar_mem_init(z, type, location, num_points, 1, status);
+    oskar_mem_init(&l, type, location, num_points, 1, status);
+    oskar_mem_init(&m, type, location, num_points, 1, status);
+    oskar_mem_init(&n, type, location, num_points, 1, status);
     oskar_evaluate_beam_horizon_direction(&beam_x, &beam_y, &beam_z, station,
             gast, status);
-    oskar_convert_apparent_ra_dec_to_enu_direction_cosines(
-            (int)oskar_mem_length(lon), x, y, z, lon, lat, last, st_lat, status);
+    oskar_convert_apparent_ra_dec_to_relative_direction_cosines(num_points,
+            lon, lat, 0.0, 0.0, &l, &m, &n, status);
+    oskar_convert_relative_direction_cosines_to_enu_direction_cosines(x, y, z,
+            num_points, &l, &m, &n, last, 0.0, st_lat, status);
     oskar_evaluate_element_weights_dft(weights, num_elements, wavenumber,
             oskar_station_element_x_weights_const(station),
             oskar_station_element_y_weights_const(station),
             oskar_station_element_z_weights_const(station),
             beam_x, beam_y, beam_z, status);
+    oskar_mem_free(&l, status);
+    oskar_mem_free(&m, status);
+    oskar_mem_free(&n, status);
 }
 
 static void run_array_pattern(oskar_Image* bp,

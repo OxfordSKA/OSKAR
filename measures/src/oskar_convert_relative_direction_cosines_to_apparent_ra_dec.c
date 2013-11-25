@@ -49,7 +49,7 @@ void oskar_convert_relative_direction_cosines_to_apparent_ra_dec_f(int np,
         float l_, m_, n_;
         l_ = l[i];
         m_ = m[i];
-        n_ = sqrtf(1.0 - l_*l_ - m_*m_);
+        n_ = sqrtf(1.0f - l_*l_ - m_*m_);
         dec[i] = asinf(n_ * sinDec0 + m_ * cosDec0);
         ra[i] = ra0 + atan2f(l_, cosDec0 * n_ - m_ * sinDec0);
     }

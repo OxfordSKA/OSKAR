@@ -48,7 +48,7 @@ mxArray* oskar_mex_sky_to_matlab_struct(const oskar_Sky* sky,
 
     int num_sources = oskar_sky_num_sources(sky);
 
-    mxClassID classId = (oskar_sky_type(sky) == OSKAR_DOUBLE) ?
+    mxClassID classId = (oskar_sky_precision(sky) == OSKAR_DOUBLE) ?
             mxDOUBLE_CLASS : mxSINGLE_CLASS;
 
     mwSize m = num_sources;

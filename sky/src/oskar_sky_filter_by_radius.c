@@ -60,7 +60,7 @@ void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
     }
 
     /* Get the type and location. */
-    type = oskar_sky_type(sky);
+    type = oskar_sky_precision(sky);
     location = oskar_sky_location(sky);
     num_sources = oskar_sky_num_sources(sky);
 

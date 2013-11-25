@@ -6,15 +6,11 @@
 # FIXME Append CUDA source files only if CUDA found.
 set(name measures)
 set(${name}_SRC
-    src/oskar_convert_apparent_ha_dec_to_az_el.c
-    src/oskar_convert_apparent_ha_dec_to_enu_direction_cosines_cuda.cu
     src/oskar_convert_apparent_ha_dec_to_enu_direction_cosines.c
 
-    src/oskar_convert_apparent_ra_dec_to_az_el_cuda.cu
     src/oskar_convert_apparent_ra_dec_to_az_el.c
     src/oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda.cu
     src/oskar_convert_apparent_ra_dec_to_relative_direction_cosines.c
-    src/oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda.cu
     src/oskar_convert_apparent_ra_dec_to_enu_direction_cosines.c
 
     src/oskar_convert_relative_direction_cosines_to_apparent_ra_dec.c
@@ -25,7 +21,6 @@ set(${name}_SRC
     src/oskar_convert_ecef_to_station_uvw.c
     src/oskar_convert_ecef_to_station_uvw_cuda.cu
 
-    src/oskar_convert_enu_direction_cosines_to_az_el_cuda.cu
     src/oskar_convert_enu_direction_cosines_to_az_el.c
     src/oskar_convert_enu_to_ecef.c
     src/oskar_convert_enu_to_offset_ecef.c

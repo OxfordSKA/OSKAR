@@ -136,7 +136,7 @@ void oskar_sky_filter_by_flux_cuda(oskar_Sky* sky,
     }
 
     /* Get the type and location. */
-    type = oskar_sky_type(sky);
+    type = oskar_sky_precision(sky);
     location = oskar_sky_location(sky);
 
     /* Check location. */

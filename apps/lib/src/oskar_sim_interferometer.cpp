@@ -341,7 +341,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_timer_resume(timers->tmr_init_copy);
 
     /* Get data type and dimensions. */
-    type = oskar_sky_type(sky);
+    type = oskar_sky_precision(sky);
     n_stations = oskar_telescope_num_stations(telescope);
     n_baselines = n_stations * (n_stations - 1) / 2;
     complx = type | OSKAR_COMPLEX;

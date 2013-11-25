@@ -66,7 +66,7 @@ void oskar_telescope_set_station_coords(oskar_Telescope* dst,
     }
 
     /* Get the data type and location. */
-    type = oskar_telescope_type(dst);
+    type = oskar_telescope_precision(dst);
     location = oskar_telescope_location(dst);
 
     /* Get byte pointers. */

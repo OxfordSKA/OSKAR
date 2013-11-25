@@ -139,7 +139,8 @@ void oskar_correlate_gaussian_time_smearing_omp_f(int num_sources,
 
                 /* Compute bandwidth- and time-smearing terms. */
                 r1 = oskar_sinc_f(uu * l + vv * m);
-                r2 = oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * n);
+                r2 = oskar_sinc_f(du_dt * l + dv_dt * m +
+                        dw_dt * (fabsf(n) - 1.0f));
                 r1 *= r2;
 
                 /* Evaluate Gaussian source width term. */
@@ -254,7 +255,8 @@ void oskar_correlate_gaussian_time_smearing_omp_d(int num_sources,
 
                 /* Compute bandwidth- and time-smearing terms. */
                 r1 = oskar_sinc_d(uu * l + vv * m);
-                r2 = oskar_sinc_d(du_dt * l + dv_dt * m + dw_dt * n);
+                r2 = oskar_sinc_d(du_dt * l + dv_dt * m +
+                        dw_dt * (fabs(n) - 1.0));
                 r1 *= r2;
 
                 /* Evaluate Gaussian source width term. */

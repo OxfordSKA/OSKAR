@@ -161,7 +161,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
         *status = OSKAR_ERR_BAD_JONES_TYPE;
         return;
     }
-    if (base_type != oskar_sky_type(sky))
+    if (base_type != oskar_sky_precision(sky))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;

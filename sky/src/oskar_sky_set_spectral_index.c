@@ -56,7 +56,7 @@ void oskar_sky_set_spectral_index(oskar_Sky* sky, int index,
 
     /* Get the data location and type. */
     location = oskar_sky_location(sky);
-    type = oskar_sky_type(sky);
+    type = oskar_sky_precision(sky);
 
     if (index >= sky->num_sources)
     {

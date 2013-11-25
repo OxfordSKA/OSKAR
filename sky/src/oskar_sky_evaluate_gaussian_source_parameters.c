@@ -78,7 +78,7 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
     }
 
     /* Get data type and number of sources. */
-    type = oskar_sky_type(sky);
+    type = oskar_sky_precision(sky);
     num_sources = oskar_sky_num_sources(sky);
 
     /* Switch on type. */

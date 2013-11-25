@@ -89,31 +89,6 @@ void oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(int n,
         const double* ra, const double* dec, double lst, double lat, double* x,
         double* y, double* z);
 
-/**
- * @brief
- * Converts Equatorial to horizon 3D direction cosines.
- *
- * @details
- * This function converts positions from equatorial (RA, Dec)
- * coordinates to horizontal direction cosines at the specified local
- * apparent sidereal time and latitude.
- *
- * @param[in]     n      The number of points to convert.
- * @param[out]    z      x-direction cosines in the horizontal system.
- * @param[out]    y      y-direction cosines in the horizontal system.
- * @param[out]    z      z-direction cosines in the horizontal system.
- * @param[in]     ra     Right ascensions, in radians.
- * @param[in]     dec    Declinations, in radians.
- * @param[in]     last   The local apparent sidereal time, in radians.
- * @param[in]     lat    The geodetic latitude of the origin of the horizon
- *                       frame, in radians.
- * @param[in,out] status Status return code.
- */
-OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_enu_direction_cosines(int n, oskar_Mem* x,
-        oskar_Mem* y, oskar_Mem* z, const oskar_Mem* ra, const oskar_Mem* dec,
-        double last, double lat, int* status);
-
 #ifdef __cplusplus
 }
 #endif

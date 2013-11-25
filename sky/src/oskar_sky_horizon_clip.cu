@@ -29,7 +29,7 @@
 #include <private_sky.h>
 #include <oskar_sky.h>
 
-#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda.h>
+#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda.h>
 #include <oskar_update_horizon_mask_cuda.h>
 #include <oskar_cuda_check_error.h>
 #include <oskar_mem.h>
@@ -128,9 +128,10 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
         const oskar_Sky* input, const oskar_Telescope* telescope,
         double gast, oskar_StationWork* work, int* status)
 {
-    int *mask, type;
+    int *mask, i, type, num_sources, num_stations;
     const oskar_Station* s;
     oskar_Mem *horizon_mask, *hor_x, *hor_y, *hor_z;
+    double ra0, ha0, dec0, longitude, latitude;
 
     /* Check all inputs. */
     if (!output || !input || !telescope || !work || !status)
@@ -149,8 +150,8 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
     hor_z = oskar_station_work_enu_direction_z(work);
 
     /* Check that the types match. */
-    type = oskar_sky_type(input);
-    if (oskar_sky_type(output) != type)
+    type = oskar_sky_precision(input);
+    if (oskar_sky_precision(output) != type)
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
@@ -165,13 +166,18 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
         return;
     }
 
-    /* Copy extended source flag. */
-    oskar_sky_set_use_extended(output,
-            oskar_sky_use_extended(input));
-
     /* Get the data dimensions. */
-    int num_sources = oskar_sky_num_sources(input);
-    int num_stations = oskar_telescope_num_stations(telescope);
+    num_sources = oskar_sky_num_sources(input);
+    num_stations = oskar_telescope_num_stations(telescope);
+
+    /* Get the phase centre position (origin of l,m,n coordinates). */
+    ra0 = oskar_sky_ra0(input);
+    dec0 = oskar_sky_dec0(input);
+
+    /* Copy meta-data. */
+    oskar_sky_set_use_extended(output, oskar_sky_use_extended(input));
+    output->ra0 = ra0;
+    output->dec0 = dec0;
 
     /* Resize the output structure if necessary. */
     if (oskar_sky_num_sources(output) < num_sources)
@@ -196,27 +202,27 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
 
     if (type == OSKAR_SINGLE)
     {
-        const float *ra, *dec;
+        const float *l, *m, *n;
         float *x, *y, *z;
-        ra   = oskar_mem_float_const(oskar_sky_ra_const(input), status);
-        dec  = oskar_mem_float_const(oskar_sky_dec_const(input), status);
-        x    = oskar_mem_float(hor_x, status);
-        y    = oskar_mem_float(hor_y, status);
-        z    = oskar_mem_float(hor_z, status);
+        l = oskar_mem_float_const(oskar_sky_l_const(input), status);
+        m = oskar_mem_float_const(oskar_sky_m_const(input), status);
+        n = oskar_mem_float_const(oskar_sky_n_const(input), status);
+        x = oskar_mem_float(hor_x, status);
+        y = oskar_mem_float(hor_y, status);
+        z = oskar_mem_float(hor_z, status);
 
         /* Create the mask. */
-        for (int i = 0; i < num_stations; ++i)
+        for (i = 0; i < num_stations; ++i)
         {
             /* Get the station position. */
-            double longitude, latitude, lst;
             s = oskar_telescope_station_const(telescope, i);
             longitude = oskar_station_longitude_rad(s);
             latitude  = oskar_station_latitude_rad(s);
-            lst = gast + longitude;
+            ha0 = (gast + longitude) - ra0;
 
-            /* Evaluate source horizontal x,y,z direction cosines. */
-            oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda_f(
-                    num_sources, ra, dec, lst, latitude, x, y, z);
+            /* Evaluate source horizontal ENU direction cosines. */
+            oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_f(
+                    x, y, z, num_sources, l, m, n, ha0, dec0, latitude);
 
             /* Update the mask. */
             oskar_update_horizon_mask_cuda_f(num_sources, mask,
@@ -229,27 +235,27 @@ void oskar_sky_horizon_clip(oskar_Sky* output,
     }
     else if (type == OSKAR_DOUBLE)
     {
-        const double *ra, *dec;
+        const double *l, *m, *n;
         double *x, *y, *z;
-        ra   = oskar_mem_double_const(oskar_sky_ra_const(input), status);
-        dec  = oskar_mem_double_const(oskar_sky_dec_const(input), status);
-        x    = oskar_mem_double(hor_x, status);
-        y    = oskar_mem_double(hor_y, status);
-        z    = oskar_mem_double(hor_z, status);
+        l = oskar_mem_double_const(oskar_sky_l_const(input), status);
+        m = oskar_mem_double_const(oskar_sky_m_const(input), status);
+        n = oskar_mem_double_const(oskar_sky_n_const(input), status);
+        x = oskar_mem_double(hor_x, status);
+        y = oskar_mem_double(hor_y, status);
+        z = oskar_mem_double(hor_z, status);
 
         /* Create the mask. */
-        for (int i = 0; i < num_stations; ++i)
+        for (i = 0; i < num_stations; ++i)
         {
             /* Get the station position. */
-            double longitude, latitude, lst;
             s = oskar_telescope_station_const(telescope, i);
             longitude = oskar_station_longitude_rad(s);
             latitude  = oskar_station_latitude_rad(s);
-            lst = gast + longitude;
+            ha0 = (gast + longitude) - ra0;
 
-            /* Evaluate source horizontal x,y,z direction cosines. */
-            oskar_convert_apparent_ra_dec_to_enu_direction_cosines_cuda_d(
-                    num_sources, ra, dec, lst, latitude, x, y, z);
+            /* Evaluate source horizontal ENU direction cosines. */
+            oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_d(
+                    x, y, z, num_sources, l, m, n, ha0, dec0, latitude);
 
             /* Update the mask. */
             oskar_update_horizon_mask_cuda_d(num_sources, mask,

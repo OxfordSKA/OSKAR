@@ -130,7 +130,7 @@ void oskar_evaluate_image_lmn_grid_f(int num_l, int num_m,
             else {
                 grid_l[p] = l[i];
                 grid_m[p] = m[j];
-                grid_n[p] = sqrtf(1.0f-l[i]*l[i]-m[j]*m[j])-1.0;
+                grid_n[p] = sqrtf(1.0f-l[i]*l[i]-m[j]*m[j]);
             }
         }
     }
@@ -175,7 +175,7 @@ void oskar_evaluate_image_lmn_grid_d(int num_l, int num_m,
             else {
                 grid_l[p] = l[i];
                 grid_m[p] = m[j];
-                grid_n[p] = sqrt(1.0-l[i]*l[i]-m[j]*m[j])-1.0;
+                grid_n[p] = sqrt(1.0-l[i]*l[i]-m[j]*m[j]);
             }
         }
     }

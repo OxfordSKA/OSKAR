@@ -36,8 +36,7 @@ extern "C" {
 
 /* Properties and metadata. */
 
-/* Refactor to precision. */
-int oskar_telescope_type(const oskar_Telescope* model)
+int oskar_telescope_precision(const oskar_Telescope* model)
 {
     return model->precision;
 }

@@ -62,7 +62,7 @@ void oskar_sky_rotate_to_position(oskar_Sky* sky,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    type = oskar_sky_type(sky);
+    type = oskar_sky_precision(sky);
     location = oskar_sky_location(sky);
     if (location == OSKAR_LOCATION_CPU)
     {

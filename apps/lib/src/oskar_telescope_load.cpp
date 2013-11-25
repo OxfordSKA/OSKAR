@@ -69,6 +69,13 @@ void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
     // Check if safe to proceed.
     if (*status) return;
 
+    // Check that the telescope directory has been set.
+    if (!settings->telescope.input_directory)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
+
     // Check that the directory exists.
     oskar_Dir telescope_dir(string(settings->telescope.input_directory));
     if (!telescope_dir.exists())

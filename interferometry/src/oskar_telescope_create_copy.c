@@ -50,7 +50,7 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     }
 
     /* Create a new, empty model. */
-    telescope = oskar_telescope_create(oskar_telescope_type(src),
+    telescope = oskar_telescope_create(oskar_telescope_precision(src),
             location, 0, status);
 
     /* Copy private meta-data. */

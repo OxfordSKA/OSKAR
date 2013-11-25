@@ -26,41 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_COMPUTE_RELATIVE_LMN_H_
-#define OSKAR_SKY_COMPUTE_RELATIVE_LMN_H_
+#include <private_sky.h>
+#include <oskar_sky.h>
 
-/**
- * @file oskar_sky_compute_relative_lmn.h
- */
-
-#include <oskar_global.h>
+#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Computes 3D direction cosines of sources relative to phase centre.
- *
- * @details
- * This function populates the 3D direction cosines (l,m,n coordinates)
- * of all sources relative to the phase centre.
- *
- * It assumes that the source RA and Dec positions have already been filled,
- * and that the arrays have been preallocated to the correct length.
- *
- * @param[in,out] sky Pointer to sky model structure.
- * @param[in] ra0 Right Ascension of phase centre, in radians.
- * @param[in] dec0 Declination of phase centre, in radians.
- * @param[in,out] status Status return code.
- */
-OSKAR_EXPORT
-void oskar_sky_compute_relative_lmn(oskar_Sky* sky, double ra0,
-        double dec0, int* status);
+void oskar_sky_evaluate_relative_direction_cosines(oskar_Sky* sky, double ra0,
+        double dec0, int* status)
+{
+    /* Check all inputs. */
+    if (!sky || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Convert coordinates. */
+    oskar_convert_apparent_ra_dec_to_relative_direction_cosines(sky->num_sources,
+            &sky->RA, &sky->Dec, ra0, dec0, &sky->l, &sky->m, &sky->n, status);
+
+    /* Store the reference position. */
+    sky->ra0 = ra0;
+    sky->dec0 = dec0;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SKY_COMPUTE_RELATIVE_LMN_H_ */

@@ -65,7 +65,7 @@ void oskar_evaluate_jones_K_f(float2* jones, int num_stations,
             float2 weight;
 
             /* Calculate the source phase. */
-            phase = us * l[source] + vs * m[source] + ws * n[source];
+            phase = us * l[source] + vs * m[source] + ws * (n[source] - 1.0f);
             weight.x = cosf(phase);
             weight.y = sinf(phase);
 
@@ -101,7 +101,7 @@ void oskar_evaluate_jones_K_d(double2* jones, int num_stations,
             double2 weight;
 
             /* Calculate the source phase. */
-            phase = us * l[source] + vs * m[source] + ws * n[source];
+            phase = us * l[source] + vs * m[source] + ws * (n[source] - 1.0);
             weight.x = cos(phase);
             weight.y = sin(phase);
 

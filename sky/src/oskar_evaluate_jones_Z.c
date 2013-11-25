@@ -26,19 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_evaluate_jones_Z.h"
+#include <oskar_evaluate_jones_Z.h>
 
-/*#include "station/oskar_evaluate_source_horizontal_lmn.h"*/
-#include "oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h"
-#include "oskar_convert_offset_ecef_to_ecef.h"
-#include "utility/oskar_vector_types.h"
-#include "station/oskar_evaluate_pierce_points.h"
-#include "sky/oskar_evaluate_TEC_TID.h"
+#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines.h>
+#include <oskar_convert_offset_ecef_to_ecef.h>
+#include <oskar_evaluate_pierce_points.h>
+#include <oskar_evaluate_TEC_TID.h>
 
 #include <oskar_telescope.h>
 #include <oskar_sky.h>
 #include <oskar_jones.h>
-#include <oskar_mem.h>
 
 #include <math.h>
 #include <stdio.h>
@@ -83,8 +80,8 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
     if (*status) return;
 
     /* Check data types. */
-    type = oskar_sky_type(sky);
-    if (oskar_telescope_type(telescope) != type ||
+    type = oskar_sky_precision(sky);
+    if (oskar_telescope_precision(telescope) != type ||
             oskar_jones_type(Z) != (type | OSKAR_COMPLEX) ||
             oskar_work_jones_z_type(work) != type)
     {
@@ -120,15 +117,11 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
 
         /* Evaluate horizontal x,y,z source positions (for which to evaluate
          * pierce points) */
-        oskar_convert_apparent_ra_dec_to_enu_direction_cosines(num_sources,
-                &work->hor_x, &work->hor_y, &work->hor_z,
-                oskar_sky_ra_const(sky_cpu), oskar_sky_dec_const(sky_cpu),
-                last, lat, status);
-        /*
-        oskar_evaluate_source_horizontal_lmn(num_sources, &work->hor_x,
-                &work->hor_y, &work->hor_z, oskar_sky_ra_const(sky_cpu),
-                oskar_sky_dec_const(sky_cpu), last, lat, status);
-         */
+        oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
+                &work->hor_x, &work->hor_y, &work->hor_z, num_sources,
+                oskar_sky_l_const(sky_cpu), oskar_sky_m_const(sky_cpu),
+                oskar_sky_n_const(sky_cpu), last - oskar_sky_ra0(sky_cpu),
+                oskar_sky_dec0(sky_cpu), lat, status);
 
         /* Obtain station coordinates in the ECEF frame. */
         evaluate_station_ECEF_coords(&station_x, &station_y, &station_z, i,

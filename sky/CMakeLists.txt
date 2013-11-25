@@ -23,10 +23,10 @@ set(sky_SRC
     src/oskar_sky_append_to_set.c
     src/oskar_sky_append.c
     src/oskar_sky_combine_set.c
-    src/oskar_sky_compute_relative_lmn.c
     src/oskar_sky_create.c
     src/oskar_sky_create_copy.c
     src/oskar_sky_evaluate_gaussian_source_parameters.c
+    src/oskar_sky_evaluate_relative_direction_cosines.c
     src/oskar_sky_filter_by_flux.c
     src/oskar_sky_filter_by_flux_cuda.cu
     src/oskar_sky_filter_by_radius.c

@@ -72,7 +72,7 @@ void oskar_TelescopeLoadNoise::load(oskar_Telescope* telescope,
     if (*status || !settings_->interferometer.noise.enable)
         return;
 
-    dataType_ = oskar_telescope_type(telescope);
+    dataType_ = oskar_telescope_precision(telescope);
 
     // Update the noise files for the current station directory.
     updateFileMap_(filemap, cwd);

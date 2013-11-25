@@ -27,9 +27,8 @@
  */
 
 #include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
-#include <oskar_mem.h>
-#include <utility/oskar_cuda_check_error.h>
 #include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda.h>
+#include <oskar_cuda_check_error.h>
 
 #include <math.h>
 
@@ -44,13 +43,13 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_f(int np,
 {
     int i;
     float sinLat0, cosLat0;
-    sinLat0 = sinf(dec0);
-    cosLat0 = cosf(dec0);
+    sinLat0 = (float) sin(dec0);
+    cosLat0 = (float) cos(dec0);
 
     #pragma omp parallel for private(i)
     for (i = 0; i < np; ++i)
     {
-        float cosLat, sinLat, sinLon, cosLon, relLon, pLat, l_, m_, a;
+        float cosLat, sinLat, sinLon, cosLon, relLon, pLat, l_, m_, n_;
         pLat = dec[i];
         relLon = ra[i];
         relLon -= ra0;
@@ -60,13 +59,10 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_f(int np,
         cosLat = cosf(pLat);
         l_ = cosLat * sinLon;
         m_ = cosLat0 * sinLat - sinLat0 * cosLat * cosLon;
+        n_ = sinLat0 * sinLat + cosLat0 * cosLat * cosLon;
         l[i] = l_;
         m[i] = m_;
-        a = 1.0f - l_*l_ - m_*m_;
-        if (a < 0.0f)
-            n[i] = -1.0f;
-        else
-            n[i] = sqrtf(a) - 1.0f;
+        n[i] = n_;
     }
 }
 
@@ -83,7 +79,7 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(int np,
     #pragma omp parallel for private(i)
     for (i = 0; i < np; ++i)
     {
-        double cosLat, sinLat, sinLon, cosLon, relLon, pLat, l_, m_, a;
+        double cosLat, sinLat, sinLon, cosLon, relLon, pLat, l_, m_, n_;
         pLat = dec[i];
         relLon = ra[i];
         relLon -= ra0;
@@ -93,13 +89,10 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(int np,
         cosLat = cos(pLat);
         l_ = cosLat * sinLon;
         m_ = cosLat0 * sinLat - sinLat0 * cosLat * cosLon;
+        n_ = sinLat0 * sinLat + cosLat0 * cosLat * cosLon;
         l[i] = l_;
         m[i] = m_;
-        a = 1.0 - l_*l_ - m_*m_;
-        if (a < 0.0)
-            n[i] = -1.0;
-        else
-            n[i] = sqrt(a) - 1.0;
+        n[i] = n_;
     }
 }
 
@@ -160,7 +153,7 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_d(int np,
 }
 
 /* Wrapper. */
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines(int np,
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines(int num_points,
         const oskar_Mem* ra, const oskar_Mem* dec, double ra0_rad,
         double dec0_rad, oskar_Mem* l, oskar_Mem* m, oskar_Mem* n, int* status)
 {
@@ -183,9 +176,15 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines(int np,
     /* Check type consistency. */
     if (oskar_mem_type(dec) != type || oskar_mem_type(l) != type ||
             oskar_mem_type(m) != type || oskar_mem_type(n) != type)
+    {
         *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+    {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
 
     /* Check location consistency. */
     if (oskar_mem_location(dec) != location ||
@@ -194,74 +193,89 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines(int np,
             oskar_mem_location(n) != location)
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return;
     }
 
     /* Check memory is allocated. */
-    if (!ra->data || !dec->data)
+    if (!oskar_mem_allocated(ra) || !oskar_mem_allocated(dec))
+    {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
 
     /* Check dimensions. */
-    if ((int)oskar_mem_length(ra) < np
-            || (int)oskar_mem_length(dec) < np)
+    if ((int)oskar_mem_length(ra) < num_points ||
+            (int)oskar_mem_length(dec) < num_points)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
     }
 
     /* Resize output arrays if needed. */
-    if ((int)oskar_mem_length(l) < np)
-        oskar_mem_realloc(l, np, status);
-    if ((int)oskar_mem_length(m) < np)
-        oskar_mem_realloc(m, np, status);
-    if ((int)oskar_mem_length(n) < np)
-        oskar_mem_realloc(n, np, status);
+    if ((int)oskar_mem_length(l) < num_points)
+        oskar_mem_realloc(l, num_points, status);
+    if ((int)oskar_mem_length(m) < num_points)
+        oskar_mem_realloc(m, num_points, status);
+    if ((int)oskar_mem_length(n) < num_points)
+        oskar_mem_realloc(n, num_points, status);
 
     /* Check if safe to proceed. */
     if (*status) return;
 
     /* Convert coordinates. */
-    if (location == OSKAR_LOCATION_GPU)
+    if (type == OSKAR_SINGLE)
     {
+        const float *ra_, *dec_;
+        float *l_, *m_, *n_;
+        ra_  = oskar_mem_float_const(ra, status);
+        dec_ = oskar_mem_float_const(dec, status);
+        l_   = oskar_mem_float(l, status);
+        m_   = oskar_mem_float(m, status);
+        n_   = oskar_mem_float(n, status);
+
+        if (location == OSKAR_LOCATION_GPU)
+        {
 #ifdef OSKAR_HAVE_CUDA
-        if (type == OSKAR_SINGLE)
-        {
             oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_f(
-                    np, (const float*)ra->data, (const float*)dec->data,
-                    (float)ra0_rad, (float)dec0_rad, (float*)l->data,
-                    (float*)m->data, (float*)n->data);
+                    num_points, ra_, dec_, (float)ra0_rad, (float)dec0_rad,
+                    l_, m_, n_);
             oskar_cuda_check_error(status);
-        }
-        else if (type == OSKAR_DOUBLE)
-        {
-            oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_d(
-                    np, (const double*)ra->data, (const double*)dec->data,
-                    ra0_rad, dec0_rad, (double*)l->data, (double*)m->data,
-                    (double*)n->data);
-            oskar_cuda_check_error(status);
-        }
 #else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
-    }
-    else if (location == OSKAR_LOCATION_CPU)
-    {
-        if (type == OSKAR_SINGLE)
+        }
+        else
         {
             oskar_convert_apparent_ra_dec_to_relative_direction_cosines_f(
-                    np, (const float*)ra->data, (const float*)dec->data,
-                    (float)ra0_rad, (float)dec0_rad, (float*)l->data,
-                    (float*)m->data, (float*)n->data);
-        }
-        else if (type == OSKAR_DOUBLE)
-        {
-            oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(
-                    np, (const double*)ra->data,
-                    (const double*)dec->data, ra0_rad, dec0_rad,
-                    (double*)l->data, (double*)m->data, (double*)n->data);
+                    num_points, ra_, dec_, (float)ra0_rad, (float)dec0_rad,
+                    l_, m_, n_);
         }
     }
     else
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        const double *ra_, *dec_;
+        double *l_, *m_, *n_;
+        ra_  = oskar_mem_double_const(ra, status);
+        dec_ = oskar_mem_double_const(dec, status);
+        l_   = oskar_mem_double(l, status);
+        m_   = oskar_mem_double(m, status);
+        n_   = oskar_mem_double(n, status);
+
+        if (location == OSKAR_LOCATION_GPU)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_d(
+                    num_points, ra_, dec_, ra0_rad, dec0_rad, l_, m_, n_);
+            oskar_cuda_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
+        else
+        {
+            oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(
+                    num_points, ra_, dec_, ra0_rad, dec0_rad, l_, m_, n_);
+        }
     }
 }
 

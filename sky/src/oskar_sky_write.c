@@ -66,7 +66,7 @@ void oskar_sky_write(const char* filename, const oskar_Sky* sky, int* status)
     }
 
     /* Get the data type and number of sources. */
-    type = oskar_sky_type(sky);
+    type = oskar_sky_precision(sky);
     num_sources = oskar_sky_num_sources(sky);
 
     /* Write the header and common metadata. */

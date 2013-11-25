@@ -71,7 +71,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
     if (*status) return;
 
     /* Check type. */
-    type = oskar_telescope_type(telescope);
+    type = oskar_telescope_precision(telescope);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;

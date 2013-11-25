@@ -60,7 +60,7 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
 
     /* Get the data location and type. */
     location = oskar_sky_location(sky);
-    type = oskar_sky_type(sky);
+    type = oskar_sky_precision(sky);
 
     if (index >= sky->num_sources)
     {

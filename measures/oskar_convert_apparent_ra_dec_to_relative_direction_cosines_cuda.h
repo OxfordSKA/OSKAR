@@ -39,6 +39,50 @@
 extern "C" {
 #endif
 
+/**
+ * @brief
+ * Equatorial to relative 3D direction cosines (single precision).
+ *
+ * @details
+ * This function computes the l,m,n direction cosines of the specified points
+ * relative to the reference point.
+ *
+ * @param[in]  num_points Number of points.
+ * @param[in]  d_ra       Input position Right Ascensions in radians.
+ * @param[in]  d_dec      Input position Declinations in radians.
+ * @param[in]  ra0        Right Ascension of the reference point in radians.
+ * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[out] d_l        l-direction-cosines relative to the reference point.
+ * @param[out] d_m        m-direction-cosines relative to the reference point.
+ * @param[out] d_n        n-direction-cosines relative to the reference point.
+ */
+OSKAR_EXPORT
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_f(
+        int num_points, const float* d_ra, const float* d_dec, float ra0,
+        float dec0, float* d_l, float* d_m, float* d_n);
+
+/**
+ * @brief
+ * Equatorial to relative 3D direction cosines (double precision).
+ *
+ * @details
+ * This function computes the l,m,n direction cosines of the specified points
+ * relative to the reference point.
+ *
+ * @param[in]  num_points Number of points.
+ * @param[in]  d_ra       Input position Right Ascensions in radians.
+ * @param[in]  d_dec      Input position Declinations in radians.
+ * @param[in]  ra0        Right Ascension of the reference point in radians.
+ * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[out] d_l        l-direction-cosines relative to the reference point.
+ * @param[out] d_m        m-direction-cosines relative to the reference point.
+ * @param[out] d_n        n-direction-cosines relative to the reference point.
+ */
+OSKAR_EXPORT
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_d(
+        int num_points, const double* d_ra, const double* d_dec, double ra0,
+        double dec0, double* d_l, double* d_m, double* d_n);
+
 #ifdef __CUDACC__
 
 /**
@@ -91,54 +135,6 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_d(
         double* n);
 
 #endif /* __CUDACC__ */
-
-/**
- * @brief
- * Equatorial to relative 3D direction cosines (single precision).
- *
- * @details
- * This function computes the l,m,n direction cosines of the specified points
- * relative to the reference point.
- *
- * Note that the n-positions are given by sqrt(1 - l*l - m*m) - 1.
- *
- * @param[in]  np    The number of points.
- * @param[in]  ra    Input position Right Ascensions in radians.
- * @param[in]  dec   Input position Declinations in radians.
- * @param[in]  ra0   Right Ascension of the reference point in radians.
- * @param[in]  dec0  Declination of the reference point in radians.
- * @param[out] l     l-direction-cosines relative to the reference point.
- * @param[out] m     m-direction-cosines relative to the reference point.
- * @param[out] n     n-direction-cosines relative to the reference point.
- */
-OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_f(
-        int np, const float* ra, const float* dec, float ra0, float dec0,
-        float* l, float* m, float* n);
-
-/**
- * @brief
- * Equatorial to relative 3D direction cosines (double precision).
- *
- * @details
- * This function computes the l,m,n direction cosines of the specified points
- * relative to the reference point.
- *
- * Note that the n-positions are given by sqrt(1 - l*l - m*m) - 1.
- *
- * @param[in]  np    The number of points.
- * @param[in]  ra    Input position Right Ascensions in radians.
- * @param[in]  dec   Input position Declinations in radians.
- * @param[in]  ra0   Right Ascension of the reference point in radians.
- * @param[in]  dec0  Declination of the reference point in radians.
- * @param[out] l     l-direction-cosines relative to the reference point.
- * @param[out] m     m-direction-cosines relative to the reference point.
- * @param[out] n     n-direction-cosines relative to the reference point.
- */
-OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_d(
-        int np, const double* ra, const double* dec, double ra0, double dec0,
-        double* l, double* m, double* n);
 
 #ifdef __cplusplus
 }

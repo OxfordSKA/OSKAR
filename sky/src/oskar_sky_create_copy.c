@@ -50,7 +50,7 @@ oskar_Sky* oskar_sky_create_copy(const oskar_Sky* src, int location,
     if (*status) return model;
 
     /* Create the new model. */
-    model = oskar_sky_create(oskar_sky_type(src), location,
+    model = oskar_sky_create(oskar_sky_precision(src), location,
             oskar_sky_num_sources(src), status);
 
     /* Copy meta data */
@@ -58,6 +58,8 @@ oskar_Sky* oskar_sky_create_copy(const oskar_Sky* src, int location,
     model->location = location;
     model->num_sources = src->num_sources;
     model->use_extended = src->use_extended;
+    model->ra0 = src->ra0;
+    model->dec0 = src->dec0;
 
     /* Copy the memory blocks */
     oskar_mem_copy(&model->RA, &src->RA, status);

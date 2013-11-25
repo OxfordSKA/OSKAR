@@ -59,7 +59,7 @@ void oskar_sky_load(oskar_Sky* sky, const char* filename, int* status)
     if (*status) return;
 
     /* Get the data type. */
-    type = oskar_sky_type(sky);
+    type = oskar_sky_precision(sky);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;

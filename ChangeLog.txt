@@ -28,6 +28,9 @@
     * Fixed presence of multiple incorrect rows in DATA_DESCRIPTION and
       SPECTRAL_WINDOW tables for Measurement Set output.
 
+    * Fixed sign of visibility phase for sources greater than 90 degrees
+      from the phase centre.
+
     * Removed redundant CORRECTED_DATA and MODEL_DATA columns from
       Measurement Set output.
 

@@ -157,7 +157,7 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
     fits_close_file(fptr, status);
 
     /* Initialise the temporary sky model to hold all pixels in the table. */
-    temp_sky = oskar_sky_create(oskar_sky_type(sky),
+    temp_sky = oskar_sky_create(oskar_sky_precision(sky),
             OSKAR_LOCATION_CPU, (int)nrows, status);
 
     /* Write contents of memory to temporary sky model. */

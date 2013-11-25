@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda.h>
 #include <math.h>
 
@@ -34,119 +33,108 @@
 extern "C" {
 #endif
 
-// Single precision.
-__global__
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_f(
-        const int np, const float* ra, const float* dec, const float ra0,
-        const float cosDec0, const float sinDec0, float* l, float* m, float* n)
-{
-    // Get the position ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-
-    // Copy the input data from global memory.
-    float cosLat, sinLat, sinLon, cosLon, relLon, pLat;
-    if (i < np)
-    {
-        relLon = ra[i];
-        pLat = dec[i];
-    }
-
-    // Convert from spherical to tangent-plane.
-    relLon -= ra0;
-    sincosf(relLon, &sinLon, &cosLon);
-    sincosf(pLat, &sinLat, &cosLat);
-    float l_ = cosLat * sinLon;
-    float m_ = cosDec0 * sinLat;
-    m_ -= sinDec0 * cosLat * cosLon;
-
-    // Output data.
-    if (i < np)
-    {
-        l[i] = l_;
-        m[i] = m_;
-        float a = 1.0f - l_*l_ - m_*m_;
-        if (a < 0.0f)
-            n[i] = -1.0f;
-        else
-            n[i] = sqrtf(a) - 1.0f;
-    }
-}
-
-// Double precision.
-__global__
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_d(
-        const int np, const double* ra, const double* dec, const double ra0,
-        const double cosDec0, const double sinDec0, double* l, double* m,
-        double* n)
-{
-    // Get the position ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-
-    // Copy the input data from global memory.
-    double cosLat, sinLat, sinLon, cosLon, relLon, pLat;
-    if (i < np)
-    {
-        relLon = ra[i];
-        pLat = dec[i];
-    }
-
-    // Convert from spherical to tangent-plane.
-    relLon -= ra0;
-    sincos(relLon, &sinLon, &cosLon);
-    sincos(pLat, &sinLat, &cosLat);
-    double l_ = cosLat * sinLon;
-    double m_ = cosDec0 * sinLat;
-    m_ -= sinDec0 * cosLat * cosLon;
-
-    // Output data.
-    if (i < np)
-    {
-        l[i] = l_;
-        m[i] = m_;
-        double a = 1.0 - l_*l_ - m_*m_;
-        if (a < 0.0)
-            n[i] = -1.0;
-        else
-            n[i] = sqrt(a) - 1.0;
-    }
-}
+/* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
 void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_f(
-        int np, const float* ra, const float* dec, float ra0, float dec0,
-        float* l, float* m, float* n)
+        int num_points, const float* d_ra, const float* d_dec, float ra0,
+        float dec0, float* d_l, float* d_m, float* d_n)
 {
     float cosDec0, sinDec0;
     int num_blocks, num_threads = 256;
 
     /* Compute direction-cosines of RA, Dec relative to reference point. */
-    num_blocks = (np + num_threads - 1) / num_threads;
-    cosDec0 = cosf(dec0);
-    sinDec0 = sinf(dec0);
+    num_blocks = (num_points + num_threads - 1) / num_threads;
+    cosDec0 = (float) cos(dec0);
+    sinDec0 = (float) sin(dec0);
 
     oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_f
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (np, ra, dec, ra0, cosDec0, sinDec0, l, m, n);
+        (num_points, d_ra, d_dec, ra0, cosDec0, sinDec0, d_l, d_m, d_n);
 }
 
 /* Double precision. */
 void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_d(
-        int np, const double* ra, const double* dec, double ra0,
-        double dec0, double* l, double* m, double* n)
+        int num_points, const double* d_ra, const double* d_dec, double ra0,
+        double dec0, double* d_l, double* d_m, double* d_n)
 {
     double cosDec0, sinDec0;
     int num_blocks, num_threads = 256;
 
     /* Compute direction-cosines of RA, Dec relative to reference point. */
-    num_blocks = (np + num_threads - 1) / num_threads;
+    num_blocks = (num_points + num_threads - 1) / num_threads;
     cosDec0 = cos(dec0);
     sinDec0 = sin(dec0);
 
     oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_d
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (np, ra, dec, ra0, cosDec0, sinDec0, l, m, n);
+        (num_points, d_ra, d_dec, ra0, cosDec0, sinDec0, d_l, d_m, d_n);
 }
 
+
+/* Kernels. ================================================================ */
+
+/* Single precision. */
+__global__
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_f(
+        const int num_points, const float* ra, const float* dec,
+        const float ra0, const float cosDec0, const float sinDec0,
+        float* l, float* m, float* n)
+{
+    float cosLat, sinLat, sinLon, cosLon, relLon, pLat, l_, m_, n_;
+
+    /* Get the position ID that this thread is working on. */
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num_points) return;
+
+    /* Copy the input data from global memory. */
+    relLon = ra[i];
+    pLat = dec[i];
+
+    /* Convert from spherical to tangent-plane. */
+    relLon -= ra0;
+    sincosf(relLon, &sinLon, &cosLon);
+    sincosf(pLat, &sinLat, &cosLat);
+    l_ = cosLat * sinLon;
+    m_ = cosDec0 * sinLat - sinDec0 * cosLat * cosLon;
+    n_ = sinDec0 * sinLat + cosDec0 * cosLat * cosLon;
+
+    /* Store output data. */
+    l[i] = l_;
+    m[i] = m_;
+    n[i] = n_;
+}
+
+/* Double precision. */
+__global__
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_d(
+        const int num_points, const double* ra, const double* dec,
+        const double ra0, const double cosDec0, const double sinDec0,
+        double* l, double* m, double* n)
+{
+    double cosLat, sinLat, sinLon, cosLon, relLon, pLat, l_, m_, n_;
+
+    /* Get the position ID that this thread is working on. */
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num_points) return;
+
+    /* Copy the input data from global memory. */
+    relLon = ra[i];
+    pLat = dec[i];
+
+    /* Convert from spherical to tangent-plane. */
+    relLon -= ra0;
+    sincos(relLon, &sinLon, &cosLon);
+    sincos(pLat, &sinLat, &cosLat);
+    l_ = cosLat * sinLon;
+    m_ = cosDec0 * sinLat - sinDec0 * cosLat * cosLon;
+    n_ = sinDec0 * sinLat + cosDec0 * cosLat * cosLon;
+
+    /* Store output data. */
+    l[i] = l_;
+    m[i] = m_;
+    n[i] = n_;
+}
 
 #ifdef __cplusplus
 }

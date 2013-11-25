@@ -57,6 +57,8 @@ void oskar_sky_init(oskar_Sky* model, int type, int location,
     model->location = location;
     model->num_sources = num_elements;
     model->use_extended = OSKAR_FALSE;
+    model->ra0 = 0.0;
+    model->dec0 = 0.0;
 
     /* Initialise the memory. */
     oskar_mem_init(&model->RA, type, location, num_elements, owner, status);

@@ -58,6 +58,9 @@ struct oskar_Sky
     oskar_Mem reference_freq; /**< Reference frequency for the source flux, in Hz. */
     oskar_Mem spectral_index; /**< Spectral index. */
     oskar_Mem RM;             /**< Rotation measure, in radians / m^2. */
+
+    double ra0;               /**< Reference right ascension, in radians. */
+    double dec0;              /**< Reference declination, in radians. */
     oskar_Mem l;              /**< Phase centre relative l-direction cosines. */
     oskar_Mem m;              /**< Phase centre relative m-direction cosines. */
     oskar_Mem n;              /**< Phase centre relative n-direction cosines. */

@@ -56,7 +56,7 @@ oskar_Sky* oskar_sky_combine_set(oskar_Sky* const* model_set,
     }
 
     /* Create a new model. */
-    model = oskar_sky_create(oskar_sky_type(model_set[0]),
+    model = oskar_sky_create(oskar_sky_precision(model_set[0]),
             OSKAR_LOCATION_CPU, 0, status);
 
     /* Append each model in the set to the new model. */

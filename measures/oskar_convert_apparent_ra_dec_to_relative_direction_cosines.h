@@ -48,21 +48,19 @@ extern "C" {
  * This function computes the direction cosines of the specified points
  * relative to the reference point.
  *
- * Note that the n-positions are given by sqrt(1 - l*l - m*m) - 1.
- *
- * @param[in]  np   Number of points.
- * @param[in]  ra   Input position Right Ascensions in radians.
- * @param[in]  dec  Input position Declinations in radians.
- * @param[in]  ra0  Right Ascension of the reference point in radians.
- * @param[in]  dec0 Declination of the reference point in radians.
- * @param[out] l    l-direction-cosines relative to the reference point.
- * @param[out] m    m-direction-cosines relative to the reference point.
- * @param[out] n    n-direction-cosines relative to the reference point.
+ * @param[in]  num_points Number of points.
+ * @param[in]  ra         Input position Right Ascensions in radians.
+ * @param[in]  dec        Input position Declinations in radians.
+ * @param[in]  ra0        Right Ascension of the reference point in radians.
+ * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[out] l          l-direction-cosines relative to the reference point.
+ * @param[out] m          m-direction-cosines relative to the reference point.
+ * @param[out] n          n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_f(int np,
-        const float* ra, const float* dec, float ra0, float dec0,
-        float* l, float* m, float* n);
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_f(
+        int num_points, const float* ra, const float* dec, float ra0,
+        float dec0, float* l, float* m, float* n);
 
 /**
  * @brief
@@ -72,20 +70,18 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_f(int np,
  * This function computes the direction cosines of the specified points
  * relative to the reference point.
  *
- * Note that the n-positions are given by sqrt(1 - l*l - m*m) - 1.
- *
- * @param[in]  np   Number of points.
- * @param[in]  ra   Input position Right Ascensions in radians.
- * @param[in]  dec  Input position Declinations in radians.
- * @param[in]  ra0  Right Ascension of the reference point in radians.
- * @param[in]  dec0 Declination of the reference point in radians.
- * @param[out] l    l-direction-cosines relative to the reference point.
- * @param[out] m    m-direction-cosines relative to the reference point.
- * @param[out] n    n-direction-cosines relative to the reference point.
+ * @param[in]  num_points Number of points.
+ * @param[in]  ra         Input position Right Ascensions in radians.
+ * @param[in]  dec        Input position Declinations in radians.
+ * @param[in]  ra0        Right Ascension of the reference point in radians.
+ * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[out] l          l-direction-cosines relative to the reference point.
+ * @param[out] m          m-direction-cosines relative to the reference point.
+ * @param[out] n          n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(int np,
-        const double* ra, const double* dec, double ra0,
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(
+        int num_points, const double* ra, const double* dec, double ra0,
         double dec0, double* l, double* m, double* n);
 
 /**
@@ -96,18 +92,18 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(int np,
  * This function computes the direction cosines of the specified points
  * relative to the reference point.
  *
- * @param[in]  np   Number of points.
- * @param[in]  ra   Input position Right Ascensions in radians.
- * @param[in]  dec  Input position Declinations in radians.
- * @param[in]  ra0  Right Ascension of the reference point in radians.
- * @param[in]  dec0 Declination of the reference point in radians.
- * @param[out] l    l-direction-cosines relative to the reference point.
- * @param[out] m    m-direction-cosines relative to the reference point.
+ * @param[in]  num_points Number of points.
+ * @param[in]  ra         Input position Right Ascensions in radians.
+ * @param[in]  dec        Input position Declinations in radians.
+ * @param[in]  ra0        Right Ascension of the reference point in radians.
+ * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[out] l          l-direction-cosines relative to the reference point.
+ * @param[out] m          m-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_f(int np,
-        const float* ra, const float* dec, float ra0, float dec0,
-        float* l, float* m);
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_f(
+        int num_points, const float* ra, const float* dec, float ra0,
+        float dec0, float* l, float* m);
 
 /**
  * @brief
@@ -117,17 +113,17 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_f(int np,
  * This function computes the direction cosines of the specified points
  * relative to the reference point.
  *
- * @param[in]  np   Number of points.
- * @param[in]  ra   Input position Right Ascensions in radians.
- * @param[in]  dec  Input position Declinations in radians.
- * @param[in]  ra0  Right Ascension of the reference point in radians.
- * @param[in]  dec0 Declination of the reference point in radians.
- * @param[out] l    l-direction-cosines relative to the reference point.
- * @param[out] m    m-direction-cosines relative to the reference point.
+ * @param[in]  num_points Number of points.
+ * @param[in]  ra         Input position Right Ascensions in radians.
+ * @param[in]  dec        Input position Declinations in radians.
+ * @param[in]  ra0        Right Ascension of the reference point in radians.
+ * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[out] l          l-direction-cosines relative to the reference point.
+ * @param[out] m          m-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_d(int np,
-        const double* ra, const double* dec, double ra0,
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_d(
+        int num_points, const double* ra, const double* dec, double ra0,
         double dec0, double* l, double* m);
 
 /**
@@ -138,22 +134,19 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_d(int np,
  * This function computes the direction cosines of the specified points
  * relative to the reference point.
  *
- * Note that the n-positions are given by sqrt(1 - l*l - m*m) - 1.
- *
- * @param[in]  np   Number of points.
- * @param[in]  ra   Input position Right Ascensions in radians.
- * @param[in]  dec  Input position Declinations in radians.
- * @param[in]  ra0  Right Ascension of the reference point in radians.
- * @param[in]  dec0 Declination of the reference point in radians.
- * @param[out] l    l-direction-cosines relative to the reference point.
- * @param[out] m    m-direction-cosines relative to the reference point.
- * @param[out] n    n-direction-cosines relative to the reference point.
+ * @param[in]  num_points Number of points.
+ * @param[in]  ra         Input position Right Ascensions in radians.
+ * @param[in]  dec        Input position Declinations in radians.
+ * @param[in]  ra0        Right Ascension of the reference point in radians.
+ * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[out] l          l-direction-cosines relative to the reference point.
+ * @param[out] m          m-direction-cosines relative to the reference point.
+ * @param[out] n          n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines(int np,
+void oskar_convert_apparent_ra_dec_to_relative_direction_cosines(int num_points,
         const oskar_Mem* ra, const oskar_Mem* dec, double ra0_rad,
         double dec0_rad, oskar_Mem* l, oskar_Mem* m, oskar_Mem* n, int* status);
-
 
 #ifdef __cplusplus
 }

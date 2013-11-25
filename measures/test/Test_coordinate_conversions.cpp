@@ -102,7 +102,7 @@ TEST(coordinate_conversions, ra_dec_to_direction_cosines)
     {
         ASSERT_NEAR(l_1[i], l_2[i], 1e-15);
         ASSERT_NEAR(m_1[i], m_2[i], 1e-15);
-        double n_1 = sqrt(1.0 - l_1[i]*l_1[i] - m_1[i]*m_1[i]) - 1;
+        double n_1 = sqrt(1.0 - l_1[i]*l_1[i] - m_1[i]*m_1[i]);
         ASSERT_NEAR(n_1, n_2[i], 1e-15);
     }
 }
