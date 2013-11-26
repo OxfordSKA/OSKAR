@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.2                                          Last update: 4 March 2013 |
+| OSKAR 2.3                                      Last update: 26 November 2013 |
 +------------------------------------------------------------------------------+
 
 1. OSKAR: The Open Square Kilometre Array Radio Telescope Simulator
@@ -31,6 +31,10 @@ Top level folder structure for OSKAR.
  |--- extern           : External libraries used by OSKAR.
  |    |
  |    |--- dierckx     : Subroutines for calculating smoothing splines (tests).
+ |    |
+ |    |--- ezOptionParser-0.2.0: Library for command line option parsing.
+ |    |
+ |    |--- gtest-1.6.0: Google testing framework library.
  |
  |--- fits             : FITS format interface library.
  |
@@ -41,6 +45,8 @@ Top level folder structure for OSKAR.
  |--- math             : Generic math functions.
  |
  |--- matlab           : MATLAB interface to OSKAR.
+ |
+ |--- measures         : Functions for coordinate conversions.
  |
  |--- ms               : Measurement Set writer.
  |
@@ -65,9 +71,7 @@ folders.
  |--- src       : C/C++ source code for module.
  |
  |--- test      : module tests / unit tests.
- |    |
- |    |---src
-
+ |    
 
 3. OSKAR Components
 --------------------------------------------------------------------------------
