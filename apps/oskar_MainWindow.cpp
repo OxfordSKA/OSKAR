@@ -492,9 +492,18 @@ void oskar_MainWindow::processNetworkReply(QNetworkReply* reply)
 
     // If the current version is newer than the version of this code
     // notify of the update.
-    if (currentVer[0].toInt() > thisVer[0].toInt() ||
-            currentVer[1].toInt() > thisVer[1].toInt() ||
-            currentVer[2].toInt() > thisVer[2].toInt())
+    bool isNewMajorVer   = currentVer[0].toInt() >  thisVer[0].toInt();
+    bool isEqualMajorVer = currentVer[0].toInt() == thisVer[0].toInt();
+    bool isNewMinorVer   = currentVer[1].toInt() >  thisVer[1].toInt();
+    bool isEqualMinorVer = currentVer[1].toInt() == thisVer[1].toInt();
+    bool isNewPatchVer   = currentVer[2].toInt() >  thisVer[2].toInt();
+
+    // Conditions to prompt for update:
+    // 1) Major version is out of date.
+    // 2) Major version not changed but minor version out of date.
+    // 3) Major and minor versions not changed but patch out of date.
+    if (isNewMajorVer || (isEqualMajorVer && isNewMinorVer) ||
+            (isEqualMajorVer && isEqualMinorVer && isNewPatchVer))
     {
         QMessageBox msgBox(this);
         msgBox.setWindowTitle(mainTitle_);
