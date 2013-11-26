@@ -1,4 +1,4 @@
-2013-xx-xx  OSKAR-2.3.0
+2013-11-26  OSKAR-2.3.0
 
     * Renamed applications operating on OSKAR format visibility files
       from oskar_visibilities_* to oskar_vis_*.

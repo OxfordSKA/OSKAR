@@ -69,12 +69,11 @@ oskar_DocumentationDisplay::oskar_DocumentationDisplay(QWidget *parent)
     html.append("<ol>");
 
     add_doc(html, "OSKAR-Introduction.pdf",
-            "Introduction",
-            "An introduction to the OSKAR documentation");
-    add_doc(html, "OSKAR-Release-Notes-and-FAQ.pdf",
-            "Release Notes & FAQ",
-            "Describes the features of the current release of OSKAR and "
-            "addresses common questions about the release");
+            "Introduction & FAQ",
+            "An introduction to the OSKAR package");
+    add_doc(html, "OSKAR-Release-Notes.pdf",
+            "Release Notes",
+            "Describes the changes in the current release of OSKAR");
     add_doc(html, "OSKAR-Install.pdf",
             "Installation Guide",
             "Describes how to build and install OSKAR");
@@ -101,8 +100,8 @@ oskar_DocumentationDisplay::oskar_DocumentationDisplay(QWidget *parent)
     add_doc(html, "OSKAR-Pointing-File.pdf",
             "Pointing File",
             "Describes the format of OSKAR pointing files");
-    add_doc(html, "OSKAR-Settings-Files.pdf",
-            "Settings Files",
+    add_doc(html, "OSKAR-Settings.pdf",
+            "Settings",
             "Describes the format of the OSKAR settings files");
     add_doc(html, "OSKAR-MATLAB-Interface.pdf",
             "MATLAB Interface",
