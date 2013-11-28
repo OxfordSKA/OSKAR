@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.3                                      Last update: 26 November 2013 |
+| OSKAR 2.3                                      Last update: 28 November 2013 |
 +------------------------------------------------------------------------------+
 
 1. OSKAR: The Open Square Kilometre Array Radio Telescope Simulator
@@ -34,7 +34,7 @@ Top level folder structure for OSKAR.
  |    |
  |    |--- ezOptionParser-0.2.0: Library for command line option parsing.
  |    |
- |    |--- gtest-1.6.0: Google testing framework library.
+ |    |--- gtest-1.7.0 : Google testing framework library.
  |
  |--- fits             : FITS format interface library.
  |

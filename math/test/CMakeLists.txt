@@ -3,7 +3,6 @@
 #
 
 set(name math_test)
-include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
 include_directories(${CUDA_INCLUDE_DIRS})
 list(APPEND CUDA_NVCC_FLAGS --compiler-options;${OpenMP_CXX_FLAGS};)
 set(${name}_SRC

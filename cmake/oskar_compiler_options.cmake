@@ -13,13 +13,6 @@ message("=======================================================================
 
 set(BUILD_SHARED_LIBS ON)
 
-if (APPLE)
-    # Temporary work around to rpath problems on OS X.
-    # Either as a result of changes in cmake 2.8.12 or using homebrew g++-4.6 
-    # or install_name_tool from xcode 5.
-    #set(CMAKE_SKIP_RPATH ON)
-endif ()
-
 # Set the include path to include the top-level folder and sub-folders for
 # main oskar library.
 # **NOTE**
@@ -27,14 +20,15 @@ endif ()
 # needs review so these includes are added for experimentation only!
 # ------------------------------------------------------------------------------
 include_directories(
-    ${OSKAR_SOURCE_DIR}
-    ${OSKAR_SOURCE_DIR}/imaging
-    ${OSKAR_SOURCE_DIR}/interferometry
-    ${OSKAR_SOURCE_DIR}/math
-    ${OSKAR_SOURCE_DIR}/measures
-    ${OSKAR_SOURCE_DIR}/sky
-    ${OSKAR_SOURCE_DIR}/station
-    ${OSKAR_SOURCE_DIR}/utility
+    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/imaging
+    ${PROJECT_SOURCE_DIR}/interferometry
+    ${PROJECT_SOURCE_DIR}/math
+    ${PROJECT_SOURCE_DIR}/measures
+    ${PROJECT_SOURCE_DIR}/sky
+    ${PROJECT_SOURCE_DIR}/station
+    ${PROJECT_SOURCE_DIR}/utility
+    ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include
 )
 
 # Set general compiler flags.
@@ -44,18 +38,18 @@ if (NOT WIN32)
         set(CMAKE_CXX_FLAGS "-fPIC")
         set(CMAKE_C_FLAGS "-fPIC")
     endif ()
-    
+
     if (CMAKE_COMPILER_IS_GNUCXX)    
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-show-option")
     endif ()
-   
+
     if (CMAKE_COMPILER_IS_GNUCC)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-show-option")
     endif ()
-    
+
     set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     set(CMAKE_C_FLAGS_RELEASE   "-O2 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -Wall -Wno-unused-function")

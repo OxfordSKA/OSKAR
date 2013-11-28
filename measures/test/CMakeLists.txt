@@ -3,7 +3,6 @@
 #
 
 
-include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
 include_directories(${CUDA_INCLUDE_DIRS})
 
 set(name measures_test)

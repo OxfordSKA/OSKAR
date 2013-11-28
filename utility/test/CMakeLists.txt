@@ -2,8 +2,7 @@
 # src/utility/test/CMakeLists.txt
 #
 set(name utility_test)
-include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include
-    ${CUDA_INCLUDE_DIRS})
+include_directories(${CUDA_INCLUDE_DIRS})
 set(${name}_SRC
     main.cpp
     Test_binary_file.cpp

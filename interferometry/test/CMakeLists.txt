@@ -3,7 +3,6 @@
 #
 
 set(name interferometry_test)
-include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
 set(${name}_SRC
     main.cpp
     Test_add_system_noise.cpp
@@ -23,7 +22,6 @@ add_test(interferometry_test ${name})
 
 # Correlate kernel performance test.
 set(name correlate_performance_test)
-include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
 cuda_add_executable(${name} Test_correlate_performance.cu)
 target_link_libraries(${name} oskar gtest_main ${CUDA_LIBRARIES})
 

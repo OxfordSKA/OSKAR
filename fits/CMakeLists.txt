@@ -24,13 +24,13 @@ if (CFITSIO_FOUND AND CUDA_FOUND)
     add_library(${libname} ${fits_SRC})
     target_link_libraries(${libname} ${CFITSIO_LIBRARIES} oskar)
     if (APPLE)
-        set_target_properties(oskar_apps PROPERTIES
+        set_target_properties(${libname} PROPERTIES
             INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
             INSTALL_RPATH_USE_LINK_PATH TRUE
             SOVERSION ${OSKAR_VERSION}
             VERSION ${OSKAR_VERSION})
     else()
-        set_target_properties(oskar_apps PROPERTIES
+        set_target_properties(${libname} PROPERTIES
             INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
             INSTALL_RPATH_USE_LINK_PATH TRUE
             SOVERSION ${OSKAR_VERSION}

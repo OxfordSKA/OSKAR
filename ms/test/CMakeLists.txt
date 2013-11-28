@@ -3,7 +3,7 @@
 #
 
 set(name ms_test)
-include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
+
 set(${name}_SRC
     Test_MeasurementSet.cpp
 )

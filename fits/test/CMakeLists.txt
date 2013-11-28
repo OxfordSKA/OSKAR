@@ -7,7 +7,6 @@
 
 
 set(name fits_test)
-include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
 set(${name}_SRC
     Test_fits_image_write.cpp
     Test_fits_write.cpp

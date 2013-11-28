@@ -1,3 +1,9 @@
+2013-11-28  OSKAR-2.3.1
+
+    * Fixed issue building the OSKAR fits library.
+
+    * Updated to google test framework version 1.7.0
+
 2013-11-26  OSKAR-2.3.0
 
     * Renamed applications operating on OSKAR format visibility files
@@ -28,8 +34,8 @@
     * Fixed presence of multiple incorrect rows in DATA_DESCRIPTION and
       SPECTRAL_WINDOW tables for Measurement Set output.
 
-    * Fixed sign of visibility phase for sources greater than 90 degrees
-      from the phase centre.
+    * Fixed visibility phase for sources greater than 90 degrees from the
+      phase centre.
 
     * Removed redundant CORRECTED_DATA and MODEL_DATA columns from
       Measurement Set output.

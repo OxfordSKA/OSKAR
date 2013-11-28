@@ -3,7 +3,6 @@
 #
 
 set(name station_test)
-include_directories(${PROJECT_SOURCE_DIR}/extern/gtest-1.6.0/include)
 set(${name}_SRC
     main.cpp
     Test_element_weights_errors.cpp
