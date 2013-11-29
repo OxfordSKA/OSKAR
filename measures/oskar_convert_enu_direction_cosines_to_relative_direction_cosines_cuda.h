@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_RELATIVE_DIRECTION_COSINES_TO_ENU_DIRECTION_COSINES_CUDA_H_
-#define OSKAR_CONVERT_RELATIVE_DIRECTION_COSINES_TO_ENU_DIRECTION_COSINES_CUDA_H_
+#ifndef OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_RELATIVE_DIRECTION_COSINES_CUDA_H_
+#define OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_RELATIVE_DIRECTION_COSINES_CUDA_H_
 
 /**
- * @file oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda.h
+ * @file oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda.h
  */
 
 #include <oskar_global.h>
@@ -41,7 +41,7 @@ extern "C" {
 
 /**
  * @brief
- * Converts from relative direction cosines to horizon ENU direction cosines
+ * Converts from horizon ENU direction cosines to relative direction cosines
  * (single precision, GPU version).
  *
  * @details
@@ -52,17 +52,17 @@ extern "C" {
  *
    \f[
     \begin{bmatrix}
-    x \\
-    y \\
-    z
-    \end{bmatrix}
-
-        = R_x(\phi) \cdot R_y(-H_0) \cdot R_x(-\delta_0) \cdot
-
-    \begin{bmatrix}
     l \\
     m \\
     n
+    \end{bmatrix}
+
+        = R_x(\delta_0) \cdot R_y(H_0) \cdot R_x(-\phi) \cdot
+
+    \begin{bmatrix}
+    x \\
+    y \\
+    z
     \end{bmatrix}
    \f]
  *
@@ -72,13 +72,13 @@ extern "C" {
  * the observer's geodetic latitude, the hour angle and the declination of
  * the phase centre.
  *
- * @param[out] x          ENU direction cosines (East).
- * @param[out] y          ENU direction cosines (North).
- * @param[out] z          ENU direction cosines (up).
+ * @param[out] l          Relative direction cosines.
+ * @param[out] m          Relative direction cosines.
+ * @param[out] n          Relative direction cosines.
  * @param[in]  num_points Number of points to convert.
- * @param[in]  l          Relative direction cosines.
- * @param[in]  m          Relative direction cosines.
- * @param[in]  n          Relative direction cosines.
+ * @param[in]  x          ENU direction cosines (East).
+ * @param[in]  y          ENU direction cosines (North).
+ * @param[in]  z          ENU direction cosines (up).
  * @param[in]  ha0        Hour angle of the origin of the relative directions,
  *                        in radians.
  * @param[in]  dec0       Declination of the origin of the relative directions,
@@ -86,13 +86,13 @@ extern "C" {
  * @param[in]  lat        Latitude of the ENU coordinate frame, in radians.
  */
 OSKAR_EXPORT
-void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_f(
-        float* x, float* y, float* z, int num_points, const float* l,
-        const float* m, const float* n, float ha0, float dec0, float lat);
+void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda_f(
+        float* l, float* m, float* n, int num_points, const float* x,
+        const float* y, const float* z, float ha0, float dec0, float lat);
 
 /**
  * @brief
- * Converts from relative direction cosines to horizon ENU direction cosines
+ * Converts from horizon ENU direction cosines to relative direction cosines
  * (double precision, GPU version).
  *
  * @details
@@ -103,17 +103,17 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_f(
  *
    \f[
     \begin{bmatrix}
-    x \\
-    y \\
-    z
-    \end{bmatrix}
-
-        = R_x(\phi) \cdot R_y(-H_0) \cdot R_x(-\delta_0) \cdot
-
-    \begin{bmatrix}
     l \\
     m \\
     n
+    \end{bmatrix}
+
+        = R_x(\delta_0) \cdot R_y(H_0) \cdot R_x(-\phi) \cdot
+
+    \begin{bmatrix}
+    x \\
+    y \\
+    z
     \end{bmatrix}
    \f]
  *
@@ -123,13 +123,13 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_f(
  * the observer's geodetic latitude, the hour angle and the declination of
  * the phase centre.
  *
- * @param[out] x          ENU direction cosines (East).
- * @param[out] y          ENU direction cosines (North).
- * @param[out] z          ENU direction cosines (up).
+ * @param[out] l          Relative direction cosines.
+ * @param[out] m          Relative direction cosines.
+ * @param[out] n          Relative direction cosines.
  * @param[in]  num_points Number of points to convert.
- * @param[in]  l          Relative direction cosines.
- * @param[in]  m          Relative direction cosines.
- * @param[in]  n          Relative direction cosines.
+ * @param[in]  x          ENU direction cosines (East).
+ * @param[in]  y          ENU direction cosines (North).
+ * @param[in]  z          ENU direction cosines (up).
  * @param[in]  ha0        Hour angle of the origin of the relative directions,
  *                        in radians.
  * @param[in]  dec0       Declination of the origin of the relative directions,
@@ -137,25 +137,25 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_f(
  * @param[in]  lat        Latitude of the ENU coordinate frame, in radians.
  */
 OSKAR_EXPORT
-void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_d(
-        double* x, double* y, double* z, int num_points, const double* l,
-        const double* m, const double* n, double ha0, double dec0, double lat);
+void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda_d(
+        double* l, double* m, double* n, int num_points, const double* x,
+        const double* y, const double* z, double ha0, double dec0, double lat);
 
 #ifdef __CUDACC__
 
 /* Kernels. */
 
 __global__
-void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cudak_f(
-        float* x, float* y, float* z, const int num_points, const float* l,
-        const float* m, const float* n, const float cos_ha0,
+void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cudak_f(
+        float* l, float* m, float* n, const int num_points, const float* x,
+        const float* y, const float* z, const float cos_ha0,
         const float sin_ha0, const float cos_dec0, const float sin_dec0,
         const float cos_lat, const float sin_lat);
 
 __global__
-void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cudak_d(
-        double* x, double* y, double* z, const int num_points, const double* l,
-        const double* m, const double* n, const double cos_ha0,
+void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cudak_d(
+        double* l, double* m, double* n, const int num_points, const double* x,
+        const double* y, const double* z, const double cos_ha0,
         const double sin_ha0, const double cos_dec0, const double sin_dec0,
         const double cos_lat, const double sin_lat);
 
@@ -165,4 +165,4 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cudak_d(
 }
 #endif
 
-#endif /* OSKAR_CONVERT_RELATIVE_DIRECTION_COSINES_TO_ENU_DIRECTION_COSINES_CUDA_H_ */
+#endif /* OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_RELATIVE_DIRECTION_COSINES_CUDA_H_ */

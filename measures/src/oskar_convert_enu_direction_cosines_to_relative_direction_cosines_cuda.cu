@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda.h>
+#include <oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,9 +34,9 @@ extern "C" {
 
 /* Kernel wrappers. ======================================================== */
 
-void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_f(
-        float* x, float* y, float* z, int num_points, const float* l,
-        const float* m, const float* n, float ha0, float dec0, float lat)
+void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda_f(
+        float* l, float* m, float* n, int num_points, const float* x,
+        const float* y, const float* z, float ha0, float dec0, float lat)
 {
     float sin_ha0, cos_ha0, sin_dec0, cos_dec0, sin_lat, cos_lat;
     int num_blocks, num_threads = 256;
@@ -52,14 +52,14 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_f(
     cos_dec0 = (float) cos(dec0);
     sin_lat  = (float) sin(lat);
     cos_lat  = (float) cos(lat);
-    oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (x, y, z, num_points, l, m, n,
+    oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (l, m, n, num_points, x, y, z,
             cos_ha0, sin_ha0, cos_dec0, sin_dec0, cos_lat, sin_lat);
 }
 
-void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_d(
-        double* x, double* y, double* z, int num_points, const double* l,
-        const double* m, const double* n, double ha0, double dec0, double lat)
+void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda_d(
+        double* l, double* m, double* n, int num_points, const double* x,
+        const double* y, const double* z, double ha0, double dec0, double lat)
 {
     double sin_ha0, cos_ha0, sin_dec0, cos_dec0, sin_lat, cos_lat;
     int num_blocks, num_threads = 256;
@@ -75,8 +75,8 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_d(
     cos_dec0 = cos(dec0);
     sin_lat  = sin(lat);
     cos_lat  = cos(lat);
-    oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (x, y, z, num_points, l, m, n,
+    oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (l, m, n, num_points, x, y, z,
             cos_ha0, sin_ha0, cos_dec0, sin_dec0, cos_lat, sin_lat);
 }
 
@@ -89,9 +89,9 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_d(
 
 /* Single precision. */
 __global__
-void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cudak_f(
-        float* x, float* y, float* z, const int num_points, const float* l,
-        const float* m, const float* n, const float cos_ha0,
+void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cudak_f(
+        float* l, float* m, float* n, const int num_points, const float* x,
+        const float* y, const float* z, const float cos_ha0,
         const float sin_ha0, const float cos_dec0, const float sin_dec0,
         const float cos_lat, const float sin_lat)
 {
@@ -99,28 +99,28 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cudak_f(
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_points) return;
 
-    l_ = l[i];
-    m_ = m[i];
-    n_ = n[i];
-    x_ = l_ * cos_ha0 + m_ * sin_ha0 * sin_dec0 - n_ * sin_ha0 * cos_dec0;
-    t = sin_lat * cos_ha0;
-    y_ = -l_ * sin_lat * sin_ha0 +
-            m_ * (cos_lat * cos_dec0 + t * sin_dec0) +
-            n_ * (cos_lat * sin_dec0 - t * cos_dec0);
-    t = cos_lat * cos_ha0;
-    z_ = l_ * cos_lat * sin_ha0 +
-            m_ * (sin_lat * cos_dec0 - t * sin_dec0) +
-            n_ * (sin_lat * sin_dec0 + t * cos_dec0);
-    x[i] = x_;
-    y[i] = y_;
-    z[i] = z_;
+    x_ = x[i];
+    y_ = y[i];
+    z_ = z[i];
+    l_ = x_ * cos_ha0 - y_ * sin_ha0 * sin_lat + z_ * sin_ha0 * cos_lat;
+    t = sin_dec0 * cos_ha0;
+    m_ = x_ * sin_dec0 * sin_ha0 +
+            y_ * (cos_dec0 * cos_lat + t * sin_lat) +
+            z_ * (cos_dec0 * sin_lat - t * cos_lat);
+    t = cos_dec0 * cos_ha0;
+    n_ = -x_ * cos_dec0 * sin_ha0 +
+            y_ * (sin_dec0 * cos_lat - t * sin_lat) +
+            z_ * (sin_dec0 * sin_lat + t * cos_lat);
+    l[i] = l_;
+    m[i] = m_;
+    n[i] = n_;
 }
 
 /* Double precision. */
 __global__
-void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cudak_d(
-        double* x, double* y, double* z, const int num_points, const double* l,
-        const double* m, const double* n, const double cos_ha0,
+void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cudak_d(
+        double* l, double* m, double* n, const int num_points, const double* x,
+        const double* y, const double* z, const double cos_ha0,
         const double sin_ha0, const double cos_dec0, const double sin_dec0,
         const double cos_lat, const double sin_lat)
 {
@@ -128,19 +128,19 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cudak_d(
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_points) return;
 
-    l_ = l[i];
-    m_ = m[i];
-    n_ = n[i];
-    x_ = l_ * cos_ha0 + m_ * sin_ha0 * sin_dec0 - n_ * sin_ha0 * cos_dec0;
-    t = sin_lat * cos_ha0;
-    y_ = -l_ * sin_lat * sin_ha0 +
-            m_ * (cos_lat * cos_dec0 + t * sin_dec0) +
-            n_ * (cos_lat * sin_dec0 - t * cos_dec0);
-    t = cos_lat * cos_ha0;
-    z_ = l_ * cos_lat * sin_ha0 +
-            m_ * (sin_lat * cos_dec0 - t * sin_dec0) +
-            n_ * (sin_lat * sin_dec0 + t * cos_dec0);
-    x[i] = x_;
-    y[i] = y_;
-    z[i] = z_;
+    x_ = x[i];
+    y_ = y[i];
+    z_ = z[i];
+    l_ = x_ * cos_ha0 - y_ * sin_ha0 * sin_lat + z_ * sin_ha0 * cos_lat;
+    t = sin_dec0 * cos_ha0;
+    m_ = x_ * sin_dec0 * sin_ha0 +
+            y_ * (cos_dec0 * cos_lat + t * sin_lat) +
+            z_ * (cos_dec0 * sin_lat - t * cos_lat);
+    t = cos_dec0 * cos_ha0;
+    n_ = -x_ * cos_dec0 * sin_ha0 +
+            y_ * (sin_dec0 * cos_lat - t * sin_lat) +
+            z_ * (sin_dec0 * sin_lat + t * cos_lat);
+    l[i] = l_;
+    m[i] = m_;
+    n[i] = n_;
 }
