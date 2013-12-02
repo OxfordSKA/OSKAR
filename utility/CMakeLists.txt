@@ -10,6 +10,7 @@ set(utility_SRC
     src/oskar_binary_header_version.c
     src/oskar_binary_stream_read_header.c
     src/oskar_binary_stream_read.c
+    src/oskar_binary_stream_read_oskar_version.c
     src/oskar_binary_stream_write_header.c
     src/oskar_binary_stream_write_cuda_info.c
     src/oskar_binary_stream_write_metadata.c

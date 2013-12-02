@@ -31,6 +31,7 @@
 #include <oskar_binary_file_read.h>
 #include <oskar_binary_file_write.h>
 #include <oskar_binary_tag_index_free.h>
+#include <oskar_binary_stream_read_oskar_version.h>
 #include <oskar_BinaryTag.h>
 #include <oskar_file_exists.h>
 #include <oskar_get_error_string.h>
@@ -288,6 +289,18 @@ TEST(Mem, binary_read_write)
         status = 0;
         EXPECT_EQ(0, (int)oskar_mem_length(&mem));
         oskar_mem_free(&mem, &status);
+    }
+
+    // Check header version.
+    {
+        int maj, min, patch;
+        FILE* fhan = fopen(filename, "r");
+        oskar_binary_stream_read_oskar_version(fhan, &maj, &min, &patch,
+                &status);
+        EXPECT_EQ(OSKAR_VERSION & 0xFF, patch);
+        EXPECT_EQ((OSKAR_VERSION & 0xFF00) >> 8, min);
+        EXPECT_EQ((OSKAR_VERSION & 0xFF0000) >> 16, maj);
+        fclose(fhan);
     }
 
     // Free the tag index.
