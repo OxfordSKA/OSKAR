@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,7 +42,16 @@ extern "C" {
 
 /**
  * @brief
+ * Converts HEALPix pixel IDs to spherical angles for the HEALPix ring scheme.
+ */
+OSKAR_EXPORT
+void oskar_convert_healpix_ring_to_theta_phi(oskar_Mem* theta, oskar_Mem* phi,
+        int nside, int* status);
+
+/**
+ * @brief
  * Converts Healpix pixel ID to angles for the Healpix RING scheme.
+ * (double precision)
  *
  * @details
  * Gives \p theta and \p phi corresponding to pixel \p ipix
@@ -54,8 +64,27 @@ extern "C" {
  * (12 * nside^2 - 1).
  */
 OSKAR_EXPORT
-void oskar_convert_healpix_ring_to_theta_phi(long nside, long ipix,
+void oskar_convert_healpix_ring_to_theta_phi_d(long nside, long ipix,
         double* theta, double* phi);
+
+/**
+ * @brief
+ * Converts Healpix pixel ID to angles for the Healpix RING scheme.
+ * (single precision)
+ *
+ * @details
+ * Gives \p theta and \p phi corresponding to pixel \p ipix
+ * for a parameter \p nside in the RING scheme.
+ *
+ * Note that \p theta is the polar angle (the colatitude) and \p phi is the
+ * east longitude.
+ *
+ * \p nside must be in the range 1 to 8192, and \p ipix in the range 0 to
+ * (12 * nside^2 - 1).
+ */
+OSKAR_EXPORT
+void oskar_convert_healpix_ring_to_theta_phi_f(long nside, long ipix,
+        float* theta, float* phi);
 
 #ifdef __cplusplus
 }

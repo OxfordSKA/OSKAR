@@ -145,6 +145,8 @@ int oskar_setup_image(oskar_Image* im, const oskar_Vis* vis,
                 chan0 * oskar_vis_freq_inc_hz(vis);
     }
     im->image_type         = settings->image_type;
+    im->coord_frame        = OSKAR_IMAGE_COORD_FRAME_EQUATORIAL;
+    im->grid_type          = OSKAR_IMAGE_GRID_TYPE_RECTILINEAR;
 
     return OSKAR_SUCCESS;
 }

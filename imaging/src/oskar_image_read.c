@@ -106,14 +106,7 @@ void oskar_image_read(oskar_Image* image, const char* filename, int idx,
     /* Read other image metadata. */
     oskar_binary_stream_read_int(stream, &index, grp,
             OSKAR_IMAGE_TAG_IMAGE_TYPE, idx, &image->image_type, status);
-    oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_CENTRE_RA, idx, &image->centre_ra_deg, status);
-    oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_CENTRE_DEC, idx, &image->centre_dec_deg, status);
-    oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_FOV_RA, idx, &image->fov_ra_deg, status);
-    oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_FOV_DEC, idx, &image->fov_dec_deg, status);
+
     oskar_binary_stream_read_double(stream, &index, grp,
             OSKAR_IMAGE_TAG_TIME_START_MJD_UTC, idx, &image->time_start_mjd_utc,
             status);
@@ -123,6 +116,32 @@ void oskar_image_read(oskar_Image* image, const char* filename, int idx,
             OSKAR_IMAGE_TAG_FREQ_START_HZ, idx, &image->freq_start_hz, status);
     oskar_binary_stream_read_double(stream, &index, grp,
             OSKAR_IMAGE_TAG_FREQ_INC_HZ, idx, &image->freq_inc_hz, status);
+
+    /* Optionally read pixel grid type and coordinate frame. These are optional
+     * to maintain compatibility with OSKAR <= v2.3.1 */
+    tag_error = 0;
+    oskar_binary_stream_read_int(stream, &index, grp,
+            OSKAR_IMAGE_TAG_GRID_TYPE, idx, &image->grid_type, &tag_error);
+    oskar_binary_stream_read_int(stream, &index, grp,
+            OSKAR_IMAGE_TAG_COORD_FRAME, idx, &image->coord_frame, &tag_error);
+
+    /* Rectilinear grid type tags */
+    tag_error = 0;
+    oskar_binary_stream_read_double(stream, &index, grp,
+            OSKAR_IMAGE_TAG_CENTRE_RA, idx, &image->centre_ra_deg, &tag_error);
+    oskar_binary_stream_read_double(stream, &index, grp,
+            OSKAR_IMAGE_TAG_CENTRE_DEC, idx, &image->centre_dec_deg, &tag_error);
+    oskar_binary_stream_read_double(stream, &index, grp,
+            OSKAR_IMAGE_TAG_FOV_RA, idx, &image->fov_ra_deg, &tag_error);
+    oskar_binary_stream_read_double(stream, &index, grp,
+            OSKAR_IMAGE_TAG_FOV_DEC, idx, &image->fov_dec_deg, &tag_error);
+
+    /* HEALPix grid type tags */
+    tag_error = 0;
+    oskar_binary_stream_read_int(stream, &index, grp,
+            OSKAR_IMAGE_TAG_HEALPIX_NSIDE, idx, &image->healpix_nside,
+            &tag_error);
+
 
     /* Read the image data. */
     oskar_mem_binary_stream_read(&image->data, stream, &index,

@@ -1152,24 +1152,29 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     setTooltip(k, "The station ID number (zero based) to select from the "
             "telescope model when generating the beam pattern.");
 
-#if 1
+
+    /* TODO change this to grid type?! */
     k = group + "/coordinate_type";
     options.clear();
-    options << "Beam image";
-    declare(k, "Coordinate type", options, 0);
+    options << "Beam image"
+            << "HEALPix";
+    declare(k, "Coordinate (grid) type", options, 0);
+    /* TODO Update tooltip */
     setTooltip(k, "Specification of coordinates at which to evaluate the beam "
             "pattern."
             "<ul>"
             "<li><b>Beam image: </b> Tangent plane image, centred on the "
             "beam pointing direction.</li>"
+            "<li><b>HEALPix</b></li>"
             "</ul>");
-#else // Proposed 2.4.x settings
-    k = group + "/coordinate_type";
+
+    k = group + "/coordinate_frame";
     options.clear();
-    options << "Beam image";
-            << "HEALPix";
-    declare(k, "Coordinate type", options, 0);
-#endif
+    options << "Equatorial"
+            << "Horizon";
+    declare(k, "Coordinate Frame", options, 0);
+    setTooltip(k, "Specification of the coordinate frame in which to evaluate "
+            "the beam pattern.");
 
     k = group + "/beam_image";
     setLabel(k, "Beam image settings");
@@ -1202,53 +1207,18 @@ void oskar_SettingsModelApps::init_settings_beampattern()
             "Declination.</li>"
             "</ul>");
 
-#if 0 // Proposed OSKAR 2.4.x features
     k = group + "/healpix";
     setLabel(k, "HEALPix settings");
     setDependency(k , group + "/coordinate_type", "HEALPix");
-    k = group + "/healpix/coord_type";
-    options.clear();
-    options << "Equatorial"
-            << "Horizon";
-    declare(k, "Coordinate type", options, 0);
     k = group + "/healpix/nside";
     declare(k, "Nside", oskar_SettingsItem::INT_UNSIGNED, "0");
     setTooltip(k, "HEALPix Nside parameter. The total number of points is "
             "12 * Nside * Nside");
 
+#if 0 /* proposed 2.4.x feature */
     k = group + "/horizon_clip";
     declare(k, "Horizon clip", oskar_SettingsItem::BOOL, "true");
     setTooltip(k, "Zero the beam pattern below the horizon");
-#endif
-
-#if 0
-    k = group + "/fov_deg";
-    declare(k, "Field-of-view (RA,Dec) [deg]",
-            oskar_SettingsItem::DOUBLE_CSV_LIST, "2.0");
-    setTooltip(k, "Field-of-view (FOV) in degrees (max 180.0). If a single value "
-            "is specified, the image is assumed to have the same FOV along each "
-            "dimension.<br>"
-            "Example:"
-            "<ul>"
-            "<li>A value of \"2.0\" results in an image with a FOV of 2.0 "
-            "degrees in each dimension.</li>"
-            "<li>A value of \"2.0,1.0\" results in a image with a FOV of "
-            "2.0 degrees in Right Ascension, and 1.0 degrees in "
-            "Declination.</li>"
-            "</ul>");
-    k = group + "/size";
-    declare(k, "Image dimensions (RA,Dec) [pixels]",
-            oskar_SettingsItem::INT_CSV_LIST, "256");
-    setTooltip(k, "Image dimensions. If a single value is specified, the "
-            "image is assumed to have the same number of pixels along each "
-            "dimension.<br>"
-            "Example:"
-            "<ul>"
-            "<li>A value of \"256\" results in a square image of size 256 by "
-            "256 pixels.</li>"
-            "<li>A value of \"256,128\" results in a image of 256 by 128 pixels, "
-            "with 256 pixels along the Right Ascension direction.</li>"
-            "</ul>");
 #endif
 
     k = group + "/root_path";

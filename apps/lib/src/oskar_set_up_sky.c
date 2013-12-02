@@ -382,7 +382,7 @@ static void set_up_gen_healpix(int* num_chunks, oskar_Sky*** sky_chunks,
     for (i = 0; i < npix; ++i)
     {
         double ra, dec;
-        oskar_convert_healpix_ring_to_theta_phi(nside, i, &dec, &ra);
+        oskar_convert_healpix_ring_to_theta_phi_d(nside, i, &dec, &ra);
         dec = M_PI / 2.0 - dec;
         oskar_sky_set_source(temp, i, ra, dec, s->amplitude, 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);

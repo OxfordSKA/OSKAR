@@ -28,7 +28,16 @@
 
 #include <apps/lib/oskar_beam_pattern_generate_coordinates.h>
 #include <oskar_evaluate_image_lmn_grid.h>
+#include <oskar_convert_healpix_ring_to_theta_phi.h>
+#include <oskar_convert_theta_phi_to_enu_direction_cosines.h>
+#include <oskar_healpix_nside_to_npix.h>
 #include <math.h>
+
+static void generate_equatorial_coordinates_(oskar_Mem* l, oskar_Mem* m,
+        oskar_Mem* n, const oskar_SettingsBeamPattern* settings, int* status);
+static void generate_horizon_coordinates_(oskar_Mem* x, oskar_Mem* y,
+        oskar_Mem* z, const oskar_SettingsBeamPattern* settings, int* status);
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,25 +53,87 @@ void oskar_beam_pattern_generate_coordinates(oskar_Mem* x, oskar_Mem* y,
         return;
     }
 
-    switch (settings->coord_type)
+    switch (settings->coord_frame_type)
     {
-        case OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE:
+        case OSKAR_BEAM_PATTERN_FRAME_EQUATORIAL:
         {
-            oskar_evaluate_image_lmn_grid(x, y, z, settings->size[0],
-                    settings->size[1], settings->fov_deg[0]*(M_PI/180.0),
-                    settings->fov_deg[1]*(M_PI/180.0), status);
+            generate_equatorial_coordinates_(x, y, z, settings, status);
             *coord_type = OSKAR_RELATIVE_DIRECTION_COSINES;
             break;
         }
-        case OSKAR_BEAM_PATTERN_COORDS_HEALPIX:
-            /* Proposed 2.4.x feature, not yet implemented */
-            *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        case OSKAR_BEAM_PATTERN_FRAME_HORIZON:
+        {
+            generate_horizon_coordinates_(x, y, z, settings, status);
+            *coord_type = OSKAR_ENU_DIRECTION_COSINES;
             break;
+        }
         default:
-            *status = OSKAR_FAIL;
+            *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
             break;
     };
 }
+
+static void generate_equatorial_coordinates_(oskar_Mem* l, oskar_Mem* m,
+        oskar_Mem* n, const oskar_SettingsBeamPattern* settings, int* status)
+{
+    switch (settings->coord_grid_type)
+     {
+         case OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE:
+         {
+             oskar_evaluate_image_lmn_grid(l, m, n, settings->size[0],
+                     settings->size[1], settings->fov_deg[0]*(M_PI/180.0),
+                     settings->fov_deg[1]*(M_PI/180.0), status);
+             break;
+         }
+         case OSKAR_BEAM_PATTERN_COORDS_HEALPIX:
+         {
+             /* TODO HEALPix equatorial grid */
+             *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+             break;
+         }
+         default:
+             *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+             break;
+     };
+}
+
+static void generate_horizon_coordinates_(oskar_Mem* x, oskar_Mem* y,
+        oskar_Mem* z, const oskar_SettingsBeamPattern* settings, int* status)
+{
+    switch (settings->coord_grid_type)
+     {
+         case OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE:
+         {
+             /* NOTE currently assumed to be an image centred at the zenith */
+             oskar_evaluate_image_lmn_grid(x, y, z, settings->size[0],
+                     settings->size[1], settings->fov_deg[0]*(M_PI/180.0),
+                     settings->fov_deg[1]*(M_PI/180.0), status);
+             break;
+         }
+         case OSKAR_BEAM_PATTERN_COORDS_HEALPIX:
+         {
+             int np, nside, type;
+             oskar_Mem* theta, *phi;
+             nside = settings->nside;
+             np = oskar_healpix_nside_to_npix(nside);
+             type = oskar_mem_type(x);
+             theta = oskar_mem_create(type, OSKAR_LOCATION_CPU, np, status);
+             phi = oskar_mem_create(type, OSKAR_LOCATION_CPU, np, status);
+             oskar_convert_healpix_ring_to_theta_phi(theta, phi, nside, status);
+             oskar_convert_theta_phi_to_enu_direction_cosines(x, y, z, np,
+                     theta, phi, status);
+             oskar_mem_free(theta, status);
+             oskar_mem_free(phi, status);
+             free(theta); /* FIXME Remove after updating oskar_mem_free(). */
+             free(phi);   /* FIXME Remove after updating oskar_mem_free(). */
+             break;
+         }
+         default:
+             *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+             break;
+     };
+}
+
 
 #ifdef __cplusplus
 }

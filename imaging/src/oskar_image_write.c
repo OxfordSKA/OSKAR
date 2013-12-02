@@ -65,7 +65,14 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Get the metadata. */
+    /* TODO currently just return an error if a HEALPix grid has been selected */
+    if (image->grid_type == OSKAR_IMAGE_GRID_TYPE_HEALPIX)
+    {
+        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        return;
+    }
+
+    /* Get the meta-data. */
     type = oskar_mem_type(&image->data);
 
     /* Check dimensions. */
@@ -143,19 +150,11 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
             OSKAR_IMAGE_TAG_DIMENSION_ORDER, idx,
             sizeof(image->dimension_order), image->dimension_order, status);
 
-    /* Write other image metadata. */
+    /* Write other image meta-data. */
     oskar_binary_stream_write_int(stream, grp,
             OSKAR_IMAGE_TAG_IMAGE_TYPE, idx, image->image_type, status);
     oskar_binary_stream_write_int(stream, grp,
             OSKAR_IMAGE_TAG_DATA_TYPE, idx, type, status);
-    oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_CENTRE_RA, idx, image->centre_ra_deg, status);
-    oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_CENTRE_DEC, idx, image->centre_dec_deg, status);
-    oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_FOV_RA, idx, image->fov_ra_deg, status);
-    oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_FOV_DEC, idx, image->fov_dec_deg, status);
     oskar_binary_stream_write_double(stream, grp,
             OSKAR_IMAGE_TAG_TIME_START_MJD_UTC, idx, image->time_start_mjd_utc,
             status);
@@ -165,6 +164,28 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
             OSKAR_IMAGE_TAG_FREQ_START_HZ, idx, image->freq_start_hz, status);
     oskar_binary_stream_write_double(stream, grp,
             OSKAR_IMAGE_TAG_FREQ_INC_HZ, idx, image->freq_inc_hz, status);
+    oskar_binary_stream_write_int(stream, grp, OSKAR_IMAGE_TAG_GRID_TYPE, idx,
+            image->grid_type, status);
+    oskar_binary_stream_write_int(stream, grp, OSKAR_IMAGE_TAG_COORD_FRAME, idx,
+            image->coord_frame, status);
+    if (image->grid_type == OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
+    {
+        oskar_binary_stream_write_double(stream, grp,
+                OSKAR_IMAGE_TAG_CENTRE_RA, idx, image->centre_ra_deg, status);
+        oskar_binary_stream_write_double(stream, grp,
+                OSKAR_IMAGE_TAG_CENTRE_DEC, idx, image->centre_dec_deg, status);
+        oskar_binary_stream_write_double(stream, grp,
+                OSKAR_IMAGE_TAG_FOV_RA, idx, image->fov_ra_deg, status);
+        oskar_binary_stream_write_double(stream, grp,
+                OSKAR_IMAGE_TAG_FOV_DEC, idx, image->fov_dec_deg, status);
+    }
+    else if (image->grid_type == OSKAR_IMAGE_GRID_TYPE_HEALPIX)
+    {
+        oskar_binary_stream_write_int(stream, grp,
+                OSKAR_IMAGE_TAG_HEALPIX_NSIDE, idx, image->healpix_nside,
+                status);
+    }
+
 
     /* Write the image data. */
     oskar_mem_binary_stream_write(&image->data, stream,

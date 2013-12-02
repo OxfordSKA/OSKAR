@@ -46,13 +46,12 @@ enum {
 
 /**
  * @brief
- * Enum describing the type HEALPix coordinates used when evaluating HEALPix
- * beams
+ * Enum describing the coordinates frame for which the beam pattern is evaluated.
  */
 enum {
-    OSKAR_HEALPIX_UNDEF,
-    OSKAR_HEALPIX_EQUATORIAL,
-    OSKAR_HEALPIX_HORIZON
+    OSKAR_BEAM_PATTERN_FRAME_UNDEF,
+    OSKAR_BEAM_PATTERN_FRAME_EQUATORIAL,
+    OSKAR_BEAM_PATTERN_FRAME_HORIZON
 };
 
 
@@ -68,7 +67,8 @@ struct oskar_SettingsBeamPattern
 {
     int station_id;
 
-    int coord_type; /* The type of beam pattern coordinates */
+    int coord_grid_type;  /* The type of beam pattern coordinates */
+    int coord_frame_type; /* Coordinate frame for beam pattern evaluation */
 
     /* Beam pattern image settings */
     double fov_deg[2];

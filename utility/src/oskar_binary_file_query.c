@@ -353,6 +353,37 @@ void oskar_binary_file_query(oskar_Log* log, const char* filename, int* status)
                             idx, &val, status);
                     oskar_log_message(log, depth, "RMS: %.3e", val);
                 }
+                else if (tag == OSKAR_IMAGE_TAG_GRID_TYPE)
+                {
+                    int val = 0;
+                    oskar_binary_stream_read_int(stream, &index, group, tag,
+                            idx, &val, status);
+                    if (val == OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
+                        oskar_log_message(log, depth, "Grid type: Rectilinear");
+                    else if (val == OSKAR_IMAGE_GRID_TYPE_HEALPIX)
+                        oskar_log_message(log, depth, "Grid type: HEALPix Ring");
+                    else
+                        oskar_log_message(log, depth, "Grid type: Undef");
+                }
+                else if (tag == OSKAR_IMAGE_TAG_COORD_FRAME)
+                {
+                    int val = 0;
+                    oskar_binary_stream_read_int(stream, &index, group, tag, idx,
+                            &val, status);
+                    if (val == OSKAR_IMAGE_COORD_FRAME_EQUATORIAL)
+                        oskar_log_message(log, depth, "Coordinate frame: Equatorial");
+                    else if (val == OSKAR_IMAGE_COORD_FRAME_HORIZON)
+                        oskar_log_message(log, depth, "Coordinate frame: Horizon");
+                    else
+                        oskar_log_message(log, depth, "Coordinate frame: Undef");
+                }
+                else if (tag == OSKAR_IMAGE_TAG_HEALPIX_NSIDE)
+                {
+                    int val = 0;
+                    oskar_binary_stream_read_int(stream, &index, group, tag, idx,
+                            &val, status);
+                    oskar_log_message(log, depth, "HEALPix nside: %i", val);
+                }
             }
             else if (group == OSKAR_TAG_GROUP_VISIBILITY)
             {

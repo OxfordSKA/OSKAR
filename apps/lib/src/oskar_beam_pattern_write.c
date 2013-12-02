@@ -62,6 +62,14 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
     const int* size;
     oskar_Image image;
 
+    if (!status || *status != OSKAR_SUCCESS)
+        return;
+
+    if (!complex_cube || !settings || !log) {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
     size = settings->beam_pattern.size;
     num_times = settings->obs.num_time_steps;
     num_channels = settings->obs.num_channels;
@@ -77,8 +85,11 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
             num_channels, status);
     image.image_type         = (num_pols == 1) ?
             OSKAR_IMAGE_TYPE_BEAM_SCALAR : OSKAR_IMAGE_TYPE_BEAM_POLARISED;
+    image.grid_type          = settings->beam_pattern.coord_grid_type;
+    image.coord_frame        = settings->beam_pattern.coord_frame_type;
     image.centre_ra_deg      = settings->obs.ra0_rad[0] * 180.0 / M_PI;
     image.centre_dec_deg     = settings->obs.dec0_rad[0] * 180.0 / M_PI;
+    image.healpix_nside      = settings->beam_pattern.nside;
     image.fov_ra_deg         = settings->beam_pattern.fov_deg[0];
     image.fov_dec_deg        = settings->beam_pattern.fov_deg[1];
     image.freq_start_hz      = settings->obs.start_frequency_hz;

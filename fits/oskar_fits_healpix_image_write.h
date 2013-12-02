@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,44 +26,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_image_free.h>
-#include <oskar_mem.h>
+#ifndef OSKAR_FITS_HEALPIX_IMAGE_WRITE_H_
+#define OSKAR_FITS_HEALPIX_IMAGE_WRITE_H_
+
+/**
+ * @file oskar_fits_healpix_image_write.h
+ */
+
+#include <oskar_global.h>
+#include <oskar_Image.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_image_free(oskar_Image* image, int* status)
-{
-    /* Check all inputs. */
-    if (!image || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+/**
+ * @brief
+ * @details
+ */
+OSKAR_EXPORT
+void oskar_fits_healpix_image_write(const char* filename, oskar_Image* image,
+        int* status);
 
-    /* Free memory. */
-    oskar_mem_free(&image->data, status);
-    oskar_mem_free(&image->settings_path, status);
-
-    /* Clear meta-data. */
-    image->grid_type = 0;
-    image->coord_frame = 0;
-    image->centre_dec_deg = 0.0;
-    image->centre_ra_deg = 0.0;
-    image->fov_dec_deg = 0.0;
-    image->fov_ra_deg = 0.0;
-    image->freq_inc_hz = 0.0;
-    image->freq_start_hz = 0.0;
-    image->height = 0;
-    image->num_channels = 0;
-    image->num_pols = 0;
-    image->num_times = 0;
-    image->time_inc_sec = 0.0;
-    image->time_start_mjd_utc = 0.0;
-    image->width = 0;
-}
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_FITS_HEALPIX_IMAGE_WRITE_H_ */

@@ -31,6 +31,7 @@
 #include <oskar_evaluate_station_beam_gaussian.h>
 #include <oskar_evaluate_vla_beam_pbcor.h>
 #include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines.h>
+#include <oskar_convert_enu_direction_cosines_to_relative_direction_cosines.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,6 +41,11 @@ extern "C" {
 static void compute_enu_directions_(oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
         int np, const oskar_Mem* l, const oskar_Mem* m,
         const oskar_Mem* n, const oskar_Station* station, double GAST,
+        int* status);
+
+static void compute_relative_directions_(oskar_Mem* l, oskar_Mem* m,
+        oskar_Mem* n, int np, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, const oskar_Station* station, double GAST,
         int* status);
 
 void oskar_evaluate_station_beam_pattern(oskar_Mem* beam_pattern,
@@ -58,11 +64,9 @@ void oskar_evaluate_station_beam_pattern(oskar_Mem* beam_pattern,
     {
         case OSKAR_ENU_DIRECTION_COSINES:
         {
-#if 0
             oskar_evaluate_station_beam_pattern_enu_directions(beam_pattern,
                     num_points, x, y, z, station, work, rand_state, frequency,
                     GAST, status);
-#endif
             break;
         }
         case OSKAR_RELATIVE_DIRECTION_COSINES:
@@ -126,7 +130,6 @@ void oskar_evaluate_station_beam_pattern_relative_directions(
     };
 }
 
-#if 0
 void oskar_evaluate_station_beam_pattern_enu_directions(oskar_Mem* beam_pattern,
         int np, const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
         const oskar_Station* station, oskar_StationWork* work,
@@ -139,24 +142,36 @@ void oskar_evaluate_station_beam_pattern_enu_directions(oskar_Mem* beam_pattern,
         return;
     }
 
-    /* FIXME Return immediately for now, this function needs to be implemented */
-    *status = OSKAR_FAIL;
-    return;
-
     switch (oskar_station_type(station))
     {
         case OSKAR_STATION_TYPE_AA:
         {
+            oskar_evaluate_station_beam_aperture_array(beam_pattern, station,
+                    np, x, y, z, GAST, frequency, work, rand_state, status);
             break;
         }
         case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
         {
-            /* Convert from enu directions to relative lmn */
+            oskar_Mem *l, *m, *n; /* Relative direction cosines*/
+            l = oskar_station_work_enu_direction_x(work);
+            m = oskar_station_work_enu_direction_y(work);
+            n = oskar_station_work_enu_direction_z(work);
+            compute_relative_directions_(l, m, n, np, x, y, z, station, GAST,
+                    status);
+            oskar_evaluate_station_beam_gaussian(beam_pattern, np, l, m, z,
+                    oskar_station_gaussian_beam_fwhm_rad(station), status);
             break;
         }
         case OSKAR_STATION_TYPE_VLA_PBCOR:
         {
-            /* Convert from enu to relative radius */
+            oskar_Mem *l, *m, *n; /* Relative direction cosines*/
+            l = oskar_station_work_enu_direction_x(work);
+            m = oskar_station_work_enu_direction_y(work);
+            n = oskar_station_work_enu_direction_z(work);
+            compute_relative_directions_(l, m, n, np, x, y, z, station, GAST,
+                    status);
+            oskar_evaluate_vla_beam_pbcor(beam_pattern, np, l, m, frequency,
+                    status);
             break;
         }
         default:
@@ -166,7 +181,6 @@ void oskar_evaluate_station_beam_pattern_enu_directions(oskar_Mem* beam_pattern,
         }
     };
 }
-#endif
 
 static void compute_enu_directions_(oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
         int np, const oskar_Mem* l, const oskar_Mem* m,
@@ -214,6 +228,54 @@ static void compute_enu_directions_(oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
     /* Convert from lmn to ENU directions */
     oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
             x, y, z, np, l, m, n, ha0, dec0, lat, status);
+}
+
+static void compute_relative_directions_(oskar_Mem* l, oskar_Mem* m,
+        oskar_Mem* n, int np, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, const oskar_Station* station, double GAST,
+        int* status)
+{
+    double ha0, ra0, dec0, LAST, lat;
+    int pointing_coord_type;
+
+    if (!status || *status != OSKAR_SUCCESS) return;
+    if (!x || !y || !z || !l || !m || !n || !station) {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Resize work arrays if needed */
+    if ((int)oskar_mem_length(l) < np) oskar_mem_realloc(l, np, status);
+    if ((int)oskar_mem_length(m) < np) oskar_mem_realloc(m, np, status);
+    if ((int)oskar_mem_length(n) < np) oskar_mem_realloc(n, np, status);
+    if (*status) return;
+
+    ra0  = oskar_station_beam_longitude_rad(station);
+    LAST = GAST + oskar_station_longitude_rad(station);
+    lat  = oskar_station_latitude_rad(station);
+    ha0  = LAST - ra0;
+
+    /* Obtain ra0, dec0 of phase centre */
+    pointing_coord_type = oskar_station_beam_coord_type(station);
+    if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
+    {
+        dec0 = oskar_station_beam_latitude_rad(station);
+    }
+    else if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)
+    {
+        /* TODO convert from az0, el0 to ra0, dec0 */
+        *status = OSKAR_FAIL;
+        return;
+    }
+    else
+    {
+        *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+        return;
+    }
+
+    /* Convert from ENU to relative directions */
+    oskar_convert_enu_direction_cosines_to_relative_direction_cosines(
+            l, m, n, np, x, y, z, ha0, dec0, lat, status);
 }
 
 #ifdef __cplusplus

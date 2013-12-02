@@ -651,10 +651,19 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
     oskar_log_message(log, depth, "Beam pattern settings");
     depth = 1;
     LVI("Station ID", s->beam_pattern.station_id);
-    switch (s->beam_pattern.coord_type) {
+    switch (s->beam_pattern.coord_frame_type)
+    {
+        case OSKAR_BEAM_PATTERN_FRAME_EQUATORIAL:
+            LVS("Coordinate frame type", "Equatorial");
+            break;
+        case OSKAR_BEAM_PATTERN_FRAME_HORIZON:
+            LVS("Coordinate frame type", "Horizon");
+            break;
+    };
+    switch (s->beam_pattern.coord_grid_type) {
         case OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE:
         {
-            LVS("Coordinate type", "Beam image");
+            LVS("Coordinate (grid) type", "Beam image");
             oskar_log_value(log, ++depth, w, "Dimensions [pixels]", "%i, %i",
                     s->beam_pattern.size[0], s->beam_pattern.size[1]);
             oskar_log_value(log, depth, w, "Field-of-view [deg]", "%.3f, %.3f",
@@ -663,7 +672,8 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
         }
         case OSKAR_BEAM_PATTERN_COORDS_HEALPIX:
         {
-            LVS("Coordinate type", "HEALPix");
+            LVS("Coordinate (grid) type", "HEALPix");
+            LVI("Nside", s->beam_pattern.nside);
             ++depth;
             break;
         }

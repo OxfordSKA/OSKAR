@@ -44,6 +44,7 @@
 
 #define FACTOR (2.0*sqrt(2.0*log(2.0)))
 
+#if 0
 TEST(fits_to_sky_model, test)
 {
     // Write a test image.
@@ -265,3 +266,5 @@ TEST(fits_to_sky_model, test)
     // Free memory.
     oskar_image_free(&image, &err);
 }
+
+#endif

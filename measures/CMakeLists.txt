@@ -25,6 +25,7 @@ set(${name}_SRC
     src/oskar_convert_offset_ecef_to_ecef.c
     src/oskar_convert_relative_direction_cosines_to_enu_direction_cosines.c
     src/oskar_convert_station_uvw_to_baseline_uvw.c
+    src/oskar_convert_theta_phi_to_enu_direction_cosines.c
     src/oskar_convert_theta_phi_to_healpix_ring.c
     src/oskar_convert_xyz_to_lon_lat.c
 )

@@ -51,15 +51,23 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     bp->station_id  = s.value("station_id").toUInt();
 
     QString temp = s.value("coordinate_type", "Beam image").toString().toUpper();
-    if (temp.startsWith("BEAM")) {
-        bp->coord_type = OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE;
+    if (temp.startsWith("B")) {
+        bp->coord_grid_type = OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE;
     }
-    else if (temp.startsWith("HEALPIX"))
-        bp->coord_type = OSKAR_BEAM_PATTERN_COORDS_HEALPIX;
+    else if (temp.startsWith("H"))
+        bp->coord_grid_type = OSKAR_BEAM_PATTERN_COORDS_HEALPIX;
     else
         return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
 
-    if (bp->coord_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
+    temp = s.value("coordinate_frame", "Equatorial").toString().toUpper();
+    if (temp.startsWith("E"))
+        bp->coord_frame_type = OSKAR_BEAM_PATTERN_FRAME_EQUATORIAL;
+    else if (temp.startsWith("H"))
+        bp->coord_frame_type = OSKAR_BEAM_PATTERN_FRAME_HORIZON;
+    else
+        return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+
+    if (bp->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
     {
         s.beginGroup("beam_image");
         QStringList dimsList;
@@ -86,16 +94,9 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
                 dimsList[1].toDouble() : bp->fov_deg[0];
         s.endGroup();
     }
-    else if (bp->coord_type == OSKAR_BEAM_PATTERN_COORDS_HEALPIX)
+    else if (bp->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_HEALPIX)
     {
         s.beginGroup("healpix");
-        temp = s.value("coordinate_type", "Galactic").toString().toUpper();
-        if (temp.startsWith("EQUATORIAL"))
-            bp->healpix_coord_type = OSKAR_HEALPIX_EQUATORIAL;
-        else if (temp.startsWith("HORIZON"))
-            bp->healpix_coord_type = OSKAR_HEALPIX_HORIZON;
-        else
-            return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
         bp->nside = s.value("nside", 0).toInt();
         s.endGroup();
     }

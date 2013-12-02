@@ -1,8 +1,16 @@
+2013-11-29  OSKAR-2.4.0
+
+    * Added new beam coordinate modes which allow output of horizon frame
+      zenith centred tangent plane images and HEALPix grids in both the 
+      equatorial and horizon planes.
+
+    * Fixed an issue building the google unit test library.
+
 2013-11-28  OSKAR-2.3.1
 
-    * Fixed issue building the OSKAR fits library.
+    * Fixed an issue building the OSKAR fits library.
 
-    * Updated to google test framework version 1.7.0
+    * Updated to Google test framework version 1.7.0
 
 2013-11-26  OSKAR-2.3.0
 

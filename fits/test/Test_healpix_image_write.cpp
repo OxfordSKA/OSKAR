@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,44 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_image_free.h>
+#include <gtest/gtest.h>
+#include <fits/oskar_fits_healpix_image_write.h>
+#include <oskar_image.h>
 #include <oskar_mem.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cstdio>
+#include <cstdlib>
 
-void oskar_image_free(oskar_Image* image, int* status)
+TEST(fits_healpix_image_write, test)
 {
-    /* Check all inputs. */
-    if (!image || !status)
+    int status = OSKAR_SUCCESS;
+    const char* filename = "tmp_test_healpix_image.fits";
+    oskar_Image image;
+    int nside = 128;
+    int npix = 12 * nside * nside;
+
+    int type = OSKAR_DOUBLE;
+    int loc = OSKAR_LOCATION_CPU;
+    int num_channels = 2;
+    oskar_mem_init(&image.data, type, loc, npix * num_channels, 1, &status);
+    double* data_ = oskar_mem_double(&image.data, &status);
+    for (int c = 0; c < num_channels; ++c)
     {
-        oskar_set_invalid_argument(status);
-        return;
+        for (int i = 0; i < npix; ++i)
+        {
+            data_[i] =  (double)rand() / ((double)RAND_MAX + 1.0);
+            data_[i] *= ((double)c+1.0);
+        }
     }
 
-    /* Free memory. */
-    oskar_mem_free(&image->data, status);
-    oskar_mem_free(&image->settings_path, status);
-
-    /* Clear meta-data. */
-    image->grid_type = 0;
-    image->coord_frame = 0;
-    image->centre_dec_deg = 0.0;
-    image->centre_ra_deg = 0.0;
-    image->fov_dec_deg = 0.0;
-    image->fov_ra_deg = 0.0;
-    image->freq_inc_hz = 0.0;
-    image->freq_start_hz = 0.0;
-    image->height = 0;
-    image->num_channels = 0;
-    image->num_pols = 0;
-    image->num_times = 0;
-    image->time_inc_sec = 0.0;
-    image->time_start_mjd_utc = 0.0;
-    image->width = 0;
+    image.healpix_nside = nside;
+    image.num_channels = num_channels;
+    oskar_fits_healpix_image_write(filename, &image, &status);
+    oskar_mem_free(&image.data, &status);
 }
 
-#ifdef __cplusplus
-}
-#endif

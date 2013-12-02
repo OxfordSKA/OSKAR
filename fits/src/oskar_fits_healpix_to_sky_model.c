@@ -185,7 +185,7 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
         }
 
         /* Convert HEALPix index into spherical coordinates. */
-        oskar_convert_healpix_ring_to_theta_phi(nside, i, &lat, &lon);
+        oskar_convert_healpix_ring_to_theta_phi_d(nside, i, &lat, &lon);
         lat = M_PI / 2.0 - lat;
 
         /* Convert spherical coordinates to RA, Dec values if required. */

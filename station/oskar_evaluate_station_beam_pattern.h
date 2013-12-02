@@ -71,7 +71,6 @@ void oskar_evaluate_station_beam_pattern_relative_directions(
         oskar_StationWork* work, oskar_RandomState* rand_state,
         double frequency, double GAST, int* status);
 
-#if 0
 /**
  * @brief
  * Evaluate the beam pattern for a station with the beam coordinates defined
@@ -85,7 +84,6 @@ void oskar_evaluate_station_beam_pattern_enu_directions(oskar_Mem* beam_pattern,
         const oskar_Station* station, oskar_StationWork* work,
         oskar_RandomState* rand_state, double frequency, double GAST,
         int* status);
-#endif
 
 #ifdef __cplusplus
 }

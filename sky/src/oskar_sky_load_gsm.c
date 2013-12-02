@@ -146,7 +146,7 @@ void oskar_sky_load_gsm(oskar_Sky* sky, const char* filename, int* status)
         temp[i] = temp[i] * 2.0 * boltzmann * 1e26;
 
         /* Compute Galactic longitude and latitude from pixel index. */
-        oskar_convert_healpix_ring_to_theta_phi(nside, i, &b, &l);
+        oskar_convert_healpix_ring_to_theta_phi_d(nside, i, &b, &l);
         b = (M_PI / 2.0) - b; /* Colatitude to latitude. */
 
         /* Compute RA and Dec. */

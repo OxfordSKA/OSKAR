@@ -27,31 +27,34 @@
  */
 
 
-#include "imaging/oskar_Image.h"
-#include "imaging/oskar_image_read.h"
-#include "imaging/oskar_get_image_type_string.h"
+#include <oskar_Image.h>
+#include <oskar_image_read.h>
+#include <oskar_get_image_type_string.h>
 
 #include <oskar_get_data_type_string.h>
 #include <oskar_get_error_string.h>
 #include <oskar_mem.h>
 #include <oskar_version_string.h>
 
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_BinaryHeader.h"
-#include "utility/oskar_mem_binary_stream_read.h"
-#include "utility/oskar_binary_tag_index_query.h"
-#include "utility/oskar_binary_tag_index_create.h"
-#include "utility/oskar_binary_tag_index_free.h"
+#include <oskar_BinaryTag.h>
+#include <oskar_BinaryHeader.h>
+#include <oskar_mem_binary_stream_read.h>
+#include <oskar_binary_tag_index_query.h>
+#include <oskar_binary_tag_index_free.h>
+#include <oskar_binary_tag_index_query.h>
+#include <oskar_binary_tag_index_create.h>
+#include <oskar_binary_stream_read_oskar_version.h>
 
 #include <apps/lib/oskar_OptionParser.h>
 
+#include <string>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
 int main(int argc, char** argv)
 {
-    int error = OSKAR_SUCCESS;
+    int status = OSKAR_SUCCESS;
 
     oskar_OptionParser opt("oskar_image_summary", oskar_version_string());
     opt.addRequired("OSKAR image file");
@@ -68,25 +71,36 @@ int main(int argc, char** argv)
     try
     {
         // Load the image into memory.
+        int vMajor, vMinor, vPatch;
         oskar_Image image;
-        oskar_image_read(&image, filename, 0, &error);
-        if (error)
-        {
+        oskar_image_read(&image, filename, 0, &status);
+
+        FILE* file = fopen(filename, "r");
+        if (file == NULL) {
+            status = OSKAR_ERR_FILE_IO;
             fprintf(stderr, "ERROR: Failed to open specified image file: %s.\n",
-                    oskar_get_error_string(error));
-            return error;
+                    oskar_get_error_string(status));
+            return status;
         }
+
+        oskar_binary_stream_read_oskar_version(file, &vMajor, &vMinor, &vPatch,
+                &status);
+        // True if version 2.3 or older
+        bool v232 = (vMajor <= 2 && vMinor <= 3 && vPatch <= 3) ? true : false;
+
+        fclose(file);
 
         if (!(displayLog || displaySettings))
         {
+            printf("\n");
+            printf("- OSKAR version ........... %i.%i.%i\n", vMajor, vMinor, vPatch);
+
             printf("\n");
             printf("- Image type .............. %s\n",
                     oskar_get_image_type_string(image.image_type));
             printf("\n");
             printf("- Data type ............... %s\n",
                     oskar_get_data_type_string(oskar_mem_type(&image.data)));
-            printf("\n");
-            printf("- Field of view (degrees) . %f\n", image.fov_dec_deg);
             printf("\n");
             printf("- Image cube dimensions:\n");
             printf("  - Order ................. ");
@@ -120,10 +134,40 @@ int main(int argc, char** argv)
             printf("  - No. of polarisations .. %i\n", image.num_pols);
             printf("  - No. of times .......... %i\n", image.num_times);
             printf("  - No. of channels ....... %i\n", image.num_channels);
-            printf("\n");
-            printf("- Pointing centre:\n");
-            printf("  - RA (degrees) .......... %f\n", image.centre_ra_deg);
-            printf("  - Dec. (degrees) ........ %f\n", image.centre_dec_deg);
+
+            if (v232 == false) {
+                printf("\n");
+                printf("- Grid type ............... ");
+                if (image.grid_type == OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
+                    printf("%s", "Rectilinear\n");
+                else if (image.grid_type == OSKAR_IMAGE_GRID_TYPE_HEALPIX)
+                    printf("%s", "HEALPIX\n");
+                else
+                    printf("%s", "Undefined\n");
+                printf("\n");
+                printf("- Coordinate frame ........ ");
+                if (image.coord_frame == OSKAR_IMAGE_COORD_FRAME_EQUATORIAL)
+                    printf("%s", "Equatorial\n");
+                else if (image.coord_frame == OSKAR_IMAGE_COORD_FRAME_HORIZON)
+                    printf("%s", "Horizon\n");
+                else
+                    printf("%s", "Undefined\n");
+            }
+
+
+            if (v232 || image.grid_type == OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
+            {
+                printf("\n");
+                printf("- Field of view (degrees) . %f\n", image.fov_dec_deg);
+                if (v232 || image.grid_type == OSKAR_IMAGE_COORD_FRAME_EQUATORIAL)
+                {
+                    printf("\n");
+                    printf("- Pointing centre:\n");
+                    printf("  - RA (degrees) .......... %f\n", image.centre_ra_deg);
+                    printf("  - Dec. (degrees) ........ %f\n", image.centre_dec_deg);
+                }
+            }
+
             printf("\n");
             printf("- Start time MJD UTC ...... %f\n", image.time_start_mjd_utc);
             printf("- Time increment (seconds)  %f\n", image.time_inc_sec);
@@ -131,6 +175,7 @@ int main(int argc, char** argv)
             printf("- Start frequency (Hz) .... %e\n", image.freq_start_hz);
             printf("- Frequency increment (Hz)  %e\n", image.freq_inc_hz);
             printf("\n");
+
         }
         // If verbose, print the run log.
         if (displayLog)
@@ -139,7 +184,7 @@ int main(int argc, char** argv)
             FILE* stream = fopen(filename, "rb");
             if (!stream)
                 return OSKAR_ERR_FILE_IO;
-            oskar_binary_tag_index_create(&index, stream, &error);
+            oskar_binary_tag_index_create(&index, stream, &status);
             size_t data_size = 0;
             long int data_offset = 0;
             int tag_error = 0;
@@ -149,16 +194,16 @@ int main(int argc, char** argv)
             if (!tag_error)
             {
                 oskar_Mem temp;
-                oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &error);
+                oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &status);
                 oskar_mem_binary_stream_read(&temp, stream, &index,
-                        OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &error);
-                oskar_mem_realloc(&temp, oskar_mem_length(&temp) + 1, &error);
-                if (error) return error;
+                        OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
+                oskar_mem_realloc(&temp, oskar_mem_length(&temp) + 1, &status);
+                if (status) return status;
                 oskar_mem_char(&temp)[oskar_mem_length(&temp) - 1] = 0;
                 printf("%s", oskar_mem_char(&temp));
             }
             fclose(stream);
-            oskar_binary_tag_index_free(index, &error);
+            oskar_binary_tag_index_free(index, &status);
         }
 
         if (displaySettings)
@@ -167,7 +212,7 @@ int main(int argc, char** argv)
             FILE* stream = fopen(filename, "rb");
             if (!stream)
                 return OSKAR_ERR_FILE_IO;
-            oskar_binary_tag_index_create(&index, stream, &error);
+            oskar_binary_tag_index_create(&index, stream, &status);
             size_t data_size = 0;
             long int data_offset = 0;
             int tag_error = 0;
@@ -176,29 +221,29 @@ int main(int argc, char** argv)
             if (!tag_error)
             {
                 oskar_Mem temp;
-                oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &error);
+                oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &status);
                 oskar_mem_binary_stream_read(&temp, stream, &index,
-                        OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &error);
-                oskar_mem_realloc(&temp, oskar_mem_length(&temp) + 1, &error);
-                if (error) return error;
+                        OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
+                oskar_mem_realloc(&temp, oskar_mem_length(&temp) + 1, &status);
+                if (status) return status;
                 oskar_mem_char(&temp)[oskar_mem_length(&temp) - 1] = 0;
                 printf("%s", oskar_mem_char(&temp));
             }
             fclose(stream);
-            oskar_binary_tag_index_free(index, &error);
+            oskar_binary_tag_index_free(index, &status);
         }
     }
     catch (int code)
     {
-        error = code;
+        status = code;
     }
 
     // Check for errors.
-    if (error)
+    if (status)
     {
-        fprintf(stderr, "ERROR: Run failed with code %i: %s.\n", error,
-                oskar_get_error_string(error));
+        fprintf(stderr, "ERROR: Run failed with code %i: %s.\n", status,
+                oskar_get_error_string(status));
     }
 
-    return error;
+    return status;
 }
