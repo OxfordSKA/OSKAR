@@ -7,10 +7,10 @@
 
 set(name fits_test)
 set(${name}_SRC
+    Test_fits_healpix_write.cpp
     Test_fits_image_write.cpp
     Test_fits_write.cpp
     Test_fits_to_sky_model.cpp
-    Test_healpix_image_write.cpp
 )
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar oskar_fits gtest_main)

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <fits/oskar_fits_healpix_image_write.h>
+#include <fits/oskar_fits_healpix_write_image.h>
 #include <oskar_Image.h>
 #include <oskar_mem.h>
 #include <fitsio.h>
@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-void oskar_fits_healpix_image_write(const char* filename, oskar_Image* image,
+void oskar_fits_healpix_write_image(const char* filename, oskar_Image* image,
         int* status)
 {
     fitsfile* fptr = 0;
@@ -70,6 +70,7 @@ void oskar_fits_healpix_image_write(const char* filename, oskar_Image* image,
     fits_write_date(fptr, status);
     printf("D STATUS = %i\n", *status);
 
+    /* FIXME this idea doesn't work with ds9 :-( */
     for (c = 0; c < image->num_channels; ++c)
     {
         printf("E STATUS = %i\n", *status);
@@ -104,11 +105,13 @@ void oskar_fits_healpix_image_write(const char* filename, oskar_Image* image,
                     (void*)&data[channel_offset], status);
         }
     }
+#if 0
     printf("STATUS = %i\n", *status);
     int num_hdu = 0;
     printf("XXXXXXXXXX %i\n", fits_get_num_hdus(fptr, &num_hdu, status));
     printf("XXXXXXXXXX %i\n", num_hdu);
     printf("STATUS = %i\n", *status);
+#endif
     fits_close_file(fptr, status);
 }
 

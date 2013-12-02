@@ -26,31 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FITS_HEALPIX_IMAGE_WRITE_H_
-#define OSKAR_FITS_HEALPIX_IMAGE_WRITE_H_
+#include <gtest/gtest.h>
+#include <fits/oskar_fits_healpix_write_image.h>
+#include <oskar_image.h>
+#include <oskar_mem.h>
 
-/**
- * @file oskar_fits_healpix_image_write.h
- */
+#include <cstdio>
+#include <cstdlib>
 
-#include <oskar_global.h>
-#include <oskar_Image.h>
+TEST(fits_healpix_image_write, test)
+{
+    int status = OSKAR_SUCCESS;
+    const char* filename = "tmp_test_healpix_image.fits";
+    oskar_Image image;
+    int nside = 128;
+    int npix = 12 * nside * nside;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+    int type = OSKAR_DOUBLE;
+    int loc = OSKAR_LOCATION_CPU;
+    int num_channels = 2;
+    oskar_mem_init(&image.data, type, loc, npix * num_channels, 1, &status);
+    double* data_ = oskar_mem_double(&image.data, &status);
+    for (int c = 0; c < num_channels; ++c)
+    {
+        for (int i = 0; i < npix; ++i)
+        {
+            data_[i] =  (double)rand() / ((double)RAND_MAX + 1.0);
+            data_[i] *= ((double)c+1.0);
+        }
+    }
 
-/**
- * @brief
- * @details
- */
-OSKAR_EXPORT
-void oskar_fits_healpix_image_write(const char* filename, oskar_Image* image,
-        int* status);
-
-
-#ifdef __cplusplus
+    image.healpix_nside = nside;
+    image.num_channels = num_channels;
+    oskar_fits_healpix_write_image(filename, &image, &status);
+    oskar_mem_free(&image.data, &status);
 }
-#endif
 
-#endif /* OSKAR_FITS_HEALPIX_IMAGE_WRITE_H_ */
