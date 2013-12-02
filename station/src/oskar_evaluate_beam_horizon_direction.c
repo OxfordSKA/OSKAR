@@ -28,8 +28,10 @@
 
 #include <oskar_evaluate_beam_horizon_direction.h>
 #include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
+#include <oskar_angular_distance.h>
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,7 +41,7 @@ void oskar_evaluate_beam_horizon_direction(double* x, double* y, double* z,
         const oskar_Station* station, const double gast, int* status)
 {
     int beam_coord_type;
-    double beam_ra, beam_dec;
+    double beam_lon, beam_lat;
 
     /* Check all inputs. */
     if (!x || !y || !z || !station || !status)
@@ -51,10 +53,10 @@ void oskar_evaluate_beam_horizon_direction(double* x, double* y, double* z,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Convert equatorial to horizontal coordinates if necessary. */
+    /* Get direction cosines in horizontal coordinates. */
     beam_coord_type = oskar_station_beam_coord_type(station);
-    beam_ra = oskar_station_beam_longitude_rad(station);
-    beam_dec = oskar_station_beam_latitude_rad(station);
+    beam_lon = oskar_station_beam_longitude_rad(station);
+    beam_lat = oskar_station_beam_latitude_rad(station);
 
     if (beam_coord_type == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
     {
@@ -62,21 +64,65 @@ void oskar_evaluate_beam_horizon_direction(double* x, double* y, double* z,
         lon = oskar_station_longitude_rad(station);
         lat = oskar_station_latitude_rad(station);
         last = gast + lon; /* Local Apparent Sidereal Time, in radians. */
-        oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(1, &beam_ra,
-                &beam_dec, last, lat, x, y, z);
+        oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(1, &beam_lon,
+                &beam_lat, last, lat, x, y, z);
     }
     else if (beam_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)
     {
         /* Convert AZEL to direction cosines. */
         double cos_lat;
-        cos_lat = cos(beam_dec);
-        *x = cos_lat * sin(beam_ra);
-        *y = cos_lat * cos(beam_ra);
-        *z = sin(beam_dec);
+        cos_lat = cos(beam_lat);
+        *x = cos_lat * sin(beam_lon);
+        *y = cos_lat * cos(beam_lon);
+        *z = sin(beam_lat);
     }
     else
     {
         *status = OSKAR_ERR_SETTINGS;
+    }
+
+    /* Check if the beam direction needs to be one of a set of
+     * allowed (az,el) directions. */
+    if (oskar_station_num_permitted_beams(station) > 0)
+    {
+        int i, n, min_index = 0;
+        double az, el, cos_el, min_dist = DBL_MAX;
+        const double *p_az, *p_el;
+
+        /* Convert current direction cosines to azimuth, elevation. */
+        az = atan2(*x, *y);
+        el = atan2(*z, sqrt(*x * *x + *y * *y));
+
+        /* Get pointers to permitted beam data. */
+        n = oskar_station_num_permitted_beams(station);
+        p_az = oskar_mem_double_const(
+                oskar_station_permitted_beam_azimuth_rad_const(station),
+                status);
+        p_el = oskar_mem_double_const(
+                oskar_station_permitted_beam_elevation_rad_const(station),
+                status);
+
+        /* Loop over permitted beams. */
+        for (i = 0; i < n; ++i)
+        {
+            double dist;
+            dist = oskar_angular_distance(p_az[i], az, p_el[i], el);
+            if (dist < min_dist)
+            {
+                min_dist = dist;
+                min_index = i;
+            }
+        }
+
+        /* Select beam azimuth and elevation based on minimum distance. */
+        az = p_az[min_index];
+        el = p_el[min_index];
+
+        /* Set new direction cosines. */
+        cos_el = cos(el);
+        *x = cos_el * sin(az);
+        *y = cos_el * cos(az);
+        *z = sin(el);
     }
 }
 

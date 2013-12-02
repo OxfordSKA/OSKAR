@@ -48,6 +48,7 @@ set(station_SRC
     src/oskar_station_load_gain_phase.c
     src/oskar_station_load_layout.c
     src/oskar_station_load_orientation.c
+    src/oskar_station_load_permitted_beams.c
     src/oskar_station_override_element_gains.c
     src/oskar_station_override_element_orientations.c
     src/oskar_station_override_element_phases.c

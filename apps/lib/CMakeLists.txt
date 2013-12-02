@@ -32,6 +32,7 @@ set(apps_SRC
     src/oskar_TelescopeLoadLayout.cpp
     src/oskar_TelescopeLoadNoise.cpp
     src/oskar_TelescopeLoadOrientation.cpp
+    src/oskar_TelescopeLoadPermittedBeams.cpp
     src/oskar_telescope_save.cpp
 )
 if(CASACORE_FOUND)

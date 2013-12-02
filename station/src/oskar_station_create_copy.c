@@ -85,6 +85,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     model->apply_element_weight = src->apply_element_weight;
     model->orientation_x = src->orientation_x;
     model->orientation_y = src->orientation_y;
+    model->num_permitted_beams = src->num_permitted_beams;
 
     /* Copy Gaussian station beam data. */
     model->gaussian_beam_fwhm_rad = src->gaussian_beam_fwhm_rad;
@@ -106,6 +107,8 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     oskar_mem_copy(&model->cos_orientation_y, &src->cos_orientation_y, status);
     oskar_mem_copy(&model->sin_orientation_y, &src->sin_orientation_y, status);
     oskar_mem_copy(&model->element_type, &src->element_type, status);
+    oskar_mem_copy(&model->permitted_beam_az, &src->permitted_beam_az, status);
+    oskar_mem_copy(&model->permitted_beam_el, &src->permitted_beam_el, status);
 
     /* Copy element models, if set. */
     if (oskar_station_has_element(src))

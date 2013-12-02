@@ -255,6 +255,15 @@ oskar_Element* oskar_station_element(oskar_Station* model, int i);
 OSKAR_EXPORT
 const oskar_Element* oskar_station_element_const(const oskar_Station* model, int i);
 
+OSKAR_EXPORT
+int oskar_station_num_permitted_beams(const oskar_Station* model);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_permitted_beam_azimuth_rad_const(const oskar_Station* model);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_permitted_beam_elevation_rad_const(const oskar_Station* model);
+
 
 /* Setters. */
 

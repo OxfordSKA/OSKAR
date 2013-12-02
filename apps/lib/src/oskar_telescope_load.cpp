@@ -35,6 +35,7 @@
 #include "apps/lib/oskar_TelescopeLoadLayout.h"
 #include "apps/lib/oskar_TelescopeLoadNoise.h"
 #include "apps/lib/oskar_TelescopeLoadOrientation.h"
+#include "apps/lib/oskar_TelescopeLoadPermittedBeams.h"
 #include <oskar_log.h>
 #include <oskar_get_error_string.h>
 
@@ -100,6 +101,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
     loaders.push_back(new oskar_TelescopeLoadGainPhase);
     loaders.push_back(new oskar_TelescopeLoadApodisation);
     loaders.push_back(new oskar_TelescopeLoadOrientation);
+    loaders.push_back(new oskar_TelescopeLoadPermittedBeams);
     loaders.push_back(new oskar_TelescopeLoadElementPattern(settings, log));
     loaders.push_back(new oskar_TelescopeLoadNoise(settings));
 

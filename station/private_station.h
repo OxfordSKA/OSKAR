@@ -94,6 +94,11 @@ struct oskar_Station
     oskar_Mem element_type;      /**< Integer array of element types (default 0). */
     oskar_Station** child;       /**< Array of child station handles (pointer is NULL if there are none). */
     oskar_Element** element_pattern; /**< Array of element models per element type (pointer is NULL if there are child stations). */
+
+    /* Data used only for aperture array stations with fixed beams. */
+    int num_permitted_beams;
+    oskar_Mem permitted_beam_az;
+    oskar_Mem permitted_beam_el;
 };
 
 #endif /* OSKAR_PRIVATE_STATION_H_ */

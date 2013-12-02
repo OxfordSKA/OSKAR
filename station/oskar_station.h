@@ -68,6 +68,7 @@ enum {
 #include <oskar_station_load_gain_phase.h>
 #include <oskar_station_load_layout.h>
 #include <oskar_station_load_orientation.h>
+#include <oskar_station_load_permitted_beams.h>
 #include <oskar_station_override_element_gains.h>
 #include <oskar_station_override_element_orientations.h>
 #include <oskar_station_override_element_phases.h>

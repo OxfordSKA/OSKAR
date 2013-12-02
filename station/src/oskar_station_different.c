@@ -67,7 +67,8 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
             a->array_is_3d != b->array_is_3d ||
             a->apply_element_errors != b->apply_element_errors ||
             a->apply_element_weight != b->apply_element_weight ||
-            a->gaussian_beam_fwhm_rad != b->gaussian_beam_fwhm_rad)
+            a->gaussian_beam_fwhm_rad != b->gaussian_beam_fwhm_rad ||
+            a->num_permitted_beams != b->num_permitted_beams)
     {
         return 1;
     }
@@ -140,6 +141,12 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
             status))
         return 1;
     if (oskar_mem_different(&a->element_type, &b->element_type, n, status))
+        return 1;
+    if (oskar_mem_different(&a->permitted_beam_az, &b->permitted_beam_az, n,
+            status))
+        return 1;
+    if (oskar_mem_different(&a->permitted_beam_el, &b->permitted_beam_el, n,
+            status))
         return 1;
 
     /* Recursively check child stations. */

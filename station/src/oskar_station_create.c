@@ -93,6 +93,8 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     oskar_mem_init(&model->cos_orientation_y, type, location, num_elements, 1, status);
     oskar_mem_init(&model->sin_orientation_y, type, location, num_elements, 1, status);
     oskar_mem_init(&model->element_type, OSKAR_INT, location, num_elements, 1, status);
+    oskar_mem_init(&model->permitted_beam_az, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, status);
+    oskar_mem_init(&model->permitted_beam_el, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, status);
 
     /* Initialise common data. */
     model->station_type = OSKAR_STATION_TYPE_AA;
@@ -121,6 +123,7 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->orientation_y = 0.0;
     model->child = 0;
     model->element_pattern = 0;
+    model->num_permitted_beams = 0;
 
     /* Return pointer to station model. */
     return model;
