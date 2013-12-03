@@ -55,10 +55,9 @@ oskar_TelescopeLoadNoise::oskar_TelescopeLoadNoise(
 
 oskar_TelescopeLoadNoise::~oskar_TelescopeLoadNoise()
 {
-    int status = OSKAR_SUCCESS;
-    oskar_mem_free(&freqs_, &status);
-    assert(status == OSKAR_SUCCESS);
-    // Note: status code ignored in release mode when NDEBUG is defined.
+    int status = 0;
+    oskar_mem_free(freqs_, &status);
+    free(freqs_); // FIXME Remove after updating oskar_mem_free().
 }
 
 
@@ -78,8 +77,8 @@ void oskar_TelescopeLoadNoise::load(oskar_Telescope* telescope,
     updateFileMap_(filemap, cwd);
 
     // Set up noise frequency values (this only happens at depth = 0)
-    oskar_mem_init(&freqs_, dataType_, 0, 0, 1, status);
-    getNoiseFreqs_(&freqs_, filemap[files_[FREQ]], status);
+    freqs_ = oskar_mem_create(dataType_, OSKAR_LOCATION_CPU, 0, status);
+    getNoiseFreqs_(freqs_, filemap[files_[FREQ]], status);
 
     // If no sub-directories (the station load function is never called)
     if (num_subdirs == 0)
@@ -89,7 +88,7 @@ void oskar_TelescopeLoadNoise::load(oskar_Telescope* telescope,
         {
             oskar_Station* s = oskar_telescope_station(telescope, i);
             oskar_SystemNoiseModel* noise = oskar_station_system_noise_model(s);
-            oskar_mem_copy(&noise->frequency, &freqs_, status);
+            oskar_mem_copy(&noise->frequency, freqs_, status);
             setNoiseRMS_(noise, filemap, status);
         }
     }
@@ -119,7 +118,7 @@ void oskar_TelescopeLoadNoise::load(oskar_Station* station,
 
     // Set the frequency noise data field of the station structure.
     oskar_SystemNoiseModel* noise = oskar_station_system_noise_model(station);
-    oskar_mem_copy(&noise->frequency, &freqs_, status);
+    oskar_mem_copy(&noise->frequency, freqs_, status);
 
     // Set the noise RMS based on files or settings.
     setNoiseRMS_(noise, filemap, status);
@@ -289,12 +288,13 @@ void oskar_TelescopeLoadNoise::noiseSpecTelescopeModel_(oskar_Mem* noise_rms,
     // Sensitivity
     else if (oskar_file_exists(f_sensitivity.c_str()))
     {
-        oskar_Mem sens;
-        oskar_mem_init(&sens, dataType_, loc, num_freqs, OSKAR_TRUE, status);
-        oskar_system_noise_model_load(&sens, f_sensitivity.c_str(), status);
-        sensitivity_to_rms_(noise_rms, &sens, num_freqs, bandwidth_hz,
+        oskar_Mem* sens;
+        sens = oskar_mem_create(dataType_, loc, num_freqs, status);
+        oskar_system_noise_model_load(sens, f_sensitivity.c_str(), status);
+        sensitivity_to_rms_(noise_rms, sens, num_freqs, bandwidth_hz,
                 integration_time_sec, status);
-        oskar_mem_free(&sens, status);
+        oskar_mem_free(sens, status);
+        free(sens); // FIXME Remove after updating oskar_mem_free().
     }
 
     // T_sys, A_eff and efficiency
@@ -302,19 +302,21 @@ void oskar_TelescopeLoadNoise::noiseSpecTelescopeModel_(oskar_Mem* noise_rms,
             oskar_file_exists(f_area.c_str()) &&
             oskar_file_exists(f_efficiency.c_str()))
     {
-        oskar_Mem t_sys, area, efficiency;
-        oskar_mem_init(&t_sys, dataType_, loc, num_freqs, 1, status);
-        oskar_mem_init(&area, dataType_, loc, num_freqs, 1, status);
-        oskar_mem_init(&efficiency, dataType_, loc, num_freqs, 1, status);
-        oskar_system_noise_model_load(&t_sys, f_tsys.c_str(), status);
-        oskar_system_noise_model_load(&area, f_area.c_str(), status);
-        oskar_system_noise_model_load(&efficiency, f_efficiency.c_str(),
-                status);
-        t_sys_to_rms_(noise_rms, &t_sys, &area, &efficiency,
+        oskar_Mem *t_sys, *area, *efficiency;
+        t_sys = oskar_mem_create(dataType_, loc, num_freqs, status);
+        area = oskar_mem_create(dataType_, loc, num_freqs, status);
+        efficiency = oskar_mem_create(dataType_, loc, num_freqs, status);
+        oskar_system_noise_model_load(t_sys, f_tsys.c_str(), status);
+        oskar_system_noise_model_load(area, f_area.c_str(), status);
+        oskar_system_noise_model_load(efficiency, f_efficiency.c_str(), status);
+        t_sys_to_rms_(noise_rms, t_sys, area, efficiency,
                 num_freqs, bandwidth_hz, integration_time_sec, status);
-        oskar_mem_free(&t_sys, status);
-        oskar_mem_free(&area, status);
-        oskar_mem_free(&efficiency, status);
+        oskar_mem_free(t_sys, status);
+        oskar_mem_free(area, status);
+        oskar_mem_free(efficiency, status);
+        free(t_sys); // FIXME Remove after updating oskar_mem_free().
+        free(area); // FIXME Remove after updating oskar_mem_free().
+        free(efficiency); // FIXME Remove after updating oskar_mem_free().
     }
     else
     {
@@ -366,26 +368,27 @@ void oskar_TelescopeLoadNoise::noiseSpecSensitivity_(oskar_Mem* rms,
     if (filemap.count(files_[SENSITIVITY]))
         filename = filemap.at(files_[SENSITIVITY]);
 
-    oskar_Mem sens;
-    oskar_mem_init(&sens, dataType_, OSKAR_LOCATION_CPU, num_freqs, 1, status);
+    oskar_Mem* sens;
+    sens = oskar_mem_create(dataType_, OSKAR_LOCATION_CPU, num_freqs, status);
     switch (s.override)
     {
         case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-            oskar_system_noise_model_load(&sens, filename.c_str(), status);
+            oskar_system_noise_model_load(sens, filename.c_str(), status);
             break;
         case OSKAR_SYSTEM_NOISE_DATA_FILE:
-            oskar_system_noise_model_load(&sens, s.file, status);
+            oskar_system_noise_model_load(sens, s.file, status);
             break;
         case OSKAR_SYSTEM_NOISE_RANGE:
-            evaluate_range_(&sens, num_freqs, s.start, s.end, status);
+            evaluate_range_(sens, num_freqs, s.start, s.end, status);
             break;
         default:
             *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
             break;
     };
-    sensitivity_to_rms_(rms, &sens, num_freqs, bandwidth_hz,
+    sensitivity_to_rms_(rms, sens, num_freqs, bandwidth_hz,
             integration_time_sec, status);
-    oskar_mem_free(&sens, status);
+    oskar_mem_free(sens, status);
+    free(sens); // FIXME Remove after updating oskar_mem_free().
 }
 
 void oskar_TelescopeLoadNoise::noiseSpecTsys_(oskar_Mem* rms, int num_freqs,
@@ -394,11 +397,11 @@ void oskar_TelescopeLoadNoise::noiseSpecTsys_(oskar_Mem* rms, int num_freqs,
 {
     if (*status) return;
 
-    oskar_Mem t_sys, area, efficiency;
+    oskar_Mem *t_sys, *area, *efficiency;
     int loc = OSKAR_LOCATION_CPU;
-    oskar_mem_init(&t_sys, dataType_, loc, num_freqs, 1, status);
-    oskar_mem_init(&area, dataType_, loc, num_freqs, 1, status);
-    oskar_mem_init(&efficiency, dataType_, loc, num_freqs, 1, status);
+    t_sys = oskar_mem_create(dataType_, loc, num_freqs, status);
+    area = oskar_mem_create(dataType_, loc, num_freqs, status);
+    efficiency = oskar_mem_create(dataType_, loc, num_freqs, status);
 
     const oskar_SettingsSystemNoiseValue& s = settings_->interferometer.noise.value;
 
@@ -414,13 +417,13 @@ void oskar_TelescopeLoadNoise::noiseSpecTsys_(oskar_Mem* rms, int num_freqs,
     switch (s.t_sys.override)
     {
         case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-            oskar_system_noise_model_load(&t_sys, f_tsys.c_str(), status);
+            oskar_system_noise_model_load(t_sys, f_tsys.c_str(), status);
             break;
         case OSKAR_SYSTEM_NOISE_DATA_FILE:
-            oskar_system_noise_model_load(&t_sys, s.t_sys.file, status);
+            oskar_system_noise_model_load(t_sys, s.t_sys.file, status);
             break;
         case OSKAR_SYSTEM_NOISE_RANGE:
-            evaluate_range_(&t_sys, num_freqs, s.t_sys.start, s.t_sys.end, status);
+            evaluate_range_(t_sys, num_freqs, s.t_sys.start, s.t_sys.end, status);
             break;
         default:
             *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
@@ -431,13 +434,13 @@ void oskar_TelescopeLoadNoise::noiseSpecTsys_(oskar_Mem* rms, int num_freqs,
     switch (s.area.override)
     {
         case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-            oskar_system_noise_model_load(&area, f_area.c_str(), status);
+            oskar_system_noise_model_load(area, f_area.c_str(), status);
             break;
         case OSKAR_SYSTEM_NOISE_DATA_FILE:
-            oskar_system_noise_model_load(&area, s.area.file, status);
+            oskar_system_noise_model_load(area, s.area.file, status);
             break;
         case OSKAR_SYSTEM_NOISE_RANGE:
-            evaluate_range_(&area, num_freqs, s.area.start, s.area.end, status);
+            evaluate_range_(area, num_freqs, s.area.start, s.area.end, status);
             break;
         default:
             *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
@@ -447,14 +450,14 @@ void oskar_TelescopeLoadNoise::noiseSpecTsys_(oskar_Mem* rms, int num_freqs,
     switch (s.efficiency.override)
     {
         case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-            oskar_system_noise_model_load(&efficiency, f_efficiency.c_str(),
+            oskar_system_noise_model_load(efficiency, f_efficiency.c_str(),
                     status);
             break;
         case OSKAR_SYSTEM_NOISE_DATA_FILE:
-            oskar_system_noise_model_load(&efficiency, s.efficiency.file, status);
+            oskar_system_noise_model_load(efficiency, s.efficiency.file, status);
             break;
         case OSKAR_SYSTEM_NOISE_RANGE:
-            evaluate_range_(&efficiency, num_freqs, s.efficiency.start,
+            evaluate_range_(efficiency, num_freqs, s.efficiency.start,
                     s.efficiency.end, status);
             break;
         default:
@@ -462,12 +465,15 @@ void oskar_TelescopeLoadNoise::noiseSpecTsys_(oskar_Mem* rms, int num_freqs,
             break;
     };
 
-    t_sys_to_rms_(rms, &t_sys, &area, &efficiency, num_freqs, bandwidth_hz,
+    t_sys_to_rms_(rms, t_sys, area, efficiency, num_freqs, bandwidth_hz,
             integration_time_sec, status);
 
-    oskar_mem_free(&t_sys, status);
-    oskar_mem_free(&area, status);
-    oskar_mem_free(&efficiency, status);
+    oskar_mem_free(t_sys, status);
+    oskar_mem_free(area, status);
+    oskar_mem_free(efficiency, status);
+    free(t_sys); // FIXME Remove after updating oskar_mem_free().
+    free(area); // FIXME Remove after updating oskar_mem_free().
+    free(efficiency); // FIXME Remove after updating oskar_mem_free().
 }
 
 void oskar_TelescopeLoadNoise::sensitivity_to_rms_(oskar_Mem* rms,

@@ -34,30 +34,28 @@
 TEST(Mem, realloc_gpu)
 {
     int status = 0;
-    oskar_Mem mem;
-    oskar_mem_init(&mem, OSKAR_DOUBLE, OSKAR_LOCATION_GPU, 0, 1, &status);
+    oskar_Mem *mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_realloc(&mem, 500, &status);
+    oskar_mem_realloc(mem, 500, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ(500, (int)oskar_mem_length(&mem));
-    ASSERT_EQ((int)OSKAR_DOUBLE, oskar_mem_type(&mem));
-    oskar_mem_free(&mem, &status);
+    ASSERT_EQ(500, (int)oskar_mem_length(mem));
+    ASSERT_EQ((int)OSKAR_DOUBLE, oskar_mem_type(mem));
+    oskar_mem_free(mem, &status);
+    free(mem); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
-
 
 TEST(Mem, realloc_cpu)
 {
     int status = 0;
-    oskar_Mem mem;
-    oskar_mem_init(&mem, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 100, 1,
-            &status);
+    oskar_Mem *mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU,
+            100, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_realloc(&mem, 1000, &status);
+    oskar_mem_realloc(mem, 1000, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ(1000, (int)oskar_mem_length(&mem));
-    ASSERT_EQ((int)OSKAR_DOUBLE_COMPLEX, oskar_mem_type(&mem));
-    oskar_mem_free(&mem, &status);
+    ASSERT_EQ(1000, (int)oskar_mem_length(mem));
+    ASSERT_EQ((int)OSKAR_DOUBLE_COMPLEX, oskar_mem_type(mem));
+    oskar_mem_free(mem, &status);
+    free(mem); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
-

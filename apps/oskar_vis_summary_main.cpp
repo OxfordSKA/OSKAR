@@ -124,15 +124,18 @@ int main(int argc, char **argv)
                 OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset, &tag_error);
         if (!tag_error)
         {
-            oskar_Mem temp;
-            oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &status);
-            oskar_mem_binary_stream_read(&temp, stream, &index,
+            oskar_Mem *temp;
+            temp = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, &status);
+            oskar_mem_binary_stream_read(temp, stream, &index,
                     OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
-            oskar_mem_realloc(&temp, oskar_mem_length(&temp) + 1, &status);
-            if (status) return status;
-            oskar_mem_char(&temp)[oskar_mem_length(&temp) - 1] = 0;
-            printf("%s", oskar_mem_char(&temp));
-            oskar_mem_free(&temp, &status);
+            oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);
+            if (!status)
+            {
+                oskar_mem_char(temp)[oskar_mem_length(temp) - 1] = 0;
+                printf("%s", oskar_mem_char(temp));
+            }
+            oskar_mem_free(temp, &status);
+            free(temp); // FIXME Remove after updating oskar_mem_free().
         }
         fclose(stream);
         oskar_binary_tag_index_free(index, &status);
@@ -151,15 +154,18 @@ int main(int argc, char **argv)
                 OSKAR_TAG_SETTINGS, 0, &data_size, &data_offset, &tag_error);
         if (!tag_error)
         {
-            oskar_Mem temp;
-            oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &status);
-            oskar_mem_binary_stream_read(&temp, stream, &index,
+            oskar_Mem *temp;
+            temp = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, &status);
+            oskar_mem_binary_stream_read(temp, stream, &index,
                     OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
-            oskar_mem_realloc(&temp, oskar_mem_length(&temp) + 1, &status);
-            if (status) return status;
-            oskar_mem_char(&temp)[oskar_mem_length(&temp) - 1] = 0;
-            printf("%s", oskar_mem_char(&temp));
-            oskar_mem_free(&temp, &status);
+            oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);
+            if (!status)
+            {
+                oskar_mem_char(temp)[oskar_mem_length(temp) - 1] = 0;
+                printf("%s", oskar_mem_char(temp));
+            }
+            oskar_mem_free(temp, &status);
+            free(temp); // FIXME Remove after updating oskar_mem_free().
         }
         fclose(stream);
         oskar_binary_tag_index_free(index, &status);

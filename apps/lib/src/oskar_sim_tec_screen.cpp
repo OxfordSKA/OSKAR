@@ -152,18 +152,15 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
         int* status)
 {
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
-
     int loc = OSKAR_LOCATION_CPU;
-    int owner = OSKAR_TRUE;
 
-    oskar_Station* station =
-            oskar_telescope_station(telescope, stationID);
+    oskar_Station* station = oskar_telescope_station(telescope, stationID);
 
     // oskar_Mem holding beam p.p. horizontal coordinates.
-    oskar_Mem hor_x, hor_y, hor_z;
-    oskar_mem_init(&hor_x, type, loc, 1, owner, status);
-    oskar_mem_init(&hor_y, type, loc, 1, owner, status);
-    oskar_mem_init(&hor_z, type, loc, 1, owner, status);
+    oskar_Mem *hor_x, *hor_y, *hor_z;
+    hor_x = oskar_mem_create(type, loc, 1, status);
+    hor_y = oskar_mem_create(type, loc, 1, status);
+    hor_z = oskar_mem_create(type, loc, 1, status);
 
     // Offset geocentric cartesian station position
     double st_x, st_y, st_z;
@@ -202,8 +199,9 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
 
         // Obtain horizontal coordinates of beam p.p.
         oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(1, &beam_ra,
-                &beam_dec, last, st_lat, (double*)hor_x.data,
-                (double*)hor_y.data, (double*)hor_z.data);
+                &beam_dec, last, st_lat, oskar_mem_double(hor_x, status),
+                oskar_mem_double(hor_y, status),
+                oskar_mem_double(hor_z, status));
     }
     else // (type == OSKAR_SINGLE)
     {
@@ -219,31 +217,45 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
 
         // Obtain horizontal coordinates of beam p.p.
         oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(1, &beam_ra,
-                &beam_dec, last, st_lat, (float*)hor_x.data,
-                (float*)hor_y.data, (float*)hor_z.data);
+                &beam_dec, last, st_lat, oskar_mem_float(hor_x, status),
+                oskar_mem_float(hor_y, status),
+                oskar_mem_float(hor_z, status));
     }
 
     // oskar_Mem functions holding the pp for the beam centre.
-    oskar_Mem m_pp_lon0, m_pp_lat0, m_pp_rel_path;
-    oskar_mem_init(&m_pp_lon0, type, loc, 1, owner, status);
-    oskar_mem_init(&m_pp_lat0, type, loc, 1, owner, status);
-    oskar_mem_init(&m_pp_rel_path, type, loc, 1, owner, status);
+    oskar_Mem *m_pp_lon0, *m_pp_lat0, *m_pp_rel_path;
+    m_pp_lon0 = oskar_mem_create(type, loc, 1, status);
+    m_pp_lat0 = oskar_mem_create(type, loc, 1, status);
+    m_pp_rel_path = oskar_mem_create(type, loc, 1, status);
 
     // Pierce point of the observation phase centre - i.e. beam direction
-    oskar_evaluate_pierce_points(&m_pp_lon0, &m_pp_lat0, &m_pp_rel_path,
+    oskar_evaluate_pierce_points(m_pp_lon0, m_pp_lat0, m_pp_rel_path,
             st_lon, st_lat, st_alt, st_x_ecef, st_y_ecef, st_z_ecef,
-            settings->ionosphere.TID[0].height_km * 1000., 1, &hor_x, &hor_y,
-            &hor_z, status);
+            settings->ionosphere.TID[0].height_km * 1000., 1, hor_x, hor_y,
+            hor_z, status);
 
     if (type == OSKAR_DOUBLE)
     {
-        *pp_lon0 = ((double*)m_pp_lon0.data)[0];
-        *pp_lat0 = ((double*)m_pp_lat0.data)[0];
+        *pp_lon0 = oskar_mem_double(m_pp_lon0, status)[0];
+        *pp_lat0 = oskar_mem_double(m_pp_lat0, status)[0];
     }
     else
     {
-        *pp_lon0 = ((float*)m_pp_lon0.data)[0];
-        *pp_lat0 = ((float*)m_pp_lat0.data)[0];
+        *pp_lon0 = oskar_mem_float(m_pp_lon0, status)[0];
+        *pp_lat0 = oskar_mem_float(m_pp_lat0, status)[0];
     }
+
+    oskar_mem_free(m_pp_lon0, status);
+    oskar_mem_free(m_pp_lat0, status);
+    oskar_mem_free(m_pp_rel_path, status);
+    oskar_mem_free(hor_x, status);
+    oskar_mem_free(hor_y, status);
+    oskar_mem_free(hor_y, status);
+    free(m_pp_lon0); // FIXME Remove after updating oskar_mem_free().
+    free(m_pp_lat0); // FIXME Remove after updating oskar_mem_free().
+    free(m_pp_rel_path); // FIXME Remove after updating oskar_mem_free().
+    free(hor_x); // FIXME Remove after updating oskar_mem_free().
+    free(hor_y); // FIXME Remove after updating oskar_mem_free().
+    free(hor_z); // FIXME Remove after updating oskar_mem_free().
 }
 

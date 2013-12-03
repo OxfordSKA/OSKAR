@@ -86,7 +86,7 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     int prec_approx, prec_accurate;
     size_t i, n;
     const oskar_Mem *app_ptr, *acc_ptr;
-    oskar_Mem approx_temp, accurate_temp;
+    oskar_Mem *approx_temp, *accurate_temp;
     double old_m = 0.0, new_m = 0.0, old_s = 0.0, new_s = 0.0;
 
     /* Check all inputs. */
@@ -141,25 +141,25 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     acc_ptr = val_accurate;
     if (oskar_mem_location(val_approx) != OSKAR_LOCATION_CPU)
     {
-        oskar_mem_init_copy(&approx_temp, val_approx, OSKAR_LOCATION_CPU,
+        approx_temp = oskar_mem_create_copy(val_approx, OSKAR_LOCATION_CPU,
                 status);
         if (*status)
         {
-            oskar_mem_free(&approx_temp, status);
+            oskar_mem_free(approx_temp, status);
             return;
         }
-        app_ptr = &approx_temp;
+        app_ptr = approx_temp;
     }
     if (oskar_mem_location(val_accurate) != OSKAR_LOCATION_CPU)
     {
-        oskar_mem_init_copy(&accurate_temp, val_accurate, OSKAR_LOCATION_CPU,
+        accurate_temp = oskar_mem_create_copy(val_accurate, OSKAR_LOCATION_CPU,
                 status);
         if (*status)
         {
-            oskar_mem_free(&accurate_temp, status);
+            oskar_mem_free(accurate_temp, status);
             return;
         }
-        acc_ptr = &accurate_temp;
+        acc_ptr = accurate_temp;
     }
 
     /* Check numbers are the same, to appropriate precision. */
@@ -236,9 +236,15 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
 
     /* Clean up temporaries if required. */
     if (oskar_mem_location(val_approx) != OSKAR_LOCATION_CPU)
-        oskar_mem_free(&approx_temp, status);
+    {
+        oskar_mem_free(approx_temp, status);
+        free(approx_temp); /* FIXME Remove after updating oskar_mem_free(). */
+    }
     if (oskar_mem_location(val_accurate) != OSKAR_LOCATION_CPU)
-        oskar_mem_free(&accurate_temp, status);
+    {
+        oskar_mem_free(accurate_temp, status);
+        free(accurate_temp); /* FIXME Remove after updating oskar_mem_free(). */
+    }
 }
 
 #ifdef __cplusplus

@@ -40,7 +40,8 @@ oskar_Jones* oskar_jones_create(int type, int location, int num_stations,
         int num_sources, int* status)
 {
     oskar_Jones* jones = 0;
-    int base_type, n_elements;
+    int base_type;
+    size_t n_elements;
 
     /* Check all inputs. */
     if (!status)
@@ -79,8 +80,7 @@ oskar_Jones* oskar_jones_create(int type, int location, int num_stations,
     jones->num_sources = num_sources;
     jones->cap_stations = num_stations;
     jones->cap_sources = num_sources;
-    oskar_mem_init(&jones->data, type, location, n_elements, OSKAR_TRUE,
-            status);
+    jones->data = oskar_mem_create(type, location, n_elements, status);
 
     /* Return pointer to the structure. */
     return jones;

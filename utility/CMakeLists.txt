@@ -58,7 +58,6 @@ set(utility_SRC
     src/oskar_mem_free.c
     src/oskar_mem_get_pointer.c
     src/oskar_mem_init.c
-    src/oskar_mem_init_copy.c
     src/oskar_mem_insert.c
     src/oskar_mem_load_ascii.c
     src/oskar_mem_random_fill.c

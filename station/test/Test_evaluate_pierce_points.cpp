@@ -173,27 +173,27 @@ TEST(evaluate_pierce_points, test2)
 
     // Evaluate horizontal x,y,z of the pierce point.
     int n = 1;
-    oskar_Mem hor_x, hor_y, hor_z;
+    oskar_Mem *hor_x, *hor_y, *hor_z;
     int type = OSKAR_DOUBLE;
     int location = OSKAR_LOCATION_CPU;
     int status = OSKAR_SUCCESS;
-    oskar_mem_init(&hor_x, type, location, n, OSKAR_TRUE, &status);
-    oskar_mem_init(&hor_y, type, location, n, OSKAR_TRUE, &status);
-    oskar_mem_init(&hor_z, type, location, n, OSKAR_TRUE, &status);
+    hor_x = oskar_mem_create(type, location, n, &status);
+    hor_y = oskar_mem_create(type, location, n, &status);
+    hor_z = oskar_mem_create(type, location, n, &status);
     double x_ = cos(el) * sin(az);
     double y_ = cos(el) * cos(az);
     double z_ = sin(el);
-    oskar_mem_double(&hor_x, &status)[0] = x_;
-    oskar_mem_double(&hor_y, &status)[0] = y_;
-    oskar_mem_double(&hor_z, &status)[0] = z_;
+    oskar_mem_double(hor_x, &status)[0] = x_;
+    oskar_mem_double(hor_y, &status)[0] = y_;
+    oskar_mem_double(hor_z, &status)[0] = z_;
 
     // Evaluate the pierce points.
-    oskar_Mem pp_lon, pp_lat, pp_path;
-    oskar_mem_init(&pp_lon, type, location, n, OSKAR_TRUE, &status);
-    oskar_mem_init(&pp_lat, type, location, n, OSKAR_TRUE, &status);
-    oskar_mem_init(&pp_path, type, location, n, OSKAR_TRUE, &status);
-    oskar_evaluate_pierce_points(&pp_lon, &pp_lat, &pp_path, lon, lat, alt,
-            x, y, z, height, n, &hor_x, &hor_y, &hor_z, &status);
+    oskar_Mem *pp_lon, *pp_lat, *pp_path;
+    pp_lon = oskar_mem_create(type, location, n, &status);
+    pp_lat = oskar_mem_create(type, location, n, &status);
+    pp_path = oskar_mem_create(type, location, n, &status);
+    oskar_evaluate_pierce_points(pp_lon, pp_lat, pp_path, lon, lat, alt,
+            x, y, z, height, n, hor_x, hor_y, hor_z, &status);
 
     printf("pierce point [%i]:\n", 0);
     printf("  lon = %f, lat = %f [station]\n", lon*(180./M_PI), lat*(180./M_PI));
@@ -201,17 +201,24 @@ TEST(evaluate_pierce_points, test2)
     printf("  hor_x = %f, hor_y = %f, hor_z = %f\n", x_, y_, z_);
     printf("  az = %f, el = %f\n", az*(180./M_PI), el*(180./M_PI));
     printf("  lon=%f, lat=%f, path=%f\n",
-            oskar_mem_double(&pp_lon, &status)[0]*(180./M_PI),
-            oskar_mem_double(&pp_lat, &status)[0]*(180./M_PI),
-            oskar_mem_double(&pp_path, &status)[0]);
+            oskar_mem_double(pp_lon, &status)[0]*(180./M_PI),
+            oskar_mem_double(pp_lat, &status)[0]*(180./M_PI),
+            oskar_mem_double(pp_path, &status)[0]);
 
     // Free memory.
-    oskar_mem_free(&hor_x, &status);
-    oskar_mem_free(&hor_y, &status);
-    oskar_mem_free(&hor_z, &status);
-    oskar_mem_free(&pp_lon, &status);
-    oskar_mem_free(&pp_lat, &status);
-    oskar_mem_free(&pp_path, &status);
+    oskar_mem_free(hor_x, &status);
+    oskar_mem_free(hor_y, &status);
+    oskar_mem_free(hor_z, &status);
+    oskar_mem_free(pp_lon, &status);
+    oskar_mem_free(pp_lat, &status);
+    oskar_mem_free(pp_path, &status);
+
+    free(hor_x); // FIXME Remove after updating oskar_mem_free().
+    free(hor_y); // FIXME Remove after updating oskar_mem_free().
+    free(hor_z); // FIXME Remove after updating oskar_mem_free().
+    free(pp_lon); // FIXME Remove after updating oskar_mem_free().
+    free(pp_lat); // FIXME Remove after updating oskar_mem_free().
+    free(pp_path); // FIXME Remove after updating oskar_mem_free().
 }
 
 

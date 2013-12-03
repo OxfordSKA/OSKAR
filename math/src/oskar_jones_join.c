@@ -66,8 +66,8 @@ void oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2,
 
     /* Multiply the array elements. */
     num_elements = n_sources1 * n_stations1;
-    oskar_mem_element_multiply(&j3->data, &j1->data, &j2->data,
-            num_elements, status);
+    oskar_mem_element_multiply(j3->data, j1->data, j2->data, num_elements,
+            status);
 }
 
 #ifdef __cplusplus

@@ -38,25 +38,25 @@ using std::vector;
 TEST(Mem, append_cpu)
 {
     int status = 0;
-    oskar_Mem mem;
 
     // Initialise.
-    oskar_mem_init(&mem, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
+    oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0,
+            &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // First append.
     int num_values1 = 10;
     double value1 = 1.0;
     vector<double> data1(num_values1, value1);
-    oskar_mem_append_raw(&mem, (const void*)&data1[0], OSKAR_DOUBLE,
+    oskar_mem_append_raw(mem, (const void*)&data1[0], OSKAR_DOUBLE,
             OSKAR_LOCATION_CPU, num_values1, &status);
 
     // First check.
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ(num_values1, (int)oskar_mem_length(&mem));
-    ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_mem_location(&mem));
-    ASSERT_EQ((int)OSKAR_DOUBLE, oskar_mem_type(&mem));
-    double* data = oskar_mem_double(&mem, &status);
+    ASSERT_EQ(num_values1, (int)oskar_mem_length(mem));
+    ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_mem_location(mem));
+    ASSERT_EQ((int)OSKAR_DOUBLE, oskar_mem_type(mem));
+    double* data = oskar_mem_double(mem, &status);
     for (int i = 0; i < num_values1; ++i)
     {
         EXPECT_DOUBLE_EQ(value1, data[i]);
@@ -66,16 +66,16 @@ TEST(Mem, append_cpu)
     int num_values2 = 5;
     double value2 = 2.0;
     vector<double> data2(num_values2, value2);
-    oskar_mem_append_raw(&mem, (const void*)&data2[0], OSKAR_DOUBLE,
+    oskar_mem_append_raw(mem, (const void*)&data2[0], OSKAR_DOUBLE,
             OSKAR_LOCATION_CPU, num_values2, &status);
 
     // Second check.
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ(num_values1 + num_values2, (int)oskar_mem_length(&mem));
-    ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_mem_location(&mem));
-    ASSERT_EQ((int)OSKAR_DOUBLE, oskar_mem_type(&mem));
-    data = oskar_mem_double(&mem, &status);
-    for (int i = 0; i < (int)oskar_mem_length(&mem); ++i)
+    ASSERT_EQ(num_values1 + num_values2, (int)oskar_mem_length(mem));
+    ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_mem_location(mem));
+    ASSERT_EQ((int)OSKAR_DOUBLE, oskar_mem_type(mem));
+    data = oskar_mem_double(mem, &status);
+    for (int i = 0; i < (int)oskar_mem_length(mem); ++i)
     {
         if (i < num_values1)
             EXPECT_DOUBLE_EQ(value1, data[i]);
@@ -84,7 +84,8 @@ TEST(Mem, append_cpu)
     }
 
     // Free memory.
-    oskar_mem_free(&mem, &status);
+    oskar_mem_free(mem, &status);
+    free(mem); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -92,26 +93,26 @@ TEST(Mem, append_cpu)
 TEST(Mem, append_gpu)
 {
     int status = 0;
-    oskar_Mem mem, temp, mem_temp;
+    oskar_Mem *mem, *temp, *mem_temp;
 
     // Initialise.
-    oskar_mem_init(&mem, OSKAR_SINGLE, OSKAR_LOCATION_GPU, 0, 1, &status);
+    mem = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_GPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // First append.
     int num_values1 = 10;
     float value1 = 1.0;
     vector<float> data1(num_values1, value1);
-    oskar_mem_append_raw(&mem, (const void*)&data1[0],
+    oskar_mem_append_raw(mem, (const void*)&data1[0],
             OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values1, &status);
 
     // First check.
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ(num_values1, (int)oskar_mem_length(&mem));
-    ASSERT_EQ((int)OSKAR_LOCATION_GPU, oskar_mem_location(&mem));
-    ASSERT_EQ((int)OSKAR_SINGLE, oskar_mem_type(&mem));
-    oskar_mem_init_copy(&mem_temp, &mem, OSKAR_LOCATION_CPU, &status);
-    float* data = oskar_mem_float(&mem_temp, &status);
+    ASSERT_EQ(num_values1, (int)oskar_mem_length(mem));
+    ASSERT_EQ((int)OSKAR_LOCATION_GPU, oskar_mem_location(mem));
+    ASSERT_EQ((int)OSKAR_SINGLE, oskar_mem_type(mem));
+    mem_temp = oskar_mem_create_copy(mem, OSKAR_LOCATION_CPU, &status);
+    float* data = oskar_mem_float(mem_temp, &status);
     for (int i = 0; i < num_values1; ++i)
     {
         EXPECT_FLOAT_EQ(value1, data[i]);
@@ -121,17 +122,17 @@ TEST(Mem, append_gpu)
     int num_values2 = 5;
     float value2 = 2.0;
     vector<float> data2(num_values2, value2);
-    oskar_mem_append_raw(&mem, (const void*)&data2[0],
+    oskar_mem_append_raw(mem, (const void*)&data2[0],
             OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values2, &status);
 
     // Second check.
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ(num_values1 + num_values2, (int)oskar_mem_length(&mem));
-    ASSERT_EQ((int)OSKAR_LOCATION_GPU, oskar_mem_location(&mem));
-    ASSERT_EQ((int)OSKAR_SINGLE, oskar_mem_type(&mem));
-    oskar_mem_init_copy(&temp, &mem, OSKAR_LOCATION_CPU, &status);
-    data = oskar_mem_float(&temp, &status);
-    for (int i = 0; i < (int)oskar_mem_length(&mem); ++i)
+    ASSERT_EQ(num_values1 + num_values2, (int)oskar_mem_length(mem));
+    ASSERT_EQ((int)OSKAR_LOCATION_GPU, oskar_mem_location(mem));
+    ASSERT_EQ((int)OSKAR_SINGLE, oskar_mem_type(mem));
+    temp = oskar_mem_create_copy(mem, OSKAR_LOCATION_CPU, &status);
+    data = oskar_mem_float(temp, &status);
+    for (int i = 0; i < (int)oskar_mem_length(mem); ++i)
     {
         if (i < num_values1)
             EXPECT_FLOAT_EQ(value1, data[i]);
@@ -140,9 +141,12 @@ TEST(Mem, append_gpu)
     }
 
     // Free memory.
-    oskar_mem_free(&temp, &status);
-    oskar_mem_free(&mem, &status);
-    oskar_mem_free(&mem_temp, &status);
+    oskar_mem_free(temp, &status);
+    oskar_mem_free(mem, &status);
+    oskar_mem_free(mem_temp, &status);
+    free(temp); // FIXME Remove after updating oskar_mem_free().
+    free(mem); // FIXME Remove after updating oskar_mem_free().
+    free(mem_temp); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 

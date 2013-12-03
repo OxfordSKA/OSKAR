@@ -43,13 +43,12 @@ TEST(fits_write, test)
     int planes = 4;
     int blocks = 4;
     int num_elements = columns * rows * planes * blocks;
-    oskar_Mem data;
-    oskar_mem_init(&data, OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
-            num_elements, 1, &status);
+    oskar_Mem* data = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+            num_elements, &status);
     const char filename[] = "temp_test_fits_write.fits";
 
     // Define test data.
-    double* d = oskar_mem_double(&data, &status);
+    double* d = oskar_mem_double(data, &status);
     int i = 0;
     for (int b = 0; b < blocks; ++b)
     {
@@ -130,8 +129,9 @@ TEST(fits_write, test)
     crota[3] = 0.0;
 
     /* Write multi-dimensional image data. */
-    oskar_fits_write(filename, oskar_mem_type(&data), 4, naxes,
-            oskar_mem_void(&data), ctype, ctype_comment,
+    oskar_fits_write(filename, oskar_mem_type(data), 4, naxes,
+            oskar_mem_void(data), ctype, ctype_comment,
             crval, cdelt, crpix, crota, &status);
-    oskar_mem_free(&data, &status);
+    oskar_mem_free(data, &status);
+    free(data); // FIXME Remove after updating oskar_mem_free().
 }

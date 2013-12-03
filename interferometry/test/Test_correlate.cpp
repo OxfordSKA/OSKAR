@@ -136,7 +136,7 @@ protected:
             double time_average)
     {
         int status = 0, type;
-        oskar_Mem vis1, vis2;
+        oskar_Mem *vis1, *vis2;
         oskar_Timer *timer1, *timer2;
         double time1, time2, frequency = 100e6;
 
@@ -148,15 +148,15 @@ protected:
 
         // Run first part.
         type = prec1 | OSKAR_COMPLEX | OSKAR_MATRIX;
-        oskar_mem_init(&vis1, type, loc1, num_baselines, 1, &status);
-        oskar_mem_clear_contents(&vis1, &status);
+        vis1 = oskar_mem_create(type, loc1, num_baselines, &status);
+        oskar_mem_clear_contents(vis1, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         createTestData(prec1, loc1);
         oskar_sky_set_use_extended(sky_, extended);
         oskar_telescope_set_smearing_values(telescope_, bandwidth,
                 time_average);
         oskar_timer_start(timer1);
-        oskar_correlate(&vis1, jones_, telescope_, sky_, &u_, &v_, 1.0,
+        oskar_correlate(vis1, jones_, telescope_, sky_, &u_, &v_, 1.0,
                 frequency, &status);
         time1 = oskar_timer_elapsed(timer1);
         destroyTestData();
@@ -164,15 +164,15 @@ protected:
 
         // Run second part.
         type = prec2 | OSKAR_COMPLEX | OSKAR_MATRIX;
-        oskar_mem_init(&vis2, type, loc2, num_baselines, 1, &status);
-        oskar_mem_clear_contents(&vis2, &status);
+        vis2 = oskar_mem_create(type, loc2, num_baselines, &status);
+        oskar_mem_clear_contents(vis2, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         createTestData(prec2, loc2);
         oskar_sky_set_use_extended(sky_, extended);
         oskar_telescope_set_smearing_values(telescope_, bandwidth,
                 time_average);
         oskar_timer_start(timer2);
-        oskar_correlate(&vis2, jones_, telescope_, sky_, &u_, &v_, 1.0,
+        oskar_correlate(vis2, jones_, telescope_, sky_, &u_, &v_, 1.0,
                 frequency, &status);
         time2 = oskar_timer_elapsed(timer2);
         destroyTestData();
@@ -183,11 +183,13 @@ protected:
         oskar_timer_free(timer2);
 
         // Compare results.
-        check_values(&vis1, &vis2);
+        check_values(vis1, vis2);
 
         // Free memory.
-        oskar_mem_free(&vis1, &status);
-        oskar_mem_free(&vis2, &status);
+        oskar_mem_free(vis1, &status);
+        oskar_mem_free(vis2, &status);
+        free(vis1); // FIXME Remove after updating oskar_mem_free().
+        free(vis2); // FIXME Remove after updating oskar_mem_free().
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Record properties for test.

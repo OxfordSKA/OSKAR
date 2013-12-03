@@ -1,10 +1,13 @@
-2013-11-29  OSKAR-2.4.0
+2013-12-xx  OSKAR-2.4.0
 
     * Added new beam coordinate modes which allow output of horizon frame
-      zenith centred tangent plane images and HEALPix grids in both the 
-      equatorial and horizon planes.
+      (zenith centred) tangent plane images, and HEALPix grids in both the 
+      equatorial and horizon frames.
 
-    * Fixed an issue building the google unit test library.
+    * Added ability to specify a set of horizon-based permitted beam directions
+      on a per-station basis.
+
+    * Fixed an issue building the Google unit test library.
 
 2013-11-28  OSKAR-2.3.1
 

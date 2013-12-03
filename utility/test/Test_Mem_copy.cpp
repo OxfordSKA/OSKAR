@@ -34,33 +34,36 @@
 TEST(Mem, copy_gpu)
 {
     int n = 100, status = 0;
-    oskar_Mem cpu, cpu2, gpu;
+    oskar_Mem *cpu, *cpu2, *gpu;
 
     // Create test array and fill with data.
-    oskar_mem_init(&cpu, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n, 1, &status);
+    cpu = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    double* cpu_ = oskar_mem_double(&cpu, &status);
+    double* cpu_ = oskar_mem_double(cpu, &status);
     for (int i = 0; i < n; ++i)
     {
         cpu_[i] = (double)i;
     }
 
     // Copy to GPU.
-    oskar_mem_init_copy(&gpu, &cpu, OSKAR_LOCATION_GPU, &status);
+    gpu = oskar_mem_create_copy(cpu, OSKAR_LOCATION_GPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check for equality.
-    oskar_mem_init_copy(&cpu2, &gpu, OSKAR_LOCATION_CPU, &status);
+    cpu2 = oskar_mem_create_copy(gpu, OSKAR_LOCATION_CPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    double* cpu2_ = oskar_mem_double(&cpu2, &status);
+    double* cpu2_ = oskar_mem_double(cpu2, &status);
     for (int i = 0; i < n; ++i)
     {
         EXPECT_DOUBLE_EQ(cpu_[i], cpu2_[i]);
     }
 
     // Free memory.
-    oskar_mem_free(&cpu, &status);
-    oskar_mem_free(&cpu2, &status);
-    oskar_mem_free(&gpu, &status);
+    oskar_mem_free(cpu, &status);
+    oskar_mem_free(cpu2, &status);
+    oskar_mem_free(gpu, &status);
+    free(cpu); // FIXME Remove after updating oskar_mem_free().
+    free(cpu2); // FIXME Remove after updating oskar_mem_free().
+    free(gpu); // FIXME Remove after updating oskar_mem_free().
 }
 

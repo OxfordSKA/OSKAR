@@ -51,7 +51,7 @@ struct oskar_Jones
     int num_sources;  /**< Fastest varying dimension. */
     int cap_stations; /**< Slowest varying dimension. */
     int cap_sources;  /**< Fastest varying dimension. */
-    oskar_Mem data;   /**< Pointer to the matrix data. */
+    oskar_Mem* data;  /**< Matrix data. */
 };
 
 #ifndef OSKAR_JONES_TYPEDEF_

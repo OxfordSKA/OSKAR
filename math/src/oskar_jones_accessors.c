@@ -47,67 +47,67 @@ int oskar_jones_num_stations(const oskar_Jones* jones)
 
 int oskar_jones_type(const oskar_Jones* jones)
 {
-    return oskar_mem_type(&jones->data);
+    return oskar_mem_type(jones->data);
 }
 
 int oskar_jones_location(const oskar_Jones* jones)
 {
-    return oskar_mem_location(&jones->data);
+    return oskar_mem_location(jones->data);
 }
 
 oskar_Mem* oskar_jones_mem(oskar_Jones* jones)
 {
-    return &jones->data;
+    return jones->data;
 }
 
 const oskar_Mem* oskar_jones_mem_const(const oskar_Jones* jones)
 {
-    return &jones->data;
+    return jones->data;
 }
 
 /* Single precision. */
 
 float2* oskar_jones_float2(oskar_Jones* jones, int* status)
 {
-    return oskar_mem_float2(&jones->data, status);
+    return oskar_mem_float2(jones->data, status);
 }
 
 const float2* oskar_jones_float2_const(const oskar_Jones* jones, int* status)
 {
-    return oskar_mem_float2_const(&jones->data, status);
+    return oskar_mem_float2_const(jones->data, status);
 }
 
 float4c* oskar_jones_float4c(oskar_Jones* jones, int* status)
 {
-    return oskar_mem_float4c(&jones->data, status);
+    return oskar_mem_float4c(jones->data, status);
 }
 
 const float4c* oskar_jones_float4c_const(const oskar_Jones* jones, int* status)
 {
-    return oskar_mem_float4c_const(&jones->data, status);
+    return oskar_mem_float4c_const(jones->data, status);
 }
 
 /* Double precision. */
 
 double2* oskar_jones_double2(oskar_Jones* jones, int* status)
 {
-    return oskar_mem_double2(&jones->data, status);
+    return oskar_mem_double2(jones->data, status);
 }
 
 const double2* oskar_jones_double2_const(const oskar_Jones* jones, int* status)
 {
-    return oskar_mem_double2_const(&jones->data, status);
+    return oskar_mem_double2_const(jones->data, status);
 }
 
 double4c* oskar_jones_double4c(oskar_Jones* jones, int* status)
 {
-    return oskar_mem_double4c(&jones->data, status);
+    return oskar_mem_double4c(jones->data, status);
 }
 
 const double4c* oskar_jones_double4c_const(const oskar_Jones* jones,
         int* status)
 {
-    return oskar_mem_double4c_const(&jones->data, status);
+    return oskar_mem_double4c_const(jones->data, status);
 }
 
 #ifdef __cplusplus

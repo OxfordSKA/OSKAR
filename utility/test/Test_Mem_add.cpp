@@ -36,13 +36,13 @@ TEST(Mem, add_matrix_cpu)
 {
     // Use case: Two CPU oskar_Mem matrix types are added together.
     int num_elements = 10, status = 0;
-    oskar_Mem mem_A, mem_B, mem_C;
-    oskar_mem_init(&mem_A, OSKAR_SINGLE_COMPLEX_MATRIX,
-            OSKAR_LOCATION_CPU, num_elements, 1, &status);
-    oskar_mem_init(&mem_B, OSKAR_SINGLE_COMPLEX_MATRIX,
-            OSKAR_LOCATION_CPU, num_elements, 1, &status);
-    float4c* A = oskar_mem_float4c(&mem_A, &status);
-    float4c* B = oskar_mem_float4c(&mem_B, &status);
+    oskar_Mem *mem_A, *mem_B, *mem_C;
+    mem_A = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+            num_elements, &status);
+    mem_B = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+            num_elements, &status);
+    float4c* A = oskar_mem_float4c(mem_A, &status);
+    float4c* B = oskar_mem_float4c(mem_B, &status);
 
     for (int i = 0; i < num_elements; ++i)
     {
@@ -64,12 +64,12 @@ TEST(Mem, add_matrix_cpu)
         B[i].d.y = 0.18;
     }
 
-    oskar_mem_init(&mem_C, OSKAR_SINGLE_COMPLEX_MATRIX,
-            OSKAR_LOCATION_CPU, num_elements, 1, &status);
-    oskar_mem_add(&mem_C, &mem_A, &mem_B, &status);
+    mem_C = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+            num_elements, &status);
+    oskar_mem_add(mem_C, mem_A, mem_B, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    float4c* C = oskar_mem_float4c(&mem_C, &status);
+    float4c* C = oskar_mem_float4c(mem_C, &status);
     for (int i = 0; i < num_elements; ++i)
     {
         EXPECT_FLOAT_EQ(A[i].a.x + B[i].a.x , C[i].a.x);
@@ -81,9 +81,12 @@ TEST(Mem, add_matrix_cpu)
         EXPECT_FLOAT_EQ(A[i].d.x + B[i].d.x , C[i].d.x);
         EXPECT_FLOAT_EQ(A[i].d.y + B[i].d.y , C[i].d.y);
     }
-    oskar_mem_free(&mem_A, &status);
-    oskar_mem_free(&mem_B, &status);
-    oskar_mem_free(&mem_C, &status);
+    oskar_mem_free(mem_A, &status);
+    oskar_mem_free(mem_B, &status);
+    oskar_mem_free(mem_C, &status);
+    free(mem_A); // FIXME Remove after updating oskar_mem_free().
+    free(mem_B); // FIXME Remove after updating oskar_mem_free().
+    free(mem_C); // FIXME Remove after updating oskar_mem_free().
 }
 
 
@@ -91,13 +94,13 @@ TEST(Mem, add_in_place)
 {
     // Use case: In place add.
     int num_elements = 10, status = 0;
-    oskar_Mem mem_A, mem_B;
-    oskar_mem_init(&mem_A, OSKAR_SINGLE_COMPLEX_MATRIX,
-            OSKAR_LOCATION_CPU, num_elements, 1, &status);
-    oskar_mem_init(&mem_B, OSKAR_SINGLE_COMPLEX_MATRIX,
-            OSKAR_LOCATION_CPU, num_elements, 1, &status);
-    float4c* A = oskar_mem_float4c(&mem_A, &status);
-    float4c* B = oskar_mem_float4c(&mem_B, &status);
+    oskar_Mem *mem_A, *mem_B;
+    mem_A = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+            num_elements, &status);
+    mem_B = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+            num_elements, &status);
+    float4c* A = oskar_mem_float4c(mem_A, &status);
+    float4c* B = oskar_mem_float4c(mem_B, &status);
 
     for (int i = 0; i < num_elements; ++i)
     {
@@ -119,7 +122,7 @@ TEST(Mem, add_in_place)
         EXPECT_FLOAT_EQ(0.0, B[i].d.y);
     }
 
-    oskar_mem_add(&mem_B, &mem_A, &mem_B, &status);
+    oskar_mem_add(mem_B, mem_A, mem_B, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     for (int i = 0; i < num_elements; ++i)
@@ -133,8 +136,10 @@ TEST(Mem, add_in_place)
         EXPECT_FLOAT_EQ(A[i].d.x, B[i].d.x);
         EXPECT_FLOAT_EQ(A[i].d.y, B[i].d.y);
     }
-    oskar_mem_free(&mem_A, &status);
-    oskar_mem_free(&mem_B, &status);
+    oskar_mem_free(mem_A, &status);
+    oskar_mem_free(mem_B, &status);
+    free(mem_A); // FIXME Remove after updating oskar_mem_free().
+    free(mem_B); // FIXME Remove after updating oskar_mem_free().
 }
 
 
@@ -142,17 +147,20 @@ TEST(Mem, add_gpu)
 {
     // Use Case: memory on the GPU.
     int num_elements = 10, status = 0;
-    oskar_Mem mem_A, mem_B, mem_C;
-    oskar_mem_init(&mem_A, OSKAR_SINGLE_COMPLEX_MATRIX,
-            OSKAR_LOCATION_GPU, num_elements, 1, &status);
-    oskar_mem_init_copy(&mem_B, &mem_A, OSKAR_LOCATION_GPU, &status);
-    oskar_mem_init_copy(&mem_C, &mem_A, OSKAR_LOCATION_GPU, &status);
-    oskar_mem_add(&mem_C, &mem_A, &mem_B, &status);
+    oskar_Mem *mem_A, *mem_B, *mem_C;
+    mem_A = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU,
+            num_elements, &status);
+    mem_B = oskar_mem_create_copy(mem_A, OSKAR_LOCATION_GPU, &status);
+    mem_C = oskar_mem_create_copy(mem_A, OSKAR_LOCATION_GPU, &status);
+    oskar_mem_add(mem_C, mem_A, mem_B, &status);
     ASSERT_EQ((int)OSKAR_ERR_BAD_LOCATION, status);
     status = 0;
-    oskar_mem_free(&mem_A, &status);
-    oskar_mem_free(&mem_B, &status);
-    oskar_mem_free(&mem_C, &status);
+    oskar_mem_free(mem_A, &status);
+    oskar_mem_free(mem_B, &status);
+    oskar_mem_free(mem_C, &status);
+    free(mem_A); // FIXME Remove after updating oskar_mem_free().
+    free(mem_B); // FIXME Remove after updating oskar_mem_free().
+    free(mem_C); // FIXME Remove after updating oskar_mem_free().
 }
 
 
@@ -160,16 +168,19 @@ TEST(Mem, add_dimension_mismatch)
 {
     // Use Case: Dimension mismatch in arrays being added.
     int num_elements = 10, status = 0;
-    oskar_Mem mem_A, mem_B, mem_C;
-    oskar_mem_init(&mem_A, OSKAR_SINGLE_COMPLEX_MATRIX,
-            OSKAR_LOCATION_CPU, num_elements, 1, &status);
-    oskar_mem_init_copy(&mem_B, &mem_A, OSKAR_LOCATION_CPU, &status);
-    oskar_mem_init(&mem_C, OSKAR_SINGLE_COMPLEX_MATRIX,
-            OSKAR_LOCATION_CPU, num_elements / 2, 1, &status);
-    oskar_mem_add(&mem_C, &mem_A, &mem_B, &status);
+    oskar_Mem *mem_A, *mem_B, *mem_C;
+    mem_A = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+            num_elements, &status);
+    mem_B = oskar_mem_create_copy(mem_A, OSKAR_LOCATION_CPU, &status);
+    mem_C = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+            num_elements / 2, &status);
+    oskar_mem_add(mem_C, mem_A, mem_B, &status);
     ASSERT_EQ((int)OSKAR_ERR_DIMENSION_MISMATCH, status);
     status = 0;
-    oskar_mem_free(&mem_A, &status);
-    oskar_mem_free(&mem_B, &status);
-    oskar_mem_free(&mem_C, &status);
+    oskar_mem_free(mem_A, &status);
+    oskar_mem_free(mem_B, &status);
+    oskar_mem_free(mem_C, &status);
+    free(mem_A); // FIXME Remove after updating oskar_mem_free().
+    free(mem_B); // FIXME Remove after updating oskar_mem_free().
+    free(mem_C); // FIXME Remove after updating oskar_mem_free().
 }

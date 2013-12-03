@@ -56,7 +56,7 @@ void oskar_image_init(oskar_Image* image, int type, int location, int* status)
     image->dimension_order[4] = OSKAR_IMAGE_DIM_CHANNEL;
 
     /* Initialise meta-data. */
-    image->grid_type = OSKAR_IMAGE_GRID_TYPE_UNDEF;
+    image->grid_type = OSKAR_IMAGE_GRID_TYPE_RECTILINEAR;
     image->coord_frame = OSKAR_IMAGE_COORD_FRAME_UNDEF;
     image->image_type = OSKAR_IMAGE_TYPE_UNDEF;
     image->centre_dec_deg = 0.0;

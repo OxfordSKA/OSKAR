@@ -48,25 +48,25 @@ TEST(Mem, load_ascii_real_cpu)
     fclose(file);
 
     // Load columns back into CPU memory.
-    oskar_Mem a, b, c, d;
-    oskar_mem_init(&a, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
-    oskar_mem_init(&b, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
-    oskar_mem_init(&c, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
-    oskar_mem_init(&d, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
+    oskar_Mem *a, *b, *c, *d;
+    a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Expect pass.
     file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 4, &status, &a, "0.0", &b, "0.0",
-            &c, "0.0", &d, "0.0");
+    oskar_mem_load_ascii(file, 4, &status, a, "0.0", b, "0.0",
+            c, "0.0", d, "0.0");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     fclose(file);
 
     // Check contents.
-    const double* a_ = oskar_mem_double_const(&a, &status);
-    const double* b_ = oskar_mem_double_const(&b, &status);
-    const double* c_ = oskar_mem_double_const(&c, &status);
-    const double* d_ = oskar_mem_double_const(&d, &status);
+    const double* a_ = oskar_mem_double_const(a, &status);
+    const double* b_ = oskar_mem_double_const(b, &status);
+    const double* c_ = oskar_mem_double_const(c, &status);
+    const double* d_ = oskar_mem_double_const(d, &status);
     for (int i = 0; i < num_elements; ++i)
     {
         ASSERT_NEAR(a_[i], i * 1.0, 1e-10);
@@ -75,10 +75,14 @@ TEST(Mem, load_ascii_real_cpu)
         ASSERT_NEAR(d_[i], i * 1000.0, 1e-10);
     }
 
-    oskar_mem_free(&a, &status);
-    oskar_mem_free(&b, &status);
-    oskar_mem_free(&c, &status);
-    oskar_mem_free(&d, &status);
+    oskar_mem_free(a, &status);
+    oskar_mem_free(b, &status);
+    oskar_mem_free(c, &status);
+    oskar_mem_free(d, &status);
+    free(a); // FIXME Remove after updating oskar_mem_free().
+    free(b); // FIXME Remove after updating oskar_mem_free().
+    free(c); // FIXME Remove after updating oskar_mem_free().
+    free(d); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -99,30 +103,30 @@ TEST(Mem, load_ascii_real_gpu)
     fclose(file);
 
     // Load columns back into GPU memory.
-    oskar_Mem a, b, c, d;
-    oskar_mem_init(&a, OSKAR_DOUBLE, OSKAR_LOCATION_GPU, 0, 1, &status);
-    oskar_mem_init(&b, OSKAR_DOUBLE, OSKAR_LOCATION_GPU, 0, 1, &status);
-    oskar_mem_init(&c, OSKAR_DOUBLE, OSKAR_LOCATION_GPU, 0, 1, &status);
-    oskar_mem_init(&d, OSKAR_DOUBLE, OSKAR_LOCATION_GPU, 0, 1, &status);
+    oskar_Mem *a, *b, *c, *d;
+    a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Expect pass.
     file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 4, &status, &a, "0.0", &b, "0.0",
-            &c, "0.0", &d, "0.0");
+    oskar_mem_load_ascii(file, 4, &status, a, "0.0", b, "0.0",
+            c, "0.0", d, "0.0");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     fclose(file);
 
     // Copy to CPU memory to check contents.
-    oskar_Mem aa, bb, cc, dd;
-    oskar_mem_init_copy(&aa, &a, OSKAR_LOCATION_CPU, &status);
-    oskar_mem_init_copy(&bb, &b, OSKAR_LOCATION_CPU, &status);
-    oskar_mem_init_copy(&cc, &c, OSKAR_LOCATION_CPU, &status);
-    oskar_mem_init_copy(&dd, &d, OSKAR_LOCATION_CPU, &status);
-    const double* a_ = oskar_mem_double_const(&aa, &status);
-    const double* b_ = oskar_mem_double_const(&bb, &status);
-    const double* c_ = oskar_mem_double_const(&cc, &status);
-    const double* d_ = oskar_mem_double_const(&dd, &status);
+    oskar_Mem *aa, *bb, *cc, *dd;
+    aa = oskar_mem_create_copy(a, OSKAR_LOCATION_CPU, &status);
+    bb = oskar_mem_create_copy(b, OSKAR_LOCATION_CPU, &status);
+    cc = oskar_mem_create_copy(c, OSKAR_LOCATION_CPU, &status);
+    dd = oskar_mem_create_copy(d, OSKAR_LOCATION_CPU, &status);
+    const double* a_ = oskar_mem_double_const(aa, &status);
+    const double* b_ = oskar_mem_double_const(bb, &status);
+    const double* c_ = oskar_mem_double_const(cc, &status);
+    const double* d_ = oskar_mem_double_const(dd, &status);
     for (int i = 0; i < num_elements; ++i)
     {
         ASSERT_NEAR(a_[i], i * 1.0, 1e-10);
@@ -131,14 +135,22 @@ TEST(Mem, load_ascii_real_gpu)
         ASSERT_NEAR(d_[i], i * 1000.0, 1e-10);
     }
 
-    oskar_mem_free(&a, &status);
-    oskar_mem_free(&b, &status);
-    oskar_mem_free(&c, &status);
-    oskar_mem_free(&d, &status);
-    oskar_mem_free(&aa, &status);
-    oskar_mem_free(&bb, &status);
-    oskar_mem_free(&cc, &status);
-    oskar_mem_free(&dd, &status);
+    oskar_mem_free(a, &status);
+    oskar_mem_free(b, &status);
+    oskar_mem_free(c, &status);
+    oskar_mem_free(d, &status);
+    free(a); // FIXME Remove after updating oskar_mem_free().
+    free(b); // FIXME Remove after updating oskar_mem_free().
+    free(c); // FIXME Remove after updating oskar_mem_free().
+    free(d); // FIXME Remove after updating oskar_mem_free().
+    oskar_mem_free(aa, &status);
+    oskar_mem_free(bb, &status);
+    oskar_mem_free(cc, &status);
+    oskar_mem_free(dd, &status);
+    free(aa); // FIXME Remove after updating oskar_mem_free().
+    free(bb); // FIXME Remove after updating oskar_mem_free().
+    free(cc); // FIXME Remove after updating oskar_mem_free().
+    free(dd); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -158,27 +170,27 @@ TEST(Mem, load_ascii_complex_real_cpu)
     fclose(file);
 
     // Load columns back into CPU memory.
-    oskar_Mem a, b;
-    oskar_mem_init(&a, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 0, 1, &status);
-    oskar_mem_init(&b, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
+    oskar_Mem *a, *b;
+    a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Wrong default: expect failure.
     file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 2, &status, &a, "1.0", &b, "0.0");
+    oskar_mem_load_ascii(file, 2, &status, a, "1.0", b, "0.0");
     ASSERT_NE(0, status);
     status = 0;
     fclose(file);
 
     // Expect pass.
     file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 2, &status, &a, "1.0 0.0", &b, "0.0");
+    oskar_mem_load_ascii(file, 2, &status, a, "1.0 0.0", b, "0.0");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     fclose(file);
 
     // Check contents.
-    const double2* a_ = oskar_mem_double2_const(&a, &status);
-    const double* b_ = oskar_mem_double_const(&b, &status);
+    const double2* a_ = oskar_mem_double2_const(a, &status);
+    const double* b_ = oskar_mem_double_const(b, &status);
     for (int i = 0; i < num_elements; ++i)
     {
         ASSERT_NEAR(a_[i].x, i * 1.0, 1e-10);
@@ -186,8 +198,10 @@ TEST(Mem, load_ascii_complex_real_cpu)
         ASSERT_NEAR(b_[i], i * 100.0, 1e-10);
     }
 
-    oskar_mem_free(&a, &status);
-    oskar_mem_free(&b, &status);
+    oskar_mem_free(a, &status);
+    oskar_mem_free(b, &status);
+    free(a); // FIXME Remove after updating oskar_mem_free().
+    free(b); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -207,29 +221,28 @@ TEST(Mem, load_ascii_complex_real_gpu_cpu)
     fclose(file);
 
     // Load columns back into CPU memory.
-    oskar_Mem a, b;
-    oskar_mem_init(&a, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, 0, 1, &status);
-    oskar_mem_init(&b, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
+    oskar_Mem *a, *b;
+    a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Wrong default: expect failure.
     file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 2, &status, &a, "1.0", &b, "0.0");
+    oskar_mem_load_ascii(file, 2, &status, a, "1.0", b, "0.0");
     ASSERT_NE(0, status);
     status = 0;
     fclose(file);
 
     // Expect pass.
     file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 2, &status, &a, "1.0 0.0", &b, "0.0");
+    oskar_mem_load_ascii(file, 2, &status, a, "1.0 0.0", b, "0.0");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     fclose(file);
 
     // Check contents.
-    oskar_Mem aa;
-    oskar_mem_init_copy(&aa, &a, OSKAR_LOCATION_CPU, &status);
-    const double2* a_ = oskar_mem_double2_const(&aa, &status);
-    const double* b_ = oskar_mem_double_const(&b, &status);
+    oskar_Mem *aa = oskar_mem_create_copy(a, OSKAR_LOCATION_CPU, &status);
+    const double2* a_ = oskar_mem_double2_const(aa, &status);
+    const double* b_ = oskar_mem_double_const(b, &status);
     for (int i = 0; i < num_elements; ++i)
     {
         ASSERT_NEAR(a_[i].x, i * 1.0, 1e-10);
@@ -237,9 +250,12 @@ TEST(Mem, load_ascii_complex_real_gpu_cpu)
         ASSERT_NEAR(b_[i], i * 100.0, 1e-10);
     }
 
-    oskar_mem_free(&a, &status);
-    oskar_mem_free(&b, &status);
-    oskar_mem_free(&aa, &status);
+    oskar_mem_free(a, &status);
+    oskar_mem_free(b, &status);
+    oskar_mem_free(aa, &status);
+    free(a); // FIXME Remove after updating oskar_mem_free().
+    free(b); // FIXME Remove after updating oskar_mem_free().
+    free(aa); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -259,36 +275,36 @@ TEST(Mem, load_ascii_complex_real_default_cpu)
     fclose(file);
 
     // Load columns back into CPU memory.
-    oskar_Mem a, b, c;
-    oskar_mem_init(&a, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 0, 1, &status);
-    oskar_mem_init(&b, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
-    oskar_mem_init(&c, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
+    oskar_Mem *a, *b, *c;
+    a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Wrong default: expect failure.
     file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 2, &status, &a, "1.0", &b, "0.0");
+    oskar_mem_load_ascii(file, 2, &status, a, "1.0", b, "0.0");
     ASSERT_NE(0, status);
     status = 0;
     fclose(file);
 
     // Badly placed default: expect failure.
     file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 3, &status, &a, "", &b, "9.9", &c, "");
+    oskar_mem_load_ascii(file, 3, &status, a, "", b, "9.9", c, "");
     ASSERT_NE(0, status);
     status = 0;
     fclose(file);
 
     // Expect pass.
     file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 3, &status, &a, "1.0 0.0", &b, "5.1", &c, "2.5");
+    oskar_mem_load_ascii(file, 3, &status, a, "1.0 0.0", b, "5.1", c, "2.5");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     fclose(file);
 
     // Check contents.
-    const double2* a_ = oskar_mem_double2_const(&a, &status);
-    const double* b_ = oskar_mem_double_const(&b, &status);
-    const double* c_ = oskar_mem_double_const(&c, &status);
+    const double2* a_ = oskar_mem_double2_const(a, &status);
+    const double* b_ = oskar_mem_double_const(b, &status);
+    const double* c_ = oskar_mem_double_const(c, &status);
     for (int i = 0; i < num_elements; ++i)
     {
         ASSERT_NEAR(a_[i].x, i * 1.0, 1e-10);
@@ -297,9 +313,12 @@ TEST(Mem, load_ascii_complex_real_default_cpu)
         ASSERT_NEAR(c_[i], 2.5, 1e-10);
     }
 
-    oskar_mem_free(&a, &status);
-    oskar_mem_free(&b, &status);
-    oskar_mem_free(&c, &status);
+    oskar_mem_free(a, &status);
+    oskar_mem_free(b, &status);
+    oskar_mem_free(c, &status);
+    free(a); // FIXME Remove after updating oskar_mem_free().
+    free(b); // FIXME Remove after updating oskar_mem_free().
+    free(c); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -320,22 +339,22 @@ TEST(Mem, load_ascii_lots_of_columns)
     fclose(file);
 
     // Load some columns back into CPU memory.
-    oskar_Mem a, b, c;
-    oskar_mem_init(&a, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 0, 1, &status);
-    oskar_mem_init(&b, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
-    oskar_mem_init(&c, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
+    oskar_Mem *a, *b, *c;
+    a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Expect pass.
     file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 3, &status, &a, "", &b, "", &c, "");
+    oskar_mem_load_ascii(file, 3, &status, a, "", b, "", c, "");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     fclose(file);
 
     // Check contents.
-    const double2* a_ = oskar_mem_double2_const(&a, &status);
-    const double* b_ = oskar_mem_double_const(&b, &status);
-    const double* c_ = oskar_mem_double_const(&c, &status);
+    const double2* a_ = oskar_mem_double2_const(a, &status);
+    const double* b_ = oskar_mem_double_const(b, &status);
+    const double* c_ = oskar_mem_double_const(c, &status);
     for (int i = 0; i < num_elements; ++i)
     {
         ASSERT_NEAR(a_[i].x, i * 1.0, 1e-10);
@@ -344,9 +363,12 @@ TEST(Mem, load_ascii_lots_of_columns)
         ASSERT_NEAR(c_[i], i * 23.0, 1e-10);
     }
 
-    oskar_mem_free(&a, &status);
-    oskar_mem_free(&b, &status);
-    oskar_mem_free(&c, &status);
+    oskar_mem_free(a, &status);
+    oskar_mem_free(b, &status);
+    oskar_mem_free(c, &status);
+    free(a); // FIXME Remove after updating oskar_mem_free().
+    free(b); // FIXME Remove after updating oskar_mem_free().
+    free(c); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -374,27 +396,27 @@ TEST(Mem, load_ascii_required_data)
     fclose(file);
 
     // Load some columns back into CPU memory.
-    oskar_Mem a, b, c;
-    oskar_mem_init(&a, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
-    oskar_mem_init(&b, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
-    oskar_mem_init(&c, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, &status);
+    oskar_Mem *a, *b, *c;
+    a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Expect pass.
     file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 3, &status, &a, "", &b, "", &c, "3.3");
+    oskar_mem_load_ascii(file, 3, &status, a, "", b, "", c, "3.3");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     fclose(file);
 
     // Check arrays are the right length.
-    EXPECT_EQ(2 * num_elements + 1, (int)oskar_mem_length(&a));
-    EXPECT_EQ(2 * num_elements + 1, (int)oskar_mem_length(&b));
-    EXPECT_EQ(2 * num_elements + 1, (int)oskar_mem_length(&c));
+    EXPECT_EQ(2 * num_elements + 1, (int)oskar_mem_length(a));
+    EXPECT_EQ(2 * num_elements + 1, (int)oskar_mem_length(b));
+    EXPECT_EQ(2 * num_elements + 1, (int)oskar_mem_length(c));
 
     // Check contents.
-    const double* a_ = oskar_mem_double_const(&a, &status);
-    const double* b_ = oskar_mem_double_const(&b, &status);
-    const double* c_ = oskar_mem_double_const(&c, &status);
+    const double* a_ = oskar_mem_double_const(a, &status);
+    const double* b_ = oskar_mem_double_const(b, &status);
+    const double* c_ = oskar_mem_double_const(c, &status);
     // a_[i] must always be less than 10000, because no default was
     // supplied for b where that value was set for a.
     for (int i = 0; i < num_elements; ++i)
@@ -416,9 +438,12 @@ TEST(Mem, load_ascii_required_data)
         ASSERT_NEAR(c_[j], i * 20.0, 1e-10);
     }
 
-    oskar_mem_free(&a, &status);
-    oskar_mem_free(&b, &status);
-    oskar_mem_free(&c, &status);
+    oskar_mem_free(a, &status);
+    oskar_mem_free(b, &status);
+    oskar_mem_free(c, &status);
+    free(a); // FIXME Remove after updating oskar_mem_free().
+    free(b); // FIXME Remove after updating oskar_mem_free().
+    free(c); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -427,42 +452,50 @@ TEST(Mem, load_ascii_required_data)
 TEST(Mem, save_ascii)
 {
     int status = 0;
-    oskar_Mem mem1, mem2, mem3, mem4, mem5, mem6, mem7, mem8;
+    oskar_Mem *mem1, *mem2, *mem3, *mem4, *mem5, *mem6, *mem7, *mem8;
     size_t length = 100;
-    oskar_mem_init(&mem1, OSKAR_SINGLE, OSKAR_LOCATION_CPU, length, 1, &status);
-    oskar_mem_init(&mem2, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, length, 1, &status);
-    oskar_mem_init(&mem3, OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU, length, 1, &status);
-    oskar_mem_init(&mem4, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, length, 1, &status);
-    oskar_mem_init(&mem5, OSKAR_SINGLE, OSKAR_LOCATION_GPU, length, 1, &status);
-    oskar_mem_init(&mem6, OSKAR_DOUBLE, OSKAR_LOCATION_GPU, length, 1, &status);
-    oskar_mem_init(&mem7, OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU, length, 1, &status);
-    oskar_mem_init(&mem8, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, length, 1, &status);
+    mem1 = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, length, &status);
+    mem2 = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, length, &status);
+    mem3 = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU, length, &status);
+    mem4 = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, length, &status);
+    mem5 = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_GPU, length, &status);
+    mem6 = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, length, &status);
+    mem7 = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU, length, &status);
+    mem8 = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, length, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    oskar_mem_set_value_real(&mem1, 1.0, 0, 0, &status);
-    oskar_mem_set_value_real(&mem2, 2.0, 0, 0, &status);
-    oskar_mem_set_value_real(&mem3, 3.0, 0, 0, &status);
-    oskar_mem_set_value_real(&mem4, 4.0, 0, 0, &status);
-    oskar_mem_set_value_real(&mem5, 5.0, 0, 0, &status);
-    oskar_mem_set_value_real(&mem6, 6.0, 0, 0, &status);
-    oskar_mem_set_value_real(&mem7, 7.0, 0, 0, &status);
-    oskar_mem_set_value_real(&mem8, 8.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem1, 1.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem2, 2.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem3, 3.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem4, 4.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem5, 5.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem6, 6.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem7, 7.0, 0, 0, &status);
+    oskar_mem_set_value_real(mem8, 8.0, 0, 0, &status);
 
     const char* fname = "temp_test_save_ascii.txt";
     FILE* f = fopen(fname, "w");
     oskar_mem_save_ascii(f, 8, length, &status,
-            &mem1, &mem2, &mem3, &mem4, &mem5, &mem6, &mem7, &mem8);
+            mem1, mem2, mem3, mem4, mem5, mem6, mem7, mem8);
     fclose(f);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    oskar_mem_free(&mem1, &status);
-    oskar_mem_free(&mem2, &status);
-    oskar_mem_free(&mem3, &status);
-    oskar_mem_free(&mem4, &status);
-    oskar_mem_free(&mem5, &status);
-    oskar_mem_free(&mem6, &status);
-    oskar_mem_free(&mem7, &status);
-    oskar_mem_free(&mem8, &status);
+    oskar_mem_free(mem1, &status);
+    oskar_mem_free(mem2, &status);
+    oskar_mem_free(mem3, &status);
+    oskar_mem_free(mem4, &status);
+    oskar_mem_free(mem5, &status);
+    oskar_mem_free(mem6, &status);
+    oskar_mem_free(mem7, &status);
+    oskar_mem_free(mem8, &status);
+    free(mem1); // FIXME Remove after updating oskar_mem_free().
+    free(mem2); // FIXME Remove after updating oskar_mem_free().
+    free(mem3); // FIXME Remove after updating oskar_mem_free().
+    free(mem4); // FIXME Remove after updating oskar_mem_free().
+    free(mem5); // FIXME Remove after updating oskar_mem_free().
+    free(mem6); // FIXME Remove after updating oskar_mem_free().
+    free(mem7); // FIXME Remove after updating oskar_mem_free().
+    free(mem8); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     remove(fname);
 }

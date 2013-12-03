@@ -58,7 +58,7 @@ oskar_Jones* oskar_jones_create_copy(const oskar_Jones* src, int location,
     jones->num_sources = src->num_sources;
     jones->cap_stations = src->cap_stations;
     jones->cap_sources = src->cap_sources;
-    oskar_mem_copy(&jones->data, &src->data, status);
+    oskar_mem_copy(jones->data, src->data, status);
 
     /* Return pointer to the new structure. */
     return jones;

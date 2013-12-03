@@ -46,24 +46,24 @@ TEST(element_weights_errors, test_evaluate)
     double element_phase_error = 0.0  * M_PI;
     int error = 0, seed = 0;
 
-    oskar_Mem d_gain, d_gain_error, d_phase, d_phase_error, d_errors;
-    oskar_mem_init(&d_gain, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_elements, 1, &error);
-    oskar_mem_init(&d_gain_error, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_elements, 1, &error);
-    oskar_mem_init(&d_phase, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_elements, 1, &error);
-    oskar_mem_init(&d_phase_error, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_elements, 1, &error);
-    oskar_mem_init(&d_errors, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU,
-            num_elements, 1, &error);
+    oskar_Mem *d_gain, *d_gain_error, *d_phase, *d_phase_error, *d_errors;
+    d_gain = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_elements, &error);
+    d_gain_error = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_elements, &error);
+    d_phase = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_elements, &error);
+    d_phase_error = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_elements, &error);
+    d_errors = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU,
+            num_elements, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    oskar_mem_set_value_real(&d_gain, element_gain, 0, 0, &error);
-    oskar_mem_set_value_real(&d_gain_error, element_gain_error, 0, 0, &error);
-    oskar_mem_set_value_real(&d_phase, element_phase, 0, 0, &error);
-    oskar_mem_set_value_real(&d_phase_error, element_phase_error, 0, 0, &error);
-    oskar_mem_set_value_real(&d_errors, 0.0, 0, 0, &error);
+    oskar_mem_set_value_real(d_gain, element_gain, 0, 0, &error);
+    oskar_mem_set_value_real(d_gain_error, element_gain_error, 0, 0, &error);
+    oskar_mem_set_value_real(d_phase, element_phase, 0, 0, &error);
+    oskar_mem_set_value_real(d_phase_error, element_phase_error, 0, 0, &error);
+    oskar_mem_set_value_real(d_errors, 0.0, 0, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     oskar_RandomState* random_state = oskar_random_state_create(num_elements,
@@ -71,8 +71,8 @@ TEST(element_weights_errors, test_evaluate)
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Evaluate weights errors.
-    oskar_evaluate_element_weights_errors(&d_errors, num_elements,
-            &d_gain, &d_gain_error, &d_phase, &d_phase_error, random_state,
+    oskar_evaluate_element_weights_errors(d_errors, num_elements,
+            d_gain, d_gain_error, d_phase, d_phase_error, random_state,
             &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
@@ -80,17 +80,22 @@ TEST(element_weights_errors, test_evaluate)
     const char* fname = "temp_test_element_errors.dat";
     FILE* file = fopen(fname, "w");
     oskar_mem_save_ascii(file, 5, num_elements, &error,
-            &d_gain, &d_gain_error, &d_phase, &d_phase_error, &d_errors);
+            d_gain, d_gain_error, d_phase, d_phase_error, d_errors);
     fclose(file);
     remove(fname);
 
     // Free memory.
     oskar_random_state_free(random_state, &error);
-    oskar_mem_free(&d_gain, &error);
-    oskar_mem_free(&d_gain_error, &error);
-    oskar_mem_free(&d_phase, &error);
-    oskar_mem_free(&d_phase_error, &error);
-    oskar_mem_free(&d_errors, &error);
+    oskar_mem_free(d_gain, &error);
+    oskar_mem_free(d_gain_error, &error);
+    oskar_mem_free(d_phase, &error);
+    oskar_mem_free(d_phase_error, &error);
+    oskar_mem_free(d_errors, &error);
+    free(d_gain); // FIXME Remove after updating oskar_mem_free().
+    free(d_gain_error); // FIXME Remove after updating oskar_mem_free().
+    free(d_phase); // FIXME Remove after updating oskar_mem_free().
+    free(d_phase_error); // FIXME Remove after updating oskar_mem_free().
+    free(d_errors); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 }
 
@@ -112,63 +117,70 @@ TEST(element_weights_errors, test_apply)
     weight.x = weight_gain * cos(weight_phase);
     weight.y = weight_gain * sin(weight_phase);
 
-    oskar_Mem d_errors, d_gain, d_gain_error, d_phase, d_phase_error;
-    oskar_Mem h_weights, d_weights;
-    oskar_mem_init(&d_errors, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU,
-            num_elements, 1, &status);
-    oskar_mem_init(&d_gain, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_elements, 1, &status);
-    oskar_mem_init(&d_gain_error, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_elements, 1, &status);
-    oskar_mem_init(&d_phase, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_elements, 1, &status);
-    oskar_mem_init(&d_phase_error, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_elements, 1, &status);
-    oskar_mem_init(&h_weights, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU,
-            num_elements, 1, &status);
+    oskar_Mem *d_gain, *d_gain_error, *d_phase, *d_phase_error, *d_errors;
+    oskar_Mem *h_weights, *d_weights;
+    d_errors = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU,
+            num_elements, &status);
+    d_gain = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_elements, &status);
+    d_gain_error = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_elements, &status);
+    d_phase = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_elements, &status);
+    d_phase_error = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_elements, &status);
+    h_weights = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU,
+            num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    oskar_mem_set_value_real(&d_gain, gain, 0, 0, &status);
-    oskar_mem_set_value_real(&d_gain_error, gain_error, 0, 0, &status);
-    oskar_mem_set_value_real(&d_phase, phase, 0, 0, &status);
-    oskar_mem_set_value_real(&d_phase_error, phase_error, 0, 0, &status);
+    oskar_mem_set_value_real(d_gain, gain, 0, 0, &status);
+    oskar_mem_set_value_real(d_gain_error, gain_error, 0, 0, &status);
+    oskar_mem_set_value_real(d_phase, phase, 0, 0, &status);
+    oskar_mem_set_value_real(d_phase_error, phase_error, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    double2* h_weights_ = oskar_mem_double2(&h_weights, &status);
+    double2* h_weights_ = oskar_mem_double2(h_weights, &status);
     for (int i = 0; i < num_elements; ++i)
     {
         h_weights_[i].x = weight.x;
         h_weights_[i].y = weight.y;
     }
-    oskar_mem_init_copy(&d_weights, &h_weights, OSKAR_LOCATION_GPU, &status);
+    d_weights = oskar_mem_create_copy(h_weights, OSKAR_LOCATION_GPU, &status);
 
     oskar_RandomState* states = oskar_random_state_create(num_elements,
             0, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_evaluate_element_weights_errors(&d_errors, num_elements,
-            &d_gain, &d_gain_error, &d_phase, &d_phase_error, states, &status);
+    oskar_evaluate_element_weights_errors(d_errors, num_elements,
+            d_gain, d_gain_error, d_phase, d_phase_error, states, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_element_multiply(NULL, &d_weights, &d_errors, num_elements, &status);
+    oskar_mem_element_multiply(NULL, d_weights, d_errors, num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Write memory to file for inspection.
     const char* fname = "temp_test_weights.dat";
     FILE* file = fopen(fname, "w");
     oskar_mem_save_ascii(file, 7, num_elements, &status,
-            &d_gain, &d_gain_error, &d_phase, &d_phase_error, &d_errors,
-            &h_weights, &d_weights);
+            d_gain, d_gain_error, d_phase, d_phase_error, d_errors,
+            h_weights, d_weights);
     fclose(file);
     remove(fname);
 
     // Free memory.
     oskar_random_state_free(states, &status);
-    oskar_mem_free(&d_gain, &status);
-    oskar_mem_free(&d_gain_error, &status);
-    oskar_mem_free(&d_phase, &status);
-    oskar_mem_free(&d_phase_error, &status);
-    oskar_mem_free(&d_errors, &status);
-    oskar_mem_free(&h_weights, &status);
-    oskar_mem_free(&d_weights, &status);
+    oskar_mem_free(d_gain, &status);
+    oskar_mem_free(d_gain_error, &status);
+    oskar_mem_free(d_phase, &status);
+    oskar_mem_free(d_phase_error, &status);
+    oskar_mem_free(d_errors, &status);
+    oskar_mem_free(h_weights, &status);
+    oskar_mem_free(d_weights, &status);
+    free(d_gain); // FIXME Remove after updating oskar_mem_free().
+    free(d_gain_error); // FIXME Remove after updating oskar_mem_free().
+    free(d_phase); // FIXME Remove after updating oskar_mem_free().
+    free(d_phase_error); // FIXME Remove after updating oskar_mem_free().
+    free(d_errors); // FIXME Remove after updating oskar_mem_free().
+    free(h_weights); // FIXME Remove after updating oskar_mem_free().
+    free(d_weights); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -183,23 +195,23 @@ TEST(element_weights_errors, test_reinit)
     double phase       = 0.1 * M_PI;
     double phase_error = (5 / 180.0) * M_PI;
 
-    oskar_Mem d_errors, d_gain, d_gain_error, d_phase, d_phase_error;
-    oskar_mem_init(&d_errors, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU,
-            num_elements, 1, &status);
-    oskar_mem_init(&d_gain, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_elements, 1, &status);
-    oskar_mem_init(&d_gain_error, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_elements, 1, &status);
-    oskar_mem_init(&d_phase, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_elements, 1, &status);
-    oskar_mem_init(&d_phase_error, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_elements, 1, &status);
+    oskar_Mem *d_errors, *d_gain, *d_gain_error, *d_phase, *d_phase_error;
+    d_errors = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU,
+            num_elements, &status);
+    d_gain = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_elements, &status);
+    d_gain_error = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_elements, &status);
+    d_phase = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_elements, &status);
+    d_phase_error = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-    oskar_mem_set_value_real(&d_gain, gain, 0, 0, &status);
-    oskar_mem_set_value_real(&d_gain_error, gain_error, 0, 0, &status);
-    oskar_mem_set_value_real(&d_phase, phase, 0, 0, &status);
-    oskar_mem_set_value_real(&d_phase_error, phase_error, 0, 0, &status);
+    oskar_mem_set_value_real(d_gain, gain, 0, 0, &status);
+    oskar_mem_set_value_real(d_gain_error, gain_error, 0, 0, &status);
+    oskar_mem_set_value_real(d_phase, phase, 0, 0, &status);
+    oskar_mem_set_value_real(d_phase_error, phase_error, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     int num_channels = 2;
@@ -225,21 +237,21 @@ TEST(element_weights_errors, test_reinit)
                 for (int s = 0; s < num_stations; ++s)
                 {
                     fprintf(file, "      station: %i  ==> ", s);
-                    oskar_evaluate_element_weights_errors(&d_errors, num_elements,
-                            &d_gain, &d_gain_error, &d_phase, &d_phase_error,
+                    oskar_evaluate_element_weights_errors(d_errors, num_elements,
+                            d_gain, d_gain_error, d_phase, d_phase_error,
                             states, &status);
                     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-                    oskar_Mem h_errors;
-                    oskar_mem_init_copy(&h_errors, &d_errors,
+                    oskar_Mem *h_errors = oskar_mem_create_copy(d_errors,
                             OSKAR_LOCATION_CPU, &status);
-                    double2* errors = oskar_mem_double2(&h_errors, &status);
+                    double2* errors = oskar_mem_double2(h_errors, &status);
                     for (int i = 0; i < num_elements; ++i)
                     {
                         fprintf(file, "(% -6.4f, % -6.4f), ",
                                 errors[i].x, errors[i].y);
                     }
                     fprintf(file, "\n");
-                    oskar_mem_free(&h_errors, &status);
+                    oskar_mem_free(h_errors, &status);
+                    free(h_errors); // FIXME Remove after updating oskar_mem_free().
                 }
             }
             oskar_random_state_free(states, &status);
@@ -249,9 +261,14 @@ TEST(element_weights_errors, test_reinit)
     fclose(file);
     remove(fname);
 
-    oskar_mem_free(&d_gain, &status);
-    oskar_mem_free(&d_gain_error, &status);
-    oskar_mem_free(&d_phase, &status);
-    oskar_mem_free(&d_phase_error, &status);
-    oskar_mem_free(&d_errors, &status);
+    oskar_mem_free(d_gain, &status);
+    oskar_mem_free(d_gain_error, &status);
+    oskar_mem_free(d_phase, &status);
+    oskar_mem_free(d_phase_error, &status);
+    oskar_mem_free(d_errors, &status);
+    free(d_gain); // FIXME Remove after updating oskar_mem_free().
+    free(d_gain_error); // FIXME Remove after updating oskar_mem_free().
+    free(d_phase); // FIXME Remove after updating oskar_mem_free().
+    free(d_phase_error); // FIXME Remove after updating oskar_mem_free().
+    free(d_errors); // FIXME Remove after updating oskar_mem_free().
 }

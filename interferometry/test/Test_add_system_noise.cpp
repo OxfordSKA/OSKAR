@@ -150,9 +150,9 @@ TEST(add_system_noise, test_rms)
     settings.obs.length_days = settings.obs.length_seconds / 86400.0;
     settings.obs.dt_dump_days = oskar_vis_time_inc_seconds(vis) / 86400.0;
 
-    oskar_Mem work_uvw;
-    oskar_mem_init(&work_uvw, type, OSKAR_LOCATION_CPU, 3 * num_stations,
-            1, &err);
+    oskar_Mem *work_uvw;
+    work_uvw = oskar_mem_create(type, OSKAR_LOCATION_CPU, 3 * num_stations,
+            &err);
     oskar_convert_ecef_to_baseline_uvw(oskar_vis_baseline_uu_metres(vis),
             oskar_vis_baseline_vv_metres(vis),
             oskar_vis_baseline_ww_metres(vis), num_stations,
@@ -160,7 +160,7 @@ TEST(add_system_noise, test_rms)
             oskar_telescope_station_y_const(telescope),
             oskar_telescope_station_z_const(telescope), ra0_rad, dec0_rad,
             settings.obs.num_time_steps, settings.obs.start_mjd_utc,
-            settings.obs.dt_dump_days, &work_uvw, &err);
+            settings.obs.dt_dump_days, work_uvw, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
     oskar_Image image;
@@ -189,7 +189,8 @@ TEST(add_system_noise, test_rms)
 
     //check_image_stats(&image, telescope);
 
-    oskar_mem_free(&work_uvw, &err);
+    oskar_mem_free(work_uvw, &err);
+    free(work_uvw); // FIXME Remove after updating oskar_mem_free().
     oskar_telescope_free(telescope, &err);
     oskar_vis_free(vis, &err);
 }

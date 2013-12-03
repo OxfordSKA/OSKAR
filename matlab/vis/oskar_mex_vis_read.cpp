@@ -75,10 +75,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
     /* Read date field from binary file */
-    oskar_Mem date;
-    oskar_mem_init(&date, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &status);
+    oskar_Mem *date = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, &status);
     oskar_BinaryTagIndex* index = NULL;
-    oskar_mem_binary_file_read(&date, filename, &index,
+    oskar_mem_binary_file_read(date, filename, &index,
             OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING, 0,
             &status);
     oskar_binary_tag_index_free(index, &status);
@@ -87,7 +86,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         oskar_matlab_error("Failed to read date field!");
     }
 
-    out[0] = oskar_mex_vis_to_matlab_struct(vis, &date, filename);
+    out[0] = oskar_mex_vis_to_matlab_struct(vis, date, filename);
 
     oskar_vis_free(vis, &status);
     if (status)
@@ -95,5 +94,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         oskar_matlab_error("Failed reading OSKAR visibility file: %s",
                 oskar_get_error_string(status));
     }
-    oskar_mem_free(&date, &status);
+    oskar_mem_free(date, &status);
+    free(date); // FIXME Remove after updating oskar_mem_free().
 }

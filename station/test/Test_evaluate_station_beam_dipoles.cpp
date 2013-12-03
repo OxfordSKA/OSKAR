@@ -50,27 +50,27 @@ TEST(evaluate_station_beam_dipoles, test)
     int num_el = 9;
     int num_pixels = num_az * num_el;
     int status = 0;
-    oskar_Mem h_az, h_el, d_l, d_m, d_n;
+    oskar_Mem *h_az, *h_el, *d_l, *d_m, *d_n;
 
     {
-        oskar_Mem h_l, h_m, h_n;
-        oskar_mem_init(&h_az, OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
-                num_pixels, 1, &status);
-        oskar_mem_init(&h_el, OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
-                num_pixels, 1, &status);
-        oskar_mem_init(&h_l, OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
-                num_pixels, 1, &status);
-        oskar_mem_init(&h_m, OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
-                num_pixels, 1, &status);
-        oskar_mem_init(&h_n, OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
-                num_pixels, 1, &status);
+        oskar_Mem *h_l, *h_m, *h_n;
+        h_az = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels,
+                &status);
+        h_el = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels,
+                &status);
+        h_l = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels,
+                &status);
+        h_m = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels,
+                &status);
+        h_n = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels,
+                &status);
 
         // Generate azimuth and elevation.
-        double* az = oskar_mem_double(&h_az, &status);
-        double* el = oskar_mem_double(&h_el, &status);
-        double* l = oskar_mem_double(&h_l, &status);
-        double* m = oskar_mem_double(&h_m, &status);
-        double* n = oskar_mem_double(&h_n, &status);
+        double* az = oskar_mem_double(h_az, &status);
+        double* el = oskar_mem_double(h_el, &status);
+        double* l = oskar_mem_double(h_l, &status);
+        double* m = oskar_mem_double(h_m, &status);
+        double* n = oskar_mem_double(h_n, &status);
         for (int j = 0; j < num_el; ++j)
         {
             for (int i = 0; i < num_az; ++i)
@@ -94,22 +94,25 @@ TEST(evaluate_station_beam_dipoles, test)
         }
 
         // Copy to GPU and free host memory.
-        oskar_mem_init_copy(&d_l, &h_l, OSKAR_LOCATION_GPU, &status);
-        oskar_mem_init_copy(&d_m, &h_m, OSKAR_LOCATION_GPU, &status);
-        oskar_mem_init_copy(&d_n, &h_n, OSKAR_LOCATION_GPU, &status);
-        oskar_mem_free(&h_l, &status);
-        oskar_mem_free(&h_m, &status);
-        oskar_mem_free(&h_n, &status);
+        d_l = oskar_mem_create_copy(h_l, OSKAR_LOCATION_GPU, &status);
+        d_m = oskar_mem_create_copy(h_m, OSKAR_LOCATION_GPU, &status);
+        d_n = oskar_mem_create_copy(h_n, OSKAR_LOCATION_GPU, &status);
+        oskar_mem_free(h_l, &status);
+        oskar_mem_free(h_m, &status);
+        oskar_mem_free(h_n, &status);
+        free(h_l); // FIXME Remove after updating oskar_mem_free().
+        free(h_m); // FIXME Remove after updating oskar_mem_free().
+        free(h_n); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Generate antenna array.
     int num_antennas_side = 100;
     int num_antennas = num_antennas_side * num_antennas_side;
-    oskar_Mem h_x, h_y;
-    oskar_mem_init(&h_x, OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
-            num_antennas, 1, &status);
-    oskar_mem_init(&h_y, OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
-            num_antennas, 1, &status);
+    oskar_Mem *h_x, *h_y;
+    h_x = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas,
+            &status);
+    h_y = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas,
+            &status);
 
     // Generate square array of antennas.
     const float sep = 0.5; // Antenna separation, metres.
@@ -121,76 +124,94 @@ TEST(evaluate_station_beam_dipoles, test)
             int i = y + x * num_antennas_side;
 
             // Antenna positions.
-            oskar_mem_double(&h_x, &status)[i] = x * sep - half_array_size;
-            oskar_mem_double(&h_y, &status)[i] = y * sep - half_array_size;
+            oskar_mem_double(h_x, &status)[i] = x * sep - half_array_size;
+            oskar_mem_double(h_y, &status)[i] = y * sep - half_array_size;
         }
     }
 
     // Copy to GPU and free host memory.
-    oskar_Mem d_x, d_y, d_z, cos_x, sin_x, cos_y, sin_y, weights, pattern;
-    oskar_mem_init(&d_z, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_antennas, 1, &status);
-    oskar_mem_init(&cos_x, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_antennas, 1, &status);
-    oskar_mem_init(&sin_x, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_antennas, 1, &status);
-    oskar_mem_init(&cos_y, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_antennas, 1, &status);
-    oskar_mem_init(&sin_y, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_antennas, 1, &status);
-    oskar_mem_init(&weights, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU,
-            num_antennas, 1, &status);
-    oskar_mem_init(&pattern, OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU,
-            num_pixels, 1, &status);
-    oskar_mem_set_value_real(&d_z, 0.0, 0, 0, &status);
-    oskar_mem_set_value_real(&cos_x, 0.0, 0, 0, &status);
-    oskar_mem_set_value_real(&sin_x, 1.0, 0, 0, &status);
-    oskar_mem_set_value_real(&cos_y, 1.0, 0, 0, &status);
-    oskar_mem_set_value_real(&sin_y, 0.0, 0, 0, &status);
-    oskar_mem_init_copy(&d_x, &h_x, OSKAR_LOCATION_GPU, &status);
-    oskar_mem_init_copy(&d_y, &h_y, OSKAR_LOCATION_GPU, &status);
-    oskar_mem_free(&h_x, &status);
-    oskar_mem_free(&h_y, &status);
+    oskar_Mem *d_x, *d_y, *d_z, *cos_x, *sin_x, *cos_y, *sin_y;
+    oskar_Mem *weights, *pattern;
+    d_z = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_antennas, &status);
+    cos_x = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_antennas, &status);
+    sin_x = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_antennas, &status);
+    cos_y = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_antennas, &status);
+    sin_y = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_antennas, &status);
+    weights = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU,
+            num_antennas, &status);
+    pattern = oskar_mem_create(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU,
+            num_pixels, &status);
+    oskar_mem_set_value_real(d_z, 0.0, 0, 0, &status);
+    oskar_mem_set_value_real(cos_x, 0.0, 0, 0, &status);
+    oskar_mem_set_value_real(sin_x, 1.0, 0, 0, &status);
+    oskar_mem_set_value_real(cos_y, 1.0, 0, 0, &status);
+    oskar_mem_set_value_real(sin_y, 0.0, 0, 0, &status);
+    d_x = oskar_mem_create_copy(h_x, OSKAR_LOCATION_GPU, &status);
+    d_y = oskar_mem_create_copy(h_y, OSKAR_LOCATION_GPU, &status);
+    oskar_mem_free(h_x, &status);
+    oskar_mem_free(h_y, &status);
+    free(h_x); // FIXME Remove after updating oskar_mem_free().
+    free(h_y); // FIXME Remove after updating oskar_mem_free().
 
     // Call the kernel.
     double wavenumber = 2.0 * M_PI * freq / 299792458.0;
     oskar_evaluate_array_pattern_dipoles_cuda_d (num_antennas, wavenumber,
-            oskar_mem_double_const(&d_x, &status),
-            oskar_mem_double_const(&d_y, &status),
-            oskar_mem_double_const(&d_z, &status),
-            oskar_mem_double_const(&cos_x, &status),
-            oskar_mem_double_const(&sin_x, &status),
-            oskar_mem_double_const(&cos_y, &status),
-            oskar_mem_double_const(&sin_y, &status),
-            oskar_mem_double2_const(&weights, &status), num_pixels,
-            oskar_mem_double_const(&d_l, &status),
-            oskar_mem_double_const(&d_m, &status),
-            oskar_mem_double_const(&d_n, &status),
-            oskar_mem_double4c(&pattern, &status));
+            oskar_mem_double_const(d_x, &status),
+            oskar_mem_double_const(d_y, &status),
+            oskar_mem_double_const(d_z, &status),
+            oskar_mem_double_const(cos_x, &status),
+            oskar_mem_double_const(sin_x, &status),
+            oskar_mem_double_const(cos_y, &status),
+            oskar_mem_double_const(sin_y, &status),
+            oskar_mem_double2_const(weights, &status), num_pixels,
+            oskar_mem_double_const(d_l, &status),
+            oskar_mem_double_const(d_m, &status),
+            oskar_mem_double_const(d_n, &status),
+            oskar_mem_double4c(pattern, &status));
     oskar_cuda_check_error(&status);
     ASSERT_EQ(0, status);
 
     const char* filename = "temp_test_station_beam_dipoles.dat";
     FILE* file = fopen(filename, "w");
-    oskar_mem_save_ascii(file, 3, num_pixels, &status, &h_az, &h_el,
-            &pattern);
+    oskar_mem_save_ascii(file, 3, num_pixels, &status, h_az, h_el, pattern);
     fclose(file);
     remove(filename);
 
-    oskar_mem_free(&pattern, &status);
-    oskar_mem_free(&d_x, &status);
-    oskar_mem_free(&d_y, &status);
-    oskar_mem_free(&d_z, &status);
-    oskar_mem_free(&cos_x, &status);
-    oskar_mem_free(&sin_x, &status);
-    oskar_mem_free(&cos_y, &status);
-    oskar_mem_free(&sin_y, &status);
-    oskar_mem_free(&weights, &status);
+    oskar_mem_free(pattern, &status);
+    oskar_mem_free(d_x, &status);
+    oskar_mem_free(d_y, &status);
+    oskar_mem_free(d_z, &status);
+    oskar_mem_free(cos_x, &status);
+    oskar_mem_free(sin_x, &status);
+    oskar_mem_free(cos_y, &status);
+    oskar_mem_free(sin_y, &status);
+    oskar_mem_free(weights, &status);
 
-    oskar_mem_free(&h_az, &status);
-    oskar_mem_free(&h_el, &status);
-    oskar_mem_free(&d_l, &status);
-    oskar_mem_free(&d_m, &status);
-    oskar_mem_free(&d_n, &status);
+    oskar_mem_free(h_az, &status);
+    oskar_mem_free(h_el, &status);
+    oskar_mem_free(d_l, &status);
+    oskar_mem_free(d_m, &status);
+    oskar_mem_free(d_n, &status);
+
+    free(pattern); // FIXME Remove after updating oskar_mem_free().
+    free(d_x); // FIXME Remove after updating oskar_mem_free().
+    free(d_y); // FIXME Remove after updating oskar_mem_free().
+    free(d_z); // FIXME Remove after updating oskar_mem_free().
+    free(cos_x); // FIXME Remove after updating oskar_mem_free().
+    free(sin_x); // FIXME Remove after updating oskar_mem_free().
+    free(cos_y); // FIXME Remove after updating oskar_mem_free().
+    free(sin_y); // FIXME Remove after updating oskar_mem_free().
+    free(weights); // FIXME Remove after updating oskar_mem_free().
+
+    free(h_az); // FIXME Remove after updating oskar_mem_free().
+    free(h_el); // FIXME Remove after updating oskar_mem_free().
+    free(d_l); // FIXME Remove after updating oskar_mem_free().
+    free(d_m); // FIXME Remove after updating oskar_mem_free().
+    free(d_n); // FIXME Remove after updating oskar_mem_free().
 }
 

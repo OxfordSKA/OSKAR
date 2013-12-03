@@ -153,18 +153,20 @@ TEST(make_image, image_lm_grid)
     int size = 256;
     int num_pixels = size * size;
     double fov = 2.0 * M_PI/180.0;
-    oskar_Mem l, m;
-    oskar_mem_init(&l, type, location, num_pixels, 1, &error);
-    oskar_mem_init(&m, type, location, num_pixels, 1, &error);
-    oskar_evaluate_image_lm_grid_d(size, size, fov, fov, (double*)l.data,
-            (double*)m.data);
+    oskar_Mem* l = oskar_mem_create(type, location, num_pixels, &error);
+    oskar_Mem* m = oskar_mem_create(type, location, num_pixels, &error);
+    oskar_evaluate_image_lm_grid_d(size, size, fov, fov,
+            oskar_mem_double(l, &error), oskar_mem_double(m, &error));
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     oskar_Image im;
     oskar_image_init(&im, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, &error);
     oskar_image_resize(&im, size, size, 1, 1, 2, &error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    memcpy(im.data.data, l.data, num_pixels * sizeof(double));
-    memcpy((double*)im.data.data + num_pixels, m.data, num_pixels * sizeof(double));
+    memcpy(im.data.data, oskar_mem_void(l), num_pixels * sizeof(double));
+    memcpy((double*)im.data.data + num_pixels, oskar_mem_void(m),
+            num_pixels * sizeof(double));
 
 #ifndef OSKAR_NO_FITS
     const char* fits_file = "test_lm_grid.fits";
@@ -176,8 +178,10 @@ TEST(make_image, image_lm_grid)
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     oskar_image_free(&im, &error);
-    oskar_mem_free(&l, &error);
-    oskar_mem_free(&m, &error);
+    oskar_mem_free(l, &error);
+    oskar_mem_free(m, &error);
+    free(l); // FIXME Remove after updating oskar_mem_free().
+    free(m); // FIXME Remove after updating oskar_mem_free().
     remove(fits_file);
     remove(image_file);
 }

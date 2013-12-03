@@ -44,7 +44,8 @@ void oskar_jones_free(oskar_Jones* jones, int* status)
     }
 
     /* Free the memory held by the structure. */
-    oskar_mem_free(&jones->data, status);
+    oskar_mem_free(jones->data, status);
+    free(jones->data); /* FIXME Remove after updating oskar_mem_free(). */
 
     /* Free the structure itself. */
     free(jones);

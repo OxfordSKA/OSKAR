@@ -214,7 +214,6 @@ OSKAR_INLINE int oskar_mem_type_is_scalar(const int mem_type)
 /* DEPRECATED */
 #include <private_mem.h> /* FIXME remove! */
 #include <oskar_mem_init.h>
-#include <oskar_mem_init_copy.h>
 
 /* REMOVE AND RENAME? */
 #include <oskar_mem_binary_file_read_raw.h>

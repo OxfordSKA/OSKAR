@@ -34,8 +34,8 @@
 
 TEST(evaluate_baselines, cpu_gpu)
 {
-    oskar_Mem u, v, w, uu, vv, ww;
-    oskar_Mem u_gpu, v_gpu, w_gpu, uu_gpu, vv_gpu, ww_gpu;
+    oskar_Mem *u, *v, *w, *uu, *vv, *ww;
+    oskar_Mem *u_gpu, *v_gpu, *w_gpu, *uu_gpu, *vv_gpu, *ww_gpu;
     int num_baselines, num_stations = 50, status = 0, type, location;
     double *u_, *v_, *w_, *uu_, *vv_, *ww_;
 
@@ -45,18 +45,18 @@ TEST(evaluate_baselines, cpu_gpu)
 
     // Allocate host memory.
     location = OSKAR_LOCATION_CPU;
-    oskar_mem_init(&u, type, location, num_stations, 1, &status);
-    oskar_mem_init(&v, type, location, num_stations, 1, &status);
-    oskar_mem_init(&w, type, location, num_stations, 1, &status);
-    oskar_mem_init(&uu, type, location, num_baselines, 1, &status);
-    oskar_mem_init(&vv, type, location, num_baselines, 1, &status);
-    oskar_mem_init(&ww, type, location, num_baselines, 1, &status);
-    u_ = oskar_mem_double(&u, &status);
-    v_ = oskar_mem_double(&v, &status);
-    w_ = oskar_mem_double(&w, &status);
-    uu_ = oskar_mem_double(&uu, &status);
-    vv_ = oskar_mem_double(&vv, &status);
-    ww_ = oskar_mem_double(&ww, &status);
+    u = oskar_mem_create(type, location, num_stations, &status);
+    v = oskar_mem_create(type, location, num_stations, &status);
+    w = oskar_mem_create(type, location, num_stations, &status);
+    uu = oskar_mem_create(type, location, num_baselines, &status);
+    vv = oskar_mem_create(type, location, num_baselines, &status);
+    ww = oskar_mem_create(type, location, num_baselines, &status);
+    u_ = oskar_mem_double(u, &status);
+    v_ = oskar_mem_double(v, &status);
+    w_ = oskar_mem_double(w, &status);
+    uu_ = oskar_mem_double(uu, &status);
+    vv_ = oskar_mem_double(vv, &status);
+    ww_ = oskar_mem_double(ww, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Fill station coordinates with test data.
@@ -68,7 +68,7 @@ TEST(evaluate_baselines, cpu_gpu)
     }
 
     // Evaluate baseline coordinates on CPU.
-    oskar_convert_station_uvw_to_baseline_uvw(&uu, &vv, &ww, &u, &v, &w, &status);
+    oskar_convert_station_uvw_to_baseline_uvw(uu, vv, ww, u, v, w, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check results are correct.
@@ -84,43 +84,56 @@ TEST(evaluate_baselines, cpu_gpu)
 
     // Allocate device memory and copy input data.
     location = OSKAR_LOCATION_GPU;
-    oskar_mem_init_copy(&u_gpu, &u, location, &status);
-    oskar_mem_init_copy(&v_gpu, &v, location, &status);
-    oskar_mem_init_copy(&w_gpu, &w, location, &status);
-    oskar_mem_init(&uu_gpu, type, location, num_baselines, 1, &status);
-    oskar_mem_init(&vv_gpu, type, location, num_baselines, 1, &status);
-    oskar_mem_init(&ww_gpu, type, location, num_baselines, 1, &status);
+    u_gpu = oskar_mem_create_copy(u, location, &status);
+    v_gpu = oskar_mem_create_copy(v, location, &status);
+    w_gpu = oskar_mem_create_copy(w, location, &status);
+    uu_gpu = oskar_mem_create(type, location, num_baselines, &status);
+    vv_gpu = oskar_mem_create(type, location, num_baselines, &status);
+    ww_gpu = oskar_mem_create(type, location, num_baselines, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Evaluate baseline coordinates on GPU.
-    oskar_convert_station_uvw_to_baseline_uvw(&uu_gpu, &vv_gpu, &ww_gpu, &u_gpu,
-            &v_gpu, &w_gpu, &status);
+    oskar_convert_station_uvw_to_baseline_uvw(uu_gpu, vv_gpu, ww_gpu, u_gpu,
+            v_gpu, w_gpu, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check results are consistent.
     double max_, avg;
-    oskar_mem_evaluate_relative_error(&uu_gpu, &uu, 0, &max_, &avg, 0, &status);
+    oskar_mem_evaluate_relative_error(uu_gpu, uu, 0, &max_, &avg, 0, &status);
     ASSERT_LT(max_, 1e-12);
     ASSERT_LT(avg, 1e-12);
-    oskar_mem_evaluate_relative_error(&vv_gpu, &vv, 0, &max_, &avg, 0, &status);
+    oskar_mem_evaluate_relative_error(vv_gpu, vv, 0, &max_, &avg, 0, &status);
     ASSERT_LT(max_, 1e-12);
     ASSERT_LT(avg, 1e-12);
-    oskar_mem_evaluate_relative_error(&ww_gpu, &ww, 0, &max_, &avg, 0, &status);
+    oskar_mem_evaluate_relative_error(ww_gpu, ww, 0, &max_, &avg, 0, &status);
     ASSERT_LT(max_, 1e-12);
     ASSERT_LT(avg, 1e-12);
 
     // Free memory.
-    oskar_mem_free(&u, &status);
-    oskar_mem_free(&v, &status);
-    oskar_mem_free(&w, &status);
-    oskar_mem_free(&uu, &status);
-    oskar_mem_free(&vv, &status);
-    oskar_mem_free(&ww, &status);
-    oskar_mem_free(&u_gpu, &status);
-    oskar_mem_free(&v_gpu, &status);
-    oskar_mem_free(&w_gpu, &status);
-    oskar_mem_free(&uu_gpu, &status);
-    oskar_mem_free(&vv_gpu, &status);
-    oskar_mem_free(&ww_gpu, &status);
+    oskar_mem_free(u, &status);
+    oskar_mem_free(v, &status);
+    oskar_mem_free(w, &status);
+    oskar_mem_free(uu, &status);
+    oskar_mem_free(vv, &status);
+    oskar_mem_free(ww, &status);
+    oskar_mem_free(u_gpu, &status);
+    oskar_mem_free(v_gpu, &status);
+    oskar_mem_free(w_gpu, &status);
+    oskar_mem_free(uu_gpu, &status);
+    oskar_mem_free(vv_gpu, &status);
+    oskar_mem_free(ww_gpu, &status);
+    free(u); // FIXME Remove after updating oskar_mem_free().
+    free(v); // FIXME Remove after updating oskar_mem_free().
+    free(w); // FIXME Remove after updating oskar_mem_free().
+    free(uu); // FIXME Remove after updating oskar_mem_free().
+    free(vv); // FIXME Remove after updating oskar_mem_free().
+    free(ww); // FIXME Remove after updating oskar_mem_free().
+    free(u_gpu); // FIXME Remove after updating oskar_mem_free().
+    free(v_gpu); // FIXME Remove after updating oskar_mem_free().
+    free(w_gpu); // FIXME Remove after updating oskar_mem_free().
+    free(uu_gpu); // FIXME Remove after updating oskar_mem_free().
+    free(vv_gpu); // FIXME Remove after updating oskar_mem_free().
+    free(ww_gpu); // FIXME Remove after updating oskar_mem_free().
+
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }

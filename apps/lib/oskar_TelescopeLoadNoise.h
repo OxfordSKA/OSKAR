@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_MODEL_LOAD_NOISE_H_
-#define OSKAR_TELESCOPE_MODEL_LOAD_NOISE_H_
+#ifndef OSKAR_TELESCOPE_LOAD_NOISE_H_
+#define OSKAR_TELESCOPE_LOAD_NOISE_H_
 
 /**
  * @file oskar_TelescopeLoadNoise.h
@@ -141,8 +141,8 @@ private:
     enum FileIds_ { FREQ, RMS, SENSITIVITY, TSYS, AREA, EFFICIENCY };
     int dataType_;  // OSKAR data type of the telescope model being loaded.
     std::map<FileIds_, std::string> files_;
-    oskar_Mem freqs_;
+    oskar_Mem* freqs_;
     const oskar_Settings* settings_;
 };
 
-#endif /* OSKAR_TELESCOPE_MODEL_LOAD_NOISE_H_ */
+#endif /* OSKAR_TELESCOPE_LOAD_NOISE_H_ */

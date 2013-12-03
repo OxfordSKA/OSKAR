@@ -26,14 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cuda_runtime_api.h>
 #include <gtest/gtest.h>
 
 #include <private_random_state.h>
 #include <oskar_random_state.h>
 #include <oskar_get_error_string.h>
 #include <oskar_mem.h>
-
-#include <cuda.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -79,7 +78,7 @@ TEST(curand, test)
     int num_states = num_threads;
     double* d_values;
     double* h_values;
-    cudaMalloc(&d_values, num_values * sizeof(double));
+    cudaMalloc((void**)&d_values, num_values * sizeof(double));
     h_values = (double*) malloc(num_values * sizeof(double));
 
     int num_blocks = (num_values + num_threads - 1) / num_threads;
@@ -148,10 +147,9 @@ TEST(curand, test_state_allocation)
     int num_threads = 20;
     int num_per_thread = 1;
     int num_values = num_blocks * num_threads * num_per_thread;
-    oskar_Mem d_values;
-    oskar_mem_init(&d_values, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-            num_values, 1, &status);
-    double* d_values_ = oskar_mem_double(&d_values, &status);
+    oskar_Mem *d_values = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+            num_values, &status);
+    double* d_values_ = oskar_mem_double(d_values, &status);
 
     for (int i = 0; i < num_iter; ++i)
     {
@@ -159,20 +157,22 @@ TEST(curand, test_state_allocation)
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
         (d_values_, num_values, num_per_thread, random_state->state, num_states);
 
-        oskar_Mem h_values;
-        oskar_mem_init_copy(&h_values, &d_values, OSKAR_LOCATION_CPU, &status);
+        oskar_Mem* h_values = oskar_mem_create_copy(d_values,
+                OSKAR_LOCATION_CPU, &status);
         if (file)
         {
-            double* v_ = oskar_mem_double(&h_values, &status);
+            double* v_ = oskar_mem_double(h_values, &status);
             for (int i = 0; i < num_values; ++i)
             {
                 fprintf(file, "%i %f\n", i, v_[i]);
             }
         }
-        oskar_mem_free(&h_values, &status);
+        oskar_mem_free(h_values, &status);
+        free(h_values); // FIXME Remove after updating oskar_mem_free().
     }
     if (file) fclose(file);
-    oskar_mem_free(&d_values, &status);
+    oskar_mem_free(d_values, &status);
+    free(d_values); // FIXME Remove after updating oskar_mem_free().
     oskar_random_state_free(random_state, &status);
 }
 
@@ -209,10 +209,9 @@ TEST(curand, test_multi_device)
         int num_threads = 2;
         int num_per_thread = 2;
         int num_values = num_blocks * num_threads * num_per_thread;
-        oskar_Mem d_values;
-        oskar_mem_init(&d_values, OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
-                num_values, 1, &error);
-        double* d_values_ = oskar_mem_double(&d_values, &error);
+        oskar_Mem *d_values = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+                num_values, &error);
+        double* d_values_ = oskar_mem_double(d_values, &error);
 
         file = fopen(filename, "w");
 
@@ -220,24 +219,26 @@ TEST(curand, test_multi_device)
         {
             test_curand_generate
                 OSKAR_CUDAK_CONF(num_blocks, num_threads)
-                (d_values_, num_values, num_per_thread, d_states->state, num_states);
+                (d_values_, num_values, num_per_thread, d_states->state,
+                        num_states);
 
-            oskar_Mem h_values;
-            oskar_mem_init_copy(&h_values, &d_values, OSKAR_LOCATION_CPU,
-                    &error);
+            oskar_Mem* h_values = oskar_mem_create_copy(d_values,
+                    OSKAR_LOCATION_CPU, &error);
             if (file)
             {
-                double* v_ = oskar_mem_double(&h_values, &error);
+                double* v_ = oskar_mem_double(h_values, &error);
                 for (int i = 0; i < num_values; ++i)
                 {
                     fprintf(file, "%i %f\n", i, v_[i]);
                 }
             }
-            oskar_mem_free(&h_values, &error);
+            oskar_mem_free(h_values, &error);
+            free(h_values); // FIXME Remove after updating oskar_mem_free().
         }
         fclose(file);
         oskar_random_state_free(d_states, &error);
-        oskar_mem_free(&d_values, &error);
+        oskar_mem_free(d_values, &error);
+        free(d_values); // FIXME Remove after updating oskar_mem_free().
         EXPECT_EQ(0, error) << oskar_get_error_string(error);
     }
 }

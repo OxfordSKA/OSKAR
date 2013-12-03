@@ -77,6 +77,10 @@ void oskar_mem_free(oskar_Mem* mem, int* status)
     mem->num_elements = 0;
     mem->type = 0;
     mem->owner = 0;
+
+    /* Free the structure itself. */
+    /* FIXME Only enable this after removing all deprecated uses of oskar_Mem. */
+    /*free(mem);*/
 }
 
 #ifdef __cplusplus
