@@ -65,6 +65,8 @@ int oskar_settings_init(oskar_Settings* settings)
     settings->beam_pattern.fits_image_voltage = NULL;
     settings->beam_pattern.fits_image_phase = NULL;
     settings->beam_pattern.fits_image_total_intensity = NULL;
+    settings->beam_pattern.size[0] = 0;
+    settings->beam_pattern.size[1] = 0;
     settings->image.input_vis_data = NULL;
     settings->image.oskar_image = NULL;
     settings->image.fits_image = NULL;

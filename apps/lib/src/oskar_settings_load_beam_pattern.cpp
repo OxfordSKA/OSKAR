@@ -97,7 +97,7 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     else if (bp->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_HEALPIX)
     {
         s.beginGroup("healpix");
-        bp->nside = s.value("nside", 0).toInt();
+        bp->nside = s.value("nside", 128).toInt();
         s.endGroup();
     }
     else

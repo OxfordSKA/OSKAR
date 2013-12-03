@@ -1211,7 +1211,7 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     setLabel(k, "HEALPix settings");
     setDependency(k , group + "/coordinate_type", "HEALPix");
     k = group + "/healpix/nside";
-    declare(k, "Nside", oskar_SettingsItem::INT_UNSIGNED, "0");
+    declare(k, "Nside", oskar_SettingsItem::INT_UNSIGNED, "128");
     setTooltip(k, "HEALPix Nside parameter. The total number of points is "
             "12 * Nside * Nside");
 

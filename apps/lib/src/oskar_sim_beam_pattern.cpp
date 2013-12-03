@@ -135,7 +135,19 @@ static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
     int num_channels = settings->obs.num_channels;
     int num_pols = settings->telescope.aperture_array.element_pattern.functional_type ==
             OSKAR_ELEMENT_TYPE_ISOTROPIC ? 1 : 4;
-    int num_pixels = image_size[0] * image_size[1];
+    int num_pixels = 0;
+    if (settings->beam_pattern.coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
+        num_pixels = image_size[0] * image_size[1];
+    else if (settings->beam_pattern.coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_HEALPIX)
+    {
+        int nside = settings->beam_pattern.nside;
+        num_pixels = nside * nside * 12;
+    }
+    else
+    {
+        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        return;
+    }
     int beam_pattern_data_type = type | OSKAR_COMPLEX;
     if (num_pols == 4) beam_pattern_data_type |= OSKAR_MATRIX;
 
@@ -155,12 +167,14 @@ static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
 
     // Generate coordinates at which beam the beam pattern is evaluated.
     // This is currently done on the CPU as it is only done once.
+
     int coord_type = 0;
     oskar_Mem* x = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
     oskar_Mem* y = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
     oskar_Mem* z = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
     oskar_beam_pattern_generate_coordinates(x, y, z, &coord_type,
             &settings->beam_pattern, status);
+
 
     // All GPU memory used within these braces.
     {
@@ -176,8 +190,6 @@ static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
         oskar_Mem* d_x = oskar_mem_create_copy(x, GPU, status);
         oskar_Mem* d_y = oskar_mem_create_copy(y, GPU, status);
         oskar_Mem* d_z = oskar_mem_create_copy(z, GPU, status);
-
-
 
         // Begin beam pattern evaluation...
         oskar_log_section(log, "Starting simulation...");
@@ -322,11 +334,25 @@ static void init_beam_pattern_cube_(oskar_Image* image,
 {
     int num_channels = settings->obs.num_channels;
     int num_times = settings->obs.num_time_steps;
-    const int* image_size = settings->beam_pattern.size;
 
-    /* Resize image cube. */
-    oskar_image_resize(image, image_size[0], image_size[1], num_pols, num_times,
-            num_channels, status);
+    if (settings->beam_pattern.coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
+    {
+        const int* image_size = settings->beam_pattern.size;
+        oskar_image_resize(image, image_size[0], image_size[1], num_pols, num_times,
+                num_channels, status);
+    }
+    else if (settings->beam_pattern.coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_HEALPIX)
+    {
+        int nside = settings->beam_pattern.nside;
+        int npix = 12 * nside * nside;
+        oskar_image_resize(image, npix, 1, num_pols, num_times, num_channels,
+                status);
+    }
+    else
+    {
+        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        return;
+    }
 
     /* Set beam pattern meta-data. */
     image->image_type         = (num_pols == 1) ?

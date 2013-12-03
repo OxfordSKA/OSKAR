@@ -65,13 +65,6 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* TODO currently just return an error if a HEALPix grid has been selected */
-    if (image->grid_type == OSKAR_IMAGE_GRID_TYPE_HEALPIX)
-    {
-        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
-        return;
-    }
-
     /* Get the meta-data. */
     type = oskar_mem_type(&image->data);
 
@@ -92,7 +85,7 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
         return;
     }
 
-    /* Write the header and common metadata. */
+    /* Write the header and common meta-data. */
     oskar_binary_stream_write_header(stream, status);
     oskar_binary_stream_write_metadata(stream, status);
 
@@ -114,7 +107,7 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
                 oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1,
                         status);
                 oskar_mem_binary_file_read_raw(&temp,
-                        (const char*) image->settings_path.data, status);
+                        (const char*)image->settings_path.data, status);
                 oskar_mem_binary_stream_write(&temp, stream,
                         OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, idx, 0,
                         status);

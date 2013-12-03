@@ -59,7 +59,6 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
 {
     /* Set up image cube for beam pattern output images. */
     int num_times, num_channels, num_pols, num_pixels, num_pixels_total;
-    const int* size;
     oskar_Image image;
 
     if (!status || *status != OSKAR_SUCCESS)
@@ -70,19 +69,28 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
         return;
     }
 
-    size = settings->beam_pattern.size;
+    oskar_image_init(&image, type, OSKAR_LOCATION_CPU, status);
+
     num_times = settings->obs.num_time_steps;
     num_channels = settings->obs.num_channels;
     num_pols = settings->telescope.aperture_array.element_pattern.functional_type ==
             OSKAR_ELEMENT_TYPE_ISOTROPIC ? 1 : 4;
-    num_pixels = size[0] * size[1];
-    num_pixels_total = num_pixels * num_times * num_channels * num_pols;
+    if (settings->beam_pattern.coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
+    {
+        const int* size = settings->beam_pattern.size;
+        num_pixels = size[0] * size[1];
+        oskar_image_resize(&image, size[0], size[1], num_pols, num_times,
+                num_channels, status);
+    }
+    else if (settings->beam_pattern.coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_HEALPIX)
+    {
+        int nside = settings->beam_pattern.nside;
+        num_pixels = 12*nside*nside;
+        oskar_image_resize(&image, num_pixels, 1, num_pols, num_times,
+                num_channels, status);
+    }
 
-    oskar_image_init(&image, type, OSKAR_LOCATION_CPU, status);
-
-    /* Set the beam pattern image cube */
-    oskar_image_resize(&image, size[0], size[1], num_pols, num_times,
-            num_channels, status);
+    /* Set meta-data */
     image.image_type         = (num_pols == 1) ?
             OSKAR_IMAGE_TYPE_BEAM_SCALAR : OSKAR_IMAGE_TYPE_BEAM_POLARISED;
     image.grid_type          = settings->beam_pattern.coord_grid_type;
@@ -97,6 +105,8 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
     image.time_inc_sec       = settings->obs.dt_dump_days * 86400.0;
     image.time_start_mjd_utc = settings->obs.start_mjd_utc;
     oskar_mem_copy(&image.settings_path, &settings->settings_path, status);
+
+    num_pixels_total = num_pixels * num_times * num_channels * num_pols;
 
     /* Save the complex beam pattern. */
     save_complex_(complex_cube, settings, log, status);
@@ -128,8 +138,8 @@ static void save_complex_(const oskar_Image* complex_cube,
 }
 
 static void save_power_(oskar_Image* image_cube,
-        const oskar_Image* complex_cube,
-        const oskar_Settings* settings, int type, oskar_Log* log,
+        const oskar_Image* complex_cube, const oskar_Settings* settings,
+        int type, oskar_Log* log,
         int num_pixels_total, int* status)
 {
     const char* filename;
@@ -247,7 +257,6 @@ static void save_total_intensity_(const oskar_Image* complex_cube,
 {
     const char* filename;
     int num_channels, num_times, num_pols, num_pixels;
-    const int* size;
     int c, t, p, i, idx, islice;
     double factor;
     oskar_Image image;
@@ -264,13 +273,15 @@ static void save_total_intensity_(const oskar_Image* complex_cube,
     num_times = complex_cube->num_times;
     num_pols = complex_cube->num_pols;
     num_pixels = complex_cube->width * complex_cube->height;
-    size = settings->beam_pattern.size;
 
     /* Allocate total intensity image cube to write into. */
     oskar_image_init(&image, type, OSKAR_LOCATION_CPU, status);
     /* Set the beam pattern image cube */
-    oskar_image_resize(&image, size[0], size[1], 1, num_times,
-            num_channels, status);
+    oskar_image_resize(&image, complex_cube->width, complex_cube->height, 1,
+            num_times, num_channels, status);
+    image.coord_frame        = settings->beam_pattern.coord_frame_type;
+    image.grid_type          = settings->beam_pattern.coord_grid_type;
+    image.healpix_nside      = settings->beam_pattern.nside;
     image.image_type         = OSKAR_IMAGE_TYPE_BEAM_SCALAR;
     image.centre_ra_deg      = settings->obs.ra0_rad[0] * 180.0 / M_PI;
     image.centre_dec_deg     = settings->obs.dec0_rad[0] * 180.0 / M_PI;
