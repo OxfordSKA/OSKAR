@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-void oskar_fits_healpix_write_mem(const char* filename, const oskar_Mem* data,
+void oskar_fits_healpix_write_mem(const char* filename, oskar_Mem* data,
         int nside, int* status)
 {
     fitsfile* fptr = 0;
