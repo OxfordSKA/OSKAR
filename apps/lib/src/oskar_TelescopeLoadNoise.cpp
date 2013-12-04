@@ -42,7 +42,7 @@ using std::string;
 
 oskar_TelescopeLoadNoise::oskar_TelescopeLoadNoise(
         const oskar_Settings* settings)
-: oskar_TelescopeLoadAbstract(), dataType_(0)
+: oskar_TelescopeLoadAbstract(), dataType_(0), freqs_(0)
 {
     files_[FREQ] = "noise_frequencies.txt";
     files_[RMS]  = "rms.txt";
@@ -56,8 +56,11 @@ oskar_TelescopeLoadNoise::oskar_TelescopeLoadNoise(
 oskar_TelescopeLoadNoise::~oskar_TelescopeLoadNoise()
 {
     int status = 0;
-    oskar_mem_free(freqs_, &status);
-    free(freqs_); // FIXME Remove after updating oskar_mem_free().
+    if (freqs_)
+    {
+        oskar_mem_free(freqs_, &status);
+        free(freqs_); // FIXME Remove after updating oskar_mem_free().
+    }
 }
 
 
