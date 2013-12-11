@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 #include <fits/oskar_fits_healpix_write_image.h>
-#include <oskar_image.h>
+#include <oskar_Image.h>
 #include <oskar_mem.h>
 
 #include <cstdio>
