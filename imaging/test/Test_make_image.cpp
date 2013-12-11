@@ -182,7 +182,9 @@ TEST(make_image, image_lm_grid)
     oskar_mem_free(m, &error);
     free(l); // FIXME Remove after updating oskar_mem_free().
     free(m); // FIXME Remove after updating oskar_mem_free().
+#ifndef OSKAR_NO_FITS
     remove(fits_file);
+#endif
     remove(image_file);
 }
 
