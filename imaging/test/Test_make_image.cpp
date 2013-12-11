@@ -139,7 +139,9 @@ TEST(make_image, test)
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     oskar_vis_free(vis, &error);
+#ifndef OSKAR_NO_FITS
     remove(fits_file);
+#endif
     remove(image_file);
     remove(vis_file);
 }
