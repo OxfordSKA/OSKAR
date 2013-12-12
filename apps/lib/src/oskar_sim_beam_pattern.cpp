@@ -161,13 +161,11 @@ static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
     init_beam_pattern_cube_(beam_pattern_cube, settings, num_pols, status);
 
     // Initialise temporary array, used to re-order polarisation.
-    oskar_Mem beam_tmp;
-    oskar_mem_init(&beam_tmp, beam_pattern_data_type, OSKAR_LOCATION_CPU,
-            num_pixels, OSKAR_TRUE, status);
+    oskar_Mem* beam_tmp = oskar_mem_create(beam_pattern_data_type,
+            OSKAR_LOCATION_CPU, num_pixels, status);
 
     // Generate coordinates at which beam the beam pattern is evaluated.
     // This is currently done on the CPU as it is only done once.
-
     int coord_type = 0;
     oskar_Mem* x = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
     oskar_Mem* y = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
@@ -182,9 +180,8 @@ static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
 
         // Set up GPU memory for beam pattern, work array, and coordiantes.
         oskar_StationWork* d_work = oskar_station_work_create(type, GPU, status);
-        oskar_Mem d_beam_pattern;
-        oskar_mem_init(&d_beam_pattern, beam_pattern_data_type, GPU, num_pixels,
-                OSKAR_TRUE, status);
+        oskar_Mem* d_beam_pattern = oskar_mem_create(beam_pattern_data_type,
+                GPU, num_pixels, status);
         const oskar_Station* station = oskar_telescope_station_const(tel, station_id);
         oskar_Station* d_station = oskar_station_create_copy(station, GPU, status);
         oskar_Mem* d_x = oskar_mem_create_copy(x, GPU, status);
@@ -217,12 +214,12 @@ static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
                 double t_dump = obs_start_mjd_utc + t * dt_dump;
                 double GAST = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
-                oskar_evaluate_station_beam_pattern(&d_beam_pattern, num_pixels,
+                oskar_evaluate_station_beam_pattern(d_beam_pattern, num_pixels,
                         d_x, d_y, d_z, coord_type, d_station, d_work, rand_state,
                         frequency, GAST, status);
 
-                add_beam_pattern_to_complex_cube_(beam_pattern_cube, &beam_tmp,
-                        &d_beam_pattern, num_times, num_pols, num_pixels, t, c,
+                add_beam_pattern_to_complex_cube_(beam_pattern_cube, beam_tmp,
+                        d_beam_pattern, num_times, num_pols, num_pixels, t, c,
                         status);
             } // End of time loop
 
@@ -232,20 +229,22 @@ static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
             oskar_random_state_free(rand_state, status);
         } // End of channel loop.
         oskar_station_work_free(d_work, status);
-        oskar_mem_free(&d_beam_pattern, status);
         oskar_station_free(d_station, status);
+        oskar_mem_free(d_beam_pattern, status);
         oskar_mem_free(d_x, status);
         oskar_mem_free(d_y, status);
         oskar_mem_free(d_z, status);
+        free(d_beam_pattern); // FIXME Remove after updating oskar_mem_free().
         free(d_x); // FIXME Remove after updating oskar_mem_free().
         free(d_y); // FIXME Remove after updating oskar_mem_free().
         free(d_z); // FIXME Remove after updating oskar_mem_free().
     } // GPU memory section
 
-    oskar_mem_free(&beam_tmp, status);
+    oskar_mem_free(beam_tmp, status);
     oskar_mem_free(x, status);
     oskar_mem_free(y, status);
     oskar_mem_free(z, status);
+    free(beam_tmp); // FIXME Remove after updating oskar_mem_free().
     free(x); // FIXME Remove after updating oskar_mem_free().
     free(y); // FIXME Remove after updating oskar_mem_free().
     free(z); // FIXME Remove after updating oskar_mem_free().

@@ -42,14 +42,16 @@ void oskar_convert_geodetic_spherical_to_ecef(int n, const double* lon,
     int i;
     for (i = 0; i < n; ++i)
     {
-        double lat_, lon_, alt_, n_phi;
+        double lat_, lon_, alt_, n_phi, sin_lat, cos_lat;
         lat_ = lat[i];
         lon_ = lon[i];
-        alt_  = alt[i];
-        n_phi = a / sqrt(1.0 - e2 * pow(sin(lat_), 2.0));
-        x[i] = (n_phi + alt_) * cos(lat_) * cos(lon_);
-        y[i] = (n_phi + alt_) * cos(lat_) * sin(lon_);
-        z[i] = ((1.0 - e2) * n_phi + alt_) * sin(lat_);
+        alt_ = alt[i];
+        sin_lat = sin(lat_);
+        cos_lat = cos(lat_);
+        n_phi = a / sqrt(1.0 - e2 * pow(sin_lat, 2.0));
+        x[i] = (n_phi + alt_) * cos_lat * cos(lon_);
+        y[i] = (n_phi + alt_) * cos_lat * sin(lon_);
+        z[i] = ((1.0 - e2) * n_phi + alt_) * sin_lat;
     }
 }
 

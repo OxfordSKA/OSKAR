@@ -71,7 +71,7 @@ protected:
     static const int num_stations = 13;
     static const int num_baselines = num_stations * (num_stations - 1) / 2;
     static const double bandwidth;
-    oskar_Mem u_, v_;
+    oskar_Mem *u_, *v_;
     oskar_Telescope* telescope_;
     oskar_Sky* sky_;
     oskar_Jones* jones_;
@@ -84,8 +84,8 @@ protected:
         // Allocate memory for data structures.
         jones_ = oskar_jones_create(precision | OSKAR_COMPLEX | OSKAR_MATRIX,
                 location, num_stations, num_sources, &status);
-        oskar_mem_init(&u_, precision, location, num_stations, 1, &status);
-        oskar_mem_init(&v_, precision, location, num_stations, 1, &status);
+        u_ = oskar_mem_create(precision, location, num_stations, &status);
+        v_ = oskar_mem_create(precision, location, num_stations, &status);
         sky_ = oskar_sky_create(precision, location, num_sources, &status);
         telescope_ = oskar_telescope_create(precision, location,
                 num_stations, &status);
@@ -94,8 +94,8 @@ protected:
         // Fill data structures with random data in sensible ranges.
         srand(0);
         oskar_mem_random_fill(oskar_jones_mem(jones_), 0.1, 100.0, &status);
-        oskar_mem_random_fill(&u_, 500.0, 1000.0, &status);
-        oskar_mem_random_fill(&v_, 500.0, 1000.0, &status);
+        oskar_mem_random_fill(u_, 500.0, 1000.0, &status);
+        oskar_mem_random_fill(v_, 500.0, 1000.0, &status);
         oskar_mem_random_fill(oskar_telescope_station_x(telescope_),
                 0.1, 1000.0, &status);
         oskar_mem_random_fill(oskar_telescope_station_y(telescope_),
@@ -125,8 +125,10 @@ protected:
     {
         int status = 0;
         oskar_jones_free(jones_, &status);
-        oskar_mem_free(&u_, &status);
-        oskar_mem_free(&v_, &status);
+        oskar_mem_free(u_, &status);
+        oskar_mem_free(v_, &status);
+        free(u_); // FIXME Remove after updating oskar_mem_free().
+        free(v_); // FIXME Remove after updating oskar_mem_free().
         oskar_sky_free(sky_, &status);
         oskar_telescope_free(telescope_, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -156,7 +158,7 @@ protected:
         oskar_telescope_set_smearing_values(telescope_, bandwidth,
                 time_average);
         oskar_timer_start(timer1);
-        oskar_correlate(vis1, jones_, telescope_, sky_, &u_, &v_, 1.0,
+        oskar_correlate(vis1, jones_, telescope_, sky_, u_, v_, 1.0,
                 frequency, &status);
         time1 = oskar_timer_elapsed(timer1);
         destroyTestData();
@@ -172,7 +174,7 @@ protected:
         oskar_telescope_set_smearing_values(telescope_, bandwidth,
                 time_average);
         oskar_timer_start(timer2);
-        oskar_correlate(vis2, jones_, telescope_, sky_, &u_, &v_, 1.0,
+        oskar_correlate(vis2, jones_, telescope_, sky_, u_, v_, 1.0,
                 frequency, &status);
         time2 = oskar_timer_elapsed(timer2);
         destroyTestData();

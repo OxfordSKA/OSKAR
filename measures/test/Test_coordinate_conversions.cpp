@@ -124,217 +124,245 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
 
     // Single precision.
     {
-        oskar_Mem ra, dec, l, m, n, x, y, z, x_gpu, y_gpu, z_gpu;
+        oskar_Mem *ra, *dec, *l, *m, *n, *x, *y, *z, *x_gpu, *y_gpu, *z_gpu;
         type = OSKAR_SINGLE;
         loc = OSKAR_LOCATION_CPU;
         tol = 1e-5;
 
-        oskar_mem_init(&ra, type, loc, num, 1, &status);
-        oskar_mem_init(&dec, type, loc, num, 1, &status);
-        oskar_mem_init(&l, type, loc, num, 1, &status);
-        oskar_mem_init(&m, type, loc, num, 1, &status);
-        oskar_mem_init(&n, type, loc, num, 1, &status);
-        oskar_mem_init(&x, type, loc, num, 1, &status);
-        oskar_mem_init(&y, type, loc, num, 1, &status);
-        oskar_mem_init(&z, type, loc, num, 1, &status);
+        ra = oskar_mem_create(type, loc, num, &status);
+        dec = oskar_mem_create(type, loc, num, &status);
+        l = oskar_mem_create(type, loc, num, &status);
+        m = oskar_mem_create(type, loc, num, &status);
+        n = oskar_mem_create(type, loc, num, &status);
+        x = oskar_mem_create(type, loc, num, &status);
+        y = oskar_mem_create(type, loc, num, &status);
+        z = oskar_mem_create(type, loc, num, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Set RA and Dec of point.
-        oskar_mem_set_value_real(&ra,  40 * D2R, 0, 0, &status);
-        oskar_mem_set_value_real(&dec, 65 * D2R, 0, 0, &status);
+        oskar_mem_set_value_real(ra,  40 * D2R, 0, 0, &status);
+        oskar_mem_set_value_real(dec, 65 * D2R, 0, 0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute l, m, n directions.
         oskar_convert_apparent_ra_dec_to_relative_direction_cosines(num,
-                &ra, &dec, ra0, dec0, &l, &m, &n, &status);
+                ra, dec, ra0, dec0, l, m, n, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute ENU directions.
         oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
-                &x, &y, &z, num, &l, &m, &n, ha0, dec0, lat, &status);
+                x, y, z, num, l, m, n, ha0, dec0, lat, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.
-        ASSERT_NEAR(oskar_mem_float(&x, &status)[0],
+        ASSERT_NEAR(oskar_mem_float(x, &status)[0],
                 0.198407255801263, tol);
-        ASSERT_NEAR(oskar_mem_float(&y, &status)[0],
+        ASSERT_NEAR(oskar_mem_float(y, &status)[0],
                 -0.0918661536386987, tol);
-        ASSERT_NEAR(oskar_mem_float(&z, &status)[0],
+        ASSERT_NEAR(oskar_mem_float(z, &status)[0],
                 0.97580488349928, tol);
 
         // Free input data.
-        oskar_mem_free(&ra, &status);
-        oskar_mem_free(&dec, &status);
-        oskar_mem_free(&l, &status);
-        oskar_mem_free(&m, &status);
-        oskar_mem_free(&n, &status);
-
+        oskar_mem_free(ra, &status);
+        oskar_mem_free(dec, &status);
+        oskar_mem_free(l, &status);
+        oskar_mem_free(m, &status);
+        oskar_mem_free(n, &status);
+        free(ra); // FIXME Remove after updating oskar_mem_free().
+        free(dec); // FIXME Remove after updating oskar_mem_free().
+        free(l); // FIXME Remove after updating oskar_mem_free().
+        free(m); // FIXME Remove after updating oskar_mem_free().
+        free(n); // FIXME Remove after updating oskar_mem_free().
 
         // GPU version.
         loc = OSKAR_LOCATION_GPU;
 
-        oskar_mem_init(&ra, type, loc, num, 1, &status);
-        oskar_mem_init(&dec, type, loc, num, 1, &status);
-        oskar_mem_init(&l, type, loc, num, 1, &status);
-        oskar_mem_init(&m, type, loc, num, 1, &status);
-        oskar_mem_init(&n, type, loc, num, 1, &status);
-        oskar_mem_init(&x_gpu, type, loc, num, 1, &status);
-        oskar_mem_init(&y_gpu, type, loc, num, 1, &status);
-        oskar_mem_init(&z_gpu, type, loc, num, 1, &status);
+        ra = oskar_mem_create(type, loc, num, &status);
+        dec = oskar_mem_create(type, loc, num, &status);
+        l = oskar_mem_create(type, loc, num, &status);
+        m = oskar_mem_create(type, loc, num, &status);
+        n = oskar_mem_create(type, loc, num, &status);
+        x_gpu = oskar_mem_create(type, loc, num, &status);
+        y_gpu = oskar_mem_create(type, loc, num, &status);
+        z_gpu = oskar_mem_create(type, loc, num, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Set RA and Dec of point.
-        oskar_mem_set_value_real(&ra,  40 * D2R, 0, 0, &status);
-        oskar_mem_set_value_real(&dec, 65 * D2R, 0, 0, &status);
+        oskar_mem_set_value_real(ra,  40 * D2R, 0, 0, &status);
+        oskar_mem_set_value_real(dec, 65 * D2R, 0, 0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute l, m, n directions.
         oskar_convert_apparent_ra_dec_to_relative_direction_cosines(num,
-                &ra, &dec, ra0, dec0, &l, &m, &n, &status);
+                ra, dec, ra0, dec0, l, m, n, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute ENU directions.
         oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
-                &x_gpu, &y_gpu, &z_gpu, num, &l, &m, &n, ha0, dec0, lat,
-                &status);
+                x_gpu, y_gpu, z_gpu, num, l, m, n, ha0, dec0, lat, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.
         double max_err, mean_err;
-        oskar_mem_evaluate_relative_error(&x_gpu, &x,
+        oskar_mem_evaluate_relative_error(x_gpu, x,
                 0, &max_err, &mean_err, 0, &status);
         ASSERT_LT(max_err, tol);
         ASSERT_LT(mean_err, tol);
-        oskar_mem_evaluate_relative_error(&y_gpu, &y,
+        oskar_mem_evaluate_relative_error(y_gpu, y,
                 0, &max_err, &mean_err, 0, &status);
         ASSERT_LT(max_err, tol);
         ASSERT_LT(mean_err, tol);
-        oskar_mem_evaluate_relative_error(&z_gpu, &z,
+        oskar_mem_evaluate_relative_error(z_gpu, z,
                 0, &max_err, &mean_err, 0, &status);
         ASSERT_LT(max_err, tol);
         ASSERT_LT(mean_err, tol);
 
         // Free input data.
-        oskar_mem_free(&ra, &status);
-        oskar_mem_free(&dec, &status);
-        oskar_mem_free(&l, &status);
-        oskar_mem_free(&m, &status);
-        oskar_mem_free(&n, &status);
+        oskar_mem_free(ra, &status);
+        oskar_mem_free(dec, &status);
+        oskar_mem_free(l, &status);
+        oskar_mem_free(m, &status);
+        oskar_mem_free(n, &status);
+        free(ra); // FIXME Remove after updating oskar_mem_free().
+        free(dec); // FIXME Remove after updating oskar_mem_free().
+        free(l); // FIXME Remove after updating oskar_mem_free().
+        free(m); // FIXME Remove after updating oskar_mem_free().
+        free(n); // FIXME Remove after updating oskar_mem_free().
 
         // Free xyz directions.
-        oskar_mem_free(&x, &status);
-        oskar_mem_free(&y, &status);
-        oskar_mem_free(&z, &status);
-        oskar_mem_free(&x_gpu, &status);
-        oskar_mem_free(&y_gpu, &status);
-        oskar_mem_free(&z_gpu, &status);
+        oskar_mem_free(x, &status);
+        oskar_mem_free(y, &status);
+        oskar_mem_free(z, &status);
+        oskar_mem_free(x_gpu, &status);
+        oskar_mem_free(y_gpu, &status);
+        oskar_mem_free(z_gpu, &status);
+        free(x); // FIXME Remove after updating oskar_mem_free().
+        free(y); // FIXME Remove after updating oskar_mem_free().
+        free(z); // FIXME Remove after updating oskar_mem_free().
+        free(x_gpu); // FIXME Remove after updating oskar_mem_free().
+        free(y_gpu); // FIXME Remove after updating oskar_mem_free().
+        free(z_gpu); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Double precision.
     {
-        oskar_Mem ra, dec, l, m, n, x, y, z, x_gpu, y_gpu, z_gpu;
+        oskar_Mem *ra, *dec, *l, *m, *n, *x, *y, *z, *x_gpu, *y_gpu, *z_gpu;
         type = OSKAR_DOUBLE;
         loc = OSKAR_LOCATION_CPU;
         tol = 1e-12;
 
-        oskar_mem_init(&ra, type, loc, num, 1, &status);
-        oskar_mem_init(&dec, type, loc, num, 1, &status);
-        oskar_mem_init(&l, type, loc, num, 1, &status);
-        oskar_mem_init(&m, type, loc, num, 1, &status);
-        oskar_mem_init(&n, type, loc, num, 1, &status);
-        oskar_mem_init(&x, type, loc, num, 1, &status);
-        oskar_mem_init(&y, type, loc, num, 1, &status);
-        oskar_mem_init(&z, type, loc, num, 1, &status);
+        ra = oskar_mem_create(type, loc, num, &status);
+        dec = oskar_mem_create(type, loc, num, &status);
+        l = oskar_mem_create(type, loc, num, &status);
+        m = oskar_mem_create(type, loc, num, &status);
+        n = oskar_mem_create(type, loc, num, &status);
+        x = oskar_mem_create(type, loc, num, &status);
+        y = oskar_mem_create(type, loc, num, &status);
+        z = oskar_mem_create(type, loc, num, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Set RA and Dec of point.
-        oskar_mem_set_value_real(&ra,  40 * D2R, 0, 0, &status);
-        oskar_mem_set_value_real(&dec, 65 * D2R, 0, 0, &status);
+        oskar_mem_set_value_real(ra,  40 * D2R, 0, 0, &status);
+        oskar_mem_set_value_real(dec, 65 * D2R, 0, 0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute l, m, n directions.
         oskar_convert_apparent_ra_dec_to_relative_direction_cosines(num,
-                &ra, &dec, ra0, dec0, &l, &m, &n, &status);
+                ra, dec, ra0, dec0, l, m, n, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute ENU directions.
         oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
-                &x, &y, &z, num, &l, &m, &n, ha0, dec0, lat, &status);
+                x, y, z, num, l, m, n, ha0, dec0, lat, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.
-        ASSERT_NEAR(oskar_mem_double(&x, &status)[0],
+        ASSERT_NEAR(oskar_mem_double(x, &status)[0],
                 0.198407255801263, tol);
-        ASSERT_NEAR(oskar_mem_double(&y, &status)[0],
+        ASSERT_NEAR(oskar_mem_double(y, &status)[0],
                 -0.0918661536386987, tol);
-        ASSERT_NEAR(oskar_mem_double(&z, &status)[0],
+        ASSERT_NEAR(oskar_mem_double(z, &status)[0],
                 0.97580488349928, tol);
 
         // Free input data.
-        oskar_mem_free(&ra, &status);
-        oskar_mem_free(&dec, &status);
-        oskar_mem_free(&l, &status);
-        oskar_mem_free(&m, &status);
-        oskar_mem_free(&n, &status);
-
+        oskar_mem_free(ra, &status);
+        oskar_mem_free(dec, &status);
+        oskar_mem_free(l, &status);
+        oskar_mem_free(m, &status);
+        oskar_mem_free(n, &status);
+        free(ra); // FIXME Remove after updating oskar_mem_free().
+        free(dec); // FIXME Remove after updating oskar_mem_free().
+        free(l); // FIXME Remove after updating oskar_mem_free().
+        free(m); // FIXME Remove after updating oskar_mem_free().
+        free(n); // FIXME Remove after updating oskar_mem_free().
 
         // GPU version.
         loc = OSKAR_LOCATION_GPU;
 
-        oskar_mem_init(&ra, type, loc, num, 1, &status);
-        oskar_mem_init(&dec, type, loc, num, 1, &status);
-        oskar_mem_init(&l, type, loc, num, 1, &status);
-        oskar_mem_init(&m, type, loc, num, 1, &status);
-        oskar_mem_init(&n, type, loc, num, 1, &status);
-        oskar_mem_init(&x_gpu, type, loc, num, 1, &status);
-        oskar_mem_init(&y_gpu, type, loc, num, 1, &status);
-        oskar_mem_init(&z_gpu, type, loc, num, 1, &status);
+        ra = oskar_mem_create(type, loc, num, &status);
+        dec = oskar_mem_create(type, loc, num, &status);
+        l = oskar_mem_create(type, loc, num, &status);
+        m = oskar_mem_create(type, loc, num, &status);
+        n = oskar_mem_create(type, loc, num, &status);
+        x_gpu = oskar_mem_create(type, loc, num, &status);
+        y_gpu = oskar_mem_create(type, loc, num, &status);
+        z_gpu = oskar_mem_create(type, loc, num, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Set RA and Dec of point.
-        oskar_mem_set_value_real(&ra,  40 * D2R, 0, 0, &status);
-        oskar_mem_set_value_real(&dec, 65 * D2R, 0, 0, &status);
+        oskar_mem_set_value_real(ra,  40 * D2R, 0, 0, &status);
+        oskar_mem_set_value_real(dec, 65 * D2R, 0, 0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute l, m, n directions.
         oskar_convert_apparent_ra_dec_to_relative_direction_cosines(num,
-                &ra, &dec, ra0, dec0, &l, &m, &n, &status);
+                ra, dec, ra0, dec0, l, m, n, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute ENU directions.
         oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
-                &x_gpu, &y_gpu, &z_gpu, num, &l, &m, &n, ha0, dec0, lat,
-                &status);
+                x_gpu, y_gpu, z_gpu, num, l, m, n, ha0, dec0, lat, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.
         double max_err, mean_err;
-        oskar_mem_evaluate_relative_error(&x_gpu, &x,
+        oskar_mem_evaluate_relative_error(x_gpu, x,
                 0, &max_err, &mean_err, 0, &status);
         ASSERT_LT(max_err, tol);
         ASSERT_LT(mean_err, tol);
-        oskar_mem_evaluate_relative_error(&y_gpu, &y,
+        oskar_mem_evaluate_relative_error(y_gpu, y,
                 0, &max_err, &mean_err, 0, &status);
         ASSERT_LT(max_err, tol);
         ASSERT_LT(mean_err, tol);
-        oskar_mem_evaluate_relative_error(&z_gpu, &z,
+        oskar_mem_evaluate_relative_error(z_gpu, z,
                 0, &max_err, &mean_err, 0, &status);
         ASSERT_LT(max_err, tol);
         ASSERT_LT(mean_err, tol);
 
         // Free input data.
-        oskar_mem_free(&ra, &status);
-        oskar_mem_free(&dec, &status);
-        oskar_mem_free(&l, &status);
-        oskar_mem_free(&m, &status);
-        oskar_mem_free(&n, &status);
+        oskar_mem_free(ra, &status);
+        oskar_mem_free(dec, &status);
+        oskar_mem_free(l, &status);
+        oskar_mem_free(m, &status);
+        oskar_mem_free(n, &status);
+        free(ra); // FIXME Remove after updating oskar_mem_free().
+        free(dec); // FIXME Remove after updating oskar_mem_free().
+        free(l); // FIXME Remove after updating oskar_mem_free().
+        free(m); // FIXME Remove after updating oskar_mem_free().
+        free(n); // FIXME Remove after updating oskar_mem_free().
 
         // Free xyz directions.
-        oskar_mem_free(&x, &status);
-        oskar_mem_free(&y, &status);
-        oskar_mem_free(&z, &status);
-        oskar_mem_free(&x_gpu, &status);
-        oskar_mem_free(&y_gpu, &status);
-        oskar_mem_free(&z_gpu, &status);
+        oskar_mem_free(x, &status);
+        oskar_mem_free(y, &status);
+        oskar_mem_free(z, &status);
+        oskar_mem_free(x_gpu, &status);
+        oskar_mem_free(y_gpu, &status);
+        oskar_mem_free(z_gpu, &status);
+        free(x); // FIXME Remove after updating oskar_mem_free().
+        free(y); // FIXME Remove after updating oskar_mem_free().
+        free(z); // FIXME Remove after updating oskar_mem_free().
+        free(x_gpu); // FIXME Remove after updating oskar_mem_free().
+        free(y_gpu); // FIXME Remove after updating oskar_mem_free().
+        free(z_gpu); // FIXME Remove after updating oskar_mem_free().
     }
 }

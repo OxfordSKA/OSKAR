@@ -48,7 +48,7 @@ extern "C" {
 void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
         const char* filename, int* status)
 {
-    oskar_Mem temp;
+    oskar_Mem *temp;
     int num_amps, num_coords;
     int uu_elements, vv_elements, ww_elements, amp_elements;
     int coord_type, amp_type, *dim;
@@ -114,11 +114,12 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
         if (oskar_file_exists(settings_path))
         {
             /* Write the settings file. */
-            oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, status);
-            oskar_mem_binary_file_read_raw(&temp, settings_path, status);
-            oskar_mem_binary_stream_write(&temp, stream,
+            temp = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, status);
+            oskar_mem_binary_file_read_raw(temp, settings_path, status);
+            oskar_mem_binary_stream_write(temp, stream,
                     OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0, status);
-            oskar_mem_free(&temp, status);
+            oskar_mem_free(temp, status);
+            free(temp); /* FIXME Remove after updating oskar_mem_free(). */
         }
     }
     /* If log exists, then write it out. */
@@ -147,15 +148,16 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
 
     /* Write the dimension order. */
     if (*status) return;
-    oskar_mem_init(&temp, OSKAR_INT, OSKAR_LOCATION_CPU, 4, 1, status);
-    dim = oskar_mem_int(&temp, status);
+    temp = oskar_mem_create(OSKAR_INT, OSKAR_LOCATION_CPU, 4, status);
+    dim = oskar_mem_int(temp, status);
     dim[0] = OSKAR_VIS_DIM_CHANNEL;
     dim[1] = OSKAR_VIS_DIM_TIME;
     dim[2] = OSKAR_VIS_DIM_BASELINE;
     dim[3] = OSKAR_VIS_DIM_POLARISATION;
-    oskar_mem_binary_stream_write(&temp, stream, grp,
+    oskar_mem_binary_stream_write(temp, stream, grp,
             OSKAR_VIS_TAG_DIMENSION_ORDER, 0, 0, status);
-    oskar_mem_free(&temp, status);
+    oskar_mem_free(temp, status);
+    free(temp); /* FIXME Remove after updating oskar_mem_free(). */
 
     /* Write other visibility metadata. */
     oskar_binary_stream_write_int(stream, grp,

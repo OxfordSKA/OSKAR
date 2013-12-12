@@ -446,7 +446,7 @@ static void oskar_mem_element_multiply_select_cuda(oskar_Mem* c,
 void oskar_mem_element_multiply_cuda(oskar_Mem* C, const oskar_Mem* A,
         const oskar_Mem* B, size_t num, int* status)
 {
-    oskar_Mem At, Bt;
+    oskar_Mem *At = 0, *Bt = 0;
     const oskar_Mem *Ap, *Bp;
 
     /* Check all inputs. */
@@ -464,49 +464,56 @@ void oskar_mem_element_multiply_cuda(oskar_Mem* C, const oskar_Mem* A,
     Bp = B;
 
     /* Check that the output array is in GPU memory. */
-    if (C->location != OSKAR_LOCATION_GPU)
+    if (oskar_mem_location(C) != OSKAR_LOCATION_GPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
 
     /* Check memory is allocated. */
-    if (!A->data || !B->data || !C->data)
+    if (!oskar_mem_allocated(A) || !oskar_mem_allocated(B) ||
+            !oskar_mem_allocated(C))
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
         return;
     }
 
     /* Set the number of elements to multiply. */
-    if (num <= 0) num = A->num_elements;
+    if (num <= 0) num = oskar_mem_length(A);
 
     /* Check that there are enough elements. */
-    if (B->num_elements < num || C->num_elements < num)
+    if (oskar_mem_length(B) < num || oskar_mem_length(C) < num)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
     }
 
     /* Copy input data to temporary GPU memory if required. */
-    oskar_mem_init(&At, A->type, OSKAR_LOCATION_GPU, 0, 1, status);
-    oskar_mem_init(&Bt, B->type, OSKAR_LOCATION_GPU, 0, 1, status);
-    if (A->location != OSKAR_LOCATION_GPU)
+    if (oskar_mem_location(A) != OSKAR_LOCATION_GPU)
     {
-        oskar_mem_copy(&At, A, status);
-        Ap = &At;
+        At = oskar_mem_create_copy(A, OSKAR_LOCATION_GPU, status);
+        Ap = At;
     }
-    if (B->location != OSKAR_LOCATION_GPU)
+    if (oskar_mem_location(B) != OSKAR_LOCATION_GPU)
     {
-        oskar_mem_copy(&Bt, B, status);
-        Bp = &Bt;
+        Bt = oskar_mem_create_copy(B, OSKAR_LOCATION_GPU, status);
+        Bp = Bt;
     }
 
     /* Do the multiplication using CUDA. */
     oskar_mem_element_multiply_select_cuda(C, Ap, Bp, num, status);
 
-    /* Free temporaries. */
-    oskar_mem_free(&At, status);
-    oskar_mem_free(&Bt, status);
+    /* Free temporary arrays if they exist. */
+    if (At)
+    {
+        oskar_mem_free(At, status);
+        free(At); /* FIXME Remove after updating oskar_mem_free(). */
+    }
+    if (Bt)
+    {
+        oskar_mem_free(Bt, status);
+        free(Bt); /* FIXME Remove after updating oskar_mem_free(). */
+    }
 }
 
 #ifdef __cplusplus

@@ -54,6 +54,8 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
     FILE* stream;
     char* log_data = 0;
     long log_size = 0;
+    const char* settings_path_str;
+    const oskar_Mem* settings_path;
 
     /* Check all inputs. */
     if (!image || !filename || !status)
@@ -90,29 +92,27 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
     oskar_binary_stream_write_metadata(stream, status);
 
     /* If settings path is set, write out the data. */
-    if (image->settings_path.data)
+    settings_path = &image->settings_path;
+    settings_path_str = oskar_mem_char_const(settings_path);
+    if (settings_path_str && strlen(settings_path_str) > 0)
     {
-        if (strlen(image->settings_path.data) > 0)
-        {
-            /* Write the settings path. */
-            oskar_mem_binary_stream_write(&image->settings_path, stream,
-                    OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, idx, 0,
-                    status);
+        /* Write the settings path. */
+        oskar_mem_binary_stream_write(settings_path, stream,
+                OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, idx, 0,
+                status);
 
-            /* Check the file exists */
-            if (oskar_file_exists((const char*)image->settings_path.data))
-            {
-                /* Write the settings file. */
-                oskar_Mem temp;
-                oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1,
-                        status);
-                oskar_mem_binary_file_read_raw(&temp,
-                        (const char*)image->settings_path.data, status);
-                oskar_mem_binary_stream_write(&temp, stream,
-                        OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, idx, 0,
-                        status);
-                oskar_mem_free(&temp, status);
-            }
+        /* Check the file exists */
+        if (oskar_file_exists(settings_path_str))
+        {
+            /* Write the settings file. */
+            oskar_Mem* temp;
+            temp = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, status);
+            oskar_mem_binary_file_read_raw(temp, settings_path_str, status);
+            oskar_mem_binary_stream_write(temp, stream,
+                    OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, idx, 0,
+                    status);
+            oskar_mem_free(temp, status);
+            free(temp); /* FIXME Remove after updating oskar_mem_free(). */
         }
     }
 

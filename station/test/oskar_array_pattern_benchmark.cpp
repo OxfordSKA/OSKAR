@@ -151,7 +151,7 @@ int main(int argc, char** argv)
 int benchmark(int num_elements, int num_directions, OpType op_type,
         int loc, int precision, bool evaluate_2d, int niter, double& time_taken)
 {
-    int status = OSKAR_SUCCESS;
+    int status = 0;
 
     // Create the timer.
     oskar_Timer *tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
@@ -161,26 +161,24 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
     if (status) return status;
     station->array_is_3d = (evaluate_2d) ? OSKAR_FALSE : OSKAR_TRUE;
 
-    oskar_Mem x, y, z;
-    oskar_mem_init(&x, precision, loc, num_directions, OSKAR_TRUE, &status);
-    oskar_mem_init(&y, precision, loc, num_directions, OSKAR_TRUE, &status);
-    oskar_mem_init(&z, precision, loc, num_directions, OSKAR_TRUE, &status);
+    oskar_Mem *x, *y, *z, *weights, *beam, *signal;
+    x = oskar_mem_create(precision, loc, num_directions, &status);
+    y = oskar_mem_create(precision, loc, num_directions, &status);
+    z = oskar_mem_create(precision, loc, num_directions, &status);
     if (status) return status;
-
-    oskar_Mem weights, beam, signal;
 
     if (op_type == O2C)
     {
         int type = precision | OSKAR_COMPLEX;
-        oskar_mem_init(&beam, type, loc, num_directions, OSKAR_TRUE, &status);
-        oskar_mem_init(&weights, type, loc, num_elements, OSKAR_TRUE, &status);
+        beam = oskar_mem_create(type, loc, num_directions, &status);
+        weights = oskar_mem_create(type, loc, num_elements, &status);
         if (status) return status;
 
         oskar_timer_start(tmr);
         for (int i = 0; i < niter; ++i)
         {
-            oskar_evaluate_array_pattern(&beam, 2.0 * M_PI, station,
-                    num_directions, &x, &y, &z, &weights, &status);
+            oskar_evaluate_array_pattern(beam, 2.0 * M_PI, station,
+                    num_directions, x, y, z, weights, &status);
         }
         time_taken = oskar_timer_elapsed(tmr);
     }
@@ -189,25 +187,25 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
         int type = precision | OSKAR_COMPLEX;
         int num_signals = num_directions * num_elements;
 
-        oskar_mem_init(&weights, type, loc, num_elements, OSKAR_TRUE, &status);
+        weights = oskar_mem_create(type, loc, num_elements, &status);
         if (op_type == C2C)
         {
-            oskar_mem_init(&beam, type, loc, num_directions, OSKAR_TRUE, &status);
-            oskar_mem_init(&signal, type, loc, num_signals, OSKAR_TRUE, &status);
+            beam = oskar_mem_create(type, loc, num_directions, &status);
+            signal = oskar_mem_create(type, loc, num_signals, &status);
         }
         else
         {
             type |= OSKAR_MATRIX;
-            oskar_mem_init(&beam, type, loc, num_directions, OSKAR_TRUE, &status);
-            oskar_mem_init(&signal, type, loc, num_signals, OSKAR_TRUE, &status);
+            beam = oskar_mem_create(type, loc, num_directions, &status);
+            signal = oskar_mem_create(type, loc, num_signals, &status);
         }
         if (status) return status;
 
         oskar_timer_start(tmr);
         for (int i = 0; i < niter; ++i)
         {
-            oskar_evaluate_array_pattern_hierarchical(&beam, 2.0 * M_PI, station,
-                    num_directions, &x, &y, &z, &signal, &weights, &status);
+            oskar_evaluate_array_pattern_hierarchical(beam, 2.0 * M_PI, station,
+                    num_directions, x, y, z, signal, weights, &status);
         }
         time_taken = oskar_timer_elapsed(tmr);
     }
@@ -217,12 +215,18 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
 
     // Free memory.
     oskar_station_free(station, &status);
-    oskar_mem_free(&x, &status);
-    oskar_mem_free(&y, &status);
-    oskar_mem_free(&z, &status);
-    oskar_mem_free(&weights, &status);
-    oskar_mem_free(&beam, &status);
-    oskar_mem_free(&signal, &status);
+    oskar_mem_free(x, &status);
+    oskar_mem_free(y, &status);
+    oskar_mem_free(z, &status);
+    oskar_mem_free(weights, &status);
+    oskar_mem_free(beam, &status);
+    oskar_mem_free(signal, &status);
+    free(x); // FIXME Remove after updating oskar_mem_free().
+    free(y); // FIXME Remove after updating oskar_mem_free().
+    free(z); // FIXME Remove after updating oskar_mem_free().
+    free(weights); // FIXME Remove after updating oskar_mem_free().
+    free(beam); // FIXME Remove after updating oskar_mem_free().
+    free(signal); // FIXME Remove after updating oskar_mem_free().
 
     return status;
 }

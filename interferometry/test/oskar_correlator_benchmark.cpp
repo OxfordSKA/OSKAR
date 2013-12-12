@@ -216,8 +216,7 @@ int benchmark(int num_stations, int num_sources, int type,
     // Set up a test sky model, telescope model and Jones matrices.
     oskar_Telescope* tel = oskar_telescope_create(type, loc,
             num_stations, &status);
-    oskar_Sky* sky = oskar_sky_create(type, loc, num_sources,
-            &status);
+    oskar_Sky* sky = oskar_sky_create(type, loc, num_sources, &status);
     oskar_Jones* J = oskar_jones_create(jones_type, loc, num_stations,
             num_sources, &status);
 
@@ -225,24 +224,27 @@ int benchmark(int num_stations, int num_sources, int type,
     oskar_sky_set_use_extended(sky, use_extended);
 
     // Memory for visibility coordinates and output visibility slice.
-    oskar_Mem vis, u, v;
-    oskar_mem_init(&vis, jones_type, loc, num_vis, 1, &status);
-    oskar_mem_init(&u, type, loc, num_stations, 1, &status);
-    oskar_mem_init(&v, type, loc, num_stations, 1, &status);
+    oskar_Mem *vis, *u, *v;
+    vis = oskar_mem_create(jones_type, loc, num_vis, &status);
+    u = oskar_mem_create(type, loc, num_stations, &status);
+    v = oskar_mem_create(type, loc, num_stations, &status);
 
     // Run benchmark.
     times.resize(niter);
     for (int i = 0; i < niter; ++i)
     {
         oskar_timer_start(timer);
-        oskar_correlate(&vis, J, tel, sky, &u, &v, 0.0, 100e6, &status);
+        oskar_correlate(vis, J, tel, sky, u, v, 0.0, 100e6, &status);
         times[i] = oskar_timer_elapsed(timer);
     }
 
     // Free memory.
-    oskar_mem_free(&u, &status);
-    oskar_mem_free(&v, &status);
-    oskar_mem_free(&vis, &status);
+    oskar_mem_free(u, &status);
+    oskar_mem_free(v, &status);
+    oskar_mem_free(vis, &status);
+    free(u); // FIXME Remove after updating oskar_mem_free().
+    free(v); // FIXME Remove after updating oskar_mem_free().
+    free(vis); // FIXME Remove after updating oskar_mem_free().
     oskar_jones_free(J, &status);
     oskar_telescope_free(tel, &status);
     oskar_sky_free(sky, &status);
