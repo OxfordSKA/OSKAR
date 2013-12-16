@@ -49,7 +49,7 @@ static const int width = 45;
 
 /* Private functions. */
 static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
-        const oskar_Settings* settings);
+        const oskar_Settings* settings, int* status);
 static void set_station_data(oskar_Station* station,
         const oskar_Station* parent, int depth,
         const oskar_Settings* settings);
@@ -84,7 +84,7 @@ oskar_Telescope* oskar_set_up_telescope(oskar_Log* log,
     oskar_telescope_config_override(telescope, &settings->telescope, status);
 
     /* Set telescope model meta-data, including global pointing settings. */
-    oskar_telescope_set_metadata(telescope, settings);
+    oskar_telescope_set_metadata(telescope, settings, status);
 
     /* Apply pointing file override if set. */
     if (settings->obs.pointing_file)
@@ -121,10 +121,13 @@ oskar_Telescope* oskar_set_up_telescope(oskar_Log* log,
 
 
 static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
-        const oskar_Settings* settings)
+        const oskar_Settings* settings, int* status)
 {
     int i, num_stations;
     const oskar_SettingsApertureArray* aa = &settings->telescope.aperture_array;
+
+    if (*status) return;
+
     oskar_telescope_set_phase_centre(telescope,
             settings->obs.ra0_rad[0], settings->obs.dec0_rad[0]);
     oskar_telescope_set_common_horizon(telescope,

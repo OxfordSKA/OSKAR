@@ -112,7 +112,7 @@ void oskar_TelescopeLoadNoise::load(oskar_Station* station,
     //   meaningless.
     if (depth > 1)
     {
-        *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+        /**status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE; */
         return;
     }
 

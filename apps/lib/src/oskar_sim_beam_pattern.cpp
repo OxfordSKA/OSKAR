@@ -71,6 +71,11 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log, int* stat
     oskar_Settings settings;
     load_settings_(&settings, settings_file, log, status);
     oskar_Telescope* tel = oskar_set_up_telescope(log, &settings, status);
+    if (*status)
+    {
+        oskar_telescope_free(tel, status);
+        return;
+    }
 
     // Compute the beam pattern cube and write to file.
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
@@ -164,6 +169,8 @@ static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
     oskar_Mem* beam_tmp = oskar_mem_create(beam_pattern_data_type,
             OSKAR_LOCATION_CPU, num_pixels, status);
 
+    const oskar_Station* station = oskar_telescope_station_const(tel, station_id);
+
     // Generate coordinates at which beam the beam pattern is evaluated.
     // This is currently done on the CPU as it is only done once.
     int coord_type = 0;
@@ -171,8 +178,10 @@ static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
     oskar_Mem* y = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
     oskar_Mem* z = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
     oskar_beam_pattern_generate_coordinates(x, y, z, &coord_type,
-            &settings->beam_pattern, status);
-
+            oskar_station_beam_longitude_rad(station),
+            oskar_station_beam_latitude_rad(station),
+            oskar_station_beam_coord_type(station), &settings->beam_pattern,
+            status);
 
     // All GPU memory used within these braces.
     {
@@ -182,7 +191,6 @@ static void simulate_beam_pattern_cube_(oskar_Image* beam_pattern_cube,
         oskar_StationWork* d_work = oskar_station_work_create(type, GPU, status);
         oskar_Mem* d_beam_pattern = oskar_mem_create(beam_pattern_data_type,
                 GPU, num_pixels, status);
-        const oskar_Station* station = oskar_telescope_station_const(tel, station_id);
         oskar_Station* d_station = oskar_station_create_copy(station, GPU, status);
         oskar_Mem* d_x = oskar_mem_create_copy(x, GPU, status);
         oskar_Mem* d_y = oskar_mem_create_copy(y, GPU, status);

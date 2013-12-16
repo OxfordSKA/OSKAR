@@ -43,14 +43,16 @@ void oskar_fits_healpix_write_image(const char* filename, oskar_Image* image,
 {
     int type, c, t, p, offset;
     int hdutype;
-    long naxis[] = {0, 0};
-    char order[] = { "RING" }; /* HEALPix ordering */
+    long naxis[]  = {0, 0};
+    char order[]  = { "RING" }; /* HEALPix ordering */
     char* ttype[] = { "SIGNAL" };
     char* tform[] = { "1E" };
     char* tunit[] = { " " };
     char coordsys[] = { "C" };
     long nside, npixels;
 
+    /* WARNING: This function is a bit dangerous in that it assumes that the
+     * length of the filename is *always* less than 100 chars */
     char filename_[100];
     char root_[100];
     char suffix_[100];
