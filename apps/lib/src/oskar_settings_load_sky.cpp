@@ -75,7 +75,12 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
 
     // Input OSKAR sky model files.
     s.beginGroup("oskar_sky_model");
-    list = s.value("file").toStringList();
+    QVariant vFiles = s.value("file");
+    if (vFiles.type() == QVariant::StringList)
+        list = vFiles.toStringList();
+    else if (vFiles.type() == QVariant::String)
+        list = vFiles.toString().split(",");
+    //list = s.value("file").toStringList();
     sky->oskar_sky_model.num_files = list.size();
     sky->oskar_sky_model.file = (char**)malloc(sky->oskar_sky_model.num_files *
             sizeof(char*));
