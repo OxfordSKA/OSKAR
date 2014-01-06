@@ -45,17 +45,22 @@
 extern "C" {
 #endif
 
-static const int width = 45;
-
 /* Private functions. */
 static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
         const oskar_Settings* settings, int* status);
 static void set_station_data(oskar_Station* station,
         const oskar_Station* parent, int depth,
         const oskar_Settings* settings);
+
 static void save_telescope(oskar_Telescope *telescope,
         const oskar_SettingsTelescope* settings, oskar_Log* log,
         const char* dir, int* status);
+
+void oskar_telescope_log_summary(const oskar_Telescope* telescope,
+        oskar_Log* log, int* status);
+
+void oskar_station_log_summary(const oskar_Station* station,
+        oskar_Log* log, int depth, int* status);
 
 oskar_Telescope* oskar_set_up_telescope(oskar_Log* log,
         const oskar_Settings* settings, int* status)
@@ -79,7 +84,7 @@ oskar_Telescope* oskar_set_up_telescope(oskar_Log* log,
     type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     telescope = oskar_telescope_create(type, OSKAR_LOCATION_CPU, 0, status);
 
-    /* Load the layout and configuration, apply overrides, load noise data. */
+    /* Load the telescope model and then apply overrides. */
     oskar_telescope_load(telescope, log, settings, status);
     oskar_telescope_config_override(telescope, &settings->telescope, status);
 
@@ -100,17 +105,17 @@ oskar_Telescope* oskar_set_up_telescope(oskar_Log* log,
     oskar_telescope_analyse(telescope, status);
     if (*status) return telescope;
 
+    /* Set error flag if number of stations is less than 2. */
+    if (oskar_telescope_num_stations(telescope) < 2)
+    {
+        *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
+        oskar_log_error(log, "Insufficient number of stations to form an "
+                "interferometer baseline (%d stations found).",
+                oskar_telescope_num_stations(telescope));
+    }
+
     /* Print summary data. */
-    oskar_log_message(log, 0, "Telescope model summary");
-    oskar_log_value(log, 1, width, "Num. stations", "%d",
-            oskar_telescope_num_stations(telescope));
-    oskar_log_value(log, 1, width, "Max station size", "%d",
-            oskar_telescope_max_station_size(telescope));
-    oskar_log_value(log, 1, width, "Max station depth", "%d",
-            oskar_telescope_max_station_depth(telescope));
-    oskar_log_value(log, 1, width, "Identical stations", "%s",
-            oskar_telescope_identical_stations(telescope) ?
-                    "true" : "false");
+    oskar_telescope_log_summary(telescope, log, status);
 
     /* Save the telescope configuration in a new directory, if required. */
     save_telescope(telescope, &settings->telescope, log,
@@ -119,6 +124,118 @@ oskar_Telescope* oskar_set_up_telescope(oskar_Log* log,
     return telescope;
 }
 
+
+void oskar_telescope_log_summary(const oskar_Telescope* telescope,
+        oskar_Log* log, int* status)
+{
+    const int width = 45;
+    int i = 0, num_stations = 0;
+
+    /* Check all inputs. */
+    if (!telescope || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Print top-level data. */
+    num_stations = oskar_telescope_num_stations(telescope);
+    oskar_log_message(log, 0, "Telescope model summary");
+    oskar_log_value(log, 1, width, "Num. stations", "%d", num_stations);
+    oskar_log_value(log, 1, width, "Max station size", "%d",
+            oskar_telescope_max_station_size(telescope));
+    oskar_log_value(log, 1, width, "Max station depth", "%d",
+            oskar_telescope_max_station_depth(telescope));
+    oskar_log_value(log, 1, width, "Identical stations", "%s",
+            oskar_telescope_identical_stations(telescope) ? "true" : "false");
+
+    /* Switch on whether stations are identical. */
+    if (oskar_telescope_identical_stations(telescope) && num_stations > 0)
+    {
+        /* Print station summary for first station. */
+        oskar_log_message(log, 1, "Station model summary");
+        oskar_station_log_summary(oskar_telescope_station_const(telescope, 0),
+                log, 1, status);
+    }
+    else
+    {
+        /* Loop over top-level stations to print summary for each. */
+        for (i = 0; i < num_stations; ++i)
+        {
+            oskar_log_message(log, 1, "Station %d model summary", i);
+            oskar_station_log_summary(oskar_telescope_station_const(telescope,
+                    i), log, 1, status);
+        }
+    }
+}
+
+void oskar_station_log_summary(const oskar_Station* station,
+        oskar_Log* log, int depth, int* status)
+{
+    const int width = 45;
+    int d1 = 0;
+
+    /* Check all inputs. */
+    if (!station || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get next level down. */
+    d1 = depth + 1;
+
+    /* Print data for this level. */
+    if (oskar_station_type(station) == OSKAR_STATION_TYPE_AA)
+    {
+        int i = 0, num_elements = 0;
+
+        /* Print station type and number of elements. */
+        num_elements = oskar_station_num_elements(station);
+        oskar_log_value(log, d1, width, "Num. elements", "%d", num_elements);
+
+        /* Print child station data. */
+        if (oskar_station_has_child(station))
+        {
+            oskar_log_value(log, d1, width, "Identical child stations", "%s",
+                    oskar_station_identical_children(station) ?
+                            "true" : "false");
+
+            /* Switch on whether child stations are identical. */
+            if (oskar_station_identical_children(station) && num_elements > 0)
+            {
+                /* Print station summary for first child station. */
+                oskar_log_message(log, d1, "Station model summary");
+                oskar_station_log_summary(oskar_station_child_const(station, 0),
+                        log, d1, status);
+            }
+            else
+            {
+                /* Loop over child stations to print summary for each. */
+                for (i = 0; i < num_elements; ++i)
+                {
+                    oskar_log_message(log, d1, "Station %d model summary", i);
+                    oskar_station_log_summary(oskar_station_child_const(station,
+                            i), log, d1, status);
+                }
+            }
+        }
+    }
+    else if (oskar_station_type(station) == OSKAR_STATION_TYPE_VLA_PBCOR)
+    {
+        oskar_log_value(log, d1, width, "Station type", "VLA (PBCOR)");
+    }
+    else if (oskar_station_type(station) == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
+    {
+        oskar_log_value(log, d1, width, "Station type", "Gaussian beam");
+    }
+}
 
 static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
         const oskar_Settings* settings, int* status)
@@ -206,11 +323,11 @@ static void save_telescope(oskar_Telescope *telescope,
         const oskar_SettingsTelescope* settings, oskar_Log* log,
         const char* dir, int* status)
 {
-    /* No output directory specified = Do nothing. */
-    if (!dir) return;
+    /* Check if safe to proceed. */
+    if (*status) return;
 
-    /* Empty output directory specified = Do nothing. */
-    if (!strlen(dir)) return;
+    /* Do nothing if no or empty directory string specified. */
+    if (!dir || !strlen(dir)) return;
 
     /* Check that the input and output directories are different. */
     if (!strcmp(dir, settings->input_directory))

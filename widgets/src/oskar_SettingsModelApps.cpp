@@ -1172,7 +1172,7 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     options.clear();
     options << "Equatorial"
             << "Horizon";
-    declare(k, "Coordinate Frame", options, 0);
+    declare(k, "Coordinate frame", options, 0);
     setTooltip(k, "Specification of the coordinate frame in which to evaluate "
             "the beam pattern.");
 

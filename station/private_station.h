@@ -65,6 +65,7 @@ struct oskar_Station
     double gaussian_beam_fwhm_rad; /**< FWHM of Gaussian station beam, in degrees. */
 
     /* Data used only for aperture array stations ---------------------------*/
+    int identical_children;      /**< True if all child stations are identical. */
     int num_elements;            /**< Number of antenna elements in the station (auto determined). */
     int num_element_types;       /**< Number of element types (this is the size of element_pattern array). */
     int use_polarised_elements;  /**< True if station elements are polarised. */

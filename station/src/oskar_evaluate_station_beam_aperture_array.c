@@ -257,18 +257,41 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         if ((int)oskar_mem_length(signal) < work_size)
             oskar_mem_realloc(signal, work_size, status);
 
-        /* Loop over child stations. */
-        for (i = 0; i < num_elements; ++i)
+        /* Check if child stations are identical. */
+        if (oskar_station_identical_children(station))
         {
-            /* Set up the output buffer for this station. */
-            oskar_Mem output;
-            oskar_mem_get_pointer(&output, signal, i * num_points,
-                    num_points, status);
+            /* Set up the output buffer for the first station. */
+            oskar_Mem output0;
+            oskar_mem_get_pointer(&output0, signal, 0, num_points, status);
 
             /* Recursive call. */
-            oskar_evaluate_station_beam_aperture_array_private(&output,
-                    oskar_station_child_const(station, i), num_points, x, y, z,
-                    gast, frequency_hz, work, random_states, depth + 1, status);
+            oskar_evaluate_station_beam_aperture_array_private(&output0,
+                    oskar_station_child_const(station, 0), num_points,
+                    x, y, z, gast, frequency_hz, work, random_states,
+                    depth + 1, status);
+
+            /* Copy beam for child station 0 into memory for other stations. */
+            for (i = 1; i < num_elements; ++i)
+            {
+                oskar_mem_insert(signal, &output0, i * num_points, status);
+            }
+        }
+        else
+        {
+            /* Loop over child stations. */
+            for (i = 0; i < num_elements; ++i)
+            {
+                /* Set up the output buffer for this station. */
+                oskar_Mem output;
+                oskar_mem_get_pointer(&output, signal, i * num_points,
+                        num_points, status);
+
+                /* Recursive call. */
+                oskar_evaluate_station_beam_aperture_array_private(&output,
+                        oskar_station_child_const(station, i), num_points,
+                        x, y, z, gast, frequency_hz, work, random_states,
+                        depth + 1, status);
+            }
         }
 
         /* Generate beamforming weights and form beam from child stations. */

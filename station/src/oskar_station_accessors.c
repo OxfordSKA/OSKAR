@@ -103,6 +103,11 @@ double oskar_station_gaussian_beam_fwhm_rad(const oskar_Station* model)
 
 /* Data used only for aperture array stations. */
 
+int oskar_station_identical_children(const oskar_Station* model)
+{
+    return model->identical_children;
+}
+
 int oskar_station_num_elements(const oskar_Station* model)
 {
     return model->num_elements;

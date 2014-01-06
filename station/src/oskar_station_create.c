@@ -110,6 +110,7 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->gaussian_beam_fwhm_rad = 0.0;
 
     /* Initialise aperture array data. */
+    model->identical_children = OSKAR_FALSE;
     model->num_elements = num_elements;
     model->num_element_types = 0;
     model->use_polarised_elements = OSKAR_TRUE;

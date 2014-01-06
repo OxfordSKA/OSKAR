@@ -75,6 +75,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     oskar_system_noise_model_copy(&model->noise, &src->noise, status);
 
     /* Copy aperture array data, except num_element_types (done later). */
+    model->identical_children = src->identical_children;
     model->num_elements = src->num_elements;
     model->use_polarised_elements = src->use_polarised_elements;
     model->normalise_beam = src->normalise_beam;

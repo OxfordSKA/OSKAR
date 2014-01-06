@@ -153,13 +153,34 @@ void oskar_station_analyse(oskar_Station* station,
         }
     }
 
-    /* Recursively analyse all child stations. */
+    /* Check if station has child stations. */
     if (oskar_station_has_child(station))
     {
+        /* Recursively analyse all child stations. */
         for (i = 0; i < station->num_elements; ++i)
         {
             oskar_station_analyse(oskar_station_child(station, i),
                     finished_identical_station_check, status);
+        }
+
+        /* Check if we need to examine every station. */
+        if (*finished_identical_station_check)
+        {
+            station->identical_children = 0;
+        }
+        else
+        {
+            /* Check if child stations are identical. */
+            station->identical_children = 1;
+            for (i = 1; i < station->num_elements; ++i)
+            {
+                if (oskar_station_different(
+                        oskar_station_child_const(station, 0),
+                        oskar_station_child_const(station, i), status))
+                {
+                    station->identical_children = 0;
+                }
+            }
         }
     }
 }
