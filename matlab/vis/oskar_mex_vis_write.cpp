@@ -40,7 +40,7 @@ void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
     if (num_in != 2 || num_out > 0)
     {
         oskar_matlab_usage(NULL, "vis", "write", "<file name>, <vis>",
-                "Writes an OSKAR visibilities binary file from the specified"
+                "Writes an OSKAR visibilities binary file from the specified "
                 "OSKAR MATLAB visibilities structure.");
     }
 

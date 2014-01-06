@@ -57,13 +57,16 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
     int num_times     = oskar_vis_num_times(v_in);
     int num_stations  = oskar_vis_num_stations(v_in);
     int num_baselines = oskar_vis_num_baselines(v_in);
-    int num_pols      = oskar_mem_is_scalar(
-            oskar_vis_amplitude_const(v_in)) ? 1 : 4;
+    if (oskar_mem_is_scalar(oskar_vis_amplitude_const(v_in))) {
+        mexErrMsgTxt("ERROR: Invalid visibility data - expecting visibility "
+                "amplitudes to be polarised.\n");
+    }
+    int num_pols = 4;
 
     // Allocate memory returned to the MATLAB work-space.
-    mwSize coord_dims[]   = { num_baselines, num_times};
-    mwSize amp_dims[]     = {num_baselines, num_times, num_channels};
-    mwSize station_dims[] = { num_stations };
+    mwSize coord_dims[]    = { num_baselines, num_times};
+    mwSize amp_dims[]      = {num_baselines, num_times, num_channels};
+    mwSize station_dims[]  = { num_stations };
     mwSize baseline_dims[] = { num_baselines };
     mxClassID class_id    = (oskar_mem_precision(oskar_vis_amplitude_const(v_in)) ==
             OSKAR_DOUBLE) ? mxDOUBLE_CLASS : mxSINGLE_CLASS;
@@ -80,18 +83,14 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
     mxArray* stationIdxP_ = mxCreateNumericArray(1, baseline_dims, mxINT32_CLASS, mxREAL);
     mxArray* stationIdxQ_ = mxCreateNumericArray(1, baseline_dims, mxINT32_CLASS, mxREAL);
     mxArray* xx_ = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
-    mxArray *yy_ = NULL, *xy_ = NULL, *yx_ = NULL;
-    mxArray *I_ = NULL, *Q_ = NULL, *U_ = NULL, *V_ = NULL;
-    if (num_pols == 4)
-    {
-        xy_ = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
-        yx_ = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
-        yy_ = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
-        I_  = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
-        Q_  = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
-        U_  = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
-        V_  = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
-    }
+    mxArray* xy_ = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
+    mxArray* yx_ = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
+    mxArray* yy_ = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
+    mxArray* I_  = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
+    // NOTE removed QUV as these are un-calibrated so could be confusing...
+//    mxArray* Q_  = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
+//    mxArray* U_  = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
+//    mxArray* V_  = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
 
     // Create time and frequency arrays.
     mwSize time_dims[1] = { num_times };
@@ -117,55 +116,42 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
     if (class_id == mxDOUBLE_CLASS)
     {
         element_size = sizeof(double);
-
         double* xx_r = (double*)mxGetPr(xx_);
         double* xx_i = (double*)mxGetPi(xx_);
-        double *xy_r = NULL, *xy_i = NULL;
-        double *yx_r = NULL, *yx_i = NULL;
-        double *yy_r = NULL, *yy_i = NULL;
-        double *I_r  = NULL, *I_i  = NULL;
-        double *Q_r  = NULL, *Q_i  = NULL;
-        double *U_r  = NULL, *U_i  = NULL;
-        double *V_r  = NULL, *V_i  = NULL;
-        if (num_pols == 4)
-        {
-            xy_r = (double*)mxGetPr(xy_); xy_i = (double*)mxGetPi(xy_);
-            yx_r = (double*)mxGetPr(yx_); yx_i = (double*)mxGetPi(yx_);
-            yy_r = (double*)mxGetPr(yy_); yy_i = (double*)mxGetPi(yy_);
-            I_r  = (double*)mxGetPr(I_);  I_i  = (double*)mxGetPi(I_);
-            Q_r  = (double*)mxGetPr(Q_);  Q_i  = (double*)mxGetPi(Q_);
-            U_r  = (double*)mxGetPr(U_);  U_i  = (double*)mxGetPi(U_);
-            V_r  = (double*)mxGetPr(V_);  V_i  = (double*)mxGetPi(V_);
-        }
+        double* xy_r = (double*)mxGetPr(xy_);
+        double* xy_i = (double*)mxGetPi(xy_);
+        double* yx_r = (double*)mxGetPr(yx_);
+        double* yx_i = (double*)mxGetPi(yx_);
+        double* yy_r = (double*)mxGetPr(yy_);
+        double* yy_i = (double*)mxGetPi(yy_);
+        double* I_r  = (double*)mxGetPr(I_);
+        double* I_i  = (double*)mxGetPi(I_);
+//        double* Q_r  = (double*)mxGetPr(Q_);
+//        double* Q_i  = (double*)mxGetPi(Q_);
+//        double* U_r  = (double*)mxGetPr(U_);
+//        double* U_i  = (double*)mxGetPi(U_);
+//        double* V_r  = (double*)mxGetPr(V_);
+//        double* V_i  = (double*)mxGetPi(V_);
 
         for (int i = 0; i < num_channels * num_times * num_baselines; ++i)
         {
-
-            if (num_pols == 1)
-            {
-                const double2* amp_ = (const double2*) amp;
-                xx_r[i] = amp_[i].x; xx_i[i] = amp_[i].y;
-            }
-            else
-            {
-                const double4c* amp_ = (const double4c*) amp;
-                xx_r[i] = amp_[i].a.x; xx_i[i] = amp_[i].a.y;
-                xy_r[i] = amp_[i].b.x; xy_i[i] = amp_[i].b.y;
-                yx_r[i] = amp_[i].c.x; yx_i[i] = amp_[i].c.y;
-                yy_r[i] = amp_[i].d.x; yy_i[i] = amp_[i].d.y;
-                // I = 0.5 (XX + YY)
-                I_r[i] =  0.5 * (xx_r[i] + yy_r[i]);
-                I_i[i] =  0.5 * (xx_i[i] + yy_i[i]);
-                // Q = 0.5 (XX - YY)
-                Q_r[i] =  0.5 * (xx_r[i] - yy_r[i]);
-                Q_i[i] =  0.5 * (xx_i[i] - yy_i[i]);
-                // U = 0.5 (XY + YX)
-                U_r[i] =  0.5 * (xy_r[i] + yx_r[i]);
-                U_i[i] =  0.5 * (xy_i[i] + yx_i[i]);
-                // V = -0.5i (XY - YX)
-                V_r[i] =  0.5 * (xy_i[i] - yx_i[i]);
-                V_i[i] = -0.5 * (xy_r[i] - yx_r[i]);
-            }
+            const double4c* amp_ = (const double4c*) amp;
+            xx_r[i] = amp_[i].a.x; xx_i[i] = amp_[i].a.y;
+            xy_r[i] = amp_[i].b.x; xy_i[i] = amp_[i].b.y;
+            yx_r[i] = amp_[i].c.x; yx_i[i] = amp_[i].c.y;
+            yy_r[i] = amp_[i].d.x; yy_i[i] = amp_[i].d.y;
+            // I = 0.5 (XX + YY)
+            I_r[i] =  0.5 * (xx_r[i] + yy_r[i]);
+            I_i[i] =  0.5 * (xx_i[i] + yy_i[i]);
+//            // Q = 0.5 (XX - YY)
+//            Q_r[i] =  0.5 * (xx_r[i] - yy_r[i]);
+//            Q_i[i] =  0.5 * (xx_i[i] - yy_i[i]);
+//            // U = 0.5 (XY + YX)
+//            U_r[i] =  0.5 * (xy_r[i] + yx_r[i]);
+//            U_i[i] =  0.5 * (xy_i[i] + yx_i[i]);
+//            // V = -0.5i (XY - YX)
+//            V_r[i] =  0.5 * (xy_i[i] - yx_i[i]);
+//            V_i[i] = -0.5 * (xy_r[i] - yx_r[i]);
         }
 
         double* t_vis = (double*)mxGetData(time);
@@ -189,53 +175,40 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
 
         float* xx_r = (float*)mxGetPr(xx_);
         float* xx_i = (float*)mxGetPi(xx_);
-        float *xy_r = NULL, *xy_i = NULL;
-        float *yx_r = NULL, *yx_i = NULL;
-        float *yy_r = NULL, *yy_i = NULL;
-        float *I_r  = NULL, *I_i  = NULL;
-        float *Q_r  = NULL, *Q_i  = NULL;
-        float *U_r  = NULL, *U_i  = NULL;
-        float *V_r  = NULL, *V_i  = NULL;
-        if (num_pols == 4)
-        {
-            xy_r = (float*)mxGetPr(xy_); xy_i = (float*)mxGetPi(xy_);
-            yx_r = (float*)mxGetPr(yx_); yx_i = (float*)mxGetPi(yx_);
-            yy_r = (float*)mxGetPr(yy_); yy_i = (float*)mxGetPi(yy_);
-            I_r  = (float*)mxGetPr(I_);  I_i  = (float*)mxGetPi(I_);
-            Q_r  = (float*)mxGetPr(Q_);  Q_i  = (float*)mxGetPi(Q_);
-            U_r  = (float*)mxGetPr(U_);  U_i  = (float*)mxGetPi(U_);
-            V_r  = (float*)mxGetPr(V_);  V_i  = (float*)mxGetPi(V_);
-
-        }
+        float* xy_r = (float*)mxGetPr(xy_);
+        float* xy_i = (float*)mxGetPi(xy_);
+        float* yx_r = (float*)mxGetPr(yx_);
+        float* yx_i = (float*)mxGetPi(yx_);
+        float* yy_r = (float*)mxGetPr(yy_);
+        float* yy_i = (float*)mxGetPi(yy_);
+        float* I_r  = (float*)mxGetPr(I_);
+        float* I_i  = (float*)mxGetPi(I_);
+//        float* Q_r  = (float*)mxGetPr(Q_);
+//        float* Q_i  = (float*)mxGetPi(Q_);
+//        float* U_r  = (float*)mxGetPr(U_);
+//        float* U_i  = (float*)mxGetPi(U_);
+//        float* V_r  = (float*)mxGetPr(V_);
+//        float* V_i  = (float*)mxGetPi(V_);
 
         for (int i = 0; i < num_channels * num_times * num_baselines; ++i)
         {
-
-            if (num_pols == 1)
-            {
-                const float2* amp_ = (const float2*) amp;
-                xx_r[i] = amp_[i].x; xx_i[i] = amp_[i].y;
-            }
-            else
-            {
-                const float4c* amp_ = (const float4c*) amp;
-                xx_r[i] = amp_[i].a.x; xx_i[i] = amp_[i].a.y;
-                xy_r[i] = amp_[i].b.x; xy_i[i] = amp_[i].b.y;
-                yx_r[i] = amp_[i].c.x; yx_i[i] = amp_[i].c.y;
-                yy_r[i] = amp_[i].d.x; yy_i[i] = amp_[i].d.y;
-                // I = 0.5 (XX + YY)
-                I_r[i]  =  0.5 * (xx_r[i] + yy_r[i]);
-                I_i[i]  =  0.5 * (xx_i[i] + yy_i[i]);
-                // Q = 0.5 (XX - YY)
-                Q_r[i]  =  0.5 * (xx_r[i] - yy_r[i]);
-                Q_i[i]  =  0.5 * (xx_i[i] - yy_i[i]);
-                // U = 0.5 (XY + YX)
-                U_r[i]  =  0.5 * (xy_r[i] + yx_r[i]);
-                U_i[i]  =  0.5 * (xy_i[i] + yx_i[i]);
-                // V = -0.5i (XY - YX)
-                V_r[i]  =  0.5 * (xy_i[i] - yx_i[i]);
-                V_i[i]  = -0.5 * (xy_r[i] - yx_r[i]);
-            }
+            const float4c* amp_ = (const float4c*) amp;
+            xx_r[i] = amp_[i].a.x; xx_i[i] = amp_[i].a.y;
+            xy_r[i] = amp_[i].b.x; xy_i[i] = amp_[i].b.y;
+            yx_r[i] = amp_[i].c.x; yx_i[i] = amp_[i].c.y;
+            yy_r[i] = amp_[i].d.x; yy_i[i] = amp_[i].d.y;
+            // I = 0.5 (XX + YY)
+            I_r[i]  =  0.5 * (xx_r[i] + yy_r[i]);
+            I_i[i]  =  0.5 * (xx_i[i] + yy_i[i]);
+//            // Q = 0.5 (XX - YY)
+//            Q_r[i]  =  0.5 * (xx_r[i] - yy_r[i]);
+//            Q_i[i]  =  0.5 * (xx_i[i] - yy_i[i]);
+//            // U = 0.5 (XY + YX)
+//            U_r[i]  =  0.5 * (xy_r[i] + yx_r[i]);
+//            U_i[i]  =  0.5 * (xy_i[i] + yx_i[i]);
+//            // V = -0.5i (XY - YX)
+//            V_r[i]  =  0.5 * (xy_i[i] - yx_i[i]);
+//            V_i[i]  = -0.5 * (xy_r[i] - yx_r[i]);
         }
         float* t_vis = (float*)mxGetData(time);
         float interval = oskar_vis_time_inc_seconds(v_in);
@@ -277,98 +250,58 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
     memcpy(mxGetData(stationOritentationY_), oskar_mem_void_const(
             oskar_vis_station_orientation_y_deg_const(v_in)), mem_size);
 
-    if (num_pols == 4)
-    {
-        const char* fields[] = {
-                "filename",
-                "date",
-                "settings_path",
-                "settings",
-                "log",
-                "telescope",
-                "num_channels",
-                "num_times",
-                "num_stations",
-                "num_baselines",
-                "freq_start_hz",
-                "freq_inc_hz",
-                "channel_bandwidth_hz",
-                "time_start_mjd_utc",
-                "time_inc_seconds",
-                "phase_centre_ra_deg",
-                "phase_centre_dec_deg",
-                "frequency",
-                "time",
-                "telescope_lon",
-                "telescope_lat",
-                "coord_units",
-                "station_x",
-                "station_y",
-                "station_z",
-                "station_lon",
-                "station_lat",
-                "station_orientation_x",
-                "station_orientation_y",
-                "uu",
-                "vv",
-                "ww",
-                "station_index_p",
-                "station_index_q",
-                "axis_order",
-                "xx",
-                "xy",
-                "yx",
-                "yy",
-                "I",
-                "Q",
-                "U",
-                "V"};
-        int nFields = sizeof(fields)/sizeof(char*);
-        v_out = mxCreateStructMatrix(1, 1, nFields, fields);
-    }
-    else
-    {
-        const char* fields[] = {
-                "filename",
-                "date",
-                "settings_path",
-                "settings",
-                "log",
-                "telescope",
-                "num_channels",
-                "num_times",
-                "num_stations",
-                "num_baselines",
-                "freq_start_hz",
-                "freq_inc_hz",
-                "channel_bandwidth_hz",
-                "time_start_mjd_utc",
-                "time_inc_seconds",
-                "phase_centre_ra_deg",
-                "phase_centre_dec_deg",
-                "frequency",
-                "time",
-                "telescope_lon",
-                "telescope_lat",
-                "coord_units",
-                "station_x",
-                "station_y",
-                "station_z",
-                "station_lon",
-                "station_lat",
-                "station_orientation_x",
-                "station_orientation_y",
-                "uu",
-                "vv",
-                "ww",
-                "station_index_p",
-                "station_index_q",
-                "axis_order",
-                "xx"};
-        int nFields = sizeof(fields)/sizeof(char*);
-        v_out = mxCreateStructMatrix(1, 1, nFields, fields);
-    }
+    const char* fields[] = {
+            "filename",
+            "creation_date",
+            "settings_file_path",
+            "simulation_settings",
+            "simulation_log",
+            "telescope_name",
 
+            "num_channels",
+            "num_times",
+            "num_stations",
+            "num_baselines",
+            "num_polarisations",
+            "freq_start_hz",
+            "freq_inc_hz",
+            "frequency_hz",
+
+            "channel_bandwidth_hz",
+            "time_start_mjd_utc",
+            "time_inc_seconds",
+            "time_int_seconds",
+            "phase_centre_ra_deg",
+            "phase_centre_dec_deg",
+            "telescope_lon_deg",
+            "telescope_lat_deg",
+
+            "time_mjd_utc_seconds",
+            "station_x_metres",
+            "station_y_metres",
+            "station_z_metres",
+            "station_lon_deg",
+            "station_lat_deg",
+            "station_orientation_x_deg",
+            "station_orientation_y_deg",
+
+            "uu_metres",
+            "vv_metres",
+            "ww_metres",
+            "station_index_p",
+            "station_index_q",
+            "axis_order",
+            "xx_Jy",
+            "xy_Jy",
+            "yx_Jy",
+            "yy_Jy",
+            "I_Jy",
+//            "Q_Jy",
+//            "U_Jy",
+//            "V_Jy"
+    };
+    int nFields = sizeof(fields)/sizeof(char*);
+    v_out = mxCreateStructMatrix(1, 1, nFields, fields);
 
     // If possible, load the settings and log.
     if (filename != NULL)
@@ -394,7 +327,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
             if (status)
                 mexErrMsgTxt("ERROR: Failed reading settings from visibility file.\n");
             (oskar_mem_char(temp))[(int)oskar_mem_length(temp) - 1] = 0;
-            mxSetField(v_out, 0, "settings", mxCreateString(oskar_mem_char(temp)));
+            mxSetField(v_out, 0, "simulation_settings", mxCreateString(oskar_mem_char(temp)));
             oskar_mem_free(temp, &status);
             free(temp); // FIXME Remove after updating oskar_mem_free().
         }
@@ -410,7 +343,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
             if (status)
                 mexErrMsgTxt("ERROR: Failed reading log from visibility file.\n");
             (oskar_mem_char(temp))[(int)oskar_mem_length(temp) - 1] = 0;
-            mxSetField(v_out, 0, "log", mxCreateString(oskar_mem_char(temp)));
+            mxSetField(v_out, 0, "simulation_log", mxCreateString(oskar_mem_char(temp)));
             oskar_mem_free(temp, &status);
             free(temp); // FIXME Remove after updating oskar_mem_free().
         }
@@ -421,10 +354,10 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
     /* Populate structure TODO convert some of this to nested structure format? */
     if (filename != NULL)
         mxSetField(v_out, 0, "filename", mxCreateString(filename));
-    mxSetField(v_out, 0, "date", mxCreateString((char*)date->data));
-    mxSetField(v_out, 0, "settings_path", mxCreateString(
+    mxSetField(v_out, 0, "creation_date", mxCreateString((char*)date->data));
+    mxSetField(v_out, 0, "settings_file_path", mxCreateString(
             oskar_mem_char_const(oskar_vis_settings_path_const(v_in))));
-    mxSetField(v_out, 0, "telescope", mxCreateString(
+    mxSetField(v_out, 0, "telescope_name", mxCreateString(
             oskar_mem_char_const(oskar_vis_telescope_path_const(v_in))));
     mxSetField(v_out, 0, "num_channels",
             mxCreateDoubleScalar((double)num_channels));
@@ -434,6 +367,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
             mxCreateDoubleScalar((double)num_stations));
     mxSetField(v_out, 0, "num_baselines",
             mxCreateDoubleScalar((double)num_baselines));
+    mxSetField(v_out, 0, "num_polarisations", mxCreateDoubleScalar(4));
     mxSetField(v_out, 0, "freq_start_hz",
             mxCreateDoubleScalar(oskar_vis_freq_start_hz(v_in)));
     mxSetField(v_out, 0, "freq_inc_hz",
@@ -444,42 +378,39 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
             mxCreateDoubleScalar(oskar_vis_time_start_mjd_utc(v_in)));
     mxSetField(v_out, 0, "time_inc_seconds",
             mxCreateDoubleScalar(oskar_vis_time_inc_seconds(v_in)));
+    mxSetField(v_out, 0, "time_int_seconds",
+            mxCreateDoubleScalar(oskar_vis_time_int_seconds(v_in)));
     mxSetField(v_out, 0, "phase_centre_ra_deg",
             mxCreateDoubleScalar(oskar_vis_phase_centre_ra_deg(v_in)));
     mxSetField(v_out, 0, "phase_centre_dec_deg",
             mxCreateDoubleScalar(oskar_vis_phase_centre_dec_deg(v_in)));
-    mxSetField(v_out, 0, "frequency", frequency);
-    mxSetField(v_out, 0, "time", time);
-    mxSetField(v_out, 0, "telescope_lon",
+    mxSetField(v_out, 0, "frequency_hz", frequency);
+    mxSetField(v_out, 0, "time_mjd_utc_seconds", time);
+    mxSetField(v_out, 0, "telescope_lon_deg",
             mxCreateDoubleScalar(oskar_vis_telescope_lon_deg(v_in)));
-    mxSetField(v_out, 0, "telescope_lat",
+    mxSetField(v_out, 0, "telescope_lat_deg",
             mxCreateDoubleScalar(oskar_vis_telescope_lat_deg(v_in)));
-    mxSetField(v_out, 0, "coord_units", mxCreateString("metres"));
-    mxSetField(v_out, 0, "station_x", x_);
-    mxSetField(v_out, 0, "station_y", y_);
-    mxSetField(v_out, 0, "station_z", z_);
-    mxSetField(v_out, 0, "station_lon", stationLon_);
-    mxSetField(v_out, 0, "station_lat", stationLat_);
-    mxSetField(v_out, 0, "station_orientation_x", stationOritentationX_);
-    mxSetField(v_out, 0, "station_orientation_y", stationOritentationY_);
-    mxSetField(v_out, 0, "uu", uu_);
-    mxSetField(v_out, 0, "vv", vv_);
-    mxSetField(v_out, 0, "ww", ww_);
+    mxSetField(v_out, 0, "station_x_metres", x_);
+    mxSetField(v_out, 0, "station_y_metres", y_);
+    mxSetField(v_out, 0, "station_z_metres", z_);
+    mxSetField(v_out, 0, "station_lon_deg", stationLon_);
+    mxSetField(v_out, 0, "station_lat_deg", stationLat_);
+    mxSetField(v_out, 0, "station_orientation_x_deg", stationOritentationX_);
+    mxSetField(v_out, 0, "station_orientation_y_deg", stationOritentationY_);
+    mxSetField(v_out, 0, "uu_metres", uu_);
+    mxSetField(v_out, 0, "vv_metres", vv_);
+    mxSetField(v_out, 0, "ww_metres", ww_);
     mxSetField(v_out, 0, "station_index_p", stationIdxP_);
     mxSetField(v_out, 0, "station_index_q", stationIdxQ_);
     mxSetField(v_out, 0, "axis_order", mxCreateString("baseline x time x channel"));
-    mxSetField(v_out, 0, "xx", xx_);
-    if (num_pols == 4)
-    {
-        mxSetField(v_out, 0, "xy", xy_);
-        mxSetField(v_out, 0, "yx", yx_);
-        mxSetField(v_out, 0, "yy", yy_);
-        mxSetField(v_out, 0, "I", I_);
-        mxSetField(v_out, 0, "Q", Q_);
-        mxSetField(v_out, 0, "U", U_);
-        mxSetField(v_out, 0, "V", V_);
-    }
-
+    mxSetField(v_out, 0, "xx_Jy", xx_);
+    mxSetField(v_out, 0, "xy_Jy", xy_);
+    mxSetField(v_out, 0, "yx_Jy", yx_);
+    mxSetField(v_out, 0, "yy_Jy", yy_);
+    mxSetField(v_out, 0, "I_Jy", I_);
+//    mxSetField(v_out, 0, "Q_Jy", Q_);
+//    mxSetField(v_out, 0, "U_Jy", U_);
+//    mxSetField(v_out, 0, "V_Jy", V_);
 
     return v_out;
 }

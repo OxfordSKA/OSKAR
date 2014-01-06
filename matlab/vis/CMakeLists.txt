@@ -10,10 +10,8 @@ add_library(mex_vis STATIC
 # Build mex functions.
 set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+oskar/+vis")
 
-oskar_mex(read oskar_mex_vis_read.cpp
-    LIBS oskar mex_vis)
-#oskar_mex(write oskar_mex_vis_write.cpp
-#    LIBS oskar mex_vis)
+oskar_mex(read oskar_mex_vis_read.cpp LIBS oskar mex_vis)
+oskar_mex(write oskar_mex_vis_write.cpp LIBS oskar mex_vis)
 oskar_mex(evaluate_baseline_uvw oskar_mex_evaluate_baseline_uvw.cpp
     LIBS oskar mex_vis)
 

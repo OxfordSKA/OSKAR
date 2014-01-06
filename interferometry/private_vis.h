@@ -67,12 +67,18 @@
  */
 struct oskar_Vis
 {
+    // Maybe the two following fields should only be in the binary file as
+    // on loading visibilities there is no guarantee these paths are still
+    // valid ... ? Think about this more when working out how to deal with
+    // files that done fit into RAM...
     oskar_Mem settings_path;     /**< Path to settings file. */
     oskar_Mem telescope_path;    /**< Path to telescope model. */
+
     int num_channels;            /**< Number of frequency channels. */
     int num_times;               /**< Number of time samples. */
     int num_stations;            /**< Number of interferometer stations. */
     int num_baselines;           /**< Number of interferometer baselines. */
+
     double freq_start_hz;        /**< Start Frequency, in Hz. */
     double freq_inc_hz;          /**< Frequency increment, in Hz. */
     double channel_bandwidth_hz; /**< Frequency channel bandwidth, in Hz */
