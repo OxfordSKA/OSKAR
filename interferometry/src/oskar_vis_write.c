@@ -133,8 +133,8 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     }
 
     /* Write the telescope model path. */
-    oskar_mem_binary_stream_write(&vis->telescope_path, stream,
-            grp, OSKAR_VIS_TAG_TELESCOPE_PATH, 0, 0, status);
+    oskar_mem_binary_stream_write(&vis->telescope_path, stream, grp,
+            OSKAR_VIS_TAG_TELESCOPE_PATH, 0, 0, status);
 
     /* Write dimensions. */
     oskar_binary_stream_write_int(stream, grp,

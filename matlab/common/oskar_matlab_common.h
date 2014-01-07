@@ -56,7 +56,7 @@ void oskar_matlab_usage(const char* rtns, const char* package, const char* funct
         {
             mexErrMsgIdAndTxt("OSKAR:ERROR",
                     "\n"
-                    "ERROR:\n\tInvalid arguments.\n"
+                    "ERROR:\n\tFunction called with invalid arguments or return values.\n"
                     "\n"
                     "Usage:\n"
                     "\toskar.%s.%s(%s)\n"
@@ -67,7 +67,7 @@ void oskar_matlab_usage(const char* rtns, const char* package, const char* funct
         {
             mexErrMsgIdAndTxt("OSKAR:ERROR",
                     "\n"
-                    "ERROR:\n\tInvalid arguments.\n"
+                    "ERROR:\n\tFunction called with invalid arguments or return values.\n"
                     "\n"
                     "Usage:\n"
                     "\toskar.%s.%s(%s)\n"
@@ -84,7 +84,7 @@ void oskar_matlab_usage(const char* rtns, const char* package, const char* funct
         {
             mexErrMsgIdAndTxt("OSKAR:ERROR",
                     "\n"
-                    "ERROR:\n\tInvalid arguments.\n"
+                    "ERROR:\n\tFunction called with invalid arguments or return values.\n"
                     "\n"
                     "Usage:\n"
                     "\t%s = oskar.%s.%s(%s)\n"
@@ -95,7 +95,7 @@ void oskar_matlab_usage(const char* rtns, const char* package, const char* funct
         {
             mexErrMsgIdAndTxt("OSKAR:ERROR",
                     "\n"
-                    "ERROR:\n\tInvalid arguments.\n"
+                    "ERROR:\n\tFunction called with invalid arguments or return values.\n"
                     "\n"
                     "Usage:\n"
                     "\t%s = oskar.%s.%s(%s)\n"
