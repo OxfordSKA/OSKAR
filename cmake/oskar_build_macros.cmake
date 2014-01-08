@@ -374,6 +374,7 @@ macro(OSKAR_MEX)
             LINK_FLAGS    "${MATLAB_LINK_FLAGS}")
     else()
         set_target_properties(${target} PROPERTIES
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
             INSTALL_RPATH_USE_LINK_PATH TRUE
             OUTPUT_NAME   "${MEX_NAME}"
             PREFIX        ""

@@ -65,6 +65,10 @@ oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in)
      *  - uu_metres
      *  - vv_metres
      *  - freq_start_hz
+     *  - Amplitude (either LINEAR or Stokes-I)
+     *
+     *  - If dimensions are specified these have to match coordinates and
+     *    amplitude arrays.
      */
 
     mxArray* uu_ = mxGetField(v_in, 0, "uu_metres");
@@ -74,13 +78,21 @@ oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in)
     mxArray* freq_start_hz_ = mxGetField(v_in, 0, "freq_start_hz");
     if (!freq_start_hz_) error_field_("freq_start_hz");
 
-    /* Note: This assumes visibility files are ALWAYS polarised */
-    int num_pols = 4;
+    mxArray* xx_ = mxGetField(v_in, 0, "xx_Jy");
+    mxArray *xy_ = mxGetField(v_in, 0, "xy_Jy");
+    mxArray* yx_ = mxGetField(v_in, 0, "yx_Jy");
+    mxArray* yy_ = mxGetField(v_in, 0, "yy_Jy");
+    mxArray* I_  = mxGetField(v_in, 0, "I_Jy");
+    if (!(xx_ && xy_ && yx_ && yy_) || !I_)
+        error_field_("xx_Jy, xy_Jy, yx_Jy, yy_Jy or I_Jy");
+
+
+
+    int num_pols = 4; // Note: Assumes visibility files are ALWAYS polarised.
     int num_channels = 1;
     int num_times = 1;
     int num_baselines = 1;
     int num_stations = 1;
-
 
 
     /* Get the data type */
@@ -163,12 +175,6 @@ oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in)
     mxArray* ww_ = mxGetField(v_in, 0, "ww_metres");
     // TODO warning rather than error for ww
 
-    /* Visibility amplitudes */
-    mxArray* xx_ = mxGetField(v_in, 0, "xx_Jy");
-    mxArray *xy_ = mxGetField(v_in, 0, "xy_Jy");
-    mxArray* yx_ = mxGetField(v_in, 0, "yx_Jy");
-    mxArray* yy_ = mxGetField(v_in, 0, "yy_Jy");
-    mxArray* I_  = mxGetField(v_in, 0, "I_Jy");
 
     /*
      * Read non- OSKAR visibility fields for consistency checking.
