@@ -81,6 +81,8 @@ oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in)
     int num_baselines = 1;
     int num_stations = 1;
 
+
+
     /* Get the data type */
 
     int type = 0;
@@ -110,9 +112,6 @@ oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in)
     // num_baselines
     mxArray* num_baselines_ = mxGetField(v_in, 0, "num_baselines");
     if (!num_baselines_) error_field_("num_baselines");
-    // freq_start_hz
-    mxArray* freq_start_hz_ = mxGetField(v_in, 0, "freq_start_hz");
-    if (!freq_start_hz_) error_field_("freq_start_hz");
     // freq_inc_hz
     mxArray* freq_inc_hz_ = mxGetField(v_in, 0, "freq_inc_hz");
     if (!freq_inc_hz_) error_field_("freq_inc_hz");
@@ -160,11 +159,7 @@ oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in)
     mxArray* station_orientation_x_ = mxGetField(v_in, 0, "station_orientation_x_deg");
     mxArray* station_orientation_y_ = mxGetField(v_in, 0, "station_orientation_y_deg");
 
-    /* Baseline co-ordinates */
-    mxArray* uu_ = mxGetField(v_in, 0, "uu_metres");
-    if (!uu_) error_field_("uu_metres");
-    mxArray* vv_ = mxGetField(v_in, 0, "vv_metres");
-    if (!vv_) error_field_("vv_metres");
+    /* Other Baseline co-ordinates. uu, vv already checked as they are required */
     mxArray* ww_ = mxGetField(v_in, 0, "ww_metres");
     // TODO warning rather than error for ww
 
@@ -183,13 +178,11 @@ oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in)
     mxArray* time_ = mxGetField(v_in, 0, "time_mjd_utc_seconds");
     mxArray* axis_order_ = mxGetField(v_in, 0, "axis_order");
 
-
-
     /* Get the data dimensions */
-    int num_baselines = (int)mxGetScalar(num_baselines_);
-    int num_times     = (int)mxGetScalar(num_times_);
-    int num_channels  = (int)mxGetScalar(num_channels_);
-    int num_stations = 0;
+    num_baselines = (int)mxGetScalar(num_baselines_);
+    num_times     = (int)mxGetScalar(num_times_);
+    num_channels  = (int)mxGetScalar(num_channels_);
+    num_stations = 0;
     if (num_stations_) /* Note: number of stations is optional */
         num_stations  = (int)mxGetScalar(num_stations_);
     else
