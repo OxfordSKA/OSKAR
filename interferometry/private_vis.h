@@ -67,10 +67,10 @@
  */
 struct oskar_Vis
 {
-    // Maybe the two following fields should only be in the binary file as
-    // on loading visibilities there is no guarantee these paths are still
-    // valid ... ? Think about this more when working out how to deal with
-    // files that done fit into RAM...
+    /* Maybe the two following fields should only be in the binary file as
+     * on loading visibilities there is no guarantee these paths are still
+     * valid ... ? Think about this more when working out how to deal with
+     * files that done fit into RAM... */
     oskar_Mem settings_path;     /**< Path to settings file. */
     oskar_Mem telescope_path;    /**< Path to telescope model. */
 

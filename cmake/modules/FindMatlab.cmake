@@ -98,6 +98,17 @@ else (WIN32)
                 PATH_SUFFIXES ${MATLAB_LIB_SUFFIXES}
                 NO_DEFAULT_PATH)
         endforeach ()
+        # HACK TO MAKE R2013b work - this seems to have dropped Qt inside the
+        # matlab folder so need to use the system one instead.
+        if (    NOT MATLAB_QT_QTCORE_LIBRARY_FOUND AND 
+                NOT MATLAB_QT_QTXML_LIBRARY_FOUND AND 
+                NOT MATLAB_QT_QTGUI_LIBRARY_FOUND
+            )
+            find_package(Qt4 QUIET)
+            set(MATLAB_QT_QTCORE_LIBRARY ${QT_QTCORE_LIBRARY})
+            set(MATLAB_QT_QTXML_LIBRARY ${QT_QTXML_LIBRARY})
+            set(MATLAB_QT_QTGUI_LIBRARY ${QT_QTGUI_LIBRARY})
+        endif()
     endif()
 
     find_path(MATLAB_INCLUDE_DIR "mex.h"
@@ -120,7 +131,7 @@ find_path(MATLAB_BINARY_DIR matlab
     PATH_SUFFIXES /bin
     NO_DEFAULT_PATH)
 
-if(MATLAB_INCLUDE_DIR AND MATLAB_LIBRARIES AND MATLAB_BINARY_DIR)
+if(MATLAB_INCLUDE_DIR AND MATLAB_LIBRARIES AND MATLAB_BINARY_DIR AND MATLAB_QT_QTCORE_LIBRARY_FOUND)
     set(MATLAB_FOUND TRUE)
 endif(MATLAB_INCLUDE_DIR AND MATLAB_LIBRARIES AND MATLAB_BINARY_DIR)
 
