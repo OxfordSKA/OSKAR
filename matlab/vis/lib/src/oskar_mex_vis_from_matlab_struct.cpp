@@ -77,32 +77,102 @@ oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in)
     if (!vv_) error_field_("vv_metres");
     mxArray* freq_start_hz_ = mxGetField(v_in, 0, "freq_start_hz");
     if (!freq_start_hz_) error_field_("freq_start_hz");
-
     mxArray* xx_ = mxGetField(v_in, 0, "xx_Jy");
     mxArray *xy_ = mxGetField(v_in, 0, "xy_Jy");
     mxArray* yx_ = mxGetField(v_in, 0, "yx_Jy");
     mxArray* yy_ = mxGetField(v_in, 0, "yy_Jy");
     mxArray* I_  = mxGetField(v_in, 0, "I_Jy");
-    if (!(xx_ && xy_ && yx_ && yy_) || !I_)
-        error_field_("xx_Jy, xy_Jy, yx_Jy, yy_Jy or I_Jy");
 
+    if (!((xx_ && xy_ && yx_ && yy_) || I_))
+        error_field_("amplitude (xx_Jy, xy_Jy, yx_Jy, and yy_Jy -or- I_Jy)");
 
+    // Get the data type
+    int type = 0;
+    if (mxIsDouble(uu_)) type = OSKAR_DOUBLE;
+    else if (mxIsSingle(uu_)) type = OSKAR_SINGLE;
+    else mexErrMsgTxt("ERROR: Invalid input visibility structure. Data arrays "
+            "must be either float or double precision.\n");
 
+    // Resolve dimensions
     int num_pols = 4; // Note: Assumes visibility files are ALWAYS polarised.
     int num_channels = 1;
     int num_times = 1;
     int num_baselines = 1;
     int num_stations = 1;
+    mxArray* num_channels_ = mxGetField(v_in, 0, "num_channels");
+    mxArray* num_times_ = mxGetField(v_in, 0, "num_times");
+    mxArray* num_stations_ = mxGetField(v_in, 0, "num_stations");
+    mxArray* num_baselines_ = mxGetField(v_in, 0, "num_baselines");
+    // If dimensions are not specified, REQUIRE data arrays to be 1D
+    // i.e. num_channels == 1, num_times == 1, length = num_baselines
+
+    // First try to set dimensions from structure fields.
+    if (num_channels_) num_channels = (int)mxGetScalar(num_channels_);
+    if (num_times_) num_times = (int)mxGetScalar(num_times_);
+    if (num_baselines_) num_baselines = (int)mxGetScalar(num_baselines_);
+    if (num_stations_) num_stations = (int)mxGetScalar(num_stations_);
+
+    // If baselines field exists but not stations work out number of stations.
+    if (!num_stations_ && num_baselines)
+        num_stations = ceil(sqrt(2.0*num_baselines));
+
+    // If dimension fields are not set, expect arrays to be 1D.
+    if (!num_channels_ && !num_times_ && !num_baselines_)
+    {
+        bool ok = (mxGetNumberOfDimensions(uu_) == 1);
+        ok &= (mxGetNumberOfDimensions(vv_) == 1);
+        ok &= (vv_ && mxGetNumberOfDimensions(vv_) == 1);
+        if (xx_ && xy_ && yx_ && yy_) {
+            ok &= (mxGetNumberOfDimensions(xx_) == 1);
+            ok &= (mxGetNumberOfDimensions(yx_) == 1);
+            ok &= (mxGetNumberOfDimensions(yx_) == 1);
+            ok &= (mxGetNumberOfDimensions(yy_) == 1);
+        }
+        else {
+            ok &= (mxGetNumberOfDimensions(I_) == 1);
+        }
+        if (!ok)
+            mexErrMsgTxt("If dimension fields are specified, data arrays must "
+                    "be 1D of length == number of baselines).");
+    }
+
+    // Linear
+    if (xx_ && xy_ && yx_ && yy_)
+    {
+        const mwSize* xxDims = mxGetDimensions(xx_);
+
+    }
+
+    if (!num_channels_) warn_field_("num_channels", "1");
+    if (!num_times_) warn_field_("num_times");
+    if (!num_baselines_) warn_field_("num_baselines");
+    if (!num_stations_) warn_field_("num_stations");
 
 
-    /* Get the data type */
 
-    int type = 0;
-    if (mxIsDouble(uu_)) type = OSKAR_DOUBLE;
-    else if (mxIsSingle(uu_)) type = OSKAR_SINGLE;
-    else mexErrMsgTxt("ERROR: Invalid input vis structure.\n");
 
-    /* Initialise oskar_Vis structure - sets the dimension variables */
+    /* Get the data dimensions */
+    num_baselines = (int)mxGetScalar(num_baselines_);
+    num_times     = (int)mxGetScalar(num_times_);
+    num_channels  = (int)mxGetScalar(num_channels_);
+    num_stations = 0;
+    if (num_stations_) /* Note: number of stations is optional */
+        num_stations  = (int)mxGetScalar(num_stations_);
+    else
+        num_stations = ceil(sqrt(2.0*num_baselines));
+
+    if (num_baselines != (num_stations*(num_stations-1))/2)
+        mexErrMsgTxt("ERROR: Invalid station or baseline dimension");
+
+    int num_dims = mxGetNumberOfDimensions(uu_);
+    if (num_dims > 3) mex_vis_error_("_dimension mismatch");
+    const mwSize* dims = mxGetDimensions(uu_);
+    if ((int)dims[0] != num_baselines) mex_vis_error_("dimension mismatch");
+
+
+
+
+    // Initialise oskar_Vis structure - sets the dimension variables
     int location = OSKAR_LOCATION_CPU;
     v_out = oskar_vis_create(type | OSKAR_COMPLEX | OSKAR_MATRIX,
             location, num_channels, num_times, num_stations, &err);
@@ -112,18 +182,6 @@ oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in)
             "failed with code %i: %s.\n", err, oskar_get_error_string(err));
     }
 
-    // num_channels
-    mxArray* num_channels_ = mxGetField(v_in, 0, "num_channels");
-    if (!num_channels_) warn_field_("num_channels", "1");
-    // num_times
-    mxArray* num_times_ = mxGetField(v_in, 0, "num_times");
-    if (!num_times_) error_field_("num_times");
-    // num_stations
-    mxArray* num_stations_ = mxGetField(v_in, 0, "num_stations");
-    if (!num_stations_) warn_field_("num_stations");
-    // num_baselines
-    mxArray* num_baselines_ = mxGetField(v_in, 0, "num_baselines");
-    if (!num_baselines_) error_field_("num_baselines");
     // freq_inc_hz
     mxArray* freq_inc_hz_ = mxGetField(v_in, 0, "freq_inc_hz");
     if (!freq_inc_hz_) error_field_("freq_inc_hz");
@@ -183,29 +241,13 @@ oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in)
     mxArray* freq_ = mxGetField(v_in, 0, "frequency_hz");
     mxArray* time_ = mxGetField(v_in, 0, "time_mjd_utc_seconds");
     mxArray* axis_order_ = mxGetField(v_in, 0, "axis_order");
+    // TODO ??
 
-    /* Get the data dimensions */
-    num_baselines = (int)mxGetScalar(num_baselines_);
-    num_times     = (int)mxGetScalar(num_times_);
-    num_channels  = (int)mxGetScalar(num_channels_);
-    num_stations = 0;
-    if (num_stations_) /* Note: number of stations is optional */
-        num_stations  = (int)mxGetScalar(num_stations_);
-    else
-        num_stations = ceil(sqrt(2.0*num_baselines));
-
-    /* Perform some consistency checking */
-    if (num_baselines != (num_stations*(num_stations-1))/2)
-        mexErrMsgTxt("ERROR: Invalid station or baseline dimension");
 
     if (axis_order_ && strcmp("baseline x time x channel",
             mxArrayToString(axis_order_)) != 0) {
         mexErrMsgTxt("ERROR: Invalid axis order specified.");
     }
-    int num_dims = mxGetNumberOfDimensions(uu_);
-    if (num_dims > 3) mex_vis_error_("_dimension mismatch");
-    const mwSize* dims = mxGetDimensions(uu_);
-    if ((int)dims[0] != num_baselines) mex_vis_error_("dimension mismatch");
 
     /* Set other (not dimensions) oskar_Vis structure meta-data fields */
 
