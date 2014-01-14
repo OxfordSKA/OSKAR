@@ -73,7 +73,7 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log, int* stat
     oskar_Telescope* tel = oskar_set_up_telescope(log, &settings, status);
     if (*status)
     {
-        oskar_telescope_free(tel, status);
+        if (tel) oskar_telescope_free(tel, status);
         return;
     }
 
@@ -122,6 +122,7 @@ static void load_settings_(oskar_Settings* settings, const char* filename,
             settings->beam_pattern.fits_image_phase ||
             settings->beam_pattern.fits_image_total_intensity))
     {
+        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
         oskar_log_error(log, "No output file(s) specified.");
         return;
     }
