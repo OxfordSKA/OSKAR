@@ -152,6 +152,7 @@ void oskar_telescope_log_summary(const oskar_Telescope* telescope,
     oskar_log_value(log, 1, width, "Identical stations", "%s",
             oskar_telescope_identical_stations(telescope) ? "true" : "false");
 
+#if 0
     /* Switch on whether stations are identical. */
     if (oskar_telescope_identical_stations(telescope) && num_stations > 0)
     {
@@ -170,6 +171,7 @@ void oskar_telescope_log_summary(const oskar_Telescope* telescope,
                     i), log, 1, status);
         }
     }
+#endif
 }
 
 void oskar_station_log_summary(const oskar_Station* station,
