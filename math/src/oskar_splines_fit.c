@@ -302,7 +302,7 @@ void oskar_splines_fit(oskar_Splines* spline, oskar_Log* log,
     {
         if (search_flag)
         {
-            oskar_log_message(log, 1, "Surface fitted to %.3f average "
+            oskar_log_message(log, 1, "Surface fitted to %.4f average "
                     "frac. error (s=%.2e).", avg_frac_err, s);
         }
         else
@@ -313,6 +313,13 @@ void oskar_splines_fit(oskar_Splines* spline, oskar_Log* log,
                 spline->num_knots_x, spline->num_knots_y);
         oskar_log_message(log, 0, "");
     }
+
+    /* Compact the knot and coefficient arrays. */
+    u = spline->num_knots_x - kx - 1;
+    v = spline->num_knots_y - ky - 1;
+    oskar_mem_realloc(&spline->knots_x, spline->num_knots_x, status);
+    oskar_mem_realloc(&spline->knots_y, spline->num_knots_y, status);
+    oskar_mem_realloc(&spline->coeff, u * v, status);
 
     /* Free work arrays. */
     free(iwrk);
