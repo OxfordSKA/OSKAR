@@ -628,7 +628,7 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     k = group + "/gain";
     declare(k, "Element gain", oskar_SettingsItem::DOUBLE);
     setTooltip(k, "Mean element amplitude gain factor. "
-            "If set (and > 0.0), this will override the contents of the station files.");
+            "If set (and &gt; 0.0), this will override the contents of the station files.");
     k = group + "/gain_error_fixed";
     declare(k, "Element gain std.dev. (systematic)", oskar_SettingsItem::DOUBLE);
     setTooltip(k, "Systematic element amplitude gain standard deviation. "
@@ -713,11 +713,11 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     k = group + "/ignore_data_below_horizon";
     declare(k, "Ignore data below horizon", oskar_SettingsItem::BOOL, true);
     setTooltip(k, "If true, then numerical element pattern data points at "
-            "theta > 90 degrees are ignored.");
+            "theta &gt; 90 degrees are ignored.");
     k = group + "/overlap_angle_deg";
     declare(k, "Overlap angle [deg]", oskar_SettingsItem::DOUBLE, 9.0);
     setTooltip(k, "The amount of overlap used for copying numerical element "
-            "pattern data for phi < 0 and phi > 360 degrees. Use carefully "
+            "pattern data for phi &lt; 0 and phi &gt; 360 degrees. Use carefully "
             "to minimise discontinuity at phi = 0.");
     k = group + "/weight_boundaries";
     declare(k, "Weighting at boundaries", oskar_SettingsItem::DOUBLE, 2.0);
@@ -727,7 +727,7 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     k = group + "/weight_overlap";
     declare(k, "Weighting in overlap region", oskar_SettingsItem::DOUBLE, 1.0);
     setTooltip(k, "The weight given to numerical element pattern data at "
-            "phi < 0 and phi > 360 degrees, relative to 1.0. Use "
+            "phi &lt; 0 and phi &gt; 360 degrees, relative to 1.0. Use "
             "carefully to minimise discontinuity at phi = 0.");
     //registerSetting("telescope/station/element_fit/use_common_set", "Use common set", oskar_SettingsItem::BOOL, true);
 
@@ -760,7 +760,7 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     setTooltip(k, "If the fitting procedure fails, this value gives the "
             "factor by which to increase the allowed average fractional "
             "error between the fitted surface and the numerical element "
-            "pattern input data, before trying again. Must be > 1.0.");
+            "pattern input data, before trying again. Must be &gt; 1.0.");
     k = group + "/smoothness_factor_override";
     declare(k, "Smoothness factor override", oskar_SettingsItem::DOUBLE, 1.0);
     setTooltip(k, "Smoothness factor used to fit smoothing splines to "
