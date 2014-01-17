@@ -4,6 +4,7 @@
 
 if (CASACORE_FOUND)
 
+    include_directories(${CASACORE_INCLUDE_DIR})
     include_directories(${CASACORE_INCLUDE_DIR}/casacore)
 
     set(ms_SRC
