@@ -104,10 +104,12 @@ else (WIN32)
                 NOT MATLAB_QT_QTXML_LIBRARY_FOUND AND 
                 NOT MATLAB_QT_QTGUI_LIBRARY_FOUND
             )
-            find_package(Qt4 QUIET)
-            set(MATLAB_QT_QTCORE_LIBRARY ${QT_QTCORE_LIBRARY})
-            set(MATLAB_QT_QTXML_LIBRARY ${QT_QTXML_LIBRARY})
-            set(MATLAB_QT_QTGUI_LIBRARY ${QT_QTGUI_LIBRARY})
+            if (QT4_FOUND)
+                #find_package(Qt4 4.6 QUIET)
+                set(MATLAB_QT_QTCORE_LIBRARY ${QT_QTCORE_LIBRARY})
+                set(MATLAB_QT_QTXML_LIBRARY ${QT_QTXML_LIBRARY})
+                set(MATLAB_QT_QTGUI_LIBRARY ${QT_QTGUI_LIBRARY})
+            endif ()
         endif()
     endif()
 
