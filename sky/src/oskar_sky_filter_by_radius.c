@@ -96,7 +96,7 @@ void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
                     dec0);                       
                     
                 if (!(dist>=(float)inner_radius && dist<(float)outer_radius))
-                    continue                        
+                    continue;                        
 
                 ra_[out]   = ra_[in];
                 dec_[out]  = dec_[in];
@@ -146,7 +146,7 @@ void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
             {
                 dist = oskar_angular_distance(ra_[in], ra0, dec_[in], dec0);
 
-                if (!(dist>=inner_radius && dist<outer_radius)) continue
+                if (!(dist>=inner_radius && dist<outer_radius)) continue;
 
                 ra_[out]   = ra_[in];
                 dec_[out]  = dec_[in];
