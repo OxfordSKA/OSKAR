@@ -100,7 +100,7 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky,
 
             for (in = 0, out = 0; in < num_sources; ++in)
             {
-                if (I_[in] < (float)min_I || I_[in] > (float)max_I) continue;
+                if (!(I_[in] > (float)min_I && I_[in] <= (float)max_I)) continue;
                 ra_[out]   = ra_[in];
                 dec_[out]  = dec_[in];
                 I_[out]    = I_[in];
@@ -145,9 +145,10 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky,
             b_    = oskar_mem_double(oskar_sky_gaussian_b(sky), status);
             c_    = oskar_mem_double(oskar_sky_gaussian_c(sky), status);
 
-            for (in = 0, out = 0; in < num_sources; ++in)
+            for (out = 0, in = 0; in < num_sources; ++in)
             {
-                if (I_[in] < min_I || I_[in] > max_I) continue;
+                if (!(I_[in] > min_I && I_[in] <= max_I)) continue;
+                
                 ra_[out]   = ra_[in];
                 dec_[out]  = dec_[in];
                 I_[out]    = I_[in];
