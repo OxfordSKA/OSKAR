@@ -8,6 +8,9 @@
       on a per-station basis.
 
     * Fixed an issue building the Google unit test library.
+    
+    * Changed the behaviour of sky model filters to include the upper bound in
+      flux, and the lower bound in radius. (Previously, both were excluded.)
 
 2013-11-28  OSKAR-2.3.1
 

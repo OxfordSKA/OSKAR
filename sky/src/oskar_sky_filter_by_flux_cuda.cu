@@ -42,7 +42,7 @@ template<typename T>
 struct is_outside_range
 {
     __host__ __device__
-    bool operator()(const T x) { return (x > max_f || x < min_f); }
+    bool operator()(const T x) { return !(x > (float)min_f && x <= (float)max_f); }
     T min_f;
     T max_f;
 };

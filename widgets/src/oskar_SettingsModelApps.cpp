@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,93 +112,28 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     group = "sky";
     setLabel(group, "Sky model settings");
 
+    // OSKAR sky model settings.
     group = "sky/oskar_sky_model";
     setLabel(group, "OSKAR sky model file settings");
-
     k = group + "/file";
     declare(k, "OSKAR sky model file(s)", oskar_SettingsItem::INPUT_FILE_LIST);
     setTooltip(k, "Paths to one or more OSKAR sky model text or binary files. "
             "See the accompanying documentation for a description of an "
             "OSKAR sky model file.");
+    add_filter_group(group + "/filter");
+    add_extended_group(group + "/extended_sources");
 
-    group = "sky/oskar_sky_model/filter";
-    setLabel(group, "Filter settings");
-    k = group + "/flux_min";
-    declare(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE_MIN, "min");
-    setTooltip(k, "Minimum flux density allowed by the filter, in Jy.");
-    k = group + "/flux_max";
-    declare(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE_MAX, "max");
-    setTooltip(k, "Maximum flux density allowed by the filter, in Jy.");
-    k = group + "/radius_inner_deg";
-    declare(k, "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Minimum angular distance from phase centre allowed by the "
-            "filter, in degrees.");
-    k = group + "/radius_outer_deg";
-    declare(k, "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE, 180.0);
-    setTooltip(k, "Maximum angular distance from phase centre allowed by the "
-            "filter, in degrees.");
-
-#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-    group = "sky/oskar_sky_model/extended_sources";
-    setLabel(group, "Extended source settings");
-    k = group + "/FWHM_major";
-    declare(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Major axis FWHM of all sources in this group, in arc "
-            "seconds. WARNING: this overrides values in the file.");
-    k = group + "/FWHM_minor";
-    declare(k, "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Minor axis FWHM of all sources in this group, in arc "
-            "seconds. WARNING: this overrides values in the file.");
-    k = group + "/position_angle";
-    declare(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Position angle of all extended sources in this group "
-            "(from North to East), in degrees. WARNING: this overrides "
-            "values in the file.");
-#endif
-
+    // GSM file settings.
     group = "sky/gsm";
     setLabel(group, "Global Sky Model (GSM) file settings");
-
     k = group + "/file";
     declare(k, "GSM file", oskar_SettingsItem::INPUT_FILE_NAME);
     setTooltip(k, "Path to a Global Sky Model file, pixellated using the "
             "HEALPix RING scheme. This option can be used to load a GSM data "
             "file produced from software written by Angelica de Oliveira, "
             "available at https://www.cfa.harvard.edu/~adeolive/gsm/");
-
-    group = "sky/gsm/filter";
-    setLabel(group, "Filter settings");
-    k = group + "/flux_min";
-    declare(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE_MIN, "min");
-    setTooltip(k, "Minimum flux density allowed by the filter, in Jy.");
-    k = group + "/flux_max";
-    declare(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE_MAX, "max");
-    setTooltip(k, "Maximum flux density allowed by the filter, in Jy.");
-    k = group + "/radius_inner_deg";
-    declare(k, "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Minimum angular distance from phase centre allowed by the "
-            "filter, in degrees.");
-    k = group + "/radius_outer_deg";
-    declare(k, "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE, 180.0);
-    setTooltip(k, "Maximum angular distance from phase centre allowed by the "
-            "filter, in degrees.");
-
-#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-    group = "sky/gsm/extended_sources";
-    setLabel(group, "Extended source settings");
-    k = group + "/FWHM_major";
-    declare(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Major axis FWHM of all sources in this group, in arc "
-            "seconds.");
-    k = group + "/FWHM_minor";
-    declare(k, "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Minor axis FWHM of all sources in this group, in arc "
-            "seconds.");
-    k = group + "/position_angle";
-    declare(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Position angle of all extended sources in this group "
-            "(from North to East), in degrees.");
-#endif
+    add_filter_group(group + "/filter");
+    add_extended_group(group + "/extended_sources");
 
 #ifndef OSKAR_NO_FITS
     // FITS file import settings.
@@ -241,45 +176,14 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "K/sr (Temperature per steradian)" <<
             "Jy/pixel (Jansky per pixel)");
     setTooltip(k, "The physical units of pixels in the input map.");
-
-    group = "sky/healpix_fits/filter";
-    setLabel(group, "Filter settings");
-    k = group + "/flux_min";
-    declare(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE_MIN, "min");
-    setTooltip(k, "Minimum flux density allowed by the filter, in Jy.");
-    k = group + "/flux_max";
-    declare(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE_MAX, "max");
-    setTooltip(k, "Maximum flux density allowed by the filter, in Jy.");
-    k = group + "/radius_inner_deg";
-    declare(k, "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Minimum angular distance from phase centre allowed by the "
-            "filter, in degrees.");
-    k = group + "/radius_outer_deg";
-    declare(k, "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE, 180.0);
-    setTooltip(k, "Maximum angular distance from phase centre allowed by the "
-            "filter, in degrees.");
-
-#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-    group = "sky/healpix_fits/extended_sources";
-    setLabel(group, "Extended source settings");
-    k = group + "/FWHM_major";
-    declare(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Major axis FWHM of all sources in this group, in arc "
-            "seconds.");
-    k = group + "/FWHM_minor";
-    declare(k, "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Minor axis FWHM of all sources in this group, in arc "
-            "seconds.");
-    k = group + "/position_angle";
-    declare(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Position angle of all extended sources in this group "
-            "(from North to East), in degrees.");
-#endif
+    add_filter_group(group + "/filter");
+    add_extended_group(group + "/extended_sources");
 #endif
 
     // Sky model generator settings.
     setLabel("sky/generator", "Generators");
 
+    // Random power law.
     group = "sky/generator/random_power_law";
     setLabel(group, "Random, power-law in flux");
     k = group + "/num_sources";
@@ -303,44 +207,12 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     declare(k, "Random seed", oskar_SettingsItem::RANDOM_SEED);
     setTooltip(k, "Random number generator seed used for random "
             "distributions.");
+    add_filter_group(group + "/filter");
+    add_extended_group(group + "/extended_sources");
 
-    group = "sky/generator/random_power_law/filter";
-    setLabel(group, "Filter settings");
-    k = group + "/flux_min";
-    declare(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE_MIN, "min");
-    setTooltip(k, "Minimum flux density allowed by the filter, in Jy.");
-    k = group + "/flux_max";
-    declare(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE_MAX, "max");
-    setTooltip(k, "Maximum flux density allowed by the filter, in Jy.");
-    k = group + "/radius_inner_deg";
-    declare(k, "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Minimum angular distance from phase centre allowed by the "
-            "filter, in degrees.");
-    k = group + "/radius_outer_deg";
-    declare(k, "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE, 180.0);
-    setTooltip(k, "Maximum angular distance from phase centre allowed by the "
-            "filter, in degrees.");
-
-#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-    group = "sky/generator/random_power_law/extended_sources";
-    setLabel(group, "Extended source settings");
-    k = group + "/FWHM_major";
-    declare(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Major axis FWHM of all sources in this group, in arc "
-            "seconds.");
-    k = group + "/FWHM_minor";
-    declare(k, "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Minor axis FWHM of all sources in this group, in arc "
-            "seconds.");
-    k = group + "/position_angle";
-    declare(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Position angle of all extended sources in this group "
-            "(from North to East), in degrees.");
-#endif
-
+    // Random broken power law.
     group = "sky/generator/random_broken_power_law";
     setLabel(group, "Random, broken power-law in flux");
-
     k = group + "/num_sources";
     declare(k, "Number of sources", oskar_SettingsItem::INT_UNSIGNED);
     setTooltip(k, "Number of sources scattered approximately uniformly over "
@@ -370,41 +242,10 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     k = group + "/seed";
     declare(k, "Random seed", oskar_SettingsItem::RANDOM_SEED);
     setTooltip(k, "Random number generator seed used for random distributions.");
+    add_filter_group(group + "/filter");
+    add_extended_group(group + "/extended_sources");
 
-    group = "sky/generator/random_broken_power_law/filter";
-    setLabel(group, "Filter settings");
-    k = group + "/flux_min";
-    declare(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE_MIN, "min");
-    setTooltip(k, "Minimum flux density allowed by the filter, in Jy.");
-    k = group + "/flux_max";
-    declare(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE_MAX, "max");
-    setTooltip(k, "Maximum flux density allowed by the filter, in Jy.");
-    k = group + "/radius_inner_deg";
-    declare(k, "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Minimum angular distance from phase centre allowed by the "
-            "filter, in degrees.");
-    k = group + "/radius_outer_deg";
-    declare(k, "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE, 180.0);
-    setTooltip(k, "Maximum angular distance from phase centre allowed by the "
-            "filter, in degrees.");
-
-#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-    group = "sky/generator/random_broken_power_law/extended_sources";
-    setLabel(group, "Extended source settings");
-    k = group + "/FWHM_major";
-    declare(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Major axis FWHM of all sources in this group, in arc "
-            "seconds.");
-    k = group + "/FWHM_minor";
-    declare(k, "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Minor axis FWHM of all sources in this group, in arc "
-            "seconds.");
-    k = group + "/position_angle";
-    declare(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Position angle of all extended sources in this group "
-            "(from North to East), in degrees.");
-#endif
-
+    // HEALPix generator.
     group = "sky/generator/healpix";
     setLabel(group, "HEALPix (uniform, all sky) grid");
     k = group + "/nside";
@@ -416,39 +257,8 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     k = group + "/amplitude";
     declare(k, "Amplitude", oskar_SettingsItem::DOUBLE, 1.0);
     setTooltip(k, "Amplitude assigned to generated HEALPix points, in Jy.");
-    group = "sky/generator/healpix/filter";
-    setLabel(group, "Filter settings");
-    k = "sky/generator/healpix/filter/flux_min";
-    declare(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE_MIN, "min");
-    setTooltip(k, "Minimum flux density allowed by the filter, in Jy.");
-    k = group + "/flux_max";
-    declare(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE_MAX, "max");
-    setTooltip(k, "Maximum flux density allowed by the filter, in Jy.");
-    k = group + "/radius_inner_deg";
-    declare(k, "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Minimum angular distance from phase centre allowed by "
-            "the filter, in degrees.");
-    k = group + "/radius_outer_deg";
-    declare(k, "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE, 180.0);
-    setTooltip(k, "Maximum angular distance from phase centre allowed by "
-            "the filter, in degrees.");
-
-#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-    group = "sky/generator/healpix/extended_sources";
-    setLabel(group, "Extended source settings");
-    k = group + "/FWHM_major";
-    declare(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Maxor axis FWHM of all sources in this group, in arc "
-            "seconds.");
-    k = group + "/FWHM_minor";
-    declare(k, "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Minor axis FWHM of all sources in this group, in arc "
-            "seconds.");
-    k = group + "/position_angle";
-    declare(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Position angle of all extended sources in this group "
-            "(from North to East), in degrees.");
-#endif
+    add_filter_group(group + "/filter");
+    add_extended_group(group + "/extended_sources");
 
     // Spectral index settings.
     group = "sky/spectral_index";
@@ -512,6 +322,50 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "for sources very far from the phase centre. If <b>false</b> (the "
             "default), sources with failed Gaussian parameter solutions are "
             "modelled as point sources.");
+}
+
+void oskar_SettingsModelApps::add_filter_group(const QString& group)
+{
+    QString k;
+    setLabel(group, "Filter settings");
+    k = group + "/flux_min";
+    declare(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE_MIN, "min");
+    setTooltip(k, "Minimum flux density allowed by the filter, in Jy. This "
+            "is an exclusive interval bound; i.e. min &lt; flux &le; max.");
+    k = group + "/flux_max";
+    declare(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE_MAX, "max");
+    setTooltip(k, "Maximum flux density allowed by the filter, in Jy. This "
+            "is an inclusive interval bound; i.e. min &lt; flux &le; max.");
+    k = group + "/radius_inner_deg";
+    declare(k, "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum angular distance from phase centre allowed by the "
+            "filter, in degrees. This is an inclusive interval bound; "
+            "i.e. inner &le; r &lt; outer.");
+    k = group + "/radius_outer_deg";
+    declare(k, "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE, 180.0);
+    setTooltip(k, "Maximum angular distance from phase centre allowed by the "
+            "filter, in degrees. This is an exclusive interval bound; "
+            "i.e. inner &le; r &lt; outer.");
+}
+
+void oskar_SettingsModelApps::add_extended_group(const QString& group)
+{
+    QString k;
+#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
+    setLabel(group, "Extended source settings");
+    k = group + "/FWHM_major";
+    declare(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Major axis FWHM override of all sources in this group, "
+            "in arc seconds.");
+    k = group + "/FWHM_minor";
+    declare(k, "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minor axis FWHM override of all sources in this group, "
+            "in arc seconds.");
+    k = group + "/position_angle";
+    declare(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Position angle override of all extended sources in this "
+            "group (from North to East), in degrees.");
+#endif
 }
 
 void oskar_SettingsModelApps::init_settings_observation()

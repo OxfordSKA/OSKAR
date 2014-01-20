@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  * @file oskar_SettingsModelApps.h
  */
 
-#include "oskar_global.h"
-#include "widgets/oskar_SettingsModel.h"
+#include <oskar_global.h>
+#include <widgets/oskar_SettingsModel.h>
 
 class OSKAR_WIDGETS_EXPORT oskar_SettingsModelApps : public oskar_SettingsModel
 {
@@ -54,6 +54,8 @@ private:
     void init_settings_beampattern();
     void init_settings_image();
     void init_settings_ionosphere();
+    void add_filter_group(const QString& group);
+    void add_extended_group(const QString& group);
 };
 
 #endif /* OSKAR_SETTINGS_MODEL_APPS_H_ */
