@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,6 +86,11 @@ oskar_Mem* oskar_splines_coeff(oskar_Splines* data)
 const oskar_Mem* oskar_splines_coeff_const(const oskar_Splines* data)
 {
     return &data->coeff;
+}
+
+double oskar_splines_smoothing_factor(const oskar_Splines* data)
+{
+    return data->smoothing_factor;
 }
 
 #ifdef __cplusplus

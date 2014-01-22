@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,20 +49,26 @@ extern "C" {
  * @details
  * This function constructs splines from a list of data points.
  *
- * @param[in,out] spline        Pointer to spline data structure.
- * @param[in,out] log           Pointer to log structure to use.
- * @param[in]     num_points    Number of data points in all arrays.
- * @param[in]     x             Array of x positions.
- * @param[in]     y             Array of y positions.
- * @param[in]     z             Array of data points.
- * @param[in]     w             Array of data point weights.
- * @param[in]     settings      Fitting parameters.
- * @param[in,out] status        Status return code.
+ * @param[in,out] spline         Pointer to spline data structure.
+ * @param[in]     num_points     Number of data points in all arrays.
+ * @param[in]     x              Array of x positions.
+ * @param[in]     y              Array of y positions.
+ * @param[in]     z              Array of data points.
+ * @param[in]     w              Array of data point weights.
+ * @param[in]     search         If set, use supplied average fractional error.
+ * @param[in,out] avg_frac_error On entry, the target average fractional error;
+ *                               on exit, the achieved average fractional error.
+ * @param[in]     inc_factor     Factor by which to increase average fractional
+ *                               error on failure.
+ * @param[in]     smooth_factor  A user-supplied smoothing factor.
+ *                               Ignored if \p search parameter is clear.
+ * @param[in,out] status         Status return code.
  */
 OSKAR_EXPORT
-void oskar_splines_fit(oskar_Splines* spline, oskar_Log* log,
-        int num_points, oskar_Mem* x, oskar_Mem* y, const oskar_Mem* z,
-        const oskar_Mem* w, const oskar_SettingsSpline* settings, int* status);
+void oskar_splines_fit(oskar_Splines* spline, int num_points, oskar_Mem* x,
+        oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* w, int search,
+        double* avg_frac_err, double inc_factor, double user_s,
+        double eps_float, double eps_double, int* status);
 
 #ifdef __cplusplus
 }

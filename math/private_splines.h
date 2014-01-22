@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,11 +46,12 @@ struct oskar_Splines
 {
     int type;
     int location;
-    int num_knots_x;      /**< Number of knots in x. */
-    int num_knots_y;      /**< Number of knots in y. */
-    oskar_Mem knots_x;    /**< Knot positions in x. */
-    oskar_Mem knots_y;    /**< Knot positions in y. */
-    oskar_Mem coeff;      /**< Spline coefficient array. */
+    int num_knots_x;         /**< Number of knots in x. */
+    int num_knots_y;         /**< Number of knots in y. */
+    oskar_Mem knots_x;       /**< Knot positions in x. */
+    oskar_Mem knots_y;       /**< Knot positions in y. */
+    oskar_Mem coeff;         /**< Spline coefficient array. */
+    double smoothing_factor; /**< Actual smoothing factor used for the fit. */
 };
 
 #ifndef OSKAR_SPLINES_TYPEDEF_

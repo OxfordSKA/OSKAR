@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,9 @@ static void copy_and_weight_data(int* num_points, int type, oskar_Mem* m_theta,
         oskar_Mem* m_phi_re, oskar_Mem* m_phi_im, oskar_Mem* weight,
         const oskar_SettingsElementFit* settings, int* status);
 
+static void print_summary(oskar_Log* log, const oskar_Splines* spline,
+        int search_flag, double avg_frac_err, int* status);
+
 void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         int port, const char* filename,
         const oskar_SettingsElementFit* settings, int* status)
@@ -68,6 +71,8 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     oskar_Splines *data_phi_im = 0, *data_theta_im = 0;
     const oskar_SettingsSpline *settings_phi_re = 0, *settings_theta_re = 0;
     const oskar_SettingsSpline *settings_phi_im = 0, *settings_theta_im = 0;
+    const oskar_SettingsSpline *set = 0;
+    double avg_frac_error = 0.0;
 
     /* Declare the line buffer. */
     char *line = NULL, *dbi = NULL;
@@ -278,18 +283,54 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
 
     /* Fit bicubic B-splines to the surface data. */
     oskar_log_message(log, 0, "Fitting B-splines to element pattern data.");
+
+    /* Theta [real]. */
+    set = settings_theta_re;
+    avg_frac_error = set->average_fractional_error;
     oskar_log_message(log, 0, "Fitting surface theta [real]...");
-    oskar_splines_fit(data_theta_re, log, n, &m_theta, &m_phi,
-            &m_theta_re, &weight, settings_theta_re, status);
+    oskar_splines_fit(data_theta_re, n, &m_theta, &m_phi, &m_theta_re, &weight,
+            set->search_for_best_fit, &avg_frac_error,
+            set->average_fractional_error_factor_increase,
+            set->smoothness_factor_override,
+            set->eps_float, set->eps_double, status);
+    print_summary(log, data_theta_re, set->search_for_best_fit, avg_frac_error,
+            status);
+
+    /* Theta [imag]. */
+    set = settings_theta_im;
+    avg_frac_error = set->average_fractional_error;
     oskar_log_message(log, 0, "Fitting surface theta [imag]...");
-    oskar_splines_fit(data_theta_im, log, n, &m_theta, &m_phi,
-            &m_theta_im, &weight, settings_theta_im, status);
+    oskar_splines_fit(data_theta_im, n, &m_theta, &m_phi, &m_theta_im, &weight,
+            set->search_for_best_fit, &avg_frac_error,
+            set->average_fractional_error_factor_increase,
+            set->smoothness_factor_override,
+            set->eps_float, set->eps_double, status);
+    print_summary(log, data_theta_im, set->search_for_best_fit, avg_frac_error,
+            status);
+
+    /* Phi [real]. */
+    set = settings_phi_re;
+    avg_frac_error = set->average_fractional_error;
     oskar_log_message(log, 0, "Fitting surface phi [real]...");
-    oskar_splines_fit(data_phi_re, log, n, &m_theta, &m_phi,
-            &m_phi_re, &weight, settings_phi_re, status);
+    oskar_splines_fit(data_phi_re, n, &m_theta, &m_phi, &m_phi_re, &weight,
+            set->search_for_best_fit, &avg_frac_error,
+            set->average_fractional_error_factor_increase,
+            set->smoothness_factor_override,
+            set->eps_float, set->eps_double, status);
+    print_summary(log, data_phi_re, set->search_for_best_fit, avg_frac_error,
+            status);
+
+    /* Phi [imag]. */
+    set = settings_phi_im;
+    avg_frac_error = set->average_fractional_error;
     oskar_log_message(log, 0, "Fitting surface phi [imag]...");
-    oskar_splines_fit(data_phi_im, log, n, &m_theta, &m_phi,
-            &m_phi_im, &weight, settings_phi_im, status);
+    oskar_splines_fit(data_phi_im, n, &m_theta, &m_phi, &m_phi_im, &weight,
+            set->search_for_best_fit, &avg_frac_error,
+            set->average_fractional_error_factor_increase,
+            set->smoothness_factor_override,
+            set->eps_float, set->eps_double, status);
+    print_summary(log, data_phi_im, set->search_for_best_fit, avg_frac_error,
+            status);
 
     /* Store the filename. */
     if (port == 1)
@@ -479,6 +520,27 @@ static void copy_and_weight_data(int* num_points, int type, oskar_Mem* m_theta,
 
     /* Return the new number of points. */
     *num_points = n;
+}
+
+static void print_summary(oskar_Log* log, const oskar_Splines* spline,
+        int search_flag, double avg_frac_err, int* status)
+{
+    if (*status) return;
+    if (search_flag)
+    {
+        oskar_log_message(log, 1, "Surface fitted to %.4f average "
+                "frac. error (s=%.2e).", avg_frac_err,
+                oskar_splines_smoothing_factor(spline));
+    }
+    else
+    {
+        oskar_log_message(log, 1, "Surface fitted (s=%.2e).",
+                oskar_splines_smoothing_factor(spline));
+    }
+    oskar_log_message(log, 1, "Number of knots (x, y) = (%d, %d).",
+            oskar_splines_num_knots_x(spline),
+            oskar_splines_num_knots_y(spline));
+    oskar_log_message(log, 0, "");
 }
 
 #ifdef __cplusplus
