@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,6 @@
  */
 
 #include <oskar_mem.h>
-#include <oskar_mem_binary_file_read_raw.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -36,72 +35,72 @@
 extern "C" {
 #endif
 
-void oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename,
-        int* status)
+oskar_Mem* oskar_mem_read_binary_raw(const char* filename, int type,
+        int location, int* status)
 {
     size_t num_elements, element_size, size_bytes;
-    oskar_Mem temp, *data = NULL;
+    oskar_Mem *mem = 0;
     FILE* stream;
 
     /* Check all inputs. */
-    if (!mem || !filename || !status)
+    if (!filename || !status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return 0;
     }
 
     /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, oskar_mem_type(mem), OSKAR_LOCATION_CPU, 0, 1, status);
-
-    /* Check if data is in CPU or GPU memory. */
-    data = (oskar_mem_location(mem) == OSKAR_LOCATION_CPU) ? mem : &temp;
+    if (*status) return 0;
 
     /* Open the input file. */
     stream = fopen(filename, "rb");
-    if (stream == NULL)
+    if (!stream)
     {
         *status = OSKAR_ERR_FILE_IO;
-        return;
+        return 0;
     }
 
     /* Get the file size. */
     fseek(stream, 0, SEEK_END);
     size_bytes = ftell(stream);
 
-    /* Resize memory block so that it can hold the data. */
-    element_size = oskar_mem_element_size(oskar_mem_type(mem));
+    /* Create memory block of the right size. */
+    element_size = oskar_mem_element_size(type);
     num_elements = (size_t)ceil(size_bytes / element_size);
-    oskar_mem_realloc(data, num_elements, status);
+    mem = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_elements, status);
     if (*status)
     {
-        oskar_mem_free(&temp, status);
+        oskar_mem_free(mem, status);
+        free(mem); /* FIXME Remove after updating oskar_mem_free(). */
         fclose(stream);
-        return;
+        return 0;
     }
-    size_bytes = num_elements * element_size;
 
     /* Read the data. */
     fseek(stream, 0, SEEK_SET);
-    if (fread(oskar_mem_void(data), 1, size_bytes, stream) != size_bytes)
+    if (fread(oskar_mem_void(mem), 1, size_bytes, stream) != size_bytes)
     {
-        oskar_mem_free(&temp, status);
+        oskar_mem_free(mem, status);
+        free(mem); /* FIXME Remove after updating oskar_mem_free(). */
         fclose(stream);
         *status = OSKAR_ERR_FILE_IO;
-        return;
+        return 0;
     }
 
     /* Close the input file. */
     fclose(stream);
 
     /* Copy to GPU memory if required. */
-    if (oskar_mem_location(mem) == OSKAR_LOCATION_GPU)
-        oskar_mem_copy(mem, &temp, status);
+    if (location == OSKAR_LOCATION_GPU)
+    {
+        oskar_Mem* gpu;
+        gpu = oskar_mem_create_copy(mem, OSKAR_LOCATION_GPU, status);
+        oskar_mem_free(mem, status);
+        free(mem); /* FIXME Remove after updating oskar_mem_free(). */
+        return gpu;
+    }
 
-    /* Free the temporary. */
-    oskar_mem_free(&temp, status);
+    return mem;
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,5 +66,7 @@ enum {
 #include <oskar_element_evaluate.h>
 #include <oskar_element_free.h>
 #include <oskar_element_load_cst.h>
+#include <oskar_element_read.h>
+#include <oskar_element_write.h>
 
 #endif /* OSKAR_ELEMENT_H_ */

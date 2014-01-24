@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -216,7 +216,6 @@ OSKAR_INLINE int oskar_mem_type_is_scalar(const int mem_type)
 #include <oskar_mem_init.h>
 
 /* REMOVE AND RENAME? */
-#include <oskar_mem_binary_file_read_raw.h>
 #include <oskar_mem_binary_file_read.h>
 #include <oskar_mem_binary_file_write.h>
 #include <oskar_mem_binary_stream_read.h>
@@ -240,6 +239,7 @@ OSKAR_INLINE int oskar_mem_type_is_scalar(const int mem_type)
 #include <oskar_mem_insert.h>
 #include <oskar_mem_load_ascii.h>
 #include <oskar_mem_random_fill.h>
+#include <oskar_mem_read_binary_raw.h>
 #include <oskar_mem_realloc.h>
 #include <oskar_mem_save_ascii.h>
 #include <oskar_mem_scale_real.h>

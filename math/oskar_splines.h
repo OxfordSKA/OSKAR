@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,17 @@ struct oskar_Splines;
 #define OSKAR_SPLINES_TYPEDEF_
 typedef struct oskar_Splines oskar_Splines;
 #endif /* OSKAR_SPLINES_TYPEDEF_ */
+
+/* To maintain binary compatibility, do not change the values
+ * in the lists below. */
+enum {
+    OSKAR_SPLINES_TAG_NUM_KNOTS_X = 1,
+    OSKAR_SPLINES_TAG_NUM_KNOTS_Y = 2,
+    OSKAR_SPLINES_TAG_KNOTS_X = 3,
+    OSKAR_SPLINES_TAG_KNOTS_Y = 4,
+    OSKAR_SPLINES_TAG_COEFF = 5,
+    OSKAR_SPLINES_TAG_SMOOTHING_FACTOR = 6
+};
 
 #ifdef __cplusplus
 }

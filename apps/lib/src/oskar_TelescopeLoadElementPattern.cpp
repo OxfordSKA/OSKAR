@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,14 +28,20 @@
 
 #include "apps/lib/oskar_TelescopeLoadElementPattern.h"
 #include "apps/lib/oskar_Dir.h"
-#include <oskar_station.h>
 #include <oskar_log.h>
+#include <oskar_file_exists.h>
 
 using std::map;
 using std::string;
 
-const string oskar_TelescopeLoadElementPattern::element_x_cst_file = "element_pattern_x_cst.txt";
-const string oskar_TelescopeLoadElementPattern::element_y_cst_file = "element_pattern_y_cst.txt";
+const string oskar_TelescopeLoadElementPattern::cst_name_x =
+        "element_pattern_x_cst.txt";
+const string oskar_TelescopeLoadElementPattern::cst_name_y =
+        "element_pattern_y_cst.txt";
+const string oskar_TelescopeLoadElementPattern::spline_name_x =
+        "spline_data_cache_x.bin";
+const string oskar_TelescopeLoadElementPattern::spline_name_y =
+        "spline_data_cache_y.bin";
 
 oskar_TelescopeLoadElementPattern::oskar_TelescopeLoadElementPattern(
         const oskar_Settings* settings, oskar_Log* log)
@@ -54,6 +60,7 @@ void oskar_TelescopeLoadElementPattern::load(oskar_Telescope* telescope,
 {
     update_map(filemap, cwd);
 
+    // Load element pattern data for stations only at the deepest level!
     if (num_subdirs == 0)
     {
         int num_stations = oskar_telescope_num_stations(telescope);
@@ -61,8 +68,8 @@ void oskar_TelescopeLoadElementPattern::load(oskar_Telescope* telescope,
         {
             oskar_Station* s = oskar_telescope_station(telescope, i);
             oskar_station_resize_element_types(s, 1, status);
-            load_element_patterns(log_, &settings_->telescope, s, filemap,
-                    status);
+            load_element_patterns(log_, &settings_->telescope, s, cwd,
+                    filemap, status);
         }
     }
 }
@@ -73,11 +80,12 @@ void oskar_TelescopeLoadElementPattern::load(oskar_Station* station,
 {
     update_map(filemap, cwd);
 
+    // Load element pattern data for stations only at the deepest level!
     if (num_subdirs == 0)
     {
         oskar_station_resize_element_types(station, 1, status);
-        load_element_patterns(log_, &settings_->telescope, station, filemap,
-                status);
+        load_element_patterns(log_, &settings_->telescope, station, cwd,
+                filemap, status);
     }
 }
 
@@ -88,68 +96,133 @@ string oskar_TelescopeLoadElementPattern::name() const
 
 void oskar_TelescopeLoadElementPattern::load_element_patterns(oskar_Log* log,
         const oskar_SettingsTelescope* settings, oskar_Station* station,
-        const map<string, string>& filemap, int* status)
+        const oskar_Dir& cwd, map<string, string>& filemap, int* status)
 {
+    bool save_fitted_data = true;
+    bool ignore_cached_files = settings->aperture_array.
+            element_pattern.fit.ignore_cached_files;
+
     // Check if safe to proceed.
     if (*status) return;
 
-    // Check if element patterns are enabled.
+    // Return if element patterns are disabled.
     if (!settings->aperture_array.element_pattern.enable_numerical_patterns)
         return;
 
-    string files, element_x, element_y;
-    if (filemap.count(element_x_cst_file))
-        element_x = filemap.at(element_x_cst_file);
-    if (filemap.count(element_y_cst_file))
-        element_y = filemap.at(element_y_cst_file);
-    files.append(element_x);
-    files.append(element_y);
+    // Get current paths for CST files and spline data.
+    string cst_path_x, cst_path_y, spline_path_x, spline_path_y;
+    if (filemap.count(cst_name_x))
+        cst_path_x = filemap.at(cst_name_x);
+    if (filemap.count(cst_name_y))
+        cst_path_y = filemap.at(cst_name_y);
+    if (filemap.count(spline_name_x))
+        spline_path_x = filemap.at(spline_name_x);
+    if (filemap.count(spline_name_y))
+        spline_path_y = filemap.at(spline_name_y);
 
-    if (files.length() > 0)
+    // Generate a unique key for a pair of element files at this location
+    // (be they ASCII data or cached coefficients).
+    // Return if no files have been found.
+    string files;
+    files.append(cst_path_x);
+    files.append(cst_path_y);
+    if (files.length() == 0)
+        return;
+
+    // Copy element pattern data and then return if this file combination
+    // has already been loaded.
+    if (models.count(files))
     {
-        // Check if this file combination has already been loaded.
-        if (models.count(files))
-        {
-            // Copy the element pattern data.
-            oskar_element_copy(oskar_station_element(station, 0),
-                    models.at(files), status);
-        }
-        else
-        {
-            // Load CST element pattern data.
-            if (element_x.length() > 0)
-            {
-                oskar_log_message(log, 0, "Loading CST element "
-                        "pattern data (X): %s", element_x.c_str());
-                oskar_log_message(log, 0, "");
-                oskar_element_load_cst(oskar_station_element(station, 0),
-                        log, 1, element_x.c_str(),
-                        &settings->aperture_array.element_pattern.fit,
-                        status);
-            }
-            if (element_y.length() > 0)
-            {
-                oskar_log_message(log, 0, "Loading CST element "
-                        "pattern data (Y): %s", element_y.c_str());
-                oskar_log_message(log, 0, "");
-                oskar_element_load_cst(oskar_station_element(station, 0),
-                        log, 2, element_y.c_str(),
-                        &settings->aperture_array.element_pattern.fit,
-                        status);
-            }
+        // Copy the element pattern data.
+        oskar_element_copy(oskar_station_element(station, 0),
+                models.at(files), status);
+        return;
+    }
 
-            // Store pointer to the element model for these files.
-            models[files] = oskar_station_element(station, 0);
+    // Load cached spline coefficients for X dipole, if present.
+    if (!ignore_cached_files && spline_path_x.length() > 0 &&
+            oskar_file_exists(spline_path_x.c_str()))
+    {
+        oskar_log_message(log, 0, "Loading cached spline data (X): %s",
+                spline_path_x.c_str());
+        oskar_log_message(log, 0, "");
+        oskar_element_read(oskar_station_element(station, 0), 1,
+                spline_path_x.c_str(), status);
+    }
+
+    // Otherwise, load CST element pattern data for X dipole.
+    else if (cst_path_x.length() > 0 &&
+            oskar_file_exists(cst_path_x.c_str()))
+    {
+        oskar_log_message(log, 0, "Loading CST element pattern (X): %s",
+                cst_path_x.c_str());
+        oskar_log_message(log, 0, "");
+        oskar_element_load_cst(oskar_station_element(station, 0), log, 1,
+                cst_path_x.c_str(),
+                &settings->aperture_array.element_pattern.fit, status);
+
+        // Save fitted data.
+        if (save_fitted_data)
+        {
+            oskar_element_write(oskar_station_element(station, 0), 1,
+                    spline_path_x.c_str(), status);
         }
     }
+
+    // Load cached spline coefficients for Y dipole, if present.
+    if (!ignore_cached_files && spline_path_y.length() > 0 &&
+            oskar_file_exists(spline_path_y.c_str()))
+    {
+        oskar_log_message(log, 0, "Loading cached spline data (Y): %s",
+                spline_path_y.c_str());
+        oskar_log_message(log, 0, "");
+        oskar_element_read(oskar_station_element(station, 0), 2,
+                spline_path_y.c_str(), status);
+    }
+
+    // Otherwise, load CST element pattern data for Y dipole.
+    else if (cst_path_y.length() > 0 &&
+            oskar_file_exists(cst_path_y.c_str()))
+    {
+        oskar_log_message(log, 0, "Loading CST element pattern (Y): %s",
+                cst_path_y.c_str());
+        oskar_log_message(log, 0, "");
+        oskar_element_load_cst(oskar_station_element(station, 0), log, 2,
+                cst_path_y.c_str(),
+                &settings->aperture_array.element_pattern.fit, status);
+
+        // Save fitted data.
+        if (save_fitted_data)
+        {
+            oskar_element_write(oskar_station_element(station, 0), 2,
+                    spline_path_y.c_str(), status);
+        }
+    }
+
+    // Store pointer to the element model for these files.
+    models[files] = oskar_station_element(station, 0);
 }
 
-void oskar_TelescopeLoadElementPattern::update_map(map<string, string>& files,
+void oskar_TelescopeLoadElementPattern::update_map(map<string, string>& filemap,
         const oskar_Dir& cwd)
 {
     // Update the dictionary of element files for the current directory.
-    if (cwd.exists(element_x_cst_file))
-        files[element_x_cst_file] = cwd.absoluteFilePath(element_x_cst_file);
-    if (cwd.exists(element_y_cst_file))
-        files[element_y_cst_file] = cwd.absoluteFilePath(element_y_cst_file);
+    // The presence of either an ASCII table or cached coefficients is
+    // sufficient to override ones from a higher level: Need to store full
+    // pathnames to both, so the fitted data can be written back out to the
+    // right location.
+    //
+    // Must then check if a file of either type actually exists before trying
+    // to load it! (Use cached coefficients if found and enabled, otherwise
+    // load ASCII data.)
+    if (cwd.exists(cst_name_x) || cwd.exists(spline_name_x))
+    {
+        filemap[cst_name_x] = cwd.absoluteFilePath(cst_name_x);
+        filemap[spline_name_x] = cwd.absoluteFilePath(spline_name_x);
+    }
+    if (cwd.exists(cst_name_y) || cwd.exists(spline_name_y))
+    {
+        filemap[cst_name_y] = cwd.absoluteFilePath(cst_name_y);
+        filemap[spline_name_y] = cwd.absoluteFilePath(spline_name_y);
+    }
 }

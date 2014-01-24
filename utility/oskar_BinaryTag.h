@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,7 +137,8 @@ enum {
     OSKAR_TAG_GROUP_VISIBILITY = 5,
     OSKAR_TAG_GROUP_IMAGE = 6,
     OSKAR_TAG_GROUP_SKY_MODEL = 7,
-    OSKAR_TAG_GROUP_TIME_FREQ_DATA = 8
+    OSKAR_TAG_GROUP_TIME_FREQ_DATA = 8,
+    OSKAR_TAG_GROUP_SPLINE_DATA = 9
 };
 
 /* Standard metadata tags. */

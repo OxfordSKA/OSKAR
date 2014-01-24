@@ -153,6 +153,8 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
                         s.value("ignore_data_at_pole", false).toBool();
                 ef->ignore_data_below_horizon =
                         s.value("ignore_data_below_horizon", true).toBool();
+                ef->ignore_cached_files =
+                        s.value("ignore_cached_files", false).toBool();
                 ef->overlap_angle_rad =
                         s.value("overlap_angle_deg", 9.0).toDouble() * D2R;
                 ef->use_common_set =

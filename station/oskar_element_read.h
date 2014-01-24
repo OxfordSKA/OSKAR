@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_BINARY_FILE_READ_RAW_H_
-#define OSKAR_MEM_BINARY_FILE_READ_RAW_H_
+#ifndef OSKAR_ELEMENT_READ_H_
+#define OSKAR_ELEMENT_READ_H_
 
 /**
- * @file oskar_mem_binary_read_raw.h
+ * @file oskar_element_read.h
  */
 
 #include <oskar_global.h>
-#include <oskar_BinaryTag.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,22 +41,24 @@ extern "C" {
 
 /**
  * @brief
- * Loads an OSKAR memory block from a raw binary file.
+ * Loads an element pattern from a file containing previously evaluated spline
+ * coefficients.
  *
  * @details
- * This function loads the contents of an OSKAR memory block from a raw
- * binary file.
+ * This function loads saved antenna pattern data from a binary file and fills
+ * the provided data structure.
  *
- * @param[in] mem          Pointer to data structure.
- * @param[in] filename     Name of binary file.
- * @param[in,out] status   Status return code.
+ * @param[out] data      Pointer to element model data structure to fill.
+ * @param[in]  port      Port number to load: 1 for X dipole, 2 for Y dipole.
+ * @param[in]  filename  Data file name.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename,
+void oskar_element_read(oskar_Element* data, int port, const char* filename,
         int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_BINARY_FILE_READ_RAW_H_ */
+#endif /* OSKAR_ELEMENT_READ_H_ */

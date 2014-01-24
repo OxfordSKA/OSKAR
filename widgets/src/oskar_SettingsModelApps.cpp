@@ -350,8 +350,8 @@ void oskar_SettingsModelApps::add_filter_group(const QString& group)
 
 void oskar_SettingsModelApps::add_extended_group(const QString& group)
 {
-    QString k;
 #if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
+    QString k;
     setLabel(group, "Extended source settings");
     k = group + "/FWHM_major";
     declare(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
@@ -568,6 +568,10 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     declare(k, "Ignore data below horizon", oskar_SettingsItem::BOOL, true);
     setTooltip(k, "If true, then numerical element pattern data points at "
             "theta &gt; 90 degrees are ignored.");
+    k = group + "/ignore_cached_files";
+    declare(k, "Ignore cached files", oskar_SettingsItem::BOOL, false);
+    setTooltip(k, "If true, then coefficients cached in files from previous "
+            "fits will be ignored.");
     k = group + "/overlap_angle_deg";
     declare(k, "Overlap angle [deg]", oskar_SettingsItem::DOUBLE, 9.0);
     setTooltip(k, "The amount of overlap used for copying numerical element "

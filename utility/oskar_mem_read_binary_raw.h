@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,43 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_ELEMENT_FIT_H_
-#define OSKAR_SETTINGS_ELEMENT_FIT_H_
+#ifndef OSKAR_MEM_READ_BINARY_RAW_H_
+#define OSKAR_MEM_READ_BINARY_RAW_H_
 
 /**
- * @file oskar_SettingsElementFit.h
+ * @file oskar_mem_read_binary_raw.h
  */
 
-#include <oskar_SettingsSpline.h>
+#include <oskar_global.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @struct oskar_SettingsElementFit
- *
- * @brief Structure to hold station element settings.
+ * @brief
+ * Creates and loads an OSKAR memory block directly from a raw binary file.
  *
  * @details
- * The structure holds station element parameters that can be used to override
- * those in the station files.
+ * This function creates an OSKAR memory block and loads its contents directly
+ * from a raw binary file in native byte order.
+ *
+ * Use with great caution!
+ *
+ * @param[in] filename     Name of binary file.
+ * @param[in] type         Enumerated type of the memory in the file.
+ * @param[in] location     Enumerated memory location of the new block.
+ * @param[in,out] status   Status return code.
+ *
+ * @return A handle to the memory block.
  */
-struct oskar_SettingsElementFit
-{
-    double overlap_angle_rad;
-    int ignore_data_below_horizon;
-    int ignore_data_at_pole;
-    int ignore_cached_files;
-    double weight_boundaries;
-    double weight_overlap;
-    int use_common_set;
-    oskar_SettingsSpline all;
-    oskar_SettingsSpline x_phi_re;
-    oskar_SettingsSpline x_phi_im;
-    oskar_SettingsSpline x_theta_re;
-    oskar_SettingsSpline x_theta_im;
-    oskar_SettingsSpline y_phi_re;
-    oskar_SettingsSpline y_phi_im;
-    oskar_SettingsSpline y_theta_re;
-    oskar_SettingsSpline y_theta_im;
-};
-typedef struct oskar_SettingsElementFit oskar_SettingsElementFit;
+OSKAR_EXPORT
+oskar_Mem* oskar_mem_read_binary_raw(const char* filename, int type,
+        int location, int* status);
 
-#endif /* OSKAR_SETTINGS_ELEMENT_FIT_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_MEM_READ_BINARY_RAW_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,15 +28,14 @@
 
 #include "imaging/oskar_image_write.h"
 #include "imaging/oskar_Image.h"
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_stream_write.h"
-#include "utility/oskar_binary_stream_write_header.h"
-#include "utility/oskar_binary_stream_write_metadata.h"
-#include "utility/oskar_file_exists.h"
+#include <oskar_BinaryTag.h>
+#include <oskar_binary_stream_write.h>
+#include <oskar_binary_stream_write_header.h>
+#include <oskar_binary_stream_write_metadata.h>
+#include <oskar_file_exists.h>
 #include <oskar_log.h>
 #include <oskar_mem.h>
-#include "utility/oskar_mem_binary_stream_write.h"
-#include "utility/oskar_mem_binary_file_read_raw.h"
+#include <oskar_mem_binary_stream_write.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -106,8 +105,8 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
         {
             /* Write the settings file. */
             oskar_Mem* temp;
-            temp = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, status);
-            oskar_mem_binary_file_read_raw(temp, settings_path_str, status);
+            temp = oskar_mem_read_binary_raw(settings_path_str, OSKAR_CHAR,
+                    OSKAR_LOCATION_CPU, status);
             oskar_mem_binary_stream_write(temp, stream,
                     OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, idx, 0,
                     status);

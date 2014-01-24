@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,14 +96,17 @@ public:
 private:
     void load_element_patterns(oskar_Log* log,
             const oskar_SettingsTelescope* settings, oskar_Station* station,
-            const std::map<std::string, std::string>& filemap, int* status);
+            const oskar_Dir& cwd, std::map<std::string, std::string>& filemap,
+            int* status);
 
     void update_map(std::map<std::string, std::string>& files,
             const oskar_Dir& cwd);
 
 private:
-    static const std::string element_x_cst_file;
-    static const std::string element_y_cst_file;
+    static const std::string cst_name_x;
+    static const std::string cst_name_y;
+    static const std::string spline_name_x;
+    static const std::string spline_name_y;
     std::map<std::string, oskar_Element*> models;
     const oskar_Settings* settings_;
     oskar_Log* log_;

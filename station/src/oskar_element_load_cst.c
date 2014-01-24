@@ -58,8 +58,9 @@ static void copy_and_weight_data(int* num_points, int type, oskar_Mem* m_theta,
         oskar_Mem* m_phi_re, oskar_Mem* m_phi_im, oskar_Mem* weight,
         const oskar_SettingsElementFit* settings, int* status);
 
-static void print_summary(oskar_Log* log, const oskar_Splines* spline,
-        int search_flag, double avg_frac_err, int* status);
+static void fit_splines(oskar_Log* log, oskar_Splines* splines, int n,
+        oskar_Mem* theta, oskar_Mem* phi, oskar_Mem* data, oskar_Mem* weight,
+        const oskar_SettingsSpline* set, const char* name, int* status);
 
 void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         int port, const char* filename,
@@ -71,8 +72,6 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     oskar_Splines *data_phi_im = 0, *data_theta_im = 0;
     const oskar_SettingsSpline *settings_phi_re = 0, *settings_theta_re = 0;
     const oskar_SettingsSpline *settings_phi_im = 0, *settings_theta_im = 0;
-    const oskar_SettingsSpline *set = 0;
-    double avg_frac_error = 0.0;
 
     /* Declare the line buffer. */
     char *line = NULL, *dbi = NULL;
@@ -80,8 +79,8 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     FILE* file;
 
     /* Temporary data storage. */
-    oskar_Mem m_theta, m_phi, m_theta_re, m_theta_im, m_phi_re, m_phi_im,
-    weight;
+    oskar_Mem *m_theta, *m_phi, *m_theta_re, *m_theta_im, *m_phi_re, *m_phi_im,
+    *weight;
 
     /* Check all inputs. */
     if (!data || !filename || !settings || !status)
@@ -162,16 +161,6 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         return;
     }
 
-    /* Initialise temporary storage. */
-    oskar_mem_init(&m_theta, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
-    oskar_mem_init(&m_phi, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
-    oskar_mem_init(&m_theta_re, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
-    oskar_mem_init(&m_theta_im, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
-    oskar_mem_init(&m_phi_re, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
-    oskar_mem_init(&m_phi_im, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
-    oskar_mem_init(&weight, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
-    if (*status) return;
-
     /* Open the file. */
     file = fopen(filename, "r");
     if (!file)
@@ -189,6 +178,16 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         return;
     }
     dbi = strstr(line, "dBi"); /* Check for presence of "dBi". */
+
+    /* Initialise temporary storage. */
+    m_theta    = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
+    m_phi      = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
+    m_theta_re = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
+    m_theta_im = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
+    m_phi_re   = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
+    m_phi_im   = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
+    weight     = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
+    if (*status) return;
 
     /* Loop over and read each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
@@ -221,8 +220,8 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         phase_phi *= DEG2RAD;
 
         /* Ensure enough space in arrays. */
-        resize_arrays(n, &m_theta, &m_phi, &m_theta_re, &m_theta_im,
-                &m_phi_re, &m_phi_im, &weight, &theta_, &phi_,
+        resize_arrays(n, m_theta, m_phi, m_theta_re, m_theta_im,
+                m_phi_re, m_phi_im, weight, &theta_, &phi_,
                 &theta_re_, &theta_im_, &phi_re_, &phi_im_, &weight_, status);
         if (*status) break;
 
@@ -270,8 +269,8 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     fclose(file);
 
     /* Copy and weight data at phi boundaries. */
-    copy_and_weight_data(&n, type, &m_theta, &m_phi, &m_theta_re, &m_theta_im,
-            &m_phi_re, &m_phi_im, &weight, settings, status);
+    copy_and_weight_data(&n, type, m_theta, m_phi, m_theta_re, m_theta_im,
+            m_phi_re, m_phi_im, weight, settings, status);
 
 #if 0
     /* Dump data to a new file. */
@@ -283,54 +282,14 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
 
     /* Fit bicubic B-splines to the surface data. */
     oskar_log_message(log, 0, "Fitting B-splines to element pattern data.");
-
-    /* Theta [real]. */
-    set = settings_theta_re;
-    avg_frac_error = set->average_fractional_error;
-    oskar_log_message(log, 0, "Fitting surface theta [real]...");
-    oskar_splines_fit(data_theta_re, n, &m_theta, &m_phi, &m_theta_re, &weight,
-            set->search_for_best_fit, &avg_frac_error,
-            set->average_fractional_error_factor_increase,
-            set->smoothness_factor_override,
-            set->eps_float, set->eps_double, status);
-    print_summary(log, data_theta_re, set->search_for_best_fit, avg_frac_error,
-            status);
-
-    /* Theta [imag]. */
-    set = settings_theta_im;
-    avg_frac_error = set->average_fractional_error;
-    oskar_log_message(log, 0, "Fitting surface theta [imag]...");
-    oskar_splines_fit(data_theta_im, n, &m_theta, &m_phi, &m_theta_im, &weight,
-            set->search_for_best_fit, &avg_frac_error,
-            set->average_fractional_error_factor_increase,
-            set->smoothness_factor_override,
-            set->eps_float, set->eps_double, status);
-    print_summary(log, data_theta_im, set->search_for_best_fit, avg_frac_error,
-            status);
-
-    /* Phi [real]. */
-    set = settings_phi_re;
-    avg_frac_error = set->average_fractional_error;
-    oskar_log_message(log, 0, "Fitting surface phi [real]...");
-    oskar_splines_fit(data_phi_re, n, &m_theta, &m_phi, &m_phi_re, &weight,
-            set->search_for_best_fit, &avg_frac_error,
-            set->average_fractional_error_factor_increase,
-            set->smoothness_factor_override,
-            set->eps_float, set->eps_double, status);
-    print_summary(log, data_phi_re, set->search_for_best_fit, avg_frac_error,
-            status);
-
-    /* Phi [imag]. */
-    set = settings_phi_im;
-    avg_frac_error = set->average_fractional_error;
-    oskar_log_message(log, 0, "Fitting surface phi [imag]...");
-    oskar_splines_fit(data_phi_im, n, &m_theta, &m_phi, &m_phi_im, &weight,
-            set->search_for_best_fit, &avg_frac_error,
-            set->average_fractional_error_factor_increase,
-            set->smoothness_factor_override,
-            set->eps_float, set->eps_double, status);
-    print_summary(log, data_phi_im, set->search_for_best_fit, avg_frac_error,
-            status);
+    fit_splines(log, data_theta_re, n, m_theta, m_phi, m_theta_re, weight,
+            settings_theta_re, "theta [real]", status);
+    fit_splines(log, data_theta_im, n, m_theta, m_phi, m_theta_im, weight,
+            settings_theta_im, "theta [imag]", status);
+    fit_splines(log, data_phi_re, n, m_theta, m_phi, m_phi_re, weight,
+            settings_phi_re, "phi [real]", status);
+    fit_splines(log, data_phi_im, n, m_theta, m_phi, m_phi_im, weight,
+            settings_phi_im, "phi [imag]", status);
 
     /* Store the filename. */
     if (port == 1)
@@ -349,13 +308,20 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     }
 
     /* Free temporary storage. */
-    oskar_mem_free(&m_theta, status);
-    oskar_mem_free(&m_phi, status);
-    oskar_mem_free(&m_theta_re, status);
-    oskar_mem_free(&m_theta_im, status);
-    oskar_mem_free(&m_phi_re, status);
-    oskar_mem_free(&m_phi_im, status);
-    oskar_mem_free(&weight, status);
+    oskar_mem_free(m_theta, status);
+    oskar_mem_free(m_phi, status);
+    oskar_mem_free(m_theta_re, status);
+    oskar_mem_free(m_theta_im, status);
+    oskar_mem_free(m_phi_re, status);
+    oskar_mem_free(m_phi_im, status);
+    oskar_mem_free(weight, status);
+    free(m_theta); /* FIXME Remove after updating oskar_mem_free(). */
+    free(m_phi); /* FIXME Remove after updating oskar_mem_free(). */
+    free(m_theta_re); /* FIXME Remove after updating oskar_mem_free(). */
+    free(m_theta_im); /* FIXME Remove after updating oskar_mem_free(). */
+    free(m_phi_re); /* FIXME Remove after updating oskar_mem_free(). */
+    free(m_phi_im); /* FIXME Remove after updating oskar_mem_free(). */
+    free(weight); /* FIXME Remove after updating oskar_mem_free(). */
 }
 
 static void resize_arrays(int n, oskar_Mem* m_theta,
@@ -522,24 +488,33 @@ static void copy_and_weight_data(int* num_points, int type, oskar_Mem* m_theta,
     *num_points = n;
 }
 
-static void print_summary(oskar_Log* log, const oskar_Splines* spline,
-        int search_flag, double avg_frac_err, int* status)
+static void fit_splines(oskar_Log* log, oskar_Splines* splines, int n,
+        oskar_Mem* theta, oskar_Mem* phi, oskar_Mem* data, oskar_Mem* weight,
+        const oskar_SettingsSpline* set, const char* name, int* status)
 {
+    double avg_frac_error;
     if (*status) return;
-    if (search_flag)
+    avg_frac_error = set->average_fractional_error;
+    oskar_log_message(log, 0, "Fitting surface %s...", name);
+    oskar_splines_fit(splines, n, theta, phi, data, weight,
+            set->search_for_best_fit, &avg_frac_error,
+            set->average_fractional_error_factor_increase,
+            set->smoothness_factor_override, set->eps_float, set->eps_double,
+            status);
+    if (set->search_for_best_fit)
     {
         oskar_log_message(log, 1, "Surface fitted to %.4f average "
-                "frac. error (s=%.2e).", avg_frac_err,
-                oskar_splines_smoothing_factor(spline));
+                "frac. error (s=%.2e).", avg_frac_error,
+                oskar_splines_smoothing_factor(splines));
     }
     else
     {
         oskar_log_message(log, 1, "Surface fitted (s=%.2e).",
-                oskar_splines_smoothing_factor(spline));
+                oskar_splines_smoothing_factor(splines));
     }
-    oskar_log_message(log, 1, "Number of knots (x, y) = (%d, %d).",
-            oskar_splines_num_knots_x(spline),
-            oskar_splines_num_knots_y(spline));
+    oskar_log_message(log, 1, "Number of knots (theta, phi) = (%d, %d).",
+            oskar_splines_num_knots_x(splines),
+            oskar_splines_num_knots_y(splines));
     oskar_log_message(log, 0, "");
 }
 

@@ -7,6 +7,10 @@
     * Added ability to specify a set of horizon-based permitted beam directions
       on a per-station basis.
 
+    * Added ability to save spline data for fitted element patterns back out
+      to the telescope model. This can offer a significant speed improvement
+      when running multiple short simulations.
+
     * Fixed an issue building the Google unit test library.
     
     * Changed the behaviour of sky model filters to include the upper bound in

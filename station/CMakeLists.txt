@@ -15,6 +15,8 @@ set(station_SRC
     src/oskar_element_evaluate.cu
     src/oskar_element_free.c
     src/oskar_element_load_cst.c
+    src/oskar_element_read.c
+    src/oskar_element_write.c
     src/oskar_evaluate_array_pattern.c
     src/oskar_evaluate_array_pattern_dipoles_cuda.cu
     src/oskar_evaluate_array_pattern_dipoles.c

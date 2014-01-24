@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,6 +124,8 @@ void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
 
 // Private functions.
 
+// Must pass filemap by value rather than by reference; otherwise, recursive
+// behaviour will not work as intended.
 static void load_directories(oskar_Telescope* telescope,
         const oskar_Settings* settings, const oskar_Dir& cwd,
         oskar_Station* station, int depth,

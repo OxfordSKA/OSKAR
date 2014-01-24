@@ -35,8 +35,6 @@
 
 #include <oskar_global.h>
 #include <oskar_mem.h>
-#include <oskar_SettingsSpline.h>
-#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {

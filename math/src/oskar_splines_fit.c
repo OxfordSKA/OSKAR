@@ -29,7 +29,6 @@
 #include <oskar_dierckx_surfit.h>
 #include <private_splines.h>
 #include <oskar_splines.h>
-#include <oskar_log.h>
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>

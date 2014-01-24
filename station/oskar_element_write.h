@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,43 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_ELEMENT_FIT_H_
-#define OSKAR_SETTINGS_ELEMENT_FIT_H_
+#ifndef OSKAR_ELEMENT_WRITE_H_
+#define OSKAR_ELEMENT_WRITE_H_
 
 /**
- * @file oskar_SettingsElementFit.h
+ * @file oskar_element_write.h
  */
 
-#include <oskar_SettingsSpline.h>
+#include <oskar_global.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @struct oskar_SettingsElementFit
- *
- * @brief Structure to hold station element settings.
+ * @brief
+ * Writes spline coefficients for an element pattern to a binary file.
  *
  * @details
- * The structure holds station element parameters that can be used to override
- * those in the station files.
+ * This function writes antenna pattern data from a text file and fills the
+ * provided data structure.
+ *
+ * @param[out] data      Pointer to element model data structure.
+ * @param[in]  port      Port number to write: 1 for X dipole, 2 for Y dipole.
+ * @param[in]  filename  Data file name.
+ * @param[in,out] status Status return code.
  */
-struct oskar_SettingsElementFit
-{
-    double overlap_angle_rad;
-    int ignore_data_below_horizon;
-    int ignore_data_at_pole;
-    int ignore_cached_files;
-    double weight_boundaries;
-    double weight_overlap;
-    int use_common_set;
-    oskar_SettingsSpline all;
-    oskar_SettingsSpline x_phi_re;
-    oskar_SettingsSpline x_phi_im;
-    oskar_SettingsSpline x_theta_re;
-    oskar_SettingsSpline x_theta_im;
-    oskar_SettingsSpline y_phi_re;
-    oskar_SettingsSpline y_phi_im;
-    oskar_SettingsSpline y_theta_re;
-    oskar_SettingsSpline y_theta_im;
-};
-typedef struct oskar_SettingsElementFit oskar_SettingsElementFit;
+OSKAR_EXPORT
+void oskar_element_write(const oskar_Element* data, int port,
+        const char* filename, int* status);
 
-#endif /* OSKAR_SETTINGS_ELEMENT_FIT_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_ELEMENT_WRITE_H_ */

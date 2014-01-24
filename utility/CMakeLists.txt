@@ -42,7 +42,6 @@ set(utility_SRC
     src/oskar_mem_append_raw.c
     src/oskar_mem_append.c
     src/oskar_mem_assign.c
-    src/oskar_mem_binary_file_read_raw.c
     src/oskar_mem_binary_file_read.c
     src/oskar_mem_binary_file_write.c
     src/oskar_mem_binary_stream_read.c
@@ -61,6 +60,7 @@ set(utility_SRC
     src/oskar_mem_insert.c
     src/oskar_mem_load_ascii.c
     src/oskar_mem_random_fill.c
+    src/oskar_mem_read_binary_raw.c
     src/oskar_mem_realloc.c
     src/oskar_mem_save_ascii.c
     src/oskar_mem_scale_real.c
