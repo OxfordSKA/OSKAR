@@ -68,7 +68,7 @@ void oskar_TelescopeLoadElementPattern::load(oskar_Telescope* telescope,
         {
             oskar_Station* s = oskar_telescope_station(telescope, i);
             oskar_station_resize_element_types(s, 1, status);
-            load_element_patterns(log_, &settings_->telescope, s, cwd,
+            load_element_patterns(log_, &settings_->telescope, s,
                     filemap, status);
         }
     }
@@ -84,7 +84,7 @@ void oskar_TelescopeLoadElementPattern::load(oskar_Station* station,
     if (num_subdirs == 0)
     {
         oskar_station_resize_element_types(station, 1, status);
-        load_element_patterns(log_, &settings_->telescope, station, cwd,
+        load_element_patterns(log_, &settings_->telescope, station,
                 filemap, status);
     }
 }
@@ -96,7 +96,7 @@ string oskar_TelescopeLoadElementPattern::name() const
 
 void oskar_TelescopeLoadElementPattern::load_element_patterns(oskar_Log* log,
         const oskar_SettingsTelescope* settings, oskar_Station* station,
-        const oskar_Dir& cwd, map<string, string>& filemap, int* status)
+        map<string, string>& filemap, int* status)
 {
     bool save_fitted_data = true;
     bool ignore_cached_files = settings->aperture_array.

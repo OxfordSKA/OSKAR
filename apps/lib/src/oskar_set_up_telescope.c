@@ -129,7 +129,7 @@ void oskar_telescope_log_summary(const oskar_Telescope* telescope,
         oskar_Log* log, int* status)
 {
     const int width = 45;
-    int i = 0, num_stations = 0;
+    int num_stations = 0;
 
     /* Check all inputs. */
     if (!telescope || !status)
@@ -163,6 +163,8 @@ void oskar_telescope_log_summary(const oskar_Telescope* telescope,
     }
     else
     {
+        int i = 0;
+
         /* Loop over top-level stations to print summary for each. */
         for (i = 0; i < num_stations; ++i)
         {

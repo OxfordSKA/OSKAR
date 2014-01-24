@@ -96,7 +96,7 @@ public:
 private:
     void load_element_patterns(oskar_Log* log,
             const oskar_SettingsTelescope* settings, oskar_Station* station,
-            const oskar_Dir& cwd, std::map<std::string, std::string>& filemap,
+            std::map<std::string, std::string>& filemap,
             int* status);
 
     void update_map(std::map<std::string, std::string>& files,
