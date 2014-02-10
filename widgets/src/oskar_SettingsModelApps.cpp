@@ -1015,15 +1015,17 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     k = group + "/coordinate_type";
     options.clear();
     options << "Beam image"
-            << "HEALPix";
+            << "HEALPix"
+            << "Sky model";
     declare(k, "Coordinate (grid) type", options, 0);
-    /* TODO Update tooltip */
     setTooltip(k, "Specification of coordinates at which to evaluate the beam "
             "pattern."
             "<ul>"
-            "<li><b>Beam image: </b> Tangent plane image, centred on the "
+            "<li><b>Beam image</b>: Tangent plane image, centred on the "
             "beam pointing direction.</li>"
-            "<li><b>HEALPix</b></li>"
+            "<li><b>HEALPix</b>: All-sky map on a HEALPix grid.</li>"
+            "<li><b>Sky model</b>: Evaluate beam only at the supplied "
+            "coordinates.</li>"
             "</ul>");
 
     k = group + "/coordinate_frame";
@@ -1072,6 +1074,13 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     declare(k, "Nside", oskar_SettingsItem::INT_UNSIGNED, "128");
     setTooltip(k, "HEALPix Nside parameter. The total number of points is "
             "12 * Nside * Nside");
+
+    k = group + "/sky_model";
+    setLabel(k, "Sky model settings");
+    setDependency(k , group + "/coordinate_type", "Sky model");
+    k = group + "/sky_model/file";
+    declare(k, "Input file", oskar_SettingsItem::INPUT_FILE_NAME);
+    setTooltip(k, "Path to an input sky model file.");
 
 #if 0 /* proposed 2.4.x feature */
     k = group + "/horizon_clip";

@@ -41,7 +41,8 @@
 enum {
     OSKAR_BEAM_PATTERN_COORDS_UNDEF,
     OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE,
-    OSKAR_BEAM_PATTERN_COORDS_HEALPIX
+    OSKAR_BEAM_PATTERN_COORDS_HEALPIX,
+    OSKAR_BEAM_PATTERN_COORDS_SKY_MODEL
 };
 
 /**
@@ -79,6 +80,7 @@ struct oskar_SettingsBeamPattern
 
     int horizon_clip;   /* Bool, to toggle horizon clip of the beam pattern */
 
+    char* sky_model;
     char* oskar_image_voltage;
     char* oskar_image_phase;
     char* oskar_image_complex;

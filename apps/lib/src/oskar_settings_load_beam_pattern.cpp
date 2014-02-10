@@ -100,6 +100,17 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
         bp->nside = s.value("nside", 128).toInt();
         s.endGroup();
     }
+    else if (bp->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_SKY_MODEL)
+    {
+        s.beginGroup("sky_model");
+        t = s.value("file").toByteArray();
+        if (t.size() > 0)
+        {
+            bp->sky_model = (char*)malloc(t.size() + 1);
+            strcpy(bp->sky_model, t.constData());
+        }
+        s.endGroup();
+    }
     else
         return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
 

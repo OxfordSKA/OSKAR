@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,6 +102,8 @@ int oskar_settings_free(oskar_Settings* settings)
     settings->interferometer.oskar_vis_filename = NULL;
 
     /* Free beam pattern file names. */
+    free(settings->beam_pattern.sky_model);
+    settings->beam_pattern.sky_model = NULL;
     free(settings->beam_pattern.oskar_image_complex);
     settings->beam_pattern.oskar_image_complex = NULL;
     free(settings->beam_pattern.oskar_image_phase);
