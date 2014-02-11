@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,7 @@ extern "C" {
  *                          Possible values are:
  *                          OSKAR_RELATIVE_DIRECTION_COSINES or
  *                          OSKAR_ENU_DIRECTION_COSINES
+ * @param[out] num_pixels   Number of pixels in the beam pattern.
  * @param[in]  beam_lon  Longitude of the beam phase centre, in radians.
  * @param[in]  beam_lat  Longitude of the beam phase centre, in radians.
  * @param[in]  beam_coord_type Enumerator describing the beam phase centre
@@ -69,13 +70,13 @@ extern "C" {
  *                             OSKAR_SPHERICAL_TYPE_HORIZONTAL
  * @param[in]  settings  Settings structure describing the specification
  *                            of coordinates to be generated.
- * @param[in/out] status Error status code.
+ * @param[in,out] status Error status code.
  */
 OSKAR_EXPORT
 void oskar_beam_pattern_generate_coordinates(oskar_Mem* x, oskar_Mem* y,
-        oskar_Mem* z, int* coord_type, double beam_lon, double beam_lat,
-        int beam_coord_type, const oskar_SettingsBeamPattern* settings,
-        int* status);
+        oskar_Mem* z, int* coord_type, int* num_pixels, double beam_lon,
+        double beam_lat, int beam_coord_type,
+        const oskar_SettingsBeamPattern* settings, int* status);
 
 #ifdef __cplusplus
 }
