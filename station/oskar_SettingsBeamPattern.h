@@ -81,6 +81,7 @@ struct oskar_SettingsBeamPattern
     int horizon_clip;   /* Bool, to toggle horizon clip of the beam pattern */
 
     char* sky_model;
+    char* output_beam_text_file;
     char* oskar_image_voltage;
     char* oskar_image_phase;
     char* oskar_image_complex;

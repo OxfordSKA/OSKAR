@@ -121,6 +121,14 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     QString root = s.value("root_path", "").toString();
     if (!root.isEmpty())
     {
+        // ASCII list file.
+        if (bp->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_SKY_MODEL)
+        {
+            t = QString(root + "_RAW_BEAM.txt").toLatin1();
+            bp->output_beam_text_file = (char*)malloc(t.size() + 1);
+            strcpy(bp->output_beam_text_file, t.constData());
+        }
+
         // OSKAR image files.
         s.beginGroup("oskar_image_file");
         if (s.value("save_voltage", false).toBool())

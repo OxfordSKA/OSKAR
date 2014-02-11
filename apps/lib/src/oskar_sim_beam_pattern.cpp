@@ -159,6 +159,18 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     }
     const oskar_Station* station = oskar_telescope_station_const(tel, station_id);
 
+    // FIXME HACK Open the output file list.
+    FILE* file = 0;
+    if (settings->beam_pattern.output_beam_text_file)
+    {
+        file = fopen(settings->beam_pattern.output_beam_text_file, "w");
+        if (!file)
+        {
+            *status = OSKAR_ERR_FILE_IO;
+            return;
+        }
+    }
+
     // Generate load/coordinates at which beam the beam pattern is evaluated.
     int coord_type = 0;
     oskar_Mem* x = oskar_mem_create(type, CPU, 0, status);
@@ -182,11 +194,6 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     oskar_Mem* d_x = oskar_mem_create_copy(x, GPU, status);
     oskar_Mem* d_y = oskar_mem_create_copy(y, GPU, status);
     oskar_Mem* d_z = oskar_mem_create_copy(z, GPU, status);
-
-    // FIXME HACK Open the output file list.
-    FILE* file = 0;
-    if (settings->beam_pattern.sky_model)
-        file = fopen(settings->beam_pattern.sky_model, "w");
 
     // Begin beam pattern evaluation.
     oskar_log_section(log, "Starting simulation...");

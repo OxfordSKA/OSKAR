@@ -104,6 +104,8 @@ int oskar_settings_free(oskar_Settings* settings)
     /* Free beam pattern file names. */
     free(settings->beam_pattern.sky_model);
     settings->beam_pattern.sky_model = NULL;
+    free(settings->beam_pattern.output_beam_text_file);
+    settings->beam_pattern.output_beam_text_file = NULL;
     free(settings->beam_pattern.oskar_image_complex);
     settings->beam_pattern.oskar_image_complex = NULL;
     free(settings->beam_pattern.oskar_image_phase);

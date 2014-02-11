@@ -59,6 +59,7 @@ int oskar_settings_init(oskar_Settings* settings)
     settings->interferometer.ms_filename = NULL;
     settings->interferometer.oskar_vis_filename = NULL;
     settings->beam_pattern.sky_model = NULL;
+    settings->beam_pattern.output_beam_text_file = NULL;
     settings->beam_pattern.oskar_image_voltage = NULL;
     settings->beam_pattern.oskar_image_phase = NULL;
     settings->beam_pattern.oskar_image_complex = NULL;
