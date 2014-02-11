@@ -363,6 +363,11 @@ static void init_beam_pattern_cube(oskar_Image* image,
         oskar_image_resize(image, npix, 1, num_pols, num_times, num_channels,
                 status);
     }
+    else if (settings->beam_pattern.coord_grid_type ==
+            OSKAR_BEAM_PATTERN_COORDS_SKY_MODEL)
+    {
+        /* Do nothing! */
+    }
     else
     {
         *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
