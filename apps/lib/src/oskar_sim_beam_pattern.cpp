@@ -118,7 +118,8 @@ static void load_settings(oskar_Settings* settings, const char* filename,
     oskar_log_settings_beam_pattern(log, settings);
 
     // Check that an output data file has been specified.
-    if (!(settings->beam_pattern.oskar_image_voltage ||
+    if (!(settings->beam_pattern.output_beam_text_file ||
+            settings->beam_pattern.oskar_image_voltage ||
             settings->beam_pattern.oskar_image_phase ||
             settings->beam_pattern.oskar_image_complex ||
             settings->beam_pattern.oskar_image_total_intensity ||
