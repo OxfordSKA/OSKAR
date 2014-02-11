@@ -51,11 +51,12 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     bp->station_id  = s.value("station_id").toUInt();
 
     QString temp = s.value("coordinate_type", "Beam image").toString().toUpper();
-    if (temp.startsWith("B")) {
+    if (temp.startsWith("B"))
         bp->coord_grid_type = OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE;
-    }
     else if (temp.startsWith("H"))
         bp->coord_grid_type = OSKAR_BEAM_PATTERN_COORDS_HEALPIX;
+    else if (temp.startsWith("S"))
+        bp->coord_grid_type = OSKAR_BEAM_PATTERN_COORDS_SKY_MODEL;
     else
         return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
 

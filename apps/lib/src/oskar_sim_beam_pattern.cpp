@@ -57,7 +57,7 @@ static void load_settings(oskar_Settings* settings, const char* filename,
 static void simulate_beam_pattern(oskar_Mem* output_beam,
         const oskar_Settings* settings, int type, const oskar_Telescope* tel,
         oskar_Log* log, int* status);
-static void add_beam_data_to_polarisation_planes(oskar_Mem* beam_pattern_planes,
+static void accumulate_to_beam_cube(oskar_Mem* beam_pattern_planes,
         oskar_Mem* beam_temp, const oskar_Mem* beam_data, int num_times,
         int num_pols, int num_pixels, int t, int c, int* status);
 static void init_beam_pattern_cube(oskar_Image* image,
@@ -83,22 +83,12 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
     QTime timer;
     timer.start();
 
-    if (settings.beam_pattern.coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_SKY_MODEL)
-    {
-        oskar_Mem list;
-        simulate_beam_pattern(&list, &settings, type, tel, log, status);
-        double elapsed = timer.elapsed() / 1.0e3;
-        oskar_log_section(log, "Simulation completed in %.3f sec.", elapsed);
-    }
-    else
-    {
-        oskar_Image beam_pattern(type | OSKAR_COMPLEX, OSKAR_LOCATION_CPU);
-        init_beam_pattern_cube(&beam_pattern, &settings, status);
-        simulate_beam_pattern(&beam_pattern.data, &settings, type, tel, log, status);
-        double elapsed = timer.elapsed() / 1.0e3;
-        oskar_log_section(log, "Simulation completed in %.3f sec.", elapsed);
-        oskar_beam_pattern_write(&beam_pattern, &settings, type, log, status);
-    }
+    oskar_Image beam_pattern(type | OSKAR_COMPLEX, OSKAR_LOCATION_CPU);
+    init_beam_pattern_cube(&beam_pattern, &settings, status);
+    simulate_beam_pattern(&beam_pattern.data, &settings, type, tel, log, status);
+    double elapsed = timer.elapsed() / 1.0e3;
+    oskar_log_section(log, "Simulation completed in %.3f sec.", elapsed);
+    oskar_beam_pattern_write(&beam_pattern, &settings, type, log, status);
 
     // Free memory.
     oskar_telescope_free(tel, status);
@@ -180,9 +170,6 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
             oskar_station_beam_coord_type(station), &settings->beam_pattern,
             status);
 
-    // Ensure the output array is big enough.
-
-
     // Initialise temporary array, used to re-order polarisation.
     oskar_Mem* beam_tmp = oskar_mem_create(beam_pattern_data_type, CPU,
             num_pixels, status);
@@ -195,6 +182,11 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     oskar_Mem* d_x = oskar_mem_create_copy(x, GPU, status);
     oskar_Mem* d_y = oskar_mem_create_copy(y, GPU, status);
     oskar_Mem* d_z = oskar_mem_create_copy(z, GPU, status);
+
+    // FIXME HACK Open the output file list.
+    FILE* file = 0;
+    if (settings->beam_pattern.sky_model)
+        file = fopen(settings->beam_pattern.sky_model, "w");
 
     // Begin beam pattern evaluation.
     oskar_log_section(log, "Starting simulation...");
@@ -223,8 +215,13 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
             oskar_evaluate_station_beam_pattern(d_beam_data, num_pixels,
                     d_x, d_y, d_z, coord_type, d_station, d_work,
                     rand_state, frequency, GAST, status);
-            add_beam_data_to_polarisation_planes(output_beam, beam_tmp,
-                    d_beam_data, num_times, num_pols, num_pixels, t, c, status);
+
+            // FIXME HACK Write raw beam data to ASCII file.
+            if (file)
+                oskar_mem_save_ascii(file, 1, num_pixels, status, d_beam_data);
+            else
+                accumulate_to_beam_cube(output_beam, beam_tmp, d_beam_data,
+                        num_times, num_pols, num_pixels, t, c, status);
         }
 
         // Record GPU memory usage.
@@ -253,6 +250,10 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     free(x); // FIXME Remove after updating oskar_mem_free().
     free(y); // FIXME Remove after updating oskar_mem_free().
     free(z); // FIXME Remove after updating oskar_mem_free().
+
+    // FIXME HACK Close the file if necessary.
+    if (file)
+        fclose(file);
 }
 
 /**
@@ -281,7 +282,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
  * @param type              The OSKAR data type of the beam pattern.
  * @param status            Status return code.
  */
-static void add_beam_data_to_polarisation_planes(oskar_Mem* beam_pattern_planes,
+static void accumulate_to_beam_cube(oskar_Mem* beam_pattern_planes,
         oskar_Mem* beam_temp, const oskar_Mem* beam_data, int num_times,
         int num_pols, int num_pixels, int t, int c, int* status)
 {
