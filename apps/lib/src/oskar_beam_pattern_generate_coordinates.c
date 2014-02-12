@@ -37,6 +37,11 @@
 #include <math.h>
 #include <stdio.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
+
 static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
         oskar_Mem* n, double beam_lon, double beam_lat, int beam_coord_type,
         const oskar_SettingsBeamPattern* settings, int* status);
@@ -312,13 +317,13 @@ static void load_coords(oskar_Mem* lon, oskar_Mem* lat, int* num_points,
         /* Store the coordinates. */
         if (type == OSKAR_DOUBLE)
         {
-            oskar_mem_double(lon, status)[n] = par[0];
-            oskar_mem_double(lat, status)[n] = par[1];
+            oskar_mem_double(lon, status)[n] = par[0] * M_PI/180.0;
+            oskar_mem_double(lat, status)[n] = par[1] * M_PI/180.0;
         }
         else
         {
-            oskar_mem_float(lon, status)[n] = par[0];
-            oskar_mem_float(lat, status)[n] = par[1];
+            oskar_mem_float(lon, status)[n] = par[0] * M_PI/180.0;
+            oskar_mem_float(lat, status)[n] = par[1] * M_PI/180.0;
         }
 
         ++n;
