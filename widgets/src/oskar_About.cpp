@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
-#include "widgets/oskar_About.h"
+#include <oskar_global.h>
+#include <widgets/oskar_About.h>
 
 #include <QtGui/QApplication>
 #include <QtGui/QDialogButtonBox>
@@ -115,7 +115,7 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
         paragraph.setBottomMargin(10);
         QTextCursor cursor(licenseText);
         cursor.setBlockFormat(paragraph);
-        cursor.insertText("Copyright (c) 2011-2013, The University of Oxford. "
+        cursor.insertText("Copyright (c) 2011-2014, The University of Oxford. "
                 "\nAll rights reserved.");
         cursor.insertList(QTextListFormat::ListDecimal);
         cursor.insertText("Redistributions of source code must retain the "
@@ -192,8 +192,8 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
                 "(<a href=\"http://netlib.org/dierckx/\">"
                 "http://netlib.org/dierckx/</a>)</li>");
     html.append("<li>The Qt cross-platform application framework "
-                "(<a href=\"http://qt.nokia.com/\">"
-                "http://qt.nokia.com/</a>)</li>");
+                "(<a href=\"http://qt.digia.com/\">"
+                "http://qt.digia.com/</a>)</li>");
 #ifndef OSKAR_NO_MS
     html.append("<li>casacore for Measurement Set export "
                 "(<a href=\"http://code.google.com/p/casacore/\">"
@@ -252,9 +252,10 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
     QLabel* ack3 = new QLabel("and/or reference the following publication:",
             this);
     vLayoutAtt->addWidget(ack3);
-    QLabel* ack4 = new QLabel("<blockquote>Dulwich, F., Mort, B.J., Salvini, S., "
-            "\"<i>Using OSKAR to simulate data from radio interferometers\"</i>,<br>"
-            "MNRAS 2013 in preparation.</blockquote>", this);
+    QLabel* ack4 = new QLabel("<blockquote>Dulwich, F., Mort, B. J., Salvini, S., "
+            "\"<i>OSKAR: A software package to simulate data from radio "
+            "interferometers\"</i>,<br>"
+            "MNRAS 2014, in preparation.</blockquote>", this);
     ack4->setTextFormat(Qt::RichText);
     vLayoutAtt->addWidget(ack4);
 
