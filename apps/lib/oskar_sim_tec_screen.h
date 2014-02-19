@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,8 @@
  */
 
 #include <oskar_global.h>
-
 #include <oskar_log.h>
-#include <oskar_Image.h>
+#include <oskar_image.h>
 #include <oskar_Settings.h>
 
 #ifdef __cplusplus
@@ -49,13 +48,12 @@ extern "C" {
  *
  * @details
  *
- * @param TEC_screen Pointer to OSKAR image structure holding the TEC screen.
  * @param settings   Pointer to settings.
  * @param log        Pointer to a log structure to use.
  */
 OSKAR_APPS_EXPORT
-int oskar_sim_tec_screen(oskar_Image* TEC_screen, oskar_Settings* settings,
-        oskar_Log* log);
+oskar_Image* oskar_sim_tec_screen(oskar_Settings* settings, oskar_Log* log,
+        int* status);
 
 #ifdef __cplusplus
 }

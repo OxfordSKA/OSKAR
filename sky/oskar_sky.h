@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,6 +73,7 @@ enum {
 #include <oskar_sky_append.h>
 #include <oskar_sky_combine_set.h>
 #include <oskar_sky_create.h>
+#include <oskar_sky_create_alias.h>
 #include <oskar_sky_create_copy.h>
 #include <oskar_sky_evaluate_gaussian_source_parameters.h>
 #include <oskar_sky_evaluate_relative_direction_cosines.h>

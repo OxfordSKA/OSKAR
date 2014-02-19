@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,7 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
     int i, num_sources, num_stations;
     /* Station position in ECEF frame */
     double station_x, station_y, station_z, wavelength;
-    oskar_Mem Z_station;
+    oskar_Mem *Z_station;
     int type;
     oskar_Sky* sky_cpu; /* Copy of the sky model on the CPU */
 
@@ -99,8 +99,7 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
     /* Copy the sky model to the CPU. */
     sky_cpu = oskar_sky_create_copy(sky, OSKAR_LOCATION_CPU, status);
 
-    oskar_mem_init(&Z_station, oskar_jones_type(Z), OSKAR_LOCATION_CPU,
-            num_sources, OSKAR_FALSE, status);
+    Z_station = oskar_mem_create_alias(0, 0, 0, status);
     wavelength = 299792458.0 / frequency_hz;
 
     /* Evaluate the ionospheric phase screen for each station at each
@@ -118,7 +117,7 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
         /* Evaluate horizontal x,y,z source positions (for which to evaluate
          * pierce points) */
         oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
-                &work->hor_x, &work->hor_y, &work->hor_z, num_sources,
+                work->hor_x, work->hor_y, work->hor_z, num_sources,
                 oskar_sky_l_const(sky_cpu), oskar_sky_m_const(sky_cpu),
                 oskar_sky_n_const(sky_cpu), last - oskar_sky_ra0(sky_cpu),
                 oskar_sky_dec0(sky_cpu), lat, status);
@@ -129,24 +128,25 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
 
         /* Obtain the pierce points. */
         /* FIXME this is current hard-coded to TID height screen 0 */
-        oskar_evaluate_pierce_points(&work->pp_lon, &work->pp_lat,
-                &work->pp_rel_path, lon, lat, alt, station_x, station_y,
+        oskar_evaluate_pierce_points(work->pp_lon, work->pp_lat,
+                work->pp_rel_path, lon, lat, alt, station_x, station_y,
                 station_z, settings->TID[0].height_km * 1000., num_sources,
-                &work->hor_x, &work->hor_y, &work->hor_z, status);
+                work->hor_x, work->hor_y, work->hor_z, status);
 
         /* Evaluate TEC values for the pierce points */
         oskar_evaluate_TEC(work, num_sources, settings, gast, status);
 
         /* Get a pointer to the Jones matrices for the station */
-        oskar_jones_get_station_pointer(&Z_station, Z, i, status);
+        oskar_jones_get_station_pointer(Z_station, Z, i, status);
 
         /* Populate the Jones matrix with ionospheric phase */
-        evaluate_jones_Z_station(&Z_station, wavelength,
-                &work->total_TEC, &work->hor_z, settings->min_elevation,
+        evaluate_jones_Z_station(Z_station, wavelength,
+                work->total_TEC, work->hor_z, settings->min_elevation,
                 num_sources, status);
     }
 
     oskar_sky_free(sky_cpu, status);
+    oskar_mem_free(Z_station, status);
 }
 
 
@@ -166,23 +166,23 @@ static void oskar_evaluate_TEC(oskar_WorkJonesZ* work, int num_pp,
     if (settings->num_TID_screens > 1)
         *status = OSKAR_ERR_SETTINGS_IONOSPHERE;
 
-    oskar_mem_set_value_real(&work->total_TEC, 0.0, 0, 0, status);
+    oskar_mem_set_value_real(work->total_TEC, 0.0, 0, 0, status);
 
     /* Loop over TID screens to evaluate TEC values */
     for (i = 0; i < settings->num_TID_screens; ++i)
     {
-        oskar_mem_set_value_real(&work->screen_TEC, 0.0, 0, 0, status);
+        oskar_mem_set_value_real(work->screen_TEC, 0.0, 0, 0, status);
 
         /* Evaluate TEC values for the screen */
-        oskar_evaluate_TEC_TID(&work->screen_TEC, num_pp, &work->pp_lon,
-                &work->pp_lat, &work->pp_rel_path, settings->TEC0,
+        oskar_evaluate_TEC_TID(work->screen_TEC, num_pp, work->pp_lon,
+                work->pp_lat, work->pp_rel_path, settings->TEC0,
                 &settings->TID[i], gast);
 
         /* Accumulate into total TEC */
         /* FIXME addition is not physical for more than one TEC screen in the
          * way TIDs are currently evaluated as TEC0 is added into both screens.
          */
-        oskar_mem_add(&work->total_TEC, &work->total_TEC, &work->screen_TEC,
+        oskar_mem_add(work->total_TEC, work->total_TEC, work->screen_TEC,
                 status);
     }
 }
@@ -243,7 +243,7 @@ static void evaluate_jones_Z_station(oskar_Mem* Z_station,
     type = oskar_mem_type(Z_station);
     if (type == OSKAR_DOUBLE_COMPLEX)
     {
-        double2* Z = (double2*)Z_station->data;
+        double2* Z = oskar_mem_double2(Z_station, status);
         for (i = 0; i < num_pp; ++i)
         {
             /* Initialise as an unit scalar Z = (1 + 0i) i.e. no phase change */
@@ -252,10 +252,11 @@ static void evaluate_jones_Z_station(oskar_Mem* Z_station,
 
             /* If the pierce point is below the minimum specified elevation
              * don't evaluate a phase */
-            if (asin(((double*)hor_z->data)[i]) < min_elevation)
+            if (asin((oskar_mem_double_const(hor_z, status))[i]) <
+                    min_elevation)
                 continue;
 
-            arg = wavelength * 25. * ((double*)TEC->data)[i];
+            arg = wavelength * 25. * oskar_mem_double_const(TEC, status)[i];
 
             /* Z phase == exp(i * lambda * 25 * tec) */
             Z[i].x = cos(arg);
@@ -264,7 +265,7 @@ static void evaluate_jones_Z_station(oskar_Mem* Z_station,
     }
     else if (type == OSKAR_SINGLE_COMPLEX)
     {
-        float2* Z = (float2*)Z_station->data;
+        float2* Z = oskar_mem_float2(Z_station, status);
         for (i = 0; i < num_pp; ++i)
         {
             /* Initialise as an unit scalar Z = (1 + 0i) i.e. no phase change */
@@ -273,10 +274,11 @@ static void evaluate_jones_Z_station(oskar_Mem* Z_station,
 
             /* If the pierce point is below the minimum specified elevation
              * don't evaluate a phase */
-            if (asin(((float*)hor_z->data)[i]) < min_elevation)
+            if (asin((oskar_mem_float_const(hor_z, status))[i]) <
+                    min_elevation)
                 continue;
 
-            arg = wavelength * 25. * ((float*)TEC->data)[i];
+            arg = wavelength * 25. * oskar_mem_float_const(TEC, status)[i];
 
             /* Z phase == exp(i * lambda * 25 * tec) */
             Z[i].x = cos(arg);

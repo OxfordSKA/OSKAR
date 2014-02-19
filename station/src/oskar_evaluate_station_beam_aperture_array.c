@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,27 +88,38 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
     }
     else
     {
+        oskar_Mem *c_beam, *c_x, *c_y, *c_z;
+        c_beam = oskar_mem_create_alias(0, 0, 0, status);
+        c_x = oskar_mem_create_alias(0, 0, 0, status);
+        c_y = oskar_mem_create_alias(0, 0, 0, status);
+        c_z = oskar_mem_create_alias(0, 0, 0, status);
+
         /* Split up list of input points into manageable chunks. */
         for (start = 0; start < num_points; start += MAX_CHUNK_SIZE)
         {
             int chunk_size;
-            oskar_Mem c_beam, c_x, c_y, c_z;
 
             /* Get size of current chunk. */
             chunk_size = num_points - start;
             if (chunk_size > MAX_CHUNK_SIZE) chunk_size = MAX_CHUNK_SIZE;
 
             /* Get pointers to start of chunk input data. */
-            oskar_mem_get_pointer(&c_beam, beam, start, chunk_size, status);
-            oskar_mem_get_pointer(&c_x, x, start, chunk_size, status);
-            oskar_mem_get_pointer(&c_y, y, start, chunk_size, status);
-            oskar_mem_get_pointer(&c_z, z, start, chunk_size, status);
+            oskar_mem_set_alias(c_beam, beam, start, chunk_size, status);
+            oskar_mem_set_alias(c_x, x, start, chunk_size, status);
+            oskar_mem_set_alias(c_y, y, start, chunk_size, status);
+            oskar_mem_set_alias(c_z, z, start, chunk_size, status);
 
             /* Start recursive call at depth 0. */
-            oskar_evaluate_station_beam_aperture_array_private(&c_beam, station,
-                    chunk_size, &c_x, &c_y, &c_z, gast, frequency_hz, work,
+            oskar_evaluate_station_beam_aperture_array_private(c_beam, station,
+                    chunk_size, c_x, c_y, c_z, gast, frequency_hz, work,
                     random_states, 0, status);
         }
+
+        /* Release handles for chunk memory. */
+        oskar_mem_free(c_beam, status);
+        oskar_mem_free(c_x, status);
+        oskar_mem_free(c_y, status);
+        oskar_mem_free(c_z, status);
     }
 }
 
@@ -123,8 +134,8 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
     int num_elements;
 
     num_elements = oskar_station_num_elements(station);
-    weights = &work->weights;
-    weights_error = &work->weights_error;
+    weights = work->weights;
+    weights_error = work->weights_error;
     wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
 
     /* Check if safe to proceed. */
@@ -155,7 +166,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             {
                 /* Get pointer to array pattern. */
                 array = (oskar_mem_is_scalar(beam) ?
-                        beam : &work->array_pattern);
+                        beam : work->array_pattern);
 
                 /* Generate beamforming weights and evaluate array pattern. */
                 oskar_evaluate_element_weights(weights, weights_error,
@@ -172,16 +183,16 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             /* Get pointer to element pattern. */
             if (oskar_station_use_polarised_elements(station))
                 element = (oskar_mem_is_matrix(beam) ?
-                        beam : &work->element_pattern_matrix);
+                        beam : work->element_pattern_matrix);
             else
-                element = (!array ? beam : &work->element_pattern_scalar);
+                element = (!array ? beam : work->element_pattern_scalar);
 
             /* Evaluate element pattern. */
             oskar_element_evaluate(oskar_station_element_const(station, 0),
                     element, oskar_station_element_orientation_x_rad(station),
                     oskar_station_element_orientation_y_rad(station),
-                    num_points, x, y, z, &work->theta_modified,
-                    &work->phi_modified, status);
+                    num_points, x, y, z, work->theta_modified,
+                    work->phi_modified, status);
 
             /* Element-wise multiply to join array and element pattern. */
             if (array && element)
@@ -249,8 +260,8 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
 
         /* Get pointer to a work array of the right type. */
         signal = (oskar_mem_is_matrix(beam)) ?
-                &work->hierarchy_work_matrix[depth] :
-                &work->hierarchy_work_scalar[depth];
+                work->hierarchy_work_matrix[depth] :
+                work->hierarchy_work_scalar[depth];
 
         /* Ensure enough space in the work array. */
         work_size = num_elements * num_points;
@@ -261,11 +272,11 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         if (oskar_station_identical_children(station))
         {
             /* Set up the output buffer for the first station. */
-            oskar_Mem output0;
-            oskar_mem_get_pointer(&output0, signal, 0, num_points, status);
+            oskar_Mem* output0;
+            output0 = oskar_mem_create_alias(signal, 0, num_points, status);
 
             /* Recursive call. */
-            oskar_evaluate_station_beam_aperture_array_private(&output0,
+            oskar_evaluate_station_beam_aperture_array_private(output0,
                     oskar_station_child_const(station, 0), num_points,
                     x, y, z, gast, frequency_hz, work, random_states,
                     depth + 1, status);
@@ -273,8 +284,9 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             /* Copy beam for child station 0 into memory for other stations. */
             for (i = 1; i < num_elements; ++i)
             {
-                oskar_mem_insert(signal, &output0, i * num_points, status);
+                oskar_mem_insert(signal, output0, i * num_points, status);
             }
+            oskar_mem_free(output0, status);
         }
         else
         {
@@ -282,15 +294,16 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             for (i = 0; i < num_elements; ++i)
             {
                 /* Set up the output buffer for this station. */
-                oskar_Mem output;
-                oskar_mem_get_pointer(&output, signal, i * num_points,
+                oskar_Mem* output;
+                output = oskar_mem_create_alias(signal, i * num_points,
                         num_points, status);
 
                 /* Recursive call. */
-                oskar_evaluate_station_beam_aperture_array_private(&output,
+                oskar_evaluate_station_beam_aperture_array_private(output,
                         oskar_station_child_const(station, i), num_points,
                         x, y, z, gast, frequency_hz, work, random_states,
                         depth + 1, status);
+                oskar_mem_free(output, status);
             }
         }
 

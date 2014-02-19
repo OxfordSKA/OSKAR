@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,6 @@ void oskar_jones_free(oskar_Jones* jones, int* status)
 
     /* Free the memory held by the structure. */
     oskar_mem_free(jones->data, status);
-    free(jones->data); /* FIXME Remove after updating oskar_mem_free(). */
 
     /* Free the structure itself. */
     free(jones);

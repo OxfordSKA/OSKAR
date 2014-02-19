@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,6 @@
 
 #include <private_sky.h>
 #include <oskar_sky.h>
-#include <oskar_sky_init.h>
 
 #include <stdlib.h>
 
@@ -36,7 +35,7 @@
 extern "C" {
 #endif
 
-oskar_Sky* oskar_sky_create(int type, int location, int num_elements,
+oskar_Sky* oskar_sky_create(int type, int location, int num_sources,
         int* status)
 {
     oskar_Sky* model = 0;
@@ -67,7 +66,34 @@ oskar_Sky* oskar_sky_create(int type, int location, int num_elements,
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
         return 0;
     }
-    oskar_sky_init(model, type, location, num_elements, status);
+
+    /* Set meta-data */
+    model->precision = type;
+    model->location = location;
+    model->num_sources = num_sources;
+    model->use_extended = OSKAR_FALSE;
+    model->ra0 = 0.0;
+    model->dec0 = 0.0;
+
+    /* Initialise the memory. */
+    model->RA = oskar_mem_create(type, location, num_sources, status);
+    model->Dec = oskar_mem_create(type, location, num_sources, status);
+    model->I = oskar_mem_create(type, location, num_sources, status);
+    model->Q = oskar_mem_create(type, location, num_sources, status);
+    model->U = oskar_mem_create(type, location, num_sources, status);
+    model->V = oskar_mem_create(type, location, num_sources, status);
+    model->reference_freq = oskar_mem_create(type, location, num_sources, status);
+    model->spectral_index = oskar_mem_create(type, location, num_sources, status);
+    model->RM = oskar_mem_create(type, location, num_sources, status);
+    model->l = oskar_mem_create(type, location, num_sources, status);
+    model->m = oskar_mem_create(type, location, num_sources, status);
+    model->n = oskar_mem_create(type, location, num_sources, status);
+    model->FWHM_major = oskar_mem_create(type, location, num_sources, status);
+    model->FWHM_minor = oskar_mem_create(type, location, num_sources, status);
+    model->position_angle = oskar_mem_create(type, location, num_sources, status);
+    model->gaussian_a = oskar_mem_create(type, location, num_sources, status);
+    model->gaussian_b = oskar_mem_create(type, location, num_sources, status);
+    model->gaussian_c = oskar_mem_create(type, location, num_sources, status);
 
     /* Return pointer to sky model. */
     return model;

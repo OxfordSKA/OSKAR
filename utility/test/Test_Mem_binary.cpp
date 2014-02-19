@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,6 @@ TEST(Mem, binary_read_write)
                 "USER", "TEST", 987654, 0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_mem_free(mem, &status);
-        free(mem); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Save data from GPU.
@@ -99,8 +98,6 @@ TEST(Mem, binary_read_write)
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_mem_free(mem_cpu, &status);
         oskar_mem_free(mem_gpu, &status);
-        free(mem_cpu); // FIXME Remove after updating oskar_mem_free().
-        free(mem_gpu); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Save a single integer with a large index.
@@ -135,7 +132,6 @@ TEST(Mem, binary_read_write)
         oskar_mem_binary_file_write_ext(mem, filename, "", "", 11, 0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_mem_free(mem, &status);
-        free(mem); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Save CPU data with tags that are equal lengths.
@@ -167,7 +163,6 @@ TEST(Mem, binary_read_write)
                 &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_mem_free(mem, &status);
-        free(mem); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Declare index pointer.
@@ -195,8 +190,6 @@ TEST(Mem, binary_read_write)
         }
         oskar_mem_free(mem_cpu, &status);
         oskar_mem_free(mem_gpu, &status);
-        free(mem_cpu); // FIXME Remove after updating oskar_mem_free().
-        free(mem_gpu); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Load integer with a large index.
@@ -220,7 +213,6 @@ TEST(Mem, binary_read_write)
             EXPECT_DOUBLE_EQ(i * 1024.0, data[i]);
         }
         oskar_mem_free(mem, &status);
-        free(mem); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Load CPU data with blank tags.
@@ -252,7 +244,6 @@ TEST(Mem, binary_read_write)
             EXPECT_DOUBLE_EQ(i * 501.0, data[i]);
         }
         oskar_mem_free(mem, &status);
-        free(mem); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Load CPU data with tags that are equal lengths.
@@ -280,7 +271,6 @@ TEST(Mem, binary_read_write)
             EXPECT_DOUBLE_EQ(i * 1001.0, data[i]);
         }
         oskar_mem_free(mem, &status);
-        free(mem); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Try to load data that isn't present.
@@ -294,7 +284,6 @@ TEST(Mem, binary_read_write)
         status = 0;
         EXPECT_EQ(0, (int)oskar_mem_length(mem));
         oskar_mem_free(mem, &status);
-        free(mem); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Check header version.

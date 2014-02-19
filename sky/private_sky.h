@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,30 +48,30 @@ struct oskar_Sky
     int precision;
     int location;
 
-    int num_sources;          /**< Number of sources in the sky model. */
-    oskar_Mem RA;             /**< Right ascension, in radians. */
-    oskar_Mem Dec;            /**< Declination, in radians. */
-    oskar_Mem I;              /**< Stokes-I, in Jy. */
-    oskar_Mem Q;              /**< Stokes-Q, in Jy. */
-    oskar_Mem U;              /**< Stokes-U, in Jy. */
-    oskar_Mem V;              /**< Stokes-V, in Jy. */
-    oskar_Mem reference_freq; /**< Reference frequency for the source flux, in Hz. */
-    oskar_Mem spectral_index; /**< Spectral index. */
-    oskar_Mem RM;             /**< Rotation measure, in radians / m^2. */
+    int num_sources;           /**< Number of sources in the sky model. */
+    oskar_Mem* RA;             /**< Right ascension, in radians. */
+    oskar_Mem* Dec;            /**< Declination, in radians. */
+    oskar_Mem* I;              /**< Stokes-I, in Jy. */
+    oskar_Mem* Q;              /**< Stokes-Q, in Jy. */
+    oskar_Mem* U;              /**< Stokes-U, in Jy. */
+    oskar_Mem* V;              /**< Stokes-V, in Jy. */
+    oskar_Mem* reference_freq; /**< Reference frequency for the source flux, in Hz. */
+    oskar_Mem* spectral_index; /**< Spectral index. */
+    oskar_Mem* RM;             /**< Rotation measure, in radians / m^2. */
 
-    double ra0;               /**< Reference right ascension, in radians. */
-    double dec0;              /**< Reference declination, in radians. */
-    oskar_Mem l;              /**< Phase centre relative l-direction cosines. */
-    oskar_Mem m;              /**< Phase centre relative m-direction cosines. */
-    oskar_Mem n;              /**< Phase centre relative n-direction cosines. */
+    double ra0;                /**< Reference right ascension, in radians. */
+    double dec0;               /**< Reference declination, in radians. */
+    oskar_Mem* l;              /**< Phase centre relative l-direction cosines. */
+    oskar_Mem* m;              /**< Phase centre relative m-direction cosines. */
+    oskar_Mem* n;              /**< Phase centre relative n-direction cosines. */
 
-    int use_extended;         /**< Enable use of extended sources */
-    oskar_Mem FWHM_major;     /**< Major axis FWHM for gaussian sources, in radians. */
-    oskar_Mem FWHM_minor;     /**< Minor axis FWHM for gaussian sources, in radians. */
-    oskar_Mem position_angle; /**< Position angle for gaussian sources, in radians. */
-    oskar_Mem gaussian_a;     /**< Gaussian source width parameter */
-    oskar_Mem gaussian_b;     /**< Gaussian source width parameter */
-    oskar_Mem gaussian_c;     /**< Gaussian source width parameter */
+    int use_extended;          /**< Enable use of extended sources */
+    oskar_Mem* FWHM_major;     /**< Major axis FWHM for Gaussian sources, in radians. */
+    oskar_Mem* FWHM_minor;     /**< Minor axis FWHM for Gaussian sources, in radians. */
+    oskar_Mem* position_angle; /**< Position angle for Gaussian sources, in radians. */
+    oskar_Mem* gaussian_a;     /**< Gaussian source width parameter */
+    oskar_Mem* gaussian_b;     /**< Gaussian source width parameter */
+    oskar_Mem* gaussian_c;     /**< Gaussian source width parameter */
 };
 
 #ifndef OSKAR_SKY_TYPEDEF_

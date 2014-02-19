@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,8 +27,7 @@
  */
 
 
-#include <oskar_Image.h>
-#include <oskar_image_read.h>
+#include <oskar_image.h>
 #include <oskar_get_image_type_string.h>
 
 #include <oskar_get_data_type_string.h>
@@ -44,6 +43,7 @@
 #include <oskar_binary_tag_index_query.h>
 #include <oskar_binary_tag_index_create.h>
 #include <oskar_binary_stream_read_oskar_version.h>
+#include <oskar_log.h>
 
 #include <apps/lib/oskar_OptionParser.h>
 
@@ -52,9 +52,11 @@
 #include <cstdlib>
 #include <cstring>
 
+static const int width = 40;
+
 int main(int argc, char** argv)
 {
-    int status = OSKAR_SUCCESS;
+    int status = 0;
 
     oskar_OptionParser opt("oskar_image_summary", oskar_version_string());
     opt.addRequired("OSKAR image file");
@@ -68,114 +70,117 @@ int main(int argc, char** argv)
     bool displayLog = opt.isSet("-l") ? true : false;
     bool displaySettings = opt.isSet("-s") ? true : false;
 
-    // Load the image into memory.
+    // Get the version of OSKAR that created the file.
     int vMajor, vMinor, vPatch;
-    oskar_Image image;
-    oskar_image_read(&image, filename, 0, &status);
-
-    FILE* file = fopen(filename, "r");
-    if (file == NULL)
+    FILE* file = fopen(filename, "rb");
+    if (!file)
     {
-        status = OSKAR_ERR_FILE_IO;
-        fprintf(stderr, "ERROR: Failed to open specified image file: %s.\n",
-                oskar_get_error_string(status));
-        return status;
+        fprintf(stderr, "ERROR: Failed to open specified file.\n");
+        return OSKAR_ERR_FILE_IO;
     }
-
     oskar_binary_stream_read_oskar_version(file, &vMajor, &vMinor, &vPatch,
             &status);
     // True if version 2.3 or older
     bool v232 = (vMajor <= 2 && vMinor <= 3 && vPatch <= 3) ? true : false;
-
     fclose(file);
 
+    // Load the image into memory.
+    oskar_Image* image = oskar_image_read(filename, 0, &status);
+
+    oskar_Log* log = 0;
     if (!(displayLog || displaySettings))
     {
-        printf("\n");
-        printf("- OSKAR version ........... %i.%i.%i\n", vMajor, vMinor, vPatch);
+        oskar_log_section(log, "Image summary");
+        oskar_log_value(log, 0, width, "File", "%s", filename);
+        oskar_log_value(log, 0, width, "Created with OSKAR version",
+                "%i.%i.%i", vMajor, vMinor, vPatch);
+        oskar_log_value(log, 0, width, "Image type", "%s",
+                oskar_get_image_type_string(oskar_image_type(image)));
+        oskar_log_value(log, 0, width, "Data type", "%s",
+                oskar_get_data_type_string(oskar_mem_type(
+                        oskar_image_data(image))));
+        oskar_log_value(log, 0, width, "Dimension order (fastest to slowest)",
+                "");
 
-        printf("\n");
-        printf("- Image type .............. %s\n",
-                oskar_get_image_type_string(image.image_type));
-        printf("\n");
-        printf("- Data type ............... %s\n",
-                oskar_get_data_type_string(oskar_mem_type(&image.data)));
-        printf("\n");
-        printf("- Image cube dimensions:\n");
-        printf("  - Order ................. ");
         for (int i = 0; i < 5; ++i)
         {
-            switch (image.dimension_order[i])
+            switch (oskar_image_dimension_order(image)[i])
             {
-            case OSKAR_IMAGE_DIM_RA:
-                printf("%s", "RA");
+            case OSKAR_IMAGE_DIM_LONGITUDE:
+                oskar_log_value(log, 1, width, 0, "[%d] Longitude", i);
                 break;
-            case OSKAR_IMAGE_DIM_DEC:
-                printf("%s", "Dec");
+            case OSKAR_IMAGE_DIM_LATITUDE:
+                oskar_log_value(log, 1, width, 0, "[%d] Latitude", i);
                 break;
             case OSKAR_IMAGE_DIM_POL:
-                printf("%s", "Pol");
+                oskar_log_value(log, 1, width, 0, "[%d] Polarisation", i);
                 break;
             case OSKAR_IMAGE_DIM_TIME:
-                printf("%s", "Time");
+                oskar_log_value(log, 1, width, 0, "[%d] Time", i);
                 break;
             case OSKAR_IMAGE_DIM_CHANNEL:
-                printf("%s", "Channel");
+                oskar_log_value(log, 1, width, 0, "[%d] Channel", i);
                 break;
             default:
-                fprintf(stderr, "\nERROR: Unrecognised dimension ID.\n");
+                fprintf(stderr, "ERROR: Unrecognised dimension ID.\n");
                 return OSKAR_FAIL;
             };
-            if (i < 4) printf(", ");
         }
-        printf("\n");
-        printf("  - Size RA, Dec. (pixels)  %i x %i\n", image.width, image.height);
-        printf("  - No. of polarisations .. %i\n", image.num_pols);
-        printf("  - No. of times .......... %i\n", image.num_times);
-        printf("  - No. of channels ....... %i\n", image.num_channels);
+
+        oskar_log_value(log, 0, width, "Width, height (pixels)", "%i x %i",
+                oskar_image_width(image), oskar_image_height(image));
+        oskar_log_value(log, 0, width, "No. polarisations",
+                "%i", oskar_image_num_pols(image));
+        oskar_log_value(log, 0, width, "No. times", "%i",
+                oskar_image_num_times(image));
+        oskar_log_value(log, 0, width, "No. channels",
+                "%i", oskar_image_num_channels(image));
 
         if (v232 == false)
         {
-            printf("\n");
-            printf("- Grid type ............... ");
-            if (image.grid_type == OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
-                printf("%s", "Rectilinear\n");
-            else if (image.grid_type == OSKAR_IMAGE_GRID_TYPE_HEALPIX)
-                printf("%s", "HEALPIX\n");
-            else
-                printf("%s", "Undefined\n");
-            printf("\n");
-            printf("- Coordinate frame ........ ");
-            if (image.coord_frame == OSKAR_IMAGE_COORD_FRAME_EQUATORIAL)
-                printf("%s", "Equatorial\n");
-            else if (image.coord_frame == OSKAR_IMAGE_COORD_FRAME_HORIZON)
-                printf("%s", "Horizon\n");
-            else
-                printf("%s", "Undefined\n");
+            const char* grid_type = "Undefined";
+            const char* coord_frame = "Undefined";
+            if (oskar_image_grid_type(image) ==
+                    OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
+                grid_type = "Rectilinear";
+            else if (oskar_image_grid_type(image) ==
+                    OSKAR_IMAGE_GRID_TYPE_HEALPIX)
+                grid_type = "HEALPix";
+            if (oskar_image_coord_frame(image) ==
+                    OSKAR_IMAGE_COORD_FRAME_EQUATORIAL)
+                coord_frame = "Equatorial (RA, Dec)";
+            else if (oskar_image_coord_frame(image) ==
+                    OSKAR_IMAGE_COORD_FRAME_HORIZON)
+                coord_frame = "Horizon (phi, theta)";
+            oskar_log_value(log, 0, width, "Grid type", "%s", grid_type);
+            oskar_log_value(log, 0, width, "Coordinate frame",
+                    "%s", coord_frame);
         }
 
-        if (v232 || image.grid_type == OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
+        if (v232 || oskar_image_grid_type(image) ==
+                OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
         {
-            printf("\n");
-            printf("- Field of view (degrees) . %f\n", image.fov_dec_deg);
-            if (v232 || image.grid_type == OSKAR_IMAGE_COORD_FRAME_EQUATORIAL)
-            {
-                printf("\n");
-                printf("- Pointing centre:\n");
-                printf("  - RA (degrees) .......... %f\n", image.centre_ra_deg);
-                printf("  - Dec. (degrees) ........ %f\n", image.centre_dec_deg);
-            }
+            oskar_log_value(log, 0, width, "Field of view (deg)", "%.3f",
+                    oskar_image_fov_latitude_deg(image));
+            oskar_log_value(log, 0, width, "Centre longitude (deg)",
+                    "%.3f", oskar_image_centre_longitude_deg(image));
+            oskar_log_value(log, 0, width, "Centre latitude (deg)",
+                    "%.3f", oskar_image_centre_latitude_deg(image));
         }
 
-        printf("\n");
-        printf("- Start time MJD UTC ...... %f\n", image.time_start_mjd_utc);
-        printf("- Time increment (seconds)  %f\n", image.time_inc_sec);
-        printf("\n");
-        printf("- Start frequency (Hz) .... %e\n", image.freq_start_hz);
-        printf("- Frequency increment (Hz)  %e\n", image.freq_inc_hz);
-        printf("\n");
-
+        oskar_log_value(log, 0, width, "Start time MJD(UTC)",
+                "%.5f", oskar_image_time_start_mjd_utc(image));
+        oskar_log_value(log, 0, width, "Time increment (seconds)",
+                "%.1f", oskar_image_time_inc_sec(image));
+        oskar_log_value(log, 0, width, "Start frequency (Hz)",
+                "%e", oskar_image_freq_start_hz(image));
+        oskar_log_value(log, 0, width, "Frequency increment (Hz)",
+                "%e", oskar_image_freq_inc_hz(image));
     }
+
+    // Free the image data.
+    oskar_image_free(image, &status);
+
     // If verbose, print the run log.
     if (displayLog)
     {
@@ -203,7 +208,6 @@ int main(int argc, char** argv)
                 printf("%s", oskar_mem_char(temp));
             }
             oskar_mem_free(temp, &status);
-            free(temp); // FIXME Remove after updating oskar_mem_free().
         }
         fclose(stream);
         oskar_binary_tag_index_free(index, &status);
@@ -234,7 +238,6 @@ int main(int argc, char** argv)
                 printf("%s", oskar_mem_char(temp));
             }
             oskar_mem_free(temp, &status);
-            free(temp); // FIXME Remove after updating oskar_mem_free().
         }
         fclose(stream);
         oskar_binary_tag_index_free(index, &status);

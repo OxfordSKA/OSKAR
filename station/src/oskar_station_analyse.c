@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,17 +71,17 @@ void oskar_station_analyse(oskar_Station* station,
         double *z_signal, *z_weights, *amp, *amp_err, *phase, *phase_err;
         double *cos_x, *sin_x, *cos_y, *sin_y;
         double2 *weights;
-        z_signal  = oskar_mem_double(&station->z_signal, status);
-        z_weights = oskar_mem_double(&station->z_weights, status);
-        amp       = oskar_mem_double(&station->gain, status);
-        amp_err   = oskar_mem_double(&station->gain_error, status);
-        phase     = oskar_mem_double(&station->phase_offset, status);
-        phase_err = oskar_mem_double(&station->phase_error, status);
-        cos_x     = oskar_mem_double(&station->cos_orientation_x, status);
-        sin_x     = oskar_mem_double(&station->sin_orientation_x, status);
-        cos_y     = oskar_mem_double(&station->cos_orientation_y, status);
-        sin_y     = oskar_mem_double(&station->sin_orientation_y, status);
-        weights   = oskar_mem_double2(&station->weight, status);
+        z_signal  = oskar_mem_double(station->z_signal, status);
+        z_weights = oskar_mem_double(station->z_weights, status);
+        amp       = oskar_mem_double(station->gain, status);
+        amp_err   = oskar_mem_double(station->gain_error, status);
+        phase     = oskar_mem_double(station->phase_offset, status);
+        phase_err = oskar_mem_double(station->phase_error, status);
+        cos_x     = oskar_mem_double(station->cos_orientation_x, status);
+        sin_x     = oskar_mem_double(station->sin_orientation_x, status);
+        cos_y     = oskar_mem_double(station->cos_orientation_y, status);
+        sin_y     = oskar_mem_double(station->sin_orientation_y, status);
+        weights   = oskar_mem_double2(station->weight, status);
 
         for (i = 0; i < station->num_elements; ++i)
         {
@@ -114,17 +114,17 @@ void oskar_station_analyse(oskar_Station* station,
         float *z_signal, *z_weights, *amp, *amp_err, *phase, *phase_err;
         float *cos_x, *sin_x, *cos_y, *sin_y;
         float2 *weights;
-        z_signal  = oskar_mem_float(&station->z_signal, status);
-        z_weights = oskar_mem_float(&station->z_weights, status);
-        amp       = oskar_mem_float(&station->gain, status);
-        amp_err   = oskar_mem_float(&station->gain_error, status);
-        phase     = oskar_mem_float(&station->phase_offset, status);
-        phase_err = oskar_mem_float(&station->phase_error, status);
-        cos_x     = oskar_mem_float(&station->cos_orientation_x, status);
-        sin_x     = oskar_mem_float(&station->sin_orientation_x, status);
-        cos_y     = oskar_mem_float(&station->cos_orientation_y, status);
-        sin_y     = oskar_mem_float(&station->sin_orientation_y, status);
-        weights   = oskar_mem_float2(&station->weight, status);
+        z_signal  = oskar_mem_float(station->z_signal, status);
+        z_weights = oskar_mem_float(station->z_weights, status);
+        amp       = oskar_mem_float(station->gain, status);
+        amp_err   = oskar_mem_float(station->gain_error, status);
+        phase     = oskar_mem_float(station->phase_offset, status);
+        phase_err = oskar_mem_float(station->phase_error, status);
+        cos_x     = oskar_mem_float(station->cos_orientation_x, status);
+        sin_x     = oskar_mem_float(station->sin_orientation_x, status);
+        cos_y     = oskar_mem_float(station->cos_orientation_y, status);
+        sin_y     = oskar_mem_float(station->sin_orientation_y, status);
+        weights   = oskar_mem_float2(station->weight, status);
 
         for (i = 0; i < station->num_elements; ++i)
         {

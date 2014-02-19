@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include "imaging/oskar_image_get_stats.h"
+#include <private_image.h>
+#include <oskar_image.h>
 
 #include <stdlib.h>
 #include <float.h>
@@ -37,14 +37,14 @@
 extern "C" {
 #endif
 
-
 void oskar_image_get_stats(oskar_ImageStats* stats, const oskar_Image* image,
         int p, int t, int c, int* status)
 {
     int slice_index, offset = 0, num_pixels = 0;
+    const oskar_Mem* d_ = 0;
 
     /* Check all inputs. */
-    if (stats == NULL || image == NULL || status == NULL)
+    if (!stats || !image || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -52,7 +52,7 @@ void oskar_image_get_stats(oskar_ImageStats* stats, const oskar_Image* image,
     if (*status) return;
 
     /* Check the image is in CPU memory. */
-    if (oskar_mem_location(&image->data) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(image->data) != OSKAR_LOCATION_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -82,11 +82,12 @@ void oskar_image_get_stats(oskar_ImageStats* stats, const oskar_Image* image,
     stats->var = 0.0;
     stats->std = 0.0;
 
-    if (oskar_mem_type(&image->data) == OSKAR_DOUBLE)
+    d_ = oskar_image_data_const(image);
+    if (oskar_mem_type(d_) == OSKAR_DOUBLE)
     {
         int i = 0;
         double sum = 0.0, sum_squared = 0.0;
-        double* image_ = (double*)image->data.data + offset;
+        const double* image_ = oskar_mem_double_const(d_, status) + offset;
         for (i = 0; i < num_pixels; ++i)
         {
             if (image_[i] > stats->max) stats->max = image_[i];
@@ -99,11 +100,11 @@ void oskar_image_get_stats(oskar_ImageStats* stats, const oskar_Image* image,
         stats->var = sum_squared/num_pixels - stats->mean*stats->mean;
         stats->std = sqrt(stats->var);
     }
-    else if (oskar_mem_type(&image->data) == OSKAR_SINGLE)
+    else if (oskar_mem_type(d_) == OSKAR_SINGLE)
     {
         int i = 0;
-        float* image_ = (float*)image->data.data + offset;
         double sum = 0.0, sum_squared = 0.0;
+        const float* image_ = oskar_mem_float_const(d_, status) + offset;
         for (i = 0; i < num_pixels; ++i)
         {
             if (image_[i] > stats->max) stats->max = image_[i];

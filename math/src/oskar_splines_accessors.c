@@ -60,32 +60,32 @@ int oskar_splines_num_knots_y(const oskar_Splines* data)
 
 oskar_Mem* oskar_splines_knots_x(oskar_Splines* data)
 {
-    return &data->knots_x;
+    return data->knots_x;
 }
 
 const oskar_Mem* oskar_splines_knots_x_const(const oskar_Splines* data)
 {
-    return &data->knots_x;
+    return data->knots_x;
 }
 
 oskar_Mem* oskar_splines_knots_y(oskar_Splines* data)
 {
-    return &data->knots_y;
+    return data->knots_y;
 }
 
 const oskar_Mem* oskar_splines_knots_y_const(const oskar_Splines* data)
 {
-    return &data->knots_y;
+    return data->knots_y;
 }
 
 oskar_Mem* oskar_splines_coeff(oskar_Splines* data)
 {
-    return &data->coeff;
+    return data->coeff;
 }
 
 const oskar_Mem* oskar_splines_coeff_const(const oskar_Splines* data)
 {
-    return &data->coeff;
+    return data->coeff;
 }
 
 double oskar_splines_smoothing_factor(const oskar_Splines* data)

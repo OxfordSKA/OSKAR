@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,7 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     int prec_approx, prec_accurate;
     size_t i, n;
     const oskar_Mem *app_ptr, *acc_ptr;
-    oskar_Mem *approx_temp, *accurate_temp;
+    oskar_Mem *approx_temp = 0, *accurate_temp = 0;
     double old_m = 0.0, new_m = 0.0, old_s = 0.0, new_s = 0.0;
 
     /* Check all inputs. */
@@ -235,16 +235,8 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     if (std_rel_error) *std_rel_error = (n > 0) ? sqrt(new_s / n) : 0.0;
 
     /* Clean up temporaries if required. */
-    if (oskar_mem_location(val_approx) != OSKAR_LOCATION_CPU)
-    {
-        oskar_mem_free(approx_temp, status);
-        free(approx_temp); /* FIXME Remove after updating oskar_mem_free(). */
-    }
-    if (oskar_mem_location(val_accurate) != OSKAR_LOCATION_CPU)
-    {
-        oskar_mem_free(accurate_temp, status);
-        free(accurate_temp); /* FIXME Remove after updating oskar_mem_free(). */
-    }
+    oskar_mem_free(approx_temp, status);
+    oskar_mem_free(accurate_temp, status);
 }
 
 #ifdef __cplusplus

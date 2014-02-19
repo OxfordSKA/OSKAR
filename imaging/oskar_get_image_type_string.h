@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_GET_IMAGE_TYPE_STRING_H_
 #define OSKAR_GET_IMAGE_TYPE_STRING_H_
 
@@ -34,12 +33,11 @@
  * @file oskar_get_image_type_string.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /**
  * @brief Return a string describing the image type.

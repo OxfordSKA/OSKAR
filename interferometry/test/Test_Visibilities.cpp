@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -361,14 +361,13 @@ TEST(Visibilities, get_channel_amps)
 
     for (int i = 0, c = 0; c < num_channels; ++c)
     {
-        oskar_Mem vis_amps;
-        oskar_vis_get_channel_amps(&vis_amps, vis, c, &status);
+        oskar_Mem* vis_amps = oskar_mem_create_alias(0, 0, 0, &status);
+        oskar_vis_get_channel_amps(vis_amps, vis, c, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ(num_times * num_baselines, (int)oskar_mem_length(&vis_amps));
-        ASSERT_EQ(amp_type, oskar_mem_type(&vis_amps));
-        ASSERT_EQ(location, oskar_mem_location(&vis_amps));
-        ASSERT_EQ(0, vis_amps.owner);
-        float2* vis_amps_data = oskar_mem_float2(&vis_amps, &status);
+        ASSERT_EQ(num_times * num_baselines, (int)oskar_mem_length(vis_amps));
+        ASSERT_EQ(amp_type, oskar_mem_type(vis_amps));
+        ASSERT_EQ(location, oskar_mem_location(vis_amps));
+        float2* vis_amps_data = oskar_mem_float2(vis_amps, &status);
 
         for (int t = 0; t < num_times; ++t)
         {
@@ -380,6 +379,7 @@ TEST(Visibilities, get_channel_amps)
                         vis_amps_data[t * num_baselines + b].y);
             }
         }
+        oskar_mem_free(vis_amps, &status);
     }
     oskar_vis_free(vis, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);

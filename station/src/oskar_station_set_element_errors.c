@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,30 +75,30 @@ void oskar_station_set_element_errors(oskar_Station* dst,
     }
 
     /* Get the data type. */
-    type = oskar_mem_type(&dst->gain);
-    if (type != oskar_mem_type(&dst->gain_error) ||
-            type != oskar_mem_type(&dst->phase_offset) ||
-            type != oskar_mem_type(&dst->phase_error))
+    type = oskar_mem_type(dst->gain);
+    if (type != oskar_mem_type(dst->gain_error) ||
+            type != oskar_mem_type(dst->phase_offset) ||
+            type != oskar_mem_type(dst->phase_error))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
 
     /* Get the data location. */
-    location = oskar_mem_location(&dst->gain);
-    if (location != oskar_mem_location(&dst->gain_error) ||
-            location != oskar_mem_location(&dst->phase_offset) ||
-            location != oskar_mem_location(&dst->phase_error))
+    location = oskar_mem_location(dst->gain);
+    if (location != oskar_mem_location(dst->gain_error) ||
+            location != oskar_mem_location(dst->phase_offset) ||
+            location != oskar_mem_location(dst->phase_error))
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
 
     /* Get byte pointers. */
-    gain_      = oskar_mem_char(&dst->gain);
-    gain_err_  = oskar_mem_char(&dst->gain_error);
-    phase_     = oskar_mem_char(&dst->phase_offset);
-    phase_err_ = oskar_mem_char(&dst->phase_error);
+    gain_      = oskar_mem_char(dst->gain);
+    gain_err_  = oskar_mem_char(dst->gain_error);
+    phase_     = oskar_mem_char(dst->phase_offset);
+    phase_err_ = oskar_mem_char(dst->phase_error);
 
     if (location == OSKAR_LOCATION_CPU)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,29 +54,6 @@ struct oskar_Mem
     size_t num_elements; /**< Number of elements in memory block. */
     int owner;           /**< Flag set if the structure owns the memory. */
     void* data;          /**< Data pointer. */
-
-    /* ALL THE FOLLOWING METHODS ARE DEPRECATED */
-#ifdef __cplusplus
-    /**
-     * @brief Constructs an oskar_Mem data structure.
-     *
-     * @details
-     * Constructs a new oskar_Mem data structure.
-     * The pointer and data types are all set to 0.
-     */
-    OSKAR_EXPORT
-    oskar_Mem();
-
-    /**
-     * @brief Destroys the structure.
-     *
-     * @details
-     * If the pointer is not NULL and the ownership flag is set to true,
-     * then the memory is also freed.
-     */
-    OSKAR_EXPORT
-    ~oskar_Mem();
-#endif
 };
 
 #ifndef OSKAR_MEM_TYPEDEF_

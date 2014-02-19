@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,6 @@
  */
 
 #include <oskar_sky.h>
-#include <oskar_sky_init.h>
 #include <oskar_mem.h>
 #include <oskar_mem_binary_file_read.h>
 #include <oskar_binary_file_read.h>
@@ -38,22 +37,22 @@
 extern "C" {
 #endif
 
-void oskar_sky_read(oskar_Sky* sky, const char* filename,
-        int location, int* status)
+oskar_Sky* oskar_sky_read(const char* filename, int location, int* status)
 {
     int type = 0, num_sources = 0, idx = 0;
     oskar_BinaryTagIndex* index = 0;
     unsigned char group = OSKAR_TAG_GROUP_SKY_MODEL;
+    oskar_Sky* sky = 0;
 
     /* Check all inputs. */
-    if (!filename || !sky || !status)
+    if (!filename || !status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return 0;
     }
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status) return 0;
 
     /* Read the sky model data parameters. */
     oskar_binary_file_read_int(filename, &index, group,
@@ -66,11 +65,11 @@ void oskar_sky_read(oskar_Sky* sky, const char* filename,
     if (*status)
     {
         oskar_binary_tag_index_free(index, status);
-        return;
+        return 0;
     }
 
-    /* Initialise the sky model structure. */
-    oskar_sky_init(sky, type, location, num_sources, status);
+    /* Create the sky model structure. */
+    sky = oskar_sky_create(type, location, num_sources, status);
 
     /* Read the arrays. */
     oskar_mem_binary_file_read(oskar_sky_ra(sky), filename,
@@ -100,6 +99,14 @@ void oskar_sky_read(oskar_Sky* sky, const char* filename,
 
     /* Free the tag index. */
     oskar_binary_tag_index_free(index, status);
+
+    /* Return a handle to the sky model, or NULL if an error occurred. */
+    if (*status)
+    {
+        oskar_sky_free(sky, status);
+        sky = 0;
+    }
+    return sky;
 }
 
 #ifdef __cplusplus

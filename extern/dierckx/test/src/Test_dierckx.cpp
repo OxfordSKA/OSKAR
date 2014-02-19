@@ -104,7 +104,7 @@ static double oskar_mem_max(const oskar_Mem* data, int n)
     if (oskar_mem_type(data) == OSKAR_SINGLE)
     {
         const float *p;
-        p = (const float*)data->data;
+        p = (const float*)oskar_mem_void_const(data);
         for (i = 0; i < n; ++i)
         {
             if (p[i] > r) r = p[i];
@@ -113,7 +113,7 @@ static double oskar_mem_max(const oskar_Mem* data, int n)
     else if (oskar_mem_type(data) == OSKAR_DOUBLE)
     {
         const double *p;
-        p = (const double*)data->data;
+        p = (const double*)oskar_mem_void_const(data);
         for (i = 0; i < n; ++i)
         {
             if (p[i] > r) r = p[i];

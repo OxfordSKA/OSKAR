@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,9 +100,6 @@ TEST(evaluate_station_beam_dipoles, test)
         oskar_mem_free(h_l, &status);
         oskar_mem_free(h_m, &status);
         oskar_mem_free(h_n, &status);
-        free(h_l); // FIXME Remove after updating oskar_mem_free().
-        free(h_m); // FIXME Remove after updating oskar_mem_free().
-        free(h_n); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Generate antenna array.
@@ -155,8 +152,6 @@ TEST(evaluate_station_beam_dipoles, test)
     d_y = oskar_mem_create_copy(h_y, OSKAR_LOCATION_GPU, &status);
     oskar_mem_free(h_x, &status);
     oskar_mem_free(h_y, &status);
-    free(h_x); // FIXME Remove after updating oskar_mem_free().
-    free(h_y); // FIXME Remove after updating oskar_mem_free().
 
     // Call the kernel.
     double wavenumber = 2.0 * M_PI * freq / 299792458.0;
@@ -197,21 +192,5 @@ TEST(evaluate_station_beam_dipoles, test)
     oskar_mem_free(d_l, &status);
     oskar_mem_free(d_m, &status);
     oskar_mem_free(d_n, &status);
-
-    free(pattern); // FIXME Remove after updating oskar_mem_free().
-    free(d_x); // FIXME Remove after updating oskar_mem_free().
-    free(d_y); // FIXME Remove after updating oskar_mem_free().
-    free(d_z); // FIXME Remove after updating oskar_mem_free().
-    free(cos_x); // FIXME Remove after updating oskar_mem_free().
-    free(sin_x); // FIXME Remove after updating oskar_mem_free().
-    free(cos_y); // FIXME Remove after updating oskar_mem_free().
-    free(sin_y); // FIXME Remove after updating oskar_mem_free().
-    free(weights); // FIXME Remove after updating oskar_mem_free().
-
-    free(h_az); // FIXME Remove after updating oskar_mem_free().
-    free(h_el); // FIXME Remove after updating oskar_mem_free().
-    free(d_l); // FIXME Remove after updating oskar_mem_free().
-    free(d_m); // FIXME Remove after updating oskar_mem_free().
-    free(d_n); // FIXME Remove after updating oskar_mem_free().
 }
 

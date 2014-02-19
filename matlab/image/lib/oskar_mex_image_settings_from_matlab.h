@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_MEX_IMAGE_SETTINGS_FROM_MATLAB_H_
 #define OSKAR_MEX_IMAGE_SETTINGS_FROM_MATLAB_H_
 
@@ -34,8 +33,8 @@
  * @file oskar_mex_image_settings_from_matlab.h
  */
 
-#include "oskar_global.h"
-#include "imaging/oskar_SettingsImage.h"
+#include <oskar_global.h>
+#include <oskar_SettingsImage.h>
 #include <mex.h>
 
 void oskar_mex_image_settings_from_matlab(oskar_SettingsImage* out, const mxArray* in);

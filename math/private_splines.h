@@ -48,9 +48,9 @@ struct oskar_Splines
     int location;
     int num_knots_x;         /**< Number of knots in x. */
     int num_knots_y;         /**< Number of knots in y. */
-    oskar_Mem knots_x;       /**< Knot positions in x. */
-    oskar_Mem knots_y;       /**< Knot positions in y. */
-    oskar_Mem coeff;         /**< Spline coefficient array. */
+    oskar_Mem* knots_x;       /**< Knot positions in x. */
+    oskar_Mem* knots_y;       /**< Knot positions in y. */
+    oskar_Mem* coeff;         /**< Spline coefficient array. */
     double smoothing_factor; /**< Actual smoothing factor used for the fit. */
 };
 

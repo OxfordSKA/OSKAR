@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,182 +70,182 @@ double oskar_sky_dec0(const oskar_Sky* sky)
 
 oskar_Mem* oskar_sky_ra(oskar_Sky* sky)
 {
-    return &sky->RA;
+    return sky->RA;
 }
 
 oskar_Mem* oskar_sky_dec(oskar_Sky* sky)
 {
-    return &sky->Dec;
+    return sky->Dec;
 }
 
 oskar_Mem* oskar_sky_I(oskar_Sky* sky)
 {
-    return &sky->I;
+    return sky->I;
 }
 
 oskar_Mem* oskar_sky_Q(oskar_Sky* sky)
 {
-    return &sky->Q;
+    return sky->Q;
 }
 
 oskar_Mem* oskar_sky_U(oskar_Sky* sky)
 {
-    return &sky->U;
+    return sky->U;
 }
 
 oskar_Mem* oskar_sky_V(oskar_Sky* sky)
 {
-    return &sky->V;
+    return sky->V;
 }
 
 oskar_Mem* oskar_sky_reference_freq(oskar_Sky* sky)
 {
-    return &sky->reference_freq;
+    return sky->reference_freq;
 }
 
 oskar_Mem* oskar_sky_spectral_index(oskar_Sky* sky)
 {
-    return &sky->spectral_index;
+    return sky->spectral_index;
 }
 
 oskar_Mem* oskar_sky_rotation_measure(oskar_Sky* sky)
 {
-    return &sky->RM;
+    return sky->RM;
 }
 
 oskar_Mem* oskar_sky_l(oskar_Sky* sky)
 {
-    return &sky->l;
+    return sky->l;
 }
 
 oskar_Mem* oskar_sky_m(oskar_Sky* sky)
 {
-    return &sky->m;
+    return sky->m;
 }
 
 oskar_Mem* oskar_sky_n(oskar_Sky* sky)
 {
-    return &sky->n;
+    return sky->n;
 }
 
 oskar_Mem* oskar_sky_fwhm_major(oskar_Sky* sky)
 {
-    return &sky->FWHM_major;
+    return sky->FWHM_major;
 }
 
 oskar_Mem* oskar_sky_fwhm_minor(oskar_Sky* sky)
 {
-    return &sky->FWHM_minor;
+    return sky->FWHM_minor;
 }
 
 oskar_Mem* oskar_sky_position_angle(oskar_Sky* sky)
 {
-    return &sky->position_angle;
+    return sky->position_angle;
 }
 
 oskar_Mem* oskar_sky_gaussian_a(oskar_Sky* sky)
 {
-    return &sky->gaussian_a;
+    return sky->gaussian_a;
 }
 
 oskar_Mem* oskar_sky_gaussian_b(oskar_Sky* sky)
 {
-    return &sky->gaussian_b;
+    return sky->gaussian_b;
 }
 
 oskar_Mem* oskar_sky_gaussian_c(oskar_Sky* sky)
 {
-    return &sky->gaussian_c;
+    return sky->gaussian_c;
 }
 
 const oskar_Mem* oskar_sky_ra_const(const oskar_Sky* sky)
 {
-    return &sky->RA;
+    return sky->RA;
 }
 
 const oskar_Mem* oskar_sky_dec_const(const oskar_Sky* sky)
 {
-    return &sky->Dec;
+    return sky->Dec;
 }
 
 const oskar_Mem* oskar_sky_I_const(const oskar_Sky* sky)
 {
-    return &sky->I;
+    return sky->I;
 }
 
 const oskar_Mem* oskar_sky_Q_const(const oskar_Sky* sky)
 {
-    return &sky->Q;
+    return sky->Q;
 }
 
 const oskar_Mem* oskar_sky_U_const(const oskar_Sky* sky)
 {
-    return &sky->U;
+    return sky->U;
 }
 
 const oskar_Mem* oskar_sky_V_const(const oskar_Sky* sky)
 {
-    return &sky->V;
+    return sky->V;
 }
 
 const oskar_Mem* oskar_sky_reference_freq_const(const oskar_Sky* sky)
 {
-    return &sky->reference_freq;
+    return sky->reference_freq;
 }
 
 const oskar_Mem* oskar_sky_spectral_index_const(const oskar_Sky* sky)
 {
-    return &sky->spectral_index;
+    return sky->spectral_index;
 }
 
 const oskar_Mem* oskar_sky_rotation_measure_const(const oskar_Sky* sky)
 {
-    return &sky->RM;
+    return sky->RM;
 }
 
 const oskar_Mem* oskar_sky_l_const(const oskar_Sky* sky)
 {
-    return &sky->l;
+    return sky->l;
 }
 
 const oskar_Mem* oskar_sky_m_const(const oskar_Sky* sky)
 {
-    return &sky->m;
+    return sky->m;
 }
 
 const oskar_Mem* oskar_sky_n_const(const oskar_Sky* sky)
 {
-    return &sky->n;
+    return sky->n;
 }
 
 const oskar_Mem* oskar_sky_fwhm_major_const(const oskar_Sky* sky)
 {
-    return &sky->FWHM_major;
+    return sky->FWHM_major;
 }
 
 const oskar_Mem* oskar_sky_fwhm_minor_const(const oskar_Sky* sky)
 {
-    return &sky->FWHM_minor;
+    return sky->FWHM_minor;
 }
 
 const oskar_Mem* oskar_sky_position_angle_const(const oskar_Sky* sky)
 {
-    return &sky->position_angle;
+    return sky->position_angle;
 }
 
 const oskar_Mem* oskar_sky_gaussian_a_const(const oskar_Sky* sky)
 {
-    return &sky->gaussian_a;
+    return sky->gaussian_a;
 }
 
 const oskar_Mem* oskar_sky_gaussian_b_const(const oskar_Sky* sky)
 {
-    return &sky->gaussian_b;
+    return sky->gaussian_b;
 }
 
 const oskar_Mem* oskar_sky_gaussian_c_const(const oskar_Sky* sky)
 {
-    return &sky->gaussian_c;
+    return sky->gaussian_c;
 }
 
 #ifdef __cplusplus

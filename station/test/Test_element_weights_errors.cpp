@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,11 +91,6 @@ TEST(element_weights_errors, test_evaluate)
     oskar_mem_free(d_phase, &error);
     oskar_mem_free(d_phase_error, &error);
     oskar_mem_free(d_errors, &error);
-    free(d_gain); // FIXME Remove after updating oskar_mem_free().
-    free(d_gain_error); // FIXME Remove after updating oskar_mem_free().
-    free(d_phase); // FIXME Remove after updating oskar_mem_free().
-    free(d_phase_error); // FIXME Remove after updating oskar_mem_free().
-    free(d_errors); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 }
 
@@ -174,13 +169,6 @@ TEST(element_weights_errors, test_apply)
     oskar_mem_free(d_errors, &status);
     oskar_mem_free(h_weights, &status);
     oskar_mem_free(d_weights, &status);
-    free(d_gain); // FIXME Remove after updating oskar_mem_free().
-    free(d_gain_error); // FIXME Remove after updating oskar_mem_free().
-    free(d_phase); // FIXME Remove after updating oskar_mem_free().
-    free(d_phase_error); // FIXME Remove after updating oskar_mem_free().
-    free(d_errors); // FIXME Remove after updating oskar_mem_free().
-    free(h_weights); // FIXME Remove after updating oskar_mem_free().
-    free(d_weights); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -251,7 +239,6 @@ TEST(element_weights_errors, test_reinit)
                     }
                     fprintf(file, "\n");
                     oskar_mem_free(h_errors, &status);
-                    free(h_errors); // FIXME Remove after updating oskar_mem_free().
                 }
             }
             oskar_random_state_free(states, &status);
@@ -266,9 +253,4 @@ TEST(element_weights_errors, test_reinit)
     oskar_mem_free(d_phase, &status);
     oskar_mem_free(d_phase_error, &status);
     oskar_mem_free(d_errors, &status);
-    free(d_gain); // FIXME Remove after updating oskar_mem_free().
-    free(d_gain_error); // FIXME Remove after updating oskar_mem_free().
-    free(d_phase); // FIXME Remove after updating oskar_mem_free().
-    free(d_phase_error); // FIXME Remove after updating oskar_mem_free().
-    free(d_errors); // FIXME Remove after updating oskar_mem_free().
 }

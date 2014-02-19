@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGE_INIT_H_
-#define OSKAR_IMAGE_INIT_H_
+#ifndef OSKAR_MEM_SET_ALIAS_H_
+#define OSKAR_MEM_SET_ALIAS_H_
 
 /**
- * @file oskar_image_init.h
+ * @file oskar_mem_set_alias.h
  */
 
-#include "oskar_global.h"
-#include "imaging/oskar_Image.h"
+#include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,30 +42,26 @@ extern "C" {
 
 /**
  * @brief
- * Initialises an image structure.
+ * Sets data for an aliased pointer.
  *
  * @details
- * This function initialises an image structure.
+ * This function sets the meta-data in a structure to set up a pointer alias
+ * to existing memory. The destination structure must not own the memory to
+ * which it points, so it must have been created using an
+ * oskar_mem_create_alias*() function.
  *
- * The dimension order is set by default to:
- * - RA (fastest varying)
- * - Dec
- * - Polarisation
- * - Time
- * - Channel (slowest varying)
- *
- * Use oskar_image_resize to allocate memory for the image data.
- *
- * @param[in] image    Pointer to image structure.
- * @param[in] type     Data type of image.
- * @param[in] location Location of image data.
+ * @param[in] src           Handle to destination memory block.
+ * @param[in] src           Handle to source memory block.
+ * @param[in] offset        Offset number of elements from start of source memory block.
+ * @param[in] num_elements  Number of elements in the returned array.
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_image_init(oskar_Image* image, int type, int location, int* status);
+void oskar_mem_set_alias(oskar_Mem* mem, const oskar_Mem* src, size_t offset,
+        size_t num_elements, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_IMAGE_INIT_H_ */
+#endif /* OSKAR_MEM_SET_ALIAS_H_ */

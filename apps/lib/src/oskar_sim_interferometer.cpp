@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,7 @@
 #include <oskar_evaluate_jones_E.h>
 #include <oskar_evaluate_jones_K.h>
 #include <oskar_convert_ecef_to_station_uvw.h>
-#include <oskar_image_free.h>
-#include <oskar_image_write.h>
+#include <oskar_image.h>
 #include <oskar_log.h>
 #include <oskar_jones.h>
 #include <oskar_make_image.h>
@@ -149,15 +148,15 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 
     // Create temporary and accumulation buffers to hold visibility amplitudes
     // (one per thread/GPU).
-    vector<oskar_Mem> vis_acc(num_devices), vis_temp(num_devices);
+    vector<oskar_Mem*> vis_acc(num_devices), vis_temp(num_devices);
     int time_baseline = oskar_telescope_num_baselines(tel) *
             settings.obs.num_time_steps;
     for (int i = 0; i < num_devices; ++i)
     {
-        oskar_mem_init(&vis_acc[i], vis_type, OSKAR_LOCATION_CPU,
-                time_baseline, 1, &error);
-        oskar_mem_init(&vis_temp[i], vis_type, OSKAR_LOCATION_CPU,
-                time_baseline, 1, &error);
+        vis_acc[i] = oskar_mem_create(vis_type, OSKAR_LOCATION_CPU,
+                time_baseline, &error);
+        vis_temp[i] = oskar_mem_create(vis_type, OSKAR_LOCATION_CPU,
+                time_baseline, &error);
     }
 
     // Copy the telescope model and create station beam work arrays on each GPU.
@@ -188,7 +187,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     for (int c = 0; c < settings.obs.num_channels; ++c)
     {
         double frequency;
-        oskar_Mem vis_amp;
+        oskar_Mem* vis_amp = oskar_mem_create_alias(0, 0, 0, &error);
 
         frequency = settings.obs.start_frequency_hz +
                 c * settings.obs.frequency_inc_hz;
@@ -207,30 +206,31 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
             error = cudaSetDevice(settings.sim.cuda_device_ids[thread_id]);
 
             // Run simulation for this chunk.
-            interferometer(&(vis_temp[thread_id]), log, &timers[thread_id],
+            interferometer(vis_temp[thread_id], log, &timers[thread_id],
                     sky_chunks[i], tel_gpu[thread_id], &settings, frequency, i,
                     num_sky_chunks, local_sky[thread_id], work[thread_id],
                     &error);
 
             oskar_timer_resume(timers[thread_id].tmr_init_copy);
-            oskar_mem_add(&(vis_acc[thread_id]), &(vis_acc[thread_id]),
-                    &(vis_temp[thread_id]), &error);
+            oskar_mem_add(vis_acc[thread_id], vis_acc[thread_id],
+                    vis_temp[thread_id], &error);
             oskar_timer_pause(timers[thread_id].tmr_init_copy);
         }
 #pragma omp barrier
 
         // Accumulate each chunk into global vis structure for this channel.
-        oskar_vis_get_channel_amps(&vis_amp, vis, c, &error);
+        oskar_vis_get_channel_amps(vis_amp, vis, c, &error);
         for (int i = 0; i < num_devices; ++i)
         {
             cudaSetDevice(settings.sim.cuda_device_ids[i]);
             oskar_timer_resume(timers[i].tmr_init_copy);
-            oskar_mem_add(&vis_amp, &vis_amp, &vis_acc[i], &error);
+            oskar_mem_add(vis_amp, vis_amp, vis_acc[i], &error);
 
             // Clear thread accumulation buffer.
-            oskar_mem_clear_contents(&vis_acc[i], &error);
+            oskar_mem_clear_contents(vis_acc[i], &error);
             oskar_timer_pause(timers[i].tmr_init_copy);
         }
+        oskar_mem_free(vis_amp, &error);
     }
 
     // Add uncorrelated system noise to the visibilities.
@@ -243,8 +243,8 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Free unneeded memory.
     for (int i = 0; i < num_devices; ++i)
     {
-        oskar_mem_free(&vis_acc[i], &error);
-        oskar_mem_free(&vis_temp[i], &error);
+        oskar_mem_free(vis_acc[i], &error);
+        oskar_mem_free(vis_temp[i], &error);
         oskar_telescope_free(tel_gpu[i], &error);
         oskar_sky_free(local_sky[i], &error);
         oskar_station_work_free(work[i], &error);
@@ -313,7 +313,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     double t_dump, t_ave, t_fringe, dt_dump, dt_ave, dt_fringe, gast;
     double obs_start_mjd_utc, ra0, dec0;
     oskar_Jones *J, *R, *E, *K;
-    oskar_Mem vis, u, v, w;
+    oskar_Mem *vis, *u, *v, *w;
     const oskar_Mem *x, *y, *z;
     oskar_Sky *sky_gpu;
     oskar_RandomState* random_state;
@@ -363,10 +363,10 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     E = oskar_jones_create(matrix, OSKAR_LOCATION_GPU, n_stations, n_src, status);
     K = oskar_jones_create(complx, OSKAR_LOCATION_GPU, n_stations, n_src, status);
     /*Z = oskar_jones_create(complx, OSKAR_LOCATION_CPU, n_stations, n_src, status);*/
-    oskar_mem_init(&vis, matrix, OSKAR_LOCATION_GPU, n_baselines, 1, status);
-    oskar_mem_init(&u, type, OSKAR_LOCATION_GPU, n_stations, 1, status);
-    oskar_mem_init(&v, type, OSKAR_LOCATION_GPU, n_stations, 1, status);
-    oskar_mem_init(&w, type, OSKAR_LOCATION_GPU, n_stations, 1, status);
+    vis = oskar_mem_create(matrix, OSKAR_LOCATION_GPU, n_baselines, status);
+    u = oskar_mem_create(type, OSKAR_LOCATION_GPU, n_stations, status);
+    v = oskar_mem_create(type, OSKAR_LOCATION_GPU, n_stations, status);
+    w = oskar_mem_create(type, OSKAR_LOCATION_GPU, n_stations, status);
     x = oskar_telescope_station_x_const(telescope);
     y = oskar_telescope_station_y_const(telescope);
     z = oskar_telescope_station_z_const(telescope);
@@ -405,7 +405,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
         /* Initialise visibilities for the dump to zero. */
-        oskar_mem_clear_contents(&vis, status);
+        oskar_mem_clear_contents(vis, status);
 
         /* Compact sky model to temporary. */
         oskar_timer_resume(timers->tmr_clip);
@@ -468,7 +468,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 gast = oskar_mjd_to_gast_fast(t_fringe + dt_fringe / 2);
 
                 /* Evaluate station u,v,w coordinates. */
-                oskar_convert_ecef_to_station_uvw(&u, &v, &w, n_stations, x, y,
+                oskar_convert_ecef_to_station_uvw(u, v, w, n_stations, x, y,
                         z, ra0, dec0, gast, status);
 
                 /* Evaluate interferometer phase (K), join Jones, correlate. */
@@ -476,7 +476,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 oskar_evaluate_jones_K(K, frequency,
                         oskar_sky_l_const(local_sky),
                         oskar_sky_m_const(local_sky),
-                        oskar_sky_n_const(local_sky), &u, &v, &w, status);
+                        oskar_sky_n_const(local_sky), u, v, w, status);
                 oskar_timer_pause(timers->tmr_K);
 
                 oskar_timer_resume(timers->tmr_join);
@@ -484,7 +484,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 oskar_timer_pause(timers->tmr_join);
 
                 oskar_timer_resume(timers->tmr_correlate);
-                oskar_correlate(&vis, J, telescope, local_sky, &u, &v, gast,
+                oskar_correlate(vis, J, telescope, local_sky, u, v, gast,
                         frequency, status);
                 oskar_timer_pause(timers->tmr_correlate);
             }
@@ -492,8 +492,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
         /* Divide visibilities by number of averages, and add to global data. */
         oskar_timer_resume(timers->tmr_init_copy);
-        oskar_mem_scale_real(&vis, 1.0/(num_fringe_ave * num_vis_ave), status);
-        oskar_mem_insert(vis_amp, &vis, i * n_baselines, status);
+        oskar_mem_scale_real(vis, 1.0/(num_fringe_ave * num_vis_ave), status);
+        oskar_mem_insert(vis_amp, vis, i * n_baselines, status);
         oskar_timer_pause(timers->tmr_init_copy);
     }
 
@@ -502,10 +502,10 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
     /* Free memory. */
     oskar_random_state_free(random_state, status);
-    oskar_mem_free(&u, status);
-    oskar_mem_free(&v, status);
-    oskar_mem_free(&w, status);
-    oskar_mem_free(&vis, status);
+    oskar_mem_free(u, status);
+    oskar_mem_free(v, status);
+    oskar_mem_free(w, status);
+    oskar_mem_free(vis, status);
     oskar_jones_free(J, status);
     oskar_jones_free(R, status);
     oskar_jones_free(E, status);
@@ -520,7 +520,7 @@ static void make_image(const oskar_Vis* vis,
         const oskar_SettingsImage* settings, oskar_Log* log, int* status)
 {
     oskar_Timer* tmr;
-    oskar_Image image;
+    oskar_Image* image;
     const char* filename;
 
     if (*status) return;
@@ -537,7 +537,7 @@ static void make_image(const oskar_Vis* vis,
     tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
     oskar_log_section(log, "Starting OSKAR imager...");
     oskar_timer_start(tmr);
-    *status = oskar_make_image(&image, log, vis, settings);
+    image = oskar_make_image(log, vis, settings, status);
     oskar_log_section(log, "Imaging completed in %.3f sec.",
             oskar_timer_elapsed(tmr));
     oskar_timer_free(tmr);
@@ -548,16 +548,16 @@ static void make_image(const oskar_Vis* vis,
     if (filename)
     {
         oskar_log_message(log, 0, "Writing FITS image file: '%s'", filename);
-        oskar_fits_image_write(&image, log, filename, status);
+        oskar_fits_image_write(image, log, filename, status);
     }
 #endif
     filename = settings->oskar_image;
     if (filename)
     {
         oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
-        oskar_image_write(&image, log, filename, 0, status);
+        oskar_image_write(image, log, filename, 0, status);
     }
-    oskar_image_free(&image, status);
+    oskar_image_free(image, status);
 }
 
 

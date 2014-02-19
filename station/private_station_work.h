@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,22 +58,22 @@
  */
 struct oskar_StationWork
 {
-    oskar_Mem horizon_mask;            /* Integer. */
+    oskar_Mem* horizon_mask;            /* Integer. */
 
-    oskar_Mem enu_direction_x;         /* Real scalar. ENU direction cosine. */
-    oskar_Mem enu_direction_y;         /* Real scalar. ENU direction cosine.*/
-    oskar_Mem enu_direction_z;         /* Real scalar. ENU direction cosine. */
+    oskar_Mem* enu_direction_x;         /* Real scalar. ENU direction cosine. */
+    oskar_Mem* enu_direction_y;         /* Real scalar. ENU direction cosine.*/
+    oskar_Mem* enu_direction_z;         /* Real scalar. ENU direction cosine. */
 
-    oskar_Mem theta_modified;          /* Real scalar. */
-    oskar_Mem phi_modified;            /* Real scalar. */
-    oskar_Mem weights;                 /* Complex scalar. */
-    oskar_Mem weights_error;           /* Complex scalar. */
-    oskar_Mem element_pattern_matrix;  /* Complex matrix. */
-    oskar_Mem element_pattern_scalar;  /* Complex scalar. */
-    oskar_Mem array_pattern;           /* Complex scalar. */
+    oskar_Mem* theta_modified;          /* Real scalar. */
+    oskar_Mem* phi_modified;            /* Real scalar. */
+    oskar_Mem* weights;                 /* Complex scalar. */
+    oskar_Mem* weights_error;           /* Complex scalar. */
+    oskar_Mem* element_pattern_matrix;  /* Complex matrix. */
+    oskar_Mem* element_pattern_scalar;  /* Complex scalar. */
+    oskar_Mem* array_pattern;           /* Complex scalar. */
 
-    oskar_Mem hierarchy_work_matrix[OSKAR_MAX_STATION_DEPTH]; /* Complex matrix. */
-    oskar_Mem hierarchy_work_scalar[OSKAR_MAX_STATION_DEPTH]; /* Complex scalar. */
+    oskar_Mem* hierarchy_work_matrix[OSKAR_MAX_STATION_DEPTH]; /* Complex matrix. */
+    oskar_Mem* hierarchy_work_scalar[OSKAR_MAX_STATION_DEPTH]; /* Complex scalar. */
 };
 
 #ifndef OSKAR_STATION_WORK_TYPEDEF_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -119,7 +119,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
 {
     int i, n, num_sources, num_stations, jones_type, base_type, location;
     double latitude, lst;
-    oskar_Mem R_station;
+    oskar_Mem *R_station;
     const oskar_Mem *ra, *dec;
 
     /* Check all inputs. */
@@ -170,6 +170,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
     /* Evaluate Jones matrix for each source for appropriate stations. */
     ra = oskar_sky_ra_const(sky);
     dec = oskar_sky_dec_const(sky);
+    R_station = oskar_mem_create_alias(0, 0, 0, status);
     if (location == OSKAR_LOCATION_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
@@ -181,13 +182,13 @@ void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
             station = oskar_telescope_station_const(telescope, i);
             latitude = oskar_station_latitude_rad(station);
             lst = gast + oskar_station_longitude_rad(station);
-            oskar_jones_get_station_pointer(&R_station, R, i, status);
+            oskar_jones_get_station_pointer(R_station, R, i, status);
 
             /* Evaluate source parallactic angles. */
             if (base_type == OSKAR_SINGLE)
             {
                 oskar_evaluate_jones_R_cuda_f(
-                        oskar_mem_float4c(&R_station, status), num_sources,
+                        oskar_mem_float4c(R_station, status), num_sources,
                         oskar_mem_float_const(ra, status),
                         oskar_mem_float_const(dec, status),
                         (float)latitude, (float)lst);
@@ -195,7 +196,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
             else if (base_type == OSKAR_DOUBLE)
             {
                 oskar_evaluate_jones_R_cuda_d(
-                        oskar_mem_double4c(&R_station, status), num_sources,
+                        oskar_mem_double4c(R_station, status), num_sources,
                         oskar_mem_double_const(ra, status),
                         oskar_mem_double_const(dec, status),
                         latitude, lst);
@@ -216,13 +217,13 @@ void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
             station = oskar_telescope_station_const(telescope, i);
             latitude = oskar_station_latitude_rad(station);
             lst = gast + oskar_station_longitude_rad(station);
-            oskar_jones_get_station_pointer(&R_station, R, i, status);
+            oskar_jones_get_station_pointer(R_station, R, i, status);
 
             /* Evaluate source parallactic angles. */
             if (base_type == OSKAR_SINGLE)
             {
                 oskar_evaluate_jones_R_f(
-                        oskar_mem_float4c(&R_station, status), num_sources,
+                        oskar_mem_float4c(R_station, status), num_sources,
                         oskar_mem_float_const(ra, status),
                         oskar_mem_float_const(dec, status),
                         (float)latitude, (float)lst);
@@ -230,7 +231,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
             else if (base_type == OSKAR_DOUBLE)
             {
                 oskar_evaluate_jones_R_d(
-                        oskar_mem_double4c(&R_station, status), num_sources,
+                        oskar_mem_double4c(R_station, status), num_sources,
                         oskar_mem_double_const(ra, status),
                         oskar_mem_double_const(dec, status),
                         latitude, lst);
@@ -241,14 +242,17 @@ void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
     /* Copy data for station 0 to stations 1 to n, if using a common sky. */
     if (oskar_telescope_common_horizon(telescope))
     {
-        oskar_Mem R0;
-        oskar_jones_get_station_pointer(&R0, R, 0, status);
+        oskar_Mem* R0;
+        R0 = oskar_mem_create_alias(0, 0, 0, status);
+        oskar_jones_get_station_pointer(R0, R, 0, status);
         for (i = 1; i < num_stations; ++i)
         {
-            oskar_jones_get_station_pointer(&R_station, R, i, status);
-            oskar_mem_insert(&R_station, &R0, 0, status);
+            oskar_jones_get_station_pointer(R_station, R, i, status);
+            oskar_mem_insert(R_station, R0, 0, status);
         }
+        oskar_mem_free(R0, status);
     }
+    oskar_mem_free(R_station, status);
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,10 +36,20 @@
 extern "C" {
 #endif
 
-void oskar_sky_filter_by_flux(oskar_Sky* sky,
-        double min_I, double max_I, int* status)
+void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
+        int* status)
 {
     int location;
+
+    /* Check all inputs. */
+    if (!sky || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Return immediately if no filtering should be done. */
     if (min_I <= 0.0 && max_I <= 0.0)

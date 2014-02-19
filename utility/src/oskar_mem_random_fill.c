@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
 #include <oskar_mem.h>
 #include <stdlib.h>
 
@@ -36,9 +35,9 @@ extern "C" {
 
 void oskar_mem_random_fill(oskar_Mem* mem, double lo, double hi, int* status)
 {
-    oskar_Mem t, *ptr;
+    oskar_Mem *temp, *ptr;
     size_t i, num_elements;
-    int base_type;
+    int location, precision, type;
 
     /* Check all inputs. */
     if (!mem || !status)
@@ -50,9 +49,12 @@ void oskar_mem_random_fill(oskar_Mem* mem, double lo, double hi, int* status)
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check type. */
-    base_type = oskar_mem_type_precision(mem->type);
-    if (base_type != OSKAR_SINGLE && base_type != OSKAR_DOUBLE)
+    /* Get meta-data and check type. */
+    location = oskar_mem_location(mem);
+    num_elements = oskar_mem_length(mem);
+    type = oskar_mem_type(mem);
+    precision = oskar_mem_type_precision(type);
+    if (precision != OSKAR_SINGLE && precision != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
@@ -60,38 +62,36 @@ void oskar_mem_random_fill(oskar_Mem* mem, double lo, double hi, int* status)
 
     /* Initialise temporary memory array if required. */
     ptr = mem;
-    if (mem->location != OSKAR_LOCATION_CPU)
+    if (location != OSKAR_LOCATION_CPU)
     {
-        oskar_mem_init(&t, mem->type, OSKAR_LOCATION_CPU,
-                mem->num_elements, 1, status);
+        temp = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_elements, status);
         if (*status)
         {
-            oskar_mem_free(&t, status);
+            oskar_mem_free(temp, status);
             return;
         }
-        ptr = &t;
+        ptr = temp;
     }
 
     /* Get total number of elements. */
-    num_elements = mem->num_elements;
-    if (oskar_mem_type_is_matrix(mem->type)) num_elements *= 4;
-    if (oskar_mem_type_is_complex(mem->type)) num_elements *= 2;
+    if (oskar_mem_type_is_matrix(type)) num_elements *= 4;
+    if (oskar_mem_type_is_complex(type)) num_elements *= 2;
 
     /* Fill memory with random numbers. */
-    if (base_type == OSKAR_SINGLE)
+    if (precision == OSKAR_SINGLE)
     {
         float r, *p;
-        p = (float*)(ptr->data);
+        p = oskar_mem_float(ptr, status);
         for (i = 0; i < num_elements; ++i)
         {
             r = (float)lo + (float)(hi - lo) * rand() / (float)RAND_MAX;
             p[i] = r;
         }
     }
-    else if (base_type == OSKAR_DOUBLE)
+    else if (precision == OSKAR_DOUBLE)
     {
         double r, *p;
-        p = (double*)(ptr->data);
+        p = oskar_mem_double(ptr, status);
         for (i = 0; i < num_elements; ++i)
         {
             r = lo + (hi - lo) * rand() / (double)RAND_MAX;
@@ -100,10 +100,10 @@ void oskar_mem_random_fill(oskar_Mem* mem, double lo, double hi, int* status)
     }
 
     /* Copy and clean up if required. */
-    if (mem->location != OSKAR_LOCATION_CPU)
+    if (location != OSKAR_LOCATION_CPU)
     {
         oskar_mem_copy(mem, ptr, status);
-        oskar_mem_free(&t, status);
+        oskar_mem_free(temp, status);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <private_image.h>
 #include <oskar_image_free.h>
 #include <oskar_mem.h>
 
@@ -43,25 +44,11 @@ void oskar_image_free(oskar_Image* image, int* status)
     }
 
     /* Free memory. */
-    oskar_mem_free(&image->data, status);
-    oskar_mem_free(&image->settings_path, status);
+    oskar_mem_free(image->data, status);
+    oskar_mem_free(image->settings_path, status);
 
-    /* Clear meta-data. */
-    image->grid_type = 0;
-    image->coord_frame = 0;
-    image->centre_dec_deg = 0.0;
-    image->centre_ra_deg = 0.0;
-    image->fov_dec_deg = 0.0;
-    image->fov_ra_deg = 0.0;
-    image->freq_inc_hz = 0.0;
-    image->freq_start_hz = 0.0;
-    image->height = 0;
-    image->num_channels = 0;
-    image->num_pols = 0;
-    image->num_times = 0;
-    image->time_inc_sec = 0.0;
-    image->time_start_mjd_utc = 0.0;
-    image->width = 0;
+    /* Free the structure itself. */
+    free(image);
 }
 
 #ifdef __cplusplus

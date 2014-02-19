@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,9 +84,6 @@ TEST(Mem, add_matrix_cpu)
     oskar_mem_free(mem_A, &status);
     oskar_mem_free(mem_B, &status);
     oskar_mem_free(mem_C, &status);
-    free(mem_A); // FIXME Remove after updating oskar_mem_free().
-    free(mem_B); // FIXME Remove after updating oskar_mem_free().
-    free(mem_C); // FIXME Remove after updating oskar_mem_free().
 }
 
 
@@ -138,8 +135,6 @@ TEST(Mem, add_in_place)
     }
     oskar_mem_free(mem_A, &status);
     oskar_mem_free(mem_B, &status);
-    free(mem_A); // FIXME Remove after updating oskar_mem_free().
-    free(mem_B); // FIXME Remove after updating oskar_mem_free().
 }
 
 
@@ -158,9 +153,6 @@ TEST(Mem, add_gpu)
     oskar_mem_free(mem_A, &status);
     oskar_mem_free(mem_B, &status);
     oskar_mem_free(mem_C, &status);
-    free(mem_A); // FIXME Remove after updating oskar_mem_free().
-    free(mem_B); // FIXME Remove after updating oskar_mem_free().
-    free(mem_C); // FIXME Remove after updating oskar_mem_free().
 }
 
 
@@ -180,7 +172,4 @@ TEST(Mem, add_dimension_mismatch)
     oskar_mem_free(mem_A, &status);
     oskar_mem_free(mem_B, &status);
     oskar_mem_free(mem_C, &status);
-    free(mem_A); // FIXME Remove after updating oskar_mem_free().
-    free(mem_B); // FIXME Remove after updating oskar_mem_free().
-    free(mem_C); // FIXME Remove after updating oskar_mem_free().
 }

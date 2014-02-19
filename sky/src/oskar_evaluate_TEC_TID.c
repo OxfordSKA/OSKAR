@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include "sky/oskar_evaluate_TEC_TID.h"
-#include <oskar_mem.h>
+#include <oskar_evaluate_TEC_TID.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -36,9 +34,10 @@
 extern "C" {
 #endif
 
-void oskar_evaluate_TEC_TID(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
-        oskar_Mem* lat, oskar_Mem* rel_path_length,
-        double TEC0, oskar_SettingsTIDscreen* TID, double gast)
+void oskar_evaluate_TEC_TID(oskar_Mem* tec, int num_directions,
+        const oskar_Mem* lon, const oskar_Mem* lat,
+        const oskar_Mem* rel_path_length, double TEC0,
+        oskar_SettingsTIDscreen* TID, double gast)
 {
     int i, j, type;
     double pp_lon, pp_lat;
@@ -47,7 +46,7 @@ void oskar_evaluate_TEC_TID(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
     double amp, w, th, v; /* TID parameters */
     double time;
     double earth_radius = 6365.0; /* km -- FIXME */
-    int status = OSKAR_SUCCESS;
+    int status = 0;
 
     /* TODO check types, dimensions etc of memory */
     type = oskar_mem_type(tec);
@@ -71,32 +70,31 @@ void oskar_evaluate_TEC_TID(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
         {
             if (type == OSKAR_DOUBLE)
             {
-                pp_lon = ((double*)lon->data)[j];
-                pp_lat = ((double*)lat->data)[j];
-                pp_sec = ((double*)rel_path_length->data)[j];
+                pp_lon = oskar_mem_double_const(lon, &status)[j];
+                pp_lat = oskar_mem_double_const(lat, &status)[j];
+                pp_sec = oskar_mem_double_const(rel_path_length, &status)[j];
                 pp_tec = pp_sec * amp * TEC0 * (
                         cos( (2.0*M_PI/w) * (cos(th)*pp_lon - v*time) ) +
                         cos( (2.0*M_PI/w) * (sin(th)*pp_lat - v*time) )
                         );
                 pp_tec += TEC0;
-                ((double*)tec->data)[j] += pp_tec;
+                oskar_mem_double(tec, &status)[j] += pp_tec;
             }
             else
             {
-                pp_lon = (double)((float*)lon->data)[j];
-                pp_lat = (double)((float*)lat->data)[j];
-                pp_sec = (double)((float*)rel_path_length->data)[j];
+                pp_lon = (double)oskar_mem_float_const(lon, &status)[j];
+                pp_lat = (double)oskar_mem_float_const(lat, &status)[j];
+                pp_sec = (double)oskar_mem_float_const(rel_path_length, &status)[j];
                 pp_tec = pp_sec * amp * TEC0 * (
                         cos( (2.0*M_PI/w) * (cos(th)*pp_lon - v*time) ) +
                         cos( (2.0*M_PI/w) * (sin(th)*pp_lat - v*time) )
                 );
                 pp_tec += TEC0;
-                ((float*)tec->data)[j] += (float)pp_tec;
+                oskar_mem_float(tec, &status)[j] += (float)pp_tec;
             }
         } /* loop over directions */
     } /* loop over components. */
 }
-
 
 #ifdef __cplusplus
 }

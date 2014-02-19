@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,25 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <oskar_image.h>
 #include <oskar_get_image_stokes.h>
-
-#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Vis* vis,
-        const oskar_SettingsImage* settings)
+oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
+        const oskar_SettingsImage* settings, int* status)
 {
-    int num_vis_pols;
-    int pol;
-    int num_vis_amps;
-    int type;
-    int i;
-    int location;
-    int error = 0;
+    int num_vis_pols, num_vis_amps, pol, type, i, location;
     const oskar_Mem* amp;
+    oskar_Mem* stokes = 0;
+
+    if (!vis || !settings || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return 0;
+    }
+    if (*status) return 0;
 
     /* Local variables */
     amp = oskar_vis_amplitude_const(vis);
@@ -52,10 +53,10 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Vis* vis,
     pol = settings->image_type;
     num_vis_amps = oskar_vis_num_baselines(vis) * oskar_vis_num_times(vis) *
             oskar_vis_num_channels(vis);
-    type = oskar_mem_is_double(amp) ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    type = oskar_mem_precision(amp);
     location = OSKAR_LOCATION_CPU;
 
-    /* If the input data is polarised and a single stokes polarisation type
+    /* If the input data is polarised and a single Stokes polarisation type
      * is selected */
     if (num_vis_pols == 4 && (pol == OSKAR_IMAGE_TYPE_STOKES_I ||
             pol == OSKAR_IMAGE_TYPE_STOKES_Q ||
@@ -67,22 +68,22 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Vis* vis,
         {
             case OSKAR_IMAGE_TYPE_STOKES_I:
             {
-                oskar_mem_init(stokes, type | OSKAR_COMPLEX, location,
-                        num_vis_amps, OSKAR_TRUE, &error);
-                if (error) return error;
+                stokes = oskar_mem_create(type | OSKAR_COMPLEX, location,
+                        num_vis_amps, status);
+                if (*status) return 0;
                 for (i = 0; i < num_vis_amps; ++i)
                 {
                     if (type == OSKAR_DOUBLE)
                     {
-                        const double4c* d_ = oskar_mem_double4c_const(amp, &error);
-                        double2* s_ = (double2*)stokes->data;
+                        const double4c* d_ = oskar_mem_double4c_const(amp, status);
+                        double2* s_ = oskar_mem_double2(stokes, status);
                         s_[i].x = 0.5 * (d_[i].a.x + d_[i].d.x);
                         s_[i].y = 0.5 * (d_[i].a.y + d_[i].d.y);
                     }
                     else
                     {
-                        const float4c* d_ = oskar_mem_float4c_const(amp, &error);
-                        float2* s_ = (float2*)stokes->data;
+                        const float4c* d_ = oskar_mem_float4c_const(amp, status);
+                        float2* s_ = oskar_mem_float2(stokes, status);
                         s_[i].x = 0.5 * (d_[i].a.x + d_[i].d.x);
                         s_[i].y = 0.5 * (d_[i].a.y + d_[i].d.y);
                     }
@@ -91,22 +92,22 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Vis* vis,
             }
             case OSKAR_IMAGE_TYPE_STOKES_Q:
             {
-                oskar_mem_init(stokes, type | OSKAR_COMPLEX, location,
-                        num_vis_amps, OSKAR_TRUE, &error);
-                if (error) return error;
+                stokes = oskar_mem_create(type | OSKAR_COMPLEX, location,
+                        num_vis_amps, status);
+                if (*status) return 0;
                 for (i = 0; i < num_vis_amps; ++i)
                 {
                     if (type == OSKAR_DOUBLE)
                     {
-                        const double4c* d_ = oskar_mem_double4c_const(amp, &error);
-                        double2* s_ = (double2*)stokes->data;
+                        const double4c* d_ = oskar_mem_double4c_const(amp, status);
+                        double2* s_ = oskar_mem_double2(stokes, status);
                         s_[i].x = 0.5 * (d_[i].a.x - d_[i].d.x);
                         s_[i].y = 0.5 * (d_[i].a.y - d_[i].d.y);
                     }
                     else
                     {
-                        const float4c* d_ = oskar_mem_float4c_const(amp, &error);
-                        float2* s_ = (float2*)stokes->data;
+                        const float4c* d_ = oskar_mem_float4c_const(amp, status);
+                        float2* s_ = oskar_mem_float2(stokes, status);
                         s_[i].x = 0.5 * (d_[i].a.x - d_[i].d.x);
                         s_[i].y = 0.5 * (d_[i].a.y - d_[i].d.y);
                     }
@@ -115,22 +116,22 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Vis* vis,
             }
             case OSKAR_IMAGE_TYPE_STOKES_U:
             {
-                oskar_mem_init(stokes, type | OSKAR_COMPLEX, location,
-                        num_vis_amps, OSKAR_TRUE, &error);
-                if (error) return error;
+                stokes = oskar_mem_create(type | OSKAR_COMPLEX, location,
+                        num_vis_amps, status);
+                if (*status) return 0;
                 for (i = 0; i < num_vis_amps; ++i)
                 {
                     if (type == OSKAR_DOUBLE)
                     {
-                        const double4c* d_ = oskar_mem_double4c_const(amp, &error);
-                        double2* s_ = (double2*)stokes->data;
+                        const double4c* d_ = oskar_mem_double4c_const(amp, status);
+                        double2* s_ = oskar_mem_double2(stokes, status);
                         s_[i].x = 0.5 * (d_[i].b.x + d_[i].c.x);
                         s_[i].y = 0.5 * (d_[i].b.y + d_[i].c.y);
                     }
                     else
                     {
-                        const float4c* d_ = oskar_mem_float4c_const(amp, &error);
-                        float2* s_ = (float2*)stokes->data;
+                        const float4c* d_ = oskar_mem_float4c_const(amp, status);
+                        float2* s_ = oskar_mem_float2(stokes, status);
                         s_[i].x = 0.5 * (d_[i].b.x + d_[i].c.x);
                         s_[i].y = 0.5 * (d_[i].b.y + d_[i].c.y);
                     }
@@ -139,22 +140,22 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Vis* vis,
             }
             case OSKAR_IMAGE_TYPE_STOKES_V:
             {
-                oskar_mem_init(stokes, type | OSKAR_COMPLEX, location,
-                        num_vis_amps, OSKAR_TRUE, &error);
-                if (error) return error;
+                stokes = oskar_mem_create(type | OSKAR_COMPLEX, location,
+                        num_vis_amps, status);
+                if (*status) return 0;
                 for (i = 0; i < num_vis_amps; ++i)
                 {
                     if (type == OSKAR_DOUBLE)
                     {
-                        const double4c* d_ = oskar_mem_double4c_const(amp, &error);
-                        double2* s_ = (double2*)stokes->data;
+                        const double4c* d_ = oskar_mem_double4c_const(amp, status);
+                        double2* s_ = oskar_mem_double2(stokes, status);
                         s_[i].x =  0.5 * (d_[i].b.y - d_[i].c.y);
                         s_[i].y = -0.5 * (d_[i].b.x - d_[i].c.x);
                     }
                     else
                     {
-                        const float4c* d_ = oskar_mem_float4c_const(amp, &error);
-                        float2* s_ = (float2*)stokes->data;
+                        const float4c* d_ = oskar_mem_float4c_const(amp, status);
+                        float2* s_ = oskar_mem_float2(stokes, status);
                         s_[i].x =  0.5 * (d_[i].b.y - d_[i].c.y);
                         s_[i].y = -0.5 * (d_[i].b.x - d_[i].c.x);
                     }
@@ -163,21 +164,22 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Vis* vis,
             }
             default:
             {
-                return OSKAR_ERR_BAD_DATA_TYPE;
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
+                return 0;
             }
         }; /* switch (pol_type) */
     }
     else if (num_vis_pols == 4 && pol == OSKAR_IMAGE_TYPE_STOKES)
     {
-        oskar_mem_init(stokes, oskar_mem_type(amp), location, num_vis_amps,
-                OSKAR_TRUE, &error);
-        if (error) return error;
+        stokes = oskar_mem_create(oskar_mem_type(amp), location, num_vis_amps,
+                status);
+        if (*status) return 0;
         for (i = 0; i < num_vis_amps; ++i)
         {
             if (type == OSKAR_DOUBLE)
             {
-                const double4c* d_ = oskar_mem_double4c_const(amp, &error);
-                double4c* s_ = (double4c*)stokes->data;
+                const double4c* d_ = oskar_mem_double4c_const(amp, status);
+                double4c* s_ = oskar_mem_double4c(stokes, status);
                 /* I = 0.5 (XX + YY) */
                 s_[i].a.x =  0.5 * (d_[i].a.x + d_[i].d.x);
                 s_[i].a.y =  0.5 * (d_[i].a.y + d_[i].d.y);
@@ -193,8 +195,8 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Vis* vis,
             }
             else
             {
-                const float4c* d_ = oskar_mem_float4c_const(amp, &error);
-                float4c* s_ = (float4c*)stokes->data;
+                const float4c* d_ = oskar_mem_float4c_const(amp, status);
+                float4c* s_ = oskar_mem_float4c(stokes, status);
                 /* I */
                 s_[i].a.x =  0.5 * (d_[i].a.x + d_[i].d.x);
                 s_[i].a.y =  0.5 * (d_[i].a.y + d_[i].d.y);
@@ -212,15 +214,16 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Vis* vis,
     }
     else if (num_vis_pols == 1)
     {
-        if (pol != OSKAR_IMAGE_TYPE_STOKES_I) return OSKAR_ERR_UNKNOWN;
-        oskar_mem_init(stokes, oskar_mem_type(amp), location, num_vis_amps,
-                OSKAR_FALSE, &error);
-        oskar_mem_assign(stokes, amp, &error);
+        if (pol != OSKAR_IMAGE_TYPE_STOKES_I)
+        {
+            *status = OSKAR_ERR_UNKNOWN;
+            return 0;
+        }
+        stokes = oskar_mem_create_alias(amp, 0, oskar_mem_length(amp), status);
     }
 
-    return OSKAR_SUCCESS;
+    return stokes;
 }
-
 
 #ifdef __cplusplus
 }

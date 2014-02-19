@@ -211,10 +211,6 @@ OSKAR_INLINE int oskar_mem_type_is_scalar(const int mem_type)
 }
 #endif
 
-/* DEPRECATED */
-#include <private_mem.h> /* FIXME remove! */
-#include <oskar_mem_init.h>
-
 /* REMOVE AND RENAME? */
 #include <oskar_mem_binary_file_read.h>
 #include <oskar_mem_binary_file_write.h>
@@ -225,17 +221,17 @@ OSKAR_INLINE int oskar_mem_type_is_scalar(const int mem_type)
 #include <oskar_mem_add.h>
 #include <oskar_mem_append_raw.h>
 #include <oskar_mem_append.h>
-#include <oskar_mem_assign.h>
 #include <oskar_mem_clear_contents.h>
 #include <oskar_mem_copy.h>
 #include <oskar_mem_create.h>
+#include <oskar_mem_create_alias.h>
+#include <oskar_mem_create_alias_from_raw.h>
 #include <oskar_mem_create_copy.h>
 #include <oskar_mem_different.h>
 #include <oskar_mem_element_multiply.h>
 #include <oskar_mem_element_size.h>
 #include <oskar_mem_evaluate_relative_error.h>
 #include <oskar_mem_free.h>
-#include <oskar_mem_get_pointer.h>
 #include <oskar_mem_insert.h>
 #include <oskar_mem_load_ascii.h>
 #include <oskar_mem_random_fill.h>
@@ -243,6 +239,7 @@ OSKAR_INLINE int oskar_mem_type_is_scalar(const int mem_type)
 #include <oskar_mem_realloc.h>
 #include <oskar_mem_save_ascii.h>
 #include <oskar_mem_scale_real.h>
+#include <oskar_mem_set_alias.h>
 #include <oskar_mem_set_value_real.h>
 #include <oskar_mem_stats.h>
 

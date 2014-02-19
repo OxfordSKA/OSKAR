@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 
-#include <imaging/oskar_evaluate_image_lon_lat_grid.h>
+#include <oskar_evaluate_image_lon_lat_grid.h>
 
 // For HEALPix grids
 #include <oskar_convert_healpix_ring_to_theta_phi.h>
@@ -82,8 +82,6 @@ TEST(beam_pattern_coordinates, generate_lon_lat_grid)
     // Clean up.
     oskar_mem_free(lon, &status);
     oskar_mem_free(lat, &status);
-    free(lon); // FIXME Remove after updating oskar_mem_free().
-    free(lat); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(OSKAR_SUCCESS, status);
 }
 
@@ -131,10 +129,4 @@ TEST(beam_pattern_coordinates, HEALPix_horizontal)
     oskar_mem_free(RA, &status);
     oskar_mem_free(Dec, &status);
     ASSERT_EQ(0, status);
-    free(b); // FIXME Remove after updating oskar_mem_free().
-    free(l); // FIXME Remove after updating oskar_mem_free().
-    free(RA); // FIXME Remove after updating oskar_mem_free().
-    free(Dec); // FIXME Remove after updating oskar_mem_free().
 }
-
-

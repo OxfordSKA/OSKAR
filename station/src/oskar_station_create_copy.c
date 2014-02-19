@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,7 +72,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     model->beam_longitude_rad = src->beam_longitude_rad;
     model->beam_latitude_rad = src->beam_latitude_rad;
     model->beam_coord_type = src->beam_coord_type;
-    oskar_system_noise_model_copy(&model->noise, &src->noise, status);
+    oskar_system_noise_model_copy(model->noise, src->noise, status);
 
     /* Copy aperture array data, except num_element_types (done later). */
     model->identical_children = src->identical_children;
@@ -92,24 +92,24 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     model->gaussian_beam_fwhm_rad = src->gaussian_beam_fwhm_rad;
 
     /* Copy memory blocks. */
-    oskar_mem_copy(&model->x_signal, &src->x_signal, status);
-    oskar_mem_copy(&model->y_signal, &src->y_signal, status);
-    oskar_mem_copy(&model->z_signal, &src->z_signal, status);
-    oskar_mem_copy(&model->x_weights, &src->x_weights, status);
-    oskar_mem_copy(&model->y_weights, &src->y_weights, status);
-    oskar_mem_copy(&model->z_weights, &src->z_weights, status);
-    oskar_mem_copy(&model->weight, &src->weight, status);
-    oskar_mem_copy(&model->gain, &src->gain, status);
-    oskar_mem_copy(&model->gain_error, &src->gain_error, status);
-    oskar_mem_copy(&model->phase_offset, &src->phase_offset, status);
-    oskar_mem_copy(&model->phase_error, &src->phase_error, status);
-    oskar_mem_copy(&model->cos_orientation_x, &src->cos_orientation_x, status);
-    oskar_mem_copy(&model->sin_orientation_x, &src->sin_orientation_x, status);
-    oskar_mem_copy(&model->cos_orientation_y, &src->cos_orientation_y, status);
-    oskar_mem_copy(&model->sin_orientation_y, &src->sin_orientation_y, status);
-    oskar_mem_copy(&model->element_type, &src->element_type, status);
-    oskar_mem_copy(&model->permitted_beam_az, &src->permitted_beam_az, status);
-    oskar_mem_copy(&model->permitted_beam_el, &src->permitted_beam_el, status);
+    oskar_mem_copy(model->x_signal, src->x_signal, status);
+    oskar_mem_copy(model->y_signal, src->y_signal, status);
+    oskar_mem_copy(model->z_signal, src->z_signal, status);
+    oskar_mem_copy(model->x_weights, src->x_weights, status);
+    oskar_mem_copy(model->y_weights, src->y_weights, status);
+    oskar_mem_copy(model->z_weights, src->z_weights, status);
+    oskar_mem_copy(model->weight, src->weight, status);
+    oskar_mem_copy(model->gain, src->gain, status);
+    oskar_mem_copy(model->gain_error, src->gain_error, status);
+    oskar_mem_copy(model->phase_offset, src->phase_offset, status);
+    oskar_mem_copy(model->phase_error, src->phase_error, status);
+    oskar_mem_copy(model->cos_orientation_x, src->cos_orientation_x, status);
+    oskar_mem_copy(model->sin_orientation_x, src->sin_orientation_x, status);
+    oskar_mem_copy(model->cos_orientation_y, src->cos_orientation_y, status);
+    oskar_mem_copy(model->sin_orientation_y, src->sin_orientation_y, status);
+    oskar_mem_copy(model->element_type, src->element_type, status);
+    oskar_mem_copy(model->permitted_beam_az, src->permitted_beam_az, status);
+    oskar_mem_copy(model->permitted_beam_el, src->permitted_beam_el, status);
 
     /* Copy element models, if set. */
     if (oskar_station_has_element(src))

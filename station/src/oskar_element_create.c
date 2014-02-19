@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,8 +65,8 @@ oskar_Element* oskar_element_create(int type, int location, int* status)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Initialise memory. */
-    oskar_mem_init(&data->filename_x, OSKAR_CHAR, location, 0, 1, status);
-    oskar_mem_init(&data->filename_y, OSKAR_CHAR, location, 0, 1, status);
+    data->filename_x = oskar_mem_create(OSKAR_CHAR, location, 0, status);
+    data->filename_y = oskar_mem_create(OSKAR_CHAR, location, 0, status);
     data->phi_re_x = oskar_splines_create(type, location, status);
     data->phi_im_x = oskar_splines_create(type, location, status);
     data->theta_re_x = oskar_splines_create(type, location, status);

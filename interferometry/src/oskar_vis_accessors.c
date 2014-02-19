@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,27 +36,27 @@ extern "C" {
 
 int oskar_vis_location(const oskar_Vis* vis)
 {
-    return oskar_mem_location(&vis->amplitude);
+    return oskar_mem_location(vis->amplitude);
 }
 
 oskar_Mem* oskar_vis_settings_path(oskar_Vis* vis)
 {
-    return &vis->settings_path;
+    return vis->settings_path;
 }
 
 const oskar_Mem* oskar_vis_settings_path_const(const oskar_Vis* vis)
 {
-    return &vis->settings_path;
+    return vis->settings_path;
 }
 
 oskar_Mem* oskar_vis_telescope_path(oskar_Vis* vis)
 {
-    return &vis->telescope_path;
+    return vis->telescope_path;
 }
 
 const oskar_Mem* oskar_vis_telescope_path_const(const oskar_Vis* vis)
 {
-    return &vis->telescope_path;
+    return vis->telescope_path;
 }
 
 int oskar_vis_num_channels(const oskar_Vis* vis)
@@ -81,7 +81,7 @@ int oskar_vis_num_baselines(const oskar_Vis* vis)
 
 int oskar_vis_num_polarisations(const oskar_Vis* vis)
 {
-    return oskar_mem_is_matrix(&vis->amplitude) ? 4 : 1;
+    return oskar_mem_is_matrix(vis->amplitude) ? 4 : 1;
 }
 
 double oskar_vis_freq_start_hz(const oskar_Vis* vis)
@@ -136,112 +136,112 @@ double oskar_vis_telescope_lat_deg(const oskar_Vis* vis)
 
 oskar_Mem* oskar_vis_station_x_metres(oskar_Vis* vis)
 {
-    return &vis->x_metres;
+    return vis->x_metres;
 }
 
 const oskar_Mem* oskar_vis_station_x_metres_const(const oskar_Vis* vis)
 {
-    return &vis->x_metres;
+    return vis->x_metres;
 }
 
 oskar_Mem* oskar_vis_station_y_metres(oskar_Vis* vis)
 {
-    return &vis->y_metres;
+    return vis->y_metres;
 }
 
 const oskar_Mem* oskar_vis_station_y_metres_const(const oskar_Vis* vis)
 {
-    return &vis->y_metres;
+    return vis->y_metres;
 }
 
 oskar_Mem* oskar_vis_station_z_metres(oskar_Vis* vis)
 {
-    return &vis->z_metres;
+    return vis->z_metres;
 }
 
 const oskar_Mem* oskar_vis_station_z_metres_const(const oskar_Vis* vis)
 {
-    return &vis->z_metres;
+    return vis->z_metres;
 }
 
 oskar_Mem* oskar_vis_station_lon_deg(oskar_Vis* vis)
 {
-    return &vis->station_lon;
+    return vis->station_lon;
 }
 
 const oskar_Mem* oskar_vis_station_lon_deg_const(const oskar_Vis* vis)
 {
-    return &vis->station_lon;
+    return vis->station_lon;
 }
 
 oskar_Mem* oskar_vis_station_lat_deg(oskar_Vis* vis)
 {
-    return &vis->station_lat;
+    return vis->station_lat;
 }
 
 const oskar_Mem* oskar_vis_station_lat_deg_const(const oskar_Vis* vis)
 {
-    return &vis->station_lat;
+    return vis->station_lat;
 }
 
 oskar_Mem* oskar_vis_station_orientation_x_deg(oskar_Vis* vis)
 {
-    return &vis->station_orientation_x;
+    return vis->station_orientation_x;
 }
 
 const oskar_Mem* oskar_vis_station_orientation_x_deg_const(const oskar_Vis* vis)
 {
-    return &vis->station_orientation_x;
+    return vis->station_orientation_x;
 }
 
 oskar_Mem* oskar_vis_station_orientation_y_deg(oskar_Vis* vis)
 {
-    return &vis->station_orientation_y;
+    return vis->station_orientation_y;
 }
 
 const oskar_Mem* oskar_vis_station_orientation_y_deg_const(const oskar_Vis* vis)
 {
-    return &vis->station_orientation_y;
+    return vis->station_orientation_y;
 }
 
 oskar_Mem* oskar_vis_baseline_uu_metres(oskar_Vis* vis)
 {
-    return &vis->uu_metres;
+    return vis->uu_metres;
 }
 
 const oskar_Mem* oskar_vis_baseline_uu_metres_const(const oskar_Vis* vis)
 {
-    return &vis->uu_metres;
+    return vis->uu_metres;
 }
 
 oskar_Mem* oskar_vis_baseline_vv_metres(oskar_Vis* vis)
 {
-    return &vis->vv_metres;
+    return vis->vv_metres;
 }
 
 const oskar_Mem* oskar_vis_baseline_vv_metres_const(const oskar_Vis* vis)
 {
-    return &vis->vv_metres;
+    return vis->vv_metres;
 }
 
 oskar_Mem* oskar_vis_baseline_ww_metres(oskar_Vis* vis)
 {
-    return &vis->ww_metres;
+    return vis->ww_metres;
 }
 
 const oskar_Mem* oskar_vis_baseline_ww_metres_const(const oskar_Vis* vis)
 {
-    return &vis->ww_metres;
+    return vis->ww_metres;
 }
 
 oskar_Mem* oskar_vis_amplitude(oskar_Vis* vis)
 {
-    return &vis->amplitude;
+    return vis->amplitude;
 }
 
 const oskar_Mem* oskar_vis_amplitude_const(const oskar_Vis* vis)
 {
-    return &vis->amplitude;
+    return vis->amplitude;
 }
 
 void oskar_vis_set_freq_start_hz(oskar_Vis* vis, double value)

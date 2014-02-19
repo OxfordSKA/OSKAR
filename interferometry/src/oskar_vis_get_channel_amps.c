@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ void oskar_vis_get_channel_amps(oskar_Mem* vis_amp,
     /* Get pointer to memory at start of this channel. */
     num_elements = vis->num_times * vis->num_baselines;
     offset = channel * num_elements;
-    oskar_mem_get_pointer(vis_amp, &vis->amplitude, offset, num_elements,
+    oskar_mem_set_alias(vis_amp, vis->amplitude, offset, num_elements,
             status);
 }
 

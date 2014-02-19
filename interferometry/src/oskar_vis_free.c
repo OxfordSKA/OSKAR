@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,19 +43,19 @@ void oskar_vis_free(oskar_Vis* vis, int* status)
     }
 
     /* Free memory. */
-    oskar_mem_free(&vis->settings_path, status);
-    oskar_mem_free(&vis->telescope_path, status);
-    oskar_mem_free(&vis->x_metres, status);
-    oskar_mem_free(&vis->y_metres, status);
-    oskar_mem_free(&vis->z_metres, status);
-    oskar_mem_free(&vis->station_lon, status);
-    oskar_mem_free(&vis->station_lat, status);
-    oskar_mem_free(&vis->station_orientation_x, status);
-    oskar_mem_free(&vis->station_orientation_y, status);
-    oskar_mem_free(&vis->uu_metres, status);
-    oskar_mem_free(&vis->vv_metres, status);
-    oskar_mem_free(&vis->ww_metres, status);
-    oskar_mem_free(&vis->amplitude, status);
+    oskar_mem_free(vis->settings_path, status);
+    oskar_mem_free(vis->telescope_path, status);
+    oskar_mem_free(vis->x_metres, status);
+    oskar_mem_free(vis->y_metres, status);
+    oskar_mem_free(vis->z_metres, status);
+    oskar_mem_free(vis->station_lon, status);
+    oskar_mem_free(vis->station_lat, status);
+    oskar_mem_free(vis->station_orientation_x, status);
+    oskar_mem_free(vis->station_orientation_y, status);
+    oskar_mem_free(vis->uu_metres, status);
+    oskar_mem_free(vis->vv_metres, status);
+    oskar_mem_free(vis->ww_metres, status);
+    oskar_mem_free(vis->amplitude, status);
 
     /* Free the structure itself. */
     free(vis);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,26 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SYSTEM_NOISE_MODEL_H_
-#define OSKAR_SYSTEM_NOISE_MODEL_H_
+#include <private_system_noise_model.h>
+#include <oskar_system_noise_model.h>
 
-/**
- * @file oskar_SystemNoiseModel.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <oskar_mem.h>
-
-/**
- * @brief Structure to hold system noise data.
- *
- * @details
- * This structure holds system noise data.
- */
-struct oskar_SystemNoiseModel
+const oskar_Mem* oskar_system_noise_model_frequency_const(
+        const oskar_SystemNoiseModel* model)
 {
-    oskar_Mem frequency;
-    oskar_Mem rms;
-};
-typedef struct oskar_SystemNoiseModel oskar_SystemNoiseModel;
+    return model->frequency;
+}
 
-#endif /* OSKAR_SYSTEM_NOISE_MODEL_H_ */
+oskar_Mem* oskar_system_noise_model_frequency(oskar_SystemNoiseModel* model)
+{
+    return model->frequency;
+}
+
+const oskar_Mem* oskar_system_noise_model_rms_const(
+        const oskar_SystemNoiseModel* model)
+{
+    return model->rms;
+}
+
+oskar_Mem* oskar_system_noise_model_rms(oskar_SystemNoiseModel* model)
+{
+    return model->rms;
+}
+
+#ifdef __cplusplus
+}
+#endif

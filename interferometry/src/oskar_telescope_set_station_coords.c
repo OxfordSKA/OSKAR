@@ -70,12 +70,12 @@ void oskar_telescope_set_station_coords(oskar_Telescope* dst,
     location = oskar_telescope_location(dst);
 
     /* Get byte pointers. */
-    xw = oskar_mem_char(&dst->station_x);
-    yw = oskar_mem_char(&dst->station_y);
-    zw = oskar_mem_char(&dst->station_z);
-    xh = oskar_mem_char(&dst->station_x_hor);
-    yh = oskar_mem_char(&dst->station_y_hor);
-    zh = oskar_mem_char(&dst->station_z_hor);
+    xw = oskar_mem_char(dst->station_x);
+    yw = oskar_mem_char(dst->station_y);
+    zw = oskar_mem_char(dst->station_z);
+    xh = oskar_mem_char(dst->station_x_hor);
+    yh = oskar_mem_char(dst->station_y_hor);
+    zh = oskar_mem_char(dst->station_z_hor);
 
     if (location == OSKAR_LOCATION_CPU)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,12 +83,12 @@ void oskar_station_set_element_coords(oskar_Station* dst,
     z_signal = z + delta_z;
 
     /* Get byte pointers. */
-    xw = oskar_mem_char(&dst->x_weights);
-    yw = oskar_mem_char(&dst->y_weights);
-    zw = oskar_mem_char(&dst->z_weights);
-    xs = oskar_mem_char(&dst->x_signal);
-    ys = oskar_mem_char(&dst->y_signal);
-    zs = oskar_mem_char(&dst->z_signal);
+    xw = oskar_mem_char(dst->x_weights);
+    yw = oskar_mem_char(dst->y_weights);
+    zw = oskar_mem_char(dst->z_weights);
+    xs = oskar_mem_char(dst->x_signal);
+    ys = oskar_mem_char(dst->y_signal);
+    zs = oskar_mem_char(dst->z_signal);
 
     if (location == OSKAR_LOCATION_CPU)
     {

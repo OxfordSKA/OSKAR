@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,8 @@ struct oskar_Element
     int taper_type; /**< Tapering type. */
     double cos_power; /**< For a cosine taper, the power of the cosine. */
     double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
-    oskar_Mem filename_x;
-    oskar_Mem filename_y;
+    oskar_Mem* filename_x;
+    oskar_Mem* filename_y;
     oskar_Splines* theta_re_x;
     oskar_Splines* theta_im_x;
     oskar_Splines* phi_re_x;

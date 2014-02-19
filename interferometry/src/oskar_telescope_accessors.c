@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -136,65 +136,65 @@ const oskar_Station* oskar_telescope_station_const(
 
 oskar_Mem* oskar_telescope_station_x(oskar_Telescope* model)
 {
-    return &model->station_x;
+    return model->station_x;
 }
 
 const oskar_Mem* oskar_telescope_station_x_const(const oskar_Telescope* model)
 {
-    return &model->station_x;
+    return model->station_x;
 }
 
 oskar_Mem* oskar_telescope_station_y(oskar_Telescope* model)
 {
-    return &model->station_y;
+    return model->station_y;
 }
 
 const oskar_Mem* oskar_telescope_station_y_const(const oskar_Telescope* model)
 {
-    return &model->station_y;
+    return model->station_y;
 }
 
 oskar_Mem* oskar_telescope_station_z(oskar_Telescope* model)
 {
-    return &model->station_z;
+    return model->station_z;
 }
 
 const oskar_Mem* oskar_telescope_station_z_const(const oskar_Telescope* model)
 {
-    return &model->station_z;
+    return model->station_z;
 }
 
 oskar_Mem* oskar_telescope_station_x_hor(oskar_Telescope* model)
 {
-    return &model->station_x_hor;
+    return model->station_x_hor;
 }
 
 const oskar_Mem* oskar_telescope_station_x_hor_const(
         const oskar_Telescope* model)
 {
-    return &model->station_x_hor;
+    return model->station_x_hor;
 }
 
 oskar_Mem* oskar_telescope_station_y_hor(oskar_Telescope* model)
 {
-    return &model->station_y_hor;
+    return model->station_y_hor;
 }
 
 const oskar_Mem* oskar_telescope_station_y_hor_const(
         const oskar_Telescope* model)
 {
-    return &model->station_y_hor;
+    return model->station_y_hor;
 }
 
 oskar_Mem* oskar_telescope_station_z_hor(oskar_Telescope* model)
 {
-    return &model->station_z_hor;
+    return model->station_z_hor;
 }
 
 const oskar_Mem* oskar_telescope_station_z_hor_const(
         const oskar_Telescope* model)
 {
-    return &model->station_z_hor;
+    return model->station_z_hor;
 }
 
 

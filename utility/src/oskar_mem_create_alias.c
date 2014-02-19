@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <private_mem.h>
+#include <oskar_mem_element_size.h>
+#include <oskar_mem_create_alias.h>
 
-#ifndef OSKAR_SETUP_IMAGE_H_
-#define OSKAR_SETUP_IMAGE_H_
-
-/**
- * @file oskar_setup_image.h
- */
-
-#include <oskar_global.h>
-#include "imaging/oskar_Image.h"
-#include "imaging/oskar_SettingsImage.h"
-#include <oskar_vis.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Resize image and set meta-data to that specified by the image
- * settings and input visibility data.
- *
- * @param image
- * @param vis
- * @param settings
- * @return
- */
-OSKAR_EXPORT
-int oskar_setup_image(oskar_Image* image, const oskar_Vis* vis,
-        const oskar_SettingsImage* settings);
+oskar_Mem* oskar_mem_create_alias(const oskar_Mem* src, size_t offset,
+        size_t num_elements, int* status)
+{
+    oskar_Mem* mem = 0;
+
+    /* Check all inputs. */
+    if (!status)
+    {
+        oskar_set_invalid_argument(status);
+        return 0;
+    }
+
+    /* Create the structure. */
+    mem = (oskar_Mem*) malloc(sizeof(oskar_Mem));
+
+    /* Initialise meta-data.
+     * (This must happen regardless of the status code.) */
+    mem->owner = 0; /* Structure does not own the memory. */
+    if (src)
+    {
+        size_t offset_bytes;
+        offset_bytes = offset * oskar_mem_element_size(src->type);
+        mem->type = src->type;
+        mem->location = src->location;
+        mem->num_elements = num_elements;
+        mem->data = (void*)(((char*)(src->data)) + offset_bytes);
+    }
+    else
+    {
+        mem->type = 0;
+        mem->location = 0;
+        mem->num_elements = 0;
+        mem->data = 0;
+    }
+
+    /* Return a handle the new structure .*/
+    return mem;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SETUP_IMAGE_H_ */

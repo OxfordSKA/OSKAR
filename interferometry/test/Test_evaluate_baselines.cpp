@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -122,18 +122,6 @@ TEST(evaluate_baselines, cpu_gpu)
     oskar_mem_free(uu_gpu, &status);
     oskar_mem_free(vv_gpu, &status);
     oskar_mem_free(ww_gpu, &status);
-    free(u); // FIXME Remove after updating oskar_mem_free().
-    free(v); // FIXME Remove after updating oskar_mem_free().
-    free(w); // FIXME Remove after updating oskar_mem_free().
-    free(uu); // FIXME Remove after updating oskar_mem_free().
-    free(vv); // FIXME Remove after updating oskar_mem_free().
-    free(ww); // FIXME Remove after updating oskar_mem_free().
-    free(u_gpu); // FIXME Remove after updating oskar_mem_free().
-    free(v_gpu); // FIXME Remove after updating oskar_mem_free().
-    free(w_gpu); // FIXME Remove after updating oskar_mem_free().
-    free(uu_gpu); // FIXME Remove after updating oskar_mem_free().
-    free(vv_gpu); // FIXME Remove after updating oskar_mem_free().
-    free(ww_gpu); // FIXME Remove after updating oskar_mem_free().
 
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }

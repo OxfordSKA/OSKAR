@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SYSTEM_NOISE_MODEL_INIT_H_
-#define OSKAR_SYSTEM_NOISE_MODEL_INIT_H_
+#ifndef OSKAR_SKY_CREATE_ALIAS_H_
+#define OSKAR_SKY_CREATE_ALIAS_H_
 
 /**
- * @file oskar_system_noise_model_init.h
+ * @file oskar_sky_create_alias.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_SystemNoiseModel.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,23 +41,25 @@ extern "C" {
 
 /**
  * @brief
- * Initialises the system noise model data structure.
+ * Get an alias to a subset of the specified sky model.
  *
  * @details
- * This function initialises the system noise model data structure.
- * All memory arrays will be empty (i.e. zero-sized).
+ * Returns a handle to a sky model structure that references (part of) an
+ * existing sky model.
  *
- * @param[in] data     Pointer to data structure.
- * @param[in] type     Type flag (valid types are OSKAR_SINGLE or OSKAR_DOUBLE).
- * @param[in] location Location flag (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
- * @param[in,out]  status   Status return code.
+ * The handle should be deallocated using oskar_sky_free() when no longer
+ * required.
+ *
+ * @param[in] sky           Sky model from which to create the alias.
+ * @param[in] offset        Start offset (source index) into input sky model.
+ * @param[in] num_sources   Number of sources in the aliased sky model.
+ * @param[in,out] status    Status return code.
  */
-OSKAR_EXPORT
-void oskar_system_noise_model_init(oskar_SystemNoiseModel* noise, int type,
-        int location, int* status);
+oskar_Sky* oskar_sky_create_alias(const oskar_Sky* sky, int offset,
+        int num_sources, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SYSTEM_NOISE_MODEL_INIT_H_ */
+#endif /* OSKAR_SKY_CREATE_ALIAS_H_ */

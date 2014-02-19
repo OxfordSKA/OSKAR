@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,21 +34,25 @@
 #include <oskar_BinaryTag.h>
 #include <oskar_BinaryHeader.h>
 #include <oskar_mem_binary_stream_read.h>
+#include <oskar_binary_stream_read_oskar_version.h>
 #include <oskar_binary_tag_index_query.h>
 #include <oskar_binary_tag_index_create.h>
 #include <oskar_binary_tag_index_free.h>
 #include <oskar_version_string.h>
+#include <oskar_log.h>
 
 #include <vector>
 #include <string>
 #include <iostream>
 #include <cstdio>
 
+static const int width = 40;
+
 using namespace std;
 
 int main(int argc, char **argv)
 {
-    int status = OSKAR_SUCCESS;
+    int status = 0;
 
     oskar_OptionParser opt("oskar_vis_summary", oskar_version_string());
     opt.addRequired("OSKAR visibility file");
@@ -59,54 +63,68 @@ int main(int argc, char **argv)
     if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;
 
+    const char* filename = opt.getArg(0);
     bool displayLog = opt.isSet("-l") ? true : false;
     bool displaySettings = opt.isSet("-s") ? true : false;
-    const char* filename = opt.getArg(0);
 
+    // Get the version of OSKAR that created the file.
+    int vMajor, vMinor, vPatch;
+    FILE* file = fopen(filename, "rb");
+    if (!file)
+    {
+        fprintf(stderr, "ERROR: Failed to open specified file.\n");
+        return OSKAR_ERR_FILE_IO;
+    }
+    oskar_binary_stream_read_oskar_version(file, &vMajor, &vMinor, &vPatch,
+            &status);
+    fclose(file);
+
+    // Load visibilities into memory.
     oskar_Vis* vis = oskar_vis_read(filename, &status);
     if (status)
     {
-        fprintf(stderr, "ERROR: Unable to read visibility file '%s'\n",
-                filename);
-        fprintf(stderr, "ERROR: [code %i] %s.\n", status, oskar_get_error_string(status));
+        fprintf(stderr, "ERROR [code %i]: Unable to read "
+                "visibility file '%s' (%s)\n", status, filename,
+                oskar_get_error_string(status));
         return status;
     }
 
+    oskar_Log* log = 0;
     if (!(displayLog || displaySettings))
     {
-        printf("\n");
-        printf("- Precision ............... %s\n", oskar_mem_is_double(
+        oskar_log_section(log, "Visibilities summary");
+        oskar_log_value(log, 0, width, "File", "%s", filename);
+        oskar_log_value(log, 0, width, "Created with OSKAR version",
+                "%i.%i.%i", vMajor, vMinor, vPatch);
+        oskar_log_value(log, 0, width, "Precision", "%s", oskar_mem_is_double(
                 oskar_vis_amplitude_const(vis)) ? "double" : "single");
-        printf("- Amplitude type .......... %s\n", oskar_get_data_type_string(
-                oskar_mem_type(oskar_vis_amplitude_const(vis))));
-        printf("\n");
-        printf("- Number of stations ...... %i\n", oskar_vis_num_stations(vis));
-        printf("\n");
-        printf("- Number of channels ...... %i\n",
+        oskar_log_value(log, 0, width, "Amplitude type", "%s",
+                oskar_get_data_type_string(oskar_mem_type(
+                        oskar_vis_amplitude_const(vis))));
+        oskar_log_value(log, 0, width, "No. stations", "%d",
+                oskar_vis_num_stations(vis));
+        oskar_log_value(log, 0, width, "No. channels", "%d",
                 oskar_vis_num_channels(vis));
-        printf("- Number of times ......... %i\n",
+        oskar_log_value(log, 0, width, "No. times", "%d",
                 oskar_vis_num_times(vis));
-        printf("- Number of baselines ..... %i\n",
+        oskar_log_value(log, 0, width, "No. baselines", "%d",
                 oskar_vis_num_baselines(vis));
-        printf("- Number of polarisations . %i\n",
+        oskar_log_value(log, 0, width, "No. polarisations", "%d",
                 oskar_vis_num_polarisations(vis));
-        printf("- Data order .............. %s\n",
+        oskar_log_value(log, 0, width, "Data order", "%s",
                 "{channel, time, baseline, polarisation}");
-        printf("\n");
-        printf("- Start frequency (MHz) ... %f\n",
+        oskar_log_value(log, 0, width, "Start frequency (MHz)", "%.6f",
                 oskar_vis_freq_start_hz(vis)/1.e6);
-        printf("- Channel separation (Hz) . %f\n",
+        oskar_log_value(log, 0, width, "Channel separation (Hz)", "%f",
                 oskar_vis_freq_inc_hz(vis));
-        printf("- Channel bandwidth (Hz) .. %f\n",
+        oskar_log_value(log, 0, width, "Channel bandwidth (Hz)", "%f",
                 oskar_vis_channel_bandwidth_hz(vis));
-        printf("\n");
-        printf("- Start time (MJD, UTC) ... %f\n",
+        oskar_log_value(log, 0, width, "Start time (MJD, UTC)", "%f",
                 oskar_vis_time_start_mjd_utc(vis));
-        printf("- Time increment (s) ...... %f\n",
+        oskar_log_value(log, 0, width, "Time increment (s)", "%f",
                 oskar_vis_time_inc_seconds(vis));
-        printf("- Integration time (s) .... %f\n",
+        oskar_log_value(log, 0, width, "Integration time (s)", "%f",
                 oskar_vis_time_int_seconds(vis));
-        printf("\n");
     }
     oskar_vis_free(vis, &status);
     vis = 0;
@@ -135,7 +153,6 @@ int main(int argc, char **argv)
                 printf("%s", oskar_mem_char(temp));
             }
             oskar_mem_free(temp, &status);
-            free(temp); // FIXME Remove after updating oskar_mem_free().
         }
         fclose(stream);
         oskar_binary_tag_index_free(index, &status);
@@ -165,7 +182,6 @@ int main(int argc, char **argv)
                 printf("%s", oskar_mem_char(temp));
             }
             oskar_mem_free(temp, &status);
-            free(temp); // FIXME Remove after updating oskar_mem_free().
         }
         fclose(stream);
         oskar_binary_tag_index_free(index, &status);

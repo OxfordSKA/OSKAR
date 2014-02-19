@@ -64,9 +64,10 @@ set(station_SRC
     src/oskar_station_set_element_errors.c
     src/oskar_station_set_element_orientation.c
     src/oskar_station_set_element_weight.c
+    src/oskar_system_noise_model.c
     src/oskar_system_noise_model_copy.c
+    src/oskar_system_noise_model_create.c
     src/oskar_system_noise_model_free.c
-    src/oskar_system_noise_model_init.c
     src/oskar_system_noise_model_load.c
     src/oskar_station_work.c
 )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,22 +90,23 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mxArray* uu_ = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
     mxArray* vv_ = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
     mxArray* ww_ = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
-    oskar_Mem uu, vv, ww, work_uvw;
-    oskar_mem_init(&uu, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_coords, OSKAR_FALSE, &err);
-    oskar_mem_init(&vv, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_coords, OSKAR_FALSE, &err);
-    oskar_mem_init(&ww, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_coords, OSKAR_FALSE, &err);
-    uu.data = mxGetData(uu_);
-    vv.data = mxGetData(vv_);
-    ww.data = mxGetData(ww_);
+    oskar_Mem *uu, *vv, *ww, *work_uvw;
+    uu = oskar_mem_create_alias_from_raw(mxGetData(uu_), OSKAR_DOUBLE,
+            OSKAR_LOCATION_CPU, num_coords, &err);
+    vv = oskar_mem_create_alias_from_raw(mxGetData(vv_), OSKAR_DOUBLE,
+            OSKAR_LOCATION_CPU, num_coords, &err);
+    ww = oskar_mem_create_alias_from_raw(mxGetData(ww_), OSKAR_DOUBLE,
+            OSKAR_LOCATION_CPU, num_coords, &err);
 
     // Allocate work array
-    oskar_mem_init(&work_uvw, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 3 * num_stations, OSKAR_TRUE, &err);
+    work_uvw = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+            3 * num_stations, &err);
 
-    oskar_convert_ecef_to_baseline_uvw(&uu, &vv, &ww, num_stations,
+    oskar_convert_ecef_to_baseline_uvw(uu, vv, ww, num_stations,
             oskar_telescope_station_x_const(telescope),
             oskar_telescope_station_y_const(telescope),
             oskar_telescope_station_z_const(telescope),
-            ra, dec, num_times, start_mjd_utc, dt, &work_uvw, &err);
+            ra, dec, num_times, start_mjd_utc, dt, work_uvw, &err);
     if (err)
     {
         mexErrMsgIdAndTxt("OSKAR:error",
@@ -120,9 +121,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mxSetField(out[0], 0, "vv", vv_);
     mxSetField(out[0], 0, "ww", ww_);
     oskar_telescope_free(telescope, &err);
-    oskar_mem_free(&work_uvw, &err);
-    oskar_mem_free(&uu, &err);
-    oskar_mem_free(&vv, &err);
-    oskar_mem_free(&ww, &err);
+    oskar_mem_free(work_uvw, &err);
+    oskar_mem_free(uu, &err);
+    oskar_mem_free(vv, &err);
+    oskar_mem_free(ww, &err);
 }
 

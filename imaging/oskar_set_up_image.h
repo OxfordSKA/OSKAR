@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,42 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
-#include <oskar_mem_assign.h>
+#ifndef OSKAR_SET_UP_IMAGE_H_
+#define OSKAR_SET_UP_IMAGE_H_
+
+/**
+ * @file oskar_set_up_image.h
+ */
+
+#include <oskar_global.h>
+#include <oskar_image.h>
+#include <oskar_SettingsImage.h>
+#include <oskar_vis.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_mem_assign(oskar_Mem* dst, const oskar_Mem* src, int* status)
-{
-    /* Check all inputs. */
-    if (!src || !dst || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Check the data types. */
-    if (src->type != dst->type)
-        *status = OSKAR_ERR_TYPE_MISMATCH;
-
-    /* If the destination memory is owned, then assignment is not possible. */
-    if (dst->owner == OSKAR_TRUE)
-        *status = OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    dst->data         = src->data;
-    dst->num_elements = src->num_elements;
-    dst->location     = src->location;
-    dst->type         = src->type;
-}
+/**
+ * @brief Creates an image and sets up meta-data to that specified by the
+ * image settings and input visibility data.
+ *
+ * @param[in] vis
+ * @param[in] settings
+ * @param[in,out] status   Status return code.
+ *
+ * @return A handle to the new image.
+ */
+OSKAR_EXPORT
+oskar_Image* oskar_set_up_image(const oskar_Vis* vis,
+        const oskar_SettingsImage* settings, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_SET_UP_IMAGE_H_ */

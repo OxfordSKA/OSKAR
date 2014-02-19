@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -212,13 +212,6 @@ TEST(evaluate_pierce_points, test2)
     oskar_mem_free(pp_lon, &status);
     oskar_mem_free(pp_lat, &status);
     oskar_mem_free(pp_path, &status);
-
-    free(hor_x); // FIXME Remove after updating oskar_mem_free().
-    free(hor_y); // FIXME Remove after updating oskar_mem_free().
-    free(hor_z); // FIXME Remove after updating oskar_mem_free().
-    free(pp_lon); // FIXME Remove after updating oskar_mem_free().
-    free(pp_lat); // FIXME Remove after updating oskar_mem_free().
-    free(pp_path); // FIXME Remove after updating oskar_mem_free().
 }
 
 

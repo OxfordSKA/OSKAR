@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -221,12 +221,6 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
     oskar_mem_free(weights, &status);
     oskar_mem_free(beam, &status);
     oskar_mem_free(signal, &status);
-    free(x); // FIXME Remove after updating oskar_mem_free().
-    free(y); // FIXME Remove after updating oskar_mem_free().
-    free(z); // FIXME Remove after updating oskar_mem_free().
-    free(weights); // FIXME Remove after updating oskar_mem_free().
-    free(beam); // FIXME Remove after updating oskar_mem_free().
-    free(signal); // FIXME Remove after updating oskar_mem_free().
 
     return status;
 }

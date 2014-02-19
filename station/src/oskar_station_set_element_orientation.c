@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,8 +70,8 @@ void oskar_station_set_element_orientation(oskar_Station* dst,
     }
 
     /* Get the data type. */
-    type = oskar_mem_type(&dst->cos_orientation_x);
-    location = oskar_mem_location(&dst->cos_orientation_x);
+    type = oskar_mem_type(dst->cos_orientation_x);
+    location = oskar_mem_location(dst->cos_orientation_x);
     size = oskar_mem_element_size(type);
     offset_bytes = index * size;
 
@@ -88,10 +88,10 @@ void oskar_station_set_element_orientation(oskar_Station* dst,
     if (type == OSKAR_DOUBLE)
     {
         double cos_x, sin_x, cos_y, sin_y, *cx, *cy, *sx, *sy;
-        cx = oskar_mem_double(&dst->cos_orientation_x, status);
-        sx = oskar_mem_double(&dst->sin_orientation_x, status);
-        cy = oskar_mem_double(&dst->cos_orientation_y, status);
-        sy = oskar_mem_double(&dst->sin_orientation_y, status);
+        cx = oskar_mem_double(dst->cos_orientation_x, status);
+        sx = oskar_mem_double(dst->sin_orientation_x, status);
+        cy = oskar_mem_double(dst->cos_orientation_y, status);
+        sy = oskar_mem_double(dst->sin_orientation_y, status);
         cos_x = cos(orientation_x);
         sin_x = sin(orientation_x);
         cos_y = cos(orientation_y);
@@ -121,10 +121,10 @@ void oskar_station_set_element_orientation(oskar_Station* dst,
     else if (type == OSKAR_SINGLE)
     {
         float cos_x, sin_x, cos_y, sin_y, *cx, *cy, *sx, *sy;
-        cx = oskar_mem_float(&dst->cos_orientation_x, status);
-        sx = oskar_mem_float(&dst->sin_orientation_x, status);
-        cy = oskar_mem_float(&dst->cos_orientation_y, status);
-        sy = oskar_mem_float(&dst->sin_orientation_y, status);
+        cx = oskar_mem_float(dst->cos_orientation_x, status);
+        sx = oskar_mem_float(dst->sin_orientation_x, status);
+        cy = oskar_mem_float(dst->cos_orientation_y, status);
+        sy = oskar_mem_float(dst->sin_orientation_y, status);
         cos_x = (float) cos(orientation_x);
         sin_x = (float) sin(orientation_x);
         cos_y = (float) cos(orientation_y);

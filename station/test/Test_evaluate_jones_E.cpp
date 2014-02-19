@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -152,16 +152,16 @@ TEST(evaluate_jones_E, evaluate_e)
     // Save to file for plotting.
     const char* filename = "temp_test_E_jones.txt";
     FILE* file = fopen(filename, "w");
-    oskar_Mem E_station;
+    oskar_Mem *E_station = oskar_mem_create_alias(0, 0, 0, &error);
     for (int j = 0; j < num_stations; ++j)
     {
-        oskar_jones_get_station_pointer(&E_station, E, j, &error);
+        oskar_jones_get_station_pointer(E_station, E, j, &error);
         ASSERT_EQ(0, error) << oskar_get_error_string(error);
         oskar_mem_save_ascii(file, 4, num_sources, &error,
                 oskar_station_work_enu_direction_x(work),
                 oskar_station_work_enu_direction_y(work),
                 oskar_station_work_enu_direction_z(work),
-                &E_station);
+                E_station);
     }
     fclose(file);
     remove(filename);
@@ -186,6 +186,7 @@ TEST(evaluate_jones_E, evaluate_e)
     oskar_jones_free(E, &error);
     oskar_telescope_free(tel_gpu, &error);
     oskar_station_work_free(work, &error);
+    oskar_mem_free(E_station, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 }
 

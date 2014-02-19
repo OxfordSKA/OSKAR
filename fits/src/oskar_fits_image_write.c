@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,13 +64,12 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
         return;
     }
 
-    if (image->grid_type == OSKAR_IMAGE_GRID_TYPE_HEALPIX)
+    if (oskar_image_grid_type(image) == OSKAR_IMAGE_GRID_TYPE_HEALPIX)
     {
         /* FIXME This is an experimental HEALPix fits writer... */
         oskar_fits_healpix_write_image(filename, image, status);
     }
-
-    else if (image->grid_type == OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
+    else if (oskar_image_grid_type(image) == OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
     {
         char value[FLEN_VALUE];
         int i, num_dimensions, num_elements = 1, decimals = 10;
@@ -87,10 +86,10 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
         }
 
         /* Get the data type. */
-        type = oskar_mem_precision(&image->data);
+        type = oskar_mem_precision(oskar_image_data(image));
 
         /* Get the number of dimensions. */
-        num_dimensions = sizeof(image->dimension_order) / sizeof(int);
+        num_dimensions = 5; /* FIXME This is a bit nasty... */
         if (num_dimensions > MAX_DIM)
         {
             *status = OSKAR_ERR_DIMENSION_MISMATCH;
@@ -101,50 +100,50 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
         for (i = 0; i < num_dimensions; ++i)
         {
             int dim;
-            dim = image->dimension_order[i];
-            if (dim == OSKAR_IMAGE_DIM_RA)
+            dim = oskar_image_dimension_order(image)[i];
+            if (dim == OSKAR_IMAGE_DIM_LONGITUDE)
             {
                 double max, inc, delta;
 
                 /* Compute pixel delta. */
-                max = sin(image->fov_ra_deg * M_PI / 360.0); /* Divide by 2. */
-                inc = max / (0.5 * image->width);
+                max = sin(oskar_image_fov_longitude_deg(image) * M_PI / 360.0); /* Divide by 2. */
+                inc = max / (0.5 * oskar_image_width(image));
                 delta = -asin(inc) * 180.0 / M_PI; /* Negative convention. */
 
                 /* Set axis properties. */
                 label[i] = "Right Ascension";
                 ctype[i] = "RA---SIN";
-                naxes[i] = image->width;
-                crval[i] = image->centre_ra_deg;
+                naxes[i] = oskar_image_width(image);
+                crval[i] = oskar_image_centre_longitude_deg(image);
                 cdelt[i] = delta;
-                crpix[i] = (image->width + 1) / 2.0;
+                crpix[i] = (oskar_image_width(image) + 1) / 2.0;
                 crota[i] = 0.0;
             }
-            else if (dim == OSKAR_IMAGE_DIM_DEC)
+            else if (dim == OSKAR_IMAGE_DIM_LATITUDE)
             {
                 double max, inc, delta;
 
                 /* Compute pixel delta. */
-                max = sin(image->fov_dec_deg * M_PI / 360.0); /* Divide by 2. */
-                inc = max / (0.5 * image->height);
+                max = sin(oskar_image_fov_latitude_deg(image) * M_PI / 360.0); /* Divide by 2. */
+                inc = max / (0.5 * oskar_image_height(image));
                 delta = asin(inc) * 180.0 / M_PI;
 
                 /* Set axis properties. */
                 label[i] = "Declination";
                 ctype[i] = "DEC--SIN";
-                naxes[i] = image->height;
-                crval[i] = image->centre_dec_deg;
+                naxes[i] = oskar_image_height(image);
+                crval[i] = oskar_image_centre_latitude_deg(image);
                 cdelt[i] = delta;
-                crpix[i] = (image->height + 1) / 2.0;
+                crpix[i] = (oskar_image_height(image) + 1) / 2.0;
                 crota[i] = 0.0;
             }
             else if (dim == OSKAR_IMAGE_DIM_CHANNEL)
             {
                 label[i] = "Frequency";
                 ctype[i] = "FREQ";
-                naxes[i] = image->num_channels;
-                crval[i] = image->freq_start_hz;
-                cdelt[i] = image->freq_inc_hz;
+                naxes[i] = oskar_image_num_channels(image);
+                crval[i] = oskar_image_freq_start_hz(image);
+                cdelt[i] = oskar_image_freq_inc_hz(image);
                 crpix[i] = 1.0;
                 crota[i] = 0.0;
             }
@@ -152,7 +151,7 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
             {
                 label[i] = "Polarisation";
                 ctype[i] = "STOKES";
-                naxes[i] = image->num_pols;
+                naxes[i] = oskar_image_num_pols(image);
                 crval[i] = 1.0;
                 cdelt[i] = 1.0;
                 crpix[i] = 1.0;
@@ -162,9 +161,9 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
             {
                 label[i] = "Time";
                 ctype[i] = "UTC";
-                naxes[i] = image->num_times;
+                naxes[i] = oskar_image_num_times(image);
                 crval[i] = 0.0; /* Zero relative to MJD-OBS. */
-                cdelt[i] = image->time_inc_sec;
+                cdelt[i] = oskar_image_time_inc_sec(image);
                 crpix[i] = 1.0;
                 crota[i] = 0.0;
             }
@@ -210,7 +209,7 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
                 "This file was created using OSKAR " OSKAR_VERSION_STR, status);
 
         /* Write brightness unit keyword. */
-        if (image->image_type < 10)
+        if (oskar_image_type(image) < 10)
         {
             strcpy(value, "JY/BEAM");
             fits_write_key_str(fptr, "BUNIT", value, "Units of flux", status);
@@ -221,14 +220,20 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
         fits_write_key_str(fptr, "TIMESYS", value, NULL, status);
         strcpy(value, "s");
         fits_write_key_str(fptr, "TIMEUNIT", value, "Time axis units", status);
-        fits_write_key_dbl(fptr, "MJD-OBS", image->time_start_mjd_utc, decimals,
+        fits_write_key_dbl(fptr, "MJD-OBS",
+                oskar_image_time_start_mjd_utc(image), decimals,
                 "Obs start time", status);
 
         /* Write pointing keywords. */
-        fits_write_key_dbl(fptr, "OBSRA", image->centre_ra_deg, decimals,
-                "Pointing RA", status);
-        fits_write_key_dbl(fptr, "OBSDEC", image->centre_dec_deg, decimals,
-                "Pointing DEC", status);
+        if (oskar_image_coord_frame(image) == OSKAR_IMAGE_COORD_FRAME_EQUATORIAL)
+        {
+            fits_write_key_dbl(fptr, "OBSRA",
+                    oskar_image_centre_longitude_deg(image), decimals,
+                    "Pointing RA", status);
+            fits_write_key_dbl(fptr, "OBSDEC",
+                    oskar_image_centre_latitude_deg(image), decimals,
+                    "Pointing DEC", status);
+        }
 
         /* Write log entries as FITS HISTORY keys. */
         if (log && oskar_log_file_handle(log) && !(*status))
@@ -252,7 +257,7 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
         }
 
         fits_write_img(fptr, datatype, 1, num_elements,
-                oskar_mem_void(&image->data), status);
+                oskar_mem_void(oskar_image_data(image)), status);
 
         /* Update header keywords with the correct axis lengths.
          * Needs to be done here because CFITSIO doesn't let us write only the

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,19 +46,19 @@
  */
 struct oskar_WorkJonesZ
 {
-    oskar_Mem hor_x;        /* Pierce point horizontal x coordinate */
-    oskar_Mem hor_y;        /* Pierce point horizontal y coordinate */
-    oskar_Mem hor_z;        /* Pierce point horizontal z coordinate */
+    oskar_Mem* hor_x;        /* Pierce point horizontal x coordinate */
+    oskar_Mem* hor_y;        /* Pierce point horizontal y coordinate */
+    oskar_Mem* hor_z;        /* Pierce point horizontal z coordinate */
 
-    oskar_Mem pp_lon;       /* Pierce point longitude, in radians */
-    oskar_Mem pp_lat;       /* Pierce point latitude, in radians */
-    oskar_Mem pp_rel_path;  /* Pierce point relative path length.
+    oskar_Mem* pp_lon;       /* Pierce point longitude, in radians */
+    oskar_Mem* pp_lat;       /* Pierce point latitude, in radians */
+    oskar_Mem* pp_rel_path;  /* Pierce point relative path length.
                                 (the extra path, relative to the vertical for
                                 the ionospheric column defined by the pierce
                                 point) */
 
-    oskar_Mem screen_TEC;    /* TEC screen values for each pierce point */
-    oskar_Mem total_TEC;     /* Total TEC values for each pierce point */
+    oskar_Mem* screen_TEC;    /* TEC screen values for each pierce point */
+    oskar_Mem* total_TEC;     /* Total TEC values for each pierce point */
 };
 
 typedef struct oskar_WorkJonesZ oskar_WorkJonesZ;
@@ -69,13 +69,16 @@ typedef struct oskar_WorkJonesZ oskar_WorkJonesZ;
 extern "C" {
 #endif
 
-void oskar_work_jones_z_init(oskar_WorkJonesZ* work, int type, int location,
-        int* status);
+OSKAR_EXPORT
+oskar_WorkJonesZ* oskar_work_jones_z_create(int type, int location, int* status);
 
+OSKAR_EXPORT
 void oskar_work_jones_z_resize(oskar_WorkJonesZ* work, int n, int* status);
 
+OSKAR_EXPORT
 void oskar_work_jones_z_free(oskar_WorkJonesZ* work, int* status);
 
+OSKAR_EXPORT
 int oskar_work_jones_z_type(oskar_WorkJonesZ* work);
 
 #ifdef __cplusplus

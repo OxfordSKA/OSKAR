@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,12 +57,12 @@ struct oskar_Telescope
     /* Station data. */
     int num_stations;            /**< Number of stations in the model. */
     oskar_Station** station;     /**< Array of station structure handles. */
-    oskar_Mem station_x;         /**< Fixed x component of station coordinate. */
-    oskar_Mem station_y;         /**< Fixed y component of station coordinate. */
-    oskar_Mem station_z;         /**< Fixed z component of station coordinate. */
-    oskar_Mem station_x_hor;     /**< Fixed x component of station coordinate (horizon plane). */
-    oskar_Mem station_y_hor;     /**< Fixed y component of station coordinate (horizon plane). */
-    oskar_Mem station_z_hor;     /**< Fixed z component of station coordinate (horizon plane). */
+    oskar_Mem* station_x;        /**< Fixed x component of station coordinate. */
+    oskar_Mem* station_y;        /**< Fixed y component of station coordinate. */
+    oskar_Mem* station_z;        /**< Fixed z component of station coordinate. */
+    oskar_Mem* station_x_hor;    /**< Fixed x component of station coordinate (horizon plane). */
+    oskar_Mem* station_y_hor;    /**< Fixed y component of station coordinate (horizon plane). */
+    oskar_Mem* station_z_hor;    /**< Fixed z component of station coordinate (horizon plane). */
     int max_station_size;        /**< Maximum station size (number of elements) */
     int max_station_depth;       /**< Maximum station depth. */
     int identical_stations;      /**< True if all stations are identical. */

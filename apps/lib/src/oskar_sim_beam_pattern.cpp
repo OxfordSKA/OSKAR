@@ -37,7 +37,7 @@
 #include <apps/lib/oskar_beam_pattern_write.h>
 
 #include <oskar_telescope.h>
-#include <oskar_image_resize.h>
+#include <oskar_image.h>
 #include <oskar_mjd_to_gast_fast.h>
 #include <oskar_station_work.h>
 #include <oskar_cuda_mem_log.h>
@@ -74,7 +74,7 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
     oskar_Telescope* tel = oskar_set_up_telescope(log, &settings, status);
     if (*status)
     {
-        if (tel) oskar_telescope_free(tel, status);
+        oskar_telescope_free(tel, status);
         return;
     }
 
@@ -83,15 +83,18 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
     QTime timer;
     timer.start();
 
-    oskar_Image beam_pattern(type | OSKAR_COMPLEX, OSKAR_LOCATION_CPU);
-    init_beam_pattern_cube(&beam_pattern, &settings, status);
-    simulate_beam_pattern(&beam_pattern.data, &settings, type, tel, log, status);
+    oskar_Image* beam_pattern = oskar_image_create(type | OSKAR_COMPLEX,
+            OSKAR_LOCATION_CPU, status);
+    init_beam_pattern_cube(beam_pattern, &settings, status);
+    simulate_beam_pattern(oskar_image_data(beam_pattern), &settings, type,
+            tel, log, status);
     double elapsed = timer.elapsed() / 1.0e3;
     oskar_log_section(log, "Simulation completed in %.3f sec.", elapsed);
-    oskar_beam_pattern_write(&beam_pattern, &settings, type, log, status);
+    oskar_beam_pattern_write(beam_pattern, &settings, type, log, status);
 
     // Free memory.
     oskar_telescope_free(tel, status);
+    oskar_image_free(beam_pattern, status);
 
     cudaDeviceReset();
 }
@@ -244,20 +247,12 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     oskar_mem_free(d_x, status);
     oskar_mem_free(d_y, status);
     oskar_mem_free(d_z, status);
-    free(d_beam_data); // FIXME Remove after updating oskar_mem_free().
-    free(d_x); // FIXME Remove after updating oskar_mem_free().
-    free(d_y); // FIXME Remove after updating oskar_mem_free().
-    free(d_z); // FIXME Remove after updating oskar_mem_free().
 
     // Free host memory.
     oskar_mem_free(beam_tmp, status);
     oskar_mem_free(x, status);
     oskar_mem_free(y, status);
     oskar_mem_free(z, status);
-    free(beam_tmp); // FIXME Remove after updating oskar_mem_free().
-    free(x); // FIXME Remove after updating oskar_mem_free().
-    free(y); // FIXME Remove after updating oskar_mem_free().
-    free(z); // FIXME Remove after updating oskar_mem_free().
 
     // FIXME HACK Close the file if necessary.
     if (file)
@@ -375,19 +370,21 @@ static void init_beam_pattern_cube(oskar_Image* image,
     }
 
     /* Set beam pattern meta-data. */
-    image->image_type         = (num_pols == 1) ?
-            OSKAR_IMAGE_TYPE_BEAM_SCALAR : OSKAR_IMAGE_TYPE_BEAM_POLARISED;
-    image->coord_frame        = settings->beam_pattern.coord_frame_type;
-    image->grid_type          = settings->beam_pattern.coord_grid_type;
-    image->healpix_nside      = settings->beam_pattern.nside;
-    image->centre_ra_deg      = settings->obs.ra0_rad[0] * 180.0 / M_PI;
-    image->centre_dec_deg     = settings->obs.dec0_rad[0] * 180.0 / M_PI;
-    image->fov_ra_deg         = settings->beam_pattern.fov_deg[0];
-    image->fov_dec_deg        = settings->beam_pattern.fov_deg[1];
-    image->freq_start_hz      = settings->obs.start_frequency_hz;
-    image->freq_inc_hz        = settings->obs.frequency_inc_hz;
-    image->time_inc_sec       = settings->obs.dt_dump_days * 86400.0;
-    image->time_start_mjd_utc = settings->obs.start_mjd_utc;
-    oskar_mem_copy(&image->settings_path, &settings->settings_path, status);
+    oskar_image_set_type(image, (num_pols == 1) ?
+            OSKAR_IMAGE_TYPE_BEAM_SCALAR : OSKAR_IMAGE_TYPE_BEAM_POLARISED);
+    oskar_image_set_coord_frame(image, settings->beam_pattern.coord_frame_type);
+    oskar_image_set_grid_type(image, settings->beam_pattern.coord_grid_type);
+    oskar_image_set_healpix_nside(image, settings->beam_pattern.nside);
+    oskar_image_set_centre(image, settings->obs.ra0_rad[0] * 180.0 / M_PI,
+            settings->obs.dec0_rad[0] * 180.0 / M_PI);
+    oskar_image_set_fov(image, settings->beam_pattern.fov_deg[0],
+            settings->beam_pattern.fov_deg[1]);
+    oskar_image_set_freq(image, settings->obs.start_frequency_hz,
+            settings->obs.frequency_inc_hz);
+    oskar_image_set_time(image, settings->obs.start_mjd_utc,
+            settings->obs.dt_dump_days * 86400.0);
+    oskar_mem_append_raw(oskar_image_settings_path(image),
+            settings->settings_path, OSKAR_CHAR, OSKAR_LOCATION_CPU,
+            1 + strlen(settings->settings_path), status);
 }
 

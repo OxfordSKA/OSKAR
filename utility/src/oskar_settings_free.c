@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_settings_free.h"
-#include "utility/oskar_mem_free.h"
+#include <oskar_settings_free.h>
+#include <oskar_mem_free.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -169,7 +169,8 @@ int oskar_settings_free(oskar_Settings* settings)
     settings->ionosphere.pierce_points.filename = NULL;
 
     /* Free path name to settings file. */
-    oskar_mem_free(&settings->settings_path, &err);
+    free(settings->settings_path);
+    settings->settings_path = NULL;
 
     return err;
 }

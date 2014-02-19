@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,8 +32,7 @@
 
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
-#include <oskar_image_free.h>
-#include <oskar_image_write.h>
+#include <oskar_image.h>
 #include <oskar_version_string.h>
 
 #include <fits/oskar_fits_image_write.h>
@@ -62,10 +61,9 @@ int main(int argc, char** argv)
     oskar_log_settings_observation(log, &settings);
     oskar_log_settings_ionosphere(log, &settings);
 
-    oskar_Image TEC_screen;
 
     // Run simulation.
-    error = oskar_sim_tec_screen(&TEC_screen, &settings, log);
+    oskar_Image* TEC_screen = oskar_sim_tec_screen(&settings, log, &error);
 
     // Write TEC screen image.
     if (!error)
@@ -75,16 +73,16 @@ int main(int argc, char** argv)
         if (fname && !error)
         {
             oskar_log_message(log, 0, "Writing FITS image file: '%s'", fname);
-            oskar_fits_image_write(&TEC_screen, log, fname, &error);
+            oskar_fits_image_write(TEC_screen, log, fname, &error);
         }
         fname = settings.ionosphere.TECImage.img_file;
         if (fname && !error)
         {
             oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", fname);
-            oskar_image_write(&TEC_screen, log, fname, 0, &error);
+            oskar_image_write(TEC_screen, log, fname, 0, &error);
         }
     }
-    oskar_image_free(&TEC_screen, &error);
+    oskar_image_free(TEC_screen, &error);
 
     // Check for errors.
     if (error)

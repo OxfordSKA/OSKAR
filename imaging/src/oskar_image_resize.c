@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_image_resize.h"
-#include "imaging/oskar_Image.h"
-#include <oskar_mem.h>
+#include <private_image.h>
+#include <oskar_image_resize.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -52,7 +51,7 @@ void oskar_image_resize(oskar_Image* image, int width, int height,
 
     /* Reallocate memory. */
     num_elements = width * height * num_pols * num_times * num_channels;
-    oskar_mem_realloc(&image->data, num_elements, status);
+    oskar_mem_realloc(image->data, num_elements, status);
 
     /* Set meta-data. */
     image->width = width;

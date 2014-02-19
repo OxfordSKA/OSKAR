@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,16 +43,16 @@ extern "C" {
  * @brief Reads an OSKAR sky model from a binary file.
  *
  * @details
- * Fills an uninitialised OSKAR sky model from the specified binary file.
+ * Creates an OSKAR sky model from the specified binary file.
  *
  * @param[in] filename    Input filename.
- * @param[in] sky         Sky model to fill.
  * @param[in] location    Location of required sky model data (CPU or GPU).
  * @param[in,out] status  Status return code.
+ *
+ * @return A handle to the sky model structure, or NULL if an error occurred.
  */
 OSKAR_EXPORT
-void oskar_sky_read(oskar_Sky* sky, const char* filename,
-        int location, int* status);
+oskar_Sky* oskar_sky_read(const char* filename, int location, int* status);
 
 #ifdef __cplusplus
 }

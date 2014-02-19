@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,9 +27,7 @@
  */
 
 #include <private_mem.h>
-
-#include <oskar_mem_alloc.h>
-#include <oskar_mem_init.h>
+#include <oskar_mem_create_alias_from_raw.h>
 
 #include <stdlib.h>
 
@@ -37,27 +35,31 @@
 extern "C" {
 #endif
 
-void oskar_mem_init(oskar_Mem* mem, int type, int location, size_t num_elements,
-        int owner, int* status)
+oskar_Mem* oskar_mem_create_alias_from_raw(void* ptr, int type, int location,
+        size_t num_elements, int* status)
 {
+    oskar_Mem* mem = 0;
+
     /* Check all inputs. */
-    if (!mem || !status)
+    if (!status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return 0;
     }
+
+    /* Create the structure. */
+    mem = (oskar_Mem*) malloc(sizeof(oskar_Mem));
 
     /* Initialise meta-data.
      * (This must happen regardless of the status code.) */
     mem->type = type;
     mem->location = location;
     mem->num_elements = num_elements;
-    mem->owner = owner;
-    mem->data = NULL;
+    mem->owner = 0; /* Structure does not own the memory. */
+    mem->data = ptr;
 
-    /* Allocate memory. */
-    if (owner)
-        oskar_mem_alloc(mem, status);
+    /* Return a handle the structure .*/
+    return mem;
 }
 
 #ifdef __cplusplus

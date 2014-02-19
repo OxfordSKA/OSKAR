@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <oskar_WorkJonesZ.h>
 #include <oskar_mem.h>
 
@@ -34,28 +33,33 @@
 extern "C" {
 #endif
 
-void oskar_work_jones_z_init(oskar_WorkJonesZ* work, int type, int location,
-        int* status)
+oskar_WorkJonesZ* oskar_work_jones_z_create(int type, int location, int* status)
 {
+    oskar_WorkJonesZ* work = 0;
+
     /* Check inputs */
-    if (!work || !status)
+    if (!status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return 0;
     }
 
     /* Check the base type is correct */
     if (!(type == OSKAR_SINGLE || type == OSKAR_DOUBLE))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
-    oskar_mem_init(&work->hor_x, type, location, 0, 1, status);
-    oskar_mem_init(&work->hor_y, type, location, 0, 1, status);
-    oskar_mem_init(&work->hor_z, type, location, 0, 1, status);
-    oskar_mem_init(&work->pp_lon, type, location, 0, 1, status);
-    oskar_mem_init(&work->pp_lat, type, location, 0, 1, status);
-    oskar_mem_init(&work->pp_rel_path, type, location, 0, 1, status);
-    oskar_mem_init(&work->screen_TEC, type, location, 0, 1, status);
-    oskar_mem_init(&work->total_TEC, type, location, 0, 1, status);
+    work = (oskar_WorkJonesZ*) malloc(sizeof(oskar_WorkJonesZ));
+
+    work->hor_x = oskar_mem_create(type, location, 0, status);
+    work->hor_y = oskar_mem_create(type, location, 0, status);
+    work->hor_z = oskar_mem_create(type, location, 0, status);
+    work->pp_lon = oskar_mem_create(type, location, 0, status);
+    work->pp_lat = oskar_mem_create(type, location, 0, status);
+    work->pp_rel_path = oskar_mem_create(type, location, 0, status);
+    work->screen_TEC = oskar_mem_create(type, location, 0, status);
+    work->total_TEC = oskar_mem_create(type, location, 0, status);
+
+    return work;
 }
 
 
@@ -67,37 +71,38 @@ void oskar_work_jones_z_free(oskar_WorkJonesZ* work, int* status)
         return;
     }
 
-    oskar_mem_free(&work->hor_x, status);
-    oskar_mem_free(&work->hor_y, status);
-    oskar_mem_free(&work->hor_z, status);
-    oskar_mem_free(&work->pp_lon, status);
-    oskar_mem_free(&work->pp_lat, status);
-    oskar_mem_free(&work->pp_rel_path, status);
-    oskar_mem_free(&work->screen_TEC, status);
-    oskar_mem_free(&work->total_TEC, status);
+    oskar_mem_free(work->hor_x, status);
+    oskar_mem_free(work->hor_y, status);
+    oskar_mem_free(work->hor_z, status);
+    oskar_mem_free(work->pp_lon, status);
+    oskar_mem_free(work->pp_lat, status);
+    oskar_mem_free(work->pp_rel_path, status);
+    oskar_mem_free(work->screen_TEC, status);
+    oskar_mem_free(work->total_TEC, status);
+    free(work);
 }
 
 int oskar_work_jones_z_type(oskar_WorkJonesZ* work)
 {
-    if (oskar_mem_type(&work->hor_x) == OSKAR_DOUBLE &&
-            oskar_mem_type(&work->hor_y) == OSKAR_DOUBLE &&
-            oskar_mem_type(&work->hor_z) == OSKAR_DOUBLE &&
-            oskar_mem_type(&work->pp_lon) == OSKAR_DOUBLE &&
-            oskar_mem_type(&work->pp_lat) == OSKAR_DOUBLE &&
-            oskar_mem_type(&work->pp_rel_path) == OSKAR_DOUBLE &&
-            oskar_mem_type(&work->screen_TEC) == OSKAR_DOUBLE &&
-            oskar_mem_type(&work->total_TEC) == OSKAR_DOUBLE)
+    if (oskar_mem_type(work->hor_x) == OSKAR_DOUBLE &&
+            oskar_mem_type(work->hor_y) == OSKAR_DOUBLE &&
+            oskar_mem_type(work->hor_z) == OSKAR_DOUBLE &&
+            oskar_mem_type(work->pp_lon) == OSKAR_DOUBLE &&
+            oskar_mem_type(work->pp_lat) == OSKAR_DOUBLE &&
+            oskar_mem_type(work->pp_rel_path) == OSKAR_DOUBLE &&
+            oskar_mem_type(work->screen_TEC) == OSKAR_DOUBLE &&
+            oskar_mem_type(work->total_TEC) == OSKAR_DOUBLE)
     {
         return OSKAR_DOUBLE;
     }
-    else if (oskar_mem_type(&work->hor_x) == OSKAR_SINGLE &&
-            oskar_mem_type(&work->hor_y) == OSKAR_SINGLE &&
-            oskar_mem_type(&work->hor_z) == OSKAR_SINGLE &&
-            oskar_mem_type(&work->pp_lon) == OSKAR_SINGLE &&
-            oskar_mem_type(&work->pp_lat) == OSKAR_SINGLE &&
-            oskar_mem_type(&work->pp_rel_path) == OSKAR_SINGLE &&
-            oskar_mem_type(&work->screen_TEC) == OSKAR_SINGLE &&
-            oskar_mem_type(&work->total_TEC) == OSKAR_SINGLE)
+    else if (oskar_mem_type(work->hor_x) == OSKAR_SINGLE &&
+            oskar_mem_type(work->hor_y) == OSKAR_SINGLE &&
+            oskar_mem_type(work->hor_z) == OSKAR_SINGLE &&
+            oskar_mem_type(work->pp_lon) == OSKAR_SINGLE &&
+            oskar_mem_type(work->pp_lat) == OSKAR_SINGLE &&
+            oskar_mem_type(work->pp_rel_path) == OSKAR_SINGLE &&
+            oskar_mem_type(work->screen_TEC) == OSKAR_SINGLE &&
+            oskar_mem_type(work->total_TEC) == OSKAR_SINGLE)
     {
         return OSKAR_SINGLE;
     }
@@ -111,14 +116,14 @@ void oskar_work_jones_z_resize(oskar_WorkJonesZ* work, int n, int* status)
         oskar_set_invalid_argument(status);
         return;
     }
-    oskar_mem_realloc(&work->hor_x, n, status);
-    oskar_mem_realloc(&work->hor_y, n, status);
-    oskar_mem_realloc(&work->hor_z, n, status);
-    oskar_mem_realloc(&work->pp_lon, n, status);
-    oskar_mem_realloc(&work->pp_lat, n, status);
-    oskar_mem_realloc(&work->pp_rel_path, n, status);
-    oskar_mem_realloc(&work->screen_TEC, n, status);
-    oskar_mem_realloc(&work->total_TEC, n, status);
+    oskar_mem_realloc(work->hor_x, n, status);
+    oskar_mem_realloc(work->hor_y, n, status);
+    oskar_mem_realloc(work->hor_z, n, status);
+    oskar_mem_realloc(work->pp_lon, n, status);
+    oskar_mem_realloc(work->pp_lat, n, status);
+    oskar_mem_realloc(work->pp_rel_path, n, status);
+    oskar_mem_realloc(work->screen_TEC, n, status);
+    oskar_mem_realloc(work->total_TEC, n, status);
 }
 
 

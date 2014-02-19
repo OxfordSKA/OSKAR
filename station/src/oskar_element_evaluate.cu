@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -151,17 +151,21 @@ void oskar_hor_lmn_to_modified_theta_phi(oskar_Mem* theta, oskar_Mem* phi,
         if (type == OSKAR_SINGLE)
         {
             oskar_hor_lmn_to_modified_theta_phi_cuda_f(num_points,
-                    ((const float*)l->data), ((const float*)m->data),
-                    ((const float*)n->data), (float)delta_phi,
-                    ((float*)theta->data), ((float*)phi->data));
+                    oskar_mem_float_const(l, status),
+                    oskar_mem_float_const(m, status),
+                    oskar_mem_float_const(n, status), (float)delta_phi,
+                    oskar_mem_float(theta, status),
+                    oskar_mem_float(phi, status));
             oskar_cuda_check_error(status);
         }
         else if (type == OSKAR_DOUBLE)
         {
             oskar_hor_lmn_to_modified_theta_phi_cuda_d(num_points,
-                    ((const double*)l->data), ((const double*)m->data),
-                    ((const double*)n->data), delta_phi,
-                    ((double*)theta->data), ((double*)phi->data));
+                    oskar_mem_double_const(l, status),
+                    oskar_mem_double_const(m, status),
+                    oskar_mem_double_const(n, status), delta_phi,
+                    oskar_mem_double(theta, status),
+                    oskar_mem_double(phi, status));
             oskar_cuda_check_error(status);
         }
         else

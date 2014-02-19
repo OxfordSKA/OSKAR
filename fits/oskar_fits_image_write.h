@@ -34,7 +34,7 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_Image.h>
+#include <oskar_image.h>
 #include <oskar_log.h>
 
 #ifdef __cplusplus

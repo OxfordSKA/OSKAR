@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_settings_init.h"
-#include "utility/oskar_mem_init.h"
+#include <oskar_settings_init.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -87,8 +86,7 @@ int oskar_settings_init(oskar_Settings* settings)
     settings->ionosphere.pierce_points.filename = NULL;
 
     /* Initialise pathname to settings file. */
-    oskar_mem_init(&settings->settings_path, OSKAR_CHAR,
-            OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &error);
+    settings->settings_path = NULL;
 
     return error;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,20 +48,16 @@ int main(int argc, char** argv)
     if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Initialise sky models.
-    input = oskar_sky_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0, &error);
-    output = oskar_sky_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0, &error);
-
     // Load input and output sky models.
     printf("Loading input '%s'\n", argv[1]);
-    oskar_sky_load(input, argv[1], &error);
+    input = oskar_sky_load(argv[1], OSKAR_SINGLE, &error);
     if (error)
     {
         fprintf(stderr, "Error loading input sky file.\n");
         return OSKAR_ERR_FILE_IO;
     }
     printf("Loading output '%s'\n", argv[2]);
-    oskar_sky_load(output, argv[2], &error);
+    output = oskar_sky_load(argv[2], OSKAR_SINGLE, &error);
     if (error)
     {
         fprintf(stderr, "Error loading output sky file.\n");

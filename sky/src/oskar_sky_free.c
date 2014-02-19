@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,24 +45,24 @@ void oskar_sky_free(oskar_Sky* model, int* status)
     }
 
     /* Free the memory. */
-    oskar_mem_free(&model->RA, status);
-    oskar_mem_free(&model->Dec, status);
-    oskar_mem_free(&model->I, status);
-    oskar_mem_free(&model->Q, status);
-    oskar_mem_free(&model->U, status);
-    oskar_mem_free(&model->V, status);
-    oskar_mem_free(&model->reference_freq, status);
-    oskar_mem_free(&model->spectral_index, status);
-    oskar_mem_free(&model->RM, status);
-    oskar_mem_free(&model->l, status);
-    oskar_mem_free(&model->m, status);
-    oskar_mem_free(&model->n, status);
-    oskar_mem_free(&model->FWHM_major, status);
-    oskar_mem_free(&model->FWHM_minor, status);
-    oskar_mem_free(&model->position_angle, status);
-    oskar_mem_free(&model->gaussian_a, status);
-    oskar_mem_free(&model->gaussian_b, status);
-    oskar_mem_free(&model->gaussian_c, status);
+    oskar_mem_free(model->RA, status);
+    oskar_mem_free(model->Dec, status);
+    oskar_mem_free(model->I, status);
+    oskar_mem_free(model->Q, status);
+    oskar_mem_free(model->U, status);
+    oskar_mem_free(model->V, status);
+    oskar_mem_free(model->reference_freq, status);
+    oskar_mem_free(model->spectral_index, status);
+    oskar_mem_free(model->RM, status);
+    oskar_mem_free(model->l, status);
+    oskar_mem_free(model->m, status);
+    oskar_mem_free(model->n, status);
+    oskar_mem_free(model->FWHM_major, status);
+    oskar_mem_free(model->FWHM_minor, status);
+    oskar_mem_free(model->position_angle, status);
+    oskar_mem_free(model->gaussian_a, status);
+    oskar_mem_free(model->gaussian_b, status);
+    oskar_mem_free(model->gaussian_c, status);
 
     /* Free the structure itself. */
     free(model);

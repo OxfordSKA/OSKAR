@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,6 @@ TEST(Mem, set_value_real_double)
         EXPECT_DOUBLE_EQ(v[i], 4.5);
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
 }
 
 TEST(Mem, set_value_real_double_complex)
@@ -71,8 +70,6 @@ TEST(Mem, set_value_real_double_complex)
     }
     oskar_mem_free(mem, &status);
     oskar_mem_free(mem2, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
-    free(mem2); // FIXME Remove after updating oskar_mem_free().
 }
 
 TEST(Mem, set_value_real_double_complex_matrix)
@@ -101,8 +98,6 @@ TEST(Mem, set_value_real_double_complex_matrix)
     }
     oskar_mem_free(mem, &status);
     oskar_mem_free(mem2, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
-    free(mem2); // FIXME Remove after updating oskar_mem_free().
 }
 
 TEST(Mem, set_value_real_single)
@@ -120,7 +115,6 @@ TEST(Mem, set_value_real_single)
         EXPECT_FLOAT_EQ(v[i], 4.5);
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
 }
 
 TEST(Mem, set_value_real_single_complex)
@@ -143,8 +137,6 @@ TEST(Mem, set_value_real_single_complex)
     }
     oskar_mem_free(mem, &status);
     oskar_mem_free(mem2, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
-    free(mem2); // FIXME Remove after updating oskar_mem_free().
 }
 
 TEST(Mem, set_value_real_single_complex_matrix)
@@ -173,6 +165,4 @@ TEST(Mem, set_value_real_single_complex_matrix)
     }
     oskar_mem_free(mem, &status);
     oskar_mem_free(mem2, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
-    free(mem2); // FIXME Remove after updating oskar_mem_free().
 }

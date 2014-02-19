@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
-#include <oskar_mem_free.h>
-#include <oskar_mem_init.h>
+#ifndef OSKAR_IMAGE_CREATE_H_
+#define OSKAR_IMAGE_CREATE_H_
 
-oskar_Mem::oskar_Mem()
-{
-    int err = 0;
-    oskar_mem_init(this, 0, 0, 0, 1, &err);
-}
+/**
+ * @file oskar_image_create.h
+ */
 
-oskar_Mem::~oskar_Mem()
-{
-    int err = 0;
-    oskar_mem_free(this, &err);
+#include <oskar_global.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Creates an image structure.
+ *
+ * @details
+ * This function creates an image structure.
+ *
+ * The dimension order is set by default to:
+ * - RA (fastest varying)
+ * - Dec
+ * - Polarisation
+ * - Time
+ * - Channel (slowest varying)
+ *
+ * Use oskar_image_resize to allocate memory for the image data.
+ *
+ * @param[in] type     Data type of image.
+ * @param[in] location Location of image data.
+ * @param[in,out]  status   Status return code.
+ */
+OSKAR_EXPORT
+oskar_Image* oskar_image_create(int type, int location, int* status);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_IMAGE_CREATE_H_ */

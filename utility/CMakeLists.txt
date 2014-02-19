@@ -41,13 +41,14 @@ set(utility_SRC
     src/oskar_mem_alloc.c
     src/oskar_mem_append_raw.c
     src/oskar_mem_append.c
-    src/oskar_mem_assign.c
     src/oskar_mem_binary_file_read.c
     src/oskar_mem_binary_file_write.c
     src/oskar_mem_binary_stream_read.c
     src/oskar_mem_binary_stream_write.c
     src/oskar_mem_clear_contents.c
     src/oskar_mem_copy.c
+    src/oskar_mem_create_alias_from_raw.c
+    src/oskar_mem_create_alias.c
     src/oskar_mem_create_copy.c
     src/oskar_mem_create.c
     src/oskar_mem_different.c
@@ -55,8 +56,6 @@ set(utility_SRC
     src/oskar_mem_element_multiply.c
     src/oskar_mem_evaluate_relative_error.c
     src/oskar_mem_free.c
-    src/oskar_mem_get_pointer.c
-    src/oskar_mem_init.c
     src/oskar_mem_insert.c
     src/oskar_mem_load_ascii.c
     src/oskar_mem_random_fill.c
@@ -64,9 +63,9 @@ set(utility_SRC
     src/oskar_mem_realloc.c
     src/oskar_mem_save_ascii.c
     src/oskar_mem_scale_real.c
+    src/oskar_mem_set_alias.c
     src/oskar_mem_set_value_real.c
     src/oskar_mem_stats.c
-    src/oskar_Mem.cpp
     src/oskar_settings_free.c
     src/oskar_settings_init.c
     src/oskar_Settings.cpp

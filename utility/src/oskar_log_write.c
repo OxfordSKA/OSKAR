@@ -140,7 +140,7 @@ void oskar_log_writev_stdout(char code, int depth, int width,
 static void print_entry(FILE* stream, char code, int depth, int width,
         const char* prefix, const char* format, va_list args)
 {
-    int i, n;
+    int i;
     const char* sym;
 
     /* Ensure code is a printable character. */
@@ -213,11 +213,14 @@ static void print_entry(FILE* stream, char code, int depth, int width,
         /* Print prefix. */
         fprintf(stream, "%s", prefix);
 
-        /* Print trailing whitespace. */
-        n = abs(2 * depth + 4 + strlen(prefix));
-        for (i = 0; i < width - n; ++i) fprintf(stream, " ");
+        /* Print trailing whitespace if format string is present. */
         if (format && *format > 0)
+        {
+            int n;
+            n = abs(2 * depth + 4 + strlen(prefix));
+            for (i = 0; i < width - n; ++i) fprintf(stream, " ");
             fprintf(stream, ": ");
+        }
     }
 
     /* Print main message from format string and arguments. */

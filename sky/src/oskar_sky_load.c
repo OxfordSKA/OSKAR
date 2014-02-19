@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,30 +40,29 @@ extern "C" {
 static const double deg2rad = 1.74532925199432957692369e-2;
 static const double arcsec2rad = 4.84813681109535993589914e-6;
 
-void oskar_sky_load(oskar_Sky* sky, const char* filename, int* status)
+oskar_Sky* oskar_sky_load(const char* filename, int type, int* status)
 {
-    int type, n = 0;
+    int n = 0;
     FILE* file;
     char* line = 0;
     size_t bufsize = 0;
-    oskar_Sky* temp;
+    oskar_Sky* sky;
 
     /* Check all inputs. */
-    if (!sky || !filename || !status)
+    if (!filename || !status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return 0;
     }
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status) return 0;
 
     /* Get the data type. */
-    type = oskar_sky_precision(sky);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
+        return 0;
     }
 
     /* Open the file. */
@@ -71,11 +70,11 @@ void oskar_sky_load(oskar_Sky* sky, const char* filename, int* status)
     if (!file)
     {
         *status = OSKAR_ERR_FILE_IO;
-        return;
+        return 0;
     }
 
-    /* Initialise the temporary sky model. */
-    temp = oskar_sky_create(type, OSKAR_LOCATION_CPU, 0, status);
+    /* Initialise the sky model. */
+    sky = oskar_sky_create(type, OSKAR_LOCATION_CPU, 0, status);
 
     /* Loop over lines in file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
@@ -94,7 +93,7 @@ void oskar_sky_load(oskar_Sky* sky, const char* filename, int* status)
         /* Ensure enough space in arrays. */
         if (oskar_sky_num_sources(sky) <= n)
         {
-            oskar_sky_resize(temp, n + 100, status);
+            oskar_sky_resize(sky, n + 100, status);
             if (*status)
                 break;
         }
@@ -102,7 +101,7 @@ void oskar_sky_load(oskar_Sky* sky, const char* filename, int* status)
         if (num_read <= 9)
         {
             /* RA, Dec, I, Q, U, V, freq0, spix, RM */
-            oskar_sky_set_source(temp, n, par[0] * deg2rad,
+            oskar_sky_set_source(sky, n, par[0] * deg2rad,
                     par[1] * deg2rad, par[2], par[3], par[4], par[5],
                     par[6], par[7], par[8], 0.0, 0.0, 0.0, status);
         }
@@ -110,7 +109,7 @@ void oskar_sky_load(oskar_Sky* sky, const char* filename, int* status)
         {
             /* Old format, with no rotation measure. */
             /* RA, Dec, I, Q, U, V, freq0, spix, FWHM maj, FWHM min, PA */
-            oskar_sky_set_source(temp, n, par[0] * deg2rad,
+            oskar_sky_set_source(sky, n, par[0] * deg2rad,
                     par[1] * deg2rad, par[2], par[3], par[4], par[5],
                     par[6], par[7], 0.0, par[8] * arcsec2rad,
                     par[9] * arcsec2rad, par[10] * deg2rad, status);
@@ -119,7 +118,7 @@ void oskar_sky_load(oskar_Sky* sky, const char* filename, int* status)
         {
             /* New format. */
             /* RA, Dec, I, Q, U, V, freq0, spix, RM, FWHM maj, FWHM min, PA */
-            oskar_sky_set_source(temp, n, par[0] * deg2rad,
+            oskar_sky_set_source(sky, n, par[0] * deg2rad,
                     par[1] * deg2rad, par[2], par[3], par[4], par[5],
                     par[6], par[7], par[8], par[9] * arcsec2rad,
                     par[10] * arcsec2rad, par[11] * deg2rad, status);
@@ -134,15 +133,21 @@ void oskar_sky_load(oskar_Sky* sky, const char* filename, int* status)
     }
 
     /* Set the size to be the actual number of elements loaded. */
-    oskar_sky_resize(temp, n, status);
-
-    /* Append to output and free the temporary sky model. */
-    oskar_sky_append(sky, temp, status);
-    oskar_sky_free(temp, status);
+    oskar_sky_resize(sky, n, status);
 
     /* Free the line buffer and close the file. */
     if (line) free(line);
     fclose(file);
+
+    /* Check if an error occurred. */
+    if (*status)
+    {
+        oskar_sky_free(sky, status);
+        sky = 0;
+    }
+
+    /* Return a handle to the sky model. */
+    return sky;
 }
 
 #ifdef __cplusplus

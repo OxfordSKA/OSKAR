@@ -27,7 +27,7 @@
  */
 
 #include <fits/oskar_fits_healpix_write_image.h>
-#include <oskar_Image.h>
+#include <oskar_image.h>
 #include <oskar_mem.h>
 #include <fitsio.h>
 #include <string.h>
@@ -62,11 +62,11 @@ void oskar_fits_healpix_write_image(const char* filename, oskar_Image* image,
     /* Copy the filename without the extension */
     strncat(root_, filename, strlen(filename)-5);
 
-    for (c = 0; c < image->num_channels; ++c)
+    for (c = 0; c < oskar_image_num_channels(image); ++c)
     {
-        for (t = 0; t < image->num_times; ++t)
+        for (t = 0; t < oskar_image_num_times(image); ++t)
         {
-            for (p = 0; p < image->num_pols; ++p)
+            for (p = 0; p < oskar_image_num_pols(image); ++p)
             {
                 fitsfile* fptr = 0;
 
@@ -81,14 +81,14 @@ void oskar_fits_healpix_write_image(const char* filename, oskar_Image* image,
                 fits_write_date(fptr, status);
 
                 fits_movabs_hdu(fptr, 1, &hdutype, status);
-                nside = image->healpix_nside;
+                nside = oskar_image_healpix_nside(image);
                 npixels = 12L * nside * nside;
-                fits_create_tbl(fptr, BINARY_TBL, npixels, 1, ttype, tform, tunit,
-                        "BINTABLE", status);
-                fits_write_key(fptr, TSTRING, "PIXTYPE", "HEALPIX", "HEALPIX Pixelisation",
-                        status);
-                fits_write_key(fptr, TSTRING, "ORDERING", order, "Pixel ordering scheme",
-                        status);
+                fits_create_tbl(fptr, BINARY_TBL, npixels, 1, ttype, tform,
+                        tunit, "BINTABLE", status);
+                fits_write_key(fptr, TSTRING, "PIXTYPE", "HEALPIX",
+                        "HEALPIX Pixelisation", status);
+                fits_write_key(fptr, TSTRING, "ORDERING", order,
+                        "Pixel ordering scheme", status);
                 fits_write_key(fptr, TLONG, "NSIDE", &nside,
                         "Resolution parameter for HEALPIX", status);
                 fits_write_key(fptr, TSTRING, "COORDSYS", coordsys,
@@ -96,19 +96,22 @@ void oskar_fits_healpix_write_image(const char* filename, oskar_Image* image,
                 fits_write_comment(fptr, "G = Galactic, E = ecliptic, "
                         "C = celestial = equatorial", status);
 
-                type = oskar_mem_type(&image->data);
-                offset = c*image->num_times*image->num_pols*npixels;
-                offset += t*image->num_pols*npixels;
+                type = oskar_mem_type(oskar_image_data(image));
+                offset = c*oskar_image_num_times(image)*
+                        oskar_image_num_pols(image)*npixels;
+                offset += t*oskar_image_num_pols(image)*npixels;
                 offset += p*npixels;
                 if (type == OSKAR_DOUBLE)
                 {
-                    double* data = oskar_mem_double(&image->data, status);
+                    double* data = oskar_mem_double(oskar_image_data(image),
+                            status);
                     fits_write_col(fptr, TDOUBLE, 1, 1, 1, npixels,
                             (void*)&data[offset], status);
                 }
                 else if (type == OSKAR_SINGLE)
                 {
-                    float* data = oskar_mem_float(&image->data, status);
+                    float* data = oskar_mem_float(oskar_image_data(image),
+                            status);
                     fits_write_col(fptr, TFLOAT, 1, 1, 1, npixels,
                             (void*)&data[offset], status);
                 }

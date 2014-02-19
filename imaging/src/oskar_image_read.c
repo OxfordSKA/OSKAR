@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_image_init.h"
-#include "imaging/oskar_image_read.h"
-#include "imaging/oskar_Image.h"
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_stream_read.h"
-#include "utility/oskar_binary_tag_index_free.h"
-#include <oskar_mem.h>
-#include "utility/oskar_mem_binary_stream_read.h"
+#include <private_image.h>
+#include <oskar_image.h>
+#include <oskar_BinaryTag.h>
+#include <oskar_binary_stream_read.h>
+#include <oskar_binary_tag_index_free.h>
+#include <oskar_mem_binary_stream_read.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -41,30 +39,30 @@
 extern "C" {
 #endif
 
-void oskar_image_read(oskar_Image* image, const char* filename, int idx,
-        int* status)
+oskar_Image* oskar_image_read(const char* filename, int idx, int* status)
 {
     int type, tag_error = 0;
     unsigned char grp = OSKAR_TAG_GROUP_IMAGE;
     FILE* stream;
     oskar_BinaryTagIndex* index = NULL;
+    oskar_Image* image = 0;
 
     /* Check all inputs. */
-    if (!image || !filename || !status)
+    if (!filename || !status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return 0;
     }
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status) return 0;
 
     /* Open the stream. */
     stream = fopen(filename, "rb");
     if (stream == NULL)
     {
         *status = OSKAR_ERR_FILE_IO;
-        return;
+        return 0;
     }
 
     /* Read the data type. */
@@ -76,14 +74,14 @@ void oskar_image_read(oskar_Image* image, const char* filename, int idx,
     {
         oskar_binary_tag_index_free(index, status);
         fclose(stream);
-        return;
+        return 0;
     }
 
     /* Initialise the image. */
-    oskar_image_init(image, type, OSKAR_LOCATION_CPU, status);
+    image = oskar_image_create(type, OSKAR_LOCATION_CPU, status);
 
     /* Optionally read the settings path (ignore the error code). */
-    oskar_mem_binary_stream_read(&image->settings_path, stream, &index,
+    oskar_mem_binary_stream_read(image->settings_path, stream, &index,
             OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0, &tag_error);
 
     /* Read the dimensions. */
@@ -128,13 +126,13 @@ void oskar_image_read(oskar_Image* image, const char* filename, int idx,
     /* Rectilinear grid type tags */
     tag_error = 0;
     oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_CENTRE_RA, idx, &image->centre_ra_deg, &tag_error);
+            OSKAR_IMAGE_TAG_CENTRE_LONGITUDE, idx, &image->centre_lon_deg, &tag_error);
     oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_CENTRE_DEC, idx, &image->centre_dec_deg, &tag_error);
+            OSKAR_IMAGE_TAG_CENTRE_LATITUDE, idx, &image->centre_lat_deg, &tag_error);
     oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_FOV_RA, idx, &image->fov_ra_deg, &tag_error);
+            OSKAR_IMAGE_TAG_FOV_LONGITUDE, idx, &image->fov_lon_deg, &tag_error);
     oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_FOV_DEC, idx, &image->fov_dec_deg, &tag_error);
+            OSKAR_IMAGE_TAG_FOV_LATITUDE, idx, &image->fov_lat_deg, &tag_error);
 
     /* HEALPix grid type tags */
     tag_error = 0;
@@ -142,14 +140,16 @@ void oskar_image_read(oskar_Image* image, const char* filename, int idx,
             OSKAR_IMAGE_TAG_HEALPIX_NSIDE, idx, &image->healpix_nside,
             &tag_error);
 
-
     /* Read the image data. */
-    oskar_mem_binary_stream_read(&image->data, stream, &index,
+    oskar_mem_binary_stream_read(image->data, stream, &index,
             grp, OSKAR_IMAGE_TAG_IMAGE_DATA, idx, status);
 
     /* Free the index and close the stream. */
     oskar_binary_tag_index_free(index, status);
     fclose(stream);
+
+    /* Return a handle to the image. */
+    return image;
 }
 
 #ifdef __cplusplus

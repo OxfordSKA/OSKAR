@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,18 +90,18 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->time_average_sec = 0.0;
 
     /* Initialise the arrays. */
-    oskar_mem_init(&telescope->station_x, type, location,
-            num_stations, 1, status);
-    oskar_mem_init(&telescope->station_y, type, location,
-            num_stations, 1, status);
-    oskar_mem_init(&telescope->station_z, type, location,
-            num_stations, 1, status);
-    oskar_mem_init(&telescope->station_x_hor, type, location,
-            num_stations, 1, status);
-    oskar_mem_init(&telescope->station_y_hor, type, location,
-            num_stations, 1, status);
-    oskar_mem_init(&telescope->station_z_hor, type, location,
-            num_stations, 1, status);
+    telescope->station_x = oskar_mem_create(type, location,
+            num_stations, status);
+    telescope->station_y = oskar_mem_create(type, location,
+            num_stations, status);
+    telescope->station_z = oskar_mem_create(type, location,
+            num_stations, status);
+    telescope->station_x_hor = oskar_mem_create(type, location,
+            num_stations, status);
+    telescope->station_y_hor = oskar_mem_create(type, location,
+            num_stations, status);
+    telescope->station_z_hor = oskar_mem_create(type, location,
+            num_stations, status);
 
     /* Initialise the station structures. */
     telescope->station = NULL;

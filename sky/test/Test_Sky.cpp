@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1092,10 +1092,8 @@ TEST(SkyModel, load_ascii)
         fclose(file);
 
         // Load the file.
-        oskar_Sky* sky = oskar_sky_create(OSKAR_SINGLE,
-                OSKAR_LOCATION_CPU, 0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_sky_load(sky, filename, &status);
+        oskar_Sky* sky = oskar_sky_load(filename, OSKAR_SINGLE, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_precision(sky));
         ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_sky_location(sky));
@@ -1135,20 +1133,13 @@ TEST(SkyModel, load_ascii)
         }
         fclose(file);
 
-        // Load the sky model onto the GPU.
-        oskar_Sky* sky_gpu = oskar_sky_create(OSKAR_SINGLE,
-                OSKAR_LOCATION_GPU, 0, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        oskar_sky_load(sky_gpu, filename, &status);
+        // Load the sky model.
+        oskar_Sky* sky = oskar_sky_load(filename, OSKAR_SINGLE, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
-        ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_precision(sky_gpu));
-        ASSERT_EQ((int)OSKAR_LOCATION_GPU, oskar_sky_location(sky_gpu));
-        ASSERT_EQ(num_sources, oskar_sky_num_sources(sky_gpu));
-
-        // Copy the sky model back to the CPU and free the GPU version.
-        oskar_Sky* sky = oskar_sky_create_copy(sky_gpu,
-                OSKAR_LOCATION_CPU, &status);
+        ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_precision(sky));
+        ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_sky_location(sky));
+        ASSERT_EQ(num_sources, oskar_sky_num_sources(sky));
 
         // Check the data is correct.
         for (int i = 0; i < num_sources; ++i)
@@ -1170,7 +1161,6 @@ TEST(SkyModel, load_ascii)
 
         // Cleanup.
         oskar_sky_free(sky, &status);
-        oskar_sky_free(sky_gpu, &status);
         remove(filename);
     }
 }
@@ -1211,8 +1201,7 @@ TEST(SkyModel, read_write)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Read the data file into a new sky model structure.
-    sky2 = oskar_sky_create(type, location, 0, &status);
-    oskar_sky_read(sky2, filename, location, &status);
+    sky2 = oskar_sky_read(filename, location, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check the contents of the sky model.

@@ -63,7 +63,7 @@ set(math_SRC
     src/oskar_random_uniform.c
     src/oskar_rotate.c
     src/oskar_round_robin.c
-    src/oskar_sph_rotate_to_position.c
+    #src/oskar_sph_rotate_to_position.c
 
     src/oskar_splines_accessors.c
     src/oskar_splines_copy.c

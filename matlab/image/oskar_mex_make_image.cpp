@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,14 +31,13 @@
 #include <oskar_vis.h>
 #include <oskar_log.h>
 #include <oskar_get_error_string.h>
-#include <math/oskar_linspace.h>
-#include <math/oskar_meshgrid.h>
-#include <imaging/oskar_image_init.h>
-#include <imaging/oskar_image_resize.h>
-#include <imaging/oskar_make_image.h>
-#include <imaging/oskar_make_image_dft.h>
-#include <imaging/oskar_SettingsImage.h>
-#include <imaging/oskar_evaluate_image_lm_grid.h>
+#include <oskar_linspace.h>
+#include <oskar_meshgrid.h>
+#include <oskar_image.h>
+#include <oskar_make_image.h>
+#include <oskar_make_image_dft.h>
+#include <oskar_SettingsImage.h>
+#include <oskar_evaluate_image_lm_grid.h>
 
 #include "matlab/image/lib/oskar_mex_image_settings_from_matlab.h"
 #include "matlab/image/lib/oskar_mex_image_to_matlab_struct.h"
@@ -113,9 +112,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     int err = OSKAR_SUCCESS;
 
-    oskar_Image image;
+    oskar_Image* image = 0;
     int location = OSKAR_LOCATION_CPU;
-
 
     // Image with the oskar_make_image() function.
     if (cube_imager)
@@ -131,14 +129,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         oskar_mex_image_settings_from_matlab(&settings, in[1]);
         mexPrintf("done.\n");
 
-        // Setup image object.
-        int type = OSKAR_DOUBLE;
-        oskar_image_init(&image, type, location, &err);
-
         // Make image.
         mexPrintf("= Making image...\n");
         mexEvalString("drawnow"); // Force flush of matlab print buffer
-        err = oskar_make_image(&image, 0, vis, &settings);
+        image = oskar_make_image(0, vis, &settings, &err);
         if (err)
         {
             oskar_matlab_error("oskar_make_image() failed with code %i: %s",
@@ -148,7 +142,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mexEvalString("drawnow");
         mexPrintf("= Make image complete\n");
     }
-
 
 
     // Image with manual data selection.
@@ -199,39 +192,35 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         int num_samples = num_baselines * num_times;
 
         // Set up the image cube.
-        oskar_image_init(&image, type, location, &err);
-        oskar_image_resize(&image, size, size, 1, 1, 1, &err);
-        image.centre_ra_deg = 0.0;
-        image.centre_dec_deg = 0.0;
-        image.fov_ra_deg = fov_deg;
-        image.fov_dec_deg = fov_deg;
-        image.time_start_mjd_utc = 0.0;
-        image.time_inc_sec = 0.0;
-        image.freq_start_hz = 0.0;
-        image.freq_inc_hz = 0.0;
-        image.image_type = 0;
+        image = oskar_image_create(type, location, &err);
+        oskar_image_resize(image, size, size, 1, 1, 1, &err);
+        oskar_image_set_centre(image, 0.0, 0.0);
+        oskar_image_set_fov(image, fov_deg, fov_deg);
+        oskar_image_set_time(image, 0.0, 0.0);
+        oskar_image_set_freq(image, 0.0, 0.0);
+        oskar_image_set_type(image, 0);
 
-        oskar_Mem uu, vv, amp, l, m;
-        oskar_mem_init(&uu, type, location, num_samples, 1, &err);
-        oskar_mem_init(&vv, type, location, num_samples, 1, &err);
-        oskar_mem_init(&amp, type | OSKAR_COMPLEX, location, num_samples, 1, &err);
+        oskar_Mem *uu, *vv, *amp, *l, *m;
+        uu = oskar_mem_create(type, location, num_samples, &err);
+        vv = oskar_mem_create(type, location, num_samples, &err);
+        amp = oskar_mem_create(type | OSKAR_COMPLEX, location, num_samples, &err);
 
         int num_pixels = size * size;
-        oskar_mem_init(&l, type, location, num_pixels, 1, &err);
-        oskar_mem_init(&m, type, location, num_pixels, 1, &err);
+        l = oskar_mem_create(type, location, num_pixels, &err);
+        m = oskar_mem_create(type, location, num_pixels, &err);
 
         // Set up imaging data.
         if (type == OSKAR_DOUBLE)
         {
             oskar_evaluate_image_lm_grid_d(size, size, fov, fov,
-                    oskar_mem_double(&l, &err), oskar_mem_double(&m, &err));
+                    oskar_mem_double(l, &err), oskar_mem_double(m, &err));
             double* uu_ = (double*)mxGetData(in[0]);
             double* vv_ = (double*)mxGetData(in[1]);
             double* re_ = (double*)mxGetPr(in[2]);
             double* im_ = (double*)mxGetPi(in[2]);
-            double* uuc = oskar_mem_double(&uu, &err);
-            double* vvc = oskar_mem_double(&vv, &err);
-            double2* amp_ = oskar_mem_double2(&amp, &err);
+            double* uuc = oskar_mem_double(uu, &err);
+            double* vvc = oskar_mem_double(vv, &err);
+            double2* amp_ = oskar_mem_double2(amp, &err);
             for (int i = 0; i < num_samples; ++i)
             {
                 double2 t; t.x = re_[i]; t.y = im_[i];
@@ -243,14 +232,14 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         else // (type == OSKAR_SINGLE)
         {
             oskar_evaluate_image_lm_grid_f(size, size, fov, fov,
-                    oskar_mem_float(&l, &err), oskar_mem_float(&m, &err));
+                    oskar_mem_float(l, &err), oskar_mem_float(m, &err));
             float* uu_ = (float*)mxGetData(in[0]);
             float* vv_ = (float*)mxGetData(in[1]);
             float* re_ = (float*)mxGetPr(in[2]);
             float* im_ = (float*)mxGetPi(in[2]);
-            float* uuc = oskar_mem_float(&uu, &err);
-            float* vvc = oskar_mem_float(&vv, &err);
-            float2* amp_ = oskar_mem_float2(&amp, &err);
+            float* uuc = oskar_mem_float(uu, &err);
+            float* vvc = oskar_mem_float(vv, &err);
+            float2* amp_ = oskar_mem_float2(amp, &err);
             for (int i = 0; i < num_samples; ++i)
             {
                 float2 t; t.x = re_[i]; t.y = im_[i];
@@ -258,13 +247,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 uuc[i] = uu_[i];
                 vvc[i] = vv_[i];
             }
-
         }
 
         // Make the image.
         mexPrintf("= Making image...\n");
         mexEvalString("drawnow");
-        err = oskar_make_image_dft(&image.data, &uu, &vv, &amp, &l, &m, freq);
+        oskar_make_image_dft(oskar_image_data(image), uu, vv, amp,
+                l, m, freq, &err);
         if (err)
         {
             oskar_matlab_error("oskar_make_image_dft() failed with code %i: %s",
@@ -272,14 +261,17 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
         mexEvalString("drawnow");
         mexPrintf("= Make image complete\n");
-        oskar_mem_free(&uu, &err);
-        oskar_mem_free(&vv, &err);
-        oskar_mem_free(&amp, &err);
-        oskar_mem_free(&l, &err);
-        oskar_mem_free(&m, &err);
+        oskar_mem_free(uu, &err);
+        oskar_mem_free(vv, &err);
+        oskar_mem_free(amp, &err);
+        oskar_mem_free(l, &err);
+        oskar_mem_free(m, &err);
     }
 
-    out[0] = oskar_mex_image_to_matlab_struct(&image, NULL);
+    out[0] = oskar_mex_image_to_matlab_struct(image, NULL);
+
+    // Free image data.
+    oskar_image_free(image, &err);
 
     // Register cleanup function.
     mexAtExit(cleanup);

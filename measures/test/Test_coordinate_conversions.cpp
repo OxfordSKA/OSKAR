@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -168,11 +168,6 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
         oskar_mem_free(l, &status);
         oskar_mem_free(m, &status);
         oskar_mem_free(n, &status);
-        free(ra); // FIXME Remove after updating oskar_mem_free().
-        free(dec); // FIXME Remove after updating oskar_mem_free().
-        free(l); // FIXME Remove after updating oskar_mem_free().
-        free(m); // FIXME Remove after updating oskar_mem_free().
-        free(n); // FIXME Remove after updating oskar_mem_free().
 
         // GPU version.
         loc = OSKAR_LOCATION_GPU;
@@ -223,11 +218,6 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
         oskar_mem_free(l, &status);
         oskar_mem_free(m, &status);
         oskar_mem_free(n, &status);
-        free(ra); // FIXME Remove after updating oskar_mem_free().
-        free(dec); // FIXME Remove after updating oskar_mem_free().
-        free(l); // FIXME Remove after updating oskar_mem_free().
-        free(m); // FIXME Remove after updating oskar_mem_free().
-        free(n); // FIXME Remove after updating oskar_mem_free().
 
         // Free xyz directions.
         oskar_mem_free(x, &status);
@@ -236,12 +226,6 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
         oskar_mem_free(x_gpu, &status);
         oskar_mem_free(y_gpu, &status);
         oskar_mem_free(z_gpu, &status);
-        free(x); // FIXME Remove after updating oskar_mem_free().
-        free(y); // FIXME Remove after updating oskar_mem_free().
-        free(z); // FIXME Remove after updating oskar_mem_free().
-        free(x_gpu); // FIXME Remove after updating oskar_mem_free().
-        free(y_gpu); // FIXME Remove after updating oskar_mem_free().
-        free(z_gpu); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Double precision.
@@ -290,11 +274,6 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
         oskar_mem_free(l, &status);
         oskar_mem_free(m, &status);
         oskar_mem_free(n, &status);
-        free(ra); // FIXME Remove after updating oskar_mem_free().
-        free(dec); // FIXME Remove after updating oskar_mem_free().
-        free(l); // FIXME Remove after updating oskar_mem_free().
-        free(m); // FIXME Remove after updating oskar_mem_free().
-        free(n); // FIXME Remove after updating oskar_mem_free().
 
         // GPU version.
         loc = OSKAR_LOCATION_GPU;
@@ -345,11 +324,6 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
         oskar_mem_free(l, &status);
         oskar_mem_free(m, &status);
         oskar_mem_free(n, &status);
-        free(ra); // FIXME Remove after updating oskar_mem_free().
-        free(dec); // FIXME Remove after updating oskar_mem_free().
-        free(l); // FIXME Remove after updating oskar_mem_free().
-        free(m); // FIXME Remove after updating oskar_mem_free().
-        free(n); // FIXME Remove after updating oskar_mem_free().
 
         // Free xyz directions.
         oskar_mem_free(x, &status);
@@ -358,11 +332,5 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
         oskar_mem_free(x_gpu, &status);
         oskar_mem_free(y_gpu, &status);
         oskar_mem_free(z_gpu, &status);
-        free(x); // FIXME Remove after updating oskar_mem_free().
-        free(y); // FIXME Remove after updating oskar_mem_free().
-        free(z); // FIXME Remove after updating oskar_mem_free().
-        free(x_gpu); // FIXME Remove after updating oskar_mem_free().
-        free(y_gpu); // FIXME Remove after updating oskar_mem_free().
-        free(z_gpu); // FIXME Remove after updating oskar_mem_free().
     }
 }

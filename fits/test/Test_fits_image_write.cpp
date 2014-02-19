@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,10 +29,7 @@
 #include <gtest/gtest.h>
 
 #include "fits/oskar_fits_image_write.h"
-#include "imaging/oskar_image_free.h"
-#include "imaging/oskar_image_init.h"
-#include "imaging/oskar_image_resize.h"
-#include <oskar_mem.h>
+#include <oskar_image.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -45,20 +42,18 @@ TEST(fits_image_write, test)
     int err = 0;
 
     // Create the image.
-    oskar_Image image(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-    oskar_image_resize(&image, columns, rows, 1, 1, 1, &err);
+    oskar_Image* image = oskar_image_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+            &err);
+    oskar_image_resize(image, columns, rows, 1, 1, 1, &err);
     ASSERT_EQ(0, err);
 
     // Add image meta-data.
-    image.centre_ra_deg = 10.0;
-    image.centre_dec_deg = 80.0;
-    image.fov_ra_deg = 1.0;
-    image.fov_dec_deg = 2.0;
-    image.freq_start_hz = 100e6;
-    image.freq_inc_hz = 1e5;
+    oskar_image_set_centre(image, 10.0, 80.0);
+    oskar_image_set_fov(image, 1.0, 2.0);
+    oskar_image_set_freq(image, 100e6, 1e5);
 
     // Define test data.
-    double* d = oskar_mem_double(&image.data, &err);
+    double* d = oskar_mem_double(oskar_image_data(image), &err);
     ASSERT_EQ(0, err);
     for (int r = 0, i = 0; r < rows; ++r)
     {
@@ -70,8 +65,8 @@ TEST(fits_image_write, test)
 
     // Write the data.
     const char filename[] = "temp_test_image.fits";
-    oskar_fits_image_write(&image, NULL, filename, &err);
+    oskar_fits_image_write(image, NULL, filename, &err);
 
     // Free memory.
-    oskar_image_free(&image, &err);
+    oskar_image_free(image, &err);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,12 +84,14 @@ extern "C" {
  * - Lines containing 10 or 13 or more columns set the status flag to
  *   indicate an error, and abort the load.
  *
- * @param[out] sky       Pointer to sky model structure to fill.
  * @param[in]  filename  Path to a source list text file.
+ * @param[in]  type      Required data type (OSKAR_SINGLE or OSKAR_DOUBLE).
  * @param[in,out] status Status return code.
+ *
+ * @return A handle to the sky model structure, or NULL if an error occurred.
  */
 OSKAR_EXPORT
-void oskar_sky_load(oskar_Sky* sky, const char* filename, int* status);
+oskar_Sky* oskar_sky_load(const char* filename, int type, int* status);
 
 #ifdef __cplusplus
 }

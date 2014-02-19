@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,6 @@
 #include "apps/lib/oskar_settings_load_sky.h"
 #include "apps/lib/oskar_settings_load_telescope.h"
 #include <oskar_log.h>
-#include <oskar_mem.h>
 #include <oskar_settings_init.h>
 #include <oskar_file_exists.h>
 #include <string.h>
@@ -80,8 +79,9 @@ int oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
      */
 
     /* Save the path to the settings file. */
-    oskar_mem_append_raw(&settings->settings_path, filename,
-            OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(filename), &error);
+    settings->settings_path = realloc(settings->settings_path,
+            1 + strlen(filename));
+    strcpy(settings->settings_path, filename);
 
     return OSKAR_SUCCESS;
 }

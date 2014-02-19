@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,5 +133,4 @@ TEST(fits_write, test)
             oskar_mem_void(data), ctype, ctype_comment,
             crval, cdelt, crpix, crota, &status);
     oskar_mem_free(data, &status);
-    free(data); // FIXME Remove after updating oskar_mem_free().
 }

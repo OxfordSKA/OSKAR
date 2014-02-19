@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,9 +57,9 @@ oskar_Splines* oskar_splines_create(int type, int location, int* status)
     data->location = location;
     data->num_knots_x = 0;
     data->num_knots_y = 0;
-    oskar_mem_init(&data->knots_x, type, location, 0, OSKAR_TRUE, status);
-    oskar_mem_init(&data->knots_y, type, location, 0, OSKAR_TRUE, status);
-    oskar_mem_init(&data->coeff, type, location, 0, OSKAR_TRUE, status);
+    data->knots_x = oskar_mem_create(type, location, 0, status);
+    data->knots_y = oskar_mem_create(type, location, 0, status);
+    data->coeff = oskar_mem_create(type, location, 0, status);
 
     /* Return pointer to the structure. */
     return data;

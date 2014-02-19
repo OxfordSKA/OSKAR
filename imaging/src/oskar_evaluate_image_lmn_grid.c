@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <imaging/oskar_evaluate_image_lmn_grid.h>
+#include <oskar_evaluate_image_lmn_grid.h>
 #include <math/oskar_linspace.h>
 #include <math.h>
 #include <stdlib.h>

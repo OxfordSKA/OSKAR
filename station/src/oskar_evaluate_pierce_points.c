@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include "station/oskar_evaluate_pierce_points.h"
-#include "oskar_convert_ecef_to_geodetic_spherical.h"
+#include <oskar_evaluate_pierce_points.h>
+#include <oskar_convert_ecef_to_geodetic_spherical.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -51,9 +50,9 @@ void oskar_evaluate_pierce_points(
         double station_z_ecef,
         double screen_height_m,
         int num_directions,
-        oskar_Mem* hor_x,
-        oskar_Mem* hor_y,
-        oskar_Mem* hor_z,
+        const oskar_Mem* hor_x,
+        const oskar_Mem* hor_y,
+        const oskar_Mem* hor_z,
         int* status)
 {
     double norm_xyz, earth_radius_m;
@@ -66,14 +65,16 @@ void oskar_evaluate_pierce_points(
     double pp_x, pp_y, pp_z;
     double pp_lon, pp_lat, pp_sec, pp_alt;
 
-    /* Check validity and consistency of arguments */
-    /* -----------------------------------------------------------------------*/
-    if (!status || (*status) != OSKAR_SUCCESS) return;
+    /* Check all inputs. */
     if (!pierce_point_lon || !pierce_point_lat || !hor_x || !hor_y || !hor_z)
     {
-        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     /* Check memory location (CPU (host) memory current required) */
     if (oskar_mem_location(pierce_point_lat) != OSKAR_LOCATION_CPU ||
             oskar_mem_location(pierce_point_lon) != OSKAR_LOCATION_CPU ||
@@ -85,23 +86,29 @@ void oskar_evaluate_pierce_points(
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
+
     /* Check type consistency */
     type = oskar_mem_type(hor_x);
-    if (oskar_mem_type(pierce_point_lat) != type || oskar_mem_type(pierce_point_lon) != type ||
-            oskar_mem_type(relative_path_length) != type || oskar_mem_type(hor_y) != type ||
+    if (oskar_mem_type(pierce_point_lat) != type ||
+            oskar_mem_type(pierce_point_lon) != type ||
+            oskar_mem_type(relative_path_length) != type ||
+            oskar_mem_type(hor_y) != type ||
             oskar_mem_type(hor_z) != type)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
+
     /* Check array size consistency */
-    if ((int)oskar_mem_length(pierce_point_lat) != num_directions ||
-            (int)oskar_mem_length(pierce_point_lon) != num_directions ||
-            (int)oskar_mem_length(relative_path_length) != num_directions ||
-            (int)oskar_mem_length(hor_x) != num_directions ||
-            (int)oskar_mem_length(hor_y) != num_directions ||
-            (int)oskar_mem_length(hor_z) != num_directions)
+    if ((int)oskar_mem_length(pierce_point_lat) < num_directions ||
+            (int)oskar_mem_length(pierce_point_lon) < num_directions ||
+            (int)oskar_mem_length(relative_path_length) < num_directions ||
+            (int)oskar_mem_length(hor_x) < num_directions ||
+            (int)oskar_mem_length(hor_y) < num_directions ||
+            (int)oskar_mem_length(hor_z) < num_directions)
     {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
     }
 
 
@@ -126,15 +133,15 @@ void oskar_evaluate_pierce_points(
            ENU frame. Vector from station to pierce point. */
         if (type == OSKAR_DOUBLE)
         {
-            x = ((double*)hor_x->data)[i];
-            y = ((double*)hor_y->data)[i];
-            z = ((double*)hor_z->data)[i];
+            x = oskar_mem_double_const(hor_x, status)[i];
+            y = oskar_mem_double_const(hor_y, status)[i];
+            z = oskar_mem_double_const(hor_z, status)[i];
         }
         else
         {
-            x = (double)((float*)hor_x->data)[i];
-            y = (double)((float*)hor_y->data)[i];
-            z = (double)((float*)hor_z->data)[i];
+            x = (double)oskar_mem_float_const(hor_x, status)[i];
+            y = (double)oskar_mem_float_const(hor_y, status)[i];
+            z = (double)oskar_mem_float_const(hor_z, status)[i];
         }
         diff_vector_ENU[0] = x;
         diff_vector_ENU[1] = y;
@@ -173,15 +180,15 @@ void oskar_evaluate_pierce_points(
 
         if (type == OSKAR_DOUBLE)
         {
-            ((double*)pierce_point_lon->data)[i] = pp_lon;
-            ((double*)pierce_point_lat->data)[i] = pp_lat;
-            ((double*)relative_path_length->data)[i] = pp_sec;
+            oskar_mem_double(pierce_point_lon, status)[i] = pp_lon;
+            oskar_mem_double(pierce_point_lat, status)[i] = pp_lat;
+            oskar_mem_double(relative_path_length, status)[i] = pp_sec;
         }
         else
         {
-            ((float*)pierce_point_lon->data)[i] = (float)pp_lon;
-            ((float*)pierce_point_lat->data)[i] = (float)pp_lat;
-            ((float*)relative_path_length->data)[i] = (float)pp_sec;
+            oskar_mem_float(pierce_point_lon, status)[i] = (float)pp_lon;
+            oskar_mem_float(pierce_point_lat, status)[i] = (float)pp_lat;
+            oskar_mem_float(relative_path_length, status)[i] = (float)pp_sec;
         }
     } /* loop over p.p. directions. */
 }

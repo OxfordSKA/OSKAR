@@ -189,8 +189,6 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
 
              oskar_mem_free(theta, status);
              oskar_mem_free(phi, status);
-             free(theta); /* FIXME Remove after updating oskar_mem_free(). */
-             free(phi);   /* FIXME Remove after updating oskar_mem_free(). */
              break;
          }
          case OSKAR_BEAM_PATTERN_COORDS_SKY_MODEL:
@@ -209,8 +207,6 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
                      num_points, ra, dec, beam_lon, beam_lat, l, m, n, status);
              oskar_mem_free(ra, status);
              oskar_mem_free(dec, status);
-             free(ra); /* FIXME Remove after updating oskar_mem_free(). */
-             free(dec); /* FIXME Remove after updating oskar_mem_free(). */
              break;
          }
          default:
@@ -246,8 +242,6 @@ static void generate_horizon_coordinates(oskar_Mem* x, oskar_Mem* y,
                      theta, phi, status);
              oskar_mem_free(theta, status);
              oskar_mem_free(phi, status);
-             free(theta); /* FIXME Remove after updating oskar_mem_free(). */
-             free(phi);   /* FIXME Remove after updating oskar_mem_free(). */
              break;
          }
          default:

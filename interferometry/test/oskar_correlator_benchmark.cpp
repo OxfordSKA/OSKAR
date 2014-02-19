@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -242,9 +242,6 @@ int benchmark(int num_stations, int num_sources, int type,
     oskar_mem_free(u, &status);
     oskar_mem_free(v, &status);
     oskar_mem_free(vis, &status);
-    free(u); // FIXME Remove after updating oskar_mem_free().
-    free(v); // FIXME Remove after updating oskar_mem_free().
-    free(vis); // FIXME Remove after updating oskar_mem_free().
     oskar_jones_free(J, &status);
     oskar_telescope_free(tel, &status);
     oskar_sky_free(sky, &status);

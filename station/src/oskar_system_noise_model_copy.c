@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_system_noise_model_copy.h"
+#include <private_system_noise_model.h>
+#include <oskar_system_noise_model_copy.h>
 #include <oskar_mem.h>
 
 #ifdef __cplusplus
@@ -46,8 +47,8 @@ void oskar_system_noise_model_copy(oskar_SystemNoiseModel* dst,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    oskar_mem_copy(&dst->frequency, &src->frequency, status);
-    oskar_mem_copy(&dst->rms, &src->rms, status);
+    oskar_mem_copy(dst->frequency, src->frequency, status);
+    oskar_mem_copy(dst->rms, src->rms, status);
 }
 
 #ifdef __cplusplus

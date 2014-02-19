@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,9 +50,9 @@ void oskar_splines_copy(oskar_Splines* dst, const oskar_Splines* src,
     dst->type = src->type;
     dst->num_knots_x = src->num_knots_x;
     dst->num_knots_y = src->num_knots_y;
-    oskar_mem_copy(&dst->knots_x, &src->knots_x, status);
-    oskar_mem_copy(&dst->knots_y, &src->knots_y, status);
-    oskar_mem_copy(&dst->coeff, &src->coeff, status);
+    oskar_mem_copy(dst->knots_x, src->knots_x, status);
+    oskar_mem_copy(dst->knots_y, src->knots_y, status);
+    oskar_mem_copy(dst->coeff, src->coeff, status);
 }
 
 #ifdef __cplusplus

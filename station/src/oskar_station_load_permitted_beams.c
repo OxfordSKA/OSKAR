@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,8 +77,8 @@ void oskar_station_load_permitted_beams(oskar_Station* station,
     }
 
     /* Get pointers to arrays to fill. */
-    az = &station->permitted_beam_az;
-    el = &station->permitted_beam_el;
+    az = station->permitted_beam_az;
+    el = station->permitted_beam_el;
 
     /* Loop over each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,66 +27,74 @@
  */
 
 #include <private_sky.h>
-
 #include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_sky_get_ptr(oskar_Sky* sky_ptr, const oskar_Sky* sky,
-        int offset, int num_sources, int* status)
+oskar_Sky* oskar_sky_create_alias(const oskar_Sky* sky, int offset,
+        int num_sources, int* status)
 {
+    oskar_Sky* sky_ptr = 0;
+
     /* Check all inputs. */
-    if (!sky || !sky_ptr)
+    if (!sky || !status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return 0;
     }
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status) return 0;
 
     /* Check ranges. */
     if (offset < 0 || num_sources < 0 ||
             sky->num_sources < offset + num_sources)
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;
-        return;
+        return 0;
     }
 
-    sky_ptr->num_sources  = num_sources;
+    /* Create the sky model structure. */
+    sky_ptr = (oskar_Sky*) malloc(sizeof(oskar_Sky));
+
+    /* Set meta-data */
+    sky_ptr->precision = sky->precision;
+    sky_ptr->location = sky->location;
+    sky_ptr->num_sources = num_sources;
     sky_ptr->use_extended = sky->use_extended;
-    oskar_mem_get_pointer(&sky_ptr->RA,  &sky->RA, offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->Dec, &sky->Dec, offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->I, &sky->I, offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->Q, &sky->Q, offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->U, &sky->U, offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->V, &sky->V, offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->reference_freq, &sky->reference_freq,
+    sky_ptr->ra0 = sky->ra0;
+    sky_ptr->dec0 = sky->dec0;
+
+    sky_ptr->RA = oskar_mem_create_alias(sky->RA, offset, num_sources, status);
+    sky_ptr->Dec = oskar_mem_create_alias(sky->Dec, offset, num_sources, status);
+    sky_ptr->I = oskar_mem_create_alias(sky->I, offset, num_sources, status);
+    sky_ptr->Q = oskar_mem_create_alias(sky->Q, offset, num_sources, status);
+    sky_ptr->U = oskar_mem_create_alias(sky->U, offset, num_sources, status);
+    sky_ptr->V = oskar_mem_create_alias(sky->V, offset, num_sources, status);
+    sky_ptr->reference_freq = oskar_mem_create_alias(sky->reference_freq,
             offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->spectral_index, &sky->spectral_index,
+    sky_ptr->spectral_index = oskar_mem_create_alias(sky->spectral_index,
             offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->RM, &sky->RM,
+    sky_ptr->RM = oskar_mem_create_alias(sky->RM, offset, num_sources, status);
+    sky_ptr->l = oskar_mem_create_alias(sky->l, offset, num_sources, status);
+    sky_ptr->m = oskar_mem_create_alias(sky->m, offset, num_sources, status);
+    sky_ptr->n = oskar_mem_create_alias(sky->n, offset, num_sources, status);
+    sky_ptr->FWHM_major = oskar_mem_create_alias(sky->FWHM_major,
             offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->l, &sky->l,
+    sky_ptr->FWHM_minor = oskar_mem_create_alias(sky->FWHM_minor,
             offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->m, &sky->m,
+    sky_ptr->position_angle = oskar_mem_create_alias(sky->position_angle,
             offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->n, &sky->n,
+    sky_ptr->gaussian_a = oskar_mem_create_alias(sky->gaussian_a,
             offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->FWHM_major, &sky->FWHM_major,
+    sky_ptr->gaussian_b = oskar_mem_create_alias(sky->gaussian_b,
             offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->FWHM_minor, &sky->FWHM_minor,
+    sky_ptr->gaussian_c = oskar_mem_create_alias(sky->gaussian_c,
             offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->position_angle, &sky->position_angle,
-            offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->gaussian_a, &sky->gaussian_a,
-            offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->gaussian_b, &sky->gaussian_b,
-            offset, num_sources, status);
-    oskar_mem_get_pointer(&sky_ptr->gaussian_c, &sky->gaussian_c,
-            offset, num_sources, status);
+
+    return sky_ptr;
 }
 
 #ifdef __cplusplus

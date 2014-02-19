@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,50 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
+#ifndef OSKAR_SYSTEM_NOISE_MODEL_CREATE_H_
+#define OSKAR_SYSTEM_NOISE_MODEL_CREATE_H_
 
-#include <oskar_mem_element_size.h>
-#include <oskar_mem_get_pointer.h>
+/**
+ * @file oskar_system_noise_model_create.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
-        size_t offset, size_t num_elements, int* status)
-{
-    size_t element_size, offset_bytes;
-
-    /* Check all inputs. */
-    if (!ptr || !src || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Check that the new pointer will be valid. */
-    if (offset + num_elements > src->num_elements)
-        *status = OSKAR_ERR_OUT_OF_RANGE;
-
-    /* Get the element size. */
-    element_size = oskar_mem_element_size(src->type);
-    if (element_size == 0)
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-
-    /* Compute the offset for the new pointer. */
-    offset_bytes = offset * element_size;
-
-    /* Initialise the new meta-data. */
-    ptr->type = src->type;
-    ptr->num_elements = num_elements;
-    ptr->data = (void*)((char*)(src->data) + offset_bytes);
-    ptr->location = src->location;
-    ptr->owner = OSKAR_FALSE;
-}
+/**
+ * @brief
+ * Creates the system noise model data structure.
+ *
+ * @details
+ * This function initialises the system noise model data structure.
+ * All memory arrays will be empty (i.e. zero-sized).
+ *
+ * @param[in] type     Type flag (valid types are OSKAR_SINGLE or OSKAR_DOUBLE).
+ * @param[in] location Location flag (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+ * @param[in,out]  status   Status return code.
+ */
+OSKAR_EXPORT
+oskar_SystemNoiseModel* oskar_system_noise_model_create(int type,
+        int location, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_SYSTEM_NOISE_MODEL_CREATE_H_ */

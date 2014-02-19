@@ -34,7 +34,7 @@
  */
 
 #include "oskar_global.h"
-#include "imaging/oskar_SettingsImage.h"
+#include "oskar_SettingsImage.h"
 
 #ifdef __cplusplus
 extern "C" {

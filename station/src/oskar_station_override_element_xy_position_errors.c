@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,10 +75,10 @@ void oskar_station_override_element_xy_position_errors(
         if (type == OSKAR_DOUBLE)
         {
             double *xs, *ys, *xw, *yw;
-            xs = oskar_mem_double(&s->x_signal, status);
-            ys = oskar_mem_double(&s->y_signal, status);
-            xw = oskar_mem_double(&s->x_weights, status);
-            yw = oskar_mem_double(&s->y_weights, status);
+            xs = oskar_mem_double(s->x_signal, status);
+            ys = oskar_mem_double(s->y_signal, status);
+            xw = oskar_mem_double(s->x_weights, status);
+            yw = oskar_mem_double(s->y_weights, status);
             for (i = 0; i < s->num_elements; ++i)
             {
                 /* Generate random numbers from Gaussian distribution. */
@@ -92,10 +92,10 @@ void oskar_station_override_element_xy_position_errors(
         else if (type == OSKAR_SINGLE)
         {
             float *xs, *ys, *xw, *yw;
-            xs = oskar_mem_float(&s->x_signal, status);
-            ys = oskar_mem_float(&s->y_signal, status);
-            xw = oskar_mem_float(&s->x_weights, status);
-            yw = oskar_mem_float(&s->y_weights, status);
+            xs = oskar_mem_float(s->x_signal, status);
+            ys = oskar_mem_float(s->y_signal, status);
+            xw = oskar_mem_float(s->x_weights, status);
+            yw = oskar_mem_float(s->y_weights, status);
             for (i = 0; i < s->num_elements; ++i)
             {
                 /* Generate random numbers from Gaussian distribution. */

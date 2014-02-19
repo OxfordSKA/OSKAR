@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,8 +53,8 @@ extern "C" {
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_sky_filter_by_flux(oskar_Sky* sky,
-        double min_I, double max_I, int* status);
+void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
+        int* status);
 
 #ifdef __cplusplus
 }

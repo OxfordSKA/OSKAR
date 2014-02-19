@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,12 +42,8 @@ extern "C" {
 
 void oskar_mem_free(oskar_Mem* mem, int* status)
 {
-    /* Check all inputs. */
-    if (!mem || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+    /* Will be safe to call with null pointers. */
+    if (!mem) return;
 
     /* Must proceed with trying to free the memory, regardless of the
      * status code value. */
@@ -68,19 +64,13 @@ void oskar_mem_free(oskar_Mem* mem, int* status)
             cudaFree(mem->data);
             oskar_cuda_check_error(status);
 #else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+            if (status) *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
     }
-    mem->data = NULL;
-    mem->location = 0;
-    mem->num_elements = 0;
-    mem->type = 0;
-    mem->owner = 0;
 
     /* Free the structure itself. */
-    /* FIXME Only enable this after removing all deprecated uses of oskar_Mem. */
-    /*free(mem);*/
+    free(mem);
 }
 
 #ifdef __cplusplus

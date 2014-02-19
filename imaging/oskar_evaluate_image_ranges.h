@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,44 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_GET_POINTER_H_
-#define OSKAR_MEM_GET_POINTER_H_
+#ifndef OSKAR_IMAGE_EVALUATE_RANGES_H_
+#define OSKAR_IMAGE_EVALUATE_RANGES_H_
 
 /**
- * @file oskar_mem_get_pointer.h
+ * @file oskar_image_evaluate_ranges.h
  */
 
 #include <oskar_global.h>
-#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Gets a pointer to memory held within another oskar_Mem structure.
- *
- * @details
- * This function gets a pointer to memory held within another oskar_Mem
- * structure. The output structure will not take ownership of the memory to
- * which it points.
- *
- * Warning: If the pointer \p ptr returned already owns memory, this will be
- * lost and cause a leak!
- *
- * @param[out] ptr         Output structure holding a pointer to a location
- *                         in memory and its associated meta-data.
- * @param[in] src          Input structure from which the pointer is derived.
- * @param[in] offset       Element offset into \p src.
- * @param[in] num_elements Number of elements of \p src referred to by \p ptr.
- * @param[in,out] status   Status return code.
- */
 OSKAR_EXPORT
-void oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
-        size_t offset, size_t num_elements, int* status);
+void oskar_evaluate_image_range(int* range, int snapshots,
+        const int* settings_range, int num_vis_times, int* status);
+
+OSKAR_EXPORT
+void oskar_evaluate_image_data_range(int* range, const int* settings_range,
+        int num_data_values, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_GET_POINTER_H_ */
+#endif /* OSKAR_IMAGE_EVALUATE_RANGES_H_ */

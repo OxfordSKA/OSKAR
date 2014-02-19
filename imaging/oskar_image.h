@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,67 +29,17 @@
 #ifndef OSKAR_IMAGE_H_
 #define OSKAR_IMAGE_H_
 
-#include <oskar_mem.h>
-
-
-/**
- * @struct oskar_Image
- *
- * @brief Structure to hold image (cube) data.
- *
- * @details
- * This structure holds data for a multi-dimensional image hyper-cube.
- */
-struct oskar_Image
-{
-    oskar_Mem data;
-    oskar_Mem settings_path;
-    int grid_type;   /* NEW v2.4 */
-    int coord_frame; /* NEW v2.4 */
-    int dimension_order[5];
-    int image_type;
-    int width;
-    int height;
-    int num_pols;
-    int num_times;
-    int num_channels;
-    int healpix_nside; /* NEW v2.4 */
-    double centre_ra_deg;
-    double centre_dec_deg;
-    double fov_ra_deg;
-    double fov_dec_deg;
-    double time_start_mjd_utc;
-    double time_inc_sec;
-    double freq_start_hz;
-    double freq_inc_hz;
+/* Public interface. */
 
 #ifdef __cplusplus
-    /* Need a default constructor. */
-    /**
-     * @brief Constructs an oskar_Image data structure.
-     *
-     * @details
-     * Constructs a new oskar_Image data structure.
-     *
-     * @param[in] type     Enumerated data type of memory contents (magic number).
-     * @param[in] location Location of memory.
-     */
-    OSKAR_EXPORT
-    oskar_Image(int type = OSKAR_DOUBLE, int location = OSKAR_LOCATION_CPU);
-
-    /**
-     * @brief Destroys an oskar_Image data structure.
-     *
-     * @details
-     * Destroys an oskar_Image data structure.
-     */
-    OSKAR_EXPORT
-    ~oskar_Image();
+extern "C" {
 #endif
-};
+
+struct oskar_Image;
+#ifndef OSKAR_IMAGE_TYPEDEF_
+#define OSKAR_IMAGE_TYPEDEF_
 typedef struct oskar_Image oskar_Image;
-
-
+#endif /* OSKAR_IMAGE_TYPEDEF_ */
 
 /* To maintain binary compatibility, do not change the values
  * in the lists below. */
@@ -103,10 +53,10 @@ enum {
     OSKAR_IMAGE_TAG_NUM_POLS = 6,
     OSKAR_IMAGE_TAG_NUM_TIMES = 7,
     OSKAR_IMAGE_TAG_NUM_CHANNELS = 8,
-    OSKAR_IMAGE_TAG_CENTRE_RA = 9,
-    OSKAR_IMAGE_TAG_CENTRE_DEC = 10,
-    OSKAR_IMAGE_TAG_FOV_RA = 11,
-    OSKAR_IMAGE_TAG_FOV_DEC = 12,
+    OSKAR_IMAGE_TAG_CENTRE_LONGITUDE = 9,
+    OSKAR_IMAGE_TAG_CENTRE_LATITUDE = 10,
+    OSKAR_IMAGE_TAG_FOV_LONGITUDE = 11,
+    OSKAR_IMAGE_TAG_FOV_LATITUDE = 12,
     OSKAR_IMAGE_TAG_TIME_START_MJD_UTC = 13,
     OSKAR_IMAGE_TAG_TIME_INC_SEC = 14,
     OSKAR_IMAGE_TAG_FREQ_START_HZ = 15,
@@ -119,14 +69,13 @@ enum {
     OSKAR_IMAGE_TAG_GRID_TYPE = 22,    /* NEW v2.4 */
     OSKAR_IMAGE_TAG_COORD_FRAME = 23,  /* NEW v2.4 */
     OSKAR_IMAGE_TAG_HEALPIX_NSIDE = 24 /* NEW v2.4 */
-
 };
 
 /* Do not change the values below - these are merely dimension labels, not the
  * actual dimension order. */
 enum {
-    OSKAR_IMAGE_DIM_RA = 0,
-    OSKAR_IMAGE_DIM_DEC = 1,
+    OSKAR_IMAGE_DIM_LONGITUDE = 0,
+    OSKAR_IMAGE_DIM_LATITUDE = 1,
     OSKAR_IMAGE_DIM_POL = 2,
     OSKAR_IMAGE_DIM_TIME = 3,
     OSKAR_IMAGE_DIM_CHANNEL = 4
@@ -172,5 +121,17 @@ enum {
     OSKAR_IMAGE_COORD_FRAME_EQUATORIAL = 1,
     OSKAR_IMAGE_COORD_FRAME_HORIZON = 2
 };
+
+#ifdef __cplusplus
+}
+#endif
+
+#include <oskar_image_accessors.h>
+#include <oskar_image_create.h>
+#include <oskar_image_free.h>
+#include <oskar_image_get_stats.h>
+#include <oskar_image_read.h>
+#include <oskar_image_resize.h>
+#include <oskar_image_write.h>
 
 #endif /* OSKAR_IMAGE_H_ */

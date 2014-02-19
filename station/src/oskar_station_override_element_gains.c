@@ -75,14 +75,14 @@ void oskar_station_override_element_gains(oskar_Station* s,
         if (type == OSKAR_DOUBLE)
         {
             double* gain;
-            gain = oskar_mem_double(&s->gain, status);
+            gain = oskar_mem_double(s->gain, status);
             for (i = 0; i < s->num_elements; ++i)
                 gain[i] = gain_mean + gain_std * oskar_random_gaussian(0);
         }
         else if (type == OSKAR_SINGLE)
         {
             float* gain;
-            gain = oskar_mem_float(&s->gain, status);
+            gain = oskar_mem_float(s->gain, status);
             for (i = 0; i < s->num_elements; ++i)
                 gain[i] = gain_mean + gain_std * oskar_random_gaussian(0);
         }

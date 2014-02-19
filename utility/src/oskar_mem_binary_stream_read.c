@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,9 +46,8 @@ void oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
         unsigned char id_tag, int user_index, int* status)
 {
     int type;
-    oskar_Mem temp;
+    oskar_Mem *temp = 0, *data = 0;
     size_t size_bytes, num_elements, element_size;
-    oskar_Mem* data = NULL;
 
     /* Check all inputs. */
     if (!mem || !stream || !index || !status)
@@ -64,10 +63,10 @@ void oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
     type = oskar_mem_type(mem);
 
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
+    temp = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
 
     /* Check if data is in CPU or GPU memory. */
-    data = (oskar_mem_location(mem) == OSKAR_LOCATION_CPU) ? mem : &temp;
+    data = (oskar_mem_location(mem) == OSKAR_LOCATION_CPU) ? mem : temp;
 
     /* Create the tag index if it doesn't already exist. */
     if (*index == NULL)
@@ -89,11 +88,11 @@ void oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
             status);
 
     /* Copy to GPU memory if required. */
-    if (oskar_mem_location(mem) == OSKAR_LOCATION_GPU)
-        oskar_mem_copy(mem, &temp, status);
+    if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
+        oskar_mem_copy(mem, temp, status);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp, status);
+    oskar_mem_free(temp, status);
 }
 
 void oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
@@ -101,9 +100,8 @@ void oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
         const char* name_tag, int user_index, int* status)
 {
     int type;
-    oskar_Mem temp;
+    oskar_Mem *temp = 0, *data = 0;
     size_t size_bytes, num_elements, element_size;
-    oskar_Mem* data = NULL;
 
     /* Check all inputs. */
     if (!mem || !stream || !index || !name_group || !name_tag || !status)
@@ -119,10 +117,10 @@ void oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
     type = oskar_mem_type(mem);
 
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
+    temp = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
 
     /* Check if data is in CPU or GPU memory. */
-    data = (oskar_mem_location(mem) == OSKAR_LOCATION_CPU) ? mem : &temp;
+    data = (oskar_mem_location(mem) == OSKAR_LOCATION_CPU) ? mem : temp;
 
     /* Create the tag index if it doesn't already exist. */
     if (*index == NULL)
@@ -144,11 +142,11 @@ void oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
             status);
 
     /* Copy to GPU memory if required. */
-    if (oskar_mem_location(mem) == OSKAR_LOCATION_GPU)
-        oskar_mem_copy(mem, &temp, status);
+    if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
+        oskar_mem_copy(mem, temp, status);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp, status);
+    oskar_mem_free(temp, status);
 }
 
 #ifdef __cplusplus

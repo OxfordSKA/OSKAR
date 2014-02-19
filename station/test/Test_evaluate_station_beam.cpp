@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -171,14 +171,6 @@ TEST(evaluate_station_beam, test_array_pattern)
     oskar_mem_free(d_m, &error);
     oskar_mem_free(d_n, &error);
 
-    free(beam_pattern); // FIXME Remove after updating oskar_mem_free().
-    free(h_l); // FIXME Remove after updating oskar_mem_free().
-    free(h_m); // FIXME Remove after updating oskar_mem_free().
-    free(h_n); // FIXME Remove after updating oskar_mem_free().
-    free(d_l); // FIXME Remove after updating oskar_mem_free().
-    free(d_m); // FIXME Remove after updating oskar_mem_free().
-    free(d_n); // FIXME Remove after updating oskar_mem_free().
-
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 }
 
@@ -224,10 +216,6 @@ TEST(evaluate_station_beam, gaussian)
         oskar_mem_free(m, &error);
         oskar_mem_free(horizon_mask, &error);
         oskar_mem_free(beam, &error);
-        free(l); // FIXME Remove after updating oskar_mem_free().
-        free(m); // FIXME Remove after updating oskar_mem_free().
-        free(horizon_mask); // FIXME Remove after updating oskar_mem_free().
-        free(beam); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Single CPU
@@ -262,10 +250,6 @@ TEST(evaluate_station_beam, gaussian)
         oskar_mem_free(m, &error);
         oskar_mem_free(horizon_mask, &error);
         oskar_mem_free(beam, &error);
-        free(l); // FIXME Remove after updating oskar_mem_free().
-        free(m); // FIXME Remove after updating oskar_mem_free().
-        free(horizon_mask); // FIXME Remove after updating oskar_mem_free().
-        free(beam); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Double GPU
@@ -304,12 +288,6 @@ TEST(evaluate_station_beam, gaussian)
         oskar_mem_free(m, &error);
         oskar_mem_free(horizon_mask, &error);
         oskar_mem_free(beam, &error);
-        free(h_l); // FIXME Remove after updating oskar_mem_free().
-        free(h_m); // FIXME Remove after updating oskar_mem_free().
-        free(l); // FIXME Remove after updating oskar_mem_free().
-        free(m); // FIXME Remove after updating oskar_mem_free().
-        free(horizon_mask); // FIXME Remove after updating oskar_mem_free().
-        free(beam); // FIXME Remove after updating oskar_mem_free().
     }
 
     // Single GPU
@@ -348,11 +326,5 @@ TEST(evaluate_station_beam, gaussian)
         oskar_mem_free(m, &error);
         oskar_mem_free(horizon_mask, &error);
         oskar_mem_free(beam, &error);
-        free(h_l); // FIXME Remove after updating oskar_mem_free().
-        free(h_m); // FIXME Remove after updating oskar_mem_free().
-        free(l); // FIXME Remove after updating oskar_mem_free().
-        free(m); // FIXME Remove after updating oskar_mem_free().
-        free(horizon_mask); // FIXME Remove after updating oskar_mem_free().
-        free(beam); // FIXME Remove after updating oskar_mem_free().
     }
 }

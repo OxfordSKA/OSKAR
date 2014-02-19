@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,29 +57,29 @@ oskar_StationWork* oskar_station_work_create(int type,
     complex_matrix = OSKAR_COMPLEX | OSKAR_MATRIX;
 
     /* Initialise arrays. */
-    oskar_mem_init(&work->horizon_mask, OSKAR_INT, location, 0, 1, status);
-    oskar_mem_init(&work->theta_modified, type, location, 0, 1, status);
-    oskar_mem_init(&work->phi_modified, type, location, 0, 1, status);
-    oskar_mem_init(&work->enu_direction_x, type, location, 0, 1, status);
-    oskar_mem_init(&work->enu_direction_y, type, location, 0, 1, status);
-    oskar_mem_init(&work->enu_direction_z, type, location, 0, 1, status);
-    oskar_mem_init(&work->weights, (type | OSKAR_COMPLEX),
-            location, 0, 1, status);
-    oskar_mem_init(&work->weights_error, (type | OSKAR_COMPLEX),
-            location, 0, 1, status);
-    oskar_mem_init(&work->array_pattern, (type | OSKAR_COMPLEX),
-            location, 0, 1, status);
-    oskar_mem_init(&work->element_pattern_matrix, (type | complex_matrix),
-            location, 0, 1, status);
-    oskar_mem_init(&work->element_pattern_scalar, (type | OSKAR_COMPLEX),
-            location, 0, 1, status);
+    work->horizon_mask = oskar_mem_create(OSKAR_INT, location, 0, status);
+    work->theta_modified = oskar_mem_create(type, location, 0, status);
+    work->phi_modified = oskar_mem_create(type, location, 0, status);
+    work->enu_direction_x = oskar_mem_create(type, location, 0, status);
+    work->enu_direction_y = oskar_mem_create(type, location, 0, status);
+    work->enu_direction_z = oskar_mem_create(type, location, 0, status);
+    work->weights = oskar_mem_create((type | OSKAR_COMPLEX),
+            location, 0, status);
+    work->weights_error = oskar_mem_create((type | OSKAR_COMPLEX),
+            location, 0, status);
+    work->array_pattern = oskar_mem_create((type | OSKAR_COMPLEX),
+            location, 0, status);
+    work->element_pattern_matrix = oskar_mem_create((type | complex_matrix),
+            location, 0, status);
+    work->element_pattern_scalar = oskar_mem_create((type | OSKAR_COMPLEX),
+            location, 0, status);
 
     for (i = 0; i < OSKAR_MAX_STATION_DEPTH; ++i)
     {
-        oskar_mem_init(&work->hierarchy_work_matrix[i], (type | complex_matrix),
-                location, 0, 1, status);
-        oskar_mem_init(&work->hierarchy_work_scalar[i], (type | OSKAR_COMPLEX),
-                location, 0, 1, status);
+        work->hierarchy_work_matrix[i] = oskar_mem_create((type | complex_matrix),
+                location, 0, status);
+        work->hierarchy_work_scalar[i] = oskar_mem_create((type | OSKAR_COMPLEX),
+                location, 0, status);
     }
 
     return work;
@@ -96,22 +96,22 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
         return;
     }
 
-    oskar_mem_free(&work->horizon_mask, status);
-    oskar_mem_free(&work->theta_modified, status);
-    oskar_mem_free(&work->phi_modified, status);
-    oskar_mem_free(&work->enu_direction_x, status);
-    oskar_mem_free(&work->enu_direction_y, status);
-    oskar_mem_free(&work->enu_direction_z, status);
-    oskar_mem_free(&work->weights, status);
-    oskar_mem_free(&work->weights_error, status);
-    oskar_mem_free(&work->array_pattern, status);
-    oskar_mem_free(&work->element_pattern_matrix, status);
-    oskar_mem_free(&work->element_pattern_scalar, status);
+    oskar_mem_free(work->horizon_mask, status);
+    oskar_mem_free(work->theta_modified, status);
+    oskar_mem_free(work->phi_modified, status);
+    oskar_mem_free(work->enu_direction_x, status);
+    oskar_mem_free(work->enu_direction_y, status);
+    oskar_mem_free(work->enu_direction_z, status);
+    oskar_mem_free(work->weights, status);
+    oskar_mem_free(work->weights_error, status);
+    oskar_mem_free(work->array_pattern, status);
+    oskar_mem_free(work->element_pattern_matrix, status);
+    oskar_mem_free(work->element_pattern_scalar, status);
 
     for (i = 0; i < OSKAR_MAX_STATION_DEPTH; ++i)
     {
-        oskar_mem_free(&work->hierarchy_work_matrix[i], status);
-        oskar_mem_free(&work->hierarchy_work_scalar[i], status);
+        oskar_mem_free(work->hierarchy_work_matrix[i], status);
+        oskar_mem_free(work->hierarchy_work_scalar[i], status);
     }
 
     /* Free the structure. */
@@ -120,46 +120,46 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
 
 oskar_Mem* oskar_station_work_horizon_mask(oskar_StationWork* work)
 {
-    return &work->horizon_mask;
+    return work->horizon_mask;
 }
 
 const oskar_Mem* oskar_station_work_horizon_mask_const(
         const oskar_StationWork* work)
 {
-    return &work->horizon_mask;
+    return work->horizon_mask;
 }
 
 oskar_Mem* oskar_station_work_enu_direction_x(oskar_StationWork* work)
 {
-    return &work->enu_direction_x;
+    return work->enu_direction_x;
 }
 
 const oskar_Mem* oskar_station_work_enu_direction_x_const(
         const oskar_StationWork* work)
 {
-    return &work->enu_direction_x;
+    return work->enu_direction_x;
 }
 
 oskar_Mem* oskar_station_work_enu_direction_y(oskar_StationWork* work)
 {
-    return &work->enu_direction_y;
+    return work->enu_direction_y;
 }
 
 const oskar_Mem* oskar_station_work_enu_direction_y_const(
         const oskar_StationWork* work)
 {
-    return &work->enu_direction_y;
+    return work->enu_direction_y;
 }
 
 oskar_Mem* oskar_station_work_enu_direction_z(oskar_StationWork* work)
 {
-    return &work->enu_direction_z;
+    return work->enu_direction_z;
 }
 
 const oskar_Mem* oskar_station_work_enu_direction_z_const(
         const oskar_StationWork* work)
 {
-    return &work->enu_direction_z;
+    return work->enu_direction_z;
 }
 
 #ifdef __cplusplus

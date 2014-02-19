@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -111,42 +111,42 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
     }
 
     /* Check if the memory contents are different. */
-    if (oskar_mem_different(&a->x_weights, &b->x_weights, n, status))
+    if (oskar_mem_different(a->x_weights, b->x_weights, n, status))
         return 1;
-    if (oskar_mem_different(&a->y_weights, &b->y_weights, n, status))
+    if (oskar_mem_different(a->y_weights, b->y_weights, n, status))
         return 1;
-    if (oskar_mem_different(&a->z_weights, &b->z_weights, n, status))
+    if (oskar_mem_different(a->z_weights, b->z_weights, n, status))
         return 1;
-    if (oskar_mem_different(&a->x_signal, &b->x_signal, n, status))
+    if (oskar_mem_different(a->x_signal, b->x_signal, n, status))
         return 1;
-    if (oskar_mem_different(&a->y_signal, &b->y_signal, n, status))
+    if (oskar_mem_different(a->y_signal, b->y_signal, n, status))
         return 1;
-    if (oskar_mem_different(&a->z_signal, &b->z_signal, n, status))
+    if (oskar_mem_different(a->z_signal, b->z_signal, n, status))
         return 1;
-    if (oskar_mem_different(&a->gain, &b->gain, n, status))
+    if (oskar_mem_different(a->gain, b->gain, n, status))
         return 1;
-    if (oskar_mem_different(&a->phase_offset, &b->phase_offset, n, status))
+    if (oskar_mem_different(a->phase_offset, b->phase_offset, n, status))
         return 1;
-    if (oskar_mem_different(&a->weight, &b->weight, n, status))
+    if (oskar_mem_different(a->weight, b->weight, n, status))
         return 1;
-    if (oskar_mem_different(&a->cos_orientation_x, &b->cos_orientation_x, n,
+    if (oskar_mem_different(a->cos_orientation_x, b->cos_orientation_x, n,
             status))
         return 1;
-    if (oskar_mem_different(&a->sin_orientation_x, &b->sin_orientation_x, n,
+    if (oskar_mem_different(a->sin_orientation_x, b->sin_orientation_x, n,
             status))
         return 1;
-    if (oskar_mem_different(&a->cos_orientation_y, &b->cos_orientation_y, n,
+    if (oskar_mem_different(a->cos_orientation_y, b->cos_orientation_y, n,
             status))
         return 1;
-    if (oskar_mem_different(&a->sin_orientation_y, &b->sin_orientation_y, n,
+    if (oskar_mem_different(a->sin_orientation_y, b->sin_orientation_y, n,
             status))
         return 1;
-    if (oskar_mem_different(&a->element_type, &b->element_type, n, status))
+    if (oskar_mem_different(a->element_type, b->element_type, n, status))
         return 1;
-    if (oskar_mem_different(&a->permitted_beam_az, &b->permitted_beam_az, n,
+    if (oskar_mem_different(a->permitted_beam_az, b->permitted_beam_az, n,
             status))
         return 1;
-    if (oskar_mem_different(&a->permitted_beam_el, &b->permitted_beam_el, n,
+    if (oskar_mem_different(a->permitted_beam_el, b->permitted_beam_el, n,
             status))
         return 1;
 

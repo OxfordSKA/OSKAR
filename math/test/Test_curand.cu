@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -168,11 +168,9 @@ TEST(curand, test_state_allocation)
             }
         }
         oskar_mem_free(h_values, &status);
-        free(h_values); // FIXME Remove after updating oskar_mem_free().
     }
     if (file) fclose(file);
     oskar_mem_free(d_values, &status);
-    free(d_values); // FIXME Remove after updating oskar_mem_free().
     oskar_random_state_free(random_state, &status);
 }
 
@@ -233,12 +231,10 @@ TEST(curand, test_multi_device)
                 }
             }
             oskar_mem_free(h_values, &error);
-            free(h_values); // FIXME Remove after updating oskar_mem_free().
         }
         fclose(file);
         oskar_random_state_free(d_states, &error);
         oskar_mem_free(d_values, &error);
-        free(d_values); // FIXME Remove after updating oskar_mem_free().
         EXPECT_EQ(0, error) << oskar_get_error_string(error);
     }
 }

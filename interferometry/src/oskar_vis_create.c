@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,19 +94,19 @@ oskar_Vis* oskar_vis_create(int amp_type, int location, int num_channels,
     vis->telescope_lat_deg = 0.0;
 
     /* Initialise memory. */
-    oskar_mem_init(&vis->settings_path, OSKAR_CHAR, location, 0, 1, status);
-    oskar_mem_init(&vis->telescope_path, OSKAR_CHAR, location, 0, 1, status);
-    oskar_mem_init(&vis->x_metres, type, location, num_stations, 1, status);
-    oskar_mem_init(&vis->y_metres, type, location, num_stations, 1, status);
-    oskar_mem_init(&vis->z_metres, type, location, num_stations, 1, status);
-    oskar_mem_init(&vis->station_lon, type, location, num_stations, 1, status);
-    oskar_mem_init(&vis->station_lat, type, location, num_stations, 1, status);
-    oskar_mem_init(&vis->station_orientation_x, type, location, num_stations, 1, status);
-    oskar_mem_init(&vis->station_orientation_y, type, location, num_stations, 1, status);
-    oskar_mem_init(&vis->uu_metres, type, location, num_coords, 1, status);
-    oskar_mem_init(&vis->vv_metres, type, location, num_coords, 1, status);
-    oskar_mem_init(&vis->ww_metres, type, location, num_coords, 1, status);
-    oskar_mem_init(&vis->amplitude, amp_type, location, num_amps, 1, status);
+    vis->settings_path = oskar_mem_create(OSKAR_CHAR, location, 0, status);
+    vis->telescope_path = oskar_mem_create(OSKAR_CHAR, location, 0, status);
+    vis->x_metres = oskar_mem_create(type, location, num_stations, status);
+    vis->y_metres = oskar_mem_create(type, location, num_stations, status);
+    vis->z_metres = oskar_mem_create(type, location, num_stations, status);
+    vis->station_lon = oskar_mem_create(type, location, num_stations, status);
+    vis->station_lat = oskar_mem_create(type, location, num_stations, status);
+    vis->station_orientation_x = oskar_mem_create(type, location, num_stations, status);
+    vis->station_orientation_y = oskar_mem_create(type, location, num_stations, status);
+    vis->uu_metres = oskar_mem_create(type, location, num_coords, status);
+    vis->vv_metres = oskar_mem_create(type, location, num_coords, status);
+    vis->ww_metres = oskar_mem_create(type, location, num_coords, status);
+    vis->amplitude = oskar_mem_create(amp_type, location, num_amps, status);
 
     /* Return handle to structure. */
     return vis;

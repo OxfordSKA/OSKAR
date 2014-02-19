@@ -27,10 +27,8 @@
  */
 
 #include <oskar_global.h>
-#include <imaging/oskar_Image.h>
-#include <imaging/oskar_ImageStats.h>
-#include <imaging/oskar_image_get_stats.h>
-#include <imaging/oskar_image_read.h>
+#include <oskar_image.h>
+#include <oskar_ImageStats.h>
 #include <apps/lib/oskar_OptionParser.h>
 #include <oskar_get_error_string.h>
 #include <oskar_version_string.h>
@@ -96,20 +94,22 @@ int main(int argc, char** argv)
     }
     for (int i = 0; i < (int)files.size(); ++i)
     {
-        oskar_Image image;
-        oskar_image_read(&image, files[i].c_str(), 0, &status);
+        oskar_Image* image;
+        image = oskar_image_read(files[i].c_str(), 0, &status);
         if (status != OSKAR_SUCCESS) {
             string msg = "Failed to read image file " + files[i];
             print_error(status, msg.c_str());
             return status;
         }
         oskar_ImageStats stats;
-        oskar_image_get_stats(&stats, &image, pol, time, channel, &status);
-        if (status != OSKAR_SUCCESS) {
+        oskar_image_get_stats(&stats, image, pol, time, channel, &status);
+        if (status != OSKAR_SUCCESS)
+        {
             string msg = "Failed to evaluate image statistics for: " + files[i];
             print_error(status, msg.c_str());
             return status;
         }
+        oskar_image_free(image, &status);
         fprintf(out, "%3i", i);
         fprintf(out, "%s", sep.c_str());
         fprintf(out, sformat.c_str(), stats.min);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,8 +68,8 @@ void oskar_telescope_resize(oskar_Telescope* telescope, int size, int* status)
         for (i = old_size; i < size; ++i)
         {
             telescope->station[i] = oskar_station_create(
-                    oskar_mem_type(&telescope->station_x),
-                    oskar_mem_location(&telescope->station_x), 0, status);
+                    oskar_mem_type(telescope->station_x),
+                    oskar_mem_location(telescope->station_x), 0, status);
         }
     }
     else if (size < old_size)

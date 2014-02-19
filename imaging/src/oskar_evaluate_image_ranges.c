@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,26 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_image_evaluate_ranges.h"
+#include <oskar_evaluate_image_ranges.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Evaluate the range of indices for the image cube [output range]. */
-int oskar_evaluate_image_range(int* range, int snapshots,
-        const int* settings_range, int num_data_values)
+void oskar_evaluate_image_range(int* range, int snapshots,
+        const int* settings_range, int num_data_values, int* status)
 {
-    if (!range || !settings_range)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    if (!range || !settings_range || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     /* Fail if top of the range is > number of data values */
     if (settings_range[1] >= num_data_values)
-        return OSKAR_ERR_INVALID_RANGE;
+    {
+        *status = OSKAR_ERR_INVALID_RANGE;
+        return;
+    }
 
     /* Fail if bottom of the range is > number of data values */
     if (settings_range[0] >= num_data_values)
-        return OSKAR_ERR_INVALID_RANGE;
+    {
+        *status = OSKAR_ERR_INVALID_RANGE;
+        return;
+    }
 
     if (snapshots)
     {
@@ -71,44 +80,54 @@ int oskar_evaluate_image_range(int* range, int snapshots,
 
         /* Fail if top of the range is < bottom of the range */
         if (range[1] < range[0])
-            return OSKAR_ERR_INVALID_RANGE;
+        {
+            *status = OSKAR_ERR_INVALID_RANGE;
+            return;
+        }
     }
     else
     {
         range[0] = 0;
         range[1] = 0;
     }
-
-    return OSKAR_SUCCESS;
 }
 
 
-/* Evaluate the range of indices for the visibility data [intput range]. */
-int oskar_evaluate_image_data_range(int* range, const int* settings_range,
-        int num_data_values)
+/* Evaluate the range of indices for the visibility data [input range]. */
+void oskar_evaluate_image_data_range(int* range, const int* settings_range,
+        int num_data_values, int* status)
 {
-    if (!range || !settings_range)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    if (!range || !settings_range || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+    if (*status) return;
 
     /* Fail if top of the range is > number of data values */
     if (settings_range[1] >= num_data_values)
-        return OSKAR_ERR_INVALID_RANGE;
+    {
+        *status = OSKAR_ERR_INVALID_RANGE;
+        return;
+    }
 
     /* Fail if bottom of the range is > number of data values */
     if (settings_range[0] >= num_data_values)
-        return OSKAR_ERR_INVALID_RANGE;
+    {
+        *status = OSKAR_ERR_INVALID_RANGE;
+        return;
+    }
 
     range[0] = settings_range[0] < 0 ? 0 : settings_range[0];
     range[1] = settings_range[1] < 0 ? num_data_values - 1 : settings_range[1];
 
     /* Fail if top of the range is < bottom of the range */
     if (range[0] > range[1])
-        return OSKAR_ERR_INVALID_RANGE;
-
-    return OSKAR_SUCCESS;
+    {
+        *status = OSKAR_ERR_INVALID_RANGE;
+        return;
+    }
 }
-
-
 
 #ifdef __cplusplus
 }

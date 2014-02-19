@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,8 +47,6 @@ TEST(Mem, different_none)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_free(one, &status);
     oskar_mem_free(two, &status);
-    free(one); // FIXME Remove after updating oskar_mem_free().
-    free(two); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -68,8 +66,6 @@ TEST(Mem, different_all)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_free(one, &status);
     oskar_mem_free(two, &status);
-    free(one); // FIXME Remove after updating oskar_mem_free().
-    free(two); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -90,8 +86,6 @@ TEST(Mem, different_by_one)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_free(one, &status);
     oskar_mem_free(two, &status);
-    free(one); // FIXME Remove after updating oskar_mem_free().
-    free(two); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -113,8 +107,6 @@ TEST(Mem, different_up_to_a_point)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_free(one, &status);
     oskar_mem_free(two, &status);
-    free(one); // FIXME Remove after updating oskar_mem_free().
-    free(two); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 

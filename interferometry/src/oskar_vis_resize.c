@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,17 +56,17 @@ void oskar_vis_resize(oskar_Vis* vis, int num_channels,
     num_amps   = num_channels * num_times * num_baselines;
     num_coords = num_times * num_baselines;
 
-    oskar_mem_realloc(&vis->x_metres, num_stations, status);
-    oskar_mem_realloc(&vis->y_metres, num_stations, status);
-    oskar_mem_realloc(&vis->z_metres, num_stations, status);
-    oskar_mem_realloc(&vis->station_lon, num_stations, status);
-    oskar_mem_realloc(&vis->station_lat, num_stations, status);
-    oskar_mem_realloc(&vis->station_orientation_x, num_stations, status);
-    oskar_mem_realloc(&vis->station_orientation_y, num_stations, status);
-    oskar_mem_realloc(&vis->uu_metres, num_coords, status);
-    oskar_mem_realloc(&vis->vv_metres, num_coords, status);
-    oskar_mem_realloc(&vis->ww_metres, num_coords, status);
-    oskar_mem_realloc(&vis->amplitude, num_amps, status);
+    oskar_mem_realloc(vis->x_metres, num_stations, status);
+    oskar_mem_realloc(vis->y_metres, num_stations, status);
+    oskar_mem_realloc(vis->z_metres, num_stations, status);
+    oskar_mem_realloc(vis->station_lon, num_stations, status);
+    oskar_mem_realloc(vis->station_lat, num_stations, status);
+    oskar_mem_realloc(vis->station_orientation_x, num_stations, status);
+    oskar_mem_realloc(vis->station_orientation_y, num_stations, status);
+    oskar_mem_realloc(vis->uu_metres, num_coords, status);
+    oskar_mem_realloc(vis->vv_metres, num_coords, status);
+    oskar_mem_realloc(vis->ww_metres, num_coords, status);
+    oskar_mem_realloc(vis->amplitude, num_amps, status);
 }
 
 #ifdef __cplusplus

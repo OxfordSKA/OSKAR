@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 
 #include <oskar_mem.h>
 #include <oskar_element.h>
-#include <oskar_SystemNoiseModel.h>
+#include <oskar_system_noise_model.h>
 
 /* Forward declaration. */
 struct oskar_Station;
@@ -59,7 +59,7 @@ struct oskar_Station
     double beam_longitude_rad;   /**< Longitude of beam phase centre, in radians. */
     double beam_latitude_rad;    /**< Latitude of beam phase centre, in radians. */
     int beam_coord_type;         /**< Enumerator describing beam spherical coordinate type (from oskar_global.h). */
-    oskar_SystemNoiseModel noise;
+    oskar_SystemNoiseModel* noise;
 
     /* Data used only for Gaussian beam stations  ---------------------------*/
     double gaussian_beam_fwhm_rad; /**< FWHM of Gaussian station beam, in degrees. */
@@ -77,29 +77,29 @@ struct oskar_Station
     int apply_element_weight;    /**< True if weights should be modified by user-supplied complex beamforming weights (auto determined; default false). */
     double orientation_x;        /**< Orientation azimuth of nominal x dipole axis, in radians. */
     double orientation_y;        /**< Orientation azimuth of nominal y dipole axis, in radians. */
-    oskar_Mem x_signal;          /**< Tangent-plane x-position, toward the East. */
-    oskar_Mem y_signal;          /**< Tangent-plane y-position, toward the North. */
-    oskar_Mem z_signal;          /**< Tangent-plane z-position, toward the zenith. */
-    oskar_Mem x_weights;         /**< Tangent-plane x-position used for weights computation, toward the East. */
-    oskar_Mem y_weights;         /**< Tangent-plane y-position used for weights computation, toward the North. */
-    oskar_Mem z_weights;         /**< Tangent-plane z-position used for weights computation, toward the zenith. */
-    oskar_Mem gain;              /**< Per-element gain factor (default 1.0) */
-    oskar_Mem gain_error;        /**< Standard deviation of per-element time-variable gain factor (default 0.0) */
-    oskar_Mem phase_offset;      /**< Per-element systematic phase offset, in radians (default 0.0) */
-    oskar_Mem phase_error;       /**< Standard deviation of per-element time-variable phase offset, in radians (default 0.0) */
-    oskar_Mem weight;            /**< Element complex weight (set to 1.0, 0.0 unless using apodisation). */
-    oskar_Mem cos_orientation_x; /**< Cosine azimuth of x dipole axis (default 0.0). */
-    oskar_Mem sin_orientation_x; /**< Sine azimuth of x dipole axis (default 1.0) */
-    oskar_Mem cos_orientation_y; /**< Cosine azimuth of y dipole axis (default 1.0) */
-    oskar_Mem sin_orientation_y; /**< Sine azimuth of y dipole axis (default 0.0) */
-    oskar_Mem element_type;      /**< Integer array of element types (default 0). */
+    oskar_Mem* x_signal;          /**< Tangent-plane x-position, toward the East. */
+    oskar_Mem* y_signal;          /**< Tangent-plane y-position, toward the North. */
+    oskar_Mem* z_signal;          /**< Tangent-plane z-position, toward the zenith. */
+    oskar_Mem* x_weights;         /**< Tangent-plane x-position used for weights computation, toward the East. */
+    oskar_Mem* y_weights;         /**< Tangent-plane y-position used for weights computation, toward the North. */
+    oskar_Mem* z_weights;         /**< Tangent-plane z-position used for weights computation, toward the zenith. */
+    oskar_Mem* gain;              /**< Per-element gain factor (default 1.0) */
+    oskar_Mem* gain_error;        /**< Standard deviation of per-element time-variable gain factor (default 0.0) */
+    oskar_Mem* phase_offset;      /**< Per-element systematic phase offset, in radians (default 0.0) */
+    oskar_Mem* phase_error;       /**< Standard deviation of per-element time-variable phase offset, in radians (default 0.0) */
+    oskar_Mem* weight;            /**< Element complex weight (set to 1.0, 0.0 unless using apodisation). */
+    oskar_Mem* cos_orientation_x; /**< Cosine azimuth of x dipole axis (default 0.0). */
+    oskar_Mem* sin_orientation_x; /**< Sine azimuth of x dipole axis (default 1.0) */
+    oskar_Mem* cos_orientation_y; /**< Cosine azimuth of y dipole axis (default 1.0) */
+    oskar_Mem* sin_orientation_y; /**< Sine azimuth of y dipole axis (default 0.0) */
+    oskar_Mem* element_type;      /**< Integer array of element types (default 0). */
     oskar_Station** child;       /**< Array of child station handles (pointer is NULL if there are none). */
     oskar_Element** element_pattern; /**< Array of element models per element type (pointer is NULL if there are child stations). */
 
     /* Data used only for aperture array stations with fixed beams. */
     int num_permitted_beams;
-    oskar_Mem permitted_beam_az;
-    oskar_Mem permitted_beam_el;
+    oskar_Mem* permitted_beam_az;
+    oskar_Mem* permitted_beam_el;
 };
 
 #endif /* OSKAR_PRIVATE_STATION_H_ */

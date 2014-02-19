@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,6 @@ TEST(Mem, to_char)
         data[i] = char(i);
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -61,7 +60,6 @@ TEST(Mem, to_int)
         data[i] = i;
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -78,7 +76,6 @@ TEST(Mem, to_float)
         data[i] = float(i);
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -98,7 +95,6 @@ TEST(Mem, to_float2)
         data[i] = t;
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -124,7 +120,6 @@ TEST(Mem, to_float4c)
         data[i] = t;
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -141,7 +136,6 @@ TEST(Mem, to_double)
         data[i] = double(i);
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -161,7 +155,6 @@ TEST(Mem, to_double2)
         data[i] = t;
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -187,7 +180,6 @@ TEST(Mem, to_double4c)
         data[i] = t;
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -205,7 +197,6 @@ TEST(Mem, to_const_char)
         ASSERT_EQ((char)0, data[i]);
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
 }
 
 TEST(Mem, to_const_int)
@@ -223,7 +214,6 @@ TEST(Mem, to_const_int)
         ASSERT_EQ(0, data[i]);
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
 }
 
 TEST(Mem, to_const_float)
@@ -241,7 +231,6 @@ TEST(Mem, to_const_float)
         ASSERT_FLOAT_EQ(2.0, data[i]);
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
 }
 
 TEST(Mem, to_const_float2)
@@ -260,7 +249,6 @@ TEST(Mem, to_const_float2)
         ASSERT_FLOAT_EQ(0.0, data[i].y);
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
 }
 
 TEST(Mem, to_const_float4c)
@@ -285,7 +273,6 @@ TEST(Mem, to_const_float4c)
         ASSERT_FLOAT_EQ(0.0, data[i].d.y);
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
 }
 
 TEST(Mem, to_const_double)
@@ -303,7 +290,6 @@ TEST(Mem, to_const_double)
         ASSERT_DOUBLE_EQ(2.0, data[i]);
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
 }
 
 TEST(Mem, to_const_double2)
@@ -322,7 +308,6 @@ TEST(Mem, to_const_double2)
         ASSERT_DOUBLE_EQ(0.0, data[i].y);
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
 }
 
 TEST(Mem, to_const_double4c)
@@ -347,5 +332,4 @@ TEST(Mem, to_const_double4c)
         ASSERT_DOUBLE_EQ(0.0, data[i].d.y);
     }
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
 }

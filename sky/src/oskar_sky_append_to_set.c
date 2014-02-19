@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,9 +29,6 @@
 #include <private_sky.h>
 #include <oskar_sky.h>
 
-#include <oskar_sky_get_ptr.h>
-#include <oskar_sky_init.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -48,7 +45,7 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
 {
     int free_space, space_required, num_extra_models, number_to_copy;
     int i, j, type, location, n, n_copy, from_offset;
-    oskar_Sky model_ptr, **set;
+    oskar_Sky **set;
     size_t new_size;
 
     /* Check all inputs. */
@@ -106,12 +103,14 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
     from_offset = 0;
     for (i = (*set_size-1 > 0) ? *set_size-1 : 0; i < *set_size + num_extra_models; ++i)
     {
+        oskar_Sky* model_ptr;
         oskar_Sky* sky = set[i];
         n = sky->num_sources;
         free_space = max_sources_per_model - n;
         n_copy = MIN(free_space, number_to_copy);
-        oskar_sky_get_ptr(&model_ptr, model, from_offset, n_copy, status);
-        oskar_sky_insert(sky, &model_ptr, n, status);
+        model_ptr = oskar_sky_create_alias(model, from_offset, n_copy, status);
+        oskar_sky_insert(sky, model_ptr, n, status);
+        oskar_sky_free(model_ptr, status);
         if (*status) break;
         sky->num_sources = n_copy + n;
         number_to_copy  -= n_copy;

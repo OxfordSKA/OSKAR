@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@ void oskar_vis_add_system_noise(oskar_Vis* vis,
     /* Evaluate baseline antenna IDs. Needed for lookup of station std.dev. */
     num_baselines = vis->num_baselines;
     num_stations = oskar_telescope_num_stations(telescope);
-    vis_amp = &vis->amplitude;
+    vis_amp = vis->amplitude;
     ant1 = malloc(num_baselines * sizeof(int));
     ant2 = malloc(num_baselines * sizeof(int));
     for (b = 0, a1 = 0; a1 < num_stations; ++a1)
@@ -96,8 +96,8 @@ void oskar_vis_add_system_noise(oskar_Vis* vis,
                 /* Retrieve the std.dev. for the baseline antennas. */
                 st = oskar_telescope_station_const(telescope, ant1[b]);
                 noise = oskar_station_system_noise_model_const(st);
-                noise_freq = &noise->frequency;
-                noise_rms = &noise->rms;
+                noise_freq = oskar_system_noise_model_frequency_const(noise);
+                noise_rms = oskar_system_noise_model_rms_const(noise);
                 is1 = oskar_find_closest_match(vis_freq, noise_freq, status);
                 if (oskar_mem_type(noise_freq) == OSKAR_DOUBLE)
                     s1 = oskar_mem_double_const(noise_rms, status)[is1];
@@ -106,8 +106,8 @@ void oskar_vis_add_system_noise(oskar_Vis* vis,
 
                 st = oskar_telescope_station_const(telescope, ant2[b]);
                 noise = oskar_station_system_noise_model_const(st);
-                noise_freq = &noise->frequency;
-                noise_rms = &noise->rms;
+                noise_freq = oskar_system_noise_model_frequency_const(noise);
+                noise_rms = oskar_system_noise_model_rms_const(noise);
                 is2 = oskar_find_closest_match(vis_freq, noise_freq, status);
                 if (oskar_mem_type(noise_freq) == OSKAR_DOUBLE)
                     s2 = oskar_mem_double_const(noise_rms, status)[is2];

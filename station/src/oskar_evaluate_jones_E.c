@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,7 +87,7 @@ static void evaluate_E_common_sky_identical_stations(oskar_Jones* E,
         oskar_RandomState* rand_state, int* status)
 {
     int i, num_sources;
-    oskar_Mem E0; /* Pointer to the row of E for station 0. */
+    oskar_Mem *E0, *E_station; /* Pointer to rows of E for stations 0 and n. */
     const oskar_Station* station0;
     const oskar_Mem *l, *m, *n;
 
@@ -95,22 +95,25 @@ static void evaluate_E_common_sky_identical_stations(oskar_Jones* E,
     if (*status) return;
 
     /* Evaluate the beam pattern for station 0 */
+    E0 = oskar_mem_create_alias(0, 0, 0, status);
+    E_station = oskar_mem_create_alias(0, 0, 0, status);
     station0 = oskar_telescope_station_const(telescope, 0);
     num_sources = oskar_sky_num_sources(sky);
-    oskar_jones_get_station_pointer(&E0, E, 0, status);
+    oskar_jones_get_station_pointer(E0, E, 0, status);
     l = oskar_sky_l_const(sky);
     m = oskar_sky_m_const(sky);
     n = oskar_sky_n_const(sky);
-    oskar_evaluate_station_beam_pattern_relative_directions(&E0, num_sources,
+    oskar_evaluate_station_beam_pattern_relative_directions(E0, num_sources,
             l, m, n, station0, work, rand_state, frequency_hz, gast, status);
 
     /* Copy E for station 0 into memory for other stations. */
     for (i = 1; i < oskar_telescope_num_stations(telescope); ++i)
     {
-        oskar_Mem E_station;
-        oskar_jones_get_station_pointer(&E_station, E, i, status);
-        oskar_mem_insert(&E_station, &E0, 0, status);
+        oskar_jones_get_station_pointer(E_station, E, i, status);
+        oskar_mem_insert(E_station, E0, 0, status);
     }
+    oskar_mem_free(E0, status);
+    oskar_mem_free(E_station, status);
 }
 
 /*
@@ -125,10 +128,12 @@ static void evaluate_E_different_sky(oskar_Jones* E,
 {
     int i, num_sources, num_stations;
     const oskar_Mem *l, *m, *n;
+    oskar_Mem *E_station;
 
     /* Check if safe to proceed. */
     if (*status) return;
 
+    E_station = oskar_mem_create_alias(0, 0, 0, status);
     num_sources = oskar_sky_num_sources(sky);
     num_stations = oskar_telescope_num_stations(telescope);
     l = oskar_sky_l_const(sky);
@@ -137,14 +142,14 @@ static void evaluate_E_different_sky(oskar_Jones* E,
 
     for (i = 0; i < num_stations; ++i)
     {
-        oskar_Mem E_station;
         const oskar_Station* station;
         station = oskar_telescope_station_const(telescope, i);
-        oskar_jones_get_station_pointer(&E_station, E, i, status);
-        oskar_evaluate_station_beam_pattern_relative_directions(&E_station,
+        oskar_jones_get_station_pointer(E_station, E, i, status);
+        oskar_evaluate_station_beam_pattern_relative_directions(E_station,
                 num_sources, l, m, n, station, work, rand_state, frequency_hz,
                 gast, status);
     }
+    oskar_mem_free(E_station, status);
 }
 
 #ifdef __cplusplus

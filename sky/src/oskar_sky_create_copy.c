@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,24 +62,24 @@ oskar_Sky* oskar_sky_create_copy(const oskar_Sky* src, int location,
     model->dec0 = src->dec0;
 
     /* Copy the memory blocks */
-    oskar_mem_copy(&model->RA, &src->RA, status);
-    oskar_mem_copy(&model->Dec, &src->Dec, status);
-    oskar_mem_copy(&model->I, &src->I, status);
-    oskar_mem_copy(&model->Q, &src->Q, status);
-    oskar_mem_copy(&model->U, &src->U, status);
-    oskar_mem_copy(&model->V, &src->V, status);
-    oskar_mem_copy(&model->reference_freq, &src->reference_freq, status);
-    oskar_mem_copy(&model->spectral_index, &src->spectral_index, status);
-    oskar_mem_copy(&model->RM, &src->RM, status);
-    oskar_mem_copy(&model->l, &src->l, status);
-    oskar_mem_copy(&model->m, &src->m, status);
-    oskar_mem_copy(&model->n, &src->n, status);
-    oskar_mem_copy(&model->FWHM_major, &src->FWHM_major, status);
-    oskar_mem_copy(&model->FWHM_minor, &src->FWHM_minor, status);
-    oskar_mem_copy(&model->position_angle, &src->position_angle, status);
-    oskar_mem_copy(&model->gaussian_a, &src->gaussian_a, status);
-    oskar_mem_copy(&model->gaussian_b, &src->gaussian_b, status);
-    oskar_mem_copy(&model->gaussian_c, &src->gaussian_c, status);
+    oskar_mem_copy(model->RA, src->RA, status);
+    oskar_mem_copy(model->Dec, src->Dec, status);
+    oskar_mem_copy(model->I, src->I, status);
+    oskar_mem_copy(model->Q, src->Q, status);
+    oskar_mem_copy(model->U, src->U, status);
+    oskar_mem_copy(model->V, src->V, status);
+    oskar_mem_copy(model->reference_freq, src->reference_freq, status);
+    oskar_mem_copy(model->spectral_index, src->spectral_index, status);
+    oskar_mem_copy(model->RM, src->RM, status);
+    oskar_mem_copy(model->l, src->l, status);
+    oskar_mem_copy(model->m, src->m, status);
+    oskar_mem_copy(model->n, src->n, status);
+    oskar_mem_copy(model->FWHM_major, src->FWHM_major, status);
+    oskar_mem_copy(model->FWHM_minor, src->FWHM_minor, status);
+    oskar_mem_copy(model->position_angle, src->position_angle, status);
+    oskar_mem_copy(model->gaussian_a, src->gaussian_a, status);
+    oskar_mem_copy(model->gaussian_b, src->gaussian_b, status);
+    oskar_mem_copy(model->gaussian_c, src->gaussian_c, status);
 
     /* Return pointer to new sky model. */
     return model;

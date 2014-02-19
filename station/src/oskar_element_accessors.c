@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,22 +70,22 @@ double oskar_element_gaussian_fwhm_rad(const oskar_Element* data)
 
 oskar_Mem* oskar_element_x_filename(oskar_Element* data)
 {
-    return &data->filename_x;
+    return data->filename_x;
 }
 
 const oskar_Mem* oskar_element_x_filename_const(const oskar_Element* data)
 {
-    return &data->filename_x;
+    return data->filename_x;
 }
 
 oskar_Mem* oskar_element_y_filename(oskar_Element* data)
 {
-    return &data->filename_y;
+    return data->filename_y;
 }
 
 const oskar_Mem* oskar_element_y_filename_const(const oskar_Element* data)
 {
-    return &data->filename_y;
+    return data->filename_y;
 }
 
 

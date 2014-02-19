@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -150,7 +150,6 @@ size_t oskar_mem_load_ascii(FILE* file, size_t num_mem, int* status, ...)
             {
                 oskar_mem_copy(mem, mem_handle[i], status);
                 oskar_mem_free(mem_handle[i], status);
-                free(mem_handle[i]); /* FIXME Remove after updating oskar_mem_free(). */
             }
 
             /* We don't need the default here, but must advance the va_arg

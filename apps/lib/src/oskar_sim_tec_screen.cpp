@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,13 +35,10 @@
 #include <oskar_mjd_to_gast_fast.h>
 #include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
 #include <oskar_Settings.h>
-#include <oskar_mem.h>
 #include <oskar_telescope.h>
 #include <oskar_convert_offset_ecef_to_ecef.h>
 #include <oskar_evaluate_image_lm_grid.h>
-#include <oskar_image_free.h>
-#include <oskar_image_init.h>
-#include <oskar_image_resize.h>
+#include <oskar_image.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
 #include <oskar_evaluate_pierce_points.h>
 
@@ -54,29 +51,32 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
         oskar_Telescope* telescope, int* status);
 
 extern "C"
-int oskar_sim_tec_screen(oskar_Image* TEC_screen, oskar_Settings* settings,
-        oskar_Log* log)
+oskar_Image* oskar_sim_tec_screen(oskar_Settings* settings, oskar_Log* log,
+        int* status)
 {
-    int status = OSKAR_SUCCESS;
-
+    oskar_Image* TEC_screen = 0;
     oskar_SettingsIonosphere* MIM = &settings->ionosphere;
+
+    if (!settings || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return 0;
+    }
+
+    if (*status) return 0;
 
     if (!MIM->TECImage.fits_file && !MIM->TECImage.img_file)
     {
-        return OSKAR_ERR_SETTINGS_IONOSPHERE;
+        *status = OSKAR_ERR_SETTINGS_IONOSPHERE;
+        return 0;
     }
 
-    oskar_Telescope* telescope = oskar_set_up_telescope(log, settings,
-            &status);
+    oskar_Telescope* telescope = oskar_set_up_telescope(log, settings, status);
 
     int im_size = MIM->TECImage.size;
     int num_pixels = im_size * im_size;
-
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
-
     int loc = OSKAR_LOCATION_CPU;
-
-    int owner = OSKAR_TRUE;
     double fov = MIM->TECImage.fov_rad;
 
     // Evaluate the p.p. coordinates of the beam phase centre.
@@ -85,12 +85,11 @@ int oskar_sim_tec_screen(oskar_Image* TEC_screen, oskar_Settings* settings,
     if (MIM->TECImage.beam_centred)
     {
         evaluate_station_beam_pp(&pp_lon0, &pp_lat0, st_idx, settings,
-                telescope, &status);
+                telescope, status);
     }
     else
     {
-        oskar_Station* s;
-        s = oskar_telescope_station(telescope, st_idx);
+        oskar_Station* s = oskar_telescope_station(telescope, st_idx);
         pp_lon0 = oskar_station_beam_longitude_rad(s);
         pp_lat0 = oskar_station_beam_latitude_rad(s);
     }
@@ -100,50 +99,45 @@ int oskar_sim_tec_screen(oskar_Image* TEC_screen, oskar_Settings* settings,
     double tinc = settings->obs.dt_dump_days;
 
     // Generate the lon, lat grid used for the TEC values.
-    oskar_Mem pp_lon, pp_lat;
-    oskar_mem_init(&pp_lon, type, loc, num_pixels, owner, &status);
-    oskar_mem_init(&pp_lat, type, loc, num_pixels, owner, &status);
-    oskar_evaluate_image_lon_lat_grid(&pp_lon, &pp_lat, im_size, im_size, fov,
-            fov, pp_lon0, pp_lat0, &status);
+    oskar_Mem *pp_lon, *pp_lat, *pp_rel_path;
+    pp_lon = oskar_mem_create(type, loc, num_pixels, status);
+    pp_lat = oskar_mem_create(type, loc, num_pixels, status);
+    oskar_evaluate_image_lon_lat_grid(pp_lon, pp_lat, im_size, im_size, fov,
+            fov, pp_lon0, pp_lat0, status);
 
     // Relative path in direction of p.p. (1.0 here as we are not using
     // any stations)
-    oskar_Mem pp_rel_path;
-    oskar_mem_init(&pp_rel_path, type, loc, num_pixels, owner, &status);
-    oskar_mem_set_value_real(&pp_rel_path, 1.0, 0, 0, &status);
+    pp_rel_path = oskar_mem_create(type, loc, num_pixels, status);
+    oskar_mem_set_value_real(pp_rel_path, 1.0, 0, 0, status);
 
     // Initialise return values
-    oskar_image_init(TEC_screen, type, loc, &status);
-    oskar_image_resize(TEC_screen, im_size, im_size, 1, num_times, 1, &status);
-    TEC_screen->image_type = OSKAR_IMAGE_TYPE_BEAM_SCALAR;
-    TEC_screen->centre_ra_deg = pp_lon0  * (180.0/M_PI);
-    TEC_screen->centre_dec_deg = pp_lat0  * (180.0/M_PI);
-    TEC_screen->fov_ra_deg = fov * (180.0/M_PI);
-    TEC_screen->fov_dec_deg = fov * (180.0/M_PI);
-    TEC_screen->freq_start_hz = 0.0;
-    TEC_screen->freq_inc_hz = 0.0;
-    TEC_screen->time_inc_sec = tinc * 86400.;
-    TEC_screen->time_start_mjd_utc = t0;
+    TEC_screen = oskar_image_create(type, loc, status);
+    oskar_image_resize(TEC_screen, im_size, im_size, 1, num_times, 1, status);
+    oskar_image_set_type(TEC_screen, OSKAR_IMAGE_TYPE_BEAM_SCALAR);
+    oskar_image_set_centre(TEC_screen, pp_lon0  * (180.0/M_PI),
+            pp_lat0  * (180.0/M_PI));
+    oskar_image_set_fov(TEC_screen, fov * (180.0/M_PI), fov * (180.0/M_PI));
+    oskar_image_set_freq(TEC_screen, 0.0, 0.0);
+    oskar_image_set_time(TEC_screen, t0, tinc * 86400);
 
-    oskar_Mem tec_screen;
-    oskar_mem_init(&tec_screen, type, loc, num_pixels, !owner, &status);
-
+    oskar_Mem *tec_screen_snapshot = oskar_mem_create_alias(0, 0, 0, status);
     for (int i = 0; i < num_times; ++i)
     {
         double gast = t0 + tinc * (double)i;
         int offset = num_pixels * i;
-        oskar_mem_get_pointer(&tec_screen, &(TEC_screen->data), offset,
-                num_pixels, &status);
-        oskar_evaluate_TEC_TID(&tec_screen, num_pixels, &pp_lon, &pp_lat,
-                &pp_rel_path, MIM->TEC0, &(MIM->TID[0]), gast);
+        oskar_mem_set_alias(tec_screen_snapshot, oskar_image_data(TEC_screen),
+                offset, num_pixels, status);
+        oskar_evaluate_TEC_TID(tec_screen_snapshot, num_pixels, pp_lon, pp_lat,
+                pp_rel_path, MIM->TEC0, &(MIM->TID[0]), gast);
     }
 
-    oskar_mem_free(&pp_lon, &status);
-    oskar_mem_free(&pp_lat, &status);
-    oskar_mem_free(&pp_rel_path, &status);
-    oskar_telescope_free(telescope, &status);
+    oskar_mem_free(pp_lon, status);
+    oskar_mem_free(pp_lat, status);
+    oskar_mem_free(pp_rel_path, status);
+    oskar_mem_free(tec_screen_snapshot, status);
+    oskar_telescope_free(telescope, status);
 
-    return status;
+    return TEC_screen;
 }
 
 
@@ -251,11 +245,5 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
     oskar_mem_free(hor_x, status);
     oskar_mem_free(hor_y, status);
     oskar_mem_free(hor_y, status);
-    free(m_pp_lon0); // FIXME Remove after updating oskar_mem_free().
-    free(m_pp_lat0); // FIXME Remove after updating oskar_mem_free().
-    free(m_pp_rel_path); // FIXME Remove after updating oskar_mem_free().
-    free(hor_x); // FIXME Remove after updating oskar_mem_free().
-    free(hor_y); // FIXME Remove after updating oskar_mem_free().
-    free(hor_z); // FIXME Remove after updating oskar_mem_free().
 }
 

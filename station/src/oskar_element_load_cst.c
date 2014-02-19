@@ -294,16 +294,12 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     /* Store the filename. */
     if (port == 1)
     {
-        oskar_mem_init(&data->filename_x, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0,
-                OSKAR_TRUE, status);
-        oskar_mem_append_raw(&data->filename_x, filename, OSKAR_CHAR,
+        oskar_mem_append_raw(data->filename_x, filename, OSKAR_CHAR,
                 OSKAR_LOCATION_CPU, 1 + strlen(filename), status);
     }
     else if (port == 2)
     {
-        oskar_mem_init(&data->filename_y, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0,
-                OSKAR_TRUE, status);
-        oskar_mem_append_raw(&data->filename_y, filename, OSKAR_CHAR,
+        oskar_mem_append_raw(data->filename_y, filename, OSKAR_CHAR,
                 OSKAR_LOCATION_CPU, 1 + strlen(filename), status);
     }
 
@@ -315,13 +311,6 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     oskar_mem_free(m_phi_re, status);
     oskar_mem_free(m_phi_im, status);
     oskar_mem_free(weight, status);
-    free(m_theta); /* FIXME Remove after updating oskar_mem_free(). */
-    free(m_phi); /* FIXME Remove after updating oskar_mem_free(). */
-    free(m_theta_re); /* FIXME Remove after updating oskar_mem_free(). */
-    free(m_theta_im); /* FIXME Remove after updating oskar_mem_free(). */
-    free(m_phi_re); /* FIXME Remove after updating oskar_mem_free(). */
-    free(m_phi_im); /* FIXME Remove after updating oskar_mem_free(). */
-    free(weight); /* FIXME Remove after updating oskar_mem_free(). */
 }
 
 static void resize_arrays(int n, oskar_Mem* m_theta,

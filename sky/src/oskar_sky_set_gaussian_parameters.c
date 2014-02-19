@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,9 +47,9 @@ void oskar_sky_set_gaussian_parameters(oskar_Sky* sky,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    oskar_mem_set_value_real(&sky->FWHM_major, FWHM_major, 0, 0, status);
-    oskar_mem_set_value_real(&sky->FWHM_minor, FWHM_minor, 0, 0, status);
-    oskar_mem_set_value_real(&sky->position_angle, position_angle, 0, 0, status);
+    oskar_mem_set_value_real(sky->FWHM_major, FWHM_major, 0, 0, status);
+    oskar_mem_set_value_real(sky->FWHM_minor, FWHM_minor, 0, 0, status);
+    oskar_mem_set_value_real(sky->position_angle, position_angle, 0, 0, status);
 }
 
 #ifdef __cplusplus

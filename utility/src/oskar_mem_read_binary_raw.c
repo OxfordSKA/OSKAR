@@ -71,7 +71,6 @@ oskar_Mem* oskar_mem_read_binary_raw(const char* filename, int type,
     if (*status)
     {
         oskar_mem_free(mem, status);
-        free(mem); /* FIXME Remove after updating oskar_mem_free(). */
         fclose(stream);
         return 0;
     }
@@ -81,7 +80,6 @@ oskar_Mem* oskar_mem_read_binary_raw(const char* filename, int type,
     if (fread(oskar_mem_void(mem), 1, size_bytes, stream) != size_bytes)
     {
         oskar_mem_free(mem, status);
-        free(mem); /* FIXME Remove after updating oskar_mem_free(). */
         fclose(stream);
         *status = OSKAR_ERR_FILE_IO;
         return 0;
@@ -96,7 +94,6 @@ oskar_Mem* oskar_mem_read_binary_raw(const char* filename, int type,
         oskar_Mem* gpu;
         gpu = oskar_mem_create_copy(mem, OSKAR_LOCATION_GPU, status);
         oskar_mem_free(mem, status);
-        free(mem); /* FIXME Remove after updating oskar_mem_free(). */
         return gpu;
     }
 

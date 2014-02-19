@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #include <private_station.h>
 #include <oskar_station.h>
 
-#include <oskar_system_noise_model_init.h>
+#include <oskar_system_noise_model_create.h>
 #include <math.h>
 
 #ifndef M_PI
@@ -77,24 +77,24 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->location = location;
 
     /* Initialise the memory. */
-    oskar_mem_init(&model->x_signal, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->y_signal, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->z_signal, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->x_weights, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->y_weights, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->z_weights, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->weight, type | OSKAR_COMPLEX, location, num_elements, 1, status);
-    oskar_mem_init(&model->gain, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->gain_error, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->phase_offset, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->phase_error, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->cos_orientation_x, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->sin_orientation_x, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->cos_orientation_y, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->sin_orientation_y, type, location, num_elements, 1, status);
-    oskar_mem_init(&model->element_type, OSKAR_INT, location, num_elements, 1, status);
-    oskar_mem_init(&model->permitted_beam_az, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, status);
-    oskar_mem_init(&model->permitted_beam_el, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, 1, status);
+    model->x_signal = oskar_mem_create(type, location, num_elements, status);
+    model->y_signal = oskar_mem_create(type, location, num_elements, status);
+    model->z_signal = oskar_mem_create(type, location, num_elements, status);
+    model->x_weights = oskar_mem_create(type, location, num_elements, status);
+    model->y_weights = oskar_mem_create(type, location, num_elements, status);
+    model->z_weights = oskar_mem_create(type, location, num_elements, status);
+    model->weight = oskar_mem_create(type | OSKAR_COMPLEX, location, num_elements, status);
+    model->gain = oskar_mem_create(type, location, num_elements, status);
+    model->gain_error = oskar_mem_create(type, location, num_elements, status);
+    model->phase_offset = oskar_mem_create(type, location, num_elements, status);
+    model->phase_error = oskar_mem_create(type, location, num_elements, status);
+    model->cos_orientation_x = oskar_mem_create(type, location, num_elements, status);
+    model->sin_orientation_x = oskar_mem_create(type, location, num_elements, status);
+    model->cos_orientation_y = oskar_mem_create(type, location, num_elements, status);
+    model->sin_orientation_y = oskar_mem_create(type, location, num_elements, status);
+    model->element_type = oskar_mem_create(OSKAR_INT, location, num_elements, status);
+    model->permitted_beam_az = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, status);
+    model->permitted_beam_el = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, status);
 
     /* Initialise common data. */
     model->station_type = OSKAR_STATION_TYPE_AA;
@@ -104,7 +104,7 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->beam_longitude_rad = 0.0;
     model->beam_latitude_rad = 0.0;
     model->beam_coord_type = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
-    oskar_system_noise_model_init(&model->noise, type, location, status);
+    model->noise = oskar_system_noise_model_create(type, location, status);
 
     /* Initialise Gaussian beam station data. */
     model->gaussian_beam_fwhm_rad = 0.0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,8 +76,8 @@ void oskar_station_override_element_orientations(oskar_Station* s,
         oskar_Mem *mem_cos, *mem_sin;
 
         /* Get pointers to the X or Y element orientation data. */
-        mem_cos = x_pol ? &s->cos_orientation_x : &s->cos_orientation_y;
-        mem_sin = x_pol ? &s->sin_orientation_x : &s->sin_orientation_y;
+        mem_cos = x_pol ? s->cos_orientation_x : s->cos_orientation_y;
+        mem_sin = x_pol ? s->sin_orientation_x : s->sin_orientation_y;
         type = oskar_station_precision(s);
         if (type == OSKAR_DOUBLE)
         {

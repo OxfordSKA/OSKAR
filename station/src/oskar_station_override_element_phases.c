@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,14 +74,14 @@ void oskar_station_override_element_phases(oskar_Station* s,
         if (type == OSKAR_DOUBLE)
         {
             double* phase;
-            phase = oskar_mem_double(&s->phase_offset, status);
+            phase = oskar_mem_double(s->phase_offset, status);
             for (i = 0; i < s->num_elements; ++i)
                 phase[i] = phase_std * oskar_random_gaussian(0);
         }
         else if (type == OSKAR_SINGLE)
         {
             float* phase;
-            phase = oskar_mem_float(&s->phase_offset, status);
+            phase = oskar_mem_float(s->phase_offset, status);
             for (i = 0; i < s->num_elements; ++i)
                 phase[i] = phase_std * oskar_random_gaussian(0);
         }

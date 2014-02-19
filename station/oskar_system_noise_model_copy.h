@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,7 @@
  * @file oskar_system_noise_model_copy.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_SystemNoiseModel.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,7 +46,6 @@ extern "C" {
  * @details
  * This function copies data held in one structure to another structure.
  *
- * @param[out] dst Pointer to destination data structure to copy into.
  * @param[in]  src Pointer to source data structure to copy from.
  * @param[in,out] status Status return code.
  */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,20 @@ void oskar_telescope_free(oskar_Telescope* telescope, int* status)
 {
     int i = 0;
 
+    /* Check all inputs. */
+    if (!telescope || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
     /* Free the arrays. */
-    oskar_mem_free(&telescope->station_x, status);
-    oskar_mem_free(&telescope->station_y, status);
-    oskar_mem_free(&telescope->station_z, status);
-    oskar_mem_free(&telescope->station_x_hor, status);
-    oskar_mem_free(&telescope->station_y_hor, status);
-    oskar_mem_free(&telescope->station_z_hor, status);
+    oskar_mem_free(telescope->station_x, status);
+    oskar_mem_free(telescope->station_y, status);
+    oskar_mem_free(telescope->station_z, status);
+    oskar_mem_free(telescope->station_x_hor, status);
+    oskar_mem_free(telescope->station_y_hor, status);
+    oskar_mem_free(telescope->station_z_hor, status);
 
     /* Free each station. */
     for (i = 0; i < telescope->num_stations; ++i)

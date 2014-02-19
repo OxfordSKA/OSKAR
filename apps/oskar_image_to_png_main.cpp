@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,10 +28,8 @@
 
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
-#include <oskar_mem.h>
 #include <oskar_version_string.h>
-
-#include <oskar_image_read.h>
+#include <oskar_image.h>
 
 #include <apps/lib/oskar_OptionParser.h>
 
@@ -123,29 +121,32 @@ int main(int argc, char** argv)
     if (!opt.check_options(argc, argv)) return OSKAR_FAIL;
 
     // Load OSKAR image
-    oskar_Image img;
-    oskar_image_read(&img, opt.getArg(), 0, &status);
+    oskar_Image* img = oskar_image_read(opt.getArg(), 0, &status);
     if (status)
     {
         oskar_log_error(0, oskar_get_error_string(status));
         return status;
     }
 
-    printf("Number of times: %i\n", img.num_times);
-    printf("Number of channels: %i\n", img.num_channels);
-    printf("Number of polarisations: %i\n", img.num_pols);
-    printf("Number of pixels: %i x %i = %i\n", img.width, img.height,
-            img.width * img.height);
+    int width, height;
+    width = oskar_image_width(img);
+    height = oskar_image_height(img);
 
-    int num_pixels = img.width*img.height;
+    printf("Number of times: %i\n", oskar_image_num_times(img));
+    printf("Number of channels: %i\n", oskar_image_num_channels(img));
+    printf("Number of polarisations: %i\n", oskar_image_num_pols(img));
+    printf("Number of pixels: %i x %i = %i\n", width, height, width * height);
+
+    int num_pixels = width * height;
     // Get a single slice of the image
-    oskar_Mem img_slice;
+    oskar_Mem *img_slice;
     int t = 0;
     int p = 0;
     int c = 0;
     printf("Creating a PNG of slice (Chan.Time.Pol): %i.%i.%i\n",c,t,p);
-    int slice_offset = ((c * img.num_times + t) * img.num_pols + p) * num_pixels;
-    oskar_mem_get_pointer(&img_slice, &(img.data), slice_offset,
+    int slice_offset = ((c * oskar_image_num_times(img) + t) *
+            oskar_image_num_pols(img) + p) * num_pixels;
+    img_slice = oskar_mem_create_alias(oskar_image_data(img), slice_offset,
             num_pixels, &status);
 
     int x, y;
@@ -184,7 +185,7 @@ int main(int argc, char** argv)
 
     bit_depth = 8;
     png_set_IHDR(png_ptr, info_ptr,
-            img.width, img.height, bit_depth,
+            width, height, bit_depth,
             PNG_COLOR_TYPE_RGB,
             PNG_INTERLACE_NONE,
             PNG_COMPRESSION_TYPE_BASE,
@@ -198,9 +199,9 @@ int main(int argc, char** argv)
 
     // Allocate memory for one row, 3 bytes per pixel - RGB.
     png_bytep row;
-    row = (png_bytep) malloc(3 * img.width * sizeof(png_byte));
+    row = (png_bytep) malloc(3 * width * sizeof(png_byte));
 
-    float* img_data = oskar_mem_float(&img_slice, &status);
+    float* img_data = oskar_mem_float(img_slice, &status);
 
     //short fltInt16;
     //int fltInt32;
@@ -212,12 +213,12 @@ int main(int argc, char** argv)
         red = std::max(red, img_data[i]);
     }
 
-    for (y = 0; y < img.height; y++)
+    for (y = 0; y < height; y++)
     {
-        for (x = 0; x < img.width; x++)
+        for (x = 0; x < width; x++)
         {
             //int idx = (img.height-y-1)*img.width + (img.width-x-1);
-            int idx = (img.height-y-1)*img.width + x;
+            int idx = (height-y-1)*width + x;
             setRGB2(&row[x*3], img_data[idx], red, blue);
 
 //            float flt = img_data[y*img.width + x];
@@ -242,6 +243,8 @@ int main(int argc, char** argv)
     png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
     png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
     free(row);
+    oskar_mem_free(img_slice, &status);
+    oskar_image_free(img, &status);
 
     return status;
 }

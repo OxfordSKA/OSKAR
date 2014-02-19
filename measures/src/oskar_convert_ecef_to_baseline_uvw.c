@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ void oskar_convert_ecef_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
         double start_mjd_utc, double dt_dump_days, oskar_Mem* work,
         int* status)
 {
-    oskar_Mem u, v, w, uu_dump, vv_dump, ww_dump; /* Pointers. */
+    oskar_Mem *u, *v, *w, *uu_dump, *vv_dump, *ww_dump; /* Aliases. */
     int i, type, location, num_baselines;
 
     /* Check all inputs. */
@@ -102,10 +102,15 @@ void oskar_convert_ecef_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
         return;
     }
 
-    /* Get pointers from work buffer. */
-    oskar_mem_get_pointer(&u, work, 0, num_stations, status);
-    oskar_mem_get_pointer(&v, work, 1 * num_stations, num_stations, status);
-    oskar_mem_get_pointer(&w, work, 2 * num_stations, num_stations, status);
+    /* Create pointers from work buffer. */
+    u = oskar_mem_create_alias(work, 0, num_stations, status);
+    v = oskar_mem_create_alias(work, 1 * num_stations, num_stations, status);
+    w = oskar_mem_create_alias(work, 2 * num_stations, num_stations, status);
+
+    /* Create pointers to baseline u,v,w coordinates for dump. */
+    uu_dump = oskar_mem_create_alias(0, 0, 0, status);
+    vv_dump = oskar_mem_create_alias(0, 0, 0, status);
+    ww_dump = oskar_mem_create_alias(0, 0, 0, status);
 
     /* Loop over dumps. */
     for (i = 0; i < num_dumps; ++i)
@@ -116,23 +121,30 @@ void oskar_convert_ecef_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
         gast = oskar_mjd_to_gast_fast(t_dump + dt_dump_days / 2.0);
 
         /* Compute u,v,w coordinates of mid point. */
-        oskar_convert_ecef_to_station_uvw(&u, &v, &w, num_stations, x, y, z,
+        oskar_convert_ecef_to_station_uvw(u, v, w, num_stations, x, y, z,
                 ra0_rad, dec0_rad, gast, status);
 
         /* Extract pointers to baseline u,v,w coordinates for this dump. */
-        oskar_mem_get_pointer(&uu_dump, uu, i * num_baselines,
+        oskar_mem_set_alias(uu_dump, uu, i * num_baselines,
                 num_baselines, status);
-        oskar_mem_get_pointer(&vv_dump, vv, i * num_baselines,
+        oskar_mem_set_alias(vv_dump, vv, i * num_baselines,
                 num_baselines, status);
-        oskar_mem_get_pointer(&ww_dump, ww, i * num_baselines,
+        oskar_mem_set_alias(ww_dump, ww, i * num_baselines,
                 num_baselines, status);
 
         /* Compute baselines from station positions. */
-        oskar_convert_station_uvw_to_baseline_uvw(&uu_dump, &vv_dump, &ww_dump,
-                &u, &v, &w, status);
+        oskar_convert_station_uvw_to_baseline_uvw(uu_dump, vv_dump, ww_dump,
+                u, v, w, status);
     }
-}
 
+    /* Free memory handles. */
+    oskar_mem_free(u, status);
+    oskar_mem_free(v, status);
+    oskar_mem_free(w, status);
+    oskar_mem_free(uu_dump, status);
+    oskar_mem_free(vv_dump, status);
+    oskar_mem_free(ww_dump, status);
+}
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,9 +74,6 @@ TEST(Mem, scale_real_single)
     oskar_mem_free(mem_cpu, &status);
     oskar_mem_free(mem_cpu2, &status);
     oskar_mem_free(mem_gpu, &status);
-    free(mem_cpu); // FIXME Remove after updating oskar_mem_free().
-    free(mem_cpu2); // FIXME Remove after updating oskar_mem_free().
-    free(mem_gpu); // FIXME Remove after updating oskar_mem_free().
 }
 
 
@@ -128,9 +125,6 @@ TEST(Mem, scale_real_single_complex)
     oskar_mem_free(mem_cpu, &status);
     oskar_mem_free(mem_cpu2, &status);
     oskar_mem_free(mem_gpu, &status);
-    free(mem_cpu); // FIXME Remove after updating oskar_mem_free().
-    free(mem_cpu2); // FIXME Remove after updating oskar_mem_free().
-    free(mem_gpu); // FIXME Remove after updating oskar_mem_free().
 }
 
 
@@ -200,9 +194,6 @@ TEST(Mem, scale_real_single_complex_matrix)
     oskar_mem_free(mem_cpu, &status);
     oskar_mem_free(mem_cpu2, &status);
     oskar_mem_free(mem_gpu, &status);
-    free(mem_cpu); // FIXME Remove after updating oskar_mem_free().
-    free(mem_cpu2); // FIXME Remove after updating oskar_mem_free().
-    free(mem_gpu); // FIXME Remove after updating oskar_mem_free().
 }
 
 
@@ -248,9 +239,6 @@ TEST(Mem, scale_real_double)
     oskar_mem_free(mem_cpu, &status);
     oskar_mem_free(mem_cpu2, &status);
     oskar_mem_free(mem_gpu, &status);
-    free(mem_cpu); // FIXME Remove after updating oskar_mem_free().
-    free(mem_cpu2); // FIXME Remove after updating oskar_mem_free().
-    free(mem_gpu); // FIXME Remove after updating oskar_mem_free().
 }
 
 
@@ -302,9 +290,6 @@ TEST(Mem, scale_real_double_complex)
     oskar_mem_free(mem_cpu, &status);
     oskar_mem_free(mem_cpu2, &status);
     oskar_mem_free(mem_gpu, &status);
-    free(mem_cpu); // FIXME Remove after updating oskar_mem_free().
-    free(mem_cpu2); // FIXME Remove after updating oskar_mem_free().
-    free(mem_gpu); // FIXME Remove after updating oskar_mem_free().
 }
 
 
@@ -374,7 +359,4 @@ TEST(Mem, scale_real_double_complex_matrix)
     oskar_mem_free(mem_cpu, &status);
     oskar_mem_free(mem_cpu2, &status);
     oskar_mem_free(mem_gpu, &status);
-    free(mem_cpu); // FIXME Remove after updating oskar_mem_free().
-    free(mem_cpu2); // FIXME Remove after updating oskar_mem_free().
-    free(mem_gpu); // FIXME Remove after updating oskar_mem_free().
 }

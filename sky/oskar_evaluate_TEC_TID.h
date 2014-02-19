@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_EVALUATE_TEC_TID_H_
 #define OSKAR_EVALUATE_TEC_TID_H_
 
@@ -37,7 +36,6 @@
 #include <oskar_global.h>
 #include <oskar_SettingsIonosphere.h>
 #include <oskar_mem.h>
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,8 +58,9 @@ extern "C" {
  * @param gast
  */
 OSKAR_EXPORT
-void oskar_evaluate_TEC_TID(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
-        oskar_Mem* lat, oskar_Mem* rel_path_length, double TEC0,
+void oskar_evaluate_TEC_TID(oskar_Mem* tec, int num_directions,
+        const oskar_Mem* lon, const oskar_Mem* lat,
+        const oskar_Mem* rel_path_length, double TEC0,
         oskar_SettingsTIDscreen* TID, double gast);
 
 #ifdef __cplusplus

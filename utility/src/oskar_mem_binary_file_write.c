@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,9 +43,9 @@ void oskar_mem_binary_file_write(const oskar_Mem* mem, const char* filename,
         size_t num_to_write, int* status)
 {
     int type;
-    oskar_Mem temp;
+    oskar_Mem *temp = 0;
     size_t size_bytes;
-    const oskar_Mem* data = NULL;
+    const oskar_Mem* data = 0;
 
     /* Check all inputs. */
     if (!mem || !filename || !status)
@@ -60,9 +60,6 @@ void oskar_mem_binary_file_write(const oskar_Mem* mem, const char* filename,
     /* Get the data type. */
     type = oskar_mem_type(mem);
 
-    /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
-
     /* Get the total number of bytes to write. */
     if (num_to_write == 0)
         num_to_write = oskar_mem_length(mem);
@@ -70,11 +67,11 @@ void oskar_mem_binary_file_write(const oskar_Mem* mem, const char* filename,
 
     /* Check if data is in CPU or GPU memory. */
     data = mem;
-    if (oskar_mem_location(mem) == OSKAR_LOCATION_GPU)
+    if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
     {
         /* Copy to temporary. */
-        oskar_mem_copy(&temp, mem, status);
-        data = &temp;
+        temp = oskar_mem_create_copy(mem, OSKAR_LOCATION_CPU, status);
+        data = temp;
     }
 
     /* Save the memory to a binary file. */
@@ -83,7 +80,7 @@ void oskar_mem_binary_file_write(const oskar_Mem* mem, const char* filename,
             oskar_mem_void_const(data), status);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp, status);
+    oskar_mem_free(temp, status);
 }
 
 void oskar_mem_binary_file_write_ext(const oskar_Mem* mem, const char* filename,
@@ -91,9 +88,9 @@ void oskar_mem_binary_file_write_ext(const oskar_Mem* mem, const char* filename,
         size_t num_to_write, int* status)
 {
     int type;
-    oskar_Mem temp;
+    oskar_Mem *temp = 0;
     size_t size_bytes;
-    const oskar_Mem* data = NULL;
+    const oskar_Mem* data = 0;
 
     /* Check all inputs. */
     if (!mem || !filename || !name_group || !name_tag || !status)
@@ -108,9 +105,6 @@ void oskar_mem_binary_file_write_ext(const oskar_Mem* mem, const char* filename,
     /* Get the data type. */
     type = oskar_mem_type(mem);
 
-    /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
-
     /* Get the total number of bytes to write. */
     if (num_to_write == 0)
         num_to_write = oskar_mem_length(mem);
@@ -118,11 +112,11 @@ void oskar_mem_binary_file_write_ext(const oskar_Mem* mem, const char* filename,
 
     /* Check if data is in CPU or GPU memory. */
     data = mem;
-    if (oskar_mem_location(mem) == OSKAR_LOCATION_GPU)
+    if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
     {
         /* Copy to temporary. */
-        oskar_mem_copy(&temp, mem, status);
-        data = &temp;
+        temp = oskar_mem_create_copy(mem, OSKAR_LOCATION_CPU, status);
+        data = temp;
     }
 
     /* Save the memory to a binary file. */
@@ -131,7 +125,7 @@ void oskar_mem_binary_file_write_ext(const oskar_Mem* mem, const char* filename,
             oskar_mem_void_const(data), status);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp, status);
+    oskar_mem_free(temp, status);
 }
 
 #ifdef __cplusplus

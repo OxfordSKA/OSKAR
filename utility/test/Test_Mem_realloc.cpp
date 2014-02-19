@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,6 @@ TEST(Mem, realloc_gpu)
     ASSERT_EQ(500, (int)oskar_mem_length(mem));
     ASSERT_EQ((int)OSKAR_DOUBLE, oskar_mem_type(mem));
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
@@ -56,6 +55,5 @@ TEST(Mem, realloc_cpu)
     ASSERT_EQ(1000, (int)oskar_mem_length(mem));
     ASSERT_EQ((int)OSKAR_DOUBLE_COMPLEX, oskar_mem_type(mem));
     oskar_mem_free(mem, &status);
-    free(mem); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }

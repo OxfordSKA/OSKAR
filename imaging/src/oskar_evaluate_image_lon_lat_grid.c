@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_evaluate_image_lm_grid.h"
-#include "imaging/oskar_evaluate_image_lon_lat_grid.h"
-#include "oskar_convert_relative_direction_cosines_to_apparent_ra_dec.h"
+#include <oskar_evaluate_image_lm_grid.h>
+#include <oskar_evaluate_image_lon_lat_grid.h>
+#include <oskar_convert_relative_direction_cosines_to_apparent_ra_dec.h>
 #include <oskar_mem.h>
 #include <stdlib.h>
 
@@ -41,7 +41,7 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
         double fov_rad_lat, double lon_rad, double lat_rad, int* status)
 {
     int num_pixels, type, location;
-    oskar_Mem lon_cpu, lat_cpu;
+    oskar_Mem *lon_cpu, *lat_cpu;
 
     /* Check all inputs. */
     if (!lon || !lat || !status)
@@ -67,13 +67,13 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
     /* Initialise temporary memory. */
     if (location != OSKAR_LOCATION_CPU)
     {
-        oskar_mem_init(&lon_cpu, type, OSKAR_LOCATION_CPU, num_pixels, 1, status);
-        oskar_mem_init(&lat_cpu, type, OSKAR_LOCATION_CPU, num_pixels, 1, status);
+        lon_cpu = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
+        lat_cpu = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
     }
     else
     {
-        oskar_mem_get_pointer(&lon_cpu, lon, 0, num_pixels, status);
-        oskar_mem_get_pointer(&lat_cpu, lat, 0, num_pixels, status);
+        lon_cpu = oskar_mem_create_alias(lon, 0, num_pixels, status);
+        lat_cpu = oskar_mem_create_alias(lat, 0, num_pixels, status);
     }
 
     /* Check if safe to proceed. */
@@ -83,33 +83,37 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
         if (type == OSKAR_SINGLE)
         {
             oskar_evaluate_image_lm_grid_f(image_size_l, image_size_m,
-                    fov_rad_lon, fov_rad_lat, (float*)lon_cpu.data,
-                    (float*)lat_cpu.data);
-            oskar_convert_relative_direction_cosines_to_apparent_ra_dec_f(num_pixels,
-                    lon_rad, lat_rad, (const float*)lon_cpu.data,
-                    (const float*)lat_cpu.data, (float*)lon_cpu.data,
-                    (float*)lat_cpu.data);
+                    fov_rad_lon, fov_rad_lat, oskar_mem_float(lon_cpu, status),
+                    oskar_mem_float(lat_cpu, status));
+            oskar_convert_relative_direction_cosines_to_apparent_ra_dec_f(
+                    num_pixels, lon_rad, lat_rad,
+                    oskar_mem_float_const(lon_cpu, status),
+                    oskar_mem_float_const(lat_cpu, status),
+                    oskar_mem_float(lon_cpu, status),
+                    oskar_mem_float(lat_cpu, status));
         }
         else if (type == OSKAR_DOUBLE)
         {
             oskar_evaluate_image_lm_grid_d(image_size_l, image_size_m,
-                    fov_rad_lon, fov_rad_lat, (double*)lon_cpu.data,
-                    (double*)lat_cpu.data);
-            oskar_convert_relative_direction_cosines_to_apparent_ra_dec_d(num_pixels,
-                    lon_rad, lat_rad, (const double*)lon_cpu.data,
-                    (const double*)lat_cpu.data, (double*)lon_cpu.data,
-                    (double*)lat_cpu.data);
+                    fov_rad_lon, fov_rad_lat, oskar_mem_double(lon_cpu, status),
+                    oskar_mem_double(lat_cpu, status));
+            oskar_convert_relative_direction_cosines_to_apparent_ra_dec_d(
+                    num_pixels, lon_rad, lat_rad,
+                    oskar_mem_double_const(lon_cpu, status),
+                    oskar_mem_double_const(lat_cpu, status),
+                    oskar_mem_double(lon_cpu, status),
+                    oskar_mem_double(lat_cpu, status));
         }
     }
 
     /* Copy data to GPU and free temporary arrays, if required. */
     if (location != OSKAR_LOCATION_CPU)
     {
-        oskar_mem_copy(lon, &lon_cpu, status);
-        oskar_mem_copy(lat, &lat_cpu, status);
-        oskar_mem_free(&lon_cpu, status);
-        oskar_mem_free(&lat_cpu, status);
+        oskar_mem_copy(lon, lon_cpu, status);
+        oskar_mem_copy(lat, lat_cpu, status);
     }
+    oskar_mem_free(lon_cpu, status);
+    oskar_mem_free(lat_cpu, status);
 }
 
 #ifdef __cplusplus

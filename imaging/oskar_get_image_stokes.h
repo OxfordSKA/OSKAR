@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_GET_IMAGE_STOKES_H_
 #define OSKAR_GET_IMAGE_STOKES_H_
 
@@ -43,8 +42,8 @@ extern "C" {
 #endif
 
 OSKAR_EXPORT
-int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Vis* vis,
-        const oskar_SettingsImage* settings);
+oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
+        const oskar_SettingsImage* settings, int* status);
 
 #ifdef __cplusplus
 }

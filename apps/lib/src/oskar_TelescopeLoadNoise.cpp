@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,6 @@ oskar_TelescopeLoadNoise::~oskar_TelescopeLoadNoise()
     if (freqs_)
     {
         oskar_mem_free(freqs_, &status);
-        free(freqs_); // FIXME Remove after updating oskar_mem_free().
     }
 }
 
@@ -91,7 +90,8 @@ void oskar_TelescopeLoadNoise::load(oskar_Telescope* telescope,
         {
             oskar_Station* s = oskar_telescope_station(telescope, i);
             oskar_SystemNoiseModel* noise = oskar_station_system_noise_model(s);
-            oskar_mem_copy(&noise->frequency, freqs_, status);
+            oskar_mem_copy(oskar_system_noise_model_frequency(noise), freqs_,
+                    status);
             setNoiseRMS_(noise, filemap, status);
         }
     }
@@ -121,7 +121,7 @@ void oskar_TelescopeLoadNoise::load(oskar_Station* station,
 
     // Set the frequency noise data field of the station structure.
     oskar_SystemNoiseModel* noise = oskar_station_system_noise_model(station);
-    oskar_mem_copy(&noise->frequency, freqs_, status);
+    oskar_mem_copy(oskar_system_noise_model_frequency(noise), freqs_, status);
 
     // Set the noise RMS based on files or settings.
     setNoiseRMS_(noise, filemap, status);
@@ -217,14 +217,15 @@ void oskar_TelescopeLoadNoise::getNoiseFreqs_(oskar_Mem* freqs,
     }
 }
 
-void oskar_TelescopeLoadNoise::setNoiseRMS_(oskar_SystemNoiseModel* noise_model,
+void oskar_TelescopeLoadNoise::setNoiseRMS_(oskar_SystemNoiseModel* model,
         const map<string, string>& filemap, int* status)
 {
     if (*status) return;
 
     const oskar_SettingsSystemNoise& settings_noise = settings_->interferometer.noise;
-    oskar_Mem* noise_rms = &noise_model->rms;
-    int num_freqs = (int)oskar_mem_length(&noise_model->frequency);
+    oskar_Mem* noise_rms = oskar_system_noise_model_rms(model);
+    int num_freqs = (int)oskar_mem_length(
+            oskar_system_noise_model_frequency(model));
     // Note: the previous noise loader implementation had integration time as
     // obs_length / number of snapshots which was wrong!
     double integration_time = settings_->interferometer.time_average_sec;
@@ -297,7 +298,6 @@ void oskar_TelescopeLoadNoise::noiseSpecTelescopeModel_(oskar_Mem* noise_rms,
         sensitivity_to_rms_(noise_rms, sens, num_freqs, bandwidth_hz,
                 integration_time_sec, status);
         oskar_mem_free(sens, status);
-        free(sens); // FIXME Remove after updating oskar_mem_free().
     }
 
     // T_sys, A_eff and efficiency
@@ -317,9 +317,6 @@ void oskar_TelescopeLoadNoise::noiseSpecTelescopeModel_(oskar_Mem* noise_rms,
         oskar_mem_free(t_sys, status);
         oskar_mem_free(area, status);
         oskar_mem_free(efficiency, status);
-        free(t_sys); // FIXME Remove after updating oskar_mem_free().
-        free(area); // FIXME Remove after updating oskar_mem_free().
-        free(efficiency); // FIXME Remove after updating oskar_mem_free().
     }
     else
     {
@@ -391,7 +388,6 @@ void oskar_TelescopeLoadNoise::noiseSpecSensitivity_(oskar_Mem* rms,
     sensitivity_to_rms_(rms, sens, num_freqs, bandwidth_hz,
             integration_time_sec, status);
     oskar_mem_free(sens, status);
-    free(sens); // FIXME Remove after updating oskar_mem_free().
 }
 
 void oskar_TelescopeLoadNoise::noiseSpecTsys_(oskar_Mem* rms, int num_freqs,
@@ -474,9 +470,6 @@ void oskar_TelescopeLoadNoise::noiseSpecTsys_(oskar_Mem* rms, int num_freqs,
     oskar_mem_free(t_sys, status);
     oskar_mem_free(area, status);
     oskar_mem_free(efficiency, status);
-    free(t_sys); // FIXME Remove after updating oskar_mem_free().
-    free(area); // FIXME Remove after updating oskar_mem_free().
-    free(efficiency); // FIXME Remove after updating oskar_mem_free().
 }
 
 void oskar_TelescopeLoadNoise::sensitivity_to_rms_(oskar_Mem* rms,

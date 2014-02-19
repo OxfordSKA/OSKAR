@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,41 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_INIT_H_
-#define OSKAR_MEM_INIT_H_
+#ifndef OSKAR_PRIVATE_IMAGE_H_
+#define OSKAR_PRIVATE_IMAGE_H_
+
+#include <oskar_mem.h>
 
 /**
- * @file oskar_mem_init.h
- */
-
-#include <oskar_global.h>
-#include <stddef.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief
- * Initialises and allocates an OSKAR memory block.
+ * @struct oskar_Image
+ *
+ * @brief Structure to hold image (cube) data.
  *
  * @details
- * This function initialises an OSKAR memory block, setting the type and
- * location, allocating memory for it as required.
- *
- * @param[in,out] mem Pointer to data structure.
- * @param[in] type Enumerated data type of memory contents (magic number).
- * @param[in] location Specify 0 for host memory, 1 for device memory.
- * @param[in] n_elements Number of elements of type \p type in the array.
- * @param[in] owner Flag to specify whether the structure should own the memory.
- * @param[in,out]  status   Status return code.
+ * This structure holds data for a multi-dimensional image hyper-cube.
  */
-OSKAR_EXPORT
-void oskar_mem_init(oskar_Mem* mem, int type, int location, size_t n_elements,
-        int owner, int* status);
+struct oskar_Image
+{
+    oskar_Mem* data;
+    oskar_Mem* settings_path;
+    int grid_type;   /* NEW v2.4 */
+    int coord_frame; /* NEW v2.4 */
+    int dimension_order[5];
+    int image_type;
+    int width;
+    int height;
+    int num_pols;
+    int num_times;
+    int num_channels;
+    int healpix_nside; /* NEW v2.4 */
+    double centre_lon_deg;
+    double centre_lat_deg;
+    double fov_lon_deg;
+    double fov_lat_deg;
+    double time_start_mjd_utc;
+    double time_inc_sec;
+    double freq_start_hz;
+    double freq_inc_hz;
+};
 
-#ifdef __cplusplus
-}
-#endif
+#ifndef OSKAR_IMAGE_TYPEDEF_
+#define OSKAR_IMAGE_TYPEDEF_
+typedef struct oskar_Image oskar_Image;
+#endif /* OSKAR_IMAGE_TYPEDEF_ */
 
-#endif /* OSKAR_MEM_INIT_H_ */
+#endif /* OSKAR_PRIVATE_IMAGE_H_ */

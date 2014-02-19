@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,12 +74,12 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     telescope->time_average_sec = src->time_average_sec;
 
     /* Copy the coordinates. */
-    oskar_mem_copy(&telescope->station_x, &src->station_x, status);
-    oskar_mem_copy(&telescope->station_y, &src->station_y, status);
-    oskar_mem_copy(&telescope->station_z, &src->station_z, status);
-    oskar_mem_copy(&telescope->station_x_hor, &src->station_x_hor, status);
-    oskar_mem_copy(&telescope->station_y_hor, &src->station_y_hor, status);
-    oskar_mem_copy(&telescope->station_z_hor, &src->station_z_hor, status);
+    oskar_mem_copy(telescope->station_x, src->station_x, status);
+    oskar_mem_copy(telescope->station_y, src->station_y, status);
+    oskar_mem_copy(telescope->station_z, src->station_z, status);
+    oskar_mem_copy(telescope->station_x_hor, src->station_x_hor, status);
+    oskar_mem_copy(telescope->station_y_hor, src->station_y_hor, status);
+    oskar_mem_copy(telescope->station_z_hor, src->station_z_hor, status);
 
     /* Copy each station. */
     telescope->station = malloc(src->num_stations * sizeof(oskar_Station*));

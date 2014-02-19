@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,25 +104,24 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
 
     oskar_Sky* chunk = sky[0];
     int num_sources = oskar_sky_num_sources(chunk);
-    oskar_Mem hor_x, hor_y, hor_z;
-    int owner = OSKAR_TRUE;
-    oskar_mem_init(&hor_x, type, loc, num_sources, owner, &status);
-    oskar_mem_init(&hor_y, type, loc, num_sources, owner, &status);
-    oskar_mem_init(&hor_z, type, loc, num_sources, owner, &status);
+    oskar_Mem *hor_x, *hor_y, *hor_z;
+    hor_x = oskar_mem_create(type, loc, num_sources, &status);
+    hor_y = oskar_mem_create(type, loc, num_sources, &status);
+    hor_z = oskar_mem_create(type, loc, num_sources, &status);
 
-    oskar_Mem pp_lon, pp_lat, pp_rel_path;
+    oskar_Mem *pp_lon, *pp_lat, *pp_rel_path;
     int num_stations = oskar_telescope_num_stations(telescope);
 
     int num_pp = num_stations * num_sources;
-    oskar_mem_init(&pp_lon, type, loc, num_pp, owner, &status);
-    oskar_mem_init(&pp_lat, type, loc, num_pp, owner, &status);
-    oskar_mem_init(&pp_rel_path, type, loc, num_pp, owner, &status);
+    pp_lon = oskar_mem_create(type, loc, num_pp, &status);
+    pp_lat = oskar_mem_create(type, loc, num_pp, &status);
+    pp_rel_path = oskar_mem_create(type, loc, num_pp, &status);
 
     // Pierce points for one station (non-owned oskar_Mem pointers)
-    oskar_Mem pp_st_lon, pp_st_lat, pp_st_rel_path;
-    oskar_mem_init(&pp_st_lon, type, loc, num_sources, !owner, &status);
-    oskar_mem_init(&pp_st_lat, type, loc, num_sources, !owner, &status);
-    oskar_mem_init(&pp_st_rel_path, type, loc, num_sources, !owner, &status);
+    oskar_Mem *pp_st_lon, *pp_st_lat, *pp_st_rel_path;
+    pp_st_lon = oskar_mem_create_alias(0, 0, 0, &status);
+    pp_st_lat = oskar_mem_create_alias(0, 0, 0, &status);
+    pp_st_rel_path = oskar_mem_create_alias(0, 0, 0, &status);
 
     int num_times = settings.obs.num_time_steps;
     double obs_start_mjd_utc = settings.obs.start_mjd_utc;
@@ -134,17 +133,15 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
     std::string label3 = "pp_path";
     std::string units  = "radians";
     std::string units2 = "";
-    oskar_Mem dims;
-    oskar_mem_init(&dims, OSKAR_INT, loc, 2, owner, &status);
+    oskar_Mem *dims = oskar_mem_create(OSKAR_INT, loc, 2, &status);
     /* FIXME is this the correct dimension order ?
      * FIXME get the MATLAB reader to respect dimension ordering */
-    ((int*)dims.data)[0] = num_sources;
-    ((int*)dims.data)[1] = num_stations;
+    oskar_mem_int(dims, &status)[0] = num_sources;
+    oskar_mem_int(dims, &status)[1] = num_stations;
 
     const char* filename = settings.ionosphere.pierce_points.filename;
-    FILE* stream;
-    stream = fopen(filename, "wb");
-    if (stream == NULL)
+    FILE* stream = fopen(filename, "wb");
+    if (!stream)
         return OSKAR_ERR_FILE_IO;
 
     oskar_binary_stream_write_header(stream, &status);
@@ -172,8 +169,7 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
             double lon = oskar_station_longitude_rad(station);
             double lat = oskar_station_latitude_rad(station);
             double alt = oskar_station_altitude_m(station);
-            double x_ecef, y_ecef, z_ecef;
-            double x_offset,y_offset,z_offset;
+            double x_ecef, y_ecef, z_ecef, x_offset, y_offset, z_offset;
 
             if (type == OSKAR_DOUBLE)
             {
@@ -197,28 +193,30 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
                 oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(num_sources,
                         oskar_mem_double_const(oskar_sky_ra_const(chunk), &status),
                         oskar_mem_double_const(oskar_sky_dec_const(chunk), &status),
-                        last, lat, (double*)hor_x.data, (double*)hor_y.data,
-                        (double*)hor_z.data);
+                        last, lat, oskar_mem_double(hor_x, &status),
+                        oskar_mem_double(hor_y, &status),
+                        oskar_mem_double(hor_z, &status));
             }
             else
             {
                 oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(num_sources,
                         oskar_mem_float_const(oskar_sky_ra_const(chunk), &status),
                         oskar_mem_float_const(oskar_sky_dec_const(chunk), &status),
-                        last, lat, (float*)hor_x.data, (float*)hor_y.data,
-                        (float*)hor_z.data);
+                        last, lat, oskar_mem_float(hor_x, &status),
+                        oskar_mem_float(hor_y, &status),
+                        oskar_mem_float(hor_z, &status));
             }
 
             int offset = i * num_sources;
-            oskar_mem_get_pointer(&pp_st_lon, &pp_lon, offset, num_sources,
+            oskar_mem_set_alias(pp_st_lon, pp_lon, offset, num_sources,
                     &status);
-            oskar_mem_get_pointer(&pp_st_lat, &pp_lat, offset, num_sources,
+            oskar_mem_set_alias(pp_st_lat, pp_lat, offset, num_sources,
                     &status);
-            oskar_mem_get_pointer(&pp_st_rel_path, &pp_rel_path, offset,
+            oskar_mem_set_alias(pp_st_rel_path, pp_rel_path, offset,
                     num_sources, &status);
-            oskar_evaluate_pierce_points(&pp_st_lon, &pp_st_lat, &pp_st_rel_path,
+            oskar_evaluate_pierce_points(pp_st_lon, pp_st_lat, pp_st_rel_path,
                     lon, lat, alt, x_ecef, y_ecef, z_ecef, screen_height_m,
-                    num_sources, &hor_x, &hor_y, &hor_z, &status);
+                    num_sources, hor_x, hor_y, hor_z, &status);
         } // Loop over stations.
 
         if (status != OSKAR_SUCCESS)
@@ -248,9 +246,9 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
         int field, tagID;
         field = 0;
         tagID = HEADER_OFFSET + (num_field_tags * field);
-        oskar_mem_binary_stream_write(&pp_lon, stream, GRP, tagID + DATA,
+        oskar_mem_binary_stream_write(pp_lon, stream, GRP, tagID + DATA,
                 index, 0, &status);
-        oskar_mem_binary_stream_write(&dims, stream, GRP, tagID  + DIMS,
+        oskar_mem_binary_stream_write(dims, stream, GRP, tagID  + DIMS,
                 index, 0, &status);
         oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + LABEL,
                 index, label1.size()+1, label1.c_str(), &status);
@@ -258,9 +256,9 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
                 index, units.size()+1, units.c_str(), &status);
         field = 1;
         tagID = HEADER_OFFSET + (num_field_tags * field);
-        oskar_mem_binary_stream_write(&pp_lat, stream, GRP, tagID + DATA,
+        oskar_mem_binary_stream_write(pp_lat, stream, GRP, tagID + DATA,
                 index, 0, &status);
-        oskar_mem_binary_stream_write(&dims, stream, GRP, tagID  + DIMS,
+        oskar_mem_binary_stream_write(dims, stream, GRP, tagID  + DIMS,
                 index, 0, &status);
         oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + LABEL,
                 index, label2.size()+1, label2.c_str(), &status);
@@ -268,9 +266,9 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
                 index, units.size()+1, units.c_str(), &status);
         field = 2;
         tagID = HEADER_OFFSET + (num_field_tags * field);
-        oskar_mem_binary_stream_write(&pp_rel_path, stream, GRP, tagID + DATA,
+        oskar_mem_binary_stream_write(pp_rel_path, stream, GRP, tagID + DATA,
                 index, 0, &status);
-        oskar_mem_binary_stream_write(&dims, stream, GRP, tagID  + DIMS,
+        oskar_mem_binary_stream_write(dims, stream, GRP, tagID  + DIMS,
                 index, 0, &status);
         oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + LABEL,
                 index, label3.size()+1, label3.c_str(), &status);
@@ -278,20 +276,20 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
                 index, units2.size()+1, units2.c_str(), &status);
     } // Loop over times
 
-    // Close the OSKAR binary data file
+    // Close the OSKAR binary file.
     fclose(stream);
 
     // clean up memory
-    oskar_mem_free(&hor_x, &status);
-    oskar_mem_free(&hor_y, &status);
-    oskar_mem_free(&hor_z, &status);
-    oskar_mem_free(&pp_lon, &status);
-    oskar_mem_free(&pp_lat, &status);
-    oskar_mem_free(&pp_rel_path, &status);
-    oskar_mem_free(&pp_st_lon, &status);
-    oskar_mem_free(&pp_st_lat, &status);
-    oskar_mem_free(&pp_st_rel_path, &status);
-    oskar_mem_free(&dims, &status);
+    oskar_mem_free(hor_x, &status);
+    oskar_mem_free(hor_y, &status);
+    oskar_mem_free(hor_z, &status);
+    oskar_mem_free(pp_lon, &status);
+    oskar_mem_free(pp_lat, &status);
+    oskar_mem_free(pp_rel_path, &status);
+    oskar_mem_free(pp_st_lon, &status);
+    oskar_mem_free(pp_st_lat, &status);
+    oskar_mem_free(pp_st_rel_path, &status);
+    oskar_mem_free(dims, &status);
     oskar_telescope_free(telescope, &status);
     oskar_sky_free(sky[0], &status);
     free(sky);

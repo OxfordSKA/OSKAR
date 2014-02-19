@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -329,7 +329,6 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
             (oskar_mem_char(temp))[(int)oskar_mem_length(temp) - 1] = 0;
             mxSetField(v_out, 0, "simulation_settings", mxCreateString(oskar_mem_char(temp)));
             oskar_mem_free(temp, &status);
-            free(temp); // FIXME Remove after updating oskar_mem_free().
         }
         // Extract the log
         oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
@@ -345,7 +344,6 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
             (oskar_mem_char(temp))[(int)oskar_mem_length(temp) - 1] = 0;
             mxSetField(v_out, 0, "simulation_log", mxCreateString(oskar_mem_char(temp)));
             oskar_mem_free(temp, &status);
-            free(temp); // FIXME Remove after updating oskar_mem_free().
         }
         fclose(stream);
         oskar_binary_tag_index_free(index, &status);
@@ -354,7 +352,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
     /* Populate structure TODO convert some of this to nested structure format? */
     if (filename != NULL)
         mxSetField(v_out, 0, "filename", mxCreateString(filename));
-    mxSetField(v_out, 0, "creation_date", mxCreateString((char*)date->data));
+    mxSetField(v_out, 0, "creation_date", mxCreateString(oskar_mem_char(date)));
     mxSetField(v_out, 0, "settings_file_path", mxCreateString(
             oskar_mem_char_const(oskar_vis_settings_path_const(v_in))));
     mxSetField(v_out, 0, "telescope_name", mxCreateString(

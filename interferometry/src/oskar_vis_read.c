@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,12 +96,12 @@ oskar_Vis* oskar_vis_read(const char* filename, int* status)
 
     /* Optionally read the settings path (ignore the error code). */
     tag_error = 0;
-    oskar_mem_binary_file_read(&vis->settings_path, filename, &index,
+    oskar_mem_binary_file_read(vis->settings_path, filename, &index,
             OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0, &tag_error);
 
     /* Optionally read the telescope model path (ignore the error code). */
     tag_error = 0;
-    oskar_mem_binary_file_read(&vis->telescope_path, filename, &index,
+    oskar_mem_binary_file_read(vis->telescope_path, filename, &index,
             grp, OSKAR_VIS_TAG_TELESCOPE_PATH, 0, &tag_error);
 
     /* Read visibility metadata. */
@@ -122,36 +122,36 @@ oskar_Vis* oskar_vis_read(const char* filename, int* status)
             status);
 
     /* Read the baseline coordinate arrays. */
-    oskar_mem_binary_file_read(&vis->uu_metres, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->uu_metres, filename, &index, grp,
             OSKAR_VIS_TAG_BASELINE_UU, 0, status);
-    oskar_mem_binary_file_read(&vis->vv_metres, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->vv_metres, filename, &index, grp,
             OSKAR_VIS_TAG_BASELINE_VV, 0, status);
-    oskar_mem_binary_file_read(&vis->ww_metres, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->ww_metres, filename, &index, grp,
             OSKAR_VIS_TAG_BASELINE_WW, 0, status);
 
     /* Read the visibility data. */
-    oskar_mem_binary_file_read(&vis->amplitude, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->amplitude, filename, &index, grp,
             OSKAR_VIS_TAG_AMPLITUDE, 0, status);
 
     /* Optionally read station coordinates (ignore the error code). */
     tag_error = 0;
-    oskar_mem_binary_file_read(&vis->x_metres, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->x_metres, filename, &index, grp,
             OSKAR_VIS_TAG_STATION_X, 0, &tag_error);
-    oskar_mem_binary_file_read(&vis->y_metres, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->y_metres, filename, &index, grp,
             OSKAR_VIS_TAG_STATION_Y, 0, &tag_error);
-    oskar_mem_binary_file_read(&vis->z_metres, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->z_metres, filename, &index, grp,
             OSKAR_VIS_TAG_STATION_Z, 0, &tag_error);
 
     /* Optionally read station lon., lat. and orientation angles
      * (ignore the error code). */
     tag_error = 0;
-    oskar_mem_binary_file_read(&vis->station_lon, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->station_lon, filename, &index, grp,
             OSKAR_VIS_TAG_STATION_LON, 0, &tag_error);
-    oskar_mem_binary_file_read(&vis->station_lat, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->station_lat, filename, &index, grp,
             OSKAR_VIS_TAG_STATION_LAT, 0, &tag_error);
-    oskar_mem_binary_file_read(&vis->station_orientation_x, filename, &index,
+    oskar_mem_binary_file_read(vis->station_orientation_x, filename, &index,
             grp, OSKAR_VIS_TAG_STATION_ORIENTATION_X, 0, &tag_error);
-    oskar_mem_binary_file_read(&vis->station_orientation_y, filename, &index,
+    oskar_mem_binary_file_read(vis->station_orientation_y, filename, &index,
             grp, OSKAR_VIS_TAG_STATION_ORIENTATION_Y, 0, &tag_error);
 
     /* Optionally read telescope lon., lat. (ignore the error code) */

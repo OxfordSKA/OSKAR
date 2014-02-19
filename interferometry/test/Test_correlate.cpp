@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -127,8 +127,6 @@ protected:
         oskar_jones_free(jones_, &status);
         oskar_mem_free(u_, &status);
         oskar_mem_free(v_, &status);
-        free(u_); // FIXME Remove after updating oskar_mem_free().
-        free(v_); // FIXME Remove after updating oskar_mem_free().
         oskar_sky_free(sky_, &status);
         oskar_telescope_free(telescope_, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -190,8 +188,6 @@ protected:
         // Free memory.
         oskar_mem_free(vis1, &status);
         oskar_mem_free(vis2, &status);
-        free(vis1); // FIXME Remove after updating oskar_mem_free().
-        free(vis2); // FIXME Remove after updating oskar_mem_free().
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Record properties for test.

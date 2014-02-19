@@ -50,9 +50,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     const char* filename = mxArrayToString(in[0]);
 
     // Load the OSKAR sky model structure from the specified file.
-    oskar_Sky* sky = oskar_sky_create(OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, 0, &status);
-    oskar_sky_load(sky, filename, &status);
+    oskar_Sky* sky = oskar_sky_load(filename, OSKAR_DOUBLE, &status);
     if (status)
     {
         oskar_matlab_error("Error reading OSKAR sky model file: '%s' (%s)",

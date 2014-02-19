@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,14 +28,11 @@
 
 #include <gtest/gtest.h>
 
-#include "imaging/oskar_SettingsImage.h"
-#include "imaging/oskar_make_image.h"
-#include "imaging/oskar_image_init.h"
-#include "imaging/oskar_image_free.h"
-#include "imaging/oskar_image_write.h"
-#include "imaging/oskar_image_resize.h"
-#include "imaging/oskar_evaluate_image_lm_grid.h"
-#include "imaging/oskar_image_evaluate_ranges.h"
+#include <oskar_SettingsImage.h>
+#include <oskar_make_image.h>
+#include <oskar_image.h>
+#include <oskar_evaluate_image_lm_grid.h>
+#include <oskar_evaluate_image_ranges.h>
 
 #include <oskar_get_error_string.h>
 #include <oskar_vis.h>
@@ -112,18 +109,17 @@ TEST(make_image, test)
     settings.direction_type = OSKAR_IMAGE_DIRECTION_OBSERVATION;
     settings.transform_type = OSKAR_IMAGE_DFT_2D;
 
-    oskar_Image image(OSKAR_DOUBLE);
-    error = oskar_make_image(&image, NULL, vis, &settings);
+    oskar_Image* image = oskar_make_image(NULL, vis, &settings, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     int idx = 0;
     const char* image_file = "temp_test_image.img";
-    oskar_image_write(&image, NULL, image_file, idx, &error);
+    oskar_image_write(image, NULL, image_file, idx, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
 #ifndef OSKAR_NO_FITS
     const char* fits_file = "temp_test_image.fits";
-    oskar_fits_image_write(&image, NULL, fits_file, &error);
+    oskar_fits_image_write(image, NULL, fits_file, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 #endif
 
@@ -134,11 +130,12 @@ TEST(make_image, test)
             "mem", "vv_metres", 0, 0, &error);
     oskar_mem_binary_file_write_ext(oskar_vis_amplitude(vis), vis_file,
             "mem", "vis_amp", 0, 0, &error);
-    oskar_mem_binary_file_write_ext(&image.data, vis_file,
+    oskar_mem_binary_file_write_ext(oskar_image_data_const(image), vis_file,
             "mem", "image", 0, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     oskar_vis_free(vis, &error);
+    oskar_image_free(image, &error);
 #ifndef OSKAR_NO_FITS
     remove(fits_file);
 #endif
@@ -161,29 +158,27 @@ TEST(make_image, image_lm_grid)
             oskar_mem_double(l, &error), oskar_mem_double(m, &error));
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    oskar_Image im;
-    oskar_image_init(&im, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, &error);
-    oskar_image_resize(&im, size, size, 1, 1, 2, &error);
+    oskar_Image* im = oskar_image_create(type, location, &error);
+    oskar_image_resize(im, size, size, 1, 1, 2, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    memcpy(im.data.data, oskar_mem_void(l), num_pixels * sizeof(double));
-    memcpy((double*)im.data.data + num_pixels, oskar_mem_void(m),
+    void* ptr = oskar_mem_void(oskar_image_data(im));
+    memcpy(ptr, oskar_mem_void(l), num_pixels * sizeof(double));
+    memcpy((double*)ptr + num_pixels, oskar_mem_void(m),
             num_pixels * sizeof(double));
 
 #ifndef OSKAR_NO_FITS
     const char* fits_file = "test_lm_grid.fits";
-    oskar_fits_image_write(&im, NULL, fits_file, &error);
+    oskar_fits_image_write(im, NULL, fits_file, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 #endif
     const char* image_file = "test_lm_grid.img";
-    oskar_image_write(&im, NULL, image_file, 0, &error);
+    oskar_image_write(im, NULL, image_file, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    oskar_image_free(&im, &error);
+    oskar_image_free(im, &error);
     oskar_mem_free(l, &error);
     oskar_mem_free(m, &error);
-    free(l); // FIXME Remove after updating oskar_mem_free().
-    free(m); // FIXME Remove after updating oskar_mem_free().
 #ifndef OSKAR_NO_FITS
     remove(fits_file);
 #endif
@@ -201,8 +196,9 @@ TEST(make_image, image_range)
         int snapshots = OSKAR_TRUE;
         int settings_range[2] = {0, 2};
 
-        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -216,8 +212,9 @@ TEST(make_image, image_range)
         int snapshots = OSKAR_FALSE;
         int settings_range[2] = {0, 2};
 
-        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -231,8 +228,9 @@ TEST(make_image, image_range)
         int snapshots = OSKAR_TRUE;
         int settings_range[2] = {0, 2};
 
-        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -246,8 +244,9 @@ TEST(make_image, image_range)
         int snapshots = OSKAR_TRUE;
         int settings_range[2] = {0, 2};
 
-        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(OSKAR_ERR_INVALID_RANGE, err) << oskar_get_error_string(err);
     }
 
@@ -258,8 +257,9 @@ TEST(make_image, image_range)
         int snapshots = OSKAR_TRUE;
         int settings_range[2] = {3, 5};
 
-        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -273,8 +273,9 @@ TEST(make_image, image_range)
         int snapshots = OSKAR_FALSE;
         int settings_range[2] = {3, 5};
 
-        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -288,8 +289,9 @@ TEST(make_image, image_range)
         int snapshots = OSKAR_FALSE;
         int settings_range[2] = {-1, 5};
 
-        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -303,8 +305,9 @@ TEST(make_image, image_range)
         int snapshots = OSKAR_FALSE;
         int settings_range[2] = {-1, -1};
 
-        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -318,8 +321,9 @@ TEST(make_image, image_range)
         int snapshots = OSKAR_TRUE;
         int settings_range[2] = {-1, -1};
 
-        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -333,8 +337,9 @@ TEST(make_image, image_range)
         int snapshots = OSKAR_TRUE;
         int settings_range[2] = {-1, 3};
 
-        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -348,8 +353,9 @@ TEST(make_image, image_range)
         int snapshots = OSKAR_TRUE;
         int settings_range[2] = {1, -1};
 
-        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -363,8 +369,9 @@ TEST(make_image, image_range)
         int snapshots = OSKAR_TRUE;
         int settings_range[2] = {5, 5};
 
-        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -378,8 +385,9 @@ TEST(make_image, image_range)
         int snapshots = OSKAR_TRUE;
         int settings_range[2] = {5, 2};
 
-        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(OSKAR_ERR_INVALID_RANGE, err) << oskar_get_error_string(err);
     }
 }
@@ -393,8 +401,9 @@ TEST(make_image, data_range)
     {
         int num_vis_times = 6;
         int settings_range[2] = {0, 2};
-        int err = oskar_evaluate_image_data_range(range, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -406,8 +415,9 @@ TEST(make_image, data_range)
     {
         int num_vis_times = 6;
         int settings_range[2] = {2, 5};
-        int err = oskar_evaluate_image_data_range(range, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(2, range[0]);
@@ -419,8 +429,9 @@ TEST(make_image, data_range)
     {
         int num_vis_times = 6;
         int settings_range[2] = {2, -1};
-        int err = oskar_evaluate_image_data_range(range, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(2, range[0]);
@@ -432,8 +443,9 @@ TEST(make_image, data_range)
     {
         int num_vis_times = 6;
         int settings_range[2] = {-1, 4};
-        int err = oskar_evaluate_image_data_range(range, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -445,8 +457,9 @@ TEST(make_image, data_range)
     {
         int num_vis_times = 6;
         int settings_range[2] = {-1, -1};
-        int err = oskar_evaluate_image_data_range(range, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         ASSERT_EQ(0, range[0]);
@@ -458,8 +471,9 @@ TEST(make_image, data_range)
     {
         int num_vis_times = 3;
         int settings_range[2] = {-1, 5};
-        int err = oskar_evaluate_image_data_range(range, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(OSKAR_ERR_INVALID_RANGE, err) << oskar_get_error_string(err);
     }
 
@@ -468,8 +482,9 @@ TEST(make_image, data_range)
     {
         int num_vis_times = 3;
         int settings_range[2] = {5, -1};
-        int err = oskar_evaluate_image_data_range(range, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(OSKAR_ERR_INVALID_RANGE, err) << oskar_get_error_string(err);
     }
 
@@ -478,9 +493,9 @@ TEST(make_image, data_range)
     {
         int num_vis_times = 10;
         int settings_range[2] = {5, 2};
-        int err = oskar_evaluate_image_data_range(range, settings_range,
-                num_vis_times);
+        int err = 0;
+        oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times, &err);
         ASSERT_EQ(OSKAR_ERR_INVALID_RANGE, err) << oskar_get_error_string(err);
     }
 }
-

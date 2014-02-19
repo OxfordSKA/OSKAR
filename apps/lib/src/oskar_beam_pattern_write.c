@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,29 +28,26 @@
 
 #include <apps/lib/oskar_beam_pattern_write.h>
 #include <oskar_element.h>
-#include <oskar_image_init.h>
-#include <oskar_image_resize.h>
-#include <oskar_image_write.h>
-#include <oskar_image_free.h>
+#include <oskar_image.h>
 #include <fits/oskar_fits_image_write.h>
-#include <oskar_mem.h>
 #include <math.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* ========================================================================== */
-static void save_complex_(const oskar_Image* complex_cube,
+static void save_complex(const oskar_Image* complex_cube,
         const oskar_Settings* settings, oskar_Log* log, int* status);
-static void save_power_(oskar_Image* image_cube,
+static void save_voltage(oskar_Image* image_cube,
         const oskar_Image* complex_cube,
         const oskar_Settings* settings, int type, oskar_Log* log,
         int num_pixels_total, int* err);
-static void save_phase_(const oskar_Image* complex_cube,
+static void save_phase(const oskar_Image* complex_cube,
         oskar_Image* image_cube, const oskar_Settings* settings, int type,
         oskar_Log* log, int num_pixels_total, int* err);
-static void save_total_intensity_(const oskar_Image* complex_cube,
+static void save_total_intensity(const oskar_Image* complex_cube,
         const oskar_Settings* settings, int type, oskar_Log* log, int* status);
 /* ========================================================================== */
 
@@ -59,7 +56,7 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
 {
     /* Set up image cube for beam pattern output images. */
     int num_times, num_channels, num_pols, num_pixels, num_pixels_total;
-    oskar_Image image;
+    oskar_Image* image;
 
     if (!status || *status != OSKAR_SUCCESS)
         return;
@@ -69,7 +66,7 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
         return;
     }
 
-    oskar_image_init(&image, type, OSKAR_LOCATION_CPU, status);
+    image = oskar_image_create(type, OSKAR_LOCATION_CPU, status);
 
     num_times = settings->obs.num_time_steps;
     num_channels = settings->obs.num_channels;
@@ -79,53 +76,55 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
     {
         const int* size = settings->beam_pattern.size;
         num_pixels = size[0] * size[1];
-        oskar_image_resize(&image, size[0], size[1], num_pols, num_times,
+        oskar_image_resize(image, size[0], size[1], num_pols, num_times,
                 num_channels, status);
     }
     else if (settings->beam_pattern.coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_HEALPIX)
     {
         int nside = settings->beam_pattern.nside;
         num_pixels = 12*nside*nside;
-        oskar_image_resize(&image, num_pixels, 1, num_pols, num_times,
+        oskar_image_resize(image, num_pixels, 1, num_pols, num_times,
                 num_channels, status);
     }
 
     /* Set meta-data */
-    image.image_type         = (num_pols == 1) ?
-            OSKAR_IMAGE_TYPE_BEAM_SCALAR : OSKAR_IMAGE_TYPE_BEAM_POLARISED;
-    image.grid_type          = settings->beam_pattern.coord_grid_type;
-    image.coord_frame        = settings->beam_pattern.coord_frame_type;
-    image.centre_ra_deg      = settings->obs.ra0_rad[0] * 180.0 / M_PI;
-    image.centre_dec_deg     = settings->obs.dec0_rad[0] * 180.0 / M_PI;
-    image.healpix_nside      = settings->beam_pattern.nside;
-    image.fov_ra_deg         = settings->beam_pattern.fov_deg[0];
-    image.fov_dec_deg        = settings->beam_pattern.fov_deg[1];
-    image.freq_start_hz      = settings->obs.start_frequency_hz;
-    image.freq_inc_hz        = settings->obs.frequency_inc_hz;
-    image.time_inc_sec       = settings->obs.dt_dump_days * 86400.0;
-    image.time_start_mjd_utc = settings->obs.start_mjd_utc;
-    oskar_mem_copy(&image.settings_path, &settings->settings_path, status);
+    oskar_image_set_type(image, (num_pols == 1) ?
+            OSKAR_IMAGE_TYPE_BEAM_SCALAR : OSKAR_IMAGE_TYPE_BEAM_POLARISED);
+    oskar_image_set_coord_frame(image, settings->beam_pattern.coord_frame_type);
+    oskar_image_set_grid_type(image, settings->beam_pattern.coord_grid_type);
+    oskar_image_set_healpix_nside(image, settings->beam_pattern.nside);
+    oskar_image_set_centre(image, settings->obs.ra0_rad[0] * 180.0 / M_PI,
+            settings->obs.dec0_rad[0] * 180.0 / M_PI);
+    oskar_image_set_fov(image, settings->beam_pattern.fov_deg[0],
+            settings->beam_pattern.fov_deg[1]);
+    oskar_image_set_freq(image, settings->obs.start_frequency_hz,
+            settings->obs.frequency_inc_hz);
+    oskar_image_set_time(image, settings->obs.start_mjd_utc,
+            settings->obs.dt_dump_days * 86400.0);
+    oskar_mem_append_raw(oskar_image_settings_path(image),
+            settings->settings_path, OSKAR_CHAR, OSKAR_LOCATION_CPU,
+            1 + strlen(settings->settings_path), status);
 
     num_pixels_total = num_pixels * num_times * num_channels * num_pols;
 
     /* Save the complex beam pattern. */
-    save_complex_(complex_cube, settings, log, status);
+    save_complex(complex_cube, settings, log, status);
 
     /* Save the power beam pattern. */
-    save_power_(&image, complex_cube, settings, type, log, num_pixels_total,
+    save_voltage(image, complex_cube, settings, type, log, num_pixels_total,
             status);
 
     /* Save the phase beam pattern. */
-    save_phase_(complex_cube, &image, settings, type, log, num_pixels_total,
+    save_phase(complex_cube, image, settings, type, log, num_pixels_total,
             status);
 
     /* Save the total intensity beam pattern. */
-    save_total_intensity_(complex_cube, settings, type, log, status);
+    save_total_intensity(complex_cube, settings, type, log, status);
 
-    oskar_image_free(&image, status);
+    oskar_image_free(image, status);
 }
 
-static void save_complex_(const oskar_Image* complex_cube,
+static void save_complex(const oskar_Image* complex_cube,
         const oskar_Settings* settings, oskar_Log* log, int* status)
 {
     const char* filename = settings->beam_pattern.oskar_image_complex;
@@ -137,7 +136,7 @@ static void save_complex_(const oskar_Image* complex_cube,
     oskar_image_write(complex_cube, log, filename, 0, status);
 }
 
-static void save_power_(oskar_Image* image_cube,
+static void save_voltage(oskar_Image* image_cube,
         const oskar_Image* complex_cube, const oskar_Settings* settings,
         int type, oskar_Log* log,
         int num_pixels_total, int* status)
@@ -154,8 +153,9 @@ static void save_power_(oskar_Image* image_cube,
         {
             float* image_data;
             const float2* complex_data;
-            image_data = oskar_mem_float(&image_cube->data, status);
-            complex_data = oskar_mem_float2_const(&complex_cube->data, status);
+            image_data = oskar_mem_float(oskar_image_data(image_cube), status);
+            complex_data = oskar_mem_float2_const(
+                    oskar_image_data_const(complex_cube), status);
             for (i = 0; i < num_pixels_total; ++i)
             {
                 float x, y;
@@ -168,8 +168,9 @@ static void save_power_(oskar_Image* image_cube,
         {
             double* image_data;
             const double2* complex_data;
-            image_data = oskar_mem_double(&image_cube->data, status);
-            complex_data = oskar_mem_double2_const(&complex_cube->data, status);
+            image_data = oskar_mem_double(oskar_image_data(image_cube), status);
+            complex_data = oskar_mem_double2_const(
+                    oskar_image_data_const(complex_cube), status);
             for (i = 0; i < num_pixels_total; ++i)
             {
                 double x, y;
@@ -198,7 +199,7 @@ static void save_power_(oskar_Image* image_cube,
     }
 }
 
-static void save_phase_(const oskar_Image* complex_cube,
+static void save_phase(const oskar_Image* complex_cube,
         oskar_Image* image_cube, const oskar_Settings* settings, int type,
         oskar_Log* log, int num_pixels_total, int* status)
 {
@@ -214,8 +215,9 @@ static void save_phase_(const oskar_Image* complex_cube,
         {
             float* image_data;
             const float2* complex_data;
-            image_data = oskar_mem_float(&image_cube->data, status);
-            complex_data = oskar_mem_float2_const(&complex_cube->data, status);
+            image_data = oskar_mem_float(oskar_image_data(image_cube), status);
+            complex_data = oskar_mem_float2_const(
+                    oskar_image_data_const(complex_cube), status);
             for (i = 0; i < num_pixels_total; ++i)
             {
                 image_data[i] = atan2(complex_data[i].y, complex_data[i].x);
@@ -225,8 +227,9 @@ static void save_phase_(const oskar_Image* complex_cube,
         {
             double* image_data;
             const double2* complex_data;
-            image_data = oskar_mem_double(&image_cube->data, status);
-            complex_data = oskar_mem_double2_const(&complex_cube->data, status);
+            image_data = oskar_mem_double(oskar_image_data(image_cube), status);
+            complex_data = oskar_mem_double2_const(
+                    oskar_image_data_const(complex_cube), status);
             for (i = 0; i < num_pixels_total; ++i)
             {
                 image_data[i] = atan2(complex_data[i].y, complex_data[i].x);
@@ -252,14 +255,14 @@ static void save_phase_(const oskar_Image* complex_cube,
     }
 }
 
-static void save_total_intensity_(const oskar_Image* complex_cube,
+static void save_total_intensity(const oskar_Image* complex_cube,
         const oskar_Settings* settings, int type, oskar_Log* log, int* status)
 {
     const char* filename;
     int num_channels, num_times, num_pols, num_pixels;
-    int c, t, p, i, idx, islice;
+    int c, t, p, i, idx, islice, width, height;
     double factor;
-    oskar_Image image;
+    oskar_Image* image;
 
     if (*status) return;
 
@@ -269,29 +272,35 @@ static void save_total_intensity_(const oskar_Image* complex_cube,
         return;
 
     /* Dimensions of input beam pattern image to be converted to total intensity. */
-    num_channels = complex_cube->num_channels;
-    num_times = complex_cube->num_times;
-    num_pols = complex_cube->num_pols;
-    num_pixels = complex_cube->width * complex_cube->height;
+    num_channels = oskar_image_num_channels(complex_cube);
+    num_times = oskar_image_num_times(complex_cube);
+    num_pols = oskar_image_num_pols(complex_cube);
+    width = oskar_image_width(complex_cube);
+    height = oskar_image_height(complex_cube);
+    num_pixels = width * height;
 
     /* Allocate total intensity image cube to write into. */
-    oskar_image_init(&image, type, OSKAR_LOCATION_CPU, status);
+    image = oskar_image_create(type, OSKAR_LOCATION_CPU, status);
     /* Set the beam pattern image cube */
-    oskar_image_resize(&image, complex_cube->width, complex_cube->height, 1,
-            num_times, num_channels, status);
-    image.coord_frame        = settings->beam_pattern.coord_frame_type;
-    image.grid_type          = settings->beam_pattern.coord_grid_type;
-    image.healpix_nside      = settings->beam_pattern.nside;
-    image.image_type         = OSKAR_IMAGE_TYPE_BEAM_SCALAR;
-    image.centre_ra_deg      = settings->obs.ra0_rad[0] * 180.0 / M_PI;
-    image.centre_dec_deg     = settings->obs.dec0_rad[0] * 180.0 / M_PI;
-    image.fov_ra_deg         = settings->beam_pattern.fov_deg[0];
-    image.fov_dec_deg        = settings->beam_pattern.fov_deg[1];
-    image.freq_start_hz      = settings->obs.start_frequency_hz;
-    image.freq_inc_hz        = settings->obs.frequency_inc_hz;
-    image.time_inc_sec       = settings->obs.dt_dump_days * 86400.0;
-    image.time_start_mjd_utc = settings->obs.start_mjd_utc;
-    oskar_mem_copy(&image.settings_path, &settings->settings_path, status);
+    oskar_image_resize(image, width, height, 1, num_times, num_channels,
+            status);
+    oskar_image_set_type(image, (num_pols == 1) ?
+            OSKAR_IMAGE_TYPE_BEAM_SCALAR : OSKAR_IMAGE_TYPE_BEAM_POLARISED);
+    oskar_image_set_coord_frame(image, settings->beam_pattern.coord_frame_type);
+    oskar_image_set_grid_type(image, settings->beam_pattern.coord_grid_type);
+    oskar_image_set_healpix_nside(image, settings->beam_pattern.nside);
+    oskar_image_set_type(image, OSKAR_IMAGE_TYPE_BEAM_SCALAR);
+    oskar_image_set_centre(image, settings->obs.ra0_rad[0] * 180.0 / M_PI,
+            settings->obs.dec0_rad[0] * 180.0 / M_PI);
+    oskar_image_set_fov(image, settings->beam_pattern.fov_deg[0],
+            settings->beam_pattern.fov_deg[1]);
+    oskar_image_set_freq(image, settings->obs.start_frequency_hz,
+            settings->obs.frequency_inc_hz);
+    oskar_image_set_time(image, settings->obs.start_mjd_utc,
+            settings->obs.dt_dump_days * 86400.0);
+    oskar_mem_append_raw(oskar_image_settings_path(image),
+            settings->settings_path, OSKAR_CHAR, OSKAR_LOCATION_CPU,
+            1 + strlen(settings->settings_path), status);
 
     /* For polarised beams Stokes I is 0.5 * (XX + YY) */
     /* For scalar beams total intensity is voltage squared. */
@@ -301,8 +310,9 @@ static void save_total_intensity_(const oskar_Image* complex_cube,
     {
         float* image_data;
         const float2* complex_data;
-        complex_data = oskar_mem_float2_const(&complex_cube->data, status);
-        image_data = oskar_mem_float(&image.data, status);
+        image_data = oskar_mem_float(oskar_image_data(image), status);
+        complex_data = oskar_mem_float2_const(
+                oskar_image_data_const(complex_cube), status);
         for (c = 0, idx = 0, islice = 0; c < num_channels; ++c)
         {
             for (t = 0; t < num_times; ++t, ++islice)
@@ -324,9 +334,9 @@ static void save_total_intensity_(const oskar_Image* complex_cube,
     {
         double* image_data;
         const double2* complex_data;
-        image_data = oskar_mem_double(&image.data, status);
-        complex_data = oskar_mem_double2_const(&complex_cube->data,
-                status);
+        image_data = oskar_mem_double(oskar_image_data(image), status);
+        complex_data = oskar_mem_double2_const(
+                oskar_image_data_const(complex_cube), status);
         for (c = 0, idx = 0, islice = 0; c < num_channels; ++c)
         {
             for (t = 0; t < num_times; ++t, ++islice)
@@ -350,7 +360,7 @@ static void save_total_intensity_(const oskar_Image* complex_cube,
     if (filename && !*status)
     {
         oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
-        oskar_image_write(&image, log, filename, 0, status);
+        oskar_image_write(image, log, filename, 0, status);
     }
 #ifndef OSKAR_NO_FITS
     /* Write FITS image. */
@@ -358,11 +368,11 @@ static void save_total_intensity_(const oskar_Image* complex_cube,
     if (filename && !*status)
     {
         oskar_log_message(log, 0, "Writing FITS image file: '%s'", filename);
-        oskar_fits_image_write(&image, log, filename, status);
+        oskar_fits_image_write(image, log, filename, status);
     }
 #endif
 
-    oskar_image_free(&image, status);
+    oskar_image_free(image, status);
 }
 
 #ifdef __cplusplus

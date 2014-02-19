@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,10 +79,6 @@ TEST(Mem, load_ascii_real_cpu)
     oskar_mem_free(b, &status);
     oskar_mem_free(c, &status);
     oskar_mem_free(d, &status);
-    free(a); // FIXME Remove after updating oskar_mem_free().
-    free(b); // FIXME Remove after updating oskar_mem_free().
-    free(c); // FIXME Remove after updating oskar_mem_free().
-    free(d); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -139,18 +135,10 @@ TEST(Mem, load_ascii_real_gpu)
     oskar_mem_free(b, &status);
     oskar_mem_free(c, &status);
     oskar_mem_free(d, &status);
-    free(a); // FIXME Remove after updating oskar_mem_free().
-    free(b); // FIXME Remove after updating oskar_mem_free().
-    free(c); // FIXME Remove after updating oskar_mem_free().
-    free(d); // FIXME Remove after updating oskar_mem_free().
     oskar_mem_free(aa, &status);
     oskar_mem_free(bb, &status);
     oskar_mem_free(cc, &status);
     oskar_mem_free(dd, &status);
-    free(aa); // FIXME Remove after updating oskar_mem_free().
-    free(bb); // FIXME Remove after updating oskar_mem_free().
-    free(cc); // FIXME Remove after updating oskar_mem_free().
-    free(dd); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -200,8 +188,6 @@ TEST(Mem, load_ascii_complex_real_cpu)
 
     oskar_mem_free(a, &status);
     oskar_mem_free(b, &status);
-    free(a); // FIXME Remove after updating oskar_mem_free().
-    free(b); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -253,9 +239,6 @@ TEST(Mem, load_ascii_complex_real_gpu_cpu)
     oskar_mem_free(a, &status);
     oskar_mem_free(b, &status);
     oskar_mem_free(aa, &status);
-    free(a); // FIXME Remove after updating oskar_mem_free().
-    free(b); // FIXME Remove after updating oskar_mem_free().
-    free(aa); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -316,9 +299,6 @@ TEST(Mem, load_ascii_complex_real_default_cpu)
     oskar_mem_free(a, &status);
     oskar_mem_free(b, &status);
     oskar_mem_free(c, &status);
-    free(a); // FIXME Remove after updating oskar_mem_free().
-    free(b); // FIXME Remove after updating oskar_mem_free().
-    free(c); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -366,9 +346,6 @@ TEST(Mem, load_ascii_lots_of_columns)
     oskar_mem_free(a, &status);
     oskar_mem_free(b, &status);
     oskar_mem_free(c, &status);
-    free(a); // FIXME Remove after updating oskar_mem_free().
-    free(b); // FIXME Remove after updating oskar_mem_free().
-    free(c); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -441,9 +418,6 @@ TEST(Mem, load_ascii_required_data)
     oskar_mem_free(a, &status);
     oskar_mem_free(b, &status);
     oskar_mem_free(c, &status);
-    free(a); // FIXME Remove after updating oskar_mem_free().
-    free(b); // FIXME Remove after updating oskar_mem_free().
-    free(c); // FIXME Remove after updating oskar_mem_free().
 
     remove(filename);
 }
@@ -488,14 +462,6 @@ TEST(Mem, save_ascii)
     oskar_mem_free(mem6, &status);
     oskar_mem_free(mem7, &status);
     oskar_mem_free(mem8, &status);
-    free(mem1); // FIXME Remove after updating oskar_mem_free().
-    free(mem2); // FIXME Remove after updating oskar_mem_free().
-    free(mem3); // FIXME Remove after updating oskar_mem_free().
-    free(mem4); // FIXME Remove after updating oskar_mem_free().
-    free(mem5); // FIXME Remove after updating oskar_mem_free().
-    free(mem6); // FIXME Remove after updating oskar_mem_free().
-    free(mem7); // FIXME Remove after updating oskar_mem_free().
-    free(mem8); // FIXME Remove after updating oskar_mem_free().
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     remove(fname);
 }

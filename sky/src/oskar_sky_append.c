@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,31 +49,31 @@ void oskar_sky_append(oskar_Sky* dst, const oskar_Sky* src,
     if (*status) return;
 
     /* Append to the sky model. */
-    oskar_mem_append(&dst->RA, &src->RA, status);
-    oskar_mem_append(&dst->Dec, &src->Dec, status);
-    oskar_mem_append(&dst->I, &src->I, status);
-    oskar_mem_append(&dst->Q, &src->Q, status);
-    oskar_mem_append(&dst->U, &src->U, status);
-    oskar_mem_append(&dst->V, &src->V, status);
-    oskar_mem_append(&dst->reference_freq, &src->reference_freq, status);
-    oskar_mem_append(&dst->spectral_index, &src->spectral_index, status);
-    oskar_mem_append(&dst->RM, &src->RM, status);
-    oskar_mem_append(&dst->FWHM_major, &src->FWHM_major, status);
-    oskar_mem_append(&dst->FWHM_minor, &src->FWHM_minor, status);
-    oskar_mem_append(&dst->position_angle, &src->position_angle, status);
+    oskar_mem_append(dst->RA, src->RA, status);
+    oskar_mem_append(dst->Dec, src->Dec, status);
+    oskar_mem_append(dst->I, src->I, status);
+    oskar_mem_append(dst->Q, src->Q, status);
+    oskar_mem_append(dst->U, src->U, status);
+    oskar_mem_append(dst->V, src->V, status);
+    oskar_mem_append(dst->reference_freq, src->reference_freq, status);
+    oskar_mem_append(dst->spectral_index, src->spectral_index, status);
+    oskar_mem_append(dst->RM, src->RM, status);
+    oskar_mem_append(dst->FWHM_major, src->FWHM_major, status);
+    oskar_mem_append(dst->FWHM_minor, src->FWHM_minor, status);
+    oskar_mem_append(dst->position_angle, src->position_angle, status);
 
     /* Update the number of sources. */
     dst->num_sources += src->num_sources;
 
     /* Resize arrays to hold the direction cosines. */
-    oskar_mem_realloc(&dst->l, dst->num_sources, status);
-    oskar_mem_realloc(&dst->m, dst->num_sources, status);
-    oskar_mem_realloc(&dst->n, dst->num_sources, status);
+    oskar_mem_realloc(dst->l, dst->num_sources, status);
+    oskar_mem_realloc(dst->m, dst->num_sources, status);
+    oskar_mem_realloc(dst->n, dst->num_sources, status);
 
     /* Resize arrays to hold gaussian source parameters */
-    oskar_mem_realloc(&dst->gaussian_a, dst->num_sources, status);
-    oskar_mem_realloc(&dst->gaussian_b, dst->num_sources, status);
-    oskar_mem_realloc(&dst->gaussian_c, dst->num_sources, status);
+    oskar_mem_realloc(dst->gaussian_a, dst->num_sources, status);
+    oskar_mem_realloc(dst->gaussian_b, dst->num_sources, status);
+    oskar_mem_realloc(dst->gaussian_c, dst->num_sources, status);
 
     dst->use_extended = (src->use_extended || dst->use_extended);
 }

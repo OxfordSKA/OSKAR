@@ -27,8 +27,7 @@
  */
 
 #include <mex.h>
-#include <imaging/oskar_image_read.h>
-#include <imaging/oskar_Image.h>
+#include <oskar_image.h>
 #include <utility/oskar_get_error_string.h>
 #include "matlab/image/lib/oskar_mex_image_to_matlab_struct.h"
 #include "matlab/common/oskar_matlab_common.h"
@@ -53,13 +52,14 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         idx = (int)mxGetScalar(in[1]);
     }
 
-    oskar_Image image;
-    oskar_image_read(&image, filename, idx, &err);
+    oskar_Image* image;
+    image = oskar_image_read(filename, idx, &err);
     if (err)
     {
         oskar_matlab_error("oskar_image_read() returned code %i: %s", err,
                 oskar_get_error_string(err));
     }
 
-    out[0] = oskar_mex_image_to_matlab_struct(&image, filename);
+    out[0] = oskar_mex_image_to_matlab_struct(image, filename);
+    oskar_image_free(image, &err);
 }

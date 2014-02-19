@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,8 +66,8 @@ void oskar_station_set_element_weight(oskar_Station* dst,
     }
 
     /* Get the data type. */
-    type = oskar_mem_type(&dst->weight);
-    location = oskar_mem_location(&dst->weight);
+    type = oskar_mem_type(dst->weight);
+    location = oskar_mem_location(dst->weight);
     size = oskar_mem_element_size(type);
     offset_bytes = index * size;
 
@@ -76,7 +76,7 @@ void oskar_station_set_element_weight(oskar_Station* dst,
     {
         double2 w, *w_;
         w.x = re; w.y = im;
-        w_ = oskar_mem_double2(&dst->weight, status);
+        w_ = oskar_mem_double2(dst->weight, status);
 
         if (location == OSKAR_LOCATION_CPU)
             w_[index] = w;
@@ -95,7 +95,7 @@ void oskar_station_set_element_weight(oskar_Station* dst,
     {
         float2 w, *w_;
         w.x = (float)re; w.y = (float)im;
-        w_ = oskar_mem_float2(&dst->weight, status);
+        w_ = oskar_mem_float2(dst->weight, status);
 
         if (location == OSKAR_LOCATION_CPU)
             w_[index] = w;

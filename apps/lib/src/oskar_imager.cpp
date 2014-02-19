@@ -29,8 +29,8 @@
 #include "apps/lib/oskar_imager.h"
 #include "apps/lib/oskar_settings_load.h"
 
+#include <oskar_image.h>
 #include <oskar_make_image.h>
-#include <oskar_image_write.h>
 #include <oskar_vis.h>
 #include <oskar_log.h>
 #include <oskar_get_error_string.h>
@@ -51,7 +51,7 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
     int error = 0;
     oskar_Settings settings;
     oskar_Vis* vis;
-    oskar_Image image;
+    oskar_Image* image;
     const char* filename;
 
     oskar_log_section(log, "Loading settings file '%s'", settings_file);
@@ -92,7 +92,7 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
 
     QTime timer;
     timer.start();
-    error = oskar_make_image(&image, log, vis, &settings.image);
+    image = oskar_make_image(log, vis, &settings.image, &error);
     if (error)
     {
         oskar_log_error(log, "Failure in oskar_make_image() [code: %i] (%s).",
@@ -106,7 +106,7 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
     if (filename)
     {
         oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
-        oskar_image_write(&image, log, filename, 0, &error);
+        oskar_image_write(image, log, filename, 0, &error);
         if (error)
         {
             oskar_log_error(log, "Failure in oskar_image_write() (%s).",
@@ -119,7 +119,7 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
     if (filename)
     {
         oskar_log_message(log, 0, "Writing FITS image file: '%s'", filename);
-        oskar_fits_image_write(&image, log, filename, &error);
+        oskar_fits_image_write(image, log, filename, &error);
         if (error)
         {
             oskar_log_error(log, "Failure in oskar_fits_image_write() (%s).",
@@ -130,7 +130,8 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
 #endif
 
     oskar_log_section(log, "Run complete.");
-    return OSKAR_SUCCESS;
+    oskar_image_free(image, &error);
+    return error;
 }
 
 #ifdef __cplusplus

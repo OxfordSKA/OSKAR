@@ -181,9 +181,9 @@ void oskar_splines_fit(oskar_Splines* spline, int num_points, oskar_Mem* x,
     nyest = ky + 1 + 3 * sqrt_num_points / 2;
     u = nxest - kx - 1;
     v = nyest - ky - 1;
-    oskar_mem_realloc(&spline->knots_x, nxest, status);
-    oskar_mem_realloc(&spline->knots_y, nyest, status);
-    oskar_mem_realloc(&spline->coeff, u * v, status);
+    oskar_mem_realloc(spline->knots_x, nxest, status);
+    oskar_mem_realloc(spline->knots_y, nyest, status);
+    oskar_mem_realloc(spline->coeff, u * v, status);
 
     /* Check if safe to proceed. */
     if (*status) return;
@@ -220,9 +220,9 @@ void oskar_splines_fit(oskar_Splines* spline, int num_points, oskar_Mem* x,
     {
         float fp = 0.0, *knots_x, *knots_y, *coeff, *x_, *y_;
         const float *z_, *w_;
-        knots_x = oskar_mem_float(&spline->knots_x, status);
-        knots_y = oskar_mem_float(&spline->knots_y, status);
-        coeff   = oskar_mem_float(&spline->coeff, status);
+        knots_x = oskar_mem_float(spline->knots_x, status);
+        knots_y = oskar_mem_float(spline->knots_y, status);
+        coeff   = oskar_mem_float(spline->coeff, status);
         x_      = oskar_mem_float(x, status);
         y_      = oskar_mem_float(y, status);
         z_      = oskar_mem_float_const(z, status);
@@ -260,9 +260,9 @@ void oskar_splines_fit(oskar_Splines* spline, int num_points, oskar_Mem* x,
     {
         double fp = 0.0, *knots_x, *knots_y, *coeff, *x_, *y_;
         const double *z_, *w_;
-        knots_x = oskar_mem_double(&spline->knots_x, status);
-        knots_y = oskar_mem_double(&spline->knots_y, status);
-        coeff   = oskar_mem_double(&spline->coeff, status);
+        knots_x = oskar_mem_double(spline->knots_x, status);
+        knots_y = oskar_mem_double(spline->knots_y, status);
+        coeff   = oskar_mem_double(spline->coeff, status);
         x_      = oskar_mem_double(x, status);
         y_      = oskar_mem_double(y, status);
         z_      = oskar_mem_double_const(z, status);
@@ -300,9 +300,9 @@ void oskar_splines_fit(oskar_Splines* spline, int num_points, oskar_Mem* x,
     /* Compact the knot and coefficient arrays. */
     u = spline->num_knots_x - kx - 1;
     v = spline->num_knots_y - ky - 1;
-    oskar_mem_realloc(&spline->knots_x, spline->num_knots_x, status);
-    oskar_mem_realloc(&spline->knots_y, spline->num_knots_y, status);
-    oskar_mem_realloc(&spline->coeff, u * v, status);
+    oskar_mem_realloc(spline->knots_x, spline->num_knots_x, status);
+    oskar_mem_realloc(spline->knots_y, spline->num_knots_y, status);
+    oskar_mem_realloc(spline->coeff, u * v, status);
 
     /* Free work arrays. */
     free(iwrk);

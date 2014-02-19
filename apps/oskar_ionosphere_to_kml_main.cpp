@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
 
-#include <oskar_image_free.h>
+#include <oskar_image.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
 
 #include <oskar_evaluate_pierce_points.h>
@@ -75,7 +75,7 @@ void write_kml_pp_scatter(FILE* file, const oskar_Mem* pp_lon,
 void write_kml_pp_vectors(FILE* file);
 inline void setRGB(png_byte *ptr, float val, float red_val, float blue_val);
 void abort_(const char* s, ...);
-void image_to_png(const char* filename, oskar_Image& image);
+void image_to_png(const char* filename, oskar_Image* image);
 int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat,
         oskar_Settings& settings, oskar_Log* log);
 
@@ -114,8 +114,7 @@ int main(int argc, char** argv)
 
     // Generate or load TEC screen image
     // -------------------------------------------------------------------------
-    oskar_Image TEC_screen;
-    status = oskar_sim_tec_screen(&TEC_screen, &settings, log);
+    oskar_Image* TEC_screen = oskar_sim_tec_screen(&settings, log, &status);
 
     // Extract corner lon, lat values.
     double coords[8];
@@ -140,11 +139,9 @@ int main(int argc, char** argv)
     const char* kml_file = "test.kml";
     write_kml(kml_file, im_file, coords, pp_lon, pp_lat);
 
-    oskar_image_free(&TEC_screen, &status);
+    oskar_image_free(TEC_screen, &status);
     oskar_mem_free(pp_lon, &status);
     oskar_mem_free(pp_lat, &status);
-    free(pp_lon); // FIXME Remove after updating oskar_mem_free().
-    free(pp_lat); // FIXME Remove after updating oskar_mem_free().
     oskar_log_free(log);
 }
 
@@ -173,11 +170,10 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings& settings
 
     oskar_Sky* chunk = sky[0];
     int num_sources = chunk->num_sources;
-    oskar_Mem hor_x, hor_y, hor_z;
-    int owner = OSKAR_TRUE;
-    oskar_mem_init(&hor_x, type, loc, num_sources, owner, &status);
-    oskar_mem_init(&hor_y, type, loc, num_sources, owner, &status);
-    oskar_mem_init(&hor_z, type, loc, num_sources, owner, &status);
+    oskar_Mem *hor_x, *hor_y, *hor_z;
+    hor_x = oskar_mem_create(type, loc, num_sources, &status);
+    hor_y = oskar_mem_create(type, loc, num_sources, &status);
+    hor_z = oskar_mem_create(type, loc, num_sources, &status);
 
     oskar_Mem* pp_rel_path;
     int num_stations = oskar_telescope_num_stations(telescope);
@@ -188,10 +184,10 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings& settings
     pp_rel_path = oskar_mem_create(type, loc, num_pp, &status);
 
     // Pierce points for one station (non-owned oskar_Mem pointers)
-    oskar_Mem pp_st_lon, pp_st_lat, pp_st_rel_path;
-    oskar_mem_init(&pp_st_lon, type, loc, num_sources, !owner, &status);
-    oskar_mem_init(&pp_st_lat, type, loc, num_sources, !owner, &status);
-    oskar_mem_init(&pp_st_rel_path, type, loc, num_sources, !owner, &status);
+    oskar_Mem *pp_st_lon, *pp_st_lat, *pp_st_rel_path;
+    pp_st_lon = oskar_mem_create_alias(0, 0, 0, &status);
+    pp_st_lat = oskar_mem_create_alias(0, 0, 0, &status);
+    pp_st_rel_path = oskar_mem_create_alias(0, 0, 0, &status);
 
     int num_times = settings.obs.num_time_steps;
     double obs_start_mjd_utc = settings.obs.start_mjd_utc;
@@ -242,8 +238,9 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings& settings
                         oskar_sky_num_sources(chunk),
                         oskar_mem_double_const(oskar_sky_ra_const(chunk), &status),
                         oskar_mem_double_const(oskar_sky_dec_const(chunk), &status),
-                        last, lat, (double*)hor_x.data, (double*)hor_y.data,
-                        (double*)hor_z.data);
+                        last, lat, oskar_mem_double(hor_x, &status),
+                        oskar_mem_double(hor_y, &status),
+                        oskar_mem_double(hor_z, &status));
             }
             else
             {
@@ -251,20 +248,21 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings& settings
                         oskar_sky_num_sources(chunk),
                         oskar_mem_float_const(oskar_sky_ra_const(chunk), &status),
                         oskar_mem_float_const(oskar_sky_dec_const(chunk), &status),
-                        last, lat, (float*)hor_x.data, (float*)hor_y.data,
-                        (float*)hor_z.data);
+                        last, lat, oskar_mem_float(hor_x, &status),
+                        oskar_mem_float(hor_y, &status),
+                        oskar_mem_float(hor_z, &status));
             }
 
             int offset = i * num_sources;
-            oskar_mem_get_pointer(&pp_st_lon, *pp_lon, offset, num_sources,
+            oskar_mem_set_alias(pp_st_lon, *pp_lon, offset, num_sources,
                     &status);
-            oskar_mem_get_pointer(&pp_st_lat, *pp_lat, offset, num_sources,
+            oskar_mem_set_alias(pp_st_lat, *pp_lat, offset, num_sources,
                     &status);
-            oskar_mem_get_pointer(&pp_st_rel_path, pp_rel_path, offset, num_sources,
+            oskar_mem_set_alias(pp_st_rel_path, pp_rel_path, offset, num_sources,
                     &status);
-            oskar_evaluate_pierce_points(&pp_st_lon, &pp_st_lat, &pp_st_rel_path,
+            oskar_evaluate_pierce_points(pp_st_lon, pp_st_lat, pp_st_rel_path,
                     lon, lat, alt, x_ecef, y_ecef, z_ecef, screen_height_m,
-                    num_sources, &hor_x, &hor_y, &hor_z, &status);
+                    num_sources, hor_x, hor_y, hor_z, &status);
         } // Loop over stations.
 
         if (status != OSKAR_SUCCESS)
@@ -272,14 +270,13 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings& settings
     } // Loop over times
 
     // clean up memory
-    oskar_mem_free(&hor_x, &status);
-    oskar_mem_free(&hor_y, &status);
-    oskar_mem_free(&hor_z, &status);
+    oskar_mem_free(hor_x, &status);
+    oskar_mem_free(hor_y, &status);
+    oskar_mem_free(hor_z, &status);
     oskar_mem_free(pp_rel_path, &status);
-    free(pp_rel_path); // FIXME Remove after updating oskar_mem_free().
-    oskar_mem_free(&pp_st_lon, &status);
-    oskar_mem_free(&pp_st_lat, &status);
-    oskar_mem_free(&pp_st_rel_path, &status);
+    oskar_mem_free(pp_st_lon, &status);
+    oskar_mem_free(pp_st_lat, &status);
+    oskar_mem_free(pp_st_rel_path, &status);
     oskar_sky_free(sky[0], &status);
     oskar_telescope_free(telescope, &status);
     free(sky);
@@ -357,8 +354,6 @@ int get_lon_lat_quad_coords(double* coords, oskar_Settings* settings,
 
     oskar_mem_free(pp_lon, &status);
     oskar_mem_free(pp_lat, &status);
-    free(pp_lon); // FIXME Remove after updating oskar_mem_free().
-    free(pp_lat); // FIXME Remove after updating oskar_mem_free().
     oskar_telescope_free(telescope, &status);
     return status;
 }
@@ -467,12 +462,6 @@ void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
     oskar_mem_free(hor_x, status);
     oskar_mem_free(hor_y, status);
     oskar_mem_free(hor_y, status);
-    free(m_pp_lon0); // FIXME Remove after updating oskar_mem_free().
-    free(m_pp_lat0); // FIXME Remove after updating oskar_mem_free().
-    free(m_pp_rel_path); // FIXME Remove after updating oskar_mem_free().
-    free(hor_x); // FIXME Remove after updating oskar_mem_free().
-    free(hor_y); // FIXME Remove after updating oskar_mem_free().
-    free(hor_z); // FIXME Remove after updating oskar_mem_free().
 }
 
 void write_kml(const char* kml_file, const char* image_file, double* coords,
@@ -655,18 +644,22 @@ void abort_(const char* s, ...)
     abort();
 }
 
-void image_to_png(const char* filename, oskar_Image& img)
+void image_to_png(const char* filename, oskar_Image* img)
 {
     int status = OSKAR_SUCCESS;
-    int num_pixels = img.width*img.height;
+    int width, height;
+    width = oskar_image_width(img);
+    height = oskar_image_height(img);
+    int num_pixels = width * height;
     // Get a single slice of the image
-    oskar_Mem img_slice;
+    oskar_Mem *img_slice;
     int t = 0;
     int p = 0;
     int c = 0;
     // XXX slice 0.0.0 (chan.time.pol)
-    int slice_offset = ((c * img.num_times + t) * img.num_pols + p) * num_pixels;
-    oskar_mem_get_pointer(&img_slice, &(img.data), slice_offset,
+    int slice_offset = ((c * oskar_image_num_times(img) + t) *
+            oskar_image_num_pols(img) + p) * num_pixels;
+    img_slice = oskar_mem_create_alias(oskar_image_data(img), slice_offset,
             num_pixels, &status);
 
     int x, y;
@@ -699,7 +692,7 @@ void image_to_png(const char* filename, oskar_Image& img)
 
     bit_depth = 8;
     png_set_IHDR(png_ptr, info_ptr,
-            img.width, img.height, bit_depth,
+            width, height, bit_depth,
             PNG_COLOR_TYPE_RGB,
             PNG_INTERLACE_NONE,
             PNG_COMPRESSION_TYPE_BASE,
@@ -713,9 +706,9 @@ void image_to_png(const char* filename, oskar_Image& img)
 
     // Allocate memory for one row, 3 bytes per pixel - RGB.
     png_bytep row;
-    row = (png_bytep) malloc(3 * img.width * sizeof(png_byte));
+    row = (png_bytep) malloc(3 * width * sizeof(png_byte));
 
-    float* img_data = oskar_mem_float(&img_slice, &status);
+    float* img_data = oskar_mem_float(img_slice, &status);
 
     float red = -FLT_MAX; // max
     float blue = FLT_MAX; // min
@@ -725,11 +718,11 @@ void image_to_png(const char* filename, oskar_Image& img)
         red = std::max(red, img_data[i]);
     }
 
-    for (y = 0; y < img.height; y++)
+    for (y = 0; y < height; y++)
     {
-        for (x = 0; x < img.width; x++)
+        for (x = 0; x < width; x++)
         {
-            int idx = (img.height-y-1)*img.width + x;
+            int idx = (height-y-1)*width + x;
             setRGB(&row[x*3], img_data[idx], red, blue);
         }
         png_write_row(png_ptr, row);
@@ -745,7 +738,5 @@ void image_to_png(const char* filename, oskar_Image& img)
     png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
     png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
     free(row);
+    oskar_mem_free(img_slice, &status);
 }
-
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_IMAGE_EVALUATE_RANGES_H_
-#define OSKAR_IMAGE_EVALUATE_RANGES_H_
+#ifndef OSKAR_PRIVATE_SYSTEM_NOISE_MODEL_H_
+#define OSKAR_PRIVATE_SYSTEM_NOISE_MODEL_H_
 
 /**
- * @file oskar_image_evaluate_ranges.h
+ * @file private_system_noise_model.h
  */
 
-#include "oskar_global.h"
+#include <oskar_mem.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @brief Structure to hold system noise data.
+ *
+ * @details
+ * This structure holds system noise data.
+ */
+struct oskar_SystemNoiseModel
+{
+    oskar_Mem* frequency;
+    oskar_Mem* rms;
+};
 
-OSKAR_EXPORT
-int oskar_evaluate_image_range(int* range, int snapshots,
-        const int* settings_range, int num_vis_times);
+#ifndef OSKAR_SYSTEM_NOISE_MODEL_TYPEDEF_
+#define OSKAR_SYSTEM_NOISE_MODEL_TYPEDEF_
+typedef struct oskar_SystemNoiseModel oskar_SystemNoiseModel;
+#endif /* OSKAR_SYSTEM_NOISE_MODEL_TYPEDEF_ */
 
-OSKAR_EXPORT
-int oskar_evaluate_image_data_range(int* range, const int* settings_range,
-        int num_data_values);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* OSKAR_IMAGE_EVALUATE_RANGES_H_ */
+#endif /* OSKAR_PRIVATE_SYSTEM_NOISE_MODEL_H_ */

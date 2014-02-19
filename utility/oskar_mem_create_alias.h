@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,19 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_Image.h"
-#include "imaging/oskar_image_free.h"
-#include "imaging/oskar_image_init.h"
-#include <cstdio>
+#ifndef OSKAR_MEM_CREATE_ALIAS_H_
+#define OSKAR_MEM_CREATE_ALIAS_H_
 
-oskar_Image::oskar_Image(int type, int location)
-{
-    int err = 0;
-    oskar_image_init(this, type, location, &err);
-}
+/**
+ * @file oskar_mem_create_alias.h
+ */
 
-oskar_Image::~oskar_Image()
-{
-    int err = 0;
-    oskar_image_free(this, &err);
+#include <oskar_global.h>
+#include <stddef.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Creates an aliased pointer from an existing one.
+ *
+ * @details
+ * This function creates a handle to an OSKAR memory block that contains an
+ * aliased pointer to (part of) an existing memory block. The structure does
+ * not own the memory to which it points.
+ *
+ * To create an empty alias, set \p src to NULL. The source alias can be set
+ * later using oskar_mem_set_alias().
+ *
+ * A handle to the memory is returned. The handle must be deallocated
+ * using oskar_mem_free() when it is no longer required.
+ *
+ * @param[in] src           Handle to source memory block (may be NULL).
+ * @param[in] offset        Offset number of elements from start of source memory block.
+ * @param[in] num_elements  Number of elements in the returned array.
+ * @param[in,out]  status   Status return code.
+ *
+ * @return A handle to the aliased memory block structure.
+ */
+OSKAR_EXPORT
+oskar_Mem* oskar_mem_create_alias(const oskar_Mem* src, size_t offset,
+        size_t num_elements, int* status);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_MEM_CREATE_ALIAS_H_ */

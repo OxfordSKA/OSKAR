@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,12 +32,11 @@
 #include <oskar_vis.h>
 #include <oskar_convert_ecef_to_baseline_uvw.h>
 
-#include <oskar_mem.h>
 #include <oskar_get_error_string.h>
 #include <oskar_settings_init.h>
 
 #include <oskar_make_image.h>
-#include <oskar_image_write.h>
+#include <oskar_image.h>
 
 #include <oskar_random_gaussian.h>
 
@@ -109,10 +108,10 @@ TEST(add_system_noise, test_rms)
 
         oskar_Station* st = oskar_telescope_station(telescope, i);
         oskar_SystemNoiseModel* noise = oskar_station_system_noise_model(st);
-        oskar_Mem* freqs = &noise->frequency;
+        oskar_Mem* freqs = oskar_system_noise_model_frequency(noise);
         generate_range(freqs, num_noise_values, freq_start, freq_inc);
 
-        oskar_Mem* stddev = &noise->rms;
+        oskar_Mem* stddev = oskar_system_noise_model_rms(noise);
         generate_range(stddev, num_noise_values, stddev_start, stddev_inc);
     }
     oskar_telescope_set_phase_centre(telescope, ra0_rad, dec0_rad);
@@ -163,7 +162,7 @@ TEST(add_system_noise, test_rms)
             settings.obs.dt_dump_days, work_uvw, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-    oskar_Image image;
+    oskar_Image* image;
     settings.image.input_vis_data = NULL;
     settings.image.size = 256;
     settings.image.fov_deg = 0.75;
@@ -181,7 +180,7 @@ TEST(add_system_noise, test_rms)
     strcpy(settings.image.oskar_image, filename.c_str());
     settings.image.fits_image = NULL;
 
-    err = oskar_make_image(&image, 0, vis, &(settings.image));
+    image = oskar_make_image(0, vis, &(settings.image), &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
     //    err = oskar_image_write(&image, NULL, settings.image.oskar_image, 0);
@@ -190,9 +189,9 @@ TEST(add_system_noise, test_rms)
     //check_image_stats(&image, telescope);
 
     oskar_mem_free(work_uvw, &err);
-    free(work_uvw); // FIXME Remove after updating oskar_mem_free().
     oskar_telescope_free(telescope, &err);
     oskar_vis_free(vis, &err);
+    oskar_image_free(image, &err);
 }
 
 

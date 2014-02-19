@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,52 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <imaging/oskar_image_init.h>
-#include <imaging/oskar_Image.h>
+#include <private_system_noise_model.h>
+#include <oskar_system_noise_model_create.h>
 #include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_image_init(oskar_Image* image, int type, int location, int* status)
+oskar_SystemNoiseModel* oskar_system_noise_model_create(int type,
+        int location, int* status)
 {
+    oskar_SystemNoiseModel* noise;
+
     /* Check all inputs. */
-    if (!image || !status)
+    if (!status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return 0;
     }
 
-    /* Initialise memory. */
-    oskar_mem_init(&image->data, type, location, 0, OSKAR_TRUE, status);
-    oskar_mem_init(&image->settings_path, OSKAR_CHAR,
-            OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
+    /* Check type. */
+    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
-    /* Set default dimension order. */
-    image->dimension_order[0] = OSKAR_IMAGE_DIM_RA;
-    image->dimension_order[1] = OSKAR_IMAGE_DIM_DEC;
-    image->dimension_order[2] = OSKAR_IMAGE_DIM_POL;
-    image->dimension_order[3] = OSKAR_IMAGE_DIM_TIME;
-    image->dimension_order[4] = OSKAR_IMAGE_DIM_CHANNEL;
+    noise = (oskar_SystemNoiseModel*) malloc(sizeof(oskar_SystemNoiseModel*));
 
-    /* Initialise meta-data. */
-    image->grid_type = OSKAR_IMAGE_GRID_TYPE_RECTILINEAR;
-    image->coord_frame = OSKAR_IMAGE_COORD_FRAME_UNDEF;
-    image->image_type = OSKAR_IMAGE_TYPE_UNDEF;
-    image->centre_dec_deg = 0.0;
-    image->centre_ra_deg = 0.0;
-    image->fov_dec_deg = 0.0;
-    image->fov_ra_deg = 0.0;
-    image->freq_inc_hz = 0.0;
-    image->freq_start_hz = 0.0;
-    image->height = 0;
-    image->num_channels = 0;
-    image->num_pols = 0;
-    image->num_times = 0;
-    image->time_inc_sec = 0.0;
-    image->time_start_mjd_utc = 0.0;
-    image->width = 0;
+    noise->frequency = oskar_mem_create(type, location, 0, status);
+    noise->rms = oskar_mem_create(type, location, 0, status);
+
+    return noise;
 }
 
 #ifdef __cplusplus

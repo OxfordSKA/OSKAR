@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,8 +43,8 @@ void oskar_element_free(oskar_Element* data, int* status)
     }
 
     /* Free the memory contents. */
-    oskar_mem_free(&data->filename_x, status);
-    oskar_mem_free(&data->filename_y, status);
+    oskar_mem_free(data->filename_x, status);
+    oskar_mem_free(data->filename_y, status);
     oskar_splines_free(data->phi_re_x, status);
     oskar_splines_free(data->phi_im_x, status);
     oskar_splines_free(data->theta_re_x, status);

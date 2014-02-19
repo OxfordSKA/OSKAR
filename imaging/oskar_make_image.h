@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_Image.h>
+#include <oskar_image.h>
 #include <oskar_SettingsImage.h>
 #include <oskar_vis.h>
 #include <oskar_log.h>
@@ -57,8 +57,8 @@ extern "C" {
  * @param[in] settings Pointer to image settings to use.
  */
 OSKAR_EXPORT
-int oskar_make_image(oskar_Image* im, oskar_Log* log,
-        const oskar_Vis* vis, const oskar_SettingsImage* settings);
+oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
+        const oskar_SettingsImage* settings, int* status);
 
 #ifdef __cplusplus
 }

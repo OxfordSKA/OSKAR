@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,5 @@ TEST(Mem, stats)
 
     // Free memory.
     oskar_mem_free(values, &status);
-    free(values); // FIXME Remove after updating oskar_mem_free().
 }
 

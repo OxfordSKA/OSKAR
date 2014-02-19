@@ -68,12 +68,12 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     if (*status) return;
 
     /* Get the metadata. */
-    uu_elements = (int)oskar_mem_length(&vis->uu_metres);
-    vv_elements = (int)oskar_mem_length(&vis->vv_metres);
-    ww_elements = (int)oskar_mem_length(&vis->ww_metres);
-    amp_elements = (int)oskar_mem_length(&vis->amplitude);
-    amp_type = oskar_mem_type(&vis->amplitude);
-    coord_type = oskar_mem_type(&vis->uu_metres);
+    uu_elements = (int)oskar_mem_length(vis->uu_metres);
+    vv_elements = (int)oskar_mem_length(vis->vv_metres);
+    ww_elements = (int)oskar_mem_length(vis->ww_metres);
+    amp_elements = (int)oskar_mem_length(vis->amplitude);
+    amp_type = oskar_mem_type(vis->amplitude);
+    coord_type = oskar_mem_type(vis->uu_metres);
 
     /* Check dimensions. */
     num_amps = vis->num_channels * vis->num_times * vis->num_baselines;
@@ -118,7 +118,6 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
             oskar_mem_binary_stream_write(temp, stream,
                     OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0, status);
             oskar_mem_free(temp, status);
-            free(temp); /* FIXME Remove after updating oskar_mem_free(). */
         }
     }
     /* If log exists, then write it out. */
@@ -132,7 +131,7 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     }
 
     /* Write the telescope model path. */
-    oskar_mem_binary_stream_write(&vis->telescope_path, stream, grp,
+    oskar_mem_binary_stream_write(vis->telescope_path, stream, grp,
             OSKAR_VIS_TAG_TELESCOPE_PATH, 0, 0, status);
 
     /* Write dimensions. */
@@ -156,7 +155,6 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     oskar_mem_binary_stream_write(temp, stream, grp,
             OSKAR_VIS_TAG_DIMENSION_ORDER, 0, 0, status);
     oskar_mem_free(temp, status);
-    free(temp); /* FIXME Remove after updating oskar_mem_free(). */
 
     /* Write other visibility metadata. */
     oskar_binary_stream_write_int(stream, grp,
@@ -196,32 +194,32 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
             OSKAR_VIS_TAG_TELESCOPE_LAT, 0, vis->telescope_lon_deg, status);
 
     /* Write the baseline coordinate arrays. */
-    oskar_mem_binary_stream_write(&vis->uu_metres, stream,
+    oskar_mem_binary_stream_write(vis->uu_metres, stream,
             grp, OSKAR_VIS_TAG_BASELINE_UU, 0, 0, status);
-    oskar_mem_binary_stream_write(&vis->vv_metres, stream,
+    oskar_mem_binary_stream_write(vis->vv_metres, stream,
             grp, OSKAR_VIS_TAG_BASELINE_VV, 0, 0, status);
-    oskar_mem_binary_stream_write(&vis->ww_metres, stream,
+    oskar_mem_binary_stream_write(vis->ww_metres, stream,
             grp, OSKAR_VIS_TAG_BASELINE_WW, 0, 0, status);
 
     /* Write the visibility data. */
-    oskar_mem_binary_stream_write(&vis->amplitude, stream,
+    oskar_mem_binary_stream_write(vis->amplitude, stream,
             grp, OSKAR_VIS_TAG_AMPLITUDE, 0, 0, status);
 
     /* Write the station coordinate arrays. */
-    oskar_mem_binary_stream_write(&vis->x_metres, stream,
+    oskar_mem_binary_stream_write(vis->x_metres, stream,
             grp, OSKAR_VIS_TAG_STATION_X, 0, 0, status);
-    oskar_mem_binary_stream_write(&vis->y_metres, stream,
+    oskar_mem_binary_stream_write(vis->y_metres, stream,
             grp, OSKAR_VIS_TAG_STATION_Y, 0, 0, status);
-    oskar_mem_binary_stream_write(&vis->z_metres, stream,
+    oskar_mem_binary_stream_write(vis->z_metres, stream,
             grp, OSKAR_VIS_TAG_STATION_Z, 0, 0, status);
 
-    oskar_mem_binary_stream_write(&vis->station_lon, stream, grp,
+    oskar_mem_binary_stream_write(vis->station_lon, stream, grp,
             OSKAR_VIS_TAG_STATION_LON, 0, 0, status);
-    oskar_mem_binary_stream_write(&vis->station_lat, stream, grp,
+    oskar_mem_binary_stream_write(vis->station_lat, stream, grp,
             OSKAR_VIS_TAG_STATION_LAT, 0, 0, status);
-    oskar_mem_binary_stream_write(&vis->station_orientation_x, stream, grp,
+    oskar_mem_binary_stream_write(vis->station_orientation_x, stream, grp,
             OSKAR_VIS_TAG_STATION_ORIENTATION_X, 0, 0, status);
-    oskar_mem_binary_stream_write(&vis->station_orientation_y, stream, grp,
+    oskar_mem_binary_stream_write(vis->station_orientation_y, stream, grp,
             OSKAR_VIS_TAG_STATION_ORIENTATION_Y, 0, 0, status);
 
     /* Close the file. */

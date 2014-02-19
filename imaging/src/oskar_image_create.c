@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,29 +26,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_system_noise_model_init.h"
-#include <oskar_mem.h>
+#include <private_image.h>
+#include <oskar_image.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_system_noise_model_init(oskar_SystemNoiseModel* noise, int type,
-        int location, int* status)
+oskar_Image* oskar_image_create(int type, int location, int* status)
 {
+    oskar_Image* image = 0;
+
     /* Check all inputs. */
-    if (!noise || !status)
+    if (!status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return 0;
     }
 
-    /* Check type. */
-    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
+    /* Allocate the structure. */
+    image = (oskar_Image*) malloc(sizeof(oskar_Image));
 
-    oskar_mem_init(&noise->frequency, type, location, 0, OSKAR_TRUE, status);
-    oskar_mem_init(&noise->rms, type, location, 0, OSKAR_TRUE, status);
+    /* Initialise memory. */
+    image->data = oskar_mem_create(type, location, 0, status);
+    image->settings_path = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0,
+            status);
+
+    /* Set default dimension order. */
+    image->dimension_order[0] = OSKAR_IMAGE_DIM_LONGITUDE;
+    image->dimension_order[1] = OSKAR_IMAGE_DIM_LATITUDE;
+    image->dimension_order[2] = OSKAR_IMAGE_DIM_POL;
+    image->dimension_order[3] = OSKAR_IMAGE_DIM_TIME;
+    image->dimension_order[4] = OSKAR_IMAGE_DIM_CHANNEL;
+
+    /* Initialise meta-data. */
+    image->grid_type = OSKAR_IMAGE_GRID_TYPE_RECTILINEAR;
+    image->coord_frame = OSKAR_IMAGE_COORD_FRAME_UNDEF;
+    image->image_type = OSKAR_IMAGE_TYPE_UNDEF;
+    image->centre_lat_deg = 0.0;
+    image->centre_lon_deg = 0.0;
+    image->fov_lat_deg = 0.0;
+    image->fov_lon_deg = 0.0;
+    image->freq_inc_hz = 0.0;
+    image->freq_start_hz = 0.0;
+    image->height = 0;
+    image->num_channels = 0;
+    image->num_pols = 0;
+    image->num_times = 0;
+    image->time_inc_sec = 0.0;
+    image->time_start_mjd_utc = 0.0;
+    image->width = 0;
+
+    /* Return a handle to the image. */
+    return image;
 }
 
 #ifdef __cplusplus

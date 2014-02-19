@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,18 +69,18 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
     }
 
     /* Get byte pointers. */
-    ra_ = oskar_mem_char(&sky->RA);
-    dec_ = oskar_mem_char(&sky->Dec);
-    i_ = oskar_mem_char(&sky->I);
-    q_ = oskar_mem_char(&sky->Q);
-    u_ = oskar_mem_char(&sky->U);
-    v_ = oskar_mem_char(&sky->V);
-    ref_ = oskar_mem_char(&sky->reference_freq);
-    spix_ = oskar_mem_char(&sky->spectral_index);
-    rm_ = oskar_mem_char(&sky->RM);
-    maj_ = oskar_mem_char(&sky->FWHM_major);
-    min_ = oskar_mem_char(&sky->FWHM_minor);
-    pa_ = oskar_mem_char(&sky->position_angle);
+    ra_ = oskar_mem_char(sky->RA);
+    dec_ = oskar_mem_char(sky->Dec);
+    i_ = oskar_mem_char(sky->I);
+    q_ = oskar_mem_char(sky->Q);
+    u_ = oskar_mem_char(sky->U);
+    v_ = oskar_mem_char(sky->V);
+    ref_ = oskar_mem_char(sky->reference_freq);
+    spix_ = oskar_mem_char(sky->spectral_index);
+    rm_ = oskar_mem_char(sky->RM);
+    maj_ = oskar_mem_char(sky->FWHM_major);
+    min_ = oskar_mem_char(sky->FWHM_minor);
+    pa_ = oskar_mem_char(sky->position_angle);
 
     if (location == OSKAR_LOCATION_GPU)
     {

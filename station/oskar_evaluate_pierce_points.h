@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_EVALUATE_PIERCE_POINTS_H_
 #define OSKAR_EVALUATE_PIERCE_POINTS_H_
 
@@ -45,9 +44,9 @@ extern "C" {
  * @brief Evaluates pierce points for a station for a number of directions.
  *
  * @details
- * This function is based on the meqtrees script Lions/PiercePoints.py
- * which was developed by Maaijke Mevius and Ilse van Bemmel and
- * can be found in the meqtrees cattery repository.
+ * This function is based on the MeqTrees script Lions/PiercePoints.py
+ * which was developed by Maaijke Mevius and Ilse van Bemmel, and
+ * can be found in the MeqTrees cattery repository.
  *
  * Possible problems:
  * - Pierce points below the horizon are still evaluated.
@@ -76,7 +75,7 @@ extern "C" {
  *                              which to evaluate pierce points.
  * @param[in] hor_z             Array of horizontal z direction cosines for
  *                              which to evaluate pierce points.
- * @param[in/out] status        Error status code.
+ * @param[in,out] status        Error status code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_pierce_points(
@@ -91,9 +90,9 @@ void oskar_evaluate_pierce_points(
         double station_z_ecef,
         double screen_height_m,
         int num_directions,
-        oskar_Mem* hor_x,
-        oskar_Mem* hor_y,
-        oskar_Mem* hor_z,
+        const oskar_Mem* hor_x,
+        const oskar_Mem* hor_y,
+        const oskar_Mem* hor_z,
         int* status);
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,8 +51,8 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
     dst->cos_power = src->cos_power;
     dst->gaussian_fwhm_rad = src->gaussian_fwhm_rad;
 
-    oskar_mem_copy(&dst->filename_x, &src->filename_x, status);
-    oskar_mem_copy(&dst->filename_y, &src->filename_y, status);
+    oskar_mem_copy(dst->filename_x, src->filename_x, status);
+    oskar_mem_copy(dst->filename_y, src->filename_y, status);
     oskar_splines_copy(dst->phi_re_x, src->phi_re_x, status);
     oskar_splines_copy(dst->phi_im_x, src->phi_im_x, status);
     oskar_splines_copy(dst->theta_re_x, src->theta_re_x, status);

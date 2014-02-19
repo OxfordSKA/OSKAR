@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,19 +67,19 @@ oskar_Vis* oskar_vis_create_copy(const oskar_Vis* src, int location,
     dst->telescope_lat_deg = src->telescope_lat_deg;
 
     /* Copy the memory. */
-    oskar_mem_copy(&dst->settings_path, &src->settings_path, status);
-    oskar_mem_copy(&dst->telescope_path, &src->telescope_path, status);
-    oskar_mem_copy(&dst->x_metres, &src->x_metres, status);
-    oskar_mem_copy(&dst->y_metres, &src->y_metres, status);
-    oskar_mem_copy(&dst->z_metres, &src->z_metres, status);
-    oskar_mem_copy(&dst->station_lon, &src->station_lon, status);
-    oskar_mem_copy(&dst->station_lat, &src->station_lat, status);
-    oskar_mem_copy(&dst->station_orientation_x, &src->station_orientation_x, status);
-    oskar_mem_copy(&dst->station_orientation_y, &src->station_orientation_y, status);
-    oskar_mem_copy(&dst->uu_metres, &src->uu_metres, status);
-    oskar_mem_copy(&dst->vv_metres, &src->vv_metres, status);
-    oskar_mem_copy(&dst->ww_metres, &src->ww_metres, status);
-    oskar_mem_copy(&dst->amplitude, &src->amplitude, status);
+    oskar_mem_copy(dst->settings_path, src->settings_path, status);
+    oskar_mem_copy(dst->telescope_path, src->telescope_path, status);
+    oskar_mem_copy(dst->x_metres, src->x_metres, status);
+    oskar_mem_copy(dst->y_metres, src->y_metres, status);
+    oskar_mem_copy(dst->z_metres, src->z_metres, status);
+    oskar_mem_copy(dst->station_lon, src->station_lon, status);
+    oskar_mem_copy(dst->station_lat, src->station_lat, status);
+    oskar_mem_copy(dst->station_orientation_x, src->station_orientation_x, status);
+    oskar_mem_copy(dst->station_orientation_y, src->station_orientation_y, status);
+    oskar_mem_copy(dst->uu_metres, src->uu_metres, status);
+    oskar_mem_copy(dst->vv_metres, src->vv_metres, status);
+    oskar_mem_copy(dst->ww_metres, src->ww_metres, status);
+    oskar_mem_copy(dst->amplitude, src->amplitude, status);
 
     /* Return a handle to the new structure. */
     return dst;

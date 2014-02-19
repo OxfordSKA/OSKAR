@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,8 +65,8 @@ void oskar_sky_set_spectral_index(oskar_Sky* sky, int index,
     }
 
     /* Get byte pointers. */
-    ref_ = oskar_mem_char(&sky->reference_freq);
-    spix_ = oskar_mem_char(&sky->spectral_index);
+    ref_ = oskar_mem_char(sky->reference_freq);
+    spix_ = oskar_mem_char(sky->spectral_index);
 
     if (location == OSKAR_LOCATION_GPU)
     {

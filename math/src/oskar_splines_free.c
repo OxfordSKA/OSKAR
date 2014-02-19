@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,9 +44,9 @@ void oskar_splines_free(oskar_Splines* data, int* status)
     }
 
     /* Free the arrays. */
-    oskar_mem_free(&data->knots_x, status);
-    oskar_mem_free(&data->knots_y, status);
-    oskar_mem_free(&data->coeff, status);
+    oskar_mem_free(data->knots_x, status);
+    oskar_mem_free(data->knots_y, status);
+    oskar_mem_free(data->coeff, status);
 
     /* Free the structure itself. */
     free(data);

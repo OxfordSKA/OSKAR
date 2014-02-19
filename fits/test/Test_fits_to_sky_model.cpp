@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,11 +28,9 @@
 
 #include <gtest/gtest.h>
 
-#include "fits/oskar_fits_image_to_sky_model.h"
-#include "fits/oskar_fits_image_write.h"
-#include <oskar_image_free.h>
-#include <oskar_image_init.h>
-#include <oskar_image_resize.h>
+#include <fits/oskar_fits_image_to_sky_model.h>
+#include <fits/oskar_fits_image_write.h>
+#include <oskar_image.h>
 #include <oskar_sky.h>
 #include <oskar_get_error_string.h>
 
@@ -63,15 +61,15 @@ TEST(fits_to_sky_model, test)
     ASSERT_EQ(0, err);
 
     // Add image meta-data.
-    image.centre_ra_deg = 10.0;
-    image.centre_dec_deg = 80.0;
-    image.fov_ra_deg = 0.1;
-    image.fov_dec_deg = 0.1;
+    image.centre_lon_deg = 10.0;
+    image.centre_lat_deg = 80.0;
+    image.fov_lon_deg = 0.1;
+    image.fov_lat_deg = 0.1;
     image.freq_start_hz = 100e6;
     image.freq_inc_hz = 1e5;
 
     // Calculate "beam" area.
-    double max = sin(image.fov_ra_deg * M_PI / 360.0); /* Divide by 2. */
+    double max = sin(image.fov_lon_deg * M_PI / 360.0); /* Divide by 2. */
     double inc = max / (0.5 * image.width);
     double cdelt1 = -asin(inc) * 180.0 / M_PI;
     double beam_area = 2.0 * M_PI * (bmaj * bmin)

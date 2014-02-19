@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,36 +26,60 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_GET_PTR_H_
-#define OSKAR_SKY_GET_PTR_H_
-
-/**
- * @file oskar_sky_get_ptr.h
- */
-
-#include <oskar_global.h>
+#include <private_mem.h>
+#include <oskar_mem_element_size.h>
+#include <oskar_mem_set_alias.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Get a non-owned pointer to a subset of the specified sky model.
- *
- * @details
- *
- * @param[in,out] sky_ptr   Output (non-owned) pointer to sky model.
- * @param[in] sky           Sky model from which to create the pointer.
- * @param[in] offset        Start offset (source index) into initial sky model.
- * @param[in] num_sources   Number of sources in the output sky model.
- * @param[in,out] status    Status return code.
- */
-void oskar_sky_get_ptr(oskar_Sky* sky_ptr, const oskar_Sky* sky,
-        int offset, int num_sources, int* status);
+void oskar_mem_set_alias(oskar_Mem* mem, const oskar_Mem* src, size_t offset,
+        size_t num_elements, int* status)
+{
+    size_t element_size = 0, offset_bytes = 0;
+
+    /* Check all inputs. */
+    if (!mem || !src || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* The destination structure must not own its memory.
+     * The structure must have been created using oskar_mem_create_alias*(),
+     * so the owner flag must be set to false. */
+    if (mem->owner)
+    {
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
+
+    /* Check that the new pointer will be valid. */
+    if (offset + num_elements > src->num_elements)
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
+
+    /* Get the element size. */
+    element_size = oskar_mem_element_size(src->type);
+    if (element_size == 0)
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
+
+    /* Compute the offset for the new pointer. */
+    offset_bytes = offset * element_size;
+
+    /* Set meta-data. */
+    mem->type = src->type;
+    mem->location = src->location;
+    mem->num_elements = num_elements;
+    mem->data = (void*)((char*)(src->data) + offset_bytes);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SKY_GET_PTR_H_ */

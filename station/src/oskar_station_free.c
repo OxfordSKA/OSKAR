@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,27 +57,27 @@ void oskar_station_free(oskar_Station* model, int* status)
     }
 
     /* Free the element data. */
-    oskar_mem_free(&model->x_signal, status);
-    oskar_mem_free(&model->y_signal, status);
-    oskar_mem_free(&model->z_signal, status);
-    oskar_mem_free(&model->x_weights, status);
-    oskar_mem_free(&model->y_weights, status);
-    oskar_mem_free(&model->z_weights, status);
-    oskar_mem_free(&model->weight, status);
-    oskar_mem_free(&model->gain, status);
-    oskar_mem_free(&model->gain_error, status);
-    oskar_mem_free(&model->phase_offset, status);
-    oskar_mem_free(&model->phase_error, status);
-    oskar_mem_free(&model->cos_orientation_x, status);
-    oskar_mem_free(&model->sin_orientation_x, status);
-    oskar_mem_free(&model->cos_orientation_y, status);
-    oskar_mem_free(&model->sin_orientation_y, status);
-    oskar_mem_free(&model->element_type, status);
-    oskar_mem_free(&model->permitted_beam_az, status);
-    oskar_mem_free(&model->permitted_beam_el, status);
+    oskar_mem_free(model->x_signal, status);
+    oskar_mem_free(model->y_signal, status);
+    oskar_mem_free(model->z_signal, status);
+    oskar_mem_free(model->x_weights, status);
+    oskar_mem_free(model->y_weights, status);
+    oskar_mem_free(model->z_weights, status);
+    oskar_mem_free(model->weight, status);
+    oskar_mem_free(model->gain, status);
+    oskar_mem_free(model->gain_error, status);
+    oskar_mem_free(model->phase_offset, status);
+    oskar_mem_free(model->phase_error, status);
+    oskar_mem_free(model->cos_orientation_x, status);
+    oskar_mem_free(model->sin_orientation_x, status);
+    oskar_mem_free(model->cos_orientation_y, status);
+    oskar_mem_free(model->sin_orientation_y, status);
+    oskar_mem_free(model->element_type, status);
+    oskar_mem_free(model->permitted_beam_az, status);
+    oskar_mem_free(model->permitted_beam_el, status);
 
     /* Free the noise model. */
-    oskar_system_noise_model_free(&model->noise, status);
+    oskar_system_noise_model_free(model->noise, status);
 
     /* Free the element pattern data if it exists. */
     if (oskar_station_has_element(model))

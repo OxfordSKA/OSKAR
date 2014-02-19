@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,24 +50,24 @@ void oskar_sky_resize(oskar_Sky* sky, int num_sources, int* status)
     sky->num_sources = num_sources;
 
     /* Resize the model data. */
-    oskar_mem_realloc(&sky->RA, num_sources, status);
-    oskar_mem_realloc(&sky->Dec, num_sources, status);
-    oskar_mem_realloc(&sky->I, num_sources, status);
-    oskar_mem_realloc(&sky->Q, num_sources, status);
-    oskar_mem_realloc(&sky->U, num_sources, status);
-    oskar_mem_realloc(&sky->V, num_sources, status);
-    oskar_mem_realloc(&sky->reference_freq, num_sources, status);
-    oskar_mem_realloc(&sky->spectral_index, num_sources, status);
-    oskar_mem_realloc(&sky->RM, num_sources, status);
-    oskar_mem_realloc(&sky->l, num_sources, status);
-    oskar_mem_realloc(&sky->m, num_sources, status);
-    oskar_mem_realloc(&sky->n, num_sources, status);
-    oskar_mem_realloc(&sky->FWHM_major, num_sources, status);
-    oskar_mem_realloc(&sky->FWHM_minor, num_sources, status);
-    oskar_mem_realloc(&sky->position_angle, num_sources, status);
-    oskar_mem_realloc(&sky->gaussian_a, num_sources, status);
-    oskar_mem_realloc(&sky->gaussian_b, num_sources, status);
-    oskar_mem_realloc(&sky->gaussian_c, num_sources, status);
+    oskar_mem_realloc(sky->RA, num_sources, status);
+    oskar_mem_realloc(sky->Dec, num_sources, status);
+    oskar_mem_realloc(sky->I, num_sources, status);
+    oskar_mem_realloc(sky->Q, num_sources, status);
+    oskar_mem_realloc(sky->U, num_sources, status);
+    oskar_mem_realloc(sky->V, num_sources, status);
+    oskar_mem_realloc(sky->reference_freq, num_sources, status);
+    oskar_mem_realloc(sky->spectral_index, num_sources, status);
+    oskar_mem_realloc(sky->RM, num_sources, status);
+    oskar_mem_realloc(sky->l, num_sources, status);
+    oskar_mem_realloc(sky->m, num_sources, status);
+    oskar_mem_realloc(sky->n, num_sources, status);
+    oskar_mem_realloc(sky->FWHM_major, num_sources, status);
+    oskar_mem_realloc(sky->FWHM_minor, num_sources, status);
+    oskar_mem_realloc(sky->position_angle, num_sources, status);
+    oskar_mem_realloc(sky->gaussian_a, num_sources, status);
+    oskar_mem_realloc(sky->gaussian_b, num_sources, status);
+    oskar_mem_realloc(sky->gaussian_c, num_sources, status);
 }
 
 #ifdef __cplusplus

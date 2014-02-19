@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,6 @@
  */
 
 #include <private_station.h>
-
 #include <oskar_station_accessors.h>
 
 #ifdef __cplusplus
@@ -84,12 +83,13 @@ int oskar_station_beam_coord_type(const oskar_Station* model)
 
 oskar_SystemNoiseModel* oskar_station_system_noise_model(oskar_Station* model)
 {
-    return &model->noise;
+    return model->noise;
 }
 
-const oskar_SystemNoiseModel* oskar_station_system_noise_model_const(const oskar_Station* model)
+const oskar_SystemNoiseModel* oskar_station_system_noise_model_const(
+        const oskar_Station* model)
 {
-    return &model->noise;
+    return model->noise;
 }
 
 
@@ -165,162 +165,162 @@ double oskar_station_element_orientation_y_rad(const oskar_Station* model)
 
 oskar_Mem* oskar_station_element_x_signal(oskar_Station* model)
 {
-    return &model->x_signal;
+    return model->x_signal;
 }
 
 const oskar_Mem* oskar_station_element_x_signal_const(const oskar_Station* model)
 {
-    return &model->x_signal;
+    return model->x_signal;
 }
 
 oskar_Mem* oskar_station_element_y_signal(oskar_Station* model)
 {
-    return &model->y_signal;
+    return model->y_signal;
 }
 
 const oskar_Mem* oskar_station_element_y_signal_const(const oskar_Station* model)
 {
-    return &model->y_signal;
+    return model->y_signal;
 }
 
 oskar_Mem* oskar_station_element_z_signal(oskar_Station* model)
 {
-    return &model->z_signal;
+    return model->z_signal;
 }
 
 const oskar_Mem* oskar_station_element_z_signal_const(const oskar_Station* model)
 {
-    return &model->z_signal;
+    return model->z_signal;
 }
 
 oskar_Mem* oskar_station_element_x_weights(oskar_Station* model)
 {
-    return &model->x_weights;
+    return model->x_weights;
 }
 
 const oskar_Mem* oskar_station_element_x_weights_const(const oskar_Station* model)
 {
-    return &model->x_weights;
+    return model->x_weights;
 }
 
 oskar_Mem* oskar_station_element_y_weights(oskar_Station* model)
 {
-    return &model->y_weights;
+    return model->y_weights;
 }
 
 const oskar_Mem* oskar_station_element_y_weights_const(const oskar_Station* model)
 {
-    return &model->y_weights;
+    return model->y_weights;
 }
 
 oskar_Mem* oskar_station_element_z_weights(oskar_Station* model)
 {
-    return &model->z_weights;
+    return model->z_weights;
 }
 
 const oskar_Mem* oskar_station_element_z_weights_const(const oskar_Station* model)
 {
-    return &model->z_weights;
+    return model->z_weights;
 }
 
 oskar_Mem* oskar_station_element_gain(oskar_Station* model)
 {
-    return &model->gain;
+    return model->gain;
 }
 
 const oskar_Mem* oskar_station_element_gain_const(const oskar_Station* model)
 {
-    return &model->gain;
+    return model->gain;
 }
 
 oskar_Mem* oskar_station_element_gain_error(oskar_Station* model)
 {
-    return &model->gain_error;
+    return model->gain_error;
 }
 
 const oskar_Mem* oskar_station_element_gain_error_const(const oskar_Station* model)
 {
-    return &model->gain_error;
+    return model->gain_error;
 }
 
 oskar_Mem* oskar_station_element_phase_offset(oskar_Station* model)
 {
-    return &model->phase_offset;
+    return model->phase_offset;
 }
 
 const oskar_Mem* oskar_station_element_phase_offset_const(const oskar_Station* model)
 {
-    return &model->phase_offset;
+    return model->phase_offset;
 }
 
 oskar_Mem* oskar_station_element_phase_error(oskar_Station* model)
 {
-    return &model->phase_error;
+    return model->phase_error;
 }
 
 const oskar_Mem* oskar_station_element_phase_error_const(const oskar_Station* model)
 {
-    return &model->phase_error;
+    return model->phase_error;
 }
 
 oskar_Mem* oskar_station_element_weight(oskar_Station* model)
 {
-    return &model->weight;
+    return model->weight;
 }
 
 const oskar_Mem* oskar_station_element_weight_const(const oskar_Station* model)
 {
-    return &model->weight;
+    return model->weight;
 }
 
 oskar_Mem* oskar_station_element_cos_orientation_x(oskar_Station* model)
 {
-    return &model->cos_orientation_x;
+    return model->cos_orientation_x;
 }
 
 const oskar_Mem* oskar_station_element_cos_orientation_x_const(const oskar_Station* model)
 {
-    return &model->cos_orientation_x;
+    return model->cos_orientation_x;
 }
 
 oskar_Mem* oskar_station_element_sin_orientation_x(oskar_Station* model)
 {
-    return &model->sin_orientation_x;
+    return model->sin_orientation_x;
 }
 
 const oskar_Mem* oskar_station_element_sin_orientation_x_const(const oskar_Station* model)
 {
-    return &model->sin_orientation_x;
+    return model->sin_orientation_x;
 }
 
 oskar_Mem* oskar_station_element_cos_orientation_y(oskar_Station* model)
 {
-    return &model->cos_orientation_y;
+    return model->cos_orientation_y;
 }
 
 const oskar_Mem* oskar_station_element_cos_orientation_y_const(const oskar_Station* model)
 {
-    return &model->cos_orientation_y;
+    return model->cos_orientation_y;
 }
 
 oskar_Mem* oskar_station_element_sin_orientation_y(oskar_Station* model)
 {
-    return &model->sin_orientation_y;
+    return model->sin_orientation_y;
 }
 
 const oskar_Mem* oskar_station_element_sin_orientation_y_const(const oskar_Station* model)
 {
-    return &model->sin_orientation_y;
+    return model->sin_orientation_y;
 }
 
 oskar_Mem* oskar_station_element_type(oskar_Station* model)
 {
-    return &model->element_type;
+    return model->element_type;
 }
 
 const oskar_Mem* oskar_station_element_type_const(const oskar_Station* model)
 {
-    return &model->element_type;
+    return model->element_type;
 }
 
 int oskar_station_has_child(const oskar_Station* model)
@@ -360,12 +360,12 @@ int oskar_station_num_permitted_beams(const oskar_Station* model)
 
 const oskar_Mem* oskar_station_permitted_beam_azimuth_rad_const(const oskar_Station* model)
 {
-    return &model->permitted_beam_az;
+    return model->permitted_beam_az;
 }
 
 const oskar_Mem* oskar_station_permitted_beam_elevation_rad_const(const oskar_Station* model)
 {
-    return &model->permitted_beam_el;
+    return model->permitted_beam_el;
 }
 
 

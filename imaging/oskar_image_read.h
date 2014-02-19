@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,7 @@
  * @file oskar_image_read.h
  */
 
-#include "oskar_global.h"
-#include "imaging/oskar_Image.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,14 +47,12 @@ extern "C" {
  * This function reads (multi-dimensional) image data from an OSKAR binary
  * file.
  *
- * @param[in] image   Pointer to empty or uninitialised image structure to fill.
  * @param[in] filename Name of file to read.
  * @param[in] idx      Image index to read from the file (set to 0 if unknown).
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_image_read(oskar_Image* image, const char* filename, int idx,
-        int* status);
+oskar_Image* oskar_image_read(const char* filename, int idx, int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,8 +85,9 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
             oskar_telescope_latitude_rad(telescope) * rad2deg);
 
     /* Add settings file path. */
-    oskar_mem_copy(oskar_vis_settings_path(vis), &settings->settings_path,
-            status);
+    oskar_mem_append_raw(oskar_vis_settings_path(vis),
+            settings->settings_path, OSKAR_CHAR, OSKAR_LOCATION_CPU,
+            1 + strlen(settings->settings_path), status);
 
     /* Add telescope model path. */
     oskar_mem_append_raw(oskar_vis_telescope_path(vis),
@@ -104,9 +105,9 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
 
     /* Compute baseline u,v,w coordinates for simulation. */
     {
-        oskar_Mem work_uvw;
-        oskar_mem_init(&work_uvw, oskar_mem_type_precision(type),
-                OSKAR_LOCATION_CPU, 3 * num_stations, 1, status);
+        oskar_Mem *work_uvw;
+        work_uvw = oskar_mem_create(oskar_mem_type_precision(type),
+                OSKAR_LOCATION_CPU, 3 * num_stations, status);
         oskar_convert_ecef_to_baseline_uvw(oskar_vis_baseline_uu_metres(vis),
                 oskar_vis_baseline_vv_metres(vis),
                 oskar_vis_baseline_ww_metres(vis),
@@ -117,8 +118,8 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
                 oskar_telescope_ra0_rad(telescope),
                 oskar_telescope_dec0_rad(telescope),
                 settings->obs.num_time_steps, settings->obs.start_mjd_utc,
-                settings->obs.dt_dump_days, &work_uvw, status);
-        oskar_mem_free(&work_uvw, status);
+                settings->obs.dt_dump_days, work_uvw, status);
+        oskar_mem_free(work_uvw, status);
     }
 
     /* Copy station lon/lat and nominal receptor orientations */

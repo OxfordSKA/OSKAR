@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -224,16 +224,15 @@ static void set_up_osm(int* num_chunks, oskar_Sky*** sky_chunks,
             int binary_file_error = 0;
 
             /* Load into a temporary structure. */
-            temp = oskar_sky_create(type, OSKAR_LOCATION_CPU, 0, status);
             oskar_log_message(log, 0, "Loading OSKAR sky model file '%s' ...",
                     filename);
 
             /* Try to read sky model as a binary file first. */
             /* If this fails, read it as an ASCII file. */
-            oskar_sky_read(temp, filename, OSKAR_LOCATION_CPU,
+            temp = oskar_sky_read(filename, OSKAR_LOCATION_CPU,
                     &binary_file_error);
             if (binary_file_error)
-                oskar_sky_load(temp, filename, status);
+                temp = oskar_sky_load(filename, type, status);
 
             /* Apply filters and extended source over-ride. */
             set_up_filter(temp, &s->filter, ra0, dec0, status);

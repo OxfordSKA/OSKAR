@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_INIT_H_
-#define OSKAR_SKY_INIT_H_
+#ifndef OSKAR_MEM_CREATE_ALIAS_FROM_RAW_H_
+#define OSKAR_MEM_CREATE_ALIAS_FROM_RAW_H_
 
 /**
- * @file oskar_sky_init.h
+ * @file oskar_mem_create_alias_from_raw.h
  */
 
 #include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,20 +42,30 @@ extern "C" {
 
 /**
  * @brief
- * Initialises the data structure.
+ * Creates an aliased pointer from an existing one.
  *
- * @param[out] model        Pointer to data structure to initialise.
- * @param[in]  type         Enumerated data type of memory contents (magic number).
- * @param[in]  location     Specify 0 for host memory, 1 for device memory.
- * @param[in]  num_elements Number of elements of type \p type in the array.
+ * @details
+ * This function creates a handle to an OSKAR memory block that contains an
+ * aliased pointer to existing memory. The structure does not own the memory
+ * to which it points.
+ *
+ * A handle to the memory is returned. The handle must be deallocated
+ * using oskar_mem_free() when it is no longer required.
+ *
+ * @param[in] ptr           Pointer to existing memory.
+ * @param[in] type          Enumerated data type of memory contents.
+ * @param[in] location      Either OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU.
+ * @param[in] num_elements  Number of elements of type \p type in the array.
  * @param[in,out]  status   Status return code.
+ *
+ * @return A handle to the aliased memory block structure.
  */
 OSKAR_EXPORT
-void oskar_sky_init(oskar_Sky* model, int type, int location,
-        int num_elements, int* status);
+oskar_Mem* oskar_mem_create_alias_from_raw(void* ptr, int type, int location,
+        size_t num_elements, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SKY_INIT_H_ */
+#endif /* OSKAR_MEM_CREATE_ALIAS_FROM_RAW_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,17 +59,12 @@ extern "C" {
  * @param[in]  l            Array of image l coordinates.
  * @param[in]  m            Array of image m coordinates.
  * @param[in]  frequency_hz Frequency, in Hz.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
+void oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
         const oskar_Mem* vv_metres, const oskar_Mem* amp, const oskar_Mem* l,
-        const oskar_Mem* m, double frequency_hz);
+        const oskar_Mem* m, double frequency_hz, int* status);
 
 #ifdef __cplusplus
 }

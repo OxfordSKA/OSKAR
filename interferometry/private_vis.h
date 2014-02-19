@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,9 +70,9 @@ struct oskar_Vis
     /* Maybe the two following fields should only be in the binary file as
      * on loading visibilities there is no guarantee these paths are still
      * valid ... ? Think about this more when working out how to deal with
-     * files that done fit into RAM... */
-    oskar_Mem settings_path;     /**< Path to settings file. */
-    oskar_Mem telescope_path;    /**< Path to telescope model. */
+     * files that don't fit into RAM... */
+    oskar_Mem* settings_path;     /**< Path to settings file. */
+    oskar_Mem* telescope_path;    /**< Path to telescope model. */
 
     int num_channels;            /**< Number of frequency channels. */
     int num_times;               /**< Number of time samples. */
@@ -88,19 +88,19 @@ struct oskar_Vis
     double phase_centre_ra_deg;  /**< Pointing phase centre RA, in degrees. */
     double phase_centre_dec_deg; /**< Pointing phase centre Dec, in degrees. */
     double telescope_lon_deg;    /**< Reference longitude of the telescope, in degrees */
-    double telescope_lat_deg;    /**< Reference latitude of the telescope, in degress */
+    double telescope_lat_deg;    /**< Reference latitude of the telescope, in degrees */
 
-    oskar_Mem x_metres;          /**< Station x coordinates, in metres. */
-    oskar_Mem y_metres;          /**< Station y coordinates, in metres. */
-    oskar_Mem z_metres;          /**< Station z coordinates, in metres. */
-    oskar_Mem station_lon;       /**< Station longitudes, in degrees */
-    oskar_Mem station_lat;       /**< Station latitudes, in degrees */
-    oskar_Mem station_orientation_x; /**< Orientation azimuth of nominal station x dipole axis, in degrees */
-    oskar_Mem station_orientation_y; /**< Orientation azimuth of nominal station y dipole axis, in degrees */
-    oskar_Mem uu_metres;         /**< Baseline coordinates, in metres. */
-    oskar_Mem vv_metres;         /**< Baseline coordinates, in metres. */
-    oskar_Mem ww_metres;         /**< Baseline coordinates, in metres. */
-    oskar_Mem amplitude;         /**< Complex visibility amplitude. */
+    oskar_Mem* x_metres;          /**< Station x coordinates, in metres. */
+    oskar_Mem* y_metres;          /**< Station y coordinates, in metres. */
+    oskar_Mem* z_metres;          /**< Station z coordinates, in metres. */
+    oskar_Mem* station_lon;       /**< Station longitudes, in degrees */
+    oskar_Mem* station_lat;       /**< Station latitudes, in degrees */
+    oskar_Mem* station_orientation_x; /**< Orientation azimuth of nominal station x dipole axis, in degrees */
+    oskar_Mem* station_orientation_y; /**< Orientation azimuth of nominal station y dipole axis, in degrees */
+    oskar_Mem* uu_metres;         /**< Baseline coordinates, in metres. */
+    oskar_Mem* vv_metres;         /**< Baseline coordinates, in metres. */
+    oskar_Mem* ww_metres;         /**< Baseline coordinates, in metres. */
+    oskar_Mem* amplitude;         /**< Complex visibility amplitude. */
 };
 
 #ifndef OSKAR_VIS_TYPEDEF_
