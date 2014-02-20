@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,15 +40,14 @@ int oskar_mem_different(const oskar_Mem* one, const oskar_Mem* two,
     int type;
     size_t bytes_to_check, i;
 
-    /* Check all inputs. */
-    if (!one || !two || !status)
+    /* Check that both arrays exist. */
+    if ((!one && two) || (one && !two))
     {
-        oskar_set_invalid_argument(status);
         return OSKAR_TRUE;
     }
 
     /* Check if safe to proceed. */
-    if (*status) return OSKAR_TRUE;
+    if (!status || *status) return OSKAR_TRUE;
 
     /* Check the data types. */
     type = one->type;

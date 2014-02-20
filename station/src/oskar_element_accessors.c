@@ -33,9 +33,9 @@
 extern "C" {
 #endif
 
-int oskar_element_type(const oskar_Element* data)
+int oskar_element_precision(const oskar_Element* data)
 {
-    return data->data_type;
+    return data->precision;
 }
 
 int oskar_element_location(const oskar_Element* data)
@@ -48,7 +48,7 @@ int oskar_element_has_spline_data(const oskar_Element* data)
     return oskar_splines_has_coeffs(data->theta_re_x);
 }
 
-int oskar_element_element_type(const oskar_Element* data)
+int oskar_element_type(const oskar_Element* data)
 {
     return data->element_type;
 }

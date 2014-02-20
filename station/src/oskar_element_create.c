@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-oskar_Element* oskar_element_create(int type, int location, int* status)
+oskar_Element* oskar_element_create(int precision, int location, int* status)
 {
     oskar_Element* data = 0;
 
@@ -53,7 +53,7 @@ oskar_Element* oskar_element_create(int type, int location, int* status)
     }
 
     /* Initialise variables. */
-    data->data_type = type;
+    data->precision = precision;
     data->data_location = location;
     data->element_type = OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE;
     data->taper_type = OSKAR_ELEMENT_TAPER_NONE;
@@ -61,20 +61,20 @@ oskar_Element* oskar_element_create(int type, int location, int* status)
     data->gaussian_fwhm_rad = 0.0;
 
     /* Check type. */
-    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+    if (precision != OSKAR_SINGLE && precision != OSKAR_DOUBLE)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Initialise memory. */
     data->filename_x = oskar_mem_create(OSKAR_CHAR, location, 0, status);
     data->filename_y = oskar_mem_create(OSKAR_CHAR, location, 0, status);
-    data->phi_re_x = oskar_splines_create(type, location, status);
-    data->phi_im_x = oskar_splines_create(type, location, status);
-    data->theta_re_x = oskar_splines_create(type, location, status);
-    data->theta_im_x = oskar_splines_create(type, location, status);
-    data->phi_re_y = oskar_splines_create(type, location, status);
-    data->phi_im_y = oskar_splines_create(type, location, status);
-    data->theta_re_y = oskar_splines_create(type, location, status);
-    data->theta_im_y = oskar_splines_create(type, location, status);
+    data->phi_re_x = oskar_splines_create(precision, location, status);
+    data->phi_im_x = oskar_splines_create(precision, location, status);
+    data->theta_re_x = oskar_splines_create(precision, location, status);
+    data->theta_im_x = oskar_splines_create(precision, location, status);
+    data->phi_re_y = oskar_splines_create(precision, location, status);
+    data->phi_im_y = oskar_splines_create(precision, location, status);
+    data->theta_re_y = oskar_splines_create(precision, location, status);
+    data->theta_im_y = oskar_splines_create(precision, location, status);
 
     /* Return pointer to the structure. */
     return data;

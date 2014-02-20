@@ -45,7 +45,7 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
 
     /* Check if safe to proceed. */
     if (*status) return;
-    dst->data_type = src->data_type;
+    dst->precision = src->precision;
     dst->element_type = src->element_type;
     dst->taper_type = src->taper_type;
     dst->cos_power = src->cos_power;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ extern "C" {
 #endif
 
 OSKAR_EXPORT
-int oskar_element_type(const oskar_Element* data);
+int oskar_element_precision(const oskar_Element* data);
 
 OSKAR_EXPORT
 int oskar_element_location(const oskar_Element* data);
@@ -51,7 +51,7 @@ OSKAR_EXPORT
 int oskar_element_has_spline_data(const oskar_Element* data);
 
 OSKAR_EXPORT
-int oskar_element_element_type(const oskar_Element* data);
+int oskar_element_type(const oskar_Element* data);
 
 OSKAR_EXPORT
 int oskar_element_taper_type(const oskar_Element* data);

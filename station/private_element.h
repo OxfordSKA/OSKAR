@@ -45,7 +45,7 @@
  */
 struct oskar_Element
 {
-    int data_type;
+    int precision;
     int data_location;
 
     int element_type; /**< Geometric dipole or isotropic. */

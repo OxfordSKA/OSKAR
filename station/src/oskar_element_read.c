@@ -35,6 +35,7 @@
 #include <oskar_mem_binary_stream_read.h>
 
 #include <stdio.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -92,6 +93,18 @@ void oskar_element_read(oskar_Element* data, int port, const char* filename,
 
     /* Close the file. */
     fclose(fhan);
+
+    /* Store the filename. */
+    if (port == 1)
+    {
+        oskar_mem_append_raw(data->filename_x, filename, OSKAR_CHAR,
+                OSKAR_LOCATION_CPU, 1 + strlen(filename), status);
+    }
+    else if (port == 2)
+    {
+        oskar_mem_append_raw(data->filename_y, filename, OSKAR_CHAR,
+                OSKAR_LOCATION_CPU, 1 + strlen(filename), status);
+    }
 
     /* Free the tag index. */
     oskar_binary_tag_index_free(idx, status);
