@@ -1,18 +1,16 @@
-2013-12-xx  OSKAR-2.4.0
-
-    * Added new beam coordinate modes which allow output of horizon frame
-      (zenith centred) tangent plane images, and HEALPix grids in both the 
-      equatorial and horizon frames.
+2014-02-25  OSKAR-2.4.0
 
     * Added ability to specify a set of horizon-based permitted beam directions
       on a per-station basis.
 
     * Added ability to save spline data for fitted element patterns back out
-      to the telescope model. This can offer a significant speed improvement
-      when running multiple short simulations.
+      to the telescope model. Note, however, that the way numerical element
+      pattern data is used will change considerably in future versions.
 
     * Fixed an issue building the Google unit test library.
-    
+
+    * Changed some beam pattern settings keys for future expansion.
+
     * Changed the behaviour of sky model filters to include the upper bound in
       flux, and the lower bound in radius. (Previously, both were excluded.)
 

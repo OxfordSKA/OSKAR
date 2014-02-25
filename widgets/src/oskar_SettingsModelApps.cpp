@@ -1010,24 +1010,27 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     setTooltip(k, "The station ID number (zero based) to select from the "
             "telescope model when generating the beam pattern.");
 
-
-    /* TODO change this to grid type?! */
     k = group + "/coordinate_type";
     options.clear();
-    options << "Beam image"
+    options << "Beam image";
+#if 0
             << "HEALPix"
             << "Sky model";
+#endif
     declare(k, "Coordinate (grid) type", options, 0);
     setTooltip(k, "Specification of coordinates at which to evaluate the beam "
             "pattern."
             "<ul>"
             "<li><b>Beam image</b>: Tangent plane image, centred on the "
             "beam pointing direction.</li>"
+#if 0
             "<li><b>HEALPix</b>: All-sky map on a HEALPix grid.</li>"
             "<li><b>Sky model</b>: Evaluate beam only at the supplied "
             "coordinates.</li>"
+#endif
             "</ul>");
 
+#if 0
     k = group + "/coordinate_frame";
     options.clear();
     options << "Equatorial"
@@ -1035,6 +1038,7 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     declare(k, "Coordinate frame", options, 0);
     setTooltip(k, "Specification of the coordinate frame in which to evaluate "
             "the beam pattern.");
+#endif
 
     k = group + "/beam_image";
     setLabel(k, "Beam image settings");
@@ -1067,6 +1071,8 @@ void oskar_SettingsModelApps::init_settings_beampattern()
             "Declination.</li>"
             "</ul>");
 
+    /* TODO These options need finalising. */
+#if 0
     k = group + "/healpix";
     setLabel(k, "HEALPix settings");
     setDependency(k , group + "/coordinate_type", "HEALPix");
@@ -1081,8 +1087,10 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     k = group + "/sky_model/file";
     declare(k, "Input file", oskar_SettingsItem::INPUT_FILE_NAME);
     setTooltip(k, "Path to an input sky model file.");
+#endif
 
-#if 0 /* proposed 2.4.x feature */
+    /* proposed new feature */
+#if 0
     k = group + "/horizon_clip";
     declare(k, "Horizon clip", oskar_SettingsItem::BOOL, "true");
     setTooltip(k, "Zero the beam pattern below the horizon");
