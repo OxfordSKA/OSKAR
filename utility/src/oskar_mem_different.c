@@ -46,6 +46,12 @@ int oskar_mem_different(const oskar_Mem* one, const oskar_Mem* two,
         return OSKAR_TRUE;
     }
 
+    /* If neither array exists, return false. */
+    if (!one && !two)
+    {
+        return OSKAR_FALSE;
+    }
+
     /* Check if safe to proceed. */
     if (!status || *status) return OSKAR_TRUE;
 
