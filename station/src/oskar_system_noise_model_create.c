@@ -50,7 +50,7 @@ oskar_SystemNoiseModel* oskar_system_noise_model_create(int type,
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
-    noise = (oskar_SystemNoiseModel*) malloc(sizeof(oskar_SystemNoiseModel*));
+    noise = (oskar_SystemNoiseModel*) malloc(sizeof(oskar_SystemNoiseModel));
 
     noise->frequency = oskar_mem_create(type, location, 0, status);
     noise->rms = oskar_mem_create(type, location, 0, status);

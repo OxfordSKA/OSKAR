@@ -47,7 +47,7 @@ void oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
 {
     int type;
     oskar_Mem *temp = 0, *data = 0;
-    size_t size_bytes, num_elements, element_size;
+    size_t size_bytes = 0, num_elements = 0, element_size = 0;
 
     /* Check all inputs. */
     if (!mem || !stream || !index || !status)
@@ -76,7 +76,6 @@ void oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
     element_size = oskar_mem_element_size(type);
     oskar_binary_tag_index_query(*index, (unsigned char)type,
             id_group, id_tag, user_index, &size_bytes, NULL, status);
-    if (*status) return;
 
     /* Resize memory block if necessary, so that it can hold the data. */
     num_elements = size_bytes / element_size;
@@ -101,7 +100,7 @@ void oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
 {
     int type;
     oskar_Mem *temp = 0, *data = 0;
-    size_t size_bytes, num_elements, element_size;
+    size_t size_bytes = 0, num_elements = 0, element_size = 0;
 
     /* Check all inputs. */
     if (!mem || !stream || !index || !name_group || !name_tag || !status)
@@ -130,7 +129,6 @@ void oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
     element_size = oskar_mem_element_size(type);
     oskar_binary_tag_index_query_ext(*index, (unsigned char)type,
             name_group, name_tag, user_index, NULL, &size_bytes, NULL, status);
-    if (*status) return;
 
     /* Resize memory block if necessary, so that it can hold the data. */
     num_elements = size_bytes / element_size;
