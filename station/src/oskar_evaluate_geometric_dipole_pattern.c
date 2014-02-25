@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_dipole_pattern.h>
-#include <oskar_evaluate_dipole_pattern_cuda.h>
+#include <oskar_evaluate_geometric_dipole_pattern.h>
+#include <oskar_evaluate_geometric_dipole_pattern_cuda.h>
 #include <oskar_cuda_check_error.h>
 
 #ifdef __cplusplus
@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 /* Wrapper. */
-void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
+void oskar_evaluate_geometric_dipole_pattern(oskar_Mem* pattern, int num_points,
         const oskar_Mem* theta, const oskar_Mem* phi, int return_x_dipole,
         int* status)
 {
@@ -85,14 +85,14 @@ void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
         {
-            oskar_evaluate_dipole_pattern_cuda_f(num_points,
+            oskar_evaluate_geometric_dipole_pattern_cuda_f(num_points,
                     oskar_mem_float_const(theta, status),
                     oskar_mem_float_const(phi, status), return_x_dipole,
                     oskar_mem_float4c(pattern, status));
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_evaluate_dipole_pattern_cuda_d(num_points,
+            oskar_evaluate_geometric_dipole_pattern_cuda_d(num_points,
                     oskar_mem_double_const(theta, status),
                     oskar_mem_double_const(phi, status), return_x_dipole,
                     oskar_mem_double4c(pattern, status));

@@ -31,7 +31,7 @@
 
 #include <oskar_apply_element_taper_cosine.h>
 #include <oskar_apply_element_taper_gaussian.h>
-#include <oskar_evaluate_dipole_pattern.h>
+#include <oskar_evaluate_geometric_dipole_pattern.h>
 #include <oskar_cuda_check_error.h>
 
 #define PIf 3.14159265358979323846f
@@ -261,7 +261,7 @@ void oskar_element_evaluate(const oskar_Element* model,
             computed_angles = 1;
 
             /* Evaluate dipole pattern for dipole X. */
-            oskar_evaluate_dipole_pattern(output, num_points, theta, phi, 1,
+            oskar_evaluate_geometric_dipole_pattern(output, num_points, theta, phi, 1,
                     status);
         }
 
@@ -293,7 +293,7 @@ void oskar_element_evaluate(const oskar_Element* model,
             computed_angles = 1;
 
             /* Evaluate dipole pattern for dipole Y. */
-            oskar_evaluate_dipole_pattern(output, num_points, theta, phi, 0,
+            oskar_evaluate_geometric_dipole_pattern(output, num_points, theta, phi, 0,
                     status);
         }
     }

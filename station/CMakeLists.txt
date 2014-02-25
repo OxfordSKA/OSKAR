@@ -22,8 +22,8 @@ set(station_SRC
     src/oskar_evaluate_array_pattern_dipoles.c
     src/oskar_evaluate_array_pattern_hierarchical.c
     src/oskar_evaluate_beam_horizon_direction.c
-    src/oskar_evaluate_dipole_pattern_cuda.cu
-    src/oskar_evaluate_dipole_pattern.c
+    src/oskar_evaluate_geometric_dipole_pattern_cuda.cu
+    src/oskar_evaluate_geometric_dipole_pattern.c
     src/oskar_evaluate_jones_E.c
     src/oskar_evaluate_pierce_points.c
     src/oskar_evaluate_element_weights_dft_cuda.cu

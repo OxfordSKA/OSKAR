@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_dipole_pattern_cuda.h>
+#include <oskar_evaluate_geometric_dipole_pattern_cuda.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,25 +35,25 @@ extern "C" {
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
-void oskar_evaluate_dipole_pattern_cuda_f(int num_points,
+void oskar_evaluate_geometric_dipole_pattern_cuda_f(int num_points,
         const float* d_theta, const float* d_phi, int return_x_dipole,
         float4c* d_pattern)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_points + num_threads - 1) / num_threads;
-    oskar_evaluate_dipole_pattern_cudak_f
+    oskar_evaluate_geometric_dipole_pattern_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points, d_theta, d_phi,
             return_x_dipole, d_pattern);
 }
 
 /* Double precision. */
-void oskar_evaluate_dipole_pattern_cuda_d(int num_points,
+void oskar_evaluate_geometric_dipole_pattern_cuda_d(int num_points,
         const double* d_theta, const double* d_phi, int return_x_dipole,
         double4c* d_pattern)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_points + num_threads - 1) / num_threads;
-    oskar_evaluate_dipole_pattern_cudak_d
+    oskar_evaluate_geometric_dipole_pattern_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points, d_theta, d_phi,
             return_x_dipole, d_pattern);
 }
@@ -63,7 +63,7 @@ void oskar_evaluate_dipole_pattern_cuda_d(int num_points,
 
 /* Single precision. */
 __global__
-void oskar_evaluate_dipole_pattern_cudak_f(const int num_points,
+void oskar_evaluate_geometric_dipole_pattern_cudak_f(const int num_points,
         const float* theta, const float* phi, const int return_x_dipole,
         float4c* pattern)
 {
@@ -101,7 +101,7 @@ void oskar_evaluate_dipole_pattern_cudak_f(const int num_points,
 
 /* Double precision. */
 __global__
-void oskar_evaluate_dipole_pattern_cudak_d(const int num_points,
+void oskar_evaluate_geometric_dipole_pattern_cudak_d(const int num_points,
         const double* theta, const double* phi, const int return_x_dipole,
         double4c* pattern)
 {

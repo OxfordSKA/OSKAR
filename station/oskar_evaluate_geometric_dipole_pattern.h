@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_DIPOLE_PATTERN_H_
-#define OSKAR_EVALUATE_DIPOLE_PATTERN_H_
+#ifndef OSKAR_EVALUATE_GEOMETRIC_DIPOLE_PATTERN_H_
+#define OSKAR_EVALUATE_GEOMETRIC_DIPOLE_PATTERN_H_
 
 /**
- * @file oskar_evaluate_dipole_pattern.h
+ * @file oskar_evaluate_geometric_dipole_pattern.h
  */
 
 #include <oskar_global.h>
@@ -67,7 +67,7 @@ extern "C" {
  * @param[in,out] status         Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
+void oskar_evaluate_geometric_dipole_pattern(oskar_Mem* pattern, int num_points,
         const oskar_Mem* theta, const oskar_Mem* phi, int return_x_dipole,
         int* status);
 
@@ -75,4 +75,4 @@ void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_DIPOLE_PATTERN_H_ */
+#endif /* OSKAR_EVALUATE_GEOMETRIC_DIPOLE_PATTERN_H_ */

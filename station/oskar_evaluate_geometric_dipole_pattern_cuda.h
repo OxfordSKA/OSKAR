@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_DIPOLE_PATTERN_CUDA_H_
-#define OSKAR_EVALUATE_DIPOLE_PATTERN_CUDA_H_
+#ifndef OSKAR_EVALUATE_GEOMETRIC_DIPOLE_PATTERN_CUDA_H_
+#define OSKAR_EVALUATE_GEOMETRIC_DIPOLE_PATTERN_CUDA_H_
 
 /**
- * @file oskar_evaluate_dipole_pattern_cuda.h
+ * @file oskar_evaluate_geometric_dipole_pattern_cuda.h
  */
 
 #include <oskar_global.h>
@@ -70,7 +70,7 @@ extern "C" {
  * @param[out] d_pattern         Array of output Jones matrices per source.
  */
 OSKAR_EXPORT
-void oskar_evaluate_dipole_pattern_cuda_f(int num_points,
+void oskar_evaluate_geometric_dipole_pattern_cuda_f(int num_points,
         const float* d_theta, const float* d_phi, int return_x_dipole,
         float4c* d_pattern);
 
@@ -104,7 +104,7 @@ void oskar_evaluate_dipole_pattern_cuda_f(int num_points,
  * @param[out] d_pattern         Array of output Jones matrices per source.
  */
 OSKAR_EXPORT
-void oskar_evaluate_dipole_pattern_cuda_d(int num_points,
+void oskar_evaluate_geometric_dipole_pattern_cuda_d(int num_points,
         const double* d_theta, const double* d_phi, int return_x_dipole,
         double4c* d_pattern);
 
@@ -137,7 +137,7 @@ void oskar_evaluate_dipole_pattern_cuda_d(int num_points,
  * @param[out] pattern           Array of output Jones matrices per source.
  */
 __global__
-void oskar_evaluate_dipole_pattern_cudak_f(const int num_points,
+void oskar_evaluate_geometric_dipole_pattern_cudak_f(const int num_points,
         const float* theta, const float* phi, const int return_x_dipole,
         float4c* pattern);
 
@@ -168,7 +168,7 @@ void oskar_evaluate_dipole_pattern_cudak_f(const int num_points,
  * @param[out] pattern           Array of output Jones matrices per source.
  */
 __global__
-void oskar_evaluate_dipole_pattern_cudak_d(const int num_points,
+void oskar_evaluate_geometric_dipole_pattern_cudak_d(const int num_points,
         const double* theta, const double* phi, const int return_x_dipole,
         double4c* pattern);
 
@@ -178,4 +178,4 @@ void oskar_evaluate_dipole_pattern_cudak_d(const int num_points,
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_DIPOLE_PATTERN_CUDA_H_ */
+#endif /* OSKAR_EVALUATE_GEOMETRIC_DIPOLE_PATTERN_CUDA_H_ */
