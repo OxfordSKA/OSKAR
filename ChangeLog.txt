@@ -9,8 +9,6 @@
 
     * Fixed an issue building the Google unit test library.
 
-    * Changed some beam pattern settings keys for future expansion.
-
     * Changed the behaviour of sky model filters to include the upper bound in
       flux, and the lower bound in radius. (Previously, both were excluded.)
 
