@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,6 +25,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+#include <cuda_runtime_api.h>
 
 #include "apps/lib/oskar_imager.h"
 #include "apps/lib/oskar_settings_load.h"
@@ -131,6 +133,7 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
 
     oskar_log_section(log, "Run complete.");
     oskar_image_free(image, &error);
+    cudaDeviceReset();
     return error;
 }
 

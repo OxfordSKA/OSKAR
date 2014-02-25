@@ -254,7 +254,9 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         oskar_sky_free(sky_chunks[i], &error);
     }
     free(tel_gpu);
-    if (sky_chunks) free(sky_chunks);
+    free(local_sky);
+    free(work);
+    free(sky_chunks);
     oskar_telescope_free(tel, &error);
 
     // Record times.
