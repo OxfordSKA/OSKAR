@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
 
-#include "oskar_global.h" // need this first to defined __CUDACC__
-#include "utility/oskar_vector_types.h"
-#include "interferometry/oskar_correlate_point_time_smearing_cuda.h"
-#include "interferometry/oskar_accumulate_baseline_visibility_for_source.h"
-#include "math/oskar_sinc.h"
+#include <oskar_global.h> // need this first to define __CUDACC__
+#include <oskar_vector_types.h>
+#include <oskar_correlate_point_time_smearing_cuda.h>
+#include <oskar_accumulate_baseline_visibility_for_source.h>
+#include <oskar_sinc.h>
 
 #include <cuda.h>
-#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 
 #include <vector>
 #include <cmath>

@@ -40,41 +40,25 @@
 #include <algorithm>
 #include <omp.h>
 
+void test_curand_generate(double* d_values, int num_blocks, int num_threads,
+        int num_values, int num_per_thread, curandStateXORWOW* state,
+        int num_states);
+
 using namespace std;
-
-#include <curand_kernel.h>
-
-// Test CURAND kernel.
-__global__
-void test_curand_generate(double* values, int num_values,
-        int num_per_thread, curandStateXORWOW* state, int num_states)
-{
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (tid >= num_states) return;
-
-    for (int i = 0; i < num_per_thread; ++i)
-    {
-        int idx = num_per_thread * tid + i;
-        if (idx >= num_values) continue;
-        values[idx] = curand_normal_double(&state[tid]);
-    }
-}
-
 
 TEST(curand, test)
 {
     int offset = 0;
     int seed   = 0;
     int num_threads = 100;
-    int num_values_per_thread = 1;
+    int num_per_thread = 1;
     int device_offset = 0;
     int status = 0;
     FILE* file = NULL;
     const char* filename = "temp_test_curand.txt";
     file = fopen(filename, "w");
 
-    int num_values = num_threads * num_values_per_thread;
+    int num_values = num_threads * num_per_thread;
     int num_states = num_threads;
     double* d_values;
     double* h_values;
@@ -91,7 +75,7 @@ TEST(curand, test)
     {
         fprintf(file, "--------\n");
         fprintf(file, "num_values            = %i\n", num_values);
-        fprintf(file, "num_values_per_thread = %i\n", num_values_per_thread);
+        fprintf(file, "num_per_thread        = %i\n", num_per_thread);
         fprintf(file, "num_blocks            = %i\n", num_blocks);
         fprintf(file, "num_threads           = %i\n", num_threads);
         fprintf(file, "num states            = %i\n", num_states);
@@ -105,10 +89,8 @@ TEST(curand, test)
     int num_sets = 3;
     for (int j = 0; j < num_sets; ++j)
     {
-        test_curand_generate
-            OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (d_values, num_values, num_values_per_thread, random_state->state,
-                    num_states);
+        test_curand_generate(d_values, num_blocks, num_threads, num_values,
+                num_per_thread, random_state->state, num_states);
         cudaMemcpy(h_values, d_values, num_values * sizeof(double), cudaMemcpyDeviceToHost);
         if (file)
         {
@@ -153,9 +135,8 @@ TEST(curand, test_state_allocation)
 
     for (int i = 0; i < num_iter; ++i)
     {
-        test_curand_generate
-        OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (d_values_, num_values, num_per_thread, random_state->state, num_states);
+        test_curand_generate(d_values_, num_blocks, num_threads, num_values,
+                num_per_thread, random_state->state, num_states);
 
         oskar_Mem* h_values = oskar_mem_create_copy(d_values,
                 OSKAR_LOCATION_CPU, &status);
@@ -215,10 +196,8 @@ TEST(curand, test_multi_device)
 
         for (int i = 0; i < num_iter; ++i)
         {
-            test_curand_generate
-                OSKAR_CUDAK_CONF(num_blocks, num_threads)
-                (d_values_, num_values, num_per_thread, d_states->state,
-                        num_states);
+            test_curand_generate(d_values_, num_blocks, num_threads,
+                    num_values, num_per_thread, d_states->state, num_states);
 
             oskar_Mem* h_values = oskar_mem_create_copy(d_values,
                     OSKAR_LOCATION_CPU, &error);

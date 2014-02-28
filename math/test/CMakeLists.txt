@@ -4,10 +4,10 @@
 
 set(name math_test)
 include_directories(${CUDA_INCLUDE_DIRS})
-list(APPEND CUDA_NVCC_FLAGS --compiler-options;${OpenMP_CXX_FLAGS};)
 set(${name}_SRC
     main.cpp
-    Test_curand.cu
+    Test_curand_generate_kernel.cu
+    Test_curand.cpp
     Test_find_closest_match.cpp
     Test_linspace.cpp
     Test_Jones.cpp
