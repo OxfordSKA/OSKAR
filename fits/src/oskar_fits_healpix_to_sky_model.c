@@ -49,6 +49,34 @@ extern "C" {
 
 static const double boltzmann = 1.3806488e-23; /* Boltzmann constant in J/K. */
 
+/*
+ * TODO Possible enhancements:
+ * 1) NEST to RING Conversion
+ * 2) Remove implicit assumption that healpix data is in the first field of the
+ *    binary table.
+ * 2) Remove implicit assumption that only the first HDU of healpix data
+ *    should be considered.
+ *
+ * Binary table mandatory keywords: (http://goo.gl/YT8Wbm)
+ * 1. XTENSION ( == BINTABLE )
+ * 2. BITPIX ( == 0 )
+ * 3. NAXIS ( == 2 )
+ * 4. NAXIS1
+ * 5. NAXIS2
+ * 6. PCOUNT
+ * 7. GCOUNT
+ * 8. TFIELDS
+ * 9..N. TFORMn n=1..k where k = value of TFIELDS
+ * last. END
+ *
+ * Expected HEALPIX keywords:
+ * 1. PIXTYPE ( == HEALPIX )
+ * 2. ORDERING ( == NESTED or RING )
+ * 3. NSIDE
+ * 4. FIRSTPIX?
+ * 5. LASTPIX?
+ * 6. INDXSCHM?
+ */
 void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
         const oskar_SettingsSkyHealpixFits* settings, oskar_Sky* sky,
         int* status)
@@ -56,10 +84,10 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
     void* data = 0;
     int col_index = 1; /* Read the first column. */
     int type_code = 0, ncols = 0, num_hdu = 0, hdu = 0, nside = 0;
-    long repeat = 0, width = 0, nrows = 0, i = 0;
+    long repeat = 0, width = 0, nrows = 0, i = 0, npixels = 0;
     fitsfile* fptr = 0;
     double lat = 0.0, lon = 0.0, val = 0.0;
-    char card[FLEN_CARD];
+    char card1[FLEN_CARD], card2[FLEN_CARD];
     oskar_Sky* temp_sky;
 
     /* Check inputs. */
@@ -92,8 +120,9 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
             continue;
 
         /* Look for PIXTYPE keyword. */
-        fits_read_key(fptr, TSTRING, "PIXTYPE", card, NULL, status);
-        if (!strcmp(card, "HEALPIX"))
+        fits_read_key(fptr, TSTRING, "XTENSION", card1, NULL, status);
+        fits_read_key(fptr, TSTRING, "PIXTYPE", card2, NULL, status);
+        if (!strcmp(card1, "BINTABLE") && !strcmp(card2, "HEALPIX"))
             break;
     }
 
@@ -107,8 +136,8 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
     }
 
     /* Check HEALPix ordering scheme. */
-    fits_read_key(fptr, TSTRING, "ORDERING", card, NULL, status);
-    if (strcmp(card, "RING"))
+    fits_read_key(fptr, TSTRING, "ORDERING", card1, NULL, status);
+    if (strcmp(card1, "RING"))
     {
         fits_close_file(fptr, status);
         *status = OSKAR_ERR_FITS_IO;
@@ -117,20 +146,25 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
     }
 
     /* Get number of rows and columns in binary table. */
+    /* Number of rows = value of NAXIS2 keyword */
+    /* Number of columns = value of TFIELDS keyword */
     fits_get_num_rows(fptr, &nrows, status);
     fits_get_num_cols(fptr, &ncols, status);
 
     /* Read type of the first column. */
     fits_get_coltype(fptr, col_index, &type_code, &repeat, &width, status);
 
+    /* Number of pixels = number of rows x number of pixels in each row */
+    npixels = nrows * repeat;
+
     /* Allocate memory for pixel data. */
     if (type_code == TFLOAT)
     {
-        data = malloc(nrows * sizeof(float));
+        data = malloc(npixels * sizeof(float));
     }
     else if (type_code == TDOUBLE)
     {
-        data = malloc(nrows * sizeof(double));
+        data = malloc(npixels * sizeof(double));
     }
     else
     {
@@ -142,7 +176,7 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
 
     /* Get HEALPix NSIDE parameter. */
     fits_read_key(fptr, TINT, "NSIDE", &nside, NULL, status);
-    if (nrows != 12 * nside * nside)
+    if (npixels != 12 * nside * nside)
     {
         free(data);
         fits_close_file(fptr, status);
@@ -153,15 +187,15 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
     }
 
     /* Read the FITS binary table into memory, and close the file. */
-    fits_read_col(fptr, type_code, col_index, 1, 1, nrows, 0, data, 0, status);
+    fits_read_col(fptr, type_code, col_index, 1, 1, npixels, 0, data, 0, status);
     fits_close_file(fptr, status);
 
     /* Initialise the temporary sky model to hold all pixels in the table. */
     temp_sky = oskar_sky_create(oskar_sky_precision(sky),
-            OSKAR_LOCATION_CPU, (int)nrows, status);
+            OSKAR_LOCATION_CPU, (int)npixels, status);
 
     /* Write contents of memory to temporary sky model. */
-    for (i = 0; i < nrows; ++i)
+    for (i = 0; i < npixels; ++i)
     {
         val = (type_code == TFLOAT) ? ((float*)data)[i] : ((double*)data)[i];
 
@@ -171,7 +205,7 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
         {
             /* Convert temperature per steradian to temperature per pixel. */
             /* Divide by number of pixels per steradian. */
-            val /= (nrows / (4.0 * M_PI));
+            val /= (npixels / (4.0 * M_PI));
             if (settings->map_units == OSKAR_MAP_UNITS_MK_PER_SR)
             {
                 val /= 1000.0; /* Convert milli-Kelvin to Kelvin. */
@@ -200,7 +234,7 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
 
     /* Append temporary sky model to input data. */
     oskar_sky_append(sky, temp_sky, status);
-    oskar_log_message(ptr, 0, "Loaded %d pixels.", (int)nrows);
+    oskar_log_message(ptr, 0, "Loaded %d pixels.", (int)npixels);
 
     /* Free memory. */
     if (data) free(data);
