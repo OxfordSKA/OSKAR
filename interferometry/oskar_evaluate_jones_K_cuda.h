@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,62 +99,14 @@ void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_stations,
 
 #ifdef __CUDACC__
 
-/**
- * @brief
- * CUDA kernel to generate un-normalised 3D DFT weights (single precision).
- *
- * @details
- * This CUDA kernel produces the complex 3D DFT weights for the
- * given inputs and outputs, and stores them in device memory.
- *
- * Each thread generates the complex weight for a single input and a single
- * output.
- *
- * The kernel requires (blockDim.x + blockDim.y) * sizeof(float3)
- * bytes of shared memory.
- *
- * @param[in] n_in     Number of input points.
- * @param[in] wavenumber Wavenumber (2 pi / wavelength).
- * @param[in] x_in     Array of input x positions.
- * @param[in] y_in     Array of input y positions.
- * @param[in] z_in     Array of input z positions.
- * @param[in] n_out    Number of output points.
- * @param[in] x_out    Array of output 1/x positions.
- * @param[in] y_out    Array of output 1/y positions.
- * @param[in] z_out    Array of output 1/z positions.
- * @param[out] weights Matrix of complex DFT weights (n_in columns, n_out rows).
- */
+/* Kernels. */
+
 __global__
 void oskar_evaluate_jones_K_cudak_f(const int n_in, const float wavenumber,
         const float* x_in, const float* y_in, const float* z_in,
         const int n_out, const float* x_out, const float* y_out,
         const float* z_out, float2* weights);
 
-/**
- * @brief
- * CUDA kernel to generate un-normalised 3D DFT weights (double precision).
- *
- * @details
- * This CUDA kernel produces the complex 3D DFT weights for the
- * given inputs and outputs, and stores them in device memory.
- *
- * Each thread generates the complex weight for a single input and a single
- * output.
- *
- * The kernel requires (blockDim.x + blockDim.y) * sizeof(double3)
- * bytes of shared memory.
- *
- * @param[in] n_in     Number of input points.
- * @param[in] wavenumber Wavenumber (2 pi / wavelength).
- * @param[in] x_in     Array of input x positions.
- * @param[in] y_in     Array of input y positions.
- * @param[in] z_in     Array of input z positions.
- * @param[in] n_out    Number of output points.
- * @param[in] x_out    Array of output 1/x positions.
- * @param[in] y_out    Array of output 1/y positions.
- * @param[in] z_out    Array of output 1/z positions.
- * @param[out] weights Matrix of complex DFT weights (n_in columns, n_out rows).
- */
 __global__
 void oskar_evaluate_jones_K_cudak_d(const int n_in, const double wavenumber,
         const double* x_in, const double* y_in, const double* z_in,

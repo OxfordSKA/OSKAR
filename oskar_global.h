@@ -38,7 +38,7 @@
  * library. For example, in OSKAR version 2.1.3 this would expand to
  * 0x020103.
  */
-#define OSKAR_VERSION 0x020400
+#define OSKAR_VERSION 0x020401
 
 /**
  * @brief Macro used to return the version of OSKAR as a text string.
@@ -47,7 +47,7 @@
  * This macro expands to a string that specifies the OSKAR version number
  * (for example, "2.1.3").
  */
-#define OSKAR_VERSION_STR "2.4.0"
+#define OSKAR_VERSION_STR "2.4.1-trunk"
 
 /**
  * @brief
@@ -267,18 +267,12 @@ enum {
 #    define OSKAR_OS_WIN
 #endif
 
-/**
- * @def OSKAR_EXPORT
- *
- * @brief
+/*
  * Macro used to export public functions.
- *
- * @details
- * Macro used for creating the Windows library.
  * Note: should only be needed in header files.
  *
- * The __declspec(dllexport) modifier enables the method to
- * be exported by the DLL so that it can be used by other applications.
+ * The modifier enables the function to be exported by the library so that
+ * it can be used by other applications.
  *
  * Usage examples:
  *   OSKAR_EXPORT void foo();
@@ -349,6 +343,29 @@ enum {
     #define OSKAR_INLINE inline
 #else
     #define OSKAR_INLINE static
+#endif
+
+/**
+ * @def OSKAR_TLS
+ *
+ * @brief
+ * Macro used to define a variable as having thread-local storage.
+ *
+ * @details
+ * Macro used to specify a thread-local storage qualifier for a global variable.
+ *
+ * This macro expands to the __thread specifier on Linux/GCC platforms, and
+ * __declspec(thread) on Windows.
+ *
+ * Usage examples:
+ *   OSKAR_TLS int foo = 0;
+ *   extern OSKAR_TLS struct state s;
+ *   static OSKAR_TLS char *p;
+ */
+#ifdef OSKAR_OS_WIN
+    #define OSKAR_TLS __declspec(thread)
+#else
+    #define OSKAR_TLS __thread
 #endif
 
 /* Macros used to prevent Eclipse from complaining about unknown CUDA syntax. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,54 +85,21 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_d(
 
 #ifdef __CUDACC__
 
-/**
- * @brief
- * CUDA kernel to convert spherical coordinates (RA, Dec) to direction cosines
- * centred on ra0, dec0 (single precision).
- *
- * @details
- * Computes the l,m,n direction cosines of the specified points relative to the
- * reference point.
- *
- * @param[in]  np      Number of positions.
- * @param[in]  ra      Right Ascensions, in radians.
- * @param[in]  dec     Declinations, in radians.
- * @param[in]  ra0     Centre (reference point) Right Ascension in radians.
- * @param[in]  cosDec0 Cosine of central (reference point) declination.
- * @param[in]  sinDec0 Sine of central (reference point) declination.
- * @param[out] l       Projected x-positions.
- * @param[out] m       Projected y-positions.
- * @param[out] n       Projected z-positions.
- */
+/* Kernels. */
+
 __global__
 void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_f(
-        const int np, const float* ra, const float* dec, const float ra0,
-        const float cosDec0, const float sinDec0, float* l, float* m, float* n);
+        const int num_points, const float* __restrict__ ra,
+        const float* __restrict__ dec, const float ra0, const float cos_dec0,
+        const float sin_dec0, float* __restrict__ l, float* __restrict__ m,
+        float* __restrict__ n);
 
-/**
- * @brief
- * CUDA kernel to convert spherical coordinates (RA, Dec) to direction cosines
- * centred on ra0, dec0 (double precision).
- *
- * @details
- * Computes the l,m,n direction cosines of the specified points relative to the
- * reference point.
- *
- * @param[in]  np      Number of positions.
- * @param[in]  ra      Right Ascensions, in radians.
- * @param[in]  dec     Declinations, in radians.
- * @param[in]  ra0     Centre (reference point) Right Ascension in radians.
- * @param[in]  cosDec0 Cosine of central (reference point) declination.
- * @param[in]  sinDec0 Sine of central (reference point) declination.
- * @param[out] l       Projected x-positions.
- * @param[out] m       Projected y-positions.
- * @param[out] n       Projected z-positions.
- */
 __global__
 void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_d(
-        const int np, const double* lon, const double* lat, const double lon0,
-        const double cosLat0, const double sinLat0, double* l, double* m,
-        double* n);
+        const int num_points, const double* __restrict__ ra,
+        const double* __restrict__ dec, const double ra0, const double cos_dec0,
+        const double sin_dec0, double* __restrict__ l, double* __restrict__ m,
+        double* __restrict__ n);
 
 #endif /* __CUDACC__ */
 

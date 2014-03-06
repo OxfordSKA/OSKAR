@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,78 +26,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_UVFITS_WRITER_H_
-#define OSKAR_UVFITS_WRITER_H_
-
-/**
- * @file oskar_uvfits_writer.h
- */
-
-#include "oskar_global.h"
-#include <fitsio.h>
+#include <oskar_global.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-struct oskar_uvfits
+/* Single precision. */
+OSKAR_INLINE
+void oskar_evaluate_geometric_dipole_pattern_inline_f(const float theta,
+        const float phi, float2* E_theta, float2* E_phi)
 {
-    fitsfile* fptr;
-    int       status;
-    int       decimals;
-    int       num_axes;
-    int       num_param;
-};
-typedef struct oskar_uvfits oskar_uvfits;
+    float sin_phi, cos_phi, cos_theta;
 
+    /* Get source vector components, relative to a dipole along x. */
+    cos_theta = cosf(theta);
+#ifdef __CUDACC__
+    sincosf(phi, &sin_phi, &cos_phi);
+#else
+    sin_phi = sinf(phi);
+    cos_phi = cosf(phi);
+#endif
 
-enum oskar_uvfits_axis_type
-{ GROUPS_NONE = 0, AMP = 1, STOKES = 2, FREQ = 3, RA = 4, DEC = 5 };
+    /* Store real and imaginary components of E_theta, E_phi vectors. */
+    E_theta->x = cos_theta * cos_phi;
+    E_theta->y = 0.0f;
+    E_phi->x = -sin_phi;
+    E_phi->y = 0.0f;
+}
 
-struct oskar_uvfits_header
+/* Double precision. */
+OSKAR_INLINE
+void oskar_evaluate_geometric_dipole_pattern_inline_d(const double theta,
+        const double phi, double2* E_theta, double2* E_phi)
 {
-    long  num_axes;
-    long* axis_dim;
+    double sin_phi, cos_phi, cos_theta;
 
-    long long num_param; /* == pcount */
-    long long gcount;    /* == num_vis */
-};
+    /* Get source vector components, relative to a dipole along x. */
+    cos_theta = cos(theta);
+#ifdef __CUDACC__
+    sincos(phi, &sin_phi, &cos_phi);
+#else
+    sin_phi = sin(phi);
+    cos_phi = cos(phi);
+#endif
 
-
-
-
-OSKAR_FITS_EXPORT
-void oskar_uvfits_create(const char* filename, oskar_uvfits* fits);
-
-OSKAR_FITS_EXPORT
-void oskar_uvfits_close(fitsfile* fits_file);
-
-OSKAR_FITS_EXPORT
-void oskar_uvfits_write_groups_header(fitsfile* fits_file, long long num_vis);
-
-OSKAR_FITS_EXPORT
-void oskar_uvfits_write_header(fitsfile* fits_file, const char* filename, double ra0,
-        double dec0, double frequency0, double date0);
-
-OSKAR_FITS_EXPORT
-void oskar_uvfits_write_param_header(fitsfile* fits_file, int id,
-        const char* type, const char* comment, double scale,
-        double zero);
-
-/* __FIXME__ This needs fixing to use the new visibility structure.
-
-OSKAR_FITS_EXPORT
-void oskar_uvfits_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
-        const double* weight, const double* date, const double* baseline);
-*/
-
-OSKAR_FITS_EXPORT
-int oskar_uvfits_baseline_id(int ant1, int ant2);
-
+    /* Store real and imaginary components of E_theta, E_phi vectors. */
+    E_theta->x = cos_theta * cos_phi;
+    E_theta->y = 0.0;
+    E_phi->x = -sin_phi;
+    E_phi->y = 0.0;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_UVFITS_WRITER_H_ */

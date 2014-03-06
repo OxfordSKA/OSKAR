@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -147,17 +147,19 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_d(
 
 __global__
 void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cudak_f(
-        float* x, float* y, float* z, const int num_points, const float* l,
-        const float* m, const float* n, const float cos_ha0,
-        const float sin_ha0, const float cos_dec0, const float sin_dec0,
-        const float cos_lat, const float sin_lat);
+        float* __restrict__ x, float* __restrict__ y, float* __restrict__ z,
+        const int num_points, const float* __restrict__ l,
+        const float* __restrict__ m, const float* __restrict__ n,
+        const float cos_ha0, const float sin_ha0, const float cos_dec0,
+        const float sin_dec0, const float cos_lat, const float sin_lat);
 
 __global__
 void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cudak_d(
-        double* x, double* y, double* z, const int num_points, const double* l,
-        const double* m, const double* n, const double cos_ha0,
-        const double sin_ha0, const double cos_dec0, const double sin_dec0,
-        const double cos_lat, const double sin_lat);
+        double* __restrict__ x, double* __restrict__ y, double* __restrict__ z,
+        const int num_points, const double* __restrict__ l,
+        const double* __restrict__ m, const double* __restrict__ n,
+        const double cos_ha0, const double sin_ha0, const double cos_dec0,
+        const double sin_dec0, const double cos_lat, const double sin_lat);
 
 #endif /* __CUDACC__ */
 

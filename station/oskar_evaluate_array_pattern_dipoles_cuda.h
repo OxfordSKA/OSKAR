@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,24 +40,6 @@
 extern "C" {
 #endif
 
-OSKAR_EXPORT
-void oskar_evaluate_array_pattern_dipoles_cuda_f(int num_antennas,
-        float wavenumber, const float* x, const float* y, const float* z,
-        const float* cos_orientation_x, const float* sin_orientation_x,
-        const float* cos_orientation_y, const float* sin_orientation_y,
-        const float2* weights, int num_sources, const float* l,
-        const float* m, const float* n, float4c* pattern);
-
-OSKAR_EXPORT
-void oskar_evaluate_array_pattern_dipoles_cuda_d(int num_antennas,
-        double wavenumber, const double* x, const double* y, const double* z,
-        const double* cos_orientation_x, const double* sin_orientation_x,
-        const double* cos_orientation_y, const double* sin_orientation_y,
-        const double2* weights, int num_sources, const double* l,
-        const double* m, const double* n, double4c* pattern);
-
-#ifdef __CUDACC__
-
 /**
  * @brief
  * Evaluates an aperture array station beam, assuming the array is composed of
@@ -96,14 +78,13 @@ void oskar_evaluate_array_pattern_dipoles_cuda_d(int num_antennas,
  * @param[in] sin_orientation_y  The sine of the azimuth angle of nominal y dipole.
  * @param[out] pattern           Array of output Jones matrices per source.
  */
-__global__
-void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
-        const float wavenumber, const float* x, const float* y, const float* z,
+OSKAR_EXPORT
+void oskar_evaluate_array_pattern_dipoles_cuda_f(int num_antennas,
+        float wavenumber, const float* x, const float* y, const float* z,
         const float* cos_orientation_x, const float* sin_orientation_x,
         const float* cos_orientation_y, const float* sin_orientation_y,
-        const float2* weights, const int num_sources, const float* l,
-        const float* m, const float* n, const int max_in_chunk,
-        float4c* pattern);
+        const float2* weights, int num_sources, const float* l,
+        const float* m, const float* n, float4c* pattern);
 
 /**
  * @brief
@@ -141,6 +122,27 @@ void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
  * @param[in] sin_orientation_y  The sine of the azimuth angle of nominal y dipole.
  * @param[out] pattern           Array of output Jones matrices per source.
  */
+OSKAR_EXPORT
+void oskar_evaluate_array_pattern_dipoles_cuda_d(int num_antennas,
+        double wavenumber, const double* x, const double* y, const double* z,
+        const double* cos_orientation_x, const double* sin_orientation_x,
+        const double* cos_orientation_y, const double* sin_orientation_y,
+        const double2* weights, int num_sources, const double* l,
+        const double* m, const double* n, double4c* pattern);
+
+#ifdef __CUDACC__
+
+/* Kernels. */
+
+__global__
+void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
+        const float wavenumber, const float* x, const float* y, const float* z,
+        const float* cos_orientation_x, const float* sin_orientation_x,
+        const float* cos_orientation_y, const float* sin_orientation_y,
+        const float2* weights, const int num_sources, const float* l,
+        const float* m, const float* n, const int max_in_chunk,
+        float4c* pattern);
+
 __global__
 void oskar_evaluate_array_pattern_dipoles_cudak_d(const int num_antennas,
         const double wavenumber, const double* x, const double* y,

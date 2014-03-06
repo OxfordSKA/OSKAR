@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include <oskar_convert_ecef_to_station_uvw_cuda.h>
+#include <oskar_convert_ecef_to_station_uvw_inline.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,29 +38,45 @@ void oskar_convert_ecef_to_station_uvw_cuda_f(float* d_u, float* d_v,
         float* d_w, int num_stations, const float* d_x, const float* d_y,
         const float* d_z, float ha0_rad, float dec0_rad)
 {
-    /* Define block and grid sizes. */
-    const int num_threads = 256;
-    const int num_blocks = (num_stations + num_threads - 1) / num_threads;
+    float sin_ha0, cos_ha0, sin_dec0, cos_dec0;
 
-    /* Call the CUDA kernel. */
+    /* Define block and grid sizes. */
+    int num_blocks, num_threads = 256;
+    num_blocks = (num_stations + num_threads - 1) / num_threads;
+
+    /* Precompute trig. */
+    sin_ha0  = (float)sin(ha0_rad);
+    cos_ha0  = (float)cos(ha0_rad);
+    sin_dec0 = (float)sin(dec0_rad);
+    cos_dec0 = (float)cos(dec0_rad);
+
     oskar_convert_ecef_to_station_uvw_cudak_f
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (d_u, d_v, d_w, num_stations, d_x, d_y, d_z, ha0_rad, dec0_rad);
+        (d_u, d_v, d_w, num_stations, d_x, d_y, d_z, sin_ha0,
+                cos_ha0, sin_dec0, cos_dec0);
 }
 
 /* Double precision. */
 void oskar_convert_ecef_to_station_uvw_cuda_d(double* d_u, double* d_v,
         double* d_w, int num_stations, const double* d_x, const double* d_y,
-        const double* d_z, double ha0, double dec0)
+        const double* d_z, double ha0_rad, double dec0_rad)
 {
-    /* Define block and grid sizes. */
-    const int num_threads = 256;
-    const int num_blocks = (num_stations + num_threads - 1) / num_threads;
+    double sin_ha0, cos_ha0, sin_dec0, cos_dec0;
 
-    /* Call the CUDA kernel. */
+    /* Define block and grid sizes. */
+    int num_blocks, num_threads = 256;
+    num_blocks = (num_stations + num_threads - 1) / num_threads;
+
+    /* Precompute trig. */
+    sin_ha0  = sin(ha0_rad);
+    cos_ha0  = cos(ha0_rad);
+    sin_dec0 = sin(dec0_rad);
+    cos_dec0 = cos(dec0_rad);
+
     oskar_convert_ecef_to_station_uvw_cudak_d
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (d_u, d_v, d_w, num_stations, d_x, d_y, d_z, ha0, dec0);
+        (d_u, d_v, d_w, num_stations, d_x, d_y, d_z, sin_ha0,
+                cos_ha0, sin_dec0, cos_dec0);
 }
 
 
@@ -67,76 +84,35 @@ void oskar_convert_ecef_to_station_uvw_cuda_d(double* d_u, double* d_v,
 
 /* Single precision. */
 __global__
-void oskar_convert_ecef_to_station_uvw_cudak_f(float* u, float* v, float* w,
-        int num_stations, const float* x, const float* y, const float* z,
-        float ha0_rad, float dec0_rad)
+void oskar_convert_ecef_to_station_uvw_cudak_f(float* __restrict__ u,
+        float* __restrict__ v, float* __restrict__ w, const int num_stations,
+        const float* __restrict__ x, const float* __restrict__ y,
+        const float* __restrict__ z, const float sin_ha0,
+        const float cos_ha0, const float sin_dec0, const float cos_dec0)
 {
-    /* Pre-compute sine and cosine of input angles. */
-    __device__ __shared__ float sinHa0, cosHa0, sinDec0, cosDec0;
-    if (threadIdx.x == 0)
-    {
-        sincosf(ha0_rad, &sinHa0, &cosHa0);
-        sincosf(dec0_rad, &sinDec0, &cosDec0);
-    }
-    __syncthreads();
-
     /* Get station ID. */
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_stations) return;
 
-    /* Cache input coordinates. */
-    float cx = x[i], cy = y[i], cz = z[i], cv, cw, t;
-
-    /* Do the rotation. */
-    t = cx * cosHa0;
-    t -= cy * sinHa0;
-    cv = cz * cosDec0;
-    cv -= sinDec0 * t;
-    cw = cosDec0 * t;
-    cw += cz * sinDec0;
-    t =  cx * sinHa0;
-    t += cy * cosHa0;
-    u[i] = t;
-    v[i] = cv;
-    w[i] = cw;
+    oskar_convert_ecef_to_station_uvw_inline_f(&u[i], &v[i], &w[i],
+            x[i], y[i], z[i], sin_ha0, cos_ha0, sin_dec0, cos_dec0);
 }
 
 /* Double precision. */
 __global__
-void oskar_convert_ecef_to_station_uvw_cudak_d(double* u, double* v, double* w,
-        int num_stations, const double* x, const double* y, const double* z,
-        double ha0_rad, double dec0_rad)
+void oskar_convert_ecef_to_station_uvw_cudak_d(double* __restrict__ u,
+        double* __restrict__ v, double* __restrict__ w, const int num_stations,
+        const double* __restrict__ x, const double* __restrict__ y,
+        const double* __restrict__ z, const double sin_ha0,
+        const double cos_ha0, const double sin_dec0, const double cos_dec0)
 {
-    /* Pre-compute sine and cosine of input angles. */
-    __device__ __shared__ double sinHa0, cosHa0, sinDec0, cosDec0;
-    if (threadIdx.x == 0)
-    {
-        sincos(ha0_rad, &sinHa0, &cosHa0);
-        sincos(dec0_rad, &sinDec0, &cosDec0);
-    }
-    __syncthreads();
-
     /* Get station ID. */
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_stations) return;
 
-    /* Cache input coordinates. */
-    double cx = x[i], cy = y[i], cz = z[i], cv, cw, t;
-
-    /* Do the rotation. */
-    t = cx * cosHa0;
-    t -= cy * sinHa0;
-    cv = cz * cosDec0;
-    cv -= sinDec0 * t;
-    cw = cosDec0 * t;
-    cw += cz * sinDec0;
-    t =  cx * sinHa0;
-    t += cy * cosHa0;
-    u[i] = t;
-    v[i] = cv;
-    w[i] = cw;
+    oskar_convert_ecef_to_station_uvw_inline_d(&u[i], &v[i], &w[i],
+            x[i], y[i], z[i], sin_ha0, cos_ha0, sin_dec0, cos_dec0);
 }
-
 
 #ifdef __cplusplus
 }

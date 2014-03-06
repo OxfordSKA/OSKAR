@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,10 +70,6 @@ void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_stations,
     (num_stations, wavenumber, d_u, d_v, d_w, num_sources, d_l, d_m, d_n,
             d_jones);
 }
-
-#ifdef __cplusplus
-}
-#endif
 
 
 /* Kernels. ================================================================ */
@@ -175,3 +171,8 @@ void oskar_evaluate_jones_K_cudak_d(const int num_stations,
         jones[w] = weight;
     }
 }
+
+#ifdef __cplusplus
+}
+#endif
+

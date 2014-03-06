@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_geometric_dipole_pattern.h>
-#include <oskar_evaluate_geometric_dipole_pattern_cuda.h>
-#include <oskar_evaluate_geometric_dipole_pattern_inline.h>
+#include <oskar_evaluate_dipole_pattern.h>
+#include <oskar_evaluate_dipole_pattern_cuda.h>
+#include <oskar_evaluate_dipole_pattern_inline.h>
 #include <oskar_cuda_check_error.h>
+#include <math.h>
+
+#define C_0 299792458.0
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_evaluate_geometric_dipole_pattern_f(int num_points,
-        const float* theta, const float* phi, int return_x_dipole,
-        float4c* pattern)
+void oskar_evaluate_dipole_pattern_f(int num_points,
+        const float* theta, const float* phi, float freq_hz,
+        float dipole_length_m, int return_x_dipole, float4c* pattern)
 {
+    float kL, cos_kL;
     float2 *E_theta, *E_phi;
     int i;
+
+    /* Precompute constants. */
+    kL = dipole_length_m * (M_PI * freq_hz / C_0);
+    cos_kL = (float)cos(kL);
 
     for (i = 0; i < num_points; ++i)
     {
@@ -56,18 +68,23 @@ void oskar_evaluate_geometric_dipole_pattern_f(int num_points,
             E_theta = &(pattern[i].c);
             E_phi   = &(pattern[i].d);
         }
-        oskar_evaluate_geometric_dipole_pattern_inline_f(theta[i], phi[i],
+        oskar_evaluate_dipole_pattern_inline_f(theta[i], phi[i], kL, cos_kL,
                 E_theta, E_phi);
     }
 }
 
 /* Double precision. */
-void oskar_evaluate_geometric_dipole_pattern_d(int num_points,
-        const double* theta, const double* phi, int return_x_dipole,
-        double4c* pattern)
+void oskar_evaluate_dipole_pattern_d(int num_points,
+        const double* theta, const double* phi, double freq_hz,
+        double dipole_length_m, int return_x_dipole, double4c* pattern)
 {
+    double kL, cos_kL;
     double2 *E_theta, *E_phi;
     int i;
+
+    /* Precompute constants. */
+    kL = dipole_length_m * (M_PI * freq_hz / C_0);
+    cos_kL = cos(kL);
 
     for (i = 0; i < num_points; ++i)
     {
@@ -82,16 +99,15 @@ void oskar_evaluate_geometric_dipole_pattern_d(int num_points,
             E_theta = &(pattern[i].c);
             E_phi   = &(pattern[i].d);
         }
-        oskar_evaluate_geometric_dipole_pattern_inline_d(theta[i], phi[i],
+        oskar_evaluate_dipole_pattern_inline_d(theta[i], phi[i], kL, cos_kL,
                 E_theta, E_phi);
     }
 }
 
-
 /* Wrapper. */
-void oskar_evaluate_geometric_dipole_pattern(oskar_Mem* pattern, int num_points,
-        const oskar_Mem* theta, const oskar_Mem* phi, int return_x_dipole,
-        int* status)
+void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
+        const oskar_Mem* theta, const oskar_Mem* phi, double freq_hz,
+        double dipole_length_m, int return_x_dipole, int* status)
 {
     int type, location;
 
@@ -139,16 +155,18 @@ void oskar_evaluate_geometric_dipole_pattern(oskar_Mem* pattern, int num_points,
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
         {
-            oskar_evaluate_geometric_dipole_pattern_cuda_f(num_points,
+            oskar_evaluate_dipole_pattern_cuda_f(num_points,
                     oskar_mem_float_const(theta, status),
-                    oskar_mem_float_const(phi, status), return_x_dipole,
+                    oskar_mem_float_const(phi, status), freq_hz,
+                    (float)dipole_length_m, return_x_dipole,
                     oskar_mem_float4c(pattern, status));
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_evaluate_geometric_dipole_pattern_cuda_d(num_points,
+            oskar_evaluate_dipole_pattern_cuda_d(num_points,
                     oskar_mem_double_const(theta, status),
-                    oskar_mem_double_const(phi, status), return_x_dipole,
+                    oskar_mem_double_const(phi, status), freq_hz,
+                    dipole_length_m, return_x_dipole,
                     oskar_mem_double4c(pattern, status));
         }
         oskar_cuda_check_error(status);
@@ -160,16 +178,18 @@ void oskar_evaluate_geometric_dipole_pattern(oskar_Mem* pattern, int num_points,
     {
         if (type == OSKAR_SINGLE)
         {
-            oskar_evaluate_geometric_dipole_pattern_f(num_points,
+            oskar_evaluate_dipole_pattern_f(num_points,
                     oskar_mem_float_const(theta, status),
-                    oskar_mem_float_const(phi, status), return_x_dipole,
+                    oskar_mem_float_const(phi, status), freq_hz,
+                    (float)dipole_length_m, return_x_dipole,
                     oskar_mem_float4c(pattern, status));
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_evaluate_geometric_dipole_pattern_d(num_points,
+            oskar_evaluate_dipole_pattern_d(num_points,
                     oskar_mem_double_const(theta, status),
-                    oskar_mem_double_const(phi, status), return_x_dipole,
+                    oskar_mem_double_const(phi, status), freq_hz,
+                    dipole_length_m, return_x_dipole,
                     oskar_mem_double4c(pattern, status));
         }
     }

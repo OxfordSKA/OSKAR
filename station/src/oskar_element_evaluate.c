@@ -32,153 +32,17 @@
 #include <oskar_apply_element_taper_cosine.h>
 #include <oskar_apply_element_taper_gaussian.h>
 #include <oskar_evaluate_geometric_dipole_pattern.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_convert_enu_direction_cosines_to_theta_phi.h>
 
-#define PIf 3.14159265358979323846f
-#define PI  3.14159265358979323846
+#include <math.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288;
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/* Kernels. ================================================================ */
-
-/* Single precision. */
-__global__
-void oskar_cudak_hor_lmn_to_modified_theta_phi_f(const int num_points,
-        const float* l, const float* m, const float* n,
-        const float delta_phi, float* theta, float* phi)
-{
-    float x, y, z, p;
-
-    /* Get the position ID that this thread is working on. */
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num_points) return;
-
-    /* Get the data. */
-    x = l[i];
-    y = m[i];
-    z = n[i];
-
-    /* Cartesian to spherical (with orientation offset). */
-    p = atan2f(y, x) + delta_phi;
-    p = fmodf(p, 2.0f * PIf);
-    x = sqrtf(x*x + y*y);
-    y = atan2f(x, z); /* Theta. */
-    if (p < 0) p += 2.0f * PIf; /* Get phi in range 0 to 2 pi. */
-    phi[i] = p;
-    theta[i] = y;
-}
-
-/* Double precision. */
-__global__
-void oskar_cudak_hor_lmn_to_modified_theta_phi_d(const int num_points,
-        const double* l, const double* m, const double* n,
-        const double delta_phi, double* theta, double* phi)
-{
-    double x, y, z, p;
-
-    /* Get the position ID that this thread is working on. */
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num_points) return;
-
-    /* Get the data. */
-    x = l[i];
-    y = m[i];
-    z = n[i];
-
-    /* Cartesian to spherical (with orientation offset). */
-    p = atan2(y, x) + delta_phi;
-    p = fmod(p, 2.0 * PI);
-    x = sqrt(x*x + y*y);
-    y = atan2(x, z); /* Theta. */
-    if (p < 0) p += 2.0 * PI; /* Get phi in range 0 to 2 pi. */
-    phi[i] = p;
-    theta[i] = y;
-}
-
-/* Kernel wrappers. ======================================================== */
-
-/* Single precision. */
-void oskar_hor_lmn_to_modified_theta_phi_cuda_f(int num_points,
-        const float* d_l, const float* d_m, const float* d_n,
-        float delta_phi, float* d_theta, float* d_phi)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (num_points + num_threads - 1) / num_threads;
-    oskar_cudak_hor_lmn_to_modified_theta_phi_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points, d_l, d_m, d_n,
-            delta_phi, d_theta, d_phi);
-}
-
-/* Double precision. */
-void oskar_hor_lmn_to_modified_theta_phi_cuda_d(int num_points,
-        const double* d_l, const double* d_m, const double* d_n,
-        double delta_phi, double* d_theta, double* d_phi)
-{
-    int num_blocks, num_threads = 256;
-    num_blocks = (num_points + num_threads - 1) / num_threads;
-    oskar_cudak_hor_lmn_to_modified_theta_phi_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points, d_l, d_m, d_n,
-            delta_phi, d_theta, d_phi);
-}
-
-/* Wrapper. */
-void oskar_hor_lmn_to_modified_theta_phi(oskar_Mem* theta, oskar_Mem* phi,
-        double delta_phi, int num_points, const oskar_Mem* l,
-        const oskar_Mem* m, const oskar_Mem* n, int* status)
-{
-    int type, location;
-
-    /* Check all inputs. */
-    if (!theta || !phi || !l || !m || !n || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Get data type and location. */
-    type = oskar_mem_type(theta);
-    location = oskar_mem_location(theta);
-
-    /* Compute modified theta and phi coordinates. */
-    if (location == OSKAR_LOCATION_GPU)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        if (type == OSKAR_SINGLE)
-        {
-            oskar_hor_lmn_to_modified_theta_phi_cuda_f(num_points,
-                    oskar_mem_float_const(l, status),
-                    oskar_mem_float_const(m, status),
-                    oskar_mem_float_const(n, status), (float)delta_phi,
-                    oskar_mem_float(theta, status),
-                    oskar_mem_float(phi, status));
-            oskar_cuda_check_error(status);
-        }
-        else if (type == OSKAR_DOUBLE)
-        {
-            oskar_hor_lmn_to_modified_theta_phi_cuda_d(num_points,
-                    oskar_mem_double_const(l, status),
-                    oskar_mem_double_const(m, status),
-                    oskar_mem_double_const(n, status), delta_phi,
-                    oskar_mem_double(theta, status),
-                    oskar_mem_double(phi, status));
-            oskar_cuda_check_error(status);
-        }
-        else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-    }
-    else if (location == OSKAR_LOCATION_CPU)
-    {
-        *status = OSKAR_ERR_BAD_LOCATION;
-    }
-}
 
 void oskar_element_evaluate(const oskar_Element* model,
         oskar_Mem* output, double orientation_x, double orientation_y,
@@ -237,8 +101,8 @@ void oskar_element_evaluate(const oskar_Element* model,
         if (spline_x)
         {
             /* Compute modified theta and phi coordinates for dipole X. */
-            delta_phi_x = PI/2 - orientation_x;
-            oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+            delta_phi_x = M_PI/2.0 - orientation_x;
+            oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
                     delta_phi_x, num_points, l, m, n, status);
             computed_angles = 1;
 
@@ -255,14 +119,14 @@ void oskar_element_evaluate(const oskar_Element* model,
         else if (model->element_type == OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE)
         {
             /* Compute modified theta and phi coordinates for dipole X. */
-            delta_phi_x = orientation_x - PI/2; /* TODO check the order. */
-            oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+            delta_phi_x = orientation_x - M_PI/2.0; /* TODO check the order. */
+            oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
                     delta_phi_x, num_points, l, m, n, status);
             computed_angles = 1;
 
             /* Evaluate dipole pattern for dipole X. */
-            oskar_evaluate_geometric_dipole_pattern(output, num_points, theta, phi, 1,
-                    status);
+            oskar_evaluate_geometric_dipole_pattern(output, num_points,
+                    theta, phi, 1, status);
         }
 
         /* Check if spline data present for dipole Y. */
@@ -270,7 +134,7 @@ void oskar_element_evaluate(const oskar_Element* model,
         {
             /* Compute modified theta and phi coordinates for dipole Y. */
             delta_phi_y = -orientation_y;
-            oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+            oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
                     delta_phi_y, num_points, l, m, n, status);
             computed_angles = 1;
 
@@ -286,22 +150,22 @@ void oskar_element_evaluate(const oskar_Element* model,
         }
         else if (model->element_type == OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE)
         {
-            /* Compute modified theta and phi coordinates for dipole X. */
-            delta_phi_y = orientation_y - PI/2; /* TODO check the order. */
-            oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+            /* Compute modified theta and phi coordinates for dipole Y. */
+            delta_phi_y = orientation_y - M_PI/2.0; /* TODO check the order. */
+            oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
                     delta_phi_y, num_points, l, m, n, status);
             computed_angles = 1;
 
             /* Evaluate dipole pattern for dipole Y. */
-            oskar_evaluate_geometric_dipole_pattern(output, num_points, theta, phi, 0,
-                    status);
+            oskar_evaluate_geometric_dipole_pattern(output, num_points,
+                    theta, phi, 0, status);
         }
     }
 
     /* Compute theta values for tapering, if not already done. */
     if (model->taper_type != OSKAR_ELEMENT_TAPER_NONE && !computed_angles)
     {
-        oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+        oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
                 0, num_points, l, m, n, status);
         computed_angles = 1;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #include <oskar_convert_ecef_to_station_uvw.h>
 #include <oskar_convert_ecef_to_station_uvw_cuda.h>
+#include <oskar_convert_ecef_to_station_uvw_inline.h>
 #include <oskar_cuda_check_error.h>
 
 #include <math.h>
@@ -42,30 +43,20 @@ void oskar_convert_ecef_to_station_uvw_f(float* u, float* v, float* w,
         double ha0_rad, double dec0_rad)
 {
     int i;
-    double sinHa0, cosHa0, sinDec0, cosDec0;
+    double sin_ha0, cos_ha0, sin_dec0, cos_dec0;
 
     /* Precompute trig. */
-    sinHa0  = sin(ha0_rad);
-    cosHa0  = cos(ha0_rad);
-    sinDec0 = sin(dec0_rad);
-    cosDec0 = cos(dec0_rad);
+    sin_ha0  = sin(ha0_rad);
+    cos_ha0  = cos(ha0_rad);
+    sin_dec0 = sin(dec0_rad);
+    cos_dec0 = cos(dec0_rad);
 
     /* Loop over points. */
     for (i = 0; i < num_stations; ++i)
     {
-        double xi, yi, zi, ut, vt, wt;
-
-        /* Get the input coordinates. */
-        xi = (double)x[i];
-        yi = (double)y[i];
-        zi = (double)z[i];
-
-        /* Apply rotation matrix. */
-        ut =  xi * sinHa0 + yi * cosHa0;
-        vt = sinDec0 * (-xi * cosHa0 + yi * sinHa0) + zi * cosDec0;
-        wt = cosDec0 * (xi * cosHa0 - yi * sinHa0) + zi * sinDec0;
-
-        /* Save the rotated values. */
+        double ut, vt, wt;
+        oskar_convert_ecef_to_station_uvw_inline_d(&ut, &vt, &wt,
+                x[i], y[i], z[i], sin_ha0, cos_ha0, sin_dec0, cos_dec0);
         u[i] = (float)ut;
         v[i] = (float)vt;
         w[i] = (float)wt;
@@ -78,33 +69,19 @@ void oskar_convert_ecef_to_station_uvw_d(double* u, double* v, double* w,
         double ha0_rad, double dec0_rad)
 {
     int i;
-    double sinHa0, cosHa0, sinDec0, cosDec0;
+    double sin_ha0, cos_ha0, sin_dec0, cos_dec0;
 
     /* Precompute trig. */
-    sinHa0  = sin(ha0_rad);
-    cosHa0  = cos(ha0_rad);
-    sinDec0 = sin(dec0_rad);
-    cosDec0 = cos(dec0_rad);
+    sin_ha0  = sin(ha0_rad);
+    cos_ha0  = cos(ha0_rad);
+    sin_dec0 = sin(dec0_rad);
+    cos_dec0 = cos(dec0_rad);
 
     /* Loop over points. */
     for (i = 0; i < num_stations; ++i)
     {
-        double xi, yi, zi, ut, vt, wt;
-
-        /* Get the input coordinates. */
-        xi = x[i];
-        yi = y[i];
-        zi = z[i];
-
-        /* Apply rotation matrix. */
-        ut =  xi * sinHa0 + yi * cosHa0;
-        vt = sinDec0 * (-xi * cosHa0 + yi * sinHa0) + zi * cosDec0;
-        wt = cosDec0 * (xi * cosHa0 - yi * sinHa0) + zi * sinDec0;
-
-        /* Save the rotated values. */
-        u[i] = ut;
-        v[i] = vt;
-        w[i] = wt;
+        oskar_convert_ecef_to_station_uvw_inline_d(&u[i], &v[i], &w[i],
+                x[i], y[i], z[i], sin_ha0, cos_ha0, sin_dec0, cos_dec0);
     }
 }
 

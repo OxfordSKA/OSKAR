@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #include <oskar_convert_enu_direction_cosines_to_relative_direction_cosines.h>
 #include <oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda.h>
+#include <oskar_convert_enu_direction_cosines_to_relative_direction_cosines_inline.h>
 #include <math.h>
 
 #ifdef __cplusplus
@@ -50,22 +51,9 @@ void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_f(
 
     for (i = 0; i < num_points; ++i)
     {
-        float l_, m_, n_, x_, y_, z_, t;
-        x_ = x[i];
-        y_ = y[i];
-        z_ = z[i];
-        l_ = x_ * cos_ha0 - y_ * sin_ha0 * sin_lat + z_ * sin_ha0 * cos_lat;
-        t = sin_dec0 * cos_ha0;
-        m_ = x_ * sin_dec0 * sin_ha0 +
-                y_ * (cos_dec0 * cos_lat + t * sin_lat) +
-                z_ * (cos_dec0 * sin_lat - t * cos_lat);
-        t = cos_dec0 * cos_ha0;
-        n_ = -x_ * cos_dec0 * sin_ha0 +
-                y_ * (sin_dec0 * cos_lat - t * sin_lat) +
-                z_ * (sin_dec0 * sin_lat + t * cos_lat);
-        l[i] = l_;
-        m[i] = m_;
-        n[i] = n_;
+        oskar_convert_enu_direction_cosines_to_relative_direction_cosines_inline_f(
+                &l[i], &m[i], &n[i], x[i], y[i], z[i],
+                cos_ha0, sin_ha0, cos_dec0, sin_dec0, cos_lat, sin_lat);
     }
 }
 
@@ -85,22 +73,9 @@ void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_d(
 
     for (i = 0; i < num_points; ++i)
     {
-        double l_, m_, n_, x_, y_, z_, t;
-        x_ = x[i];
-        y_ = y[i];
-        z_ = z[i];
-        l_ = x_ * cos_ha0 - y_ * sin_ha0 * sin_lat + z_ * sin_ha0 * cos_lat;
-        t = sin_dec0 * cos_ha0;
-        m_ = x_ * sin_dec0 * sin_ha0 +
-                y_ * (cos_dec0 * cos_lat + t * sin_lat) +
-                z_ * (cos_dec0 * sin_lat - t * cos_lat);
-        t = cos_dec0 * cos_ha0;
-        n_ = -x_ * cos_dec0 * sin_ha0 +
-                y_ * (sin_dec0 * cos_lat - t * sin_lat) +
-                z_ * (sin_dec0 * sin_lat + t * cos_lat);
-        l[i] = l_;
-        m[i] = m_;
-        n[i] = n_;
+        oskar_convert_enu_direction_cosines_to_relative_direction_cosines_inline_d(
+                &l[i], &m[i], &n[i], x[i], y[i], z[i],
+                cos_ha0, sin_ha0, cos_dec0, sin_dec0, cos_lat, sin_lat);
     }
 }
 

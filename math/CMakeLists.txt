@@ -5,25 +5,13 @@
 # Add the source files in this directory.
 set(math_SRC
     src/oskar_angular_distance.c
-    
-    src/oskar_dft_c2r_2d_cuda.cu
     src/oskar_dft_c2r_2d_omp.c
-    src/oskar_dftw_c2c_2d_cuda.cu
     src/oskar_dftw_c2c_2d_omp.c
-    src/oskar_dftw_c2c_3d_cuda.cu
     src/oskar_dftw_c2c_3d_omp.c
-    src/oskar_dftw_m2m_2d_cuda.cu
     src/oskar_dftw_m2m_2d_omp.c
-    src/oskar_dftw_m2m_3d_cuda.cu
-    src/oskar_dftw_m2m_3d_indexed_input_cuda.cu
     src/oskar_dftw_m2m_3d_omp.c
-    src/oskar_dftw_o2c_2d_cuda.cu
     src/oskar_dftw_o2c_2d_omp.c
-    src/oskar_dftw_o2c_3d_cuda.cu
-    src/oskar_dftw_o2c_3d_omp.c
-    
-    src/oskar_dierckx_bispev_bicubic_cuda.cu
-    src/oskar_dierckx_bispev_cuda.cu
+    src/oskar_dftw_o2c_3d_omp.c    
     src/oskar_dierckx_bispev.c
     src/oskar_dierckx_fpback.c
     src/oskar_dierckx_fpbisp.c
@@ -36,15 +24,11 @@ set(math_SRC
     src/oskar_dierckx_fprota.c
     src/oskar_dierckx_fpsurf.c
     src/oskar_dierckx_surfit.c
-    
     src/oskar_find_closest_match.c
     src/oskar_fit_ellipse.c
     src/oskar_gaussian.c
-    src/oskar_gaussian_cuda.cu
-    
     src/oskar_healpix_npix_to_nside.c
     src/oskar_healpix_nside_to_npix.c
-
     src/oskar_jones_accessors.c
     src/oskar_jones_create.c
     src/oskar_jones_create_copy.c
@@ -53,7 +37,6 @@ set(math_SRC
     src/oskar_jones_join.c
     src/oskar_jones_set_size.c
     src/oskar_jones_set_real_scalar.c
-
     src/oskar_linspace.c
     src/oskar_matrix_multiply.c
     src/oskar_meshgrid.c
@@ -64,7 +47,6 @@ set(math_SRC
     src/oskar_rotate.c
     src/oskar_round_robin.c
     #src/oskar_sph_rotate_to_position.c
-
     src/oskar_splines_accessors.c
     src/oskar_splines_copy.c
     src/oskar_splines_create.c
@@ -72,6 +54,22 @@ set(math_SRC
     src/oskar_splines_fit.c
     src/oskar_splines_free.c
 )
+
+if (CUDA_FOUND)
+    list(APPEND math_SRC
+        src/oskar_dierckx_bispev_cuda.cu
+        src/oskar_dierckx_bispev_bicubic_cuda.cu
+        src/oskar_dft_c2r_2d_cuda.cu
+        src/oskar_dftw_c2c_2d_cuda.cu
+        src/oskar_dftw_c2c_3d_cuda.cu
+        src/oskar_dftw_m2m_2d_cuda.cu
+        src/oskar_dftw_m2m_3d_cuda.cu
+        src/oskar_dftw_m2m_3d_indexed_input_cuda.cu
+        src/oskar_dftw_o2c_2d_cuda.cu
+        src/oskar_dftw_o2c_3d_cuda.cu
+        src/oskar_gaussian_cuda.cu
+    )
+endif()
 
 set(math_SRC "${math_SRC}" PARENT_SCOPE)
 

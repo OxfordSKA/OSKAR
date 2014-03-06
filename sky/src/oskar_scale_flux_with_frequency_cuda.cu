@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include <oskar_scale_flux_with_frequency_cuda.h>
+#include <oskar_scale_flux_with_frequency_inline.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,130 +59,41 @@ void oskar_scale_flux_with_frequency_cuda_d(int num_sources,
             d_I, d_Q, d_U, d_V, d_ref_freq, d_sp_index, d_rm);
 }
 
-#ifdef __cplusplus
-}
-#endif
-
 
 /* Kernels. ================================================================ */
-
-#define C0  299792458.0
-#define C0f 299792458.0f
 
 /* Single precision. */
 __global__
 void oskar_scale_flux_with_frequency_cudak_f(const int num_sources,
-        const float frequency, float* I, float* Q, float* U, float* V,
-        float* ref_freq, const float* __restrict__ sp_index,
+        const float frequency, float* __restrict__ I, float* __restrict__ Q,
+        float* __restrict__ U, float* __restrict__ V,
+        float* __restrict__ ref_freq, const float* __restrict__ sp_index,
         const float* __restrict__ rm)
 {
-    int i;
-    float freq0_, spix_, rm_, sin_b, cos_b;
-
     /* Get source index and check bounds. */
-    i = blockDim.x * blockIdx.x + threadIdx.x;
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    /* Get reference frequency, spectral index and rotation measure. */
-    freq0_ = ref_freq[i];
-    spix_ = sp_index[i];
-    rm_ = rm[i];
-    if (freq0_ == 0.0f)
-        return;
-
-    /* Compute rotation factors, sin(2 beta) and cos(2 beta). */
-    {
-        float delta_lambda_squared;
-
-        /* Compute delta_lambda_squared using factorised difference of two
-         * squares. (Numerically superior than an explicit difference.)
-         * This is (lambda^2 - lambda0^2) */
-        {
-            float lambda, lambda0;
-            lambda  = C0f / frequency;
-            lambda0 = C0f / freq0_;
-            delta_lambda_squared = (lambda - lambda0) * (lambda + lambda0);
-        }
-
-        /* Compute sin(2 beta) and cos(2 beta). */
-        {
-            float b;
-            b = 2.0f * rm_ * delta_lambda_squared;
-            sincosf(b, &sin_b, &cos_b);
-        }
-    }
-
-    /* Set new values and update reference frequency. */
-    {
-        float scale, Q_, U_;
-
-        /* Compute spectral index scaling factor. */
-        scale = powf(frequency / freq0_, spix_);
-        Q_ = scale * Q[i];
-        U_ = scale * U[i];
-        I[i] *= scale;
-        V[i] *= scale;
-        Q[i] = Q_ * cos_b - U_ * sin_b;
-        U[i] = Q_ * sin_b + U_ * cos_b;
-        ref_freq[i] = frequency;
-    }
+    oskar_scale_flux_with_frequency_inline_f(frequency,
+            &I[i], &Q[i], &U[i], &V[i], &ref_freq[i], sp_index[i], rm[i]);
 }
 
 /* Double precision. */
 __global__
 void oskar_scale_flux_with_frequency_cudak_d(const int num_sources,
-        const double frequency, double* I, double* Q, double* U, double* V,
-        double* ref_freq, const double* __restrict__ sp_index,
+        const double frequency, double* __restrict__ I, double* __restrict__ Q,
+        double* __restrict__ U, double* __restrict__ V,
+        double* __restrict__ ref_freq, const double* __restrict__ sp_index,
         const double* __restrict__ rm)
 {
-    int i;
-    double freq0_, spix_, rm_, sin_b, cos_b;
-
     /* Get source index and check bounds. */
-    i = blockDim.x * blockIdx.x + threadIdx.x;
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_sources) return;
 
-    /* Get reference frequency, spectral index and rotation measure. */
-    freq0_ = ref_freq[i];
-    spix_ = sp_index[i];
-    rm_ = rm[i];
-    if (freq0_ == 0.0)
-        return;
-
-    /* Compute rotation factors, sin(2 beta) and cos(2 beta). */
-    {
-        double delta_lambda_squared;
-
-        /* Compute delta_lambda_squared using factorised difference of two
-         * squares. (Numerically superior than an explicit difference.)
-         * This is (lambda^2 - lambda0^2) */
-        {
-            double lambda, lambda0;
-            lambda  = C0 / frequency;
-            lambda0 = C0 / freq0_;
-            delta_lambda_squared = (lambda - lambda0) * (lambda + lambda0);
-        }
-
-        /* Compute sin(2 beta) and cos(2 beta). */
-        {
-            double b;
-            b = 2.0 * rm_ * delta_lambda_squared;
-            sincos(b, &sin_b, &cos_b);
-        }
-    }
-
-    /* Set new values and update reference frequency. */
-    {
-        double scale, Q_, U_;
-
-        /* Compute spectral index scaling factor. */
-        scale = pow(frequency / freq0_, spix_);
-        Q_ = scale * Q[i];
-        U_ = scale * U[i];
-        I[i] *= scale;
-        V[i] *= scale;
-        Q[i] = Q_ * cos_b - U_ * sin_b;
-        U[i] = Q_ * sin_b + U_ * cos_b;
-        ref_freq[i] = frequency;
-    }
+    oskar_scale_flux_with_frequency_inline_d(frequency,
+            &I[i], &Q[i], &U[i], &V[i], &ref_freq[i], sp_index[i], rm[i]);
 }
+
+#ifdef __cplusplus
+}
+#endif

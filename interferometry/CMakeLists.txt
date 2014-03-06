@@ -4,20 +4,13 @@
 
 # Add the source files in this directory.
 set(interferometry_SRC
-    
-    src/oskar_correlate_gaussian_cuda.cu
     src/oskar_correlate_gaussian_omp.c
-    src/oskar_correlate_gaussian_time_smearing_cuda.cu
     src/oskar_correlate_gaussian_time_smearing_omp.c
-    src/oskar_correlate_point_cuda.cu
     src/oskar_correlate_point_omp.c
-    src/oskar_correlate_point_scalar_cuda.cu
-    src/oskar_correlate_point_time_smearing_cuda.cu
     src/oskar_correlate_point_time_smearing_omp.c
     src/oskar_correlate.c
     
     src/oskar_evaluate_jones_K.c
-    src/oskar_evaluate_jones_K_cuda.cu
     
     src/oskar_telescope_accessors.c
     src/oskar_telescope_analyse.c
@@ -44,6 +37,17 @@ set(interferometry_SRC
     #src/oskar_vis_rotate_polarisation.c
     src/oskar_vis_write.c
 )
+
+if (CUDA_FOUND)
+    list(APPEND interferometry_SRC
+        src/oskar_correlate_gaussian_cuda.cu
+        src/oskar_correlate_gaussian_time_smearing_cuda.cu
+        src/oskar_correlate_point_cuda.cu
+        src/oskar_correlate_point_scalar_cuda.cu
+        src/oskar_correlate_point_time_smearing_cuda.cu
+        src/oskar_evaluate_jones_K_cuda.cu
+    )
+endif()
 
 set(interferometry_SRC "${interferometry_SRC}" PARENT_SCOPE)
 

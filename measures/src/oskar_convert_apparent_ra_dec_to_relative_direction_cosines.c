@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
 #include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda.h>
+#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines_inline.h>
 #include <oskar_cuda_check_error.h>
 
 #include <math.h>
@@ -42,27 +43,15 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_f(int np,
         float* l, float* m, float* n)
 {
     int i;
-    float sinLat0, cosLat0;
-    sinLat0 = (float) sin(dec0);
-    cosLat0 = (float) cos(dec0);
+    float sin_dec0, cos_dec0;
+    sin_dec0 = (float) sin(dec0);
+    cos_dec0 = (float) cos(dec0);
 
     #pragma omp parallel for private(i)
     for (i = 0; i < np; ++i)
     {
-        float cosLat, sinLat, sinLon, cosLon, relLon, pLat, l_, m_, n_;
-        pLat = dec[i];
-        relLon = ra[i];
-        relLon -= ra0;
-        sinLon = sinf(relLon);
-        cosLon = cosf(relLon);
-        sinLat = sinf(pLat);
-        cosLat = cosf(pLat);
-        l_ = cosLat * sinLon;
-        m_ = cosLat0 * sinLat - sinLat0 * cosLat * cosLon;
-        n_ = sinLat0 * sinLat + cosLat0 * cosLat * cosLon;
-        l[i] = l_;
-        m[i] = m_;
-        n[i] = n_;
+        oskar_convert_apparent_ra_dec_to_relative_direction_cosines_inline_f(
+                ra[i], dec[i], ra0, cos_dec0, sin_dec0, &l[i], &m[i], &n[i]);
     }
 }
 
@@ -72,27 +61,15 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(int np,
         double* l, double* m, double* n)
 {
     int i;
-    double sinLat0, cosLat0;
-    sinLat0 = sin(dec0);
-    cosLat0 = cos(dec0);
+    double sin_dec0, cos_dec0;
+    sin_dec0 = sin(dec0);
+    cos_dec0 = cos(dec0);
 
     #pragma omp parallel for private(i)
     for (i = 0; i < np; ++i)
     {
-        double cosLat, sinLat, sinLon, cosLon, relLon, pLat, l_, m_, n_;
-        pLat = dec[i];
-        relLon = ra[i];
-        relLon -= ra0;
-        sinLon = sin(relLon);
-        cosLon = cos(relLon);
-        sinLat = sin(pLat);
-        cosLat = cos(pLat);
-        l_ = cosLat * sinLon;
-        m_ = cosLat0 * sinLat - sinLat0 * cosLat * cosLon;
-        n_ = sinLat0 * sinLat + cosLat0 * cosLat * cosLon;
-        l[i] = l_;
-        m[i] = m_;
-        n[i] = n_;
+        oskar_convert_apparent_ra_dec_to_relative_direction_cosines_inline_d(
+                ra[i], dec[i], ra0, cos_dec0, sin_dec0, &l[i], &m[i], &n[i]);
     }
 }
 

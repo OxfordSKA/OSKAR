@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_RANDOM_STATE_CREATE_H_
-#define OSKAR_RANDOM_STATE_CREATE_H_
-
-/**
- * @file oskar_random_state_create.h
- */
+#ifndef OSKAR_CONVERT_ECEF_TO_STATION_UVW_INLINE_H_
+#define OSKAR_CONVERT_ECEF_TO_STATION_UVW_INLINE_H_
 
 #include <oskar_global.h>
 
@@ -39,12 +35,52 @@
 extern "C" {
 #endif
 
-OSKAR_EXPORT
-oskar_RandomState* oskar_random_state_create(int num_states,
-        int seed, int offset, int use_device_offset, int* status);
+/* Single precision. */
+OSKAR_INLINE
+void oskar_convert_ecef_to_station_uvw_inline_f(float* u, float* v, float* w,
+        const float x, const float y, const float z, const float sin_ha0,
+        const float cos_ha0, const float sin_dec0, const float cos_dec0)
+{
+    float v_, w_, t;
+
+    /* This is just the standard textbook rotation matrix. */
+    t = x * cos_ha0;
+    t -= y * sin_ha0;
+    v_ = z * cos_dec0;
+    v_ -= sin_dec0 * t;
+    w_ = cos_dec0 * t;
+    w_ += z * sin_dec0;
+    t =  x * sin_ha0;
+    t += y * cos_ha0;
+    *u = t;
+    *v = v_;
+    *w = w_;
+}
+
+/* Double precision. */
+OSKAR_INLINE
+void oskar_convert_ecef_to_station_uvw_inline_d(double* u, double* v, double* w,
+        const double x, const double y, const double z, const double sin_ha0,
+        const double cos_ha0, const double sin_dec0, const double cos_dec0)
+{
+    double v_, w_, t;
+
+    /* This is just the standard textbook rotation matrix. */
+    t = x * cos_ha0;
+    t -= y * sin_ha0;
+    v_ = z * cos_dec0;
+    v_ -= sin_dec0 * t;
+    w_ = cos_dec0 * t;
+    w_ += z * sin_dec0;
+    t =  x * sin_ha0;
+    t += y * cos_ha0;
+    *u = t;
+    *v = v_;
+    *w = w_;
+}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_RANDOM_STATE_CREATE_H_ */
+#endif /* OSKAR_CONVERT_ECEF_TO_STATION_UVW_INLINE_H_ */

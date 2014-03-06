@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -122,74 +122,20 @@ void oskar_apply_element_taper_gaussian_matrix_cuda_d(double4c* d_jones,
 
 #ifdef __CUDACC__
 
-/**
- * @brief
- * CUDA kernel to apply a Gaussian taper to the scalar element response
- * (single precision).
- *
- * @details
- * This CUDA kernel multiplies the scalar response of the element by a
- * Gaussian taper. The multiplication is performed in-place.
- *
- * @param[in,out] jones    Array of Jones scalars.
- * @param[in] num_sources  Number of source positions.
- * @param[in] fwhm         Full-width half-max of Gaussian, in radians.
- * @param[in] theta        Array of source theta values, in radians.
- */
+/* Kernels. */
+
 __global__
 void oskar_apply_element_taper_gaussian_scalar_cudak_f(float2* jones,
         const int num_sources, const float fwhm, const float* theta);
 
-/**
- * @brief
- * CUDA kernel to apply a Gaussian taper to the matrix element response
- * (single precision).
- *
- * @details
- * This CUDA kernel multiplies the matrix response of the element by a
- * Gaussian taper. The multiplication is performed in-place.
- *
- * @param[in,out] jones    Array of Jones matrices.
- * @param[in] num_sources  Number of source positions.
- * @param[in] fwhm         Full-width half-max of Gaussian, in radians.
- * @param[in] theta        Array of source theta values, in radians.
- */
 __global__
 void oskar_apply_element_taper_gaussian_matrix_cudak_f(float4c* jones,
         const int num_sources, const float fwhm, const float* theta);
 
-/**
- * @brief
- * CUDA kernel to apply a Gaussian taper to the scalar element response
- * (double precision).
- *
- * @details
- * This CUDA kernel multiplies the scalar response of the element by a
- * Gaussian taper. The multiplication is performed in-place.
- *
- * @param[in,out] jones    Array of Jones scalars.
- * @param[in] num_sources  Number of source positions.
- * @param[in] fwhm         Full-width half-max of Gaussian, in radians.
- * @param[in] theta        Array of source theta values, in radians.
- */
 __global__
 void oskar_apply_element_taper_gaussian_scalar_cudak_d(double2* jones,
         const int num_sources, const double fwhm, const double* theta);
 
-/**
- * @brief
- * CUDA kernel to apply a Gaussian taper to the matrix element response
- * (double precision).
- *
- * @details
- * This CUDA kernel multiplies the matrix response of the element by a
- * Gaussian taper. The multiplication is performed in-place.
- *
- * @param[in,out] jones    Array of Jones matrices.
- * @param[in] num_sources  Number of source positions.
- * @param[in] fwhm         Full-width half-max of Gaussian, in radians.
- * @param[in] theta        Array of source theta values, in radians.
- */
 __global__
 void oskar_apply_element_taper_gaussian_matrix_cudak_d(double4c* jones,
         const int num_sources, const double fwhm, const double* theta);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -150,44 +150,8 @@ void oskar_correlate_gaussian_time_smearing_cuda_d(int num_sources,
 
 #ifdef __CUDACC__
 
-/**
- * @brief
- * CUDA correlate kernel for extended Gaussian sources with time-average
- * smearing (single precision).
- *
- * @details
- * Forms visibilities on all baselines by correlating Jones matrices for pairs
- * of stations and summing along the source dimension.
- *
- * Gaussian parameters a, b and c are assumed to be evaluated when the
- * sky model is loaded.
- *
- * Note that the station x, y coordinates must be in the ECEF frame.
- *
- * @param[in] num_sources    Number of sources.
- * @param[in] num_stations   Number of stations.
- * @param[in] jones          Matrix of Jones matrices to correlate.
- * @param[in] source_I       Source Stokes I values, in Jy.
- * @param[in] source_Q       Source Stokes Q values, in Jy.
- * @param[in] source_U       Source Stokes U values, in Jy.
- * @param[in] source_V       Source Stokes V values, in Jy.
- * @param[in] source_l       Source l-direction cosines from phase centre.
- * @param[in] source_m       Source m-direction cosines from phase centre.
- * @param[in] source_n       Source n-direction cosines from phase centre.
- * @param[in] source_a       Source Gaussian parameter a.
- * @param[in] source_b       Source Gaussian parameter b.
- * @param[in] source_c       Source Gaussian parameter c.
- * @param[in] station_u      Station u-coordinates, in metres.
- * @param[in] station_v      Station v-coordinates, in metres.
- * @param[in] station_x      Station x-coordinates, in metres.
- * @param[in] station_y      Station y-coordinates, in metres.
- * @param[in] inv_wavelength Inverse of the wavelength, in metres.
- * @param[in] frac_bandwidth Bandwidth divided by frequency.
- * @param[in] time_int_sec   Time averaging interval, in seconds.
- * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
- * @param[in] dec0_rad       Declination of phase centre, in radians.
- * @param[in,out] vis        Modified output complex visibilities.
- */
+/* Kernels. */
+
 __global__
 void oskar_correlate_gaussian_time_smearing_cudak_f(const int num_sources,
         const int num_stations, const float4c* __restrict__ jones,
@@ -209,44 +173,6 @@ void oskar_correlate_gaussian_time_smearing_cudak_f(const int num_sources,
         const float gha0_rad, const float dec0_rad,
         float4c* __restrict__ vis);
 
-/**
- * @brief
- * CUDA correlate kernel for extended Gaussian sources with time-average
- * smearing (double precision).
- *
- * @details
- * Forms visibilities on all baselines by correlating Jones matrices for pairs
- * of stations and summing along the source dimension.
- *
- * Gaussian parameters a, b and c are assumed to be evaluated when the
- * sky model is loaded.
- *
- * Note that the station x, y coordinates must be in the ECEF frame.
- *
- * @param[in] num_sources    Number of sources.
- * @param[in] num_stations   Number of stations.
- * @param[in] jones          Matrix of Jones matrices to correlate.
- * @param[in] source_I       Source Stokes I values, in Jy.
- * @param[in] source_Q       Source Stokes Q values, in Jy.
- * @param[in] source_U       Source Stokes U values, in Jy.
- * @param[in] source_V       Source Stokes V values, in Jy.
- * @param[in] source_l       Source l-direction cosines from phase centre.
- * @param[in] source_m       Source m-direction cosines from phase centre.
- * @param[in] source_n       Source n-direction cosines from phase centre.
- * @param[in] source_a       Source Gaussian parameter a.
- * @param[in] source_b       Source Gaussian parameter b.
- * @param[in] source_c       Source Gaussian parameter c.
- * @param[in] station_u      Station u-coordinates, in metres.
- * @param[in] station_v      Station v-coordinates, in metres.
- * @param[in] station_x      Station x-coordinates, in metres.
- * @param[in] station_y      Station y-coordinates, in metres.
- * @param[in] inv_wavelength Inverse of the wavelength, in metres.
- * @param[in] frac_bandwidth Bandwidth divided by frequency.
- * @param[in] time_int_sec   Time averaging interval, in seconds.
- * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
- * @param[in] dec0_rad       Declination of phase centre, in radians.
- * @param[in,out] vis        Modified output complex visibilities.
- */
 __global__
 void oskar_correlate_gaussian_time_smearing_cudak_d(const int num_sources,
         const int num_stations, const double4c* __restrict__ jones,

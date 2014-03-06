@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,53 +89,21 @@ void oskar_convert_ecef_to_station_uvw_cuda_d(double* d_u, double* d_v,
 
 #ifdef __CUDACC__
 
-/**
- * @brief
- * CUDA kernel to rotate station (x,y,z) to (u,v,w) coordinates
- * (single precision).
- *
- * @details
- * CUDA kernel to rotate station (x,y,z) to (u,v,w) coordinates
- * (single precision).
- *
- * @param[out] u            Output station u coordinates.
- * @param[out] v            Output station v coordinates.
- * @param[out] w            Output station w coordinates.
- * @param[in]  num_stations The size of the station coordinate arrays.
- * @param[in]  x            Input station x coordinates (ECEF or related frame).
- * @param[in]  y            Input station y coordinates (ECEF or related frame).
- * @param[in]  z            Input station z coordinates (ECEF or related frame).
- * @param[in]  ha0_rad      The Hour Angle of the phase centre, in radians.
- * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
- */
-__global__
-void oskar_convert_ecef_to_station_uvw_cudak_f(float* u, float* v, float* w,
-        int num_stations, const float* x, const float* y, const float* z,
-        float ha0_rad, float dec0_rad);
+/* Kernels. */
 
-/**
- * @brief
- * CUDA kernel to rotate station (x,y,z) to (u,v,w) coordinates
- * (double precision).
- *
- * @details
- * CUDA kernel to rotate station (x,y,z) to (u,v,w) coordinates
- * (double precision).
- *
- * @param[out] u            Output station u coordinates.
- * @param[out] v            Output station v coordinates.
- * @param[out] w            Output station w coordinates.
- * @param[in]  num_stations The size of the station coordinate arrays.
- * @param[in]  x            Input station x coordinates (ECEF or related frame).
- * @param[in]  y            Input station y coordinates (ECEF or related frame).
- * @param[in]  z            Input station z coordinates (ECEF or related frame).
- * @param[in]  ha0_rad      The Hour Angle of the phase centre, in radians.
- * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
- */
 __global__
-void oskar_convert_ecef_to_station_uvw_cudak_d(double* u, double* v, double* w,
-        int num_stations, const double* x, const double* y, const double* z,
-        double ha0_rad, double dec0_rad);
+void oskar_convert_ecef_to_station_uvw_cudak_f(float* __restrict__ u,
+        float* __restrict__ v, float* __restrict__ w, const int num_stations,
+        const float* __restrict__ x, const float* __restrict__ y,
+        const float* __restrict__ z, const float sin_ha0,
+        const float cos_ha0, const float sin_dec0, const float cos_dec0);
+
+__global__
+void oskar_convert_ecef_to_station_uvw_cudak_d(double* __restrict__ u,
+        double* __restrict__ v, double* __restrict__ w, const int num_stations,
+        const double* __restrict__ x, const double* __restrict__ y,
+        const double* __restrict__ z, const double sin_ha0,
+        const double cos_ha0, const double sin_dec0, const double cos_dec0);
 
 #endif /* __CUDACC__ */
 

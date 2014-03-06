@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_GEOMETRIC_DIPOLE_PATTERN_H_
-#define OSKAR_EVALUATE_GEOMETRIC_DIPOLE_PATTERN_H_
+#ifndef OSKAR_EVALUATE_DIPOLE_PATTERN_H_
+#define OSKAR_EVALUATE_DIPOLE_PATTERN_H_
 
 /**
- * @file oskar_evaluate_geometric_dipole_pattern.h
+ * @file oskar_evaluate_dipole_pattern.h
  */
 
 #include <oskar_global.h>
@@ -49,12 +49,20 @@ extern "C" {
  * This function evaluates the pattern of a perfect dipole antenna
  * at the supplied source positions.
  *
+ * The magnitude of the dipole response is given by
+ *
+ * \f[
+ * E_{\theta^{'}} =
+ *           \frac{\cos(\frac{kL}{2}\cos\phi\sin\theta) - \cos(\frac{kL}{2})}
+ *                                 {\sqrt{1 - \cos^2\phi \sin^2\theta}};
+ * \f]
+ *
  * The output matrix is
  *
  * ( g_theta^a   g_phi^a )
  * ( g_theta^b   g_phi^b )
  *
- * where phi and theta are the angles measured from x to y and from xy to z,
+ * where phi and theta are the angles measured from x to y and from z to xy,
  * respectively.
  *
  * The supplied theta and phi positions of the sources are the <b>modified</b>
@@ -64,13 +72,15 @@ extern "C" {
  * @param[in] num_points         Number of points.
  * @param[in] theta              Source position (modified) theta values in rad.
  * @param[in] phi                Source position (modified) phi values in rad.
+ * @param[in] freq_hz            Observing frequency in Hz.
+ * @param[in] dipole_length_m    Length of dipole in metres.
  * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
  * @param[out] pattern           Array of output Jones matrices per source.
  */
 OSKAR_EXPORT
-void oskar_evaluate_geometric_dipole_pattern_f(int num_points,
-        const float* theta, const float* phi, int return_x_dipole,
-        float4c* pattern);
+void oskar_evaluate_dipole_pattern_f(int num_points,
+        const float* theta, const float* phi, float freq_hz,
+        float dipole_length_m, int return_x_dipole, float4c* pattern);
 
 /**
  * @brief
@@ -81,12 +91,20 @@ void oskar_evaluate_geometric_dipole_pattern_f(int num_points,
  * This function evaluates the pattern of a perfect dipole antenna
  * at the supplied source positions.
  *
+ * The magnitude of the dipole response is given by
+ *
+ * \f[
+ * E_{\theta^{'}} =
+ *           \frac{\cos(\frac{kL}{2}\cos\phi\sin\theta) - \cos(\frac{kL}{2})}
+ *                                 {\sqrt{1 - \cos^2\phi \sin^2\theta}};
+ * \f]
+ *
  * The output matrix is
  *
  * ( g_theta^a   g_phi^a )
  * ( g_theta^b   g_phi^b )
  *
- * where phi and theta are the angles measured from x to y and from xy to z,
+ * where phi and theta are the angles measured from x to y and from z to xy,
  * respectively.
  *
  * The supplied theta and phi positions of the sources are the <b>modified</b>
@@ -96,13 +114,15 @@ void oskar_evaluate_geometric_dipole_pattern_f(int num_points,
  * @param[in] num_points         Number of points.
  * @param[in] theta              Source position (modified) theta values in rad.
  * @param[in] phi                Source position (modified) phi values in rad.
+ * @param[in] freq_hz            Observing frequency in Hz.
+ * @param[in] dipole_length_m    Length of dipole in metres.
  * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
  * @param[out] pattern           Array of output Jones matrices per source.
  */
 OSKAR_EXPORT
-void oskar_evaluate_geometric_dipole_pattern_d(int num_points,
-        const double* theta, const double* phi, int return_x_dipole,
-        double4c* pattern);
+void oskar_evaluate_dipole_pattern_d(int num_points,
+        const double* theta, const double* phi, double freq_hz,
+        double dipole_length_m, int return_x_dipole, double4c* pattern);
 
 /**
  * @brief
@@ -131,12 +151,12 @@ void oskar_evaluate_geometric_dipole_pattern_d(int num_points,
  * @param[in,out] status         Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_geometric_dipole_pattern(oskar_Mem* pattern, int num_points,
-        const oskar_Mem* theta, const oskar_Mem* phi, int return_x_dipole,
-        int* status);
+void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
+        const oskar_Mem* theta, const oskar_Mem* phi, double freq_hz,
+        double dipole_length_m, int return_x_dipole, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_GEOMETRIC_DIPOLE_PATTERN_H_ */
+#endif /* OSKAR_EVALUATE_DIPOLE_PATTERN_H_ */

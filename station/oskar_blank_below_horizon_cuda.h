@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,94 +126,20 @@ void oskar_blank_below_horizon_matrix_cuda_d(double4c* d_jones,
 
 #ifdef __CUDACC__
 
-/**
- * @brief
- * CUDA kernel to blank sources below the horizon (single precision).
- *
- * @details
- * This CUDA kernel sets individual Jones scalars to zero for those
- * sources that are below the horizon.
- *
- * For sources where the mask value is negative, the corresponding element
- * of the Jones array is set to zero.
- *
- * Note:
- * - One thread is assigned per source.
- * - Threads are assigned based on linear 'x' block and grid dimensions.
- *
- * @param[in,out] jones    Array of Jones scalars.
- * @param[in] num_sources  Number of source positions.
- * @param[in] mask         Array of source mask values.
- */
+/* Kernels. */
+
 __global__
 void oskar_blank_below_horizon_scalar_cudak_f(float2* jones,
         const int num_sources, const float* mask);
 
-/**
- * @brief
- * CUDA kernel to blank sources below the horizon (single precision).
- *
- * @details
- * This CUDA kernel sets individual Jones matrices to zero for those
- * sources that are below the horizon.
- *
- * For sources where the mask value is negative, the corresponding element
- * of the Jones array is set to zero.
- *
- * Note:
- * - One thread is assigned per source.
- * - Threads are assigned based on linear 'x' block and grid dimensions.
- *
- * @param[in,out] jones    Array of Jones matrices.
- * @param[in] num_sources  Number of source positions.
- * @param[in] mask         Array of source mask values.
- */
 __global__
 void oskar_blank_below_horizon_matrix_cudak_f(float4c* jones,
         const int num_sources, const float* mask);
 
-/**
- * @brief
- * CUDA kernel to blank sources below the horizon (double precision).
- *
- * @details
- * This CUDA kernel sets individual Jones scalars to zero for those
- * sources that are below the horizon.
- *
- * For sources where the mask value is negative, the corresponding element
- * of the Jones array is set to zero.
- *
- * Note:
- * - One thread is assigned per source.
- * - Threads are assigned based on linear 'x' block and grid dimensions.
- *
- * @param[in,out] jones    Array of Jones scalars.
- * @param[in] num_sources  Number of source positions.
- * @param[in] mask         Array of source mask values.
- */
 __global__
 void oskar_blank_below_horizon_scalar_cudak_d(double2* jones,
         const int num_sources, const double* mask);
 
-/**
- * @brief
- * CUDA kernel to blank sources below the horizon (double precision).
- *
- * @details
- * This CUDA kernel sets individual Jones matrices to zero for those
- * sources that are below the horizon.
- *
- * For sources where the mask value is negative, the corresponding element
- * of the Jones array is set to zero.
- *
- * Note:
- * - One thread is assigned per source.
- * - Threads are assigned based on linear 'x' block and grid dimensions.
- *
- * @param[in,out] jones    Array of Jones matrices.
- * @param[in] num_sources  Number of source positions.
- * @param[in] mask         Array of source mask values.
- */
 __global__
 void oskar_blank_below_horizon_matrix_cudak_d(double4c* jones,
         const int num_sources, const double* mask);

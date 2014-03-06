@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,75 +117,21 @@ void oskar_scale_flux_with_frequency_cuda_d(int num_sources,
 
 #ifdef __CUDACC__
 
-/**
- * @brief
- * CUDA kernel to scale source fluxes by spectral index values
- * (single precision).
- *
- * @details
- * This kernel evaluates all fluxes (all Stokes parameters) at the specified
- * frequency using the spectral index and rotation measure of each source.
- * The reference frequency of each source is also updated to the specified
- * frequency.
- *
- * Frequency scaling is performed using the expression:
- *
- * \f[
- * F = F * (\nu / \nu_0)^\alpha
- * \f]
- *
- * where \f$F\f$ is the flux, \f$\nu\f$ is the new frequency, \f$\nu_0\f$ is
- * the reference frequency, and \f$\alpha\f$ is the spectral index value.
- *
- * @param[in] num_sources    The number of sources in the input arrays.
- * @param[in] frequency      The frequency at which to evaluate fluxes, in Hz.
- * @param[in,out] I          Source Stokes I values.
- * @param[in,out] Q          Source Stokes Q values.
- * @param[in,out] U          Source Stokes U values.
- * @param[in,out] V          Source Stokes V values.
- * @param[in,out] ref_freq   Source reference frequency values, in Hz.
- * @param[in] sp_index       Source spectral index values.
- * @param[in] rm             Source rotation measure values, in rad/m^2.
- */
+/* Kernels. */
+
 __global__
 void oskar_scale_flux_with_frequency_cudak_f(const int num_sources,
-        const float frequency, float* I, float* Q, float* U, float* V,
-        float* ref_freq, const float* sp_index, const float* rm);
+        const float frequency, float* __restrict__ I, float* __restrict__ Q,
+        float* __restrict__ U, float* __restrict__ V,
+        float* __restrict__ ref_freq, const float* __restrict__ sp_index,
+        const float* __restrict__ rm);
 
-/**
- * @brief
- * CUDA kernel to scale source fluxes by spectral index values
- * (double precision).
- *
- * @details
- * This kernel evaluates all fluxes (all Stokes parameters) at the specified
- * frequency using the spectral index and rotation measure of each source.
- * The reference frequency of each source is also updated to the specified
- * frequency.
- *
- * Frequency scaling is performed using the expression:
- *
- * \f[
- * F = F * (\nu / \nu_0)^\alpha
- * \f]
- *
- * where \f$F\f$ is the flux, \f$\nu\f$ is the new frequency, \f$\nu_0\f$ is
- * the reference frequency, and \f$\alpha\f$ is the spectral index value.
- *
- * @param[in] num_sources    The number of sources in the input arrays.
- * @param[in] frequency      The frequency at which to evaluate fluxes, in Hz.
- * @param[in,out] I          Source Stokes I values.
- * @param[in,out] Q          Source Stokes Q values.
- * @param[in,out] U          Source Stokes U values.
- * @param[in,out] V          Source Stokes V values.
- * @param[in,out] ref_freq   Source reference frequency values, in Hz.
- * @param[in] sp_index       Source spectral index values.
- * @param[in] rm             Source rotation measure values, in rad/m^2.
- */
 __global__
 void oskar_scale_flux_with_frequency_cudak_d(const int num_sources,
-        const double frequency, double* I, double* Q, double* U, double* V,
-        double* ref_freq, const double* sp_index, const double* rm);
+        const double frequency, double* __restrict__ I, double* __restrict__ Q,
+        double* __restrict__ U, double* __restrict__ V,
+        double* __restrict__ ref_freq, const double* __restrict__ sp_index,
+        const double* __restrict__ rm);
 
 #endif /* __CUDACC__ */
 

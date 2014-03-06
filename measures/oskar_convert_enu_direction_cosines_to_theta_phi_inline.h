@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,25 +26,62 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_RANDOM_STATE_CREATE_H_
-#define OSKAR_RANDOM_STATE_CREATE_H_
-
-/**
- * @file oskar_random_state_create.h
- */
+#ifndef OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_THETA_PHI_INLINE_H_
+#define OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_THETA_PHI_INLINE_H_
 
 #include <oskar_global.h>
+#include <math.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
+#ifndef M_PIf
+#define M_PIf 3.14159265358979323846264338327950288f
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-OSKAR_EXPORT
-oskar_RandomState* oskar_random_state_create(int num_states,
-        int seed, int offset, int use_device_offset, int* status);
+/* Single precision. */
+OSKAR_INLINE
+void oskar_convert_enu_direction_cosines_to_theta_phi_inline_f(
+        float x, float y, const float z, const float delta_phi,
+        float* theta, float* phi)
+{
+    float p;
+
+    /* Cartesian to spherical (with orientation offset). */
+    p = atan2f(y, x) + delta_phi;
+    p = fmodf(p, 2.0f * M_PIf);
+    x = sqrtf(x*x + y*y);
+    y = atan2f(x, z); /* Theta. */
+    if (p < 0.0f) p += 2.0f * M_PIf; /* Get phi in range 0 to 2 pi. */
+    *phi = p;
+    *theta = y;
+}
+
+/* Double precision. */
+OSKAR_INLINE
+void oskar_convert_enu_direction_cosines_to_theta_phi_inline_d(
+        double x, double y, const double z, const double delta_phi,
+        double* theta, double* phi)
+{
+    double p;
+
+    /* Cartesian to spherical (with orientation offset). */
+    p = atan2(y, x) + delta_phi;
+    p = fmod(p, 2.0 * M_PI);
+    x = sqrt(x*x + y*y);
+    y = atan2(x, z); /* Theta. */
+    if (p < 0.0) p += 2.0 * M_PI; /* Get phi in range 0 to 2 pi. */
+    *phi = p;
+    *theta = y;
+}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_RANDOM_STATE_CREATE_H_ */
+#endif /* OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_THETA_PHI_INLINE_H_ */
