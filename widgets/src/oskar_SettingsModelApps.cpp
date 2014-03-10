@@ -36,6 +36,7 @@ oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
     init_settings_sky_model();
     init_settings_observation();
     init_settings_telescope_model();
+    init_settings_element_fit();
     init_settings_interferometer();
     init_settings_beampattern();
     init_settings_image();
@@ -556,75 +557,6 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
             "numerical element pattern files. If numerical pattern data "
             "are missing, the functional type will be used instead.");
 
-    // Element pattern fitting parameters.
-    group = root + "/aperture_array/element_pattern/fit";
-    setLabel(group, "Element pattern fitting parameters");
-    setDependency(group, k_numerical, true);
-    k = group + "/ignore_data_at_pole";
-    declare(k, "Ignore data at poles", oskar_SettingsItem::BOOL, false);
-    setTooltip(k, "If true, then numerical element pattern data points at "
-            "theta = 0 and theta = 180 degrees are ignored.");
-    k = group + "/ignore_data_below_horizon";
-    declare(k, "Ignore data below horizon", oskar_SettingsItem::BOOL, true);
-    setTooltip(k, "If true, then numerical element pattern data points at "
-            "theta &gt; 90 degrees are ignored.");
-    k = group + "/ignore_cached_files";
-    declare(k, "Ignore cached files", oskar_SettingsItem::BOOL, false);
-    setTooltip(k, "If true, then coefficients cached in files from previous "
-            "fits will be ignored.");
-    k = group + "/overlap_angle_deg";
-    declare(k, "Overlap angle [deg]", oskar_SettingsItem::DOUBLE, 9.0);
-    setTooltip(k, "The amount of overlap used for copying numerical element "
-            "pattern data for phi &lt; 0 and phi &gt; 360 degrees. Use carefully "
-            "to minimise discontinuity at phi = 0.");
-    k = group + "/weight_boundaries";
-    declare(k, "Weighting at boundaries", oskar_SettingsItem::DOUBLE, 2.0);
-    setTooltip(k, "The weight given to numerical element pattern data at "
-            "phi = 0 and phi = 360 degrees, relative to 1.0. Use "
-            "carefully to minimise discontinuity at phi = 0.");
-    k = group + "/weight_overlap";
-    declare(k, "Weighting in overlap region", oskar_SettingsItem::DOUBLE, 1.0);
-    setTooltip(k, "The weight given to numerical element pattern data at "
-            "phi &lt; 0 and phi &gt; 360 degrees, relative to 1.0. Use "
-            "carefully to minimise discontinuity at phi = 0.");
-    //registerSetting("telescope/station/element_fit/use_common_set", "Use common set", oskar_SettingsItem::BOOL, true);
-
-    group = root + "/aperture_array/element_pattern/fit/all";
-    setLabel(group, "Common settings (for all surfaces)");
-    k = group + "/eps_float";
-    declare(k, "Epsilon (single precision)", oskar_SettingsItem::DOUBLE, 1e-4);
-    setTooltip(k, "The value of epsilon used for fitting in single precision. "
-            "Suggested value approx. 1e-04.");
-    k = group + "/eps_double";
-    declare(k, "Epsilon (double precision)", oskar_SettingsItem::DOUBLE, 1e-8);
-    setTooltip(k, "The value of epsilon used for fitting in double precision. "
-            "Suggested value approx. 1e-08.");
-    k = group + "/search_for_best_fit";
-    declare(k, "Search for best fit", oskar_SettingsItem::BOOL, true);
-    setTooltip(k, "If true (the default), then any numerical element pattern "
-            "data will be fitted with smoothing splines, where the smoothness "
-            "factor is selected to give the requested average fractional "
-            "error. If false, the supplied smoothness factor is used instead.");
-    k = group + "/average_fractional_error";
-    declare(k, "Average fractional error", oskar_SettingsItem::DOUBLE, 0.02);
-    setTooltip(k, "The target average fractional error between the fitted "
-            "surface and the numerical element pattern input data. "
-            "Choose this value carefully. A value that is too small may "
-            "introduce fitting artefacts, or may cause the fitting procedure "
-            "to fail. A value that is too large will cause detail to be lost "
-            "in the fitted surface.");
-    k = group + "/average_fractional_error_factor_increase";
-    declare(k, "Average fractional error factor increase", oskar_SettingsItem::DOUBLE, 1.5);
-    setTooltip(k, "If the fitting procedure fails, this value gives the "
-            "factor by which to increase the allowed average fractional "
-            "error between the fitted surface and the numerical element "
-            "pattern input data, before trying again. Must be &gt; 1.0.");
-    k = group + "/smoothness_factor_override";
-    declare(k, "Smoothness factor override", oskar_SettingsItem::DOUBLE, 1.0);
-    setTooltip(k, "Smoothness factor used to fit smoothing splines to "
-            "numerical element pattern data, if not searching for a "
-            "best fit. Use only if you really know what you're doing!");
-
     // Element tapering options.
     group = root + "/aperture_array/element_pattern/taper";
     setLabel(group, "Tapering options");
@@ -660,6 +592,102 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     setTooltip(k, "Path used to save the final telescope model directory, "
             "excluding any element pattern data (useful for debugging). "
             "Leave blank if not required.");
+}
+
+void oskar_SettingsModelApps::init_settings_element_fit()
+{
+    QString k, group, root;
+    root = "element_fit";
+
+    setLabel(root, "Element pattern fitting settings");
+
+    k = root + "/input_cst_file";
+    declare(k, "Input CST file", oskar_SettingsItem::INPUT_FILE_NAME);
+    setTooltip(k, "Path to a text file containing element pattern data "
+            "exported by CST.");
+
+    k = root + "/frequency_hz";
+    declare(k, "Frequency [Hz]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Observing frequency at which numerical element pattern "
+            "data is applicable, in Hz.");
+
+    k = root + "/polarisation_type";
+    declare(k, "Polarisation type", QStringList() << "XY" << "X" << "Y");
+    setTooltip(k, "Specify whether the input data is to be used for the "
+            "X or Y dipole, or both.");
+
+    // Element pattern fitting parameters.
+    group = root;
+    setLabel(group, "Element pattern fitting parameters");
+    k = group + "/ignore_data_at_pole";
+    declare(k, "Ignore data at poles", oskar_SettingsItem::BOOL, false);
+    setTooltip(k, "If true, then numerical element pattern data points at "
+            "theta = 0 and theta = 180 degrees are ignored.");
+    k = group + "/ignore_data_below_horizon";
+    declare(k, "Ignore data below horizon", oskar_SettingsItem::BOOL, true);
+    setTooltip(k, "If true, then numerical element pattern data points at "
+            "theta &gt; 90 degrees are ignored.");
+    k = group + "/overlap_angle_deg";
+    declare(k, "Overlap angle [deg]", oskar_SettingsItem::DOUBLE, 9.0);
+    setTooltip(k, "The amount of overlap used for copying numerical element "
+            "pattern data for phi &lt; 0 and phi &gt; 360 degrees. Use carefully "
+            "to minimise discontinuity at phi = 0.");
+    k = group + "/weight_boundaries";
+    declare(k, "Weighting at boundaries", oskar_SettingsItem::DOUBLE, 2.0);
+    setTooltip(k, "The weight given to numerical element pattern data at "
+            "phi = 0 and phi = 360 degrees, relative to 1.0. Use "
+            "carefully to minimise discontinuity at phi = 0.");
+    k = group + "/weight_overlap";
+    declare(k, "Weighting in overlap region", oskar_SettingsItem::DOUBLE, 1.0);
+    setTooltip(k, "The weight given to numerical element pattern data at "
+            "phi &lt; 0 and phi &gt; 360 degrees, relative to 1.0. Use "
+            "carefully to minimise discontinuity at phi = 0.");
+    //k = group + "/use_common_set";
+    //declare(k, "Use common set", oskar_SettingsItem::BOOL, true);
+
+    group = root + "/all";
+    setLabel(group, "Common settings (for all surfaces)");
+    k = group + "/eps_float";
+    declare(k, "Epsilon (single precision)", oskar_SettingsItem::DOUBLE, 1e-4);
+    setTooltip(k, "The value of epsilon used for fitting in single precision. "
+            "Suggested value approx. 1e-04.");
+    k = group + "/eps_double";
+    declare(k, "Epsilon (double precision)", oskar_SettingsItem::DOUBLE, 1e-8);
+    setTooltip(k, "The value of epsilon used for fitting in double precision. "
+            "Suggested value approx. 1e-08.");
+    k = group + "/search_for_best_fit";
+    declare(k, "Search for best fit", oskar_SettingsItem::BOOL, true);
+    setTooltip(k, "If true (the default), then any numerical element pattern "
+            "data will be fitted with smoothing splines, where the smoothness "
+            "factor is selected to give the requested average fractional "
+            "error. If false, the supplied smoothness factor is used instead.");
+    k = group + "/average_fractional_error";
+    declare(k, "Average fractional error", oskar_SettingsItem::DOUBLE, 0.02);
+    setTooltip(k, "The target average fractional error between the fitted "
+            "surface and the numerical element pattern input data. "
+            "Choose this value carefully. A value that is too small may "
+            "introduce fitting artifacts, or may cause the fitting procedure "
+            "to fail. A value that is too large will cause detail to be lost "
+            "in the fitted surface.");
+    k = group + "/average_fractional_error_factor_increase";
+    declare(k, "Average fractional error factor increase", oskar_SettingsItem::DOUBLE, 1.5);
+    setTooltip(k, "If the fitting procedure fails, this value gives the "
+            "factor by which to increase the allowed average fractional "
+            "error between the fitted surface and the numerical element "
+            "pattern input data, before trying again. Must be &gt; 1.0.");
+    k = group + "/smoothness_factor_override";
+    declare(k, "Smoothness factor override", oskar_SettingsItem::DOUBLE, 1.0);
+    setTooltip(k, "Smoothness factor used to fit smoothing splines to "
+            "numerical element pattern data, if not searching for a "
+            "best fit. Use only if you really know what you're doing!");
+
+
+
+    k = root + "/output_directory";
+    declare(k, "Telescope or station output directory",
+            oskar_SettingsItem::TELESCOPE_DIR_NAME);
+    setTooltip(k, "Path to the telescope or station directory in which to "
+            "save the fitted coefficients.");
 }
 
 void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& root)

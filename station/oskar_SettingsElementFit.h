@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,10 @@
  */
 struct oskar_SettingsElementFit
 {
+    char* input_cst_file;
+    char* output_directory;
+    int polarisation_type;
+    double frequency_hz;
     double overlap_angle_rad;
     int ignore_data_below_horizon;
     int ignore_data_at_pole;

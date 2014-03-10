@@ -96,20 +96,48 @@ void oskar_element_write(const oskar_Element* data, int port,
 static void write_splines(FILE* fhan, const oskar_Splines* splines,
         int index, int* status)
 {
+    const oskar_Mem *knots_x, *knots_y, *coeff;
+    oskar_Mem* temp;
     unsigned char group;
     group = OSKAR_TAG_GROUP_SPLINE_DATA;
+    knots_x = oskar_splines_knots_x_const(splines);
+    knots_y = oskar_splines_knots_y_const(splines);
+    coeff   = oskar_splines_coeff_const(splines);
     oskar_binary_stream_write_int(fhan, group,
             OSKAR_SPLINES_TAG_NUM_KNOTS_X, index,
             oskar_splines_num_knots_x(splines), status);
     oskar_binary_stream_write_int(fhan, group,
             OSKAR_SPLINES_TAG_NUM_KNOTS_Y, index,
             oskar_splines_num_knots_y(splines), status);
-    oskar_mem_binary_stream_write(oskar_splines_knots_x_const(splines),
-            fhan, group, OSKAR_SPLINES_TAG_KNOTS_X, index, 0, status);
-    oskar_mem_binary_stream_write(oskar_splines_knots_y_const(splines),
-            fhan, group, OSKAR_SPLINES_TAG_KNOTS_Y, index, 0, status);
-    oskar_mem_binary_stream_write(oskar_splines_coeff_const(splines),
-            fhan, group, OSKAR_SPLINES_TAG_COEFF, index, 0, status);
+
+    /* Write data in double precision. */
+    temp = oskar_mem_convert_precision(knots_x, OSKAR_DOUBLE, status);
+    oskar_mem_binary_stream_write(temp, fhan, group,
+            OSKAR_SPLINES_TAG_KNOTS_X, index, 0, status);
+    oskar_mem_free(temp, status);
+    temp = oskar_mem_convert_precision(knots_y, OSKAR_DOUBLE, status);
+    oskar_mem_binary_stream_write(temp, fhan, group,
+            OSKAR_SPLINES_TAG_KNOTS_Y, index, 0, status);
+    oskar_mem_free(temp, status);
+    temp = oskar_mem_convert_precision(coeff, OSKAR_DOUBLE, status);
+    oskar_mem_binary_stream_write(temp, fhan, group,
+            OSKAR_SPLINES_TAG_COEFF, index, 0, status);
+    oskar_mem_free(temp, status);
+
+    /* Write data in single precision. */
+    temp = oskar_mem_convert_precision(knots_x, OSKAR_SINGLE, status);
+    oskar_mem_binary_stream_write(temp, fhan, group,
+            OSKAR_SPLINES_TAG_KNOTS_X, index, 0, status);
+    oskar_mem_free(temp, status);
+    temp = oskar_mem_convert_precision(knots_y, OSKAR_SINGLE, status);
+    oskar_mem_binary_stream_write(temp, fhan, group,
+            OSKAR_SPLINES_TAG_KNOTS_Y, index, 0, status);
+    oskar_mem_free(temp, status);
+    temp = oskar_mem_convert_precision(coeff, OSKAR_SINGLE, status);
+    oskar_mem_binary_stream_write(temp, fhan, group,
+            OSKAR_SPLINES_TAG_COEFF, index, 0, status);
+    oskar_mem_free(temp, status);
+
     oskar_binary_stream_write_double(fhan, group,
             OSKAR_SPLINES_TAG_SMOOTHING_FACTOR, index,
             oskar_splines_smoothing_factor(splines), status);

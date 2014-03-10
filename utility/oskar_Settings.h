@@ -35,6 +35,7 @@
 #include <oskar_SettingsBeamPattern.h>
 #include <oskar_SettingsObservation.h>
 #include <oskar_SettingsTelescope.h>
+#include <oskar_SettingsElementFit.h>
 #include <oskar_SettingsInterferometer.h>
 #include <oskar_SettingsSimulator.h>
 #include <oskar_mem.h>
@@ -54,6 +55,7 @@ struct oskar_Settings
     oskar_SettingsSky sky;
     oskar_SettingsObservation obs;
     oskar_SettingsTelescope telescope;
+    oskar_SettingsElementFit element_fit;
     oskar_SettingsInterferometer interferometer;
     oskar_SettingsBeamPattern beam_pattern;
     oskar_SettingsImage image;

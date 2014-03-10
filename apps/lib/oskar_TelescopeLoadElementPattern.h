@@ -94,17 +94,14 @@ public:
     virtual std::string name() const;
 
 private:
-    void load_element_patterns(oskar_Log* log,
-            const oskar_SettingsTelescope* settings, oskar_Station* station,
-            std::map<std::string, std::string>& filemap,
+    void load_element_patterns(oskar_Log* log, const oskar_Settings* settings,
+            oskar_Station* station, std::map<std::string, std::string>& filemap,
             int* status);
 
     void update_map(std::map<std::string, std::string>& files,
             const oskar_Dir& cwd);
 
 private:
-    static const std::string cst_name_x;
-    static const std::string cst_name_y;
     static const std::string spline_name_x;
     static const std::string spline_name_y;
     std::map<std::string, oskar_Element*> models;

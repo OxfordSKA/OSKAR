@@ -35,10 +35,10 @@
 extern "C" {
 #endif
 
-int oskar_settings_free(oskar_Settings* settings)
+void oskar_settings_free(oskar_Settings* settings)
 {
     oskar_SettingsSystemNoise* noise = &settings->interferometer.noise;
-    int i = 0, err = 0;
+    int i = 0;
 
     /* Free all settings arrays. */
     free(settings->sim.cuda_device_ids);
@@ -94,6 +94,12 @@ int oskar_settings_free(oskar_Settings* settings)
     settings->telescope.input_directory = NULL;
     free(settings->telescope.output_directory);
     settings->telescope.output_directory = NULL;
+
+    /* Free element fit parameter file names. */
+    free(settings->element_fit.input_cst_file);
+    settings->element_fit.input_cst_file = NULL;
+    free(settings->element_fit.output_directory);
+    settings->element_fit.output_directory = NULL;
 
     /* Free interferometer output file names. */
     free(settings->interferometer.ms_filename);
@@ -171,8 +177,6 @@ int oskar_settings_free(oskar_Settings* settings)
     /* Free path name to settings file. */
     free(settings->settings_path);
     settings->settings_path = NULL;
-
-    return err;
 }
 
 #ifdef __cplusplus

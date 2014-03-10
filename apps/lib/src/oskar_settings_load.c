@@ -35,6 +35,7 @@
 #include "apps/lib/oskar_settings_load_simulator.h"
 #include "apps/lib/oskar_settings_load_sky.h"
 #include "apps/lib/oskar_settings_load_telescope.h"
+#include "apps/lib/oskar_settings_load_element_fit.h"
 #include <oskar_log.h>
 #include <oskar_settings_init.h>
 #include <oskar_file_exists.h>
@@ -44,46 +45,34 @@
 extern "C" {
 #endif
 
-int oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
-        const char* filename)
+void oskar_settings_load(oskar_Settings* s, oskar_Log* log,
+        const char* filename, int* status)
 {
-    int error;
-
     /* Check if the settings file exists! */
     if (!oskar_file_exists(filename))
-        return OSKAR_ERR_FILE_IO;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
-    /* Initialise the settings array. */
-    error = oskar_settings_init(settings);
-    if (error) return error;
+    /* Initialise the settings arrays. */
+    oskar_settings_init(s);
 
     /* Load observation settings first. */
-    error = oskar_settings_load_observation(&settings->obs, log, filename);
-    if (error) return error;
+    oskar_settings_load_observation(&s->obs, log, filename, status);
 
-    error = oskar_settings_load_simulator(&settings->sim, filename);
-    if (error) return error;
-    error = oskar_settings_load_sky(&settings->sky, filename);
-    if (error) return error;
-    error = oskar_settings_load_telescope(&settings->telescope, filename);
-    if (error) return error;
-    error = oskar_settings_load_beam_pattern(&settings->beam_pattern, filename);
-    if (error) return error;
-    error = oskar_settings_load_interferometer(&settings->interferometer, filename);
-    if (error) return error;
-    error = oskar_settings_load_image(&settings->image, filename);
-    if (error) return error;
-    /*
-     * error = oskar_settings_load_ionosphere(&settings->ionosphere, filename);
-     * if (error) return error;
-     */
+    oskar_settings_load_simulator(&s->sim, filename, status);
+    oskar_settings_load_sky(&s->sky, filename, status);
+    oskar_settings_load_telescope(&s->telescope, filename, status);
+    oskar_settings_load_beam_pattern(&s->beam_pattern, filename, status);
+    oskar_settings_load_interferometer(&s->interferometer, filename, status);
+    oskar_settings_load_image(&s->image, filename, status);
+    oskar_settings_load_element_fit(&s->element_fit, filename, status);
+    /* oskar_settings_load_ionosphere(&s->ionosphere, filename, status); */
 
     /* Save the path to the settings file. */
-    settings->settings_path = realloc(settings->settings_path,
-            1 + strlen(filename));
-    strcpy(settings->settings_path, filename);
-
-    return OSKAR_SUCCESS;
+    s->settings_path = realloc(s->settings_path, 1 + strlen(filename));
+    strcpy(s->settings_path, filename);
 }
 
 #ifdef __cplusplus

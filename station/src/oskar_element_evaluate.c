@@ -31,6 +31,7 @@
 
 #include <oskar_apply_element_taper_cosine.h>
 #include <oskar_apply_element_taper_gaussian.h>
+#include <oskar_evaluate_dipole_pattern.h>
 #include <oskar_evaluate_geometric_dipole_pattern.h>
 #include <oskar_convert_enu_direction_cosines_to_theta_phi.h>
 
@@ -44,15 +45,15 @@
 extern "C" {
 #endif
 
-void oskar_element_evaluate(const oskar_Element* model,
-        oskar_Mem* output, double orientation_x, double orientation_y,
-        int num_points, const oskar_Mem* l, const oskar_Mem* m,
-        const oskar_Mem* n, oskar_Mem* theta, oskar_Mem* phi, int* status)
+void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
+        double orientation_x, double orientation_y, int num_points,
+        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        double frequency_hz, oskar_Mem* theta, oskar_Mem* phi, int* status)
 {
     int spline_x = 0, spline_y = 0, computed_angles = 0;
 
     /* Check all inputs. */
-    if (!model || !output || !l || !m || !n || !theta || !phi || !status)
+    if (!model || !output || !x || !y || !z || !theta || !phi || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -103,7 +104,7 @@ void oskar_element_evaluate(const oskar_Element* model,
             /* Compute modified theta and phi coordinates for dipole X. */
             delta_phi_x = M_PI/2.0 - orientation_x;
             oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-                    delta_phi_x, num_points, l, m, n, status);
+                    delta_phi_x, num_points, x, y, z, status);
             computed_angles = 1;
 
             /* Evaluate spline pattern for dipole X. */
@@ -121,12 +122,24 @@ void oskar_element_evaluate(const oskar_Element* model,
             /* Compute modified theta and phi coordinates for dipole X. */
             delta_phi_x = orientation_x - M_PI/2.0; /* TODO check the order. */
             oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-                    delta_phi_x, num_points, l, m, n, status);
+                    delta_phi_x, num_points, x, y, z, status);
             computed_angles = 1;
 
             /* Evaluate dipole pattern for dipole X. */
             oskar_evaluate_geometric_dipole_pattern(output, num_points,
                     theta, phi, 1, status);
+        }
+        else if (model->element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
+        {
+            /* Compute modified theta and phi coordinates for dipole X. */
+            delta_phi_x = orientation_x - M_PI/2.0; /* TODO check the order. */
+            oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
+                    delta_phi_x, num_points, x, y, z, status);
+            computed_angles = 1;
+
+            /* Evaluate dipole pattern for dipole X. */
+            oskar_evaluate_dipole_pattern(output, num_points, theta, phi,
+                    frequency_hz, model->dipole_length_m, 1, status);
         }
 
         /* Check if spline data present for dipole Y. */
@@ -135,7 +148,7 @@ void oskar_element_evaluate(const oskar_Element* model,
             /* Compute modified theta and phi coordinates for dipole Y. */
             delta_phi_y = -orientation_y;
             oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-                    delta_phi_y, num_points, l, m, n, status);
+                    delta_phi_y, num_points, x, y, z, status);
             computed_angles = 1;
 
             /* Evaluate spline pattern for dipole Y. */
@@ -153,12 +166,24 @@ void oskar_element_evaluate(const oskar_Element* model,
             /* Compute modified theta and phi coordinates for dipole Y. */
             delta_phi_y = orientation_y - M_PI/2.0; /* TODO check the order. */
             oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-                    delta_phi_y, num_points, l, m, n, status);
+                    delta_phi_y, num_points, x, y, z, status);
             computed_angles = 1;
 
             /* Evaluate dipole pattern for dipole Y. */
             oskar_evaluate_geometric_dipole_pattern(output, num_points,
                     theta, phi, 0, status);
+        }
+        else if (model->element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
+        {
+            /* Compute modified theta and phi coordinates for dipole Y. */
+            delta_phi_y = orientation_y - M_PI/2.0; /* TODO check the order. */
+            oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
+                    delta_phi_y, num_points, x, y, z, status);
+            computed_angles = 1;
+
+            /* Evaluate dipole pattern for dipole Y. */
+            oskar_evaluate_dipole_pattern(output, num_points, theta, phi,
+                    frequency_hz, model->dipole_length_m, 0, status);
         }
     }
 
@@ -166,7 +191,7 @@ void oskar_element_evaluate(const oskar_Element* model,
     if (model->taper_type != OSKAR_ELEMENT_TAPER_NONE && !computed_angles)
     {
         oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-                0, num_points, l, m, n, status);
+                0, num_points, x, y, z, status);
         computed_angles = 1;
     }
 

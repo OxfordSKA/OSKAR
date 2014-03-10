@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,12 +53,16 @@ static int get_seed(const QVariant& t)
 }
 
 extern "C"
-int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
-        const char* filename)
+void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
+        const char* filename, int* status)
 {
     QByteArray t;
     QString temp;
     QSettings s(QString(filename), QSettings::IniFormat);
+
+    // Check if safe to proceed.
+    if (*status) return;
+
     s.beginGroup("telescope");
 
     // Telescope input directory.
@@ -83,7 +87,10 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     else if (temp.startsWith("VLA (PBCOR)", Qt::CaseInsensitive))
         tel->station_type = OSKAR_STATION_TYPE_VLA_PBCOR;
     else
-        return OSKAR_ERR_SETTINGS_TELESCOPE;
+    {
+        *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+        return;
+    }
 
     // Aperture array settings.
     s.beginGroup("aperture_array");
@@ -104,7 +111,10 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
                 if (temp.startsWith("N", Qt::CaseInsensitive))
                     ae->apodisation_type = 0;
                 else
-                    return OSKAR_ERR_SETTINGS_TELESCOPE;
+                {
+                    *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+                    return;
+                }
 
                 ae->gain = s.value("gain", 0.0).toDouble();
                 ae->gain_error_fixed =
@@ -145,50 +155,16 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
             ep->enable_numerical_patterns =
                     s.value("enable_numerical", true).toBool();
 
-            // Station element fitting parameters (general).
-            s.beginGroup("fit");
-            {
-                oskar_SettingsElementFit* ef = &ep->fit;
-                ef->ignore_data_at_pole =
-                        s.value("ignore_data_at_pole", false).toBool();
-                ef->ignore_data_below_horizon =
-                        s.value("ignore_data_below_horizon", true).toBool();
-                ef->ignore_cached_files =
-                        s.value("ignore_cached_files", false).toBool();
-                ef->overlap_angle_rad =
-                        s.value("overlap_angle_deg", 9.0).toDouble() * D2R;
-                ef->use_common_set =
-                        s.value("use_common_set", true).toBool();
-                ef->weight_boundaries =
-                        s.value("weight_boundaries", 2.0).toDouble();
-                ef->weight_overlap =
-                        s.value("weight_overlap", 1.0).toDouble();
-
-                // Station element fitting parameters (for all surfaces).
-                s.beginGroup("all");
-                ef->all.eps_float =
-                        s.value("eps_float", 1e-4).toDouble();
-                ef->all.eps_double =
-                        s.value("eps_double", 1e-8).toDouble();
-                ef->all.search_for_best_fit =
-                        s.value("search_for_best_fit", true).toBool();
-                ef->all.average_fractional_error =
-                        s.value("average_fractional_error", 0.02).toDouble();
-                ef->all.average_fractional_error_factor_increase =
-                        s.value("average_fractional_error_factor_increase", 1.5).toDouble();
-                ef->all.smoothness_factor_override =
-                        s.value("smoothness_factor_override", 1.0).toDouble();
-                s.endGroup();
-            }
-            s.endGroup(); // End element fit group.
-
             temp = s.value("functional_type", "Geometric dipole").toString();
             if (temp.startsWith("G", Qt::CaseInsensitive))
                 ep->functional_type = OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE;
             else if (temp.startsWith("I", Qt::CaseInsensitive))
                 ep->functional_type = OSKAR_ELEMENT_TYPE_ISOTROPIC;
             else
-                return OSKAR_ERR_SETTINGS_TELESCOPE;
+            {
+                *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+                return;
+            }
 
             s.beginGroup("taper");
             {
@@ -200,7 +176,10 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
                 else if (temp.startsWith("G", Qt::CaseInsensitive))
                     ep->taper.type = OSKAR_ELEMENT_TAPER_GAUSSIAN;
                 else
-                    return OSKAR_ERR_SETTINGS_TELESCOPE;
+                {
+                    *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+                    return;
+                }
                 ep->taper.cosine_power =
                         s.value("cosine_power", 1.0).toDouble();
                 ep->taper.gaussian_fwhm_rad =
@@ -226,6 +205,4 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
         tel->output_directory = (char*)malloc(t.size() + 1);
         strcpy(tel->output_directory, t.constData());
     }
-
-    return OSKAR_SUCCESS;
 }

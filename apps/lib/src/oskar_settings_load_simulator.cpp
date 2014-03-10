@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,13 +37,15 @@
 #include <QtCore/QVariant>
 #include <QtCore/QStringList>
 
-#include <QtCore/QDebug>
-
 extern "C"
-int oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
-        const char* filename)
+void oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
+        const char* filename, int* status)
 {
     QSettings s(QString(filename), QSettings::IniFormat);
+
+    // Check if safe to proceed.
+    if (*status) return;
+
     s.beginGroup("simulator");
 
     // Get the simulator settings.
@@ -64,7 +66,8 @@ int oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
         {
             fprintf(stderr, "Unable to determine number of CUDA devices: %s\n",
                     cudaGetErrorString(error));
-            return error;
+            *status = (int) error;
+            return;
         }
 
         // Append all device IDs to device list.
@@ -86,6 +89,4 @@ int oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
     {
         sim->cuda_device_ids[i] = devsList[i].toInt();
     }
-
-    return OSKAR_SUCCESS;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
  * @file oskar_SettingsElementPattern.h
  */
 
-#include <oskar_SettingsElementFit.h>
 #include <oskar_SettingsElementTaper.h>
 
 /**
@@ -47,7 +46,6 @@
 struct oskar_SettingsElementPattern
 {
     int enable_numerical_patterns;
-    oskar_SettingsElementFit fit;
     int functional_type;
     oskar_SettingsElementTaper taper;
 };

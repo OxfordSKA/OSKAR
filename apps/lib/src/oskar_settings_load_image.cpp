@@ -38,12 +38,16 @@
 #include <QtCore/QFile>
 
 extern "C"
-int oskar_settings_load_image(oskar_SettingsImage* im,
-        const char* filename)
+void oskar_settings_load_image(oskar_SettingsImage* im,
+        const char* filename, int* status)
 {
     QString temp;
     QByteArray t;
     QSettings s(QString(filename), QSettings::IniFormat);
+
+    // Check if safe to proceed.
+    if (*status) return;
+
     s.beginGroup("image");
 
     im->fov_deg = s.value("fov_deg", 2).toDouble();
@@ -96,7 +100,10 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     else if (temp == "PSF")
         im->image_type = OSKAR_IMAGE_TYPE_PSF;
     else
-        return OSKAR_ERR_SETTINGS_IMAGE;
+    {
+        *status = OSKAR_ERR_SETTINGS_IMAGE;
+        return;
+    }
 
     temp = s.value("transform_type", "DFT 2D").toString().toUpper();
     if (temp == "DFT 2D")
@@ -106,7 +113,10 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     else if (temp == "FFT")
         im->transform_type = OSKAR_IMAGE_FFT;
     else
-        return OSKAR_ERR_SETTINGS_IMAGE;
+    {
+        *status = OSKAR_ERR_SETTINGS_IMAGE;
+        return;
+    }
 
     temp = s.value("direction", "Observation pointing direction").toString();
     if (temp.startsWith("O", Qt::CaseInsensitive))
@@ -114,7 +124,10 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     else if (temp.startsWith("R", Qt::CaseInsensitive))
         im->direction_type = OSKAR_IMAGE_DIRECTION_RA_DEC;
     else
-        return OSKAR_ERR_SETTINGS_IMAGE;
+    {
+        *status = OSKAR_ERR_SETTINGS_IMAGE;
+        return;
+    }
 
     im->ra_deg  = s.value("direction/ra_deg", 0.0).toDouble();
     im->dec_deg = s.value("direction/dec_deg", 0.0).toDouble();
@@ -184,6 +197,4 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
             strcpy(im->oskar_image, filename.constData());
         }
     }
-
-    return OSKAR_SUCCESS;
 }

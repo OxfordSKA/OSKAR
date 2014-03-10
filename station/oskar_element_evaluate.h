@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,18 +53,19 @@ extern "C" {
  * @param[in] orientation_x Azimuth of X dipole in radians.
  * @param[in] orientation_y Azimuth of Y dipole in radians.
  * @param[in] num_points Number of points at which to evaluate beam.
- * @param[in] l          Pointer to l-direction cosines.
- * @param[in] m          Pointer to m-direction cosines.
- * @param[in] n          Pointer to n-direction cosines.
+ * @param[in] x          Pointer to x-direction cosines.
+ * @param[in] y          Pointer to y-direction cosines.
+ * @param[in] z          Pointer to z-direction cosines.
+ * @param[in] frequency_hz Current observing frequency in Hz.
  * @param[out] theta     Pointer to work array for computing theta values.
  * @param[out] phi       Pointer to work array for computing phi values.
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* G,
+void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
         double orientation_x, double orientation_y, int num_points,
-        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
-        oskar_Mem* theta, oskar_Mem* phi, int* status);
+        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        double frequency_hz, oskar_Mem* theta, oskar_Mem* phi, int* status);
 
 #ifdef __cplusplus
 }

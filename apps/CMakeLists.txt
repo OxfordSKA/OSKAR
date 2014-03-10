@@ -65,6 +65,10 @@ if (QT4_FOUND AND CUDA_FOUND)
     set(name oskar_imager)
     oskar_qt_app(${name} ${name}_main.cpp)
 
+    # BINARY: oskar_fit_element_data
+    set(name oskar_fit_element_data)
+    oskar_qt_app(${name} ${name}_main.cpp)
+
     # BINARY: oskar_vis_to_ms
     set(name oskar_vis_to_ms)
     oskar_qt_app(${name} ${name}_main.cpp)

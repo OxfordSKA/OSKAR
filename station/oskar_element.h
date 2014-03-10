@@ -46,6 +46,7 @@ typedef struct oskar_Element oskar_Element;
 #endif /* OSKAR_ELEMENT_TYPEDEF_ */
 
 enum {
+    OSKAR_ELEMENT_TYPE_DIPOLE,
     OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE,
     OSKAR_ELEMENT_TYPE_ISOTROPIC
 };

@@ -34,9 +34,8 @@
 extern "C" {
 #endif
 
-int oskar_settings_init(oskar_Settings* settings)
+void oskar_settings_init(oskar_Settings* settings)
 {
-    int error = 0;
     oskar_SettingsSystemNoise* noise = &settings->interferometer.noise;
 
     /* Initialise all array pointers to NULL. */
@@ -55,6 +54,8 @@ int oskar_settings_init(oskar_Settings* settings)
     settings->sky.healpix_fits.file = NULL;
     settings->telescope.input_directory = NULL;
     settings->telescope.output_directory = NULL;
+    settings->element_fit.input_cst_file = NULL;
+    settings->element_fit.output_directory = NULL;
     settings->interferometer.ms_filename = NULL;
     settings->interferometer.oskar_vis_filename = NULL;
     settings->beam_pattern.sky_model = NULL;
@@ -77,7 +78,7 @@ int oskar_settings_init(oskar_Settings* settings)
     noise->value.t_sys.file = NULL;
     noise->value.area.file = NULL;
     noise->value.efficiency.file = NULL;
-    settings->ionosphere.enable = OSKAR_FALSE;
+    settings->ionosphere.enable = 0;
     settings->ionosphere.num_TID_screens = 0;
     settings->ionosphere.TID_files = NULL;
     settings->ionosphere.TID = NULL;
@@ -87,8 +88,6 @@ int oskar_settings_init(oskar_Settings* settings)
 
     /* Initialise pathname to settings file. */
     settings->settings_path = NULL;
-
-    return error;
 }
 
 #ifdef __cplusplus

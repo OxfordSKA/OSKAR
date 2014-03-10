@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
  */
 
 #include "apps/lib/oskar_settings_load_interferometer.h"
-#include "sky/oskar_date_time_to_mjd.h"
+#include <oskar_date_time_to_mjd.h>
 #include <oskar_log.h>
 
 #include <QtCore/QSettings>
@@ -42,22 +42,27 @@
 #include <cstdlib>
 #include <cstring>
 
-// local (private) methods
-static int load_noise(oskar_SettingsSystemNoise* noise, const char* filename);
-static int load_noise_freqs(oskar_SettingsSystemNoiseFreq* freq, QSettings& s);
-static int load_noise_values(oskar_SettingsSystemNoiseValue* value, QSettings& s);
-static int load_noise_type(oskar_SettingsSystemNoiseType* stddev, QSettings& s,
-        const QString& name);
-static void get_filename(char** filename, const QSettings& s, const QString& key,
-        const QString& defaultValue = "");
+
+static void load_noise(oskar_SettingsSystemNoise* noise, const char* filename,
+        int* status);
+static void load_noise_freqs(oskar_SettingsSystemNoiseFreq* freq, QSettings& s,
+        int* status);
+static void load_noise_values(oskar_SettingsSystemNoiseValue* value,
+        QSettings& s, int* status);
+static void load_noise_type(oskar_SettingsSystemNoiseType* stddev, QSettings& s,
+        const QString& name, int* status);
+static void get_filename(char** filename, const QSettings& s,
+        const QString& key, const QString& defaultValue = "");
 
 
 extern "C"
-int oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
-        const char* filename)
+void oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
+        const char* filename, int* status)
 {
     QByteArray t;
     QSettings s(QString(filename), QSettings::IniFormat);
+
+    if (*status) return;
 
     s.beginGroup("interferometer");
     {
@@ -91,19 +96,16 @@ int oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
     if (settings->num_vis_ave <= 0) settings->num_vis_ave = 1;
     if (settings->num_fringe_ave <= 0) settings->num_fringe_ave = 1;
 
-    int status = load_noise(&settings->noise, filename);
-    if (status) return status;
-
-    return OSKAR_SUCCESS;
+    load_noise(&settings->noise, filename, status);
 }
 
 
-static int load_noise(oskar_SettingsSystemNoise* noise, const char* filename)
+static void load_noise(oskar_SettingsSystemNoise* noise, const char* filename,
+        int* status)
 {
     QByteArray t;
     QString temp;
     QSettings s(QString(filename), QSettings::IniFormat);
-    int error = OSKAR_SUCCESS;
 
     s.beginGroup("interferometer");
     {
@@ -118,22 +120,18 @@ static int load_noise(oskar_SettingsSystemNoise* noise, const char* filename)
                     (int)time(NULL) : temp.toInt();
 
             /* Load frequency settings */
-            error = load_noise_freqs(&noise->freq, s);
-            if (error) return error;
+            load_noise_freqs(&noise->freq, s, status);
 
             /* Values */
-            error = load_noise_values(&noise->value, s);
-            if (error) return error;
+            load_noise_values(&noise->value, s, status);
         }
         s.endGroup(); // noise
     }
     s.endGroup(); // interferometer
-
-    return error;
 }
 
-static int load_noise_freqs(oskar_SettingsSystemNoiseFreq* freq,
-        QSettings& s)
+static void load_noise_freqs(oskar_SettingsSystemNoiseFreq* freq,
+        QSettings& s, int* status)
 {
     QString temp = s.value("freq", "T").toString().toUpper();
     if (temp.startsWith("T"))
@@ -145,7 +143,10 @@ static int load_noise_freqs(oskar_SettingsSystemNoiseFreq* freq,
     else if (temp.startsWith("R"))
         freq->specification = OSKAR_SYSTEM_NOISE_RANGE;
     else
-        return OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+    {
+        *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+        return;
+    }
 
     s.beginGroup("freq");
     {
@@ -155,16 +156,12 @@ static int load_noise_freqs(oskar_SettingsSystemNoiseFreq* freq,
         freq->inc    = s.value("inc").toDouble();
     }
     s.endGroup(); // freq
-
-    return OSKAR_SUCCESS;
 }
 
 
-static int load_noise_values(oskar_SettingsSystemNoiseValue* value,
-        QSettings& s)
+static void load_noise_values(oskar_SettingsSystemNoiseValue* value,
+        QSettings& s, int* status)
 {
-    int error = OSKAR_SUCCESS;
-
     QString temp = s.value("values", "TEL").toString().toUpper();
     if (temp.startsWith("TEL"))
         value->specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
@@ -175,45 +172,51 @@ static int load_noise_values(oskar_SettingsSystemNoiseValue* value,
     else if(temp.startsWith("TEMP"))
         value->specification = OSKAR_SYSTEM_NOISE_SYS_TEMP;
     else
-        return OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+    {
+        *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+        return;
+    }
 
     s.beginGroup("values");
     {
-        error = load_noise_type(&value->rms, s, "rms");
-        if (error) return error;
-
-        error = load_noise_type(&value->sensitivity, s, "sensitivity");
-        if (error) return error;
+        load_noise_type(&value->rms, s, "rms", status);
+        load_noise_type(&value->sensitivity, s, "sensitivity", status);
 
         s.beginGroup("components");
         {
-            error = load_noise_type(&value->t_sys, s, "t_sys");
-            if (error) return error;
-
-            error = load_noise_type(&value->area, s, "area");
-            if (error) return error;
-
-            error = load_noise_type(&value->efficiency, s, "efficiency");
+            load_noise_type(&value->t_sys, s, "t_sys", status);
+            load_noise_type(&value->area, s, "area", status);
+            load_noise_type(&value->efficiency, s, "efficiency", status);
             if (value->efficiency.start < 0.0 || value->efficiency.start > 1.0)
-                return OSKAR_ERR_SETTINGS_INTERFEROMETER;
+            {
+                *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+                return;
+            }
             if (value->efficiency.end < 0.0 || value->efficiency.end > 1.0)
-                 return OSKAR_ERR_SETTINGS_INTERFEROMETER;
+            {
+                *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+                return;
+            }
             if (value->efficiency.start > value->efficiency.end)
-                return OSKAR_ERR_SETTINGS_INTERFEROMETER;
-            if (error) return error;
+            {
+                *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+                return;
+            }
         }
         s.endGroup();
     }
     s.endGroup(); // spec
-
-    return error;
 }
 
 
-static int load_noise_type(oskar_SettingsSystemNoiseType* type, QSettings& s,
-        const QString& name)
+static void load_noise_type(oskar_SettingsSystemNoiseType* type, QSettings& s,
+        const QString& name, int* status)
 {
-    QString temp = s.value(name, "N").toString().toUpper();
+    QString temp;
+
+    if (*status) return;
+
+    temp = s.value(name, "N").toString().toUpper();
     if (temp.startsWith("N"))
         type->override = OSKAR_SYSTEM_NOISE_NO_OVERRIDE;
     else if (temp.startsWith("D"))
@@ -221,7 +224,10 @@ static int load_noise_type(oskar_SettingsSystemNoiseType* type, QSettings& s,
     else if (temp.startsWith("R"))
         type->override = OSKAR_SYSTEM_NOISE_RANGE;
     else
-        return OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+    {
+        *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+        return;
+    }
 
     s.beginGroup(name);
     {
@@ -230,8 +236,6 @@ static int load_noise_type(oskar_SettingsSystemNoiseType* type, QSettings& s,
         type->end    = s.value("end").toDouble();
     }
     s.endGroup();
-
-    return OSKAR_SUCCESS;
 }
 
 

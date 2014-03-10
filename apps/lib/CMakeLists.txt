@@ -7,12 +7,14 @@ set(apps_SRC
     src/oskar_beam_pattern_write.c
     src/oskar_Dir.cpp
     src/oskar_evaluate_station_pierce_points.cpp
+    src/oskar_fit_element_data.cpp
     src/oskar_imager.cpp
     src/oskar_remove_dir.cpp
     src/oskar_set_up_sky.c
     src/oskar_set_up_telescope.c
     src/oskar_set_up_visibilities.c
     src/oskar_settings_load_beam_pattern.cpp
+    src/oskar_settings_load_element_fit.cpp
     src/oskar_settings_load_image.cpp
     src/oskar_settings_load_interferometer.cpp
     src/oskar_settings_load_ionosphere.cpp

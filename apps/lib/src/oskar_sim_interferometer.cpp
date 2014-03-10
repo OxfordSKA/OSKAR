@@ -93,7 +93,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Load the settings file.
     oskar_Settings settings;
     oskar_log_section(log, "Loading settings file '%s'", settings_file);
-    error = oskar_settings_load(&settings, log, settings_file);
+    oskar_settings_load(&settings, log, settings_file, &error);
     if (error) return error;
     type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     vis_type = type | OSKAR_COMPLEX | OSKAR_MATRIX;

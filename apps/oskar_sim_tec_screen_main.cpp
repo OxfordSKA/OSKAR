@@ -42,7 +42,7 @@
 
 int main(int argc, char** argv)
 {
-    int error = OSKAR_SUCCESS;
+    int error = 0;
 
     oskar_OptionParser opt("oskar_sim_tec_screen", oskar_version_string());
     opt.addRequired("settings file");
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
 
     const char* settings_file = opt.getArg(0);
     oskar_Settings settings;
-    oskar_settings_load(&settings, log, settings_file);
+    oskar_settings_load(&settings, log, settings_file, &error);
     oskar_log_set_keep_file(log, settings.sim.keep_log_file);
 
     oskar_log_settings_telescope(log, &settings);

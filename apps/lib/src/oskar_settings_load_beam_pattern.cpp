@@ -37,14 +37,16 @@
 #include <QtCore/QVariant>
 #include <QtCore/QStringList>
 
-#include <iostream>
-
 extern "C"
-int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
-        const char* filename)
+void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
+        const char* filename, int* status)
 {
     QByteArray t;
     QSettings s(QString(filename), QSettings::IniFormat);
+
+    // Check if safe to proceed.
+    if (*status) return;
+
     s.beginGroup("beam_pattern");
 
     // Get station ID to use.
@@ -58,7 +60,10 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     else if (temp.startsWith("S"))
         bp->coord_grid_type = OSKAR_BEAM_PATTERN_COORDS_SKY_MODEL;
     else
-        return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+    {
+        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        return;
+    }
 
     temp = s.value("coordinate_frame", "Equatorial").toString().toUpper();
     if (temp.startsWith("E"))
@@ -66,7 +71,10 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     else if (temp.startsWith("H"))
         bp->coord_frame_type = OSKAR_BEAM_PATTERN_FRAME_HORIZON;
     else
-        return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+    {
+        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        return;
+    }
 
     if (bp->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
     {
@@ -77,9 +85,16 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
             dimsList = dims.toStringList();
         else if (dims.type() == QVariant::String)
             dimsList = dims.toString().split(",");
-        else return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        else
+        {
+            *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+            return;
+        }
         if (!(dimsList.size() == 1 || dimsList.size() == 2))
-            return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        {
+            *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+            return;
+        }
         bp->size[0] = dimsList[0].toUInt();
         bp->size[1] = (dimsList.size() == 2) ? dimsList[1].toUInt() : bp->size[0];
         dims = s.value("fov_deg", "2.0,2.0");
@@ -87,9 +102,16 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
             dimsList = dims.toStringList();
         else if (dims.type() == QVariant::String)
             dimsList = dims.toString().split(",");
-        else return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        else
+        {
+            *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+            return;
+        }
         if (!(dimsList.size() == 1 || dimsList.size() == 2))
-            return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        {
+            *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+            return;
+        }
         bp->fov_deg[0] = dimsList[0].toDouble();
         bp->fov_deg[1] = (dimsList.size() == 2) ?
                 dimsList[1].toDouble() : bp->fov_deg[0];
@@ -113,7 +135,10 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
         s.endGroup();
     }
     else
-        return OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+    {
+        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        return;
+    }
 
     bp->horizon_clip = s.value("horizon_clip").toBool();
 
@@ -179,6 +204,4 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
         }
         s.endGroup();
     }
-
-    return OSKAR_SUCCESS;
 }

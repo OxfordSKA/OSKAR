@@ -57,7 +57,7 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
     const char* filename;
 
     oskar_log_section(log, "Loading settings file '%s'", settings_file);
-    error = oskar_settings_load(&settings, log, settings_file);
+    oskar_settings_load(&settings, log, settings_file, &error);
     if (error)
     {
         oskar_log_error(log, "Failure in oskar_settings_load() (%s).",

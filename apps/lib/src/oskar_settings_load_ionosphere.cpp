@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "apps/lib/oskar_settings_load_ionosphere.h"
-#include "sky/oskar_load_TID_parameter_file.h"
+#include <oskar_load_TID_parameter_file.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -41,15 +40,17 @@
 #include <cmath>
 
 extern "C"
-int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
-        const char* filename)
+void oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
+        const char* filename, int* status)
 {
     QString temp;
     QByteArray t;
     QStringList list;
-    int status = OSKAR_SUCCESS;
-
     QSettings s(QString(filename), QSettings::IniFormat);
+
+    // Check if safe to proceed.
+    if (*status) return;
+
     s.beginGroup("ionosphere");
     settings->enable = (int)s.value("enable", false).toBool();
     settings->min_elevation = (double)s.value("min_elevation_deg", 0.0).toDouble();
@@ -67,7 +68,7 @@ int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
         settings->TID_files[i] = (char*)malloc(t.size() + 1);
         strcpy(settings->TID_files[i], t.constData());
         oskar_load_TID_parameter_file(&settings->TID[i], settings->TID_files[i],
-                &status);
+                status);
     }
 
     s.beginGroup("TECImage");
@@ -105,6 +106,4 @@ int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
     s.endGroup(); // pierce_points
 
     s.endGroup(); // ionosphere
-
-    return status;
 }

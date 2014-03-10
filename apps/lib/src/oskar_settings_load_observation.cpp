@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
  */
 
 #include "apps/lib/oskar_settings_load_observation.h"
-#include "sky/oskar_date_time_to_mjd.h"
+#include <oskar_date_time_to_mjd.h>
 #include <oskar_log.h>
 
 #include <cmath>
@@ -58,12 +58,14 @@ static QStringList get_list(QVariant v)
 }
 
 extern "C"
-int oskar_settings_load_observation(oskar_SettingsObservation* obs,
-        oskar_Log* log, const char* filename)
+void oskar_settings_load_observation(oskar_SettingsObservation* obs,
+        oskar_Log* log, const char* filename, int* status)
 {
     QByteArray t;
     QVariant v;
     QSettings s(QString(filename), QSettings::IniFormat);
+
+    if (*status) return;
 
     s.beginGroup("observation");
     {
@@ -77,7 +79,8 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
         {
             oskar_log_error(log, "RA and Dec coordinate arrays "
                     "must be the same length.");
-            return OSKAR_ERR_SETTINGS_OBSERVATION;
+            *status = OSKAR_ERR_SETTINGS_OBSERVATION;
+            return;
         }
 
         // Allocate memory for pointing data and copy to settings arrays.
@@ -101,7 +104,10 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
         // Get frequency / channel data.
         obs->start_frequency_hz = s.value("start_frequency_hz").toDouble();
         if (obs->start_frequency_hz < DBL_MIN)
-            return OSKAR_ERR_SETTINGS_OBSERVATION;
+        {
+            *status = OSKAR_ERR_SETTINGS_OBSERVATION;
+            return;
+        }
 
         obs->num_channels         = s.value("num_channels", 1).toInt();
         obs->frequency_inc_hz     = s.value("frequency_inc_hz").toDouble();
@@ -113,7 +119,8 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
         {
             oskar_log_error(log, "Invalid date string for 'start_time_utc' "
                     "(format must be: 'd-M-yyyy h:m:s.z').");
-            return OSKAR_ERR_SETTINGS_OBSERVATION;
+            *status = OSKAR_ERR_SETTINGS_OBSERVATION;
+            return;
         }
         int year   = st.date().year();
         int month  = st.date().month();
@@ -137,7 +144,8 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
         {
             oskar_log_error(log, "Invalid time string for 'length' "
                     "(format must be: 'h:m:s.z').");
-            return OSKAR_ERR_SETTINGS_OBSERVATION;
+            *status = OSKAR_ERR_SETTINGS_OBSERVATION;
+            return;
         }
         obs->length_seconds = len.hour() * 3600.0 +
                 len.minute() * 60.0 + len.second() + len.msec() / 1000.0;
@@ -151,6 +159,4 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
 
     // Compute interval
     obs->dt_dump_days = obs->length_days / obs->num_time_steps;
-
-    return OSKAR_SUCCESS;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,40 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_LOAD_H_
-#define OSKAR_SETTINGS_LOAD_H_
-
-/**
- * @file oskar_settings_load.h
- */
-
-#include <oskar_global.h>
+#include <apps/lib/oskar_OptionParser.h>
+#include <apps/lib/oskar_fit_element_data.h>
+#include <oskar_get_error_string.h>
 #include <oskar_log.h>
-#include <oskar_Settings.h>
+#include <oskar_version_string.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cstdio>
 
-/**
- * @brief
- * Populates all settings from the given settings file.
- *
- * @details
- * This top-level function populates a settings structure from the given
- * settings file.
- *
- * @param[out] settings A pointer to a settings structure to populate.
- * @param[in,out] log A pointer to a log structure to use.
- * @param[in] filename  String containing name of settings file to read.
- * @param[in,out] status Status return code.
- */
-OSKAR_APPS_EXPORT
-void oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
-        const char* filename, int* status);
+int main(int argc, char** argv)
+{
+    int error = 0;
 
-#ifdef __cplusplus
+    oskar_OptionParser opt("oskar_fit_element_data", oskar_version_string());
+    opt.addRequired("settings file");
+    if (!opt.check_options(argc, argv))
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    const char* settings_file = opt.getArg(0);
+
+    // Create the log.
+    oskar_Log* log = oskar_log_create();
+    oskar_log_message(log, 0, "Running binary %s", argv[0]);
+
+    // Do the fitting.
+    oskar_fit_element_data(settings_file, log, &error);
+
+    // Check for errors.
+    if (error)
+    {
+        oskar_log_error(log, "Run failed with code %i: %s.", error,
+                oskar_get_error_string(error));
+    }
+    oskar_log_free(log);
+
+    return error;
 }
-#endif
-
-#endif /* OSKAR_SETTINGS_LOAD_H_ */

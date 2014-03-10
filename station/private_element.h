@@ -48,8 +48,9 @@ struct oskar_Element
     int precision;
     int data_location;
 
-    int element_type; /**< Geometric dipole or isotropic. */
+    int element_type; /**< Dipole or isotropic. */
     int taper_type; /**< Tapering type. */
+    double dipole_length_m; /**< Length of dipole in metres. */
     double cos_power; /**< For a cosine taper, the power of the cosine. */
     double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
     oskar_Mem* filename_x;

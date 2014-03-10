@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,16 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_LOAD_H_
-#define OSKAR_SETTINGS_LOAD_H_
+#ifndef OSKAR_SETTINGS_LOAD_ELEMENT_FIT_H_
+#define OSKAR_SETTINGS_LOAD_ELEMENT_FIT_H_
 
 /**
- * @file oskar_settings_load.h
+ * @file oskar_settings_load_element_fit.h
  */
 
 #include <oskar_global.h>
-#include <oskar_log.h>
-#include <oskar_Settings.h>
+#include <oskar_SettingsElementFit.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,23 +42,21 @@ extern "C" {
 
 /**
  * @brief
- * Populates all settings from the given settings file.
+ * Populates element pattern fit parameters from the given settings file.
  *
  * @details
- * This top-level function populates a settings structure from the given
- * settings file.
+ * This function populates a element pattern fit parameters structure from
+ * the given settings file.
  *
  * @param[out] settings A pointer to a settings structure to populate.
- * @param[in,out] log A pointer to a log structure to use.
  * @param[in] filename  String containing name of settings file to read.
- * @param[in,out] status Status return code.
  */
 OSKAR_APPS_EXPORT
-void oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
+void oskar_settings_load_element_fit(oskar_SettingsElementFit* settings,
         const char* filename, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SETTINGS_LOAD_H_ */
+#endif /* OSKAR_SETTINGS_LOAD_ELEMENT_FIT_H_ */

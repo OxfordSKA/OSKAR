@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ extern "C" {
  * @param settings A pointer to the settings structure.
  */
 OSKAR_EXPORT
-int oskar_settings_init(oskar_Settings* settings);
+void oskar_settings_init(oskar_Settings* settings);
 
 #ifdef __cplusplus
 }

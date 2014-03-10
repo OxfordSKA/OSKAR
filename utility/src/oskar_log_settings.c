@@ -45,7 +45,6 @@
 extern "C" {
 #endif
 
-
 /* Column width for key prefixes. */
 static const int w = 45;
 
@@ -58,8 +57,7 @@ static const int w = 45;
 #define LVI(prefix, value) LV(prefix, "%d", value)
 #define LVS(prefix, value) LV(prefix, "%s", value)
 
-#define LVS0(key, value) \
-    oskar_log_value(log, depth, 0, key, "%s", value)
+#define LVS0(key, value) oskar_log_value(log, depth, 0, key, "%s", value)
 
 void oskar_log_settings_simulator(oskar_Log* log, const oskar_Settings* s)
 {
@@ -422,38 +420,6 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
             oskar_log_message(log, depth, "Element pattern settings");
             ++depth;
             LVB("Enable numerical patterns", ep->enable_numerical_patterns);
-            if (ep->enable_numerical_patterns)
-            {
-                const oskar_SettingsElementFit* ef = &ep->fit;
-
-                oskar_log_message(log, depth, "Element pattern fitting "
-                        "parameters");
-                ++depth;
-                LVB("Ignore data at poles", ef->ignore_data_at_pole);
-                LVB("Ignore data below horizon", ef->ignore_data_below_horizon);
-                LV("Overlap angle [deg]", "%.1f", ef->overlap_angle_rad * R2D);
-                LV("Weighting at boundaries", "%.1f", ef->weight_boundaries);
-                LV("Weighting in overlap region", "%.1f", ef->weight_overlap);
-                oskar_log_message(log, depth, "Common settings (for all surfaces)");
-                ++depth;
-                LV("Epsilon (single precision)", "%.3e", ef->all.eps_float);
-                LV("Epsilon (double precision)", "%.3e", ef->all.eps_double);
-                LVB("Search for best fit", ef->all.search_for_best_fit);
-                if (ef->all.search_for_best_fit)
-                {
-                    LV("Average fractional error", "%.4f",
-                            ef->all.average_fractional_error);
-                    LV("Average fractional error factor increase", "%.1f",
-                            ef->all.average_fractional_error_factor_increase);
-                }
-                else
-                {
-                    LV("Smoothness factor override", "%.4e",
-                            ef->all.smoothness_factor_override);
-                }
-                --depth;
-                --depth;
-            } /* [Enable numerical patterns] */
 
             switch (ep->functional_type)
             {
@@ -759,7 +725,6 @@ void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s)
             break;
     };
 
-
     /* Transform type. */
     switch (s->image.transform_type)
     {
@@ -801,6 +766,36 @@ void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s)
     }
 }
 
+void oskar_log_settings_element_fit(oskar_Log* log, const oskar_Settings* s)
+{
+    int depth = 0;
+    const oskar_SettingsElementFit* ef = &s->element_fit;
+
+    oskar_log_message(log, depth, "Element pattern fitting parameters");
+    ++depth;
+    LVB("Ignore data at poles", ef->ignore_data_at_pole);
+    LVB("Ignore data below horizon", ef->ignore_data_below_horizon);
+    LV("Overlap angle [deg]", "%.1f", ef->overlap_angle_rad * R2D);
+    LV("Weighting at boundaries", "%.1f", ef->weight_boundaries);
+    LV("Weighting in overlap region", "%.1f", ef->weight_overlap);
+    oskar_log_message(log, depth, "Common settings (for all surfaces)");
+    ++depth;
+    LV("Epsilon (single precision)", "%.3e", ef->all.eps_float);
+    LV("Epsilon (double precision)", "%.3e", ef->all.eps_double);
+    LVB("Search for best fit", ef->all.search_for_best_fit);
+    if (ef->all.search_for_best_fit)
+    {
+        LV("Average fractional error", "%.4f",
+                ef->all.average_fractional_error);
+        LV("Average fractional error factor increase", "%.1f",
+                ef->all.average_fractional_error_factor_increase);
+    }
+    else
+    {
+        LV("Smoothness factor override", "%.4e",
+                ef->all.smoothness_factor_override);
+    }
+}
 
 #ifdef __cplusplus
 }

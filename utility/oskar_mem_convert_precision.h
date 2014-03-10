@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,16 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_LOAD_H_
-#define OSKAR_SETTINGS_LOAD_H_
+#ifndef OSKAR_MEM_CONVERT_PRECISION_H_
+#define OSKAR_MEM_CONVERT_PRECISION_H_
 
 /**
- * @file oskar_settings_load.h
+ * @file oskar_mem_convert_precision.h
  */
 
 #include <oskar_global.h>
-#include <oskar_log.h>
-#include <oskar_Settings.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,23 +41,28 @@ extern "C" {
 
 /**
  * @brief
- * Populates all settings from the given settings file.
+ * Converts data from double precision to single precision (or vice versa).
  *
  * @details
- * This top-level function populates a settings structure from the given
- * settings file.
+ * This function converts data from a double precision to single precision
+ * representation (or vice versa, but there will be an obvious loss of
+ * significance in this case).
  *
- * @param[out] settings A pointer to a settings structure to populate.
- * @param[in,out] log A pointer to a log structure to use.
- * @param[in] filename  String containing name of settings file to read.
- * @param[in,out] status Status return code.
+ * A handle to the converted data is returned. Note that this new memory block
+ * must be released using oskar_mem_free() when no longer required.
+ *
+ * @param[in] input            Pointer to source data structure.
+ * @param[in] output_precision Required precision of output data.
+ * @param[in,out]  status      Status return code.
+ *
+ * @return A handle to the converted data.
  */
-OSKAR_APPS_EXPORT
-void oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
-        const char* filename, int* status);
+OSKAR_EXPORT
+oskar_Mem* oskar_mem_convert_precision(const oskar_Mem* input,
+        int output_precision, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SETTINGS_LOAD_H_ */
+#endif /* OSKAR_MEM_CONVERT_PRECISION_H_ */

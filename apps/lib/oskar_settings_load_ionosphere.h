@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,16 +34,16 @@
  * @file oskar_settings_load_ionosphere.h
  */
 
-#include "oskar_global.h"
-#include "sky/oskar_SettingsIonosphere.h"
+#include <oskar_global.h>
+#include <oskar_SettingsIonosphere.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 OSKAR_APPS_EXPORT
-int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
-        const char* filename);
+void oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
+        const char* filename, int* status);
 
 #ifdef __cplusplus
 }

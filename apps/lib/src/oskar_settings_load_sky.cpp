@@ -49,12 +49,17 @@ static void get_filter_params(QSettings& s, oskar_SettingsSkyFilter* flt);
 static int get_seed(const QVariant& t);
 
 extern "C"
-int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
+void oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename,
+        int* status)
 {
     QByteArray t;
     QStringList list;
     QString temp;
     QSettings s(QString(filename), QSettings::IniFormat);
+
+    // Check if safe to proceed.
+    if (*status) return;
+
     s.beginGroup("sky");
 
     // Output OSKAR sky model text file.
@@ -230,8 +235,6 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     s.endGroup();
 
     sky->zero_failed_gaussians = s.value("advanced/zero_failed_gaussians", false).toBool();
-
-    return OSKAR_SUCCESS;
 }
 
 static void get_extended_params(QSettings& s,

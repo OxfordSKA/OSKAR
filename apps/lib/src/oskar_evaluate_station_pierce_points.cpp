@@ -57,7 +57,7 @@ extern "C" {
 
 int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* log)
 {
-    int status = OSKAR_SUCCESS;
+    int status = 0;
 
     // Enum values used in writing time-freq data binary files
     enum {
@@ -76,7 +76,7 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
     };
 
     oskar_Settings settings;
-    status = oskar_settings_load(&settings, log, settings_file);
+    oskar_settings_load(&settings, log, settings_file, &status);
     oskar_log_set_keep_file(log, settings.sim.keep_log_file);
     if (status) return status;
 

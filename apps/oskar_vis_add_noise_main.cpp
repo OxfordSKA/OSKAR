@@ -51,7 +51,7 @@ void check_error(int status);
 
 int main(int argc, char** argv)
 {
-    int status = OSKAR_SUCCESS;
+    int status = 0;
 
     // Register options. ======================================================
     oskar_OptionParser opt("oskar_vis_add_noise", oskar_version_string());
@@ -95,7 +95,7 @@ int main(int argc, char** argv)
 
     // Add uncorrelated noise. ================================================
     oskar_Settings settings;
-    status = oskar_settings_load(&settings, 0, settings_file.c_str());
+    oskar_settings_load(&settings, 0, settings_file.c_str(), &status);
     if (!settings.interferometer.noise.enable)
     {
         cout << "Warning: Noise addition disabled in the settings." << endl;

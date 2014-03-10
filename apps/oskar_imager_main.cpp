@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 
 int main(int argc, char** argv)
 {
-    int error = OSKAR_SUCCESS;
+    int error = 0;
 
     oskar_OptionParser opt("oskar_imager", oskar_version_string());
     opt.addRequired("settings file");
@@ -48,15 +48,8 @@ int main(int argc, char** argv)
     oskar_Log* log = oskar_log_create();
     oskar_log_message(log, 0, "Running binary %s", argv[0]);
 
-    try
-    {
-        // Run the imager.
-        error = oskar_imager(argv[1], log);
-    }
-    catch (int code)
-    {
-        error = code;
-    }
+    // Run the imager.
+    error = oskar_imager(argv[1], log);
 
     // Check for errors.
     if (error)

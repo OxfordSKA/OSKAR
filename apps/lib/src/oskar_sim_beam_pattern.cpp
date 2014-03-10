@@ -113,7 +113,7 @@ static void load_settings(oskar_Settings* settings, const char* filename,
     if (*status) return;
 
     oskar_log_section(log, "Loading settings file '%s'", filename);
-    *status = oskar_settings_load(settings, log, filename);
+    oskar_settings_load(settings, log, filename, status);
     if (*status)
     {
         oskar_log_error(log, "Unable to load settings file.");

@@ -191,7 +191,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             oskar_element_evaluate(oskar_station_element_const(station, 0),
                     element, oskar_station_element_orientation_x_rad(station),
                     oskar_station_element_orientation_y_rad(station),
-                    num_points, x, y, z, work->theta_modified,
+                    num_points, x, y, z, frequency_hz, work->theta_modified,
                     work->phi_modified, status);
 
             /* Element-wise multiply to join array and element pattern. */

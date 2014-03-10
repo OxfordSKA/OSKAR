@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  * @file oskar_settings_load_beam_pattern.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_SettingsBeamPattern.h"
+#include <oskar_global.h>
+#include <oskar_SettingsBeamPattern.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,8 +52,8 @@ extern "C" {
  * @param[in] filename  String containing name of settings file to read.
  */
 OSKAR_APPS_EXPORT
-int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* settings,
-        const char* filename);
+void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* settings,
+        const char* filename, int* status);
 
 #ifdef __cplusplus
 }

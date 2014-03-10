@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -144,6 +144,18 @@ void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s);
 OSKAR_EXPORT
 void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s);
 
+/**
+ * @brief
+ * Writes element fitting parameters to a log.
+ *
+ * @details
+ * This function writes element fitting parameters to a log.
+ *
+ * @param[out,in] log  Pointer to a log structure.
+ * @param[in] s        Pointer to a populated settings structure.
+ */
+OSKAR_EXPORT
+void oskar_log_settings_element_fit(oskar_Log* log, const oskar_Settings* s);
 
 #ifdef __cplusplus
 }

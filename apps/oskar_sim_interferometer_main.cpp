@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 
 int main(int argc, char** argv)
 {
-    int error = OSKAR_SUCCESS;
+    int error = 0;
 
     oskar_OptionParser opt("oskar_sim_interferometer", oskar_version_string());
     opt.addRequired("settings file");
@@ -49,15 +49,8 @@ int main(int argc, char** argv)
     oskar_Log* log = oskar_log_create();
     oskar_log_message(log, 0, "Running binary %s", argv[0]);
 
-    try
-    {
-        // Run simulation.
-        error = oskar_sim_interferometer(opt.getArg(0), log);
-    }
-    catch (int code)
-    {
-        error = code;
-    }
+    // Run simulation.
+    error = oskar_sim_interferometer(opt.getArg(0), log);
 
     // Check for errors.
     if (error)
