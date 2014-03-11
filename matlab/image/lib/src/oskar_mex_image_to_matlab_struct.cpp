@@ -134,16 +134,17 @@ mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im,
             "num_pols",
             "num_times",
             "num_channels",
-            "centre_ra_deg",
-            "centre_dec_deg",
-            "fov_ra_deg",
-            "fov_dec_deg",
+            "centre_lon_deg",
+            "centre_lat_deg",
+            "fov_lon_deg",
+            "fov_lat_deg",
             "time_start_mjd_utc",
             "time_inc_sec",
             "freq_start_hz",
             "freq_inc_hz"
     };
-    mxArray* im_out = mxCreateStructMatrix(1, 1, 18, fields);
+    mxArray* im_out = mxCreateStructMatrix(1, 1, sizeof(fields) / sizeof(char*),
+            fields);
 
     /* Populate structure */
     if (filename != NULL)
@@ -158,7 +159,7 @@ mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im,
             mxCreateString(oskar_mem_char_const(
                     oskar_image_settings_path_const(im))));
     mxSetField(im_out, 0, "data", data_);
-    mxArray* dim_order_str_ = mxCreateString("ra(width) x dec(height) x pol x time x channel");
+    mxArray* dim_order_str_ = mxCreateString("width, height, pol, time, channel");
     if (!dim_order_str_) mexErrMsgTxt("failed to create dim order string");
     mxSetField(im_out, 0, "dimension_order", dim_order_str_);
     mxSetField(im_out, 0, "image_type", image_type_);
