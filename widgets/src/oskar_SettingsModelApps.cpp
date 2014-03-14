@@ -97,7 +97,7 @@ void oskar_SettingsModelApps::init_settings_simulator()
             "stored in any OSKAR binary data files produced by the "
             "simulator.");
     k = group + "/max_sources_per_chunk";
-    declare(k, "Max. number of sources per chunk", oskar_SettingsItem::INT_POSITIVE, 10000);
+    declare(k, "Max. number of sources per chunk", oskar_SettingsItem::INT_POSITIVE, 16384);
     setTooltip(k, "Maximum number of sources processed concurrently on a "
             "single GPU.");
     k = group + "/cuda_device_ids";
