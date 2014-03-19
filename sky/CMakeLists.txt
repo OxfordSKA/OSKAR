@@ -20,6 +20,7 @@ set(sky_SRC
     src/oskar_sky_append_to_set.c
     src/oskar_sky_append.c
     src/oskar_sky_combine_set.c
+    src/oskar_sky_copy_source_data.c
     src/oskar_sky_create.c
     src/oskar_sky_create_alias.c
     src/oskar_sky_create_copy.c
@@ -28,6 +29,7 @@ set(sky_SRC
     src/oskar_sky_filter_by_flux.c
     src/oskar_sky_filter_by_radius.c
     src/oskar_sky_free.c
+    src/oskar_sky_horizon_clip.c
     src/oskar_sky_insert.c
     src/oskar_sky_load.c
     src/oskar_sky_load_gsm.c
@@ -49,8 +51,8 @@ if (CUDA_FOUND)
         src/oskar_scale_flux_with_frequency_cuda.cu
         src/oskar_evaluate_jones_R_cuda.cu
         #src/oskar_rebin_sky_cuda.cu # Doesn't work on compute 1.3 architectures.
+        src/oskar_sky_copy_source_data_cuda.cu
         src/oskar_sky_filter_by_flux_cuda.cu
-        src/oskar_sky_horizon_clip.cu # TODO Needs a CPU version!
         src/oskar_update_horizon_mask_cuda.cu
     )
 endif()

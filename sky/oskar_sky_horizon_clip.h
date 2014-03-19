@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,16 +50,16 @@ extern "C" {
  * Copies sources into another sky model that are above the horizon of
  * stations.
  *
- * @param[out] output    The output sky model.
- * @param[in]  input     The input sky model.
- * @param[in]  telescope The telescope model.
- * @param[in]  work      Work arrays.
+ * @param[out] out          The output sky model.
+ * @param[in]  in           The input sky model.
+ * @param[in]  telescope    The telescope model.
+ * @param[in]  work         Work arrays.
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_sky_horizon_clip(oskar_Sky* output,
-        const oskar_Sky* input, const oskar_Telescope* telescope,
-        double gast, oskar_StationWork* work, int* status);
+void oskar_sky_horizon_clip(oskar_Sky* out, const oskar_Sky* in,
+        const oskar_Telescope* telescope, double gast,
+        oskar_StationWork* work, int* status);
 
 #ifdef __cplusplus
 }

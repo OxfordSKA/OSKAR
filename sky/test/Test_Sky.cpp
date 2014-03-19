@@ -32,7 +32,6 @@
 #include <oskar_sky.h>
 #include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
 #include <oskar_get_error_string.h>
-#include <oskar_mem.h>
 #include <oskar_timer.h>
 
 #include <cstdlib>
@@ -436,11 +435,8 @@ TEST(SkyModel, filter_by_flux)
 
 TEST(SkyModel, horizon_clip)
 {
-    // Create sky models.
     int status = 0;
     int type = OSKAR_SINGLE;
-    oskar_Sky* sky_cpu = oskar_sky_create(type, OSKAR_LOCATION_CPU, 0, &status);
-    oskar_Sky* sky_out = oskar_sky_create(type, OSKAR_LOCATION_GPU, 0, &status);
 
     // Constants.
     const double deg2rad = M_PI / 180.0;
@@ -453,17 +449,18 @@ TEST(SkyModel, horizon_clip)
     double lon_start = 0.0;
     double lat_end = 90.0;
     double lon_end = 330.0;
-    oskar_sky_resize(sky_cpu, n_sources, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Generate grid.
+    oskar_Sky* sky_in_cpu = oskar_sky_create(type, OSKAR_LOCATION_CPU,
+            n_sources, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0, k = 0; i < n_lat; ++i)
     {
         for (int j = 0; j < n_lon; ++j, ++k)
         {
             double ra = lon_start + j * (lon_end - lon_start) / (n_lon - 1);
             double dec = lat_start + i * (lat_end - lat_start) / (n_lat - 1);
-            oskar_sky_set_source(sky_cpu, k, ra * deg2rad, dec * deg2rad,
+            oskar_sky_set_source(sky_in_cpu, k, ra * deg2rad, dec * deg2rad,
                     double(k), double(2*k), double(3*k), double(4*k),
                     double(5*k), double(6*k), double(7*k), 0.0, 0.0, 0.0,
                     &status);
@@ -471,37 +468,34 @@ TEST(SkyModel, horizon_clip)
         }
     }
 
-    // Create a telescope model near the pole.
+    // Evaluate relative direction cosines.
+    oskar_sky_evaluate_relative_direction_cosines(sky_in_cpu, 0.0, M_PI/2, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+
+    // Create a telescope model near the north pole.
     int n_stations = 25;
-    oskar_Telescope* telescope =
-            oskar_telescope_create(type, OSKAR_LOCATION_GPU, 0, &status);
+    oskar_Telescope* telescope = oskar_telescope_create(type,
+            OSKAR_LOCATION_CPU, 0, &status);
     oskar_telescope_resize(telescope, n_stations, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     for (int i = 0; i < n_stations; ++i)
     {
-        oskar_Station* s = oskar_telescope_station(telescope, i);
-        oskar_station_set_position(s, 0.0, (90.0 - i * 0.01) * deg2rad, 0.0);
+        oskar_station_set_position(oskar_telescope_station(telescope, i),
+                0.0, (90.0 - i * 0.01) * deg2rad, 0.0);
     }
 
-    // Create a work buffer.
-    oskar_StationWork* work = oskar_station_work_create(type,
-            OSKAR_LOCATION_GPU, &status);
-
-    // Evaluate relative direction cosines.
-    oskar_sky_evaluate_relative_direction_cosines(sky_cpu, 0.0, M_PI/2, &status);
-
-    // Try horizon clip: should currently fail because it's in host memory.
-    oskar_sky_horizon_clip(sky_out, sky_cpu, telescope, 0.0, work, &status);
-    ASSERT_EQ((int)OSKAR_ERR_BAD_LOCATION, status);
-    status = 0;
-
+    // Horizon clip on GPU.
+    int loc = OSKAR_LOCATION_GPU;
     {
-        // Copy input sky data to GPU.
-        oskar_Sky* sky_gpu = oskar_sky_create_copy(sky_cpu,
-                OSKAR_LOCATION_GPU, &status);
+        // Create a work buffer and output sky model.
+        oskar_StationWork* work = oskar_station_work_create(type, loc, &status);
+        oskar_Sky* sky_out = oskar_sky_create(type, loc, 0, &status);
 
-        // Horizon clip should now succeed.
-        oskar_sky_horizon_clip(sky_out, sky_gpu, telescope, 0.0, work,
+        // Copy input sky model to GPU.
+        oskar_Sky* sky_in_gpu = oskar_sky_create_copy(sky_in_cpu, loc, &status);
+
+        // Horizon clip should succeed.
+        oskar_sky_horizon_clip(sky_out, sky_in_gpu, telescope, 0.0, work,
                 &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         ASSERT_EQ(n_sources / 2, oskar_sky_num_sources(sky_out));
@@ -519,12 +513,39 @@ TEST(SkyModel, horizon_clip)
         }
 
         oskar_sky_free(sky_temp, &status);
-        oskar_sky_free(sky_gpu, &status);
+        oskar_sky_free(sky_in_gpu, &status);
+        oskar_sky_free(sky_out, &status);
+        oskar_station_work_free(work, &status);
     }
-    oskar_sky_free(sky_out, &status);
-    oskar_sky_free(sky_cpu, &status);
+
+    // Horizon clip on CPU.
+    loc = OSKAR_LOCATION_CPU;
+    {
+        // Create a work buffer and output sky model.
+        oskar_StationWork* work = oskar_station_work_create(type, loc, &status);
+        oskar_Sky* sky_out = oskar_sky_create(type, loc, 0, &status);
+
+        // Horizon clip should succeed.
+        oskar_sky_horizon_clip(sky_out, sky_in_cpu, telescope, 0.0, work,
+                &status);
+        ASSERT_EQ(0, status) << oskar_get_error_string(status);
+
+        // Check sky data.
+        ASSERT_EQ(n_sources / 2, oskar_sky_num_sources(sky_out));
+        const float* dec = oskar_mem_float_const(oskar_sky_dec_const(sky_out),
+                &status);
+        ASSERT_EQ(0, status) << oskar_get_error_string(status);
+        for (int i = 0, n = oskar_sky_num_sources(sky_out); i < n; ++i)
+        {
+            ASSERT_GT(dec[i], 0.0f);
+        }
+
+        oskar_sky_free(sky_out, &status);
+        oskar_station_work_free(work, &status);
+    }
+
+    oskar_sky_free(sky_in_cpu, &status);
     oskar_telescope_free(telescope, &status);
-    oskar_station_work_free(work, &status);
 }
 
 
