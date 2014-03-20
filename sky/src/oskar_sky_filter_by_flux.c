@@ -27,8 +27,8 @@
  */
 
 #include <oskar_sky.h>
-#include <oskar_mem.h>
 #include <oskar_sky_filter_by_flux_cuda.h>
+#include <oskar_cuda_check_error.h>
 
 #include <float.h>
 
@@ -39,7 +39,7 @@ extern "C" {
 void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
         int* status)
 {
-    int location;
+    int location, type, num_sources, in = 0, out = 0;
 
     /* Check all inputs. */
     if (!sky || !status)
@@ -69,48 +69,105 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
         return;
     }
 
-    /* Get the location. */
+    /* Get the meta-data. */
     location = oskar_sky_location(sky);
-    if (location == OSKAR_LOCATION_GPU)
+    type = oskar_sky_precision(sky);
+    num_sources = oskar_sky_num_sources(sky);
+
+
+    if (type == OSKAR_SINGLE)
     {
+        float *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *spix_, *rm_;
+        float *l_, *m_, *n_, *maj_, *min_, *pa_, *a_, *b_, *c_;
+        ra_   = oskar_mem_float(oskar_sky_ra(sky), status);
+        dec_  = oskar_mem_float(oskar_sky_dec(sky), status);
+        I_    = oskar_mem_float(oskar_sky_I(sky), status);
+        Q_    = oskar_mem_float(oskar_sky_Q(sky), status);
+        U_    = oskar_mem_float(oskar_sky_U(sky), status);
+        V_    = oskar_mem_float(oskar_sky_V(sky), status);
+        ref_  = oskar_mem_float(oskar_sky_reference_freq(sky), status);
+        spix_ = oskar_mem_float(oskar_sky_spectral_index(sky), status);
+        rm_   = oskar_mem_float(oskar_sky_rotation_measure(sky), status);
+        l_    = oskar_mem_float(oskar_sky_l(sky), status);
+        m_    = oskar_mem_float(oskar_sky_m(sky), status);
+        n_    = oskar_mem_float(oskar_sky_n(sky), status);
+        maj_  = oskar_mem_float(oskar_sky_fwhm_major(sky), status);
+        min_  = oskar_mem_float(oskar_sky_fwhm_minor(sky), status);
+        pa_   = oskar_mem_float(oskar_sky_position_angle(sky), status);
+        a_    = oskar_mem_float(oskar_sky_gaussian_a(sky), status);
+        b_    = oskar_mem_float(oskar_sky_gaussian_b(sky), status);
+        c_    = oskar_mem_float(oskar_sky_gaussian_c(sky), status);
+
+        if (location == OSKAR_LOCATION_CPU)
+        {
+            for (in = 0; in < num_sources; ++in)
+            {
+                if (!(I_[in] > (float)min_I && I_[in] <= (float)max_I))
+                    continue;
+
+                ra_[out]   = ra_[in];
+                dec_[out]  = dec_[in];
+                I_[out]    = I_[in];
+                Q_[out]    = Q_[in];
+                U_[out]    = U_[in];
+                V_[out]    = V_[in];
+                ref_[out]  = ref_[in];
+                spix_[out] = spix_[in];
+                rm_[out]   = rm_[in];
+                l_[out]    = l_[in];
+                m_[out]    = m_[in];
+                n_[out]    = n_[in];
+                maj_[out]  = maj_[in];
+                min_[out]  = min_[in];
+                pa_[out]   = pa_[in];
+                a_[out]    = a_[in];
+                b_[out]    = b_[in];
+                c_[out]    = c_[in];
+                out++;
+            }
+        }
+        else if (location == OSKAR_LOCATION_GPU)
+        {
 #ifdef OSKAR_HAVE_CUDA
-        oskar_sky_filter_by_flux_cuda(sky, min_I, max_I, status);
+            oskar_sky_filter_by_flux_cuda_f(num_sources, &out, min_I, max_I,
+                    ra_, dec_, I_, Q_, U_, V_, ref_, spix_, rm_, l_, m_, n_,
+                    a_, b_, c_, maj_, min_, pa_);
+            oskar_cuda_check_error(status);
 #else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
+        }
     }
-    else if (location == OSKAR_LOCATION_CPU)
+    else if (type == OSKAR_DOUBLE)
     {
-        int in, out, type, num_sources;
-        type = oskar_sky_precision(sky);
-        num_sources = oskar_sky_num_sources(sky);
+        double *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *spix_, *rm_;
+        double *l_, *m_, *n_, *maj_, *min_, *pa_, *a_, *b_, *c_;
+        ra_   = oskar_mem_double(oskar_sky_ra(sky), status);
+        dec_  = oskar_mem_double(oskar_sky_dec(sky), status);
+        I_    = oskar_mem_double(oskar_sky_I(sky), status);
+        Q_    = oskar_mem_double(oskar_sky_Q(sky), status);
+        U_    = oskar_mem_double(oskar_sky_U(sky), status);
+        V_    = oskar_mem_double(oskar_sky_V(sky), status);
+        ref_  = oskar_mem_double(oskar_sky_reference_freq(sky), status);
+        spix_ = oskar_mem_double(oskar_sky_spectral_index(sky), status);
+        rm_   = oskar_mem_double(oskar_sky_rotation_measure(sky), status);
+        l_    = oskar_mem_double(oskar_sky_l(sky), status);
+        m_    = oskar_mem_double(oskar_sky_m(sky), status);
+        n_    = oskar_mem_double(oskar_sky_n(sky), status);
+        maj_  = oskar_mem_double(oskar_sky_fwhm_major(sky), status);
+        min_  = oskar_mem_double(oskar_sky_fwhm_minor(sky), status);
+        pa_   = oskar_mem_double(oskar_sky_position_angle(sky), status);
+        a_    = oskar_mem_double(oskar_sky_gaussian_a(sky), status);
+        b_    = oskar_mem_double(oskar_sky_gaussian_b(sky), status);
+        c_    = oskar_mem_double(oskar_sky_gaussian_c(sky), status);
 
-        if (type == OSKAR_SINGLE)
+        if (location == OSKAR_LOCATION_CPU)
         {
-            float *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *spix_, *rm_;
-            float *l_, *m_, *n_, *maj_, *min_, *pa_, *a_, *b_, *c_;
-            ra_   = oskar_mem_float(oskar_sky_ra(sky), status);
-            dec_  = oskar_mem_float(oskar_sky_dec(sky), status);
-            I_    = oskar_mem_float(oskar_sky_I(sky), status);
-            Q_    = oskar_mem_float(oskar_sky_Q(sky), status);
-            U_    = oskar_mem_float(oskar_sky_U(sky), status);
-            V_    = oskar_mem_float(oskar_sky_V(sky), status);
-            ref_  = oskar_mem_float(oskar_sky_reference_freq(sky), status);
-            spix_ = oskar_mem_float(oskar_sky_spectral_index(sky), status);
-            rm_   = oskar_mem_float(oskar_sky_rotation_measure(sky), status);
-            l_    = oskar_mem_float(oskar_sky_l(sky), status);
-            m_    = oskar_mem_float(oskar_sky_m(sky), status);
-            n_    = oskar_mem_float(oskar_sky_n(sky), status);
-            maj_  = oskar_mem_float(oskar_sky_fwhm_major(sky), status);
-            min_  = oskar_mem_float(oskar_sky_fwhm_minor(sky), status);
-            pa_   = oskar_mem_float(oskar_sky_position_angle(sky), status);
-            a_    = oskar_mem_float(oskar_sky_gaussian_a(sky), status);
-            b_    = oskar_mem_float(oskar_sky_gaussian_b(sky), status);
-            c_    = oskar_mem_float(oskar_sky_gaussian_c(sky), status);
-
-            for (in = 0, out = 0; in < num_sources; ++in)
+            for (in = 0; in < num_sources; ++in)
             {
-                if (!(I_[in] > (float)min_I && I_[in] <= (float)max_I)) continue;
+                if (!(I_[in] > min_I && I_[in] <= max_I))
+                    continue;
+
                 ra_[out]   = ra_[in];
                 dec_[out]  = dec_[in];
                 I_[out]    = I_[in];
@@ -132,63 +189,26 @@ void oskar_sky_filter_by_flux(oskar_Sky* sky, double min_I, double max_I,
                 out++;
             }
         }
-        else if (type == OSKAR_DOUBLE)
+        else if (location == OSKAR_LOCATION_GPU)
         {
-            double *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *spix_, *rm_;
-            double *l_, *m_, *n_, *maj_, *min_, *pa_, *a_, *b_, *c_;
-            ra_   = oskar_mem_double(oskar_sky_ra(sky), status);
-            dec_  = oskar_mem_double(oskar_sky_dec(sky), status);
-            I_    = oskar_mem_double(oskar_sky_I(sky), status);
-            Q_    = oskar_mem_double(oskar_sky_Q(sky), status);
-            U_    = oskar_mem_double(oskar_sky_U(sky), status);
-            V_    = oskar_mem_double(oskar_sky_V(sky), status);
-            ref_  = oskar_mem_double(oskar_sky_reference_freq(sky), status);
-            spix_ = oskar_mem_double(oskar_sky_spectral_index(sky), status);
-            rm_   = oskar_mem_double(oskar_sky_rotation_measure(sky), status);
-            l_    = oskar_mem_double(oskar_sky_l(sky), status);
-            m_    = oskar_mem_double(oskar_sky_m(sky), status);
-            n_    = oskar_mem_double(oskar_sky_n(sky), status);
-            maj_  = oskar_mem_double(oskar_sky_fwhm_major(sky), status);
-            min_  = oskar_mem_double(oskar_sky_fwhm_minor(sky), status);
-            pa_   = oskar_mem_double(oskar_sky_position_angle(sky), status);
-            a_    = oskar_mem_double(oskar_sky_gaussian_a(sky), status);
-            b_    = oskar_mem_double(oskar_sky_gaussian_b(sky), status);
-            c_    = oskar_mem_double(oskar_sky_gaussian_c(sky), status);
-
-            for (out = 0, in = 0; in < num_sources; ++in)
-            {
-                if (!(I_[in] > min_I && I_[in] <= max_I)) continue;
-                
-                ra_[out]   = ra_[in];
-                dec_[out]  = dec_[in];
-                I_[out]    = I_[in];
-                Q_[out]    = Q_[in];
-                U_[out]    = U_[in];
-                V_[out]    = V_[in];
-                ref_[out]  = ref_[in];
-                spix_[out] = spix_[in];
-                rm_[out]   = rm_[in];
-                l_[out]    = l_[in];
-                m_[out]    = m_[in];
-                n_[out]    = n_[in];
-                maj_[out]  = maj_[in];
-                min_[out]  = min_[in];
-                pa_[out]   = pa_[in];
-                a_[out]    = a_[in];
-                b_[out]    = b_[in];
-                c_[out]    = c_[in];
-                out++;
-            }
+#ifdef OSKAR_HAVE_CUDA
+            oskar_sky_filter_by_flux_cuda_d(num_sources, &out, min_I, max_I,
+                    ra_, dec_, I_, Q_, U_, V_, ref_, spix_, rm_, l_, m_, n_,
+                    a_, b_, c_, maj_, min_, pa_);
+            oskar_cuda_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
         }
-        else
-        {
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-            return;
-        }
-
-        /* Set the new size of the sky model. */
-        oskar_sky_resize(sky, out, status);
     }
+    else
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
+
+    /* Set the new size of the sky model. */
+    oskar_sky_resize(sky, out, status);
 }
 
 #ifdef __cplusplus

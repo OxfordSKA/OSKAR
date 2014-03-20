@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,20 +41,79 @@ extern "C" {
 
 /**
  * @brief
- * Removes sources outside a given flux range using CUDA.
+ * Removes sources outside a given flux range using CUDA (single precision).
  *
  * @details
- * This function removes sources from a sky model that lie outside a given
+ * This function removes sources from all arrays that lie outside a given
  * flux range specified by \p min_I and \p max_I
  *
- * @param[out] sky Pointer to sky model.
- * @param[in] min_I Minimum Stokes I flux.
- * @param[in] max_I Maximum Stokes I flux.
- * @param[in,out] status Status return code.
+ * @param[in] num        Number of input sources.
+ * @param[out] num_out   Number of sources retained.
+ * @param[in] min_I      Minimum Stokes I flux.
+ * @param[in] max_I      Maximum Stokes I flux.
+ * @param[in,out] ra     Right ascension coordinates.
+ * @param[in,out] dec    Declination coordinates.
+ * @param[in,out] I      Stokes I values.
+ * @param[in,out] Q      Stokes Q values.
+ * @param[in,out] U      Stokes U values.
+ * @param[in,out] V      Stokes V values.
+ * @param[in,out] ref    Reference frequency values.
+ * @param[in,out] sp     Spectral index values.
+ * @param[in,out] rm     Rotation measure values.
+ * @param[in,out] l      l-direction-cosine values.
+ * @param[in,out] m      m-direction-cosine values.
+ * @param[in,out] n      n-direction-cosine values.
+ * @param[in,out] a      Gaussian parameter a values.
+ * @param[in,out] b      Gaussian parameter b values.
+ * @param[in,out] c      Gaussian parameter c values.
+ * @param[in,out] maj    Gaussian major axis values.
+ * @param[in,out] min    Gaussian minor axis values.
+ * @param[in,out] pa     Gaussian position angle values.
  */
 OSKAR_EXPORT
-void oskar_sky_filter_by_flux_cuda(oskar_Sky* sky,
-        double min_I, double max_I, int* status);
+void oskar_sky_filter_by_flux_cuda_f(int num, int* num_out, float min_I,
+        float max_I, float* ra, float* dec, float* I, float* Q, float* U,
+        float* V, float* ref, float* sp, float* rm, float* l, float* m,
+        float* n, float* a, float* b, float* c, float* maj, float* min,
+        float* pa);
+
+/**
+ * @brief
+ * Removes sources outside a given flux range using CUDA (double precision).
+ *
+ * @details
+ * This function removes sources from all arrays that lie outside a given
+ * flux range specified by \p min_I and \p max_I
+ *
+ * @param[in] num        Number of input sources.
+ * @param[out] num_out   Number of sources retained.
+ * @param[in] min_I      Minimum Stokes I flux.
+ * @param[in] max_I      Maximum Stokes I flux.
+ * @param[in,out] ra     Right ascension coordinates.
+ * @param[in,out] dec    Declination coordinates.
+ * @param[in,out] I      Stokes I values.
+ * @param[in,out] Q      Stokes Q values.
+ * @param[in,out] U      Stokes U values.
+ * @param[in,out] V      Stokes V values.
+ * @param[in,out] ref    Reference frequency values.
+ * @param[in,out] sp     Spectral index values.
+ * @param[in,out] rm     Rotation measure values.
+ * @param[in,out] l      l-direction-cosine values.
+ * @param[in,out] m      m-direction-cosine values.
+ * @param[in,out] n      n-direction-cosine values.
+ * @param[in,out] a      Gaussian parameter a values.
+ * @param[in,out] b      Gaussian parameter b values.
+ * @param[in,out] c      Gaussian parameter c values.
+ * @param[in,out] maj    Gaussian major axis values.
+ * @param[in,out] min    Gaussian minor axis values.
+ * @param[in,out] pa     Gaussian position angle values.
+ */
+OSKAR_EXPORT
+void oskar_sky_filter_by_flux_cuda_d(int num, int* num_out, double min_I,
+        double max_I, double* ra, double* dec, double* I, double* Q, double* U,
+        double* V, double* ref, double* sp, double* rm, double* l, double* m,
+        double* n, double* a, double* b, double* c, double* maj, double* min,
+        double* pa);
 
 #ifdef __cplusplus
 }
