@@ -8,7 +8,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 message("===============================================================================")
-message("-- INFO: Build type: ${CMAKE_BUILD_TYPE}.")
+message("-- INFO: Build type: ${CMAKE_BUILD_TYPE}")
 message("===============================================================================")
 
 set(BUILD_SHARED_LIBS ON)

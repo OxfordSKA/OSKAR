@@ -315,7 +315,7 @@ set(mex_function_def ${OSKAR_SOURCE_DIR}/matlab/mex_function.def)
 # Macro to build and install oskar mex functions.
 #
 # Usage:
-#       oskar_qt_mex(name
+#       oskar_mex(name
 #           source
 #           [EXTRA_LIBS lib1 lib2 ...])
 #
@@ -388,4 +388,50 @@ macro(OSKAR_MEX)
 
 endmacro(OSKAR_MEX)
 
+# Macro to build and install oskar python modules.
+#
+# Usage:
+#       oskar_python_module(name
+#           source
+#           [EXTRA_LIBS lib1 lib2 ...])
+#
+#       name       = name of mex function
+#       source     = source file containing mex function
+#       EXTRA_LIBS = list of additional libraries to link against.
+#
+macro(OSKAR_PY_MODULE)
 
+    parse_arguments(PY   # prefix
+        "LIBS"           # arg names
+        ""               # option names
+        ${ARGN})
+
+    CAR(PY_NAME ${PY_DEFAULT_ARGS})
+    CDR(PY_SOURCES ${PY_DEFAULT_ARGS})
+
+    # Over-ride compiler flags for python modules
+    set(CMAKE_C_FLAGS "-fpic -std=c99")
+    set(CMAKE_C_FLAGS_RELEASE "-O2")
+    set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+
+    # Get a unique build target name
+    get_filename_component(target ${PY_SOURCES} NAME_WE)
+    add_library(${target} MODULE ${PY_SOURCES})
+    target_link_libraries(${target} ${PYTHON_LIBRARIES} ${PY_LIBS})
+
+    if (APPLE)
+        set_target_properties(${target} PROPERTIES
+            OUTPUT_NAME   "${PY_NAME}"
+            PREFIX        ""
+            SUFFIX        ".so")
+    else()
+        set_target_properties(${target} PROPERTIES
+            OUTPUT_NAME   "${PY_NAME}"
+            PREFIX        ""
+            SUFFIX        ".so")
+    endif()
+
+    # Install target for python module.
+    install(TARGETS ${target} DESTINATION ${OSKAR_PYTHON_INSTALL_DIR})
+endmacro(OSKAR_PY_MODULE)

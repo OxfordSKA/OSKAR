@@ -223,7 +223,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             double2* amp_ = oskar_mem_double2(amp, &err);
             for (int i = 0; i < num_samples; ++i)
             {
-                double2 t; t.x = re_[i]; t.y = im_[i];
+                double2 t;
+                t.x = re_[i];
+                t.y = im_[i];
                 amp_[i] = t;
                 uuc[i] = uu_[i];
                 vvc[i] = vv_[i];
@@ -242,7 +244,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             float2* amp_ = oskar_mem_float2(amp, &err);
             for (int i = 0; i < num_samples; ++i)
             {
-                float2 t; t.x = re_[i]; t.y = im_[i];
+                float2 t;
+                t.x = re_[i];
+                t.y = im_[i];
                 amp_[i] = t;
                 uuc[i] = uu_[i];
                 vvc[i] = vv_[i];
@@ -251,7 +255,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
         // Make the image.
         mexPrintf("= Making image...\n");
-        mexEvalString("drawnow");
+        mexEvalString("drawnow"); // Does this do anything?
         oskar_make_image_dft(oskar_image_data(image), uu, vv, amp,
                 l, m, freq, &err);
         if (err)
@@ -259,7 +263,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             oskar_matlab_error("oskar_make_image_dft() failed with code %i: %s",
                     err, oskar_get_error_string(err));
         }
-        mexEvalString("drawnow");
+        mexEvalString("drawnow"); // Does this do anything?
         mexPrintf("= Make image complete\n");
         oskar_mem_free(uu, &err);
         oskar_mem_free(vv, &err);

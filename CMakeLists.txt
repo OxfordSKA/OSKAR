@@ -39,8 +39,12 @@ if (NOT OSKAR_BIN_INSTALL_DIR)
     set(OSKAR_BIN_INSTALL_DIR "bin")
 endif()
 if (NOT OSKAR_MATLAB_INSTALL_DIR)
-    set(OSKAR_MATLAB_INSTALL_DIR "share/matlab/toolbox/oskar")
+    set(OSKAR_MATLAB_INSTALL_DIR "share/oskar/matlab")
 endif()
+if (NOT OSKAR_PYTHON_INSTALL_DIR)
+    set(OSKAR_PYTHON_INSTALL_DIR "share/oskar/python")
+endif()
+
 
 # === Set dependencies and compiler options.
 include(cmake/oskar_dependencies.cmake)
@@ -136,6 +140,7 @@ add_subdirectory(apps)
 add_subdirectory(fits)
 add_subdirectory(matlab)
 add_subdirectory(ms)
+#add_subdirectory(python)
 add_subdirectory(widgets)
 
 # === Build external libraries (gtest)

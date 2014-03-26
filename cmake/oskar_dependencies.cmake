@@ -44,6 +44,13 @@ find_package(CasaCore QUIET) # liboskar_ms
 find_package(CFitsio QUIET)  # liboskar_fits
 find_package(Matlab QUIET)   # mex functions
 #find_package(PNG QUIET)     # For writing PNG images.
+find_package(PythonInterp QUIET) # For python interface
+find_package(PythonLibs QUIET)   # For python interface
+find_package(NumPy QUIET)        # For python interface
+
+if (PYTHONLIBS_FOUND AND NUMPY_FOUND AND PYTHONINTERP_FOUND AND PYTHON_VERSION_MAJOR EQUAL 2)
+    set(PYTHON_FOUND TRUE)
+endif()
 
 # ==== Work out which libraries to build.
 if (NOT CUDA_FOUND)
@@ -128,6 +135,13 @@ if (NOT MATLAB_FOUND)
     message("===============================================================================")
 endif()
 
+if (NOT PYTHON_FOUND)
+    message("===============================================================================")
+    message("-- WARNING: Python not found: "
+            "Unable to build the OSKAR Python interface.")
+    message("===============================================================================")
+endif()
+
 # Prints a message saying which libraries are being built.
 message("===============================================================================")
 message("-- INFO: The following OSKAR components will be built:")
@@ -161,19 +175,25 @@ if ("${component_count}" EQUAL 0)
 endif()
 if (MATLAB_FOUND AND CUDA_FOUND)
     message("-- INFO:   - OSKAR MATLAB interface functions")
-endif ()
+endif()
+if (PYTHON_FOUND AND CUDA_FOUND)
+    message("-- INFO:   - OSKAR Python interface")
+endif()
 message("===============================================================================")
 
 
 message("===============================================================================")
 message("-- INFO: 'make install' will install OSKAR to:")
-message("-- INFO:   - Libraries         ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}/")
-message("-- INFO:   - Headers           ${CMAKE_INSTALL_PREFIX}/${OSKAR_INCLUDE_INSTALL_DIR}/")
+message("-- INFO:   - Libraries         ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}")
+message("-- INFO:   - Headers           ${CMAKE_INSTALL_PREFIX}/${OSKAR_INCLUDE_INSTALL_DIR}")
 if (QT4_FOUND AND CUDA_FOUND)
-message("-- INFO:   - Applications      ${CMAKE_INSTALL_PREFIX}/${OSKAR_BIN_INSTALL_DIR}/")
+message("-- INFO:   - Applications      ${CMAKE_INSTALL_PREFIX}/${OSKAR_BIN_INSTALL_DIR}")
 endif()
 if (MATLAB_FOUND AND CUDA_FOUND)
-message("-- INFO:   - MATLAB interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_MATLAB_INSTALL_DIR}/")
+message("-- INFO:   - MATLAB interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_MATLAB_INSTALL_DIR}")
+endif()
+if (PYTHON_FOUND AND CUDA_FOUND)
+message("-- INFO:   - Python interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_PYTHON_INSTALL_DIR}")
 endif()
 #message("-- NOTE: These paths can be changed using: '-DCMAKE_INSTALL_PREFIX=<path>'")
 message("===============================================================================")
