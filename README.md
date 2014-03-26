@@ -1,6 +1,6 @@
-OSKAR version 2
-===============
+OSKAR
+=====
 
-Oxford SKA Radio Telescope Simulator
+SKA Radio Telescope Simulator
 
-This is currently a placeholder project. 
+This is currently a placeholder project.
