@@ -104,9 +104,14 @@ static PyObject* oskar_make_image(PyObject* self, PyObject* args, PyObject* keyw
     double freq = 100e6;
 
     static char* keywords[] = {"uu", "vv", "amp", "freq", "fov", "size", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OOOddi", keywords, &uu_,
+    //static char* keywords[] = {"fov", "size", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OOOd|di", keywords, &uu_,
         &vv_, &amp_, &freq, &fov_deg, &size))
         return NULL;
+
+    // FIXME Permit uu,vv,and amp to be tuple, list or np.array type
+//    printf("uu length = %i\n", PyObject_Length(uu_));
+//    printf("uu ndim = %i\n", PyArray_NDIM(uu_));
 
     // Parse inputs
     if (PyArray_NDIM(uu_) != 1 || PyArray_NDIM(vv_) != 1 || PyArray_NDIM(amp_) != 1) {
@@ -119,13 +124,20 @@ static PyObject* oskar_make_image(PyObject* self, PyObject* args, PyObject* keyw
         return NULL;
     }
 
-    // Extra C arrays from Python objects.
+    // Extract C arrays from Python objects.
     double* uu = (double*)PyArray_DATA(uu_);
     double* vv = (double*)PyArray_DATA(vv_);
     dComplex* amp = (dComplex*)PyArray_DATA(amp_);
 
+//    printf("No. vis = %i\n", num_vis);
+//    printf("freq = %.2e\n", freq);
+//    printf("fov = %.2f\n", fov_deg);
+//    printf("size = %i\n", size);
+//    printf("[0] uu = %.2f, vv = %.2f, amp = (%.2f,%.2f)\n", uu[0], vv[0], amp[0].re, amp[0].im);
+//    printf("[1] uu = %.2f, vv = %.2f, amp = (%.2f,%.2f)\n", uu[1], vv[1], amp[1].re, amp[1].im);
+
     // Create memory for image data.
-    npy_intp dims = num_vis;
+    npy_intp dims = size*size;
     PyArrayObject* image_ = (PyArrayObject*)PyArray_SimpleNew(1,&dims,NPY_DOUBLE);
     double* image = (double*)PyArray_DATA(image_);
 
@@ -140,12 +152,16 @@ static PyObject* oskar_make_image(PyObject* self, PyObject* args, PyObject* keyw
 static PyMethodDef oskar_methods[] =
 {
         {"make_image", (PyCFunction)oskar_make_image, METH_VARARGS | METH_KEYWORDS,
-        "make_image()\n\n"
+        "make_image(uu,vv,amp,freq,fov=2.0,size=128)\n\n"
         "Makes an image from visibility data.\n\n"
         "Parameters\n"
         "----------\n"
         "uu : 1-dimensional array\n"
         "vv : 1-dimensional array\n"
+        "amp : 1-dimensional array\n"
+        "freq : 1-dimensional array\n"
+        "fov : 1-dimensional array\n"
+        "size : 1-dimensional array\n"
         },
         {NULL, NULL, 0, NULL}
 };
@@ -153,8 +169,6 @@ static PyMethodDef oskar_methods[] =
 // Initialisation function (called init[filename] where filename = name of *.so)
 PyMODINIT_FUNC initoskar(void )
 {
-    //(void)Py_InitModule3("oskar", oskar_methods, "docstring...");
-
     PyObject* m = NULL;
     m = Py_InitModule3("oskar", oskar_methods, "docstring...");
     if (m == NULL)

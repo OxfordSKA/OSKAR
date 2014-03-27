@@ -140,7 +140,7 @@ add_subdirectory(apps)
 add_subdirectory(fits)
 add_subdirectory(matlab)
 add_subdirectory(ms)
-#add_subdirectory(python)
+add_subdirectory(python)
 add_subdirectory(widgets)
 
 # === Build external libraries (gtest)
