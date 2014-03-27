@@ -153,24 +153,32 @@ static PyMethodDef oskar_methods[] =
 {
         {"make_image", (PyCFunction)oskar_make_image, METH_VARARGS | METH_KEYWORDS,
         "make_image(uu,vv,amp,freq,fov=2.0,size=128)\n\n"
-        "Makes an image from visibility data.\n\n"
+        "Makes an image from visibility data. Computation is performed using a\n"
+        "DFT implemented on the GPU using CUDA.\n\n"
         "Parameters\n"
         "----------\n"
-        "uu : 1-dimensional array\n"
-        "vv : 1-dimensional array\n"
-        "amp : 1-dimensional array\n"
-        "freq : 1-dimensional array\n"
-        "fov : 1-dimensional array\n"
-        "size : 1-dimensional array\n"
+        "uu : array like, shape (n,)\n"
+        "   Input baseline uu coordinates, in metres.\n\n"
+        "vv : array like, shape (n,)\n"
+        "   Input baseline vv coordinates, in metres.\n\n"
+        "amp : array like, shape (n,), complex\n"
+        "   Input baseline amplitudes.\n\n"
+        "freq : scalar\n"
+        "   Frequency, in Hz.\n\n"
+        "fov : scalar, default=2.0\n"
+        "   Image field of view, in degrees.\n\n"
+        "size : integer, default=128\n"
+        "   Image size along one dimension, in pixels.\n\n"
         },
         {NULL, NULL, 0, NULL}
 };
 
 // Initialisation function (called init[filename] where filename = name of *.so)
+// http://docs.python.org/2/extending/extending.html
 PyMODINIT_FUNC initoskar(void )
 {
     PyObject* m = NULL;
-    m = Py_InitModule3("oskar", oskar_methods, "docstring...");
+    m = Py_InitModule3("oskar", oskar_methods, "TODO: docstring...");
     if (m == NULL)
         return;
     OskarError = PyErr_NewException("oskar.error", NULL, NULL);
