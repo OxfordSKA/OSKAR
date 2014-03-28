@@ -47,11 +47,11 @@ void oskar_splines_copy(oskar_Splines* dst, const oskar_Splines* src,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    dst->type = src->type;
-    dst->num_knots_x = src->num_knots_x;
-    dst->num_knots_y = src->num_knots_y;
-    oskar_mem_copy(dst->knots_x, src->knots_x, status);
-    oskar_mem_copy(dst->knots_y, src->knots_y, status);
+    dst->precision = src->precision;
+    dst->num_knots_x_theta = src->num_knots_x_theta;
+    dst->num_knots_y_phi = src->num_knots_y_phi;
+    oskar_mem_copy(dst->knots_x_theta, src->knots_x_theta, status);
+    oskar_mem_copy(dst->knots_y_phi, src->knots_y_phi, status);
     oskar_mem_copy(dst->coeff, src->coeff, status);
 }
 

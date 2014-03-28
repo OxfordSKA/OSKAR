@@ -31,19 +31,22 @@
 #include <oskar_log.h>
 #include <oskar_file_exists.h>
 
+#include <sstream>
+
+using std::vector;
 using std::map;
 using std::string;
 
-const string oskar_TelescopeLoadElementPattern::spline_name_x =
-        "spline_data_cache_x.bin";
-const string oskar_TelescopeLoadElementPattern::spline_name_y =
-        "spline_data_cache_y.bin";
+const string oskar_TelescopeLoadElementPattern::root_name =
+        "element_pattern_fit_";
 
 oskar_TelescopeLoadElementPattern::oskar_TelescopeLoadElementPattern(
         const oskar_Settings* settings, oskar_Log* log)
 {
     settings_ = settings;
     log_ = log;
+    root_x = root_name + "x_";
+    root_y = root_name + "y_";
 }
 
 oskar_TelescopeLoadElementPattern::~oskar_TelescopeLoadElementPattern()
@@ -64,7 +67,7 @@ void oskar_TelescopeLoadElementPattern::load(oskar_Telescope* telescope,
         {
             oskar_Station* s = oskar_telescope_station(telescope, i);
             oskar_station_resize_element_types(s, 1, status);
-            load_element_patterns(log_, settings_, s, filemap, status);
+            load_element_patterns(s, filemap, status);
         }
     }
 }
@@ -79,7 +82,7 @@ void oskar_TelescopeLoadElementPattern::load(oskar_Station* station,
     if (num_subdirs == 0)
     {
         oskar_station_resize_element_types(station, 1, status);
-        load_element_patterns(log_, settings_, station, filemap, status);
+        load_element_patterns(station, filemap, status);
     }
 }
 
@@ -88,82 +91,116 @@ string oskar_TelescopeLoadElementPattern::name() const
     return string("element pattern loader");
 }
 
-void oskar_TelescopeLoadElementPattern::load_element_patterns(oskar_Log* log,
-        const oskar_Settings* settings, oskar_Station* station,
-        map<string, string>& filemap, int* status)
+double oskar_TelescopeLoadElementPattern::frequency_from_filename(
+        const string& filename, int startidx, int* status)
 {
+    double freq = 0.0;
+
+    // Get the numeric portion of the filename
+    // (the last section before the file extension).
+    string str = filename.substr(startidx,
+            filename.find_last_of(".") - startidx);
+
+    // Convert to number.
+    std::stringstream ss(str);
+    ss >> freq;
+    if (!ss)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return 0.0;
+    }
+    return freq * 1e6; // Multiply by 1e6 to convert to Hz.
+}
+
+void oskar_TelescopeLoadElementPattern::load_element_patterns(
+        oskar_Station* station, const map<string, string>& filemap, int* status)
+{
+    int n;
+
     // Check if safe to proceed.
     if (*status) return;
 
     // Return if element patterns are disabled.
-    if (!settings->telescope.aperture_array.element_pattern.
+    if (!settings_->telescope.aperture_array.element_pattern.
             enable_numerical_patterns)
         return;
 
-    // Get current absolute paths for spline data.
-    string spline_path_x, spline_path_y;
-    if (filemap.count(spline_name_x))
-        spline_path_x = filemap.at(spline_name_x);
-    if (filemap.count(spline_name_y))
-        spline_path_y = filemap.at(spline_name_y);
-
-    // Generate a unique key for a pair of element files at this location
-    // (be they ASCII data or cached coefficients).
-    // Return if no files have been found.
-    string files;
-    files.append(spline_path_x);
-    files.append(spline_path_y);
-    if (files.length() == 0)
-        return;
-
-    // Copy element pattern data and then return if this file combination
-    // has already been loaded.
-    if (models.count(files))
+    // Get lists of all paths in the map that have keys starting with the
+    // right root name.
+    vector<string> keys_x, keys_y;
+    vector<string> paths_x, paths_y;
+    for (map<string, string>::const_iterator i = filemap.begin();
+            i != filemap.end(); ++i)
     {
-        // Copy the element pattern data.
-        oskar_element_copy(oskar_station_element(station, 0),
-                models.at(files), status);
-        return;
+        string key = i->first;
+        if (key.compare(0, root_x.size(), root_x) == 0)
+        {
+            keys_x.push_back(key);
+            paths_x.push_back(i->second);
+        }
+        if (key.compare(0, root_y.size(), root_y) == 0)
+        {
+            keys_y.push_back(key);
+            paths_y.push_back(i->second);
+        }
     }
 
-    // Load cached spline coefficients for X dipole, if present.
-    if (spline_path_x.length() > 0 &&
-            oskar_file_exists(spline_path_x.c_str()))
+    // Load X data.
+    n = keys_x.size();
+    for (int i = 0; i < n; ++i)
     {
-        oskar_log_message(log, 0, "Loading spline data (X): %s",
-                spline_path_x.c_str());
-        oskar_log_message(log, 0, "");
-        oskar_element_read(oskar_station_element(station, 0), 1,
-                spline_path_x.c_str(), status);
+        // Get the frequency from the key.
+        double freq = frequency_from_filename(keys_x[i], root_x.size(), status);
+
+        // Load the file.
+        string path = paths_x[i];
+        if (models.count(path) == 0)
+        {
+            oskar_log_message(log_, 0,
+                    "Loading fitted element pattern (X) at %.0f MHz: %s",
+                    freq / 1.0e6, path.c_str());
+            models[path] = 1;
+        }
+        oskar_element_read(oskar_station_element(station, 0), 1, freq,
+                path.c_str(), status);
     }
 
-    // Load cached spline coefficients for Y dipole, if present.
-    if (spline_path_y.length() > 0 &&
-            oskar_file_exists(spline_path_y.c_str()))
+    // Load Y data.
+    n = keys_x.size();
+    for (int i = 0; i < n; ++i)
     {
-        oskar_log_message(log, 0, "Loading spline data (Y): %s",
-                spline_path_y.c_str());
-        oskar_log_message(log, 0, "");
-        oskar_element_read(oskar_station_element(station, 0), 2,
-                spline_path_y.c_str(), status);
-    }
+        // Get the frequency from the key.
+        double freq = frequency_from_filename(keys_y[i], root_y.size(), status);
 
-    // Store pointer to the element model for these files.
-    models[files] = oskar_station_element(station, 0);
+        // Load the file.
+        string path = paths_y[i];
+        if (models.count(path) == 0)
+        {
+            oskar_log_message(log_, 0,
+                    "Loading fitted element pattern (Y) at %.0f MHz: %s",
+                    freq / 1.0e6, path.c_str());
+            models[path] = 1;
+        }
+        oskar_element_read(oskar_station_element(station, 0), 2, freq,
+                path.c_str(), status);
+    }
 }
 
 void oskar_TelescopeLoadElementPattern::update_map(map<string, string>& filemap,
         const oskar_Dir& cwd)
 {
-    // Update the dictionary of element files for the current directory.
-    // The presence of spline coefficients is sufficient to override ones
+    // Update the map of element files for the current directory.
+    // The presence of fitted coefficients is sufficient to override ones
     // from a higher level.
-    if (cwd.exists(spline_name_x))
+
+    // Get a listing of the files in the current directory that start with
+    // the fitted element data root name.
+    vector<string> file_list = cwd.filesStartingWith(root_name);
+
+    // Store the full paths to these files in the persistent map, with the
+    // local filename as the key.
+    for (size_t i = 0; i < file_list.size(); ++i)
     {
-        filemap[spline_name_x] = cwd.absoluteFilePath(spline_name_x);
-    }
-    if (cwd.exists(spline_name_y))
-    {
-        filemap[spline_name_y] = cwd.absoluteFilePath(spline_name_y);
+        filemap[file_list[i]] = cwd.absoluteFilePath(file_list[i]);
     }
 }

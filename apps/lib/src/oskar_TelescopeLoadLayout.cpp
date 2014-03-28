@@ -55,7 +55,7 @@ void oskar_TelescopeLoadLayout::load(oskar_Telescope* telescope,
     {
         // Load the interferometer layout (horizon plane).
         oskar_telescope_load_station_coords_horizon(telescope,
-                cwd.filePath(layout_file).c_str(),
+                cwd.absoluteFilePath(layout_file).c_str(),
                 settings_->telescope.longitude_rad,
                 settings_->telescope.latitude_rad,
                 settings_->telescope.altitude_m, status);
@@ -64,7 +64,7 @@ void oskar_TelescopeLoadLayout::load(oskar_Telescope* telescope,
     {
         // Load the interferometer layout (ECEF system).
         oskar_telescope_load_station_coords_ecef(telescope,
-                cwd.filePath(layout_ecef_file).c_str(),
+                cwd.absoluteFilePath(layout_ecef_file).c_str(),
                 settings_->telescope.longitude_rad,
                 settings_->telescope.latitude_rad,
                 settings_->telescope.altitude_m, status);
@@ -105,8 +105,8 @@ void oskar_TelescopeLoadLayout::load(oskar_Station* station,
     // Check for presence of "layout.txt".
     if (cwd.exists(layout_file))
     {
-        oskar_station_load_layout(station, cwd.filePath(layout_file).c_str(),
-                status);
+        oskar_station_load_layout(station,
+                cwd.absoluteFilePath(layout_file).c_str(), status);
     }
     else
     {

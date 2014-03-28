@@ -212,8 +212,8 @@ void oskar_splines_fit_fortran(oskar_Splines* spline, oskar_Log* log,
     u = nxest - kx - 1;
     v = nyest - ky - 1;
     oskar_splines_init(spline, type, OSKAR_LOCATION_CPU, status);
-    oskar_mem_realloc(&spline->knots_x, nxest, status);
-    oskar_mem_realloc(&spline->knots_y, nyest, status);
+    oskar_mem_realloc(&spline->knots_x_theta, nxest, status);
+    oskar_mem_realloc(&spline->knots_y_phi, nyest, status);
     oskar_mem_realloc(&spline->coeff, u * v, status);
 
     /* Check if safe to proceed. */
@@ -256,8 +256,8 @@ void oskar_splines_fit_fortran(oskar_Splines* spline, oskar_Log* log,
         float *knots_x, *knots_y, *coeff;
         eps              = (float)settings->eps_float;
         avg_frac_err_loc = (float)settings->average_fractional_error;
-        knots_x          = (float*)spline->knots_x.data;
-        knots_y          = (float*)spline->knots_y.data;
+        knots_x          = (float*)spline->knots_x_theta.data;
+        knots_y          = (float*)spline->knots_y_phi.data;
         coeff            = (float*)spline->coeff.data;
         peak_abs         = oskar_mem_max_abs(z, num_points);
         user_s           = (float)settings->smoothness_factor_override;
@@ -270,8 +270,8 @@ void oskar_splines_fit_fortran(oskar_Splines* spline, oskar_Log* log,
                     (float*)y->data, (float*)z->data,
                     (float*)w->data, &x_beg, &x_end,
                     &y_beg, &y_end, &kx, &ky, &s, &nxest, &nyest,
-                    &ne, &eps, &spline->num_knots_x, knots_x,
-                    &spline->num_knots_y, knots_y, coeff, &fp,
+                    &ne, &eps, &spline->num_knots_x_theta, knots_x,
+                    &spline->num_knots_y_phi, knots_y, coeff, &fp,
                     (float*)wrk1, &lwrk1, (float*)wrk2, &lwrk2, iwrk,
                     &kwrk, &err);
 
@@ -285,7 +285,7 @@ void oskar_splines_fit_fortran(oskar_Splines* spline, oskar_Log* log,
                 else
                     oskar_log_message(log, 1, "Surface fitted (s=%.2e).", s);
                 oskar_log_message(log, 1, "Number of knots (x, y) = (%d, %d).",
-                        spline->num_knots_x, spline->num_knots_y);
+                        spline->num_knots_x_theta, spline->num_knots_y_phi);
             }
             else
             {
@@ -338,8 +338,8 @@ static int oskar_splines_evaluate_fortran(oskar_Mem* output, int offset,
     /* Check location. */
     location = oskar_mem_location(output);
     if (location != oskar_mem_location(&spline->coeff) ||
-            location != oskar_mem_location(&spline->knots_x) ||
-            location != oskar_mem_location(&spline->knots_y) ||
+            location != oskar_mem_location(&spline->knots_x_theta) ||
+            location != oskar_mem_location(&spline->knots_y_phi) ||
             location != oskar_mem_location(x) ||
             location != oskar_mem_location(y))
         return OSKAR_ERR_BAD_LOCATION;
@@ -349,10 +349,10 @@ static int oskar_splines_evaluate_fortran(oskar_Mem* output, int offset,
     {
         float *knots_x, *knots_y, *coeff;
         float *out;
-        nx      = spline->num_knots_x;
-        ny      = spline->num_knots_y;
-        knots_x = (float*)spline->knots_x.data;
-        knots_y = (float*)spline->knots_y.data;
+        nx      = spline->num_knots_x_theta;
+        ny      = spline->num_knots_y_phi;
+        knots_x = (float*)spline->knots_x_theta.data;
+        knots_y = (float*)spline->knots_y_phi.data;
         coeff   = (float*)spline->coeff.data;
         out     = (float*)output->data + offset;
 
@@ -419,7 +419,7 @@ void Test_dierckx::test_surfit()
     oskar_SettingsSpline settings;
     settings.average_fractional_error = 0.002;
     settings.average_fractional_error_factor_increase = 1.5;
-    settings.eps_double = 2e-8;
+    settings.epsilon = 2e-8;
     settings.eps_float = 4e-4;
     settings.search_for_best_fit = 1;
     settings.smoothness_factor_override = 1.0;
@@ -436,16 +436,16 @@ void Test_dierckx::test_surfit()
 
     // Check results are consistent.
     double delta = 1e-5;
-    CPPUNIT_ASSERT_EQUAL(spline_data_fortran.num_knots_x,
-            spline_data_c.num_knots_x);
-    CPPUNIT_ASSERT_EQUAL(spline_data_fortran.num_knots_y,
-            spline_data_c.num_knots_y);
-    for (int i = 0; i < spline_data_c.num_knots_x; ++i)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)spline_data_fortran.knots_x)[i],
-                ((float*)spline_data_c.knots_x)[i], delta);
-    for (int i = 0; i < spline_data_c.num_knots_y; ++i)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)spline_data_fortran.knots_y)[i],
-                ((float*)spline_data_c.knots_y)[i], delta);
+    CPPUNIT_ASSERT_EQUAL(spline_data_fortran.num_knots_x_theta,
+            spline_data_c.num_knots_x_theta);
+    CPPUNIT_ASSERT_EQUAL(spline_data_fortran.num_knots_y_phi,
+            spline_data_c.num_knots_y_phi);
+    for (int i = 0; i < spline_data_c.num_knots_x_theta; ++i)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)spline_data_fortran.knots_x_theta)[i],
+                ((float*)spline_data_c.knots_x_theta)[i], delta);
+    for (int i = 0; i < spline_data_c.num_knots_y_phi; ++i)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)spline_data_fortran.knots_y_phi)[i],
+                ((float*)spline_data_c.knots_y_phi)[i], delta);
     for (int i = 0; i < (int)oskar_mem_length(&spline_data_c.coeff); ++i)
         CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)spline_data_fortran.coeff)[i],
                 ((float*)spline_data_c.coeff)[i], delta);

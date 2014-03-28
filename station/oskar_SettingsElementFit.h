@@ -33,39 +33,26 @@
  * @file oskar_SettingsElementFit.h
  */
 
-#include <oskar_SettingsSpline.h>
-
 /**
  * @struct oskar_SettingsElementFit
  *
- * @brief Structure to hold station element settings.
+ * @brief Structure to hold element fit settings.
  *
  * @details
- * The structure holds station element parameters that can be used to override
- * those in the station files.
+ * The structure holds fitting parameters used for the numerical element
+ * pattern fitting procedure.
  */
 struct oskar_SettingsElementFit
 {
     char* input_cst_file;
     char* output_directory;
+    char* fits_image;
     int polarisation_type;
     double frequency_hz;
-    double overlap_angle_rad;
     int ignore_data_below_horizon;
     int ignore_data_at_pole;
-    int ignore_cached_files;
-    double weight_boundaries;
-    double weight_overlap;
-    int use_common_set;
-    oskar_SettingsSpline all;
-    oskar_SettingsSpline x_phi_re;
-    oskar_SettingsSpline x_phi_im;
-    oskar_SettingsSpline x_theta_re;
-    oskar_SettingsSpline x_theta_im;
-    oskar_SettingsSpline y_phi_re;
-    oskar_SettingsSpline y_phi_im;
-    oskar_SettingsSpline y_theta_re;
-    oskar_SettingsSpline y_theta_im;
+    double average_fractional_error; /**< Target average fractional error. */
+    double average_fractional_error_factor_increase; /**< In case of fitting failure, factor by which to increase allowed average fractional error. */
 };
 typedef struct oskar_SettingsElementFit oskar_SettingsElementFit;
 

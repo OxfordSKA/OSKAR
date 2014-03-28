@@ -1,5 +1,5 @@
-#include "math/oskar_dierckx_bispev.h"
-#include "math/oskar_dierckx_fpbisp.h"
+#include <oskar_dierckx_bispev.h>
+#include <oskar_dierckx_fpbisp.h>
 
 #ifdef __cplusplus
 extern "C" {

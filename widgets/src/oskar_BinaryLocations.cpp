@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
-#include "widgets/oskar_BinaryLocations.h"
+#include <oskar_global.h>
+#include <widgets/oskar_BinaryLocations.h>
 
 #include <QtGui/QApplication>
 #include <QtGui/QDialogButtonBox>
@@ -77,14 +77,22 @@ oskar_BinaryLocations::oskar_BinaryLocations(QWidget *parent) : QDialog(parent)
     gridLayout->addWidget(editImager_, 2, 1);
     gridLayout->addWidget(browseImager, 2, 2);
 
+    QLabel* labelFitElementData = new QLabel("Element data fit binary:", this);
+    editFitElementData_ = new QLineEdit(this);
+    QPushButton* browseFitElementData = new QPushButton("Browse...", this);
+    connect(browseImager, SIGNAL(clicked()), this, SLOT(setFitElementData()));
+    gridLayout->addWidget(labelFitElementData, 3, 0);
+    gridLayout->addWidget(editFitElementData_, 3, 1);
+    gridLayout->addWidget(browseFitElementData, 3, 2);
+
     QLabel* labelCudaSystemInfo = new QLabel("CUDA system info binary:", this);
     editCudaSystemInfo_ = new QLineEdit(this);
     QPushButton* browseCudaSystemInfo = new QPushButton("Browse...", this);
     connect(browseCudaSystemInfo, SIGNAL(clicked()),
             this, SLOT(setCudaSystemInfo()));
-    gridLayout->addWidget(labelCudaSystemInfo, 3, 0);
-    gridLayout->addWidget(editCudaSystemInfo_, 3, 1);
-    gridLayout->addWidget(browseCudaSystemInfo, 3, 2);
+    gridLayout->addWidget(labelCudaSystemInfo, 4, 0);
+    gridLayout->addWidget(editCudaSystemInfo_, 4, 1);
+    gridLayout->addWidget(browseCudaSystemInfo, 4, 2);
 
     // Add binary location group.
     vLayoutMain->addWidget(grp);
@@ -108,6 +116,11 @@ QString oskar_BinaryLocations::cudaSystemInfo() const
     return editCudaSystemInfo_->text();
 }
 
+QString oskar_BinaryLocations::fitElementData() const
+{
+    return editFitElementData_->text();
+}
+
 QString oskar_BinaryLocations::imager() const
 {
     return editImager_->text();
@@ -126,6 +139,11 @@ void oskar_BinaryLocations::setCudaSystemInfo(const QString& value)
 void oskar_BinaryLocations::setBeamPattern(const QString& value)
 {
     editBeamPattern_->setText(value);
+}
+
+void oskar_BinaryLocations::setFitElementData(const QString& value)
+{
+    editFitElementData_->setText(value);
 }
 
 void oskar_BinaryLocations::setImager(const QString& value)
@@ -159,6 +177,13 @@ void oskar_BinaryLocations::setImager()
     QString name = QFileDialog::getOpenFileName(this, "Imager Binary");
     if (!name.isEmpty())
         setImager(name);
+}
+
+void oskar_BinaryLocations::setFitElementData()
+{
+    QString name = QFileDialog::getOpenFileName(this, "Element Data Fit Binary");
+    if (!name.isEmpty())
+        setFitElementData(name);
 }
 
 void oskar_BinaryLocations::setInterferometer()

@@ -55,7 +55,7 @@ void oskar_TelescopeLoadConfig::load(oskar_Telescope* telescope,
 
     // Load the interferometer layout.
     oskar_telescope_load_station_coords_horizon(telescope,
-            cwd.filePath(config_file).c_str(),
+            cwd.absoluteFilePath(config_file).c_str(),
             settings_->telescope.longitude_rad,
             settings_->telescope.latitude_rad,
             settings_->telescope.altitude_m, status);
@@ -91,8 +91,8 @@ void oskar_TelescopeLoadConfig::load(oskar_Station* station,
         return;
 
     // Load the station configuration.
-    oskar_station_load_config(station, cwd.filePath(config_file).c_str(),
-            status);
+    oskar_station_load_config(station,
+            cwd.absoluteFilePath(config_file).c_str(), status);
 
     // Check if this is the last level.
     if (num_subdirs > 0)

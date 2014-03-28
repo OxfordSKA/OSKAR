@@ -13,13 +13,7 @@ extern "C" {
  * @details
  * Subroutine fpgivs calculates the parameters of a givens transformation.
  */
-void oskar_dierckx_fpgivs_f(float piv, float *ww, float *cos_, float *sin_);
-
-/**
- * @details
- * Subroutine fpgivs calculates the parameters of a givens transformation.
- */
-void oskar_dierckx_fpgivs_d(double piv, double *ww, double *cos_, double *sin_);
+void oskar_dierckx_fpgivs(double piv, double *ww, double *cos_, double *sin_);
 
 #ifdef __cplusplus
 }

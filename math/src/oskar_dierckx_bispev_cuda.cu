@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_dierckx_bispev_cuda.h"
+#include <oskar_dierckx_bispev_cuda.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -155,7 +155,7 @@ void oskar_cudaf_dierckx_fpbisp_single_f(const float *tx, const int nx,
     int j, l, l1, l2, k1, nk1, lx;
     float wx[6], wy[6], t;
 
-    // Do x.
+    /* Do x. */
     k1 = kx + 1;
     nk1 = nx - k1;
     t = tx[kx];
@@ -167,7 +167,7 @@ void oskar_cudaf_dierckx_fpbisp_single_f(const float *tx, const int nx,
     oskar_cudaf_dierckx_fpbspl_f(tx, kx, x, l, wx);
     lx = l - k1;
 
-    // Do y.
+    /* Do y. */
     k1 = ky + 1;
     nk1 = ny - k1;
     t = ty[ky];
@@ -179,7 +179,7 @@ void oskar_cudaf_dierckx_fpbisp_single_f(const float *tx, const int nx,
     oskar_cudaf_dierckx_fpbspl_f(ty, ky, y, l, wy);
     l1 = lx * nk1 + (l - k1);
 
-    // Evaluate surface using coefficients.
+    /* Evaluate surface using coefficients. */
     t = 0.0f;
     for (l = 0; l <= kx; ++l)
     {
@@ -210,7 +210,7 @@ void oskar_cudaf_dierckx_fpbisp_single_d(const double *tx, const int nx,
     int j, l, l1, l2, k1, nk1, lx;
     double wx[6], wy[6], t;
 
-    // Do x.
+    /* Do x. */
     k1 = kx + 1;
     nk1 = nx - k1;
     t = tx[kx];
@@ -222,7 +222,7 @@ void oskar_cudaf_dierckx_fpbisp_single_d(const double *tx, const int nx,
     oskar_cudaf_dierckx_fpbspl_d(tx, kx, x, l, wx);
     lx = l - k1;
 
-    // Do y.
+    /* Do y. */
     k1 = ky + 1;
     nk1 = ny - k1;
     t = ty[ky];
@@ -234,7 +234,7 @@ void oskar_cudaf_dierckx_fpbisp_single_d(const double *tx, const int nx,
     oskar_cudaf_dierckx_fpbspl_d(ty, ky, y, l, wy);
     l1 = lx * nk1 + (l - k1);
 
-    // Evaluate surface using coefficients.
+    /* Evaluate surface using coefficients. */
     t = 0.0;
     for (l = 0; l <= kx; ++l)
     {
@@ -272,11 +272,11 @@ void oskar_dierckx_bispev_cudak_d(const double* tx, const int nx,
         const int ky, const int n, const double* x, const double* y,
         const int stride, double* z)
 {
-    // Get the output position (pixel) ID that this thread is working on. */
+    /* Get the output position (pixel) ID that this thread is working on. */
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= n) return;
 
-    // Call device function to evaluate surface. */
+    /* Call device function to evaluate surface. */
     oskar_cudaf_dierckx_fpbisp_single_d(tx, nx, ty, ny, c, kx, ky,
             x[i], y[i], &z[i * stride]);
 }

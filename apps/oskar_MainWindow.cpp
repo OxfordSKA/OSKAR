@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -106,6 +106,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     QAction* actRunInterferometer = new QAction("Run &Interferometer", this);
     QAction* actRunBeamPattern = new QAction("Run &Beam Pattern", this);
     QAction* actRunImager = new QAction("Run I&mager", this);
+    QAction* actRunFitElementData = new QAction("Run Element Data Fit", this);
     QAction* actHelpDoc = new QAction("Documentation...", this);
     QAction* actCudaInfo = new QAction("CUDA System Info...", this);
     QAction* actAbout = new QAction("&About OSKAR...", this);
@@ -126,6 +127,8 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     connect(actRunBeamPattern, SIGNAL(triggered()),
             this, SLOT(runBeamPattern()));
     connect(actRunImager, SIGNAL(triggered()), this, SLOT(runImager()));
+    connect(actRunFitElementData, SIGNAL(triggered()), this,
+            SLOT(runFitElementData()));
     connect(actHelpDoc, SIGNAL(triggered()), this, SLOT(helpDoc()));
 
     // Set up keyboard shortcuts.
@@ -164,6 +167,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     menuRun->addAction(actRunInterferometer);
     menuRun->addAction(actRunBeamPattern);
     menuRun->addAction(actRunImager);
+    menuRun->addAction(actRunFitElementData);
     menuHelp->addAction(actHelpDoc);
     menuHelp->addSeparator();
     menuHelp->addAction(actCudaInfo);
@@ -175,6 +179,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     toolbar->addAction(actRunInterferometer);
     toolbar->addAction(actRunBeamPattern);
     toolbar->addAction(actRunImager);
+    toolbar->addAction(actRunFitElementData);
     addToolBar(Qt::TopToolBarArea, toolbar);
 
     // Create the network access manager to check the current version.
@@ -195,6 +200,8 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
             "oskar_sim_beam_pattern").toString();
     binary_imager_ = settings.value("binaries/imager",
             "oskar_imager").toString();
+    binary_fit_element_data_ = settings.value("binaries/fit_element_data",
+            "oskar_fit_element_data").toString();
     binary_cuda_info_ = settings.value("binaries/cuda_info",
             "oskar_cuda_system_info").toString();
 
@@ -337,6 +344,7 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
     settings.setValue("binaries/interferometer", binary_interferometer_);
     settings.setValue("binaries/beam_pattern", binary_beam_pattern_);
     settings.setValue("binaries/imager", binary_imager_);
+    settings.setValue("binaries/fit_element_data", binary_fit_element_data_);
     settings.setValue("binaries/cuda_info", binary_cuda_info_);
 
     if (settingsFile_.isEmpty() && model_->isModified())
@@ -384,12 +392,14 @@ void oskar_MainWindow::binLocations()
     oskar_BinaryLocations binaryLocations(this);
     binaryLocations.setBeamPattern(binary_beam_pattern_);
     binaryLocations.setCudaSystemInfo(binary_cuda_info_);
+    binaryLocations.setFitElementData(binary_fit_element_data_);
     binaryLocations.setImager(binary_imager_);
     binaryLocations.setInterferometer(binary_interferometer_);
     if (binaryLocations.exec() == QDialog::Accepted)
     {
         binary_beam_pattern_ = binaryLocations.beamPattern();
         binary_cuda_info_ = binaryLocations.cudaSystemInfo();
+        binary_fit_element_data_ = binaryLocations.fitElementData();
         binary_imager_ = binaryLocations.imager();
         binary_interferometer_ = binaryLocations.interferometer();
     }
@@ -537,6 +547,12 @@ void oskar_MainWindow::runInterferometer()
 void oskar_MainWindow::runImager()
 {
     run_binary_ = binary_imager_;
+    runButton();
+}
+
+void oskar_MainWindow::runFitElementData()
+{
+    run_binary_ = binary_fit_element_data_;
     runButton();
 }
 

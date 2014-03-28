@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,31 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_SPLINE_H_
-#define OSKAR_SETTINGS_SPLINE_H_
+#ifndef OSKAR_CONVERT_LUDWIG3_TO_THETA_PHI_COMPONENTS_H_
+#define OSKAR_CONVERT_LUDWIG3_TO_THETA_PHI_COMPONENTS_H_
 
 /**
- * @file oskar_SettingsSpline.h
+ * @file oskar_convert_ludwig3_to_theta_phi_components.h
  */
 
+#include <oskar_global.h>
+#include <oskar_mem.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
- * @struct oskar_SettingsSpline
- *
- * @brief Structure to hold settings for spline surface fitting.
+ * @brief
  *
  * @details
- * The structure holds settings used to parameterise the spline surface fitting
- * procedure.
+ *
+ * @param[in] num_points The number of points.
+ * @param[in,out] vec    The Ludwig-3 (input) and spherical (output) components.
+ * @param[out] phi       The phi angles, in radians.
  */
-struct oskar_SettingsSpline
-{
-    double eps_float; /**< Epsilon for single precision fit. */
-    double eps_double; /**< Epsilon for double precision fit. */
-    double smoothness_factor_override; /**< Value to use for smoothness factor, if not searching. */
-    int search_for_best_fit; /**< If true, then search for best fit using average fractional error. */
-    double average_fractional_error; /**< Target average fractional error. */
-    double average_fractional_error_factor_increase; /**< In case of fitting failure, factor by which to increase allowed average fractional error. */
-};
-typedef struct oskar_SettingsSpline oskar_SettingsSpline;
+OSKAR_EXPORT
+void oskar_convert_ludwig3_to_theta_phi_components_f(int num_points,
+        float2* h_theta, float2* v_phi, const float* phi, int stride);
 
-#endif /* OSKAR_SETTINGS_SPLINE_H_ */
+OSKAR_EXPORT
+void oskar_convert_ludwig3_to_theta_phi_components_d(int num_points,
+        double2* h_theta, double2* v_phi, const double* phi, int stride);
+
+/**
+ * @brief
+ *
+ * @details
+ * @param[in,out] status   Status return code.
+ */
+OSKAR_EXPORT
+void oskar_convert_ludwig3_to_theta_phi_components(oskar_Mem* vec,
+        int offset, int stride, int num_points, const oskar_Mem* phi,
+        int* status);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_CONVERT_LUDWIG3_TO_THETA_PHI_COMPONENTS_H_ */

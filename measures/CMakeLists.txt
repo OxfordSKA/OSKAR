@@ -23,6 +23,7 @@ set(${name}_SRC
     src/oskar_convert_geodetic_spherical_to_ecef.c
     src/oskar_convert_healpix_ring_to_theta_phi.c
     src/oskar_convert_lon_lat_to_xyz.c
+    src/oskar_convert_ludwig3_to_theta_phi_components.c
     src/oskar_convert_offset_ecef_to_ecef.c
     src/oskar_convert_relative_direction_cosines_to_enu_direction_cosines.c
     src/oskar_convert_station_uvw_to_baseline_uvw.c
@@ -37,6 +38,7 @@ if (CUDA_FOUND)
         src/oskar_convert_ecef_to_station_uvw_cuda.cu
         src/oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda.cu
         src/oskar_convert_enu_direction_cosines_to_theta_phi_cuda.cu
+        src/oskar_convert_ludwig3_to_theta_phi_components_cuda.cu
         src/oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda.cu
         src/oskar_convert_station_uvw_to_baseline_uvw_cuda.cu
     )

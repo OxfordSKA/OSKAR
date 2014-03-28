@@ -36,6 +36,8 @@ extern "C" {
 void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
         int* status)
 {
+    int i;
+
     /* Check all inputs. */
     if (!dst || !src || !status)
     {
@@ -45,22 +47,31 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
 
     /* Check if safe to proceed. */
     if (*status) return;
+
     dst->precision = src->precision;
     dst->element_type = src->element_type;
     dst->taper_type = src->taper_type;
     dst->cos_power = src->cos_power;
     dst->gaussian_fwhm_rad = src->gaussian_fwhm_rad;
 
-    oskar_mem_copy(dst->filename_x, src->filename_x, status);
-    oskar_mem_copy(dst->filename_y, src->filename_y, status);
-    oskar_splines_copy(dst->phi_re_x, src->phi_re_x, status);
-    oskar_splines_copy(dst->phi_im_x, src->phi_im_x, status);
-    oskar_splines_copy(dst->theta_re_x, src->theta_re_x, status);
-    oskar_splines_copy(dst->theta_im_x, src->theta_im_x, status);
-    oskar_splines_copy(dst->phi_re_y, src->phi_re_y, status);
-    oskar_splines_copy(dst->phi_im_y, src->phi_im_y, status);
-    oskar_splines_copy(dst->theta_re_y, src->theta_re_y, status);
-    oskar_splines_copy(dst->theta_im_y, src->theta_im_y, status);
+    /* Resize the arrays. */
+    oskar_element_resize_frequency_data(dst, src->num_frequencies, status);
+
+    /* Copy the new data across. */
+    for (i = 0; i < src->num_frequencies; ++i)
+    {
+        dst->frequency_hz[i] = src->frequency_hz[i];
+        oskar_mem_copy(dst->filename_x[i], src->filename_x[i], status);
+        oskar_mem_copy(dst->filename_y[i], src->filename_y[i], status);
+        oskar_splines_copy(dst->x_v_re[i], src->x_v_re[i], status);
+        oskar_splines_copy(dst->x_v_im[i], src->x_v_im[i], status);
+        oskar_splines_copy(dst->x_h_re[i], src->x_h_re[i], status);
+        oskar_splines_copy(dst->x_h_im[i], src->x_h_im[i], status);
+        oskar_splines_copy(dst->y_v_re[i], src->y_v_re[i], status);
+        oskar_splines_copy(dst->y_v_im[i], src->y_v_im[i], status);
+        oskar_splines_copy(dst->y_h_re[i], src->y_h_re[i], status);
+        oskar_splines_copy(dst->y_h_im[i], src->y_h_im[i], status);
+    }
 }
 
 #ifdef __cplusplus

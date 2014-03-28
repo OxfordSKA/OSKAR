@@ -1,4 +1,4 @@
-#include "math/oskar_dierckx_fpbspl.h"
+#include <oskar_dierckx_fpbspl.h>
 
 #ifdef __cplusplus
 extern "C" {

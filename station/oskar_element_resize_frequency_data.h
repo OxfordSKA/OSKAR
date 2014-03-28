@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,54 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_element.h>
-#include <oskar_element.h>
+#ifndef OSKAR_ELEMENT_RESIZE_FREQUENCY_DATA_H_
+#define OSKAR_ELEMENT_RESIZE_FREQUENCY_DATA_H_
+
+/**
+ * @file oskar_element_resize_frequency_data.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_element_free(oskar_Element* data, int* status)
-{
-    int i;
-
-    /* Check all inputs. */
-    if (!data || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Free the memory contents. */
-    for (i = 0; i < data->num_frequencies; ++i)
-    {
-        oskar_mem_free(data->filename_x[i], status);
-        oskar_mem_free(data->filename_y[i], status);
-        oskar_splines_free(data->x_v_re[i], status);
-        oskar_splines_free(data->x_v_im[i], status);
-        oskar_splines_free(data->x_h_re[i], status);
-        oskar_splines_free(data->x_h_im[i], status);
-        oskar_splines_free(data->y_v_re[i], status);
-        oskar_splines_free(data->y_v_im[i], status);
-        oskar_splines_free(data->y_h_re[i], status);
-        oskar_splines_free(data->y_h_im[i], status);
-    }
-    free(data->frequency_hz);
-    free(data->filename_x);
-    free(data->filename_y);
-    free(data->x_h_re);
-    free(data->x_h_im);
-    free(data->x_v_re);
-    free(data->x_v_im);
-    free(data->y_h_re);
-    free(data->y_h_im);
-    free(data->y_v_re);
-    free(data->y_v_im);
-
-    /* Free the structure itself. */
-    free(data);
-}
+/**
+ * @brief
+ * Resizes internal arrays holding frequency-dependent data.
+ *
+ * @details
+ * This function resizes all arrays within the element model that are
+ * frequency-dependent.
+ *
+ * @param[out] model     Pointer to element model data structure.
+ * @param[in]  size      The required size of the arrays.
+ * @param[in,out] status Status return code.
+ */
+OSKAR_EXPORT
+void oskar_element_resize_frequency_data(oskar_Element* model, int size,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_ELEMENT_RESIZE_FREQUENCY_DATA_H_ */

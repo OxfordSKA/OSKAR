@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_BinaryLocations.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 #include <QtGui/QDialog>
 
 class QLineEdit;
@@ -47,16 +47,19 @@ public:
 
     QString beamPattern() const;
     QString cudaSystemInfo() const;
+    QString fitElementData() const;
     QString imager() const;
     QString interferometer() const;
     void setBeamPattern(const QString& value);
     void setCudaSystemInfo(const QString& value);
+    void setFitElementData(const QString& value);
     void setImager(const QString& value);
     void setInterferometer(const QString& value);
 
 private slots:
     void setBeamPattern();
     void setCudaSystemInfo();
+    void setFitElementData();
     void setImager();
     void setInterferometer();
 
@@ -64,6 +67,7 @@ private:
     QLineEdit* editInterferometer_;
     QLineEdit* editBeamPattern_;
     QLineEdit* editImager_;
+    QLineEdit* editFitElementData_;
     QLineEdit* editCudaSystemInfo_;
 };
 

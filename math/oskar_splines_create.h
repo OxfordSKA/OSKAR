@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,14 +50,14 @@ extern "C" {
  * The data structure must be deallocated using oskar_splines_free() when it is
  * no longer required.
  *
- * @param[in] type Enumerated type of data structure.
+ * @param[in] precision Enumerated type of data structure.
  * @param[in] location Enumerated location of memory held in data structure.
  * @param[in,out]  status   Status return code.
  *
  * @return A handle to the new data structure.
  */
 OSKAR_EXPORT
-oskar_Splines* oskar_splines_create(int type, int location, int* status);
+oskar_Splines* oskar_splines_create(int precision, int location, int* status);
 
 #ifdef __cplusplus
 }

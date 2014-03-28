@@ -76,7 +76,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
-        int port, const char* filename,
+        int port, double freq_hz, const char* filename,
         const oskar_SettingsElementFit* settings, int* status);
 
 #ifdef __cplusplus

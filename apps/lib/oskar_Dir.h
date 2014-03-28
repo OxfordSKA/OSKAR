@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,7 +82,8 @@ public:
      * Returns the names of all the directories in the current directory.
      *
      * @details
-     * Returns true if the specified file exists in the current directory.
+     * Returns a list of the names of all the directories in the current
+     * directory. The list is sorted by name.
      */
     std::vector<std::string> allSubDirs() const;
 
@@ -117,6 +118,16 @@ public:
      * @return Pathname to file.
      */
     std::string filePath(const std::string& filename) const;
+
+    /**
+     * @brief
+     * Returns the names of all the directories in the current directory.
+     *
+     * @details
+     * Returns a list of the names of all the directories in the current
+     * directory. The list is sorted by name.
+     */
+    std::vector<std::string> filesStartingWith(std::string) const;
 
 private:
     struct oskar_DirPrivate;

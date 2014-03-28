@@ -57,7 +57,7 @@ void oskar_TelescopeLoadPermittedBeams::load(oskar_Station* station,
     if (cwd.exists(permitted_beams_file))
     {
         oskar_station_load_permitted_beams(station,
-                cwd.filePath(permitted_beams_file).c_str(), status);
+                cwd.absoluteFilePath(permitted_beams_file).c_str(), status);
     }
 }
 

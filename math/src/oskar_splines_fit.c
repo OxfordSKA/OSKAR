@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <oskar_dierckx_sphere.h>
 #include <oskar_dierckx_surfit.h>
 #include <private_splines.h>
 #include <oskar_splines.h>
@@ -37,101 +38,32 @@
 extern "C" {
 #endif
 
-/* Returns the largest absolute (real) value in the array. */
-static double oskar_mem_max_abs(const oskar_Mem* data, int n)
+/* Returns the range of values in the array. */
+static void min_max(const double* data, int n, double* min, double* max)
 {
     int i;
-    double r = -DBL_MAX;
-    if (oskar_mem_type(data) == OSKAR_SINGLE)
+    double val;
+    *max = -DBL_MAX, *min = DBL_MAX;
+    for (i = 0; i < n; ++i)
     {
-        const float *p;
-        p = (const float*)oskar_mem_void_const(data);
-        for (i = 0; i < n; ++i)
-        {
-            if (fabsf(p[i]) > r) r = fabsf(p[i]);
-        }
+        val = data[i];
+        if (val > *max) *max = val;
+        if (val < *min) *min = val;
     }
-    else if (oskar_mem_type(data) == OSKAR_DOUBLE)
-    {
-        const double *p;
-        p = (const double*)oskar_mem_void_const(data);
-        for (i = 0; i < n; ++i)
-        {
-            if (fabs(p[i]) > r) r = fabs(p[i]);
-        }
-    }
-    return r;
 }
 
-/* Returns the largest value in the array. */
-static double oskar_mem_max(const oskar_Mem* data, int n)
+void oskar_splines_fit(oskar_Splines* spline, int num_points, double* x_theta,
+        double* y_phi, const double* z_data, const double* weight,
+        int fit_type, int search_flag, double* avg_frac_err,
+        double inc_factor, double smooth_factor, double epsilon, int* status)
 {
-    int i;
-    double r = -DBL_MAX;
-    if (oskar_mem_type(data) == OSKAR_SINGLE)
-    {
-        const float *p;
-        p = (const float*)oskar_mem_void_const(data);
-        for (i = 0; i < n; ++i)
-        {
-            if (p[i] > r) r = p[i];
-        }
-    }
-    else if (oskar_mem_type(data) == OSKAR_DOUBLE)
-    {
-        const double *p;
-        p = (const double*)oskar_mem_void_const(data);
-        for (i = 0; i < n; ++i)
-        {
-            if (p[i] > r) r = p[i];
-        }
-    }
-    return r;
-}
-
-/* Returns the smallest value in the array. */
-static double oskar_mem_min(const oskar_Mem* data, int n)
-{
-    int i;
-    double r = DBL_MAX;
-    if (oskar_mem_type(data) == OSKAR_SINGLE)
-    {
-        const float *p;
-        p = (const float*)oskar_mem_void_const(data);
-        for (i = 0; i < n; ++i)
-        {
-            if (p[i] < r) r = p[i];
-        }
-    }
-    else if (oskar_mem_type(data) == OSKAR_DOUBLE)
-    {
-        const double *p;
-        p = (const double*)oskar_mem_void_const(data);
-        for (i = 0; i < n; ++i)
-        {
-            if (p[i] < r) r = p[i];
-        }
-    }
-    return r;
-}
-
-void oskar_splines_fit(oskar_Splines* spline, int num_points, oskar_Mem* x,
-        oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* w, int search_flag,
-        double* avg_frac_err, double factor, double user_s,
-        double eps_float, double eps_double, int* status)
-{
-    int element_size, err = 0, type;
-    int b1, b2, bx, by, km, kwrk, lwrk1, lwrk2, ne, nxest, nyest, u, v, *iwrk;
-    int sqrt_num_points, done = 0;
-    void *wrk1, *wrk2;
-    double x_beg, x_end, y_beg, y_end, eps;
-    double avg_err, peak_abs;
-
-    /* Order of splines - do not change these values. */
-    int kx = 3, ky = 3;
+    int err = 0, kwrk = 0, lwrk1 = 0, lwrk2 = 0, u = 0, v = 0, *iwrk = 0;
+    double *coeff = 0, *wrk1 = 0, *wrk2 = 0;
+    double avg_err = 0., peak_abs = 0., fp = 0., z_min = 0., z_max = 0.;
 
     /* Check all inputs. */
-    if (!spline || !x || !y || !z || !w || !avg_frac_err || !status)
+    if (!spline || !x_theta || !y_phi || !z_data || !weight ||
+            !avg_frac_err || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -141,173 +73,207 @@ void oskar_splines_fit(oskar_Splines* spline, int num_points, oskar_Mem* x,
     if (*status) return;
     if (num_points <= 0) return;
 
-    /* Get the data type. */
-    type = oskar_mem_type(z);
-    element_size = oskar_mem_element_size(type);
-    if ((type != OSKAR_SINGLE) && (type != OSKAR_DOUBLE))
+    /* Check the output data type and location. */
+    if (oskar_splines_precision(spline) != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
-
-    /* Check that parameters are within allowed ranges. */
-    eps = (type == OSKAR_SINGLE) ? eps_float : eps_double;
-    if (factor <= 1.0)
-    {
-        *status = OSKAR_ERR_SETTINGS;
-        return;
-    }
-
-    /* Check that input data is on the CPU. */
-    if (oskar_mem_location(x) != OSKAR_LOCATION_CPU ||
-            oskar_mem_location(y) != OSKAR_LOCATION_CPU ||
-            oskar_mem_location(z) != OSKAR_LOCATION_CPU ||
-            oskar_mem_location(w) != OSKAR_LOCATION_CPU)
+    if (oskar_splines_location(spline) != OSKAR_LOCATION_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
 
-    /* Get data boundaries. */
-    x_beg    = oskar_mem_min(x, num_points);
-    x_end    = oskar_mem_max(x, num_points);
-    y_beg    = oskar_mem_min(y, num_points);
-    y_end    = oskar_mem_max(y, num_points);
-    peak_abs = oskar_mem_max_abs(z, num_points);
-
-    /* Initialise and allocate spline data. */
-    sqrt_num_points = (int)sqrt(num_points);
-    nxest = kx + 1 + 3 * sqrt_num_points / 2;
-    nyest = ky + 1 + 3 * sqrt_num_points / 2;
-    u = nxest - kx - 1;
-    v = nyest - ky - 1;
-    oskar_mem_realloc(spline->knots_x, nxest, status);
-    oskar_mem_realloc(spline->knots_y, nyest, status);
-    oskar_mem_realloc(spline->coeff, u * v, status);
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Set up workspace. */
-    km = 1 + ((kx > ky) ? kx : ky);
-    ne = (nxest > nyest) ? nxest : nyest;
-    bx = kx * v + ky + 1;
-    by = ky * u + kx + 1;
-    if (bx <= by)
+    /* Check that parameters are within allowed ranges. */
+    if (inc_factor <= 1.0)
     {
-        b1 = bx;
-        b2 = b1 + v - ky;
-    }
-    else
-    {
-        b1 = by;
-        b2 = b1 + u - kx;
-    }
-    lwrk1 = u * v * (2 + b1 + b2) +
-            2 * (u + v + km * (num_points + ne) + ne - kx - ky) + b2 + 1;
-    lwrk2 = u * v * (b2 + 1) + b2;
-    kwrk = num_points + (nxest - 2 * kx - 1) * (nyest - 2 * ky - 1);
-    wrk1 = malloc(lwrk1 * element_size);
-    wrk2 = malloc(lwrk2 * element_size);
-    iwrk = (int*)malloc(kwrk * sizeof(int));
-    if (wrk1 == NULL || wrk2 == NULL || iwrk == NULL)
-    {
-        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        *status = OSKAR_ERR_SETTINGS;
         return;
     }
 
-    if (type == OSKAR_SINGLE)
-    {
-        float fp = 0.0, *knots_x, *knots_y, *coeff, *x_, *y_;
-        const float *z_, *w_;
-        knots_x = oskar_mem_float(spline->knots_x, status);
-        knots_y = oskar_mem_float(spline->knots_y, status);
-        coeff   = oskar_mem_float(spline->coeff, status);
-        x_      = oskar_mem_float(x, status);
-        y_      = oskar_mem_float(y, status);
-        z_      = oskar_mem_float_const(z, status);
-        w_      = oskar_mem_float_const(w, status);
-        do
-        {
-            avg_err = *avg_frac_err * peak_abs;
-            spline->smoothing_factor = search_flag ?
-                    (num_points * avg_err * avg_err) : user_s;
-            oskar_dierckx_surfit_f(0, num_points, x_, y_, z_, w_,
-                    (float)x_beg, (float)x_end, (float)y_beg, (float)y_end,
-                    kx, ky, (float)spline->smoothing_factor, nxest, nyest, ne,
-                    (float)eps, &spline->num_knots_x, knots_x,
-                    &spline->num_knots_y, knots_y, coeff, &fp, (float*)wrk1,
-                    lwrk1, (float*)wrk2, lwrk2, iwrk, kwrk, &err);
+    /* Get range of z_data. */
+    min_max(z_data, num_points, &z_min, &z_max);
+    peak_abs = fabs(z_min) > fabs(z_max) ? fabs(z_min) : fabs(z_max);
 
-            /* Check for errors. */
-            if (err == 0 || err == -1 || err == -2) done = 1;
-            else
-            {
-                if (!search_flag || err >= 10 || *avg_frac_err == 0.0)
-                {
-                    *status = OSKAR_ERR_SPLINE_COEFF_FAIL;
-                    done = 1;
-                }
-                else
-                {
-                    err = 0; /* Try again with a larger smoothing factor. */
-                    *avg_frac_err *= factor;
-                }
-            }
-        } while (search_flag && !done);
-    }
-    else if (type == OSKAR_DOUBLE)
+    /* Check fit type. */
+    if (fit_type == OSKAR_SPLINES_LINEAR)
     {
-        double fp = 0.0, *knots_x, *knots_y, *coeff, *x_, *y_;
-        const double *z_, *w_;
-        knots_x = oskar_mem_double(spline->knots_x, status);
-        knots_y = oskar_mem_double(spline->knots_y, status);
+        int b1, b2, bx, by, km, nxest, nyest, ne;
+        double x_min, x_max, y_min, y_max;
+        double *knots_x = 0, *knots_y = 0;
+
+        /* Order of splines - do not change these values. */
+        int kx = 3, ky = 3;
+
+        /* Get data boundaries. */
+        min_max(x_theta, num_points, &x_min, &x_max);
+        min_max(y_phi, num_points, &y_min, &y_max);
+
+        /* Allocate output spline data arrays. */
+        nxest = kx + 1 + (int)ceil(1.5 * sqrt(num_points));
+        nyest = ky + 1 + (int)ceil(1.5 * sqrt(num_points));
+        u = nxest - kx - 1;
+        v = nyest - ky - 1;
+        oskar_mem_realloc(spline->knots_x_theta, nxest, status);
+        oskar_mem_realloc(spline->knots_y_phi, nyest, status);
+        oskar_mem_realloc(spline->coeff, u * v, status);
+
+        /* Check if safe to proceed. */
+        if (*status) return;
+
+        /* Set up workspace. */
+        km = 1 + ((kx > ky) ? kx : ky);
+        ne = (nxest > nyest) ? nxest : nyest;
+        bx = kx * v + ky + 1;
+        by = ky * u + kx + 1;
+        if (bx <= by)
+        {
+            b1 = bx;
+            b2 = b1 + v - ky;
+        }
+        else
+        {
+            b1 = by;
+            b2 = b1 + u - kx;
+        }
+        lwrk1 = 1 + b2 + u * v * (2 + b1 + b2) +
+                2 * (u + v + km * (num_points + ne) + ne - kx - ky);
+        lwrk2 = u * v * (b2 + 1) + b2;
+        kwrk = num_points + (nxest - 2 * kx - 1) * (nyest - 2 * ky - 1);
+        wrk1 = (double*)malloc(lwrk1 * sizeof(double));
+        wrk2 = (double*)malloc(lwrk2 * sizeof(double));
+        iwrk = (int*)malloc(kwrk * sizeof(int));
+        if (!wrk1 || !wrk2 || !iwrk)
+        {
+            free(wrk1);
+            free(wrk2);
+            free(iwrk);
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            return;
+        }
+
+        /* Fitting procedure. */
+        knots_x = oskar_mem_double(spline->knots_x_theta, status);
+        knots_y = oskar_mem_double(spline->knots_y_phi, status);
         coeff   = oskar_mem_double(spline->coeff, status);
-        x_      = oskar_mem_double(x, status);
-        y_      = oskar_mem_double(y, status);
-        z_      = oskar_mem_double_const(z, status);
-        w_      = oskar_mem_double_const(w, status);
         do
         {
             avg_err = *avg_frac_err * peak_abs;
             spline->smoothing_factor = search_flag ?
-                    (num_points * avg_err * avg_err) : user_s;
-            oskar_dierckx_surfit_d(0, num_points, x_, y_, z_, w_,
-                    x_beg, x_end, y_beg, y_end, kx, ky,
-                    spline->smoothing_factor, nxest, nyest, ne, eps,
-                    &spline->num_knots_x, knots_x, &spline->num_knots_y,
-                    knots_y, coeff, &fp, (double*)wrk1, lwrk1, (double*)wrk2,
-                    lwrk2, iwrk, kwrk, &err);
+                    (num_points * avg_err * avg_err) : smooth_factor;
+            oskar_dierckx_surfit(0, num_points, x_theta, y_phi, z_data,
+                    weight, x_min, x_max, y_min, y_max, kx, ky,
+                    spline->smoothing_factor, nxest, nyest, ne, epsilon,
+                    &spline->num_knots_x_theta, knots_x,
+                    &spline->num_knots_y_phi, knots_y, coeff, &fp, wrk1,
+                    lwrk1, wrk2, lwrk2, iwrk, kwrk, &err);
 
-            /* Check for errors. */
-            if (err == 0 || err == -1 || err == -2) done = 1;
+            /* Break immediately if successful. */
+            if (err == 0 || err == -1 || err == -2)
+                break;
+
+            /* Check for unrecoverable errors. */
+            if (!search_flag || err >= 10 || *avg_frac_err == 0.0)
+            {
+                *status = OSKAR_ERR_SPLINE_COEFF_FAIL;
+                break;
+            }
             else
             {
-                if (!search_flag || err >= 10 || *avg_frac_err == 0.0)
-                {
-                    *status = OSKAR_ERR_SPLINE_COEFF_FAIL;
-                    done = 1;
-                }
-                else
-                {
-                    err = 0; /* Try again with a larger smoothing factor. */
-                    *avg_frac_err *= factor;
-                }
+                err = 0; /* Try again with a larger smoothing factor. */
+                *avg_frac_err *= inc_factor;
             }
-        } while (search_flag && !done);
-    }
+        } while (search_flag);
 
-    /* Compact the knot and coefficient arrays. */
-    u = spline->num_knots_x - kx - 1;
-    v = spline->num_knots_y - ky - 1;
-    oskar_mem_realloc(spline->knots_x, spline->num_knots_x, status);
-    oskar_mem_realloc(spline->knots_y, spline->num_knots_y, status);
-    oskar_mem_realloc(spline->coeff, u * v, status);
+        /* Compact the knot and coefficient arrays. */
+        u = spline->num_knots_x_theta - kx - 1;
+        v = spline->num_knots_y_phi - ky - 1;
+        oskar_mem_realloc(spline->knots_x_theta,
+                spline->num_knots_x_theta, status);
+        oskar_mem_realloc(spline->knots_y_phi,
+                spline->num_knots_y_phi, status);
+        oskar_mem_realloc(spline->coeff, u * v, status);
+    }
+    else if (fit_type == OSKAR_SPLINES_SPHERICAL)
+    {
+        int ntest, npest;
+        double *knots_theta, *knots_phi;
+
+        /* Allocate output spline data arrays. */
+        ntest = 8 + (int)ceil(sqrt(num_points/2));
+        npest = 8 + (int)ceil(sqrt(num_points/2));
+        oskar_mem_realloc(spline->knots_x_theta, ntest, status);
+        oskar_mem_realloc(spline->knots_y_phi, npest, status);
+        oskar_mem_realloc(spline->coeff, (ntest-4) * (npest-4), status);
+
+        /* Check if safe to proceed. */
+        if (*status) return;
+
+        /* Set up workspace. */
+        u = ntest - 7;
+        v = npest - 7;
+        lwrk1 = 185 + 52*v + 10*u + 14*u*v + 8*(u-1)*v*v + 8*num_points;
+        lwrk2 = 48 + 21*v + 7*u*v + 4*(u-1)*v*v;
+        kwrk = num_points + u*v;
+        wrk1 = (double*)malloc(lwrk1 * sizeof(double));
+        wrk2 = (double*)malloc(lwrk2 * sizeof(double));
+        iwrk = (int*)malloc(kwrk * sizeof(int));
+        if (!wrk1 || !wrk2 || !iwrk)
+        {
+            free(wrk1);
+            free(wrk2);
+            free(iwrk);
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            return;
+        }
+
+        /* Fitting procedure. */
+        knots_theta = oskar_mem_double(spline->knots_x_theta, status);
+        knots_phi   = oskar_mem_double(spline->knots_y_phi, status);
+        coeff       = oskar_mem_double(spline->coeff, status);
+        do
+        {
+            avg_err = *avg_frac_err * peak_abs;
+            spline->smoothing_factor = search_flag ?
+                    (num_points * avg_err * avg_err) : smooth_factor;
+            oskar_dierckx_sphere(0, num_points, x_theta, y_phi, z_data, weight,
+                    spline->smoothing_factor, ntest, npest, epsilon,
+                    &spline->num_knots_x_theta, knots_theta,
+                    &spline->num_knots_y_phi, knots_phi, coeff, &fp, wrk1,
+                    lwrk1, wrk2, lwrk2, iwrk, kwrk, &err);
+
+            /* Break immediately if successful. */
+            if (err == 0 || err == -1 || err == -2)
+                break;
+
+            /* Check for unrecoverable errors. */
+            if (!search_flag || err >= 10 || *avg_frac_err == 0.0)
+            {
+                *status = OSKAR_ERR_SPLINE_COEFF_FAIL;
+                break;
+            }
+            else
+            {
+                err = 0; /* Try again with a larger smoothing factor. */
+                *avg_frac_err *= inc_factor;
+            }
+        } while (search_flag);
+
+        /* Compact the knot and coefficient arrays. */
+        u = spline->num_knots_x_theta - 4;
+        v = spline->num_knots_y_phi - 4;
+        oskar_mem_realloc(spline->knots_x_theta,
+                spline->num_knots_x_theta, status);
+        oskar_mem_realloc(spline->knots_y_phi,
+                spline->num_knots_x_theta, status);
+        oskar_mem_realloc(spline->coeff, u * v, status);
+    }
 
     /* Free work arrays. */
-    free(iwrk);
-    free(wrk2);
     free(wrk1);
+    free(wrk2);
+    free(iwrk);
 }
 
 #ifdef __cplusplus

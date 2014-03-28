@@ -48,12 +48,17 @@ typedef struct oskar_Splines oskar_Splines;
 /* To maintain binary compatibility, do not change the values
  * in the lists below. */
 enum {
-    OSKAR_SPLINES_TAG_NUM_KNOTS_X = 1,
-    OSKAR_SPLINES_TAG_NUM_KNOTS_Y = 2,
-    OSKAR_SPLINES_TAG_KNOTS_X = 3,
-    OSKAR_SPLINES_TAG_KNOTS_Y = 4,
+    OSKAR_SPLINES_TAG_NUM_KNOTS_X_THETA = 1,
+    OSKAR_SPLINES_TAG_NUM_KNOTS_Y_PHI = 2,
+    OSKAR_SPLINES_TAG_KNOTS_X_THETA = 3,
+    OSKAR_SPLINES_TAG_KNOTS_Y_PHI = 4,
     OSKAR_SPLINES_TAG_COEFF = 5,
     OSKAR_SPLINES_TAG_SMOOTHING_FACTOR = 6
+};
+
+enum {
+    OSKAR_SPLINES_LINEAR = 0,
+    OSKAR_SPLINES_SPHERICAL = 1
 };
 
 #ifdef __cplusplus

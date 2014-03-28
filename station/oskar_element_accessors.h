@@ -51,6 +51,18 @@ OSKAR_EXPORT
 int oskar_element_has_spline_data(const oskar_Element* data);
 
 OSKAR_EXPORT
+int oskar_element_has_x_spline_data(const oskar_Element* data);
+
+OSKAR_EXPORT
+int oskar_element_has_y_spline_data(const oskar_Element* data);
+
+OSKAR_EXPORT
+int oskar_element_num_frequencies(const oskar_Element* data);
+
+OSKAR_EXPORT
+const double* oskar_element_frequencies_hz(const oskar_Element* data);
+
+OSKAR_EXPORT
 int oskar_element_type(const oskar_Element* data);
 
 OSKAR_EXPORT
@@ -63,68 +75,78 @@ OSKAR_EXPORT
 double oskar_element_gaussian_fwhm_rad(const oskar_Element* data);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_element_x_filename(oskar_Element* data);
+oskar_Mem* oskar_element_x_filename(oskar_Element* data, int freq_id);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_element_x_filename_const(const oskar_Element* data);
+const oskar_Mem* oskar_element_x_filename_const(const oskar_Element* data,
+        int freq_id);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_element_y_filename(oskar_Element* data);
+oskar_Mem* oskar_element_y_filename(oskar_Element* data, int freq_id);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_element_y_filename_const(const oskar_Element* data);
-
-
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_x_theta_re(oskar_Element* data);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_x_theta_re_const(const oskar_Element* data);
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_x_theta_im(oskar_Element* data);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_x_theta_im_const(const oskar_Element* data);
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_x_phi_re(oskar_Element* data);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_x_phi_re_const(const oskar_Element* data);
-
-OSKAR_EXPORT
-oskar_Splines* oskar_element_x_phi_im(oskar_Element* data);
-
-OSKAR_EXPORT
-const oskar_Splines* oskar_element_x_phi_im_const(const oskar_Element* data);
+const oskar_Mem* oskar_element_y_filename_const(const oskar_Element* data,
+        int freq_id);
 
 
 
 OSKAR_EXPORT
-oskar_Splines* oskar_element_y_theta_re(oskar_Element* data);
+oskar_Splines* oskar_element_x_h_re(oskar_Element* data, int freq_id);
 
 OSKAR_EXPORT
-const oskar_Splines* oskar_element_y_theta_re_const(const oskar_Element* data);
+const oskar_Splines* oskar_element_x_h_re_const(const oskar_Element* data,
+        int freq_id);
 
 OSKAR_EXPORT
-oskar_Splines* oskar_element_y_theta_im(oskar_Element* data);
+oskar_Splines* oskar_element_x_h_im(oskar_Element* data, int freq_id);
 
 OSKAR_EXPORT
-const oskar_Splines* oskar_element_y_theta_im_const(const oskar_Element* data);
+const oskar_Splines* oskar_element_x_h_im_const(const oskar_Element* data,
+        int freq_id);
 
 OSKAR_EXPORT
-oskar_Splines* oskar_element_y_phi_re(oskar_Element* data);
+oskar_Splines* oskar_element_x_v_re(oskar_Element* data, int freq_id);
 
 OSKAR_EXPORT
-const oskar_Splines* oskar_element_y_phi_re_const(const oskar_Element* data);
+const oskar_Splines* oskar_element_x_v_re_const(const oskar_Element* data,
+        int freq_id);
 
 OSKAR_EXPORT
-oskar_Splines* oskar_element_y_phi_im(oskar_Element* data);
+oskar_Splines* oskar_element_x_v_im(oskar_Element* data, int freq_id);
 
 OSKAR_EXPORT
-const oskar_Splines* oskar_element_y_phi_im_const(const oskar_Element* data);
+const oskar_Splines* oskar_element_x_v_im_const(const oskar_Element* data,
+        int freq_id);
+
+
+
+OSKAR_EXPORT
+oskar_Splines* oskar_element_y_h_re(oskar_Element* data, int freq_id);
+
+OSKAR_EXPORT
+const oskar_Splines* oskar_element_y_h_re_const(const oskar_Element* data,
+        int freq_id);
+
+OSKAR_EXPORT
+oskar_Splines* oskar_element_y_h_im(oskar_Element* data, int freq_id);
+
+OSKAR_EXPORT
+const oskar_Splines* oskar_element_y_h_im_const(const oskar_Element* data,
+        int freq_id);
+
+OSKAR_EXPORT
+oskar_Splines* oskar_element_y_v_re(oskar_Element* data, int freq_id);
+
+OSKAR_EXPORT
+const oskar_Splines* oskar_element_y_v_re_const(const oskar_Element* data,
+        int freq_id);
+
+OSKAR_EXPORT
+oskar_Splines* oskar_element_y_v_im(oskar_Element* data, int freq_id);
+
+OSKAR_EXPORT
+const oskar_Splines* oskar_element_y_v_im_const(const oskar_Element* data,
+        int freq_id);
 
 
 

@@ -65,17 +65,19 @@ oskar_Element* oskar_element_create(int precision, int location, int* status)
     if (precision != OSKAR_SINGLE && precision != OSKAR_DOUBLE)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
-    /* Initialise memory. */
-    data->filename_x = oskar_mem_create(OSKAR_CHAR, location, 0, status);
-    data->filename_y = oskar_mem_create(OSKAR_CHAR, location, 0, status);
-    data->phi_re_x = oskar_splines_create(precision, location, status);
-    data->phi_im_x = oskar_splines_create(precision, location, status);
-    data->theta_re_x = oskar_splines_create(precision, location, status);
-    data->theta_im_x = oskar_splines_create(precision, location, status);
-    data->phi_re_y = oskar_splines_create(precision, location, status);
-    data->phi_im_y = oskar_splines_create(precision, location, status);
-    data->theta_re_y = oskar_splines_create(precision, location, status);
-    data->theta_im_y = oskar_splines_create(precision, location, status);
+    /* Initialise arrays (to zero length). */
+    data->num_frequencies = 0;
+    data->frequency_hz = 0;
+    data->filename_x = 0;
+    data->filename_y = 0;
+    data->x_h_re = 0;
+    data->x_h_im = 0;
+    data->x_v_re = 0;
+    data->x_v_im = 0;
+    data->y_h_re = 0;
+    data->y_h_im = 0;
+    data->y_v_re = 0;
+    data->y_v_im = 0;
 
     /* Return pointer to the structure. */
     return data;

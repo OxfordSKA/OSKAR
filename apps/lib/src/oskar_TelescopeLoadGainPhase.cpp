@@ -57,7 +57,7 @@ void oskar_TelescopeLoadGainPhase::load(oskar_Station* station,
     if (cwd.exists(gain_phase_file))
     {
         oskar_station_load_gain_phase(station,
-                cwd.filePath(gain_phase_file).c_str(), status);
+                cwd.absoluteFilePath(gain_phase_file).c_str(), status);
     }
 }
 

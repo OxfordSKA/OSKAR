@@ -756,7 +756,7 @@ void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s)
         oskar_log_message(log, depth, "TEC image settings");
         depth++;
         LVI("Station index", s->ionosphere.TECImage.stationID);
-        LVI("Beam centred", s->ionosphere.TECImage.beam_centred);
+        LVB("Beam centred", s->ionosphere.TECImage.beam_centred);
         LVI("Image size", s->ionosphere.TECImage.size);
         LV("FOV (deg)", "%.3f", s->ionosphere.TECImage.fov_rad*(180./M_PI));
         if (s->ionosphere.TECImage.fits_file)
@@ -771,30 +771,20 @@ void oskar_log_settings_element_fit(oskar_Log* log, const oskar_Settings* s)
     int depth = 0;
     const oskar_SettingsElementFit* ef = &s->element_fit;
 
-    oskar_log_message(log, depth, "Element pattern fitting parameters");
+    oskar_log_message(log, depth, "Element pattern fitting settings");
     ++depth;
+    LVS("Input CST file", ef->input_cst_file);
+    LVS("Output FITS image file", ef->fits_image);
+    LV("Frequency [Hz]", "%.5e", ef->frequency_hz);
+    LVS("Polarisation type", ef->polarisation_type == 1 ? "X" :
+            ef->polarisation_type == 2 ? "Y" : "XY");
     LVB("Ignore data at poles", ef->ignore_data_at_pole);
     LVB("Ignore data below horizon", ef->ignore_data_below_horizon);
-    LV("Overlap angle [deg]", "%.1f", ef->overlap_angle_rad * R2D);
-    LV("Weighting at boundaries", "%.1f", ef->weight_boundaries);
-    LV("Weighting in overlap region", "%.1f", ef->weight_overlap);
-    oskar_log_message(log, depth, "Common settings (for all surfaces)");
-    ++depth;
-    LV("Epsilon (single precision)", "%.3e", ef->all.eps_float);
-    LV("Epsilon (double precision)", "%.3e", ef->all.eps_double);
-    LVB("Search for best fit", ef->all.search_for_best_fit);
-    if (ef->all.search_for_best_fit)
-    {
-        LV("Average fractional error", "%.4f",
-                ef->all.average_fractional_error);
-        LV("Average fractional error factor increase", "%.1f",
-                ef->all.average_fractional_error_factor_increase);
-    }
-    else
-    {
-        LV("Smoothness factor override", "%.4e",
-                ef->all.smoothness_factor_override);
-    }
+    LV("Average fractional error", "%.4f",
+            ef->average_fractional_error);
+    LV("Average fractional error factor increase", "%.1f",
+            ef->average_fractional_error_factor_increase);
+    LVS("Output telescope/station directory", ef->output_directory);
 }
 
 #ifdef __cplusplus

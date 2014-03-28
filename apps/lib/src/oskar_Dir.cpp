@@ -88,3 +88,16 @@ string oskar_Dir::filePath(const string& filename) const
 {
     return p->dir.filePath(QString::fromStdString(filename)).toStdString();
 }
+
+vector<string> oskar_Dir::filesStartingWith(string rootname) const
+{
+    vector<string> r;
+    QStringList files = p->dir.entryList(
+            QStringList() << (QString::fromStdString(rootname) + "*"),
+            QDir::Files | QDir::NoDotAndDotDot, QDir::Name);
+    for (int i = 0; i < files.size(); ++i)
+    {
+        r.push_back(files[i].toStdString());
+    }
+    return r;
+}

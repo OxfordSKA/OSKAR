@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-oskar_Splines* oskar_splines_create(int type, int location, int* status)
+oskar_Splines* oskar_splines_create(int precision, int location, int* status)
 {
     oskar_Splines* data = 0;
 
@@ -53,13 +53,13 @@ oskar_Splines* oskar_splines_create(int type, int location, int* status)
         return 0;
     }
 
-    data->type = type;
+    data->precision = precision;
     data->location = location;
-    data->num_knots_x = 0;
-    data->num_knots_y = 0;
-    data->knots_x = oskar_mem_create(type, location, 0, status);
-    data->knots_y = oskar_mem_create(type, location, 0, status);
-    data->coeff = oskar_mem_create(type, location, 0, status);
+    data->num_knots_x_theta = 0;
+    data->num_knots_y_phi = 0;
+    data->knots_x_theta = oskar_mem_create(precision, location, 0, status);
+    data->knots_y_phi = oskar_mem_create(precision, location, 0, status);
+    data->coeff = oskar_mem_create(precision, location, 0, status);
 
     /* Return pointer to the structure. */
     return data;

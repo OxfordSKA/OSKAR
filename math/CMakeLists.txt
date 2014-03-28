@@ -22,7 +22,10 @@ set(math_SRC
     src/oskar_dierckx_fprank.c
     src/oskar_dierckx_fprati.c
     src/oskar_dierckx_fprota.c
+    src/oskar_dierckx_fprpsp.c
+    src/oskar_dierckx_fpsphe.c
     src/oskar_dierckx_fpsurf.c
+    src/oskar_dierckx_sphere.c
     src/oskar_dierckx_surfit.c
     src/oskar_find_closest_match.c
     src/oskar_fit_ellipse.c

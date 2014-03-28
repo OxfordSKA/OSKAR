@@ -44,8 +44,8 @@ void oskar_splines_free(oskar_Splines* data, int* status)
     }
 
     /* Free the arrays. */
-    oskar_mem_free(data->knots_x, status);
-    oskar_mem_free(data->knots_y, status);
+    oskar_mem_free(data->knots_x_theta, status);
+    oskar_mem_free(data->knots_y_phi, status);
     oskar_mem_free(data->coeff, status);
 
     /* Free the structure itself. */

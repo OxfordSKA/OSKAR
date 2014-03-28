@@ -122,7 +122,6 @@ void oskar_convert_enu_direction_cosines_to_theta_phi(oskar_Mem* theta,
                     oskar_mem_float_const(z, status), (float)delta_phi,
                     oskar_mem_float(theta, status),
                     oskar_mem_float(phi, status));
-            oskar_cuda_check_error(status);
         }
         else if (type == OSKAR_DOUBLE)
         {
@@ -132,7 +131,6 @@ void oskar_convert_enu_direction_cosines_to_theta_phi(oskar_Mem* theta,
                     oskar_mem_double_const(z, status), delta_phi,
                     oskar_mem_double(theta, status),
                     oskar_mem_double(phi, status));
-            oskar_cuda_check_error(status);
         }
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;

@@ -69,6 +69,12 @@ void oskar_settings_load_element_fit(oskar_SettingsElementFit* settings,
         settings->output_directory = (char*)malloc(t.size() + 1);
         strcpy(settings->output_directory, t.constData());
     }
+    t = s.value("fits_image").toByteArray();
+    if (t.size() > 0)
+    {
+        settings->fits_image = (char*)malloc(t.size() + 1);
+        strcpy(settings->fits_image, t.constData());
+    }
     t = s.value("polarisation_type", "XY").toByteArray().toUpper();
     if (t == "X")
     {
@@ -94,30 +100,10 @@ void oskar_settings_load_element_fit(oskar_SettingsElementFit* settings,
             s.value("ignore_data_at_pole", false).toBool();
     settings->ignore_data_below_horizon =
             s.value("ignore_data_below_horizon", true).toBool();
-    settings->ignore_cached_files =
-            s.value("ignore_cached_files", false).toBool();
-    settings->overlap_angle_rad =
-            s.value("overlap_angle_deg", 9.0).toDouble() * D2R;
-    settings->use_common_set =
-            s.value("use_common_set", true).toBool();
-    settings->weight_boundaries =
-            s.value("weight_boundaries", 2.0).toDouble();
-    settings->weight_overlap =
-            s.value("weight_overlap", 1.0).toDouble();
 
-    // Element fitting parameters (for all surfaces).
-    s.beginGroup("all");
-    settings->all.eps_float =
-            s.value("eps_float", 1e-4).toDouble();
-    settings->all.eps_double =
-            s.value("eps_double", 1e-8).toDouble();
-    settings->all.search_for_best_fit =
-            s.value("search_for_best_fit", true).toBool();
-    settings->all.average_fractional_error =
-            s.value("average_fractional_error", 0.02).toDouble();
-    settings->all.average_fractional_error_factor_increase =
-            s.value("average_fractional_error_factor_increase", 1.5).toDouble();
-    settings->all.smoothness_factor_override =
-            s.value("smoothness_factor_override", 1.0).toDouble();
+    settings->average_fractional_error =
+            s.value("average_fractional_error", 0.005).toDouble();
+    settings->average_fractional_error_factor_increase =
+            s.value("average_fractional_error_factor_increase", 1.1).toDouble();
     s.endGroup();
 }

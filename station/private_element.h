@@ -53,16 +53,21 @@ struct oskar_Element
     double dipole_length_m; /**< Length of dipole in metres. */
     double cos_power; /**< For a cosine taper, the power of the cosine. */
     double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
-    oskar_Mem* filename_x;
-    oskar_Mem* filename_y;
-    oskar_Splines* theta_re_x;
-    oskar_Splines* theta_im_x;
-    oskar_Splines* phi_re_x;
-    oskar_Splines* phi_im_x;
-    oskar_Splines* theta_re_y;
-    oskar_Splines* theta_im_y;
-    oskar_Splines* phi_re_y;
-    oskar_Splines* phi_im_y;
+
+
+    /* These arrays of fitted data are per-frequency. */
+    int num_frequencies;
+    double* frequency_hz; /* Array of frequencies in Hz. */
+    oskar_Mem** filename_x;
+    oskar_Mem** filename_y;
+    oskar_Splines** x_h_re;
+    oskar_Splines** x_h_im;
+    oskar_Splines** x_v_re;
+    oskar_Splines** x_v_im;
+    oskar_Splines** y_h_re;
+    oskar_Splines** y_h_im;
+    oskar_Splines** y_v_re;
+    oskar_Splines** y_v_im;
 };
 
 #ifndef OSKAR_ELEMENT_TYPEDEF_

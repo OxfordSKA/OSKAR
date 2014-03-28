@@ -94,19 +94,22 @@ public:
     virtual std::string name() const;
 
 private:
-    void load_element_patterns(oskar_Log* log, const oskar_Settings* settings,
-            oskar_Station* station, std::map<std::string, std::string>& filemap,
+    double frequency_from_filename(const std::string& filename, int startidx,
             int* status);
+
+    void load_element_patterns(oskar_Station* station,
+            const std::map<std::string, std::string>& filemap, int* status);
 
     void update_map(std::map<std::string, std::string>& files,
             const oskar_Dir& cwd);
 
 private:
-    static const std::string spline_name_x;
-    static const std::string spline_name_y;
-    std::map<std::string, oskar_Element*> models;
+    static const std::string root_name;
+    std::string root_x;
+    std::string root_y;
     const oskar_Settings* settings_;
     oskar_Log* log_;
+    std::map<std::string, int> models;
 };
 
 #endif /* OSKAR_TELESCOPE_LOAD_ELEMENT_PATTERN_H_ */

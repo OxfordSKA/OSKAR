@@ -31,34 +31,41 @@
 #include <apps/lib/oskar_Dir.h>
 
 #include <oskar_element.h>
+#include <oskar_image.h>
 #include <oskar_log.h>
 #include <oskar_settings_init.h>
 #include <oskar_settings_free.h>
 #include <oskar_get_error_string.h>
 
 #include <string>
+#include <sstream>
+#include <iomanip>
+#include <cmath>
 
 using std::string;
 
-static std::string oskar_construct_element_pathname(const char* output_dir,
+static std::string construct_element_pathname(const char* output_dir,
         int port, double frequency_hz)
 {
-    string filename = "spline_data_cache";
+    std::ostringstream stream;
+    stream << "element_pattern_fit_";
     if (port == 1)
     {
-        filename += "_x";
+        stream << "x_";
     }
     else if (port == 2)
     {
-        filename += "_y";
+        stream << "y_";
     }
-    // FIXME Use the frequency in kHz to construct the filename.
-    filename += ".bin";
+
+    // Append the frequency in MHz.
+    stream << std::fixed << std::setprecision(0) << frequency_hz / 1.0e6;
+
+    // Append the file extension.
+    stream << ".bin";
 
     oskar_Dir dir(output_dir);
-    string pathname = dir.absoluteFilePath(filename);
-
-    return pathname;
+    return dir.absoluteFilePath(stream.str());
 }
 
 
@@ -66,6 +73,9 @@ extern "C"
 void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
         int* status)
 {
+    int port;
+    string output;
+
     // Load the settings.
     oskar_Settings settings;
     oskar_settings_init(&settings);
@@ -81,29 +91,69 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
     oskar_log_settings_element_fit(log, &settings);
     const char* input_file = settings.element_fit.input_cst_file;
     const char* output_dir = settings.element_fit.output_directory;
+    const char* fits_image = settings.element_fit.fits_image;
     double frequency_hz = settings.element_fit.frequency_hz;
 
-    // Set the port (X=1, Y=2) based on settings.
-    int port = settings.element_fit.polarisation_type;
-
-    // Construct the output file name based on the settings.
-    string output_file = oskar_construct_element_pathname(output_dir, port,
-            frequency_hz);
+    // Check that the input and output files have been set.
+    if (!input_file || !output_dir)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        oskar_settings_free(&settings);
+        return;
+    }
 
     // Create an element model.
     oskar_Element* element = oskar_element_create(OSKAR_DOUBLE,
             OSKAR_LOCATION_CPU, status);
 
-    // Load the CST text file.
-    if (port == 0) port = 1; // FIXME Handle unpolarised input?
+    // Load the CST text file for the correct port (X=1, Y=2).
+    port = settings.element_fit.polarisation_type;
     oskar_log_message(log, 0, "Loading CST element pattern: %s", input_file);
-    oskar_element_load_cst(element, log, port, input_file,
+    oskar_element_load_cst(element, log, port, frequency_hz, input_file,
             &settings.element_fit, status);
 
-    // Save fitted data.
-    oskar_element_write(element, port, output_file.c_str(), status);
+    // Construct the output file name based on the settings.
+    port = settings.element_fit.polarisation_type;
+
+    if (port == 0)
+    {
+        output = construct_element_pathname(output_dir, 1, frequency_hz);
+        oskar_element_write(element, 1, frequency_hz, output.c_str(), status);
+        output = construct_element_pathname(output_dir, 2, frequency_hz);
+        oskar_element_write(element, 2, frequency_hz, output.c_str(), status);
+    }
+    else
+    {
+        output = construct_element_pathname(output_dir, port, frequency_hz);
+        oskar_element_write(element, port, frequency_hz, output.c_str(),
+                status);
+    }
+
+    // Check if a FITS image is required.
+    if (fits_image)
+    {
+        // Generate an image grid.
+        int image_size = 512;
+
+        oskar_Image* image = oskar_image_create(OSKAR_DOUBLE,
+                OSKAR_LOCATION_CPU, status);
+        oskar_image_resize(image, image_size, image_size, 1, 1, 1, status);
+
+        /* Set element pattern meta-data. */
+        oskar_image_set_type(image, OSKAR_IMAGE_TYPE_BEAM_SCALAR);
+        oskar_image_set_coord_frame(image, OSKAR_IMAGE_COORD_FRAME_HORIZON);
+        oskar_image_set_grid_type(image, OSKAR_IMAGE_GRID_TYPE_RECTILINEAR);
+        oskar_image_set_centre(image, 0.0, 90.0);
+        oskar_image_set_fov(image, 180.0, 180.0);
+        oskar_image_set_freq(image, settings.element_fit.frequency_hz,
+                settings.element_fit.frequency_hz);
+        oskar_image_set_time(image, 0.0, 0.0);
+
+        oskar_image_free(image, status);
+    }
 
     // Free memory.
     oskar_element_free(element, status);
     oskar_settings_free(&settings);
 }
+

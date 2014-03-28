@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,6 +66,7 @@ private slots:
     void runBeamPattern();
     void runInterferometer();
     void runImager();
+    void runFitElementData();
     void setHideUnsetItems(bool value);
 
 private:
@@ -99,6 +100,7 @@ private:
     QString binary_interferometer_;
     QString binary_beam_pattern_;
     QString binary_imager_;
+    QString binary_fit_element_data_;
     QString binary_cuda_info_;
 
     bool isModified_;

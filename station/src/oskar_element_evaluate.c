@@ -34,6 +34,8 @@
 #include <oskar_evaluate_dipole_pattern.h>
 #include <oskar_evaluate_geometric_dipole_pattern.h>
 #include <oskar_convert_enu_direction_cosines_to_theta_phi.h>
+#include <oskar_convert_ludwig3_to_theta_phi_components.h>
+#include <oskar_find_closest_match.h>
 
 #include <math.h>
 
@@ -63,14 +65,8 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
     if (*status) return;
 
     /* Check if spline data is present for x or y dipole. */
-    spline_x = oskar_splines_has_coeffs(model->theta_re_x) &&
-            oskar_splines_has_coeffs(model->theta_im_x) &&
-            oskar_splines_has_coeffs(model->phi_re_x) &&
-            oskar_splines_has_coeffs(model->phi_im_x);
-    spline_y = oskar_splines_has_coeffs(model->theta_re_y) &&
-            oskar_splines_has_coeffs(model->theta_im_y) &&
-            oskar_splines_has_coeffs(model->phi_re_y) &&
-            oskar_splines_has_coeffs(model->phi_im_y);
+    spline_x = oskar_element_has_x_spline_data(model);
+    spline_y = oskar_element_has_y_spline_data(model);
 
     /* Check that the output array is complex. */
     if (!oskar_mem_is_complex(output))
@@ -101,21 +97,32 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
         /* Check if spline data present for dipole X. */
         if (spline_x)
         {
+            int freq_id;
+
             /* Compute modified theta and phi coordinates for dipole X. */
             delta_phi_x = M_PI/2.0 - orientation_x;
             oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
                     delta_phi_x, num_points, x, y, z, status);
             computed_angles = 1;
 
+            /* Get the frequency index. */
+            freq_id = oskar_find_closest_match_d(frequency_hz,
+                    oskar_element_num_frequencies(model),
+                    oskar_element_frequencies_hz(model));
+
             /* Evaluate spline pattern for dipole X. */
-            oskar_splines_evaluate(output, 0, 8, model->theta_re_x,
+            oskar_splines_evaluate(output, 0, 8, model->x_h_re[freq_id],
                     num_points, theta, phi, status);
-            oskar_splines_evaluate(output, 1, 8, model->theta_im_x,
+            oskar_splines_evaluate(output, 1, 8, model->x_h_im[freq_id],
                     num_points, theta, phi, status);
-            oskar_splines_evaluate(output, 2, 8, model->phi_re_x,
+            oskar_splines_evaluate(output, 2, 8, model->x_v_re[freq_id],
                     num_points, theta, phi, status);
-            oskar_splines_evaluate(output, 3, 8, model->phi_im_x,
+            oskar_splines_evaluate(output, 3, 8, model->x_v_im[freq_id],
                     num_points, theta, phi, status);
+
+            /* Convert from Ludwig-3 to spherical representation. */
+            oskar_convert_ludwig3_to_theta_phi_components(output,
+                    0, 4, num_points, phi, status);
         }
         else if (model->element_type == OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE)
         {
@@ -145,21 +152,32 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
         /* Check if spline data present for dipole Y. */
         if (spline_y)
         {
+            int freq_id;
+
             /* Compute modified theta and phi coordinates for dipole Y. */
-            delta_phi_y = -orientation_y;
+            delta_phi_y = M_PI/2.0 - orientation_y;
             oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
                     delta_phi_y, num_points, x, y, z, status);
             computed_angles = 1;
 
+            /* Get the frequency index. */
+            freq_id = oskar_find_closest_match_d(frequency_hz,
+                    oskar_element_num_frequencies(model),
+                    oskar_element_frequencies_hz(model));
+
             /* Evaluate spline pattern for dipole Y. */
-            oskar_splines_evaluate(output, 4, 8, model->theta_re_y,
+            oskar_splines_evaluate(output, 4, 8, model->y_h_re[freq_id],
                     num_points, theta, phi, status);
-            oskar_splines_evaluate(output, 5, 8, model->theta_im_y,
+            oskar_splines_evaluate(output, 5, 8, model->y_h_im[freq_id],
                     num_points, theta, phi, status);
-            oskar_splines_evaluate(output, 6, 8, model->phi_re_y,
+            oskar_splines_evaluate(output, 6, 8, model->y_v_re[freq_id],
                     num_points, theta, phi, status);
-            oskar_splines_evaluate(output, 7, 8, model->phi_im_y,
+            oskar_splines_evaluate(output, 7, 8, model->y_v_im[freq_id],
                     num_points, theta, phi, status);
+
+            /* Convert from Ludwig-3 to spherical representation. */
+            oskar_convert_ludwig3_to_theta_phi_components(output,
+                    2, 4, num_points, phi, status);
         }
         else if (model->element_type == OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE)
         {

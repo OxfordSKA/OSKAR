@@ -100,6 +100,8 @@ void oskar_settings_free(oskar_Settings* settings)
     settings->element_fit.input_cst_file = NULL;
     free(settings->element_fit.output_directory);
     settings->element_fit.output_directory = NULL;
+    free(settings->element_fit.fits_image);
+    settings->element_fit.fits_image = NULL;
 
     /* Free interferometer output file names. */
     free(settings->interferometer.ms_filename);

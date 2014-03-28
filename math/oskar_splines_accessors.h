@@ -41,31 +41,31 @@ extern "C" {
 #endif
 
 OSKAR_EXPORT
-int oskar_splines_type(const oskar_Splines* data);
+int oskar_splines_precision(const oskar_Splines* data);
 
 OSKAR_EXPORT
 int oskar_splines_location(const oskar_Splines* data);
 
 OSKAR_EXPORT
-int oskar_splines_has_coeffs(const oskar_Splines* data);
+int oskar_splines_have_coeffs(const oskar_Splines* data);
 
 OSKAR_EXPORT
-int oskar_splines_num_knots_x(const oskar_Splines* data);
+int oskar_splines_num_knots_x_theta(const oskar_Splines* data);
 
 OSKAR_EXPORT
-int oskar_splines_num_knots_y(const oskar_Splines* data);
+int oskar_splines_num_knots_y_phi(const oskar_Splines* data);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_splines_knots_x(oskar_Splines* data);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_splines_knots_x_const(const oskar_Splines* data);
+const oskar_Mem* oskar_splines_knots_x_theta_const(const oskar_Splines* data);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_splines_knots_y(oskar_Splines* data);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_splines_knots_y_const(const oskar_Splines* data);
+const oskar_Mem* oskar_splines_knots_y_phi_const(const oskar_Splines* data);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_splines_coeff(oskar_Splines* data);

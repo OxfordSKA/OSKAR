@@ -32,6 +32,7 @@
 #include <oskar_binary_stream_write_header.h>
 #include <oskar_binary_stream_write.h>
 #include <oskar_mem_binary_stream_write.h>
+#include <oskar_find_closest_match.h>
 
 #include <stdio.h>
 
@@ -42,11 +43,12 @@ extern "C" {
 static void write_splines(FILE* fhan, const oskar_Splines* splines,
         int index, int* status);
 
-void oskar_element_write(const oskar_Element* data, int port,
+void oskar_element_write(const oskar_Element* data, int port, double freq_hz,
         const char* filename, int* status)
 {
     FILE* fhan = 0;
-    const oskar_Splines *theta_re, *theta_im, *phi_re, *phi_im;
+    const oskar_Splines *h_re, *h_im, *v_re, *v_im;
+    int freq_id;
 
     /* Check all inputs. */
     if (!data || !filename  || !status)
@@ -58,20 +60,25 @@ void oskar_element_write(const oskar_Element* data, int port,
     /* Check if safe to proceed. */
     if (*status) return;
 
+    /* Get the frequency ID. */
+    freq_id = oskar_find_closest_match_d(freq_hz,
+            oskar_element_num_frequencies(data),
+            oskar_element_frequencies_hz(data));
+
     /* Get pointers based on port number. */
     if (port == 1)
     {
-        theta_re = oskar_element_x_theta_re_const(data);
-        theta_im = oskar_element_x_theta_im_const(data);
-        phi_re   = oskar_element_x_phi_re_const(data);
-        phi_im   = oskar_element_x_phi_im_const(data);
+        h_re = oskar_element_x_h_re_const(data, freq_id);
+        h_im = oskar_element_x_h_im_const(data, freq_id);
+        v_re = oskar_element_x_v_re_const(data, freq_id);
+        v_im = oskar_element_x_v_im_const(data, freq_id);
     }
     else if (port == 2)
     {
-        theta_re = oskar_element_y_theta_re_const(data);
-        theta_im = oskar_element_y_theta_im_const(data);
-        phi_re   = oskar_element_y_phi_re_const(data);
-        phi_im   = oskar_element_y_phi_im_const(data);
+        h_re = oskar_element_y_h_re_const(data, freq_id);
+        h_im = oskar_element_y_h_im_const(data, freq_id);
+        v_re = oskar_element_y_v_re_const(data, freq_id);
+        v_im = oskar_element_y_v_im_const(data, freq_id);
     }
     else
     {
@@ -79,15 +86,22 @@ void oskar_element_write(const oskar_Element* data, int port,
         return;
     }
 
+    /* Check that the data exist. */
+    if (!h_re || !h_im || !v_re || !v_im)
+    {
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
+
     /* Dump data to a binary file. */
     fhan = fopen(filename, "wb");
     oskar_binary_stream_write_header(fhan, status);
 
-    /* Write data for [theta_re], [theta_im], [phi_re], [phi_im] surfaces. */
-    write_splines(fhan, theta_re, 0, status);
-    write_splines(fhan, theta_im, 1, status);
-    write_splines(fhan, phi_re, 2, status);
-    write_splines(fhan, phi_im, 3, status);
+    /* Write data for [h_re], [h_im], [v_re], [v_im] surfaces. */
+    write_splines(fhan, h_re, 0, status);
+    write_splines(fhan, h_im, 1, status);
+    write_splines(fhan, v_re, 2, status);
+    write_splines(fhan, v_im, 3, status);
 
     /* Close the file. */
     fclose(fhan);
@@ -100,24 +114,24 @@ static void write_splines(FILE* fhan, const oskar_Splines* splines,
     oskar_Mem* temp;
     unsigned char group;
     group = OSKAR_TAG_GROUP_SPLINE_DATA;
-    knots_x = oskar_splines_knots_x_const(splines);
-    knots_y = oskar_splines_knots_y_const(splines);
+    knots_x = oskar_splines_knots_x_theta_const(splines);
+    knots_y = oskar_splines_knots_y_phi_const(splines);
     coeff   = oskar_splines_coeff_const(splines);
     oskar_binary_stream_write_int(fhan, group,
-            OSKAR_SPLINES_TAG_NUM_KNOTS_X, index,
-            oskar_splines_num_knots_x(splines), status);
+            OSKAR_SPLINES_TAG_NUM_KNOTS_X_THETA, index,
+            oskar_splines_num_knots_x_theta(splines), status);
     oskar_binary_stream_write_int(fhan, group,
-            OSKAR_SPLINES_TAG_NUM_KNOTS_Y, index,
-            oskar_splines_num_knots_y(splines), status);
+            OSKAR_SPLINES_TAG_NUM_KNOTS_Y_PHI, index,
+            oskar_splines_num_knots_y_phi(splines), status);
 
     /* Write data in double precision. */
     temp = oskar_mem_convert_precision(knots_x, OSKAR_DOUBLE, status);
     oskar_mem_binary_stream_write(temp, fhan, group,
-            OSKAR_SPLINES_TAG_KNOTS_X, index, 0, status);
+            OSKAR_SPLINES_TAG_KNOTS_X_THETA, index, 0, status);
     oskar_mem_free(temp, status);
     temp = oskar_mem_convert_precision(knots_y, OSKAR_DOUBLE, status);
     oskar_mem_binary_stream_write(temp, fhan, group,
-            OSKAR_SPLINES_TAG_KNOTS_Y, index, 0, status);
+            OSKAR_SPLINES_TAG_KNOTS_Y_PHI, index, 0, status);
     oskar_mem_free(temp, status);
     temp = oskar_mem_convert_precision(coeff, OSKAR_DOUBLE, status);
     oskar_mem_binary_stream_write(temp, fhan, group,
@@ -127,11 +141,11 @@ static void write_splines(FILE* fhan, const oskar_Splines* splines,
     /* Write data in single precision. */
     temp = oskar_mem_convert_precision(knots_x, OSKAR_SINGLE, status);
     oskar_mem_binary_stream_write(temp, fhan, group,
-            OSKAR_SPLINES_TAG_KNOTS_X, index, 0, status);
+            OSKAR_SPLINES_TAG_KNOTS_X_THETA, index, 0, status);
     oskar_mem_free(temp, status);
     temp = oskar_mem_convert_precision(knots_y, OSKAR_SINGLE, status);
     oskar_mem_binary_stream_write(temp, fhan, group,
-            OSKAR_SPLINES_TAG_KNOTS_Y, index, 0, status);
+            OSKAR_SPLINES_TAG_KNOTS_Y_PHI, index, 0, status);
     oskar_mem_free(temp, status);
     temp = oskar_mem_convert_precision(coeff, OSKAR_SINGLE, status);
     oskar_mem_binary_stream_write(temp, fhan, group,

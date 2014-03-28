@@ -29,29 +29,22 @@
 #ifndef OSKAR_PRIVATE_SPLINES_H_
 #define OSKAR_PRIVATE_SPLINES_H_
 
-/**
- * @file private_splines.h
- */
-
 #include <oskar_mem.h>
 
-/**
- * @brief Structure to hold spline data.
- *
- * @details
+/*
  * This structure holds the data required to construct a surface from
  * splines.
  */
 struct oskar_Splines
 {
-    int type;
+    int precision;
     int location;
-    int num_knots_x;         /**< Number of knots in x. */
-    int num_knots_y;         /**< Number of knots in y. */
-    oskar_Mem* knots_x;       /**< Knot positions in x. */
-    oskar_Mem* knots_y;       /**< Knot positions in y. */
-    oskar_Mem* coeff;         /**< Spline coefficient array. */
-    double smoothing_factor; /**< Actual smoothing factor used for the fit. */
+    int num_knots_x_theta;    /* Number of knots in x or theta. */
+    int num_knots_y_phi;      /* Number of knots in y or phi. */
+    oskar_Mem* knots_x_theta; /* Knot positions in x or theta. */
+    oskar_Mem* knots_y_phi;   /* Knot positions in y or phi. */
+    oskar_Mem* coeff;         /* Spline coefficient array. */
+    double smoothing_factor;  /* Actual smoothing factor used for the fit. */
 };
 
 #ifndef OSKAR_SPLINES_TYPEDEF_

@@ -13,6 +13,7 @@ set(station_SRC
     src/oskar_element_free.c
     src/oskar_element_load_cst.c
     src/oskar_element_read.c
+    src/oskar_element_resize_frequency_data.c
     src/oskar_element_write.c
     src/oskar_evaluate_array_pattern.c
     src/oskar_evaluate_array_pattern_dipoles.c

@@ -13,13 +13,7 @@ extern "C" {
  * @details
  * Subroutine fprota applies a givens rotation to a and b.
  */
-void oskar_dierckx_fprota_f(float cos_, float sin_, float *a, float *b);
-
-/**
- * @details
- * Subroutine fprota applies a givens rotation to a and b.
- */
-void oskar_dierckx_fprota_d(double cos_, double sin_, double *a, double *b);
+void oskar_dierckx_fprota(double cos_, double sin_, double *a, double *b);
 
 #ifdef __cplusplus
 }

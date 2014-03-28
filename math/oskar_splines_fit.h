@@ -49,24 +49,26 @@ extern "C" {
  *
  * @param[in,out] spline         Pointer to spline data structure.
  * @param[in]     num_points     Number of data points in all arrays.
- * @param[in]     x              Array of x positions.
- * @param[in]     y              Array of y positions.
- * @param[in]     z              Array of data points.
- * @param[in]     w              Array of data point weights.
- * @param[in]     search         If set, use supplied average fractional error.
+ * @param[in]     x_theta        Array of x or theta positions.
+ * @param[in]     y_phi          Array of y or phi positions.
+ * @param[in]     z_data         Array of data points.
+ * @param[in]     weight         Array of data point weights.
+ * @param[in]     fit_type       If set, use a spherical fit; otherwise linear.
+ * @param[in]     search_flag    If set, use supplied average fractional error.
  * @param[in,out] avg_frac_error On entry, the target average fractional error;
  *                               on exit, the achieved average fractional error.
  * @param[in]     inc_factor     Factor by which to increase average fractional
  *                               error on failure.
  * @param[in]     smooth_factor  A user-supplied smoothing factor.
- *                               Ignored if \p search parameter is clear.
+ *                               Ignored if \p search_flag parameter is clear.
+ * @param[in]     epsilon        Value of epsilon used for the fitting.
  * @param[in,out] status         Status return code.
  */
 OSKAR_EXPORT
-void oskar_splines_fit(oskar_Splines* spline, int num_points, oskar_Mem* x,
-        oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* w, int search,
-        double* avg_frac_err, double inc_factor, double user_s,
-        double eps_float, double eps_double, int* status);
+void oskar_splines_fit(oskar_Splines* spline, int num_points, double* x_theta,
+        double* y_phi, const double* z_data, const double* weight,
+        int fit_type, int search_flag, double* avg_frac_err,
+        double inc_factor, double smooth_factor, double epsilon, int* status);
 
 #ifdef __cplusplus
 }

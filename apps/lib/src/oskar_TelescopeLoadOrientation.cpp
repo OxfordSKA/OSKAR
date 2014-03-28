@@ -57,7 +57,7 @@ void oskar_TelescopeLoadOrientation::load(oskar_Station* station,
     if (cwd.exists(orientation_file))
     {
         oskar_station_load_orientation(station,
-                cwd.filePath(orientation_file).c_str(), status);
+                cwd.absoluteFilePath(orientation_file).c_str(), status);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,6 @@
 
 #include <oskar_dierckx_bispev.h>
 #include <oskar_dierckx_bispev_bicubic_cuda.h>
-#include <private_splines.h>
 #include <oskar_splines.h>
 #include <oskar_cuda_check_error.h>
 
@@ -53,7 +52,7 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
     if (*status) return;
 
     /* Check type. */
-    type = oskar_splines_type(spline);
+    type = oskar_splines_precision(spline);
     if (type != oskar_mem_type(x) || type != oskar_mem_type(y))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
@@ -71,11 +70,11 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
     }
 
     /* Check that the spline data has been set up. */
-    nx = spline->num_knots_x;
-    ny = spline->num_knots_y;
+    nx = oskar_splines_num_knots_x_theta(spline);
+    ny = oskar_splines_num_knots_y_phi(spline);
     if (!oskar_mem_allocated(oskar_splines_coeff_const(spline)) ||
-            !oskar_mem_allocated(oskar_splines_knots_x_const(spline)) ||
-            !oskar_mem_allocated(oskar_splines_knots_y_const(spline)))
+            !oskar_mem_allocated(oskar_splines_knots_x_theta_const(spline)) ||
+            !oskar_mem_allocated(oskar_splines_knots_y_phi_const(spline)))
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
         return;
@@ -87,9 +86,9 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
         const float *tx, *ty, *coeff, *x_, *y_;
         float *out;
         tx    = oskar_mem_float_const(
-                oskar_splines_knots_x_const(spline), status);
+                oskar_splines_knots_x_theta_const(spline), status);
         ty    = oskar_mem_float_const(
-                oskar_splines_knots_y_const(spline), status);
+                oskar_splines_knots_y_phi_const(spline), status);
         coeff = oskar_mem_float_const(
                 oskar_splines_coeff_const(spline), status);
         x_    = oskar_mem_float_const(x, status);
@@ -136,9 +135,9 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
         const double *tx, *ty, *coeff, *x_, *y_;
         double *out;
         tx    = oskar_mem_double_const(
-                oskar_splines_knots_x_const(spline), status);
+                oskar_splines_knots_x_theta_const(spline), status);
         ty    = oskar_mem_double_const(
-                oskar_splines_knots_y_const(spline), status);
+                oskar_splines_knots_y_phi_const(spline), status);
         coeff = oskar_mem_double_const(
                 oskar_splines_coeff_const(spline), status);
         x_    = oskar_mem_double_const(x, status);
