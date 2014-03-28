@@ -29,22 +29,34 @@
 #  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 #  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
-#
+# 
+"""
+=====================================================
+sim.py : Simulation helper functions for use with OSKAR
+=====================================================
 
-class Settings:
-    def __ini__(self, filename)
-        self.filename = filename
-        self.group = []
+This module provides functions that may be useful for scripting OSKAR 
+simulations
 
-    def beginGroup(self, name):
-        self.group.append(name)
+- :func:`run_interferometer` 
+- :func:`run_beam_pattern` 
+- :func:`create_dir` 
 
-    def endGroup(self):
+"""
 
 
-    def set(self, key, value):
-        set_(key, value)
+def run_interferometer(ini):
+    import os
+    os.system('oskar_sim_interferometer '+ini)
 
-    def set_(self, key, value):
-        import os
-        os.system('oskar_settings_set -q '+filename+' '+key+' "'+str(value)+'"')
+def run_beam_pattern(ini):
+    import os
+    os.system('oskar_sim_beam_pattern '+ini)
+
+def create_dir(name):
+    import os
+    if not os.path.isdir(name):
+        os.makedirs(name)
+
+
+

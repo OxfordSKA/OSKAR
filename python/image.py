@@ -55,5 +55,23 @@ def make(uu,vv,amp,freq,fov,size):
     return image_lib.make(uu,vv,amp,freq,fov,size)
 
 
+def fov_to_cellsize(fov_deg, size):
+    """
+    fov_to_cellsize(fov_deg, size)
+    
+    Convert image FoV and size along one dimension in pixels to cellsize in arcseconds.
+
+    Arguments:
+    fov_deg -- Image FoV, in degrees
+    size    -- Image size in one dimension in pixels
+
+    Return:
+    Image cellsize, in arcseconds
+    """
+    import numpy as np
+    rmax = np.sin(fov_deg/2.0*(np.pi/180.0))
+    inc = rmax / (0.5 * size)
+    return np.arcsin(inc)*((180.0*3600.0)/np.pi)
+
     
 
