@@ -36,4 +36,4 @@
 import oskar
 
 m1 = oskar.mem.oskar_Mem(10, type=oskar.mem.mtype.double, location=oskar.mem.mloc.gpu)
-print m1.location()
+print 'location =',m1.location(),' [0 = cpu, 1 = gpu]'

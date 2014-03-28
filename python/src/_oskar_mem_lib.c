@@ -57,13 +57,11 @@ static PyObject* create(PyObject* self, PyObject* args, PyObject* keywds)
         return NULL;
 
     int status = OSKAR_SUCCESS;
-
     oskar_Mem* mem = oskar_mem_create(type_, loc_, length_, &status);
 
     const char* name = "oskar_Mem";
     PyObject* mem_ =  PyCapsule_New((void*)mem,name,(PyCapsule_Destructor)mem_free);
-    return mem_;
-    //return Py_BuildValue("Oi", mem_, status);
+    return Py_BuildValue("Oi", mem_, status);
 }
 
 static PyObject* get_location(PyObject* self, PyObject* args)

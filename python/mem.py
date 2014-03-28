@@ -68,7 +68,7 @@ class mtype:
 class oskar_Mem:
 
     def __init__(self, length, type=mtype.double, location=mloc.cpu):
-        self.__handle = mem_lib.create(type, location, length)
+        (self.__handle,_) = mem_lib.create(type, location, length)
 
     def location(self):
         return mem_lib.location(self.__handle)
