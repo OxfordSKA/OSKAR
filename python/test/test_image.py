@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 # 
 #  This file is part of OSKAR.
 # 
@@ -29,31 +31,27 @@
 #  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 #  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
-# 
-"""
-=====================================================
-image.py : OSKAR image related functions
-=====================================================
-
-This module provides functions related to OSKAR images.
-
-Image creation
-----------------------------------
-
-- :func:`make` makes an image of visibility data by DFT on the GPU
-
-"""
+#
 
 import numpy as np
-import exceptions
-import _image_lib as image_lib
+import oskar
+import matplotlib.pyplot as plt
 
-__all__ = ['make']
+uu = np.array([ 1, -1], dtype=np.float64)
+vv = np.array([-1,  1], dtype=np.float64)
+amp = np.array([1+0j, 1+0j], dtype=np.complex128)
+uu*=10.0
+vv*=20.0
 
-def make(uu,vv,amp,freq,fov,size):
-    """make(uu,vv,amp,freq,fov,size)"""
-    return image_lib.make(uu,vv,amp,freq,fov,size)
+freq = 100.0e6
+fov = 180.0
+size = 256
 
+img = oskar.image.make(uu, vv, amp, freq, fov, size)
 
-    
+img = np.reshape(img, (size, size))
+plt.imshow(img)
+plt.colorbar()
+plt.show()
+
 

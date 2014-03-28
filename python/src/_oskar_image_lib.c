@@ -90,6 +90,8 @@ static void make_image_dft_(double* image, int num_vis, const double* uu,
     oskar_mem_free(amp_, &err);
     oskar_mem_free(l_, &err);
     oskar_mem_free(m_, &err);
+
+    //printf("status = %i\n", err);
 }
 
 // TODO avoid memory duplication between Python and oskar_Mem/Image arrays.
@@ -134,7 +136,7 @@ static PyObject* make_image_dft(PyObject* self, PyObject* args, PyObject* keywds
 //    printf("fov = %.2f\n", fov_deg);
 //    printf("size = %i\n", size);
 //    printf("[0] uu = %.2f, vv = %.2f, amp = (%.2f,%.2f)\n", uu[0], vv[0], amp[0].re, amp[0].im);
-//    printf("[1] uu = %.2f, vv = %.2f, amp = (%.2f,%.2f)\n", uu[1], vv[1], amp[1].re, amp[1].im);
+    //printf("[1] uu = %.2f, vv = %.2f, amp = (%.2f,%.2f)\n", uu[1], vv[1], amp[1].re, amp[1].im);
 
     // Create memory for image data.
     npy_intp dims = size*size;
@@ -142,7 +144,9 @@ static PyObject* make_image_dft(PyObject* self, PyObject* args, PyObject* keywds
     double* image = (double*)PyArray_DATA(image_);
 
     // Call wrapper function to make image.
-    make_image_dft_(image, num_vis, uu, vv, amp, freq, size, fov_deg*M_PI/180.0);
+    make_image_dft_(image, num_vis, uu, vv, amp, freq, size, fov_deg*(M_PI/180.0));
+
+//    printf("image [0] = %.2f\n", image[0]);
 
     // Return image to the python workspace.
     return Py_BuildValue("O", image_);

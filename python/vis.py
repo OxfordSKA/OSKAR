@@ -29,30 +29,25 @@
 #  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 #  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
-# 
+#
+
 """
 =====================================================
-image.py : OSKAR image related functions
+vis.py : OSKAR visibility related functions
 =====================================================
 
-This module provides functions related to OSKAR images.
+This module provides functions related to OSKAR visibility data.
 
-Image creation
-----------------------------------
-
-- :func:`make` makes an image of visibility data by DFT on the GPU
+- :func:`read` reads an oskar visibility binary file
 
 """
 
 import numpy as np
 import exceptions
-import _image_lib as image_lib
+import _vis_lib as vis_lib
 
-__all__ = ['make']
+__all__ = ['read']
 
-def make(uu,vv,amp,freq,fov,size):
-    """make(uu,vv,amp,freq,fov,size)"""
-    return image_lib.make(uu,vv,amp,freq,fov,size)
 
 
     
