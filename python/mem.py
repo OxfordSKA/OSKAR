@@ -54,16 +54,16 @@ class mloc:
     gpu = 1
 
 class mtype:
-    char = 1
-    int = 2
-    single = 4
-    double = 8
-    complex = 20
-    matrix = 40
-    single_complex = (single|complex)
-    double_complex = (double|complex)
-    single_complex_matrix = (single|complex|matrix)
-    double_complex_matrix = (double|complex|matrix)
+    char    = 0x01
+    int     = 0x02
+    single  = 0x04
+    double  = 0x08
+    complex = 0x20
+    matrix  = 0x40
+    single_complex = single | complex
+    double_complex = double | complex
+    single_complex_matrix = single | complex | matrix
+    double_complex_matrix = double | complex | matrix
 
 class oskar_Mem:
 
