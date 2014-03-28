@@ -337,9 +337,9 @@ macro(OSKAR_MEX)
         message(CRITICAL "Unable to build mex functions without a MATLAB install!")
     endif ()
 
-    if (NOT DEFINED OSKAR_MEX_INSTALL_DIR)
-        set(OSKAR_MEX_INSTALL_DIR ${OSKAR_MATLAB_INSTALL_DIR})
-    endif()
+#    if (NOT DEFINED OSKAR_MEX_INSTALL_DIR)
+#        set(OSKAR_MEX_INSTALL_DIR ${OSKAR_MATLAB_INSTALL_DIR})
+#    endif()
 
     # Over-ride compiler flags for mex functions
     set(CMAKE_CXX_FLAGS "")
@@ -422,11 +422,14 @@ macro(OSKAR_PY_MODULE)
 
     if (APPLE)
         set_target_properties(${target} PROPERTIES
+            INSTALL_RPATH_USE_LINK_PATH TRUE
             OUTPUT_NAME   "${PY_NAME}"
             PREFIX        ""
             SUFFIX        ".so")
     else()
         set_target_properties(${target} PROPERTIES
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            INSTALL_RPATH_USE_LINK_PATH TRUE
             OUTPUT_NAME   "${PY_NAME}"
             PREFIX        ""
             SUFFIX        ".so")

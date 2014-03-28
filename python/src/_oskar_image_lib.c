@@ -48,7 +48,7 @@ typedef struct {
     double im;
 } dComplex;
 
-static void make_image(double* image, int num_vis, const double* uu,
+static void make_image_dft_(double* image, int num_vis, const double* uu,
     const double* vv, const dComplex* amp, double freq, int size, double fov)
 {
     int err = OSKAR_SUCCESS;
@@ -93,7 +93,7 @@ static void make_image(double* image, int num_vis, const double* uu,
 }
 
 // TODO avoid memory duplication between Python and oskar_Mem/Image arrays.
-static PyObject* oskar_make_image(PyObject* self, PyObject* args, PyObject* keywds)
+static PyObject* make_image_dft(PyObject* self, PyObject* args, PyObject* keywds)
 {
     // Function arguments.
     PyObject* uu_ = NULL;
@@ -101,7 +101,7 @@ static PyObject* oskar_make_image(PyObject* self, PyObject* args, PyObject* keyw
     PyObject* amp_ = NULL;
     int size = 128;
     double fov_deg = 2.0;
-    double freq = 100e6;
+    double freq;
 
     static char* keywords[] = {"uu", "vv", "amp", "freq", "fov", "size", NULL};
     //static char* keywords[] = {"fov", "size", NULL};
@@ -142,16 +142,16 @@ static PyObject* oskar_make_image(PyObject* self, PyObject* args, PyObject* keyw
     double* image = (double*)PyArray_DATA(image_);
 
     // Call wrapper function to make image.
-    make_image(image, num_vis, uu, vv, amp, freq, size, fov_deg*M_PI/180.0);
+    make_image_dft_(image, num_vis, uu, vv, amp, freq, size, fov_deg*M_PI/180.0);
 
     // Return image to the python workspace.
     return Py_BuildValue("O", image_);
 }
 
 // Method table.
-static PyMethodDef oskar_methods[] =
+static PyMethodDef oskar_image_lib_methods[] =
 {
-        {"make_image", (PyCFunction)oskar_make_image, METH_VARARGS | METH_KEYWORDS,
+        {"make", (PyCFunction)make_image_dft, METH_VARARGS | METH_KEYWORDS,
         "make_image(uu,vv,amp,freq,fov=2.0,size=128)\n\n"
         "Makes an image from visibility data. Computation is performed using a\n"
         "DFT implemented on the GPU using CUDA.\n\n"
@@ -175,10 +175,10 @@ static PyMethodDef oskar_methods[] =
 
 // Initialisation function (called init[filename] where filename = name of *.so)
 // http://docs.python.org/2/extending/extending.html
-PyMODINIT_FUNC initoskar(void )
+PyMODINIT_FUNC init_image_lib(void)
 {
     PyObject* m = NULL;
-    m = Py_InitModule3("oskar", oskar_methods, "TODO: docstring...");
+    m = Py_InitModule3("_image_lib", oskar_image_lib_methods, "TODO: docstring...");
     if (m == NULL)
         return;
     OskarError = PyErr_NewException("oskar.error", NULL, NULL);
