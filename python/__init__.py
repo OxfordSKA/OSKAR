@@ -33,18 +33,12 @@
 """OSKAR is a package to simulate interferometric visibility data ....
 """
 
-import warnings
-
-try:
-    ImportWarning
-except NameError:
-    class ImportWarning(Warning):
-        pass
-
 from version import __version__
 
+import binary_file
 import image
 import mem
+import settings
+import sim
 import vis
 from mem import (mloc, mtype)
-
