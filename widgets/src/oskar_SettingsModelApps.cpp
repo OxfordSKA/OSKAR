@@ -452,6 +452,11 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
             "time-invariant Gaussian station beam can be used instead of an "
             "aperture array beam if required for testing.");
 
+    k = root + "/normalise_beam_centre";
+    declare(k , "Normalise beam centre", oskar_SettingsItem::BOOL, false);
+    setTooltip(k, "If <b>true</b>, then scale the amplitude at the centre of "
+            "every station beam to precisely 1.0 for each time snapshot.");
+
     // Aperture array settings.
     group = root + "/aperture_array";
     setLabel(group, "Aperture array settings");
@@ -469,10 +474,10 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     k = group + "/normalise";
     declare(k, "Normalise array pattern", oskar_SettingsItem::BOOL, false);
     setDependency(k, k_enable_array, true);
-    setTooltip(k, "If true, the station beam will be normalised by dividing "
-            "by the number of antennas in the station to give a nominal "
-            "peak value of 1.0; if false, then no normalisation is "
-            "performed.");
+    setTooltip(k, "If true, the amplitude of each station beam will be divided "
+            "by the number of antennas in the station; if false, then this "
+            "normalisation is not performed. Note, however, that global beam "
+            "normalisation is still possible.");
 
     // Array element override settings.
     group = root + "/aperture_array/array_pattern/element";
@@ -551,9 +556,9 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
             "if not using a numerically-defined pattern.");
 
     // Element pattern numerical option.
-    QString k_numerical = group + "/enable_numerical";
-    declare(k_numerical, "Enable numerical patterns if present", oskar_SettingsItem::BOOL, true);
-    setTooltip(k_numerical, "If <b>true</b>, make use of any available "
+    k = group + "/enable_numerical";
+    declare(k, "Enable numerical patterns if present", oskar_SettingsItem::BOOL, true);
+    setTooltip(k, "If <b>true</b>, make use of any available "
             "numerical element pattern files. If numerical pattern data "
             "are missing, the functional type will be used instead.");
 
@@ -603,13 +608,10 @@ void oskar_SettingsModelApps::init_settings_element_fit()
 
     k = root + "/input_cst_file";
     declare(k, "Input CST file", oskar_SettingsItem::INPUT_FILE_NAME);
-    setTooltip(k, "Path to a text file containing element pattern data "
-            "exported by CST.");
-
-    k = root + "/fits_image";
-    declare(k, "Output FITS image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
-    setTooltip(k, "Optional path to save a FITS image using the fitted "
-            "coefficients.");
+    setTooltip(k, "Pathname to a file containing an ASCII data table of the "
+            "directional element pattern response, as exported by the CST "
+            "software package in (theta, phi) coordinates. See the Telescope "
+            "Model documentation for a description of the required columns.");
 
     k = root + "/frequency_hz";
     declare(k, "Frequency [Hz]", oskar_SettingsItem::DOUBLE);
@@ -645,12 +647,16 @@ void oskar_SettingsModelApps::init_settings_element_fit()
             "error between the fitted surface and the numerical element "
             "pattern input data, before trying again. Must be &gt; 1.0.");
 
-
     k = root + "/output_directory";
     declare(k, "Telescope or station directory",
             oskar_SettingsItem::TELESCOPE_DIR_NAME);
     setTooltip(k, "Path to the telescope or station directory in which to "
             "save the fitted coefficients.");
+
+    k = root + "/fits_image";
+    declare(k, "Output FITS image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "Optional path to save a FITS image generated using the "
+            "fitted coefficients.");
 }
 
 void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& root)
