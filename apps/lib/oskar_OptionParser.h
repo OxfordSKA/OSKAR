@@ -151,11 +151,9 @@ public:
             this->syntax += " <" + required_[i] + ">";
         for (int i = 0; i < (int)optional_.size(); ++i)
             this->syntax += " [" + optional_[i] + "]";
-
         // TODO overload here rather than editing the library header...!
         ez::ezOptionParser::getUsage(usage);
-
-    } // void getUsage(std::string& usage)
+    }
 
     int numArgs() const
     {

@@ -76,7 +76,6 @@ static PyObject* get_num_baselines(PyObject* self, PyObject* args)
     return Py_BuildValue("");
 }
 
-
 // Methods table
 static PyMethodDef oskar_vis_lib_methods[] =
 {

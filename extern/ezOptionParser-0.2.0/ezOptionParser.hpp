@@ -1816,6 +1816,7 @@ void ezOptionParser::getUsage(std::string & usage, int width, Layout layout)
         usage.append("\n");
         usage.append("  ");
         // Wrap the description string.
+        // TODO respect user added formatting.
         typedef string::size_type string_size;
         string_size i = 0;
         string_size counter = 0;

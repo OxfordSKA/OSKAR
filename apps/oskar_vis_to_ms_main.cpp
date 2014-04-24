@@ -32,7 +32,7 @@
 #include <oskar_log.h>
 #include <oskar_vis.h>
 #include <oskar_version_string.h>
-
+#include <string>
 #include <cstdio>
 
 int main(int argc, char** argv)
@@ -42,17 +42,26 @@ int main(int argc, char** argv)
     int error = 0;
 
     oskar_OptionParser opt("oskar_vis_to_ms", oskar_version_string());
+    opt.setDescription("Converts an OSKAR visibility binary file to "
+            "Measurement Set format (http://casa.nrao.edu/Memos/229.html).\n"
+            "If not specified, the name of the Measurement Set is constructed "
+            "from the name of the OSKAR visibility file with the suffix '.ms' "
+            "added.");
     opt.addRequired("OSKAR vis file");
-    opt.addRequired("MS name");
+    opt.addOptional("MS name");
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
 
     const char* oskar_vis = opt.getArg(0);
-    const char* ms_name = opt.getArg(1);
+    std::string ms_name;
+    if (opt.numArgs() == 2)
+        ms_name = std::string(opt.getArg(1));
+    else
+        ms_name = std::string(oskar_vis) + ".ms";
 
     // Load the visibility file and write it out as a Measurement Set.
     oskar_Vis* vis = oskar_vis_read(oskar_vis, &error);
-    oskar_vis_write_ms(vis, ms_name, 1, &error);
+    oskar_vis_write_ms(vis, ms_name.c_str(), 1, &error);
     if (error)
         oskar_log_error(0, oskar_get_error_string(error));
     oskar_vis_free(vis, &error);

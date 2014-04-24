@@ -51,7 +51,26 @@ import _image_lib as image_lib
 __all__ = ['make']
 
 def make(uu,vv,amp,freq,fov,size):
-    """make(uu,vv,amp,freq,fov,size)"""
+    """make(uu,vv,amp,freq,fov=2.0,size=128)
+    
+    Makes an image from visibility data. Computation is performed using a 
+    DFT implemented on the GPU using CUDA.
+    
+    Parameters
+    ----------
+    uu : array like, shape (n,), float64
+        Input baseline uu coordinates, in metres.
+    vv : array like, shape (n,), float64
+        Input baseline vv coordinates, in metres.
+    amp : array like, shape (n,), complex128
+        Input baseline amplitudes.
+    freq : scalar, float64
+        Frequency, in Hz.
+    fov : scalar, default = 2.0
+        Image field of view, in degrees.
+    size : integer, default=128
+        Image size along one dimension, in pixels.
+    """
     return image_lib.make(uu,vv,amp,freq,fov,size)
 
 
