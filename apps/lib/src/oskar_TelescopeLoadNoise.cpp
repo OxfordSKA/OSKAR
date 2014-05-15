@@ -231,7 +231,8 @@ void oskar_TelescopeLoadNoise::setNoiseRMS_(oskar_SystemNoiseModel* model,
     double integration_time = settings_->interferometer.time_average_sec;
     double bandwidth = settings_->interferometer.channel_bandwidth_hz;
 
-    if (bandwidth < DBL_MIN || integration_time < DBL_MIN)
+    if (settings_noise.value.specification != OSKAR_SYSTEM_NOISE_RMS &&
+            (bandwidth < DBL_MIN || integration_time < DBL_MIN))
     {
         *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
         return;
