@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,27 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief Splits a string into integer fields.
+ *
+ * @details
+ * This function splits a string into a sequence of integers. Splitting is
+ * performed either using whitespace or a comma.
+ *
+ * <b>Note that the input string is corrupted on exit.</b>
+ *
+ * Any data after a hash '#' symbol on the line is treated as a comment and
+ * ignored.
+ *
+ * @param[in,out] str The input string to split.
+ * @param[in] n The maximum number of values to return (size of array \p data).
+ * @param[out] data The array of values returned.
+ *
+ * @return The number of values matched (or number of array elements filled).
+ */
+OSKAR_EXPORT
+size_t oskar_string_to_array_i(char* str, size_t n, int* data);
 
 /**
  * @brief Splits a string into numeric fields (single precision).

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,23 @@ extern "C" {
 #endif
 
 #define DELIMITERS ", "
+
+/* Integer. */
+size_t oskar_string_to_array_i(char* str, size_t n, int* data)
+{
+    size_t i = 0;
+    char *save_ptr, *token;
+    do
+    {
+        token = strtok_r(str, DELIMITERS, &save_ptr);
+        str = NULL;
+        if (!token) break;
+        if (token[0] == '#') break;
+        if (sscanf(token, "%i", &data[i]) > 0) i++;
+    }
+    while (i < n);
+    return i;
+}
 
 /* Single precision. */
 size_t oskar_string_to_array_f(char* str, size_t n, float* data)
