@@ -233,6 +233,7 @@ OSKAR_INLINE int oskar_mem_type_is_scalar(const int mem_type)
 #include <oskar_mem_element_size.h>
 #include <oskar_mem_evaluate_relative_error.h>
 #include <oskar_mem_free.h>
+#include <oskar_mem_get_element.h>
 #include <oskar_mem_insert.h>
 #include <oskar_mem_load_ascii.h>
 #include <oskar_mem_random_fill.h>
@@ -241,6 +242,7 @@ OSKAR_INLINE int oskar_mem_type_is_scalar(const int mem_type)
 #include <oskar_mem_save_ascii.h>
 #include <oskar_mem_scale_real.h>
 #include <oskar_mem_set_alias.h>
+#include <oskar_mem_set_element.h>
 #include <oskar_mem_set_value_real.h>
 #include <oskar_mem_stats.h>
 

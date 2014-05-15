@@ -57,6 +57,7 @@ set(utility_SRC
     src/oskar_mem_element_multiply.c
     src/oskar_mem_evaluate_relative_error.c
     src/oskar_mem_free.c
+    src/oskar_mem_get_element.c
     src/oskar_mem_insert.c
     src/oskar_mem_load_ascii.c
     src/oskar_mem_random_fill.c
@@ -65,6 +66,7 @@ set(utility_SRC
     src/oskar_mem_save_ascii.c
     src/oskar_mem_scale_real.c
     src/oskar_mem_set_alias.c
+    src/oskar_mem_set_element.c
     src/oskar_mem_set_value_real.c
     src/oskar_mem_stats.c
     src/oskar_settings_free.c
