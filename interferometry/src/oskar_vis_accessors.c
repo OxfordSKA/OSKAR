@@ -59,6 +59,16 @@ const oskar_Mem* oskar_vis_telescope_path_const(const oskar_Vis* vis)
     return vis->telescope_path;
 }
 
+oskar_Mem* oskar_vis_settings(oskar_Vis* vis)
+{
+    return vis->settings;
+}
+
+const oskar_Mem* oskar_vis_settings_const(const oskar_Vis* vis)
+{
+    return vis->settings;
+}
+
 int oskar_vis_num_channels(const oskar_Vis* vis)
 {
     return vis->num_channels;

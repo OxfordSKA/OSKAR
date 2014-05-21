@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,29 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_APERTURE_ARRAY_H_
-#define OSKAR_SETTINGS_APERTURE_ARRAY_H_
+#ifndef OSKAR_STATION_SAVE_ORIENTATION_H_
+#define OSKAR_STATION_SAVE_ORIENTATION_H_
 
 /**
- * @file oskar_SettingsApertureArray.h
+ * @file oskar_station_save_orientation.h
  */
 
-#include <oskar_SettingsArrayPattern.h>
-#include <oskar_SettingsElementPattern.h>
+#include <oskar_global.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @struct oskar_SettingsApertureArray
- *
- * @brief Structure to hold settings for aperture array stations.
+ * @brief Writes OSKAR station model data to an ASCII file.
  *
  * @details
- * The structure holds settings for aperture array stations.
+ * This function writes element orientation data from the station model to an
+ * ASCII file.
+ *
+ * @param[in] filename   Pathname of file to write.
+ * @param[in] station    Station model to write.
+ * @param[in,out] status Status return code.
  */
-struct oskar_SettingsApertureArray
-{
-    oskar_SettingsArrayPattern array_pattern;
-    oskar_SettingsElementPattern element_pattern;
-};
-typedef struct oskar_SettingsApertureArray oskar_SettingsApertureArray;
+OSKAR_EXPORT
+void oskar_station_save_orientation(const char* filename,
+        const oskar_Station* station, int* status);
 
-#endif /* OSKAR_SETTINGS_APERTURE_ARRAY_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_STATION_SAVE_ORIENTATION_H_ */

@@ -73,6 +73,7 @@ struct oskar_Vis
      * files that don't fit into RAM... */
     oskar_Mem* settings_path;     /**< Path to settings file. */
     oskar_Mem* telescope_path;    /**< Path to telescope model. */
+    oskar_Mem* settings;          /**< Settings file contents. */
 
     int num_channels;            /**< Number of frequency channels. */
     int num_times;               /**< Number of time samples. */

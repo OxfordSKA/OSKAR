@@ -51,7 +51,7 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
     unsigned char grp = OSKAR_TAG_GROUP_IMAGE;
     FILE* stream;
     char* log_data = 0;
-    long log_size = 0;
+    size_t log_size = 0;
     const char* settings_path_str;
     const oskar_Mem* settings_path;
 

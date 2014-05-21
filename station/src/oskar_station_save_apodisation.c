@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,27 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_ELEMENT_TAPER_H_
-#define OSKAR_SETTINGS_ELEMENT_TAPER_H_
+#include <private_station.h>
+#include <oskar_station.h>
 
-/**
- * @file oskar_SettingsElementTaper.h
- */
+#include <stdio.h>
+#include <stdlib.h>
 
-/**
- * @struct oskar_SettingsElementTaper
- *
- * @brief Structure to hold settings for the station element tapering.
- *
- * @details
- * The structure holds settings for the station element tapering.
- */
-struct oskar_SettingsElementTaper
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void oskar_station_save_apodisation(const char* filename,
+        const oskar_Station* station, int* status)
 {
-    int type;
-    double cosine_power;
-    double gaussian_fwhm_rad;
-};
-typedef struct oskar_SettingsElementTaper oskar_SettingsElementTaper;
+    FILE* file;
 
-#endif /* OSKAR_SETTINGS_ELEMENT_TAPER_H_ */
+    /* Check all inputs. */
+    if (!filename || !station || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Save the data. */
+    file = fopen(filename, "w");
+    if (!file)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
+    oskar_mem_save_ascii(file, 1, oskar_station_num_elements(station), status,
+            oskar_station_element_weight_const(station));
+    fclose(file);
+}
+
+#ifdef __cplusplus
+}
+#endif

@@ -32,7 +32,6 @@
 #include <oskar_evaluate_jones_R.h>
 #include <oskar_evaluate_jones_R_cuda.h>
 #include <oskar_parallactic_angle.h>
-#include <oskar_mem.h>
 #include <oskar_cuda_check_error.h>
 
 #ifdef __cplusplus
@@ -95,8 +94,8 @@ void oskar_evaluate_jones_R_d(double4c* jones, int num_sources,
         /* Compute the source hour angle and parallactic angle. */
         ha = lst_rad - ra[i]; /* HA = LST - RA. */
         q = oskar_parallactic_angle_d(ha, dec[i], cos_lat, sin_lat);
-        cos_q = cosf(q);
-        sin_q = sinf(q);
+        cos_q = cos(q);
+        sin_q = sin(q);
 
         /* Construct the Jones matrix for the source. */
         J.a.x = cos_q;
@@ -114,16 +113,16 @@ void oskar_evaluate_jones_R_d(double4c* jones, int num_sources,
 }
 
 /* Wrapper. */
-void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
+void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
+        const oskar_Mem* ra, const oskar_Mem* dec,
         const oskar_Telescope* telescope, double gast, int* status)
 {
-    int i, n, num_sources, num_stations, jones_type, base_type, location;
+    int i, n, num_stations, jones_type, base_type, location;
     double latitude, lst;
     oskar_Mem *R_station;
-    const oskar_Mem *ra, *dec;
 
     /* Check all inputs. */
-    if (!R || !sky || !telescope || !status)
+    if (!R || !ra || !dec || !telescope || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -136,12 +135,13 @@ void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
     jones_type = oskar_jones_type(R);
     base_type = oskar_mem_type_precision(jones_type);
     location = oskar_jones_location(R);
-    num_sources = oskar_jones_num_sources(R);
     num_stations = oskar_jones_num_stations(R);
     n = (oskar_telescope_common_horizon(telescope) ? 1 : num_stations);
 
     /* Check that the data dimensions are OK. */
-    if (num_sources != oskar_sky_num_sources(sky) ||
+    if (num_sources > (int)oskar_mem_length(ra) ||
+            num_sources > (int)oskar_mem_length(dec) ||
+            num_sources > oskar_jones_num_sources(R) ||
             num_stations != oskar_telescope_num_stations(telescope))
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
@@ -149,7 +149,8 @@ void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
     }
 
     /* Check that the data is in the right location. */
-    if (location != oskar_sky_location(sky))
+    if (location != oskar_mem_location(ra) ||
+            location != oskar_mem_location(dec))
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
@@ -161,15 +162,14 @@ void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
         *status = OSKAR_ERR_BAD_JONES_TYPE;
         return;
     }
-    if (base_type != oskar_sky_precision(sky))
+    if (base_type != oskar_mem_precision(ra) ||
+            base_type != oskar_mem_precision(dec))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
 
     /* Evaluate Jones matrix for each source for appropriate stations. */
-    ra = oskar_sky_ra_const(sky);
-    dec = oskar_sky_dec_const(sky);
     R_station = oskar_mem_create_alias(0, 0, 0, status);
     if (location == OSKAR_LOCATION_GPU)
     {
@@ -248,7 +248,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
         for (i = 1; i < num_stations; ++i)
         {
             oskar_jones_get_station_pointer(R_station, R, i, status);
-            oskar_mem_insert(R_station, R0, 0, status);
+            oskar_mem_insert(R_station, R0, 0, oskar_mem_length(R0), status);
         }
         oskar_mem_free(R0, status);
     }

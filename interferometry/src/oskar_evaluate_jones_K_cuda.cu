@@ -35,9 +35,10 @@ extern "C" {
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
-void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_stations,
-        float wavenumber, const float* d_u, const float* d_v, const float* d_w,
-        int num_sources, const float* d_l, const float* d_m, const float* d_n)
+void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_sources,
+        const float* d_l, const float* d_m, const float* d_n,
+        int num_stations, const float* d_u, const float* d_v,
+        const float* d_w, float wavenumber)
 {
     /* Define block and grid sizes. */
     const dim3 num_threads(64, 4); /* Sources, stations. */
@@ -48,15 +49,15 @@ void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_stations,
     /* Compute DFT phase weights for K. */
     oskar_evaluate_jones_K_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads, s_mem)
-    (num_stations, wavenumber, d_u, d_v, d_w, num_sources, d_l, d_m, d_n,
-            d_jones);
+    (d_jones, num_sources, d_l, d_m, d_n, num_stations, d_u, d_v, d_w,
+            wavenumber);
 }
 
 /* Double precision. */
-void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_stations,
-        double wavenumber, const double* d_u, const double* d_v,
-        const double* d_w, int num_sources, const double* d_l,
-        const double* d_m, const double* d_n)
+void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_sources,
+        const double* d_l, const double* d_m, const double* d_n,
+        int num_stations, const double* d_u, const double* d_v,
+        const double* d_w, double wavenumber)
 {
     /* Define block and grid sizes. */
     const dim3 num_threads(64, 4); /* Sources, stations. */
@@ -67,8 +68,8 @@ void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_stations,
     /* Compute DFT phase weights for K. */
     oskar_evaluate_jones_K_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads, s_mem)
-    (num_stations, wavenumber, d_u, d_v, d_w, num_sources, d_l, d_m, d_n,
-            d_jones);
+    (d_jones, num_sources, d_l, d_m, d_n, num_stations, d_u, d_v, d_w,
+            wavenumber);
 }
 
 
@@ -80,10 +81,10 @@ extern __shared__ double smem_d[];
 
 /* Single precision. */
 __global__
-void oskar_evaluate_jones_K_cudak_f(const int num_stations,
-        const float wavenumber, const float* u, const float* v,
-        const float* w, const int num_sources, const float* l,
-        const float* m, const float* n, float2* jones)
+void oskar_evaluate_jones_K_cudak_f(float2* jones, const int num_sources,
+        const float* l, const float* m, const float* n,
+        const int num_stations, const float* u, const float* v,
+        const float* w, const float wavenumber)
 {
     const int s = blockDim.x * blockIdx.x + threadIdx.x; /* Output index. */
     const int a = blockDim.y * blockIdx.y + threadIdx.y; /* Input index. */
@@ -127,10 +128,10 @@ void oskar_evaluate_jones_K_cudak_f(const int num_stations,
 
 /* Double precision. */
 __global__
-void oskar_evaluate_jones_K_cudak_d(const int num_stations,
-        const double wavenumber, const double* u, const double* v,
-        const double* w, const int num_sources, const double* l,
-        const double* m, const double* n, double2* jones)
+void oskar_evaluate_jones_K_cudak_d(double2* jones, const int num_sources,
+        const double* l, const double* m, const double* n,
+        const int num_stations, const double* u, const double* v,
+        const double* w, const double wavenumber)
 {
     const int s = blockDim.x * blockIdx.x + threadIdx.x; /* Output index. */
     const int a = blockDim.y * blockIdx.y + threadIdx.y; /* Input index. */

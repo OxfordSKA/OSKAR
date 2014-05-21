@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,12 @@
 #include <QtCore/QDir>
 #include <QtCore/QStringList>
 
-static const char config_name[] = "config.txt";
+static const char layout_name[] = "layout.txt";
+static const char apodisaion_name[] = "apodisation.txt";
+static const char orientation_name[] = "orientation.txt";
+static const char element_types_name[] = "element_types.txt";
+static const char gain_phase_name[] = "gain_phase.txt";
+static const char permitted_beams_name[] = "permitted_beams.txt";
 
 static void oskar_telescope_save_private(const oskar_Telescope* telescope,
         const char* dir_path, const oskar_Station* station, int depth,
@@ -78,7 +83,7 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
     if (depth == 0)
     {
         // Write the station coordinates.
-        QByteArray coord_path = dir.filePath(config_name).toLatin1();
+        QByteArray coord_path = dir.filePath(layout_name).toLatin1();
         oskar_telescope_save_station_coords(telescope, coord_path,
                 status);
 
@@ -87,9 +92,32 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
     }
     else
     {
-        // Write the station configuration.
-        QByteArray config_path = dir.filePath(config_name).toLatin1();
-        oskar_station_save_config(config_path, station, status);
+        // Write the station configuration data.
+        QByteArray path;
+        path = dir.filePath(layout_name).toLatin1();
+        oskar_station_save_layout(path, station, status);
+        path = dir.filePath(orientation_name).toLatin1();
+        oskar_station_save_orientation(path, station, status);
+        if (oskar_station_apply_element_errors(station))
+        {
+            path = dir.filePath(gain_phase_name).toLatin1();
+            oskar_station_save_gain_phase(path, station, status);
+        }
+        if (oskar_station_apply_element_weight(station))
+        {
+            path = dir.filePath(apodisaion_name).toLatin1();
+            oskar_station_save_apodisation(path, station, status);
+        }
+        if (oskar_station_num_element_types(station) > 1)
+        {
+            path = dir.filePath(element_types_name).toLatin1();
+            oskar_station_save_element_types(path, station, status);
+        }
+        if (oskar_station_num_permitted_beams(station) > 0)
+        {
+            path = dir.filePath(permitted_beams_name).toLatin1();
+            oskar_station_save_permitted_beams(path, station, status);
+        }
 
         // Get the number of stations.
         if (oskar_station_has_child(station))

@@ -54,28 +54,30 @@ extern "C" {
  * direction cosines or phase centre relative direction cosines according to
  * the value of @p coord_type.
  *
- * @param[out]  x  Array of x direction cosines.
- * @param[out]  y  Array of y direction cosines.
- * @param[out]  z  Array of z direction cosines.
  * @param[out]  coord_type  Coordinate type of the returned direction cosines.
  *                          Possible values are:
  *                          OSKAR_RELATIVE_DIRECTION_COSINES or
  *                          OSKAR_ENU_DIRECTION_COSINES
+ * @param[out]  x  Array of x direction cosines.
+ * @param[out]  y  Array of y direction cosines.
+ * @param[out]  z  Array of z direction cosines.
+ * @param[out] lon0 Reference longitude of direction cosines.
+ * @param[out] lat0 Reference latitude of direction cosines.
  * @param[out] num_pixels   Number of pixels in the beam pattern.
- * @param[in]  beam_lon  Longitude of the beam phase centre, in radians.
- * @param[in]  beam_lat  Longitude of the beam phase centre, in radians.
  * @param[in]  beam_coord_type Enumerator describing the beam phase centre
  *                             coordinate type, with possible values of:
  *                             OSKAR_SPHERICAL_TYPE_EQUATORIAL
  *                             OSKAR_SPHERICAL_TYPE_HORIZONTAL
+ * @param[in]  beam_lon  Longitude of the beam phase centre, in radians.
+ * @param[in]  beam_lat  Longitude of the beam phase centre, in radians.
  * @param[in]  settings  Settings structure describing the specification
  *                            of coordinates to be generated.
  * @param[in,out] status Error status code.
  */
 OSKAR_EXPORT
-void oskar_beam_pattern_generate_coordinates(oskar_Mem* x, oskar_Mem* y,
-        oskar_Mem* z, int* coord_type, int* num_pixels, double beam_lon,
-        double beam_lat, int beam_coord_type,
+void oskar_beam_pattern_generate_coordinates(int* coord_type, oskar_Mem* x,
+        oskar_Mem* y, oskar_Mem* z, double* lon0, double* lat0,
+        int* num_pixels, int beam_coord_type, double beam_lon, double beam_lat,
         const oskar_SettingsBeamPattern* settings, int* status);
 
 #ifdef __cplusplus

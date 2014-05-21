@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -276,6 +276,8 @@ static void set_station_data(oskar_Station* station,
     int i = 0;
     const oskar_SettingsApertureArray* aa = &settings->telescope.aperture_array;
     oskar_station_set_station_type(station, settings->telescope.station_type);
+    oskar_station_set_normalise_final_beam(station,
+            settings->telescope.normalise_beams_at_phase_centre);
     if (parent)
     {
         oskar_station_set_position(station,
@@ -284,21 +286,24 @@ static void set_station_data(oskar_Station* station,
                 oskar_station_altitude_m(parent));
     }
     oskar_station_set_enable_array_pattern(station, aa->array_pattern.enable);
-    oskar_station_set_normalise_beam(station, aa->array_pattern.normalise);
+    oskar_station_set_normalise_array_pattern(station,
+            aa->array_pattern.normalise);
     oskar_station_set_gaussian_beam_fwhm_rad(station,
             settings->telescope.gaussian_beam.fwhm_deg * M_PI / 180.0);
     oskar_station_set_use_polarised_elements(station,
             !(aa->element_pattern.functional_type ==
                     OSKAR_ELEMENT_TYPE_ISOTROPIC));
 
-    /* Set element pattern data, if element structure exists. */
-    if (oskar_station_has_element(station))
+    /* Set element pattern data for all element types (if they exist). */
+    for (i = 0; i < oskar_station_num_element_types(station); ++i)
     {
         const oskar_SettingsElementPattern* ep;
         oskar_Element* element;
         ep = &aa->element_pattern;
-        element = oskar_station_element(station, 0);
+        element = oskar_station_element(station, i);
         oskar_element_set_element_type(element, ep->functional_type);
+        oskar_element_set_dipole_length(element, ep->dipole_length,
+                ep->dipole_length_units);
         oskar_element_set_taper_type(element, ep->taper.type);
         oskar_element_set_cos_power(element, ep->taper.cosine_power);
         oskar_element_set_gaussian_fwhm_rad(element, ep->taper.gaussian_fwhm_rad);

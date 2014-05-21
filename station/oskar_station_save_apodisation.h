@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,42 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_ARRAY_ELEMENT_H_
-#define OSKAR_SETTINGS_ARRAY_ELEMENT_H_
+#ifndef OSKAR_STATION_SAVE_APODISATION_H_
+#define OSKAR_STATION_SAVE_APODISATION_H_
 
 /**
- * @file oskar_SettingsArrayElement.h
+ * @file oskar_station_save_apodisation.h
  */
 
+#include <oskar_global.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
- * @struct oskar_SettingsArrayElement
- *
- * @brief Structure to hold station element settings.
+ * @brief Writes OSKAR station model data to an ASCII file.
  *
  * @details
- * The structure holds station element parameters that can be used to override
- * those in the station files.
+ * This function writes element apodisation data from the station model to an
+ * ASCII file.
+ *
+ * @param[in] filename   Pathname of file to write.
+ * @param[in] station    Station model to write.
+ * @param[in,out] status Status return code.
  */
-struct oskar_SettingsArrayElement
-{
-    int apodisation_type;
-    double gain;
-    double gain_error_fixed;
-    double gain_error_time;
-    double phase_error_fixed_rad;
-    double phase_error_time_rad;
-    double position_error_xy_m;
-    double x_orientation_error_rad;
-    double y_orientation_error_rad;
+OSKAR_EXPORT
+void oskar_station_save_apodisation(const char* filename,
+        const oskar_Station* station, int* status);
 
-    /* Random seeds. */
-    int seed_gain_errors;
-    int seed_phase_errors;
-    int seed_time_variable_errors;
-    int seed_position_xy_errors;
-    int seed_x_orientation_error;
-    int seed_y_orientation_error;
-};
-typedef struct oskar_SettingsArrayElement oskar_SettingsArrayElement;
+#ifdef __cplusplus
+}
+#endif
 
-#endif /* OSKAR_SETTINGS_ARRAY_ELEMENT_H_ */
+#endif /* OSKAR_STATION_SAVE_APODISATION_H_ */

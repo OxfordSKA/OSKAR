@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,6 @@ using std::map;
 using std::string;
 
 const string oskar_TelescopeLoadOrientation::orientation_file = "orientation.txt";
-
-oskar_TelescopeLoadOrientation::oskar_TelescopeLoadOrientation()
-{
-}
-
-oskar_TelescopeLoadOrientation::~oskar_TelescopeLoadOrientation()
-{
-}
 
 void oskar_TelescopeLoadOrientation::load(oskar_Telescope* /*telescope*/,
         const oskar_Dir& /*cwd*/, int /*num_subdirs*/,

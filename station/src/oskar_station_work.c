@@ -73,6 +73,10 @@ oskar_StationWork* oskar_station_work_create(int type,
             location, 0, status);
     work->element_pattern_scalar = oskar_mem_create((type | OSKAR_COMPLEX),
             location, 0, status);
+    work->beam_temp_matrix = oskar_mem_create((type | complex_matrix),
+            location, 0, status);
+    work->beam_temp_scalar = oskar_mem_create((type | OSKAR_COMPLEX),
+            location, 0, status);
 
     for (i = 0; i < OSKAR_MAX_STATION_DEPTH; ++i)
     {
@@ -107,6 +111,8 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
     oskar_mem_free(work->array_pattern, status);
     oskar_mem_free(work->element_pattern_matrix, status);
     oskar_mem_free(work->element_pattern_scalar, status);
+    oskar_mem_free(work->beam_temp_matrix, status);
+    oskar_mem_free(work->beam_temp_scalar, status);
 
     for (i = 0; i < OSKAR_MAX_STATION_DEPTH; ++i)
     {

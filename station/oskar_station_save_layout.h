@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,41 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOG_FILE_DATA_H_
-#define OSKAR_LOG_FILE_DATA_H_
+#ifndef OSKAR_STATION_SAVE_LAYOUT_H_
+#define OSKAR_STATION_SAVE_LAYOUT_H_
 
 /**
- * @file oskar_log_file_data.h
+ * @file oskar_station_save_layout.h
  */
 
 #include <oskar_global.h>
-#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief
- * Returns a pointer to a memory buffer containing the current log file data.
+ * @brief Writes OSKAR station layout data to an ASCII file.
  *
  * @details
- * This function returns a pointer to a memory buffer containing all data
- * currently in the log file.
+ * This function writes data from the station model to an ASCII file.
+ * The file contains a simple header describing the number of (antenna)
+ * elements in the station, and the station longitude, latitude and altitude.
+ * This is followed by a CSV list of the local horizontal x,y,z positions of
+ * the elements (in metres).
  *
- * WARNING: This function allocates memory internally, and the returned pointer
- * must be explicitly freed by the caller using free().
+ * Note:
+ * - The station model must reside in host (CPU) memory.
  *
- * @param[in,out] log    Pointer to a log structure.
- * @param[out] size      Size (in bytes) of returned array.
- *
- * @return Pointer to memory buffer containing data currently in the log file.
+ * @param[in] filename   Pathname of file to write.
+ * @param[in] station    Station model to write.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-char* oskar_log_file_data(oskar_Log* log, size_t* size);
+void oskar_station_save_layout(const char* filename,
+        const oskar_Station* station, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_LOG_FILE_DATA_H_ */
+#endif /* OSKAR_STATION_SAVE_LAYOUT_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_GAIN_PHASE_H_
-#define OSKAR_TELESCOPE_LOAD_GAIN_PHASE_H_
+#ifndef OSKAR_TELESCOPE_LOAD_ELEMENT_TYPES_H_
+#define OSKAR_TELESCOPE_LOAD_ELEMENT_TYPES_H_
 
 /**
- * @file oskar_TelescopeLoadGainPhase.h
+ * @file oskar_TelescopeLoadElementTypes.h
  */
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-class OSKAR_APPS_EXPORT oskar_TelescopeLoadGainPhase
+class OSKAR_APPS_EXPORT oskar_TelescopeLoadElementTypes
 : public oskar_TelescopeLoadAbstract
 {
 public:
-    oskar_TelescopeLoadGainPhase() {}
+    oskar_TelescopeLoadElementTypes() {}
 
-    virtual ~oskar_TelescopeLoadGainPhase() {}
+    virtual ~oskar_TelescopeLoadElementTypes() {}
 
     /**
      * @brief
@@ -90,7 +90,7 @@ public:
     virtual std::string name() const;
 
 private:
-    static const std::string gain_phase_file;
+    static const std::string element_types_file;
 };
 
-#endif /* OSKAR_TELESCOPE_LOAD_GAIN_PHASE_H_ */
+#endif /* OSKAR_TELESCOPE_LOAD_ELEMENT_TYPES_H_ */

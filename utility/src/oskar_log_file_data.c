@@ -36,7 +36,7 @@
 extern "C" {
 #endif
 
-char* oskar_log_file_data(oskar_Log* log, long* size)
+char* oskar_log_file_data(oskar_Log* log, size_t* size)
 {
     char* data = 0;
     if (!size || !log) return 0;
@@ -61,8 +61,8 @@ char* oskar_log_file_data(oskar_Log* log, long* size)
             if (data != 0)
             {
                 rewind(log->file);
-                bytes_read = fread(data, 1, (size_t)(*size), log->file);
-                if (bytes_read != (size_t)(*size))
+                bytes_read = fread(data, 1, *size, log->file);
+                if (bytes_read != *size)
                 {
                     free(data);
                     data = 0;

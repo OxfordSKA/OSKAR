@@ -26,12 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef OSKAR_HAVE_CUDA
-/* Must include this first to avoid type conflict.*/
-#include <cuda_runtime_api.h>
-#define H2D cudaMemcpyHostToDevice
-#endif
-
 #include <stdlib.h>
 #include <math.h>
 
@@ -49,9 +43,6 @@ extern "C" {
 void oskar_station_set_element_orientation(oskar_Station* dst,
         int index, double orientation_x, double orientation_y, int* status)
 {
-    int type, location;
-    size_t size, offset_bytes;
-
     /* Check all inputs. */
     if (!dst || !status)
     {
@@ -69,90 +60,18 @@ void oskar_station_set_element_orientation(oskar_Station* dst,
         return;
     }
 
-    /* Get the data type. */
-    type = oskar_mem_type(dst->cos_orientation_x);
-    location = oskar_mem_location(dst->cos_orientation_x);
-    size = oskar_mem_element_size(type);
-    offset_bytes = index * size;
-
     /* Convert orientations to radians. */
     orientation_x *= M_PI / 180.0;
     orientation_y *= M_PI / 180.0;
     if (index == 0)
     {
-        dst->orientation_x = orientation_x;
-        dst->orientation_y = orientation_y;
+        dst->nominal_orientation_x = orientation_x;
+        dst->nominal_orientation_y = orientation_y;
     }
 
-    /* Check the type. */
-    if (type == OSKAR_DOUBLE)
-    {
-        double cos_x, sin_x, cos_y, sin_y, *cx, *cy, *sx, *sy;
-        cx = oskar_mem_double(dst->cos_orientation_x, status);
-        sx = oskar_mem_double(dst->sin_orientation_x, status);
-        cy = oskar_mem_double(dst->cos_orientation_y, status);
-        sy = oskar_mem_double(dst->sin_orientation_y, status);
-        cos_x = cos(orientation_x);
-        sin_x = sin(orientation_x);
-        cos_y = cos(orientation_y);
-        sin_y = sin(orientation_y);
-
-        if (location == OSKAR_LOCATION_CPU)
-        {
-            cx[index] = cos_x;
-            sx[index] = sin_x;
-            cy[index] = cos_y;
-            sy[index] = sin_y;
-        }
-        else if (location == OSKAR_LOCATION_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            cudaMemcpy((char*)cx + offset_bytes, &cos_x, size, H2D);
-            cudaMemcpy((char*)sx + offset_bytes, &sin_x, size, H2D);
-            cudaMemcpy((char*)cy + offset_bytes, &cos_y, size, H2D);
-            cudaMemcpy((char*)sy + offset_bytes, &sin_y, size, H2D);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else
-            *status = OSKAR_ERR_BAD_LOCATION;
-    }
-    else if (type == OSKAR_SINGLE)
-    {
-        float cos_x, sin_x, cos_y, sin_y, *cx, *cy, *sx, *sy;
-        cx = oskar_mem_float(dst->cos_orientation_x, status);
-        sx = oskar_mem_float(dst->sin_orientation_x, status);
-        cy = oskar_mem_float(dst->cos_orientation_y, status);
-        sy = oskar_mem_float(dst->sin_orientation_y, status);
-        cos_x = (float) cos(orientation_x);
-        sin_x = (float) sin(orientation_x);
-        cos_y = (float) cos(orientation_y);
-        sin_y = (float) sin(orientation_y);
-
-        if (location == OSKAR_LOCATION_CPU)
-        {
-            cx[index] = cos_x;
-            sx[index] = sin_x;
-            cy[index] = cos_y;
-            sy[index] = sin_y;
-        }
-        else if (location == OSKAR_LOCATION_GPU)
-        {
-#ifdef OSKAR_HAVE_CUDA
-            cudaMemcpy((char*)cx + offset_bytes, &cos_x, size, H2D);
-            cudaMemcpy((char*)sx + offset_bytes, &sin_x, size, H2D);
-            cudaMemcpy((char*)cy + offset_bytes, &cos_y, size, H2D);
-            cudaMemcpy((char*)sy + offset_bytes, &sin_y, size, H2D);
-#else
-            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-        }
-        else
-            *status = OSKAR_ERR_BAD_LOCATION;
-    }
-    else
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
+    /* Store the data. */
+    oskar_mem_double(dst->orientation_x_cpu, status)[index] = orientation_x;
+    oskar_mem_double(dst->orientation_y_cpu, status)[index] = orientation_y;
 }
 
 #ifdef __cplusplus

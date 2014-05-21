@@ -92,14 +92,33 @@ string oskar_TelescopeLoadElementPattern::name() const
 }
 
 double oskar_TelescopeLoadElementPattern::frequency_from_filename(
-        const string& filename, int startidx, int* status)
+        const string& filename, int* status)
 {
     double freq = 0.0;
+    size_t i1, i2;
 
-    // Get the numeric portion of the filename
+    // Check if safe to proceed.
+    if (*status) return 0.0;
+
+    // Get indices of the delimiters.
+    i2 = filename.find_last_of(".");
+    if (i2 == string::npos)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return 0.0;
+    }
+    i2--;
+    i1 = filename.find_last_of("_");
+    if (i1 == string::npos)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return 0.0;
+    }
+    i1++;
+
+    // Get the frequency part of the filename
     // (the last section before the file extension).
-    string str = filename.substr(startidx,
-            filename.find_last_of(".") - startidx);
+    string str = filename.substr(i1, 1+i2-i1);
 
     // Convert to number.
     std::stringstream ss(str);
@@ -109,7 +128,47 @@ double oskar_TelescopeLoadElementPattern::frequency_from_filename(
         *status = OSKAR_ERR_FILE_IO;
         return 0.0;
     }
-    return freq * 1e6; // Multiply by 1e6 to convert to Hz.
+    return freq * 1e6; // Convert from MHz to Hz.
+}
+
+int oskar_TelescopeLoadElementPattern::index_from_filename(
+        const string& filename, int* status)
+{
+    int ind = 0;
+    size_t i1, i2;
+
+    // Check if safe to proceed.
+    if (*status) return 0;
+
+    // Get indices of the delimiters.
+    i2 = filename.find_last_of("_");
+    if (i2 == string::npos)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return 0;
+    }
+    i2--;
+    i1 = filename.find_last_of("_", i2); // Get the next "_".
+    if (i1 == string::npos)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return 0;
+    }
+    i1++;
+
+    // Get the index part of the filename
+    // (the section between the last two underscores).
+    string str = filename.substr(i1, 1+i2-i1);
+
+    // Convert to number.
+    std::stringstream ss(str);
+    ss >> ind;
+    if (!ss || ind < 0)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return 0;
+    }
+    return ind;
 }
 
 void oskar_TelescopeLoadElementPattern::load_element_patterns(
@@ -149,39 +208,53 @@ void oskar_TelescopeLoadElementPattern::load_element_patterns(
     n = keys_x.size();
     for (int i = 0; i < n; ++i)
     {
-        // Get the frequency from the key.
-        double freq = frequency_from_filename(keys_x[i], root_x.size(), status);
+        string path, key;
+        key = keys_x[i];
+        path = paths_x[i];
+
+        // Get the element index and frequency from the key.
+        int ind = index_from_filename(key, status);
+        double freq = frequency_from_filename(key, status);
 
         // Load the file.
-        string path = paths_x[i];
         if (models.count(path) == 0)
         {
             oskar_log_message(log_, 0,
-                    "Loading fitted element pattern (X) at %.0f MHz: %s",
-                    freq / 1.0e6, path.c_str());
+                    "Loading fitted element pattern X[%d] at %.0f MHz: %s",
+                    ind, freq / 1.0e6, path.c_str());
             models[path] = 1;
         }
-        oskar_element_read(oskar_station_element(station, 0), 1, freq,
+        if (*status) break;
+        if (oskar_station_num_element_types(station) < ind + 1)
+            oskar_station_resize_element_types(station, ind + 1, status);
+        oskar_element_read(oskar_station_element(station, ind), 1, freq,
                 path.c_str(), status);
     }
 
     // Load Y data.
-    n = keys_x.size();
+    n = keys_y.size();
     for (int i = 0; i < n; ++i)
     {
-        // Get the frequency from the key.
-        double freq = frequency_from_filename(keys_y[i], root_y.size(), status);
+        string path, key;
+        key = keys_y[i];
+        path = paths_y[i];
+
+        // Get the element index and frequency from the key.
+        int ind = index_from_filename(key, status);
+        double freq = frequency_from_filename(key, status);
 
         // Load the file.
-        string path = paths_y[i];
         if (models.count(path) == 0)
         {
             oskar_log_message(log_, 0,
-                    "Loading fitted element pattern (Y) at %.0f MHz: %s",
-                    freq / 1.0e6, path.c_str());
+                    "Loading fitted element pattern Y[%d] at %.0f MHz: %s",
+                    ind, freq / 1.0e6, path.c_str());
             models[path] = 1;
         }
-        oskar_element_read(oskar_station_element(station, 0), 2, freq,
+        if (*status) break;
+        if (oskar_station_num_element_types(station) < ind + 1)
+            oskar_station_resize_element_types(station, ind + 1, status);
+        oskar_element_read(oskar_station_element(station, ind), 2, freq,
                 path.c_str(), status);
     }
 }

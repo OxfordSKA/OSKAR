@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <oskar_mem.h>
 #include <oskar_station.h>
 #include <oskar_station_work.h>
 #include <oskar_random_state.h>
@@ -47,11 +48,11 @@ extern "C" {
  * Evaluates the station beam for an aperture array station.
  *
  * @details
- * This top-level function evaluates the beam for an aperture array station,
+ * This function evaluates the beam for an aperture array station,
  * including any possible child stations and/or element models within the
  * station.
  *
- * The supplied station model must be fully set-up on entry, and must include
+ * The supplied station model must be fully set-up, and must include
  * the element positions, the required beam coordinates, and all associated
  * options and meta-data necessary for beamforming.
  *
@@ -72,9 +73,6 @@ extern "C" {
  *
  * The pointer to the structure holding random number states must be
  * initialised.
- *
- * Notes:
- * - random_states .. TODO how to set up this buffer
  *
  * @param[out]    beam          Station beam evaluated at x,y,z positions.
  * @param[in]     station       Fully populated station model structure.

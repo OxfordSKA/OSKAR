@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,20 +54,20 @@ extern "C" {
  * The output set of Jones matrices (K) are scalar complex values.
  *
  * @param[out] jones        Output set of Jones matrices.
- * @param[in]  num_stations Number of stations.
- * @param[in]  wavenumber   Wavenumber (2 pi / wavelength).
- * @param[in]  u            Station u coordinates, in metres.
- * @param[in]  v            Station v coordinates, in metres.
- * @param[in]  w            Station w coordinates, in metres.
  * @param[in]  num_sources  Number of sources.
  * @param[in]  l            Source l-direction cosines.
  * @param[in]  m            Source m-direction cosines.
  * @param[in]  n            Source n-direction cosines.
+ * @param[in]  num_stations Number of stations.
+ * @param[in]  u            Station u coordinates, in metres.
+ * @param[in]  v            Station v coordinates, in metres.
+ * @param[in]  w            Station w coordinates, in metres.
+ * @param[in]  wavenumber   Wavenumber (2 pi / wavelength).
  */
 OSKAR_EXPORT
-void oskar_evaluate_jones_K_f(float2* jones, int num_stations,
-        float wavenumber, const float* u, const float* v, const float* w,
-        int num_sources, const float* l, const float* m, const float* n);
+void oskar_evaluate_jones_K_f(float2* jones, int num_sources, const float* l,
+        const float* m, const float* n, int num_stations,
+        const float* u, const float* v, const float* w, float wavenumber);
 
 /**
  * @brief
@@ -81,20 +81,20 @@ void oskar_evaluate_jones_K_f(float2* jones, int num_stations,
  * The output set of Jones matrices (K) are scalar complex values.
  *
  * @param[out] jones        Output set of Jones matrices.
- * @param[in]  num_stations Number of stations.
- * @param[in]  wavenumber   Wavenumber (2 pi / wavelength).
- * @param[in]  u            Station u coordinates, in metres.
- * @param[in]  v            Station v coordinates, in metres.
- * @param[in]  w            Station w coordinates, in metres.
  * @param[in]  num_sources  Number of sources.
  * @param[in]  l            Source l-direction cosines.
  * @param[in]  m            Source m-direction cosines.
  * @param[in]  n            Source n-direction cosines.
+ * @param[in]  num_stations Number of stations.
+ * @param[in]  u            Station u coordinates, in metres.
+ * @param[in]  v            Station v coordinates, in metres.
+ * @param[in]  w            Station w coordinates, in metres.
+ * @param[in]  wavenumber   Wavenumber (2 pi / wavelength).
  */
 OSKAR_EXPORT
-void oskar_evaluate_jones_K_d(double2* jones, int num_stations,
-        double wavenumber, const double* u, const double* v, const double* w,
-        int num_sources, const double* l, const double* m, const double* n);
+void oskar_evaluate_jones_K_d(double2* jones, int num_sources, const double* l,
+        const double* m, const double* n, int num_stations,
+        const double* u, const double* v, const double* w, double wavenumber);
 
 /**
  * @brief
@@ -109,19 +109,21 @@ void oskar_evaluate_jones_K_d(double2* jones, int num_stations,
  * This function will return an error if an incorrect type is used.
  *
  * @param[out] K            Output set of Jones matrices.
- * @param[in]  frequency_hz The current observing frequency, in Hz.
+ * @param[in]  num_sources  The number of sources in the input arrays.
  * @param[in]  l            Source l-direction cosines.
  * @param[in]  m            Source m-direction cosines.
  * @param[in]  n            Source n-direction cosines.
  * @param[in]  u            Station u coordinates, in metres.
  * @param[in]  v            Station v coordinates, in metres.
  * @param[in]  w            Station w coordinates, in metres.
+ * @param[in]  frequency_hz The current observing frequency, in Hz.
  * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_jones_K(oskar_Jones* K, double frequency_hz,
+void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
         const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
-        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w, int* status);
+        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w,
+        double frequency_hz, int* status);
 
 #ifdef __cplusplus
 }

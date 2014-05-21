@@ -156,8 +156,8 @@ protected:
         oskar_telescope_set_smearing_values(telescope_, bandwidth,
                 time_average);
         oskar_timer_start(timer1);
-        oskar_correlate(vis1, jones_, telescope_, sky_, u_, v_, 1.0,
-                frequency, &status);
+        oskar_correlate(vis1, oskar_sky_num_sources(sky_), jones_, sky_,
+                telescope_, u_, v_, 1.0, frequency, &status);
         time1 = oskar_timer_elapsed(timer1);
         destroyTestData();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -172,8 +172,8 @@ protected:
         oskar_telescope_set_smearing_values(telescope_, bandwidth,
                 time_average);
         oskar_timer_start(timer2);
-        oskar_correlate(vis2, jones_, telescope_, sky_, u_, v_, 1.0,
-                frequency, &status);
+        oskar_correlate(vis2, oskar_sky_num_sources(sky_), jones_, sky_,
+                telescope_, u_, v_, 1.0, frequency, &status);
         time2 = oskar_timer_elapsed(timer2);
         destroyTestData();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);

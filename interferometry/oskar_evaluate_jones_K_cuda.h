@@ -53,20 +53,21 @@ extern "C" {
  * The output set of Jones matrices (K) are scalar complex values.
  *
  * @param[out] d_jones      Output set of Jones matrices.
- * @param[in]  num_stations Number of stations.
- * @param[in]  wavenumber   Wavenumber (2 pi / wavelength).
- * @param[in]  d_u          Station u coordinates, in metres.
- * @param[in]  d_v          Station v coordinates, in metres.
- * @param[in]  d_w          Station w coordinates, in metres.
  * @param[in]  num_sources  Number of sources.
  * @param[in]  d_l          Source l-direction cosines.
  * @param[in]  d_m          Source m-direction cosines.
  * @param[in]  d_n          Source n-direction cosines.
+ * @param[in]  num_stations Number of stations.
+ * @param[in]  d_u          Station u coordinates, in metres.
+ * @param[in]  d_v          Station v coordinates, in metres.
+ * @param[in]  d_w          Station w coordinates, in metres.
+ * @param[in]  wavenumber   Wavenumber (2 pi / wavelength).
  */
 OSKAR_EXPORT
-void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_stations,
-        float wavenumber, const float* d_u, const float* d_v, const float* d_w,
-        int num_sources, const float* d_l, const float* d_m, const float* d_n);
+void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_sources,
+        const float* d_l, const float* d_m, const float* d_n,
+        int num_stations, const float* d_u, const float* d_v,
+        const float* d_w, float wavenumber);
 
 /**
  * @brief
@@ -81,37 +82,37 @@ void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_stations,
  * The output set of Jones matrices (K) are scalar complex values.
  *
  * @param[out] d_jones      Output set of Jones matrices.
- * @param[in]  num_stations Number of stations.
- * @param[in]  wavenumber   Wavenumber (2 pi / wavelength).
- * @param[in]  d_u          Station u coordinates, in metres.
- * @param[in]  d_v          Station v coordinates, in metres.
- * @param[in]  d_w          Station w coordinates, in metres.
  * @param[in]  num_sources  Number of sources.
  * @param[in]  d_l          Source l-direction cosines.
  * @param[in]  d_m          Source m-direction cosines.
  * @param[in]  d_n          Source n-direction cosines.
+ * @param[in]  num_stations Number of stations.
+ * @param[in]  d_u          Station u coordinates, in metres.
+ * @param[in]  d_v          Station v coordinates, in metres.
+ * @param[in]  d_w          Station w coordinates, in metres.
+ * @param[in]  wavenumber   Wavenumber (2 pi / wavelength).
  */
 OSKAR_EXPORT
-void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_stations,
-        double wavenumber, const double* d_u, const double* d_v,
-        const double* d_w, int num_sources, const double* d_l,
-        const double* d_m, const double* d_n);
+void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_sources,
+        const double* d_l, const double* d_m, const double* d_n,
+        int num_stations, const double* d_u, const double* d_v,
+        const double* d_w, double wavenumber);
 
 #ifdef __CUDACC__
 
 /* Kernels. */
 
 __global__
-void oskar_evaluate_jones_K_cudak_f(const int n_in, const float wavenumber,
-        const float* x_in, const float* y_in, const float* z_in,
-        const int n_out, const float* x_out, const float* y_out,
-        const float* z_out, float2* weights);
+void oskar_evaluate_jones_K_cudak_f(float2* jones, const int num_sources,
+        const float* l, const float* m, const float* n,
+        const int num_stations, const float* u, const float* v,
+        const float* w, const float wavenumber);
 
 __global__
-void oskar_evaluate_jones_K_cudak_d(const int n_in, const double wavenumber,
-        const double* x_in, const double* y_in, const double* z_in,
-        const int n_out, const double* x_out, const double* y_out,
-        const double* z_out, double2* weights);
+void oskar_evaluate_jones_K_cudak_d(double2* jones, const int num_sources,
+        const double* l, const double* m, const double* n,
+        const int num_stations, const double* u, const double* v,
+        const double* w, const double wavenumber);
 
 #endif /* __CUDACC__ */
 

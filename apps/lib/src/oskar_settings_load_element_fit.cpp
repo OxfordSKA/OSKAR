@@ -69,12 +69,14 @@ void oskar_settings_load_element_fit(oskar_SettingsElementFit* settings,
         settings->output_directory = (char*)malloc(t.size() + 1);
         strcpy(settings->output_directory, t.constData());
     }
+#ifndef OSKAR_NO_FITS
     t = s.value("fits_image").toByteArray();
     if (t.size() > 0)
     {
         settings->fits_image = (char*)malloc(t.size() + 1);
         strcpy(settings->fits_image, t.constData());
     }
+#endif
     t = s.value("polarisation_type", "XY").toByteArray().toUpper();
     if (t == "X")
     {
@@ -94,13 +96,12 @@ void oskar_settings_load_element_fit(oskar_SettingsElementFit* settings,
         return;
     }
 
+    settings->element_type_index = s.value("element_type_index").toInt();
     settings->frequency_hz = s.value("frequency_hz").toDouble();
-
     settings->ignore_data_at_pole =
             s.value("ignore_data_at_pole", false).toBool();
     settings->ignore_data_below_horizon =
             s.value("ignore_data_below_horizon", true).toBool();
-
     settings->average_fractional_error =
             s.value("average_fractional_error", 0.005).toDouble();
     settings->average_fractional_error_factor_increase =

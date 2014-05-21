@@ -39,7 +39,7 @@ extern "C" {
 int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
         int* status)
 {
-    int i, n;
+    int i, j, n, num_element_types;
 
     /* Check all inputs. */
     if (!a || !b || !status)
@@ -54,6 +54,7 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
     /* Check if the meta-data are different. */
     n = a->num_elements;
     if (a->station_type != b->station_type ||
+            a->normalise_final_beam != b->normalise_final_beam ||
             a->beam_coord_type != b->beam_coord_type ||
             a->beam_longitude_rad != b->beam_longitude_rad ||
             a->beam_latitude_rad != b->beam_latitude_rad ||
@@ -61,9 +62,9 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
             a->num_elements != b->num_elements ||
             a->num_element_types != b->num_element_types ||
             a->use_polarised_elements != b->use_polarised_elements ||
-            a->normalise_beam != b->normalise_beam ||
+            a->normalise_array_pattern != b->normalise_array_pattern ||
             a->enable_array_pattern != b->enable_array_pattern ||
-            a->single_element_model != b->single_element_model ||
+            a->common_element_orientation != b->common_element_orientation ||
             a->array_is_3d != b->array_is_3d ||
             a->apply_element_errors != b->apply_element_errors ||
             a->apply_element_weight != b->apply_element_weight ||
@@ -83,13 +84,15 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
             (!oskar_station_has_element(a) && oskar_station_has_element(b)) )
         return 1;
 
-    /* FIXME Check if element pattern filenames are different (needs updating for multiple element types). */
-    if (oskar_station_has_element(a) && oskar_station_has_element(b))
+    /* Check if element pattern filenames are different,
+     * for each element type. */
+    num_element_types = oskar_station_num_element_types(a);
+    for (j = 0; j < num_element_types; ++j)
     {
         const oskar_Element *e_a, *e_b;
         int num_freq_a, num_freq_b;
-        e_a = oskar_station_element_const(a, 0);
-        e_b = oskar_station_element_const(b, 0);
+        e_a = oskar_station_element_const(a, j);
+        e_b = oskar_station_element_const(b, j);
 
         /* Check if number of frequencies in element models are different. */
         num_freq_a = oskar_element_num_frequencies(e_a);
@@ -132,19 +135,16 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
         return 1;
     if (oskar_mem_different(a->weight, b->weight, n, status))
         return 1;
-    if (oskar_mem_different(a->cos_orientation_x, b->cos_orientation_x, n,
+    if (oskar_mem_different(a->orientation_x_cpu, b->orientation_x_cpu, n,
             status))
         return 1;
-    if (oskar_mem_different(a->sin_orientation_x, b->sin_orientation_x, n,
+    if (oskar_mem_different(a->orientation_y_cpu, b->orientation_y_cpu, n,
             status))
         return 1;
-    if (oskar_mem_different(a->cos_orientation_y, b->cos_orientation_y, n,
-            status))
+    if (oskar_mem_different(a->element_types, b->element_types, n, status))
         return 1;
-    if (oskar_mem_different(a->sin_orientation_y, b->sin_orientation_y, n,
+    if (oskar_mem_different(a->element_types_cpu, b->element_types_cpu, n,
             status))
-        return 1;
-    if (oskar_mem_different(a->element_type, b->element_type, n, status))
         return 1;
     if (oskar_mem_different(a->permitted_beam_az, b->permitted_beam_az, n,
             status))

@@ -51,6 +51,11 @@ int oskar_station_type(const oskar_Station* model)
     return model->station_type;
 }
 
+int oskar_station_normalise_final_beam(const oskar_Station* model)
+{
+    return model->normalise_final_beam;
+}
+
 double oskar_station_longitude_rad(const oskar_Station* model)
 {
     return model->longitude_rad;
@@ -123,9 +128,9 @@ int oskar_station_use_polarised_elements(const oskar_Station* model)
     return model->use_polarised_elements;
 }
 
-int oskar_station_normalise_beam(const oskar_Station* model)
+int oskar_station_normalise_array_pattern(const oskar_Station* model)
 {
-    return model->normalise_beam;
+    return model->normalise_array_pattern;
 }
 
 int oskar_station_enable_array_pattern(const oskar_Station* model)
@@ -133,9 +138,9 @@ int oskar_station_enable_array_pattern(const oskar_Station* model)
     return model->enable_array_pattern;
 }
 
-int oskar_station_single_element_model(const oskar_Station* model)
+int oskar_station_common_element_orientation(const oskar_Station* model)
 {
-    return model->single_element_model;
+    return model->common_element_orientation;
 }
 
 int oskar_station_array_is_3d(const oskar_Station* model)
@@ -153,14 +158,30 @@ int oskar_station_apply_element_weight(const oskar_Station* model)
     return model->apply_element_weight;
 }
 
-double oskar_station_element_orientation_x_rad(const oskar_Station* model)
+double oskar_station_nominal_element_orientation_x_rad(const oskar_Station* model)
 {
-    return model->orientation_x;
+    return model->nominal_orientation_x;
 }
 
-double oskar_station_element_orientation_y_rad(const oskar_Station* model)
+double oskar_station_nominal_element_orientation_y_rad(const oskar_Station* model)
 {
-    return model->orientation_y;
+    return model->nominal_orientation_y;
+}
+
+double oskar_station_element_orientation_x_rad(const oskar_Station* model,
+        int index)
+{
+    const double *p;
+    p = (const double*) oskar_mem_void_const(model->orientation_x_cpu);
+    return p[index];
+}
+
+double oskar_station_element_orientation_y_rad(const oskar_Station* model,
+        int index)
+{
+    const double *p;
+    p = (const double*) oskar_mem_void_const(model->orientation_y_cpu);
+    return p[index];
 }
 
 oskar_Mem* oskar_station_element_x_signal(oskar_Station* model)
@@ -273,54 +294,39 @@ const oskar_Mem* oskar_station_element_weight_const(const oskar_Station* model)
     return model->weight;
 }
 
-oskar_Mem* oskar_station_element_cos_orientation_x(oskar_Station* model)
+oskar_Mem* oskar_station_element_orientation_x_cpu(oskar_Station* model)
 {
-    return model->cos_orientation_x;
+    return model->orientation_x_cpu;
 }
 
-const oskar_Mem* oskar_station_element_cos_orientation_x_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_orientation_x_cpu_const(const oskar_Station* model)
 {
-    return model->cos_orientation_x;
+    return model->orientation_x_cpu;
 }
 
-oskar_Mem* oskar_station_element_sin_orientation_x(oskar_Station* model)
+oskar_Mem* oskar_station_element_orientation_y_cpu(oskar_Station* model)
 {
-    return model->sin_orientation_x;
+    return model->orientation_y_cpu;
 }
 
-const oskar_Mem* oskar_station_element_sin_orientation_x_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_orientation_y_cpu_const(const oskar_Station* model)
 {
-    return model->sin_orientation_x;
+    return model->orientation_y_cpu;
 }
 
-oskar_Mem* oskar_station_element_cos_orientation_y(oskar_Station* model)
+oskar_Mem* oskar_station_element_types(oskar_Station* model)
 {
-    return model->cos_orientation_y;
+    return model->element_types;
 }
 
-const oskar_Mem* oskar_station_element_cos_orientation_y_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_types_const(const oskar_Station* model)
 {
-    return model->cos_orientation_y;
+    return model->element_types;
 }
 
-oskar_Mem* oskar_station_element_sin_orientation_y(oskar_Station* model)
+const int* oskar_station_element_types_cpu_const(const oskar_Station* model)
 {
-    return model->sin_orientation_y;
-}
-
-const oskar_Mem* oskar_station_element_sin_orientation_y_const(const oskar_Station* model)
-{
-    return model->sin_orientation_y;
-}
-
-oskar_Mem* oskar_station_element_type(oskar_Station* model)
-{
-    return model->element_type;
-}
-
-const oskar_Mem* oskar_station_element_type_const(const oskar_Station* model)
-{
-    return model->element_type;
+    return (const int*) oskar_mem_void_const(model->element_types_cpu);
 }
 
 int oskar_station_has_child(const oskar_Station* model)
@@ -343,14 +349,16 @@ int oskar_station_has_element(const oskar_Station* model)
     return model->element_pattern ? 1 : 0;
 }
 
-oskar_Element* oskar_station_element(oskar_Station* model, int i)
+oskar_Element* oskar_station_element(oskar_Station* model,
+        int element_type_index)
 {
-    return model->element_pattern[i];
+    return model->element_pattern[element_type_index];
 }
 
-const oskar_Element* oskar_station_element_const(const oskar_Station* model, int i)
+const oskar_Element* oskar_station_element_const(const oskar_Station* model,
+        int element_type_index)
 {
-    return model->element_pattern[i];
+    return model->element_pattern[element_type_index];
 }
 
 int oskar_station_num_permitted_beams(const oskar_Station* model)
@@ -374,6 +382,11 @@ const oskar_Mem* oskar_station_permitted_beam_elevation_rad_const(const oskar_St
 void oskar_station_set_station_type(oskar_Station* model, int type)
 {
     model->station_type = type;
+}
+
+void oskar_station_set_normalise_final_beam(oskar_Station* model, int value)
+{
+    model->normalise_final_beam = value;
 }
 
 void oskar_station_set_position(oskar_Station* model,
@@ -404,9 +417,9 @@ void oskar_station_set_use_polarised_elements(oskar_Station* model, int value)
     model->use_polarised_elements = value;
 }
 
-void oskar_station_set_normalise_beam(oskar_Station* model, int value)
+void oskar_station_set_normalise_array_pattern(oskar_Station* model, int value)
 {
-    model->normalise_beam = value;
+    model->normalise_array_pattern = value;
 }
 
 void oskar_station_set_enable_array_pattern(oskar_Station* model, int value)

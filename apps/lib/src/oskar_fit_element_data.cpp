@@ -36,6 +36,7 @@
 #include <oskar_settings_init.h>
 #include <oskar_settings_free.h>
 #include <oskar_get_error_string.h>
+#include <fits/oskar_fits_image_write.h>
 
 #include <string>
 #include <sstream>
@@ -45,7 +46,7 @@
 using std::string;
 
 static std::string construct_element_pathname(const char* output_dir,
-        int port, double frequency_hz)
+        int port, int element_type_index, double frequency_hz)
 {
     std::ostringstream stream;
     stream << "element_pattern_fit_";
@@ -57,6 +58,9 @@ static std::string construct_element_pathname(const char* output_dir,
     {
         stream << "y_";
     }
+
+    // Append the element type index.
+    stream << element_type_index << "_";
 
     // Append the frequency in MHz.
     stream << std::fixed << std::setprecision(0) << frequency_hz / 1.0e6;
@@ -73,7 +77,6 @@ extern "C"
 void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
         int* status)
 {
-    int port;
     string output;
 
     // Load the settings.
@@ -93,6 +96,8 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
     const char* output_dir = settings.element_fit.output_directory;
     const char* fits_image = settings.element_fit.fits_image;
     double frequency_hz = settings.element_fit.frequency_hz;
+    int element_type_index = settings.element_fit.element_type_index;
+    int port = settings.element_fit.polarisation_type;
 
     // Check that the input and output files have been set.
     if (!input_file || !output_dir)
@@ -107,31 +112,32 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
             OSKAR_LOCATION_CPU, status);
 
     // Load the CST text file for the correct port (X=1, Y=2).
-    port = settings.element_fit.polarisation_type;
     oskar_log_message(log, 0, "Loading CST element pattern: %s", input_file);
     oskar_element_load_cst(element, log, port, frequency_hz, input_file,
             &settings.element_fit, status);
 
     // Construct the output file name based on the settings.
-    port = settings.element_fit.polarisation_type;
-
     if (port == 0)
     {
-        output = construct_element_pathname(output_dir, 1, frequency_hz);
+        output = construct_element_pathname(output_dir, 1, element_type_index,
+                frequency_hz);
         oskar_element_write(element, 1, frequency_hz, output.c_str(), status);
-        output = construct_element_pathname(output_dir, 2, frequency_hz);
+        output = construct_element_pathname(output_dir, 2, element_type_index,
+                frequency_hz);
         oskar_element_write(element, 2, frequency_hz, output.c_str(), status);
     }
     else
     {
-        output = construct_element_pathname(output_dir, port, frequency_hz);
+        output = construct_element_pathname(output_dir, port,
+                element_type_index, frequency_hz);
         oskar_element_write(element, port, frequency_hz, output.c_str(),
                 status);
     }
 
-    // Check if a FITS image is required.
+    // TODO Check if a FITS image is required - needs implementing.
     if (fits_image)
     {
+#if 0
         // Generate an image grid.
         int image_size = 512;
 
@@ -139,17 +145,19 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
                 OSKAR_LOCATION_CPU, status);
         oskar_image_resize(image, image_size, image_size, 1, 1, 1, status);
 
-        /* Set element pattern meta-data. */
+        // Set element pattern image meta-data.
         oskar_image_set_type(image, OSKAR_IMAGE_TYPE_BEAM_SCALAR);
         oskar_image_set_coord_frame(image, OSKAR_IMAGE_COORD_FRAME_HORIZON);
         oskar_image_set_grid_type(image, OSKAR_IMAGE_GRID_TYPE_RECTILINEAR);
         oskar_image_set_centre(image, 0.0, 90.0);
         oskar_image_set_fov(image, 180.0, 180.0);
-        oskar_image_set_freq(image, settings.element_fit.frequency_hz,
-                settings.element_fit.frequency_hz);
+        oskar_image_set_freq(image, settings.element_fit.frequency_hz, 1.0);
         oskar_image_set_time(image, 0.0, 0.0);
 
+        // Write out the image and free memory.
+        oskar_fits_image_write(image, log, fits_image, status);
         oskar_image_free(image, status);
+#endif
     }
 
     // Free memory.

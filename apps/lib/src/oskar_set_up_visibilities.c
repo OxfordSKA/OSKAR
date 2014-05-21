@@ -95,6 +95,15 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
             OSKAR_LOCATION_CPU, 1 + strlen(settings->telescope.input_directory),
             status);
 
+    /* Add settings file contents. */
+    {
+        oskar_Mem* temp;
+        temp = oskar_mem_read_binary_raw(settings->settings_path,
+                OSKAR_CHAR, OSKAR_LOCATION_CPU, status);
+        oskar_mem_copy(oskar_vis_settings(vis), temp, status);
+        oskar_mem_free(temp, status);
+    }
+
     /* Copy station coordinates from telescope model. */
     oskar_mem_copy(oskar_vis_station_x_metres(vis),
             oskar_telescope_station_x_const(telescope), status);
@@ -138,9 +147,9 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
             lon[i] = oskar_station_longitude_rad(station) * rad2deg;
             lat[i] = oskar_station_latitude_rad(station) * rad2deg;
             orientation_x[i] =
-                    oskar_station_element_orientation_x_rad(station) * rad2deg;
+                    oskar_station_nominal_element_orientation_x_rad(station) * rad2deg;
             orientation_y[i] =
-                    oskar_station_element_orientation_y_rad(station) * rad2deg;
+                    oskar_station_nominal_element_orientation_y_rad(station) * rad2deg;
         }
     }
     else
@@ -158,9 +167,9 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
             lon[i] = oskar_station_longitude_rad(station) * rad2deg;
             lat[i] = oskar_station_latitude_rad(station) * rad2deg;
             orientation_x[i] =
-                    oskar_station_element_orientation_x_rad(station) * rad2deg;
+                    oskar_station_nominal_element_orientation_x_rad(station) * rad2deg;
             orientation_y[i] =
-                    oskar_station_element_orientation_y_rad(station) * rad2deg;
+                    oskar_station_nominal_element_orientation_y_rad(station) * rad2deg;
         }
     }
     return vis;

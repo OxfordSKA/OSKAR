@@ -237,7 +237,8 @@ static void run_array_pattern(oskar_Image* bp,
     oskar_mem_free(y, status);
     oskar_mem_free(z, status);
 
-    oskar_mem_insert(oskar_image_data(bp), pattern, 0, status);
+    oskar_mem_insert(oskar_image_data(bp), pattern, 0,
+            oskar_mem_length(pattern), status);
     ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
     oskar_mem_free(pattern, status);
 }
@@ -278,7 +279,8 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
 
     if (oskar_mem_is_scalar(pattern))
     {
-        oskar_mem_insert(oskar_image_data(bp), pattern, 0, status);
+        oskar_mem_insert(oskar_image_data(bp), pattern, 0,
+                oskar_mem_length(pattern), status);
     }
     else
     {

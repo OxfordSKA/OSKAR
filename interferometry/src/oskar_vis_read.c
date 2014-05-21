@@ -99,6 +99,11 @@ oskar_Vis* oskar_vis_read(const char* filename, int* status)
     oskar_mem_binary_file_read(vis->settings_path, filename, &index,
             OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0, &tag_error);
 
+    /* Optionally read the settings data (ignore the error code). */
+    tag_error = 0;
+    oskar_mem_binary_file_read(vis->settings, filename, &index,
+            OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &tag_error);
+
     /* Optionally read the telescope model path (ignore the error code). */
     tag_error = 0;
     oskar_mem_binary_file_read(vis->telescope_path, filename, &index,

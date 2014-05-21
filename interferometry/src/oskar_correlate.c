@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,11 +42,11 @@
 extern "C" {
 #endif
 
-void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
-        const oskar_Telescope* tel, const oskar_Sky* sky, const oskar_Mem* u,
+void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
+        const oskar_Sky* sky, const oskar_Telescope* tel, const oskar_Mem* u,
         const oskar_Mem* v, double gast, double frequency_hz, int* status)
 {
-    int jones_type, base_type, location, matrix_type, n_stations, n_sources;
+    int jones_type, base_type, location, matrix_type, n_stations;
     int use_extended;
     double inv_wavelength, frac_bandwidth, time_avg, gha0, dec0;
 
@@ -62,7 +62,6 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
 
     /* Get the data dimensions. */
     n_stations = oskar_telescope_num_stations(tel);
-    n_sources = oskar_sky_num_sources(sky);
     use_extended = oskar_sky_use_extended(sky);
 
     /* Get bandwidth-smearing terms. */
@@ -115,7 +114,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
     }
 
     /* Check the input dimensions. */
-    if (oskar_jones_num_sources(J) != n_sources ||
+    if (oskar_jones_num_sources(J) < n_sources ||
             (int)oskar_mem_length(u) != n_stations ||
             (int)oskar_mem_length(v) != n_stations)
     {

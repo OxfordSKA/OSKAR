@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_STATION_BEAM_PATTERN_H_
-#define OSKAR_EVALUATE_STATION_BEAM_PATTERN_H_
+#ifndef OSKAR_STATION_LOAD_ELEMENT_TYPES_H_
+#define OSKAR_STATION_LOAD_ELEMENT_TYPES_H_
 
 /**
- * @file oskar_evaluate_station_beam_pattern.h
+ * @file oskar_station_load_element_types.h
  */
 
 #include <oskar_global.h>
-#include <oskar_station.h>
-#include <oskar_mem.h>
-#include <oskar_station_work.h>
-#include <oskar_random_state.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,48 +41,26 @@ extern "C" {
 
 /**
  * @brief
- * Evaluate the beam pattern for a station.
+ * Loads station element types from a text file.
  *
  * @details
+ * This function loads station element types from a comma- or
+ * space-separated text file. Each line contains data for one element
+ * of the station.
  *
+ * The file may contain one column:
+ * - Element type index (integer, default 0).
+ *
+ * @param[out] station   Pointer to destination data structure to fill.
+ * @param[in] filename   Name of the data file to load.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_station_beam_pattern(oskar_Mem* beam_pattern,
-        int np, const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        int coord_type, const oskar_Station* station, oskar_StationWork* work,
-        oskar_RandomState* rand_state, double frequency, double GAST,
-        int* status);
-
-/**
- * @brief
- * Evaluate the beam pattern for a station with the beam coordinates defined
- * as relative direction cosines.
- *
- * @details
- */
-OSKAR_EXPORT
-void oskar_evaluate_station_beam_pattern_relative_directions(
-        oskar_Mem* beam_pattern, int np, const oskar_Mem* l, const oskar_Mem* m,
-        const oskar_Mem* n, const oskar_Station* station,
-        oskar_StationWork* work, oskar_RandomState* rand_state,
-        double frequency, double GAST, int* status);
-
-/**
- * @brief
- * Evaluate the beam pattern for a station with the beam coordinates defined
- * as ENU direction cosines.
- *
- * @details
- */
-OSKAR_EXPORT
-void oskar_evaluate_station_beam_pattern_enu_directions(oskar_Mem* beam_pattern,
-        int np, const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        const oskar_Station* station, oskar_StationWork* work,
-        oskar_RandomState* rand_state, double frequency, double GAST,
-        int* status);
+void oskar_station_load_element_types(oskar_Station* station,
+        const char* filename, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_STATION_BEAM_PATTERN_NEW_H_ */
+#endif /* OSKAR_STATION_LOAD_ELEMENT_TYPES_H_ */

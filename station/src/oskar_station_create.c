@@ -88,16 +88,16 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->gain_error = oskar_mem_create(type, location, num_elements, status);
     model->phase_offset = oskar_mem_create(type, location, num_elements, status);
     model->phase_error = oskar_mem_create(type, location, num_elements, status);
-    model->cos_orientation_x = oskar_mem_create(type, location, num_elements, status);
-    model->sin_orientation_x = oskar_mem_create(type, location, num_elements, status);
-    model->cos_orientation_y = oskar_mem_create(type, location, num_elements, status);
-    model->sin_orientation_y = oskar_mem_create(type, location, num_elements, status);
-    model->element_type = oskar_mem_create(OSKAR_INT, location, num_elements, status);
+    model->orientation_x_cpu = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_elements, status);
+    model->orientation_y_cpu = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_elements, status);
+    model->element_types = oskar_mem_create(OSKAR_INT, location, num_elements, status);
+    model->element_types_cpu = oskar_mem_create(OSKAR_INT, OSKAR_LOCATION_CPU, num_elements, status);
     model->permitted_beam_az = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, status);
     model->permitted_beam_el = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, status);
 
     /* Initialise common data. */
     model->station_type = OSKAR_STATION_TYPE_AA;
+    model->normalise_final_beam = OSKAR_FALSE;
     model->longitude_rad = 0.0;
     model->latitude_rad = 0.0;
     model->altitude_m = 0.0;
@@ -114,14 +114,14 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->num_elements = num_elements;
     model->num_element_types = 0;
     model->use_polarised_elements = OSKAR_TRUE;
-    model->normalise_beam = OSKAR_FALSE;
+    model->normalise_array_pattern = OSKAR_FALSE;
     model->enable_array_pattern = OSKAR_TRUE;
-    model->single_element_model = OSKAR_TRUE;
+    model->common_element_orientation = OSKAR_TRUE;
     model->array_is_3d = OSKAR_FALSE;
     model->apply_element_errors = OSKAR_FALSE;
     model->apply_element_weight = OSKAR_FALSE;
-    model->orientation_x = M_PI / 2.0;
-    model->orientation_y = 0.0;
+    model->nominal_orientation_x = M_PI / 2.0;
+    model->nominal_orientation_y = 0.0;
     model->child = 0;
     model->element_pattern = 0;
     model->num_permitted_beams = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
-#include <oskar_mem.h>
+#include <oskar_station.h>
 
-#include <oskar_mem_copy.h>
-#include <oskar_mem_insert.h>
-#include <oskar_mem_realloc.h>
+#include <oskar_getline.h>
+#include <oskar_string_to_array.h>
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src, int* status)
+void oskar_station_load_element_types(oskar_Station* station,
+        const char* filename, int* status)
 {
+    /* Declare the line buffer and counter. */
+    char* line = NULL;
+    size_t bufsize = 0;
+    int n = 0, type = 0, old_size = 0;
+    FILE* file;
+
     /* Check all inputs. */
-    if (!src || !dst || !status)
+    if (!station || !filename || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -49,19 +57,55 @@ void oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src, int* status)
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check the data types. */
-    if (src->type != dst->type)
+    /* Check type. */
+    type = oskar_station_precision(station);
+    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
-        *status = OSKAR_ERR_TYPE_MISMATCH;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
 
-    /* Check the data dimensions, and resize if required. */
-    if (src->num_elements > dst->num_elements)
-        oskar_mem_realloc(dst, src->num_elements, status);
+    /* Open the file. */
+    file = fopen(filename, "r");
+    if (!file)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
-    /* Copy the memory. */
-    oskar_mem_insert(dst, src, 0, oskar_mem_length(src), status);
+    /* Get the size of the station before loading the data. */
+    old_size = oskar_station_num_elements(station);
+
+    /* Loop over each line in the file. */
+    while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
+    {
+        int par = 0;
+
+        /* Load element data. */
+        if (oskar_string_to_array_i(line, 1, &par) < 1) continue;
+
+        /* Ensure the station model is big enough. */
+        if (oskar_station_num_elements(station) <= n)
+        {
+            oskar_station_resize(station, n + 100, status);
+            if (*status) break;
+        }
+
+        /* Store the data. */
+        oskar_station_set_element_type(station, n, par, status);
+
+        /* Increment element counter. */
+        ++n;
+    }
+
+    /* Consistency check with previous station size (should be the same as
+     * the number of elements loaded). */
+    if (!*status && n != old_size)
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+
+    /* Free the line buffer and close the file. */
+    if (line) free(line);
+    fclose(file);
 }
 
 #ifdef __cplusplus

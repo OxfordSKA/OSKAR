@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,7 @@ extern "C" {
  * GPU.
  *
  * @param[out] E            Output set of Jones matrices.
+ * @param[in]  num_sources  Number of sources to use from the sky model.
  * @param[in]  sky          Input sky model.
  * @param[in]  telescope    Input telescope model.
  * @param[in]  gast         The Greenwich Apparent Sidereal Time, in radians.
@@ -63,7 +64,7 @@ extern "C" {
  * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_jones_E(oskar_Jones* E, const oskar_Sky* sky,
+void oskar_evaluate_jones_E(oskar_Jones* E, int num_sources, oskar_Sky* sky,
         const oskar_Telescope* telescope, double gast, double frequency_hz,
         oskar_StationWork* work, oskar_RandomState* random_state, int* status);
 

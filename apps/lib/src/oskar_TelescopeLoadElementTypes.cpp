@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,25 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_GAUSSIAN_BEAM_H_
-#define OSKAR_SETTINGS_GAUSSIAN_BEAM_H_
+#include "apps/lib/oskar_TelescopeLoadElementTypes.h"
+#include "apps/lib/oskar_Dir.h"
 
-/**
- * @file oskar_SettingsGaussianBeam.h
- */
+using std::map;
+using std::string;
 
-/**
- * @struct oskar_SettingsGaussianBeam
- *
- * @brief Structure to hold settings for stations with a Gaussian beam.
- *
- * @details
- * The structure holds settings for stations with a Gaussian beam.
- */
-struct oskar_SettingsGaussianBeam
+const string oskar_TelescopeLoadElementTypes::element_types_file = "element_types.txt";
+
+void oskar_TelescopeLoadElementTypes::load(oskar_Telescope* /*telescope*/,
+        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
+        map<string, string>& /*filemap*/, int* /*status*/)
 {
-    double fwhm_deg;
-};
-typedef struct oskar_SettingsGaussianBeam oskar_SettingsGaussianBeam;
+    // Nothing to do at the telescope level.
+}
 
-#endif /* OSKAR_SETTINGS_GAUSSIAN_BEAM_H_ */
+void oskar_TelescopeLoadElementTypes::load(oskar_Station* station,
+        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
+        map<string, string>& /*filemap*/, int* status)
+{
+    // Check for presence of "element_types.txt".
+    if (cwd.exists(element_types_file))
+    {
+        oskar_station_load_element_types(station,
+                cwd.absoluteFilePath(element_types_file).c_str(), status);
+    }
+}
+
+string oskar_TelescopeLoadElementTypes::name() const
+{
+    return string("element types file loader");
+}

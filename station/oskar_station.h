@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,7 @@ typedef struct oskar_Station oskar_Station;
 
 enum {
     OSKAR_STATION_TYPE_AA,
+    OSKAR_STATION_TYPE_ISOTROPIC,
     OSKAR_STATION_TYPE_GAUSSIAN_BEAM,
     OSKAR_STATION_TYPE_VLA_PBCOR
 };
@@ -65,6 +66,7 @@ enum {
 #include <oskar_station_free.h>
 #include <oskar_station_load_apodisation.h>
 #include <oskar_station_load_config.h>
+#include <oskar_station_load_element_types.h>
 #include <oskar_station_load_gain_phase.h>
 #include <oskar_station_load_layout.h>
 #include <oskar_station_load_orientation.h>
@@ -77,10 +79,16 @@ enum {
 #include <oskar_station_override_element_xy_position_errors.h>
 #include <oskar_station_resize.h>
 #include <oskar_station_resize_element_types.h>
-#include <oskar_station_save_config.h>
+#include <oskar_station_save_apodisation.h>
+#include <oskar_station_save_element_types.h>
+#include <oskar_station_save_gain_phase.h>
+#include <oskar_station_save_layout.h>
+#include <oskar_station_save_orientation.h>
+#include <oskar_station_save_permitted_beams.h>
 #include <oskar_station_set_element_coords.h>
 #include <oskar_station_set_element_errors.h>
 #include <oskar_station_set_element_orientation.h>
+#include <oskar_station_set_element_type.h>
 #include <oskar_station_set_element_weight.h>
 
 #endif /* OSKAR_STATION_H_ */

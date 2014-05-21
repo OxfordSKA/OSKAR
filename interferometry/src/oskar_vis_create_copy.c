@@ -69,6 +69,7 @@ oskar_Vis* oskar_vis_create_copy(const oskar_Vis* src, int location,
     /* Copy the memory. */
     oskar_mem_copy(dst->settings_path, src->settings_path, status);
     oskar_mem_copy(dst->telescope_path, src->telescope_path, status);
+    oskar_mem_copy(dst->settings, src->settings, status);
     oskar_mem_copy(dst->x_metres, src->x_metres, status);
     oskar_mem_copy(dst->y_metres, src->y_metres, status);
     oskar_mem_copy(dst->z_metres, src->z_metres, status);

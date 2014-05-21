@@ -48,19 +48,20 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
 static void generate_horizon_coordinates(oskar_Mem* x, oskar_Mem* y,
         oskar_Mem* z, const oskar_SettingsBeamPattern* settings, int* status);
 static void load_coords(oskar_Mem* lon, oskar_Mem* lat, int* num_points,
-        double lon0_rad, double lat0_rad, const char* filename, int* status);
+        const char* filename, int* status);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_beam_pattern_generate_coordinates(oskar_Mem* x, oskar_Mem* y,
-        oskar_Mem* z, int* coord_type, int* num_pixels, double beam_lon,
-        double beam_lat, int beam_coord_type,
+void oskar_beam_pattern_generate_coordinates(int* coord_type, oskar_Mem* x,
+        oskar_Mem* y, oskar_Mem* z, double* lon0, double* lat0,
+        int* num_pixels, int beam_coord_type, double beam_lon, double beam_lat,
         const oskar_SettingsBeamPattern* settings, int* status)
 {
     /* Check all inputs. */
-    if (!x || !y || !z || !coord_type || !num_pixels || !settings || !status)
+    if (!coord_type || !x || !y || !z || !lon0 || !lat0 || !num_pixels ||
+            !settings || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -99,12 +100,16 @@ void oskar_beam_pattern_generate_coordinates(oskar_Mem* x, oskar_Mem* y,
             generate_equatorial_coordinates(x, y, z, beam_lon, beam_lat,
                     beam_coord_type, settings, status);
             *coord_type = OSKAR_RELATIVE_DIRECTION_COSINES;
+            *lon0 = beam_lon;
+            *lat0 = beam_lat;
             break;
         }
         case OSKAR_BEAM_PATTERN_FRAME_HORIZON:
         {
             generate_horizon_coordinates(x, y, z, settings, status);
             *coord_type = OSKAR_ENU_DIRECTION_COSINES;
+            *lon0 = 0.0; /* TODO Hard-coded for now. */
+            *lat0 = M_PI / 2.0; /* TODO Hard-coded for now. */
             break;
         }
         default:
@@ -198,8 +203,7 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
              type = oskar_mem_type(l);
              ra = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
              dec = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
-             load_coords(ra, dec, &num_points, beam_lon, beam_lat,
-                     settings->sky_model, status);
+             load_coords(ra, dec, &num_points, settings->sky_model, status);
              oskar_mem_realloc(l, num_points, status);
              oskar_mem_realloc(m, num_points, status);
              oskar_mem_realloc(n, num_points, status);
@@ -251,31 +255,18 @@ static void generate_horizon_coordinates(oskar_Mem* x, oskar_Mem* y,
 }
 
 static void load_coords(oskar_Mem* lon, oskar_Mem* lat, int* num_points,
-        double lon0_rad, double lat0_rad, const char* filename, int* status)
+        const char* filename, int* status)
 {
     int type = 0;
     FILE* file;
     char* line = 0;
-    size_t n = 1, bufsize = 0;
+    size_t n = 0, bufsize = 0;
 
     if (*status) return;
 
     /* Set initial size of coordinate arrays. */
     oskar_mem_realloc(lon, 100, status);
     oskar_mem_realloc(lat, 100, status);
-
-    /* Set first point to the phase centre. */
-    type = oskar_mem_precision(lon);
-    if (type == OSKAR_DOUBLE)
-    {
-        oskar_mem_double(lon, status)[0] = lon0_rad;
-        oskar_mem_double(lat, status)[0] = lat0_rad;
-    }
-    else
-    {
-        oskar_mem_float(lon, status)[0] = lon0_rad;
-        oskar_mem_float(lat, status)[0] = lat0_rad;
-    }
 
     /* Open the file. */
     file = fopen(filename, "r");

@@ -1,3 +1,43 @@
+2014-xx-yy  OSKAR-2.5.0
+
+    * Removed element model fitting parameters from telescope model settings.
+
+    * Created new application to fit element pattern data and write spline 
+      coefficients to a telescope model in OSKAR binary format.
+      Added new settings group for this.
+
+    * Changed element pattern fitting procedure to use Ludwig-3 coordinate
+      system internally. This generally produces better quality fits for a 
+      given number of knots, and eliminates instability near the zenith.
+
+    * Added the ability to specify element pattern data as a function of
+      frequency. The element data closest to the current observing frequency
+      is used.
+
+    * Added the ability to specify element orientations when using
+      numerical element pattern data.
+
+    * Added the ability to specify multiple element types within a station.
+
+    * Added option to use an analytic dipole with a definable length
+      (in metres or wavelengths) as an element pattern.
+
+    * Changed settings to use a half-wavelength dipole by default,
+      instead of a geometric dipole. 
+
+    * Added option to completely normalise the centre of the station beam
+      to 1.0 each time it is evaluated. This will effectively perform an
+      amplitude calibration for a source at the phase centre.
+
+    * Added option to turn off the station beam completely
+      (use the "isotropic" station type for this).
+
+    * Fixed a problem in the telescope model noise loader that caused it to
+      incorrectly report an error in one situation.
+
+    * Added run log and settings file to Measurement Set HISTORY table.
+      (Run log will now be propagated to images made with CASA.)
+
 2014-02-25  OSKAR-2.4.0
 
     * Added ability to specify a set of horizon-based permitted beam directions

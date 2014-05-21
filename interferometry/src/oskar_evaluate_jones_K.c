@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,9 +40,9 @@ extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_evaluate_jones_K_f(float2* jones, int num_stations,
-        float wavenumber, const float* u, const float* v, const float* w,
-        int num_sources, const float* l, const float* m, const float* n)
+void oskar_evaluate_jones_K_f(float2* jones, int num_sources, const float* l,
+        const float* m, const float* n, int num_stations,
+        const float* u, const float* v, const float* w, float wavenumber)
 {
     int station, source;
 
@@ -76,9 +76,9 @@ void oskar_evaluate_jones_K_f(float2* jones, int num_stations,
 }
 
 /* Double precision. */
-void oskar_evaluate_jones_K_d(double2* jones, int num_stations,
-        double wavenumber, const double* u, const double* v, const double* w,
-        int num_sources, const double* l, const double* m, const double* n)
+void oskar_evaluate_jones_K_d(double2* jones, int num_sources, const double* l,
+        const double* m, const double* n, int num_stations,
+        const double* u, const double* v, const double* w, double wavenumber)
 {
     int station, source;
 
@@ -112,11 +112,12 @@ void oskar_evaluate_jones_K_d(double2* jones, int num_stations,
 }
 
 /* Wrapper. */
-void oskar_evaluate_jones_K(oskar_Jones* K, double frequency_hz,
+void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
         const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
-        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w, int* status)
+        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w,
+        double frequency_hz, int* status)
 {
-    int num_sources, num_stations, jones_type, base_type, location;
+    int num_stations, jones_type, base_type, location;
     double wavenumber;
 
     /* Check all inputs. */
@@ -133,7 +134,6 @@ void oskar_evaluate_jones_K(oskar_Jones* K, double frequency_hz,
     jones_type = oskar_jones_type(K);
     base_type = oskar_mem_type_precision(jones_type);
     location = oskar_jones_location(K);
-    num_sources = oskar_jones_num_sources(K);
     num_stations = oskar_jones_num_stations(K);
     wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
 
@@ -183,26 +183,26 @@ void oskar_evaluate_jones_K(oskar_Jones* K, double frequency_hz,
         if (jones_type == OSKAR_SINGLE_COMPLEX)
         {
             oskar_evaluate_jones_K_cuda_f(oskar_jones_float2(K, status),
-                    num_stations, wavenumber,
-                    oskar_mem_float_const(u, status),
-                    oskar_mem_float_const(v, status),
-                    oskar_mem_float_const(w, status),
                     num_sources,
                     oskar_mem_float_const(l, status),
                     oskar_mem_float_const(m, status),
-                    oskar_mem_float_const(n, status));
+                    oskar_mem_float_const(n, status),
+                    num_stations,
+                    oskar_mem_float_const(u, status),
+                    oskar_mem_float_const(v, status),
+                    oskar_mem_float_const(w, status), wavenumber);
         }
         else if (jones_type == OSKAR_DOUBLE_COMPLEX)
         {
             oskar_evaluate_jones_K_cuda_d(oskar_jones_double2(K, status),
-                    num_stations, wavenumber,
-                    oskar_mem_double_const(u, status),
-                    oskar_mem_double_const(v, status),
-                    oskar_mem_double_const(w, status),
                     num_sources,
                     oskar_mem_double_const(l, status),
                     oskar_mem_double_const(m, status),
-                    oskar_mem_double_const(n, status));
+                    oskar_mem_double_const(n, status),
+                    num_stations,
+                    oskar_mem_double_const(u, status),
+                    oskar_mem_double_const(v, status),
+                    oskar_mem_double_const(w, status), wavenumber);
         }
         oskar_cuda_check_error(status);
 #else
@@ -214,26 +214,26 @@ void oskar_evaluate_jones_K(oskar_Jones* K, double frequency_hz,
         if (jones_type == OSKAR_SINGLE_COMPLEX)
         {
             oskar_evaluate_jones_K_f(oskar_jones_float2(K, status),
-                    num_stations, wavenumber,
-                    oskar_mem_float_const(u, status),
-                    oskar_mem_float_const(v, status),
-                    oskar_mem_float_const(w, status),
                     num_sources,
                     oskar_mem_float_const(l, status),
                     oskar_mem_float_const(m, status),
-                    oskar_mem_float_const(n, status));
+                    oskar_mem_float_const(n, status),
+                    num_stations,
+                    oskar_mem_float_const(u, status),
+                    oskar_mem_float_const(v, status),
+                    oskar_mem_float_const(w, status), wavenumber);
         }
         else if (jones_type == OSKAR_DOUBLE_COMPLEX)
         {
             oskar_evaluate_jones_K_d(oskar_jones_double2(K, status),
-                    num_stations, wavenumber,
-                    oskar_mem_double_const(u, status),
-                    oskar_mem_double_const(v, status),
-                    oskar_mem_double_const(w, status),
                     num_sources,
                     oskar_mem_double_const(l, status),
                     oskar_mem_double_const(m, status),
-                    oskar_mem_double_const(n, status));
+                    oskar_mem_double_const(n, status),
+                    num_stations,
+                    oskar_mem_double_const(u, status),
+                    oskar_mem_double_const(v, status),
+                    oskar_mem_double_const(w, status), wavenumber);
         }
     }
 }

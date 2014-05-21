@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
-        int* status)
+        size_t num_elements, int* status)
 {
     int type_src, type_dst, location_src, location_dst;
     size_t n_elements_src, n_elements_dst, bytes, start;
@@ -64,10 +64,6 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
     location_src = src->location;
     location_dst = dst->location;
 
-    /* Return immediately if there is nothing to copy. */
-    if (src->data == NULL || n_elements_src == 0)
-        return;
-
     /* Check the data types. */
     if (type_src != type_dst)
     {
@@ -75,15 +71,26 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
         return;
     }
 
-    /* Check the data dimensions. */
-    if (n_elements_src > (n_elements_dst - offset))
+    /* Check that there are enough elements to copy. */
+    if (num_elements > n_elements_src)
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }
 
+    /* Check the data dimensions. */
+    if (num_elements > (n_elements_dst - offset))
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
+
+    /* Return immediately if there is nothing to copy. */
+    if (src->data == NULL || n_elements_src == 0)
+        return;
+
     /* Get the number of bytes to copy. */
-    bytes = oskar_mem_element_size(type_src) * n_elements_src;
+    bytes = oskar_mem_element_size(type_src) * num_elements;
     start = oskar_mem_element_size(type_src) * offset;
     destination = (void*)((char*)(dst->data) + start);
 

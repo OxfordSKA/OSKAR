@@ -234,7 +234,8 @@ int benchmark(int num_stations, int num_sources, int type,
     for (int i = 0; i < niter; ++i)
     {
         oskar_timer_start(timer);
-        oskar_correlate(vis, J, tel, sky, u, v, 0.0, 100e6, &status);
+        oskar_correlate(vis, oskar_sky_num_sources(sky), J, sky, tel, u, v,
+                0.0, 100e6, &status);
         times[i] = oskar_timer_elapsed(timer);
     }
 

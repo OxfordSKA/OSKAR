@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_element.h>
-#include <oskar_element.h>
+#ifdef OSKAR_HAVE_CUDA
+/* Must include this first to avoid type conflict.*/
+#include <cuda_runtime_api.h>
+#define H2D cudaMemcpyHostToDevice
+#endif
+
+#include <stdlib.h>
+#include <math.h>
+
+#include <private_station.h>
+#include <oskar_station.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
-        int* status)
+void oskar_station_set_element_type(oskar_Station* dst,
+        int index, int element_type, int* status)
 {
-    int i;
+    int location, *t_;
+    size_t offset_bytes;
 
     /* Check all inputs. */
-    if (!dst || !src || !status)
+    if (!dst || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -48,32 +58,32 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    dst->precision = src->precision;
-    dst->element_type = src->element_type;
-    dst->taper_type = src->taper_type;
-    dst->cos_power = src->cos_power;
-    dst->gaussian_fwhm_rad = src->gaussian_fwhm_rad;
-    dst->dipole_length = src->dipole_length;
-    dst->dipole_length_units = src->dipole_length_units;
-
-    /* Resize the arrays. */
-    oskar_element_resize_frequency_data(dst, src->num_frequencies, status);
-
-    /* Copy the new data across. */
-    for (i = 0; i < src->num_frequencies; ++i)
+    /* Check range. */
+    if (index >= dst->num_elements)
     {
-        dst->frequency_hz[i] = src->frequency_hz[i];
-        oskar_mem_copy(dst->filename_x[i], src->filename_x[i], status);
-        oskar_mem_copy(dst->filename_y[i], src->filename_y[i], status);
-        oskar_splines_copy(dst->x_v_re[i], src->x_v_re[i], status);
-        oskar_splines_copy(dst->x_v_im[i], src->x_v_im[i], status);
-        oskar_splines_copy(dst->x_h_re[i], src->x_h_re[i], status);
-        oskar_splines_copy(dst->x_h_im[i], src->x_h_im[i], status);
-        oskar_splines_copy(dst->y_v_re[i], src->y_v_re[i], status);
-        oskar_splines_copy(dst->y_v_im[i], src->y_v_im[i], status);
-        oskar_splines_copy(dst->y_h_re[i], src->y_h_re[i], status);
-        oskar_splines_copy(dst->y_h_im[i], src->y_h_im[i], status);
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
     }
+
+    /* Get the data type. */
+    location = oskar_mem_location(dst->element_types);
+    offset_bytes = index * sizeof(int);
+
+    /* Set the data. */
+    oskar_mem_int(dst->element_types_cpu, status)[index] = element_type;
+    t_ = oskar_mem_int(dst->element_types, status);
+    if (location == OSKAR_LOCATION_CPU)
+        t_[index] = element_type;
+    else if (location == OSKAR_LOCATION_GPU)
+    {
+#ifdef OSKAR_HAVE_CUDA
+        cudaMemcpy((char*)t_ + offset_bytes, &element_type, sizeof(int), H2D);
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+    }
+    else
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus

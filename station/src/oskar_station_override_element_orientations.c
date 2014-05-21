@@ -50,13 +50,6 @@ void oskar_station_override_element_orientations(oskar_Station* s,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check location. */
-    if (oskar_station_location(s) != OSKAR_LOCATION_CPU)
-    {
-        *status = OSKAR_ERR_BAD_LOCATION;
-        return;
-    }
-
     /* Check if there are child stations. */
     if (oskar_station_has_child(s))
     {
@@ -71,45 +64,19 @@ void oskar_station_override_element_orientations(oskar_Station* s,
     else
     {
         /* Override element data at last level. */
-        int type;
-        double delta, angle;
-        oskar_Mem *mem_cos, *mem_sin;
+        double delta, *d;
+        oskar_Mem *mem;
 
-        /* Get pointers to the X or Y element orientation data. */
-        mem_cos = x_pol ? s->cos_orientation_x : s->cos_orientation_y;
-        mem_sin = x_pol ? s->sin_orientation_x : s->sin_orientation_y;
-        type = oskar_station_precision(s);
-        if (type == OSKAR_DOUBLE)
+        /* Get pointer to the X or Y element orientation data. */
+        mem = x_pol ? s->orientation_x_cpu : s->orientation_y_cpu;
+        d = oskar_mem_double(mem, status);
+        for (i = 0; i < s->num_elements; ++i)
         {
-            double *cos_x, *sin_x;
-            cos_x = oskar_mem_double(mem_cos, status);
-            sin_x = oskar_mem_double(mem_sin, status);
-            for (i = 0; i < s->num_elements; ++i)
-            {
-                /* Generate random number from Gaussian distribution. */
-                delta = orientation_error_rad * oskar_random_gaussian(0);
+            /* Generate random number from Gaussian distribution. */
+            delta = orientation_error_rad * oskar_random_gaussian(0);
 
-                /* Get the new angle. */
-                angle = delta + atan2(sin_x[i], cos_x[i]);
-                cos_x[i] = cos(angle);
-                sin_x[i] = sin(angle);
-            }
-        }
-        else if (type == OSKAR_SINGLE)
-        {
-            float *cos_x, *sin_x;
-            cos_x = oskar_mem_float(mem_cos, status);
-            sin_x = oskar_mem_float(mem_sin, status);
-            for (i = 0; i < s->num_elements; ++i)
-            {
-                /* Generate random number from Gaussian distribution. */
-                delta = orientation_error_rad * oskar_random_gaussian(0);
-
-                /* Get the new angle. */
-                angle = delta + atan2(sin_x[i], cos_x[i]);
-                cos_x[i] = (float) cos(angle);
-                sin_x[i] = (float) sin(angle);
-            }
+            /* Set the new angle. */
+            d[i] += delta;
         }
     }
 }

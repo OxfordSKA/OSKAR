@@ -45,7 +45,8 @@
 
 extern "C"
 void oskar_vis_write_ms(const oskar_Vis* vis,
-        const char* ms_path, int overwrite, int* status)
+        const char* ms_path, int overwrite, const char* run_log,
+        size_t run_log_length, int* status)
 {
     // Check all inputs.
     if (!vis || !ms_path || !status)
@@ -257,6 +258,13 @@ void oskar_vis_write_ms(const oskar_Vis* vis,
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
+
+    // Add the settings.
+    ms.addSettings(oskar_mem_char_const(oskar_vis_settings_const(vis)),
+            oskar_mem_length(oskar_vis_settings_const(vis)));
+
+    // Add the run log.
+    ms.addLog(run_log, run_log_length);
 
     // Cleanup.
     free(baseline_ant_1);

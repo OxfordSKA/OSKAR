@@ -94,8 +94,8 @@ public:
     virtual std::string name() const;
 
 private:
-    double frequency_from_filename(const std::string& filename, int startidx,
-            int* status);
+    double frequency_from_filename(const std::string& filename, int* status);
+    int index_from_filename(const std::string& filename, int* status);
 
     void load_element_patterns(oskar_Station* station,
             const std::map<std::string, std::string>& filemap, int* status);

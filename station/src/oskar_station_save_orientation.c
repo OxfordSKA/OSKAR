@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,36 +26,65 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_STATION_H_
-#define OSKAR_SETTINGS_STATION_H_
+#include <oskar_station.h>
 
-/**
- * @file oskar_SettingsStation.h
- */
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <oskar_SettingsArrayElement.h>
-#include <oskar_SettingsElementFit.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/**
- * @struct oskar_SettingsStation
- *
- * @brief Structure to hold station model settings.
- *
- * @details
- * The structure holds station model parameters.
- */
-struct oskar_SettingsStation
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#define R2D (180.0 / M_PI)
+
+void oskar_station_save_orientation(const char* filename,
+        const oskar_Station* station, int* status)
 {
-    int station_type;
-    int use_polarised_elements;
-    int ignore_custom_element_patterns;
-    int evaluate_array_factor;
-    int evaluate_element_factor;
-    int normalise_beam;
-    double gaussian_beam_fwhm_deg;
-    oskar_SettingsArrayElement element;
-    oskar_SettingsElementFit element_fit;
-};
-typedef struct oskar_SettingsStation oskar_SettingsStation;
+    int i, num_elements;
+    FILE* file;
+    const double *orientation_x, *orientation_y;
 
-#endif /* OSKAR_SETTINGS_STATION_H_ */
+    /* Check all inputs. */
+    if (!filename || !station || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get pointers to the arrays. */
+    orientation_x = oskar_mem_double_const(
+            oskar_station_element_orientation_x_cpu_const(station), status);
+    orientation_y = oskar_mem_double_const(
+            oskar_station_element_orientation_y_cpu_const(station), status);
+
+    /* Open the file. */
+    file = fopen(filename, "w");
+    if (!file)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
+
+    /* Save the data. */
+    num_elements = oskar_station_num_elements(station);
+    for (i = 0; i < num_elements; ++i)
+    {
+        fprintf(file, "% 14.6f % 14.6f\n",
+                orientation_x[i] * R2D, orientation_y[i] * R2D);
+    }
+
+    /* Close the file. */
+    fclose(file);
+}
+
+#ifdef __cplusplus
+}
+#endif

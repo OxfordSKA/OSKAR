@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_element.h>
-#include <oskar_element.h>
+#include <oskar_station.h>
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
-        int* status)
+void oskar_station_save_element_types(const char* filename,
+        const oskar_Station* station, int* status)
 {
-    int i;
+    FILE* file;
 
     /* Check all inputs. */
-    if (!dst || !src || !status)
+    if (!filename || !station || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -48,32 +50,16 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    dst->precision = src->precision;
-    dst->element_type = src->element_type;
-    dst->taper_type = src->taper_type;
-    dst->cos_power = src->cos_power;
-    dst->gaussian_fwhm_rad = src->gaussian_fwhm_rad;
-    dst->dipole_length = src->dipole_length;
-    dst->dipole_length_units = src->dipole_length_units;
-
-    /* Resize the arrays. */
-    oskar_element_resize_frequency_data(dst, src->num_frequencies, status);
-
-    /* Copy the new data across. */
-    for (i = 0; i < src->num_frequencies; ++i)
+    /* Save the data. */
+    file = fopen(filename, "w");
+    if (!file)
     {
-        dst->frequency_hz[i] = src->frequency_hz[i];
-        oskar_mem_copy(dst->filename_x[i], src->filename_x[i], status);
-        oskar_mem_copy(dst->filename_y[i], src->filename_y[i], status);
-        oskar_splines_copy(dst->x_v_re[i], src->x_v_re[i], status);
-        oskar_splines_copy(dst->x_v_im[i], src->x_v_im[i], status);
-        oskar_splines_copy(dst->x_h_re[i], src->x_h_re[i], status);
-        oskar_splines_copy(dst->x_h_im[i], src->x_h_im[i], status);
-        oskar_splines_copy(dst->y_v_re[i], src->y_v_re[i], status);
-        oskar_splines_copy(dst->y_v_im[i], src->y_v_im[i], status);
-        oskar_splines_copy(dst->y_h_re[i], src->y_h_re[i], status);
-        oskar_splines_copy(dst->y_h_im[i], src->y_h_im[i], status);
+        *status = OSKAR_ERR_FILE_IO;
+        return;
     }
+    oskar_mem_save_ascii(file, 1, oskar_station_num_elements(station), status,
+            oskar_station_element_types_const(station));
+    fclose(file);
 }
 
 #ifdef __cplusplus

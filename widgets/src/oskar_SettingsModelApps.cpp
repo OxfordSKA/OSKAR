@@ -447,15 +447,18 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
 
     k = root + "/station_type";
     declare(k, "Station type", QStringList() << "Aperture array"
-            << "Gaussian beam" << "VLA (PBCOR)");
+            << "Isotropic beam" << "Gaussian beam" << "VLA (PBCOR)");
     setTooltip(k, "The type of each station in the interferometer. A simple, "
             "time-invariant Gaussian station beam can be used instead of an "
             "aperture array beam if required for testing.");
 
-    k = root + "/normalise_beam_centre";
-    declare(k , "Normalise beam centre", oskar_SettingsItem::BOOL, false);
-    setTooltip(k, "If <b>true</b>, then scale the amplitude at the centre of "
-            "every station beam to precisely 1.0 for each time snapshot.");
+    k = root + "/normalise_beams_at_phase_centre";
+    declare(k , "Normalise beams at phase centre", oskar_SettingsItem::BOOL,
+            false);
+    setTooltip(k, "If <b>true</b>, then scale the amplitude of "
+            "every station beam at the interferometer phase centre to "
+            "precisely 1.0 for each time snapshot. This effectively "
+            "performs an amplitude calibration.");
 
     // Aperture array settings.
     group = root + "/aperture_array";
@@ -549,11 +552,26 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     setLabel(group, "Element pattern settings");
 
     // Element pattern functional type.
+    QString functional_type = group + "/functional_type";
     k = group + "/functional_type";
-    declare(k, "Functional pattern type", QStringList() << "Geometric dipole"
-            << "Isotropic (unpolarised)");
-    setTooltip(k, "The type of functional pattern to apply to the elements, "
-            "if not using a numerically-defined pattern.");
+    declare(functional_type, "Functional pattern type", QStringList() <<
+            "Dipole" <<
+            "Geometric dipole" <<
+            "Isotropic (unpolarised)");
+    setTooltip(functional_type, "The type of functional pattern to apply to "
+            "the elements, if not using a numerically-defined pattern.");
+
+    // Dipole length (and units).
+    k = group + "/dipole_length";
+    declare(k, "Dipole length", oskar_SettingsItem::DOUBLE, 0.5);
+    setTooltip(k, "The length of the dipole, if using dipole elements.");
+    setDependency(k, functional_type, "Dipole");
+    k = group + "/dipole_length_units";
+    declare(k, "Dipole length units", QStringList() <<
+            "Wavelengths" << "Metres");
+    setTooltip(k, "The units used to specify the dipole length (metres or"
+            "wavelengths), if using dipole elements.");
+    setDependency(k, functional_type, "Dipole");
 
     // Element pattern numerical option.
     k = group + "/enable_numerical";
@@ -623,6 +641,11 @@ void oskar_SettingsModelApps::init_settings_element_fit()
     setTooltip(k, "Specify whether the input data is to be used for the "
             "X or Y dipole, or both.");
 
+    k = root + "/element_type_index";
+    declare(k, "Element type index", oskar_SettingsItem::INT_UNSIGNED);
+    setTooltip(k, "The type index of the element. Leave this at zero if there "
+            "is only one type of element per station.");
+
     k = root + "/ignore_data_at_pole";
     declare(k, "Ignore data at poles", oskar_SettingsItem::BOOL, false);
     setTooltip(k, "If true, then numerical element pattern data points at "
@@ -653,10 +676,13 @@ void oskar_SettingsModelApps::init_settings_element_fit()
     setTooltip(k, "Path to the telescope or station directory in which to "
             "save the fitted coefficients.");
 
+    // TODO This needs implementing.
+#if 0
     k = root + "/fits_image";
     declare(k, "Output FITS image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Optional path to save a FITS image generated using the "
             "fitted coefficients.");
+#endif
 }
 
 void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& root)

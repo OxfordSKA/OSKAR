@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,12 @@ oskar_Mem* oskar_vis_telescope_path(oskar_Vis* vis);
 
 OSKAR_EXPORT
 const oskar_Mem* oskar_vis_telescope_path_const(const oskar_Vis* vis);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_vis_settings(oskar_Vis* vis);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_vis_settings_const(const oskar_Vis* vis);
 
 OSKAR_EXPORT
 int oskar_vis_num_channels(const oskar_Vis* vis);

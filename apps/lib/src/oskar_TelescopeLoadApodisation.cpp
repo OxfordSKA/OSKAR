@@ -34,14 +34,6 @@ using std::string;
 
 const string oskar_TelescopeLoadApodisation::apodisation_file = "apodisation.txt";
 
-oskar_TelescopeLoadApodisation::oskar_TelescopeLoadApodisation()
-{
-}
-
-oskar_TelescopeLoadApodisation::~oskar_TelescopeLoadApodisation()
-{
-}
-
 void oskar_TelescopeLoadApodisation::load(oskar_Telescope* /*telescope*/,
         const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
         map<string, string>& /*filemap*/, int* /*status*/)

@@ -21,9 +21,9 @@ add_test(interferometry_test ${name})
 
 
 # Correlate kernel performance test.
-set(name correlate_performance_test)
-cuda_add_executable(${name} Test_correlate_performance.cu)
-target_link_libraries(${name} oskar gtest_main ${CUDA_LIBRARIES})
+#set(name correlate_performance_test)
+#cuda_add_executable(${name} Test_correlate_performance.cu)
+#target_link_libraries(${name} oskar gtest_main ${CUDA_LIBRARIES})
 
 # Correlator benchmark binary.
 include_directories(${CUDA_INCLUDE_DIRS})

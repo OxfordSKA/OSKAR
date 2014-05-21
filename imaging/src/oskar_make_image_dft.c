@@ -149,7 +149,8 @@ void oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
 
         /* Copy image back to host memory if required. */
         if (oskar_mem_location(image) == OSKAR_LOCATION_CPU)
-            oskar_mem_insert(image, t_image, 0, status);
+            oskar_mem_insert(image, t_image, 0, oskar_mem_length(t_image),
+                    status);
     }
 
     /* Free temporary memory. */

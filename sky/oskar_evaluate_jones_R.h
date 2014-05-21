@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,14 +110,17 @@ void oskar_evaluate_jones_R_d(double4c* jones, int num_sources,
  * ( cos(q)  -sin(q) )
  * ( sin(q)   cos(q) )
  *
- * @param[out] R         Output set of Jones matrices.
- * @param[in] sky        Input sky model.
- * @param[in] telescope  Input telescope model.
- * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
- * @param[in,out] status Status return code.
+ * @param[out] R          Output set of Jones matrices.
+ * @param[in] num_sources Number of sources to use from coordinate arrays.
+ * @param[in] ra          Input Right Ascension values, in radians.
+ * @param[in] dec         Input Declination values, in radians.
+ * @param[in] telescope   Input telescope model.
+ * @param[in] gast        The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_Sky* sky,
+void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
+        const oskar_Mem* ra, const oskar_Mem* dec,
         const oskar_Telescope* telescope, double gast, int* status);
 
 #ifdef __cplusplus

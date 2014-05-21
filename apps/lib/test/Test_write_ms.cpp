@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,9 @@ TEST(write_ms, test_write)
 
     const char* filename = "temp_test_write_ms.ms";
 
-    oskar_vis_write_ms(vis, filename, OSKAR_TRUE, &status);
+    const char log_line[] = "Log line";
+    oskar_vis_write_ms(vis, filename, OSKAR_TRUE,
+            log_line, sizeof(log_line), &status);
     oskar_vis_free(vis, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_remove_dir(filename);

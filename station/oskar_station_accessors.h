@@ -76,6 +76,9 @@ OSKAR_EXPORT
 int oskar_station_type(const oskar_Station* model);
 
 OSKAR_EXPORT
+int oskar_station_normalise_final_beam(const oskar_Station* model);
+
+OSKAR_EXPORT
 double oskar_station_longitude_rad(const oskar_Station* model);
 
 OSKAR_EXPORT
@@ -121,13 +124,13 @@ OSKAR_EXPORT
 int oskar_station_use_polarised_elements(const oskar_Station* model);
 
 OSKAR_EXPORT
-int oskar_station_normalise_beam(const oskar_Station* model);
+int oskar_station_normalise_array_pattern(const oskar_Station* model);
 
 OSKAR_EXPORT
 int oskar_station_enable_array_pattern(const oskar_Station* model);
 
 OSKAR_EXPORT
-int oskar_station_single_element_model(const oskar_Station* model);
+int oskar_station_common_element_orientation(const oskar_Station* model);
 
 OSKAR_EXPORT
 int oskar_station_array_is_3d(const oskar_Station* model);
@@ -139,10 +142,18 @@ OSKAR_EXPORT
 int oskar_station_apply_element_weight(const oskar_Station* model);
 
 OSKAR_EXPORT
-double oskar_station_element_orientation_x_rad(const oskar_Station* model);
+double oskar_station_nominal_element_orientation_x_rad(const oskar_Station* model);
 
 OSKAR_EXPORT
-double oskar_station_element_orientation_y_rad(const oskar_Station* model);
+double oskar_station_nominal_element_orientation_y_rad(const oskar_Station* model);
+
+OSKAR_EXPORT
+double oskar_station_element_orientation_x_rad(const oskar_Station* model,
+        int index);
+
+OSKAR_EXPORT
+double oskar_station_element_orientation_y_rad(const oskar_Station* model,
+        int index);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_station_element_x_signal(oskar_Station* model);
@@ -211,34 +222,25 @@ OSKAR_EXPORT
 const oskar_Mem* oskar_station_element_weight_const(const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_cos_orientation_x(oskar_Station* model);
+oskar_Mem* oskar_station_element_orientation_x_cpu(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_cos_orientation_x_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_orientation_x_cpu_const(const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_sin_orientation_x(oskar_Station* model);
+oskar_Mem* oskar_station_element_orientation_y_cpu(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_sin_orientation_x_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_orientation_y_cpu_const(const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_cos_orientation_y(oskar_Station* model);
+oskar_Mem* oskar_station_element_types(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_cos_orientation_y_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_types_const(const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_sin_orientation_y(oskar_Station* model);
-
-OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_sin_orientation_y_const(const oskar_Station* model);
-
-OSKAR_EXPORT
-oskar_Mem* oskar_station_element_type(oskar_Station* model);
-
-OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_type_const(const oskar_Station* model);
+const int* oskar_station_element_types_cpu_const(const oskar_Station* model);
 
 OSKAR_EXPORT
 int oskar_station_has_child(const oskar_Station* model);
@@ -253,10 +255,12 @@ OSKAR_EXPORT
 int oskar_station_has_element(const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_Element* oskar_station_element(oskar_Station* model, int i);
+oskar_Element* oskar_station_element(oskar_Station* model,
+        int element_type_index);
 
 OSKAR_EXPORT
-const oskar_Element* oskar_station_element_const(const oskar_Station* model, int i);
+const oskar_Element* oskar_station_element_const(const oskar_Station* model,
+        int element_type_index);
 
 OSKAR_EXPORT
 int oskar_station_num_permitted_beams(const oskar_Station* model);
@@ -282,6 +286,21 @@ const oskar_Mem* oskar_station_permitted_beam_elevation_rad_const(const oskar_St
  */
 OSKAR_EXPORT
 void oskar_station_set_station_type(oskar_Station* model, int type);
+
+/**
+ * @brief
+ * Sets the flag to specify whether the beam should be completely normalised
+ * (default false).
+ *
+ * @details
+ * Sets the flag to specify whether the station beam should be completely
+ * normalised to a peak value of 1.0 (default false).
+ *
+ * @param[in] model Pointer to station model.
+ * @param[in] value True or false.
+ */
+OSKAR_EXPORT
+void oskar_station_set_normalise_final_beam(oskar_Station* model, int value);
 
 /**
  * @brief
@@ -357,7 +376,7 @@ void oskar_station_set_use_polarised_elements(oskar_Station* model, int value);
  * @param[in] value  True or false.
  */
 OSKAR_EXPORT
-void oskar_station_set_normalise_beam(oskar_Station* model, int value);
+void oskar_station_set_normalise_array_pattern(oskar_Station* model, int value);
 
 /**
  * @brief

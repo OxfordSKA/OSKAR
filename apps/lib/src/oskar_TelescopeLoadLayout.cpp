@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,13 +87,6 @@ void oskar_TelescopeLoadLayout::load(oskar_Telescope* telescope,
             oskar_Station* station = oskar_telescope_station(telescope, i);
             oskar_station_resize(station, 1, status);
             oskar_station_resize_element_types(station, 1, status);
-            oskar_station_set_element_coords(station, 0,
-                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
-            oskar_station_set_element_errors(station, 0,
-                    1.0, 0.0, 0.0, 0.0, status);
-            oskar_station_set_element_orientation(station, 0,
-                    90.0, 0.0, status);
-            oskar_station_set_element_weight(station, 0, 1.0, 0.0, status);
         }
     }
 }

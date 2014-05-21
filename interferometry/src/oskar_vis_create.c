@@ -94,8 +94,9 @@ oskar_Vis* oskar_vis_create(int amp_type, int location, int num_channels,
     vis->telescope_lat_deg = 0.0;
 
     /* Initialise memory. */
-    vis->settings_path = oskar_mem_create(OSKAR_CHAR, location, 0, status);
-    vis->telescope_path = oskar_mem_create(OSKAR_CHAR, location, 0, status);
+    vis->settings_path = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, status);
+    vis->telescope_path = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, status);
+    vis->settings = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, status);
     vis->x_metres = oskar_mem_create(type, location, num_stations, status);
     vis->y_metres = oskar_mem_create(type, location, num_stations, status);
     vis->z_metres = oskar_mem_create(type, location, num_stations, status);

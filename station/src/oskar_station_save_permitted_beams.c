@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,29 +26,66 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_ARRAY_PATTERN_H_
-#define OSKAR_SETTINGS_ARRAY_PATTERN_H_
+#include <oskar_station.h>
+#include <private_station.h>
 
-/**
- * @file oskar_SettingsArrayPattern.h
- */
+#include <oskar_getline.h>
+#include <oskar_string_to_array.h>
 
-#include <oskar_SettingsArrayElement.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
-/**
- * @struct oskar_SettingsArrayPattern
- *
- * @brief Structure to hold settings for the station array pattern evaluation.
- *
- * @details
- * The structure holds settings for the station array pattern evaluation.
- */
-struct oskar_SettingsArrayPattern
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void oskar_station_save_permitted_beams(const char* filename,
+        const oskar_Station* station, int* status)
 {
-    int enable;
-    int normalise;
-    oskar_SettingsArrayElement element;
-};
-typedef struct oskar_SettingsArrayPattern oskar_SettingsArrayPattern;
+    /* Declare the line buffer and counter. */
+    FILE* file;
+    const double *az, *el;
+    int i, num_beams;
 
-#endif /* OSKAR_SETTINGS_ARRAY_PATTERN_H_ */
+    /* Check all inputs. */
+    if (!station || !filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Open the file. */
+    file = fopen(filename, "w");
+    if (!file)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
+
+    /* Get pointers to arrays. */
+    az = oskar_mem_double_const(
+            oskar_station_permitted_beam_azimuth_rad_const(station), status);
+    el = oskar_mem_double_const(
+            oskar_station_permitted_beam_elevation_rad_const(station), status);
+    num_beams = oskar_station_num_permitted_beams(station);
+    for (i = 0; i < num_beams; ++i)
+    {
+        fprintf(file, "%.6f %.6f\n", az[i] * 180.0 / M_PI,
+                el[i] * 180.0 / M_PI);
+    }
+
+    /* Close the file. */
+    fclose(file);
+}
+
+#ifdef __cplusplus
+}
+#endif

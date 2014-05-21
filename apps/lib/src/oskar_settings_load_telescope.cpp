@@ -82,6 +82,8 @@ void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     temp = s.value("station_type", "Aperture array").toString();
     if (temp.startsWith("A", Qt::CaseInsensitive))
         tel->station_type = OSKAR_STATION_TYPE_AA;
+    else if (temp.startsWith("I", Qt::CaseInsensitive))
+        tel->station_type = OSKAR_STATION_TYPE_ISOTROPIC;
     else if (temp.startsWith("G", Qt::CaseInsensitive))
         tel->station_type = OSKAR_STATION_TYPE_GAUSSIAN_BEAM;
     else if (temp.startsWith("VLA (PBCOR)", Qt::CaseInsensitive))
@@ -91,6 +93,10 @@ void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
         *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         return;
     }
+
+    // Normalise beam.
+    tel->normalise_beams_at_phase_centre =
+            s.value("normalise_beams_at_phase_centre", false).toBool();
 
     // Aperture array settings.
     s.beginGroup("aperture_array");
@@ -155,11 +161,25 @@ void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
             ep->enable_numerical_patterns =
                     s.value("enable_numerical", true).toBool();
 
-            temp = s.value("functional_type", "Geometric dipole").toString();
-            if (temp.startsWith("G", Qt::CaseInsensitive))
+            temp = s.value("functional_type", "Dipole").toString();
+            if (temp.startsWith("D", Qt::CaseInsensitive))
+                ep->functional_type = OSKAR_ELEMENT_TYPE_DIPOLE;
+            else if (temp.startsWith("G", Qt::CaseInsensitive))
                 ep->functional_type = OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE;
             else if (temp.startsWith("I", Qt::CaseInsensitive))
                 ep->functional_type = OSKAR_ELEMENT_TYPE_ISOTROPIC;
+            else
+            {
+                *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+                return;
+            }
+
+            ep->dipole_length = s.value("dipole_length", 0.5).toDouble();
+            temp = s.value("dipole_length_units", "Wavelengths").toString();
+            if (temp.startsWith("W", Qt::CaseInsensitive))
+                ep->dipole_length_units = OSKAR_ELEMENT_LENGTH_WAVELENGTHS;
+            else if (temp.startsWith("M", Qt::CaseInsensitive))
+                ep->dipole_length_units = OSKAR_ELEMENT_LENGTH_METRES;
             else
             {
                 *status = OSKAR_ERR_SETTINGS_TELESCOPE;

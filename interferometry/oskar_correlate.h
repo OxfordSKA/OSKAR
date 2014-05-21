@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,28 +48,26 @@ extern "C" {
  * matrices to form visibilities (i.e. V = J B J*).
  *
  * @details
- * The source brightness matrices are specified in by means of an OSKAR sky
- * model.
+ * The source brightness matrices are constructed from the Stokes parameters
+ * in the supplied sky model.
  *
  * The Jones matrices should have dimensions corresponding to the number of
  * sources in the brightness matrix and the number of stations.
  *
- * Station u,v coordinates are specified in radians at the frequency of the
- * simulation (i.e. multiplied by the wavenumber).
- *
  * @param[out] vis          Output visibility amplitudes.
+ * @param[in]  n_sources    Number of sources to use.
  * @param[in]  J            Set of Jones matrices.
- * @param[in]  tel          OSKAR telescope model.
- * @param[in]  sky          OSKAR sky model.
- * @param[in]  u            Station u coordinates, in radians.
- * @param[in]  v            Station v coordinates, in radians.
+ * @param[in]  sky          Sky model.
+ * @param[in]  tel          Telescope model.
+ * @param[in]  u            Station u coordinates, in metres.
+ * @param[in]  v            Station v coordinates, in metres.
  * @param[in]  gast         Greenwich apparent sidereal time, in radians.
  * @param[in]  frequency_hz Current observation frequency, in Hz.
  * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
-        const oskar_Telescope* tel, const oskar_Sky* sky, const oskar_Mem* u,
+void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
+        const oskar_Sky* sky, const oskar_Telescope* tel, const oskar_Mem* u,
         const oskar_Mem* v, double gast, double frequency_hz, int* status);
 
 #ifdef __cplusplus

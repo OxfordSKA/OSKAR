@@ -141,8 +141,8 @@ TEST(evaluate_jones_E, evaluate_e)
 
     oskar_StationWork* work = oskar_station_work_create(OSKAR_SINGLE,
             OSKAR_LOCATION_GPU, &error);
-    oskar_evaluate_jones_E(E, sky_gpu, tel_gpu, gast, frequency, work,
-            random_state, &error);
+    oskar_evaluate_jones_E(E, oskar_sky_num_sources(sky_gpu), sky_gpu, tel_gpu,
+            gast, frequency, work, random_state, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Free the sky models.

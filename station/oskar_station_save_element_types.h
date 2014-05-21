@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_SAVE_CONFIG_H_
-#define OSKAR_STATION_SAVE_CONFIG_H_
+#ifndef OSKAR_STATION_SAVE_ELEMENT_TYPES_H_
+#define OSKAR_STATION_SAVE_ELEMENT_TYPES_H_
 
 /**
- * @file oskar_station_save_config.h
+ * @file oskar_station_save_element_types.h
  */
 
 #include <oskar_global.h>
@@ -43,26 +43,19 @@ extern "C" {
  * @brief Writes OSKAR station model data to an ASCII file.
  *
  * @details
- * This function writes data from the station model to an ASCII file.
- * The file contains a simple header describing the number of (antenna)
- * elements in the station, and the station longitude, latitude and altitude.
- * This is followed by a CSV list of the local horizontal x,y,z positions of
- * the elements (in metres) and remaining station element data.
- *
- * Note:
- * - The station model must reside in host (CPU) memory.
- * - The coordinates in the station structure must be in metres.
+ * This function writes element type data from the station model to an
+ * ASCII file.
  *
  * @param[in] filename   Pathname of file to write.
  * @param[in] station    Station model to write.
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_save_config(const char* filename,
+void oskar_station_save_element_types(const char* filename,
         const oskar_Station* station, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_SAVE_CONFIG_H_ */
+#endif /* OSKAR_STATION_SAVE_ELEMENT_TYPES_H_ */

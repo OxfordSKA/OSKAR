@@ -1,0 +1,401 @@
+/*
+ * Copyright (c) 2013-2014, The University of Oxford
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. Neither the name of the University of Oxford nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <oskar_evaluate_station_beam.h>
+#include <oskar_evaluate_station_beam_aperture_array.h>
+#include <oskar_evaluate_station_beam_gaussian.h>
+#include <oskar_evaluate_vla_beam_pbcor.h>
+#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines.h>
+#include <oskar_convert_enu_direction_cosines_to_relative_direction_cosines.h>
+
+#include <private_station_work.h>
+
+#include <math.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+static void evaluate_station_beam_relative_directions(oskar_Mem* beam_pattern,
+        int np, const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
+        const oskar_Station* station, oskar_StationWork* work,
+        oskar_RandomState* rand_state, double frequency, double GAST,
+        int* status);
+static void evaluate_station_beam_enu_directions(oskar_Mem* beam_pattern,
+        int np, const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        const oskar_Station* station, oskar_StationWork* work,
+        oskar_RandomState* rand_state, double frequency, double GAST,
+        int* status);
+static void compute_enu_directions(oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
+        int np, const oskar_Mem* l, const oskar_Mem* m,
+        const oskar_Mem* n, const oskar_Station* station, double GAST,
+        int* status);
+static void compute_relative_directions(oskar_Mem* l, oskar_Mem* m,
+        oskar_Mem* n, int np, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, const oskar_Station* station, double GAST,
+        int* status);
+
+void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
+        oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int coord_type,
+        double ra0, double dec0, const oskar_Station* station,
+        oskar_StationWork* work, oskar_RandomState* rand_state,
+        double frequency, double GAST, int* status)
+{
+    int normalise_final_beam;
+    oskar_Mem* op;
+
+    /* Check all inputs. */
+    if (!beam_pattern || !x || !y || !z || !station || !work || !rand_state ||
+            !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Set default output beam array. */
+    op = beam_pattern;
+
+    /* Check that the arrays have enough space to add an extra source at the
+     * end (for normalisation). We don't want to reallocate here, since that
+     * will be slow to do each time: must simply ensure that we pass input
+     * arrays that are large enough.
+     * Obviously the normalisation doesn't need to happen if the station has
+     * an isotropic beam. */
+    normalise_final_beam = oskar_station_normalise_final_beam(station) &&
+            (oskar_station_type(station) != OSKAR_STATION_TYPE_ISOTROPIC);
+    if (normalise_final_beam)
+    {
+        double c_x = 0.0, c_y = 0.0, c_z = 1.0;
+
+        /* Increment number of points. */
+        num_points++;
+
+        /* Check the input arrays are big enough to hold the new source. */
+        if ((int)oskar_mem_length(x) < num_points ||
+                (int)oskar_mem_length(y) < num_points ||
+                (int)oskar_mem_length(z) < num_points)
+        {
+            *status = OSKAR_ERR_DIMENSION_MISMATCH;
+            return;
+        }
+
+        /* Set output beam array to work buffer. */
+        op = oskar_mem_is_matrix(beam_pattern) ? work->beam_temp_matrix :
+                work->beam_temp_scalar;
+
+        /* Resize output beam array if necessary. */
+        if ((int)oskar_mem_length(op) < num_points)
+            oskar_mem_realloc(op, num_points, status);
+
+        /* Get the beam direction in the appropriate coordinate system. */
+        /* (Direction cosines are already set to the interferometer phase
+         * centre for relative directions.) */
+        if (coord_type == OSKAR_ENU_DIRECTION_COSINES)
+        {
+            double t_x, t_y, t_z, ha0;
+            ha0 = (GAST + oskar_station_longitude_rad(station)) - ra0;
+            oskar_convert_relative_direction_cosines_to_enu_direction_cosines_d(
+                    &t_x, &t_y, &t_z, 1, &c_x, &c_y, &c_z, ha0, dec0,
+                    oskar_station_latitude_rad(station));
+            c_x = t_x;
+            c_y = t_y;
+            c_z = t_z;
+        }
+
+        /* Add the extra source at the phase centre to the end of the arrays. */
+        oskar_mem_set_element_scalar(x, num_points-1, c_x, status);
+        oskar_mem_set_element_scalar(y, num_points-1, c_y, status);
+        oskar_mem_set_element_scalar(z, num_points-1, c_z, status);
+    }
+
+    /* Evaluate the station beam for the given directions. */
+    if (coord_type == OSKAR_ENU_DIRECTION_COSINES)
+    {
+        evaluate_station_beam_enu_directions(op, num_points,
+                x, y, z, station, work, rand_state, frequency, GAST,
+                status);
+    }
+    else if (coord_type == OSKAR_RELATIVE_DIRECTION_COSINES)
+    {
+        evaluate_station_beam_relative_directions(op, num_points,
+                x, y, z, station, work, rand_state, frequency, GAST,
+                status);
+    }
+    else
+    {
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+    }
+
+    /* Scale beam pattern by value of the last source if required. */
+    if (normalise_final_beam)
+    {
+        double amp = 0.0;
+
+        /* Get the last element of the vector and convert to amplitude. */
+        if (oskar_mem_is_matrix(op))
+        {
+            double4c val;
+            val = oskar_mem_get_element_matrix(op, num_points-1, status);
+
+            /*
+             * Scale by square root of "Stokes I" autocorrelation:
+             * sqrt(0.5 * [sum of resultant diagonal]).
+             *
+             * We have
+             * [ Xa  Xb ] [ Xa*  Xc* ] = [ Xa Xa* + Xb Xb*    (don't care)   ]
+             * [ Xc  Xd ] [ Xb*  Xd* ]   [  (don't care)     Xc Xc* + Xd Xd* ]
+             *
+             * Stokes I is completely real, so need only evaluate the real
+             * part of all the multiplies. Because of the conjugate terms,
+             * these become re*re + im*im.
+             *
+             * Need the square root because we only want the normalised value
+             * for the beam itself (in isolation), not its actual
+             * autocorrelation!
+             */
+            amp = val.a.x * val.a.x + val.a.y * val.a.y +
+                    val.b.x * val.b.x + val.b.y * val.b.y +
+                    val.c.x * val.c.x + val.c.y * val.c.y +
+                    val.d.x * val.d.x + val.d.y * val.d.y;
+            amp = sqrt(0.5 * amp);
+        }
+        else
+        {
+            double2 val;
+            val = oskar_mem_get_element_complex(op, num_points-1, status);
+
+            /* Scale by voltage. */
+            amp = sqrt(val.x * val.x + val.y * val.y);
+        }
+
+        /* Scale beam array by normalisation value. */
+        oskar_mem_scale_real(op, 1.0/amp, status);
+
+        /* Copy output beam data. */
+        oskar_mem_insert(beam_pattern, op, 0, num_points-1, status);
+    }
+}
+
+static void evaluate_station_beam_relative_directions(oskar_Mem* beam_pattern,
+        int np, const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
+        const oskar_Station* station, oskar_StationWork* work,
+        oskar_RandomState* rand_state, double frequency, double GAST,
+        int* status)
+{
+    oskar_Mem *x, *y, *z; /* ENU direction cosines */
+
+    if (*status) return;
+
+    /* ENU directions are needed for horizon clip in all cases */
+    x = oskar_station_work_enu_direction_x(work);
+    y = oskar_station_work_enu_direction_y(work);
+    z = oskar_station_work_enu_direction_z(work);
+    compute_enu_directions(x, y, z, np, l, m, n, station, GAST, status);
+
+    switch (oskar_station_type(station))
+    {
+        case OSKAR_STATION_TYPE_AA:
+        {
+            oskar_evaluate_station_beam_aperture_array(beam_pattern, station,
+                    np, x, y, z, GAST, frequency, work, rand_state, status);
+            break;
+        }
+        case OSKAR_STATION_TYPE_ISOTROPIC:
+        {
+            oskar_mem_set_value_real(beam_pattern, 1.0, 0, np, status);
+            break;
+        }
+        case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
+        {
+            oskar_evaluate_station_beam_gaussian(beam_pattern, np, l, m, z,
+                    oskar_station_gaussian_beam_fwhm_rad(station), status);
+            break;
+        }
+        case OSKAR_STATION_TYPE_VLA_PBCOR:
+        {
+            oskar_evaluate_vla_beam_pbcor(beam_pattern, np, l, m, frequency,
+                    status);
+            break;
+        }
+        default:
+        {
+            *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+            break;
+        }
+    };
+}
+
+static void evaluate_station_beam_enu_directions(oskar_Mem* beam_pattern,
+        int np, const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        const oskar_Station* station, oskar_StationWork* work,
+        oskar_RandomState* rand_state, double frequency, double GAST,
+        int* status)
+{
+    if (*status) return;
+
+    switch (oskar_station_type(station))
+    {
+        case OSKAR_STATION_TYPE_AA:
+        {
+            oskar_evaluate_station_beam_aperture_array(beam_pattern, station,
+                    np, x, y, z, GAST, frequency, work, rand_state, status);
+            break;
+        }
+        case OSKAR_STATION_TYPE_ISOTROPIC:
+        {
+            oskar_mem_set_value_real(beam_pattern, 1.0, 0, np, status);
+            break;
+        }
+        case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
+        {
+            oskar_Mem *l, *m, *n; /* Relative direction cosines */
+            l = oskar_station_work_enu_direction_x(work);
+            m = oskar_station_work_enu_direction_y(work);
+            n = oskar_station_work_enu_direction_z(work);
+            compute_relative_directions(l, m, n, np, x, y, z, station, GAST,
+                    status);
+            oskar_evaluate_station_beam_gaussian(beam_pattern, np, l, m, z,
+                    oskar_station_gaussian_beam_fwhm_rad(station), status);
+            break;
+        }
+        case OSKAR_STATION_TYPE_VLA_PBCOR:
+        {
+            oskar_Mem *l, *m, *n; /* Relative direction cosines */
+            l = oskar_station_work_enu_direction_x(work);
+            m = oskar_station_work_enu_direction_y(work);
+            n = oskar_station_work_enu_direction_z(work);
+            compute_relative_directions(l, m, n, np, x, y, z, station, GAST,
+                    status);
+            oskar_evaluate_vla_beam_pbcor(beam_pattern, np, l, m, frequency,
+                    status);
+            break;
+        }
+        default:
+        {
+            *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+            break;
+        }
+    };
+}
+
+static void compute_enu_directions(oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
+        int np, const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
+        const oskar_Station* station, double GAST, int* status)
+{
+    double ha0, dec0, lat;
+    int pointing_coord_type;
+
+    if (*status) return;
+
+    /* Resize work arrays if needed */
+    if ((int)oskar_mem_length(x) < np) oskar_mem_realloc(x, np, status);
+    if ((int)oskar_mem_length(y) < np) oskar_mem_realloc(y, np, status);
+    if ((int)oskar_mem_length(z) < np) oskar_mem_realloc(z, np, status);
+    if (*status) return;
+
+    /* Obtain ra0, dec0 of phase centre */
+    lat  = oskar_station_latitude_rad(station);
+    pointing_coord_type = oskar_station_beam_coord_type(station);
+    if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
+    {
+        double ra0;
+        ra0  = oskar_station_beam_longitude_rad(station);
+        ha0  = (GAST + oskar_station_longitude_rad(station)) - ra0;
+        dec0 = oskar_station_beam_latitude_rad(station);
+    }
+    else if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)
+    {
+        /* TODO convert from az0, el0 to ha0, dec0 */
+        ha0 = 0.0;
+        dec0 = 0.0;
+        *status = OSKAR_FAIL;
+        return;
+    }
+    else
+    {
+        *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+        return;
+    }
+
+    /* Convert from phase-centre-relative to ENU directions. */
+    oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
+            x, y, z, np, l, m, n, ha0, dec0, lat, status);
+}
+
+static void compute_relative_directions(oskar_Mem* l, oskar_Mem* m,
+        oskar_Mem* n, int np, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, const oskar_Station* station, double GAST,
+        int* status)
+{
+    double ha0, dec0, lat;
+    int pointing_coord_type;
+
+    if (*status) return;
+
+    /* Resize work arrays if needed */
+    if ((int)oskar_mem_length(l) < np) oskar_mem_realloc(l, np, status);
+    if ((int)oskar_mem_length(m) < np) oskar_mem_realloc(m, np, status);
+    if ((int)oskar_mem_length(n) < np) oskar_mem_realloc(n, np, status);
+    if (*status) return;
+
+    /* Obtain ra0, dec0 of phase centre */
+    lat  = oskar_station_latitude_rad(station);
+    pointing_coord_type = oskar_station_beam_coord_type(station);
+    if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
+    {
+        double ra0;
+        ra0  = oskar_station_beam_longitude_rad(station);
+        ha0  = (GAST + oskar_station_longitude_rad(station)) - ra0;
+        dec0 = oskar_station_beam_latitude_rad(station);
+    }
+    else if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)
+    {
+        /* TODO convert from az0, el0 to ha0, dec0 */
+        ha0 = 0.0;
+        dec0 = 0.0;
+        *status = OSKAR_FAIL;
+        return;
+    }
+    else
+    {
+        *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+        return;
+    }
+
+    /* Convert from ENU to phase-centre-relative directions. */
+    oskar_convert_enu_direction_cosines_to_relative_direction_cosines(
+            l, m, n, np, x, y, z, ha0, dec0, lat, status);
+}
+
+#ifdef __cplusplus
+}
+#endif
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,29 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_ELEMENT_PATTERN_H_
-#define OSKAR_SETTINGS_ELEMENT_PATTERN_H_
+#ifndef OSKAR_STATION_SET_ELEMENT_TYPE_H_
+#define OSKAR_STATION_SET_ELEMENT_TYPE_H_
 
 /**
- * @file oskar_SettingsElementPattern.h
+ * @file oskar_station_set_element_type.h
  */
 
-#include <oskar_SettingsElementTaper.h>
+#include <oskar_global.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @struct oskar_SettingsElementPattern
- *
- * @brief Structure to hold settings for the station element pattern evaluation.
+ * @brief
+ * Sets the type index of an element in the station model.
  *
  * @details
- * The structure holds settings for the station element pattern evaluation.
+ * This function sets the type index of the specified element in the
+ * station model, transferring data to the GPU if necessary.
+ *
+ * @param[in] dst          Station model structure to copy into.
+ * @param[in] index        Element array index to set.
+ * @param[in] element_type Type of element.
+ * @param[in,out] status   Status return code.
  */
-struct oskar_SettingsElementPattern
-{
-    int enable_numerical_patterns;
-    int functional_type;
-    oskar_SettingsElementTaper taper;
-};
-typedef struct oskar_SettingsElementPattern oskar_SettingsElementPattern;
+OSKAR_EXPORT
+void oskar_station_set_element_type(oskar_Station* dst,
+        int index, int element_type, int* status);
 
-#endif /* OSKAR_SETTINGS_ELEMENT_PATTERN_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_STATION_SET_ELEMENT_TYPE_H_ */

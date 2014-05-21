@@ -54,7 +54,7 @@ oskar_Mem* oskar_mem_create_copy(const oskar_Mem* src, int location,
         return mem;
 
     /* Copy the memory. */
-    oskar_mem_insert(mem, src, 0, status);
+    oskar_mem_insert(mem, src, 0, oskar_mem_length(src), status);
 
     /* Return a handle to the new structure. */
     return mem;

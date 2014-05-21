@@ -54,8 +54,8 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     unsigned char grp = OSKAR_TAG_GROUP_VISIBILITY;
     FILE* stream;
     char* log_data = 0;
-    long log_size = 0;
-    const char* settings_path;
+    size_t log_size = 0;
+    const char* settings;
 
     /* Check all inputs. */
     if (!vis || !filename || !status)
@@ -101,25 +101,23 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     if (*status) return;
 
     /* If settings path is set, write out the data. */
-    settings_path = oskar_mem_char_const(oskar_vis_settings_path_const(vis));
-    if (settings_path && strlen(settings_path) > 0)
+    settings = oskar_mem_char_const(oskar_vis_settings_path_const(vis));
+    if (settings && strlen(settings) > 0)
     {
-        /* Write the settings path. */
         oskar_mem_binary_stream_write(oskar_vis_settings_path_const(vis),
-                stream, OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0, 0,
-                status);
-
-        /* Check the file exists */
-        if (oskar_file_exists(settings_path))
-        {
-            /* Write the settings file. */
-            temp = oskar_mem_read_binary_raw(settings_path, OSKAR_CHAR,
-                    OSKAR_LOCATION_CPU, status);
-            oskar_mem_binary_stream_write(temp, stream,
-                    OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0, status);
-            oskar_mem_free(temp, status);
-        }
+                stream, OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH,
+                0, 0, status);
     }
+
+    /* If settings exist, write out the data. */
+    settings = oskar_mem_char_const(oskar_vis_settings_const(vis));
+    if (settings && strlen(settings) > 0)
+    {
+        oskar_mem_binary_stream_write(oskar_vis_settings_const(vis),
+                stream, OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS,
+                0, 0, status);
+    }
+
     /* If log exists, then write it out. */
     log_data = oskar_log_file_data(log, &log_size);
     if (log_data)

@@ -321,6 +321,8 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
     LV("Longitude [deg]", "%.1f", s->telescope.longitude_rad * R2D);
     LV("Latitude [deg]", "%.1f", s->telescope.latitude_rad * R2D);
     LV("Altitude [m]", "%.1f", s->telescope.altitude_m);
+    LVB("Normalise beams at phase centre",
+            s->telescope.normalise_beams_at_phase_centre);
 
     /* Aperture array settings. */
     if (s->telescope.station_type == OSKAR_STATION_TYPE_AA)
@@ -429,6 +431,21 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
             case OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE:
                 LVS("Functional pattern type", "Geometric dipole");
                 break;
+            case OSKAR_ELEMENT_TYPE_DIPOLE:
+            {
+                LVS("Functional pattern type", "Dipole");
+                LV("Dipole length", "%.3f", ep->dipole_length);
+                switch (ep->functional_type)
+                {
+                case OSKAR_ELEMENT_LENGTH_WAVELENGTHS:
+                    LVS("Dipole length units", "Wavelengths");
+                    break;
+                case OSKAR_ELEMENT_LENGTH_METRES:
+                    LVS("Dipole length units", "Metres");
+                    break;
+                }
+                break;
+            }
             default:
                 LVS("Functional pattern type", "Unknown");
                 break;
@@ -476,6 +493,10 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
         LV("Gaussian FWHM [deg]", "%.4f",
                 s->telescope.gaussian_beam.fwhm_deg);
         --depth;
+    }
+    else if (s->telescope.station_type == OSKAR_STATION_TYPE_ISOTROPIC)
+    {
+        LVS("Station type", "Isotropic (STATION BEAM DISABLED!)");
     }
 
     /* Telescope model output directory. */

@@ -98,6 +98,16 @@ double oskar_element_gaussian_fwhm_rad(const oskar_Element* data)
     return data->gaussian_fwhm_rad;
 }
 
+double oskar_element_dipole_length(const oskar_Element* data)
+{
+    return data->dipole_length;
+}
+
+int oskar_element_dipole_length_units(const oskar_Element* data)
+{
+    return data->dipole_length_units;
+}
+
 oskar_Mem* oskar_element_x_filename(oskar_Element* data, int freq_id)
 {
     return data->filename_x[freq_id];
@@ -249,6 +259,13 @@ void oskar_element_set_gaussian_fwhm_rad(oskar_Element* data, double value)
 void oskar_element_set_cos_power(oskar_Element* data, double value)
 {
     data->cos_power = value;
+}
+
+void oskar_element_set_dipole_length(oskar_Element* data, double value,
+        int units)
+{
+    data->dipole_length = value;
+    data->dipole_length_units = units;
 }
 
 #ifdef __cplusplus

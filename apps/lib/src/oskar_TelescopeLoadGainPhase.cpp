@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,6 @@ using std::map;
 using std::string;
 
 const string oskar_TelescopeLoadGainPhase::gain_phase_file = "gain_phase.txt";
-
-oskar_TelescopeLoadGainPhase::oskar_TelescopeLoadGainPhase()
-{
-}
-
-oskar_TelescopeLoadGainPhase::~oskar_TelescopeLoadGainPhase()
-{
-}
 
 void oskar_TelescopeLoadGainPhase::load(oskar_Telescope* /*telescope*/,
         const oskar_Dir& /*cwd*/, int /*num_subdirs*/,

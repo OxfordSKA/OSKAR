@@ -66,6 +66,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
 
     /* Copy common station parameters. */
     model->station_type = src->station_type;
+    model->normalise_final_beam = src->normalise_final_beam;
     model->longitude_rad = src->longitude_rad;
     model->latitude_rad = src->latitude_rad;
     model->altitude_m = src->altitude_m;
@@ -78,14 +79,14 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     model->identical_children = src->identical_children;
     model->num_elements = src->num_elements;
     model->use_polarised_elements = src->use_polarised_elements;
-    model->normalise_beam = src->normalise_beam;
+    model->normalise_array_pattern = src->normalise_array_pattern;
     model->enable_array_pattern = src->enable_array_pattern;
-    model->single_element_model = src->single_element_model;
+    model->common_element_orientation = src->common_element_orientation;
     model->array_is_3d = src->array_is_3d;
     model->apply_element_errors = src->apply_element_errors;
     model->apply_element_weight = src->apply_element_weight;
-    model->orientation_x = src->orientation_x;
-    model->orientation_y = src->orientation_y;
+    model->nominal_orientation_x = src->nominal_orientation_x;
+    model->nominal_orientation_y = src->nominal_orientation_y;
     model->num_permitted_beams = src->num_permitted_beams;
 
     /* Copy Gaussian station beam data. */
@@ -103,11 +104,10 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     oskar_mem_copy(model->gain_error, src->gain_error, status);
     oskar_mem_copy(model->phase_offset, src->phase_offset, status);
     oskar_mem_copy(model->phase_error, src->phase_error, status);
-    oskar_mem_copy(model->cos_orientation_x, src->cos_orientation_x, status);
-    oskar_mem_copy(model->sin_orientation_x, src->sin_orientation_x, status);
-    oskar_mem_copy(model->cos_orientation_y, src->cos_orientation_y, status);
-    oskar_mem_copy(model->sin_orientation_y, src->sin_orientation_y, status);
-    oskar_mem_copy(model->element_type, src->element_type, status);
+    oskar_mem_copy(model->orientation_x_cpu, src->orientation_x_cpu, status);
+    oskar_mem_copy(model->orientation_y_cpu, src->orientation_y_cpu, status);
+    oskar_mem_copy(model->element_types, src->element_types, status);
+    oskar_mem_copy(model->element_types_cpu, src->element_types_cpu, status);
     oskar_mem_copy(model->permitted_beam_az, src->permitted_beam_az, status);
     oskar_mem_copy(model->permitted_beam_el, src->permitted_beam_el, status);
 

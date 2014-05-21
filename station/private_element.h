@@ -50,10 +50,10 @@ struct oskar_Element
 
     int element_type; /**< Dipole or isotropic. */
     int taper_type; /**< Tapering type. */
-    double dipole_length_m; /**< Length of dipole in metres. */
+    int dipole_length_units; /**< Units of dipole length (metres or wavelengths). */
+    double dipole_length; /**< Length of dipole. */
     double cos_power; /**< For a cosine taper, the power of the cosine. */
     double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
-
 
     /* These arrays of fitted data are per-frequency. */
     int num_frequencies;

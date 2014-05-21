@@ -170,7 +170,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     {
         cudaSetDevice(settings.sim.cuda_device_ids[i]);
         local_sky[i] = oskar_sky_create(type, OSKAR_LOCATION_GPU,
-                settings.sim.max_sources_per_chunk, &error);
+                settings.sim.max_sources_per_chunk + 1, &error);
         tel_gpu[i] = oskar_telescope_create_copy(tel, OSKAR_LOCATION_GPU,
                 &error);
         work[i] = oskar_station_work_create(type, OSKAR_LOCATION_GPU,
@@ -275,8 +275,14 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     fname = settings.interferometer.ms_filename;
     if (fname && !error)
     {
+        char* log_data;
+        size_t log_size;
         oskar_log_message(log, 0, "Writing Measurement Set: '%s'", fname);
-        oskar_vis_write_ms(vis, fname, true, &error);
+
+        // Get the log.
+        log_data = oskar_log_file_data(log, &log_size);
+        oskar_vis_write_ms(vis, fname, true, log_data, log_size, &error);
+        free(log_data);
     }
 #endif
 
@@ -439,12 +445,13 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
             /* Evaluate parallactic angle (R), station beam (E), and join. */
             oskar_timer_resume(timers->tmr_R);
-            oskar_evaluate_jones_R(R, local_sky, telescope, gast, status);
+            oskar_evaluate_jones_R(R, n_src, oskar_sky_ra_const(local_sky),
+                    oskar_sky_dec_const(local_sky), telescope, gast, status);
             oskar_timer_pause(timers->tmr_R);
 
             oskar_timer_resume(timers->tmr_E);
-            oskar_evaluate_jones_E(E, local_sky, telescope, gast, frequency,
-                    work, random_state, status);
+            oskar_evaluate_jones_E(E, n_src, local_sky, telescope, gast,
+                    frequency, work, random_state, status);
             oskar_timer_pause(timers->tmr_E);
 
             oskar_timer_resume(timers->tmr_join);
@@ -456,7 +463,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
             /* NOTE this is currently only a CPU implementation */
             if (settings->ionosphere.enable)
             {
-                oskar_evaluate_jones_Z(Z, local_sky, telescope,
+                oskar_evaluate_jones_Z(Z, n_src, local_sky, telescope,
                         &settings->ionosphere, gast, frequency, &workJonesZ,
                         status);
                 oskar_jones_join(R, Z, R, status);
@@ -475,10 +482,11 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
                 /* Evaluate interferometer phase (K), join Jones, correlate. */
                 oskar_timer_resume(timers->tmr_K);
-                oskar_evaluate_jones_K(K, frequency,
+                oskar_evaluate_jones_K(K, n_src,
                         oskar_sky_l_const(local_sky),
                         oskar_sky_m_const(local_sky),
-                        oskar_sky_n_const(local_sky), u, v, w, status);
+                        oskar_sky_n_const(local_sky), u, v, w, frequency,
+                        status);
                 oskar_timer_pause(timers->tmr_K);
 
                 oskar_timer_resume(timers->tmr_join);
@@ -486,8 +494,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 oskar_timer_pause(timers->tmr_join);
 
                 oskar_timer_resume(timers->tmr_correlate);
-                oskar_correlate(vis, J, telescope, local_sky, u, v, gast,
-                        frequency, status);
+                oskar_correlate(vis, n_src, J, local_sky, telescope, u, v,
+                        gast, frequency, status);
                 oskar_timer_pause(timers->tmr_correlate);
             }
         }
@@ -495,7 +503,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         /* Divide visibilities by number of averages, and add to global data. */
         oskar_timer_resume(timers->tmr_init_copy);
         oskar_mem_scale_real(vis, 1.0/(num_fringe_ave * num_vis_ave), status);
-        oskar_mem_insert(vis_amp, vis, i * n_baselines, status);
+        oskar_mem_insert(vis_amp, vis, i * n_baselines, oskar_mem_length(vis),
+                status);
         oskar_timer_pause(timers->tmr_init_copy);
     }
 

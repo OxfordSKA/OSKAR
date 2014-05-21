@@ -31,13 +31,11 @@
 #include <oskar_evaluate_beam_horizon_direction.h>
 #include <oskar_evaluate_array_pattern.h>
 #include <oskar_evaluate_array_pattern_hierarchical.h>
-#include <oskar_evaluate_array_pattern_dipoles.h>
 #include <oskar_evaluate_element_weights.h>
 #include <oskar_element_evaluate.h>
 #include <oskar_blank_below_horizon.h>
 #include <private_station_work.h>
 
-#include <oskar_mem.h>
 #include <math.h>
 
 #ifndef M_PI
@@ -152,21 +150,24 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
     oskar_evaluate_beam_horizon_direction(&beam_x, &beam_y, &beam_z, station,
             gast, status);
 
-    /* Check if there are no child stations. */
+    /* Evaluate beam if there are no child stations. */
     if (!oskar_station_has_child(station))
     {
-        /* Common element model for all detectors in the station. */
-        if (oskar_station_single_element_model(station))
+        /* First optimisation: A single element model type, and either a common
+         * orientation for all elements within the station, or unpolarised
+         * elements. */
+        /* Array pattern and element pattern are separable. */
+        if (oskar_station_num_element_types(station) == 1 &&
+                (oskar_station_common_element_orientation(station) ||
+                        !oskar_station_use_polarised_elements(station)) )
         {
-            /* Array pattern and element pattern are separable. */
             oskar_Mem *array = 0, *element = 0;
 
             /* Evaluate array pattern if required. */
             if (oskar_station_enable_array_pattern(station))
             {
                 /* Get pointer to array pattern. */
-                array = (oskar_mem_is_scalar(beam) ?
-                        beam : work->array_pattern);
+                array = oskar_mem_is_scalar(beam) ? beam : work->array_pattern;
 
                 /* Generate beamforming weights and evaluate array pattern. */
                 oskar_evaluate_element_weights(weights, weights_error,
@@ -176,7 +177,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
                         num_points, x, y, z, weights, status);
 
                 /* Normalise array response if required. */
-                if (oskar_station_normalise_beam(station))
+                if (oskar_station_normalise_array_pattern(station))
                     oskar_mem_scale_real(array, 1.0 / num_elements, status);
             }
 
@@ -185,12 +186,13 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
                 element = (oskar_mem_is_matrix(beam) ?
                         beam : work->element_pattern_matrix);
             else
-                element = (!array ? beam : work->element_pattern_scalar);
+                element = !array ? beam : work->element_pattern_scalar;
 
             /* Evaluate element pattern. */
             oskar_element_evaluate(oskar_station_element_const(station, 0),
-                    element, oskar_station_element_orientation_x_rad(station),
-                    oskar_station_element_orientation_y_rad(station),
+                    element,
+                    oskar_station_nominal_element_orientation_x_rad(station),
+                    oskar_station_nominal_element_orientation_y_rad(station),
                     num_points, x, y, z, frequency_hz, work->theta_modified,
                     work->phi_modified, status);
 
@@ -208,44 +210,88 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             }
         }
 
-        /* Different element model per detector in the station. */
+#if 0
+        /* Second optimisation: Common orientation for all elements within the
+         * station, but more than one element type. */
+        else if (oskar_station_common_element_orientation(station))
+        {
+            /* Must evaluate array pattern, so check that this is enabled. */
+            if (!oskar_station_enable_array_pattern(station))
+            {
+                *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+                return;
+            }
+
+            /* Call a DFT using indexed input. */
+            /* TODO Not yet implemented. */
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+        }
+#endif
+
+        /* No optimisation: No common element orientation. */
         /* Can't separate array and element evaluation. */
         else
         {
-            const oskar_Element* element;
-            element = oskar_station_element_const(station, 0);
+            int i, work_size, num_element_types;
+            oskar_Mem *element_block = 0, *element = 0;
+            const int* element_type_array = 0;
 
             /* Must evaluate array pattern, so check that this is enabled. */
             if (!oskar_station_enable_array_pattern(station))
-                *status = OSKAR_ERR_SETTINGS;
-
-            /* Can't use tapered elements here, for the moment. */
-            if (oskar_element_taper_type(element) != OSKAR_ELEMENT_TAPER_NONE)
-                *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-
-            /* Check if safe to proceed. */
-            if (*status) return;
-
-            /* Check that there are no spline coefficients. */
-            if (!oskar_element_has_spline_data(element))
             {
-                /* Generate beamforming weights and evaluate beam from
-                 * dipoles that are oriented differently. */
-                oskar_evaluate_element_weights(weights, weights_error,
-                        wavenumber, station, beam_x, beam_y, beam_z,
-                        random_states, status);
-                oskar_evaluate_array_pattern_dipoles(beam, wavenumber, station,
-                        num_points, x, y, z, weights, status);
+                *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+                return;
+            }
 
-                /* Normalise array response if required. */
-                if (oskar_station_normalise_beam(station))
-                    oskar_mem_scale_real(beam, 1.0 / num_elements, status);
-            }
-            else
+            /* Get pointer to element pattern block and set size. */
+            work_size = num_elements * num_points;
+            element_block = oskar_station_use_polarised_elements(station) ?
+                    work->element_pattern_matrix : work->element_pattern_scalar;
+            if ((int)oskar_mem_length(element_block) < work_size)
+                oskar_mem_realloc(element_block, work_size, status);
+
+            /* Create alias into element block. */
+            element = oskar_mem_create_alias(element_block, 0, 0, status);
+
+            /* Loop over elements and evaluate response for each. */
+            element_type_array = oskar_station_element_types_cpu_const(station);
+            num_element_types = oskar_station_num_element_types(station);
+            for (i = 0; i < num_elements; ++i)
             {
-                /* Unique spline patterns: not implemented. */
-                *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+                int element_type_idx;
+                element_type_idx = element_type_array[i];
+                if (element_type_idx >= num_element_types)
+                {
+                    *status = OSKAR_ERR_OUT_OF_RANGE;
+                    break;
+                }
+                oskar_mem_set_alias(element, element_block, i * num_points,
+                        num_points, status);
+                oskar_element_evaluate(
+                        oskar_station_element_const(station, element_type_idx),
+                        element,
+                        oskar_station_element_orientation_x_rad(station, i),
+                        oskar_station_element_orientation_y_rad(station, i),
+                        num_points, x, y, z, frequency_hz, work->theta_modified,
+                        work->phi_modified, status);
             }
+
+            /* Generate beamforming weights. */
+            oskar_evaluate_element_weights(weights, weights_error,
+                    wavenumber, station, beam_x, beam_y, beam_z,
+                    random_states, status);
+
+            /* Evaluate array response using "hierarchical" beamforming. */
+            oskar_evaluate_array_pattern_hierarchical(beam, wavenumber,
+                    station, num_points, x, y, z, element_block, weights,
+                    status);
+
+            /* Free element alias. */
+            oskar_mem_free(element, status);
+
+            /* Normalise array response if required. */
+            if (oskar_station_normalise_array_pattern(station))
+                oskar_mem_scale_real(beam, 1.0 / num_elements, status);
         }
 
         /* Blank (set to zero) points below the horizon. */
@@ -257,6 +303,13 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
     {
         int i, work_size;
         oskar_Mem* signal;
+
+        /* Must evaluate array pattern, so check that this is enabled. */
+        if (!oskar_station_enable_array_pattern(station))
+        {
+            *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+            return;
+        }
 
         /* Get pointer to a work array of the right type. */
         signal = (oskar_mem_is_matrix(beam)) ?
@@ -284,7 +337,8 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             /* Copy beam for child station 0 into memory for other stations. */
             for (i = 1; i < num_elements; ++i)
             {
-                oskar_mem_insert(signal, output0, i * num_points, status);
+                oskar_mem_insert(signal, output0, i * num_points,
+                        oskar_mem_length(output0), status);
             }
             oskar_mem_free(output0, status);
         }
@@ -314,7 +368,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
                 num_points, x, y, z, signal, weights, status);
 
         /* Normalise array response if required. */
-        if (oskar_station_normalise_beam(station))
+        if (oskar_station_normalise_array_pattern(station))
             oskar_mem_scale_real(beam, 1.0 / num_elements, status);
     }
 }

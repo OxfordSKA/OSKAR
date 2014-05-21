@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 #include <oskar_log.h>
 #include <oskar_vis.h>
 #include <oskar_version_string.h>
+#include <oskar_binary_tag_index_free.h>
 #include <string>
 #include <cstdio>
 
@@ -52,19 +53,30 @@ int main(int argc, char** argv)
     if (!opt.check_options(argc, argv))
         return OSKAR_FAIL;
 
-    const char* oskar_vis = opt.getArg(0);
+    const char* vis_file = opt.getArg(0);
     std::string ms_name;
     if (opt.numArgs() == 2)
         ms_name = std::string(opt.getArg(1));
     else
-        ms_name = std::string(oskar_vis) + ".ms";
+        ms_name = std::string(vis_file) + ".ms";
 
-    // Load the visibility file and write it out as a Measurement Set.
-    oskar_Vis* vis = oskar_vis_read(oskar_vis, &error);
-    oskar_vis_write_ms(vis, ms_name.c_str(), 1, &error);
+    // Load the visibility file.
+    oskar_Vis* vis = oskar_vis_read(vis_file, &error);
+
+    // Load the run log.
+    oskar_BinaryTagIndex* index = 0;
+    oskar_Mem* log = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, &error);
+    oskar_mem_binary_file_read(log, vis_file, &index,
+            OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &error);
+    oskar_binary_tag_index_free(index, &error);
+
+    // Write data as a Measurement Set.
+    oskar_vis_write_ms(vis, ms_name.c_str(), 1,
+            oskar_mem_char_const(log), oskar_mem_length(log), &error);
     if (error)
         oskar_log_error(0, oskar_get_error_string(error));
     oskar_vis_free(vis, &error);
+    oskar_mem_free(log, &error);
     return error;
 
 #else

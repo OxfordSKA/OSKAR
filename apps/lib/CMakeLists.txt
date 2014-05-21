@@ -30,6 +30,7 @@ set(apps_SRC
     src/oskar_TelescopeLoadApodisation.cpp
     src/oskar_TelescopeLoadConfig.cpp
     src/oskar_TelescopeLoadElementPattern.cpp
+    src/oskar_TelescopeLoadElementTypes.cpp
     src/oskar_TelescopeLoadGainPhase.cpp
     src/oskar_TelescopeLoadLayout.cpp
     src/oskar_TelescopeLoadNoise.cpp

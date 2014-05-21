@@ -16,7 +16,6 @@ set(station_SRC
     src/oskar_element_resize_frequency_data.c
     src/oskar_element_write.c
     src/oskar_evaluate_array_pattern.c
-    src/oskar_evaluate_array_pattern_dipoles.c
     src/oskar_evaluate_array_pattern_hierarchical.c
     src/oskar_evaluate_beam_horizon_direction.c
     src/oskar_evaluate_dipole_pattern.c
@@ -28,7 +27,7 @@ set(station_SRC
     src/oskar_evaluate_element_weights.c
     src/oskar_evaluate_station_beam_aperture_array.c
     src/oskar_evaluate_station_beam_gaussian.c
-    src/oskar_evaluate_station_beam_pattern.c
+    src/oskar_evaluate_station_beam.c
     src/oskar_evaluate_station_from_telescope_dipole_azimuth.c
     src/oskar_evaluate_vla_beam_pbcor.c
     src/oskar_station_accessors.c
@@ -41,6 +40,7 @@ set(station_SRC
     src/oskar_station_free.c
     src/oskar_station_load_apodisation.c
     src/oskar_station_load_config.c
+    src/oskar_station_load_element_types.c
     src/oskar_station_load_gain_phase.c
     src/oskar_station_load_layout.c
     src/oskar_station_load_orientation.c
@@ -53,10 +53,16 @@ set(station_SRC
     src/oskar_station_override_element_xy_position_errors.c
     src/oskar_station_resize_element_types.c
     src/oskar_station_resize.c
-    src/oskar_station_save_config.c
+    src/oskar_station_save_apodisation.c
+    src/oskar_station_save_element_types.c
+    src/oskar_station_save_gain_phase.c
+    src/oskar_station_save_layout.c
+    src/oskar_station_save_orientation.c
+    src/oskar_station_save_permitted_beams.c
     src/oskar_station_set_element_coords.c
     src/oskar_station_set_element_errors.c
     src/oskar_station_set_element_orientation.c
+    src/oskar_station_set_element_type.c
     src/oskar_station_set_element_weight.c
     src/oskar_system_noise_model.c
     src/oskar_system_noise_model_copy.c
@@ -71,7 +77,6 @@ if (CUDA_FOUND)
         src/oskar_apply_element_taper_cosine_cuda.cu
         src/oskar_apply_element_taper_gaussian_cuda.cu
         src/oskar_blank_below_horizon_cuda.cu
-        src/oskar_evaluate_array_pattern_dipoles_cuda.cu
         src/oskar_evaluate_dipole_pattern_cuda.cu
         src/oskar_evaluate_geometric_dipole_pattern_cuda.cu
         src/oskar_evaluate_element_weights_errors_cuda.cu

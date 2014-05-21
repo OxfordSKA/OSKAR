@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,8 @@
  * @file oskar_MeasurementSet.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
+#include <stddef.h>
 
 // CASA declarations.
 namespace casa {
@@ -152,6 +153,34 @@ public:
      * @param[in] name An optional string containing the name of the field.
      */
     void addField(double ra, double dec, const char* name = 0);
+
+    /**
+     * @brief Adds the run log to the HISTORY table.
+     *
+     * @details
+     * Adds the supplied run log string to the HISTORY table.
+     * The log string is split into lines, and each is added as its own
+     * HISTORY entry. The origin of each will be "LOG".
+     *
+     * @param[in] str   The log file, as a single string.
+     * @param[in] size  The length of the string.
+     */
+    void addLog(const char* str, size_t size);
+
+    /**
+     * @brief Adds the contents of the settings file to the HISTORY table.
+     *
+     * @details
+     * Adds the supplied settings file string to the HISTORY table.
+     * The settings string is split into lines, and these are entered to
+     * the APP_PARAMS column as a single HISTORY entry.
+     * The history message will read "OSKAR settings file", and the origin
+     * will be "SETTINGS".
+     *
+     * @param[in] str   The settings file, as a single string.
+     * @param[in] size  The length of the string.
+     */
+    void addSettings(const char* str, size_t size);
 
     /**
      * @brief Adds a polarisation to the POLARIZATION subtable.

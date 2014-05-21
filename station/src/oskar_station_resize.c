@@ -29,6 +29,12 @@
 #include <private_station.h>
 #include <oskar_station.h>
 
+#include <math.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -58,11 +64,10 @@ void oskar_station_resize(oskar_Station* station, int num_elements,
     oskar_mem_realloc(station->gain_error, num_elements, status);
     oskar_mem_realloc(station->phase_offset, num_elements, status);
     oskar_mem_realloc(station->phase_error, num_elements, status);
-    oskar_mem_realloc(station->cos_orientation_x, num_elements, status);
-    oskar_mem_realloc(station->sin_orientation_x, num_elements, status);
-    oskar_mem_realloc(station->cos_orientation_y, num_elements, status);
-    oskar_mem_realloc(station->sin_orientation_y, num_elements, status);
-    oskar_mem_realloc(station->element_type, num_elements, status);
+    oskar_mem_realloc(station->orientation_x_cpu, num_elements, status);
+    oskar_mem_realloc(station->orientation_y_cpu, num_elements, status);
+    oskar_mem_realloc(station->element_types, num_elements, status);
+    oskar_mem_realloc(station->element_types_cpu, num_elements, status);
 
     /* Initialise any new elements with default values. */
     if (num_elements > station->num_elements)
@@ -74,9 +79,7 @@ void oskar_station_resize(oskar_Station* station, int num_elements,
         /* Must set default element weight, gain and orientation. */
         oskar_mem_set_value_real(station->gain, 1.0,
                 offset, num_new, status);
-        oskar_mem_set_value_real(station->sin_orientation_x, 1.0,
-                offset, num_new, status);
-        oskar_mem_set_value_real(station->cos_orientation_y, 1.0,
+        oskar_mem_set_value_real(station->orientation_x_cpu, M_PI / 2.0,
                 offset, num_new, status);
         oskar_mem_set_value_real(station->weight, 1.0,
                 offset, num_new, status);

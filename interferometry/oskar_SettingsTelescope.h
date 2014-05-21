@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,115 @@
  * @file oskar_SettingsTelescope.h
  */
 
-#include <oskar_SettingsStation.h>
-#include <oskar_SettingsApertureArray.h>
-#include <oskar_SettingsGaussianBeam.h>
+/**
+ * @struct oskar_SettingsArrayElement
+ *
+ * @brief Structure to hold station element settings.
+ *
+ * @details
+ * The structure holds station element parameters that can be used to override
+ * those in the station files.
+ */
+struct oskar_SettingsArrayElement
+{
+    int apodisation_type;
+    double gain;
+    double gain_error_fixed;
+    double gain_error_time;
+    double phase_error_fixed_rad;
+    double phase_error_time_rad;
+    double position_error_xy_m;
+    double x_orientation_error_rad;
+    double y_orientation_error_rad;
+
+    /* Random seeds. */
+    int seed_gain_errors;
+    int seed_phase_errors;
+    int seed_time_variable_errors;
+    int seed_position_xy_errors;
+    int seed_x_orientation_error;
+    int seed_y_orientation_error;
+};
+typedef struct oskar_SettingsArrayElement oskar_SettingsArrayElement;
+
+/**
+ * @struct oskar_SettingsArrayPattern
+ *
+ * @brief Structure to hold settings for the station array pattern evaluation.
+ *
+ * @details
+ * The structure holds settings for the station array pattern evaluation.
+ */
+struct oskar_SettingsArrayPattern
+{
+    int enable;
+    int normalise;
+    oskar_SettingsArrayElement element;
+};
+typedef struct oskar_SettingsArrayPattern oskar_SettingsArrayPattern;
+
+/**
+ * @struct oskar_SettingsElementTaper
+ *
+ * @brief Structure to hold settings for the station element tapering.
+ *
+ * @details
+ * The structure holds settings for the station element tapering.
+ */
+struct oskar_SettingsElementTaper
+{
+    int type;
+    double cosine_power;
+    double gaussian_fwhm_rad;
+};
+typedef struct oskar_SettingsElementTaper oskar_SettingsElementTaper;
+
+/**
+ * @struct oskar_SettingsElementPattern
+ *
+ * @brief Structure to hold settings for the station element pattern evaluation.
+ *
+ * @details
+ * The structure holds settings for the station element pattern evaluation.
+ */
+struct oskar_SettingsElementPattern
+{
+    int enable_numerical_patterns;
+    int functional_type;
+    int dipole_length_units;
+    double dipole_length;
+    oskar_SettingsElementTaper taper;
+};
+typedef struct oskar_SettingsElementPattern oskar_SettingsElementPattern;
+
+/**
+ * @struct oskar_SettingsApertureArray
+ *
+ * @brief Structure to hold settings for aperture array stations.
+ *
+ * @details
+ * The structure holds settings for aperture array stations.
+ */
+struct oskar_SettingsApertureArray
+{
+    oskar_SettingsArrayPattern array_pattern;
+    oskar_SettingsElementPattern element_pattern;
+};
+typedef struct oskar_SettingsApertureArray oskar_SettingsApertureArray;
+
+/**
+ * @struct oskar_SettingsGaussianBeam
+ *
+ * @brief Structure to hold settings for stations with a Gaussian beam.
+ *
+ * @details
+ * The structure holds settings for stations with a Gaussian beam.
+ */
+struct oskar_SettingsGaussianBeam
+{
+    double fwhm_deg;
+};
+typedef struct oskar_SettingsGaussianBeam oskar_SettingsGaussianBeam;
 
 /**
  * @struct oskar_SettingsTelescope
@@ -52,9 +158,8 @@ struct oskar_SettingsTelescope
     double longitude_rad;
     double latitude_rad;
     double altitude_m;
-    /*int use_common_sky; DEPRECATED (moved to interferometer settings) */
     int station_type;
-    /*oskar_SettingsStation station; DEPRECATED */
+    int normalise_beams_at_phase_centre;
     oskar_SettingsApertureArray aperture_array;
     oskar_SettingsGaussianBeam gaussian_beam;
 };

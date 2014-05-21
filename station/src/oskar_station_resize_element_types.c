@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,6 @@ void oskar_station_resize_element_types(oskar_Station* model,
 
     /* Get the old size. */
     old_num_element_types = model->num_element_types;
-    model->num_element_types = num_element_types;
 
     /* Check if increasing or decreasing in size. */
     if (num_element_types > old_num_element_types)
@@ -68,8 +67,8 @@ void oskar_station_resize_element_types(oskar_Station* model,
         for (i = old_num_element_types; i < num_element_types; ++i)
         {
             model->element_pattern[i] = oskar_element_create(
-                    oskar_station_precision(model), oskar_station_location(model),
-                    status);
+                    oskar_station_precision(model),
+                    oskar_station_location(model), status);
         }
     }
     else if (num_element_types < old_num_element_types)
@@ -82,6 +81,9 @@ void oskar_station_resize_element_types(oskar_Station* model,
         model->element_pattern = realloc(model->element_pattern,
                 num_element_types * sizeof(oskar_Element*));
     }
+
+    /* Update the new size. */
+    model->num_element_types = num_element_types;
 }
 
 #ifdef __cplusplus

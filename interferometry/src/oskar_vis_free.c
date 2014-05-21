@@ -45,6 +45,7 @@ void oskar_vis_free(oskar_Vis* vis, int* status)
     /* Free memory. */
     oskar_mem_free(vis->settings_path, status);
     oskar_mem_free(vis->telescope_path, status);
+    oskar_mem_free(vis->settings, status);
     oskar_mem_free(vis->x_metres, status);
     oskar_mem_free(vis->y_metres, status);
     oskar_mem_free(vis->z_metres, status);

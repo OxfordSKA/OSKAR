@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,53 @@
 #include <tables/Tables.h>
 #include <casa/Arrays/Vector.h>
 
+#include <string>
+#include <sstream>
+#include <vector>
+#include <ctime>
+
 using namespace casa;
+
+/*=============================================================================
+ * Local (static) functions
+ *---------------------------------------------------------------------------*/
+
+static std::vector<std::string> split(const std::string& s, char delim)
+{
+    std::stringstream ss(s);
+    std::string item;
+    std::vector<std::string> v;
+    while (std::getline(ss, item, delim))
+    {
+        v.push_back(item);
+    }
+    return v;
+}
+
+double current_utc_to_mjd()
+{
+    int a, y, m, jdn;
+    double day_fraction;
+    time_t unix_time;
+    struct tm* time_s;
+
+    // Get system UTC.
+    unix_time = std::time(NULL);
+    time_s = std::gmtime(&unix_time);
+
+    // Compute Julian Day Number (Note: all integer division).
+    // Note that tm_mon is in range 0-11, so must add 1.
+    a = (14 - (time_s->tm_mon + 1)) / 12;
+    y = (time_s->tm_year + 1900) + 4800 - a;
+    m = (time_s->tm_mon + 1) + 12 * a - 3;
+    jdn = time_s->tm_mday + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
+            + (y / 400) - 32045;
+
+    // Compute day fraction.
+    day_fraction = time_s->tm_hour / 24.0 + time_s->tm_min / 1440.0 +
+            time_s->tm_sec / 86400.0;
+    return jdn + day_fraction - 2400000.5 - 0.5;
+}
 
 /*=============================================================================
  * Constructor & Destructor
@@ -123,6 +169,59 @@ void oskar_MeasurementSet::addField(double ra, double dec, const char* name)
     msc_->field().referenceDirMeasCol().put(row, direction);
     if (name)
         msc_->field().name().put(row, String(name));
+}
+
+void oskar_MeasurementSet::addLog(const char* str, size_t size)
+{
+    if (!ms_ || !msc_ || !str) return;
+
+    // Construct a string from the char array and split on each newline.
+    std::vector<std::string> v = split(std::string(str, size), '\n');
+
+    // Add to the HISTORY table.
+    int num_lines = v.size();
+    int row = ms_->history().nrow();
+    ms_->history().addRow(num_lines);
+    double current_utc = 86400.0 * current_utc_to_mjd();
+    for (int i = 0; i < num_lines; ++i)
+    {
+        msc_->history().message().put(row + i, String(v[i]));
+        msc_->history().application().put(row + i, "OSKAR " OSKAR_VERSION_STR);
+        msc_->history().priority().put(row + i, "INFO");
+        msc_->history().origin().put(row + i, "LOG");
+        msc_->history().time().put(row + i, current_utc);
+        msc_->history().observationId().put(row + i, -1);
+        msc_->history().appParams().put(row + i, Vector<String>()); // Required!
+        msc_->history().cliCommand().put(row + i, Vector<String>()); // Required!
+    }
+}
+
+void oskar_MeasurementSet::addSettings(const char* str, size_t size)
+{
+    if (!ms_ || !msc_ || !str) return;
+
+    // Construct a string from the char array and split on each newline.
+    std::vector<std::string> v = split(std::string(str, size), '\n');
+
+    // Fill a CASA vector with the settings file contents.
+    int num_lines = v.size();
+    Vector<String> vec(num_lines);
+    for (int i = 0; i < num_lines; ++i)
+    {
+        vec(i) = v[i];
+    }
+
+    // Add to the HISTORY table.
+    int row = ms_->history().nrow();
+    ms_->history().addRow();
+    msc_->history().appParams().put(row, vec);
+    msc_->history().message().put(row, "OSKAR settings file");
+    msc_->history().application().put(row, "OSKAR " OSKAR_VERSION_STR);
+    msc_->history().priority().put(row, "INFO");
+    msc_->history().origin().put(row, "SETTINGS");
+    msc_->history().time().put(row, 86400.0 * current_utc_to_mjd());
+    msc_->history().observationId().put(row, -1);
+    msc_->history().cliCommand().put(row, Vector<String>()); // Required!
 }
 
 void oskar_MeasurementSet::addPolarisation(int num_pols)
@@ -334,10 +433,29 @@ void oskar_MeasurementSet::create(const char* filename)
     Vector<String> corrSchedule(1);
     Vector<Double> timeRange(2, 0.0);
     msc_->observation().schedule().put(0, corrSchedule);
-    msc_->observation().project().put(0, "OSKAR");
+    msc_->observation().project().put(0, "");
     msc_->observation().telescopeName().put(0, "OSKAR " OSKAR_VERSION_STR);
     msc_->observation().timeRange().put(0, timeRange);
     setTimeRange(0.0, 1.0);
+
+    // Get a string containing the current system time.
+    char time_str[80];
+    time_t unix_time;
+    unix_time = std::time(NULL);
+    std::strftime(time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)",
+            std::localtime(&unix_time));
+
+    // Add a row to the HISTORY subtable.
+    ms_->history().addRow();
+    msc_->history().message().put(0, String("Measurement Set created at ") +
+            String(time_str));
+    msc_->history().application().put(0, "OSKAR " OSKAR_VERSION_STR);
+    msc_->history().origin().put(0, "OSKAR " OSKAR_VERSION_STR);
+    msc_->history().priority().put(0, "INFO");
+    msc_->history().time().put(0, 86400.0 * current_utc_to_mjd());
+    msc_->history().observationId().put(0, -1);
+    msc_->history().appParams().put(0, Vector<String>()); // Required!
+    msc_->history().cliCommand().put(0, Vector<String>()); // Required!
 }
 
 void oskar_MeasurementSet::open(const char* filename)

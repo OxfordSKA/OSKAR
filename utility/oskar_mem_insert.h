@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,11 +55,12 @@ extern "C" {
  * @param[out] dst          Pointer to destination data structure to copy into.
  * @param[in]  src          Pointer to source data structure to copy from.
  * @param[in]  offset       Offset into destination memory block.
+ * @param[in]  num_elements Number of elements to copy from source memory block.
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
 void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
-        int* status);
+        size_t num_elements, int* status);
 
 #ifdef __cplusplus
 }
