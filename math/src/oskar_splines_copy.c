@@ -48,6 +48,7 @@ void oskar_splines_copy(oskar_Splines* dst, const oskar_Splines* src,
     if (*status) return;
 
     dst->precision = src->precision;
+    dst->smoothing_factor = src->smoothing_factor;
     dst->num_knots_x_theta = src->num_knots_x_theta;
     dst->num_knots_y_phi = src->num_knots_y_phi;
     oskar_mem_copy(dst->knots_x_theta, src->knots_x_theta, status);
