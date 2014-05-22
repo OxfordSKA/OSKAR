@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -120,9 +120,18 @@ oskar_Log* oskar_log_create()
     /* Write a message to say if the log file was opened successfully. */
     if (log->file)
     {
+        char* current_dir;
+
+        /* Get the current working directory. */
+        current_dir = getenv("PWD");
+        if (!current_dir)
+            current_dir = getenv("CD");
+
         /* Save the file name in the structure. */
         log->name = malloc(n + 1);
         strcpy(log->name, fname2);
+        if (current_dir)
+            oskar_log_message(log, 0, "Current dir is %s", current_dir);
         oskar_log_message(log, 0, "Logging to file %s", fname2);
     }
     else
