@@ -102,12 +102,13 @@ oskar_SystemNoiseModel* oskar_station_system_noise_model(oskar_Station* model);
 OSKAR_EXPORT
 const oskar_SystemNoiseModel* oskar_station_system_noise_model_const(const oskar_Station* model);
 
-
 /* Data used only for Gaussian beam stations. */
 
 OSKAR_EXPORT
 double oskar_station_gaussian_beam_fwhm_rad(const oskar_Station* model);
 
+OSKAR_EXPORT
+double oskar_station_gaussian_beam_ref_freq_hz(const oskar_Station* model);
 
 /* Data used only for aperture array stations. */
 
@@ -349,6 +350,18 @@ void oskar_station_set_phase_centre(oskar_Station* model,
  */
 OSKAR_EXPORT
 void oskar_station_set_gaussian_beam_fwhm_rad(oskar_Station* model,
+        double value);
+
+/**
+ * @brief
+ * Sets the reference frequency of the FWHM value of the Gaussian beam
+ * used for Gaussian beam stations.
+ *
+ * @param[in] model Pointer to station model.
+ * @param[in] value Reference frequency, in Hz.
+ */
+OSKAR_EXPORT
+void oskar_station_set_gaussian_beam_ref_freq_hz(oskar_Station* model,
         double value);
 
 /**

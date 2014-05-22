@@ -607,7 +607,10 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     declare(k, "Gaussian FWHM [deg]", oskar_SettingsItem::DOUBLE, 1.0);
     setTooltip(k, "For stations using a simple Gaussian beam, this setting "
             "gives the full-width half maximum value of the Gaussian "
-            "station beam, in degrees.");
+            "station beam at the reference frequency, in degrees.");
+    k = group + "/ref_freq_hz";
+    declare(k, "Reference frequency [Hz]", oskar_SettingsItem::DOUBLE, 0.0);
+    setTooltip(k, "The reference frequency of the specified FWHM, in Hz.");
 
     // Output directory.
     k = root + "/output_directory";

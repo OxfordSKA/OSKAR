@@ -69,6 +69,7 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
             a->apply_element_errors != b->apply_element_errors ||
             a->apply_element_weight != b->apply_element_weight ||
             a->gaussian_beam_fwhm_rad != b->gaussian_beam_fwhm_rad ||
+            a->gaussian_beam_ref_feq_hz != b->gaussian_beam_ref_feq_hz ||
             a->num_permitted_beams != b->num_permitted_beams)
     {
         return 1;

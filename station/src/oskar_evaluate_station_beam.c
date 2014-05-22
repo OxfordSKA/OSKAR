@@ -235,8 +235,12 @@ static void evaluate_station_beam_relative_directions(oskar_Mem* beam_pattern,
         }
         case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
         {
+            double fwhm, f0;
+            fwhm = oskar_station_gaussian_beam_fwhm_rad(station);
+            f0 =oskar_station_gaussian_beam_ref_freq_hz(station);
+            fwhm *= f0 / frequency;
             oskar_evaluate_station_beam_gaussian(beam_pattern, np, l, m, z,
-                    oskar_station_gaussian_beam_fwhm_rad(station), status);
+                    fwhm, status);
             break;
         }
         case OSKAR_STATION_TYPE_VLA_PBCOR:
@@ -277,13 +281,17 @@ static void evaluate_station_beam_enu_directions(oskar_Mem* beam_pattern,
         case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
         {
             oskar_Mem *l, *m, *n; /* Relative direction cosines */
+            double fwhm, f0;
             l = oskar_station_work_enu_direction_x(work);
             m = oskar_station_work_enu_direction_y(work);
             n = oskar_station_work_enu_direction_z(work);
             compute_relative_directions(l, m, n, np, x, y, z, station, GAST,
                     status);
+            fwhm = oskar_station_gaussian_beam_fwhm_rad(station);
+            f0 =oskar_station_gaussian_beam_ref_freq_hz(station);
+            fwhm *= f0 / frequency;
             oskar_evaluate_station_beam_gaussian(beam_pattern, np, l, m, z,
-                    oskar_station_gaussian_beam_fwhm_rad(station), status);
+                    fwhm, status);
             break;
         }
         case OSKAR_STATION_TYPE_VLA_PBCOR:

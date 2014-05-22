@@ -492,6 +492,8 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
         ++depth;
         LV("Gaussian FWHM [deg]", "%.4f",
                 s->telescope.gaussian_beam.fwhm_deg);
+        LV("Reference frequency [Hz]", "%.3e",
+                s->telescope.gaussian_beam.ref_freq_hz);
         --depth;
     }
     else if (s->telescope.station_type == OSKAR_STATION_TYPE_ISOTROPIC)

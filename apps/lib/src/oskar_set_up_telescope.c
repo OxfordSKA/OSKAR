@@ -290,6 +290,9 @@ static void set_station_data(oskar_Station* station,
             aa->array_pattern.normalise);
     oskar_station_set_gaussian_beam_fwhm_rad(station,
             settings->telescope.gaussian_beam.fwhm_deg * M_PI / 180.0);
+    oskar_station_set_gaussian_beam_ref_freq_hz(station,
+            settings->telescope.gaussian_beam.ref_freq_hz);
+
     oskar_station_set_use_polarised_elements(station,
             !(aa->element_pattern.functional_type ==
                     OSKAR_ELEMENT_TYPE_ISOTROPIC));

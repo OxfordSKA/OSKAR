@@ -38,6 +38,9 @@
     * Added run log and settings file to Measurement Set HISTORY table.
       (Run log will now be propagated to images made with CASA.)
 
+    * Added a reference frequency which is used to scale the FWHM of Gaussian
+      beams for Gaussian beam station types.  
+
 2014-02-25  OSKAR-2.4.0
 
     * Added ability to specify a set of horizon-based permitted beam directions

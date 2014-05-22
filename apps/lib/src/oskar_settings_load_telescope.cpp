@@ -215,6 +215,7 @@ void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     s.beginGroup("gaussian_beam");
     {
         tel->gaussian_beam.fwhm_deg = s.value("fwhm_deg", 1.0).toDouble();
+        tel->gaussian_beam.ref_freq_hz = s.value("ref_freq_hz", 0.0).toDouble();
     }
     s.endGroup(); // End Gaussian beam group
 

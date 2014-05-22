@@ -63,7 +63,8 @@ struct oskar_Station
     oskar_SystemNoiseModel* noise;
 
     /* Data used only for Gaussian beam stations  ---------------------------*/
-    double gaussian_beam_fwhm_rad; /**< FWHM of Gaussian station beam, in degrees. */
+    double gaussian_beam_fwhm_rad;   /**< FWHM of Gaussian station beam, in degrees. */
+    double gaussian_beam_ref_feq_hz; /**< Reference frequency of the FHWM, in Hz. */
 
     /* Data used only for aperture array stations ---------------------------*/
     int identical_children;       /**< True if all child stations are identical. */

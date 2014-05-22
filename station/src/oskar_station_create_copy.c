@@ -91,6 +91,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
 
     /* Copy Gaussian station beam data. */
     model->gaussian_beam_fwhm_rad = src->gaussian_beam_fwhm_rad;
+    model->gaussian_beam_ref_feq_hz = src->gaussian_beam_ref_feq_hz;
 
     /* Copy memory blocks. */
     oskar_mem_copy(model->x_signal, src->x_signal, status);

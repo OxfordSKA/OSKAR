@@ -140,6 +140,7 @@ typedef struct oskar_SettingsApertureArray oskar_SettingsApertureArray;
 struct oskar_SettingsGaussianBeam
 {
     double fwhm_deg;
+    double ref_freq_hz;
 };
 typedef struct oskar_SettingsGaussianBeam oskar_SettingsGaussianBeam;
 

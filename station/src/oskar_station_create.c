@@ -108,6 +108,7 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
 
     /* Initialise Gaussian beam station data. */
     model->gaussian_beam_fwhm_rad = 0.0;
+    model->gaussian_beam_ref_feq_hz = 0.0;
 
     /* Initialise aperture array data. */
     model->identical_children = OSKAR_FALSE;

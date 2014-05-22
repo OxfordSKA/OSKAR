@@ -97,7 +97,6 @@ const oskar_SystemNoiseModel* oskar_station_system_noise_model_const(
     return model->noise;
 }
 
-
 /* Data used only for Gaussian beam stations. */
 
 double oskar_station_gaussian_beam_fwhm_rad(const oskar_Station* model)
@@ -105,6 +104,10 @@ double oskar_station_gaussian_beam_fwhm_rad(const oskar_Station* model)
     return model->gaussian_beam_fwhm_rad;
 }
 
+double oskar_station_gaussian_beam_ref_freq_hz(const oskar_Station* model)
+{
+    return model->gaussian_beam_ref_feq_hz;
+}
 
 /* Data used only for aperture array stations. */
 
@@ -410,6 +413,12 @@ void oskar_station_set_gaussian_beam_fwhm_rad(oskar_Station* model,
         double value)
 {
     model->gaussian_beam_fwhm_rad = value;
+}
+
+void oskar_station_set_gaussian_beam_ref_freq_hz(oskar_Station* model,
+        double value)
+{
+    model->gaussian_beam_ref_feq_hz = value;
 }
 
 void oskar_station_set_use_polarised_elements(oskar_Station* model, int value)
