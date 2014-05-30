@@ -90,7 +90,11 @@ struct oskar_Vis
     double phase_centre_dec_deg; /**< Pointing phase centre Dec, in degrees. */
     double telescope_lon_deg;    /**< Reference longitude of the telescope, in degrees */
     double telescope_lat_deg;    /**< Reference latitude of the telescope, in degrees */
+    /* TODO telescope alt! */
 
+    /* TODO Make these coordinates always double as there are no cases where
+     * we want to loose precision here when converting */
+    /* TODO also store horizon coordinates */
     oskar_Mem* x_metres;          /**< Station x coordinates, in metres. */
     oskar_Mem* y_metres;          /**< Station y coordinates, in metres. */
     oskar_Mem* z_metres;          /**< Station z coordinates, in metres. */

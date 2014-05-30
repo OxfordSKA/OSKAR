@@ -106,23 +106,38 @@ double oskar_vis_telescope_lon_deg(const oskar_Vis* vis);
 OSKAR_EXPORT
 double oskar_vis_telescope_lat_deg(const oskar_Vis* vis);
 
+/* NOTE: Offset ECEF coordinates */
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_station_x_metres(oskar_Vis* vis);
 
+/* NOTE: Offset ECEF coordinates */
 OSKAR_EXPORT
 const oskar_Mem* oskar_vis_station_x_metres_const(const oskar_Vis* vis);
 
+/* NOTE: Offset ECEF coordinates */
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_station_y_metres(oskar_Vis* vis);
 
+/* NOTE: Offset ECEF coordinates */
 OSKAR_EXPORT
 const oskar_Mem* oskar_vis_station_y_metres_const(const oskar_Vis* vis);
 
+/* NOTE: Offset ECEF coordinates */
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_station_z_metres(oskar_Vis* vis);
 
+/* NOTE: Offset ECEF coordinates */
 OSKAR_EXPORT
 const oskar_Mem* oskar_vis_station_z_metres_const(const oskar_Vis* vis);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_vis_station_horizon_x_metres_create(const oskar_Vis* vis);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_vis_station_horizon_y_metres_create(const oskar_Vis* vis);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_vis_station_horizon_z_metres_create(const oskar_Vis* vis);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_station_lon_deg(oskar_Vis* vis);
@@ -171,7 +186,6 @@ oskar_Mem* oskar_vis_amplitude(oskar_Vis* vis);
 
 OSKAR_EXPORT
 const oskar_Mem* oskar_vis_amplitude_const(const oskar_Vis* vis);
-
 
 /* Setters. */
 OSKAR_EXPORT

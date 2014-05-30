@@ -516,6 +516,22 @@ void oskar_binary_file_query(oskar_Log* log, const char* filename, int* status)
                     oskar_log_message(log, depth,
                             "Phase centre Dec [deg]: %.3f", val);
                 }
+                else if (tag == OSKAR_VIS_TAG_TELESCOPE_LON)
+                {
+                    double val = 0;
+                    oskar_binary_stream_read_double(stream, &index, group, tag,
+                            idx, &val, status);
+                    oskar_log_message(log, depth,
+                            "Telescope longitude [deg]: %.3f", val);
+                }
+                else if (tag == OSKAR_VIS_TAG_TELESCOPE_LAT)
+                {
+                    double val = 0;
+                    oskar_binary_stream_read_double(stream, &index, group, tag,
+                            idx, &val, status);
+                    oskar_log_message(log, depth,
+                            "Telescope latitude [deg]: %.3f", val);
+                }
                 else if (tag == OSKAR_VIS_TAG_NUM_STATIONS)
                 {
                     int val = 0;

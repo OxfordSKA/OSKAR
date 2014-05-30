@@ -187,9 +187,9 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     oskar_binary_stream_write_double(stream, grp,
             OSKAR_VIS_TAG_TIME_INT_SEC, 0, vis->time_int_seconds, status);
     oskar_binary_stream_write_double(stream, grp,
-            OSKAR_VIS_TAG_TELESCOPE_LON, 0, vis->telescope_lat_deg, status);
+            OSKAR_VIS_TAG_TELESCOPE_LON, 0, vis->telescope_lon_deg, status);
     oskar_binary_stream_write_double(stream, grp,
-            OSKAR_VIS_TAG_TELESCOPE_LAT, 0, vis->telescope_lon_deg, status);
+            OSKAR_VIS_TAG_TELESCOPE_LAT, 0, vis->telescope_lat_deg, status);
 
     /* Write the baseline coordinate arrays. */
     oskar_mem_binary_stream_write(vis->uu_metres, stream,

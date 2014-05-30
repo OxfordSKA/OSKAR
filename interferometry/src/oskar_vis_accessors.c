@@ -28,6 +28,10 @@
 
 #include <private_vis.h>
 #include <oskar_vis.h>
+#include <oskar_mem.h>
+#include <math.h>
+#include <oskar_convert_offset_ecef_to_ecef.h>
+#include <oskar_convert_ecef_to_enu.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -173,6 +177,85 @@ const oskar_Mem* oskar_vis_station_z_metres_const(const oskar_Vis* vis)
 {
     return vis->z_metres;
 }
+
+inline static void station_xyz_to_horizon(const oskar_Vis* vis, oskar_Mem* x,
+        oskar_Mem* y, oskar_Mem* z)
+{
+    int status = OSKAR_SUCCESS;
+    oskar_Mem* x_ = oskar_mem_convert_precision(vis->x_metres, OSKAR_DOUBLE, &status);
+    oskar_Mem* y_ = oskar_mem_convert_precision(vis->y_metres, OSKAR_DOUBLE, &status);
+    oskar_Mem* z_ = oskar_mem_convert_precision(vis->z_metres, OSKAR_DOUBLE, &status);
+
+    int n = vis->num_stations;
+    double* offset_ecef_x = oskar_mem_double(x_, &status);
+    double* offset_ecef_y = oskar_mem_double(y_, &status);
+    double* offset_ecef_z = oskar_mem_double(z_, &status);
+    double* ecef_x = (double*)malloc(n*sizeof(double));
+    double* ecef_y = (double*)malloc(n*sizeof(double));
+    double* ecef_z = (double*)malloc(n*sizeof(double));
+    double lon = vis->telescope_lon_deg * M_PI/180.0;
+    double lat = vis->telescope_lat_deg * M_PI/180.0;
+    /* FIXME altitude hard-coded to 0 as this isn't in the vis structure! */
+    double alt = 0;
+    double* enu_x = oskar_mem_double(x, &status);
+    double* enu_y = oskar_mem_double(y, &status);
+    double* enu_z = oskar_mem_double(z, &status);
+
+    oskar_convert_offset_ecef_to_ecef(n, offset_ecef_x, offset_ecef_y,
+            offset_ecef_z, lon, lat, alt, ecef_x, ecef_y, ecef_z);
+    oskar_convert_ecef_to_enu(n, ecef_x, ecef_y, ecef_z, lon, lat, alt, enu_x,
+            enu_y, enu_z);
+
+    free(ecef_x);
+    free(ecef_y);
+    free(ecef_z);
+    oskar_mem_free(x_, &status);
+    oskar_mem_free(z_, &status);
+    oskar_mem_free(y_, &status);
+}
+
+oskar_Mem* oskar_vis_station_horizon_x_metres_create(const oskar_Vis* vis)
+{
+    int status = OSKAR_SUCCESS;
+    oskar_Mem *x = 0, *y = 0, *z = 0;
+    int n = vis->num_stations;
+    x = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
+    y = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
+    z = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
+    station_xyz_to_horizon(vis, x, y, z);
+    oskar_mem_free(y, &status);
+    oskar_mem_free(z, &status);
+    return x;
+}
+
+oskar_Mem* oskar_vis_station_horizon_y_metres_create(const oskar_Vis* vis)
+{
+    int status = OSKAR_SUCCESS;
+    oskar_Mem *x = 0, *y = 0, *z = 0;
+    int n = vis->num_stations;
+    x = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
+    y = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
+    z = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
+    station_xyz_to_horizon(vis, x, y, z);
+    oskar_mem_free(x, &status);
+    oskar_mem_free(z, &status);
+    return y;
+}
+
+oskar_Mem* oskar_vis_station_horizon_z_metres_create(const oskar_Vis* vis)
+{
+    int status = OSKAR_SUCCESS;
+    oskar_Mem *x, *y, *z;
+    int n = vis->num_stations;
+    x = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
+    y = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
+    z = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
+    station_xyz_to_horizon(vis, x, y, z);
+    oskar_mem_free(x, &status);
+    oskar_mem_free(y, &status);
+    return z;
+}
+
 
 oskar_Mem* oskar_vis_station_lon_deg(oskar_Vis* vis)
 {

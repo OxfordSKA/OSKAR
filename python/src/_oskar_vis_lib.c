@@ -37,12 +37,31 @@
 
 #include <oskar_global.h>
 #include <oskar_vis.h>
+#include <oskar_mem.h>
 
-void mem_free(void* ptr)
+void vis_free(void* ptr)
 {
-    //oskar_mem_free(
-    // TODO: Py_DECREF(..)
-    printf("PyCapsule destructor called!\n");
+    int status = OSKAR_SUCCESS;
+    oskar_vis_free((oskar_Vis*)ptr, &status);
+    ptr = 0;
+    printf("PyCapsule destructor for oskar_Vis called! (status = %i)\n", status);
+}
+
+static inline oskar_Vis* tupple_to_vis(PyObject* objs, PyObject* args)
+{
+    PyObject* vis_ = NULL;
+    if (!PyArg_ParseTuple(args, "O", &vis_))
+        return NULL;
+    if (!PyCapsule_CheckExact(vis_)) {
+        printf("Input argument not a PyCapsule object!\n");
+        return NULL;
+    }
+    oskar_Vis* vis = (oskar_Vis*)PyCapsule_GetPointer(vis_, "oskar_Vis");
+    if (!vis) {
+        printf("Unable to convert PyCapsule object to pointer :(\n");
+        return NULL;
+    }
+    return vis;
 }
 
 static PyObject* vis_read(PyObject* self, PyObject* args)
@@ -52,35 +71,137 @@ static PyObject* vis_read(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "s", &filename))
         return NULL;
 
-    printf("%s\n", filename);
-
     int status = OSKAR_SUCCESS;
     oskar_Vis* vis = oskar_vis_read(filename, &status);
 
-    return Py_BuildValue("i", status);
-    // TODO return a handle to the visibility structure
-}
+    const char* name = "oskar_Vis";
+    PyObject* vis_ = PyCapsule_New((void*)vis, name,
+            (PyCapsule_Destructor)vis_free);
 
-static PyObject* get_num_channels(PyObject* self, PyObject* args)
-{
-    return Py_BuildValue("");
-}
-
-static PyObject* get_num_times(PyObject* self, PyObject* args)
-{
-    return Py_BuildValue("");
+    return Py_BuildValue("Oi", vis_, status);
 }
 
 static PyObject* get_num_baselines(PyObject* self, PyObject* args)
 {
-    return Py_BuildValue("");
+    oskar_Vis* vis = tupple_to_vis(self, args);
+    return Py_BuildValue("i", oskar_vis_num_baselines(vis));
+}
+
+static PyObject* get_lon(PyObject* self, PyObject* args)
+{
+    oskar_Vis* vis = tupple_to_vis(self, args);
+    return Py_BuildValue("d", oskar_vis_telescope_lon_deg(vis));
+}
+
+static PyObject* get_lat(PyObject* self, PyObject* args)
+{
+    oskar_Vis* vis = tupple_to_vis(self, args);
+    return Py_BuildValue("d", oskar_vis_telescope_lat_deg(vis));
+}
+
+static PyObject* get_num_channels(PyObject* self, PyObject* args)
+{
+    oskar_Vis* vis = tupple_to_vis(self, args);
+    return Py_BuildValue("i", oskar_vis_num_channels(vis));
+}
+
+static PyObject* get_num_times(PyObject* self, PyObject* args)
+{
+    oskar_Vis* vis = tupple_to_vis(self, args);
+    return Py_BuildValue("i", oskar_vis_num_times(vis));
+}
+
+static inline PyArrayObject* mem_to_PyArrayObject(const oskar_Mem* mem)
+{
+    int status = OSKAR_SUCCESS;
+    PyArrayObject* rtn = 0;
+
+    size_t length = oskar_mem_length(mem);
+    oskar_Mem* mem_ = oskar_mem_create_copy(mem, OSKAR_LOCATION_CPU, &status);
+    oskar_Mem* data_ = oskar_mem_convert_precision(mem_, OSKAR_DOUBLE, &status);
+
+    int type = oskar_mem_type(mem);
+
+    switch (type)
+    {
+        case OSKAR_DOUBLE:
+        case OSKAR_SINGLE:
+        {
+            npy_intp dims = length;
+            rtn = (PyArrayObject*)PyArray_SimpleNew(1, &dims, NPY_DOUBLE);
+            size_t size = length * sizeof(double);
+            memcpy(PyArray_DATA(rtn), oskar_mem_void(data_), size);
+            break;
+        }
+        case OSKAR_DOUBLE_COMPLEX:
+        case OSKAR_SINGLE_COMPLEX:
+        {
+            break;
+        }
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+        {
+            npy_intp dims[2] = {length,4};
+            rtn = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_COMPLEX128);
+            size_t size = length * 8 * sizeof(double);
+            memcpy(PyArray_DATA(rtn), oskar_mem_void(data_), size);
+            break;
+        }
+        default:
+            break;
+    };
+    oskar_mem_free(mem_, &status);
+    oskar_mem_free(data_, &status);
+    return rtn;
+}
+
+static PyObject* get_station_coords(PyObject* self, PyObject* args)
+{
+    oskar_Vis* vis = tupple_to_vis(self, args);
+    int status = OSKAR_SUCCESS;
+    oskar_Mem* x = oskar_vis_station_horizon_x_metres_create(vis);
+    oskar_Mem* y = oskar_vis_station_horizon_y_metres_create(vis);
+    oskar_Mem* z = oskar_vis_station_horizon_z_metres_create(vis);
+    PyArrayObject* x_ = mem_to_PyArrayObject(x);
+    PyArrayObject* y_ = mem_to_PyArrayObject(y);
+    PyArrayObject* z_ = mem_to_PyArrayObject(z);
+    oskar_mem_free(x, &status);
+    oskar_mem_free(y, &status);
+    oskar_mem_free(z, &status);
+    return Py_BuildValue("OOO", x_, y_, z_);
+}
+
+static PyObject* get_baseline_coords(PyObject* self, PyObject* args)
+{
+    oskar_Vis* vis = tupple_to_vis(self, args);
+    PyArrayObject* uu_ = mem_to_PyArrayObject(oskar_vis_baseline_uu_metres_const(vis));
+    PyArrayObject* vv_ = mem_to_PyArrayObject(oskar_vis_baseline_vv_metres_const(vis));
+    PyArrayObject* ww_ = mem_to_PyArrayObject(oskar_vis_baseline_ww_metres_const(vis));
+    return Py_BuildValue("OOO", uu_, vv_, ww_);
+}
+
+static PyObject* get_amplitude(PyObject* self, PyObject* args)
+{
+    oskar_Vis* vis = tupple_to_vis(self, args);
+    return Py_BuildValue("O", mem_to_PyArrayObject(oskar_vis_amplitude_const(vis)));
 }
 
 // Methods table
 static PyMethodDef oskar_vis_lib_methods[] =
 {
-    {"read", (PyCFunction)vis_read, METH_VARARGS,
-    "read(filename)"},
+    {"read", (PyCFunction)vis_read, METH_VARARGS, "read(filename)"},
+    {"num_baselines", (PyCFunction)get_num_baselines, METH_VARARGS,
+     "num_baselines(vis)"},
+    {"num_channels", (PyCFunction)get_num_channels, METH_VARARGS,
+     "num_channels(vis)"},
+    {"num_times", (PyCFunction)get_num_times, METH_VARARGS, "num_times(vis)"},
+    {"station_coords", (PyCFunction)get_station_coords, METH_VARARGS,
+     "station_coords(vis)"},
+    {"lon", (PyCFunction)get_lon, METH_VARARGS, "lon(vis)"},
+    {"lat", (PyCFunction)get_lat, METH_VARARGS, "lat(vis)"},
+    {"baseline_coords", (PyCFunction)get_baseline_coords, METH_VARARGS,
+     "baseline_coords(vis)"},
+    {"amplitude", (PyCFunction)get_amplitude, METH_VARARGS, "amplitude(vis)"},
     {NULL, NULL, 0, NULL}
 };
 

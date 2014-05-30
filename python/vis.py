@@ -46,9 +46,52 @@ import numpy as np
 import exceptions
 import _vis_lib as vis_lib
 
-__all__ = ['read']
+__all__ = ['']
+
+class oskar_Vis:
+
+    def __init__(self, filename):
+        (self.__handle,_) = vis_lib.read(filename)
+
+    def num_baselines(self):
+        return vis_lib.num_baselines(self.__handle)
+
+    def num_channels(self):
+        return vis_lib.num_channels(self.__handle)
+
+    def num_times(self):
+        return vis_lib.num_times(self.__handle)
+
+    def station_coords(self):
+        return vis_lib.station_coords(self.__handle)
+
+    def lon(self):
+        return vis_lib.lon(self.__handle)
+
+    def lat(self):
+        return vis_lib.lat(self.__handle)
+
+    def baseline_coords(self, hermitian_copy=False):
+        import numpy as np
+        (uu,vv,ww) = vis_lib.baseline_coords(self.__handle)
+        if hermitian_copy == True:
+            uu = np.concatenate((uu,-uu), axis=0)
+            vv = np.concatenate((vv,-vv), axis=0)
+            ww = np.concatenate((ww,-ww), axis=0)
+        return (uu,vv,ww)
+
+    def linear_amps(self):
+        a = vis_lib.amplitude(self.__handle)
+        return (a[:,0],a[:,1],a[:,2],a[:,3]) 
+
+    def stokes_amps(self):
+        import numpy as np
+        a = vis_lib.amplitude(self.__handle)
+        I = 0.5 * (a[:,0] + a[:,3])
+        Q = 0.5 * (a[:,0] - a[:,3])
+        U = 0.5 * (a[:,1] + a[:,2])
+        V = -0.5j * (a[:,1] - a[:,2])
+        return (I,Q,U,V)
 
 
-
-    
 
