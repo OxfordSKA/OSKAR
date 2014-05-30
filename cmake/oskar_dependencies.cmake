@@ -6,6 +6,7 @@
 #------------------------------------------------------------------------------
 #
 #   CUDA (>= 4.0)   (oskar, oskar_apps, oskar_widgets, OSKAR applications)
+#   OpenMP          (for multi-GPU support)
 #   Qt4 (>=4.6)     (oskar_apps, oskar_widgets, OSKAR applications)
 #   MKL             (oskar -> to enable extended sources)
 #   CBLAS           (oskar -> to enable extended sources)
@@ -125,6 +126,12 @@ if (NOT CFITSIO_FOUND)
            "Unable to build OSKAR FITS library.")
     message("===============================================================================")
     add_definitions(-DOSKAR_NO_FITS)
+endif ()
+
+if (NOT OPENMP_FOUND)
+    message("===============================================================================")
+    message("-- WARNING: OpenMP not found: Unable to use multiple GPUs.")
+    message("===============================================================================")
 endif ()
 
 if (NOT MATLAB_FOUND)

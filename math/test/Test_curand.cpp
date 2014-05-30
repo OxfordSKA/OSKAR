@@ -38,7 +38,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
+
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 void test_curand_generate(double* d_values, int num_blocks, int num_threads,
         int num_values, int num_per_thread, curandStateXORWOW* state,
@@ -156,6 +159,8 @@ TEST(curand, test_state_allocation)
 }
 
 
+#ifdef _OPENMP
+
 TEST(curand, test_multi_device)
 {
     int num_devices = 0;
@@ -217,3 +222,5 @@ TEST(curand, test_multi_device)
         EXPECT_EQ(0, error) << oskar_get_error_string(error);
     }
 }
+
+#endif /* _OPENMP */

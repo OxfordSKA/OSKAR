@@ -27,7 +27,6 @@
  */
 
 #include <cuda_runtime_api.h>
-#include <omp.h>
 
 #include "apps/lib/oskar_settings_load.h"
 #include "apps/lib/oskar_set_up_sky.h"
@@ -56,6 +55,10 @@
 #include <oskar_timer.h>
 #include <oskar_vis.h>
 #include <oskar_station_work.h>
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 #ifndef OSKAR_NO_FITS
 #include <fits/oskar_fits_image_write.h>
@@ -178,7 +181,11 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     }
 
     // Set the number of host threads to use (one per GPU).
+#ifdef _OPENMP
     omp_set_num_threads(num_devices);
+#else
+    oskar_log_warning(log, "OpenMP not enabled: Ignoring CUDA device list.");
+#endif
 
     // Run the simulation.
     cudaSetDevice(settings.sim.cuda_device_ids[0]);
@@ -199,10 +206,13 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 #pragma omp parallel for schedule(dynamic, 1)
         for (int i = 0; i < num_sky_chunks; ++i)
         {
+            int thread_id = 0;
             if (error) continue;
 
             // Get thread ID for this chunk, and set device for this thread.
-            int thread_id = omp_get_thread_num();
+#ifdef _OPENMP
+            thread_id = omp_get_thread_num();
+#endif
             error = cudaSetDevice(settings.sim.cuda_device_ids[thread_id]);
 
             // Run simulation for this chunk.
