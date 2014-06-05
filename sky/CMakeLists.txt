@@ -33,6 +33,7 @@ set(sky_SRC
     src/oskar_sky_insert.c
     src/oskar_sky_load.c
     src/oskar_sky_load_gsm.c
+    src/oskar_sky_override_polarisation.c
     src/oskar_sky_read.c
     src/oskar_sky_resize.c
     src/oskar_sky_rotate_to_position.c

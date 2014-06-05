@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,8 @@ struct oskar_SettingsSkyFilter
 {
     double flux_min;
     double flux_max;
-    double radius_inner;
-    double radius_outer;
+    double radius_inner_rad;
+    double radius_outer_rad;
 };
 typedef struct oskar_SettingsSkyFilter oskar_SettingsSkyFilter;
 
@@ -57,11 +57,26 @@ typedef struct oskar_SettingsSkyFilter oskar_SettingsSkyFilter;
  */
 struct oskar_SettingsSkyExtendedSources
 {
-    double FWHM_major;      /**< Major axis FWHM in radians. */
-    double FWHM_minor;      /**< Minor axis FWHM in radians. */
-    double position_angle;  /**< Position angle in radians. */
+    double FWHM_major_rad;      /**< Major axis FWHM in radians. */
+    double FWHM_minor_rad;      /**< Minor axis FWHM in radians. */
+    double position_angle_rad;  /**< Position angle in radians. */
 };
 typedef struct oskar_SettingsSkyExtendedSources oskar_SettingsSkyExtendedSources;
+
+/**
+ * @struct oskar_SettingsSkyPolarisation
+ *
+ * @brief Holds polarisation settings for sky model generators.
+ */
+struct oskar_SettingsSkyPolarisation
+{
+    double mean_pol_fraction; /**< Mean polarisation fraction. */
+    double std_pol_fraction;  /**< Standard deviation of polarisation fraction. */
+    double mean_pol_angle_rad; /**< Mean polarisation angle in radians. */
+    double std_pol_angle_rad; /**< Standard deviation of polarisation angle in radians. */
+    int seed;
+};
+typedef struct oskar_SettingsSkyPolarisation oskar_SettingsSkyPolarisation;
 
 /**
  * @struct oskar_SettingsSkyOskar
@@ -189,6 +204,26 @@ struct oskar_SettingsSkyGeneratorHealpix
 typedef struct oskar_SettingsSkyGeneratorHealpix oskar_SettingsSkyGeneratorHealpix;
 
 /**
+ * @struct oskar_SettingsSkyGeneratorGrid
+ *
+ * @brief Structure to hold settings for a sky model grid generator.
+ *
+ * @details
+ * The structure holds parameters for a sky model grid generator.
+ */
+struct oskar_SettingsSkyGeneratorGrid
+{
+    oskar_SettingsSkyExtendedSources extended_sources;
+    oskar_SettingsSkyPolarisation pol;
+    int side_length;
+    double fov_rad;
+    double mean_flux_jy;
+    double std_flux_jy;
+    int seed;
+};
+typedef struct oskar_SettingsSkyGeneratorGrid oskar_SettingsSkyGeneratorGrid;
+
+/**
  * @struct oskar_SettingsSkyGenerator
  *
  * @brief Structure to hold all sky model generator settings.
@@ -199,6 +234,7 @@ typedef struct oskar_SettingsSkyGeneratorHealpix oskar_SettingsSkyGeneratorHealp
 struct oskar_SettingsSkyGenerator
 {
     oskar_SettingsSkyGeneratorHealpix healpix;
+    oskar_SettingsSkyGeneratorGrid grid;
     oskar_SettingsSkyGeneratorRandomPowerLaw random_power_law;
     oskar_SettingsSkyGeneratorRandomBrokenPowerLaw random_broken_power_law;
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,38 +26,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_MODEL_APPS_H_
-#define OSKAR_SETTINGS_MODEL_APPS_H_
+#ifndef OSKAR_SKY_OVERRIDE_POLARISATION_H_
+#define OSKAR_SKY_OVERRIDE_POLARISATION_H_
 
 /**
- * @file oskar_SettingsModelApps.h
+ * @file oskar_sky_override_polarisation.h
  */
 
 #include <oskar_global.h>
-#include <widgets/oskar_SettingsModel.h>
 
-class OSKAR_WIDGETS_EXPORT oskar_SettingsModelApps : public oskar_SettingsModel
-{
-    Q_OBJECT
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-public:
-    oskar_SettingsModelApps(QObject* parent = 0);
-    virtual ~oskar_SettingsModelApps();
+/**
+ * @brief
+ * Overrides source polarisation data in a sky model.
+ *
+ * @details
+ * This function overrides source polarisation values in a sky model based
+ * on the supplied mean and standard deviation of the polarisation
+ * fraction and polarisation angle.
+ *
+ * A negative value for the mean polarisation fraction will disable the
+ * function and leave the sky model unchanged.
+ *
+ * Stokes I values must already exist in the sky model.
+ * Only the Stokes Q and U values will be modified.
+ *
+ * @param[out] sky               Pointer to sky model.
+ * @param[in] mean_pol_fraction  Mean source polarisation fraction (range 0-1).
+ * @param[in] std_pol_fraction   Standard deviation of source polarisation (range 0-1).
+ * @param[in] mean_pol_angle_rad Mean source polarisation angle in radians.
+ * @param[in] std_pol_angle_rad  Standard deviation of source polarisation angle in radians.
+ * @param[in] seed               Random generator seed.
+ * @param[in,out] status         Status return code.
+ */
+OSKAR_EXPORT
+void oskar_sky_override_polarisation(oskar_Sky* sky, double mean_pol_fraction,
+        double std_pol_fraction, double mean_pol_angle_rad,
+        double std_pol_angle_rad, int seed, int* status);
 
-private:
-    void init_settings_simulator();
-    void init_settings_sky_model();
-    void init_settings_observation();
-    void init_settings_telescope_model();
-    void init_settings_element_fit();
-    void init_settings_interferometer();
-    void init_settings_system_noise_model(const QString& root);
-    void init_settings_beampattern();
-    void init_settings_image();
-    void init_settings_ionosphere();
-    void add_filter_group(const QString& group);
-    void add_extended_group(const QString& group);
-    void add_polarisation_group(const QString& group);
-};
+#ifdef __cplusplus
+}
+#endif
 
-#endif /* OSKAR_SETTINGS_MODEL_APPS_H_ */
+#endif /* OSKAR_SKY_OVERRIDE_POLARISATION_H_ */

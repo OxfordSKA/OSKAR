@@ -71,6 +71,10 @@ static void set_up_healpix_fits(int* num_chunks, oskar_Sky*** sky_chunks,
         const oskar_SettingsSkyHealpixFits* s, double ra0, double dec0,
         int zero_failed, int* status);
 
+static void set_up_gen_grid(int* num_chunks, oskar_Sky*** sky_chunks,
+        int max_per_chunk, int type, oskar_Log* log,
+        const oskar_SettingsSkyGeneratorGrid* s, double ra0, double dec0,
+        int zero_failed, int* status);
 static void set_up_gen_healpix(int* num_chunks, oskar_Sky*** sky_chunks,
         int max_per_chunk, int type, oskar_Log* log,
         const oskar_SettingsSkyGeneratorHealpix* s, double ra0, double dec0,
@@ -92,6 +96,8 @@ static void set_up_filter(oskar_Sky* sky, const oskar_SettingsSkyFilter* f,
 static void set_up_extended(oskar_Sky* sky,
         const oskar_SettingsSkyExtendedSources* ext, oskar_Log* log,
         double ra0_rad, double dec0_rad, int zero_failed_sources, int* status);
+static void set_up_pol(oskar_Sky* sky,
+        const oskar_SettingsSkyPolarisation* pol, int* status);
 
 
 oskar_Sky** oskar_set_up_sky(int* num_chunks, oskar_Log* log,
@@ -131,6 +137,8 @@ oskar_Sky** oskar_set_up_sky(int* num_chunks, oskar_Log* log,
             &settings->sky.healpix_fits, ra0, dec0, zero_flag, status);
 
     /* Generate sky models from generator parameters. */
+    set_up_gen_grid(num_chunks, &sky_chunks, max_per_chunk, type, log,
+            &settings->sky.generator.grid, ra0, dec0, zero_flag, status);
     set_up_gen_healpix(num_chunks, &sky_chunks, max_per_chunk, type, log,
             &settings->sky.generator.healpix, ra0, dec0, zero_flag, status);
     set_up_gen_rpl(num_chunks, &sky_chunks, max_per_chunk, type, log,
@@ -360,6 +368,76 @@ static void set_up_healpix_fits(int* num_chunks, oskar_Sky*** sky_chunks,
 }
 
 
+static void set_up_gen_grid(int* num_chunks, oskar_Sky*** sky_chunks,
+        int max_per_chunk, int type, oskar_Log* log,
+        const oskar_SettingsSkyGeneratorGrid* s, double ra0, double dec0,
+        int zero_failed, int* status)
+{
+    int i, j, k, num_points, side_length;
+    double fov_rad, flux, mean_flux, std_flux;
+    oskar_Sky* temp;
+
+    /* Get the grid generator parameters. */
+    side_length = s->side_length;
+    fov_rad = s->fov_rad;
+    mean_flux = s->mean_flux_jy;
+    std_flux = s->std_flux_jy;
+    if (*status || side_length <= 0)
+        return;
+
+    /* Create a temporary sky model. */
+    num_points = side_length * side_length;
+    temp = oskar_sky_create(type, OSKAR_LOCATION_CPU, num_points, status);
+    oskar_log_message(log, 0, "Generating source grid positions...");
+    srand(s->seed);
+
+    /* Side length of 1 is a special case. */
+    if (side_length == 1)
+    {
+        /* Generate the Stokes I flux and store the value. */
+        flux = mean_flux + std_flux * oskar_random_gaussian(0);
+        oskar_sky_set_source(temp, 0, ra0, dec0, flux, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
+    }
+    else
+    {
+        double l_max, l, m, n, sin_dec0, cos_dec0, ra, dec;
+        l_max = sin(0.5 * fov_rad);
+        sin_dec0 = sin(dec0);
+        cos_dec0 = cos(dec0);
+        for (j = 0, k = 0; j < side_length; ++j)
+        {
+            m = 2.0 * l_max * j / (side_length - 1) - l_max;
+            for (i = 0; i < side_length; ++i, ++k)
+            {
+                l = -2.0 * l_max * i / (side_length - 1) + l_max;
+
+                /* Get longitude and latitude from tangent plane coords. */
+                n = sqrt(1.0 - l*l - m*m);
+                dec = asin(n * sin_dec0 + m * cos_dec0);
+                ra = ra0 + atan2(l, cos_dec0 * n - m * sin_dec0);
+
+                /* Generate the Stokes I flux and store the value. */
+                flux = mean_flux + std_flux * oskar_random_gaussian(0);
+                oskar_sky_set_source(temp, k, ra, dec, flux, 0.0, 0.0,
+                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
+            }
+        }
+    }
+
+    /* Apply polarisation and extended source over-ride. */
+    set_up_pol(temp, &s->pol, status);
+    set_up_extended(temp, &s->extended_sources, log, ra0, dec0, zero_failed,
+            status);
+
+    /* Append to chunks. */
+    oskar_sky_append_to_set(num_chunks, sky_chunks, max_per_chunk, temp,
+            status);
+    oskar_sky_free(temp, status);
+    oskar_log_message(log, 1, "done.");
+}
+
+
 static void set_up_gen_healpix(int* num_chunks, oskar_Sky*** sky_chunks,
         int max_per_chunk, int type, oskar_Log* log,
         const oskar_SettingsSkyGeneratorHealpix* s, double ra0, double dec0,
@@ -526,7 +604,7 @@ static void set_up_filter(oskar_Sky* sky, const oskar_SettingsSkyFilter* f,
         double ra0_rad, double dec0_rad, int* status)
 {
     oskar_sky_filter_by_flux(sky, f->flux_min, f->flux_max, status);
-    oskar_sky_filter_by_radius(sky, f->radius_inner, f->radius_outer,
+    oskar_sky_filter_by_radius(sky, f->radius_inner_rad, f->radius_outer_rad,
             ra0_rad, dec0_rad, status);
 }
 
@@ -539,10 +617,10 @@ static void set_up_extended(oskar_Sky* sky,
     int num_failed = 0;
 
     /* Apply extended source over-ride. */
-    if (ext->FWHM_major > 0.0 || ext->FWHM_minor > 0.0)
+    if (ext->FWHM_major_rad > 0.0 || ext->FWHM_minor_rad > 0.0)
     {
-        oskar_sky_set_gaussian_parameters(sky, ext->FWHM_major,
-                ext->FWHM_minor, ext->position_angle, status);
+        oskar_sky_set_gaussian_parameters(sky, ext->FWHM_major_rad,
+                ext->FWHM_minor_rad, ext->position_angle_rad, status);
     }
 
     /* Evaluate extended source parameters. */
@@ -565,6 +643,15 @@ static void set_up_extended(oskar_Sky* sky,
         }
     }
 #endif
+}
+
+
+static void set_up_pol(oskar_Sky* sky,
+        const oskar_SettingsSkyPolarisation* pol, int* status)
+{
+    oskar_sky_override_polarisation(sky, pol->mean_pol_fraction,
+            pol->std_pol_fraction, pol->mean_pol_angle_rad,
+            pol->std_pol_angle_rad, pol->seed, status);
 }
 
 #ifdef __cplusplus

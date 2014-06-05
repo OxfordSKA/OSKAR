@@ -70,14 +70,29 @@ void oskar_log_settings_simulator(oskar_Log* log, const oskar_Settings* s)
     LVI("Max sources per chunk", s->sim.max_sources_per_chunk);
 }
 
+static void oskar_log_settings_sky_polarisation(oskar_Log* log, int depth,
+        const oskar_SettingsSkyPolarisation* s)
+{
+    if (s->mean_pol_fraction != 0.0 || s->std_pol_fraction != 0.0)
+    {
+        LV("Mean polarisation fraction", "%.3f", s->mean_pol_fraction);
+        LV("Std.dev. polarisation fraction", "%.3f", s->std_pol_fraction);
+        LV("Mean polarisation angle [deg]", "%.3f",
+                s->mean_pol_angle_rad * 180/M_PI);
+        LV("Std.dev. polarisation angle [deg]", "%.3f",
+                s->std_pol_angle_rad * 180/M_PI);
+        LVI("Random seed", s->seed);
+    }
+}
+
 static void oskar_log_settings_sky_extended(oskar_Log* log, int depth,
         const oskar_SettingsSkyExtendedSources* s)
 {
-    if (!(s->FWHM_major == 0.0 && s->FWHM_minor == 0.0))
+    if (!(s->FWHM_major_rad == 0.0 && s->FWHM_minor_rad == 0.0))
     {
-        LV("FWHM major [arcsec]", "%.3f", s->FWHM_major * 3600*(180/M_PI));
-        LV("FWHM minor [arcsec]", "%.3f", s->FWHM_minor * 3600*(180/M_PI));
-        LV("Position angle [deg]", "%.3f", s->position_angle * 180/M_PI);
+        LV("FWHM major [arcsec]", "%.3f", s->FWHM_major_rad * 3600*(180/M_PI));
+        LV("FWHM minor [arcsec]", "%.3f", s->FWHM_minor_rad * 3600*(180/M_PI));
+        LV("Position angle [deg]", "%.3f", s->position_angle_rad * 180/M_PI);
     }
 }
 
@@ -88,10 +103,10 @@ static void oskar_log_settings_sky_filter(oskar_Log* log, int depth,
         LV("Filter flux min [Jy]", "%.3e", f->flux_min);
     if (f->flux_max != 0.0)
         LV("Filter flux max [Jy]", "%.3e", f->flux_max);
-    if (!(f->radius_inner == 0.0 && f->radius_outer >= M_PI / 2.0))
+    if (!(f->radius_inner_rad == 0.0 && f->radius_outer_rad >= M_PI / 2.0))
     {
-        LV("Filter radius inner [deg]", "%.3f", f->radius_inner * R2D);
-        LV("Filter radius outer [deg]", "%.3f", f->radius_outer * R2D);
+        LV("Filter radius inner [deg]", "%.3f", f->radius_inner_rad * R2D);
+        LV("Filter radius outer [deg]", "%.3f", f->radius_outer_rad * R2D);
     }
 }
 
@@ -220,6 +235,24 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         LVI("Random seed", gen->seed);
         ++depth;
         oskar_log_settings_sky_filter(log, depth, &gen->filter);
+        oskar_log_settings_sky_extended(log, depth, &gen->extended_sources);
+    }
+
+    /* Grid generator settings. */
+    depth = 1;
+    if (s->sky.generator.grid.side_length != 0)
+    {
+        const oskar_SettingsSkyGeneratorGrid* gen = &s->sky.generator.grid;
+
+        oskar_log_message(log, depth, "Generator (grid at phase centre)");
+        ++depth;
+        LVI("Side length", gen->side_length);
+        LV("Field-of-view [deg]", "%.3f", gen->fov_rad * R2D);
+        LV("Mean Stokes I flux [Jy]", "%.3e", gen->mean_flux_jy);
+        LV("Std.dev. Stokes I flux [Jy]", "%.3e", gen->std_flux_jy);
+        LVI("Random seed", gen->seed);
+        ++depth;
+        oskar_log_settings_sky_polarisation(log, depth, &gen->pol);
         oskar_log_settings_sky_extended(log, depth, &gen->extended_sources);
     }
 

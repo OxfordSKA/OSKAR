@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,12 +38,13 @@
 #include <QtCore/QStringList>
 
 #ifndef M_PI
-#define M_PI 3.14159265358979323846
+#define M_PI 3.14159265358979323846264338327950288
 #endif
 
 #define D2R M_PI/180.0
 #define ARCSEC2RAD M_PI/648000.0
 
+static void get_pol_params(QSettings& s, oskar_SettingsSkyPolarisation* ext);
 static void get_extended_params(QSettings& s, oskar_SettingsSkyExtendedSources* ext);
 static void get_filter_params(QSettings& s, oskar_SettingsSkyFilter* flt);
 static int get_seed(const QVariant& t);
@@ -197,6 +198,18 @@ void oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename,
     get_extended_params(s, &sky->generator.random_broken_power_law.extended_sources);
     s.endGroup();
 
+    // Grid generator settings.
+    s.beginGroup("grid");
+    sky->generator.grid.side_length = s.value("side_length", 0).toInt();
+    sky->generator.grid.fov_rad = s.value("fov_deg", 0.0).toDouble() * D2R;
+    sky->generator.grid.mean_flux_jy = s.value("mean_flux_jy", 0.0).toDouble();
+    sky->generator.grid.std_flux_jy = s.value("std_flux_jy", 0.0).toDouble();
+    sky->generator.grid.seed = get_seed(s.value("seed"));
+    // Grid generator extended parameters.
+    get_extended_params(s, &sky->generator.grid.extended_sources);
+    get_pol_params(s, &sky->generator.grid.pol);
+    s.endGroup();
+
     // HEALPix generator settings.
     s.beginGroup("healpix");
     sky->generator.healpix.nside = s.value("nside", 0).toInt();
@@ -237,13 +250,24 @@ void oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename,
     sky->zero_failed_gaussians = s.value("advanced/zero_failed_gaussians", false).toBool();
 }
 
+static void get_pol_params(QSettings& s, oskar_SettingsSkyPolarisation* pol)
+{
+    s.beginGroup("pol");
+    pol->mean_pol_fraction = s.value("mean_pol_fraction").toDouble();
+    pol->std_pol_fraction = s.value("std_pol_fraction").toDouble();
+    pol->mean_pol_angle_rad = s.value("mean_pol_angle_deg").toDouble() * D2R;
+    pol->std_pol_angle_rad = s.value("std_pol_angle_deg").toDouble() * D2R;
+    pol->seed = get_seed(s.value("seed"));
+    s.endGroup();
+}
+
 static void get_extended_params(QSettings& s,
         oskar_SettingsSkyExtendedSources* ext)
 {
     s.beginGroup("extended_sources");
-    ext->FWHM_major = s.value("FWHM_major").toDouble() * ARCSEC2RAD;
-    ext->FWHM_minor = s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
-    ext->position_angle = s.value("position_angle").toDouble() * D2R;
+    ext->FWHM_major_rad = s.value("FWHM_major").toDouble() * ARCSEC2RAD;
+    ext->FWHM_minor_rad = s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
+    ext->position_angle_rad = s.value("position_angle").toDouble() * D2R;
     s.endGroup();
 }
 
@@ -261,8 +285,8 @@ static void get_filter_params(QSettings& s, oskar_SettingsSkyFilter* flt)
         flt->flux_max = 0.0;
     else
         flt->flux_max = temp.toDouble();
-    flt->radius_inner = s.value("radius_inner_deg").toDouble() * D2R;
-    flt->radius_outer = s.value("radius_outer_deg", 180.0).toDouble() * D2R;
+    flt->radius_inner_rad = s.value("radius_inner_deg").toDouble() * D2R;
+    flt->radius_outer_rad = s.value("radius_outer_deg", 180.0).toDouble() * D2R;
     s.endGroup();
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,18 +45,18 @@ extern "C" {
  *
  * @details
  * This function removes sources from a sky model that lie within
- * \p inner_radius or beyond \p outer_radius.
+ * the inner radius or beyond the outer radius.
  *
- * @param[in,out] sky Pointer to sky model.
- * @param[in] inner_radius Inner radius in radians.
- * @param[in] outer_radius Outer radius in radians.
- * @param[in] ra0 Right ascension of the phase centre in radians.
- * @param[in] dec0 Declination of the phase centre in radians.
- * @param[in,out] status Status return code.
+ * @param[in,out] sky          Pointer to sky model.
+ * @param[in] inner_radius_rad Inner radius in radians.
+ * @param[in] outer_radius_rad Outer radius in radians.
+ * @param[in] ra0_rad          Right ascension of the phase centre in radians.
+ * @param[in] dec0_rad         Declination of the phase centre in radians.
+ * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
-        double outer_radius, double ra0, double dec0, int* status);
+void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius_rad,
+        double outer_radius_rad, double ra0_rad, double dec0_rad, int* status);
 
 #ifdef __cplusplus
 }

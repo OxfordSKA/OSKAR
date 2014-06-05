@@ -246,6 +246,29 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     add_filter_group(group + "/filter");
     add_extended_group(group + "/extended_sources");
 
+    // Grid generator.
+    group = "sky/generator/grid";
+    setLabel(group, "Grid at phase centre");
+    k = group + "/side_length";
+    declare(k, "Side length of grid", oskar_SettingsItem::INT_UNSIGNED);
+    setTooltip(k, "Side length of the generated grid. A value greater "
+            "than 0 will activate the grid generator.");
+    k = group + "/fov_deg";
+    declare(k, "Field-of-view [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Field-of-view spanned by the grid centre, in degrees.");
+    k = group + "/mean_flux_jy";
+    declare(k, "Mean Stokes I flux [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The mean of generated Stokes I fluxes, in Jy.");
+    k = group + "/std_flux_jy";
+    declare(k, "Standard deviation of Stokes I flux [Jy]",
+            oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The standard deviation of generated Stokes I fluxes, in Jy.");
+    k = group + "/seed";
+    declare(k, "Random seed", oskar_SettingsItem::RANDOM_SEED);
+    setTooltip(k, "Random number generator seed used for random distributions.");
+    add_polarisation_group(group + "/pol");
+    add_extended_group(group + "/extended_sources");
+
     // HEALPix generator.
     group = "sky/generator/healpix";
     setLabel(group, "HEALPix (uniform, all sky) grid");
@@ -367,6 +390,33 @@ void oskar_SettingsModelApps::add_extended_group(const QString& group)
     setTooltip(k, "Position angle override of all extended sources in this "
             "group (from North to East), in degrees.");
 #endif
+}
+
+void oskar_SettingsModelApps::add_polarisation_group(const QString& group)
+{
+    QString k;
+    setLabel(group, "Polarisation settings");
+    k = group + "/mean_pol_fraction";
+    declare(k, "Mean polarisation fraction", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The mean polarisation fraction of generated source fluxes "
+            "(range 0 to 1).");
+    k = group + "/std_pol_fraction";
+    declare(k, "Standard deviation polarisation fraction",
+            oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The standard deviation of polarisation fraction of "
+            "generated source fluxes (range 0 to 1).");
+    k = group + "/mean_pol_angle_deg";
+    declare(k, "Mean polarisation angle [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The mean polarisation angle of generated source fluxes, "
+            "in degrees.");
+    k = group + "/std_pol_angle_deg";
+    declare(k, "Standard deviation polarisation angle [deg]",
+            oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The standard deviation of polarisation angle of generated "
+            "source fluxes, in degrees.");
+    k = group + "/seed";
+    declare(k, "Random seed", oskar_SettingsItem::RANDOM_SEED);
+    setTooltip(k, "Random number generator seed used for random distributions.");
 }
 
 void oskar_SettingsModelApps::init_settings_observation()

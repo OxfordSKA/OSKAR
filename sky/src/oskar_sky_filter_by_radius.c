@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,12 +30,18 @@
 #include <oskar_sky.h>
 #include <oskar_mem.h>
 
+#include <math.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
-        double outer_radius, double ra0, double dec0, int* status)
+void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius_rad,
+        double outer_radius_rad, double ra0_rad, double dec0_rad, int* status)
 {
     int type, location, num_sources;
 
@@ -50,10 +56,10 @@ void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
     if (*status) return;
 
     /* Return immediately if no filtering should be done. */
-    if (inner_radius == 0.0 && outer_radius >= 180.0)
+    if (inner_radius_rad == 0.0 && outer_radius_rad >= M_PI)
         return;
 
-    if (outer_radius < inner_radius)
+    if (outer_radius_rad < inner_radius_rad)
     {
         *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
@@ -92,10 +98,11 @@ void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
 
             for (in = 0, out = 0; in < num_sources; ++in)
             {
-                dist = (float)oskar_angular_distance(ra_[in], ra0, dec_[in],
-                    dec0);                       
-                    
-                if (!(dist>=(float)inner_radius && dist<(float)outer_radius))
+                dist = (float)oskar_angular_distance(ra_[in],
+                        ra0_rad, dec_[in], dec0_rad);
+
+                if (!(dist>=(float)inner_radius_rad &&
+                        dist<(float)outer_radius_rad))
                     continue;                        
 
                 ra_[out]   = ra_[in];
@@ -144,9 +151,12 @@ void oskar_sky_filter_by_radius(oskar_Sky* sky, double inner_radius,
 
             for (in = 0, out = 0; in < num_sources; ++in)
             {
-                dist = oskar_angular_distance(ra_[in], ra0, dec_[in], dec0);
+                dist = oskar_angular_distance(ra_[in],
+                        ra0_rad, dec_[in], dec0_rad);
 
-                if (!(dist>=inner_radius && dist<outer_radius)) continue;
+                if (!(dist>=inner_radius_rad &&
+                        dist<outer_radius_rad))
+                    continue;
 
                 ra_[out]   = ra_[in];
                 dec_[out]  = dec_[in];

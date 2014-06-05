@@ -84,6 +84,7 @@ enum {
 #include <oskar_sky_insert.h>
 #include <oskar_sky_load.h>
 #include <oskar_sky_load_gsm.h>
+#include <oskar_sky_override_polarisation.h>
 #include <oskar_sky_read.h>
 #include <oskar_sky_resize.h>
 #include <oskar_sky_rotate_to_position.h>
