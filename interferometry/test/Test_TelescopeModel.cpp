@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,9 +124,12 @@ TEST(TelescopeModel, load_telescope_cpu)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     double *station_x, *station_y, *station_z;
-    station_x = oskar_mem_double(oskar_telescope_station_x(tel_cpu2), &status);
-    station_y = oskar_mem_double(oskar_telescope_station_y(tel_cpu2), &status);
-    station_z = oskar_mem_double(oskar_telescope_station_z(tel_cpu2), &status);
+    station_x = oskar_mem_double(
+            oskar_telescope_station_x_offset_ecef_metres(tel_cpu2), &status);
+    station_y = oskar_mem_double(
+            oskar_telescope_station_y_offset_ecef_metres(tel_cpu2), &status);
+    station_z = oskar_mem_double(
+            oskar_telescope_station_z_offset_ecef_metres(tel_cpu2), &status);
 
     // Check the contents of the CPU structure.
     for (int i = 0; i < n_stations; ++i)

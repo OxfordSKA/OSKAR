@@ -270,11 +270,11 @@ oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in)
     oskar_vis_set_freq_inc_hz(v_out, mxGetScalar(freq_inc_hz_));
     oskar_vis_set_channel_bandwidth_hz(v_out, mxGetScalar(channel_bandwidth_hz_));
     oskar_vis_set_time_start_mjd_utc(v_out, mxGetScalar(time_start_mjd_utc_));
-    oskar_vis_set_time_inc_seconds(v_out, mxGetScalar(time_inc_sec_));
+    oskar_vis_set_time_inc_sec(v_out, mxGetScalar(time_inc_sec_));
     if (time_int_sec_)
-        oskar_vis_set_time_int_seconds(v_out, mxGetScalar(time_int_sec_));
+        oskar_vis_set_time_average_sec(v_out, mxGetScalar(time_int_sec_));
     else
-        oskar_vis_set_time_int_seconds(v_out, 0);
+        oskar_vis_set_time_average_sec(v_out, 0);
     oskar_vis_set_phase_centre(v_out, mxGetScalar(phase_centre_ra_deg_),
             mxGetScalar(phase_centre_dec_deg_));
     oskar_vis_set_telescope_position(v_out, mxGetScalar(telescope_lon_deg_),
@@ -318,11 +318,11 @@ oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in)
 #if 0
     size_t mem_size = num_stations;
     mem_size *= (type == OSKAR_DOUBLE) ? sizeof(double) : sizeof(float);
-    memcpy(oskar_mem_void(oskar_vis_station_x_metres(v_out)), mxGetData(x_),
+    memcpy(oskar_mem_void(oskar_vis_station_x_offset_ecef_metres(v_out)), mxGetData(x_),
             mem_size);
-    memcpy(oskar_mem_void(oskar_vis_station_y_metres(v_out)), mxGetData(y_),
+    memcpy(oskar_mem_void(oskar_vis_station_y_offset_ecef_metres(v_out)), mxGetData(y_),
             mem_size);
-    memcpy(oskar_mem_void(oskar_vis_station_z_metres(v_out)), mxGetData(z_),
+    memcpy(oskar_mem_void(oskar_vis_station_z_offset_ecef_metres(v_out)), mxGetData(z_),
             mem_size);
 #endif
 #endif

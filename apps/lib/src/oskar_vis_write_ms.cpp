@@ -87,7 +87,7 @@ void oskar_vis_write_ms(const oskar_Vis* vis,
     int num_channels   = oskar_vis_num_channels(vis);
     int num_times      = oskar_vis_num_times(vis);
     int num_coords     = num_times * num_baselines;
-    double dt_vis_dump = oskar_vis_time_inc_seconds(vis);
+    double dt_vis_dump = oskar_vis_time_inc_sec(vis);
     double t_start_sec = oskar_vis_time_start_mjd_utc(vis) * DAYS_2_SEC +
             (dt_vis_dump / 2);
     double ref_freq    = oskar_vis_freq_start_hz(vis);
@@ -110,9 +110,9 @@ void oskar_vis_write_ms(const oskar_Vis* vis,
     ms.create(ms_path);
 
     // Add the antenna positions.
-    const oskar_Mem* x_metres = oskar_vis_station_x_metres_const(vis);
-    const oskar_Mem* y_metres = oskar_vis_station_y_metres_const(vis);
-    const oskar_Mem* z_metres = oskar_vis_station_z_metres_const(vis);
+    const oskar_Mem* x_metres = oskar_vis_station_x_offset_ecef_metres_const(vis);
+    const oskar_Mem* y_metres = oskar_vis_station_y_offset_ecef_metres_const(vis);
+    const oskar_Mem* z_metres = oskar_vis_station_z_offset_ecef_metres_const(vis);
     if (oskar_mem_type(x_metres) == OSKAR_DOUBLE)
     {
         ms.addAntennas(num_antennas, oskar_mem_double_const(x_metres, status),

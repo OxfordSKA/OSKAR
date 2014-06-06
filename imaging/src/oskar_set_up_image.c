@@ -130,8 +130,8 @@ oskar_Image* oskar_set_up_image(const oskar_Vis* vis,
     /* TODO for time synthesis the time inc should be 0...? need to
      * determine difference between inc and integration time. */
     oskar_image_set_time(im, oskar_vis_time_start_mjd_utc(vis) +
-            (vis_time_range[0] * oskar_vis_time_inc_seconds(vis) * SEC2DAYS),
-            (settings->time_snapshots) ? oskar_vis_time_inc_seconds(vis) : 0.0);
+            (vis_time_range[0] * oskar_vis_time_inc_sec(vis) * SEC2DAYS),
+            (settings->time_snapshots) ? oskar_vis_time_inc_sec(vis) : 0.0);
 
     /* TODO for channel synthesis the channel inc should be 0...? need to
      * determine difference between inc and channel bandwidth. */

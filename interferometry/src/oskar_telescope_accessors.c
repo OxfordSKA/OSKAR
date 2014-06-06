@@ -56,9 +56,9 @@ double oskar_telescope_latitude_rad(const oskar_Telescope* model)
     return model->latitude_rad;
 }
 
-double oskar_telescope_altitude_m(const oskar_Telescope* model)
+double oskar_telescope_altitude_metres(const oskar_Telescope* model)
 {
-    return model->altitude_m;
+    return model->altitude_metres;
 }
 
 double oskar_telescope_ra0_rad(const oskar_Telescope* model)
@@ -71,9 +71,9 @@ double oskar_telescope_dec0_rad(const oskar_Telescope* model)
     return model->dec0_rad;
 }
 
-double oskar_telescope_bandwidth_hz(const oskar_Telescope* model)
+double oskar_telescope_channel_bandwidth_hz(const oskar_Telescope* model)
 {
-    return model->bandwidth_hz;
+    return model->channel_bandwidth_hz;
 }
 
 double oskar_telescope_time_average_sec(
@@ -134,67 +134,70 @@ const oskar_Station* oskar_telescope_station_const(
 
 /* Coordinate arrays. */
 
-oskar_Mem* oskar_telescope_station_x(oskar_Telescope* model)
+oskar_Mem* oskar_telescope_station_x_offset_ecef_metres(oskar_Telescope* model)
 {
-    return model->station_x;
+    return model->station_x_offset_ecef_metres;
 }
 
-const oskar_Mem* oskar_telescope_station_x_const(const oskar_Telescope* model)
-{
-    return model->station_x;
-}
-
-oskar_Mem* oskar_telescope_station_y(oskar_Telescope* model)
-{
-    return model->station_y;
-}
-
-const oskar_Mem* oskar_telescope_station_y_const(const oskar_Telescope* model)
-{
-    return model->station_y;
-}
-
-oskar_Mem* oskar_telescope_station_z(oskar_Telescope* model)
-{
-    return model->station_z;
-}
-
-const oskar_Mem* oskar_telescope_station_z_const(const oskar_Telescope* model)
-{
-    return model->station_z;
-}
-
-oskar_Mem* oskar_telescope_station_x_hor(oskar_Telescope* model)
-{
-    return model->station_x_hor;
-}
-
-const oskar_Mem* oskar_telescope_station_x_hor_const(
+const oskar_Mem* oskar_telescope_station_x_offset_ecef_metres_const(
         const oskar_Telescope* model)
 {
-    return model->station_x_hor;
+    return model->station_x_offset_ecef_metres;
 }
 
-oskar_Mem* oskar_telescope_station_y_hor(oskar_Telescope* model)
+oskar_Mem* oskar_telescope_station_y_offset_ecef_metres(oskar_Telescope* model)
 {
-    return model->station_y_hor;
+    return model->station_y_offset_ecef_metres;
 }
 
-const oskar_Mem* oskar_telescope_station_y_hor_const(
+const oskar_Mem* oskar_telescope_station_y_offset_ecef_metres_const(
         const oskar_Telescope* model)
 {
-    return model->station_y_hor;
+    return model->station_y_offset_ecef_metres;
 }
 
-oskar_Mem* oskar_telescope_station_z_hor(oskar_Telescope* model)
+oskar_Mem* oskar_telescope_station_z_offset_ecef_metres(oskar_Telescope* model)
 {
-    return model->station_z_hor;
+    return model->station_z_offset_ecef_metres;
 }
 
-const oskar_Mem* oskar_telescope_station_z_hor_const(
+const oskar_Mem* oskar_telescope_station_z_offset_ecef_metres_const(
         const oskar_Telescope* model)
 {
-    return model->station_z_hor;
+    return model->station_z_offset_ecef_metres;
+}
+
+oskar_Mem* oskar_telescope_station_x_enu_metres(oskar_Telescope* model)
+{
+    return model->station_x_enu_metres;
+}
+
+const oskar_Mem* oskar_telescope_station_x_enu_metres_const(
+        const oskar_Telescope* model)
+{
+    return model->station_x_enu_metres;
+}
+
+oskar_Mem* oskar_telescope_station_y_enu_metres(oskar_Telescope* model)
+{
+    return model->station_y_enu_metres;
+}
+
+const oskar_Mem* oskar_telescope_station_y_enu_metres_const(
+        const oskar_Telescope* model)
+{
+    return model->station_y_enu_metres;
+}
+
+oskar_Mem* oskar_telescope_station_z_enu_metres(oskar_Telescope* model)
+{
+    return model->station_z_enu_metres;
+}
+
+const oskar_Mem* oskar_telescope_station_z_enu_metres_const(
+        const oskar_Telescope* model)
+{
+    return model->station_z_enu_metres;
 }
 
 
@@ -205,7 +208,7 @@ void oskar_telescope_set_position(oskar_Telescope* model,
 {
     model->longitude_rad = longitude_rad;
     model->latitude_rad = latitude_rad;
-    model->altitude_m = altitude_m;
+    model->altitude_metres = altitude_m;
 }
 
 void oskar_telescope_set_phase_centre(oskar_Telescope* model,
@@ -218,7 +221,7 @@ void oskar_telescope_set_phase_centre(oskar_Telescope* model,
 void oskar_telescope_set_smearing_values(oskar_Telescope* model,
         double bandwidth_hz, double time_average_sec)
 {
-    model->bandwidth_hz = bandwidth_hz;
+    model->channel_bandwidth_hz = bandwidth_hz;
     model->time_average_sec = time_average_sec;
 }
 

@@ -35,7 +35,6 @@
 #include <math.h>
 #include <string.h>
 
-#include <oskar_global.h>
 #include <oskar_vis.h>
 #include <oskar_mem.h>
 
@@ -47,7 +46,7 @@ void vis_free(void* ptr)
     printf("PyCapsule destructor for oskar_Vis called! (status = %i)\n", status);
 }
 
-static inline oskar_Vis* tupple_to_vis(PyObject* objs, PyObject* args)
+static inline oskar_Vis* tuple_to_vis(PyObject* objs, PyObject* args)
 {
     PyObject* vis_ = NULL;
     if (!PyArg_ParseTuple(args, "O", &vis_))
@@ -58,7 +57,7 @@ static inline oskar_Vis* tupple_to_vis(PyObject* objs, PyObject* args)
     }
     oskar_Vis* vis = (oskar_Vis*)PyCapsule_GetPointer(vis_, "oskar_Vis");
     if (!vis) {
-        printf("Unable to convert PyCapsule object to pointer :(\n");
+        printf("Unable to convert PyCapsule object to pointer.\n");
         return NULL;
     }
     return vis;
@@ -83,31 +82,31 @@ static PyObject* vis_read(PyObject* self, PyObject* args)
 
 static PyObject* get_num_baselines(PyObject* self, PyObject* args)
 {
-    oskar_Vis* vis = tupple_to_vis(self, args);
+    oskar_Vis* vis = tuple_to_vis(self, args);
     return Py_BuildValue("i", oskar_vis_num_baselines(vis));
 }
 
 static PyObject* get_lon(PyObject* self, PyObject* args)
 {
-    oskar_Vis* vis = tupple_to_vis(self, args);
+    oskar_Vis* vis = tuple_to_vis(self, args);
     return Py_BuildValue("d", oskar_vis_telescope_lon_deg(vis));
 }
 
 static PyObject* get_lat(PyObject* self, PyObject* args)
 {
-    oskar_Vis* vis = tupple_to_vis(self, args);
+    oskar_Vis* vis = tuple_to_vis(self, args);
     return Py_BuildValue("d", oskar_vis_telescope_lat_deg(vis));
 }
 
 static PyObject* get_num_channels(PyObject* self, PyObject* args)
 {
-    oskar_Vis* vis = tupple_to_vis(self, args);
+    oskar_Vis* vis = tuple_to_vis(self, args);
     return Py_BuildValue("i", oskar_vis_num_channels(vis));
 }
 
 static PyObject* get_num_times(PyObject* self, PyObject* args)
 {
-    oskar_Vis* vis = tupple_to_vis(self, args);
+    oskar_Vis* vis = tuple_to_vis(self, args);
     return Py_BuildValue("i", oskar_vis_num_times(vis));
 }
 
@@ -157,23 +156,16 @@ static inline PyArrayObject* mem_to_PyArrayObject(const oskar_Mem* mem)
 
 static PyObject* get_station_coords(PyObject* self, PyObject* args)
 {
-    oskar_Vis* vis = tupple_to_vis(self, args);
-    int status = OSKAR_SUCCESS;
-    oskar_Mem* x = oskar_vis_station_horizon_x_metres_create(vis);
-    oskar_Mem* y = oskar_vis_station_horizon_y_metres_create(vis);
-    oskar_Mem* z = oskar_vis_station_horizon_z_metres_create(vis);
-    PyArrayObject* x_ = mem_to_PyArrayObject(x);
-    PyArrayObject* y_ = mem_to_PyArrayObject(y);
-    PyArrayObject* z_ = mem_to_PyArrayObject(z);
-    oskar_mem_free(x, &status);
-    oskar_mem_free(y, &status);
-    oskar_mem_free(z, &status);
+    oskar_Vis* vis = tuple_to_vis(self, args);
+    PyArrayObject* x_ = mem_to_PyArrayObject(oskar_vis_station_x_enu_metres_const(vis));
+    PyArrayObject* y_ = mem_to_PyArrayObject(oskar_vis_station_y_enu_metres_const(vis));
+    PyArrayObject* z_ = mem_to_PyArrayObject(oskar_vis_station_z_enu_metres_const(vis));
     return Py_BuildValue("OOO", x_, y_, z_);
 }
 
 static PyObject* get_baseline_coords(PyObject* self, PyObject* args)
 {
-    oskar_Vis* vis = tupple_to_vis(self, args);
+    oskar_Vis* vis = tuple_to_vis(self, args);
     PyArrayObject* uu_ = mem_to_PyArrayObject(oskar_vis_baseline_uu_metres_const(vis));
     PyArrayObject* vv_ = mem_to_PyArrayObject(oskar_vis_baseline_vv_metres_const(vis));
     PyArrayObject* ww_ = mem_to_PyArrayObject(oskar_vis_baseline_ww_metres_const(vis));
@@ -182,7 +174,7 @@ static PyObject* get_baseline_coords(PyObject* self, PyObject* args)
 
 static PyObject* get_amplitude(PyObject* self, PyObject* args)
 {
-    oskar_Vis* vis = tupple_to_vis(self, args);
+    oskar_Vis* vis = tuple_to_vis(self, args);
     return Py_BuildValue("O", mem_to_PyArrayObject(oskar_vis_amplitude_const(vis)));
 }
 

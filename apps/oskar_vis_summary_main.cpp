@@ -122,9 +122,9 @@ int main(int argc, char **argv)
         oskar_log_value(log, 0, width, "Start time (MJD, UTC)", "%f",
                 oskar_vis_time_start_mjd_utc(vis));
         oskar_log_value(log, 0, width, "Time increment (s)", "%f",
-                oskar_vis_time_inc_seconds(vis));
+                oskar_vis_time_inc_sec(vis));
         oskar_log_value(log, 0, width, "Integration time (s)", "%f",
-                oskar_vis_time_int_seconds(vis));
+                oskar_vis_time_average_sec(vis));
     }
     oskar_vis_free(vis, &status);
     vis = 0;

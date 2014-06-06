@@ -72,9 +72,9 @@ protected:
     static const int num_baselines = num_stations * (num_stations - 1) / 2;
     static const double bandwidth;
     oskar_Mem *u_, *v_;
-    oskar_Telescope* telescope_;
-    oskar_Sky* sky_;
-    oskar_Jones* jones_;
+    oskar_Telescope* tel;
+    oskar_Sky* sky;
+    oskar_Jones* jones;
 
 protected:
     void createTestData(int precision, int location)
@@ -82,53 +82,53 @@ protected:
         int status = 0;
 
         // Allocate memory for data structures.
-        jones_ = oskar_jones_create(precision | OSKAR_COMPLEX | OSKAR_MATRIX,
+        jones = oskar_jones_create(precision | OSKAR_COMPLEX | OSKAR_MATRIX,
                 location, num_stations, num_sources, &status);
         u_ = oskar_mem_create(precision, location, num_stations, &status);
         v_ = oskar_mem_create(precision, location, num_stations, &status);
-        sky_ = oskar_sky_create(precision, location, num_sources, &status);
-        telescope_ = oskar_telescope_create(precision, location,
+        sky = oskar_sky_create(precision, location, num_sources, &status);
+        tel = oskar_telescope_create(precision, location,
                 num_stations, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Fill data structures with random data in sensible ranges.
         srand(0);
-        oskar_mem_random_fill(oskar_jones_mem(jones_), 0.1, 100.0, &status);
+        oskar_mem_random_fill(oskar_jones_mem(jones), 0.1, 100.0, &status);
         oskar_mem_random_fill(u_, 500.0, 1000.0, &status);
         oskar_mem_random_fill(v_, 500.0, 1000.0, &status);
-        oskar_mem_random_fill(oskar_telescope_station_x(telescope_),
+        oskar_mem_random_fill(oskar_telescope_station_x_offset_ecef_metres(tel),
                 0.1, 1000.0, &status);
-        oskar_mem_random_fill(oskar_telescope_station_y(telescope_),
+        oskar_mem_random_fill(oskar_telescope_station_y_offset_ecef_metres(tel),
                 0.1, 1000.0, &status);
-        oskar_mem_random_fill(oskar_telescope_station_z(telescope_),
+        oskar_mem_random_fill(oskar_telescope_station_z_offset_ecef_metres(tel),
                 0.1, 1000.0, &status);
-        oskar_mem_random_fill(oskar_sky_I(sky_), 2.0, 5.0, &status);
-        oskar_mem_random_fill(oskar_sky_Q(sky_), 0.1, 1.0, &status);
-        oskar_mem_random_fill(oskar_sky_U(sky_), 0.1, 0.5, &status);
-        oskar_mem_random_fill(oskar_sky_V(sky_), 0.1, 0.2, &status);
-        oskar_mem_random_fill(oskar_sky_l(sky_), 0.1, 0.9, &status);
-        oskar_mem_random_fill(oskar_sky_m(sky_), 0.1, 0.9, &status);
-        oskar_mem_random_fill(oskar_sky_n(sky_), 0.1, 0.9, &status);
-        oskar_mem_random_fill(oskar_sky_gaussian_a(sky_), 0.1e-6, 0.2e-6,
+        oskar_mem_random_fill(oskar_sky_I(sky), 2.0, 5.0, &status);
+        oskar_mem_random_fill(oskar_sky_Q(sky), 0.1, 1.0, &status);
+        oskar_mem_random_fill(oskar_sky_U(sky), 0.1, 0.5, &status);
+        oskar_mem_random_fill(oskar_sky_V(sky), 0.1, 0.2, &status);
+        oskar_mem_random_fill(oskar_sky_l(sky), 0.1, 0.9, &status);
+        oskar_mem_random_fill(oskar_sky_m(sky), 0.1, 0.9, &status);
+        oskar_mem_random_fill(oskar_sky_n(sky), 0.1, 0.9, &status);
+        oskar_mem_random_fill(oskar_sky_gaussian_a(sky), 0.1e-6, 0.2e-6,
                 &status);
-        oskar_mem_random_fill(oskar_sky_gaussian_b(sky_), 0.1e-6, 0.2e-6,
+        oskar_mem_random_fill(oskar_sky_gaussian_b(sky), 0.1e-6, 0.2e-6,
                 &status);
-        oskar_mem_random_fill(oskar_sky_gaussian_c(sky_), 0.1e-6, 0.2e-6,
+        oskar_mem_random_fill(oskar_sky_gaussian_c(sky), 0.1e-6, 0.2e-6,
                 &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Set bandwidth.
-        oskar_telescope_set_smearing_values(telescope_, bandwidth, 0.0);
+        oskar_telescope_set_smearing_values(tel, bandwidth, 0.0);
     }
 
     void destroyTestData()
     {
         int status = 0;
-        oskar_jones_free(jones_, &status);
+        oskar_jones_free(jones, &status);
         oskar_mem_free(u_, &status);
         oskar_mem_free(v_, &status);
-        oskar_sky_free(sky_, &status);
-        oskar_telescope_free(telescope_, &status);
+        oskar_sky_free(sky, &status);
+        oskar_telescope_free(tel, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
     }
 
@@ -152,12 +152,12 @@ protected:
         oskar_mem_clear_contents(vis1, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         createTestData(prec1, loc1);
-        oskar_sky_set_use_extended(sky_, extended);
-        oskar_telescope_set_smearing_values(telescope_, bandwidth,
+        oskar_sky_set_use_extended(sky, extended);
+        oskar_telescope_set_smearing_values(tel, bandwidth,
                 time_average);
         oskar_timer_start(timer1);
-        oskar_correlate(vis1, oskar_sky_num_sources(sky_), jones_, sky_,
-                telescope_, u_, v_, 1.0, frequency, &status);
+        oskar_correlate(vis1, oskar_sky_num_sources(sky), jones, sky,
+                tel, u_, v_, 1.0, frequency, &status);
         time1 = oskar_timer_elapsed(timer1);
         destroyTestData();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -168,12 +168,12 @@ protected:
         oskar_mem_clear_contents(vis2, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         createTestData(prec2, loc2);
-        oskar_sky_set_use_extended(sky_, extended);
-        oskar_telescope_set_smearing_values(telescope_, bandwidth,
+        oskar_sky_set_use_extended(sky, extended);
+        oskar_telescope_set_smearing_values(tel, bandwidth,
                 time_average);
         oskar_timer_start(timer2);
-        oskar_correlate(vis2, oskar_sky_num_sources(sky_), jones_, sky_,
-                telescope_, u_, v_, 1.0, frequency, &status);
+        oskar_correlate(vis2, oskar_sky_num_sources(sky), jones, sky,
+                tel, u_, v_, 1.0, frequency, &status);
         time2 = oskar_timer_elapsed(timer2);
         destroyTestData();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);

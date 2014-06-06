@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,9 @@
 extern "C" {
 #endif
 
-void oskar_telescope_set_station_coords(oskar_Telescope* dst,
-        int index, double x, double y, double z,
-        double x_hor, double y_hor, double z_hor, int* status)
+void oskar_telescope_set_station_coords(oskar_Telescope* dst, int index,
+        double x_offset_ecef, double y_offset_ecef, double z_offset_ecef,
+        double x_enu, double y_enu, double z_enu, int* status)
 {
     int type, location;
     char *xw, *yw, *zw, *xh, *yh, *zh;
@@ -70,32 +70,32 @@ void oskar_telescope_set_station_coords(oskar_Telescope* dst,
     location = oskar_telescope_location(dst);
 
     /* Get byte pointers. */
-    xw = oskar_mem_char(dst->station_x);
-    yw = oskar_mem_char(dst->station_y);
-    zw = oskar_mem_char(dst->station_z);
-    xh = oskar_mem_char(dst->station_x_hor);
-    yh = oskar_mem_char(dst->station_y_hor);
-    zh = oskar_mem_char(dst->station_z_hor);
+    xw = oskar_mem_char(dst->station_x_offset_ecef_metres);
+    yw = oskar_mem_char(dst->station_y_offset_ecef_metres);
+    zw = oskar_mem_char(dst->station_z_offset_ecef_metres);
+    xh = oskar_mem_char(dst->station_x_enu_metres);
+    yh = oskar_mem_char(dst->station_y_enu_metres);
+    zh = oskar_mem_char(dst->station_z_enu_metres);
 
     if (location == OSKAR_LOCATION_CPU)
     {
         if (type == OSKAR_DOUBLE)
         {
-            ((double*)xw)[index] = x;
-            ((double*)yw)[index] = y;
-            ((double*)zw)[index] = z;
-            ((double*)xh)[index] = x_hor;
-            ((double*)yh)[index] = y_hor;
-            ((double*)zh)[index] = z_hor;
+            ((double*)xw)[index] = x_offset_ecef;
+            ((double*)yw)[index] = y_offset_ecef;
+            ((double*)zw)[index] = z_offset_ecef;
+            ((double*)xh)[index] = x_enu;
+            ((double*)yh)[index] = y_enu;
+            ((double*)zh)[index] = z_enu;
         }
         else if (type == OSKAR_SINGLE)
         {
-            ((float*)xw)[index] = (float)x;
-            ((float*)yw)[index] = (float)y;
-            ((float*)zw)[index] = (float)z;
-            ((float*)xh)[index] = (float)x_hor;
-            ((float*)yh)[index] = (float)y_hor;
-            ((float*)zh)[index] = (float)z_hor;
+            ((float*)xw)[index] = (float)x_offset_ecef;
+            ((float*)yw)[index] = (float)y_offset_ecef;
+            ((float*)zw)[index] = (float)z_offset_ecef;
+            ((float*)xh)[index] = (float)x_enu;
+            ((float*)yh)[index] = (float)y_enu;
+            ((float*)zh)[index] = (float)z_enu;
         }
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -108,22 +108,22 @@ void oskar_telescope_set_station_coords(oskar_Telescope* dst,
         offset_bytes = index * size;
         if (type == OSKAR_DOUBLE)
         {
-            cudaMemcpy(xw + offset_bytes, &x, size, H2D);
-            cudaMemcpy(yw + offset_bytes, &y, size, H2D);
-            cudaMemcpy(zw + offset_bytes, &z, size, H2D);
-            cudaMemcpy(xh + offset_bytes, &x_hor, size, H2D);
-            cudaMemcpy(yh + offset_bytes, &y_hor, size, H2D);
-            cudaMemcpy(zh + offset_bytes, &z_hor, size, H2D);
+            cudaMemcpy(xw + offset_bytes, &x_offset_ecef, size, H2D);
+            cudaMemcpy(yw + offset_bytes, &y_offset_ecef, size, H2D);
+            cudaMemcpy(zw + offset_bytes, &z_offset_ecef, size, H2D);
+            cudaMemcpy(xh + offset_bytes, &x_enu, size, H2D);
+            cudaMemcpy(yh + offset_bytes, &y_enu, size, H2D);
+            cudaMemcpy(zh + offset_bytes, &z_enu, size, H2D);
         }
         else if (type == OSKAR_SINGLE)
         {
             float tx, ty, tz, tx_hor, ty_hor, tz_hor;
-            tx = (float) x;
-            ty = (float) y;
-            tz = (float) z;
-            tx_hor = (float) x_hor;
-            ty_hor = (float) y_hor;
-            tz_hor = (float) z_hor;
+            tx = (float) x_offset_ecef;
+            ty = (float) y_offset_ecef;
+            tz = (float) z_offset_ecef;
+            tx_hor = (float) x_enu;
+            ty_hor = (float) y_enu;
+            tz_hor = (float) z_enu;
             cudaMemcpy(xw + offset_bytes, &tx, size, H2D);
             cudaMemcpy(yw + offset_bytes, &ty, size, H2D);
             cudaMemcpy(zw + offset_bytes, &tz, size, H2D);

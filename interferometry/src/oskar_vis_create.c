@@ -86,27 +86,31 @@ oskar_Vis* oskar_vis_create(int amp_type, int location, int num_channels,
     vis->freq_inc_hz = 0.0;
     vis->channel_bandwidth_hz = 0.0;
     vis->time_start_mjd_utc = 0.0;
-    vis->time_inc_seconds = 0.0;
-    vis->time_int_seconds = 0.0;
+    vis->time_inc_sec = 0.0;
+    vis->time_average_sec = 0.0;
     vis->phase_centre_ra_deg = 0.0;
     vis->phase_centre_dec_deg = 0.0;
     vis->telescope_lon_deg = 0.0;
     vis->telescope_lat_deg = 0.0;
+    vis->telescope_alt_metres = 0.0;
 
     /* Initialise memory. */
     vis->settings_path = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, status);
     vis->telescope_path = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, status);
     vis->settings = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, status);
-    vis->x_metres = oskar_mem_create(type, location, num_stations, status);
-    vis->y_metres = oskar_mem_create(type, location, num_stations, status);
-    vis->z_metres = oskar_mem_create(type, location, num_stations, status);
-    vis->station_lon = oskar_mem_create(type, location, num_stations, status);
-    vis->station_lat = oskar_mem_create(type, location, num_stations, status);
-    vis->station_orientation_x = oskar_mem_create(type, location, num_stations, status);
-    vis->station_orientation_y = oskar_mem_create(type, location, num_stations, status);
-    vis->uu_metres = oskar_mem_create(type, location, num_coords, status);
-    vis->vv_metres = oskar_mem_create(type, location, num_coords, status);
-    vis->ww_metres = oskar_mem_create(type, location, num_coords, status);
+    vis->station_x_offset_ecef_metres = oskar_mem_create(type, location, num_stations, status);
+    vis->station_y_offset_ecef_metres = oskar_mem_create(type, location, num_stations, status);
+    vis->station_z_offset_ecef_metres = oskar_mem_create(type, location, num_stations, status);
+    vis->station_x_enu_metres = oskar_mem_create(type, location, num_stations, status);
+    vis->station_y_enu_metres = oskar_mem_create(type, location, num_stations, status);
+    vis->station_z_enu_metres = oskar_mem_create(type, location, num_stations, status);
+    vis->station_lon_deg = oskar_mem_create(type, location, num_stations, status);
+    vis->station_lat_deg = oskar_mem_create(type, location, num_stations, status);
+    vis->station_orientation_x_deg = oskar_mem_create(type, location, num_stations, status);
+    vis->station_orientation_y_deg = oskar_mem_create(type, location, num_stations, status);
+    vis->baseline_uu_metres = oskar_mem_create(type, location, num_coords, status);
+    vis->baseline_vv_metres = oskar_mem_create(type, location, num_coords, status);
+    vis->baseline_ww_metres = oskar_mem_create(type, location, num_coords, status);
     vis->amplitude = oskar_mem_create(amp_type, location, num_amps, status);
 
     /* Return handle to structure. */

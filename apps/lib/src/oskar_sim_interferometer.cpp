@@ -385,9 +385,9 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     u = oskar_mem_create(type, OSKAR_LOCATION_GPU, n_stations, status);
     v = oskar_mem_create(type, OSKAR_LOCATION_GPU, n_stations, status);
     w = oskar_mem_create(type, OSKAR_LOCATION_GPU, n_stations, status);
-    x = oskar_telescope_station_x_const(telescope);
-    y = oskar_telescope_station_y_const(telescope);
-    z = oskar_telescope_station_z_const(telescope);
+    x = oskar_telescope_station_x_offset_ecef_metres_const(telescope);
+    y = oskar_telescope_station_y_offset_ecef_metres_const(telescope);
+    z = oskar_telescope_station_z_offset_ecef_metres_const(telescope);
 
     /* Initialise work buffer for Z Jones evaluation */
     /*oskar_work_jones_z_init(&workJonesZ, type, OSKAR_LOCATION_CPU, status);*/

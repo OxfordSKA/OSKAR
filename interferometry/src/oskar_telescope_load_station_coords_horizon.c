@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ void oskar_telescope_load_station_coords_horizon(oskar_Telescope* telescope,
     /* Store the telescope centre longitude, latitude, and altitude. */
     telescope->longitude_rad = longitude;
     telescope->latitude_rad = latitude;
-    telescope->altitude_m = altitude;
+    telescope->altitude_metres = altitude;
 
     /* Loop over each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)

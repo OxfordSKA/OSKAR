@@ -87,9 +87,12 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
     const oskar_Mem *baseline_uu = oskar_vis_baseline_uu_metres_const(vis);
     const oskar_Mem *baseline_vv = oskar_vis_baseline_vv_metres_const(vis);
     const oskar_Mem *baseline_ww = oskar_vis_baseline_ww_metres_const(vis);
-    const oskar_Mem *station_ecef_x = oskar_vis_station_x_metres_const(vis);
-    const oskar_Mem *station_ecef_y = oskar_vis_station_y_metres_const(vis);
-    const oskar_Mem *station_ecef_z = oskar_vis_station_z_metres_const(vis);
+    const oskar_Mem *station_ecef_x =
+            oskar_vis_station_x_offset_ecef_metres_const(vis);
+    const oskar_Mem *station_ecef_y =
+            oskar_vis_station_y_offset_ecef_metres_const(vis);
+    const oskar_Mem *station_ecef_z =
+            oskar_vis_station_z_offset_ecef_metres_const(vis);
 
     /* Get and check settings. */
     int size = settings->size;
@@ -241,7 +244,7 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
         oskar_convert_ecef_to_baseline_uvw(uu_rot, vv_rot, ww_rot,
                 num_stations, station_ecef_x, station_ecef_y, station_ecef_z,
                 ra_rad, dec_rad, num_times, oskar_vis_time_start_mjd_utc(vis),
-                oskar_vis_time_inc_seconds(vis) * SEC2DAYS, work_uvw, status);
+                oskar_vis_time_inc_sec(vis) * SEC2DAYS, work_uvw, status);
         oskar_mem_free(work_uvw, status);
     }
 

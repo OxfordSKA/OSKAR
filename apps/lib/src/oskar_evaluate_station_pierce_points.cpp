@@ -153,9 +153,9 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
 //    printf("Number of stations = %i\n", num_stations);
 
     void *x_, *y_, *z_;
-    x_ = oskar_mem_void(oskar_telescope_station_x(telescope));
-    y_ = oskar_mem_void(oskar_telescope_station_y(telescope));
-    z_ = oskar_mem_void(oskar_telescope_station_z(telescope));
+    x_ = oskar_mem_void(oskar_telescope_station_x_offset_ecef_metres(telescope));
+    y_ = oskar_mem_void(oskar_telescope_station_y_offset_ecef_metres(telescope));
+    z_ = oskar_mem_void(oskar_telescope_station_z_offset_ecef_metres(telescope));
 
     for (int t = 0; t < num_times; ++t)
     {

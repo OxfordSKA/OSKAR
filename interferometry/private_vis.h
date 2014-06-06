@@ -67,45 +67,42 @@
  */
 struct oskar_Vis
 {
-    /* Maybe the two following fields should only be in the binary file as
-     * on loading visibilities there is no guarantee these paths are still
-     * valid ... ? Think about this more when working out how to deal with
-     * files that don't fit into RAM... */
-    oskar_Mem* settings_path;     /**< Path to settings file. */
-    oskar_Mem* telescope_path;    /**< Path to telescope model. */
-    oskar_Mem* settings;          /**< Settings file contents. */
+    oskar_Mem* settings_path;    /**< Path to settings file. */
+    oskar_Mem* telescope_path;   /**< Path to telescope model. */
+    oskar_Mem* settings;         /**< Settings file contents. */
 
     int num_channels;            /**< Number of frequency channels. */
     int num_times;               /**< Number of time samples. */
     int num_stations;            /**< Number of interferometer stations. */
     int num_baselines;           /**< Number of interferometer baselines. */
 
-    double freq_start_hz;        /**< Start Frequency, in Hz. */
+    double freq_start_hz;        /**< Start frequency, in Hz. */
     double freq_inc_hz;          /**< Frequency increment, in Hz. */
     double channel_bandwidth_hz; /**< Frequency channel bandwidth, in Hz */
     double time_start_mjd_utc;   /**< Start time in MJD, UTC. */
-    double time_inc_seconds;     /**< Time increment, in seconds. */
-    double time_int_seconds;     /**< Time integration, in seconds. */
+    double time_inc_sec;         /**< Time increment, in seconds. */
+    double time_average_sec;     /**< Time average smearing duration, in seconds. */
     double phase_centre_ra_deg;  /**< Pointing phase centre RA, in degrees. */
     double phase_centre_dec_deg; /**< Pointing phase centre Dec, in degrees. */
     double telescope_lon_deg;    /**< Reference longitude of the telescope, in degrees */
     double telescope_lat_deg;    /**< Reference latitude of the telescope, in degrees */
-    /* TODO telescope alt! */
+    double telescope_alt_metres; /**< Reference altitude of the telescope, in metres. */
 
-    /* TODO Make these coordinates always double as there are no cases where
-     * we want to loose precision here when converting */
-    /* TODO also store horizon coordinates */
-    oskar_Mem* x_metres;          /**< Station x coordinates, in metres. */
-    oskar_Mem* y_metres;          /**< Station y coordinates, in metres. */
-    oskar_Mem* z_metres;          /**< Station z coordinates, in metres. */
-    oskar_Mem* station_lon;       /**< Station longitudes, in degrees */
-    oskar_Mem* station_lat;       /**< Station latitudes, in degrees */
-    oskar_Mem* station_orientation_x; /**< Orientation azimuth of nominal station x dipole axis, in degrees */
-    oskar_Mem* station_orientation_y; /**< Orientation azimuth of nominal station y dipole axis, in degrees */
-    oskar_Mem* uu_metres;         /**< Baseline coordinates, in metres. */
-    oskar_Mem* vv_metres;         /**< Baseline coordinates, in metres. */
-    oskar_Mem* ww_metres;         /**< Baseline coordinates, in metres. */
-    oskar_Mem* amplitude;         /**< Complex visibility amplitude. */
+    /* TODO Store station coordinates always in double precision? */
+    oskar_Mem* station_x_offset_ecef_metres; /**< Station x-coordinate, in metres (offset ECEF). */
+    oskar_Mem* station_y_offset_ecef_metres; /**< Station y-coordinate, in metres (offset ECEF). */
+    oskar_Mem* station_z_offset_ecef_metres; /**< Station z-coordinate, in metres (offset ECEF). */
+    oskar_Mem* station_x_enu_metres;         /**< Station x-coordinate, in metres (horizon). */
+    oskar_Mem* station_y_enu_metres;         /**< Station y-coordinate, in metres (horizon). */
+    oskar_Mem* station_z_enu_metres;         /**< Station z-coordinate, in metres (horizon). */
+    oskar_Mem* station_lon_deg;              /**< Station longitudes, in degrees. */
+    oskar_Mem* station_lat_deg;              /**< Station latitudes, in degrees. */
+    oskar_Mem* station_orientation_x_deg;    /**< Orientation azimuth of nominal station x dipole axis, in degrees. */
+    oskar_Mem* station_orientation_y_deg;    /**< Orientation azimuth of nominal station y dipole axis, in degrees. */
+    oskar_Mem* baseline_uu_metres;           /**< Baseline coordinates, in metres. */
+    oskar_Mem* baseline_vv_metres;           /**< Baseline coordinates, in metres. */
+    oskar_Mem* baseline_ww_metres;           /**< Baseline coordinates, in metres. */
+    oskar_Mem* amplitude;                    /**< Complex visibility amplitude. */
 };
 
 #ifndef OSKAR_VIS_TYPEDEF_

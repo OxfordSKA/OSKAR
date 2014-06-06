@@ -148,8 +148,8 @@ static bool isCompatible(const oskar_Vis* v1, const oskar_Vis* v2)
     if (fabs(oskar_vis_time_start_mjd_utc(v1) -
             oskar_vis_time_start_mjd_utc(v2)) > DBL_EPSILON)
         return false;
-    if (fabs(oskar_vis_time_inc_seconds(v1) -
-            oskar_vis_time_inc_seconds(v2)) > DBL_EPSILON)
+    if (fabs(oskar_vis_time_inc_sec(v1) -
+            oskar_vis_time_inc_sec(v2)) > DBL_EPSILON)
         return false;
     if (fabs(oskar_vis_phase_centre_ra_deg(v1) -
             oskar_vis_phase_centre_ra_deg(v2)) > DBL_EPSILON)

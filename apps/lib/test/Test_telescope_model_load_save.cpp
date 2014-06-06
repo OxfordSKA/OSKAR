@@ -163,27 +163,27 @@ TEST(telescope_model_load_save, test_1_level)
             oskar_telescope_longitude_rad(telescope2), 1e-10);
     EXPECT_NEAR(oskar_telescope_latitude_rad(telescope),
             oskar_telescope_latitude_rad(telescope2), 1e-10);
-    EXPECT_NEAR(oskar_telescope_altitude_m(telescope),
-            oskar_telescope_altitude_m(telescope2), 1e-10);
+    EXPECT_NEAR(oskar_telescope_altitude_metres(telescope),
+            oskar_telescope_altitude_metres(telescope2), 1e-10);
 
     double max_, avg_;
     oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_x_hor(telescope),
-            oskar_telescope_station_x_hor(telescope2),
+            oskar_telescope_station_x_enu_metres(telescope),
+            oskar_telescope_station_x_enu_metres(telescope2),
             0, &max_, &avg_, 0, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
     EXPECT_LT(max_, 1e-5);
     EXPECT_LT(avg_, 1e-5);
     oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_y_hor(telescope),
-            oskar_telescope_station_y_hor(telescope2),
+            oskar_telescope_station_y_enu_metres(telescope),
+            oskar_telescope_station_y_enu_metres(telescope2),
             0, &max_, &avg_, 0, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
     EXPECT_LT(max_, 1e-5);
     EXPECT_LT(avg_, 1e-5);
     oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_z_hor(telescope),
-            oskar_telescope_station_z_hor(telescope2),
+            oskar_telescope_station_z_enu_metres(telescope),
+            oskar_telescope_station_z_enu_metres(telescope2),
             0, &max_, &avg_, 0, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
     EXPECT_LT(max_, 1e-5);
@@ -302,27 +302,27 @@ TEST(telescope_model_load_save, test_2_level)
             oskar_telescope_longitude_rad(telescope2), 1e-10);
     EXPECT_NEAR(oskar_telescope_latitude_rad(telescope),
             oskar_telescope_latitude_rad(telescope2), 1e-10);
-    EXPECT_NEAR(oskar_telescope_altitude_m(telescope),
-            oskar_telescope_altitude_m(telescope2), 1e-10);
+    EXPECT_NEAR(oskar_telescope_altitude_metres(telescope),
+            oskar_telescope_altitude_metres(telescope2), 1e-10);
 
     double max_, avg_ = 0.0;
     oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_x_hor(telescope),
-            oskar_telescope_station_x_hor(telescope2),
+            oskar_telescope_station_x_enu_metres(telescope),
+            oskar_telescope_station_x_enu_metres(telescope2),
             0, &max_, &avg_, 0, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
     EXPECT_LT(max_, 1e-5);
     EXPECT_LT(avg_, 1e-5);
     oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_y_hor(telescope),
-            oskar_telescope_station_y_hor(telescope2),
+            oskar_telescope_station_y_enu_metres(telescope),
+            oskar_telescope_station_y_enu_metres(telescope2),
             0, &max_, &avg_, 0, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
     EXPECT_LT(max_, 1e-5);
     EXPECT_LT(avg_, 1e-5);
     oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_z_hor(telescope),
-            oskar_telescope_station_z_hor(telescope2),
+            oskar_telescope_station_z_enu_metres(telescope),
+            oskar_telescope_station_z_enu_metres(telescope2),
             0, &max_, &avg_, 0, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
     EXPECT_LT(max_, 1e-5);
@@ -386,26 +386,26 @@ TEST(telescope_model_load_save, test_2_level)
             oskar_telescope_longitude_rad(telescope3), 1e-10);
     EXPECT_NEAR(oskar_telescope_latitude_rad(telescope),
             oskar_telescope_latitude_rad(telescope3), 1e-10);
-    EXPECT_NEAR(oskar_telescope_altitude_m(telescope),
-            oskar_telescope_altitude_m(telescope3), 1e-10);
+    EXPECT_NEAR(oskar_telescope_altitude_metres(telescope),
+            oskar_telescope_altitude_metres(telescope3), 1e-10);
 
     oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_x_hor(telescope),
-            oskar_telescope_station_x_hor(telescope3),
+            oskar_telescope_station_x_enu_metres(telescope),
+            oskar_telescope_station_x_enu_metres(telescope3),
             0, &max_, &avg_, 0, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
     EXPECT_LT(max_, 1e-5);
     EXPECT_LT(avg_, 1e-5);
     oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_y_hor(telescope),
-            oskar_telescope_station_y_hor(telescope3),
+            oskar_telescope_station_y_enu_metres(telescope),
+            oskar_telescope_station_y_enu_metres(telescope3),
             0, &max_, &avg_, 0, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
     EXPECT_LT(max_, 1e-5);
     EXPECT_LT(avg_, 1e-5);
     oskar_mem_evaluate_relative_error(
-            oskar_telescope_station_z_hor(telescope),
-            oskar_telescope_station_z_hor(telescope3),
+            oskar_telescope_station_z_enu_metres(telescope),
+            oskar_telescope_station_z_enu_metres(telescope3),
             0, &max_, &avg_, 0, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
     EXPECT_LT(max_, 1e-5);

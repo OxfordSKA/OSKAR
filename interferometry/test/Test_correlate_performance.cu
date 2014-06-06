@@ -471,7 +471,7 @@ correlate_warpshuffle_cudak_f(const int num_sources, const int num_stations,
 
         /* Modify the baseline distance to include the common components
          * of the bandwidth smearing term. */
-        float temp = bandwidth_hz / freq_hz; /* Fractional bandwidth */
+        float temp = channel_bandwidth_hz / freq_hz; /* Fractional bandwidth */
         uu *= temp;
         vv *= temp;
 
@@ -481,7 +481,7 @@ correlate_warpshuffle_cudak_f(const int num_sources, const int num_stations,
         sincosf(dec0_rad, &sin_Dec, &cos_Dec);
         float xx = (d_x[SI] - d_x[SJ]) * 0.5f;
         float yy = (d_y[SI] - d_y[SJ]) * 0.5f;
-        float rot_angle = OMEGA_EARTHf * time_int_sec;
+        float rot_angle = OMEGA_EARTHf * time_average_sec;
         temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
         du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
         dv_dt = temp * sin_Dec;
@@ -652,7 +652,7 @@ correlate_warpshuffle_blocked_smem_cudak_f(const int num_sources, const int num_
 
         /* Modify the baseline distance to include the common components
          * of the bandwidth smearing term. */
-        float temp = bandwidth_hz / freq_hz; /* Fractional bandwidth */
+        float temp = channel_bandwidth_hz / freq_hz; /* Fractional bandwidth */
         uu[threadIdx.x] *= temp;
         vv[threadIdx.x] *= temp;
 
@@ -662,7 +662,7 @@ correlate_warpshuffle_blocked_smem_cudak_f(const int num_sources, const int num_
         sincosf(dec0_rad, &sin_Dec, &cos_Dec);
         float xx = (d_x[q] - d_x[p]) * 0.5f;
         float yy = (d_y[q] - d_y[p]) * 0.5f;
-        float rot_angle = OMEGA_EARTHf * time_int_sec;
+        float rot_angle = OMEGA_EARTHf * time_average_sec;
         temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
         du_dt[threadIdx.x] = (xx * cos_HA - yy * sin_HA) * rot_angle;
         dv_dt[threadIdx.x] = temp * sin_Dec;
@@ -850,7 +850,7 @@ correlate_warpshuffle_blocked_cudak_f(const int num_sources, const int num_stati
 
         /* Modify the baseline distance to include the common components
          * of the bandwidth smearing term. */
-        float temp = bandwidth_hz / freq_hz; /* Fractional bandwidth */
+        float temp = channel_bandwidth_hz / freq_hz; /* Fractional bandwidth */
         uu[threadIdx.x] *= temp;
         vv[threadIdx.x] *= temp;
 
@@ -860,7 +860,7 @@ correlate_warpshuffle_blocked_cudak_f(const int num_sources, const int num_stati
         sincosf(dec0_rad, &sin_Dec, &cos_Dec);
         float xx = (d_x[q] - d_x[p]) * 0.5f;
         float yy = (d_y[q] - d_y[p]) * 0.5f;
-        float rot_angle = OMEGA_EARTHf * time_int_sec;
+        float rot_angle = OMEGA_EARTHf * time_average_sec;
         temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
         du_dt[threadIdx.x] = (xx * cos_HA - yy * sin_HA) * rot_angle;
         dv_dt[threadIdx.x] = temp * sin_Dec;

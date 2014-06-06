@@ -61,9 +61,9 @@ TEST(write_ms, test_write)
     uu = oskar_mem_double(oskar_vis_baseline_uu_metres(vis), &status);
     vv = oskar_mem_double(oskar_vis_baseline_vv_metres(vis), &status);
     ww = oskar_mem_double(oskar_vis_baseline_ww_metres(vis), &status);
-    x = oskar_mem_double(oskar_vis_station_x_metres(vis), &status);
-    y = oskar_mem_double(oskar_vis_station_y_metres(vis), &status);
-    z = oskar_mem_double(oskar_vis_station_z_metres(vis), &status);
+    x = oskar_mem_double(oskar_vis_station_x_offset_ecef_metres(vis), &status);
+    y = oskar_mem_double(oskar_vis_station_y_offset_ecef_metres(vis), &status);
+    z = oskar_mem_double(oskar_vis_station_z_offset_ecef_metres(vis), &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     for (int i = 0, c = 0; c < num_channels; ++c)
@@ -106,7 +106,7 @@ TEST(write_ms, test_write)
     oskar_vis_set_freq_inc_hz(vis, 11.1e6);
     oskar_vis_set_time_start_mjd_utc(vis,
             oskar_convert_date_time_to_mjd(2011, 11, 17, 0.0));
-    oskar_vis_set_time_inc_seconds(vis, 1.0);
+    oskar_vis_set_time_inc_sec(vis, 1.0);
 
     const char* filename = "temp_test_write_ms.ms";
 

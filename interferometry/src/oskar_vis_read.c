@@ -118,7 +118,7 @@ oskar_Vis* oskar_vis_read(const char* filename, int* status)
             OSKAR_VIS_TAG_TIME_START_MJD_UTC, 0, &vis->time_start_mjd_utc,
             status);
     oskar_binary_file_read_double(filename, &index, grp,
-            OSKAR_VIS_TAG_TIME_INC_SEC, 0, &vis->time_inc_seconds, status);
+            OSKAR_VIS_TAG_TIME_INC_SEC, 0, &vis->time_inc_sec, status);
     oskar_binary_file_read_double(filename, &index, grp,
             OSKAR_VIS_TAG_PHASE_CENTRE_RA, 0, &vis->phase_centre_ra_deg,
             status);
@@ -127,11 +127,11 @@ oskar_Vis* oskar_vis_read(const char* filename, int* status)
             status);
 
     /* Read the baseline coordinate arrays. */
-    oskar_mem_binary_file_read(vis->uu_metres, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->baseline_uu_metres, filename, &index, grp,
             OSKAR_VIS_TAG_BASELINE_UU, 0, status);
-    oskar_mem_binary_file_read(vis->vv_metres, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->baseline_vv_metres, filename, &index, grp,
             OSKAR_VIS_TAG_BASELINE_VV, 0, status);
-    oskar_mem_binary_file_read(vis->ww_metres, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->baseline_ww_metres, filename, &index, grp,
             OSKAR_VIS_TAG_BASELINE_WW, 0, status);
 
     /* Read the visibility data. */
@@ -140,31 +140,42 @@ oskar_Vis* oskar_vis_read(const char* filename, int* status)
 
     /* Optionally read station coordinates (ignore the error code). */
     tag_error = 0;
-    oskar_mem_binary_file_read(vis->x_metres, filename, &index, grp,
-            OSKAR_VIS_TAG_STATION_X, 0, &tag_error);
-    oskar_mem_binary_file_read(vis->y_metres, filename, &index, grp,
-            OSKAR_VIS_TAG_STATION_Y, 0, &tag_error);
-    oskar_mem_binary_file_read(vis->z_metres, filename, &index, grp,
-            OSKAR_VIS_TAG_STATION_Z, 0, &tag_error);
+    oskar_mem_binary_file_read(vis->station_x_offset_ecef_metres, filename,
+            &index, grp, OSKAR_VIS_TAG_STATION_X_OFFSET_ECEF, 0, &tag_error);
+    oskar_mem_binary_file_read(vis->station_y_offset_ecef_metres, filename,
+            &index, grp, OSKAR_VIS_TAG_STATION_Y_OFFSET_ECEF, 0, &tag_error);
+    oskar_mem_binary_file_read(vis->station_z_offset_ecef_metres, filename,
+            &index, grp, OSKAR_VIS_TAG_STATION_Z_OFFSET_ECEF, 0, &tag_error);
+    oskar_mem_binary_file_read(vis->station_x_enu_metres, filename,
+            &index, grp, OSKAR_VIS_TAG_STATION_X_ENU, 0, &tag_error);
+    oskar_mem_binary_file_read(vis->station_y_enu_metres, filename,
+            &index, grp, OSKAR_VIS_TAG_STATION_Y_ENU, 0, &tag_error);
+    oskar_mem_binary_file_read(vis->station_z_enu_metres, filename,
+            &index, grp, OSKAR_VIS_TAG_STATION_Z_ENU, 0, &tag_error);
 
     /* Optionally read station lon., lat. and orientation angles
      * (ignore the error code). */
     tag_error = 0;
-    oskar_mem_binary_file_read(vis->station_lon, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->station_lon_deg, filename, &index, grp,
             OSKAR_VIS_TAG_STATION_LON, 0, &tag_error);
-    oskar_mem_binary_file_read(vis->station_lat, filename, &index, grp,
+    oskar_mem_binary_file_read(vis->station_lat_deg, filename, &index, grp,
             OSKAR_VIS_TAG_STATION_LAT, 0, &tag_error);
-    oskar_mem_binary_file_read(vis->station_orientation_x, filename, &index,
+    oskar_mem_binary_file_read(vis->station_orientation_x_deg, filename, &index,
             grp, OSKAR_VIS_TAG_STATION_ORIENTATION_X, 0, &tag_error);
-    oskar_mem_binary_file_read(vis->station_orientation_y, filename, &index,
+    oskar_mem_binary_file_read(vis->station_orientation_y_deg, filename, &index,
             grp, OSKAR_VIS_TAG_STATION_ORIENTATION_Y, 0, &tag_error);
 
-    /* Optionally read telescope lon., lat. (ignore the error code) */
+    /* Optionally read telescope lon., lat., alt. (ignore the error code) */
     tag_error = 0;
     oskar_binary_file_read_double(filename, &index, grp,
-            OSKAR_VIS_TAG_TELESCOPE_LON, 0, &vis->telescope_lon_deg, &tag_error);
+            OSKAR_VIS_TAG_TELESCOPE_LON, 0, &vis->telescope_lon_deg,
+            &tag_error);
     oskar_binary_file_read_double(filename, &index, grp,
-            OSKAR_VIS_TAG_TELESCOPE_LAT, 0, &vis->telescope_lat_deg, &tag_error);
+            OSKAR_VIS_TAG_TELESCOPE_LAT, 0, &vis->telescope_lat_deg,
+            &tag_error);
+    oskar_binary_file_read_double(filename, &index, grp,
+            OSKAR_VIS_TAG_TELESCOPE_ALT, 0, &vis->telescope_alt_metres,
+            &tag_error);
 
     /* Optionally read the channel bandwidth value. */
     tag_error = 0;
@@ -175,7 +186,7 @@ oskar_Vis* oskar_vis_read(const char* filename, int* status)
     /* Optionally read the time integration value. */
     tag_error = 0;
     oskar_binary_file_read_double(filename, &index, grp,
-            OSKAR_VIS_TAG_TIME_INT_SEC, 0, &vis->time_int_seconds, &tag_error);
+            OSKAR_VIS_TAG_TIME_AVERAGE_SEC, 0, &vis->time_average_sec, &tag_error);
 
     /* Free the tag index. */
     oskar_binary_tag_index_free(index, status);

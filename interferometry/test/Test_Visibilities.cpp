@@ -409,7 +409,7 @@ TEST(Visibilities, read_write)
         oskar_vis_set_freq_start_hz(vis1, start_freq);
         oskar_vis_set_freq_inc_hz(vis1, freq_inc);
         oskar_vis_set_time_start_mjd_utc(vis1, time_start_mjd_utc);
-        oskar_vis_set_time_inc_seconds(vis1, time_inc_seconds);
+        oskar_vis_set_time_inc_sec(vis1, time_inc_seconds);
         const char* name = "dummy";
         oskar_mem_append_raw(oskar_vis_telescope_path(vis1), name,
                 OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(name), &status);
@@ -459,7 +459,7 @@ TEST(Visibilities, read_write)
         ASSERT_EQ(start_freq, oskar_vis_freq_start_hz(vis2));
         ASSERT_EQ(freq_inc, oskar_vis_freq_inc_hz(vis2));
         ASSERT_EQ(time_start_mjd_utc, oskar_vis_time_start_mjd_utc(vis2));
-        ASSERT_EQ(time_inc_seconds, oskar_vis_time_inc_seconds(vis2));
+        ASSERT_EQ(time_inc_seconds, oskar_vis_time_inc_sec(vis2));
         float2* amp = oskar_mem_float2(oskar_vis_amplitude(vis2), &status);
         float* uu = oskar_mem_float(oskar_vis_baseline_uu_metres(vis2), &status);
         float* vv = oskar_mem_float(oskar_vis_baseline_vv_metres(vis2), &status);

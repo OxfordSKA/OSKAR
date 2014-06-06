@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,20 +47,22 @@ extern "C" {
  * This function sets the coordinates of the specified station in the telescope
  * model, transferring data to the GPU if necessary.
  *
- * @param[in] dst        Telescope model structure to copy into.
- * @param[in] index      Station array index to set.
- * @param[in] x          Station x position (ECEF).
- * @param[in] y          Station y position (ECEF).
- * @param[in] z          Station z position (ECEF).
- * @param[in] x_hor      Station x position (horizon plane).
- * @param[in] y_hor      Station y position (horizon plane).
- * @param[in] z_hor      Station z position (horizon plane).
- * @param[in,out] status Status return code.
+ * All coordinates must be in metres.
+ *
+ * @param[in] dst           Telescope model structure to modify.
+ * @param[in] index         Station array index to set.
+ * @param[in] x_offset_ecef Station x position (ECEF).
+ * @param[in] y_offset_ecef Station y position (ECEF).
+ * @param[in] z_offset_ecef Station z position (ECEF).
+ * @param[in] x_enu         Station x position (horizon).
+ * @param[in] y_enu         Station y position (horizon).
+ * @param[in] z_enu         Station z position (horizon).
+ * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_telescope_set_station_coords(oskar_Telescope* dst,
-        int index, double x, double y, double z,
-        double x_hor, double y_hor, double z_hor, int* status);
+void oskar_telescope_set_station_coords(oskar_Telescope* dst, int index,
+        double x_offset_ecef, double y_offset_ecef, double z_offset_ecef,
+        double x_enu, double y_enu, double z_enu, int* status);
 
 #ifdef __cplusplus
 }

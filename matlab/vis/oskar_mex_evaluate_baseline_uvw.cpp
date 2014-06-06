@@ -103,9 +103,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             3 * num_stations, &err);
 
     oskar_convert_ecef_to_baseline_uvw(uu, vv, ww, num_stations,
-            oskar_telescope_station_x_const(telescope),
-            oskar_telescope_station_y_const(telescope),
-            oskar_telescope_station_z_const(telescope),
+            oskar_telescope_station_x_offset_ecef_metres_const(telescope),
+            oskar_telescope_station_y_offset_ecef_metres_const(telescope),
+            oskar_telescope_station_z_offset_ecef_metres_const(telescope),
             ra, dec, num_times, start_mjd_utc, dt, work_uvw, &err);
     if (err)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,7 +112,7 @@ double oskar_telescope_latitude_rad(const oskar_Telescope* model);
  * @return The altitude in metres.
  */
 OSKAR_EXPORT
-double oskar_telescope_altitude_m(const oskar_Telescope* model);
+double oskar_telescope_altitude_metres(const oskar_Telescope* model);
 
 /**
  * @brief
@@ -154,7 +154,7 @@ double oskar_telescope_dec0_rad(const oskar_Telescope* model);
  * @return The channel bandwidth in Hz.
  */
 OSKAR_EXPORT
-double oskar_telescope_bandwidth_hz(const oskar_Telescope* model);
+double oskar_telescope_channel_bandwidth_hz(const oskar_Telescope* model);
 
 /**
  * @brief
@@ -320,7 +320,7 @@ const oskar_Station* oskar_telescope_station_const(
  * @return A handle to the station x positions.
  */
 OSKAR_EXPORT
-oskar_Mem* oskar_telescope_station_x(oskar_Telescope* model);
+oskar_Mem* oskar_telescope_station_x_offset_ecef_metres(oskar_Telescope* model);
 
 /**
  * @brief
@@ -334,7 +334,8 @@ oskar_Mem* oskar_telescope_station_x(oskar_Telescope* model);
  * @return A constant handle to the station x positions.
  */
 OSKAR_EXPORT
-const oskar_Mem* oskar_telescope_station_x_const(const oskar_Telescope* model);
+const oskar_Mem* oskar_telescope_station_x_offset_ecef_metres_const(
+        const oskar_Telescope* model);
 
 /**
  * @brief
@@ -348,7 +349,7 @@ const oskar_Mem* oskar_telescope_station_x_const(const oskar_Telescope* model);
  * @return A handle to the station y positions.
  */
 OSKAR_EXPORT
-oskar_Mem* oskar_telescope_station_y(oskar_Telescope* model);
+oskar_Mem* oskar_telescope_station_y_offset_ecef_metres(oskar_Telescope* model);
 
 /**
  * @brief
@@ -362,7 +363,8 @@ oskar_Mem* oskar_telescope_station_y(oskar_Telescope* model);
  * @return A constant handle to the station y positions.
  */
 OSKAR_EXPORT
-const oskar_Mem* oskar_telescope_station_y_const(const oskar_Telescope* model);
+const oskar_Mem* oskar_telescope_station_y_offset_ecef_metres_const(
+        const oskar_Telescope* model);
 
 /**
  * @brief
@@ -376,7 +378,7 @@ const oskar_Mem* oskar_telescope_station_y_const(const oskar_Telescope* model);
  * @return A handle to the station z positions.
  */
 OSKAR_EXPORT
-oskar_Mem* oskar_telescope_station_z(oskar_Telescope* model);
+oskar_Mem* oskar_telescope_station_z_offset_ecef_metres(oskar_Telescope* model);
 
 /**
  * @brief
@@ -390,7 +392,8 @@ oskar_Mem* oskar_telescope_station_z(oskar_Telescope* model);
  * @return A constant handle to the station z positions.
  */
 OSKAR_EXPORT
-const oskar_Mem* oskar_telescope_station_z_const(const oskar_Telescope* model);
+const oskar_Mem* oskar_telescope_station_z_offset_ecef_metres_const(
+        const oskar_Telescope* model);
 
 /**
  * @brief
@@ -404,7 +407,7 @@ const oskar_Mem* oskar_telescope_station_z_const(const oskar_Telescope* model);
  * @return A handle to the horizon plane station x positions.
  */
 OSKAR_EXPORT
-oskar_Mem* oskar_telescope_station_x_hor(oskar_Telescope* model);
+oskar_Mem* oskar_telescope_station_x_enu_metres(oskar_Telescope* model);
 
 /**
  * @brief
@@ -418,7 +421,7 @@ oskar_Mem* oskar_telescope_station_x_hor(oskar_Telescope* model);
  * @return A constant handle to the horizon plane station x positions.
  */
 OSKAR_EXPORT
-const oskar_Mem* oskar_telescope_station_x_hor_const(
+const oskar_Mem* oskar_telescope_station_x_enu_metres_const(
         const oskar_Telescope* model);
 
 /**
@@ -433,7 +436,7 @@ const oskar_Mem* oskar_telescope_station_x_hor_const(
  * @return A handle to the horizon plane station y positions.
  */
 OSKAR_EXPORT
-oskar_Mem* oskar_telescope_station_y_hor(oskar_Telescope* model);
+oskar_Mem* oskar_telescope_station_y_enu_metres(oskar_Telescope* model);
 
 /**
  * @brief
@@ -447,7 +450,7 @@ oskar_Mem* oskar_telescope_station_y_hor(oskar_Telescope* model);
  * @return A constant handle to the horizon plane station y positions.
  */
 OSKAR_EXPORT
-const oskar_Mem* oskar_telescope_station_y_hor_const(
+const oskar_Mem* oskar_telescope_station_y_enu_metres_const(
         const oskar_Telescope* model);
 
 /**
@@ -462,7 +465,7 @@ const oskar_Mem* oskar_telescope_station_y_hor_const(
  * @return A handle to the horizon plane station z positions.
  */
 OSKAR_EXPORT
-oskar_Mem* oskar_telescope_station_z_hor(oskar_Telescope* model);
+oskar_Mem* oskar_telescope_station_z_enu_metres(oskar_Telescope* model);
 
 /**
  * @brief
@@ -476,7 +479,7 @@ oskar_Mem* oskar_telescope_station_z_hor(oskar_Telescope* model);
  * @return A constant handle to the horizon plane station z positions.
  */
 OSKAR_EXPORT
-const oskar_Mem* oskar_telescope_station_z_hor_const(
+const oskar_Mem* oskar_telescope_station_z_enu_metres_const(
         const oskar_Telescope* model);
 
 

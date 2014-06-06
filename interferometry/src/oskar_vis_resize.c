@@ -56,16 +56,19 @@ void oskar_vis_resize(oskar_Vis* vis, int num_channels,
     num_amps   = num_channels * num_times * num_baselines;
     num_coords = num_times * num_baselines;
 
-    oskar_mem_realloc(vis->x_metres, num_stations, status);
-    oskar_mem_realloc(vis->y_metres, num_stations, status);
-    oskar_mem_realloc(vis->z_metres, num_stations, status);
-    oskar_mem_realloc(vis->station_lon, num_stations, status);
-    oskar_mem_realloc(vis->station_lat, num_stations, status);
-    oskar_mem_realloc(vis->station_orientation_x, num_stations, status);
-    oskar_mem_realloc(vis->station_orientation_y, num_stations, status);
-    oskar_mem_realloc(vis->uu_metres, num_coords, status);
-    oskar_mem_realloc(vis->vv_metres, num_coords, status);
-    oskar_mem_realloc(vis->ww_metres, num_coords, status);
+    oskar_mem_realloc(vis->station_x_offset_ecef_metres, num_stations, status);
+    oskar_mem_realloc(vis->station_y_offset_ecef_metres, num_stations, status);
+    oskar_mem_realloc(vis->station_z_offset_ecef_metres, num_stations, status);
+    oskar_mem_realloc(vis->station_x_enu_metres, num_stations, status);
+    oskar_mem_realloc(vis->station_y_enu_metres, num_stations, status);
+    oskar_mem_realloc(vis->station_z_enu_metres, num_stations, status);
+    oskar_mem_realloc(vis->station_lon_deg, num_stations, status);
+    oskar_mem_realloc(vis->station_lat_deg, num_stations, status);
+    oskar_mem_realloc(vis->station_orientation_x_deg, num_stations, status);
+    oskar_mem_realloc(vis->station_orientation_y_deg, num_stations, status);
+    oskar_mem_realloc(vis->baseline_uu_metres, num_coords, status);
+    oskar_mem_realloc(vis->baseline_vv_metres, num_coords, status);
+    oskar_mem_realloc(vis->baseline_ww_metres, num_coords, status);
     oskar_mem_realloc(vis->amplitude, num_amps, status);
 }
 

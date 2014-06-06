@@ -175,9 +175,9 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
     double last = gast + st_lon;
 
     void *x_, *y_, *z_;
-    x_ = oskar_mem_void(oskar_telescope_station_x(telescope));
-    y_ = oskar_mem_void(oskar_telescope_station_y(telescope));
-    z_ = oskar_mem_void(oskar_telescope_station_z(telescope));
+    x_ = oskar_mem_void(oskar_telescope_station_x_offset_ecef_metres(telescope));
+    y_ = oskar_mem_void(oskar_telescope_station_y_offset_ecef_metres(telescope));
+    z_ = oskar_mem_void(oskar_telescope_station_z_offset_ecef_metres(telescope));
 
     if (type == OSKAR_DOUBLE)
     {

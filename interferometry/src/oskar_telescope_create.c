@@ -83,24 +83,24 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->seed_time_variable_station_element_errors = 0;
     telescope->longitude_rad = 0.0;
     telescope->latitude_rad = 0.0;
-    telescope->altitude_m = 0.0;
+    telescope->altitude_metres = 0.0;
     telescope->ra0_rad = 0.0;
     telescope->dec0_rad = 0.0;
-    telescope->bandwidth_hz = 0.0;
+    telescope->channel_bandwidth_hz = 0.0;
     telescope->time_average_sec = 0.0;
 
     /* Initialise the arrays. */
-    telescope->station_x = oskar_mem_create(type, location,
+    telescope->station_x_offset_ecef_metres = oskar_mem_create(type, location,
             num_stations, status);
-    telescope->station_y = oskar_mem_create(type, location,
+    telescope->station_y_offset_ecef_metres = oskar_mem_create(type, location,
             num_stations, status);
-    telescope->station_z = oskar_mem_create(type, location,
+    telescope->station_z_offset_ecef_metres = oskar_mem_create(type, location,
             num_stations, status);
-    telescope->station_x_hor = oskar_mem_create(type, location,
+    telescope->station_x_enu_metres = oskar_mem_create(type, location,
             num_stations, status);
-    telescope->station_y_hor = oskar_mem_create(type, location,
+    telescope->station_y_enu_metres = oskar_mem_create(type, location,
             num_stations, status);
-    telescope->station_z_hor = oskar_mem_create(type, location,
+    telescope->station_z_enu_metres = oskar_mem_create(type, location,
             num_stations, status);
 
     /* Initialise the station structures. */

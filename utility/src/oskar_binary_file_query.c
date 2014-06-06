@@ -468,13 +468,13 @@ void oskar_binary_file_query(oskar_Log* log, const char* filename, int* status)
                             idx, &val, status);
                     oskar_log_message(log, depth, "Time inc [s]: %.1f", val);
                 }
-                else if (tag == OSKAR_VIS_TAG_TIME_INT_SEC)
+                else if (tag == OSKAR_VIS_TAG_TIME_AVERAGE_SEC)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
                             idx, &val, status);
                     oskar_log_message(log, depth,
-                            "Time integration [s]: %.1f", val);
+                            "Time average integration [s]: %.1f", val);
                 }
                 else if (tag == OSKAR_VIS_TAG_POL_TYPE)
                 {
@@ -532,6 +532,14 @@ void oskar_binary_file_query(oskar_Log* log, const char* filename, int* status)
                     oskar_log_message(log, depth,
                             "Telescope latitude [deg]: %.3f", val);
                 }
+                else if (tag == OSKAR_VIS_TAG_TELESCOPE_ALT)
+                {
+                    double val = 0;
+                    oskar_binary_stream_read_double(stream, &index, group, tag,
+                            idx, &val, status);
+                    oskar_log_message(log, depth,
+                            "Telescope altitude [m]: %.3f", val);
+                }
                 else if (tag == OSKAR_VIS_TAG_NUM_STATIONS)
                 {
                     int val = 0;
@@ -544,17 +552,35 @@ void oskar_binary_file_query(oskar_Log* log, const char* filename, int* status)
                 {
                     oskar_log_message(log, depth, "Station coordinate unit");
                 }
-                else if (tag == OSKAR_VIS_TAG_STATION_X)
+                else if (tag == OSKAR_VIS_TAG_STATION_X_OFFSET_ECEF)
                 {
-                    oskar_log_message(log, depth, "Station X coordinates");
+                    oskar_log_message(log, depth,
+                            "Station X coordinates (offset ECEF)");
                 }
-                else if (tag == OSKAR_VIS_TAG_STATION_Y)
+                else if (tag == OSKAR_VIS_TAG_STATION_Y_OFFSET_ECEF)
                 {
-                    oskar_log_message(log, depth, "Station Y coordinates");
+                    oskar_log_message(log, depth,
+                            "Station Y coordinates (offset ECEF)");
                 }
-                else if (tag == OSKAR_VIS_TAG_STATION_Z)
+                else if (tag == OSKAR_VIS_TAG_STATION_Z_OFFSET_ECEF)
                 {
-                    oskar_log_message(log, depth, "Station Z coordinates");
+                    oskar_log_message(log, depth,
+                            "Station Z coordinates (offset ECEF)");
+                }
+                else if (tag == OSKAR_VIS_TAG_STATION_X_ENU)
+                {
+                    oskar_log_message(log, depth,
+                            "Station X coordinates (ENU)");
+                }
+                else if (tag == OSKAR_VIS_TAG_STATION_Y_ENU)
+                {
+                    oskar_log_message(log, depth,
+                            "Station Y coordinates (ENU)");
+                }
+                else if (tag == OSKAR_VIS_TAG_STATION_Z_ENU)
+                {
+                    oskar_log_message(log, depth,
+                            "Station Z coordinates (ENU)");
                 }
             }
             else if (group == OSKAR_TAG_GROUP_SKY_MODEL)

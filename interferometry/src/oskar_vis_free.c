@@ -46,16 +46,19 @@ void oskar_vis_free(oskar_Vis* vis, int* status)
     oskar_mem_free(vis->settings_path, status);
     oskar_mem_free(vis->telescope_path, status);
     oskar_mem_free(vis->settings, status);
-    oskar_mem_free(vis->x_metres, status);
-    oskar_mem_free(vis->y_metres, status);
-    oskar_mem_free(vis->z_metres, status);
-    oskar_mem_free(vis->station_lon, status);
-    oskar_mem_free(vis->station_lat, status);
-    oskar_mem_free(vis->station_orientation_x, status);
-    oskar_mem_free(vis->station_orientation_y, status);
-    oskar_mem_free(vis->uu_metres, status);
-    oskar_mem_free(vis->vv_metres, status);
-    oskar_mem_free(vis->ww_metres, status);
+    oskar_mem_free(vis->station_x_offset_ecef_metres, status);
+    oskar_mem_free(vis->station_y_offset_ecef_metres, status);
+    oskar_mem_free(vis->station_z_offset_ecef_metres, status);
+    oskar_mem_free(vis->station_x_enu_metres, status);
+    oskar_mem_free(vis->station_y_enu_metres, status);
+    oskar_mem_free(vis->station_z_enu_metres, status);
+    oskar_mem_free(vis->station_lon_deg, status);
+    oskar_mem_free(vis->station_lat_deg, status);
+    oskar_mem_free(vis->station_orientation_x_deg, status);
+    oskar_mem_free(vis->station_orientation_y_deg, status);
+    oskar_mem_free(vis->baseline_uu_metres, status);
+    oskar_mem_free(vis->baseline_vv_metres, status);
+    oskar_mem_free(vis->baseline_ww_metres, status);
     oskar_mem_free(vis->amplitude, status);
 
     /* Free the structure itself. */

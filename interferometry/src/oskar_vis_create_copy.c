@@ -59,27 +59,39 @@ oskar_Vis* oskar_vis_create_copy(const oskar_Vis* src, int location,
     dst->freq_inc_hz = src->freq_inc_hz;
     dst->channel_bandwidth_hz = src->channel_bandwidth_hz;
     dst->time_start_mjd_utc = src->time_start_mjd_utc;
-    dst->time_inc_seconds = src->time_inc_seconds;
-    dst->time_int_seconds = src->time_int_seconds;
+    dst->time_inc_sec = src->time_inc_sec;
+    dst->time_average_sec = src->time_average_sec;
     dst->phase_centre_ra_deg = src->phase_centre_ra_deg;
     dst->phase_centre_dec_deg = src->phase_centre_dec_deg;
     dst->telescope_lon_deg = src->telescope_lon_deg;
     dst->telescope_lat_deg = src->telescope_lat_deg;
+    dst->telescope_alt_metres = src->telescope_alt_metres;
 
     /* Copy the memory. */
     oskar_mem_copy(dst->settings_path, src->settings_path, status);
     oskar_mem_copy(dst->telescope_path, src->telescope_path, status);
     oskar_mem_copy(dst->settings, src->settings, status);
-    oskar_mem_copy(dst->x_metres, src->x_metres, status);
-    oskar_mem_copy(dst->y_metres, src->y_metres, status);
-    oskar_mem_copy(dst->z_metres, src->z_metres, status);
-    oskar_mem_copy(dst->station_lon, src->station_lon, status);
-    oskar_mem_copy(dst->station_lat, src->station_lat, status);
-    oskar_mem_copy(dst->station_orientation_x, src->station_orientation_x, status);
-    oskar_mem_copy(dst->station_orientation_y, src->station_orientation_y, status);
-    oskar_mem_copy(dst->uu_metres, src->uu_metres, status);
-    oskar_mem_copy(dst->vv_metres, src->vv_metres, status);
-    oskar_mem_copy(dst->ww_metres, src->ww_metres, status);
+    oskar_mem_copy(dst->station_x_offset_ecef_metres,
+            src->station_x_offset_ecef_metres, status);
+    oskar_mem_copy(dst->station_y_offset_ecef_metres,
+            src->station_y_offset_ecef_metres, status);
+    oskar_mem_copy(dst->station_z_offset_ecef_metres,
+            src->station_z_offset_ecef_metres, status);
+    oskar_mem_copy(dst->station_x_enu_metres,
+            src->station_x_enu_metres, status);
+    oskar_mem_copy(dst->station_y_enu_metres,
+            src->station_y_enu_metres, status);
+    oskar_mem_copy(dst->station_z_enu_metres,
+            src->station_z_enu_metres, status);
+    oskar_mem_copy(dst->station_lon_deg, src->station_lon_deg, status);
+    oskar_mem_copy(dst->station_lat_deg, src->station_lat_deg, status);
+    oskar_mem_copy(dst->station_orientation_x_deg,
+            src->station_orientation_x_deg, status);
+    oskar_mem_copy(dst->station_orientation_y_deg,
+            src->station_orientation_y_deg, status);
+    oskar_mem_copy(dst->baseline_uu_metres, src->baseline_uu_metres, status);
+    oskar_mem_copy(dst->baseline_vv_metres, src->baseline_vv_metres, status);
+    oskar_mem_copy(dst->baseline_ww_metres, src->baseline_ww_metres, status);
     oskar_mem_copy(dst->amplitude, src->amplitude, status);
 
     /* Return a handle to the new structure. */

@@ -75,14 +75,17 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
     oskar_vis_set_freq_start_hz(vis, settings->obs.start_frequency_hz);
     oskar_vis_set_freq_inc_hz(vis, settings->obs.frequency_inc_hz);
     oskar_vis_set_time_start_mjd_utc(vis, settings->obs.start_mjd_utc);
-    oskar_vis_set_time_inc_seconds(vis, settings->obs.dt_dump_days * 86400.0);
-    oskar_vis_set_time_int_seconds(vis, settings->interferometer.time_average_sec);
-    oskar_vis_set_channel_bandwidth_hz(vis, settings->interferometer.channel_bandwidth_hz);
+    oskar_vis_set_time_inc_sec(vis, settings->obs.dt_dump_days * 86400.0);
+    oskar_vis_set_time_average_sec(vis,
+            settings->interferometer.time_average_sec);
+    oskar_vis_set_channel_bandwidth_hz(vis,
+            settings->interferometer.channel_bandwidth_hz);
     oskar_vis_set_phase_centre(vis, settings->obs.ra0_rad[0] * rad2deg,
             settings->obs.dec0_rad[0] * rad2deg);
     oskar_vis_set_telescope_position(vis,
             oskar_telescope_longitude_rad(telescope) * rad2deg,
-            oskar_telescope_latitude_rad(telescope) * rad2deg);
+            oskar_telescope_latitude_rad(telescope) * rad2deg,
+            oskar_telescope_altitude_metres(telescope));
 
     /* Add settings file path. */
     oskar_mem_append_raw(oskar_vis_settings_path(vis),
@@ -105,12 +108,21 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
     }
 
     /* Copy station coordinates from telescope model. */
-    oskar_mem_copy(oskar_vis_station_x_metres(vis),
-            oskar_telescope_station_x_const(telescope), status);
-    oskar_mem_copy(oskar_vis_station_y_metres(vis),
-            oskar_telescope_station_y_const(telescope), status);
-    oskar_mem_copy(oskar_vis_station_z_metres(vis),
-            oskar_telescope_station_z_const(telescope), status);
+    oskar_mem_copy(oskar_vis_station_x_offset_ecef_metres(vis),
+            oskar_telescope_station_x_offset_ecef_metres_const(telescope),
+            status);
+    oskar_mem_copy(oskar_vis_station_y_offset_ecef_metres(vis),
+            oskar_telescope_station_y_offset_ecef_metres_const(telescope),
+            status);
+    oskar_mem_copy(oskar_vis_station_z_offset_ecef_metres(vis),
+            oskar_telescope_station_z_offset_ecef_metres_const(telescope),
+            status);
+    oskar_mem_copy(oskar_vis_station_x_enu_metres(vis),
+            oskar_telescope_station_x_enu_metres_const(telescope), status);
+    oskar_mem_copy(oskar_vis_station_y_enu_metres(vis),
+            oskar_telescope_station_y_enu_metres_const(telescope), status);
+    oskar_mem_copy(oskar_vis_station_z_enu_metres(vis),
+            oskar_telescope_station_z_enu_metres_const(telescope), status);
 
     /* Compute baseline u,v,w coordinates for simulation. */
     {
@@ -121,9 +133,9 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
                 oskar_vis_baseline_vv_metres(vis),
                 oskar_vis_baseline_ww_metres(vis),
                 oskar_telescope_num_stations(telescope),
-                oskar_telescope_station_x_const(telescope),
-                oskar_telescope_station_y_const(telescope),
-                oskar_telescope_station_z_const(telescope),
+                oskar_telescope_station_x_offset_ecef_metres_const(telescope),
+                oskar_telescope_station_y_offset_ecef_metres_const(telescope),
+                oskar_telescope_station_z_offset_ecef_metres_const(telescope),
                 oskar_telescope_ra0_rad(telescope),
                 oskar_telescope_dec0_rad(telescope),
                 settings->obs.num_time_steps, settings->obs.start_mjd_utc,

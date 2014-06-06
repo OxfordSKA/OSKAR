@@ -66,7 +66,7 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
 
     /* Get bandwidth-smearing terms. */
     inv_wavelength = frequency_hz / 299792458.0;
-    frac_bandwidth = oskar_telescope_bandwidth_hz(tel) / frequency_hz;
+    frac_bandwidth = oskar_telescope_channel_bandwidth_hz(tel) / frequency_hz;
 
     /* Get time-average smearing term and Greenwich hour angle. */
     time_avg = oskar_telescope_time_average_sec(tel);
@@ -79,10 +79,12 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
             oskar_jones_location(J) != location ||
             oskar_mem_location(u) != location ||
             oskar_mem_location(v) != location ||
-            oskar_mem_location(oskar_telescope_station_x_const(tel))
-            != location ||
-            oskar_mem_location(oskar_telescope_station_y_const(tel))
-            != location)
+            oskar_mem_location(
+                    oskar_telescope_station_x_offset_ecef_metres_const(tel)) !=
+                            location ||
+            oskar_mem_location(
+                    oskar_telescope_station_y_offset_ecef_metres_const(tel)) !=
+                            location)
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
@@ -146,8 +148,12 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
         c_ = oskar_mem_double_const(oskar_sky_gaussian_c_const(sky), status);
         u_ = oskar_mem_double_const(u, status);
         v_ = oskar_mem_double_const(v, status);
-        x_ = oskar_mem_double_const(oskar_telescope_station_x_const(tel), status);
-        y_ = oskar_mem_double_const(oskar_telescope_station_y_const(tel), status);
+        x_ = oskar_mem_double_const(
+                oskar_telescope_station_x_offset_ecef_metres_const(tel),
+                status);
+        y_ = oskar_mem_double_const(
+                oskar_telescope_station_y_offset_ecef_metres_const(tel),
+                status);
 
         if (matrix_type)
         {
@@ -272,8 +278,12 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
         c_ = oskar_mem_float_const(oskar_sky_gaussian_c_const(sky), status);
         u_ = oskar_mem_float_const(u, status);
         v_ = oskar_mem_float_const(v, status);
-        x_ = oskar_mem_float_const(oskar_telescope_station_x_const(tel), status);
-        y_ = oskar_mem_float_const(oskar_telescope_station_y_const(tel), status);
+        x_ = oskar_mem_float_const(
+                oskar_telescope_station_x_offset_ecef_metres_const(tel),
+                status);
+        y_ = oskar_mem_float_const(
+                oskar_telescope_station_y_offset_ecef_metres_const(tel),
+                status);
 
         if (matrix_type)
         {

@@ -28,10 +28,6 @@
 
 #include <private_vis.h>
 #include <oskar_vis.h>
-#include <oskar_mem.h>
-#include <math.h>
-#include <oskar_convert_offset_ecef_to_ecef.h>
-#include <oskar_convert_ecef_to_enu.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -118,14 +114,14 @@ double oskar_vis_time_start_mjd_utc(const oskar_Vis* vis)
     return vis->time_start_mjd_utc;
 }
 
-double oskar_vis_time_inc_seconds(const oskar_Vis* vis)
+double oskar_vis_time_inc_sec(const oskar_Vis* vis)
 {
-    return vis->time_inc_seconds;
+    return vis->time_inc_sec;
 }
 
-double oskar_vis_time_int_seconds(const oskar_Vis* vis)
+double oskar_vis_time_average_sec(const oskar_Vis* vis)
 {
-    return vis->time_int_seconds;
+    return vis->time_average_sec;
 }
 
 double oskar_vis_phase_centre_ra_deg(const oskar_Vis* vis)
@@ -148,183 +144,142 @@ double oskar_vis_telescope_lat_deg(const oskar_Vis* vis)
     return vis->telescope_lat_deg;
 }
 
-oskar_Mem* oskar_vis_station_x_metres(oskar_Vis* vis)
+double oskar_vis_telescope_alt_metres(const oskar_Vis* vis)
 {
-    return vis->x_metres;
+    return vis->telescope_alt_metres;
 }
 
-const oskar_Mem* oskar_vis_station_x_metres_const(const oskar_Vis* vis)
+oskar_Mem* oskar_vis_station_x_offset_ecef_metres(oskar_Vis* vis)
 {
-    return vis->x_metres;
+    return vis->station_x_offset_ecef_metres;
 }
 
-oskar_Mem* oskar_vis_station_y_metres(oskar_Vis* vis)
+const oskar_Mem* oskar_vis_station_x_offset_ecef_metres_const(
+        const oskar_Vis* vis)
 {
-    return vis->y_metres;
+    return vis->station_x_offset_ecef_metres;
 }
 
-const oskar_Mem* oskar_vis_station_y_metres_const(const oskar_Vis* vis)
+oskar_Mem* oskar_vis_station_y_offset_ecef_metres(oskar_Vis* vis)
 {
-    return vis->y_metres;
+    return vis->station_y_offset_ecef_metres;
 }
 
-oskar_Mem* oskar_vis_station_z_metres(oskar_Vis* vis)
+const oskar_Mem* oskar_vis_station_y_offset_ecef_metres_const(
+        const oskar_Vis* vis)
 {
-    return vis->z_metres;
+    return vis->station_y_offset_ecef_metres;
 }
 
-const oskar_Mem* oskar_vis_station_z_metres_const(const oskar_Vis* vis)
+oskar_Mem* oskar_vis_station_z_offset_ecef_metres(oskar_Vis* vis)
 {
-    return vis->z_metres;
+    return vis->station_z_offset_ecef_metres;
 }
 
-inline static void station_xyz_to_horizon(const oskar_Vis* vis, oskar_Mem* x,
-        oskar_Mem* y, oskar_Mem* z)
+const oskar_Mem* oskar_vis_station_z_offset_ecef_metres_const(
+        const oskar_Vis* vis)
 {
-    int status = OSKAR_SUCCESS;
-    oskar_Mem* x_ = oskar_mem_convert_precision(vis->x_metres, OSKAR_DOUBLE, &status);
-    oskar_Mem* y_ = oskar_mem_convert_precision(vis->y_metres, OSKAR_DOUBLE, &status);
-    oskar_Mem* z_ = oskar_mem_convert_precision(vis->z_metres, OSKAR_DOUBLE, &status);
-
-    int n = vis->num_stations;
-    double* offset_ecef_x = oskar_mem_double(x_, &status);
-    double* offset_ecef_y = oskar_mem_double(y_, &status);
-    double* offset_ecef_z = oskar_mem_double(z_, &status);
-    double* ecef_x = (double*)malloc(n*sizeof(double));
-    double* ecef_y = (double*)malloc(n*sizeof(double));
-    double* ecef_z = (double*)malloc(n*sizeof(double));
-    double lon = vis->telescope_lon_deg * M_PI/180.0;
-    double lat = vis->telescope_lat_deg * M_PI/180.0;
-    /* FIXME altitude hard-coded to 0 as this isn't in the vis structure! */
-    double alt = 0;
-    double* enu_x = oskar_mem_double(x, &status);
-    double* enu_y = oskar_mem_double(y, &status);
-    double* enu_z = oskar_mem_double(z, &status);
-
-    oskar_convert_offset_ecef_to_ecef(n, offset_ecef_x, offset_ecef_y,
-            offset_ecef_z, lon, lat, alt, ecef_x, ecef_y, ecef_z);
-    oskar_convert_ecef_to_enu(n, ecef_x, ecef_y, ecef_z, lon, lat, alt, enu_x,
-            enu_y, enu_z);
-
-    free(ecef_x);
-    free(ecef_y);
-    free(ecef_z);
-    oskar_mem_free(x_, &status);
-    oskar_mem_free(z_, &status);
-    oskar_mem_free(y_, &status);
+    return vis->station_z_offset_ecef_metres;
 }
 
-oskar_Mem* oskar_vis_station_horizon_x_metres_create(const oskar_Vis* vis)
+oskar_Mem* oskar_vis_station_x_enu_metres(oskar_Vis* vis)
 {
-    int status = OSKAR_SUCCESS;
-    oskar_Mem *x = 0, *y = 0, *z = 0;
-    int n = vis->num_stations;
-    x = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
-    y = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
-    z = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
-    station_xyz_to_horizon(vis, x, y, z);
-    oskar_mem_free(y, &status);
-    oskar_mem_free(z, &status);
-    return x;
+    return vis->station_x_enu_metres;
 }
 
-oskar_Mem* oskar_vis_station_horizon_y_metres_create(const oskar_Vis* vis)
+const oskar_Mem* oskar_vis_station_x_enu_metres_const(const oskar_Vis* vis)
 {
-    int status = OSKAR_SUCCESS;
-    oskar_Mem *x = 0, *y = 0, *z = 0;
-    int n = vis->num_stations;
-    x = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
-    y = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
-    z = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
-    station_xyz_to_horizon(vis, x, y, z);
-    oskar_mem_free(x, &status);
-    oskar_mem_free(z, &status);
-    return y;
+    return vis->station_x_enu_metres;
 }
 
-oskar_Mem* oskar_vis_station_horizon_z_metres_create(const oskar_Vis* vis)
+oskar_Mem* oskar_vis_station_y_enu_metres(oskar_Vis* vis)
 {
-    int status = OSKAR_SUCCESS;
-    oskar_Mem *x, *y, *z;
-    int n = vis->num_stations;
-    x = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
-    y = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
-    z = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, (size_t)n, &status);
-    station_xyz_to_horizon(vis, x, y, z);
-    oskar_mem_free(x, &status);
-    oskar_mem_free(y, &status);
-    return z;
+    return vis->station_y_enu_metres;
 }
 
+const oskar_Mem* oskar_vis_station_y_enu_metres_const(const oskar_Vis* vis)
+{
+    return vis->station_y_enu_metres;
+}
+
+oskar_Mem* oskar_vis_station_z_enu_metres(oskar_Vis* vis)
+{
+    return vis->station_z_enu_metres;
+}
+
+const oskar_Mem* oskar_vis_station_z_enu_metres_const(const oskar_Vis* vis)
+{
+    return vis->station_z_enu_metres;
+}
 
 oskar_Mem* oskar_vis_station_lon_deg(oskar_Vis* vis)
 {
-    return vis->station_lon;
+    return vis->station_lon_deg;
 }
 
 const oskar_Mem* oskar_vis_station_lon_deg_const(const oskar_Vis* vis)
 {
-    return vis->station_lon;
+    return vis->station_lon_deg;
 }
 
 oskar_Mem* oskar_vis_station_lat_deg(oskar_Vis* vis)
 {
-    return vis->station_lat;
+    return vis->station_lat_deg;
 }
 
 const oskar_Mem* oskar_vis_station_lat_deg_const(const oskar_Vis* vis)
 {
-    return vis->station_lat;
+    return vis->station_lat_deg;
 }
 
 oskar_Mem* oskar_vis_station_orientation_x_deg(oskar_Vis* vis)
 {
-    return vis->station_orientation_x;
+    return vis->station_orientation_x_deg;
 }
 
 const oskar_Mem* oskar_vis_station_orientation_x_deg_const(const oskar_Vis* vis)
 {
-    return vis->station_orientation_x;
+    return vis->station_orientation_x_deg;
 }
 
 oskar_Mem* oskar_vis_station_orientation_y_deg(oskar_Vis* vis)
 {
-    return vis->station_orientation_y;
+    return vis->station_orientation_y_deg;
 }
 
 const oskar_Mem* oskar_vis_station_orientation_y_deg_const(const oskar_Vis* vis)
 {
-    return vis->station_orientation_y;
+    return vis->station_orientation_y_deg;
 }
 
 oskar_Mem* oskar_vis_baseline_uu_metres(oskar_Vis* vis)
 {
-    return vis->uu_metres;
+    return vis->baseline_uu_metres;
 }
 
 const oskar_Mem* oskar_vis_baseline_uu_metres_const(const oskar_Vis* vis)
 {
-    return vis->uu_metres;
+    return vis->baseline_uu_metres;
 }
 
 oskar_Mem* oskar_vis_baseline_vv_metres(oskar_Vis* vis)
 {
-    return vis->vv_metres;
+    return vis->baseline_vv_metres;
 }
 
 const oskar_Mem* oskar_vis_baseline_vv_metres_const(const oskar_Vis* vis)
 {
-    return vis->vv_metres;
+    return vis->baseline_vv_metres;
 }
 
 oskar_Mem* oskar_vis_baseline_ww_metres(oskar_Vis* vis)
 {
-    return vis->ww_metres;
+    return vis->baseline_ww_metres;
 }
 
 const oskar_Mem* oskar_vis_baseline_ww_metres_const(const oskar_Vis* vis)
 {
-    return vis->ww_metres;
+    return vis->baseline_ww_metres;
 }
 
 oskar_Mem* oskar_vis_amplitude(oskar_Vis* vis)
@@ -357,14 +312,14 @@ void oskar_vis_set_time_start_mjd_utc(oskar_Vis* vis, double value)
     vis->time_start_mjd_utc = value;
 }
 
-void oskar_vis_set_time_inc_seconds(oskar_Vis* vis, double value)
+void oskar_vis_set_time_inc_sec(oskar_Vis* vis, double value)
 {
-    vis->time_inc_seconds = value;
+    vis->time_inc_sec = value;
 }
 
-void oskar_vis_set_time_int_seconds(oskar_Vis* vis, double value)
+void oskar_vis_set_time_average_sec(oskar_Vis* vis, double value)
 {
-    vis->time_int_seconds = value;
+    vis->time_average_sec = value;
 }
 
 void oskar_vis_set_phase_centre(oskar_Vis* vis, double ra_deg, double dec_deg)
@@ -374,10 +329,11 @@ void oskar_vis_set_phase_centre(oskar_Vis* vis, double ra_deg, double dec_deg)
 }
 
 void oskar_vis_set_telescope_position(oskar_Vis* vis, double lon_deg,
-        double lat_deg)
+        double lat_deg, double alt_metres)
 {
     vis->telescope_lon_deg = lon_deg;
     vis->telescope_lat_deg = lat_deg;
+    vis->telescope_alt_metres = alt_metres;
 }
 
 #ifdef __cplusplus

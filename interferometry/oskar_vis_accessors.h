@@ -89,10 +89,10 @@ OSKAR_EXPORT
 double oskar_vis_time_start_mjd_utc(const oskar_Vis* vis);
 
 OSKAR_EXPORT
-double oskar_vis_time_inc_seconds(const oskar_Vis* vis);
+double oskar_vis_time_inc_sec(const oskar_Vis* vis);
 
 OSKAR_EXPORT
-double oskar_vis_time_int_seconds(const oskar_Vis* vis);
+double oskar_vis_time_average_sec(const oskar_Vis* vis);
 
 OSKAR_EXPORT
 double oskar_vis_phase_centre_ra_deg(const oskar_Vis* vis);
@@ -106,38 +106,44 @@ double oskar_vis_telescope_lon_deg(const oskar_Vis* vis);
 OSKAR_EXPORT
 double oskar_vis_telescope_lat_deg(const oskar_Vis* vis);
 
-/* NOTE: Offset ECEF coordinates */
 OSKAR_EXPORT
-oskar_Mem* oskar_vis_station_x_metres(oskar_Vis* vis);
-
-/* NOTE: Offset ECEF coordinates */
-OSKAR_EXPORT
-const oskar_Mem* oskar_vis_station_x_metres_const(const oskar_Vis* vis);
-
-/* NOTE: Offset ECEF coordinates */
-OSKAR_EXPORT
-oskar_Mem* oskar_vis_station_y_metres(oskar_Vis* vis);
-
-/* NOTE: Offset ECEF coordinates */
-OSKAR_EXPORT
-const oskar_Mem* oskar_vis_station_y_metres_const(const oskar_Vis* vis);
-
-/* NOTE: Offset ECEF coordinates */
-OSKAR_EXPORT
-oskar_Mem* oskar_vis_station_z_metres(oskar_Vis* vis);
-
-/* NOTE: Offset ECEF coordinates */
-OSKAR_EXPORT
-const oskar_Mem* oskar_vis_station_z_metres_const(const oskar_Vis* vis);
+double oskar_vis_telescope_alt_metres(const oskar_Vis* vis);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_vis_station_horizon_x_metres_create(const oskar_Vis* vis);
+oskar_Mem* oskar_vis_station_x_offset_ecef_metres(oskar_Vis* vis);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_vis_station_horizon_y_metres_create(const oskar_Vis* vis);
+const oskar_Mem* oskar_vis_station_x_offset_ecef_metres_const(const oskar_Vis* vis);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_vis_station_horizon_z_metres_create(const oskar_Vis* vis);
+oskar_Mem* oskar_vis_station_y_offset_ecef_metres(oskar_Vis* vis);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_vis_station_y_offset_ecef_metres_const(const oskar_Vis* vis);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_vis_station_z_offset_ecef_metres(oskar_Vis* vis);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_vis_station_z_offset_ecef_metres_const(const oskar_Vis* vis);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_vis_station_x_enu_metres(oskar_Vis* vis);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_vis_station_x_enu_metres_const(const oskar_Vis* vis);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_vis_station_y_enu_metres(oskar_Vis* vis);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_vis_station_y_enu_metres_const(const oskar_Vis* vis);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_vis_station_z_enu_metres(oskar_Vis* vis);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_vis_station_z_enu_metres_const(const oskar_Vis* vis);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_station_lon_deg(oskar_Vis* vis);
@@ -201,17 +207,17 @@ OSKAR_EXPORT
 void oskar_vis_set_time_start_mjd_utc(oskar_Vis* vis, double value);
 
 OSKAR_EXPORT
-void oskar_vis_set_time_inc_seconds(oskar_Vis* vis, double value);
+void oskar_vis_set_time_inc_sec(oskar_Vis* vis, double value);
 
 OSKAR_EXPORT
-void oskar_vis_set_time_int_seconds(oskar_Vis* vis, double value);
+void oskar_vis_set_time_average_sec(oskar_Vis* vis, double value);
 
 OSKAR_EXPORT
 void oskar_vis_set_phase_centre(oskar_Vis* vis, double ra_deg, double dec_deg);
 
 OSKAR_EXPORT
 void oskar_vis_set_telescope_position(oskar_Vis* vis, double lon_deg,
-        double lat_deg);
+        double lat_deg, double alt_metres);
 
 
 #ifdef __cplusplus

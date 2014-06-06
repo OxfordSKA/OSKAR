@@ -195,9 +195,9 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings& settings
     double screen_height_m = settings.ionosphere.TID->height_km * 1000.0;
 
     void *x_, *y_, *z_;
-    x_ = oskar_mem_void(oskar_telescope_station_x(telescope));
-    y_ = oskar_mem_void(oskar_telescope_station_y(telescope));
-    z_ = oskar_mem_void(oskar_telescope_station_z(telescope));
+    x_ = oskar_mem_void(oskar_telescope_station_x_offset_ecef_metres(telescope));
+    y_ = oskar_mem_void(oskar_telescope_station_y_offset_ecef_metres(telescope));
+    z_ = oskar_mem_void(oskar_telescope_station_z_offset_ecef_metres(telescope));
 
     num_times = 1; // XXX restriction made to match image.
     for (int t = 0; t < num_times; ++t)
@@ -392,9 +392,9 @@ void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
     double last = gast + st_lon;
 
     void *x_, *y_, *z_;
-    x_ = oskar_mem_void(oskar_telescope_station_x(telescope));
-    y_ = oskar_mem_void(oskar_telescope_station_y(telescope));
-    z_ = oskar_mem_void(oskar_telescope_station_z(telescope));
+    x_ = oskar_mem_void(oskar_telescope_station_x_offset_ecef_metres(telescope));
+    y_ = oskar_mem_void(oskar_telescope_station_y_offset_ecef_metres(telescope));
+    z_ = oskar_mem_void(oskar_telescope_station_z_offset_ecef_metres(telescope));
 
     if (type == OSKAR_DOUBLE)
     {

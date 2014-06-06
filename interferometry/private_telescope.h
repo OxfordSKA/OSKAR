@@ -48,25 +48,25 @@ struct oskar_Telescope
     /* Fundamental properties that don't depend on stations. */
     double longitude_rad;        /**< Geodetic longitude of telescope, in radians. */
     double latitude_rad;         /**< Geodetic latitude of telescope, in radians. */
-    double altitude_m;           /**< Altitude of telescope above ellipsoid, in metres. */
+    double altitude_metres;      /**< Altitude of telescope above ellipsoid, in metres. */
     double ra0_rad;              /**< Right Ascension of phase centre, in radians. */
     double dec0_rad;             /**< Declination of phase centre, in radians. */
-    double bandwidth_hz;         /**< Channel bandwidth, in Hz. */
-    double time_average_sec;     /**< Time average smearing interval, in sec. */
+    double channel_bandwidth_hz; /**< Channel bandwidth, in Hz. */
+    double time_average_sec;     /**< Time average smearing duration, in sec. */
 
     /* Station data. */
-    int num_stations;            /**< Number of stations in the model. */
-    oskar_Station** station;     /**< Array of station structure handles. */
-    oskar_Mem* station_x;        /**< Fixed x component of station coordinate. */
-    oskar_Mem* station_y;        /**< Fixed y component of station coordinate. */
-    oskar_Mem* station_z;        /**< Fixed z component of station coordinate. */
-    oskar_Mem* station_x_hor;    /**< Fixed x component of station coordinate (horizon plane). */
-    oskar_Mem* station_y_hor;    /**< Fixed y component of station coordinate (horizon plane). */
-    oskar_Mem* station_z_hor;    /**< Fixed z component of station coordinate (horizon plane). */
-    int max_station_size;        /**< Maximum station size (number of elements) */
-    int max_station_depth;       /**< Maximum station depth. */
-    int identical_stations;      /**< True if all stations are identical. */
-    int use_common_sky;          /**< True if all stations should use common source positions. */
+    int num_stations;                /**< Number of stations in the model. */
+    oskar_Station** station;         /**< Array of station structure handles. */
+    oskar_Mem* station_x_offset_ecef_metres; /**< Station x-coordinate, in metres (offset ECEF). */
+    oskar_Mem* station_y_offset_ecef_metres; /**< Station y-coordinate, in metres (offset ECEF). */
+    oskar_Mem* station_z_offset_ecef_metres; /**< Station z-coordinate, in metres (offset ECEF). */
+    oskar_Mem* station_x_enu_metres; /**< Station x-coordinate, in metres (horizon). */
+    oskar_Mem* station_y_enu_metres; /**< Station y-coordinate, in metres (horizon). */
+    oskar_Mem* station_z_enu_metres; /**< Station z-coordinate, in metres (horizon). */
+    int max_station_size;            /**< Maximum station size (number of elements) */
+    int max_station_depth;           /**< Maximum station depth. */
+    int identical_stations;          /**< True if all stations are identical. */
+    int use_common_sky;              /**< True if all stations should use common source positions. */
 
     /** Random seed for time-variable station element errors (amplitude and phase). */
     int seed_time_variable_station_element_errors;

@@ -155,7 +155,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
         }
 
         double* t_vis = (double*)mxGetData(time);
-        double interval = oskar_vis_time_inc_seconds(v_in);
+        double interval = oskar_vis_time_inc_sec(v_in);
         double start_time = oskar_vis_time_start_mjd_utc(v_in) * 86400.0 +
                 interval / 2.0;
         for (int i = 0; i < num_times; ++i)
@@ -211,7 +211,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
 //            V_i[i]  = -0.5 * (xy_r[i] - yx_r[i]);
         }
         float* t_vis = (float*)mxGetData(time);
-        float interval = oskar_vis_time_inc_seconds(v_in);
+        float interval = oskar_vis_time_inc_sec(v_in);
         float start_time = oskar_vis_time_start_mjd_utc(v_in) * 86400.0 +
                 interval / 2.0;
         for (int i = 0; i < num_times; ++i)
@@ -236,11 +236,11 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
 
     mem_size = num_stations * element_size;
     memcpy(mxGetData(x_), oskar_mem_void_const(
-            oskar_vis_station_x_metres_const(v_in)), mem_size);
+            oskar_vis_station_x_offset_ecef_metres_const(v_in)), mem_size);
     memcpy(mxGetData(y_), oskar_mem_void_const(
-            oskar_vis_station_y_metres_const(v_in)), mem_size);
+            oskar_vis_station_y_offset_ecef_metres_const(v_in)), mem_size);
     memcpy(mxGetData(z_), oskar_mem_void_const(
-            oskar_vis_station_z_metres_const(v_in)), mem_size);
+            oskar_vis_station_z_offset_ecef_metres_const(v_in)), mem_size);
     memcpy(mxGetData(stationLon_), oskar_mem_void_const(
             oskar_vis_station_lon_deg_const(v_in)), mem_size);
     memcpy(mxGetData(stationLat_), oskar_mem_void_const(
@@ -375,9 +375,9 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
     mxSetField(v_out, 0, "time_start_mjd_utc",
             mxCreateDoubleScalar(oskar_vis_time_start_mjd_utc(v_in)));
     mxSetField(v_out, 0, "time_inc_seconds",
-            mxCreateDoubleScalar(oskar_vis_time_inc_seconds(v_in)));
+            mxCreateDoubleScalar(oskar_vis_time_inc_sec(v_in)));
     mxSetField(v_out, 0, "time_int_seconds",
-            mxCreateDoubleScalar(oskar_vis_time_int_seconds(v_in)));
+            mxCreateDoubleScalar(oskar_vis_time_average_sec(v_in)));
     mxSetField(v_out, 0, "phase_centre_ra_deg",
             mxCreateDoubleScalar(oskar_vis_phase_centre_ra_deg(v_in)));
     mxSetField(v_out, 0, "phase_centre_dec_deg",

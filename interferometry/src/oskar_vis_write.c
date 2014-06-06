@@ -68,12 +68,12 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     if (*status) return;
 
     /* Get the metadata. */
-    uu_elements = (int)oskar_mem_length(vis->uu_metres);
-    vv_elements = (int)oskar_mem_length(vis->vv_metres);
-    ww_elements = (int)oskar_mem_length(vis->ww_metres);
+    uu_elements = (int)oskar_mem_length(vis->baseline_uu_metres);
+    vv_elements = (int)oskar_mem_length(vis->baseline_vv_metres);
+    ww_elements = (int)oskar_mem_length(vis->baseline_ww_metres);
     amp_elements = (int)oskar_mem_length(vis->amplitude);
     amp_type = oskar_mem_type(vis->amplitude);
-    coord_type = oskar_mem_type(vis->uu_metres);
+    coord_type = oskar_mem_type(vis->baseline_uu_metres);
 
     /* Check dimensions. */
     num_amps = vis->num_channels * vis->num_times * vis->num_baselines;
@@ -167,7 +167,7 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
             OSKAR_VIS_TAG_TIME_START_MJD_UTC, 0, vis->time_start_mjd_utc,
             status);
     oskar_binary_stream_write_double(stream, grp,
-            OSKAR_VIS_TAG_TIME_INC_SEC, 0, vis->time_inc_seconds, status);
+            OSKAR_VIS_TAG_TIME_INC_SEC, 0, vis->time_inc_sec, status);
     oskar_binary_stream_write_int(stream, grp,
             OSKAR_VIS_TAG_POL_TYPE, 0, OSKAR_VIS_POL_TYPE_LINEAR, status);
     oskar_binary_stream_write_int(stream, grp,
@@ -185,18 +185,20 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
             OSKAR_VIS_TAG_CHANNEL_BANDWIDTH_HZ, 0, vis->channel_bandwidth_hz,
             status);
     oskar_binary_stream_write_double(stream, grp,
-            OSKAR_VIS_TAG_TIME_INT_SEC, 0, vis->time_int_seconds, status);
+            OSKAR_VIS_TAG_TIME_AVERAGE_SEC, 0, vis->time_average_sec, status);
     oskar_binary_stream_write_double(stream, grp,
             OSKAR_VIS_TAG_TELESCOPE_LON, 0, vis->telescope_lon_deg, status);
     oskar_binary_stream_write_double(stream, grp,
             OSKAR_VIS_TAG_TELESCOPE_LAT, 0, vis->telescope_lat_deg, status);
+    oskar_binary_stream_write_double(stream, grp,
+            OSKAR_VIS_TAG_TELESCOPE_ALT, 0, vis->telescope_alt_metres, status);
 
     /* Write the baseline coordinate arrays. */
-    oskar_mem_binary_stream_write(vis->uu_metres, stream,
+    oskar_mem_binary_stream_write(vis->baseline_uu_metres, stream,
             grp, OSKAR_VIS_TAG_BASELINE_UU, 0, 0, status);
-    oskar_mem_binary_stream_write(vis->vv_metres, stream,
+    oskar_mem_binary_stream_write(vis->baseline_vv_metres, stream,
             grp, OSKAR_VIS_TAG_BASELINE_VV, 0, 0, status);
-    oskar_mem_binary_stream_write(vis->ww_metres, stream,
+    oskar_mem_binary_stream_write(vis->baseline_ww_metres, stream,
             grp, OSKAR_VIS_TAG_BASELINE_WW, 0, 0, status);
 
     /* Write the visibility data. */
@@ -204,20 +206,26 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
             grp, OSKAR_VIS_TAG_AMPLITUDE, 0, 0, status);
 
     /* Write the station coordinate arrays. */
-    oskar_mem_binary_stream_write(vis->x_metres, stream,
-            grp, OSKAR_VIS_TAG_STATION_X, 0, 0, status);
-    oskar_mem_binary_stream_write(vis->y_metres, stream,
-            grp, OSKAR_VIS_TAG_STATION_Y, 0, 0, status);
-    oskar_mem_binary_stream_write(vis->z_metres, stream,
-            grp, OSKAR_VIS_TAG_STATION_Z, 0, 0, status);
+    oskar_mem_binary_stream_write(vis->station_x_offset_ecef_metres, stream,
+            grp, OSKAR_VIS_TAG_STATION_X_OFFSET_ECEF, 0, 0, status);
+    oskar_mem_binary_stream_write(vis->station_y_offset_ecef_metres, stream,
+            grp, OSKAR_VIS_TAG_STATION_Y_OFFSET_ECEF, 0, 0, status);
+    oskar_mem_binary_stream_write(vis->station_z_offset_ecef_metres, stream,
+            grp, OSKAR_VIS_TAG_STATION_Z_OFFSET_ECEF, 0, 0, status);
+    oskar_mem_binary_stream_write(vis->station_x_enu_metres, stream,
+            grp, OSKAR_VIS_TAG_STATION_X_ENU, 0, 0, status);
+    oskar_mem_binary_stream_write(vis->station_y_enu_metres, stream,
+            grp, OSKAR_VIS_TAG_STATION_Y_ENU, 0, 0, status);
+    oskar_mem_binary_stream_write(vis->station_z_enu_metres, stream,
+            grp, OSKAR_VIS_TAG_STATION_Z_ENU, 0, 0, status);
 
-    oskar_mem_binary_stream_write(vis->station_lon, stream, grp,
+    oskar_mem_binary_stream_write(vis->station_lon_deg, stream, grp,
             OSKAR_VIS_TAG_STATION_LON, 0, 0, status);
-    oskar_mem_binary_stream_write(vis->station_lat, stream, grp,
+    oskar_mem_binary_stream_write(vis->station_lat_deg, stream, grp,
             OSKAR_VIS_TAG_STATION_LAT, 0, 0, status);
-    oskar_mem_binary_stream_write(vis->station_orientation_x, stream, grp,
+    oskar_mem_binary_stream_write(vis->station_orientation_x_deg, stream, grp,
             OSKAR_VIS_TAG_STATION_ORIENTATION_X, 0, 0, status);
-    oskar_mem_binary_stream_write(vis->station_orientation_y, stream, grp,
+    oskar_mem_binary_stream_write(vis->station_orientation_y_deg, stream, grp,
             OSKAR_VIS_TAG_STATION_ORIENTATION_Y, 0, 0, status);
 
     /* Close the file. */

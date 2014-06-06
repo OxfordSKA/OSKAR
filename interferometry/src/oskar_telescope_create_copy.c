@@ -67,19 +67,25 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
             src->seed_time_variable_station_element_errors;
     telescope->longitude_rad = src->longitude_rad;
     telescope->latitude_rad = src->latitude_rad;
-    telescope->altitude_m = src->altitude_m;
+    telescope->altitude_metres = src->altitude_metres;
     telescope->ra0_rad = src->ra0_rad;
     telescope->dec0_rad = src->dec0_rad;
-    telescope->bandwidth_hz = src->bandwidth_hz;
+    telescope->channel_bandwidth_hz = src->channel_bandwidth_hz;
     telescope->time_average_sec = src->time_average_sec;
 
     /* Copy the coordinates. */
-    oskar_mem_copy(telescope->station_x, src->station_x, status);
-    oskar_mem_copy(telescope->station_y, src->station_y, status);
-    oskar_mem_copy(telescope->station_z, src->station_z, status);
-    oskar_mem_copy(telescope->station_x_hor, src->station_x_hor, status);
-    oskar_mem_copy(telescope->station_y_hor, src->station_y_hor, status);
-    oskar_mem_copy(telescope->station_z_hor, src->station_z_hor, status);
+    oskar_mem_copy(telescope->station_x_offset_ecef_metres,
+            src->station_x_offset_ecef_metres, status);
+    oskar_mem_copy(telescope->station_y_offset_ecef_metres,
+            src->station_y_offset_ecef_metres, status);
+    oskar_mem_copy(telescope->station_z_offset_ecef_metres,
+            src->station_z_offset_ecef_metres, status);
+    oskar_mem_copy(telescope->station_x_enu_metres,
+            src->station_x_enu_metres, status);
+    oskar_mem_copy(telescope->station_y_enu_metres,
+            src->station_y_enu_metres, status);
+    oskar_mem_copy(telescope->station_z_enu_metres,
+            src->station_z_enu_metres, status);
 
     /* Copy each station. */
     telescope->station = malloc(src->num_stations * sizeof(oskar_Station*));
