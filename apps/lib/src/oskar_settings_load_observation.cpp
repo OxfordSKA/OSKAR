@@ -27,7 +27,7 @@
  */
 
 #include "apps/lib/oskar_settings_load_observation.h"
-#include <oskar_date_time_to_mjd.h>
+#include <oskar_convert_date_time_to_mjd.h>
 #include <oskar_log.h>
 
 #include <cmath>
@@ -131,7 +131,7 @@ void oskar_settings_load_observation(oskar_SettingsObservation* obs,
 
         // Compute start time as MJD(UTC).
         double day_fraction = (hour + (minute / 60.0) + (second / 3600.0)) / 24.0;
-        obs->start_mjd_utc = oskar_date_time_to_mjd(year, month, day,
+        obs->start_mjd_utc = oskar_convert_date_time_to_mjd(year, month, day,
                 day_fraction);
 
         // Get number of time steps.

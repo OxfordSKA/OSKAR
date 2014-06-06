@@ -4,17 +4,9 @@
 
 # Add the source files in this directory.
 set(sky_SRC
-    src/oskar_date_time_to_mjd.c
-    src/oskar_equation_of_equinoxes_fast.c
-    src/oskar_evaluate_jones_R.c
-    src/oskar_evaluate_jones_Z.c
     src/oskar_evaluate_TEC_TID.c
     src/oskar_generate_random_coordinate.c
     src/oskar_load_TID_parameter_file.c
-    src/oskar_mjd_to_gast_fast.c
-    src/oskar_mjd_to_gmst.c
-    src/oskar_mjd_to_last_fast.c
-    src/oskar_mjd_to_lmst.c
     src/oskar_scale_flux_with_frequency.c
     src/oskar_sky_accessors.c
     src/oskar_sky_append_to_set.c
@@ -43,14 +35,12 @@ set(sky_SRC
     src/oskar_sky_set_source.c
     src/oskar_sky_set_spectral_index.c
     src/oskar_sky_write.c
-    src/oskar_WorkJonesZ.c
     src/oskar_update_horizon_mask.c
 )
 
 if (CUDA_FOUND)
     list(APPEND sky_SRC
         src/oskar_scale_flux_with_frequency_cuda.cu
-        src/oskar_evaluate_jones_R_cuda.cu
         #src/oskar_rebin_sky_cuda.cu # Doesn't work on compute 1.3 architectures.
         src/oskar_sky_copy_source_data_cuda.cu
         src/oskar_sky_filter_by_flux_cuda.cu

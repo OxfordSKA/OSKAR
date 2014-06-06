@@ -38,7 +38,7 @@
 
 #include <oskar_telescope.h>
 #include <oskar_image.h>
-#include <oskar_mjd_to_gast_fast.h>
+#include <oskar_convert_mjd_to_gast_fast.h>
 #include <oskar_station_work.h>
 #include <oskar_cuda_mem_log.h>
 #include <oskar_random_state.h>
@@ -235,7 +235,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
             oskar_log_message(log, 1, "Snapshot %4d/%d", t+1, num_times);
 
             double t_dump = obs_start_mjd_utc + t * dt_dump;
-            double GAST = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
+            double GAST = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
             oskar_evaluate_station_beam(d_beam_data, num_pixels,
                     d_x, d_y, d_z, coord_type, lon0, lat0, d_station, d_work,

@@ -37,7 +37,7 @@
 #include <oskar_telescope.h>
 #include <oskar_convert_offset_ecef_to_ecef.h>
 
-#include <oskar_mjd_to_gast_fast.h>
+#include <oskar_convert_mjd_to_gast_fast.h>
 #include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
 #include <oskar_sky.h>
 
@@ -203,7 +203,7 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings& settings
     for (int t = 0; t < num_times; ++t)
     {
         double t_dump = obs_start_mjd_utc + t * dt_dump; // MJD UTC
-        double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
+        double gast = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
         for (int i = 0; i < num_stations; ++i)
         {
@@ -388,7 +388,7 @@ void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
     double obs_start_mjd_utc = settings->obs.start_mjd_utc;
     double dt_dump = settings->obs.dt_dump_days;
     double t_dump = obs_start_mjd_utc + t * dt_dump; // MJD UTC
-    double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
+    double gast = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
     double last = gast + st_lon;
 
     void *x_, *y_, *z_;

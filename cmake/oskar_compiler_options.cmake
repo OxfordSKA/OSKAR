@@ -15,17 +15,16 @@ set(BUILD_SHARED_LIBS ON)
 
 # Set the include path to include the top-level folder and sub-folders for
 # main oskar library.
-# **NOTE**
-# The convension to omit sub-folders from the include path still
-# needs review so these includes are added for experimentation only!
 # ------------------------------------------------------------------------------
 include_directories(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/imaging
     ${PROJECT_SOURCE_DIR}/interferometry
+    ${PROJECT_SOURCE_DIR}/jones
     ${PROJECT_SOURCE_DIR}/math
     ${PROJECT_SOURCE_DIR}/measures
     ${PROJECT_SOURCE_DIR}/sky
+    ${PROJECT_SOURCE_DIR}/splines
     ${PROJECT_SOURCE_DIR}/station
     ${PROJECT_SOURCE_DIR}/utility
     ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include

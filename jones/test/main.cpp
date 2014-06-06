@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,29 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_date_time_to_mjd.h"
-
-#ifdef __cplusplus
-extern "C" {
+#include <gtest/gtest.h>
+#ifdef OSKAR_HAVE_CUDA
+#include <cuda_runtime_api.h>
 #endif
 
-double oskar_date_time_to_mjd(int year, int month, int day,
-        double day_fraction)
+int main(int argc, char** argv)
 {
-    int a, y, m, jdn;
-
-    /* Compute Julian Day Number (Note: all integer division). */
-    a = (14 - month) / 12;
-    y = year + 4800 - a;
-    m = month + 12 * a - 3;
-    jdn = day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
-            + (y / 400) - 32045;
-
-    /* Compute day fraction. */
-    day_fraction -= 0.5;
-    return jdn + day_fraction - 2400000.5;
-}
-
-#ifdef __cplusplus
-}
+    ::testing::InitGoogleTest(&argc, argv);
+    int val = RUN_ALL_TESTS();
+#ifdef OSKAR_HAVE_CUDA
+    cudaDeviceReset();
 #endif
+    return val;
+}

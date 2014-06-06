@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MJD_TO_LAST_FAST_H_
-#define OSKAR_MJD_TO_LAST_FAST_H_
+#ifndef OSKAR_CONVERT_MJD_TO_GMST_H_
+#define OSKAR_CONVERT_MJD_TO_GMST_H_
 
 /**
- * @file oskar_mjd_to_last_fast.h
+ * @file oskar_convert_mjd_to_gmst.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,24 +41,20 @@ extern "C" {
 
 /**
  * @brief
- * Convert MJD(UT1) to Local Apparent Sidereal Time (double precision).
+ * Convert MJD(UT1) to Greenwich Mean Sidereal Time.
  *
  * @details
- * This function converts MJD(UT1) to the Local Apparent Sidereal Time.
+ * This function converts MJD(UT1) to the Greenwich Mean Sidereal Time.
  *
  * @param[in] mjd  The MJD(UT1).
- * @param[in] lon  The site longitude (east-positive), in radians.
  *
- * @return The Local Apparent Sidereal Time, in radians.
+ * @return The Greenwich Mean Sidereal Time in radians.
  */
 OSKAR_EXPORT
-double oskar_mjd_to_last_fast_d(double mjd, double lon);
-
-OSKAR_EXPORT
-float oskar_mjd_to_last_fast_f(float mjd, float lon);
+double oskar_convert_mjd_to_gmst(double mjd);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MJD_TO_LAST_FAST_H_ */
+#endif /* OSKAR_CONVERT_MJD_TO_GMST_H_ */

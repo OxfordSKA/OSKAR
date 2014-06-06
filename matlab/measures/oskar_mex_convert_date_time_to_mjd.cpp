@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,35 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MJD_TO_GMST_H_
-#define OSKAR_MJD_TO_GMST_H_
+#include <mex.h>
+#include "matlab/common/oskar_matlab_common.h"
+#include <oskar_convert_date_time_to_mjd.h>
 
-/**
- * @file oskar_mjd_to_gmst.h
- */
+// MATLAB Entry function.
+void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
+{
+    // Parse Inputs.
+    if (num_in != 4 || num_out < 1)
+    {
+        oskar_matlab_usage("[mjd_utc]", "sky", "convert_date_time_to_mjd",
+                "<year>, <month>, <day>, <day fraction>",
+                "Converts date and time to MJD(UTC)");
+    }
 
-#include "oskar_global.h"
+    // Get MATLAB inputs.
+    int year  = (int)mxGetScalar(in[0]);
+    int month = (int)mxGetScalar(in[1]);
+    int day   = (int)mxGetScalar(in[2]);
+    double day_fraction = (double)mxGetScalar(in[3]);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief
- * Convert MJD(UT1) to Greenwich Mean Sidereal Time.
- *
- * @details
- * This function converts MJD(UT1) to the Greenwich Mean Sidereal Time.
- *
- * @param[in] mjd  The MJD(UT1).
- *
- * @return The Greenwich Mean Sidereal Time in radians.
- */
-OSKAR_EXPORT
-double oskar_mjd_to_gmst(double mjd);
-
-#ifdef __cplusplus
+    out[0] = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
+    double* mjd = (double*)mxGetData(out[0]);
+    *mjd = oskar_convert_date_time_to_mjd(year, month, day, day_fraction);
 }
-#endif
-
-#endif /* OSKAR_MJD_TO_GMST_H_ */

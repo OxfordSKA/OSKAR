@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_mjd_to_lmst.h"
-#include "sky/oskar_mjd_to_gmst.h"
+#ifndef OSKAR_CONVERT_DATE_TIME_TO_MJD_H_
+#define OSKAR_CONVERT_DATE_TIME_TO_MJD_H_
+
+/**
+ * @file oskar_convert_date_time_to_mjd.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Double precision. */
-
-double oskar_mjd_to_lmst_d(double mjd, double lon)
-{
-    return oskar_mjd_to_gmst(mjd) + lon;
-}
+/**
+ * @brief
+ * Convert a date and time of UTC to a Modified Julian Date (double precision).
+ *
+ * @details
+ * This function converts a UTC date and time into a Modified Julian Date.
+ * (MJD = JD - 2400000.5)
+ *
+ * @param[in] year          The UTC year.
+ * @param[in] month         The UTC month.
+ * @param[in] day           The UTC day.
+ * @param[in] day_fraction  The UTC day fraction, from midnight.
+ *
+ * @return The Modified Julian Date.
+ */
+OSKAR_EXPORT
+double oskar_convert_date_time_to_mjd(int year, int month, int day,
+        double day_fraction);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_CONVERT_DATE_TIME_TO_MJD_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MJD_TO_LMST_H_
-#define OSKAR_MJD_TO_LMST_H_
+#ifndef OSKAR_EQUATION_OF_EQUINOXES_FAST_H_
+#define OSKAR_EQUATION_OF_EQUINOXES_FAST_H_
 
 /**
- * @file oskar_mjd_to_lmst.h
+ * @file oskar_equation_of_equinoxes_fast.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,21 +41,24 @@ extern "C" {
 
 /**
  * @brief
- * Convert MJD(UT1) to Local Mean Sidereal Time (double precision).
+ * Compute the equation of the equinoxes for the supplied MJD(UT1)
+ * (double precision).
  *
  * @details
- * This function converts MJD(UT1) to the Local Mean Sidereal Time.
+ * This function computes the equation of the equinoxes in radians, for the
+ * supplied MJD(UT1). Only first-order terms (the longitude of the ascending
+ * node of the Moon, and the mean longitude of the Sun) are used for the
+ * nutation calculation.
  *
  * @param[in] mjd  The MJD(UT1).
- * @param[in] lon  The site longitude (east-positive) in radians.
  *
- * @return The Greenwich Mean Sidereal Time in radians.
+ * @return The equation of the equinoxes in radians.
  */
 OSKAR_EXPORT
-double oskar_mjd_to_lmst_d(double mjd, double lon);
+double oskar_equation_of_equinoxes_fast(double mjd);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MJD_TO_LMST_H_ */
+#endif /* OSKAR_EQUATION_OF_EQUINOXES_FAST_H_ */

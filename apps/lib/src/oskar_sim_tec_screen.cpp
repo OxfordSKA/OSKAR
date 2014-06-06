@@ -32,7 +32,7 @@
 
 #include <oskar_evaluate_TEC_TID.h>
 #include <oskar_SettingsIonosphere.h>
-#include <oskar_mjd_to_gast_fast.h>
+#include <oskar_convert_mjd_to_gast_fast.h>
 #include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
 #include <oskar_Settings.h>
 #include <oskar_telescope.h>
@@ -171,7 +171,7 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
     double obs_start_mjd_utc = settings->obs.start_mjd_utc;
     double dt_dump = settings->obs.dt_dump_days;
     double t_dump = obs_start_mjd_utc + t * dt_dump; // MJD UTC
-    double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
+    double gast = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
     double last = gast + st_lon;
 
     void *x_, *y_, *z_;

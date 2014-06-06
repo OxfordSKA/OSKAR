@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,19 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_mjd_to_gast_fast.h"
-#include "sky/oskar_mjd_to_gmst.h"
-#include "sky/oskar_equation_of_equinoxes_fast.h"
+#ifndef OSKAR_CONVERT_MJD_TO_GAST_FAST_H_
+#define OSKAR_CONVERT_MJD_TO_GAST_FAST_H_
+
+/**
+ * @file oskar_convert_mjd_to_gast_fast.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-double oskar_mjd_to_gast_fast(double mjd)
-{
-    return oskar_mjd_to_gmst(mjd) + oskar_equation_of_equinoxes_fast(mjd);
-}
+/**
+ * @brief
+ * Convert MJD(UT1) to Greenwich Apparent Sidereal Time.
+ *
+ * @details
+ * This function converts MJD(UT1) to the Greenwich Apparent Sidereal Time.
+ *
+ * @param[in] mjd  The MJD(UT1).
+ *
+ * @return The Greenwich Apparent Sidereal Time, in radians.
+ */
+OSKAR_EXPORT
+double oskar_convert_mjd_to_gast_fast(double mjd);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_CONVERT_MJD_TO_GAST_FAST_H_ */

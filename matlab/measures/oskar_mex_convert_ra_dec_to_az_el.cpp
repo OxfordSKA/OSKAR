@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 #include <mex.h>
 
 #include "matlab/common/oskar_matlab_common.h"
-#include <utility/oskar_get_error_string.h>
+#include <oskar_get_error_string.h>
 #include <oskar_convert_apparent_ra_dec_to_az_el.h>
 
 #include <algorithm>
@@ -45,8 +45,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     if (num_in != 4 || num_out > 2)
     {
-        oskar_matlab_usage("[az, el]", "sky", "ra_dec_to_az_el",
-                "<RA>, <Dec>, <LST>, <lat>",
+        oskar_matlab_usage("[az, el]", "sky", "convert_ra_dec_to_az_el",
+                "<RA>, <Dec>, <LAST>, <lat>",
                 "Converts RA, Dec coordinates to az, el coordinates. Note all "
                 "coordinates are assumed to be in radians.");
     }
@@ -63,7 +63,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     mwSize num_sources = max(mxGetM(in[0]), mxGetN(in[0]));
     mxClassID class_id = mxGetClassID(in[0]);
-    int err = OSKAR_SUCCESS;
 
     double lst = mxGetScalar(in[2]);
     double lat = mxGetScalar(in[3]);
@@ -104,12 +103,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     else
     {
         oskar_matlab_error("Invalid data class");
-    }
-
-    if (err)
-    {
-        oskar_matlab_error("oskar_ra_dec_to_az_el_d() failed with code %i: %s",
-                err, oskar_get_error_string(err));
     }
 }
 

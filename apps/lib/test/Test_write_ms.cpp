@@ -31,7 +31,7 @@
 #include <apps/lib/oskar_vis_write_ms.h>
 #include <apps/lib/oskar_remove_dir.h>
 
-#include <oskar_date_time_to_mjd.h>
+#include <oskar_convert_date_time_to_mjd.h>
 #include <oskar_vis.h>
 #include <oskar_telescope.h>
 #include <oskar_get_error_string.h>
@@ -105,7 +105,7 @@ TEST(write_ms, test_write)
     oskar_vis_set_freq_start_hz(vis, 222.22e6);
     oskar_vis_set_freq_inc_hz(vis, 11.1e6);
     oskar_vis_set_time_start_mjd_utc(vis,
-            oskar_date_time_to_mjd(2011, 11, 17, 0.0));
+            oskar_convert_date_time_to_mjd(2011, 11, 17, 0.0));
     oskar_vis_set_time_inc_seconds(vis, 1.0);
 
     const char* filename = "temp_test_write_ms.ms";

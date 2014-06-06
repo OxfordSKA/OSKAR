@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <oskar_convert_mjd_to_gmst.h>
+#include <math.h>
 
-#include <mex.h>
-#include "matlab/common/oskar_matlab_common.h"
-#include <sky/oskar_mjd_to_last_fast.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// MATLAB Entry function.
-void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
+/* Seconds to radians. */
+#define SEC2RAD 7.2722052166430399038487e-5
+
+#ifndef M_2PI
+#define M_2PI 6.28318530717958647693
+#endif
+
+double oskar_convert_mjd_to_gmst(double mjd)
 {
-    // Parse Inputs.
-    if (num_in != 2 || num_out > 1)
-    {
-        oskar_matlab_usage("[LAST in radians]", "sky", "mjd_to_last_fast",
-                "<MJD UT1>, <lonitude in radians>",
-                "Converts a MJD to Local Apparent Sidereal Time (LAST)");
-    }
+    double d, t, gmst;
 
-    // Get matlab inputs.
-    double mjd_utc  = mxGetScalar(in[0]);
-    double lon_rad  = mxGetScalar(in[1]);
+    /* Days from J2000.0. */
+    d = mjd - 51544.5;
 
-    out[0] = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
-    double* last_rad = (double*)mxGetPr(out[0]);
+    /* Centuries from J2000.0. */
+    t = d / 36525.0;
 
-    *last_rad = oskar_mjd_to_last_fast_d(mjd_utc, lon_rad);
+    /* GMST at this time. */
+    gmst = fmod(mjd, 1.0) * M_2PI + (24110.54841 + (8640184.812866 +
+                    (0.093104 - 6.2e-6 * t) * t) * t) * SEC2RAD;
+
+    /* Range check (0 to 2pi). */
+    t = fmod(gmst, M_2PI);
+    return (t >= 0.0) ? t : t + M_2PI;
 }
 
-
+#ifdef __cplusplus
+}
+#endif

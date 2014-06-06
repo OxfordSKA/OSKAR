@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.3                                      Last update: 28 November 2013 |
+| OSKAR 2.5                                           Last update: 6 June 2014 |
 +------------------------------------------------------------------------------+
 
 1. OSKAR: The Open Square Kilometre Array Radio Telescope Simulator
@@ -42,6 +42,9 @@ Top level folder structure for OSKAR.
  |
  |--- interferometry   : Interferometry functions, telescope model functions.
  |
+ |--- jones            : Jones data structure and jones matrix evaluation
+ |                       functions. 
+ |
  |--- math             : Generic math functions.
  |
  |--- matlab           : MATLAB interface to OSKAR.
@@ -52,6 +55,8 @@ Top level folder structure for OSKAR.
  |
  |--- sky              : Sky generators, coordinate conversion,
  |                       horizon clipping, sky model functions.
+ |
+ |--- splines          : Spline fitting functions.
  |
  |--- station          : Evaluation of beam pattern (E Jones),
  |                       station level processing, antenna level processing.

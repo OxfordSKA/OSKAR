@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_convert_ecef_to_baseline_uvw.h"
+#include <oskar_convert_ecef_to_baseline_uvw.h>
 #include <oskar_convert_station_uvw_to_baseline_uvw.h>
 #include <oskar_convert_ecef_to_station_uvw.h>
-#include <oskar_mjd_to_gast_fast.h>
+#include <oskar_convert_mjd_to_gast_fast.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -118,7 +118,7 @@ void oskar_convert_ecef_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
         double t_dump, gast;
 
         t_dump = start_mjd_utc + i * dt_dump_days;
-        gast = oskar_mjd_to_gast_fast(t_dump + dt_dump_days / 2.0);
+        gast = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump_days / 2.0);
 
         /* Compute u,v,w coordinates of mid point. */
         oskar_convert_ecef_to_station_uvw(u, v, w, num_stations, x, y, z,

@@ -27,7 +27,6 @@
  */
 
 #include "apps/lib/oskar_settings_load_interferometer.h"
-#include <oskar_date_time_to_mjd.h>
 #include <oskar_log.h>
 
 #include <QtCore/QSettings>

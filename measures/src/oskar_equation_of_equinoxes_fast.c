@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,40 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_DATE_TIME_TO_MJD_H_
-#define OSKAR_DATE_TIME_TO_MJD_H_
-
-/**
- * @file oskar_date_time_to_mjd.h
- */
-
-#include "oskar_global.h"
+#include <oskar_equation_of_equinoxes_fast.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Convert a date and time of UTC to a Modified Julian Date (double precision).
- *
- * @details
- * This function converts a UTC date and time into a Modified Julian Date.
- * (MJD = JD - 2400000.5)
- *
- * @param[in] year          The UTC year.
- * @param[in] month         The UTC month.
- * @param[in] day           The UTC day.
- * @param[in] day_fraction  The UTC day fraction, from midnight.
- *
- * @return The Modified Julian Date.
- */
-OSKAR_EXPORT
-double oskar_date_time_to_mjd(int year, int month, int day,
-        double day_fraction);
+#define DEG2RAD 0.0174532925199432957692
+#define HOUR2RAD 0.261799387799149436539
+
+double oskar_equation_of_equinoxes_fast(double mjd)
+{
+    double d, omega, L, delta_psi, epsilon, eqeq;
+
+    /* Days from J2000.0. */
+    d = mjd - 51544.5;
+
+    /* Longitude of ascending node of the Moon. */
+    omega = (125.04 - 0.052954 * d) * DEG2RAD;
+
+    /* Mean Longitude of the Sun. */
+    L = (280.47 + 0.98565 * d) * DEG2RAD;
+
+    /* eqeq = delta_psi * cos(epsilon). */
+    delta_psi = -0.000319 * sin(omega) - 0.000024 * sin(2.0 * L);
+    epsilon = (23.4393 - 0.0000004 * d) * DEG2RAD;
+
+    /* Return equation of equinoxes in radians. */
+    eqeq = delta_psi * cos(epsilon) * HOUR2RAD;
+    return eqeq;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_DATE_TIME_TO_MJD_H_ */

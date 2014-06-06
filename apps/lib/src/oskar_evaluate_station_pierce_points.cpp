@@ -44,7 +44,7 @@
 #include <oskar_binary_stream_write.h>
 #include <oskar_mem_binary_stream_write.h>
 #include <oskar_convert_offset_ecef_to_ecef.h>
-#include <oskar_mjd_to_gast_fast.h>
+#include <oskar_convert_mjd_to_gast_fast.h>
 #include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
 #include <oskar_evaluate_pierce_points.h>
 
@@ -160,7 +160,7 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
     for (int t = 0; t < num_times; ++t)
     {
         double t_dump = obs_start_mjd_utc + t * dt_dump; // MJD UTC
-        double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
+        double gast = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
         for (int i = 0; i < num_stations; ++i)
         {

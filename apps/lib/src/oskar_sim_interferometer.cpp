@@ -46,7 +46,7 @@
 #include <oskar_log.h>
 #include <oskar_jones.h>
 #include <oskar_make_image.h>
-#include <oskar_mjd_to_gast_fast.h>
+#include <oskar_convert_mjd_to_gast_fast.h>
 #include <oskar_random_state.h>
 #include <oskar_settings_free.h>
 #include <oskar_sky.h>
@@ -420,7 +420,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
         /* Start time for the visibility dump, in MJD(UTC). */
         t_dump = obs_start_mjd_utc + i * dt_dump;
-        gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
+        gast = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
         /* Initialise visibilities for the dump to zero. */
         oskar_mem_clear_contents(vis, status);
@@ -451,7 +451,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         {
             /* Evaluate Greenwich Apparent Sidereal Time. */
             t_ave = t_dump + j * dt_ave;
-            gast = oskar_mjd_to_gast_fast(t_ave + dt_ave / 2);
+            gast = oskar_convert_mjd_to_gast_fast(t_ave + dt_ave / 2);
 
             /* Evaluate parallactic angle (R), station beam (E), and join. */
             oskar_timer_resume(timers->tmr_R);
@@ -484,7 +484,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
             {
                 /* Evaluate Greenwich Apparent Sidereal Time. */
                 t_fringe = t_ave + k * dt_fringe;
-                gast = oskar_mjd_to_gast_fast(t_fringe + dt_fringe / 2);
+                gast = oskar_convert_mjd_to_gast_fast(t_fringe + dt_fringe / 2);
 
                 /* Evaluate station u,v,w coordinates. */
                 oskar_convert_ecef_to_station_uvw(u, v, w, n_stations, x, y,
