@@ -55,8 +55,8 @@ extern "C" {
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_set_element_scalar(oskar_Mem* mem, size_t index, double val,
-        int* status);
+void oskar_mem_set_element_scalar_real(oskar_Mem* mem, size_t index,
+        double val, int* status);
 
 #ifdef __cplusplus
 }

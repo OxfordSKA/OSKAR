@@ -37,10 +37,9 @@
 extern "C" {
 #endif
 
-void oskar_mem_set_element_scalar(oskar_Mem* mem, size_t index, double val,
-        int* status)
+void oskar_mem_set_element_scalar_real(oskar_Mem* mem, size_t index,
+        double val, int* status)
 {
-    size_t n;
     int type, location;
 
     /* Check all inputs. */
@@ -53,15 +52,16 @@ void oskar_mem_set_element_scalar(oskar_Mem* mem, size_t index, double val,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Get the data type, location, and number of elements. */
-    type = mem->type;
-    location = mem->location;
-    n = mem->num_elements;
-    if (index >= n)
+    /* Check index is within range. */
+    if (index >= mem->num_elements)
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }
+
+    /* Get the data type and location */
+    type = mem->type;
+    location = mem->location;
 
     /* Set the data into the array element. */
     if (location == OSKAR_LOCATION_CPU)
@@ -69,10 +69,12 @@ void oskar_mem_set_element_scalar(oskar_Mem* mem, size_t index, double val,
         if (type == OSKAR_DOUBLE)
         {
             ((double*)(mem->data))[index] = val;
+            return;
         }
         else if (type == OSKAR_SINGLE)
         {
             ((float*)(mem->data))[index] = (float) val;
+            return;
         }
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -84,6 +86,7 @@ void oskar_mem_set_element_scalar(oskar_Mem* mem, size_t index, double val,
         {
             cudaMemcpy((double*)(mem->data) + index, &val, sizeof(double),
                     cudaMemcpyHostToDevice);
+            return;
         }
         else if (type == OSKAR_SINGLE)
         {
@@ -91,6 +94,7 @@ void oskar_mem_set_element_scalar(oskar_Mem* mem, size_t index, double val,
             temp = (float) val;
             cudaMemcpy((float*)(mem->data) + index, &temp, sizeof(float),
                     cudaMemcpyHostToDevice);
+            return;
         }
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
