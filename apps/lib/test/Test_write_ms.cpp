@@ -53,7 +53,7 @@ TEST(write_ms, test_write)
 
     // Create a visibility structure and fill in some data.
     oskar_Vis* vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX_MATRIX,
-            OSKAR_LOCATION_CPU, num_channels, num_times, num_antennas, &status);
+            OSKAR_CPU, num_channels, num_times, num_antennas, &status);
     ASSERT_TRUE(vis);
     oskar_vis_set_phase_centre(vis, 160.0, 89.0);
     double4c* v_ = oskar_mem_double4c(oskar_vis_amplitude(vis), &status);

@@ -56,7 +56,7 @@ extern "C" {
  *
  * @param[in] one Pointer to the first data structure.
  * @param[in] two Pointer to the second data structure.
- * @param[in] num_elements Number of elements to check.
+ * @param[in] num_elements Number of elements to check (0 checks all).
  * @param[in,out]  status   Status return code.
  *
  * @return

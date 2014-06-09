@@ -52,7 +52,7 @@ void oskar_station_analyse(oskar_Station* station,
     if (*status) return;
 
     /* Check station model is in CPU-accessible memory. */
-    if (oskar_station_location(station) != OSKAR_LOCATION_CPU)
+    if (oskar_station_mem_location(station) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -68,8 +68,10 @@ void oskar_station_analyse(oskar_Station* station,
     station->common_element_orientation = 1;
 
     /* Analyse orientations separately (always double precision). */
-    orientation_x = oskar_mem_double(station->orientation_x_cpu, status);
-    orientation_y = oskar_mem_double(station->orientation_y_cpu, status);
+    orientation_x =
+            oskar_mem_double(station->element_orientation_x_rad_cpu, status);
+    orientation_y =
+            oskar_mem_double(station->element_orientation_y_rad_cpu, status);
     for (i = 1; i < station->num_elements; ++i)
     {
         if (orientation_x[i] != orientation_x[0] ||
@@ -82,19 +84,19 @@ void oskar_station_analyse(oskar_Station* station,
 
     if (type == OSKAR_DOUBLE)
     {
-        double *z_signal, *z_weights, *amp, *amp_err, *phase, *phase_err;
+        double *z_true, *z_meas, *amp, *amp_err, *phase, *phase_err;
         double2 *weights;
-        z_signal  = oskar_mem_double(station->z_signal, status);
-        z_weights = oskar_mem_double(station->z_weights, status);
-        amp       = oskar_mem_double(station->gain, status);
-        amp_err   = oskar_mem_double(station->gain_error, status);
-        phase     = oskar_mem_double(station->phase_offset, status);
-        phase_err = oskar_mem_double(station->phase_error, status);
-        weights   = oskar_mem_double2(station->weight, status);
+        z_true    = oskar_mem_double(station->element_true_z_enu_metres, status);
+        z_meas    = oskar_mem_double(station->element_measured_z_enu_metres, status);
+        amp       = oskar_mem_double(station->element_gain, status);
+        amp_err   = oskar_mem_double(station->element_gain_error, status);
+        phase     = oskar_mem_double(station->element_phase_offset_rad, status);
+        phase_err = oskar_mem_double(station->element_phase_error_rad, status);
+        weights   = oskar_mem_double2(station->element_weight, status);
 
         for (i = 0; i < station->num_elements; ++i)
         {
-            if (z_signal[i] != 0.0 || z_weights[i] != 0.0)
+            if (z_true[i] != 0.0 || z_meas[i] != 0.0)
             {
                 station->array_is_3d = 1;
             }
@@ -115,19 +117,19 @@ void oskar_station_analyse(oskar_Station* station,
     }
     else if (type == OSKAR_SINGLE)
     {
-        float *z_signal, *z_weights, *amp, *amp_err, *phase, *phase_err;
+        float *z_true, *z_meas, *amp, *amp_err, *phase, *phase_err;
         float2 *weights;
-        z_signal  = oskar_mem_float(station->z_signal, status);
-        z_weights = oskar_mem_float(station->z_weights, status);
-        amp       = oskar_mem_float(station->gain, status);
-        amp_err   = oskar_mem_float(station->gain_error, status);
-        phase     = oskar_mem_float(station->phase_offset, status);
-        phase_err = oskar_mem_float(station->phase_error, status);
-        weights   = oskar_mem_float2(station->weight, status);
+        z_true    = oskar_mem_float(station->element_true_z_enu_metres, status);
+        z_meas    = oskar_mem_float(station->element_measured_z_enu_metres, status);
+        amp       = oskar_mem_float(station->element_gain, status);
+        amp_err   = oskar_mem_float(station->element_gain_error, status);
+        phase     = oskar_mem_float(station->element_phase_offset_rad, status);
+        phase_err = oskar_mem_float(station->element_phase_error_rad, status);
+        weights   = oskar_mem_float2(station->element_weight, status);
 
         for (i = 0; i < station->num_elements; ++i)
         {
-            if (z_signal[i] != 0.0 || z_weights[i] != 0.0)
+            if (z_true[i] != 0.0 || z_meas[i] != 0.0)
             {
                 station->array_is_3d = 1;
             }

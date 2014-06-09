@@ -53,19 +53,24 @@ void oskar_station_resize(oskar_Station* station, int num_elements,
     if (*status) return;
 
     /* Resize arrays in the model. */
-    oskar_mem_realloc(station->x_signal, num_elements, status);
-    oskar_mem_realloc(station->y_signal, num_elements, status);
-    oskar_mem_realloc(station->z_signal, num_elements, status);
-    oskar_mem_realloc(station->x_weights, num_elements, status);
-    oskar_mem_realloc(station->y_weights, num_elements, status);
-    oskar_mem_realloc(station->z_weights, num_elements, status);
-    oskar_mem_realloc(station->weight, num_elements, status);
-    oskar_mem_realloc(station->gain, num_elements, status);
-    oskar_mem_realloc(station->gain_error, num_elements, status);
-    oskar_mem_realloc(station->phase_offset, num_elements, status);
-    oskar_mem_realloc(station->phase_error, num_elements, status);
-    oskar_mem_realloc(station->orientation_x_cpu, num_elements, status);
-    oskar_mem_realloc(station->orientation_y_cpu, num_elements, status);
+    oskar_mem_realloc(station->element_true_x_enu_metres, num_elements, status);
+    oskar_mem_realloc(station->element_true_y_enu_metres, num_elements, status);
+    oskar_mem_realloc(station->element_true_z_enu_metres, num_elements, status);
+    oskar_mem_realloc(station->element_measured_x_enu_metres,
+            num_elements, status);
+    oskar_mem_realloc(station->element_measured_y_enu_metres,
+            num_elements, status);
+    oskar_mem_realloc(station->element_measured_z_enu_metres,
+            num_elements, status);
+    oskar_mem_realloc(station->element_weight, num_elements, status);
+    oskar_mem_realloc(station->element_gain, num_elements, status);
+    oskar_mem_realloc(station->element_gain_error, num_elements, status);
+    oskar_mem_realloc(station->element_phase_offset_rad, num_elements, status);
+    oskar_mem_realloc(station->element_phase_error_rad, num_elements, status);
+    oskar_mem_realloc(station->element_orientation_x_rad_cpu,
+            num_elements, status);
+    oskar_mem_realloc(station->element_orientation_y_rad_cpu,
+            num_elements, status);
     oskar_mem_realloc(station->element_types, num_elements, status);
     oskar_mem_realloc(station->element_types_cpu, num_elements, status);
 
@@ -77,12 +82,12 @@ void oskar_station_resize(oskar_Station* station, int num_elements,
         num_new = num_elements - offset;
 
         /* Must set default element weight, gain and orientation. */
-        oskar_mem_set_value_real(station->gain, 1.0,
-                offset, num_new, status);
-        oskar_mem_set_value_real(station->orientation_x_cpu, M_PI / 2.0,
-                offset, num_new, status);
-        oskar_mem_set_value_real(station->weight, 1.0,
-                offset, num_new, status);
+        oskar_mem_set_value_real(station->element_gain,
+                1.0, offset, num_new, status);
+        oskar_mem_set_value_real(station->element_orientation_x_rad_cpu,
+                M_PI / 2.0, offset, num_new, status);
+        oskar_mem_set_value_real(station->element_weight,
+                1.0, offset, num_new, status);
     }
 
     /* Set the new number of elements. */

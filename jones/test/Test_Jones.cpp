@@ -42,8 +42,8 @@
 #define TOL_FLT 1e-6
 #define TOL_DBL 1e-12
 
-#define LC   OSKAR_LOCATION_CPU
-#define LG   OSKAR_LOCATION_GPU
+#define LC   OSKAR_CPU
+#define LG   OSKAR_GPU
 #define TSC  OSKAR_SINGLE_COMPLEX
 #define TSCM OSKAR_SINGLE_COMPLEX_MATRIX
 #define TDC  OSKAR_DOUBLE_COMPLEX
@@ -83,9 +83,9 @@ static void t_join(int out_typeA, int in_type1A, int in_type2A,
     oskar_Jones *in1, *in2, *outA, *outB;
 
     // Create the timers.
-    timerA = oskar_timer_create(out_locA == OSKAR_LOCATION_GPU ?
+    timerA = oskar_timer_create(out_locA == OSKAR_GPU ?
             OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
-    timerB = oskar_timer_create(out_locB == OSKAR_LOCATION_GPU ?
+    timerB = oskar_timer_create(out_locB == OSKAR_GPU ?
             OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
 
     // Create output blocks.
@@ -148,9 +148,9 @@ void t_join_in_place(int in_type1A, int in_type2A, int in_loc1A, int in_loc2A,
     oskar_Jones *in1A, *in2A, *in1B, *in2B;
 
     // Create the timers.
-    timerA = oskar_timer_create(in_type1A == OSKAR_LOCATION_GPU ?
+    timerA = oskar_timer_create(in_type1A == OSKAR_GPU ?
             OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
-    timerB = oskar_timer_create(in_type1B == OSKAR_LOCATION_GPU ?
+    timerB = oskar_timer_create(in_type1B == OSKAR_GPU ?
             OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
 
     // Run test A.
@@ -566,9 +566,9 @@ static void test_ones(int precision, int location)
     j_ptr = jones;
 
     // Copy back to CPU memory if required.
-    if (location != OSKAR_LOCATION_CPU)
+    if (location != OSKAR_CPU)
     {
-        temp = oskar_jones_create_copy(jones, OSKAR_LOCATION_CPU, &status);
+        temp = oskar_jones_create_copy(jones, OSKAR_CPU, &status);
         ASSERT_EQ(0, status);
         j_ptr = temp;
     }
@@ -602,7 +602,7 @@ static void test_ones(int precision, int location)
     }
 
     // Free memory.
-    if (location != OSKAR_LOCATION_CPU)
+    if (location != OSKAR_CPU)
         oskar_jones_free(temp, &status);
     oskar_jones_free(jones, &status);
     ASSERT_EQ(0, status);
@@ -616,9 +616,9 @@ static void test_ones(int precision, int location)
     j_ptr = jones;
 
     // Copy back to CPU memory if required.
-    if (location != OSKAR_LOCATION_CPU)
+    if (location != OSKAR_CPU)
     {
-        temp = oskar_jones_create_copy(jones, OSKAR_LOCATION_CPU, &status);
+        temp = oskar_jones_create_copy(jones, OSKAR_CPU, &status);
         ASSERT_EQ(0, status);
         j_ptr = temp;
     }
@@ -664,7 +664,7 @@ static void test_ones(int precision, int location)
     }
 
     // Free memory.
-    if (location != OSKAR_LOCATION_CPU)
+    if (location != OSKAR_CPU)
         oskar_jones_free(temp, &status);
     oskar_jones_free(jones, &status);
     ASSERT_EQ(0, status);
@@ -672,22 +672,22 @@ static void test_ones(int precision, int location)
 
 TEST(Jones, set_ones_singleCPU)
 {
-    test_ones(OSKAR_SINGLE, OSKAR_LOCATION_CPU);
+    test_ones(OSKAR_SINGLE, OSKAR_CPU);
 }
 
 TEST(Jones, set_ones_singleGPU)
 {
-    test_ones(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
+    test_ones(OSKAR_SINGLE, OSKAR_GPU);
 }
 
 TEST(Jones, set_ones_doubleCPU)
 {
-    test_ones(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
+    test_ones(OSKAR_DOUBLE, OSKAR_CPU);
 }
 
 TEST(Jones, set_ones_doubleGPU)
 {
-    test_ones(OSKAR_DOUBLE, OSKAR_LOCATION_GPU);
+    test_ones(OSKAR_DOUBLE, OSKAR_GPU);
 }
 
 #endif

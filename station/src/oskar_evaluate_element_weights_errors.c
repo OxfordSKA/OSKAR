@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,7 +101,7 @@ void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         phase_error_ = oskar_mem_double_const(phase_error, status);
         errors_ = oskar_mem_double2(errors, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_evaluate_element_weights_errors_cuda_d(errors_, num_elements,
@@ -111,7 +111,7 @@ void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
-        else if (location == OSKAR_LOCATION_CPU)
+        else if (location == OSKAR_CPU)
         {
             *status = OSKAR_ERR_BAD_LOCATION;
         }
@@ -126,7 +126,7 @@ void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         phase_error_ = oskar_mem_float_const(phase_error, status);
         errors_ = oskar_mem_float2(errors, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_evaluate_element_weights_errors_cuda_f(errors_, num_elements,
@@ -136,7 +136,7 @@ void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
-        else if (location == OSKAR_LOCATION_CPU)
+        else if (location == OSKAR_CPU)
         {
             *status = OSKAR_ERR_BAD_LOCATION;
         }

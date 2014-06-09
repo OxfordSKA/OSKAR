@@ -51,18 +51,18 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
     dst->precision = src->precision;
     dst->element_type = src->element_type;
     dst->taper_type = src->taper_type;
-    dst->cos_power = src->cos_power;
+    dst->cosine_power = src->cosine_power;
     dst->gaussian_fwhm_rad = src->gaussian_fwhm_rad;
     dst->dipole_length = src->dipole_length;
     dst->dipole_length_units = src->dipole_length_units;
 
     /* Resize the arrays. */
-    oskar_element_resize_frequency_data(dst, src->num_frequencies, status);
+    oskar_element_resize_freq_data(dst, src->num_freq, status);
 
     /* Copy the new data across. */
-    for (i = 0; i < src->num_frequencies; ++i)
+    for (i = 0; i < src->num_freq; ++i)
     {
-        dst->frequency_hz[i] = src->frequency_hz[i];
+        dst->freqs_hz[i] = src->freqs_hz[i];
         oskar_mem_copy(dst->filename_x[i], src->filename_x[i], status);
         oskar_mem_copy(dst->filename_y[i], src->filename_y[i], status);
         oskar_splines_copy(dst->x_v_re[i], src->x_v_re[i], status);

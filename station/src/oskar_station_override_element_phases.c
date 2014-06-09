@@ -50,7 +50,7 @@ void oskar_station_override_element_phases(oskar_Station* s,
     if (*status) return;
 
     /* Check location. */
-    if (oskar_station_location(s) != OSKAR_LOCATION_CPU)
+    if (oskar_station_mem_location(s) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -74,14 +74,14 @@ void oskar_station_override_element_phases(oskar_Station* s,
         if (type == OSKAR_DOUBLE)
         {
             double* phase;
-            phase = oskar_mem_double(s->phase_offset, status);
+            phase = oskar_mem_double(s->element_phase_offset_rad, status);
             for (i = 0; i < s->num_elements; ++i)
                 phase[i] = phase_std * oskar_random_gaussian(0);
         }
         else if (type == OSKAR_SINGLE)
         {
             float* phase;
-            phase = oskar_mem_float(s->phase_offset, status);
+            phase = oskar_mem_float(s->element_phase_offset_rad, status);
             for (i = 0; i < s->num_elements; ++i)
                 phase[i] = phase_std * oskar_random_gaussian(0);
         }

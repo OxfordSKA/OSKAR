@@ -74,7 +74,7 @@ oskar_Sky* oskar_sky_load(const char* filename, int type, int* status)
     }
 
     /* Initialise the sky model. */
-    sky = oskar_sky_create(type, OSKAR_LOCATION_CPU, 0, status);
+    sky = oskar_sky_create(type, OSKAR_CPU, 0, status);
 
     /* Loop over lines in file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)

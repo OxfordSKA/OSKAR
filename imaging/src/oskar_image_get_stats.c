@@ -52,7 +52,7 @@ void oskar_image_get_stats(oskar_ImageStats* stats, const oskar_Image* image,
     if (*status) return;
 
     /* Check the image is in CPU memory. */
-    if (oskar_mem_location(image->data) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(image->data) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,14 +80,14 @@ void oskar_mem_alloc(oskar_Mem* mem, int* status)
     bytes = n_elements * element_size;
 
     /* Check whether the memory should be on the host or the device. */
-    if (location == OSKAR_LOCATION_CPU)
+    if (location == OSKAR_CPU)
     {
         /* Allocate host memory. */
         mem->data = calloc(bytes, 1);
         if (mem->data == NULL)
             *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
     }
-    else if (location == OSKAR_LOCATION_GPU)
+    else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         /* Allocate GPU memory. */

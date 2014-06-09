@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -150,7 +150,7 @@ void oskar_apply_element_taper_cosine(oskar_Mem* jones, int num_sources,
         const float* theta_;
         theta_ = oskar_mem_float_const(theta, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             if (type == OSKAR_SINGLE_COMPLEX)
@@ -172,7 +172,7 @@ void oskar_apply_element_taper_cosine(oskar_Mem* jones, int num_sources,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
-        else if (location == OSKAR_LOCATION_CPU)
+        else if (location == OSKAR_CPU)
         {
             if (type == OSKAR_SINGLE_COMPLEX)
             {
@@ -197,7 +197,7 @@ void oskar_apply_element_taper_cosine(oskar_Mem* jones, int num_sources,
         const double* theta_;
         theta_ = oskar_mem_double_const(theta, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             if (type == OSKAR_DOUBLE_COMPLEX)
@@ -219,7 +219,7 @@ void oskar_apply_element_taper_cosine(oskar_Mem* jones, int num_sources,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
-        else if (location == OSKAR_LOCATION_CPU)
+        else if (location == OSKAR_CPU)
         {
             if (type == OSKAR_DOUBLE_COMPLEX)
             {

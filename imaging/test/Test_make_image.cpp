@@ -53,7 +53,7 @@
 TEST(make_image, test)
 {
     int amp_type      = OSKAR_DOUBLE_COMPLEX_MATRIX;
-    int location      = OSKAR_LOCATION_CPU;
+    int location      = OSKAR_CPU;
     int num_channels  = 2;
     int num_times     = 2;
     int num_stations  = 2;
@@ -148,7 +148,7 @@ TEST(make_image, image_lm_grid)
     // Fill image with lm grid.
     int error = 0;
     int type = OSKAR_DOUBLE;
-    int location = OSKAR_LOCATION_CPU;
+    int location = OSKAR_CPU;
     int size = 256;
     int num_pixels = size * size;
     double fov = 2.0 * M_PI/180.0;

@@ -46,18 +46,18 @@
 struct oskar_Element
 {
     int precision;
-    int data_location;
+    int mem_location;
 
     int element_type; /**< Dipole or isotropic. */
     int taper_type; /**< Tapering type. */
     int dipole_length_units; /**< Units of dipole length (metres or wavelengths). */
     double dipole_length; /**< Length of dipole. */
-    double cos_power; /**< For a cosine taper, the power of the cosine. */
+    double cosine_power; /**< For a cosine taper, the power of the cosine. */
     double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
 
     /* These arrays of fitted data are per-frequency. */
-    int num_frequencies;
-    double* frequency_hz; /* Array of frequencies in Hz. */
+    int num_freq;
+    double* freqs_hz; /* Array of frequencies in Hz. */
     oskar_Mem** filename_x;
     oskar_Mem** filename_y;
     oskar_Splines** x_h_re;

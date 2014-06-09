@@ -62,9 +62,9 @@ void oskar_mem_random_fill(oskar_Mem* mem, double lo, double hi, int* status)
 
     /* Initialise temporary memory array if required. */
     ptr = mem;
-    if (location != OSKAR_LOCATION_CPU)
+    if (location != OSKAR_CPU)
     {
-        temp = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_elements, status);
+        temp = oskar_mem_create(type, OSKAR_CPU, num_elements, status);
         if (*status)
         {
             oskar_mem_free(temp, status);
@@ -100,7 +100,7 @@ void oskar_mem_random_fill(oskar_Mem* mem, double lo, double hi, int* status)
     }
 
     /* Copy and clean up if required. */
-    if (location != OSKAR_LOCATION_CPU)
+    if (location != OSKAR_CPU)
     {
         oskar_mem_copy(mem, ptr, status);
         oskar_mem_free(temp, status);

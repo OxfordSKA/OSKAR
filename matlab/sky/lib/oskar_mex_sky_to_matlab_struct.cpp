@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,9 +70,9 @@ mxArray* oskar_mex_sky_to_matlab_struct(const oskar_Sky* sky,
     mem_size *= (classId == mxDOUBLE_CLASS) ? sizeof(double) : sizeof(float);
 
     memcpy(mxGetData(mxRA),
-            oskar_mem_void_const(oskar_sky_ra_const(sky)), mem_size);
+            oskar_mem_void_const(oskar_sky_ra_rad_const(sky)), mem_size);
     memcpy(mxGetData(mxDec),
-            oskar_mem_void_const(oskar_sky_dec_const(sky)), mem_size);
+            oskar_mem_void_const(oskar_sky_dec_rad_const(sky)), mem_size);
     memcpy(mxGetData(mxI),
             oskar_mem_void_const(oskar_sky_I_const(sky)), mem_size);
     memcpy(mxGetData(mxQ),
@@ -82,22 +82,22 @@ mxArray* oskar_mex_sky_to_matlab_struct(const oskar_Sky* sky,
     memcpy(mxGetData(mxV),
             oskar_mem_void_const(oskar_sky_V_const(sky)), mem_size);
     memcpy(mxGetData(mxRefFreq),
-            oskar_mem_void_const(oskar_sky_reference_freq_const(sky)),
+            oskar_mem_void_const(oskar_sky_reference_freq_hz_const(sky)),
             mem_size);
     memcpy(mxGetData(mxSPIX),
             oskar_mem_void_const(oskar_sky_spectral_index_const(sky)),
             mem_size);
     memcpy(mxGetData(mxRM),
-            oskar_mem_void_const(oskar_sky_rotation_measure_const(sky)),
+            oskar_mem_void_const(oskar_sky_rotation_measure_rad_const(sky)),
             mem_size);
     memcpy(mxGetData(mxFWHM_Maj),
-            oskar_mem_void_const(oskar_sky_fwhm_major_const(sky)),
+            oskar_mem_void_const(oskar_sky_fwhm_major_rad_const(sky)),
             mem_size);
     memcpy(mxGetData(mxFWHM_Min),
-            oskar_mem_void_const(oskar_sky_fwhm_minor_const(sky)),
+            oskar_mem_void_const(oskar_sky_fwhm_minor_rad_const(sky)),
             mem_size);
     memcpy(mxGetData(mxPA),
-            oskar_mem_void_const(oskar_sky_position_angle_const(sky)),
+            oskar_mem_void_const(oskar_sky_position_angle_rad_const(sky)),
             mem_size);
 
     const char* fields[] =

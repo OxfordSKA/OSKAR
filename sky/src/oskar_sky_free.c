@@ -45,21 +45,21 @@ void oskar_sky_free(oskar_Sky* model, int* status)
     }
 
     /* Free the memory. */
-    oskar_mem_free(model->RA, status);
-    oskar_mem_free(model->Dec, status);
+    oskar_mem_free(model->ra_rad, status);
+    oskar_mem_free(model->dec_rad, status);
     oskar_mem_free(model->I, status);
     oskar_mem_free(model->Q, status);
     oskar_mem_free(model->U, status);
     oskar_mem_free(model->V, status);
-    oskar_mem_free(model->reference_freq, status);
+    oskar_mem_free(model->reference_freq_hz, status);
     oskar_mem_free(model->spectral_index, status);
-    oskar_mem_free(model->RM, status);
+    oskar_mem_free(model->rm_rad, status);
     oskar_mem_free(model->l, status);
     oskar_mem_free(model->m, status);
     oskar_mem_free(model->n, status);
-    oskar_mem_free(model->FWHM_major, status);
-    oskar_mem_free(model->FWHM_minor, status);
-    oskar_mem_free(model->position_angle, status);
+    oskar_mem_free(model->fwhm_major_rad, status);
+    oskar_mem_free(model->fwhm_minor_rad, status);
+    oskar_mem_free(model->pa_rad, status);
     oskar_mem_free(model->gaussian_a, status);
     oskar_mem_free(model->gaussian_b, status);
     oskar_mem_free(model->gaussian_c, status);

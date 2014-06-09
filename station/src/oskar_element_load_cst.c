@@ -90,25 +90,25 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     }
 
     /* Check the location. */
-    if (oskar_element_location(data) != OSKAR_LOCATION_CPU)
+    if (oskar_element_mem_location(data) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
 
     /* Check if this frequency has already been set, and get its index if so. */
-    n = data->num_frequencies;
+    n = data->num_freq;
     for (i = 0; i < n; ++i)
     {
-        if (fabs(data->frequency_hz[i] - freq_hz) <= freq_hz * DBL_EPSILON)
+        if (fabs(data->freqs_hz[i] - freq_hz) <= freq_hz * DBL_EPSILON)
             break;
     }
 
     /* Expand arrays to hold data for a new frequency, if needed. */
-    if (i >= data->num_frequencies)
+    if (i >= data->num_freq)
     {
-        i = data->num_frequencies;
-        oskar_element_resize_frequency_data(data, i + 1, status);
+        i = data->num_freq;
+        oskar_element_resize_freq_data(data, i + 1, status);
     }
 
     /* Get pointers to surface data based on port number and frequency index. */
@@ -147,13 +147,13 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     dbi = strstr(line, "dBi"); /* Check for presence of "dBi". */
 
     /* Create local arrays to hold data for fitting. */
-    theta  = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
-    phi    = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
-    h_re   = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
-    h_im   = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
-    v_re   = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
-    v_im   = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
-    weight = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
+    theta  = oskar_mem_create(type, OSKAR_CPU, 0, status);
+    phi    = oskar_mem_create(type, OSKAR_CPU, 0, status);
+    h_re   = oskar_mem_create(type, OSKAR_CPU, 0, status);
+    h_im   = oskar_mem_create(type, OSKAR_CPU, 0, status);
+    v_re   = oskar_mem_create(type, OSKAR_CPU, 0, status);
+    v_im   = oskar_mem_create(type, OSKAR_CPU, 0, status);
+    weight = oskar_mem_create(type, OSKAR_CPU, 0, status);
     if (*status) return;
 
     /* Loop over and read each line in the file. */
@@ -257,19 +257,19 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     if (port == 0)
     {
         oskar_mem_append_raw(data->filename_x[i], filename, OSKAR_CHAR,
-                OSKAR_LOCATION_CPU, fname_len, status);
+                OSKAR_CPU, fname_len, status);
         oskar_mem_append_raw(data->filename_y[i], filename, OSKAR_CHAR,
-                OSKAR_LOCATION_CPU, fname_len, status);
+                OSKAR_CPU, fname_len, status);
     }
     else if (port == 1)
     {
         oskar_mem_append_raw(data->filename_x[i], filename, OSKAR_CHAR,
-                OSKAR_LOCATION_CPU, fname_len, status);
+                OSKAR_CPU, fname_len, status);
     }
     else if (port == 2)
     {
         oskar_mem_append_raw(data->filename_y[i], filename, OSKAR_CHAR,
-                OSKAR_LOCATION_CPU, fname_len, status);
+                OSKAR_CPU, fname_len, status);
     }
 
     /* Copy X to Y if both ports are the same. */

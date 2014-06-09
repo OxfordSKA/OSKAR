@@ -72,9 +72,9 @@ void oskar_station_set_element_type(oskar_Station* dst,
     /* Set the data. */
     oskar_mem_int(dst->element_types_cpu, status)[index] = element_type;
     t_ = oskar_mem_int(dst->element_types, status);
-    if (location == OSKAR_LOCATION_CPU)
+    if (location == OSKAR_CPU)
         t_[index] = element_type;
-    else if (location == OSKAR_LOCATION_GPU)
+    else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         cudaMemcpy((char*)t_ + offset_bytes, &element_type, sizeof(int), H2D);

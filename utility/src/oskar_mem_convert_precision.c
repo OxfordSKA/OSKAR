@@ -56,13 +56,13 @@ oskar_Mem* oskar_mem_convert_precision(const oskar_Mem* input,
     input_precision = oskar_mem_precision(input);
     if (input_precision == output_precision)
     {
-        return oskar_mem_create_copy(input, OSKAR_LOCATION_CPU, status);
+        return oskar_mem_create_copy(input, OSKAR_CPU, status);
     }
 
     /* Copy source data to CPU memory if necessary. */
-    if (oskar_mem_location(input) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(input) != OSKAR_CPU)
     {
-        in_temp = oskar_mem_create_copy(input, OSKAR_LOCATION_CPU, status);
+        in_temp = oskar_mem_create_copy(input, OSKAR_CPU, status);
         in = in_temp;
     }
     else
@@ -83,7 +83,7 @@ oskar_Mem* oskar_mem_convert_precision(const oskar_Mem* input,
         type |= OSKAR_MATRIX;
         num_elements *= 4;
     }
-    output = oskar_mem_create(type, OSKAR_LOCATION_CPU, oskar_mem_length(in),
+    output = oskar_mem_create(type, OSKAR_CPU, oskar_mem_length(in),
             status);
 
     /* Convert the data. */

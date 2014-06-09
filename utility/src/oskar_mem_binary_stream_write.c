@@ -66,10 +66,10 @@ void oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
 
     /* Check if data is in CPU or GPU memory. */
     data = mem;
-    if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(mem) != OSKAR_CPU)
     {
         /* Copy to temporary. */
-        temp = oskar_mem_create_copy(mem, OSKAR_LOCATION_CPU, status);
+        temp = oskar_mem_create_copy(mem, OSKAR_CPU, status);
         data = temp;
     }
 
@@ -111,10 +111,10 @@ void oskar_mem_binary_stream_write_ext(const oskar_Mem* mem, FILE* stream,
 
     /* Check if data is in CPU or GPU memory. */
     data = mem;
-    if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(mem) != OSKAR_CPU)
     {
         /* Copy to temporary. */
-        temp = oskar_mem_create_copy(mem, OSKAR_LOCATION_CPU, status);
+        temp = oskar_mem_create_copy(mem, OSKAR_CPU, status);
         data = temp;
     }
 

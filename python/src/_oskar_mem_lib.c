@@ -48,7 +48,7 @@ void mem_free(void* ptr)
 static PyObject* create(PyObject* self, PyObject* args, PyObject* keywds)
 {
     int type_ = OSKAR_DOUBLE;
-    int loc_ = OSKAR_LOCATION_CPU;
+    int loc_ = OSKAR_CPU;
     int length_ = 0;
 
     static char* keywords[] = {"type", "location", "length", NULL};

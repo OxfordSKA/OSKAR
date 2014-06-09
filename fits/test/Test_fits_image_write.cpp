@@ -42,7 +42,7 @@ TEST(fits_image_write, test)
     int err = 0;
 
     // Create the image.
-    oskar_Image* image = oskar_image_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+    oskar_Image* image = oskar_image_create(OSKAR_DOUBLE, OSKAR_CPU,
             &err);
     oskar_image_resize(image, columns, rows, 1, 1, 1, &err);
     ASSERT_EQ(0, err);

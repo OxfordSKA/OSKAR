@@ -37,9 +37,9 @@ TEST(Mem, add_matrix_cpu)
     // Use case: Two CPU oskar_Mem matrix types are added together.
     int num_elements = 10, status = 0;
     oskar_Mem *mem_A, *mem_B, *mem_C;
-    mem_A = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+    mem_A = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
             num_elements, &status);
-    mem_B = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+    mem_B = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
             num_elements, &status);
     float4c* A = oskar_mem_float4c(mem_A, &status);
     float4c* B = oskar_mem_float4c(mem_B, &status);
@@ -64,7 +64,7 @@ TEST(Mem, add_matrix_cpu)
         B[i].d.y = 0.18;
     }
 
-    mem_C = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+    mem_C = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
             num_elements, &status);
     oskar_mem_add(mem_C, mem_A, mem_B, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -92,9 +92,9 @@ TEST(Mem, add_in_place)
     // Use case: In place add.
     int num_elements = 10, status = 0;
     oskar_Mem *mem_A, *mem_B;
-    mem_A = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+    mem_A = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
             num_elements, &status);
-    mem_B = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+    mem_B = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
             num_elements, &status);
     float4c* A = oskar_mem_float4c(mem_A, &status);
     float4c* B = oskar_mem_float4c(mem_B, &status);
@@ -143,10 +143,10 @@ TEST(Mem, add_gpu)
     // Use Case: memory on the GPU.
     int num_elements = 10, status = 0;
     oskar_Mem *mem_A, *mem_B, *mem_C;
-    mem_A = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU,
+    mem_A = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_GPU,
             num_elements, &status);
-    mem_B = oskar_mem_create_copy(mem_A, OSKAR_LOCATION_GPU, &status);
-    mem_C = oskar_mem_create_copy(mem_A, OSKAR_LOCATION_GPU, &status);
+    mem_B = oskar_mem_create_copy(mem_A, OSKAR_GPU, &status);
+    mem_C = oskar_mem_create_copy(mem_A, OSKAR_GPU, &status);
     oskar_mem_add(mem_C, mem_A, mem_B, &status);
     ASSERT_EQ((int)OSKAR_ERR_BAD_LOCATION, status);
     status = 0;
@@ -161,10 +161,10 @@ TEST(Mem, add_dimension_mismatch)
     // Use Case: Dimension mismatch in arrays being added.
     int num_elements = 10, status = 0;
     oskar_Mem *mem_A, *mem_B, *mem_C;
-    mem_A = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+    mem_A = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
             num_elements, &status);
-    mem_B = oskar_mem_create_copy(mem_A, OSKAR_LOCATION_CPU, &status);
-    mem_C = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+    mem_B = oskar_mem_create_copy(mem_A, OSKAR_CPU, &status);
+    mem_C = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
             num_elements / 2, &status);
     oskar_mem_add(mem_C, mem_A, mem_B, &status);
     ASSERT_EQ((int)OSKAR_ERR_DIMENSION_MISMATCH, status);

@@ -65,10 +65,10 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
     if (*status) return;
 
     /* Initialise temporary memory. */
-    if (location != OSKAR_LOCATION_CPU)
+    if (location != OSKAR_CPU)
     {
-        lon_cpu = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
-        lat_cpu = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, status);
+        lon_cpu = oskar_mem_create(type, OSKAR_CPU, num_pixels, status);
+        lat_cpu = oskar_mem_create(type, OSKAR_CPU, num_pixels, status);
     }
     else
     {
@@ -107,7 +107,7 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
     }
 
     /* Copy data to GPU and free temporary arrays, if required. */
-    if (location != OSKAR_LOCATION_CPU)
+    if (location != OSKAR_CPU)
     {
         oskar_mem_copy(lon, lon_cpu, status);
         oskar_mem_copy(lat, lat_cpu, status);

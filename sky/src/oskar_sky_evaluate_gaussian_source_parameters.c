@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,7 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
     if (*status) return;
 
     /* Return if memory is not on the CPU. */
-    if (oskar_sky_location(sky) != OSKAR_LOCATION_CPU)
+    if (oskar_sky_mem_location(sky) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -93,11 +93,11 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
         double work1[5 * ELLIPSE_PTS], work2[5 * ELLIPSE_PTS];
         double lon[ELLIPSE_PTS], lat[ELLIPSE_PTS];
         double x[ELLIPSE_PTS], y[ELLIPSE_PTS], z[ELLIPSE_PTS];
-        ra_  = oskar_mem_double_const(oskar_sky_ra_const(sky), status);
-        dec_ = oskar_mem_double_const(oskar_sky_dec_const(sky), status);
-        maj_ = oskar_mem_double_const(oskar_sky_fwhm_major_const(sky), status);
-        min_ = oskar_mem_double_const(oskar_sky_fwhm_minor_const(sky), status);
-        pa_  = oskar_mem_double_const(oskar_sky_position_angle_const(sky), status);
+        ra_  = oskar_mem_double_const(oskar_sky_ra_rad_const(sky), status);
+        dec_ = oskar_mem_double_const(oskar_sky_dec_rad_const(sky), status);
+        maj_ = oskar_mem_double_const(oskar_sky_fwhm_major_rad_const(sky), status);
+        min_ = oskar_mem_double_const(oskar_sky_fwhm_minor_rad_const(sky), status);
+        pa_  = oskar_mem_double_const(oskar_sky_position_angle_rad_const(sky), status);
         I_   = oskar_mem_double(oskar_sky_I(sky), status);
         Q_   = oskar_mem_double(oskar_sky_Q(sky), status);
         U_   = oskar_mem_double(oskar_sky_U(sky), status);
@@ -179,11 +179,11 @@ void oskar_sky_evaluate_gaussian_source_parameters(oskar_Sky* sky,
         float work1[5 * ELLIPSE_PTS], work2[5 * ELLIPSE_PTS];
         float lon[ELLIPSE_PTS], lat[ELLIPSE_PTS];
         float x[ELLIPSE_PTS], y[ELLIPSE_PTS], z[ELLIPSE_PTS];
-        ra_  = oskar_mem_float_const(oskar_sky_ra_const(sky), status);
-        dec_ = oskar_mem_float_const(oskar_sky_dec_const(sky), status);
-        maj_ = oskar_mem_float_const(oskar_sky_fwhm_major_const(sky), status);
-        min_ = oskar_mem_float_const(oskar_sky_fwhm_minor_const(sky), status);
-        pa_  = oskar_mem_float_const(oskar_sky_position_angle_const(sky), status);
+        ra_  = oskar_mem_float_const(oskar_sky_ra_rad_const(sky), status);
+        dec_ = oskar_mem_float_const(oskar_sky_dec_rad_const(sky), status);
+        maj_ = oskar_mem_float_const(oskar_sky_fwhm_major_rad_const(sky), status);
+        min_ = oskar_mem_float_const(oskar_sky_fwhm_minor_rad_const(sky), status);
+        pa_  = oskar_mem_float_const(oskar_sky_position_angle_rad_const(sky), status);
         I_   = oskar_mem_float(oskar_sky_I(sky), status);
         Q_   = oskar_mem_float(oskar_sky_Q(sky), status);
         U_   = oskar_mem_float(oskar_sky_U(sky), status);

@@ -36,7 +36,6 @@
 #include <oskar_global.h>
 #include <oskar_mem.h>
 #include <oskar_element.h>
-#include <oskar_system_noise_model.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,10 +66,10 @@ int oskar_station_precision(const oskar_Station* model);
  *
  * @param[in] model   Pointer to station model.
  *
- * @return The memory location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+ * @return The memory location (OSKAR_CPU or OSKAR_GPU).
  */
 OSKAR_EXPORT
-int oskar_station_location(const oskar_Station* model);
+int oskar_station_mem_location(const oskar_Station* model);
 
 OSKAR_EXPORT
 int oskar_station_type(const oskar_Station* model);
@@ -79,28 +78,34 @@ OSKAR_EXPORT
 int oskar_station_normalise_final_beam(const oskar_Station* model);
 
 OSKAR_EXPORT
-double oskar_station_longitude_rad(const oskar_Station* model);
+double oskar_station_lon_rad(const oskar_Station* model);
 
 OSKAR_EXPORT
-double oskar_station_latitude_rad(const oskar_Station* model);
+double oskar_station_lat_rad(const oskar_Station* model);
 
 OSKAR_EXPORT
-double oskar_station_altitude_m(const oskar_Station* model);
+double oskar_station_alt_metres(const oskar_Station* model);
 
 OSKAR_EXPORT
-double oskar_station_beam_longitude_rad(const oskar_Station* model);
+double oskar_station_beam_lon_rad(const oskar_Station* model);
 
 OSKAR_EXPORT
-double oskar_station_beam_latitude_rad(const oskar_Station* model);
+double oskar_station_beam_lat_rad(const oskar_Station* model);
 
 OSKAR_EXPORT
 int oskar_station_beam_coord_type(const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_SystemNoiseModel* oskar_station_system_noise_model(oskar_Station* model);
+oskar_Mem* oskar_station_noise_freq_hz(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_SystemNoiseModel* oskar_station_system_noise_model_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_noise_freq_hz_const(const oskar_Station* model);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_station_noise_rms_jy(oskar_Station* model);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_station_noise_rms_jy_const(const oskar_Station* model);
 
 /* Data used only for Gaussian beam stations. */
 
@@ -108,7 +113,7 @@ OSKAR_EXPORT
 double oskar_station_gaussian_beam_fwhm_rad(const oskar_Station* model);
 
 OSKAR_EXPORT
-double oskar_station_gaussian_beam_ref_freq_hz(const oskar_Station* model);
+double oskar_station_gaussian_beam_reference_freq_hz(const oskar_Station* model);
 
 /* Data used only for aperture array stations. */
 
@@ -143,10 +148,12 @@ OSKAR_EXPORT
 int oskar_station_apply_element_weight(const oskar_Station* model);
 
 OSKAR_EXPORT
-double oskar_station_nominal_element_orientation_x_rad(const oskar_Station* model);
+double oskar_station_nominal_element_orientation_x_rad(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
-double oskar_station_nominal_element_orientation_y_rad(const oskar_Station* model);
+double oskar_station_nominal_element_orientation_y_rad(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
 double oskar_station_element_orientation_x_rad(const oskar_Station* model,
@@ -157,40 +164,46 @@ double oskar_station_element_orientation_y_rad(const oskar_Station* model,
         int index);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_x_signal(oskar_Station* model);
+oskar_Mem* oskar_station_element_true_x_enu_metres(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_x_signal_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_true_x_enu_metres_const(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_y_signal(oskar_Station* model);
+oskar_Mem* oskar_station_element_true_y_enu_metres(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_y_signal_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_true_y_enu_metres_const(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_z_signal(oskar_Station* model);
+oskar_Mem* oskar_station_element_true_z_enu_metres(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_z_signal_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_true_z_enu_metres_const(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_x_weights(oskar_Station* model);
+oskar_Mem* oskar_station_element_measured_x_enu_metres(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_x_weights_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_measured_x_enu_metres_const(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_y_weights(oskar_Station* model);
+oskar_Mem* oskar_station_element_measured_y_enu_metres(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_y_weights_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_measured_y_enu_metres_const(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_z_weights(oskar_Station* model);
+oskar_Mem* oskar_station_element_measured_z_enu_metres(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_z_weights_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_measured_z_enu_metres_const(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_station_element_gain(oskar_Station* model);
@@ -202,19 +215,22 @@ OSKAR_EXPORT
 oskar_Mem* oskar_station_element_gain_error(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_gain_error_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_gain_error_const(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_phase_offset(oskar_Station* model);
+oskar_Mem* oskar_station_element_phase_offset_rad(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_phase_offset_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_phase_offset_rad_const(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_phase_error(oskar_Station* model);
+oskar_Mem* oskar_station_element_phase_error_rad(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_phase_error_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_phase_error_rad_const(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_station_element_weight(oskar_Station* model);
@@ -223,16 +239,18 @@ OSKAR_EXPORT
 const oskar_Mem* oskar_station_element_weight_const(const oskar_Station* model);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_station_element_orientation_x_cpu(oskar_Station* model);
+oskar_Mem* oskar_station_element_orientation_x_rad_cpu(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_orientation_x_cpu_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_orientation_x_rad_cpu_const(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_station_element_orientation_y_cpu(oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_orientation_y_cpu_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_element_orientation_y_rad_cpu_const(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_station_element_types(oskar_Station* model);
@@ -250,7 +268,8 @@ OSKAR_EXPORT
 oskar_Station* oskar_station_child(oskar_Station* model, int i);
 
 OSKAR_EXPORT
-const oskar_Station* oskar_station_child_const(const oskar_Station* model, int i);
+const oskar_Station* oskar_station_child_const(const oskar_Station* model,
+        int i);
 
 OSKAR_EXPORT
 int oskar_station_has_element(const oskar_Station* model);
@@ -267,10 +286,12 @@ OSKAR_EXPORT
 int oskar_station_num_permitted_beams(const oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_permitted_beam_azimuth_rad_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_permitted_beam_az_rad_const(
+        const oskar_Station* model);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_station_permitted_beam_elevation_rad_const(const oskar_Station* model);
+const oskar_Mem* oskar_station_permitted_beam_el_rad_const(
+        const oskar_Station* model);
 
 
 /* Setters. */
@@ -340,29 +361,18 @@ void oskar_station_set_phase_centre(oskar_Station* model,
 
 /**
  * @brief
- * Sets the FWHM value of the Gaussian beam used for Gaussian beam stations.
+ * Sets the parameters of the Gaussian beam used for Gaussian beam stations.
  *
  * @details
- * Sets the FWHM value of the Gaussian beam used for Gaussian beam stations.
+ * Sets the parameters of the Gaussian beam used for Gaussian beam stations.
  *
- * @param[in] model Pointer to station model.
- * @param[in] value Full-width-half-maximum of the Gaussian beam, in radians.
+ * @param[in] model       Pointer to station model.
+ * @param[in] fwhm_rad    Full-width-half-maximum of the Gaussian beam, in radians.
+ * @param[in] ref_freq_hz Reference frequency at which FWHM applies, in Hz.
  */
 OSKAR_EXPORT
-void oskar_station_set_gaussian_beam_fwhm_rad(oskar_Station* model,
-        double value);
-
-/**
- * @brief
- * Sets the reference frequency of the FWHM value of the Gaussian beam
- * used for Gaussian beam stations.
- *
- * @param[in] model Pointer to station model.
- * @param[in] value Reference frequency, in Hz.
- */
-OSKAR_EXPORT
-void oskar_station_set_gaussian_beam_ref_freq_hz(oskar_Station* model,
-        double value);
+void oskar_station_set_gaussian_beam(oskar_Station* model,
+        double fwhm_rad, double ref_freq_hz);
 
 /**
  * @brief

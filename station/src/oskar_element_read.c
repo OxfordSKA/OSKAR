@@ -65,22 +65,22 @@ void oskar_element_read(oskar_Element* data, int port, double freq_hz,
     if (*status) return;
 
     /* Check if this frequency has already been set, and get its index if so. */
-    n = data->num_frequencies;
+    n = data->num_freq;
     for (i = 0; i < n; ++i)
     {
-        if (fabs(data->frequency_hz[i] - freq_hz) <= freq_hz * DBL_EPSILON)
+        if (fabs(data->freqs_hz[i] - freq_hz) <= freq_hz * DBL_EPSILON)
             break;
     }
 
     /* Expand arrays to hold data for a new frequency, if needed. */
-    if (i >= data->num_frequencies)
+    if (i >= data->num_freq)
     {
-        i = data->num_frequencies;
-        oskar_element_resize_frequency_data(data, i + 1, status);
+        i = data->num_freq;
+        oskar_element_resize_freq_data(data, i + 1, status);
     }
 
     /* Store the frequency. */
-    data->frequency_hz[i] = freq_hz;
+    data->freqs_hz[i] = freq_hz;
 
     /* Get pointers to surface data based on port number and frequency index. */
     if (port == 1)
@@ -119,12 +119,12 @@ void oskar_element_read(oskar_Element* data, int port, double freq_hz,
     if (port == 1)
     {
         oskar_mem_append_raw(data->filename_x[i], filename, OSKAR_CHAR,
-                OSKAR_LOCATION_CPU, 1 + strlen(filename), status);
+                OSKAR_CPU, 1 + strlen(filename), status);
     }
     else if (port == 2)
     {
         oskar_mem_append_raw(data->filename_y[i], filename, OSKAR_CHAR,
-                OSKAR_LOCATION_CPU, 1 + strlen(filename), status);
+                OSKAR_CPU, 1 + strlen(filename), status);
     }
 
     /* Free the tag index. */

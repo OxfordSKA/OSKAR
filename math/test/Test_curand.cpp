@@ -132,7 +132,7 @@ TEST(curand, test_state_allocation)
     int num_threads = 20;
     int num_per_thread = 1;
     int num_values = num_blocks * num_threads * num_per_thread;
-    oskar_Mem *d_values = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+    oskar_Mem *d_values = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
             num_values, &status);
     double* d_values_ = oskar_mem_double(d_values, &status);
 
@@ -142,7 +142,7 @@ TEST(curand, test_state_allocation)
                 num_per_thread, random_state->state, num_states);
 
         oskar_Mem* h_values = oskar_mem_create_copy(d_values,
-                OSKAR_LOCATION_CPU, &status);
+                OSKAR_CPU, &status);
         if (file)
         {
             double* v_ = oskar_mem_double(h_values, &status);
@@ -193,7 +193,7 @@ TEST(curand, test_multi_device)
         int num_threads = 2;
         int num_per_thread = 2;
         int num_values = num_blocks * num_threads * num_per_thread;
-        oskar_Mem *d_values = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU,
+        oskar_Mem *d_values = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
                 num_values, &error);
         double* d_values_ = oskar_mem_double(d_values, &error);
 
@@ -205,7 +205,7 @@ TEST(curand, test_multi_device)
                     num_values, num_per_thread, d_states->state, num_states);
 
             oskar_Mem* h_values = oskar_mem_create_copy(d_values,
-                    OSKAR_LOCATION_CPU, &error);
+                    OSKAR_CPU, &error);
             if (file)
             {
                 double* v_ = oskar_mem_double(h_values, &error);

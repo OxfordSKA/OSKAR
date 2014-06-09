@@ -464,7 +464,7 @@ void oskar_mem_element_multiply_cuda(oskar_Mem* C, const oskar_Mem* A,
     Bp = B;
 
     /* Check that the output array is in GPU memory. */
-    if (oskar_mem_location(C) != OSKAR_LOCATION_GPU)
+    if (oskar_mem_location(C) != OSKAR_GPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -489,14 +489,14 @@ void oskar_mem_element_multiply_cuda(oskar_Mem* C, const oskar_Mem* A,
     }
 
     /* Copy input data to temporary GPU memory if required. */
-    if (oskar_mem_location(A) != OSKAR_LOCATION_GPU)
+    if (oskar_mem_location(A) != OSKAR_GPU)
     {
-        At = oskar_mem_create_copy(A, OSKAR_LOCATION_GPU, status);
+        At = oskar_mem_create_copy(A, OSKAR_GPU, status);
         Ap = At;
     }
-    if (oskar_mem_location(B) != OSKAR_LOCATION_GPU)
+    if (oskar_mem_location(B) != OSKAR_GPU)
     {
-        Bt = oskar_mem_create_copy(B, OSKAR_LOCATION_GPU, status);
+        Bt = oskar_mem_create_copy(B, OSKAR_GPU, status);
         Bp = Bt;
     }
 

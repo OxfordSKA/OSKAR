@@ -61,9 +61,9 @@ void oskar_station_save_orientation(const char* filename,
 
     /* Get pointers to the arrays. */
     orientation_x = oskar_mem_double_const(
-            oskar_station_element_orientation_x_cpu_const(station), status);
+            oskar_station_element_orientation_x_rad_cpu_const(station), status);
     orientation_y = oskar_mem_double_const(
-            oskar_station_element_orientation_y_cpu_const(station), status);
+            oskar_station_element_orientation_y_rad_cpu_const(station), status);
 
     /* Open the file. */
     file = fopen(filename, "w");

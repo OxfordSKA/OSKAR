@@ -121,10 +121,10 @@ void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
         if (coord_type == OSKAR_ENU_DIRECTION_COSINES)
         {
             double t_x, t_y, t_z, ha0;
-            ha0 = (GAST + oskar_station_longitude_rad(station)) - ra0;
+            ha0 = (GAST + oskar_station_lon_rad(station)) - ra0;
             oskar_convert_relative_direction_cosines_to_enu_direction_cosines_d(
                     &t_x, &t_y, &t_z, 1, &c_x, &c_y, &c_z, ha0, dec0,
-                    oskar_station_latitude_rad(station));
+                    oskar_station_lat_rad(station));
             c_x = t_x;
             c_y = t_y;
             c_z = t_z;
@@ -237,7 +237,7 @@ static void evaluate_station_beam_relative_directions(oskar_Mem* beam_pattern,
         {
             double fwhm, f0;
             fwhm = oskar_station_gaussian_beam_fwhm_rad(station);
-            f0 =oskar_station_gaussian_beam_ref_freq_hz(station);
+            f0 =oskar_station_gaussian_beam_reference_freq_hz(station);
             fwhm *= f0 / frequency;
             oskar_evaluate_station_beam_gaussian(beam_pattern, np, l, m, z,
                     fwhm, status);
@@ -288,7 +288,7 @@ static void evaluate_station_beam_enu_directions(oskar_Mem* beam_pattern,
             compute_relative_directions(l, m, n, np, x, y, z, station, GAST,
                     status);
             fwhm = oskar_station_gaussian_beam_fwhm_rad(station);
-            f0 =oskar_station_gaussian_beam_ref_freq_hz(station);
+            f0 =oskar_station_gaussian_beam_reference_freq_hz(station);
             fwhm *= f0 / frequency;
             oskar_evaluate_station_beam_gaussian(beam_pattern, np, l, m, z,
                     fwhm, status);
@@ -330,14 +330,14 @@ static void compute_enu_directions(oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
     if (*status) return;
 
     /* Obtain ra0, dec0 of phase centre */
-    lat  = oskar_station_latitude_rad(station);
+    lat  = oskar_station_lat_rad(station);
     pointing_coord_type = oskar_station_beam_coord_type(station);
     if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
     {
         double ra0;
-        ra0  = oskar_station_beam_longitude_rad(station);
-        ha0  = (GAST + oskar_station_longitude_rad(station)) - ra0;
-        dec0 = oskar_station_beam_latitude_rad(station);
+        ra0  = oskar_station_beam_lon_rad(station);
+        ha0  = (GAST + oskar_station_lon_rad(station)) - ra0;
+        dec0 = oskar_station_beam_lat_rad(station);
     }
     else if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)
     {
@@ -375,14 +375,14 @@ static void compute_relative_directions(oskar_Mem* l, oskar_Mem* m,
     if (*status) return;
 
     /* Obtain ra0, dec0 of phase centre */
-    lat  = oskar_station_latitude_rad(station);
+    lat  = oskar_station_lat_rad(station);
     pointing_coord_type = oskar_station_beam_coord_type(station);
     if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
     {
         double ra0;
-        ra0  = oskar_station_beam_longitude_rad(station);
-        ha0  = (GAST + oskar_station_longitude_rad(station)) - ra0;
-        dec0 = oskar_station_beam_latitude_rad(station);
+        ra0  = oskar_station_beam_lon_rad(station);
+        ha0  = (GAST + oskar_station_lon_rad(station)) - ra0;
+        dec0 = oskar_station_beam_lat_rad(station);
     }
     else if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)
     {

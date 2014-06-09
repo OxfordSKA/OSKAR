@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ void oskar_sky_save(const char* filename, const oskar_Sky* sky, int* status)
     if (*status) return;
 
     /* Check sky model is in CPU memory. */
-    if (oskar_sky_location(sky) == OSKAR_LOCATION_GPU)
+    if (oskar_sky_mem_location(sky) == OSKAR_GPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -86,18 +86,18 @@ void oskar_sky_save(const char* filename, const oskar_Sky* sky, int* status)
     {
         const double *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *sp_, *rm_;
         const double *maj_, *min_, *pa_;
-        ra_  = oskar_mem_double_const(oskar_sky_ra_const(sky), status);
-        dec_ = oskar_mem_double_const(oskar_sky_dec_const(sky), status);
+        ra_  = oskar_mem_double_const(oskar_sky_ra_rad_const(sky), status);
+        dec_ = oskar_mem_double_const(oskar_sky_dec_rad_const(sky), status);
         I_   = oskar_mem_double_const(oskar_sky_I_const(sky), status);
         Q_   = oskar_mem_double_const(oskar_sky_Q_const(sky), status);
         U_   = oskar_mem_double_const(oskar_sky_U_const(sky), status);
         V_   = oskar_mem_double_const(oskar_sky_V_const(sky), status);
-        ref_ = oskar_mem_double_const(oskar_sky_reference_freq_const(sky), status);
+        ref_ = oskar_mem_double_const(oskar_sky_reference_freq_hz_const(sky), status);
         sp_  = oskar_mem_double_const(oskar_sky_spectral_index_const(sky), status);
-        rm_  = oskar_mem_double_const(oskar_sky_rotation_measure_const(sky), status);
-        maj_ = oskar_mem_double_const(oskar_sky_fwhm_major_const(sky), status);
-        min_ = oskar_mem_double_const(oskar_sky_fwhm_minor_const(sky), status);
-        pa_  = oskar_mem_double_const(oskar_sky_position_angle_const(sky), status);
+        rm_  = oskar_mem_double_const(oskar_sky_rotation_measure_rad_const(sky), status);
+        maj_ = oskar_mem_double_const(oskar_sky_fwhm_major_rad_const(sky), status);
+        min_ = oskar_mem_double_const(oskar_sky_fwhm_minor_rad_const(sky), status);
+        pa_  = oskar_mem_double_const(oskar_sky_position_angle_rad_const(sky), status);
 
         for (s = 0; s < num_sources; ++s)
         {
@@ -113,18 +113,18 @@ void oskar_sky_save(const char* filename, const oskar_Sky* sky, int* status)
     {
         const float *ra_, *dec_, *I_, *Q_, *U_, *V_, *ref_, *sp_, *rm_;
         const float *maj_, *min_, *pa_;
-        ra_  = oskar_mem_float_const(oskar_sky_ra_const(sky), status);
-        dec_ = oskar_mem_float_const(oskar_sky_dec_const(sky), status);
+        ra_  = oskar_mem_float_const(oskar_sky_ra_rad_const(sky), status);
+        dec_ = oskar_mem_float_const(oskar_sky_dec_rad_const(sky), status);
         I_   = oskar_mem_float_const(oskar_sky_I_const(sky), status);
         Q_   = oskar_mem_float_const(oskar_sky_Q_const(sky), status);
         U_   = oskar_mem_float_const(oskar_sky_U_const(sky), status);
         V_   = oskar_mem_float_const(oskar_sky_V_const(sky), status);
-        ref_ = oskar_mem_float_const(oskar_sky_reference_freq_const(sky), status);
+        ref_ = oskar_mem_float_const(oskar_sky_reference_freq_hz_const(sky), status);
         sp_  = oskar_mem_float_const(oskar_sky_spectral_index_const(sky), status);
-        rm_  = oskar_mem_float_const(oskar_sky_rotation_measure_const(sky), status);
-        maj_ = oskar_mem_float_const(oskar_sky_fwhm_major_const(sky), status);
-        min_ = oskar_mem_float_const(oskar_sky_fwhm_minor_const(sky), status);
-        pa_  = oskar_mem_float_const(oskar_sky_position_angle_const(sky), status);
+        rm_  = oskar_mem_float_const(oskar_sky_rotation_measure_rad_const(sky), status);
+        maj_ = oskar_mem_float_const(oskar_sky_fwhm_major_rad_const(sky), status);
+        min_ = oskar_mem_float_const(oskar_sky_fwhm_minor_rad_const(sky), status);
+        pa_  = oskar_mem_float_const(oskar_sky_position_angle_rad_const(sky), status);
 
         for (s = 0; s < num_sources; ++s)
         {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,7 @@ oskar_Jones* oskar_jones_create(int type, int location, int num_stations,
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return 0;
     }
-    if (location != OSKAR_LOCATION_CPU && location != OSKAR_LOCATION_GPU)
+    if (location != OSKAR_CPU && location != OSKAR_GPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return 0;

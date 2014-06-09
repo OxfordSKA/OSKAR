@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,7 @@ void oskar_convert_theta_phi_to_enu_direction_cosines(oskar_Mem* x,
         return;
     }
 
-    if (loc != OSKAR_LOCATION_CPU)
+    if (loc != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;

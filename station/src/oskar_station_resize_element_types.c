@@ -57,18 +57,18 @@ void oskar_station_resize_element_types(oskar_Station* model,
     if (num_element_types > old_num_element_types)
     {
         /* Enlarge the element array and create new elements. */
-        model->element_pattern = realloc(model->element_pattern,
+        model->element = realloc(model->element,
                 num_element_types * sizeof(oskar_Element*));
-        if (!model->element_pattern)
+        if (!model->element)
         {
             *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
             return;
         }
         for (i = old_num_element_types; i < num_element_types; ++i)
         {
-            model->element_pattern[i] = oskar_element_create(
+            model->element[i] = oskar_element_create(
                     oskar_station_precision(model),
-                    oskar_station_location(model), status);
+                    oskar_station_mem_location(model), status);
         }
     }
     else if (num_element_types < old_num_element_types)
@@ -78,7 +78,7 @@ void oskar_station_resize_element_types(oskar_Station* model,
         {
             oskar_element_free(oskar_station_element(model, i), status);
         }
-        model->element_pattern = realloc(model->element_pattern,
+        model->element = realloc(model->element,
                 num_element_types * sizeof(oskar_Element*));
     }
 

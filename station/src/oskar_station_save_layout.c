@@ -56,26 +56,26 @@ void oskar_station_save_layout(const char* filename,
 
     /* Check type and location. */
     type = oskar_station_precision(station);
-    location = oskar_station_location(station);
+    location = oskar_station_mem_location(station);
     num_elements = oskar_station_num_elements(station);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
-    if (location != OSKAR_LOCATION_CPU)
+    if (location != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
 
     /* Get pointers to the arrays. */
-    x_weights = oskar_station_element_x_weights_const(station);
-    y_weights = oskar_station_element_y_weights_const(station);
-    z_weights = oskar_station_element_z_weights_const(station);
-    x_signal = oskar_station_element_x_signal_const(station);
-    y_signal = oskar_station_element_y_signal_const(station);
-    z_signal = oskar_station_element_z_signal_const(station);
+    x_weights = oskar_station_element_measured_x_enu_metres_const(station);
+    y_weights = oskar_station_element_measured_y_enu_metres_const(station);
+    z_weights = oskar_station_element_measured_z_enu_metres_const(station);
+    x_signal = oskar_station_element_true_x_enu_metres_const(station);
+    y_signal = oskar_station_element_true_y_enu_metres_const(station);
+    z_signal = oskar_station_element_true_z_enu_metres_const(station);
 
     /* Open the file. */
     file = fopen(filename, "w");
@@ -87,9 +87,9 @@ void oskar_station_save_layout(const char* filename,
 
     /* Save the station data. */
     fprintf(file, "# Number of elements  = %i\n", num_elements);
-    fprintf(file, "# Longitude [radians] = %f\n", station->longitude_rad);
-    fprintf(file, "# Latitude [radians]  = %f\n", station->latitude_rad);
-    fprintf(file, "# Altitude [metres]   = %f\n", station->altitude_m);
+    fprintf(file, "# Longitude [radians] = %f\n", station->lon_rad);
+    fprintf(file, "# Latitude [radians]  = %f\n", station->lat_rad);
+    fprintf(file, "# Altitude [metres]   = %f\n", station->alt_metres);
     fprintf(file, "# Local horizontal x (east), y (north), z (up) [metres], "
             "delta x, delta y, delta z [metres]\n");
     if (type == OSKAR_DOUBLE)

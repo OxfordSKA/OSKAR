@@ -107,7 +107,7 @@ int main(int argc, char** argv)
         oskar_log_settings_interferometer(0, &settings);
     }
 
-    oskar_Telescope* tel = oskar_set_up_telescope(0, &settings, &status);
+    oskar_Telescope* tel = oskar_set_up_telescope(&settings, 0, &status);
     check_error(status);
 
 

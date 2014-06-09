@@ -91,13 +91,11 @@ void oskar_vis_add_system_noise(oskar_Vis* vis,
             {
                 const oskar_Mem *noise_freq, *noise_rms;
                 const oskar_Station *st;
-                const oskar_SystemNoiseModel* noise;
 
                 /* Retrieve the std.dev. for the baseline antennas. */
                 st = oskar_telescope_station_const(telescope, ant1[b]);
-                noise = oskar_station_system_noise_model_const(st);
-                noise_freq = oskar_system_noise_model_frequency_const(noise);
-                noise_rms = oskar_system_noise_model_rms_const(noise);
+                noise_freq = oskar_station_noise_freq_hz_const(st);
+                noise_rms = oskar_station_noise_rms_jy_const(st);
                 is1 = oskar_find_closest_match(vis_freq, noise_freq, status);
                 if (oskar_mem_type(noise_freq) == OSKAR_DOUBLE)
                     s1 = oskar_mem_double_const(noise_rms, status)[is1];
@@ -105,9 +103,8 @@ void oskar_vis_add_system_noise(oskar_Vis* vis,
                     s1 = oskar_mem_float_const(noise_rms, status)[is1];
 
                 st = oskar_telescope_station_const(telescope, ant2[b]);
-                noise = oskar_station_system_noise_model_const(st);
-                noise_freq = oskar_system_noise_model_frequency_const(noise);
-                noise_rms = oskar_system_noise_model_rms_const(noise);
+                noise_freq = oskar_station_noise_freq_hz_const(st);
+                noise_rms = oskar_station_noise_rms_jy_const(st);
                 is2 = oskar_find_closest_match(vis_freq, noise_freq, status);
                 if (oskar_mem_type(noise_freq) == OSKAR_DOUBLE)
                     s2 = oskar_mem_double_const(noise_rms, status)[is2];

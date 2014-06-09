@@ -67,7 +67,7 @@ void oskar_station_create_child_stations(oskar_Station* station,
 
     /* Create and initialise each child station. */
     type = oskar_station_precision(station);
-    location = oskar_station_location(station);
+    location = oskar_station_mem_location(station);
     for (i = 0; i < station->num_elements; ++i)
     {
         station->child[i] = oskar_station_create(type, location, 0, status);

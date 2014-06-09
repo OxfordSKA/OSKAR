@@ -72,7 +72,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Load the telescope model station layout file
     int err = OSKAR_SUCCESS;
     oskar_Telescope* telescope = oskar_telescope_create(OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, 0, &err);
+            OSKAR_CPU, 0, &err);
     oskar_telescope_load_station_coords_horizon(telescope, filename,
             lon, lat, alt, &err);
     if (err)
@@ -92,20 +92,20 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mxArray* ww_ = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
     oskar_Mem *uu, *vv, *ww, *work_uvw;
     uu = oskar_mem_create_alias_from_raw(mxGetData(uu_), OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, num_coords, &err);
+            OSKAR_CPU, num_coords, &err);
     vv = oskar_mem_create_alias_from_raw(mxGetData(vv_), OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, num_coords, &err);
+            OSKAR_CPU, num_coords, &err);
     ww = oskar_mem_create_alias_from_raw(mxGetData(ww_), OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, num_coords, &err);
+            OSKAR_CPU, num_coords, &err);
 
     // Allocate work array
-    work_uvw = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+    work_uvw = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
             3 * num_stations, &err);
 
     oskar_convert_ecef_to_baseline_uvw(uu, vv, ww, num_stations,
-            oskar_telescope_station_x_offset_ecef_metres_const(telescope),
-            oskar_telescope_station_y_offset_ecef_metres_const(telescope),
-            oskar_telescope_station_z_offset_ecef_metres_const(telescope),
+            oskar_telescope_station_true_x_offset_ecef_metres_const(telescope),
+            oskar_telescope_station_true_y_offset_ecef_metres_const(telescope),
+            oskar_telescope_station_true_z_offset_ecef_metres_const(telescope),
             ra, dec, num_times, start_mjd_utc, dt, work_uvw, &err);
     if (err)
     {

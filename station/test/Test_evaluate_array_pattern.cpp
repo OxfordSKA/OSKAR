@@ -110,7 +110,7 @@ static oskar_Image* set_up_beam_pattern(int type, bool polarised,
     num_pols     = polarised ? 4 : 1;
 
     /* Initialise complex image cube. */
-    bp = oskar_image_create(type | OSKAR_COMPLEX, OSKAR_LOCATION_CPU, status);
+    bp = oskar_image_create(type | OSKAR_COMPLEX, OSKAR_CPU, status);
     oskar_image_resize(bp, image_size, image_size, num_pols, num_times,
             num_channels, status);
 
@@ -134,7 +134,7 @@ static oskar_Station* set_up_station1(int num_x, int num_y,
     int dummy = 0, ix, iy, i;
 
     /* Initialise the station model. */
-    station = oskar_station_create(type, OSKAR_LOCATION_CPU,
+    station = oskar_station_create(type, OSKAR_CPU,
             num_x * num_y, status);
 
     /* Generate a square station. */
@@ -176,12 +176,12 @@ static void set_up_pointing(oskar_Mem** weights, oskar_Mem** x, oskar_Mem** y,
     oskar_Mem *l, *m, *n;
 
     type = oskar_station_precision(station);
-    location = oskar_station_location(station);
+    location = oskar_station_mem_location(station);
     num_elements = oskar_station_num_elements(station);
     num_points = oskar_mem_length(lon);
     wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
-    last = gast + oskar_station_longitude_rad(station);
-    st_lat = oskar_station_latitude_rad(station);
+    last = gast + oskar_station_lon_rad(station);
+    st_lat = oskar_station_lat_rad(station);
     *weights = oskar_mem_create(type | OSKAR_COMPLEX, location, num_elements,
             status);
     *x = oskar_mem_create(type, location, num_points, status);
@@ -197,9 +197,9 @@ static void set_up_pointing(oskar_Mem** weights, oskar_Mem** x, oskar_Mem** y,
     oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
             *x, *y, *z, num_points, l, m, n, last, 0.0, st_lat, status);
     oskar_evaluate_element_weights_dft(*weights, num_elements, wavenumber,
-            oskar_station_element_x_weights_const(station),
-            oskar_station_element_y_weights_const(station),
-            oskar_station_element_z_weights_const(station),
+            oskar_station_element_measured_x_enu_metres_const(station),
+            oskar_station_element_measured_y_enu_metres_const(station),
+            oskar_station_element_measured_z_enu_metres_const(station),
             beam_x, beam_y, beam_z, status);
     oskar_mem_free(l, status);
     oskar_mem_free(m, status);
@@ -217,7 +217,7 @@ static void run_array_pattern(oskar_Image* bp,
 
     /* Get the meta-data. */
     num_pixels = (int)oskar_mem_length(lon);
-    location = oskar_station_location(station);
+    location = oskar_station_mem_location(station);
     wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
 
     /* Initialise temporary arrays. */
@@ -254,7 +254,7 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
 
     /* Get the meta-data. */
     num_pixels = (int)oskar_mem_length(lon);
-    location = oskar_station_location(station);
+    location = oskar_station_mem_location(station);
     wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
 
     /* Initialise temporary array. */
@@ -286,7 +286,7 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
     {
         /* Copy beam pattern for re-ordering. */
         oskar_Mem *pattern_temp = oskar_mem_create_copy(pattern,
-                OSKAR_LOCATION_CPU, status);
+                OSKAR_CPU, status);
         ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
 
         /* Re-order the polarisation data. */
@@ -364,28 +364,28 @@ TEST(evaluate_array_pattern, test)
             ra_deg, dec_deg, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     station_gpu_f = oskar_station_create_copy(station_cpu_f,
-            OSKAR_LOCATION_GPU, &status);
+            OSKAR_GPU, &status);
     station_gpu_d = oskar_station_create_copy(station_cpu_d,
-            OSKAR_LOCATION_GPU, &status);
+            OSKAR_GPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Set up longitude/latitude grids. */
     type = OSKAR_SINGLE;
-    lon_cpu_f = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, &status);
-    lat_cpu_f = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, &status);
+    lon_cpu_f = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
+    lat_cpu_f = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
     oskar_evaluate_image_lon_lat_grid(lon_cpu_f, lat_cpu_f, image_side,
             image_side, fov_rad, fov_rad, ra_rad, dec_rad, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     type = OSKAR_DOUBLE;
-    lon_cpu_d = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, &status);
-    lat_cpu_d = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_pixels, &status);
+    lon_cpu_d = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
+    lat_cpu_d = oskar_mem_create(type, OSKAR_CPU, num_pixels, &status);
     oskar_evaluate_image_lon_lat_grid(lon_cpu_d, lat_cpu_d, image_side,
             image_side, fov_rad, fov_rad, ra_rad, dec_rad, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    lon_gpu_f = oskar_mem_create_copy(lon_cpu_f, OSKAR_LOCATION_GPU, &status);
-    lon_gpu_d = oskar_mem_create_copy(lon_cpu_d, OSKAR_LOCATION_GPU, &status);
-    lat_gpu_f = oskar_mem_create_copy(lat_cpu_f, OSKAR_LOCATION_GPU, &status);
-    lat_gpu_d = oskar_mem_create_copy(lat_cpu_d, OSKAR_LOCATION_GPU, &status);
+    lon_gpu_f = oskar_mem_create_copy(lon_cpu_f, OSKAR_GPU, &status);
+    lon_gpu_d = oskar_mem_create_copy(lon_cpu_d, OSKAR_GPU, &status);
+    lat_gpu_f = oskar_mem_create_copy(lat_cpu_f, OSKAR_GPU, &status);
+    lat_gpu_d = oskar_mem_create_copy(lat_cpu_d, OSKAR_GPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Set up beam patterns. */

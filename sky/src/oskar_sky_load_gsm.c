@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -121,7 +121,7 @@ void oskar_sky_load_gsm(oskar_Sky* sky, const char* filename, int* status)
     }
 
     /* Initialise the temporary sky model. */
-    temp_sky = oskar_sky_create(type, OSKAR_LOCATION_CPU, n, status);
+    temp_sky = oskar_sky_create(type, OSKAR_CPU, n, status);
     if (*status)
     {
         if (temp) free(temp);

@@ -161,11 +161,11 @@ int main(int argc, char** argv)
                 OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
         {
             oskar_log_value(log, 0, width, "Field of view (deg)", "%.3f",
-                    oskar_image_fov_latitude_deg(image));
+                    oskar_image_fov_lat_deg(image));
             oskar_log_value(log, 0, width, "Centre longitude (deg)",
-                    "%.3f", oskar_image_centre_longitude_deg(image));
+                    "%.3f", oskar_image_centre_lon_deg(image));
             oskar_log_value(log, 0, width, "Centre latitude (deg)",
-                    "%.3f", oskar_image_centre_latitude_deg(image));
+                    "%.3f", oskar_image_centre_lat_deg(image));
         }
 
         oskar_log_value(log, 0, width, "Start time MJD(UTC)",
@@ -198,7 +198,7 @@ int main(int argc, char** argv)
         if (!tag_error)
         {
             oskar_Mem *temp;
-            temp = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, &status);
+            temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &status);
             oskar_mem_binary_stream_read(temp, stream, &index,
                     OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
             oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);
@@ -228,7 +228,7 @@ int main(int argc, char** argv)
         if (!tag_error)
         {
             oskar_Mem *temp;
-            temp = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, &status);
+            temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &status);
             oskar_mem_binary_stream_read(temp, stream, &index,
                     OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
             oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);

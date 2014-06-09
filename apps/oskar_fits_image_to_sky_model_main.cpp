@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
 
     // Load the FITS file as a sky model.
     oskar_Sky* sky = oskar_sky_create(OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, 0, &error);
+            OSKAR_CPU, 0, &error);
     error = oskar_fits_image_to_sky_model(0, opt.getArg(0), sky,
             spectral_index, min_peak_fraction, noise_floor, downsample_factor);
     if (error)

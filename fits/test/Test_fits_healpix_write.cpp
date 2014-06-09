@@ -43,7 +43,7 @@ TEST(fits_healpix_image_write, test)
     int npix = 12 * nside * nside;
 
     int type = OSKAR_DOUBLE;
-    int loc = OSKAR_LOCATION_CPU;
+    int loc = OSKAR_CPU;
     int num_channels = 2;
     oskar_mem_init(&image.data, type, loc, npix * num_channels, 1, &status);
     double* data_ = oskar_mem_double(oskar_image_data(&image), &status);

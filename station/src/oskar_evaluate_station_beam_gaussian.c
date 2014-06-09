@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -119,7 +119,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         l_ = oskar_mem_double_const(l, status);
         m_ = oskar_mem_double_const(m, status);
 
-        if (location == OSKAR_LOCATION_CPU)
+        if (location == OSKAR_CPU)
         {
             if (oskar_mem_is_scalar(beam))
             {
@@ -153,7 +153,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         l_ = oskar_mem_float_const(l, status);
         m_ = oskar_mem_float_const(m, status);
 
-        if (location == OSKAR_LOCATION_CPU)
+        if (location == OSKAR_CPU)
         {
             if (oskar_mem_is_scalar(beam))
             {

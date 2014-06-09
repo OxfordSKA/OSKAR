@@ -89,9 +89,9 @@ int main(int argc, char** argv)
 
     int loc;
     if (opt.isSet("-g"))
-        loc = OSKAR_LOCATION_GPU;
+        loc = OSKAR_GPU;
     if (opt.isSet("-c"))
-        loc = OSKAR_LOCATION_CPU;
+        loc = OSKAR_CPU;
     if (!(opt.isSet("-c") ^ opt.isSet("-g")))
     {
         opt.error("Please select one of -g or -c");
@@ -114,7 +114,7 @@ int main(int argc, char** argv)
         printf("- Number of elements: %i\n", num_elements);
         printf("- Number of directions: %i\n", num_directions);
         printf("- Precision: %s\n", (precision == OSKAR_SINGLE) ? "single" : "double");
-        printf("- %s\n", loc == OSKAR_LOCATION_CPU ? "CPU" : "GPU");
+        printf("- %s\n", loc == OSKAR_CPU ? "CPU" : "GPU");
         printf("- %s\n", evaluate_2d ? "2D" : "3D");
         printf("- Evaluation type = ");
         if (op_type == O2C) printf("o2c\n");

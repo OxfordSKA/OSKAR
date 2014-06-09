@@ -50,7 +50,7 @@ int oskar_jones_type(const oskar_Jones* jones)
     return oskar_mem_type(jones->data);
 }
 
-int oskar_jones_location(const oskar_Jones* jones)
+int oskar_jones_mem_location(const oskar_Jones* jones)
 {
     return oskar_mem_location(jones->data);
 }

@@ -109,7 +109,7 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
 
     // Create an element model.
     oskar_Element* element = oskar_element_create(OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, status);
+            OSKAR_CPU, status);
 
     // Load the CST text file for the correct port (X=1, Y=2).
     oskar_log_message(log, 0, "Loading CST element pattern: %s", input_file);
@@ -142,7 +142,7 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
         int image_size = 512;
 
         oskar_Image* image = oskar_image_create(OSKAR_DOUBLE,
-                OSKAR_LOCATION_CPU, status);
+                OSKAR_CPU, status);
         oskar_image_resize(image, image_size, image_size, 1, 1, 1, status);
 
         // Set element pattern image meta-data.

@@ -95,16 +95,16 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
     destination = (void*)((char*)(dst->data) + start);
 
     /* Host to host. */
-    if (location_src == OSKAR_LOCATION_CPU
-            && location_dst == OSKAR_LOCATION_CPU)
+    if (location_src == OSKAR_CPU
+            && location_dst == OSKAR_CPU)
     {
         memcpy(destination, src->data, bytes);
         return;
     }
 
     /* Host to device. */
-    else if (location_src == OSKAR_LOCATION_CPU
-            && location_dst == OSKAR_LOCATION_GPU)
+    else if (location_src == OSKAR_CPU
+            && location_dst == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         cudaMemcpy(destination, src->data, bytes, cudaMemcpyHostToDevice);
@@ -116,8 +116,8 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
     }
 
     /* Device to host. */
-    else if (location_src == OSKAR_LOCATION_GPU
-            && location_dst == OSKAR_LOCATION_CPU)
+    else if (location_src == OSKAR_GPU
+            && location_dst == OSKAR_CPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         cudaMemcpy(destination, src->data, bytes, cudaMemcpyDeviceToHost);
@@ -129,8 +129,8 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
     }
 
     /* Device to device. */
-    else if (location_src == OSKAR_LOCATION_GPU
-            && location_dst == OSKAR_LOCATION_GPU)
+    else if (location_src == OSKAR_GPU
+            && location_dst == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         cudaMemcpy(destination, src->data, bytes, cudaMemcpyDeviceToDevice);

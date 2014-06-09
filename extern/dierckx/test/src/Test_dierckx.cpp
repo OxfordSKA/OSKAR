@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -186,10 +186,10 @@ void oskar_splines_fit_fortran(oskar_Splines* spline, oskar_Log* log,
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that input data is on the CPU. */
-    if (oskar_mem_location(x) != OSKAR_LOCATION_CPU ||
-            oskar_mem_location(y) != OSKAR_LOCATION_CPU ||
-            oskar_mem_location(z) != OSKAR_LOCATION_CPU ||
-            oskar_mem_location(w) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(x) != OSKAR_CPU ||
+            oskar_mem_location(y) != OSKAR_CPU ||
+            oskar_mem_location(z) != OSKAR_CPU ||
+            oskar_mem_location(w) != OSKAR_CPU)
         *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Check if safe to proceed. */
@@ -211,7 +211,7 @@ void oskar_splines_fit_fortran(oskar_Splines* spline, oskar_Log* log,
     nyest = ky + 1 + 3 * sqrt_num_points / 2;
     u = nxest - kx - 1;
     v = nyest - ky - 1;
-    oskar_splines_init(spline, type, OSKAR_LOCATION_CPU, status);
+    oskar_splines_init(spline, type, OSKAR_CPU, status);
     oskar_mem_realloc(&spline->knots_x_theta, nxest, status);
     oskar_mem_realloc(&spline->knots_y_phi, nyest, status);
     oskar_mem_realloc(&spline->coeff, u * v, status);
@@ -357,7 +357,7 @@ static int oskar_splines_evaluate_fortran(oskar_Mem* output, int offset,
         out     = (float*)output->data + offset;
 
         /* Check if data are in CPU memory. */
-        if (location == OSKAR_LOCATION_CPU)
+        if (location == OSKAR_CPU)
         {
             /* Set up workspace. */
             float wrk[8];
@@ -396,10 +396,10 @@ void Test_dierckx::test_surfit()
     int num_points_in = size_x_in * size_y_in;
 
     // Set up the input data.
-    oskar_Mem x_in(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_in);
-    oskar_Mem y_in(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_in);
-    oskar_Mem z_in(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_in);
-    oskar_Mem w(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_in);
+    oskar_Mem x_in(OSKAR_SINGLE, OSKAR_CPU, num_points_in);
+    oskar_Mem y_in(OSKAR_SINGLE, OSKAR_CPU, num_points_in);
+    oskar_Mem z_in(OSKAR_SINGLE, OSKAR_CPU, num_points_in);
+    oskar_Mem w(OSKAR_SINGLE, OSKAR_CPU, num_points_in);
     for (int y = 0, i = 0; y < size_y_in; ++y)
     {
         float y1 = y * (2.0 * M_PI) / (size_y_in - 1);
@@ -454,8 +454,8 @@ void Test_dierckx::test_surfit()
     int size_x_out = 100;
     int size_y_out = 200;
     int num_points_out = size_x_out * size_y_out;
-    oskar_Mem x_out(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_out);
-    oskar_Mem y_out(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_out);
+    oskar_Mem x_out(OSKAR_SINGLE, OSKAR_CPU, num_points_out);
+    oskar_Mem y_out(OSKAR_SINGLE, OSKAR_CPU, num_points_out);
     for (int y = 0, i = 0; y < size_y_out; ++y)
     {
         float y1 = y * (2.0 * M_PI) / (size_y_out - 1);
@@ -468,7 +468,7 @@ void Test_dierckx::test_surfit()
     }
 
     // Evaluate surface (Fortran).
-    oskar_Mem z_out_fortran(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_out);
+    oskar_Mem z_out_fortran(OSKAR_SINGLE, OSKAR_CPU, num_points_out);
     TIMER_START
     err = oskar_splines_evaluate_fortran(&z_out_fortran, 0, 1,
             &spline_data_fortran, &x_out, &y_out);
@@ -477,7 +477,7 @@ void Test_dierckx::test_surfit()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     // Evaluate surface (C).
-    oskar_Mem z_out_c(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_out);
+    oskar_Mem z_out_c(OSKAR_SINGLE, OSKAR_CPU, num_points_out);
     TIMER_START
     oskar_splines_evaluate(&z_out_c, 0, 1, &spline_data_c,
             num_points_out, &x_out, &y_out, &err);
@@ -485,20 +485,20 @@ void Test_dierckx::test_surfit()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     // Evaluate surface (CUDA).
-    oskar_Mem z_out_cuda(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_out);
+    oskar_Mem z_out_cuda(OSKAR_SINGLE, OSKAR_CPU, num_points_out);
     {
         // Copy the spline data to the GPU.
         oskar_Splines spline_data_cuda;
         oskar_splines_init(&spline_data_cuda, OSKAR_SINGLE,
-                OSKAR_LOCATION_GPU, &err);
+                OSKAR_GPU, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         oskar_splines_copy(&spline_data_cuda, &spline_data_c, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
         // Copy the x,y positions to the GPU and allocate memory for result.
-        oskar_Mem x_out_temp(&x_out, OSKAR_LOCATION_GPU);
-        oskar_Mem y_out_temp(&y_out, OSKAR_LOCATION_GPU);
-        oskar_Mem z_out_temp(OSKAR_SINGLE, OSKAR_LOCATION_GPU, num_points_out);
+        oskar_Mem x_out_temp(&x_out, OSKAR_GPU);
+        oskar_Mem y_out_temp(&y_out, OSKAR_GPU);
+        oskar_Mem z_out_temp(OSKAR_SINGLE, OSKAR_GPU, num_points_out);
 
         // Do the evaluation.
         TIMER_START

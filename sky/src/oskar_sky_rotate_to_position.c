@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,8 +63,8 @@ void oskar_sky_rotate_to_position(oskar_Sky* sky,
     if (*status) return;
 
     type = oskar_sky_precision(sky);
-    location = oskar_sky_location(sky);
-    if (location == OSKAR_LOCATION_CPU)
+    location = oskar_sky_mem_location(sky);
+    if (location == OSKAR_CPU)
     {
         if (type == OSKAR_SINGLE)
         {
@@ -79,8 +79,8 @@ void oskar_sky_rotate_to_position(oskar_Sky* sky,
             m11 = cosA * sinD; m12 = -sinA; m13 = cosA * cosD;
             m21 = sinA * sinD; m22 =  cosA; m23 = sinA * cosD;
             m31 = -cosD; m33 = sinD;
-            ra = oskar_mem_float(oskar_sky_ra(sky), status);
-            dec = oskar_mem_float(oskar_sky_dec(sky), status);
+            ra = oskar_mem_float(oskar_sky_ra_rad(sky), status);
+            dec = oskar_mem_float(oskar_sky_dec_rad(sky), status);
 
             /* Loop over current sources. */
             for (i = 0; i < sky->num_sources; ++i)
@@ -116,8 +116,8 @@ void oskar_sky_rotate_to_position(oskar_Sky* sky,
             m11 = cosA * sinD; m12 = -sinA; m13 = cosA * cosD;
             m21 = sinA * sinD; m22 =  cosA; m23 = sinA * cosD;
             m31 = -cosD; m33 = sinD;
-            ra = oskar_mem_double(oskar_sky_ra(sky), status);
-            dec = oskar_mem_double(oskar_sky_dec(sky), status);
+            ra = oskar_mem_double(oskar_sky_ra_rad(sky), status);
+            dec = oskar_mem_double(oskar_sky_dec_rad(sky), status);
 
             /* Loop over current sources. */
             for (i = 0; i < sky->num_sources; ++i)

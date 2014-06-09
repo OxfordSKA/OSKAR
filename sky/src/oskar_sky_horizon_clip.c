@@ -92,8 +92,8 @@ void oskar_sky_horizon_clip(oskar_Sky* out, const oskar_Sky* in,
     }
 
     /* Check that the locations match. */
-    location = oskar_sky_location(out);
-    if (oskar_sky_location(in) != location ||
+    location = oskar_sky_mem_location(out);
+    if (oskar_sky_mem_location(in) != location ||
             oskar_mem_location(horizon_mask) != location ||
             oskar_mem_location(hor_x) != location ||
             oskar_mem_location(hor_y) != location ||
@@ -105,13 +105,13 @@ void oskar_sky_horizon_clip(oskar_Sky* out, const oskar_Sky* in,
 
     /* Get remaining properties of input sky model. */
     num_in = oskar_sky_num_sources(in);
-    ra0 = oskar_sky_ra0(in);
-    dec0 = oskar_sky_dec0(in);
+    ra0 = oskar_sky_reference_ra_rad(in);
+    dec0 = oskar_sky_reference_dec_rad(in);
 
     /* Copy meta-data. */
     oskar_sky_set_use_extended(out, oskar_sky_use_extended(in));
-    out->ra0 = ra0;
-    out->dec0 = dec0;
+    out->reference_ra_rad = ra0;
+    out->reference_dec_rad = dec0;
 
     /* Resize the output structure if necessary. */
     if (oskar_sky_num_sources(out) < num_in)
@@ -175,44 +175,44 @@ static void horizon_clip_single(oskar_Sky* out, const oskar_Sky* in,
     num_stations = oskar_telescope_num_stations(telescope);
 
     /* Inputs. */
-    ra = CFC(oskar_sky_ra_const(in));
-    dec = CFC(oskar_sky_dec_const(in));
+    ra = CFC(oskar_sky_ra_rad_const(in));
+    dec = CFC(oskar_sky_dec_rad_const(in));
     I = CFC(oskar_sky_I_const(in));
     Q = CFC(oskar_sky_Q_const(in));
     U = CFC(oskar_sky_U_const(in));
     V = CFC(oskar_sky_V_const(in));
-    ref = CFC(oskar_sky_reference_freq_const(in));
+    ref = CFC(oskar_sky_reference_freq_hz_const(in));
     sp = CFC(oskar_sky_spectral_index_const(in));
-    rm = CFC(oskar_sky_rotation_measure_const(in));
+    rm = CFC(oskar_sky_rotation_measure_rad_const(in));
     l = CFC(oskar_sky_l_const(in));
     m = CFC(oskar_sky_m_const(in));
     n = CFC(oskar_sky_n_const(in));
     a = CFC(oskar_sky_gaussian_a_const(in));
     b = CFC(oskar_sky_gaussian_b_const(in));
     c = CFC(oskar_sky_gaussian_c_const(in));
-    maj = CFC(oskar_sky_fwhm_major_const(in));
-    min = CFC(oskar_sky_fwhm_minor_const(in));
-    pa = CFC(oskar_sky_position_angle_const(in));
+    maj = CFC(oskar_sky_fwhm_major_rad_const(in));
+    min = CFC(oskar_sky_fwhm_minor_rad_const(in));
+    pa = CFC(oskar_sky_position_angle_rad_const(in));
 
     /* Outputs. */
-    o_ra = CF(oskar_sky_ra(out));
-    o_dec = CF(oskar_sky_dec(out));
+    o_ra = CF(oskar_sky_ra_rad(out));
+    o_dec = CF(oskar_sky_dec_rad(out));
     o_I = CF(oskar_sky_I(out));
     o_Q = CF(oskar_sky_Q(out));
     o_U = CF(oskar_sky_U(out));
     o_V = CF(oskar_sky_V(out));
-    o_ref = CF(oskar_sky_reference_freq(out));
+    o_ref = CF(oskar_sky_reference_freq_hz(out));
     o_sp = CF(oskar_sky_spectral_index(out));
-    o_rm = CF(oskar_sky_rotation_measure(out));
+    o_rm = CF(oskar_sky_rotation_measure_rad(out));
     o_l = CF(oskar_sky_l(out));
     o_m = CF(oskar_sky_m(out));
     o_n = CF(oskar_sky_n(out));
     o_a = CF(oskar_sky_gaussian_a(out));
     o_b = CF(oskar_sky_gaussian_b(out));
     o_c = CF(oskar_sky_gaussian_c(out));
-    o_maj = CF(oskar_sky_fwhm_major(out));
-    o_min = CF(oskar_sky_fwhm_minor(out));
-    o_pa = CF(oskar_sky_position_angle(out));
+    o_maj = CF(oskar_sky_fwhm_major_rad(out));
+    o_min = CF(oskar_sky_fwhm_minor_rad(out));
+    o_pa = CF(oskar_sky_position_angle_rad(out));
 
     /* Work arrays. */
     x = CF(hor_x);
@@ -220,7 +220,7 @@ static void horizon_clip_single(oskar_Sky* out, const oskar_Sky* in,
     z = CF(hor_z);
 
     /* Check data location. */
-    if (location == OSKAR_LOCATION_GPU)
+    if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         /* Create the mask. */
@@ -230,8 +230,8 @@ static void horizon_clip_single(oskar_Sky* out, const oskar_Sky* in,
             s = oskar_telescope_station_const(telescope, i);
             oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_f(
                     x, y, z, num_in, l, m, n,
-                    ha0(oskar_station_longitude_rad(s), ra0, gast), dec0,
-                    oskar_station_latitude_rad(s));
+                    ha0(oskar_station_lon_rad(s), ra0, gast), dec0,
+                    oskar_station_lat_rad(s));
 
             /* Update the mask. */
             oskar_update_horizon_mask_cuda_f(num_in, mask, z);
@@ -247,7 +247,7 @@ static void horizon_clip_single(oskar_Sky* out, const oskar_Sky* in,
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
     }
-    else if (location == OSKAR_LOCATION_CPU)
+    else if (location == OSKAR_CPU)
     {
         /* Create the mask. */
         for (i = 0; i < num_stations; ++i)
@@ -256,8 +256,8 @@ static void horizon_clip_single(oskar_Sky* out, const oskar_Sky* in,
             s = oskar_telescope_station_const(telescope, i);
             oskar_convert_relative_direction_cosines_to_enu_direction_cosines_f(
                     x, y, z, num_in, l, m, n,
-                    ha0(oskar_station_longitude_rad(s), ra0, gast), dec0,
-                    oskar_station_latitude_rad(s));
+                    ha0(oskar_station_lon_rad(s), ra0, gast), dec0,
+                    oskar_station_lat_rad(s));
 
             /* Update the mask. */
             oskar_update_horizon_mask_f(num_in, mask, z);
@@ -295,44 +295,44 @@ static void horizon_clip_double(oskar_Sky* out, const oskar_Sky* in,
     num_stations = oskar_telescope_num_stations(telescope);
 
     /* Inputs. */
-    ra = CDC(oskar_sky_ra_const(in));
-    dec = CDC(oskar_sky_dec_const(in));
+    ra = CDC(oskar_sky_ra_rad_const(in));
+    dec = CDC(oskar_sky_dec_rad_const(in));
     I = CDC(oskar_sky_I_const(in));
     Q = CDC(oskar_sky_Q_const(in));
     U = CDC(oskar_sky_U_const(in));
     V = CDC(oskar_sky_V_const(in));
-    ref = CDC(oskar_sky_reference_freq_const(in));
+    ref = CDC(oskar_sky_reference_freq_hz_const(in));
     sp = CDC(oskar_sky_spectral_index_const(in));
-    rm = CDC(oskar_sky_rotation_measure_const(in));
+    rm = CDC(oskar_sky_rotation_measure_rad_const(in));
     l = CDC(oskar_sky_l_const(in));
     m = CDC(oskar_sky_m_const(in));
     n = CDC(oskar_sky_n_const(in));
     a = CDC(oskar_sky_gaussian_a_const(in));
     b = CDC(oskar_sky_gaussian_b_const(in));
     c = CDC(oskar_sky_gaussian_c_const(in));
-    maj = CDC(oskar_sky_fwhm_major_const(in));
-    min = CDC(oskar_sky_fwhm_minor_const(in));
-    pa = CDC(oskar_sky_position_angle_const(in));
+    maj = CDC(oskar_sky_fwhm_major_rad_const(in));
+    min = CDC(oskar_sky_fwhm_minor_rad_const(in));
+    pa = CDC(oskar_sky_position_angle_rad_const(in));
 
     /* Outputs. */
-    o_ra = CD(oskar_sky_ra(out));
-    o_dec = CD(oskar_sky_dec(out));
+    o_ra = CD(oskar_sky_ra_rad(out));
+    o_dec = CD(oskar_sky_dec_rad(out));
     o_I = CD(oskar_sky_I(out));
     o_Q = CD(oskar_sky_Q(out));
     o_U = CD(oskar_sky_U(out));
     o_V = CD(oskar_sky_V(out));
-    o_ref = CD(oskar_sky_reference_freq(out));
+    o_ref = CD(oskar_sky_reference_freq_hz(out));
     o_sp = CD(oskar_sky_spectral_index(out));
-    o_rm = CD(oskar_sky_rotation_measure(out));
+    o_rm = CD(oskar_sky_rotation_measure_rad(out));
     o_l = CD(oskar_sky_l(out));
     o_m = CD(oskar_sky_m(out));
     o_n = CD(oskar_sky_n(out));
     o_a = CD(oskar_sky_gaussian_a(out));
     o_b = CD(oskar_sky_gaussian_b(out));
     o_c = CD(oskar_sky_gaussian_c(out));
-    o_maj = CD(oskar_sky_fwhm_major(out));
-    o_min = CD(oskar_sky_fwhm_minor(out));
-    o_pa = CD(oskar_sky_position_angle(out));
+    o_maj = CD(oskar_sky_fwhm_major_rad(out));
+    o_min = CD(oskar_sky_fwhm_minor_rad(out));
+    o_pa = CD(oskar_sky_position_angle_rad(out));
 
     /* Work arrays. */
     x = CD(hor_x);
@@ -340,7 +340,7 @@ static void horizon_clip_double(oskar_Sky* out, const oskar_Sky* in,
     z = CD(hor_z);
 
     /* Check data location. */
-    if (location == OSKAR_LOCATION_GPU)
+    if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         /* Create the mask. */
@@ -350,8 +350,8 @@ static void horizon_clip_double(oskar_Sky* out, const oskar_Sky* in,
             s = oskar_telescope_station_const(telescope, i);
             oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_d(
                     x, y, z, num_in, l, m, n,
-                    ha0(oskar_station_longitude_rad(s), ra0, gast), dec0,
-                    oskar_station_latitude_rad(s));
+                    ha0(oskar_station_lon_rad(s), ra0, gast), dec0,
+                    oskar_station_lat_rad(s));
 
             /* Update the mask. */
             oskar_update_horizon_mask_cuda_d(num_in, mask, z);
@@ -367,7 +367,7 @@ static void horizon_clip_double(oskar_Sky* out, const oskar_Sky* in,
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
     }
-    else if (location == OSKAR_LOCATION_CPU)
+    else if (location == OSKAR_CPU)
     {
         /* Create the mask. */
         for (i = 0; i < num_stations; ++i)
@@ -376,8 +376,8 @@ static void horizon_clip_double(oskar_Sky* out, const oskar_Sky* in,
             s = oskar_telescope_station_const(telescope, i);
             oskar_convert_relative_direction_cosines_to_enu_direction_cosines_d(
                     x, y, z, num_in, l, m, n,
-                    ha0(oskar_station_longitude_rad(s), ra0, gast), dec0,
-                    oskar_station_latitude_rad(s));
+                    ha0(oskar_station_lon_rad(s), ra0, gast), dec0,
+                    oskar_station_lat_rad(s));
 
             /* Update the mask. */
             oskar_update_horizon_mask_d(num_in, mask, z);

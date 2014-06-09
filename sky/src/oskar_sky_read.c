@@ -72,9 +72,9 @@ oskar_Sky* oskar_sky_read(const char* filename, int location, int* status)
     sky = oskar_sky_create(type, location, num_sources, status);
 
     /* Read the arrays. */
-    oskar_mem_binary_file_read(oskar_sky_ra(sky), filename,
+    oskar_mem_binary_file_read(oskar_sky_ra_rad(sky), filename,
             &index, group, OSKAR_SKY_TAG_RA, idx, status);
-    oskar_mem_binary_file_read(oskar_sky_dec(sky), filename,
+    oskar_mem_binary_file_read(oskar_sky_dec_rad(sky), filename,
             &index, group, OSKAR_SKY_TAG_DEC, idx, status);
     oskar_mem_binary_file_read(oskar_sky_I(sky), filename,
             &index, group, OSKAR_SKY_TAG_STOKES_I, idx, status);
@@ -84,17 +84,17 @@ oskar_Sky* oskar_sky_read(const char* filename, int location, int* status)
             &index, group, OSKAR_SKY_TAG_STOKES_U, idx, status);
     oskar_mem_binary_file_read(oskar_sky_V(sky), filename,
             &index, group, OSKAR_SKY_TAG_STOKES_V, idx, status);
-    oskar_mem_binary_file_read(oskar_sky_reference_freq(sky), filename,
+    oskar_mem_binary_file_read(oskar_sky_reference_freq_hz(sky), filename,
             &index, group, OSKAR_SKY_TAG_REF_FREQ, idx, status);
     oskar_mem_binary_file_read(oskar_sky_spectral_index(sky), filename,
             &index, group, OSKAR_SKY_TAG_SPECTRAL_INDEX, idx, status);
-    oskar_mem_binary_file_read(oskar_sky_fwhm_major(sky), filename,
+    oskar_mem_binary_file_read(oskar_sky_fwhm_major_rad(sky), filename,
             &index, group, OSKAR_SKY_TAG_FWHM_MAJOR, idx, status);
-    oskar_mem_binary_file_read(oskar_sky_fwhm_minor(sky), filename,
+    oskar_mem_binary_file_read(oskar_sky_fwhm_minor_rad(sky), filename,
             &index, group, OSKAR_SKY_TAG_FWHM_MINOR, idx, status);
-    oskar_mem_binary_file_read(oskar_sky_position_angle(sky), filename,
+    oskar_mem_binary_file_read(oskar_sky_position_angle_rad(sky), filename,
             &index, group, OSKAR_SKY_TAG_POSITION_ANGLE, idx, status);
-    oskar_mem_binary_file_read(oskar_sky_rotation_measure(sky), filename,
+    oskar_mem_binary_file_read(oskar_sky_rotation_measure_rad(sky), filename,
             &index, group, OSKAR_SKY_TAG_ROTATION_MEASURE, idx, status);
 
     /* Free the tag index. */

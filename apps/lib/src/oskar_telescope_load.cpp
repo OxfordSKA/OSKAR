@@ -87,7 +87,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
     }
 
     // Check that the telescope model is in CPU memory.
-    if (oskar_telescope_location(telescope) != OSKAR_LOCATION_CPU)
+    if (oskar_telescope_mem_location(telescope) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;

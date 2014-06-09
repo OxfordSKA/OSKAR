@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,7 +80,7 @@ size_t oskar_mem_length(const oskar_Mem* mem);
  *
  * @param[in] mem Pointer to the memory block.
  *
- * @return The memory location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+ * @return The memory location (OSKAR_CPU or OSKAR_GPU).
  */
 OSKAR_EXPORT
 int oskar_mem_location(const oskar_Mem* mem);

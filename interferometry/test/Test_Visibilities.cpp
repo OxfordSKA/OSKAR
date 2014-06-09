@@ -49,12 +49,12 @@ TEST(Visibilities, create)
     {
         int status = 0;
         oskar_Vis* vis;
-        vis = oskar_vis_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU,
+        vis = oskar_vis_create(OSKAR_SINGLE, OSKAR_CPU,
                 num_channels, num_times, num_stations, &status);
         EXPECT_EQ(OSKAR_ERR_BAD_DATA_TYPE, status);
         status = 0;
         oskar_vis_free(vis, &status);
-        vis = oskar_vis_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+        vis = oskar_vis_create(OSKAR_DOUBLE, OSKAR_CPU,
                 num_channels, num_times, num_stations, &status);
         EXPECT_EQ(OSKAR_ERR_BAD_DATA_TYPE, status);
         status = 0;
@@ -65,7 +65,7 @@ TEST(Visibilities, create)
     {
         int location, status = 0;
         oskar_Vis* vis;
-        location = OSKAR_LOCATION_CPU;
+        location = OSKAR_CPU;
         vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX, location,
                 num_channels, num_times, num_stations, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -82,7 +82,7 @@ TEST(Visibilities, create)
                 num_channels, num_times, num_stations, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_vis_free(vis, &status);
-        location = OSKAR_LOCATION_GPU;
+        location = OSKAR_GPU;
         vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX, location,
                 num_channels, num_times, num_stations, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -106,10 +106,10 @@ TEST(Visibilities, create)
         // Construct visibility data on the CPU and check dimensions.
         oskar_Vis* vis;
         vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX_MATRIX,
-                OSKAR_LOCATION_CPU, num_channels, num_times, num_stations,
+                OSKAR_CPU, num_channels, num_times, num_stations,
                 &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_vis_location(vis));
+        ASSERT_EQ((int)OSKAR_CPU, oskar_vis_location(vis));
 
         ASSERT_EQ((int)OSKAR_SINGLE_COMPLEX_MATRIX,
                 oskar_mem_type(oskar_vis_amplitude(vis)));
@@ -136,9 +136,9 @@ TEST(Visibilities, create)
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX_MATRIX,
-                OSKAR_LOCATION_CPU, 0, 0, 0, &status);
+                OSKAR_CPU, 0, 0, 0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_vis_location(vis));
+        ASSERT_EQ((int)OSKAR_CPU, oskar_vis_location(vis));
         ASSERT_EQ((int)OSKAR_DOUBLE_COMPLEX_MATRIX,
                 oskar_mem_type(oskar_vis_amplitude(vis)));
         ASSERT_EQ((int)OSKAR_DOUBLE,
@@ -167,10 +167,10 @@ TEST(Visibilities, create)
         // Construct visibility data on the GPU and check dimensions.
         oskar_Vis* vis;
         vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX_MATRIX,
-                OSKAR_LOCATION_CPU, num_channels, num_times, num_stations,
+                OSKAR_CPU, num_channels, num_times, num_stations,
                 &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_vis_location(vis));
+        ASSERT_EQ((int)OSKAR_CPU, oskar_vis_location(vis));
 
         ASSERT_EQ((int)OSKAR_SINGLE_COMPLEX_MATRIX,
                 oskar_mem_type(oskar_vis_amplitude(vis)));
@@ -206,7 +206,7 @@ TEST(Visibilities, copy)
     int num_channels = 2, num_times = 3, num_stations = 2, status = 0;
 
     // Create and fill a visibility structure on the CPU.
-    oskar_Vis* vis1 = oskar_vis_create(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU,
+    oskar_Vis* vis1 = oskar_vis_create(OSKAR_SINGLE_COMPLEX, OSKAR_CPU,
             num_channels, num_times, num_stations, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     float2* amp = oskar_mem_float2(oskar_vis_amplitude(vis1), &status);
@@ -235,18 +235,18 @@ TEST(Visibilities, copy)
     }
 
     // Copy to GPU.
-    oskar_Vis* vis2 = oskar_vis_create_copy(vis1, OSKAR_LOCATION_GPU, &status);
+    oskar_Vis* vis2 = oskar_vis_create_copy(vis1, OSKAR_GPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ((int)OSKAR_LOCATION_GPU, oskar_vis_location(vis2));
+    ASSERT_EQ((int)OSKAR_GPU, oskar_vis_location(vis2));
     ASSERT_EQ(oskar_vis_num_channels(vis1), oskar_vis_num_channels(vis2));
     ASSERT_EQ(oskar_vis_num_times(vis1), oskar_vis_num_times(vis2));
     ASSERT_EQ(oskar_vis_num_stations(vis1), oskar_vis_num_stations(vis2));
     ASSERT_EQ(oskar_vis_num_baselines(vis1), oskar_vis_num_baselines(vis2));
 
     // Copy back to CPU and check values.
-    oskar_Vis* vis3 = oskar_vis_create_copy(vis2, OSKAR_LOCATION_CPU, &status);
+    oskar_Vis* vis3 = oskar_vis_create_copy(vis2, OSKAR_CPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_vis_location(vis3));
+    ASSERT_EQ((int)OSKAR_CPU, oskar_vis_location(vis3));
     ASSERT_EQ(oskar_vis_num_channels(vis1), oskar_vis_num_channels(vis3));
     ASSERT_EQ(oskar_vis_num_times(vis1), oskar_vis_num_times(vis3));
     ASSERT_EQ(oskar_vis_num_stations(vis1), oskar_vis_num_stations(vis3));
@@ -293,9 +293,9 @@ TEST(Visibilities, resize)
     {
         oskar_Vis* vis;
         vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX,
-                OSKAR_LOCATION_CPU, 0, 0, 0, &status);
+                OSKAR_CPU, 0, 0, 0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_vis_location(vis));
+        ASSERT_EQ((int)OSKAR_CPU, oskar_vis_location(vis));
         ASSERT_EQ(0, oskar_vis_num_channels(vis));
         ASSERT_EQ(0, oskar_vis_num_times(vis));
         ASSERT_EQ(0, oskar_vis_num_stations(vis));
@@ -313,9 +313,9 @@ TEST(Visibilities, resize)
     {
         oskar_Vis* vis;
         vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX,
-                OSKAR_LOCATION_GPU, 0, 0, 0, &status);
+                OSKAR_GPU, 0, 0, 0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ((int)OSKAR_LOCATION_GPU, oskar_vis_location(vis));
+        ASSERT_EQ((int)OSKAR_GPU, oskar_vis_location(vis));
         ASSERT_EQ(0, oskar_vis_num_channels(vis));
         ASSERT_EQ(0, oskar_vis_num_times(vis));
         ASSERT_EQ(0, oskar_vis_num_stations(vis));
@@ -335,7 +335,7 @@ TEST(Visibilities, resize)
 TEST(Visibilities, get_channel_amps)
 {
     int amp_type     = OSKAR_SINGLE_COMPLEX;
-    int location     = OSKAR_LOCATION_CPU;
+    int location     = OSKAR_CPU;
     int num_channels = 5;
     int num_times    = 4;
     int num_stations = 3;
@@ -403,7 +403,7 @@ TEST(Visibilities, read_write)
 
     // Create visibilities on the CPU, fill in some data and write to file.
     {
-        vis1 = oskar_vis_create(amp_type, OSKAR_LOCATION_CPU,
+        vis1 = oskar_vis_create(amp_type, OSKAR_CPU,
                 num_channels, num_times, num_stations, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_vis_set_freq_start_hz(vis1, start_freq);
@@ -412,7 +412,7 @@ TEST(Visibilities, read_write)
         oskar_vis_set_time_inc_sec(vis1, time_inc_seconds);
         const char* name = "dummy";
         oskar_mem_append_raw(oskar_vis_telescope_path(vis1), name,
-                OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(name), &status);
+                OSKAR_CHAR, OSKAR_CPU, 1 + strlen(name), &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         float2* amp = oskar_mem_float2(oskar_vis_amplitude(vis1), &status);
         float* uu = oskar_mem_float(oskar_vis_baseline_uu_metres(vis1), &status);
@@ -451,7 +451,7 @@ TEST(Visibilities, read_write)
         ASSERT_EQ(precision, oskar_mem_type(oskar_vis_baseline_uu_metres(vis2)));
         ASSERT_EQ(precision, oskar_mem_type(oskar_vis_baseline_vv_metres(vis2)));
         ASSERT_EQ(precision, oskar_mem_type(oskar_vis_baseline_ww_metres(vis2)));
-        ASSERT_EQ((int)OSKAR_LOCATION_CPU, oskar_vis_location(vis2));
+        ASSERT_EQ((int)OSKAR_CPU, oskar_vis_location(vis2));
         ASSERT_EQ(num_channels, oskar_vis_num_channels(vis2));
         ASSERT_EQ(num_stations * (num_stations - 1) / 2, oskar_vis_num_baselines(vis2));
         ASSERT_EQ(num_times, oskar_vis_num_times(vis2));

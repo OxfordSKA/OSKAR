@@ -67,7 +67,7 @@ oskar_Mem* oskar_mem_read_binary_raw(const char* filename, int type,
     /* Create memory block of the right size. */
     element_size = oskar_mem_element_size(type);
     num_elements = (size_t)ceil(size_bytes / element_size);
-    mem = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_elements, status);
+    mem = oskar_mem_create(type, OSKAR_CPU, num_elements, status);
     if (*status)
     {
         oskar_mem_free(mem, status);
@@ -89,10 +89,10 @@ oskar_Mem* oskar_mem_read_binary_raw(const char* filename, int type,
     fclose(stream);
 
     /* Copy to GPU memory if required. */
-    if (location == OSKAR_LOCATION_GPU)
+    if (location == OSKAR_GPU)
     {
         oskar_Mem* gpu;
-        gpu = oskar_mem_create_copy(mem, OSKAR_LOCATION_GPU, status);
+        gpu = oskar_mem_create_copy(mem, OSKAR_GPU, status);
         oskar_mem_free(mem, status);
         return gpu;
     }

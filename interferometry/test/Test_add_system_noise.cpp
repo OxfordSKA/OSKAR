@@ -59,7 +59,7 @@ TEST(add_system_noise, test_rms)
 {
     int err = OSKAR_SUCCESS;
     int type = OSKAR_DOUBLE;
-    int location = OSKAR_LOCATION_CPU;
+    int location = OSKAR_CPU;
     int seed = 0;
 
     // Set up some settings.
@@ -86,11 +86,11 @@ TEST(add_system_noise, test_rms)
         {
             double *x, *y, *z, r1, r2;
             x = oskar_mem_double(
-                    oskar_telescope_station_x_offset_ecef_metres(tel), &err);
+                    oskar_telescope_station_true_x_offset_ecef_metres(tel), &err);
             y = oskar_mem_double(
-                    oskar_telescope_station_y_offset_ecef_metres(tel), &err);
+                    oskar_telescope_station_true_y_offset_ecef_metres(tel), &err);
             z = oskar_mem_double(
-                    oskar_telescope_station_z_offset_ecef_metres(tel), &err);
+                    oskar_telescope_station_true_z_offset_ecef_metres(tel), &err);
             r1 = oskar_random_gaussian(&r2);
             x[i] = r1 * r_stddev;
             y[i] = r2 * r_stddev;
@@ -101,11 +101,11 @@ TEST(add_system_noise, test_rms)
             float *x, *y, *z;
             double r1, r2;
             x = oskar_mem_float(
-                    oskar_telescope_station_x_offset_ecef_metres(tel), &err);
+                    oskar_telescope_station_true_x_offset_ecef_metres(tel), &err);
             y = oskar_mem_float(
-                    oskar_telescope_station_y_offset_ecef_metres(tel), &err);
+                    oskar_telescope_station_true_y_offset_ecef_metres(tel), &err);
             z = oskar_mem_float(
-                    oskar_telescope_station_z_offset_ecef_metres(tel), &err);
+                    oskar_telescope_station_true_z_offset_ecef_metres(tel), &err);
             r1 = oskar_random_gaussian(&r2);
             x[i] = r1 * r_stddev;
             y[i] = r2 * r_stddev;
@@ -113,12 +113,10 @@ TEST(add_system_noise, test_rms)
         }
 
         oskar_Station* st = oskar_telescope_station(tel, i);
-        oskar_SystemNoiseModel* noise = oskar_station_system_noise_model(st);
-        oskar_Mem* freqs = oskar_system_noise_model_frequency(noise);
-        generate_range(freqs, num_noise_values, freq_start, freq_inc);
-
-        oskar_Mem* stddev = oskar_system_noise_model_rms(noise);
-        generate_range(stddev, num_noise_values, stddev_start, stddev_inc);
+        generate_range(oskar_station_noise_freq_hz(st), num_noise_values,
+                freq_start, freq_inc);
+        generate_range(oskar_station_noise_rms_jy(st), num_noise_values,
+                stddev_start, stddev_inc);
     }
     oskar_telescope_set_phase_centre(tel, ra0_rad, dec0_rad);
 
@@ -156,14 +154,14 @@ TEST(add_system_noise, test_rms)
     settings.obs.dt_dump_days = oskar_vis_time_inc_sec(vis) / 86400.0;
 
     oskar_Mem *work_uvw;
-    work_uvw = oskar_mem_create(type, OSKAR_LOCATION_CPU, 3 * num_stations,
+    work_uvw = oskar_mem_create(type, OSKAR_CPU, 3 * num_stations,
             &err);
     oskar_convert_ecef_to_baseline_uvw(oskar_vis_baseline_uu_metres(vis),
             oskar_vis_baseline_vv_metres(vis),
             oskar_vis_baseline_ww_metres(vis), num_stations,
-            oskar_telescope_station_x_offset_ecef_metres_const(tel),
-            oskar_telescope_station_y_offset_ecef_metres_const(tel),
-            oskar_telescope_station_z_offset_ecef_metres_const(tel),
+            oskar_telescope_station_true_x_offset_ecef_metres_const(tel),
+            oskar_telescope_station_true_y_offset_ecef_metres_const(tel),
+            oskar_telescope_station_true_z_offset_ecef_metres_const(tel),
             ra0_rad, dec0_rad,
             settings.obs.num_time_steps, settings.obs.start_mjd_utc,
             settings.obs.dt_dump_days, work_uvw, &err);

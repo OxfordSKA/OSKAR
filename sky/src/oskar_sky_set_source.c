@@ -59,7 +59,7 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
     if (*status) return;
 
     /* Get the data location and type. */
-    location = oskar_sky_location(sky);
+    location = oskar_sky_mem_location(sky);
     type = oskar_sky_precision(sky);
 
     if (index >= sky->num_sources)
@@ -69,20 +69,20 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
     }
 
     /* Get byte pointers. */
-    ra_ = oskar_mem_char(sky->RA);
-    dec_ = oskar_mem_char(sky->Dec);
+    ra_ = oskar_mem_char(sky->ra_rad);
+    dec_ = oskar_mem_char(sky->dec_rad);
     i_ = oskar_mem_char(sky->I);
     q_ = oskar_mem_char(sky->Q);
     u_ = oskar_mem_char(sky->U);
     v_ = oskar_mem_char(sky->V);
-    ref_ = oskar_mem_char(sky->reference_freq);
+    ref_ = oskar_mem_char(sky->reference_freq_hz);
     spix_ = oskar_mem_char(sky->spectral_index);
-    rm_ = oskar_mem_char(sky->RM);
-    maj_ = oskar_mem_char(sky->FWHM_major);
-    min_ = oskar_mem_char(sky->FWHM_minor);
-    pa_ = oskar_mem_char(sky->position_angle);
+    rm_ = oskar_mem_char(sky->rm_rad);
+    maj_ = oskar_mem_char(sky->fwhm_major_rad);
+    min_ = oskar_mem_char(sky->fwhm_minor_rad);
+    pa_ = oskar_mem_char(sky->pa_rad);
 
-    if (location == OSKAR_LOCATION_GPU)
+    if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         size_t size, offset_bytes;

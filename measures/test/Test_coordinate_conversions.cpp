@@ -126,7 +126,7 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
     {
         oskar_Mem *ra, *dec, *l, *m, *n, *x, *y, *z, *x_gpu, *y_gpu, *z_gpu;
         type = OSKAR_SINGLE;
-        loc = OSKAR_LOCATION_CPU;
+        loc = OSKAR_CPU;
         tol = 1e-5;
 
         ra = oskar_mem_create(type, loc, num, &status);
@@ -170,7 +170,7 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
         oskar_mem_free(n, &status);
 
         // GPU version.
-        loc = OSKAR_LOCATION_GPU;
+        loc = OSKAR_GPU;
 
         ra = oskar_mem_create(type, loc, num, &status);
         dec = oskar_mem_create(type, loc, num, &status);
@@ -232,7 +232,7 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
     {
         oskar_Mem *ra, *dec, *l, *m, *n, *x, *y, *z, *x_gpu, *y_gpu, *z_gpu;
         type = OSKAR_DOUBLE;
-        loc = OSKAR_LOCATION_CPU;
+        loc = OSKAR_CPU;
         tol = 1e-12;
 
         ra = oskar_mem_create(type, loc, num, &status);
@@ -276,7 +276,7 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
         oskar_mem_free(n, &status);
 
         // GPU version.
-        loc = OSKAR_LOCATION_GPU;
+        loc = OSKAR_GPU;
 
         ra = oskar_mem_create(type, loc, num, &status);
         dec = oskar_mem_create(type, loc, num, &status);

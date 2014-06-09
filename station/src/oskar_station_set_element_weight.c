@@ -66,8 +66,8 @@ void oskar_station_set_element_weight(oskar_Station* dst,
     }
 
     /* Get the data type. */
-    type = oskar_mem_type(dst->weight);
-    location = oskar_mem_location(dst->weight);
+    type = oskar_mem_type(dst->element_weight);
+    location = oskar_mem_location(dst->element_weight);
     size = oskar_mem_element_size(type);
     offset_bytes = index * size;
 
@@ -76,11 +76,11 @@ void oskar_station_set_element_weight(oskar_Station* dst,
     {
         double2 w, *w_;
         w.x = re; w.y = im;
-        w_ = oskar_mem_double2(dst->weight, status);
+        w_ = oskar_mem_double2(dst->element_weight, status);
 
-        if (location == OSKAR_LOCATION_CPU)
+        if (location == OSKAR_CPU)
             w_[index] = w;
-        else if (location == OSKAR_LOCATION_GPU)
+        else if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             cudaMemcpy((char*)w_ + offset_bytes, &w, size, H2D);
@@ -95,11 +95,11 @@ void oskar_station_set_element_weight(oskar_Station* dst,
     {
         float2 w, *w_;
         w.x = (float)re; w.y = (float)im;
-        w_ = oskar_mem_float2(dst->weight, status);
+        w_ = oskar_mem_float2(dst->element_weight, status);
 
-        if (location == OSKAR_LOCATION_CPU)
+        if (location == OSKAR_CPU)
             w_[index] = w;
-        else if (location == OSKAR_LOCATION_GPU)
+        else if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             cudaMemcpy((char*)w_ + offset_bytes, &w, size, H2D);

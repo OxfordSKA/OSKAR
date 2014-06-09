@@ -51,25 +51,25 @@ void oskar_sky_insert(oskar_Sky* dst, const oskar_Sky* src, int offset,
     if (*status) return;
 
     num_sources = (size_t)oskar_sky_num_sources(src);
-    oskar_mem_insert(dst->RA, src->RA, offset, num_sources, status);
-    oskar_mem_insert(dst->Dec, src->Dec, offset, num_sources, status);
+    oskar_mem_insert(dst->ra_rad, src->ra_rad, offset, num_sources, status);
+    oskar_mem_insert(dst->dec_rad, src->dec_rad, offset, num_sources, status);
     oskar_mem_insert(dst->I, src->I, offset, num_sources, status);
     oskar_mem_insert(dst->Q, src->Q, offset, num_sources, status);
     oskar_mem_insert(dst->U, src->U, offset, num_sources, status);
     oskar_mem_insert(dst->V, src->V, offset, num_sources, status);
-    oskar_mem_insert(dst->reference_freq, src->reference_freq, offset,
+    oskar_mem_insert(dst->reference_freq_hz, src->reference_freq_hz, offset,
             num_sources, status);
     oskar_mem_insert(dst->spectral_index, src->spectral_index, offset,
             num_sources, status);
-    oskar_mem_insert(dst->RM, src->RM, offset, num_sources, status);
+    oskar_mem_insert(dst->rm_rad, src->rm_rad, offset, num_sources, status);
     oskar_mem_insert(dst->l, src->l, offset, num_sources, status);
     oskar_mem_insert(dst->m, src->m, offset, num_sources, status);
     oskar_mem_insert(dst->n, src->n, offset, num_sources, status);
-    oskar_mem_insert(dst->FWHM_major, src->FWHM_major, offset, num_sources,
+    oskar_mem_insert(dst->fwhm_major_rad, src->fwhm_major_rad, offset, num_sources,
             status);
-    oskar_mem_insert(dst->FWHM_minor, src->FWHM_minor, offset, num_sources,
+    oskar_mem_insert(dst->fwhm_minor_rad, src->fwhm_minor_rad, offset, num_sources,
             status);
-    oskar_mem_insert(dst->position_angle, src->position_angle, offset,
+    oskar_mem_insert(dst->pa_rad, src->pa_rad, offset,
             num_sources, status);
     oskar_mem_insert(dst->gaussian_a, src->gaussian_a, offset, num_sources,
             status);

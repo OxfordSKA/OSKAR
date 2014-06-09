@@ -99,7 +99,7 @@ oskar_Image* oskar_set_up_image(const oskar_Vis* vis,
     /* Create the image and size it. */
     if (*status) return 0;
     im = oskar_image_create(oskar_mem_precision(oskar_vis_amplitude_const(vis)),
-            OSKAR_LOCATION_CPU, status);
+            OSKAR_CPU, status);
     oskar_image_resize(im, settings->size, settings->size,
             num_pols, im_num_times, im_num_chan, status);
 

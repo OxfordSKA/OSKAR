@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -72,9 +72,9 @@ void oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
     if (*status) return;
 
     /* Append to the memory. */
-    if (from_location == OSKAR_LOCATION_CPU)
+    if (from_location == OSKAR_CPU)
     {
-        if (to->location == OSKAR_LOCATION_CPU)
+        if (to->location == OSKAR_CPU)
             memcpy((char*)(to->data) + offset_bytes, from, mem_size);
         else
         {
@@ -86,10 +86,10 @@ void oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
 #endif
         }
     }
-    else if (from_location == OSKAR_LOCATION_GPU)
+    else if (from_location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        if (to->location == OSKAR_LOCATION_CPU)
+        if (to->location == OSKAR_CPU)
             cudaMemcpy((char*)(to->data) + offset_bytes, from,
                     mem_size, cudaMemcpyDeviceToHost);
         else

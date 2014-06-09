@@ -91,7 +91,7 @@ oskar_Vis* oskar_vis_read(const char* filename, int* status)
     }
 
     /* Create the visibility structure. */
-    vis = oskar_vis_create(amp_type, OSKAR_LOCATION_CPU,
+    vis = oskar_vis_create(amp_type, OSKAR_CPU,
             num_channels, num_times, num_stations, status);
 
     /* Optionally read the settings path (ignore the error code). */

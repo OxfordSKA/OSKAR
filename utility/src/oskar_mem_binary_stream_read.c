@@ -63,10 +63,10 @@ void oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
     type = oskar_mem_type(mem);
 
     /* Initialise temporary (to zero length). */
-    temp = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
+    temp = oskar_mem_create(type, OSKAR_CPU, 0, status);
 
     /* Check if data is in CPU or GPU memory. */
-    data = (oskar_mem_location(mem) == OSKAR_LOCATION_CPU) ? mem : temp;
+    data = (oskar_mem_location(mem) == OSKAR_CPU) ? mem : temp;
 
     /* Create the tag index if it doesn't already exist. */
     if (*index == NULL)
@@ -87,7 +87,7 @@ void oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
             status);
 
     /* Copy to GPU memory if required. */
-    if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(mem) != OSKAR_CPU)
         oskar_mem_copy(mem, temp, status);
 
     /* Free the temporary. */
@@ -116,10 +116,10 @@ void oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
     type = oskar_mem_type(mem);
 
     /* Initialise temporary (to zero length). */
-    temp = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
+    temp = oskar_mem_create(type, OSKAR_CPU, 0, status);
 
     /* Check if data is in CPU or GPU memory. */
-    data = (oskar_mem_location(mem) == OSKAR_LOCATION_CPU) ? mem : temp;
+    data = (oskar_mem_location(mem) == OSKAR_CPU) ? mem : temp;
 
     /* Create the tag index if it doesn't already exist. */
     if (*index == NULL)
@@ -140,7 +140,7 @@ void oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
             status);
 
     /* Copy to GPU memory if required. */
-    if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(mem) != OSKAR_CPU)
         oskar_mem_copy(mem, temp, status);
 
     /* Free the temporary. */

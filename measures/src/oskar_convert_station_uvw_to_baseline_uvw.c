@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -131,7 +131,7 @@ void oskar_convert_station_uvw_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
         return;
     }
 
-    if (location == OSKAR_LOCATION_CPU)
+    if (location == OSKAR_CPU)
     {
         if (type == OSKAR_SINGLE)
         {
@@ -158,7 +158,7 @@ void oskar_convert_station_uvw_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
     }
-    else if (location == OSKAR_LOCATION_GPU)
+    else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)

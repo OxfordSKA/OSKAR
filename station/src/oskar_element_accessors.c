@@ -39,9 +39,9 @@ int oskar_element_precision(const oskar_Element* data)
     return data->precision;
 }
 
-int oskar_element_location(const oskar_Element* data)
+int oskar_element_mem_location(const oskar_Element* data)
 {
-    return data->data_location;
+    return data->mem_location;
 }
 
 int oskar_element_has_spline_data(const oskar_Element* data)
@@ -52,7 +52,7 @@ int oskar_element_has_spline_data(const oskar_Element* data)
 
 int oskar_element_has_x_spline_data(const oskar_Element* data)
 {
-    return (data->num_frequencies > 0) && /* Short-circuit, so will be safe. */
+    return (data->num_freq > 0) && /* Short-circuit, so will be safe. */
             (oskar_splines_have_coeffs(data->x_h_re[0])) &&
             (oskar_splines_have_coeffs(data->x_h_im[0])) &&
             (oskar_splines_have_coeffs(data->x_v_re[0])) &&
@@ -61,21 +61,21 @@ int oskar_element_has_x_spline_data(const oskar_Element* data)
 
 int oskar_element_has_y_spline_data(const oskar_Element* data)
 {
-    return (data->num_frequencies > 0) && /* Short-circuit, so will be safe. */
+    return (data->num_freq > 0) && /* Short-circuit, so will be safe. */
             (oskar_splines_have_coeffs(data->y_h_re[0])) &&
             (oskar_splines_have_coeffs(data->y_h_im[0])) &&
             (oskar_splines_have_coeffs(data->y_v_re[0])) &&
             (oskar_splines_have_coeffs(data->y_v_im[0]));
 }
 
-int oskar_element_num_frequencies(const oskar_Element* data)
+int oskar_element_num_freq(const oskar_Element* data)
 {
-    return data->num_frequencies;
+    return data->num_freq;
 }
 
-const double* oskar_element_frequencies_hz(const oskar_Element* data)
+const double* oskar_element_freqs_hz(const oskar_Element* data)
 {
-    return data->frequency_hz;
+    return data->freqs_hz;
 }
 
 int oskar_element_type(const oskar_Element* data)
@@ -88,9 +88,9 @@ int oskar_element_taper_type(const oskar_Element* data)
     return data->taper_type;
 }
 
-double oskar_element_cos_power(const oskar_Element* data)
+double oskar_element_cosine_power(const oskar_Element* data)
 {
-    return data->cos_power;
+    return data->cosine_power;
 }
 
 double oskar_element_gaussian_fwhm_rad(const oskar_Element* data)
@@ -134,53 +134,53 @@ const oskar_Mem* oskar_element_y_filename_const(const oskar_Element* data,
 
 oskar_Splines* oskar_element_x_h_re(oskar_Element* data, int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->x_h_re[freq_id];
 }
 
 const oskar_Splines* oskar_element_x_h_re_const(const oskar_Element* data,
         int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->x_h_re[freq_id];
 }
 
 oskar_Splines* oskar_element_x_h_im(oskar_Element* data, int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->x_h_im[freq_id];
 }
 
 const oskar_Splines* oskar_element_x_h_im_const(const oskar_Element* data,
         int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->x_h_im[freq_id];
 }
 
 oskar_Splines* oskar_element_x_v_re(oskar_Element* data, int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->x_v_re[freq_id];
 }
 
 const oskar_Splines* oskar_element_x_v_re_const(const oskar_Element* data,
         int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->x_v_re[freq_id];
 }
 
 oskar_Splines* oskar_element_x_v_im(oskar_Element* data, int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->x_v_im[freq_id];
 }
 
 const oskar_Splines* oskar_element_x_v_im_const(const oskar_Element* data,
         int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->x_v_im[freq_id];
 }
 
@@ -188,53 +188,53 @@ const oskar_Splines* oskar_element_x_v_im_const(const oskar_Element* data,
 
 oskar_Splines* oskar_element_y_h_re(oskar_Element* data, int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->y_h_re[freq_id];
 }
 
 const oskar_Splines* oskar_element_y_h_re_const(const oskar_Element* data,
         int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->y_h_re[freq_id];
 }
 
 oskar_Splines* oskar_element_y_h_im(oskar_Element* data, int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->y_h_im[freq_id];
 }
 
 const oskar_Splines* oskar_element_y_h_im_const(const oskar_Element* data,
         int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->y_h_im[freq_id];
 }
 
 oskar_Splines* oskar_element_y_v_re(oskar_Element* data, int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->y_v_re[freq_id];
 }
 
 const oskar_Splines* oskar_element_y_v_re_const(const oskar_Element* data,
         int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->y_v_re[freq_id];
 }
 
 oskar_Splines* oskar_element_y_v_im(oskar_Element* data, int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->y_v_im[freq_id];
 }
 
 const oskar_Splines* oskar_element_y_v_im_const(const oskar_Element* data,
         int freq_id)
 {
-    if (freq_id >= data->num_frequencies) return 0;
+    if (freq_id >= data->num_freq) return 0;
     return data->y_v_im[freq_id];
 }
 
@@ -256,9 +256,9 @@ void oskar_element_set_gaussian_fwhm_rad(oskar_Element* data, double value)
     data->gaussian_fwhm_rad = value;
 }
 
-void oskar_element_set_cos_power(oskar_Element* data, double value)
+void oskar_element_set_cosine_power(oskar_Element* data, double value)
 {
-    data->cos_power = value;
+    data->cosine_power = value;
 }
 
 void oskar_element_set_dipole_length(oskar_Element* data, double value,

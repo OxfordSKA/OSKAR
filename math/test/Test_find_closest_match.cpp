@@ -35,7 +35,7 @@
 TEST(find_closest_match, test)
 {
     int i = 0, size = 10, status = 0;
-    int type = OSKAR_DOUBLE, location = OSKAR_LOCATION_CPU;
+    int type = OSKAR_DOUBLE, location = OSKAR_CPU;
     double start = 0.0, inc = 0.3, value = 0.0, *values_;
     oskar_Mem* values;
 

@@ -114,7 +114,7 @@ void oskar_convert_enu_direction_cosines_to_relative_direction_cosines(
 
     /* Get location and check consistency. */
     location = oskar_mem_location(x);
-    if (location != OSKAR_LOCATION_CPU && location != OSKAR_LOCATION_GPU)
+    if (location != OSKAR_CPU && location != OSKAR_GPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -153,12 +153,12 @@ void oskar_convert_enu_direction_cosines_to_relative_direction_cosines(
         y_ = oskar_mem_double_const(y, status);
         z_ = oskar_mem_double_const(z, status);
 
-        if (location == OSKAR_LOCATION_CPU)
+        if (location == OSKAR_CPU)
         {
             oskar_convert_enu_direction_cosines_to_relative_direction_cosines_d(
                     l_, m_, n_, num_points, x_, y_, z_, ha0, dec0, lat);
         }
-        else if (location == OSKAR_LOCATION_GPU)
+        else if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda_d(
@@ -179,12 +179,12 @@ void oskar_convert_enu_direction_cosines_to_relative_direction_cosines(
         y_ = oskar_mem_float_const(y, status);
         z_ = oskar_mem_float_const(z, status);
 
-        if (location == OSKAR_LOCATION_CPU)
+        if (location == OSKAR_CPU)
         {
             oskar_convert_enu_direction_cosines_to_relative_direction_cosines_f(
                     l_, m_, n_, num_points, x_, y_, z_, ha0, dec0, lat);
         }
-        else if (location == OSKAR_LOCATION_GPU)
+        else if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda_f(

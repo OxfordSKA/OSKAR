@@ -63,7 +63,7 @@ void oskar_station_override_element_time_variable_gains(
     else
     {
         /* Override element data at last level. */
-        oskar_mem_set_value_real(s->gain_error, gain_std, 0, 0, status);
+        oskar_mem_set_value_real(s->element_gain_error, gain_std, 0, 0, status);
     }
 }
 

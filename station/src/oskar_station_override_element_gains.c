@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ void oskar_station_override_element_gains(oskar_Station* s,
     if (*status) return;
 
     /* Check location. */
-    if (oskar_station_location(s) != OSKAR_LOCATION_CPU)
+    if (oskar_station_mem_location(s) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -75,14 +75,14 @@ void oskar_station_override_element_gains(oskar_Station* s,
         if (type == OSKAR_DOUBLE)
         {
             double* gain;
-            gain = oskar_mem_double(s->gain, status);
+            gain = oskar_mem_double(s->element_gain, status);
             for (i = 0; i < s->num_elements; ++i)
                 gain[i] = gain_mean + gain_std * oskar_random_gaussian(0);
         }
         else if (type == OSKAR_SINGLE)
         {
             float* gain;
-            gain = oskar_mem_float(s->gain, status);
+            gain = oskar_mem_float(s->element_gain, status);
             for (i = 0; i < s->num_elements; ++i)
                 gain[i] = gain_mean + gain_std * oskar_random_gaussian(0);
         }

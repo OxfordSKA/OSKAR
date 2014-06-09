@@ -102,7 +102,7 @@ void oskar_telescope_model_noise_load(oskar_TelescopeModel* telescope,
     }
 
     // Check that the telescope model is in CPU memory.
-    if (oskar_telescope_model_location(telescope) != OSKAR_LOCATION_CPU)
+    if (oskar_telescope_model_location(telescope) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -171,7 +171,7 @@ static void load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
         for (int i = 0; i < num_dirs; ++i)
         {
             oskar_station_model_init(&station->child[i], type,
-                    OSKAR_LOCATION_CPU, 0, status);
+                    OSKAR_CPU, 0, status);
         }
     }
     printf("HERE C\n");
@@ -314,7 +314,7 @@ static void load_noise_rms(const oskar_Settings* settings,
     oskar_Mem* stddev = &noise->rms;
     QByteArray file;
     int num_freqs = noise->frequency.num_elements;
-    oskar_Mem t_sys(type, OSKAR_LOCATION_CPU, num_freqs);
+    oskar_Mem t_sys(type, OSKAR_CPU, num_freqs);
     double integration_time = settings->obs.length_seconds /
             (double)settings->obs.num_time_steps;
     double bandwidth = settings->interferometer.channel_bandwidth_hz;
@@ -340,7 +340,7 @@ static void load_noise_rms(const oskar_Settings* settings,
             // Sensitivity
             else if (QFile::exists(data_files[sensitivity_file]))
             {
-                oskar_Mem sensitivity(type, OSKAR_LOCATION_CPU, num_freqs);
+                oskar_Mem sensitivity(type, OSKAR_CPU, num_freqs);
                 file = data_files[sensitivity_file].toLatin1();
                 oskar_system_noise_model_load(&sensitivity, file.constData(),
                         status);
@@ -355,11 +355,11 @@ static void load_noise_rms(const oskar_Settings* settings,
                 file = data_files[t_sys_file].toLatin1();
                 oskar_system_noise_model_load(&t_sys, file.constData(), status);
 
-                oskar_Mem area(type, OSKAR_LOCATION_CPU, num_freqs);
+                oskar_Mem area(type, OSKAR_CPU, num_freqs);
                 file = data_files[area_file].toLatin1();
                 oskar_system_noise_model_load(&area, file.constData(), status);
 
-                oskar_Mem efficiency(type, OSKAR_LOCATION_CPU, num_freqs);
+                oskar_Mem efficiency(type, OSKAR_CPU, num_freqs);
                 file = data_files[efficiency_file].toLatin1();
                 oskar_system_noise_model_load(&efficiency, file.constData(),
                         status);
@@ -409,7 +409,7 @@ static void load_noise_rms(const oskar_Settings* settings,
         // Sensitivity priority
         case OSKAR_SYSTEM_NOISE_SENSITIVITY:
         {
-            oskar_Mem sensitivity(type, OSKAR_LOCATION_CPU, num_freqs);
+            oskar_Mem sensitivity(type, OSKAR_CPU, num_freqs);
             switch (ns->value.sensitivity.override)
             {
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
@@ -470,7 +470,7 @@ static void load_noise_rms(const oskar_Settings* settings,
             } // switch (t_sys.override)
             if (*status) return;
 
-            oskar_Mem area(type, OSKAR_LOCATION_CPU, num_freqs);
+            oskar_Mem area(type, OSKAR_CPU, num_freqs);
             switch (ns->value.area.override)
             {
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
@@ -498,7 +498,7 @@ static void load_noise_rms(const oskar_Settings* settings,
             } // switch (area.override)
             if (*status) return;
 
-            oskar_Mem efficiency(type, OSKAR_LOCATION_CPU, num_freqs);
+            oskar_Mem efficiency(type, OSKAR_CPU, num_freqs);
             switch (ns->value.efficiency.override)
             {
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:

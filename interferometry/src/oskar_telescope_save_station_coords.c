@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,14 +55,14 @@ void oskar_telescope_save_station_coords(
 
     /* Check type and location. */
     type = oskar_telescope_precision(telescope);
-    location = oskar_telescope_location(telescope);
+    location = oskar_telescope_mem_location(telescope);
     num_stations = oskar_telescope_num_stations(telescope);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
-    if (location != OSKAR_LOCATION_CPU)
+    if (location != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -78,19 +78,19 @@ void oskar_telescope_save_station_coords(
 
     /* Save the position of each station. */
     fprintf(file, "# Number of stations  = %i\n", num_stations);
-    fprintf(file, "# Longitude [radians] = %f\n", telescope->longitude_rad);
-    fprintf(file, "# Latitude [radians]  = %f\n", telescope->latitude_rad);
-    fprintf(file, "# Altitude [metres]   = %f\n", telescope->altitude_metres);
+    fprintf(file, "# Longitude [radians] = %f\n", telescope->lon_rad);
+    fprintf(file, "# Latitude [radians]  = %f\n", telescope->lat_rad);
+    fprintf(file, "# Altitude [metres]   = %f\n", telescope->alt_metres);
     fprintf(file, "# Local horizontal x(east), y(north), z(up) [metres]\n");
     if (type == OSKAR_SINGLE)
     {
         const float *x_hor, *y_hor, *z_hor;
         x_hor = oskar_mem_float_const(
-                oskar_telescope_station_x_enu_metres_const(telescope), status);
+                oskar_telescope_station_true_x_enu_metres_const(telescope), status);
         y_hor = oskar_mem_float_const(
-                oskar_telescope_station_y_enu_metres_const(telescope), status);
+                oskar_telescope_station_true_y_enu_metres_const(telescope), status);
         z_hor = oskar_mem_float_const(
-                oskar_telescope_station_z_enu_metres_const(telescope), status);
+                oskar_telescope_station_true_z_enu_metres_const(telescope), status);
         for (i = 0; i < num_stations; ++i)
         {
             fprintf(file, "% 14.6f % 14.6f % 14.6f\n",
@@ -101,11 +101,11 @@ void oskar_telescope_save_station_coords(
     {
         const double *x_hor, *y_hor, *z_hor;
         x_hor = oskar_mem_double_const(
-                oskar_telescope_station_x_enu_metres_const(telescope), status);
+                oskar_telescope_station_true_x_enu_metres_const(telescope), status);
         y_hor = oskar_mem_double_const(
-                oskar_telescope_station_y_enu_metres_const(telescope), status);
+                oskar_telescope_station_true_y_enu_metres_const(telescope), status);
         z_hor = oskar_mem_double_const(
-                oskar_telescope_station_z_enu_metres_const(telescope), status);
+                oskar_telescope_station_true_z_enu_metres_const(telescope), status);
         for (i = 0; i < num_stations; ++i)
         {
             fprintf(file, "% 14.6f % 14.6f % 14.6f\n",

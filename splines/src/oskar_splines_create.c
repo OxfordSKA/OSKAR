@@ -54,7 +54,7 @@ oskar_Splines* oskar_splines_create(int precision, int location, int* status)
     }
 
     data->precision = precision;
-    data->location = location;
+    data->mem_location = location;
     data->smoothing_factor = 0.0;
     data->num_knots_x_theta = 0;
     data->num_knots_y_phi = 0;

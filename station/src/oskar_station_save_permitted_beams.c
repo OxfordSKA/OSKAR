@@ -72,9 +72,9 @@ void oskar_station_save_permitted_beams(const char* filename,
 
     /* Get pointers to arrays. */
     az = oskar_mem_double_const(
-            oskar_station_permitted_beam_azimuth_rad_const(station), status);
+            oskar_station_permitted_beam_az_rad_const(station), status);
     el = oskar_mem_double_const(
-            oskar_station_permitted_beam_elevation_rad_const(station), status);
+            oskar_station_permitted_beam_el_rad_const(station), status);
     num_beams = oskar_station_num_permitted_beams(station);
     for (i = 0; i < num_beams; ++i)
     {

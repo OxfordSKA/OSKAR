@@ -45,7 +45,7 @@ OSKAR_EXPORT
 int oskar_element_precision(const oskar_Element* data);
 
 OSKAR_EXPORT
-int oskar_element_location(const oskar_Element* data);
+int oskar_element_mem_location(const oskar_Element* data);
 
 OSKAR_EXPORT
 int oskar_element_has_spline_data(const oskar_Element* data);
@@ -57,10 +57,10 @@ OSKAR_EXPORT
 int oskar_element_has_y_spline_data(const oskar_Element* data);
 
 OSKAR_EXPORT
-int oskar_element_num_frequencies(const oskar_Element* data);
+int oskar_element_num_freq(const oskar_Element* data);
 
 OSKAR_EXPORT
-const double* oskar_element_frequencies_hz(const oskar_Element* data);
+const double* oskar_element_freqs_hz(const oskar_Element* data);
 
 OSKAR_EXPORT
 int oskar_element_type(const oskar_Element* data);
@@ -69,7 +69,7 @@ OSKAR_EXPORT
 int oskar_element_taper_type(const oskar_Element* data);
 
 OSKAR_EXPORT
-double oskar_element_cos_power(const oskar_Element* data);
+double oskar_element_cosine_power(const oskar_Element* data);
 
 OSKAR_EXPORT
 double oskar_element_gaussian_fwhm_rad(const oskar_Element* data);
@@ -168,7 +168,7 @@ OSKAR_EXPORT
 void oskar_element_set_gaussian_fwhm_rad(oskar_Element* data, double value);
 
 OSKAR_EXPORT
-void oskar_element_set_cos_power(oskar_Element* data, double value);
+void oskar_element_set_cosine_power(oskar_Element* data, double value);
 
 OSKAR_EXPORT
 void oskar_element_set_dipole_length(oskar_Element* data, double value,

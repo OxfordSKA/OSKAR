@@ -37,7 +37,7 @@ TEST(Mem, copy_gpu)
     oskar_Mem *cpu, *cpu2, *gpu;
 
     // Create test array and fill with data.
-    cpu = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n, &status);
+    cpu = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, n, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     double* cpu_ = oskar_mem_double(cpu, &status);
     for (int i = 0; i < n; ++i)
@@ -46,11 +46,11 @@ TEST(Mem, copy_gpu)
     }
 
     // Copy to GPU.
-    gpu = oskar_mem_create_copy(cpu, OSKAR_LOCATION_GPU, &status);
+    gpu = oskar_mem_create_copy(cpu, OSKAR_GPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy back and check for equality.
-    cpu2 = oskar_mem_create_copy(gpu, OSKAR_LOCATION_CPU, &status);
+    cpu2 = oskar_mem_create_copy(gpu, OSKAR_CPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     double* cpu2_ = oskar_mem_double(cpu2, &status);
     for (int i = 0; i < n; ++i)

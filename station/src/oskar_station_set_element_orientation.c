@@ -65,13 +65,15 @@ void oskar_station_set_element_orientation(oskar_Station* dst,
     orientation_y *= M_PI / 180.0;
     if (index == 0)
     {
-        dst->nominal_orientation_x = orientation_x;
-        dst->nominal_orientation_y = orientation_y;
+        dst->nominal_orientation_x_rad = orientation_x;
+        dst->nominal_orientation_y_rad = orientation_y;
     }
 
     /* Store the data. */
-    oskar_mem_double(dst->orientation_x_cpu, status)[index] = orientation_x;
-    oskar_mem_double(dst->orientation_y_cpu, status)[index] = orientation_y;
+    oskar_mem_double(dst->element_orientation_x_rad_cpu, status)[index] =
+            orientation_x;
+    oskar_mem_double(dst->element_orientation_y_rad_cpu, status)[index] =
+            orientation_y;
 }
 
 #ifdef __cplusplus

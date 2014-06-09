@@ -65,7 +65,7 @@ int main(int argc, char** argv)
 
     // Load the run log.
     oskar_BinaryTagIndex* index = 0;
-    oskar_Mem* log = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, &error);
+    oskar_Mem* log = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &error);
     oskar_mem_binary_file_read(log, vis_file, &index,
             OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &error);
     oskar_binary_tag_index_free(index, &error);

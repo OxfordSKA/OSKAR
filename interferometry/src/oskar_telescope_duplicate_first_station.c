@@ -54,7 +54,7 @@ void oskar_telescope_duplicate_first_station(oskar_Telescope* telescope,
         oskar_station_free(oskar_telescope_station(telescope, i), status);
         telescope->station[i] = oskar_station_create_copy(
                 oskar_telescope_station_const(telescope, 0),
-                telescope->location, status);
+                telescope->mem_location, status);
     }
 }
 

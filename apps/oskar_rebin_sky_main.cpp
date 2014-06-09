@@ -65,8 +65,8 @@ int main(int argc, char** argv)
     }
 
     // Copy sky models to GPU.
-    input_gpu = oskar_sky_create_copy(input, OSKAR_LOCATION_GPU, &error);
-    output_gpu = oskar_sky_create_copy(output, OSKAR_LOCATION_GPU, &error);
+    input_gpu = oskar_sky_create_copy(input, OSKAR_GPU, &error);
+    output_gpu = oskar_sky_create_copy(output, OSKAR_GPU, &error);
 
     // Free CPU sky models.
     oskar_sky_free(input, &error);
@@ -77,18 +77,18 @@ int main(int argc, char** argv)
     oskar_rebin_sky_cuda_f(
             oskar_sky_num_sources(input_gpu),
             oskar_sky_num_sources(output_gpu),
-            oskar_mem_float_const(oskar_sky_ra_const(input_gpu), &error),
-            oskar_mem_float_const(oskar_sky_dec_const(input_gpu), &error),
+            oskar_mem_float_const(oskar_sky_ra_rad_const(input_gpu), &error),
+            oskar_mem_float_const(oskar_sky_dec_rad_const(input_gpu), &error),
             oskar_mem_float_const(oskar_sky_I_const(input_gpu), &error),
-            oskar_mem_float_const(oskar_sky_ra_const(output_gpu), &error),
-            oskar_mem_float_const(oskar_sky_dec_const(output_gpu), &error),
+            oskar_mem_float_const(oskar_sky_ra_rad_const(output_gpu), &error),
+            oskar_mem_float_const(oskar_sky_dec_rad_const(output_gpu), &error),
             oskar_mem_float(oskar_sky_I(output_gpu), &error));
     oskar_cuda_check_error(&error);
     if (error)
         fprintf(stderr, "CUDA error (%s).\n", oskar_get_error_string(error));
 
     // Write new sky model out.
-    output = oskar_sky_create_copy(output_gpu, OSKAR_LOCATION_CPU, &error);
+    output = oskar_sky_create_copy(output_gpu, OSKAR_CPU, &error);
     oskar_sky_save(argv[2], output, &error);
 
     // Free sky models.

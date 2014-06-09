@@ -61,31 +61,31 @@ oskar_Sky* oskar_sky_create_alias(const oskar_Sky* sky, int offset,
 
     /* Set meta-data */
     sky_ptr->precision = sky->precision;
-    sky_ptr->location = sky->location;
+    sky_ptr->mem_location = sky->mem_location;
     sky_ptr->num_sources = num_sources;
     sky_ptr->use_extended = sky->use_extended;
-    sky_ptr->ra0 = sky->ra0;
-    sky_ptr->dec0 = sky->dec0;
+    sky_ptr->reference_ra_rad = sky->reference_ra_rad;
+    sky_ptr->reference_dec_rad = sky->reference_dec_rad;
 
-    sky_ptr->RA = oskar_mem_create_alias(sky->RA, offset, num_sources, status);
-    sky_ptr->Dec = oskar_mem_create_alias(sky->Dec, offset, num_sources, status);
+    sky_ptr->ra_rad = oskar_mem_create_alias(sky->ra_rad, offset, num_sources, status);
+    sky_ptr->dec_rad = oskar_mem_create_alias(sky->dec_rad, offset, num_sources, status);
     sky_ptr->I = oskar_mem_create_alias(sky->I, offset, num_sources, status);
     sky_ptr->Q = oskar_mem_create_alias(sky->Q, offset, num_sources, status);
     sky_ptr->U = oskar_mem_create_alias(sky->U, offset, num_sources, status);
     sky_ptr->V = oskar_mem_create_alias(sky->V, offset, num_sources, status);
-    sky_ptr->reference_freq = oskar_mem_create_alias(sky->reference_freq,
+    sky_ptr->reference_freq_hz = oskar_mem_create_alias(sky->reference_freq_hz,
             offset, num_sources, status);
     sky_ptr->spectral_index = oskar_mem_create_alias(sky->spectral_index,
             offset, num_sources, status);
-    sky_ptr->RM = oskar_mem_create_alias(sky->RM, offset, num_sources, status);
+    sky_ptr->rm_rad = oskar_mem_create_alias(sky->rm_rad, offset, num_sources, status);
     sky_ptr->l = oskar_mem_create_alias(sky->l, offset, num_sources, status);
     sky_ptr->m = oskar_mem_create_alias(sky->m, offset, num_sources, status);
     sky_ptr->n = oskar_mem_create_alias(sky->n, offset, num_sources, status);
-    sky_ptr->FWHM_major = oskar_mem_create_alias(sky->FWHM_major,
+    sky_ptr->fwhm_major_rad = oskar_mem_create_alias(sky->fwhm_major_rad,
             offset, num_sources, status);
-    sky_ptr->FWHM_minor = oskar_mem_create_alias(sky->FWHM_minor,
+    sky_ptr->fwhm_minor_rad = oskar_mem_create_alias(sky->fwhm_minor_rad,
             offset, num_sources, status);
-    sky_ptr->position_angle = oskar_mem_create_alias(sky->position_angle,
+    sky_ptr->pa_rad = oskar_mem_create_alias(sky->pa_rad,
             offset, num_sources, status);
     sky_ptr->gaussian_a = oskar_mem_create_alias(sky->gaussian_a,
             offset, num_sources, status);

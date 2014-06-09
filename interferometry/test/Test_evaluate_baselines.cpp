@@ -44,7 +44,7 @@ TEST(evaluate_baselines, cpu_gpu)
     type = OSKAR_DOUBLE;
 
     // Allocate host memory.
-    location = OSKAR_LOCATION_CPU;
+    location = OSKAR_CPU;
     u = oskar_mem_create(type, location, num_stations, &status);
     v = oskar_mem_create(type, location, num_stations, &status);
     w = oskar_mem_create(type, location, num_stations, &status);
@@ -83,7 +83,7 @@ TEST(evaluate_baselines, cpu_gpu)
     }
 
     // Allocate device memory and copy input data.
-    location = OSKAR_LOCATION_GPU;
+    location = OSKAR_GPU;
     u_gpu = oskar_mem_create_copy(u, location, &status);
     v_gpu = oskar_mem_create_copy(v, location, &status);
     w_gpu = oskar_mem_create_copy(w, location, &status);

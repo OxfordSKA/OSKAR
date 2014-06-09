@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,7 +87,7 @@ int oskar_find_closest_match(double value, const oskar_Mem* values,
     if (*status) return 0;
 
     /* Check location. */
-    if (oskar_mem_location(values) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(values) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return 0;

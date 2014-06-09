@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,24 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_system_noise_model.h>
-#include <oskar_system_noise_model_free.h>
-#include <oskar_mem.h>
+#ifndef OSKAR_ELEMENT_RESIZE_FREQ_DATA_H_
+#define OSKAR_ELEMENT_RESIZE_FREQ_DATA_H_
+
+/**
+ * @file oskar_element_resize_freq_data.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_system_noise_model_free(oskar_SystemNoiseModel* noise, int* status)
-{
-    if (!noise) return;
-
-    oskar_mem_free(noise->frequency, status);
-    oskar_mem_free(noise->rms, status);
-
-    free(noise);
-}
+/**
+ * @brief
+ * Resizes internal arrays holding frequency-dependent data.
+ *
+ * @details
+ * This function resizes all arrays within the element model that are
+ * frequency-dependent.
+ *
+ * @param[out] model     Pointer to element model data structure.
+ * @param[in]  size      The required size of the arrays.
+ * @param[in,out] status Status return code.
+ */
+OSKAR_EXPORT
+void oskar_element_resize_freq_data(oskar_Element* model, int size,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_ELEMENT_RESIZE_FREQ_DATA_H_ */

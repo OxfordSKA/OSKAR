@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -369,7 +369,7 @@ void oskar_mem_element_multiply(oskar_Mem* c, oskar_Mem* a, const oskar_Mem* b,
     }
 
     /* Do the multiplication using CUDA. */
-    if (c->location == OSKAR_LOCATION_GPU)
+    if (c->location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         oskar_mem_element_multiply_cuda(c, a, b, num, status);
@@ -377,10 +377,10 @@ void oskar_mem_element_multiply(oskar_Mem* c, oskar_Mem* a, const oskar_Mem* b,
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
     }
-    else if (c->location == OSKAR_LOCATION_CPU)
+    else if (c->location == OSKAR_CPU)
     {
-        if (a->location != OSKAR_LOCATION_CPU ||
-                b->location != OSKAR_LOCATION_CPU)
+        if (a->location != OSKAR_CPU ||
+                b->location != OSKAR_CPU)
             *status = OSKAR_ERR_LOCATION_MISMATCH;
         oskar_mem_element_multiply_select(c, a, b, num, status);
     }

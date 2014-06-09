@@ -133,7 +133,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
     /* Get the Jones matrix block meta-data. */
     jones_type = oskar_jones_type(K);
     base_type = oskar_mem_type_precision(jones_type);
-    location = oskar_jones_location(K);
+    location = oskar_jones_mem_location(K);
     num_stations = oskar_jones_num_stations(K);
     wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
 
@@ -177,7 +177,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
     }
 
     /* Evaluate Jones matrices. */
-    if (location == OSKAR_LOCATION_GPU)
+    if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         if (jones_type == OSKAR_SINGLE_COMPLEX)
@@ -209,7 +209,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
     }
-    else if (location == OSKAR_LOCATION_CPU)
+    else if (location == OSKAR_CPU)
     {
         if (jones_type == OSKAR_SINGLE_COMPLEX)
         {

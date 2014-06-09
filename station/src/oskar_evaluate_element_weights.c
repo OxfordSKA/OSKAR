@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,9 +60,9 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
 
     /* Generate DFT weights. */
     oskar_evaluate_element_weights_dft(weights, num_elements, wavenumber,
-            oskar_station_element_x_weights_const(station),
-            oskar_station_element_y_weights_const(station),
-            oskar_station_element_z_weights_const(station),
+            oskar_station_element_measured_x_enu_metres_const(station),
+            oskar_station_element_measured_y_enu_metres_const(station),
+            oskar_station_element_measured_z_enu_metres_const(station),
             x_beam, y_beam, z_beam, status);
 
     /* Apply time-variable errors. */
@@ -72,8 +72,8 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
         oskar_evaluate_element_weights_errors(weights_error, num_elements,
                 oskar_station_element_gain_const(station),
                 oskar_station_element_gain_error_const(station),
-                oskar_station_element_phase_offset_const(station),
-                oskar_station_element_phase_error_const(station),
+                oskar_station_element_phase_offset_rad_const(station),
+                oskar_station_element_phase_error_rad_const(station),
                 random_state, status);
 
         /* Modify the weights (complex multiply with error vector). */

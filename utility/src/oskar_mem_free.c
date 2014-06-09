@@ -52,12 +52,12 @@ void oskar_mem_free(oskar_Mem* mem, int* status)
     if (mem->owner && mem->data)
     {
         /* Check whether the memory is on the host or the device. */
-        if (mem->location == OSKAR_LOCATION_CPU)
+        if (mem->location == OSKAR_CPU)
         {
             /* Free host memory. */
             free(mem->data);
         }
-        else if (mem->location == OSKAR_LOCATION_GPU)
+        else if (mem->location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             /* Free GPU memory. */

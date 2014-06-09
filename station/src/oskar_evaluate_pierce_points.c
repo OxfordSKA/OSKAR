@@ -76,12 +76,12 @@ void oskar_evaluate_pierce_points(
     if (*status) return;
 
     /* Check memory location (CPU (host) memory current required) */
-    if (oskar_mem_location(pierce_point_lat) != OSKAR_LOCATION_CPU ||
-            oskar_mem_location(pierce_point_lon) != OSKAR_LOCATION_CPU ||
-            oskar_mem_location(relative_path_length) != OSKAR_LOCATION_CPU ||
-            oskar_mem_location(hor_x) != OSKAR_LOCATION_CPU ||
-            oskar_mem_location(hor_y) != OSKAR_LOCATION_CPU ||
-            oskar_mem_location(hor_z) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(pierce_point_lat) != OSKAR_CPU ||
+            oskar_mem_location(pierce_point_lon) != OSKAR_CPU ||
+            oskar_mem_location(relative_path_length) != OSKAR_CPU ||
+            oskar_mem_location(hor_x) != OSKAR_CPU ||
+            oskar_mem_location(hor_y) != OSKAR_CPU ||
+            oskar_mem_location(hor_z) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;

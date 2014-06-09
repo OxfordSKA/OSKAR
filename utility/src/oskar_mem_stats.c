@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@ void oskar_mem_stats(const oskar_Mem* mem, double* min, double* max,
     if (*status) return;
 
     /* Check that data is in CPU accessible memory. */
-    if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(mem) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;

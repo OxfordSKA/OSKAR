@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ extern "C" {
  * no longer required.
  *
  * @param[in]  type         Enumerated data type of memory contents.
- * @param[in]  location     Location of memory (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+ * @param[in]  location     Location of memory (OSKAR_CPU or OSKAR_GPU).
  * @param[in]  num_elements Number of antenna elements in the station.
  * @param[in,out]  status   Status return code.
  */

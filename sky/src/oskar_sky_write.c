@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,9 +80,9 @@ void oskar_sky_write(const char* filename, const oskar_Sky* sky, int* status)
             OSKAR_SKY_TAG_DATA_TYPE, idx, type, status);
 
     /* Write the arrays. */
-    oskar_mem_binary_stream_write(oskar_sky_ra_const(sky),
+    oskar_mem_binary_stream_write(oskar_sky_ra_rad_const(sky),
             stream, group, OSKAR_SKY_TAG_RA, idx, num_sources, status);
-    oskar_mem_binary_stream_write(oskar_sky_dec_const(sky),
+    oskar_mem_binary_stream_write(oskar_sky_dec_rad_const(sky),
             stream, group, OSKAR_SKY_TAG_DEC, idx, num_sources, status);
     oskar_mem_binary_stream_write(oskar_sky_I_const(sky),
             stream, group, OSKAR_SKY_TAG_STOKES_I, idx, num_sources, status);
@@ -92,19 +92,19 @@ void oskar_sky_write(const char* filename, const oskar_Sky* sky, int* status)
             stream, group, OSKAR_SKY_TAG_STOKES_U, idx, num_sources, status);
     oskar_mem_binary_stream_write(oskar_sky_V_const(sky),
             stream, group, OSKAR_SKY_TAG_STOKES_V, idx, num_sources, status);
-    oskar_mem_binary_stream_write(oskar_sky_reference_freq_const(sky),
+    oskar_mem_binary_stream_write(oskar_sky_reference_freq_hz_const(sky),
             stream, group, OSKAR_SKY_TAG_REF_FREQ, idx, num_sources, status);
     oskar_mem_binary_stream_write(oskar_sky_spectral_index_const(sky),
             stream, group, OSKAR_SKY_TAG_SPECTRAL_INDEX, idx, num_sources,
             status);
-    oskar_mem_binary_stream_write(oskar_sky_fwhm_major_const(sky),
+    oskar_mem_binary_stream_write(oskar_sky_fwhm_major_rad_const(sky),
             stream, group, OSKAR_SKY_TAG_FWHM_MAJOR, idx, num_sources, status);
-    oskar_mem_binary_stream_write(oskar_sky_fwhm_minor_const(sky),
+    oskar_mem_binary_stream_write(oskar_sky_fwhm_minor_rad_const(sky),
             stream, group, OSKAR_SKY_TAG_FWHM_MINOR, idx, num_sources, status);
-    oskar_mem_binary_stream_write(oskar_sky_position_angle_const(sky),
+    oskar_mem_binary_stream_write(oskar_sky_position_angle_rad_const(sky),
             stream, group, OSKAR_SKY_TAG_POSITION_ANGLE, idx, num_sources,
             status);
-    oskar_mem_binary_stream_write(oskar_sky_rotation_measure_const(sky),
+    oskar_mem_binary_stream_write(oskar_sky_rotation_measure_rad_const(sky),
             stream, group, OSKAR_SKY_TAG_ROTATION_MEASURE, idx, num_sources,
             status);
 

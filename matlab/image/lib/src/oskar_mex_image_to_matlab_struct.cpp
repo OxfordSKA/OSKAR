@@ -174,13 +174,13 @@ mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im,
     mxSetField(im_out, 0, "num_channels",
             mxCreateDoubleScalar((double)oskar_image_num_channels(im)));
     mxSetField(im_out, 0, "centre_lon_deg",
-            mxCreateDoubleScalar(oskar_image_centre_longitude_deg(im)));
+            mxCreateDoubleScalar(oskar_image_centre_lon_deg(im)));
     mxSetField(im_out, 0, "centre_lat_deg",
-            mxCreateDoubleScalar(oskar_image_centre_latitude_deg(im)));
+            mxCreateDoubleScalar(oskar_image_centre_lat_deg(im)));
     mxSetField(im_out, 0, "fov_lon_deg",
-            mxCreateDoubleScalar(oskar_image_fov_longitude_deg(im)));
+            mxCreateDoubleScalar(oskar_image_fov_lon_deg(im)));
     mxSetField(im_out, 0, "fov_lat_deg",
-            mxCreateDoubleScalar(oskar_image_fov_latitude_deg(im)));
+            mxCreateDoubleScalar(oskar_image_fov_lat_deg(im)));
     mxSetField(im_out, 0, "time_start_mjd_utc",
             mxCreateDoubleScalar(oskar_image_time_start_mjd_utc(im)));
     mxSetField(im_out, 0, "time_inc_sec",

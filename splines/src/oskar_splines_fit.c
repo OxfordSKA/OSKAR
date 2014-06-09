@@ -79,7 +79,7 @@ void oskar_splines_fit(oskar_Splines* spline, int num_points, double* x_theta,
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
-    if (oskar_splines_location(spline) != OSKAR_LOCATION_CPU)
+    if (oskar_splines_mem_location(spline) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;

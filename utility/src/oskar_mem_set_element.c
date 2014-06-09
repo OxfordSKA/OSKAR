@@ -64,7 +64,7 @@ void oskar_mem_set_element_scalar_real(oskar_Mem* mem, size_t index,
     location = mem->location;
 
     /* Set the data into the array element. */
-    if (location == OSKAR_LOCATION_CPU)
+    if (location == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE)
         {
@@ -79,7 +79,7 @@ void oskar_mem_set_element_scalar_real(oskar_Mem* mem, size_t index,
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-    else if (location == OSKAR_LOCATION_GPU)
+    else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_DOUBLE)

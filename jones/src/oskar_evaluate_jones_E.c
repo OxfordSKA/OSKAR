@@ -103,8 +103,8 @@ static void evaluate_E_all_identical(oskar_Jones* E,
     l = oskar_sky_l(sky);
     m = oskar_sky_m(sky);
     n = oskar_sky_n(sky);
-    ra0 = oskar_sky_ra0(sky);
-    dec0 = oskar_sky_dec0(sky);
+    ra0 = oskar_sky_reference_ra_rad(sky);
+    dec0 = oskar_sky_reference_dec_rad(sky);
     oskar_evaluate_station_beam(E0, num_sources, l, m, n,
             OSKAR_RELATIVE_DIRECTION_COSINES, ra0, dec0, station0, work,
             rand_state, frequency_hz, gast, status);
@@ -141,8 +141,8 @@ static void evaluate_E_all_different(oskar_Jones* E,
     l = oskar_sky_l(sky);
     m = oskar_sky_m(sky);
     n = oskar_sky_n(sky);
-    ra0 = oskar_sky_ra0(sky);
-    dec0 = oskar_sky_dec0(sky);
+    ra0 = oskar_sky_reference_ra_rad(sky);
+    dec0 = oskar_sky_reference_dec_rad(sky);
 
     for (i = 0; i < num_stations; ++i)
     {

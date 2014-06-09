@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -192,7 +192,7 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
 
     /* Initialise the temporary sky model to hold all pixels in the table. */
     temp_sky = oskar_sky_create(oskar_sky_precision(sky),
-            OSKAR_LOCATION_CPU, (int)npixels, status);
+            OSKAR_CPU, (int)npixels, status);
 
     /* Write contents of memory to temporary sky model. */
     for (i = 0; i < npixels; ++i)

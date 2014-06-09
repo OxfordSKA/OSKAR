@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         return;
 
     /* Check memory location. */
-    if (mem->location == OSKAR_LOCATION_CPU)
+    if (mem->location == OSKAR_CPU)
     {
         /* Reallocate the memory. */
         void* mem_new = NULL;
@@ -96,7 +96,7 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         mem->data = mem_new;
         mem->num_elements = num_elements;
     }
-    else if (mem->location == OSKAR_LOCATION_GPU)
+    else if (mem->location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         /* Allocate and initialise a new block of memory. */

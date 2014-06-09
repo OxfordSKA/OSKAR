@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,15 +50,15 @@ extern "C" {
  * This function initialises and populates a telescope model structure in CPU
  * memory from the given settings structure.
  *
- * @param[in,out] log       A pointer to the log structure to use.
  * @param[in] settings      A pointer to the settings structure.
+ * @param[in,out] log       A pointer to the log structure to use.
  * @param[in,out] status    Status return code.
  *
  * @return A handle to the new structure.
  */
 OSKAR_APPS_EXPORT
-oskar_Telescope* oskar_set_up_telescope(oskar_Log* log,
-        const oskar_Settings* settings, int* status);
+oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
+        oskar_Log* log, int* status);
 
 #ifdef __cplusplus
 }

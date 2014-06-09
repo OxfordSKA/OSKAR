@@ -78,7 +78,7 @@ oskar_Image* oskar_image_read(const char* filename, int idx, int* status)
     }
 
     /* Initialise the image. */
-    image = oskar_image_create(type, OSKAR_LOCATION_CPU, status);
+    image = oskar_image_create(type, OSKAR_CPU, status);
 
     /* Optionally read the settings path (ignore the error code). */
     oskar_mem_binary_stream_read(image->settings_path, stream, &index,

@@ -96,11 +96,14 @@ protected:
         oskar_mem_random_fill(oskar_jones_mem(jones), 0.1, 100.0, &status);
         oskar_mem_random_fill(u_, 500.0, 1000.0, &status);
         oskar_mem_random_fill(v_, 500.0, 1000.0, &status);
-        oskar_mem_random_fill(oskar_telescope_station_x_offset_ecef_metres(tel),
+        oskar_mem_random_fill(
+                oskar_telescope_station_true_x_offset_ecef_metres(tel),
                 0.1, 1000.0, &status);
-        oskar_mem_random_fill(oskar_telescope_station_y_offset_ecef_metres(tel),
+        oskar_mem_random_fill(
+                oskar_telescope_station_true_y_offset_ecef_metres(tel),
                 0.1, 1000.0, &status);
-        oskar_mem_random_fill(oskar_telescope_station_z_offset_ecef_metres(tel),
+        oskar_mem_random_fill(
+                oskar_telescope_station_true_z_offset_ecef_metres(tel),
                 0.1, 1000.0, &status);
         oskar_mem_random_fill(oskar_sky_I(sky), 2.0, 5.0, &status);
         oskar_mem_random_fill(oskar_sky_Q(sky), 0.1, 1.0, &status);
@@ -141,9 +144,9 @@ protected:
         double time1, time2, frequency = 100e6;
 
         // Create the timers.
-        timer1 = oskar_timer_create(loc1 == OSKAR_LOCATION_GPU ?
+        timer1 = oskar_timer_create(loc1 == OSKAR_GPU ?
                 OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
-        timer2 = oskar_timer_create(loc2 == OSKAR_LOCATION_GPU ?
+        timer2 = oskar_timer_create(loc2 == OSKAR_GPU ?
                 OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
 
         // Run first part.
@@ -194,10 +197,10 @@ protected:
         RecordProperty("SourceType", extended ? "Gaussian" : "Point");
         RecordProperty("TimeSmearing", time_average == 0.0 ? "off" : "on");
         RecordProperty("Prec1", prec1 == OSKAR_SINGLE ? "Single" : "Double");
-        RecordProperty("Loc1", loc1 == OSKAR_LOCATION_CPU ? "CPU" : "GPU");
+        RecordProperty("Loc1", loc1 == OSKAR_CPU ? "CPU" : "GPU");
         RecordProperty("Time1_ms", int(time1 * 1000));
         RecordProperty("Prec2", prec2 == OSKAR_SINGLE ? "Single" : "Double");
-        RecordProperty("Loc2", loc2 == OSKAR_LOCATION_CPU ? "CPU" : "GPU");
+        RecordProperty("Loc2", loc2 == OSKAR_CPU ? "CPU" : "GPU");
         RecordProperty("Time2_ms", int(time2 * 1000));
 
 #ifdef ALLOW_PRINTING
@@ -207,10 +210,10 @@ protected:
                 time_average == 0.0 ? "off" : "on");
         printf("    %s precision %s: %.2f ms, %s precision %s: %.2f ms\n",
                 prec1 == OSKAR_SINGLE ? "Single" : "Double",
-                loc1 == OSKAR_LOCATION_CPU ? "CPU" : "GPU",
+                loc1 == OSKAR_CPU ? "CPU" : "GPU",
                 time1 * 1000.0,
                 prec2 == OSKAR_SINGLE ? "Single" : "Double",
-                loc2 == OSKAR_LOCATION_CPU ? "CPU" : "GPU",
+                loc2 == OSKAR_CPU ? "CPU" : "GPU",
                 time2 * 1000.0);
 #endif
     }
@@ -222,38 +225,38 @@ const double correlate::bandwidth = 1e4;
 TEST_F(correlate, point_singleCPU_doubleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, OSKAR_LOCATION_CPU, 0, 0.0);
+            OSKAR_CPU, OSKAR_CPU, 0, 0.0);
 }
 
 #ifdef OSKAR_HAVE_CUDA
 TEST_F(correlate, point_singleGPU_doubleGPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_GPU, 0, 0.0);
+            OSKAR_GPU, OSKAR_GPU, 0, 0.0);
 }
 
 TEST_F(correlate, point_singleGPU_singleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_SINGLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_CPU, 0, 0.0);
+            OSKAR_GPU, OSKAR_CPU, 0, 0.0);
 }
 
 TEST_F(correlate, point_doubleGPU_doubleCPU)
 {
     runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_CPU, 0, 0.0);
+            OSKAR_GPU, OSKAR_CPU, 0, 0.0);
 }
 
 TEST_F(correlate, point_singleGPU_doubleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_CPU, 0, 0.0);
+            OSKAR_GPU, OSKAR_CPU, 0, 0.0);
 }
 
 TEST_F(correlate, point_singleCPU_doubleGPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, OSKAR_LOCATION_GPU, 0, 0.0);
+            OSKAR_CPU, OSKAR_GPU, 0, 0.0);
 }
 #endif
 
@@ -261,38 +264,38 @@ TEST_F(correlate, point_singleCPU_doubleGPU)
 TEST_F(correlate, point_timeSmearing_singleCPU_doubleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, OSKAR_LOCATION_CPU, 0, 10.0);
+            OSKAR_CPU, OSKAR_CPU, 0, 10.0);
 }
 
 #ifdef OSKAR_HAVE_CUDA
 TEST_F(correlate, point_timeSmearing_singleGPU_doubleGPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_GPU, 0, 10.0);
+            OSKAR_GPU, OSKAR_GPU, 0, 10.0);
 }
 
 TEST_F(correlate, point_timeSmearing_singleGPU_singleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_SINGLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_CPU, 0, 10.0);
+            OSKAR_GPU, OSKAR_CPU, 0, 10.0);
 }
 
 TEST_F(correlate, point_timeSmearing_doubleGPU_doubleCPU)
 {
     runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_CPU, 0, 10.0);
+            OSKAR_GPU, OSKAR_CPU, 0, 10.0);
 }
 
 TEST_F(correlate, point_timeSmearing_singleGPU_doubleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_CPU, 0, 10.0);
+            OSKAR_GPU, OSKAR_CPU, 0, 10.0);
 }
 
 TEST_F(correlate, point_timeSmearing_singleCPU_doubleGPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, OSKAR_LOCATION_GPU, 0, 10.0);
+            OSKAR_CPU, OSKAR_GPU, 0, 10.0);
 }
 #endif
 
@@ -300,38 +303,38 @@ TEST_F(correlate, point_timeSmearing_singleCPU_doubleGPU)
 TEST_F(correlate, gaussian_singleCPU_doubleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, OSKAR_LOCATION_CPU, 1, 0.0);
+            OSKAR_CPU, OSKAR_CPU, 1, 0.0);
 }
 
 #ifdef OSKAR_HAVE_CUDA
 TEST_F(correlate, gaussian_singleGPU_doubleGPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_GPU, 1, 0.0);
+            OSKAR_GPU, OSKAR_GPU, 1, 0.0);
 }
 
 TEST_F(correlate, gaussian_singleGPU_singleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_SINGLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_CPU, 1, 0.0);
+            OSKAR_GPU, OSKAR_CPU, 1, 0.0);
 }
 
 TEST_F(correlate, gaussian_doubleGPU_doubleCPU)
 {
     runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_CPU, 1, 0.0);
+            OSKAR_GPU, OSKAR_CPU, 1, 0.0);
 }
 
 TEST_F(correlate, gaussian_singleGPU_doubleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_CPU, 1, 0.0);
+            OSKAR_GPU, OSKAR_CPU, 1, 0.0);
 }
 
 TEST_F(correlate, gaussian_singleCPU_doubleGPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, OSKAR_LOCATION_GPU, 1, 0.0);
+            OSKAR_CPU, OSKAR_GPU, 1, 0.0);
 }
 #endif
 
@@ -339,38 +342,38 @@ TEST_F(correlate, gaussian_singleCPU_doubleGPU)
 TEST_F(correlate, gaussian_timeSmearing_singleCPU_doubleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, OSKAR_LOCATION_CPU, 1, 10.0);
+            OSKAR_CPU, OSKAR_CPU, 1, 10.0);
 }
 
 #ifdef OSKAR_HAVE_CUDA
 TEST_F(correlate, gaussian_timeSmearing_singleGPU_doubleGPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_GPU, 1, 10.0);
+            OSKAR_GPU, OSKAR_GPU, 1, 10.0);
 }
 
 TEST_F(correlate, gaussian_timeSmearing_singleGPU_singleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_SINGLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_CPU, 1, 10.0);
+            OSKAR_GPU, OSKAR_CPU, 1, 10.0);
 }
 
 TEST_F(correlate, gaussian_timeSmearing_doubleGPU_doubleCPU)
 {
     runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_CPU, 1, 10.0);
+            OSKAR_GPU, OSKAR_CPU, 1, 10.0);
 }
 
 TEST_F(correlate, gaussian_timeSmearing_singleGPU_doubleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_GPU, OSKAR_LOCATION_CPU, 1, 10.0);
+            OSKAR_GPU, OSKAR_CPU, 1, 10.0);
 }
 
 TEST_F(correlate, gaussian_timeSmearing_singleCPU_doubleGPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, OSKAR_LOCATION_GPU, 1, 10.0);
+            OSKAR_CPU, OSKAR_GPU, 1, 10.0);
 }
 #endif
 

@@ -43,26 +43,26 @@ struct oskar_Telescope
 {
     /* Private structure meta-data. */
     int precision;
-    int location;
+    int mem_location;
 
     /* Fundamental properties that don't depend on stations. */
-    double longitude_rad;        /**< Geodetic longitude of telescope, in radians. */
-    double latitude_rad;         /**< Geodetic latitude of telescope, in radians. */
-    double altitude_metres;      /**< Altitude of telescope above ellipsoid, in metres. */
-    double ra0_rad;              /**< Right Ascension of phase centre, in radians. */
-    double dec0_rad;             /**< Declination of phase centre, in radians. */
+    double lon_rad;              /**< Geodetic longitude of telescope, in radians. */
+    double lat_rad;              /**< Geodetic latitude of telescope, in radians. */
+    double alt_metres;           /**< Altitude of telescope above ellipsoid, in metres. */
+    double phase_centre_ra_rad;  /**< Right Ascension of phase centre, in radians. */
+    double phase_centre_dec_rad; /**< Declination of phase centre, in radians. */
     double channel_bandwidth_hz; /**< Channel bandwidth, in Hz. */
     double time_average_sec;     /**< Time average smearing duration, in sec. */
 
     /* Station data. */
     int num_stations;                /**< Number of stations in the model. */
     oskar_Station** station;         /**< Array of station structure handles. */
-    oskar_Mem* station_x_offset_ecef_metres; /**< Station x-coordinate, in metres (offset ECEF). */
-    oskar_Mem* station_y_offset_ecef_metres; /**< Station y-coordinate, in metres (offset ECEF). */
-    oskar_Mem* station_z_offset_ecef_metres; /**< Station z-coordinate, in metres (offset ECEF). */
-    oskar_Mem* station_x_enu_metres; /**< Station x-coordinate, in metres (horizon). */
-    oskar_Mem* station_y_enu_metres; /**< Station y-coordinate, in metres (horizon). */
-    oskar_Mem* station_z_enu_metres; /**< Station z-coordinate, in metres (horizon). */
+    oskar_Mem* station_true_x_offset_ecef_metres; /**< True station x-coordinates, in metres (offset ECEF). */
+    oskar_Mem* station_true_y_offset_ecef_metres; /**< True station y-coordinates, in metres (offset ECEF). */
+    oskar_Mem* station_true_z_offset_ecef_metres; /**< True station z-coordinates, in metres (offset ECEF). */
+    oskar_Mem* station_true_x_enu_metres;         /**< True station x-coordinate, in metres (horizon). */
+    oskar_Mem* station_true_y_enu_metres;         /**< True station y-coordinate, in metres (horizon). */
+    oskar_Mem* station_true_z_enu_metres;         /**< True station z-coordinate, in metres (horizon). */
     int max_station_size;            /**< Maximum station size (number of elements) */
     int max_station_depth;           /**< Maximum station depth. */
     int identical_stations;          /**< True if all stations are identical. */

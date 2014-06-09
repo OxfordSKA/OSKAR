@@ -79,9 +79,9 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem, size_t num_elements,
     {
         oskar_Mem* mem;
         mem = va_arg(args, oskar_Mem*);
-        if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
+        if (oskar_mem_location(mem) != OSKAR_CPU)
         {
-            handles[i] = oskar_mem_create_copy(mem, OSKAR_LOCATION_CPU, status);
+            handles[i] = oskar_mem_create_copy(mem, OSKAR_CPU, status);
         }
         else
         {
@@ -163,7 +163,7 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem, size_t num_elements,
     {
         const oskar_Mem* mem;
         mem = va_arg(args, const oskar_Mem*);
-        if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
+        if (oskar_mem_location(mem) != OSKAR_CPU)
         {
             oskar_mem_free(handles[i], status);
         }

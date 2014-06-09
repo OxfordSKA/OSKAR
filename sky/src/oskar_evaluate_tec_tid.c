@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_TEC_TID.h>
+#include <oskar_evaluate_tec_tid.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-void oskar_evaluate_TEC_TID(oskar_Mem* tec, int num_directions,
+void oskar_evaluate_tec_tid(oskar_Mem* tec, int num_directions,
         const oskar_Mem* lon, const oskar_Mem* lat,
         const oskar_Mem* rel_path_length, double TEC0,
         oskar_SettingsTIDscreen* TID, double gast)

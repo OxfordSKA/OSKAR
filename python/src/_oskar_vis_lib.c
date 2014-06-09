@@ -116,7 +116,7 @@ static inline PyArrayObject* mem_to_PyArrayObject(const oskar_Mem* mem)
     PyArrayObject* rtn = 0;
 
     size_t length = oskar_mem_length(mem);
-    oskar_Mem* mem_ = oskar_mem_create_copy(mem, OSKAR_LOCATION_CPU, &status);
+    oskar_Mem* mem_ = oskar_mem_create_copy(mem, OSKAR_CPU, &status);
     oskar_Mem* data_ = oskar_mem_convert_precision(mem_, OSKAR_DOUBLE, &status);
 
     int type = oskar_mem_type(mem);

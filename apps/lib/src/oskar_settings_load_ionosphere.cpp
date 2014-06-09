@@ -27,7 +27,7 @@
  */
 
 #include "apps/lib/oskar_settings_load_ionosphere.h"
-#include <oskar_load_TID_parameter_file.h>
+#include <oskar_load_tid_parameter_file.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -67,7 +67,7 @@ void oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
         t = list[i].toLatin1();
         settings->TID_files[i] = (char*)malloc(t.size() + 1);
         strcpy(settings->TID_files[i], t.constData());
-        oskar_load_TID_parameter_file(&settings->TID[i], settings->TID_files[i],
+        oskar_load_tid_parameter_file(&settings->TID[i], settings->TID_files[i],
                 status);
     }
 

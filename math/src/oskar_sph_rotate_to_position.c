@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ int oskar_sph_rotate_to_position(int n, oskar_Mem* lon, oskar_Mem* lat,
     if (lon == NULL || lat == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (oskar_mem_location(lon) != OSKAR_LOCATION_CPU || oskar_mem_location(lat) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(lon) != OSKAR_CPU || oskar_mem_location(lat) != OSKAR_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     if (oskar_mem_type(lon) == OSKAR_DOUBLE && oskar_mem_type(lat) == OSKAR_DOUBLE)

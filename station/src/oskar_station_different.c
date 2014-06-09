@@ -56,8 +56,8 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
     if (a->station_type != b->station_type ||
             a->normalise_final_beam != b->normalise_final_beam ||
             a->beam_coord_type != b->beam_coord_type ||
-            a->beam_longitude_rad != b->beam_longitude_rad ||
-            a->beam_latitude_rad != b->beam_latitude_rad ||
+            a->beam_lon_rad != b->beam_lon_rad ||
+            a->beam_lat_rad != b->beam_lat_rad ||
             a->identical_children != b->identical_children ||
             a->num_elements != b->num_elements ||
             a->num_element_types != b->num_element_types ||
@@ -69,7 +69,7 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
             a->apply_element_errors != b->apply_element_errors ||
             a->apply_element_weight != b->apply_element_weight ||
             a->gaussian_beam_fwhm_rad != b->gaussian_beam_fwhm_rad ||
-            a->gaussian_beam_ref_feq_hz != b->gaussian_beam_ref_feq_hz ||
+            a->gaussian_beam_reference_freq_hz != b->gaussian_beam_reference_freq_hz ||
             a->num_permitted_beams != b->num_permitted_beams)
     {
         return 1;
@@ -96,8 +96,8 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
         e_b = oskar_station_element_const(b, j);
 
         /* Check if number of frequencies in element models are different. */
-        num_freq_a = oskar_element_num_frequencies(e_a);
-        num_freq_b = oskar_element_num_frequencies(e_b);
+        num_freq_a = oskar_element_num_freq(e_a);
+        num_freq_b = oskar_element_num_freq(e_b);
         if (num_freq_a != num_freq_b)
             return 1;
 
@@ -118,39 +118,50 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
     }
 
     /* Check if the memory contents are different. */
-    if (oskar_mem_different(a->x_weights, b->x_weights, n, status))
+    if (oskar_mem_different(a->noise_freq_hz, b->noise_freq_hz, 0, status))
         return 1;
-    if (oskar_mem_different(a->y_weights, b->y_weights, n, status))
+    if (oskar_mem_different(a->noise_rms_jy, b->noise_rms_jy, 0, status))
         return 1;
-    if (oskar_mem_different(a->z_weights, b->z_weights, n, status))
+    if (oskar_mem_different(a->element_measured_x_enu_metres,
+            b->element_measured_x_enu_metres, n, status))
         return 1;
-    if (oskar_mem_different(a->x_signal, b->x_signal, n, status))
+    if (oskar_mem_different(a->element_measured_y_enu_metres,
+            b->element_measured_y_enu_metres, n, status))
         return 1;
-    if (oskar_mem_different(a->y_signal, b->y_signal, n, status))
+    if (oskar_mem_different(a->element_measured_z_enu_metres,
+            b->element_measured_z_enu_metres, n, status))
         return 1;
-    if (oskar_mem_different(a->z_signal, b->z_signal, n, status))
+    if (oskar_mem_different(a->element_true_x_enu_metres,
+            b->element_true_x_enu_metres, n, status))
         return 1;
-    if (oskar_mem_different(a->gain, b->gain, n, status))
+    if (oskar_mem_different(a->element_true_y_enu_metres,
+            b->element_true_y_enu_metres, n, status))
         return 1;
-    if (oskar_mem_different(a->phase_offset, b->phase_offset, n, status))
+    if (oskar_mem_different(a->element_true_z_enu_metres,
+            b->element_true_z_enu_metres, n, status))
         return 1;
-    if (oskar_mem_different(a->weight, b->weight, n, status))
+    if (oskar_mem_different(a->element_gain, b->element_gain, n, status))
         return 1;
-    if (oskar_mem_different(a->orientation_x_cpu, b->orientation_x_cpu, n,
-            status))
+    if (oskar_mem_different(a->element_phase_offset_rad,
+            b->element_phase_offset_rad, n, status))
         return 1;
-    if (oskar_mem_different(a->orientation_y_cpu, b->orientation_y_cpu, n,
-            status))
+    if (oskar_mem_different(a->element_weight, b->element_weight, n, status))
+        return 1;
+    if (oskar_mem_different(a->element_orientation_x_rad_cpu,
+            b->element_orientation_x_rad_cpu, n, status))
+        return 1;
+    if (oskar_mem_different(a->element_orientation_y_rad_cpu,
+            b->element_orientation_y_rad_cpu, n, status))
         return 1;
     if (oskar_mem_different(a->element_types, b->element_types, n, status))
         return 1;
     if (oskar_mem_different(a->element_types_cpu, b->element_types_cpu, n,
             status))
         return 1;
-    if (oskar_mem_different(a->permitted_beam_az, b->permitted_beam_az, n,
+    if (oskar_mem_different(a->permitted_beam_az_rad, b->permitted_beam_az_rad, n,
             status))
         return 1;
-    if (oskar_mem_different(a->permitted_beam_el, b->permitted_beam_el, n,
+    if (oskar_mem_different(a->permitted_beam_el_rad, b->permitted_beam_el_rad, n,
             status))
         return 1;
 

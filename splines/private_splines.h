@@ -38,7 +38,7 @@
 struct oskar_Splines
 {
     int precision;
-    int location;
+    int mem_location;
     int num_knots_x_theta;    /* Number of knots in x or theta. */
     int num_knots_y_phi;      /* Number of knots in y or phi. */
     oskar_Mem* knots_x_theta; /* Knot positions in x or theta. */

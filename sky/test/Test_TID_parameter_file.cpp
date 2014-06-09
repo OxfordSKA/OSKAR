@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_load_TID_parameter_file.h>
+#include <oskar_load_tid_parameter_file.h>
 #include <oskar_SettingsIonosphere.h>
 
 #include <oskar_get_error_string.h>
@@ -61,7 +61,7 @@ TEST(TID_parameter_file, load)
     // Attempt to read the file!
     int status = OSKAR_SUCCESS;
     oskar_SettingsTIDscreen TID;
-    oskar_load_TID_parameter_file(&TID, filename, &status);
+    oskar_load_tid_parameter_file(&TID, filename, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     EXPECT_DOUBLE_EQ(height_km, TID.height_km);

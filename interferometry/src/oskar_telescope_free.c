@@ -47,12 +47,12 @@ void oskar_telescope_free(oskar_Telescope* telescope, int* status)
     }
 
     /* Free the arrays. */
-    oskar_mem_free(telescope->station_x_offset_ecef_metres, status);
-    oskar_mem_free(telescope->station_y_offset_ecef_metres, status);
-    oskar_mem_free(telescope->station_z_offset_ecef_metres, status);
-    oskar_mem_free(telescope->station_x_enu_metres, status);
-    oskar_mem_free(telescope->station_y_enu_metres, status);
-    oskar_mem_free(telescope->station_z_enu_metres, status);
+    oskar_mem_free(telescope->station_true_x_offset_ecef_metres, status);
+    oskar_mem_free(telescope->station_true_y_offset_ecef_metres, status);
+    oskar_mem_free(telescope->station_true_z_offset_ecef_metres, status);
+    oskar_mem_free(telescope->station_true_x_enu_metres, status);
+    oskar_mem_free(telescope->station_true_y_enu_metres, status);
+    oskar_mem_free(telescope->station_true_z_enu_metres, status);
 
     /* Free each station. */
     for (i = 0; i < telescope->num_stations; ++i)

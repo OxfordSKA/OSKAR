@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ extern "C" {
  * All memory arrays will be empty (i.e. zero-sized).
  *
  * @param[in] type     Type flag (valid types are OSKAR_SINGLE or OSKAR_DOUBLE).
- * @param[in] location Location flag (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+ * @param[in] location Location flag (OSKAR_CPU or OSKAR_GPU).
  * @param[in,out]  status   Status return code.
  *
  * @return A handle to the new data structure.

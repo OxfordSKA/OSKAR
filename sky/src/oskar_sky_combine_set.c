@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ oskar_Sky* oskar_sky_combine_set(oskar_Sky* const* model_set,
 
     /* Create a new model. */
     model = oskar_sky_create(oskar_sky_precision(model_set[0]),
-            OSKAR_LOCATION_CPU, 0, status);
+            OSKAR_CPU, 0, status);
 
     /* Append each model in the set to the new model. */
     for (i = 0; i < num_models; ++i)

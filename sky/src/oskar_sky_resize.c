@@ -50,21 +50,21 @@ void oskar_sky_resize(oskar_Sky* sky, int num_sources, int* status)
     sky->num_sources = num_sources;
 
     /* Resize the model data. */
-    oskar_mem_realloc(sky->RA, num_sources, status);
-    oskar_mem_realloc(sky->Dec, num_sources, status);
+    oskar_mem_realloc(sky->ra_rad, num_sources, status);
+    oskar_mem_realloc(sky->dec_rad, num_sources, status);
     oskar_mem_realloc(sky->I, num_sources, status);
     oskar_mem_realloc(sky->Q, num_sources, status);
     oskar_mem_realloc(sky->U, num_sources, status);
     oskar_mem_realloc(sky->V, num_sources, status);
-    oskar_mem_realloc(sky->reference_freq, num_sources, status);
+    oskar_mem_realloc(sky->reference_freq_hz, num_sources, status);
     oskar_mem_realloc(sky->spectral_index, num_sources, status);
-    oskar_mem_realloc(sky->RM, num_sources, status);
+    oskar_mem_realloc(sky->rm_rad, num_sources, status);
     oskar_mem_realloc(sky->l, num_sources, status);
     oskar_mem_realloc(sky->m, num_sources, status);
     oskar_mem_realloc(sky->n, num_sources, status);
-    oskar_mem_realloc(sky->FWHM_major, num_sources, status);
-    oskar_mem_realloc(sky->FWHM_minor, num_sources, status);
-    oskar_mem_realloc(sky->position_angle, num_sources, status);
+    oskar_mem_realloc(sky->fwhm_major_rad, num_sources, status);
+    oskar_mem_realloc(sky->fwhm_minor_rad, num_sources, status);
+    oskar_mem_realloc(sky->pa_rad, num_sources, status);
     oskar_mem_realloc(sky->gaussian_a, num_sources, status);
     oskar_mem_realloc(sky->gaussian_b, num_sources, status);
     oskar_mem_realloc(sky->gaussian_c, num_sources, status);

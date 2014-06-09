@@ -55,28 +55,28 @@ oskar_Sky* oskar_sky_create_copy(const oskar_Sky* src, int location,
 
     /* Copy meta data */
     model->precision = src->precision;
-    model->location = location;
+    model->mem_location = location;
     model->num_sources = src->num_sources;
     model->use_extended = src->use_extended;
-    model->ra0 = src->ra0;
-    model->dec0 = src->dec0;
+    model->reference_ra_rad = src->reference_ra_rad;
+    model->reference_dec_rad = src->reference_dec_rad;
 
     /* Copy the memory blocks */
-    oskar_mem_copy(model->RA, src->RA, status);
-    oskar_mem_copy(model->Dec, src->Dec, status);
+    oskar_mem_copy(model->ra_rad, src->ra_rad, status);
+    oskar_mem_copy(model->dec_rad, src->dec_rad, status);
     oskar_mem_copy(model->I, src->I, status);
     oskar_mem_copy(model->Q, src->Q, status);
     oskar_mem_copy(model->U, src->U, status);
     oskar_mem_copy(model->V, src->V, status);
-    oskar_mem_copy(model->reference_freq, src->reference_freq, status);
+    oskar_mem_copy(model->reference_freq_hz, src->reference_freq_hz, status);
     oskar_mem_copy(model->spectral_index, src->spectral_index, status);
-    oskar_mem_copy(model->RM, src->RM, status);
+    oskar_mem_copy(model->rm_rad, src->rm_rad, status);
     oskar_mem_copy(model->l, src->l, status);
     oskar_mem_copy(model->m, src->m, status);
     oskar_mem_copy(model->n, src->n, status);
-    oskar_mem_copy(model->FWHM_major, src->FWHM_major, status);
-    oskar_mem_copy(model->FWHM_minor, src->FWHM_minor, status);
-    oskar_mem_copy(model->position_angle, src->position_angle, status);
+    oskar_mem_copy(model->fwhm_major_rad, src->fwhm_major_rad, status);
+    oskar_mem_copy(model->fwhm_minor_rad, src->fwhm_minor_rad, status);
+    oskar_mem_copy(model->pa_rad, src->pa_rad, status);
     oskar_mem_copy(model->gaussian_a, src->gaussian_a, status);
     oskar_mem_copy(model->gaussian_b, src->gaussian_b, status);
     oskar_mem_copy(model->gaussian_c, src->gaussian_c, status);

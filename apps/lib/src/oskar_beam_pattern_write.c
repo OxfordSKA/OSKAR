@@ -66,7 +66,7 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
         return;
     }
 
-    image = oskar_image_create(type, OSKAR_LOCATION_CPU, status);
+    image = oskar_image_create(type, OSKAR_CPU, status);
 
     num_times = settings->obs.num_time_steps;
     num_channels = settings->obs.num_channels;
@@ -102,7 +102,7 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
     oskar_image_set_time(image, settings->obs.start_mjd_utc,
             settings->obs.dt_dump_days * 86400.0);
     oskar_mem_append_raw(oskar_image_settings_path(image),
-            settings->settings_path, OSKAR_CHAR, OSKAR_LOCATION_CPU,
+            settings->settings_path, OSKAR_CHAR, OSKAR_CPU,
             1 + strlen(settings->settings_path), status);
 
     num_pixels_total = num_pixels * num_times * num_channels * num_pols;
@@ -280,7 +280,7 @@ static void save_total_intensity(const oskar_Image* complex_cube,
     num_pixels = width * height;
 
     /* Allocate total intensity image cube to write into. */
-    image = oskar_image_create(type, OSKAR_LOCATION_CPU, status);
+    image = oskar_image_create(type, OSKAR_CPU, status);
     /* Set the beam pattern image cube */
     oskar_image_resize(image, width, height, 1, num_times, num_channels,
             status);
@@ -299,7 +299,7 @@ static void save_total_intensity(const oskar_Image* complex_cube,
     oskar_image_set_time(image, settings->obs.start_mjd_utc,
             settings->obs.dt_dump_days * 86400.0);
     oskar_mem_append_raw(oskar_image_settings_path(image),
-            settings->settings_path, OSKAR_CHAR, OSKAR_LOCATION_CPU,
+            settings->settings_path, OSKAR_CHAR, OSKAR_CPU,
             1 + strlen(settings->settings_path), status);
 
     /* For polarised beams Stokes I is 0.5 * (XX + YY) */

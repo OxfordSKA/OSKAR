@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ extern "C" {
  * no longer required.
  *
  * @param[in] src           Pointer to existing memory block to copy.
- * @param[in] location      Either OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU.
+ * @param[in] location      Either OSKAR_CPU or OSKAR_GPU.
  * @param[in,out]  status   Status return code.
  *
  * @return A handle to the memory block structure.

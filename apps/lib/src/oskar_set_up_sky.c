@@ -100,8 +100,8 @@ static void set_up_pol(oskar_Sky* sky,
         const oskar_SettingsSkyPolarisation* pol, int* status);
 
 
-oskar_Sky** oskar_set_up_sky(int* num_chunks, oskar_Log* log,
-        const oskar_Settings* settings, int* status)
+oskar_Sky** oskar_set_up_sky(const oskar_Settings* settings, oskar_Log* log,
+        int* num_chunks, int* status)
 {
     int max_per_chunk, type, zero_flag, i, j;
     int total_sources = 0, num_extended_chunks = 0;
@@ -237,8 +237,7 @@ static void set_up_osm(int* num_chunks, oskar_Sky*** sky_chunks,
 
             /* Try to read sky model as a binary file first. */
             /* If this fails, read it as an ASCII file. */
-            temp = oskar_sky_read(filename, OSKAR_LOCATION_CPU,
-                    &binary_file_error);
+            temp = oskar_sky_read(filename, OSKAR_CPU, &binary_file_error);
             if (binary_file_error)
                 temp = oskar_sky_load(filename, type, status);
 
@@ -271,7 +270,7 @@ static void set_up_gsm(int* num_chunks, oskar_Sky*** sky_chunks,
     if (filename && strlen(filename) > 0)
     {
         /* Load the sky model data into a temporary sky model. */
-        temp = oskar_sky_create(type, OSKAR_LOCATION_CPU, 0, status);
+        temp = oskar_sky_create(type, OSKAR_CPU, 0, status);
         oskar_log_message(log, 0, "Loading GSM data...");
         oskar_sky_load_gsm(temp, filename, status);
 
@@ -306,7 +305,7 @@ static void set_up_fits_image(int* num_chunks, oskar_Sky*** sky_chunks,
         if (filename && strlen(filename) > 0)
         {
             /* Load into a temporary structure. */
-            temp = oskar_sky_create(type, OSKAR_LOCATION_CPU, 0, status);
+            temp = oskar_sky_create(type, OSKAR_CPU, 0, status);
             oskar_log_message(log, 0, "Loading FITS file '%s' ...",
                     filename);
             *status = oskar_fits_image_to_sky_model(log, filename, temp,
@@ -347,7 +346,7 @@ static void set_up_healpix_fits(int* num_chunks, oskar_Sky*** sky_chunks,
         if (filename && strlen(filename) > 0)
         {
             /* Load into a temporary structure. */
-            temp = oskar_sky_create(type, OSKAR_LOCATION_CPU, 0, status);
+            temp = oskar_sky_create(type, OSKAR_CPU, 0, status);
             oskar_log_message(log, 0, "Loading HEALPix FITS file '%s' ...",
                     filename);
             oskar_fits_healpix_to_sky_model(log, filename, s, temp, status);
@@ -387,7 +386,7 @@ static void set_up_gen_grid(int* num_chunks, oskar_Sky*** sky_chunks,
 
     /* Create a temporary sky model. */
     num_points = side_length * side_length;
-    temp = oskar_sky_create(type, OSKAR_LOCATION_CPU, num_points, status);
+    temp = oskar_sky_create(type, OSKAR_CPU, num_points, status);
     oskar_log_message(log, 0, "Generating source grid positions...");
     srand(s->seed);
 
@@ -453,7 +452,7 @@ static void set_up_gen_healpix(int* num_chunks, oskar_Sky*** sky_chunks,
 
     /* Generate the new positions into a temporary sky model. */
     npix = oskar_healpix_nside_to_npix(nside);
-    temp = oskar_sky_create(type, OSKAR_LOCATION_CPU, npix, status);
+    temp = oskar_sky_create(type, OSKAR_CPU, npix, status);
     oskar_log_message(log, 0, "Generating HEALPix source positions...");
 #pragma omp parallel for private(i)
     for (i = 0; i < npix; ++i)
@@ -492,8 +491,7 @@ static void set_up_gen_rpl(int* num_chunks, oskar_Sky*** sky_chunks,
         return;
 
     /* Generate the new positions into a temporary sky model. */
-    temp = oskar_sky_create(type, OSKAR_LOCATION_CPU, num_sources,
-            status);
+    temp = oskar_sky_create(type, OSKAR_CPU, num_sources, status);
     oskar_log_message(log, 0,
             "Generating random power law source distribution...");
 
@@ -535,8 +533,7 @@ static void set_up_gen_rbpl(int* num_chunks, oskar_Sky*** sky_chunks,
         return;
 
     /* Generate the new positions into a temporary sky model. */
-    temp = oskar_sky_create(type, OSKAR_LOCATION_CPU, num_sources,
-            status);
+    temp = oskar_sky_create(type, OSKAR_CPU, num_sources, status);
     oskar_log_message(log, 0,
             "Generating random broken power law source distribution...");
 

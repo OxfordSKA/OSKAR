@@ -134,7 +134,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
     /* Get the Jones matrix block meta-data. */
     jones_type = oskar_jones_type(R);
     base_type = oskar_mem_type_precision(jones_type);
-    location = oskar_jones_location(R);
+    location = oskar_jones_mem_location(R);
     num_stations = oskar_jones_num_stations(R);
     n = (oskar_telescope_common_horizon(telescope) ? 1 : num_stations);
 
@@ -171,7 +171,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
 
     /* Evaluate Jones matrix for each source for appropriate stations. */
     R_station = oskar_mem_create_alias(0, 0, 0, status);
-    if (location == OSKAR_LOCATION_GPU)
+    if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         for (i = 0; i < n; ++i)
@@ -180,8 +180,8 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
 
             /* Get station data. */
             station = oskar_telescope_station_const(telescope, i);
-            latitude = oskar_station_latitude_rad(station);
-            lst = gast + oskar_station_longitude_rad(station);
+            latitude = oskar_station_lat_rad(station);
+            lst = gast + oskar_station_lon_rad(station);
             oskar_jones_get_station_pointer(R_station, R, i, status);
 
             /* Evaluate source parallactic angles. */
@@ -207,7 +207,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
     }
-    else if (location == OSKAR_LOCATION_CPU)
+    else if (location == OSKAR_CPU)
     {
         for (i = 0; i < n; ++i)
         {
@@ -215,8 +215,8 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
 
             /* Get station data. */
             station = oskar_telescope_station_const(telescope, i);
-            latitude = oskar_station_latitude_rad(station);
-            lst = gast + oskar_station_longitude_rad(station);
+            latitude = oskar_station_lat_rad(station);
+            lst = gast + oskar_station_lon_rad(station);
             oskar_jones_get_station_pointer(R_station, R, i, status);
 
             /* Evaluate source parallactic angles. */

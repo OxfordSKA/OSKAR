@@ -35,6 +35,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,13 +48,15 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
         double** row_defaults, size_t* num_cols_min, size_t* num_cols_max,
         va_list args, int* status);
 
-size_t oskar_mem_load_ascii(FILE* file, size_t num_mem, int* status, ...)
+size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
+        int* status, ...)
 {
     size_t i = 0;               /* Loop counter. */
     size_t row_index = 0;       /* Current row index loaded from file. */
     size_t buffer_size = 0;     /* Line buffer size. */
     size_t num_cols_min = 0;    /* Minimum number of columns required. */
     size_t num_cols_max = 0;    /* Maximum number of columns required. */
+    FILE* file = 0;             /* File handle. */
     oskar_Mem** mem_handle = 0; /* Array of oskar_Mem handles in CPU memory. */
     double* row_data = 0;       /* Array to hold data from one row of file. */
     double* row_defaults = 0;   /* Array to hold default data for one row. */
@@ -61,7 +64,7 @@ size_t oskar_mem_load_ascii(FILE* file, size_t num_mem, int* status, ...)
     va_list args;               /* Variable argument list. */
 
     /* Check all inputs. */
-    if (!file || !num_mem || !status)
+    if (!filename || !num_mem || !status)
     {
         oskar_set_invalid_argument(status);
         return 0;
@@ -69,6 +72,14 @@ size_t oskar_mem_load_ascii(FILE* file, size_t num_mem, int* status, ...)
 
     /* Check if safe to proceed. */
     if (*status) return 0;
+
+    /* Open the file. */
+    file = fopen(filename, "r");
+    if (!file)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return 0;
+    }
 
     /* Allocate array of handles to data in CPU memory. */
     mem_handle = calloc(num_mem, sizeof(oskar_Mem*));
@@ -146,7 +157,7 @@ size_t oskar_mem_load_ascii(FILE* file, size_t num_mem, int* status, ...)
         {
             oskar_Mem* mem;
             mem = va_arg(args, oskar_Mem*);
-            if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
+            if (oskar_mem_location(mem) != OSKAR_CPU)
             {
                 oskar_mem_copy(mem, mem_handle[i], status);
                 oskar_mem_free(mem_handle[i], status);
@@ -160,10 +171,11 @@ size_t oskar_mem_load_ascii(FILE* file, size_t num_mem, int* status, ...)
     }
 
     /* Free local arrays. */
-    if (line) free(line);
-    if (row_data) free(row_data);
-    if (row_defaults) free(row_defaults);
-    if (mem_handle) free(mem_handle);
+    free(line);
+    free(row_data);
+    free(row_defaults);
+    free(mem_handle);
+    fclose(file);
     return row_index;
 }
 
@@ -189,10 +201,10 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
             oskar_Mem* mem;
             mem = va_arg(args, oskar_Mem*);
             mem_handle[i] = mem;
-            if (oskar_mem_location(mem) != OSKAR_LOCATION_CPU)
+            if (oskar_mem_location(mem) != OSKAR_CPU)
             {
                 mem_handle[i] = oskar_mem_create(oskar_mem_type(mem),
-                        OSKAR_LOCATION_CPU, oskar_mem_length(mem), status);
+                        OSKAR_CPU, oskar_mem_length(mem), status);
             }
         }
 
@@ -259,7 +271,7 @@ static void set_up_handles_and_defaults(size_t num_mem, oskar_Mem** mem_handle,
         }
         col_start += num_cols_needed;
     }
-    if (line) free(line);
+    free(line);
 }
 
 

@@ -45,7 +45,7 @@ void oskar_element_free(oskar_Element* data, int* status)
     }
 
     /* Free the memory contents. */
-    for (i = 0; i < data->num_frequencies; ++i)
+    for (i = 0; i < data->num_freq; ++i)
     {
         oskar_mem_free(data->filename_x[i], status);
         oskar_mem_free(data->filename_y[i], status);
@@ -58,7 +58,7 @@ void oskar_element_free(oskar_Element* data, int* status)
         oskar_splines_free(data->y_h_re[i], status);
         oskar_splines_free(data->y_h_im[i], status);
     }
-    free(data->frequency_hz);
+    free(data->freqs_hz);
     free(data->filename_x);
     free(data->filename_y);
     free(data->x_h_re);

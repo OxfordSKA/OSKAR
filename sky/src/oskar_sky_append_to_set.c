@@ -60,8 +60,8 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
 
     /* Get type and location. */
     type     = oskar_sky_precision(model);
-    location = oskar_sky_location(model);
-    if (location != OSKAR_LOCATION_CPU)
+    location = oskar_sky_mem_location(model);
+    if (location != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -127,8 +127,8 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
         const oskar_Mem *major, *minor;
 
         /* If any source in the model is extended, set the flag. */
-        major = oskar_sky_fwhm_major_const(sky);
-        minor = oskar_sky_fwhm_minor_const(sky);
+        major = oskar_sky_fwhm_major_rad_const(sky);
+        minor = oskar_sky_fwhm_minor_rad_const(sky);
         if (type == OSKAR_DOUBLE)
         {
             const double *maj_, *min_;

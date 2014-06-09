@@ -57,11 +57,11 @@ void oskar_sky_override_polarisation(oskar_Sky* sky, double mean_pol_fraction,
         return;
 
     /* Get the data location and type. */
-    location = oskar_sky_location(sky);
+    location = oskar_sky_mem_location(sky);
     type = oskar_sky_precision(sky);
     num_sources = oskar_sky_num_sources(sky);
 
-    if (location == OSKAR_LOCATION_CPU)
+    if (location == OSKAR_CPU)
     {
         int i;
         double pol_fraction, pol_angle_rad;

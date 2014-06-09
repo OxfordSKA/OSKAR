@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ int oskar_jones_type(const oskar_Jones* jones);
  * Returns the enumerated location of the Jones matrix block.
  *
  * @details
- * Returns the enumerated location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
+ * Returns the enumerated location (OSKAR_CPU or OSKAR_GPU)
  * of the Jones matrix block.
  *
  * @param[in]     jones  Pointer to data structure.
@@ -96,7 +96,7 @@ int oskar_jones_type(const oskar_Jones* jones);
  * @return The enumerated location.
  */
 OSKAR_EXPORT
-int oskar_jones_location(const oskar_Jones* jones);
+int oskar_jones_mem_location(const oskar_Jones* jones);
 
 /**
  * @brief

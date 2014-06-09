@@ -66,7 +66,7 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
     oskar_Image* im = 0;
 
     /* Location of temporary memory used by this function (needs to be CPU). */
-    int location = OSKAR_LOCATION_CPU;
+    int location = OSKAR_CPU;
 
     if (!vis || !settings || !status)
     {

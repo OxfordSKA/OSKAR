@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,7 @@ oskar_Sky* oskar_mex_sky_from_matlab_struct(const mxArray* mxSky)
 
     int num_sources = (int)mxGetScalar(mxNumSources);
     int type = mxIsDouble(mxRA) ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    sky = oskar_sky_create(type, OSKAR_LOCATION_CPU, num_sources, &status);
+    sky = oskar_sky_create(type, OSKAR_CPU, num_sources, &status);
     if (status)
     {
         mexErrMsgIdAndTxt("oskar:error", "ERROR: oskar_sky_create() failed "
@@ -119,23 +119,23 @@ oskar_Sky* oskar_mex_sky_from_matlab_struct(const mxArray* mxSky)
 
     size_t mem_size = num_sources;
     mem_size *= (type == OSKAR_DOUBLE) ? sizeof(double) : sizeof(float);
-    memcpy(oskar_mem_void(oskar_sky_ra(sky)), mxGetData(mxRA), mem_size);
-    memcpy(oskar_mem_void(oskar_sky_dec(sky)), mxGetData(mxDec), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_ra_rad(sky)), mxGetData(mxRA), mem_size);
+    memcpy(oskar_mem_void(oskar_sky_dec_rad(sky)), mxGetData(mxDec), mem_size);
     memcpy(oskar_mem_void(oskar_sky_I(sky)), mxGetData(mxI), mem_size);
     memcpy(oskar_mem_void(oskar_sky_Q(sky)), mxGetData(mxQ), mem_size);
     memcpy(oskar_mem_void(oskar_sky_U(sky)), mxGetData(mxU), mem_size);
     memcpy(oskar_mem_void(oskar_sky_V(sky)), mxGetData(mxV), mem_size);
-    memcpy(oskar_mem_void(oskar_sky_reference_freq(sky)),
+    memcpy(oskar_mem_void(oskar_sky_reference_freq_hz(sky)),
             mxGetData(mxRefFreq), mem_size);
     memcpy(oskar_mem_void(oskar_sky_spectral_index(sky)),
             mxGetData(mxSPIX), mem_size);
-    memcpy(oskar_mem_void(oskar_sky_rotation_measure(sky)),
+    memcpy(oskar_mem_void(oskar_sky_rotation_measure_rad(sky)),
             mxGetData(mxRM), mem_size);
-    memcpy(oskar_mem_void(oskar_sky_fwhm_major(sky)),
+    memcpy(oskar_mem_void(oskar_sky_fwhm_major_rad(sky)),
             mxGetData(mxFWHM_Maj), mem_size);
-    memcpy(oskar_mem_void(oskar_sky_fwhm_minor(sky)),
+    memcpy(oskar_mem_void(oskar_sky_fwhm_minor_rad(sky)),
             mxGetData(mxFWHM_Min), mem_size);
-    memcpy(oskar_mem_void(oskar_sky_position_angle(sky)),
+    memcpy(oskar_mem_void(oskar_sky_position_angle_rad(sky)),
             mxGetData(mxPA), mem_size);
     return sky;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     const char* filename = mxArrayToString(in[0]);
 
     // Load the OSKAR sky model structure from the specified file.
-    oskar_Sky* sky = oskar_sky_read(filename, OSKAR_LOCATION_CPU, &status);
+    oskar_Sky* sky = oskar_sky_read(filename, OSKAR_CPU, &status);
     if (status)
     {
         oskar_matlab_error("Failed to read sky model file: %s (%s)", filename,

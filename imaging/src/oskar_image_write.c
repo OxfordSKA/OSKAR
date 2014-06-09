@@ -105,7 +105,7 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
             /* Write the settings file. */
             oskar_Mem* temp;
             temp = oskar_mem_read_binary_raw(settings_path_str, OSKAR_CHAR,
-                    OSKAR_LOCATION_CPU, status);
+                    OSKAR_CPU, status);
             oskar_mem_binary_stream_write(temp, stream,
                     OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, idx, 0,
                     status);

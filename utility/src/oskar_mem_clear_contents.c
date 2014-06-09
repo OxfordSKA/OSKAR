@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,11 +58,11 @@ void oskar_mem_clear_contents(oskar_Mem* mem, int* status)
     size = mem->num_elements * oskar_mem_element_size(mem->type);
 
     /* Clear the memory. */
-    if (mem->location == OSKAR_LOCATION_CPU)
+    if (mem->location == OSKAR_CPU)
     {
         memset(mem->data, 0, size);
     }
-    else if (mem->location == OSKAR_LOCATION_GPU)
+    else if (mem->location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         cudaMemset(mem->data, 0, size);

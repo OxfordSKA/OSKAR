@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,11 +97,11 @@ inline int get_location_id(const char* location)
 {
     if (strcmp(location, "gpu") == 0)
     {
-        return OSKAR_LOCATION_GPU;
+        return OSKAR_GPU;
     }
     else if (strcmp(location, "cpu") == 0)
     {
-        return OSKAR_LOCATION_CPU;
+        return OSKAR_CPU;
     }
     else
     {

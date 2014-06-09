@@ -47,9 +47,9 @@ void oskar_sky_set_gaussian_parameters(oskar_Sky* sky,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    oskar_mem_set_value_real(sky->FWHM_major, FWHM_major, 0, 0, status);
-    oskar_mem_set_value_real(sky->FWHM_minor, FWHM_minor, 0, 0, status);
-    oskar_mem_set_value_real(sky->position_angle, position_angle, 0, 0, status);
+    oskar_mem_set_value_real(sky->fwhm_major_rad, FWHM_major, 0, 0, status);
+    oskar_mem_set_value_real(sky->fwhm_minor_rad, FWHM_minor, 0, 0, status);
+    oskar_mem_set_value_real(sky->pa_rad, position_angle, 0, 0, status);
 }
 
 #ifdef __cplusplus

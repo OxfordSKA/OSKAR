@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@
 
 #include <oskar_global.h>
 #include <stddef.h>
-#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,17 +55,21 @@ extern "C" {
  *
  * If the default is a blank string, then it is a required column.
  *
+ * Note that, for a single column file (with no default), the default must
+ * be passed as a blank string, i.e. "".
+ *
  * Data within oskar_Mem structures may reside either in CPU or GPU memory.
  * The number of structures passed is given by the \p num_mem parameter.
  *
- * @param[in] file          Pointer to input stream.
+ * @param[in] filename      Pathname of file to read.
  * @param[in] num_mem       Number of arrays passed to this function.
  * @param[in,out]  status   Status return code.
  *
  * @return The number of rows read from the file.
  */
 OSKAR_EXPORT
-size_t oskar_mem_load_ascii(FILE* file, size_t num_mem, int* status, ...);
+size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
+        int* status, ...);
 
 #ifdef __cplusplus
 }

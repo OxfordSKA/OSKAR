@@ -103,22 +103,22 @@ int oskar_image_healpix_nside(const oskar_Image* image)
     return image->healpix_nside;
 }
 
-double oskar_image_centre_longitude_deg(const oskar_Image* image)
+double oskar_image_centre_lon_deg(const oskar_Image* image)
 {
     return image->centre_lon_deg;
 }
 
-double oskar_image_centre_latitude_deg(const oskar_Image* image)
+double oskar_image_centre_lat_deg(const oskar_Image* image)
 {
     return image->centre_lat_deg;
 }
 
-double oskar_image_fov_longitude_deg(const oskar_Image* image)
+double oskar_image_fov_lon_deg(const oskar_Image* image)
 {
     return image->fov_lon_deg;
 }
 
-double oskar_image_fov_latitude_deg(const oskar_Image* image)
+double oskar_image_fov_lat_deg(const oskar_Image* image)
 {
     return image->fov_lat_deg;
 }

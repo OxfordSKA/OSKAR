@@ -81,15 +81,15 @@ void oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     }
 
     /* Copy the baselines to temporary GPU memory and compute the wavenumber. */
-    u = oskar_mem_create_copy(uu_metres, OSKAR_LOCATION_GPU, status);
-    v = oskar_mem_create_copy(vv_metres, OSKAR_LOCATION_GPU, status);
+    u = oskar_mem_create_copy(uu_metres, OSKAR_GPU, status);
+    v = oskar_mem_create_copy(vv_metres, OSKAR_GPU, status);
     wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
 
     /* Check location of the image array. */
     p_image = image;
-    if (oskar_mem_location(image) == OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(image) == OSKAR_CPU)
     {
-        t_image = oskar_mem_create(oskar_mem_type(image), OSKAR_LOCATION_GPU,
+        t_image = oskar_mem_create(oskar_mem_type(image), OSKAR_GPU,
                 (int)oskar_mem_length(image), status);
         p_image = t_image;
     }
@@ -97,22 +97,22 @@ void oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     /* Check location of the l,m arrays. */
     p_l = l;
     p_m = m;
-    if (oskar_mem_location(l) == OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(l) == OSKAR_CPU)
     {
-        t_l = oskar_mem_create_copy(l, OSKAR_LOCATION_GPU, status);
+        t_l = oskar_mem_create_copy(l, OSKAR_GPU, status);
         p_l = t_l;
     }
-    if (oskar_mem_location(m) == OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(m) == OSKAR_CPU)
     {
-        t_m = oskar_mem_create_copy(m, OSKAR_LOCATION_GPU, status);
+        t_m = oskar_mem_create_copy(m, OSKAR_GPU, status);
         p_m = t_m;
     }
 
     /* Check location of the amplitude array. */
     p_amp = amp;
-    if (oskar_mem_location(amp) == OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(amp) == OSKAR_CPU)
     {
-        t_amp = oskar_mem_create_copy(amp, OSKAR_LOCATION_GPU, status);
+        t_amp = oskar_mem_create_copy(amp, OSKAR_GPU, status);
         p_amp = t_amp;
     }
 
@@ -148,7 +148,7 @@ void oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
         oskar_mem_scale_real(p_image, 1.0 / num_vis, status);
 
         /* Copy image back to host memory if required. */
-        if (oskar_mem_location(image) == OSKAR_LOCATION_CPU)
+        if (oskar_mem_location(image) == OSKAR_CPU)
             oskar_mem_insert(image, t_image, 0, oskar_mem_length(t_image),
                     status);
     }

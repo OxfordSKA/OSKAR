@@ -61,14 +61,14 @@ void oskar_station_save_gain_phase(const char* filename,
 
     /* Check type and location. */
     type = oskar_station_precision(station);
-    location = oskar_station_location(station);
+    location = oskar_station_mem_location(station);
     num_elements = oskar_station_num_elements(station);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
-    if (location != OSKAR_LOCATION_CPU)
+    if (location != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -77,8 +77,8 @@ void oskar_station_save_gain_phase(const char* filename,
     /* Get pointers to the arrays. */
     gain = oskar_station_element_gain_const(station);
     gain_error = oskar_station_element_gain_error_const(station);
-    phase = oskar_station_element_phase_offset_const(station);
-    phase_error = oskar_station_element_phase_error_const(station);
+    phase = oskar_station_element_phase_offset_rad_const(station);
+    phase_error = oskar_station_element_phase_error_rad_const(station);
 
     /* Open the file. */
     file = fopen(filename, "w");

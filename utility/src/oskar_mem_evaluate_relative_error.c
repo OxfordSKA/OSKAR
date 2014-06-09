@@ -139,9 +139,9 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     /* Copy input data to temporary CPU arrays if required. */
     app_ptr = val_approx;
     acc_ptr = val_accurate;
-    if (oskar_mem_location(val_approx) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(val_approx) != OSKAR_CPU)
     {
-        approx_temp = oskar_mem_create_copy(val_approx, OSKAR_LOCATION_CPU,
+        approx_temp = oskar_mem_create_copy(val_approx, OSKAR_CPU,
                 status);
         if (*status)
         {
@@ -150,9 +150,9 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
         }
         app_ptr = approx_temp;
     }
-    if (oskar_mem_location(val_accurate) != OSKAR_LOCATION_CPU)
+    if (oskar_mem_location(val_accurate) != OSKAR_CPU)
     {
-        accurate_temp = oskar_mem_create_copy(val_accurate, OSKAR_LOCATION_CPU,
+        accurate_temp = oskar_mem_create_copy(val_accurate, OSKAR_CPU,
                 status);
         if (*status)
         {

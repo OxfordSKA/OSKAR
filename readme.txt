@@ -1,8 +1,8 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.5                                           Last update: 6 June 2014 |
+| OSKAR 2.5                                           Last update: 9 June 2014 |
 +------------------------------------------------------------------------------+
 
-1. OSKAR: The Open Square Kilometre Array Radio Telescope Simulator
+1. OSKAR: The Oxford Square Kilometre Array Radio Telescope Simulator
 --------------------------------------------------------------------------------
 
 The OSKAR package consists of a number of open source libraries and applications

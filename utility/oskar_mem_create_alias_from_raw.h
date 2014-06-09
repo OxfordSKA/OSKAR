@@ -54,7 +54,7 @@ extern "C" {
  *
  * @param[in] ptr           Pointer to existing memory.
  * @param[in] type          Enumerated data type of memory contents.
- * @param[in] location      Either OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU.
+ * @param[in] location      Either OSKAR_CPU or OSKAR_GPU.
  * @param[in] num_elements  Number of elements of type \p type in the array.
  * @param[in,out]  status   Status return code.
  *

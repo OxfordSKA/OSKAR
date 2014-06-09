@@ -117,8 +117,8 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
 
             /* Get the frequency index. */
             freq_id = oskar_find_closest_match_d(frequency_hz,
-                    oskar_element_num_frequencies(model),
-                    oskar_element_frequencies_hz(model));
+                    oskar_element_num_freq(model),
+                    oskar_element_freqs_hz(model));
 
             /* Evaluate spline pattern for dipole X. */
             oskar_splines_evaluate(output, 0, 8, model->x_h_re[freq_id],
@@ -172,8 +172,8 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
 
             /* Get the frequency index. */
             freq_id = oskar_find_closest_match_d(frequency_hz,
-                    oskar_element_num_frequencies(model),
-                    oskar_element_frequencies_hz(model));
+                    oskar_element_num_freq(model),
+                    oskar_element_freqs_hz(model));
 
             /* Evaluate spline pattern for dipole Y. */
             oskar_splines_evaluate(output, 4, 8, model->y_h_re[freq_id],
@@ -227,7 +227,7 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
     if (model->taper_type == OSKAR_ELEMENT_TAPER_COSINE)
     {
         oskar_apply_element_taper_cosine(output, num_points,
-                model->cos_power, theta, status);
+                model->cosine_power, theta, status);
     }
     else if (model->taper_type == OSKAR_ELEMENT_TAPER_GAUSSIAN)
     {

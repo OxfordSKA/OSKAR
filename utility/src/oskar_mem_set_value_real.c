@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val,
         n = mem->num_elements;
     }
 
-    if (location == OSKAR_LOCATION_CPU)
+    if (location == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE)
         {
@@ -133,7 +133,7 @@ void oskar_mem_set_value_real(oskar_Mem* mem, double val,
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-    else if (location == OSKAR_LOCATION_GPU)
+    else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_DOUBLE)

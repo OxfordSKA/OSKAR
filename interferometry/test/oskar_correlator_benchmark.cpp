@@ -87,9 +87,9 @@ int main(int argc, char** argv)
 
     int loc;
     if (opt.isSet("-g"))
-        loc = OSKAR_LOCATION_GPU;
+        loc = OSKAR_GPU;
     if (opt.isSet("-c"))
-        loc = OSKAR_LOCATION_CPU;
+        loc = OSKAR_CPU;
     if (!(opt.isSet("-c") ^ opt.isSet("-g")))
     {
         opt.error("Please select one of -g or -c");
@@ -210,7 +210,7 @@ int benchmark(int num_stations, int num_sources, int type,
     int num_vis = num_stations * (num_stations-1) / 2;
 
     oskar_Timer* timer;
-    timer = oskar_timer_create(loc == OSKAR_LOCATION_GPU ?
+    timer = oskar_timer_create(loc == OSKAR_GPU ?
             OSKAR_TIMER_CUDA : OSKAR_TIMER_OMP);
 
     // Set up a test sky model, telescope model and Jones matrices.

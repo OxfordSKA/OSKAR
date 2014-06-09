@@ -113,7 +113,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int err = OSKAR_SUCCESS;
 
     oskar_Image* image = 0;
-    int location = OSKAR_LOCATION_CPU;
+    int location = OSKAR_CPU;
 
     // Image with the oskar_make_image() function.
     if (cube_imager)

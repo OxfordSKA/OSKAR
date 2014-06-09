@@ -52,7 +52,7 @@ TEST(beam_pattern_coordinates, generate_lon_lat_grid)
 
     int num_pixels = image_size * image_size;
     int type = OSKAR_DOUBLE;
-    int loc = OSKAR_LOCATION_CPU;
+    int loc = OSKAR_CPU;
 
     oskar_Mem* lon = oskar_mem_create(type, loc, num_pixels, &status);
     ASSERT_EQ(OSKAR_SUCCESS, status);
@@ -92,7 +92,7 @@ TEST(beam_pattern_coordinates, HEALPix_horizontal)
 
     int nside = 12;
     int num_pixels = oskar_healpix_nside_to_npix(nside);
-    int loc = OSKAR_LOCATION_CPU;
+    int loc = OSKAR_CPU;
     int type = OSKAR_DOUBLE;
 
     // galactic longitude = l, latidude = b

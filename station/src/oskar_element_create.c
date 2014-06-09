@@ -54,12 +54,12 @@ oskar_Element* oskar_element_create(int precision, int location, int* status)
 
     /* Initialise variables. */
     data->precision = precision;
-    data->data_location = location;
+    data->mem_location = location;
     data->element_type = OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE;
     data->taper_type = OSKAR_ELEMENT_TAPER_NONE;
     data->dipole_length = 0.5;
     data->dipole_length_units = OSKAR_ELEMENT_LENGTH_WAVELENGTHS;
-    data->cos_power = 0.0;
+    data->cosine_power = 0.0;
     data->gaussian_fwhm_rad = 0.0;
 
     /* Check type. */
@@ -67,8 +67,8 @@ oskar_Element* oskar_element_create(int precision, int location, int* status)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Initialise arrays (to zero length). */
-    data->num_frequencies = 0;
-    data->frequency_hz = 0;
+    data->num_freq = 0;
+    data->freqs_hz = 0;
     data->filename_x = 0;
     data->filename_y = 0;
     data->x_h_re = 0;

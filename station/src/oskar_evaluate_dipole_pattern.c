@@ -150,7 +150,7 @@ void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
     }
 
     /* Check the location. */
-    if (location == OSKAR_LOCATION_GPU)
+    if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
@@ -174,7 +174,7 @@ void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
     }
-    else if (location == OSKAR_LOCATION_CPU)
+    else if (location == OSKAR_CPU)
     {
         if (type == OSKAR_SINGLE)
         {

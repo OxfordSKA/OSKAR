@@ -77,8 +77,8 @@ void oskar_station_load_permitted_beams(oskar_Station* station,
     }
 
     /* Get pointers to arrays to fill. */
-    az = station->permitted_beam_az;
-    el = station->permitted_beam_el;
+    az = station->permitted_beam_az_rad;
+    el = station->permitted_beam_el_rad;
 
     /* Loop over each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)

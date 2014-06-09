@@ -30,7 +30,6 @@
 #include <oskar_station.h>
 
 #include <oskar_element_copy.h>
-#include <oskar_system_noise_model_copy.h>
 
 #include <stdlib.h>
 #include <stddef.h>
@@ -62,18 +61,19 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
 
     /* Set meta-data. */
     model->precision = src->precision;
-    model->location = location;
+    model->mem_location = location;
 
     /* Copy common station parameters. */
     model->station_type = src->station_type;
     model->normalise_final_beam = src->normalise_final_beam;
-    model->longitude_rad = src->longitude_rad;
-    model->latitude_rad = src->latitude_rad;
-    model->altitude_m = src->altitude_m;
-    model->beam_longitude_rad = src->beam_longitude_rad;
-    model->beam_latitude_rad = src->beam_latitude_rad;
+    model->lon_rad = src->lon_rad;
+    model->lat_rad = src->lat_rad;
+    model->alt_metres = src->alt_metres;
+    model->beam_lon_rad = src->beam_lon_rad;
+    model->beam_lat_rad = src->beam_lat_rad;
     model->beam_coord_type = src->beam_coord_type;
-    oskar_system_noise_model_copy(model->noise, src->noise, status);
+    oskar_mem_copy(model->noise_freq_hz, src->noise_freq_hz, status);
+    oskar_mem_copy(model->noise_rms_jy, src->noise_rms_jy, status);
 
     /* Copy aperture array data, except num_element_types (done later). */
     model->identical_children = src->identical_children;
@@ -85,32 +85,42 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     model->array_is_3d = src->array_is_3d;
     model->apply_element_errors = src->apply_element_errors;
     model->apply_element_weight = src->apply_element_weight;
-    model->nominal_orientation_x = src->nominal_orientation_x;
-    model->nominal_orientation_y = src->nominal_orientation_y;
+    model->nominal_orientation_x_rad = src->nominal_orientation_x_rad;
+    model->nominal_orientation_y_rad = src->nominal_orientation_y_rad;
     model->num_permitted_beams = src->num_permitted_beams;
 
     /* Copy Gaussian station beam data. */
     model->gaussian_beam_fwhm_rad = src->gaussian_beam_fwhm_rad;
-    model->gaussian_beam_ref_feq_hz = src->gaussian_beam_ref_feq_hz;
+    model->gaussian_beam_reference_freq_hz = src->gaussian_beam_reference_freq_hz;
 
     /* Copy memory blocks. */
-    oskar_mem_copy(model->x_signal, src->x_signal, status);
-    oskar_mem_copy(model->y_signal, src->y_signal, status);
-    oskar_mem_copy(model->z_signal, src->z_signal, status);
-    oskar_mem_copy(model->x_weights, src->x_weights, status);
-    oskar_mem_copy(model->y_weights, src->y_weights, status);
-    oskar_mem_copy(model->z_weights, src->z_weights, status);
-    oskar_mem_copy(model->weight, src->weight, status);
-    oskar_mem_copy(model->gain, src->gain, status);
-    oskar_mem_copy(model->gain_error, src->gain_error, status);
-    oskar_mem_copy(model->phase_offset, src->phase_offset, status);
-    oskar_mem_copy(model->phase_error, src->phase_error, status);
-    oskar_mem_copy(model->orientation_x_cpu, src->orientation_x_cpu, status);
-    oskar_mem_copy(model->orientation_y_cpu, src->orientation_y_cpu, status);
+    oskar_mem_copy(model->element_true_x_enu_metres,
+            src->element_true_x_enu_metres, status);
+    oskar_mem_copy(model->element_true_y_enu_metres,
+            src->element_true_y_enu_metres, status);
+    oskar_mem_copy(model->element_true_z_enu_metres,
+            src->element_true_z_enu_metres, status);
+    oskar_mem_copy(model->element_measured_x_enu_metres,
+            src->element_measured_x_enu_metres, status);
+    oskar_mem_copy(model->element_measured_y_enu_metres,
+            src->element_measured_y_enu_metres, status);
+    oskar_mem_copy(model->element_measured_z_enu_metres,
+            src->element_measured_z_enu_metres, status);
+    oskar_mem_copy(model->element_weight, src->element_weight, status);
+    oskar_mem_copy(model->element_gain, src->element_gain, status);
+    oskar_mem_copy(model->element_gain_error, src->element_gain_error, status);
+    oskar_mem_copy(model->element_phase_offset_rad,
+            src->element_phase_offset_rad, status);
+    oskar_mem_copy(model->element_phase_error_rad,
+            src->element_phase_error_rad, status);
+    oskar_mem_copy(model->element_orientation_x_rad_cpu,
+            src->element_orientation_x_rad_cpu, status);
+    oskar_mem_copy(model->element_orientation_y_rad_cpu,
+            src->element_orientation_y_rad_cpu, status);
     oskar_mem_copy(model->element_types, src->element_types, status);
     oskar_mem_copy(model->element_types_cpu, src->element_types_cpu, status);
-    oskar_mem_copy(model->permitted_beam_az, src->permitted_beam_az, status);
-    oskar_mem_copy(model->permitted_beam_el, src->permitted_beam_el, status);
+    oskar_mem_copy(model->permitted_beam_az_rad, src->permitted_beam_az_rad, status);
+    oskar_mem_copy(model->permitted_beam_el_rad, src->permitted_beam_el_rad, status);
 
     /* Copy element models, if set. */
     if (oskar_station_has_element(src))
@@ -122,8 +132,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
         /* Copy the element model data. */
         for (i = 0; i < src->num_element_types; ++i)
         {
-            oskar_element_copy(model->element_pattern[i],
-                    src->element_pattern[i], status);
+            oskar_element_copy(model->element[i], src->element[i], status);
         }
     }
 

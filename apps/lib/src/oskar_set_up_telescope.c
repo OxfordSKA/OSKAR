@@ -62,8 +62,8 @@ void oskar_telescope_log_summary(const oskar_Telescope* telescope,
 void oskar_station_log_summary(const oskar_Station* station,
         oskar_Log* log, int depth, int* status);
 
-oskar_Telescope* oskar_set_up_telescope(oskar_Log* log,
-        const oskar_Settings* settings, int* status)
+oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
+        oskar_Log* log, int* status)
 {
     int type;
     oskar_Telescope* telescope;
@@ -82,7 +82,7 @@ oskar_Telescope* oskar_set_up_telescope(oskar_Log* log,
 
     /* Initialise the structure in CPU memory. */
     type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    telescope = oskar_telescope_create(type, OSKAR_LOCATION_CPU, 0, status);
+    telescope = oskar_telescope_create(type, OSKAR_CPU, 0, status);
 
     /* Load the telescope model and then apply overrides. */
     oskar_telescope_load(telescope, log, settings, status);
@@ -281,16 +281,15 @@ static void set_station_data(oskar_Station* station,
     if (parent)
     {
         oskar_station_set_position(station,
-                oskar_station_longitude_rad(parent),
-                oskar_station_latitude_rad(parent),
-                oskar_station_altitude_m(parent));
+                oskar_station_lon_rad(parent),
+                oskar_station_lat_rad(parent),
+                oskar_station_alt_metres(parent));
     }
     oskar_station_set_enable_array_pattern(station, aa->array_pattern.enable);
     oskar_station_set_normalise_array_pattern(station,
             aa->array_pattern.normalise);
-    oskar_station_set_gaussian_beam_fwhm_rad(station,
-            settings->telescope.gaussian_beam.fwhm_deg * M_PI / 180.0);
-    oskar_station_set_gaussian_beam_ref_freq_hz(station,
+    oskar_station_set_gaussian_beam(station,
+            settings->telescope.gaussian_beam.fwhm_deg * M_PI / 180.0,
             settings->telescope.gaussian_beam.ref_freq_hz);
 
     oskar_station_set_use_polarised_elements(station,
@@ -308,7 +307,7 @@ static void set_station_data(oskar_Station* station,
         oskar_element_set_dipole_length(element, ep->dipole_length,
                 ep->dipole_length_units);
         oskar_element_set_taper_type(element, ep->taper.type);
-        oskar_element_set_cos_power(element, ep->taper.cosine_power);
+        oskar_element_set_cosine_power(element, ep->taper.cosine_power);
         oskar_element_set_gaussian_fwhm_rad(element, ep->taper.gaussian_fwhm_rad);
     }
 

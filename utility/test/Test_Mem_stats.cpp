@@ -36,7 +36,7 @@ TEST(Mem, stats)
 {
     int status = 0;
     oskar_Mem* values;
-    values = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 5, &status);
+    values = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 5, &status);
 
     // Fill an array with the values 1, 2, 3, 4, 5.
     double *v = oskar_mem_double(values, &status);

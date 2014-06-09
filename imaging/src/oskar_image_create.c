@@ -49,7 +49,7 @@ oskar_Image* oskar_image_create(int type, int location, int* status)
 
     /* Initialise memory. */
     image->data = oskar_mem_create(type, location, 0, status);
-    image->settings_path = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0,
+    image->settings_path = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0,
             status);
 
     /* Set default dimension order. */

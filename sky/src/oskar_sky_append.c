@@ -49,18 +49,18 @@ void oskar_sky_append(oskar_Sky* dst, const oskar_Sky* src,
     if (*status) return;
 
     /* Append to the sky model. */
-    oskar_mem_append(dst->RA, src->RA, status);
-    oskar_mem_append(dst->Dec, src->Dec, status);
+    oskar_mem_append(dst->ra_rad, src->ra_rad, status);
+    oskar_mem_append(dst->dec_rad, src->dec_rad, status);
     oskar_mem_append(dst->I, src->I, status);
     oskar_mem_append(dst->Q, src->Q, status);
     oskar_mem_append(dst->U, src->U, status);
     oskar_mem_append(dst->V, src->V, status);
-    oskar_mem_append(dst->reference_freq, src->reference_freq, status);
+    oskar_mem_append(dst->reference_freq_hz, src->reference_freq_hz, status);
     oskar_mem_append(dst->spectral_index, src->spectral_index, status);
-    oskar_mem_append(dst->RM, src->RM, status);
-    oskar_mem_append(dst->FWHM_major, src->FWHM_major, status);
-    oskar_mem_append(dst->FWHM_minor, src->FWHM_minor, status);
-    oskar_mem_append(dst->position_angle, src->position_angle, status);
+    oskar_mem_append(dst->rm_rad, src->rm_rad, status);
+    oskar_mem_append(dst->fwhm_major_rad, src->fwhm_major_rad, status);
+    oskar_mem_append(dst->fwhm_minor_rad, src->fwhm_minor_rad, status);
+    oskar_mem_append(dst->pa_rad, src->pa_rad, status);
 
     /* Update the number of sources. */
     dst->num_sources += src->num_sources;

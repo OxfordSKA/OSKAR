@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,8 +54,8 @@ extern "C" {
  * - OSKAR_DOUBLE_COMPLEX_MATRIX
  *
  * Allowed values of the \p location parameter are
- * - OSKAR_LOCATION_CPU
- * - OSKAR_LOCATION_GPU
+ * - OSKAR_CPU
+ * - OSKAR_GPU
  *
  * The number of polarisations is determined by the choice of matrix or
  * scalar amplitude types. Matrix amplitude types represent 4 polarisation
@@ -69,7 +69,7 @@ extern "C" {
  * no longer required.
  *
  * @param amp_type          OSKAR memory type for the visibility amplitudes.
- * @param location          Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCAITON_GPU).
+ * @param location          Memory location (OSKAR_CPU or OSKAR_LOCAITON_GPU).
  * @param num_channels      Number of frequency channels.
  * @param num_times         Number of time samples.
  * @param num_stations      Number of stations.

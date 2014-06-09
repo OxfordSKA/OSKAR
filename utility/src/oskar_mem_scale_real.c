@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,13 +60,13 @@ void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status)
     /* Scale the vector. */
     if (oskar_mem_type_is_single(mem->type))
     {
-        if (mem->location == OSKAR_LOCATION_CPU)
+        if (mem->location == OSKAR_CPU)
         {
             float *aa;
             aa = (float*) mem->data;
             for (i = 0; i < num_elements; ++i) aa[i] *= (float)value;
         }
-        else if (mem->location == OSKAR_LOCATION_GPU)
+        else if (mem->location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_mem_scale_real_cuda_f(num_elements, (float)value,
@@ -83,13 +83,13 @@ void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status)
     }
     else if (oskar_mem_type_is_double(mem->type))
     {
-        if (mem->location == OSKAR_LOCATION_CPU)
+        if (mem->location == OSKAR_CPU)
         {
             double *aa;
             aa = (double*) mem->data;
             for (i = 0; i < num_elements; ++i) aa[i] *= value;
         }
-        else if (mem->location == OSKAR_LOCATION_GPU)
+        else if (mem->location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_mem_scale_real_cuda_d(num_elements, value,

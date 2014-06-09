@@ -68,7 +68,8 @@ void oskar_station_override_element_orientations(oskar_Station* s,
         oskar_Mem *mem;
 
         /* Get pointer to the X or Y element orientation data. */
-        mem = x_pol ? s->orientation_x_cpu : s->orientation_y_cpu;
+        mem = x_pol ? s->element_orientation_x_rad_cpu :
+                s->element_orientation_y_rad_cpu;
         d = oskar_mem_double(mem, status);
         for (i = 0; i < s->num_elements; ++i)
         {

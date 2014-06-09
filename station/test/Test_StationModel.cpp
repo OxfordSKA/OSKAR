@@ -51,7 +51,7 @@ TEST(Station, test_load_single)
 
     // Load the data.
     oskar_Station* station = oskar_station_create(OSKAR_SINGLE,
-            OSKAR_LOCATION_CPU, 0, &status);
+            OSKAR_CPU, 0, &status);
     oskar_station_load_config(station, filename, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
@@ -61,11 +61,11 @@ TEST(Station, test_load_single)
     for (int i = 0; i < n_elements; ++i)
     {
         EXPECT_NEAR(i/10.0f, oskar_mem_float(
-                oskar_station_element_x_weights(station), &status)[i], tol);
+                oskar_station_element_measured_x_enu_metres(station), &status)[i], tol);
         EXPECT_NEAR(i/12.0f, oskar_mem_float(
-                oskar_station_element_y_weights(station), &status)[i], tol);
+                oskar_station_element_measured_y_enu_metres(station), &status)[i], tol);
         EXPECT_NEAR(i/14.0f, oskar_mem_float(
-                oskar_station_element_z_weights(station), &status)[i], tol);
+                oskar_station_element_measured_z_enu_metres(station), &status)[i], tol);
         EXPECT_NEAR(1.0f, oskar_mem_float2(
                 oskar_station_element_weight(station), &status)[i].x, tol);
         EXPECT_NEAR(0.0f, oskar_mem_float2(
@@ -75,9 +75,9 @@ TEST(Station, test_load_single)
         EXPECT_NEAR(0.0f, oskar_mem_float(
                 oskar_station_element_gain_error(station), &status)[i], tol);
         EXPECT_NEAR(0.0f, oskar_mem_float(
-                oskar_station_element_phase_offset(station), &status)[i], tol);
+                oskar_station_element_phase_offset_rad(station), &status)[i], tol);
         EXPECT_NEAR(0.0f, oskar_mem_float(
-                oskar_station_element_phase_error(station), &status)[i], tol);
+                oskar_station_element_phase_error_rad(station), &status)[i], tol);
     }
 
     // Remove the test file.
@@ -103,7 +103,7 @@ TEST(Station, test_load_double)
 
     // Load the data.
     oskar_Station* station = oskar_station_create(OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, 0, &status);
+            OSKAR_CPU, 0, &status);
     oskar_station_load_config(station, filename, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
@@ -113,11 +113,11 @@ TEST(Station, test_load_double)
     for (int i = 0; i < n_elements; ++i)
     {
         EXPECT_NEAR(i/10.0, oskar_mem_double(
-                oskar_station_element_x_weights(station), &status)[i], tol);
+                oskar_station_element_measured_x_enu_metres(station), &status)[i], tol);
         EXPECT_NEAR(i/12.0, oskar_mem_double(
-                oskar_station_element_y_weights(station), &status)[i], tol);
+                oskar_station_element_measured_y_enu_metres(station), &status)[i], tol);
         EXPECT_NEAR(i/14.0, oskar_mem_double(
-                oskar_station_element_z_weights(station), &status)[i], tol);
+                oskar_station_element_measured_z_enu_metres(station), &status)[i], tol);
         EXPECT_NEAR(1.0, oskar_mem_double2(
                 oskar_station_element_weight(station), &status)[i].x, tol);
         EXPECT_NEAR(0.0, oskar_mem_double2(
@@ -127,9 +127,9 @@ TEST(Station, test_load_double)
         EXPECT_NEAR(0.0, oskar_mem_double(
                 oskar_station_element_gain_error(station), &status)[i], tol);
         EXPECT_NEAR(0.0, oskar_mem_double(
-                oskar_station_element_phase_offset(station), &status)[i], tol);
+                oskar_station_element_phase_offset_rad(station), &status)[i], tol);
         EXPECT_NEAR(0.0, oskar_mem_double(
-                oskar_station_element_phase_error(station), &status)[i], tol);
+                oskar_station_element_phase_error_rad(station), &status)[i], tol);
     }
 
     // Remove the test file.

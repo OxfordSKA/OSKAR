@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -155,7 +155,7 @@ void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
         const float* mask_;
         mask_ = oskar_mem_float_const(mask, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
@@ -196,7 +196,7 @@ void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
         const double* mask_;
         mask_ = oskar_mem_double_const(mask, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)

@@ -41,9 +41,9 @@ int oskar_station_precision(const oskar_Station* model)
     return model->precision;
 }
 
-int oskar_station_location(const oskar_Station* model)
+int oskar_station_mem_location(const oskar_Station* model)
 {
-    return model->location;
+    return model->mem_location;
 }
 
 int oskar_station_type(const oskar_Station* model)
@@ -56,29 +56,29 @@ int oskar_station_normalise_final_beam(const oskar_Station* model)
     return model->normalise_final_beam;
 }
 
-double oskar_station_longitude_rad(const oskar_Station* model)
+double oskar_station_lon_rad(const oskar_Station* model)
 {
-    return model->longitude_rad;
+    return model->lon_rad;
 }
 
-double oskar_station_latitude_rad(const oskar_Station* model)
+double oskar_station_lat_rad(const oskar_Station* model)
 {
-    return model->latitude_rad;
+    return model->lat_rad;
 }
 
-double oskar_station_altitude_m(const oskar_Station* model)
+double oskar_station_alt_metres(const oskar_Station* model)
 {
-    return model->altitude_m;
+    return model->alt_metres;
 }
 
-double oskar_station_beam_longitude_rad(const oskar_Station* model)
+double oskar_station_beam_lon_rad(const oskar_Station* model)
 {
-    return model->beam_longitude_rad;
+    return model->beam_lon_rad;
 }
 
-double oskar_station_beam_latitude_rad(const oskar_Station* model)
+double oskar_station_beam_lat_rad(const oskar_Station* model)
 {
-    return model->beam_latitude_rad;
+    return model->beam_lat_rad;
 }
 
 int oskar_station_beam_coord_type(const oskar_Station* model)
@@ -86,15 +86,24 @@ int oskar_station_beam_coord_type(const oskar_Station* model)
     return model->beam_coord_type;
 }
 
-oskar_SystemNoiseModel* oskar_station_system_noise_model(oskar_Station* model)
+oskar_Mem* oskar_station_noise_freq_hz(oskar_Station* model)
 {
-    return model->noise;
+    return model->noise_freq_hz;
 }
 
-const oskar_SystemNoiseModel* oskar_station_system_noise_model_const(
-        const oskar_Station* model)
+const oskar_Mem* oskar_station_noise_freq_hz_const(const oskar_Station* model)
 {
-    return model->noise;
+    return model->noise_freq_hz;
+}
+
+oskar_Mem* oskar_station_noise_rms_jy(oskar_Station* model)
+{
+    return model->noise_rms_jy;
+}
+
+const oskar_Mem* oskar_station_noise_rms_jy_const(const oskar_Station* model)
+{
+    return model->noise_rms_jy;
 }
 
 /* Data used only for Gaussian beam stations. */
@@ -104,9 +113,9 @@ double oskar_station_gaussian_beam_fwhm_rad(const oskar_Station* model)
     return model->gaussian_beam_fwhm_rad;
 }
 
-double oskar_station_gaussian_beam_ref_freq_hz(const oskar_Station* model)
+double oskar_station_gaussian_beam_reference_freq_hz(const oskar_Station* model)
 {
-    return model->gaussian_beam_ref_feq_hz;
+    return model->gaussian_beam_reference_freq_hz;
 }
 
 /* Data used only for aperture array stations. */
@@ -161,21 +170,24 @@ int oskar_station_apply_element_weight(const oskar_Station* model)
     return model->apply_element_weight;
 }
 
-double oskar_station_nominal_element_orientation_x_rad(const oskar_Station* model)
+double oskar_station_nominal_element_orientation_x_rad(
+        const oskar_Station* model)
 {
-    return model->nominal_orientation_x;
+    return model->nominal_orientation_x_rad;
 }
 
-double oskar_station_nominal_element_orientation_y_rad(const oskar_Station* model)
+double oskar_station_nominal_element_orientation_y_rad(
+        const oskar_Station* model)
 {
-    return model->nominal_orientation_y;
+    return model->nominal_orientation_y_rad;
 }
 
 double oskar_station_element_orientation_x_rad(const oskar_Station* model,
         int index)
 {
     const double *p;
-    p = (const double*) oskar_mem_void_const(model->orientation_x_cpu);
+    p = (const double*)
+            oskar_mem_void_const(model->element_orientation_x_rad_cpu);
     return p[index];
 }
 
@@ -183,138 +195,150 @@ double oskar_station_element_orientation_y_rad(const oskar_Station* model,
         int index)
 {
     const double *p;
-    p = (const double*) oskar_mem_void_const(model->orientation_y_cpu);
+    p = (const double*)
+            oskar_mem_void_const(model->element_orientation_y_rad_cpu);
     return p[index];
 }
 
-oskar_Mem* oskar_station_element_x_signal(oskar_Station* model)
+oskar_Mem* oskar_station_element_true_x_enu_metres(oskar_Station* model)
 {
-    return model->x_signal;
+    return model->element_true_x_enu_metres;
 }
 
-const oskar_Mem* oskar_station_element_x_signal_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_true_x_enu_metres_const(
+        const oskar_Station* model)
 {
-    return model->x_signal;
+    return model->element_true_x_enu_metres;
 }
 
-oskar_Mem* oskar_station_element_y_signal(oskar_Station* model)
+oskar_Mem* oskar_station_element_true_y_enu_metres(oskar_Station* model)
 {
-    return model->y_signal;
+    return model->element_true_y_enu_metres;
 }
 
-const oskar_Mem* oskar_station_element_y_signal_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_true_y_enu_metres_const(
+        const oskar_Station* model)
 {
-    return model->y_signal;
+    return model->element_true_y_enu_metres;
 }
 
-oskar_Mem* oskar_station_element_z_signal(oskar_Station* model)
+oskar_Mem* oskar_station_element_true_z_enu_metres(oskar_Station* model)
 {
-    return model->z_signal;
+    return model->element_true_z_enu_metres;
 }
 
-const oskar_Mem* oskar_station_element_z_signal_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_true_z_enu_metres_const(
+        const oskar_Station* model)
 {
-    return model->z_signal;
+    return model->element_true_z_enu_metres;
 }
 
-oskar_Mem* oskar_station_element_x_weights(oskar_Station* model)
+oskar_Mem* oskar_station_element_measured_x_enu_metres(oskar_Station* model)
 {
-    return model->x_weights;
+    return model->element_measured_x_enu_metres;
 }
 
-const oskar_Mem* oskar_station_element_x_weights_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_measured_x_enu_metres_const(
+        const oskar_Station* model)
 {
-    return model->x_weights;
+    return model->element_measured_x_enu_metres;
 }
 
-oskar_Mem* oskar_station_element_y_weights(oskar_Station* model)
+oskar_Mem* oskar_station_element_measured_y_enu_metres(oskar_Station* model)
 {
-    return model->y_weights;
+    return model->element_measured_y_enu_metres;
 }
 
-const oskar_Mem* oskar_station_element_y_weights_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_measured_y_enu_metres_const(
+        const oskar_Station* model)
 {
-    return model->y_weights;
+    return model->element_measured_y_enu_metres;
 }
 
-oskar_Mem* oskar_station_element_z_weights(oskar_Station* model)
+oskar_Mem* oskar_station_element_measured_z_enu_metres(oskar_Station* model)
 {
-    return model->z_weights;
+    return model->element_measured_z_enu_metres;
 }
 
-const oskar_Mem* oskar_station_element_z_weights_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_measured_z_enu_metres_const(
+        const oskar_Station* model)
 {
-    return model->z_weights;
+    return model->element_measured_z_enu_metres;
 }
 
 oskar_Mem* oskar_station_element_gain(oskar_Station* model)
 {
-    return model->gain;
+    return model->element_gain;
 }
 
 const oskar_Mem* oskar_station_element_gain_const(const oskar_Station* model)
 {
-    return model->gain;
+    return model->element_gain;
 }
 
 oskar_Mem* oskar_station_element_gain_error(oskar_Station* model)
 {
-    return model->gain_error;
+    return model->element_gain_error;
 }
 
-const oskar_Mem* oskar_station_element_gain_error_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_gain_error_const(
+        const oskar_Station* model)
 {
-    return model->gain_error;
+    return model->element_gain_error;
 }
 
-oskar_Mem* oskar_station_element_phase_offset(oskar_Station* model)
+oskar_Mem* oskar_station_element_phase_offset_rad(oskar_Station* model)
 {
-    return model->phase_offset;
+    return model->element_phase_offset_rad;
 }
 
-const oskar_Mem* oskar_station_element_phase_offset_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_phase_offset_rad_const(
+        const oskar_Station* model)
 {
-    return model->phase_offset;
+    return model->element_phase_offset_rad;
 }
 
-oskar_Mem* oskar_station_element_phase_error(oskar_Station* model)
+oskar_Mem* oskar_station_element_phase_error_rad(oskar_Station* model)
 {
-    return model->phase_error;
+    return model->element_phase_error_rad;
 }
 
-const oskar_Mem* oskar_station_element_phase_error_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_phase_error_rad_const(
+        const oskar_Station* model)
 {
-    return model->phase_error;
+    return model->element_phase_error_rad;
 }
 
 oskar_Mem* oskar_station_element_weight(oskar_Station* model)
 {
-    return model->weight;
+    return model->element_weight;
 }
 
 const oskar_Mem* oskar_station_element_weight_const(const oskar_Station* model)
 {
-    return model->weight;
+    return model->element_weight;
 }
 
-oskar_Mem* oskar_station_element_orientation_x_cpu(oskar_Station* model)
+oskar_Mem* oskar_station_element_orientation_x_rad_cpu(oskar_Station* model)
 {
-    return model->orientation_x_cpu;
+    return model->element_orientation_x_rad_cpu;
 }
 
-const oskar_Mem* oskar_station_element_orientation_x_cpu_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_orientation_x_rad_cpu_const(
+        const oskar_Station* model)
 {
-    return model->orientation_x_cpu;
+    return model->element_orientation_x_rad_cpu;
 }
 
 oskar_Mem* oskar_station_element_orientation_y_cpu(oskar_Station* model)
 {
-    return model->orientation_y_cpu;
+    return model->element_orientation_y_rad_cpu;
 }
 
-const oskar_Mem* oskar_station_element_orientation_y_cpu_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_element_orientation_y_rad_cpu_const(
+        const oskar_Station* model)
 {
-    return model->orientation_y_cpu;
+    return model->element_orientation_y_rad_cpu;
 }
 
 oskar_Mem* oskar_station_element_types(oskar_Station* model)
@@ -342,26 +366,27 @@ oskar_Station* oskar_station_child(oskar_Station* model, int i)
     return model->child[i];
 }
 
-const oskar_Station* oskar_station_child_const(const oskar_Station* model, int i)
+const oskar_Station* oskar_station_child_const(const oskar_Station* model,
+        int i)
 {
     return model->child[i];
 }
 
 int oskar_station_has_element(const oskar_Station* model)
 {
-    return model->element_pattern ? 1 : 0;
+    return model->element ? 1 : 0;
 }
 
 oskar_Element* oskar_station_element(oskar_Station* model,
         int element_type_index)
 {
-    return model->element_pattern[element_type_index];
+    return model->element[element_type_index];
 }
 
 const oskar_Element* oskar_station_element_const(const oskar_Station* model,
         int element_type_index)
 {
-    return model->element_pattern[element_type_index];
+    return model->element[element_type_index];
 }
 
 int oskar_station_num_permitted_beams(const oskar_Station* model)
@@ -369,14 +394,16 @@ int oskar_station_num_permitted_beams(const oskar_Station* model)
     return model->num_permitted_beams;
 }
 
-const oskar_Mem* oskar_station_permitted_beam_azimuth_rad_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_permitted_beam_az_rad_const(
+        const oskar_Station* model)
 {
-    return model->permitted_beam_az;
+    return model->permitted_beam_az_rad;
 }
 
-const oskar_Mem* oskar_station_permitted_beam_elevation_rad_const(const oskar_Station* model)
+const oskar_Mem* oskar_station_permitted_beam_el_rad_const(
+        const oskar_Station* model)
 {
-    return model->permitted_beam_el;
+    return model->permitted_beam_el_rad;
 }
 
 
@@ -395,9 +422,9 @@ void oskar_station_set_normalise_final_beam(oskar_Station* model, int value)
 void oskar_station_set_position(oskar_Station* model,
         double longitude_rad, double latitude_rad, double altitude_m)
 {
-    model->longitude_rad = longitude_rad;
-    model->latitude_rad = latitude_rad;
-    model->altitude_m = altitude_m;
+    model->lon_rad = longitude_rad;
+    model->lat_rad = latitude_rad;
+    model->alt_metres = altitude_m;
 }
 
 void oskar_station_set_phase_centre(oskar_Station* model,
@@ -405,20 +432,15 @@ void oskar_station_set_phase_centre(oskar_Station* model,
         double beam_latitude_rad)
 {
     model->beam_coord_type = beam_coord_type;
-    model->beam_longitude_rad = beam_longitude_rad;
-    model->beam_latitude_rad = beam_latitude_rad;
+    model->beam_lon_rad = beam_longitude_rad;
+    model->beam_lat_rad = beam_latitude_rad;
 }
 
-void oskar_station_set_gaussian_beam_fwhm_rad(oskar_Station* model,
-        double value)
+void oskar_station_set_gaussian_beam(oskar_Station* model,
+        double fwhm_rad, double ref_freq_hz)
 {
-    model->gaussian_beam_fwhm_rad = value;
-}
-
-void oskar_station_set_gaussian_beam_ref_freq_hz(oskar_Station* model,
-        double value)
-{
-    model->gaussian_beam_ref_feq_hz = value;
+    model->gaussian_beam_fwhm_rad = fwhm_rad;
+    model->gaussian_beam_reference_freq_hz = ref_freq_hz;
 }
 
 void oskar_station_set_use_polarised_elements(oskar_Station* model, int value)

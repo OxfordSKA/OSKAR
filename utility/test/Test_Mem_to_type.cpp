@@ -35,7 +35,7 @@
 TEST(Mem, to_char)
 {
     int status = 0, size = 100;
-    oskar_Mem* mem = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, size,
+    oskar_Mem* mem = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, size,
             &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     char* data = oskar_mem_char(mem);
@@ -50,7 +50,7 @@ TEST(Mem, to_char)
 TEST(Mem, to_int)
 {
     int status = 0, size = 100;
-    oskar_Mem* mem = oskar_mem_create(OSKAR_INT, OSKAR_LOCATION_CPU, size,
+    oskar_Mem* mem = oskar_mem_create(OSKAR_INT, OSKAR_CPU, size,
             &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     int* data = oskar_mem_int(mem, &status);
@@ -66,7 +66,7 @@ TEST(Mem, to_int)
 TEST(Mem, to_float)
 {
     int status = 0, size = 100;
-    oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, size,
+    oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, size,
             &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     float* data = oskar_mem_float(mem, &status);
@@ -82,7 +82,7 @@ TEST(Mem, to_float)
 TEST(Mem, to_float2)
 {
     int status = 0, size = 100;
-    oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU,
+    oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_CPU,
             size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     float2* data = oskar_mem_float2(mem, &status);
@@ -102,7 +102,7 @@ TEST(Mem, to_float4c)
 {
     int status = 0, size = 100;
     oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX,
-            OSKAR_LOCATION_CPU, size, &status);
+            OSKAR_CPU, size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     float4c* data = oskar_mem_float4c(mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -126,7 +126,7 @@ TEST(Mem, to_float4c)
 TEST(Mem, to_double)
 {
     int status = 0, size = 100;
-    oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, size,
+    oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, size,
             &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     double* data = oskar_mem_double(mem, &status);
@@ -142,7 +142,7 @@ TEST(Mem, to_double)
 TEST(Mem, to_double2)
 {
     int status = 0, size = 100;
-    oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU,
+    oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU,
             size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     double2* data = oskar_mem_double2(mem, &status);
@@ -162,7 +162,7 @@ TEST(Mem, to_double4c)
 {
     int status = 0, size = 100;
     oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX_MATRIX,
-            OSKAR_LOCATION_CPU, size, &status);
+            OSKAR_CPU, size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     double4c* data = oskar_mem_double4c(mem, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -186,7 +186,7 @@ TEST(Mem, to_double4c)
 TEST(Mem, to_const_char)
 {
     int status = 0, size = 100;
-    oskar_Mem* mem = oskar_mem_create(OSKAR_CHAR, OSKAR_LOCATION_CPU, size,
+    oskar_Mem* mem = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, size,
             &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_clear_contents(mem, &status);
@@ -202,7 +202,7 @@ TEST(Mem, to_const_char)
 TEST(Mem, to_const_int)
 {
     int status = 0, size = 100;
-    oskar_Mem* mem = oskar_mem_create(OSKAR_INT, OSKAR_LOCATION_CPU, size,
+    oskar_Mem* mem = oskar_mem_create(OSKAR_INT, OSKAR_CPU, size,
             &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_clear_contents(mem, &status);
@@ -219,7 +219,7 @@ TEST(Mem, to_const_int)
 TEST(Mem, to_const_float)
 {
     int status = 0, size = 100;
-    oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, size,
+    oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, size,
             &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(mem, 2.0, 0, 0, &status);
@@ -236,7 +236,7 @@ TEST(Mem, to_const_float)
 TEST(Mem, to_const_float2)
 {
     int status = 0, size = 100;
-    oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU,
+    oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_CPU,
             size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(mem, 2.0, 0, 0, &status);
@@ -255,7 +255,7 @@ TEST(Mem, to_const_float4c)
 {
     int status = 0, size = 100;
     oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX,
-            OSKAR_LOCATION_CPU, size, &status);
+            OSKAR_CPU, size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(mem, 2.0, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -278,7 +278,7 @@ TEST(Mem, to_const_float4c)
 TEST(Mem, to_const_double)
 {
     int status = 0, size = 100;
-    oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+    oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
             size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(mem, 2.0, 0, 0, &status);
@@ -295,7 +295,7 @@ TEST(Mem, to_const_double)
 TEST(Mem, to_const_double2)
 {
     int status = 0, size = 100;
-    oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU,
+    oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU,
             size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(mem, 2.0, 0, 0, &status);
@@ -314,7 +314,7 @@ TEST(Mem, to_const_double4c)
 {
     int status = 0, size = 100;
     oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX_MATRIX,
-            OSKAR_LOCATION_CPU, size, &status);
+            OSKAR_CPU, size, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(mem, 2.0, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);

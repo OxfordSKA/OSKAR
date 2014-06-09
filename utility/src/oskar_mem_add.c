@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,7 @@ void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
     }
 
     /* Note that device memory is not supported. */
-    if (a->location == OSKAR_LOCATION_GPU)
+    if (a->location == OSKAR_GPU)
         *status = OSKAR_ERR_BAD_LOCATION;
 
     if (a->data == NULL || b->data == NULL || c->data == NULL)

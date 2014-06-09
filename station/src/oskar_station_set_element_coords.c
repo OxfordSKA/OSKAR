@@ -68,7 +68,7 @@ void oskar_station_set_element_coords(oskar_Station* dst,
 
     /* Get the data type and location. */
     type = oskar_station_precision(dst);
-    location = oskar_station_location(dst);
+    location = oskar_station_mem_location(dst);
 
     /* Check if z or delta_z is nonzero, and set 3D flag if so. */
     if (z != 0.0 || delta_z != 0.0)
@@ -83,14 +83,14 @@ void oskar_station_set_element_coords(oskar_Station* dst,
     z_signal = z + delta_z;
 
     /* Get byte pointers. */
-    xw = oskar_mem_char(dst->x_weights);
-    yw = oskar_mem_char(dst->y_weights);
-    zw = oskar_mem_char(dst->z_weights);
-    xs = oskar_mem_char(dst->x_signal);
-    ys = oskar_mem_char(dst->y_signal);
-    zs = oskar_mem_char(dst->z_signal);
+    xw = oskar_mem_char(dst->element_measured_x_enu_metres);
+    yw = oskar_mem_char(dst->element_measured_y_enu_metres);
+    zw = oskar_mem_char(dst->element_measured_z_enu_metres);
+    xs = oskar_mem_char(dst->element_true_x_enu_metres);
+    ys = oskar_mem_char(dst->element_true_y_enu_metres);
+    zs = oskar_mem_char(dst->element_true_z_enu_metres);
 
-    if (location == OSKAR_LOCATION_CPU)
+    if (location == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE)
         {
@@ -113,7 +113,7 @@ void oskar_station_set_element_coords(oskar_Station* dst,
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-    else if (location == OSKAR_LOCATION_GPU)
+    else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         size_t size, offset_bytes;

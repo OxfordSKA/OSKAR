@@ -53,7 +53,7 @@ oskar_Sky* oskar_sky_create(int type, int location, int num_sources,
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return 0;
     }
-    if (location != OSKAR_LOCATION_CPU && location != OSKAR_LOCATION_GPU)
+    if (location != OSKAR_CPU && location != OSKAR_GPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return 0;
@@ -69,28 +69,28 @@ oskar_Sky* oskar_sky_create(int type, int location, int num_sources,
 
     /* Set meta-data */
     model->precision = type;
-    model->location = location;
+    model->mem_location = location;
     model->num_sources = num_sources;
     model->use_extended = OSKAR_FALSE;
-    model->ra0 = 0.0;
-    model->dec0 = 0.0;
+    model->reference_ra_rad = 0.0;
+    model->reference_dec_rad = 0.0;
 
     /* Initialise the memory. */
-    model->RA = oskar_mem_create(type, location, num_sources, status);
-    model->Dec = oskar_mem_create(type, location, num_sources, status);
+    model->ra_rad = oskar_mem_create(type, location, num_sources, status);
+    model->dec_rad = oskar_mem_create(type, location, num_sources, status);
     model->I = oskar_mem_create(type, location, num_sources, status);
     model->Q = oskar_mem_create(type, location, num_sources, status);
     model->U = oskar_mem_create(type, location, num_sources, status);
     model->V = oskar_mem_create(type, location, num_sources, status);
-    model->reference_freq = oskar_mem_create(type, location, num_sources, status);
+    model->reference_freq_hz = oskar_mem_create(type, location, num_sources, status);
     model->spectral_index = oskar_mem_create(type, location, num_sources, status);
-    model->RM = oskar_mem_create(type, location, num_sources, status);
+    model->rm_rad = oskar_mem_create(type, location, num_sources, status);
     model->l = oskar_mem_create(type, location, num_sources, status);
     model->m = oskar_mem_create(type, location, num_sources, status);
     model->n = oskar_mem_create(type, location, num_sources, status);
-    model->FWHM_major = oskar_mem_create(type, location, num_sources, status);
-    model->FWHM_minor = oskar_mem_create(type, location, num_sources, status);
-    model->position_angle = oskar_mem_create(type, location, num_sources, status);
+    model->fwhm_major_rad = oskar_mem_create(type, location, num_sources, status);
+    model->fwhm_minor_rad = oskar_mem_create(type, location, num_sources, status);
+    model->pa_rad = oskar_mem_create(type, location, num_sources, status);
     model->gaussian_a = oskar_mem_create(type, location, num_sources, status);
     model->gaussian_b = oskar_mem_create(type, location, num_sources, status);
     model->gaussian_c = oskar_mem_create(type, location, num_sources, status);

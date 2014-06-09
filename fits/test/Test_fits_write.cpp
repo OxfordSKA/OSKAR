@@ -43,7 +43,7 @@ TEST(fits_write, test)
     int planes = 4;
     int blocks = 4;
     int num_elements = columns * rows * planes * blocks;
-    oskar_Mem* data = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+    oskar_Mem* data = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
             num_elements, &status);
     const char filename[] = "temp_test_fits_write.fits";
 

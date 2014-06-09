@@ -97,7 +97,7 @@ TEST(TelescopeModel, load_telescope_cpu)
     double altitude = 0.0;
     oskar_Telescope *tel_cpu, *tel_cpu2, *tel_gpu;
     tel_cpu = oskar_telescope_create(OSKAR_DOUBLE,
-            OSKAR_LOCATION_CPU, 0, &status);
+            OSKAR_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Fill the telescope structure.
@@ -115,21 +115,21 @@ TEST(TelescopeModel, load_telescope_cpu)
 
     // Copy telescope structure to GPU.
     tel_gpu = oskar_telescope_create_copy(tel_cpu,
-            OSKAR_LOCATION_GPU, &status);
+            OSKAR_GPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy the telescope structure back to the CPU.
     tel_cpu2 = oskar_telescope_create_copy(tel_gpu,
-            OSKAR_LOCATION_CPU, &status);
+            OSKAR_CPU, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     double *station_x, *station_y, *station_z;
     station_x = oskar_mem_double(
-            oskar_telescope_station_x_offset_ecef_metres(tel_cpu2), &status);
+            oskar_telescope_station_true_x_offset_ecef_metres(tel_cpu2), &status);
     station_y = oskar_mem_double(
-            oskar_telescope_station_y_offset_ecef_metres(tel_cpu2), &status);
+            oskar_telescope_station_true_y_offset_ecef_metres(tel_cpu2), &status);
     station_z = oskar_mem_double(
-            oskar_telescope_station_z_offset_ecef_metres(tel_cpu2), &status);
+            oskar_telescope_station_true_z_offset_ecef_metres(tel_cpu2), &status);
 
     // Check the contents of the CPU structure.
     for (int i = 0; i < n_stations; ++i)
@@ -150,9 +150,12 @@ TEST(TelescopeModel, load_telescope_cpu)
         EXPECT_NEAR(z, station_z[i], 1e-5);
 
         double *e_x, *e_y, *e_z;
-        e_x = oskar_mem_double(oskar_station_element_x_weights(s), &status);
-        e_y = oskar_mem_double(oskar_station_element_y_weights(s), &status);
-        e_z = oskar_mem_double(oskar_station_element_z_weights(s), &status);
+        e_x = oskar_mem_double(
+                oskar_station_element_measured_x_enu_metres(s), &status);
+        e_y = oskar_mem_double(
+                oskar_station_element_measured_y_enu_metres(s), &status);
+        e_z = oskar_mem_double(
+                oskar_station_element_measured_z_enu_metres(s), &status);
 
         for (int j = 0; j < n_elements; ++j)
         {

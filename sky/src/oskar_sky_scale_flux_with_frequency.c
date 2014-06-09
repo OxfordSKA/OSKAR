@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ void oskar_sky_scale_flux_with_frequency(oskar_Sky* model, double frequency,
 
     /* Get the type, location and dimensions. */
     type = oskar_sky_precision(model);
-    location = oskar_sky_location(model);
+    location = oskar_sky_mem_location(model);
     num_sources = oskar_sky_num_sources(model);
 
     /* Scale the flux values. */
@@ -64,13 +64,13 @@ void oskar_sky_scale_flux_with_frequency(oskar_Sky* model, double frequency,
         Q    = oskar_mem_float(oskar_sky_Q(model), status);
         U    = oskar_mem_float(oskar_sky_U(model), status);
         V    = oskar_mem_float(oskar_sky_V(model), status);
-        ref  = oskar_mem_float(oskar_sky_reference_freq(model), status);
+        ref  = oskar_mem_float(oskar_sky_reference_freq_hz(model), status);
         spix = oskar_mem_float_const(
                 oskar_sky_spectral_index_const(model), status);
         rm   = oskar_mem_float_const(
-                oskar_sky_rotation_measure_const(model), status);
+                oskar_sky_rotation_measure_rad_const(model), status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_scale_flux_with_frequency_cuda_f(num_sources, frequency,
@@ -94,13 +94,13 @@ void oskar_sky_scale_flux_with_frequency(oskar_Sky* model, double frequency,
         Q    = oskar_mem_double(oskar_sky_Q(model), status);
         U    = oskar_mem_double(oskar_sky_U(model), status);
         V    = oskar_mem_double(oskar_sky_V(model), status);
-        ref  = oskar_mem_double(oskar_sky_reference_freq(model), status);
+        ref  = oskar_mem_double(oskar_sky_reference_freq_hz(model), status);
         spix = oskar_mem_double_const(
                 oskar_sky_spectral_index_const(model), status);
         rm   = oskar_mem_double_const(
-                oskar_sky_rotation_measure_const(model), status);
+                oskar_sky_rotation_measure_rad_const(model), status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_scale_flux_with_frequency_cuda_d(num_sources, frequency,

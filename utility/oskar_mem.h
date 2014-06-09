@@ -89,8 +89,8 @@ enum
 
 enum
 {
-    OSKAR_LOCATION_CPU = 0,
-    OSKAR_LOCATION_GPU = 1
+    OSKAR_CPU = 0,
+    OSKAR_GPU = 1
 };
 
 /**

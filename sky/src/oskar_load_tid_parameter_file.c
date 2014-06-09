@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,10 +27,10 @@
  */
 
 
-#include "sky/oskar_load_TID_parameter_file.h"
+#include <oskar_load_tid_parameter_file.h>
 
-#include "utility/oskar_getline.h"
-#include "utility/oskar_string_to_array.h"
+#include <oskar_getline.h>
+#include <oskar_string_to_array.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,7 +39,7 @@
 extern "C" {
 #endif
 
-void oskar_load_TID_parameter_file(oskar_SettingsTIDscreen* TID,
+void oskar_load_tid_parameter_file(oskar_SettingsTIDscreen* TID,
         const char* filename, int* status)
 {
     /* Declare the line buffer and counter. */

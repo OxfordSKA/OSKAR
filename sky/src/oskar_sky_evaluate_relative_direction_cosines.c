@@ -50,11 +50,11 @@ void oskar_sky_evaluate_relative_direction_cosines(oskar_Sky* sky, double ra0,
 
     /* Convert coordinates. */
     oskar_convert_apparent_ra_dec_to_relative_direction_cosines(sky->num_sources,
-            sky->RA, sky->Dec, ra0, dec0, sky->l, sky->m, sky->n, status);
+            sky->ra_rad, sky->dec_rad, ra0, dec0, sky->l, sky->m, sky->n, status);
 
     /* Store the reference position. */
-    sky->ra0 = ra0;
-    sky->dec0 = dec0;
+    sky->reference_ra_rad = ra0;
+    sky->reference_dec_rad = dec0;
 }
 
 #ifdef __cplusplus

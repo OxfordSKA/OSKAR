@@ -35,7 +35,7 @@ extern "C" {
 
 static void realloc_arrays(oskar_Element* e, int size, int* status);
 
-void oskar_element_resize_frequency_data(oskar_Element* model, int size,
+void oskar_element_resize_freq_data(oskar_Element* model, int size,
         int* status)
 {
     int i, old_size, loc, precision;
@@ -51,8 +51,8 @@ void oskar_element_resize_frequency_data(oskar_Element* model, int size,
     if (*status) return;
 
     /* Get the old size. */
-    old_size = model->num_frequencies;
-    loc = oskar_element_location(model);
+    old_size = model->num_freq;
+    loc = oskar_element_mem_location(model);
     precision = oskar_element_precision(model);
 
     if (size > old_size)
@@ -62,9 +62,9 @@ void oskar_element_resize_frequency_data(oskar_Element* model, int size,
         for (i = old_size; i < size; ++i)
         {
             model->filename_x[i] = oskar_mem_create(OSKAR_CHAR,
-                    OSKAR_LOCATION_CPU, 0, status);
+                    OSKAR_CPU, 0, status);
             model->filename_y[i] = oskar_mem_create(OSKAR_CHAR,
-                    OSKAR_LOCATION_CPU, 0, status);
+                    OSKAR_CPU, 0, status);
             model->x_v_re[i] = oskar_splines_create(precision, loc, status);
             model->x_v_im[i] = oskar_splines_create(precision, loc, status);
             model->x_h_re[i] = oskar_splines_create(precision, loc, status);
@@ -100,13 +100,13 @@ void oskar_element_resize_frequency_data(oskar_Element* model, int size,
     }
 
     /* Store the new size. */
-    model->num_frequencies = size;
+    model->num_freq = size;
 }
 
 static void realloc_arrays(oskar_Element* e, int size, int* status)
 {
-    e->frequency_hz = realloc(e->frequency_hz, size * sizeof(double));
-    if (!e->frequency_hz) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+    e->freqs_hz = realloc(e->freqs_hz, size * sizeof(double));
+    if (!e->freqs_hz) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
     e->filename_x = realloc(e->filename_x, size * sizeof(oskar_Mem*));
     if (!e->filename_x) *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
     e->filename_y = realloc(e->filename_y, size * sizeof(oskar_Mem*));

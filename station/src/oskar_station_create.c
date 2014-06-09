@@ -29,7 +29,6 @@
 #include <private_station.h>
 #include <oskar_station.h>
 
-#include <oskar_system_noise_model_create.h>
 #include <math.h>
 
 #ifndef M_PI
@@ -44,6 +43,7 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
         int* status)
 {
     oskar_Station* model;
+    int CPU = OSKAR_CPU;
 
     /* Check all inputs. */
     if (!status)
@@ -58,7 +58,7 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return 0;
     }
-    if (location != OSKAR_LOCATION_CPU && location != OSKAR_LOCATION_GPU)
+    if (location != OSKAR_CPU && location != OSKAR_GPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return 0;
@@ -74,41 +74,59 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
 
     /* Initialise station meta data. */
     model->precision = type;
-    model->location = location;
+    model->mem_location = location;
 
     /* Initialise the memory. */
-    model->x_signal = oskar_mem_create(type, location, num_elements, status);
-    model->y_signal = oskar_mem_create(type, location, num_elements, status);
-    model->z_signal = oskar_mem_create(type, location, num_elements, status);
-    model->x_weights = oskar_mem_create(type, location, num_elements, status);
-    model->y_weights = oskar_mem_create(type, location, num_elements, status);
-    model->z_weights = oskar_mem_create(type, location, num_elements, status);
-    model->weight = oskar_mem_create(type | OSKAR_COMPLEX, location, num_elements, status);
-    model->gain = oskar_mem_create(type, location, num_elements, status);
-    model->gain_error = oskar_mem_create(type, location, num_elements, status);
-    model->phase_offset = oskar_mem_create(type, location, num_elements, status);
-    model->phase_error = oskar_mem_create(type, location, num_elements, status);
-    model->orientation_x_cpu = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_elements, status);
-    model->orientation_y_cpu = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_elements, status);
-    model->element_types = oskar_mem_create(OSKAR_INT, location, num_elements, status);
-    model->element_types_cpu = oskar_mem_create(OSKAR_INT, OSKAR_LOCATION_CPU, num_elements, status);
-    model->permitted_beam_az = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, status);
-    model->permitted_beam_el = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, status);
+    model->element_true_x_enu_metres =
+            oskar_mem_create(type, location, num_elements, status);
+    model->element_true_y_enu_metres =
+            oskar_mem_create(type, location, num_elements, status);
+    model->element_true_z_enu_metres =
+            oskar_mem_create(type, location, num_elements, status);
+    model->element_measured_x_enu_metres =
+            oskar_mem_create(type, location, num_elements, status);
+    model->element_measured_y_enu_metres =
+            oskar_mem_create(type, location, num_elements, status);
+    model->element_measured_z_enu_metres =
+            oskar_mem_create(type, location, num_elements, status);
+    model->element_weight =
+            oskar_mem_create(type | OSKAR_COMPLEX, location, num_elements, status);
+    model->element_gain =
+            oskar_mem_create(type, location, num_elements, status);
+    model->element_gain_error =
+            oskar_mem_create(type, location, num_elements, status);
+    model->element_phase_offset_rad =
+            oskar_mem_create(type, location, num_elements, status);
+    model->element_phase_error_rad =
+            oskar_mem_create(type, location, num_elements, status);
+    model->element_orientation_x_rad_cpu =
+            oskar_mem_create(OSKAR_DOUBLE, CPU, num_elements, status);
+    model->element_orientation_y_rad_cpu =
+            oskar_mem_create(OSKAR_DOUBLE, CPU, num_elements, status);
+    model->element_types =
+            oskar_mem_create(OSKAR_INT, location, num_elements, status);
+    model->element_types_cpu =
+            oskar_mem_create(OSKAR_INT, CPU, num_elements, status);
+    model->permitted_beam_az_rad =
+            oskar_mem_create(OSKAR_DOUBLE, CPU, 0, status);
+    model->permitted_beam_el_rad =
+            oskar_mem_create(OSKAR_DOUBLE, CPU, 0, status);
 
     /* Initialise common data. */
     model->station_type = OSKAR_STATION_TYPE_AA;
     model->normalise_final_beam = OSKAR_FALSE;
-    model->longitude_rad = 0.0;
-    model->latitude_rad = 0.0;
-    model->altitude_m = 0.0;
-    model->beam_longitude_rad = 0.0;
-    model->beam_latitude_rad = 0.0;
+    model->lon_rad = 0.0;
+    model->lat_rad = 0.0;
+    model->alt_metres = 0.0;
+    model->beam_lon_rad = 0.0;
+    model->beam_lat_rad = 0.0;
     model->beam_coord_type = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
-    model->noise = oskar_system_noise_model_create(type, location, status);
+    model->noise_freq_hz = oskar_mem_create(type, location, 0, status);
+    model->noise_rms_jy = oskar_mem_create(type, location, 0, status);
 
     /* Initialise Gaussian beam station data. */
     model->gaussian_beam_fwhm_rad = 0.0;
-    model->gaussian_beam_ref_feq_hz = 0.0;
+    model->gaussian_beam_reference_freq_hz = 0.0;
 
     /* Initialise aperture array data. */
     model->identical_children = OSKAR_FALSE;
@@ -121,10 +139,10 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->array_is_3d = OSKAR_FALSE;
     model->apply_element_errors = OSKAR_FALSE;
     model->apply_element_weight = OSKAR_FALSE;
-    model->nominal_orientation_x = M_PI / 2.0;
-    model->nominal_orientation_y = 0.0;
+    model->nominal_orientation_x_rad = M_PI / 2.0;
+    model->nominal_orientation_y_rad = 0.0;
     model->child = 0;
-    model->element_pattern = 0;
+    model->element = 0;
     model->num_permitted_beams = 0;
 
     /* Return pointer to station model. */

@@ -96,7 +96,7 @@ void oskar_convert_ludwig3_to_theta_phi_components(oskar_Mem* vec,
         v_phi = oskar_mem_float2(vec, status) + offset + 1;
         phi_ = oskar_mem_float_const(phi, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_convert_ludwig3_to_theta_phi_components_cuda_f(num_points,
@@ -106,7 +106,7 @@ void oskar_convert_ludwig3_to_theta_phi_components(oskar_Mem* vec,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
-        else if (location == OSKAR_LOCATION_CPU)
+        else if (location == OSKAR_CPU)
         {
             oskar_convert_ludwig3_to_theta_phi_components_f(num_points,
                     h_theta, v_phi, phi_, stride);
@@ -120,7 +120,7 @@ void oskar_convert_ludwig3_to_theta_phi_components(oskar_Mem* vec,
         v_phi = oskar_mem_double2(vec, status) + offset + 1;
         phi_ = oskar_mem_double_const(phi, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_convert_ludwig3_to_theta_phi_components_cuda_d(num_points,
@@ -130,7 +130,7 @@ void oskar_convert_ludwig3_to_theta_phi_components(oskar_Mem* vec,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
-        else if (location == OSKAR_LOCATION_CPU)
+        else if (location == OSKAR_CPU)
         {
             oskar_convert_ludwig3_to_theta_phi_components_d(num_points,
                     h_theta, v_phi, phi_, stride);

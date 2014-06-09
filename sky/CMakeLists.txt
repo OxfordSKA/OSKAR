@@ -4,9 +4,9 @@
 
 # Add the source files in this directory.
 set(sky_SRC
-    src/oskar_evaluate_TEC_TID.c
+    src/oskar_evaluate_tec_tid.c
     src/oskar_generate_random_coordinate.c
-    src/oskar_load_TID_parameter_file.c
+    src/oskar_load_tid_parameter_file.c
     src/oskar_scale_flux_with_frequency.c
     src/oskar_sky_accessors.c
     src/oskar_sky_append_to_set.c

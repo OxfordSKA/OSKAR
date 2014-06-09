@@ -32,6 +32,41 @@
 #include <oskar_mem.h>
 #include <cstdio>
 
+TEST(Mem, load_ascii_single_column)
+{
+    int status = 0;
+
+    // Write a test file.
+    const char* filename = "temp_test_load_ascii_single_column.txt";
+    FILE* file = fopen(filename, "w");
+    ASSERT_TRUE(file);
+    size_t i = 0, num_elements = 13;
+    fprintf(file, "# A header\n");
+    for (; i < num_elements; ++i) fprintf(file, "%.3f\n", i * 1.0);
+    fprintf(file, "# A comment\n");
+    for (; i < 2 * num_elements; ++i) fprintf(file, "%.3f\n", i * 1.0);
+    fprintf(file, "  # A silly comment\n");
+    for (; i < 3 * num_elements; ++i) fprintf(file, "%.3f\n", i * 1.0);
+    fclose(file);
+
+    // Load column back into CPU memory.
+    oskar_Mem *a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_mem_load_ascii(filename, 1, &status, a, "");
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    ASSERT_EQ(3 * num_elements, oskar_mem_length(a));
+
+    // Check contents.
+    const double* a_ = oskar_mem_double_const(a, &status);
+    for (i = 0; i < 3 * num_elements; ++i)
+    {
+        ASSERT_NEAR(a_[i], i * 1.0, 1e-10);
+    }
+
+    oskar_mem_free(a, &status);
+    remove(filename);
+}
+
 TEST(Mem, load_ascii_real_cpu)
 {
     int status = 0;
@@ -39,6 +74,7 @@ TEST(Mem, load_ascii_real_cpu)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_real.txt";
     FILE* file = fopen(filename, "w");
+    ASSERT_TRUE(file);
     int num_elements = 287;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -49,18 +85,16 @@ TEST(Mem, load_ascii_real_cpu)
 
     // Load columns back into CPU memory.
     oskar_Mem *a, *b, *c, *d;
-    a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
-    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
-    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
-    d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
+    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
+    d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Expect pass.
-    file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 4, &status, a, "0.0", b, "0.0",
+    oskar_mem_load_ascii(filename, 4, &status, a, "0.0", b, "0.0",
             c, "0.0", d, "0.0");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    fclose(file);
 
     // Check contents.
     const double* a_ = oskar_mem_double_const(a, &status);
@@ -90,6 +124,7 @@ TEST(Mem, load_ascii_real_gpu)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_real_gpu.txt";
     FILE* file = fopen(filename, "w");
+    ASSERT_TRUE(file);
     int num_elements = 474;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -100,25 +135,23 @@ TEST(Mem, load_ascii_real_gpu)
 
     // Load columns back into GPU memory.
     oskar_Mem *a, *b, *c, *d;
-    a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
-    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
-    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
-    d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
+    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
+    d = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Expect pass.
-    file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 4, &status, a, "0.0", b, "0.0",
+    oskar_mem_load_ascii(filename, 4, &status, a, "0.0", b, "0.0",
             c, "0.0", d, "0.0");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    fclose(file);
 
     // Copy to CPU memory to check contents.
     oskar_Mem *aa, *bb, *cc, *dd;
-    aa = oskar_mem_create_copy(a, OSKAR_LOCATION_CPU, &status);
-    bb = oskar_mem_create_copy(b, OSKAR_LOCATION_CPU, &status);
-    cc = oskar_mem_create_copy(c, OSKAR_LOCATION_CPU, &status);
-    dd = oskar_mem_create_copy(d, OSKAR_LOCATION_CPU, &status);
+    aa = oskar_mem_create_copy(a, OSKAR_CPU, &status);
+    bb = oskar_mem_create_copy(b, OSKAR_CPU, &status);
+    cc = oskar_mem_create_copy(c, OSKAR_CPU, &status);
+    dd = oskar_mem_create_copy(d, OSKAR_CPU, &status);
     const double* a_ = oskar_mem_double_const(aa, &status);
     const double* b_ = oskar_mem_double_const(bb, &status);
     const double* c_ = oskar_mem_double_const(cc, &status);
@@ -150,6 +183,7 @@ TEST(Mem, load_ascii_complex_real_cpu)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_complex_real_cpu.txt";
     FILE* file = fopen(filename, "w");
+    ASSERT_TRUE(file);
     int num_elements = 326;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -159,22 +193,18 @@ TEST(Mem, load_ascii_complex_real_cpu)
 
     // Load columns back into CPU memory.
     oskar_Mem *a, *b;
-    a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 0, &status);
-    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Wrong default: expect failure.
-    file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 2, &status, a, "1.0", b, "0.0");
+    oskar_mem_load_ascii(filename, 2, &status, a, "1.0", b, "0.0");
     ASSERT_NE(0, status);
     status = 0;
-    fclose(file);
 
     // Expect pass.
-    file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 2, &status, a, "1.0 0.0", b, "0.0");
+    oskar_mem_load_ascii(filename, 2, &status, a, "1.0 0.0", b, "0.0");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    fclose(file);
 
     // Check contents.
     const double2* a_ = oskar_mem_double2_const(a, &status);
@@ -199,6 +229,7 @@ TEST(Mem, load_ascii_complex_real_gpu_cpu)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_complex_real_gpu_cpu.txt";
     FILE* file = fopen(filename, "w");
+    ASSERT_TRUE(file);
     int num_elements = 753;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -208,25 +239,21 @@ TEST(Mem, load_ascii_complex_real_gpu_cpu)
 
     // Load columns back into CPU memory.
     oskar_Mem *a, *b;
-    a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, 0, &status);
-    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_GPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Wrong default: expect failure.
-    file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 2, &status, a, "1.0", b, "0.0");
+    oskar_mem_load_ascii(filename, 2, &status, a, "1.0", b, "0.0");
     ASSERT_NE(0, status);
     status = 0;
-    fclose(file);
 
     // Expect pass.
-    file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 2, &status, a, "1.0 0.0", b, "0.0");
+    oskar_mem_load_ascii(filename, 2, &status, a, "1.0 0.0", b, "0.0");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    fclose(file);
 
     // Check contents.
-    oskar_Mem *aa = oskar_mem_create_copy(a, OSKAR_LOCATION_CPU, &status);
+    oskar_Mem *aa = oskar_mem_create_copy(a, OSKAR_CPU, &status);
     const double2* a_ = oskar_mem_double2_const(aa, &status);
     const double* b_ = oskar_mem_double_const(b, &status);
     for (int i = 0; i < num_elements; ++i)
@@ -250,6 +277,7 @@ TEST(Mem, load_ascii_complex_real_default_cpu)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_complex_real_default_cpu.txt";
     FILE* file = fopen(filename, "w");
+    ASSERT_TRUE(file);
     int num_elements = 89;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -259,30 +287,24 @@ TEST(Mem, load_ascii_complex_real_default_cpu)
 
     // Load columns back into CPU memory.
     oskar_Mem *a, *b, *c;
-    a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 0, &status);
-    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
-    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
+    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Wrong default: expect failure.
-    file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 2, &status, a, "1.0", b, "0.0");
+    oskar_mem_load_ascii(filename, 2, &status, a, "1.0", b, "0.0");
     ASSERT_NE(0, status);
     status = 0;
-    fclose(file);
 
     // Badly placed default: expect failure.
-    file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 3, &status, a, "", b, "9.9", c, "");
+    oskar_mem_load_ascii(filename, 3, &status, a, "", b, "9.9", c, "");
     ASSERT_NE(0, status);
     status = 0;
-    fclose(file);
 
     // Expect pass.
-    file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 3, &status, a, "1.0 0.0", b, "5.1", c, "2.5");
+    oskar_mem_load_ascii(filename, 3, &status, a, "1.0 0.0", b, "5.1", c, "2.5");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    fclose(file);
 
     // Check contents.
     const double2* a_ = oskar_mem_double2_const(a, &status);
@@ -310,6 +332,7 @@ TEST(Mem, load_ascii_lots_of_columns)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_lots_of_columns.txt";
     FILE* file = fopen(filename, "w");
+    ASSERT_TRUE(file);
     int num_elements = 119;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -320,16 +343,14 @@ TEST(Mem, load_ascii_lots_of_columns)
 
     // Load some columns back into CPU memory.
     oskar_Mem *a, *b, *c;
-    a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 0, &status);
-    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
-    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    a = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
+    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Expect pass.
-    file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 3, &status, a, "", b, "", c, "");
+    oskar_mem_load_ascii(filename, 3, &status, a, "", b, "", c, "");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    fclose(file);
 
     // Check contents.
     const double2* a_ = oskar_mem_double2_const(a, &status);
@@ -357,6 +378,7 @@ TEST(Mem, load_ascii_required_data)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_required_data.txt";
     FILE* file = fopen(filename, "w");
+    ASSERT_TRUE(file);
     int num_elements = 119;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -374,16 +396,14 @@ TEST(Mem, load_ascii_required_data)
 
     // Load some columns back into CPU memory.
     oskar_Mem *a, *b, *c;
-    a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
-    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
-    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
+    b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
+    c = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Expect pass.
-    file = fopen(filename, "r");
-    oskar_mem_load_ascii(file, 3, &status, a, "", b, "", c, "3.3");
+    oskar_mem_load_ascii(filename, 3, &status, a, "", b, "", c, "3.3");
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    fclose(file);
 
     // Check arrays are the right length.
     EXPECT_EQ(2 * num_elements + 1, (int)oskar_mem_length(a));
@@ -428,14 +448,14 @@ TEST(Mem, save_ascii)
     int status = 0;
     oskar_Mem *mem1, *mem2, *mem3, *mem4, *mem5, *mem6, *mem7, *mem8;
     size_t length = 100;
-    mem1 = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, length, &status);
-    mem2 = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, length, &status);
-    mem3 = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU, length, &status);
-    mem4 = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, length, &status);
-    mem5 = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_GPU, length, &status);
-    mem6 = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, length, &status);
-    mem7 = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU, length, &status);
-    mem8 = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, length, &status);
+    mem1 = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, length, &status);
+    mem2 = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, length, &status);
+    mem3 = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_CPU, length, &status);
+    mem4 = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU, length, &status);
+    mem5 = oskar_mem_create(OSKAR_SINGLE, OSKAR_GPU, length, &status);
+    mem6 = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU, length, &status);
+    mem7 = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_GPU, length, &status);
+    mem8 = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_GPU, length, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     oskar_mem_set_value_real(mem1, 1.0, 0, 0, &status);
@@ -449,6 +469,7 @@ TEST(Mem, save_ascii)
 
     const char* fname = "temp_test_save_ascii.txt";
     FILE* f = fopen(fname, "w");
+    ASSERT_TRUE(f);
     oskar_mem_save_ascii(f, 8, length, &status,
             mem1, mem2, mem3, mem4, mem5, mem6, mem7, mem8);
     fclose(f);

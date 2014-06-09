@@ -60,7 +60,7 @@ void oskar_evaluate_image_lmn_grid(oskar_Mem* l, oskar_Mem* m, oskar_Mem* n,
         return;
     }
 
-    if (loc == OSKAR_LOCATION_CPU)
+    if (loc == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE)
         {
@@ -83,7 +83,7 @@ void oskar_evaluate_image_lmn_grid(oskar_Mem* l, oskar_Mem* m, oskar_Mem* n,
             return;
         }
     }
-    else if (loc == OSKAR_LOCATION_GPU)
+    else if (loc == OSKAR_GPU)
     {
         /* There is currently no need for a GPU version of this function */
         *status = OSKAR_ERR_BAD_LOCATION;

@@ -55,14 +55,14 @@ void oskar_evaluate_beam_horizon_direction(double* x, double* y, double* z,
 
     /* Get direction cosines in horizontal coordinates. */
     beam_coord_type = oskar_station_beam_coord_type(station);
-    beam_lon = oskar_station_beam_longitude_rad(station);
-    beam_lat = oskar_station_beam_latitude_rad(station);
+    beam_lon = oskar_station_beam_lon_rad(station);
+    beam_lat = oskar_station_beam_lat_rad(station);
 
     if (beam_coord_type == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
     {
         double lon, lat, last;
-        lon = oskar_station_longitude_rad(station);
-        lat = oskar_station_latitude_rad(station);
+        lon = oskar_station_lon_rad(station);
+        lat = oskar_station_lat_rad(station);
         last = gast + lon; /* Local Apparent Sidereal Time, in radians. */
         oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(1, &beam_lon,
                 &beam_lat, last, lat, x, y, z);
@@ -96,10 +96,10 @@ void oskar_evaluate_beam_horizon_direction(double* x, double* y, double* z,
         /* Get pointers to permitted beam data. */
         n = oskar_station_num_permitted_beams(station);
         p_az = oskar_mem_double_const(
-                oskar_station_permitted_beam_azimuth_rad_const(station),
+                oskar_station_permitted_beam_az_rad_const(station),
                 status);
         p_el = oskar_mem_double_const(
-                oskar_station_permitted_beam_elevation_rad_const(station),
+                oskar_station_permitted_beam_el_rad_const(station),
                 status);
 
         /* Loop over permitted beams. */

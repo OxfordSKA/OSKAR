@@ -153,7 +153,7 @@ void oskar_convert_ecef_to_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
     ha0_rad = gast - ra0_rad;
 
     /* Evaluate station u,v,w coordinates. */
-    if (location == OSKAR_LOCATION_GPU)
+    if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
@@ -187,7 +187,7 @@ void oskar_convert_ecef_to_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
     }
-    else if (location == OSKAR_LOCATION_CPU)
+    else if (location == OSKAR_CPU)
     {
         if (type == OSKAR_SINGLE)
         {

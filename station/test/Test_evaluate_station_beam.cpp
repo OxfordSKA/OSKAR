@@ -64,7 +64,7 @@ TEST(evaluate_station_beam, test_array_pattern)
     double station_size_m = 180.0;
     int num_antennas = station_dim * station_dim;
     oskar_Station* station = oskar_station_create(OSKAR_SINGLE,
-            OSKAR_LOCATION_CPU, num_antennas, &error);
+            OSKAR_CPU, num_antennas, &error);
     oskar_station_resize_element_types(station, 1, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
@@ -73,8 +73,8 @@ TEST(evaluate_station_beam, test_array_pattern)
     float* x_pos = (float*) malloc(station_dim * sizeof(float));
     oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
     oskar_meshgrid_f(
-            oskar_mem_float(oskar_station_element_x_weights(station), &error),
-            oskar_mem_float(oskar_station_element_y_weights(station), &error),
+            oskar_mem_float(oskar_station_element_measured_x_enu_metres(station), &error),
+            oskar_mem_float(oskar_station_element_measured_y_enu_metres(station), &error),
             x_pos, station_dim, x_pos, station_dim);
     free(x_pos);
 
@@ -91,7 +91,7 @@ TEST(evaluate_station_beam, test_array_pattern)
 
     // Copy the station structure to the GPU and free the original structure.
     oskar_Station* station_gpu = oskar_station_create_copy(station,
-            OSKAR_LOCATION_GPU, &error);
+            OSKAR_GPU, &error);
     oskar_station_free(station, &error);
 
     // Evaluate horizontal l,m positions at which to generate the beam pattern.
@@ -101,9 +101,9 @@ TEST(evaluate_station_beam, test_array_pattern)
 
     // Generate horizontal lm coordinates for the beam pattern.
     oskar_Mem *beam_pattern, *h_l, *h_m, *h_n, *d_l, *d_m, *d_n;
-    h_l = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_pixels, &error);
-    h_m = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_pixels, &error);
-    h_n = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_pixels, &error);
+    h_l = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pixels, &error);
+    h_m = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pixels, &error);
+    h_n = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pixels, &error);
     float* lm = (float*)malloc(image_size * sizeof(float));
     double lm_max = sin(fov_deg * M_PI / 180.0);
     oskar_linspace_f(lm, -lm_max, lm_max, image_size);
@@ -112,9 +112,9 @@ TEST(evaluate_station_beam, test_array_pattern)
     free(lm);
 
     // Copy horizontal lm coordinates to GPU.
-    d_l = oskar_mem_create_copy(h_l, OSKAR_LOCATION_GPU, &error);
-    d_m = oskar_mem_create_copy(h_m, OSKAR_LOCATION_GPU, &error);
-    d_n = oskar_mem_create_copy(h_n, OSKAR_LOCATION_GPU, &error);
+    d_l = oskar_mem_create_copy(h_l, OSKAR_GPU, &error);
+    d_m = oskar_mem_create_copy(h_m, OSKAR_GPU, &error);
+    d_n = oskar_mem_create_copy(h_n, OSKAR_GPU, &error);
 
     // Initialise the random number generator.
     int seed = 0;
@@ -124,10 +124,10 @@ TEST(evaluate_station_beam, test_array_pattern)
 
     // Allocate weights work array.
     oskar_StationWork* work = oskar_station_work_create(OSKAR_SINGLE,
-            OSKAR_LOCATION_GPU, &error);
+            OSKAR_GPU, &error);
 
     // Create memory for the beam pattern.
-    beam_pattern = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU,
+    beam_pattern = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_GPU,
             num_pixels, &error);
 
     ASSERT_EQ(0, oskar_station_array_is_3d(station_gpu));
@@ -187,7 +187,7 @@ TEST(evaluate_station_beam, gaussian)
     // Double CPU
     {
         int type = OSKAR_DOUBLE;
-        int location = OSKAR_LOCATION_CPU;
+        int location = OSKAR_CPU;
         double* x = (double*)malloc(size * sizeof(double));
         oskar_linspace_d(x, -lm_minmax, lm_minmax, size);
         oskar_Mem *l, *m, *beam, *horizon_mask;
@@ -221,7 +221,7 @@ TEST(evaluate_station_beam, gaussian)
     // Single CPU
     {
         int type = OSKAR_SINGLE;
-        int location = OSKAR_LOCATION_CPU;
+        int location = OSKAR_CPU;
         float* x = (float*)malloc(size * sizeof(float));
         oskar_linspace_f(x, -lm_minmax, lm_minmax, size);
         oskar_Mem *l, *m, *beam, *horizon_mask;
@@ -255,12 +255,12 @@ TEST(evaluate_station_beam, gaussian)
     // Double GPU
     {
         int type = OSKAR_DOUBLE;
-        int location = OSKAR_LOCATION_GPU;
+        int location = OSKAR_GPU;
         double* x = (double*)malloc(size * sizeof(double));
         oskar_linspace_d(x, -lm_minmax, lm_minmax, size);
         oskar_Mem *h_l, *h_m, *l, *m, *beam, *horizon_mask;
-        h_l = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_points, &error);
-        h_m = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_points, &error);
+        h_l = oskar_mem_create(type, OSKAR_CPU, num_points, &error);
+        h_m = oskar_mem_create(type, OSKAR_CPU, num_points, &error);
         horizon_mask = oskar_mem_create(type, location, num_points, &error);
         beam = oskar_mem_create(type | OSKAR_COMPLEX, location, num_points, &error);
         oskar_meshgrid_d(oskar_mem_double(h_l, &error),
@@ -293,12 +293,12 @@ TEST(evaluate_station_beam, gaussian)
     // Single GPU
     {
         int type = OSKAR_SINGLE;
-        int location = OSKAR_LOCATION_GPU;
+        int location = OSKAR_GPU;
         float* x = (float*)malloc(size * sizeof(float));
         oskar_linspace_f(x, -lm_minmax, lm_minmax, size);
         oskar_Mem *h_l, *h_m, *l, *m, *beam, *horizon_mask;
-        h_l = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_points, &error);
-        h_m = oskar_mem_create(type, OSKAR_LOCATION_CPU, num_points, &error);
+        h_l = oskar_mem_create(type, OSKAR_CPU, num_points, &error);
+        h_m = oskar_mem_create(type, OSKAR_CPU, num_points, &error);
         horizon_mask = oskar_mem_create(type, location, num_points, &error);
         beam = oskar_mem_create(type | OSKAR_COMPLEX, location, num_points, &error);
         oskar_meshgrid_f(oskar_mem_float(h_l, &error),

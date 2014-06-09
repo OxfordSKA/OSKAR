@@ -30,7 +30,6 @@
 #include <oskar_station.h>
 
 #include <oskar_element_free.h>
-#include <oskar_system_noise_model_free.h>
 
 #include <oskar_mem.h>
 #include <stdlib.h>
@@ -57,26 +56,27 @@ void oskar_station_free(oskar_Station* model, int* status)
     }
 
     /* Free the element data. */
-    oskar_mem_free(model->x_signal, status);
-    oskar_mem_free(model->y_signal, status);
-    oskar_mem_free(model->z_signal, status);
-    oskar_mem_free(model->x_weights, status);
-    oskar_mem_free(model->y_weights, status);
-    oskar_mem_free(model->z_weights, status);
-    oskar_mem_free(model->weight, status);
-    oskar_mem_free(model->gain, status);
-    oskar_mem_free(model->gain_error, status);
-    oskar_mem_free(model->phase_offset, status);
-    oskar_mem_free(model->phase_error, status);
-    oskar_mem_free(model->orientation_x_cpu, status);
-    oskar_mem_free(model->orientation_y_cpu, status);
+    oskar_mem_free(model->element_true_x_enu_metres, status);
+    oskar_mem_free(model->element_true_y_enu_metres, status);
+    oskar_mem_free(model->element_true_z_enu_metres, status);
+    oskar_mem_free(model->element_measured_x_enu_metres, status);
+    oskar_mem_free(model->element_measured_y_enu_metres, status);
+    oskar_mem_free(model->element_measured_z_enu_metres, status);
+    oskar_mem_free(model->element_weight, status);
+    oskar_mem_free(model->element_gain, status);
+    oskar_mem_free(model->element_gain_error, status);
+    oskar_mem_free(model->element_phase_offset_rad, status);
+    oskar_mem_free(model->element_phase_error_rad, status);
+    oskar_mem_free(model->element_orientation_x_rad_cpu, status);
+    oskar_mem_free(model->element_orientation_y_rad_cpu, status);
     oskar_mem_free(model->element_types, status);
     oskar_mem_free(model->element_types_cpu, status);
-    oskar_mem_free(model->permitted_beam_az, status);
-    oskar_mem_free(model->permitted_beam_el, status);
+    oskar_mem_free(model->permitted_beam_az_rad, status);
+    oskar_mem_free(model->permitted_beam_el_rad, status);
 
     /* Free the noise model. */
-    oskar_system_noise_model_free(model->noise, status);
+    oskar_mem_free(model->noise_freq_hz, status);
+    oskar_mem_free(model->noise_rms_jy, status);
 
     /* Free the element pattern data if it exists. */
     if (oskar_station_has_element(model))
@@ -87,7 +87,7 @@ void oskar_station_free(oskar_Station* model, int* status)
         }
 
         /* Free the element model handle array. */
-        free(model->element_pattern);
+        free(model->element);
     }
 
     /* Recursively free the child stations. */

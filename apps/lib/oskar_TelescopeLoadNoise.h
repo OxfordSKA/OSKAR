@@ -104,7 +104,7 @@ private:
             int* status);
 
     // Obtains the noise RMS values and sets then into the telescope model.
-    void setNoiseRMS_(oskar_SystemNoiseModel* noise_model,
+    void setNoiseRMS_(oskar_Station* model,
             const std::map<std::string, std::string>& filemap, int* status);
 
     // Obtains noise RMS values for telescope model priority loading.

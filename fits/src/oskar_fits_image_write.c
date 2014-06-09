@@ -106,7 +106,7 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
                 double max, inc, delta;
 
                 /* Compute pixel delta. */
-                max = sin(oskar_image_fov_longitude_deg(image) * M_PI / 360.0); /* Divide by 2. */
+                max = sin(oskar_image_fov_lon_deg(image) * M_PI / 360.0); /* Divide by 2. */
                 inc = max / (0.5 * oskar_image_width(image));
                 delta = -asin(inc) * 180.0 / M_PI; /* Negative convention. */
 
@@ -114,7 +114,7 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
                 label[i] = "Right Ascension";
                 ctype[i] = "RA---SIN";
                 naxes[i] = oskar_image_width(image);
-                crval[i] = oskar_image_centre_longitude_deg(image);
+                crval[i] = oskar_image_centre_lon_deg(image);
                 cdelt[i] = delta;
                 crpix[i] = (oskar_image_width(image) + 1) / 2.0;
                 crota[i] = 0.0;
@@ -124,7 +124,7 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
                 double max, inc, delta;
 
                 /* Compute pixel delta. */
-                max = sin(oskar_image_fov_latitude_deg(image) * M_PI / 360.0); /* Divide by 2. */
+                max = sin(oskar_image_fov_lat_deg(image) * M_PI / 360.0); /* Divide by 2. */
                 inc = max / (0.5 * oskar_image_height(image));
                 delta = asin(inc) * 180.0 / M_PI;
 
@@ -132,7 +132,7 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
                 label[i] = "Declination";
                 ctype[i] = "DEC--SIN";
                 naxes[i] = oskar_image_height(image);
-                crval[i] = oskar_image_centre_latitude_deg(image);
+                crval[i] = oskar_image_centre_lat_deg(image);
                 cdelt[i] = delta;
                 crpix[i] = (oskar_image_height(image) + 1) / 2.0;
                 crota[i] = 0.0;
@@ -228,10 +228,10 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
         if (oskar_image_coord_frame(image) == OSKAR_IMAGE_COORD_FRAME_EQUATORIAL)
         {
             fits_write_key_dbl(fptr, "OBSRA",
-                    oskar_image_centre_longitude_deg(image), decimals,
+                    oskar_image_centre_lon_deg(image), decimals,
                     "Pointing RA", status);
             fits_write_key_dbl(fptr, "OBSDEC",
-                    oskar_image_centre_latitude_deg(image), decimals,
+                    oskar_image_centre_lat_deg(image), decimals,
                     "Pointing DEC", status);
         }
 

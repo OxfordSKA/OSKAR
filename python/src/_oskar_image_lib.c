@@ -52,7 +52,7 @@ static void make_image_dft_(double* image, int num_vis, const double* uu,
     const double* vv, const dComplex* amp, double freq, int size, double fov)
 {
     int err = OSKAR_SUCCESS;
-    int location = OSKAR_LOCATION_CPU;
+    int location = OSKAR_CPU;
     int num_pixels = size * size;
     int type = OSKAR_DOUBLE; // Note Also allow OSKAR_SINGLE?
 

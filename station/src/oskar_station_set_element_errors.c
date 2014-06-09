@@ -75,32 +75,32 @@ void oskar_station_set_element_errors(oskar_Station* dst,
     }
 
     /* Get the data type. */
-    type = oskar_mem_type(dst->gain);
-    if (type != oskar_mem_type(dst->gain_error) ||
-            type != oskar_mem_type(dst->phase_offset) ||
-            type != oskar_mem_type(dst->phase_error))
+    type = oskar_mem_type(dst->element_gain);
+    if (type != oskar_mem_type(dst->element_gain_error) ||
+            type != oskar_mem_type(dst->element_phase_offset_rad) ||
+            type != oskar_mem_type(dst->element_phase_error_rad))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
 
     /* Get the data location. */
-    location = oskar_mem_location(dst->gain);
-    if (location != oskar_mem_location(dst->gain_error) ||
-            location != oskar_mem_location(dst->phase_offset) ||
-            location != oskar_mem_location(dst->phase_error))
+    location = oskar_mem_location(dst->element_gain);
+    if (location != oskar_mem_location(dst->element_gain_error) ||
+            location != oskar_mem_location(dst->element_phase_offset_rad) ||
+            location != oskar_mem_location(dst->element_phase_error_rad))
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
 
     /* Get byte pointers. */
-    gain_      = oskar_mem_char(dst->gain);
-    gain_err_  = oskar_mem_char(dst->gain_error);
-    phase_     = oskar_mem_char(dst->phase_offset);
-    phase_err_ = oskar_mem_char(dst->phase_error);
+    gain_      = oskar_mem_char(dst->element_gain);
+    gain_err_  = oskar_mem_char(dst->element_gain_error);
+    phase_     = oskar_mem_char(dst->element_phase_offset_rad);
+    phase_err_ = oskar_mem_char(dst->element_phase_error_rad);
 
-    if (location == OSKAR_LOCATION_CPU)
+    if (location == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE)
         {
@@ -119,7 +119,7 @@ void oskar_station_set_element_errors(oskar_Station* dst,
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-    else if (location == OSKAR_LOCATION_GPU)
+    else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         /* Get the data type. */

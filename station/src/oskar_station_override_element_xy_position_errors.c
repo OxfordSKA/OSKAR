@@ -50,7 +50,7 @@ void oskar_station_override_element_xy_position_errors(
     if (*status) return;
 
     /* Check location. */
-    if (oskar_station_location(s) != OSKAR_LOCATION_CPU)
+    if (oskar_station_mem_location(s) != OSKAR_CPU)
     {
         *status = OSKAR_ERR_BAD_LOCATION;
         return;
@@ -75,10 +75,10 @@ void oskar_station_override_element_xy_position_errors(
         if (type == OSKAR_DOUBLE)
         {
             double *xs, *ys, *xw, *yw;
-            xs = oskar_mem_double(s->x_signal, status);
-            ys = oskar_mem_double(s->y_signal, status);
-            xw = oskar_mem_double(s->x_weights, status);
-            yw = oskar_mem_double(s->y_weights, status);
+            xs = oskar_mem_double(s->element_true_x_enu_metres, status);
+            ys = oskar_mem_double(s->element_true_y_enu_metres, status);
+            xw = oskar_mem_double(s->element_measured_x_enu_metres, status);
+            yw = oskar_mem_double(s->element_measured_y_enu_metres, status);
             for (i = 0; i < s->num_elements; ++i)
             {
                 /* Generate random numbers from Gaussian distribution. */
@@ -92,10 +92,10 @@ void oskar_station_override_element_xy_position_errors(
         else if (type == OSKAR_SINGLE)
         {
             float *xs, *ys, *xw, *yw;
-            xs = oskar_mem_float(s->x_signal, status);
-            ys = oskar_mem_float(s->y_signal, status);
-            xw = oskar_mem_float(s->x_weights, status);
-            yw = oskar_mem_float(s->y_weights, status);
+            xs = oskar_mem_float(s->element_true_x_enu_metres, status);
+            ys = oskar_mem_float(s->element_true_y_enu_metres, status);
+            xw = oskar_mem_float(s->element_measured_x_enu_metres, status);
+            yw = oskar_mem_float(s->element_measured_y_enu_metres, status);
             for (i = 0; i < s->num_elements; ++i)
             {
                 /* Generate random numbers from Gaussian distribution. */

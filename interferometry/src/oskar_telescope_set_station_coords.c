@@ -67,17 +67,17 @@ void oskar_telescope_set_station_coords(oskar_Telescope* dst, int index,
 
     /* Get the data type and location. */
     type = oskar_telescope_precision(dst);
-    location = oskar_telescope_location(dst);
+    location = oskar_telescope_mem_location(dst);
 
     /* Get byte pointers. */
-    xw = oskar_mem_char(dst->station_x_offset_ecef_metres);
-    yw = oskar_mem_char(dst->station_y_offset_ecef_metres);
-    zw = oskar_mem_char(dst->station_z_offset_ecef_metres);
-    xh = oskar_mem_char(dst->station_x_enu_metres);
-    yh = oskar_mem_char(dst->station_y_enu_metres);
-    zh = oskar_mem_char(dst->station_z_enu_metres);
+    xw = oskar_mem_char(dst->station_true_x_offset_ecef_metres);
+    yw = oskar_mem_char(dst->station_true_y_offset_ecef_metres);
+    zw = oskar_mem_char(dst->station_true_z_offset_ecef_metres);
+    xh = oskar_mem_char(dst->station_true_x_enu_metres);
+    yh = oskar_mem_char(dst->station_true_y_enu_metres);
+    zh = oskar_mem_char(dst->station_true_z_enu_metres);
 
-    if (location == OSKAR_LOCATION_CPU)
+    if (location == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE)
         {
@@ -100,7 +100,7 @@ void oskar_telescope_set_station_coords(oskar_Telescope* dst, int index,
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-    else if (location == OSKAR_LOCATION_GPU)
+    else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         size_t size, offset_bytes;

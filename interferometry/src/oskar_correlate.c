@@ -70,21 +70,16 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
 
     /* Get time-average smearing term and Greenwich hour angle. */
     time_avg = oskar_telescope_time_average_sec(tel);
-    gha0 = gast - oskar_telescope_ra0_rad(tel);
-    dec0 = oskar_telescope_dec0_rad(tel);
+    gha0 = gast - oskar_telescope_phase_centre_ra_rad(tel);
+    dec0 = oskar_telescope_phase_centre_dec_rad(tel);
 
     /* Check data locations. */
-    location = oskar_sky_location(sky);
-    if (oskar_mem_location(vis) != location ||
-            oskar_jones_location(J) != location ||
+    location = oskar_sky_mem_location(sky);
+    if (oskar_telescope_mem_location(tel) != location ||
+            oskar_jones_mem_location(J) != location ||
+            oskar_mem_location(vis) != location ||
             oskar_mem_location(u) != location ||
-            oskar_mem_location(v) != location ||
-            oskar_mem_location(
-                    oskar_telescope_station_x_offset_ecef_metres_const(tel)) !=
-                            location ||
-            oskar_mem_location(
-                    oskar_telescope_station_y_offset_ecef_metres_const(tel)) !=
-                            location)
+            oskar_mem_location(v) != location)
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
@@ -149,10 +144,10 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
         u_ = oskar_mem_double_const(u, status);
         v_ = oskar_mem_double_const(v, status);
         x_ = oskar_mem_double_const(
-                oskar_telescope_station_x_offset_ecef_metres_const(tel),
+                oskar_telescope_station_true_x_offset_ecef_metres_const(tel),
                 status);
         y_ = oskar_mem_double_const(
-                oskar_telescope_station_y_offset_ecef_metres_const(tel),
+                oskar_telescope_station_true_y_offset_ecef_metres_const(tel),
                 status);
 
         if (matrix_type)
@@ -162,7 +157,7 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
             vis_ = oskar_mem_double4c(vis, status);
             J_   = oskar_jones_double4c_const(J, status);
 
-            if (location == OSKAR_LOCATION_GPU)
+            if (location == OSKAR_GPU)
             {
 #ifdef OSKAR_HAVE_CUDA
                 if (time_avg > 0.0)
@@ -247,7 +242,7 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
             vis_ = oskar_mem_double2(vis, status);
             J_   = oskar_jones_double2_const(J, status);
 
-            if (location == OSKAR_LOCATION_GPU)
+            if (location == OSKAR_GPU)
             {
 #ifdef OSKAR_HAVE_CUDA
                 oskar_correlate_point_scalar_cuda_d
@@ -279,10 +274,10 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
         u_ = oskar_mem_float_const(u, status);
         v_ = oskar_mem_float_const(v, status);
         x_ = oskar_mem_float_const(
-                oskar_telescope_station_x_offset_ecef_metres_const(tel),
+                oskar_telescope_station_true_x_offset_ecef_metres_const(tel),
                 status);
         y_ = oskar_mem_float_const(
-                oskar_telescope_station_y_offset_ecef_metres_const(tel),
+                oskar_telescope_station_true_y_offset_ecef_metres_const(tel),
                 status);
 
         if (matrix_type)
@@ -292,7 +287,7 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
             vis_ = oskar_mem_float4c(vis, status);
             J_   = oskar_jones_float4c_const(J, status);
 
-            if (location == OSKAR_LOCATION_GPU)
+            if (location == OSKAR_GPU)
             {
 #ifdef OSKAR_HAVE_CUDA
                 if (time_avg > 0.0)
@@ -377,7 +372,7 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
             vis_ = oskar_mem_float2(vis, status);
             J_   = oskar_jones_float2_const(J, status);
 
-            if (location == OSKAR_LOCATION_GPU)
+            if (location == OSKAR_GPU)
             {
 #ifdef OSKAR_HAVE_CUDA
                 oskar_correlate_point_scalar_cuda_f

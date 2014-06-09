@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -159,7 +159,7 @@ void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
         z_ = oskar_mem_double_const(z, status);
         weights_ = oskar_mem_double2(weights, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_evaluate_element_weights_dft_cuda_d(weights_, num_elements,
@@ -169,7 +169,7 @@ void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
-        else if (location == OSKAR_LOCATION_CPU)
+        else if (location == OSKAR_CPU)
         {
             oskar_evaluate_element_weights_dft_d(weights_, num_elements,
                     wavenumber, x_, y_, z_, x_beam, y_beam, z_beam);
@@ -184,7 +184,7 @@ void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
         z_ = oskar_mem_float_const(z, status);
         weights_ = oskar_mem_float2(weights, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_evaluate_element_weights_dft_cuda_f(weights_, num_elements,
@@ -195,7 +195,7 @@ void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
-        else if (location == OSKAR_LOCATION_CPU)
+        else if (location == OSKAR_CPU)
         {
             oskar_evaluate_element_weights_dft_f(weights_, num_elements,
                     (float)wavenumber, x_, y_, z_, (float)x_beam,

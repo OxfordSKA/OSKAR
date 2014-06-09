@@ -55,7 +55,7 @@ void oskar_sky_set_spectral_index(oskar_Sky* sky, int index,
     if (*status) return;
 
     /* Get the data location and type. */
-    location = oskar_sky_location(sky);
+    location = oskar_sky_mem_location(sky);
     type = oskar_sky_precision(sky);
 
     if (index >= sky->num_sources)
@@ -65,10 +65,10 @@ void oskar_sky_set_spectral_index(oskar_Sky* sky, int index,
     }
 
     /* Get byte pointers. */
-    ref_ = oskar_mem_char(sky->reference_freq);
+    ref_ = oskar_mem_char(sky->reference_freq_hz);
     spix_ = oskar_mem_char(sky->spectral_index);
 
-    if (location == OSKAR_LOCATION_GPU)
+    if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         size_t size, offset_bytes;

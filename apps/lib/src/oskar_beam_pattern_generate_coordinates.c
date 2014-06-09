@@ -142,8 +142,8 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
              nside = settings->nside;
              np = oskar_healpix_nside_to_npix(nside);
              type = oskar_mem_type(l);
-             theta = oskar_mem_create(type, OSKAR_LOCATION_CPU, np, status);
-             phi = oskar_mem_create(type, OSKAR_LOCATION_CPU, np, status);
+             theta = oskar_mem_create(type, OSKAR_CPU, np, status);
+             phi = oskar_mem_create(type, OSKAR_CPU, np, status);
              oskar_convert_healpix_ring_to_theta_phi(theta, phi, nside, status);
 
              /* Convert theta from polar angle to elevation. */
@@ -201,8 +201,8 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
              oskar_Mem *ra, *dec;
              int type = 0, num_points = 0;
              type = oskar_mem_type(l);
-             ra = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
-             dec = oskar_mem_create(type, OSKAR_LOCATION_CPU, 0, status);
+             ra = oskar_mem_create(type, OSKAR_CPU, 0, status);
+             dec = oskar_mem_create(type, OSKAR_CPU, 0, status);
              load_coords(ra, dec, &num_points, settings->sky_model, status);
              oskar_mem_realloc(l, num_points, status);
              oskar_mem_realloc(m, num_points, status);
@@ -239,8 +239,8 @@ static void generate_horizon_coordinates(oskar_Mem* x, oskar_Mem* y,
              nside = settings->nside;
              np = oskar_healpix_nside_to_npix(nside);
              type = oskar_mem_type(x);
-             theta = oskar_mem_create(type, OSKAR_LOCATION_CPU, np, status);
-             phi = oskar_mem_create(type, OSKAR_LOCATION_CPU, np, status);
+             theta = oskar_mem_create(type, OSKAR_CPU, np, status);
+             phi = oskar_mem_create(type, OSKAR_CPU, np, status);
              oskar_convert_healpix_ring_to_theta_phi(theta, phi, nside, status);
              oskar_convert_theta_phi_to_enu_direction_cosines(x, y, z, np,
                      theta, phi, status);

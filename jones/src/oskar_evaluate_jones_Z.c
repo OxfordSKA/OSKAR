@@ -31,7 +31,7 @@
 #include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines.h>
 #include <oskar_convert_offset_ecef_to_ecef.h>
 #include <oskar_evaluate_pierce_points.h>
-#include <oskar_evaluate_TEC_TID.h>
+#include <oskar_evaluate_tec_tid.h>
 
 #include <oskar_telescope.h>
 #include <oskar_sky.h>
@@ -97,7 +97,7 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
     oskar_work_jones_z_resize(work, num_sources, status);
 
     /* Copy the sky model to the CPU. */
-    sky_cpu = oskar_sky_create_copy(sky, OSKAR_LOCATION_CPU, status);
+    sky_cpu = oskar_sky_create_copy(sky, OSKAR_CPU, status);
 
     Z_station = oskar_mem_create_alias(0, 0, 0, status);
     wavelength = 299792458.0 / frequency_hz;
@@ -109,9 +109,9 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
         double last, lon, lat, alt;
         const oskar_Station* station;
         station = oskar_telescope_station_const(telescope, i);
-        lon = oskar_station_longitude_rad(station);
-        lat = oskar_station_latitude_rad(station);
-        alt = oskar_station_altitude_m(station);
+        lon = oskar_station_lon_rad(station);
+        lat = oskar_station_lat_rad(station);
+        alt = oskar_station_alt_metres(station);
         last = gast + lon;
 
         /* Evaluate horizontal x,y,z source positions (for which to evaluate
@@ -119,8 +119,8 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
         oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
                 work->hor_x, work->hor_y, work->hor_z, num_sources,
                 oskar_sky_l_const(sky_cpu), oskar_sky_m_const(sky_cpu),
-                oskar_sky_n_const(sky_cpu), last - oskar_sky_ra0(sky_cpu),
-                oskar_sky_dec0(sky_cpu), lat, status);
+                oskar_sky_n_const(sky_cpu), last - oskar_sky_reference_ra_rad(sky_cpu),
+                oskar_sky_reference_dec_rad(sky_cpu), lat, status);
 
         /* Obtain station coordinates in the ECEF frame. */
         evaluate_station_ECEF_coords(&station_x, &station_y, &station_z, i,
@@ -174,7 +174,7 @@ static void oskar_evaluate_TEC(oskar_WorkJonesZ* work, int num_pp,
         oskar_mem_set_value_real(work->screen_TEC, 0.0, 0, 0, status);
 
         /* Evaluate TEC values for the screen */
-        oskar_evaluate_TEC_TID(work->screen_TEC, num_pp, work->pp_lon,
+        oskar_evaluate_tec_tid(work->screen_TEC, num_pp, work->pp_lon,
                 work->pp_lat, work->pp_rel_path, settings->TEC0,
                 &settings->TID[i], gast);
 
@@ -198,18 +198,18 @@ static void evaluate_station_ECEF_coords(
     const void *x_, *y_, *z_;
 
     x_ = oskar_mem_void_const(
-            oskar_telescope_station_x_offset_ecef_metres_const(telescope));
+            oskar_telescope_station_true_x_offset_ecef_metres_const(telescope));
     y_ = oskar_mem_void_const(
-            oskar_telescope_station_y_offset_ecef_metres_const(telescope));
+            oskar_telescope_station_true_y_offset_ecef_metres_const(telescope));
     z_ = oskar_mem_void_const(
-            oskar_telescope_station_z_offset_ecef_metres_const(telescope));
+            oskar_telescope_station_true_z_offset_ecef_metres_const(telescope));
     station = oskar_telescope_station_const(telescope, stationID);
-    lon = oskar_station_longitude_rad(station);
-    lat = oskar_station_latitude_rad(station);
-    alt = oskar_station_altitude_m(station);
+    lon = oskar_station_lon_rad(station);
+    lat = oskar_station_lat_rad(station);
+    alt = oskar_station_alt_metres(station);
 
     if (oskar_mem_type(
-            oskar_telescope_station_x_offset_ecef_metres_const(telescope)) ==
+            oskar_telescope_station_true_x_offset_ecef_metres_const(telescope)) ==
             OSKAR_DOUBLE)
     {
         st_x = ((const double*)x_)[stationID];

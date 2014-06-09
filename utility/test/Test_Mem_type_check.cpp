@@ -36,7 +36,7 @@ TEST(Mem, type_check_single)
 {
     int status = 0;
     oskar_Mem *mem;
-    mem = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0, &status);
+    mem = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     EXPECT_EQ((int)OSKAR_FALSE, oskar_mem_is_double(mem));
     EXPECT_EQ((int)OSKAR_FALSE, oskar_mem_is_complex(mem));
@@ -53,7 +53,7 @@ TEST(Mem, type_check_double)
 {
     int status = 0;
     oskar_Mem *mem;
-    mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     EXPECT_EQ((int)OSKAR_TRUE, oskar_mem_is_double(mem));
     EXPECT_EQ((int)OSKAR_FALSE, oskar_mem_is_complex(mem));
@@ -70,7 +70,7 @@ TEST(Mem, type_check_single_complex)
 {
     int status = 0;
     oskar_Mem *mem;
-    mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU, 0,
+    mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_CPU, 0,
             &status);
     EXPECT_EQ((int)OSKAR_FALSE, oskar_mem_is_double(mem));
     EXPECT_EQ((int)OSKAR_TRUE, oskar_mem_is_complex(mem));
@@ -87,7 +87,7 @@ TEST(Mem, type_check_double_complex)
 {
     int status = 0;
     oskar_Mem *mem;
-    mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 0,
+    mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU, 0,
             &status);
     EXPECT_EQ((int)OSKAR_TRUE, oskar_mem_is_double(mem));
     EXPECT_EQ((int)OSKAR_TRUE, oskar_mem_is_complex(mem));
@@ -104,7 +104,7 @@ TEST(Mem, type_check_single_complex_matrix)
 {
     int status = 0;
     oskar_Mem *mem;
-    mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, 0,
+    mem = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU, 0,
             &status);
     EXPECT_EQ((int)OSKAR_FALSE, oskar_mem_is_double(mem));
     EXPECT_EQ((int)OSKAR_TRUE, oskar_mem_is_complex(mem));
@@ -121,7 +121,7 @@ TEST(Mem, type_check_double_complex_matrix)
 {
     int status = 0;
     oskar_Mem *mem;
-    mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, 0,
+    mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_CPU, 0,
             &status);
     EXPECT_EQ((int)OSKAR_TRUE, oskar_mem_is_double(mem));
     EXPECT_EQ((int)OSKAR_TRUE, oskar_mem_is_complex(mem));

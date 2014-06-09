@@ -34,7 +34,7 @@
 TEST(Mem, realloc_gpu)
 {
     int status = 0;
-    oskar_Mem *mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, 0, &status);
+    oskar_Mem *mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_realloc(mem, 500, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -47,7 +47,7 @@ TEST(Mem, realloc_gpu)
 TEST(Mem, realloc_cpu)
 {
     int status = 0;
-    oskar_Mem *mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU,
+    oskar_Mem *mem = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU,
             100, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_realloc(mem, 1000, &status);

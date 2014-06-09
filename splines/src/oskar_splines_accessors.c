@@ -38,9 +38,9 @@ int oskar_splines_precision(const oskar_Splines* data)
     return data->precision;
 }
 
-int oskar_splines_location(const oskar_Splines* data)
+int oskar_splines_mem_location(const oskar_Splines* data)
 {
-    return data->location;
+    return data->mem_location;
 }
 
 int oskar_splines_have_coeffs(const oskar_Splines* data)

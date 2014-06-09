@@ -210,7 +210,7 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines(int num_points,
         m_   = oskar_mem_float(m, status);
         n_   = oskar_mem_float(n, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_f(
@@ -238,7 +238,7 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines(int num_points,
         m_   = oskar_mem_double(m, status);
         n_   = oskar_mem_double(n, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_d(

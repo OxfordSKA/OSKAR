@@ -60,7 +60,7 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
     }
 
     /* Check that all arrays are co-located. */
-    location = oskar_splines_location(spline);
+    location = oskar_splines_mem_location(spline);
     if (location != oskar_mem_location(output) ||
             location != oskar_mem_location(x) ||
             location != oskar_mem_location(y))
@@ -96,7 +96,7 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
         out   = oskar_mem_float(output, status) + offset;
 
         /* Check if data are in CPU memory. */
-        if (location == OSKAR_LOCATION_CPU)
+        if (location == OSKAR_CPU)
         {
             /* Set up workspace. */
             float x1, y1, wrk[8];
@@ -117,7 +117,7 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
                 }
             }
         }
-        else if (location == OSKAR_LOCATION_GPU)
+        else if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_dierckx_bispev_bicubic_cuda_f(tx, nx, ty, ny, coeff,
@@ -145,7 +145,7 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
         out   = oskar_mem_double(output, status) + offset;
 
         /* Check if data are in CPU memory. */
-        if (location == OSKAR_LOCATION_CPU)
+        if (location == OSKAR_CPU)
         {
             /* Set up workspace. */
             double x1, y1, wrk[8];
@@ -166,7 +166,7 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
                 }
             }
         }
-        else if (location == OSKAR_LOCATION_GPU)
+        else if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             oskar_dierckx_bispev_bicubic_cuda_d(tx, nx, ty, ny, coeff,

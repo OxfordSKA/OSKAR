@@ -37,8 +37,8 @@ TEST(Mem, different_none)
     // Test two memory blocks that are the same.
     int status = 0;
     oskar_Mem *one, *two;
-    one = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, &status);
-    two = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, &status);
+    one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
+    two = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(one, 4.4, 0, 0, &status);
     oskar_mem_set_value_real(two, 4.4, 0, 0, &status);
@@ -56,8 +56,8 @@ TEST(Mem, different_all)
     // Test two memory blocks that are different.
     int status = 0;
     oskar_Mem *one, *two;
-    one = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, &status);
-    two = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, &status);
+    one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
+    two = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(one, 4.4, 0, 0, &status);
     oskar_mem_set_value_real(two, 4.2, 0, 0, &status);
@@ -75,8 +75,8 @@ TEST(Mem, different_by_one)
     // Test two memory blocks that are different by one element.
     int status = 0;
     oskar_Mem *one, *two;
-    one = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, &status);
-    two = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, &status);
+    one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
+    two = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(one, 1.0, 0, 0, &status);
     oskar_mem_set_value_real(two, 1.0, 0, 0, &status);
@@ -96,8 +96,8 @@ TEST(Mem, different_up_to_a_point)
     // the point where they are different.
     int status = 0;
     oskar_Mem *one, *two;
-    one = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, &status);
-    two = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20, &status);
+    one = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
+    two = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 20, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_set_value_real(one, 1.0, 0, 0, &status);
     oskar_mem_set_value_real(two, 1.0, 0, 0, &status);

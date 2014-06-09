@@ -79,9 +79,9 @@ void oskar_telescope_load_station_coords_ecef(oskar_Telescope* telescope,
     }
 
     /* Store the telescope centre longitude, latitude, and altitude. */
-    telescope->longitude_rad = longitude;
-    telescope->latitude_rad = latitude;
-    telescope->altitude_metres = altitude;
+    telescope->lon_rad = longitude;
+    telescope->lat_rad = latitude;
+    telescope->alt_metres = altitude;
 
     /* Loop over each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)

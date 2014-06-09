@@ -55,7 +55,7 @@ TEST(Mem, binary_read_write)
 
     // Save data from CPU.
     {
-        oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU,
+        oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU,
                 num_cpu, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         float* data = oskar_mem_float(mem, &status);
@@ -76,7 +76,7 @@ TEST(Mem, binary_read_write)
     // Save data from GPU.
     {
         oskar_Mem *mem_cpu, *mem_gpu;
-        mem_cpu = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU,
+        mem_cpu = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU,
                 num_gpu, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         double2* data = oskar_mem_double2(mem_cpu, &status);
@@ -89,7 +89,7 @@ TEST(Mem, binary_read_write)
         }
 
         // Copy data to GPU.
-        mem_gpu = oskar_mem_create_copy(mem_cpu, OSKAR_LOCATION_GPU, &status);
+        mem_gpu = oskar_mem_create_copy(mem_cpu, OSKAR_GPU, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Save GPU data.
@@ -107,7 +107,7 @@ TEST(Mem, binary_read_write)
 
     // Save data from CPU with blank tags.
     {
-        oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+        oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
                 num_cpu, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         double* data = oskar_mem_double(mem, &status);
@@ -136,7 +136,7 @@ TEST(Mem, binary_read_write)
 
     // Save CPU data with tags that are equal lengths.
     {
-        oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+        oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
                 num_cpu, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         double* data = oskar_mem_double(mem, &status);
@@ -171,7 +171,7 @@ TEST(Mem, binary_read_write)
     // Load data directly to GPU.
     {
         oskar_Mem *mem_gpu, *mem_cpu;
-        mem_gpu = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU,
+        mem_gpu = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_GPU,
                 0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_mem_binary_file_read_ext(mem_gpu, filename, &index,
@@ -180,7 +180,7 @@ TEST(Mem, binary_read_write)
         EXPECT_EQ(num_gpu, (int)oskar_mem_length(mem_gpu));
 
         // Copy back to CPU and examine contents.
-        mem_cpu = oskar_mem_create_copy(mem_gpu, OSKAR_LOCATION_CPU, &status);
+        mem_cpu = oskar_mem_create_copy(mem_gpu, OSKAR_CPU, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         double2* data = oskar_mem_double2(mem_cpu, &status);
         for (int i = 0; i < num_gpu; ++i)
@@ -201,7 +201,7 @@ TEST(Mem, binary_read_write)
 
     // Load CPU data.
     {
-        oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE, OSKAR_LOCATION_CPU,
+        oskar_Mem* mem = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU,
                 num_cpu, &status);
         oskar_mem_binary_file_read_ext(mem, filename, &index,
                 "USER", "TEST", 987654, &status);
@@ -218,7 +218,7 @@ TEST(Mem, binary_read_write)
     // Load CPU data with blank tags.
     {
         double* data;
-        oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
+        oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
                 num_cpu, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_mem_binary_file_read_ext(mem, filename, &index, "", "", 10,
@@ -249,7 +249,7 @@ TEST(Mem, binary_read_write)
     // Load CPU data with tags that are equal lengths.
     {
         double* data;
-        oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0,
+        oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0,
                 &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_mem_binary_file_read_ext(mem, filename, &index,
@@ -275,7 +275,7 @@ TEST(Mem, binary_read_write)
 
     // Try to load data that isn't present.
     {
-        oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0,
+        oskar_Mem* mem = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0,
                 &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         oskar_mem_binary_file_read_ext(mem, filename, &index,

@@ -64,7 +64,7 @@ double oskar_mem_get_element_scalar(const oskar_Mem* mem, size_t index,
     }
 
     /* Set the data into the array element. */
-    if (location == OSKAR_LOCATION_CPU)
+    if (location == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE)
         {
@@ -77,7 +77,7 @@ double oskar_mem_get_element_scalar(const oskar_Mem* mem, size_t index,
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-    else if (location == OSKAR_LOCATION_GPU)
+    else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_DOUBLE)
@@ -135,7 +135,7 @@ double2 oskar_mem_get_element_complex(const oskar_Mem* mem, size_t index,
     }
 
     /* Set the data into the array element. */
-    if (location == OSKAR_LOCATION_CPU)
+    if (location == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE_COMPLEX)
         {
@@ -151,7 +151,7 @@ double2 oskar_mem_get_element_complex(const oskar_Mem* mem, size_t index,
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-    else if (location == OSKAR_LOCATION_GPU)
+    else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_DOUBLE_COMPLEX)
@@ -217,7 +217,7 @@ double4c oskar_mem_get_element_matrix(const oskar_Mem* mem, size_t index,
     }
 
     /* Set the data into the array element. */
-    if (location == OSKAR_LOCATION_CPU)
+    if (location == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
         {
@@ -240,7 +240,7 @@ double4c oskar_mem_get_element_matrix(const oskar_Mem* mem, size_t index,
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-    else if (location == OSKAR_LOCATION_GPU)
+    else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)

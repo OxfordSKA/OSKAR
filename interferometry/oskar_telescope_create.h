@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ extern "C" {
  * Creates and initialises a telescope model structure.
  *
  * @param[in] type         Array element type (OSKAR_SINGLE or OSKAR_DOUBLE).
- * @param[in] location     Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+ * @param[in] location     Memory location (OSKAR_CPU or OSKAR_GPU).
  * @param[in] num_stations Number of stations.
  * @param[in,out]  status  Status return code.
  *

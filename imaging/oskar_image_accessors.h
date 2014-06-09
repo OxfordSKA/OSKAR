@@ -83,16 +83,16 @@ OSKAR_EXPORT
 int oskar_image_healpix_nside(const oskar_Image* image);
 
 OSKAR_EXPORT
-double oskar_image_centre_longitude_deg(const oskar_Image* image);
+double oskar_image_centre_lon_deg(const oskar_Image* image);
 
 OSKAR_EXPORT
-double oskar_image_centre_latitude_deg(const oskar_Image* image);
+double oskar_image_centre_lat_deg(const oskar_Image* image);
 
 OSKAR_EXPORT
-double oskar_image_fov_longitude_deg(const oskar_Image* image);
+double oskar_image_fov_lon_deg(const oskar_Image* image);
 
 OSKAR_EXPORT
-double oskar_image_fov_latitude_deg(const oskar_Image* image);
+double oskar_image_fov_lat_deg(const oskar_Image* image);
 
 OSKAR_EXPORT
 double oskar_image_time_start_mjd_utc(const oskar_Image* image);

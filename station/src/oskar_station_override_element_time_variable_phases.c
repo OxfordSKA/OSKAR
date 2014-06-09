@@ -63,7 +63,8 @@ void oskar_station_override_element_time_variable_phases(
     else
     {
         /* Override element data at last level. */
-        oskar_mem_set_value_real(s->phase_error, phase_std, 0, 0, status);
+        oskar_mem_set_value_real(s->element_phase_error_rad,
+                phase_std, 0, 0, status);
     }
 }
 

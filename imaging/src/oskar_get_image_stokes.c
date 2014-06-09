@@ -54,7 +54,7 @@ oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
     num_vis_amps = oskar_vis_num_baselines(vis) * oskar_vis_num_times(vis) *
             oskar_vis_num_channels(vis);
     type = oskar_mem_precision(amp);
-    location = OSKAR_LOCATION_CPU;
+    location = OSKAR_CPU;
 
     /* If the input data is polarised and a single Stokes polarisation type
      * is selected */

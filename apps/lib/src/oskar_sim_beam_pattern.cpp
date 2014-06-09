@@ -73,7 +73,7 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
     load_settings(&settings, settings_file, log, status);
     if (*status) return;
 
-    oskar_Telescope* tel = oskar_set_up_telescope(log, &settings, status);
+    oskar_Telescope* tel = oskar_set_up_telescope(&settings, log, status);
     if (*status)
     {
         oskar_telescope_free(tel, status);
@@ -86,7 +86,7 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
     timer.start();
 
     oskar_Image* beam_pattern = oskar_image_create(type | OSKAR_COMPLEX,
-            OSKAR_LOCATION_CPU, status);
+            OSKAR_CPU, status);
     init_beam_pattern_cube(beam_pattern, &settings, status);
     simulate_beam_pattern(oskar_image_data(beam_pattern), &settings, type,
             tel, log, status);
@@ -147,8 +147,8 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
         const oskar_Settings* settings, int type, const oskar_Telescope* tel,
         oskar_Log* log, int* status)
 {
-    const int GPU = OSKAR_LOCATION_GPU;
-    const int CPU = OSKAR_LOCATION_CPU;
+    const int GPU = OSKAR_GPU;
+    const int CPU = OSKAR_CPU;
 
     // Make local copies of settings.
     int num_times = settings->obs.num_time_steps;
@@ -190,8 +190,8 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     oskar_Mem* z = oskar_mem_create(type, CPU, 0, status);
     oskar_beam_pattern_generate_coordinates(&coord_type, x, y, z, &lon0, &lat0,
             &num_pixels, oskar_station_beam_coord_type(station),
-            oskar_station_beam_longitude_rad(station),
-            oskar_station_beam_latitude_rad(station), &settings->beam_pattern,
+            oskar_station_beam_lon_rad(station),
+            oskar_station_beam_lat_rad(station), &settings->beam_pattern,
             status);
 
     // Resize coordinate arrays to allow space for a normalisation source.
@@ -400,7 +400,7 @@ static void init_beam_pattern_cube(oskar_Image* image,
     oskar_image_set_time(image, settings->obs.start_mjd_utc,
             settings->obs.dt_dump_days * 86400.0);
     oskar_mem_append_raw(oskar_image_settings_path(image),
-            settings->settings_path, OSKAR_CHAR, OSKAR_LOCATION_CPU,
+            settings->settings_path, OSKAR_CHAR, OSKAR_CPU,
             1 + strlen(settings->settings_path), status);
 }
 

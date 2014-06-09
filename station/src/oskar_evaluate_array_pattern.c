@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam, double wavenumber,
 
     /* Get meta-data. */
     type = oskar_station_precision(station);
-    location = oskar_station_location(station);
+    location = oskar_station_mem_location(station);
     num_elements = oskar_station_num_elements(station);
     array_is_3d = oskar_station_array_is_3d(station);
 
@@ -102,18 +102,18 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam, double wavenumber,
         const double2 *weights_;
         double2 *beam_;
         xs = oskar_mem_double_const(
-                oskar_station_element_x_signal_const(station), status);
+                oskar_station_element_true_x_enu_metres_const(station), status);
         ys = oskar_mem_double_const(
-                oskar_station_element_y_signal_const(station), status);
+                oskar_station_element_true_y_enu_metres_const(station), status);
         zs = oskar_mem_double_const(
-                oskar_station_element_z_signal_const(station), status);
+                oskar_station_element_true_z_enu_metres_const(station), status);
         x_ = oskar_mem_double_const(x, status);
         y_ = oskar_mem_double_const(y, status);
         z_ = oskar_mem_double_const(z, status);
         weights_ = oskar_mem_double2_const(weights, status);
         beam_ = oskar_mem_double2(beam, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             if (array_is_3d)
@@ -131,7 +131,7 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam, double wavenumber,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
-        else if (location == OSKAR_LOCATION_CPU)
+        else if (location == OSKAR_CPU)
         {
             if (array_is_3d)
             {
@@ -155,18 +155,18 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam, double wavenumber,
         const float2 *weights_;
         float2 *beam_;
         xs = oskar_mem_float_const(
-                oskar_station_element_x_signal_const(station), status);
+                oskar_station_element_true_x_enu_metres_const(station), status);
         ys = oskar_mem_float_const(
-                oskar_station_element_y_signal_const(station), status);
+                oskar_station_element_true_y_enu_metres_const(station), status);
         zs = oskar_mem_float_const(
-                oskar_station_element_z_signal_const(station), status);
+                oskar_station_element_true_z_enu_metres_const(station), status);
         x_ = oskar_mem_float_const(x, status);
         y_ = oskar_mem_float_const(y, status);
         z_ = oskar_mem_float_const(z, status);
         weights_ = oskar_mem_float2_const(weights, status);
         beam_ = oskar_mem_float2(beam, status);
 
-        if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
             if (array_is_3d)
@@ -184,7 +184,7 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam, double wavenumber,
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
-        else if (location == OSKAR_LOCATION_CPU)
+        else if (location == OSKAR_CPU)
         {
             if (array_is_3d)
             {

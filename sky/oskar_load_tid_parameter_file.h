@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,31 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_system_noise_model.h>
-#include <oskar_system_noise_model_copy.h>
-#include <oskar_mem.h>
+#ifndef OSKAR_LOAD_TID_PARAMETER_FILE_H_
+#define OSKAR_LOAD_TID_PARAMETER_FILE_H_
+
+/**
+ * @file oskar_load_tid_parameter_file.h
+ */
+
+#include <oskar_global.h>
+#include <oskar_SettingsIonosphere.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_system_noise_model_copy(oskar_SystemNoiseModel* dst,
-        const oskar_SystemNoiseModel* src, int* status)
-{
-    /* Check all inputs. */
-    if (!dst || !src || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    oskar_mem_copy(dst->frequency, src->frequency, status);
-    oskar_mem_copy(dst->rms, src->rms, status);
-}
+OSKAR_EXPORT
+void oskar_load_tid_parameter_file(oskar_SettingsTIDscreen* settings,
+        const char* filename, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_LOAD_TID_PARAMETER_FILE_H_ */

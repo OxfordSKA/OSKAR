@@ -83,7 +83,7 @@ void oskar_convert_enu_direction_cosines_to_theta_phi(oskar_Mem* theta,
     location = oskar_mem_location(theta);
 
     /* Compute modified theta and phi coordinates. */
-    if (location == OSKAR_LOCATION_GPU)
+    if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
@@ -112,7 +112,7 @@ void oskar_convert_enu_direction_cosines_to_theta_phi(oskar_Mem* theta,
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
     }
-    else if (location == OSKAR_LOCATION_CPU)
+    else if (location == OSKAR_CPU)
     {
         if (type == OSKAR_SINGLE)
         {
