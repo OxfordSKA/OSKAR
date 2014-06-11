@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,12 @@
  * @file oskar_multiply_inline.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 #ifdef __CUDACC__
 /* Must include this first to avoid type conflicts. */
 #include <vector_types.h>
 #endif
-#include "utility/oskar_vector_types.h"
+#include <oskar_vector_types.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <oskar_correlate_scalar_point_cuda.h>
 #include <oskar_correlate_functions_inline.h>
-#include <oskar_correlate_gaussian_cuda.h>
+#include <oskar_multiply_inline.h>
 #include <oskar_sinc.h>
 #include <oskar_add_inline.h>
-
-#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,47 +39,37 @@ extern "C" {
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
-void oskar_correlate_gaussian_cuda_f(int num_sources,
-        int num_stations, const float4c* d_jones,
-        const float* d_source_I, const float* d_source_Q,
-        const float* d_source_U, const float* d_source_V,
-        const float* d_source_l, const float* d_source_m,
-        const float* d_source_a, const float* d_source_b,
-        const float* d_source_c, const float* d_station_u,
+void oskar_correlate_scalar_point_cuda_f(int num_sources,
+        int num_stations, const float2* d_jones,
+        const float* d_source_I, const float* d_source_l,
+        const float* d_source_m, const float* d_station_u,
         const float* d_station_v, float inv_wavelength,
-        float frac_bandwidth, float4c* d_vis)
+        float frac_bandwidth, float2* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
-    size_t shared_mem = num_threads.x * sizeof(float4c);
-    oskar_correlate_gaussian_cudak_f
+    size_t shared_mem = num_threads.x * sizeof(float2);
+    oskar_correlate_scalar_point_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
-            d_source_V, d_source_l, d_source_m, d_source_a, d_source_b,
-            d_source_c, d_station_u, d_station_v, inv_wavelength,
-            frac_bandwidth, d_vis);
+    (num_sources, num_stations, d_jones, d_source_I, d_source_l, d_source_m,
+            d_station_u, d_station_v, inv_wavelength, frac_bandwidth, d_vis);
 }
 
 /* Double precision. */
-void oskar_correlate_gaussian_cuda_d(int num_sources,
-        int num_stations, const double4c* d_jones,
-        const double* d_source_I, const double* d_source_Q,
-        const double* d_source_U, const double* d_source_V,
-        const double* d_source_l, const double* d_source_m,
-        const double* d_source_a, const double* d_source_b,
-        const double* d_source_c, const double* d_station_u,
+void oskar_correlate_scalar_point_cuda_d(int num_sources,
+        int num_stations, const double2* d_jones,
+        const double* d_source_I, const double* d_source_l,
+        const double* d_source_m, const double* d_station_u,
         const double* d_station_v, double inv_wavelength,
-        double frac_bandwidth, double4c* d_vis)
+        double frac_bandwidth, double2* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
-    size_t shared_mem = num_threads.x * sizeof(double4c);
-    oskar_correlate_gaussian_cudak_d
+    size_t shared_mem = num_threads.x * sizeof(double2);
+    oskar_correlate_scalar_point_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
-            d_source_V, d_source_l, d_source_m, d_source_a, d_source_b,
-            d_source_c, d_station_u, d_station_v, inv_wavelength,
-            frac_bandwidth, d_vis);
+    (num_sources, num_stations, d_jones, d_source_I, d_source_l, d_source_m,
+            d_station_u, d_station_v, inv_wavelength, frac_bandwidth, d_vis);
 }
 
 #ifdef __cplusplus
@@ -94,24 +83,20 @@ void oskar_correlate_gaussian_cuda_d(int num_sources,
 #define SP blockIdx.x /* Column index. */
 #define SQ blockIdx.y /* Row index. */
 
-extern __shared__ float4c  smem_f[];
-extern __shared__ double4c smem_d[];
-
+extern __shared__ float2  smem_f[];
+extern __shared__ double2 smem_d[];
 
 /* Single precision. */
 __global__
-void oskar_correlate_gaussian_cudak_f(const int num_sources,
-        const int num_stations, const float4c* restrict jones,
-        const float* restrict source_I, const float* restrict source_Q,
-        const float* restrict source_U, const float* restrict source_V,
-        const float* restrict source_l, const float* restrict source_m,
-        const float* restrict source_a, const float* restrict source_b,
-        const float* restrict source_c, const float* restrict station_u,
+void oskar_correlate_scalar_point_cudak_f(const int num_sources,
+        const int num_stations, const float2* restrict jones,
+        const float* restrict source_I, const float* restrict source_l,
+        const float* restrict source_m, const float* restrict station_u,
         const float* restrict station_v, const float inv_wavelength,
-        const float frac_bandwidth, float4c* restrict vis)
+        const float frac_bandwidth, float2* restrict vis)
 {
-    __shared__ float uu, vv, uu2, vv2, uuvv;
-    float4c sum;
+    __shared__ float uu, vv;
+    float2 sum;
     int i;
 
     /* Return immediately if in the wrong half of the visibility matrix. */
@@ -120,31 +105,37 @@ void oskar_correlate_gaussian_cudak_f(const int num_sources,
     /* Get common baseline values per thread block. */
     if (threadIdx.x == 0)
     {
-        oskar_evaluate_modified_baseline_gaussian_inline_f(station_u[SP],
+        /* Get common baseline values. */
+        oskar_evaluate_modified_baseline_inline_f(station_u[SP],
                 station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                frac_bandwidth, &uu, &vv, &uu2, &vv2, &uuvv);
+                frac_bandwidth, &uu, &vv);
     }
     __syncthreads();
 
     /* Get pointers to source vectors for both stations. */
-    const float4c* restrict station_p = &jones[num_sources * SP];
-    const float4c* restrict station_q = &jones[num_sources * SQ];
+    const float2* restrict station_p = &jones[num_sources * SP];
+    const float2* restrict station_q = &jones[num_sources * SQ];
 
     /* Each thread loops over a subset of the sources. */
-    oskar_clear_complex_matrix_f(&sum); /* Partial sum per thread. */
+    sum = make_float2(0.0f, 0.0f); /* Partial sum per thread. */
     for (i = threadIdx.x; i < num_sources; i += blockDim.x)
     {
         /* Compute bandwidth-smearing term. */
         float rb = oskar_sinc_f(uu * source_l[i] + vv * source_m[i]);
+        float2 c_a = station_p[i];
+        float2 c_b = station_q[i];
+        float2 temp;
 
-        /* Evaluate gaussian source width term. */
-        float f = expf(-(source_a[i] * uu2 +
-                source_b[i] * uuvv + source_c[i] * vv2));
+        /* Complex-conjugate multiply. */
+        oskar_multiply_complex_conjugate_f(&temp, &c_a, &c_b);
 
-        /* Accumulate baseline visibility response for source. */
-        oskar_accumulate_baseline_visibility_for_source_inline_f(&sum, i,
-                source_I, source_Q, source_U, source_V,
-                station_p, station_q, rb * f);
+        /* Multiply by the source brightness. */
+        temp.x *= source_I[i];
+        temp.y *= source_I[i];
+
+        /* Multiply result by bandwidth-smearing term. */
+        sum.x += temp.x * rb;
+        sum.y += temp.y * rb;
     }
 
     /* Store partial sum for the thread in shared memory and synchronise. */
@@ -157,29 +148,28 @@ void oskar_correlate_gaussian_cudak_f(const int num_sources,
         /* Sum over all sources for this baseline. */
         for (i = 1; i < blockDim.x; ++i)
         {
-            oskar_add_complex_matrix_in_place_f(&sum, &smem_f[i]);
+            sum.x += smem_f[i].x;
+            sum.y += smem_f[i].y;
         }
 
         /* Add result of this thread block to the baseline visibility. */
         i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
-        oskar_add_complex_matrix_in_place_f(&vis[i], &sum);
+        vis[i].x += sum.x;
+        vis[i].y += sum.y;
     }
 }
 
 /* Double precision. */
 __global__
-void oskar_correlate_gaussian_cudak_d(const int num_sources,
-        const int num_stations, const double4c* restrict jones,
-        const double* restrict source_I, const double* restrict source_Q,
-        const double* restrict source_U, const double* restrict source_V,
-        const double* restrict source_l, const double* restrict source_m,
-        const double* restrict source_a, const double* restrict source_b,
-        const double* restrict source_c, const double* restrict station_u,
+void oskar_correlate_scalar_point_cudak_d(const int num_sources,
+        const int num_stations, const double2* restrict jones,
+        const double* restrict source_I, const double* restrict source_l,
+        const double* restrict source_m, const double* restrict station_u,
         const double* restrict station_v, const double inv_wavelength,
-        const double frac_bandwidth, double4c* restrict vis)
+        const double frac_bandwidth, double2* restrict vis)
 {
-    __shared__ double uu, vv, uu2, vv2, uuvv;
-    double4c sum;
+    __shared__ double uu, vv;
+    double2 sum;
     int i;
 
     /* Return immediately if in the wrong half of the visibility matrix. */
@@ -188,31 +178,37 @@ void oskar_correlate_gaussian_cudak_d(const int num_sources,
     /* Get common baseline values per thread block. */
     if (threadIdx.x == 0)
     {
-        oskar_evaluate_modified_baseline_gaussian_inline_d(station_u[SP],
+        /* Get common baseline values. */
+        oskar_evaluate_modified_baseline_inline_d(station_u[SP],
                 station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                frac_bandwidth, &uu, &vv, &uu2, &vv2, &uuvv);
+                frac_bandwidth, &uu, &vv);
     }
     __syncthreads();
 
     /* Get pointers to source vectors for both stations. */
-    const double4c* restrict station_p = &jones[num_sources * SP];
-    const double4c* restrict station_q = &jones[num_sources * SQ];
+    const double2* restrict station_p = &jones[num_sources * SP];
+    const double2* restrict station_q = &jones[num_sources * SQ];
 
     /* Each thread loops over a subset of the sources. */
-    oskar_clear_complex_matrix_d(&sum); /* Partial sum per thread. */
+    sum = make_double2(0.0, 0.0); /* Partial sum per thread. */
     for (i = threadIdx.x; i < num_sources; i += blockDim.x)
     {
         /* Compute bandwidth-smearing term. */
         double rb = oskar_sinc_d(uu * source_l[i] + vv * source_m[i]);
+        double2 c_a = station_p[i];
+        double2 c_b = station_q[i];
+        double2 temp;
 
-        /* Evaluate gaussian source width term. */
-        double f = exp(-(source_a[i] * uu2 +
-                source_b[i] * uuvv + source_c[i] * vv2));
+        /* Complex-conjugate multiply. */
+        oskar_multiply_complex_conjugate_d(&temp, &c_a, &c_b);
 
-        /* Accumulate baseline visibility response for source. */
-        oskar_accumulate_baseline_visibility_for_source_inline_d(&sum, i,
-                source_I, source_Q, source_U, source_V,
-                station_p, station_q, rb * f);
+        /* Multiply by the source brightness. */
+        temp.x *= source_I[i];
+        temp.y *= source_I[i];
+
+        /* Multiply result by bandwidth-smearing term. */
+        sum.x += temp.x * rb;
+        sum.y += temp.y * rb;
     }
 
     /* Store partial sum for the thread in shared memory and synchronise. */
@@ -225,11 +221,13 @@ void oskar_correlate_gaussian_cudak_d(const int num_sources,
         /* Sum over all sources for this baseline. */
         for (i = 1; i < blockDim.x; ++i)
         {
-            oskar_add_complex_matrix_in_place_d(&sum, &smem_d[i]);
+            sum.x += smem_d[i].x;
+            sum.y += smem_d[i].y;
         }
 
         /* Add result of this thread block to the baseline visibility. */
         i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
-        oskar_add_complex_matrix_in_place_d(&vis[i], &sum);
+        vis[i].x += sum.x;
+        vis[i].y += sum.y;
     }
 }

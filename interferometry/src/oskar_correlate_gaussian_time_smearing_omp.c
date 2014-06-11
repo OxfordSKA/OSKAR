@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,21 +27,10 @@
  */
 
 #include <math.h>
-#include <oskar_accumulate_baseline_visibility_for_source.h>
+#include <oskar_correlate_functions_inline.h>
 #include <oskar_correlate_gaussian_time_smearing_omp.h>
 #include <oskar_sinc.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-#ifndef M_PIf
-#define M_PIf 3.14159265358979323846f
-#endif
-
-#define OMEGA_EARTH  7.272205217e-5  /* radians/sec */
-#define OMEGA_EARTHf 7.272205217e-5f /* radians/sec */
-
+#include <oskar_add_inline.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,74 +47,39 @@ void oskar_correlate_gaussian_time_smearing_omp_f(int num_sources,
         float inv_wavelength, float frac_bandwidth, float time_int_sec,
         float gha0_rad, float dec0_rad, float4c* vis)
 {
-    int station_q;
+    int SQ;
 
     /* Loop over stations. */
-#pragma omp parallel for private(station_q) schedule(dynamic, 1)
-    for (station_q = 0; station_q < num_stations; ++station_q)
+#pragma omp parallel for private(SQ) schedule(dynamic, 1)
+    for (SQ = 0; SQ < num_stations; ++SQ)
     {
-        int station_p, i;
-        const float4c *sp, *sq;
+        int SP, i;
+        const float4c *station_p, *station_q;
 
         /* Pointer to source vector for station q. */
-        sq = &jones[station_q * num_sources];
+        station_q = &jones[SQ * num_sources];
 
         /* Loop over baselines for this station. */
-        for (station_p = station_q + 1; station_p < num_stations; ++station_p)
+        for (SP = SQ + 1; SP < num_stations; ++SP)
         {
             float uu, vv, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
             float4c sum, guard;
-            sum.a.x = 0.0f;
-            sum.a.y = 0.0f;
-            sum.b.x = 0.0f;
-            sum.b.y = 0.0f;
-            sum.c.x = 0.0f;
-            sum.c.y = 0.0f;
-            sum.d.x = 0.0f;
-            sum.d.y = 0.0f;
-            guard.a.x = 0.0f;
-            guard.a.y = 0.0f;
-            guard.b.x = 0.0f;
-            guard.b.y = 0.0f;
-            guard.c.x = 0.0f;
-            guard.c.y = 0.0f;
-            guard.d.x = 0.0f;
-            guard.d.y = 0.0f;
+            oskar_clear_complex_matrix_f(&sum);
+            oskar_clear_complex_matrix_f(&guard);
 
             /* Pointer to source vector for station p. */
-            sp = &jones[station_p * num_sources];
+            station_p = &jones[SP * num_sources];
 
-            /* Baseline lengths. */
-            uu = (station_u[station_p] - station_u[station_q]) * inv_wavelength;
-            vv = (station_v[station_p] - station_v[station_q]) * inv_wavelength;
-
-            /* Quantities needed for evaluating source with Gaussian term. */
-            uu2  = uu * uu;
-            vv2  = vv * vv;
-            uuvv = 2.0f * uu * vv;
-
-            /* Modify the baseline distance to include the common components
-             * of the bandwidth smearing term. */
-            uu *= M_PIf * frac_bandwidth;
-            vv *= M_PIf * frac_bandwidth;
+            /* Get common baseline values. */
+            oskar_evaluate_modified_baseline_gaussian_inline_f(station_u[SP],
+                    station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
+                    frac_bandwidth, &uu, &vv, &uu2, &vv2, &uuvv);
 
             /* Compute the derivatives for time-average smearing. */
-            {
-                float xx, yy, rot_angle, temp;
-                float sin_HA, cos_HA, sin_Dec, cos_Dec;
-                sin_HA = sinf(gha0_rad);
-                cos_HA = cosf(gha0_rad);
-                sin_Dec = sinf(dec0_rad);
-                cos_Dec = cosf(dec0_rad);
-                temp = M_PIf * inv_wavelength;
-                xx = (station_x[station_p] - station_x[station_q]) * temp;
-                yy = (station_y[station_p] - station_y[station_q]) * temp;
-                rot_angle = OMEGA_EARTHf * time_int_sec;
-                temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
-                du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
-                dv_dt = temp * sin_Dec;
-                dw_dt = -temp * cos_Dec;
-            }
+            oskar_evaluate_baseline_derivatives_inline_f(station_x[SP],
+                    station_x[SQ], station_y[SP], station_y[SQ],
+                    inv_wavelength, time_int_sec, gha0_rad, dec0_rad,
+                    &du_dt, &dv_dt, &dw_dt);
 
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)
@@ -149,24 +103,14 @@ void oskar_correlate_gaussian_time_smearing_omp_f(int num_sources,
                 r1 *= r2;
 
                 /* Accumulate baseline visibility response for source. */
-                oskar_accumulate_baseline_visibility_for_source_f(&sum, i,
-                        source_I, source_Q, source_U, source_V,
-                        sp, sq, r1, &guard);
+                oskar_accumulate_baseline_visibility_for_source_inline_f(&sum,
+                        i, source_I, source_Q, source_U, source_V,
+                        station_p, station_q, r1, &guard);
             }
 
-            /* Determine 1D visibility index. */
-            i = station_q*(num_stations-1) - (station_q-1)*station_q/2 +
-                    station_p - station_q - 1;
-
             /* Add result to the baseline visibility. */
-            vis[i].a.x += sum.a.x;
-            vis[i].a.y += sum.a.y;
-            vis[i].b.x += sum.b.x;
-            vis[i].b.y += sum.b.y;
-            vis[i].c.x += sum.c.x;
-            vis[i].c.y += sum.c.y;
-            vis[i].d.x += sum.d.x;
-            vis[i].d.y += sum.d.y;
+            i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
+            oskar_add_complex_matrix_in_place_f(&vis[i], &sum);
         }
     }
 }
@@ -182,66 +126,38 @@ void oskar_correlate_gaussian_time_smearing_omp_d(int num_sources,
         double inv_wavelength, double frac_bandwidth, double time_int_sec,
         double gha0_rad, double dec0_rad, double4c* vis)
 {
-    int station_q;
+    int SQ;
 
     /* Loop over stations. */
-#pragma omp parallel for private(station_q) schedule(dynamic, 1)
-    for (station_q = 0; station_q < num_stations; ++station_q)
+#pragma omp parallel for private(SQ) schedule(dynamic, 1)
+    for (SQ = 0; SQ < num_stations; ++SQ)
     {
-        int station_p, i;
-        const double4c *sp, *sq;
+        int SP, i;
+        const double4c *station_p, *station_q;
 
         /* Pointer to source vector for station q. */
-        sq = &jones[station_q * num_sources];
+        station_q = &jones[SQ * num_sources];
 
         /* Loop over baselines for this station. */
-        for (station_p = station_q + 1; station_p < num_stations; ++station_p)
+        for (SP = SQ + 1; SP < num_stations; ++SP)
         {
             double uu, vv, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
             double4c sum;
-            sum.a.x = 0.0;
-            sum.a.y = 0.0;
-            sum.b.x = 0.0;
-            sum.b.y = 0.0;
-            sum.c.x = 0.0;
-            sum.c.y = 0.0;
-            sum.d.x = 0.0;
-            sum.d.y = 0.0;
+            oskar_clear_complex_matrix_d(&sum);
 
             /* Pointer to source vector for station p. */
-            sp = &jones[station_p * num_sources];
+            station_p = &jones[SP * num_sources];
 
-            /* Baseline lengths. */
-            uu = (station_u[station_p] - station_u[station_q]) * inv_wavelength;
-            vv = (station_v[station_p] - station_v[station_q]) * inv_wavelength;
-
-            /* Quantities needed for evaluating source with Gaussian term. */
-            uu2  = uu * uu;
-            vv2  = vv * vv;
-            uuvv = 2.0 * uu * vv;
-
-            /* Modify the baseline distance to include the common components
-             * of the bandwidth smearing term. */
-            uu *= M_PI * frac_bandwidth;
-            vv *= M_PI * frac_bandwidth;
+            /* Get common baseline values. */
+            oskar_evaluate_modified_baseline_gaussian_inline_d(station_u[SP],
+                    station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
+                    frac_bandwidth, &uu, &vv, &uu2, &vv2, &uuvv);
 
             /* Compute the derivatives for time-average smearing. */
-            {
-                double xx, yy, rot_angle, temp;
-                double sin_HA, cos_HA, sin_Dec, cos_Dec;
-                sin_HA = sin(gha0_rad);
-                cos_HA = cos(gha0_rad);
-                sin_Dec = sin(dec0_rad);
-                cos_Dec = cos(dec0_rad);
-                temp = M_PI * inv_wavelength;
-                xx = (station_x[station_p] - station_x[station_q]) * temp;
-                yy = (station_y[station_p] - station_y[station_q]) * temp;
-                rot_angle = OMEGA_EARTH * time_int_sec;
-                temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
-                du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
-                dv_dt = temp * sin_Dec;
-                dw_dt = -temp * cos_Dec;
-            }
+            oskar_evaluate_baseline_derivatives_inline_d(station_x[SP],
+                    station_x[SQ], station_y[SP], station_y[SQ],
+                    inv_wavelength, time_int_sec, gha0_rad, dec0_rad,
+                    &du_dt, &dv_dt, &dw_dt);
 
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)
@@ -265,24 +181,14 @@ void oskar_correlate_gaussian_time_smearing_omp_d(int num_sources,
                 r1 *= r2;
 
                 /* Accumulate baseline visibility response for source. */
-                oskar_accumulate_baseline_visibility_for_source_d(&sum, i,
-                        source_I, source_Q, source_U, source_V,
-                        sp, sq, r1);
+                oskar_accumulate_baseline_visibility_for_source_inline_d(&sum,
+                        i, source_I, source_Q, source_U, source_V,
+                        station_p, station_q, r1);
             }
 
-            /* Determine 1D visibility index. */
-            i = station_q*(num_stations-1) - (station_q-1)*station_q/2 +
-                    station_p - station_q - 1;
-
             /* Add result to the baseline visibility. */
-            vis[i].a.x += sum.a.x;
-            vis[i].a.y += sum.a.y;
-            vis[i].b.x += sum.b.x;
-            vis[i].b.y += sum.b.y;
-            vis[i].c.x += sum.c.x;
-            vis[i].c.y += sum.c.y;
-            vis[i].d.x += sum.d.x;
-            vis[i].d.y += sum.d.y;
+            i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
+            oskar_add_complex_matrix_in_place_d(&vis[i], &sum);
         }
     }
 }

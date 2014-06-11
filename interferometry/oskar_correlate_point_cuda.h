@@ -116,29 +116,23 @@ void oskar_correlate_point_cuda_d(int num_sources,
 
 __global__
 void oskar_correlate_point_cudak_f(const int num_sources,
-        const int num_stations, const float4c* __restrict__ jones,
-        const float* __restrict__ source_I,
-        const float* __restrict__ source_Q,
-        const float* __restrict__ source_U,
-        const float* __restrict__ source_V,
-        const float* __restrict__ source_l,
-        const float* __restrict__ source_m,
-        const float* __restrict__ station_u,
-        const float* __restrict__ station_v, const float inv_wavelength,
-        const float frac_bandwidth, float4c* __restrict__ vis);
+        const int num_stations, const float4c* restrict jones,
+        const float* restrict source_I, const float* restrict source_Q,
+        const float* restrict source_U, const float* restrict source_V,
+        const float* restrict source_l, const float* restrict source_m,
+        const float* restrict station_u, const float* restrict station_v,
+        const float inv_wavelength, const float frac_bandwidth,
+        float4c* restrict vis);
 
 __global__
 void oskar_correlate_point_cudak_d(const int num_sources,
-        const int num_stations, const double4c* __restrict__ jones,
-        const double* __restrict__ source_I,
-        const double* __restrict__ source_Q,
-        const double* __restrict__ source_U,
-        const double* __restrict__ source_V,
-        const double* __restrict__ source_l,
-        const double* __restrict__ source_m,
-        const double* __restrict__ station_u,
-        const double* __restrict__ station_v, const double inv_wavelength,
-        const double frac_bandwidth, double4c* __restrict__ vis);
+        const int num_stations, const double4c* restrict jones,
+        const double* restrict source_I, const double* restrict source_Q,
+        const double* restrict source_U, const double* restrict source_V,
+        const double* restrict source_l, const double* restrict source_m,
+        const double* restrict station_u, const double* restrict station_v,
+        const double inv_wavelength, const double frac_bandwidth,
+        double4c* restrict vis);
 
 #endif /* __CUDACC__ */
 

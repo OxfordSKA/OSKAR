@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,17 +27,10 @@
  */
 
 #include <math.h>
-#include <oskar_accumulate_baseline_visibility_for_source.h>
+#include <oskar_correlate_functions_inline.h>
 #include <oskar_correlate_point_time_smearing_omp.h>
 #include <oskar_sinc.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-#ifndef M_PIf
-#define M_PIf 3.14159265358979323846f
-#endif
+#include <oskar_add_inline.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,48 +43,33 @@ void oskar_correlate_point_omp_f(int num_sources, int num_stations,
         const float* source_m, const float* station_u, const float* station_v,
         float inv_wavelength, float frac_bandwidth, float4c* vis)
 {
-    int station_q;
+    int SQ;
 
     /* Loop over stations. */
-#pragma omp parallel for private(station_q) schedule(dynamic, 1)
-    for (station_q = 0; station_q < num_stations; ++station_q)
+#pragma omp parallel for private(SQ) schedule(dynamic, 1)
+    for (SQ = 0; SQ < num_stations; ++SQ)
     {
-        int station_p, i;
-        const float4c *sp, *sq;
+        int SP, i;
+        const float4c *station_p, *station_q;
 
         /* Pointer to source vector for station q. */
-        sq = &jones[station_q * num_sources];
+        station_q = &jones[SQ * num_sources];
 
         /* Loop over baselines for this station. */
-        for (station_p = station_q + 1; station_p < num_stations; ++station_p)
+        for (SP = SQ + 1; SP < num_stations; ++SP)
         {
-            float uu, vv, factor;
+            float uu, vv;
             float4c sum, guard;
-            sum.a.x = 0.0f;
-            sum.a.y = 0.0f;
-            sum.b.x = 0.0f;
-            sum.b.y = 0.0f;
-            sum.c.x = 0.0f;
-            sum.c.y = 0.0f;
-            sum.d.x = 0.0f;
-            sum.d.y = 0.0f;
-            guard.a.x = 0.0f;
-            guard.a.y = 0.0f;
-            guard.b.x = 0.0f;
-            guard.b.y = 0.0f;
-            guard.c.x = 0.0f;
-            guard.c.y = 0.0f;
-            guard.d.x = 0.0f;
-            guard.d.y = 0.0f;
+            oskar_clear_complex_matrix_f(&sum);
+            oskar_clear_complex_matrix_f(&guard);
 
             /* Pointer to source vector for station p. */
-            sp = &jones[station_p * num_sources];
+            station_p = &jones[SP * num_sources];
 
-            /* Determine UV-distance for baseline modified by the bandwidth
-             * smearing parameters. */
-            factor = frac_bandwidth * M_PIf * inv_wavelength;
-            uu = (station_u[station_p] - station_u[station_q]) * factor;
-            vv = (station_v[station_p] - station_v[station_q]) * factor;
+            /* Get common baseline values. */
+            oskar_evaluate_modified_baseline_inline_f(station_u[SP],
+                    station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
+                    frac_bandwidth, &uu, &vv);
 
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)
@@ -106,24 +84,14 @@ void oskar_correlate_point_omp_f(int num_sources, int num_stations,
                 rb = oskar_sinc_f(uu * l + vv * m);
 
                 /* Accumulate baseline visibility response for source. */
-                oskar_accumulate_baseline_visibility_for_source_f(&sum, i,
-                        source_I, source_Q, source_U, source_V,
-                        sp, sq, rb, &guard);
+                oskar_accumulate_baseline_visibility_for_source_inline_f(&sum,
+                        i, source_I, source_Q, source_U, source_V,
+                        station_p, station_q, rb, &guard);
             }
 
-            /* Determine 1D visibility index. */
-            i = station_q*(num_stations-1) - (station_q-1)*station_q/2 +
-                    station_p - station_q - 1;
-
             /* Add result to the baseline visibility. */
-            vis[i].a.x += sum.a.x;
-            vis[i].a.y += sum.a.y;
-            vis[i].b.x += sum.b.x;
-            vis[i].b.y += sum.b.y;
-            vis[i].c.x += sum.c.x;
-            vis[i].c.y += sum.c.y;
-            vis[i].d.x += sum.d.x;
-            vis[i].d.y += sum.d.y;
+            i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
+            oskar_add_complex_matrix_in_place_f(&vis[i], &sum);
         }
     }
 }
@@ -136,40 +104,32 @@ void oskar_correlate_point_omp_d(int num_sources, int num_stations,
         const double* station_v, double inv_wavelength, double frac_bandwidth,
         double4c* vis)
 {
-    int station_q;
+    int SQ;
 
     /* Loop over stations. */
-#pragma omp parallel for private(station_q) schedule(dynamic, 1)
-    for (station_q = 0; station_q < num_stations; ++station_q)
+#pragma omp parallel for private(SQ) schedule(dynamic, 1)
+    for (SQ = 0; SQ < num_stations; ++SQ)
     {
-        int station_p, i;
-        const double4c *sp, *sq;
+        int SP, i;
+        const double4c *station_p, *station_q;
 
         /* Pointer to source vector for station q. */
-        sq = &jones[station_q * num_sources];
+        station_q = &jones[SQ * num_sources];
 
         /* Loop over baselines for this station. */
-        for (station_p = station_q + 1; station_p < num_stations; ++station_p)
+        for (SP = SQ + 1; SP < num_stations; ++SP)
         {
-            double uu, vv, factor;
+            double uu, vv;
             double4c sum;
-            sum.a.x = 0.0;
-            sum.a.y = 0.0;
-            sum.b.x = 0.0;
-            sum.b.y = 0.0;
-            sum.c.x = 0.0;
-            sum.c.y = 0.0;
-            sum.d.x = 0.0;
-            sum.d.y = 0.0;
+            oskar_clear_complex_matrix_d(&sum);
 
             /* Pointer to source vector for station p. */
-            sp = &jones[station_p * num_sources];
+            station_p = &jones[SP * num_sources];
 
-            /* Determine UV-distance for baseline modified by the bandwidth
-             * smearing parameters. */
-            factor = frac_bandwidth * M_PI * inv_wavelength;
-            uu = (station_u[station_p] - station_u[station_q]) * factor;
-            vv = (station_v[station_p] - station_v[station_q]) * factor;
+            /* Get common baseline values. */
+            oskar_evaluate_modified_baseline_inline_d(station_u[SP],
+                    station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
+                    frac_bandwidth, &uu, &vv);
 
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)
@@ -184,24 +144,14 @@ void oskar_correlate_point_omp_d(int num_sources, int num_stations,
                 rb = oskar_sinc_d(uu * l + vv * m);
 
                 /* Accumulate baseline visibility response for source. */
-                oskar_accumulate_baseline_visibility_for_source_d(&sum, i,
-                        source_I, source_Q, source_U, source_V,
-                        sp, sq, rb);
+                oskar_accumulate_baseline_visibility_for_source_inline_d(&sum,
+                        i, source_I, source_Q, source_U, source_V,
+                        station_p, station_q, rb);
             }
 
-            /* Determine 1D visibility index. */
-            i = station_q*(num_stations-1) - (station_q-1)*station_q/2 +
-                    station_p - station_q - 1;
-
             /* Add result to the baseline visibility. */
-            vis[i].a.x += sum.a.x;
-            vis[i].a.y += sum.a.y;
-            vis[i].b.x += sum.b.x;
-            vis[i].b.y += sum.b.y;
-            vis[i].c.x += sum.c.x;
-            vis[i].c.y += sum.c.y;
-            vis[i].d.x += sum.d.x;
-            vis[i].d.y += sum.d.y;
+            i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
+            oskar_add_complex_matrix_in_place_d(&vis[i], &sum);
         }
     }
 }

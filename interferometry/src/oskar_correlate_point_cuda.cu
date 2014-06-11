@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_accumulate_baseline_visibility_for_source.h>
+#include <oskar_correlate_functions_inline.h>
 #include <oskar_correlate_point_cuda.h>
 #include <oskar_sinc.h>
+#include <oskar_add_inline.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,17 +82,9 @@ void oskar_correlate_point_cuda_d(int num_sources,
 
 /* Kernels. ================================================================ */
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-#ifndef M_PIf
-#define M_PIf 3.14159265358979323846f
-#endif
-
 /* Indices into the visibility/baseline matrix. */
-#define AI blockIdx.x /* Column index. */
-#define AJ blockIdx.y /* Row index. */
+#define SP blockIdx.x /* Column index. */
+#define SQ blockIdx.y /* Row index. */
 
 extern __shared__ float4c  smem_f[];
 extern __shared__ double4c smem_d[];
@@ -99,183 +92,125 @@ extern __shared__ double4c smem_d[];
 /* Single precision. */
 __global__
 void oskar_correlate_point_cudak_f(const int num_sources,
-        const int num_stations, const float4c* __restrict__ jones,
-        const float* __restrict__ source_I,
-        const float* __restrict__ source_Q,
-        const float* __restrict__ source_U,
-        const float* __restrict__ source_V,
-        const float* __restrict__ source_l,
-        const float* __restrict__ source_m,
-        const float* __restrict__ station_u,
-        const float* __restrict__ station_v, const float inv_wavelength,
-        const float frac_bandwidth, float4c* __restrict__ vis)
+        const int num_stations, const float4c* restrict jones,
+        const float* restrict source_I, const float* restrict source_Q,
+        const float* restrict source_U, const float* restrict source_V,
+        const float* restrict source_l, const float* restrict source_m,
+        const float* restrict station_u, const float* restrict station_v,
+        const float inv_wavelength, const float frac_bandwidth,
+        float4c* restrict vis)
 {
-    /* Return immediately if in the wrong half of the visibility matrix. */
-    if (AJ >= AI) return;
-
-    /* Common values per thread block. */
     __shared__ float uu, vv;
+    float4c sum;
+    int i;
+
+    /* Return immediately if in the wrong half of the visibility matrix. */
+    if (SQ >= SP) return;
+
+    /* Get common baseline values per thread block. */
     if (threadIdx.x == 0)
     {
-        float factor;
-
-        /* Determine UV-distance for baseline modified by the bandwidth
-         * smearing parameters. */
-        factor = frac_bandwidth * M_PIf * inv_wavelength;
-        uu = factor * (station_u[AI] - station_u[AJ]);
-        vv = factor * (station_v[AI] - station_v[AJ]);
+        oskar_evaluate_modified_baseline_inline_f(station_u[SP],
+                station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
+                frac_bandwidth, &uu, &vv);
     }
     __syncthreads();
 
-    /* Get pointers to both source vectors for station i and j. */
-    const float4c* __restrict__ station_i = &jones[num_sources * AI];
-    const float4c* __restrict__ station_j = &jones[num_sources * AJ];
+    /* Get pointers to source vectors for both stations. */
+    const float4c* restrict station_p = &jones[num_sources * SP];
+    const float4c* restrict station_q = &jones[num_sources * SQ];
 
     /* Each thread loops over a subset of the sources. */
+    oskar_clear_complex_matrix_f(&sum); /* Partial sum per thread. */
+    for (i = threadIdx.x; i < num_sources; i += blockDim.x)
     {
-        float4c sum; /* Partial sum per thread. */
-        sum.a = make_float2(0.0f, 0.0f);
-        sum.b = make_float2(0.0f, 0.0f);
-        sum.c = make_float2(0.0f, 0.0f);
-        sum.d = make_float2(0.0f, 0.0f);
-        for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
-        {
-            /* Compute bandwidth-smearing term. */
-            float rb = oskar_sinc_f(uu * source_l[t] + vv * source_m[t]);
+        /* Compute bandwidth-smearing term. */
+        float rb = oskar_sinc_f(uu * source_l[i] + vv * source_m[i]);
 
-            /* Accumulate baseline visibility response for source. */
-            oskar_accumulate_baseline_visibility_for_source_f(&sum, t,
-                    source_I, source_Q, source_U, source_V,
-                    station_i, station_j, rb);
-        }
-        smem_f[threadIdx.x] = sum;
+        /* Accumulate baseline visibility response for source. */
+        oskar_accumulate_baseline_visibility_for_source_inline_f(&sum, i,
+                source_I, source_Q, source_U, source_V,
+                station_p, station_q, rb);
     }
+
+    /* Store partial sum for the thread in shared memory and synchronise. */
+    smem_f[threadIdx.x] = sum;
     __syncthreads();
 
     /* Accumulate contents of shared memory. */
     if (threadIdx.x == 0)
     {
         /* Sum over all sources for this baseline. */
-        float4c sum;
-        sum.a = make_float2(0.0f, 0.0f);
-        sum.b = make_float2(0.0f, 0.0f);
-        sum.c = make_float2(0.0f, 0.0f);
-        sum.d = make_float2(0.0f, 0.0f);
-        for (int i = 0; i < blockDim.x; ++i)
+        for (i = 1; i < blockDim.x; ++i)
         {
-            sum.a.x += smem_f[i].a.x;
-            sum.a.y += smem_f[i].a.y;
-            sum.b.x += smem_f[i].b.x;
-            sum.b.y += smem_f[i].b.y;
-            sum.c.x += smem_f[i].c.x;
-            sum.c.y += smem_f[i].c.y;
-            sum.d.x += smem_f[i].d.x;
-            sum.d.y += smem_f[i].d.y;
+            oskar_add_complex_matrix_in_place_f(&sum, &smem_f[i]);
         }
 
-        /* Determine 1D index. */
-        int idx = AJ*(num_stations-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
-
-        /* Modify existing visibility. */
-        vis[idx].a.x += sum.a.x;
-        vis[idx].a.y += sum.a.y;
-        vis[idx].b.x += sum.b.x;
-        vis[idx].b.y += sum.b.y;
-        vis[idx].c.x += sum.c.x;
-        vis[idx].c.y += sum.c.y;
-        vis[idx].d.x += sum.d.x;
-        vis[idx].d.y += sum.d.y;
+        /* Add result of this thread block to the baseline visibility. */
+        i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
+        oskar_add_complex_matrix_in_place_f(&vis[i], &sum);
     }
 }
 
 /* Double precision. */
 __global__
 void oskar_correlate_point_cudak_d(const int num_sources,
-        const int num_stations, const double4c* __restrict__ jones,
-        const double* __restrict__ source_I,
-        const double* __restrict__ source_Q,
-        const double* __restrict__ source_U,
-        const double* __restrict__ source_V,
-        const double* __restrict__ source_l,
-        const double* __restrict__ source_m,
-        const double* __restrict__ station_u,
-        const double* __restrict__ station_v, const double inv_wavelength,
-        const double frac_bandwidth, double4c* __restrict__ vis)
+        const int num_stations, const double4c* restrict jones,
+        const double* restrict source_I, const double* restrict source_Q,
+        const double* restrict source_U, const double* restrict source_V,
+        const double* restrict source_l, const double* restrict source_m,
+        const double* restrict station_u, const double* restrict station_v,
+        const double inv_wavelength, const double frac_bandwidth,
+        double4c* restrict vis)
 {
-    /* Return immediately if in the wrong half of the visibility matrix. */
-    if (AJ >= AI) return;
-
-    /* Common values per thread block. */
     __shared__ double uu, vv;
+    double4c sum;
+    int i;
+
+    /* Return immediately if in the wrong half of the visibility matrix. */
+    if (SQ >= SP) return;
+
+    /* Get common baseline values per thread block. */
     if (threadIdx.x == 0)
     {
-        double factor;
-
-        /* Determine UV-distance for baseline modified by the bandwidth
-         * smearing parameters. */
-        factor = frac_bandwidth * M_PI * inv_wavelength;
-        uu = factor * (station_u[AI] - station_u[AJ]);
-        vv = factor * (station_v[AI] - station_v[AJ]);
+        oskar_evaluate_modified_baseline_inline_d(station_u[SP],
+                station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
+                frac_bandwidth, &uu, &vv);
     }
     __syncthreads();
 
-    /* Get pointers to both source vectors for station i and j. */
-    const double4c* __restrict__ station_i = &jones[num_sources * AI];
-    const double4c* __restrict__ station_j = &jones[num_sources * AJ];
+    /* Get pointers to source vectors for both stations. */
+    const double4c* restrict station_p = &jones[num_sources * SP];
+    const double4c* restrict station_q = &jones[num_sources * SQ];
 
     /* Each thread loops over a subset of the sources. */
+    oskar_clear_complex_matrix_d(&sum); /* Partial sum per thread. */
+    for (i = threadIdx.x; i < num_sources; i += blockDim.x)
     {
-        double4c sum; /* Partial sum per thread. */
-        sum.a = make_double2(0.0, 0.0);
-        sum.b = make_double2(0.0, 0.0);
-        sum.c = make_double2(0.0, 0.0);
-        sum.d = make_double2(0.0, 0.0);
-        for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
-        {
-            /* Compute bandwidth-smearing term. */
-            double rb = oskar_sinc_d(uu * source_l[t] + vv * source_m[t]);
+        /* Compute bandwidth-smearing term. */
+        double rb = oskar_sinc_d(uu * source_l[i] + vv * source_m[i]);
 
-            /* Accumulate baseline visibility response for source. */
-            oskar_accumulate_baseline_visibility_for_source_d(&sum, t,
-                    source_I, source_Q, source_U, source_V,
-                    station_i, station_j, rb);
-        }
-        smem_d[threadIdx.x] = sum;
+        /* Accumulate baseline visibility response for source. */
+        oskar_accumulate_baseline_visibility_for_source_inline_d(&sum, i,
+                source_I, source_Q, source_U, source_V,
+                station_p, station_q, rb);
     }
+
+    /* Store partial sum for the thread in shared memory and synchronise. */
+    smem_d[threadIdx.x] = sum;
     __syncthreads();
 
     /* Accumulate contents of shared memory. */
     if (threadIdx.x == 0)
     {
         /* Sum over all sources for this baseline. */
-        double4c sum;
-        sum.a = make_double2(0.0, 0.0);
-        sum.b = make_double2(0.0, 0.0);
-        sum.c = make_double2(0.0, 0.0);
-        sum.d = make_double2(0.0, 0.0);
-        for (int i = 0; i < blockDim.x; ++i)
+        for (i = 1; i < blockDim.x; ++i)
         {
-            sum.a.x += smem_d[i].a.x;
-            sum.a.y += smem_d[i].a.y;
-            sum.b.x += smem_d[i].b.x;
-            sum.b.y += smem_d[i].b.y;
-            sum.c.x += smem_d[i].c.x;
-            sum.c.y += smem_d[i].c.y;
-            sum.d.x += smem_d[i].d.x;
-            sum.d.y += smem_d[i].d.y;
+            oskar_add_complex_matrix_in_place_d(&sum, &smem_d[i]);
         }
 
-        /* Determine 1D index. */
-        int idx = AJ*(num_stations-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
-
-        /* Modify existing visibility. */
-        vis[idx].a.x += sum.a.x;
-        vis[idx].a.y += sum.a.y;
-        vis[idx].b.x += sum.b.x;
-        vis[idx].b.y += sum.b.y;
-        vis[idx].c.x += sum.c.x;
-        vis[idx].c.y += sum.c.y;
-        vis[idx].d.x += sum.d.x;
-        vis[idx].d.y += sum.d.y;
+        /* Add result of this thread block to the baseline visibility. */
+        i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
+        oskar_add_complex_matrix_in_place_d(&vis[i], &sum);
     }
 }

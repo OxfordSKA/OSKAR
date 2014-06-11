@@ -3,7 +3,7 @@
 #include <oskar_global.h> // need this first to define __CUDACC__
 #include <oskar_vector_types.h>
 #include <oskar_correlate_point_time_smearing_cuda.h>
-#include <oskar_accumulate_baseline_visibility_for_source.h>
+#include <oskar_correlate_functions_inline.h>
 #include <oskar_sinc.h>
 
 #include <cuda.h>
@@ -377,7 +377,7 @@ correlate_cudak_f(const int num_sources, const int num_stations,
         rb *= rt;
 
         /* Accumulate baseline visibility response for source. */
-        oskar_accumulate_baseline_visibility_for_source_f(&sum, i,
+        oskar_accumulate_baseline_visibility_for_source_inline_f(&sum, i,
                 d_I, d_Q, d_U, d_V, station_i, station_j, rb);
     }
 
@@ -515,7 +515,7 @@ correlate_warpshuffle_cudak_f(const int num_sources, const int num_stations,
         rb *= rt;
 
         /* Accumulate baseline visibility response for source. */
-        oskar_accumulate_baseline_visibility_for_source_f(&sum, i,
+        oskar_accumulate_baseline_visibility_for_source_inline_f(&sum, i,
                 d_I, d_Q, d_U, d_V, station_i, station_j, rb);
     }
 
@@ -707,7 +707,7 @@ correlate_warpshuffle_blocked_smem_cudak_f(const int num_sources, const int num_
             rb *= rt;
 
             /* Accumulate baseline visibility response for source. */
-            oskar_accumulate_baseline_visibility_for_source_f(&b_sum[j], i,
+            oskar_accumulate_baseline_visibility_for_source_inline_f(&b_sum[j], i,
                     d_I, d_Q, d_U, d_V, station_q, station_p, rb);
         } /* end of loop over source blocks */
     } /* end of loop over baselines */
@@ -907,7 +907,7 @@ correlate_warpshuffle_blocked_cudak_f(const int num_sources, const int num_stati
             rb *= rt;
 
             /* Accumulate baseline visibility response for source. */
-            oskar_accumulate_baseline_visibility_for_source_f(&b_sum[j], i,
+            oskar_accumulate_baseline_visibility_for_source_inline_f(&b_sum[j], i,
                     d_I, d_Q, d_U, d_V, station_q, station_p, rb);
         } /* end of loop over source blocks */
     } /* end of loop over baselines */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_sinc.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 /**
  * @brief
@@ -45,7 +45,7 @@
  * @param[in] x Function argument.
  */
 OSKAR_INLINE
-float oskar_sinc_f(float a)
+float oskar_sinc_f(const float a)
 {
     return (a == 0.0f) ? 1.0f : sinf(a) / a;
 }
@@ -60,7 +60,7 @@ float oskar_sinc_f(float a)
  * @param[in] x Function argument.
  */
 OSKAR_INLINE
-double oskar_sinc_d(double a)
+double oskar_sinc_d(const double a)
 {
     return (a == 0.0) ? 1.0 : sin(a) / a;
 }

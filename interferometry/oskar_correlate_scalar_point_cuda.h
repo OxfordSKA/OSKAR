@@ -64,7 +64,7 @@ extern "C" {
  * @param[in,out] d_vis      Modified output complex visibilities.
  */
 OSKAR_EXPORT
-void oskar_correlate_point_scalar_cuda_f(int num_sources,
+void oskar_correlate_scalar_point_cuda_f(int num_sources,
         int num_stations, const float2* d_jones,
         const float* d_source_I, const float* d_source_l,
         const float* d_source_m, const float* d_station_u,
@@ -95,7 +95,7 @@ void oskar_correlate_point_scalar_cuda_f(int num_sources,
  * @param[in,out] d_vis      Modified output complex visibilities.
  */
 OSKAR_EXPORT
-void oskar_correlate_point_scalar_cuda_d(int num_sources,
+void oskar_correlate_scalar_point_cuda_d(int num_sources,
         int num_stations, const double2* d_jones,
         const double* d_source_I, const double* d_source_l,
         const double* d_source_m, const double* d_station_u,
@@ -107,18 +107,20 @@ void oskar_correlate_point_scalar_cuda_d(int num_sources,
 /* Kernels. */
 
 __global__
-void oskar_correlate_point_scalar_cudak_f(const int num_sources,
-        const int num_stations, const float2* jones, const float* source_I,
-        const float* source_l, const float* source_m,
-        const float* station_u, const float* station_v,
-        const float inv_wavelength, const float frac_bandwidth, float2* vis);
+void oskar_correlate_scalar_point_cudak_f(const int num_sources,
+        const int num_stations, const float2* restrict jones,
+        const float* restrict source_I, const float* restrict source_l,
+        const float* restrict source_m, const float* restrict station_u,
+        const float* restrict station_v, const float inv_wavelength,
+        const float frac_bandwidth, float2* restrict vis);
 
 __global__
-void oskar_correlate_point_scalar_cudak_d(const int num_sources,
-        const int num_stations, const double2* jones, const double* source_I,
-        const double* source_l, const double* source_m,
-        const double* station_u, const double* station_v,
-        const double inv_wavelength, const double frac_bandwidth, double2* vis);
+void oskar_correlate_scalar_point_cudak_d(const int num_sources,
+        const int num_stations, const double2* restrict jones,
+        const double* restrict source_I, const double* restrict source_l,
+        const double* restrict source_m, const double* restrict station_u,
+        const double* restrict station_v, const double inv_wavelength,
+        const double frac_bandwidth, double2* restrict vis);
 
 #endif /* __CUDACC__ */
 

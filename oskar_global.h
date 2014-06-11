@@ -345,6 +345,16 @@ enum {
     #define OSKAR_INLINE static
 #endif
 
+
+/* Redefine restrict keyword to __restrict__ for CUDA code, and define
+ * restrict keyword for pre-C99 compilers.. */
+#ifdef __CUDACC__
+    #define restrict __restrict__
+#elif !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L
+    #define restrict
+#endif
+
+
 /**
  * @def OSKAR_TLS
  *

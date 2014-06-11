@@ -33,9 +33,9 @@
 #include <oskar_correlate_gaussian_time_smearing_omp.h>
 #include <oskar_correlate_point_cuda.h>
 #include <oskar_correlate_point_omp.h>
-#include <oskar_correlate_point_scalar_cuda.h>
 #include <oskar_correlate_point_time_smearing_cuda.h>
 #include <oskar_correlate_point_time_smearing_omp.h>
+#include <oskar_correlate_scalar_point_cuda.h>
 #include <oskar_cuda_check_error.h>
 
 #ifdef __cplusplus
@@ -245,7 +245,7 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
             if (location == OSKAR_GPU)
             {
 #ifdef OSKAR_HAVE_CUDA
-                oskar_correlate_point_scalar_cuda_d
+                oskar_correlate_scalar_point_cuda_d
                 (n_sources, n_stations, J_, I_, l_, m_, u_, v_,
                         inv_wavelength, frac_bandwidth, vis_);
                 oskar_cuda_check_error(status);
@@ -375,7 +375,7 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
             if (location == OSKAR_GPU)
             {
 #ifdef OSKAR_HAVE_CUDA
-                oskar_correlate_point_scalar_cuda_f
+                oskar_correlate_scalar_point_cuda_f
                 (n_sources, n_stations, J_, I_, l_, m_, u_, v_,
                         inv_wavelength, frac_bandwidth, vis_);
                 oskar_cuda_check_error(status);
