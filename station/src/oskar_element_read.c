@@ -46,13 +46,13 @@ extern "C" {
 static void read_splines(FILE* fhan, oskar_Splines* splines,
         oskar_BinaryTagIndex** idx, int index, int* status);
 
-void oskar_element_read(oskar_Element* data, int port, double freq_hz,
-        const char* filename, int* status)
+void oskar_element_read(oskar_Element* data, const char* filename,
+        int port, double freq_hz, int* status)
 {
     FILE* fhan = 0;
     oskar_Splines *h_re, *h_im, *v_re, *v_im;
     oskar_BinaryTagIndex* idx = 0;
-    int i, n;
+    int i, n, surface_type = -1;
 
     /* Check all inputs. */
     if (!data || !filename  || !status)
@@ -105,6 +105,27 @@ void oskar_element_read(oskar_Element* data, int port, double freq_hz,
 
     /* Read data from binary file. */
     fhan = fopen(filename, "rb");
+    if (!fhan)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
+
+    /* Get the surface type. */
+    oskar_binary_stream_read_int(fhan, &idx, OSKAR_TAG_GROUP_ELEMENT_DATA,
+            OSKAR_ELEMENT_TAG_SURFACE_TYPE, 0, &surface_type, status);
+    if (*status)
+    {
+        fclose(fhan);
+        oskar_binary_tag_index_free(idx, status);
+        return;
+    }
+
+    /* Check the surface type. TODO: Allow scalar surface here too. */
+    if (surface_type != OSKAR_ELEMENT_SURFACE_TYPE_LUDWIG_3)
+    {
+        *status = OSKAR_ERR_UNKNOWN;
+    }
 
     /* Read data for [h_re], [h_im], [v_re], [v_im] surfaces. */
     read_splines(fhan, h_re, &idx, 0, status);
@@ -136,6 +157,7 @@ static void read_splines(FILE* fhan, oskar_Splines* splines,
 {
     unsigned char group;
     group = OSKAR_TAG_GROUP_SPLINE_DATA;
+    if (*status) return;
     oskar_binary_stream_read_int(fhan, idx, group,
             OSKAR_SPLINES_TAG_NUM_KNOTS_X_THETA, index,
             &splines->num_knots_x_theta, status);

@@ -227,8 +227,8 @@ void oskar_TelescopeLoadElementPattern::load_element_patterns(
         if (*status) break;
         if (oskar_station_num_element_types(station) < ind + 1)
             oskar_station_resize_element_types(station, ind + 1, status);
-        oskar_element_read(oskar_station_element(station, ind), 1, freq,
-                path.c_str(), status);
+        oskar_element_read(oskar_station_element(station, ind), path.c_str(),
+                1, freq, status);
     }
 
     // Load Y data.
@@ -254,8 +254,8 @@ void oskar_TelescopeLoadElementPattern::load_element_patterns(
         if (*status) break;
         if (oskar_station_num_element_types(station) < ind + 1)
             oskar_station_resize_element_types(station, ind + 1, status);
-        oskar_element_read(oskar_station_element(station, ind), 2, freq,
-                path.c_str(), status);
+        oskar_element_read(oskar_station_element(station, ind), path.c_str(),
+                2, freq, status);
     }
 }
 

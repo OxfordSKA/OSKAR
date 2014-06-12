@@ -121,16 +121,18 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
     {
         output = construct_element_pathname(output_dir, 1, element_type_index,
                 frequency_hz);
-        oskar_element_write(element, 1, frequency_hz, output.c_str(), status);
+        oskar_element_write(element, log, output.c_str(), 1, frequency_hz,
+                status);
         output = construct_element_pathname(output_dir, 2, element_type_index,
                 frequency_hz);
-        oskar_element_write(element, 2, frequency_hz, output.c_str(), status);
+        oskar_element_write(element, log, output.c_str(), 2, frequency_hz,
+                status);
     }
     else
     {
         output = construct_element_pathname(output_dir, port,
                 element_type_index, frequency_hz);
-        oskar_element_write(element, port, frequency_hz, output.c_str(),
+        oskar_element_write(element, log, output.c_str(), port, frequency_hz,
                 status);
     }
 

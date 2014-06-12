@@ -43,12 +43,14 @@ extern "C" {
 static void write_splines(FILE* fhan, const oskar_Splines* splines,
         int index, int* status);
 
-void oskar_element_write(const oskar_Element* data, int port, double freq_hz,
-        const char* filename, int* status)
+void oskar_element_write(const oskar_Element* data, oskar_Log* log,
+        const char* filename, int port, double freq_hz, int* status)
 {
     FILE* fhan = 0;
     const oskar_Splines *h_re, *h_im, *v_re, *v_im;
     int freq_id;
+    char* log_data = 0;
+    size_t log_size = 0;
 
     /* Check all inputs. */
     if (!data || !filename  || !status)
@@ -96,6 +98,21 @@ void oskar_element_write(const oskar_Element* data, int port, double freq_hz,
     /* Dump data to a binary file. */
     fhan = fopen(filename, "wb");
     oskar_binary_stream_write_header(fhan, status);
+
+    /* If log exists, then write it out. */
+    log_data = oskar_log_file_data(log, &log_size);
+    if (log_data)
+    {
+        oskar_binary_stream_write(fhan, OSKAR_CHAR,
+                OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, log_size, log_data,
+                status);
+        free(log_data);
+    }
+
+    /* Write the surface type. TODO Allow scalar surface here too. */
+    oskar_binary_stream_write_int(fhan, OSKAR_TAG_GROUP_ELEMENT_DATA,
+            OSKAR_ELEMENT_TAG_SURFACE_TYPE, 0,
+            OSKAR_ELEMENT_SURFACE_TYPE_LUDWIG_3, status);
 
     /* Write data for [h_re], [h_im], [v_re], [v_im] surfaces. */
     write_splines(fhan, h_re, 0, status);

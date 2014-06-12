@@ -45,6 +45,17 @@ struct oskar_Element;
 typedef struct oskar_Element oskar_Element;
 #endif /* OSKAR_ELEMENT_TYPEDEF_ */
 
+/* To maintain binary compatibility, do not change the values
+ * in the lists below. */
+enum {
+    OSKAR_ELEMENT_TAG_SURFACE_TYPE = 1
+};
+
+enum {
+    OSKAR_ELEMENT_SURFACE_TYPE_SCALAR = 0,
+    OSKAR_ELEMENT_SURFACE_TYPE_LUDWIG_3 = 1
+};
+
 enum {
     OSKAR_ELEMENT_TYPE_DIPOLE,
     OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE,

@@ -49,14 +49,14 @@ extern "C" {
  * the provided data structure.
  *
  * @param[out] data      Pointer to element model data structure to fill.
+ * @param[in]  filename  Data file name.
  * @param[in]  port      Port number to load: 1 for X dipole, 2 for Y dipole.
  * @param[in]  freq_hz   The frequency in Hz that this data applies to.
- * @param[in]  filename  Data file name.
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_element_read(oskar_Element* data, int port, double freq_hz,
-        const char* filename, int* status);
+void oskar_element_read(oskar_Element* data, const char* filename, int port,
+        double freq_hz, int* status);
 
 #ifdef __cplusplus
 }

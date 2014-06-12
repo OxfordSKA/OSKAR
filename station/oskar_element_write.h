@@ -48,14 +48,15 @@ extern "C" {
  * provided data structure.
  *
  * @param[out] data      Pointer to element model data structure.
+ * @param[in]  log       Pointer to log to use.
+ * @param[in]  filename  Data file name.
  * @param[in]  port      Port number to write: 1 for X dipole, 2 for Y dipole.
  * @param[in]  freq_hz   Frequency to select, in Hz.
- * @param[in]  filename  Data file name.
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_element_write(const oskar_Element* data, int port, double freq_hz,
-        const char* filename, int* status);
+void oskar_element_write(const oskar_Element* data, oskar_Log* log,
+        const char* filename, int port, double freq_hz, int* status);
 
 #ifdef __cplusplus
 }
