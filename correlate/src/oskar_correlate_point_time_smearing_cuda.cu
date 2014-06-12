@@ -112,7 +112,7 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         float4c* restrict vis)
 {
     __shared__ float uu, vv, du_dt, dv_dt, dw_dt;
-    __shared__ const float4c *restrict station_i, *restrict station_j;
+    __shared__ const float4c *restrict station_p, *restrict station_q;
     float4c sum;
     float l, m, n, rb, rt;
     int i;
@@ -133,8 +133,8 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
                 time_int_sec, gha0_rad, dec0_rad, &du_dt, &dv_dt, &dw_dt);
 
         /* Get pointers to source vectors for both stations. */
-        station_i = &jones[num_sources * SP];
-        station_j = &jones[num_sources * SQ];
+        station_p = &jones[num_sources * SP];
+        station_q = &jones[num_sources * SQ];
     }
     __syncthreads();
 
@@ -155,7 +155,7 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         /* Accumulate baseline visibility response for source. */
         oskar_accumulate_baseline_visibility_for_source_inline_f(&sum, i,
                 source_I, source_Q, source_U, source_V,
-                station_i, station_j, rb);
+                station_p, station_q, rb);
     }
 
     /* Store partial sum for the thread in shared memory and synchronise. */
@@ -192,7 +192,7 @@ void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
         double4c* restrict vis)
 {
     __shared__ double uu, vv, du_dt, dv_dt, dw_dt;
-    __shared__ const double4c *restrict station_i, *restrict station_j;
+    __shared__ const double4c *restrict station_p, *restrict station_q;
     double4c sum;
     double l, m, n, r1, r2;
     int i;
@@ -213,8 +213,8 @@ void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
                 time_int_sec, gha0_rad, dec0_rad, &du_dt, &dv_dt, &dw_dt);
 
         /* Get pointers to source vectors for both stations. */
-        station_i = &jones[num_sources * SP];
-        station_j = &jones[num_sources * SQ];
+        station_p = &jones[num_sources * SP];
+        station_q = &jones[num_sources * SQ];
     }
     __syncthreads();
 
@@ -235,7 +235,7 @@ void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
         /* Accumulate baseline visibility response for source. */
         oskar_accumulate_baseline_visibility_for_source_inline_d(&sum, i,
                 source_I, source_Q, source_U, source_V,
-                station_i, station_j, r1);
+                station_p, station_q, r1);
     }
 
     /* Store partial sum for the thread in shared memory and synchronise. */

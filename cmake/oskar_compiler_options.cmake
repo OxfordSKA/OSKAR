@@ -18,6 +18,7 @@ set(BUILD_SHARED_LIBS ON)
 # ------------------------------------------------------------------------------
 include_directories(
     ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/correlate
     ${PROJECT_SOURCE_DIR}/imaging
     ${PROJECT_SOURCE_DIR}/interferometry
     ${PROJECT_SOURCE_DIR}/jones
