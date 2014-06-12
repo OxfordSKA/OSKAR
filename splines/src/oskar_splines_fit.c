@@ -189,10 +189,9 @@ void oskar_splines_fit(oskar_Splines* spline, int num_points, double* x_theta,
         /* Compact the knot and coefficient arrays. */
         u = spline->num_knots_x_theta - kx - 1;
         v = spline->num_knots_y_phi - ky - 1;
-        oskar_mem_realloc(spline->knots_x_theta,
-                spline->num_knots_x_theta, status);
-        oskar_mem_realloc(spline->knots_y_phi,
-                spline->num_knots_y_phi, status);
+        oskar_mem_realloc(spline->knots_x_theta, spline->num_knots_x_theta,
+                status);
+        oskar_mem_realloc(spline->knots_y_phi, spline->num_knots_y_phi, status);
         oskar_mem_realloc(spline->coeff, u * v, status);
     }
     else if (fit_type == OSKAR_SPLINES_SPHERICAL)
@@ -263,10 +262,9 @@ void oskar_splines_fit(oskar_Splines* spline, int num_points, double* x_theta,
         /* Compact the knot and coefficient arrays. */
         u = spline->num_knots_x_theta - 4;
         v = spline->num_knots_y_phi - 4;
-        oskar_mem_realloc(spline->knots_x_theta,
-                spline->num_knots_x_theta, status);
-        oskar_mem_realloc(spline->knots_y_phi,
-                spline->num_knots_x_theta, status);
+        oskar_mem_realloc(spline->knots_x_theta, spline->num_knots_x_theta,
+                status);
+        oskar_mem_realloc(spline->knots_y_phi, spline->num_knots_y_phi, status);
         oskar_mem_realloc(spline->coeff, u * v, status);
     }
 
