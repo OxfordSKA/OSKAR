@@ -8,6 +8,10 @@ set(correlate_SRC
     src/oskar_correlate_gaussian_time_smearing_omp.c
     src/oskar_correlate_point_omp.c
     src/oskar_correlate_point_time_smearing_omp.c
+    src/oskar_correlate_scalar_gaussian_omp.c
+    src/oskar_correlate_scalar_gaussian_time_smearing_omp.c
+    src/oskar_correlate_scalar_point_omp.c
+    src/oskar_correlate_scalar_point_time_smearing_omp.c
     src/oskar_correlate.c
 )
 
@@ -17,7 +21,10 @@ if (CUDA_FOUND)
         src/oskar_correlate_gaussian_time_smearing_cuda.cu
         src/oskar_correlate_point_cuda.cu
         src/oskar_correlate_point_time_smearing_cuda.cu
+        src/oskar_correlate_scalar_gaussian_cuda.cu
+        src/oskar_correlate_scalar_gaussian_time_smearing_cuda.cu
         src/oskar_correlate_scalar_point_cuda.cu
+        src/oskar_correlate_scalar_point_time_smearing_cuda.cu
     )
 endif()
 

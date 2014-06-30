@@ -35,7 +35,14 @@
 #include <oskar_correlate_point_omp.h>
 #include <oskar_correlate_point_time_smearing_cuda.h>
 #include <oskar_correlate_point_time_smearing_omp.h>
+#include <oskar_correlate_scalar_gaussian_cuda.h>
+#include <oskar_correlate_scalar_gaussian_omp.h>
+#include <oskar_correlate_scalar_gaussian_time_smearing_cuda.h>
+#include <oskar_correlate_scalar_gaussian_time_smearing_omp.h>
 #include <oskar_correlate_scalar_point_cuda.h>
+#include <oskar_correlate_scalar_point_omp.h>
+#include <oskar_correlate_scalar_point_time_smearing_cuda.h>
+#include <oskar_correlate_scalar_point_time_smearing_omp.h>
 #include <oskar_cuda_check_error.h>
 
 #ifdef __cplusplus
@@ -245,16 +252,80 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
             if (location == OSKAR_GPU)
             {
 #ifdef OSKAR_HAVE_CUDA
-                oskar_correlate_scalar_point_cuda_d
-                (n_sources, n_stations, J_, I_, l_, m_, u_, v_,
-                        inv_wavelength, frac_bandwidth, vis_);
+                if (time_avg > 0.0)
+                {
+                    if (use_extended)
+                    {
+                        oskar_correlate_scalar_gaussian_time_smearing_cuda_d
+                        (n_sources, n_stations, J_, I_, l_, m_, n_,
+                                a_, b_, c_, u_, v_, x_, y_, inv_wavelength,
+                                frac_bandwidth, time_avg, gha0, dec0, vis_);
+                    }
+                    else
+                    {
+                        oskar_correlate_scalar_point_time_smearing_cuda_d
+                        (n_sources, n_stations, J_, I_, l_, m_, n_,
+                                u_, v_, x_, y_, inv_wavelength,
+                                frac_bandwidth, time_avg, gha0, dec0, vis_);
+                    }
+                }
+                else /* Non-time-smearing. */
+                {
+                    if (use_extended)
+                    {
+                        oskar_correlate_scalar_gaussian_cuda_d
+                        (n_sources, n_stations, J_, I_, l_, m_,
+                                a_, b_, c_, u_, v_, inv_wavelength,
+                                frac_bandwidth, vis_);
+                    }
+                    else
+                    {
+                        oskar_correlate_scalar_point_cuda_d
+                        (n_sources, n_stations, J_, I_, l_, m_,
+                                u_, v_, inv_wavelength, frac_bandwidth, vis_);
+                    }
+                }
                 oskar_cuda_check_error(status);
 #else
                 *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
             }
-            else
-                *status = OSKAR_ERR_BAD_LOCATION;
+            else /* CPU */
+            {
+                if (time_avg > 0.0)
+                {
+                    if (use_extended)
+                    {
+                        oskar_correlate_scalar_gaussian_time_smearing_omp_d
+                        (n_sources, n_stations, J_, I_, l_, m_, n_,
+                                a_, b_, c_, u_, v_, x_, y_, inv_wavelength,
+                                frac_bandwidth, time_avg, gha0, dec0, vis_);
+                    }
+                    else
+                    {
+                        oskar_correlate_scalar_point_time_smearing_omp_d
+                        (n_sources, n_stations, J_, I_, l_, m_, n_,
+                                u_, v_, x_, y_, inv_wavelength,
+                                frac_bandwidth, time_avg, gha0, dec0, vis_);
+                    }
+                }
+                else /* Non-time-smearing. */
+                {
+                    if (use_extended)
+                    {
+                        oskar_correlate_scalar_gaussian_omp_d
+                        (n_sources, n_stations, J_, I_, l_, m_,
+                                a_, b_, c_, u_, v_, inv_wavelength,
+                                frac_bandwidth, vis_);
+                    }
+                    else
+                    {
+                        oskar_correlate_scalar_point_omp_d
+                        (n_sources, n_stations, J_, I_, l_, m_,
+                                u_, v_, inv_wavelength, frac_bandwidth, vis_);
+                    }
+                }
+            }
         }
     }
     else /* Single precision. */
@@ -375,16 +446,80 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
             if (location == OSKAR_GPU)
             {
 #ifdef OSKAR_HAVE_CUDA
-                oskar_correlate_scalar_point_cuda_f
-                (n_sources, n_stations, J_, I_, l_, m_, u_, v_,
-                        inv_wavelength, frac_bandwidth, vis_);
+                if (time_avg > 0.0)
+                {
+                    if (use_extended)
+                    {
+                        oskar_correlate_scalar_gaussian_time_smearing_cuda_f
+                        (n_sources, n_stations, J_, I_, l_, m_, n_,
+                                a_, b_, c_, u_, v_, x_, y_, inv_wavelength,
+                                frac_bandwidth, time_avg, gha0, dec0, vis_);
+                    }
+                    else
+                    {
+                        oskar_correlate_scalar_point_time_smearing_cuda_f
+                        (n_sources, n_stations, J_, I_, l_, m_, n_,
+                                u_, v_, x_, y_, inv_wavelength,
+                                frac_bandwidth, time_avg, gha0, dec0, vis_);
+                    }
+                }
+                else /* Non-time-smearing. */
+                {
+                    if (use_extended)
+                    {
+                        oskar_correlate_scalar_gaussian_cuda_f
+                        (n_sources, n_stations, J_, I_, l_, m_,
+                                a_, b_, c_, u_, v_, inv_wavelength,
+                                frac_bandwidth, vis_);
+                    }
+                    else
+                    {
+                        oskar_correlate_scalar_point_cuda_f
+                        (n_sources, n_stations, J_, I_, l_, m_,
+                                u_, v_, inv_wavelength, frac_bandwidth, vis_);
+                    }
+                }
                 oskar_cuda_check_error(status);
 #else
                 *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
             }
-            else
-                *status = OSKAR_ERR_BAD_LOCATION;
+            else /* CPU */
+            {
+                if (time_avg > 0.0)
+                {
+                    if (use_extended)
+                    {
+                        oskar_correlate_scalar_gaussian_time_smearing_omp_f
+                        (n_sources, n_stations, J_, I_, l_, m_, n_,
+                                a_, b_, c_, u_, v_, x_, y_, inv_wavelength,
+                                frac_bandwidth, time_avg, gha0, dec0, vis_);
+                    }
+                    else
+                    {
+                        oskar_correlate_scalar_point_time_smearing_omp_f
+                        (n_sources, n_stations, J_, I_, l_, m_, n_,
+                                u_, v_, x_, y_, inv_wavelength,
+                                frac_bandwidth, time_avg, gha0, dec0, vis_);
+                    }
+                }
+                else /* Non-time-smearing. */
+                {
+                    if (use_extended)
+                    {
+                        oskar_correlate_scalar_gaussian_omp_f
+                        (n_sources, n_stations, J_, I_, l_, m_,
+                                a_, b_, c_, u_, v_, inv_wavelength,
+                                frac_bandwidth, vis_);
+                    }
+                    else
+                    {
+                        oskar_correlate_scalar_point_omp_f
+                        (n_sources, n_stations, J_, I_, l_, m_,
+                                u_, v_, inv_wavelength, frac_bandwidth, vis_);
+                    }
+                }
+            }
         }
     }
 }

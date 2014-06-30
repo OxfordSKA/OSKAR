@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,19 +28,18 @@
 
 #include <math.h>
 #include <oskar_correlate_functions_inline.h>
-#include <oskar_correlate_point_omp.h>
-#include <oskar_add_inline.h>
+#include <oskar_correlate_scalar_point_omp.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_correlate_point_omp_f(int num_sources, int num_stations,
-        const float4c* jones, const float* source_I, const float* source_Q,
-        const float* source_U, const float* source_V, const float* source_l,
-        const float* source_m, const float* station_u, const float* station_v,
-        float inv_wavelength, float frac_bandwidth, float4c* vis)
+void oskar_correlate_scalar_point_omp_f(int num_sources, int num_stations,
+        const float2* jones, const float* source_I, const float* source_l,
+        const float* source_m, const float* station_u,
+        const float* station_v, float inv_wavelength, float frac_bandwidth,
+        float2* vis)
 {
     int SQ;
 
@@ -49,7 +48,7 @@ void oskar_correlate_point_omp_f(int num_sources, int num_stations,
     for (SQ = 0; SQ < num_stations; ++SQ)
     {
         int SP, i;
-        const float4c *station_p, *station_q;
+        const float2 *station_p, *station_q;
 
         /* Pointer to source vector for station q. */
         station_q = &jones[SQ * num_sources];
@@ -58,9 +57,11 @@ void oskar_correlate_point_omp_f(int num_sources, int num_stations,
         for (SP = SQ + 1; SP < num_stations; ++SP)
         {
             float uu, vv;
-            float4c sum, guard;
-            oskar_clear_complex_matrix_f(&sum);
-            oskar_clear_complex_matrix_f(&guard);
+            float2 sum, guard;
+            sum.x = 0.0f;
+            sum.y = 0.0f;
+            guard.x = 0.0f;
+            guard.y = 0.0f;
 
             /* Pointer to source vector for station p. */
             station_p = &jones[SP * num_sources];
@@ -83,25 +84,24 @@ void oskar_correlate_point_omp_f(int num_sources, int num_stations,
                 rb = oskar_sinc_f(uu * l + vv * m);
 
                 /* Accumulate baseline visibility response for source. */
-                oskar_accumulate_baseline_visibility_for_source_inline_f(&sum,
-                        i, source_I, source_Q, source_U, source_V,
-                        station_p, station_q, rb, &guard);
+                oskar_accumulate_baseline_visibility_for_source_scalar_inline_f(
+                        &sum, i, source_I, station_p, station_q, rb, &guard);
             }
 
             /* Add result to the baseline visibility. */
             i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
-            oskar_add_complex_matrix_in_place_f(&vis[i], &sum);
+            vis[i].x += sum.x;
+            vis[i].y += sum.y;
         }
     }
 }
 
 /* Double precision. */
-void oskar_correlate_point_omp_d(int num_sources, int num_stations,
-        const double4c* jones, const double* source_I, const double* source_Q,
-        const double* source_U, const double* source_V, const double* source_l,
+void oskar_correlate_scalar_point_omp_d(int num_sources, int num_stations,
+        const double2* jones, const double* source_I, const double* source_l,
         const double* source_m, const double* station_u,
         const double* station_v, double inv_wavelength, double frac_bandwidth,
-        double4c* vis)
+        double2* vis)
 {
     int SQ;
 
@@ -110,7 +110,7 @@ void oskar_correlate_point_omp_d(int num_sources, int num_stations,
     for (SQ = 0; SQ < num_stations; ++SQ)
     {
         int SP, i;
-        const double4c *station_p, *station_q;
+        const double2 *station_p, *station_q;
 
         /* Pointer to source vector for station q. */
         station_q = &jones[SQ * num_sources];
@@ -119,8 +119,9 @@ void oskar_correlate_point_omp_d(int num_sources, int num_stations,
         for (SP = SQ + 1; SP < num_stations; ++SP)
         {
             double uu, vv;
-            double4c sum;
-            oskar_clear_complex_matrix_d(&sum);
+            double2 sum;
+            sum.x = 0.0;
+            sum.y = 0.0;
 
             /* Pointer to source vector for station p. */
             station_p = &jones[SP * num_sources];
@@ -143,14 +144,14 @@ void oskar_correlate_point_omp_d(int num_sources, int num_stations,
                 rb = oskar_sinc_d(uu * l + vv * m);
 
                 /* Accumulate baseline visibility response for source. */
-                oskar_accumulate_baseline_visibility_for_source_inline_d(&sum,
-                        i, source_I, source_Q, source_U, source_V,
-                        station_p, station_q, rb);
+                oskar_accumulate_baseline_visibility_for_source_scalar_inline_d(
+                        &sum, i, source_I, station_p, station_q, rb);
             }
 
             /* Add result to the baseline visibility. */
             i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
-            oskar_add_complex_matrix_in_place_d(&vis[i], &sum);
+            vis[i].x += sum.x;
+            vis[i].y += sum.y;
         }
     }
 }

@@ -33,10 +33,14 @@
  * @file oskar_correlate_functions_inline.h
  */
 
+#ifdef __cplusplus
+#include <cmath>
+#else
+#include <math.h>
+#endif
 #include <oskar_global.h>
 #include <oskar_multiply_inline.h>
 #include <oskar_kahan_sum.h>
-#include <math.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327950288
@@ -52,6 +56,36 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief
+ * Function to evaluate sinc(x) (single precision).
+ *
+ * @details
+ * This function evaluates sinc(x) = sin(x) / x.
+ *
+ * @param[in] x Function argument.
+ */
+OSKAR_INLINE
+float oskar_sinc_f(const float a)
+{
+    return (a == 0.0f) ? 1.0f : sinf(a) / a;
+}
+
+/**
+ * @brief
+ * Function to evaluate sinc(x) (double precision).
+ *
+ * @details
+ * This function evaluates sinc(x) = sin(x) / x.
+ *
+ * @param[in] x Function argument.
+ */
+OSKAR_INLINE
+double oskar_sinc_d(const double a)
+{
+    return (a == 0.0) ? 1.0 : sin(a) / a;
+}
 
 /**
  * @brief
@@ -252,6 +286,117 @@ void oskar_accumulate_baseline_visibility_for_source_inline_d(
 
 /**
  * @brief
+ * Accumulates the visibility response on one baseline due to a single source
+ * (scalar, single precision).
+ *
+ * @details
+ * This function evaluates the visibility response for a single source on a
+ * single baseline between stations p and q, accumulating the result with
+ * the existing baseline visibility. It requires the final (collapsed)
+ * Jones scalars for the source for stations p and q, and the unmodified
+ * Stokes I value of the source.
+ *
+ * The output visibility on the baseline is updated according to:
+ *
+ * V_pq = V_pq + J_p * I * J_q^H
+ *
+ * Visibilities are updated for a single source, even though array pointers are
+ * passed to this function. The source is specified using the \p source_id
+ * index parameter.
+ *
+ * @param[in,out] V_pq  Running total of source visibilities on the baseline.
+ * @param[in] source_id Index of source in all arrays.
+ * @param[in] I         Array of source Stokes I values, in Jy.
+ * @param[in] J_p       Array of source Jones matrices for station p.
+ * @param[in] J_q       Array of source Jones matrices for station q.
+ * @param[in] smear     Smearing factor by which to modify source visibility.
+ * @param[in,out] guard Updated guard value used in Kahan summation.
+ */
+OSKAR_INLINE
+void oskar_accumulate_baseline_visibility_for_source_scalar_inline_f(
+        float2* restrict V_pq, const int source_id, const float* restrict I,
+        const float2* restrict J_p, const float2* restrict J_q,
+        const float smear
+#ifndef __CUDACC__
+        , float2* restrict guard
+#endif
+        )
+{
+    float2 t1, t2;
+    float I_;
+
+    /* Multiply first Jones scalar with Stokes I value. */
+    I_ = I[source_id];
+    t1 = J_p[source_id];
+    t1.x *= I_;
+    t1.y *= I_;
+
+    /* Multiply result with second (conjugated) Jones scalar. */
+    t2 = J_q[source_id];
+    oskar_multiply_complex_conjugate_in_place_f(&t1, &t2);
+
+    /* Multiply result by smearing term and accumulate. */
+#ifdef __CUDACC__
+    V_pq->x += t1.x * smear;
+    V_pq->y += t1.y * smear;
+#else
+    oskar_kahan_sum_multiply_complex_f(V_pq, t1, smear, guard);
+#endif /* __CUDACC__ */
+}
+
+/**
+ * @brief
+ * Accumulates the visibility response on one baseline due to a single source
+ * (scalar, double precision).
+ *
+ * @details
+ * This function evaluates the visibility response for a single source on a
+ * single baseline between stations p and q, accumulating the result with
+ * the existing baseline visibility. It requires the final (collapsed)
+ * Jones scalars for the source for stations p and q, and the unmodified
+ * Stokes I value of the source.
+ *
+ * The output visibility on the baseline is updated according to:
+ *
+ * V_pq = V_pq + J_p * I * J_q^H
+ *
+ * Visibilities are updated for a single source, even though array pointers are
+ * passed to this function. The source is specified using the \p source_id
+ * index parameter.
+ *
+ * @param[in,out] V_pq  Running total of source visibilities on the baseline.
+ * @param[in] source_id Index of source in all arrays.
+ * @param[in] I         Array of source Stokes I values, in Jy.
+ * @param[in] J_p       Array of source Jones matrices for station p.
+ * @param[in] J_q       Array of source Jones matrices for station q.
+ * @param[in] smear     Smearing factor by which to modify source visibility.
+ */
+OSKAR_INLINE
+void oskar_accumulate_baseline_visibility_for_source_scalar_inline_d(
+        double2* restrict V_pq, const int source_id, const double* restrict I,
+        const double2* restrict J_p, const double2* restrict J_q,
+        const double smear)
+{
+    double2 t1, t2;
+    double I_;
+
+    /* Multiply first Jones scalar with Stokes I value. */
+    I_ = I[source_id];
+    t1 = J_p[source_id];
+    t1.x *= I_;
+    t1.y *= I_;
+
+    /* Multiply result with second (conjugated) Jones scalar. */
+    t2 = J_q[source_id];
+    oskar_multiply_complex_conjugate_in_place_d(&t1, &t2);
+
+    /* Multiply result by smearing term and accumulate. */
+    V_pq->x += t1.x * smear;
+    V_pq->y += t1.y * smear;
+}
+
+/**
+ * @brief
  * Evaluates the rate of change of baseline coordinates with time
  * (single precision).
  *
@@ -364,7 +509,7 @@ void oskar_evaluate_baseline_derivatives_inline_d(const double station_xp,
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[out] uu            Modified baseline u-coordinate.
- * @param[out] vv            Modified baseline u-coordinate.
+ * @param[out] vv            Modified baseline v-coordinate.
  */
 OSKAR_INLINE
 void oskar_evaluate_modified_baseline_inline_f(const float station_up,
@@ -399,7 +544,7 @@ void oskar_evaluate_modified_baseline_inline_f(const float station_up,
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[out] uu            Modified baseline u-coordinate.
- * @param[out] vv            Modified baseline u-coordinate.
+ * @param[out] vv            Modified baseline v-coordinate.
  * @param[out] uu2           Baseline length of u, in wavelengths, squared.
  * @param[out] vv2           Baseline length of v, in wavelengths, squared.
  * @param[out] uuvv          2.0 * u * v, with u and v in wavelengths.
@@ -447,7 +592,7 @@ void oskar_evaluate_modified_baseline_gaussian_inline_f(const float station_up,
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[out] uu            Modified baseline u-coordinate.
- * @param[out] vv            Modified baseline u-coordinate.
+ * @param[out] vv            Modified baseline v-coordinate.
  */
 OSKAR_INLINE
 void oskar_evaluate_modified_baseline_inline_d(const double station_up,
@@ -482,7 +627,7 @@ void oskar_evaluate_modified_baseline_inline_d(const double station_up,
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[out] uu            Modified baseline u-coordinate.
- * @param[out] vv            Modified baseline u-coordinate.
+ * @param[out] vv            Modified baseline v-coordinate.
  * @param[out] uu2           Baseline length of u, in wavelengths, squared.
  * @param[out] vv2           Baseline length of v, in wavelengths, squared.
  * @param[out] uuvv          2.0 * u * v, with u and v in wavelengths.
@@ -510,6 +655,36 @@ void oskar_evaluate_modified_baseline_gaussian_inline_d(const double station_up,
     f = M_PI * frac_bandwidth;
     *uu *= f;
     *vv *= f;
+}
+
+/**
+ * @brief
+ * Evaluates the time-smearing term (single precision).
+ *
+ * @brief
+ * This function evaluates the time-smearing term, given the time derivatives
+ * of the baseline coordinates, and the source direction cosines.
+ */
+OSKAR_INLINE
+float oskar_evaluate_time_smearing_f(const float du_dt, const float dv_dt,
+        const float dw_dt, const float l, const float m, const float n)
+{
+    return oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * (fabsf(n) - 1.0f));
+}
+
+/**
+ * @brief
+ * Evaluates the time-smearing term (double precision).
+ *
+ * @brief
+ * This function evaluates the time-smearing term, given the time derivatives
+ * of the baseline coordinates, and the source direction cosines.
+ */
+OSKAR_INLINE
+double oskar_evaluate_time_smearing_d(const double du_dt, const double dv_dt,
+        const double dw_dt, const double l, const double m, const double n)
+{
+    return oskar_sinc_d(du_dt * l + dv_dt * m + dw_dt * (fabs(n) - 1.0));
 }
 
 /**

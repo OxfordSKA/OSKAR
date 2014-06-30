@@ -28,7 +28,6 @@
 
 #include <oskar_correlate_functions_inline.h>
 #include <oskar_correlate_gaussian_cuda.h>
-#include <oskar_sinc.h>
 #include <oskar_add_inline.h>
 
 #include <math.h>

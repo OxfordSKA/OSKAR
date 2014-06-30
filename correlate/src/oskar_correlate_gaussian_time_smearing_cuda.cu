@@ -28,7 +28,6 @@
 
 #include <oskar_correlate_functions_inline.h>
 #include <oskar_correlate_gaussian_time_smearing_cuda.h>
-#include <oskar_sinc.h>
 #include <oskar_add_inline.h>
 
 #ifdef __cplusplus
@@ -154,7 +153,7 @@ void oskar_correlate_gaussian_time_smearing_cudak_f(const int num_sources,
 
         /* Compute bandwidth- and time-smearing terms. */
         r1 = oskar_sinc_f(uu * l + vv * m);
-        r2 = oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * (fabsf(n) - 1.0f));
+        r2 = oskar_evaluate_time_smearing_f(du_dt, dv_dt, dw_dt, l, m, n);
         r1 *= r2;
 
         /* Evaluate Gaussian source width term. */
@@ -240,7 +239,7 @@ void oskar_correlate_gaussian_time_smearing_cudak_d(const int num_sources,
 
         /* Compute bandwidth- and time-smearing terms. */
         r1 = oskar_sinc_d(uu * l + vv * m);
-        r2 = oskar_sinc_d(du_dt * l + dv_dt * m + dw_dt * (fabs(n) - 1.0));
+        r2 = oskar_evaluate_time_smearing_d(du_dt, dv_dt, dw_dt, l, m, n);
         r1 *= r2;
 
         /* Evaluate Gaussian source width term. */

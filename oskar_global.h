@@ -255,7 +255,26 @@ enum {
     OSKAR_RELATIVE_DIRECTION_COSINES
 };
 
+/* Macros used to prevent Eclipse from complaining about unknown CUDA syntax. */
+#ifdef __CDT_PARSER__
+    #define __global__
+    #define __device__
+    #define __host__
+    #define __shared__
+    #define __constant__
+    #define __forceinline__
+    #define __launch_bounds__(...)
+    #define OSKAR_CUDAK_CONF(...)
+    #define OSKAR_HAVE_CUDA
+    #define __CUDACC__
+    #define __CUDA_ARCH__ 200
+    #define _OPENMP
+#else
+    #define OSKAR_CUDAK_CONF(...) <<< __VA_ARGS__ >>>
+#endif
 
+
+/* Detect Windows platform. */
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
 #    define OSKAR_OS_WIN32
 #endif
@@ -347,9 +366,13 @@ enum {
 
 
 /* Redefine restrict keyword to __restrict__ for CUDA code, and define
- * restrict keyword for pre-C99 compilers.. */
+ * restrict keyword for pre-C99 compilers. */
 #ifdef __CUDACC__
     #define restrict __restrict__
+#elif defined(__cplusplus) && defined(__GNUC__)
+    #define restrict __restrict__
+#elif defined(__cplusplus) && defined(OSKAR_OS_WIN)
+    #define restrict __restrict
 #elif !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L
     #define restrict
 #endif
@@ -376,23 +399,6 @@ enum {
     #define OSKAR_TLS __declspec(thread)
 #else
     #define OSKAR_TLS __thread
-#endif
-
-/* Macros used to prevent Eclipse from complaining about unknown CUDA syntax. */
-#ifdef __CDT_PARSER__
-    #define __global__
-    #define __device__
-    #define __host__
-    #define __shared__
-    #define __constant__
-    #define __forceinline__
-    #define __launch_bounds__(...)
-    #define OSKAR_CUDAK_CONF(...)
-    #define OSKAR_HAVE_CUDA
-    #define __CUDACC__
-    #define _OPENMP
-#else
-    #define OSKAR_CUDAK_CONF(...) <<< __VA_ARGS__ >>>
 #endif
 
 

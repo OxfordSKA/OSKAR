@@ -29,7 +29,6 @@
 #include <math.h>
 #include <oskar_correlate_functions_inline.h>
 #include <oskar_correlate_point_time_smearing_omp.h>
-#include <oskar_sinc.h>
 #include <oskar_add_inline.h>
 
 #ifdef __cplusplus
@@ -83,7 +82,7 @@ void oskar_correlate_point_time_smearing_omp_f(int num_sources,
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)
             {
-                float l, m, n, rb, rt;
+                float l, m, n, r1, r2;
 
                 /* Get source direction cosines. */
                 l = source_l[i];
@@ -91,15 +90,15 @@ void oskar_correlate_point_time_smearing_omp_f(int num_sources,
                 n = source_n[i];
 
                 /* Compute bandwidth- and time-smearing terms. */
-                rb = oskar_sinc_f(uu * l + vv * m);
-                rt = oskar_sinc_f(du_dt * l + dv_dt * m +
-                        dw_dt * (fabsf(n) - 1.0f));
-                rb *= rt;
+                r1 = oskar_sinc_f(uu * l + vv * m);
+                r2 = oskar_evaluate_time_smearing_f(du_dt, dv_dt, dw_dt,
+                        l, m, n);
+                r1 *= r2;
 
                 /* Accumulate baseline visibility response for source. */
                 oskar_accumulate_baseline_visibility_for_source_inline_f(&sum,
                         i, source_I, source_Q, source_U, source_V,
-                        station_p, station_q, rb, &guard);
+                        station_p, station_q, r1, &guard);
             }
 
             /* Add result to the baseline visibility. */
@@ -155,7 +154,7 @@ void oskar_correlate_point_time_smearing_omp_d(int num_sources,
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)
             {
-                double l, m, n, rb, rt;
+                double l, m, n, r1, r2;
 
                 /* Get source direction cosines. */
                 l = source_l[i];
@@ -163,15 +162,15 @@ void oskar_correlate_point_time_smearing_omp_d(int num_sources,
                 n = source_n[i];
 
                 /* Compute bandwidth- and time-smearing terms. */
-                rb = oskar_sinc_d(uu * l + vv * m);
-                rt = oskar_sinc_d(du_dt * l + dv_dt * m +
-                        dw_dt * (fabs(n) - 1.0));
-                rb *= rt;
+                r1 = oskar_sinc_d(uu * l + vv * m);
+                r2 = oskar_evaluate_time_smearing_d(du_dt, dv_dt, dw_dt,
+                        l, m, n);
+                r1 *= r2;
 
                 /* Accumulate baseline visibility response for source. */
                 oskar_accumulate_baseline_visibility_for_source_inline_d(&sum,
                         i, source_I, source_Q, source_U, source_V,
-                        station_p, station_q, rb);
+                        station_p, station_q, r1);
             }
 
             /* Add result to the baseline visibility. */
