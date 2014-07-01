@@ -1066,11 +1066,6 @@ void oskar_SettingsModelApps::init_settings_interferometer()
     setTooltip(k, "Path of the Measurement Set containing the results of the "
             "simulation. Leave blank if not required.");
 #endif
-    k = group + "/image_output";
-    declare(k, "Image simulation output", oskar_SettingsItem::BOOL, false);
-    setTooltip(k, "If true, run the OSKAR imager on completion of the "
-            "interferometer simulation. For image settings, see the "
-            "'Image settings' group");
 }
 
 void oskar_SettingsModelApps::init_settings_beampattern()

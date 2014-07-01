@@ -86,8 +86,6 @@ void oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
             settings->ms_filename = (char*)malloc(t.size() + 1);
             strcpy(settings->ms_filename, t.constData());
         }
-
-        settings->image_interferometer_output = s.value("image_output", false).toBool();
     }
     s.endGroup();
 

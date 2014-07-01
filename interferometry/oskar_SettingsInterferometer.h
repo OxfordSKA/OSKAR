@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,6 @@ struct oskar_SettingsInterferometer
 
     char* oskar_vis_filename;
     char* ms_filename;
-    int image_interferometer_output;
     int use_common_sky;
 };
 typedef struct oskar_SettingsInterferometer oskar_SettingsInterferometer;

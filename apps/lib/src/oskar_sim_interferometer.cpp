@@ -76,9 +76,6 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         double frequency, int chunk_index, int num_sky_chunks,
         oskar_Sky* local_sky, oskar_StationWork* work, int* status);
 
-static void make_image(const oskar_Vis* vis,
-        const oskar_SettingsImage* settings, oskar_Log* log, int* status);
-
 static void record_timing(int num_devices, int* cuda_device_ids,
         oskar_Timers* timers, oskar_Log* log);
 
@@ -109,14 +106,10 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     oskar_log_settings_telescope(log, &settings);
     oskar_log_settings_interferometer(log, &settings);
     //oskar_log_settings_ionosphere(log, &settings);
-    if (settings.interferometer.image_interferometer_output)
-        oskar_log_settings_image(log, &settings);
 
     // Check that a data file has been specified.
     if ( !(settings.interferometer.oskar_vis_filename ||
-            settings.interferometer.ms_filename ||
-            (settings.interferometer.image_interferometer_output &&
-                    (settings.image.oskar_image || settings.image.fits_image))))
+            settings.interferometer.ms_filename))
     {
         oskar_log_error(log, "No output file specified.");
         return OSKAR_ERR_SETTINGS;
@@ -293,13 +286,6 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         free(log_data);
     }
 #endif
-
-    // Make image(s) of the visibilities using first device, if required.
-    if (settings.interferometer.image_interferometer_output)
-    {
-        cudaSetDevice(settings.sim.cuda_device_ids[0]);
-        make_image(vis, &settings.image, log, &error);
-    }
 
     // Free visibility data.
     oskar_vis_free(vis, &error);
@@ -533,52 +519,6 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_sky_free(sky_gpu, status);
     /*oskar_work_jones_z_free(&workJonesZ, status);*/
 }
-
-
-static void make_image(const oskar_Vis* vis,
-        const oskar_SettingsImage* settings, oskar_Log* log, int* status)
-{
-    oskar_Timer* tmr;
-    oskar_Image* image;
-    const char* filename;
-
-    if (*status) return;
-
-    // Check filenames.
-    if (!settings->oskar_image && !settings->fits_image)
-    {
-        oskar_log_warning(log, "No image output name specified "
-                "(skipping OSKAR imager)");
-        return;
-    }
-
-    // Make image(s).
-    tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
-    oskar_log_section(log, "Starting OSKAR imager...");
-    oskar_timer_start(tmr);
-    image = oskar_make_image(log, vis, settings, status);
-    oskar_log_section(log, "Imaging completed in %.3f sec.",
-            oskar_timer_elapsed(tmr));
-    oskar_timer_free(tmr);
-
-    // Write image file(s).
-#ifndef OSKAR_NO_FITS
-    filename = settings->fits_image;
-    if (filename)
-    {
-        oskar_log_message(log, 0, "Writing FITS image file: '%s'", filename);
-        oskar_fits_image_write(image, log, filename, status);
-    }
-#endif
-    filename = settings->oskar_image;
-    if (filename)
-    {
-        oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
-        oskar_image_write(image, log, filename, 0, status);
-    }
-    oskar_image_free(image, status);
-}
-
 
 static void record_timing(int num_devices, int* cuda_device_ids,
         oskar_Timers* timers, oskar_Log* log)

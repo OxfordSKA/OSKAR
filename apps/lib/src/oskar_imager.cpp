@@ -37,12 +37,11 @@
 #include <oskar_log.h>
 #include <oskar_get_error_string.h>
 #include <oskar_settings_free.h>
+#include <oskar_timer.h>
 
 #ifndef OSKAR_NO_FITS
 #include "fits/oskar_fits_image_write.h"
 #endif
-
-#include <QtCore/QTime>
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,8 +53,10 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
     oskar_Settings settings;
     oskar_Vis* vis;
     oskar_Image* image;
+    oskar_Timer* tmr;
     const char* filename;
 
+    // Load the settings file.
     oskar_log_section(log, "Loading settings file '%s'", settings_file);
     oskar_settings_load(&settings, log, settings_file, &error);
     if (error)
@@ -70,18 +71,19 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
     oskar_log_settings_simulator(log, &settings);
     oskar_log_settings_image(log, &settings);
 
+    // Check filenames have been set.
     if (!(settings.image.oskar_image || settings.image.fits_image))
     {
         oskar_log_error(log, "No output image file specified.");
         return OSKAR_ERR_SETTINGS;
     }
-
     if (!settings.image.input_vis_data)
     {
         oskar_log_error(log, "No input visibility data file specified.");
         return OSKAR_ERR_SETTINGS;
     }
 
+    // Read the visibility data.
     vis = oskar_vis_read(settings.image.input_vis_data, &error);
     if (error)
     {
@@ -90,48 +92,38 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
         return error;
     }
 
+    // Make the image.
+    tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
     oskar_log_section(log, "Starting OSKAR imager...");
-
-    QTime timer;
-    timer.start();
+    oskar_timer_start(tmr);
     image = oskar_make_image(log, vis, &settings.image, &error);
     if (error)
-    {
         oskar_log_error(log, "Failure in oskar_make_image() [code: %i] (%s).",
                 error, oskar_get_error_string(error));
-        return error;
-    }
+    else
+        oskar_log_section(log, "Imaging completed in %.3f sec.",
+                oskar_timer_elapsed(tmr));
     oskar_vis_free(vis, &error);
-    oskar_log_section(log, "Imaging completed in %.3f sec.", timer.elapsed()/1.0e3);
+    oskar_timer_free(tmr);
 
+    // Write the image to files(s).
     filename = settings.image.oskar_image;
-    if (filename)
+    if (filename && !error)
     {
         oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
         oskar_image_write(image, log, filename, 0, &error);
-        if (error)
-        {
-            oskar_log_error(log, "Failure in oskar_image_write() (%s).",
-                    oskar_get_error_string(error));
-            return error;
-        }
     }
 #ifndef OSKAR_NO_FITS
     filename = settings.image.fits_image;
-    if (filename)
+    if (filename && !error)
     {
         oskar_log_message(log, 0, "Writing FITS image file: '%s'", filename);
         oskar_fits_image_write(image, log, filename, &error);
-        if (error)
-        {
-            oskar_log_error(log, "Failure in oskar_fits_image_write() (%s).",
-                    oskar_get_error_string(error));
-            return error;
-        }
     }
 #endif
 
-    oskar_log_section(log, "Run complete.");
+    if (!error)
+        oskar_log_section(log, "Run complete.");
     oskar_image_free(image, &error);
     cudaDeviceReset();
     return error;
