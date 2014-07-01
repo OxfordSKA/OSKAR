@@ -56,9 +56,8 @@ extern "C" {
  * @param[in,out] status      Status return code.
  */
 OSKAR_APPS_EXPORT
-void oskar_vis_write_ms(const oskar_Vis* vis,
-        const char* ms_path, int overwrite, const char* run_log,
-        size_t run_log_length, int* status);
+void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
+        int overwrite, const char* run_log, size_t run_log_length, int* status);
 
 #ifdef __cplusplus
 }

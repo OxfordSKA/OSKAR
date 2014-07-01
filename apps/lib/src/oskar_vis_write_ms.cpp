@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,15 +39,15 @@
 #include <cstdlib>
 #include <cstring>
 
-#ifndef DAYS_2_SEC
-#define DAYS_2_SEC 86400.0
-#endif
-
 extern "C"
-void oskar_vis_write_ms(const oskar_Vis* vis,
-        const char* ms_path, int overwrite, const char* run_log,
-        size_t run_log_length, int* status)
+void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
+        int overwrite, const char* run_log, size_t run_log_length, int* status)
 {
+    const oskar_Mem *x_metres, *y_metres, *z_metres, *amp, *uu, *vv, *ww;
+    double dt_dump, t_start_sec, ref_freq, chan_width;
+    int num_antennas, num_baselines, num_pols, num_channels, num_times;
+    int precision;
+
     // Check all inputs.
     if (!vis || !ms_path || !status)
     {
@@ -80,25 +80,26 @@ void oskar_vis_write_ms(const oskar_Vis* vis,
         }
     }
 
-    // Get dimensions.
-    int num_antennas   = oskar_vis_num_stations(vis);
-    int num_baselines  = oskar_vis_num_baselines(vis);
-    int num_pols       = oskar_vis_num_polarisations(vis);
-    int num_channels   = oskar_vis_num_channels(vis);
-    int num_times      = oskar_vis_num_times(vis);
-    int num_coords     = num_times * num_baselines;
-    double dt_vis_dump = oskar_vis_time_inc_sec(vis);
-    double t_start_sec = oskar_vis_time_start_mjd_utc(vis) * DAYS_2_SEC +
-            (dt_vis_dump / 2);
-    double ref_freq    = oskar_vis_freq_start_hz(vis);
-    /* NOTE should the chan_width == freq_inc or channel bandwidth...
-     * these are in general different numbers */
-    double chan_width  = oskar_vis_freq_inc_hz(vis);
-    if (num_antennas * (num_antennas - 1) / 2 != num_baselines)
-    {
-        *status = OSKAR_ERR_DIMENSION_MISMATCH;
-        return;
-    }
+    // Pull data from visibility structure.
+    num_antennas  = oskar_vis_num_stations(vis);
+    num_baselines = oskar_vis_num_baselines(vis);
+    num_pols      = oskar_vis_num_polarisations(vis);
+    num_channels  = oskar_vis_num_channels(vis);
+    num_times     = oskar_vis_num_times(vis);
+    dt_dump       = oskar_vis_time_inc_sec(vis);
+    t_start_sec   = oskar_vis_time_start_mjd_utc(vis) * 86400 + (dt_dump / 2);
+    ref_freq      = oskar_vis_freq_start_hz(vis);
+    /* NOTE Should the chan_width be freq_inc or channel bandwidth?
+     * (These are different numbers in general.) */
+    chan_width    = oskar_vis_freq_inc_hz(vis);
+    x_metres      = oskar_vis_station_x_offset_ecef_metres_const(vis);
+    y_metres      = oskar_vis_station_y_offset_ecef_metres_const(vis);
+    z_metres      = oskar_vis_station_z_offset_ecef_metres_const(vis);
+    amp           = oskar_vis_amplitude_const(vis);
+    uu            = oskar_vis_baseline_uu_metres_const(vis);
+    vv            = oskar_vis_baseline_vv_metres_const(vis);
+    ww            = oskar_vis_baseline_ww_metres_const(vis);
+    precision     = oskar_mem_precision(amp);
 
     // Set channel width to be greater than 0, if it isn't already.
     // This is required for the Measurement Set to be valid.
@@ -110,9 +111,6 @@ void oskar_vis_write_ms(const oskar_Vis* vis,
     ms.create(ms_path);
 
     // Add the antenna positions.
-    const oskar_Mem* x_metres = oskar_vis_station_x_offset_ecef_metres_const(vis);
-    const oskar_Mem* y_metres = oskar_vis_station_y_offset_ecef_metres_const(vis);
-    const oskar_Mem* z_metres = oskar_vis_station_z_offset_ecef_metres_const(vis);
     if (oskar_mem_type(x_metres) == OSKAR_DOUBLE)
     {
         ms.addAntennas(num_antennas, oskar_mem_double_const(x_metres, status),
@@ -125,134 +123,112 @@ void oskar_vis_write_ms(const oskar_Vis* vis,
                 oskar_mem_float_const(y_metres, status),
                 oskar_mem_float_const(z_metres, status));
     }
-    else
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
-    }
 
-    // Add the field data.
+    // Add the field, polarisation and channel data.
     ms.addField(oskar_vis_phase_centre_ra_deg(vis) * M_PI / 180,
             oskar_vis_phase_centre_dec_deg(vis) * M_PI / 180);
-
-    // Add polarisation and channel data.
     ms.addPolarisation(num_pols);
     ms.addBand(0, num_channels, ref_freq, chan_width);
 
     // Evaluate baseline index arrays.
-    int* baseline_ant_1 = (int*)malloc(num_coords * sizeof(int));
-    int* baseline_ant_2 = (int*)malloc(num_coords * sizeof(int));
-    for (int idx = 0, t = 0; t < num_times; ++t)
+    int* baseline_ant_1 = (int*)malloc(num_baselines * sizeof(int));
+    int* baseline_ant_2 = (int*)malloc(num_baselines * sizeof(int));
+    for (int a1 = 0, i = 0; a1 < num_antennas; ++a1)
     {
-        for (int a1 = 0; a1 < num_antennas; ++a1)
+        for (int a2 = a1 + 1; a2 < num_antennas; ++a2, ++i)
         {
-            for (int a2 = (a1 + 1); a2 < num_antennas; ++a2)
-            {
-                baseline_ant_1[idx] = a1;
-                baseline_ant_2[idx] = a2;
-                ++idx;
-            }
+            baseline_ant_1[i] = a1;
+            baseline_ant_2[i] = a2;
         }
     }
 
     // Add visibilities and u,v,w coordinates.
-    const oskar_Mem* amp = oskar_vis_amplitude_const(vis);
-    const oskar_Mem* uu = oskar_vis_baseline_uu_metres_const(vis);
-    const oskar_Mem* vv = oskar_vis_baseline_vv_metres_const(vis);
-    const oskar_Mem* ww = oskar_vis_baseline_ww_metres_const(vis);
     const void* amp_ = oskar_mem_void_const(amp);
-    if (oskar_mem_is_double(amp))
+    oskar_Mem* amp_tb_ = oskar_mem_create(precision | OSKAR_COMPLEX, OSKAR_CPU,
+            num_baselines * num_channels * num_pols, status);
+    oskar_Mem* times = oskar_mem_create(precision, OSKAR_CPU, num_baselines,
+            status);
+    if (precision == OSKAR_DOUBLE)
     {
-        double2* amp_tb = (double2*)malloc(num_channels * num_pols * sizeof(double2));
+        double2* amp_tb;
         const double *uu_, *vv_, *ww_;
         uu_ = oskar_mem_double_const(uu, status);
         vv_ = oskar_mem_double_const(vv, status);
         ww_ = oskar_mem_double_const(ww, status);
+        amp_tb = oskar_mem_double2(amp_tb_, status);
         for (int t = 0; t < num_times; ++t)
         {
-            double vis_time = t_start_sec + (t * dt_vis_dump);
+            int row = t * num_baselines;
+            double vis_time = t_start_sec + (t * dt_dump);
+            oskar_mem_set_value_real(times, vis_time, 0, num_baselines, status);
 
             for (int b = 0; b < num_baselines; ++b)
             {
-                int row = t * num_baselines + b;
-                double u = uu_[row];
-                double v = vv_[row];
-                double w = ww_[row];
-
-                int ant1 = baseline_ant_1[row];
-                int ant2 = baseline_ant_2[row];
-
                 // Construct the amplitude data for the given time, baseline.
                 for (int c = 0; c < num_channels; ++c)
                 {
-                    int idx = num_baselines * (c * num_times + t) + b;
-                    int i_out = c * num_pols;
+                    int i_in = num_baselines * (num_times * c + t) + b;
+                    int i_out = num_pols * (num_channels * b + c);
                     if (num_pols == 1)
                     {
-                        double2 vis_amp = ((const double2*)amp_)[idx];
-                        amp_tb[i_out + 0] = vis_amp; // XX
+                        amp_tb[i_out] = ((const double2*)amp_)[i_in]; // I
                     }
                     else
                     {
-                        double4c vis_amp = ((const double4c*)amp_)[idx];
+                        double4c vis_amp = ((const double4c*)amp_)[i_in];
                         amp_tb[i_out + 0] = vis_amp.a; // XX
                         amp_tb[i_out + 1] = vis_amp.b; // XY
                         amp_tb[i_out + 2] = vis_amp.c; // YX
                         amp_tb[i_out + 3] = vis_amp.d; // YY
                     }
                 }
-                ms.addVisibilities(num_pols, num_channels, 1, &u, &v, &w,
-                        (double*)amp_tb, &ant1, &ant2, dt_vis_dump, dt_vis_dump,
-                        &vis_time);
             }
+            ms.addVisibilities(num_pols, num_channels, num_baselines,
+                    &uu_[row], &vv_[row], &ww_[row], (const double*)amp_tb,
+                    baseline_ant_1, baseline_ant_2, dt_dump, dt_dump,
+                    oskar_mem_double_const(times, status));
         }
-        free(amp_tb);
     }
-    else if (oskar_mem_is_single(amp))
+    else if (precision == OSKAR_SINGLE)
     {
-        float2* amp_tb = (float2*)malloc(num_channels * num_pols * sizeof(float2));
+        float2* amp_tb;
         const float *uu_, *vv_, *ww_;
         uu_ = oskar_mem_float_const(uu, status);
         vv_ = oskar_mem_float_const(vv, status);
         ww_ = oskar_mem_float_const(ww, status);
+        amp_tb = oskar_mem_float2(amp_tb_, status);
         for (int t = 0; t < num_times; ++t)
         {
-            float vis_time = t_start_sec + (t * dt_vis_dump);
+            int row = t * num_baselines;
+            double vis_time = t_start_sec + (t * dt_dump);
+            oskar_mem_set_value_real(times, vis_time, 0, num_baselines, status);
 
             for (int b = 0; b < num_baselines; ++b)
             {
-                int row = t * num_baselines + b;
-                float u = uu_[row];
-                float v = vv_[row];
-                float w = ww_[row];
-                int ant1 = baseline_ant_1[row];
-                int ant2 = baseline_ant_2[row];
-
                 // Construct the amplitude data for the given time, baseline.
                 for (int c = 0; c < num_channels; ++c)
                 {
-                    int idx = num_baselines * (c * num_times + t) + b;
-                    int i_out = c * num_pols;
+                    int i_in = num_baselines * (num_times * c + t) + b;
+                    int i_out = num_pols * (num_channels * b + c);
                     if (num_pols == 1)
                     {
-                        float2 vis_amp = ((const float2*)amp_)[idx];
-                        amp_tb[i_out + 0] = vis_amp; // XX
+                        amp_tb[i_out] = ((const float2*)amp_)[i_in]; // I
                     }
                     else
                     {
-                        float4c vis_amp = ((const float4c*)amp_)[idx];
+                        float4c vis_amp = ((const float4c*)amp_)[i_in];
                         amp_tb[i_out + 0] = vis_amp.a; // XX
                         amp_tb[i_out + 1] = vis_amp.b; // XY
                         amp_tb[i_out + 2] = vis_amp.c; // YX
                         amp_tb[i_out + 3] = vis_amp.d; // YY
                     }
                 }
-                ms.addVisibilities(num_pols, num_channels, 1, &u, &v, &w,
-                        (float*)amp_tb, &ant1, &ant2, dt_vis_dump, dt_vis_dump,
-                        &vis_time);
             }
+            ms.addVisibilities(num_pols, num_channels, num_baselines,
+                    &uu_[row], &vv_[row], &ww_[row], (const float*)amp_tb,
+                    baseline_ant_1, baseline_ant_2, dt_dump, dt_dump,
+                    oskar_mem_float_const(times, status));
         }
-        free(amp_tb);
     }
     else
     {
@@ -267,6 +243,8 @@ void oskar_vis_write_ms(const oskar_Vis* vis,
     ms.addLog(run_log, run_log_length);
 
     // Cleanup.
+    oskar_mem_free(amp_tb_, status);
+    oskar_mem_free(times, status);
     free(baseline_ant_1);
     free(baseline_ant_2);
 }
