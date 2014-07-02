@@ -72,7 +72,7 @@ using std::vector;
 
 static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         oskar_Timers* timers, const oskar_Sky* sky,
-        const oskar_Telescope* telescope, const oskar_Settings* settings,
+        const oskar_Telescope* tel, const oskar_Settings* settings,
         double frequency, int chunk_index, int num_sky_chunks,
         oskar_Sky* local_sky, oskar_StationWork* work, int* status);
 
@@ -83,7 +83,7 @@ static void record_timing(int num_devices, int* cuda_device_ids,
 extern "C"
 int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 {
-    int error, num_devices = 0, device_count = 0, type, vis_type;
+    int error, num_devices = 0, device_count = 0, precision, vis_type;
     const char* fname;
 
     // Find out how many GPUs are in the system.
@@ -95,8 +95,9 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     oskar_log_section(log, "Loading settings file '%s'", settings_file);
     oskar_settings_load(&settings, log, settings_file, &error);
     if (error) return error;
-    type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    vis_type = type | OSKAR_COMPLEX | OSKAR_MATRIX;
+    precision = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    vis_type = precision | OSKAR_COMPLEX;
+    if (!settings.interferometer.scalar_mode) vis_type |= OSKAR_MATRIX;
 
     // Log the relevant settings.
     oskar_log_set_keep_file(log, settings.sim.keep_log_file);
@@ -165,10 +166,10 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     for (int i = 0; i < num_devices; ++i)
     {
         cudaSetDevice(settings.sim.cuda_device_ids[i]);
-        local_sky[i] = oskar_sky_create(type, OSKAR_GPU,
+        local_sky[i] = oskar_sky_create(precision, OSKAR_GPU,
                 settings.sim.max_sources_per_chunk + 1, &error);
         tel_gpu[i] = oskar_telescope_create_copy(tel, OSKAR_GPU, &error);
-        work[i] = oskar_station_work_create(type, OSKAR_GPU, &error);
+        work[i] = oskar_station_work_create(precision, OSKAR_GPU, &error);
     }
 
     // Set the number of host threads to use (one per GPU).
@@ -306,15 +307,15 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 
 static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         oskar_Timers* timers, const oskar_Sky* sky,
-        const oskar_Telescope* telescope, const oskar_Settings* settings,
+        const oskar_Telescope* tel, const oskar_Settings* settings,
         double frequency, int chunk_index, int num_sky_chunks,
         oskar_Sky* local_sky, oskar_StationWork* work, int* status)
 {
-    int i, j, k, device_id = 0, type, n_stations, n_baselines, n_src;
+    int i, j, k, device_id = 0, type, vis_type, n_stations, n_baselines, n_src;
     int complx, matrix, num_vis_dumps, num_vis_ave, num_fringe_ave;
     double t_dump, t_ave, t_fringe, dt_dump, dt_ave, dt_fringe, gast;
     double obs_start_mjd_utc, ra0, dec0;
-    oskar_Jones *J, *R, *E, *K;
+    oskar_Jones *J = 0, *R = 0, *E = 0, *Z = 0, *K = 0;
     oskar_Mem *vis, *u, *v, *w;
     const oskar_Mem *x, *y, *z;
     oskar_Sky *sky_gpu;
@@ -344,10 +345,10 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
     /* Get data type and dimensions. */
     type = oskar_sky_precision(sky);
-    n_stations = oskar_telescope_num_stations(telescope);
+    vis_type = oskar_mem_type(vis_amp);
+    n_stations = oskar_telescope_num_stations(tel);
     n_baselines = n_stations * (n_stations - 1) / 2;
     complx = type | OSKAR_COMPLEX;
-    matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
 
     /* Copy sky model for frequency scaling. */
     sky_gpu = oskar_sky_create_copy(sky, OSKAR_GPU, status);
@@ -360,18 +361,19 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     n_src = oskar_sky_num_sources(sky_gpu);
 
     /* Initialise blocks of Jones matrices and visibilities. */
-    J = oskar_jones_create(matrix, OSKAR_GPU, n_stations, n_src, status);
-    R = oskar_jones_create(matrix, OSKAR_GPU, n_stations, n_src, status);
-    E = oskar_jones_create(matrix, OSKAR_GPU, n_stations, n_src, status);
+    if (oskar_mem_is_matrix(vis_amp))
+        R = oskar_jones_create(vis_type, OSKAR_GPU, n_stations, n_src, status);
+    J = oskar_jones_create(vis_type, OSKAR_GPU, n_stations, n_src, status);
+    E = oskar_jones_create(vis_type, OSKAR_GPU, n_stations, n_src, status);
     K = oskar_jones_create(complx, OSKAR_GPU, n_stations, n_src, status);
     /*Z = oskar_jones_create(complx, OSKAR_CPU, n_stations, n_src, status);*/
-    vis = oskar_mem_create(matrix, OSKAR_GPU, n_baselines, status);
+    vis = oskar_mem_create(vis_type, OSKAR_GPU, n_baselines, status);
     u = oskar_mem_create(type, OSKAR_GPU, n_stations, status);
     v = oskar_mem_create(type, OSKAR_GPU, n_stations, status);
     w = oskar_mem_create(type, OSKAR_GPU, n_stations, status);
-    x = oskar_telescope_station_true_x_offset_ecef_metres_const(telescope);
-    y = oskar_telescope_station_true_y_offset_ecef_metres_const(telescope);
-    z = oskar_telescope_station_true_z_offset_ecef_metres_const(telescope);
+    x = oskar_telescope_station_true_x_offset_ecef_metres_const(tel);
+    y = oskar_telescope_station_true_y_offset_ecef_metres_const(tel);
+    z = oskar_telescope_station_true_z_offset_ecef_metres_const(tel);
 
     /* Initialise work buffer for Z Jones evaluation */
     /*oskar_work_jones_z_init(&workJonesZ, type, OSKAR_CPU, status);*/
@@ -381,8 +383,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
      * This is required so that when splitting the sky into chunks or channels,
      * antennas still have the same error value for the given time and seed. */
     random_state = oskar_random_state_create(
-            oskar_telescope_max_station_size(telescope),
-            oskar_telescope_random_seed(telescope), 0, 0, status);
+            oskar_telescope_max_station_size(tel),
+            oskar_telescope_random_seed(tel), 0, 0, status);
 
     /* Get time increments. */
     num_vis_dumps      = settings->obs.num_time_steps;
@@ -392,8 +394,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     dt_dump            = settings->obs.dt_dump_days;
     dt_ave             = dt_dump / settings->interferometer.num_vis_ave;
     dt_fringe          = dt_ave / settings->interferometer.num_fringe_ave;
-    ra0                = oskar_telescope_phase_centre_ra_rad(telescope);
-    dec0               = oskar_telescope_phase_centre_dec_rad(telescope);
+    ra0                = oskar_telescope_phase_centre_ra_rad(tel);
+    dec0               = oskar_telescope_phase_centre_dec_rad(tel);
 
     /* Start simulation. */
     oskar_timer_pause(timers->tmr_init_copy);
@@ -411,8 +413,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
         /* Compact sky model to temporary. */
         oskar_timer_resume(timers->tmr_clip);
-        oskar_sky_horizon_clip(local_sky, sky_gpu, telescope, gast, work,
-                status);
+        oskar_sky_horizon_clip(local_sky, sky_gpu, tel, gast, work, status);
         oskar_timer_pause(timers->tmr_clip);
 
         /* Record number of visible sources in this snapshot. */
@@ -425,8 +426,9 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         if (n_src == 0) continue;
 
         /* Set dimensions of Jones matrices (this is not a resize!). */
+        if (R) oskar_jones_set_size(R, n_stations, n_src, status);
+        if (Z) oskar_jones_set_size(Z, n_stations, n_src, status);
         oskar_jones_set_size(J, n_stations, n_src, status);
-        oskar_jones_set_size(R, n_stations, n_src, status);
         oskar_jones_set_size(E, n_stations, n_src, status);
         oskar_jones_set_size(K, n_stations, n_src, status);
 
@@ -437,32 +439,40 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
             t_ave = t_dump + j * dt_ave;
             gast = oskar_convert_mjd_to_gast_fast(t_ave + dt_ave / 2);
 
-            /* Evaluate parallactic angle (R), station beam (E), and join. */
-            oskar_timer_resume(timers->tmr_R);
-            oskar_evaluate_jones_R(R, n_src, oskar_sky_ra_rad_const(local_sky),
-                    oskar_sky_dec_rad_const(local_sky), telescope, gast, status);
-            oskar_timer_pause(timers->tmr_R);
-
+            /* Evaluate station beam (Jones E: may be matrix). */
             oskar_timer_resume(timers->tmr_E);
-            oskar_evaluate_jones_E(E, n_src, local_sky, telescope, gast,
-                    frequency, work, random_state, status);
+            oskar_evaluate_jones_E(E, n_src, local_sky, tel, gast, frequency,
+                    work, random_state, status);
             oskar_timer_pause(timers->tmr_E);
 
-            oskar_timer_resume(timers->tmr_join);
-            oskar_jones_join(R, E, R, status);
-            oskar_timer_pause(timers->tmr_join);
-
 #if 0
-            /* Evaluate ionospheric phase screen (Jones Z), and join */
+            /* Evaluate ionospheric phase screen (Jones Z: scalar),
+             * and join with Jones E. */
             /* NOTE this is currently only a CPU implementation */
-            if (settings->ionosphere.enable)
+            if (Z)
             {
-                oskar_evaluate_jones_Z(Z, n_src, local_sky, telescope,
+                oskar_evaluate_jones_Z(Z, n_src, local_sky, tel,
                         &settings->ionosphere, gast, frequency, &workJonesZ,
                         status);
-                oskar_jones_join(R, Z, R, status);
+                oskar_timer_resume(timers->tmr_join);
+                oskar_jones_join(E, Z, E, status);
+                oskar_timer_pause(timers->tmr_join);
             }
 #endif
+
+            /* Evaluate parallactic angle (Jones R: matrix),
+             * and join with Jones Z*E. */
+            if (R)
+            {
+                oskar_timer_resume(timers->tmr_R);
+                oskar_evaluate_jones_R(R, n_src,
+                        oskar_sky_ra_rad_const(local_sky),
+                        oskar_sky_dec_rad_const(local_sky), tel, gast, status);
+                oskar_timer_pause(timers->tmr_R);
+                oskar_timer_resume(timers->tmr_join);
+                oskar_jones_join(R, E, R, status);
+                oskar_timer_pause(timers->tmr_join);
+            }
 
             for (k = 0; k < num_fringe_ave; ++k)
             {
@@ -471,10 +481,10 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 gast = oskar_convert_mjd_to_gast_fast(t_fringe + dt_fringe / 2);
 
                 /* Evaluate station u,v,w coordinates. */
-                oskar_convert_ecef_to_station_uvw(u, v, w, n_stations, x, y,
-                        z, ra0, dec0, gast, status);
+                oskar_convert_ecef_to_station_uvw(u, v, w, n_stations, x, y, z,
+                        ra0, dec0, gast, status);
 
-                /* Evaluate interferometer phase (K), join Jones, correlate. */
+                /* Evaluate interferometer phase (Jones K: scalar). */
                 oskar_timer_resume(timers->tmr_K);
                 oskar_evaluate_jones_K(K, n_src,
                         oskar_sky_l_const(local_sky),
@@ -483,12 +493,18 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                         status);
                 oskar_timer_pause(timers->tmr_K);
 
+                /* Join Jones K with Jones Z*E*R (if it exists),
+                 * otherwise with Jones Z*E */
                 oskar_timer_resume(timers->tmr_join);
-                oskar_jones_join(J, K, R, status);
+                if (R)
+                    oskar_jones_join(J, K, R, status);
+                else
+                    oskar_jones_join(J, K, E, status);
                 oskar_timer_pause(timers->tmr_join);
 
+                /* Correlate. */
                 oskar_timer_resume(timers->tmr_correlate);
-                oskar_correlate(vis, n_src, J, local_sky, telescope, u, v,
+                oskar_correlate(vis, n_src, J, local_sky, tel, u, v,
                         gast, frequency, status);
                 oskar_timer_pause(timers->tmr_correlate);
             }
@@ -515,7 +531,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_jones_free(R, status);
     oskar_jones_free(E, status);
     oskar_jones_free(K, status);
-    /*oskar_jones_free(Z, status);*/
+    oskar_jones_free(Z, status);
     oskar_sky_free(sky_gpu, status);
     /*oskar_work_jones_z_free(&workJonesZ, status);*/
 }

@@ -34,6 +34,8 @@
     * Added option to turn off the station beam completely
       (use the "isotropic" station type for this).
 
+    * Added scalar mode option (Stokes I only) to interferometer simulator.
+
     * Fixed a problem in the telescope model noise loader that caused it to
       incorrectly report an error in one situation.
 

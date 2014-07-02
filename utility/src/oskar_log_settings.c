@@ -552,6 +552,7 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
     LVI("Num. fringe ave.", s->interferometer.num_fringe_ave);
     LVB("Use common sky (short baseline approximation)",
             s->interferometer.use_common_sky);
+    LVB("Scalar mode (Stokes I only)", s->interferometer.scalar_mode);
 
     /* Noise */
     LVB("System noise enabled", n->enable);

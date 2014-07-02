@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,13 +51,13 @@ extern "C" {
  * memory, which is filled during the simulation.
  *
  * @param[in] settings   A pointer to the settings structure.
- * @param[in] telescope  A pointer to the telescope model.
- * @param[in] type       The type of the visibility data (must be complex type).
+ * @param[in] tel        A pointer to the telescope model.
+ * @param[in] vis_type   The type of the visibility data (must be complex type).
  * @param[in,out] status Status return code.
  */
 OSKAR_APPS_EXPORT
 oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
-        const oskar_Telescope* telescope, int type, int* status);
+        const oskar_Telescope* tel, int vis_type, int* status);
 
 #ifdef __cplusplus
 }

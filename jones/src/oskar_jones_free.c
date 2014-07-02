@@ -36,12 +36,8 @@ extern "C" {
 
 void oskar_jones_free(oskar_Jones* jones, int* status)
 {
-    /* Check all inputs. */
-    if (!jones || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+    /* Will be safe to call with null pointers. */
+    if (!jones) return;
 
     /* Free the memory held by the structure. */
     oskar_mem_free(jones->data, status);

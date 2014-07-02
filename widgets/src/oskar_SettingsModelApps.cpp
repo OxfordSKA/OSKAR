@@ -1053,6 +1053,11 @@ void oskar_SettingsModelApps::init_settings_interferometer()
             "where source positions are the same relative to every station. "
             "If <b>false</b>, then re-evaluate all source positions and all "
             "station beams.");
+    k = group + "/scalar_mode";
+    declare(k, "Scalar mode (Stokes I only)", oskar_SettingsItem::BOOL, false);
+    setTooltip(k, "If <b>true</b>, operate in a scalar mode to simulate only "
+            "Stokes I data. If <b>false</b> (the default), then simulate "
+            "fully polarised data.");
 
     init_settings_system_noise_model("interferometer");
 

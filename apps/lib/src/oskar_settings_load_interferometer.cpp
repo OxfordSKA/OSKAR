@@ -70,6 +70,7 @@ void oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
         settings->num_vis_ave      = s.value("num_vis_ave", 1).toInt();
         settings->num_fringe_ave   = s.value("num_fringe_ave", 1).toInt();
         settings->use_common_sky   = s.value("use_common_sky", true).toBool();
+        settings->scalar_mode      = s.value("scalar_mode", false).toBool();
 
         // Get output visibility file name.
         t = s.value("oskar_vis_filename", "").toByteArray();
