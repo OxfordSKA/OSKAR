@@ -230,15 +230,13 @@ void oskar_MeasurementSet::addPolarisation(int num_pols)
 
     // Set up the correlation type, based on number of polarisations.
     Vector<Int> corrType(num_pols);
-    corrType(0) = Stokes::I;
+    corrType(0) = Stokes::XX; // Can't be Stokes I if num_pols = 1! (Throws exception.)
     if (num_pols == 2)
     {
-        corrType(0) = Stokes::XX;
         corrType(1) = Stokes::YY;
     }
     else if (num_pols == 4)
     {
-        corrType(0) = Stokes::XX;
         corrType(1) = Stokes::XY;
         corrType(2) = Stokes::YX;
         corrType(3) = Stokes::YY;
