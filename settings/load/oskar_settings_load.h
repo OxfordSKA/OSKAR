@@ -54,7 +54,7 @@ extern "C" {
  * @param[in] filename  String containing name of settings file to read.
  * @param[in,out] status Status return code.
  */
-OSKAR_EXPORT
+OSKAR_SETTINGS_LOAD_EXPORT
 void oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
         const char* filename, int* status);
 

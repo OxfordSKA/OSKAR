@@ -68,7 +68,7 @@ extern "C" {
  * @return The number of characters read, or -1 if the end of the file has
  * been reached.
  */
-OSKAR_EXPORT
+OSKAR_SETTINGS_LOAD_EXPORT
 int oskar_settings_getline(char** lineptr, size_t* n, FILE* stream);
 
 #ifdef __cplusplus

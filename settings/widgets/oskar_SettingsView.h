@@ -36,7 +36,7 @@
 #include <oskar_global.h>
 #include <QtGui/QTreeView>
 
-class OSKAR_EXPORT oskar_SettingsView : public QTreeView
+class OSKAR_SETTINGS_WIDGETS_EXPORT oskar_SettingsView : public QTreeView
 {
     Q_OBJECT
 

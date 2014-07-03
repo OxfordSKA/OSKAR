@@ -51,7 +51,7 @@ extern "C" {
  * @return
  * If the file exists, this function returns 1; if not, it returns 0.
  */
-OSKAR_EXPORT
+OSKAR_SETTINGS_LOAD_EXPORT
 int oskar_settings_file_exists(const char* filename);
 
 #ifdef __cplusplus

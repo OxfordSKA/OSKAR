@@ -36,7 +36,8 @@
 #include <oskar_global.h>
 #include <oskar_SettingsModel.h>
 
-class OSKAR_EXPORT oskar_SettingsModelApps : public oskar_SettingsModel
+class OSKAR_SETTINGS_WIDGETS_EXPORT oskar_SettingsModelApps
+: public oskar_SettingsModel
 {
     Q_OBJECT
 

@@ -51,7 +51,7 @@ extern "C" {
  * @param[out] settings A pointer to a settings structure to populate.
  * @param[in] filename  String containing name of settings file to read.
  */
-OSKAR_EXPORT
+OSKAR_SETTINGS_LOAD_EXPORT
 void oskar_settings_load_element_fit(oskar_SettingsElementFit* settings,
         const char* filename, int* status);
 
