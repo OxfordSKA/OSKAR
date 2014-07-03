@@ -2,7 +2,28 @@
 # src/utility/CMakeLists.txt
 #
 
-# ==== Utility library source
+# Utility logging library
+# -----------------------------------------------------------------------------
+set(name oskar_utility_log)
+set(lib_dir log/src)
+set(${name}_SRC
+    ${lib_dir}/oskar_log_accessors.c
+    ${lib_dir}/oskar_log_create.c
+    ${lib_dir}/oskar_log_error.c
+    ${lib_dir}/oskar_log_file_data.c
+    ${lib_dir}/oskar_log_free.c
+    ${lib_dir}/oskar_log_line.c
+    ${lib_dir}/oskar_log_message.c
+    ${lib_dir}/oskar_log_section.c
+    ${lib_dir}/oskar_log_value.c
+    ${lib_dir}/oskar_log_warning.c
+    ${lib_dir}/oskar_log_write.c
+)
+add_library(${name} STATIC ${${name}_SRC})
+
+
+# Utility functions source (main oskar library)
+# -----------------------------------------------------------------------------
 set(utility_SRC
     src/oskar_binary_file_query.c
     src/oskar_binary_file_read.c
@@ -24,18 +45,6 @@ set(utility_SRC
     src/oskar_get_data_type_string.c
     src/oskar_get_error_string.c
     src/oskar_getline.c
-    src/oskar_log_accessors.c
-    src/oskar_log_create.c
-    src/oskar_log_error.c
-    src/oskar_log_file_data.c
-    src/oskar_log_free.c
-    src/oskar_log_line.c
-    src/oskar_log_message.c
-    src/oskar_log_section.c
-    src/oskar_log_settings.c
-    src/oskar_log_value.c
-    src/oskar_log_warning.c
-    src/oskar_log_write.c
     src/oskar_mem_accessors.c
     src/oskar_mem_add.c
     src/oskar_mem_alloc.c
@@ -69,9 +78,6 @@ set(utility_SRC
     src/oskar_mem_set_element.c
     src/oskar_mem_set_value_real.c
     src/oskar_mem_stats.c
-    src/oskar_settings_free.c
-    src/oskar_settings_init.c
-    src/oskar_Settings.cpp
     src/oskar_string_to_array.c
     src/oskar_system_clock_data.c
     src/oskar_system_clock_string.c

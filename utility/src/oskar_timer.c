@@ -63,6 +63,9 @@ static double oskar_get_wtime(oskar_Timer* timer)
 #endif
 #endif
 
+    /* FIXME? Any reason why this isn't at the top and the ifdef's can't be
+     * joined up?
+     */
     /* Return immediately if timer is not of native type. */
     if (timer->type != OSKAR_TIMER_NATIVE)
         return 0.0;

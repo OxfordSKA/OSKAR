@@ -27,11 +27,13 @@
  */
 
 
-#include "apps/lib/oskar_evaluate_station_pierce_points.h"
+#include <oskar_evaluate_station_pierce_points.h>
 
-#include "apps/lib/oskar_settings_load.h"
-#include "apps/lib/oskar_set_up_telescope.h"
-#include "apps/lib/oskar_set_up_sky.h"
+#include <oskar_settings_load.h>
+#include <oskar_settings_log.h>
+
+#include <oskar_set_up_telescope.h>
+#include <oskar_set_up_sky.h>
 
 #include <oskar_log.h>
 #include <oskar_mem.h>

@@ -6,7 +6,6 @@ set(name sky_test)
 include_directories(${CUDA_INCLUDE_DIRS})
 set(${name}_SRC
     main.cpp
-    Test_TID_parameter_file.cpp
     Test_Sky.cpp
 )
 add_executable(${name} ${${name}_SRC})

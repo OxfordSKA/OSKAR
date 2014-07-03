@@ -28,7 +28,7 @@
 
 #include "test/Test_dierckx.h"
 #include <oskar_splines.h>
-#include <oskar_SettingsSpline.h>
+#include <oskar_SettingsSpline.h> /* THIS NO LONGER EXISTS!! */
 #include <oskar_mem.h>
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>

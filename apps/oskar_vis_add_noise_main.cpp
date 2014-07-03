@@ -26,7 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/lib/oskar_settings_load.h>
+#include <oskar_settings_load.h>
+#include <oskar_settings_log.h>
+
 #include <apps/lib/oskar_set_up_telescope.h>
 #include <apps/lib/oskar_OptionParser.h>
 
@@ -43,11 +45,11 @@
 
 using namespace std;
 
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void set_options(oskar_OptionParser& opt);
 bool check_options(oskar_OptionParser& opt, int argc, char** argv);
 void check_error(int status);
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 int main(int argc, char** argv)
 {

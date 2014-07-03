@@ -27,9 +27,10 @@
  */
 
 #include <oskar_global.h>
-#include "widgets/oskar_RunDialog.h"
-#include "widgets/oskar_RunThread.h"
-#include "utility/oskar_get_error_string.h"
+#include <oskar_RunDialog.h>
+#include <oskar_RunThread.h>
+
+#include <oskar_get_error_string.h>
 
 #include <QtCore/QProcess>
 #include <QtCore/QSettings>
@@ -45,7 +46,8 @@
 #include <QtGui/QTextEdit>
 #include <QtGui/QVBoxLayout>
 
-oskar_RunDialog::oskar_RunDialog(QWidget *parent) : QDialog(parent)
+oskar_RunDialog::oskar_RunDialog(QWidget *parent)
+: QDialog(parent), labelSettingsFile_(0)
 {
     // Initialise members.
     failed_ = false;

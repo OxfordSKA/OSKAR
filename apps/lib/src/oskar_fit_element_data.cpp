@@ -26,9 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/lib/oskar_settings_load_element_fit.h>
+#include <oskar_settings_load_element_fit.h>
+
 #include <apps/lib/oskar_fit_element_data.h>
 #include <apps/lib/oskar_Dir.h>
+#include <oskar_settings_log.h>
 
 #include <oskar_element.h>
 #include <oskar_image.h>

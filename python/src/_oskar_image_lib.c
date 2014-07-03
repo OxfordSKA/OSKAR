@@ -30,7 +30,7 @@
  */
 
 #include <Python.h>
-#include <numpy/arrayobject.h>
+
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -40,6 +40,10 @@
 #include <oskar_image.h>
 #include <oskar_evaluate_image_lm_grid.h>
 #include <oskar_make_image_dft.h>
+
+// http://docs.scipy.org/doc/numpy-dev/reference/c-api.deprecations.html
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <numpy/arrayobject.h>
 
 static PyObject* OskarError;
 
@@ -116,20 +120,23 @@ static PyObject* make_image_dft(PyObject* self, PyObject* args, PyObject* keywds
 //    printf("uu ndim = %i\n", PyArray_NDIM(uu_));
 
     // Parse inputs
-    if (PyArray_NDIM(uu_) != 1 || PyArray_NDIM(vv_) != 1 || PyArray_NDIM(amp_) != 1) {
+    if (PyArray_NDIM((PyArrayObject*)uu_) != 1 ||
+            PyArray_NDIM((PyArrayObject*)vv_) != 1 ||
+            PyArray_NDIM((PyArrayObject*)amp_) != 1) {
         PyErr_SetString(OskarError, "Input data arrays must be 1D.");
         return NULL;
     }
-    int num_vis = (int)*PyArray_DIMS(uu_);
-    if (num_vis != (int)*PyArray_DIMS(vv_) || num_vis != (int)*PyArray_DIMS(amp_)) {
+    int num_vis = (int)*PyArray_DIMS((PyArrayObject*)uu_);
+    if (num_vis != (int)*PyArray_DIMS((PyArrayObject*)vv_) ||
+            num_vis != (int)*PyArray_DIMS((PyArrayObject*)amp_)) {
         PyErr_SetString(OskarError, "Input data dimension mismatch.");
         return NULL;
     }
 
     // Extract C arrays from Python objects.
-    double* uu = (double*)PyArray_DATA(uu_);
-    double* vv = (double*)PyArray_DATA(vv_);
-    dComplex* amp = (dComplex*)PyArray_DATA(amp_);
+    double* uu = (double*)PyArray_DATA((PyArrayObject*)uu_);
+    double* vv = (double*)PyArray_DATA((PyArrayObject*)vv_);
+    dComplex* amp = (dComplex*)PyArray_DATA((PyArrayObject*)amp_);
 
 //    printf("No. vis = %i\n", num_vis);
 //    printf("freq = %.2e\n", freq);

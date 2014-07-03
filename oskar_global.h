@@ -344,6 +344,26 @@ enum {
 #else
 #    define OSKAR_APPS_EXPORT OSKAR_DECL_IMPORT
 #endif
+#if defined(oskar_settings_widgets_EXPORTS)
+#    define OSKAR_SETTINGS_WIDGETS_EXPORT OSKAR_DECL_EXPORT
+#else
+#    define OSKAR_SETTINGS_WIDGETS_EXPORT OSKAR_DECL_IMPORT
+#endif
+#if defined(oskar_settings_struct_EXPORTS)
+#    define OSKAR_SETTINGS_STRUCT_EXPORT OSKAR_DECL_EXPORT
+#else
+#    define OSKAR_SETTINGS_STRUCT_EXPORT OSKAR_DECL_IMPORT
+#endif
+#if defined(oskar_settings_log_EXPORTS)
+#    define OSKAR_SETTINGS_LOG_EXPORT OSKAR_DECL_EXPORT
+#else
+#    define OSKAR_SETTINGS_LOG_EXPORT OSKAR_DECL_IMPORT
+#endif
+#if defined(oskar_settings_load_EXPORTS)
+#    define OSKAR_SETTINGS_LOAD_EXPORT OSKAR_DECL_EXPORT
+#else
+#    define OSKAR_SETTINGS_LOAD_EXPORT OSKAR_DECL_IMPORT
+#endif
 
 /**
  * @def OSKAR_INLINE

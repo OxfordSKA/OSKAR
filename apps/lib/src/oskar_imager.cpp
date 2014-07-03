@@ -27,10 +27,9 @@
  */
 
 #include <cuda_runtime_api.h>
-
-#include "apps/lib/oskar_imager.h"
-#include "apps/lib/oskar_settings_load.h"
-
+#include <oskar_settings_log.h>
+#include <oskar_imager.h>
+#include <oskar_settings_load.h>
 #include <oskar_image.h>
 #include <oskar_make_image.h>
 #include <oskar_vis.h>

@@ -27,12 +27,12 @@
  */
 
 #include <apps/lib/oskar_OptionParser.h>
-
 #include <apps/lib/oskar_sim_tec_screen.h>
 #include <apps/lib/oskar_evaluate_station_pierce_points.h>
-#include <apps/lib/oskar_settings_load.h>
 #include <apps/lib/oskar_set_up_telescope.h>
 #include <apps/lib/oskar_set_up_sky.h>
+
+#include <oskar_settings_load.h>
 
 #include <oskar_telescope.h>
 #include <oskar_convert_offset_ecef_to_ecef.h>
@@ -72,7 +72,7 @@ void write_kml(const char* kml_file, const char* image_file, double* coords,
 void write_kml_ground_overlay(FILE* file, const double* coords, const char* image);
 void write_kml_pp_scatter(FILE* file, const oskar_Mem* pp_lon,
         const oskar_Mem* pp_lat, double alt_m = 300010.0);
-void write_kml_pp_vectors(FILE* file);
+//void write_kml_pp_vectors(FILE* file);
 inline void setRGB(png_byte *ptr, float val, float red_val, float blue_val);
 void abort_(const char* s, ...);
 void image_to_png(const char* filename, oskar_Image* image);
@@ -168,7 +168,7 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings& settings
     int loc = OSKAR_CPU;
 
     oskar_Sky* chunk = sky[0];
-    int num_sources = chunk->num_sources;
+    int num_sources = oskar_sky_num_sources(chunk);
     oskar_Mem *hor_x, *hor_y, *hor_z;
     hor_x = oskar_mem_create(type, loc, num_sources, &status);
     hor_y = oskar_mem_create(type, loc, num_sources, &status);
@@ -585,25 +585,25 @@ void write_kml_pp_scatter(FILE* file, const oskar_Mem* pp_lon,
     );
 }
 
-void write_kml_pp_vectors(FILE* file)
-{
-    fprintf(file,
-            ""
-            "   <Placemark>"
-            "       <styleUrl> #pp_vec</styleUrl>"
-            "       <LineString>"
-            "           <extrude>0</extrude>"
-            "           <tessellate>0</tessellate>"
-            "           <altitudeMode>absolute</altitudeMode>"
-            "           <coordinates>"
-            "               0.0,-50.0,0.0"
-            "               0.00061715,-49.999,300000.0"
-            "           </coordinates>"
-            "       </LineString>"
-            "   </Placemark>"
-            ""
-    );
-}
+//void write_kml_pp_vectors(FILE* file)
+//{
+//    fprintf(file,
+//            ""
+//            "   <Placemark>"
+//            "       <styleUrl> #pp_vec</styleUrl>"
+//            "       <LineString>"
+//            "           <extrude>0</extrude>"
+//            "           <tessellate>0</tessellate>"
+//            "           <altitudeMode>absolute</altitudeMode>"
+//            "           <coordinates>"
+//            "               0.0,-50.0,0.0"
+//            "               0.00061715,-49.999,300000.0"
+//            "           </coordinates>"
+//            "       </LineString>"
+//            "   </Placemark>"
+//            ""
+//    );
+//}
 
 inline void setRGB(png_byte *ptr, float val, float red_val, float blue_val)
 {

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/lib/oskar_settings_load.h>
+#include <oskar_settings_load.h>
 #include <apps/lib/oskar_sim_tec_screen.h>
 #include <apps/lib/oskar_OptionParser.h>
 

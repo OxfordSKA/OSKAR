@@ -26,16 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_MainWindow.h"
-#include "widgets/oskar_About.h"
-#include "widgets/oskar_BinaryLocations.h"
-#include "widgets/oskar_CudaInfoDisplay.h"
-#include "widgets/oskar_DocumentationDisplay.h"
-#include "widgets/oskar_RunDialog.h"
-#include "widgets/oskar_SettingsDelegate.h"
-#include "widgets/oskar_SettingsItem.h"
-#include "widgets/oskar_SettingsModelApps.h"
-#include "widgets/oskar_SettingsView.h"
+#include <oskar_MainWindow.h>
+
+#include <oskar_About.h>
+#include <oskar_BinaryLocations.h>
+#include <oskar_CudaInfoDisplay.h>
+#include <oskar_DocumentationDisplay.h>
+#include <oskar_RunDialog.h>
+#include <oskar_SettingsDelegate.h>
+#include <oskar_SettingsItem.h>
+#include <oskar_SettingsModelApps.h>
+#include <oskar_SettingsView.h>
 
 #include <QtGui/QAction>
 #include <QtGui/QApplication>

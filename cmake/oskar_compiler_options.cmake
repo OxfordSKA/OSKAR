@@ -18,18 +18,28 @@ set(BUILD_SHARED_LIBS ON)
 # ------------------------------------------------------------------------------
 include_directories(
     ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/apps
+    ${PROJECT_SOURCE_DIR}/apps/lib
     ${PROJECT_SOURCE_DIR}/correlate
+    ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include
     ${PROJECT_SOURCE_DIR}/imaging
     ${PROJECT_SOURCE_DIR}/interferometry
     ${PROJECT_SOURCE_DIR}/jones
     ${PROJECT_SOURCE_DIR}/math
     ${PROJECT_SOURCE_DIR}/measures
+    ${PROJECT_SOURCE_DIR}/settings
+    ${PROJECT_SOURCE_DIR}/settings/load
+    ${PROJECT_SOURCE_DIR}/settings/widgets
+    ${PROJECT_SOURCE_DIR}/settings/struct
     ${PROJECT_SOURCE_DIR}/sky
     ${PROJECT_SOURCE_DIR}/splines
     ${PROJECT_SOURCE_DIR}/station
     ${PROJECT_SOURCE_DIR}/utility
-    ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include
+    ${PROJECT_SOURCE_DIR}/utility/log
+    ${PROJECT_SOURCE_DIR}/widgets
 )
+
+
 
 # Set general compiler flags.
 # ------------------------------------------------------------------------------

@@ -28,12 +28,14 @@
 
 #include <cuda_runtime_api.h>
 
-#include "apps/lib/oskar_settings_load.h"
-#include "apps/lib/oskar_set_up_sky.h"
-#include "apps/lib/oskar_set_up_telescope.h"
-#include "apps/lib/oskar_set_up_visibilities.h"
-#include "apps/lib/oskar_sim_interferometer.h"
-#include "apps/lib/oskar_vis_write_ms.h"
+#include <oskar_settings_load.h>
+#include <oskar_settings_log.h>
+
+#include <oskar_set_up_sky.h>
+#include <oskar_set_up_telescope.h>
+#include <oskar_set_up_visibilities.h>
+#include <oskar_sim_interferometer.h>
+#include <oskar_vis_write_ms.h>
 
 #include <oskar_correlate.h>
 #include <oskar_cuda_mem_log.h>
@@ -312,7 +314,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         oskar_Sky* local_sky, oskar_StationWork* work, int* status)
 {
     int i, j, k, device_id = 0, type, vis_type, n_stations, n_baselines, n_src;
-    int complx, matrix, num_vis_dumps, num_vis_ave, num_fringe_ave;
+    int complx, num_vis_dumps, num_vis_ave, num_fringe_ave;
     double t_dump, t_ave, t_fringe, dt_dump, dt_ave, dt_fringe, gast;
     double obs_start_mjd_utc, ra0, dec0;
     oskar_Jones *J = 0, *R = 0, *E = 0, *Z = 0, *K = 0;

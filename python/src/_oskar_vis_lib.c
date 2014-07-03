@@ -30,17 +30,23 @@
  */
 
 #include <Python.h>
-#include <numpy/arrayobject.h>
+
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+
+// http://docs.scipy.org/doc/numpy-dev/reference/c-api.deprecations.html
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <numpy/arrayobject.h>
 
 #include <oskar_vis.h>
 #include <oskar_mem.h>
 
 void vis_free(void* ptr)
 {
+
     int status = OSKAR_SUCCESS;
+    printf("PyCapsule destructor for oskar_Vis called! (status = %i)\n", status);
     oskar_vis_free((oskar_Vis*)ptr, &status);
     ptr = 0;
     printf("PyCapsule destructor for oskar_Vis called! (status = %i)\n", status);

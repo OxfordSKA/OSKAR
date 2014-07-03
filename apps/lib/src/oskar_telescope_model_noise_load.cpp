@@ -28,17 +28,14 @@
 
 #include "apps/lib/oskar_telescope_model_noise_load.h"
 
-#include "interferometry/oskar_telescope_model_location.h"
-#include "interferometry/oskar_telescope_model_type.h"
-#include "interferometry/oskar_telescope_model_resize.h"
-#include "station/oskar_system_noise_model_load.h"
-#include "station/oskar_station_model_init.h"
+#include <oskar_telescope_accessors.h>
+#include <oskar_station_accessors.h>
 
-#include "utility/oskar_log_message.h"
-#include "utility/oskar_log_error.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_realloc.h"
+#include <oskar_log_message.h>
+#include <oskar_log_error.h>
+#include <oskar_get_error_string.h>
+#include <oskar_mem_copy.h>
+#include <oskar_mem_realloc.h>
 
 #include <QtCore/QtCore>
 

@@ -13,16 +13,6 @@ set(apps_SRC
     src/oskar_set_up_sky.c
     src/oskar_set_up_telescope.c
     src/oskar_set_up_visibilities.c
-    src/oskar_settings_load_beam_pattern.cpp
-    src/oskar_settings_load_element_fit.cpp
-    src/oskar_settings_load_image.cpp
-    src/oskar_settings_load_interferometer.cpp
-    src/oskar_settings_load_ionosphere.cpp
-    src/oskar_settings_load_observation.cpp
-    src/oskar_settings_load_simulator.cpp
-    src/oskar_settings_load_sky.cpp
-    src/oskar_settings_load_telescope.cpp
-    src/oskar_settings_load.c
     src/oskar_sim_beam_pattern.cpp
     src/oskar_sim_interferometer.cpp
     src/oskar_sim_tec_screen.cpp
@@ -49,17 +39,19 @@ set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_apps.
 cuda_add_library(oskar_apps ${apps_SRC})
 
 # Link in oskar_ms and oskar_fits if avaliable.
+set(settings_libs oskar_settings_load oskar_settings_log)
 if(CASACORE_FOUND AND CFITSIO_FOUND)
     target_link_libraries(oskar_apps oskar oskar_ms oskar_fits
-        ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES})
+        ${settings_libs} ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} 
+        ${CUDA_LIBRARIES})
 elseif(CASACORE_FOUND)
-    target_link_libraries(oskar_apps oskar oskar_ms
+    target_link_libraries(oskar_apps oskar oskar_ms ${settings_libs}
         ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES})
 elseif(CFITSIO_FOUND)
-    target_link_libraries(oskar_apps oskar oskar_fits
+    target_link_libraries(oskar_apps oskar oskar_fits ${settings_libs}
         ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES})
 else()
-    target_link_libraries(oskar_apps oskar
+    target_link_libraries(oskar_apps oskar ${settings_libs}
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES})
 endif()
 

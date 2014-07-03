@@ -28,13 +28,15 @@
 
 #include <cuda_runtime_api.h>
 
-#include <apps/lib/oskar_sim_beam_pattern.h>
-#include <apps/lib/oskar_settings_load.h>
-#include <apps/lib/oskar_set_up_telescope.h>
+#include <oskar_settings_load.h>
+#include <oskar_settings_log.h>
 
-#include <apps/lib/oskar_beam_pattern_generate_coordinates.h>
+#include <oskar_sim_beam_pattern.h>
+#include <oskar_set_up_telescope.h>
+#include <oskar_beam_pattern_generate_coordinates.h>
+#include <oskar_beam_pattern_write.h>
+
 #include <oskar_evaluate_station_beam.h>
-#include <apps/lib/oskar_beam_pattern_write.h>
 
 #include <oskar_telescope.h>
 #include <oskar_image.h>

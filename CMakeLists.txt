@@ -2,13 +2,6 @@
 # src/CMakeLists.txt (top level CMakeLists.txt)
 #
 
-# HACK FOR OS X to prevent the C++ compiler using clang.
-# This is because clang doesnt have OpenMP support.
-if (APPLE AND NOT CMAKE_CXX_COMPILER)
-    set(CMAKE_CXX_COMPILER g++)
-    set(CMAKE_C_COMPILER gcc)
-endif()
-
 if (DEFINED ENV{CMAKE_CXX_COMPILER})
     set(CMAKE_CXX_COMPILER $ENV{CMAKE_CXX_COMPILER})
 endif()
@@ -20,6 +13,10 @@ endif()
 # === Set the project name and specify the required CMAKE version.
 project(OSKAR CXX C)
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+# http://www.cmake.org/Wiki/CMake/Policies
+if("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_GREATER 2.8)
+    cmake_policy(SET CMP0042 OLD) # Currently required for cmake-3.x
+endif()
 
 # === Project version.
 set(OSKAR_VERSION_MAJOR 2)
@@ -102,7 +99,10 @@ if (CUDA_FOUND)
         ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${libname}.dir/src)
 
     cuda_add_library(${libname} ${${libname}_SRC})
-    target_link_libraries(${libname} ${CUDA_curand_LIBRARY})
+    target_link_libraries(${libname} 
+        oskar_utility_log 
+        oskar_settings_struct 
+        ${CUDA_curand_LIBRARY})
 
     if (OSKAR_USE_CBLAS)
         target_link_libraries(${libname} ${OSKAR_CBLAS})
@@ -115,32 +115,14 @@ if (CUDA_FOUND)
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
             SOVERSION ${OSKAR_VERSION})
     else ()
-        if (APPLE)
-            set_target_properties(${libname} PROPERTIES
-                INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-                INSTALL_RPATH_USE_LINK_PATH TRUE
-                COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-                LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-                SOVERSION ${OSKAR_VERSION} 
-                VERSION ${OSKAR_VERSION})
-        else()
-            set_target_properties(${libname} PROPERTIES
-                INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-                INSTALL_RPATH_USE_LINK_PATH TRUE
-                COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-                LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-                SOVERSION ${OSKAR_VERSION} 
-                VERSION ${OSKAR_VERSION})
-                endif()
-    endif()
-    
-#    set(props
-#        LINK_LIBRARIES
-#    )
-#    foreach (p ${props})
-#        get_target_property(TEMP ${libname} ${p})
-#        message(">>>>>> ${p} = ${TEMP}")
-#    endforeach()
+        set_target_properties(${libname} PROPERTIES
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            INSTALL_RPATH_USE_LINK_PATH TRUE
+            COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+            LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+            SOVERSION ${OSKAR_VERSION} 
+            VERSION ${OSKAR_VERSION})
+    endif(MSVC)
 
     install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
@@ -152,8 +134,9 @@ add_subdirectory(apps)
 add_subdirectory(fits)
 add_subdirectory(matlab)
 add_subdirectory(ms)
-#add_subdirectory(python)
+add_subdirectory(python)
 add_subdirectory(widgets)
+add_subdirectory(settings)
 
 # === Build external libraries (gtest)
 add_subdirectory(extern)
