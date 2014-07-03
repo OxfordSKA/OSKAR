@@ -45,8 +45,8 @@ find_package(CasaCore QUIET) # liboskar_ms
 find_package(CFitsio QUIET)  # liboskar_fits
 find_package(Matlab QUIET)   # mex functions
 #find_package(PNG QUIET)     # For writing PNG images.
-find_package(PythonInterp QUIET) # For python interface
-find_package(PythonLibs QUIET)   # For python interface
+find_package(PythonInterp 2.7 QUIET) # For python interface
+find_package(PythonLibs 2.7 QUIET)   # For python interface
 find_package(NumPy QUIET)        # For python interface
 
 if (PYTHONLIBS_FOUND AND NUMPY_FOUND AND PYTHONINTERP_FOUND AND PYTHON_VERSION_MAJOR EQUAL 2)
@@ -143,7 +143,7 @@ endif()
 
 #if (NOT PYTHON_FOUND)
 #    message("===============================================================================")
-#    message("-- WARNING: Python not found: "
+#    message("-- WARNING: Python 2.7 not found: "
 #            "Unable to build the OSKAR Python interface.")
 #    message("===============================================================================")
 #endif()
@@ -182,9 +182,9 @@ endif()
 if (MATLAB_FOUND AND CUDA_FOUND)
     message("-- INFO:   - OSKAR MATLAB interface functions")
 endif()
-#if (PYTHON_FOUND AND CUDA_FOUND)
-#    message("-- INFO:   - OSKAR Python interface")
-#endif()
+if (PYTHON_FOUND AND CUDA_FOUND)
+    message("-- INFO:   - OSKAR Python interface")
+endif()
 message("===============================================================================")
 
 
@@ -198,9 +198,9 @@ endif()
 if (MATLAB_FOUND AND CUDA_FOUND)
 message("-- INFO:   - MATLAB interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_MATLAB_INSTALL_DIR}")
 endif()
-#if (PYTHON_FOUND AND CUDA_FOUND)
-#message("-- INFO:   - Python interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_PYTHON_INSTALL_DIR}")
-#endif()
+if (PYTHON_FOUND AND CUDA_FOUND)
+message("-- INFO:   - Python interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_PYTHON_INSTALL_DIR}")
+endif()
 #message("-- NOTE: These paths can be changed using: '-DCMAKE_INSTALL_PREFIX=<path>'")
 message("===============================================================================")
 
