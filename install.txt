@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.3                                      Last update: 26 November 2013 |
+| OSKAR 2.5                                           Last update: 8 July 2014 |
 +------------------------------------------------------------------------------+
 
 1. Introduction
@@ -161,6 +161,6 @@ the following email address:
 It is also advised, with any fresh install of OSKAR, to run the example
 simulation described in the documentation found at
 
-    http://www.oerc.ox.ac.uk/~ska/oskar2
+    http://www.oerc.ox.ac.uk/~ska/oskar
 
 to establish if a simple simulation behaves as expected.

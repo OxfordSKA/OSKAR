@@ -135,11 +135,6 @@ int oskar_station_num_element_types(const oskar_Station* model)
     return model->num_element_types;
 }
 
-int oskar_station_use_polarised_elements(const oskar_Station* model)
-{
-    return model->use_polarised_elements;
-}
-
 int oskar_station_normalise_array_pattern(const oskar_Station* model)
 {
     return model->normalise_array_pattern;
@@ -441,11 +436,6 @@ void oskar_station_set_gaussian_beam(oskar_Station* model,
 {
     model->gaussian_beam_fwhm_rad = fwhm_rad;
     model->gaussian_beam_reference_freq_hz = ref_freq_hz;
-}
-
-void oskar_station_set_use_polarised_elements(oskar_Station* model, int value)
-{
-    model->use_polarised_elements = value;
 }
 
 void oskar_station_set_normalise_array_pattern(oskar_Station* model, int value)

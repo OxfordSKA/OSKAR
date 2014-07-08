@@ -35,8 +35,6 @@
 
 #include <oskar_mem.h>
 
-#define OSKAR_MAX_STATION_DEPTH 3
-
 /**
  * @brief
  * Structure to hold work buffers used for calculation of the station beam.
@@ -50,7 +48,6 @@
  * - Modified source phi values [real scalar].
  * - Beamforming weights [complex scalar].
  * - Beamforming weights error [complex scalar].
- * - Element pattern [complex matrix and complex scalar].
  * - Array pattern  [complex scalar].
  * - Hierarchy work array per beamforming level [complex matrix and complex scalar].
  *
@@ -58,24 +55,21 @@
  */
 struct oskar_StationWork
 {
-    oskar_Mem* horizon_mask;            /* Integer. */
+    oskar_Mem* horizon_mask;     /* Integer. */
 
-    oskar_Mem* enu_direction_x;         /* Real scalar. ENU direction cosine. */
-    oskar_Mem* enu_direction_y;         /* Real scalar. ENU direction cosine. */
-    oskar_Mem* enu_direction_z;         /* Real scalar. ENU direction cosine. */
+    oskar_Mem* enu_direction_x;  /* Real scalar. ENU direction cosine. */
+    oskar_Mem* enu_direction_y;  /* Real scalar. ENU direction cosine. */
+    oskar_Mem* enu_direction_z;  /* Real scalar. ENU direction cosine. */
 
-    oskar_Mem* theta_modified;          /* Real scalar. */
-    oskar_Mem* phi_modified;            /* Real scalar. */
-    oskar_Mem* weights;                 /* Complex scalar. */
-    oskar_Mem* weights_error;           /* Complex scalar. */
-    oskar_Mem* element_pattern_matrix;  /* Complex matrix. */
-    oskar_Mem* element_pattern_scalar;  /* Complex scalar. */
-    oskar_Mem* array_pattern;           /* Complex scalar. */
-    oskar_Mem* beam_temp_matrix;        /* Complex matrix (normalised mode). */
-    oskar_Mem* beam_temp_scalar;        /* Complex scalar (normalised mode). */
+    oskar_Mem* theta_modified;   /* Real scalar. */
+    oskar_Mem* phi_modified;     /* Real scalar. */
+    oskar_Mem* weights;          /* Complex scalar. */
+    oskar_Mem* weights_error;    /* Complex scalar. */
+    oskar_Mem* array_pattern;    /* Complex scalar. */
+    oskar_Mem* normalised_beam;  /* For beam normalisation. */
 
-    oskar_Mem* hierarchy_work_matrix[OSKAR_MAX_STATION_DEPTH]; /* Complex matrix. */
-    oskar_Mem* hierarchy_work_scalar[OSKAR_MAX_STATION_DEPTH]; /* Complex scalar. */
+    int num_depths;
+    oskar_Mem** beam;            /* For hierarchical stations. */
 };
 
 #ifndef OSKAR_STATION_WORK_TYPEDEF_

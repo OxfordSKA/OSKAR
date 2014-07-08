@@ -85,7 +85,6 @@ TEST(evaluate_station_beam, test_array_pattern)
     // Set the station meta-data.
     oskar_Element* element = oskar_station_element(station, 0);
     oskar_element_set_element_type(element, OSKAR_ELEMENT_TYPE_ISOTROPIC);
-    oskar_station_set_use_polarised_elements(station, 0);
 
     //error = oskar_station_save_configuration("temp_test_station.txt", &station_cpu);
 

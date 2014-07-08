@@ -127,9 +127,6 @@ OSKAR_EXPORT
 int oskar_station_num_element_types(const oskar_Station* model);
 
 OSKAR_EXPORT
-int oskar_station_use_polarised_elements(const oskar_Station* model);
-
-OSKAR_EXPORT
 int oskar_station_normalise_array_pattern(const oskar_Station* model);
 
 OSKAR_EXPORT
@@ -373,19 +370,6 @@ void oskar_station_set_phase_centre(oskar_Station* model,
 OSKAR_EXPORT
 void oskar_station_set_gaussian_beam(oskar_Station* model,
         double fwhm_rad, double ref_freq_hz);
-
-/**
- * @brief
- * Sets the flag to specify whether elements are polarised (default true).
- *
- * @details
- * Sets the flag to specify whether elements are polarised (default true).
- *
- * @param[in] model  Pointer to station model.
- * @param[in] value  True or false.
- */
-OSKAR_EXPORT
-void oskar_station_set_use_polarised_elements(oskar_Station* model, int value);
 
 /**
  * @brief

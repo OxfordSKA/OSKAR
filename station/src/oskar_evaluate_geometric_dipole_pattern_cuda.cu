@@ -37,26 +37,48 @@ extern "C" {
 
 /* Single precision. */
 void oskar_evaluate_geometric_dipole_pattern_cuda_f(int num_points,
-        const float* d_theta, const float* d_phi, int return_x_dipole,
-        float4c* d_pattern)
+        const float* d_theta, const float* d_phi, int stride,
+        float2* d_E_theta, float2* d_E_phi)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_points + num_threads - 1) / num_threads;
     oskar_evaluate_geometric_dipole_pattern_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points, d_theta, d_phi,
-            return_x_dipole, d_pattern);
+            stride, d_E_theta, d_E_phi);
+}
+
+void oskar_evaluate_geometric_dipole_pattern_scalar_cuda_f(int num_points,
+        const float* d_theta, const float* d_phi, int stride,
+        float2* d_pattern)
+{
+    int num_blocks, num_threads = 256;
+    num_blocks = (num_points + num_threads - 1) / num_threads;
+    oskar_evaluate_geometric_dipole_pattern_scalar_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points, d_theta, d_phi,
+            stride, d_pattern);
 }
 
 /* Double precision. */
 void oskar_evaluate_geometric_dipole_pattern_cuda_d(int num_points,
-        const double* d_theta, const double* d_phi, int return_x_dipole,
-        double4c* d_pattern)
+        const double* d_theta, const double* d_phi, int stride,
+        double2* d_E_theta, double2* d_E_phi)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_points + num_threads - 1) / num_threads;
     oskar_evaluate_geometric_dipole_pattern_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points, d_theta, d_phi,
-            return_x_dipole, d_pattern);
+            stride, d_E_theta, d_E_phi);
+}
+
+void oskar_evaluate_geometric_dipole_pattern_scalar_cuda_d(int num_points,
+        const double* d_theta, const double* d_phi, int stride,
+        double2* d_pattern)
+{
+    int num_blocks, num_threads = 256;
+    num_blocks = (num_points + num_threads - 1) / num_threads;
+    oskar_evaluate_geometric_dipole_pattern_scalar_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points, d_theta, d_phi,
+            stride, d_pattern);
 }
 
 
@@ -65,56 +87,98 @@ void oskar_evaluate_geometric_dipole_pattern_cuda_d(int num_points,
 /* Single precision. */
 __global__
 void oskar_evaluate_geometric_dipole_pattern_cudak_f(const int num_points,
-        const float* theta, const float* phi, const int return_x_dipole,
-        float4c* pattern)
+        const float* restrict theta, const float* restrict phi,
+        const int stride, float2* E_theta, float2* E_phi)
 {
-    float2 *E_theta, *E_phi;
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    const int i_out = i * stride;
+    if (i >= num_points) return;
+    oskar_evaluate_geometric_dipole_pattern_inline_f(theta[i], phi[i],
+            E_theta + i_out, E_phi + i_out);
 
-    /* Source index being processed by the thread. */
-    const int s = blockIdx.x * blockDim.x + threadIdx.x;
-    if (s >= num_points) return;
+}
 
-    /* Select the right outputs. */
-    if (return_x_dipole)
-    {
-        E_theta = &(pattern[s].a);
-        E_phi   = &(pattern[s].b);
-    }
-    else
-    {
-        E_theta = &(pattern[s].c);
-        E_phi   = &(pattern[s].d);
-    }
-    oskar_evaluate_geometric_dipole_pattern_inline_f(theta[s], phi[s],
-            E_theta, E_phi);
+__global__
+void oskar_evaluate_geometric_dipole_pattern_scalar_cudak_f(
+        const int num_points, const float* restrict theta,
+        const float* restrict phi, const int stride,
+        float2* restrict pattern)
+{
+    float theta_, phi_, amp;
+    float4c val;
 
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    const int i_out = i * stride;
+    if (i >= num_points) return;
+
+    /* Get source coordinates. */
+    theta_ = theta[i];
+    phi_ = phi[i];
+
+    /* Evaluate E_theta, E_phi for both X and Y dipoles. */
+    oskar_evaluate_geometric_dipole_pattern_inline_f(theta_,
+            phi_, &val.a, &val.b);
+    oskar_evaluate_geometric_dipole_pattern_inline_f(theta_,
+            phi_ + (float)M_PI_2, &val.c, &val.d);
+
+    /* Get sum of the diagonal of the autocorrelation matrix. */
+    amp = val.a.x * val.a.x + val.a.y * val.a.y +
+            val.b.x * val.b.x + val.b.y * val.b.y +
+            val.c.x * val.c.x + val.c.y * val.c.y +
+            val.d.x * val.d.x + val.d.y * val.d.y;
+    amp = sqrtf(0.5f * amp);
+
+    /* Save amplitude. */
+    pattern[i_out].x = amp;
+    pattern[i_out].y = 0.0f;
 }
 
 /* Double precision. */
 __global__
 void oskar_evaluate_geometric_dipole_pattern_cudak_d(const int num_points,
-        const double* theta, const double* phi, const int return_x_dipole,
-        double4c* pattern)
+        const double* restrict theta, const double* restrict phi,
+        const int stride, double2* E_theta, double2* E_phi)
 {
-    double2 *E_theta, *E_phi;
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    const int i_out = i * stride;
+    if (i >= num_points) return;
+    oskar_evaluate_geometric_dipole_pattern_inline_d(theta[i], phi[i],
+            E_theta + i_out, E_phi + i_out);
+}
 
-    /* Source index being processed by the thread. */
-    const int s = blockIdx.x * blockDim.x + threadIdx.x;
-    if (s >= num_points) return;
+__global__
+void oskar_evaluate_geometric_dipole_pattern_scalar_cudak_d(
+        const int num_points, const double* restrict theta,
+        const double* restrict phi, const int stride,
+        double2* restrict pattern)
+{
+    double theta_, phi_, amp;
+    double4c val;
 
-    /* Select the right outputs. */
-    if (return_x_dipole)
-    {
-        E_theta = &(pattern[s].a);
-        E_phi   = &(pattern[s].b);
-    }
-    else
-    {
-        E_theta = &(pattern[s].c);
-        E_phi   = &(pattern[s].d);
-    }
-    oskar_evaluate_geometric_dipole_pattern_inline_d(theta[s], phi[s],
-            E_theta, E_phi);
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    const int i_out = i * stride;
+    if (i >= num_points) return;
+
+    /* Get source coordinates. */
+    theta_ = theta[i];
+    phi_ = phi[i];
+
+    /* Evaluate E_theta, E_phi for both X and Y dipoles. */
+    oskar_evaluate_geometric_dipole_pattern_inline_d(theta_,
+            phi_, &val.a, &val.b);
+    oskar_evaluate_geometric_dipole_pattern_inline_d(theta_,
+            phi_ + M_PI_2, &val.c, &val.d);
+
+    /* Get sum of the diagonal of the autocorrelation matrix. */
+    amp = val.a.x * val.a.x + val.a.y * val.a.y +
+            val.b.x * val.b.x + val.b.y * val.b.y +
+            val.c.x * val.c.x + val.c.y * val.c.y +
+            val.d.x * val.d.x + val.d.y * val.d.y;
+    amp = sqrt(0.5 * amp);
+
+    /* Save amplitude. */
+    pattern[i_out].x = amp;
+    pattern[i_out].y = 0.0;
 }
 
 #ifdef __cplusplus

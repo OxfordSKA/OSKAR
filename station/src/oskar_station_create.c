@@ -132,7 +132,6 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->identical_children = OSKAR_FALSE;
     model->num_elements = num_elements;
     model->num_element_types = 0;
-    model->use_polarised_elements = OSKAR_TRUE;
     model->normalise_array_pattern = OSKAR_FALSE;
     model->enable_array_pattern = OSKAR_TRUE;
     model->common_element_orientation = OSKAR_TRUE;

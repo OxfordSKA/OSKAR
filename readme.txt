@@ -1,8 +1,8 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.5                                           Last update: 4 July 2014 |
+| OSKAR 2.5                                           Last update: 8 July 2014 |
 +------------------------------------------------------------------------------+
 
-1. OSKAR: The Oxford Square Kilometre Array Radio Telescope Simulator
+1. OSKAR: Oxford's Square Kilometre Array Radio-telescope simulator
 --------------------------------------------------------------------------------
 
 The OSKAR package consists of a number of open source libraries and applications
@@ -27,6 +27,8 @@ Top level folder structure for OSKAR.
  |                       applications.
  |
  |--- cmake            : Build system macros.
+ |
+ |--- correlate        : Cross-correlation functions.
  |
  |--- extern           : External libraries used by OSKAR.
  |    |
@@ -108,7 +110,7 @@ Simulation Applications:
 
 Utility Applications:
 
-* oskar_binry_file_query        :
+* oskar_binary_file_query       :
 * oskar_cuda_system_info        :
 * oskar_fit_element_data        :
 * oskar_fits_image_to_sky_model :

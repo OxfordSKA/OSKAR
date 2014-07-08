@@ -39,8 +39,8 @@
 
 #include <math.h>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288;
+#ifndef M_PI_2
+#define M_PI_2 1.57079632679489661923132169163975144
 #endif
 
 #define C_0 299792458.0
@@ -54,7 +54,7 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
         double frequency_hz, oskar_Mem* theta, oskar_Mem* phi, int* status)
 {
-    int spline_x = 0, spline_y = 0, computed_angles = 0;
+    int spline_x = 0, spline_y = 0, element_type, taper_type, freq_id;
     double dipole_length_m;
 
     /* Check all inputs. */
@@ -73,7 +73,31 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
 
     /* Check that the output array is complex. */
     if (!oskar_mem_is_complex(output))
+    {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
+
+    /* Resize output array if required. */
+    if ((int)oskar_mem_length(output) < num_points)
+        oskar_mem_realloc(output, num_points, status);
+
+    /* Get the element model properties. */
+    element_type    = model->element_type;
+    taper_type      = model->taper_type;
+    dipole_length_m = model->dipole_length;
+    if (model->dipole_length_units == OSKAR_ELEMENT_LENGTH_WAVELENGTHS)
+        dipole_length_m *= (C_0 / frequency_hz);
+
+    /* Check if element type is isotropic. */
+    if (element_type == OSKAR_ELEMENT_TYPE_ISOTROPIC)
+    {
+        oskar_mem_set_value_real(output, 1.0, 0, 0, status);
+
+        /* If isotropic and no tapering, then we've finished here... */
+        if (taper_type == OSKAR_ELEMENT_TAPER_NONE)
+            return;
+    }
 
     /* Ensure there is enough space in the theta and phi work arrays. */
     if ((int)oskar_mem_length(theta) < num_points)
@@ -81,40 +105,16 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
     if ((int)oskar_mem_length(phi) < num_points)
         oskar_mem_realloc(phi, num_points, status);
 
-    /* Resize output array if required. */
-    if ((int)oskar_mem_length(output) < num_points)
-        oskar_mem_realloc(output, num_points, status);
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Check if element type is isotropic. */
-    if (model->element_type == OSKAR_ELEMENT_TYPE_ISOTROPIC)
-        oskar_mem_set_value_real(output, 1.0, 0, 0, status);
-
-    /* Get the length of the dipole in metres. */
-    dipole_length_m = model->dipole_length;
-    if (model->dipole_length_units == OSKAR_ELEMENT_LENGTH_WAVELENGTHS)
-    {
-        dipole_length_m *= (C_0 / frequency_hz);
-    }
+    /* Compute modified theta and phi coordinates for dipole X. */
+    oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
+            M_PI_2 - orientation_x, num_points, x, y, z, status);
 
     /* Evaluate polarised response if output array is matrix type. */
     if (oskar_mem_is_matrix(output))
     {
-        double delta_phi_x, delta_phi_y;
-
         /* Check if spline data present for dipole X. */
         if (spline_x)
         {
-            int freq_id;
-
-            /* Compute modified theta and phi coordinates for dipole X. */
-            delta_phi_x = M_PI/2.0 - orientation_x;
-            oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-                    delta_phi_x, num_points, x, y, z, status);
-            computed_angles = 1;
-
             /* Get the frequency index. */
             freq_id = oskar_find_closest_match_d(frequency_hz,
                     oskar_element_num_freq(model),
@@ -131,45 +131,29 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
                     num_points, theta, phi, status);
 
             /* Convert from Ludwig-3 to spherical representation. */
-            oskar_convert_ludwig3_to_theta_phi_components(output,
-                    0, 4, num_points, phi, status);
+            oskar_convert_ludwig3_to_theta_phi_components(output, 0, 4,
+                    num_points, phi, status);
         }
-        else if (model->element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
+        else if (element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
         {
-            /* Compute modified theta and phi coordinates for dipole X. */
-            delta_phi_x = orientation_x - M_PI/2.0; /* TODO check the order. */
-            oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-                    delta_phi_x, num_points, x, y, z, status);
-            computed_angles = 1;
-
             /* Evaluate dipole pattern for dipole X. */
             oskar_evaluate_dipole_pattern(output, num_points, theta, phi,
-                    frequency_hz, dipole_length_m, 1, status);
+                    frequency_hz, dipole_length_m, 0, 4, status);
         }
-        else if (model->element_type == OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE)
+        else if (element_type == OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE)
         {
-            /* Compute modified theta and phi coordinates for dipole X. */
-            delta_phi_x = orientation_x - M_PI/2.0; /* TODO check the order. */
-            oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-                    delta_phi_x, num_points, x, y, z, status);
-            computed_angles = 1;
-
             /* Evaluate dipole pattern for dipole X. */
             oskar_evaluate_geometric_dipole_pattern(output, num_points,
-                    theta, phi, 1, status);
+                    theta, phi, 0, 4, status);
         }
+
+        /* Compute modified theta and phi coordinates for dipole Y. */
+        oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
+                M_PI_2 - orientation_y, num_points, x, y, z, status);
 
         /* Check if spline data present for dipole Y. */
         if (spline_y)
         {
-            int freq_id;
-
-            /* Compute modified theta and phi coordinates for dipole Y. */
-            delta_phi_y = M_PI/2.0 - orientation_y;
-            oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-                    delta_phi_y, num_points, x, y, z, status);
-            computed_angles = 1;
-
             /* Get the frequency index. */
             freq_id = oskar_find_closest_match_d(frequency_hz,
                     oskar_element_num_freq(model),
@@ -186,50 +170,50 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
                     num_points, theta, phi, status);
 
             /* Convert from Ludwig-3 to spherical representation. */
-            oskar_convert_ludwig3_to_theta_phi_components(output,
-                    2, 4, num_points, phi, status);
+            oskar_convert_ludwig3_to_theta_phi_components(output, 2, 4,
+                    num_points, phi, status);
         }
-        else if (model->element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
+        else if (element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
         {
-            /* Compute modified theta and phi coordinates for dipole Y. */
-            delta_phi_y = orientation_y - M_PI/2.0; /* TODO check the order. */
-            oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-                    delta_phi_y, num_points, x, y, z, status);
-            computed_angles = 1;
-
             /* Evaluate dipole pattern for dipole Y. */
             oskar_evaluate_dipole_pattern(output, num_points, theta, phi,
-                    frequency_hz, dipole_length_m, 0, status);
+                    frequency_hz, dipole_length_m, 2, 4, status);
         }
-        else if (model->element_type == OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE)
+        else if (element_type == OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE)
         {
-            /* Compute modified theta and phi coordinates for dipole Y. */
-            delta_phi_y = orientation_y - M_PI/2.0; /* TODO check the order. */
-            oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-                    delta_phi_y, num_points, x, y, z, status);
-            computed_angles = 1;
-
             /* Evaluate dipole pattern for dipole Y. */
             oskar_evaluate_geometric_dipole_pattern(output, num_points,
-                    theta, phi, 0, status);
+                    theta, phi, 2, 4, status);
         }
     }
 
-    /* Compute theta values for tapering, if not already done. */
-    if (model->taper_type != OSKAR_ELEMENT_TAPER_NONE && !computed_angles)
+    /* Scalar response. */
+    else
     {
-        oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-                0, num_points, x, y, z, status);
-        computed_angles = 1;
+        /* Can't use spline data here (yet). */
+        if (spline_x || spline_y)
+        {
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+        }
+        else if (element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
+        {
+            oskar_evaluate_dipole_pattern(output, num_points, theta, phi,
+                    frequency_hz, dipole_length_m, 0, 1, status);
+        }
+        else if (element_type == OSKAR_ELEMENT_TYPE_GEOMETRIC_DIPOLE)
+        {
+            oskar_evaluate_geometric_dipole_pattern(output, num_points,
+                    theta, phi, 0, 1, status);
+        }
     }
 
     /* Apply element tapering, if specified. */
-    if (model->taper_type == OSKAR_ELEMENT_TAPER_COSINE)
+    if (taper_type == OSKAR_ELEMENT_TAPER_COSINE)
     {
         oskar_apply_element_taper_cosine(output, num_points,
                 model->cosine_power, theta, status);
     }
-    else if (model->taper_type == OSKAR_ELEMENT_TAPER_GAUSSIAN)
+    else if (taper_type == OSKAR_ELEMENT_TAPER_GAUSSIAN)
     {
         oskar_apply_element_taper_gaussian(output, num_points,
                 model->gaussian_fwhm_rad, theta, status);

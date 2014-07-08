@@ -78,7 +78,6 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     /* Copy aperture array data, except num_element_types (done later). */
     model->identical_children = src->identical_children;
     model->num_elements = src->num_elements;
-    model->use_polarised_elements = src->use_polarised_elements;
     model->normalise_array_pattern = src->normalise_array_pattern;
     model->enable_array_pattern = src->enable_array_pattern;
     model->common_element_orientation = src->common_element_orientation;

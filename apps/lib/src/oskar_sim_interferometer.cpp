@@ -86,7 +86,7 @@ extern "C"
 int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 {
     int error, num_devices = 0, device_count = 0, precision, vis_type;
-    const char* fname;
+    const char *fname, *ms_name;
 
     // Find out how many GPUs are in the system.
     error = (int)cudaGetDeviceCount(&device_count);
@@ -111,8 +111,9 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     //oskar_log_settings_ionosphere(log, &settings);
 
     // Check that a data file has been specified.
-    if ( !(settings.interferometer.oskar_vis_filename ||
-            settings.interferometer.ms_filename))
+    fname = settings.interferometer.oskar_vis_filename;
+    ms_name = settings.interferometer.ms_filename;
+    if ( !(fname || ms_name))
     {
         oskar_log_error(log, "No output file specified.");
         return OSKAR_ERR_SETTINGS;
@@ -267,7 +268,6 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     record_timing(num_devices, settings.sim.cuda_device_ids, &timers[0], log);
 
     // Write visibilities to disk.
-    fname = settings.interferometer.oskar_vis_filename;
     if (fname && !error)
     {
         oskar_log_message(log, 0, "Writing OSKAR visibility file: '%s'", fname);
@@ -276,16 +276,15 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 
 #ifndef OSKAR_NO_MS
     // Write Measurement Set.
-    fname = settings.interferometer.ms_filename;
-    if (fname && !error)
+    if (ms_name && !error)
     {
         char* log_data;
         size_t log_size;
-        oskar_log_message(log, 0, "Writing Measurement Set: '%s'", fname);
+        oskar_log_message(log, 0, "Writing Measurement Set: '%s'", ms_name);
 
         // Get the log.
         log_data = oskar_log_file_data(log, &log_size);
-        oskar_vis_write_ms(vis, fname, true, log_data, log_size, &error);
+        oskar_vis_write_ms(vis, ms_name, true, log_data, log_size, &error);
         free(log_data);
     }
 #endif

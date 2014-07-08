@@ -74,7 +74,6 @@ TEST(evaluate_jones_E, evaluate_e)
                 OSKAR_SPHERICAL_TYPE_EQUATORIAL, 0.0, M_PI/2.0);
         oskar_Element* element = oskar_station_element(s, 0);
         oskar_element_set_element_type(element, OSKAR_ELEMENT_TYPE_ISOTROPIC);
-        oskar_station_set_use_polarised_elements(s, 0);
 
         // Generate the coordinates.
         std::vector<float> x_pos(station_dim);

@@ -33,8 +33,6 @@
 #include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines.h>
 #include <oskar_convert_enu_direction_cosines_to_relative_direction_cosines.h>
 
-#include <private_station_work.h>
-
 #include <math.h>
 
 #ifdef __cplusplus
@@ -108,12 +106,7 @@ void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
         }
 
         /* Set output beam array to work buffer. */
-        op = oskar_mem_is_matrix(beam_pattern) ? work->beam_temp_matrix :
-                work->beam_temp_scalar;
-
-        /* Resize output beam array if necessary. */
-        if ((int)oskar_mem_length(op) < num_points)
-            oskar_mem_realloc(op, num_points, status);
+        op = oskar_station_work_normalised_beam(work, beam_pattern, status);
 
         /* Get the beam direction in the appropriate coordinate system. */
         /* (Direction cosines are already set to the interferometer phase

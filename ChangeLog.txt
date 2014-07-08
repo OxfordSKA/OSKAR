@@ -1,8 +1,15 @@
 2014-xx-yy  OSKAR-2.5.0
 
-    * Removed element model fitting parameters from telescope model settings.
+    * Changed settings to use a half-wavelength dipole by default,
+      instead of a geometric dipole. 
+
+    * Fixed a problem in the telescope model noise loader that caused it to
+      incorrectly report an error in one situation.
 
     * Removed option to image interferometer output at end of simulation.
+      (The OSKAR imager is not recommended for general use.)
+
+    * Removed element pattern fitting parameters from telescope model settings.
 
     * Created new application to fit element pattern data and write spline 
       coefficients to a telescope model in OSKAR binary format.
@@ -24,9 +31,6 @@
     * Added option to use an analytic dipole with a definable length
       (in metres or wavelengths) as an element pattern.
 
-    * Changed settings to use a half-wavelength dipole by default,
-      instead of a geometric dipole. 
-
     * Added option to completely normalise the centre of the station beam
       to 1.0 each time it is evaluated. This will effectively perform an
       amplitude calibration for a source at the phase centre.
@@ -36,18 +40,15 @@
 
     * Added scalar mode option (Stokes I only) to interferometer simulator.
 
-    * Fixed a problem in the telescope model noise loader that caused it to
-      incorrectly report an error in one situation.
-
     * Added polarised sky model grid generator.
+
+    * Added a reference frequency which is used to scale the FWHM of Gaussian
+      beams for Gaussian beam station types.  
 
     * Added run log and settings file to Measurement Set HISTORY table.
       (Run log will now be propagated to images made with CASA.)
 
     * Improved efficiency of Measurement Set export.
-
-    * Added a reference frequency which is used to scale the FWHM of Gaussian
-      beams for Gaussian beam station types.  
 
 2014-02-25  OSKAR-2.4.0
 

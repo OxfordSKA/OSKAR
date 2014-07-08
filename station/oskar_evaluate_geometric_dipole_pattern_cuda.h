@@ -49,13 +49,32 @@ extern "C" {
  * This function evaluates the pattern of a perfect dipole antenna
  * at the supplied source positions using CUDA.
  *
- * The output matrix is
+ * The supplied theta and phi positions of the sources are the <b>modified</b>
+ * source positions. They must be adjusted relative to a dipole with its axis
+ * oriented along the x-direction.
  *
- * ( g_theta^a   g_phi^a )
- * ( g_theta^b   g_phi^b )
+ * Note that all pointers refer to device memory.
  *
- * where phi and theta are the angles measured from x to y and from xy to z,
- * respectively.
+ * @param[in] num_points         Number of points.
+ * @param[in] d_theta            Point position (modified) theta values in rad.
+ * @param[in] d_phi              Point position (modified) phi values in rad.
+ * @param[in] stride             Stride into output arrays.
+ * @param[out] d_E_theta         Response per point in E_theta.
+ * @param[out] d_E_phi           Response per point in E_phi.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_geometric_dipole_pattern_cuda_f(int num_points,
+        const float* d_theta, const float* d_phi, int stride,
+        float2* d_E_theta, float2* d_E_phi);
+
+/**
+ * @brief
+ * Evaluates pattern of a perfect dipole at source positions using CUDA
+ * (scalar version, single precision).
+ *
+ * @details
+ * This function evaluates the scalar pattern of a perfect dipole antenna
+ * at the supplied source positions using CUDA.
  *
  * The supplied theta and phi positions of the sources are the <b>modified</b>
  * source positions. They must be adjusted relative to a dipole with its axis
@@ -64,15 +83,15 @@ extern "C" {
  * Note that all pointers refer to device memory.
  *
  * @param[in] num_points         Number of points.
- * @param[in] d_theta            Source position (modified) theta values in rad.
- * @param[in] d_phi              Source position (modified) phi values in rad.
- * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
- * @param[out] d_pattern         Array of output Jones matrices per source.
+ * @param[in] d_theta            Point position (modified) theta values in rad.
+ * @param[in] d_phi              Point position (modified) phi values in rad.
+ * @param[in] stride             Stride into output array (normally 1).
+ * @param[out] d_pattern         Response per point.
  */
 OSKAR_EXPORT
-void oskar_evaluate_geometric_dipole_pattern_cuda_f(int num_points,
-        const float* d_theta, const float* d_phi, int return_x_dipole,
-        float4c* d_pattern);
+void oskar_evaluate_geometric_dipole_pattern_scalar_cuda_f(int num_points,
+        const float* d_theta, const float* d_phi, int stride,
+        float2* d_pattern);
 
 /**
  * @brief
@@ -83,13 +102,32 @@ void oskar_evaluate_geometric_dipole_pattern_cuda_f(int num_points,
  * This function evaluates the pattern of a perfect dipole antenna
  * at the supplied source positions using CUDA.
  *
- * The output matrix is
+ * The supplied theta and phi positions of the sources are the <b>modified</b>
+ * source positions. They must be adjusted relative to a dipole with its axis
+ * oriented along the x-direction.
  *
- * ( g_theta^a   g_phi^a )
- * ( g_theta^b   g_phi^b )
+ * Note that all pointers refer to device memory.
  *
- * where phi and theta are the angles measured from x to y and from xy to z,
- * respectively.
+ * @param[in] num_points         Number of points.
+ * @param[in] d_theta            Point position (modified) theta values in rad.
+ * @param[in] d_phi              Point position (modified) phi values in rad.
+ * @param[in] stride             Stride into output arrays.
+ * @param[out] d_E_theta         Response per point in E_theta.
+ * @param[out] d_E_phi           Response per point in E_phi.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_geometric_dipole_pattern_cuda_d(int num_points,
+        const double* d_theta, const double* d_phi, int stride,
+        double2* d_E_theta, double2* d_E_phi);
+
+/**
+ * @brief
+ * Evaluates pattern of a perfect dipole at source positions using CUDA
+ * (scalar version, double precision).
+ *
+ * @details
+ * This function evaluates the scalar pattern of a perfect dipole antenna
+ * at the supplied source positions using CUDA.
  *
  * The supplied theta and phi positions of the sources are the <b>modified</b>
  * source positions. They must be adjusted relative to a dipole with its axis
@@ -98,79 +136,41 @@ void oskar_evaluate_geometric_dipole_pattern_cuda_f(int num_points,
  * Note that all pointers refer to device memory.
  *
  * @param[in] num_points         Number of points.
- * @param[in] d_theta            Source position (modified) theta values in rad.
- * @param[in] d_phi              Source position (modified) phi values in rad.
- * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
- * @param[out] d_pattern         Array of output Jones matrices per source.
+ * @param[in] d_theta            Point position (modified) theta values in rad.
+ * @param[in] d_phi              Point position (modified) phi values in rad.
+ * @param[in] stride             Stride into output array (normally 1).
+ * @param[out] d_pattern         Response per point.
  */
 OSKAR_EXPORT
-void oskar_evaluate_geometric_dipole_pattern_cuda_d(int num_points,
-        const double* d_theta, const double* d_phi, int return_x_dipole,
-        double4c* d_pattern);
+void oskar_evaluate_geometric_dipole_pattern_scalar_cuda_d(int num_points,
+        const double* d_theta, const double* d_phi, int stride,
+        double2* d_pattern);
 
 #ifdef __CUDACC__
 
-/**
- * @brief
- * Evaluates pattern of a perfect dipole at source positions (single precision).
- *
- * @details
- * This CUDA kernel evaluates the pattern of a perfect dipole antenna
- * at the supplied source positions.
- *
- * The output matrix is
- *
- * ( g_theta^a   g_phi^a )
- * ( g_theta^b   g_phi^b )
- *
- * where phi and theta are the angles measured from x to y and from xy to z,
- * respectively.
- *
- * The supplied theta and phi positions of the sources are the <b>modified</b>
- * source positions. They must be adjusted relative to a dipole with its axis
- * oriented along the x-direction.
- *
- * @param[in] num_points         Number of points.
- * @param[in] theta              Source position (modified) theta values in rad.
- * @param[in] phi                Source position (modified) phi values in rad.
- * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
- * @param[out] pattern           Array of output Jones matrices per source.
- */
+/* Kernels. */
+
+__global__
+void oskar_evaluate_geometric_dipole_pattern_scalar_cudak_f(
+        const int num_points, const float* restrict theta,
+        const float* restrict phi, const int stride,
+        float2* restrict pattern);
+
 __global__
 void oskar_evaluate_geometric_dipole_pattern_cudak_f(const int num_points,
-        const float* theta, const float* phi, const int return_x_dipole,
-        float4c* pattern);
+        const float* restrict theta, const float* restrict phi,
+        const int stride, float2* E_theta, float2* E_phi);
 
-/**
- * @brief
- * Evaluates pattern of a perfect dipole at source positions (double precision).
- *
- * @details
- * This CUDA kernel evaluates the pattern of a perfect dipole antenna
- * at the supplied source positions.
- *
- * The output matrix is
- *
- * ( g_theta^a   g_phi^a )
- * ( g_theta^b   g_phi^b )
- *
- * where phi and theta are the angles measured from x to y and from xy to z,
- * respectively.
- *
- * The supplied theta and phi positions of the sources are the <b>modified</b>
- * source positions. They must be adjusted relative to a dipole with its axis
- * oriented along the x-direction.
- *
- * @param[in] num_points         Number of points.
- * @param[in] theta              Source position (modified) theta values in rad.
- * @param[in] phi                Source position (modified) phi values in rad.
- * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
- * @param[out] pattern           Array of output Jones matrices per source.
- */
 __global__
 void oskar_evaluate_geometric_dipole_pattern_cudak_d(const int num_points,
-        const double* theta, const double* phi, const int return_x_dipole,
-        double4c* pattern);
+        const double* restrict theta, const double* restrict phi,
+        const int stride, double2* E_theta, double2* E_phi);
+
+__global__
+void oskar_evaluate_geometric_dipole_pattern_scalar_cudak_d(
+        const int num_points, const double* restrict theta,
+        const double* restrict phi, const int stride,
+        double2* restrict pattern);
 
 #endif /* __CUDACC__ */
 

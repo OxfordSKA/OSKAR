@@ -33,10 +33,12 @@
 extern "C" {
 #endif
 
+static void get_mem_from_template(oskar_Mem** b, const oskar_Mem* a,
+        size_t length, int* status);
+
 oskar_StationWork* oskar_station_work_create(int type,
         int location, int* status)
 {
-    int i, complex_matrix;
     oskar_StationWork* work = 0;
 
     /* Check all inputs. */
@@ -53,9 +55,6 @@ oskar_StationWork* oskar_station_work_create(int type,
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
-    /* Set complex matrix type. */
-    complex_matrix = OSKAR_COMPLEX | OSKAR_MATRIX;
-
     /* Initialise arrays. */
     work->horizon_mask = oskar_mem_create(OSKAR_INT, location, 0, status);
     work->theta_modified = oskar_mem_create(type, location, 0, status);
@@ -69,22 +68,9 @@ oskar_StationWork* oskar_station_work_create(int type,
             location, 0, status);
     work->array_pattern = oskar_mem_create((type | OSKAR_COMPLEX),
             location, 0, status);
-    work->element_pattern_matrix = oskar_mem_create((type | complex_matrix),
-            location, 0, status);
-    work->element_pattern_scalar = oskar_mem_create((type | OSKAR_COMPLEX),
-            location, 0, status);
-    work->beam_temp_matrix = oskar_mem_create((type | complex_matrix),
-            location, 0, status);
-    work->beam_temp_scalar = oskar_mem_create((type | OSKAR_COMPLEX),
-            location, 0, status);
-
-    for (i = 0; i < OSKAR_MAX_STATION_DEPTH; ++i)
-    {
-        work->hierarchy_work_matrix[i] = oskar_mem_create((type | complex_matrix),
-                location, 0, status);
-        work->hierarchy_work_scalar[i] = oskar_mem_create((type | OSKAR_COMPLEX),
-                location, 0, status);
-    }
+    work->normalised_beam = 0;
+    work->num_depths = 0;
+    work->beam = 0;
 
     return work;
 }
@@ -93,12 +79,7 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
 {
     int i;
 
-    /* Check all inputs. */
-    if (!work || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+    if (!work) return;
 
     oskar_mem_free(work->horizon_mask, status);
     oskar_mem_free(work->theta_modified, status);
@@ -109,15 +90,11 @@ void oskar_station_work_free(oskar_StationWork* work, int* status)
     oskar_mem_free(work->weights, status);
     oskar_mem_free(work->weights_error, status);
     oskar_mem_free(work->array_pattern, status);
-    oskar_mem_free(work->element_pattern_matrix, status);
-    oskar_mem_free(work->element_pattern_scalar, status);
-    oskar_mem_free(work->beam_temp_matrix, status);
-    oskar_mem_free(work->beam_temp_scalar, status);
+    oskar_mem_free(work->normalised_beam, status);
 
-    for (i = 0; i < OSKAR_MAX_STATION_DEPTH; ++i)
+    for (i = 0; i < work->num_depths; ++i)
     {
-        oskar_mem_free(work->hierarchy_work_matrix[i], status);
-        oskar_mem_free(work->hierarchy_work_scalar[i], status);
+        oskar_mem_free(work->beam[i], status);
     }
 
     /* Free the structure. */
@@ -129,19 +106,7 @@ oskar_Mem* oskar_station_work_horizon_mask(oskar_StationWork* work)
     return work->horizon_mask;
 }
 
-const oskar_Mem* oskar_station_work_horizon_mask_const(
-        const oskar_StationWork* work)
-{
-    return work->horizon_mask;
-}
-
 oskar_Mem* oskar_station_work_enu_direction_x(oskar_StationWork* work)
-{
-    return work->enu_direction_x;
-}
-
-const oskar_Mem* oskar_station_work_enu_direction_x_const(
-        const oskar_StationWork* work)
 {
     return work->enu_direction_x;
 }
@@ -151,21 +116,57 @@ oskar_Mem* oskar_station_work_enu_direction_y(oskar_StationWork* work)
     return work->enu_direction_y;
 }
 
-const oskar_Mem* oskar_station_work_enu_direction_y_const(
-        const oskar_StationWork* work)
-{
-    return work->enu_direction_y;
-}
-
 oskar_Mem* oskar_station_work_enu_direction_z(oskar_StationWork* work)
 {
     return work->enu_direction_z;
 }
 
-const oskar_Mem* oskar_station_work_enu_direction_z_const(
-        const oskar_StationWork* work)
+oskar_Mem* oskar_station_work_normalised_beam(oskar_StationWork* work,
+        const oskar_Mem* output_beam, int* status)
 {
-    return work->enu_direction_z;
+    get_mem_from_template(&work->normalised_beam, output_beam,
+            1 + oskar_mem_length(output_beam), status);
+    return work->normalised_beam;
+}
+
+oskar_Mem* oskar_station_work_beam(oskar_StationWork* work,
+        const oskar_Mem* output_beam, size_t length, int depth, int* status)
+{
+    if (depth > work->num_depths - 1)
+    {
+        int i, old_num_depths;
+        old_num_depths = work->num_depths;
+        work->num_depths = depth + 1;
+        work->beam = realloc(work->beam, work->num_depths * sizeof(oskar_Mem*));
+        for (i = old_num_depths; i < work->num_depths; ++i)
+        {
+            work->beam[i] = 0;
+        }
+    }
+
+    get_mem_from_template(&work->beam[depth], output_beam, length, status);
+    return work->beam[depth];
+}
+
+static void get_mem_from_template(oskar_Mem** b, const oskar_Mem* a,
+        size_t length, int* status)
+{
+    int type, loc;
+    type = oskar_mem_type(a);
+    loc = oskar_mem_location(a);
+
+    /* Check if the array exists with an incorrect type and location. */
+    if (*b && (oskar_mem_type(*b) != type || oskar_mem_location(*b) != loc))
+    {
+        oskar_mem_free(*b, status);
+        *b = 0;
+    }
+
+    /* Create or resize the array. */
+    if (!*b)
+        *b = oskar_mem_create(type, loc, length, status);
+    else if (oskar_mem_length(*b) < length)
+        oskar_mem_realloc(*b, length, status);
 }
 
 #ifdef __cplusplus
