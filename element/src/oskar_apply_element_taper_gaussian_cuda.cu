@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_apply_element_taper_gaussian_cuda.h"
+#include <oskar_apply_element_taper_gaussian_cuda.h>
 
 #define M_4LN2f 2.77258872223978123767f
 #define M_4LN2  2.77258872223978123767

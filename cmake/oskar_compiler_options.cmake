@@ -21,6 +21,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/apps
     ${PROJECT_SOURCE_DIR}/apps/lib
     ${PROJECT_SOURCE_DIR}/correlate
+    ${PROJECT_SOURCE_DIR}/element
     ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include
     ${PROJECT_SOURCE_DIR}/imaging
     ${PROJECT_SOURCE_DIR}/interferometry

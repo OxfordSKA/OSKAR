@@ -3,23 +3,10 @@
 #
 
 set(station_SRC
-    src/oskar_apply_element_taper_cosine.c
-    src/oskar_apply_element_taper_gaussian.c
     src/oskar_blank_below_horizon.c
-    src/oskar_element_accessors.c
-    src/oskar_element_copy.c
-    src/oskar_element_create.c
-    src/oskar_element_evaluate.c
-    src/oskar_element_free.c
-    src/oskar_element_load_cst.c
-    src/oskar_element_read.c
-    src/oskar_element_resize_freq_data.c
-    src/oskar_element_write.c
     src/oskar_evaluate_array_pattern.c
     src/oskar_evaluate_array_pattern_hierarchical.c
     src/oskar_evaluate_beam_horizon_direction.c
-    src/oskar_evaluate_dipole_pattern.c
-    src/oskar_evaluate_geometric_dipole_pattern.c
     src/oskar_evaluate_pierce_points.c
     src/oskar_evaluate_element_weights_dft.c
     src/oskar_evaluate_element_weights_errors.c
@@ -68,11 +55,7 @@ set(station_SRC
 
 if (CUDA_FOUND)
     list(APPEND station_SRC
-        src/oskar_apply_element_taper_cosine_cuda.cu
-        src/oskar_apply_element_taper_gaussian_cuda.cu
         src/oskar_blank_below_horizon_cuda.cu
-        src/oskar_evaluate_dipole_pattern_cuda.cu
-        src/oskar_evaluate_geometric_dipole_pattern_cuda.cu
         src/oskar_evaluate_element_weights_errors_cuda.cu
         src/oskar_evaluate_element_weights_dft_cuda.cu
         src/oskar_evaluate_vla_beam_pbcor_cuda.cu
