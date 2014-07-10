@@ -32,8 +32,10 @@
 
 // For HEALPix grids
 #include <oskar_convert_healpix_ring_to_theta_phi.h>
-#include <math/oskar_healpix_nside_to_npix.h>
+#include <oskar_healpix_nside_to_npix.h>
 #include <oskar_convert_galactic_to_fk5.h>
+
+#include <oskar_binary.h>
 
 #include <cmath>
 #include <cstdio>
@@ -70,14 +72,13 @@ TEST(beam_pattern_coordinates, generate_lon_lat_grid)
 
     // Write to OSKAR binary file (for manual inspection in MATLAB).
     const char* filename = "coords1.dat";
-    remove(filename);
     const char* group = "coords";
-    oskar_mem_binary_file_write_ext(lon, filename, group, "RA", 0, num_pixels,
-            &status);
+    oskar_Binary* h = oskar_binary_create(filename, 'w', &status);
+    oskar_binary_write_mem_ext(h, lon, group, "RA", 0, num_pixels, &status);
     ASSERT_EQ(OSKAR_SUCCESS, status);
-    oskar_mem_binary_file_write_ext(lat, filename, group, "Dec", 0, num_pixels,
-            &status);
+    oskar_binary_write_mem_ext(h, lat, group, "Dec", 0, num_pixels, &status);
     ASSERT_EQ(OSKAR_SUCCESS, status);
+    oskar_binary_free(h);
 
     // Clean up.
     oskar_mem_free(lon, &status);
@@ -114,15 +115,12 @@ TEST(beam_pattern_coordinates, HEALPix_horizontal)
     }
 
     const char* filename = "test_healpix_coords.dat";
-    remove(filename);
-    oskar_mem_binary_file_write_ext(l, filename, "healpix", "phi", 0,
-            num_pixels, &status);
-    oskar_mem_binary_file_write_ext(b, filename, "healpix", "theta", 0,
-            num_pixels, &status);
-    oskar_mem_binary_file_write_ext(RA, filename, "healpix", "RA", 0,
-            num_pixels, &status);
-    oskar_mem_binary_file_write_ext(Dec, filename, "healpix", "Dec", 0,
-            num_pixels, &status);
+    oskar_Binary* h = oskar_binary_create(filename, 'w', &status);
+    oskar_binary_write_mem_ext(h, l, "healpix", "phi", 0, num_pixels, &status);
+    oskar_binary_write_mem_ext(h, b, "healpix", "theta", 0, num_pixels, &status);
+    oskar_binary_write_mem_ext(h, RA, "healpix", "RA", 0, num_pixels, &status);
+    oskar_binary_write_mem_ext(h, Dec, "healpix", "Dec", 0, num_pixels, &status);
+    oskar_binary_free(h);
 
     oskar_mem_free(b, &status);
     oskar_mem_free(l, &status);

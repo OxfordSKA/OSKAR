@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,54 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_binary_stream_read_oskar_version.h>
-#include <oskar_BinaryHeader.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ifndef OSKAR_MEM_DATA_TYPE_STRING_H_
+#define OSKAR_MEM_DATA_TYPE_STRING_H_
+
+/**
+ * @file oskar_mem_data_type_string.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_binary_stream_read_oskar_version(FILE* stream,
-        int* major, int* minor, int* patch, int* status)
-{
-    oskar_BinaryHeader header;
-
-    /* Check all inputs. */
-    if (!stream || !major || !minor || !patch || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Set stream pointer to beginning. */
-    rewind(stream);
-
-    /* Read the header from the stream. */
-    if (fread(&header, sizeof(oskar_BinaryHeader), 1, stream) != 1)
-    {
-        *status = OSKAR_ERR_FILE_IO;
-        return;
-    }
-
-    /* Check if this is a valid header. */
-    if (strncmp("OSKARBIN", header.magic, 8) != 0)
-    {
-        *status = OSKAR_ERR_BINARY_FILE_INVALID;
-        return;
-    }
-
-    /* Read the OSKAR version. */
-    *major = header.version[2];
-    *minor = header.version[1];
-    *patch = header.version[0];
-}
+OSKAR_EXPORT
+const char* oskar_mem_data_type_string(int data_type);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_MEM_DATA_TYPE_STRING_H_ */

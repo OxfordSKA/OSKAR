@@ -31,9 +31,7 @@
 #include <oskar_vis.h>
 
 #include <oskar_get_error_string.h>
-#include <oskar_BinaryTag.h>
-#include <oskar_mem_binary_file_read.h>
-#include <oskar_binary_tag_index_free.h>
+#include <oskar_binary.h>
 
 #include "matlab/vis/lib/oskar_mex_vis_to_matlab_struct.h"
 #include "matlab/common/oskar_matlab_common.h"
@@ -76,11 +74,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     /* Read date field from binary file */
     oskar_Mem *date = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &status);
-    oskar_BinaryTagIndex* index = NULL;
-    oskar_mem_binary_file_read(date, filename, &index,
-            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING, 0,
-            &status);
-    oskar_binary_tag_index_free(index, &status);
+    oskar_Binary* index = oskar_binary_create(filename, 'r', &status);
+    oskar_binary_read_mem(index, date, OSKAR_TAG_GROUP_METADATA,
+            OSKAR_TAG_METADATA_DATE_TIME_STRING, 0, &status);
+    oskar_binary_free(index);
     if (status)
     {
         oskar_matlab_error("Failed to read date field!");

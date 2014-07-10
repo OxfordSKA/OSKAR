@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_stream_write.h"
-#include "utility/oskar_endian.h"
+#include <private_binary.h>
+#include <oskar_binary_write.h>
+#include <oskar_endian.h>
 #include <oskar_mem.h>
 #include <string.h>
 #include <stdlib.h>
@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-void oskar_binary_stream_write(FILE* stream, unsigned char data_type,
+void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
         unsigned char id_group, unsigned char id_tag, int user_index,
         size_t data_size, const void* data, int* status)
 {
@@ -52,7 +52,7 @@ void oskar_binary_stream_write(FILE* stream, unsigned char data_type,
     memset(tag.user_index, 0, sizeof(tag.user_index));
 
     /* Check all inputs. */
-    if (!stream || !data || !status)
+    if (!handle || !data || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -100,40 +100,41 @@ void oskar_binary_stream_write(FILE* stream, unsigned char data_type,
     memcpy(tag.user_index, &user_index, sizeof(int));
 
     /* Write the tag to the file. */
-    if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, stream) != 1)
+    if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, handle->stream) != 1)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
 
     /* Write the data to the file. */
-    if (fwrite(data, 1, data_size, stream) != data_size)
+    if (fwrite(data, 1, data_size, handle->stream) != data_size)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
 }
 
-void oskar_binary_stream_write_double(FILE* stream, unsigned char id_group,
+void oskar_binary_write_double(oskar_Binary* handle, unsigned char id_group,
         unsigned char id_tag, int user_index, double value, int* status)
 {
-    oskar_binary_stream_write(stream, OSKAR_DOUBLE, id_group, id_tag,
+    oskar_binary_write(handle, OSKAR_DOUBLE, id_group, id_tag,
             user_index, sizeof(double), &value, status);
 }
 
-void oskar_binary_stream_write_int(FILE* stream, unsigned char id_group,
+void oskar_binary_write_int(oskar_Binary* handle, unsigned char id_group,
         unsigned char id_tag, int user_index, int value, int* status)
 {
-    oskar_binary_stream_write(stream, OSKAR_INT, id_group, id_tag,
+    oskar_binary_write(handle, OSKAR_INT, id_group, id_tag,
             user_index, sizeof(int), &value, status);
 }
 
-void oskar_binary_stream_write_ext(FILE* stream, unsigned char data_type,
+void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
         const char* name_group, const char* name_tag, int user_index,
         size_t data_size, const void* data, int* status)
 {
     oskar_BinaryTag tag;
     size_t block_size, lgroup, ltag;
+    FILE* stream;
 
     /* Initialise the tag. */
     char magic[] = "TAG";
@@ -142,7 +143,7 @@ void oskar_binary_stream_write_ext(FILE* stream, unsigned char data_type,
     memset(tag.user_index, 0, sizeof(tag.user_index));
 
     /* Check all inputs. */
-    if (!stream || !data || !name_group || !name_tag || !status)
+    if (!handle || !data || !name_group || !name_tag || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -200,43 +201,44 @@ void oskar_binary_stream_write_ext(FILE* stream, unsigned char data_type,
     memcpy(tag.user_index, &user_index, sizeof(int));
 
     /* Write the tag to the file. */
-    if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, stream) != 1)
+    if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, handle->stream) != 1)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
 
     /* Write the group name and tag name to the file. */
-    if (fwrite(name_group, 1, tag.group.bytes, stream) != tag.group.bytes)
+    if (fwrite(name_group, 1, tag.group.bytes,
+            handle->stream) != tag.group.bytes)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-    if (fwrite(name_tag, 1, tag.tag.bytes, stream) != tag.tag.bytes)
+    if (fwrite(name_tag, 1, tag.tag.bytes, handle->stream) != tag.tag.bytes)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
 
     /* Write the data to the file. */
-    if (fwrite(data, 1, data_size, stream) != data_size)
+    if (fwrite(data, 1, data_size, handle->stream) != data_size)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
 }
 
-void oskar_binary_stream_write_ext_double(FILE* stream, const char* name_group,
+void oskar_binary_write_ext_double(oskar_Binary* handle, const char* name_group,
         const char* name_tag, int user_index, double value, int* status)
 {
-    oskar_binary_stream_write_ext(stream, OSKAR_DOUBLE, name_group,
+    oskar_binary_write_ext(handle, OSKAR_DOUBLE, name_group,
             name_tag, user_index, sizeof(double), &value, status);
 }
 
-void oskar_binary_stream_write_ext_int(FILE* stream, const char* name_group,
+void oskar_binary_write_ext_int(oskar_Binary* handle, const char* name_group,
         const char* name_tag, int user_index, int value, int* status)
 {
-    oskar_binary_stream_write_ext(stream, OSKAR_INT, name_group,
+    oskar_binary_write_ext(handle, OSKAR_INT, name_group,
             name_tag, user_index, sizeof(int), &value, status);
 }
 

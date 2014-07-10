@@ -28,10 +28,7 @@
 
 #include <private_image.h>
 #include <oskar_image.h>
-#include <oskar_BinaryTag.h>
-#include <oskar_binary_stream_read.h>
-#include <oskar_binary_tag_index_free.h>
-#include <oskar_mem_binary_stream_read.h>
+#include <oskar_binary.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -43,8 +40,7 @@ oskar_Image* oskar_image_read(const char* filename, int idx, int* status)
 {
     int type, tag_error = 0;
     unsigned char grp = OSKAR_TAG_GROUP_IMAGE;
-    FILE* stream;
-    oskar_BinaryTagIndex* index = NULL;
+    oskar_Binary* h = 0;
     oskar_Image* image = 0;
 
     /* Check all inputs. */
@@ -57,23 +53,17 @@ oskar_Image* oskar_image_read(const char* filename, int idx, int* status)
     /* Check if safe to proceed. */
     if (*status) return 0;
 
-    /* Open the stream. */
-    stream = fopen(filename, "rb");
-    if (stream == NULL)
-    {
-        *status = OSKAR_ERR_FILE_IO;
-        return 0;
-    }
+    /* Create the handle. */
+    h = oskar_binary_create(filename, 'r', status);
 
     /* Read the data type. */
-    oskar_binary_stream_read_int(stream, &index, grp,
-            OSKAR_IMAGE_TAG_DATA_TYPE, idx, &type, status);
+    oskar_binary_read_int(h, grp, OSKAR_IMAGE_TAG_DATA_TYPE, idx, &type,
+            status);
 
     /* Check if safe to proceed. */
     if (*status)
     {
-        oskar_binary_tag_index_free(index, status);
-        fclose(stream);
+        oskar_binary_free(h);
         return 0;
     }
 
@@ -81,72 +71,69 @@ oskar_Image* oskar_image_read(const char* filename, int idx, int* status)
     image = oskar_image_create(type, OSKAR_CPU, status);
 
     /* Optionally read the settings path (ignore the error code). */
-    oskar_mem_binary_stream_read(image->settings_path, stream, &index,
+    oskar_binary_read_mem(h, image->settings_path,
             OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0, &tag_error);
 
     /* Read the dimensions. */
-    oskar_binary_stream_read_int(stream, &index, grp,
+    oskar_binary_read_int(h, grp,
             OSKAR_IMAGE_TAG_NUM_PIXELS_WIDTH, idx, &image->width, status);
-    oskar_binary_stream_read_int(stream, &index, grp,
+    oskar_binary_read_int(h, grp,
             OSKAR_IMAGE_TAG_NUM_PIXELS_HEIGHT, idx, &image->height, status);
-    oskar_binary_stream_read_int(stream, &index, grp,
+    oskar_binary_read_int(h, grp,
             OSKAR_IMAGE_TAG_NUM_POLS, idx, &image->num_pols, status);
-    oskar_binary_stream_read_int(stream, &index, grp,
+    oskar_binary_read_int(h, grp,
             OSKAR_IMAGE_TAG_NUM_TIMES, idx, &image->num_times, status);
-    oskar_binary_stream_read_int(stream, &index, grp,
+    oskar_binary_read_int(h, grp,
             OSKAR_IMAGE_TAG_NUM_CHANNELS, idx, &image->num_channels, status);
 
     /* Read the dimension order. */
-    oskar_binary_stream_read(stream, &index, OSKAR_INT, grp,
-            OSKAR_IMAGE_TAG_DIMENSION_ORDER, idx, sizeof(image->dimension_order),
-            image->dimension_order, status);
+    oskar_binary_read(h, OSKAR_INT, grp, OSKAR_IMAGE_TAG_DIMENSION_ORDER, idx,
+            sizeof(image->dimension_order), image->dimension_order, status);
 
     /* Read other image metadata. */
-    oskar_binary_stream_read_int(stream, &index, grp,
+    oskar_binary_read_int(h, grp,
             OSKAR_IMAGE_TAG_IMAGE_TYPE, idx, &image->image_type, status);
 
-    oskar_binary_stream_read_double(stream, &index, grp,
+    oskar_binary_read_double(h, grp,
             OSKAR_IMAGE_TAG_TIME_START_MJD_UTC, idx, &image->time_start_mjd_utc,
             status);
-    oskar_binary_stream_read_double(stream, &index, grp,
+    oskar_binary_read_double(h, grp,
             OSKAR_IMAGE_TAG_TIME_INC_SEC, idx, &image->time_inc_sec, status);
-    oskar_binary_stream_read_double(stream, &index, grp,
+    oskar_binary_read_double(h, grp,
             OSKAR_IMAGE_TAG_FREQ_START_HZ, idx, &image->freq_start_hz, status);
-    oskar_binary_stream_read_double(stream, &index, grp,
+    oskar_binary_read_double(h, grp,
             OSKAR_IMAGE_TAG_FREQ_INC_HZ, idx, &image->freq_inc_hz, status);
 
     /* Optionally read pixel grid type and coordinate frame. These are optional
      * to maintain compatibility with OSKAR <= v2.3.1 */
     tag_error = 0;
-    oskar_binary_stream_read_int(stream, &index, grp,
+    oskar_binary_read_int(h, grp,
             OSKAR_IMAGE_TAG_GRID_TYPE, idx, &image->grid_type, &tag_error);
-    oskar_binary_stream_read_int(stream, &index, grp,
+    oskar_binary_read_int(h, grp,
             OSKAR_IMAGE_TAG_COORD_FRAME, idx, &image->coord_frame, &tag_error);
 
     /* Rectilinear grid type tags */
     tag_error = 0;
-    oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_CENTRE_LONGITUDE, idx, &image->centre_lon_deg, &tag_error);
-    oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_CENTRE_LATITUDE, idx, &image->centre_lat_deg, &tag_error);
-    oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_FOV_LONGITUDE, idx, &image->fov_lon_deg, &tag_error);
-    oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_FOV_LATITUDE, idx, &image->fov_lat_deg, &tag_error);
+    oskar_binary_read_double(h, grp, OSKAR_IMAGE_TAG_CENTRE_LONGITUDE, idx,
+            &image->centre_lon_deg, &tag_error);
+    oskar_binary_read_double(h, grp, OSKAR_IMAGE_TAG_CENTRE_LATITUDE, idx,
+            &image->centre_lat_deg, &tag_error);
+    oskar_binary_read_double(h, grp, OSKAR_IMAGE_TAG_FOV_LONGITUDE, idx,
+            &image->fov_lon_deg, &tag_error);
+    oskar_binary_read_double(h, grp, OSKAR_IMAGE_TAG_FOV_LATITUDE, idx,
+            &image->fov_lat_deg, &tag_error);
 
     /* HEALPix grid type tags */
     tag_error = 0;
-    oskar_binary_stream_read_int(stream, &index, grp,
-            OSKAR_IMAGE_TAG_HEALPIX_NSIDE, idx, &image->healpix_nside,
-            &tag_error);
+    oskar_binary_read_int(h, grp, OSKAR_IMAGE_TAG_HEALPIX_NSIDE, idx,
+            &image->healpix_nside, &tag_error);
 
     /* Read the image data. */
-    oskar_mem_binary_stream_read(image->data, stream, &index,
-            grp, OSKAR_IMAGE_TAG_IMAGE_DATA, idx, status);
+    oskar_binary_read_mem(h, image->data, grp, OSKAR_IMAGE_TAG_IMAGE_DATA, idx,
+            status);
 
-    /* Free the index and close the stream. */
-    oskar_binary_tag_index_free(index, status);
-    fclose(stream);
+    /* Release the handle. */
+    oskar_binary_free(h);
 
     /* Return a handle to the image. */
     return image;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,44 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_get_data_type_string.h>
-#include <oskar_mem.h>
+#ifndef OSKAR_SCAN_BINARY_FILE_H_
+#define OSKAR_SCAN_BINARY_FILE_H_
+
+/**
+ * @file oskar_scan_binary_file.h
+ */
+
+#include <oskar_global.h>
+#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-const char* oskar_get_data_type_string(int data_type)
-{
-    switch (data_type)
-    {
-        case OSKAR_CHAR:
-            return "OSKAR_CHAR";
-        case OSKAR_INT:
-            return "OSKAR_INT";
-        case OSKAR_SINGLE:
-            return "OSKAR_SINGLE";
-        case OSKAR_DOUBLE:
-            return "OSKAR_DOUBLE";
-        case OSKAR_COMPLEX:
-            return "OSKAR_COMPLEX";
-        case OSKAR_MATRIX:
-            return "OSKAR_MATRIX";
-        case OSKAR_SINGLE_COMPLEX:
-            return "OSKAR_SINGLE_COMPLEX";
-        case OSKAR_DOUBLE_COMPLEX:
-            return "OSKAR_DOUBLE_COMPLEX";
-        case OSKAR_SINGLE_COMPLEX_MATRIX:
-            return "OSKAR_SINGLE_COMPLEX_MATRIX";
-        case OSKAR_DOUBLE_COMPLEX_MATRIX:
-            return "OSKAR_DOUBLE_COMPLEX_MATRIX";
-        default:
-            break;
-    };
-    return "ERROR: Unknown data type.";
-}
-
+/**
+ * @brief Summarises the contents of an OSKAR binary file.
+ *
+ * @details
+ * This function summarises the given binary file and writes details of the
+ * tags it contains to the log.
+ *
+ * @param[in,out] log      Pointer to log structure.
+ * @param[in] filename     Name of binary file.
+ * @param[in,out] status   Status return code.
+ */
+OSKAR_EXPORT
+void oskar_scan_binary_file(oskar_Log* log, const char* filename, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_SCAN_BINARY_FILE_H_ */

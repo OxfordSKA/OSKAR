@@ -38,8 +38,6 @@
 #include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
 #include <oskar_convert_ecef_to_baseline_uvw.h>
 
-#include <oskar_get_data_type_string.h>
-
 #include <math.h>
 #include <stddef.h>
 

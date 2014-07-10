@@ -211,12 +211,6 @@ OSKAR_INLINE int oskar_mem_type_is_scalar(const int mem_type)
 }
 #endif
 
-/* REMOVE AND RENAME? */
-#include <oskar_mem_binary_file_read.h>
-#include <oskar_mem_binary_file_write.h>
-#include <oskar_mem_binary_stream_read.h>
-#include <oskar_mem_binary_stream_write.h>
-
 #include <oskar_mem_accessors.h>
 #include <oskar_mem_add.h>
 #include <oskar_mem_append_raw.h>
@@ -228,6 +222,7 @@ OSKAR_INLINE int oskar_mem_type_is_scalar(const int mem_type)
 #include <oskar_mem_create_alias.h>
 #include <oskar_mem_create_alias_from_raw.h>
 #include <oskar_mem_create_copy.h>
+#include <oskar_mem_data_type_string.h>
 #include <oskar_mem_different.h>
 #include <oskar_mem_element_multiply.h>
 #include <oskar_mem_element_size.h>

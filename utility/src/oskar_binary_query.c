@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_tag_index_query.h"
-#include "utility/oskar_endian.h"
+#include <private_binary.h>
+#include <oskar_binary_query.h>
+#include <oskar_endian.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-void oskar_binary_tag_index_query(const oskar_BinaryTagIndex* index,
+void oskar_binary_query(const oskar_Binary* index,
         unsigned char data_type, unsigned char id_group, unsigned char id_tag,
         int user_index, size_t* data_size, long* data_offset, int* status)
 {
@@ -81,7 +81,7 @@ void oskar_binary_tag_index_query(const oskar_BinaryTagIndex* index,
         *data_offset = index->data_offset_bytes[i];
 }
 
-void oskar_binary_tag_index_query_ext(const oskar_BinaryTagIndex* index,
+void oskar_binary_query_ext(const oskar_Binary* index,
         unsigned char data_type, const char* name_group, const char* name_tag,
         int user_index, size_t* block_size, size_t* data_size,
         long* data_offset, int* status)

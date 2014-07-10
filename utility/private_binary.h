@@ -26,22 +26,66 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_TAG_H_
-#define OSKAR_BINARY_TAG_H_
+#ifndef OSKAR_PRIVATE_BINARY_H_
+#define OSKAR_PRIVATE_BINARY_H_
 
 /**
- * @file oskar_BinaryTag.h
+ * @file private_binary.h
  */
 
-#ifdef __cplusplus
-#include <cstdlib>
-#else
 #include <stdlib.h>
-#endif
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief Structure to hold a 64-byte header in an OSKAR binary file.
+ *
+ * @details
+ * This structure holds header data for an OSKAR binary file.
+ * The header is exactly 64 bytes long and contains the following data:
+ *
+   @verbatim
+   Offset  Length  Description
+   ----------------------------------------------------------------------------
+    0       9      The ASCII string "OSKARBIN", with trailing zero.
+    9       1      The OSKAR binary format version (enumerator).
+   10       1      If data blocks are written as little endian, 0; else 1.
+   11       1      Size of void* in bytes.
+   12       1      Size of int in bytes.
+   13       1      Size of long int in bytes.
+   14       1      Size of float in bytes.
+   15       1      Size of double in bytes.
+   16       4      The OSKAR_VERSION as a little-endian, 4-byte integer.
+   20      44      Padding to 64 byte length (reserved for future use).
+   @endverbatim
+ */
+struct oskar_BinaryHeader
+{
+    char magic[9];              /* Start + 0 */
+    char bin_version;           /* Start + 9 */
+    char endian;                /* Start + 10 */
+    char size_ptr;              /* Start + 11 */
+    char size_int;              /* Start + 12 */
+    char size_long;             /* Start + 13 */
+    char size_float;            /* Start + 14 */
+    char size_double;           /* Start + 15 */
+    char version[4];            /* Start + 16 */
+    char reserved[44];          /* Start + 20 */
+};
+
+#ifndef OSKAR_BINARY_HEADER_TYPEDEF_
+#define OSKAR_BINARY_HEADER_TYPEDEF_
+typedef struct oskar_BinaryHeader oskar_BinaryHeader;
+#endif /* OSKAR_BINARY_HEADER_TYPEDEF_ */
+
+/* This binary format is anticipated to remain stable. */
+enum
+{
+    OSKAR_BINARY_FORMAT_VERSION = 1
+};
 
 /**
  * @brief Structure to hold tag data from an OSKAR binary file.
@@ -96,18 +140,29 @@ struct oskar_BinaryTag
     char user_index[4];      /**< User index, as little-endian 4-byte integer. */
     char size_bytes[8];      /**< Block size in bytes, as little-endian 8-byte integer. */
 };
+
+#ifndef OSKAR_BINARY_TAG_TYPEDEF_
+#define OSKAR_BINARY_TAG_TYPEDEF_
 typedef struct oskar_BinaryTag oskar_BinaryTag;
+#endif /* OSKAR_BINARY_TAG_TYPEDEF_ */
 
 /**
- * @brief Structure to hold tag index data from an OSKAR binary file.
+ * @brief Structure to manage an OSKAR binary file.
  *
  * @details
  * This structure holds an index of tags found in an OSKAR binary file,
  * and the offset in bytes from the start of the file of each data block.
  * It can be used to find an item of the required type.
  */
-struct oskar_BinaryTagIndex
+struct oskar_Binary
 {
+    FILE* stream;             /**< Standard file stream handle. */
+    int big_endian;           /**< True if data are in big endian format. */
+    int bin_version;          /**< Binary format version number. */
+    int size_ptr;             /**< Size of void* recorded in the file. */
+    int oskar_ver_major;
+    int oskar_ver_minor;
+    int oskar_ver_patch;
     int num_tags;             /**< Number of tags in the index. */
     int* extended;            /**< Array of flags (if true, tag is extended). */
     int* data_type;           /**< Array of tag data types. */
@@ -120,72 +175,14 @@ struct oskar_BinaryTagIndex
     size_t* data_size_bytes;  /**< Array of data sizes.*/
     size_t* block_size_bytes; /**< Array of block sizes. */
 };
-typedef struct oskar_BinaryTagIndex oskar_BinaryTagIndex;
 
-/*
- * IMPORTANT:
- * To maintain binary data compatibility, do not modify any numbers
- * that appear in the lists below!
- */
-
-/* Standard tag groups. */
-enum {
-    OSKAR_TAG_GROUP_METADATA = 1,
-    OSKAR_TAG_GROUP_CUDA_INFO = 2,
-    OSKAR_TAG_GROUP_SETTINGS = 3,
-    OSKAR_TAG_GROUP_RUN = 4,
-    OSKAR_TAG_GROUP_VISIBILITY = 5,
-    OSKAR_TAG_GROUP_IMAGE = 6,
-    OSKAR_TAG_GROUP_SKY_MODEL = 7,
-    OSKAR_TAG_GROUP_TIME_FREQ_DATA = 8,
-    OSKAR_TAG_GROUP_SPLINE_DATA = 9,
-    OSKAR_TAG_GROUP_ELEMENT_DATA = 10
-};
-
-/* Standard metadata tags. */
-enum {
-    OSKAR_TAG_METADATA_DATE_TIME_STRING = 1,
-    OSKAR_TAG_METADATA_OSKAR_VERSION_STRING = 2,
-    OSKAR_TAG_METADATA_USERNAME = 3,
-    OSKAR_TAG_METADATA_CWD = 4
-};
-
-/* Standard settings tags. */
-enum {
-    OSKAR_TAG_SETTINGS_PATH = 1,
-    OSKAR_TAG_SETTINGS = 2
-};
-
-/* Standard CUDA info tags. */
-/* Values are as in oskar_CudaInfo and oskar_CudaDeviceInfo. */
-enum {
-    OSKAR_TAG_CUDA_INFO_NUM_DEVICES = 1,
-    OSKAR_TAG_CUDA_INFO_DRIVER_VERSION = 2,
-    OSKAR_TAG_CUDA_INFO_RUNTIME_VERSION = 3,
-    OSKAR_TAG_CUDA_INFO_DEVICE_NAME = 4,
-    OSKAR_TAG_CUDA_INFO_DEVICE_COMPUTE = 5,
-    OSKAR_TAG_CUDA_INFO_DEVICE_MEMORY_SIZE = 6,
-    OSKAR_TAG_CUDA_INFO_DEVICE_MULTIPROCESSORS = 7,
-    OSKAR_TAG_CUDA_INFO_DEVICE_GPU_CLOCK = 8,
-    OSKAR_TAG_CUDA_INFO_DEVICE_MEMORY_CLOCK = 9,
-    OSKAR_TAG_CUDA_INFO_DEVICE_MEMORY_BUS = 10,
-    OSKAR_TAG_CUDA_INFO_DEVICE_L2_CACHE = 11,
-    OSKAR_TAG_CUDA_INFO_DEVICE_SHARED_MEMORY_SIZE = 12,
-    OSKAR_TAG_CUDA_INFO_DEVICE_REGS_PER_BLOCK = 13,
-    OSKAR_TAG_CUDA_INFO_DEVICE_WARP_SIZE = 14,
-    OSKAR_TAG_CUDA_INFO_DEVICE_MAX_THREADS_PER_BLOCK = 15,
-    OSKAR_TAG_CUDA_INFO_DEVICE_MAX_THREADS_DIM = 16,
-    OSKAR_TAG_CUDA_INFO_DEVICE_MAX_GRID_SIZE = 17
-};
-
-/* Standard run info tags. */
-enum {
-    OSKAR_TAG_RUN_LOG = 1,
-    OSKAR_TAG_RUN_TIME = 2 /* (double; sec) */
-};
+#ifndef OSKAR_BINARY_TYPEDEF_
+#define OSKAR_BINARY_TYPEDEF_
+typedef struct oskar_Binary oskar_Binary;
+#endif /* OSKAR_BINARY_TYPEDEF_ */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_TAG_H_ */
+#endif /* OSKAR_PRIVATE_BINARY_H_ */

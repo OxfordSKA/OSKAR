@@ -32,7 +32,7 @@
 #include <oskar_log.h>
 #include <oskar_vis.h>
 #include <oskar_version_string.h>
-#include <oskar_binary_tag_index_free.h>
+#include <oskar_binary.h>
 #include <string>
 #include <cstdio>
 
@@ -64,11 +64,11 @@ int main(int argc, char** argv)
     oskar_Vis* vis = oskar_vis_read(vis_file, &error);
 
     // Load the run log.
-    oskar_BinaryTagIndex* index = 0;
+    oskar_Binary* h = oskar_binary_create(vis_file, 'r', &error);
     oskar_Mem* log = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &error);
-    oskar_mem_binary_file_read(log, vis_file, &index,
-            OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &error);
-    oskar_binary_tag_index_free(index, &error);
+    oskar_binary_read_mem(h, log, OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0,
+            &error);
+    oskar_binary_free(h);
 
     // Write data as a Measurement Set.
     oskar_vis_write_ms(vis, ms_name.c_str(), 1,

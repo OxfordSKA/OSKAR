@@ -26,15 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "matlab/vis/lib/oskar_mex_vis_to_matlab_struct.h"
 
 #include <oskar_get_error_string.h>
-#include <oskar_BinaryTag.h>
-#include <oskar_mem_binary_stream_read.h>
-#include <oskar_binary_tag_index_query.h>
-#include <oskar_binary_tag_index_create.h>
-#include <oskar_binary_tag_index_free.h>
+#include <oskar_binary.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -306,22 +301,22 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
     // If possible, load the settings and log.
     if (filename != NULL)
     {
-        int status = OSKAR_SUCCESS;
-        oskar_BinaryTagIndex* index = NULL;
+        int status = 0;
+        oskar_Binary* h = 0;
         FILE* stream = fopen(filename, "rb");
-        if (!stream)
+        h = oskar_binary_create(filename, 'r', &status);
+        if (status)
             mexErrMsgTxt("ERROR: Failed reading settings from visibility file.\n");
-        oskar_binary_tag_index_create(&index, stream, &status);
         size_t data_size = 0;
         long int data_offset = 0;
         int tag_error = 0;
         // Extract the settings
-        oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_SETTINGS,
+        oskar_binary_query(h, OSKAR_CHAR, OSKAR_TAG_GROUP_SETTINGS,
                 OSKAR_TAG_SETTINGS, 0, &data_size, &data_offset, &tag_error);
         if (!tag_error)
         {
             oskar_Mem* temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &status);
-            oskar_mem_binary_stream_read(temp, stream, &index,
+            oskar_binary_read_mem(h, temp,
                     OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
             oskar_mem_realloc(temp, (int)oskar_mem_length(temp) + 1, &status);
             if (status)
@@ -331,12 +326,12 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
             oskar_mem_free(temp, &status);
         }
         // Extract the log
-        oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
+        oskar_binary_query(h, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
                 OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset, &tag_error);
         if (!tag_error)
         {
             oskar_Mem* temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &status);
-            oskar_mem_binary_stream_read(temp, stream, &index,
+            oskar_binary_read_mem(h, temp,
                     OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
             oskar_mem_realloc(temp, (int)oskar_mem_length(temp) + 1, &status);
             if (status)
@@ -346,7 +341,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
             oskar_mem_free(temp, &status);
         }
         fclose(stream);
-        oskar_binary_tag_index_free(index, &status);
+        oskar_binary_free(h);
     }
 
     /* Populate structure TODO convert some of this to nested structure format? */

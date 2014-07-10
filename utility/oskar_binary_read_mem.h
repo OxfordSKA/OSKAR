@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,44 +26,63 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_STREAM_READ_OSKAR_VERSION_H_
-#define OSKAR_BINARY_STREAM_READ_OSKAR_VERSION_H_
+#ifndef OSKAR_BINARY_READ_MEM_H_
+#define OSKAR_BINARY_READ_MEM_H_
 
 /**
- * @file oskar_binary_stream_read_oskar_version.h
+ * @file oskar_binary_read_mem.h
  */
 
 #include <oskar_global.h>
-
-#ifdef __cplusplus
-#include <cstdio>
-#else
-#include <stdio.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Reads the OSKAR version from an input stream.
+ * @brief
+ * Loads an OSKAR memory block from an OSKAR binary file.
  *
  * @details
- * This function reads the version of the OSKAR library that created a
- * binary file.
+ * This function loads the contents of an OSKAR memory block from a binary file.
  *
- * @param[in,out] stream An input stream.
- * @param[out]    maj    OSKAR version (major).
- * @param[out]    min    OSKAR version (minor).
- * @param[out]    patch  OSKAR version (patch).
- * @param[in,out] status Status return code.
+ * @param[in] mem          Pointer to data structure.
+ * @param[in,out] stream   An input stream.
+ * @param[in,out] index    Pointer to an index structure pointer.
+ * @param[in] data_type    Type of the memory (as in oskar_Mem).
+ * @param[in] id_group     Tag group identifier.
+ * @param[in] id_tag       Tag identifier.
+ * @param[in] user_index   User-defined index.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_binary_stream_read_oskar_version(FILE* stream,
-        int* major, int* minor, int* patch, int* status);
+void oskar_binary_read_mem(oskar_Binary* handle, oskar_Mem* mem,
+        unsigned char id_group, unsigned char id_tag, int user_index,
+        int* status);
+
+/**
+ * @brief
+ * Loads an OSKAR memory block from an OSKAR binary file.
+ *
+ * @details
+ * This function loads the contents of an OSKAR memory block from a binary file.
+ *
+ * @param[in] mem          Pointer to data structure.
+ * @param[in,out] stream   An input stream.
+ * @param[in,out] index    Pointer to an index structure pointer.
+ * @param[in] data_type    Type of the memory (as in oskar_Mem).
+ * @param[in] name_group   Tag group name.
+ * @param[in] name_tag     Tag name.
+ * @param[in] user_index   User-defined index.
+ * @param[in,out] status   Status return code.
+ */
+OSKAR_EXPORT
+void oskar_binary_read_mem_ext(oskar_Binary* handle, oskar_Mem* mem,
+        const char* name_group, const char* name_tag, int user_index,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_STREAM_READ_OSKAR_VERSION_H_ */
+#endif /* OSKAR_BINARY_READ_MEM_H_ */

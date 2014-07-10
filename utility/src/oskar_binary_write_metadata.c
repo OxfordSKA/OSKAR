@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_binary_header_version.h"
+#include <oskar_binary.h>
+
+#include <oskar_system_clock_string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,21 +37,58 @@
 extern "C" {
 #endif
 
-int oskar_binary_header_version(const oskar_BinaryHeader* header)
+void oskar_binary_write_metadata(oskar_Binary* handle, int* status)
 {
-    if (sizeof(int) == sizeof(header->version))
+    const char* str;
+    size_t len;
+
+    /* Check all inputs. */
+    if (!handle || !status)
     {
-        union {
-            int version;
-            char v[sizeof(int)];
-        } version;
-        memcpy(version.v, header->version, sizeof(int));
-        return version.version;
+        oskar_set_invalid_argument(status);
+        return;
     }
-    return 0;
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Write the system date and time. */
+    str = oskar_system_clock_string(0);
+    len = 1 + strlen(str);
+    oskar_binary_write(handle, OSKAR_CHAR,
+            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING,
+            0, len, str, status);
+
+    /* Write the OSKAR version string. */
+    len = 1 + strlen(OSKAR_VERSION_STR);
+    oskar_binary_write(handle, OSKAR_CHAR,
+            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_OSKAR_VERSION_STRING,
+            0, len, OSKAR_VERSION_STR, status);
+
+    /* Write the current working directory. */
+    str = getenv("PWD");
+    if (!str) str = getenv("CD");
+    if (str)
+    {
+        len = 1 + strlen(str);
+        oskar_binary_write(handle, OSKAR_CHAR,
+                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_CWD,
+                0, len, str, status);
+    }
+
+    /* Write the username. */
+    str = getenv("USERNAME");
+    if (!str)
+        str = getenv("USER");
+    if (str)
+    {
+        len = 1 + strlen(str);
+        oskar_binary_write(handle, OSKAR_CHAR,
+                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_USERNAME,
+                0, len, str, status);
+    }
 }
 
 #ifdef __cplusplus
 }
 #endif
-

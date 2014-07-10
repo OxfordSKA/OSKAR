@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,33 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_HEADER_VERSION_H_
-#define OSKAR_BINARY_HEADER_VERSION_H_
+#ifndef OSKAR_BINARY_FREE_H_
+#define OSKAR_BINARY_FREE_H_
 
 /**
- * @file oskar_binary_header_version.h
+ * @file oskar_binary_free.h
  */
 
-#include "oskar_global.h"
-#include "oskar_BinaryHeader.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Returns the OSKAR_VERSION in a binary file header.
+ * @brief Frees memory held by a binary file handle.
  *
  * @details
- * This function returns the OSKAR_VERSION in a binary file header.
+ * This function frees memory held by a binary file handle.
  *
- * @param[in] header Pointer to a header structure.
+ * @param[in,out] handle  Pointer to structure to free.
  */
 OSKAR_EXPORT
-int oskar_binary_header_version(const oskar_BinaryHeader* header);
+void oskar_binary_free(oskar_Binary* handle);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_HEADER_VERSION_H_ */
+#endif /* OSKAR_BINARY_FREE_H_ */

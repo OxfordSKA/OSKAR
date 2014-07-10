@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,42 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_STREAM_WRITE_CUDA_INFO_H_
-#define OSKAR_BINARY_STREAM_WRITE_CUDA_INFO_H_
+#ifndef OSKAR_BINARY_READ_OSKAR_VERSION_H_
+#define OSKAR_BINARY_READ_OSKAR_VERSION_H_
 
 /**
- * @file oskar_binary_stream_write_cuda_info.h
+ * @file oskar_binary_read_oskar_version.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_CudaInfo.h"
-
-#ifdef __cplusplus
-#include <cstdio>
-#else
-#include <stdio.h>
-#endif
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Writes standard CUDA device information to an output stream.
+ * @brief Reads the OSKAR version from a binary file.
  *
  * @details
- * This function writes standard CUDA device information to an output stream.
+ * This function reads the version of the OSKAR library that created a
+ * binary file.
  *
- * @param[in,out] stream An output stream.
- * @param[in] cuda_info  Pointer to CUDA information structure to write out.
+ * @param[in] filename   Name of file to check.
+ * @param[out]    maj    OSKAR version (major).
+ * @param[out]    min    OSKAR version (minor).
+ * @param[out]    patch  OSKAR version (patch).
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_binary_stream_write_cuda_info(FILE* stream,
-        const oskar_CudaInfo* cuda_info, int* status);
+void oskar_binary_read_oskar_version(const char* filename,
+        int* major, int* minor, int* patch, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_STREAM_WRITE_CUDA_INFO_H_ */
+#endif /* OSKAR_BINARY_READ_OSKAR_VERSION_H_ */

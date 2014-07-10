@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_BINARY_FILE_READ_H_
-#define OSKAR_MEM_BINARY_FILE_READ_H_
+#ifndef OSKAR_BINARY_WRITE_MEM_H_
+#define OSKAR_BINARY_WRITE_MEM_H_
 
 /**
- * @file oskar_mem_binary_file_read.h
+ * @file oskar_binary_write_mem.h
  */
 
 #include <oskar_global.h>
-#include <oskar_BinaryTag.h>
+#include <stddef.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,48 +43,46 @@ extern "C" {
 
 /**
  * @brief
- * Loads an OSKAR memory block from an OSKAR binary file.
+ * Appends an OSKAR memory block to an OSKAR binary file.
  *
  * @details
- * This function loads the contents of an OSKAR memory block from a binary file.
+ * This function saves the contents of an OSKAR memory block to a binary file.
  *
+ * @param[in,out] handle   Binary file handle.
  * @param[in] mem          Pointer to data structure.
- * @param[in] filename     Name of binary file.
- * @param[in,out] index    Pointer to an index structure pointer.
- * @param[in] data_type    Type of the memory (as in oskar_Mem).
  * @param[in] id_group     Tag group identifier.
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
+ * @param[in] num_to_write If > 0, only the first \p num_elements are written.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_binary_file_read(oskar_Mem* mem, const char* filename,
-        oskar_BinaryTagIndex** index, unsigned char id_group,
-        unsigned char id_tag, int user_index, int* status);
+void oskar_binary_write_mem(oskar_Binary* handle, const oskar_Mem* mem,
+        unsigned char id_group, unsigned char id_tag, int user_index,
+        size_t num_to_write, int* status);
 
 /**
  * @brief
- * Loads an OSKAR memory block from an OSKAR binary file.
+ * Appends an OSKAR memory block to an OSKAR binary file.
  *
  * @details
- * This function loads the contents of an OSKAR memory block from a binary file.
+ * This function saves the contents of an OSKAR memory block to a binary file.
  *
+ * @param[in,out] handle   Binary file handle.
  * @param[in] mem          Pointer to data structure.
- * @param[in] filename     Name of binary file.
- * @param[in,out] index    Pointer to an index structure pointer.
- * @param[in] data_type    Type of the memory (as in oskar_Mem).
  * @param[in] name_group   Tag group name.
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
+ * @param[in] num_to_write If > 0, only the first \p num_elements are written.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_binary_file_read_ext(oskar_Mem* mem, const char* filename,
-        oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index, int* status);
+void oskar_binary_write_mem_ext(oskar_Binary* handle, const oskar_Mem* mem,
+        const char* name_group, const char* name_tag, int user_index,
+        size_t num_to_write, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_BINARY_FILE_READ_H_ */
+#endif /* OSKAR_BINARY_WRITE_MEM_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,25 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_GET_DATA_TYPE_STRING_H_
-#define OSKAR_GET_DATA_TYPE_STRING_H_
+#ifndef OSKAR_BINARY_CREATE_H_
+#define OSKAR_BINARY_CREATE_H_
 
 /**
- * @file oskar_get_data_type_string.h
+ * @file oskar_binary_create.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * @brief Create a handle to work with an OSKAR binary file.
+ *
+ * @details
+ * This function creates a handle to work with an OSKAR binary file.
+ *
+ * The handle must be released by calling oskar_binary_free() when it has been
+ * finished with.
+ *
+ * @param[in] filename    Filename to open.
+ * @param[in] mode        Mode: either 'w' (write), 'r' (read) or 'a' (append).
+ * @param[in,out] status  Status return code.
+ */
 OSKAR_EXPORT
-const char* oskar_get_data_type_string(int data_type);
+oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_GET_DATA_TYPE_STRING_H_ */
+#endif /* OSKAR_BINARY_CREATE_H_ */

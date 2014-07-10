@@ -25,24 +25,18 @@ add_library(${name} STATIC ${${name}_SRC})
 # Utility functions source (main oskar library)
 # -----------------------------------------------------------------------------
 set(utility_SRC
-    src/oskar_binary_file_query.c
-    src/oskar_binary_file_read.c
-    src/oskar_binary_file_write.c
-    src/oskar_binary_header_version.c
-    src/oskar_binary_stream_read_header.c
-    src/oskar_binary_stream_read.c
-    src/oskar_binary_stream_read_oskar_version.c
-    src/oskar_binary_stream_write_header.c
-    src/oskar_binary_stream_write_cuda_info.c
-    src/oskar_binary_stream_write_metadata.c
-    src/oskar_binary_stream_write.c
-    src/oskar_binary_tag_index_create.c
-    src/oskar_binary_tag_index_free.c
-    src/oskar_binary_tag_index_query.c
+    src/oskar_binary_create.c
+    src/oskar_binary_free.c
+    src/oskar_binary_query.c
+    src/oskar_binary_read_mem.c
+    src/oskar_binary_read_oskar_version.c
+    src/oskar_binary_read.c
+    src/oskar_binary_write_mem.c
+    src/oskar_binary_write_metadata.c
+    src/oskar_binary_write.c
     src/oskar_blank_parentheses.c
     src/oskar_endian.c
     src/oskar_file_exists.c
-    src/oskar_get_data_type_string.c
     src/oskar_get_error_string.c
     src/oskar_getline.c
     src/oskar_mem_accessors.c
@@ -50,10 +44,6 @@ set(utility_SRC
     src/oskar_mem_alloc.c
     src/oskar_mem_append_raw.c
     src/oskar_mem_append.c
-    src/oskar_mem_binary_file_read.c
-    src/oskar_mem_binary_file_write.c
-    src/oskar_mem_binary_stream_read.c
-    src/oskar_mem_binary_stream_write.c
     src/oskar_mem_clear_contents.c
     src/oskar_mem_convert_precision.c
     src/oskar_mem_copy.c
@@ -61,6 +51,7 @@ set(utility_SRC
     src/oskar_mem_create_alias.c
     src/oskar_mem_create_copy.c
     src/oskar_mem_create.c
+    src/oskar_mem_data_type_string.c
     src/oskar_mem_different.c
     src/oskar_mem_element_size.c
     src/oskar_mem_element_multiply.c
@@ -78,6 +69,7 @@ set(utility_SRC
     src/oskar_mem_set_element.c
     src/oskar_mem_set_value_real.c
     src/oskar_mem_stats.c
+    src/oskar_scan_binary_file.c
     src/oskar_string_to_array.c
     src/oskar_system_clock_data.c
     src/oskar_system_clock_string.c

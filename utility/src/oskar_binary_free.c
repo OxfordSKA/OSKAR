@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,39 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_STREAM_WRITE_METADATA_H_
-#define OSKAR_BINARY_STREAM_WRITE_METADATA_H_
-
-/**
- * @file oskar_binary_stream_write_metadata.h
- */
-
-#include "oskar_global.h"
-
-#ifdef __cplusplus
-#include <cstdio>
-#else
-#include <stdio.h>
-#endif
+#include <private_binary.h>
+#include <oskar_binary_free.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Writes standard metadata to an output stream.
- *
- * @details
- * This function writes standard metadata to an output stream.
- *
- * @param[in,out] stream An output stream.
- * @param[in,out] status Status return code.
- */
-OSKAR_EXPORT
-void oskar_binary_stream_write_metadata(FILE* stream, int* status);
+void oskar_binary_free(oskar_Binary* handle)
+{
+    int i;
+
+    /* Check if structure exists. */
+    if (!handle) return;
+
+    /* Close the file. */
+    if (handle->stream)
+        fclose(handle->stream);
+
+    /* Free string data. */
+    for (i = 0; i < handle->num_tags; ++i)
+    {
+        free(handle->name_group[i]);
+        free(handle->name_tag[i]);
+    }
+
+    /* Free arrays. */
+    free(handle->extended);
+    free(handle->data_type);
+    free(handle->id_group);
+    free(handle->id_tag);
+    free(handle->name_group);
+    free(handle->name_tag);
+    free(handle->user_index);
+    free(handle->data_offset_bytes);
+    free(handle->data_size_bytes);
+    free(handle->block_size_bytes);
+
+    /* Free the structure itself. */
+    free(handle);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_BINARY_STREAM_WRITE_METADATA_H_ */

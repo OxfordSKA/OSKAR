@@ -30,14 +30,7 @@
 
 #include <apps/lib/oskar_OptionParser.h>
 #include <oskar_get_error_string.h>
-#include <oskar_get_data_type_string.h>
-#include <oskar_BinaryTag.h>
-#include <oskar_BinaryHeader.h>
-#include <oskar_mem_binary_stream_read.h>
-#include <oskar_binary_stream_read_oskar_version.h>
-#include <oskar_binary_tag_index_query.h>
-#include <oskar_binary_tag_index_create.h>
-#include <oskar_binary_tag_index_free.h>
+#include <oskar_binary.h>
 #include <oskar_version_string.h>
 #include <oskar_log.h>
 
@@ -69,15 +62,8 @@ int main(int argc, char **argv)
 
     // Get the version of OSKAR that created the file.
     int vMajor, vMinor, vPatch;
-    FILE* file = fopen(filename, "rb");
-    if (!file)
-    {
-        fprintf(stderr, "ERROR: Failed to open specified file.\n");
-        return OSKAR_ERR_FILE_IO;
-    }
-    oskar_binary_stream_read_oskar_version(file, &vMajor, &vMinor, &vPatch,
+    oskar_binary_read_oskar_version(filename, &vMajor, &vMinor, &vPatch,
             &status);
-    fclose(file);
 
     // Load visibilities into memory.
     oskar_Vis* vis = oskar_vis_read(filename, &status);
@@ -99,7 +85,7 @@ int main(int argc, char **argv)
         oskar_log_value(log, 0, width, "Precision", "%s", oskar_mem_is_double(
                 oskar_vis_amplitude_const(vis)) ? "double" : "single");
         oskar_log_value(log, 0, width, "Amplitude type", "%s",
-                oskar_get_data_type_string(oskar_mem_type(
+                oskar_mem_data_type_string(oskar_mem_type(
                         oskar_vis_amplitude_const(vis))));
         oskar_log_value(log, 0, width, "No. stations", "%d",
                 oskar_vis_num_stations(vis));
@@ -131,20 +117,19 @@ int main(int argc, char **argv)
 
     if (displayLog)
     {
-        oskar_BinaryTagIndex* index = NULL;
-        FILE* stream = fopen(filename, "rb");
-        if (!stream) return OSKAR_ERR_FILE_IO;
-        oskar_binary_tag_index_create(&index, stream, &status);
+        oskar_Binary* h = 0;
+        h = oskar_binary_create(filename, 'r', &status);
+        if (status) return OSKAR_ERR_FILE_IO;
         size_t data_size = 0;
         long int data_offset = 0;
         int tag_error = 0;
-        oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
+        oskar_binary_query(h, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
                 OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset, &tag_error);
         if (!tag_error)
         {
             oskar_Mem *temp;
             temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &status);
-            oskar_mem_binary_stream_read(temp, stream, &index,
+            oskar_binary_read_mem(h, temp,
                     OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
             oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);
             if (!status)
@@ -154,26 +139,24 @@ int main(int argc, char **argv)
             }
             oskar_mem_free(temp, &status);
         }
-        fclose(stream);
-        oskar_binary_tag_index_free(index, &status);
+        oskar_binary_free(h);
     }
 
     if (displaySettings)
     {
-        oskar_BinaryTagIndex* index = NULL;
-        FILE* stream = fopen(filename, "rb");
-        if (!stream) return OSKAR_ERR_FILE_IO;
-        oskar_binary_tag_index_create(&index, stream, &status);
+        oskar_Binary* h = 0;
+        h = oskar_binary_create(filename, 'r', &status);
+        if (status) return OSKAR_ERR_FILE_IO;
         size_t data_size = 0;
         long int data_offset = 0;
         int tag_error = 0;
-        oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_SETTINGS,
+        oskar_binary_query(h, OSKAR_CHAR, OSKAR_TAG_GROUP_SETTINGS,
                 OSKAR_TAG_SETTINGS, 0, &data_size, &data_offset, &tag_error);
         if (!tag_error)
         {
             oskar_Mem *temp;
             temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &status);
-            oskar_mem_binary_stream_read(temp, stream, &index,
+            oskar_binary_read_mem(h, temp,
                     OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
             oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);
             if (!status)
@@ -183,8 +166,7 @@ int main(int argc, char **argv)
             }
             oskar_mem_free(temp, &status);
         }
-        fclose(stream);
-        oskar_binary_tag_index_free(index, &status);
+        oskar_binary_free(h);
     }
 
     return status;

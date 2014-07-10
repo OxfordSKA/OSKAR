@@ -36,15 +36,10 @@
 #include <oskar_set_up_sky.h>
 
 #include <oskar_log.h>
-#include <oskar_mem.h>
 #include <oskar_sky.h>
 #include <oskar_station.h>
 #include <oskar_telescope.h>
-#include <oskar_BinaryTag.h>
-#include <oskar_binary_stream_write_header.h>
-#include <oskar_binary_stream_write_metadata.h>
-#include <oskar_binary_stream_write.h>
-#include <oskar_mem_binary_stream_write.h>
+#include <oskar_binary.h>
 #include <oskar_convert_offset_ecef_to_ecef.h>
 #include <oskar_convert_mjd_to_gast_fast.h>
 #include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
@@ -141,12 +136,12 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
     oskar_mem_int(dims, &status)[1] = num_stations;
 
     const char* filename = settings.ionosphere.pierce_points.filename;
+    oskar_Binary* h = oskar_binary_create(filename, 'w', &status);
     FILE* stream = fopen(filename, "wb");
     if (!stream)
         return OSKAR_ERR_FILE_IO;
 
-    oskar_binary_stream_write_header(stream, &status);
-    oskar_binary_stream_write_metadata(stream, &status);
+    oskar_binary_write_metadata(h, &status);
 
     double screen_height_m = settings.ionosphere.TID->height_km * 1000.0;
 
@@ -230,55 +225,50 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
         int freq_idx = 0;
 
         // Write the header TAGS
-        oskar_binary_stream_write_int(stream, GRP, TIME_IDX, index, t,
+        oskar_binary_write_int(h, GRP, TIME_IDX, index, t, &status);
+        oskar_binary_write_double(h, GRP, FREQ_IDX, index, freq_idx, &status);
+        oskar_binary_write_double(h, GRP, TIME_MJD_UTC, index, t_dump, &status);
+        oskar_binary_write_double(h, GRP, FREQ_HZ, index, freq_hz, &status);
+        oskar_binary_write_int(h, GRP, NUM_FIELDS, index, num_fields, &status);
+        oskar_binary_write_int(h, GRP, NUM_FIELD_TAGS, index, num_field_tags,
                 &status);
-        oskar_binary_stream_write_double(stream, GRP, FREQ_IDX, index,
-                freq_idx, &status);
-        oskar_binary_stream_write_double(stream, GRP, TIME_MJD_UTC, index,
-                t_dump, &status);
-        oskar_binary_stream_write_double(stream, GRP, FREQ_HZ, index,
-                freq_hz, &status);
-        oskar_binary_stream_write_int(stream, GRP, NUM_FIELDS, index,
-                num_fields, &status);
-        oskar_binary_stream_write_int(stream, GRP, NUM_FIELD_TAGS, index,
-                num_field_tags, &status);
 
         // Write data TAGS (fields)
         int field, tagID;
         field = 0;
         tagID = HEADER_OFFSET + (num_field_tags * field);
-        oskar_mem_binary_stream_write(pp_lon, stream, GRP, tagID + DATA,
+        oskar_binary_write_mem(h, pp_lon, GRP, tagID + DATA,
                 index, 0, &status);
-        oskar_mem_binary_stream_write(dims, stream, GRP, tagID  + DIMS,
+        oskar_binary_write_mem(h, dims, GRP, tagID  + DIMS,
                 index, 0, &status);
-        oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + LABEL,
+        oskar_binary_write(h, OSKAR_CHAR, GRP, tagID + LABEL,
                 index, label1.size()+1, label1.c_str(), &status);
-        oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + UNITS,
+        oskar_binary_write(h, OSKAR_CHAR, GRP, tagID + UNITS,
                 index, units.size()+1, units.c_str(), &status);
         field = 1;
         tagID = HEADER_OFFSET + (num_field_tags * field);
-        oskar_mem_binary_stream_write(pp_lat, stream, GRP, tagID + DATA,
+        oskar_binary_write_mem(h, pp_lat, GRP, tagID + DATA,
                 index, 0, &status);
-        oskar_mem_binary_stream_write(dims, stream, GRP, tagID  + DIMS,
+        oskar_binary_write_mem(h, dims, GRP, tagID  + DIMS,
                 index, 0, &status);
-        oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + LABEL,
+        oskar_binary_write(h, OSKAR_CHAR, GRP, tagID + LABEL,
                 index, label2.size()+1, label2.c_str(), &status);
-        oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + UNITS,
+        oskar_binary_write(h, OSKAR_CHAR, GRP, tagID + UNITS,
                 index, units.size()+1, units.c_str(), &status);
         field = 2;
         tagID = HEADER_OFFSET + (num_field_tags * field);
-        oskar_mem_binary_stream_write(pp_rel_path, stream, GRP, tagID + DATA,
+        oskar_binary_write_mem(h, pp_rel_path, GRP, tagID + DATA,
                 index, 0, &status);
-        oskar_mem_binary_stream_write(dims, stream, GRP, tagID  + DIMS,
+        oskar_binary_write_mem(h, dims, GRP, tagID  + DIMS,
                 index, 0, &status);
-        oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + LABEL,
+        oskar_binary_write(h, OSKAR_CHAR, GRP, tagID + LABEL,
                 index, label3.size()+1, label3.c_str(), &status);
-        oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + UNITS,
+        oskar_binary_write(h, OSKAR_CHAR, GRP, tagID + UNITS,
                 index, units2.size()+1, units2.c_str(), &status);
     } // Loop over times
 
     // Close the OSKAR binary file.
-    fclose(stream);
+    oskar_binary_free(h);
 
     // clean up memory
     oskar_mem_free(hor_x, &status);

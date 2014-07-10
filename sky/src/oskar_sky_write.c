@@ -27,15 +27,7 @@
  */
 
 #include <oskar_sky.h>
-#include <oskar_binary_stream_write.h>
-#include <oskar_binary_stream_write_header.h>
-#include <oskar_binary_stream_write_metadata.h>
-#include <oskar_BinaryTag.h>
-#include <oskar_mem.h>
-#include <oskar_mem_binary_stream_write.h>
-
-#include <stdlib.h>
-#include <stdio.h>
+#include <oskar_binary.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,7 +37,7 @@ void oskar_sky_write(const char* filename, const oskar_Sky* sky, int* status)
 {
     int type, num_sources, idx = 0;
     unsigned char group = OSKAR_TAG_GROUP_SKY_MODEL;
-    FILE* stream;
+    oskar_Binary* h = 0;
 
     /* Check all inputs. */
     if (!filename || !sky || !status)
@@ -57,59 +49,50 @@ void oskar_sky_write(const char* filename, const oskar_Sky* sky, int* status)
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Open the output file. */
-    stream = fopen(filename, "wb");
-    if (!stream)
-    {
-        *status = OSKAR_ERR_FILE_IO;
-        return;
-    }
-
     /* Get the data type and number of sources. */
     type = oskar_sky_precision(sky);
     num_sources = oskar_sky_num_sources(sky);
 
-    /* Write the header and common metadata. */
-    oskar_binary_stream_write_header(stream, status);
-    oskar_binary_stream_write_metadata(stream, status);
+    /* Create the handle. */
+    h = oskar_binary_create(filename, 'w', status);
+
+    /* Write the common metadata. */
+    oskar_binary_write_metadata(h, status);
 
     /* Write the sky model data parameters. */
-    oskar_binary_stream_write_int(stream, group,
+    oskar_binary_write_int(h, group,
             OSKAR_SKY_TAG_NUM_SOURCES, idx, num_sources, status);
-    oskar_binary_stream_write_int(stream, group,
+    oskar_binary_write_int(h, group,
             OSKAR_SKY_TAG_DATA_TYPE, idx, type, status);
 
     /* Write the arrays. */
-    oskar_mem_binary_stream_write(oskar_sky_ra_rad_const(sky),
-            stream, group, OSKAR_SKY_TAG_RA, idx, num_sources, status);
-    oskar_mem_binary_stream_write(oskar_sky_dec_rad_const(sky),
-            stream, group, OSKAR_SKY_TAG_DEC, idx, num_sources, status);
-    oskar_mem_binary_stream_write(oskar_sky_I_const(sky),
-            stream, group, OSKAR_SKY_TAG_STOKES_I, idx, num_sources, status);
-    oskar_mem_binary_stream_write(oskar_sky_Q_const(sky),
-            stream, group, OSKAR_SKY_TAG_STOKES_Q, idx, num_sources, status);
-    oskar_mem_binary_stream_write(oskar_sky_U_const(sky),
-            stream, group, OSKAR_SKY_TAG_STOKES_U, idx, num_sources, status);
-    oskar_mem_binary_stream_write(oskar_sky_V_const(sky),
-            stream, group, OSKAR_SKY_TAG_STOKES_V, idx, num_sources, status);
-    oskar_mem_binary_stream_write(oskar_sky_reference_freq_hz_const(sky),
-            stream, group, OSKAR_SKY_TAG_REF_FREQ, idx, num_sources, status);
-    oskar_mem_binary_stream_write(oskar_sky_spectral_index_const(sky),
-            stream, group, OSKAR_SKY_TAG_SPECTRAL_INDEX, idx, num_sources,
-            status);
-    oskar_mem_binary_stream_write(oskar_sky_fwhm_major_rad_const(sky),
-            stream, group, OSKAR_SKY_TAG_FWHM_MAJOR, idx, num_sources, status);
-    oskar_mem_binary_stream_write(oskar_sky_fwhm_minor_rad_const(sky),
-            stream, group, OSKAR_SKY_TAG_FWHM_MINOR, idx, num_sources, status);
-    oskar_mem_binary_stream_write(oskar_sky_position_angle_rad_const(sky),
-            stream, group, OSKAR_SKY_TAG_POSITION_ANGLE, idx, num_sources,
-            status);
-    oskar_mem_binary_stream_write(oskar_sky_rotation_measure_rad_const(sky),
-            stream, group, OSKAR_SKY_TAG_ROTATION_MEASURE, idx, num_sources,
-            status);
+    oskar_binary_write_mem(h, oskar_sky_ra_rad_const(sky),
+            group, OSKAR_SKY_TAG_RA, idx, num_sources, status);
+    oskar_binary_write_mem(h, oskar_sky_dec_rad_const(sky),
+            group, OSKAR_SKY_TAG_DEC, idx, num_sources, status);
+    oskar_binary_write_mem(h, oskar_sky_I_const(sky),
+            group, OSKAR_SKY_TAG_STOKES_I, idx, num_sources, status);
+    oskar_binary_write_mem(h, oskar_sky_Q_const(sky),
+            group, OSKAR_SKY_TAG_STOKES_Q, idx, num_sources, status);
+    oskar_binary_write_mem(h, oskar_sky_U_const(sky),
+            group, OSKAR_SKY_TAG_STOKES_U, idx, num_sources, status);
+    oskar_binary_write_mem(h, oskar_sky_V_const(sky),
+            group, OSKAR_SKY_TAG_STOKES_V, idx, num_sources, status);
+    oskar_binary_write_mem(h, oskar_sky_reference_freq_hz_const(sky),
+            group, OSKAR_SKY_TAG_REF_FREQ, idx, num_sources, status);
+    oskar_binary_write_mem(h, oskar_sky_spectral_index_const(sky),
+            group, OSKAR_SKY_TAG_SPECTRAL_INDEX, idx, num_sources, status);
+    oskar_binary_write_mem(h, oskar_sky_fwhm_major_rad_const(sky),
+            group, OSKAR_SKY_TAG_FWHM_MAJOR, idx, num_sources, status);
+    oskar_binary_write_mem(h, oskar_sky_fwhm_minor_rad_const(sky),
+            group, OSKAR_SKY_TAG_FWHM_MINOR, idx, num_sources, status);
+    oskar_binary_write_mem(h, oskar_sky_position_angle_rad_const(sky),
+            group, OSKAR_SKY_TAG_POSITION_ANGLE, idx, num_sources, status);
+    oskar_binary_write_mem(h, oskar_sky_rotation_measure_rad_const(sky),
+            group, OSKAR_SKY_TAG_ROTATION_MEASURE, idx, num_sources, status);
 
-    /* Close the file. */
-    fclose(stream);
+    /* Release the handle. */
+    oskar_binary_free(h);
 }
 
 #ifdef __cplusplus

@@ -10,7 +10,6 @@ set(${name}_SRC
     Test_Mem_add.cpp
     Test_Mem_append.cpp
     Test_Mem_ascii.cpp
-    Test_Mem_binary.cpp
     Test_Mem_copy.cpp
     Test_Mem_different.cpp
     Test_Mem_realloc.cpp

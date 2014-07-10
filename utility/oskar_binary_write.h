@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,166 +26,160 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_STREAM_READ_H_
-#define OSKAR_BINARY_STREAM_READ_H_
+#ifndef OSKAR_BINARY_WRITE_H_
+#define OSKAR_BINARY_WRITE_H_
 
 /**
- * @file oskar_binary_stream_read.h
+ * @file oskar_binary_write.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_BinaryTag.h"
-
-#ifdef __cplusplus
-#include <cstdio>
-#else
-#include <stdio.h>
-#endif
+#include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Reads a block of binary data for a single tag from an input stream.
+ * @brief Writes a block of binary data to an output stream.
  *
  * @details
- * This function reads a block of binary data for a single tag from an input
- * stream.
+ * This function writes a block of binary data to an output stream.
+ * The data are written at the current position of the stream, in native
+ * byte order.
  *
  * The tag is specified as a standard tag, using a group ID and a tag ID
  * that are both given as bytes.
  *
- * @param[in,out] stream   An input stream.
- * @param[in,out] index    Pointer to an index structure pointer.
+ * @param[in,out] handle   Binary file handle.
  * @param[in] data_type    Type of the memory (as in oskar_Mem).
  * @param[in] id_group     Tag group identifier.
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
- * @param[in] data_size    Size of memory available at \p data, in bytes.
- * @param[out] data        Pointer to memory block to write into.
+ * @param[in] data_size    Size of data block, in bytes.
+ * @param[out] data        Pointer to memory block to write.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_binary_stream_read(FILE* stream, oskar_BinaryTagIndex** index,
-        unsigned char data_type, unsigned char id_group, unsigned char id_tag,
-        int user_index, size_t data_size, void* data, int* status);
+void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
+        unsigned char id_group, unsigned char id_tag, int user_index,
+        size_t data_size, const void* data, int* status);
 
 /**
- * @brief Reads a single double-precision value from an input stream.
+ * @brief Writes a single double-precision value to an output stream.
  *
  * @details
- * This function reads a single double-precision value from an input stream.
+ * This function writes a single double-precision value to an output stream.
+ * The data are written at the current position of the stream, in native
+ * byte order.
  *
  * The tag is specified as a standard tag, using a group ID and a tag ID
  * that are both given as bytes.
  *
- * @param[in,out] stream   An input stream.
- * @param[in,out] index    Pointer to an index structure pointer.
+ * @param[in,out] handle   Binary file handle.
  * @param[in] id_group     Tag group identifier.
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
- * @param[out] value       Pointer to output value.
+ * @param[in] value        Value to write.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_binary_stream_read_double(FILE* stream,
-        oskar_BinaryTagIndex** index, unsigned char id_group,
-        unsigned char id_tag, int user_index, double* value, int* status);
+void oskar_binary_write_double(oskar_Binary* handle, unsigned char id_group,
+        unsigned char id_tag, int user_index, double value, int* status);
 
 /**
- * @brief Reads a single integer value from an input stream.
+ * @brief Writes a single integer value to an output stream.
  *
  * @details
- * This function reads a single integer value from an input stream.
+ * This function writes a single integer value to an output stream.
+ * The data are written at the current position of the stream, in native
+ * byte order.
  *
  * The tag is specified as a standard tag, using a group ID and a tag ID
  * that are both given as bytes.
  *
- * @param[in,out] stream   An input stream.
- * @param[in,out] index    Pointer to an index structure pointer.
+ * @param[in,out] handle   Binary file handle.
  * @param[in] id_group     Tag group identifier.
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
- * @param[out] value       Pointer to output value.
+ * @param[in] value        Value to write.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_binary_stream_read_int(FILE* stream,
-        oskar_BinaryTagIndex** index, unsigned char id_group,
-        unsigned char id_tag, int user_index, int* value, int* status);
+void oskar_binary_write_int(oskar_Binary* handle, unsigned char id_group,
+        unsigned char id_tag, int user_index, int value, int* status);
 
 /**
- * @brief Reads a block of binary data for a single tag from an input stream.
+ * @brief Writes a block of binary data to an output stream.
  *
  * @details
- * This function reads a block of binary data for a single tag from an input
- * stream.
+ * This function writes a block of binary data to an output stream.
+ * The data are written at the current position of the stream, in native
+ * byte order.
  *
  * The tag is specified as an extended tag, using a group name and a tag name
  * that are both given as strings.
  *
- * @param[in,out] stream   An input stream.
- * @param[in,out] index    Pointer to an index structure pointer.
+ * @param[in,out] handle   Binary file handle.
  * @param[in] data_type    Type of the memory (as in oskar_Mem).
  * @param[in] name_group   Tag group name.
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
- * @param[in] data_size    Size of memory available at \p data, in bytes.
- * @param[out] data        Pointer to memory block to write into.
+ * @param[in] data_size    Size of data block, in bytes.
+ * @param[out] data        Pointer to memory block to write.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_binary_stream_read_ext(FILE* stream, oskar_BinaryTagIndex** index,
-        unsigned char data_type, const char* name_group, const char* name_tag,
-        int user_index, size_t data_size, void* data, int* status);
+void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
+        const char* name_group, const char* name_tag, int user_index,
+        size_t data_size, const void* data, int* status);
 
 /**
- * @brief Reads a single double-precision value from an input stream.
+ * @brief Writes a single double-precision value to an output stream.
  *
  * @details
- * This function reads a single double-precision value from an input stream.
+ * This function writes a single double-precision value to an output stream.
+ * The data are written at the current position of the stream, in native
+ * byte order.
  *
  * The tag is specified as an extended tag, using a group name and a tag name
  * that are both given as strings.
  *
- * @param[in,out] stream   An input stream.
- * @param[in,out] index    Pointer to an index structure pointer.
+ * @param[in,out] handle   Binary file handle.
  * @param[in] name_group   Tag group name.
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
- * @param[out] value       Pointer to output value.
+ * @param[in] value        Value to write.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_binary_stream_read_ext_double(FILE* stream,
-        oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index, double* value, int* status);
+void oskar_binary_write_ext_double(oskar_Binary* handle, const char* name_group,
+        const char* name_tag, int user_index, double value, int* status);
 
 /**
- * @brief Reads a single integer value from an input stream.
+ * @brief Writes a single integer value to an output stream.
  *
  * @details
- * This function reads a single integer value from an input stream.
+ * This function writes a single integer value to an output stream.
+ * The data are written at the current position of the stream, in native
+ * byte order.
  *
  * The tag is specified as an extended tag, using a group name and a tag name
  * that are both given as strings.
  *
- * @param[in,out] stream   An input stream.
- * @param[in,out] index    Pointer to an index structure pointer.
+ * @param[in,out] handle   Binary file handle.
  * @param[in] name_group   Tag group name.
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
- * @param[out] value       Pointer to output value.
+ * @param[in] value        Value to write.
  * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_binary_stream_read_ext_int(FILE* stream,
-        oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index, int* value, int* status);
+void oskar_binary_write_ext_int(oskar_Binary* handle, const char* name_group,
+        const char* name_tag, int user_index, int value, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_STREAM_READ_H_ */
+#endif /* OSKAR_BINARY_WRITE_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_TAG_INDEX_CREATE_H_
-#define OSKAR_BINARY_TAG_INDEX_CREATE_H_
+#ifndef OSKAR_BINARY_WRITE_METADATA_H_
+#define OSKAR_BINARY_WRITE_METADATA_H_
 
 /**
- * @file oskar_binary_tag_index_create.h
+ * @file oskar_binary_write_metadata.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_BinaryTag.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 #include <cstdio>
@@ -47,36 +46,19 @@ extern "C" {
 #endif
 
 /**
- * @brief Generate index of tags in an OSKAR binary file from an input stream.
+ * @brief Writes standard metadata to an output stream.
  *
  * @details
- * This function generates an index of tags in an OSKAR binary file from an
- * input stream.
+ * This function writes standard metadata to an output stream.
  *
- * The index structure pointer should be NULL on input.
- * Typical use would be:
- *
- * @code
- * oskar_BinaryTagIndex* index = NULL;
- * oskar_binary_tag_index_create(&index, stream, status);
- * @endcode
- *
- * The index structure should be freed using
- *
- * @code
- * oskar_binary_tag_index_free(&index, status);
- * @endcode
- *
- * @param[in,out] index   Pointer to index structure pointer.
- * @param[in,out] stream  An input stream to index.
- * @param[in,out] status  Status return code.
+ * @param[in,out] handle Binary file handle.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream,
-        int* status);
+void oskar_binary_write_metadata(oskar_Binary* handle, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_TAG_INDEX_CREATE_H_ */
+#endif /* OSKAR_BINARY_WRITE_METADATA_H_ */

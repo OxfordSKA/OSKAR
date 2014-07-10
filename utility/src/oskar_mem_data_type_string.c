@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,39 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_STREAM_WRITE_HEADER_H_
-#define OSKAR_BINARY_STREAM_WRITE_HEADER_H_
-
-/**
- * @file oskar_binary_stream_write_header.h
- */
-
-#include "oskar_global.h"
-
-#ifdef __cplusplus
-#include <cstdio>
-#else
-#include <stdio.h>
-#endif
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Writes a binary header to an output stream.
- *
- * @details
- * This function writes a header to an output stream.
- *
- * @param[in,out] stream An output stream.
- * @param[in,out] status Status return code.
- */
-OSKAR_EXPORT
-void oskar_binary_stream_write_header(FILE* stream, int* status);
+const char* oskar_mem_data_type_string(int data_type)
+{
+    switch (data_type)
+    {
+        case OSKAR_CHAR:
+            return "CHAR";
+        case OSKAR_INT:
+            return "INT";
+        case OSKAR_SINGLE:
+            return "SINGLE";
+        case OSKAR_DOUBLE:
+            return "DOUBLE";
+        case OSKAR_COMPLEX:
+            return "COMPLEX";
+        case OSKAR_MATRIX:
+            return "MATRIX";
+        case OSKAR_SINGLE_COMPLEX:
+            return "SINGLE COMPLEX";
+        case OSKAR_DOUBLE_COMPLEX:
+            return "DOUBLE COMPLEX";
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+            return "SINGLE COMPLEX MATRIX";
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+            return "DOUBLE COMPLEX MATRIX";
+        default:
+            break;
+    };
+    return "UNKNOWN TYPE";
+}
+
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_BINARY_STREAM_WRITE_HEADER_H_ */

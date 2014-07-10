@@ -26,10 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_mem.h>
-
-#include <oskar_binary_stream_write.h>
-#include <oskar_mem_binary_stream_write.h>
+#include <oskar_binary.h>
 
 #include <stdlib.h>
 
@@ -37,7 +34,7 @@
 extern "C" {
 #endif
 
-void oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
+void oskar_binary_write_mem(oskar_Binary* handle, const oskar_Mem* mem,
         unsigned char id_group, unsigned char id_tag, int user_index,
         size_t num_to_write, int* status)
 {
@@ -47,7 +44,7 @@ void oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
     const oskar_Mem* data = 0;
 
     /* Check all inputs. */
-    if (!mem || !stream || !status)
+    if (!handle || !mem || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -74,7 +71,7 @@ void oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
     }
 
     /* Save the memory to a binary stream. */
-    oskar_binary_stream_write(stream, (unsigned char)type,
+    oskar_binary_write(handle, (unsigned char)type,
             id_group, id_tag, user_index, size_bytes,
             oskar_mem_void_const(data), status);
 
@@ -82,7 +79,7 @@ void oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
     oskar_mem_free(temp, status);
 }
 
-void oskar_mem_binary_stream_write_ext(const oskar_Mem* mem, FILE* stream,
+void oskar_binary_write_mem_ext(oskar_Binary* handle, const oskar_Mem* mem,
         const char* name_group, const char* name_tag, int user_index,
         size_t num_to_write, int* status)
 {
@@ -92,7 +89,7 @@ void oskar_mem_binary_stream_write_ext(const oskar_Mem* mem, FILE* stream,
     const oskar_Mem* data = 0;
 
     /* Check all inputs. */
-    if (!mem || !stream || !name_group || !name_tag || !status)
+    if (!handle || !mem || !name_group || !name_tag || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -119,7 +116,7 @@ void oskar_mem_binary_stream_write_ext(const oskar_Mem* mem, FILE* stream,
     }
 
     /* Save the memory to a binary stream. */
-    oskar_binary_stream_write_ext(stream, (unsigned char)type,
+    oskar_binary_write_ext(handle, (unsigned char)type,
             name_group, name_tag, user_index, size_bytes,
             oskar_mem_void_const(data), status);
 

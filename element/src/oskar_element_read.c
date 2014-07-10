@@ -29,12 +29,8 @@
 #include <private_splines.h>
 #include <private_element.h>
 #include <oskar_element.h>
+#include <oskar_binary.h>
 
-#include <oskar_binary_tag_index_free.h>
-#include <oskar_binary_stream_read.h>
-#include <oskar_mem_binary_stream_read.h>
-
-#include <stdio.h>
 #include <string.h>
 #include <float.h>
 #include <math.h>
@@ -43,15 +39,14 @@
 extern "C" {
 #endif
 
-static void read_splines(FILE* fhan, oskar_Splines* splines,
-        oskar_BinaryTagIndex** idx, int index, int* status);
+static void read_splines(oskar_Binary* h, oskar_Splines* splines, int index,
+        int* status);
 
 void oskar_element_read(oskar_Element* data, const char* filename,
         int port, double freq_hz, int* status)
 {
-    FILE* fhan = 0;
     oskar_Splines *h_re, *h_im, *v_re, *v_im;
-    oskar_BinaryTagIndex* idx = 0;
+    oskar_Binary* h = 0;
     int i, n, surface_type = -1;
 
     /* Check all inputs. */
@@ -103,21 +98,20 @@ void oskar_element_read(oskar_Element* data, const char* filename,
         return;
     }
 
-    /* Read data from binary file. */
-    fhan = fopen(filename, "rb");
-    if (!fhan)
+    /* Create the handle. */
+    h = oskar_binary_create(filename, 'r', status);
+    if (*status)
     {
-        *status = OSKAR_ERR_FILE_IO;
+        oskar_binary_free(h);
         return;
     }
 
     /* Get the surface type. */
-    oskar_binary_stream_read_int(fhan, &idx, OSKAR_TAG_GROUP_ELEMENT_DATA,
+    oskar_binary_read_int(h, OSKAR_TAG_GROUP_ELEMENT_DATA,
             OSKAR_ELEMENT_TAG_SURFACE_TYPE, 0, &surface_type, status);
     if (*status)
     {
-        fclose(fhan);
-        oskar_binary_tag_index_free(idx, status);
+        oskar_binary_free(h);
         return;
     }
 
@@ -128,13 +122,10 @@ void oskar_element_read(oskar_Element* data, const char* filename,
     }
 
     /* Read data for [h_re], [h_im], [v_re], [v_im] surfaces. */
-    read_splines(fhan, h_re, &idx, 0, status);
-    read_splines(fhan, h_im, &idx, 1, status);
-    read_splines(fhan, v_re, &idx, 2, status);
-    read_splines(fhan, v_im, &idx, 3, status);
-
-    /* Close the file. */
-    fclose(fhan);
+    read_splines(h, h_re, 0, status);
+    read_splines(h, h_im, 1, status);
+    read_splines(h, v_re, 2, status);
+    read_splines(h, v_im, 3, status);
 
     /* Store the filename. */
     if (port == 1)
@@ -148,31 +139,28 @@ void oskar_element_read(oskar_Element* data, const char* filename,
                 OSKAR_CPU, 1 + strlen(filename), status);
     }
 
-    /* Free the tag index. */
-    oskar_binary_tag_index_free(idx, status);
+    /* Release the handle. */
+    oskar_binary_free(h);
 }
 
-static void read_splines(FILE* fhan, oskar_Splines* splines,
-        oskar_BinaryTagIndex** idx, int index, int* status)
+static void read_splines(oskar_Binary* h, oskar_Splines* splines, int index,
+        int* status)
 {
     unsigned char group;
     group = OSKAR_TAG_GROUP_SPLINE_DATA;
     if (*status) return;
-    oskar_binary_stream_read_int(fhan, idx, group,
-            OSKAR_SPLINES_TAG_NUM_KNOTS_X_THETA, index,
+    oskar_binary_read_int(h, group, OSKAR_SPLINES_TAG_NUM_KNOTS_X_THETA, index,
             &splines->num_knots_x_theta, status);
-    oskar_binary_stream_read_int(fhan, idx, group,
-            OSKAR_SPLINES_TAG_NUM_KNOTS_Y_PHI, index,
+    oskar_binary_read_int(h, group, OSKAR_SPLINES_TAG_NUM_KNOTS_Y_PHI, index,
             &splines->num_knots_y_phi, status);
-    oskar_mem_binary_stream_read(oskar_splines_knots_x(splines),
-            fhan, idx, group, OSKAR_SPLINES_TAG_KNOTS_X_THETA, index, status);
-    oskar_mem_binary_stream_read(oskar_splines_knots_y(splines),
-            fhan, idx, group, OSKAR_SPLINES_TAG_KNOTS_Y_PHI, index, status);
-    oskar_mem_binary_stream_read(oskar_splines_coeff(splines),
-            fhan, idx, group, OSKAR_SPLINES_TAG_COEFF, index, status);
-    oskar_binary_stream_read_double(fhan, idx, group,
-            OSKAR_SPLINES_TAG_SMOOTHING_FACTOR, index,
-            &splines->smoothing_factor, status);
+    oskar_binary_read_mem(h, oskar_splines_knots_x(splines),
+            group, OSKAR_SPLINES_TAG_KNOTS_X_THETA, index, status);
+    oskar_binary_read_mem(h, oskar_splines_knots_y(splines),
+            group, OSKAR_SPLINES_TAG_KNOTS_Y_PHI, index, status);
+    oskar_binary_read_mem(h, oskar_splines_coeff(splines),
+            group, OSKAR_SPLINES_TAG_COEFF, index, status);
+    oskar_binary_read_double(h, group, OSKAR_SPLINES_TAG_SMOOTHING_FACTOR,
+            index, &splines->smoothing_factor, status);
 }
 
 #ifdef __cplusplus

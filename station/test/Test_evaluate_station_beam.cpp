@@ -37,7 +37,7 @@
 #include <oskar_linspace.h>
 #include <oskar_meshgrid.h>
 #include <oskar_random_state.h>
-#include <oskar_mem_binary_file_write.h>
+#include <oskar_binary.h>
 #include <oskar_cuda_check_error.h>
 
 #define TIMER_ENABLE 1
@@ -206,10 +206,11 @@ TEST(evaluate_station_beam, gaussian)
         if (save_results)
         {
             const char* filename = "temp_test_beam_double_cpu.dat";
-            remove(filename);
-            oskar_mem_binary_file_write(beam, filename, 0, 0, 0,
+            oskar_Binary* h = oskar_binary_create(filename, 'w', &error);
+            oskar_binary_write_mem(h, beam, 0, 0, 0,
                     (int)oskar_mem_length(beam), &error);
             ASSERT_EQ(0, error) << oskar_get_error_string(error);
+            oskar_binary_free(h);
         }
         oskar_mem_free(l, &error);
         oskar_mem_free(m, &error);
@@ -240,10 +241,11 @@ TEST(evaluate_station_beam, gaussian)
         if (save_results)
         {
             const char* filename = "temp_test_beam_single_cpu.dat";
-            remove(filename);
-            oskar_mem_binary_file_write(beam, filename, 0, 0, 0,
+            oskar_Binary* h = oskar_binary_create(filename, 'w', &error);
+            oskar_binary_write_mem(h, beam, 0, 0, 0,
                     (int)oskar_mem_length(beam), &error);
             ASSERT_EQ(0, error) << oskar_get_error_string(error);
+            oskar_binary_free(h);
         }
         oskar_mem_free(l, &error);
         oskar_mem_free(m, &error);
@@ -276,10 +278,11 @@ TEST(evaluate_station_beam, gaussian)
         if (save_results)
         {
             const char* filename = "temp_test_beam_double_gpu.dat";
-            remove(filename);
-            oskar_mem_binary_file_write(beam, filename, 0, 0, 0,
+            oskar_Binary* h = oskar_binary_create(filename, 'w', &error);
+            oskar_binary_write_mem(h, beam, 0, 0, 0,
                     (int)oskar_mem_length(beam), &error);
             ASSERT_EQ(0, error) << oskar_get_error_string(error);
+            oskar_binary_free(h);
         }
         oskar_mem_free(h_l, &error);
         oskar_mem_free(h_m, &error);
@@ -314,10 +317,11 @@ TEST(evaluate_station_beam, gaussian)
         if (save_results)
         {
             const char* filename = "temp_test_beam_single_gpu.dat";
-            remove(filename);
-            oskar_mem_binary_file_write(beam, filename, 0, 0, 0,
+            oskar_Binary* h = oskar_binary_create(filename, 'w', &error);
+            oskar_binary_write_mem(h, beam, 0, 0, 0,
                     (int)oskar_mem_length(beam), &error);
             ASSERT_EQ(0, error) << oskar_get_error_string(error);
+            oskar_binary_free(h);
         }
         oskar_mem_free(h_l, &error);
         oskar_mem_free(h_m, &error);

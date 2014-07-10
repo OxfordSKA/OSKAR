@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "matlab/common/oskar_matlab_common.h"
 
 #include <mex.h>
-#include <utility/oskar_mem.h>
-#include <utility/oskar_BinaryTag.h>
-#include <utility/oskar_binary_tag_index_query.h>
-#include <utility/oskar_binary_file_read.h>
-#include <utility/oskar_binary_tag_index_create.h>
-#include <utility/oskar_binary_tag_index_free.h>
-#include <utility/oskar_binary_stream_read.h>
-#include <utility/oskar_get_error_string.h>
-#include <utility/oskar_get_data_type_string.h>
-#include <utility/oskar_vector_types.h>
+
+#include <private_binary.h>
+#include <oskar_binary.h>
+#include <oskar_get_error_string.h>
+#include <oskar_vector_types.h>
 
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
@@ -56,121 +50,116 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     char filename[100];
     mxGetString(in[0], filename, 100);
 
-    FILE* file = fopen(filename, "r");
-    if (!file)
-        oskar_matlab_error("Unable to open file: '%s'", filename);
-
-    oskar_BinaryTagIndex* index = NULL;
-    oskar_binary_tag_index_create(&index, file, &err);
-    if (err) oskar_matlab_error("oskar_binary_tag_index_create() failed with "
+    oskar_Binary* h = oskar_binary_create(filename, 'r', &err);
+    if (err) oskar_matlab_error("oskar_binary_create() failed with "
             "code %i: %s",err, oskar_get_error_string(err));
 
-    mexPrintf("= Binary file header loaded (%i tags found).\n", index->num_tags);
+    mexPrintf("= Binary file header loaded (%i tags found).\n", h->num_tags);
 
     // Create a MATLAB structure array to hold records.
     int num_fields = 5;
     const char* fields[5] = { "type", "group", "tag", "index", "data" };
-    out[0] = mxCreateStructMatrix(index->num_tags, 1, num_fields, fields);
+    out[0] = mxCreateStructMatrix(h->num_tags, 1, num_fields, fields);
 
     // Populate the MATLAB record array from the binary tags found.
-    for (int i = 0; i < index->num_tags; ++i)
+    for (int i = 0; i < h->num_tags; ++i)
     {
         mxSetField(out[0], i, fields[0],
-                mxCreateString(oskar_get_data_type_string(index->data_type[i])));
-        if (index->extended[i])
+                mxCreateString(oskar_mem_data_type_string(h->data_type[i])));
+        if (h->extended[i])
         {
-            mxSetField(out[0], i, fields[1], mxCreateString(index->name_group[i]));
-            mxSetField(out[0], i, fields[2], mxCreateString(index->name_tag[i]));
+            mxSetField(out[0], i, fields[1], mxCreateString(h->name_group[i]));
+            mxSetField(out[0], i, fields[2], mxCreateString(h->name_tag[i]));
         }
         else
         {
-            mxSetField(out[0], i, fields[1], mxCreateDoubleScalar((double)index->id_group[i]));
-            mxSetField(out[0], i, fields[2], mxCreateDoubleScalar((double)index->id_tag[i]));
+            mxSetField(out[0], i, fields[1], mxCreateDoubleScalar((double)h->id_group[i]));
+            mxSetField(out[0], i, fields[2], mxCreateDoubleScalar((double)h->id_tag[i]));
         }
-        mxSetField(out[0], i, fields[3], mxCreateDoubleScalar((double)index->user_index[i]));
+        mxSetField(out[0], i, fields[3], mxCreateDoubleScalar((double)h->user_index[i]));
         mxArray* data_ = NULL;
         void* data = NULL;
         mwSize m = 0;
-        switch (index->data_type[i])
+        switch (h->data_type[i])
         {
             case OSKAR_CHAR:
             {
-                data = malloc(index->data_size_bytes[i]);
+                data = malloc(h->data_size_bytes[i]);
                 break;
             }
             case OSKAR_INT:
             {
-                m = index->data_size_bytes[i] / sizeof(int);
+                m = h->data_size_bytes[i] / sizeof(int);
                 data_ = mxCreateNumericMatrix(m, 1, mxINT32_CLASS, mxREAL);
                 data = mxGetData(data_);
                 break;
             }
             case OSKAR_SINGLE:
             {
-                m = index->data_size_bytes[i] / sizeof(float);
+                m = h->data_size_bytes[i] / sizeof(float);
                 data_ = mxCreateNumericMatrix(m, 1, mxSINGLE_CLASS, mxREAL);
                 data = mxGetData(data_);
                 break;
             }
             case OSKAR_DOUBLE:
             {
-                m = index->data_size_bytes[i] / sizeof(double);
+                m = h->data_size_bytes[i] / sizeof(double);
                 data_ = mxCreateNumericMatrix(m, 1, mxDOUBLE_CLASS, mxREAL);
                 data = mxGetData(data_);
                 break;
             }
             case OSKAR_SINGLE_COMPLEX:
             {
-                m = index->data_size_bytes[i] / sizeof(float2);
+                m = h->data_size_bytes[i] / sizeof(float2);
                 data_ = mxCreateNumericMatrix(m, 1, mxSINGLE_CLASS, mxCOMPLEX);
-                data = malloc(index->data_size_bytes[i]);
+                data = malloc(h->data_size_bytes[i]);
                 break;
             }
             case OSKAR_DOUBLE_COMPLEX:
             {
-                m = index->data_size_bytes[i] / sizeof(double2);
+                m = h->data_size_bytes[i] / sizeof(double2);
                 data_ = mxCreateNumericMatrix(m, 1, mxDOUBLE_CLASS, mxCOMPLEX);
-                data = malloc(index->data_size_bytes[i]);
+                data = malloc(h->data_size_bytes[i]);
                 break;
             }
             case OSKAR_SINGLE_COMPLEX_MATRIX:
             {
-                m = index->data_size_bytes[i] / sizeof(float4c);
+                m = h->data_size_bytes[i] / sizeof(float4c);
                 mwSize dims[3] = {2, 2, m};
                 data_ = mxCreateNumericArray(3, dims, mxSINGLE_CLASS, mxCOMPLEX);
-                data = malloc(index->data_size_bytes[i]);
+                data = malloc(h->data_size_bytes[i]);
                 break;
             }
             case OSKAR_DOUBLE_COMPLEX_MATRIX:
             {
-                m = index->data_size_bytes[i] / sizeof(double4c);
+                m = h->data_size_bytes[i] / sizeof(double4c);
                 mwSize dims[3] = {2, 2, m};
                 data_ = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxCOMPLEX);
-                data = malloc(index->data_size_bytes[i]);
+                data = malloc(h->data_size_bytes[i]);
                 break;
             }
             default:
                 oskar_matlab_error("Unknown OSKAR data type");
                 break;
         };
-        if (index->extended[i])
+        if (h->extended[i])
         {
-            oskar_binary_stream_read_ext(file, &index,
-                    (unsigned char)index->data_type[i],
-                    index->name_group[i],
-                    index->name_tag[i],
-                    index->user_index[i],
-                    (size_t)index->data_size_bytes[i],
+            oskar_binary_read_ext(h,
+                    (unsigned char)h->data_type[i],
+                    h->name_group[i],
+                    h->name_tag[i],
+                    h->user_index[i],
+                    (size_t)h->data_size_bytes[i],
                     data, &err);
         }
         else
         {
-            oskar_binary_stream_read(file, &index,
-                    (unsigned char)index->data_type[i],
-                    (unsigned char)index->id_group[i],
-                    (unsigned char)index->id_tag[i],
-                    index->user_index[i],
-                    (size_t)index->data_size_bytes[i],
+            oskar_binary_read(h,
+                    (unsigned char)h->data_type[i],
+                    (unsigned char)h->id_group[i],
+                    (unsigned char)h->id_tag[i],
+                    h->user_index[i],
+                    (size_t)h->data_size_bytes[i],
                     data, &err);
         }
         if (err) {
@@ -178,12 +167,12 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                     "%s.\n", err, oskar_get_error_string(err));
         }
         /* If the data is a char array convert to MATLAB string (16bit char format). */
-        if (index->data_type[i] == OSKAR_CHAR)
+        if (h->data_type[i] == OSKAR_CHAR)
         {
             data_ = mxCreateString((char*)data);
             free(data);
         }
-        else if (index->data_type[i] == OSKAR_SINGLE_COMPLEX)
+        else if (h->data_type[i] == OSKAR_SINGLE_COMPLEX)
         {
             float* re = (float*)mxGetPr(data_);
             float* im = (float*)mxGetPi(data_);
@@ -194,7 +183,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             }
             free(data);
         }
-        else if (index->data_type[i] == OSKAR_DOUBLE_COMPLEX)
+        else if (h->data_type[i] == OSKAR_DOUBLE_COMPLEX)
         {
             double* re = mxGetPr(data_);
             double* im = mxGetPi(data_);
@@ -205,7 +194,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             }
             free(data);
         }
-        else if (index->data_type[i] == OSKAR_SINGLE_COMPLEX_MATRIX)
+        else if (h->data_type[i] == OSKAR_SINGLE_COMPLEX_MATRIX)
         {
             float* re = (float*)mxGetPr(data_);
             float* im = (float*)mxGetPi(data_);
@@ -222,7 +211,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             }
             free(data);
         }
-        else if (index->data_type[i] == OSKAR_DOUBLE_COMPLEX_MATRIX)
+        else if (h->data_type[i] == OSKAR_DOUBLE_COMPLEX_MATRIX)
         {
             double* re = mxGetPr(data_);
             double* im = mxGetPi(data_);
@@ -242,6 +231,5 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mxSetField(out[0], i, fields[4], data_);
     }
 
-    oskar_binary_tag_index_free(index, &err);
-    fclose(file);
+    oskar_binary_free(h);
 }

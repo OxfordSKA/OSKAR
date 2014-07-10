@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 
 #include "apps/lib/oskar_OptionParser.h"
 
-#include <oskar_binary_file_query.h>
+#include <oskar_scan_binary_file.h>
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
 #include <oskar_version_string.h>
@@ -45,9 +45,9 @@ int main(int argc, char** argv)
         return OSKAR_FAIL;
     const char* filename = opt.getArg();
 
-    // Query the file.
+    // Scan the file.
     int error = OSKAR_SUCCESS;
-    oskar_binary_file_query(0, filename, &error);
+    oskar_scan_binary_file(0, filename, &error);
     if (error)
     {
         oskar_log_error(0, oskar_get_error_string(error));

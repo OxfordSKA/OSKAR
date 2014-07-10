@@ -36,8 +36,7 @@
 
 #include <oskar_get_error_string.h>
 #include <oskar_vis.h>
-#include <oskar_mem_binary_file_write.h>
-#include <oskar_mem_binary_stream_write.h>
+#include <oskar_binary.h>
 
 #ifndef OSKAR_NO_FITS
 #include "fits/oskar_fits_image_write.h"
@@ -124,15 +123,17 @@ TEST(make_image, test)
 #endif
 
     const char* vis_file = "temp_test_make_image.dat";
-    oskar_mem_binary_file_write_ext(oskar_vis_baseline_uu_metres(vis), vis_file,
+    oskar_Binary* h = oskar_binary_create(vis_file, 'w', &error);
+    oskar_binary_write_mem_ext(h, oskar_vis_baseline_uu_metres(vis),
             "mem", "uu_metres", 0, 0, &error);
-    oskar_mem_binary_file_write_ext(oskar_vis_baseline_vv_metres(vis), vis_file,
+    oskar_binary_write_mem_ext(h, oskar_vis_baseline_vv_metres(vis),
             "mem", "vv_metres", 0, 0, &error);
-    oskar_mem_binary_file_write_ext(oskar_vis_amplitude(vis), vis_file,
+    oskar_binary_write_mem_ext(h, oskar_vis_amplitude(vis),
             "mem", "vis_amp", 0, 0, &error);
-    oskar_mem_binary_file_write_ext(oskar_image_data_const(image), vis_file,
+    oskar_binary_write_mem_ext(h, oskar_image_data_const(image),
             "mem", "image", 0, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
+    oskar_binary_free(h);
 
     oskar_vis_free(vis, &error);
     oskar_image_free(image, &error);
