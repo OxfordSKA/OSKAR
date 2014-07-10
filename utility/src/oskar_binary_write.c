@@ -32,7 +32,6 @@
 #include <oskar_mem.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -134,7 +133,6 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
 {
     oskar_BinaryTag tag;
     size_t block_size, lgroup, ltag;
-    FILE* stream;
 
     /* Initialise the tag. */
     char magic[] = "TAG";

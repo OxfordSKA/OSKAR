@@ -49,7 +49,6 @@ static const int width = 40;
 
 void oskar_scan_binary_file(oskar_Log* log, const char* filename, int* status)
 {
-    FILE* stream;
     int extended_tags = 0, depth = -4, i, tag_not_present = 0;
     oskar_Binary* h = NULL;
     oskar_Mem* temp = 0;
