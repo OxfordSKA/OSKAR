@@ -34,12 +34,7 @@
  */
 
 #include <oskar_global.h>
-
-#ifdef __cplusplus
-#include <cstdio>
-#else
-#include <stdio.h>
-#endif
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {

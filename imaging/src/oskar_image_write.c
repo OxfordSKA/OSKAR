@@ -32,8 +32,6 @@
 #include <oskar_file_exists.h>
 #include <oskar_log.h>
 #include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #ifdef __cplusplus
