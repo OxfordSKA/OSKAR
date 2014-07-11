@@ -551,14 +551,14 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
     LV("Time average [sec]", "%.2f", s->interferometer.time_average_sec);
     LVI("Num. visibility ave.", s->interferometer.num_vis_ave);
     LVI("Num. fringe ave.", s->interferometer.num_fringe_ave);
-    if (s->interferometer.uv_filter_min >= 0.0 ||
+    if (s->interferometer.uv_filter_min > 0.0)
+        LV("UV range filter min", "%.3f", s->interferometer.uv_filter_min);
+    if (s->interferometer.uv_filter_max >= 0.0)
+        LV("UV range filter max", "%.3f", s->interferometer.uv_filter_max);
+    if (s->interferometer.uv_filter_min > 0.0 ||
             s->interferometer.uv_filter_max >= 0.0)
-    {
-        LV("UV range filter min", "%.3e", s->interferometer.uv_filter_min);
-        LV("UV range filter max", "%.3e", s->interferometer.uv_filter_max);
         LVS("UV range filter units", s->interferometer.uv_filter_units ==
                 OSKAR_METRES ? "Metres" : "Wavelengths");
-    }
     LVB("Use common sky (short baseline approximation)",
             s->interferometer.use_common_sky);
     LVB("Scalar mode (Stokes I only)", s->interferometer.scalar_mode);

@@ -75,7 +75,7 @@ void oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
 
         // Get UV filter parameters.
         temp = s.value("uv_filter_min", "min").toString().toUpper();
-        settings->uv_filter_min = (temp == "MIN" ? -1.0 : temp.toDouble());
+        settings->uv_filter_min = (temp == "MIN" ? 0.0 : temp.toDouble());
         temp = s.value("uv_filter_max", "max").toString().toUpper();
         settings->uv_filter_max = (temp == "MAX" ? -1.0 : temp.toDouble());
         temp = s.value("uv_filter_units", "Metres").toString().toUpper();
