@@ -46,8 +46,8 @@ void oskar_correlate_gaussian_cuda_f(int num_sources,
         const float* d_source_l, const float* d_source_m,
         const float* d_source_a, const float* d_source_b,
         const float* d_source_c, const float* d_station_u,
-        const float* d_station_v, float inv_wavelength,
-        float frac_bandwidth, float4c* d_vis)
+        const float* d_station_v, float uv_min_lambda, float uv_max_lambda,
+        float inv_wavelength, float frac_bandwidth, float4c* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
@@ -56,8 +56,8 @@ void oskar_correlate_gaussian_cuda_f(int num_sources,
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_source_a, d_source_b,
-            d_source_c, d_station_u, d_station_v, inv_wavelength,
-            frac_bandwidth, d_vis);
+            d_source_c, d_station_u, d_station_v, uv_min_lambda, uv_max_lambda,
+            inv_wavelength, frac_bandwidth, d_vis);
 }
 
 /* Double precision. */
@@ -68,8 +68,8 @@ void oskar_correlate_gaussian_cuda_d(int num_sources,
         const double* d_source_l, const double* d_source_m,
         const double* d_source_a, const double* d_source_b,
         const double* d_source_c, const double* d_station_u,
-        const double* d_station_v, double inv_wavelength,
-        double frac_bandwidth, double4c* d_vis)
+        const double* d_station_v, double uv_min_lambda, double uv_max_lambda,
+        double inv_wavelength, double frac_bandwidth, double4c* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
@@ -78,8 +78,8 @@ void oskar_correlate_gaussian_cuda_d(int num_sources,
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_source_a, d_source_b,
-            d_source_c, d_station_u, d_station_v, inv_wavelength,
-            frac_bandwidth, d_vis);
+            d_source_c, d_station_u, d_station_v, uv_min_lambda, uv_max_lambda,
+            inv_wavelength, frac_bandwidth, d_vis);
 }
 
 #ifdef __cplusplus
@@ -106,10 +106,11 @@ void oskar_correlate_gaussian_cudak_f(const int num_sources,
         const float* restrict source_l, const float* restrict source_m,
         const float* restrict source_a, const float* restrict source_b,
         const float* restrict source_c, const float* restrict station_u,
-        const float* restrict station_v, const float inv_wavelength,
+        const float* restrict station_v, const float uv_min_lambda,
+        const float uv_max_lambda, const float inv_wavelength,
         const float frac_bandwidth, float4c* restrict vis)
 {
-    __shared__ float uu, vv, uu2, vv2, uuvv;
+    __shared__ float uv_len, uu, vv, uu2, vv2, uuvv;
     float4c sum;
     int i;
 
@@ -119,11 +120,15 @@ void oskar_correlate_gaussian_cudak_f(const int num_sources,
     /* Get common baseline values per thread block. */
     if (threadIdx.x == 0)
     {
-        oskar_evaluate_modified_baseline_gaussian_inline_f(station_u[SP],
+        oskar_evaluate_baseline_terms_inline_f(station_u[SP],
                 station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                frac_bandwidth, &uu, &vv, &uu2, &vv2, &uuvv);
+                frac_bandwidth, &uv_len, &uu, &vv, &uu2, &vv2, &uuvv);
     }
     __syncthreads();
+
+    /* Apply the baseline length filter. */
+    if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
+        return;
 
     /* Get pointers to source vectors for both stations. */
     const float4c* restrict station_p = &jones[num_sources * SP];
@@ -174,10 +179,11 @@ void oskar_correlate_gaussian_cudak_d(const int num_sources,
         const double* restrict source_l, const double* restrict source_m,
         const double* restrict source_a, const double* restrict source_b,
         const double* restrict source_c, const double* restrict station_u,
-        const double* restrict station_v, const double inv_wavelength,
+        const double* restrict station_v, const double uv_min_lambda,
+        const double uv_max_lambda, const double inv_wavelength,
         const double frac_bandwidth, double4c* restrict vis)
 {
-    __shared__ double uu, vv, uu2, vv2, uuvv;
+    __shared__ double uv_len, uu, vv, uu2, vv2, uuvv;
     double4c sum;
     int i;
 
@@ -187,11 +193,15 @@ void oskar_correlate_gaussian_cudak_d(const int num_sources,
     /* Get common baseline values per thread block. */
     if (threadIdx.x == 0)
     {
-        oskar_evaluate_modified_baseline_gaussian_inline_d(station_u[SP],
+        oskar_evaluate_baseline_terms_inline_d(station_u[SP],
                 station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                frac_bandwidth, &uu, &vv, &uu2, &vv2, &uuvv);
+                frac_bandwidth, &uv_len, &uu, &vv, &uu2, &vv2, &uuvv);
     }
     __syncthreads();
+
+    /* Apply the baseline length filter. */
+    if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
+        return;
 
     /* Get pointers to source vectors for both stations. */
     const double4c* restrict station_p = &jones[num_sources * SP];

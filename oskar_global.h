@@ -232,6 +232,14 @@ enum {
     OSKAR_TRUE  = 1
 };
 
+/**
+ * @brief
+ * Enumerator to specify length units (metres or wavelengths).
+ */
+enum {
+    OSKAR_METRES = 0,
+    OSKAR_WAVELENGTHS = 1
+};
 
 /**
  * @brief

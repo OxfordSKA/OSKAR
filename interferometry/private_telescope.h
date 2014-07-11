@@ -53,6 +53,9 @@ struct oskar_Telescope
     double phase_centre_dec_rad; /**< Declination of phase centre, in radians. */
     double channel_bandwidth_hz; /**< Channel bandwidth, in Hz. */
     double time_average_sec;     /**< Time average smearing duration, in sec. */
+    double uv_filter_min;        /**< Minimum allowed UV distance. */
+    double uv_filter_max;        /**< Maximum allowed UV distance. */
+    int uv_filter_units;         /**< Unit of allowed UV distance (OSKAR_METRES or OSKAR_WAVELENGTHS). */
 
     /* Station data. */
     int num_stations;                /**< Number of stations in the model. */

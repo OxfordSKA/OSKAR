@@ -39,7 +39,8 @@ void oskar_correlate_scalar_gaussian_omp_f(int num_sources, int num_stations,
         const float2* jones, const float* source_I, const float* source_l,
         const float* source_m, const float* source_a, const float* source_b,
         const float* source_c, const float* station_u, const float* station_v,
-        float inv_wavelength, float frac_bandwidth, float2* vis)
+        float uv_min_lambda, float uv_max_lambda, float inv_wavelength,
+        float frac_bandwidth, float2* vis)
 {
     int SQ;
 
@@ -56,7 +57,7 @@ void oskar_correlate_scalar_gaussian_omp_f(int num_sources, int num_stations,
         /* Loop over baselines for this station. */
         for (SP = SQ + 1; SP < num_stations; ++SP)
         {
-            float uu, vv, uu2, vv2, uuvv;
+            float uv_len, uu, vv, uu2, vv2, uuvv;
             float2 sum, guard;
             sum.x = 0.0f;
             sum.y = 0.0f;
@@ -67,9 +68,13 @@ void oskar_correlate_scalar_gaussian_omp_f(int num_sources, int num_stations,
             station_p = &jones[SP * num_sources];
 
             /* Get common baseline values. */
-            oskar_evaluate_modified_baseline_gaussian_inline_f(station_u[SP],
+            oskar_evaluate_baseline_terms_inline_f(station_u[SP],
                     station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                    frac_bandwidth, &uu, &vv, &uu2, &vv2, &uuvv);
+                    frac_bandwidth, &uv_len, &uu, &vv, &uu2, &vv2, &uuvv);
+
+            /* Apply the baseline length filter. */
+            if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
+                continue;
 
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)
@@ -106,8 +111,8 @@ void oskar_correlate_scalar_gaussian_omp_d(int num_sources, int num_stations,
         const double2* jones, const double* source_I, const double* source_l,
         const double* source_m, const double* source_a, const double* source_b,
         const double* source_c, const double* station_u,
-        const double* station_v, double inv_wavelength, double frac_bandwidth,
-        double2* vis)
+        const double* station_v, double uv_min_lambda, double uv_max_lambda,
+        double inv_wavelength, double frac_bandwidth, double2* vis)
 {
     int SQ;
 
@@ -124,7 +129,7 @@ void oskar_correlate_scalar_gaussian_omp_d(int num_sources, int num_stations,
         /* Loop over baselines for this station. */
         for (SP = SQ + 1; SP < num_stations; ++SP)
         {
-            double uu, vv, uu2, vv2, uuvv;
+            double uv_len, uu, vv, uu2, vv2, uuvv;
             double2 sum;
             sum.x = 0.0;
             sum.y = 0.0;
@@ -133,9 +138,13 @@ void oskar_correlate_scalar_gaussian_omp_d(int num_sources, int num_stations,
             station_p = &jones[SP * num_sources];
 
             /* Get common baseline values. */
-            oskar_evaluate_modified_baseline_gaussian_inline_d(station_u[SP],
+            oskar_evaluate_baseline_terms_inline_d(station_u[SP],
                     station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                    frac_bandwidth, &uu, &vv, &uu2, &vv2, &uuvv);
+                    frac_bandwidth, &uv_len, &uu, &vv, &uu2, &vv2, &uuvv);
+
+            /* Apply the baseline length filter. */
+            if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
+                continue;
 
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)

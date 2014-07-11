@@ -256,6 +256,10 @@ static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
     oskar_telescope_set_smearing_values(telescope,
             settings->interferometer.channel_bandwidth_hz,
             settings->interferometer.time_average_sec);
+    oskar_telescope_set_uv_filter(telescope,
+            settings->interferometer.uv_filter_min,
+            settings->interferometer.uv_filter_max,
+            settings->interferometer.uv_filter_units);
     oskar_telescope_set_random_seed(telescope,
             aa->array_pattern.element.seed_time_variable_errors);
     num_stations = oskar_telescope_num_stations(telescope);

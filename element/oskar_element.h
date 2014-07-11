@@ -68,11 +68,6 @@ enum {
     OSKAR_ELEMENT_TAPER_GAUSSIAN
 };
 
-enum {
-    OSKAR_ELEMENT_LENGTH_WAVELENGTHS,
-    OSKAR_ELEMENT_LENGTH_METRES
-};
-
 #ifdef __cplusplus
 }
 #endif

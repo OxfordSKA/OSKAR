@@ -471,10 +471,10 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
                 LV("Dipole length", "%.3f", ep->dipole_length);
                 switch (ep->functional_type)
                 {
-                case OSKAR_ELEMENT_LENGTH_WAVELENGTHS:
+                case OSKAR_WAVELENGTHS:
                     LVS("Dipole length units", "Wavelengths");
                     break;
-                case OSKAR_ELEMENT_LENGTH_METRES:
+                case OSKAR_METRES:
                     LVS("Dipole length units", "Metres");
                     break;
                 }
@@ -551,6 +551,14 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
     LV("Time average [sec]", "%.2f", s->interferometer.time_average_sec);
     LVI("Num. visibility ave.", s->interferometer.num_vis_ave);
     LVI("Num. fringe ave.", s->interferometer.num_fringe_ave);
+    if (s->interferometer.uv_filter_min >= 0.0 ||
+            s->interferometer.uv_filter_max >= 0.0)
+    {
+        LV("UV range filter min", "%.3e", s->interferometer.uv_filter_min);
+        LV("UV range filter max", "%.3e", s->interferometer.uv_filter_max);
+        LVS("UV range filter units", s->interferometer.uv_filter_units ==
+                OSKAR_METRES ? "Metres" : "Wavelengths");
+    }
     LVB("Use common sky (short baseline approximation)",
             s->interferometer.use_common_sky);
     LVB("Scalar mode (Stokes I only)", s->interferometer.scalar_mode);

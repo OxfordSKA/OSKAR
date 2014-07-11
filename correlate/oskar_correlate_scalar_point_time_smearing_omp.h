@@ -62,6 +62,8 @@ extern "C" {
  * @param[in] station_v      Station v-coordinates, in metres.
  * @param[in] station_x      Station x-coordinates, in metres.
  * @param[in] station_y      Station y-coordinates, in metres.
+ * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
+ * @param[in] uv_max_lambda  Maximum allowed UV length, in wavelengths.
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in] time_int_sec   Time averaging interval, in seconds.
@@ -74,9 +76,9 @@ void oskar_correlate_scalar_point_time_smearing_omp_f(int num_sources,
         int num_stations, const float2* jones, const float* source_I,
         const float* source_l, const float* source_m, const float* source_n,
         const float* station_u, const float* station_v,
-        const float* station_x, const float* station_y, float inv_wavelength,
-        float frac_bandwidth, float time_int_sec, float gha0_rad,
-        float dec0_rad, float2* vis);
+        const float* station_x, const float* station_y, float uv_min_lambda,
+        float uv_max_lambda, float inv_wavelength, float frac_bandwidth,
+        float time_int_sec, float gha0_rad, float dec0_rad, float2* vis);
 
 /**
  * @brief
@@ -100,6 +102,8 @@ void oskar_correlate_scalar_point_time_smearing_omp_f(int num_sources,
  * @param[in] station_v      Station v-coordinates, in metres.
  * @param[in] station_x      Station x-coordinates, in metres.
  * @param[in] station_y      Station y-coordinates, in metres.
+ * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
+ * @param[in] uv_max_lambda  Maximum allowed UV length, in wavelengths.
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in] time_int_sec   Time averaging interval, in seconds.
@@ -112,9 +116,9 @@ void oskar_correlate_scalar_point_time_smearing_omp_d(int num_sources,
         int num_stations, const double2* jones, const double* source_I,
         const double* source_l, const double* source_m, const double* source_n,
         const double* station_u, const double* station_v,
-        const double* station_x, const double* station_y, double inv_wavelength,
-        double frac_bandwidth, double time_int_sec, double gha0_rad,
-        double dec0_rad, double2* vis);
+        const double* station_x, const double* station_y, double uv_min_lambda,
+        double uv_max_lambda, double inv_wavelength, double frac_bandwidth,
+        double time_int_sec, double gha0_rad, double dec0_rad, double2* vis);
 
 #ifdef __cplusplus
 }

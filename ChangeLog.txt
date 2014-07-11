@@ -7,7 +7,7 @@
       incorrectly report an error in one situation.
 
     * Removed option to image interferometer output at end of simulation.
-      (The OSKAR imager is not recommended for general use.)
+      (The OSKAR DFT imager is not recommended for general use.)
 
     * Removed element pattern fitting parameters from telescope model settings.
 
@@ -39,6 +39,8 @@
       (use the "isotropic" station type for this).
 
     * Added scalar mode option (Stokes I only) to interferometer simulator.
+
+    * Added UV range filter for visibility evaluation.
 
     * Added polarised sky model grid generator.
 

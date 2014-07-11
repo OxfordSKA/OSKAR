@@ -41,9 +41,9 @@ void oskar_correlate_point_time_smearing_omp_f(int num_sources,
         const float* source_Q, const float* source_U, const float* source_V,
         const float* source_l, const float* source_m, const float* source_n,
         const float* station_u, const float* station_v,
-        const float* station_x, const float* station_y, float inv_wavelength,
-        float frac_bandwidth, float time_int_sec, float gha0_rad,
-        float dec0_rad, float4c* vis)
+        const float* station_x, const float* station_y, float uv_min_lambda,
+        float uv_max_lambda, float inv_wavelength, float frac_bandwidth,
+        float time_int_sec, float gha0_rad, float dec0_rad, float4c* vis)
 {
     int SQ;
 
@@ -60,7 +60,7 @@ void oskar_correlate_point_time_smearing_omp_f(int num_sources,
         /* Loop over baselines for this station. */
         for (SP = SQ + 1; SP < num_stations; ++SP)
         {
-            float uu, vv, du_dt, dv_dt, dw_dt;
+            float uv_len, uu, vv, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
             float4c sum, guard;
             oskar_clear_complex_matrix_f(&sum);
             oskar_clear_complex_matrix_f(&guard);
@@ -69,9 +69,13 @@ void oskar_correlate_point_time_smearing_omp_f(int num_sources,
             station_p = &jones[SP * num_sources];
 
             /* Get common baseline values. */
-            oskar_evaluate_modified_baseline_inline_f(station_u[SP],
+            oskar_evaluate_baseline_terms_inline_f(station_u[SP],
                     station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                    frac_bandwidth, &uu, &vv);
+                    frac_bandwidth, &uv_len, &uu, &vv, &uu2, &vv2, &uuvv);
+
+            /* Apply the baseline length filter. */
+            if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
+                continue;
 
             /* Compute the derivatives for time-average smearing. */
             oskar_evaluate_baseline_derivatives_inline_f(station_x[SP],
@@ -114,9 +118,9 @@ void oskar_correlate_point_time_smearing_omp_d(int num_sources,
         const double* source_Q, const double* source_U, const double* source_V,
         const double* source_l, const double* source_m, const double* source_n,
         const double* station_u, const double* station_v,
-        const double* station_x, const double* station_y, double inv_wavelength,
-        double frac_bandwidth, double time_int_sec, double gha0_rad,
-        double dec0_rad, double4c* vis)
+        const double* station_x, const double* station_y, double uv_min_lambda,
+        double uv_max_lambda, double inv_wavelength, double frac_bandwidth,
+        double time_int_sec, double gha0_rad, double dec0_rad, double4c* vis)
 {
     int SQ;
 
@@ -133,7 +137,7 @@ void oskar_correlate_point_time_smearing_omp_d(int num_sources,
         /* Loop over baselines for this station. */
         for (SP = SQ + 1; SP < num_stations; ++SP)
         {
-            double uu, vv, du_dt, dv_dt, dw_dt;
+            double uv_len, uu, vv, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
             double4c sum;
             oskar_clear_complex_matrix_d(&sum);
 
@@ -141,9 +145,13 @@ void oskar_correlate_point_time_smearing_omp_d(int num_sources,
             station_p = &jones[SP * num_sources];
 
             /* Get common baseline values. */
-            oskar_evaluate_modified_baseline_inline_d(station_u[SP],
+            oskar_evaluate_baseline_terms_inline_d(station_u[SP],
                     station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                    frac_bandwidth, &uu, &vv);
+                    frac_bandwidth, &uv_len, &uu, &vv, &uu2, &vv2, &uuvv);
+
+            /* Apply the baseline length filter. */
+            if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
+                continue;
 
             /* Compute the derivatives for time-average smearing. */
             oskar_evaluate_baseline_derivatives_inline_d(station_x[SP],

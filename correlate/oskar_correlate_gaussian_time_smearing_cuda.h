@@ -74,6 +74,8 @@ extern "C" {
  * @param[in] d_station_v    Station v-coordinates, in metres.
  * @param[in] d_station_x    Station x-coordinates, in metres.
  * @param[in] d_station_y    Station y-coordinates, in metres.
+ * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
+ * @param[in] uv_max_lambda  Maximum allowed UV length, in wavelengths.
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in] time_int_sec   Time averaging interval, in seconds.
@@ -91,7 +93,8 @@ void oskar_correlate_gaussian_time_smearing_cuda_f(int num_sources,
         const float* d_source_b, const float* d_source_c,
         const float* d_station_u, const float* d_station_v,
         const float* d_station_x, const float* d_station_y,
-        float inv_wavelength, float frac_bandwidth, float time_int_sec,
+        float uv_min_lambda, float uv_max_lambda, float inv_wavelength,
+        float frac_bandwidth, float time_int_sec,
         float gha0_rad, float dec0_rad, float4c* d_vis);
 
 /**
@@ -128,6 +131,8 @@ void oskar_correlate_gaussian_time_smearing_cuda_f(int num_sources,
  * @param[in] d_station_v    Station v-coordinates, in metres.
  * @param[in] d_station_x    Station x-coordinates, in metres.
  * @param[in] d_station_y    Station y-coordinates, in metres.
+ * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
+ * @param[in] uv_max_lambda  Maximum allowed UV length, in wavelengths.
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in] time_int_sec   Time averaging interval, in seconds.
@@ -145,7 +150,8 @@ void oskar_correlate_gaussian_time_smearing_cuda_d(int num_sources,
         const double* d_source_b, const double* d_source_c,
         const double* d_station_u, const double* d_station_v,
         const double* d_station_x, const double* d_station_y,
-        double inv_wavelength, double frac_bandwidth, double time_int_sec,
+        double uv_min_lambda, double uv_max_lambda, double inv_wavelength,
+        double frac_bandwidth, double time_int_sec,
         double gha0_rad, double dec0_rad, double4c* d_vis);
 
 #ifdef __CUDACC__
@@ -162,6 +168,7 @@ void oskar_correlate_gaussian_time_smearing_cudak_f(const int num_sources,
         const float* restrict source_b, const float* restrict source_c,
         const float* restrict station_u, const float* restrict station_v,
         const float* restrict station_x, const float* restrict station_y,
+        const float uv_min_lambda, const float uv_max_lambda,
         const float inv_wavelength, const float frac_bandwidth,
         const float time_int_sec, const float gha0_rad, const float dec0_rad,
         float4c* restrict vis);
@@ -176,6 +183,7 @@ void oskar_correlate_gaussian_time_smearing_cudak_d(const int num_sources,
         const double* restrict source_b, const double* restrict source_c,
         const double* restrict station_u, const double* restrict station_v,
         const double* restrict station_x, const double* restrict station_y,
+        const double uv_min_lambda, const double uv_max_lambda,
         const double inv_wavelength, const double frac_bandwidth,
         const double time_int_sec, const double gha0_rad, const double dec0_rad,
         double4c* restrict vis);

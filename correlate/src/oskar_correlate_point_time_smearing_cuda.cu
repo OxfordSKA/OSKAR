@@ -46,8 +46,9 @@ void oskar_correlate_point_time_smearing_cuda_f(int num_sources,
         const float* d_source_l, const float* d_source_m,
         const float* d_source_n, const float* d_station_u,
         const float* d_station_v, const float* d_station_x,
-        const float* d_station_y, float inv_wavelength, float frac_bandwidth,
-        float time_int_sec, float gha0_rad, float dec0_rad, float4c* d_vis)
+        const float* d_station_y, float uv_min_lambda, float uv_max_lambda,
+        float inv_wavelength, float frac_bandwidth, float time_int_sec,
+        float gha0_rad, float dec0_rad, float4c* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
@@ -56,8 +57,9 @@ void oskar_correlate_point_time_smearing_cuda_f(int num_sources,
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_source_n, d_station_u,
-            d_station_v, d_station_x, d_station_y, inv_wavelength,
-            frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+            d_station_v, d_station_x, d_station_y, uv_min_lambda, uv_max_lambda,
+            inv_wavelength, frac_bandwidth, time_int_sec, gha0_rad, dec0_rad,
+            d_vis);
 }
 
 /* Double precision. */
@@ -68,8 +70,9 @@ void oskar_correlate_point_time_smearing_cuda_d(int num_sources,
         const double* d_source_l, const double* d_source_m,
         const double* d_source_n, const double* d_station_u,
         const double* d_station_v, const double* d_station_x,
-        const double* d_station_y, double inv_wavelength, double frac_bandwidth,
-        double time_int_sec, double gha0_rad, double dec0_rad, double4c* d_vis)
+        const double* d_station_y, double uv_min_lambda, double uv_max_lambda,
+        double inv_wavelength, double frac_bandwidth, double time_int_sec,
+        double gha0_rad, double dec0_rad, double4c* d_vis)
 {
     dim3 num_threads(128, 1);
     dim3 num_blocks(num_stations, num_stations);
@@ -78,8 +81,9 @@ void oskar_correlate_point_time_smearing_cuda_d(int num_sources,
     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
     (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
             d_source_V, d_source_l, d_source_m, d_source_n, d_station_u,
-            d_station_v, d_station_x, d_station_y, inv_wavelength,
-            frac_bandwidth, time_int_sec, gha0_rad, dec0_rad, d_vis);
+            d_station_v, d_station_x, d_station_y, uv_min_lambda, uv_max_lambda,
+            inv_wavelength, frac_bandwidth, time_int_sec, gha0_rad, dec0_rad,
+            d_vis);
 }
 
 #ifdef __cplusplus
@@ -105,12 +109,13 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         const float* restrict source_l, const float* restrict source_m,
         const float* restrict source_n, const float* restrict station_u,
         const float* restrict station_v, const float* restrict station_x,
-        const float* restrict station_y, const float inv_wavelength,
+        const float* restrict station_y, const float uv_min_lambda,
+        const float uv_max_lambda, const float inv_wavelength,
         const float frac_bandwidth, const float time_int_sec,
         const float gha0_rad, const float dec0_rad,
         float4c* restrict vis)
 {
-    __shared__ float uu, vv, du_dt, dv_dt, dw_dt;
+    __shared__ float uv_len, uu, vv, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
     __shared__ const float4c *restrict station_p, *restrict station_q;
     float4c sum;
     float l, m, n, r1, r2;
@@ -122,9 +127,9 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
     /* Get common baseline values per thread block. */
     if (threadIdx.x == 0)
     {
-        oskar_evaluate_modified_baseline_inline_f(station_u[SP],
+        oskar_evaluate_baseline_terms_inline_f(station_u[SP],
                 station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                frac_bandwidth, &uu, &vv);
+                frac_bandwidth, &uv_len, &uu, &vv, &uu2, &vv2, &uuvv);
 
         /* Compute the derivatives for time-average smearing. */
         oskar_evaluate_baseline_derivatives_inline_f(station_x[SP],
@@ -136,6 +141,10 @@ void oskar_correlate_point_time_smearing_cudak_f(const int num_sources,
         station_q = &jones[num_sources * SQ];
     }
     __syncthreads();
+
+    /* Apply the baseline length filter. */
+    if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
+        return;
 
     /* Each thread loops over a subset of the sources. */
     oskar_clear_complex_matrix_f(&sum); /* Partial sum per thread. */
@@ -185,12 +194,13 @@ void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
         const double* restrict source_l, const double* restrict source_m,
         const double* restrict source_n, const double* restrict station_u,
         const double* restrict station_v, const double* restrict station_x,
-        const double* restrict station_y, const double inv_wavelength,
+        const double* restrict station_y, const double uv_min_lambda,
+        const double uv_max_lambda, const double inv_wavelength,
         const double frac_bandwidth, const double time_int_sec,
         const double gha0_rad, const double dec0_rad,
         double4c* restrict vis)
 {
-    __shared__ double uu, vv, du_dt, dv_dt, dw_dt;
+    __shared__ double uv_len, uu, vv, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
     __shared__ const double4c *restrict station_p, *restrict station_q;
     double4c sum;
     double l, m, n, r1, r2;
@@ -202,9 +212,9 @@ void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
     /* Get common baseline values per thread block. */
     if (threadIdx.x == 0)
     {
-        oskar_evaluate_modified_baseline_inline_d(station_u[SP],
+        oskar_evaluate_baseline_terms_inline_d(station_u[SP],
                 station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                frac_bandwidth, &uu, &vv);
+                frac_bandwidth, &uv_len, &uu, &vv, &uu2, &vv2, &uuvv);
 
         /* Compute the derivatives for time-average smearing. */
         oskar_evaluate_baseline_derivatives_inline_d(station_x[SP],
@@ -216,6 +226,10 @@ void oskar_correlate_point_time_smearing_cudak_d(const int num_sources,
         station_q = &jones[num_sources * SQ];
     }
     __syncthreads();
+
+    /* Apply the baseline length filter. */
+    if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
+        return;
 
     /* Each thread loops over a subset of the sources. */
     oskar_clear_complex_matrix_d(&sum); /* Partial sum per thread. */

@@ -63,6 +63,8 @@ extern "C" {
  * @param[in] source_c       Source Gaussian parameter c.
  * @param[in] station_u      Station u-coordinates, in metres.
  * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
+ * @param[in] uv_max_lambda  Maximum allowed UV length, in wavelengths.
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] vis        Modified output complex visibilities.
@@ -72,7 +74,8 @@ void oskar_correlate_scalar_gaussian_omp_f(int num_sources, int num_stations,
         const float2* jones, const float* source_I, const float* source_l,
         const float* source_m, const float* source_a, const float* source_b,
         const float* source_c, const float* station_u, const float* station_v,
-        float inv_wavelength, float frac_bandwidth, float2* vis);
+        float uv_min_lambda, float uv_max_lambda, float inv_wavelength,
+        float frac_bandwidth, float2* vis);
 
 /**
  * @brief
@@ -97,6 +100,8 @@ void oskar_correlate_scalar_gaussian_omp_f(int num_sources, int num_stations,
  * @param[in] source_c       Source Gaussian parameter c.
  * @param[in] station_u      Station u-coordinates, in metres.
  * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
+ * @param[in] uv_max_lambda  Maximum allowed UV length, in wavelengths.
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] vis        Modified output complex visibilities.
@@ -106,8 +111,8 @@ void oskar_correlate_scalar_gaussian_omp_d(int num_sources, int num_stations,
         const double2* jones, const double* source_I, const double* source_l,
         const double* source_m, const double* source_a, const double* source_b,
         const double* source_c, const double* station_u,
-        const double* station_v, double inv_wavelength, double frac_bandwidth,
-        double2* vis);
+        const double* station_v, double uv_min_lambda, double uv_max_lambda,
+        double inv_wavelength, double frac_bandwidth, double2* vis);
 
 #ifdef __cplusplus
 }

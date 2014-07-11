@@ -172,6 +172,49 @@ double oskar_telescope_time_average_sec(const oskar_Telescope* model);
 
 /**
  * @brief
+ * Returns the UV filter minimum bound.
+ *
+ * @details
+ * Returns the UV filter minimum bound.
+ *
+ * @param[in] model   Pointer to telescope model.
+ *
+ * @return The UV filter minimum bound.
+ */
+OSKAR_EXPORT
+double oskar_telescope_uv_filter_min(const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns the UV filter maximum bound.
+ *
+ * @details
+ * Returns the UV filter maximum bound.
+ *
+ * @param[in] model   Pointer to telescope model.
+ *
+ * @return The UV filter maximum bound.
+ */
+OSKAR_EXPORT
+double oskar_telescope_uv_filter_max(const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns the units of the UV filter values.
+ *
+ * @details
+ * Returns the units of the UV filter values
+ * (OSKAR_METRES or OSKAR_WAVELENGTHS).
+ *
+ * @param[in] model   Pointer to telescope model.
+ *
+ * @return The units of the UV filter values.
+ */
+OSKAR_EXPORT
+int oskar_telescope_uv_filter_units(const oskar_Telescope* model);
+
+/**
+ * @brief
  * Returns the number of unique baselines in the telescope model.
  *
  * @details
@@ -533,6 +576,22 @@ void oskar_telescope_set_phase_centre(oskar_Telescope* model,
 OSKAR_EXPORT
 void oskar_telescope_set_smearing_values(oskar_Telescope* model,
         double bandwidth_hz, double time_average_sec);
+
+/**
+ * @brief
+ * Sets the values of the smearing parameters.
+ *
+ * @details
+ * Sets the values of the smearing parameters.
+ *
+ * @param[in] model            Pointer to telescope model.
+ * @param[in] uv_filter_min    Minimum value for UV filter.
+ * @param[in] uv_filter_max    Maximum value for UV filter.
+ * @param[in] uv_filter_units  Units of UV filter (OSKAR_METRES or OSKAR_WAVELENGTHS).
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_uv_filter(oskar_Telescope* model,
+        double uv_filter_min, double uv_filter_max, int uv_filter_units);
 
 /**
  * @brief

@@ -1046,6 +1046,22 @@ void oskar_SettingsModelApps::init_settings_interferometer()
     declare(k, "Number of fringe averages", oskar_SettingsItem::INT_POSITIVE);
     setTooltip(k, "Number of averaged evaluations of the K-Jones matrix per "
             "Measurement Equation average.");
+
+    k = group + "/uv_filter_min";
+    declare(k, "UV range filter min", oskar_SettingsItem::DOUBLE_MIN, "min");
+    setTooltip(k, "The minimum value of the baseline UV length allowed by "
+            "the filter. <b>Note that visibilities on baseline UV "
+            "lengths outside this range will not be evaluated!</b>");
+    k = group + "/uv_filter_max";
+    declare(k, "UV range filter max", oskar_SettingsItem::DOUBLE_MAX, "max");
+    setTooltip(k, "The maximum value of the baseline UV length allowed by "
+            "the filter. <b>Note that visibilities on baseline UV "
+            "lengths outside this range will not be evaluated!</b>");
+    k = group + "/uv_filter_units";
+    declare(k, "UV range filter units",
+            QStringList() << "Metres" << "Wavelengths");
+    setTooltip(k, "The units of the baseline UV length filter values.");
+
     k = group + "/use_common_sky";
     declare(k, "Use common sky (short baseline approximation)",
             oskar_SettingsItem::BOOL, true);

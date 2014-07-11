@@ -66,6 +66,8 @@ extern "C" {
  * @param[in] d_source_c     Source Gaussian parameter c.
  * @param[in] d_station_u    Station u-coordinates, in metres.
  * @param[in] d_station_v    Station v-coordinates, in metres.
+ * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
+ * @param[in] uv_max_lambda  Maximum allowed UV length, in wavelengths.
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] d_vis      Modified output complex visibilities.
@@ -77,7 +79,8 @@ void oskar_correlate_scalar_gaussian_cuda_f(int num_sources,
         const float* d_source_m, const float* d_source_a,
         const float* d_source_b, const float* d_source_c,
         const float* d_station_u, const float* d_station_v,
-        float inv_wavelength, float frac_bandwidth, float2* d_vis);
+        float uv_min_lambda, float uv_max_lambda, float inv_wavelength,
+        float frac_bandwidth, float2* d_vis);
 
 /**
  * @brief
@@ -105,6 +108,8 @@ void oskar_correlate_scalar_gaussian_cuda_f(int num_sources,
  * @param[in] d_source_c     Source Gaussian parameter c.
  * @param[in] d_station_u    Station u-coordinates, in metres.
  * @param[in] d_station_v    Station v-coordinates, in metres.
+ * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
+ * @param[in] uv_max_lambda  Maximum allowed UV length, in wavelengths.
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[in,out] d_vis      Modified output complex visibilities.
@@ -116,7 +121,8 @@ void oskar_correlate_scalar_gaussian_cuda_d(int num_sources,
         const double* d_source_m, const double* d_source_a,
         const double* d_source_b, const double* d_source_c,
         const double* d_station_u, const double* d_station_v,
-        double inv_wavelength, double frac_bandwidth, double2* d_vis);
+        double uv_min_lambda, double uv_max_lambda, double inv_wavelength,
+        double frac_bandwidth, double2* d_vis);
 
 #ifdef __CUDACC__
 
@@ -129,6 +135,7 @@ void oskar_correlate_scalar_gaussian_cudak_f(const int num_sources,
         const float* restrict source_m, const float* restrict source_a,
         const float* restrict source_b, const float* restrict source_c,
         const float* restrict station_u, const float* restrict station_v,
+        const float uv_min_lambda, const float uv_max_lambda,
         const float inv_wavelength, const float frac_bandwidth,
         float2* restrict vis);
 
@@ -139,6 +146,7 @@ void oskar_correlate_scalar_gaussian_cudak_d(const int num_sources,
         const double* restrict source_m, const double* restrict source_a,
         const double* restrict source_b, const double* restrict source_c,
         const double* restrict station_u, const double* restrict station_v,
+        const double uv_min_lambda, const double uv_max_lambda,
         const double inv_wavelength, const double frac_bandwidth,
         double2* restrict vis);
 

@@ -86,7 +86,7 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
     element_type    = model->element_type;
     taper_type      = model->taper_type;
     dipole_length_m = model->dipole_length;
-    if (model->dipole_length_units == OSKAR_ELEMENT_LENGTH_WAVELENGTHS)
+    if (model->dipole_length_units == OSKAR_WAVELENGTHS)
         dipole_length_m *= (C_0 / frequency_hz);
 
     /* Check if element type is isotropic. */

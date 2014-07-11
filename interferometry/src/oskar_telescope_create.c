@@ -32,6 +32,7 @@
 #include <oskar_mem.h>
 
 #include <stdlib.h>
+#include <float.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -88,6 +89,9 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->phase_centre_dec_rad = 0.0;
     telescope->channel_bandwidth_hz = 0.0;
     telescope->time_average_sec = 0.0;
+    telescope->uv_filter_min = 0.0;
+    telescope->uv_filter_max = FLT_MAX;
+    telescope->uv_filter_units = OSKAR_METRES;
 
     /* Initialise the arrays. */
     telescope->station_true_x_offset_ecef_metres = oskar_mem_create(type, location,

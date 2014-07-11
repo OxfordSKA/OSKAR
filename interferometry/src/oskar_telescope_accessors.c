@@ -81,6 +81,21 @@ double oskar_telescope_time_average_sec(const oskar_Telescope* model)
     return model->time_average_sec;
 }
 
+double oskar_telescope_uv_filter_min(const oskar_Telescope* model)
+{
+    return model->uv_filter_min;
+}
+
+double oskar_telescope_uv_filter_max(const oskar_Telescope* model)
+{
+    return model->uv_filter_max;
+}
+
+int oskar_telescope_uv_filter_units(const oskar_Telescope* model)
+{
+    return model->uv_filter_units;
+}
+
 int oskar_telescope_num_baselines(const oskar_Telescope* model)
 {
     return ((model->num_stations * (model->num_stations - 1)) / 2);
@@ -225,6 +240,14 @@ void oskar_telescope_set_smearing_values(oskar_Telescope* model,
 {
     model->channel_bandwidth_hz = bandwidth_hz;
     model->time_average_sec = time_average_sec;
+}
+
+void oskar_telescope_set_uv_filter(oskar_Telescope* model,
+        double uv_filter_min, double uv_filter_max, int uv_filter_units)
+{
+    model->uv_filter_min = uv_filter_min;
+    model->uv_filter_max = uv_filter_max;
+    model->uv_filter_units = uv_filter_units;
 }
 
 void oskar_telescope_set_common_horizon(oskar_Telescope* model, int value)

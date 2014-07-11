@@ -177,9 +177,9 @@ void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
             ep->dipole_length = s.value("dipole_length", 0.5).toDouble();
             temp = s.value("dipole_length_units", "Wavelengths").toString();
             if (temp.startsWith("W", Qt::CaseInsensitive))
-                ep->dipole_length_units = OSKAR_ELEMENT_LENGTH_WAVELENGTHS;
+                ep->dipole_length_units = OSKAR_WAVELENGTHS;
             else if (temp.startsWith("M", Qt::CaseInsensitive))
-                ep->dipole_length_units = OSKAR_ELEMENT_LENGTH_METRES;
+                ep->dipole_length_units = OSKAR_METRES;
             else
             {
                 *status = OSKAR_ERR_SETTINGS_TELESCOPE;

@@ -47,6 +47,9 @@ struct oskar_SettingsInterferometer
 {
     double channel_bandwidth_hz;
     double time_average_sec;
+    double uv_filter_min;
+    double uv_filter_max;
+    int uv_filter_units;
     int num_vis_ave;
     int num_fringe_ave;
 
