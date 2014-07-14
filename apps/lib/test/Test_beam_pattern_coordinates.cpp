@@ -36,16 +36,15 @@
 #include <oskar_convert_galactic_to_fk5.h>
 
 #include <oskar_binary.h>
+#include <oskar_timer.h>
 
 #include <cmath>
 #include <cstdio>
 #include <iostream>
 
-#include <QtCore/QTime>
-
 TEST(beam_pattern_coordinates, generate_lon_lat_grid)
 {
-    int status = OSKAR_SUCCESS;
+    int status = 0;
 
     double lon0 = 0.0 * (M_PI/180.0);
     double lat0 = 90.0 * (M_PI/180.0);
@@ -57,17 +56,18 @@ TEST(beam_pattern_coordinates, generate_lon_lat_grid)
     int loc = OSKAR_CPU;
 
     oskar_Mem* lon = oskar_mem_create(type, loc, num_pixels, &status);
-    ASSERT_EQ(OSKAR_SUCCESS, status);
     oskar_Mem* lat = oskar_mem_create(type, loc, num_pixels, &status);
-    ASSERT_EQ(OSKAR_SUCCESS, status);
+    ASSERT_EQ(0, status);
 
     // ##### Generates a grid of pixels centred on ra0, dec0 ##################
-    QTime timer;
-    timer.start();
+    oskar_Timer* timer = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    oskar_timer_start(timer);
     oskar_evaluate_image_lon_lat_grid(lon, lat, image_size, image_size,
             fov, fov, lon0, lat0, &status);
-    ASSERT_EQ(OSKAR_SUCCESS, status);
-    std::cout << "Grid generation: " << timer.elapsed() << " ms" << std::endl;
+    ASSERT_EQ(0, status);
+    std::cout << "Grid generation: " << oskar_timer_elapsed(timer)/1000.0
+            << " ms" << std::endl;
+    oskar_timer_free(timer);
     // ########################################################################
 
     // Write to OSKAR binary file (for manual inspection in MATLAB).
@@ -75,28 +75,28 @@ TEST(beam_pattern_coordinates, generate_lon_lat_grid)
     const char* group = "coords";
     oskar_Binary* h = oskar_binary_create(filename, 'w', &status);
     oskar_binary_write_mem_ext(h, lon, group, "RA", 0, num_pixels, &status);
-    ASSERT_EQ(OSKAR_SUCCESS, status);
+    ASSERT_EQ(0, status);
     oskar_binary_write_mem_ext(h, lat, group, "Dec", 0, num_pixels, &status);
-    ASSERT_EQ(OSKAR_SUCCESS, status);
+    ASSERT_EQ(0, status);
     oskar_binary_free(h);
 
     // Clean up.
     oskar_mem_free(lon, &status);
     oskar_mem_free(lat, &status);
-    ASSERT_EQ(OSKAR_SUCCESS, status);
+    ASSERT_EQ(0, status);
 }
 
 
 TEST(beam_pattern_coordinates, HEALPix_horizontal)
 {
-    int status = OSKAR_SUCCESS;
+    int status = 0;
 
     int nside = 12;
     int num_pixels = oskar_healpix_nside_to_npix(nside);
     int loc = OSKAR_CPU;
     int type = OSKAR_DOUBLE;
 
-    // galactic longitude = l, latidude = b
+    // galactic longitude = l, latitude = b
     oskar_Mem* b = oskar_mem_create(type, loc, num_pixels, &status);
     oskar_Mem* l = oskar_mem_create(type, loc, num_pixels, &status);
     oskar_Mem* RA = oskar_mem_create(type, loc, num_pixels, &status);

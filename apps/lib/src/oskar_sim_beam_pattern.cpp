@@ -44,14 +44,13 @@
 #include <oskar_station_work.h>
 #include <oskar_cuda_mem_log.h>
 #include <oskar_random_state.h>
+#include <oskar_timer.h>
 #include <oskar_log.h>
 
 #include <oskar_settings_free.h>
 
-#include <QtCore/QTime>
-
 #include <cmath>
-#include <cstdio>      // for remove()
+#include <cstring>
 
 // ============================================================================
 static void load_settings(oskar_Settings* settings, const char* filename,
@@ -84,17 +83,18 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
 
     // Compute the beam pattern cube and write to file.
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    QTime timer;
-    timer.start();
+    oskar_Timer* timer = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    oskar_timer_start(timer);
 
     oskar_Image* beam_pattern = oskar_image_create(type | OSKAR_COMPLEX,
             OSKAR_CPU, status);
     init_beam_pattern_cube(beam_pattern, &settings, status);
     simulate_beam_pattern(oskar_image_data(beam_pattern), &settings, type,
             tel, log, status);
-    double elapsed = timer.elapsed() / 1.0e3;
-    oskar_log_section(log, "Simulation completed in %.3f sec.", elapsed);
+    oskar_log_section(log, "Simulation completed in %.3f sec.",
+            oskar_timer_elapsed(timer));
     oskar_beam_pattern_write(beam_pattern, &settings, type, log, status);
+    oskar_timer_free(timer);
 
     // Free memory.
     oskar_telescope_free(tel, status);
