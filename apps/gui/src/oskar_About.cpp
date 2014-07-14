@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <oskar_global.h>
 #include <apps/gui/oskar_About.h>
 
 #include <QtGui/QApplication>

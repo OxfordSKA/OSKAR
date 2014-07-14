@@ -5,9 +5,9 @@
 # Dependencies:
 #------------------------------------------------------------------------------
 #
-#   CUDA (>= 4.0)   (oskar, oskar_apps, oskar_widgets, OSKAR applications)
+#   CUDA (>= 4.0)   (oskar, oskar_apps, OSKAR applications)
 #   OpenMP          (for multi-GPU support)
-#   Qt4 (>=4.6)     (oskar_apps, oskar_widgets, OSKAR applications)
+#   Qt4 (>=4.6)     (oskar_apps, GUI, OSKAR applications)
 #   MKL             (oskar -> to enable extended sources)
 #   CBLAS           (oskar -> to enable extended sources)
 #   LAPACK          (oskar -> to enable extended sources)
@@ -28,7 +28,7 @@ find_package(OpenMP QUIET)   # liboskar
 #find_package(MKL QUIET)     # liboskar
 find_package(CBLAS QUIET)    # liboskar
 find_package(LAPACK QUIET)   # liboskar
-find_package(Qt4 4.6 QUIET)  # liboskar_apps, liboskar_widgets, apps
+find_package(Qt4 4.6 QUIET)  # liboskar_apps, apps
 # HACK for using Qt4 frameworks on OS X. 
 # Avoids having to symlink headers and libraries from the Qt binary installer
 # into the system paths.
@@ -59,6 +59,8 @@ if (NOT CUDA_FOUND)
     message("-- WARNING: CUDA toolkit not found: Unable to build main OSKAR library.")
     message("===============================================================================")
 elseif (NOT CUDA_CUDA_LIBRARY)
+    # Leave this as a warning only, as drivers may not be installed
+    # on cluster head nodes.
     message("===============================================================================")
     message("-- WARNING: CUDA driver library not found: You may experience problems!")
     message("===============================================================================")
@@ -148,7 +150,7 @@ endif()
 #    message("===============================================================================")
 #endif()
 
-# Prints a message saying which libraries are being built.
+# Prints a message saying which components are being built.
 message("===============================================================================")
 message("-- INFO: The following OSKAR components will be built:")
 set(component_count 0)
@@ -164,13 +166,13 @@ if (CFITSIO_FOUND AND CUDA_FOUND)
     message("-- INFO:   - liboskar_fits")
     math(EXPR component_count '${component_count}+1')
 endif ()
-if (QT4_FOUND)
-    message("-- INFO:   - liboskar_widgets")
-    math(EXPR component_count '${component_count}+1')
-endif ()
 if (QT4_FOUND AND CUDA_FOUND)
     message("-- INFO:   - liboskar_apps")
-    message("-- INFO:   - OSKAR applications")
+    message("-- INFO:   - OSKAR command line applications")
+    math(EXPR component_count '${component_count}+1')
+endif ()
+if (QT4_FOUND)
+    message("-- INFO:   - OSKAR GUI")
     math(EXPR component_count '${component_count}+1')
 endif ()
 if ("${component_count}" EQUAL 0)
@@ -183,7 +185,7 @@ if (MATLAB_FOUND AND CUDA_FOUND)
     message("-- INFO:   - OSKAR MATLAB interface functions")
 endif()
 if (PYTHON_FOUND AND CUDA_FOUND)
-    message("-- INFO:   - OSKAR Python interface")
+    message("-- INFO:   - OSKAR Python interface functions (experimental)")
 endif()
 message("===============================================================================")
 

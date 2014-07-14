@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,9 @@
  * @file oskar_DocumentationDisplay.h
  */
 
-#include "oskar_global.h"
 #include <QtGui/QDialog>
 
-class OSKAR_WIDGETS_EXPORT oskar_DocumentationDisplay : public QDialog
+class oskar_DocumentationDisplay : public QDialog
 {
     Q_OBJECT
 
@@ -44,4 +43,4 @@ public:
     oskar_DocumentationDisplay(QWidget *parent = 0);
 };
 
-#endif /* OSKAR_DOCUMENTATION_DISPLAY_H_ */
+#endif

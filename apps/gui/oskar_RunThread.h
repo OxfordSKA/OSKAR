@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,6 @@
  * @file oskar_RunThread.h
  */
 
-#include <oskar_global.h>
-
 #include <QtCore/QThread>
 #include <QtCore/QMutex>
 #include <QtCore/QStringList>
@@ -42,7 +40,7 @@
 class QProcess;
 class oskar_SettingsModel;
 
-class OSKAR_WIDGETS_EXPORT oskar_RunThread : public QThread
+class oskar_RunThread : public QThread
 {
     Q_OBJECT
 
@@ -73,4 +71,4 @@ private:
     QProcess* process_;
 };
 
-#endif /* OSKAR_RUN_THREAD_H_ */
+#endif

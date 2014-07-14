@@ -60,10 +60,8 @@ Each of the top level module folders listed above will contain the following
 folders.
 
 (module)
- |--- src       : C/C++ source code for module.
- |
- |--- test      : module tests / unit tests.
- |    
+ |-- src       : C/C++ source code for module.
+ |-- test      : module tests / unit tests.
 
 3. OSKAR Components
 --------------------------------------------------------------------------------
@@ -74,7 +72,6 @@ folders.
 * oskar_apps               : Application utility library.
 * oskar_fits               : FITS interface library.
 * oskar_ms                 : Measurement Set writer.
-* oskar_widgets            : Qt Widgets.
 
 3.2 Applications
 --------------------------------------------------------------------------------

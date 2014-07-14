@@ -33,12 +33,11 @@
  * @file oskar_BinaryLocations.h
  */
 
-#include <oskar_global.h>
 #include <QtGui/QDialog>
 
 class QLineEdit;
 
-class OSKAR_WIDGETS_EXPORT oskar_BinaryLocations : public QDialog
+class oskar_BinaryLocations : public QDialog
 {
     Q_OBJECT
 
@@ -71,4 +70,4 @@ private:
     QLineEdit* editCudaSystemInfo_;
 };
 
-#endif /* OSKAR_BINARY_LOCATIONS_H_ */
+#endif
