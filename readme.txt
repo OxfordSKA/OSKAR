@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.5                                           Last update: 8 July 2014 |
+| OSKAR 2.5                                          Last update: 14 July 2014 |
 +------------------------------------------------------------------------------+
 
 1. OSKAR: Oxford's Square Kilometre Array Radio-telescope simulator
@@ -20,60 +20,37 @@ as those envisaged for the SKA.
 Top level folder structure for OSKAR.
 
  src
- |--- apps             : Applications directory containing application main()
- |    |                  functions.
- |    |
- |    |--- lib         : Application library. Utility functions used by OSKAR
- |                       applications.
- |
- |--- cmake            : Build system macros.
- |
- |--- correlate        : Cross-correlation functions.
- |
- |--- extern           : External libraries used by OSKAR.
- |    |
- |    |--- dierckx     : Subroutines for calculating smoothing splines (tests).
- |    |
- |    |--- ezOptionParser-0.2.0: Library for command line option parsing.
- |    |
- |    |--- gtest-1.7.0 : Google testing framework library.
- |
- |--- fits             : FITS format interface library.
- |
- |--- imaging          : Image/imaging functions.
- |
- |--- interferometry   : Interferometry functions, telescope model functions.
- |
- |--- jones            : Jones data structure and jones matrix evaluation
- |                       functions. 
- |
- |--- math             : Generic math functions.
- |
- |--- matlab           : MATLAB interface to OSKAR.
- |
- |--- measures         : Functions for coordinate conversions.
- |
- |--- ms               : Measurement Set writer.
- |
- |--- python           : Experimental Python interface.
- |
- |--- settings         : Functions, widgets and structures for settings.
- |    |--- load        : Functions for loading settings ini files.
- |    |--- struct      : Settings structures and functions for handling them.
- |    |--- widgets     : Settings widgets for use with the OSKAR GUI
- |
- |--- sky              : Sky generators, coordinate conversion,
- |                       horizon clipping, sky model functions.
- |
- |--- splines          : Spline fitting functions.
- |
- |--- station          : Evaluation of beam pattern (E Jones),
- |                       station level processing, antenna level processing.
- |
- |--- utility          : Utility functions.
- |    |--- log         : Functions for printing formatted log messages.
- |
- |--- widgets          : GUI components.
+ |-- apps             : Applications directory containing application main()
+ |   |                  functions.
+ |   |-- gui          : GUI classes.
+ |   |-- lib          : Application library. Utility functions used by OSKAR
+ |                      applications.
+ |-- cmake            : Build system macros.
+ |-- correlate        : Cross-correlation functions.
+ |-- element          : Element structure and related functions.
+ |-- extern           : External libraries used by OSKAR.
+ |   |-- ezOptionParser-0.2.0: Library for command line option parsing.
+ |   |-- gtest-1.7.0  : Google testing framework library.
+ |-- fits             : FITS format interface library.
+ |-- imaging          : Image/imaging functions.
+ |-- interferometry   : Visibility functions and telescope model functions.
+ |-- jones            : Jones data structure and jones matrix evaluation
+ |                      functions.
+ |-- math             : General math functions and DFT kernels.
+ |-- matlab           : Experimental MATLAB interface.
+ |-- measures         : Functions for coordinate conversions.
+ |-- ms               : Measurement Set writer.
+ |-- python           : Experimental Python interface.
+ |-- settings         : Functions, widgets and structures for settings.
+ |   |-- load         : Functions for loading settings ini files.
+ |   |-- struct       : Settings structures and functions for handling them.
+ |   |-- widgets      : Settings widgets for use with the OSKAR GUI
+ |-- sky              : Horizon clipping and sky model functions.
+ |-- splines          : Spline fitting functions.
+ |-- station          : Evaluation of station beam pattern,
+ |                      station level processing, antenna level processing.
+ |-- utility          : Utility functions.
+ |   |-- log          : Functions for printing formatted log messages.
 
 
 2.2 Sub-folder Structure

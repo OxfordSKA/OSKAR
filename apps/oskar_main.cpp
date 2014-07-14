@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_MainWindow.h"
-
-#include "apps/lib/oskar_OptionParser.h"
+#include <apps/gui/oskar_MainWindow.h>
+#include <apps/lib/oskar_OptionParser.h>
 
 #include <QtGui/QApplication>
 #include <cstdlib>

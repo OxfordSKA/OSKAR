@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_global.h>
-#include <widgets/oskar_BinaryLocations.h>
+#include <apps/gui/oskar_BinaryLocations.h>
 
 #include <QtGui/QApplication>
 #include <QtGui/QDialogButtonBox>

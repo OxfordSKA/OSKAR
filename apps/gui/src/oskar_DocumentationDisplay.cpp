@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "widgets/oskar_DocumentationDisplay.h"
+#include <apps/gui/oskar_DocumentationDisplay.h>
 
 #include <QtGui/QApplication>
 #include <QtGui/QDialogButtonBox>

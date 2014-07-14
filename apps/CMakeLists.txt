@@ -16,11 +16,22 @@ if (QT4_FOUND)
     set(name oskar_settings_get)
     qt_app(${name} ${name}_main.cpp)
 
-    # BINARY: oskar
-    qt_app(oskar oskar_main.cpp oskar_MainWindow.cpp
-        QT_MOC_SRC oskar_MainWindow.h
+    # BINARY: oskar (GUI)
+    add_subdirectory(gui)
+    foreach (file ${gui_SRC})
+        list(REMOVE_ITEM gui_SRC ${file})
+        list(APPEND gui_SRC gui/${file})
+    endforeach()
+    foreach (file ${gui_MOC_SRC})
+        list(REMOVE_ITEM gui_MOC_SRC ${file})
+        list(APPEND gui_MOC_SRC gui/${file})
+    endforeach()
+    qt4_wrap_cpp(gui_SRC ${gui_MOC_SRC})
+    qt4_add_resources(gui_SRC gui/icons/icons.qrc)
+    qt_app(oskar oskar_main.cpp ${gui_SRC} ${gui_MOC_SRC}
         EXTRA_LIBS 
-            oskar_widgets 
+            oskar_settings_widgets 
+            ${QT_QTCORE_LIBRARY}
             ${QT_QTGUI_LIBRARY}
             ${QT_QTNETWORK_LIBRARY}
     )

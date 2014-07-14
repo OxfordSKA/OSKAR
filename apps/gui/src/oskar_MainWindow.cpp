@@ -26,13 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_MainWindow.h>
+#include <apps/gui/oskar_MainWindow.h>
 
-#include <oskar_About.h>
-#include <oskar_BinaryLocations.h>
-#include <oskar_CudaInfoDisplay.h>
-#include <oskar_DocumentationDisplay.h>
-#include <oskar_RunDialog.h>
+#include <apps/gui/oskar_About.h>
+#include <apps/gui/oskar_BinaryLocations.h>
+#include <apps/gui/oskar_CudaInfoDisplay.h>
+#include <apps/gui/oskar_DocumentationDisplay.h>
+#include <apps/gui/oskar_RunDialog.h>
 #include <oskar_SettingsDelegate.h>
 #include <oskar_SettingsItem.h>
 #include <oskar_SettingsModelApps.h>
