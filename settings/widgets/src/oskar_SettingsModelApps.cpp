@@ -1059,7 +1059,7 @@ void oskar_SettingsModelApps::init_settings_interferometer()
             "lengths outside this range will not be evaluated!</b>");
     k = group + "/uv_filter_units";
     declare(k, "UV range filter units",
-            QStringList() << "Metres" << "Wavelengths");
+            QStringList() << "Wavelengths" << "Metres");
     setTooltip(k, "The units of the baseline UV length filter values.");
 
     k = group + "/use_common_sky";
