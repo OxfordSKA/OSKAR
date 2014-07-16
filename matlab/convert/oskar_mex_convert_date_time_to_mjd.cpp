@@ -28,24 +28,26 @@
 
 #include <mex.h>
 #include "matlab/common/oskar_matlab_common.h"
-#include <oskar_convert_mjd_to_gast_fast.h>
+#include <oskar_convert_date_time_to_mjd.h>
 
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     // Parse Inputs.
-    if (num_in != 1 || num_out > 1)
+    if (num_in != 4 || num_out < 1)
     {
-        oskar_matlab_usage("[GAST in radians]", "sky",
-                "convert_mjd_to_gast_fast", "<MJD UT1>",
-                "Converts a MJD to Greenwich Apparent Sidereal Time (GAST)");
+        oskar_matlab_usage("[mjd_utc]", "sky", "date_time_to_mjd",
+                "<year>, <month>, <day>, <day fraction>",
+                "Converts date and time to MJD(UTC)");
     }
 
     // Get MATLAB inputs.
-    double mjd_utc  = mxGetScalar(in[0]);
+    int year  = (int)mxGetScalar(in[0]);
+    int month = (int)mxGetScalar(in[1]);
+    int day   = (int)mxGetScalar(in[2]);
+    double day_fraction = (double)mxGetScalar(in[3]);
 
     out[0] = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
-    double* gast_rad = (double*)mxGetPr(out[0]);
-
-    *gast_rad = oskar_convert_mjd_to_gast_fast(mjd_utc);
+    double* mjd = (double*)mxGetData(out[0]);
+    *mjd = oskar_convert_date_time_to_mjd(year, month, day, day_fraction);
 }

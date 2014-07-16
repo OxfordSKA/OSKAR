@@ -20,6 +20,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/apps
     ${PROJECT_SOURCE_DIR}/apps/lib
+    ${PROJECT_SOURCE_DIR}/convert
     ${PROJECT_SOURCE_DIR}/correlate
     ${PROJECT_SOURCE_DIR}/element
     ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include
@@ -27,7 +28,6 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/interferometry
     ${PROJECT_SOURCE_DIR}/jones
     ${PROJECT_SOURCE_DIR}/math
-    ${PROJECT_SOURCE_DIR}/measures
     ${PROJECT_SOURCE_DIR}/settings
     ${PROJECT_SOURCE_DIR}/settings/load
     ${PROJECT_SOURCE_DIR}/settings/widgets

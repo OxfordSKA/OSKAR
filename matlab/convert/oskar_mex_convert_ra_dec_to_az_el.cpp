@@ -45,7 +45,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     if (num_in != 4 || num_out > 2)
     {
-        oskar_matlab_usage("[az, el]", "sky", "convert_ra_dec_to_az_el",
+        oskar_matlab_usage("[az, el]", "sky", "ra_dec_to_az_el",
                 "<RA>, <Dec>, <LAST>, <lat>",
                 "Converts RA, Dec coordinates to az, el coordinates. Note all "
                 "coordinates are assumed to be in radians.");

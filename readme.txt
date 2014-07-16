@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.5                                          Last update: 14 July 2014 |
+| OSKAR 2.5                                          Last update: 16 July 2014 |
 +------------------------------------------------------------------------------+
 
 1. OSKAR: Oxford's Square Kilometre Array Radio-telescope simulator
@@ -26,6 +26,7 @@ Top level folder structure for OSKAR.
  |   |-- lib          : Application library. Utility functions used by OSKAR
  |                      applications.
  |-- cmake            : Build system macros.
+ |-- convert          : Functions for coordinate conversions.
  |-- correlate        : Cross-correlation functions.
  |-- element          : Element structure and related functions.
  |-- extern           : External libraries used by OSKAR.
@@ -38,7 +39,6 @@ Top level folder structure for OSKAR.
  |                      functions.
  |-- math             : General math functions and DFT kernels.
  |-- matlab           : Experimental MATLAB interface.
- |-- measures         : Functions for coordinate conversions.
  |-- ms               : Measurement Set writer.
  |-- python           : Experimental Python interface.
  |-- settings         : Functions, widgets and structures for settings.
