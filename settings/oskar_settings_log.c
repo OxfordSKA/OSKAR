@@ -841,8 +841,8 @@ void oskar_log_settings_element_fit(oskar_Log* log, const oskar_Settings* s)
     LVS("Input CST file", ef->input_cst_file);
     LVS("Output FITS image file", ef->fits_image);
     LV("Frequency [Hz]", "%.5e", ef->frequency_hz);
-    LVS("Polarisation type", ef->polarisation_type == 1 ? "X" :
-            ef->polarisation_type == 2 ? "Y" : "XY");
+    LVS("Polarisation type", ef->pol_type == 1 ? "X" :
+            ef->pol_type == 2 ? "Y" : "XY");
     LVB("Ignore data at poles", ef->ignore_data_at_pole);
     LVB("Ignore data below horizon", ef->ignore_data_below_horizon);
     LV("Average fractional error", "%.4f",

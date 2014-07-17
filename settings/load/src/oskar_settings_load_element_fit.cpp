@@ -77,18 +77,18 @@ void oskar_settings_load_element_fit(oskar_SettingsElementFit* settings,
         strcpy(settings->fits_image, t.constData());
     }
 #endif
-    t = s.value("polarisation_type", "XY").toByteArray().toUpper();
+    t = s.value("pol_type", "XY").toByteArray().toUpper();
     if (t == "X")
     {
-        settings->polarisation_type = 1;
+        settings->pol_type = 1;
     }
     else if (t == "Y")
     {
-        settings->polarisation_type = 2;
+        settings->pol_type = 2;
     }
     else if (t == "XY")
     {
-        settings->polarisation_type = 0;
+        settings->pol_type = 0;
     }
     else
     {

@@ -99,7 +99,7 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
     const char* fits_image = settings.element_fit.fits_image;
     double frequency_hz = settings.element_fit.frequency_hz;
     int element_type_index = settings.element_fit.element_type_index;
-    int port = settings.element_fit.polarisation_type;
+    int port = settings.element_fit.pol_type;
 
     // Check that the input and output files have been set.
     if (!input_file || !output_dir)

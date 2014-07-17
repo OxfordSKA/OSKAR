@@ -500,7 +500,8 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
             << "Isotropic beam" << "Gaussian beam" << "VLA (PBCOR)");
     setTooltip(k, "The type of each station in the interferometer. A simple, "
             "time-invariant Gaussian station beam can be used instead of an "
-            "aperture array beam if required for testing.");
+            "aperture array beam if required for testing. All station beam "
+            "effects can be disabled by selecting 'Isotropic beam'.");
 
     k = root + "/normalise_beams_at_phase_centre";
     declare(k , "Normalise beams at phase centre", oskar_SettingsItem::BOOL,
@@ -619,7 +620,7 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     k = group + "/dipole_length_units";
     declare(k, "Dipole length units", QStringList() <<
             "Wavelengths" << "Metres");
-    setTooltip(k, "The units used to specify the dipole length (metres or"
+    setTooltip(k, "The units used to specify the dipole length (metres or "
             "wavelengths), if using dipole elements.");
     setDependency(k, functional_type, "Dipole");
 
@@ -689,7 +690,7 @@ void oskar_SettingsModelApps::init_settings_element_fit()
     setTooltip(k, "Observing frequency at which numerical element pattern "
             "data is applicable, in Hz.");
 
-    k = root + "/polarisation_type";
+    k = root + "/pol_type";
     declare(k, "Polarisation type", QStringList() << "XY" << "X" << "Y");
     setTooltip(k, "Specify whether the input data is to be used for the "
             "X or Y dipole, or both.");
@@ -1146,7 +1147,7 @@ void oskar_SettingsModelApps::init_settings_beampattern()
             "<ul>"
             "<li>A value of \"256\" results in a square image of size 256 by "
             "256 pixels.</li>"
-            "<li>A value of \"256,128\" results in a image of 256 by 128 "
+            "<li>A value of \"256,128\" results in an image of 256 by 128 "
             "pixels, with 256 pixels along the Right Ascension direction.</li>"
             "</ul>");
     k = group + "/beam_image/fov_deg";
@@ -1158,7 +1159,7 @@ void oskar_SettingsModelApps::init_settings_beampattern()
             "<ul>"
             "<li>A value of \"2.0\" results in an image with a FOV of 2.0 "
             "degrees in each dimension.</li>"
-            "<li>A value of \"2.0,1.0\" results in a image with a FOV of "
+            "<li>A value of \"2.0,1.0\" results in an image with a FOV of "
             "2.0 degrees in Right Ascension, and 1.0 degrees in "
             "Declination.</li>"
             "</ul>");
@@ -1329,7 +1330,6 @@ void oskar_SettingsModelApps::init_settings_image()
         setDependency(k, group, options[1]);
     }
 
-    // TODO Clarify tooltip for the case where image interferometer output is selected...
     k = group + "/input_vis_data";
     declare(k, "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
     setTooltip(k, "Path to the input OSKAR visibility data file.");

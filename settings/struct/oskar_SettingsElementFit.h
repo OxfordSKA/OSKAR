@@ -47,7 +47,7 @@ struct oskar_SettingsElementFit
     char* input_cst_file;
     char* output_directory;
     char* fits_image;
-    int polarisation_type;
+    int pol_type;
     int element_type_index;
     double frequency_hz;
     int ignore_data_below_horizon;
