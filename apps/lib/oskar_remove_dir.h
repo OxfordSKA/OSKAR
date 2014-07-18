@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_remove_dir.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,7 +48,7 @@ extern "C" {
  * @param[in] dir_name Name of the directory to remove.
  */
 OSKAR_APPS_EXPORT
-bool oskar_remove_dir(const char* dir_name);
+int oskar_remove_dir(const char* dir_name);
 
 #ifdef __cplusplus
 }

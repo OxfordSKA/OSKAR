@@ -29,15 +29,12 @@
 #include "apps/lib/oskar_vis_write_ms.h"
 #include "apps/lib/oskar_remove_dir.h"
 #include <oskar_vis.h>
+#include <oskar_Dir.h>
 
 #include "ms/oskar_MeasurementSet.h"
 
-#include <QtCore/QDir>
-
 #include <cmath>
-#include <cstdio>
 #include <cstdlib>
-#include <cstring>
 
 extern "C"
 void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
@@ -59,9 +56,8 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
     if (*status) return;
 
     // Check if the Measurement Set already exists, and overwrite if specified.
-    QDir dir;
-    dir.setPath(QString(ms_path));
-    if (dir.exists(dir.absolutePath()))
+    oskar_Dir dir(ms_path);
+    if (dir.exists())
     {
         // Try to overwrite.
         if (overwrite)

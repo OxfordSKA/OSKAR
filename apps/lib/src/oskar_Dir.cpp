@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,8 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 
+#include <cstdio>
+
 using std::string;
 using std::vector;
 
@@ -41,7 +43,7 @@ struct oskar_Dir::oskar_DirPrivate
     QDir dir;
 };
 
-oskar_Dir::oskar_Dir(const string path)
+oskar_Dir::oskar_Dir(const string& path)
 {
     p = new oskar_DirPrivate(path);
 }
@@ -60,6 +62,18 @@ string oskar_Dir::absoluteFilePath(const string& filename) const
 string oskar_Dir::absolutePath() const
 {
     return p->dir.absolutePath().toStdString();
+}
+
+vector<string> oskar_Dir::allFiles() const
+{
+    vector<string> r;
+    QStringList files = p->dir.entryList(QDir::Files | QDir::NoDotAndDotDot |
+            QDir::System | QDir::Hidden, QDir::Name);
+    for (int i = 0; i < files.size(); ++i)
+    {
+        r.push_back(files[i].toStdString());
+    }
+    return r;
 }
 
 vector<string> oskar_Dir::allSubDirs() const
@@ -89,7 +103,7 @@ string oskar_Dir::filePath(const string& filename) const
     return p->dir.filePath(QString::fromStdString(filename)).toStdString();
 }
 
-vector<string> oskar_Dir::filesStartingWith(string rootname) const
+vector<string> oskar_Dir::filesStartingWith(const string& rootname) const
 {
     vector<string> r;
     QStringList files = p->dir.entryList(
@@ -100,4 +114,37 @@ vector<string> oskar_Dir::filesStartingWith(string rootname) const
         r.push_back(files[i].toStdString());
     }
     return r;
+}
+
+bool oskar_Dir::rmdir(const string& name)
+{
+    return p->dir.rmdir(QString::fromStdString(name));
+}
+
+bool oskar_Dir::rmtree(const string& root)
+{
+    bool result = 0;
+    oskar_Dir dir(root);
+    if (dir.exists())
+    {
+        // Remove all files.
+        vector<string> files = dir.allFiles();
+        for (size_t i = 0; i < files.size(); ++i)
+        {
+            const string& name = files[i];
+            if (std::remove(dir.absoluteFilePath(name).c_str())) return false;
+        }
+
+        // Recursively remove all subdirectories.
+        vector<string> dirs = dir.allSubDirs();
+        for (size_t i = 0; i < dirs.size(); ++i)
+        {
+            const string& name = dirs[i];
+            if (!rmtree(dir.absoluteFilePath(name))) return false;
+        }
+
+        // Remove the empty directory.
+        result = dir.rmdir(dir.absolutePath());
+    }
+    return result;
 }

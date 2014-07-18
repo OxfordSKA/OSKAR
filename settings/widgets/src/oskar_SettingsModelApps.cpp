@@ -257,10 +257,10 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     declare(k, "Field-of-view [deg]", oskar_SettingsItem::DOUBLE);
     setTooltip(k, "Field-of-view spanned by the grid centre, in degrees.");
     k = group + "/mean_flux_jy";
-    declare(k, "Mean Stokes I flux [Jy]", oskar_SettingsItem::DOUBLE);
+    declare(k, "Mean Stokes I flux [Jy].", oskar_SettingsItem::DOUBLE);
     setTooltip(k, "The mean of generated Stokes I fluxes, in Jy.");
     k = group + "/std_flux_jy";
-    declare(k, "Standard deviation of Stokes I flux [Jy]",
+    declare(k, "Standard deviation of Stokes I flux [Jy].",
             oskar_SettingsItem::DOUBLE);
     setTooltip(k, "The standard deviation of generated Stokes I fluxes, in Jy.");
     k = group + "/seed";

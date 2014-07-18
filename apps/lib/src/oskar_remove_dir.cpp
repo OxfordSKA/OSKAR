@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,42 +27,10 @@
  */
 
 #include "apps/lib/oskar_remove_dir.h"
-
-#include <QtCore/QByteArray>
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
+#include <oskar_Dir.h>
 
 extern "C"
-bool oskar_remove_dir(const char* dir_name)
+int oskar_remove_dir(const char* dir_name)
 {
-    bool result = false;
-    QDir dir;
-    dir.setPath(QString(dir_name));
-    if (dir.exists())
-    {
-        Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot
-                | QDir::System | QDir::Hidden  | QDir::AllDirs
-                | QDir::Files, QDir::DirsFirst))
-        {
-            if (info.isDir())
-            {
-                // Recursive call to remove the directory.
-                QByteArray t = info.absoluteFilePath().toLatin1();
-                result = oskar_remove_dir(t);
-            }
-            else
-            {
-                // Remove the file.
-                result = QFile::remove(info.absoluteFilePath());
-            }
-
-            if (!result)
-                return result;
-        }
-
-        // Remove the empty directory.
-        result = dir.rmdir(dir.absolutePath());
-    }
-    return result;
+    return (int) oskar_Dir::rmtree(std::string(dir_name));
 }

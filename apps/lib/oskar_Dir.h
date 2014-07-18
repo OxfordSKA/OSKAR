@@ -51,7 +51,7 @@ public:
     /**
      * @brief Constructs a directory object pointing to the given path.
      */
-    oskar_Dir(const std::string path);
+    oskar_Dir(const std::string& path);
     ~oskar_Dir();
 
     /**
@@ -76,6 +76,16 @@ public:
      * Returns the absolute path of the directory.
      */
     std::string absolutePath() const;
+
+    /**
+     * @brief
+     * Returns the names of all the files in the current directory.
+     *
+     * @details
+     * Returns a list of the names of all the files in the current
+     * directory. The list is sorted by name.
+     */
+    std::vector<std::string> allFiles() const;
 
     /**
      * @brief
@@ -127,7 +137,34 @@ public:
      * Returns a list of the names of all the directories in the current
      * directory. The list is sorted by name.
      */
-    std::vector<std::string> filesStartingWith(std::string) const;
+    std::vector<std::string> filesStartingWith(const std::string& name) const;
+
+    /**
+     * @brief
+     * Removes an empty directory from the current directory.
+     *
+     * @details
+     * Removes an empty directory from the current directory.
+     *
+     * @return True if successful, false if unsuccessful.
+     */
+    bool rmdir(const std::string& name);
+
+    /**
+     * @brief
+     * Recursively remove a directory tree.
+     *
+     * @details
+     * Recursively removes all files and directories in the specified root
+     * directory, which must be given as an absolute path.
+     *
+     * Use with caution!
+     *
+     * @param[in] root Full (absolute) pathname of directory to remove.
+     *
+     * @return True if successful, false if unsuccessful.
+     */
+    static bool rmtree(const std::string& root);
 
 private:
     struct oskar_DirPrivate;
