@@ -104,7 +104,6 @@ if (CUDA_FOUND)
 
     cuda_add_library(${libname} ${${libname}_SRC})
     target_link_libraries(${libname} 
-        oskar_utility_log 
         oskar_settings_struct 
         ${CUDA_curand_LIBRARY})
 

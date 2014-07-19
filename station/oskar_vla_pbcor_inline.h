@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,7 @@ float oskar_vla_pbcor_inline_f(const float l, const float m,
         const float p3)
 {
     float r, t, X, cutoff_arcmin;
-    if (l != l) return NAN;
+    if (l != l) return l; /* Catch and return NAN without using the macro. */
     cutoff_arcmin = 44.376293f / freq_ghz;
     r = asinf(sqrtf(l * l + m * m)) * 3437.74677078493951f; /* rad to arcmin */
     if (r < cutoff_arcmin)
@@ -103,7 +103,7 @@ double oskar_vla_pbcor_inline_d(const double l, const double m,
         const double p3)
 {
     double r, t, X, cutoff_arcmin;
-    if (l != l) return NAN;
+    if (l != l) return l; /* Catch and return NAN without using the macro. */
     cutoff_arcmin = 44.376293 / freq_ghz;
     r = asin(sqrt(l * l + m * m)) * 3437.74677078493951; /* rad to arcmin */
     if (r < cutoff_arcmin)

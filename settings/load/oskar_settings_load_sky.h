@@ -50,7 +50,6 @@ extern "C" {
  * @param[out] settings A pointer to a settings structure to populate.
  * @param[in] filename  String containing name of settings file to read.
  */
-OSKAR_SETTINGS_LOAD_EXPORT
 void oskar_settings_load_sky(oskar_SettingsSky* settings,
         const char* filename, int* status);
 

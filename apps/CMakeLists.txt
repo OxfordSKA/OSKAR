@@ -31,6 +31,7 @@ if (QT4_FOUND)
     qt_app(oskar oskar_main.cpp ${gui_SRC} ${gui_MOC_SRC}
         EXTRA_LIBS 
             oskar_settings_widgets 
+            oskar_apps
             ${QT_QTCORE_LIBRARY}
             ${QT_QTGUI_LIBRARY}
             ${QT_QTNETWORK_LIBRARY}

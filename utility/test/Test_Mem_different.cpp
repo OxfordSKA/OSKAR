@@ -81,7 +81,7 @@ TEST(Mem, different_by_one)
     oskar_mem_set_value_real(one, 1.0, 0, 0, &status);
     oskar_mem_set_value_real(two, 1.0, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_float(two, &status)[4] = 1.1;
+    oskar_mem_float(two, &status)[4] = 1.1f;
     ASSERT_EQ((int)OSKAR_TRUE, oskar_mem_different(one, two, 0, &status));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_free(one, &status);
@@ -102,7 +102,7 @@ TEST(Mem, different_up_to_a_point)
     oskar_mem_set_value_real(one, 1.0, 0, 0, &status);
     oskar_mem_set_value_real(two, 1.0, 0, 0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_mem_float(two, &status)[4] = 1.1;
+    oskar_mem_float(two, &status)[4] = 1.1f;
     ASSERT_EQ((int)OSKAR_FALSE, oskar_mem_different(one, two, 4, &status));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_free(one, &status);

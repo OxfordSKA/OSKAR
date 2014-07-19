@@ -33,6 +33,10 @@
 extern "C" {
 #endif
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 void oskar_convert_healpix_ring_to_theta_phi(oskar_Mem* theta, oskar_Mem* phi,
         int nside, int* status)
 {

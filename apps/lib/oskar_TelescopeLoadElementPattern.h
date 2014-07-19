@@ -38,8 +38,7 @@
 struct oskar_Settings;
 struct oskar_Log;
 
-class OSKAR_APPS_EXPORT oskar_TelescopeLoadElementPattern
-: public oskar_TelescopeLoadAbstract
+class oskar_TelescopeLoadElementPattern : public oskar_TelescopeLoadAbstract
 {
 public:
     oskar_TelescopeLoadElementPattern(const oskar_Settings* settings,

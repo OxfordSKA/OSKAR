@@ -52,6 +52,10 @@
 #include <cmath>
 #include <cstring>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 // ============================================================================
 static void load_settings(oskar_Settings* settings, const char* filename,
         oskar_Log* log, int* status);

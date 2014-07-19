@@ -62,10 +62,7 @@ struct oskar_Settings
     oskar_SettingsIonosphere ionosphere;
 
 #ifdef __cplusplus
-    OSKAR_SETTINGS_STRUCT_EXPORT
     oskar_Settings();
-
-    OSKAR_SETTINGS_STRUCT_EXPORT
     ~oskar_Settings();
 #endif
 };

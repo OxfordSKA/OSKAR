@@ -30,9 +30,14 @@
 #include <oskar_evaluate_geometric_dipole_pattern_cuda.h>
 #include <oskar_evaluate_geometric_dipole_pattern_inline.h>
 #include <oskar_cuda_check_error.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
 #endif
 
 /* Single precision. */

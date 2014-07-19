@@ -50,6 +50,10 @@
 #include <cfloat>
 #include <vector>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 static void generate_range(oskar_Mem* data, int number,
         double start, double inc);
 //static void check_image_stats(oskar_Image* image, oskar_Telescope* tel);

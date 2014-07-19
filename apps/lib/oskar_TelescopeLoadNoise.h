@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,8 +51,7 @@ struct oskar_Settings;
  * The telescope model being populated must have already been allocated in CPU
  * memory.
  */
-class OSKAR_APPS_EXPORT oskar_TelescopeLoadNoise
-: public oskar_TelescopeLoadAbstract
+class oskar_TelescopeLoadNoise : public oskar_TelescopeLoadAbstract
 {
 public:
     oskar_TelescopeLoadNoise(const oskar_Settings* settings);

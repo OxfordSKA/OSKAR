@@ -37,6 +37,10 @@
 #include <cmath>
 #include <cstdio>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 static void create_rot_matrix(double* M, double lon_rad, double lat_rad);
 static void matrix_multiply(double* v_out, double* M, double *v_in);
 

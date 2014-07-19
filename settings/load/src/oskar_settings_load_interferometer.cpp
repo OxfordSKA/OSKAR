@@ -40,6 +40,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 
 
 static void load_noise(oskar_SettingsSystemNoise* noise, const char* filename,

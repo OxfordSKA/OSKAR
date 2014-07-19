@@ -41,7 +41,6 @@
 extern "C" {
 #endif
 
-OSKAR_SETTINGS_LOAD_EXPORT
 void oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
         const char* filename, int* status);
 

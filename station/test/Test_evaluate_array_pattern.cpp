@@ -48,6 +48,10 @@
 #include <cstdio>
 #include <cstdlib>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 using namespace std;
 
 static void check_images(const oskar_Image* image1, const oskar_Image* image2)

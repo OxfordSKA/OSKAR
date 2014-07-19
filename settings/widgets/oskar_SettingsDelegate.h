@@ -41,8 +41,7 @@ class QWidget;
 class oskar_SettingsItem;
 class oskar_SettingsModel;
 
-class OSKAR_SETTINGS_WIDGETS_EXPORT oskar_SettingsDelegate
-: public QStyledItemDelegate
+class oskar_SettingsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 

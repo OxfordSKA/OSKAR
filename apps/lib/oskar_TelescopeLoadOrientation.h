@@ -35,7 +35,7 @@
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-class OSKAR_APPS_EXPORT oskar_TelescopeLoadOrientation
+class oskar_TelescopeLoadOrientation
 : public oskar_TelescopeLoadAbstract
 {
 public:

@@ -34,6 +34,10 @@
 extern "C" {
 #endif
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 void oskar_evaluate_tec_tid(oskar_Mem* tec, int num_directions,
         const oskar_Mem* lon, const oskar_Mem* lat,
         const oskar_Mem* rel_path_length, double TEC0,

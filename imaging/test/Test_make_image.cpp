@@ -49,6 +49,10 @@
 
 #define C_0 299792458.0
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 TEST(make_image, test)
 {
     int amp_type      = OSKAR_DOUBLE_COMPLEX_MATRIX;

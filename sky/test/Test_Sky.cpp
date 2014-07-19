@@ -37,6 +37,9 @@
 #include <cstdlib>
 #include <cmath>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
 
 TEST(SkyModel, append)
 {
@@ -145,7 +148,7 @@ TEST(SkyModel, compute_relative_lmn)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check the data.
-    float tol = 1e-6;
+    float tol = (float) 1e-6;
     for (int i = 0; i < n; ++i)
     {
         float l = sin(ra[i] - ra0) * cos(dec[i]);
@@ -912,13 +915,13 @@ TEST(SkyModel, set_source)
     ASSERT_EQ((int)OSKAR_CPU, oskar_sky_mem_location(sky_temp));
     ASSERT_EQ((int)OSKAR_SINGLE, oskar_sky_precision(sky_temp));
     ASSERT_EQ(2, oskar_sky_num_sources(sky_temp));
-    EXPECT_FLOAT_EQ(1.0, oskar_mem_float(oskar_sky_ra_rad(sky_temp), &status)[0]);
-    EXPECT_FLOAT_EQ(200e6, oskar_mem_float(oskar_sky_reference_freq_hz(sky_temp),
-            &status)[0]);
-    EXPECT_FLOAT_EQ(4.5, oskar_mem_float(oskar_sky_Q(sky_temp), &status)[1]);
-    EXPECT_FLOAT_EQ(-0.8, oskar_mem_float(oskar_sky_spectral_index(sky_temp),
+    EXPECT_FLOAT_EQ(1.0f, oskar_mem_float(oskar_sky_ra_rad(sky_temp), &status)[0]);
+    EXPECT_FLOAT_EQ((float)200e6,
+            oskar_mem_float(oskar_sky_reference_freq_hz(sky_temp), &status)[0]);
+    EXPECT_FLOAT_EQ(4.5f, oskar_mem_float(oskar_sky_Q(sky_temp), &status)[1]);
+    EXPECT_FLOAT_EQ(-0.8f, oskar_mem_float(oskar_sky_spectral_index(sky_temp),
             &status)[1]);
-    EXPECT_FLOAT_EQ(2.5, oskar_mem_float(oskar_sky_rotation_measure_rad(sky_temp),
+    EXPECT_FLOAT_EQ(2.5f, oskar_mem_float(oskar_sky_rotation_measure_rad(sky_temp),
             &status)[1]);
 
     // Free memory.
@@ -1096,7 +1099,7 @@ TEST(SkyModel, test_gaussian_source)
 TEST(SkyModel, load_ascii)
 {
     int status = 0;
-    const double deg2rad = 0.0174532925199432957692;
+    const float deg2rad = 0.0174532925199432957692f;
     const char* filename = "temp_sources.osm";
 
     // Load sky file with all columns specified.
@@ -1123,17 +1126,17 @@ TEST(SkyModel, load_ascii)
         // Check the data loaded correctly.
         for (int i = 0; i < num_sources; ++i)
         {
-            ASSERT_FLOAT_EQ(i/10.0 * deg2rad,
+            ASSERT_FLOAT_EQ(i/10.0f * deg2rad,
                     oskar_mem_float(oskar_sky_ra_rad(sky), &status)[i]);
-            ASSERT_FLOAT_EQ(i/20.0 * deg2rad,
+            ASSERT_FLOAT_EQ(i/20.0f * deg2rad,
                     oskar_mem_float(oskar_sky_dec_rad(sky), &status)[i]);
-            ASSERT_FLOAT_EQ(0.0, oskar_mem_float(oskar_sky_I(sky), &status)[i]);
-            ASSERT_FLOAT_EQ(1.0, oskar_mem_float(oskar_sky_Q(sky), &status)[i]);
-            ASSERT_FLOAT_EQ(2.0, oskar_mem_float(oskar_sky_U(sky), &status)[i]);
-            ASSERT_FLOAT_EQ(3.0, oskar_mem_float(oskar_sky_V(sky), &status)[i]);
-            ASSERT_FLOAT_EQ(200.0e6,
+            ASSERT_FLOAT_EQ(0.0f, oskar_mem_float(oskar_sky_I(sky), &status)[i]);
+            ASSERT_FLOAT_EQ(1.0f, oskar_mem_float(oskar_sky_Q(sky), &status)[i]);
+            ASSERT_FLOAT_EQ(2.0f, oskar_mem_float(oskar_sky_U(sky), &status)[i]);
+            ASSERT_FLOAT_EQ(3.0f, oskar_mem_float(oskar_sky_V(sky), &status)[i]);
+            ASSERT_FLOAT_EQ((float)200.0e6,
                     oskar_mem_float(oskar_sky_reference_freq_hz(sky), &status)[i]);
-            ASSERT_FLOAT_EQ(-0.7,
+            ASSERT_FLOAT_EQ(-0.7f,
                     oskar_mem_float(oskar_sky_spectral_index(sky), &status)[i]);
         }
 
@@ -1165,18 +1168,18 @@ TEST(SkyModel, load_ascii)
         // Check the data is correct.
         for (int i = 0; i < num_sources; ++i)
         {
-            ASSERT_FLOAT_EQ(i/10.0 * deg2rad,
+            ASSERT_FLOAT_EQ(i/10.0f * deg2rad,
                     oskar_mem_float(oskar_sky_ra_rad(sky), &status)[i]);
-            ASSERT_FLOAT_EQ(i/20.0 * deg2rad,
+            ASSERT_FLOAT_EQ(i/20.0f * deg2rad,
                     oskar_mem_float(oskar_sky_dec_rad(sky), &status)[i]);
             ASSERT_FLOAT_EQ((float)i,
                     oskar_mem_float(oskar_sky_I(sky), &status)[i]);
-            ASSERT_FLOAT_EQ(0.0, oskar_mem_float(oskar_sky_Q(sky), &status)[i]);
-            ASSERT_FLOAT_EQ(0.0, oskar_mem_float(oskar_sky_U(sky), &status)[i]);
-            ASSERT_FLOAT_EQ(0.0, oskar_mem_float(oskar_sky_V(sky), &status)[i]);
-            ASSERT_FLOAT_EQ(0.0,
+            ASSERT_FLOAT_EQ(0.0f, oskar_mem_float(oskar_sky_Q(sky), &status)[i]);
+            ASSERT_FLOAT_EQ(0.0f, oskar_mem_float(oskar_sky_U(sky), &status)[i]);
+            ASSERT_FLOAT_EQ(0.0f, oskar_mem_float(oskar_sky_V(sky), &status)[i]);
+            ASSERT_FLOAT_EQ(0.0f,
                     oskar_mem_float(oskar_sky_reference_freq_hz(sky), &status)[i]);
-            ASSERT_FLOAT_EQ(0.0,
+            ASSERT_FLOAT_EQ(0.0f,
                     oskar_mem_float(oskar_sky_spectral_index(sky), &status)[i]);
         }
 

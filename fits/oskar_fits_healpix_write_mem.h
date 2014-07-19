@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ extern "C" {
  * @brief
  * @details
  */
-OSKAR_EXPORT
+OSKAR_FITS_EXPORT
 void oskar_fits_healpix_write_mem(const char* filename, oskar_Mem* data,
         int nside, int* status);
 

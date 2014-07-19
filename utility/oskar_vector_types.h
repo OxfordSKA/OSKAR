@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,16 +42,6 @@ extern "C" {
 #include <vector_types.h>
 #endif
 
-#if !defined(__align__)
-#if defined(__GNUC__)
-#define __align__(n) __attribute__((aligned(n)))
-#elif defined(_WIN32)
-#define __align__(n) __declspec(align(n))
-#else
-#define __align__(n)
-#endif
-#endif
-
 #if !(defined(__VECTOR_TYPES_H__) || defined(__CUDACC__))
 /**
  * @brief
@@ -61,7 +51,7 @@ extern "C" {
  * Structure used to hold data for a length-2 vector.
  * This must be compatible with the CUDA float2 type.
  */
-struct __align__(8) float2
+struct float2
 {
     float x;
     float y;
@@ -80,7 +70,7 @@ typedef struct float2 float2;
  *   ( a  b )
  *   ( c  d )
  */
-struct __align__(16) float4c
+struct float4c
 {
     float2 a;
     float2 b;
@@ -98,7 +88,7 @@ typedef struct float4c float4c;
  * Structure used to hold data for a length-2 vector.
  * This must be compatible with the CUDA double2 type.
  */
-struct __align__(16) double2
+struct double2
 {
     double x;
     double y;
@@ -117,7 +107,7 @@ typedef struct double2 double2;
  *   ( a  b )
  *   ( c  d )
  */
-struct __align__(16) double4c
+struct double4c
 {
     double2 a;
     double2 b;

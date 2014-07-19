@@ -106,13 +106,14 @@ TEST(evaluate_jones_E, evaluate_e)
     oskar_Sky* sky_cpu = oskar_sky_create(OSKAR_SINGLE,
             OSKAR_CPU, num_sources, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
-    float centre_long = 180.0 * M_PI / 180.0;
-    float centre_lat  = 0.0   * M_PI / 180.0;
-    float size_long   = 90.0  * M_PI / 180.0;
-    float size_lat    = 40.0  * M_PI / 180.0;
-    float sep_long    = 2.0   * M_PI / 180.0;
-    float sep_lat     = 2.0   * M_PI / 180.0;
-    float rho         = 0.0   * M_PI / 180.0;
+    const float deg2rad = (float) M_PI / 180.0f;
+    float centre_long = 180.0f * deg2rad;
+    float centre_lat  = 0.0f   * deg2rad;
+    float size_long   = 90.0f  * deg2rad;
+    float size_lat    = 40.0f  * deg2rad;
+    float sep_long    = 2.0f   * deg2rad;
+    float sep_lat     = 2.0f   * deg2rad;
+    float rho         = 0.0f   * deg2rad;
     bool force_constant_sep = true;
     bool set_centre_after   = false;
     bool force_centre_point = true;

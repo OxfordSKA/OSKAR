@@ -74,7 +74,7 @@ extern "C" {
  *                            of coordinates to be generated.
  * @param[in,out] status Error status code.
  */
-OSKAR_EXPORT
+OSKAR_APPS_EXPORT
 void oskar_beam_pattern_generate_coordinates(int* coord_type, oskar_Mem* x,
         oskar_Mem* y, oskar_Mem* z, double* lon0, double* lat0,
         int* num_pixels, int beam_coord_type, double beam_lon, double beam_lat,

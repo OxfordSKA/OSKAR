@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ TEST(Station, test_load_single)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Check the coordinates.
-    float tol = 1e-6;
+    float tol = (float)1e-6;
     ASSERT_EQ(n_elements, oskar_station_num_elements(station));
     for (int i = 0; i < n_elements; ++i)
     {

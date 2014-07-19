@@ -18,6 +18,7 @@ add_test(apps_lib_test ${name})
 
 # Binary to test the option parser.
 add_executable(test_OptionParser Test_OptionParser.cpp)
+target_link_libraries(test_OptionParser oskar_apps)
 
 set(name test_beam_pattern_coordinates)
 add_executable(${name}

@@ -53,7 +53,6 @@ extern "C" {
  * @param[in,out] log A pointer to a log structure to use.
  * @param[in] filename  String containing name of settings file to read.
  */
-OSKAR_SETTINGS_LOAD_EXPORT
 void oskar_settings_load_observation(oskar_SettingsObservation* obs,
         oskar_Log* log, const char* filename, int* status);
 

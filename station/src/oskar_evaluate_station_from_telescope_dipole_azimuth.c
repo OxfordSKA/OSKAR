@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_station_from_telescope_dipole_azimuth.h"
+#include <oskar_evaluate_station_from_telescope_dipole_azimuth.h>
 #include <math.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
 #endif
 
 float oskar_evaluate_station_from_telescope_dipole_azimuth_f(
@@ -59,16 +63,16 @@ float oskar_evaluate_station_from_telescope_dipole_azimuth_f(
             cos_station * sin_telescope -
             sin_station * cos_telescope * cos_delta);
     initial_bearing = fmodf(initial_bearing, 2.0f * M_PI);
-    if (initial_bearing < 0.0)
-        initial_bearing += 2.0f * M_PI;
+    if (initial_bearing < 0.0f)
+        initial_bearing += 2.0f * (float) M_PI;
 
     /* Final bearing. */
     final_bearing = atan2f(sin_delta * cos_station,
             cos_telescope * sin_station -
             sin_telescope * cos_station * cos_delta);
     final_bearing = M_PI - fmodf(final_bearing, 2.0f * M_PI);
-    if (final_bearing < 0.0)
-        final_bearing += 2.0f * M_PI;
+    if (final_bearing < 0.0f)
+        final_bearing += 2.0f * (float) M_PI;
 
     /* Return difference. */
     return initial_bearing - final_bearing;

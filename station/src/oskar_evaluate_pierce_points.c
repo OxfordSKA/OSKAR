@@ -38,6 +38,10 @@ static void matrix_multiply(double* v_out, double* M, double* v_in);
 extern "C" {
 #endif
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 void oskar_evaluate_pierce_points(
         oskar_Mem* pierce_point_lon,
         oskar_Mem* pierce_point_lat,

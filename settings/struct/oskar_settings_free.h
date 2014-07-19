@@ -49,7 +49,6 @@ extern "C" {
  *
  * @param settings A pointer to the settings structure.
  */
-OSKAR_SETTINGS_STRUCT_EXPORT
 void oskar_settings_free(oskar_Settings* settings);
 
 #ifdef __cplusplus

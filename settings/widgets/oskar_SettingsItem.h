@@ -39,7 +39,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
 
-class OSKAR_SETTINGS_WIDGETS_EXPORT oskar_SettingsItem
+class oskar_SettingsItem
 {
 public:
     enum {

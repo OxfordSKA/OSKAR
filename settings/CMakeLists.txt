@@ -108,7 +108,6 @@ if (QT4_FOUND)
     add_library(${name} ${lib_type} ${${name}_C_SRC} ${${name}_CXX_SRC})
     target_link_libraries(${name} 
         oskar_settings_struct
-        oskar_utility_log
         ${QT_QTCORE_LIBRARY}
         ${CUDA_LIBRARIES})
 endif (QT4_FOUND)

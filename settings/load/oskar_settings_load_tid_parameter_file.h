@@ -40,7 +40,6 @@
 extern "C" {
 #endif
 
-OSKAR_SETTINGS_LOAD_EXPORT
 void oskar_settings_load_tid_parameter_file(oskar_SettingsTIDscreen* settings,
         const char* filename, int* status);
 

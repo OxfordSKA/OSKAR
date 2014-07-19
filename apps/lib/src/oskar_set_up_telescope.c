@@ -45,6 +45,10 @@
 extern "C" {
 #endif
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 /* Private functions. */
 static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
         const oskar_Settings* settings, int* status);

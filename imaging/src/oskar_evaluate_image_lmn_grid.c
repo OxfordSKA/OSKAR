@@ -123,11 +123,12 @@ void oskar_evaluate_image_lmn_grid_f(int num_l, int num_m,
             r = sqrtf(l[i]*l[i] + m[j]*m[j]);
             if (r > 1.0f)
             {
-                grid_l[p] = NAN;
-                grid_m[p] = NAN;
-                grid_n[p] = NAN;
+                grid_l[p] = sqrtf(-1.0f); /* NAN */
+                grid_m[p] = sqrtf(-1.0f); /* NAN */
+                grid_n[p] = sqrtf(-1.0f); /* NAN */
             }
-            else {
+            else
+            {
                 grid_l[p] = l[i];
                 grid_m[p] = m[j];
                 grid_n[p] = sqrtf(1.0f-l[i]*l[i]-m[j]*m[j]);
@@ -168,11 +169,12 @@ void oskar_evaluate_image_lmn_grid_d(int num_l, int num_m,
             r = sqrt(l[i]*l[i] + m[j]*m[j]);
             if (r > 1.0)
             {
-                grid_l[p] = NAN;
-                grid_m[p] = NAN;
-                grid_n[p] = NAN;
+                grid_l[p] = sqrtf(-1.0f); /* NAN */
+                grid_m[p] = sqrtf(-1.0f); /* NAN */
+                grid_n[p] = sqrtf(-1.0f); /* NAN */
             }
-            else {
+            else
+            {
                 grid_l[p] = l[i];
                 grid_m[p] = m[j];
                 grid_n[p] = sqrt(1.0-l[i]*l[i]-m[j]*m[j]);

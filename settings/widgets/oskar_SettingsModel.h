@@ -46,8 +46,7 @@ class QSettings;
 class QVariant;
 class oskar_SettingsItem;
 
-class OSKAR_SETTINGS_WIDGETS_EXPORT oskar_SettingsModel
-: public QAbstractItemModel
+class oskar_SettingsModel : public QAbstractItemModel
 {
     Q_OBJECT
 
@@ -128,8 +127,7 @@ private:
     QDateTime lastModified_;
 };
 
-class OSKAR_SETTINGS_WIDGETS_EXPORT oskar_SettingsModelFilter
-: public QSortFilterProxyModel
+class oskar_SettingsModelFilter : public QSortFilterProxyModel
 {
     Q_OBJECT
 

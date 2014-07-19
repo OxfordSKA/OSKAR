@@ -53,6 +53,7 @@ extern "C" {
 
 static double oskar_get_wtime(oskar_Timer* timer)
 {
+    /* Declarations first (needs separate ifdef block). */
 #ifdef OSKAR_OS_WIN
     LARGE_INTEGER cntr;
 #else
@@ -63,9 +64,6 @@ static double oskar_get_wtime(oskar_Timer* timer)
 #endif
 #endif
 
-    /* FIXME? Any reason why this isn't at the top and the ifdef's can't be
-     * joined up?
-     */
     /* Return immediately if timer is not of native type. */
     if (timer->type != OSKAR_TIMER_NATIVE)
         return 0.0;
@@ -90,13 +88,15 @@ static double oskar_get_wtime(oskar_Timer* timer)
 oskar_Timer* oskar_timer_create(int type)
 {
     oskar_Timer* timer;
+#ifdef OSKAR_OS_WIN
+    LARGE_INTEGER freq;
+#endif
 
     /* Create the structure. */
     timer = malloc(sizeof(oskar_Timer));
 
 #ifdef OSKAR_OS_WIN
-    LARGE_INTEGER freq;
-    QueryPerformanceFrequency(&freq)
+    QueryPerformanceFrequency(&freq);
     timer->freq = (double)(freq.QuadPart);
 #endif
     timer->type = type;

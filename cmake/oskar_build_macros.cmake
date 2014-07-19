@@ -177,6 +177,7 @@ macro(OSKAR_APP)
     add_executable(${target} ${APP_SOURCES})
     target_link_libraries(${target}
         oskar               # default libs
+        oskar_apps 
         ${APP_EXTRA_LIBS}   # extra libs
     )
     # We do need the OpenMP flags here, otherwise programs will crash.

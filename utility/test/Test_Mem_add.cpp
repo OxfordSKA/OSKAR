@@ -46,22 +46,22 @@ TEST(Mem, add_matrix_cpu)
 
     for (int i = 0; i < num_elements; ++i)
     {
-        A[i].a.x = (float)i + 0.1;
-        A[i].a.y = (float)i + 0.2;
-        A[i].b.x = (float)i + 0.3;
-        A[i].b.y = (float)i + 0.4;
-        A[i].c.x = (float)i + 0.5;
-        A[i].c.y = (float)i + 0.6;
-        A[i].d.x = (float)i + 0.7;
-        A[i].d.y = (float)i + 0.8;
-        B[i].a.x = 1.15;
-        B[i].a.y = 0.15;
-        B[i].b.x = 2.16;
-        B[i].b.y = 0.16;
-        B[i].c.x = 3.17;
-        B[i].c.y = 0.17;
-        B[i].d.x = 4.18;
-        B[i].d.y = 0.18;
+        A[i].a.x = (float)i + 0.1f;
+        A[i].a.y = (float)i + 0.2f;
+        A[i].b.x = (float)i + 0.3f;
+        A[i].b.y = (float)i + 0.4f;
+        A[i].c.x = (float)i + 0.5f;
+        A[i].c.y = (float)i + 0.6f;
+        A[i].d.x = (float)i + 0.7f;
+        A[i].d.y = (float)i + 0.8f;
+        B[i].a.x = 1.15f;
+        B[i].a.y = 0.15f;
+        B[i].b.x = 2.16f;
+        B[i].b.y = 0.16f;
+        B[i].c.x = 3.17f;
+        B[i].c.y = 0.17f;
+        B[i].d.x = 4.18f;
+        B[i].d.y = 0.18f;
     }
 
     mem_C = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
@@ -101,22 +101,22 @@ TEST(Mem, add_in_place)
 
     for (int i = 0; i < num_elements; ++i)
     {
-        A[i].a.x = (float)i + 0.1;
-        A[i].a.y = (float)i + 0.2;
-        A[i].b.x = (float)i + 0.3;
-        A[i].b.y = (float)i + 0.4;
-        A[i].c.x = (float)i + 0.5;
-        A[i].c.y = (float)i + 0.6;
-        A[i].d.x = (float)i + 0.7;
-        A[i].d.y = (float)i + 0.8;
-        EXPECT_FLOAT_EQ(0.0, B[i].a.x);
-        EXPECT_FLOAT_EQ(0.0, B[i].a.y);
-        EXPECT_FLOAT_EQ(0.0, B[i].b.x);
-        EXPECT_FLOAT_EQ(0.0, B[i].b.y);
-        EXPECT_FLOAT_EQ(0.0, B[i].c.x);
-        EXPECT_FLOAT_EQ(0.0, B[i].c.y);
-        EXPECT_FLOAT_EQ(0.0, B[i].d.x);
-        EXPECT_FLOAT_EQ(0.0, B[i].d.y);
+        A[i].a.x = (float)i + 0.1f;
+        A[i].a.y = (float)i + 0.2f;
+        A[i].b.x = (float)i + 0.3f;
+        A[i].b.y = (float)i + 0.4f;
+        A[i].c.x = (float)i + 0.5f;
+        A[i].c.y = (float)i + 0.6f;
+        A[i].d.x = (float)i + 0.7f;
+        A[i].d.y = (float)i + 0.8f;
+        EXPECT_FLOAT_EQ(0.0f, B[i].a.x);
+        EXPECT_FLOAT_EQ(0.0f, B[i].a.y);
+        EXPECT_FLOAT_EQ(0.0f, B[i].b.x);
+        EXPECT_FLOAT_EQ(0.0f, B[i].b.y);
+        EXPECT_FLOAT_EQ(0.0f, B[i].c.x);
+        EXPECT_FLOAT_EQ(0.0f, B[i].c.y);
+        EXPECT_FLOAT_EQ(0.0f, B[i].d.x);
+        EXPECT_FLOAT_EQ(0.0f, B[i].d.y);
     }
 
     oskar_mem_add(mem_B, mem_A, mem_B, &status);

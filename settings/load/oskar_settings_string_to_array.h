@@ -58,7 +58,6 @@ extern "C" {
  *
  * @return The number of values matched (or number of array elements filled).
  */
-OSKAR_SETTINGS_LOAD_EXPORT
 size_t oskar_settings_string_to_array_i(char* str, size_t n, int* data);
 
 /**
@@ -79,7 +78,6 @@ size_t oskar_settings_string_to_array_i(char* str, size_t n, int* data);
  *
  * @return The number of values matched (or number of array elements filled).
  */
-OSKAR_SETTINGS_LOAD_EXPORT
 size_t oskar_settings_string_to_array_f(char* str, size_t n, float* data);
 
 /**
@@ -100,7 +98,6 @@ size_t oskar_settings_string_to_array_f(char* str, size_t n, float* data);
  *
  * @return The number of values matched (or number of array elements filled).
  */
-OSKAR_SETTINGS_LOAD_EXPORT
 size_t oskar_settings_string_to_array_d(char* str, size_t n, double* data);
 
 /**
@@ -121,7 +118,6 @@ size_t oskar_settings_string_to_array_d(char* str, size_t n, double* data);
  *
  * @return The number of array elements filled.
  */
-OSKAR_SETTINGS_LOAD_EXPORT
 size_t oskar_settings_string_to_array_s(char* str, size_t n, char** data);
 
 /**
@@ -164,7 +160,6 @@ size_t oskar_settings_string_to_array_s(char* str, size_t n, char** data);
  *
  * @return The number of array elements filled.
  */
-OSKAR_SETTINGS_LOAD_EXPORT
 size_t oskar_settings_string_to_array_realloc_s(char* str, size_t* n, char*** data);
 
 #ifdef __cplusplus

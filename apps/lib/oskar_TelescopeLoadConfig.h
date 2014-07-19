@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,7 @@
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 #include <oskar_Settings.h>
 
-class OSKAR_APPS_EXPORT oskar_TelescopeLoadConfig
-: public oskar_TelescopeLoadAbstract
+class oskar_TelescopeLoadConfig : public oskar_TelescopeLoadAbstract
 {
 public:
     oskar_TelescopeLoadConfig(const oskar_Settings* settings);

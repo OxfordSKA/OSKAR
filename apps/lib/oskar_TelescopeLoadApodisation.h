@@ -35,8 +35,7 @@
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-class OSKAR_APPS_EXPORT oskar_TelescopeLoadApodisation
-: public oskar_TelescopeLoadAbstract
+class oskar_TelescopeLoadApodisation : public oskar_TelescopeLoadAbstract
 {
 public:
     oskar_TelescopeLoadApodisation() {}

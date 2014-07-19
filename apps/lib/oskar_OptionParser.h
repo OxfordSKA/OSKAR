@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@
  *  |    = mutually exclusive (e.g.
  *
  */
-class OSKAR_EXPORT oskar_OptionParser : public ez::ezOptionParser
+class oskar_OptionParser : public ez::ezOptionParser
 {
 public:
     oskar_OptionParser(const char* title, const char* ver = OSKAR_VERSION_STR)

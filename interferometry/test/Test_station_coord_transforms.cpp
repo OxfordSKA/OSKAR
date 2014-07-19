@@ -33,6 +33,10 @@
 
 #include <cmath> // for M_PI
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
 TEST(station_coord_transforms, geocentric_cartesian_to_geodetic_spherical)
 {
     double lon1[] = {0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0, 105.0,

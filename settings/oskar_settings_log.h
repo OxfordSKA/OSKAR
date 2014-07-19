@@ -51,7 +51,6 @@ extern "C" {
  * @param[out,in] log  Pointer to a log structure.
  * @param[in] s        Pointer to a populated settings structure.
  */
-OSKAR_SETTINGS_LOG_EXPORT
 void oskar_log_settings_simulator(oskar_Log* log, const oskar_Settings* s);
 
 /**
@@ -64,7 +63,6 @@ void oskar_log_settings_simulator(oskar_Log* log, const oskar_Settings* s);
  * @param[out,in] log  Pointer to a log structure.
  * @param[in] s        Pointer to a populated settings structure.
  */
-OSKAR_SETTINGS_LOG_EXPORT
 void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s);
 
 /**
@@ -77,7 +75,6 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s);
  * @param[out,in] log  Pointer to a log structure.
  * @param[in] s        Pointer to a populated settings structure.
  */
-OSKAR_SETTINGS_LOG_EXPORT
 void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s);
 
 /**
@@ -90,7 +87,6 @@ void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s);
  * @param[out,in] log  Pointer to a log structure.
  * @param[in] s        Pointer to a populated settings structure.
  */
-OSKAR_SETTINGS_LOG_EXPORT
 void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s);
 
 /**
@@ -103,7 +99,6 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s);
  * @param[out,in] log  Pointer to a log structure.
  * @param[in] s        Pointer to a populated settings structure.
  */
-OSKAR_SETTINGS_LOG_EXPORT
 void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s);
 
 /**
@@ -116,7 +111,6 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s);
  * @param[out,in] log  Pointer to a log structure.
  * @param[in] s        Pointer to a populated settings structure.
  */
-OSKAR_SETTINGS_LOG_EXPORT
 void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s);
 
 /**
@@ -129,7 +123,6 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s);
  * @param[out,in] log  Pointer to a log structure.
  * @param[in] s        Pointer to a populated settings structure.
  */
-OSKAR_SETTINGS_LOG_EXPORT
 void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s);
 
 /**
@@ -142,7 +135,6 @@ void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s);
  * @param[out,in] log  Pointer to a log structure.
  * @param[in] s        Pointer to a populated settings structure.
  */
-OSKAR_SETTINGS_LOG_EXPORT
 void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s);
 
 /**
@@ -155,7 +147,6 @@ void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s);
  * @param[out,in] log  Pointer to a log structure.
  * @param[in] s        Pointer to a populated settings structure.
  */
-OSKAR_SETTINGS_LOG_EXPORT
 void oskar_log_settings_element_fit(oskar_Log* log, const oskar_Settings* s);
 
 #ifdef __cplusplus

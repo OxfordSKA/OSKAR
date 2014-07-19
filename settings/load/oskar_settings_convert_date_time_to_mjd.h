@@ -54,7 +54,6 @@ extern "C" {
  *
  * @return The Modified Julian Date.
  */
-OSKAR_SETTINGS_LOAD_EXPORT
 double oskar_settings_convert_date_time_to_mjd(int year, int month, int day,
         double day_fraction);
 

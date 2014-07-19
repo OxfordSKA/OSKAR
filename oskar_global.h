@@ -347,26 +347,6 @@ enum {
 #else
 #    define OSKAR_APPS_EXPORT OSKAR_DECL_IMPORT
 #endif
-#if defined(oskar_settings_widgets_EXPORTS)
-#    define OSKAR_SETTINGS_WIDGETS_EXPORT OSKAR_DECL_EXPORT
-#else
-#    define OSKAR_SETTINGS_WIDGETS_EXPORT OSKAR_DECL_IMPORT
-#endif
-#if defined(oskar_settings_struct_EXPORTS)
-#    define OSKAR_SETTINGS_STRUCT_EXPORT OSKAR_DECL_EXPORT
-#else
-#    define OSKAR_SETTINGS_STRUCT_EXPORT OSKAR_DECL_IMPORT
-#endif
-#if defined(oskar_settings_log_EXPORTS)
-#    define OSKAR_SETTINGS_LOG_EXPORT OSKAR_DECL_EXPORT
-#else
-#    define OSKAR_SETTINGS_LOG_EXPORT OSKAR_DECL_IMPORT
-#endif
-#if defined(oskar_settings_load_EXPORTS)
-#    define OSKAR_SETTINGS_LOAD_EXPORT OSKAR_DECL_EXPORT
-#else
-#    define OSKAR_SETTINGS_LOAD_EXPORT OSKAR_DECL_IMPORT
-#endif
 
 /**
  * @def OSKAR_INLINE
@@ -395,7 +375,7 @@ enum {
 #elif defined(__cplusplus) && defined(__GNUC__)
     #define restrict __restrict__
 #elif defined(__cplusplus) && defined(OSKAR_OS_WIN)
-    #define restrict __restrict
+    //#define restrict __restrict
 #elif !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L
     #define restrict
 #endif

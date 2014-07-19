@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ extern "C" {
  * @brief
  * @details
  */
-OSKAR_EXPORT
+OSKAR_APPS_EXPORT
 void oskar_beam_pattern_write(const oskar_Image* complex_cube,
         oskar_Settings* settings, int type, oskar_Log* log, int* status);
 

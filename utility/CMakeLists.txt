@@ -2,28 +2,6 @@
 # src/utility/CMakeLists.txt
 #
 
-# Utility logging library
-# -----------------------------------------------------------------------------
-set(name oskar_utility_log)
-set(lib_dir log/src)
-set(${name}_SRC
-    ${lib_dir}/oskar_log_accessors.c
-    ${lib_dir}/oskar_log_create.c
-    ${lib_dir}/oskar_log_error.c
-    ${lib_dir}/oskar_log_file_data.c
-    ${lib_dir}/oskar_log_free.c
-    ${lib_dir}/oskar_log_line.c
-    ${lib_dir}/oskar_log_message.c
-    ${lib_dir}/oskar_log_section.c
-    ${lib_dir}/oskar_log_value.c
-    ${lib_dir}/oskar_log_warning.c
-    ${lib_dir}/oskar_log_write.c
-)
-add_library(${name} STATIC ${${name}_SRC})
-
-
-# Utility functions source (main oskar library)
-# -----------------------------------------------------------------------------
 set(utility_SRC
     src/oskar_binary_create.c
     src/oskar_binary_free.c
@@ -76,6 +54,20 @@ set(utility_SRC
     src/oskar_timer.c
     src/oskar_timers.c
     src/oskar_version_string.c
+)
+
+list(APPEND utility_SRC
+    log/src/oskar_log_accessors.c
+    log/src/oskar_log_create.c
+    log/src/oskar_log_error.c
+    log/src/oskar_log_file_data.c
+    log/src/oskar_log_free.c
+    log/src/oskar_log_line.c
+    log/src/oskar_log_message.c
+    log/src/oskar_log_section.c
+    log/src/oskar_log_value.c
+    log/src/oskar_log_warning.c
+    log/src/oskar_log_write.c
 )
 
 if (CUDA_FOUND)

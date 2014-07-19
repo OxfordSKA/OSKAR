@@ -39,7 +39,7 @@ TEST(Mem, load_ascii_single_column)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_single_column.txt";
     FILE* file = fopen(filename, "w");
-    ASSERT_TRUE(file);
+    ASSERT_TRUE(file != NULL);
     size_t i = 0, num_elements = 13;
     fprintf(file, "# A header\n");
     for (; i < num_elements; ++i) fprintf(file, "%.3f\n", i * 1.0);
@@ -74,7 +74,7 @@ TEST(Mem, load_ascii_real_cpu)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_real.txt";
     FILE* file = fopen(filename, "w");
-    ASSERT_TRUE(file);
+    ASSERT_TRUE(file != NULL);
     int num_elements = 287;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -124,7 +124,7 @@ TEST(Mem, load_ascii_real_gpu)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_real_gpu.txt";
     FILE* file = fopen(filename, "w");
-    ASSERT_TRUE(file);
+    ASSERT_TRUE(file != NULL);
     int num_elements = 474;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -183,7 +183,7 @@ TEST(Mem, load_ascii_complex_real_cpu)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_complex_real_cpu.txt";
     FILE* file = fopen(filename, "w");
-    ASSERT_TRUE(file);
+    ASSERT_TRUE(file != NULL);
     int num_elements = 326;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -229,7 +229,7 @@ TEST(Mem, load_ascii_complex_real_gpu_cpu)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_complex_real_gpu_cpu.txt";
     FILE* file = fopen(filename, "w");
-    ASSERT_TRUE(file);
+    ASSERT_TRUE(file != NULL);
     int num_elements = 753;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -277,7 +277,7 @@ TEST(Mem, load_ascii_complex_real_default_cpu)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_complex_real_default_cpu.txt";
     FILE* file = fopen(filename, "w");
-    ASSERT_TRUE(file);
+    ASSERT_TRUE(file != NULL);
     int num_elements = 89;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -332,7 +332,7 @@ TEST(Mem, load_ascii_lots_of_columns)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_lots_of_columns.txt";
     FILE* file = fopen(filename, "w");
-    ASSERT_TRUE(file);
+    ASSERT_TRUE(file != NULL);
     int num_elements = 119;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -378,7 +378,7 @@ TEST(Mem, load_ascii_required_data)
     // Write a test file.
     const char* filename = "temp_test_load_ascii_required_data.txt";
     FILE* file = fopen(filename, "w");
-    ASSERT_TRUE(file);
+    ASSERT_TRUE(file != NULL);
     int num_elements = 119;
     for (int i = 0; i < num_elements; ++i)
     {
@@ -469,7 +469,7 @@ TEST(Mem, save_ascii)
 
     const char* fname = "temp_test_save_ascii.txt";
     FILE* f = fopen(fname, "w");
-    ASSERT_TRUE(f);
+    ASSERT_TRUE(f != NULL);
     oskar_mem_save_ascii(f, 8, length, &status,
             mem1, mem2, mem3, mem4, mem5, mem6, mem7, mem8);
     fclose(f);
