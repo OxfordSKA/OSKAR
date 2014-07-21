@@ -34,6 +34,8 @@
 #include <float.h>
 #include <stdlib.h>
 
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -95,6 +97,13 @@ void oskar_splines_fit(oskar_Splines* spline, int num_points, double* x_theta,
     /* Get range of z_data. */
     min_max(z_data, num_points, &z_min, &z_max);
     peak_abs = fabs(z_min) > fabs(z_max) ? fabs(z_min) : fabs(z_max);
+
+    /* Check range. */
+    if ((z_max - z_min) < epsilon)
+    {
+        /* No surface to fit, so return. */
+        return;
+    }
 
     /* Check fit type. */
     if (fit_type == OSKAR_SPLINES_LINEAR)

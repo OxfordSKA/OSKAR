@@ -51,7 +51,7 @@ void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
     memset(tag.user_index, 0, sizeof(tag.user_index));
 
     /* Check all inputs. */
-    if (!handle || !data || !status)
+    if (!handle || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -105,6 +105,10 @@ void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
         return;
     }
 
+    /* Return if no data to write. */
+    if (data_size == 0 || !data)
+        return;
+
     /* Write the data to the file. */
     if (fwrite(data, 1, data_size, handle->stream) != data_size)
     {
@@ -141,7 +145,7 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
     memset(tag.user_index, 0, sizeof(tag.user_index));
 
     /* Check all inputs. */
-    if (!handle || !data || !name_group || !name_tag || !status)
+    if (!handle || !name_group || !name_tag || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -217,6 +221,10 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
+
+    /* Return if no data to write. */
+    if (data_size == 0 || !data)
+        return;
 
     /* Write the data to the file. */
     if (fwrite(data, 1, data_size, handle->stream) != data_size)

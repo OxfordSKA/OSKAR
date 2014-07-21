@@ -46,7 +46,7 @@ void oskar_binary_read(oskar_Binary* handle,
     char* p;
 
     /* Check all inputs. */
-    if (!handle || !data || !status)
+    if (!handle || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -60,8 +60,11 @@ void oskar_binary_read(oskar_Binary* handle,
             id_tag, user_index, &block_size, &block_offset, status);
     if (*status) return;
 
+    /* Return if no data to read. */
+    if (block_size == 0) return;
+
     /* Check that there is enough memory in the block. */
-    if (data_size < block_size)
+    if (!data || data_size < block_size)
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
         return;
@@ -112,7 +115,7 @@ void oskar_binary_read_ext(oskar_Binary* handle,
     char* p;
 
     /* Check all inputs. */
-    if (!handle || !data || !name_group || !name_tag || !status)
+    if (!handle || !name_group || !name_tag || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -126,8 +129,11 @@ void oskar_binary_read_ext(oskar_Binary* handle,
             name_tag, user_index, NULL, &block_size, &block_offset, status);
     if (*status) return;
 
+    /* Return if no data to read. */
+    if (block_size == 0) return;
+
     /* Check that there is enough memory in the block. */
-    if (data_size < block_size)
+    if (!data || data_size < block_size)
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
         return;
