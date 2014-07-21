@@ -105,6 +105,7 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     {
         i = data->num_freq;
         oskar_element_resize_freq_data(data, i + 1, status);
+        data->freqs_hz[i] = freq_hz;
     }
 
     /* Get pointers to surface data based on port number and frequency index. */
