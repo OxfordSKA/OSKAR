@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,14 +27,10 @@
  */
 
 #include <oskar_convert_galactic_to_fk5.h>
-#include <math.h>
+#include <oskar_cmath.h>
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
 #endif
 
 /* Equatorial to Galactic rotation matrix. */

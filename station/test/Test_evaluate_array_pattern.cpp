@@ -44,13 +44,9 @@
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
 
-#include <cmath>
+#include <oskar_cmath.h>
 #include <cstdio>
 #include <cstdlib>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
 
 using namespace std;
 

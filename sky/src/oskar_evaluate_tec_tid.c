@@ -27,15 +27,11 @@
  */
 
 #include <oskar_evaluate_tec_tid.h>
-#include <math.h>
+#include <oskar_cmath.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
 #endif
 
 void oskar_evaluate_tec_tid(oskar_Mem* tec, int num_directions,

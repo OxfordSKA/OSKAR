@@ -33,12 +33,8 @@
 #include <oskar_sky.h>
 #include <oskar_getline.h>
 #include <oskar_string_to_array.h>
-#include <math.h>
+#include <oskar_cmath.h>
 #include <stdlib.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 #ifdef __cplusplus
 extern "C" {

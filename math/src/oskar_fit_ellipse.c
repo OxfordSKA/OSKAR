@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,15 +29,11 @@
 #include <oskar_fit_ellipse.h>
 #include <oskar_matrix_multiply.h>
 
-#include <math.h>
+#include <oskar_cmath.h>
 #include <string.h> /* For memset() */
 
 #define MAX( a, b ) ( ((a) > (b)) ? (a) : (b) )
 #define MIN( a, b ) ( ((a) < (b)) ? (a) : (b) )
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 #ifdef __cplusplus
 extern "C" {

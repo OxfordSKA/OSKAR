@@ -28,7 +28,7 @@
 
 #include <oskar_evaluate_pierce_points.h>
 #include <oskar_convert_ecef_to_geodetic_spherical.h>
-#include <math.h>
+#include <oskar_cmath.h>
 #include <stdio.h>
 
 static void create_rot_matrix(double* R, double lon, double lat);
@@ -36,10 +36,6 @@ static void matrix_multiply(double* v_out, double* M, double* v_in);
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
 #endif
 
 void oskar_evaluate_pierce_points(

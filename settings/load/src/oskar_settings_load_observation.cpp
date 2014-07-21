@@ -30,7 +30,7 @@
 #include <oskar_settings_convert_date_time_to_mjd.h>
 #include <oskar_log.h>
 
-#include <cmath>
+#include <oskar_cmath.h>
 #include <cstdlib>
 #include <cstring>
 #include <cfloat>
@@ -42,10 +42,6 @@
 #include <QtCore/QTime>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 static QStringList get_list(QVariant v)
 {

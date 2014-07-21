@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_generate_random_coordinate.h"
-#include <math.h>
+#include <oskar_generate_random_coordinate.h>
+#include <oskar_cmath.h>
 #include <stdlib.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 void oskar_generate_random_coordinate(double* longitude, double* latitude)
 {

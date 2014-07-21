@@ -30,13 +30,9 @@
 #include <oskar_evaluate_dipole_pattern_cuda.h>
 #include <oskar_evaluate_dipole_pattern_inline.h>
 #include <oskar_cuda_check_error.h>
-#include <math.h>
+#include <oskar_cmath.h>
 
 #define C_0 299792458.0
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
 
 #ifdef __cplusplus
 extern "C" {

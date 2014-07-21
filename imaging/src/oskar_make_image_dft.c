@@ -30,12 +30,8 @@
 #include <oskar_dft_c2r_2d_cuda.h>
 #include <oskar_cuda_check_error.h>
 
-#include <math.h>
+#include <oskar_cmath.h>
 #include <stdio.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 #ifdef __cplusplus
 extern "C" {

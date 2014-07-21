@@ -37,13 +37,9 @@
 #include <oskar_set_up_image.h>
 #include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
 #include <oskar_convert_ecef_to_baseline_uvw.h>
+#include <oskar_cmath.h>
 
-#include <math.h>
 #include <stddef.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 #define DEG2RAD M_PI/180.0
 

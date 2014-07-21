@@ -37,14 +37,10 @@
 #include <oskar_evaluate_image_lm_grid.h>
 #include <oskar_get_error_string.h>
 
-#include <cmath>
+#include <oskar_cmath.h>
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
 
 #define D2R M_PI/180.0
 

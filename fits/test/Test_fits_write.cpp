@@ -30,14 +30,10 @@
 
 #include "fits/oskar_fits_write.h"
 #include <oskar_mem.h>
+#include <oskar_cmath.h>
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
 
 TEST(fits_write, test)
 {

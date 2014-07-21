@@ -28,15 +28,10 @@
 
 #include <oskar_evaluate_geometric_dipole_pattern_cuda.h>
 #include <oskar_evaluate_geometric_dipole_pattern_inline.h>
-
-#include <math.h>
+#include <oskar_cmath.h>
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifndef M_PI_2
-#define M_PI_2 1.57079632679489661923132169163975144
 #endif
 
 /* Kernel wrappers. ======================================================== */

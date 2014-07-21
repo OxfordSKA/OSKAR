@@ -34,19 +34,15 @@
 #include <oskar_telescope.h>
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
+#include <oskar_cmath.h>
 
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
 #endif
 
 /* Private functions. */

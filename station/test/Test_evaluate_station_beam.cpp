@@ -43,15 +43,11 @@
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
 
-#include <cmath>
+#include <oskar_cmath.h>
 #include <cstdio>
 #include <cstdlib>
 
 using namespace std;
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 TEST(evaluate_station_beam, test_array_pattern)
 {

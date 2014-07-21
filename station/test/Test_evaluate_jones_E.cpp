@@ -38,14 +38,10 @@
 #include <oskar_random_state.h>
 #include <oskar_get_error_string.h>
 
-#include <cmath>
+#include <oskar_cmath.h>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 
 TEST(evaluate_jones_E, evaluate_e)

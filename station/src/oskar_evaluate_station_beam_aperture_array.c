@@ -36,11 +36,7 @@
 #include <oskar_blank_below_horizon.h>
 #include <private_station_work.h>
 
-#include <math.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
+#include <oskar_cmath.h>
 
 #ifdef __cplusplus
 extern "C" {

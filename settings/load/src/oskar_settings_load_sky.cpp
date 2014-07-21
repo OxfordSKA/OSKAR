@@ -28,7 +28,7 @@
 
 #include <oskar_settings_load_sky.h>
 
-#include <cmath>
+#include <oskar_cmath.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -36,10 +36,6 @@
 #include <QtCore/QSettings>
 #include <QtCore/QByteArray>
 #include <QtCore/QStringList>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
 
 #define D2R M_PI/180.0
 #define ARCSEC2RAD M_PI/648000.0

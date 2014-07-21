@@ -33,14 +33,10 @@
 #endif
 
 #include <stdlib.h>
-#include <math.h>
+#include <oskar_cmath.h>
 
 #include <private_station.h>
 #include <oskar_station.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 #ifdef __cplusplus
 extern "C" {

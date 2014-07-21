@@ -37,11 +37,7 @@
 #include <oskar_convert_ludwig3_to_theta_phi_components.h>
 #include <oskar_find_closest_match.h>
 
-#include <math.h>
-
-#ifndef M_PI_2
-#define M_PI_2 1.57079632679489661923132169163975144
-#endif
+#include <oskar_cmath.h>
 
 #define C_0 299792458.0
 

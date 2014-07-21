@@ -27,12 +27,8 @@
  */
 
 #include <oskar_sky.h>
+#include <oskar_cmath.h>
 #include <stdio.h>
-#include <math.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 #define RAD2DEG 180.0/M_PI
 #define RAD2ARCSEC RAD2DEG * 3600.0

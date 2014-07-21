@@ -33,22 +33,10 @@
  * @file oskar_correlate_functions_inline.h
  */
 
-#ifdef __cplusplus
-#include <cmath>
-#else
-#include <math.h>
-#endif
+#include <oskar_cmath.h>
 #include <oskar_global.h>
 #include <oskar_multiply_inline.h>
 #include <oskar_kahan_sum.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
-
-#ifndef M_PIf
-#define M_PIf 3.14159265358979323846264338327950288f
-#endif
 
 #define OMEGA_EARTH  7.272205217e-5  /* radians/sec */
 #define OMEGA_EARTHf 7.272205217e-5f /* radians/sec */

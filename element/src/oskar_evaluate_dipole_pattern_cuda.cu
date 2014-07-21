@@ -28,22 +28,13 @@
 
 #include <oskar_evaluate_dipole_pattern_cuda.h>
 #include <oskar_evaluate_dipole_pattern_inline.h>
-#include <math.h>
+#include <oskar_cmath.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define C_0 299792458.0
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
-
-#ifndef M_PI_2
-#define M_PI_2 1.57079632679489661923132169163975144
-#endif
-
 
 /* Kernel wrappers. ======================================================== */
 

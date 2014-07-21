@@ -34,13 +34,8 @@
 #include <oskar_healpix_nside_to_npix.h>
 #include <oskar_getline.h>
 #include <oskar_string_to_array.h>
-#include <math.h>
+#include <oskar_cmath.h>
 #include <stdio.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
-
 
 static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
         oskar_Mem* n, double beam_lon, double beam_lat, int beam_coord_type,

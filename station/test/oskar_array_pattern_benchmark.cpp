@@ -37,11 +37,7 @@
 
 #include <cstdlib>
 #include <cstdio>
-#include <cmath>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
+#include <oskar_cmath.h>
 
 enum OpType { O2C, C2C, M2M, UNDEF };
 

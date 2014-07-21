@@ -38,13 +38,9 @@
 #include <oskar_binary.h>
 #include <oskar_timer.h>
 
-#include <cmath>
+#include <oskar_cmath.h>
 #include <cstdio>
 #include <iostream>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
 
 TEST(beam_pattern_coordinates, generate_lon_lat_grid)
 {

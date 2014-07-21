@@ -31,16 +31,12 @@
 #include "oskar_convert_relative_direction_cosines_to_apparent_ra_dec.h"
 #include <oskar_log.h>
 #include <oskar_sky.h>
+#include <oskar_cmath.h>
 
-#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <fitsio.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 #ifdef __cplusplus
 extern "C" {

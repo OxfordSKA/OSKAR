@@ -37,17 +37,13 @@
 #include <oskar_mem.h>
 #include <oskar_timer.h>
 
-#include <cmath>
+#include <oskar_cmath.h>
 #include <cstdio>
 
 static const char* telescope_file_name = "test_telescope.dat";
 static const char* station_base = "test_station";
 static const int n_stations = 25;
 static const int n_elements = 200;
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
 
 static void create_test_data()
 {

@@ -35,13 +35,9 @@
 #include <oskar_vis.h>
 #include <oskar_telescope.h>
 #include <oskar_get_error_string.h>
+#include <oskar_cmath.h>
 
 #include <cstdio>
-#include <cmath>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 TEST(write_ms, test_write)
 {

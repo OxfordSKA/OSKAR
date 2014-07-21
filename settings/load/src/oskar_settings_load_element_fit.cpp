@@ -29,7 +29,7 @@
 #include <oskar_settings_load_element_fit.h>
 #include <oskar_station.h>
 
-#include <cmath>
+#include <oskar_cmath.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -39,10 +39,6 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QVariant>
 #include <QtCore/QString>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 #define D2R (M_PI/180.0)
 

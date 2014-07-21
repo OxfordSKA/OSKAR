@@ -37,6 +37,7 @@
 #include <oskar_get_error_string.h>
 #include <oskar_vis.h>
 #include <oskar_binary.h>
+#include <oskar_cmath.h>
 
 #ifndef OSKAR_NO_FITS
 #include "fits/oskar_fits_image_write.h"
@@ -44,14 +45,9 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
 #include <cstring>
 
 #define C_0 299792458.0
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
 
 TEST(make_image, test)
 {

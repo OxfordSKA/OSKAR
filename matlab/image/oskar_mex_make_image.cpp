@@ -46,19 +46,11 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
+#include <oskar_cmath.h>
 #include <algorithm>
 #include <limits>
 
 using namespace std;
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-#ifndef M_PI_2
-#define M_PI_2 1.57079632679489661923
-#endif
 
 #ifndef c_0
 #define c_0 299792458.0

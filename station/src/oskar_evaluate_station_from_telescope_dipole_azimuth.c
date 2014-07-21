@@ -27,15 +27,11 @@
  */
 
 #include <oskar_evaluate_station_from_telescope_dipole_azimuth.h>
-#include <math.h>
+#include <oskar_cmath.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
 #endif
 
 float oskar_evaluate_station_from_telescope_dipole_azimuth_f(

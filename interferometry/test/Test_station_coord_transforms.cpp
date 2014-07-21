@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,12 +30,7 @@
 
 #include <oskar_convert_ecef_to_geodetic_spherical.h>
 #include <oskar_convert_geodetic_spherical_to_ecef.h>
-
-#include <cmath> // for M_PI
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
+#include <oskar_cmath.h>
 
 TEST(station_coord_transforms, geocentric_cartesian_to_geodetic_spherical)
 {

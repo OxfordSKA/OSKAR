@@ -31,17 +31,13 @@
 #include <oskar_convert_galactic_to_fk5.h>
 #include <oskar_log.h>
 #include <oskar_sky.h>
+#include <oskar_cmath.h>
 
 #include <limits.h>
-#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <fitsio.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 #ifdef __cplusplus
 extern "C" {

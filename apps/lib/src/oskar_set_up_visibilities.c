@@ -28,14 +28,10 @@
 
 #include "apps/lib/oskar_set_up_visibilities.h"
 #include <oskar_convert_ecef_to_baseline_uvw.h>
+#include <oskar_cmath.h>
 
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
 
 #ifdef __cplusplus
 extern "C" {

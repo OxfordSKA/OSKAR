@@ -30,15 +30,7 @@
 #define OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_THETA_PHI_INLINE_H_
 
 #include <oskar_global.h>
-#include <math.h>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
-
-#ifndef M_PIf
-#define M_PIf 3.14159265358979323846264338327950288f
-#endif
+#include <oskar_cmath.h>
 
 #ifdef __cplusplus
 extern "C" {

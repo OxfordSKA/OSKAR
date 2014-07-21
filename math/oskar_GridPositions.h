@@ -33,12 +33,8 @@
  * @file GridPositions.h
  */
 
-#include <cmath>
-#include "math/oskar_random_gaussian.h"
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+#include <oskar_cmath.h>
+#include <oskar_random_gaussian.h>
 
 /**
  * @brief Class used for generating coordinates.

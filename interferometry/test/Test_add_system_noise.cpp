@@ -39,8 +39,8 @@
 #include <oskar_image.h>
 
 #include <oskar_random_gaussian.h>
+#include <oskar_cmath.h>
 
-#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -49,10 +49,6 @@
 #include <limits>
 #include <cfloat>
 #include <vector>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288
-#endif
 
 static void generate_range(oskar_Mem* data, int number,
         double start, double inc);

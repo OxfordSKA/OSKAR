@@ -29,19 +29,15 @@
 #include <private_element.h>
 #include <oskar_element.h>
 #include <oskar_getline.h>
+#include <oskar_cmath.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <float.h>
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
 #endif
 
 #define DEG2RAD (M_PI/180.0)
