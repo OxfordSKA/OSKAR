@@ -114,7 +114,7 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
             /* Get the frequency index. */
             freq_id = oskar_find_closest_match_d(frequency_hz,
                     oskar_element_num_freq(model),
-                    oskar_element_freqs_hz(model));
+                    oskar_element_freqs_hz_const(model));
 
             /* Evaluate spline pattern for dipole X. */
             oskar_splines_evaluate(output, 0, 8, model->x_h_re[freq_id],
@@ -153,7 +153,7 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
             /* Get the frequency index. */
             freq_id = oskar_find_closest_match_d(frequency_hz,
                     oskar_element_num_freq(model),
-                    oskar_element_freqs_hz(model));
+                    oskar_element_freqs_hz_const(model));
 
             /* Evaluate spline pattern for dipole Y. */
             oskar_splines_evaluate(output, 4, 8, model->y_h_re[freq_id],

@@ -60,7 +60,7 @@ void oskar_element_write(const oskar_Element* data, oskar_Log* log,
     /* Get the frequency ID. */
     freq_id = oskar_find_closest_match_d(freq_hz,
             oskar_element_num_freq(data),
-            oskar_element_freqs_hz(data));
+            oskar_element_freqs_hz_const(data));
 
     /* Get pointers based on port number. */
     if (port == 1)

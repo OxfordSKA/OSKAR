@@ -60,7 +60,7 @@ OSKAR_EXPORT
 int oskar_element_num_freq(const oskar_Element* data);
 
 OSKAR_EXPORT
-const double* oskar_element_freqs_hz(const oskar_Element* data);
+const double* oskar_element_freqs_hz_const(const oskar_Element* data);
 
 OSKAR_EXPORT
 int oskar_element_type(const oskar_Element* data);
