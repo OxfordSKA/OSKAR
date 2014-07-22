@@ -29,68 +29,23 @@
 #ifndef OSKAR_TELESCOPE_LOAD_NOISE_H_
 #define OSKAR_TELESCOPE_LOAD_NOISE_H_
 
-/**
- * @file oskar_TelescopeLoadNoise.h
- */
-
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
 struct oskar_Settings;
 
-/**
- * @brief
- * Implementation of the telescope model loader for uncorrelated system noise.
- *
- * @details
- * This class loads and/or evaluates lookup tables of RMS noise vs. frequency
- * for each station in the telescope model.
- *
- * Noise values are derived from settings in the oskar_Settings structure
- * either directly or by reading files in the telescope model directory.
- *
- * The telescope model being populated must have already been allocated in CPU
- * memory.
- */
-class oskar_TelescopeLoadNoise : public oskar_TelescopeLoadAbstract
+class TelescopeLoadNoise : public oskar_TelescopeLoadAbstract
 {
 public:
-    oskar_TelescopeLoadNoise(const oskar_Settings* settings);
-    ~oskar_TelescopeLoadNoise();
+    TelescopeLoadNoise(const oskar_Settings* settings);
+    ~TelescopeLoadNoise();
 
-    /**
-     * @brief
-     * Handles loading of uncorrelated system noise in the top level of the
-     * telescope model.
-     *
-     * @param[in,out] telescope   Pointer to telescope model.
-     * @param[in]     cwd         Reference to the current working directory.
-     * @param[in]     num_subdirs Number of sub-directories in the working directory.
-     * @param[in,out] filemap     Reference to file map to use for this level.
-     * @param[in,out] status      Status return code.
-     */
     void load(oskar_Telescope* telescope, const oskar_Dir& cwd, int num_subdirs,
             std::map<std::string, std::string>& filemap, int* status);
 
-    /**
-     * @brief
-     * Handles loading of uncorrelated system noise for stations in the
-     * telescope model.
-     *
-     * @param[in,out] station     Pointer to station model.
-     * @param[in]     cwd         Reference to the current working directory.
-     * @param[in]     num_subdirs Number of sub-directories in the working directory.
-     * @param[in]     depth       Current depth index.
-     * @param[in,out] filemap     Reference to file map to use for this level.
-     * @param[in,out] status      Status return code.
-     */
     void load(oskar_Station* station, const oskar_Dir& cwd, int num_subdirs,
             int depth, std::map<std::string, std::string>& filemap,
             int* status);
 
-    /**
-     * @brief
-     * Returns a readable name for the loader.
-     */
     virtual std::string name() const;
 
 private:

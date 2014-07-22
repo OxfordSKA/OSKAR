@@ -26,74 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_LAYOUT_H_
-#define OSKAR_TELESCOPE_LOAD_LAYOUT_H_
-
-/**
- * @file oskar_TelescopeLoadLayout.h
- */
+#ifndef OSKAR_TELESCOPE_LOAD_GAIN_PHASE_H_
+#define OSKAR_TELESCOPE_LOAD_GAIN_PHASE_H_
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-struct oskar_Settings;
-
-class oskar_TelescopeLoadLayout : public oskar_TelescopeLoadAbstract
+class TelescopeLoadGainPhase : public oskar_TelescopeLoadAbstract
 {
 public:
-    oskar_TelescopeLoadLayout(const oskar_Settings* settings);
+    TelescopeLoadGainPhase() {}
 
-    virtual ~oskar_TelescopeLoadLayout();
+    virtual ~TelescopeLoadGainPhase() {}
 
-    /**
-     * @brief
-     * Loads data into the top-level telescope model structure.
-     *
-     * @details
-     * Implement this function to load a data file into the top-level telescope
-     * model.
-     *
-     * @param[in,out] telescope Pointer to telescope model.
-     * @param[in] cwd Reference to the current working directory.
-     * @param[in] num_subdirs Number of subdirectories in the working directory.
-     * @param[in,out] filemap Reference to file map to use for this level.
-     *                        This should be updated for use at a deeper
-     *                        level if necessary.
-     * @param[in,out] status Status return code.
-     */
     virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
             int num_subdirs, std::map<std::string, std::string>& filemap,
             int* status);
 
-    /**
-     * @brief
-     * Loads data into a station model structure.
-     *
-     * @details
-     * Implement this function to load a data file into a station model.
-     *
-     * @param[in,out] station Pointer to station model.
-     * @param[in] cwd Reference to the current working directory.
-     * @param[in] num_subdirs Number of subdirectories in the working directory.
-     * @param[in] depth Current depth index.
-     * @param[in,out] filemap Reference to file map to use for this level.
-     *                        This should be updated for use at a deeper
-     *                        level if necessary.
-     * @param[in,out] status Status return code.
-     */
     virtual void load(oskar_Station* station, const oskar_Dir& cwd,
             int num_subdirs, int depth,
             std::map<std::string, std::string>& filemap, int* status);
 
-    /**
-     * @brief
-     * Returns a readable name for the loader.
-     */
     virtual std::string name() const;
 
 private:
-    static const std::string layout_file;
-    static const std::string layout_ecef_file;
-    const oskar_Settings* settings_;
+    static const std::string gain_phase_file;
 };
 
-#endif /* OSKAR_TELESCOPE_LOAD_LAYOUT_H_ */
+#endif /* OSKAR_TELESCOPE_LOAD_GAIN_PHASE_H_ */

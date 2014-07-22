@@ -26,34 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_TelescopeLoadGainPhase.h"
+#include "apps/lib/private_TelescopeLoadPermittedBeams.h"
 #include "apps/lib/oskar_Dir.h"
 
 using std::map;
 using std::string;
 
-const string oskar_TelescopeLoadGainPhase::gain_phase_file = "gain_phase.txt";
+const string TelescopeLoadPermittedBeams::permitted_beams_file = "permitted_beams.txt";
 
-void oskar_TelescopeLoadGainPhase::load(oskar_Telescope* /*telescope*/,
+TelescopeLoadPermittedBeams::TelescopeLoadPermittedBeams()
+{
+}
+
+TelescopeLoadPermittedBeams::~TelescopeLoadPermittedBeams()
+{
+}
+
+void TelescopeLoadPermittedBeams::load(oskar_Telescope* /*telescope*/,
         const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
         map<string, string>& /*filemap*/, int* /*status*/)
 {
     // Nothing to do at the telescope level.
 }
 
-void oskar_TelescopeLoadGainPhase::load(oskar_Station* station,
+void TelescopeLoadPermittedBeams::load(oskar_Station* station,
         const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
         map<string, string>& /*filemap*/, int* status)
 {
-    // Check for presence of "gain_phase.txt".
-    if (cwd.exists(gain_phase_file))
+    // Check for presence of "permitted_beams.txt".
+    if (cwd.exists(permitted_beams_file))
     {
-        oskar_station_load_gain_phase(station,
-                cwd.absoluteFilePath(gain_phase_file).c_str(), status);
+        oskar_station_load_permitted_beams(station,
+                cwd.absoluteFilePath(permitted_beams_file).c_str(), status);
     }
 }
 
-string oskar_TelescopeLoadGainPhase::name() const
+string TelescopeLoadPermittedBeams::name() const
 {
-    return string("element gain and phase file loader");
+    return string("permitted beams file loader");
 }

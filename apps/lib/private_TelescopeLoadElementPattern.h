@@ -26,70 +26,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_GAIN_PHASE_H_
-#define OSKAR_TELESCOPE_LOAD_GAIN_PHASE_H_
-
-/**
- * @file oskar_TelescopeLoadGainPhase.h
- */
+#ifndef OSKAR_TELESCOPE_LOAD_ELEMENT_PATTERN_H_
+#define OSKAR_TELESCOPE_LOAD_ELEMENT_PATTERN_H_
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-class oskar_TelescopeLoadGainPhase : public oskar_TelescopeLoadAbstract
+struct oskar_Settings;
+struct oskar_Log;
+
+class TelescopeLoadElementPattern : public oskar_TelescopeLoadAbstract
 {
 public:
-    oskar_TelescopeLoadGainPhase() {}
+    TelescopeLoadElementPattern(const oskar_Settings* settings,
+            oskar_Log* log);
 
-    virtual ~oskar_TelescopeLoadGainPhase() {}
+    virtual ~TelescopeLoadElementPattern();
 
-    /**
-     * @brief
-     * Loads data into the top-level telescope model structure.
-     *
-     * @details
-     * Implement this function to load a data file into the top-level telescope
-     * model.
-     *
-     * @param[in,out] telescope Pointer to telescope model.
-     * @param[in] cwd Reference to the current working directory.
-     * @param[in] num_subdirs Number of subdirectories in the working directory.
-     * @param[in,out] filemap Reference to file map to use for this level.
-     *                        This should be updated for use at a deeper
-     *                        level if necessary.
-     * @param[in,out] status Status return code.
-     */
     virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
             int num_subdirs, std::map<std::string, std::string>& filemap,
             int* status);
 
-    /**
-     * @brief
-     * Loads data into a station model structure.
-     *
-     * @details
-     * Implement this function to load a data file into a station model.
-     *
-     * @param[in,out] station Pointer to station model.
-     * @param[in] cwd Reference to the current working directory.
-     * @param[in] num_subdirs Number of subdirectories in the working directory.
-     * @param[in] depth Current depth index.
-     * @param[in,out] filemap Reference to file map to use for this level.
-     *                        This should be updated for use at a deeper
-     *                        level if necessary.
-     * @param[in,out] status Status return code.
-     */
     virtual void load(oskar_Station* station, const oskar_Dir& cwd,
             int num_subdirs, int depth,
             std::map<std::string, std::string>& filemap, int* status);
 
-    /**
-     * @brief
-     * Returns a readable name for the loader.
-     */
     virtual std::string name() const;
 
 private:
-    static const std::string gain_phase_file;
+    double frequency_from_filename(const std::string& filename, int* status);
+    int index_from_filename(const std::string& filename, int* status);
+
+    void load_element_patterns(oskar_Station* station,
+            const std::map<std::string, std::string>& filemap, int* status);
+
+    void update_map(std::map<std::string, std::string>& files,
+            const oskar_Dir& cwd);
+
+private:
+    static const std::string root_name;
+    std::string root_x;
+    std::string root_y;
+    const oskar_Settings* settings_;
+    oskar_Log* log_;
+    std::map<std::string, int> models;
 };
 
-#endif /* OSKAR_TELESCOPE_LOAD_GAIN_PHASE_H_ */
+#endif /* OSKAR_TELESCOPE_LOAD_ELEMENT_PATTERN_H_ */

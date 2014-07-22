@@ -26,34 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_TelescopeLoadOrientation.h"
+#include "apps/lib/private_TelescopeLoadApodisation.h"
 #include "apps/lib/oskar_Dir.h"
 
 using std::map;
 using std::string;
 
-const string oskar_TelescopeLoadOrientation::orientation_file = "orientation.txt";
+const string TelescopeLoadApodisation::apodisation_file = "apodisation.txt";
 
-void oskar_TelescopeLoadOrientation::load(oskar_Telescope* /*telescope*/,
+void TelescopeLoadApodisation::load(oskar_Telescope* /*telescope*/,
         const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
         map<string, string>& /*filemap*/, int* /*status*/)
 {
     // Nothing to do at the telescope level.
 }
 
-void oskar_TelescopeLoadOrientation::load(oskar_Station* station,
+void TelescopeLoadApodisation::load(oskar_Station* station,
         const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
         map<string, string>& /*filemap*/, int* status)
 {
-    // Check for presence of "orientation.txt".
-    if (cwd.exists(orientation_file))
+    // Check for presence of "apodisation.txt".
+    if (cwd.exists(apodisation_file))
     {
-        oskar_station_load_orientation(station,
-                cwd.absoluteFilePath(orientation_file).c_str(), status);
+        oskar_station_load_apodisation(station,
+                cwd.absoluteFilePath(apodisation_file).c_str(), status);
     }
 }
 
-string oskar_TelescopeLoadOrientation::name() const
+string TelescopeLoadApodisation::name() const
 {
-    return string("element orientation file loader");
+    return string("element apodisation weight file loader");
 }

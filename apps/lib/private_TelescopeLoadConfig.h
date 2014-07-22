@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,42 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_TelescopeLoadPermittedBeams.h"
-#include "apps/lib/oskar_Dir.h"
+#ifndef OSKAR_TELESCOPE_LOAD_CONFIG_H_
+#define OSKAR_TELESCOPE_LOAD_CONFIG_H_
 
-using std::map;
-using std::string;
+#include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-const string oskar_TelescopeLoadPermittedBeams::permitted_beams_file = "permitted_beams.txt";
+struct oskar_Settings;
 
-oskar_TelescopeLoadPermittedBeams::oskar_TelescopeLoadPermittedBeams()
+class TelescopeLoadConfig : public oskar_TelescopeLoadAbstract
 {
-}
+public:
+    TelescopeLoadConfig(const oskar_Settings* settings);
 
-oskar_TelescopeLoadPermittedBeams::~oskar_TelescopeLoadPermittedBeams()
-{
-}
+    virtual ~TelescopeLoadConfig();
 
-void oskar_TelescopeLoadPermittedBeams::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
-{
-    // Nothing to do at the telescope level.
-}
+    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
+            int num_subdirs, std::map<std::string, std::string>& filemap,
+            int* status);
 
-void oskar_TelescopeLoadPermittedBeams::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
-        map<string, string>& /*filemap*/, int* status)
-{
-    // Check for presence of "permitted_beams.txt".
-    if (cwd.exists(permitted_beams_file))
-    {
-        oskar_station_load_permitted_beams(station,
-                cwd.absoluteFilePath(permitted_beams_file).c_str(), status);
-    }
-}
+    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
+            int num_subdirs, int depth,
+            std::map<std::string, std::string>& filemap, int* status);
 
-string oskar_TelescopeLoadPermittedBeams::name() const
-{
-    return string("permitted beams file loader");
-}
+    virtual std::string name() const;
+
+private:
+    static const std::string config_file;
+    const oskar_Settings* settings_;
+};
+
+#endif /* OSKAR_TELESCOPE_LOAD_CONFIG_H_ */
