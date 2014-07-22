@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,49 +95,13 @@ void oskar_dierckx_bispev_bicubic_cuda_d(const double* d_tx, int nx,
 
 #ifdef __CUDACC__
 
-/**
- * @brief
- * CUDA kernel to evaluate bicubic B-spline coefficients (single precision).
- *
- * @details
- * This CUDA kernel evaluates bicubic B-spline coefficients to determine
- * values of a fitted surface at the specified points.
- *
- * @param[in] tx     Array of knot positions in x.
- * @param[in] nx     Number of knot positions in x.
- * @param[in] ty     Array of knot positions in y.
- * @param[in] ny     Number of knot positions in y.
- * @param[in] c      Array of spline coefficients.
- * @param[in] n      Number of points to evaluate.
- * @param[in] x      Input x positions.
- * @param[in] y      Input y positions.
- * @param[in] stride Memory stride of output values (use 1 for contiguous).
- * @param[out] z     Output surface values.
- */
+/* Kernels. */
+
 __global__
 void oskar_dierckx_bispev_bicubic_cudak_f(const float* tx, const int nx,
         const float* ty, const int ny, const float* c, const int n,
         const float* x, const float* y, const int stride, float* z);
 
-/**
- * @brief
- * CUDA kernel to evaluate bicubic B-spline coefficients (double precision).
- *
- * @details
- * This CUDA kernel evaluates bicubic B-spline coefficients to determine
- * values of a fitted surface at the specified points.
- *
- * @param[in] tx     Array of knot positions in x.
- * @param[in] nx     Number of knot positions in x.
- * @param[in] ty     Array of knot positions in y.
- * @param[in] ny     Number of knot positions in y.
- * @param[in] c      Array of spline coefficients.
- * @param[in] n      Number of points to evaluate.
- * @param[in] x      Input x positions.
- * @param[in] y      Input y positions.
- * @param[in] stride Memory stride of output values (use 1 for contiguous).
- * @param[out] z     Output surface values.
- */
 __global__
 void oskar_dierckx_bispev_bicubic_cudak_d(const double* tx, const int nx,
         const double* ty, const int ny, const double* c, const int n,

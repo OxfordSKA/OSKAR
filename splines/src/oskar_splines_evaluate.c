@@ -69,16 +69,9 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
         return;
     }
 
-    /* Check that the spline data has been set up. */
+    /* Get number of knots. */
     nx = oskar_splines_num_knots_x_theta(spline);
     ny = oskar_splines_num_knots_y_phi(spline);
-    if (!oskar_mem_allocated(oskar_splines_coeff_const(spline)) ||
-            !oskar_mem_allocated(oskar_splines_knots_x_theta_const(spline)) ||
-            !oskar_mem_allocated(oskar_splines_knots_y_phi_const(spline)))
-    {
-        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-        return;
-    }
 
     /* Check data type. */
     if (type == OSKAR_SINGLE)
@@ -98,22 +91,33 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
         /* Check if data are in CPU memory. */
         if (location == OSKAR_CPU)
         {
-            /* Set up workspace. */
-            float x1, y1, wrk[8];
-            int i, iwrk1[2], kwrk1 = 2, lwrk = 8, err = 0;
-
-            /* Evaluate surface at the points. */
-            for (i = 0; i < num_points; ++i)
+            int i;
+            if (nx == 0 || ny == 0 || !tx || !ty || !coeff)
             {
-                x1 = x_[i];
-                y1 = y_[i];
-                oskar_dierckx_bispev_f(tx, nx, ty, ny, coeff, 3, 3, &x1, 1,
-                        &y1, 1, &out[i * stride], wrk, lwrk, iwrk1, kwrk1,
-                        &err);
-                if (err != 0)
+                for (i = 0; i < num_points; ++i)
                 {
-                    *status = OSKAR_ERR_SPLINE_EVAL_FAIL;
-                    return;
+                    out[i * stride] = 0.0f;
+                }
+            }
+            else
+            {
+                /* Set up workspace. */
+                float x1, y1, wrk[8];
+                int iwrk1[2], kwrk1 = 2, lwrk = 8, err = 0;
+
+                /* Evaluate surface at the points. */
+                for (i = 0; i < num_points; ++i)
+                {
+                    x1 = x_[i];
+                    y1 = y_[i];
+                    oskar_dierckx_bispev_f(tx, nx, ty, ny, coeff, 3, 3,
+                            &x1, 1, &y1, 1, &out[i * stride],
+                            wrk, lwrk, iwrk1, kwrk1, &err);
+                    if (err != 0)
+                    {
+                        *status = OSKAR_ERR_SPLINE_EVAL_FAIL;
+                        return;
+                    }
                 }
             }
         }
@@ -147,22 +151,33 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
         /* Check if data are in CPU memory. */
         if (location == OSKAR_CPU)
         {
-            /* Set up workspace. */
-            double x1, y1, wrk[8];
-            int i, iwrk1[2], kwrk1 = 2, lwrk = 8, err = 0;
-
-            /* Evaluate surface at the points. */
-            for (i = 0; i < num_points; ++i)
+            int i;
+            if (nx == 0 || ny == 0 || !tx || !ty || !coeff)
             {
-                x1 = x_[i];
-                y1 = y_[i];
-                oskar_dierckx_bispev_d(tx, nx, ty, ny, coeff, 3, 3, &x1, 1,
-                        &y1, 1, &out[i * stride], wrk, lwrk, iwrk1, kwrk1,
-                        &err);
-                if (err != 0)
+                for (i = 0; i < num_points; ++i)
                 {
-                    *status = OSKAR_ERR_SPLINE_EVAL_FAIL;
-                    return;
+                    out[i * stride] = 0.0;
+                }
+            }
+            else
+            {
+                /* Set up workspace. */
+                double x1, y1, wrk[8];
+                int iwrk1[2], kwrk1 = 2, lwrk = 8, err = 0;
+
+                /* Evaluate surface at the points. */
+                for (i = 0; i < num_points; ++i)
+                {
+                    x1 = x_[i];
+                    y1 = y_[i];
+                    oskar_dierckx_bispev_d(tx, nx, ty, ny, coeff, 3, 3,
+                            &x1, 1, &y1, 1, &out[i * stride],
+                            wrk, lwrk, iwrk1, kwrk1, &err);
+                    if (err != 0)
+                    {
+                        *status = OSKAR_ERR_SPLINE_EVAL_FAIL;
+                        return;
+                    }
                 }
             }
         }

@@ -52,20 +52,20 @@ int oskar_element_has_spline_data(const oskar_Element* data)
 
 int oskar_element_has_x_spline_data(const oskar_Element* data)
 {
-    return (data->num_freq > 0) && /* Short-circuit, so will be safe. */
-            (oskar_splines_have_coeffs(data->x_h_re[0])) &&
-            (oskar_splines_have_coeffs(data->x_h_im[0])) &&
-            (oskar_splines_have_coeffs(data->x_v_re[0])) &&
-            (oskar_splines_have_coeffs(data->x_v_im[0]));
+    return (data->num_freq > 0) && ( /* Short-circuit, so will be safe. */
+            oskar_splines_have_coeffs(data->x_h_re[0]) ||
+            oskar_splines_have_coeffs(data->x_h_im[0]) ||
+            oskar_splines_have_coeffs(data->x_v_re[0]) ||
+            oskar_splines_have_coeffs(data->x_v_im[0]));
 }
 
 int oskar_element_has_y_spline_data(const oskar_Element* data)
 {
-    return (data->num_freq > 0) && /* Short-circuit, so will be safe. */
-            (oskar_splines_have_coeffs(data->y_h_re[0])) &&
-            (oskar_splines_have_coeffs(data->y_h_im[0])) &&
-            (oskar_splines_have_coeffs(data->y_v_re[0])) &&
-            (oskar_splines_have_coeffs(data->y_v_im[0]));
+    return (data->num_freq > 0) && ( /* Short-circuit, so will be safe. */
+            oskar_splines_have_coeffs(data->y_h_re[0]) ||
+            oskar_splines_have_coeffs(data->y_h_im[0]) ||
+            oskar_splines_have_coeffs(data->y_v_re[0]) ||
+            oskar_splines_have_coeffs(data->y_v_im[0]));
 }
 
 int oskar_element_num_freq(const oskar_Element* data)

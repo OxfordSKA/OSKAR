@@ -32,6 +32,9 @@
 extern "C" {
 #endif
 
+static __global__ void oskar_set_zeros_f(float* out, int n, int stride);
+static __global__ void oskar_set_zeros_d(double* out, int n, int stride);
+
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
@@ -42,9 +45,17 @@ void oskar_dierckx_bispev_cuda_f(const float* d_tx, int nx,
     /* Evaluate surface at the points by calling kernel. */
     int num_blocks, num_threads = 256;
     num_blocks = (n + num_threads - 1) / num_threads;
-    oskar_dierckx_bispev_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_tx, nx, d_ty, ny, d_c,
-            kx, ky, n, d_x, d_y, stride, d_z);
+    if (!d_tx || !d_ty || !d_c || nx == 0 || ny == 0)
+    {
+        oskar_set_zeros_f
+        OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_z, n, stride);
+    }
+    else
+    {
+        oskar_dierckx_bispev_cudak_f
+        OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_tx, nx, d_ty, ny,
+                d_c, kx, ky, n, d_x, d_y, stride, d_z);
+    }
 }
 
 /* Double precision. */
@@ -55,9 +66,17 @@ void oskar_dierckx_bispev_cuda_d(const double* d_tx, int nx,
     /* Evaluate surface at the points by calling kernel. */
     int num_blocks, num_threads = 256;
     num_blocks = (n + num_threads - 1) / num_threads;
-    oskar_dierckx_bispev_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_tx, nx, d_ty, ny, d_c,
-            kx, ky, n, d_x, d_y, stride, d_z);
+    if (!d_tx || !d_ty || !d_c || nx == 0 || ny == 0)
+    {
+        oskar_set_zeros_d
+        OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_z, n, stride);
+    }
+    else
+    {
+        oskar_dierckx_bispev_cudak_d
+        OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_tx, nx, d_ty, ny,
+                d_c, kx, ky, n, d_x, d_y, stride, d_z);
+    }
 }
 
 
@@ -265,6 +284,14 @@ void oskar_dierckx_bispev_cudak_f(const float* tx, const int nx,
             x[i], y[i], &z[i * stride]);
 }
 
+static __global__
+void oskar_set_zeros_f(float* out, int n, int stride)
+{
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
+    out[i * stride] = 0.0f;
+}
+
 /* Double precision. */
 __global__
 void oskar_dierckx_bispev_cudak_d(const double* tx, const int nx,
@@ -279,6 +306,14 @@ void oskar_dierckx_bispev_cudak_d(const double* tx, const int nx,
     /* Call device function to evaluate surface. */
     oskar_cudaf_dierckx_fpbisp_single_d(tx, nx, ty, ny, c, kx, ky,
             x[i], y[i], &z[i * stride]);
+}
+
+static __global__
+void oskar_set_zeros_d(double* out, int n, int stride)
+{
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
+    out[i * stride] = 0.0;
 }
 
 #ifdef __cplusplus
