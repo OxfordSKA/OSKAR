@@ -1,4 +1,4 @@
-2014-xx-yy  OSKAR-2.5.0
+2014-07-22  OSKAR-2.5.0
 
     * Changed settings to use a half-wavelength dipole by default,
       instead of a geometric dipole. 
