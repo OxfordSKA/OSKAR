@@ -27,6 +27,7 @@
  */
 
 #include <oskar_settings_load_element_fit.h>
+#include <oskar_settings_load_simulator.h>
 
 #include <apps/lib/oskar_fit_element_data.h>
 #include <apps/lib/oskar_Dir.h>
@@ -84,6 +85,7 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
     // Load the settings.
     oskar_Settings settings;
     oskar_settings_init(&settings);
+    oskar_settings_load_simulator(&settings.sim, settings_file, status);
     oskar_settings_load_element_fit(&settings.element_fit, settings_file, status);
     if (*status)
     {
@@ -93,6 +95,7 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
     }
 
     // Get the main settings.
+    oskar_log_set_keep_file(log, settings.sim.keep_log_file);
     oskar_log_settings_element_fit(log, &settings);
     const char* input_file = settings.element_fit.input_cst_file;
     const char* output_dir = settings.element_fit.output_directory;
