@@ -257,6 +257,67 @@ public:
 
     /**
      * @details
+     * Replaces visibility data in the main table.
+     *
+     * @details
+     * This method puts the given block of visibility data in the main table of
+     * the Measurement Set. The dimensionality of the complex \p vis data block
+     * is \p num_pols x \p num_channels x \p num_rows, with \p num_pols the
+     * fastest varying dimension, then \p num_channels, and finally \p num_rows.
+     *
+     * Each row of the main table holds data from a single baseline for a
+     * single time stamp, so the number of rows is given by the number of
+     * baselines multiplied by the number of times. The complex visibilities
+     * are therefore understood to be given per polarisation, per channel and
+     * per baseline (and repeated as many times as required).
+     *
+     * The times are given in units of (MJD) * 86400, i.e. seconds since
+     * Julian date 2400000.5.
+     *
+     * Thus (for C-ordered memory), the layout of \p vis corresponding to two
+     * time snapshots, for a three-element interferometer with four
+     * polarisations and two channels would be:
+     *
+     * time0,ant0-1
+     *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
+     *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
+     * time0,ant0-2
+     *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
+     *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
+     * time0,ant1-2
+     *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
+     *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
+     * time1,ant0-1
+     *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
+     *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
+     * time1,ant0-2
+     *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
+     *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
+     * time1,ant1-2
+     *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
+     *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
+     *
+     * @param[in] start_row    The start row index of the Measurement Set.
+     * @param[in] num_pols     Number of polarisations.
+     * @param[in] num_channels Number of channels.
+     * @param[in] num_rows     Number of rows to add to the main table (see note).
+     * @param[in] u            Baseline u-coordinates, in metres (size num_rows).
+     * @param[in] v            Baseline v-coordinate, in metres (size num_rows).
+     * @param[in] w            Baseline w-coordinate, in metres (size num_rows).
+     * @param[in] vis          Matrix of complex visibilities per row (see note).
+     * @param[in] ant1         Indices of antenna 1 for each baseline (size num_rows).
+     * @param[in] ant2         Indices of antenna 2 for each baseline (size num_rows).
+     * @param[in] exposure     The exposure length per visibility, in seconds.
+     * @param[in] interval     The interval length per visibility, in seconds.
+     * @param[in] times        Timestamp of each visibility block (size num_rows).
+     */
+    void putVisibilities(int start_row, int num_pols, int num_channels,
+            int num_rows, const double* u, const double* v, const double* w,
+            const double* vis, const int* ant1, const int* ant2,
+            double exposure, double interval, const double* times);
+
+    /**
+     * @details
      * Adds visibility data to the main table.
      *
      * @details
@@ -316,6 +377,67 @@ public:
             double exposure, double interval, const float* times);
 
     /**
+     * @details
+     * Replaces visibility data to the main table.
+     *
+     * @details
+     * This method puts the given block of visibility data in the main table of
+     * the Measurement Set. The dimensionality of the complex \p vis data block
+     * is \p num_pols x \p num_channels x \p num_rows, with \p num_pols the
+     * fastest varying dimension, then \p num_channels, and finally \p num_rows.
+     *
+     * Each row of the main table holds data from a single baseline for a
+     * single time stamp, so the number of rows is given by the number of
+     * baselines multiplied by the number of times. The complex visibilities
+     * are therefore understood to be given per polarisation, per channel and
+     * per baseline (and repeated as many times as required).
+     *
+     * The times are given in units of (MJD) * 86400, i.e. seconds since
+     * Julian date 2400000.5.
+     *
+     * Thus (for C-ordered memory), the layout of \p vis corresponding to two
+     * time snapshots, for a three-element interferometer with four
+     * polarisations and two channels would be:
+     *
+     * time0,ant0-1
+     *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
+     *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
+     * time0,ant0-2
+     *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
+     *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
+     * time0,ant1-2
+     *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
+     *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
+     * time1,ant0-1
+     *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
+     *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
+     * time1,ant0-2
+     *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
+     *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
+     * time1,ant1-2
+     *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
+     *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
+     *
+     * @param[in] start_row    The start row index of the Measurement Set.
+     * @param[in] num_pols     Number of polarisations.
+     * @param[in] num_channels Number of channels.
+     * @param[in] num_rows     Number of rows to add to the main table (see note).
+     * @param[in] u            Baseline u-coordinates, in metres (size num_rows).
+     * @param[in] v            Baseline v-coordinate, in metres (size num_rows).
+     * @param[in] w            Baseline w-coordinate, in metres (size num_rows).
+     * @param[in] vis          Matrix of complex visibilities per row (see note).
+     * @param[in] ant1         Indices of antenna 1 for each baseline (size num_rows).
+     * @param[in] ant2         Indices of antenna 2 for each baseline (size num_rows).
+     * @param[in] exposure     The exposure length per visibility, in seconds.
+     * @param[in] interval     The interval length per visibility, in seconds.
+     * @param[in] times        Timestamp of each visibility block (size num_rows).
+     */
+    void putVisibilities(int start_row, int num_pols, int num_channels,
+            int num_rows, const float* u, const float* v, const float* w,
+            const float* vis, const int* ant1, const int* ant2,
+            double exposure, double interval, const float* times);
+
+    /**
      * @brief Cleanup routine.
      *
      * @details
@@ -331,7 +453,8 @@ public:
      *
      * @param[in] filename The filename to use.
      */
-    void create(const char* filename);
+    void create(const char* filename, int num_pols, int num_channels,
+            int num_stations);
 
     /**
      * @brief Opens an existing Measurement Set.
@@ -340,6 +463,24 @@ public:
      * Opens an existing Measurement Set.
      */
     void open(const char* filename);
+
+    /**
+     * @brief Sets the number of rows in the main table.
+     *
+     * @details
+     * Sets the number of rows in the main table to be at least as large
+     * as the value given.
+     */
+    void setNumRows(int num);
+
+    /**
+     * @brief Sets the time range of the data.
+     *
+     * @details
+     * Sets the time range of the data in the main table. This is typically
+     * used after multiple calls to putVisibilities().
+     */
+    void setTimeRange(double start_time, double last_time);
 
 protected:
     /**
@@ -356,7 +497,6 @@ protected:
             const casa::Vector<double>& chanWidths);
 
     void setAntennaFeeds(int num_antennas, int num_receptors);
-    void setTimeRange(double start_time, double last_time);
 
 protected:
     casa::MeasurementSet* ms_;   ///< Pointer to the Measurement Set.

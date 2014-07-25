@@ -265,6 +265,22 @@ void oskar_MeasurementSet::addVisibilities(int num_pols, int num_channels,
 {
     if (!ms_ || !msc_ || !msmc_) return;
 
+    // Add enough rows to the main table.
+    int start_row = ms_->nrow();
+    ms_->addRow(num_rows);
+
+    putVisibilities(start_row, num_pols, num_channels, num_rows,
+            u, v, w, vis, ant1, ant2, exposure, interval, times);
+    setTimeRange(times[0], times[num_rows - 1]);
+}
+
+void oskar_MeasurementSet::putVisibilities(int start_row, int num_pols,
+        int num_channels, int num_rows, const double* u, const double* v,
+        const double* w, const double* vis, const int* ant1, const int* ant2,
+        double exposure, double interval, const double* times)
+{
+    if (!ms_ || !msc_ || !msmc_) return;
+
     // Allocate storage for a (u,v,w) coordinate,
     // a visibility matrix, a visibility weight, and a flag matrix.
     Vector<Double> uvw(3);
@@ -273,18 +289,23 @@ void oskar_MeasurementSet::addVisibilities(int num_pols, int num_channels,
     Vector<Float> weight(num_pols, 1.0);
     Vector<Float> sigma(num_pols, 1.0);
 
-    // Add enough rows to the main table.
-    int start_row = ms_->nrow();
-    ms_->addRow(num_rows);
+    // Get references to columns.
+    ArrayColumn<Double>& col_uvw = msmc_->uvw();
+    ArrayColumn<Complex>& col_data = msmc_->data();
+    ScalarColumn<Int>& col_antenna1 = msmc_->antenna1();
+    ScalarColumn<Int>& col_antenna2 = msmc_->antenna2();
+    ArrayColumn<Bool>& col_flag = msmc_->flag();
+    ArrayColumn<Float>& col_weight = msmc_->weight();
+    ArrayColumn<Float>& col_sigma = msmc_->sigma();
+    ScalarColumn<Double>& col_exposure = msmc_->exposure();
+    ScalarColumn<Double>& col_interval = msmc_->interval();
+    ScalarColumn<Double>& col_time = msmc_->time();
+    ScalarColumn<Double>& col_timeCentroid = msmc_->timeCentroid();
 
     // Loop over rows / visibilities.
     for (int r = 0; r < num_rows; ++r)
     {
         int row = r + start_row;
-
-        // Add the u,v,w coordinates.
-        uvw(0) = u[r]; uvw(1) = v[r]; uvw(2) = w[r];
-        msmc_->uvw().put(row, uvw);
 
         // Get a pointer to the start of the visibility matrix for this row.
         const double* vis_row = vis + (2 * num_pols * num_channels) * r;
@@ -299,28 +320,41 @@ void oskar_MeasurementSet::addVisibilities(int num_pols, int num_channels,
             }
         }
 
-        // Add the visibilities.
-        msmc_->data().put(row, vis_data);
-
-        // Add the antenna pairs.
-        msmc_->antenna1().put(row, ant1[r]);
-        msmc_->antenna2().put(row, ant2[r]);
-
-        // Add remaining meta-data.
-        msmc_->flag().put(row, flag);
-        msmc_->weight().put(row, weight);
-        msmc_->sigma().put(row, sigma);
-        msmc_->exposure().put(row, exposure);
-        msmc_->interval().put(row, interval);
-        msmc_->time().put(row, times[r]);
-        msmc_->timeCentroid().put(row, times[r]);
+        // Write the data to the Measurement Set.
+        uvw(0) = u[r]; uvw(1) = v[r]; uvw(2) = w[r];
+        col_uvw.put(row, uvw);
+        col_antenna1.put(row, ant1[r]);
+        col_antenna2.put(row, ant2[r]);
+        col_data.put(row, vis_data);
+        col_flag.put(row, flag);
+        col_weight.put(row, weight);
+        col_sigma.put(row, sigma);
+        col_exposure.put(row, exposure);
+        col_interval.put(row, interval);
+        col_time.put(row, times[r]);
+        col_timeCentroid.put(row, times[r]);
     }
-    setTimeRange(times[0], times[num_rows - 1]);
 }
 
 void oskar_MeasurementSet::addVisibilities(int num_pols, int num_channels,
         int num_rows, const float* u, const float* v, const float* w,
         const float* vis, const int* ant1, const int* ant2,
+        double exposure, double interval, const float* times)
+{
+    if (!ms_ || !msc_ || !msmc_) return;
+
+    // Add enough rows to the main table.
+    int start_row = ms_->nrow();
+    ms_->addRow(num_rows);
+
+    putVisibilities(start_row, num_pols, num_channels, num_rows,
+            u, v, w, vis, ant1, ant2, exposure, interval, times);
+    setTimeRange(times[0], times[num_rows - 1]);
+}
+
+void oskar_MeasurementSet::putVisibilities(int start_row, int num_pols,
+        int num_channels, int num_rows, const float* u, const float* v,
+        const float* w, const float* vis, const int* ant1, const int* ant2,
         double exposure, double interval, const float* times)
 {
     if (!ms_ || !msc_ || !msmc_) return;
@@ -333,18 +367,23 @@ void oskar_MeasurementSet::addVisibilities(int num_pols, int num_channels,
     Vector<Float> weight(num_pols, 1.0);
     Vector<Float> sigma(num_pols, 1.0);
 
-    // Add enough rows to the main table.
-    int start_row = ms_->nrow();
-    ms_->addRow(num_rows);
+    // Get references to columns.
+    ArrayColumn<Double>& col_uvw = msmc_->uvw();
+    ArrayColumn<Complex>& col_data = msmc_->data();
+    ScalarColumn<Int>& col_antenna1 = msmc_->antenna1();
+    ScalarColumn<Int>& col_antenna2 = msmc_->antenna2();
+    ArrayColumn<Bool>& col_flag = msmc_->flag();
+    ArrayColumn<Float>& col_weight = msmc_->weight();
+    ArrayColumn<Float>& col_sigma = msmc_->sigma();
+    ScalarColumn<Double>& col_exposure = msmc_->exposure();
+    ScalarColumn<Double>& col_interval = msmc_->interval();
+    ScalarColumn<Double>& col_time = msmc_->time();
+    ScalarColumn<Double>& col_timeCentroid = msmc_->timeCentroid();
 
     // Loop over rows / visibilities.
     for (int r = 0; r < num_rows; ++r)
     {
         int row = r + start_row;
-
-        // Add the u,v,w coordinates.
-        uvw(0) = u[r]; uvw(1) = v[r]; uvw(2) = w[r];
-        msmc_->uvw().put(row, uvw);
 
         // Get a pointer to the start of the visibility matrix for this row.
         const float* vis_row = vis + (2 * num_pols * num_channels) * r;
@@ -359,23 +398,20 @@ void oskar_MeasurementSet::addVisibilities(int num_pols, int num_channels,
             }
         }
 
-        // Add the visibilities.
-        msmc_->data().put(row, vis_data);
-
-        // Add the antenna pairs.
-        msmc_->antenna1().put(row, ant1[r]);
-        msmc_->antenna2().put(row, ant2[r]);
-
-        // Add remaining meta-data.
-        msmc_->flag().put(row, flag);
-        msmc_->weight().put(row, weight);
-        msmc_->sigma().put(row, sigma);
-        msmc_->exposure().put(row, exposure);
-        msmc_->interval().put(row, interval);
-        msmc_->time().put(row, times[r]);
-        msmc_->timeCentroid().put(row, times[r]);
+        // Write the data to the Measurement Set.
+        uvw(0) = u[r]; uvw(1) = v[r]; uvw(2) = w[r];
+        col_uvw.put(row, uvw);
+        col_antenna1.put(row, ant1[r]);
+        col_antenna2.put(row, ant2[r]);
+        col_data.put(row, vis_data);
+        col_flag.put(row, flag);
+        col_weight.put(row, weight);
+        col_sigma.put(row, sigma);
+        col_exposure.put(row, exposure);
+        col_interval.put(row, interval);
+        col_time.put(row, times[r]);
+        col_timeCentroid.put(row, times[r]);
     }
-    setTimeRange(times[0], times[num_rows - 1]);
 }
 
 void oskar_MeasurementSet::close()
@@ -398,16 +434,51 @@ void oskar_MeasurementSet::close()
     }
 }
 
-void oskar_MeasurementSet::create(const char* filename)
+void oskar_MeasurementSet::create(const char* filename,
+        int num_pols, int num_channels, int num_stations)
 {
-    // Close any existing Measurment Set.
+    // Close any existing Measurement Set.
     if (ms_ || msc_ || msmc_)
         close();
 
     // Create the table descriptor and use it to set up a new main table.
     TableDesc desc = MS::requiredTableDesc();
-    MS::addColumnToDesc(desc, MS::DATA); // For visibilities.
+    MS::addColumnToDesc(desc, MS::DATA, 2); // Visibilities (2D: pol, chan).
+    desc.rwColumnDesc(MS::columnName(MS::DATA)).
+            rwKeywordSet().define("UNIT", "Jy");
+    IPosition dataShape(2, num_pols, num_channels);
+    desc.rwColumnDesc(MS::columnName(MS::DATA)).setShape(dataShape);
+    desc.rwColumnDesc(MS::columnName(MS::FLAG)).setShape(dataShape);
+    Vector<String> tsmNames(1);
+    tsmNames[0] = MS::columnName(MS::DATA);
+    desc.defineHypercolumn("TiledData", 3, tsmNames);
+    tsmNames[0] = MS::columnName(MS::FLAG);
+    desc.defineHypercolumn("TiledFlag", 3, tsmNames);
+    tsmNames[0] = MS::columnName(MS::UVW);
+    desc.defineHypercolumn("TiledUVW", 2, tsmNames);
     SetupNewTable newTab(filename, desc, Table::New);
+
+    // Create the default storage managers.
+    IncrementalStMan incrStorageManager("ISMData");
+    newTab.bindAll(incrStorageManager);
+    StandardStMan stdStorageManager("SSMData", 32768, 32768);
+    newTab.bindColumn(MS::columnName(MS::ANTENNA1), stdStorageManager);
+    newTab.bindColumn(MS::columnName(MS::ANTENNA2), stdStorageManager);
+
+    // Create tiled column storage manager for UVW column.
+    IPosition uvwTileShape(2, 3, 2 * num_stations * (num_stations - 1) / 2);
+    TiledColumnStMan uvwStorageManager("TiledUVW", uvwTileShape);
+    newTab.bindColumn(MS::columnName(MS::UVW), uvwStorageManager);
+
+    // Create tiled column storage managers for DATA and FLAG columns.
+    IPosition dataTileShape(3, num_pols, num_channels,
+            2 * num_stations * (num_stations - 1) / 2);
+    TiledColumnStMan dataStorageManager("TiledData", dataTileShape);
+    newTab.bindColumn(MS::columnName(MS::DATA), dataStorageManager);
+    IPosition flagTileShape(3, num_pols, num_channels,
+            16 * num_stations * (num_stations - 1) / 2);
+    TiledColumnStMan flagStorageManager("TiledFlag", flagTileShape);
+    newTab.bindColumn(MS::columnName(MS::FLAG), flagStorageManager);
 
     // Create the MeasurementSet.
     ms_ = new MeasurementSet(newTab);
@@ -473,6 +544,34 @@ void oskar_MeasurementSet::open(const char* filename)
     msmc_ = new MSMainColumns(*ms_);
 }
 
+void oskar_MeasurementSet::setNumRows(int num)
+{
+    if (!ms_) return;
+
+    int old_num_rows = ms_->nrow();
+    int rows_to_add = num - old_num_rows;
+    if (rows_to_add <= 0) return;
+    ms_->addRow(rows_to_add);
+}
+
+void oskar_MeasurementSet::setTimeRange(double start_time, double end_time)
+{
+    if (!msc_) return;
+
+    // Get the old time range.
+    Vector<Double> oldTimeRange(2, 0.0);
+    msc_->observation().timeRange().get(0, oldTimeRange);
+
+    // Compute the new time range.
+    Vector<Double> timeRange(2, 0.0);
+    timeRange[0] = (oldTimeRange[0] <= 0.0) ? start_time : oldTimeRange[0];
+    timeRange[1] = (end_time > oldTimeRange[1]) ? end_time : oldTimeRange[1];
+    double releaseDate = timeRange[1] + 365.25 * 86400.0;
+
+    // Fill observation columns.
+    msc_->observation().timeRange().put(0, timeRange);
+    msc_->observation().releaseDate().put(0, releaseDate);
+}
 
 /*=============================================================================
  * Protected Members
@@ -541,21 +640,4 @@ void oskar_MeasurementSet::setAntennaFeeds(int num_antennas, int num_receptors)
         msc_->feed().receptorAngle().put(row, feedAngle);
         msc_->feed().numReceptors().put(row, num_receptors);
     }
-}
-
-void oskar_MeasurementSet::setTimeRange(double start_time, double end_time)
-{
-    // Get the old time range.
-    Vector<Double> oldTimeRange(2, 0.0);
-    msc_->observation().timeRange().get(0, oldTimeRange);
-
-    // Compute the new time range.
-    Vector<Double> timeRange(2, 0.0);
-    timeRange[0] = (oldTimeRange[0] <= 0.0) ? start_time : oldTimeRange[0];
-    timeRange[1] = (end_time > oldTimeRange[1]) ? end_time : oldTimeRange[1];
-    double releaseDate = timeRange[1] + 365.25 * 86400.0;
-
-    // Fill observation columns.
-    msc_->observation().timeRange().put(0, timeRange);
-    msc_->observation().releaseDate().put(0, releaseDate);
 }

@@ -104,7 +104,7 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
 
     // Create an empty Measurement Set.
     oskar_MeasurementSet ms;
-    ms.create(ms_path);
+    ms.create(ms_path, num_pols, num_channels, num_antennas);
 
     // Add the antenna positions.
     if (oskar_mem_type(x_metres) == OSKAR_DOUBLE)
@@ -138,6 +138,9 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
         }
     }
 
+    // Pre-size the main table.
+    ms.setNumRows(num_times * num_baselines);
+
     // Add visibilities and u,v,w coordinates.
     const void* amp_ = oskar_mem_void_const(amp);
     oskar_Mem* amp_tb_ = oskar_mem_create(precision | OSKAR_COMPLEX, OSKAR_CPU,
@@ -154,23 +157,31 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
         amp_tb = oskar_mem_double2(amp_tb_, status);
         for (int t = 0; t < num_times; ++t)
         {
-            int row = t * num_baselines;
+            int i_in, i_out, row = t * num_baselines;
             double vis_time = t_start_sec + (t * dt_dump);
             oskar_mem_set_value_real(times, vis_time, 0, num_baselines, status);
 
-            for (int b = 0; b < num_baselines; ++b)
+            // Construct the amplitude data for the given time, baseline.
+            if (num_pols == 1)
             {
-                // Construct the amplitude data for the given time, baseline.
-                for (int c = 0; c < num_channels; ++c)
+                for (int b = 0; b < num_baselines; ++b)
                 {
-                    int i_in = num_baselines * (num_times * c + t) + b;
-                    int i_out = num_pols * (num_channels * b + c);
-                    if (num_pols == 1)
+                    for (int c = 0; c < num_channels; ++c)
                     {
+                        i_in = num_baselines * (num_times * c + t) + b;
+                        i_out = num_channels * b + c;
                         amp_tb[i_out] = ((const double2*)amp_)[i_in]; // I
                     }
-                    else
+                }
+            }
+            else
+            {
+                for (int b = 0; b < num_baselines; ++b)
+                {
+                    for (int c = 0; c < num_channels; ++c)
                     {
+                        i_in = num_baselines * (num_times * c + t) + b;
+                        i_out = 4 * (num_channels * b + c);
                         double4c vis_amp = ((const double4c*)amp_)[i_in];
                         amp_tb[i_out + 0] = vis_amp.a; // XX
                         amp_tb[i_out + 1] = vis_amp.b; // XY
@@ -179,7 +190,7 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
                     }
                 }
             }
-            ms.addVisibilities(num_pols, num_channels, num_baselines,
+            ms.putVisibilities(row, num_pols, num_channels, num_baselines,
                     &uu_[row], &vv_[row], &ww_[row], (const double*)amp_tb,
                     baseline_ant_1, baseline_ant_2, dt_dump, dt_dump,
                     oskar_mem_double_const(times, status));
@@ -195,23 +206,31 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
         amp_tb = oskar_mem_float2(amp_tb_, status);
         for (int t = 0; t < num_times; ++t)
         {
-            int row = t * num_baselines;
+            int i_in, i_out, row = t * num_baselines;
             double vis_time = t_start_sec + (t * dt_dump);
             oskar_mem_set_value_real(times, vis_time, 0, num_baselines, status);
 
-            for (int b = 0; b < num_baselines; ++b)
+            // Construct the amplitude data for the given time, baseline.
+            if (num_pols == 1)
             {
-                // Construct the amplitude data for the given time, baseline.
-                for (int c = 0; c < num_channels; ++c)
+                for (int b = 0; b < num_baselines; ++b)
                 {
-                    int i_in = num_baselines * (num_times * c + t) + b;
-                    int i_out = num_pols * (num_channels * b + c);
-                    if (num_pols == 1)
+                    for (int c = 0; c < num_channels; ++c)
                     {
+                        i_in = num_baselines * (num_times * c + t) + b;
+                        i_out = num_channels * b + c;
                         amp_tb[i_out] = ((const float2*)amp_)[i_in]; // I
                     }
-                    else
+                }
+            }
+            else
+            {
+                for (int b = 0; b < num_baselines; ++b)
+                {
+                    for (int c = 0; c < num_channels; ++c)
                     {
+                        i_in = num_baselines * (num_times * c + t) + b;
+                        i_out = 4 * (num_channels * b + c);
                         float4c vis_amp = ((const float4c*)amp_)[i_in];
                         amp_tb[i_out + 0] = vis_amp.a; // XX
                         amp_tb[i_out + 1] = vis_amp.b; // XY
@@ -220,7 +239,7 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
                     }
                 }
             }
-            ms.addVisibilities(num_pols, num_channels, num_baselines,
+            ms.putVisibilities(row, num_pols, num_channels, num_baselines,
                     &uu_[row], &vv_[row], &ww_[row], (const float*)amp_tb,
                     baseline_ant_1, baseline_ant_2, dt_dump, dt_dump,
                     oskar_mem_float_const(times, status));
@@ -230,6 +249,7 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
+    ms.setTimeRange(t_start_sec, t_start_sec + (num_times - 1) * dt_dump);
 
     // Add the settings.
     ms.addSettings(oskar_mem_char_const(oskar_vis_settings_const(vis)),

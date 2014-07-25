@@ -1,3 +1,7 @@
+2014-xx-yy  OSKAR-2.5.1
+
+    * Further improved efficiency of Measurement Set export.
+
 2014-07-22  OSKAR-2.5.0
 
     * Changed settings to use a half-wavelength dipole by default,

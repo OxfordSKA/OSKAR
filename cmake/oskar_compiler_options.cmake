@@ -37,7 +37,6 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/station
     ${PROJECT_SOURCE_DIR}/utility
     ${PROJECT_SOURCE_DIR}/utility/log
-    ${PROJECT_SOURCE_DIR}/widgets
 )
 
 

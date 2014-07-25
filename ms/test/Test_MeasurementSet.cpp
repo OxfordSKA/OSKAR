@@ -36,13 +36,13 @@ TEST(MeasurementSet, test_create_simple)
 {
     // Create the Measurement Set.
     oskar_MeasurementSet ms;
-    ms.create("simple.ms");
 
     // Add some dummy antenna positions.
     double ax[] = {0, 0, 0};
     double ay[] = {0, 0, 0};
     double az[] = {0, 0, 0};
     int na = sizeof(ax) / sizeof(double);
+    ms.create("simple.ms", 1, 1, na);
     ms.addAntennas(na, ax, ay, az);
 
     // Add the Right Ascension & Declination of field centre.
@@ -82,7 +82,7 @@ TEST(MeasurementSet, test_multi_channel)
 
     // Create the Measurement Set.
     oskar_MeasurementSet ms;
-    ms.create(filename);
+    ms.create(filename, n_pol, n_chan, n_ant);
 
     // Add some dummy antenna positions.
     std::vector<double> ax(n_ant), ay(n_ant), az(n_ant);
