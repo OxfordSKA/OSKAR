@@ -260,6 +260,7 @@ static void load_coords(oskar_Mem* lon, oskar_Mem* lat, int* num_points,
     if (*status) return;
 
     /* Set initial size of coordinate arrays. */
+    type = oskar_mem_precision(lon);
     oskar_mem_realloc(lon, 100, status);
     oskar_mem_realloc(lat, 100, status);
 
