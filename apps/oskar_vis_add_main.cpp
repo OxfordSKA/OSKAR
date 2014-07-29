@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,11 +60,14 @@ int main(int argc, char** argv)
     opt.get("-o")->getString(out_path);
     vector<string> in_files = opt.getInputFiles(2);
     bool verbose = opt.isSet("-q") ? false : true;
+    int num_in_files = in_files.size();
+
+    // Print if verbose.
     if (verbose)
     {
-        cout << "Output visibility file = " << out_path << endl;
-        cout << "Combining the " << in_files.size() << " input files:" << endl;
-        for (int i = 0; i < (int)in_files.size(); ++i)
+        cout << "Output visibility file: " << out_path << endl;
+        cout << "Combining the " << num_in_files << " input files:" << endl;
+        for (int i = 0; i < num_in_files; ++i)
         {
             cout << "  [" << setw(2) << i << "] " << in_files[i] << endl;
         }
@@ -85,7 +88,7 @@ int main(int argc, char** argv)
     // accumulated visibility data set...
 
     // Loop over other visibility files and combine.
-    for (int i = 1; i < (int)in_files.size(); ++i)
+    for (int i = 1; i < num_in_files; ++i)
     {
         if (status) break;
 
@@ -122,7 +125,7 @@ int main(int argc, char** argv)
 static void print_error(int status, const char* message)
 {
     cerr << "ERROR[" << status << "] " << message << endl;
-    cerr << "REASON = " << oskar_get_error_string(status) << endl;
+    cerr << "REASON: " << oskar_get_error_string(status) << endl;
 }
 
 

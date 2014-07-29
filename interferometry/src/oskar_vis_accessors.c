@@ -89,7 +89,7 @@ int oskar_vis_num_baselines(const oskar_Vis* vis)
     return vis->num_baselines;
 }
 
-int oskar_vis_num_polarisations(const oskar_Vis* vis)
+int oskar_vis_num_pols(const oskar_Vis* vis)
 {
     return oskar_mem_is_matrix(vis->amplitude) ? 4 : 1;
 }

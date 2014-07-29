@@ -67,7 +67,7 @@ public:
                 "\n"
                 "" + std::string(80, '-') + "\n"
                 "OSKAR (version " + ver + ")\n"
-                "Copyright (C) 2013, The University of Oxford.\n"
+                "Copyright (c) 2014, The University of Oxford.\n"
                 "This program is free and without warranty.\n"
                 "" + std::string(80, '-') + "\n";
         setVersion(ver, false);

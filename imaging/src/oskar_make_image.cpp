@@ -132,7 +132,7 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
     }
 
     /* Get number of polarisations. */
-    int num_vis_pols = oskar_vis_num_polarisations(vis);
+    int num_vis_pols = oskar_vis_num_pols(vis);
     if (im_num_times > num_times || im_num_chan > num_channels ||
             num_pols > num_vis_pols)
     {

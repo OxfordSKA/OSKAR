@@ -96,7 +96,7 @@ int main(int argc, char **argv)
         oskar_log_value(log, 0, width, "No. baselines", "%d",
                 oskar_vis_num_baselines(vis));
         oskar_log_value(log, 0, width, "No. polarisations", "%d",
-                oskar_vis_num_polarisations(vis));
+                oskar_vis_num_pols(vis));
         oskar_log_value(log, 0, width, "Data order", "%s",
                 "{channel, time, baseline, polarisation}");
         oskar_log_value(log, 0, width, "Start frequency (MHz)", "%.6f",

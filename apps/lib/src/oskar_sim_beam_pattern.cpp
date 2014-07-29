@@ -184,7 +184,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
         }
     }
 
-    // Generate load/coordinates at which beam the beam pattern is evaluated.
+    // Generate load/coordinates at which the beam pattern is evaluated.
     int coord_type = 0;
     double lon0 = 0.0, lat0 = 0.0;
     oskar_Mem* x = oskar_mem_create(type, CPU, 0, status);

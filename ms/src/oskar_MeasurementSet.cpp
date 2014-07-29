@@ -55,7 +55,7 @@ static std::vector<std::string> split(const std::string& s, char delim)
     return v;
 }
 
-double current_utc_to_mjd()
+static double current_utc_to_mjd()
 {
     int a, y, m, jdn;
     double day_fraction;
@@ -81,124 +81,73 @@ double current_utc_to_mjd()
 }
 
 /*=============================================================================
- * Constructor & Destructor
+ * Private implementation
  *---------------------------------------------------------------------------*/
 
-oskar_MeasurementSet::oskar_MeasurementSet() : ms_(0), msc_(0), msmc_(0)
+struct oskar_MeasurementSet
 {
-}
+    casa::MeasurementSet* ms;   // Pointer to the Measurement Set.
+    casa::MSColumns* msc;       // Pointer to the sub-tables.
+    casa::MSMainColumns* msmc;  // Pointer to the main columns.
+    int num_pols;
+    int num_channels;
+    int num_stations;
+    int num_receptors;
+    double ref_freq;
+    double phase_centre_ra;
+    double phase_centre_dec;
+    double start_time;
+    double end_time;
 
-oskar_MeasurementSet::~oskar_MeasurementSet()
-{
-    close();
-}
+    oskar_MeasurementSet() : ms(0), msc(0), msmc(0),
+            num_pols(0), num_channels(0), num_stations(0), num_receptors(2),
+            ref_freq(0.0), phase_centre_ra(0.0), phase_centre_dec(0.0),
+            start_time(0.0), end_time(1.0) {}
+    ~oskar_MeasurementSet();
+
+    void add_band(int pol_id, int num_channels, double ref_freq,
+            const Vector<double>& chan_freqs,
+            const Vector<double>& chan_widths);
+    void add_field(double ra_rad, double dec_rad);
+    void add_history(String message, String origin, double time,
+            Vector<String> app_params);
+    void add_pol(int num_pols);
+    void create(const char* filename, double ra_rad, double dec_rad,
+            int num_pols, int num_channels, double ref_freq,
+            double chan_width, int num_stations);
+    void close();
+    void get_time_range();
+    int num_rows() const;
+    void open(const char* filename);
+    void set_antenna_feeds();
+    void set_num_rows(int num);
+    void set_time_range();
+};
 
 /*=============================================================================
- * Public Members
+ * Public interface
  *---------------------------------------------------------------------------*/
 
-void oskar_MeasurementSet::addAntennas(int num_antennas, const double* x,
-        const double* y, const double* z, int num_receptors)
+void oskar_ms_add_log(oskar_MeasurementSet* p, const char* str, size_t size)
 {
-    if (!ms_ || !msc_) return;
-
-    // Add rows to the ANTENNA subtable.
-    int startRow = ms_->antenna().nrow();
-    ms_->antenna().addRow(num_antennas);
-    Vector<Double> pos(3, 0.0);
-    for (int a = 0; a < num_antennas; ++a)
-    {
-        int row = a + startRow;
-        pos(0) = x[a]; pos(1) = y[a]; pos(2) = z[a];
-        msc_->antenna().position().put(row, pos);
-        msc_->antenna().mount().put(row, "ALT-AZ");
-        msc_->antenna().dishDiameter().put(row, 1);
-        msc_->antenna().flagRow().put(row, false);
-    }
-    setAntennaFeeds(num_antennas, num_receptors);
-}
-
-void oskar_MeasurementSet::addAntennas(int num_antennas, const float* x,
-        const float* y, const float* z, int num_receptors)
-{
-    if (!ms_ || !msc_) return;
-
-    // Add rows to the ANTENNA subtable.
-    int startRow = ms_->antenna().nrow();
-    ms_->antenna().addRow(num_antennas);
-    Vector<Double> pos(3, 0.0);
-    for (int a = 0; a < num_antennas; ++a)
-    {
-        int row = a + startRow;
-        pos(0) = x[a]; pos(1) = y[a]; pos(2) = z[a];
-        msc_->antenna().position().put(row, pos);
-        msc_->antenna().mount().put(row, "ALT-AZ");
-        msc_->antenna().dishDiameter().put(row, 1);
-        msc_->antenna().flagRow().put(row, false);
-    }
-    setAntennaFeeds(num_antennas, num_receptors);
-}
-
-void oskar_MeasurementSet::addBand(int polid, int num_channels, double ref_freq,
-        double chan_width)
-{
-    Vector<double> chanWidths(num_channels, chan_width);
-    Vector<double> chanFreqs(num_channels);
-    //double start = refFreq - (nc - 1) * chanWidth / 2.0;
-    for (int c = 0; c < num_channels; ++c)
-    {
-        chanFreqs(c) = ref_freq + c * chan_width;
-    }
-    addBand(polid, num_channels, ref_freq, chanFreqs, chanWidths);
-}
-
-void oskar_MeasurementSet::addField(double ra, double dec, const char* name)
-{
-    if (!ms_ || !msc_) return;
-
-    // Set up the field info.
-    MVDirection radec(Quantity(ra, "rad"), Quantity(dec, "rad"));
-    Vector<MDirection> direction(1);
-    direction(0) = MDirection(radec, MDirection::J2000);
-
-    // Add a row to the FIELD table.
-    int row = ms_->field().nrow();
-    ms_->field().addRow();
-    msc_->field().delayDirMeasCol().put(row, direction);
-    msc_->field().phaseDirMeasCol().put(row, direction);
-    msc_->field().referenceDirMeasCol().put(row, direction);
-    if (name)
-        msc_->field().name().put(row, String(name));
-}
-
-void oskar_MeasurementSet::addLog(const char* str, size_t size)
-{
-    if (!ms_ || !msc_ || !str) return;
+    if (!str) return;
 
     // Construct a string from the char array and split on each newline.
     std::vector<std::string> v = split(std::string(str, size), '\n');
 
     // Add to the HISTORY table.
     int num_lines = v.size();
-    int row = ms_->history().nrow();
-    ms_->history().addRow(num_lines);
     double current_utc = 86400.0 * current_utc_to_mjd();
     for (int i = 0; i < num_lines; ++i)
     {
-        msc_->history().message().put(row + i, String(v[i]));
-        msc_->history().application().put(row + i, "OSKAR " OSKAR_VERSION_STR);
-        msc_->history().priority().put(row + i, "INFO");
-        msc_->history().origin().put(row + i, "LOG");
-        msc_->history().time().put(row + i, current_utc);
-        msc_->history().observationId().put(row + i, -1);
-        msc_->history().appParams().put(row + i, Vector<String>()); // Required!
-        msc_->history().cliCommand().put(row + i, Vector<String>()); // Required!
+        p->add_history(String(v[i]), "LOG", current_utc, Vector<String>());
     }
 }
 
-void oskar_MeasurementSet::addSettings(const char* str, size_t size)
+void oskar_ms_add_settings(oskar_MeasurementSet* p,
+        const char* str, size_t size)
 {
-    if (!ms_ || !msc_ || !str) return;
+    if (!str) return;
 
     // Construct a string from the char array and split on each newline.
     std::vector<std::string> v = split(std::string(str, size), '\n');
@@ -212,235 +161,385 @@ void oskar_MeasurementSet::addSettings(const char* str, size_t size)
     }
 
     // Add to the HISTORY table.
-    int row = ms_->history().nrow();
-    ms_->history().addRow();
-    msc_->history().appParams().put(row, vec);
-    msc_->history().message().put(row, "OSKAR settings file");
-    msc_->history().application().put(row, "OSKAR " OSKAR_VERSION_STR);
-    msc_->history().priority().put(row, "INFO");
-    msc_->history().origin().put(row, "SETTINGS");
-    msc_->history().time().put(row, 86400.0 * current_utc_to_mjd());
-    msc_->history().observationId().put(row, -1);
-    msc_->history().cliCommand().put(row, Vector<String>()); // Required!
+    p->add_history("OSKAR settings file", "SETTINGS",
+            86400.0 * current_utc_to_mjd(), vec);
 }
 
-void oskar_MeasurementSet::addPolarisation(int num_pols)
+void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p, int num_stations,
+        const double* x, const double* y, const double* z)
 {
-    if (!ms_ || !msc_) return;
+    if (!p->ms || !p->msc) return;
+    if (num_stations != p->num_stations) return;
+
+    Vector<Double> pos(3, 0.0);
+    for (int a = 0; a < num_stations; ++a)
+    {
+        pos(0) = x[a]; pos(1) = y[a]; pos(2) = z[a];
+        p->msc->antenna().position().put(a, pos);
+        p->msc->antenna().mount().put(a, "ALT-AZ");
+        p->msc->antenna().dishDiameter().put(a, 1);
+        p->msc->antenna().flagRow().put(a, false);
+    }
+}
+
+void oskar_ms_set_station_coords_f(oskar_MeasurementSet* p, int num_stations,
+        const float* x, const float* y, const float* z)
+{
+    if (!p->ms || !p->msc) return;
+    if (num_stations != p->num_stations) return;
+
+    Vector<Double> pos(3, 0.0);
+    for (int a = 0; a < num_stations; ++a)
+    {
+        pos(0) = x[a]; pos(1) = y[a]; pos(2) = z[a];
+        p->msc->antenna().position().put(a, pos);
+        p->msc->antenna().mount().put(a, "ALT-AZ");
+        p->msc->antenna().dishDiameter().put(a, 1);
+        p->msc->antenna().flagRow().put(a, false);
+    }
+}
+
+void oskar_ms_close(oskar_MeasurementSet* p)
+{
+    delete p; // Calls destructor, which closes everything.
+}
+
+oskar_MeasurementSet* oskar_ms_create(const char* filename, double ra_rad,
+        double dec_rad, int num_pols, int num_channels, double ref_freq,
+        double chan_width, int num_stations)
+{
+    oskar_MeasurementSet* p = new oskar_MeasurementSet;
+    p->create(filename, ra_rad, dec_rad, num_pols,
+            num_channels, ref_freq, chan_width, num_stations);
+    return p;
+}
+
+int oskar_ms_num_pols(const oskar_MeasurementSet* p)
+{
+    return p->num_pols;
+}
+
+int oskar_ms_num_channels(const oskar_MeasurementSet* p)
+{
+    return p->num_channels;
+}
+
+int oskar_ms_num_rows(const oskar_MeasurementSet* p)
+{
+    return p->num_rows();
+}
+
+int oskar_ms_num_stations(const oskar_MeasurementSet* p)
+{
+    return p->num_stations;
+}
+
+oskar_MeasurementSet* oskar_ms_open(const char* filename)
+{
+    oskar_MeasurementSet* p = new oskar_MeasurementSet;
+    p->open(filename);
+    return p;
+}
+
+double oskar_ms_phase_centre_ra_rad(const oskar_MeasurementSet* p)
+{
+    return p->phase_centre_ra;
+}
+
+double oskar_ms_phase_centre_dec_rad(const oskar_MeasurementSet* p)
+{
+    return p->phase_centre_dec;
+}
+
+double oskar_ms_ref_freq_hz(const oskar_MeasurementSet* p)
+{
+    return p->ref_freq;
+}
+
+void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p, int start_row,
+        int num_baselines, const double* u, const double* v, const double* w,
+        const double* vis, const int* ant1, const int* ant2,
+        double exposure, double interval, double time)
+{
+    MSMainColumns* msmc = p->msmc;
+    if (!msmc) return;
+
+    // Allocate storage for a (u,v,w) coordinate,
+    // a visibility matrix, a visibility weight, and a flag matrix.
+    int n_pols = p->num_pols;
+    int n_channels = p->num_channels;
+    Vector<Double> uvw(3);
+    Matrix<Complex> vis_data(n_pols, n_channels);
+    Matrix<Bool> flag(n_pols, n_channels, false);
+    Vector<Float> weight(n_pols, 1.0);
+    Vector<Float> sigma(n_pols, 1.0);
+
+    // Get references to columns.
+    ArrayColumn<Double>& col_uvw = msmc->uvw();
+    ArrayColumn<Complex>& col_data = msmc->data();
+    ScalarColumn<Int>& col_antenna1 = msmc->antenna1();
+    ScalarColumn<Int>& col_antenna2 = msmc->antenna2();
+    ArrayColumn<Bool>& col_flag = msmc->flag();
+    ArrayColumn<Float>& col_weight = msmc->weight();
+    ArrayColumn<Float>& col_sigma = msmc->sigma();
+    ScalarColumn<Double>& col_exposure = msmc->exposure();
+    ScalarColumn<Double>& col_interval = msmc->interval();
+    ScalarColumn<Double>& col_time = msmc->time();
+    ScalarColumn<Double>& col_timeCentroid = msmc->timeCentroid();
+
+    // Loop over rows / visibilities.
+    for (int r = 0; r < num_baselines; ++r)
+    {
+        int row = r + start_row;
+
+        // Get a pointer to the start of the visibility matrix for this row.
+        const double* vis_row = vis + (2 * n_pols * n_channels) * r;
+
+        // Fill the visibility matrix (polarisation and channel data).
+        for (int c = 0; c < n_channels; ++c)
+        {
+            for (int p = 0; p < n_pols; ++p)
+            {
+                int b = 2 * (p + c * n_pols);
+                vis_data(p, c) = Complex(vis_row[b], vis_row[b + 1]);
+            }
+        }
+
+        // Write the data to the Measurement Set.
+        uvw(0) = u[r]; uvw(1) = v[r]; uvw(2) = w[r];
+        col_uvw.put(row, uvw);
+        col_antenna1.put(row, ant1[r]);
+        col_antenna2.put(row, ant2[r]);
+        col_data.put(row, vis_data);
+        col_flag.put(row, flag);
+        col_weight.put(row, weight);
+        col_sigma.put(row, sigma);
+        col_exposure.put(row, exposure);
+        col_interval.put(row, interval);
+        col_time.put(row, time);
+        col_timeCentroid.put(row, time);
+    }
+
+    // Check/update time range.
+    if (time < p->start_time) p->start_time = time;
+    if (time > p->end_time) p->end_time = time;
+}
+
+void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p, int start_row,
+        int num_baselines, const float* u, const float* v, const float* w,
+        const float* vis, const int* ant1, const int* ant2,
+        double exposure, double interval, double time)
+{
+    MSMainColumns* msmc = p->msmc;
+    if (!msmc) return;
+
+    // Allocate storage for a (u,v,w) coordinate,
+    // a visibility matrix, a visibility weight, and a flag matrix.
+    int n_pols = p->num_pols;
+    int n_channels = p->num_channels;
+    Vector<Double> uvw(3);
+    Matrix<Complex> vis_data(n_pols, n_channels);
+    Matrix<Bool> flag(n_pols, n_channels, false);
+    Vector<Float> weight(n_pols, 1.0);
+    Vector<Float> sigma(n_pols, 1.0);
+
+    // Get references to columns.
+    ArrayColumn<Double>& col_uvw = msmc->uvw();
+    ArrayColumn<Complex>& col_data = msmc->data();
+    ScalarColumn<Int>& col_antenna1 = msmc->antenna1();
+    ScalarColumn<Int>& col_antenna2 = msmc->antenna2();
+    ArrayColumn<Bool>& col_flag = msmc->flag();
+    ArrayColumn<Float>& col_weight = msmc->weight();
+    ArrayColumn<Float>& col_sigma = msmc->sigma();
+    ScalarColumn<Double>& col_exposure = msmc->exposure();
+    ScalarColumn<Double>& col_interval = msmc->interval();
+    ScalarColumn<Double>& col_time = msmc->time();
+    ScalarColumn<Double>& col_timeCentroid = msmc->timeCentroid();
+
+    // Loop over rows / visibilities.
+    for (int r = 0; r < num_baselines; ++r)
+    {
+        int row = r + start_row;
+
+        // Get a pointer to the start of the visibility matrix for this row.
+        const float* vis_row = vis + (2 * n_pols * n_channels) * r;
+
+        // Fill the visibility matrix (polarisation and channel data).
+        for (int c = 0; c < n_channels; ++c)
+        {
+            for (int p = 0; p < n_pols; ++p)
+            {
+                int b = 2 * (p + c * n_pols);
+                vis_data(p, c) = Complex(vis_row[b], vis_row[b + 1]);
+            }
+        }
+
+        // Write the data to the Measurement Set.
+        uvw(0) = u[r]; uvw(1) = v[r]; uvw(2) = w[r];
+        col_uvw.put(row, uvw);
+        col_antenna1.put(row, ant1[r]);
+        col_antenna2.put(row, ant2[r]);
+        col_data.put(row, vis_data);
+        col_flag.put(row, flag);
+        col_weight.put(row, weight);
+        col_sigma.put(row, sigma);
+        col_exposure.put(row, exposure);
+        col_interval.put(row, interval);
+        col_time.put(row, time);
+        col_timeCentroid.put(row, time);
+    }
+
+    // Check/update time range.
+    if (time < p->start_time) p->start_time = time;
+    if (time > p->end_time) p->end_time = time;
+}
+
+void oskar_ms_set_num_rows(oskar_MeasurementSet* p, int num)
+{
+    p->set_num_rows(num);
+}
+
+
+/*=============================================================================
+ * Private
+ *---------------------------------------------------------------------------*/
+
+oskar_MeasurementSet::~oskar_MeasurementSet()
+{
+    close();
+}
+
+void oskar_MeasurementSet::add_band(int pol_id, int num_channels,
+        double ref_freq, const Vector<double>& chan_freqs,
+        const Vector<double>& chan_widths)
+{
+    if (!ms || !msc) return;
+
+    // Add a row to the DATA_DESCRIPTION subtable.
+    int row = ms->dataDescription().nrow();
+    ms->dataDescription().addRow();
+    msc->dataDescription().spectralWindowId().put(row, row);
+    msc->dataDescription().polarizationId().put(row, pol_id);
+    msc->dataDescription().flagRow().put(row, false);
+
+    // Get total bandwidth from maximum and minimum.
+    Vector<double> startFreqs = chan_freqs - chan_widths / 2.0;
+    Vector<double> endFreqs = chan_freqs + chan_widths / 2.0;
+    double totalBandwidth = max(endFreqs) - min(startFreqs);
+
+    // Add a row to the SPECTRAL_WINDOW sub-table.
+    ms->spectralWindow().addRow();
+    MSSpWindowColumns& s = msc->spectralWindow();
+    s.measFreqRef().put(row, MFrequency::TOPO);
+    s.chanFreq().put(row, chan_freqs);
+    s.refFrequency().put(row, ref_freq);
+    s.chanWidth().put(row, chan_widths);
+    s.effectiveBW().put(row, chan_widths);
+    s.resolution().put(row, chan_widths);
+    s.flagRow().put(row, false);
+    s.freqGroup().put(row, 0);
+    s.freqGroupName().put(row, "");
+    s.ifConvChain().put(row, 0);
+    s.name().put(row, "");
+    s.netSideband().put(row, 0);
+    s.numChan().put(row, num_channels);
+    s.totalBandwidth().put(row, totalBandwidth);
+}
+
+void oskar_MeasurementSet::add_field(double ra_rad, double dec_rad)
+{
+    if (!ms || !msc) return;
+
+    // Set up the field info.
+    MVDirection radec(Quantity(ra_rad, "rad"), Quantity(dec_rad, "rad"));
+    Vector<MDirection> direction(1);
+    direction(0) = MDirection(radec, MDirection::J2000);
+
+    // Add a row to the FIELD table.
+    int row = ms->field().nrow();
+    ms->field().addRow();
+    msc->field().delayDirMeasCol().put(row, direction);
+    msc->field().phaseDirMeasCol().put(row, direction);
+    msc->field().referenceDirMeasCol().put(row, direction);
+    phase_centre_ra = ra_rad;
+    phase_centre_dec = dec_rad;
+}
+
+void oskar_MeasurementSet::add_history(String message, String origin,
+        double time, Vector<String> app_params)
+{
+    if (!ms || !msc) return;
+
+    int row = ms->history().nrow();
+    ms->history().addRow(1);
+    MSHistoryColumns& c = msc->history();
+    c.message().put(row, message);
+    c.application().put(row, "OSKAR " OSKAR_VERSION_STR);
+    c.priority().put(row, "INFO");
+    c.origin().put(row, origin);
+    c.time().put(row, time);
+    c.observationId().put(row, -1);
+    c.appParams().put(row, app_params);
+    c.cliCommand().put(row, Vector<String>()); // Required!
+}
+
+void oskar_MeasurementSet::add_pol(int num_pols)
+{
+    if (!ms || !msc) return;
 
     // Set up the correlation type, based on number of polarisations.
-    Vector<Int> corrType(num_pols);
-    corrType(0) = Stokes::XX; // Can't be Stokes I if num_pols = 1! (Throws exception.)
+    Vector<Int> corr_type(num_pols);
+    corr_type(0) = Stokes::XX; // Can't be Stokes I if num_pols = 1! (Throws exception.)
     if (num_pols == 2)
     {
-        corrType(1) = Stokes::YY;
+        corr_type(1) = Stokes::YY;
     }
     else if (num_pols == 4)
     {
-        corrType(1) = Stokes::XY;
-        corrType(2) = Stokes::YX;
-        corrType(3) = Stokes::YY;
+        corr_type(1) = Stokes::XY;
+        corr_type(2) = Stokes::YX;
+        corr_type(3) = Stokes::YY;
     }
 
     // Set up the correlation product, based on number of polarisations.
-    Matrix<Int> corrProduct(2, num_pols);
+    Matrix<Int> corr_product(2, num_pols);
     for (int i = 0; i < num_pols; ++i)
     {
-        corrProduct(0, i) = Stokes::receptor1(Stokes::type(corrType(i)));
-        corrProduct(1, i) = Stokes::receptor2(Stokes::type(corrType(i)));
+        corr_product(0, i) = Stokes::receptor1(Stokes::type(corr_type(i)));
+        corr_product(1, i) = Stokes::receptor2(Stokes::type(corr_type(i)));
     }
 
     // Create a new row, and fill the columns.
-    int row = ms_->polarization().nrow();
-    ms_->polarization().addRow();
-    msc_->polarization().corrType().put(row, corrType);
-    msc_->polarization().corrProduct().put(row, corrProduct);
-    msc_->polarization().numCorr().put(row, num_pols);
-}
-
-void oskar_MeasurementSet::addVisibilities(int num_pols, int num_channels,
-        int num_rows, const double* u, const double* v, const double* w,
-        const double* vis, const int* ant1, const int* ant2,
-        double exposure, double interval, const double* times)
-{
-    if (!ms_ || !msc_ || !msmc_) return;
-
-    // Add enough rows to the main table.
-    int start_row = ms_->nrow();
-    ms_->addRow(num_rows);
-
-    putVisibilities(start_row, num_pols, num_channels, num_rows,
-            u, v, w, vis, ant1, ant2, exposure, interval, times);
-    setTimeRange(times[0], times[num_rows - 1]);
-}
-
-void oskar_MeasurementSet::putVisibilities(int start_row, int num_pols,
-        int num_channels, int num_rows, const double* u, const double* v,
-        const double* w, const double* vis, const int* ant1, const int* ant2,
-        double exposure, double interval, const double* times)
-{
-    if (!ms_ || !msc_ || !msmc_) return;
-
-    // Allocate storage for a (u,v,w) coordinate,
-    // a visibility matrix, a visibility weight, and a flag matrix.
-    Vector<Double> uvw(3);
-    Matrix<Complex> vis_data(num_pols, num_channels);
-    Matrix<Bool> flag(num_pols, num_channels, false);
-    Vector<Float> weight(num_pols, 1.0);
-    Vector<Float> sigma(num_pols, 1.0);
-
-    // Get references to columns.
-    ArrayColumn<Double>& col_uvw = msmc_->uvw();
-    ArrayColumn<Complex>& col_data = msmc_->data();
-    ScalarColumn<Int>& col_antenna1 = msmc_->antenna1();
-    ScalarColumn<Int>& col_antenna2 = msmc_->antenna2();
-    ArrayColumn<Bool>& col_flag = msmc_->flag();
-    ArrayColumn<Float>& col_weight = msmc_->weight();
-    ArrayColumn<Float>& col_sigma = msmc_->sigma();
-    ScalarColumn<Double>& col_exposure = msmc_->exposure();
-    ScalarColumn<Double>& col_interval = msmc_->interval();
-    ScalarColumn<Double>& col_time = msmc_->time();
-    ScalarColumn<Double>& col_timeCentroid = msmc_->timeCentroid();
-
-    // Loop over rows / visibilities.
-    for (int r = 0; r < num_rows; ++r)
-    {
-        int row = r + start_row;
-
-        // Get a pointer to the start of the visibility matrix for this row.
-        const double* vis_row = vis + (2 * num_pols * num_channels) * r;
-
-        // Fill the visibility matrix (polarisation and channel data).
-        for (int c = 0; c < num_channels; ++c)
-        {
-            for (int p = 0; p < num_pols; ++p)
-            {
-                int b = 2 * (p + c * num_pols);
-                vis_data(p, c) = Complex(vis_row[b], vis_row[b + 1]);
-            }
-        }
-
-        // Write the data to the Measurement Set.
-        uvw(0) = u[r]; uvw(1) = v[r]; uvw(2) = w[r];
-        col_uvw.put(row, uvw);
-        col_antenna1.put(row, ant1[r]);
-        col_antenna2.put(row, ant2[r]);
-        col_data.put(row, vis_data);
-        col_flag.put(row, flag);
-        col_weight.put(row, weight);
-        col_sigma.put(row, sigma);
-        col_exposure.put(row, exposure);
-        col_interval.put(row, interval);
-        col_time.put(row, times[r]);
-        col_timeCentroid.put(row, times[r]);
-    }
-}
-
-void oskar_MeasurementSet::addVisibilities(int num_pols, int num_channels,
-        int num_rows, const float* u, const float* v, const float* w,
-        const float* vis, const int* ant1, const int* ant2,
-        double exposure, double interval, const float* times)
-{
-    if (!ms_ || !msc_ || !msmc_) return;
-
-    // Add enough rows to the main table.
-    int start_row = ms_->nrow();
-    ms_->addRow(num_rows);
-
-    putVisibilities(start_row, num_pols, num_channels, num_rows,
-            u, v, w, vis, ant1, ant2, exposure, interval, times);
-    setTimeRange(times[0], times[num_rows - 1]);
-}
-
-void oskar_MeasurementSet::putVisibilities(int start_row, int num_pols,
-        int num_channels, int num_rows, const float* u, const float* v,
-        const float* w, const float* vis, const int* ant1, const int* ant2,
-        double exposure, double interval, const float* times)
-{
-    if (!ms_ || !msc_ || !msmc_) return;
-
-    // Allocate storage for a (u,v,w) coordinate,
-    // a visibility matrix, a visibility weight, and a flag matrix.
-    Vector<Double> uvw(3);
-    Matrix<Complex> vis_data(num_pols, num_channels);
-    Matrix<Bool> flag(num_pols, num_channels, false);
-    Vector<Float> weight(num_pols, 1.0);
-    Vector<Float> sigma(num_pols, 1.0);
-
-    // Get references to columns.
-    ArrayColumn<Double>& col_uvw = msmc_->uvw();
-    ArrayColumn<Complex>& col_data = msmc_->data();
-    ScalarColumn<Int>& col_antenna1 = msmc_->antenna1();
-    ScalarColumn<Int>& col_antenna2 = msmc_->antenna2();
-    ArrayColumn<Bool>& col_flag = msmc_->flag();
-    ArrayColumn<Float>& col_weight = msmc_->weight();
-    ArrayColumn<Float>& col_sigma = msmc_->sigma();
-    ScalarColumn<Double>& col_exposure = msmc_->exposure();
-    ScalarColumn<Double>& col_interval = msmc_->interval();
-    ScalarColumn<Double>& col_time = msmc_->time();
-    ScalarColumn<Double>& col_timeCentroid = msmc_->timeCentroid();
-
-    // Loop over rows / visibilities.
-    for (int r = 0; r < num_rows; ++r)
-    {
-        int row = r + start_row;
-
-        // Get a pointer to the start of the visibility matrix for this row.
-        const float* vis_row = vis + (2 * num_pols * num_channels) * r;
-
-        // Fill the visibility matrix (polarisation and channel data).
-        for (int c = 0; c < num_channels; ++c)
-        {
-            for (int p = 0; p < num_pols; ++p)
-            {
-                int b = 2 * (p + c * num_pols);
-                vis_data(p, c) = Complex(vis_row[b], vis_row[b + 1]);
-            }
-        }
-
-        // Write the data to the Measurement Set.
-        uvw(0) = u[r]; uvw(1) = v[r]; uvw(2) = w[r];
-        col_uvw.put(row, uvw);
-        col_antenna1.put(row, ant1[r]);
-        col_antenna2.put(row, ant2[r]);
-        col_data.put(row, vis_data);
-        col_flag.put(row, flag);
-        col_weight.put(row, weight);
-        col_sigma.put(row, sigma);
-        col_exposure.put(row, exposure);
-        col_interval.put(row, interval);
-        col_time.put(row, times[r]);
-        col_timeCentroid.put(row, times[r]);
-    }
+    int row = ms->polarization().nrow();
+    ms->polarization().addRow();
+    msc->polarization().corrType().put(row, corr_type);
+    msc->polarization().corrProduct().put(row, corr_product);
+    msc->polarization().numCorr().put(row, num_pols);
 }
 
 void oskar_MeasurementSet::close()
 {
-    // Delete object references.
-    if (msmc_)
-    {
-        delete msmc_;
-        msmc_ = 0;
-    }
-    if (msc_)
-    {
-        delete msc_;
-        msc_ = 0;
-    }
-    if (ms_)
-    {
-        delete ms_;
-        ms_ = 0;
-    }
+    set_time_range();
+    if (msmc)
+        delete msmc;
+    if (msc)
+        delete msc;
+    if (ms)
+        delete ms;
+    ms = 0;
+    msc = 0;
+    msmc = 0;
+    num_pols = 0;
+    num_channels = 0;
+    num_stations = 0;
+    phase_centre_ra = 0.0;
+    phase_centre_dec = 0.0;
 }
 
 void oskar_MeasurementSet::create(const char* filename,
-        int num_pols, int num_channels, int num_stations)
+        double ra_rad, double dec_rad, int num_pols, int num_channels,
+        double ref_freq, double chan_width, int num_stations)
 {
-    // Close any existing Measurement Set.
-    if (ms_ || msc_ || msmc_)
-        close();
-
     // Create the table descriptor and use it to set up a new main table.
     TableDesc desc = MS::requiredTableDesc();
     MS::addColumnToDesc(desc, MS::DATA, 2); // Visibilities (2D: pol, chan).
@@ -481,33 +580,49 @@ void oskar_MeasurementSet::create(const char* filename,
     newTab.bindColumn(MS::columnName(MS::FLAG), flagStorageManager);
 
     // Create the MeasurementSet.
-    ms_ = new MeasurementSet(newTab);
+    ms = new MeasurementSet(newTab, TableLock(TableLock::PermanentLocking));
 
     // Create SOURCE sub-table.
     TableDesc descSource = MSSource::requiredTableDesc();
     MSSource::addColumnToDesc(descSource, MSSource::REST_FREQUENCY);
     MSSource::addColumnToDesc(descSource, MSSource::POSITION);
-    SetupNewTable sourceSetup(ms_->sourceTableName(), descSource, Table::New);
-    ms_->rwKeywordSet().defineTable(MS::keywordName(MS::SOURCE),
+    SetupNewTable sourceSetup(ms->sourceTableName(), descSource, Table::New);
+    ms->rwKeywordSet().defineTable(MS::keywordName(MS::SOURCE),
                    Table(sourceSetup));
 
     // Create all required default subtables.
-    ms_->createDefaultSubtables(Table::New);
+    ms->createDefaultSubtables(Table::New);
 
     // Create the MSMainColumns and MSColumns objects for accessing data
     // in the main table and subtables.
-    msc_ = new MSColumns(*ms_);
-    msmc_ = new MSMainColumns(*ms_);
+    msc = new MSColumns(*ms);
+    msmc = new MSMainColumns(*ms);
 
     // Add a row to the OBSERVATION subtable.
-    ms_->observation().addRow();
+    ms->observation().addRow();
     Vector<String> corrSchedule(1);
     Vector<Double> timeRange(2, 0.0);
-    msc_->observation().schedule().put(0, corrSchedule);
-    msc_->observation().project().put(0, "");
-    msc_->observation().telescopeName().put(0, "OSKAR " OSKAR_VERSION_STR);
-    msc_->observation().timeRange().put(0, timeRange);
-    setTimeRange(0.0, 1.0);
+    msc->observation().schedule().put(0, corrSchedule);
+    msc->observation().project().put(0, "");
+    msc->observation().telescopeName().put(0, "OSKAR " OSKAR_VERSION_STR);
+    msc->observation().timeRange().put(0, timeRange);
+    set_time_range();
+
+    // Add polarisation ID.
+    add_pol(num_pols);
+
+    // Add field data.
+    add_field(ra_rad, dec_rad);
+
+    // Set up the band.
+    Vector<double> chan_widths(num_channels, chan_width);
+    Vector<double> chan_freqs(num_channels);
+    //double start = ref_freq - (num_channels - 1) * chan_width / 2.0;
+    for (int c = 0; c < num_channels; ++c)
+    {
+        chan_freqs(c) = ref_freq + c * chan_width;
+    }
+    add_band(0, num_channels, ref_freq, chan_freqs, chan_widths);
 
     // Get a string containing the current system time.
     char time_str[80];
@@ -517,107 +632,74 @@ void oskar_MeasurementSet::create(const char* filename,
             std::localtime(&unix_time));
 
     // Add a row to the HISTORY subtable.
-    ms_->history().addRow();
-    msc_->history().message().put(0, String("Measurement Set created at ") +
-            String(time_str));
-    msc_->history().application().put(0, "OSKAR " OSKAR_VERSION_STR);
-    msc_->history().origin().put(0, "OSKAR " OSKAR_VERSION_STR);
-    msc_->history().priority().put(0, "INFO");
-    msc_->history().time().put(0, 86400.0 * current_utc_to_mjd());
-    msc_->history().observationId().put(0, -1);
-    msc_->history().appParams().put(0, Vector<String>()); // Required!
-    msc_->history().cliCommand().put(0, Vector<String>()); // Required!
+    add_history(String("Measurement Set created at ") + String(time_str),
+            "OSKAR " OSKAR_VERSION_STR, 86400.0 * current_utc_to_mjd(),
+            Vector<String>());
+
+    // Set the private data.
+    this->num_pols = num_pols;
+    this->num_channels = num_channels;
+    this->num_stations = num_stations;
+    this->num_receptors = 2; // By default.
+    this->ref_freq = ref_freq;
+
+    // Size the ANTENNA and FEED tables.
+    ms->antenna().addRow(num_stations);
+    ms->feed().addRow(num_stations);
+    set_antenna_feeds();
+}
+
+int oskar_MeasurementSet::num_rows() const
+{
+    if (!ms) return 0;
+    return ms->nrow();
 }
 
 void oskar_MeasurementSet::open(const char* filename)
 {
-    // Close any existing Measurment Set.
-    if (ms_ || msc_ || msmc_)
-        close();
-
-    // Create the MeasurementSet.
-    ms_ = new MeasurementSet(filename, Table::Update);
+    // Create the MeasurementSet. Storage managers are recreated as needed.
+    ms = new MeasurementSet(filename, TableLock(TableLock::PermanentLocking),
+            Table::Update);
 
     // Create the MSMainColumns and MSColumns objects for accessing data
     // in the main table and subtables.
-    msc_ = new MSColumns(*ms_);
-    msmc_ = new MSMainColumns(*ms_);
+    msc = new MSColumns(*ms);
+    msmc = new MSMainColumns(*ms);
+
+    // Get the data dimensions.
+    num_pols = 0;
+    num_channels = 0;
+    if (ms->polarization().nrow() > 0)
+        num_pols = msc->polarization().numCorr().get(0);
+    if (ms->spectralWindow().nrow() > 0)
+    {
+        num_channels = msc->spectralWindow().numChan().get(0);
+        ref_freq = msc->spectralWindow().refFrequency().get(0);
+    }
+    num_stations = ms->antenna().nrow();
+
+    // Get the phase centre.
+    phase_centre_ra = 0.0;
+    phase_centre_dec = 0.0;
+    if (ms->field().nrow() > 0)
+    {
+        Vector<MDirection> dir;
+        msc->field().phaseDirMeasCol().get(0, dir, true);
+        if (dir.size() > 0)
+        {
+            Vector<Double> v = dir(0).getAngle().getValue();
+            phase_centre_ra = v(0);
+            phase_centre_dec = v(1);
+        }
+    }
+
+    // Get the time range.
+    get_time_range();
 }
 
-void oskar_MeasurementSet::setNumRows(int num)
+void oskar_MeasurementSet::set_antenna_feeds()
 {
-    if (!ms_) return;
-
-    int old_num_rows = ms_->nrow();
-    int rows_to_add = num - old_num_rows;
-    if (rows_to_add <= 0) return;
-    ms_->addRow(rows_to_add);
-}
-
-void oskar_MeasurementSet::setTimeRange(double start_time, double end_time)
-{
-    if (!msc_) return;
-
-    // Get the old time range.
-    Vector<Double> oldTimeRange(2, 0.0);
-    msc_->observation().timeRange().get(0, oldTimeRange);
-
-    // Compute the new time range.
-    Vector<Double> timeRange(2, 0.0);
-    timeRange[0] = (oldTimeRange[0] <= 0.0) ? start_time : oldTimeRange[0];
-    timeRange[1] = (end_time > oldTimeRange[1]) ? end_time : oldTimeRange[1];
-    double releaseDate = timeRange[1] + 365.25 * 86400.0;
-
-    // Fill observation columns.
-    msc_->observation().timeRange().put(0, timeRange);
-    msc_->observation().releaseDate().put(0, releaseDate);
-}
-
-/*=============================================================================
- * Protected Members
- *---------------------------------------------------------------------------*/
-
-void oskar_MeasurementSet::addBand(int polid, int num_channels,
-        double refFrequency, const Vector<double>& chanFreqs,
-        const Vector<double>& chanWidths)
-{
-    if (!ms_ || !msc_) return;
-
-    // Add a row to the DATA_DESCRIPTION subtable.
-    int row = ms_->dataDescription().nrow();
-    ms_->dataDescription().addRow();
-    msc_->dataDescription().spectralWindowId().put(row, row);
-    msc_->dataDescription().polarizationId().put(row, polid);
-    msc_->dataDescription().flagRow().put(row, false);
-    ms_->dataDescription().flush();
-
-    // Get total bandwidth from maximum and minimum.
-    Vector<double> startFreqs = chanFreqs - chanWidths / 2.0;
-    Vector<double> endFreqs = chanFreqs + chanWidths / 2.0;
-    double totalBandwidth = max(endFreqs) - min(startFreqs);
-
-    // Add a row to the SPECTRAL_WINDOW sub-table.
-    ms_->spectralWindow().addRow();
-    msc_->spectralWindow().measFreqRef().put(row, MFrequency::TOPO);
-    msc_->spectralWindow().chanFreq().put(row, chanFreqs);
-    msc_->spectralWindow().refFrequency().put(row, refFrequency);
-    msc_->spectralWindow().chanWidth().put(row, chanWidths);
-    msc_->spectralWindow().effectiveBW().put(row, chanWidths);
-    msc_->spectralWindow().resolution().put(row, chanWidths);
-    msc_->spectralWindow().flagRow().put(row, false);
-    msc_->spectralWindow().freqGroup().put(row, 0);
-    msc_->spectralWindow().freqGroupName().put(row, "");
-    msc_->spectralWindow().ifConvChain().put(row, 0);
-    msc_->spectralWindow().name().put(row, "");
-    msc_->spectralWindow().netSideband().put(row, 0);
-    msc_->spectralWindow().numChan().put(row, num_channels);
-    msc_->spectralWindow().totalBandwidth().put(row, totalBandwidth);
-    ms_->spectralWindow().flush();
-}
-
-void oskar_MeasurementSet::setAntennaFeeds(int num_antennas, int num_receptors)
-{
-    if (!ms_ || !msc_) return;
+    if (!ms || !msc) return;
 
     // Determine constants for the FEED subtable.
     Matrix<Double> feedOffset(2, num_receptors, 0.0);
@@ -628,16 +710,52 @@ void oskar_MeasurementSet::setAntennaFeeds(int num_antennas, int num_receptors)
     Vector<Double> feedAngle(num_receptors, 0.0);
 
     // Fill the FEED subtable (required).
-    int startRow = ms_->feed().nrow();
-    ms_->feed().addRow(num_antennas);
-    for (int a = 0; a < num_antennas; ++a)
+    for (int a = 0; a < num_stations; ++a)
     {
-        int row = a + startRow;
-        msc_->feed().antennaId().put(row, a);
-        msc_->feed().beamOffset().put(row, feedOffset);
-        msc_->feed().polarizationType().put(row, feedType);
-        msc_->feed().polResponse().put(row, feedResponse);
-        msc_->feed().receptorAngle().put(row, feedAngle);
-        msc_->feed().numReceptors().put(row, num_receptors);
+        msc->feed().antennaId().put(a, a);
+        msc->feed().beamOffset().put(a, feedOffset);
+        msc->feed().polarizationType().put(a, feedType);
+        msc->feed().polResponse().put(a, feedResponse);
+        msc->feed().receptorAngle().put(a, feedAngle);
+        msc->feed().numReceptors().put(a, num_receptors);
     }
+}
+
+void oskar_MeasurementSet::set_num_rows(int num)
+{
+    if (!ms) return;
+
+    int old_num_rows = num_rows();
+    int rows_to_add = num - old_num_rows;
+    if (rows_to_add <= 0) return;
+    ms->addRow(rows_to_add);
+}
+
+void oskar_MeasurementSet::get_time_range()
+{
+    if (!msc) return;
+    Vector<Double> range(2, 0.0);
+    if (msc->observation().nrow() > 0)
+        msc->observation().timeRange().get(0, range);
+    start_time = range[0];
+    end_time = range[1];
+}
+
+void oskar_MeasurementSet::set_time_range()
+{
+    if (!msc) return;
+
+    // Get the old time range.
+    Vector<Double> old_range(2, 0.0);
+    msc->observation().timeRange().get(0, old_range);
+
+    // Compute the new time range.
+    Vector<Double> range(2, 0.0);
+    range[0] = (old_range[0] <= 0.0) ? start_time : old_range[0];
+    range[1] = (end_time > old_range[1]) ? end_time : old_range[1];
+    double release_date = range[1] + 365.25 * 86400.0;
+
+    // Fill observation columns.
+    msc->observation().timeRange().put(0, range);
+    msc->observation().releaseDate().put(0, release_date);
 }

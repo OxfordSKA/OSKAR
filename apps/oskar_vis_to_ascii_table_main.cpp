@@ -109,7 +109,7 @@ int main(int argc, char** argv)
     int num_chan = oskar_vis_num_channels(vis);
     int num_times = oskar_vis_num_times(vis);
     int num_baselines = oskar_vis_num_baselines(vis);
-    int num_pol = oskar_vis_num_polarisations(vis);
+    int num_pol = oskar_vis_num_pols(vis);
     int num_stations = oskar_vis_num_stations(vis);
     int total_vis = num_chan * num_times * num_baselines * num_pol;
     double freq_start_hz = oskar_vis_freq_start_hz(vis);

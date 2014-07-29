@@ -38,7 +38,7 @@
  * library. For example, in OSKAR version 2.1.3 this would expand to
  * 0x020103.
  */
-#define OSKAR_VERSION 0x020501
+#define OSKAR_VERSION 0x020600
 
 /**
  * @brief Macro used to return the version of OSKAR as a text string.
@@ -47,7 +47,7 @@
  * This macro expands to a string that specifies the OSKAR version number
  * (for example, "2.1.3").
  */
-#define OSKAR_VERSION_STR "2.5.1-trunk"
+#define OSKAR_VERSION_STR "2.6.0-trunk"
 
 /**
  * @brief
@@ -114,7 +114,8 @@ enum {
     /* Indicates that spline evaluation failed. */
     OSKAR_ERR_SPLINE_EVAL_FAIL         = -16,
 
-    /* NOTE -17 missing: moved to 600 */
+    /* Indicates an inconsistent phase centre. */
+    OSKAR_ERR_PHASE_CENTRE_MISMATCH    = -17,
 
     /* Indicates that there are not enough CUDA devices available. */
     OSKAR_ERR_CUDA_DEVICES             = -18,
@@ -216,6 +217,9 @@ enum {
 
     /* Indicates a badly formed global sky model file. */
     OSKAR_ERR_BAD_SKY_FILE             = -911,
+
+    /* Indicates inconsistent reference frequencies. */
+    OSKAR_ERR_REF_FREQ_MISMATCH        = -920,
 
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN                  = -1000,

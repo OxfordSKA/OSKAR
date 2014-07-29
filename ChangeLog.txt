@@ -1,6 +1,11 @@
-2014-xx-yy  OSKAR-2.5.1
+2014-xx-yy  OSKAR-2.6.0
 
-    * Further improved efficiency of Measurement Set export.
+    * Further improved efficiency of Measurement Set export, using appropriate
+      storage managers. This has the additional benefit of making the CASA
+      imager faster.
+
+    * Added the ability to concatenate OSKAR visibility files for different
+      observation periods into one Measurement Set. 
 
 2014-07-22  OSKAR-2.5.0
 

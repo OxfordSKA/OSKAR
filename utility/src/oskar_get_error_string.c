@@ -83,6 +83,8 @@ const char* oskar_get_error_string(int error)
             return "spline coefficient computation failed";
         case OSKAR_ERR_SPLINE_EVAL_FAIL:
             return "spline evaluation failed";
+        case OSKAR_ERR_PHASE_CENTRE_MISMATCH:
+            return "phase centres are inconsistent";
         case OSKAR_ERR_CUDA_DEVICES:
             return "insufficient CUDA devices found";
         case OSKAR_ERR_FUNCTION_NOT_AVAILABLE:
@@ -166,6 +168,9 @@ const char* oskar_get_error_string(int error)
 
         case OSKAR_ERR_BAD_SKY_FILE:
             return "invalid OSKAR sky model file";
+
+        case OSKAR_ERR_REF_FREQ_MISMATCH:
+            return "reference frequencies do not match";
 
         default:
             break;

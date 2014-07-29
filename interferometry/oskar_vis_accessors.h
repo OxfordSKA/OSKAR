@@ -74,7 +74,7 @@ OSKAR_EXPORT
 int oskar_vis_num_baselines(const oskar_Vis* vis);
 
 OSKAR_EXPORT
-int oskar_vis_num_polarisations(const oskar_Vis* vis);
+int oskar_vis_num_pols(const oskar_Vis* vis);
 
 OSKAR_EXPORT
 double oskar_vis_freq_start_hz(const oskar_Vis* vis);
