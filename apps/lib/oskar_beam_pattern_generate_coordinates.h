@@ -40,6 +40,8 @@
 #include <oskar_station_work.h>
 #include <oskar_SettingsBeamPattern.h>
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -63,7 +65,6 @@ extern "C" {
  * @param[out]  z  Array of z direction cosines.
  * @param[out] lon0 Reference longitude of direction cosines.
  * @param[out] lat0 Reference latitude of direction cosines.
- * @param[out] num_pixels   Number of pixels in the beam pattern.
  * @param[in]  beam_coord_type Enumerator describing the beam phase centre
  *                             coordinate type, with possible values of:
  *                             OSKAR_SPHERICAL_TYPE_EQUATORIAL
@@ -73,11 +74,13 @@ extern "C" {
  * @param[in]  settings  Settings structure describing the specification
  *                            of coordinates to be generated.
  * @param[in,out] status Error status code.
+ *
+ * @return The number of pixels generated.
  */
 OSKAR_APPS_EXPORT
-void oskar_beam_pattern_generate_coordinates(int* coord_type, oskar_Mem* x,
+size_t oskar_beam_pattern_generate_coordinates(int* coord_type, oskar_Mem* x,
         oskar_Mem* y, oskar_Mem* z, double* lon0, double* lat0,
-        int* num_pixels, int beam_coord_type, double beam_lon, double beam_lat,
+        int beam_coord_type, double beam_lon, double beam_lat,
         const oskar_SettingsBeamPattern* settings, int* status);
 
 #ifdef __cplusplus

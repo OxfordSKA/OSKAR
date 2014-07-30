@@ -149,9 +149,6 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
         const oskar_Settings* settings, int type, const oskar_Telescope* tel,
         oskar_Log* log, int* status)
 {
-    const int GPU = OSKAR_GPU;
-    const int CPU = OSKAR_CPU;
-
     // Make local copies of settings.
     int num_times = settings->obs.num_time_steps;
     double obs_start_mjd_utc = settings->obs.start_mjd_utc;
@@ -160,7 +157,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     int num_channels = settings->obs.num_channels;
     int num_pols = settings->telescope.aperture_array.element_pattern.
             functional_type == OSKAR_ELEMENT_TYPE_ISOTROPIC ? 1 : 4;
-    int num_pixels = 0;
+    size_t num_pixels = 0;
     int beam_pattern_data_type = type | OSKAR_COMPLEX;
     if (num_pols == 4) beam_pattern_data_type |= OSKAR_MATRIX;
 
@@ -170,7 +167,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
         *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }
-    const oskar_Station* station = oskar_telescope_station_const(tel, station_id);
+    const oskar_Station* st = oskar_telescope_station_const(tel, station_id);
 
     // FIXME HACK Open the output file list.
     FILE* file = 0;
@@ -187,13 +184,13 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     // Generate load/coordinates at which the beam pattern is evaluated.
     int coord_type = 0;
     double lon0 = 0.0, lat0 = 0.0;
-    oskar_Mem* x = oskar_mem_create(type, CPU, 0, status);
-    oskar_Mem* y = oskar_mem_create(type, CPU, 0, status);
-    oskar_Mem* z = oskar_mem_create(type, CPU, 0, status);
-    oskar_beam_pattern_generate_coordinates(&coord_type, x, y, z, &lon0, &lat0,
-            &num_pixels, oskar_station_beam_coord_type(station),
-            oskar_station_beam_lon_rad(station),
-            oskar_station_beam_lat_rad(station), &settings->beam_pattern,
+    oskar_Mem* x = oskar_mem_create(type, OSKAR_CPU, 0, status);
+    oskar_Mem* y = oskar_mem_create(type, OSKAR_CPU, 0, status);
+    oskar_Mem* z = oskar_mem_create(type, OSKAR_CPU, 0, status);
+    num_pixels = oskar_beam_pattern_generate_coordinates(&coord_type, x, y, z,
+            &lon0, &lat0, oskar_station_beam_coord_type(st),
+            oskar_station_beam_lon_rad(st),
+            oskar_station_beam_lat_rad(st), &settings->beam_pattern,
             status);
 
     // Resize coordinate arrays to allow space for a normalisation source.
@@ -202,18 +199,19 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     oskar_mem_realloc(z, num_pixels + 1, status);
 
     // Initialise temporary array, used to re-order polarisation.
-    oskar_Mem* beam_tmp = oskar_mem_create(beam_pattern_data_type, CPU,
+    oskar_Mem* beam_tmp = oskar_mem_create(beam_pattern_data_type, OSKAR_CPU,
             num_pixels, status);
 
     // Set up GPU memory for station model, work arrays, coordinates and
     // beam pattern.
-    oskar_Station* d_station = oskar_station_create_copy(station, GPU, status);
-    oskar_StationWork* d_work = oskar_station_work_create(type, GPU, status);
-    oskar_Mem* d_beam_data = oskar_mem_create(beam_pattern_data_type, GPU,
-            num_pixels + 1, status);
-    oskar_Mem* d_x = oskar_mem_create_copy(x, GPU, status);
-    oskar_Mem* d_y = oskar_mem_create_copy(y, GPU, status);
-    oskar_Mem* d_z = oskar_mem_create_copy(z, GPU, status);
+    oskar_Station* d_st = oskar_station_create_copy(st, OSKAR_GPU, status);
+    oskar_StationWork* d_work = oskar_station_work_create(type, OSKAR_GPU,
+            status);
+    oskar_Mem* d_beam_data = oskar_mem_create(beam_pattern_data_type,
+            OSKAR_GPU, num_pixels + 1, status);
+    oskar_Mem* d_x = oskar_mem_create_copy(x, OSKAR_GPU, status);
+    oskar_Mem* d_y = oskar_mem_create_copy(y, OSKAR_GPU, status);
+    oskar_Mem* d_z = oskar_mem_create_copy(z, OSKAR_GPU, status);
 
     // Begin beam pattern evaluation.
     oskar_log_section(log, "Starting simulation...");
@@ -239,17 +237,16 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
             double t_dump = obs_start_mjd_utc + t * dt_dump;
             double GAST = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
-            oskar_evaluate_station_beam(d_beam_data, num_pixels,
-                    d_x, d_y, d_z, coord_type, lon0, lat0, d_station, d_work,
+            oskar_evaluate_station_beam(d_beam_data, (int)num_pixels,
+                    d_x, d_y, d_z, coord_type, lon0, lat0, d_st, d_work,
                     rand_state, frequency, GAST, status);
 
             // FIXME HACK Write raw beam data to ASCII file.
             if (file)
-                oskar_mem_save_ascii(file, 1, num_pixels, status,
-                        d_beam_data);
+                oskar_mem_save_ascii(file, 1, num_pixels, status, d_beam_data);
             else
                 accumulate_to_beam_cube(output_beam, beam_tmp, d_beam_data,
-                        num_times, num_pols, num_pixels, t, c, status);
+                        num_times, num_pols, (int)num_pixels, t, c, status);
         }
 
         // Record GPU memory usage.
@@ -257,15 +254,13 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
         oskar_random_state_free(rand_state, status);
     }
 
-    // Free GPU memory.
+    // Free memory.
     oskar_station_work_free(d_work, status);
-    oskar_station_free(d_station, status);
+    oskar_station_free(d_st, status);
     oskar_mem_free(d_beam_data, status);
     oskar_mem_free(d_x, status);
     oskar_mem_free(d_y, status);
     oskar_mem_free(d_z, status);
-
-    // Free host memory.
     oskar_mem_free(beam_tmp, status);
     oskar_mem_free(x, status);
     oskar_mem_free(y, status);

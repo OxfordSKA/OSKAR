@@ -42,78 +42,76 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
         const oskar_SettingsBeamPattern* settings, int* status);
 static void generate_horizon_coordinates(oskar_Mem* x, oskar_Mem* y,
         oskar_Mem* z, const oskar_SettingsBeamPattern* settings, int* status);
-static void load_coords(oskar_Mem* lon, oskar_Mem* lat, int* num_points,
+static void load_coords(oskar_Mem* lon, oskar_Mem* lat,
         const char* filename, int* status);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_beam_pattern_generate_coordinates(int* coord_type, oskar_Mem* x,
+size_t oskar_beam_pattern_generate_coordinates(int* coord_type, oskar_Mem* x,
         oskar_Mem* y, oskar_Mem* z, double* lon0, double* lat0,
-        int* num_pixels, int beam_coord_type, double beam_lon, double beam_lat,
+        int beam_coord_type, double beam_lon, double beam_lat,
         const oskar_SettingsBeamPattern* settings, int* status)
 {
+    size_t num_pixels = 0;
+    int coord_grid_type, coord_frame_type;
+
     /* Check all inputs. */
-    if (!coord_type || !x || !y || !z || !lon0 || !lat0 || !num_pixels ||
-            !settings || !status)
+    if (!coord_type || !x || !y || !z || !lon0 || !lat0 || !settings ||
+            !status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return 0;
     }
-    if (*status) return;
+    if (*status) return 0;
 
-    /* Compute number of pixels, and set size of output arrays if possible. */
-    if (settings->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
+    /* Get coordinate grid type and frame type. */
+    coord_grid_type = settings->coord_grid_type;
+    coord_frame_type = settings->coord_frame_type;
+
+    /* Calculate number of pixels if possible. */
+    if (coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
+        num_pixels = settings->size[0] * settings->size[1];
+    else if (coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_HEALPIX)
+        num_pixels = 12 * settings->nside * settings->nside;
+    else if (coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_SKY_MODEL)
+        num_pixels = 0;
+    else
     {
-        *num_pixels = settings->size[0] * settings->size[1];
+        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        return 0;
     }
-    else if (settings->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_HEALPIX)
+
+    /* Set size of output arrays. */
+    oskar_mem_realloc(x, num_pixels, status);
+    oskar_mem_realloc(y, num_pixels, status);
+    oskar_mem_realloc(z, num_pixels, status);
+
+    /* Get equatorial or horizon coordinates. */
+    if (coord_frame_type == OSKAR_BEAM_PATTERN_FRAME_EQUATORIAL)
     {
-        int nside = settings->nside;
-        *num_pixels = 12 * nside * nside;
+        generate_equatorial_coordinates(x, y, z, beam_lon, beam_lat,
+                beam_coord_type, settings, status);
+        *coord_type = OSKAR_RELATIVE_DIRECTION_COSINES;
+        *lon0 = beam_lon;
+        *lat0 = beam_lat;
     }
-    else if (settings->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_SKY_MODEL)
+    else if (coord_frame_type == OSKAR_BEAM_PATTERN_FRAME_HORIZON)
     {
-        *num_pixels = 0; /* Can't set this now, so must set it later. */
+        generate_horizon_coordinates(x, y, z, settings, status);
+        *coord_type = OSKAR_ENU_DIRECTION_COSINES;
+        *lon0 = 0.0; /* TODO Hard-coded for now. */
+        *lat0 = M_PI / 2.0; /* TODO Hard-coded for now. */
     }
     else
     {
         *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
-        return;
     }
 
-    /* Set size of output arrays. */
-    oskar_mem_realloc(x, (size_t) *num_pixels, status);
-    oskar_mem_realloc(y, (size_t) *num_pixels, status);
-    oskar_mem_realloc(z, (size_t) *num_pixels, status);
-
-    switch (settings->coord_frame_type)
-    {
-        case OSKAR_BEAM_PATTERN_FRAME_EQUATORIAL:
-        {
-            generate_equatorial_coordinates(x, y, z, beam_lon, beam_lat,
-                    beam_coord_type, settings, status);
-            *coord_type = OSKAR_RELATIVE_DIRECTION_COSINES;
-            *lon0 = beam_lon;
-            *lat0 = beam_lat;
-            break;
-        }
-        case OSKAR_BEAM_PATTERN_FRAME_HORIZON:
-        {
-            generate_horizon_coordinates(x, y, z, settings, status);
-            *coord_type = OSKAR_ENU_DIRECTION_COSINES;
-            *lon0 = 0.0; /* TODO Hard-coded for now. */
-            *lat0 = M_PI / 2.0; /* TODO Hard-coded for now. */
-            break;
-        }
-        default:
-            *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
-            break;
-    };
-
-    /* Set the number of pixels. */
-    *num_pixels = oskar_mem_length(x);
+    /* Return the number of pixels. */
+    num_pixels = oskar_mem_length(x);
+    return num_pixels;
 }
 
 static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
@@ -134,6 +132,8 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
              int np, nside, type, i;
              double ra0, dec0;
              oskar_Mem* theta, *phi;
+
+             /* Generate theta and phi from nside. */
              nside = settings->nside;
              np = oskar_healpix_nside_to_npix(nside);
              type = oskar_mem_type(l);
@@ -163,7 +163,7 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
                  *status = OSKAR_ERR_BAD_DATA_TYPE;
              }
 
-             /* Evaluate beam phase centre coordinates in the equatorial frame */
+             /* Evaluate beam phase centre coordinates in equatorial frame. */
              ra0 = 0.0; dec0 = 0.0;
              if (beam_coord_type == OSKAR_SPHERICAL_TYPE_EQUATORIAL)
              {
@@ -179,7 +179,7 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
              }
              else
              {
-                 *status = OSKAR_ERR_SETTINGS_TELESCOPE; /* TODO better error code */
+                 *status = OSKAR_ERR_INVALID_ARGUMENT;
              }
 
              /* Convert equatorial angles to direction cosines in the frame
@@ -187,6 +187,7 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
              oskar_convert_apparent_ra_dec_to_relative_direction_cosines(np,
                      phi, theta, ra0, dec0, l, m, n, status);
 
+             /* Free memory. */
              oskar_mem_free(theta, status);
              oskar_mem_free(phi, status);
              break;
@@ -198,7 +199,8 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
              type = oskar_mem_type(l);
              ra = oskar_mem_create(type, OSKAR_CPU, 0, status);
              dec = oskar_mem_create(type, OSKAR_CPU, 0, status);
-             load_coords(ra, dec, &num_points, settings->sky_model, status);
+             load_coords(ra, dec, settings->sky_model, status);
+             num_points = oskar_mem_length(ra);
              oskar_mem_realloc(l, num_points, status);
              oskar_mem_realloc(m, num_points, status);
              oskar_mem_realloc(n, num_points, status);
@@ -249,7 +251,7 @@ static void generate_horizon_coordinates(oskar_Mem* x, oskar_Mem* y,
      };
 }
 
-static void load_coords(oskar_Mem* lon, oskar_Mem* lat, int* num_points,
+static void load_coords(oskar_Mem* lon, oskar_Mem* lat,
         const char* filename, int* status)
 {
     int type = 0;
@@ -311,7 +313,6 @@ static void load_coords(oskar_Mem* lon, oskar_Mem* lat, int* num_points,
     }
 
     /* Resize output arrays to final size. */
-    *num_points = n;
     oskar_mem_realloc(lon, n, status);
     oskar_mem_realloc(lat, n, status);
 
