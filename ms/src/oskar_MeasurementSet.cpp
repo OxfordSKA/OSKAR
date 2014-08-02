@@ -130,7 +130,7 @@ struct oskar_MeasurementSet
 
 void oskar_ms_add_log(oskar_MeasurementSet* p, const char* str, size_t size)
 {
-    if (!str) return;
+    if (!str || size == 0) return;
 
     // Construct a string from the char array and split on each newline.
     std::vector<std::string> v = split(std::string(str, size), '\n');
@@ -147,7 +147,7 @@ void oskar_ms_add_log(oskar_MeasurementSet* p, const char* str, size_t size)
 void oskar_ms_add_settings(oskar_MeasurementSet* p,
         const char* str, size_t size)
 {
-    if (!str) return;
+    if (!str || size == 0) return;
 
     // Construct a string from the char array and split on each newline.
     std::vector<std::string> v = split(std::string(str, size), '\n');

@@ -82,6 +82,8 @@ int main(int argc, char** argv)
     // Loop over input files.
     for (int i = 0; i < num_in_files; ++i)
     {
+        int tag_error = 0;
+
         // Break on error.
         if (error) break;
 
@@ -95,7 +97,7 @@ int main(int argc, char** argv)
         oskar_Binary* h = oskar_binary_create(in_file, 'r', &error);
         oskar_Mem* log = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &error);
         oskar_binary_read_mem(h, log, OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0,
-                &error);
+                &tag_error);
         oskar_binary_free(h);
 
         // Write data to Measurement Set.
