@@ -5,7 +5,10 @@
       imager faster.
 
     * Added the ability to concatenate OSKAR visibility files for different
-      observation periods into one Measurement Set. 
+      observation periods into one Measurement Set.
+
+    * Fixed "out of range" error encountered when making a beam pattern with
+      isotropic elements.
 
 2014-07-22  OSKAR-2.5.0
 
