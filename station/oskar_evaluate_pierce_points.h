@@ -56,9 +56,6 @@ extern "C" {
  * @param[out] relative_path_length  Array of relative path lengths in the direction
  *                                   of the pierce point from the station
  *                                   [sec(alpha_prime)].
- * @param[in] station_lon       Station longitude, in radians.
- * @param[in] station_lat       Station latitude, in radians.
- * @param[in] station_alt       Station altitude, in metres.
  * @param[in] station_x_ecef    Station x (earth centred, earth fixed
  *                              /ITRF/geocentric) coordinate.
  * @param[in] station_x_ecef    Station y (earth centred, earth fixed
@@ -82,9 +79,6 @@ void oskar_evaluate_pierce_points(
         oskar_Mem* pierce_point_lon,
         oskar_Mem* pierce_point_lat,
         oskar_Mem* relative_path_length,
-        double station_lon,
-        double station_lat,
-        double station_alt,
         double station_x_ecef,
         double station_y_ecef,
         double station_z_ecef,

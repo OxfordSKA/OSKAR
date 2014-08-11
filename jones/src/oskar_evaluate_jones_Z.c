@@ -106,12 +106,11 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
      * source pierce point. */
     for (i = 0; i < num_stations; ++i)
     {
-        double last, lon, lat, alt;
+        double last, lon, lat;
         const oskar_Station* station;
         station = oskar_telescope_station_const(telescope, i);
         lon = oskar_station_lon_rad(station);
         lat = oskar_station_lat_rad(station);
-        alt = oskar_station_alt_metres(station);
         last = gast + lon;
 
         /* Evaluate horizontal x,y,z source positions (for which to evaluate
@@ -129,7 +128,7 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
         /* Obtain the pierce points. */
         /* FIXME this is current hard-coded to TID height screen 0 */
         oskar_evaluate_pierce_points(work->pp_lon, work->pp_lat,
-                work->pp_rel_path, lon, lat, alt, station_x, station_y,
+                work->pp_rel_path, station_x, station_y,
                 station_z, settings->TID[0].height_km * 1000., num_sources,
                 work->hor_x, work->hor_y, work->hor_z, status);
 

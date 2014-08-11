@@ -137,10 +137,6 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
 
     const char* filename = settings.ionosphere.pierce_points.filename;
     oskar_Binary* h = oskar_binary_create(filename, 'w', &status);
-    FILE* stream = fopen(filename, "wb");
-    if (!stream)
-        return OSKAR_ERR_FILE_IO;
-
     oskar_binary_write_metadata(h, &status);
 
     double screen_height_m = settings.ionosphere.TID->height_km * 1000.0;
@@ -211,7 +207,7 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
             oskar_mem_set_alias(pp_st_rel_path, pp_rel_path, offset,
                     num_sources, &status);
             oskar_evaluate_pierce_points(pp_st_lon, pp_st_lat, pp_st_rel_path,
-                    lon, lat, alt, x_ecef, y_ecef, z_ecef, screen_height_m,
+                    x_ecef, y_ecef, z_ecef, screen_height_m,
                     num_sources, hor_x, hor_y, hor_z, &status);
         } // Loop over stations.
 

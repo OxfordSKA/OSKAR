@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,15 +42,17 @@ void oskar_convert_geodetic_spherical_to_ecef(int n, const double* lon,
     int i;
     for (i = 0; i < n; ++i)
     {
-        double lat_, lon_, alt_, n_phi, sin_lat, cos_lat;
+        double lat_, lon_, alt_, n_phi, sin_lat, cos_lat, sin_lon, cos_lon;
         lat_ = lat[i];
         lon_ = lon[i];
         alt_ = alt[i];
         sin_lat = sin(lat_);
         cos_lat = cos(lat_);
-        n_phi = a / sqrt(1.0 - e2 * pow(sin_lat, 2.0));
-        x[i] = (n_phi + alt_) * cos_lat * cos(lon_);
-        y[i] = (n_phi + alt_) * cos_lat * sin(lon_);
+        sin_lon = sin(lon_);
+        cos_lon = cos(lon_);
+        n_phi = a / sqrt(1.0 - e2 * sin_lat * sin_lat);
+        x[i] = (n_phi + alt_) * cos_lat * cos_lon;
+        y[i] = (n_phi + alt_) * cos_lat * sin_lon;
         z[i] = ((1.0 - e2) * n_phi + alt_) * sin_lat;
     }
 }

@@ -27,23 +27,101 @@
  */
 
 #include <oskar_evaluate_pierce_points.h>
-#include <oskar_convert_ecef_to_geodetic_spherical.h>
+#include <oskar_convert_ecef_to_geodetic_spherical_inline.h>
 #include <oskar_cmath.h>
-
-static void create_rot_matrix(double* R, double lon, double lat);
-static void matrix_multiply(double* v_out, double* M, double* v_in);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+void oskar_evaluate_pierce_points_d(int num_directions, const double* hor_x,
+        const double* hor_y, const double* hor_z, double* pp_lon_,
+        double* pp_lat_, double* rel_path_len_, double screen_height_m,
+        const double station_ecef_x, const double station_ecef_y,
+        const double station_ecef_z)
+{
+    int i;
+    double pp_lon, pp_lat, pp_alt, pp_sec, scale, x, y, z;
+    double diff_ecef_x, diff_ecef_y, diff_ecef_z;
+    double norm_xyz, earth_radius_plus_screen_height_m;
+    double cos_l, sin_l, cos_b, sin_b;
+    double station_lon, station_lat, station_alt;
+
+    /* Get the station longitude and latitude from ECEF coordinates. */
+    oskar_convert_ecef_to_geodetic_spherical_inline_d(station_ecef_x,
+            station_ecef_y, station_ecef_z, &station_lon, &station_lat,
+            &station_alt);
+
+    /* Calculate sine and cosine of station longitude and latitude. */
+    sin_l = sin(station_lon);
+    cos_l = cos(station_lon);
+    sin_b = sin(station_lat);
+    cos_b = cos(station_lat);
+
+    /* Length of the vector from the centre of the earth to the station. */
+    norm_xyz = sqrt(station_ecef_x * station_ecef_x +
+            station_ecef_y * station_ecef_y +
+            station_ecef_z * station_ecef_z);
+
+    /* Evaluate the Earth radius plus screen height at the station position. */
+    earth_radius_plus_screen_height_m =
+            screen_height_m + norm_xyz - station_alt;
+
+    /* Loop over directions to evaluate pierce points. */
+    for (i = 0; i < num_directions; ++i)
+    {
+        /* Unit vector describing the direction of the pierce point in the
+         * ENU frame. Vector from station to pierce point. */
+        x = hor_x[i];
+        y = hor_y[i];
+        z = hor_z[i];
+
+        /* Evaluate length of vector between station and pierce point. */
+        /* If the direction is directly towards the zenith we don't have to
+         * calculate anything, as the length is simply the screen height! */
+        if (fabs(z - 1.0) > 1.0e-10)
+        {
+            double el, cos_el, arg, alpha_prime, sin_beta;
+            el = asin(z);
+            cos_el = cos(el);
+            arg = (cos_el * norm_xyz) / earth_radius_plus_screen_height_m;
+            alpha_prime = asin(arg);
+            sin_beta = sin((M_PI_2 - el) - alpha_prime);
+            pp_sec = 1.0 / cos(alpha_prime);
+            scale = earth_radius_plus_screen_height_m * sin_beta / cos_el;
+        }
+        else
+        {
+            pp_sec = 1.0;
+            scale = screen_height_m;
+        }
+
+        /* Convert ENU unit vector to ECEF frame using rotation matrix. */
+        diff_ecef_x = -x * sin_l - y * sin_b * cos_l + z * cos_b * cos_l;
+        diff_ecef_y =  x * cos_l - y * sin_b * sin_l + z * cos_b * sin_l;
+        diff_ecef_z =  y * cos_b + z * sin_b;
+
+        /* Evaluate the pierce point in ECEF coordinates. */
+        x = station_ecef_x + diff_ecef_x * scale;
+        y = station_ecef_y + diff_ecef_y * scale;
+        z = station_ecef_z + diff_ecef_z * scale;
+
+        /* Convert ECEF x,y,z coordinates to long., lat. */
+        /* FIXME Probably use geocentric coordinates here for simplicity. */
+        oskar_convert_ecef_to_geodetic_spherical_inline_d(x, y, z,
+                &pp_lon, &pp_lat, &pp_alt);
+
+        /* Store data. */
+        pp_lon_[i] = pp_lon;
+        pp_lat_[i] = pp_lat;
+        rel_path_len_[i] = pp_sec;
+    }
+}
+
 void oskar_evaluate_pierce_points(
         oskar_Mem* pierce_point_lon,
         oskar_Mem* pierce_point_lat,
         oskar_Mem* relative_path_length,
-        double station_lon,
-        double station_lat,
-        double station_alt,
         double station_x_ecef,
         double station_y_ecef,
         double station_z_ecef,
@@ -54,15 +132,7 @@ void oskar_evaluate_pierce_points(
         const oskar_Mem* hor_z,
         int* status)
 {
-    double norm_xyz, earth_radius_m;
-    double x, y, z;
-    int i, type, location;
-    double rotM[9];
-    double diff_vector_ENU[3];
-    double diff_vector_ECEF[3];
-    double scale, arg, alpha_prime, sin_beta;
-    double pp_x, pp_y, pp_z;
-    double pp_lon, pp_lat, pp_sec, pp_alt;
+    int type, location;
 
     /* Check all inputs. */
     if (!pierce_point_lon || !pierce_point_lat || !hor_x || !hor_y || !hor_z)
@@ -74,7 +144,7 @@ void oskar_evaluate_pierce_points(
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check memory location. CPU (host) memory currently required. */
+    /* Check memory location consistency. */
     location = oskar_mem_location(hor_x);
     if (oskar_mem_location(pierce_point_lat) != location ||
             oskar_mem_location(pierce_point_lon) != location ||
@@ -83,11 +153,6 @@ void oskar_evaluate_pierce_points(
             oskar_mem_location(hor_z) != location)
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
-        return;
-    }
-    if (location != OSKAR_CPU)
-    {
-        *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
 
@@ -115,114 +180,62 @@ void oskar_evaluate_pierce_points(
         return;
     }
 
-
-    /* Pierce point evaluation */
-    /* -----------------------------------------------------------------------*/
-
-    /* Length of the vector from the centre of the earth to the station. */
-    norm_xyz = sqrt(station_x_ecef*station_x_ecef +
-            station_y_ecef*station_y_ecef +
-            station_z_ecef*station_z_ecef);
-
-    /* Evaluate the earth radius at the station position. */
-    earth_radius_m = norm_xyz - station_alt;
-
-    /* Evaluate a rotation matrix used for ENU to ECEF coordinate conversion. */
-    create_rot_matrix(rotM, station_lon, station_lat);
-
-    /* Loop over directions to evaluate pierce points. */
-    for (i = 0; i < num_directions; ++i)
+    /* Switch on type. */
+    if (type == OSKAR_DOUBLE)
     {
-        /* Unit vector describing the direction of the pierce point in the
-           ENU frame. Vector from station to pierce point. */
-        if (type == OSKAR_DOUBLE)
+        double *pp_lon_, *pp_lat_, *rel_path_len_;
+        const double *x_, *y_, *z_;
+        x_ = oskar_mem_double_const(hor_x, status);
+        y_ = oskar_mem_double_const(hor_y, status);
+        z_ = oskar_mem_double_const(hor_z, status);
+        pp_lon_ = oskar_mem_double(pierce_point_lon, status);
+        pp_lat_ = oskar_mem_double(pierce_point_lat, status);
+        rel_path_len_ = oskar_mem_double(relative_path_length, status);
+
+        if (location == OSKAR_CPU)
         {
-            x = oskar_mem_double_const(hor_x, status)[i];
-            y = oskar_mem_double_const(hor_y, status)[i];
-            z = oskar_mem_double_const(hor_z, status)[i];
+            oskar_evaluate_pierce_points_d(num_directions, x_, y_, z_,
+                    pp_lon_, pp_lat_, rel_path_len_, screen_height_m,
+                    station_x_ecef, station_y_ecef, station_z_ecef);
         }
         else
         {
-            x = (double)oskar_mem_float_const(hor_x, status)[i];
-            y = (double)oskar_mem_float_const(hor_y, status)[i];
-            z = (double)oskar_mem_float_const(hor_z, status)[i];
+#ifdef OSKAR_HAVE_CUDA
+            *status = OSKAR_ERR_BAD_LOCATION;
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
         }
-        diff_vector_ENU[0] = x;
-        diff_vector_ENU[1] = y;
-        diff_vector_ENU[2] = z;
+    }
+    else
+    {
+#if 0
+        float *pp_lon_, *pp_lat_, *rel_path_len_;
+        const float *x_, *y_, *z_;
+        x_ = oskar_mem_float_const(hor_x, status);
+        y_ = oskar_mem_float_const(hor_y, status);
+        z_ = oskar_mem_float_const(hor_z, status);
+        pp_lon_ = oskar_mem_float(pierce_point_lon, status);
+        pp_lat_ = oskar_mem_float(pierce_point_lat, status);
+        rel_path_len_ = oskar_mem_float(relative_path_length, status);
+#endif
 
-        /* Convert unit vector to ECEF frame. */
-        matrix_multiply(diff_vector_ECEF, rotM, diff_vector_ENU);
-
-        /* Evaluate length of vector between station and pierce point. */
-        scale = screen_height_m;
-        pp_sec = 1.0;
-
-        /* If the direction is directly towards the zenith we don't have to
-           calculate anything as the length is simply the screen height! */
-        if (fabs(diff_vector_ENU[2] - 1.0) > 1.0e-10)
+        if (location == OSKAR_CPU)
         {
-            double el, cos_el;
-            el = asin(z); /* FIXME check this way of evaluating elevation is stable */
-            cos_el = cos(el);
-            arg = (cos_el * norm_xyz) / (earth_radius_m + screen_height_m);
-            alpha_prime = asin(arg);
-            pp_sec = 1.0 / cos(alpha_prime);
-            sin_beta = sin((0.5 * M_PI - el) - alpha_prime);
-            scale = (earth_radius_m + screen_height_m) * sin_beta / cos_el;
-        }
-
-        /* Evaluate the pierce point in ECEF x,y,z coordinates. */
-        pp_x = station_x_ecef + (diff_vector_ECEF[0] * scale);
-        pp_y = station_y_ecef + (diff_vector_ECEF[1] * scale);
-        pp_z = station_z_ecef + (diff_vector_ECEF[2] * scale);
-
-        /* Convert ECEF x,y,z coordinates to long., lat. */
-        oskar_convert_ecef_to_geodetic_spherical(1, &pp_x, &pp_y, &pp_z,
-                &pp_lon, &pp_lat, &pp_alt);
-
-        if (type == OSKAR_DOUBLE)
-        {
-            oskar_mem_double(pierce_point_lon, status)[i] = pp_lon;
-            oskar_mem_double(pierce_point_lat, status)[i] = pp_lat;
-            oskar_mem_double(relative_path_length, status)[i] = pp_sec;
+            /* oskar_evaluate_pierce_points_f(num_directions, x_, y_, z_,
+                    pp_lon_, pp_lat_, rel_path_len_, screen_height_m,
+                    station_x_ecef, station_y_ecef, station_z_ecef); */
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE; /* FIXME */
         }
         else
         {
-            oskar_mem_float(pierce_point_lon, status)[i] = (float)pp_lon;
-            oskar_mem_float(pierce_point_lat, status)[i] = (float)pp_lat;
-            oskar_mem_float(relative_path_length, status)[i] = (float)pp_sec;
+#ifdef OSKAR_HAVE_CUDA
+            *status = OSKAR_ERR_BAD_LOCATION;
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
         }
-    } /* loop over p.p. directions. */
-}
-
-
-
-/* Populate a rotation matrix for ENU to ITRF conversion.
-   3x3 matrix, row-major order. */
-void create_rot_matrix(double* R, double lon, double lat)
-{
-    double cosl   = cos(lon);
-    double sinl   = sin(lon);
-    double cosphi = cos(lat);
-    double sinphi = sin(lat);
-    R[0] = -sinl;
-    R[1] = -sinphi * cosl;
-    R[2] =  cosphi * cosl;
-    R[3] =  cosl;
-    R[4] = -sinphi * sinl;
-    R[5] =  cosphi * sinl;
-    R[6] =  0.0;
-    R[7] =  cosphi;
-    R[8] =  sinphi;
-}
-
-/* row-major matrix vector multiply. */
-void matrix_multiply(double* v_out, double* M, double* v_in)
-{
-    v_out[0] = (M[0] * v_in[0]) + (M[1] * v_in[1]) + (M[2] * v_in[2]);
-    v_out[1] = (M[3] * v_in[0]) + (M[4] * v_in[1]) + (M[5] * v_in[2]);
-    v_out[2] = (M[6] * v_in[0]) + (M[7] * v_in[1]) + (M[8] * v_in[2]);
+    }
 }
 
 #ifdef __cplusplus

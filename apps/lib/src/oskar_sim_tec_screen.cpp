@@ -224,7 +224,7 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
 
     // Pierce point of the observation phase centre - i.e. beam direction
     oskar_evaluate_pierce_points(m_pp_lon0, m_pp_lat0, m_pp_rel_path,
-            st_lon, st_lat, st_alt, st_x_ecef, st_y_ecef, st_z_ecef,
+            st_x_ecef, st_y_ecef, st_z_ecef,
             settings->ionosphere.TID[0].height_km * 1000., 1, hor_x, hor_y,
             hor_z, status);
 

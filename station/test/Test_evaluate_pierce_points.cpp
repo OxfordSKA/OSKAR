@@ -192,8 +192,8 @@ TEST(evaluate_pierce_points, test2)
     pp_lon = oskar_mem_create(type, location, n, &status);
     pp_lat = oskar_mem_create(type, location, n, &status);
     pp_path = oskar_mem_create(type, location, n, &status);
-    oskar_evaluate_pierce_points(pp_lon, pp_lat, pp_path, lon, lat, alt,
-            x, y, z, height, n, hor_x, hor_y, hor_z, &status);
+    oskar_evaluate_pierce_points(pp_lon, pp_lat, pp_path, x, y, z,
+            height, n, hor_x, hor_y, hor_z, &status);
 
     printf("pierce point [%i]:\n", 0);
     printf("  lon = %f, lat = %f [station]\n", lon*(180./M_PI), lat*(180./M_PI));

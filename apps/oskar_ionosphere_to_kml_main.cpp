@@ -264,7 +264,7 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings& settings
             oskar_mem_set_alias(pp_st_rel_path, pp_rel_path, offset, num_sources,
                     &status);
             oskar_evaluate_pierce_points(pp_st_lon, pp_st_lat, pp_st_rel_path,
-                    lon, lat, alt, x_ecef, y_ecef, z_ecef, screen_height_m,
+                    x_ecef, y_ecef, z_ecef, screen_height_m,
                     num_sources, hor_x, hor_y, hor_z, &status);
         } // Loop over stations.
 
@@ -444,7 +444,7 @@ void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
 
     // Pierce point of the observation phase centre - i.e. beam direction
     oskar_evaluate_pierce_points(m_pp_lon0, m_pp_lat0, m_pp_rel_path,
-            st_lon, st_lat, st_alt, st_x_ecef, st_y_ecef, st_z_ecef,
+            st_x_ecef, st_y_ecef, st_z_ecef,
             settings->ionosphere.TID[0].height_km * 1000., 1, hor_x, hor_y,
             hor_z, status);
 
