@@ -1,5 +1,7 @@
 2014-xx-yy  OSKAR-2.6.0
 
+    * Changed the integer range of random seeds to start at 1 (instead of 0).
+
     * Further improved efficiency of Measurement Set export, using appropriate
       storage managers. This has the additional benefit of making the CASA
       imager faster.
@@ -9,6 +11,9 @@
 
     * Fixed "out of range" error encountered when making a beam pattern with
       isotropic elements.
+      
+    * Fixed the scaling of uncorrelated system noise when used with the 
+      Stokes-I only (scalar mode) added in 2.5.0.
 
 2014-07-22  OSKAR-2.5.0
 
