@@ -78,7 +78,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         double* el = (double*)mxGetData(out[1]);
         oskar_convert_apparent_ra_dec_to_az_el_d(num_sources, ra, dec,
                 lst, lat, &work[0], az, el);
-
 //        mexPrintf("num_sources = %i\n", (int)num_sources);
 //        mexPrintf("lst         = %f (%f)\n", lst, lst*(180.0/M_PI));
 //        mexPrintf("lat         = %f (%f)\n", lat, lat*(180.0/M_PI));

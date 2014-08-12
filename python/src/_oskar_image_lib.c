@@ -115,10 +115,6 @@ static PyObject* make_image_dft(PyObject* self, PyObject* args, PyObject* keywds
         &vv_, &amp_, &freq, &fov_deg, &size))
         return NULL;
 
-    // FIXME Permit uu,vv,and amp to be tuple, list or np.array type
-//    printf("uu length = %i\n", PyObject_Length(uu_));
-//    printf("uu ndim = %i\n", PyArray_NDIM(uu_));
-
     // Parse inputs
     if (PyArray_NDIM((PyArrayObject*)uu_) != 1 ||
             PyArray_NDIM((PyArrayObject*)vv_) != 1 ||
@@ -134,16 +130,17 @@ static PyObject* make_image_dft(PyObject* self, PyObject* args, PyObject* keywds
     }
 
     // Extract C arrays from Python objects.
-    double* uu = (double*)PyArray_DATA((PyArrayObject*)uu_);
-    double* vv = (double*)PyArray_DATA((PyArrayObject*)vv_);
+    double* uu    = (double*)PyArray_DATA((PyArrayObject*)uu_);
+    double* vv    = (double*)PyArray_DATA((PyArrayObject*)vv_);
     dComplex* amp = (dComplex*)PyArray_DATA((PyArrayObject*)amp_);
 
-//    printf("No. vis = %i\n", num_vis);
-//    printf("freq = %.2e\n", freq);
-//    printf("fov = %.2f\n", fov_deg);
+//    printf("Freq = %f\n", freq);
+//    printf("FoV  = %f\n", fov_deg);
 //    printf("size = %i\n", size);
-//    printf("[0] uu = %.2f, vv = %.2f, amp = (%.2f,%.2f)\n", uu[0], vv[0], amp[0].re, amp[0].im);
-    //printf("[1] uu = %.2f, vv = %.2f, amp = (%.2f,%.2f)\n", uu[1], vv[1], amp[1].re, amp[1].im);
+//    for (int i = 0; i < 10; ++i) {
+//        printf("==> %02i % -6.1f % -6.1f % -7.2e % -7.2e\n", i, uu[i], vv[i],
+//                amp[i].re, amp[i].im);
+//    }
 
     // Create memory for image data.
     npy_intp dims = size*size;
@@ -152,8 +149,6 @@ static PyObject* make_image_dft(PyObject* self, PyObject* args, PyObject* keywds
 
     // Call wrapper function to make image.
     make_image_dft_(image, num_vis, uu, vv, amp, freq, size, fov_deg*(M_PI/180.0));
-
-//    printf("image [0] = %.2f\n", image[0]);
 
     // Return image to the python workspace.
     return Py_BuildValue("O", image_);

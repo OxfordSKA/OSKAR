@@ -168,7 +168,7 @@ void oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename,
     sky->generator.random_power_law.flux_min = s.value("flux_min").toDouble();
     sky->generator.random_power_law.flux_max = s.value("flux_max").toDouble();
     sky->generator.random_power_law.power = s.value("power").toDouble();
-    sky->generator.random_power_law.seed = get_seed(s.value("seed"));
+    sky->generator.random_power_law.seed = get_seed(s.value("seed", 1));
     // Random power-law generator filter.
     get_filter_params(s, &sky->generator.random_power_law.filter);
     get_extended_params(s, &sky->generator.random_power_law.extended_sources);
@@ -188,7 +188,7 @@ void oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename,
             s.value("power1").toDouble();
     sky->generator.random_broken_power_law.power2 =
             s.value("power2").toDouble();
-    sky->generator.random_broken_power_law.seed = get_seed(s.value("seed"));
+    sky->generator.random_broken_power_law.seed = get_seed(s.value("seed", 1));
     // Random broken-power-law generator filter.
     get_filter_params(s, &sky->generator.random_broken_power_law.filter);
     get_extended_params(s, &sky->generator.random_broken_power_law.extended_sources);
@@ -200,7 +200,7 @@ void oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename,
     sky->generator.grid.fov_rad = s.value("fov_deg", 0.0).toDouble() * D2R;
     sky->generator.grid.mean_flux_jy = s.value("mean_flux_jy", 0.0).toDouble();
     sky->generator.grid.std_flux_jy = s.value("std_flux_jy", 0.0).toDouble();
-    sky->generator.grid.seed = get_seed(s.value("seed"));
+    sky->generator.grid.seed = get_seed(s.value("seed", 1));
     // Grid generator extended parameters.
     get_extended_params(s, &sky->generator.grid.extended_sources);
     get_pol_params(s, &sky->generator.grid.pol);
@@ -225,7 +225,7 @@ void oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename,
             s.value("ref_frequency_hz", 0.0).toDouble();
     sky->spectral_index.mean = s.value("mean", 0.0).toDouble();
     sky->spectral_index.std_dev = s.value("std_dev", 0.0).toDouble();
-    sky->spectral_index.seed = get_seed(s.value("seed"));
+    sky->spectral_index.seed = get_seed(s.value("seed", 1));
     s.endGroup();
 
     // Common flux filtering settings, applied per-channel
@@ -253,7 +253,7 @@ static void get_pol_params(QSettings& s, oskar_SettingsSkyPolarisation* pol)
     pol->std_pol_fraction = s.value("std_pol_fraction").toDouble();
     pol->mean_pol_angle_rad = s.value("mean_pol_angle_deg").toDouble() * D2R;
     pol->std_pol_angle_rad = s.value("std_pol_angle_deg").toDouble() * D2R;
-    pol->seed = get_seed(s.value("seed"));
+    pol->seed = get_seed(s.value("seed", 1));
     s.endGroup();
 }
 

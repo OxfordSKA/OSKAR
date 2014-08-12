@@ -143,7 +143,7 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
             // Random seed editors.
             QSpinBox* spinner = new QSpinBox(parent);
             spinner->setFrame(false);
-            spinner->setRange(-1, INT_MAX);
+            spinner->setRange(0, INT_MAX);
             spinner->setSpecialValueText("time");
             editor = spinner;
             break;
@@ -395,8 +395,8 @@ void oskar_SettingsDelegate::setEditorData(QWidget* editor,
         case oskar_SettingsItem::RANDOM_SEED:
         {
             // Random seed editors.
-            if (value.toString().toUpper() == "TIME" || value.toInt() < 0)
-                static_cast<QSpinBox*>(editor)->setValue(-1);
+            if (value.toString().toUpper() == "TIME" || value.toInt() < 1)
+                static_cast<QSpinBox*>(editor)->setValue(0);
             else
                 static_cast<QSpinBox*>(editor)->setValue(value.toInt());
             break;
@@ -489,7 +489,7 @@ void oskar_SettingsDelegate::setModelData(QWidget* editor,
         {
             // Random seed editors.
             int val = static_cast<QSpinBox*>(editor)->value();
-            if (val < 0)
+            if (val < 1)
                 value = static_cast<QSpinBox*>(editor)->specialValueText();
             else
                 value = val;

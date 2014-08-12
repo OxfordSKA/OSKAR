@@ -365,24 +365,14 @@ macro(OSKAR_MEX)
     add_library(${target} MODULE ${MEX_SOURCES} ${mex_function_def})
     target_link_libraries(${target} ${MATLAB_LIBRARIES} ${MEX_LIBS})
 
-    if (APPLE)
-        set_target_properties(${target} PROPERTIES
-            INSTALL_RPATH_USE_LINK_PATH TRUE        
-            OUTPUT_NAME   "${MEX_NAME}"
-            PREFIX        ""
-            SUFFIX        ".${MATLAB_MEXFILE_EXT}"
-            COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS}"
-            LINK_FLAGS    "${MATLAB_LINK_FLAGS}")
-    else()
-        set_target_properties(${target} PROPERTIES
-            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-            INSTALL_RPATH_USE_LINK_PATH TRUE
-            OUTPUT_NAME   "${MEX_NAME}"
-            PREFIX        ""
-            SUFFIX        ".${MATLAB_MEXFILE_EXT}"
-            COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS}"
-            LINK_FLAGS    "${MATLAB_LINK_FLAGS}")
-    endif ()
+    set_target_properties(${target} PROPERTIES
+        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+        INSTALL_RPATH_USE_LINK_PATH TRUE
+        OUTPUT_NAME   "${MEX_NAME}"
+        PREFIX        ""
+        SUFFIX        ".${MATLAB_MEXFILE_EXT}"
+        COMPILE_FLAGS "${MATLAB_COMPILE_FLAGS}"
+        LINK_FLAGS    "${MATLAB_LINK_FLAGS}")
 
     # Install target for mex function.
     install(TARGETS ${target} DESTINATION ${OSKAR_MEX_INSTALL_DIR})

@@ -135,16 +135,16 @@ void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
                         s.value("y_orientation_error_deg", 0.0).toDouble() * D2R;
 
                 // Station element random seeds.
-                ae->seed_gain_errors = get_seed(s.value("seed_gain_errors"));
-                ae->seed_phase_errors = get_seed(s.value("seed_phase_errors"));
+                ae->seed_gain_errors = get_seed(s.value("seed_gain_errors", 1));
+                ae->seed_phase_errors = get_seed(s.value("seed_phase_errors", 1));
                 ae->seed_time_variable_errors =
-                        get_seed(s.value("seed_time_variable_errors"));
+                        get_seed(s.value("seed_time_variable_errors", 1));
                 ae->seed_position_xy_errors =
-                        get_seed(s.value("seed_position_xy_errors"));
+                        get_seed(s.value("seed_position_xy_errors", 1));
                 ae->seed_x_orientation_error =
-                        get_seed(s.value("seed_x_orientation_error"));
+                        get_seed(s.value("seed_x_orientation_error", 1));
                 ae->seed_y_orientation_error =
-                        get_seed(s.value("seed_y_orientation_error"));
+                        get_seed(s.value("seed_y_orientation_error", 1));
             }
             s.endGroup(); // End array element group.
         }

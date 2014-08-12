@@ -126,7 +126,7 @@ static void load_noise(oskar_SettingsSystemNoise* noise, const char* filename,
             noise->enable = s.value("enable", false).toBool();
 
             /* Seed */
-            temp = s.value("seed").toString().toUpper();
+            temp = s.value("seed", 1).toString().toUpper();
             noise->seed = (temp == "TIME" || temp.toInt() < 0) ?
                     (int)time(NULL) : temp.toInt();
 

@@ -746,7 +746,8 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
     QString key = root + "/noise";
     setLabel(key, "System noise");
     setTooltip(key,  "Settings specifying additive uncorrelated, "
-            "direction-independent, Gaussian noise.");
+            "direction-independent, Gaussian noise. Note all noise is specified "
+            "for a single polarisation of the antennas.");
     {
         QString root = key;
 
@@ -809,7 +810,7 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                 << "Temperature, area, and system efficiency";
         declare(key, "Noise values", noiseOptions);
         setDependency(key, root + "/enable", true);
-        setTooltip(key,  "Noise value specification type:"
+        setTooltip(key,  "Single polarisation noise value specification type:"
                 "<ul>"
                 "<li><b>Telescope model priority</b>: values are loaded from "
                 "files in the telescope model directory, according to the "
@@ -870,9 +871,10 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
             options << "No override (telescope model)"
                     << "Data file"
                     << "Range";
-            declare(key, "Sensitivity", options);
+            declare(key, "System sensitivity (SEFD)", options);
             setDependency(key, root, noiseOptions[2]);
-            setTooltip(key, "Sensitivity specification type:"
+            setTooltip(key, "System sensitivity (or System Equivalent Flux density, "
+                    "SEFD) specification type:"
                     "<ul>"
                     "<li><b>No override</b>: values are loaded from "
                     "sensitivity files found in the telescope model "
@@ -887,7 +889,7 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                 QString key = root  + "/file";
                 declare(key, "Data file", oskar_SettingsItem::INPUT_FILE_NAME);
                 setDependency(key, root, options[1]);
-                setTooltip(key, "Data file containing noise sensitivity value(s).");
+                setTooltip(key, "Data file containing system sensitivity value(s).");
                 key = root + "/start";
                 declare(key, "Start [Jy]", oskar_SettingsItem::DOUBLE);
                 setDependency(key, root, options[2]);

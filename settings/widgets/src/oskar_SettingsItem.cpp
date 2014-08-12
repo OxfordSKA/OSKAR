@@ -40,8 +40,10 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
     if (type == DOUBLE || type == DOUBLE_MAX || type == DOUBLE_MIN ||
             type == DOUBLE_CSV_LIST)
         defaultValue_ = 0.0;
-    else if (type == INT || type == INT_UNSIGNED || type == RANDOM_SEED)
+    else if (type == INT || type == INT_UNSIGNED)
         defaultValue_ = 0;
+    else if (type == RANDOM_SEED)
+        defaultValue_ = 1;
     else if (type == INT_POSITIVE)
         defaultValue_ = 1;
     else if (type == BOOL)

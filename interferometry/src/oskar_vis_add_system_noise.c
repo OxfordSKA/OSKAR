@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
+#include <stdlib.h>
 
 #define DAYS_2_SEC 86400.0
 
@@ -92,7 +93,7 @@ void oskar_vis_add_system_noise(oskar_Vis* vis,
                 const oskar_Mem *noise_freq, *noise_rms;
                 const oskar_Station *st;
 
-                /* Retrieve the std.dev. for the baseline antennas. */
+                /* Retrieve the STD for the baseline antennas. */
                 st = oskar_telescope_station_const(telescope, ant1[b]);
                 noise_freq = oskar_station_noise_freq_hz_const(st);
                 noise_rms = oskar_station_noise_rms_jy_const(st);
@@ -111,18 +112,28 @@ void oskar_vis_add_system_noise(oskar_Vis* vis,
                 else
                     s2 = oskar_mem_float_const(noise_rms, status)[is2];
 
-                /* Combine antenna std.devs. to evaluate the baseline std.dev.
+                /* Combine antenna STD to evaluate the baseline STD
                  * See Wrobel & Walker (1999) */
                 std = sqrt(s1*s2);
 
                 /* Apply noise */
                 switch (oskar_mem_type(vis_amp))
                 {
-                    case OSKAR_SINGLE_COMPLEX:
+                    case OSKAR_SINGLE_COMPLEX: /* Scalar amps. = Stokes-I mode */
                     {
                         float2* amps_;
                         amps_ = oskar_mem_float2(vis_amp, status);
                         r1 = oskar_random_gaussian(&r2);
+                        /* As we are adding noise directly to stokes I
+                         * and the noise is defined as single dipole noise
+                         * we have to divide by sqrt(2) to take into the account
+                         * of the two different dipoles that go into the
+                         * calculation of stokes-I. Note that for polarised mode
+                         * this is not required (npols == 4) as this falls out
+                         * naturally when evaluating stokes-I from the
+                         * dipole correlations (ie. I = 0.5 (XX+YY) ).
+                         */
+                        std = std/sqrt(2);
                         amps_[idx].x += r1 * std + mean;
                         amps_[idx].y += r2 * std + mean;
                         break;
@@ -145,11 +156,12 @@ void oskar_vis_add_system_noise(oskar_Vis* vis,
                         amps_[idx].d.y += r2 * std + mean;
                         break;
                     }
-                    case OSKAR_DOUBLE_COMPLEX:
+                    case OSKAR_DOUBLE_COMPLEX: /* Scalar amps. = Stokes-I mode */
                     {
                         double2* amps_;
                         amps_ = oskar_mem_double2(vis_amp, status);
                         r1 = oskar_random_gaussian(&r2);
+                        std = std/sqrt(2);
                         amps_[idx].x += r1 * std + mean;
                         amps_[idx].y += r2 * std + mean;
                         break;
