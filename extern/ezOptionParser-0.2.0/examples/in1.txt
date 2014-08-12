@@ -1,9 +1,0 @@
--s String1
-# Comment1 here.
--str "String2 Hello World"
-  # Comment2 here too.
---string "String3 # without # comment."
-  -s String4 # Comment3 here.
-	# Comment4 here.
-	-s 'String5 # no # comment # here.' # Comment5.
--s "String6 \# no \# comment # here." # Comment6.
