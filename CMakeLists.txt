@@ -12,17 +12,21 @@ endif()
 
 # === Set the project name and specify the required CMAKE version.
 project(OSKAR CXX C)
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # http://www.cmake.org/Wiki/CMake/Policies
 if("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_GREATER 2.8)
     cmake_policy(SET CMP0042 OLD) # Currently required for cmake-3.x
 endif()
 
 # === Project version.
+set(OSKAR_VERSION_ID "0x020600")
 set(OSKAR_VERSION_MAJOR 2)
 set(OSKAR_VERSION_MINOR 6)
 set(OSKAR_VERSION_PATCH 0)
-set(OSKAR_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
+set(OSKAR_VERSION_SUFFIX "trunk")
+
+# === Add a local module path
+list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake)
 
 # === Setup install directory paths
 # Note: the install directory prefix is set by -DCMAKE_INSTALL_PRFEIX=<path>
@@ -44,8 +48,8 @@ endif()
 
 
 # === Set dependencies and compiler options.
-include(cmake/oskar_dependencies.cmake)
-include(cmake/oskar_compiler_options.cmake)
+include(oskar_dependencies)
+include(oskar_compiler_options)
 
 enable_testing()
 
@@ -174,5 +178,5 @@ install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
     PATTERN .svn EXCLUDE)
 
 # === Include packaging script.
-include(cmake/oskar_packaging.cmake)
+include(oskar_packaging)
 

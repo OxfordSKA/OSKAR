@@ -7,10 +7,6 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE release)
 endif()
 
-message("===============================================================================")
-message("-- INFO: Build type: ${CMAKE_BUILD_TYPE}")
-message("===============================================================================")
-
 set(BUILD_SHARED_LIBS ON)
 
 # Set the include path to include the top-level folder and sub-folders for
@@ -39,10 +35,20 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/utility/log
 )
 
-
+# Build the various version strings to be passed to the code.
+set(OSKAR_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
+set(OSKAR_VERSION_STR "${OSKAR_VERSION}")
+if (OSKAR_VERSION_SUFFIX)
+    set(OSKAR_VERSION_STR "${OSKAR_VERSION}-${OSKAR_VERSION_SUFFIX}")
+endif()
+if (CMAKE_VERSION VERSION_GREATER 2.8.11)
+    string(TIMESTAMP OSKAR_BUILD_DATE "%Y-%m-%d %H:%M:%S")
+endif()
 
 # Set general compiler flags.
 # ------------------------------------------------------------------------------
+add_definitions(-DOSKAR_VERSION=${OSKAR_VERSION_ID})
+add_definitions(-DOSKAR_VERSION_STR="${OSKAR_VERSION_STR}")
 if (NOT WIN32)
     if (NOT APPLE)
         set(CMAKE_CXX_FLAGS "-fPIC")
@@ -247,6 +253,15 @@ if (MSVC)
         endforeach ()
     endif ()
 endif ()
+
+message("===============================================================================")
+message("-- INFO: OSKAR version: ${OSKAR_VERSION_STR} [${OSKAR_VERSION_ID}]")
+if (CMAKE_VERSION VERSION_GREATER 2.8.11)
+    message("-- INFO: Build date: ${OSKAR_BUILD_DATE}")
+endif()
+message("-- INFO: Build type: ${CMAKE_BUILD_TYPE}")
+message("===============================================================================")
+
 
 if (BUILD_INFO)
     message(STATUS "")

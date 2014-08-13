@@ -61,6 +61,9 @@ int main(int argc, char** argv)
     if (!check_options(opt, argc, argv))
         return OSKAR_FAIL;
 
+    oskar_Log* log = oskar_log_create();
+    oskar_log_set_keep_file(log, false);
+
     // Retrieve options. ======================================================
     string settings_file;
     opt.get("-s")->getString(settings_file);
@@ -81,6 +84,24 @@ int main(int argc, char** argv)
         }
     }
 
+    oskar_Settings settings;
+    oskar_settings_load(&settings, 0, settings_file.c_str(), &status);
+    check_error(status);
+    if (!settings.interferometer.noise.enable)
+    {
+        oskar_log_error(log, "Noise addition disabled in the settings.");
+        return EXIT_FAILURE;
+    }
+
+
+    if (verbose)
+    {
+        oskar_log_message(log, 0, "Running binary %s", argv[0]);
+        oskar_log_section(log, "Loading settings file '%s'", settings_file.c_str());
+        oskar_log_settings_interferometer(log, &settings);
+    }
+
+
     if (verbose)
     {
         cout << endl;
@@ -88,35 +109,26 @@ int main(int argc, char** argv)
         cout << "Number of visibility files = " << vis_filename_in.size() << endl;
         for (int i = 0; i < (int)vis_filename_in.size(); ++i)
             cout << "  --> " << vis_filename_in[i] << endl;
+        cout << endl;
         cout << "Settings file = " << settings_file << endl;
-        cout << "Verbose = " << verbose << endl;
-        cout << "In place = " << inplace << endl;
+        cout << "Verbose       = " << verbose << endl;
+        cout << "In place      = " << inplace << endl;
         cout << "---------------------------------------------------------" << endl;
         cout << endl;
     }
 
     // Add uncorrelated noise. ================================================
-    oskar_Settings settings;
-    oskar_settings_load(&settings, 0, settings_file.c_str(), &status);
-    if (!settings.interferometer.noise.enable)
-    {
-        cout << "Warning: Noise addition disabled in the settings." << endl;
-        return EXIT_FAILURE;
-    }
-    check_error(status);
-    if (verbose)
-    {
-        oskar_log_settings_interferometer(0, &settings);
-    }
 
-    oskar_Telescope* tel = oskar_set_up_telescope(&settings, 0, &status);
-    check_error(status);
 
+    oskar_Telescope* tel = oskar_set_up_telescope(&settings, log, &status);
+    check_error(status);
 
     for (int i = 0; i < (int)vis_filename_in.size(); ++i)
     {
-        if (verbose)
+        if (verbose) {
+            cout << endl;
             cout << "Loading visibility file: " << vis_filename_in[i] << endl;
+        }
         oskar_Vis* vis = oskar_vis_read(vis_filename_in[i].c_str(), &status);
         check_error(status);
 
@@ -138,6 +150,7 @@ int main(int argc, char** argv)
     }
 
     oskar_telescope_free(tel, &status);
+    oskar_log_free(log);
     return status;
 }
 

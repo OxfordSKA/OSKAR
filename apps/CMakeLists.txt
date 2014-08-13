@@ -2,6 +2,8 @@
 # src/apps/CMakeLists.txt
 #
 
+add_subdirectory(test)
+
 # === Include build macros used for apps and mex functions.
 include(${OSKAR_SOURCE_DIR}/cmake/oskar_build_macros.cmake)
 

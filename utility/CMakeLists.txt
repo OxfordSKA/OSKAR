@@ -56,6 +56,7 @@ set(utility_SRC
     src/oskar_version_string.c
 )
 
+# TODO move this into the apps folder! (log should ONLY be used for apps)
 list(APPEND utility_SRC
     log/src/oskar_log_accessors.c
     log/src/oskar_log_create.c

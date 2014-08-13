@@ -595,7 +595,6 @@ static void record_timing(int num_devices, int* cuda_device_ids,
     oskar_log_message(log, -1, "");
 }
 
-
 static void log_warning_box(oskar_Log* log, const char* format, ...)
 {
     size_t max_len = 55; /* Controls the width of the box */
