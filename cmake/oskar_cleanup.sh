@@ -51,10 +51,10 @@ rm -f  .DS_Store
 
 # Remove install folders (WARNING: Use this option with CARE!!)
 if [ "$1" == "-uninstall" ]; then
-    rm -rf @OSKAR_BIN_INSTALL_DIR@
-    rm -rf @OSKAR_LIB_INSTALL_DIR@
-    rm -rf @OSKAR_INCLUDE_INSTALL_DIR@
-    rm -rf @OSKAR_MATLAB_INSTALL_DIR@
-    rm -rf @OSKAR_PYTHON_INSTALL_DIR@
+    rm -f @CMAKE_INSTALL_PREFIX@/@OSKAR_BIN_INSTALL_DIR@/oskar*
+    rm -f @CMAKE_INSTALL_PREFIX@/@OSKAR_LIB_INSTALL_DIR@/liboskar*
+    rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_INCLUDE_INSTALL_DIR@
+    rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_MATLAB_INSTALL_DIR@
+    rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_PYTHON_INSTALL_DIR@
 fi
 
