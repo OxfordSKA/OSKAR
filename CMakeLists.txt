@@ -177,6 +177,10 @@ install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
     PATTERN extern EXCLUDE
     PATTERN .svn EXCLUDE)
 
+# === Copy cleanup bash script into the build directory
+configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_cleanup.sh 
+    ${PROJECT_BINARY_DIR}/oskar_cleanup.sh @ONLY)
+
 # === Include packaging script.
 include(oskar_packaging)
 
