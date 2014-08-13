@@ -52,6 +52,19 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_log_warning(oskar_Log* log, const char* format, ...);
 
+/**
+ * @brief
+ * Writes a single line warning message to a log.
+ *
+ * @details
+ * This function writes a warning message to the log.
+ *
+ * @param[in,out] log    Pointer to a log structure.
+ * @param[in]     format Format string (for printf()).
+ */
+OSKAR_EXPORT
+void oskar_log_warning_line(oskar_Log* log, const char* format, ...);
+
 #ifdef __cplusplus
 }
 #endif

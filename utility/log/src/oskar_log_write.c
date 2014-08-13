@@ -174,6 +174,9 @@ static void print_entry(FILE* stream, char code, int depth, int width,
     case -100: /* Special case. */
         sym = "==";
         break;
+    case -101:
+        sym = "";
+        break;
     case 0:
         sym = " +";
         break;

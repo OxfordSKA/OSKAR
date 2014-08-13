@@ -52,6 +52,23 @@ void oskar_log_warning(oskar_Log* log, const char* format, ...)
     va_end(args);
 }
 
+void oskar_log_warning_line(oskar_Log* log, const char* format, ...)
+{
+    char code = 'W';
+    const char* prefix = "";
+    va_list args;
+
+    /* Write to standard output. */
+    va_start(args, format);
+    oskar_log_writev_stdout(code, -101, 0, prefix, format, args);
+    va_end(args);
+
+    /* Write to log file. */
+    va_start(args, format);
+    oskar_log_writev(log, code, -101, 0, prefix, format, args);
+    va_end(args);
+}
+
 #ifdef __cplusplus
 }
 #endif

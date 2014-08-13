@@ -69,6 +69,9 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
+#include <string>
+#include <sstream>
+#include <cstdarg>
 
 using std::vector;
 
@@ -80,6 +83,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
 static void record_timing(int num_devices, int* cuda_device_ids,
         oskar_Timers* timers, oskar_Log* log);
+
+static void log_warning_box(oskar_Log* log, const char* format, ...);
 
 
 extern "C"
@@ -241,7 +246,20 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Add uncorrelated system noise to the visibilities.
     if (settings.interferometer.noise.enable)
     {
+        int have_sources = (num_sky_chunks > 0 && oskar_sky_num_sources(sky_chunks[0]) > 0);
+        int amp_calibrated = settings.telescope.normalise_beams_at_phase_centre;
         int seed = settings.interferometer.noise.seed;
+        // If there are sources in the simulation and the station beam is not
+        // normalised to 1.0 at the phase centre, the values of noise RMS
+        // may give a very unexpected S/N ratio!
+        // The alternative would be to scale the noise to match the station beam
+        // gain but that would require knowledge of the station beam amplitude
+        // at the phase centre for each time and channel...
+        if (have_sources > 0 && !amp_calibrated) {
+            log_warning_box(log, "WARNING: System noise is be added to visibilities "
+                    "without station beam normalisation enabled. This may lead "
+                    "to an invalid signal to noise ratio.");
+        }
         oskar_vis_add_system_noise(vis, tel, seed, &error);
     }
 
@@ -576,3 +594,44 @@ static void record_timing(int num_devices, int* cuda_device_ids,
     oskar_log_message(log, -1, "%4.1f%% Jones correlate.", t_correlate);
     oskar_log_message(log, -1, "");
 }
+
+
+static void log_warning_box(oskar_Log* log, const char* format, ...)
+{
+    size_t max_len = 55; /* Controls the width of the box */
+
+    char buf[5000];
+    va_list args;
+    va_start(args, format);
+    vsprintf(buf, format, args);
+    std::string msg(buf);
+    std::istringstream ss(msg);
+    std::string word, line;
+    oskar_log_warning_line(log, "");
+    oskar_log_warning_line(log, std::string(max_len,'*').c_str());
+    while (std::getline(ss, word, ' ')) {
+        if (line.length() > 0) line += std::string(1, ' ');
+        if ((line.length() + word.length() + 4) >= max_len) {
+            int pad = max_len-line.length()-1;
+            int pad_l = (pad/2) > 1 ? (pad/2) : 1;
+            int pad_r = (pad/2) > 0 ? (pad/2) : 0;
+            if (pad%2==0) pad_r-=1;
+            line = "!" + std::string(pad_l,' ') + line;
+            line += std::string(pad_r,' ') + "!";
+            oskar_log_warning_line(log, line.c_str());
+            line.clear();
+        }
+        line += word;
+    }
+    int pad = max_len-line.length()-1;
+    int pad_l = (pad/2) > 1 ? (pad/2) : 1;
+    int pad_r = (pad/2) > 0 ? (pad/2) : 0;
+    if (pad%2==0) pad_r-=1;
+    line = "!" + std::string(pad_l,' ') + line;
+    line += std::string(pad_r,' ') + "!";
+    oskar_log_warning_line(log, line.c_str());
+    oskar_log_warning_line(log, std::string(max_len,'*').c_str());
+    oskar_log_warning_line(log, "");
+}
+
+
