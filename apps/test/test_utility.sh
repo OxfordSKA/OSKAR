@@ -24,6 +24,7 @@
 #   3. Functions for working with OSKAR.                                      #
 #       - set_setting                                                         #
 #       - run_sim_interferomer                                                #
+#       - run_beam_pattern                                                    #
 #       - run_imager                                                          #
 #       - run_vis_add_noise                                                   #
 ###############################################################################
@@ -214,6 +215,30 @@ function run_sim_interferometer() {
     if [ ! $# -eq 1 ]; then
         echo "ERROR: run_sim_interferomter requires 1 input arguments got $#."
         echo "usage: run_sim_interferomter [ini_file]"
+        exit 1
+    fi
+    eval "${bin} $1"
+}
+
+# Description:
+#   Runs the 'oskar_sim_beam_pattern' binary using the specified settings 
+#   file.
+#
+# Usage:
+#   run_beam_pattern [ini_file]
+#
+# Example
+#   run_beam_pattern test.ini
+#
+function run_beam_pattern() {
+    local bin=${oskar_app_path}/oskar_sim_beam_pattern
+    if [ ! -x ${bin} ]; then
+        echo "ERROR: Unable to find required binary: $bin."
+        exit 1
+    fi
+    if [ ! $# -eq 1 ]; then
+        echo "ERROR: run_beam_pattern requires 1 input arguments got $#."
+        echo "usage: run_beam_pattern [ini_file]"
         exit 1
     fi
     eval "${bin} $1"
