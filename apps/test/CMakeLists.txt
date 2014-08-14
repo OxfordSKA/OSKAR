@@ -8,5 +8,7 @@ macro(copy_test_file NAME)
     configure_file(${SRC_DIR}/${NAME} ${DST_DIR}/${NAME} @ONLY)
 endmacro()
 
-copy_test_file(run_example_3_3.sh)
+copy_test_file(test_utility.sh)
+copy_test_file(run_example_interferometry.sh)
+copy_test_file(run_example_add_noise.sh)
 
