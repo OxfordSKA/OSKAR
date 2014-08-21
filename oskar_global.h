@@ -30,26 +30,29 @@
 #define OSKAR_GLOBAL_H_
 
 /**
- * @brief Macro used to determine the version of OSKAR.
+ * @def OSKAR_VERSION
+ *
+ * @brief OSKAR_VERSION is a macro used to determine the version of OSKAR.
  *
  * @details
  * This macro expands to a numeric value of the form 0xMMNNPP (MM = major,
  * NN = minor, PP = patch) that specifies the version number of the OSKAR
  * library. For example, in OSKAR version 2.1.3 this would expand to
  * 0x020103.
+ * NOTE this value is set in the CMake build system
  */
-/* This value is now set in the top level CMakeLists.txt */
-/*#define OSKAR_VERSION 0x020600*/
 
 /**
- * @brief Macro used to return the version of OSKAR as a text string.
+ * @def OSKAR_VERSION_STR
+ *
+ * @brief OSKAR_VERSION_STR is a macro used to return the version of OSKAR as
+ * a text string.
  *
  * @details
  * This macro expands to a string that specifies the OSKAR version number
  * (for example, "2.1.3").
+ * NOTE this value is set in the CMake build system
  */
-/* This value is now set in the top level CMakeLists.txt */
-/*#define OSKAR_VERSION_STR "2.6.0-trunk"*/
 
 /**
  * @brief
@@ -62,7 +65,7 @@
  * All OSKAR error codes are negative.
  * Positive error codes indicate CUDA run-time execution errors.
  */
-enum {
+enum OSKAR_ERROR_CODES {
     /* Indicates that no error has occurred. */
     OSKAR_SUCCESS                      = 0,
 
@@ -269,7 +272,8 @@ enum {
     OSKAR_RELATIVE_DIRECTION_COSINES
 };
 
-/* Macros used to prevent Eclipse from complaining about unknown CUDA syntax. */
+/* Macros used to prevent Eclipse from complaining about unknown CUDA syntax
+ * and a few other things */
 #ifdef __CDT_PARSER__
     #define __global__
     #define __device__
@@ -283,6 +287,8 @@ enum {
     #define __CUDACC__
     #define __CUDA_ARCH__ 200
     #define _OPENMP
+    #define OSKAR_VERSION_STR "OSKAR_VERSION_ERROR"
+    #define OSKAR_VERSION 0x999999
 #else
     #define OSKAR_CUDAK_CONF(...) <<< __VA_ARGS__ >>>
 #endif
