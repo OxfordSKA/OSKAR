@@ -16,6 +16,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/apps
     ${PROJECT_SOURCE_DIR}/apps/lib
+    ${PROJECT_SOURCE_DIR}/apps/log
     ${PROJECT_SOURCE_DIR}/convert
     ${PROJECT_SOURCE_DIR}/correlate
     ${PROJECT_SOURCE_DIR}/element
@@ -32,8 +33,9 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/splines
     ${PROJECT_SOURCE_DIR}/station
     ${PROJECT_SOURCE_DIR}/utility
-    ${PROJECT_SOURCE_DIR}/utility/log
 )
+set(GTEST_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include/gtest)
+set(EZOPT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/ezOptionParser-0.2.0)
 
 # Build the various version strings to be passed to the code.
 set(OSKAR_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
@@ -46,80 +48,87 @@ if (CMAKE_VERSION VERSION_GREATER 2.8.11)
 endif()
 
 # Set general compiler flags.
-# ------------------------------------------------------------------------------
 add_definitions(-DOSKAR_VERSION=${OSKAR_VERSION_ID})
 add_definitions(-DOSKAR_VERSION_STR="${OSKAR_VERSION_STR}")
 if (NOT WIN32)
-    if (NOT APPLE)
-        set(CMAKE_CXX_FLAGS "-fPIC")
-        set(CMAKE_C_FLAGS "-fPIC")
-    endif ()
+    # Common compiler options. Note C code is compiled as gnu89 in order to 
+    # allow for a number of non C89 compiler extensions such as sinf, powf, 
+    # strtok_r as well as gnu inline mode which is needed for CUDA Thurst with
+    # some compilers.
+    set(CMAKE_C_FLAGS "-fPIC -std=gnu89")
+    set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
+    set(CMAKE_C_FLAGS_DEBUG "-O0 -g -Wall")
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g -Wall")
+    set(CMAKE_C_FLAGS_MINSIZEREL "-O1 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    set(CMAKE_CXX_FLAGS "-fPIC")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -Wall")
+    set(CMAKE_CXX_FLAGS_MINSIZEREL "-O1 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")  
 
-    if (CMAKE_COMPILER_IS_GNUCXX)    
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-show-option")
-    endif ()
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        # Using Clang or GNU compilers.
 
-    if (CMAKE_COMPILER_IS_GNUCC)
+        # Treat CUDA, CASA, GTEST, and ezOptionParser headers as system headers.
+        # This avoids a number of warning supression flags. 
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${GTEST_INCLUDE_DIR}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${GTEST_INCLUDE_DIR}/internal")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${CASACORE_INCLUDE_DIR}/casacore")
+
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-show-option")
-    endif ()
-
-    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    set(CMAKE_C_FLAGS_RELEASE   "-O2 -DNDEBUG")
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -Wall -Wno-unused-function")
-    set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g -Wall -Wno-unused-function")
-    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall")
-    set(CMAKE_C_FLAGS_DEBUG   "-O0 -g -Wall")
-    set(CMAKE_CXX_FLAGS_MINSIZEREL "-O1 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    set(CMAKE_C_FLAGS_MINSIZEREL "-O1 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-
-    if (CMAKE_COMPILER_IS_GNUCC)
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wextra")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -pedantic")
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wcast-align")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wcast-qual")
+        # long-long is required for C as cfitsio headers pull this into OSKAR 
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-long-long")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-variadic-macros")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-unused-function")
-    endif ()
-
-    if (CMAKE_COMPILER_IS_GNUCXX)
+        set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -Wno-unused-function")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-show-option")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wextra")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pedantic")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-align")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-qual")
+        # long-long is required for C++ as ezOptionParser, gTest, and Qt headers
+        # all pull this into OSKAR.
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-long-long")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-variadic-macros")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-function")
-    endif ()
+        set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -Wno-unused-function")
+        if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+            set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wcast-align")
+            set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-align")
+        endif()
+        if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+            # Tell Clang to use libstdc++ rather than libc++
+            # This is required if any of the OSKAR dependencies are built
+            # against libstdc++. libc++ seems not to be ABI compatible with
+            # libstdc++ so this is currently required.
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
+        endif()
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+        # Using Intel compilers.
+    endif()
+else()
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /D QT_NO_DEBUG /D QT_NO_DEBUG_OUTPUT")
 
-    if (${CMAKE_C_COMPILER} MATCHES "icc.*$")
-        set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   -Wcheck")
-        set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   -wd2259")
-        set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   -wd1125")
-    endif ()
+        # Disable warning about loss of precision converting double to float.
+        set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}   /wd4244")
+        set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}     /wd4244")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /wd4244")
+        set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   /wd4244")
 
-    if (${CMAKE_CXX_COMPILER} MATCHES "icpc.*$")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcheck")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -wd2259")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -wd1125")
-    endif ()
-elseif (MSVC)
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /D QT_NO_DEBUG /D QT_NO_DEBUG_OUTPUT")
-
-    # Disable warning about loss of precision converting double to float.
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /wd4244")
-    set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}   /wd4244")
-    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   /wd4244")
-    set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}     /wd4244")
-
-    # Disable nonsensical warning about fopen.
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /wd4996")
-    set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}   /wd4996")
-    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   /wd4996")
-    set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}     /wd4996")
+        # Disable nonsensical warning about fopen.
+        set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}   /wd4996")
+        set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}     /wd4996")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /wd4996")
+        set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   /wd4996")
+    endif()
 endif ()
 
 # Rpath settings for OS X
@@ -151,12 +160,9 @@ if (CUDA_FOUND)
         list(APPEND CUDA_NVCC_FLAGS_RELWIDTHDEBINFO -Xcompiler;-g)
         list(APPEND CUDA_NVCC_FLAGS_MINSIZEREL -Xcompiler;-01)
 
-        if (CMAKE_COMPILER_IS_GNUCC)
+        if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
             list(APPEND CUDA_NVCC_FLAGS -Xcompiler;-fvisibility=hidden;)
-            if (NOT APPLE)
-                list(APPEND CUDA_NVCC_FLAGS_RELEASE -Xcompiler;-fPIC;)
-                list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-fPIC;)
-            endif()
+            list(APPEND CUDA_NVCC_FLAGS -Xcompiler;-fPIC;)
             list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wall;)
             list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wextra;)
             list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-parameter;)
@@ -166,13 +172,6 @@ if (CUDA_FOUND)
             list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-missing-field-initializers;)
             # Disable warning about "unsigned int* __get_precalculated_matrix(int) defined but not used".
             list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-function;)
-            # Ignore warnings from CUDA headers by specifying them as system headers.
-            set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -isystem ${CUDA_INCLUDE_DIRS}")
-            set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} -isystem ${CUDA_INCLUDE_DIRS}")
-            if (NOT APPLE)
-                # Disable warning about "variable '__f' set but not used".
-                list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-but-set-variable;)
-            endif ()
         endif()
         # PTX compiler options
         #list(APPEND CUDA_NVCC_FLAGS_RELEASE --ptxas-options=-v;)
@@ -255,39 +254,36 @@ if (MSVC)
 endif ()
 
 message("===============================================================================")
-message("-- INFO: OSKAR version: ${OSKAR_VERSION_STR} [${OSKAR_VERSION_ID}]")
+message("-- INFO: OSKAR version  ${OSKAR_VERSION_STR} [${OSKAR_VERSION_ID}]")
 if (CMAKE_VERSION VERSION_GREATER 2.8.11)
-    message("-- INFO: Build date: ${OSKAR_BUILD_DATE}")
+    message("-- INFO: Build date     ${OSKAR_BUILD_DATE}")
 endif()
-message("-- INFO: Build type: ${CMAKE_BUILD_TYPE}")
+message("-- INFO: Build type     ${CMAKE_BUILD_TYPE}")
+message("-- INFO: Compiler ID    ${CMAKE_C_COMPILER_ID}:${CMAKE_CXX_COMPILER_ID}")
 message("===============================================================================")
 
-
+#set(BUILD_INFO OFF) # Enable with -DBUILD_INFO=ON when running cmake
 if (BUILD_INFO)
-    message(STATUS "")
-    message(STATUS "****************************************************************************")
-    message(STATUS "Compiler Options:")
-    message(STATUS "  Build type: ${CMAKE_BUILD_TYPE}")
-    message(STATUS "  C++ compiler: ${CMAKE_CXX_COMPILER}")
-    message(STATUS "  C compiler: ${CMAKE_C_COMPILER}")
+    message("===============================================================================")
+    message(STATUS "C++ compiler : ${CMAKE_CXX_COMPILER}")
+    message(STATUS "C compiler   : ${CMAKE_C_COMPILER}")
     if (${CMAKE_BUILD_TYPE} MATCHES release)
-        message(STATUS "  C++ flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
-        message(STATUS "  C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
-        message(STATUS "  CUDA flags: ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_RELEASE}")
+        message(STATUS "C++ flags    : ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+        message(STATUS "C flags      : ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}")
+        message(STATUS "CUDA flags   : ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_RELEASE}")
     elseif (${CMAKE_BUILD_TYPE} MATCHES debug)
-        message(STATUS "  C++ flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
-        message(STATUS "  C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
-        message(STATUS "  CUDA flags: ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_DEBUG}")
+        message(STATUS "C++ flags    : ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
+        message(STATUS "C flags      : ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}")
+        message(STATUS "CUDA flags   : ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_DEBUG}")
     elseif (${CMAKE_BUILD_TYPE} MATCHES relwithdebinfo)
-        message(STATUS "  C++ flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-        message(STATUS "  C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELWITHDEBINFO}")
-        message(STATUS "  CUDA flags: ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_RELWITHDEBINFO}")
+        message(STATUS "C++ flags    : ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+        message(STATUS "C flags      : ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+        message(STATUS "CUDA flags   : ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_RELWITHDEBINFO}")
     elseif (${CMAKE_BUILD_TYPE} MATCHES minsizerel)
-        message(STATUS "  C++ flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_MINSIZEREL}")
-        message(STATUS "  C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_MINSIZEREL}")
-        message(STATUS "  CUDA flags: ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_MINSIZEREL}")
-    endif ()
-    message(STATUS "****************************************************************************")
-    message(STATUS "")
+        message(STATUS "C++ flags    : ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_MINSIZEREL}")
+        message(STATUS "C flags      : ${CMAKE_C_FLAGS}$ {CMAKE_C_FLAGS_MINSIZEREL}")
+        message(STATUS "CUDA flags   : ${CUDA_NVCC_FLAGS} ${CUDA_NVCC_FLAGS_MINSIZEREL}")
+    endif()
+    message("===============================================================================")
 endif (BUILD_INFO)
 

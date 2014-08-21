@@ -56,7 +56,7 @@ int oskar_cuda_info_create(oskar_CudaInfo** info)
     if (error != cudaSuccess || inf->num_devices == 0)
     {
         fprintf(stderr, "Unable to determine number of CUDA devices: %s\n",
-                cudaGetErrorString(error));
+                cudaGetErrorString((cudaError_t)error));
         return error;
     }
 

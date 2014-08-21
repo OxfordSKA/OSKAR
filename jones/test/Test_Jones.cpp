@@ -554,7 +554,7 @@ TEST(Jones, join_in_place_matx_matx_matx_doubleMix_doubleCPU)
 
 static void test_ones(int precision, int location)
 {
-    oskar_Jones *jones, *temp, *j_ptr;
+    oskar_Jones *jones, *temp = 0, *j_ptr;
     int status = 0, num_stations, num_sources;
 
     // Test scalar complex type.

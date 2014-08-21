@@ -39,8 +39,6 @@
 #include <iostream>
 #include <cstdio>
 
-static const int width = 40;
-
 using namespace std;
 
 int main(int argc, char **argv)
@@ -49,12 +47,9 @@ int main(int argc, char **argv)
 
     oskar_OptionParser opt("oskar_vis_summary", oskar_version_string());
     opt.addRequired("OSKAR visibility file");
-    opt.addFlag("-l", "Display the simulation log.",
-            false, "--log");
-    opt.addFlag("-s", "Display the simulation settings file.",
-            false, "--settings");
-    if (!opt.check_options(argc, argv))
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    opt.addFlag("-l", "Display the simulation log.", false, "--log");
+    opt.addFlag("-s", "Display the simulation settings file.", false, "--settings");
+    if (!opt.check_options(argc, argv)) return OSKAR_ERR_INVALID_ARGUMENT;
 
     const char* filename = opt.getArg(0);
     bool displayLog = opt.isSet("-l") ? true : false;
@@ -78,39 +73,23 @@ int main(int argc, char **argv)
     oskar_Log* log = 0;
     if (!(displayLog || displaySettings))
     {
-        oskar_log_section(log, "Visibilities summary");
-        oskar_log_value(log, 0, width, "File", "%s", filename);
-        oskar_log_value(log, 0, width, "Created with OSKAR version",
-                "%i.%i.%i", vMajor, vMinor, vPatch);
-        oskar_log_value(log, 0, width, "Precision", "%s", oskar_mem_is_double(
-                oskar_vis_amplitude_const(vis)) ? "double" : "single");
-        oskar_log_value(log, 0, width, "Amplitude type", "%s",
-                oskar_mem_data_type_string(oskar_mem_type(
-                        oskar_vis_amplitude_const(vis))));
-        oskar_log_value(log, 0, width, "No. stations", "%d",
-                oskar_vis_num_stations(vis));
-        oskar_log_value(log, 0, width, "No. channels", "%d",
-                oskar_vis_num_channels(vis));
-        oskar_log_value(log, 0, width, "No. times", "%d",
-                oskar_vis_num_times(vis));
-        oskar_log_value(log, 0, width, "No. baselines", "%d",
-                oskar_vis_num_baselines(vis));
-        oskar_log_value(log, 0, width, "No. polarisations", "%d",
-                oskar_vis_num_pols(vis));
-        oskar_log_value(log, 0, width, "Data order", "%s",
-                "{channel, time, baseline, polarisation}");
-        oskar_log_value(log, 0, width, "Start frequency (MHz)", "%.6f",
-                oskar_vis_freq_start_hz(vis)/1.e6);
-        oskar_log_value(log, 0, width, "Channel separation (Hz)", "%f",
-                oskar_vis_freq_inc_hz(vis));
-        oskar_log_value(log, 0, width, "Channel bandwidth (Hz)", "%f",
-                oskar_vis_channel_bandwidth_hz(vis));
-        oskar_log_value(log, 0, width, "Start time (MJD, UTC)", "%f",
-                oskar_vis_time_start_mjd_utc(vis));
-        oskar_log_value(log, 0, width, "Time increment (s)", "%f",
-                oskar_vis_time_inc_sec(vis));
-        oskar_log_value(log, 0, width, "Integration time (s)", "%f",
-                oskar_vis_time_average_sec(vis));
+        oskar_log_section(log, 'M', "Visibilities summary");
+        oskar_log_list_value(log, 'M', 0, "File", "%s", filename);
+        oskar_log_list_value(log, 'M', 0, "Created with OSKAR version", "%i.%i.%i", vMajor, vMinor, vPatch);
+        oskar_log_list_value(log, 'M', 0, "Precision", "%s", oskar_mem_is_double(oskar_vis_amplitude_const(vis)) ? "double" : "single");
+        oskar_log_list_value(log, 'M', 0, "Amplitude type", "%s", oskar_mem_data_type_string(oskar_mem_type(oskar_vis_amplitude_const(vis))));
+        oskar_log_list_value(log, 'M', 0, "No. stations", "%d", oskar_vis_num_stations(vis));
+        oskar_log_list_value(log, 'M', 0, "No. channels", "%d", oskar_vis_num_channels(vis));
+        oskar_log_list_value(log, 'M', 0, "No. times", "%d", oskar_vis_num_times(vis));
+        oskar_log_list_value(log, 'M', 0, "No. baselines", "%d", oskar_vis_num_baselines(vis));
+        oskar_log_list_value(log, 'M', 0, "No. polarisations", "%d", oskar_vis_num_pols(vis));
+        oskar_log_list_value(log, 'M', 0, "Data order", "%s", "{channel, time, baseline, polarisation}");
+        oskar_log_list_value(log, 'M', 0, "Start frequency (MHz)", "%.6f", oskar_vis_freq_start_hz(vis)/1.e6);
+        oskar_log_list_value(log, 'M', 0, "Channel separation (Hz)", "%f", oskar_vis_freq_inc_hz(vis));
+        oskar_log_list_value(log, 'M', 0, "Channel bandwidth (Hz)", "%f", oskar_vis_channel_bandwidth_hz(vis));
+        oskar_log_list_value(log, 'M', 0, "Start time (MJD, UTC)", "%f", oskar_vis_time_start_mjd_utc(vis));
+        oskar_log_list_value(log, 'M', 0, "Time increment (s)", "%f", oskar_vis_time_inc_sec(vis));
+        oskar_log_list_value(log, 'M', 0, "Integration time (s)", "%f", oskar_vis_time_average_sec(vis));
     }
     oskar_vis_free(vis, &status);
     vis = 0;
@@ -156,8 +135,7 @@ int main(int argc, char **argv)
         {
             oskar_Mem *temp;
             temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &status);
-            oskar_binary_read_mem(h, temp,
-                    OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
+            oskar_binary_read_mem(h, temp, OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
             oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);
             if (!status)
             {

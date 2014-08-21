@@ -6,6 +6,9 @@
 # WARNING: Must only be run from inside the top level of the build directory
 #
 
+# NOTE: This check inserts the CMAKE build directory into this script. 
+# If the build directory is a symbolic link this check will fail if used
+# from the absolute path rather than the link directory.
 if [ ! "$PWD" == "@PROJECT_BINARY_DIR@" ]; then
     echo "ERROR: This script MUST be run from the top level build directory."
     exit 1
@@ -49,10 +52,13 @@ rm -rf OSKAR-*-Example-Data
 # Remove OS X .DS_Store file
 rm -f  .DS_Store
 
+# Remove any stray log files
+rm -f  *.log
+
 # Remove install folders (WARNING: Use this option with CARE!!)
 if [ "$1" == "-uninstall" ]; then
-    rm -f @CMAKE_INSTALL_PREFIX@/@OSKAR_BIN_INSTALL_DIR@/oskar*
-    rm -f @CMAKE_INSTALL_PREFIX@/@OSKAR_LIB_INSTALL_DIR@/liboskar*
+    rm -f  @CMAKE_INSTALL_PREFIX@/@OSKAR_BIN_INSTALL_DIR@/oskar*
+    rm -f  @CMAKE_INSTALL_PREFIX@/@OSKAR_LIB_INSTALL_DIR@/liboskar*
     rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_INCLUDE_INSTALL_DIR@
     rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_MATLAB_INSTALL_DIR@
     rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_PYTHON_INSTALL_DIR@

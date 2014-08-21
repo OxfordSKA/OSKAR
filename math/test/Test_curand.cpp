@@ -158,21 +158,31 @@ TEST(curand, test_state_allocation)
     oskar_random_state_free(random_state, &status);
 }
 
-
 #ifdef _OPENMP
 
 TEST(curand, test_multi_device)
 {
     int num_devices = 0;
+    int max_threads = 2;
     cudaGetDeviceCount(&num_devices);
-    omp_set_num_threads(min(num_devices, 2));
+    omp_set_num_threads(min(num_devices, max_threads));
     int use_device[4] = {0, 1, 2, 3};
+#if defined(__INTEL_COMPILER)
+    /* The Intel compiler doesn't seem to like GTest macros inside
+     * OpenMP parallel regions therefore the results of the tests are
+     * stored and checked after the parallel region is complete */
+    int iError[2][3]; /* per-thread, per-check error code [thread][check] */
+#endif
 
     #pragma omp parallel
     {
         int thread_id = omp_get_thread_num();
         int error = (int)cudaSetDevice(use_device[thread_id]);
+#if defined( __INTEL_COMPILER)
+        iError[thread_id][0] = error;
+#else
         EXPECT_EQ(0, error) << oskar_get_error_string(error);
+#endif
 
         int device_id = 0;
         cudaGetDevice(&device_id);
@@ -186,7 +196,11 @@ TEST(curand, test_multi_device)
         int num_states = (int)2e4; // FIXME This was 2e5 - OK to reduce for the test?
         oskar_RandomState* d_states = oskar_random_state_create(num_states,
                 seed, 0, 0, &error);
+#if defined(__INTEL_COMPILER)
+        iError[thread_id][1] = error;
+#else
         EXPECT_EQ(0, error) << oskar_get_error_string(error);
+#endif
 
         int num_iter = 2;
         int num_blocks  = 1;
@@ -219,8 +233,24 @@ TEST(curand, test_multi_device)
         fclose(file);
         oskar_random_state_free(d_states, &error);
         oskar_mem_free(d_values, &error);
+#if defined(__INTEL_COMPILER)
+        iError[thread_id][2] = error;
+#else
         EXPECT_EQ(0, error) << oskar_get_error_string(error);
+#endif
+    } /* End of omp parallel region */
+
+    #if defined(__INTEL_COMPILER)
+    for (int t = 0; t < omp_get_num_threads(); ++t) {
+        for (int c = 0; c < 3; ++c) {
+            int error = iError[t][c];
+            if (error != 0) {
+                FAIL() << "device:" <<t << ", check:" << c
+                       << " : '" << oskar_get_error_string(error) << "'";
+            }
+        }
     }
+    #endif
 }
 
 #endif /* _OPENMP */

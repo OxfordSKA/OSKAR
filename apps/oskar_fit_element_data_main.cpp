@@ -40,14 +40,18 @@ int main(int argc, char** argv)
 
     oskar_OptionParser opt("oskar_fit_element_data", oskar_version_string());
     opt.addRequired("settings file");
+    opt.addFlag("-q", "Suppress printing.", false, "--quiet");
     if (!opt.check_options(argc, argv))
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     const char* settings_file = opt.getArg(0);
 
     // Create the log.
-    oskar_Log* log = oskar_log_create();
-    oskar_log_message(log, 0, "Running binary %s", argv[0]);
+    int file_priority = OSKAR_LOG_MESSAGE;
+    int term_priority = opt.isSet("-q") ? OSKAR_LOG_WARN : OSKAR_LOG_MESSAGE;
+    oskar_Log* log = oskar_log_create(file_priority, term_priority);
+
+    oskar_log_list(log, 'M', 0, "Running binary %s", argv[0]);
 
     // Do the fitting.
     oskar_fit_element_data(settings_file, log, &error);

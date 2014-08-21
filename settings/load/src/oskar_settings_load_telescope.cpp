@@ -44,7 +44,7 @@
 
 static int get_seed(const QVariant& t)
 {
-    return (t.toString().toLower() == "time" || t.toInt() < 0) ?
+    return (t.toString().toLower() == "time" || t.toInt() < 1) ?
             (int)time(NULL) : t.toInt();
 }
 

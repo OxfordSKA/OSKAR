@@ -57,6 +57,8 @@
  *  ...  = repeating elements, "and so on" (e.g.
  *  |    = mutually exclusive (e.g.
  *
+ * TODO better handling of unexpected options. It would be useful if a warning
+ * could be printed.
  */
 class oskar_OptionParser : public ez::ezOptionParser
 {

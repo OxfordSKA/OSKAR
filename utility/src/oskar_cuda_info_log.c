@@ -36,57 +36,57 @@ extern "C" {
 int oskar_cuda_info_log(oskar_Log* log, const oskar_CudaInfo* info)
 {
     int i;
-    int width = 40;
+    char p = 'M'; /* Log entry priority = message */
 
-    oskar_log_section(log, "CUDA System Information");
+    oskar_log_section(log, 'M', "CUDA System Information");
 
     /* Print driver and runtime version. */
-    oskar_log_value(log, 0, width, "CUDA driver version", "%d.%d",
+    oskar_log_list_value(log, p, 0, "CUDA driver version", "%d.%d",
             info->driver_version / 1000, (info->driver_version % 100) / 10);
-    oskar_log_value(log, 0, width, "CUDA runtime version", "%d.%d",
+    oskar_log_list_value(log, p, 0, "CUDA runtime version", "%d.%d",
             info->runtime_version / 1000, (info->runtime_version % 100) / 10);
-    oskar_log_value(log, 0, width, "Number of CUDA devices detected", "%d",
+    oskar_log_list_value(log, p, 0, "Number of CUDA devices detected", "%d",
             info->num_devices);
 
     /* Print device array. */
     for (i = 0; i < info->num_devices; ++i)
     {
-        oskar_log_message(log, 0, "Device %d (%s):", i, info->device[i].name);
-        oskar_log_value(log, 1, width, "Compute capability", "%d.%d",
+        oskar_log_list(log, p, 0, "Device %d (%s):", i, info->device[i].name);
+        oskar_log_list_value(log, p, 1, "Compute capability", "%d.%d",
                 info->device[i].compute.capability.major,
                 info->device[i].compute.capability.minor);
-        oskar_log_value(log, 1, width, "Supports double precision", "%s",
+        oskar_log_list_value(log, p, 1, "Supports double precision", "%s",
                 info->device[i].supports_double ? "true" : "false");
-        oskar_log_value(log, 1, width, "Global memory (MiB)", "%.1f",
+        oskar_log_list_value(log, p, 1, "Global memory (MiB)", "%.1f",
                 info->device[i].global_memory_size / 1024.0);
-        oskar_log_value(log, 1, width, "Free global memory (MiB)", "%.1f",
+        oskar_log_list_value(log, p, 1, "Free global memory (MiB)", "%.1f",
                 info->device[i].free_memory / 1024.0);
-        oskar_log_value(log, 1, width, "Number of multiprocessors", "%d",
+        oskar_log_list_value(log, p, 1, "Number of multiprocessors", "%d",
                 info->device[i].num_multiprocessors);
-        oskar_log_value(log, 1, width, "Number of CUDA cores", "%d",
+        oskar_log_list_value(log, p, 1, "Number of CUDA cores", "%d",
                 info->device[i].num_cores);
-        oskar_log_value(log, 1, width, "GPU clock speed (MHz)", "%.0f",
+        oskar_log_list_value(log, p, 1, "GPU clock speed (MHz)", "%.0f",
                 info->device[i].gpu_clock / 1000.0);
-        oskar_log_value(log, 1, width, "Memory clock speed (MHz)", "%.0f",
+        oskar_log_list_value(log, p, 1, "Memory clock speed (MHz)", "%.0f",
                 info->device[i].memory_clock / 1000.0);
-        oskar_log_value(log, 1, width, "Memory bus width", "%d-bit",
+        oskar_log_list_value(log, p, 1, "Memory bus width", "%d-bit",
                 info->device[i].memory_bus_width);
-        oskar_log_value(log, 1, width, "Level-2 cache size (kiB)", "%d",
+        oskar_log_list_value(log, p, 1, "Level-2 cache size (kiB)", "%d",
                 info->device[i].level_2_cache_size / 1024);
-        oskar_log_value(log, 1, width, "Shared memory size (kiB)", "%d",
+        oskar_log_list_value(log, p, 1, "Shared memory size (kiB)", "%d",
                 info->device[i].shared_memory_size / 1024);
-        oskar_log_value(log, 1, width, "Registers per block", "%d",
+        oskar_log_list_value(log, p, 1, "Registers per block", "%d",
                 info->device[i].num_registers);
-        oskar_log_value(log, 1, width, "Warp size", "%d",
+        oskar_log_list_value(log, p, 1, "Warp size", "%d",
                 info->device[i].warp_size);
-        oskar_log_value(log, 1, width, "Max threads per block", "%d",
+        oskar_log_list_value(log, p, 1, "Max threads per block", "%d",
                 info->device[i].max_threads_per_block);
-        oskar_log_value(log, 1, width, "Max dimensions of a thread block",
+        oskar_log_list_value(log, p, 1, "Max dimensions of a thread block",
                 "(%d x %d x %d)",
                 info->device[i].max_threads_dim[0],
                 info->device[i].max_threads_dim[1],
                 info->device[i].max_threads_dim[2]);
-        oskar_log_value(log, 1, width, "Max dimensions of a grid",
+        oskar_log_list_value(log, p, 1, "Max dimensions of a grid",
                 "(%d x %d x %d)",
                 info->device[i].max_grid_size[0],
                 info->device[i].max_grid_size[1],

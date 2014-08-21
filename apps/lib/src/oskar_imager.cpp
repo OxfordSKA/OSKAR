@@ -56,7 +56,7 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
     const char* filename;
 
     // Load the settings file.
-    oskar_log_section(log, "Loading settings file '%s'", settings_file);
+    oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
     oskar_settings_load(&settings, log, settings_file, &error);
     if (error)
     {
@@ -93,14 +93,14 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
 
     // Make the image.
     tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
-    oskar_log_section(log, "Starting OSKAR imager...");
+    oskar_log_section(log, 'M', "Starting OSKAR imager...");
     oskar_timer_start(tmr);
     image = oskar_make_image(log, vis, &settings.image, &error);
     if (error)
         oskar_log_error(log, "Failure in oskar_make_image() [code: %i] (%s).",
                 error, oskar_get_error_string(error));
     else
-        oskar_log_section(log, "Imaging completed in %.3f sec.",
+        oskar_log_section(log, 'M', "Imaging completed in %.3f sec.",
                 oskar_timer_elapsed(tmr));
     oskar_vis_free(vis, &error);
     oskar_timer_free(tmr);
@@ -109,20 +109,20 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
     filename = settings.image.oskar_image;
     if (filename && !error)
     {
-        oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
+        oskar_log_list(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
         oskar_image_write(image, log, filename, 0, &error);
     }
 #ifndef OSKAR_NO_FITS
     filename = settings.image.fits_image;
     if (filename && !error)
     {
-        oskar_log_message(log, 0, "Writing FITS image file: '%s'", filename);
+        oskar_log_list(log, 'M', 0, "Writing FITS image file: '%s'", filename);
         oskar_fits_image_write(image, log, filename, &error);
     }
 #endif
 
     if (!error)
-        oskar_log_section(log, "Run complete.");
+        oskar_log_section(log, 'M', "Run complete.");
     oskar_image_free(image, &error);
     cudaDeviceReset();
     return error;

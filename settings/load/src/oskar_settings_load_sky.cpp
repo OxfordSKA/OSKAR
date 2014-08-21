@@ -290,5 +290,5 @@ static int get_seed(const QVariant& t)
 {
     QString str = t.toString().toUpper();
     int val = str.toInt();
-    return (str == "TIME" || val < 0) ? (int)time(NULL) : val;
+    return (str == "TIME" || val < 1) ? (int)time(NULL) : val;
 }

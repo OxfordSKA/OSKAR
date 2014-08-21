@@ -249,7 +249,7 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
         int vis_chan = im_chan_range[0] + c;
         double im_freq = oskar_image_freq_start_hz(im) +
                 c * oskar_image_freq_inc_hz(im);
-        oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
+        oskar_log_list(log, 'M', 0, "Channel %3d/%d [%.4f MHz]",
                 c + 1, im_num_chan, im_freq / 1e6);
 
         for (int t = 0; t < im_num_times; ++t)
@@ -288,7 +288,7 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
             {
                 if (*status) break;
 
-                oskar_log_message(log, 1, "Making image %3i/%i, "
+                oskar_log_list(log, 'M', 1, "Making image %3i/%i, "
                         "cube index (c=%i, t=%i, p=%i)",
                         i+1, (im_num_chan*im_num_times*num_pols), c, t, p);
 
@@ -311,7 +311,7 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
                     }
                 }
 
-                oskar_log_message(log, 2, "Number of visibilities %i",
+                oskar_log_list(log, 'M', 2, "Number of visibilities %i",
                         (int)oskar_mem_length(vis_im));
 
                 /* Get pointer to slice of the image cube. */

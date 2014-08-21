@@ -157,7 +157,7 @@ int benchmark(int num_elements, int num_directions, OpType op_type,
     if (status) return status;
     station->array_is_3d = (evaluate_2d) ? OSKAR_FALSE : OSKAR_TRUE;
 
-    oskar_Mem *x, *y, *z, *weights, *beam, *signal;
+    oskar_Mem *x, *y, *z, *weights = 0, *beam = 0, *signal = 0;
     x = oskar_mem_create(precision, loc, num_directions, &status);
     y = oskar_mem_create(precision, loc, num_directions, &status);
     z = oskar_mem_create(precision, loc, num_directions, &status);

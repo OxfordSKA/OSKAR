@@ -36,8 +36,11 @@ set_setting $ini beam_pattern/fits_file/save_total_intensity true
 set_setting $ini beam_pattern/oskar_image_file/save_voltage  false
 set_setting $ini beam_pattern/oskar_image_file/save_total_intensity false
 
-# Run the interferometry simulation
-run_beam_pattern $ini
+# Run the beam pattern simulation
+echo "Running beam pattern simulation"
+T0="$(date +%s)" 
+run_beam_pattern -q $ini
+echo "  Finished in $(($(date +%s)-T0)) s"
 
 echo ""
 echo "-------------------------------------------------------------------------"

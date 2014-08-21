@@ -41,10 +41,10 @@
 
 using namespace std;
 
+// Check if built with Measurement Set support.
+#ifndef OSKAR_NO_MS
 int main(int argc, char** argv)
 {
-    // Check if built with Measurement Set support.
-#ifndef OSKAR_NO_MS
     int error = 0;
 
     oskar_OptionParser opt("oskar_vis_to_ms", oskar_version_string());
@@ -113,10 +113,14 @@ int main(int argc, char** argv)
     if (error)
         oskar_log_error(0, oskar_get_error_string(error));
     return error;
-
+}
 #else
-    // No Measurement Set support.
+// No Measurement Set support.
+int main(void)
+{
     oskar_log_error(0, "OSKAR was not compiled with Measurement Set support.");
     return OSKAR_FAIL;
-#endif
 }
+#endif
+
+

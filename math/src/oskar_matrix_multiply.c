@@ -75,7 +75,8 @@ void oskar_matrix_multiply_f(float* C,
     *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
     return;
 #else
-    int M, N, K, LDA, LDB, LDC, tA, tB;
+    int M, N, K, LDA, LDB, LDC;
+    enum CBLAS_TRANSPOSE tA, tB;
     float alpha = 1.0f, beta = 0.0f;
 
     /* [ C = alpha * A * B + beta * C ] */
@@ -111,7 +112,8 @@ void oskar_matrix_multiply_d(double* C,
     *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
     return;
 #else
-    int M, N, K, LDA, LDB, LDC, tA, tB;
+    int M, N, K, LDA, LDB, LDC;
+    enum CBLAS_TRANSPOSE tA, tB;
     double alpha = 1.0, beta = 0.0;
 
     /* [ C = alpha * A * B + beta * C ] */

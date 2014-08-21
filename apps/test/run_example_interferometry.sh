@@ -5,8 +5,7 @@ run_dir=$PWD
 get_example_data_version $@
 download_example_data $version
 
-echo "Running OSKAR example demonstrating noise addition"
-echo "simulated visibilities"
+echo "Running OSKAR example: Interferometry simulation and DFT imaging."
 echo ""
 echo "  * OSKAR version          = $current_oskar_version"
 echo "  * Example data version   = $version"
@@ -23,10 +22,17 @@ set_setting $ini sky/oskar_sky_model/file sky.osm
 set_setting $ini telescope/input_directory telescope
 
 # Run the interferometry simulation
-run_sim_interferometer $ini
+echo "Starting interferometry simulation"
+T0="$(date +%s)"
+run_sim_interferometer -q $ini
+echo " - Finished in $(($(date +%s)-T0)) s"
+echo ""
 
 # Make images
-run_imager $ini
+echo "Imaging interferometry simulation output"
+T0="$(date +%s)"
+run_imager -q $ini
+echo " - Finished in $(($(date +%s)-T0)) s"
 
 echo ""
 echo "-------------------------------------------------------------------------"

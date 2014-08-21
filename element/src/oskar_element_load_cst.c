@@ -160,7 +160,8 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         double t = 0., p = 0., abs_theta, phase_theta, abs_phi, phase_phi;
         double phi_re, phi_im, theta_re, theta_im;
         double cos_p, sin_p, h_re_, h_im_, v_re_, v_im_;
-        void *p_theta, *p_phi, *p_h_re, *p_h_im, *p_v_re, *p_v_im, *p_weight;
+        void *p_theta = 0, *p_phi = 0, *p_h_re = 0, *p_h_im = 0, *p_v_re = 0;
+        void *p_v_im = 0, *p_weight = 0;
 
         /* Parse the line, and skip if data were not read correctly. */
         if (sscanf(line, "%lf %lf %*f %lf %lf %lf %lf %*f", &t, &p,
@@ -296,17 +297,17 @@ static void fit_splines(oskar_Log* log, oskar_Splines* splines, int n,
     double avg_frac_error;
     if (*status) return;
     avg_frac_error = set->average_fractional_error;
-    oskar_log_message(log, 0, "");
-    oskar_log_message(log, 0, "Fitting surface %s...", name);
+    oskar_log_list(log, 'M', 0, "");
+    oskar_log_list(log, 'M', 0, "Fitting surface %s...", name);
     oskar_splines_fit(splines, n, oskar_mem_double(theta, status),
             oskar_mem_double(phi, status), oskar_mem_double_const(data, status),
             oskar_mem_double_const(weight, status), OSKAR_SPLINES_SPHERICAL, 1,
             &avg_frac_error, set->average_fractional_error_factor_increase, 1,
             1e-14, status);
-    oskar_log_message(log, 1, "Surface fitted to %.4f average "
+    oskar_log_list(log, 'M', 1, "Surface fitted to %.4f average "
             "frac. error (s=%.2e).", avg_frac_error,
             oskar_splines_smoothing_factor(splines));
-    oskar_log_message(log, 1, "Number of knots (theta, phi) = (%d, %d).",
+    oskar_log_list(log, 'M', 1, "Number of knots (theta, phi) = (%d, %d).",
             oskar_splines_num_knots_x_theta(splines),
             oskar_splines_num_knots_y_phi(splines));
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 #define OSKAR_SYSTEM_CLOCK_DATA_H_
 
 /**
- * @file oskar_system_clock_time.h
+ * @file oskar_system_clock_data.h
  */
 
 #include "oskar_global.h"

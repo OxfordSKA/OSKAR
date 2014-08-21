@@ -56,21 +56,6 @@ set(utility_SRC
     src/oskar_version_string.c
 )
 
-# TODO move this into the apps folder! (log should ONLY be used for apps)
-list(APPEND utility_SRC
-    log/src/oskar_log_accessors.c
-    log/src/oskar_log_create.c
-    log/src/oskar_log_error.c
-    log/src/oskar_log_file_data.c
-    log/src/oskar_log_free.c
-    log/src/oskar_log_line.c
-    log/src/oskar_log_message.c
-    log/src/oskar_log_section.c
-    log/src/oskar_log_value.c
-    log/src/oskar_log_warning.c
-    log/src/oskar_log_write.c
-)
-
 if (CUDA_FOUND)
     list(APPEND utility_SRC
         src/oskar_cuda_check_error.c

@@ -42,8 +42,6 @@
 #include <cstdlib>
 #include <cstring>
 
-static const int width = 40;
-
 int main(int argc, char** argv)
 {
     int status = 0;
@@ -78,51 +76,43 @@ int main(int argc, char** argv)
     oskar_Log* log = 0;
     if (!(displayLog || displaySettings))
     {
-        oskar_log_section(log, "Image summary");
-        oskar_log_value(log, 0, width, "File", "%s", filename);
-        oskar_log_value(log, 0, width, "Created with OSKAR version",
-                "%i.%i.%i", vMajor, vMinor, vPatch);
-        oskar_log_value(log, 0, width, "Image type", "%s",
-                oskar_get_image_type_string(oskar_image_type(image)));
-        oskar_log_value(log, 0, width, "Data type", "%s",
-                oskar_mem_data_type_string(oskar_mem_type(
-                        oskar_image_data(image))));
-        oskar_log_value(log, 0, width, "Dimension order (fastest to slowest)",
-                "");
+        oskar_log_section(log, 'M', "Image summary");
+        oskar_log_list_value(log, 'M', 0, "File", "%s", filename);
+        oskar_log_list_value(log, 'M', 0, "Created with OSKAR version", "%i.%i.%i", vMajor, vMinor, vPatch);
+        oskar_log_list_value(log, 'M', 0, "Image type", "%s", oskar_get_image_type_string(oskar_image_type(image)));
+        oskar_log_list_value(log, 'M', 0, "Data type", "%s", oskar_mem_data_type_string(oskar_mem_type(oskar_image_data(image))));
+        oskar_log_list_value(log, 'M', 0, "Dimension order (fastest to slowest)", 0);
 
         for (int i = 0; i < 5; ++i)
         {
             switch (oskar_image_dimension_order(image)[i])
             {
             case OSKAR_IMAGE_DIM_LONGITUDE:
-                oskar_log_value(log, 1, width, 0, "[%d] Longitude", i);
+                oskar_log_list_value(log, 'M', 1, 0, "[%d] Longitude", i);
                 break;
             case OSKAR_IMAGE_DIM_LATITUDE:
-                oskar_log_value(log, 1, width, 0, "[%d] Latitude", i);
+                oskar_log_list_value(log, 'M', 1, 0, "[%d] Latitude", i);
                 break;
             case OSKAR_IMAGE_DIM_POL:
-                oskar_log_value(log, 1, width, 0, "[%d] Polarisation", i);
+                oskar_log_list_value(log, 'M', 1, 0, "[%d] Polarisation", i);
                 break;
             case OSKAR_IMAGE_DIM_TIME:
-                oskar_log_value(log, 1, width, 0, "[%d] Time", i);
+                oskar_log_list_value(log, 'M', 1, 0, "[%d] Time", i);
                 break;
             case OSKAR_IMAGE_DIM_CHANNEL:
-                oskar_log_value(log, 1, width, 0, "[%d] Channel", i);
+                oskar_log_list_value(log, 'M', 1, 0, "[%d] Channel", i);
                 break;
             default:
+                /* FIXME REPLACE WITH LOG ERROR */
                 fprintf(stderr, "ERROR: Unrecognised dimension ID.\n");
                 return OSKAR_FAIL;
             };
         }
 
-        oskar_log_value(log, 0, width, "Width, height (pixels)", "%i x %i",
-                oskar_image_width(image), oskar_image_height(image));
-        oskar_log_value(log, 0, width, "No. polarisations",
-                "%i", oskar_image_num_pols(image));
-        oskar_log_value(log, 0, width, "No. times", "%i",
-                oskar_image_num_times(image));
-        oskar_log_value(log, 0, width, "No. channels",
-                "%i", oskar_image_num_channels(image));
+        oskar_log_list_value(log, 'M', 0, "Width, height (pixels)", "%i x %i", oskar_image_width(image), oskar_image_height(image));
+        oskar_log_list_value(log, 'M', 0, "No. polarisations", "%i", oskar_image_num_pols(image));
+        oskar_log_list_value(log, 'M', 0, "No. times", "%i", oskar_image_num_times(image));
+        oskar_log_list_value(log, 'M', 0, "No. channels", "%i", oskar_image_num_channels(image));
 
         if (v232 == false)
         {
@@ -140,30 +130,22 @@ int main(int argc, char** argv)
             else if (oskar_image_coord_frame(image) ==
                     OSKAR_IMAGE_COORD_FRAME_HORIZON)
                 coord_frame = "Horizon (phi, theta)";
-            oskar_log_value(log, 0, width, "Grid type", "%s", grid_type);
-            oskar_log_value(log, 0, width, "Coordinate frame",
-                    "%s", coord_frame);
+            oskar_log_list_value(log, 'M', 0, "Grid type", "%s", grid_type);
+            oskar_log_list_value(log, 'M', 0, "Coordinate frame", "%s", coord_frame);
         }
 
         if (v232 || oskar_image_grid_type(image) ==
                 OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
         {
-            oskar_log_value(log, 0, width, "Field of view (deg)", "%.3f",
-                    oskar_image_fov_lat_deg(image));
-            oskar_log_value(log, 0, width, "Centre longitude (deg)",
-                    "%.3f", oskar_image_centre_lon_deg(image));
-            oskar_log_value(log, 0, width, "Centre latitude (deg)",
-                    "%.3f", oskar_image_centre_lat_deg(image));
+            oskar_log_list_value(log, 'M', 0, "Field of view (deg)", "%.3f", oskar_image_fov_lat_deg(image));
+            oskar_log_list_value(log, 'M', 0, "Centre longitude (deg)", "%.3f", oskar_image_centre_lon_deg(image));
+            oskar_log_list_value(log, 'M', 0, "Centre latitude (deg)", "%.3f", oskar_image_centre_lat_deg(image));
         }
 
-        oskar_log_value(log, 0, width, "Start time MJD(UTC)",
-                "%.5f", oskar_image_time_start_mjd_utc(image));
-        oskar_log_value(log, 0, width, "Time increment (seconds)",
-                "%.1f", oskar_image_time_inc_sec(image));
-        oskar_log_value(log, 0, width, "Start frequency (Hz)",
-                "%e", oskar_image_freq_start_hz(image));
-        oskar_log_value(log, 0, width, "Frequency increment (Hz)",
-                "%e", oskar_image_freq_inc_hz(image));
+        oskar_log_list_value(log, 'M', 0, "Start time MJD(UTC)", "%.5f", oskar_image_time_start_mjd_utc(image));
+        oskar_log_list_value(log, 'M', 0, "Time increment (seconds)", "%.1f", oskar_image_time_inc_sec(image));
+        oskar_log_list_value(log, 'M', 0, "Start frequency (Hz)", "%e", oskar_image_freq_start_hz(image));
+        oskar_log_list_value(log, 'M', 0, "Frequency increment (Hz)", "%e", oskar_image_freq_inc_hz(image));
     }
 
     // Free the image data.

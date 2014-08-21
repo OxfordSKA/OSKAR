@@ -91,7 +91,7 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
     init_beam_pattern_cube(beam_pattern, &settings, status);
     simulate_beam_pattern(oskar_image_data(beam_pattern), &settings, type,
             tel, log, status);
-    oskar_log_section(log, "Simulation completed in %.3f sec.",
+    oskar_log_section(log, 'M', "Simulation completed in %.3f sec.",
             oskar_timer_elapsed(timer));
     oskar_beam_pattern_write(beam_pattern, &settings, type, log, status);
     oskar_timer_free(timer);
@@ -114,7 +114,7 @@ static void load_settings(oskar_Settings* settings, const char* filename,
 
     if (*status) return;
 
-    oskar_log_section(log, "Loading settings file '%s'", filename);
+    oskar_log_section(log, 'M', "Loading settings file '%s'", filename);
     oskar_settings_load(settings, log, filename, status);
     if (*status)
     {
@@ -214,7 +214,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     oskar_Mem* d_z = oskar_mem_create_copy(z, OSKAR_GPU, status);
 
     // Begin beam pattern evaluation.
-    oskar_log_section(log, "Starting simulation...");
+    oskar_log_section(log, 'M', "Starting simulation...");
     for (int c = 0; c < num_channels; ++c)
     {
         if (*status) break;
@@ -222,7 +222,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
         double frequency = settings->obs.start_frequency_hz +
                 c * settings->obs.frequency_inc_hz;
 
-        oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
+        oskar_log_list(log, 'M', 0, "Channel %3d/%d [%.4f MHz]",
                 c + 1, num_channels, frequency / 1e6);
 
         oskar_RandomState* rand_state = oskar_random_state_create(
@@ -232,7 +232,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
         for (int t = 0; t < num_times; ++t)
         {
             if (*status) break;
-            oskar_log_message(log, 1, "Snapshot %4d/%d", t+1, num_times);
+            oskar_log_list(log, 'M', 1, "Snapshot %4d/%d", t+1, num_times);
 
             double t_dump = obs_start_mjd_utc + t * dt_dump;
             double GAST = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump / 2.0);

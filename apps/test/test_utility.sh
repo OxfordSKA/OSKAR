@@ -151,7 +151,7 @@ function download_example_data() {
         echo "Error: Failed to download example data from:"
         echo "  '$example_data_url'"
         echo ""
-        echo "Please check the example data for OSKAR ${version} exists!"
+        echo "Please check the example data for OSKAR version '${version}' exists!"
         example_data_script_usage
         exit 1
     fi
@@ -197,27 +197,69 @@ function set_setting() {
 }
 
 # Description:
+#   Runs the specified OSKAR binary.
+#
+# Usage:
+#   run_oskar_bin <name> [command line args]
+function run_oskar_bin() {
+    local ARGS=("$@")
+    local NARGS=${#ARGS[@]}
+    local LAST=$((NARGS-1))
+    local OPTIONS=("${ARGS[@]:1:${NARGS}}")
+    local NOPTIONS=${#OPTIONS[@]}
+    local name=${ARGS[0]}
+    local bin=${oskar_app_path}/${name}
+    if [ ! -x ${bin} ]; then
+        echo "ERROR: Unable to find required binary: $bin."
+        exit 1
+    fi
+    echo "--------------------------------------------------------------------"
+    echo "  * name  : $name"
+    echo "  * bin   : $bin"
+    echo "  * NARGS : $NOPTIONS"
+    echo "  * ARGS  : ${OPTIONS[@]}"
+    echo "--------------------------------------------------------------------"
+}
+
+# Description:
 #   Runs the 'oskar_sim_interferometer' binary using the specified settings 
 #   file.
 #
 # Usage:
-#   run_sim_interferomter [ini_file]
+#   run_sim_interferomter [OPTONS] <ini_file>
 #
 # Example
-#   run_sim_interferomter test.ini
+#   run_sim_interferomter -q test.ini
 #
 function run_sim_interferometer() {
+    local ARGS=("$@")
+    local NARGS=${#ARGS[@]}
+    local LAST=$((NARGS-1))
+    local INI=${ARGS[${LAST}]}
+    local OPTIONS=("${ARGS[@]:0:${LAST}}")
+    local name="run_sim_interferometer"
     local bin=${oskar_app_path}/oskar_sim_interferometer
     if [ ! -x ${bin} ]; then
         echo "ERROR: Unable to find required binary: $bin."
         exit 1
     fi
-    if [ ! $# -eq 1 ]; then
-        echo "ERROR: run_sim_interferomter requires 1 input arguments got $#."
-        echo "usage: run_sim_interferomter [ini_file]"
+    if [ ! -f $INI ]; then
+        echo "ERROR: $name. Specified INI file not found!"
+        echo "       INI file = '$INI'"
+        echo ""
+        echo "usage: $name [OPTIONS] <ini_file>"
         exit 1
     fi
-    eval "${bin} $1"
+    if [ $NARGS -lt 1 ]; then
+        echo "ERROR: $name requires at least 1 input argument(s), got $#."
+        echo "usage: $name [OPTIONS] <ini_file>"
+        exit 1
+    fi
+    eval "${bin} ${OPTIONS[@]} $INI"
+    if [ $? != 0 ]; then
+        echo "ERROR: $name. Failed."
+        exit 1
+    fi 
 }
 
 # Description:
@@ -225,23 +267,40 @@ function run_sim_interferometer() {
 #   file.
 #
 # Usage:
-#   run_beam_pattern [ini_file]
+#   run_beam_pattern [OPTIONS] [ini_file]
 #
 # Example
 #   run_beam_pattern test.ini
 #
 function run_beam_pattern() {
+    local ARGS=("$@")
+    local NARGS=${#ARGS[@]}
+    local LAST=$((NARGS-1))
+    local INI=${ARGS[${LAST}]}
+    local OPTIONS=("${ARGS[@]:0:${LAST}}")
+    local name="oskar_sim_beam_pattern"
     local bin=${oskar_app_path}/oskar_sim_beam_pattern
     if [ ! -x ${bin} ]; then
         echo "ERROR: Unable to find required binary: $bin."
         exit 1
     fi
-    if [ ! $# -eq 1 ]; then
-        echo "ERROR: run_beam_pattern requires 1 input arguments got $#."
-        echo "usage: run_beam_pattern [ini_file]"
+    if [ ! -f $INI ]; then
+        echo "ERROR: $name. Specified INI file not found!"
+        echo "       INI file = '$INI'"
+        echo ""
+        echo "usage: $name [OPTIONS] <ini_file>"
         exit 1
     fi
-    eval "${bin} $1"
+    if [ $NARGS -lt 1 ]; then
+        echo "ERROR: $name requires at least 1 input argument(s), got $#."
+        echo "usage: $name [OPTIONS] <ini_file>"
+        exit 1
+    fi
+    eval "${bin} ${OPTIONS[@]} $INI"
+    if [ $? != 0 ]; then
+        echo "ERROR: $name. Failed."
+        exit 1
+    fi
 }
 
 # Description:
@@ -249,23 +308,40 @@ function run_beam_pattern() {
 #   file.
 #
 # Usage:
-#   run_imager [ini_file]
+#   run_imager [OPTIONS] <ini_file>
 #
 # Example
-#   run_imager test.ini
+#   run_imager -q test.ini
 #
 function run_imager() {
+    local ARGS=("$@")
+    local NARGS=${#ARGS[@]}
+    local LAST=$((NARGS-1))
+    local INI=${ARGS[${LAST}]}
+    local OPTIONS=("${ARGS[@]:0:${LAST}}")
+    local name="run_imager"
     local bin=${oskar_app_path}/oskar_imager
     if [ ! -x ${bin} ]; then
-        echo "ERROR: Unable to find required binary: $bin."
+        echo "ERROR: $1 unable to find required binary: $bin."
         exit 1
     fi
-    if [ ! $# -eq 1 ]; then
-        echo "ERROR: run_imager requires 1 input arguments got $#."
-        echo "usage: run_imager [ini_file]"
+    if [ ! -f $INI ]; then
+        echo "ERROR: $name. Specified INI file not found!"
+        echo "       INI file = '$INI'"
+        echo ""
+        echo "usage: $name [OPTIONS] <ini_file>"
         exit 1
     fi
-    eval "${bin} $1"
+    if [ $NARGS -lt 1 ]; then
+        echo "ERROR: $name requires at least 1 input argument(s), got $#."
+        echo "usage: $name [OPTIONS] <ini_file>"
+        exit 1
+    fi
+    eval "${bin} ${OPTIONS[@]} $INI"
+    if [ $? != 0 ]; then
+        echo "ERROR: $name. Failed."
+        exit 1
+    fi
 }
 
 # Description:
@@ -273,21 +349,48 @@ function run_imager() {
 #   file and visibility binary data file
 #
 # Usage:
-#   run_vis_add_noise [ini_file] [vis file]
+#   run_vis_add_noise [OPTIONS] <ini_file> <vis file>
 #
 # Example
-#   run_vis_add_noise test.ini test.vis
+#   run_vis_add_noise -q test.ini test.vis
+#   run_vis_add_noise -v test.ini test.vis
 #
 function run_vis_add_noise() {
+    local ARGS=("$@")
+    local NARGS=${#ARGS[@]}
+    local IVIS=$((NARGS-1)) # Index of last argument
+    local VIS=${ARGS[${IVIS}]}
+    local IINI=$((NARGS-2)) # Index of 2nd to last argument
+    local INI=${ARGS[${IINI}]}
+    local OPTIONS=("${ARGS[@]:0:${IINI}}") # Options
+    local name="oskar_vis_add_noise"
     local bin=${oskar_app_path}/oskar_vis_add_noise
     if [ ! -x ${bin} ]; then
         echo "ERROR: Unable to find required binary: $bin."
         exit 1
     fi
-    if [ ! $# -eq 2 ]; then
-        echo "ERROR: run_vis_add_noise requires 2 input arguments got $#."
-        echo "usage: run_vis_add_noise [ini_file] [vis file]"
+    if [ ! -f $INI ]; then
+        echo "ERROR: $name. Specified INI file not found!"
+        echo "       INI file = '$INI'"
+        echo ""
+        echo "usage: $name [OPTIONS] <ini_file> <vis file>"
         exit 1
     fi
-    eval "${bin} -v -s $1 $2"
+    if [ ! -f $VIS ]; then
+        echo "ERROR: $name. Specified VIS file not found!"
+        echo "       VIS file = '$VIS'"
+        echo ""
+        echo "usage: $name [OPTIONS] <ini_file> <vis file>"
+        exit 1
+    fi
+    if [ $NARGS -lt 2 ]; then
+        echo "ERROR: $name requires at least 2 input argument(s), got $#."
+        echo "usage: $name [OPTIONS] <ini_file> <vis file>"
+        exit 1
+    fi
+    eval "${bin} ${OPTIONS[@]} -s $INI $VIS"
+    if [ $? != 0 ]; then
+        echo "ERROR: $name. Failed."
+        exit 1
+    fi
 }

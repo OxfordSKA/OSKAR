@@ -46,7 +46,6 @@ if (NOT OSKAR_PYTHON_INSTALL_DIR)
     set(OSKAR_PYTHON_INSTALL_DIR "share/oskar/python")
 endif()
 
-
 # === Set dependencies and compiler options.
 include(oskar_dependencies)
 include(oskar_compiler_options)
@@ -108,7 +107,8 @@ if (CUDA_FOUND)
 
     cuda_add_library(${libname} ${${libname}_SRC})
     target_link_libraries(${libname} 
-        oskar_settings_struct 
+        oskar_settings_struct
+        oskar_log
         ${CUDA_curand_LIBRARY})
 
     if (OSKAR_USE_CBLAS)
@@ -183,4 +183,3 @@ configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_cleanup.sh
 
 # === Include packaging script.
 include(oskar_packaging)
-

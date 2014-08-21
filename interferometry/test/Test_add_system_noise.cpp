@@ -52,7 +52,9 @@
 
 static void generate_range(oskar_Mem* data, int number,
         double start, double inc);
-//static void check_image_stats(oskar_Image* image, oskar_Telescope* tel);
+#if 0
+static void check_image_stats(oskar_Image* image, oskar_Telescope* tel);
+#endif
 
 
 TEST(add_system_noise, test_rms)
@@ -118,6 +120,7 @@ TEST(add_system_noise, test_rms)
         generate_range(oskar_station_noise_rms_jy(st), num_noise_values,
                 stddev_start, stddev_inc);
     }
+
     oskar_telescope_set_phase_centre(tel, ra0_rad, dec0_rad);
 
     // Setup the visibilities structure.
@@ -185,13 +188,17 @@ TEST(add_system_noise, test_rms)
     strcpy(settings.image.oskar_image, filename.c_str());
     settings.image.fits_image = NULL;
 
+
     image = oskar_make_image(0, vis, &(settings.image), &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
     //    err = oskar_image_write(&image, NULL, settings.image.oskar_image, 0);
     //    ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-    //check_image_stats(&image, telescope);
+
+#if 0
+    check_image_stats(&image, telescope);
+#endif
 
     oskar_mem_free(work_uvw, &err);
     oskar_telescope_free(tel, &err);

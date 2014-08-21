@@ -42,14 +42,18 @@ int main(int argc, char** argv)
 
     oskar_OptionParser opt("oskar_imager", oskar_version_string());
     opt.addRequired("settings file");
+    opt.addFlag("-q", "Suppress printing.", false, "--quiet");
     if (!opt.check_options(argc, argv)) return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Create the log.
-    oskar_Log* log = oskar_log_create();
-    oskar_log_message(log, 0, "Running binary %s", argv[0]);
+    int file_priority = OSKAR_LOG_MESSAGE;
+    int term_priority = opt.isSet("-q") ? OSKAR_LOG_WARN : OSKAR_LOG_MESSAGE;
+    oskar_Log* log = oskar_log_create(file_priority, term_priority);
+
+    oskar_log_list(log, 'M', 0, "Running binary %s", argv[0]);
 
     // Run the imager.
-    error = oskar_imager(argv[1], log);
+    error = oskar_imager(opt.getArg(0), log);
 
     // Check for errors.
     if (error)

@@ -69,7 +69,7 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
     {
         char value[FLEN_VALUE];
         int i, num_dimensions, num_elements = 1, decimals = 10;
-        int type, datatype, imagetype;
+        int type, datatype = 0, imagetype = 0;
         long naxes[MAX_DIM], naxes_dummy[MAX_DIM];
         double crval[MAX_DIM], crpix[MAX_DIM], cdelt[MAX_DIM], crota[MAX_DIM];
         fitsfile* fptr = NULL;
@@ -179,6 +179,9 @@ void oskar_fits_image_write(oskar_Image* image, oskar_Log* log,
         {
             datatype = TDOUBLE;
             imagetype = DOUBLE_IMG;
+        }
+        else {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
 
         /* Create a new (empty) FITS file, and write the image headers
