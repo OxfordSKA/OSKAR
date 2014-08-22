@@ -44,11 +44,6 @@ void oskar_log_free(oskar_Log* log)
     oskar_log_section(log, 'M', "OSKAR-%s ending at %s.",
             OSKAR_VERSION_STR, oskar_system_clock_string(0));
 
-    /* Reset log. -- FIXME What is this supposed to do ?! */
-#if 0
-    oskar_log_write(0, 0, 0, 0, 0, 0);
-#endif
-
     /* Close the file. */
     if (log->file) fclose(log->file);
 
@@ -60,11 +55,11 @@ void oskar_log_free(oskar_Log* log)
     }
 
     /* Free memory for the log data. */
-    if (log->name) free(log->name);
-    if (log->code) free(log->code);
-    if (log->offset) free(log->offset);
-    if (log->length) free(log->length);
-    if (log->timestamp) free(log->timestamp);
+    free(log->name);
+    free(log->code);
+    free(log->offset);
+    free(log->length);
+    free(log->timestamp);
 
 #ifdef _OPENMP
     omp_destroy_lock(&log->mutex);

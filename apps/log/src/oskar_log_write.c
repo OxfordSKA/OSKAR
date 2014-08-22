@@ -34,6 +34,12 @@
 #include <stdio.h>
 #include <time.h>
 
+/* va_copy is C99 but this gets around the problem on windows
+ * Note: this may not be entirely safe! */
+#if defined(OSKAR_OS_WIN) && !defined(va_copy)
+#   define va_copy(dest, src) (dest = src)
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,8 +51,6 @@ static void oskar_log_update_record(oskar_Log* log, char code);
 static int oskar_log_priority_level(char code);
 static int should_print_term_entry(oskar_Log* log, char priority);
 static int should_print_file_entry(oskar_Log* log, char priority);
-
-
 
 void oskar_log_write(oskar_Log* log, char priority, char code, int depth,
         const char* prefix, const char* format, va_list args)
