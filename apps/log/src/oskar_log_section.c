@@ -36,24 +36,16 @@ extern "C" {
 
 void oskar_log_section(oskar_Log* log, char priority, const char* format, ...)
 {
-    char code = '=';
     va_list args;
+    char code = '=';
+    const char* prefix = "== ";
+    int depth = OSKAR_LOG_SECTION;
 
-    /* List entries not require width or prefix to be set. */
-    const char* prefix = 0;
-    int depth = -100;
-
-    /* TODO implement this using a higher level interface */
-
-    /* Write to standard output. */
+    oskar_log_line(log, priority, ' ');
     va_start(args, format);
-    oskar_log_writev_stdout(log, priority, code, depth, prefix, format, args);
+    oskar_log_write(log, priority, code, depth, prefix, format, args);
     va_end(args);
-
-    /* Write to log file. */
-    va_start(args, format);
-    oskar_log_writev(log, priority, code, depth, prefix, format, args);
-    va_end(args);
+    oskar_log_line(log, priority, ' ');
 }
 
 #ifdef __cplusplus

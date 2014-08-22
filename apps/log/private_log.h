@@ -42,18 +42,26 @@
 
 struct oskar_Log
 {
-    int keep_file; /**< Flag true if log file will be retained on completion. */
+    /* Variables to control which log entries will be printed */
     int file_priority; /**< Controls which log messages are printed in the log file */
     int term_priority; /**< Controls which log messages are printed in the terminal */
-    int size; /**< The number of entries in the log. */
-    int capacity; /**< The capacity of the arrays in this structure. */
-    FILE* file;  /**< Pointer to an open log file stream. */
-    char* name;  /**< The name of the log file. */
-    char* code;  /**< Array containing the code of each entry. */
-    int* offset; /**< Array containing the memory offsets in bytes of each entry. */
-    int* length; /**< Array containing the length in bytes of each entry. */
+
+    /* The column start index for value log entries. */
+    int value_width;   /**< Width of value message */
+
+    /* File pointer to the log file */
+    FILE* file;        /**< Pointer to an open log file stream. */
+    int keep_file;     /**< Flag, true if log file will be retained on completion. */
+
+    /* Log record meta-data */
+    int size;          /**< The number of entries in the log. */
+    int capacity;      /**< The capacity of the arrays in this structure. */
+    char* name;        /**< The name of the log file. */
+    char* code;        /**< Array containing the code of each entry. */
+    int* offset;       /**< Array containing the memory offsets in bytes of each entry. */
+    int* length;       /**< Array containing the length in bytes of each entry. */
     time_t* timestamp; /**< Array containing log time stamps. */
-    int value_width; /**< Width of value message */
+
 #ifdef _OPENMP
     omp_lock_t mutex;
 #endif

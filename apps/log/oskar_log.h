@@ -52,15 +52,22 @@ typedef struct oskar_Log oskar_Log;
 #define OSKAR_LOG_DEFAULT_PRIORITY    2  /* 2 = OSKAR_LOG_MESSAGE (or code 'M') */
 #define OSKAR_LOG_DEFAULT_VALUE_WIDTH 40 /* Default width for value log entries */
 
+enum OSKAR_LOG_SPECIAL_DEPTH {
+    OSKAR_LOG_NO_LIST_MARKER = -1,
+    OSKAR_LOG_INFO_PREFIX    = -101,
+    OSKAR_LOG_SECTION        = -102,
+    OSKAR_LOG_LINE           = -1000
+};
+
 /* Enum describing the logging level.
  * The logging level determines the maximum verbosity of the log
  * ie. settings the level to DEBUG will print all logs, and setting it WARN
  * will only print warning logs
  */
-enum LOGGING_LEVEL {
+enum OSKAR_LOG_PRIORITY {
     OSKAR_LOG_NONE    = -1,
     OSKAR_LOG_ERROR   =  0,  /* == 'E' */
-    OSKAR_LOG_WARN    =  1,  /* == 'W' */
+    OSKAR_LOG_WARNING =  1,  /* == 'W' */
     OSKAR_LOG_MESSAGE =  2,  /* == 'M' */
     OSKAR_LOG_DEBUG   =  3   /* == 'D' */
 };
@@ -72,8 +79,7 @@ enum LOGGING_LEVEL {
 #include <oskar_log_file_exists.h>
 #include <oskar_log_free.h>
 #include <oskar_log_line.h>
-#include <oskar_log_list_value.h>
-#include <oskar_log_list.h>
+#include <oskar_log_message.h>
 #include <oskar_log_section.h>
 #include <oskar_log_system_clock_data.h>
 #include <oskar_log_system_clock_string.h>

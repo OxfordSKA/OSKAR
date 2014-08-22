@@ -43,8 +43,7 @@ extern "C" {
 #endif
 
 /* Convenience macro to log a value with a given format. */
-#define LV(prefix, format, value) \
-    oskar_log_list_value(log, 'M', depth, prefix, format, value)
+#define LV(prefix, format, value) oskar_log_value(log, 'M', depth, prefix, format, value)
 
 /* Convenience macros to log boolean, integer, string values. */
 #define LVB(prefix, value) LV(prefix, "%s", ((value) ? "true" : "false"))
@@ -52,18 +51,12 @@ extern "C" {
 #define LVS(prefix, value) LV(prefix, "%s", value)
 
 /* Width 0 value list message */
-#define LVS0(key, value) oskar_log_list(log, 'M', depth, "%s: %s", key, value)
-/*
-#define LVS0(key, value) \
-    oskar_log_set_value_width(log, 0); \
-    oskar_log_list_value(log, 'X', depth, key, "%s", value); \
-    oskar_log_set_value_width(OSKAR_LOG_DEFAULT_VALUE_WIDTH)
-*/
+#define LVS0(key, value) oskar_log_message(log, 'M', depth, "%s: %s", key, value)
 
 void oskar_log_settings_simulator(oskar_Log* log, const oskar_Settings* s)
 {
     int depth = 0;
-    oskar_log_list(log, 'M', depth, "Simulator settings");
+    oskar_log_message(log, 'M', depth, "Simulator settings");
     depth = 1;
     LVB("Double precision", s->sim.double_precision);
     LVB("Keep log file", s->sim.keep_log_file);
@@ -112,18 +105,18 @@ static void oskar_log_settings_sky_filter(oskar_Log* log, int depth,
 void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
 {
     int depth = 0, i = 0;
-    oskar_log_list(log, 'M', depth, "Sky model settings");
+    oskar_log_message(log, 'M', depth, "Sky model settings");
 
     /* Input OSKAR sky model file settings. */
     depth = 1;
     if (s->sky.oskar_sky_model.num_files > 0)
     {
-        oskar_log_list(log, 'M', depth, "Input OSKAR sky model file(s)");
+        oskar_log_message(log, 'M', depth, "Input OSKAR sky model file(s)");
         ++depth;
         ++depth;
         for (i = 0; i < s->sky.oskar_sky_model.num_files; ++i)
         {
-            oskar_log_list(log, 'M', depth, "File %2d: %s", i,
+            oskar_log_message(log, 'M', depth, "File %2d: %s", i,
                     s->sky.oskar_sky_model.file[i]);
         }
         --depth;
@@ -148,12 +141,12 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
     depth = 1;
     if (s->sky.fits_image.num_files > 0)
     {
-        oskar_log_list(log, 'M', depth, "Input FITS file(s)");
+        oskar_log_message(log, 'M', depth, "Input FITS file(s)");
         ++depth;
         ++depth;
         for (i = 0; i < s->sky.fits_image.num_files; ++i)
         {
-            oskar_log_list(log, 'M', depth, "File %2d: %s", i,
+            oskar_log_message(log, 'M', depth, "File %2d: %s", i,
                     s->sky.fits_image.file[i]);
         }
         --depth;
@@ -169,12 +162,12 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
     depth = 1;
     if (s->sky.healpix_fits.num_files > 0)
     {
-        oskar_log_list(log, 'M', depth, "Input HEALPix FITS file(s)");
+        oskar_log_message(log, 'M', depth, "Input HEALPix FITS file(s)");
         ++depth;
         ++depth;
         for (i = 0; i < s->sky.healpix_fits.num_files; ++i)
         {
-            oskar_log_list(log, 'M', depth, "File %2d: %s", i,
+            oskar_log_message(log, 'M', depth, "File %2d: %s", i,
                     s->sky.healpix_fits.file[i]);
         }
         --depth;
@@ -204,7 +197,7 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         const oskar_SettingsSkyGeneratorRandomPowerLaw* gen =
                 &s->sky.generator.random_power_law;
 
-        oskar_log_list(log, 'M', depth, "Generator (random power law)");
+        oskar_log_message(log, 'M', depth, "Generator (random power law)");
         ++depth;
         LVI("Num. sources", gen->num_sources);
         LV("Flux min [Jy]", "%.3e", gen->flux_min);
@@ -223,7 +216,7 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         const oskar_SettingsSkyGeneratorRandomBrokenPowerLaw* gen =
                 &s->sky.generator.random_broken_power_law;
 
-        oskar_log_list(log, 'M', depth, "Generator (random broken power law)");
+        oskar_log_message(log, 'M', depth, "Generator (random broken power law)");
         ++depth;
         LVI("Num. sources", gen->num_sources);
         LV("Flux min [Jy]", "%.3e", gen->flux_min);
@@ -243,7 +236,7 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
     {
         const oskar_SettingsSkyGeneratorGrid* gen = &s->sky.generator.grid;
 
-        oskar_log_list(log, 'M', depth, "Generator (grid at phase centre)");
+        oskar_log_message(log, 'M', depth, "Generator (grid at phase centre)");
         ++depth;
         LVI("Side length", gen->side_length);
         LV("Field-of-view [deg]", "%.3f", gen->fov_rad * R2D);
@@ -262,7 +255,7 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         const oskar_SettingsSkyGeneratorHealpix* gen =
                 &s->sky.generator.healpix;
 
-        oskar_log_list(log, 'M', depth, "Generator (HEALPix)");
+        oskar_log_message(log, 'M', depth, "Generator (HEALPix)");
         ++depth;
         LVI("Nside", gen->nside);
         LVI("(Num. sources)", (12 * (gen->nside) * (gen->nside)));
@@ -276,7 +269,7 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
     depth = 1;
     if (s->sky.spectral_index.override)
     {
-        oskar_log_list(log, 'M', depth, "Spectral index overrides");
+        oskar_log_message(log, 'M', depth, "Spectral index overrides");
         ++depth;
         LVB("Override", s->sky.spectral_index.override);
         LV("Reference frequency [Hz]", "%.3e",
@@ -292,7 +285,7 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
     if (s->sky.common_flux_filter_min_jy != 0.0 ||
             s->sky.common_flux_filter_max_jy != 0.0)
     {
-        oskar_log_list(log, 'M', depth, "Common source flux filtering settings");
+        oskar_log_message(log, 'M', depth, "Common source flux filtering settings");
         ++depth;
         LV("Filter flux min [Jy]", "%.3e", s->sky.common_flux_filter_min_jy);
         LV("Filter flux max [Jy]", "%.3e", s->sky.common_flux_filter_max_jy);
@@ -313,7 +306,7 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
 void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
 {
     int depth = 0;
-    oskar_log_list(log, 'M', depth, "Observation settings");
+    oskar_log_message(log, 'M', depth, "Observation settings");
     depth = 1;
     if (s->obs.num_pointing_levels == 1)
     {
@@ -325,9 +318,9 @@ void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
         int i = 0;
         for (i = 0; i < s->obs.num_pointing_levels; ++i)
         {
-            oskar_log_list_value(log, 'M', depth, "Phase centre RA [deg]", "(%d) %.3f",
+            oskar_log_value(log, 'M', depth, "Phase centre RA [deg]", "(%d) %.3f",
                     i, s->obs.ra0_rad[i] * R2D);
-            oskar_log_list_value(log, 'M', depth, "Phase centre Dec [deg]", "(%d) %.3f",
+            oskar_log_value(log, 'M', depth, "Phase centre Dec [deg]", "(%d) %.3f",
                     i, s->obs.dec0_rad[i] * R2D);
         }
     }
@@ -347,7 +340,7 @@ void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
 void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
 {
     int depth = 0;
-    oskar_log_list(log, 'M', depth, "Telescope model settings");
+    oskar_log_message(log, 'M', depth, "Telescope model settings");
     depth = 1;
     LVS0("Input directory", s->telescope.input_directory);
     LV("Longitude [deg]", "%.1f", s->telescope.longitude_rad * R2D);
@@ -362,7 +355,7 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
         const oskar_SettingsApertureArray* aa = &s->telescope.aperture_array;
 
         LVS("Station type", "Aperture array");
-        oskar_log_list(log, 'M', depth, "Aperture array settings");
+        oskar_log_message(log, 'M', depth, "Aperture array settings");
         ++depth;
 
         /* Array pattern settings. */
@@ -370,7 +363,7 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
             const oskar_SettingsArrayPattern* ap = &aa->array_pattern;
             const oskar_SettingsArrayElement* ae = &ap->element;
 
-            oskar_log_list(log, 'M', depth, "Array pattern settings");
+            oskar_log_message(log, 'M', depth, "Array pattern settings");
             ++depth;
             LVB("Enable array pattern", ap->enable);
             if (ap->enable)
@@ -388,7 +381,7 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
                         ae->x_orientation_error_rad > 0.0 ||
                         ae->y_orientation_error_rad > 0.0)
                 {
-                    oskar_log_list(log, 'M', depth,"Element settings (overrides)");
+                    oskar_log_message(log, 'M', depth,"Element settings (overrides)");
                     ++depth;
                     switch (ae->apodisation_type)
                     {
@@ -451,7 +444,7 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
         {
             const oskar_SettingsElementPattern* ep = &aa->element_pattern;
 
-            oskar_log_list(log, 'M', depth, "Element pattern settings");
+            oskar_log_message(log, 'M', depth, "Element pattern settings");
             ++depth;
             LVB("Enable numerical patterns", ep->enable_numerical_patterns);
 
@@ -485,7 +478,7 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
 
             /* Tapering options. */
             {
-                oskar_log_list(log, 'M', depth, "Tapering options");
+                oskar_log_message(log, 'M', depth, "Tapering options");
                 ++depth;
                 switch (ep->taper.type)
                 {
@@ -520,7 +513,7 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
     else if (s->telescope.station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
     {
         LVS("Station type", "Gaussian beam");
-        oskar_log_list(log, 'M', depth, "Gaussian beam settings");
+        oskar_log_message(log, 'M', depth, "Gaussian beam settings");
         ++depth;
         LV("Gaussian FWHM [deg]", "%.4f",
                 s->telescope.gaussian_beam.fwhm_deg);
@@ -542,7 +535,7 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
 {
     int depth = 0;
     const oskar_SettingsSystemNoise* n = &s->interferometer.noise;
-    oskar_log_list(log, 'M', depth, "Interferometer settings");
+    oskar_log_message(log, 'M', depth, "Interferometer settings");
     depth = 1;
 
     LV("Channel bandwidth [Hz]", "%.3e", s->interferometer.channel_bandwidth_hz);
@@ -678,7 +671,7 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
 void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
 {
     int depth = 0;
-    oskar_log_list(log, 'M', depth, "Beam pattern settings");
+    oskar_log_message(log, 'M', depth, "Beam pattern settings");
     depth = 1;
     LVI("Station ID", s->beam_pattern.station_id);
     switch (s->beam_pattern.coord_frame_type)
@@ -694,9 +687,9 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
         case OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE:
         {
             LVS("Coordinate (grid) type", "Beam image");
-            oskar_log_list_value(log, 'M', ++depth, "Dimensions [pixels]", "%i, %i",
+            oskar_log_value(log, 'M', ++depth, "Dimensions [pixels]", "%i, %i",
                     s->beam_pattern.size[0], s->beam_pattern.size[1]);
-            oskar_log_list_value(log, 'M', depth, "Field-of-view [deg]", "%.3f, %.3f",
+            oskar_log_value(log, 'M', depth, "Field-of-view [deg]", "%.3f, %.3f",
                     s->beam_pattern.fov_deg[0], s->beam_pattern.fov_deg[1]);
             break;
         }
@@ -712,7 +705,7 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
     if (s->beam_pattern.oskar_image_voltage || s->beam_pattern.oskar_image_phase ||
             s->beam_pattern.oskar_image_complex)
     {
-        oskar_log_list(log, 'M', --depth, "Output OSKAR image files:");
+        oskar_log_message(log, 'M', --depth, "Output OSKAR image files:");
     }
     ++depth;
     if (s->beam_pattern.oskar_image_voltage)
@@ -724,7 +717,7 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
 
     if (s->beam_pattern.fits_image_voltage || s->beam_pattern.fits_image_phase)
     {
-        oskar_log_list(log, 'M', --depth, "Output FITS image files:");
+        oskar_log_message(log, 'M', --depth, "Output FITS image files:");
     }
     ++depth;
     if (s->beam_pattern.fits_image_voltage)
@@ -737,15 +730,15 @@ void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s)
 {
     int depth = 0;
     const char* option;
-    oskar_log_list(log, 'M', depth, "Image settings");
+    oskar_log_message(log, 'M', depth, "Image settings");
     depth = 1;
     LV("Field-of-view [deg]", "%.3f", s->image.fov_deg);
     LVI("Dimension (size) [pixels]", s->image.size);
     LVB("Channel snapshots", s->image.channel_snapshots);
-    oskar_log_list_value(log, 'M', depth, "Channel range", "%i -> %i",
+    oskar_log_value(log, 'M', depth, "Channel range", "%i -> %i",
             s->image.channel_range[0], s->image.channel_range[1]);
     LVB("Time snapshots", s->image.time_snapshots);
-    oskar_log_list_value(log, 'M', depth, "Time range", "%i -> %i",
+    oskar_log_value(log, 'M', depth, "Time range", "%i -> %i",
             s->image.time_range[0], s->image.time_range[1]);
 
     /* Image type. */
@@ -807,7 +800,7 @@ void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s)
 void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s)
 {
     int depth = 0;
-    oskar_log_list(log, 'M', depth, "Ionosphere (Z Jones) settings");
+    oskar_log_message(log, 'M', depth, "Ionosphere (Z Jones) settings");
     depth = 1;
     LVB("Enabled", s->ionosphere.enable);
     LV("Minimum elevation (deg)", "%.3f%", s->ionosphere.min_elevation * 180./M_PI);
@@ -816,7 +809,7 @@ void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s)
 
     if (s->ionosphere.TECImage.fits_file || s->ionosphere.TECImage.img_file)
     {
-        oskar_log_list(log, 'M', depth, "TEC image settings");
+        oskar_log_message(log, 'M', depth, "TEC image settings");
         depth++;
         LVI("Station index", s->ionosphere.TECImage.stationID);
         LVB("Beam centred", s->ionosphere.TECImage.beam_centred);
@@ -834,7 +827,7 @@ void oskar_log_settings_element_fit(oskar_Log* log, const oskar_Settings* s)
     int depth = 0;
     const oskar_SettingsElementFit* ef = &s->element_fit;
 
-    oskar_log_list(log, 'M', depth, "Element pattern fitting settings");
+    oskar_log_message(log, 'M', depth, "Element pattern fitting settings");
     ++depth;
     LVS("Input CST file", ef->input_cst_file);
     LVS("Output FITS image file", ef->fits_image);

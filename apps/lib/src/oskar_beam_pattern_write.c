@@ -132,7 +132,7 @@ static void save_complex(const oskar_Image* complex_cube,
     /* Return if there is an error or the filename has not been set. */
     if ((status && *status != OSKAR_SUCCESS) || !filename)
         return;
-    oskar_log_list(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
+    oskar_log_message(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
     oskar_image_write(complex_cube, log, filename, 0, status);
 }
 
@@ -184,7 +184,7 @@ static void save_voltage(oskar_Image* image_cube,
         filename = settings->beam_pattern.oskar_image_voltage;
         if (filename && !*status)
         {
-            oskar_log_list(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
+            oskar_log_message(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
             oskar_image_write(image_cube, log, filename, 0, status);
         }
 #ifndef OSKAR_NO_FITS
@@ -192,7 +192,7 @@ static void save_voltage(oskar_Image* image_cube,
         filename = settings->beam_pattern.fits_image_voltage;
         if (filename && !*status)
         {
-            oskar_log_list(log, 'M', 0, "Writing FITS image file: '%s'", filename);
+            oskar_log_message(log, 'M', 0, "Writing FITS image file: '%s'", filename);
             oskar_fits_image_write(image_cube, log, filename, status);
         }
 #endif
@@ -240,7 +240,7 @@ static void save_phase(const oskar_Image* complex_cube,
         filename = settings->beam_pattern.oskar_image_phase;
         if (filename && !*status)
         {
-            oskar_log_list(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
+            oskar_log_message(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
             oskar_image_write(image_cube, log, filename, 0, status);
         }
 #ifndef OSKAR_NO_FITS
@@ -248,7 +248,7 @@ static void save_phase(const oskar_Image* complex_cube,
         filename = settings->beam_pattern.fits_image_phase;
         if (filename && !*status)
         {
-            oskar_log_list(log, 'M', 0, "Writing FITS image file: '%s'", filename);
+            oskar_log_message(log, 'M', 0, "Writing FITS image file: '%s'", filename);
             oskar_fits_image_write(image_cube, log, filename, status);
         }
 #endif
@@ -359,7 +359,7 @@ static void save_total_intensity(const oskar_Image* complex_cube,
     filename = settings->beam_pattern.oskar_image_total_intensity;
     if (filename && !*status)
     {
-        oskar_log_list(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
+        oskar_log_message(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
         oskar_image_write(image, log, filename, 0, status);
     }
 #ifndef OSKAR_NO_FITS
@@ -367,7 +367,7 @@ static void save_total_intensity(const oskar_Image* complex_cube,
     filename = settings->beam_pattern.fits_image_total_intensity;
     if (filename && !*status)
     {
-        oskar_log_list(log, 'M', 0, "Writing FITS image file: '%s'", filename);
+        oskar_log_message(log, 'M', 0, "Writing FITS image file: '%s'", filename);
         oskar_fits_image_write(image, log, filename, status);
     }
 #endif

@@ -219,7 +219,7 @@ void TelescopeLoadElementPattern::load_element_patterns(
         // Load the file.
         if (models.count(path) == 0)
         {
-            oskar_log_list(log_, 'M', 0,
+            oskar_log_message(log_, 'M', 0,
                     "Loading fitted element pattern X[%d] at %.0f MHz: %s",
                     ind, freq / 1.0e6, path.c_str());
             models[path] = 1;
@@ -246,7 +246,7 @@ void TelescopeLoadElementPattern::load_element_patterns(
         // Load the file.
         if (models.count(path) == 0)
         {
-            oskar_log_list(log_, 'M', 0,
+            oskar_log_message(log_, 'M', 0,
                     "Loading fitted element pattern Y[%d] at %.0f MHz: %s",
                     ind, freq / 1.0e6, path.c_str());
             models[path] = 1;

@@ -74,22 +74,22 @@ int main(int argc, char **argv)
     if (!(displayLog || displaySettings))
     {
         oskar_log_section(log, 'M', "Visibilities summary");
-        oskar_log_list_value(log, 'M', 0, "File", "%s", filename);
-        oskar_log_list_value(log, 'M', 0, "Created with OSKAR version", "%i.%i.%i", vMajor, vMinor, vPatch);
-        oskar_log_list_value(log, 'M', 0, "Precision", "%s", oskar_mem_is_double(oskar_vis_amplitude_const(vis)) ? "double" : "single");
-        oskar_log_list_value(log, 'M', 0, "Amplitude type", "%s", oskar_mem_data_type_string(oskar_mem_type(oskar_vis_amplitude_const(vis))));
-        oskar_log_list_value(log, 'M', 0, "No. stations", "%d", oskar_vis_num_stations(vis));
-        oskar_log_list_value(log, 'M', 0, "No. channels", "%d", oskar_vis_num_channels(vis));
-        oskar_log_list_value(log, 'M', 0, "No. times", "%d", oskar_vis_num_times(vis));
-        oskar_log_list_value(log, 'M', 0, "No. baselines", "%d", oskar_vis_num_baselines(vis));
-        oskar_log_list_value(log, 'M', 0, "No. polarisations", "%d", oskar_vis_num_pols(vis));
-        oskar_log_list_value(log, 'M', 0, "Data order", "%s", "{channel, time, baseline, polarisation}");
-        oskar_log_list_value(log, 'M', 0, "Start frequency (MHz)", "%.6f", oskar_vis_freq_start_hz(vis)/1.e6);
-        oskar_log_list_value(log, 'M', 0, "Channel separation (Hz)", "%f", oskar_vis_freq_inc_hz(vis));
-        oskar_log_list_value(log, 'M', 0, "Channel bandwidth (Hz)", "%f", oskar_vis_channel_bandwidth_hz(vis));
-        oskar_log_list_value(log, 'M', 0, "Start time (MJD, UTC)", "%f", oskar_vis_time_start_mjd_utc(vis));
-        oskar_log_list_value(log, 'M', 0, "Time increment (s)", "%f", oskar_vis_time_inc_sec(vis));
-        oskar_log_list_value(log, 'M', 0, "Integration time (s)", "%f", oskar_vis_time_average_sec(vis));
+        oskar_log_value(log, 'M', 0, "File", "%s", filename);
+        oskar_log_value(log, 'M', 0, "Created with OSKAR version", "%i.%i.%i", vMajor, vMinor, vPatch);
+        oskar_log_value(log, 'M', 0, "Precision", "%s", oskar_mem_is_double(oskar_vis_amplitude_const(vis)) ? "double" : "single");
+        oskar_log_value(log, 'M', 0, "Amplitude type", "%s", oskar_mem_data_type_string(oskar_mem_type(oskar_vis_amplitude_const(vis))));
+        oskar_log_value(log, 'M', 0, "No. stations", "%d", oskar_vis_num_stations(vis));
+        oskar_log_value(log, 'M', 0, "No. channels", "%d", oskar_vis_num_channels(vis));
+        oskar_log_value(log, 'M', 0, "No. times", "%d", oskar_vis_num_times(vis));
+        oskar_log_value(log, 'M', 0, "No. baselines", "%d", oskar_vis_num_baselines(vis));
+        oskar_log_value(log, 'M', 0, "No. polarisations", "%d", oskar_vis_num_pols(vis));
+        oskar_log_value(log, 'M', 0, "Data order", "%s", "{channel, time, baseline, polarisation}");
+        oskar_log_value(log, 'M', 0, "Start frequency (MHz)", "%.6f", oskar_vis_freq_start_hz(vis)/1.e6);
+        oskar_log_value(log, 'M', 0, "Channel separation (Hz)", "%f", oskar_vis_freq_inc_hz(vis));
+        oskar_log_value(log, 'M', 0, "Channel bandwidth (Hz)", "%f", oskar_vis_channel_bandwidth_hz(vis));
+        oskar_log_value(log, 'M', 0, "Start time (MJD, UTC)", "%f", oskar_vis_time_start_mjd_utc(vis));
+        oskar_log_value(log, 'M', 0, "Time increment (s)", "%f", oskar_vis_time_inc_sec(vis));
+        oskar_log_value(log, 'M', 0, "Integration time (s)", "%f", oskar_vis_time_average_sec(vis));
     }
     oskar_vis_free(vis, &status);
     vis = 0;

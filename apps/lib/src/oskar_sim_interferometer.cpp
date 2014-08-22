@@ -199,7 +199,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         frequency = settings.obs.start_frequency_hz +
                 c * settings.obs.frequency_inc_hz;
 
-        oskar_log_list(log, 'M', 0, "Channel %3d/%d [%.4f MHz]",
+        oskar_log_message(log, 'M', 0, "Channel %3d/%d [%.4f MHz]",
                 c + 1, settings.obs.num_channels, frequency / 1e6);
 
         // Use OpenMP dynamic scheduling for loop over chunks.
@@ -288,7 +288,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Write visibilities to disk.
     if (fname && !error)
     {
-        oskar_log_list(log, 'M', 0, "Writing OSKAR visibility file: '%s'", fname);
+        oskar_log_message(log, 'M', 0, "Writing OSKAR visibility file: '%s'", fname);
         oskar_vis_write(vis, log, fname, &error);
     }
 
@@ -298,7 +298,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     {
         char* log_data;
         size_t log_size;
-        oskar_log_list(log, 'M', 0, "Writing Measurement Set: '%s'", ms_name);
+        oskar_log_message(log, 'M', 0, "Writing Measurement Set: '%s'", ms_name);
 
         // Get the log.
         log_data = oskar_log_file_data(log, &log_size);
@@ -437,7 +437,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
         /* Record number of visible sources in this snapshot. */
         n_src = oskar_sky_num_sources(local_sky);
-        oskar_log_list(log, 'M', 1, "Snapshot %4d/%d, chunk %4d/%d, "
+        oskar_log_message(log, 'M', 1, "Snapshot %4d/%d, chunk %4d/%d, "
                 "device %d [%d sources]", i+1, num_vis_dumps, chunk_index+1,
                 num_sky_chunks, device_id, n_src);
 
@@ -586,13 +586,13 @@ static void record_timing(int num_devices, int* cuda_device_ids,
     t_join *= (100.0 / (num_devices * elapsed));
     t_correlate *= (100.0 / (num_devices * elapsed));
     /* TODO DEPTH -1 !???! */
-    oskar_log_list(log, 'M', -1, "%4.1f%% Chunk copy & initialise.", t_init);
-    oskar_log_list(log, 'M', -1, "%4.1f%% Horizon clip.", t_clip);
-    oskar_log_list(log, 'M', -1, "%4.1f%% Jones R.", t_R);
-    oskar_log_list(log, 'M', -1, "%4.1f%% Jones E.", t_E);
-    oskar_log_list(log, 'M', -1, "%4.1f%% Jones K.", t_K);
-    oskar_log_list(log, 'M', -1, "%4.1f%% Jones join.", t_join);
-    oskar_log_list(log, 'M', -1, "%4.1f%% Jones correlate.", t_correlate);
+    oskar_log_message(log, 'M', -1, "%4.1f%% Chunk copy & initialise.", t_init);
+    oskar_log_message(log, 'M', -1, "%4.1f%% Horizon clip.", t_clip);
+    oskar_log_message(log, 'M', -1, "%4.1f%% Jones R.", t_R);
+    oskar_log_message(log, 'M', -1, "%4.1f%% Jones E.", t_E);
+    oskar_log_message(log, 'M', -1, "%4.1f%% Jones K.", t_K);
+    oskar_log_message(log, 'M', -1, "%4.1f%% Jones join.", t_join);
+    oskar_log_message(log, 'M', -1, "%4.1f%% Jones correlate.", t_correlate);
     oskar_log_line(log, 'M', ' ');
 }
 
@@ -618,7 +618,7 @@ static void log_warning_box(oskar_Log* log, const char* format, ...)
             if (pad%2==0) pad_r-=1;
             line = "!" + std::string(pad_l,' ') + line;
             line += std::string(pad_r,' ') + "!";
-            oskar_log_list(log, 'W', -1, "%s", line.c_str());
+            oskar_log_message(log, 'W', -1, "%s", line.c_str());
             line.clear();
         }
         line += word;
@@ -629,7 +629,7 @@ static void log_warning_box(oskar_Log* log, const char* format, ...)
     if (pad%2==0) pad_r-=1;
     line = "!" + std::string(pad_l,' ') + line;
     line += std::string(pad_r,' ') + "!";
-    oskar_log_list(log, 'W', -1, "%s", line.c_str());
+    oskar_log_message(log, 'W', -1, "%s", line.c_str());
     oskar_log_line(log, 'W', '*');
     oskar_log_line(log, 'W', ' ');
 }

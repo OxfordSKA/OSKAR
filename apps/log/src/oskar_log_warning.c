@@ -37,20 +37,17 @@ extern "C" {
 
 void oskar_log_warning(oskar_Log* log, const char* format, ...)
 {
+    va_list args;
     char priority = 'W';
     char code = 'W';
-    const char* prefix = "WARNING";
-    va_list args;
+    const char* prefix = "== WARNING";
+    int depth = OSKAR_LOG_INFO_PREFIX;
 
-    /* Write to standard output. */
+    oskar_log_line(log, priority, ' ');
     va_start(args, format);
-    oskar_log_writev_stdout(log, priority, code, -100, prefix, format, args);
+    oskar_log_write(log, priority, code, depth, prefix, format, args);
     va_end(args);
-
-    /* Write to log file. */
-    va_start(args, format);
-    oskar_log_writev(log, priority, code, -100, prefix, format, args);
-    va_end(args);
+    oskar_log_line(log, priority, ' ');
 }
 
 #ifdef __cplusplus

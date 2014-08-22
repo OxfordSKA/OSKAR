@@ -230,7 +230,7 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
 
     /* Append temporary sky model to input data. */
     oskar_sky_append(sky, temp_sky, status);
-    oskar_log_list(ptr, 'M', 0, "Loaded %d pixels.", (int)npixels);
+    oskar_log_message(ptr, 'M', 0, "Loaded %d pixels.", (int)npixels);
 
     /* Free memory. */
     if (data) free(data);

@@ -41,49 +41,11 @@ extern "C" {
 
 /**
  * @brief
- * Writes a generic message to a log.
+ * Writes a generic log entry.
  *
  * @details
- * This function writes a message to the log.
- * It is called by other log functions, such as oskar_log_message(),
- * oskar_log_warning(), and oskar_log_error().
- *
- * @param[in,out] log      Pointer to a log structure.
- * @param[in]     priority Priority level of the log entry.
- * @param[in]     code     Code (group) of log message.
- * @param[in]     depth    Level of nesting of log message.
- * @param[in]     prefix   Description of key (set blank or NULL if not required).
- * @param[in]     args     Variable argument list for printf().
- */
-void oskar_log_writev(oskar_Log* log, char priority, char code, int depth,
-        const char* prefix, const char* format, va_list args);
-
-/**
- * @brief
- * Writes a generic message to standard error channel.
- *
- * @details
- * This function writes a message to the standard error channel.
- * It is called by oskar_log_error().
- *
- * @param[in,out] log    Pointer to a log structure.
- * @param[in]     code   Code (group) of log message.
- * @param[in]     priority Priority level of the log entry.
- * @param[in]     depth  Level of nesting of log message.
- * @param[in]     prefix Description of key (set blank or NULL if not required).
- * @param[in]     args   Variable argument list for printf().
- */
-void oskar_log_writev_stderr(oskar_Log* log, char priority, char code, int depth,
-        const char* prefix, const char* format, va_list args);
-
-/**
- * @brief
- * Writes a generic message to standard output channel.
- *
- * @details
- * This function writes a message to the standard output channel.
- * It is called by other log functions, such as oskar_log_message(),
- * oskar_log_warning().
+ * This function writes a log entry to the to the terminal and, if the log
+ * structure is defined, to a log file.
  *
  * @param[in,out] log    Pointer to a log structure.
  * @param[in]     priority Priority level of the log entry.
@@ -92,7 +54,7 @@ void oskar_log_writev_stderr(oskar_Log* log, char priority, char code, int depth
  * @param[in]     prefix Description of key (set blank or NULL if not required).
  * @param[in]     args   Variable argument list for printf().
  */
-void oskar_log_writev_stdout(oskar_Log* log, char priority, char code, int depth,
+void oskar_log_write(oskar_Log* log, char priority, char code, int depth,
         const char* prefix, const char* format, va_list args);
 
 /**

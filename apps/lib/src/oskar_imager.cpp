@@ -109,14 +109,14 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
     filename = settings.image.oskar_image;
     if (filename && !error)
     {
-        oskar_log_list(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
+        oskar_log_message(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
         oskar_image_write(image, log, filename, 0, &error);
     }
 #ifndef OSKAR_NO_FITS
     filename = settings.image.fits_image;
     if (filename && !error)
     {
-        oskar_log_list(log, 'M', 0, "Writing FITS image file: '%s'", filename);
+        oskar_log_message(log, 'M', 0, "Writing FITS image file: '%s'", filename);
         oskar_fits_image_write(image, log, filename, &error);
     }
 #endif

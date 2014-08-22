@@ -297,17 +297,17 @@ static void fit_splines(oskar_Log* log, oskar_Splines* splines, int n,
     double avg_frac_error;
     if (*status) return;
     avg_frac_error = set->average_fractional_error;
-    oskar_log_list(log, 'M', 0, "");
-    oskar_log_list(log, 'M', 0, "Fitting surface %s...", name);
+    oskar_log_message(log, 'M', 0, "");
+    oskar_log_message(log, 'M', 0, "Fitting surface %s...", name);
     oskar_splines_fit(splines, n, oskar_mem_double(theta, status),
             oskar_mem_double(phi, status), oskar_mem_double_const(data, status),
             oskar_mem_double_const(weight, status), OSKAR_SPLINES_SPHERICAL, 1,
             &avg_frac_error, set->average_fractional_error_factor_increase, 1,
             1e-14, status);
-    oskar_log_list(log, 'M', 1, "Surface fitted to %.4f average "
+    oskar_log_message(log, 'M', 1, "Surface fitted to %.4f average "
             "frac. error (s=%.2e).", avg_frac_error,
             oskar_splines_smoothing_factor(splines));
-    oskar_log_list(log, 'M', 1, "Number of knots (theta, phi) = (%d, %d).",
+    oskar_log_message(log, 'M', 1, "Number of knots (theta, phi) = (%d, %d).",
             oskar_splines_num_knots_x_theta(splines),
             oskar_splines_num_knots_y_phi(splines));
 }

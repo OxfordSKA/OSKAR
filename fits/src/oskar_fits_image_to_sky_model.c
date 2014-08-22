@@ -165,7 +165,7 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
         if (strncmp(ctype[i], "FREQ", 4) == 0)
         {
             ref_freq = crval[i];
-            oskar_log_list(ptr, 'M', 0, "Reference frequency is %.3f MHz.",
+            oskar_log_message(ptr, 'M', 0, "Reference frequency is %.3f MHz.",
                     ref_freq / 1e6);
             break;
         }
@@ -198,7 +198,7 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
     /* Check if we have beam size information. */
     if (bmaj > 0.0 && bmin > 0.0)
     {
-        oskar_log_list(ptr, 'M', 0, "Found beam size to be "
+        oskar_log_message(ptr, 'M', 0, "Found beam size to be "
                 "%.3f x %.3f arcsec.", bmaj * 3600.0, bmin * 3600.0);
 
         /* Calculate the beam area in pixels (normalisation factor). */
@@ -208,7 +208,7 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
 
     /* Record the beam area. */
     if (barea > 0.0)
-        oskar_log_list(ptr, 'M', 0, "Beam area is %.3f pixels.", barea);
+        oskar_log_message(ptr, 'M', 0, "Beam area is %.3f pixels.", barea);
     else if (jy_beam)
     {
         oskar_log_error(ptr, "Unknown beam size, and map units are JY/BEAM.");
@@ -371,7 +371,7 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
     /* Set size to the number of elements loaded, and append to output. */
     oskar_sky_resize(temp_sky, j, &err);
     oskar_sky_append(sky, temp_sky, &err);
-    oskar_log_list(ptr, 'M', 0, "Loaded %d pixels.", j);
+    oskar_log_message(ptr, 'M', 0, "Loaded %d pixels.", j);
 
     /* Close the FITS file and free memory. */
     cleanup:

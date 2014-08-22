@@ -47,10 +47,10 @@ int main(int argc, char** argv)
 
     // Create the log.
     int file_priority = OSKAR_LOG_MESSAGE;
-    int term_priority = opt.isSet("-q") ? OSKAR_LOG_WARN : OSKAR_LOG_MESSAGE;
+    int term_priority = opt.isSet("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_MESSAGE;
     oskar_Log* log = oskar_log_create(file_priority, term_priority);
 
-    oskar_log_list(log, 'M', 0, "Running binary %s", argv[0]);
+    oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
 
     // Run the imager.
     error = oskar_imager(opt.getArg(0), log);

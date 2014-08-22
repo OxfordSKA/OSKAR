@@ -37,21 +37,35 @@ extern "C" {
 
 void oskar_log_error(oskar_Log* log, const char* format, ...)
 {
-    const char* prefix = "ERROR";
+    const char* prefix = "== ERROR";
     va_list args;
     char priority = 'E'; /* FIXME set this properly */
     char code = 'E';
-    int depth = -100;
+    int depth = OSKAR_LOG_INFO_PREFIX;
 
+    oskar_log_line(log, priority, ' ');
+    va_start(args, format);
+    oskar_log_write(log, priority, code, depth, prefix, format, args);
+    va_end(args);
+    oskar_log_line(log, priority, ' ');
+
+#if 0
     /* Write to standard error. */
     va_start(args, format);
-    oskar_log_writev_stderr(log, priority, code, depth, prefix, format, args);
+    /*oskar_log_writev_stderr(log, priority, code, depth, "ERROR", format, args);*/
+    oskar_log_writev_stderr(log, priority, ' ', -1000, 0, 0, 0);
+    oskar_log_writev_stderr(log, priority, code, -101, prefix, format, args);
+    oskar_log_writev_stderr(log, priority, ' ', -1000, 0, 0, 0);
     va_end(args);
 
     /* Write to log file. */
     va_start(args, format);
-    oskar_log_writev(log, priority, code, depth, prefix, format, args);
+    /*oskar_log_writev(log, priority, code, depth, "ERROR", format, args);*/
+    oskar_log_writev(log, priority, ' ', -1000, 0, 0, 0);
+    oskar_log_writev(log, priority, code, -101, prefix, format, args);
+    oskar_log_writev(log, priority, ' ', -1000, 0, 0, 0);
     va_end(args);
+#endif
 }
 
 #ifdef __cplusplus

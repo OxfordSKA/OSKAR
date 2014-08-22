@@ -94,7 +94,7 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
     /* Apply pointing file override if set. */
     if (settings->obs.pointing_file)
     {
-        oskar_log_list(log, 'M', 0, "Loading station pointing file "
+        oskar_log_message(log, 'M', 0, "Loading station pointing file "
                 "override '%s'...", settings->obs.pointing_file);
         oskar_telescope_load_pointing_file(telescope,
                 settings->obs.pointing_file, status);
@@ -142,13 +142,13 @@ void oskar_telescope_log_summary(const oskar_Telescope* telescope,
 
     /* Print top-level data. */
     num_stations = oskar_telescope_num_stations(telescope);
-    oskar_log_list(log, 'M', 0, "Telescope model summary");
-    oskar_log_list_value(log, 'M', 1, "Num. stations", "%d", num_stations);
-    oskar_log_list_value(log, 'M', 1, "Max station size", "%d",
+    oskar_log_message(log, 'M', 0, "Telescope model summary");
+    oskar_log_value(log, 'M', 1, "Num. stations", "%d", num_stations);
+    oskar_log_value(log, 'M', 1, "Max station size", "%d",
             oskar_telescope_max_station_size(telescope));
-    oskar_log_list_value(log, 'M', 1, "Max station depth", "%d",
+    oskar_log_value(log, 'M', 1, "Max station depth", "%d",
             oskar_telescope_max_station_depth(telescope));
-    oskar_log_list_value(log, 'M', 1, "Identical stations", "%s",
+    oskar_log_value(log, 'M', 1, "Identical stations", "%s",
             oskar_telescope_identical_stations(telescope) ? "true" : "false");
 
 #if 0
@@ -200,12 +200,12 @@ void oskar_station_log_summary(const oskar_Station* station,
 
         /* Print station type and number of elements. */
         num_elements = oskar_station_num_elements(station);
-        oskar_log_list_value(log, 'M', d1, "Num. elements", "%d", num_elements);
+        oskar_log_value(log, 'M', d1, "Num. elements", "%d", num_elements);
 
         /* Print child station data. */
         if (oskar_station_has_child(station))
         {
-            oskar_log_list_value(log, 'M', d1, "Identical child stations", "%s",
+            oskar_log_value(log, 'M', d1, "Identical child stations", "%s",
                     oskar_station_identical_children(station) ?
                             "true" : "false");
 
@@ -213,7 +213,7 @@ void oskar_station_log_summary(const oskar_Station* station,
             if (oskar_station_identical_children(station) && num_elements > 0)
             {
                 /* Print station summary for first child station. */
-                oskar_log_list(log, 'M', d1, "Station model summary");
+                oskar_log_message(log, 'M', d1, "Station model summary");
                 oskar_station_log_summary(oskar_station_child_const(station, 0),
                         log, d1, status);
             }
@@ -222,7 +222,7 @@ void oskar_station_log_summary(const oskar_Station* station,
                 /* Loop over child stations to print summary for each. */
                 for (i = 0; i < num_elements; ++i)
                 {
-                    oskar_log_list(log, 'M', d1, "Station %d model summary", i);
+                    oskar_log_message(log, 'M', d1, "Station %d model summary", i);
                     oskar_station_log_summary(oskar_station_child_const(station,
                             i), log, d1, status);
                 }
@@ -231,11 +231,11 @@ void oskar_station_log_summary(const oskar_Station* station,
     }
     else if (oskar_station_type(station) == OSKAR_STATION_TYPE_VLA_PBCOR)
     {
-        oskar_log_list_value(log, 'M', d1, "Station type", "VLA (PBCOR)");
+        oskar_log_value(log, 'M', d1, "Station type", "VLA (PBCOR)");
     }
     else if (oskar_station_type(station) == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
     {
-        oskar_log_list_value(log, 'M', d1, "Station type", "Gaussian beam");
+        oskar_log_value(log, 'M', d1, "Station type", "Gaussian beam");
     }
 }
 
@@ -345,7 +345,7 @@ static void save_telescope(oskar_Telescope *telescope,
         return;
     }
 
-    oskar_log_list(log, 'M', 1, "Writing telescope model to disk as: %s", dir);
+    oskar_log_message(log, 'M', 1, "Writing telescope model to disk as: %s", dir);
     oskar_telescope_save(telescope, dir, status);
     if (*status)
     {

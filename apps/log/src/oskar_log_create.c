@@ -132,8 +132,8 @@ oskar_Log* oskar_log_create(int file_priority, int term_priority)
         log->name = malloc(n + 1);
         strcpy(log->name, fname2);
         if (current_dir)
-            oskar_log_list(log, 'M', 0, "Current dir is %s", current_dir);
-        oskar_log_list(log, 'M', 0, "Logging to file %s", fname2);
+            oskar_log_message(log, 'M', 0, "Current dir is %s", current_dir);
+        oskar_log_message(log, 'M', 0, "Logging to file %s", fname2);
     }
     else
     {

@@ -29,46 +29,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOG_LIST_H_
-#define OSKAR_LOG_LIST_H_
-
-/**
- * @file oskar_log_list.h
- */
-
-#include <oskar_global.h>
+#include <private_log.h>
+#include <oskar_log.h>
+#include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Writes a list log entry.
- *
- * @details
- * This function writes a list log entry. List entries have a depth which
- * set the indent and associated list symbol.
- *
- * Log entries are created with a priority code which is used to determine
- * which log are printed in the log and also sets a letter code with which
- * the message is tagged.
- *
- * The priority code takes one of the following values:
- *   - 'E' : Error
- *   - 'W' : Warning
- *   - 'M' : Message
- *   - 'D' : Debug
- *
- * @param[in,out] log      Pointer to a log structure.
- * @param[in]     priority Priority of log entry.
- * @param[in]     depth    Level of nesting of log entry.
- * @param[in]     format   Format string (for printf()).
- */
-void oskar_log_list(oskar_Log* log, char priority, int depth, const char* format, ...);
+void oskar_log_message(oskar_Log* log, char priority, int depth,
+        const char* format, ...)
+{
+    va_list args;
+    const char* prefix = 0;
+    char code = oskar_log_get_entry_code(priority);
+    /* Only depth codes > -1 are valid for message log entries */
+    if (depth < -1) return;
+    va_start(args, format);
+    oskar_log_write(log, priority, code, depth, prefix, format, args);
+    va_end(args);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_LOG_LIST_H_ */

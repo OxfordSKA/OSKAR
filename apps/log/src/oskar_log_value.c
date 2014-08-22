@@ -37,21 +37,15 @@
 extern "C" {
 #endif
 
-void oskar_log_value(oskar_Log* log, char priority, const char* prefix,
-        const char* format, ...)
+void oskar_log_value(oskar_Log* log, char priority, int depth,
+        const char* prefix, const char* format, ...)
 {
     va_list args;
     char code = oskar_log_get_entry_code(priority);
-    int depth = -1;
-
-    /* Write to standard output. */
+    /* Only depth codes > -1 are valid for value log entries */
+    if (depth < -1) return;
     va_start(args, format);
-    oskar_log_writev_stdout(log, priority, code, depth, prefix, format, args);
-    va_end(args);
-
-    /* Write to log file. */
-    va_start(args, format);
-    oskar_log_writev(log, priority, code, depth, prefix, format, args);
+    oskar_log_write(log, priority, code, depth, prefix, format, args);
     va_end(args);
 }
 

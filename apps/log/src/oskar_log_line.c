@@ -38,15 +38,10 @@ void oskar_log_line(oskar_Log* log, char priority, char symbol)
 {
     va_list args;
     char code = symbol;
-    int depth = -1000; /* Depth code -1000 == line */
+    int depth = OSKAR_LOG_LINE;
     const char* prefix = 0;
     const char* format = 0;
-
-    /* Write to standard output. */
-     oskar_log_writev_stdout(log, priority, code, depth, prefix, format, args);
-
-    /* Write to log file. */
-    oskar_log_writev(log, priority, code, depth, prefix, format, args);
+    oskar_log_write(log, priority, code, depth, prefix, format, args);
 }
 
 #ifdef __cplusplus

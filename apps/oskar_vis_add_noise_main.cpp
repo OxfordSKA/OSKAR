@@ -74,13 +74,13 @@ int main(int argc, char** argv)
     // Create the log.
     int file_priority = OSKAR_LOG_MESSAGE;
     int term_priority = OSKAR_LOG_MESSAGE;
-    if (quiet) term_priority = OSKAR_LOG_WARN;
+    if (quiet) term_priority = OSKAR_LOG_WARNING;
     if (verbose) term_priority = OSKAR_LOG_DEBUG;
     oskar_Log* log = oskar_log_create(file_priority, term_priority);
 
     oskar_log_set_keep_file(log, false);
 
-    oskar_log_list(log, 'M', 0, "Running binary %s", argv[0]);
+    oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
 
     // Load the settings file and telescope model.
     oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file.c_str());
@@ -115,19 +115,19 @@ int main(int argc, char** argv)
     // Print a summary of what is about to happen.
     oskar_log_line(log, 'D', ' ');
     oskar_log_line(log, 'D', '-');
-    oskar_log_list_value(log, 'D', 0, "Number of visibility files", "%li", vis_filename_in.size());
+    oskar_log_value(log, 'D', -1, "Number of visibility files", "%li", vis_filename_in.size());
     for (int i = 0; i < (int)vis_filename_in.size(); ++i)
-        oskar_log_list(log, 'D', 1, "%s", vis_filename_in[i].c_str());
-    oskar_log_list_value(log, 'D', 0, "Settings file", "%s", settings_file.c_str());
-    oskar_log_list_value(log, 'D', 0, "Verbose", "%s", (verbose?"true":"false"));
-    oskar_log_list_value(log, 'D', 0, "In place", "%s", (inplace?"true":"false"));
+        oskar_log_message(log, 'D', 1, "%s", vis_filename_in[i].c_str());
+    oskar_log_value(log, 'D', -1, "Settings file", "%s", settings_file.c_str());
+    oskar_log_value(log, 'D', -1, "Verbose", "%s", (verbose?"true":"false"));
+    oskar_log_value(log, 'D', -1, "In place", "%s", (inplace?"true":"false"));
     oskar_log_line(log, 'D', '-');
 
     // Add uncorrelated noise to each of the visibility files.
     for (int i = 0; i < (int)vis_filename_in.size(); ++i)
     {
         oskar_log_line(log, 'D', ' ');
-        oskar_log_list_value(log, 'D', 0, "Loading visibility file", "%s", vis_filename_in[i].c_str());
+        oskar_log_value(log, 'D', -1, "Loading visibility file", "%s", vis_filename_in[i].c_str());
 
         // Load the visibility file
         oskar_Vis* vis = oskar_vis_read(vis_filename_in[i].c_str(), &status);
@@ -136,16 +136,16 @@ int main(int argc, char** argv)
         // beam mode enabled. If not print a warning.
         // TODO Also verify any settings in the vis file against those loaded.
         //vis_file_settings(log, vis);
-        oskar_log_list_value(log, 'D', 0, "No. of baselines", "%i", oskar_vis_num_baselines(vis));
-        oskar_log_list_value(log, 'D', 0, "No. of times", "%i", oskar_vis_num_times(vis));
-        oskar_log_list_value(log, 'D', 0, "No. of channels", "%i", oskar_vis_num_channels(vis));
+        oskar_log_value(log, 'D', -1, "No. of baselines", "%i", oskar_vis_num_baselines(vis));
+        oskar_log_value(log, 'D', -1, "No. of times", "%i", oskar_vis_num_times(vis));
+        oskar_log_value(log, 'D', -1, "No. of channels", "%i", oskar_vis_num_channels(vis));
 
         // Add noise
         int seed = settings.interferometer.noise.seed;
         oskar_vis_add_system_noise(vis, tel, seed, &status);
 
         // Write the noisy visibility file.
-        oskar_log_list_value(log, 'D', 0, "Writing visibility file", "%s", vis_filename_out[i].c_str());
+        oskar_log_value(log, 'D', -1, "Writing visibility file", "%s", vis_filename_out[i].c_str());
         oskar_vis_write(vis, 0, vis_filename_out[i].c_str(), &status);
 
         oskar_vis_free(vis, &status);

@@ -222,7 +222,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
         double frequency = settings->obs.start_frequency_hz +
                 c * settings->obs.frequency_inc_hz;
 
-        oskar_log_list(log, 'M', 0, "Channel %3d/%d [%.4f MHz]",
+        oskar_log_message(log, 'M', 0, "Channel %3d/%d [%.4f MHz]",
                 c + 1, num_channels, frequency / 1e6);
 
         oskar_RandomState* rand_state = oskar_random_state_create(
@@ -232,7 +232,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
         for (int t = 0; t < num_times; ++t)
         {
             if (*status) break;
-            oskar_log_list(log, 'M', 1, "Snapshot %4d/%d", t+1, num_times);
+            oskar_log_message(log, 'M', 1, "Snapshot %4d/%d", t+1, num_times);
 
             double t_dump = obs_start_mjd_utc + t * dt_dump;
             double GAST = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump / 2.0);

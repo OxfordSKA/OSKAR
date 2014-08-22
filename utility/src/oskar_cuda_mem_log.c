@@ -42,7 +42,7 @@ void oskar_cuda_mem_log(oskar_Log* log, int depth, int device_id)
     /* Record GPU memory usage. */
     cudaMemGetInfo(&mem_free, &mem_total);
     cudaGetDeviceProperties(&device_prop, device_id);
-    oskar_log_list(log, 'M', depth, "Memory on device %d [%s] is %.1f%% used.",
+    oskar_log_message(log, 'M', depth, "Memory on device %d [%s] is %.1f%% used.",
             device_id, device_prop.name,
             100.0 * (1.0 - ((double)mem_free / (double)mem_total)));
 }

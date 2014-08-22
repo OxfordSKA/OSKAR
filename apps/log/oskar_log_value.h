@@ -45,12 +45,23 @@ extern "C" {
  * Writes a key-value pair to the log.
  *
  * @details
- * This function writes a key-value pair to the log.
+ * This function writes a key-value pair to the log, where the value is
+ * written starting at a fixed column offset from the start of the entry.
  *
  * The separation of the key and value is specified by the log width parameter
  * which is set by the oskar_log_set_value_width() method. The default
- * width for value messages places the value of the message in the 45th column
- * of the log.
+ * width for value messages places the value of the message is determined
+ * by the OSKAR_LOG_DEFAULT_VALUE_WIDTH macro in the oskar_Log.h header.
+ *
+ * Value log entries have a depth which, if positive, will indent the message
+ * by 2 spaces per depth value and prefix the message with a list bullet.
+ *
+ * If the depth value is set to -1 the list bullet will be omitted and
+ * no indent is applied.
+ *
+ * Log entries are created with a priority code which is used to determine
+ * which log are printed in the log and also sets a letter code with which
+ * the message is tagged.
  *
  * The priority code takes one of the following values:
  *   - 'E' : Error
@@ -59,12 +70,13 @@ extern "C" {
  *   - 'D' : Debug
  *
  * @param[in,out] log      Pointer to a log structure.
+ * @param[in]     Depth    List depth of the log entry.
  * @param[in]     priority Priority of nesting of log entry.
  * @param[in]     prefix   String prefix (key).
  * @param[in]     format   Format string for printf().
  */
-void oskar_log_value(oskar_Log* log, char priority, const char* prefix,
-        const char* format, ...);
+void oskar_log_value(oskar_Log* log, char priority, int depth,
+        const char* prefix, const char* format, ...);
 
 #ifdef __cplusplus
 }
