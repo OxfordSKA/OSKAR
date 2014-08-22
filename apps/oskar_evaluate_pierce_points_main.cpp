@@ -47,8 +47,8 @@ int main(int argc, char** argv)
     const char* filename = opt.getArg();
 
     // Create the log.
-    oskar_Log* log = oskar_log_create();
-    oskar_log_message(log, 0, "Running binary %s", argv[0]);
+    oskar_Log* log = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_MESSAGE);
+    oskar_log_list(log, 'M', 0, "Running binary %s", argv[0]);
 
     int error = OSKAR_SUCCESS;
     try

@@ -74,7 +74,6 @@ enum LOGGING_LEVEL {
 #include <oskar_log_line.h>
 #include <oskar_log_list_value.h>
 #include <oskar_log_list.h>
-/*#include <oskar_log_message.h>*/
 #include <oskar_log_section.h>
 #include <oskar_log_system_clock_data.h>
 #include <oskar_log_system_clock_string.h>

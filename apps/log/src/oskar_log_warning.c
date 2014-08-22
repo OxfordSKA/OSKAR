@@ -37,47 +37,21 @@ extern "C" {
 
 void oskar_log_warning(oskar_Log* log, const char* format, ...)
 {
+    char priority = 'W';
     char code = 'W';
     const char* prefix = "WARNING";
     va_list args;
 
     /* Write to standard output. */
-    if (log->term_priority >= OSKAR_LOG_WARN) {
-        va_start(args, format);
-        oskar_log_writev_stdout(log, code, -100, 0, prefix, format, args);
-        va_end(args);
-    }
+    va_start(args, format);
+    oskar_log_writev_stdout(log, priority, code, -100, prefix, format, args);
+    va_end(args);
 
     /* Write to log file. */
-    if (log->file_priority >= OSKAR_LOG_WARN) {
-        va_start(args, format);
-        oskar_log_writev(log, code, -100, 0, prefix, format, args);
-        va_end(args);
-    }
+    va_start(args, format);
+    oskar_log_writev(log, priority, code, -100, prefix, format, args);
+    va_end(args);
 }
-
-#if 0
-void oskar_log_warning_line(oskar_Log* log, const char* format, ...)
-{
-    char code = 'W';
-    const char* prefix = "";
-    va_list args;
-
-    /* Write to standard output. */
-    if (log->term_priority >= OSKAR_LOG_WARN) {
-        va_start(args, format);
-        oskar_log_writev_stdout(log, code, -101, 0, prefix, format, args);
-        va_end(args);
-    }
-
-    /* Write to log file. */
-    if (log->file_priority >= OSKAR_LOG_WARN) {
-        va_start(args, format);
-        oskar_log_writev(log, code, -101, 0, prefix, format, args);
-        va_end(args);
-    }
-}
-#endif
 
 #ifdef __cplusplus
 }

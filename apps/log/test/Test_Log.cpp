@@ -175,6 +175,15 @@ TEST(Log, depth_symbol)
     }
 }
 
+TEST(Log, special_methods)
+{
+    oskar_Log* log = 0;
+    oskar_log_warning(log, "This is a warning");
+    oskar_log_error(log, "This is an error");
+    oskar_log_section(log, 'M', "This is a section!");
+    if (log) oskar_log_free(log);
+}
+
 #if 0
 TEST(Log, create_free)
 {

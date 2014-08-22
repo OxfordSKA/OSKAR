@@ -218,8 +218,7 @@ static void print_entry(FILE* stream, oskar_Log* log, char priority, char code,
     {
         char priority_code = oskar_log_get_entry_code(priority);
         fprintf(stream, "%c|", priority_code);
-        for (i = 0; i < 68; ++i)
-            fprintf(stream, "%c", code);
+        for (i = 0; i < 68; ++i) fprintf(stream, "%c", code);
         fprintf(stream, "\n");
         return;
     }

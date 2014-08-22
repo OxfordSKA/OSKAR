@@ -14,7 +14,6 @@ set(${name}_SRC
     src/oskar_log_line.c
     src/oskar_log_list_value.c
     src/oskar_log_list.c
-    src/oskar_log_message.c
     src/oskar_log_section.c
     src/oskar_log_system_clock_data.c
     src/oskar_log_system_clock_string.c
