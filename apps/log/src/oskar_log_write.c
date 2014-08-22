@@ -34,12 +34,6 @@
 #include <stdio.h>
 #include <time.h>
 
-/* va_copy is C99 but this gets around the problem on windows
- * Note: this may not be entirely safe! */
-#if defined(OSKAR_OS_WIN) && !defined(va_copy)
-#   define va_copy(dest, src) (dest = src)
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -52,37 +46,31 @@ static int oskar_log_priority_level(char code);
 static int should_print_term_entry(oskar_Log* log, char priority);
 static int should_print_file_entry(oskar_Log* log, char priority);
 
-void oskar_log_write(oskar_Log* log, char priority, char code, int depth,
-        const char* prefix, const char* format, va_list args)
+void oskar_log_write(oskar_Log* log, FILE* stream, char priority, char code,
+        int depth, const char* prefix, const char* format, va_list args)
 {
-    int width = 0;
+    int width = 0, is_file = 0;
 
     /* If both strings are NULL and not printing a line the entry is invalid */
     if (!format && !prefix && depth != OSKAR_LOG_LINE) return;
 
     width = log ? log->value_width : OSKAR_LOG_DEFAULT_VALUE_WIDTH;
+    is_file = (stream == stdout || stream == stderr) ? 0 : 1;
 
     /* Write the entry to the terminal */
-    if (should_print_term_entry(log, priority))
+    if (!is_file && should_print_term_entry(log, priority))
     {
-        va_list args_;
-        FILE* stream = (priority == 'E') ? stderr : stdout;
-        va_copy(args_, args);
-        print_entry(stream, priority, code, depth, prefix, width, format, args_);
-        va_end(args_);
+        print_entry(stream, priority, code, depth, prefix, width, format, args);
         fflush(stream);
     }
 
     /* Write the entry to the log file */
-    if (log && log->file && should_print_file_entry(log, priority))
+    else if (log && log->file && should_print_file_entry(log, priority))
     {
-        va_list args_;
 #ifdef _OPENMP
         omp_set_lock(&log->mutex); /* lock the mutex */
 #endif
-        va_copy(args_, args);
-        print_entry(log->file, priority, code, depth, prefix, width, format, args_);
-        va_end(args_);
+        print_entry(log->file, priority, code, depth, prefix, width, format, args);
         oskar_log_update_record(log, code);
 #ifdef _OPENMP
     omp_unset_lock(&log->mutex); /* Unlock the mutex. */

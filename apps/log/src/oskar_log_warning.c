@@ -45,8 +45,14 @@ void oskar_log_warning(oskar_Log* log, const char* format, ...)
 
     oskar_log_line(log, priority, ' ');
     va_start(args, format);
-    oskar_log_write(log, priority, code, depth, prefix, format, args);
+    oskar_log_write(log, stdout, priority, code, depth, prefix, format, args);
     va_end(args);
+    if (log && log->file)
+    {
+        va_start(args, format);
+        oskar_log_write(log, log->file, priority, code, depth, prefix, format, args);
+        va_end(args);
+    }
     oskar_log_line(log, priority, ' ');
 }
 

@@ -41,12 +41,20 @@ void oskar_log_value(oskar_Log* log, char priority, int depth,
         const char* prefix, const char* format, ...)
 {
     va_list args;
+    FILE* stream = 0;
     char code = oskar_log_get_entry_code(priority);
     /* Only depth codes > -1 are valid for value log entries */
     if (depth < -1) return;
+    stream = (priority == 'E') ? stderr : stdout;
     va_start(args, format);
-    oskar_log_write(log, priority, code, depth, prefix, format, args);
+    oskar_log_write(log, stream, priority, code, depth, prefix, format, args);
     va_end(args);
+    if (log && log->file)
+    {
+        va_start(args, format);
+        oskar_log_write(log, log->file, priority, code, depth, prefix, format, args);
+        va_end(args);
+    }
 }
 
 #ifdef __cplusplus

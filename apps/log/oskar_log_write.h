@@ -54,8 +54,9 @@ extern "C" {
  * @param[in]     prefix Description of key (set blank or NULL if not required).
  * @param[in]     args   Variable argument list for printf().
  */
-void oskar_log_write(oskar_Log* log, char priority, char code, int depth,
-        const char* prefix, const char* format, va_list args);
+void oskar_log_write(oskar_Log* log, FILE* stream, char priority, char code,
+        int depth, const char* prefix, const char* format, va_list args);
+
 
 /**
  * @brief

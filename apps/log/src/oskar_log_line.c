@@ -38,10 +38,17 @@ void oskar_log_line(oskar_Log* log, char priority, char symbol)
 {
     va_list args;
     char code = symbol;
+    FILE* stream = 0;
     int depth = OSKAR_LOG_LINE;
     const char* prefix = 0;
     const char* format = 0;
-    oskar_log_write(log, priority, code, depth, prefix, format, args);
+    stream = (priority == 'E') ? stderr : stdout;
+    oskar_log_write(log, stream, priority, code, depth, prefix, format, args);
+    if (log && log->file)
+    {
+        oskar_log_write(log, log->file, priority, code, depth, prefix, format, args);
+    }
+
 }
 
 #ifdef __cplusplus

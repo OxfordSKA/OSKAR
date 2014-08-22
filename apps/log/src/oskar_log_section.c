@@ -38,13 +38,21 @@ void oskar_log_section(oskar_Log* log, char priority, const char* format, ...)
 {
     va_list args;
     char code = '=';
+    FILE* stream = 0;
     const char* prefix = "== ";
     int depth = OSKAR_LOG_SECTION;
 
     oskar_log_line(log, priority, ' ');
+    stream = (priority == 'E') ? stderr : stdout;
     va_start(args, format);
-    oskar_log_write(log, priority, code, depth, prefix, format, args);
+    oskar_log_write(log, stream, priority, code, depth, prefix, format, args);
     va_end(args);
+    if (log && log->file)
+    {
+        va_start(args, format);
+        oskar_log_write(log, log->file, priority, code, depth, prefix, format, args);
+        va_end(args);
+    }
     oskar_log_line(log, priority, ' ');
 }
 

@@ -42,11 +42,16 @@ void oskar_log_error(oskar_Log* log, const char* format, ...)
     char priority = 'E';
     char code = 'E';
     int depth = OSKAR_LOG_INFO_PREFIX;
-
     oskar_log_line(log, priority, ' ');
     va_start(args, format);
-    oskar_log_write(log, priority, code, depth, prefix, format, args);
+    oskar_log_write(log, stderr, priority, code, depth, prefix, format, args);
     va_end(args);
+    if (log && log->file)
+    {
+        va_start(args, format);
+        oskar_log_write(log, log->file, priority, code, depth, prefix, format, args);
+        va_end(args);
+    }
     oskar_log_line(log, priority, ' ');
 }
 
