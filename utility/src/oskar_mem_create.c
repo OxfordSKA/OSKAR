@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
+#ifdef OSKAR_HAVE_CUDA
+#include <cuda_runtime_api.h>
+#endif
 
-#include <oskar_mem_alloc.h>
-#include <oskar_mem_create.h>
+#include <oskar_mem.h>
+#include <private_mem.h>
 
 #include <stdlib.h>
 
@@ -41,6 +43,7 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
          int* status)
 {
     oskar_Mem* mem = 0;
+    size_t element_size, bytes;
 
     /* Check all inputs. */
     if (!status)
@@ -60,10 +63,44 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
     mem->owner = 1;
     mem->data = NULL;
 
-    /* Allocate memory. */
-    oskar_mem_alloc(mem, status);
+    /* Check if allocation should happen or not. */
+    if (*status || num_elements == 0)
+        return mem;
 
-    /* Return a handle the structure .*/
+    /* Get the memory size. */
+    element_size = oskar_mem_element_size(type);
+    if (element_size == 0)
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return mem;
+    }
+    bytes = num_elements * element_size;
+
+    /* Check whether the memory should be on the host or the device. */
+    if (location == OSKAR_CPU)
+    {
+        /* Allocate host memory. */
+        mem->data = calloc(bytes, 1);
+        if (mem->data == NULL)
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+    }
+    else if (location == OSKAR_GPU)
+    {
+#ifdef OSKAR_HAVE_CUDA
+        /* Allocate GPU memory. */
+        cudaMalloc(&mem->data, bytes);
+        /*cudaMemset(mem->data, 0, bytes);*/ /* Shouldn't be needed. */
+        *status = cudaPeekAtLastError();
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+    }
+    else
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+    }
+
+    /* Return a handle to the structure .*/
     return mem;
 }
 
