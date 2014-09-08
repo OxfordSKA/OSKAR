@@ -193,7 +193,7 @@ void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
         oskar_mem_scale_real(op, 1.0/amp, status);
 
         /* Copy output beam data. */
-        oskar_mem_insert(beam_pattern, op, 0, num_points-1, status);
+        oskar_mem_copy_contents(beam_pattern, op, 0, 0, num_points-1, status);
     }
 }
 

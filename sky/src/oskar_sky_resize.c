@@ -37,6 +37,8 @@ extern "C" {
 
 void oskar_sky_resize(oskar_Sky* sky, int num_sources, int* status)
 {
+    int capacity;
+
     /* Check all inputs. */
     if (!sky || !status)
     {
@@ -47,27 +49,29 @@ void oskar_sky_resize(oskar_Sky* sky, int num_sources, int* status)
     /* Check if safe to proceed. */
     if (*status) return;
 
+    capacity = num_sources + 1;
+    sky->capacity = capacity;
     sky->num_sources = num_sources;
 
     /* Resize the model data. */
-    oskar_mem_realloc(sky->ra_rad, num_sources, status);
-    oskar_mem_realloc(sky->dec_rad, num_sources, status);
-    oskar_mem_realloc(sky->I, num_sources, status);
-    oskar_mem_realloc(sky->Q, num_sources, status);
-    oskar_mem_realloc(sky->U, num_sources, status);
-    oskar_mem_realloc(sky->V, num_sources, status);
-    oskar_mem_realloc(sky->reference_freq_hz, num_sources, status);
-    oskar_mem_realloc(sky->spectral_index, num_sources, status);
-    oskar_mem_realloc(sky->rm_rad, num_sources, status);
-    oskar_mem_realloc(sky->l, num_sources, status);
-    oskar_mem_realloc(sky->m, num_sources, status);
-    oskar_mem_realloc(sky->n, num_sources, status);
-    oskar_mem_realloc(sky->fwhm_major_rad, num_sources, status);
-    oskar_mem_realloc(sky->fwhm_minor_rad, num_sources, status);
-    oskar_mem_realloc(sky->pa_rad, num_sources, status);
-    oskar_mem_realloc(sky->gaussian_a, num_sources, status);
-    oskar_mem_realloc(sky->gaussian_b, num_sources, status);
-    oskar_mem_realloc(sky->gaussian_c, num_sources, status);
+    oskar_mem_realloc(sky->ra_rad, capacity, status);
+    oskar_mem_realloc(sky->dec_rad, capacity, status);
+    oskar_mem_realloc(sky->I, capacity, status);
+    oskar_mem_realloc(sky->Q, capacity, status);
+    oskar_mem_realloc(sky->U, capacity, status);
+    oskar_mem_realloc(sky->V, capacity, status);
+    oskar_mem_realloc(sky->reference_freq_hz, capacity, status);
+    oskar_mem_realloc(sky->spectral_index, capacity, status);
+    oskar_mem_realloc(sky->rm_rad, capacity, status);
+    oskar_mem_realloc(sky->l, capacity, status);
+    oskar_mem_realloc(sky->m, capacity, status);
+    oskar_mem_realloc(sky->n, capacity, status);
+    oskar_mem_realloc(sky->fwhm_major_rad, capacity, status);
+    oskar_mem_realloc(sky->fwhm_minor_rad, capacity, status);
+    oskar_mem_realloc(sky->pa_rad, capacity, status);
+    oskar_mem_realloc(sky->gaussian_a, capacity, status);
+    oskar_mem_realloc(sky->gaussian_b, capacity, status);
+    oskar_mem_realloc(sky->gaussian_c, capacity, status);
 }
 
 #ifdef __cplusplus

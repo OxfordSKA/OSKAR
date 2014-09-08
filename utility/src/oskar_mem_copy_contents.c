@@ -39,12 +39,12 @@
 extern "C" {
 #endif
 
-void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
-        size_t num_elements, int* status)
+void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
+        size_t offset_dst, size_t offset_src, size_t num_elements, int* status)
 {
     int type_src, type_dst, location_src, location_dst;
-    size_t n_elements_src, n_elements_dst, bytes, start;
-    void* destination;
+    size_t n_elements_src, n_elements_dst, bytes, start_dst, start_src;
+    void *destination, *source;
 
     /* Check all inputs. */
     if (!src || !dst || !status)
@@ -79,7 +79,7 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
     }
 
     /* Check the data dimensions. */
-    if (num_elements > (n_elements_dst - offset))
+    if (num_elements > (n_elements_dst - offset_dst))
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
@@ -90,24 +90,24 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
         return;
 
     /* Get the number of bytes to copy. */
-    bytes = oskar_mem_element_size(type_src) * num_elements;
-    start = oskar_mem_element_size(type_src) * offset;
-    destination = (void*)((char*)(dst->data) + start);
+    bytes       = oskar_mem_element_size(type_src) * num_elements;
+    start_dst   = oskar_mem_element_size(type_src) * offset_dst;
+    start_src   = oskar_mem_element_size(type_src) * offset_src;
+    destination = (void*)((char*)(dst->data) + start_dst);
+    source      = (void*)((char*)(src->data) + start_src);
 
     /* Host to host. */
-    if (location_src == OSKAR_CPU
-            && location_dst == OSKAR_CPU)
+    if (location_src == OSKAR_CPU && location_dst == OSKAR_CPU)
     {
-        memcpy(destination, src->data, bytes);
+        memcpy(destination, source, bytes);
         return;
     }
 
     /* Host to device. */
-    else if (location_src == OSKAR_CPU
-            && location_dst == OSKAR_GPU)
+    else if (location_src == OSKAR_CPU && location_dst == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        cudaMemcpy(destination, src->data, bytes, cudaMemcpyHostToDevice);
+        cudaMemcpy(destination, source, bytes, cudaMemcpyHostToDevice);
         *status = cudaPeekAtLastError();
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
@@ -116,11 +116,10 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
     }
 
     /* Device to host. */
-    else if (location_src == OSKAR_GPU
-            && location_dst == OSKAR_CPU)
+    else if (location_src == OSKAR_GPU && location_dst == OSKAR_CPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        cudaMemcpy(destination, src->data, bytes, cudaMemcpyDeviceToHost);
+        cudaMemcpy(destination, source, bytes, cudaMemcpyDeviceToHost);
         *status = cudaPeekAtLastError();
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
@@ -129,11 +128,10 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, size_t offset,
     }
 
     /* Device to device. */
-    else if (location_src == OSKAR_GPU
-            && location_dst == OSKAR_GPU)
+    else if (location_src == OSKAR_GPU && location_dst == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        cudaMemcpy(destination, src->data, bytes, cudaMemcpyDeviceToDevice);
+        cudaMemcpy(destination, source, bytes, cudaMemcpyDeviceToDevice);
         *status = cudaPeekAtLastError();
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;

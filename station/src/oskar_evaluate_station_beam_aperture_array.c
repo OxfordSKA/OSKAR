@@ -296,7 +296,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
             /* Copy beam for child station 0 into memory for other stations. */
             for (i = 1; i < num_elements; ++i)
             {
-                oskar_mem_insert(signal, output0, i * num_points,
+                oskar_mem_copy_contents(signal, output0, i * num_points, 0,
                         oskar_mem_length(output0), status);
             }
             oskar_mem_free(output0, status);

@@ -113,7 +113,8 @@ static void evaluate_E_all_identical(oskar_Jones* E,
     for (i = 1; i < oskar_telescope_num_stations(telescope); ++i)
     {
         oskar_jones_get_station_pointer(E_station, E, i, status);
-        oskar_mem_insert(E_station, E0, 0, oskar_mem_length(E0), status);
+        oskar_mem_copy_contents(E_station, E0, 0, 0,
+                oskar_mem_length(E0), status);
     }
     oskar_mem_free(E0, status);
     oskar_mem_free(E_station, status);

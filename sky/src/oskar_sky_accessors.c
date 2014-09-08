@@ -43,6 +43,11 @@ int oskar_sky_mem_location(const oskar_Sky* sky)
     return sky->mem_location;
 }
 
+int oskar_sky_capacity(const oskar_Sky* sky)
+{
+    return sky->capacity;
+}
+
 int oskar_sky_num_sources(const oskar_Sky* sky)
 {
     return sky->num_sources;

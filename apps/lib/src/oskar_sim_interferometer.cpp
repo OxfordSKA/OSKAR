@@ -175,7 +175,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     {
         cudaSetDevice(settings.sim.cuda_device_ids[i]);
         local_sky[i] = oskar_sky_create(precision, OSKAR_GPU,
-                settings.sim.max_sources_per_chunk + 1, &error);
+                settings.sim.max_sources_per_chunk, &error);
         tel_gpu[i] = oskar_telescope_create_copy(tel, OSKAR_GPU, &error);
         work[i] = oskar_station_work_create(precision, OSKAR_GPU, &error);
     }
@@ -246,19 +246,21 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Add uncorrelated system noise to the visibilities.
     if (settings.interferometer.noise.enable)
     {
-        int have_sources = (num_sky_chunks > 0 && oskar_sky_num_sources(sky_chunks[0]) > 0);
+        int have_sources = (num_sky_chunks > 0 &&
+                oskar_sky_num_sources(sky_chunks[0]) > 0);
         int amp_calibrated = settings.telescope.normalise_beams_at_phase_centre;
         int seed = settings.interferometer.noise.seed;
         // If there are sources in the simulation and the station beam is not
         // normalised to 1.0 at the phase centre, the values of noise RMS
         // may give a very unexpected S/N ratio!
-        // The alternative would be to scale the noise to match the station beam
-        // gain but that would require knowledge of the station beam amplitude
-        // at the phase centre for each time and channel...
-        if (have_sources > 0 && !amp_calibrated) {
-            log_warning_box(log, "WARNING: System noise is be added to visibilities "
-                    "without station beam normalisation enabled. This may lead "
-                    "to an invalid signal to noise ratio.");
+        // The alternative would be to scale the noise to match the station
+        // beam gain but that would require knowledge of the station beam
+        // amplitude at the phase centre for each time and channel...
+        if (have_sources > 0 && !amp_calibrated)
+        {
+            log_warning_box(log, "WARNING: System noise is be added to "
+                    "visibilities without station beam normalisation enabled. "
+                    "This may lead to an invalid signal to noise ratio.");
         }
         oskar_vis_add_system_noise(vis, tel, seed, &error);
     }
@@ -288,7 +290,8 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Write visibilities to disk.
     if (fname && !error)
     {
-        oskar_log_message(log, 'M', 0, "Writing OSKAR visibility file: '%s'", fname);
+        oskar_log_message(log, 'M', 0,
+                "Writing OSKAR visibility file: '%s'", fname);
         oskar_vis_write(vis, log, fname, &error);
     }
 
@@ -298,7 +301,8 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     {
         char* log_data;
         size_t log_size;
-        oskar_log_message(log, 'M', 0, "Writing Measurement Set: '%s'", ms_name);
+        oskar_log_message(log, 'M', 0,
+                "Writing Measurement Set: '%s'", ms_name);
 
         // Get the log.
         log_data = oskar_log_file_data(log, &log_size);
@@ -532,8 +536,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         /* Divide visibilities by number of averages, and add to global data. */
         oskar_timer_resume(timers->tmr_init_copy);
         oskar_mem_scale_real(vis, 1.0/(num_fringe_ave * num_vis_ave), status);
-        oskar_mem_insert(vis_amp, vis, i * n_baselines, oskar_mem_length(vis),
-                status);
+        oskar_mem_copy_contents(vis_amp, vis, i * n_baselines, 0,
+                oskar_mem_length(vis), status);
         oskar_timer_pause(timers->tmr_init_copy);
     }
 

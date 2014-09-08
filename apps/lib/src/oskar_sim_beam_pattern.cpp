@@ -311,7 +311,7 @@ static void accumulate_to_beam_cube(oskar_Mem* beam_pattern_planes,
     int offset = (t + c * num_times) * num_pols * num_pixels;
     if (oskar_mem_is_scalar(beam_data))
     {
-        oskar_mem_insert(beam_pattern_planes, beam_data, offset,
+        oskar_mem_copy_contents(beam_pattern_planes, beam_data, offset, 0,
                 num_pixels, status);
     }
     else

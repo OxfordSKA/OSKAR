@@ -114,7 +114,7 @@ void oskar_sky_horizon_clip(oskar_Sky* out, const oskar_Sky* in,
     out->reference_dec_rad = dec0;
 
     /* Resize the output structure if necessary. */
-    if (oskar_sky_num_sources(out) < num_in)
+    if (oskar_sky_capacity(out) < num_in)
         oskar_sky_resize(out, num_in, status);
 
     /* Resize the work buffers if necessary. */

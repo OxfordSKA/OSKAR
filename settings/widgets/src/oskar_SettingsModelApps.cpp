@@ -505,7 +505,7 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
 
     k = root + "/normalise_beams_at_phase_centre";
     declare(k , "Normalise beams at phase centre", oskar_SettingsItem::BOOL,
-            false);
+            true);
     setTooltip(k, "If <b>true</b>, then scale the amplitude of "
             "every station beam at the interferometer phase centre to "
             "precisely 1.0 for each time snapshot. This effectively "

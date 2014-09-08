@@ -63,8 +63,8 @@ static void check_values(const oskar_Mem* approx, const oskar_Mem* accurate)
 class correlate : public ::testing::Test
 {
 protected:
-    static const int num_sources = 3000;
-    static const int num_stations = 17;
+    static const int num_sources = 277;
+    static const int num_stations = 7;
     static const int num_baselines = num_stations * (num_stations - 1) / 2;
     static const double bandwidth;
     oskar_Mem *u_, *v_;

@@ -47,6 +47,7 @@ struct oskar_Sky
 {
     int precision;
     int mem_location;
+    int capacity;
 
     int num_sources;           /**< Number of sources in the sky model. */
     oskar_Mem* ra_rad;         /**< Right ascension, in radians. */

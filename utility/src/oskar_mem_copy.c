@@ -26,12 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
 #include <oskar_mem.h>
-
-#include <oskar_mem_copy.h>
-#include <oskar_mem_insert.h>
-#include <oskar_mem_realloc.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,18 +45,18 @@ void oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src, int* status)
     if (*status) return;
 
     /* Check the data types. */
-    if (src->type != dst->type)
+    if (oskar_mem_type(src) != oskar_mem_type(dst))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
 
     /* Check the data dimensions, and resize if required. */
-    if (src->num_elements > dst->num_elements)
-        oskar_mem_realloc(dst, src->num_elements, status);
+    if (oskar_mem_length(src) > oskar_mem_length(dst))
+        oskar_mem_realloc(dst, oskar_mem_length(src), status);
 
     /* Copy the memory. */
-    oskar_mem_insert(dst, src, 0, oskar_mem_length(src), status);
+    oskar_mem_copy_contents(dst, src, 0, 0, oskar_mem_length(src), status);
 }
 
 #ifdef __cplusplus

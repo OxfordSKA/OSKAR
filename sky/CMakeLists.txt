@@ -11,9 +11,9 @@ set(sky_SRC
     src/oskar_sky_append_to_set.c
     src/oskar_sky_append.c
     src/oskar_sky_combine_set.c
+    src/oskar_sky_copy_contents.c
     src/oskar_sky_copy_source_data.c
     src/oskar_sky_create.c
-    src/oskar_sky_create_alias.c
     src/oskar_sky_create_copy.c
     src/oskar_sky_evaluate_gaussian_source_parameters.c
     src/oskar_sky_evaluate_relative_direction_cosines.c
@@ -21,7 +21,6 @@ set(sky_SRC
     src/oskar_sky_filter_by_radius.c
     src/oskar_sky_free.c
     src/oskar_sky_horizon_clip.c
-    src/oskar_sky_insert.c
     src/oskar_sky_load.c
     src/oskar_sky_load_gsm.c
     src/oskar_sky_override_polarisation.c

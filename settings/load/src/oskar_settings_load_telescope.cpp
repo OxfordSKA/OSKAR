@@ -92,7 +92,7 @@ void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
 
     // Normalise beam.
     tel->normalise_beams_at_phase_centre =
-            s.value("normalise_beams_at_phase_centre", false).toBool();
+            s.value("normalise_beams_at_phase_centre", true).toBool();
 
     // Aperture array settings.
     s.beginGroup("aperture_array");

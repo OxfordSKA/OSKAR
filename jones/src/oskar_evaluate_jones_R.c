@@ -248,7 +248,8 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
         for (i = 1; i < num_stations; ++i)
         {
             oskar_jones_get_station_pointer(R_station, R, i, status);
-            oskar_mem_insert(R_station, R0, 0, oskar_mem_length(R0), status);
+            oskar_mem_copy_contents(R_station, R0, 0, 0,
+                    oskar_mem_length(R0), status);
         }
         oskar_mem_free(R0, status);
     }

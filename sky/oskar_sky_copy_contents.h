@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,26 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
-#include <oskar_mem.h>
+#ifndef OSKAR_SKY_COPY_CONTENTS_H_
+#define OSKAR_SKY_COPY_CONTENTS_H_
+
+/**
+ * @file oskar_sky_copy_contents.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_mem_append(oskar_Mem* to, const oskar_Mem* from, int* status)
-{
-    /* Check all inputs. */
-    if (!from || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-	oskar_mem_append_raw(to, from->data, from->type, from->location,
-	        from->num_elements, status);
-}
+/**
+ * @brief Copies source information from one sky model into another.
+ *
+ * @details
+ * Note: this function does not alter meta-data (num_sources, and use_extended)
+ * fields of the destination model.
+ *
+ * @param[out] dst         Sky model to copy into.
+ * @param[in]  src         Sky model to copy from.
+ * @param[in]  offset_dst  Required offset into the destination sky model.
+ * @param[in]  offset_src  Offset from start of source sky model.
+ * @param[in]  num_sources Number of sources to copy from source sky model.
+ * @param[in,out] status   Status return code.
+*/
+OSKAR_EXPORT
+void oskar_sky_copy_contents(oskar_Sky* dst, const oskar_Sky* src,
+        int offset_dst, int offset_src, int num_sources, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_SKY_COPY_CONTENTS_H_ */

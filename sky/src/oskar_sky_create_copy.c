@@ -56,6 +56,7 @@ oskar_Sky* oskar_sky_create_copy(const oskar_Sky* src, int location,
     /* Copy meta data */
     model->precision = src->precision;
     model->mem_location = location;
+    model->capacity = src->capacity;
     model->num_sources = src->num_sources;
     model->use_extended = src->use_extended;
     model->reference_ra_rad = src->reference_ra_rad;

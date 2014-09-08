@@ -72,8 +72,8 @@ enum {
 #include <oskar_sky_append_to_set.h>
 #include <oskar_sky_append.h>
 #include <oskar_sky_combine_set.h>
+#include <oskar_sky_copy_contents.h>
 #include <oskar_sky_create.h>
-#include <oskar_sky_create_alias.h>
 #include <oskar_sky_create_copy.h>
 #include <oskar_sky_evaluate_gaussian_source_parameters.h>
 #include <oskar_sky_evaluate_relative_direction_cosines.h>
@@ -81,7 +81,6 @@ enum {
 #include <oskar_sky_filter_by_radius.h>
 #include <oskar_sky_free.h>
 #include <oskar_sky_horizon_clip.h>
-#include <oskar_sky_insert.h>
 #include <oskar_sky_load.h>
 #include <oskar_sky_load_gsm.h>
 #include <oskar_sky_override_polarisation.h>

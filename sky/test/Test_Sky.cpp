@@ -160,6 +160,66 @@ TEST(SkyModel, compute_relative_lmn)
 }
 
 
+TEST(SkyModel, copy_contents)
+{
+    int src_size = 20, dst_size = 60, status = 0;
+
+    oskar_Sky *dst, *src;
+    dst = oskar_sky_create(OSKAR_DOUBLE, OSKAR_CPU, dst_size, &status);
+    src = oskar_sky_create(OSKAR_DOUBLE, OSKAR_CPU, src_size, &status);
+    for (int i = 0; i < src_size; ++i)
+    {
+        oskar_sky_set_source(src, i,
+                i + 0.0, i + 0.1, i + 0.2, i + 0.3, i + 0.4, i + 0.5,
+                i + 0.6, i + 0.7, i + 0.8, i + 0.9, i + 1.0, i + 1.1, &status);
+        ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    }
+
+    oskar_sky_copy_contents(dst, src, 0 * src_size, 0, src_size, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_sky_copy_contents(dst, src, 1 * src_size, 0, src_size, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_sky_copy_contents(dst, src, 2 * src_size, 0, src_size, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+
+    double* ra   = oskar_mem_double(oskar_sky_ra_rad(dst), &status);
+    double* dec  = oskar_mem_double(oskar_sky_dec_rad(dst), &status);
+    double* I    = oskar_mem_double(oskar_sky_I(dst), &status);
+    double* Q    = oskar_mem_double(oskar_sky_Q(dst), &status);
+    double* U    = oskar_mem_double(oskar_sky_U(dst), &status);
+    double* V    = oskar_mem_double(oskar_sky_V(dst), &status);
+    double* ref  = oskar_mem_double(oskar_sky_reference_freq_hz(dst), &status);
+    double* spix = oskar_mem_double(oskar_sky_spectral_index(dst), &status);
+    double* rm   = oskar_mem_double(oskar_sky_rotation_measure_rad(dst), &status);
+    double* maj  = oskar_mem_double(oskar_sky_fwhm_major_rad(dst), &status);
+    double* min  = oskar_mem_double(oskar_sky_fwhm_minor_rad(dst), &status);
+    double* pa   = oskar_mem_double(oskar_sky_position_angle_rad(dst), &status);
+
+    for (int j = 0, s = 0; j < 3; ++j)
+    {
+        for (int i = 0; i < src_size; ++i, ++s)
+        {
+            EXPECT_DOUBLE_EQ(i + 0.0, ra[s]);
+            EXPECT_DOUBLE_EQ(i + 0.1, dec[s]);
+            EXPECT_DOUBLE_EQ(i + 0.2, I[s]);
+            EXPECT_DOUBLE_EQ(i + 0.3, Q[s]);
+            EXPECT_DOUBLE_EQ(i + 0.4, U[s]);
+            EXPECT_DOUBLE_EQ(i + 0.5, V[s]);
+            EXPECT_DOUBLE_EQ(i + 0.6, ref[s]);
+            EXPECT_DOUBLE_EQ(i + 0.7, spix[s]);
+            EXPECT_DOUBLE_EQ(i + 0.8, rm[s]);
+            EXPECT_DOUBLE_EQ(i + 0.9, maj[s]);
+            EXPECT_DOUBLE_EQ(i + 1.0, min[s]);
+            EXPECT_DOUBLE_EQ(i + 1.1, pa[s]);
+        }
+    }
+    oskar_sky_free(src, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    oskar_sky_free(dst, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+}
+
+
 TEST(SkyModel, evaluate_gaussian_source_parameters)
 {
     const double asec2rad = M_PI / (180.0 * 3600.0);
@@ -545,68 +605,6 @@ TEST(SkyModel, horizon_clip)
 
     oskar_sky_free(sky_in_cpu, &status);
     oskar_telescope_free(telescope, &status);
-}
-
-
-TEST(SkyModel, insert)
-{
-    int src_size = 20, dst_size = 60, status = 0;
-
-    oskar_Sky *dst, *src;
-    dst = oskar_sky_create(OSKAR_DOUBLE, OSKAR_CPU, dst_size,
-            &status);
-    src = oskar_sky_create(OSKAR_DOUBLE, OSKAR_CPU, src_size,
-            &status);
-    for (int i = 0; i < src_size; ++i)
-    {
-        oskar_sky_set_source(src, i,
-                i + 0.0, i + 0.1, i + 0.2, i + 0.3, i + 0.4, i + 0.5,
-                i + 0.6, i + 0.7, i + 0.8, i + 0.9, i + 1.0, i + 1.1, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    }
-
-    oskar_sky_insert(dst, src, 0 * src_size, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_sky_insert(dst, src, 1 * src_size, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_sky_insert(dst, src, 2 * src_size, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-
-    double* ra   = oskar_mem_double(oskar_sky_ra_rad(dst), &status);
-    double* dec  = oskar_mem_double(oskar_sky_dec_rad(dst), &status);
-    double* I    = oskar_mem_double(oskar_sky_I(dst), &status);
-    double* Q    = oskar_mem_double(oskar_sky_Q(dst), &status);
-    double* U    = oskar_mem_double(oskar_sky_U(dst), &status);
-    double* V    = oskar_mem_double(oskar_sky_V(dst), &status);
-    double* ref  = oskar_mem_double(oskar_sky_reference_freq_hz(dst), &status);
-    double* spix = oskar_mem_double(oskar_sky_spectral_index(dst), &status);
-    double* rm   = oskar_mem_double(oskar_sky_rotation_measure_rad(dst), &status);
-    double* maj  = oskar_mem_double(oskar_sky_fwhm_major_rad(dst), &status);
-    double* min  = oskar_mem_double(oskar_sky_fwhm_minor_rad(dst), &status);
-    double* pa   = oskar_mem_double(oskar_sky_position_angle_rad(dst), &status);
-
-    for (int j = 0, s = 0; j < 3; ++j)
-    {
-        for (int i = 0; i < src_size; ++i, ++s)
-        {
-            EXPECT_DOUBLE_EQ(i + 0.0, ra[s]);
-            EXPECT_DOUBLE_EQ(i + 0.1, dec[s]);
-            EXPECT_DOUBLE_EQ(i + 0.2, I[s]);
-            EXPECT_DOUBLE_EQ(i + 0.3, Q[s]);
-            EXPECT_DOUBLE_EQ(i + 0.4, U[s]);
-            EXPECT_DOUBLE_EQ(i + 0.5, V[s]);
-            EXPECT_DOUBLE_EQ(i + 0.6, ref[s]);
-            EXPECT_DOUBLE_EQ(i + 0.7, spix[s]);
-            EXPECT_DOUBLE_EQ(i + 0.8, rm[s]);
-            EXPECT_DOUBLE_EQ(i + 0.9, maj[s]);
-            EXPECT_DOUBLE_EQ(i + 1.0, min[s]);
-            EXPECT_DOUBLE_EQ(i + 1.1, pa[s]);
-        }
-    }
-    oskar_sky_free(src, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_sky_free(dst, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
 }
 
 

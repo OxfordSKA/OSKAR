@@ -20,10 +20,10 @@ set(utility_SRC
     src/oskar_mem_accessors.c
     src/oskar_mem_add.c
     src/oskar_mem_append_raw.c
-    src/oskar_mem_append.c
     src/oskar_mem_clear_contents.c
     src/oskar_mem_convert_precision.c
     src/oskar_mem_copy.c
+    src/oskar_mem_copy_contents.c
     src/oskar_mem_create_alias_from_raw.c
     src/oskar_mem_create_alias.c
     src/oskar_mem_create_copy.c
@@ -35,7 +35,6 @@ set(utility_SRC
     src/oskar_mem_evaluate_relative_error.c
     src/oskar_mem_free.c
     src/oskar_mem_get_element.c
-    src/oskar_mem_insert.c
     src/oskar_mem_load_ascii.c
     src/oskar_mem_random_fill.c
     src/oskar_mem_read_binary_raw.c

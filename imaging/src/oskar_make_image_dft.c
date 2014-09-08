@@ -86,7 +86,7 @@ void oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     if (oskar_mem_location(image) == OSKAR_CPU)
     {
         t_image = oskar_mem_create(oskar_mem_type(image), OSKAR_GPU,
-                (int)oskar_mem_length(image), status);
+                oskar_mem_length(image), status);
         p_image = t_image;
     }
 
@@ -145,8 +145,8 @@ void oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
 
         /* Copy image back to host memory if required. */
         if (oskar_mem_location(image) == OSKAR_CPU)
-            oskar_mem_insert(image, t_image, 0, oskar_mem_length(t_image),
-                    status);
+            oskar_mem_copy_contents(image, t_image, 0, 0,
+                    oskar_mem_length(t_image), status);
     }
 
     /* Free temporary memory. */

@@ -65,6 +65,17 @@ OSKAR_EXPORT
 int oskar_sky_mem_location(const oskar_Sky* sky);
 
 /**
+ * @brief Returns the sky model capacity.
+ *
+ * @details
+ * Returns the sky model capacity.
+ *
+ * @param[in] sky Pointer to sky model.
+ */
+OSKAR_EXPORT
+int oskar_sky_capacity(const oskar_Sky* sky);
+
+/**
  * @brief Returns the number of sources in the sky model.
  *
  * @details

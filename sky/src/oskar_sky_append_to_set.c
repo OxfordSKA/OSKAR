@@ -44,7 +44,7 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
         int max_sources_per_model, const oskar_Sky* model, int* status)
 {
     int free_space, space_required, num_extra_models, number_to_copy;
-    int i, j, type, location, n, n_copy, from_offset;
+    int i, j, type, location, from_offset;
     oskar_Sky **set;
     size_t new_size;
 
@@ -101,27 +101,27 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
     /* Loop over set entries with free space and copy sources into them. */
     number_to_copy = model->num_sources;
     from_offset = 0;
-    for (i = (*set_size-1 > 0) ? *set_size-1 : 0; i < *set_size + num_extra_models; ++i)
+    for (i = (*set_size-1 > 0) ? *set_size-1 : 0;
+            i < *set_size + num_extra_models; ++i)
     {
-        oskar_Sky* model_ptr;
-        oskar_Sky* sky = set[i];
-        n = sky->num_sources;
-        free_space = max_sources_per_model - n;
+        int n_copy, offset_dst;
+        offset_dst = oskar_sky_num_sources(set[i]);
+        free_space = max_sources_per_model - offset_dst;
         n_copy = MIN(free_space, number_to_copy);
-        model_ptr = oskar_sky_create_alias(model, from_offset, n_copy, status);
-        oskar_sky_insert(sky, model_ptr, n, status);
-        oskar_sky_free(model_ptr, status);
+        oskar_sky_copy_contents(set[i], model, offset_dst, from_offset,
+                n_copy, status);
         if (*status) break;
-        sky->num_sources = n_copy + n;
-        number_to_copy  -= n_copy;
-        from_offset     += n_copy;
+        set[i]->num_sources = n_copy + offset_dst;
+        number_to_copy     -= n_copy;
+        from_offset        += n_copy;
     }
 
     if (*status) return;
 
 #if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
     /* Set the use extended flag if needed. */
-    for (j = (*set_size-1 > 0) ? *set_size-1 : 0; j < *set_size + num_extra_models; ++j)
+    for (j = (*set_size-1 > 0) ? *set_size-1 : 0;
+            j < *set_size + num_extra_models; ++j)
     {
         oskar_Sky* sky = set[j];
         const oskar_Mem *major, *minor;
@@ -157,7 +157,6 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
                 }
             }
         }
-
     }
 #endif
 

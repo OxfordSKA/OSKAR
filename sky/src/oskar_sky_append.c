@@ -26,18 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_sky.h>
 #include <oskar_sky.h>
-
-#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_sky_append(oskar_Sky* dst, const oskar_Sky* src,
-        int* status)
+void oskar_sky_append(oskar_Sky* dst, const oskar_Sky* src, int* status)
 {
+    int num_dst, num_src;
+
     /* Check all inputs. */
     if (!dst || !src || !status)
     {
@@ -48,34 +46,17 @@ void oskar_sky_append(oskar_Sky* dst, const oskar_Sky* src,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Append to the sky model. */
-    oskar_mem_append(dst->ra_rad, src->ra_rad, status);
-    oskar_mem_append(dst->dec_rad, src->dec_rad, status);
-    oskar_mem_append(dst->I, src->I, status);
-    oskar_mem_append(dst->Q, src->Q, status);
-    oskar_mem_append(dst->U, src->U, status);
-    oskar_mem_append(dst->V, src->V, status);
-    oskar_mem_append(dst->reference_freq_hz, src->reference_freq_hz, status);
-    oskar_mem_append(dst->spectral_index, src->spectral_index, status);
-    oskar_mem_append(dst->rm_rad, src->rm_rad, status);
-    oskar_mem_append(dst->fwhm_major_rad, src->fwhm_major_rad, status);
-    oskar_mem_append(dst->fwhm_minor_rad, src->fwhm_minor_rad, status);
-    oskar_mem_append(dst->pa_rad, src->pa_rad, status);
+    /* Resize the sky model. */
+    num_dst = oskar_sky_num_sources(dst);
+    num_src = oskar_sky_num_sources(src);
+    oskar_sky_resize(dst, num_dst + num_src, status);
 
-    /* Update the number of sources. */
-    dst->num_sources += src->num_sources;
+    /* Copy memory contents at the appropriate offset. */
+    oskar_sky_copy_contents(dst, src, num_dst, 0, num_src, status);
 
-    /* Resize arrays to hold the direction cosines. */
-    oskar_mem_realloc(dst->l, dst->num_sources, status);
-    oskar_mem_realloc(dst->m, dst->num_sources, status);
-    oskar_mem_realloc(dst->n, dst->num_sources, status);
-
-    /* Resize arrays to hold gaussian source parameters */
-    oskar_mem_realloc(dst->gaussian_a, dst->num_sources, status);
-    oskar_mem_realloc(dst->gaussian_b, dst->num_sources, status);
-    oskar_mem_realloc(dst->gaussian_c, dst->num_sources, status);
-
-    dst->use_extended = (src->use_extended || dst->use_extended);
+    /* Set flag to use extended sources. */
+    oskar_sky_set_use_extended(dst,
+            oskar_sky_use_extended(src) || oskar_sky_use_extended(dst));
 }
 
 #ifdef __cplusplus

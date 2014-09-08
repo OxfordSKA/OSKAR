@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,7 @@ extern "C" {
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_sky_append(oskar_Sky* dst, const oskar_Sky* src,
-        int* status);
+void oskar_sky_append(oskar_Sky* dst, const oskar_Sky* src, int* status);
 
 #ifdef __cplusplus
 }
