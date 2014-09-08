@@ -18,7 +18,7 @@
       normalised beams.
 
     * Fixed the scaling of uncorrelated system noise when used with the 
-      Stokes-I only (scalar mode) added in 2.5.0.
+      Stokes-I only (scalar) mode added in 2.5.0.
 
 2014-07-22  OSKAR-2.5.0
 
