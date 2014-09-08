@@ -12,7 +12,7 @@
       observation periods into one Measurement Set as an update to the
       oskar_vis_to_ms app.
 
-    * Added a -q option to supress command line output log messages for many
+    * Added a -q option to suppress command line output log messages for many
       of the OSKAR apps.
 
     * Fixed "out of range" error encountered when making a beam pattern with
