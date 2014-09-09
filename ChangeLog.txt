@@ -1,4 +1,4 @@
-2014-09-08  OSKAR-2.5.1
+2014-09-09  OSKAR-2.5.1
 
     * Changed the integer range of random seeds to start at 1 (instead of 0).
 
