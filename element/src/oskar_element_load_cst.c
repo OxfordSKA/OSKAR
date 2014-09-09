@@ -193,15 +193,15 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
             oskar_mem_realloc(v_re, size, status);
             oskar_mem_realloc(v_im, size, status);
             oskar_mem_realloc(weight, size, status);
-            p_theta  = oskar_mem_void(theta);
-            p_phi    = oskar_mem_void(phi);
-            p_h_re   = oskar_mem_void(h_re);
-            p_h_im   = oskar_mem_void(h_im);
-            p_v_re   = oskar_mem_void(v_re);
-            p_v_im   = oskar_mem_void(v_im);
-            p_weight = oskar_mem_void(weight);
             if (*status) break;
         }
+        p_theta  = oskar_mem_void(theta);
+        p_phi    = oskar_mem_void(phi);
+        p_h_re   = oskar_mem_void(h_re);
+        p_h_im   = oskar_mem_void(h_im);
+        p_v_re   = oskar_mem_void(v_re);
+        p_v_im   = oskar_mem_void(v_im);
+        p_weight = oskar_mem_void(weight);
 
         /* Convert decibel to linear scale if necessary. */
         if (dbi)
