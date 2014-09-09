@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_file_exists.h>
 #include <private_log.h>
 #include <oskar_log.h>
-#include <oskar_system_clock_string.h>
+#include <oskar_log_file_exists.h>
+#include <oskar_log_system_clock_string.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,7 +42,7 @@ void oskar_log_free(oskar_Log* log)
 {
     /* Print closing message. */
     oskar_log_section(log, 'M', "OSKAR-%s ending at %s.",
-            OSKAR_VERSION_STR, oskar_system_clock_string(0));
+            OSKAR_VERSION_STR, oskar_log_system_clock_string(0));
 
     /* Close the file. */
     if (log->file) fclose(log->file);
@@ -50,7 +50,7 @@ void oskar_log_free(oskar_Log* log)
     /* If flag is set to delete, then remove the log file. */
     if (!log->keep_file && log->name)
     {
-        if (oskar_file_exists(log->name))
+        if (oskar_log_file_exists(log->name))
             remove(log->name);
     }
 
