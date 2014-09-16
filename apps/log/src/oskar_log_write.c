@@ -65,7 +65,7 @@ void oskar_log_write(oskar_Log* log, FILE* stream, char priority, char code,
     }
 
     /* Write the entry to the log file */
-    else if (log && log->file && should_print_file_entry(log, priority))
+    else if (is_file && log && log->file && should_print_file_entry(log, priority))
     {
 #ifdef _OPENMP
         omp_set_lock(&log->mutex); /* lock the mutex */
