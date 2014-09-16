@@ -39,8 +39,23 @@ extern "C" {
 
 #ifdef __CUDACC__
 /* Include the CUDA vector types header first, if we're compiling with nvcc. */
-#include <vector_types.h>
+#   include <vector_types.h>
 #endif
+
+/* Memory alignment macros mirroring those used by CUDA. */
+#if !(defined(__VECTOR_TYPES_H__) || defined(__CUDACC__))
+#   if defined(__GNUC__)
+#       define __align__(n) __attribute__((aligned(n)))
+#   elif defined(_MSC_VER)
+#       define __align__(n) __declspec(align(n))
+#   endif
+#   if defined(__GNUC__) || defined(_WIN64)
+#       define __builtin_align__(a) __align__(a)
+#   else
+#       define __builtin_align__(a)
+#   endif
+#endif
+
 
 #if !(defined(__VECTOR_TYPES_H__) || defined(__CUDACC__))
 /**
@@ -51,10 +66,9 @@ extern "C" {
  * Structure used to hold data for a length-2 vector.
  * This must be compatible with the CUDA float2 type.
  */
-struct float2
+struct __builtin_align__(8)  float2
 {
-    float x;
-    float y;
+    float x, y;
 };
 typedef struct float2 float2;
 #endif
@@ -70,12 +84,9 @@ typedef struct float2 float2;
  *   ( a  b )
  *   ( c  d )
  */
-struct float4c
+struct __builtin_align__(8) float4c
 {
-    float2 a;
-    float2 b;
-    float2 c;
-    float2 d;
+    float2 a, b, c, d;
 };
 typedef struct float4c float4c;
 
@@ -88,10 +99,10 @@ typedef struct float4c float4c;
  * Structure used to hold data for a length-2 vector.
  * This must be compatible with the CUDA double2 type.
  */
-struct double2
+struct __builtin_align__(16) double2
 {
-    double x;
-    double y;
+    double x, y;
+
 };
 typedef struct double2 double2;
 #endif
@@ -107,12 +118,9 @@ typedef struct double2 double2;
  *   ( a  b )
  *   ( c  d )
  */
-struct double4c
+struct __builtin_align__(16) double4c
 {
-    double2 a;
-    double2 b;
-    double2 c;
-    double2 d;
+    double2 a, b, c, d;
 };
 typedef struct double4c double4c;
 
