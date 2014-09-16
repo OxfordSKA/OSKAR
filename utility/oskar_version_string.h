@@ -49,7 +49,7 @@ extern "C" {
  * reliably at run-time, without any ambiguity.
  */
 OSKAR_EXPORT
-const char* oskar_version_string();
+const char* oskar_version_string(void);
 
 #ifdef __cplusplus
 }

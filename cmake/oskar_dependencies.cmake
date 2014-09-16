@@ -22,13 +22,21 @@
 # === Append the src/cmake directory to the module path.
 list(INSERT CMAKE_MODULE_PATH 0 ${OSKAR_SOURCE_DIR}/cmake/modules)
 
+if (DEFINED LAPACK_LIB_DIR)
+    list(INSERT CMAKE_LIBRARY_PATH 0 ${LAPACK_LIB_DIR})
+endif()
+
 # ==== Find dependencies.
-find_package(CUDA 4.0 QUIET) # liboskar
-find_package(OpenMP QUIET)   # liboskar
-#find_package(MKL QUIET)     # liboskar
-find_package(CBLAS QUIET)    # liboskar
-find_package(LAPACK QUIET)   # liboskar
-find_package(Qt4 4.6 QUIET)  # liboskar_apps, apps
+find_package(CUDA 4.0 QUIET)        # liboskar
+find_package(OpenMP QUIET)          # liboskar
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+    find_package(MKL QUIET)         # liboskar
+endif()
+if (NOT MKL_FOUND )
+    find_package(CBLAS QUIET)       # liboskar
+    find_package(LAPACK QUIET)          # liboskar
+endif ()
+find_package(Qt4 4.6 QUIET)         # liboskar_apps, apps
 # HACK for using Qt4 frameworks on OS X. 
 # Avoids having to symlink headers and libraries from the Qt binary installer
 # into the system paths.
@@ -39,15 +47,14 @@ if (APPLE AND QT_USE_FRAMEWORKS)
 endif()
 #if (NOT QT4_FOUND)
 #    find_package(Qt5Core)
-#    find_package(Qt5Core)
 #endif()
-find_package(CasaCore QUIET) # liboskar_ms
-find_package(CFitsio QUIET)  # liboskar_fits
-find_package(Matlab QUIET)   # mex functions
-#find_package(PNG QUIET)     # For writing PNG images.
+find_package(CasaCore QUIET)         # liboskar_ms
+find_package(CFitsio QUIET)          # liboskar_fits
+find_package(Matlab QUIET)           # mex functions
+#find_package(PNG QUIET)             # For writing PNG images
 find_package(PythonInterp 2.7 QUIET) # For python interface
 find_package(PythonLibs 2.7 QUIET)   # For python interface
-find_package(NumPy QUIET)        # For python interface
+find_package(NumPy QUIET)            # For python interface
 
 if (PYTHONLIBS_FOUND AND NUMPY_FOUND AND PYTHONINTERP_FOUND AND PYTHON_VERSION_MAJOR EQUAL 2)
     set(PYTHON_FOUND TRUE)
@@ -74,7 +81,7 @@ endif ()
 
 if (MKL_FOUND)
     message("===============================================================================")
-    message("INFO: Using MKL for LAPACK AND BLAS.")
+    message("-- INFO: Using MKL for LAPACK AND BLAS.")
     message("===============================================================================")
     set(OSKAR_LAPACK ${MKL_LIBRARIES})
     set(OSKAR_BLAS ${MKL_LIBRARIES})

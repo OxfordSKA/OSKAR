@@ -42,7 +42,7 @@ void oskar_sky_set_spectral_index(oskar_Sky* sky, int index,
         double ref_frequency, double spectral_index, int* status)
 {
     int type, location;
-    char *ref_, *spix_;
+    void *ref_, *spix_;
 
     /* Check all inputs. */
     if (!sky || !status)
@@ -65,8 +65,8 @@ void oskar_sky_set_spectral_index(oskar_Sky* sky, int index,
     }
 
     /* Get byte pointers. */
-    ref_ = oskar_mem_char(sky->reference_freq_hz);
-    spix_ = oskar_mem_char(sky->spectral_index);
+    ref_ = oskar_mem_void(sky->reference_freq_hz);
+    spix_ = oskar_mem_void(sky->spectral_index);
 
     if (location == OSKAR_GPU)
     {
@@ -76,15 +76,15 @@ void oskar_sky_set_spectral_index(oskar_Sky* sky, int index,
         offset_bytes = index * size;
         if (type == OSKAR_DOUBLE)
         {
-            cudaMemcpy(ref_ + offset_bytes, &ref_frequency, size, H2D);
-            cudaMemcpy(spix_ + offset_bytes, &spectral_index, size, H2D);
+            cudaMemcpy((char*)ref_ + offset_bytes, &ref_frequency, size, H2D);
+            cudaMemcpy((char*)spix_ + offset_bytes, &spectral_index, size, H2D);
         }
         else if (type == OSKAR_SINGLE)
         {
             float t_ref_freq = (float)ref_frequency;
             float t_spectral_index = (float)spectral_index;
-            cudaMemcpy(ref_ + offset_bytes, &t_ref_freq, size, H2D);
-            cudaMemcpy(spix_ + offset_bytes, &t_spectral_index, size, H2D);
+            cudaMemcpy((char*)ref_ + offset_bytes, &t_ref_freq, size, H2D);
+            cudaMemcpy((char*)spix_ + offset_bytes, &t_spectral_index, size, H2D);
         }
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;

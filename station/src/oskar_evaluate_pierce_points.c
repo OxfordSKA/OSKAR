@@ -38,85 +38,7 @@ void oskar_evaluate_pierce_points_d(int num_directions, const double* hor_x,
         const double* hor_y, const double* hor_z, double* pp_lon_,
         double* pp_lat_, double* rel_path_len_, double screen_height_m,
         const double station_ecef_x, const double station_ecef_y,
-        const double station_ecef_z)
-{
-    int i;
-    double pp_lon, pp_lat, pp_alt, pp_sec, scale, x, y, z;
-    double diff_ecef_x, diff_ecef_y, diff_ecef_z;
-    double norm_xyz, earth_radius_plus_screen_height_m;
-    double cos_l, sin_l, cos_b, sin_b;
-    double station_lon, station_lat, station_alt;
-
-    /* Get the station longitude and latitude from ECEF coordinates. */
-    oskar_convert_ecef_to_geodetic_spherical_inline_d(station_ecef_x,
-            station_ecef_y, station_ecef_z, &station_lon, &station_lat,
-            &station_alt);
-
-    /* Calculate sine and cosine of station longitude and latitude. */
-    sin_l = sin(station_lon);
-    cos_l = cos(station_lon);
-    sin_b = sin(station_lat);
-    cos_b = cos(station_lat);
-
-    /* Length of the vector from the centre of the earth to the station. */
-    norm_xyz = sqrt(station_ecef_x * station_ecef_x +
-            station_ecef_y * station_ecef_y +
-            station_ecef_z * station_ecef_z);
-
-    /* Evaluate the Earth radius plus screen height at the station position. */
-    earth_radius_plus_screen_height_m =
-            screen_height_m + norm_xyz - station_alt;
-
-    /* Loop over directions to evaluate pierce points. */
-    for (i = 0; i < num_directions; ++i)
-    {
-        /* Unit vector describing the direction of the pierce point in the
-         * ENU frame. Vector from station to pierce point. */
-        x = hor_x[i];
-        y = hor_y[i];
-        z = hor_z[i];
-
-        /* Evaluate length of vector between station and pierce point. */
-        /* If the direction is directly towards the zenith we don't have to
-         * calculate anything, as the length is simply the screen height! */
-        if (fabs(z - 1.0) > 1.0e-10)
-        {
-            double el, cos_el, arg, alpha_prime, sin_beta;
-            el = asin(z);
-            cos_el = cos(el);
-            arg = (cos_el * norm_xyz) / earth_radius_plus_screen_height_m;
-            alpha_prime = asin(arg);
-            sin_beta = sin((M_PI_2 - el) - alpha_prime);
-            pp_sec = 1.0 / cos(alpha_prime);
-            scale = earth_radius_plus_screen_height_m * sin_beta / cos_el;
-        }
-        else
-        {
-            pp_sec = 1.0;
-            scale = screen_height_m;
-        }
-
-        /* Convert ENU unit vector to ECEF frame using rotation matrix. */
-        diff_ecef_x = -x * sin_l - y * sin_b * cos_l + z * cos_b * cos_l;
-        diff_ecef_y =  x * cos_l - y * sin_b * sin_l + z * cos_b * sin_l;
-        diff_ecef_z =  y * cos_b + z * sin_b;
-
-        /* Evaluate the pierce point in ECEF coordinates. */
-        x = station_ecef_x + diff_ecef_x * scale;
-        y = station_ecef_y + diff_ecef_y * scale;
-        z = station_ecef_z + diff_ecef_z * scale;
-
-        /* Convert ECEF x,y,z coordinates to long., lat. */
-        /* FIXME Probably use geocentric coordinates here for simplicity. */
-        oskar_convert_ecef_to_geodetic_spherical_inline_d(x, y, z,
-                &pp_lon, &pp_lat, &pp_alt);
-
-        /* Store data. */
-        pp_lon_[i] = pp_lon;
-        pp_lat_[i] = pp_lat;
-        rel_path_len_[i] = pp_sec;
-    }
-}
+        const double station_ecef_z);
 
 void oskar_evaluate_pierce_points(
         oskar_Mem* pierce_point_lon,
@@ -235,6 +157,90 @@ void oskar_evaluate_pierce_points(
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
+    }
+}
+
+void oskar_evaluate_pierce_points_d(int num_directions, const double* hor_x,
+        const double* hor_y, const double* hor_z, double* pp_lon_,
+        double* pp_lat_, double* rel_path_len_, double screen_height_m,
+        const double station_ecef_x, const double station_ecef_y,
+        const double station_ecef_z)
+{
+    int i;
+    double pp_lon, pp_lat, pp_alt, pp_sec, scale, x, y, z;
+    double diff_ecef_x, diff_ecef_y, diff_ecef_z;
+    double norm_xyz, earth_radius_plus_screen_height_m;
+    double cos_l, sin_l, cos_b, sin_b;
+    double station_lon, station_lat, station_alt;
+
+    /* Get the station longitude and latitude from ECEF coordinates. */
+    oskar_convert_ecef_to_geodetic_spherical_inline_d(station_ecef_x,
+            station_ecef_y, station_ecef_z, &station_lon, &station_lat,
+            &station_alt);
+
+    /* Calculate sine and cosine of station longitude and latitude. */
+    sin_l = sin(station_lon);
+    cos_l = cos(station_lon);
+    sin_b = sin(station_lat);
+    cos_b = cos(station_lat);
+
+    /* Length of the vector from the centre of the earth to the station. */
+    norm_xyz = sqrt(station_ecef_x * station_ecef_x +
+            station_ecef_y * station_ecef_y +
+            station_ecef_z * station_ecef_z);
+
+    /* Evaluate the Earth radius plus screen height at the station position. */
+    earth_radius_plus_screen_height_m =
+            screen_height_m + norm_xyz - station_alt;
+
+    /* Loop over directions to evaluate pierce points. */
+    for (i = 0; i < num_directions; ++i)
+    {
+        /* Unit vector describing the direction of the pierce point in the
+         * ENU frame. Vector from station to pierce point. */
+        x = hor_x[i];
+        y = hor_y[i];
+        z = hor_z[i];
+
+        /* Evaluate length of vector between station and pierce point. */
+        /* If the direction is directly towards the zenith we don't have to
+         * calculate anything, as the length is simply the screen height! */
+        if (fabs(z - 1.0) > 1.0e-10)
+        {
+            double el, cos_el, arg, alpha_prime, sin_beta;
+            el = asin(z);
+            cos_el = cos(el);
+            arg = (cos_el * norm_xyz) / earth_radius_plus_screen_height_m;
+            alpha_prime = asin(arg);
+            sin_beta = sin((M_PI_2 - el) - alpha_prime);
+            pp_sec = 1.0 / cos(alpha_prime);
+            scale = earth_radius_plus_screen_height_m * sin_beta / cos_el;
+        }
+        else
+        {
+            pp_sec = 1.0;
+            scale = screen_height_m;
+        }
+
+        /* Convert ENU unit vector to ECEF frame using rotation matrix. */
+        diff_ecef_x = -x * sin_l - y * sin_b * cos_l + z * cos_b * cos_l;
+        diff_ecef_y =  x * cos_l - y * sin_b * sin_l + z * cos_b * sin_l;
+        diff_ecef_z =  y * cos_b + z * sin_b;
+
+        /* Evaluate the pierce point in ECEF coordinates. */
+        x = station_ecef_x + diff_ecef_x * scale;
+        y = station_ecef_y + diff_ecef_y * scale;
+        z = station_ecef_z + diff_ecef_z * scale;
+
+        /* Convert ECEF x,y,z coordinates to long., lat. */
+        /* FIXME Probably use geocentric coordinates here for simplicity. */
+        oskar_convert_ecef_to_geodetic_spherical_inline_d(x, y, z,
+                &pp_lon, &pp_lat, &pp_alt);
+
+        /* Store data. */
+        pp_lon_[i] = pp_lon;
+        pp_lat_[i] = pp_lat;
+        rel_path_len_[i] = pp_sec;
     }
 }
 

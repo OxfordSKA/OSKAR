@@ -47,7 +47,7 @@ void oskar_station_set_element_errors(oskar_Station* dst,
         double phase_error, int* status)
 {
     int type, location;
-    char *gain_, *gain_err_, *phase_, *phase_err_;
+    void *gain_, *gain_err_, *phase_, *phase_err_;
 
     /* Check all inputs. */
     if (!dst || !status)
@@ -91,10 +91,10 @@ void oskar_station_set_element_errors(oskar_Station* dst,
     }
 
     /* Get byte pointers. */
-    gain_      = oskar_mem_char(dst->element_gain);
-    gain_err_  = oskar_mem_char(dst->element_gain_error);
-    phase_     = oskar_mem_char(dst->element_phase_offset_rad);
-    phase_err_ = oskar_mem_char(dst->element_phase_error_rad);
+    gain_      = oskar_mem_void(dst->element_gain);
+    gain_err_  = oskar_mem_void(dst->element_gain_error);
+    phase_     = oskar_mem_void(dst->element_phase_offset_rad);
+    phase_err_ = oskar_mem_void(dst->element_phase_error_rad);
 
     if (location == OSKAR_CPU)
     {
@@ -124,10 +124,10 @@ void oskar_station_set_element_errors(oskar_Station* dst,
         offset_bytes = index * size;
         if (type == OSKAR_DOUBLE)
         {
-            cudaMemcpy(gain_ + offset_bytes, &gain, size, H2D);
-            cudaMemcpy(gain_err_ + offset_bytes, &gain_error, size, H2D);
-            cudaMemcpy(phase_ + offset_bytes, &phase_offset, size, H2D);
-            cudaMemcpy(phase_err_ + offset_bytes, &phase_error, size, H2D);
+            cudaMemcpy((char*)gain_ + offset_bytes, &gain, size, H2D);
+            cudaMemcpy((char*)gain_err_ + offset_bytes, &gain_error, size, H2D);
+            cudaMemcpy((char*)phase_ + offset_bytes, &phase_offset, size, H2D);
+            cudaMemcpy((char*)phase_err_ + offset_bytes, &phase_error, size, H2D);
         }
         else if (type == OSKAR_SINGLE)
         {
@@ -136,10 +136,10 @@ void oskar_station_set_element_errors(oskar_Station* dst,
             t_amp_error = (float) gain_error;
             t_phase_offset = (float) phase_offset;
             t_phase_error = (float) phase_error;
-            cudaMemcpy(gain_ + offset_bytes, &t_amp_gain, size, H2D);
-            cudaMemcpy(gain_err_ + offset_bytes, &t_amp_error, size, H2D);
-            cudaMemcpy(phase_ + offset_bytes, &t_phase_offset, size, H2D);
-            cudaMemcpy(phase_err_ + offset_bytes, &t_phase_error, size, H2D);
+            cudaMemcpy((char*)gain_ + offset_bytes, &t_amp_gain, size, H2D);
+            cudaMemcpy((char*)gain_err_ + offset_bytes, &t_amp_error, size, H2D);
+            cudaMemcpy((char*)phase_ + offset_bytes, &t_phase_offset, size, H2D);
+            cudaMemcpy((char*)phase_err_ + offset_bytes, &t_phase_error, size, H2D);
         }
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;

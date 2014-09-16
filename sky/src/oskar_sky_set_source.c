@@ -45,8 +45,8 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
         int* status)
 {
     int type, location;
-    char *ra_, *dec_, *i_, *q_, *u_, *v_, *ref_, *spix_, *rm_;
-    char *maj_, *min_, *pa_;
+    void *ra_, *dec_, *i_, *q_, *u_, *v_, *ref_, *spix_, *rm_;
+    void *maj_, *min_, *pa_;
 
     /* Check all inputs. */
     if (!sky || !status)
@@ -69,18 +69,18 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
     }
 
     /* Get byte pointers. */
-    ra_ = oskar_mem_char(sky->ra_rad);
-    dec_ = oskar_mem_char(sky->dec_rad);
-    i_ = oskar_mem_char(sky->I);
-    q_ = oskar_mem_char(sky->Q);
-    u_ = oskar_mem_char(sky->U);
-    v_ = oskar_mem_char(sky->V);
-    ref_ = oskar_mem_char(sky->reference_freq_hz);
-    spix_ = oskar_mem_char(sky->spectral_index);
-    rm_ = oskar_mem_char(sky->rm_rad);
-    maj_ = oskar_mem_char(sky->fwhm_major_rad);
-    min_ = oskar_mem_char(sky->fwhm_minor_rad);
-    pa_ = oskar_mem_char(sky->pa_rad);
+    ra_ = oskar_mem_void(sky->ra_rad);
+    dec_ = oskar_mem_void(sky->dec_rad);
+    i_ = oskar_mem_void(sky->I);
+    q_ = oskar_mem_void(sky->Q);
+    u_ = oskar_mem_void(sky->U);
+    v_ = oskar_mem_void(sky->V);
+    ref_ = oskar_mem_void(sky->reference_freq_hz);
+    spix_ = oskar_mem_void(sky->spectral_index);
+    rm_ = oskar_mem_void(sky->rm_rad);
+    maj_ = oskar_mem_void(sky->fwhm_major_rad);
+    min_ = oskar_mem_void(sky->fwhm_minor_rad);
+    pa_ = oskar_mem_void(sky->pa_rad);
 
     if (location == OSKAR_GPU)
     {
@@ -90,18 +90,18 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
         offset_bytes = index * size;
         if (type == OSKAR_DOUBLE)
         {
-            cudaMemcpy(ra_ + offset_bytes, &ra_rad, size, H2D);
-            cudaMemcpy(dec_ + offset_bytes, &dec_rad, size, H2D);
-            cudaMemcpy(i_ + offset_bytes, &I, size, H2D);
-            cudaMemcpy(q_ + offset_bytes, &Q, size, H2D);
-            cudaMemcpy(u_ + offset_bytes, &U, size, H2D);
-            cudaMemcpy(v_ + offset_bytes, &V, size, H2D);
-            cudaMemcpy(ref_ + offset_bytes, &ref_frequency_hz, size, H2D);
-            cudaMemcpy(spix_ + offset_bytes, &spectral_index, size, H2D);
-            cudaMemcpy(rm_ + offset_bytes, &rotation_measure, size, H2D);
-            cudaMemcpy(maj_ + offset_bytes, &fwhm_major_rad, size, H2D);
-            cudaMemcpy(min_ + offset_bytes, &fwhm_minor_rad, size, H2D);
-            cudaMemcpy(pa_ + offset_bytes, &position_angle_rad, size, H2D);
+            cudaMemcpy((char*)ra_ + offset_bytes, &ra_rad, size, H2D);
+            cudaMemcpy((char*)dec_ + offset_bytes, &dec_rad, size, H2D);
+            cudaMemcpy((char*)i_ + offset_bytes, &I, size, H2D);
+            cudaMemcpy((char*)q_ + offset_bytes, &Q, size, H2D);
+            cudaMemcpy((char*)u_ + offset_bytes, &U, size, H2D);
+            cudaMemcpy((char*)v_ + offset_bytes, &V, size, H2D);
+            cudaMemcpy((char*)ref_ + offset_bytes, &ref_frequency_hz, size, H2D);
+            cudaMemcpy((char*)spix_ + offset_bytes, &spectral_index, size, H2D);
+            cudaMemcpy((char*)rm_ + offset_bytes, &rotation_measure, size, H2D);
+            cudaMemcpy((char*)maj_ + offset_bytes, &fwhm_major_rad, size, H2D);
+            cudaMemcpy((char*)min_ + offset_bytes, &fwhm_minor_rad, size, H2D);
+            cudaMemcpy((char*)pa_ + offset_bytes, &position_angle_rad, size, H2D);
         }
         else if (type == OSKAR_SINGLE)
         {
@@ -117,18 +117,18 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
             float t_FWHM_major = (float)fwhm_major_rad;
             float t_FWHM_minor = (float)fwhm_minor_rad;
             float t_position_angle = (float)position_angle_rad;
-            cudaMemcpy(ra_ + offset_bytes, &t_ra, size, H2D);
-            cudaMemcpy(dec_ + offset_bytes, &t_dec, size, H2D);
-            cudaMemcpy(i_ + offset_bytes, &t_I, size, H2D);
-            cudaMemcpy(q_ + offset_bytes, &t_Q, size, H2D);
-            cudaMemcpy(u_ + offset_bytes, &t_U, size, H2D);
-            cudaMemcpy(v_ + offset_bytes, &t_V, size, H2D);
-            cudaMemcpy(ref_ + offset_bytes, &t_ref_freq, size, H2D);
-            cudaMemcpy(spix_ + offset_bytes, &t_spectral_index, size, H2D);
-            cudaMemcpy(rm_ + offset_bytes, &t_rotation_measure, size, H2D);
-            cudaMemcpy(maj_ + offset_bytes, &t_FWHM_major, size, H2D);
-            cudaMemcpy(min_ + offset_bytes, &t_FWHM_minor, size, H2D);
-            cudaMemcpy(pa_ + offset_bytes, &t_position_angle, size, H2D);
+            cudaMemcpy((char*)ra_ + offset_bytes, &t_ra, size, H2D);
+            cudaMemcpy((char*)dec_ + offset_bytes, &t_dec, size, H2D);
+            cudaMemcpy((char*)i_ + offset_bytes, &t_I, size, H2D);
+            cudaMemcpy((char*)q_ + offset_bytes, &t_Q, size, H2D);
+            cudaMemcpy((char*)u_ + offset_bytes, &t_U, size, H2D);
+            cudaMemcpy((char*)v_ + offset_bytes, &t_V, size, H2D);
+            cudaMemcpy((char*)ref_ + offset_bytes, &t_ref_freq, size, H2D);
+            cudaMemcpy((char*)spix_ + offset_bytes, &t_spectral_index, size, H2D);
+            cudaMemcpy((char*)rm_ + offset_bytes, &t_rotation_measure, size, H2D);
+            cudaMemcpy((char*)maj_ + offset_bytes, &t_FWHM_major, size, H2D);
+            cudaMemcpy((char*)min_ + offset_bytes, &t_FWHM_minor, size, H2D);
+            cudaMemcpy((char*)pa_ + offset_bytes, &t_position_angle, size, H2D);
         }
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;

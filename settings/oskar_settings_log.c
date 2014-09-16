@@ -26,6 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <oskar_settings_log.h>
+
 #include <private_log.h>
 #include <oskar_log.h>
 #include <oskar_station.h>
