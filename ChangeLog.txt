@@ -1,3 +1,7 @@
+2014-XX-XX  OSKAR-2.X.X
+
+    * Fixed an issue which could result in repeat log entries.
+
 2014-09-09  OSKAR-2.5.1
 
     * Changed the integer range of random seeds to start at 1 (instead of 0).
