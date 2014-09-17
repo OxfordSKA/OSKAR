@@ -36,7 +36,7 @@ extern "C" {
 
 void oskar_log_line(oskar_Log* log, char priority, char symbol)
 {
-    va_list args = 0;
+    va_list args;
     char code = symbol;
     FILE* stream = 0;
     int depth = OSKAR_LOG_LINE;
