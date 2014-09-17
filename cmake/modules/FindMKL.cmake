@@ -1,10 +1,6 @@
 #
 # Find Intel MKL.
 #
-# Warning:
-#   This script will most likely fail with true 64-bit processors such as the
-#   Intel Itanium 2.
-#
 # This script defines the following variables:
 #  MKL_FOUND:        True if MKL is found.
 #  MKL_INCLUDE_DIR:  MKL include directory.
@@ -41,9 +37,6 @@ if(use_threaded_mkl)
     else(CMAKE_COMPILER_IS_GNUCXX)
         list(APPEND mkl_lib_names mkl_intel_thread)
     endif(CMAKE_COMPILER_IS_GNUCXX)
-    find_package(OpenMP REQUIRED)
-    list(APPEND CMAKE_CXX_FLAGS ${OpenMP_CXX_FLAGS})
-    list(APPEND CMAKE_C_FLAGS ${OpenMP_C_FLAGS})
 else(use_threaded_mkl)
     list(APPEND mkl_lib_names mkl_sequential)
 endif(use_threaded_mkl)
