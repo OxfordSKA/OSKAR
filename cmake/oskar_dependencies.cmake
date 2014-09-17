@@ -16,7 +16,6 @@
 #   MATLAB          (for MATLAB interface fuctions)
 #
 # =============================================================================
-#
 
 
 # === Append the src/cmake directory to the module path.
@@ -27,17 +26,17 @@ if (DEFINED LAPACK_LIB_DIR)
 endif()
 
 # ==== Find dependencies.
-find_package(CUDA 4.0 QUIET)        # liboskar
-find_package(OpenMP QUIET)          # liboskar
+find_package(CUDA 5.5)              # liboskar
+find_package(OpenMP)                # liboskar
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-    find_package(MKL QUIET)         # liboskar
+    find_package(MKL)               # liboskar
 endif()
 if (NOT MKL_FOUND )
-    find_package(CBLAS QUIET)       # liboskar
-    find_package(LAPACK QUIET)          # liboskar
+    find_package(CBLAS)             # liboskar
+    find_package(LAPACK)            # liboskar
 endif ()
-find_package(Qt4 4.6 QUIET)         # liboskar_apps, apps
-# HACK for using Qt4 frameworks on OS X. 
+find_package(Qt4 4.6 COMPONENTS QtCore QtGui QtNetwork) # liboskar_apps, apps
+# HACK for using Qt4 frameworks on OS X.
 # Avoids having to symlink headers and libraries from the Qt binary installer
 # into the system paths.
 if (APPLE AND QT_USE_FRAMEWORKS)
@@ -48,13 +47,14 @@ endif()
 #if (NOT QT4_FOUND)
 #    find_package(Qt5Core)
 #endif()
-find_package(CasaCore QUIET)         # liboskar_ms
-find_package(CFitsio QUIET)          # liboskar_fits
-find_package(Matlab QUIET)           # mex functions
+find_package(CasaCore)               # liboskar_ms
+find_package(CFitsio)                # liboskar_fits
+find_package(Matlab)                 # mex functions
 #find_package(PNG QUIET)             # For writing PNG images
 find_package(PythonInterp 2.7 QUIET) # For python interface
 find_package(PythonLibs 2.7 QUIET)   # For python interface
 find_package(NumPy QUIET)            # For python interface
+
 
 if (PYTHONLIBS_FOUND AND NUMPY_FOUND AND PYTHONINTERP_FOUND AND PYTHON_VERSION_MAJOR EQUAL 2)
     set(PYTHON_FOUND TRUE)
@@ -196,7 +196,6 @@ if (PYTHON_FOUND AND CUDA_FOUND)
 endif()
 message("===============================================================================")
 
-
 message("===============================================================================")
 message("-- INFO: 'make install' will install OSKAR to:")
 message("-- INFO:   - Libraries         ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}")
@@ -212,6 +211,32 @@ message("-- INFO:   - Python interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_PYTHON_I
 endif()
 #message("-- NOTE: These paths can be changed using: '-DCMAKE_INSTALL_PREFIX=<path>'")
 message("===============================================================================")
+
+# Optional verbose printing.
+if (BUILD_INFO)
+message("===============================================================================")
+if (BLAS_FOUND)
+    message("-- INFO: BLAS     : ${BLAS_LIBRARIES}")
+endif()
+if (CBLAS_FOUND)
+    message("-- INFO: CBLAS    : ${CBLAS_LIBRARIES}")
+endif ()
+if (LAPACK_FOUND)
+    message("-- INFO: LAPACK   : ${LAPACK_LIBRARIES}")
+endif ()
+if (CASACORE_FOUND)
+    message("-- INFO: CASACORE : ${CASACORE_LIBRARIES}")
+endif()
+if (CFITSIO_FOUND)
+    message("-- INFO: CFITSIO  : ${CFITSIO_LIBRARIES}")
+endif()
+if (QT4_FOUND)
+    message("-- INFO: QT4      : ${QT_QTCORE_LIBRARY}")
+    message("--                : ${QT_QTGUI_LIBRARY}")
+    message("--                : ${QT_QTNETWORK_LIBRARY}")
+endif()
+message("===============================================================================")
+endif()
 
 # Set a flag to tell cmake that dependencies have been checked.
 set(CHECKED_DEPENDENCIES YES)

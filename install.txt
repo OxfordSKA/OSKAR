@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.5                                          Last update: 22 July 2014 |
+| OSKAR 2.5                                          Last update: 17 Sept 2014 |
 +------------------------------------------------------------------------------+
 
 1. Introduction
@@ -25,7 +25,7 @@ further.
 The OSKAR CMake build system will compile and install as many components as
 possible according to the following dependencies being satisfied:
 
-    * CUDA (>=4.0)
+    * CUDA (>=5.5)
         - Required for: liboskar, liboskar_apps, Applications, MATLAB interface
     * Qt (>=4.6)
         - Required for: liboskar_apps, Applications
@@ -37,7 +37,7 @@ possible according to the following dependencies being satisfied:
     * CFITSIO
         - Required for: liboskar_fits
         - Optional for: liboskar_apps, Applications (for FITS file export)
-    * casacore (>= 1.2.0)
+    * casacore (>= 1.5.0)
         - Required for: liboskar_ms
         - Optional for: liboskar_apps, Applications (for Measurement Set export)
     * MATLAB (>=R2010b)
