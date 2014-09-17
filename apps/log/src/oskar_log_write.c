@@ -202,7 +202,7 @@ static void print_entry(FILE* stream, char priority, char code, int depth,
         if (format && *format > 0)
         {
             int n;
-            n = abs(2 * depth + 4 + strlen(prefix));
+            n = abs(2 * depth + 4 + (int)strlen(prefix));
             for (i = 0; i < width - n; ++i) fprintf(stream, " ");
             if (depth != OSKAR_LOG_SECTION) fprintf(stream, ": ");
         }
