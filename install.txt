@@ -147,7 +147,7 @@ the system search path.
 The unit test binaries can be run by typing the following command from the
 build directory:
 
-    $ make test
+    $ ctest [--verbose]
 
 All the unit tests should pass. If any fail, please report this by copying
 the terminal output and sending it, together with a description of the hardware
