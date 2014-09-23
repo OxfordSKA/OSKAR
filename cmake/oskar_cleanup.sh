@@ -9,10 +9,13 @@
 # NOTE: This check inserts the CMAKE build directory into this script. 
 # If the build directory is a symbolic link this check will fail if used
 # from the absolute path rather than the link directory.
-if [ ! "$PWD" == "@PROJECT_BINARY_DIR@" ]; then
+if [[ ! "$PWD" == "@PROJECT_BINARY_DIR@" && "$1" != "--force" ]]; then 
     echo "ERROR: This script MUST be run from the top level build directory."
+    echo "     : build directory   : '@PROJECT_BINARY_DIR@'"
+    echo "     : current directory : '$PWD'"
     exit 1
 fi
+
 
 # Remove files and directories created by CMake
 rm -rf CMake*
