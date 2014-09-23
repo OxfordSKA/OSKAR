@@ -271,8 +271,8 @@ void oskar_MainWindow::openSettings(QString filename)
                 msgBox.setIcon(QMessageBox::Warning);
                 msgBox.setText("This file was created by an unknown version "
                         "of OSKAR.");
-                msgBox.setInformativeText("Please check all settings carefully, "
-                        "as the keys may have changed.");
+                msgBox.setInformativeText("Please check all settings "
+                        "carefully, as the keys may have changed.");
                 msgBox.exec();
             }
             else if (major != ((OSKAR_VERSION & 0xFF0000) >> 16) ||
@@ -283,8 +283,12 @@ void oskar_MainWindow::openSettings(QString filename)
                 msgBox.setIcon(QMessageBox::Warning);
                 msgBox.setText(QString("This file was created by OSKAR %1.")
                         .arg(ver));
-                msgBox.setInformativeText("Please check all settings carefully, "
-                        "as the keys may have changed since that version.");
+                msgBox.setInformativeText("Please check all settings "
+                        "carefully, as the keys may have changed since that "
+                        "version. You should open the settings file in a text "
+                        "editor to verify the keys and update the version "
+                        "number in the file, which will suppress future "
+                        "warnings of this type.");
                 msgBox.exec();
             }
         }
