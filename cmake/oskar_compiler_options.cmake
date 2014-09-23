@@ -2,9 +2,15 @@ if (NOT CHECKED_DEPENDENCIES)
     message(FATAL_ERROR "Please include oskar_dependencies.cmake before this script!")
 endif ()
 
-# Set the build type to release if not otherwise specified.
+# Automatically set the build type to release or debug if not specified.
 if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE release)
+    # Use debug mode if building in dbg or debug directory.
+    get_filename_component(dirname ${CMAKE_BINARY_DIR} NAME)
+    if (${dirname} MATCHES "dbg" OR ${dirname} MATCHES "debug")
+        set(CMAKE_BUILD_TYPE debug)
+    else()
+        set(CMAKE_BUILD_TYPE release)
+    endif()
 endif()
 
 set(BUILD_SHARED_LIBS ON)
