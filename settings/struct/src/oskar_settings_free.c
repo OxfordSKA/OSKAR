@@ -97,6 +97,8 @@ void oskar_settings_free(oskar_Settings* settings)
     /* Free element fit parameter file names. */
     free(settings->element_fit.input_cst_file);
     settings->element_fit.input_cst_file = NULL;
+    free(settings->element_fit.input_scalar_file);
+    settings->element_fit.input_scalar_file = NULL;
     free(settings->element_fit.output_directory);
     settings->element_fit.output_directory = NULL;
     free(settings->element_fit.fits_image);

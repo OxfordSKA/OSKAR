@@ -55,6 +55,7 @@ void oskar_settings_init(oskar_Settings* settings)
     settings->telescope.input_directory = NULL;
     settings->telescope.output_directory = NULL;
     settings->element_fit.input_cst_file = NULL;
+    settings->element_fit.input_scalar_file = NULL;
     settings->element_fit.output_directory = NULL;
     settings->element_fit.fits_image = NULL;
     settings->interferometer.ms_filename = NULL;

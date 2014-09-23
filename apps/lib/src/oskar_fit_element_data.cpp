@@ -48,19 +48,17 @@
 
 using std::string;
 
-static std::string construct_element_pathname(const char* output_dir,
+static string construct_element_pathname(const char* output_dir,
         int port, int element_type_index, double frequency_hz)
 {
     std::ostringstream stream;
     stream << "element_pattern_fit_";
-    if (port == 1)
-    {
+    if (port == 0)
+        stream << "scalar_";
+    else if (port == 1)
         stream << "x_";
-    }
     else if (port == 2)
-    {
         stream << "y_";
-    }
 
     // Append the element type index.
     stream << element_type_index << "_";
@@ -84,9 +82,10 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
 
     // Load the settings.
     oskar_Settings settings;
+    oskar_SettingsElementFit *fit = &settings.element_fit;
     oskar_settings_init(&settings);
     oskar_settings_load_simulator(&settings.sim, settings_file, status);
-    oskar_settings_load_element_fit(&settings.element_fit, settings_file, status);
+    oskar_settings_load_element_fit(fit, settings_file, status);
     if (*status)
     {
         oskar_log_error(log, "Failed to read settings file: %s\n",
@@ -97,15 +96,15 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
     // Get the main settings.
     oskar_log_set_keep_file(log, settings.sim.keep_log_file);
     oskar_log_settings_element_fit(log, &settings);
-    const char* input_file = settings.element_fit.input_cst_file;
-    const char* output_dir = settings.element_fit.output_directory;
-    const char* fits_image = settings.element_fit.fits_image;
-    double frequency_hz = settings.element_fit.frequency_hz;
-    int element_type_index = settings.element_fit.element_type_index;
-    int port = settings.element_fit.pol_type;
+    const char* input_cst_file = fit->input_cst_file;
+    const char* input_scalar_file = fit->input_scalar_file;
+    const char* output_dir = fit->output_directory;
+    double frequency_hz = fit->frequency_hz;
+    int element_type_index = fit->element_type_index;
+    int port = fit->pol_type;
 
     // Check that the input and output files have been set.
-    if (!input_file || !output_dir)
+    if ((!input_cst_file && !input_scalar_file) || !output_dir)
     {
         *status = OSKAR_ERR_FILE_IO;
         oskar_settings_free(&settings);
@@ -116,55 +115,54 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
     oskar_Element* element = oskar_element_create(OSKAR_DOUBLE,
             OSKAR_CPU, status);
 
-    // Load the CST text file for the correct port (X=1, Y=2).
-    oskar_log_message(log, 'M', 0, "Loading CST element pattern: %s", input_file);
-    oskar_element_load_cst(element, log, port, frequency_hz, input_file,
-            &settings.element_fit, status);
+    // Load the CST text file for the correct port, if specified (X=1, Y=2).
+    if (input_cst_file)
+    {
+        oskar_log_message(log, 'M', 0, "Loading CST element pattern: %s",
+                input_cst_file);
+        oskar_element_load_cst(element, log, port, frequency_hz,
+                input_cst_file, fit->average_fractional_error,
+                fit->average_fractional_error_factor_increase,
+                fit->ignore_data_at_pole, fit->ignore_data_below_horizon,
+                status);
 
-    // Construct the output file name based on the settings.
-    if (port == 0)
-    {
-        output = construct_element_pathname(output_dir, 1, element_type_index,
-                frequency_hz);
-        oskar_element_write(element, log, output.c_str(), 1, frequency_hz,
-                status);
-        output = construct_element_pathname(output_dir, 2, element_type_index,
-                frequency_hz);
-        oskar_element_write(element, log, output.c_str(), 2, frequency_hz,
-                status);
+        // Construct the output file name based on the settings.
+        if (port == 0)
+        {
+            output = construct_element_pathname(output_dir, 1,
+                    element_type_index, frequency_hz);
+            oskar_element_write(element, log, output.c_str(), 1,
+                    frequency_hz, status);
+            output = construct_element_pathname(output_dir, 2,
+                    element_type_index, frequency_hz);
+            oskar_element_write(element, log, output.c_str(), 2,
+                    frequency_hz, status);
+        }
+        else
+        {
+            output = construct_element_pathname(output_dir, port,
+                    element_type_index, frequency_hz);
+            oskar_element_write(element, log, output.c_str(), port,
+                    frequency_hz, status);
+        }
     }
-    else
+
+    // Load the scalar text file, if specified.
+    if (input_scalar_file)
     {
-        output = construct_element_pathname(output_dir, port,
+        oskar_log_message(log, 'M', 0, "Loading scalar element pattern: %s",
+                input_scalar_file);
+        oskar_element_load_scalar(element, log, frequency_hz,
+                input_scalar_file, fit->average_fractional_error,
+                fit->average_fractional_error_factor_increase,
+                fit->ignore_data_at_pole, fit->ignore_data_below_horizon,
+                status);
+
+        // Construct the output file name based on the settings.
+        output = construct_element_pathname(output_dir, 0,
                 element_type_index, frequency_hz);
-        oskar_element_write(element, log, output.c_str(), port, frequency_hz,
-                status);
-    }
-
-    // TODO Check if a FITS image is required - needs implementing.
-    if (fits_image)
-    {
-#if 0
-        // Generate an image grid.
-        int image_size = 512;
-
-        oskar_Image* image = oskar_image_create(OSKAR_DOUBLE,
-                OSKAR_CPU, status);
-        oskar_image_resize(image, image_size, image_size, 1, 1, 1, status);
-
-        // Set element pattern image meta-data.
-        oskar_image_set_type(image, OSKAR_IMAGE_TYPE_BEAM_SCALAR);
-        oskar_image_set_coord_frame(image, OSKAR_IMAGE_COORD_FRAME_HORIZON);
-        oskar_image_set_grid_type(image, OSKAR_IMAGE_GRID_TYPE_RECTILINEAR);
-        oskar_image_set_centre(image, 0.0, 90.0);
-        oskar_image_set_fov(image, 180.0, 180.0);
-        oskar_image_set_freq(image, settings.element_fit.frequency_hz, 1.0);
-        oskar_image_set_time(image, 0.0, 0.0);
-
-        // Write out the image and free memory.
-        oskar_fits_image_write(image, log, fits_image, status);
-        oskar_image_free(image, status);
-#endif
+        oskar_element_write(element, log, output.c_str(), 0,
+                frequency_hz, status);
     }
 
     // Free memory.

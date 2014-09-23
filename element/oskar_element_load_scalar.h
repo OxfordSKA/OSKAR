@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,46 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_H_
-#define OSKAR_TELESCOPE_H_
+#ifndef OSKAR_ELEMENT_LOAD_SCALAR_H_
+#define OSKAR_ELEMENT_LOAD_SCALAR_H_
 
 /**
- * @file oskar_telescope.h
+ * @file oskar_element_load_scalar.h
  */
 
-/* Public interface. */
+#include <oskar_global.h>
+#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_Telescope;
-#ifndef OSKAR_TELESCOPE_TYPEDEF_
-#define OSKAR_TELESCOPE_TYPEDEF_
-typedef struct oskar_Telescope oskar_Telescope;
-#endif /* OSKAR_TELESCOPE_TYPEDEF_ */
-
-enum {
-    OSKAR_POL_MODE_FULL,
-    OSKAR_POL_MODE_SCALAR
-};
+/**
+ * @brief
+ * Loads a scalar antenna pattern from an ASCII text file.
+ *
+ * @details
+ * This function loads scalar antenna pattern data from a text file and fills
+ * the provided data structure.
+ *
+ * The data file must contain at least three columns, in the following order:
+ * - <theta, deg>
+ * - <phi, deg>
+ * - <amplitude>
+ * - <phase, deg> [optional]
+ *
+ * @param[in,out] data         Pointer to element model data structure to fill.
+ * @param[in,out] log          Pointer to log structure to use.
+ * @param[in]  freq_hz         Frequency at which element data applies, in Hz.
+ * @param[in]  filename        Data file name.
+ * @param[in]  closeness       Target average fractional error required (<< 1).
+ * @param[in]  closeness_inc   Average fractional error factor increase (> 1).
+ * @param[in]  ignore_at_poles If set, ignore data at theta = 0 and theta = 180.
+ * @param[in]  ignore_below_horizon If set, ignore data at theta > 90 deg.
+ * @param[in,out] status       Status return code.
+ */
+OSKAR_EXPORT
+void oskar_element_load_scalar(oskar_Element* data, oskar_Log* log,
+        double freq_hz, const char* filename, double closeness,
+        double closeness_inc, int ignore_at_poles, int ignore_below_horizon,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#include <oskar_telescope_accessors.h>
-#include <oskar_telescope_analyse.h>
-#include <oskar_telescope_config_override.h>
-#include <oskar_telescope_create.h>
-#include <oskar_telescope_create_copy.h>
-#include <oskar_telescope_duplicate_first_station.h>
-#include <oskar_telescope_free.h>
-#include <oskar_telescope_load_pointing_file.h>
-#include <oskar_telescope_load_station_coords_ecef.h>
-#include <oskar_telescope_load_station_coords_horizon.h>
-#include <oskar_telescope_resize.h>
-#include <oskar_telescope_save_station_coords.h>
-#include <oskar_telescope_set_station_coords.h>
-
-#endif /* OSKAR_TELESCOPE_H_ */
+#endif /* OSKAR_ELEMENT_LOAD_SCALAR_H_ */

@@ -155,8 +155,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     double dt_dump = settings->obs.dt_dump_days;
     int station_id = settings->beam_pattern.station_id;
     int num_channels = settings->obs.num_channels;
-    int num_pols = settings->telescope.aperture_array.element_pattern.
-            functional_type == OSKAR_ELEMENT_TYPE_ISOTROPIC ? 1 : 4;
+    int num_pols = settings->telescope.pol_mode == OSKAR_POL_MODE_FULL ? 4 : 1;
     size_t num_pixels = 0;
     int beam_pattern_data_type = type | OSKAR_COMPLEX;
     if (num_pols == 4) beam_pattern_data_type |= OSKAR_MATRIX;
@@ -353,8 +352,7 @@ static void init_beam_pattern_cube(oskar_Image* image,
 {
     int num_channels = settings->obs.num_channels;
     int num_times = settings->obs.num_time_steps;
-    int num_pols = settings->telescope.aperture_array.element_pattern.
-            functional_type == OSKAR_ELEMENT_TYPE_ISOTROPIC ? 1 : 4;
+    int num_pols = settings->telescope.pol_mode == OSKAR_POL_MODE_FULL ? 4 : 1;
 
     if (settings->beam_pattern.coord_grid_type ==
             OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)

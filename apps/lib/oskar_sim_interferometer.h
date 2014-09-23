@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,10 +48,12 @@ extern "C" {
  * This function acts as though it were a stand-alone executable.
  *
  * @param[in] settings_file Path to a settings file.
- * @param[in,out] log  Pointer to a log structure to use.
+ * @param[in,out] log       Pointer to a log structure to use.
+ * @param[in,out] status    Status return code.
  */
 OSKAR_APPS_EXPORT
-int oskar_sim_interferometer(const char* settings_file, oskar_Log* log);
+void oskar_sim_interferometer(const char* settings_file, oskar_Log* log,
+        int* status);
 
 #ifdef __cplusplus
 }

@@ -34,6 +34,8 @@
 struct oskar_Settings;
 struct oskar_Log;
 
+#include <vector>
+
 class TelescopeLoadElementPattern : public oskar_TelescopeLoadAbstract
 {
 public:
@@ -58,6 +60,9 @@ private:
 
     void load_element_patterns(oskar_Station* station,
             const std::map<std::string, std::string>& filemap, int* status);
+    void load(int port, oskar_Station* station,
+            const std::vector<std::string>& keys,
+            const std::vector<std::string>& paths, int* status);
 
     void update_map(std::map<std::string, std::string>& files,
             const oskar_Dir& cwd);
@@ -66,6 +71,7 @@ private:
     static const std::string root_name;
     std::string root_x;
     std::string root_y;
+    std::string root_scalar;
     const oskar_Settings* settings_;
     oskar_Log* log_;
     std::map<std::string, int> models;

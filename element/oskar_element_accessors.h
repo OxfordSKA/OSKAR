@@ -48,13 +48,13 @@ OSKAR_EXPORT
 int oskar_element_mem_location(const oskar_Element* data);
 
 OSKAR_EXPORT
-int oskar_element_has_spline_data(const oskar_Element* data);
-
-OSKAR_EXPORT
 int oskar_element_has_x_spline_data(const oskar_Element* data);
 
 OSKAR_EXPORT
 int oskar_element_has_y_spline_data(const oskar_Element* data);
+
+OSKAR_EXPORT
+int oskar_element_has_scalar_spline_data(const oskar_Element* data);
 
 OSKAR_EXPORT
 int oskar_element_num_freq(const oskar_Element* data);
@@ -94,6 +94,12 @@ OSKAR_EXPORT
 const oskar_Mem* oskar_element_y_filename_const(const oskar_Element* data,
         int freq_id);
 
+OSKAR_EXPORT
+oskar_Mem* oskar_element_scalar_filename(oskar_Element* data, int freq_id);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_element_scalar_filename_const(const oskar_Element* data,
+        int freq_id);
 
 
 OSKAR_EXPORT
@@ -154,6 +160,19 @@ OSKAR_EXPORT
 const oskar_Splines* oskar_element_y_v_im_const(const oskar_Element* data,
         int freq_id);
 
+OSKAR_EXPORT
+oskar_Splines* oskar_element_scalar_re(oskar_Element* data, int freq_id);
+
+OSKAR_EXPORT
+const oskar_Splines* oskar_element_scalar_re_const(const oskar_Element* data,
+        int freq_id);
+
+OSKAR_EXPORT
+oskar_Splines* oskar_element_scalar_im(oskar_Element* data, int freq_id);
+
+OSKAR_EXPORT
+const oskar_Splines* oskar_element_scalar_im_const(const oskar_Element* data,
+        int freq_id);
 
 
 /* Setters. */

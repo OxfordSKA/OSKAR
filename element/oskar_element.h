@@ -78,6 +78,7 @@ enum {
 #include <oskar_element_evaluate.h>
 #include <oskar_element_free.h>
 #include <oskar_element_load_cst.h>
+#include <oskar_element_load_scalar.h>
 #include <oskar_element_resize_freq_data.h>
 #include <oskar_element_read.h>
 #include <oskar_element_write.h>

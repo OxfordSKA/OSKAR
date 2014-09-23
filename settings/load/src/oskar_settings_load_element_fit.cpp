@@ -59,6 +59,12 @@ void oskar_settings_load_element_fit(oskar_SettingsElementFit* settings,
         settings->input_cst_file = (char*)malloc(t.size() + 1);
         strcpy(settings->input_cst_file, t.constData());
     }
+    t = s.value("input_scalar_file").toByteArray();
+    if (t.size() > 0)
+    {
+        settings->input_scalar_file = (char*)malloc(t.size() + 1);
+        strcpy(settings->input_scalar_file, t.constData());
+    }
     t = s.value("output_directory").toByteArray();
     if (t.size() > 0)
     {

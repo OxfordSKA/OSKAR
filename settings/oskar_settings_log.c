@@ -30,7 +30,7 @@
 
 #include <private_log.h>
 #include <oskar_log.h>
-#include <oskar_station.h>
+#include <oskar_telescope.h>
 #include <oskar_image.h>
 #include <oskar_Settings.h>
 
@@ -350,6 +350,8 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
     LV("Altitude [m]", "%.1f", s->telescope.altitude_m);
     LVB("Normalise beams at phase centre",
             s->telescope.normalise_beams_at_phase_centre);
+    LVS("Polarisation mode",
+            s->telescope.pol_mode == OSKAR_POL_MODE_FULL ? "Full" : "Scalar");
 
     /* Aperture array settings. */
     if (s->telescope.station_type == OSKAR_STATION_TYPE_AA)
@@ -462,7 +464,7 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
             {
                 LVS("Functional pattern type", "Dipole");
                 LV("Dipole length", "%.3f", ep->dipole_length);
-                switch (ep->functional_type)
+                switch (ep->dipole_length_units)
                 {
                 case OSKAR_WAVELENGTHS:
                     LVS("Dipole length units", "Wavelengths");
@@ -554,7 +556,6 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
                 OSKAR_METRES ? "Metres" : "Wavelengths");
     LVB("Use common sky (short baseline approximation)",
             s->interferometer.use_common_sky);
-    LVB("Scalar mode (Stokes I only)", s->interferometer.scalar_mode);
 
     /* Noise */
     LVB("System noise enabled", n->enable);
@@ -832,6 +833,7 @@ void oskar_log_settings_element_fit(oskar_Log* log, const oskar_Settings* s)
     oskar_log_message(log, 'M', depth, "Element pattern fitting settings");
     ++depth;
     LVS("Input CST file", ef->input_cst_file);
+    LVS("Input scalar file", ef->input_scalar_file);
     LVS("Output FITS image file", ef->fits_image);
     LV("Frequency [Hz]", "%.5e", ef->frequency_hz);
     LVS("Polarisation type", ef->pol_type == 1 ? "X" :

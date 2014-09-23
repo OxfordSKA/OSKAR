@@ -71,6 +71,7 @@ oskar_Element* oskar_element_create(int precision, int location, int* status)
     data->freqs_hz = 0;
     data->filename_x = 0;
     data->filename_y = 0;
+    data->filename_scalar = 0;
     data->x_h_re = 0;
     data->x_h_im = 0;
     data->x_v_re = 0;
@@ -79,6 +80,8 @@ oskar_Element* oskar_element_create(int precision, int location, int* status)
     data->y_h_im = 0;
     data->y_v_re = 0;
     data->y_v_im = 0;
+    data->scalar_re = 0;
+    data->scalar_im = 0;
 
     /* Return pointer to the structure. */
     return data;

@@ -41,7 +41,8 @@ static void write_splines(oskar_Binary* h, const oskar_Splines* splines,
 void oskar_element_write(const oskar_Element* data, oskar_Log* log,
         const char* filename, int port, double freq_hz, int* status)
 {
-    const oskar_Splines *h_re, *h_im, *v_re, *v_im;
+    const oskar_Splines *h_re = 0, *h_im = 0, *v_re = 0, *v_im = 0;
+    const oskar_Splines *scalar_re = 0, *scalar_im = 0;
     oskar_Binary* h = 0;
     int freq_id;
     char* log_data = 0;
@@ -62,8 +63,13 @@ void oskar_element_write(const oskar_Element* data, oskar_Log* log,
             oskar_element_num_freq(data),
             oskar_element_freqs_hz_const(data));
 
-    /* Get pointers based on port number. */
-    if (port == 1)
+    /* Get pointers to surface data based on port number and frequency index. */
+    if (port == 0)
+    {
+        scalar_re = oskar_element_scalar_re_const(data, freq_id);
+        scalar_im = oskar_element_scalar_im_const(data, freq_id);
+    }
+    else if (port == 1)
     {
         h_re = oskar_element_x_h_re_const(data, freq_id);
         h_im = oskar_element_x_h_im_const(data, freq_id);
@@ -80,13 +86,6 @@ void oskar_element_write(const oskar_Element* data, oskar_Log* log,
     else
     {
         *status = OSKAR_ERR_INVALID_ARGUMENT;
-        return;
-    }
-
-    /* Check that the data exist. */
-    if (!h_re || !h_im || !v_re || !v_im)
-    {
-        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
         return;
     }
 
@@ -108,16 +107,30 @@ void oskar_element_write(const oskar_Element* data, oskar_Log* log,
         free(log_data);
     }
 
-    /* Write the surface type. TODO Allow scalar surface here too. */
-    oskar_binary_write_int(h, OSKAR_TAG_GROUP_ELEMENT_DATA,
-            OSKAR_ELEMENT_TAG_SURFACE_TYPE, 0,
-            OSKAR_ELEMENT_SURFACE_TYPE_LUDWIG_3, status);
+    if (port == 0)
+    {
+        /* Write the surface type (scalar). */
+        oskar_binary_write_int(h, OSKAR_TAG_GROUP_ELEMENT_DATA,
+                OSKAR_ELEMENT_TAG_SURFACE_TYPE, 0,
+                OSKAR_ELEMENT_SURFACE_TYPE_SCALAR, status);
 
-    /* Write data for [h_re], [h_im], [v_re], [v_im] surfaces. */
-    write_splines(h, h_re, 0, status);
-    write_splines(h, h_im, 1, status);
-    write_splines(h, v_re, 2, status);
-    write_splines(h, v_im, 3, status);
+        /* Write data for [real], [imag] surfaces. */
+        write_splines(h, scalar_re, 0, status);
+        write_splines(h, scalar_im, 1, status);
+    }
+    else
+    {
+        /* Write the surface type (Ludwig-3). */
+        oskar_binary_write_int(h, OSKAR_TAG_GROUP_ELEMENT_DATA,
+                OSKAR_ELEMENT_TAG_SURFACE_TYPE, 0,
+                OSKAR_ELEMENT_SURFACE_TYPE_LUDWIG_3, status);
+
+        /* Write data for [h_re], [h_im], [v_re], [v_im] surfaces. */
+        write_splines(h, h_re, 0, status);
+        write_splines(h, h_im, 1, status);
+        write_splines(h, v_re, 2, status);
+        write_splines(h, v_im, 3, status);
+    }
 
     /* Release the handle. */
     oskar_binary_free(h);
@@ -128,8 +141,15 @@ static void write_splines(oskar_Binary* h, const oskar_Splines* splines,
 {
     const oskar_Mem *knots_x, *knots_y, *coeff;
     oskar_Mem* temp;
-    unsigned char group;
-    group = OSKAR_TAG_GROUP_SPLINE_DATA;
+    unsigned char group = (unsigned char) OSKAR_TAG_GROUP_SPLINE_DATA;
+
+    if (!splines)
+    {
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
+    if (*status) return;
+
     knots_x = oskar_splines_knots_x_theta_const(splines);
     knots_y = oskar_splines_knots_y_phi_const(splines);
     coeff   = oskar_splines_coeff_const(splines);

@@ -60,6 +60,7 @@ struct oskar_Element
     double* freqs_hz; /* Array of frequencies in Hz. */
     oskar_Mem** filename_x;
     oskar_Mem** filename_y;
+    oskar_Mem** filename_scalar;
     oskar_Splines** x_h_re;
     oskar_Splines** x_h_im;
     oskar_Splines** x_v_re;
@@ -68,6 +69,8 @@ struct oskar_Element
     oskar_Splines** y_h_im;
     oskar_Splines** y_v_re;
     oskar_Splines** y_v_im;
+    oskar_Splines** scalar_re;
+    oskar_Splines** scalar_im;
 };
 
 #ifndef OSKAR_ELEMENT_TYPEDEF_

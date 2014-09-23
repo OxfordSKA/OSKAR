@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #include <private_element.h>
 #include <oskar_element.h>
 #include <oskar_getline.h>
+#include <oskar_string_to_array.h>
 #include <oskar_cmath.h>
 
 #include <stdio.h>
@@ -46,19 +47,17 @@ static void fit_splines(oskar_Log* log, oskar_Splines* splines, int n,
         oskar_Mem* theta, oskar_Mem* phi, oskar_Mem* data, oskar_Mem* weight,
         double closeness, double closeness_inc, const char* name, int* status);
 
-void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
-        int port, double freq_hz, const char* filename,
+void oskar_element_load_scalar(oskar_Element* data, oskar_Log* log,
+        double freq_hz, const char* filename,
         double closeness, double closeness_inc, int ignore_at_poles,
         int ignore_below_horizon, int* status)
 {
     int i, n = 0, type = OSKAR_DOUBLE;
-    size_t fname_len;
-    oskar_Splines *data_h_re = 0, *data_h_im = 0;
-    oskar_Splines *data_v_re = 0, *data_v_im = 0;
-    oskar_Mem *theta, *phi, *h_re, *h_im, *v_re, *v_im, *weight;
+    oskar_Splines *scalar_re = 0, *scalar_im = 0;
+    oskar_Mem *theta = 0, *phi = 0, *re = 0, *im = 0, *weight = 0;
 
     /* Declare the line buffer. */
-    char *line = NULL, *dbi = NULL;
+    char *line = NULL;
     size_t bufsize = 0;
     FILE* file;
 
@@ -71,13 +70,6 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
 
     /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Check port number. */
-    if (port != 0 && port != 1 && port != 2)
-    {
-        *status = OSKAR_ERR_INVALID_ARGUMENT;
-        return;
-    }
 
     /* Check the data type. */
     if (oskar_element_precision(data) != type)
@@ -109,24 +101,11 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         data->freqs_hz[i] = freq_hz;
     }
 
-    /* Get pointers to surface data based on port number and frequency index. */
-    if (port == 1 || port == 0)
-    {
-        data_h_re = oskar_element_x_h_re(data, i);
-        data_h_im = oskar_element_x_h_im(data, i);
-        data_v_re = oskar_element_x_v_re(data, i);
-        data_v_im = oskar_element_x_v_im(data, i);
-    }
-    else if (port == 2)
-    {
-        data_h_re = oskar_element_y_h_re(data, i);
-        data_h_im = oskar_element_y_h_im(data, i);
-        data_v_re = oskar_element_y_v_re(data, i);
-        data_v_im = oskar_element_y_v_im(data, i);
-    }
+    /* Get pointers to surface data based on frequency index. */
+    scalar_re = oskar_element_scalar_re(data, i);
+    scalar_im = oskar_element_scalar_im(data, i);
 
     /* Open the file. */
-    fname_len = 1 + strlen(filename);
     file = fopen(filename, "r");
     if (!file)
     {
@@ -134,23 +113,11 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         return;
     }
 
-    /* Read the first line and check if data is in logarithmic format. */
-    if (oskar_getline(&line, &bufsize, file) < 0)
-    {
-        *status = OSKAR_ERR_FILE_IO;
-        free(line);
-        fclose(file);
-        return;
-    }
-    dbi = strstr(line, "dBi"); /* Check for presence of "dBi". */
-
     /* Create local arrays to hold data for fitting. */
     theta  = oskar_mem_create(type, OSKAR_CPU, 0, status);
     phi    = oskar_mem_create(type, OSKAR_CPU, 0, status);
-    h_re   = oskar_mem_create(type, OSKAR_CPU, 0, status);
-    h_im   = oskar_mem_create(type, OSKAR_CPU, 0, status);
-    v_re   = oskar_mem_create(type, OSKAR_CPU, 0, status);
-    v_im   = oskar_mem_create(type, OSKAR_CPU, 0, status);
+    re     = oskar_mem_create(type, OSKAR_CPU, 0, status);
+    im     = oskar_mem_create(type, OSKAR_CPU, 0, status);
     weight = oskar_mem_create(type, OSKAR_CPU, 0, status);
     if (*status) return;
 
@@ -158,29 +125,25 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     n = 0;
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
-        double t = 0., p = 0., abs_theta, phase_theta, abs_phi, phase_phi;
-        double phi_re, phi_im, theta_re, theta_im;
-        double cos_p, sin_p, h_re_, h_im_, v_re_, v_im_;
-        void *p_theta = 0, *p_phi = 0, *p_h_re = 0, *p_h_im = 0, *p_v_re = 0;
-        void *p_v_im = 0, *p_weight = 0;
+        double re_, im_;
+        double par[] = {0., 0., 0., 0.}; /* theta, phi, amp, phase (optional) */
+        void *p_theta = 0, *p_phi = 0, *p_re = 0, *p_im = 0, *p_weight = 0;
 
         /* Parse the line, and skip if data were not read correctly. */
-        if (sscanf(line, "%lf %lf %*f %lf %lf %lf %lf %*f", &t, &p,
-                    &abs_theta, &phase_theta, &abs_phi, &phase_phi) != 6)
+        if (oskar_string_to_array_d(line, 4, par) < 3)
             continue;
 
         /* Ignore data below horizon if requested. */
-        if (ignore_below_horizon && t > 90.0) continue;
+        if (ignore_below_horizon && par[0] > 90.0) continue;
 
         /* Ignore data at poles if requested. */
         if (ignore_at_poles)
-            if (t < 1e-6 || t > (180.0 - 1e-6)) continue;
+            if (par[0] < 1e-6 || par[0] > (180.0 - 1e-6)) continue;
 
         /* Convert angular measures to radians. */
-        t *= DEG2RAD;
-        p *= DEG2RAD;
-        phase_theta *= DEG2RAD;
-        phase_phi *= DEG2RAD;
+        par[0] *= DEG2RAD; /* theta */
+        par[1] *= DEG2RAD; /* phi */
+        par[3] *= DEG2RAD; /* phase */
 
         /* Ensure enough space in arrays. */
         if (n % 100 == 0)
@@ -189,49 +152,26 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
             size = n + 100;
             oskar_mem_realloc(theta, size, status);
             oskar_mem_realloc(phi, size, status);
-            oskar_mem_realloc(h_re, size, status);
-            oskar_mem_realloc(h_im, size, status);
-            oskar_mem_realloc(v_re, size, status);
-            oskar_mem_realloc(v_im, size, status);
+            oskar_mem_realloc(re, size, status);
+            oskar_mem_realloc(im, size, status);
             oskar_mem_realloc(weight, size, status);
             if (*status) break;
         }
         p_theta  = oskar_mem_void(theta);
         p_phi    = oskar_mem_void(phi);
-        p_h_re   = oskar_mem_void(h_re);
-        p_h_im   = oskar_mem_void(h_im);
-        p_v_re   = oskar_mem_void(v_re);
-        p_v_im   = oskar_mem_void(v_im);
+        p_re     = oskar_mem_void(re);
+        p_im     = oskar_mem_void(im);
         p_weight = oskar_mem_void(weight);
 
-        /* Convert decibel to linear scale if necessary. */
-        if (dbi)
-        {
-            abs_theta = pow(10.0, abs_theta / 10.0);
-            abs_phi   = pow(10.0, abs_phi / 10.0);
-        }
-
         /* Amp,phase to real,imag conversion. */
-        theta_re = abs_theta * cos(phase_theta);
-        theta_im = abs_theta * sin(phase_theta);
-        phi_re = abs_phi * cos(phase_phi);
-        phi_im = abs_phi * sin(phase_phi);
+        re_ = par[2] * cos(par[3]);
+        im_ = par[2] * sin(par[3]);
 
-        /* Convert to Ludwig-3 polarisation system. */
-        sin_p = sin(p);
-        cos_p = cos(p);
-        h_re_ = theta_re * cos_p - phi_re * sin_p;
-        h_im_ = theta_im * cos_p - phi_im * sin_p;
-        v_re_ = theta_re * sin_p + phi_re * cos_p;
-        v_im_ = theta_im * sin_p + phi_im * cos_p;
-
-        /* Store the surface data in Ludwig-3 format. */
-        ((double*)p_theta)[n]  = t;
-        ((double*)p_phi)[n]    = p;
-        ((double*)p_h_re)[n]   = h_re_;
-        ((double*)p_h_im)[n]   = h_im_;
-        ((double*)p_v_re)[n]   = v_re_;
-        ((double*)p_v_im)[n]   = v_im_;
+        /* Store the surface data. */
+        ((double*)p_theta)[n]  = par[0];
+        ((double*)p_phi)[n]    = par[1];
+        ((double*)p_re)[n]     = re_;
+        ((double*)p_im)[n]     = im_;
         ((double*)p_weight)[n] = 1.0;
 
         /* Increment array pointer. */
@@ -243,50 +183,20 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     fclose(file);
 
     /* Fit splines to the surface data. */
-    fit_splines(log, data_h_re, n, theta, phi, h_re, weight,
-            closeness, closeness_inc, "H [real]", status);
-    fit_splines(log, data_h_im, n, theta, phi, h_im, weight,
-            closeness, closeness_inc, "H [imag]", status);
-    fit_splines(log, data_v_re, n, theta, phi, v_re, weight,
-            closeness, closeness_inc, "V [real]", status);
-    fit_splines(log, data_v_im, n, theta, phi, v_im, weight,
-            closeness, closeness_inc, "V [imag]", status);
+    fit_splines(log, scalar_re, n, theta, phi, re, weight,
+            closeness, closeness_inc, "Scalar [real]", status);
+    fit_splines(log, scalar_im, n, theta, phi, im, weight,
+            closeness, closeness_inc, "Scalar [imag]", status);
 
     /* Store the filename. */
-    if (port == 0)
-    {
-        oskar_mem_append_raw(data->filename_x[i], filename, OSKAR_CHAR,
-                OSKAR_CPU, fname_len, status);
-        oskar_mem_append_raw(data->filename_y[i], filename, OSKAR_CHAR,
-                OSKAR_CPU, fname_len, status);
-    }
-    else if (port == 1)
-    {
-        oskar_mem_append_raw(data->filename_x[i], filename, OSKAR_CHAR,
-                OSKAR_CPU, fname_len, status);
-    }
-    else if (port == 2)
-    {
-        oskar_mem_append_raw(data->filename_y[i], filename, OSKAR_CHAR,
-                OSKAR_CPU, fname_len, status);
-    }
-
-    /* Copy X to Y if both ports are the same. */
-    if (port == 0)
-    {
-        oskar_splines_copy(data->y_h_re[i], data->x_h_re[i], status);
-        oskar_splines_copy(data->y_h_im[i], data->x_h_im[i], status);
-        oskar_splines_copy(data->y_v_re[i], data->x_v_re[i], status);
-        oskar_splines_copy(data->y_v_im[i], data->x_v_im[i], status);
-    }
+    oskar_mem_append_raw(data->filename_scalar[i], filename, OSKAR_CHAR,
+                OSKAR_CPU, 1 + strlen(filename), status);
 
     /* Free local arrays. */
     oskar_mem_free(theta, status);
     oskar_mem_free(phi, status);
-    oskar_mem_free(h_re, status);
-    oskar_mem_free(h_im, status);
-    oskar_mem_free(v_re, status);
-    oskar_mem_free(v_im, status);
+    oskar_mem_free(re, status);
+    oskar_mem_free(im, status);
     oskar_mem_free(weight, status);
 }
 

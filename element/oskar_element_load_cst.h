@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_SettingsElementFit.h>
 #include <oskar_log.h>
 
 #ifdef __cplusplus
@@ -65,19 +64,22 @@ extern "C" {
  * Amplitude values in dBi are detected, and converted to linear format
  * on loading.
  *
- * The theta dimension is assumed to be the fastest varying.
- *
- * @param[out] data      Pointer to element model data structure to fill.
- * @param[in,out] log    Pointer to log structure to use.
- * @param[in]  filename  Data file name.
- * @param[in]  port      Port number to load: 1 for X dipole, 2 for Y dipole.
- * @param[in]  settings  Pointer to settings structure used for surface fitting.
- * @param[in,out] status Status return code.
+ * @param[in,out] data         Pointer to element model data structure to fill.
+ * @param[in,out] log          Pointer to log structure to use.
+ * @param[in]  port            Port number: 1 for X dipole, 2 for Y dipole.
+ * @param[in]  freq_hz         Frequency at which element data applies, in Hz.
+ * @param[in]  filename        Data file name.
+ * @param[in]  closeness       Target average fractional error required (<< 1).
+ * @param[in]  closeness_inc   Average fractional error factor increase (> 1).
+ * @param[in]  ignore_at_poles If set, ignore data at theta = 0 and theta = 180.
+ * @param[in]  ignore_below_horizon If set, ignore data at theta > 90 deg.
+ * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
 void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         int port, double freq_hz, const char* filename,
-        const oskar_SettingsElementFit* settings, int* status);
+        double closeness, double closeness_inc, int ignore_at_poles,
+        int ignore_below_horizon, int* status);
 
 #ifdef __cplusplus
 }

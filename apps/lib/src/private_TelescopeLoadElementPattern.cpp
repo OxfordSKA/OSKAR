@@ -47,6 +47,7 @@ TelescopeLoadElementPattern::TelescopeLoadElementPattern(
     log_ = log;
     root_x = root_name + "x_";
     root_y = root_name + "y_";
+    root_scalar = root_name + "scalar_";
 }
 
 TelescopeLoadElementPattern::~TelescopeLoadElementPattern()
@@ -174,8 +175,6 @@ int TelescopeLoadElementPattern::index_from_filename(
 void TelescopeLoadElementPattern::load_element_patterns(
         oskar_Station* station, const map<string, string>& filemap, int* status)
 {
-    int n;
-
     // Check if safe to proceed.
     if (*status) return;
 
@@ -186,8 +185,8 @@ void TelescopeLoadElementPattern::load_element_patterns(
 
     // Get lists of all paths in the map that have keys starting with the
     // right root name.
-    vector<string> keys_x, keys_y;
-    vector<string> paths_x, paths_y;
+    vector<string> keys_x, keys_y, keys_scalar;
+    vector<string> paths_x, paths_y, paths_scalar;
     for (map<string, string>::const_iterator i = filemap.begin();
             i != filemap.end(); ++i)
     {
@@ -202,15 +201,28 @@ void TelescopeLoadElementPattern::load_element_patterns(
             keys_y.push_back(key);
             paths_y.push_back(i->second);
         }
+        if (key.compare(0, root_scalar.size(), root_scalar) == 0)
+        {
+            keys_scalar.push_back(key);
+            paths_scalar.push_back(i->second);
+        }
     }
 
-    // Load X data.
-    n = keys_x.size();
-    for (int i = 0; i < n; ++i)
+    // Load X, Y and scalar data.
+    load(1, station, keys_x, paths_x, status);
+    load(2, station, keys_y, paths_y, status);
+    load(0, station, keys_scalar, paths_scalar, status);
+}
+
+void TelescopeLoadElementPattern::load(int port, oskar_Station* station,
+        const vector<string>& keys, const vector<string>& paths, int* status)
+{
+    if (*status) return;
+    const char* s = port == 0 ? "SCALAR" : port == 1 ? "X" : "Y";
+    for (size_t i = 0; i < keys.size(); ++i)
     {
-        string path, key;
-        key = keys_x[i];
-        path = paths_x[i];
+        string key = keys[i];
+        string path = paths[i];
 
         // Get the element index and frequency from the key.
         int ind = index_from_filename(key, status);
@@ -220,42 +232,15 @@ void TelescopeLoadElementPattern::load_element_patterns(
         if (models.count(path) == 0)
         {
             oskar_log_message(log_, 'M', 0,
-                    "Loading fitted element pattern X[%d] at %.0f MHz: %s",
-                    ind, freq / 1.0e6, path.c_str());
+                    "Loading fitted element pattern %s[%d] at %.0f MHz: %s",
+                    s, ind, freq / 1.0e6, path.c_str());
             models[path] = 1;
         }
         if (*status) break;
         if (oskar_station_num_element_types(station) < ind + 1)
             oskar_station_resize_element_types(station, ind + 1, status);
         oskar_element_read(oskar_station_element(station, ind), path.c_str(),
-                1, freq, status);
-    }
-
-    // Load Y data.
-    n = keys_y.size();
-    for (int i = 0; i < n; ++i)
-    {
-        string path, key;
-        key = keys_y[i];
-        path = paths_y[i];
-
-        // Get the element index and frequency from the key.
-        int ind = index_from_filename(key, status);
-        double freq = frequency_from_filename(key, status);
-
-        // Load the file.
-        if (models.count(path) == 0)
-        {
-            oskar_log_message(log_, 'M', 0,
-                    "Loading fitted element pattern Y[%d] at %.0f MHz: %s",
-                    ind, freq / 1.0e6, path.c_str());
-            models[path] = 1;
-        }
-        if (*status) break;
-        if (oskar_station_num_element_types(station) < ind + 1)
-            oskar_station_resize_element_types(station, ind + 1, status);
-        oskar_element_read(oskar_station_element(station, ind), path.c_str(),
-                2, freq, status);
+                port, freq, status);
     }
 }
 

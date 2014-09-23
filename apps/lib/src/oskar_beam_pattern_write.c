@@ -27,7 +27,7 @@
  */
 
 #include <apps/lib/oskar_beam_pattern_write.h>
-#include <oskar_element.h>
+#include <oskar_telescope.h>
 #include <oskar_image.h>
 #include <fits/oskar_fits_image_write.h>
 #include <oskar_cmath.h>
@@ -70,16 +70,17 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
 
     num_times = settings->obs.num_time_steps;
     num_channels = settings->obs.num_channels;
-    num_pols = settings->telescope.aperture_array.element_pattern.functional_type ==
-            OSKAR_ELEMENT_TYPE_ISOTROPIC ? 1 : 4;
-    if (settings->beam_pattern.coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
+    num_pols = settings->telescope.pol_mode == OSKAR_POL_MODE_FULL ? 4 : 1;
+    if (settings->beam_pattern.coord_grid_type ==
+            OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
     {
         const int* size = settings->beam_pattern.size;
         num_pixels = size[0] * size[1];
         oskar_image_resize(image, size[0], size[1], num_pols, num_times,
                 num_channels, status);
     }
-    else if (settings->beam_pattern.coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_HEALPIX)
+    else if (settings->beam_pattern.coord_grid_type ==
+            OSKAR_BEAM_PATTERN_COORDS_HEALPIX)
     {
         int nside = settings->beam_pattern.nside;
         num_pixels = 12*nside*nside;

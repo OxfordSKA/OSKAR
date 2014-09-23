@@ -509,7 +509,18 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     setTooltip(k, "If <b>true</b>, then scale the amplitude of "
             "every station beam at the interferometer phase centre to "
             "precisely 1.0 for each time snapshot. This effectively "
-            "performs an amplitude calibration.");
+            "performs an amplitude calibration for a source at the phase "
+            "centre.");
+
+    k = root + "/pol_mode";
+    declare(k , "Polarisation mode", QStringList() << "Full" << "Scalar");
+    setTooltip(k, "The polarisation mode of simulations which use the "
+            "telescope model. If this is <b>Scalar</b>, then only Stokes I "
+            "visibility data will be simulated, and scalar element responses "
+            "will be used when evaluating station beams. If this is "
+            "<b>Full</b> (the default) then correlation products from both "
+            "polarisations will be simulated. <b>Note that scalar mode can "
+            "be significantly faster.</b>");
 
     // Aperture array settings.
     group = root + "/aperture_array";
@@ -685,6 +696,12 @@ void oskar_SettingsModelApps::init_settings_element_fit()
             "software package in (theta, phi) coordinates. See the Telescope "
             "Model documentation for a description of the required columns.");
 
+    k = root + "/input_scalar_file";
+    declare(k, "Input scalar file", oskar_SettingsItem::INPUT_FILE_NAME);
+    setTooltip(k, "Pathname to a file containing an ASCII data table of the "
+            "scalar directional element pattern response. See the Telescope "
+            "Model documentation for a description of the required columns.");
+
     k = root + "/frequency_hz";
     declare(k, "Frequency [Hz]", oskar_SettingsItem::DOUBLE);
     setTooltip(k, "Observing frequency at which numerical element pattern "
@@ -693,7 +710,7 @@ void oskar_SettingsModelApps::init_settings_element_fit()
     k = root + "/pol_type";
     declare(k, "Polarisation type", QStringList() << "XY" << "X" << "Y");
     setTooltip(k, "Specify whether the input data is to be used for the "
-            "X or Y dipole, or both.");
+            "X or Y dipole, or both. (This is ignored for scalar data.)");
 
     k = root + "/element_type_index";
     declare(k, "Element type index", oskar_SettingsItem::INT_UNSIGNED);
@@ -1072,11 +1089,6 @@ void oskar_SettingsModelApps::init_settings_interferometer()
             "where source positions are the same relative to every station. "
             "If <b>false</b>, then re-evaluate all source positions and all "
             "station beams.");
-    k = group + "/scalar_mode";
-    declare(k, "Scalar mode (Stokes I only)", oskar_SettingsItem::BOOL, false);
-    setTooltip(k, "If <b>true</b>, operate in a scalar mode to simulate only "
-            "Stokes I data. If <b>false</b> (the default), then simulate "
-            "fully polarised data.");
 
     init_settings_system_noise_model("interferometer");
 

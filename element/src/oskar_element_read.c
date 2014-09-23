@@ -45,7 +45,8 @@ static void read_splines(oskar_Binary* h, oskar_Splines* splines, int index,
 void oskar_element_read(oskar_Element* data, const char* filename,
         int port, double freq_hz, int* status)
 {
-    oskar_Splines *h_re, *h_im, *v_re, *v_im;
+    oskar_Splines *h_re = 0, *h_im = 0, *v_re = 0, *v_im = 0;
+    oskar_Splines *scalar_re = 0, *scalar_im = 0;
     oskar_Binary* h = 0;
     int i, n, surface_type = -1;
 
@@ -78,7 +79,12 @@ void oskar_element_read(oskar_Element* data, const char* filename,
     data->freqs_hz[i] = freq_hz;
 
     /* Get pointers to surface data based on port number and frequency index. */
-    if (port == 1)
+    if (port == 0)
+    {
+        scalar_re = oskar_element_scalar_re(data, i);
+        scalar_im = oskar_element_scalar_im(data, i);
+    }
+    else if (port == 1)
     {
         h_re = oskar_element_x_h_re(data, i);
         h_im = oskar_element_x_h_im(data, i);
@@ -115,20 +121,36 @@ void oskar_element_read(oskar_Element* data, const char* filename,
         return;
     }
 
-    /* Check the surface type. TODO: Allow scalar surface here too. */
-    if (surface_type != OSKAR_ELEMENT_SURFACE_TYPE_LUDWIG_3)
+    if (port == 0)
     {
-        *status = OSKAR_ERR_UNKNOWN;
+        /* Check the surface type (scalar). */
+        if (surface_type != OSKAR_ELEMENT_SURFACE_TYPE_SCALAR)
+            *status = OSKAR_ERR_UNKNOWN;
+
+        /* Read data for [real], [imag] surfaces. */
+        read_splines(h, scalar_re, 0, status);
+        read_splines(h, scalar_im, 1, status);
+    }
+    else
+    {
+        /* Check the surface type (Ludwig-3). */
+        if (surface_type != OSKAR_ELEMENT_SURFACE_TYPE_LUDWIG_3)
+            *status = OSKAR_ERR_UNKNOWN;
+
+        /* Read data for [h_re], [h_im], [v_re], [v_im] surfaces. */
+        read_splines(h, h_re, 0, status);
+        read_splines(h, h_im, 1, status);
+        read_splines(h, v_re, 2, status);
+        read_splines(h, v_im, 3, status);
     }
 
-    /* Read data for [h_re], [h_im], [v_re], [v_im] surfaces. */
-    read_splines(h, h_re, 0, status);
-    read_splines(h, h_im, 1, status);
-    read_splines(h, v_re, 2, status);
-    read_splines(h, v_im, 3, status);
-
     /* Store the filename. */
-    if (port == 1)
+    if (port == 0)
+    {
+        oskar_mem_append_raw(data->filename_scalar[i], filename, OSKAR_CHAR,
+                OSKAR_CPU, 1 + strlen(filename), status);
+    }
+    else if (port == 1)
     {
         oskar_mem_append_raw(data->filename_x[i], filename, OSKAR_CHAR,
                 OSKAR_CPU, 1 + strlen(filename), status);
@@ -146,9 +168,15 @@ void oskar_element_read(oskar_Element* data, const char* filename,
 static void read_splines(oskar_Binary* h, oskar_Splines* splines, int index,
         int* status)
 {
-    unsigned char group;
-    group = OSKAR_TAG_GROUP_SPLINE_DATA;
+    unsigned char group = (unsigned char) OSKAR_TAG_GROUP_SPLINE_DATA;
+
+    if (!splines)
+    {
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
     if (*status) return;
+
     oskar_binary_read_int(h, group, OSKAR_SPLINES_TAG_NUM_KNOTS_X_THETA, index,
             &splines->num_knots_x_theta, status);
     oskar_binary_read_int(h, group, OSKAR_SPLINES_TAG_NUM_KNOTS_Y_PHI, index,

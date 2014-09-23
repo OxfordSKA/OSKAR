@@ -65,6 +65,7 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
         dst->freqs_hz[i] = src->freqs_hz[i];
         oskar_mem_copy(dst->filename_x[i], src->filename_x[i], status);
         oskar_mem_copy(dst->filename_y[i], src->filename_y[i], status);
+        oskar_mem_copy(dst->filename_scalar[i], src->filename_scalar[i], status);
         oskar_splines_copy(dst->x_v_re[i], src->x_v_re[i], status);
         oskar_splines_copy(dst->x_v_im[i], src->x_v_im[i], status);
         oskar_splines_copy(dst->x_h_re[i], src->x_h_re[i], status);
@@ -73,6 +74,8 @@ void oskar_element_copy(oskar_Element* dst, const oskar_Element* src,
         oskar_splines_copy(dst->y_v_im[i], src->y_v_im[i], status);
         oskar_splines_copy(dst->y_h_re[i], src->y_h_re[i], status);
         oskar_splines_copy(dst->y_h_im[i], src->y_h_im[i], status);
+        oskar_splines_copy(dst->scalar_re[i], src->scalar_re[i], status);
+        oskar_splines_copy(dst->scalar_im[i], src->scalar_im[i], status);
     }
 }
 

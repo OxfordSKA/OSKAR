@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
 
     // Run simulation.
-    error = oskar_sim_interferometer(opt.getArg(0), log);
+    oskar_sim_interferometer(opt.getArg(0), log, &error);
 
     // Check for errors.
     if (error)

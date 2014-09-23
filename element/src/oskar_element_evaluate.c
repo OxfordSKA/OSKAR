@@ -50,7 +50,7 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
         double frequency_hz, oskar_Mem* theta, oskar_Mem* phi, int* status)
 {
-    int spline_x = 0, spline_y = 0, element_type, taper_type, freq_id;
+    int element_type, taper_type, freq_id;
     double dipole_length_m;
 
     /* Check all inputs. */
@@ -62,10 +62,6 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
 
     /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Check if spline data is present for x or y dipole. */
-    spline_x = oskar_element_has_x_spline_data(model);
-    spline_y = oskar_element_has_y_spline_data(model);
 
     /* Check that the output array is complex. */
     if (!oskar_mem_is_complex(output))
@@ -109,7 +105,7 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
     if (oskar_mem_is_matrix(output))
     {
         /* Check if spline data present for dipole X. */
-        if (spline_x)
+        if (oskar_element_has_x_spline_data(model))
         {
             /* Get the frequency index. */
             freq_id = oskar_find_closest_match_d(frequency_hz,
@@ -148,7 +144,7 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
                 M_PI_2 - orientation_y, num_points, x, y, z, status);
 
         /* Check if spline data present for dipole Y. */
-        if (spline_y)
+        if (oskar_element_has_y_spline_data(model))
         {
             /* Get the frequency index. */
             freq_id = oskar_find_closest_match_d(frequency_hz,
@@ -186,10 +182,18 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
     /* Scalar response. */
     else
     {
-        /* Can't use spline data here (yet). */
-        if (spline_x || spline_y)
+        /* Check if scalar spline data present. */
+        if (oskar_element_has_scalar_spline_data(model))
         {
-            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            /* Get the frequency index. */
+            freq_id = oskar_find_closest_match_d(frequency_hz,
+                    oskar_element_num_freq(model),
+                    oskar_element_freqs_hz_const(model));
+
+            oskar_splines_evaluate(output, 0, 2, model->scalar_re[freq_id],
+                    num_points, theta, phi, status);
+            oskar_splines_evaluate(output, 1, 2, model->scalar_im[freq_id],
+                    num_points, theta, phi, status);
         }
         else if (element_type == OSKAR_ELEMENT_TYPE_DIPOLE)
         {

@@ -11,6 +11,7 @@ set(element_SRC
     src/oskar_element_evaluate.c
     src/oskar_element_free.c
     src/oskar_element_load_cst.c
+    src/oskar_element_load_scalar.c
     src/oskar_element_read.c
     src/oskar_element_resize_freq_data.c
     src/oskar_element_write.c

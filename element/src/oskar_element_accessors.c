@@ -44,12 +44,6 @@ int oskar_element_mem_location(const oskar_Element* data)
     return data->mem_location;
 }
 
-int oskar_element_has_spline_data(const oskar_Element* data)
-{
-    return oskar_element_has_x_spline_data(data) ||
-            oskar_element_has_y_spline_data(data);
-}
-
 int oskar_element_has_x_spline_data(const oskar_Element* data)
 {
     return (data->num_freq > 0) && ( /* Short-circuit, so will be safe. */
@@ -66,6 +60,13 @@ int oskar_element_has_y_spline_data(const oskar_Element* data)
             oskar_splines_have_coeffs(data->y_h_im[0]) ||
             oskar_splines_have_coeffs(data->y_v_re[0]) ||
             oskar_splines_have_coeffs(data->y_v_im[0]));
+}
+
+int oskar_element_has_scalar_spline_data(const oskar_Element* data)
+{
+    return (data->num_freq > 0) && ( /* Short-circuit, so will be safe. */
+            oskar_splines_have_coeffs(data->scalar_re[0]) ||
+            oskar_splines_have_coeffs(data->scalar_im[0]));
 }
 
 int oskar_element_num_freq(const oskar_Element* data)
@@ -128,6 +129,17 @@ const oskar_Mem* oskar_element_y_filename_const(const oskar_Element* data,
         int freq_id)
 {
     return data->filename_y[freq_id];
+}
+
+oskar_Mem* oskar_element_scalar_filename(oskar_Element* data, int freq_id)
+{
+    return data->filename_scalar[freq_id];
+}
+
+const oskar_Mem* oskar_element_scalar_filename_const(const oskar_Element* data,
+        int freq_id)
+{
+    return data->filename_scalar[freq_id];
 }
 
 
@@ -236,6 +248,32 @@ const oskar_Splines* oskar_element_y_v_im_const(const oskar_Element* data,
 {
     if (freq_id >= data->num_freq) return 0;
     return data->y_v_im[freq_id];
+}
+
+oskar_Splines* oskar_element_scalar_re(oskar_Element* data, int freq_id)
+{
+    if (freq_id >= data->num_freq) return 0;
+    return data->scalar_re[freq_id];
+}
+
+const oskar_Splines* oskar_element_scalar_re_const(const oskar_Element* data,
+        int freq_id)
+{
+    if (freq_id >= data->num_freq) return 0;
+    return data->scalar_re[freq_id];
+}
+
+oskar_Splines* oskar_element_scalar_im(oskar_Element* data, int freq_id)
+{
+    if (freq_id >= data->num_freq) return 0;
+    return data->scalar_im[freq_id];
+}
+
+const oskar_Splines* oskar_element_scalar_im_const(const oskar_Element* data,
+        int freq_id)
+{
+    if (freq_id >= data->num_freq) return 0;
+    return data->scalar_im[freq_id];
 }
 
 

@@ -49,6 +49,7 @@ void oskar_element_free(oskar_Element* data, int* status)
     {
         oskar_mem_free(data->filename_x[i], status);
         oskar_mem_free(data->filename_y[i], status);
+        oskar_mem_free(data->filename_scalar[i], status);
         oskar_splines_free(data->x_v_re[i], status);
         oskar_splines_free(data->x_v_im[i], status);
         oskar_splines_free(data->x_h_re[i], status);
@@ -57,10 +58,13 @@ void oskar_element_free(oskar_Element* data, int* status)
         oskar_splines_free(data->y_v_im[i], status);
         oskar_splines_free(data->y_h_re[i], status);
         oskar_splines_free(data->y_h_im[i], status);
+        oskar_splines_free(data->scalar_re[i], status);
+        oskar_splines_free(data->scalar_im[i], status);
     }
     free(data->freqs_hz);
     free(data->filename_x);
     free(data->filename_y);
+    free(data->filename_scalar);
     free(data->x_h_re);
     free(data->x_h_im);
     free(data->x_v_re);
@@ -69,6 +73,8 @@ void oskar_element_free(oskar_Element* data, int* status)
     free(data->y_h_im);
     free(data->y_v_re);
     free(data->y_v_im);
+    free(data->scalar_re);
+    free(data->scalar_im);
 
     /* Free the structure itself. */
     free(data);

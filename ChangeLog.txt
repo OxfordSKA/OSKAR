@@ -1,6 +1,12 @@
 2014-XX-XX  OSKAR-2.X.X
 
-    * Fixed an issue which could result in repeat log entries.
+    * Fixed an issue which could result in repeated log entries.
+
+    * Added the ability to use numerically-defined element patterns in
+      scalar mode.
+
+    * Moved option to select polarisation mode into telescope model settings
+      group, so that scalar mode can also be used for beam pattern simulations.
 
 2014-09-09  OSKAR-2.5.1
 

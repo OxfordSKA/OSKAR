@@ -45,6 +45,7 @@
 struct oskar_SettingsElementFit
 {
     char* input_cst_file;
+    char* input_scalar_file;
     char* output_directory;
     char* fits_image;
     int pol_type;

@@ -27,7 +27,7 @@
  */
 
 #include <oskar_settings_load_telescope.h>
-#include <oskar_station.h>
+#include <oskar_telescope.h>
 
 #include <oskar_cmath.h>
 #include <cstdio>
@@ -93,6 +93,13 @@ void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     // Normalise beam.
     tel->normalise_beams_at_phase_centre =
             s.value("normalise_beams_at_phase_centre", true).toBool();
+
+    // Polarisation mode.
+    temp = s.value("pol_mode", "Full").toString();
+    if (temp.startsWith("F", Qt::CaseInsensitive))
+        tel->pol_mode = OSKAR_POL_MODE_FULL;
+    else if (temp.startsWith("S", Qt::CaseInsensitive))
+        tel->pol_mode = OSKAR_POL_MODE_SCALAR;
 
     // Aperture array settings.
     s.beginGroup("aperture_array");

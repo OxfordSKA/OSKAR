@@ -58,7 +58,6 @@ struct oskar_SettingsInterferometer
     char* oskar_vis_filename;
     char* ms_filename;
     int use_common_sky;
-    int scalar_mode;
 };
 typedef struct oskar_SettingsInterferometer oskar_SettingsInterferometer;
 
