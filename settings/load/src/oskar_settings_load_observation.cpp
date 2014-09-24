@@ -134,20 +134,24 @@ void oskar_settings_load_observation(oskar_SettingsObservation* obs,
         obs->num_time_steps  = s.value("num_time_steps", 1).toInt();
 
         // Get observation length, either as number of seconds, or as a string.
-        QVariant length = s.value("length", 0.0);
-        if (length.canConvert(QVariant::Double))
+        QString length = s.value("length").toString();
+        if (length.size() > 0 && !length.contains(":"))
         {
             obs->length_sec = length.toDouble();
         }
         else
         {
-            QTime len = QTime::fromString(length.toString(), "h:m:s.z");
+            QTime len = QTime::fromString(length, "h:m:s.z");
             if (!len.isValid())
             {
-                oskar_log_error(log, "Invalid time string for 'length' "
-                        "(format must be hh:mm:ss.z).");
-                *status = OSKAR_ERR_SETTINGS_OBSERVATION;
-                return;
+                len = QTime::fromString(length, "h:m:s");
+                if (!len.isValid())
+                {
+                    oskar_log_error(log, "Invalid time string for 'length' "
+                            "(format must be hh:mm:ss.z).");
+                    *status = OSKAR_ERR_SETTINGS_OBSERVATION;
+                    return;
+                }
             }
             obs->length_sec = len.hour() * 3600.0 +
                     len.minute() * 60.0 + len.second() + len.msec() / 1000.0;
