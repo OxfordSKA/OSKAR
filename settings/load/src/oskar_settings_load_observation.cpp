@@ -133,19 +133,27 @@ void oskar_settings_load_observation(oskar_SettingsObservation* obs,
         // Get number of time steps.
         obs->num_time_steps  = s.value("num_time_steps", 1).toInt();
 
-        // Get observation length.
-        QString str_len = s.value("length", "00:00:00.000").toString();
-        QTime len = QTime::fromString(str_len, "h:m:s.z");
-        if (!len.isValid())
+        // Get observation length, either as number of seconds, or as a string.
+        QVariant length = s.value("length", 0.0);
+        if (length.canConvert(QVariant::Double))
         {
-            oskar_log_error(log, "Invalid time string for 'length' "
-                    "(format must be: 'h:m:s.z').");
-            *status = OSKAR_ERR_SETTINGS_OBSERVATION;
-            return;
+            obs->length_sec = length.toDouble();
         }
-        obs->length_seconds = len.hour() * 3600.0 +
-                len.minute() * 60.0 + len.second() + len.msec() / 1000.0;
-        obs->length_days = obs->length_seconds / 86400.0;
+        else
+        {
+            QTime len = QTime::fromString(length.toString(), "h:m:s.z");
+            if (!len.isValid())
+            {
+                oskar_log_error(log, "Invalid time string for 'length' "
+                        "(format must be hh:mm:ss.z).");
+                *status = OSKAR_ERR_SETTINGS_OBSERVATION;
+                return;
+            }
+            obs->length_sec = len.hour() * 3600.0 +
+                    len.minute() * 60.0 + len.second() + len.msec() / 1000.0;
+        }
+        obs->length_days = obs->length_sec / 86400.0;
+
     }
     s.endGroup();
 

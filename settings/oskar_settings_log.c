@@ -335,7 +335,7 @@ void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
     LV("Frequency inc [Hz]", "%.3e", s->obs.frequency_inc_hz);
     LV("Start time (MJD)", "%f", s->obs.start_mjd_utc);
     LV("Num. time steps", "%d", s->obs.num_time_steps);
-    LV("Length [sec]", "%.1f", s->obs.length_seconds);
+    LV("Length [sec]", "%.1f", s->obs.length_sec);
 }
 
 

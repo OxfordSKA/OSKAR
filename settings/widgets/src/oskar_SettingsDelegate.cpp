@@ -39,7 +39,6 @@
 #include <QtGui/QLineEdit>
 #include <QtGui/QSpinBox>
 #include <QtGui/QDateTimeEdit>
-#include <QtGui/QTimeEdit>
 #include <QtGui/QComboBox>
 
 #include <QtGui/QDialog>
@@ -132,10 +131,13 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
         case oskar_SettingsItem::TIME:
         {
             // Time editors.
-            QTimeEdit* spinner = new QTimeEdit(parent);
-            spinner->setFrame(false);
-            spinner->setDisplayFormat("hh:mm:ss.zzz");
-            editor = spinner;
+            QLineEdit* line = new QLineEdit(parent);
+            QValidator* validator = new QRegExpValidator(
+                    QRegExp("(\\d+\\.?\\d*)|(\\d\\d:\\d\\d:\\d\\d(\\.\\d+)?)"),
+                    line);
+            line->setFrame(false);
+            line->setValidator(validator);
+            editor = line;
             break;
         }
         case oskar_SettingsItem::RANDOM_SEED:
@@ -388,8 +390,7 @@ void oskar_SettingsDelegate::setEditorData(QWidget* editor,
         case oskar_SettingsItem::TIME:
         {
             // Time editors.
-            QTime time = QTime::fromString(value.toString(), "h:m:s.z");
-            static_cast<QTimeEdit*>(editor)->setTime(time);
+            static_cast<QLineEdit*>(editor)->setText(value.toString());
             break;
         }
         case oskar_SettingsItem::RANDOM_SEED:
@@ -481,8 +482,7 @@ void oskar_SettingsDelegate::setModelData(QWidget* editor,
         case oskar_SettingsItem::TIME:
         {
             // Time editors.
-            QTime date = static_cast<QTimeEdit*>(editor)->time();
-            value = date.toString("hh:mm:ss.zzz");
+            value = static_cast<QLineEdit*>(editor)->text();
             break;
         }
         case oskar_SettingsItem::RANDOM_SEED:

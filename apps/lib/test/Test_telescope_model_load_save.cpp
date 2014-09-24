@@ -539,7 +539,7 @@ TEST(telescope_model_load_save, test_load_telescope_noise_rms)
     noise->seed = 0;
     noise->value.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     noise->freq.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
-    settings.obs.length_seconds = 1;
+    settings.obs.length_sec = 1;
     settings.obs.num_time_steps = 1;
     settings.interferometer.channel_bandwidth_hz = 1;
     settings.interferometer.time_average_sec = 1;
@@ -628,14 +628,14 @@ TEST(telescope_model_load_save, test_load_telescope_noise_sensitivity)
     noise->seed = 0;
     noise->value.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     noise->freq.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
-    settings.obs.length_seconds = 1;
+    settings.obs.length_sec = 1;
     settings.obs.num_time_steps = 1;
 
     double bandwidth = 10.0e6;
     settings.interferometer.channel_bandwidth_hz = bandwidth;
-    settings.obs.length_seconds = 60 * 60;
+    settings.obs.length_sec = 60 * 60;
     settings.obs.num_time_steps = 36;
-    double integration_time = settings.obs.length_seconds /
+    double integration_time = settings.obs.length_sec /
             (double)settings.obs.num_time_steps;
     settings.interferometer.time_average_sec = integration_time;
 
@@ -741,14 +741,14 @@ TEST(telescope_model_load_save, test_load_telescope_noise_t_sys)
     noise->seed = 0;
     noise->value.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     noise->freq.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
-    settings.obs.length_seconds = 1;
+    settings.obs.length_sec = 1;
     settings.obs.num_time_steps = 1;
 
     double bandwidth = 10.0e6;
     settings.interferometer.channel_bandwidth_hz = bandwidth;
-    settings.obs.length_seconds = 60 * 60;
+    settings.obs.length_sec = 60 * 60;
     settings.obs.num_time_steps = 36;
-    double integration_time = settings.obs.length_seconds /
+    double integration_time = settings.obs.length_sec /
             (double)settings.obs.num_time_steps;
     settings.interferometer.time_average_sec = integration_time;
 

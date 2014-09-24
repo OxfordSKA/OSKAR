@@ -54,7 +54,7 @@ struct oskar_SettingsObservation
 
     int    num_time_steps;
     double start_mjd_utc;
-    double length_seconds;
+    double length_sec;
     double length_days;
     double dt_dump_days;
 };

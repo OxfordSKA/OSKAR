@@ -458,9 +458,9 @@ void oskar_SettingsModelApps::init_settings_observation()
     setTooltip(k, "A string describing the start time and date for the "
             "observation.");
     k = group + "/length";
-    declare(k, "Observation length (H:M:S)",
+    declare(k, "Observation length [sec, or hh:mm:ss]",
             oskar_SettingsItem::TIME, QVariant(), true);
-    setTooltip(k, "A string describing the observation length, in hours, "
+    setTooltip(k, "The observation length either in seconds, or in hours, "
             "minutes and seconds.");
     k = group + "/num_time_steps";
     declare(k, "Number of time steps", oskar_SettingsItem::INT_POSITIVE);

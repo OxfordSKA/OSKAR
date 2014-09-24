@@ -8,6 +8,9 @@
     * Moved option to select polarisation mode into telescope model settings
       group, so that scalar mode can also be used for beam pattern simulations.
 
+    * Added the ability to use seconds (as well as hours, minutes and seconds)
+      to specify observation length.
+
 2014-09-09  OSKAR-2.5.1
 
     * Changed the integer range of random seeds to start at 1 (instead of 0).

@@ -152,8 +152,8 @@ TEST(add_system_noise, test_rms)
     settings.obs.frequency_inc_hz = oskar_vis_freq_inc_hz(vis);
     settings.obs.num_time_steps = num_times;
     settings.obs.start_mjd_utc = oskar_vis_time_start_mjd_utc(vis);
-    settings.obs.length_seconds = num_times * oskar_vis_time_inc_sec(vis);
-    settings.obs.length_days = settings.obs.length_seconds / 86400.0;
+    settings.obs.length_sec = num_times * oskar_vis_time_inc_sec(vis);
+    settings.obs.length_days = settings.obs.length_sec / 86400.0;
     settings.obs.dt_dump_days = oskar_vis_time_inc_sec(vis) / 86400.0;
 
     oskar_Mem *work_uvw;
