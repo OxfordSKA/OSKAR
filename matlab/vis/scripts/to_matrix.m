@@ -56,34 +56,34 @@ for j=1:vis.num_stations
 end
 
 
-if (isfield(vis, 'xx'))
-    visM.xx = zeros(nSt,nSt,nTi,nCh);
+if (isfield(vis, 'xx_Jy'))
+    visM.xx_Jy = zeros(nSt,nSt,nTi,nCh);
 end
-if (isfield(vis, 'xy'))
-    visM.xy = zeros(nSt,nSt,nTi,nCh);
+if (isfield(vis, 'xy_Jy'))
+    visM.xy_Jy = zeros(nSt,nSt,nTi,nCh);
 end
-if (isfield(vis, 'yx'))
-    visM.yx = zeros(nSt,nSt,nTi,nCh);
+if (isfield(vis, 'yx_Jy'))
+    visM.yx_Jy = zeros(nSt,nSt,nTi,nCh);
 end
-if (isfield(vis, 'yy'))
-    visM.yy = zeros(nSt,nSt,nTi,nCh);
+if (isfield(vis, 'yy_Jy'))
+    visM.yy_Jy = zeros(nSt,nSt,nTi,nCh);
 end
-if (isfield(vis, 'xx') && isfield(vis, 'xy') && isfield(vis, 'yx') && isfield(vis,'yy'))
+if (isfield(vis, 'xx_Jy') && isfield(vis, 'xy_Jy') && isfield(vis, 'yx_Jy') && isfield(vis,'yy_Jy'))
     visM.matrix = zeros(nSt*2,nSt*2,nTi,nCh);
     visM.matrix_2 = zeros(2,2,nSt,nSt,nTi,nCh);
 end
 
-if (isfield(vis, 'I'))
-    visM.I  = zeros(nSt,nSt,nTi,nCh);
+if (isfield(vis, 'I_Jy'))
+    visM.I_Jy  = zeros(nSt,nSt,nTi,nCh);
 end
-if (isfield(vis, 'Q'))
-    visM.Q  = zeros(nSt,nSt,nTi,nCh);
+if (isfield(vis, 'Q_Jy'))
+    visM.Q_Jy  = zeros(nSt,nSt,nTi,nCh);
 end
-if (isfield(vis, 'U'))
-    visM.U  = zeros(nSt,nSt,nTi,nCh);
+if (isfield(vis, 'U_Jy'))
+    visM.U_Jy  = zeros(nSt,nSt,nTi,nCh);
 end
-if (isfield(vis, 'V'))
-    visM.V  = zeros(nSt,nSt,nTi,nCh);
+if (isfield(vis, 'V_Jy'))
+    visM.V_Jy  = zeros(nSt,nSt,nTi,nCh);
 end
 
 for c=1:vis.num_channels
@@ -91,38 +91,38 @@ for c=1:vis.num_channels
         idx = 1;
         for j=1:vis.num_stations
             for i=(j+1):vis.num_stations
-                if (isfield(vis, 'xx'))
-                    visM.xx(i,j,t,c) = vis.xx(idx,t,c);
-                    visM.matrix((2*i)-1,(2*j)-1,t,c) = vis.xx(idx,t,c);
-                    visM.matrix_2(1,1,i,j,t,c) = vis.xx(idx,t,c);
+                if (isfield(vis, 'xx_Jy'))
+                    visM.xx_Jy(i,j,t,c) = vis.xx_Jy(idx,t,c);
+                    visM.matrix((2*i)-1,(2*j)-1,t,c) = vis.xx_Jy(idx,t,c);
+                    visM.matrix_2(1,1,i,j,t,c) = vis.xx_Jy(idx,t,c);
                 end
-                if (isfield(vis, 'xy'))
-                    visM.xy(i,j,t,c) = vis.xy(idx,t,c);
-                    visM.matrix((2*i)-1,2*j,t,c) = vis.xy(idx,t,c);
-                    visM.matrix_2(1,2,i,j,t,c) = vis.xy(idx,t,c);
+                if (isfield(vis, 'xy_Jy'))
+                    visM.xy_Jy(i,j,t,c) = vis.xy_Jy(idx,t,c);
+                    visM.matrix((2*i)-1,2*j,t,c) = vis.xy_Jy(idx,t,c);
+                    visM.matrix_2(1,2,i,j,t,c) = vis.xy_Jy(idx,t,c);
                 end
-                if (isfield(vis, 'yx'))
-                    visM.yx(i,j,t,c) = vis.yx(idx,t,c);
-                    visM.matrix(2*i,(2*j)-1,t,c) = vis.yx(idx,t,c);
-                    visM.matrix_2(2,1,i,j,t,c) = vis.yx(idx,t,c);
+                if (isfield(vis, 'yx_Jy'))
+                    visM.yx_Jy(i,j,t,c) = vis.yx_Jy(idx,t,c);
+                    visM.matrix(2*i,(2*j)-1,t,c) = vis.yx_Jy(idx,t,c);
+                    visM.matrix_2(2,1,i,j,t,c) = vis.yx_Jy(idx,t,c);
                 end
-                if (isfield(vis, 'yy'))
-                    visM.yy(i,j,t,c) = vis.yy(idx,t,c);
-                    visM.matrix(2*i,2*j,t,c) = vis.yy(idx,t,c);
-                    visM.matrix_2(2,2,i,j,t,c) = vis.yy(idx,t,c);
+                if (isfield(vis, 'yy_Jy'))
+                    visM.yy_Jy(i,j,t,c) = vis.yy_Jy(idx,t,c);
+                    visM.matrix(2*i,2*j,t,c) = vis.yy_Jy(idx,t,c);
+                    visM.matrix_2(2,2,i,j,t,c) = vis.yy_Jy(idx,t,c);
                 end
                
-                if (isfield(vis, 'I'))
-                    visM.I(i,j,t,c) = vis.I(idx,t,c);
+                if (isfield(vis, 'I_Jy'))
+                    visM.I_Jy(i,j,t,c) = vis.I_Jy(idx,t,c);
                 end
-                if (isfield(vis, 'Q'))
-                    visM.Q(i,j,t,c) = vis.Q(idx,t,c);
+                if (isfield(vis, 'Q_Jy'))
+                    visM.Q_Jy(i,j,t,c) = vis.Q_Jy(idx,t,c);
                 end
-                if (isfield(vis, 'U'))
-                    visM.U(i,j,t,c) = vis.U(idx,t,c);
+                if (isfield(vis, 'U_Jy'))
+                    visM.U_Jy(i,j,t,c) = vis.U_Jy(idx,t,c);
                 end
-                if (isfield(vis, 'V'))
-                    visM.V(i,j,t,c) = vis.V(idx,t,c);
+                if (isfield(vis, 'V_Jy'))
+                    visM.V_Jy(i,j,t,c) = vis.V_Jy(idx,t,c);
                 end
                 
                 idx = idx+1;
