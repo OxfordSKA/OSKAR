@@ -6,13 +6,13 @@ if (nargin < 1)
         '\nERROR:\n' ...
         '\tIncorrect number of input arguments.\n\n' ...
         'Usage:\n'...
-        '\toskar.visibilities.to_matrix(vis)\n\n' ...
+        '\toskar.vis.to_matrix(vis)\n\n' ...
         '' ...
         'Arguments:\n' ...
         '\t1) vis (required): OSKAR MATLAB visibility structure.\n' ...
         '\n' ...
         'Example: \n' ...
-        '\toskar.visibilities.to_matrix(vis)\n' ...
+        '\toskar.vis.to_matrix(vis)\n' ...
         ]);
 end
 
@@ -28,9 +28,9 @@ nSt = vis.num_stations;
 nTi = vis.num_times;
 nCh = vis.num_channels;
 
-visM.uu = zeros(nSt,nSt,nTi);
-visM.vv = zeros(nSt,nSt,nTi);
-visM.ww = zeros(nSt,nSt,nTi);
+visM.uu_metres = zeros(nSt,nSt,nTi);
+visM.vv_metres = zeros(nSt,nSt,nTi);
+visM.ww_metres = zeros(nSt,nSt,nTi);
 visM.station_index_p = zeros(nSt,nSt);
 visM.station_index_q = zeros(nSt,nSt);
 
@@ -38,9 +38,9 @@ for t=1:vis.num_times
     idx = 1;
     for j=1:vis.num_stations
         for i=(j+1):vis.num_stations
-            visM.uu(i,j,t) = vis.uu(idx,t);
-            visM.vv(i,j,t) = vis.vv(idx,t);
-            visM.ww(i,j,t) = vis.ww(idx,t);
+            visM.uu_metres(i,j,t) = vis.uu_metres(idx,t);
+            visM.vv_metres(i,j,t) = vis.vv_metres(idx,t);
+            visM.ww_metres(i,j,t) = vis.ww_metres(idx,t);
             idx = idx+1;
         end
     end
