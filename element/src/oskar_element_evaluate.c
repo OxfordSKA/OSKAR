@@ -83,13 +83,7 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
 
     /* Check if element type is isotropic. */
     if (element_type == OSKAR_ELEMENT_TYPE_ISOTROPIC)
-    {
         oskar_mem_set_value_real(output, 1.0, 0, 0, status);
-
-        /* If isotropic and no tapering, then we've finished here... */
-        if (taper_type == OSKAR_ELEMENT_TAPER_NONE)
-            return;
-    }
 
     /* Ensure there is enough space in the theta and phi work arrays. */
     if ((int)oskar_mem_length(theta) < num_points)
