@@ -115,6 +115,19 @@ if (QT4_FOUND AND CUDA_FOUND)
     endif()
 endif ()
 
+# Install python scripts to the installation binary directory
+include(oskar_copy_files)
+copy_files(${CMAKE_CURRENT_SOURCE_DIR} *.py ${CMAKE_CURRENT_BINARY_DIR})
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
+    DESTINATION "${OSKAR_BIN_INSTALL_DIR}"
+    FILES_MATCHING PATTERN "*.py"
+    PERMISSIONS WORLD_EXECUTE
+    PATTERN "CMakeFiles" EXCLUDE
+    PATTERN "log" EXCLUDE
+    PATTERN "gui" EXCLUDE
+    PATTERN "lib" EXCLUDE
+    PATTERN "test" EXCLUDE
+)
 
 #if (CUDA_FOUND AND PNG_FOUND)
 #    include_directories(${PNG_INCLUDE_DIRS})

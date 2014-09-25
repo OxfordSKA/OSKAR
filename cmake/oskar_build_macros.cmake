@@ -411,20 +411,12 @@ macro(OSKAR_PY_MODULE)
     add_library(${target} MODULE ${PY_SOURCES})
     target_link_libraries(${target} ${PYTHON_LIBRARIES} ${PY_LIBS})
 
-    if (APPLE)
-        set_target_properties(${target} PROPERTIES
-            INSTALL_RPATH_USE_LINK_PATH TRUE
-            OUTPUT_NAME   "${PY_NAME}"
-            PREFIX        ""
-            SUFFIX        ".so")
-    else()
-        set_target_properties(${target} PROPERTIES
-            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-            INSTALL_RPATH_USE_LINK_PATH TRUE
-            OUTPUT_NAME   "${PY_NAME}"
-            PREFIX        ""
-            SUFFIX        ".so")
-    endif()
+    set_target_properties(${target} PROPERTIES
+        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+        INSTALL_RPATH_USE_LINK_PATH TRUE
+        OUTPUT_NAME   "${PY_NAME}"
+        PREFIX        ""
+        SUFFIX        ".so")
 
     # Install target for python module.
     install(TARGETS ${target} DESTINATION ${OSKAR_PYTHON_INSTALL_DIR})

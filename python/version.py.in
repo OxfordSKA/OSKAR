@@ -31,4 +31,4 @@
 #  POSSIBILITY OF SUCH DAMAGE.
 #
 
-__version__='2.4.0'
+__version__='@OSKAR_VERSION_STR@'
