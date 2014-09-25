@@ -208,10 +208,14 @@ void TelescopeLoadElementPattern::load_element_patterns(
         }
     }
 
-    // Load X, Y and scalar data.
-    load(1, station, keys_x, paths_x, status);
-    load(2, station, keys_y, paths_y, status);
-    load(0, station, keys_scalar, paths_scalar, status);
+    // Load X, Y or scalar data.
+    if (settings_->telescope.pol_mode == OSKAR_POL_MODE_FULL)
+    {
+        load(1, station, keys_x, paths_x, status);
+        load(2, station, keys_y, paths_y, status);
+    }
+    else
+        load(0, station, keys_scalar, paths_scalar, status);
 }
 
 void TelescopeLoadElementPattern::load(int port, oskar_Station* station,
