@@ -35,21 +35,22 @@
 #include <math.h>
 #include <string.h>
 
-// http://docs.scipy.org/doc/numpy-dev/reference/c-api.deprecations.html
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+/* http://docs.scipy.org/doc/numpy-dev/reference/c-api.deprecations.html */
+/*#define NPY_NO_DEPRECATED_API NPY_1_8_API_VERSION*/
 #include <numpy/arrayobject.h>
 
 #include <oskar_vis.h>
 #include <oskar_mem.h>
 
-void vis_free(void* ptr)
-{
+static const char* name = "oskar_Vis";
 
+void vis_free(PyObject* ptr)
+{
     int status = OSKAR_SUCCESS;
     printf("PyCapsule destructor for oskar_Vis called! (status = %i)\n", status);
-    oskar_vis_free((oskar_Vis*)ptr, &status);
-    ptr = 0;
-    printf("PyCapsule destructor for oskar_Vis called! (status = %i)\n", status);
+    fflush(stdout);
+    oskar_Vis* vis = (oskar_Vis*)PyCapsule_GetPointer(ptr, "oskar_Vis");
+    if (vis) oskar_vis_free(vis, &status);
 }
 
 static inline oskar_Vis* tuple_to_vis(PyObject* objs, PyObject* args)
@@ -72,18 +73,12 @@ static inline oskar_Vis* tuple_to_vis(PyObject* objs, PyObject* args)
 static PyObject* vis_read(PyObject* self, PyObject* args)
 {
     const char* filename;
-
     if (!PyArg_ParseTuple(args, "s", &filename))
         return NULL;
-
     int status = OSKAR_SUCCESS;
     oskar_Vis* vis = oskar_vis_read(filename, &status);
-
-    const char* name = "oskar_Vis";
-    PyObject* vis_ = PyCapsule_New((void*)vis, name,
-            (PyCapsule_Destructor)vis_free);
-
-    return Py_BuildValue("Oi", vis_, status);
+    PyObject* vis_ = PyCapsule_New((void*)vis, name, (PyCapsule_Destructor)vis_free);
+    return Py_BuildValue("Ni", vis_, status);
 }
 
 static PyObject* get_num_baselines(PyObject* self, PyObject* args)
@@ -184,31 +179,71 @@ static PyObject* get_amplitude(PyObject* self, PyObject* args)
     return Py_BuildValue("O", mem_to_PyArrayObject(oskar_vis_amplitude_const(vis)));
 }
 
-// Methods table
+/* Methods table */
 static PyMethodDef oskar_vis_lib_methods[] =
 {
-    {"read", (PyCFunction)vis_read, METH_VARARGS, "read(filename)"},
-    {"num_baselines", (PyCFunction)get_num_baselines, METH_VARARGS,
-     "num_baselines(vis)"},
-    {"num_channels", (PyCFunction)get_num_channels, METH_VARARGS,
-     "num_channels(vis)"},
-    {"num_times", (PyCFunction)get_num_times, METH_VARARGS, "num_times(vis)"},
-    {"station_coords", (PyCFunction)get_station_coords, METH_VARARGS,
-     "station_coords(vis)"},
-    {"lon", (PyCFunction)get_lon, METH_VARARGS, "lon(vis)"},
-    {"lat", (PyCFunction)get_lat, METH_VARARGS, "lat(vis)"},
-    {"baseline_coords", (PyCFunction)get_baseline_coords, METH_VARARGS,
-     "baseline_coords(vis)"},
-    {"amplitude", (PyCFunction)get_amplitude, METH_VARARGS, "amplitude(vis)"},
-    {NULL, NULL, 0, NULL}
+    {
+            "read",
+            (PyCFunction)vis_read,
+            METH_VARARGS,
+            "read(filename)"
+    },
+    {
+            "num_baselines",
+            (PyCFunction)get_num_baselines,
+            METH_VARARGS,
+            "num_baselines(vis)"
+    },
+    {
+            "num_channels",
+            (PyCFunction)get_num_channels,
+            METH_VARARGS,
+            "num_channels(vis)"
+    },
+    {
+            "num_times",
+            (PyCFunction)get_num_times,
+            METH_VARARGS,
+            "num_times(vis)"
+    },
+    {
+            "station_coords",
+            (PyCFunction)get_station_coords,
+            METH_VARARGS,
+            "station_coords(vis)"
+    },
+    {
+            "lon",
+            (PyCFunction)get_lon,
+            METH_VARARGS,
+            "lon(vis)"
+    },
+    {
+            "lat",
+            (PyCFunction)get_lat,
+            METH_VARARGS,
+            "lat(vis)"
+    },
+    {
+            "baseline_coords",
+            (PyCFunction)get_baseline_coords,
+            METH_VARARGS,
+            "baseline_coords(vis)"
+    },
+    {
+            "amplitude",
+            (PyCFunction)get_amplitude,
+            METH_VARARGS,
+            "amplitude(vis)"
+    },
+    { NULL, NULL, 0, NULL }
 };
 
-// Initialisation function (called init[filename] where filename = name of *.so)
-// http://docs.python.org/2/extending/extending.html
+/* Initialisation function (note: has to be called called init<filename>) */
 PyMODINIT_FUNC init_vis_lib(void)
 {
-    (void) Py_InitModule3("_vis_lib", oskar_vis_lib_methods, "docstring...");
+    Py_InitModule3("_vis_lib", oskar_vis_lib_methods, "docstring...");
 
-    // Import Numpy array module.
+    /* Import the use of numpy array objects */
     import_array();
 }

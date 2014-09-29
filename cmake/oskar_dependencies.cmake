@@ -51,9 +51,8 @@ find_package(CasaCore)               # liboskar_ms
 find_package(CFitsio)                # liboskar_fits
 find_package(Matlab)                 # mex functions
 #find_package(PNG QUIET)             # For writing PNG images
-find_package(PythonInterp 2.7 QUIET) # For python interface
-find_package(PythonLibs 2.7 QUIET)   # For python interface
-find_package(NumPy QUIET)            # For python interface
+find_package(PythonLibs 2.7)         # For python interface
+find_package(NumPy 1.8)              # For python interface
 
 
 if (PYTHONLIBS_FOUND AND NUMPY_FOUND AND PYTHONINTERP_FOUND AND PYTHON_VERSION_MAJOR EQUAL 2)
