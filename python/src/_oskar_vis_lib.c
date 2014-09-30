@@ -36,7 +36,7 @@
 #include <string.h>
 
 /* http://docs.scipy.org/doc/numpy-dev/reference/c-api.deprecations.html */
-/*#define NPY_NO_DEPRECATED_API NPY_1_8_API_VERSION*/
+#define NPY_NO_DEPRECATED_API NPY_1_9_API_VERSION
 #include <numpy/arrayobject.h>
 
 #include <oskar_vis.h>

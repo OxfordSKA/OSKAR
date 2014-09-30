@@ -16,6 +16,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # http://www.cmake.org/Wiki/CMake/Policies
 if("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_GREATER 2.8)
     cmake_policy(SET CMP0042 OLD) # Currently required for cmake-3.x
+    cmake_policy(SET CMP0045 OLD)
 endif()
 
 # === Project version.
@@ -106,7 +107,7 @@ if (CUDA_FOUND)
         ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${libname}.dir/src)
 
     cuda_add_library(${libname} ${${libname}_SRC})
-    target_link_libraries(${libname} 
+    target_link_libraries(${libname}
         oskar_settings_struct
         oskar_log
         ${CUDA_curand_LIBRARY})
@@ -127,7 +128,7 @@ if (CUDA_FOUND)
             INSTALL_RPATH_USE_LINK_PATH TRUE
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
             LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-            SOVERSION ${OSKAR_VERSION} 
+            SOVERSION ${OSKAR_VERSION}
             VERSION ${OSKAR_VERSION})
     endif(MSVC)
 
@@ -146,6 +147,9 @@ add_subdirectory(settings)
 
 # === Build external libraries (gtest)
 add_subdirectory(extern)
+
+# === Build documentation
+add_subdirectory(doc)
 
 # === Install header tree.
 if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")
@@ -178,7 +182,7 @@ install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
     PATTERN .svn EXCLUDE)
 
 # === Copy cleanup bash script into the build directory
-configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_cleanup.sh 
+configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_cleanup.sh
     ${PROJECT_BINARY_DIR}/oskar_cleanup.sh @ONLY)
 
 # === Include packaging script.
