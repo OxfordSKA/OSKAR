@@ -19,6 +19,9 @@ blocks, each with its own descriptive header tag. Every data block is
 independent, and each is stored as an array of values in the native byte-order
 of the system that wrote the file. (The byte order is recorded in the header.)
 
+\image html block_structure.png "Overall structure of data in an OSKAR binary file"
+\image latex block_structure.pdf "Overall structure of data in an OSKAR binary file" width=15cm
+
 Since the type and size of each data block is stored in the tag, any program
 reading such a file can simply skip over any data blocks which are not of
 interest. A single data block may consist of a single value, or an array of
@@ -124,7 +127,11 @@ available at (respectively) byte offsets 6 and 7 in the tag header.
 Note that the block size in the tag header is the total number of bytes until 
 the next tag, including the extended tag names.
 
-\subsubsection binary_data_type Data Types
+\latexonly
+\clearpage
+\endlatexonly
+
+\subsubsection binary_data_type Binary Data Types
 
 The data type field in the tag header consists of a single byte, whose 
 eight bits have the following meaning:
@@ -161,43 +168,273 @@ format files.
 
 Tags in this group have a group ID of 1.
 
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Date and time of file creation [string].
+| 2      | Version of OSKAR that created the file [string].
+| 3      | Username of user that created the file [string].
+| 4      | Current working directory for application that created the file [string].
+
+\htmlonly <hr /> \endhtmlonly
+
 \subsection binary_tag_settings Settings Tags
 
 Tags in this group have a group ID of 3.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Path to settings file [string].
+| 2      | Settings file contents [string].
+
+\htmlonly <hr /> \endhtmlonly
 
 \subsection binary_tag_run Run Information Tags
 
 Tags in this group have a group ID of 4.
 
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Run log [string].
+
+\htmlonly <hr /> \endhtmlonly
+
+\latexonly
+\clearpage
+\endlatexonly
+
 \subsection binary_tag_vis Visibility Data Tags
 
 Tags in this group have a group ID of 5.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Number of channels [int].
+| 2      | Number of times [int].
+| 3      | Number of baselines [int].
+| 4      | Dimension order of visibility data [array, int(4)]. (See \ref vis_dim_order "Visibility Dimension Order", below.)
+| 5      | Data type of coordinate arrays [int]. (See \ref binary_data_type)
+| 6      | Data type of visibility data array [int]. (See \ref binary_data_type)
+| 7      | Start frequency, in Hz [double].
+| 8      | Frequency increment, in Hz [double].
+| 9      | Observation start time, as MJD(UTC) [double].
+| 10     | Time increment, in seconds [double].
+| 11     | Polarisation type [int]. (0 = none, 1 = linear)
+| 12     | Unit of baseline coordinates [int]. (1 = metres)
+| 13     | Baseline UU-coordinates [array; type given by tag ID 5].
+| 14     | Baseline VV-coordinates [array; type given by tag ID 5].
+| 15     | Baseline WW-coordinates [array; type given by tag ID 5].
+| 16     | Complex visibility amplitudes [array; type given by tag ID 6].
+| 17     | Phase centre Right Ascension [double].
+| 18     | Phase centre Declination [double].
+| 19     | Number of stations [int].
+| 20     | Unit of station coordinates [int]. (1 = metres)
+| 21     | Station X-coordinates in ECEF frame [array; type given by tag ID 5].
+| 22     | Station Y-coordinates in ECEF frame [array; type given by tag ID 5].
+| 23     | Station Z-coordinates in ECEF frame [array; type given by tag ID 5].
+| 24     | Channel bandwidth, in Hz [double].
+| 25     | Time integration per correlator dump, in seconds [double].
+| 26     | Path to telescope model directory [string].
+
+
+The visibility dimension order is given by tag ID 4, which is a four-element 
+array containing the following integer IDs:
+\anchor vis_dim_order 
+
+
+| Code | Meaning
+| ---- | ---------------------------------------------------------------------
+|    0 | Channel
+|    1 | Time
+|    2 | Baseline
+|    3 | Polarisation
+
+ - The order of the IDs gives the dimension order of the visibility data
+   array, from slowest- to fastest-varying. Current versions of OSKAR write
+   visibility data with polarisation varying fastest, then baseline, then 
+   time, then frequency channel.
+
+Baselines are formed by cross-correlating stations 0-1, 0-2, 0-3...
+1-2, 1-3... etc. The autocorrelations are not computed, so for \f$n\f$
+stations, there will be \f$ n(n-1)/2 \f$ baselines.
+
+\htmlonly <hr /> \endhtmlonly
+
+\latexonly
+\clearpage
+\endlatexonly
 
 \subsection binary_tag_image Image Data Tags
 
 Tags in this group have a group ID of 6.
 
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 0      | Image data [array; type given by tag ID 2].
+| 1      | Image type [int]. (See \ref image_type "Image Type", below.)
+| 2      | Data type of image data array [int]. (See \ref binary_data_type)
+| 3      | Dimension order of image data [array, int(5)]. (See \ref image_dim_order "Image Dimension Order", below.)
+| 4      | Number of pixels, width [int].
+| 5      | Number of pixels, height [int].
+| 6      | Number of polarisation planes [int].
+| 7      | Number of time slices [int].
+| 8      | Number of frequency channel planes [int].
+| 9      | Image centre Right Ascension (degrees) [double].
+| 10     | Image centre Declination (degrees) [double].
+| 11     | Field of view in Right Ascension (degrees) [double].
+| 12     | Field of view in Declination (degrees) [double].
+| 13     | Observation start time, as MJD(UTC) [double].
+| 14     | Time increment, in seconds [double].
+| 15     | Start frequency, in Hz [double].
+| 16     | Frequency increment, in Hz [double].
+| 17     | Mean image value [double].
+| 18     | Image variance [double].
+| 19     | Minimum image value [double].
+| 20     | Maximum image value [double].
+| 21     | Image RMS [double].
+| 22     | Grid type [int].
+| 23     | Coordinate frame [int].
+| 24     | HEALPix nside [int].
+
+
+The image dimension order is given by tag ID 3, which is a five-element array
+containing the following integer IDs:
+\anchor image_dim_order
+
+
+| Code | Meaning
+| ---- | ---------------------------------------------------------------------
+|    0 | RA
+|    1 | Dec
+|    2 | Polarisation
+|    3 | Time
+|    4 | Channel
+
+- The order of the IDs gives the dimension order of the image data array, 
+  from slowest- to fastest-varying. Current versions of OSKAR write image data 
+  with RA varying fastest, then Dec, then polarisation, then time, then 
+  frequency channel.
+
+The image grid type (tag ID 22) is given as an integer code from the 
+following list:
+
+
+| Code | Meaning
+| ---- | ---------------------------------------------------------------------
+|    0 | Undefined.
+|    1 | Rectilinear.
+|    2 | HEALPix Ring scheme.
+
+ - Rectilinear grid type images are made using an 
+   orthographic (-SIN, in FITS nomenclature) tangent-plane projection.
+
+
+The image coordinate frame (tag ID 23) is given as an integer code from 
+the following list:
+
+
+| Code | Meaning
+| ---- | ---------------------------------------------------------------------
+|    0 | Undefined.
+|    1 | Equatorial.
+|    2 | Horizontal.
+
+
+\anchor image_type
+The image type is given as an integer code from the following list:
+
+| Code | Meaning
+| ---- | ---------------------------------------------------------------------
+|    0 | Undefined.
+|    1 | Full Stokes (in order: I, Q, U, V).
+|    2 | Stokes I.
+|    3 | Stokes Q.
+|    4 | Stokes U.
+|    5 | Stokes V.
+|    6 | All linear polarisations (in order: XX, XY, YX, YY).
+|    7 | Linear XX.
+|    8 | Linear YY.
+|    9 | Linear XY.
+|   10 | Linear YX.
+|   50 | Point-spread function (PSF).
+|  100 | Beam pattern, scalar.
+|  101 | Beam pattern, polarised.
+
+
+\htmlonly <hr /> \endhtmlonly
+
+\latexonly
+\clearpage
+\endlatexonly
+
 \subsection binary_tag_sky_model Sky Model Data Tags
 
 Tags in this group have a group ID of 7.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Number of sources [int].
+| 2      | Data type of all arrays [int]. (See \ref binary_data_type)
+| 3      | Right Ascension values, in radians [array; type given by tag ID 2].
+| 4      | Declination values, in radians [array; type given by tag ID 2].
+| 5      | Stokes I values, in Jy [array; type given by tag ID 2].
+| 6      | Stokes Q values, in Jy [array; type given by tag ID 2].
+| 7      | Stokes U values, in Jy [array; type given by tag ID 2].
+| 8      | Stokes V values, in Jy [array; type given by tag ID 2].
+| 9      | Reference frequency values, in Hz [array; type given by tag ID 2].
+| 10     | Spectral index values [array; type given by tag ID 2].
+| 11     | FWHM (major axis), in radians [array; type given by tag ID 2].
+| 12     | FWHM (minor axis), in radians [array; type given by tag ID 2].
+| 13     | Position angle of major axis, in radians [array; type given by tag ID 2].
+| 14     | Rotation measure, in radians / \f$ m^2 \f$ [array; type given by tag ID 2].
+
+\htmlonly <hr /> \endhtmlonly
 
 \subsection binary_tag_spline Spline Data Tags
 
 Tags in this group have a group ID of 9.
 Arrays will be present in both single and double precision.
 
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Number of knots in X or theta coordinate [int].
+| 2      | Number of knots in Y or phi coordinate [int].
+| 3      | Knot positions in X or theta [real array].
+| 4      | Knot positions in Y or phi [real array].
+| 5      | Spline coefficients [real array].
+| 6      | Smoothing factor [double].
+
+\htmlonly <hr /> \endhtmlonly
+
 \subsection binary_tag_element Element Data Tags
 
 Tags in this group have a group ID of 10.
 
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Surface type [int]. 1 = Ludwig-3
 
 
+Element data files will contain a number of spline data tag groups, which are
+identified by an index.
+
+For fitted coefficients in the Ludwig-3 system, the spline tags will have the
+following index values:
+
+| Code | Meaning
+| ---- | ---------------------------------------------------------------------
+|    0 | H (real).
+|    1 | H (imag).
+|    2 | V (real).
+|    3 | V (imag).
+
+
+\htmlonly <hr /> \endhtmlonly
 
 \latexonly
 \vskip 1cm
 \endlatexonly
 
-<b>Chapter history</b>
+<b>Chapter History</b>
 
 <table>
 <tr><th>Revision</th><th>Date</th><th>Modification</th></tr>

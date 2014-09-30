@@ -82,7 +82,7 @@ ignored. Empty lines are also ignored.
 The following is an example sky file describing three sources, making use of 
 a number of comment lines.
 
-\code
+\verbatim
 #
 # Required columns:
 # =================
@@ -100,7 +100,7 @@ a number of comment lines.
 
 # A source where only Stokes I is defined (other columns take default values) 
 0.1 69.8 1.0
-\endcode
+\endverbatim
 
 \section sky_spix Spectral Index
 
