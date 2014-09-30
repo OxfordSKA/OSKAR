@@ -1,0 +1,200 @@
+/**
+
+\mainpage Introduction
+
+\latexonly
+\def \chapterver{6}
+\endlatexonly
+
+\section intro_intro What is OSKAR?
+
+The OSKAR package consists of a number of open source libraries and
+applications for the simulation of astronomical radio interferometers.
+OSKAR 2.x has been designed primarily to produce simulated data from large
+aperture arrays, such as those envisaged for the SKA.
+
+\section intro_features Features
+
+Below is a summary of the current features of the OSKAR package.
+
+- **Simulation capability:**
+  - Evaluation of a fully polarised Measurement Equation accelerated using
+    NVIDIA GPU(s).
+  - Extensible framework using Jones matrix formalism. The following terms
+    are currently implemented (for baselines \f$p\f$,\f$q\f$ and all visible
+    sources, \f$s\f$):
+    \f[ \mathbf{V}_{p,q} = \sum_s
+        \mathbf{K}_{p,s} \mathbf{E}_{p,s} \mathbf{R}_{p,s}
+        \left< \mathbf{B}_{s} \right> 
+        \mathbf{R}_{q,s}^H \mathbf{E}_{q,s}^H \mathbf{K}_{q,s}^H \f]
+    - **B**: Source brightness matrix.
+    - **R**: Parallactic angle rotation.
+    - **E**: Station beam, including antenna element response(s).
+    - **K**: Interferometer phase.
+    - **V**: Complex visibility.
+  - Optimised for simulation using very large source catalogues.
+  - Easily capable of simulating interferometers constructed from large
+    aperture arrays.
+  - Sky models:
+    - Catalogues of point and/or elliptical Gaussian sources.
+    - Imported from a number of data file formats:
+      - Simple custom ASCII or binary tables.
+      - HEALPix pixel grids, in ASCII list and/or FITS format.
+      - FITS images.
+    - Built-in sky model generators for random power-law,
+      random broken-power-law and uniform HEALPix grid distributions.
+  - Station beam response:
+    - Direct evaluation of aperture array station beams (E Jones) from
+      arbitrary telescope configurations (using either single level or
+      hierarchical beam forming schemes). Options include:
+      - Independent specification of pointing direction for each station or
+        tile.
+      - Apodisation weighting.
+      - Antenna element position and dipole orientation errors.
+      - Systematic and random element phase and gain errors.
+    - Inclusion of (embedded) antenna element patterns specified by an
+      analytical dipole response or a numerically defined pattern, as a
+      function of element type and frequency.
+  - Interferometric response allows for:
+    - Analytical time and bandwidth smearing.
+    - Uncorrelated system noise.
+    - Filtering as a function of baseline UV distance.
+- **An application to simulate interferometer data**
+  - Configurable using INI format settings files.
+  - Export to Measurement Set format.
+  - Capability to produce raw images of simulated visibility data in FITS
+    format.
+- **An application to simulate aperture array beam patterns**
+  - Configurable using INI format settings files. 
+  - Employs the same algorithms as those used to evaluate the beam response
+    when simulating interferometric data.
+  - Export to FITS image format.
+- **A simple graphical user interface application for setting up and running
+  simulations.**
+- **A number of utility applications to provide support for scripting of 
+  simulations.**
+- **Supported and tested on Linux and Apple Mac OS X.**
+
+\section intro_docs Getting Started
+
+The following documents are available, and we suggest that you read them in
+the order listed below.
+
+- \ref install_guide "Installation Guide"<br>
+  Describes how to build and install OSKAR.
+
+- \ref example "Example"<br>
+  Describes how to run an example simulation and test that your version of
+  OSKAR is working as intended.
+
+- <b>Theory of Operation</b><br>
+  Describes the theory of operation of OSKAR, its implementation of the
+  measurement equation and its treatment of polarisation. Please read this
+  document to verify that OSKAR works as you expect.
+
+- <b>Apps</b><br>
+  Describes the available OSKAR applications and the MATLAB interface.
+  
+- \ref sky_model "Sky Model"<br>
+  Describes the format of the OSKAR sky model files.
+
+- <b>Telescope Model</b><br>
+  Describes the format of the OSKAR telescope model files and directories.
+
+- <b>Pointing File</b><br>
+  Describes the format of OSKAR pointing files.
+  
+- <b>Settings Files</b><br>
+  Describes the settings used by OSKAR and the format of the OSKAR settings
+  files.
+
+- <b>MATLAB interface</b><br>
+  Describes an experimental interface for accessing OSKAR data types and
+  making images of visibility data in MATLAB.
+
+- \ref binary_file "Binary File Format"<br>
+  Describes the format of binary files written by OSKAR applications
+  (for reference only).
+
+
+\section intro_faq FAQ
+
+This section attempts to address some frequently asked questions about OSKAR.
+If you have a question that is not answered here, please send it to
+oskar@oerc.ox.ac.uk and we will do our best to respond.
+
+-# <b>Which operating systems/platforms are supported?</b><br>
+OSKAR has been tested on Ubuntu Linux 12.04, and 13.10, and we anticipate
+that it will work without problems with other recent Linux distributions.
+OSKAR has also been tested to compile and run correctly on Mac OS X 10.8
+and 10.9. If you encounter a problem with OSKAR while trying to compile or
+run it on a Linux or Mac OS X system, please report it to oskar@oerc.ox.ac.uk.
+Since there is no known platform-specific code in OSKAR, it is likely that
+it will work on Microsoft Windows, but this platform is currently unsupported.
+However, depending on demand, support for this platform could be added in a
+future release.
+
+-# <b>Does OSKAR require an NVIDIA GPU to work?</b><br>
+Yes. The core parts of the code are currently written using NVIDIA's CUDA
+language for general-purpose computing on GPUs, and this is only supported on
+NVIDIA hardware. Systems that do not have a CUDA-capable NVIDIA graphics
+processor will not be able to run the current version of OSKAR.
+
+-# <b>Is OpenCL supported?</b><br>
+No. However, depending on demand, support for OpenCL could potentially be
+added in a future release.
+
+-# <b>Are pre-built binary packages of OSKAR available?</b><br>
+No. Currently we don't have the resources to produce or support pre-built
+binaries. Please compile OSKAR for your target system using the available
+source code.
+
+-# <b>I found a bug!</b><br>
+Please let us know by sending an email to oskar@oerc.ox.ac.uk.
+
+-# <b>I found a bug, but I managed to fix it in my copy!</b><br>
+Wonderful! Please send us your patch by sending an email to
+oskar@oerc.ox.ac.uk. We'll test it and integrate it back into the main code
+base.
+
+-# <b>Please could you add feature/capability X?</b><br>
+Please check first to see if it's something that's already on the list in the
+planned roadmap. We will certainly consider new features but can't guarantee
+that we can implement them.
+
+\section intro_roadmap Roadmap
+
+Releases in the immediate future will be mainly aimed at fixing bugs and
+adding missing features. The current items on the high-priority list include:
+ - Interferometry simulations using dishes.
+ - Allowing for different antenna types within each station.
+ - Inclusion of direction-independent gain and phase errors, to be corrected
+   during calibration
+ - Inclusion of a simple ionosphere model.
+
+
+\latexonly
+\newpage
+\endlatexonly
+
+<b>Chapter history</b>
+
+<table>
+<tr><th>Revision</th><th>Date</th><th>Modification</th></tr>
+<tr><td>1</td><td>2012-04-23</td><td>Creation.</td></tr>
+<tr><td>2</td><td>2012-04-27</td>
+    <td>Added reference to theory of operation document.</td></tr>
+<tr><td>3</td><td>2012-11-23</td>
+    <td>Added reference to binary file format description.</td></tr>
+<tr><td>4</td><td>2013-03-01</td>
+    <td>Added references to documents for pointing files and MATLAB interface 
+    for OSKAR 2.2.0.</td></tr>
+<tr><td>5</td><td>2013-11-26</td>
+    <td>Added summary of OSKAR features (moved from the release notes
+    document) and updated file names of settings and release notes 
+    documents.</td></tr>
+<tr><td>6</td><td>2014-07-16</td>
+    <td>Updated feature summary and roadmap for OSKAR 2.5.0.</td></tr>
+</table>
+
+*/

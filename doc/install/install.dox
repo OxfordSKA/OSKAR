@@ -1,0 +1,209 @@
+/**
+
+\page install_guide Installation Guide
+
+\latexonly
+\def \chapterver{6}
+\endlatexonly
+
+\section install_intro Introduction
+
+This document describes how to obtain, build and install the OSKAR simulation
+package. The current release is available as a source code distribution,
+targeted at Linux and Mac OS X operating systems. Microsoft Windows installs
+may be possible, but are not currently supported.
+
+\section install_obtain  Obtaining OSKAR
+
+The current release of OSKAR can be downloaded as a compressed zip archive
+from the following link:<br>
+http://www.oerc.ox.ac.uk/~ska/oskar/OSKAR-Source.zip
+
+Older versions (if available) are listed by version at:<br>
+http://www.oerc.ox.ac.uk/~ska/oskar
+
+\section install_deps Dependencies
+
+OSKAR depends on a number of other libraries. The main components of OSKAR
+require an NVIDIA GPU with CUDA 4.0 (and associated NVIDIA driver) or later
+and Qt 4 (version 4.6 or later) to be installed on the target system, and 
+also CBLAS and LAPACK for full functionality. Additionally, the CFITSIO and 
+casacore libraries must be present if FITS images and Measurement Sets are to 
+be exported. The MATLAB interface will be built if MATLAB R2010b or later 
+is found.
+
+The OSKAR CMake build system will compile and install as many components as 
+possible according to the following dependencies being satisfied:
+
+- NVIDIA CUDA (http://developer.nvidia.com/cuda-downloads), version >= 4.0
+  - Required for: liboskar, liboskar_apps, Applications, MATLAB interface
+  - (Make sure you install the CUDA toolkit.)
+- Qt4 (http://www.qt.io), version >= 4.6
+  - Required for: liboskar_apps, Applications
+  - Optional for: MATLAB interface (for manipulation of OSKAR settings files)
+- CBLAS (http://www.netlib.org/blas)
+  - Optional for: liboskar (to enable the use of extended sources) 
+  - Available as part of the GSL and ATLAS packages.
+- LAPACK  (http://www.netlib.org/lapack)
+  - Optional for: liboskar (to enable the use of extended sources)
+- CFITSIO (http://heasarc.gsfc.nasa.gov/fitsio)
+  - Required for: liboskar_fits
+  - Optional for: liboskar_apps, Applications (for FITS file export)
+- casacore (http://code.google.com/p/casacore), version >= 1.2.0
+  - Required for: liboskar_ms
+  - Optional for: liboskar_apps, Application (for Measurement Sets export)
+- MATLAB (http://www.mathworks.co.uk/products/matlab), version >= R2010b
+  - Required for: Matlab interface
+- CMake (http://www.cmake.org), version >= 2.8
+  - Required for: Makefile generation
+
+\subsection install_ubuntu_packages Ubuntu Packages
+
+If you are running a recent version of the Ubuntu Linux distribution 
+(>= 10.04), then you can simply download and install the following packages 
+from the main distribution repository:
+- libqt4-dev
+- libatlas-base-dev
+- liblapack-dev
+- libcfitsio3-dev
+- g++
+- cmake
+
+However, note that you will need to install CUDA from the NVIDIA downloads
+page, as described in Section 3. Note that you will also need the NVIDIA
+driver for your particular model of NVIDIA GPU.
+
+\section install_build Building OSKAR
+
+Once the archive has been uncompressed, OSKAR can be built by issuing the
+following commands:
+
+\code
+$ mkdir build
+$ cd build
+$ cmake [OPTIONS] ../top/level/source/folder  
+$ make 
+\endcode
+
+OSKAR can then be installed with:
+
+\code
+$ make install
+\endcode
+
+You may need to run this command as root, unless you change the default 
+install location as described in the next section.
+
+\subsection install_build_options Build Options
+
+When running the 'cmake'  command a number of build options can be specified.
+These are as listed below.
+- <tt><b>-DCUDA_ARCH=\<arch\></b></tt> (default: all)
+  - Sets the target architecture for the compilation of CUDA device code
+  - \<arch\> must be one of either: 2.0, 2.1, 3.0, 3.5 or ALL
+
+- <tt><b>-DCMAKE_INSTALL_PREFIX=\<path\></b></tt>  (default: /usr/local/)
+  - Prefix install path used when installing OSKAR (with make install)
+
+\subsubsection install_build_advanced Advanced Build Options
+
+- <tt><b>-DCMAKE_BUILD_TYPE=\<release, debug, or relwithdebinfo\></b></tt>  (default: release)
+  - Build OSKAR with release flags, debug flags, or release flags with 
+    debugging symbols.
+
+- <tt><b>-DLAPACK_LIB_DIR=\<path\></b></tt> (default: searches the system library paths)
+  - Specifies a custom path in which to look for the LAPACK library (liblapack.so).
+  - Note: This should only be used in special cases, where the version of LAPACK installed in the system library path can't be used to build OSKAR.
+
+- <tt><b>-DCBLAS_LIB_DIR=\<path\></b></tt> (default: searches the system library paths)
+  - Specifies a custom path in which to look for the CBLAS library (ATLAS: libcblas.so; GSL: libgslcblas.so)
+  - Note: This should only be used in special cases, where the version of CBLAS installed in the system library path can't be used to build OSKAR.
+- <tt><b>-DCFITSIO_LIB_DIR=\<path\></b></tt> (default: searches the system library paths)
+  - Specifies a custom path in which to look for the CFITSIO library (libcfitsio.so).
+  - Note: This should only be used in special cases, where the version of CFITSIO installed in the system library path can't be used to build OSKAR.
+
+- <tt><b>-DCFITSIO_INC_DIR=\<path\></b></tt> (default: searches the system include paths)
+  - Specifies a custom path in which to look for the CFITSIO library headers (fitsio.h and others)
+  - Note: This should only be used in special cases, where the version of CFITSIO headers installed in system include path can't be used to build OSKAR.
+
+- <tt><b>-DCASACORE_LIB_DIR=\<path\></b></tt> (default: searches the system library paths)
+  - Specifies a custom path in which to look for the CasaCore libraries (libcasa_ms.so and others).
+  - Note: This should only be used in special cases, where the version of CasaCore installed in the system library path can't be used to build OSKAR.
+
+- <tt><b>-DCASACORE_INC_DIR=\<path\></b></tt> (default: searches the system include paths)
+  - Specifies a custom path in which to look for the CasaCore library headers. This is the path to the top level casacore include folder.
+  - Note: This should only be used in special cases, where the version of CasaCore headers installed in system include path can't be used to build OSKAR.
+
+- <tt><b>-DMATLAB_ROOT=\<path\></b></tt> (default: searches common system install locations)
+  - Specifies a custom root path, in which to search for MATLAB libraries and library headers.
+  - Note: This should only be used in special cases, where MATLAB is installed in a non-standard location, or, where several versions of MATLAB are installed, and a particular version is favoured.
+
+\subsection install_build_env Environment Variables
+
+The following environment variables affect the CMake build system:
+
+- MATLAB_ROOT
+  - The MATLAB root install directory used by CMake when searching for the 
+    MATLAB dependency. This directory should contain the MATLAB 'extern' 
+    directory. (Note that this variable should not normally need to be set, 
+    but can be used if the default CMake macros fail to find MATLAB on your 
+    system.)
+  
+\subsection install_build_qt4 Custom (Non-System) Qt4 Installations
+
+When searching for a valid Qt4 installation, the OSKAR CMake build system 
+queries the qmake binary in order to determine the location of the relevant 
+libraries and headers. Therefore, all that is required to use a specific 
+version of Qt4 is to add the location of the desired qmake binary to the 
+beginning of the system search path.
+
+\section install_test Testing the Installation
+
+\subsection install_unit_tests Unit Tests
+
+When building OSKAR from source, a number of unit test binaries will be 
+created. The tests can be run by typing the following command from the build 
+directory:
+
+\code
+$ make test
+\endcode
+
+All the unit tests should pass. If any fail, please report this by copying 
+the terminal output and sending it, together with a description of the 
+hardware in your machine and your version of OSKAR, to the email address
+oskar@oerc.ox.ac.uk.
+
+\subsection install_test_example Running the Example Simulation
+
+It is also advised, with any fresh install of OSKAR, to run the 
+\ref example "example simulation" to establish if a simple simulation 
+behaves as expected.
+
+\latexonly
+\vskip 1cm
+\endlatexonly
+
+<b>Chapter history</b>
+
+<table>
+<tr><th>Revision</th><th>Date</th><th>Modification</th></tr>
+<tr><td>1</td><td>2012-04-23</td><td>Creation.</td></tr>
+<tr><td>2</td><td>2012-06-13</td>
+    <td>Added description of new CMAKE build flags specifying the location 
+    of custom library search paths for LAPACK, CBLAS and CFITSIO. 
+    Added note on using custom (non-system) Qt4 installations.</td></tr>
+<tr><td>3</td><td>2012-06-19</td>
+    <td>Added description of new CMAKE flags for specifying the location of 
+    CPPUNIT and CasaCore added in OSKAR-2.0.3-beta.</td></tr>
+<tr><td>4</td><td>2013-04-12</td>
+    <td>Added description of MATLAB_ROOT CMAKE variable.</td></tr>
+<tr><td>5</td><td>2013-11-14</td>
+    <td>Updated for version 2.3.0. Removed CppUnit dependency. 
+    Unit tests now use the Google testing framework, which is included in 
+    the OSKAR source tree.</td></tr>
+<tr><td>6</td><td>2014-09-30</td>
+    <td>Changed default CUDA_ARCH to all.</td></tr>
+</table>
+
+*/

@@ -1,0 +1,217 @@
+/**
+
+\page binary_file Binary File Format
+
+\latexonly
+\def \chapterver{5}
+\endlatexonly
+
+\section binary_intro Introduction
+
+This document describes the binary file format used by OSKAR applications.
+It is intended to be used for reference only, since there are library
+functions to read and write data files in this format. 
+
+\section binary_desc Format Description
+
+An OSKAR binary file contains a simple file header, and a sequence of data
+blocks, each with its own descriptive header tag. Every data block is
+independent, and each is stored as an array of values in the native byte-order
+of the system that wrote the file. (The byte order is recorded in the header.)
+
+Since the type and size of each data block is stored in the tag, any program
+reading such a file can simply skip over any data blocks which are not of
+interest. A single data block may consist of a single value, or an array of
+values; in the latter case, other data blocks within the file should
+contain the dimension sizes of multi-dimensional arrays.
+
+When reading an OSKAR binary file, it is sensible to first construct a local
+tag index to help locate the correct data. All OSKAR library functions
+that read binary files will do this automatically if necessary.
+
+\subsection binary_header File Header
+
+The file header is exactly 64 bytes long, and is structured as follows:
+
+<table>
+<tr><th>Offset (bytes)</th> <th>Length (bytes)</th> <th>Description</th> </tr>
+<tr><td>0</td><td>9</td><td>The ASCII string "OSKARBIN", with trailing zero.</td></tr>
+<tr><td>9</td><td>1</td><td>The OSKAR binary format version.</td></tr>
+<tr><td>10</td><td>1</td><td>If data blocks are written as little endian, 0; else 1.</td></tr>
+<tr><td>11</td><td>1</td><td>Size of void* in bytes.</td></tr>
+<tr><td>12</td><td>1</td><td>Size of int in bytes.</td></tr>
+<tr><td>13</td><td>1</td><td>Size of long int in bytes.</td></tr>
+<tr><td>14</td><td>1</td><td>Size of float in bytes.</td></tr>
+<tr><td>15</td><td>1</td><td>Size of double in bytes.</td></tr>
+<tr><td>16</td><td>4</td><td>The OSKAR_VERSION as a little-endian, 4-byte integer.</td></tr>
+<tr><td>20</td><td>44</td><td><i>Reserved (must be 0).</i></td></tr>
+</table>
+
+The OSKAR binary format version (at byte offset 9) is currently 1.
+This format is anticipated to remain stable, and will only change if the
+underlying header or tag structure is modified.
+
+The OSKAR_VERSION (at byte offset 16) is given as a little-endian, 4-byte
+integer in hexadecimal format. It is a numeric value of the form 0xMMNNPP
+(MM = major, NN = minor, PP = patch) that specifies the version number of
+the OSKAR library that wrote the file. For example, in OSKAR version 2.1.3
+this would be 0x020103.
+
+
+\subsection binary_tag_header Tag (Data Block Header)
+
+Each data block that follows the file header (whether a single value or an
+array of values) is preceded by a tag, which is a structure exactly 20 bytes
+long. The data that follows the tag is uniquely identified by the combination
+of the group ID, tag ID and index. The two identifiers will take different
+forms depending on whether the tag is "standard" or "extended," and this is
+specified by the tag flags. A user-specified index can be used to identify
+multiple versions of the same tag type within a file, and should be set to 0
+if this is not required. The differences between the two tag types are
+detailed in \ref binary_tag_standard and \ref binary_tag_extended.
+
+<table>
+<tr><th>Offset (bytes)</th> <th>Length (bytes)</th> <th>Description</th> </tr>
+<tr><td>0</td><td>4</td>
+    <td>The string "TAG" in ASCII format, with trailing zero.</td></tr>
+<tr><td>4</td><td>1</td>
+    <td>\ref binary_tag_flags "Tag flags".</td></tr>
+<tr><td>5</td><td>1</td>
+    <td>\ref binary_data_type "Data type" of the data block.</td></tr>
+<tr><td>6</td><td>1</td>
+    <td>The group ID, if not an extended tag;
+    else the group name size in bytes.</td></tr>
+<tr><td>7</td><td>1</td>
+    <td>The tag ID, if not an extended tag; 
+    else the tag name size in bytes.</td></tr>
+<tr><td>8</td><td>4</td>
+    <td>User-specified index, as little-endian 4-byte integer.</td></tr>
+<tr><td>12</td><td>8</td>
+    <td>Block size in bytes, as little-endian 8-byte integer.
+    This is the total number of bytes until the next tag.</td></tr>
+</table>
+
+\subsubsection binary_tag_flags Tag Flags
+
+<table>
+<tr><th>Bit</th><th>Description</th></tr>
+<tr><td>0-6</td><td><i>(Reserved; must be 0.)</i></td></tr>
+<tr><td>7</td>
+    <td>If true, this is an extended tag; if false, this is a standard
+    tag.</td></tr>
+</table>
+
+\subsubsection binary_tag_standard Standard Tags
+
+A standard tag has both the group ID and tag ID specified as 8-bit integer 
+values, which are found at byte offsets 6 and 7 in the tag header.
+
+There can be a maximum of 256 different group types, and a maximum of 256 
+tags per group, so the total number of unique tag types supported for 
+standard tags is 65,536. All data files written by current versions of 
+OSKAR applications only use standard tag identifiers.
+
+\subsubsection binary_tag_extended Extended Tags
+
+If the tag is an extended tag, then the group name and tag name are specified 
+as strings rather than 8-bit IDs: extended tags in an OSKAR binary file have 
+the group name and then the tag name written as ASCII 8-bit character strings 
+immediately after the main tag structure itself. Both strings must be less 
+than 255 characters long, and both will have a null terminator. The length of 
+the group ID string and tag ID string, including the null terminators, will be 
+available at (respectively) byte offsets 6 and 7 in the tag header.
+
+Note that the block size in the tag header is the total number of bytes until 
+the next tag, including the extended tag names.
+
+\subsubsection binary_data_type Data Types
+
+The data type field in the tag header consists of a single byte, whose 
+eight bits have the following meaning:
+
+<table>
+<tr><th>Bit</th><th>Meaning when set</th></tr>
+<tr><td>0</td><td>Char type (1 byte), used also for string data.</td></tr>
+<tr><td>1</td><td>Integer type (4 bytes).</td></tr>
+<tr><td>2</td><td>Single-precision floating point type (4 bytes).</td></tr>
+<tr><td>3</td><td>Double-precision floating point type (8 bytes).</td></tr>
+<tr><td>4</td><td><i>(Reserved; must be 0.)</i></td></tr>
+<tr><td>5</td>
+    <td>Complex flag: data consists of a pair of values that describe
+    real and imaginary components. The real part is given first, then the 
+    imaginary part.</td></tr>
+<tr><td>6</td>
+    <td>Matrix flag: data consists of four values that describe a 2x2 matrix.
+    For a matrix written as
+    \f$ \left[\begin{array}{cc} a & b \\ c & d \\ \end{array} \right] \f$, 
+    the order of the values is a, b, c, d.</td></tr>
+<tr><td>7</td><td><i>(Reserved; must be 0.)</i></td></tr>
+</table>
+
+Note that bits 5-6 are used to specify compound types with bits 2-3: so, for 
+example, a double-precision complex matrix type would be represented as 
+(binary) 01101000 = (decimal) 104.
+
+\section binary_standard_tags Standard Tag Groups
+
+This section lists the tag identifiers found in various OSKAR binary
+format files.
+
+\subsection binary_tag_metadata Standard Meta-Data Tags
+
+Tags in this group have a group ID of 1.
+
+\subsection binary_tag_settings Settings Tags
+
+Tags in this group have a group ID of 3.
+
+\subsection binary_tag_run Run Information Tags
+
+Tags in this group have a group ID of 4.
+
+\subsection binary_tag_vis Visibility Data Tags
+
+Tags in this group have a group ID of 5.
+
+\subsection binary_tag_image Image Data Tags
+
+Tags in this group have a group ID of 6.
+
+\subsection binary_tag_sky_model Sky Model Data Tags
+
+Tags in this group have a group ID of 7.
+
+\subsection binary_tag_spline Spline Data Tags
+
+Tags in this group have a group ID of 9.
+Arrays will be present in both single and double precision.
+
+\subsection binary_tag_element Element Data Tags
+
+Tags in this group have a group ID of 10.
+
+
+
+
+\latexonly
+\vskip 1cm
+\endlatexonly
+
+<b>Chapter history</b>
+
+<table>
+<tr><th>Revision</th><th>Date</th><th>Modification</th></tr>
+<tr><td>1</td><td>2012-11-23</td><td>Creation.</td></tr>
+<tr><td>2</td><td>2013-03-04</td>
+    <td>Fixed description of image data tag.</td></tr>
+<tr><td>3</td><td>2013-04-18</td>
+    <td>Added telescope model path, channel bandwidth and time integration
+    tags to visibility data group.</td></tr>
+<tr><td>4</td><td>2013-11-29</td>
+    <td>Added image group tags for grid type and coordinate frame. Added sky 
+    group tag for rotation measure.</td></tr>
+<tr><td>5</td><td>2014-07-16</td>
+    <td>[2.5.0] Added spline data and element data tag groups.</td></tr>
+</table>
+
+*/

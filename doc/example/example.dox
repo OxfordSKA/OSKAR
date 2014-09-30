@@ -1,0 +1,28 @@
+/**
+
+\page example Example
+
+\latexonly
+\def \chapterver{10}
+\endlatexonly
+
+\section example_intro Introduction
+
+This document will guide you through an example to perform a couple of simple
+simulations using OSKAR.
+
+Note that all steps are intended to be followed in order.
+
+\section example_getting_started Getting Started
+
+This example assumes that OSKAR has been built successfully with the CUDA,
+Qt4, CBLAS, LAPACK, and CFITSIO dependencies satisfied (for details, see
+the install guide documentation).
+
+\subsection example_obtaining_setup_files Obtaining the Example Setup Files
+
+The data files used for this example can be downloaded from:<br>
+http://www.oerc.ox.ac.uk/~ska/oskar/OSKAR-Example-Data.zip
+
+
+*/

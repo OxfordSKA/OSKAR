@@ -1,0 +1,116 @@
+/**
+
+\page sky_model Sky Model
+
+\latexonly
+\def \chapterver{3}
+\endlatexonly
+
+\section sky_intro Introduction
+
+This document describes the sky model file format used by OSKAR 2.x.
+
+OSKAR sky model files contain a simple catalogue to describe the source
+properties for a set of point sources or Gaussian sources.
+
+For each source in the model it is possible to specify:
+
+ - A position in equatorial coordinates (Right Ascension and Declination).
+ - Flux densities for all four Stokes parameters (I, Q, U, V), at a reference
+   frequency.
+ - Reference frequency, spectral index and rotation measure.
+ - Gaussian source width parameters (FWHM and position angle).
+
+\section sky_file Sky Model File
+
+The sky model file holds a table of ASCII text, where each row corresponds to 
+one source, and columns describe the source parameters. Most parameters are 
+optional, and will be set to a default value if not specified.
+
+In order, the parameter columns are:
+
+<table>
+<tr><th>Column</th><th>Parameter</th><th>Unit</th><th>Comment</th></tr>
+<tr><td>1</td><td>Right Ascension</td><td>deg</td>
+<td>Required. This is currently interpreted as the apparent rather than mean (J2000) Right Ascension.</td></tr>
+<tr><td>2</td><td>Declination</td><td>deg</td>
+<td>Required. This is currently interpreted as the apparent rather than mean (J2000) Declination.</td></tr>
+<tr><td>3</td><td>Stokes I flux density</td><td>Jy</td><td>Required.</td></tr>
+<tr><td>4</td><td>Stokes Q flux density</td><td>Jy</td><td>Optional (default 0.0)</td></tr>
+<tr><td>5</td><td>Stokes U flux density</td><td>Jy</td><td>Optional (default 0.0)</td></tr>
+<tr><td>6</td><td>Stokes V flux density</td><td>Jy</td><td>Optional (default 0.0)</td></tr>
+<tr><td>7</td><td>Reference frequency</td><td>Hz</td>
+<td>Optional (default 0.0). Frequency at which flux densities are given.</td></tr>
+<tr><td>8</td><td>Spectral index</td><td>N/A</td><td>Optional (default 0.0)</td></tr>
+<tr><td>9</td><td>Rotation measure</td><td>rad \f${\rm m}^{-2}\f$</td><td>Optional (default 0.0)</td></tr>
+<tr><td>10</td><td>Major axis FWHM</td><td>arcsec</td><td>Optional (default 0.0)</td></tr>
+<tr><td>11</td><td>Minor axis FWHM</td><td>arcsec</td><td>Optional (default 0.0)</td></tr>
+<tr><td>12</td><td>Position angle</td><td>deg</td><td>Optional (default 0.0). East of North.</td></tr>
+</table>
+
+\note
+- <i>In order for a source to be recognised as a Gaussian, all three of the
+  major axis FWHM, minor axis FWHM and position angle parameters must be
+  specified.</i>
+
+\note 
+- <i>When the file is read, parameters are assigned according to their column
+  position. In order to specify an optional parameter, all columns up to the 
+  designated column must be specified.</i>
+
+\note
+ - <i>The rotation measure column was added for OSKAR 2.3.0. To provide backwards
+   compatibility with older sky model files containing extended sources, a 
+   check is made on the number of columns on each line, and source data is 
+   loaded according to the following rules:</i>
+     -# Lines containing between 3 and 9 columns will set all parameters 
+        up to and including the rotation measure. Any missing parameters will 
+        be set to defaults.
+     -# Lines containing 11 columns set the first 8 parameters and the 
+        Gaussian source data (this is the old file format). The rotation 
+        measure will be set to zero.
+     -# Lines containing 12 columns set all parameters.
+     -# Lines containing 10, 13, or more columns will raise an error.
+
+The fields can be space-separated and/or comma-separated. Characters 
+appearing after a hash ('\#') symbol are treated as comments and will be 
+ignored. Empty lines are also ignored.
+
+
+\subsection sky_example Example
+
+The following is an example sky file describing three sources, making use of 
+a number of comment lines.
+
+\code
+#
+# Required columns:
+# =================
+# RA(deg), Dec(deg), I(Jy)
+#
+# Optional columns:
+# =================
+# Q(Jy), U(Jy), V(Jy), freq0(Hz), spectral index, rotation measure,
+#           FWHM major (arcsec), FWHM minor (arcsec), position angle (deg)
+#
+#
+# Two fully-specified sources
+0.0 70.0 1.1 0.0 0.0 0.0 100e6 -0.7 0.0 200.0 150.0  23.0
+0.0 71.2 2.3 1.0 0.0 0.0 100e6 -0.7 0.0  90.0  40.0 -10.0   
+
+# A source where only Stokes I is defined (other columns take default values) 
+0.1 69.8 1.0
+\endcode
+
+\section sky_spix Spectral Index
+
+The spectral index \f$\alpha\f$ is defined according to the following equation:
+\f[ \mathbf{F} = \mathbf{F_0} (\nu/\nu_0 )^{\alpha} \f]
+where \f$\mathbf{F}\f$ is a 4-vector containing the Stokes (I,Q,U,V) fluxes 
+of the source at the current observing frequency \f$\nu\f$, and
+\f$\mathbf{F_0}\f$ is a 4-vector containing the fluxes at the reference
+frequency \f$\nu_0\f$. Negative values for \f$\alpha\f$ will cause the flux at
+frequencies higher than the reference frequency to be reduced relative to the
+reference flux.
+
+*/
