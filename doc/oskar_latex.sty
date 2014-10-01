@@ -140,7 +140,9 @@
 % Used by @image, @dotfile, @dot ... @enddot, and @msc ... @endmsc
 % (only if no caption is specified)
 \newenvironment{DoxyImageNoCaption}{%
+    \begin{center}%
 }{%
+    \end{center}%
 }
 
 % Used by @attention
@@ -247,16 +249,19 @@
 }{%
 }
 
+
 % Used by @par and @paragraph
 \newenvironment{DoxyParagraph}[1]{%
   \begin{list}{}{%
     \settowidth{\labelwidth}{40pt}%
-    \setlength{\leftmargin}{\labelwidth}%
+%    \setlength{\leftmargin}{\labelwidth}%
+    \setlength{\leftmargin}{\labelwidth+12pt}%
     \setlength{\parsep}{0pt}%
     \setlength{\itemsep}{-4pt}%
     \renewcommand{\makelabel}{\entrylabel}%
   }%
-  \item[#1]%
+%  \item[#1]%
+  \item[{\parbox[t]{\textwidth}{\hangindent=10em #1}}]%
 }{%
   \end{list}%
 }

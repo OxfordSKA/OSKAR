@@ -30,7 +30,7 @@
   \color{black}%
 }
 \renewcommand{\DoxyLabelFont}{%
-  \fontseries{bc}\selectfont%
+  \fontseries{b}\selectfont%
   \color{black}%
 }
 \newcommand{\+}{\discretionary{\mbox{\scriptsize$\hookleftarrow$}}{}{}}
@@ -75,13 +75,12 @@
 % Headers & footers
 \usepackage{fancyhdr}
 \pagestyle{fancyplain}
-\fancyhead[LE,LO]{\fancyplain{}{OSKAR \input version.txt }}
+\fancyhead[LE,LO]{\fancyplain{}{OSKAR $projectnumber }}
 \fancyhead[CE,CO]{\fancyplain{}{\leftmark}}
 \fancyhead[RE,RO]{\fancyplain{}{\ifdefined\chapterver Rev. \chapterver\fi}}
 \fancyfoot[LE]{\fancyplain{}{\bfseries\thepage}}
 \fancyfoot[CE]{\fancyplain{}{}}
-\fancyfoot[RE]{\fancyplain{}{}}
-\fancyfoot[LO]{\fancyplain{}{}}
+\fancyfoot[RE,LO]{\fancyplain{}{\scriptsize \copyright\, The University of Oxford, 2012-2014 \normalsize}}
 \fancyfoot[CO]{\fancyplain{}{}}
 \fancyfoot[RO]{\fancyplain{}{\bfseries\thepage}}
 \renewcommand{\footrulewidth}{0.4pt}
@@ -92,7 +91,7 @@
   \markright{\thesection\ #1}%
 }
 \fancypagestyle{plain}{%
-\fancyhead[LE,LO]{\fancyplain{}{OSKAR \input version.txt }}
+\fancyhead[LE,LO]{\fancyplain{}{OSKAR $projectnumber }}
 \fancyhead[CE,CO]{\fancyplain{}{\leftmark}}
 \fancyhead[RE,RO]{\fancyplain{}{\ifdefined\chapterver Rev. \chapterver\fi}}
 }
@@ -138,7 +137,7 @@
 \begin{titlepage}
 \vspace*{7cm}
 \begin{center}%
-{\huge \bf OSKAR \input version.txt }\\
+{\huge \bf OSKAR $projectnumber }\\
 \vspace*{1cm}
 {\large User Documentation }\\
 \end{center}

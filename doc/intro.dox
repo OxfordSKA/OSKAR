@@ -87,28 +87,28 @@ the order listed below.
   Describes how to run an example simulation and test that your version of
   OSKAR is working as intended.
 
-- <b>Theory of Operation</b><br>
+- \ref theory "Theory of Operation"<br>
   Describes the theory of operation of OSKAR, its implementation of the
   measurement equation and its treatment of polarisation. Please read this
   document to verify that OSKAR works as you expect.
 
-- <b>Apps</b><br>
+- \ref apps "Apps"<br>
   Describes the available OSKAR applications and the MATLAB interface.
-  
+
 - \ref sky_model "Sky Model"<br>
   Describes the format of the OSKAR sky model files.
 
-- <b>Telescope Model</b><br>
+- \ref telescope_model "Telescope Model"<br>
   Describes the format of the OSKAR telescope model files and directories.
 
-- <b>Pointing File</b><br>
+- \ref pointing_file "Pointing File"<br>
   Describes the format of OSKAR pointing files.
-  
+
 - <b>Settings Files</b><br>
   Describes the settings used by OSKAR and the format of the OSKAR settings
   files.
 
-- <b>MATLAB interface</b><br>
+- \ref matlab_interface "MATLAB interface"<br>
   Describes an experimental interface for accessing OSKAR data types and
   making images of visibility data in MATLAB.
 

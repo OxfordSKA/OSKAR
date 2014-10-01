@@ -766,8 +766,12 @@ WARN_LOGFILE           =
 INPUT                  = @CMAKE_SOURCE_DIR@/doc/intro.dox \
                          @CMAKE_SOURCE_DIR@/doc/install \
                          @CMAKE_SOURCE_DIR@/doc/example \
+                         @CMAKE_SOURCE_DIR@/doc/theory \
+                         @CMAKE_SOURCE_DIR@/doc/apps \
                          @CMAKE_SOURCE_DIR@/doc/sky_model \
                          @CMAKE_SOURCE_DIR@/doc/telescope_model \
+                         @CMAKE_SOURCE_DIR@/doc/pointing_file \
+                         @CMAKE_SOURCE_DIR@/doc/matlab \
                          @CMAKE_SOURCE_DIR@/doc/binary_file
 
 # This tag can be used to specify the character encoding of the source files
@@ -897,7 +901,10 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             = @CMAKE_SOURCE_DIR@/doc/binary_file
+IMAGE_PATH             = @CMAKE_SOURCE_DIR@/doc/binary_file \
+                         @CMAKE_SOURCE_DIR@/doc/example \
+                         @CMAKE_SOURCE_DIR@/doc/matlab \
+                         @CMAKE_SOURCE_DIR@/doc/sky_model
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program

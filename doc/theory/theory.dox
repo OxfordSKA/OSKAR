@@ -1,0 +1,34 @@
+/**
+
+\page theory Theory of Operation
+
+\latexonly
+\def \chapterver{6}
+\endlatexonly
+
+\section theory_intro Introduction
+
+\latexonly
+\vskip 1cm
+\endlatexonly
+
+<b>Chapter History</b>
+
+<table>
+<tr><th>Revision</th><th>Date</th><th>Modification</th></tr>
+<tr><td>1</td><td>2012-04-27</td><td>Creation.</td></tr>
+<tr><td>2</td><td>2012-05-03</td>
+    <td>Clarified polarisation convention, updated definition of R and G 
+    matrices.</td></tr>
+<tr><td>3</td><td>2012-05-14</td>
+    <td>Added polarisation examples.</td></tr>
+<tr><td>4</td><td>2012-10-22</td>
+    <td>Added description of the addition of uncorrelated system 
+    noise.</td></tr> 
+<tr><td>5</td><td>2013-11-26</td>
+    <td>Fixed description of interferometer phase term.</td></tr>
+<tr><td>6</td><td>2014-08-12</td>
+    <td>Updated description of addition of uncorrelated noise.</td></tr>
+</table>
+
+*/

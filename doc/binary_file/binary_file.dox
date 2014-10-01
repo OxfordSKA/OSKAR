@@ -385,7 +385,7 @@ Tags in this group have a group ID of 7.
 | 11     | FWHM (major axis), in radians [array; type given by tag ID 2].
 | 12     | FWHM (minor axis), in radians [array; type given by tag ID 2].
 | 13     | Position angle of major axis, in radians [array; type given by tag ID 2].
-| 14     | Rotation measure, in radians / \f$ m^2 \f$ [array; type given by tag ID 2].
+| 14     | Rotation measure, in radians / \f$ \mathrm{m}^2 \f$ [array; type given by tag ID 2].
 
 \htmlonly <hr /> \endhtmlonly
 
