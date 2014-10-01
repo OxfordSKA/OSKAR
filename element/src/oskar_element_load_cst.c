@@ -298,7 +298,7 @@ static void fit_splines(oskar_Log* log, oskar_Splines* splines, int n,
     double avg_frac_error;
     if (*status) return;
     avg_frac_error = closeness; /* Copy the fitting parameter. */
-    oskar_log_message(log, 'M', 0, "");
+    oskar_log_line(log, 'M', ' ');
     oskar_log_message(log, 'M', 0, "Fitting surface %s...", name);
     oskar_splines_fit(splines, n, oskar_mem_double(theta, status),
             oskar_mem_double(phi, status), oskar_mem_double_const(data, status),

@@ -118,6 +118,7 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
     // Load the CST text file for the correct port, if specified (X=1, Y=2).
     if (input_cst_file)
     {
+        oskar_log_line(log, 'M', ' ');
         oskar_log_message(log, 'M', 0, "Loading CST element pattern: %s",
                 input_cst_file);
         oskar_element_load_cst(element, log, port, frequency_hz,

@@ -574,13 +574,23 @@ void oskar_MainWindow::setHideUnsetItems(bool value)
 
 void oskar_MainWindow::runButton()
 {
+    // Block signals from the model to prevent an erroneous warning saying
+    // the settings file was updated by another program.
+    // (oskar_SettingsView::fileReloaded)
+    // FIXME this is a hack! find a better fix...
+    bool oldState = model_->blockSignals(true);
+
     // Save settings if they are not already saved.
     if (settingsFile_.isEmpty())
     {
         // Get the name of the new settings file (return if empty).
         saveSettingsAs(QString());
         if (settingsFile_.isEmpty())
+        {
+            // FIXME Restore signals from the model.
+            model_->blockSignals(oldState);
             return;
+        }
     }
 
     // Check that the selected binary actually exists.
@@ -596,6 +606,8 @@ void oskar_MainWindow::runButton()
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.exec();
         binLocations();
+        // FIXME Restore signals from the model.
+        model_->blockSignals(oldState);
         return;
     }
 
@@ -603,6 +615,9 @@ void oskar_MainWindow::runButton()
     oskar_RunDialog dialog(this);
     dialog.start(run_binary_, settingsFile_);
     dialog.exec();
+
+    // FIXME Restore signals from the model.
+    model_->blockSignals(oldState);
 }
 
 void oskar_MainWindow::createRecentFileActions()
