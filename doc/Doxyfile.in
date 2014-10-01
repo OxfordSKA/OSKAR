@@ -1722,8 +1722,7 @@ LATEX_FOOTER           = @CMAKE_SOURCE_DIR@/doc/oskar_latex_footer.tex
 # markers available.
 # This tag requires that the tag GENERATE_LATEX is set to YES.
 
-LATEX_EXTRA_FILES      = @CMAKE_SOURCE_DIR@/doc/oskar_latex.sty \
-                         @CMAKE_SOURCE_DIR@/doc/version.txt
+LATEX_EXTRA_FILES      = @CMAKE_SOURCE_DIR@/doc/oskar_latex.sty
 
 # If the PDF_HYPERLINKS tag is set to YES, the LaTeX that is generated is
 # prepared for conversion to PDF (using ps2pdf or pdflatex). The PDF file will

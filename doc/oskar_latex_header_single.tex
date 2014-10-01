@@ -72,6 +72,12 @@
   {\huge}           % before-code
 \titlespacing*{\chapter}{0pt}{-0.5em}{1em}
 
+% Omit chapter from section number
+\renewcommand{\thesection}{\arabic{section}}
+
+% Omit chapter from figure number
+\renewcommand{\thefigure}{\arabic{figure}}
+
 % Headers & footers
 \usepackage{fancyhdr}
 \pagestyle{fancyplain}
