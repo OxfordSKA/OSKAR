@@ -191,7 +191,7 @@ baseline range are optional, and if not specified the entire data set is
 plotted (i.e. time range = [1 vis.num_times], and 
 baseline range = [1 vis.num_baselines]).
 
-\par [uvw] = oskar.vis.evaluate_baseline_uvw(\<layout file\>, \<lon\>, <br> \par \<lat\>, \<alt\>, \<RA\>, \<Dec\>, \<start time\>, \<no. times\>, \<dt\>)
+\par [uvw] = oskar.vis.evaluate_baseline_uvw(\<layout file\>, \<lon\>, \<lat\>, \<alt\>, \<RA\>, \<Dec\>, \<start time\>, \<no. times\>, \<dt\>)
 Generates the baseline coordinates for a given station and observation 
 parameters. The station is specified as an OSKAR station layout file at a 
 given longitude, latitude and altitude in degrees and metres respectively. 

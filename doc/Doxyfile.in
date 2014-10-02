@@ -905,7 +905,8 @@ IMAGE_PATH             = @CMAKE_SOURCE_DIR@/doc/binary_file \
                          @CMAKE_SOURCE_DIR@/doc/example \
                          @CMAKE_SOURCE_DIR@/doc/matlab \
                          @CMAKE_SOURCE_DIR@/doc/sky_model \
-                         @CMAKE_SOURCE_DIR@/doc/telescope_model
+                         @CMAKE_SOURCE_DIR@/doc/telescope_model \
+                         @CMAKE_SOURCE_DIR@/doc/theory
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program

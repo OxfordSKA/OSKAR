@@ -164,8 +164,8 @@ U_0 - i V_0 & I_0 - Q_0
 
 Multiplying this out implies that
 
-- \f$Q_0\f$ transforms to \f$Q=Q_0  cos(2\beta)-U_0 sin(2\beta)\f$,
-- \f$U_0\f$ transforms to \f$U=Q_0  sin(2\beta)+U_0 cos(2\beta)\f$,
+- \f$Q_0\f$ transforms to \f$Q=Q_0 \cos(2\beta)-U_0 \sin(2\beta)\f$,
+- \f$U_0\f$ transforms to \f$U=Q_0 \sin(2\beta)+U_0 \cos(2\beta)\f$,
 - \f$I\f$ and \f$V\f$ remain unchanged, as expected.
 
 

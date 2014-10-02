@@ -168,7 +168,7 @@ theta and phi voltage response of the X and Y dipoles, at the three
 observation frequencies (100, 120, and 140 MHz), and 24 pointing centres
 corresponding to the 24 observation snapshots.
 
-\ref example_bp_output "The figure below" shows the first plane of this
+\ref example_bp_fig "The figure below" shows the first plane of this
 FITS cube, which is the theta pattern voltage response (in Right Ascension
 and Declination) of the X dipole for the first frequency channel and first
 time snapshot. Note that the area of zero voltage on the left of the
