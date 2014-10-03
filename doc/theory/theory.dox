@@ -93,7 +93,8 @@ Stokes +U corresponds to North-East-to-South-West polarisation,
 and 100% Stokes +V corresponds to right-handed circular polarisation.
 
 \anchor theory_fig_pol_axes
-<b>FIXME Insert sketch</b>
+\image html sketch_pol.png ""
+\image latex sketch_pol.pdf "" width=10cm
 
 Using this convention, Hamaker & Bregman (1996) show that
 
@@ -112,9 +113,9 @@ U - i V & I - Q
 The emission from each source must ultimately be expressed in the 
 antenna frame, so the equatorial Stokes parameters must be transformed 
 from components along the
-\f$(\mathbf{\hat{e}}_{\delta}, \mathbf{\hat{e}}_{\alpha}\f$ 
+\f$(\mathbf{\hat{e}}_{\delta}, \mathbf{\hat{e}}_{\alpha})\f$ 
 directions to components along the
-\f$(\mathbf{\hat{e}}_{\theta}, \mathbf{\hat{e}}_{\phi}\f$ directions.
+\f$(\mathbf{\hat{e}}_{\theta}, \mathbf{\hat{e}}_{\phi})\f$ directions.
 This involves a rotation (intermixing) of only the Stokes Q and U parameters, 
 using the parallactic angle at the position of the source: 
 Stokes I and V remain unchanged.
@@ -246,7 +247,7 @@ the \f$w\f$ and \f$n\f$ directions increase towards the phase centre.
 Having obtained the simulated visibility correlation matrix
 
 \f[
-\left< \mathbf{V_{p,q}} \right> = 
+\mathbf{V_{p,q}} = 
 \left[
 \begin{array}{cc}
 XX & XY \\
@@ -294,7 +295,563 @@ frame. We then make images of these sources in Stokes Q and U to show how
 the simulator will corrupt the source polarisation, even when using 
 ideal dipoles.
 
-<b>FIXME Finish converting this section...</b>
+
+\subsubsection theory_pol_example_1 Telescope near North Pole, observing towards (RA, Dec) = (90, 87)
+
+Let the telescope be sited at latitude 89.9 degrees, observing in the 
+direction of RA = 90 degrees, Dec = 87 degrees. (These numbers were chosen 
+to be close to the pole and the zenith, but not precisely at these points, 
+so that all directions remain well-defined.) Almost everywhere in the sky at 
+this latitude, the parallactic angle is very close to zero: for a source at 
+this declination, \f$\mathbf{R}\f$ is almost an identity matrix, so it can 
+be ignored safely. The source at RA = 90 degrees lies in the Easterly 
+direction at this point in time, or along the x-axis in the horizontal 
+frame. This is shown in the \ref theory_sketch1 "figure below" which shows the
+geometry looking towards the zenith and pole from the observer's location. 
+The shaded grey square shows an area of the sky that will be imaged using 
+the normal conventions, and the blue arrow shows the direction that would 
+actually appear as 'up' in the image (and hence defines the IAU axis of 
+polarisation for the source, corresponding to Stokes +Q).
+
+\anchor theory_sketch1
+\image html sketch1.png ""
+\image latex sketch1.pdf "" width=15cm
+
+When making an image of this source, the usual conventions apply: 
+The direction to the North Celestial Pole will be 'up' and 
+the direction of increasing right ascension will be 'left,' so 
+using \ref theory_sketch1 "the figure" as a guideline, the marked x-axis 
+would be pointing 'down,' and the blue arrow would be pointing 'up.' 
+(The marked x-axis is in the horizon plane, and is unrelated to the 
+image l-coordinate or baseline u-coordinate.)
+
+Ignoring all except the G-Jones term, the measurement equation for this 
+source is given by:
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+=
+\left[
+\begin{array}{cc}
+g_{\theta}^X & g_{\phi}^X \\
+g_{\theta}^Y & g_{\phi}^Y
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+I + Q   & U + i V \\
+U - i V & I - Q
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+g_{\theta}^X & g_{\theta}^Y \\
+g_{\phi}^X   & g_{\phi}^Y
+\end{array}
+\right]
+\f]
+
+At this source position, the \f$\mathbf{G}\f$ matrix is approximately:
+
+\f[
+\mathbf{G} \approx 
+\left[
+\begin{array}{cc}
+1 & 0 \\
+0 & 1
+\end{array}
+\right]
+\f]
+
+The \f$\mathbf{G}\f$ matrix is almost an identity matrix here, because the 
+dipole oriented along the x-axis will respond maximally to radiation 
+polarised in the \f$\theta\f$-direction (which is essentially parallel to x 
+for this source), and the dipole oriented along the y-axis will respond 
+maximally to radiation polarised in the \f$\phi\f$-direction (parallel to y 
+for this source).
+
+If the source emits in pure Stokes +Q (\f$I=1\f$,\f$Q=1\f$, IAU frame of 
+the sky), then the measured values will be
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) = \frac{1}{2} (I+Q-(I-Q)) \approx \frac{1}{2} (1+1-(1-1)) \approx 1 \\
+U_m &=& \frac{1}{2} (XY+YX) \approx \frac{1}{2} (0+0) \approx 0
+\f}
+
+If the source emits in pure Stokes -Q (\f$I=1\f$,\f$Q=-1\f$, IAU frame of 
+the sky), then the measured values will be
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) = \frac{1}{2} (I+Q-(I-Q)) \approx \frac{1}{2} (1-1-(1-(-1))) \approx -1 \\
+U_m &=& \frac{1}{2} (XY+YX) \approx \frac{1}{2} (0+0) \approx 0
+\f}
+
+If the source emits in pure Stokes +U (\f$I=1\f$,\f$U=1\f$, IAU frame of 
+the sky), then the measured values will be
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) = \frac{1}{2} (I+Q-(I-Q)) \approx \frac{1}{2} (1-1) \approx 0 \\
+U_m &=& \frac{1}{2} (XY+YX) = \frac{1}{2} (U+U) \approx \frac{1}{2} (1+1) \approx 1
+\f}
+
+If the source emits in pure Stokes -U (\f$I=1\f$,\f$U=-1\f$, IAU frame of 
+the sky), then the measured values will be
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) = \frac{1}{2} (I+Q-(I-Q)) \approx \frac{1}{2} (1-1) \approx 0 \\
+U_m &=& \frac{1}{2} (XY+YX) = \frac{1}{2} (U+U) \approx \frac{1}{2} (-1-1) \approx -1
+\f}
+
+This is one of the few examples where the \f$\mathbf{G}\f$-matrix is almost an 
+identity matrix, and the instrumental response closely corresponds to the 
+intrinsic polarisation properties of the source.
+
+The \ref theory_fig_pole_ra_90 "figure below" shows images of a source 
+at (RA, Dec) = (90, 87) for an observer near the North Pole. 
+The four non-zero polarisations in the images correspond closely to the 
+intrinsic source polarisation, labelled in the top-right of each panel.
+
+\anchor theory_fig_pole_ra_90
+\image html Pole_RA_90.png ""
+\image latex Pole_RA_90.png "" width=12cm
+
+\subsubsection theory_pol_example_2 Telescope near North Pole, observing towards (RA, Dec) = (0, 87)
+
+Now let the telescope be placed at the same latitude of 89.9 degrees, but 
+observing in the direction of RA = 0 degrees, Dec = 87 degrees. 
+The source at RA = 0 degrees now lies in the Southerly direction, or along 
+the -y-axis in the horizontal frame. The orientation of each dipole has 
+not changed, but the axis of polarisation angle (as defined by the IAU in 
+the tangent plane to the sky) has now been effectively rotated by 90 
+degrees with respect to the antennas, so the response of the instrument 
+will no longer correspond to the intrinsic source polarisation.
+This is shown in the \ref theory_sketch2 "figure below" which shows the
+geometry looking towards the zenith and pole from the observer's location. 
+The shaded grey square shows an area of the sky that will be imaged using the 
+normal conventions, and the blue arrow shows the direction that would actually 
+appear as 'up' in the image (and hence defines the IAU axis of polarisation 
+for the source, corresponding to Stokes +Q).
+
+\anchor theory_sketch2
+\image html sketch2.png ""
+\image latex sketch2.pdf "" width=15cm
+
+Ignoring all except the G-Jones term, the measurement equation for this 
+source is given by:
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+=
+\left[
+\begin{array}{cc}
+g_{\theta}^X & g_{\phi}^X \\
+g_{\theta}^Y & g_{\phi}^Y
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+I + Q   & U + i V \\
+U - i V & I - Q
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+g_{\theta}^X & g_{\theta}^Y \\
+g_{\phi}^X   & g_{\phi}^Y
+\end{array}
+\right]
+\f]
+
+At this source position, the \f$\mathbf{G}\f$ matrix is approximately:
+
+\f[
+\mathbf{G} \approx 
+\left[
+\begin{array}{cc}
+0 & 1 \\
+-1 & 0
+\end{array}
+\right]
+\f]
+
+The \f$\mathbf{G}\f$ matrix takes this form at this point, because the 
+dipole oriented along the x-axis will respond maximally to radiation 
+polarised in the \f$\phi\f$-direction (which is essentially parallel to x 
+for this source), and the dipole oriented along the y-axis will respond 
+maximally to radiation polarised in the \f$\theta\f$-direction (anti-parallel 
+to y for this source, hence the negative sign).
+
+If the source emits in pure Stokes +Q (\f$I=1\f$,\f$Q=1\f$, IAU frame 
+of the sky), then the measured values will be
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 1 \\
+-1 & 0
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+1+1 & 0 \\
+0 & 1-1
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 0 \\
+-2 & 0
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 0 \\
+0 & 2
+\end{array}
+\right]
+
+\f]
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) \approx \frac{1}{2} (0-2) \approx -1 \\
+U_m &=& \frac{1}{2} (XY+YX) \approx 0
+\f}
+
+If the source emits in pure Stokes -Q (\f$I=1\f$,\f$Q=-1\f$, IAU frame 
+of the sky), then the measured values will be
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 1 \\
+-1 & 0
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+1+-1 & 0 \\
+0 & 1- -1
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 2 \\
+0 & 0
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+2 & 0 \\
+0 & 0
+\end{array}
+\right]
+
+\f]
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) \approx \frac{1}{2} (2-0) \approx 1 \\
+U_m &=& \frac{1}{2} (XY+YX) \approx 0
+\f}
+
+If the source emits in pure Stokes +U (\f$I=1\f$,\f$U=1\f$, IAU frame 
+of the sky), then the measured values will be
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 1 \\
+-1 & 0
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+1 & 1 \\
+1 & 1
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+1 & 1 \\
+-1 & -1
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+1 & -1 \\
+-1 & 1
+\end{array}
+\right]
+
+\f]
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) \approx \frac{1}{2} (1-1) \approx 0 \\
+U_m &=& \frac{1}{2} (XY+YX) \approx \frac{1}{2} (-1 -1) \approx -1
+\f}
+
+If the source emits in pure Stokes -U (\f$I=1\f$,\f$U=-1\f$, IAU frame 
+of the sky), then the measured values will be
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 1 \\
+-1 & 0
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+1 & -1 \\
+-1 & 1
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+-1 & 1 \\
+-1 & 1
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+1 & 1 \\
+1 & 1
+\end{array}
+\right]
+
+\f]
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) \approx \frac{1}{2} (1-1) \approx 0 \\
+U_m &=& \frac{1}{2} (XY+YX) \approx \frac{1}{2} (1 + 1) \approx 1
+\f}
+
+\latexonly
+\newpage
+\endlatexonly
+
+The \ref theory_fig_pole_ra_0 "figure below" shows images of a source 
+at (RA, Dec) = (0, 87) for an observer near the North Pole. The four
+non-zero polarisations in the images show a sign change with respect to the 
+intrinsic source polarisation, labelled in the top-right of each panel.
+
+\anchor theory_fig_pole_ra_0
+\image html Pole_RA_0.png ""
+\image latex Pole_RA_0.png "" width=12cm
+
+
+\subsubsection theory_pol_example_3 Telescope on Equator, observing towards (RA, Dec) = (1, 0)
+
+In this final example, the telescope is at latitude 0 degrees (on the 
+Earth's equator), observing in the direction of RA = 1 degree, 
+Dec = 0 degrees (again, almost directly overhead). The source at 
+RA = 1 degree again lies in the Easterly direction, or along the x-axis 
+in the horizontal frame. The main difference between this example and 
+\ref theory_pol_example_1 "the first example" is that the parallactic angle 
+is no longer nearly zero, but is now -90 degrees.
+
+This is shown in the \ref theory_sketch2 "figure below" which shows the
+geometry looking towards the zenith from the observer's location. 
+The shaded grey square shows an area of the sky that will be imaged using 
+the normal conventions, and the blue arrow shows the direction that would 
+actually appear as 'up' in the image (and hence defines the IAU axis of 
+polarisation for the source, corresponding to Stokes +Q).
+
+\image html sketch3.png ""
+\image latex sketch3.pdf "" width=15cm
+
+Ignoring all except the R- and G-Jones terms, the measurement equation for 
+this source is given by:
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+=
+\left[
+\begin{array}{cc}
+g_{\theta}^X & g_{\phi}^X \\
+g_{\theta}^Y & g_{\phi}^Y
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+\cos\psi_p & -\sin\psi_p \\
+\sin\psi_p & \cos\psi_p
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+I + Q   & U + i V \\
+U - i V & I - Q
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+\cos\psi_p & \sin\psi_p \\
+-\sin\psi_p & \cos\psi_p
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+g_{\theta}^X & g_{\theta}^Y \\
+g_{\phi}^X   & g_{\phi}^Y
+\end{array}
+\right]
+\f]
+
+While the \f$\mathbf{G}\f$ matrix is almost equal to the identity matrix for 
+the same reasons as described in the
+\ref theory_pol_example_1 "first example", the \f$\mathbf{R}\f$ matrix is 
+now given by:
+
+\f[
+\mathbf{R} \approx
+\left[
+\begin{array}{cc}
+0 & 1 \\
+-1 & 0
+\end{array}
+\right]
+\f]
+
+Since \f$\mathbf{R}\f$ in this case is equal to \f$\mathbf{G}\f$ in 
+the \ref theory_pol_example_2 "second example", it follows that the source 
+polarisation will be modified in the same way.
+
+The \ref theory_fig_equator_ra_1 "figure below" shows images of a source 
+at (RA, Dec) = (1, 0) for an observer on the Equator. The four non-zero 
+polarisations in the images show a sign change with respect to the intrinsic 
+source polarisation, labelled in the top-right of each panel.
+
+\anchor theory_fig_equator_ra_1
+\image html Equator_RA_1.png ""
+\image latex Equator_RA_1.png "" width=12cm
+
+\latexonly
+\newpage
+\endlatexonly
+
 
 \section theory_beam_pattern_pol_order Beam Pattern Polarisation Order
 
