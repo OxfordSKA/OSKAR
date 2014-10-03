@@ -167,7 +167,6 @@ that we can implement them.
 Releases in the immediate future will be mainly aimed at fixing bugs and
 adding missing features. The current items on the high-priority list include:
  - Interferometry simulations using dishes.
- - Allowing for different antenna types within each station.
  - Inclusion of direction-independent gain and phase errors, to be corrected
    during calibration
  - Inclusion of a simple ionosphere model.
