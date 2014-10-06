@@ -5,7 +5,6 @@
 include(UseDoxygen/UseDoxygen)
 
 set(DOXYFILE_PROJECT_NAME "OSKAR User Documentation")
-set(DOXYFILE_LATEX_FOOTER "${CMAKE_SOURCE_DIR}/doc/oskar_latex_footer.tex")
 set(DOXYFILE_LATEX_EXTRA_FILES "${CMAKE_SOURCE_DIR}/doc/oskar_latex.sty")
 #
 # Note/FIXME (src/doc/Doxyfile.in):
@@ -49,7 +48,6 @@ add_doc(
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
     LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header.tex)
 
-set(DOXYFILE_LATEX_FOOTER "${CMAKE_SOURCE_DIR}/doc/oskar_latex_footer_single.tex")
 set(DOXYFILE_IMAGE_PATHS "")
 set(DOXYFILE_EXAMPLE_PATHS "")
 # Install documentation
