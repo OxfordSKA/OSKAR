@@ -35,8 +35,15 @@ add_doc(
     TARGET_NAME  doc
     DOC_INPUTS   ${USER_DOC_SRC}
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header.tex
-    VERBOSE)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header.tex)
+
+# Settings documentation
+add_doc(
+    DOC_NAME     install
+    TARGET_NAME  doc_single
+    DOC_INPUTS   ${CMAKE_CURRENT_SOURCE_DIR}/install
+    TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
 
 # Settings documentation
 add_doc(
@@ -44,8 +51,7 @@ add_doc(
     TARGET_NAME  doc_single
     DOC_INPUTS   ${CMAKE_CURRENT_SOURCE_DIR}/settings
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex
-    VERBOSE)
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
 
 
 
