@@ -1,0 +1,49 @@
+/**
+
+\page settings Settings
+
+\latexonly
+\def \chapterver{666}
+\endlatexonly
+
+\section settings_intro Introduction
+This document describes the settings files used by OSKAR applications, which
+use the INI plain-text file format.
+
+<b> Note that if you are using the OSKAR GUI, the settings descriptions are
+available as tool-tips, and you should not need to refer to this document.
+Settings documentation is provided for scripting reference only.</b>
+
+Settings are defined simply using key-value pairs, for example:
+
+\verbatim
+simulator/double_precision=true
+observation/ start_time_utc=01-01-2000 12:01:02.000
+observation/length=06:00:00.000
+\endverbatim
+
+Settings can also be grouped into sections. For example, the above can also be
+written as:
+
+\verbatim
+[simulator]
+double_precision=true
+[observation]
+start_time_utc=01-01-2000 12:01:02.000
+length=06:00:00.000
+\endverbatim
+
+Settings files can be written or modified using any text editor, or by using the
+<tt>oskar_settings_set</tt> binary, or (the recommended method) by using the
+OSKAR GUI.
+
+The following section describes the currently available settings options
+
+\section settings_simulator Simulator Settings
+These parameters affect the operation of the software.
+
+All settings keys in this group are prefixed with <tt>simulator/</tt>.
+
+\latexinclude latex_simulator_settings_test.tex
+
+*/

@@ -17,10 +17,6 @@
 #
 # =============================================================================
 
-
-# === Append the src/cmake directory to the module path.
-list(INSERT CMAKE_MODULE_PATH 0 ${OSKAR_SOURCE_DIR}/cmake/modules)
-
 if (DEFINED LAPACK_LIB_DIR)
     list(INSERT CMAKE_LIBRARY_PATH 0 ${LAPACK_LIB_DIR})
 endif()

@@ -1,57 +1,12 @@
 #
 # cmake/oskar_build_macros.cmake
 #
-#===============================================================================
+
+#
 # A collection of cmake macros used by the oskar build system.
 #
 
-
-#
-# http://www.cmake.org/Wiki/CMakeMacroParseArguments
-#
-MACRO(PARSE_ARGUMENTS prefix arg_names option_names)
-  SET(DEFAULT_ARGS)
-  FOREACH(arg_name ${arg_names})
-    SET(${prefix}_${arg_name})
-  ENDFOREACH(arg_name)
-  FOREACH(option ${option_names})
-    SET(${prefix}_${option} FALSE)
-  ENDFOREACH(option)
-
-  SET(current_arg_name DEFAULT_ARGS)
-  SET(current_arg_list)
-  FOREACH(arg ${ARGN})
-    SET(larg_names ${arg_names})
-    LIST(FIND larg_names "${arg}" is_arg_name)
-    IF (is_arg_name GREATER -1)
-      SET(${prefix}_${current_arg_name} ${current_arg_list})
-      SET(current_arg_name ${arg})
-      SET(current_arg_list)
-    ELSE (is_arg_name GREATER -1)
-      SET(loption_names ${option_names})
-      LIST(FIND loption_names "${arg}" is_option)
-      IF (is_option GREATER -1)
-         SET(${prefix}_${arg} TRUE)
-      ELSE (is_option GREATER -1)
-         SET(current_arg_list ${current_arg_list} ${arg})
-      ENDIF (is_option GREATER -1)
-    ENDIF (is_arg_name GREATER -1)
-  ENDFOREACH(arg)
-  SET(${prefix}_${current_arg_name} ${current_arg_list})
-ENDMACRO(PARSE_ARGUMENTS)
-
-
-#
-# http://www.cmake.org/Wiki/CMakeMacroListOperations#CAR_and_CDR
-#
-MACRO(CAR var)
-  SET(${var} ${ARGV1})
-ENDMACRO(CAR)
-
-MACRO(CDR var junk)
-  SET(${var} ${ARGN})
-ENDMACRO(CDR)
-
+include(oskar_cmake_utilities)
 
 # Macro to build and install apps that depend on Qt.
 #
@@ -73,16 +28,16 @@ ENDMACRO(CDR)
 # Note: Named options can appear in any order
 #
 macro(QT_APP)
-    parse_arguments(APP   # prefix
+    parse_arguments(APP         # prefix
         "QT_MOC_SRC;EXTRA_LIBS" # arg names
-        "NO_INSTALL"   # option names
+        "NO_INSTALL"            # option names
         ${ARGN}
     )
     CAR(APP_NAME ${APP_DEFAULT_ARGS})
     CDR(APP_SOURCES ${APP_DEFAULT_ARGS})
 
     if (NOT QT4_FOUND)
-        message(CRITICAL "Unable to build oskar app ${APP_NAME}, Qt4 not found!")
+        message(FATAL_ERROR "Unable to build oskar app ${APP_NAME}, Qt4 not found!")
     endif ()
 
     # Create a target name from the app name.
@@ -177,7 +132,7 @@ macro(OSKAR_APP)
     add_executable(${target} ${APP_SOURCES})
     target_link_libraries(${target}
         oskar               # default libs
-        oskar_apps 
+        oskar_apps
         ${APP_EXTRA_LIBS}   # extra libs
     )
     # We do need the OpenMP flags here, otherwise programs will crash.

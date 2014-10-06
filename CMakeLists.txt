@@ -12,7 +12,7 @@ endif()
 
 # === Set the project name and specify the required CMAKE version.
 project(OSKAR CXX C)
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.3 FATAL_ERROR)
 # http://www.cmake.org/Wiki/CMake/Policies
 if("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_GREATER 2.8)
     cmake_policy(SET CMP0042 OLD) # Currently required for cmake-3.x
@@ -28,6 +28,7 @@ set(OSKAR_VERSION_SUFFIX "trunk")
 
 # === Add a local module path
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake)
+list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake/modules)
 
 # === Setup install directory paths
 # Note: the install directory prefix is set by -DCMAKE_INSTALL_PRFEIX=<path>
