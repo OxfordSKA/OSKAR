@@ -93,7 +93,7 @@ the order listed below.
   document to verify that OSKAR works as you expect.
 
 - \ref apps "Apps"<br>
-  Describes the available OSKAR applications and the MATLAB interface.
+  Describes the available OSKAR applications.
 
 - \ref sky_model "Sky Model"<br>
   Describes the format of the OSKAR sky model files.

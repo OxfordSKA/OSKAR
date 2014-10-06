@@ -28,13 +28,13 @@ interest. A single data block may consist of a single value, or an array of
 values; in the latter case, other data blocks within the file should
 contain the dimension sizes of multi-dimensional arrays.
 
-When reading an OSKAR binary file, it is sensible to first construct a local
-tag index to help locate the correct data. All OSKAR library functions
-that read binary files will do this automatically if necessary.
+When reading an OSKAR binary file, it is sensible for the program to 
+construct a local tag index to help locate the correct data. All OSKAR 
+library functions that read binary files do this automatically.
 
 \subsection binary_header File Header
 
-The file header is exactly 64 bytes long, and is structured as follows:
+The file header is 64 bytes long, and is structured as follows:
 
 <table>
 <tr><th>Offset (bytes)</th> <th>Length (bytes)</th> <th>Description</th> </tr>
@@ -64,7 +64,7 @@ this would be 0x020103.
 \subsection binary_tag_header Tag (Data Block Header)
 
 Each data block that follows the file header (whether a single value or an
-array of values) is preceded by a tag, which is a structure exactly 20 bytes
+array of values) is preceded by a tag, which is a structure 20 bytes
 long. The data that follows the tag is uniquely identified by the combination
 of the group ID, tag ID and index. The two identifiers will take different
 forms depending on whether the tag is "standard" or "extended," and this is
