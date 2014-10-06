@@ -1,47 +1,41 @@
 
+% Rules:
+% Widths have to add up to: 23cm
+% First column is fixed width based on longest key
+% After that all columns are variable width.
+% -- TODO pass column widths though script.
 
-\begin{DoxyItemize}
-\item {\bf \ttfamily simulator/double\_precision} [type=bool] [default=true]
-\begin{DoxyItemize}
-\item {\bf Description} : Determines whether double precision arithmetic is
-used. This description spans a couple of lines to provide a useful example
-it also contains some html tags such as <b>bold</b>
-\item {\bf Default} : true
-\item {\bf Allowed values} : true / false
-\end{DoxyItemize}
-\end{DoxyItemize}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 
-% =============================================================================
+\begin{longtable}{|L{9cm}|p{8cm}|L{4cm}|L{2cm}|}
 
-\begin{landscape}
-%\begin{pdflandscape}
-
-Simulator settings
-
-%\begin{sidewaystable}
-%\begin{rotate}{90}
-%\begin{table}[H]
-%\centering
-
-%\begin{tabularx}{25cm}{|l|l|X|l|l|}
-%\begin{tabularx}{\textwidth}{|l|l|X|l|l|}
-%\begin{tabularx}{\textheight}{|l|l|X|l|l|}
-\begin{longtable}{|l|l|p{8cm}|l|l|}
 \hline
 \rowcolor{lightgray}
-{\bf Key}&{\bf Type}&{\bf Description}&{\bf Allowed values}&{\bf Default}\\\cline{1-5}
+{\bf Key}&{\bf Description}&{\bf Allowed values}&{\bf Default}
+\\ \hline
+
 simulator/double\_precision &
-bool
-&
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>
 &
 true / false & true
 \\ \hline
+simulator/ double\_precision /very/long/long/key/goes\_here/dgsdgfs/gfdsgfdgdf/gfdgdfg/gfdgdf &
+Determines whether double precision arithmetic is used. This description spans
+a couple of lines to provide a useful example it also contains some html
+tags such as <b>bold</b>. Some more description ... blah blah blah blah
+blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
+blah blah blah blah blah blah blah blah blah blah
+&
+This is a very long set or specification of allowed values
+&
+true
+\\ \hline
 
 simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>. Some more description ... blah blah blah blah
@@ -51,7 +45,6 @@ true / false & true
 \\ \hline
 
 simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>. Some more description ... blah blah blah blah
@@ -61,7 +54,6 @@ true / false & true
 \\ \hline
 
 simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>. Some more description ... blah blah blah blah
@@ -71,7 +63,6 @@ true / false & true
 \\ \hline
 
 simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>. Some more description ... blah blah blah blah
@@ -81,7 +72,6 @@ true / false & true
 \\ \hline
 
 simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>. Some more description ... blah blah blah blah
@@ -91,7 +81,6 @@ true / false & true
 \\ \hline
 
 simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>. Some more description ... blah blah blah blah
@@ -101,7 +90,6 @@ true / false & true
 \\ \hline
 
 simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>. Some more description ... blah blah blah blah
@@ -111,7 +99,6 @@ true / false & true
 \\ \hline
 
 simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>. Some more description ... blah blah blah blah
@@ -121,7 +108,6 @@ true / false & true
 \\ \hline
 
 simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>. Some more description ... blah blah blah blah
@@ -131,7 +117,6 @@ true / false & true
 \\ \hline
 
 simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>. Some more description ... blah blah blah blah
@@ -141,7 +126,6 @@ true / false & true
 \\ \hline
 
 simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>. Some more description ... blah blah blah blah
@@ -151,7 +135,6 @@ true / false & true
 \\ \hline
 
 simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>. Some more description ... blah blah blah blah
@@ -161,7 +144,6 @@ true / false & true
 \\ \hline
 
 simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
 Determines whether double precision arithmetic is used. This description spans
 a couple of lines to provide a useful example it also contains some html
 tags such as <b>bold</b>. Some more description ... blah blah blah blah
@@ -170,41 +152,5 @@ blah blah blah blah blah blah blah blah blah blah &
 true / false & true
 \\ \hline
 
-simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
-Determines whether double precision arithmetic is used. This description spans
-a couple of lines to provide a useful example it also contains some html
-tags such as <b>bold</b>. Some more description ... blah blah blah blah
-blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-blah blah blah blah blah blah blah blah blah blah &
-true / false & true
-\\ \hline
-
-simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
-Determines whether double precision arithmetic is used. This description spans
-a couple of lines to provide a useful example it also contains some html
-tags such as <b>bold</b>. Some more description ... blah blah blah blah
-blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-blah blah blah blah blah blah blah blah blah blah &
-true / false & true
-\\ \hline
-
-simulator/double\_precision/very/long/long/key/goes\_here &
-bool &
-Determines whether double precision arithmetic is used. This description spans
-a couple of lines to provide a useful example it also contains some html
-tags such as <b>bold</b>. Some more description ... blah blah blah blah
-blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-blah blah blah blah blah blah blah blah blah blah &
-true / false & true
-\\ \hline
-
-%\end{tabularx}
 \caption{Caption...}
 \end{longtable}
-
-%\end{sidewaystable}
-%\end{table}
-%\end{rotate}
-\end{landscape}

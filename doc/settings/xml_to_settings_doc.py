@@ -13,7 +13,6 @@
 #     print root.childNodes[i].toxml()
 #     print '----------'
 
-
 import xml.etree.ElementTree as ET
 filename = 'oskar_simulator_2.xml'
 tree = ET.parse(filename)

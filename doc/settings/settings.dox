@@ -39,11 +39,22 @@ OSKAR GUI.
 
 The following section describes the currently available settings options
 
-\section settings_simulator Simulator Settings
-These parameters affect the operation of the software.
+\latexonly
+\begin{landscape}
+\endlatexonly
 
-All settings keys in this group are prefixed with <tt>simulator/</tt>.
+\section settings_simulator Simulator settings
+These parameters affect the operation of the software. All settings keys in
+this group are prefixed with <tt>simulator/</tt>.
 
 \latexinclude latex_simulator_settings_test.tex
+
+\htmlinclude html_simulator_settings_test.html
+
+\latexonly
+\end{landscape}
+\endlatexonly
+
+
 
 */
