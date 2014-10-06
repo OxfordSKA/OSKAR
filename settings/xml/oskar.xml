@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <root version="@OSKAR_VERSION_STR@">
-
-<import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_simulator.xml" />
-<import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_sky_model.xml" />
-
+    <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_simulator.xml" />
+    <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_sky_model.xml" />
 </root>

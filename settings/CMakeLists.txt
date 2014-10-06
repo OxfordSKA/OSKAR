@@ -8,6 +8,7 @@
 # 2. log_settings function in untility (this is really an app function!)
 #
 
+add_subdirectory(xml)
 
 #
 # Note this module is currently being built as a STATIC library. This may need
@@ -43,7 +44,7 @@ if (QT4_FOUND)
     )
     qt4_wrap_cpp(${name}_SRC ${${name}_MOC_SRC})
     add_library(${name} ${lib_type} ${${name}_SRC} ${${name}_MOC_SRC})
-    target_link_libraries(${name} 
+    target_link_libraries(${name}
         ${QT_QTCORE_LIBRARY}
         ${QT_QTGUI_LIBRARY}
     )
@@ -106,7 +107,7 @@ if (QT4_FOUND)
     )
 
     add_library(${name} ${lib_type} ${${name}_C_SRC} ${${name}_CXX_SRC})
-    target_link_libraries(${name} 
+    target_link_libraries(${name}
         oskar_settings_struct
         ${QT_QTCORE_LIBRARY}
         ${CUDA_LIBRARIES})

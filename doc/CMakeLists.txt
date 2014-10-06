@@ -76,3 +76,13 @@ add_doc(
     DOC_INPUTS   ${CMAKE_CURRENT_SOURCE_DIR}/binary_file
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
     LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+
+
+
+
+
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/settings/xml_to_settings_doc.py
+    ${CMAKE_CURRENT_BINARY_DIR}/settings/xml_to_settings_doc.py @ONLY)
+
+    
