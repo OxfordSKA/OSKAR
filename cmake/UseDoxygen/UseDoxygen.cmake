@@ -105,7 +105,6 @@ endmacro()
 # to alter default behaviour.
 #   - DOXYFILE_PROJECT_NAME
 #   - DOXYFILE_PROJECT_NUMBER
-#   - DOXYFILE_LATEX_FOOTER
 #   - DOXYFILE_LATEX_EXTRA_FILES
 #
 function(add_doc)

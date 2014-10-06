@@ -17,7 +17,6 @@ set(DOXYFILE_LATEX_EXTRA_FILES "${CMAKE_SOURCE_DIR}/doc/oskar_latex.sty")
 #        ${CMAKE_CURRENT_BINARY_DIR}/oskar_latex.sty)
 #endif()
 
-
 # User documentation
 set(USER_DOC_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/intro.dox
@@ -77,14 +76,3 @@ add_doc(
     DOC_INPUTS   ${CMAKE_CURRENT_SOURCE_DIR}/binary_file
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
     LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
-
-
-
-
-
-
-
-
-
-
-
