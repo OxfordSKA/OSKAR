@@ -1,4 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<s key="sky" label="Sky model settings">
+<s k="sky">
+    <apps>oskar_sim_interferometer</apps>
+    <label>Sky model settings</label>
+
+    <!-- OSM (OSKAR sky model) file group -->
+    <s k="oskar_sky_model"><label>OSKAR sky model file settings</label>
+        <s k="file"><label>OSKAR sky model file(s)</label>
+            <type name="InputFileList" default="" />
+            <description>
+                Paths to one or more OSKAR sky model text or binary files.
+                See the accompanying documentation for a description of an
+                OSKAR sky model file.
+            </description>
+        </s>
+        <import filename="oskar_sky_model_filter.xml" />
+        <import filename="oskar_sky_model_extended_sources.xml" />
+    </s>
+
+    <!-- GSM file group -->
+    <s k="gsm"><label>Global Sky Model (GSM) file settings</label>
+        <s k="file"><label>GSM file</label>
+            <type name="InputFile" default="" />
+            <desc>
+                Path to a Global Sky Model file, pixellated using the 
+                HEALPix RING scheme. This option can be used to load 
+                a GSM data file produced from software written
+                by Angelica de Oliveira, available at 
+                https://www.cfa.harvard.edu/~adeolive/gsm/
+            </desc>
+        </s>
+        <import filename="oskar_sky_model_filter.xml" />
+        <import filename="oskar_sky_model_extended_sources.xml" />
+    </s>
+
+    <!-- FITS image group -->
+    <s k="fits_image"><label>FITS image file settings</label>
+
+        <s k="file"><label>Input FITS file(s)</label>
+            <type name="InputFileList" default="" />
+            <desc>FITS file(s) to use as a sky model.</desc>
+        </s>        
+        <s k="downsample_factor"><label>Downsample factor</label>
+            <type name="IntRange" default="1">1,MAX</type>
+            <desc>The factor by which to sownsample the pixel grid.</desc>
+        </s>        
+        <s k="min_peak_fraction"><label>Minimum fraction of peak</label>
+            <type name="IntRange" default="0.02">0,MAX</type>
+            <desc>
+                The minimum allowed pixel value, as a fraction of the 
+                peak value in the image.
+            </desc>
+        </s>
+        <s k="noise_floor"><label>"Noise floor [Jy/PIXEL]</label>
+            <type name="DoubleRange" default="0.0" >0,MAX</type>
+            <desc>The noise floor of the image, in Jy/PIXEL.</desc>
+        </s>
+        <s k="spectral_index"><label>Spectral index</label>
+            <type name="double" default="0.0" />
+            <desc>The spectral index of each pixel.</desc>
+        </s>
+    </s>
+
+    <!-- HEALPix FITS image group -->    
+    <s k="healpix_fits"><label>HEALPix FITS file settings</label>
+        <s k="file"><label>Input HEALPix FITS file</label>
+            <type name="InputFileList" default="" />
+            <desc>
+                Paths to one or more HEALPix FITS files, ordered using
+                the HEALPix RING scheme (NEST schemes are not supported).
+            </desc>
+        </s>
+        <s k="coord_sys"><label>Coordinate system</label>
+            <type name="OptionList" default="G">
+                Galactic,Equatorial
+            </type> 
+            <desc>
+                The spherical coordinate system used for the HEALPix
+                representation.
+            </desc>
+        </s>
+        <s k="map_units"><label>Map units</label>
+            <type name="OptionList" default="mK/sr" > 
+                mK/sr (Temperature per steradian),
+                K/sr (Temperature per steradian),
+                Jy/pixel (Jansky per pixel)
+            </type>
+            <desc>The physical units of pixels in the input map.</desc>
+        </s>
+        <import filename="oskar_sky_model_filter.xml" />
+        <import filename="oskar_sky_model_extended_sources.xml" />
+    </s>
+
 </s>

@@ -5,6 +5,8 @@ import os
 
 # http://stackoverflow.com/questions/8845456/how-can-i-do-replace-a-child-elements-in-elementtree
 def process_import_nodes(xmlFile):
+    print ''
+    print '** INFO: Reading xml file:', xmlFile,'**'
     xmlFH = open(xmlFile, 'r')
     xmlStr = xmlFH.read()
     et = ET.fromstring(xmlStr)
@@ -38,18 +40,28 @@ def parse_setting_node(node, key, depth):
 
     if 'key' in node.attrib:
         key_ = node.attrib['key']
+    elif 'k' in node.attrib:
+        key_ = node.attrib['k']
     else:
         raise 'Invalid settings node: has no key!'
     type_node_ = node.find('type')
     if type_node_ == None and depth == 1:
-        print '%s<G> key:%s' % ('  '*depth, key_)
+        #print '%s<G> key:%s' % ('  '*depth, key_)
+        print '%s[GROUP %s]' % ('  '*depth, key_)
         return None
     else:
         if key: full_key = key + '/' + key_
         else: full_key = key_
-        print ''
-        print '%s<S> key:%s [%s]' % ('  '*depth, key_, full_key)
+        #print ''
+        #print '%s<S> key:%s [%s]' % ('  '*depth, key_, full_key)
+        print '%s%s' % ('  '*depth, full_key)
         return full_key
+
+def parse_label_node(node, depth):
+    if not (node.tag == 'label' or node.tag == 'l'): return
+    if not node.text: raise 'Invalid type tag!'
+    label_ = node.text
+    #print '%s[Label] %s' % ('  '*(depth), label_)
 
 def parse_type_node(node, depth):
     if not (node.tag == 'type' or node.tag == 't'): return
@@ -62,11 +74,18 @@ def parse_type_node(node, depth):
         default_ = attributes['default']
     else:
         default_ = ''
-    print '%s<type> name:%s default:%s' % ('  '*(depth), name_, default_)
+    #print '%s<type> name:%s default:%s' % ('  '*(depth), name_, default_)
 
 def parse_description_node(node, depth):
     if not (node.tag == 'description' or node.tag == 'desc'): return
-    print '%s<Desc> %s' % ('  '*(depth), node.text)
+    #print '%s<Desc> ...' % ('  '*(depth))
+    #print '%s<Desc> %s' % ('  '*(depth), node.text)
+    desc_ = node.text
+    # TODO latex instead of < or <=
+    desc_ = desc_.replace('&lt;', '<')
+    desc_ = desc_.replace('&le;', '<=')
+    #print '%s<Desc> %s' % ('  '*(depth), desc_)
+    
 
 def recurse_tree(root, key = None, depth=0):
     depth += 1
@@ -74,6 +93,9 @@ def recurse_tree(root, key = None, depth=0):
 
         # Settings node
         new_key = parse_setting_node(node_, key, depth)
+
+        # label node
+        parse_label_node(node_, depth)
 
         # type node
         parse_type_node(node_, depth)
@@ -90,7 +112,7 @@ filename = '@PROJECT_BINARY_DIR@/settings/xml/oskar.xml'
 
 
 xml = process_import_nodes(filename)
-# print ET.tostring(xml)
+print ET.tostring(xml)
 # print type(xml)
 print '---------------------------------'
 print '<%s>' % xml.tag
