@@ -35,7 +35,7 @@ def process_import_nodes(xmlFile):
 
     return et
 
-def parse_setting_node(node, key, depth):
+def parse_setting_node(node, key, depth, count):
     if not (node.tag == 's' or node.tag == 'setting'): return
 
     if 'key' in node.attrib:
@@ -47,14 +47,18 @@ def parse_setting_node(node, key, depth):
     type_node_ = node.find('type')
     if type_node_ == None and depth == 1:
         #print '%s<G> key:%s' % ('  '*depth, key_)
-        print '%s[GROUP %s]' % ('  '*depth, key_)
+        print ''
+        print '***** [GROUP %s] *****' % (key_)
         return None
     else:
         if key: full_key = key + '/' + key_
         else: full_key = key_
         #print ''
         #print '%s<S> key:%s [%s]' % ('  '*depth, key_, full_key)
-        print '%s%s' % ('  '*depth, full_key)
+        if type_node_ == None:
+            print '[---]%s%s' % (' '*depth, full_key)
+        else:
+            print '[%03i]%s%s' % (count, ' '*depth, full_key)
         return full_key
 
 def parse_label_node(node, depth):
@@ -64,7 +68,8 @@ def parse_label_node(node, depth):
     #print '%s[Label] %s' % ('  '*(depth), label_)
 
 def parse_type_node(node, depth):
-    if not (node.tag == 'type' or node.tag == 't'): return
+    if not (node.tag == 'type' or node.tag == 't'): return None
+    
     attributes = node.attrib
     if 'name' in attributes:
         name_ = attributes['name']
@@ -74,6 +79,7 @@ def parse_type_node(node, depth):
         default_ = attributes['default']
     else:
         default_ = ''
+    return name_
     #print '%s<type> name:%s default:%s' % ('  '*(depth), name_, default_)
 
 def parse_description_node(node, depth):
@@ -87,26 +93,37 @@ def parse_description_node(node, depth):
     #print '%s<Desc> %s' % ('  '*(depth), desc_)
     
 
-def recurse_tree(root, key = None, depth=0):
+def recurse_tree(node, key=None, depth=0, count=0):
     depth += 1
-    for node_ in root:
+    
+    # Loop over child nodes of the current node.
+    for child_ in node:
 
         # Settings node
-        new_key = parse_setting_node(node_, key, depth)
+        key_ = parse_setting_node(child_, key, depth, count)
 
         # label node
-        parse_label_node(node_, depth)
+        parse_label_node(child_, depth)
 
         # type node
-        parse_type_node(node_, depth)
+        parse_type_node(child_, depth)
 
         # Description node
-        parse_description_node(node_, depth)
+        parse_description_node(child_, depth)
+        
+        # Increment the setting count if a valid setting.
+        
+        if key_ != None:
+            type_ = child_.find('type')
+            if type_ != None:
+                count+=1
 
         # Descend the tree.
         new_depth = depth+1
-        recurse_tree(node_, new_key, new_depth)
+        count = recurse_tree(child_, key_, new_depth, count)
 
+
+    return count
 
 filename = '@PROJECT_BINARY_DIR@/settings/xml/oskar.xml'
 

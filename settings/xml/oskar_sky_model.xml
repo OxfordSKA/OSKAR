@@ -92,4 +92,89 @@
         <import filename="oskar_sky_model_extended_sources.xml" />
     </s>
 
+
+    <!-- Sky model generators -->
+    <s k="generator"><label>Generators</label>
+
+        <!-- Random Power law -->
+        <s k="random_power_law"><label>Random, power-law in flux</label>
+            <s k="num_sources"><label>Number of sources</label>
+                <type name="UInt" default="0"/>
+                <desc>
+                    Number of sources scattered approximately uniformly 
+                    over the sphere (before filtering). A value greater 
+                    than 0 will activate the random power-law generator.
+                </desc>
+            </s>
+            <s k="flux_min"><label>Flux density min [Jy]</label>
+                <type name="DoubleRange" default="0">0,MAX</type>
+                <desc>
+                    Minimum flux density in the random distribution, in Jy
+                    (before filtering).
+                </desc>
+            </s>
+            <s k="flux_max"><label>Flux density max [Jy]</label>
+                <type name="DoubleRange" default="0">0,MAX</type>
+                <desc>
+                    Maximum flux density in the random distribution, in Jy
+                    (before filtering).
+                </desc>
+            </s>
+            <s k="power"><label>Power law index</label>
+                <type name="double" default="0"/>
+                <desc>
+                    Power law exponent describing number per unit flux 
+                    density.
+                </desc>
+            </s>
+
+            <s k="seed"><label>Random seed</label>
+                <type name="RandomSeed" default="1"/>
+                <desc>
+                    Random number generator seed used for random 
+                    distributions.
+                </desc>
+            </s>
+            <import filename="oskar_sky_model_filter.xml" />
+            <import filename="oskar_sky_model_extended_sources.xml" />
+        </s>
+
+
+
+
+    </s>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </s>
