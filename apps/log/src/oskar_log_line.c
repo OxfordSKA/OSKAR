@@ -34,21 +34,40 @@
 extern "C" {
 #endif
 
+/* http://stackoverflow.com/questions/15321493/how-should-i-pass-null-to-the-va-list-function-parameter */
+static va_list do_create_empty_va_list(int i, ...)
+{
+    va_list vl;
+    va_start(vl, i);
+    return vl;
+}
+static va_list create_empty_va_list()
+{
+    return do_create_empty_va_list(0);
+}
+
 void oskar_log_line(oskar_Log* log, char priority, char symbol)
 {
-    va_list args;
     char code = symbol;
-    FILE* stream = 0;
     int depth = OSKAR_LOG_LINE;
     const char* prefix = 0;
     const char* format = 0;
-    stream = (priority == 'E') ? stderr : stdout;
-    oskar_log_write(log, stream, priority, code, depth, prefix, format, args);
+
+    /* Print to stdout or stderr */
+    {
+        FILE* stream = (priority == 'E') ? stderr : stdout;
+        va_list vl = create_empty_va_list();
+        oskar_log_write(log, stream, priority, code, depth, prefix, format, vl);
+        va_end(vl);
+    }
+    
+    /* Print to the log file */
     if (log && log->file)
     {
-        oskar_log_write(log, log->file, priority, code, depth, prefix, format, args);
+        va_list vl = create_empty_va_list();
+        oskar_log_write(log, log->file, priority, code, depth, prefix, format, create_empty_va_list());
+        va_end(vl);
     }
-
 }
 
 #ifdef __cplusplus
