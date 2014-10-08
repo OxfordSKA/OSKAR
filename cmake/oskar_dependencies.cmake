@@ -27,7 +27,7 @@ find_package(OpenMP)                # liboskar
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     find_package(MKL)               # liboskar
 endif()
-if (NOT MKL_FOUND )
+if (NOT MKL_FOUND)
     find_package(CBLAS)             # liboskar
     find_package(LAPACK)            # liboskar
 endif ()

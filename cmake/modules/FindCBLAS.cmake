@@ -7,9 +7,13 @@
 # Also defined, but not for general use are
 #  CBLAS_LIBRARY, where to find the library.
 
-set(BLAS_FIND_REQUIRED true)
 
-set(CBLAS_NAMES ${CBLAS_NAMES} cblas gslcblas)
+#set(BLAS_FIND_REQUIRED true)
+
+set(CBLAS_NAMES 
+    cblas 
+    gslcblas
+)
 
 find_library(CBLAS_LIBRARY
     NAMES ${CBLAS_NAMES}
@@ -22,7 +26,8 @@ find_library(CBLAS_LIBRARY
     /usr/lib64
     /usr/lib
     /usr/local/lib64
-    /usr/local/lib)
+    /usr/local/lib
+)
 
 if (CBLAS_LIBRARY)
     set(CBLAS_LIBRARIES ${CBLAS_LIBRARY})
