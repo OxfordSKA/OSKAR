@@ -2,6 +2,9 @@
 
 <s key="simulator">
     <label>Simulator settings</label>
+    <desc>
+        These parameters affect the operation of the software.
+    </desc>
 
     <s key="double_precision">
         <label>Use double precision</label>

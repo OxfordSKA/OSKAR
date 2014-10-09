@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<s k="observation">
+    <label>Observation settings</label>
+    <apps></apps>
+    <desc>
+        These parameters are used to specify the observation.
+    </desc>
+
+    <s k="phase_centre_ra_deg"><label>Phase centre RA [deg]</label>
+        <type name="DoubleList" default="0"/>
+        <desc>
+            Right Ascension of the observation pointing (phase centre), 
+            in degrees.
+        </desc>
+    </s>
+    <s k="phase_centre_dec_deg"><label>Phase centre Dec [deg]</label>
+        <type name="DoubleList" default="0"/>
+        <desc>
+            Declination of the observation pointing (phase centre), in degrees.
+        </desc>
+    </s>
+    <s k="pointing_file"><label>Station pointing file</label>
+        <type name="InputFile" default="0"/>
+        <desc>
+            Pathname to optional station pointing file, which can be 
+            used to override the beam direction for any or all stations in 
+            the telescope model. See the accompanying documentation for a 
+            description of a station pointing file.
+        </desc>
+    </s>
+    <s k="start_frequency_hz" required="true">
+        <label>Start frequency [Hz]</label>
+        <type name="DoubleRange">0,MAX</type>
+        <desc>The frequency at the midpoint of the first channel, in Hz.</desc>
+    </s>
+    <s k="num_channels"><label>Number of frequency channels</label>
+        <type name="IntRange" default="1">1,MAX</type>
+        <desc>Number of frequency channels / bands to use.</desc>
+    </s>
+    <s k="frequency_inc_hz"><label>Frequency increment [Hz]</label>
+        <type name="DoubleRange" default="0">0,MAX</type>
+        <desc>The frequency increment between successive channels, in Hz.</desc>
+    </s>
+    <s k="start_time_utc" required="true"><label>Start time (UTC)</label>
+        <type name="DateTime" />
+        <desc>
+            A string describing the start time and date for the observation.
+        </desc>
+    </s>
+    <s k="length" required="true">
+        <label>Observation length [sec, or hh:mm:ss]</label>
+        <type name="Time" />
+        <desc>
+            The observation length either in seconds, or in hours, minutes and seconds.
+        </desc>
+    </s>   
+    <s k="num_time_steps">
+        <label>Number of time steps</label>
+        <type name="IntRange" default="1">1,MAX</type>
+        <desc>
+            Number of time steps in the output data during the observation
+            length. This corresponds to the number of correlator dumps
+            for interferometer simulations, and the number of beam 
+            pattern snapshots for beam pattern simulations. 
+        </desc>
+    </s>
+</s>

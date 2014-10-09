@@ -1,0 +1,27 @@
+
+<!-- ************************************* -->
+\section settings_simulator Simulator settings
+These parameters affect the operation of the software.
+
+All settings keys in this group are prefixed with <tt>simulator/</tt>.
+
+\latexinclude latex_simulator.tex
+\htmlinclude  html_simulator_settings_text.html
+
+<!-- ************************************* -->
+\section settings_sky Sky model settings
+These parameters are used to specify the content of the sky model.
+
+All settings keys in this group are prefixed with <tt>sky/</tt>.
+
+\latexinclude latex_sky.tex
+\htmlinclude  html_simulator_settings_text.html
+
+<!-- ************************************* -->
+\section settings_observation Observation settings
+These parameters are used to specify the observation.
+
+All settings keys in this group are prefixed with <tt>observation/</tt>.
+
+\latexinclude latex_observation.tex
+\htmlinclude  html_simulator_settings_text.html
