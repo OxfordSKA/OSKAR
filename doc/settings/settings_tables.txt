@@ -25,3 +25,12 @@ All settings keys in this group are prefixed with <tt>observation/</tt>.
 
 \latexinclude latex_observation.tex
 \htmlinclude  html_simulator_settings_text.html
+
+<!-- ************************************* -->
+\section settings_telescope Telescope model settings
+These parameters are used to specify the contents of the telescope model.
+
+All settings keys in this group are prefixed with <tt>telescope/</tt>.
+
+\latexinclude latex_telescope.tex
+\htmlinclude  html_simulator_settings_text.html

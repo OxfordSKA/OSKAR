@@ -31,7 +31,7 @@
     </s>
     <s k="start_frequency_hz" required="true">
         <label>Start frequency [Hz]</label>
-        <type name="DoubleRange">0,MAX</type>
+        <type name="UnsignedDouble" />
         <desc>The frequency at the midpoint of the first channel, in Hz.</desc>
     </s>
     <s k="num_channels"><label>Number of frequency channels</label>
@@ -39,7 +39,7 @@
         <desc>Number of frequency channels / bands to use.</desc>
     </s>
     <s k="frequency_inc_hz"><label>Frequency increment [Hz]</label>
-        <type name="DoubleRange" default="0">0,MAX</type>
+        <type name="UnsignedDouble" default="0" />
         <desc>The frequency increment between successive channels, in Hz.</desc>
     </s>
     <s k="start_time_utc" required="true"><label>Start time (UTC)</label>

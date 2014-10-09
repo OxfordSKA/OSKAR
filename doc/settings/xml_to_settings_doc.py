@@ -45,9 +45,7 @@ def get_attribute(node, allowed_keys, toupper=True):
             else: return a
     return None
 
-def set_allowed_values_latex(node, latex_file):
-    latex_file.write('%s\n' % 'allowed values...')
-    latex_file.write('&\n')
+
 
 def get_first_child(node, possible_tags):
     if node == None: return None
@@ -77,7 +75,6 @@ def format_double_string(string):
             return '%.1f' % float(string)
         else:
             return '%.*f' % (len(value[1]), float(string))
-
 
 def set_default_value_latex(node, latex_file):
     type_      = get_first_child(node, ['type', 't'])
@@ -124,10 +121,58 @@ def set_default_value_latex(node, latex_file):
                     tmp = option.split()
                     default_ = tmp[0]
                     break
-            print default_
+            #print default_
 
     latex_file.write('%s\n' % default_)
 
+def set_allowed_values_latex(node, latex_file):
+    type_      = get_first_child(node, ['type', 't'])
+    type_name_ = get_attribute(type_, ['name', 't'])
+    if type_name_ == None: raise 'Invalid setting'
+
+    allowed_values_ = 'Allowed values'
+
+    if type_name_  == 'DOUBLE' or type_name_ == 'INT' or \
+        type_name_ == 'BOOL' or type_name_ == 'STRING':
+        allowed_values_ = type_name_[0].upper() + type_name_[1:].lower()
+
+    elif type_name_ == 'UINT':
+        allowed_values_ = 'Unsigned int'
+
+    elif type_name_ == 'INTPOSITIVE':
+        allowed_values_ = 'Integer > 0'
+
+    elif type_name_  == 'UNSIGNEDDOUBLE':
+        params_ = get_type_params(type_)
+        allowed_values_ = 'Unsigned double'
+
+    elif type_name_  == 'RANDOMSEED':
+        allowed_values_ = "`time' or integer seed $\geq$ 1"
+
+    elif type_name_  == 'DOUBLERANGE':
+        params_ = get_type_params(type_)
+        # TODO logic on not setting both values
+        # for eg 2  to max display as  >= 2
+        # for eg min to 5 display as  <= 5
+        a = params_[0]
+        b = params_[1]
+        allowed_values_ = 'Double. %s $\leq$ value $\leq$ %s' % (a, b)
+
+    elif type_name_  == 'DOUBLERANGEEXT':
+        params_ = get_type_params(type_)
+        min_ = params_[0]
+        max_ = params_[1]
+        special_value = params_[2]
+        # TODO logic on range as for DoubleRange
+        # eg  Double > 2 or max
+        allowed_values_ = "Double in range %s $\leq$ value $\leq$ %s or `%s'" % (min_, max_, special_value)
+
+    elif type_name_ == 'INPUTFILE' or type_name_ == 'INPUTFILELIST' or \
+        type_name_ == 'OUTPUTFILE':
+        allowed_values_ = 'Path name'
+    
+    latex_file.write('%s\n' % allowed_values_)
+    latex_file.write('&\n')
 
 def parse_setting_node(node, key, depth, count, latex_file=None):
     if not (node.tag == 's' or node.tag == 'setting'): return
@@ -239,6 +284,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
 #                         latex_file.write('\n')
 #             else:
             latex_key = latex_key.replace('_', '\_')
+            #latex_file.write(latex_key + ' ' +str(len(latex_key)) +'\n')
             latex_file.write(latex_key + '\n')
             latex_file.write('&\n')
     
@@ -250,6 +296,20 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
                         continue
                     else:
                         desc_ = child_.text
+                        
+                    # If the description text contains xml entries,
+                    # these have to be appended correctly to the description.
+                    for format_tag in child_:
+                        desc_ += r'<' + format_tag.tag + r'>'
+                        desc_ += format_tag.text
+                        desc_ += r'</' + format_tag.tag + r'>'
+                        desc_ += format_tag.tail
+#                     num_format_tags = len(list(child_))
+#                     if num_format_tags >= 1:
+#                         print "text:[",child_.text,"]"
+#                         print "tail:[",child_.tail,"]"
+#                         print "desc:[",desc_,"]"
+
                     latex_desc_ = desc_
                     pattern = re.compile(r'\s+')
                     latex_desc_ = re.sub(pattern, ' ', latex_desc_)
@@ -257,6 +317,9 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
                     latex_desc_ = latex_desc_.replace(" '", " `")
                     latex_desc_ = latex_desc_.replace(r'&lt;', r'$<$')
                     latex_desc_ = latex_desc_.replace(r'&le;', r'$\leq$')
+                    latex_desc_ = latex_desc_.replace(r'&gt;', r'$>$')
+                    latex_desc_ = latex_desc_.replace(r"<b>", r'\textbf{')
+                    latex_desc_ = latex_desc_.replace(r"</b>", r'}')
                     latex_file.write('%s\n' % latex_desc_)
                     latex_file.write('&\n')
     

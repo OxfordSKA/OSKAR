@@ -110,14 +110,14 @@
                 </desc>
             </s>
             <s k="flux_min"><label>Flux density min [Jy]</label>
-                <type name="DoubleRange" default="0">0,MAX</type>
+                <type name="UnsignedDouble" default="0" />
                 <desc>
                     Minimum flux density in the random distribution, in Jy
                     (before filtering).
                 </desc>
             </s>
             <s k="flux_max"><label>Flux density max [Jy]</label>
-                <type name="DoubleRange" default="0">0,MAX</type>
+                <type name="UnsignedDouble" default="0" />
                 <desc>
                     Maximum flux density in the random distribution, in Jy
                     (before filtering).
@@ -155,14 +155,14 @@
                 </desc>
             </s>
             <s k="flux_min"><label>Flux density min [Jy]</label>
-                <type name="DoubleRange" default="0">0,MAX</type>
+                <type name="UnsignedDouble" default="0" />
                 <desc>
                     Minimum flux density in the random distribution, in Jy
                     (before filtering).
                 </desc>
             </s>
             <s k="flux_max"><label>Flux density max [Jy]</label>
-                <type name="DoubleRange" default="0">0,MAX</type>
+                <type name="UnsignedDouble" default="0" />
                 <desc>
                     Maximum flux density in the random distribution, in Jy
                     (before filtering).
@@ -217,12 +217,12 @@
                 </desc>
             </s>
             <s k="mean_flux_jy"><label>Mean Stokes I flux [Jy].</label>
-                <type name="DoubleRange" default="0">0,MAX</type>
+                <type name="UnsignedDouble" default="0" />
                 <desc>The mean of generated Stokes I fluxes, in Jy.</desc>
             </s>
              <s k="std_flux_jy">
                 <label>Standard deviation of Stokes I flux [Jy].</label>
-                <type name="DoubleRange" default="0">0,MAX</type>
+                <type name="UnsignedDouble" default="0" />
                 <desc>
                     The standard deviation of generated Stokes I fluxes, 
                     in Jy.
@@ -276,7 +276,7 @@
         </s>
         <s k="ref_frequency_hz">
             <label>Reference frequency [Hz]</label>
-            <type name="DoubleRange" default="0">0,MAX</type>
+            <type name="UnsignedDouble" default="0" />
             <desc>
                 Reference frequency of all sources in the final sky model.
             </desc>

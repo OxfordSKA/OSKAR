@@ -18,7 +18,7 @@ double\_precision
 &
 Determines whether double precision arithmetic is used.
 &
-allowed values...
+Bool
 &
 true
 \\
@@ -28,7 +28,7 @@ keep\_log\_file
 &
 Determines whether a log file of the run will be kept on disk. Note that even if this option is set to false, log files will be stored in any OSKAR binary data files produced by the simulator.
 &
-allowed values...
+Bool
 &
 false
 \\
@@ -38,7 +38,7 @@ max\_sources\_per\_chunk
 &
 Maximum number of sources processed concurrently on a single GPU.
 &
-allowed values...
+Integer > 0
 &
 16384
 \\
@@ -48,7 +48,7 @@ cuda\_device\_ids
 &
 A comma-separated string containing device (GPU) IDs to use on a multi-GPU system, or `all' to use all devices.
 &
-allowed values...
+Allowed values
 &
 all
 \\
