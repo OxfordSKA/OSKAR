@@ -322,7 +322,7 @@
             </desc>
         </s>
         <s k="flux_max"><label>Flux density max [Jy]</label>
-            <type name="DoubleRangeExt" default="min">0,MAX,min</type>
+            <type name="DoubleRangeExt" default="max">0,MAX,max</type>
             <desc>
                 Maximum flux density allowed by the filter, in Jy. <b>Note 
                 that this filter is applied on a per-channel basis after 

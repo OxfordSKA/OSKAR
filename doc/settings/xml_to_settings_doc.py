@@ -256,7 +256,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
             latex_file_.write(r'  {\textbf{Key}} &'+'\n')
             latex_file_.write(r'  {\textbf{Description}} &'+'\n')
             latex_file_.write(r'  {\textbf{Allowed values}} &'+'\n')
-            latex_file_.write(r'  {\textbf{Default}} \\[0.5ex] \hline'+'\n')
+            latex_file_.write(r'  {\textbf{Default}} \\ \hline'+'\n')
             latex_file_.write(r'\endfirsthead'+'\n')
     
             # Header for remaining page(s)
@@ -266,7 +266,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
             latex_file_.write(r'  {\textbf{Key}} &'+'\n')
             latex_file_.write(r'  {\textbf{Description}} &'+'\n')
             latex_file_.write(r'  {\textbf{Allowed values}} &'+'\n')
-            latex_file_.write(r'  {\textbf{Default}} \\[0.5ex] \hline'+'\n')
+            latex_file_.write(r'  {\textbf{Default}} \\ \hline'+'\n')
             latex_file_.write(r'\endhead'+'\n')
     
             # Footer for all pages except the last page of the table

@@ -36,6 +36,15 @@ All settings keys in this group are prefixed with <tt>telescope/</tt>.
 \htmlinclude  html_simulator_settings_text.html
 
 <!-- ************************************* -->
+\subsection settings_element_fit Element pattern fitting settings
+These settings are used when running the 'oskar_fit_element_data' application binary to fit splines to numerically-defined element pattern data.
+
+All settings keys in this group are prefixed with <tt>element_fit/</tt>.
+
+\latexinclude latex_element_fit.tex
+\htmlinclude  html_simulator_settings_text.html
+
+<!-- ************************************* -->
 \subsection settings_interferometer Interferometer settings
 These settings are used only when running the interferometer simulation.
 

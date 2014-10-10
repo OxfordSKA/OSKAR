@@ -22,7 +22,7 @@ Settings are defined simply using key-value pairs, for example:
 
 \verbatim
 simulator/double_precision=true
-observation/ start_time_utc=01-01-2000 12:01:02.000
+observation/start_time_utc=01-01-2000 12:01:02.000
 observation/length=06:00:00.000
 \endverbatim
 
@@ -32,6 +32,7 @@ written as:
 \verbatim
 [simulator]
 double_precision=true
+
 [observation]
 start_time_utc=01-01-2000 12:01:02.000
 length=06:00:00.000

@@ -6,7 +6,7 @@
 
     <s k="functional_type">
         <label>Functional pattern type</label>
-        <type name="OptionList" default="Dipple">
+        <type name="OptionList" default="Dipole">
             Dipole,
             Geometric dipole,
             Isotropic (unpolarised)

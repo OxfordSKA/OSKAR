@@ -22,7 +22,7 @@ Settings are defined simply using key-value pairs, for example:
 
 \verbatim
 simulator/double_precision=true
-observation/ start_time_utc=01-01-2000 12:01:02.000
+observation/start_time_utc=01-01-2000 12:01:02.000
 observation/length=06:00:00.000
 \endverbatim
 
@@ -32,6 +32,7 @@ written as:
 \verbatim
 [simulator]
 double_precision=true
+
 [observation]
 start_time_utc=01-01-2000 12:01:02.000
 length=06:00:00.000
@@ -88,6 +89,15 @@ These parameters are used to specify the contents of the telescope model.
 All settings keys in this group are prefixed with <tt>telescope/</tt>.
 
 \latexinclude latex_telescope.tex
+\htmlinclude  html_simulator_settings_text.html
+
+<!-- ************************************* -->
+\subsection settings_element_fit Element pattern fitting settings
+These settings are used when running the 'oskar_fit_element_data' application binary to fit splines to numerically-defined element pattern data.
+
+All settings keys in this group are prefixed with <tt>element_fit/</tt>.
+
+\latexinclude latex_element_fit.tex
 \htmlinclude  html_simulator_settings_text.html
 
 <!-- ************************************* -->
