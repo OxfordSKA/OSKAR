@@ -88,7 +88,7 @@ def set_default_value_latex(node, latex_file):
         default_ = ''
     else:
         # If the default isnt set we have a problem!
-        if default_ == None:
+        if default_ == None and not 'FILE' in type_name_:
             raise RuntimeError('Invalid setting, missing default!')
     
         # Format double type default values.
@@ -341,35 +341,45 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
             # >>>>> Description <<<<<
             for child_ in node:
                 if child_.tag == 'desc' or child_.tag == 'd' or child_.tag == 'description':
-                    if child_.text == None:
-                        desc_ = ''
-                        continue
-                    else:
-                        desc_ = child_.text
-                        
-                    # If the description text contains xml entries,
-                    # these have to be appended correctly to the description.
-                    for format_tag in child_:
-                        desc_ += r'<' + format_tag.tag + r'>'
-                        desc_ += format_tag.text
-                        desc_ += r'</' + format_tag.tag + r'>'
-                        desc_ += format_tag.tail
-#                     num_format_tags = len(list(child_))
-#                     if num_format_tags >= 1:
-#                         print "text:[",child_.text,"]"
-#                         print "tail:[",child_.tail,"]"
-#                         print "desc:[",desc_,"]"
+                    # Extract the contents of the description tag as a string.
+                    desc_ = ET.tostring(child_, method="xml")
+                    desc_ = desc_.replace('<desc>', '')
+                    desc_ = desc_.replace('</desc>', '')
+                    desc_ = desc_.replace('<d>', '')
+                    desc_ = desc_.replace('</d>', '')
+                    desc_ = desc_.replace('<description>', '')
+                    desc_ = desc_.replace('</description>', '')
+#                     if child_.text == None:
+#                         desc_ = ''
+#                         continue
+#                     else:
+#                         desc_ = child_.text
+#
+#                     # If the description text contains xml entries,
+#                     # these have to be appended correctly to the description.
+#                     for format_tag in child_:
+#                         desc_ += r'<' + format_tag.tag + r'>'
+#                         desc_ += format_tag.text
+#                         desc_ += r'</' + format_tag.tag + r'>'
+#                         desc_ += format_tag.tail
+# #                     num_format_tags = len(list(child_))
+# #                     if num_format_tags >= 1:
+# #                         print "text:[",child_.text,"]"
+# #                         print "tail:[",child_.tail,"]"
+# #                         print "desc:[",desc_,"]"
 
                     latex_desc_ = desc_
                     pattern = re.compile(r'\s+')
                     latex_desc_ = re.sub(pattern, ' ', latex_desc_)
                     latex_desc_ = latex_desc_.strip()
                     latex_desc_ = latex_desc_.replace(" '", " `")
-                    latex_desc_ = latex_desc_.replace(r'&lt;', r'$<$')
-                    latex_desc_ = latex_desc_.replace(r'&le;', r'$\leq$')
-                    latex_desc_ = latex_desc_.replace(r'&gt;', r'$>$')
+                    latex_desc_ = latex_desc_.replace(r'&amp;lt;', r'$<$')
+                    latex_desc_ = latex_desc_.replace(r'&amp;le;', r'$\leq$')
+                    latex_desc_ = latex_desc_.replace(r'&amp;gt;', r'$>$')
                     latex_desc_ = latex_desc_.replace(r"<b>", r'\textbf{')
                     latex_desc_ = latex_desc_.replace(r"</b>", r'}')
+                    print latex_desc_
+                    print ''
                     latex_file.write('%s\n' % latex_desc_)
                     latex_file.write('&\n')
     

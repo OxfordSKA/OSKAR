@@ -34,3 +34,12 @@ All settings keys in this group are prefixed with <tt>telescope/</tt>.
 
 \latexinclude latex_telescope.tex
 \htmlinclude  html_simulator_settings_text.html
+
+<!-- ************************************* -->
+\subsection settings_interferometer Interferometer settings
+These settings are used only when running the interferometer simulation.
+
+All settings keys in this group are prefixed with <tt>interferometer/</tt>.
+
+\latexinclude latex_interferometer.tex
+\htmlinclude  html_simulator_settings_text.html

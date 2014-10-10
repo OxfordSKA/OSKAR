@@ -5,4 +5,5 @@
     <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_sky_model.xml" />
     <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_observation.xml" />
     <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_telescope_model.xml" />
+    <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_interferometer.xml" />
 </root>
