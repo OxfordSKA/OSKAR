@@ -43,3 +43,11 @@ All settings keys in this group are prefixed with <tt>interferometer/</tt>.
 
 \latexinclude latex_interferometer.tex
 \htmlinclude  html_simulator_settings_text.html
+
+<!-- ************************************* -->
+\subsection settings_beam_pattern Beam pattern settings
+
+All settings keys in this group are prefixed with <tt>beam_pattern/</tt>.
+
+\latexinclude latex_beam_pattern.tex
+\htmlinclude  html_simulator_settings_text.html

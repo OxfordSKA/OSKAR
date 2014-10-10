@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<s k="beam_pattern">
+    <label>Beam pattern settings</label>
+
+    <s k="station_id"><label>Station ID</label>
+        <type name="uint" default="0"/>
+        <desc>The station ID number (zero based) to select from the
+            telescope model when generating the beam pattern.</desc>
+    </s>
+    <!--
+    <s k="coordinate_type"><label>Coordinate (grid) type</label>
+        <type name="OptionList" default="Beam image">
+            Beam image, HEALPix, Sky model
+        </type>
+        <desc>
+            Specification of coordinates at which to evaluate the beam pattern.
+            <ul>
+            <li><b>Beam image</b>: Tangent plane image, centred on the
+            beam pointing direction.</li>"
+            <li><b>HEALPix</b>: All-sky map on a HEALPix grid.</li>
+            <li><b>Sky model</b>: Evaluate beam only at the supplied
+            coordinates.</li>
+            </ul>
+        </desc>
+    </s>
+    -->
+    <!--
+    <s k="coordinate_frame">
+        <label>Coordinate frame</label>
+        <type name="OptionList" default="Equatorial">Equatorial, Horizon</type>
+        <desc>Specification of the coordinate frame in which to evaluate
+            the beam pattern.</desc>
+    </s>
+    -->
+    <s k="beam_image">
+        <label>Beam image</label>
+        <desc>Image of the beam, centred on the beam direction.</desc>
+        <!-- <depends k="beampattern/coordinate_type" v="Beam image"/> -->
+
+        <s k="size" >
+            <label>Image dimensions [pixels]</label>
+            <type name="IntList" default="256" />
+            <desc>
+                Image dimensions. If a single value is specified, the
+                image is assumed to have the same number of pixels along each
+                dimension.<br/>
+                Example:
+                <ul>
+                <li>A value of '256' results in a square image of size 256 by
+                256 pixels.</li>
+                <li>A value of '256,128' results in an image of 256 by 128
+                pixels, with 256 pixels along the Right Ascension direction.</li>
+                </ul>
+            </desc>
+        </s>
+        <s k="fov_deg" >
+            <label>Field-of-view [deg]</label>
+            <type name="DoubleList" default="2.0" />
+            <desc>
+                Field-of-view (FOV) in degrees (max 180.0). If a single value
+                is specified, the image is assumed to have the same FOV along each
+                dimension. <br/>
+                Example:
+                <ul>
+                <li>A value of '2.0' results in an image with a FOV of 2.0
+                degrees in each dimension.</li>
+                <li>A value of '2.0,1.0' results in an image with a FOV of
+                2.0 degrees in Right Ascension, and 1.0 degrees in
+                Declination.</li>
+                </ul>
+            </desc>
+        </s>
+    </s> <!-- End beam image group -->
+
+    <!--
+    <s k="healpix">
+        <label>HEALPix settings</label>
+        <depends k="beampattern/coordinate_type" v="HEALPix"/>
+        <s k="nside"><label>Nside</label>
+            <type name="uint" default="128" />
+            <desc>HEALPix Nside parameter. The total number of points is
+                12 * Nside * Nside</desc>
+        </s>
+    </s>
+    <s k="sky_model">
+        <label>Sky model settings</label>
+        <depends k="beampattern/coordinate_type" v="Sky model"/>
+        <s k="file"><label>Input file</label>
+            <type name="InputFile" />
+            <desc>Path to an input sky model file.</desc>
+        </s>
+    </s>
+    -->
+    <!--
+    <s k="horizon_clip"><label>Horizon clip</label>
+        <type name="bool" default="true" />
+        <desc>Zero the beam pattern below the horizon</desc>
+    </s>
+    -->
+
+    <s k="root_path"><label>Output root path name</label>
+        <type name="OutputFile" />
+        <desc>Root path name of the generated data file.
+            Appropriate suffixes and extensions will be added to this,
+            based on the settings below.</desc>
+    </s>
+
+
+    <s k="oskar_image_file">
+        <label>OSKAR image file options</label>
+        <s k="save_voltage"><label>Voltage pattern</label>
+            <type name="bool" default="false" />
+            <desc>If true, save the voltage amplitude pattern in an OSKAR image
+                file. (This is given by the square root of the sum of the
+                squares of the real and imaginary values.)</desc>
+        </s>
+        <s k="save_phase"><label>Phase pattern</label>
+            <type name="bool" default="false" />
+            <desc>If true, save the phase pattern in an OSKAR image file.</desc>
+        </s>
+        <s k="save_complex"><label>Complex (voltage) pattern</label>
+            <type name="bool" default="false" />
+            <desc>If true, save the complex (real and imaginary) pattern in an
+                OSKAR image file.</desc>
+        </s>
+        <s k="save_total_intensity"><label>Total intensity pattern</label>
+            <type name="bool" default="false" />
+            <desc>If true, save the total intensity beam. This is evaluated as
+            the Stokes I response of the beam pattern auto-correlation.</desc>
+        </s>
+    </s>
+
+    <s k="fits_file">
+        <label>FITS image options</label>
+        <s k="save_voltage"><label>Voltage pattern</label>
+            <type name="bool" default="false" />
+            <desc>If true, save the voltage amplitude pattern in a FITS image
+                file. (This is given by the square root of the sum of the
+                squares of the real and imaginary values.)</desc>
+        </s>
+        <s k="save_phase"><label>Phase pattern</label>
+            <type name="bool" default="false" />
+            <desc>If true, save the phase pattern in a FITS image file.</desc>
+        </s>
+        <s k="save_total_intensity"><label>Total intensity pattern</label>
+            <type name="bool" default="false" />
+            <desc>If true, save the total intensity beam. This is evaluated as
+            the Stokes-I response of the beam pattern auto-correlation.</desc>
+        </s>
+    </s>
+
+</s>

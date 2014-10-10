@@ -64,6 +64,8 @@ def get_node_text(node):
     return txt.strip()
 
 def get_type_params(node):
+    # TODO Ignore csv inside quotes
+    # http://stackoverflow.com/questions/8208358/split-string-ignoring-delimiter-within-quotation-marks-python
     params_ = get_node_text(node)
     if params_ == None: return None
     return params_.split(',')
@@ -302,6 +304,9 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
         else:
             print '[%03i]%s%s' % (count, ' '*depth, full_key)
             
+#             if len(full_key.split('/'))%2 == 1:
+#                 latex_file.write(r'  \rowcolor{lightgray}'+'\n')
+            
             latex_file.write('%03i\n' % count)
             latex_file.write('&\n')
             
@@ -378,8 +383,8 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
                     latex_desc_ = latex_desc_.replace(r'&amp;gt;', r'$>$')
                     latex_desc_ = latex_desc_.replace(r"<b>", r'\textbf{')
                     latex_desc_ = latex_desc_.replace(r"</b>", r'}')
-                    print latex_desc_
-                    print ''
+#                     print latex_desc_
+#                     print ''
                     latex_file.write('%s\n' % latex_desc_)
                     latex_file.write('&\n')
     
