@@ -1,6 +1,6 @@
 
 <!-- ************************************* -->
-\section settings_simulator Simulator settings
+\subsection settings_simulator Simulator settings
 These parameters affect the operation of the software.
 
 All settings keys in this group are prefixed with <tt>simulator/</tt>.
@@ -9,7 +9,7 @@ All settings keys in this group are prefixed with <tt>simulator/</tt>.
 \htmlinclude  html_simulator_settings_text.html
 
 <!-- ************************************* -->
-\section settings_sky Sky model settings
+\subsection settings_sky Sky model settings
 These parameters are used to specify the content of the sky model.
 
 All settings keys in this group are prefixed with <tt>sky/</tt>.
@@ -18,7 +18,7 @@ All settings keys in this group are prefixed with <tt>sky/</tt>.
 \htmlinclude  html_simulator_settings_text.html
 
 <!-- ************************************* -->
-\section settings_observation Observation settings
+\subsection settings_observation Observation settings
 These parameters are used to specify the observation.
 
 All settings keys in this group are prefixed with <tt>observation/</tt>.
@@ -27,7 +27,7 @@ All settings keys in this group are prefixed with <tt>observation/</tt>.
 \htmlinclude  html_simulator_settings_text.html
 
 <!-- ************************************* -->
-\section settings_telescope Telescope model settings
+\subsection settings_telescope Telescope model settings
 These parameters are used to specify the contents of the telescope model.
 
 All settings keys in this group are prefixed with <tt>telescope/</tt>.

@@ -10,7 +10,7 @@
     <s k="phase_centre_ra_deg"><label>Phase centre RA [deg]</label>
         <type name="DoubleList" default="0"/>
         <desc>
-            Right Ascension of the observation pointing (phase centre), 
+            Right Ascension of the observation pointing (phase centre),
             in degrees.
         </desc>
     </s>
@@ -23,9 +23,9 @@
     <s k="pointing_file"><label>Station pointing file</label>
         <type name="InputFile" default="0"/>
         <desc>
-            Pathname to optional station pointing file, which can be 
-            used to override the beam direction for any or all stations in 
-            the telescope model. See the accompanying documentation for a 
+            Pathname to optional station pointing file, which can be
+            used to override the beam direction for any or all stations in
+            the telescope model. See the accompanying documentation for a
             description of a station pointing file.
         </desc>
     </s>
@@ -54,15 +54,15 @@
         <desc>
             The observation length either in seconds, or in hours, minutes and seconds.
         </desc>
-    </s>   
+    </s>
     <s k="num_time_steps">
         <label>Number of time steps</label>
         <type name="IntRange" default="1">1,MAX</type>
         <desc>
             Number of time steps in the output data during the observation
             length. This corresponds to the number of correlator dumps
-            for interferometer simulations, and the number of beam 
-            pattern snapshots for beam pattern simulations. 
+            for interferometer simulations, and the number of beam
+            pattern snapshots for beam pattern simulations.
         </desc>
     </s>
 </s>
