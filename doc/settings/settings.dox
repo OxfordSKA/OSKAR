@@ -107,6 +107,14 @@ All settings keys in this group are prefixed with <tt>beam_pattern/</tt>.
 \latexinclude latex_beam_pattern.tex
 \htmlinclude  html_simulator_settings_text.html
 
+<!-- ************************************* -->
+\subsection settings_image Image settings
+
+All settings keys in this group are prefixed with <tt>image/</tt>.
+
+\latexinclude latex_image.tex
+\htmlinclude  html_simulator_settings_text.html
+
 
 \latexonly
 \end{landscape}

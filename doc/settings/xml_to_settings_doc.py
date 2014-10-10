@@ -383,7 +383,12 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
                     latex_desc_ = latex_desc_.replace(r'&amp;gt;', r'$>$')
                     latex_desc_ = latex_desc_.replace(r"<b>", r'\textbf{')
                     latex_desc_ = latex_desc_.replace(r"</b>", r'}')
-#                     print latex_desc_
+                    latex_desc_ = latex_desc_.replace(r'<code>', r'{\texttt{ ')
+                    latex_desc_ = latex_desc_.replace(r'</code>', '}}')
+                    latex_desc_ = latex_desc_.replace(r'&amp;nbsp;', '')
+                    latex_desc_ = latex_desc_.replace(r'_', '\_')
+                    
+                    print latex_desc_
 #                     print ''
                     latex_file.write('%s\n' % latex_desc_)
                     latex_file.write('&\n')
