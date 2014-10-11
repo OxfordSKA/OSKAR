@@ -164,7 +164,7 @@ structure.
 
 \subsection matlab_vis Visibility Data
 
-\par [vis] = oskar.vis.read(<file name>)
+\par [vis] = oskar.vis.read(\<file name\>)
 A function that reads an OSKAR visibility binary file into an OSKAR MATLAB 
 visibility workspace structure.
 
