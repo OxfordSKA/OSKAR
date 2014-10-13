@@ -81,7 +81,16 @@ station\_type
 &
 The type of each station in the interferometer. A simple, time-invariant Gaussian station beam can be used instead of an aperture array beam if required for testing. All station beam effects can be disabled by selecting `Isotropic beam'.
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item Aperture array
+\item Isotropic beam
+\item Gaussian beam
+\item VLA (PBCOR)
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 Aperture
 \\
@@ -105,7 +114,14 @@ pol\_mode
 &
 The polarisation mode of simulations which use the telescope model. If this is \textbf{Scalar}, then only Stokes I visibility data will be simulated, and scalar element responses will be used when evaluating station beams. If this is \textbf{Full} (the default) then correlation products from both polarisations will be simulated. \textbf{Note that scalar mode can be significantly faster.}
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item Full
+\item Scalar
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 Full
 \\
@@ -309,7 +325,15 @@ aperture\_array/element\_pattern/functional\_type
 &
 The type of functional pattern to apply to the elements, if not using a numerically-defined pattern.
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item Dipole
+\item Geometric dipole
+\item Isotropic (unpolarised)
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 Dipole
 \\
@@ -333,7 +357,14 @@ aperture\_array/element\_pattern/dipole\_length\_units
 &
 The units used to specify the dipole length (metres or wavelengths), if using dipole elements.
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item Wavelengths
+\item Metres
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 Wavelengths
 \\
@@ -357,7 +388,15 @@ aperture\_array/element\_pattern/taper/type
 &
 The type of tapering function to apply to the element pattern.
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item None
+\item Cosine
+\item Gaussian
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 None
 \\

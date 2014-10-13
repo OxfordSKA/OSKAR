@@ -32,7 +32,7 @@
 
     <s key="cuda_device_ids">
         <label>CUDA device IDs to use</label>
-        <type name="IntListExt" default="all" />
+        <type name="IntListExt" default="all">all</type>
         <description>
             A comma-separated string containing device (GPU) IDs to
             use on a multi-GPU system, or 'all' to use all devices.

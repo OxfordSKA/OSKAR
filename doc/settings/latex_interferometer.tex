@@ -81,7 +81,7 @@ uv\_filter\_min
 &
 The minimum value of the baseline UV length allowed by the filter. \textbf{Note that visibilities on baseline UV lengths outside this range will not be evaluated!}
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `min'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `min'
 &
 min
 \\
@@ -93,7 +93,7 @@ uv\_filter\_max
 &
 The maximum value of the baseline UV length allowed by the filter. \textbf{Note that visibilities on baseline UV lengths outside this range will not be evaluated!}
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `max'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `max'
 &
 max
 \\
@@ -105,7 +105,14 @@ uv\_filter\_units
 &
 The units of the baseline UV length filter values.
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item Wavelengths
+\item Metres
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 Wavelengths
 \\
@@ -153,7 +160,16 @@ noise/freq
 &
 Specification of the list of frequencies at which noise values are defined: <ul> <li>\textbf{Telescope model}: frequencies are loaded from the data file in the telescope model directory.</li> <li>\textbf{Observation settings}: frequencies are defined by the observation settings.</li> <li>\textbf{Data file}: frequencies are loaded from the specified data file.</li> <li>\textbf{Range}: frequencies are specified by the range parameters.</li> </ul>
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item Telescope model
+\item Observation settings
+\item Data file
+\item Range
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 Telescope
 \\
@@ -213,7 +229,17 @@ noise/values
 &
 Single polarisation noise value specification type: <ul> <li>\textbf{Telescope model priority}: values are loaded from files in the telescope model directory, according to the default file type priority.</li> <li>\textbf{RMS flux density}: use values specified in terms of noise RMS flux density. </li> <li>\textbf{Sensitivity}: use values specified in terms of station sensitivity.</li> <li>\textbf{Temperature ...}: use values specified by the system temperature, effective area, and system efficiency.</li> </ul> <i>Note: Noise values are interpreted as a function of frequency. The list of frequencies to which noise values correspond is based upon the value of the noise frequency specification.</i>.
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item Telescope model priority
+\item RMS flux density Sensitivity
+\item "Temperature
+\item area
+\item and system efficiency"
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 Telescope
 \\
@@ -225,7 +251,15 @@ noise/values/rms
 &
 Root mean square (RMS) flux density specification: <ul> <li>\textbf{No override}: values are loaded from RMS files found in the telescope model directory.</li> <li>\textbf{Data file}: values are loaded from the specified file.</li> <li>\textbf{Range}: values are evaluated according to the specified range parameters.</li> </ul>
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item No override (telescope model)
+\item Data file
+\item Range
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 No
 \\
@@ -273,7 +307,15 @@ noise/values/sensitivity
 &
 System sensitivity (or System Equivalent Flux density, SEFD) specification type: <ul> <li>\textbf{No override}: values are loaded from sensitivity files found in the telescope model directory.</li> <li>\textbf{Data file}: values are loaded from the specified file.</li> <li>\textbf{Range}: values are evaluated according to the specified range parameters.</li> </ul>
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item No override (telescope model)
+\item Data file
+\item Range
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 No
 \\
@@ -321,7 +363,15 @@ noise/values/components/t\_sys
 &
 System temperature specification type: <ul> <li>\textbf{No override}: values are loaded from system temperature files found in the telescope model directory.</li> <li>\textbf{Data file}: values are loaded from the specified file.</li> <li>\textbf{Range}: values are evaluated according to the specified range parameters.</li> </ul>
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item No override (telescope model)
+\item Data file
+\item Range
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 No
 \\
@@ -369,7 +419,15 @@ noise/values/components/area
 &
 Station effective area specification type <ul> <li>\textbf{No override}: values are loaded from system temperature files found in the telescope model directory.</li> <li>\textbf{Data file}: values are loaded from the specified file.</li> <li>\textbf{Range}: values are evaluated according to the specified range parameters.</li> </ul>
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item No override (telescope model)
+\item Data file
+\item Range
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 No
 \\
@@ -417,7 +475,15 @@ noise/values/components/efficiency
 &
 Station system efficiency specification type: <ul> <li>\textbf{No override}: values are loaded from system temperature files found in the telescope model directory.</li> <li>\textbf{Data file}: values are loaded from the specified file.</li> <li>\textbf{Range}: values are evaluated according to the specified range parameters.</li> </ul>
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item No override (telescope model)
+\item Data file
+\item Range
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 No
 \\
@@ -441,7 +507,7 @@ noise/values/components/efficiency/start
 &
 System efficiency range start value (allowed range: 0.0 to 1.0).
 &
-Double. 0 $\leq$ value $\leq$ 1
+Double in range 0 $\leq$ $x$ $\leq$ 1
 &
 0.0
 \\
@@ -453,7 +519,7 @@ noise/values/components/efficiency/end
 &
 System efficiency range end value (allowed range: 0.0 to 1.0).
 &
-Double. 0 $\leq$ value $\leq$ 1
+Double in range 0 $\leq$ $x$ $\leq$ 1
 &
 0.0
 \\

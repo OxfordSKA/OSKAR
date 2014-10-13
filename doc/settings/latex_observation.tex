@@ -33,7 +33,7 @@ phase\_centre\_ra\_deg
 &
 Right Ascension of the observation pointing (phase centre), in degrees.
 &
-Allowed values
+Double, or CSV list of doubles.
 &
 0
 \\
@@ -45,7 +45,7 @@ phase\_centre\_dec\_deg
 &
 Declination of the observation pointing (phase centre), in degrees.
 &
-Allowed values
+Double, or CSV list of doubles.
 &
 0
 \\
@@ -81,7 +81,7 @@ num\_channels
 &
 Number of frequency channels / bands to use.
 &
-Allowed values
+Integer in range 1 $\leq$ $x$ $\leq$ MAX
 &
 1
 \\
@@ -129,7 +129,7 @@ num\_time\_steps
 &
 Number of time steps in the output data during the observation length. This corresponds to the number of correlator dumps for interferometer simulations, and the number of beam pattern snapshots for beam pattern simulations.
 &
-Allowed values
+Integer in range 1 $\leq$ $x$ $\leq$ MAX
 &
 1
 \\

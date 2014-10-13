@@ -33,7 +33,7 @@ oskar\_sky\_model/file
 &
 Paths to one or more OSKAR sky model text or binary files. See the accompanying documentation for a description of an OSKAR sky model file.
 &
-Path name
+CSV list of path names
 &
 
 \\
@@ -45,7 +45,7 @@ oskar\_sky\_model/filter/flux\_min
 &
 Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `min'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `min'
 &
 min
 \\
@@ -57,7 +57,7 @@ oskar\_sky\_model/filter/flux\_max
 &
 Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `max'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `max'
 &
 max
 \\
@@ -69,7 +69,7 @@ oskar\_sky\_model/filter/radius\_inner\_deg
 &
 Minimum angular distance from phase centre allowed by the filter, in degrees. This is an inclusive interval bound; i.e. inner $\leq$ r $<$ outer.
 &
-Double. 0 $\leq$ value $\leq$ 180
+Double in range 0 $\leq$ $x$ $\leq$ 180
 &
 0.0
 \\
@@ -81,7 +81,7 @@ oskar\_sky\_model/filter/radius\_outer\_deg
 &
 Maximum angular distance from phase centre allowed by the filter, in degrees. This is an exclusive interval bound; i.e. inner $\leq$ r $<$ outer.
 &
-Double. 0 $\leq$ value $\leq$ 180
+Double in range 0 $\leq$ $x$ $\leq$ 180
 &
 180.0
 \\
@@ -141,7 +141,7 @@ gsm/filter/flux\_min
 &
 Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `min'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `min'
 &
 min
 \\
@@ -153,7 +153,7 @@ gsm/filter/flux\_max
 &
 Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `max'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `max'
 &
 max
 \\
@@ -165,7 +165,7 @@ gsm/filter/radius\_inner\_deg
 &
 Minimum angular distance from phase centre allowed by the filter, in degrees. This is an inclusive interval bound; i.e. inner $\leq$ r $<$ outer.
 &
-Double. 0 $\leq$ value $\leq$ 180
+Double in range 0 $\leq$ $x$ $\leq$ 180
 &
 0.0
 \\
@@ -177,7 +177,7 @@ gsm/filter/radius\_outer\_deg
 &
 Maximum angular distance from phase centre allowed by the filter, in degrees. This is an exclusive interval bound; i.e. inner $\leq$ r $<$ outer.
 &
-Double. 0 $\leq$ value $\leq$ 180
+Double in range 0 $\leq$ $x$ $\leq$ 180
 &
 180.0
 \\
@@ -225,7 +225,7 @@ fits\_image/file
 &
 FITS file(s) to use as a sky model.
 &
-Path name
+CSV list of path names
 &
 
 \\
@@ -237,7 +237,7 @@ fits\_image/downsample\_factor
 &
 The factor by which to downsample the pixel grid.
 &
-Allowed values
+Integer in range 1 $\leq$ $x$ $\leq$ MAX
 &
 1
 \\
@@ -249,7 +249,7 @@ fits\_image/min\_peak\_fraction
 &
 The minimum allowed pixel value, as a fraction of the peak value in the image.
 &
-Allowed values
+Integer in range 0 $\leq$ $x$ $\leq$ MAX
 &
 0.02
 \\
@@ -261,7 +261,7 @@ fits\_image/noise\_floor
 &
 The noise floor of the image, in Jy/PIXEL.
 &
-Double. 0 $\leq$ value $\leq$ MAX
+Double in range 0 $\leq$ $x$ $\leq$ MAX
 &
 0.0
 \\
@@ -285,7 +285,7 @@ healpix\_fits/file
 &
 Paths to one or more HEALPix FITS files, ordered using the HEALPix RING scheme (NEST schemes are not supported).
 &
-Path name
+CSV list of path names
 &
 
 \\
@@ -297,7 +297,14 @@ healpix\_fits/coord\_sys
 &
 The spherical coordinate system used for the HEALPix representation.
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item Galactic
+\item Equatorial
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 Galactic
 \\
@@ -309,7 +316,15 @@ healpix\_fits/map\_units
 &
 The physical units of pixels in the input map.
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item mK/sr (Temperature per steradian)
+\item K/sr (Temperature per steradian)
+\item Jy/pixel (Jansky per pixel)
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 mK/sr
 \\
@@ -321,7 +336,7 @@ healpix\_fits/filter/flux\_min
 &
 Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `min'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `min'
 &
 min
 \\
@@ -333,7 +348,7 @@ healpix\_fits/filter/flux\_max
 &
 Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `max'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `max'
 &
 max
 \\
@@ -345,7 +360,7 @@ healpix\_fits/filter/radius\_inner\_deg
 &
 Minimum angular distance from phase centre allowed by the filter, in degrees. This is an inclusive interval bound; i.e. inner $\leq$ r $<$ outer.
 &
-Double. 0 $\leq$ value $\leq$ 180
+Double in range 0 $\leq$ $x$ $\leq$ 180
 &
 0.0
 \\
@@ -357,7 +372,7 @@ healpix\_fits/filter/radius\_outer\_deg
 &
 Maximum angular distance from phase centre allowed by the filter, in degrees. This is an exclusive interval bound; i.e. inner $\leq$ r $<$ outer.
 &
-Double. 0 $\leq$ value $\leq$ 180
+Double in range 0 $\leq$ $x$ $\leq$ 180
 &
 180.0
 \\
@@ -465,7 +480,7 @@ generator/random\_power\_law/filter/flux\_min
 &
 Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `min'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `min'
 &
 min
 \\
@@ -477,7 +492,7 @@ generator/random\_power\_law/filter/flux\_max
 &
 Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `max'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `max'
 &
 max
 \\
@@ -489,7 +504,7 @@ generator/random\_power\_law/filter/radius\_inner\_deg
 &
 Minimum angular distance from phase centre allowed by the filter, in degrees. This is an inclusive interval bound; i.e. inner $\leq$ r $<$ outer.
 &
-Double. 0 $\leq$ value $\leq$ 180
+Double in range 0 $\leq$ $x$ $\leq$ 180
 &
 0.0
 \\
@@ -501,7 +516,7 @@ generator/random\_power\_law/filter/radius\_outer\_deg
 &
 Maximum angular distance from phase centre allowed by the filter, in degrees. This is an exclusive interval bound; i.e. inner $\leq$ r $<$ outer.
 &
-Double. 0 $\leq$ value $\leq$ 180
+Double in range 0 $\leq$ $x$ $\leq$ 180
 &
 180.0
 \\
@@ -633,7 +648,7 @@ generator/random\_broken\_power\_law/filter/flux\_min
 &
 Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `min'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `min'
 &
 min
 \\
@@ -645,7 +660,7 @@ generator/random\_broken\_power\_law/filter/flux\_max
 &
 Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `max'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `max'
 &
 max
 \\
@@ -657,7 +672,7 @@ generator/random\_broken\_power\_law/filter/radius\_inner\_deg
 &
 Minimum angular distance from phase centre allowed by the filter, in degrees. This is an inclusive interval bound; i.e. inner $\leq$ r $<$ outer.
 &
-Double. 0 $\leq$ value $\leq$ 180
+Double in range 0 $\leq$ $x$ $\leq$ 180
 &
 0.0
 \\
@@ -669,7 +684,7 @@ generator/random\_broken\_power\_law/filter/radius\_outer\_deg
 &
 Maximum angular distance from phase centre allowed by the filter, in degrees. This is an exclusive interval bound; i.e. inner $\leq$ r $<$ outer.
 &
-Double. 0 $\leq$ value $\leq$ 180
+Double in range 0 $\leq$ $x$ $\leq$ 180
 &
 180.0
 \\
@@ -729,7 +744,7 @@ generator/grid/fov\_deg
 &
 Field-of-view spanned by the grid centre, in degrees.
 &
-Double. 0 $\leq$ value $\leq$ 180.0
+Double in range 0 $\leq$ $x$ $\leq$ 180.0
 &
 0.0
 \\
@@ -777,7 +792,7 @@ generator/grid/pol/mean\_pol\_fraction
 &
 The mean polarisation fraction of generated source fluxes (range 0 to 1).
 &
-Double. 0 $\leq$ value $\leq$ 1
+Double in range 0 $\leq$ $x$ $\leq$ 1
 &
 0.0
 \\
@@ -789,7 +804,7 @@ generator/grid/pol/std\_pol\_fraction
 &
 The standard deviation of polarisation fraction of generated source fluxes (range 0 to 1).
 &
-Double. 0 $\leq$ value $\leq$ 1
+Double in range 0 $\leq$ $x$ $\leq$ 1
 &
 0.0
 \\
@@ -897,7 +912,7 @@ generator/healpix/filter/flux\_min
 &
 Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `min'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `min'
 &
 min
 \\
@@ -909,7 +924,7 @@ generator/healpix/filter/flux\_max
 &
 Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `max'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `max'
 &
 max
 \\
@@ -921,7 +936,7 @@ generator/healpix/filter/radius\_inner\_deg
 &
 Minimum angular distance from phase centre allowed by the filter, in degrees. This is an inclusive interval bound; i.e. inner $\leq$ r $<$ outer.
 &
-Double. 0 $\leq$ value $\leq$ 180
+Double in range 0 $\leq$ $x$ $\leq$ 180
 &
 0.0
 \\
@@ -933,7 +948,7 @@ generator/healpix/filter/radius\_outer\_deg
 &
 Maximum angular distance from phase centre allowed by the filter, in degrees. This is an exclusive interval bound; i.e. inner $\leq$ r $<$ outer.
 &
-Double. 0 $\leq$ value $\leq$ 180
+Double in range 0 $\leq$ $x$ $\leq$ 180
 &
 180.0
 \\
@@ -1041,7 +1056,7 @@ common\_flux\_filter/flux\_min
 &
 Minimum flux density allowed by the filter, in Jy. \textbf{Note that this filter is applied on a per-channel basis after scaling all source fluxes by the spectral index.}
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `min'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `min'
 &
 min
 \\
@@ -1053,7 +1068,7 @@ common\_flux\_filter/flux\_max
 &
 Maximum flux density allowed by the filter, in Jy. \textbf{Note that this filter is applied on a per-channel basis after scaling all source flux values by the spectral index.}
 &
-Double in range 0 $\leq$ value $\leq$ MAX or `max'
+Double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX, or `max'
 &
 max
 \\

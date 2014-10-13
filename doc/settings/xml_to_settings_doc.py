@@ -6,10 +6,11 @@ import re
 
 # http://stackoverflow.com/questions/8845456/how-can-i-do-replace-a-child-elements-in-elementtree
 def process_import_nodes(xmlFile):
-    print ''
-    print '** INFO: Reading xml file:', xmlFile,'**'
+    #print ''
+    #print '** INFO: Reading xml file:', xmlFile,'**'
     xmlFH = open(xmlFile, 'r')
     xmlStr = xmlFH.read()
+    xmlFH.close()
     et = ET.fromstring(xmlStr)
     parent_map = dict((c, p) for p in et.getiterator() for c in p)
     # ref: http://stackoverflow.com/questions/2170610/access-elementtree-node-parent-node/2170994
@@ -19,21 +20,17 @@ def process_import_nodes(xmlFile):
         new_dir = os.path.dirname(importPlaceholder.attrib['filename'])
         shallPushd = os.path.exists(new_dir)
         if shallPushd:
-            print "  pushd: %s" %(new_dir)
+            #print "  pushd: %s" %(new_dir)
             os.chdir(new_dir) # pushd (for relative linking)
-
         # Recursing to import element from file reference
         importedElement = process_import_nodes(os.path.basename(importPlaceholder.attrib['filename']))
-
         # element replacement
         parent = parent_map[importPlaceholder]
         index = parent._children.index(importPlaceholder)
         parent._children[index] = importedElement
-
         if shallPushd:
-            print "  popd: %s" %(old_dir)
+            #print "  popd: %s" %(old_dir)
             os.chdir(old_dir) # popd
-
     return et
 
 def get_attribute(node, allowed_keys, toupper=True):
@@ -44,8 +41,6 @@ def get_attribute(node, allowed_keys, toupper=True):
             if toupper: return a.upper()
             else: return a
     return None
-
-
 
 def get_first_child(node, possible_tags):
     if node == None: return None
@@ -151,6 +146,12 @@ def set_allowed_values_latex(node, latex_file):
     elif type_name_  == 'RANDOMSEED':
         allowed_values_ = "`time' or integer seed $\geq$ 1"
 
+    elif type_name_ == 'INTRANGE':
+        params_ = get_type_params(type_)
+        a = params_[0]
+        b = params_[1]
+        allowed_values_ = 'Integer in range %s $\leq$ $x$ $\leq$ %s' % (a, b)
+
     elif type_name_  == 'DOUBLERANGE':
         params_ = get_type_params(type_)
         # TODO logic on not setting both values
@@ -158,7 +159,7 @@ def set_allowed_values_latex(node, latex_file):
         # for eg min to 5 display as  <= 5
         a = params_[0]
         b = params_[1]
-        allowed_values_ = 'Double. %s $\leq$ value $\leq$ %s' % (a, b)
+        allowed_values_ = 'Double in range %s $\leq$ $x$ $\leq$ %s' % (a, b)
 
     elif type_name_  == 'DOUBLERANGEEXT':
         params_ = get_type_params(type_)
@@ -167,12 +168,51 @@ def set_allowed_values_latex(node, latex_file):
         special_value = params_[2]
         # TODO logic on range as for DoubleRange
         # eg  Double > 2 or max
-        allowed_values_ = "Double in range %s $\leq$ value $\leq$ %s or `%s'" % (min_, max_, special_value)
+        #allowed_values_ = "Double in range %s $\leq$ value $\leq$ %s or `%s'" % (min_, max_, special_value)
+        #allowed_values_ = "Double in the range %s to %s inclusive, or the string `%s'" % (min_, max_, special_value)
+        #allowed_values_ = "Double. $\geq$ %s and $\\leq$ %s, or the string `%s'" % (min_, max_, special_value)
+        #allowed_values_ = "Double range. $\geq$ %s and $\\leq$ %s, or the string `%s'" % (min_, max_, special_value)
+        allowed_values_ = "Double in range %s $\leq$ {\\textbf{$x$}} $\leq$ %s, or `%s'" % (min_, max_, special_value)
 
-    elif type_name_ == 'INPUTFILE' or type_name_ == 'INPUTFILELIST' or \
-        type_name_ == 'OUTPUTFILE':
+    elif type_name_ == 'INPUTFILELIST':
+        #allowed_values_ = 'Comma separated list of path names'
+        allowed_values_ = 'CSV list of path names'
+
+    elif type_name_ == 'INPUTFILE' or type_name_ == 'OUTPUTFILE':
         allowed_values_ = 'Path name'
+
+    elif type_name_ == 'INTLISTEXT':
+        params_ = get_type_params(type_)
+        if params_ == None:
+            #allowed_values_ = "Integer list (CSV)"
+            #allowed_values_ = 'Comma separated integer list'
+            #allowed_values_ = 'CSV integer list'
+            raise ValueError('Invalid IntListExt specified')
+        else:
+            #allowed_values_ = "Integer list (CSV) or '%s'" % params_[0]
+            #allowed_values_ = "Comma separated integer list, or the string `%s'" % params_[0]
+            #allowed_values_ = "Comma separated integer list, or `%s'" % params_[0]
+            allowed_values_ = "CSV integer list or `%s'" % params_[0]
+            
+    elif type_name_ == 'INTLIST':
+        allowed_values_ = 'CSV integer list'
     
+    elif type_name_ == 'DOUBLELIST':
+        allowed_values_ = 'Double, or CSV list of doubles.'
+    
+    elif type_name_ == 'OPTIONLIST':
+        params_ = get_type_params(type_)
+        #allowed_values_ = r'{\textbf{One of the following:}}'+'\n'
+        allowed_values_ = r'{One of the following:}'+'\n'
+        #allowed_values_ = r'\vspace{-3.5mm}'
+        allowed_values_ += r'{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]'+'\n'
+        allowed_values_ += '\itemsep1pt \parskip0pt \parsep0pt '+'\n'
+        for p in params_:
+            p = p.strip()
+            allowed_values_ += r'\item ' + p+'\n'
+        allowed_values_ += r'\end{itemize}'+'\n'
+        allowed_values_ += r'\vspace{-\baselineskip}\mbox{}'+'\n'
+        allowed_values_ += r'}'
     latex_file.write('%s\n' % allowed_values_)
     latex_file.write('&\n')
 
@@ -443,34 +483,34 @@ def recurse_tree(node, key=None, depth=0, count=0, latex_file=None):
 
     return count
 
-filename = '@PROJECT_BINARY_DIR@/settings/xml/oskar.xml'
-dox_filename = '@PROJECT_SOURCE_DIR@/doc/settings/settings_tables.txt'
-if os.path.isfile(dox_filename):
-    os.remove(dox_filename)
 
+if __name__ == "__main__":
 
-xml = process_import_nodes(filename)
-#print ET.tostring(xml)
-# print type(xml)
-#print '---------------------------------'
-#print '<%s>' % xml.tag
-recurse_tree(xml)
+    filename = '@PROJECT_BINARY_DIR@/settings/xml/oskar.xml'
+    dox_filename = '@PROJECT_SOURCE_DIR@/doc/settings/settings_tables.txt'
+    if os.path.isfile(dox_filename):
+        os.remove(dox_filename)
 
+    xml = process_import_nodes(filename)
+    #print ET.tostring(xml)
+    # print type(xml)
+    #print '---------------------------------'
+    #print '<%s>' % xml.tag
+    recurse_tree(xml)
 
-
-# Create the settings.dox file.
-file_replace = '@PROJECT_SOURCE_DIR@/doc/settings/settings_tables.txt'
-file_in = '@PROJECT_SOURCE_DIR@/doc/settings/settings.dox.in'
-file_out = '@PROJECT_SOURCE_DIR@/doc/settings/settings.dox'
-# Get the text to insert
-fh = open(file_replace, 'r')
-replace_text = fh.read()
-fh.close()
-fh = open(file_in,'r')
-in_text = fh.read()
-fh.close()
-out_text = in_text.replace('SETTINGS_TABLES', replace_text)
-fh = open(file_out,'w')
-fh.write(out_text)
-fh.close()
+    # Create the settings.dox file.
+    file_replace = '@PROJECT_SOURCE_DIR@/doc/settings/settings_tables.txt'
+    file_in = '@PROJECT_SOURCE_DIR@/doc/settings/settings.dox.in'
+    file_out = '@PROJECT_SOURCE_DIR@/doc/settings/settings.dox'
+    # Get the text to insert
+    fh = open(file_replace, 'r')
+    replace_text = fh.read()
+    fh.close()
+    fh = open(file_in,'r')
+    in_text = fh.read()
+    fh.close()
+    out_text = in_text.replace('SETTINGS_TABLES', replace_text)
+    fh = open(file_out,'w')
+    fh.write(out_text)
+    fh.close()
 

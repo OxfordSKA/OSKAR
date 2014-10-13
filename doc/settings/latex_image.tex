@@ -57,7 +57,29 @@ image\_type
 &
 The type of image to generate. Note that the Stokes parameter images (if selected) are uncalibrated, and are formed simply using the standard combinations of the linear polarisations: <ul> <li>I = 0.5 (XX + YY)</li> <li>Q = 0.5 (XX - YY)</li> <li>U = 0.5 (XY + YX)</li> <li>V = -0.5i (XY - YX)</li> </ul> The point spread function of the observation can be generated using the PSF option.
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item "Linear (XX
+\item XY
+\item YX
+\item YY)"
+\item XX
+\item XY
+\item YX
+\item YY
+\item "Stokes (I
+\item Q
+\item U
+\item V)"
+\item I
+\item Q
+\item U
+\item V
+\item PSF
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 I
 \\
@@ -141,7 +163,15 @@ direction
 &
 Specifies the direction of the image phase centre. <ul> <li>If `Observation direction' is selected, the image is centred on the pointing direction of the primary beam.</li> <li>If `RA, Dec.' is selected, the image is centred on the values of RA and Dec. found below.</li> </ul>
 &
-Allowed values
+{One of the following:}
+{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+\itemsep1pt \parskip0pt \parsep0pt 
+\item Observation direction
+\item "RA
+\item Dec."
+\end{itemize}
+\vspace{-\baselineskip}\mbox{}
+}
 &
 Observation
 \\
