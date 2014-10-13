@@ -121,7 +121,7 @@ should be set to 0 if this is not required. The differences between the two
 tag types are detailed in \ref binary_tag_standard and \ref binary_tag_extended.
 
 <table>
-<tr><th>Offset (bytes)</th> <th>Length (bytes)</th> <th>Description</th> </tr>
+<tr><th>Offset (bytes)</th><th>Length (bytes)</th><th>Description</th></tr>
 <tr><td>0</td><td>1</td>
     <td>0x54 (ASCII 'T')</td></tr>
 <tr><td>1</td><td>1</td>

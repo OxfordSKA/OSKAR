@@ -55,6 +55,13 @@ void oskar_binary_read(oskar_Binary* handle,
     /* Check if safe to proceed. */
     if (*status) return;
 
+    /* Check file was opened for reading. */
+    if (handle->open_mode != 'r')
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
+
     /* Query the tag index to get the block size and offset. */
     i = oskar_binary_query(handle, data_type, id_group, id_tag,
             user_index, &payload_size, status);
@@ -133,6 +140,13 @@ void oskar_binary_read_ext(oskar_Binary* handle,
 
     /* Check if safe to proceed. */
     if (*status) return;
+
+    /* Check file was opened for reading. */
+    if (handle->open_mode != 'r')
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     /* Query the tag index to get the block size and offset. */
     i = oskar_binary_query_ext(handle, data_type, name_group, name_tag,

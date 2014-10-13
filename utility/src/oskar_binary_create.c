@@ -129,8 +129,6 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
 
     /* Store the contents of the header for later use. */
     handle->bin_version     = header.bin_version;
-    handle->big_endian      = header.endian;
-    handle->size_ptr        = header.size_ptr;
     handle->oskar_ver_major = header.version[2];
     handle->oskar_ver_minor = header.version[1];
     handle->oskar_ver_patch = header.version[0];
@@ -184,18 +182,28 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
                 element_size /= 4;
             if (tag.data_type & OSKAR_COMPLEX)
                 element_size /= 2;
-            if ((tag.data_type & OSKAR_CHAR) &&
-                    element_size != sizeof(char))
-                *status = OSKAR_ERR_BAD_BINARY_FORMAT;
-            else if ((tag.data_type & OSKAR_INT) &&
-                    element_size != sizeof(int))
-                *status = OSKAR_ERR_BAD_BINARY_FORMAT;
-            else if ((tag.data_type & OSKAR_SINGLE) &&
-                    element_size != sizeof(float))
-                *status = OSKAR_ERR_BAD_BINARY_FORMAT;
-            else if ((tag.data_type & OSKAR_DOUBLE) &&
-                    element_size != sizeof(double))
-                *status = OSKAR_ERR_BAD_BINARY_FORMAT;
+            if (tag.data_type & OSKAR_CHAR)
+            {
+                if (element_size != sizeof(char))
+                    *status = OSKAR_ERR_BAD_BINARY_FORMAT;
+            }
+            else if (tag.data_type & OSKAR_INT)
+            {
+                if (element_size != sizeof(int))
+                    *status = OSKAR_ERR_BINARY_INT_MISMATCH;
+            }
+            else if (tag.data_type & OSKAR_SINGLE)
+            {
+                if (element_size != sizeof(float))
+                    *status = OSKAR_ERR_BINARY_FLOAT_MISMATCH;
+            }
+            else if (tag.data_type & OSKAR_DOUBLE)
+            {
+                if (element_size != sizeof(double))
+                    *status = OSKAR_ERR_BINARY_DOUBLE_MISMATCH;
+            }
+            else
+                *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
 
         /* Check if we need to allocate more storage for the tag data. */
@@ -319,7 +327,7 @@ static void oskar_binary_write_header(FILE* stream, oskar_BinaryHeader* header,
         int* status)
 {
     int version = OSKAR_VERSION;
-    char magic[] = "OSKARBIN";
+    const char magic[] = "OSKARBIN";
 
     /* Construct binary header. */
     memset(header, 0, sizeof(oskar_BinaryHeader));
@@ -330,9 +338,6 @@ static void oskar_binary_write_header(FILE* stream, oskar_BinaryHeader* header,
     if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
         oskar_endian_swap(&version, sizeof(int));
     memcpy(header->version, &version, sizeof(header->version));
-
-    /* Pad rest of header with zeros. */
-    memset(header->reserved, 0, sizeof(header->reserved));
 
     /* Write header to stream. */
     rewind(stream);

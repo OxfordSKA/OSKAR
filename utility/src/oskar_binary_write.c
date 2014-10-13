@@ -55,10 +55,18 @@ void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
     /* Check if safe to proceed. */
     if (*status) return;
 
+    /* Check file was opened for writing. */
+    if (handle->open_mode != 'w' && handle->open_mode != 'a')
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
+
     /* Initialise the tag. */
     tag.magic[0] = 'T';
     tag.magic[1] = 0x40 + OSKAR_BINARY_FORMAT_VERSION;
     tag.magic[2] = 'G';
+    tag.magic[3] = 0;
     memset(tag.size_bytes, 0, sizeof(tag.size_bytes));
     memset(tag.user_index, 0, sizeof(tag.user_index));
 
@@ -71,6 +79,11 @@ void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
         tag.magic[3] = sizeof(float);
     else if (data_type & OSKAR_DOUBLE)
         tag.magic[3] = sizeof(double);
+    else
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
     if (data_type & OSKAR_COMPLEX)
         tag.magic[3] *= 2;
     if (data_type & OSKAR_MATRIX)
@@ -162,10 +175,18 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
     /* Check if safe to proceed. */
     if (*status) return;
 
+    /* Check file was opened for writing. */
+    if (handle->open_mode != 'w' && handle->open_mode != 'a')
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
+
     /* Initialise the tag. */
     tag.magic[0] = 'T';
     tag.magic[1] = 0x40 + OSKAR_BINARY_FORMAT_VERSION;
     tag.magic[2] = 'G';
+    tag.magic[3] = 0;
     memset(tag.size_bytes, 0, sizeof(tag.size_bytes));
     memset(tag.user_index, 0, sizeof(tag.user_index));
 
@@ -178,6 +199,11 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
         tag.magic[3] = sizeof(float);
     else if (data_type & OSKAR_DOUBLE)
         tag.magic[3] = sizeof(double);
+    else
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
     if (data_type & OSKAR_COMPLEX)
         tag.magic[3] *= 2;
     if (data_type & OSKAR_MATRIX)
