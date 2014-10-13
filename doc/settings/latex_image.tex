@@ -5,7 +5,7 @@
 
 \fontsize{8}{10}\selectfont
 \begin{center}
-\begin{longtable}{|c|L{9cm}|L{8.5cm}|L{3.0cm}|L{1.7cm}|}
+\begin{longtable}{|c|L{9cm}|L{7.5cm}|L{4.0cm}|L{1.7cm}|}
 
 \hline
   \rowcolor{lightgray}
@@ -31,7 +31,7 @@
 &
 fov\_deg
 &
-Total field of view in degrees.
+{Total field of view in degrees.}
 &
 Unsigned double
 &
@@ -43,7 +43,7 @@ Unsigned double
 &
 size
 &
-Image width in one dimension (e.g. a value of 256 would give a 256 by 256 image).
+{Image width in one dimension (e.g. a value of 256 would give a 256 by 256 image).}
 &
 Integer > 0
 &
@@ -55,28 +55,28 @@ Integer > 0
 &
 image\_type
 &
-The type of image to generate. Note that the Stokes parameter images (if selected) are uncalibrated, and are formed simply using the standard combinations of the linear polarisations: <ul> <li>I = 0.5 (XX + YY)</li> <li>Q = 0.5 (XX - YY)</li> <li>U = 0.5 (XY + YX)</li> <li>V = -0.5i (XY - YX)</li> </ul> The point spread function of the observation can be generated using the PSF option.
+{The type of image to generate. Note that the Stokes parameter images (if selected) are uncalibrated, and are formed simply using the standard combinations of the linear polarisations: {\begin{itemize}
+ \item {I = 0.5 (XX + YY)}
+ \item {Q = 0.5 (XX - YY)}
+ \item {U = 0.5 (XY + YX)}
+ \item {V = -0.5i (XY - YX)}
+ \end{itemize}}
+ The point spread function of the observation can be generated using the PSF option.}
 &
 {One of the following:}
-{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+{\begin{itemize}[leftmargin=2ex, topsep=0pt]
 \itemsep1pt \parskip0pt \parsep0pt 
-\item "Linear (XX
-\item XY
-\item YX
-\item YY)"
-\item XX
-\item XY
-\item YX
-\item YY
-\item "Stokes (I
-\item Q
-\item U
-\item V)"
-\item I
-\item Q
-\item U
-\item V
-\item PSF
+\item {Linear (XX,XY,YX,YY)}
+\item {XX}
+\item {XY}
+\item {YX}
+\item {YY}
+\item {Stokes (I,Q,U,V)}
+\item {I}
+\item {Q}
+\item {U}
+\item {V}
+\item {PSF}
 \end{itemize}
 \vspace{-\baselineskip}\mbox{}
 }
@@ -89,7 +89,7 @@ I
 &
 channel\_snapshots
 &
-If true, then produce an image cube containing snapshots for each frequency channel. If false, then use frequency-synthesis to stack the channels in the final image.
+{If true, then produce an image cube containing snapshots for each frequency channel. If false, then use frequency-synthesis to stack the channels in the final image.}
 &
 Bool
 &
@@ -101,9 +101,9 @@ true
 &
 channel\_start
 &
-The start channel index to include in the image or image cube.
+{The start channel index to include in the image or image cube.}
 &
-Unsigned int
+Unsigned integer
 &
 0
 \\
@@ -113,9 +113,9 @@ Unsigned int
 &
 channel\_end
 &
-The end channel index to include in the image or image cube.
+{The end channel index to include in the image or image cube.}
 &
-Allowed values
+`max' or integer in range 0 $\leq$ $x$ $\leq$ MAX
 &
 max
 \\
@@ -125,7 +125,7 @@ max
 &
 time\_snapshots
 &
-If true, then produce an image cube containing snapshots for each time step. If false, then use time-synthesis to stack the times in the final image.
+{If true, then produce an image cube containing snapshots for each time step. If false, then use time-synthesis to stack the times in the final image.}
 &
 Bool
 &
@@ -137,9 +137,9 @@ true
 &
 time\_start
 &
-The start time index to include in the image or image cube.
+{The start time index to include in the image or image cube.}
 &
-Unsigned int
+Unsigned integer
 &
 0
 \\
@@ -149,9 +149,9 @@ Unsigned int
 &
 time\_end
 &
-The end time index to include in the image or image cube.
+{The end time index to include in the image or image cube.}
 &
-Allowed values
+`max' or integer in range 0 $\leq$ $x$ $\leq$ MAX
 &
 max
 \\
@@ -161,14 +161,17 @@ max
 &
 direction
 &
-Specifies the direction of the image phase centre. <ul> <li>If `Observation direction' is selected, the image is centred on the pointing direction of the primary beam.</li> <li>If `RA, Dec.' is selected, the image is centred on the values of RA and Dec. found below.</li> </ul>
+{Specifies the direction of the image phase centre. {\begin{itemize}
+ \item {If `Observation direction' is selected, the image is centred on the pointing direction of the primary beam.}
+ \item {If `RA, Dec.' is selected, the image is centred on the values of RA and Dec. found below.}
+ \end{itemize}}
+}
 &
 {One of the following:}
-{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+{\begin{itemize}[leftmargin=2ex, topsep=0pt]
 \itemsep1pt \parskip0pt \parsep0pt 
-\item Observation direction
-\item "RA
-\item Dec."
+\item {Observation direction}
+\item {RA, Dec.}
 \end{itemize}
 \vspace{-\baselineskip}\mbox{}
 }
@@ -181,7 +184,7 @@ Observation
 &
 direction/ra\_deg
 &
-The Right Ascension of the image phase centre. This value is used if the image centre direction is set to `RA, Dec.'.
+{The Right Ascension of the image phase centre. This value is used if the image centre direction is set to `RA, Dec.'.}
 &
 Double
 &
@@ -193,7 +196,7 @@ Double
 &
 direction/dec\_deg
 &
-The Declination of the image phase centre. This value is used if the image centre direction is set to `RA, Dec.'.
+{The Declination of the image phase centre. This value is used if the image centre direction is set to `RA, Dec.'.}
 &
 Double
 &
@@ -205,7 +208,7 @@ Double
 &
 input\_vis\_data
 &
-Path to the input OSKAR visibility data file.
+{Path to the input OSKAR visibility data file.}
 &
 Path name
 &
@@ -217,7 +220,7 @@ None
 &
 root\_path
 &
-Path consisting of the root of the image filename used to save the output image. The full filename will be constructed as {\texttt{ \textbf{ $<$root$>$\_$<$image\_type$>$.$<$extension$>$, }}}
+{Path consisting of the root of the image filename used to save the output image. The full filename will be constructed as {\texttt{ \textbf{ $<$root$>$\_$<$image\_type$>$.$<$extension$>$, }}}}
 &
 Path name
 &
@@ -229,7 +232,7 @@ None
 &
 fits\_image
 &
-If true, save the image in FITS format.
+{If true, save the image in FITS format.}
 &
 Bool
 &
@@ -241,7 +244,7 @@ true
 &
 oskar\_image
 &
-If true, save the image in OSKAR image binary format.
+{If true, save the image in OSKAR image binary format.}
 &
 Bool
 &
@@ -253,7 +256,7 @@ true
 &
 overwrite
 &
-If \textbf{true}, existing image files will be overwritten. If \textbf{false}, new image files of the same name will be created by appending an number to the existing filename with the pattern: <br />{\texttt{ \textbf{ $<$filename$>$-$<$N$>$.$<$extension$>$, }}}<br /> where N starts at 1 and is incremented for each new image created.
+{If \textbf{true}, existing image files will be overwritten. If \textbf{false}, new image files of the same name will be created by appending an number to the existing filename with the pattern: {\texttt{ \textbf{ $<$filename$>$-$<$N$>$.$<$extension$>$, }}} where N starts at 1 and is incremented for each new image created.}
 &
 Bool
 &

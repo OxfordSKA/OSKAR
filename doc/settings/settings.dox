@@ -49,10 +49,11 @@ The following section describes the possible options that can be currently used
 in OSKAR settings files. The settings file is arranged into a number of groups,
 which are described in the subsections below.
 
+<!--
 \subsection settings_allowed_values A note on allowed values
 - MAX represents the maximum representable value for the type.
 - Bool types should be set as the strings, true or false.
-
+-->
 
 \latexonly
 \begin{landscape}

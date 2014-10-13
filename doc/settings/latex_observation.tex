@@ -5,7 +5,7 @@
 
 \fontsize{8}{10}\selectfont
 \begin{center}
-\begin{longtable}{|c|L{9cm}|L{8.5cm}|L{3.0cm}|L{1.7cm}|}
+\begin{longtable}{|c|L{9cm}|L{7.5cm}|L{4.0cm}|L{1.7cm}|}
 
 \hline
   \rowcolor{lightgray}
@@ -31,7 +31,7 @@
 &
 phase\_centre\_ra\_deg
 &
-Right Ascension of the observation pointing (phase centre), in degrees.
+{Right Ascension of the observation pointing (phase centre), in degrees.}
 &
 Double, or CSV list of doubles.
 &
@@ -43,7 +43,7 @@ Double, or CSV list of doubles.
 &
 phase\_centre\_dec\_deg
 &
-Declination of the observation pointing (phase centre), in degrees.
+{Declination of the observation pointing (phase centre), in degrees.}
 &
 Double, or CSV list of doubles.
 &
@@ -55,7 +55,7 @@ Double, or CSV list of doubles.
 &
 pointing\_file
 &
-Pathname to optional station pointing file, which can be used to override the beam direction for any or all stations in the telescope model. See the accompanying documentation for a description of a station pointing file.
+{Pathname to optional station pointing file, which can be used to override the beam direction for any or all stations in the telescope model. See the accompanying documentation for a description of a station pointing file.}
 &
 Path name
 &
@@ -67,7 +67,7 @@ Path name
 &
 start\_frequency\_hz\textsuperscript{\textbf{\dag}}
 &
-The frequency at the midpoint of the first channel, in Hz.
+{The frequency at the midpoint of the first channel, in Hz.}
 &
 Unsigned double
 &
@@ -79,7 +79,7 @@ Unsigned double
 &
 num\_channels
 &
-Number of frequency channels / bands to use.
+{Number of frequency channels / bands to use.}
 &
 Integer in range 1 $\leq$ $x$ $\leq$ MAX
 &
@@ -91,7 +91,7 @@ Integer in range 1 $\leq$ $x$ $\leq$ MAX
 &
 frequency\_inc\_hz
 &
-The frequency increment between successive channels, in Hz.
+{The frequency increment between successive channels, in Hz.}
 &
 Unsigned double
 &
@@ -103,9 +103,25 @@ Unsigned double
 &
 start\_time\_utc\textsuperscript{\textbf{\dag}}
 &
-A string describing the start time and date for the observation.
+{A string describing the start time and date for the observation.}
 &
-Allowed values
+{\vspace{-3.5mm}{\begin{flushleft}
+Date-time string of format: \\
+\hspace{2ex}\textbf{`d-M-yyyy h:m:s.z'} \\
+where: \\
+{
+\begin{tabular}{@{}p{2ex}@{} @{}p{5ex} @{}p{2ex}@{} l}
+~&\textbf{d}    & : & day number (1 to 31) \\[-0.9ex]
+~&\textbf{M}    & : & month (1 to 12)   \\[-0.9ex]
+~&\textbf{yyyy} & : & year (4 digits)   \\[-0.9ex]
+~&\textbf{h}    & : & hours (0 to 23)   \\[-0.9ex]
+~&\textbf{m}    & : & minutes (0 to 59) \\[-0.9ex]
+~&\textbf{s}    & : & seconds (0 to 59) \\[-0.9ex]
+~&\textbf{z}    & : & milliseconds (0 to 999) \\[-0.9ex]
+\end{tabular}
+}
+\end{flushleft}
+}}
 &
 
 \\
@@ -115,9 +131,24 @@ Allowed values
 &
 length\textsuperscript{\textbf{\dag}}
 &
-The observation length either in seconds, or in hours, minutes and seconds.
+{The observation length either in seconds, or in hours, minutes and seconds.}
 &
-Allowed values
+{\vspace{-6.5mm}{\begin{flushleft}
+Double (if length in seconds), or
+time string of format: \\
+\hspace{2ex}\textbf{`h:m:s.z'} \\
+where:\\
+{
+\begin{tabular}{@{}p{2ex}@{} @{}p{5ex} @{}p{2ex}@{} l}
+~&\textbf{h} & : & hours (0 to 23)   \\[-0.9ex]
+~&\textbf{m} & : & minutes (0 to 59) \\[-0.9ex]
+~&\textbf{s} & : & seconds (0 to 59) \\[-0.9ex]
+~&\textbf{z} & : & milliseconds (0 to 999) \\[-0.9ex]
+\end{tabular}
+}
+\end{flushleft}
+}}
+
 &
 
 \\
@@ -127,7 +158,7 @@ Allowed values
 &
 num\_time\_steps
 &
-Number of time steps in the output data during the observation length. This corresponds to the number of correlator dumps for interferometer simulations, and the number of beam pattern snapshots for beam pattern simulations.
+{Number of time steps in the output data during the observation length. This corresponds to the number of correlator dumps for interferometer simulations, and the number of beam pattern snapshots for beam pattern simulations.}
 &
 Integer in range 1 $\leq$ $x$ $\leq$ MAX
 &

@@ -5,7 +5,7 @@
 
 \fontsize{8}{10}\selectfont
 \begin{center}
-\begin{longtable}{|c|L{9cm}|L{8.5cm}|L{3.0cm}|L{1.7cm}|}
+\begin{longtable}{|c|L{9cm}|L{7.5cm}|L{4.0cm}|L{1.7cm}|}
 
 \hline
   \rowcolor{lightgray}
@@ -31,9 +31,9 @@
 &
 station\_id
 &
-The station ID number (zero based) to select from the telescope model when generating the beam pattern.
+{The station ID number (zero based) to select from the telescope model when generating the beam pattern.}
 &
-Unsigned int
+Unsigned integer
 &
 0
 \\
@@ -43,7 +43,11 @@ Unsigned int
 &
 beam\_image/size
 &
-Image dimensions. If a single value is specified, the image is assumed to have the same number of pixels along each dimension.<br /> Example: <ul> <li>A value of `256' results in a square image of size 256 by 256 pixels.</li> <li>A value of `256,128' results in an image of 256 by 128 pixels, with 256 pixels along the Right Ascension direction.</li> </ul>
+{Image dimensions. If a single value is specified, the image is assumed to have the same number of pixels along each dimension. Example: {\begin{itemize}
+ \item {A value of `256' results in a square image of size 256 by 256 pixels.}
+ \item {A value of `256,128' results in an image of 256 by 128 pixels, with 256 pixels along the Right Ascension direction.}
+ \end{itemize}}
+}
 &
 CSV integer list
 &
@@ -55,7 +59,11 @@ CSV integer list
 &
 beam\_image/fov\_deg
 &
-Field-of-view (FOV) in degrees (max 180.0). If a single value is specified, the image is assumed to have the same FOV along each dimension. <br /> Example: <ul> <li>A value of `2.0' results in an image with a FOV of 2.0 degrees in each dimension.</li> <li>A value of `2.0,1.0' results in an image with a FOV of 2.0 degrees in Right Ascension, and 1.0 degrees in Declination.</li> </ul>
+{Field-of-view (FOV) in degrees (max 180.0). If a single value is specified, the image is assumed to have the same FOV along each dimension.  Example: {\begin{itemize}
+ \item {A value of `2.0' results in an image with a FOV of 2.0 degrees in each dimension.}
+ \item {A value of `2.0,1.0' results in an image with a FOV of 2.0 degrees in Right Ascension, and 1.0 degrees in Declination.}
+ \end{itemize}}
+}
 &
 Double, or CSV list of doubles.
 &
@@ -67,7 +75,7 @@ Double, or CSV list of doubles.
 &
 root\_path
 &
-Root path name of the generated data file. Appropriate suffixes and extensions will be added to this, based on the settings below.
+{Root path name of the generated data file. Appropriate suffixes and extensions will be added to this, based on the settings below.}
 &
 Path name
 &
@@ -79,7 +87,7 @@ None
 &
 oskar\_image\_file/save\_voltage
 &
-If true, save the voltage amplitude pattern in an OSKAR image file. (This is given by the square root of the sum of the squares of the real and imaginary values.)
+{If true, save the voltage amplitude pattern in an OSKAR image file. (This is given by the square root of the sum of the squares of the real and imaginary values.)}
 &
 Bool
 &
@@ -91,7 +99,7 @@ false
 &
 oskar\_image\_file/save\_phase
 &
-If true, save the phase pattern in an OSKAR image file.
+{If true, save the phase pattern in an OSKAR image file.}
 &
 Bool
 &
@@ -103,7 +111,7 @@ false
 &
 oskar\_image\_file/save\_complex
 &
-If true, save the complex (real and imaginary) pattern in an OSKAR image file.
+{If true, save the complex (real and imaginary) pattern in an OSKAR image file.}
 &
 Bool
 &
@@ -115,7 +123,7 @@ false
 &
 oskar\_image\_file/save\_total\_intensity
 &
-If true, save the total intensity beam. This is evaluated as the Stokes I response of the beam pattern auto-correlation.
+{If true, save the total intensity beam. This is evaluated as the Stokes I response of the beam pattern auto-correlation.}
 &
 Bool
 &
@@ -127,7 +135,7 @@ false
 &
 fits\_file/save\_voltage
 &
-If true, save the voltage amplitude pattern in a FITS image file. (This is given by the square root of the sum of the squares of the real and imaginary values.)
+{If true, save the voltage amplitude pattern in a FITS image file. (This is given by the square root of the sum of the squares of the real and imaginary values.)}
 &
 Bool
 &
@@ -139,7 +147,7 @@ false
 &
 fits\_file/save\_phase
 &
-If true, save the phase pattern in a FITS image file.
+{If true, save the phase pattern in a FITS image file.}
 &
 Bool
 &
@@ -151,7 +159,7 @@ false
 &
 fits\_file/save\_total\_intensity
 &
-If true, save the total intensity beam. This is evaluated as the Stokes-I response of the beam pattern auto-correlation.
+{If true, save the total intensity beam. This is evaluated as the Stokes-I response of the beam pattern auto-correlation.}
 &
 Bool
 &

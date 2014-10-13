@@ -5,7 +5,7 @@
 
 \fontsize{8}{10}\selectfont
 \begin{center}
-\begin{longtable}{|c|L{9cm}|L{8.5cm}|L{3.0cm}|L{1.7cm}|}
+\begin{longtable}{|c|L{9cm}|L{7.5cm}|L{4.0cm}|L{1.7cm}|}
 
 \hline
   \rowcolor{lightgray}
@@ -31,7 +31,7 @@
 &
 input\_cst\_file
 &
-Pathname to a file containing an ASCII data table of the directional element pattern response, as exported by the CST software package in (theta, phi) coordinates. See the Telescope Model documentation for a description of the required columns.
+{Pathname to a file containing an ASCII data table of the directional element pattern response, as exported by the CST software package in (theta, phi) coordinates. See the Telescope Model documentation for a description of the required columns.}
 &
 Path name
 &
@@ -43,7 +43,7 @@ Path name
 &
 input\_scalar\_file
 &
-Pathname to a file containing an ASCII data table of the scalar directional element pattern response. See the Telescope Model documentation for a description of the required columns.
+{Pathname to a file containing an ASCII data table of the scalar directional element pattern response. See the Telescope Model documentation for a description of the required columns.}
 &
 Path name
 &
@@ -55,7 +55,7 @@ Path name
 &
 frequency\_hz
 &
-Observing frequency at which numerical element pattern data is applicable, in Hz.
+{Observing frequency at which numerical element pattern data is applicable, in Hz.}
 &
 Unsigned double
 &
@@ -67,14 +67,14 @@ Unsigned double
 &
 pol\_type
 &
-Specify whether the input data is to be used for the X or Y dipole, or both. (This is ignored for scalar data.)
+{Specify whether the input data is to be used for the X or Y dipole, or both. (This is ignored for scalar data.)}
 &
 {One of the following:}
-{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]
+{\begin{itemize}[leftmargin=2ex, topsep=0pt]
 \itemsep1pt \parskip0pt \parsep0pt 
-\item XY
-\item X
-\item Y
+\item {XY}
+\item {X}
+\item {Y}
 \end{itemize}
 \vspace{-\baselineskip}\mbox{}
 }
@@ -87,9 +87,9 @@ XY
 &
 element\_type\_index
 &
-The type index of the element. Leave this at zero if there is only one type of element per station.
+{The type index of the element. Leave this at zero if there is only one type of element per station.}
 &
-Unsigned int
+Unsigned integer
 &
 0
 \\
@@ -99,7 +99,7 @@ Unsigned int
 &
 ignore\_data\_at\_pole
 &
-If \textbf{true}, then numerical element pattern data points at theta = 0 and theta = 180 degrees are ignored.
+{If \textbf{true}, then numerical element pattern data points at theta = 0 and theta = 180 degrees are ignored.}
 &
 Bool
 &
@@ -111,7 +111,7 @@ false
 &
 ignore\_data\_below\_horizon
 &
-If \textbf{true}, then numerical element pattern data points at theta $>$ 90 degrees are ignored.
+{If \textbf{true}, then numerical element pattern data points at theta $>$ 90 degrees are ignored.}
 &
 Bool
 &
@@ -123,7 +123,7 @@ true
 &
 average\_fractional\_error
 &
-The target average fractional error between the fitted surface and the numerical element pattern input data. Choose this value carefully. A value that is too small may introduce fitting artifacts, or may cause the fitting procedure to fail. A value that is too large will cause detail to be lost in the fitted surface.
+{The target average fractional error between the fitted surface and the numerical element pattern input data. Choose this value carefully. A value that is too small may introduce fitting artifacts, or may cause the fitting procedure to fail. A value that is too large will cause detail to be lost in the fitted surface.}
 &
 Unsigned double
 &
@@ -135,7 +135,7 @@ Unsigned double
 &
 average\_fractional\_error\_factor\_increase
 &
-If the fitting procedure fails, this value gives the factor by which to increase the allowed average fractional error between the fitted surface and the numerical element pattern input data, before trying again. Must be $>$ 1.0.
+{If the fitting procedure fails, this value gives the factor by which to increase the allowed average fractional error between the fitted surface and the numerical element pattern input data, before trying again. Must be $>$ 1.0.}
 &
 Unsigned double
 &
@@ -147,9 +147,9 @@ Unsigned double
 &
 output\_directory
 &
-Path to the telescope or station directory in which to save the fitted coefficients.
+{Path to the telescope or station directory in which to save the fitted coefficients.}
 &
-Allowed values
+Path name
 &
 
 \\

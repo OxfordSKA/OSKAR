@@ -59,11 +59,17 @@ def get_node_text(node):
     return txt.strip()
 
 def get_type_params(node):
+    import csv
     # TODO Ignore csv inside quotes
     # http://stackoverflow.com/questions/8208358/split-string-ignoring-delimiter-within-quotation-marks-python
     params_ = get_node_text(node)
     if params_ == None: return None
-    return params_.split(',')
+    if '"' in params_:
+        x = csv.reader([params_], skipinitialspace=True)
+        params_ = x.next()
+    else:
+        params_ = params_.split(',')
+    return params_
 
 def format_double_string(string):
     if not 'e' in string:
@@ -127,14 +133,14 @@ def set_allowed_values_latex(node, latex_file):
     type_name_ = get_attribute(type_, ['name', 't'])
     if type_name_ == None: raise 'Invalid setting'
 
-    allowed_values_ = 'Allowed values'
+    allowed_values_ = r'\textcolor{red}{\textbf{FIXME}}'
 
     if type_name_  == 'DOUBLE' or type_name_ == 'INT' or \
         type_name_ == 'BOOL' or type_name_ == 'STRING':
         allowed_values_ = type_name_[0].upper() + type_name_[1:].lower()
 
     elif type_name_ == 'UINT':
-        allowed_values_ = 'Unsigned int'
+        allowed_values_ = 'Unsigned integer'
 
     elif type_name_ == 'INTPOSITIVE':
         allowed_values_ = 'Integer > 0'
@@ -151,6 +157,14 @@ def set_allowed_values_latex(node, latex_file):
         a = params_[0]
         b = params_[1]
         allowed_values_ = 'Integer in range %s $\leq$ $x$ $\leq$ %s' % (a, b)
+
+    elif type_name_ == 'INTRANGEEXT':
+        params_ = get_type_params(type_)
+        a = params_[0]
+        b = params_[1]
+        special_value = params_[2]
+        allowed_values_ = "`%s' or integer in range %s $\leq$ $x$ $\leq$ %s" \
+            % (special_value, a, b)
 
     elif type_name_  == 'DOUBLERANGE':
         params_ = get_type_params(type_)
@@ -172,13 +186,15 @@ def set_allowed_values_latex(node, latex_file):
         #allowed_values_ = "Double in the range %s to %s inclusive, or the string `%s'" % (min_, max_, special_value)
         #allowed_values_ = "Double. $\geq$ %s and $\\leq$ %s, or the string `%s'" % (min_, max_, special_value)
         #allowed_values_ = "Double range. $\geq$ %s and $\\leq$ %s, or the string `%s'" % (min_, max_, special_value)
-        allowed_values_ = "Double in range %s $\leq$ {\\textbf{$x$}} $\leq$ %s, or `%s'" % (min_, max_, special_value)
+        allowed_values_ = "`%s' or double in range %s $\leq$ {\\textbf{$x$}} $\leq$ %s" \
+            % (special_value, min_, max_)
 
     elif type_name_ == 'INPUTFILELIST':
         #allowed_values_ = 'Comma separated list of path names'
         allowed_values_ = 'CSV list of path names'
 
-    elif type_name_ == 'INPUTFILE' or type_name_ == 'OUTPUTFILE':
+    elif type_name_ == 'INPUTFILE' or type_name_ == 'OUTPUTFILE' or \
+        type_name_ == 'INPUTDIRECTORY':
         allowed_values_ = 'Path name'
 
     elif type_name_ == 'INTLISTEXT':
@@ -203,18 +219,61 @@ def set_allowed_values_latex(node, latex_file):
     elif type_name_ == 'OPTIONLIST':
         params_ = get_type_params(type_)
         #allowed_values_ = r'{\textbf{One of the following:}}'+'\n'
-        allowed_values_ = r'{One of the following:}'+'\n'
         #allowed_values_ = r'\vspace{-3.5mm}'
-        allowed_values_ += r'{\begin{itemize}[leftmargin=0.3cm, topsep=0pt]'+'\n'
+        allowed_values_ = r'{One of the following:}'+'\n'
+        allowed_values_ += r'{\begin{itemize}[leftmargin=2ex, topsep=0pt]'+'\n'
         allowed_values_ += '\itemsep1pt \parskip0pt \parsep0pt '+'\n'
         for p in params_:
             p = p.strip()
-            allowed_values_ += r'\item ' + p+'\n'
+            allowed_values_ += r'\item {' + p+'}\n'
         allowed_values_ += r'\end{itemize}'+'\n'
         allowed_values_ += r'\vspace{-\baselineskip}\mbox{}'+'\n'
         allowed_values_ += r'}'
+
+    elif type_name_ == 'DATETIME':
+        allowed_values_  = r'{\vspace{-3.5mm}'
+        allowed_values_ += r'{'
+        allowed_values_ += r'\begin{flushleft}'+'\n'
+        allowed_values_ += r'Date-time string of format: \\'+'\n'
+        allowed_values_ += r"\hspace{2ex}\textbf{`d-M-yyyy h:m:s.z'} \\"+'\n'
+        allowed_values_ += r'where: \\'+'\n'
+        allowed_values_ += r'{'+'\n'
+        allowed_values_ += r'\begin{tabular}{@{}p{2ex}@{} @{}p{5ex} @{}p{2ex}@{} l}'+'\n'
+        allowed_values_ += r'~&\textbf{d}    & : & day number (1 to 31) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{M}    & : & month (1 to 12)   \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{yyyy} & : & year (4 digits)   \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{h}    & : & hours (0 to 23)   \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{m}    & : & minutes (0 to 59) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{s}    & : & seconds (0 to 59) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{z}    & : & milliseconds (0 to 999) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'\end{tabular}'+'\n'
+        allowed_values_ += r'}'+'\n'
+        allowed_values_ += r'\end{flushleft}'+'\n'
+        allowed_values_ += r'}}'
+
+    elif type_name_ == 'TIME':
+        allowed_values_  = r'{\vspace{-6.5mm}'
+        allowed_values_ += r'{'
+        allowed_values_ += r'\begin{flushleft}'+'\n'
+        allowed_values_ += r'Double (if length in seconds), or'+'\n'
+        allowed_values_ += r'time string of format: \\'+'\n'
+        allowed_values_ += r"\hspace{2ex}\textbf{`h:m:s.z'} \\"+'\n'
+        allowed_values_ += r'where:\\'+'\n'
+        allowed_values_ += r'{'+'\n'
+        allowed_values_ += r'\begin{tabular}{@{}p{2ex}@{} @{}p{5ex} @{}p{2ex}@{} l}'+'\n'
+        allowed_values_ += r'~&\textbf{h} & : & hours (0 to 23)   \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{m} & : & minutes (0 to 59) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{s} & : & seconds (0 to 59) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{z} & : & milliseconds (0 to 999) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'\end{tabular}'+'\n'
+        allowed_values_ += r'}'+'\n'
+        allowed_values_ += r'\end{flushleft}'+'\n'
+        allowed_values_ += r'}}'+'\n'
+
+
     latex_file.write('%s\n' % allowed_values_)
     latex_file.write('&\n')
+
 
 def parse_setting_node(node, key, depth, count, latex_file=None):
     if not (node.tag == 's' or node.tag == 'setting'): return
@@ -283,7 +342,8 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
         latex_file_.write(r'\fontsize{8}{10}\selectfont' + '\n')
         #latex_file_.write(r'\fontsize{6}{10}\selectfont' + '\n')
         latex_file_.write(r'\begin{center}'+'\n')
-        latex_file_.write(r'\begin{longtable}{|c|L{9cm}|L{8.5cm}|L{3.0cm}|L{1.7cm}|}' + '\n')
+        #latex_file_.write(r'\begin{longtable}{|c|L{9cm}|L{8.5cm}|L{3.0cm}|L{1.7cm}|}' + '\n')
+        latex_file_.write(r'\begin{longtable}{|c|L{9cm}|L{7.5cm}|L{4.0cm}|L{1.7cm}|}' + '\n')
         #latex_file_.write(r'\begin{longtable}{|L{9cm}|L{8.5cm}|L{3.0cm}|L{1.7cm}|}' + '\n')
         latex_file_.write('\n')
         
@@ -394,6 +454,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
                     desc_ = desc_.replace('</d>', '')
                     desc_ = desc_.replace('<description>', '')
                     desc_ = desc_.replace('</description>', '')
+
 #                     if child_.text == None:
 #                         desc_ = ''
 #                         continue
@@ -423,14 +484,22 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
                     latex_desc_ = latex_desc_.replace(r'&amp;gt;', r'$>$')
                     latex_desc_ = latex_desc_.replace(r"<b>", r'\textbf{')
                     latex_desc_ = latex_desc_.replace(r"</b>", r'}')
+                    latex_desc_ = latex_desc_.replace(r"<i>", r'\textit{')
+                    latex_desc_ = latex_desc_.replace(r"</i>", r'}')
                     latex_desc_ = latex_desc_.replace(r'<code>', r'{\texttt{ ')
                     latex_desc_ = latex_desc_.replace(r'</code>', '}}')
                     latex_desc_ = latex_desc_.replace(r'&amp;nbsp;', '')
                     latex_desc_ = latex_desc_.replace(r'_', '\_')
-                    
-                    print latex_desc_
-#                     print ''
-                    latex_file.write('%s\n' % latex_desc_)
+                    latex_desc_ = latex_desc_.replace('<ul>', r'{\begin{itemize}'+'\n')
+                    latex_desc_ = latex_desc_.replace('<li>', r'\item {')
+                    latex_desc_ = latex_desc_.replace('</li>', r'}'+'\n')
+                    latex_desc_ = latex_desc_.replace('</ul>', r'\end{itemize}}'+'\n')
+                    latex_desc_ = latex_desc_.replace('<br />', r'')
+                    latex_desc_ = latex_desc_.replace('<br/>', r'')
+
+                    #latex_file.write(r'\begin{flushleft}'+'\n')
+                    latex_file.write('{%s}\n' % latex_desc_)
+                    #latex_file.write(r'\end{flushleft}'+'\n')
                     latex_file.write('&\n')
     
             # >>>>> Allowed values <<<<<<
