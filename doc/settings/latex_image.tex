@@ -101,7 +101,7 @@ channel\_end
 &
 {The end channel index to include in the image or image cube.}
 &
-Integer in range 0 $\leq$ $x$ $\leq$ MAX, or `max'
+{Integer $\geq$ 0, or `max'}
 &
 max
 \\
@@ -131,7 +131,7 @@ time\_end
 &
 {The end time index to include in the image or image cube.}
 &
-Integer in range 0 $\leq$ $x$ $\leq$ MAX, or `max'
+{Integer $\geq$ 0, or `max'}
 &
 max
 \\
@@ -141,8 +141,8 @@ direction
 &
 {Specifies the direction of the image phase centre. 
 {\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
-\vspace{8pt} \item {If `Observation direction' is selected, the image is centred on the pointing direction of the primary beam.}
- \item {If `RA, Dec.' is selected, the image is centred on the values of RA and Dec. found below.}
+\vspace{8pt} \item {If \textbf{Observation direction} is selected, the image is centred on the pointing direction of the primary beam.}
+ \item {If \textbf{RA, Dec.} is selected, the image is centred on the values of RA and Dec. found below.}
  \vspace{8pt}
 \end{itemize}}
 }
@@ -190,7 +190,7 @@ None
 
 root\_path
 &
-{Path consisting of the root of the image filename used to save the output image. The full filename will be constructed as {\texttt{ \textbf{ $<$root$>$\_$<$image\_type$>$.$<$extension$>$, }}}}
+{Path consisting of the root of the image filename used to save the output image. The full filename will be constructed as {\texttt{ \textbf{ $<$root$>$\_$<$image\_type$>$.$<$extension$>$ }}}}
 &
 Path name
 &

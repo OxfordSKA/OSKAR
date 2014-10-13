@@ -78,10 +78,10 @@
         </type>
         <desc>Specifies the direction of the image phase centre.
             <ul>
-            <li>If 'Observation direction' is selected, the image is centred
-                on the pointing direction of the primary beam.</li>
-            <li>If 'RA, Dec.' is selected, the image is centred on the values
-                of RA and Dec. found below.</li>
+            <li>If <b>Observation direction</b> is selected, the image is 
+                centred on the pointing direction of the primary beam.</li>
+            <li>If <b>RA, Dec.</b> is selected, the image is centred on the 
+                values of RA and Dec. found below.</li>
             </ul>
         </desc>
 
@@ -107,7 +107,7 @@
         <type name="OutputFile" />
         <desc>Path consisting of the root of the image filename used to save
             the output image. The full filename will be constructed as <code><b>
-            &amp;lt;root&amp;gt;_&amp;lt;image_type&amp;gt;.&amp;lt;extension&amp;gt;,
+            &amp;lt;root&amp;gt;_&amp;lt;image_type&amp;gt;.&amp;lt;extension&amp;gt;
             </b></code>
         </desc>
     </s>

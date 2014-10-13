@@ -167,8 +167,11 @@ def set_allowed_values_latex(node, latex_file):
         a = params_[0]
         b = params_[1]
         c = params_[2]
-        allowed_values_ = "Integer in range %s $\leq$ $x$ $\leq$ %s, or `%s'" \
-            % (a, b, c)
+        if b == 'MAX':
+            allowed_values_ = r"{Integer $\geq$ %s, or `%s'}" % (a,c)
+        else:
+            allowed_values_ = "Integer in range %s $\leq$ $x$ $\leq$ %s, or `%s'" \
+                % (a, b, c)
 
     elif type_name_  == 'DOUBLERANGE':
         params_ = get_type_params(type_)
@@ -191,7 +194,7 @@ def set_allowed_values_latex(node, latex_file):
         if b == 'MAX':
             allowed_values_ = r"{Double $\geq$ %s, or `%s'}" % (a,c)
         else:
-            allowed_values_ = "Double in range %s $\leq$ {\\textbf{$x$}} $\leq$ %s, or `%s'" \
+            allowed_values_ = "Double in range %s $\leq$ $x$ $\leq$ %s, or `%s'" \
                 % (a, b, c)
 
     elif type_name_ == 'INPUTFILELIST':
@@ -502,7 +505,8 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
                     latex_desc_ = latex_desc_.replace(r'<sup>', r'\textsuperscript{')
                     latex_desc_ = latex_desc_.replace(r'</sup>', r'}')
                     latex_desc_ = latex_desc_.replace(r'&amp;nbsp;', '')
-                    latex_desc_ = latex_desc_.replace(r'_', '\_')
+                    latex_desc_ = latex_desc_.replace(r'_', r'\_')
+                    latex_desc_ = latex_desc_.replace(r'~', r'\textasciitilde ')
                     #[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
                     latex_desc_ = latex_desc_.replace('<ul>', '\n' + \
                         r'{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]'+'\n' \

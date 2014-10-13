@@ -89,8 +89,8 @@ the possible elements that may be present within a chunk.
 Essentially, the *payload* is the part of the chunk that contains the actual
 data. The payload is embedded within the variable-length data block.
 Fields within the fixed-length tag, or block header (described in the 
-\ref binary_tag "following section", particularly the 
-\ref binary_chunk_flags "chunk flags" byte) determine how 
+\ref binary_tag "following section"), particularly the 
+\ref binary_chunk_flags "chunk flags" byte, determine how 
 the rest of the data should be interpreted.
 
 All bytes in the chunk that precede the payload are used to identify it, 
@@ -523,7 +523,7 @@ following index values:
 \vskip 1cm
 \endlatexonly
 
-<b>Chapter History</b>
+<b>Document History</b>
 
 <table>
 <tr><th>Revision</th><th>Date</th><th>Modification</th></tr>
