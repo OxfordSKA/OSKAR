@@ -330,49 +330,17 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
         v_out = mxCreateStructMatrix(1, 1, nFields, fields);
     }
 
-    // If possible, load the settings and log.
-    if (filename != NULL)
+    // If possible, load the log.
+    if (filename)
     {
         int status = 0;
-        oskar_Binary* h = 0;
-        FILE* stream = fopen(filename, "rb");
-        h = oskar_binary_create(filename, 'r', &status);
-        if (status)
-            mexErrMsgTxt("ERROR: Failed reading settings from visibility file.\n");
-        size_t data_size = 0;
-        long int data_offset = 0;
-        int tag_error = 0;
-        // Extract the settings
-        oskar_binary_query(h, OSKAR_CHAR, OSKAR_TAG_GROUP_SETTINGS,
-                OSKAR_TAG_SETTINGS, 0, &data_size, &data_offset, &tag_error);
-        if (!tag_error)
-        {
-            oskar_Mem* temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &status);
-            oskar_binary_read_mem(h, temp,
-                    OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
-            oskar_mem_realloc(temp, (int)oskar_mem_length(temp) + 1, &status);
-            if (status)
-                mexErrMsgTxt("ERROR: Failed reading settings from visibility file.\n");
-            (oskar_mem_char(temp))[(int)oskar_mem_length(temp) - 1] = 0;
-            mxSetField(v_out, 0, "simulation_settings", mxCreateString(oskar_mem_char(temp)));
-            oskar_mem_free(temp, &status);
-        }
-        // Extract the log
-        oskar_binary_query(h, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
-                OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset, &tag_error);
-        if (!tag_error)
-        {
-            oskar_Mem* temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &status);
-            oskar_binary_read_mem(h, temp,
-                    OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
-            oskar_mem_realloc(temp, (int)oskar_mem_length(temp) + 1, &status);
-            if (status)
-                mexErrMsgTxt("ERROR: Failed reading log from visibility file.\n");
-            (oskar_mem_char(temp))[(int)oskar_mem_length(temp) - 1] = 0;
-            mxSetField(v_out, 0, "simulation_log", mxCreateString(oskar_mem_char(temp)));
-            oskar_mem_free(temp, &status);
-        }
-        fclose(stream);
+        oskar_Binary* h = oskar_binary_create(filename, 'r', &status);
+        oskar_Mem* temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 1, &status);
+        oskar_binary_read_mem(h, temp,
+                OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
+        oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);
+        mxSetField(v_out, 0, "simulation_log", mxCreateString(oskar_mem_char(temp)));
+        oskar_mem_free(temp, &status);
         oskar_binary_free(h);
     }
 
@@ -382,6 +350,8 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
     mxSetField(v_out, 0, "creation_date", mxCreateString(oskar_mem_char(date)));
     mxSetField(v_out, 0, "settings_file_path", mxCreateString(
             oskar_mem_char_const(oskar_vis_settings_path_const(v_in))));
+    mxSetField(v_out, 0, "simulation_settings", mxCreateString(
+            oskar_mem_char_const(oskar_vis_settings_const(v_in))));
     mxSetField(v_out, 0, "telescope_name", mxCreateString(
             oskar_mem_char_const(oskar_vis_telescope_path_const(v_in))));
     mxSetField(v_out, 0, "num_channels",

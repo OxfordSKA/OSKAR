@@ -28,6 +28,8 @@
 
 #include <private_binary.h>
 #include <oskar_binary_create.h>
+#include <oskar_mem.h>
+#include <oskar_crc.h>
 #include <oskar_endian.h>
 #include <string.h>
 #include <stdlib.h>
@@ -42,7 +44,8 @@ extern "C" {
 static void oskar_binary_resize(oskar_Binary* handle, int m);
 static void oskar_binary_read_header(FILE* stream, oskar_BinaryHeader* header,
         int* status);
-static void oskar_binary_write_header(FILE* stream, int* status);
+static void oskar_binary_write_header(FILE* stream, oskar_BinaryHeader* header,
+        int* status);
 
 
 oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
@@ -79,7 +82,7 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
             *status = OSKAR_ERR_FILE_IO;
             return 0;
         }
-        oskar_binary_write_header(stream, status);
+        oskar_binary_write_header(stream, &header, status);
     }
     else if (mode == 'a')
     {
@@ -93,7 +96,7 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         /* Write header only if the file is empty. */
         fseek(stream, 0, SEEK_END);
         if (ftell(stream) == 0)
-            oskar_binary_write_header(stream, status);
+            oskar_binary_write_header(stream, &header, status);
     }
     else
     {
@@ -104,9 +107,13 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
     /* Allocate index and store the stream handle. */
     handle = (oskar_Binary*) malloc(sizeof(oskar_Binary));
     handle->stream = stream;
+    handle->open_mode = mode;
+
+    /* Create the CRC lookup tables. */
+    handle->crc_data = oskar_crc_create(OSKAR_CRC_32C);
 
     /* Initialise tag index. */
-    handle->num_tags = 0;
+    handle->num_chunks = 0;
     handle->extended = 0;
     handle->data_type = 0;
     handle->id_group = 0;
@@ -114,13 +121,11 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
     handle->name_group = 0;
     handle->name_tag = 0;
     handle->user_index = 0;
-    handle->data_offset_bytes = 0;
-    handle->data_size_bytes = 0;
+    handle->payload_offset_bytes = 0;
+    handle->payload_size_bytes = 0;
     handle->block_size_bytes = 0;
-
-    /* Finish if writing. */
-    if (mode == 'w')
-        return handle;
+    handle->crc = 0;
+    handle->crc_header = 0;
 
     /* Store the contents of the header for later use. */
     handle->bin_version     = header.bin_version;
@@ -130,13 +135,70 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
     handle->oskar_ver_minor = header.version[1];
     handle->oskar_ver_patch = header.version[0];
 
+    /* Finish if writing. */
+    if (mode == 'w')
+        return handle;
+
     /* Read all tags in the stream. */
     for (i = 0; OSKAR_TRUE; ++i)
     {
         oskar_BinaryTag tag;
+        unsigned long crc;
+        int format_version, element_size;
         size_t memcpy_size = 0;
 
-        /* Check if we need to allocate more storage for the tag. */
+        /* Try to read a tag, and end the loop if unsuccessful. */
+        if (fread(&tag, sizeof(oskar_BinaryTag), 1, stream) != 1)
+            break;
+
+        /* If the bytes read are not a tag, or the reserved flag bits
+         * are not zero, then return an error. */
+        if (tag.magic[0] != 'T' || tag.magic[2] != 'G'
+                || (tag.flags & 0x1F) != 0)
+        {
+            *status = OSKAR_ERR_BINARY_FILE_INVALID;
+            break;
+        }
+
+        /* Get the binary format version. */
+        format_version = tag.magic[1] - 0x40;
+        if (format_version < 1 || format_version > OSKAR_BINARY_FORMAT_VERSION)
+        {
+            *status = OSKAR_ERR_BINARY_VERSION_UNKNOWN;
+            break;
+        }
+
+        /* Additional checks if format version > 1. */
+        if (format_version > 1)
+        {
+            /* Check system byte order is compatible. */
+            if (oskar_endian() && !(tag.flags & (1 << 5)))
+            {
+                *status = OSKAR_ERR_BINARY_ENDIAN_MISMATCH;
+                break;
+            }
+
+            /* Check data size is compatible. */
+            element_size = tag.magic[3];
+            if (tag.data_type & OSKAR_MATRIX)
+                element_size /= 4;
+            if (tag.data_type & OSKAR_COMPLEX)
+                element_size /= 2;
+            if ((tag.data_type & OSKAR_CHAR) &&
+                    element_size != sizeof(char))
+                *status = OSKAR_ERR_BAD_BINARY_FORMAT;
+            else if ((tag.data_type & OSKAR_INT) &&
+                    element_size != sizeof(int))
+                *status = OSKAR_ERR_BAD_BINARY_FORMAT;
+            else if ((tag.data_type & OSKAR_SINGLE) &&
+                    element_size != sizeof(float))
+                *status = OSKAR_ERR_BAD_BINARY_FORMAT;
+            else if ((tag.data_type & OSKAR_DOUBLE) &&
+                    element_size != sizeof(double))
+                *status = OSKAR_ERR_BAD_BINARY_FORMAT;
+        }
+
+        /* Check if we need to allocate more storage for the tag data. */
         if (i % 10 == 0)
             oskar_binary_resize(handle, i + 10);
 
@@ -148,95 +210,84 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         handle->name_group[i] = 0;
         handle->name_tag[i] = 0;
         handle->user_index[i] = 0;
-        handle->data_offset_bytes[i] = 0;
-        handle->data_size_bytes[i] = 0;
+        handle->payload_offset_bytes[i] = 0;
+        handle->payload_size_bytes[i] = 0;
         handle->block_size_bytes[i] = 0;
+        handle->crc[i] = 0;
+        handle->crc_header[i] = 0;
 
-        /* Try to read a tag, and end the loop if unsuccessful. */
-        if (fread(&tag, sizeof(oskar_BinaryTag), 1, stream) != 1)
-            break;
+        /* Start computing the CRC code. */
+        crc = oskar_crc_compute(handle->crc_data, &tag,
+                sizeof(oskar_BinaryTag));
 
-        /* If the bytes read are not a tag, then return an error. */
-        if (tag.magic[0] != 'T' || tag.magic[1] != 'A' || tag.magic[2] != 'G' ||
-                tag.magic[3] != 0)
-        {
-            *status = OSKAR_ERR_BINARY_FILE_INVALID;
-            break;
-        }
-
-        /* Get the data type and IDs. */
+        /* Store the data type and IDs. */
         handle->data_type[i] = (int) tag.data_type;
         handle->id_group[i] = (int) tag.group.id;
         handle->id_tag[i] = (int) tag.tag.id;
 
-        /* Copy out the index. */
+        /* Store the index in native byte order. */
         memcpy_size = MIN(sizeof(int), sizeof(tag.user_index));
         memcpy(&handle->user_index[i], tag.user_index, memcpy_size);
-
-        /* Get the index in native byte order. */
         if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
-        {
-            if (sizeof(int) == 2)
-                oskar_endian_swap_2((char*)(&handle->user_index[i]));
-            else if (sizeof(int) == 4)
-                oskar_endian_swap_4((char*)(&handle->user_index[i]));
-            else if (sizeof(int) == 8)
-                oskar_endian_swap_8((char*)(&handle->user_index[i]));
-        }
+            oskar_endian_swap(&handle->user_index[i], sizeof(int));
 
-        /* Copy out the number of bytes in the block. */
+        /* Store the number of bytes in the block in native byte order. */
         memcpy_size = MIN(sizeof(size_t), sizeof(tag.size_bytes));
         memcpy(&handle->block_size_bytes[i], tag.size_bytes, memcpy_size);
-
-        /* Get the number of bytes in the block in native byte order. */
         if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
-        {
-            if (sizeof(size_t) == 2)
-                oskar_endian_swap_2((char*)(&handle->block_size_bytes[i]));
-            else if (sizeof(size_t) == 4)
-                oskar_endian_swap_4((char*)(&handle->block_size_bytes[i]));
-            else if (sizeof(size_t) == 8)
-                oskar_endian_swap_8((char*)(&handle->block_size_bytes[i]));
-        }
+            oskar_endian_swap(&handle->block_size_bytes[i], sizeof(size_t));
 
-        /* Store the data size. */
-        handle->data_size_bytes[i] = handle->block_size_bytes[i];
+        /* Set payload size to block size, minus 4 bytes if CRC-32 present. */
+        handle->payload_size_bytes[i] = handle->block_size_bytes[i];
+        handle->payload_size_bytes[i] -= (tag.flags & (1 << 6) ? 4 : 0);
 
         /* Check if the tag is extended. */
         if (tag.flags & (1 << 7))
         {
-            size_t lgroup, ltag;
-
             /* Extended tag: set the extended flag. */
             handle->extended[i] = 1;
 
-            /* Get the lengths of the strings. */
-            lgroup = tag.group.bytes;
-            ltag = tag.tag.bytes;
-
-            /* Modify data size. */
-            handle->data_size_bytes[i] -= (lgroup + ltag);
+            /* Reduce payload size by sum of length of tag names. */
+            handle->payload_size_bytes[i] -= (tag.group.bytes + tag.tag.bytes);
 
             /* Allocate memory for the tag names. */
-            handle->name_group[i] = (char*) malloc(lgroup);
-            handle->name_tag[i]   = (char*) malloc(ltag);
+            handle->name_group[i] = (char*) malloc(tag.group.bytes);
+            handle->name_tag[i]   = (char*) malloc(tag.tag.bytes);
 
-            /* Copy the tag names into the index. */
-            if (fread(handle->name_group[i], 1, lgroup, stream) != lgroup)
+            /* Store the tag names. */
+            if (fread(handle->name_group[i], tag.group.bytes, 1, stream) != 1)
                 *status = OSKAR_ERR_BINARY_FILE_INVALID;
-            if (fread(handle->name_tag[i], 1, ltag, stream) != ltag)
+            if (fread(handle->name_tag[i], tag.tag.bytes, 1, stream) != 1)
                 *status = OSKAR_ERR_BINARY_FILE_INVALID;
             if (*status) break;
+
+            /* Update the CRC code. */
+            crc = oskar_crc_update(handle->crc_data, crc,
+                    handle->name_group[i], tag.group.bytes);
+            crc = oskar_crc_update(handle->crc_data, crc,
+                    handle->name_tag[i], tag.tag.bytes);
         }
 
-        /* Store the current stream pointer as the data offset. */
-        handle->data_offset_bytes[i] = ftell(stream);
+        /* Store the current stream pointer as the payload offset. */
+        handle->payload_offset_bytes[i] = ftell(stream);
 
-        /* Increment stream pointer by data size. */
-        fseek(stream, handle->data_size_bytes[i], SEEK_CUR);
+        /* Increment stream pointer by payload size. */
+        fseek(stream, handle->payload_size_bytes[i], SEEK_CUR);
+
+        /* Store header CRC code and get file CRC code in native byte order. */
+        handle->crc_header[i] = crc;
+        if (tag.flags & (1 << 6))
+        {
+            if (fread(&handle->crc[i], 4, 1, stream) != 1)
+                *status = OSKAR_ERR_BINARY_FILE_INVALID;
+            if (*status) break;
+
+            if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
+                oskar_endian_swap(&handle->crc[i], sizeof(unsigned long));
+        }
 
         /* Save the number of tags read from the stream. */
-        handle->num_tags = i + 1;
+        handle->num_chunks = i + 1;
     }
 
     return handle;
@@ -252,48 +303,40 @@ static void oskar_binary_resize(oskar_Binary* handle, int m)
             m * sizeof(char*));
     handle->name_tag = (char**) realloc(handle->name_tag, m * sizeof(char*));
     handle->user_index = (int*) realloc(handle->user_index, m * sizeof(int));
-    handle->data_offset_bytes = (long*) realloc(handle->data_offset_bytes,
+    handle->payload_offset_bytes = (long*) realloc(handle->payload_offset_bytes,
             m * sizeof(long));
-    handle->data_size_bytes = (size_t*) realloc(handle->data_size_bytes,
+    handle->payload_size_bytes = (size_t*) realloc(handle->payload_size_bytes,
             m * sizeof(size_t));
     handle->block_size_bytes = (size_t*) realloc(handle->block_size_bytes,
             m * sizeof(size_t));
+    handle->crc = (unsigned long*) realloc(handle->crc,
+            m * sizeof(unsigned long));
+    handle->crc_header = (unsigned long*) realloc(handle->crc_header,
+            m * sizeof(unsigned long));
 }
 
-static void oskar_binary_write_header(FILE* stream, int* status)
+static void oskar_binary_write_header(FILE* stream, oskar_BinaryHeader* header,
+        int* status)
 {
     int version = OSKAR_VERSION;
-    oskar_BinaryHeader header;
     char magic[] = "OSKARBIN";
 
     /* Construct binary header. */
-    strcpy(header.magic, magic);
-    header.bin_version = OSKAR_BINARY_FORMAT_VERSION;
-    header.endian      = (char)oskar_endian();
-    header.size_ptr    = (char)sizeof(void*);
-    header.size_int    = (char)sizeof(int);
-    header.size_long   = (char)sizeof(long);
-    header.size_float  = (char)sizeof(float);
-    header.size_double = (char)sizeof(double);
+    memset(header, 0, sizeof(oskar_BinaryHeader));
+    strcpy(header->magic, magic);
+    header->bin_version = OSKAR_BINARY_FORMAT_VERSION;
 
     /* Write OSKAR version data in little-endian format. */
     if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
-    {
-        if (sizeof(int) == 4)
-            oskar_endian_swap_4((char*)&version);
-        else if (sizeof(int) == 8)
-            oskar_endian_swap_8((char*)&version);
-    }
-    memcpy(header.version, &version, sizeof(header.version));
+        oskar_endian_swap(&version, sizeof(int));
+    memcpy(header->version, &version, sizeof(header->version));
 
     /* Pad rest of header with zeros. */
-    memset(header.reserved, 0, sizeof(header.reserved));
-
-    /* Set stream pointer to beginning. */
-    rewind(stream);
+    memset(header->reserved, 0, sizeof(header->reserved));
 
     /* Write header to stream. */
-    if (fwrite(&header, sizeof(oskar_BinaryHeader), 1, stream) != 1)
+    rewind(stream);
+    if (fwrite(header, sizeof(oskar_BinaryHeader), 1, stream) != 1)
         *status = OSKAR_ERR_FILE_IO;
 }
 
@@ -317,26 +360,29 @@ static void oskar_binary_read_header(FILE* stream, oskar_BinaryHeader* header,
     }
 
     /* Check if the format is compatible. */
-    if (OSKAR_BINARY_FORMAT_VERSION != (int)(header->bin_version))
+    if ((int)(header->bin_version) > OSKAR_BINARY_FORMAT_VERSION)
     {
         *status = OSKAR_ERR_BINARY_VERSION_UNKNOWN;
         return;
     }
 
-    /* Check if the architecture is compatible. */
-    if (oskar_endian() != (int)(header->endian))
+    if (header->bin_version == 1)
     {
-        *status = OSKAR_ERR_BINARY_ENDIAN_MISMATCH;
-        return;
-    }
+        /* Check if the architecture is compatible. */
+        if (oskar_endian() != (int)(header->endian))
+        {
+            *status = OSKAR_ERR_BINARY_ENDIAN_MISMATCH;
+            return;
+        }
 
-    /* Check size of data types. */
-    if (sizeof(int) != (size_t)(header->size_int))
-        *status = OSKAR_ERR_BINARY_INT_MISMATCH;
-    if (sizeof(float) != (size_t)(header->size_float))
-        *status = OSKAR_ERR_BINARY_FLOAT_MISMATCH;
-    if (sizeof(double) != (size_t)(header->size_double))
-        *status = OSKAR_ERR_BINARY_DOUBLE_MISMATCH;
+        /* Check size of data types. */
+        if (sizeof(int) != (size_t)(header->size_int))
+            *status = OSKAR_ERR_BINARY_INT_MISMATCH;
+        if (sizeof(float) != (size_t)(header->size_float))
+            *status = OSKAR_ERR_BINARY_FLOAT_MISMATCH;
+        if (sizeof(double) != (size_t)(header->size_double))
+            *status = OSKAR_ERR_BINARY_DOUBLE_MISMATCH;
+    }
 }
 
 #ifdef __cplusplus

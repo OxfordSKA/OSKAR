@@ -54,15 +54,15 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     if (err) oskar_matlab_error("oskar_binary_create() failed with "
             "code %i: %s",err, oskar_get_error_string(err));
 
-    mexPrintf("= Binary file header loaded (%i tags found).\n", h->num_tags);
+    mexPrintf("= Binary file header loaded (%i tags found).\n", h->num_chunks);
 
     // Create a MATLAB structure array to hold records.
     int num_fields = 5;
     const char* fields[5] = { "type", "group", "tag", "index", "data" };
-    out[0] = mxCreateStructMatrix(h->num_tags, 1, num_fields, fields);
+    out[0] = mxCreateStructMatrix(h->num_chunks, 1, num_fields, fields);
 
     // Populate the MATLAB record array from the binary tags found.
-    for (int i = 0; i < h->num_tags; ++i)
+    for (int i = 0; i < h->num_chunks; ++i)
     {
         mxSetField(out[0], i, fields[0],
                 mxCreateString(oskar_mem_data_type_string(h->data_type[i])));
@@ -84,58 +84,58 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         {
             case OSKAR_CHAR:
             {
-                data = malloc(h->data_size_bytes[i]);
+                data = malloc(h->payload_size_bytes[i]);
                 break;
             }
             case OSKAR_INT:
             {
-                m = h->data_size_bytes[i] / sizeof(int);
+                m = h->payload_size_bytes[i] / sizeof(int);
                 data_ = mxCreateNumericMatrix(m, 1, mxINT32_CLASS, mxREAL);
                 data = mxGetData(data_);
                 break;
             }
             case OSKAR_SINGLE:
             {
-                m = h->data_size_bytes[i] / sizeof(float);
+                m = h->payload_size_bytes[i] / sizeof(float);
                 data_ = mxCreateNumericMatrix(m, 1, mxSINGLE_CLASS, mxREAL);
                 data = mxGetData(data_);
                 break;
             }
             case OSKAR_DOUBLE:
             {
-                m = h->data_size_bytes[i] / sizeof(double);
+                m = h->payload_size_bytes[i] / sizeof(double);
                 data_ = mxCreateNumericMatrix(m, 1, mxDOUBLE_CLASS, mxREAL);
                 data = mxGetData(data_);
                 break;
             }
             case OSKAR_SINGLE_COMPLEX:
             {
-                m = h->data_size_bytes[i] / sizeof(float2);
+                m = h->payload_size_bytes[i] / sizeof(float2);
                 data_ = mxCreateNumericMatrix(m, 1, mxSINGLE_CLASS, mxCOMPLEX);
-                data = malloc(h->data_size_bytes[i]);
+                data = malloc(h->payload_size_bytes[i]);
                 break;
             }
             case OSKAR_DOUBLE_COMPLEX:
             {
-                m = h->data_size_bytes[i] / sizeof(double2);
+                m = h->payload_size_bytes[i] / sizeof(double2);
                 data_ = mxCreateNumericMatrix(m, 1, mxDOUBLE_CLASS, mxCOMPLEX);
-                data = malloc(h->data_size_bytes[i]);
+                data = malloc(h->payload_size_bytes[i]);
                 break;
             }
             case OSKAR_SINGLE_COMPLEX_MATRIX:
             {
-                m = h->data_size_bytes[i] / sizeof(float4c);
+                m = h->payload_size_bytes[i] / sizeof(float4c);
                 mwSize dims[3] = {2, 2, m};
                 data_ = mxCreateNumericArray(3, dims, mxSINGLE_CLASS, mxCOMPLEX);
-                data = malloc(h->data_size_bytes[i]);
+                data = malloc(h->payload_size_bytes[i]);
                 break;
             }
             case OSKAR_DOUBLE_COMPLEX_MATRIX:
             {
-                m = h->data_size_bytes[i] / sizeof(double4c);
+                m = h->payload_size_bytes[i] / sizeof(double4c);
                 mwSize dims[3] = {2, 2, m};
                 data_ = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxCOMPLEX);
-                data = malloc(h->data_size_bytes[i]);
+                data = malloc(h->payload_size_bytes[i]);
                 break;
             }
             default:
@@ -149,7 +149,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                     h->name_group[i],
                     h->name_tag[i],
                     h->user_index[i],
-                    (size_t)h->data_size_bytes[i],
+                    (size_t)h->payload_size_bytes[i],
                     data, &err);
         }
         else
@@ -159,7 +159,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                     (unsigned char)h->id_group[i],
                     (unsigned char)h->id_tag[i],
                     h->user_index[i],
-                    (size_t)h->data_size_bytes[i],
+                    (size_t)h->payload_size_bytes[i],
                     data, &err);
         }
         if (err) {

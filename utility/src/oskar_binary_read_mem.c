@@ -66,7 +66,7 @@ void oskar_binary_read_mem(oskar_Binary* handle, oskar_Mem* mem,
     /* Query the tag index to find out how big the block is. */
     element_size = oskar_mem_element_size(type);
     oskar_binary_query(handle, (unsigned char)type,
-            id_group, id_tag, user_index, &size_bytes, NULL, status);
+            id_group, id_tag, user_index, &size_bytes, status);
 
     /* Resize memory block if necessary, so that it can hold the data. */
     oskar_mem_realloc(data, size_bytes / element_size, status);
@@ -113,7 +113,7 @@ void oskar_binary_read_mem_ext(oskar_Binary* handle, oskar_Mem* mem,
     /* Query the tag index to find out how big the block is. */
     element_size = oskar_mem_element_size(type);
     oskar_binary_query_ext(handle, (unsigned char)type,
-            name_group, name_tag, user_index, NULL, &size_bytes, NULL, status);
+            name_group, name_tag, user_index, &size_bytes, status);
 
     /* Resize memory block if necessary, so that it can hold the data. */
     oskar_mem_realloc(data, size_bytes / element_size, status);

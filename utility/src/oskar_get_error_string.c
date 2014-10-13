@@ -115,6 +115,8 @@ const char* oskar_get_error_string(int error)
             return "incompatible double format";
         case OSKAR_ERR_BINARY_TAG_TOO_LONG:
             return "extended binary tag too long";
+        case OSKAR_ERR_CRC_FAIL:
+            return "CRC code mismatch";
 
         case OSKAR_ERR_CUDA_NOT_AVAILABLE:
             return "CUDA not available";

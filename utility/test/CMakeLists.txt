@@ -6,6 +6,7 @@ include_directories(${CUDA_INCLUDE_DIRS})
 set(${name}_SRC
     main.cpp
     Test_binary_file.cpp
+    Test_crc.cpp
     Test_getline.cpp
     Test_Mem_add.cpp
     Test_Mem_append.cpp

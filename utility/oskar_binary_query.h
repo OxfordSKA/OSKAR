@@ -41,54 +41,52 @@ extern "C" {
 #endif
 
 /**
- * @brief Return the data size and offset associated with a standard tag.
+ * @brief Return the payload size associated with a standard tag.
  *
  * @details
- * This function returns the block size, data size and offset associated with
- * a given tag.
+ * This function returns the payload size associated with a given tag.
  *
  * The tag is specified as a standard tag, using a group ID and a tag ID
  * that are both given as bytes.
  *
- * @param[in] index        Index structure pointer.
- * @param[in] data_type    Type of the memory (as in oskar_Mem).
- * @param[in] id_group     Tag group identifier.
- * @param[in] id_tag       Tag identifier.
- * @param[in] user_index   User-defined index.
- * @param[out] data_size   The size of the data, in bytes.
- * @param[out] data_offset The data offset from the start of the file, in bytes.
- * @param[in,out] status   Status return code.
+ * @param[in] handle        Binary data handle.
+ * @param[in] data_type     Type of the memory (as in oskar_Mem).
+ * @param[in] id_group      Tag group identifier.
+ * @param[in] id_tag        Tag identifier.
+ * @param[in] user_index    User-defined index.
+ * @param[out] payload_size Payload size in bytes.
+ * @param[in,out] status    Status return code.
+ *
+ * @return Sequence index of the tag in the file, or -1 if not found.
  */
 OSKAR_EXPORT
-void oskar_binary_query(const oskar_Binary* index,
+int oskar_binary_query(const oskar_Binary* handle,
         unsigned char data_type, unsigned char id_group, unsigned char id_tag,
-        int user_index, size_t* data_size, long* data_offset, int* status);
+        int user_index, size_t* payload_size, int* status);
 
 /**
- * @brief Return the block size, data size and offset associated with a tag.
+ * @brief Return the payload size associated with a tag.
  *
  * @details
- * This function returns the block size, data size and offset associated with
- * a given tag.
+ * This function returns the payload size associated with a given tag.
  *
  * The tag is specified as an extended tag, using a group name and a tag name
  * that are both given as strings.
  *
- * @param[in] index        Index structure pointer.
- * @param[in] data_type    Type of the memory (as in oskar_Mem).
- * @param[in] name_group   Tag group name.
- * @param[in] name_tag     Tag name.
- * @param[in] user_index   User-defined index.
- * @param[out] block_size  The total size of the block, in bytes.
- * @param[out] data_size   The size of the data, in bytes.
- * @param[out] data_offset The data offset from the start of the file, in bytes.
- * @param[in,out] status   Status return code.
+ * @param[in] handle        Binary data handle.
+ * @param[in] data_type     Type of the memory (as in oskar_Mem).
+ * @param[in] name_group    Tag group name.
+ * @param[in] name_tag      Tag name.
+ * @param[in] user_index    User-defined index.
+ * @param[out] payload_size Payload size in bytes.
+ * @param[in,out] status    Status return code.
+ *
+ * @return Sequence index of the tag in the file, or -1 if not found.
  */
 OSKAR_EXPORT
-void oskar_binary_query_ext(const oskar_Binary* index,
+int oskar_binary_query_ext(const oskar_Binary* handle,
         unsigned char data_type, const char* name_group, const char* name_tag,
-        int user_index, size_t* block_size, size_t* data_size,
-        long* data_offset, int* status);
+        int user_index, size_t* payload_size, int* status);
 
 #ifdef __cplusplus
 }

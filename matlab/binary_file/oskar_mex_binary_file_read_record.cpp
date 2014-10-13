@@ -113,7 +113,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     // Loop over indices to find the specified record.
     int idx = -1;
-    for (int i = 0; i < h->num_tags; ++i)
+    for (int i = 0; i < h->num_chunks; ++i)
     {
         if (is_extended && h->extended[i])
         {
@@ -166,58 +166,58 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         case OSKAR_CHAR:
         {
-            data = malloc(h->data_size_bytes[idx]);
+            data = malloc(h->payload_size_bytes[idx]);
             break;
         }
         case OSKAR_INT:
         {
-            m = h->data_size_bytes[idx] / sizeof(int);
+            m = h->payload_size_bytes[idx] / sizeof(int);
             data_ = mxCreateNumericMatrix(m, 1, mxINT32_CLASS, mxREAL);
             data = mxGetData(data_);
             break;
         }
         case OSKAR_SINGLE:
         {
-            m = h->data_size_bytes[idx] / sizeof(float);
+            m = h->payload_size_bytes[idx] / sizeof(float);
             data_ = mxCreateNumericMatrix(m, 1, mxSINGLE_CLASS, mxREAL);
             data = mxGetData(data_);
             break;
         }
         case OSKAR_DOUBLE:
         {
-            m = h->data_size_bytes[idx] / sizeof(double);
+            m = h->payload_size_bytes[idx] / sizeof(double);
             data_ = mxCreateNumericMatrix(m, 1, mxDOUBLE_CLASS, mxREAL);
             data = mxGetData(data_);
             break;
         }
         case OSKAR_SINGLE_COMPLEX:
         {
-            m = h->data_size_bytes[idx] / sizeof(float2);
+            m = h->payload_size_bytes[idx] / sizeof(float2);
             data_ = mxCreateNumericMatrix(m, 1, mxSINGLE_CLASS, mxCOMPLEX);
-            data = malloc(h->data_size_bytes[idx]);
+            data = malloc(h->payload_size_bytes[idx]);
             break;
         }
         case OSKAR_DOUBLE_COMPLEX:
         {
-            m = h->data_size_bytes[idx] / sizeof(double2);
+            m = h->payload_size_bytes[idx] / sizeof(double2);
             data_ = mxCreateNumericMatrix(m, 1, mxDOUBLE_CLASS, mxCOMPLEX);
-            data = malloc(h->data_size_bytes[idx]);
+            data = malloc(h->payload_size_bytes[idx]);
             break;
         }
         case OSKAR_SINGLE_COMPLEX_MATRIX:
         {
-            m = h->data_size_bytes[idx] / sizeof(float4c);
+            m = h->payload_size_bytes[idx] / sizeof(float4c);
             mwSize dims[3] = {2, 2, m};
             data_ = mxCreateNumericArray(3, dims, mxSINGLE_CLASS, mxCOMPLEX);
-            data = malloc(h->data_size_bytes[idx]);
+            data = malloc(h->payload_size_bytes[idx]);
             break;
         }
         case OSKAR_DOUBLE_COMPLEX_MATRIX:
         {
-            m = h->data_size_bytes[idx] / sizeof(double4c);
+            m = h->payload_size_bytes[idx] / sizeof(double4c);
             mwSize dims[3] = {2, 2, m};
             data_ = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxCOMPLEX);
-            data = malloc(h->data_size_bytes[idx]);
+            data = malloc(h->payload_size_bytes[idx]);
             break;
         }
         default:
@@ -230,7 +230,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         oskar_binary_read_ext(h,
                 (unsigned char)h->data_type[idx],
                 h->name_group[idx], h->name_tag[idx],
-                h->user_index[idx], (size_t)h->data_size_bytes[idx],
+                h->user_index[idx], (size_t)h->payload_size_bytes[idx],
                 data, &err);
     }
     else
@@ -238,7 +238,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         oskar_binary_read(h,
                 (unsigned char)h->data_type[idx],
                 (unsigned char)group.id, (unsigned char)tag.id,
-                h->user_index[idx], (size_t)h->data_size_bytes[idx],
+                h->user_index[idx], (size_t)h->payload_size_bytes[idx],
                 data, &err);
     }
     if (err)

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* FIXME Remove. */
+/* FIXME Remove? */
 #include <private_binary.h>
 
 #include <oskar_image.h>
@@ -51,7 +51,6 @@ void oskar_scan_binary_file(oskar_Log* log, const char* filename, int* status)
     oskar_Binary* h = NULL;
     oskar_Mem* temp = 0;
     size_t data_size = 0;
-    long int data_offset = 0;
     char p = 'M'; /* Log entry priority */
 
     /* Check all inputs. */
@@ -76,19 +75,14 @@ void oskar_scan_binary_file(oskar_Log* log, const char* filename, int* status)
     oskar_log_section(log, p, "File header in '%s'", filename);
     oskar_log_value(log, p, 1, "Binary file format version", "%d",
             h->bin_version);
-    oskar_log_value(log, p, 1, "Host system is little endian", "%s",
-            (h->big_endian == 0) ? "true" : "false");
-    oskar_log_value(log, p, 1, "Size of void* on host system", "%d",
-            h->size_ptr);
     oskar_log_value(log, p, 1, "Generated using OSKAR version", "%d.%d.%d",
             h->oskar_ver_major, h->oskar_ver_minor, h->oskar_ver_patch);
     oskar_log_line(log, p, ' ');
-    oskar_log_message(log, p, 0, "File contains %d tags.", h->num_tags);
+    oskar_log_message(log, p, 0, "File contains %d chunks.", h->num_chunks);
 
     /* Display the run log if it is present. */
     oskar_binary_query(h, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
-                OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset,
-                &tag_not_present);
+                OSKAR_TAG_RUN_LOG, 0, &data_size, &tag_not_present);
     if (!tag_not_present)
     {
         oskar_log_section(log, p, "Run log:");
@@ -107,7 +101,7 @@ void oskar_scan_binary_file(oskar_Log* log, const char* filename, int* status)
             "ID", "TYPE", "GROUP", "TAG", "INDEX", "BYTES");
     oskar_log_message(log, p, depth, "CONTENTS");
     oskar_log_line(log, p, '-');
-    for (i = 0; i < h->num_tags; ++i)
+    for (i = 0; i < h->num_chunks; ++i)
     {
         /* Check if any tags are extended. */
         if (h->extended[i])
@@ -123,7 +117,7 @@ void oskar_scan_binary_file(oskar_Log* log, const char* filename, int* status)
             tag   = (char) (h->id_tag[i]);
             type  = (char) (h->data_type[i]);
             idx   = h->user_index[i];
-            bytes = h->data_size_bytes[i];
+            bytes = h->payload_size_bytes[i];
             temp = oskar_mem_create(type, OSKAR_CPU, 0, status);
 
             /* Display tag data. */
@@ -594,7 +588,7 @@ void oskar_scan_binary_file(oskar_Log* log, const char* filename, int* status)
                 "ID", "TYPE", "BYTES");
         oskar_log_message(log, p, depth, "%s.%s : %s", "GROUP", "TAG", "INDEX");
         oskar_log_line(log, p, '-');
-        for (i = 0; i < h->num_tags; ++i)
+        for (i = 0; i < h->num_chunks; ++i)
         {
             if (h->extended[i])
             {
@@ -607,7 +601,7 @@ void oskar_scan_binary_file(oskar_Log* log, const char* filename, int* status)
                 tag   = h->name_tag[i];
                 type  = (char) (h->data_type[i]);
                 idx   = h->user_index[i];
-                bytes = h->data_size_bytes[i];
+                bytes = h->payload_size_bytes[i];
 
                 /* Display tag data. */
                 oskar_log_message(log, p, -1, "[%3d] %-23s (%d bytes)",

@@ -35,6 +35,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <oskar_crc.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,10 +82,9 @@ struct oskar_BinaryHeader
 typedef struct oskar_BinaryHeader oskar_BinaryHeader;
 #endif /* OSKAR_BINARY_HEADER_TYPEDEF_ */
 
-/* This binary format is anticipated to remain stable. */
 enum
 {
-    OSKAR_BINARY_FORMAT_VERSION = 1
+    OSKAR_BINARY_FORMAT_VERSION = 2
 };
 
 /**
@@ -105,14 +105,15 @@ enum
     7       1      The tag ID, if not an extended tag;
                        else the tag name size in bytes.
     8       4      User-specified index, as little-endian 4-byte integer.
-   12       8      Block size in bytes, as little-endian 8-byte integer.
+   12       8      Total block size in bytes, as little-endian 8-byte integer.
    @endverbatim
  *
- * The flags field specifies the tag type. Supported flags are:
+ * Supported flags are:
  *
    @verbatim
    Bit  Description
    ----------------------------------------------------------------------------
+   6    If true, a little-endian CRC-32C code is present after the payload.
    7    If true, this is an extended tag; if false, this is a standard tag.
    @endverbatim
  *
@@ -121,8 +122,12 @@ enum
  * binary file have the group name and tag name written as ASCII 8-bit strings
  * immediately after the main tag itself. Both strings have a trailing zero.
  *
+ * If present, the CRC-32C code is evaluated using all the bytes in the
+ * frame, starting from the beginning of the "TAG" string, until the point
+ * at which it is written.
+ *
  * Note that the block size is the total number of bytes until the next tag,
- * including any extended tag names.
+ * including any extended tag names and the CRC-32C code.
  */
 struct oskar_BinaryTag
 {
@@ -156,24 +161,32 @@ typedef struct oskar_BinaryTag oskar_BinaryTag;
  */
 struct oskar_Binary
 {
-    FILE* stream;             /**< Standard file stream handle. */
-    int big_endian;           /**< True if data are in big endian format. */
-    int bin_version;          /**< Binary format version number. */
-    int size_ptr;             /**< Size of void* recorded in the file. */
+    FILE* stream;                /**< File stream handle. */
+    int big_endian;              /**< True if payloads are big endian. */
+    int bin_version;             /**< Binary format version number. */
+    int size_ptr;                /**< Size of void* recorded in the file. */
     int oskar_ver_major;
     int oskar_ver_minor;
     int oskar_ver_patch;
-    int num_tags;             /**< Number of tags in the index. */
-    int* extended;            /**< Array of flags (if true, tag is extended). */
-    int* data_type;           /**< Array of tag data types. */
-    int* id_group;            /**< Array of tag group IDs. */
-    int* id_tag;              /**< Array of tag IDs. */
-    char** name_group;        /**< Array of tag group names. */
-    char** name_tag;          /**< Array of tag names. */
-    int* user_index;          /**< Array of user indices. */
-    long* data_offset_bytes;  /**< Array of data offsets from the start. */
-    size_t* data_size_bytes;  /**< Array of data sizes.*/
-    size_t* block_size_bytes; /**< Array of block sizes. */
+    char open_mode;              /**< Mode in which file was opened (read/write). */
+
+    /* Tag data. */
+    int num_chunks;                /**< Number of tags in the index. */
+    int* extended;               /**< True if tag is extended. */
+    int* data_type;              /**< Tag data type. */
+    int* id_group;               /**< Tag group ID. */
+    int* id_tag;                 /**< Tag ID. */
+    char** name_group;           /**< Tag group name. */
+    char** name_tag;             /**< Tag name. */
+    int* user_index;             /**< Tag index. */
+    long* payload_offset_bytes;  /**< Payload offset from start of file. */
+    size_t* payload_size_bytes;  /**< Payload size.*/
+    size_t* block_size_bytes;    /**< Total block size. */
+    unsigned long* crc;          /**< CRC-32C code. */
+    unsigned long* crc_header;   /**< Computed CRC-32C code of header only. */
+
+    /* Data tables used for CRC computation. */
+    oskar_CRC* crc_data;
 };
 
 #ifndef OSKAR_BINARY_TYPEDEF_

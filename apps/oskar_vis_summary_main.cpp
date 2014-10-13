@@ -94,56 +94,33 @@ int main(int argc, char **argv)
     oskar_vis_free(vis, &status);
     vis = 0;
 
-    if (displayLog)
+    if (displayLog && !status)
     {
-        oskar_Binary* h = 0;
-        h = oskar_binary_create(filename, 'r', &status);
-        if (status) return OSKAR_ERR_FILE_IO;
-        size_t data_size = 0;
-        long int data_offset = 0;
-        int tag_error = 0;
-        oskar_binary_query(h, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
-                OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset, &tag_error);
-        if (!tag_error)
-        {
-            oskar_Mem *temp;
-            temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &status);
-            oskar_binary_read_mem(h, temp,
-                    OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
-            oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);
-            if (!status)
-            {
-                oskar_mem_char(temp)[oskar_mem_length(temp) - 1] = 0;
-                printf("%s", oskar_mem_char(temp));
-            }
-            oskar_mem_free(temp, &status);
-        }
+        oskar_Binary* h = oskar_binary_create(filename, 'r', &status);
+        oskar_Mem* temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 1, &status);
+        oskar_binary_read_mem(h, temp,
+                OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
+        oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);
+        oskar_mem_char(temp)[oskar_mem_length(temp) - 1] = 0;
+        if (!status)
+            printf("%s", oskar_mem_char(temp));
+        status = 0;
+        oskar_mem_free(temp, &status);
         oskar_binary_free(h);
     }
 
-    if (displaySettings)
+    if (displaySettings && !status)
     {
-        oskar_Binary* h = 0;
-        h = oskar_binary_create(filename, 'r', &status);
-        if (status) return OSKAR_ERR_FILE_IO;
-        size_t data_size = 0;
-        long int data_offset = 0;
-        int tag_error = 0;
-        oskar_binary_query(h, OSKAR_CHAR, OSKAR_TAG_GROUP_SETTINGS,
-                OSKAR_TAG_SETTINGS, 0, &data_size, &data_offset, &tag_error);
-        if (!tag_error)
-        {
-            oskar_Mem *temp;
-            temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &status);
-            oskar_binary_read_mem(h, temp, OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
-            oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);
-            if (!status)
-            {
-                oskar_mem_char(temp)[oskar_mem_length(temp) - 1] = 0;
-                printf("%s", oskar_mem_char(temp));
-            }
-            oskar_mem_free(temp, &status);
-        }
+        oskar_Binary* h = oskar_binary_create(filename, 'r', &status);
+        oskar_Mem* temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 1, &status);
+        oskar_binary_read_mem(h, temp,
+                OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
+        oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, &status);
+        oskar_mem_char(temp)[oskar_mem_length(temp) - 1] = 0;
+        if (!status)
+            printf("%s", oskar_mem_char(temp));
+        status = 0;
+        oskar_mem_free(temp, &status);
         oskar_binary_free(h);
     }
 

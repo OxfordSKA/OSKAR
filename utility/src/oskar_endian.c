@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_endian.h"
+#include <oskar_endian.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,40 +40,42 @@ int oskar_endian(void)
     return OSKAR_BIG_ENDIAN;
 }
 
-void oskar_endian_swap_2(char* d)
+void oskar_endian_swap(void* val, size_t size)
 {
-    char t;
-    t    = d[0];
-    d[0] = d[1];
-    d[1] = t;
-}
-
-void oskar_endian_swap_4(char* d)
-{
-    char t;
-    t    = d[0];
-    d[0] = d[3];
-    d[3] = t;
-    t    = d[1];
-    d[1] = d[2];
-    d[2] = t;
-}
-
-void oskar_endian_swap_8(char* d)
-{
-    char t;
-    t    = d[0];
-    d[0] = d[7];
-    d[7] = t;
-    t    = d[1];
-    d[1] = d[6];
-    d[6] = t;
-    t    = d[2];
-    d[2] = d[5];
-    d[5] = t;
-    t    = d[3];
-    d[3] = d[4];
-    d[4] = t;
+    char t, *d = (char*) val;
+    if (size == 4)
+    {
+        t    = d[0];
+        d[0] = d[3];
+        d[3] = t;
+        t    = d[1];
+        d[1] = d[2];
+        d[2] = t;
+        return;
+    }
+    if (size == 8)
+    {
+        t    = d[0];
+        d[0] = d[7];
+        d[7] = t;
+        t    = d[1];
+        d[1] = d[6];
+        d[6] = t;
+        t    = d[2];
+        d[2] = d[5];
+        d[5] = t;
+        t    = d[3];
+        d[3] = d[4];
+        d[4] = t;
+        return;
+    }
+    if (size == 2)
+    {
+        t    = d[0];
+        d[0] = d[1];
+        d[1] = t;
+        return;
+    }
 }
 
 #ifdef __cplusplus

@@ -41,8 +41,8 @@ void oskar_binary_read(oskar_Binary* handle,
         unsigned char data_type, unsigned char id_group, unsigned char id_tag,
         int user_index, size_t data_size, void* data, int* status)
 {
-    size_t block_size = 0, bytes = 0, chunk_size = 1 << 29;
-    long block_offset = 0;
+    size_t payload_size = 0, bytes = 0, chunk_size = 1 << 29;
+    int i;
     char* p;
 
     /* Check all inputs. */
@@ -56,22 +56,22 @@ void oskar_binary_read(oskar_Binary* handle,
     if (*status) return;
 
     /* Query the tag index to get the block size and offset. */
-    oskar_binary_query(handle, data_type, id_group,
-            id_tag, user_index, &block_size, &block_offset, status);
+    i = oskar_binary_query(handle, data_type, id_group, id_tag,
+            user_index, &payload_size, status);
     if (*status) return;
 
     /* Return if no data to read. */
-    if (block_size == 0) return;
+    if (payload_size == 0) return;
 
     /* Check that there is enough memory in the block. */
-    if (!data || data_size < block_size)
+    if (!data || data_size < payload_size)
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
         return;
     }
 
     /* Copy the data out of the stream. */
-    if (fseek(handle->stream, block_offset, SEEK_SET) != 0)
+    if (fseek(handle->stream, handle->payload_offset_bytes[i], SEEK_SET) != 0)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
@@ -80,7 +80,7 @@ void oskar_binary_read(oskar_Binary* handle,
     /* Read the data in chunks of 2^29 bytes (512 MB). */
     /* This works around a bug in some versions of fread() which are
      * limited to reading a maximum of 2 GB at once. */
-    for (p = (char*)data, bytes = block_size; bytes > 0; p += chunk_size)
+    for (p = (char*)data, bytes = payload_size; bytes > 0; p += chunk_size)
     {
         if (bytes < chunk_size) chunk_size = bytes;
         if (fread(p, 1, chunk_size, handle->stream) != chunk_size)
@@ -89,6 +89,16 @@ void oskar_binary_read(oskar_Binary* handle,
             return;
         }
         bytes -= chunk_size;
+    }
+
+    /* Check CRC-32 code, if present. */
+    if (handle->crc[i])
+    {
+        unsigned long crc;
+        crc = handle->crc_header[i];
+        crc = oskar_crc_update(handle->crc_data, crc, data, payload_size);
+        if (crc != handle->crc[i])
+            *status = OSKAR_ERR_CRC_FAIL;
     }
 }
 
@@ -110,8 +120,8 @@ void oskar_binary_read_ext(oskar_Binary* handle,
         unsigned char data_type, const char* name_group, const char* name_tag,
         int user_index, size_t data_size, void* data, int* status)
 {
-    size_t block_size = 0, bytes = 0, chunk_size = 1 << 29;
-    long block_offset = 0;
+    size_t payload_size = 0, bytes = 0, chunk_size = 1 << 29;
+    int i;
     char* p;
 
     /* Check all inputs. */
@@ -125,22 +135,22 @@ void oskar_binary_read_ext(oskar_Binary* handle,
     if (*status) return;
 
     /* Query the tag index to get the block size and offset. */
-    oskar_binary_query_ext(handle, data_type, name_group,
-            name_tag, user_index, NULL, &block_size, &block_offset, status);
+    i = oskar_binary_query_ext(handle, data_type, name_group, name_tag,
+            user_index, &payload_size, status);
     if (*status) return;
 
     /* Return if no data to read. */
-    if (block_size == 0) return;
+    if (payload_size == 0) return;
 
     /* Check that there is enough memory in the block. */
-    if (!data || data_size < block_size)
+    if (!data || data_size < payload_size)
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
         return;
     }
 
     /* Copy the data out of the stream. */
-    if (fseek(handle->stream, block_offset, SEEK_SET) != 0)
+    if (fseek(handle->stream, handle->payload_offset_bytes[i], SEEK_SET) != 0)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
@@ -149,7 +159,7 @@ void oskar_binary_read_ext(oskar_Binary* handle,
     /* Read the data in chunks of 2^29 bytes (512 MB). */
     /* This works around a bug in some versions of fread() which are
      * limited to reading a maximum of 2 GB at once. */
-    for (p = (char*)data, bytes = block_size; bytes > 0; p += chunk_size)
+    for (p = (char*)data, bytes = payload_size; bytes > 0; p += chunk_size)
     {
         if (bytes < chunk_size) chunk_size = bytes;
         if (fread(p, 1, chunk_size, handle->stream) != chunk_size)
@@ -158,6 +168,16 @@ void oskar_binary_read_ext(oskar_Binary* handle,
             return;
         }
         bytes -= chunk_size;
+    }
+
+    /* Check CRC-32 code, if present. */
+    if (handle->crc[i])
+    {
+        unsigned long crc;
+        crc = handle->crc_header[i];
+        crc = oskar_crc_update(handle->crc_data, crc, data, payload_size);
+        if (crc != handle->crc[i])
+            *status = OSKAR_ERR_CRC_FAIL;
     }
 }
 

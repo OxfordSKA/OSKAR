@@ -58,11 +58,11 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     if (err) oskar_matlab_error("oskar_binary_create() failed with "
             "code %i: %s",err, oskar_get_error_string(err));
 
-    mexPrintf("= Binary file header loaded (%i tags found).\n", h->num_tags);
+    mexPrintf("= Binary file header loaded (%i tags found).\n", h->num_chunks);
     int num_fields = 5;
     const char* fields[5] = { "type", "group", "tag", "index", "data_size"};
 
-    int num_records = h->num_tags;
+    int num_records = h->num_chunks;
     out[0] = mxCreateCellMatrix(num_records + 1, 6);
     out[1] = mxCreateStructMatrix(num_records, 1, num_fields, fields);
 
@@ -104,9 +104,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mxSetCell(out[0], 4 * (num_records + 1) + i + 1,
                 mxCreateDoubleScalar((double)h->user_index[i]));
         mxSetField(out[1], i, fields[4],
-                mxCreateDoubleScalar((double)h->data_size_bytes[i]));
+                mxCreateDoubleScalar((double)h->payload_size_bytes[i]));
         mxSetCell(out[0], 5 * (num_records + 1) + i + 1,
-                mxCreateDoubleScalar((double)h->data_size_bytes[i]));
+                mxCreateDoubleScalar((double)h->payload_size_bytes[i]));
     }
     oskar_binary_free(h);
 }

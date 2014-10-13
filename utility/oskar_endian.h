@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,8 @@
  * @file oskar_endian.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,34 +54,17 @@ OSKAR_EXPORT
 int oskar_endian(void);
 
 /**
- * @brief Swaps the byte ordering of the two bytes at the supplied address.
+ * @brief Swaps the byte ordering of the value at the supplied address.
  *
  * @details
- * This function swaps the byte ordering of the two bytes at the supplied
- * address.
- */
-OSKAR_EXPORT
-void oskar_endian_swap_2(char* data);
-
-/**
- * @brief Swaps the byte ordering of the four bytes at the supplied address.
+ * This function swaps the byte ordering of the value at the supplied
+ * address. The size of the value can be 2, 4 or 8 bytes only.
  *
- * @details
- * This function swaps the byte ordering of the four bytes at the supplied
- * address.
+ * @param[in,out] data Pointer to value to convert.
+ * @param[in]     size Size of value in bytes.
  */
 OSKAR_EXPORT
-void oskar_endian_swap_4(char* data);
-
-/**
- * @brief Swaps the byte ordering of the eight bytes at the supplied address.
- *
- * @details
- * This function swaps the byte ordering of the eight bytes at the supplied
- * address.
- */
-OSKAR_EXPORT
-void oskar_endian_swap_8(char* data);
+void oskar_endian_swap(void* d, size_t size);
 
 enum
 {

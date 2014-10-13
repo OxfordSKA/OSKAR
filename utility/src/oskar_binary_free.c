@@ -28,6 +28,7 @@
 
 #include <private_binary.h>
 #include <oskar_binary_free.h>
+#include <oskar_crc.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -46,7 +47,7 @@ void oskar_binary_free(oskar_Binary* handle)
         fclose(handle->stream);
 
     /* Free string data. */
-    for (i = 0; i < handle->num_tags; ++i)
+    for (i = 0; i < handle->num_chunks; ++i)
     {
         free(handle->name_group[i]);
         free(handle->name_tag[i]);
@@ -60,9 +61,14 @@ void oskar_binary_free(oskar_Binary* handle)
     free(handle->name_group);
     free(handle->name_tag);
     free(handle->user_index);
-    free(handle->data_offset_bytes);
-    free(handle->data_size_bytes);
+    free(handle->payload_offset_bytes);
+    free(handle->payload_size_bytes);
     free(handle->block_size_bytes);
+    free(handle->crc);
+    free(handle->crc_header);
+
+    /* Free the CRC data. */
+    oskar_crc_free(handle->crc_data);
 
     /* Free the structure itself. */
     free(handle);

@@ -28,39 +28,37 @@
 
 #include <private_binary.h>
 #include <oskar_binary_query.h>
-#include <oskar_endian.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_binary_query(const oskar_Binary* index,
+int oskar_binary_query(const oskar_Binary* handle,
         unsigned char data_type, unsigned char id_group, unsigned char id_tag,
-        int user_index, size_t* data_size, long* data_offset, int* status)
+        int user_index, size_t* payload_size, int* status)
 {
     int i;
 
     /* Check all inputs. */
-    if (!index || !status)
+    if (!handle || !status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return -1;
     }
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status) return 0;
 
     /* Find the tag in the index. */
-    for (i = 0; i < index->num_tags; ++i)
+    for (i = 0; i < handle->num_chunks; ++i)
     {
-        if (!(index->extended[i]) &&
-                index->data_type[i] == (int) data_type &&
-                index->id_group[i] == (int) id_group &&
-                index->id_tag[i] == (int) id_tag &&
-                index->user_index[i] == user_index)
+        if (!(handle->extended[i]) &&
+                handle->data_type[i] == (int) data_type &&
+                handle->id_group[i] == (int) id_group &&
+                handle->id_tag[i] == (int) id_tag &&
+                handle->user_index[i] == user_index)
         {
             /* Match found, so break. */
             break;
@@ -68,35 +66,31 @@ void oskar_binary_query(const oskar_Binary* index,
     }
 
     /* Check if tag is not present. */
-    if (i == index->num_tags)
+    if (i == handle->num_chunks)
     {
         *status = OSKAR_ERR_BINARY_TAG_NOT_FOUND;
-        return;
+        return -1;
     }
 
-    /* Get the tag data. */
-    if (data_size)
-        *data_size = index->data_size_bytes[i];
-    if (data_offset)
-        *data_offset = index->data_offset_bytes[i];
+    *payload_size = handle->payload_size_bytes[i];
+    return i;
 }
 
-void oskar_binary_query_ext(const oskar_Binary* index,
+int oskar_binary_query_ext(const oskar_Binary* handle,
         unsigned char data_type, const char* name_group, const char* name_tag,
-        int user_index, size_t* block_size, size_t* data_size,
-        long* data_offset, int* status)
+        int user_index, size_t* payload_size, int* status)
 {
     int i, lgroup, ltag;
 
     /* Check all inputs. */
-    if (!index || !name_group || !name_tag || !status)
+    if (!handle || !name_group || !name_tag || !status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return -1;
     }
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status) return 0;
 
     /* Check that string lengths are within range. */
     lgroup = 1 + strlen(name_group);
@@ -104,22 +98,22 @@ void oskar_binary_query_ext(const oskar_Binary* index,
     if (lgroup > 255 || ltag > 255)
     {
         *status = OSKAR_ERR_BINARY_TAG_TOO_LONG;
-        return;
+        return -1;
     }
 
     /* Find the tag in the index. */
-    for (i = 0; i < index->num_tags; ++i)
+    for (i = 0; i < handle->num_chunks; ++i)
     {
-        if (index->extended[i] &&
-                index->data_type[i] == (int) data_type &&
-                index->id_group[i] == (int) lgroup &&
-                index->id_tag[i] == (int) ltag &&
-                index->user_index[i] == user_index)
+        if (handle->extended[i] &&
+                handle->data_type[i] == (int) data_type &&
+                handle->id_group[i] == (int) lgroup &&
+                handle->id_tag[i] == (int) ltag &&
+                handle->user_index[i] == user_index)
         {
             /* Possible match: check names. */
-            if (strcmp(name_group, index->name_group[i]))
+            if (strcmp(name_group, handle->name_group[i]))
                 continue;
-            if (strcmp(name_tag, index->name_tag[i]))
+            if (strcmp(name_tag, handle->name_tag[i]))
                 continue;
 
             /* Match found, so break. */
@@ -128,19 +122,14 @@ void oskar_binary_query_ext(const oskar_Binary* index,
     }
 
     /* Check if tag is not present. */
-    if (i == index->num_tags)
+    if (i == handle->num_chunks)
     {
         *status = OSKAR_ERR_BINARY_TAG_NOT_FOUND;
-        return;
+        return -1;
     }
 
-    /* Get the tag data. */
-    if (block_size)
-        *block_size = index->block_size_bytes[i];
-    if (data_size)
-        *data_size = index->data_size_bytes[i];
-    if (data_offset)
-        *data_offset = index->data_offset_bytes[i];
+    *payload_size = handle->payload_size_bytes[i];
+    return i;
 }
 
 #ifdef __cplusplus

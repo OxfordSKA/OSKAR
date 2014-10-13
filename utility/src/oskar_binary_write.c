@@ -43,12 +43,7 @@ void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
 {
     oskar_BinaryTag tag;
     size_t block_size;
-
-    /* Initialise the tag. */
-    char magic[] = "TAG";
-    strcpy(tag.magic, magic);
-    memset(tag.size_bytes, 0, sizeof(tag.size_bytes));
-    memset(tag.user_index, 0, sizeof(tag.user_index));
+    unsigned long crc = 0;
 
     /* Check all inputs. */
     if (!handle || !status)
@@ -60,14 +55,37 @@ void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
     /* Check if safe to proceed. */
     if (*status) return;
 
+    /* Initialise the tag. */
+    tag.magic[0] = 'T';
+    tag.magic[1] = 0x40 + OSKAR_BINARY_FORMAT_VERSION;
+    tag.magic[2] = 'G';
+    memset(tag.size_bytes, 0, sizeof(tag.size_bytes));
+    memset(tag.user_index, 0, sizeof(tag.user_index));
+
+    /* Set the size of the payload element. */
+    if (data_type & OSKAR_CHAR)
+        tag.magic[3] = sizeof(char);
+    else if (data_type & OSKAR_INT)
+        tag.magic[3] = sizeof(int);
+    else if (data_type & OSKAR_SINGLE)
+        tag.magic[3] = sizeof(float);
+    else if (data_type & OSKAR_DOUBLE)
+        tag.magic[3] = sizeof(double);
+    if (data_type & OSKAR_COMPLEX)
+        tag.magic[3] *= 2;
+    if (data_type & OSKAR_MATRIX)
+        tag.magic[3] *= 4;
+
     /* Set up the tag identifiers */
     tag.flags = 0;
+    tag.flags |= (1 << 6); /* Set bit 6 to indicate CRC-32C code added. */
     tag.data_type = data_type;
     tag.group.id = id_group;
     tag.tag.id = id_tag;
 
-    /* Get the number of bytes in the block in little-endian byte order. */
-    block_size = data_size;
+    /* Get the number of bytes in the block and user index in
+     * little-endian byte order (add 4 for CRC). */
+    block_size = data_size + 4;
     if (sizeof(size_t) != 4 && sizeof(size_t) != 8)
     {
         *status = OSKAR_ERR_BAD_BINARY_FORMAT;
@@ -75,28 +93,19 @@ void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
     }
     if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
     {
-        if (sizeof(size_t) == 4)
-            oskar_endian_swap_4((char*)&block_size);
-        else if (sizeof(size_t) == 8)
-            oskar_endian_swap_8((char*)&block_size);
+        oskar_endian_swap(&block_size, sizeof(size_t));
+        oskar_endian_swap(&user_index, sizeof(int));
     }
 
-    /* Copy the block size in bytes to the tag, as little endian. */
+    /* Copy user index and block size to the tag, as little endian values. */
+    memcpy(tag.user_index, &user_index, sizeof(int));
     memcpy(tag.size_bytes, &block_size, sizeof(size_t));
 
-    /* Get the user index in little-endian byte order. */
+    /* Tag is complete at this point, so calculate CRC. */
+    crc = oskar_crc_compute(handle->crc_data, &tag, sizeof(oskar_BinaryTag));
+    crc = oskar_crc_update(handle->crc_data, crc, data, data_size);
     if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
-    {
-        if (sizeof(int) == 2)
-            oskar_endian_swap_2((char*)&user_index);
-        else if (sizeof(int) == 4)
-            oskar_endian_swap_4((char*)&user_index);
-        else if (sizeof(int) == 8)
-            oskar_endian_swap_8((char*)&user_index);
-    }
-
-    /* Copy the user index to the tag, as little endian. */
-    memcpy(tag.user_index, &user_index, sizeof(int));
+        oskar_endian_swap(&crc, sizeof(unsigned long));
 
     /* Write the tag to the file. */
     if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, handle->stream) != 1)
@@ -105,16 +114,20 @@ void oskar_binary_write(oskar_Binary* handle, unsigned char data_type,
         return;
     }
 
-    /* Return if no data to write. */
-    if (data_size == 0 || !data)
-        return;
-
-    /* Write the data to the file. */
-    if (fwrite(data, 1, data_size, handle->stream) != data_size)
+    /* Check there is data to write. */
+    if (data && data_size > 0)
     {
-        *status = OSKAR_ERR_FILE_IO;
-        return;
+        /* Write the data to the file. */
+        if (fwrite(data, 1, data_size, handle->stream) != data_size)
+        {
+            *status = OSKAR_ERR_FILE_IO;
+            return;
+        }
     }
+
+    /* Write the 4-byte CRC-32C code. */
+    if (fwrite(&crc, 4, 1, handle->stream) != 1)
+        *status = OSKAR_ERR_FILE_IO;
 }
 
 void oskar_binary_write_double(oskar_Binary* handle, unsigned char id_group,
@@ -137,12 +150,7 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
 {
     oskar_BinaryTag tag;
     size_t block_size, lgroup, ltag;
-
-    /* Initialise the tag. */
-    char magic[] = "TAG";
-    strcpy(tag.magic, magic);
-    memset(tag.size_bytes, 0, sizeof(tag.size_bytes));
-    memset(tag.user_index, 0, sizeof(tag.user_index));
+    unsigned long crc = 0;
 
     /* Check all inputs. */
     if (!handle || !name_group || !name_tag || !status)
@@ -153,6 +161,27 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
 
     /* Check if safe to proceed. */
     if (*status) return;
+
+    /* Initialise the tag. */
+    tag.magic[0] = 'T';
+    tag.magic[1] = 0x40 + OSKAR_BINARY_FORMAT_VERSION;
+    tag.magic[2] = 'G';
+    memset(tag.size_bytes, 0, sizeof(tag.size_bytes));
+    memset(tag.user_index, 0, sizeof(tag.user_index));
+
+    /* Set the size of the payload element. */
+    if (data_type & OSKAR_CHAR)
+        tag.magic[3] = sizeof(char);
+    else if (data_type & OSKAR_INT)
+        tag.magic[3] = sizeof(int);
+    else if (data_type & OSKAR_SINGLE)
+        tag.magic[3] = sizeof(float);
+    else if (data_type & OSKAR_DOUBLE)
+        tag.magic[3] = sizeof(double);
+    if (data_type & OSKAR_COMPLEX)
+        tag.magic[3] *= 2;
+    if (data_type & OSKAR_MATRIX)
+        tag.magic[3] *= 4;
 
     /* Check that string lengths are within range. */
     lgroup = strlen(name_group);
@@ -166,12 +195,14 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
     /* Set up the tag identifiers */
     tag.flags = 0;
     tag.flags |= (1 << 7); /* Set bit 7 to indicate that tag is extended. */
+    tag.flags |= (1 << 6); /* Set bit 6 to indicate CRC-32C code added. */
     tag.data_type = data_type;
     tag.group.bytes = 1 + (unsigned char)lgroup;
     tag.tag.bytes = 1 + (unsigned char)ltag;
 
-    /* Get the number of bytes in the block in little-endian byte order. */
-    block_size = data_size + tag.group.bytes + tag.tag.bytes;
+    /* Get the number of bytes in the block and user index in
+     * little-endian byte order (add 4 for CRC). */
+    block_size = data_size + tag.group.bytes + tag.tag.bytes + 4;
     if (sizeof(size_t) != 4 && sizeof(size_t) != 8)
     {
         *status = OSKAR_ERR_BAD_BINARY_FORMAT;
@@ -179,28 +210,21 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
     }
     if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
     {
-        if (sizeof(size_t) == 4)
-            oskar_endian_swap_4((char*)&block_size);
-        else if (sizeof(size_t) == 8)
-            oskar_endian_swap_8((char*)&block_size);
+        oskar_endian_swap(&block_size, sizeof(size_t));
+        oskar_endian_swap(&user_index, sizeof(int));
     }
 
-    /* Copy the block size in bytes to the tag, as little endian. */
+    /* Copy user index and block size to the tag, as little endian values. */
+    memcpy(tag.user_index, &user_index, sizeof(int));
     memcpy(tag.size_bytes, &block_size, sizeof(size_t));
 
-    /* Get the user index in little-endian byte order. */
+    /* Tag is complete at this point, so calculate CRC. */
+    crc = oskar_crc_compute(handle->crc_data, &tag, sizeof(oskar_BinaryTag));
+    crc = oskar_crc_update(handle->crc_data, crc, name_group, tag.group.bytes);
+    crc = oskar_crc_update(handle->crc_data, crc, name_tag, tag.tag.bytes);
+    crc = oskar_crc_update(handle->crc_data, crc, data, data_size);
     if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
-    {
-        if (sizeof(int) == 2)
-            oskar_endian_swap_2((char*)&user_index);
-        else if (sizeof(int) == 4)
-            oskar_endian_swap_4((char*)&user_index);
-        else if (sizeof(int) == 8)
-            oskar_endian_swap_8((char*)&user_index);
-    }
-
-    /* Copy the user index to the tag, as little endian. */
-    memcpy(tag.user_index, &user_index, sizeof(int));
+        oskar_endian_swap(&crc, sizeof(unsigned long));
 
     /* Write the tag to the file. */
     if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, handle->stream) != 1)
@@ -210,28 +234,31 @@ void oskar_binary_write_ext(oskar_Binary* handle, unsigned char data_type,
     }
 
     /* Write the group name and tag name to the file. */
-    if (fwrite(name_group, 1, tag.group.bytes,
-            handle->stream) != tag.group.bytes)
+    if (fwrite(name_group, tag.group.bytes, 1, handle->stream) != 1)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
-    if (fwrite(name_tag, 1, tag.tag.bytes, handle->stream) != tag.tag.bytes)
+    if (fwrite(name_tag, tag.tag.bytes, 1, handle->stream) != 1)
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
     }
 
-    /* Return if no data to write. */
-    if (data_size == 0 || !data)
-        return;
-
-    /* Write the data to the file. */
-    if (fwrite(data, 1, data_size, handle->stream) != data_size)
+    /* Check there is data to write. */
+    if (data && data_size > 0)
     {
-        *status = OSKAR_ERR_FILE_IO;
-        return;
+        /* Write the data to the file. */
+        if (fwrite(data, 1, data_size, handle->stream) != data_size)
+        {
+            *status = OSKAR_ERR_FILE_IO;
+            return;
+        }
     }
+
+    /* Write the 4-byte CRC-32C code. */
+    if (fwrite(&crc, 4, 1, handle->stream) != 1)
+        *status = OSKAR_ERR_FILE_IO;
 }
 
 void oskar_binary_write_ext_double(oskar_Binary* handle, const char* name_group,

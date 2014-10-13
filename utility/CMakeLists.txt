@@ -13,6 +13,7 @@ set(utility_SRC
     src/oskar_binary_write_metadata.c
     src/oskar_binary_write.c
     src/oskar_blank_parentheses.c
+    src/oskar_crc.c
     src/oskar_endian.c
     src/oskar_file_exists.c
     src/oskar_get_error_string.c
