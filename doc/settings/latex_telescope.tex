@@ -5,11 +5,10 @@
 
 \fontsize{8}{10}\selectfont
 \begin{center}
-\begin{longtable}{|c|L{9cm}|L{7.5cm}|L{4.0cm}|L{1.7cm}|}
+\begin{longtable}{|L{9cm}|L{8.5cm}|L{4.0cm}|L{1.7cm}|}
 
 \hline
   \rowcolor{lightgray}
-  {\textbf{ID}} &
   {\textbf{Key}} &
   {\textbf{Description}} &
   {\textbf{Allowed values}} &
@@ -17,18 +16,15 @@
 \endfirsthead
 \hline
   \rowcolor{lightgray}
-  {\textbf{ID}} &
   {\textbf{Key}} &
   {\textbf{Description}} &
   {\textbf{Allowed values}} &
   {\textbf{Default}} \\ \hline
 \endhead
-  \multicolumn{5}{l}{{Continued on next page\ldots}} \\
+  \multicolumn{4}{l}{{Continued on next page\ldots}} \\
 \endfoot
  
 \endlastfoot
-102
-&
 input\_directory\textsuperscript{\textbf{\dag}}
 &
 {Path to a directory containing the telescope configuration data. See the accompanying documentation for a description of an OSKAR telescope model directory.}
@@ -39,8 +35,6 @@ Path name
 \\
 \hline
 
-103
-&
 longitude\_deg
 &
 {Telescope centre (east) longitude, in degrees.}
@@ -51,8 +45,6 @@ Double
 \\
 \hline
 
-104
-&
 latitude\_deg
 &
 {Telescope centre latitude, in degrees.}
@@ -63,8 +55,6 @@ Double
 \\
 \hline
 
-105
-&
 altitude\_m
 &
 {Telescope centre altitude, in metres.}
@@ -75,29 +65,23 @@ Double
 \\
 \hline
 
-106
-&
 station\_type
 &
 {The type of each station in the interferometer. A simple, time-invariant Gaussian station beam can be used instead of an aperture array beam if required for testing. All station beam effects can be disabled by selecting `Isotropic beam'.}
 &
 {One of the following:}
-{\begin{itemize}[leftmargin=2ex, topsep=0pt]
-\itemsep1pt \parskip0pt \parsep0pt 
-\item {Aperture array}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Aperture array}
 \item {Isotropic beam}
 \item {Gaussian beam}
 \item {VLA (PBCOR)}
 \end{itemize}
-\vspace{-\baselineskip}\mbox{}
 }
 &
 Aperture
 \\
 \hline
 
-107
-&
 normalise\_beams\_at\_phase\_centre
 &
 {If \textbf{true}, then scale the amplitude of every station beam at the interferometer phase centre to precisely 1.0 for each time snapshot. This effectively performs an amplitude calibration for a source at the phase centre.}
@@ -108,27 +92,21 @@ true
 \\
 \hline
 
-108
-&
 pol\_mode
 &
 {The polarisation mode of simulations which use the telescope model. If this is \textbf{Scalar}, then only Stokes I visibility data will be simulated, and scalar element responses will be used when evaluating station beams. If this is \textbf{Full} (the default) then correlation products from both polarisations will be simulated. \textbf{Note that scalar mode can be significantly faster.}}
 &
 {One of the following:}
-{\begin{itemize}[leftmargin=2ex, topsep=0pt]
-\itemsep1pt \parskip0pt \parsep0pt 
-\item {Full}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Full}
 \item {Scalar}
 \end{itemize}
-\vspace{-\baselineskip}\mbox{}
 }
 &
 Full
 \\
 \hline
 
-109
-&
 aperture\_array/array\_pattern/enable
 &
 {If true, then the contribution to the station beam from the array pattern (given by beamforming the antennas in the station) is evaluated. If false, then the array pattern is ignored.}
@@ -139,8 +117,6 @@ true
 \\
 \hline
 
-110
-&
 aperture\_array/array\_pattern/normalise
 &
 {If true, the amplitude of each station beam will be divided by the number of antennas in the station; if false, then this normalisation is not performed. Note, however, that global beam normalisation is still possible.}
@@ -151,8 +127,6 @@ false
 \\
 \hline
 
-111
-&
 aperture\_array/array\_pattern/element/gain
 &
 {Mean element amplitude gain factor. If set (and $>$ 0.0), this will override the contents of the station files.}
@@ -163,8 +137,6 @@ Double
 \\
 \hline
 
-112
-&
 aperture\_array/array\_pattern/element/gain\_error\_fixed
 &
 {Systematic element amplitude gain standard deviation. If set, this will override the contents of the station files.}
@@ -175,8 +147,6 @@ Double
 \\
 \hline
 
-113
-&
 aperture\_array/array\_pattern/element/gain\_error\_time
 &
 {Time-variable element amplitude gain standard deviation. If set, this will override the contents of the station files.}
@@ -187,8 +157,6 @@ Double
 \\
 \hline
 
-114
-&
 aperture\_array/array\_pattern/element/phase\_error\_fixed\_deg
 &
 {Systematic element phase standard deviation. If set, this will override the contents of the station files.}
@@ -199,8 +167,6 @@ Double
 \\
 \hline
 
-115
-&
 aperture\_array/array\_pattern/element/phase\_error\_time\_deg
 &
 {Time-variable element phase standard deviation. If set, this will override the contents of the station files.}
@@ -211,8 +177,6 @@ Double
 \\
 \hline
 
-116
-&
 aperture\_array/array\_pattern/element/position\_error\_xy\_m
 &
 {The standard deviation of the antenna xy-position uncertainties. If set, this will override the contents of the station files.}
@@ -223,8 +187,6 @@ Double
 \\
 \hline
 
-117
-&
 aperture\_array/array\_pattern/element/x\_orientation\_error\_deg
 &
 {The standard deviation of the antenna X-dipole orientation error. If set, this will override the contents of the station files.}
@@ -235,8 +197,6 @@ Double
 \\
 \hline
 
-118
-&
 aperture\_array/array\_pattern/element/y\_orientation\_error\_deg
 &
 {The standard deviation of the antenna Y-dipole orientation error. If set, this will override the contents of the station files.}
@@ -247,8 +207,6 @@ Double
 \\
 \hline
 
-119
-&
 aperture\_array/array\_pattern/element/seed\_gain\_errors
 &
 {Random number generator seed used for systematic gain error distribution.}
@@ -259,8 +217,6 @@ aperture\_array/array\_pattern/element/seed\_gain\_errors
 \\
 \hline
 
-120
-&
 aperture\_array/array\_pattern/element/seed\_phase\_errors
 &
 {Random number generator seed used for systematic phase error distribution.}
@@ -271,8 +227,6 @@ aperture\_array/array\_pattern/element/seed\_phase\_errors
 \\
 \hline
 
-121
-&
 aperture\_array/array\_pattern/element/seed\_time\_variable\_errors
 &
 {Random number generator seed used for time variable error distributions.}
@@ -283,8 +237,6 @@ aperture\_array/array\_pattern/element/seed\_time\_variable\_errors
 \\
 \hline
 
-122
-&
 aperture\_array/array\_pattern/element/seed\_position\_xy\_errors
 &
 {Random number generator seed used for antenna xy-position error distribution.}
@@ -295,8 +247,6 @@ aperture\_array/array\_pattern/element/seed\_position\_xy\_errors
 \\
 \hline
 
-123
-&
 aperture\_array/array\_pattern/element/seed\_x\_orientation\_error
 &
 {Random number generator seed used for antenna X dipole orientation error distribution.}
@@ -307,8 +257,6 @@ aperture\_array/array\_pattern/element/seed\_x\_orientation\_error
 \\
 \hline
 
-124
-&
 aperture\_array/array\_pattern/element/seed\_y\_orientation\_error
 &
 {Random number generator seed used for antenna Y dipole orientation error distribution.}
@@ -319,28 +267,22 @@ aperture\_array/array\_pattern/element/seed\_y\_orientation\_error
 \\
 \hline
 
-125
-&
 aperture\_array/element\_pattern/functional\_type
 &
 {The type of functional pattern to apply to the elements, if not using a numerically-defined pattern.}
 &
 {One of the following:}
-{\begin{itemize}[leftmargin=2ex, topsep=0pt]
-\itemsep1pt \parskip0pt \parsep0pt 
-\item {Dipole}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Dipole}
 \item {Geometric dipole}
 \item {Isotropic (unpolarised)}
 \end{itemize}
-\vspace{-\baselineskip}\mbox{}
 }
 &
 Dipole
 \\
 \hline
 
-126
-&
 aperture\_array/element\_pattern/dipole\_length
 &
 {The length of the dipole, if using dipole elements.}
@@ -351,27 +293,21 @@ Double
 \\
 \hline
 
-127
-&
 aperture\_array/element\_pattern/dipole\_length\_units
 &
 {The units used to specify the dipole length (metres or wavelengths), if using dipole elements.}
 &
 {One of the following:}
-{\begin{itemize}[leftmargin=2ex, topsep=0pt]
-\itemsep1pt \parskip0pt \parsep0pt 
-\item {Wavelengths}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Wavelengths}
 \item {Metres}
 \end{itemize}
-\vspace{-\baselineskip}\mbox{}
 }
 &
 Wavelengths
 \\
 \hline
 
-128
-&
 aperture\_array/element\_pattern/enable\_numerical
 &
 {If \textbf{true}, make use of any available numerical element pattern files. If numerical pattern data are missing, the functional type will be used instead.}
@@ -382,28 +318,22 @@ true
 \\
 \hline
 
-129
-&
 aperture\_array/element\_pattern/taper/type
 &
 {The type of tapering function to apply to the element pattern.}
 &
 {One of the following:}
-{\begin{itemize}[leftmargin=2ex, topsep=0pt]
-\itemsep1pt \parskip0pt \parsep0pt 
-\item {None}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {None}
 \item {Cosine}
 \item {Gaussian}
 \end{itemize}
-\vspace{-\baselineskip}\mbox{}
 }
 &
 None
 \\
 \hline
 
-130
-&
 aperture\_array/element\_pattern/taper/cosine\_power
 &
 {If a cosine element taper is selected, this setting gives the power of the cosine(theta) function.}
@@ -414,8 +344,6 @@ Double
 \\
 \hline
 
-131
-&
 aperture\_array/element\_pattern/taper/gaussian\_fwhm\_deg
 &
 {If a Gaussian element taper is selected, this setting gives the full-width half maximum value of the Gaussian, in degrees.}
@@ -426,8 +354,6 @@ Double
 \\
 \hline
 
-132
-&
 gaussian\_beam/fwhm\_deg
 &
 {For stations using a simple Gaussian beam, this setting gives the full-width half maximum value of the Gaussian station beam at the reference frequency, in degrees.}
@@ -438,8 +364,6 @@ Double
 \\
 \hline
 
-133
-&
 gaussian\_beam/ref\_freq\_hz
 &
 {The reference frequency of the specified FWHM, in Hz.}
@@ -450,8 +374,6 @@ Double
 \\
 \hline
 
-134
-&
 output\_directory
 &
 {Path used to save the final telescope model directory, excluding any element pattern data (useful for debugging). Leave blank if not required.}

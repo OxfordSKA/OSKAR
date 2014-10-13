@@ -5,11 +5,10 @@
 
 \fontsize{8}{10}\selectfont
 \begin{center}
-\begin{longtable}{|c|L{9cm}|L{7.5cm}|L{4.0cm}|L{1.7cm}|}
+\begin{longtable}{|L{9cm}|L{8.5cm}|L{4.0cm}|L{1.7cm}|}
 
 \hline
   \rowcolor{lightgray}
-  {\textbf{ID}} &
   {\textbf{Key}} &
   {\textbf{Description}} &
   {\textbf{Allowed values}} &
@@ -17,18 +16,15 @@
 \endfirsthead
 \hline
   \rowcolor{lightgray}
-  {\textbf{ID}} &
   {\textbf{Key}} &
   {\textbf{Description}} &
   {\textbf{Allowed values}} &
   {\textbf{Default}} \\ \hline
 \endhead
-  \multicolumn{5}{l}{{Continued on next page\ldots}} \\
+  \multicolumn{4}{l}{{Continued on next page\ldots}} \\
 \endfoot
  
 \endlastfoot
-000
-&
 double\_precision
 &
 {Determines whether double precision arithmetic is used.}
@@ -39,8 +35,6 @@ true
 \\
 \hline
 
-001
-&
 keep\_log\_file
 &
 {Determines whether a log file of the run will be kept on disk. Note that even if this option is set to false, log files will be stored in any OSKAR binary data files produced by the simulator.}
@@ -51,8 +45,6 @@ false
 \\
 \hline
 
-002
-&
 max\_sources\_per\_chunk
 &
 {Maximum number of sources processed concurrently on a single GPU.}
@@ -63,8 +55,6 @@ Integer > 0
 \\
 \hline
 
-003
-&
 cuda\_device\_ids
 &
 {A comma-separated string containing device (GPU) IDs to use on a multi-GPU system, or `all' to use all devices.}

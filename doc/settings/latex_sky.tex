@@ -5,11 +5,10 @@
 
 \fontsize{8}{10}\selectfont
 \begin{center}
-\begin{longtable}{|c|L{9cm}|L{7.5cm}|L{4.0cm}|L{1.7cm}|}
+\begin{longtable}{|L{9cm}|L{8.5cm}|L{4.0cm}|L{1.7cm}|}
 
 \hline
   \rowcolor{lightgray}
-  {\textbf{ID}} &
   {\textbf{Key}} &
   {\textbf{Description}} &
   {\textbf{Allowed values}} &
@@ -17,18 +16,15 @@
 \endfirsthead
 \hline
   \rowcolor{lightgray}
-  {\textbf{ID}} &
   {\textbf{Key}} &
   {\textbf{Description}} &
   {\textbf{Allowed values}} &
   {\textbf{Default}} \\ \hline
 \endhead
-  \multicolumn{5}{l}{{Continued on next page\ldots}} \\
+  \multicolumn{4}{l}{{Continued on next page\ldots}} \\
 \endfoot
  
 \endlastfoot
-004
-&
 oskar\_sky\_model/file
 &
 {Paths to one or more OSKAR sky model text or binary files. See the accompanying documentation for a description of an OSKAR sky model file.}
@@ -39,8 +35,6 @@ CSV list of path names
 \\
 \hline
 
-005
-&
 oskar\_sky\_model/filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.}
@@ -51,8 +45,6 @@ min
 \\
 \hline
 
-006
-&
 oskar\_sky\_model/filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.}
@@ -63,8 +55,6 @@ max
 \\
 \hline
 
-007
-&
 oskar\_sky\_model/filter/radius\_inner\_deg
 &
 {Minimum angular distance from phase centre allowed by the filter, in degrees. This is an inclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
@@ -75,8 +65,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 180
 \\
 \hline
 
-008
-&
 oskar\_sky\_model/filter/radius\_outer\_deg
 &
 {Maximum angular distance from phase centre allowed by the filter, in degrees. This is an exclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
@@ -87,8 +75,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 180
 \\
 \hline
 
-009
-&
 oskar\_sky\_model/extended\_sources/FWHM\_major
 &
 {Major axis FWHM override of all sources in this group, in arc seconds.}
@@ -99,8 +85,6 @@ Double
 \\
 \hline
 
-010
-&
 oskar\_sky\_model/extended\_sources/FWHM\_minor
 &
 {Minor axis FWHM override of all sources in this group, in arc seconds.}
@@ -111,8 +95,6 @@ Double
 \\
 \hline
 
-011
-&
 oskar\_sky\_model/extended\_sources/position\_angle
 &
 {Position angle override of all extended sources in this group (from North to East), in degrees.}
@@ -123,8 +105,6 @@ Double
 \\
 \hline
 
-012
-&
 gsm/file
 &
 {Path to a Global Sky Model file, pixellated using the HEALPix RING scheme. This option can be used to load a GSM data file produced from software written by Angelica de Oliveira, available at https://www.cfa.harvard.edu/~adeolive/gsm/}
@@ -135,8 +115,6 @@ Path name
 \\
 \hline
 
-013
-&
 gsm/filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.}
@@ -147,8 +125,6 @@ min
 \\
 \hline
 
-014
-&
 gsm/filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.}
@@ -159,8 +135,6 @@ max
 \\
 \hline
 
-015
-&
 gsm/filter/radius\_inner\_deg
 &
 {Minimum angular distance from phase centre allowed by the filter, in degrees. This is an inclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
@@ -171,8 +145,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 180
 \\
 \hline
 
-016
-&
 gsm/filter/radius\_outer\_deg
 &
 {Maximum angular distance from phase centre allowed by the filter, in degrees. This is an exclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
@@ -183,8 +155,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 180
 \\
 \hline
 
-017
-&
 gsm/extended\_sources/FWHM\_major
 &
 {Major axis FWHM override of all sources in this group, in arc seconds.}
@@ -195,8 +165,6 @@ Double
 \\
 \hline
 
-018
-&
 gsm/extended\_sources/FWHM\_minor
 &
 {Minor axis FWHM override of all sources in this group, in arc seconds.}
@@ -207,8 +175,6 @@ Double
 \\
 \hline
 
-019
-&
 gsm/extended\_sources/position\_angle
 &
 {Position angle override of all extended sources in this group (from North to East), in degrees.}
@@ -219,8 +185,6 @@ Double
 \\
 \hline
 
-020
-&
 fits\_image/file
 &
 {FITS file(s) to use as a sky model.}
@@ -231,8 +195,6 @@ CSV list of path names
 \\
 \hline
 
-021
-&
 fits\_image/downsample\_factor
 &
 {The factor by which to downsample the pixel grid.}
@@ -243,8 +205,6 @@ Integer in range 1 $\leq$ $x$ $\leq$ MAX
 \\
 \hline
 
-022
-&
 fits\_image/min\_peak\_fraction
 &
 {The minimum allowed pixel value, as a fraction of the peak value in the image.}
@@ -255,8 +215,6 @@ Unsigned integer
 \\
 \hline
 
-023
-&
 fits\_image/noise\_floor
 &
 {The noise floor of the image, in Jy/PIXEL.}
@@ -267,8 +225,6 @@ Unsigned double
 \\
 \hline
 
-024
-&
 fits\_image/spectral\_index
 &
 {The spectral index of each pixel.}
@@ -279,8 +235,6 @@ Double
 \\
 \hline
 
-025
-&
 healpix\_fits/file
 &
 {Paths to one or more HEALPix FITS files, ordered using the HEALPix RING scheme (NEST schemes are not supported).}
@@ -291,47 +245,37 @@ CSV list of path names
 \\
 \hline
 
-026
-&
 healpix\_fits/coord\_sys
 &
 {The spherical coordinate system used for the HEALPix representation.}
 &
 {One of the following:}
-{\begin{itemize}[leftmargin=2ex, topsep=0pt]
-\itemsep1pt \parskip0pt \parsep0pt 
-\item {Galactic}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Galactic}
 \item {Equatorial}
 \end{itemize}
-\vspace{-\baselineskip}\mbox{}
 }
 &
 Galactic
 \\
 \hline
 
-027
-&
 healpix\_fits/map\_units
 &
 {The physical units of pixels in the input map.}
 &
 {One of the following:}
-{\begin{itemize}[leftmargin=2ex, topsep=0pt]
-\itemsep1pt \parskip0pt \parsep0pt 
-\item {mK/sr (Temperature per steradian)}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {mK/sr (Temperature per steradian)}
 \item {K/sr (Temperature per steradian)}
 \item {Jy/pixel (Jansky per pixel)}
 \end{itemize}
-\vspace{-\baselineskip}\mbox{}
 }
 &
 mK/sr
 \\
 \hline
 
-028
-&
 healpix\_fits/filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.}
@@ -342,8 +286,6 @@ min
 \\
 \hline
 
-029
-&
 healpix\_fits/filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.}
@@ -354,8 +296,6 @@ max
 \\
 \hline
 
-030
-&
 healpix\_fits/filter/radius\_inner\_deg
 &
 {Minimum angular distance from phase centre allowed by the filter, in degrees. This is an inclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
@@ -366,8 +306,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 180
 \\
 \hline
 
-031
-&
 healpix\_fits/filter/radius\_outer\_deg
 &
 {Maximum angular distance from phase centre allowed by the filter, in degrees. This is an exclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
@@ -378,8 +316,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 180
 \\
 \hline
 
-032
-&
 healpix\_fits/extended\_sources/FWHM\_major
 &
 {Major axis FWHM override of all sources in this group, in arc seconds.}
@@ -390,8 +326,6 @@ Double
 \\
 \hline
 
-033
-&
 healpix\_fits/extended\_sources/FWHM\_minor
 &
 {Minor axis FWHM override of all sources in this group, in arc seconds.}
@@ -402,8 +336,6 @@ Double
 \\
 \hline
 
-034
-&
 healpix\_fits/extended\_sources/position\_angle
 &
 {Position angle override of all extended sources in this group (from North to East), in degrees.}
@@ -414,8 +346,6 @@ Double
 \\
 \hline
 
-035
-&
 generator/random\_power\_law/num\_sources
 &
 {Number of sources scattered approximately uniformly over the sphere (before filtering). A value greater than 0 will activate the random power-law generator.}
@@ -426,8 +356,6 @@ Unsigned integer
 \\
 \hline
 
-036
-&
 generator/random\_power\_law/flux\_min
 &
 {Minimum flux density in the random distribution, in Jy (before filtering).}
@@ -438,8 +366,6 @@ Unsigned double
 \\
 \hline
 
-037
-&
 generator/random\_power\_law/flux\_max
 &
 {Maximum flux density in the random distribution, in Jy (before filtering).}
@@ -450,8 +376,6 @@ Unsigned double
 \\
 \hline
 
-038
-&
 generator/random\_power\_law/power
 &
 {Power law exponent describing number per unit flux density.}
@@ -462,8 +386,6 @@ Double
 \\
 \hline
 
-039
-&
 generator/random\_power\_law/seed
 &
 {Random number generator seed used for random distributions.}
@@ -474,8 +396,6 @@ generator/random\_power\_law/seed
 \\
 \hline
 
-040
-&
 generator/random\_power\_law/filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.}
@@ -486,8 +406,6 @@ min
 \\
 \hline
 
-041
-&
 generator/random\_power\_law/filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.}
@@ -498,8 +416,6 @@ max
 \\
 \hline
 
-042
-&
 generator/random\_power\_law/filter/radius\_inner\_deg
 &
 {Minimum angular distance from phase centre allowed by the filter, in degrees. This is an inclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
@@ -510,8 +426,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 180
 \\
 \hline
 
-043
-&
 generator/random\_power\_law/filter/radius\_outer\_deg
 &
 {Maximum angular distance from phase centre allowed by the filter, in degrees. This is an exclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
@@ -522,8 +436,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 180
 \\
 \hline
 
-044
-&
 generator/random\_power\_law/extended\_sources/FWHM\_major
 &
 {Major axis FWHM override of all sources in this group, in arc seconds.}
@@ -534,8 +446,6 @@ Double
 \\
 \hline
 
-045
-&
 generator/random\_power\_law/extended\_sources/FWHM\_minor
 &
 {Minor axis FWHM override of all sources in this group, in arc seconds.}
@@ -546,8 +456,6 @@ Double
 \\
 \hline
 
-046
-&
 generator/random\_power\_law/extended\_sources/position\_angle
 &
 {Position angle override of all extended sources in this group (from North to East), in degrees.}
@@ -558,8 +466,6 @@ Double
 \\
 \hline
 
-047
-&
 generator/random\_broken\_power\_law/num\_sources
 &
 {Number of sources scattered approximately uniformly over the sphere (before filtering). A value greater than 0 will activate the random broken-power-law generator.}
@@ -570,8 +476,6 @@ Unsigned integer
 \\
 \hline
 
-048
-&
 generator/random\_broken\_power\_law/flux\_min
 &
 {Minimum flux density in the random distribution, in Jy (before filtering).}
@@ -582,8 +486,6 @@ Unsigned double
 \\
 \hline
 
-049
-&
 generator/random\_broken\_power\_law/flux\_max
 &
 {Maximum flux density in the random distribution, in Jy (before filtering).}
@@ -594,8 +496,6 @@ Unsigned double
 \\
 \hline
 
-050
-&
 generator/random\_broken\_power\_law/power1
 &
 {Power law exponent describing number per unit flux density in region 1.}
@@ -606,8 +506,6 @@ Double
 \\
 \hline
 
-051
-&
 generator/random\_broken\_power\_law/power2
 &
 {Power law exponent describing number per unit flux density in region 2.}
@@ -618,8 +516,6 @@ Double
 \\
 \hline
 
-052
-&
 generator/random\_broken\_power\_law/threshold
 &
 {Threshold flux density for the intersection of region 1 and 2, in Jy. Region 1 is less than the threshold; Region 2 is greater than the threshold.}
@@ -630,8 +526,6 @@ Double
 \\
 \hline
 
-053
-&
 generator/random\_broken\_power\_law/seed
 &
 {Random number generator seed used for random distributions.}
@@ -642,8 +536,6 @@ generator/random\_broken\_power\_law/seed
 \\
 \hline
 
-054
-&
 generator/random\_broken\_power\_law/filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.}
@@ -654,8 +546,6 @@ min
 \\
 \hline
 
-055
-&
 generator/random\_broken\_power\_law/filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.}
@@ -666,8 +556,6 @@ max
 \\
 \hline
 
-056
-&
 generator/random\_broken\_power\_law/filter/radius\_inner\_deg
 &
 {Minimum angular distance from phase centre allowed by the filter, in degrees. This is an inclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
@@ -678,8 +566,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 180
 \\
 \hline
 
-057
-&
 generator/random\_broken\_power\_law/filter/radius\_outer\_deg
 &
 {Maximum angular distance from phase centre allowed by the filter, in degrees. This is an exclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
@@ -690,8 +576,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 180
 \\
 \hline
 
-058
-&
 generator/random\_broken\_power\_law/extended\_sources/FWHM\_major
 &
 {Major axis FWHM override of all sources in this group, in arc seconds.}
@@ -702,8 +586,6 @@ Double
 \\
 \hline
 
-059
-&
 generator/random\_broken\_power\_law/extended\_sources/FWHM\_minor
 &
 {Minor axis FWHM override of all sources in this group, in arc seconds.}
@@ -714,8 +596,6 @@ Double
 \\
 \hline
 
-060
-&
 generator/random\_broken\_power\_law/extended\_sources/position\_angle
 &
 {Position angle override of all extended sources in this group (from North to East), in degrees.}
@@ -726,8 +606,6 @@ Double
 \\
 \hline
 
-061
-&
 generator/grid/side\_length
 &
 {Side length of the generated grid. A value greater than 0 will activate the grid generator.}
@@ -738,8 +616,6 @@ Unsigned integer
 \\
 \hline
 
-062
-&
 generator/grid/fov\_deg
 &
 {Field-of-view spanned by the grid centre, in degrees.}
@@ -750,8 +626,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 180.0
 \\
 \hline
 
-063
-&
 generator/grid/mean\_flux\_jy
 &
 {The mean of generated Stokes I fluxes, in Jy.}
@@ -762,8 +636,6 @@ Unsigned double
 \\
 \hline
 
-064
-&
 generator/grid/std\_flux\_jy
 &
 {The standard deviation of generated Stokes I fluxes, in Jy.}
@@ -774,8 +646,6 @@ Unsigned double
 \\
 \hline
 
-065
-&
 generator/grid/seed
 &
 {Random number generator seed used for random distributions.}
@@ -786,8 +656,6 @@ generator/grid/seed
 \\
 \hline
 
-066
-&
 generator/grid/pol/mean\_pol\_fraction
 &
 {The mean polarisation fraction of generated source fluxes (range 0 to 1).}
@@ -798,8 +666,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 1
 \\
 \hline
 
-067
-&
 generator/grid/pol/std\_pol\_fraction
 &
 {The standard deviation of polarisation fraction of generated source fluxes (range 0 to 1).}
@@ -810,8 +676,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 1
 \\
 \hline
 
-068
-&
 generator/grid/pol/mean\_pol\_angle\_deg
 &
 {The mean polarisation angle of generated source fluxes, in degrees.}
@@ -822,8 +686,6 @@ Double
 \\
 \hline
 
-069
-&
 generator/grid/pol/std\_pol\_angle\_deg
 &
 {The standard deviation of polarisation angle of generated source fluxes, in degrees.}
@@ -834,8 +696,6 @@ Double
 \\
 \hline
 
-070
-&
 generator/grid/pol/seed
 &
 {Random number generator seed used for random distributions.}
@@ -846,8 +706,6 @@ generator/grid/pol/seed
 \\
 \hline
 
-071
-&
 generator/grid/extended\_sources/FWHM\_major
 &
 {Major axis FWHM override of all sources in this group, in arc seconds.}
@@ -858,8 +716,6 @@ Double
 \\
 \hline
 
-072
-&
 generator/grid/extended\_sources/FWHM\_minor
 &
 {Minor axis FWHM override of all sources in this group, in arc seconds.}
@@ -870,8 +726,6 @@ Double
 \\
 \hline
 
-073
-&
 generator/grid/extended\_sources/position\_angle
 &
 {Position angle override of all extended sources in this group (from North to East), in degrees.}
@@ -882,8 +736,6 @@ Double
 \\
 \hline
 
-074
-&
 generator/healpix/nside
 &
 {HEALPix Nside parameter. A value greater than 0 will activate the HEALPix generator, which will produce points evenly spaced over the whole sky. The total number of points is 12 * Nside * Nside.}
@@ -894,8 +746,6 @@ Unsigned integer
 \\
 \hline
 
-075
-&
 generator/healpix/amplitude
 &
 {Amplitude assigned to generated HEALPix points, in Jy.}
@@ -906,8 +756,6 @@ Double
 \\
 \hline
 
-076
-&
 generator/healpix/filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.}
@@ -918,8 +766,6 @@ min
 \\
 \hline
 
-077
-&
 generator/healpix/filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.}
@@ -930,8 +776,6 @@ max
 \\
 \hline
 
-078
-&
 generator/healpix/filter/radius\_inner\_deg
 &
 {Minimum angular distance from phase centre allowed by the filter, in degrees. This is an inclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
@@ -942,8 +786,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 180
 \\
 \hline
 
-079
-&
 generator/healpix/filter/radius\_outer\_deg
 &
 {Maximum angular distance from phase centre allowed by the filter, in degrees. This is an exclusive interval bound; i.e. inner $\leq$ r $<$ outer.}
@@ -954,8 +796,6 @@ Double in range 0 $\leq$ $x$ $\leq$ 180
 \\
 \hline
 
-080
-&
 generator/healpix/extended\_sources/FWHM\_major
 &
 {Major axis FWHM override of all sources in this group, in arc seconds.}
@@ -966,8 +806,6 @@ Double
 \\
 \hline
 
-081
-&
 generator/healpix/extended\_sources/FWHM\_minor
 &
 {Minor axis FWHM override of all sources in this group, in arc seconds.}
@@ -978,8 +816,6 @@ Double
 \\
 \hline
 
-082
-&
 generator/healpix/extended\_sources/position\_angle
 &
 {Position angle override of all extended sources in this group (from North to East), in degrees.}
@@ -990,8 +826,6 @@ Double
 \\
 \hline
 
-083
-&
 spectral\_index/override
 &
 {If \textbf{true}, override all source spectral index values using the parameters below.}
@@ -1002,8 +836,6 @@ false
 \\
 \hline
 
-084
-&
 spectral\_index/ref\_frequency\_hz
 &
 {Reference frequency of all sources in the final sky model.}
@@ -1014,8 +846,6 @@ Unsigned double
 \\
 \hline
 
-085
-&
 spectral\_index/mean
 &
 {Mean spectral index of all sources in the final sky model.}
@@ -1026,8 +856,6 @@ Double
 \\
 \hline
 
-086
-&
 spectral\_index/std\_dev
 &
 {Standard deviation of spectral index values for all sources in the final sky model.}
@@ -1038,8 +866,6 @@ Double
 \\
 \hline
 
-087
-&
 spectral\_index/seed
 &
 {Random number generator seed used for random distributions.}
@@ -1050,8 +876,6 @@ spectral\_index/seed
 \\
 \hline
 
-088
-&
 common\_flux\_filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. \textbf{Note that this filter is applied on a per-channel basis after scaling all source fluxes by the spectral index.}}
@@ -1062,8 +886,6 @@ min
 \\
 \hline
 
-089
-&
 common\_flux\_filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. \textbf{Note that this filter is applied on a per-channel basis after scaling all source flux values by the spectral index.}}
@@ -1074,8 +896,6 @@ max
 \\
 \hline
 
-090
-&
 advanced/zero\_failed\_gaussians
 &
 {If \textbf{true}, remove (set to zero) sources for which Gaussian width parameter solutions have failed. This can occur for sources very far from the phase centre. If \textbf{false} (the default), sources with failed Gaussian parameter solutions are modelled as point sources.}
@@ -1086,8 +906,6 @@ false
 \\
 \hline
 
-091
-&
 output\_binary\_file
 &
 {Path used to save the final sky model structure as an OSKAR binary file. Leave blank if not required.}
@@ -1098,8 +916,6 @@ Path name
 \\
 \hline
 
-092
-&
 output\_text\_file
 &
 {Path used to save the final sky model structure as a text file (useful for debugging). Leave blank if not required.}

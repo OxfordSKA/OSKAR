@@ -5,11 +5,10 @@
 
 \fontsize{8}{10}\selectfont
 \begin{center}
-\begin{longtable}{|c|L{9cm}|L{7.5cm}|L{4.0cm}|L{1.7cm}|}
+\begin{longtable}{|L{9cm}|L{8.5cm}|L{4.0cm}|L{1.7cm}|}
 
 \hline
   \rowcolor{lightgray}
-  {\textbf{ID}} &
   {\textbf{Key}} &
   {\textbf{Description}} &
   {\textbf{Allowed values}} &
@@ -17,18 +16,15 @@
 \endfirsthead
 \hline
   \rowcolor{lightgray}
-  {\textbf{ID}} &
   {\textbf{Key}} &
   {\textbf{Description}} &
   {\textbf{Allowed values}} &
   {\textbf{Default}} \\ \hline
 \endhead
-  \multicolumn{5}{l}{{Continued on next page\ldots}} \\
+  \multicolumn{4}{l}{{Continued on next page\ldots}} \\
 \endfoot
  
 \endlastfoot
-194
-&
 fov\_deg
 &
 {Total field of view in degrees.}
@@ -39,8 +35,6 @@ Unsigned double
 \\
 \hline
 
-195
-&
 size
 &
 {Image width in one dimension (e.g. a value of 256 would give a 256 by 256 image).}
@@ -51,22 +45,21 @@ Integer > 0
 \\
 \hline
 
-196
-&
 image\_type
 &
-{The type of image to generate. Note that the Stokes parameter images (if selected) are uncalibrated, and are formed simply using the standard combinations of the linear polarisations: {\begin{itemize}
- \item {I = 0.5 (XX + YY)}
+{The type of image to generate. Note that the Stokes parameter images (if selected) are uncalibrated, and are formed simply using the standard combinations of the linear polarisations: 
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
+\vspace{8pt} \item {I = 0.5 (XX + YY)}
  \item {Q = 0.5 (XX - YY)}
  \item {U = 0.5 (XY + YX)}
  \item {V = -0.5i (XY - YX)}
- \end{itemize}}
+ \vspace{8pt}
+\end{itemize}}
  The point spread function of the observation can be generated using the PSF option.}
 &
 {One of the following:}
-{\begin{itemize}[leftmargin=2ex, topsep=0pt]
-\itemsep1pt \parskip0pt \parsep0pt 
-\item {Linear (XX,XY,YX,YY)}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Linear (XX,XY,YX,YY)}
 \item {XX}
 \item {XY}
 \item {YX}
@@ -78,15 +71,12 @@ image\_type
 \item {V}
 \item {PSF}
 \end{itemize}
-\vspace{-\baselineskip}\mbox{}
 }
 &
 I
 \\
 \hline
 
-197
-&
 channel\_snapshots
 &
 {If true, then produce an image cube containing snapshots for each frequency channel. If false, then use frequency-synthesis to stack the channels in the final image.}
@@ -97,8 +87,6 @@ true
 \\
 \hline
 
-198
-&
 channel\_start
 &
 {The start channel index to include in the image or image cube.}
@@ -109,8 +97,6 @@ Unsigned integer
 \\
 \hline
 
-199
-&
 channel\_end
 &
 {The end channel index to include in the image or image cube.}
@@ -121,8 +107,6 @@ max
 \\
 \hline
 
-200
-&
 time\_snapshots
 &
 {If true, then produce an image cube containing snapshots for each time step. If false, then use time-synthesis to stack the times in the final image.}
@@ -133,8 +117,6 @@ true
 \\
 \hline
 
-201
-&
 time\_start
 &
 {The start time index to include in the image or image cube.}
@@ -145,8 +127,6 @@ Unsigned integer
 \\
 \hline
 
-202
-&
 time\_end
 &
 {The end time index to include in the image or image cube.}
@@ -157,31 +137,27 @@ max
 \\
 \hline
 
-203
-&
 direction
 &
-{Specifies the direction of the image phase centre. {\begin{itemize}
- \item {If `Observation direction' is selected, the image is centred on the pointing direction of the primary beam.}
+{Specifies the direction of the image phase centre. 
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
+\vspace{8pt} \item {If `Observation direction' is selected, the image is centred on the pointing direction of the primary beam.}
  \item {If `RA, Dec.' is selected, the image is centred on the values of RA and Dec. found below.}
- \end{itemize}}
+ \vspace{8pt}
+\end{itemize}}
 }
 &
 {One of the following:}
-{\begin{itemize}[leftmargin=2ex, topsep=0pt]
-\itemsep1pt \parskip0pt \parsep0pt 
-\item {Observation direction}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Observation direction}
 \item {RA, Dec.}
 \end{itemize}
-\vspace{-\baselineskip}\mbox{}
 }
 &
 Observation
 \\
 \hline
 
-204
-&
 direction/ra\_deg
 &
 {The Right Ascension of the image phase centre. This value is used if the image centre direction is set to `RA, Dec.'.}
@@ -192,8 +168,6 @@ Double
 \\
 \hline
 
-205
-&
 direction/dec\_deg
 &
 {The Declination of the image phase centre. This value is used if the image centre direction is set to `RA, Dec.'.}
@@ -204,8 +178,6 @@ Double
 \\
 \hline
 
-206
-&
 input\_vis\_data
 &
 {Path to the input OSKAR visibility data file.}
@@ -216,8 +188,6 @@ None
 \\
 \hline
 
-207
-&
 root\_path
 &
 {Path consisting of the root of the image filename used to save the output image. The full filename will be constructed as {\texttt{ \textbf{ $<$root$>$\_$<$image\_type$>$.$<$extension$>$, }}}}
@@ -228,8 +198,6 @@ None
 \\
 \hline
 
-208
-&
 fits\_image
 &
 {If true, save the image in FITS format.}
@@ -240,8 +208,6 @@ true
 \\
 \hline
 
-209
-&
 oskar\_image
 &
 {If true, save the image in OSKAR image binary format.}
@@ -252,11 +218,11 @@ true
 \\
 \hline
 
-210
-&
 overwrite
 &
-{If \textbf{true}, existing image files will be overwritten. If \textbf{false}, new image files of the same name will be created by appending an number to the existing filename with the pattern: {\texttt{ \textbf{ $<$filename$>$-$<$N$>$.$<$extension$>$, }}} where N starts at 1 and is incremented for each new image created.}
+{If \textbf{true}, existing image files will be overwritten. If \textbf{false}, new image files of the same name will be created by appending an number to the existing filename with the pattern: 
+\vspace{8pt}\par\noindent{\texttt{ \textbf{ $<$filename$>$-$<$N$>$.$<$extension$>$, }}}
+\vspace{8pt}\par\noindent where N starts at 1 and is incremented for each new image created.}
 &
 Bool
 &

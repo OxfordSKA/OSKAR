@@ -5,11 +5,10 @@
 
 \fontsize{8}{10}\selectfont
 \begin{center}
-\begin{longtable}{|c|L{9cm}|L{7.5cm}|L{4.0cm}|L{1.7cm}|}
+\begin{longtable}{|L{9cm}|L{8.5cm}|L{4.0cm}|L{1.7cm}|}
 
 \hline
   \rowcolor{lightgray}
-  {\textbf{ID}} &
   {\textbf{Key}} &
   {\textbf{Description}} &
   {\textbf{Allowed values}} &
@@ -17,18 +16,15 @@
 \endfirsthead
 \hline
   \rowcolor{lightgray}
-  {\textbf{ID}} &
   {\textbf{Key}} &
   {\textbf{Description}} &
   {\textbf{Allowed values}} &
   {\textbf{Default}} \\ \hline
 \endhead
-  \multicolumn{5}{l}{{Continued on next page\ldots}} \\
+  \multicolumn{4}{l}{{Continued on next page\ldots}} \\
 \endfoot
  
 \endlastfoot
-135
-&
 input\_cst\_file
 &
 {Pathname to a file containing an ASCII data table of the directional element pattern response, as exported by the CST software package in (theta, phi) coordinates. See the Telescope Model documentation for a description of the required columns.}
@@ -39,8 +35,6 @@ Path name
 \\
 \hline
 
-136
-&
 input\_scalar\_file
 &
 {Pathname to a file containing an ASCII data table of the scalar directional element pattern response. See the Telescope Model documentation for a description of the required columns.}
@@ -51,8 +45,6 @@ Path name
 \\
 \hline
 
-137
-&
 frequency\_hz
 &
 {Observing frequency at which numerical element pattern data is applicable, in Hz.}
@@ -63,28 +55,22 @@ Unsigned double
 \\
 \hline
 
-138
-&
 pol\_type
 &
 {Specify whether the input data is to be used for the X or Y dipole, or both. (This is ignored for scalar data.)}
 &
 {One of the following:}
-{\begin{itemize}[leftmargin=2ex, topsep=0pt]
-\itemsep1pt \parskip0pt \parsep0pt 
-\item {XY}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {XY}
 \item {X}
 \item {Y}
 \end{itemize}
-\vspace{-\baselineskip}\mbox{}
 }
 &
 XY
 \\
 \hline
 
-139
-&
 element\_type\_index
 &
 {The type index of the element. Leave this at zero if there is only one type of element per station.}
@@ -95,8 +81,6 @@ Unsigned integer
 \\
 \hline
 
-140
-&
 ignore\_data\_at\_pole
 &
 {If \textbf{true}, then numerical element pattern data points at theta = 0 and theta = 180 degrees are ignored.}
@@ -107,8 +91,6 @@ false
 \\
 \hline
 
-141
-&
 ignore\_data\_below\_horizon
 &
 {If \textbf{true}, then numerical element pattern data points at theta $>$ 90 degrees are ignored.}
@@ -119,8 +101,6 @@ true
 \\
 \hline
 
-142
-&
 average\_fractional\_error
 &
 {The target average fractional error between the fitted surface and the numerical element pattern input data. Choose this value carefully. A value that is too small may introduce fitting artifacts, or may cause the fitting procedure to fail. A value that is too large will cause detail to be lost in the fitted surface.}
@@ -131,8 +111,6 @@ Unsigned double
 \\
 \hline
 
-143
-&
 average\_fractional\_error\_factor\_increase
 &
 {If the fitting procedure fails, this value gives the factor by which to increase the allowed average fractional error between the fitted surface and the numerical element pattern input data, before trying again. Must be $>$ 1.0.}
@@ -143,8 +121,6 @@ Unsigned double
 \\
 \hline
 
-144
-&
 output\_directory
 &
 {Path to the telescope or station directory in which to save the fitted coefficients.}

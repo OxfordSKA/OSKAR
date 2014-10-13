@@ -5,11 +5,10 @@
 
 \fontsize{8}{10}\selectfont
 \begin{center}
-\begin{longtable}{|c|L{9cm}|L{7.5cm}|L{4.0cm}|L{1.7cm}|}
+\begin{longtable}{|L{9cm}|L{8.5cm}|L{4.0cm}|L{1.7cm}|}
 
 \hline
   \rowcolor{lightgray}
-  {\textbf{ID}} &
   {\textbf{Key}} &
   {\textbf{Description}} &
   {\textbf{Allowed values}} &
@@ -17,18 +16,15 @@
 \endfirsthead
 \hline
   \rowcolor{lightgray}
-  {\textbf{ID}} &
   {\textbf{Key}} &
   {\textbf{Description}} &
   {\textbf{Allowed values}} &
   {\textbf{Default}} \\ \hline
 \endhead
-  \multicolumn{5}{l}{{Continued on next page\ldots}} \\
+  \multicolumn{4}{l}{{Continued on next page\ldots}} \\
 \endfoot
  
 \endlastfoot
-093
-&
 phase\_centre\_ra\_deg
 &
 {Right Ascension of the observation pointing (phase centre), in degrees.}
@@ -39,8 +35,6 @@ Double, or CSV list of doubles.
 \\
 \hline
 
-094
-&
 phase\_centre\_dec\_deg
 &
 {Declination of the observation pointing (phase centre), in degrees.}
@@ -51,8 +45,6 @@ Double, or CSV list of doubles.
 \\
 \hline
 
-095
-&
 pointing\_file
 &
 {Pathname to optional station pointing file, which can be used to override the beam direction for any or all stations in the telescope model. See the accompanying documentation for a description of a station pointing file.}
@@ -63,8 +55,6 @@ Path name
 \\
 \hline
 
-096
-&
 start\_frequency\_hz\textsuperscript{\textbf{\dag}}
 &
 {The frequency at the midpoint of the first channel, in Hz.}
@@ -75,8 +65,6 @@ Unsigned double
 \\
 \hline
 
-097
-&
 num\_channels
 &
 {Number of frequency channels / bands to use.}
@@ -87,8 +75,6 @@ Integer in range 1 $\leq$ $x$ $\leq$ MAX
 \\
 \hline
 
-098
-&
 frequency\_inc\_hz
 &
 {The frequency increment between successive channels, in Hz.}
@@ -99,25 +85,26 @@ Unsigned double
 \\
 \hline
 
-099
-&
 start\_time\_utc\textsuperscript{\textbf{\dag}}
 &
 {A string describing the start time and date for the observation.}
 &
 {\vspace{-3.5mm}{\begin{flushleft}
 Date-time string of format: \\
+\vspace{2pt}
 \hspace{2ex}\textbf{`d-M-yyyy h:m:s.z'} \\
+\vspace{2pt}
 where: \\
+\vspace{2pt}
 {
-\begin{tabular}{@{}p{2ex}@{} @{}p{5ex} @{}p{2ex}@{} l}
-~&\textbf{d}    & : & day number (1 to 31) \\[-0.9ex]
-~&\textbf{M}    & : & month (1 to 12)   \\[-0.9ex]
-~&\textbf{yyyy} & : & year (4 digits)   \\[-0.9ex]
-~&\textbf{h}    & : & hours (0 to 23)   \\[-0.9ex]
-~&\textbf{m}    & : & minutes (0 to 59) \\[-0.9ex]
-~&\textbf{s}    & : & seconds (0 to 59) \\[-0.9ex]
-~&\textbf{z}    & : & milliseconds (0 to 999) \\[-0.9ex]
+\begin{tabular}{@{}p{2ex}@{} @{}p{4.8ex} @{}p{1.25ex}@{} l}
+~&\textbf{d}    &  & day number (1 to 31) \\[-0.9ex]
+~&\textbf{M}    &  & month (1 to 12)   \\[-0.9ex]
+~&\textbf{yyyy} &  & year (4 digits)   \\[-0.9ex]
+~&\textbf{h}    &  & hours (0 to 23)   \\[-0.9ex]
+~&\textbf{m}    &  & minutes (0 to 59) \\[-0.9ex]
+~&\textbf{s}    &  & seconds (0 to 59) \\[-0.9ex]
+~&\textbf{z}    &  & milliseconds (0 to 999) \\[-0.9ex]
 \end{tabular}
 }
 \end{flushleft}
@@ -127,8 +114,6 @@ where: \\
 \\
 \hline
 
-100
-&
 length\textsuperscript{\textbf{\dag}}
 &
 {The observation length either in seconds, or in hours, minutes and seconds.}
@@ -136,14 +121,17 @@ length\textsuperscript{\textbf{\dag}}
 {\vspace{-6.5mm}{\begin{flushleft}
 Double (if length in seconds), or
 time string of format: \\
+\vspace{2pt}
 \hspace{2ex}\textbf{`h:m:s.z'} \\
+\vspace{2pt}
 where:\\
+\vspace{2pt}
 {
-\begin{tabular}{@{}p{2ex}@{} @{}p{5ex} @{}p{2ex}@{} l}
-~&\textbf{h} & : & hours (0 to 23)   \\[-0.9ex]
-~&\textbf{m} & : & minutes (0 to 59) \\[-0.9ex]
-~&\textbf{s} & : & seconds (0 to 59) \\[-0.9ex]
-~&\textbf{z} & : & milliseconds (0 to 999) \\[-0.9ex]
+\begin{tabular}{@{}p{2ex}@{} @{}p{4.8ex} @{}p{1.25ex}@{} l}
+~&\textbf{h} &  & hours (0 to 23)   \\[-0.9ex]
+~&\textbf{m} &  & minutes (0 to 59) \\[-0.9ex]
+~&\textbf{s} &  & seconds (0 to 59) \\[-0.9ex]
+~&\textbf{z} &  & milliseconds (0 to 999) \\[-0.9ex]
 \end{tabular}
 }
 \end{flushleft}
@@ -154,8 +142,6 @@ where:\\
 \\
 \hline
 
-101
-&
 num\_time\_steps
 &
 {Number of time steps in the output data during the observation length. This corresponds to the number of correlator dumps for interferometer simulations, and the number of beam pattern snapshots for beam pattern simulations.}

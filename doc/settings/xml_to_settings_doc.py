@@ -221,13 +221,13 @@ def set_allowed_values_latex(node, latex_file):
         #allowed_values_ = r'{\textbf{One of the following:}}'+'\n'
         #allowed_values_ = r'\vspace{-3.5mm}'
         allowed_values_ = r'{One of the following:}'+'\n'
-        allowed_values_ += r'{\begin{itemize}[leftmargin=2ex, topsep=0pt]'+'\n'
-        allowed_values_ += '\itemsep1pt \parskip0pt \parsep0pt '+'\n'
+        allowed_values_ += r'{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]'+'\n'
+        allowed_values_ += r'\vspace{4pt}'
         for p in params_:
             p = p.strip()
             allowed_values_ += r'\item {' + p+'}\n'
         allowed_values_ += r'\end{itemize}'+'\n'
-        allowed_values_ += r'\vspace{-\baselineskip}\mbox{}'+'\n'
+        #allowed_values_ += r'\vspace{-\baselineskip}\mbox{}'+'\n'
         allowed_values_ += r'}'
 
     elif type_name_ == 'DATETIME':
@@ -235,17 +235,20 @@ def set_allowed_values_latex(node, latex_file):
         allowed_values_ += r'{'
         allowed_values_ += r'\begin{flushleft}'+'\n'
         allowed_values_ += r'Date-time string of format: \\'+'\n'
+        allowed_values_ += r'\vspace{2pt}'+'\n'
         allowed_values_ += r"\hspace{2ex}\textbf{`d-M-yyyy h:m:s.z'} \\"+'\n'
+        allowed_values_ += r'\vspace{2pt}'+'\n'
         allowed_values_ += r'where: \\'+'\n'
+        allowed_values_ += r'\vspace{2pt}'+'\n'
         allowed_values_ += r'{'+'\n'
-        allowed_values_ += r'\begin{tabular}{@{}p{2ex}@{} @{}p{5ex} @{}p{2ex}@{} l}'+'\n'
-        allowed_values_ += r'~&\textbf{d}    & : & day number (1 to 31) \\[-0.9ex]'+'\n'
-        allowed_values_ += r'~&\textbf{M}    & : & month (1 to 12)   \\[-0.9ex]'+'\n'
-        allowed_values_ += r'~&\textbf{yyyy} & : & year (4 digits)   \\[-0.9ex]'+'\n'
-        allowed_values_ += r'~&\textbf{h}    & : & hours (0 to 23)   \\[-0.9ex]'+'\n'
-        allowed_values_ += r'~&\textbf{m}    & : & minutes (0 to 59) \\[-0.9ex]'+'\n'
-        allowed_values_ += r'~&\textbf{s}    & : & seconds (0 to 59) \\[-0.9ex]'+'\n'
-        allowed_values_ += r'~&\textbf{z}    & : & milliseconds (0 to 999) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'\begin{tabular}{@{}p{2ex}@{} @{}p{4.8ex} @{}p{1.25ex}@{} l}'+'\n'
+        allowed_values_ += r'~&\textbf{d}    &  & day number (1 to 31) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{M}    &  & month (1 to 12)   \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{yyyy} &  & year (4 digits)   \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{h}    &  & hours (0 to 23)   \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{m}    &  & minutes (0 to 59) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{s}    &  & seconds (0 to 59) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{z}    &  & milliseconds (0 to 999) \\[-0.9ex]'+'\n'
         allowed_values_ += r'\end{tabular}'+'\n'
         allowed_values_ += r'}'+'\n'
         allowed_values_ += r'\end{flushleft}'+'\n'
@@ -257,14 +260,17 @@ def set_allowed_values_latex(node, latex_file):
         allowed_values_ += r'\begin{flushleft}'+'\n'
         allowed_values_ += r'Double (if length in seconds), or'+'\n'
         allowed_values_ += r'time string of format: \\'+'\n'
+        allowed_values_ += r'\vspace{2pt}'+'\n'
         allowed_values_ += r"\hspace{2ex}\textbf{`h:m:s.z'} \\"+'\n'
+        allowed_values_ += r'\vspace{2pt}'+'\n'
         allowed_values_ += r'where:\\'+'\n'
+        allowed_values_ += r'\vspace{2pt}'+'\n'
         allowed_values_ += r'{'+'\n'
-        allowed_values_ += r'\begin{tabular}{@{}p{2ex}@{} @{}p{5ex} @{}p{2ex}@{} l}'+'\n'
-        allowed_values_ += r'~&\textbf{h} & : & hours (0 to 23)   \\[-0.9ex]'+'\n'
-        allowed_values_ += r'~&\textbf{m} & : & minutes (0 to 59) \\[-0.9ex]'+'\n'
-        allowed_values_ += r'~&\textbf{s} & : & seconds (0 to 59) \\[-0.9ex]'+'\n'
-        allowed_values_ += r'~&\textbf{z} & : & milliseconds (0 to 999) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'\begin{tabular}{@{}p{2ex}@{} @{}p{4.8ex} @{}p{1.25ex}@{} l}'+'\n'
+        allowed_values_ += r'~&\textbf{h} &  & hours (0 to 23)   \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{m} &  & minutes (0 to 59) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{s} &  & seconds (0 to 59) \\[-0.9ex]'+'\n'
+        allowed_values_ += r'~&\textbf{z} &  & milliseconds (0 to 999) \\[-0.9ex]'+'\n'
         allowed_values_ += r'\end{tabular}'+'\n'
         allowed_values_ += r'}'+'\n'
         allowed_values_ += r'\end{flushleft}'+'\n'
@@ -343,8 +349,8 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
         #latex_file_.write(r'\fontsize{6}{10}\selectfont' + '\n')
         latex_file_.write(r'\begin{center}'+'\n')
         #latex_file_.write(r'\begin{longtable}{|c|L{9cm}|L{8.5cm}|L{3.0cm}|L{1.7cm}|}' + '\n')
-        latex_file_.write(r'\begin{longtable}{|c|L{9cm}|L{7.5cm}|L{4.0cm}|L{1.7cm}|}' + '\n')
-        #latex_file_.write(r'\begin{longtable}{|L{9cm}|L{8.5cm}|L{3.0cm}|L{1.7cm}|}' + '\n')
+        #latex_file_.write(r'\begin{longtable}{|c|L{9cm}|L{7.5cm}|L{4.0cm}|L{1.7cm}|}' + '\n')
+        latex_file_.write(r'\begin{longtable}{|L{9cm}|L{8.5cm}|L{4.0cm}|L{1.7cm}|}' + '\n')
         latex_file_.write('\n')
         
         multi_header = True
@@ -352,7 +358,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
             # Header for first page
             latex_file_.write(r'\hline'+'\n')
             latex_file_.write(r'  \rowcolor{lightgray}'+'\n')
-            latex_file_.write(r'  {\textbf{ID}} &'+'\n')
+            #latex_file_.write(r'  {\textbf{ID}} &'+'\n')
             latex_file_.write(r'  {\textbf{Key}} &'+'\n')
             latex_file_.write(r'  {\textbf{Description}} &'+'\n')
             latex_file_.write(r'  {\textbf{Allowed values}} &'+'\n')
@@ -362,7 +368,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
             # Header for remaining page(s)
             latex_file_.write(r'\hline'+'\n')
             latex_file_.write(r'  \rowcolor{lightgray}' + '\n')
-            latex_file_.write(r'  {\textbf{ID}} &'+'\n')
+            #latex_file_.write(r'  {\textbf{ID}} &'+'\n')
             latex_file_.write(r'  {\textbf{Key}} &'+'\n')
             latex_file_.write(r'  {\textbf{Description}} &'+'\n')
             latex_file_.write(r'  {\textbf{Allowed values}} &'+'\n')
@@ -370,7 +376,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
             latex_file_.write(r'\endhead'+'\n')
     
             # Footer for all pages except the last page of the table
-            latex_file_.write(r'  \multicolumn{5}{l}{{Continued on next page\ldots}} \\'+'\n')
+            latex_file_.write(r'  \multicolumn{4}{l}{{Continued on next page\ldots}} \\'+'\n')
             latex_file_.write(r'\endfoot'+'\n')
             # Footer for last page of the table
             latex_file_.write(r' '+'\n')
@@ -379,7 +385,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
         else:
             latex_file_.write('\hline\n')
             latex_file_.write(r'\rowcolor{lightgray}' + '\n')
-            latex_file_.write(r'{\textbf{ID}}&' + '\n')
+            #latex_file_.write(r'{\textbf{ID}}&' + '\n')
             latex_file_.write(r'{\textbf{Key}}&' + '\n')
             latex_file_.write(r'{\textbf{Description}}&' + '\n')
             latex_file_.write(r'{\textbf{Allowed values}}&' + '\n')
@@ -407,8 +413,8 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
 #             if len(full_key.split('/'))%2 == 1:
 #                 latex_file.write(r'  \rowcolor{lightgray}'+'\n')
             
-            latex_file.write('%03i\n' % count)
-            latex_file.write('&\n')
+#             latex_file.write('%03i\n' % count)
+#             latex_file.write('&\n')
             
             # escape '_' characters in the latex
             latex_key = full_key
@@ -488,23 +494,34 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
                     latex_desc_ = latex_desc_.replace(r"</i>", r'}')
                     latex_desc_ = latex_desc_.replace(r'<code>', r'{\texttt{ ')
                     latex_desc_ = latex_desc_.replace(r'</code>', '}}')
+                    latex_desc_ = latex_desc_.replace(r'<sup>', r'\textsuperscript{')
+                    latex_desc_ = latex_desc_.replace(r'</sup>', r'}')
                     latex_desc_ = latex_desc_.replace(r'&amp;nbsp;', '')
                     latex_desc_ = latex_desc_.replace(r'_', '\_')
-                    latex_desc_ = latex_desc_.replace('<ul>', r'{\begin{itemize}'+'\n')
+                    #[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+                    latex_desc_ = latex_desc_.replace('<ul>', '\n' + \
+                        r'{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]'+'\n' \
+                        r'\vspace{8pt}'
+                    )
                     latex_desc_ = latex_desc_.replace('<li>', r'\item {')
                     latex_desc_ = latex_desc_.replace('</li>', r'}'+'\n')
-                    latex_desc_ = latex_desc_.replace('</ul>', r'\end{itemize}}'+'\n')
-                    latex_desc_ = latex_desc_.replace('<br />', r'')
-                    latex_desc_ = latex_desc_.replace('<br/>', r'')
+                    latex_desc_ = latex_desc_.replace('</ul>', r'\vspace{8pt}'+'\n' \
+                       +r'\end{itemize}}'+'\n')
+                    latex_desc_ = latex_desc_.replace('<br />', '\n'+r'\vspace{8pt}\par\noindent')
+                    latex_desc_ = latex_desc_.replace('<br/>', '\n'+r'\vspace{8pt}\par\noindent')
+
+                    #allowed_values_ += r'\vspace{-\baselineskip}\mbox{}'+'\n'
+
+
 
                     #latex_file.write(r'\begin{flushleft}'+'\n')
                     latex_file.write('{%s}\n' % latex_desc_)
                     #latex_file.write(r'\end{flushleft}'+'\n')
                     latex_file.write('&\n')
-    
+
             # >>>>> Allowed values <<<<<<
             set_allowed_values_latex(node, latex_file)
-    
+
             # >>>>> Default value <<<<<<
             set_default_value_latex(node, latex_file)
         
