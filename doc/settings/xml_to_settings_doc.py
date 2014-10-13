@@ -150,21 +150,25 @@ def set_allowed_values_latex(node, latex_file):
         allowed_values_ = 'Unsigned double'
 
     elif type_name_  == 'RANDOMSEED':
-        allowed_values_ = "`time' or integer seed $\geq$ 1"
+        allowed_values_ = "Integer $\geq$ 1, or `time'"
 
     elif type_name_ == 'INTRANGE':
         params_ = get_type_params(type_)
         a = params_[0]
         b = params_[1]
-        allowed_values_ = 'Integer in range %s $\leq$ $x$ $\leq$ %s' % (a, b)
+        if b == 'MAX':
+            #allowed_values_ = r'\textcolor{red}{Integer $\geq$ %s}' % (a)
+            allowed_values_ = r'Integer $\geq$ %s' % (a)
+        else:
+            allowed_values_ = 'Integer in range %s $\leq$ $x$ $\leq$ %s' % (a, b)
 
     elif type_name_ == 'INTRANGEEXT':
         params_ = get_type_params(type_)
         a = params_[0]
         b = params_[1]
-        special_value = params_[2]
-        allowed_values_ = "`%s' or integer in range %s $\leq$ $x$ $\leq$ %s" \
-            % (special_value, a, b)
+        c = params_[2]
+        allowed_values_ = "Integer in range %s $\leq$ $x$ $\leq$ %s, or `%s'" \
+            % (a, b, c)
 
     elif type_name_  == 'DOUBLERANGE':
         params_ = get_type_params(type_)
@@ -173,21 +177,22 @@ def set_allowed_values_latex(node, latex_file):
         # for eg min to 5 display as  <= 5
         a = params_[0]
         b = params_[1]
-        allowed_values_ = 'Double in range %s $\leq$ $x$ $\leq$ %s' % (a, b)
+        if b == 'MAX':
+            #allowed_values_ = r'\textcolor{red}{Double $\geq$ %s}' % (a)
+            allowed_values_ = r'{Double $\geq$ %s}' % (a)
+        else:
+            allowed_values_ = 'Double in range %s $\leq$ $x$ $\leq$ %s' % (a, b)
 
     elif type_name_  == 'DOUBLERANGEEXT':
         params_ = get_type_params(type_)
-        min_ = params_[0]
-        max_ = params_[1]
-        special_value = params_[2]
-        # TODO logic on range as for DoubleRange
-        # eg  Double > 2 or max
-        #allowed_values_ = "Double in range %s $\leq$ value $\leq$ %s or `%s'" % (min_, max_, special_value)
-        #allowed_values_ = "Double in the range %s to %s inclusive, or the string `%s'" % (min_, max_, special_value)
-        #allowed_values_ = "Double. $\geq$ %s and $\\leq$ %s, or the string `%s'" % (min_, max_, special_value)
-        #allowed_values_ = "Double range. $\geq$ %s and $\\leq$ %s, or the string `%s'" % (min_, max_, special_value)
-        allowed_values_ = "`%s' or double in range %s $\leq$ {\\textbf{$x$}} $\leq$ %s" \
-            % (special_value, min_, max_)
+        a = params_[0]
+        b = params_[1]
+        c = params_[2]
+        if b == 'MAX':
+            allowed_values_ = r"{Double $\geq$ %s, or `%s'}" % (a,c)
+        else:
+            allowed_values_ = "Double in range %s $\leq$ {\\textbf{$x$}} $\leq$ %s, or `%s'" \
+                % (a, b, c)
 
     elif type_name_ == 'INPUTFILELIST':
         #allowed_values_ = 'Comma separated list of path names'

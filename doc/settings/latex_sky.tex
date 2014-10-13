@@ -39,7 +39,7 @@ oskar\_sky\_model/filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.}
 &
-`min' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `min'}
 &
 min
 \\
@@ -49,7 +49,7 @@ oskar\_sky\_model/filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.}
 &
-`max' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `max'}
 &
 max
 \\
@@ -119,7 +119,7 @@ gsm/filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.}
 &
-`min' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `min'}
 &
 min
 \\
@@ -129,7 +129,7 @@ gsm/filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.}
 &
-`max' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `max'}
 &
 max
 \\
@@ -199,7 +199,7 @@ fits\_image/downsample\_factor
 &
 {The factor by which to downsample the pixel grid.}
 &
-Integer in range 1 $\leq$ $x$ $\leq$ MAX
+Integer $\geq$ 1
 &
 1
 \\
@@ -280,7 +280,7 @@ healpix\_fits/filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.}
 &
-`min' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `min'}
 &
 min
 \\
@@ -290,7 +290,7 @@ healpix\_fits/filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.}
 &
-`max' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `max'}
 &
 max
 \\
@@ -390,7 +390,7 @@ generator/random\_power\_law/seed
 &
 {Random number generator seed used for random distributions.}
 &
-`time' or integer seed $\geq$ 1
+Integer $\geq$ 1, or `time'
 &
 1
 \\
@@ -400,7 +400,7 @@ generator/random\_power\_law/filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.}
 &
-`min' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `min'}
 &
 min
 \\
@@ -410,7 +410,7 @@ generator/random\_power\_law/filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.}
 &
-`max' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `max'}
 &
 max
 \\
@@ -530,7 +530,7 @@ generator/random\_broken\_power\_law/seed
 &
 {Random number generator seed used for random distributions.}
 &
-`time' or integer seed $\geq$ 1
+Integer $\geq$ 1, or `time'
 &
 1
 \\
@@ -540,7 +540,7 @@ generator/random\_broken\_power\_law/filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.}
 &
-`min' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `min'}
 &
 min
 \\
@@ -550,7 +550,7 @@ generator/random\_broken\_power\_law/filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.}
 &
-`max' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `max'}
 &
 max
 \\
@@ -650,7 +650,7 @@ generator/grid/seed
 &
 {Random number generator seed used for random distributions.}
 &
-`time' or integer seed $\geq$ 1
+Integer $\geq$ 1, or `time'
 &
 1
 \\
@@ -700,7 +700,7 @@ generator/grid/pol/seed
 &
 {Random number generator seed used for random distributions.}
 &
-`time' or integer seed $\geq$ 1
+Integer $\geq$ 1, or `time'
 &
 1
 \\
@@ -760,7 +760,7 @@ generator/healpix/filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. This is an exclusive interval bound; i.e. min $<$ flux $\leq$ max.}
 &
-`min' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `min'}
 &
 min
 \\
@@ -770,7 +770,7 @@ generator/healpix/filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. This is an inclusive interval bound; i.e. min $<$ flux $\leq$ max.}
 &
-`max' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `max'}
 &
 max
 \\
@@ -870,7 +870,7 @@ spectral\_index/seed
 &
 {Random number generator seed used for random distributions.}
 &
-`time' or integer seed $\geq$ 1
+Integer $\geq$ 1, or `time'
 &
 1
 \\
@@ -880,7 +880,7 @@ common\_flux\_filter/flux\_min
 &
 {Minimum flux density allowed by the filter, in Jy. \textbf{Note that this filter is applied on a per-channel basis after scaling all source fluxes by the spectral index.}}
 &
-`min' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `min'}
 &
 min
 \\
@@ -890,7 +890,7 @@ common\_flux\_filter/flux\_max
 &
 {Maximum flux density allowed by the filter, in Jy. \textbf{Note that this filter is applied on a per-channel basis after scaling all source flux values by the spectral index.}}
 &
-`max' or double in range 0 $\leq$ {\textbf{$x$}} $\leq$ MAX
+{Double $\geq$ 0, or `max'}
 &
 max
 \\
