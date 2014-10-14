@@ -111,8 +111,8 @@ function(add_doc)
     if (DOXYGEN_FOUND)
         # http://www.cmake.org/cmake/help/v2.8.3/cmake.html#module:CMakeParseArguments
         set(options NO_LATEX VERBOSE)
-        set(oneValueArgs DOC_NAME TARGET_NAME TEMPLATE LATEX_HEADER)
-        set(multiValueArgs DOC_INPUTS)
+        set(oneValueArgs DOC_NAME PDF_NAME TARGET_NAME TEMPLATE LATEX_HEADER)
+        set(multiValueArgs DOC_DIRS DOC_FILES)
         cmake_parse_arguments(DOX
             "${options}"
             "${oneValueArgs}"
@@ -123,47 +123,45 @@ function(add_doc)
             message(FATAL_ERROR "ERROR: add_doc() macro requires a valid DOC_NAME argument.")
         endif()
 
+        if (NOT DOX_PDF_NAME)
+            set(DOX_PDF_NAME ${DOX_DOC_NAME})
+        endif()
+
         if (DOX_UNPARSED_ARGUMENTS)
-            message(FATAL_ERROR "ERROR: unexpected arguments passed to add_doc() macro. '${DOX_UNPARSED_ARGUMENTS}'")
+            message(FATAL_ERROR "ERROR: Unexpected arguments passed to add_doc() macro. '${DOX_UNPARSED_ARGUMENTS}'")
         endif()
 
         # Set CMAKE variables to be replaced in the tempalte doxyfile.
         #======================================================================
         usedoxygen_set_default(DOXYFILE_PROJECT_NUMBER "${OSKAR_VERSION_STR}" STRING "The Doxyfile PROJECT_NUMBER tag")
         usedoxygen_set_default(DOXYFILE_HTML_DIR  "html"  STRING "Doxygen HTML output directory")
-        usedoxygen_set_default(DOXYFILE_LATEX_DIR "latex" STRING "LaTex output directory")
+        usedoxygen_set_default(DOXYFILE_LATEX_DIR "latex" STRING "LaTeX output directory")
         usedoxygen_set_default(DOXYFILE_LATEX "NO" BOOL "Generate LaTeX API documentation" OFF)
 
         set(DOXYFILE_OUTPUT_DIR "${CMAKE_BINARY_DIR}/doc/${DOX_DOC_NAME}")
-        list(LENGTH DOX_DOC_INPUTS NUM_DOX_INPUTS)
-        if (${NUM_DOX_INPUTS} GREATER 1)
-            foreach (path_ ${DOX_DOC_INPUTS})
+        list(LENGTH DOX_DOC_DIRS NUM_DOX_DIRS)
+        if (${NUM_DOX_DIRS} GREATER 1)
+            foreach (path_ ${DOX_DOC_DIRS})
                 set(DOXYFILE_SOURCE_DIRS
                     "${DOXYFILE_SOURCE_DIRS} \\
-                                 \"${path_}\"")
+                          \"${path_}\"")
             endforeach()
         else()
-            set(DOXYFILE_SOURCE_DIRS ${DOX_DOC_INPUTS})
+            set(DOXYFILE_SOURCE_DIRS ${DOX_DOC_DIRS})
         endif()
-        list(LENGTH DOXYFILE_EXAMPLE_PATHS NUM_EG_PATHS)
-        if (${NUM_EG_PATHS} GREATER 1)
-            foreach (path_ ${DOXYFILE_EXAMPLE_PATHS})
-                set(DOXYFILE_EXAMPLE_PATH
-                    "${DOXYFILE_EXAMPLE_PATH} \\
-                                 \"${path_}\"")
-            endforeach()
-        else()
-            set(DOXYFILE_EXAMPLE_PATH ${DOXYFILE_EXAMPLE_PATHS})
-        endif()
-        list(LENGTH DOXYFILE_IMAGE_PATHS NUM_IMG_PATHS)
-        if (${NUM_IMG_PATHS} GREATER 1)
-            foreach (path_ ${DOXYFILE_IMAGE_PATHS})
-                set(DOXYFILE_IMAGE_PATH
-                    "${DOXYFILE_IMAGE_PATH} \\
-                                 \"${path_}\"")
-            endforeach()
-        else()
-            set(DOXYFILE_IMAGE_PATH ${DOXYFILE_IMAGE_PATHS})
+        set(DOXYFILE_EXAMPLE_PATH ${DOXYFILE_SOURCE_DIRS})
+        set(DOXYFILE_IMAGE_PATH ${DOXYFILE_SOURCE_DIRS})
+        if (DOX_DOC_FILES)
+            list(LENGTH DOX_DOC_FILES NUM_DOX_FILES)
+            if (${NUM_DOX_DIRS} GREATER 1 OR ${NUM_DOX_FILES} GREATER 1)
+                foreach (path_ ${DOX_DOC_FILES})
+                    set(DOXYFILE_SOURCE_DIRS
+                        "${DOXYFILE_SOURCE_DIRS} \\
+                          \"${path_}\"")
+                endforeach()
+            else()
+                set(DOXYFILE_SOURCE_DIRS ${DOX_DOC_FILES})
+            endif()
         endif()
         if (NOT ${DOX_NO_LATEX})
             set(DOXYFILE_LATEX "ON")
@@ -175,7 +173,7 @@ function(add_doc)
             find_package_handle_standard_args(DOXYFILE_IN DEFAULT_MSG "DOXYFILE_IN")
             set(DOXYFILE_IN_FOUND YES)
         else ()
-            message(FATAL_ERROR "ERROR: Unable to find specified doxyfile template.")
+            message(FATAL_ERROR "ERROR: Unable to find specified Doxyfile template.")
             set(DOXFILE_IN_FOUND DOXYFILE_IN-NOTFOUND)
         endif()
         set(DOXYFILE_OUT "Doxyfile_${DOX_DOC_NAME}")
@@ -237,7 +235,7 @@ function(add_doc)
                     COMMENT "Running LaTeX for Doxygen documentation in ${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_LATEX_DIR}..."
                     WORKING_DIRECTORY "${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_LATEX_DIR}")
                 set(refman_src ${DOXYFILE_OUTPUT_DIR}/${DOXYFILE_LATEX_DIR}/refman.pdf)
-                set(refman_dst ${CMAKE_BINARY_DIR}/doc/${DOX_DOC_NAME}.pdf)
+                set(refman_dst ${CMAKE_BINARY_DIR}/doc/${DOX_PDF_NAME})
                 add_custom_command(TARGET ${target_} POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy ${refman_src} ${refman_dst}
                     COMMENT "Copying ${refman_src} to ${refman_dst}" VERBATIM)

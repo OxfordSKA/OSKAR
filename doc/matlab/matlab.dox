@@ -61,7 +61,7 @@ to their original targets in the MATLAB installation.
 
 \section matlab_oskar OSKAR MATLAB Functions
 
-The OSKAR toolbox consists of six packages, each containing one or more 
+The OSKAR toolbox consists of a number of packages, each containing one or more 
 functions and/or classes, listed in the following sections. Usage information 
 for a function can be obtained from within MATLAB by running the function with 
 no arguments.

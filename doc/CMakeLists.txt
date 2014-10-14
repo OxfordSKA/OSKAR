@@ -3,6 +3,7 @@
 #
 
 include(UseDoxygen/UseDoxygen)
+set(OSKAR_PDF_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}")
 
 set(DOXYFILE_PROJECT_NAME "OSKAR User Documentation")
 set(DOXYFILE_LATEX_EXTRA_FILES "${CMAKE_SOURCE_DIR}/doc/oskar_latex.sty")
@@ -18,8 +19,7 @@ set(DOXYFILE_LATEX_EXTRA_FILES "${CMAKE_SOURCE_DIR}/doc/oskar_latex.sty")
 #endif()
 
 # User documentation
-set(USER_DOC_SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/intro.dox
+set(USER_DOC_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/install
     ${CMAKE_CURRENT_SOURCE_DIR}/example
     ${CMAKE_CURRENT_SOURCE_DIR}/theory
@@ -31,54 +31,105 @@ set(USER_DOC_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/settings
     ${CMAKE_CURRENT_SOURCE_DIR}/binary_file
 )
-set(DOXYFILE_EXAMPLE_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/settings)
-set(DOXYFILE_IMAGE_PATHS
-    ${CMAKE_CURRENT_SOURCE_DIR}/example
-    ${CMAKE_CURRENT_SOURCE_DIR}/theory
-    ${CMAKE_CURRENT_SOURCE_DIR}/sky_model
-    ${CMAKE_CURRENT_SOURCE_DIR}/telescope_model
-    ${CMAKE_CURRENT_SOURCE_DIR}/matlab
-    ${CMAKE_CURRENT_SOURCE_DIR}/binary_file
-)
+
 add_doc(
     DOC_NAME     user
+    PDF_NAME     OSKAR-${OSKAR_PDF_VERSION}-User-Documentation.pdf
     TARGET_NAME  doc
-    DOC_INPUTS   ${USER_DOC_SRC}
+    DOC_DIRS     ${USER_DOC_DIRS}
+    DOC_FILES    ${CMAKE_CURRENT_SOURCE_DIR}/intro.dox
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
     LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header.tex)
 
-set(DOXYFILE_IMAGE_PATHS "")
-set(DOXYFILE_EXAMPLE_PATHS "")
+# Apps documentation
+add_doc(
+    DOC_NAME     apps
+    PDF_NAME     OSKAR-${OSKAR_PDF_VERSION}-Apps.pdf
+    TARGET_NAME  doc_single
+    DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/apps
+    TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+
+# Binary file documentation
+add_doc(
+    DOC_NAME     binary_file
+    PDF_NAME     OSKAR-${OSKAR_PDF_VERSION}-Binary-File-Format.pdf
+    TARGET_NAME  doc_single
+    DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/binary_file
+    TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+
+# Example documentation
+add_doc(
+    DOC_NAME     example
+    PDF_NAME     OSKAR-${OSKAR_PDF_VERSION}-Example.pdf
+    TARGET_NAME  doc_single
+    DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/example
+    TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+
 # Install documentation
 add_doc(
     DOC_NAME     install
+    PDF_NAME     OSKAR-${OSKAR_PDF_VERSION}-Install.pdf
     TARGET_NAME  doc_single
-    DOC_INPUTS   ${CMAKE_CURRENT_SOURCE_DIR}/install
+    DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/install
+    TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+
+# MATLAB documentation
+add_doc(
+    DOC_NAME     matlab
+    PDF_NAME     OSKAR-${OSKAR_PDF_VERSION}-MATLAB-Interface.pdf
+    TARGET_NAME  doc_single
+    DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/matlab
+    TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
+
+# Pointing file documentation
+add_doc(
+    DOC_NAME     pointing_file
+    PDF_NAME     OSKAR-${OSKAR_PDF_VERSION}-Pointing-Files.pdf
+    TARGET_NAME  doc_single
+    DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/pointing_file
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
     LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
 
 # Settings documentation
-set(DOXYFILE_EXAMPLE_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/settings)
-set(DOXYFILE_IMAGE_PATHS "")
 add_doc(
     DOC_NAME     settings
+    PDF_NAME     OSKAR-${OSKAR_PDF_VERSION}-Settings.pdf
     TARGET_NAME  doc_single
-    DOC_INPUTS   ${CMAKE_CURRENT_SOURCE_DIR}/settings
+    DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/settings
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
     LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
 
-# binary file documentation
-set(DOXYFILE_IMAGE_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/binary_file)
-set(DOXYFILE_EXAMPLE_PATHS "")
+# Sky model documentation
 add_doc(
-    DOC_NAME     binary_file
+    DOC_NAME     sky_model
+    PDF_NAME     OSKAR-${OSKAR_PDF_VERSION}-Sky-Model.pdf
     TARGET_NAME  doc_single
-    DOC_INPUTS   ${CMAKE_CURRENT_SOURCE_DIR}/binary_file
+    DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/sky_model
     TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
     LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
 
+# Telescope model documentation
+add_doc(
+    DOC_NAME     telescope_model
+    PDF_NAME     OSKAR-${OSKAR_PDF_VERSION}-Telescope-Model.pdf
+    TARGET_NAME  doc_single
+    DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/telescope_model
+    TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
 
-
+# Theory documentation
+add_doc(
+    DOC_NAME     theory
+    PDF_NAME     OSKAR-${OSKAR_PDF_VERSION}-Theory.pdf
+    TARGET_NAME  doc_single
+    DOC_DIRS     ${CMAKE_CURRENT_SOURCE_DIR}/theory
+    TEMPLATE     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+    LATEX_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/oskar_latex_header_single.tex)
 
 
 
