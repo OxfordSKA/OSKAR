@@ -1,0 +1,38 @@
+/**
+
+\page release_notes Release Notes
+
+\section release_notes_intro Introduction
+
+OSKAR 2.6 is the current version of the OSKAR interferometry and beamforming
+simulation package.
+
+The function of these release notes is to summarise changes and new 
+features, and highlight any known issues.
+
+\section release_notes_changes Changes
+
+The changes for the current release are listed below. For earlier releases 
+please refer to older revisions of this document or the 
+<tt>ChangeLog.txt</tt> file in the OSKAR source tree.
+
+\subsection version_2_6_0 Version 2.6.0
+
+- Fixed an issue which could result in repeated log entries.
+- Added the ability to use numerically-defined element patterns in
+  scalar mode.
+- Moved option to select polarisation mode into telescope model settings
+  group, so that scalar mode can also be used for beam pattern simulations.
+- Added the ability to use seconds (as well as hours, minutes and seconds)
+  to specify observation length.
+
+\section known_issues Known Issues
+
+While every effort has been made to identify and fix problems through 
+extensive testing, some will undoubtedly remain. Please report any issues 
+you find to oskar@oerc.ox.ac.uk and include a description of the problem, 
+your terminal output, your version of OSKAR, and details of your operating 
+system and hardware configuration. If necessary, we may also require 
+settings and/or data files to replicate the problem.
+
+*/

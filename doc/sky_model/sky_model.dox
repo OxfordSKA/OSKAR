@@ -3,7 +3,7 @@
 \page sky_model Sky Model
 
 \latexonly
-\def \chapterver{3}
+\def \docversion{3}
 \endlatexonly
 
 \section sky_intro Introduction

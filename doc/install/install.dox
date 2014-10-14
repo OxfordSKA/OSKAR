@@ -3,7 +3,7 @@
 \page install_guide Installation Guide
 
 \latexonly
-\def \chapterver{6}
+\def \docversion{6}
 \endlatexonly
 
 \section install_intro Introduction

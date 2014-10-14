@@ -3,7 +3,7 @@
 \page theory Theory of Operation
 
 \latexonly
-\def \chapterver{6}
+\def \docversion{6}
 \endlatexonly
 
 \section theory_intro Introduction

@@ -3,7 +3,7 @@
 \page pointing_file Pointing File
 
 \latexonly
-\def \chapterver{1}
+\def \docversion{1}
 \endlatexonly
 
 \section pointing_intro Introduction

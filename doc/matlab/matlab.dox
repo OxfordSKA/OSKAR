@@ -3,7 +3,7 @@
 \page matlab_interface MATLAB Interface
 
 \latexonly
-\def \chapterver{4}
+\def \docversion{4}
 \endlatexonly
 
 \section matlab_intro Introduction

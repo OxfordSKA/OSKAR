@@ -3,7 +3,7 @@
 \page binary_file Binary File Format
 
 \latexonly
-\def \chapterver{6}
+\def \docversion{6}
 \endlatexonly
 
 \section binary_intro Introduction

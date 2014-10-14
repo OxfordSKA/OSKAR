@@ -29,8 +29,8 @@
                 Path to a Global Sky Model file, pixellated using the
                 HEALPix RING scheme. This option can be used to load
                 a GSM data file produced from software written
-                by Angelica de Oliveira, available at
-                https://www.cfa.harvard.edu/~adeolive/gsm/
+                by Angelica de Oliveira-Costa, available at
+                http://space.mit.edu/~angelica/gsm/index.html
             </desc>
         </s>
         <import filename="oskar_sky_model_filter.xml" />

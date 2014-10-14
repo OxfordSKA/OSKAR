@@ -306,7 +306,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
         print ''
         print '***** [GROUP %s] *****' % (key_)
 
-        html_file = '@PROJECT_SOURCE_DIR@/doc/settings/html_simulator_settings_text.html'
+        html_file = '@PROJECT_SOURCE_DIR@/doc/settings/html_simulator_settings_test.html'
         filename_ = '@PROJECT_SOURCE_DIR@/doc/settings/latex_%s.tex' % (key_)
         dox_filename = '@PROJECT_SOURCE_DIR@/doc/settings/settings_tables.txt'
 
@@ -459,13 +459,11 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
     
             # >>>>> Description <<<<<
             for child_ in node:
-                if child_.tag == 'desc' or child_.tag == 'd' or child_.tag == 'description':
+                if child_.tag == 'desc' or child_.tag == 'description':
                     # Extract the contents of the description tag as a string.
                     desc_ = ET.tostring(child_, method="xml")
                     desc_ = desc_.replace('<desc>', '')
                     desc_ = desc_.replace('</desc>', '')
-                    desc_ = desc_.replace('<d>', '')
-                    desc_ = desc_.replace('</d>', '')
                     desc_ = desc_.replace('<description>', '')
                     desc_ = desc_.replace('</description>', '')
 

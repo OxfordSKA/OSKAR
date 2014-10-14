@@ -6,7 +6,7 @@ These parameters affect the operation of the software.
 All settings keys in this group are prefixed with <tt>simulator/</tt>.
 
 \latexinclude latex_simulator.tex
-\htmlinclude  html_simulator_settings_text.html
+\htmlinclude  html_simulator_settings_test.html
 
 <!-- ************************************* -->
 \subsection settings_sky Sky model settings
@@ -15,7 +15,7 @@ These parameters are used to specify the content of the sky model.
 All settings keys in this group are prefixed with <tt>sky/</tt>.
 
 \latexinclude latex_sky.tex
-\htmlinclude  html_simulator_settings_text.html
+\htmlinclude  html_simulator_settings_test.html
 
 <!-- ************************************* -->
 \subsection settings_observation Observation settings
@@ -24,7 +24,7 @@ These parameters are used to specify the observation.
 All settings keys in this group are prefixed with <tt>observation/</tt>.
 
 \latexinclude latex_observation.tex
-\htmlinclude  html_simulator_settings_text.html
+\htmlinclude  html_simulator_settings_test.html
 
 <!-- ************************************* -->
 \subsection settings_telescope Telescope model settings
@@ -33,7 +33,7 @@ These parameters are used to specify the contents of the telescope model.
 All settings keys in this group are prefixed with <tt>telescope/</tt>.
 
 \latexinclude latex_telescope.tex
-\htmlinclude  html_simulator_settings_text.html
+\htmlinclude  html_simulator_settings_test.html
 
 <!-- ************************************* -->
 \subsection settings_element_fit Element pattern fitting settings
@@ -42,7 +42,7 @@ These settings are used when running the 'oskar_fit_element_data' application bi
 All settings keys in this group are prefixed with <tt>element_fit/</tt>.
 
 \latexinclude latex_element_fit.tex
-\htmlinclude  html_simulator_settings_text.html
+\htmlinclude  html_simulator_settings_test.html
 
 <!-- ************************************* -->
 \subsection settings_interferometer Interferometer settings
@@ -51,7 +51,7 @@ These settings are used only when running the interferometer simulation.
 All settings keys in this group are prefixed with <tt>interferometer/</tt>.
 
 \latexinclude latex_interferometer.tex
-\htmlinclude  html_simulator_settings_text.html
+\htmlinclude  html_simulator_settings_test.html
 
 <!-- ************************************* -->
 \subsection settings_beam_pattern Beam pattern settings
@@ -59,7 +59,7 @@ All settings keys in this group are prefixed with <tt>interferometer/</tt>.
 All settings keys in this group are prefixed with <tt>beam_pattern/</tt>.
 
 \latexinclude latex_beam_pattern.tex
-\htmlinclude  html_simulator_settings_text.html
+\htmlinclude  html_simulator_settings_test.html
 
 <!-- ************************************* -->
 \subsection settings_image Image settings
@@ -67,4 +67,4 @@ All settings keys in this group are prefixed with <tt>beam_pattern/</tt>.
 All settings keys in this group are prefixed with <tt>image/</tt>.
 
 \latexinclude latex_image.tex
-\htmlinclude  html_simulator_settings_text.html
+\htmlinclude  html_simulator_settings_test.html

@@ -3,7 +3,7 @@
 \page telescope_model Telescope Model
 
 \latexonly
-\def \chapterver{6}
+\def \docversion{6}
 \endlatexonly
 
 \section telescope_intro Introduction

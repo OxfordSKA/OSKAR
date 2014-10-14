@@ -3,7 +3,7 @@
 \page example Example
 
 \latexonly
-\def \chapterver{10}
+\def \docversion{10}
 \endlatexonly
 
 \section example_intro Introduction

@@ -3,7 +3,7 @@
 \page apps Applications
 
 \latexonly
-\def \chapterver{9}
+\def \docversion{9}
 \endlatexonly
 
 \section apps_intro Introduction

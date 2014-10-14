@@ -3,7 +3,7 @@
 \mainpage Introduction
 
 \latexonly
-\def \chapterver{6}
+\def \docversion{6}
 \endlatexonly
 
 \section intro_intro What is OSKAR?
@@ -104,13 +104,13 @@ the order listed below.
 - \ref pointing_file "Pointing File"<br>
   Describes the format of OSKAR pointing files.
 
-- <b>Settings Files</b><br>
-  Describes the settings used by OSKAR and the format of the OSKAR settings
-  files.
-
 - \ref matlab_interface "MATLAB interface"<br>
   Describes an experimental interface for accessing OSKAR data types and
   making images of visibility data in MATLAB.
+
+- \ref settings "Settings Files"<br>
+  Describes the settings used by OSKAR and the format of the OSKAR settings
+  files.
 
 - \ref binary_file "Binary File Format"<br>
   Describes the format of binary files written by OSKAR applications
