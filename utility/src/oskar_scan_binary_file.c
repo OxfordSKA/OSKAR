@@ -50,7 +50,6 @@ void oskar_scan_binary_file(oskar_Log* log, const char* filename, int* status)
     int extended_tags = 0, depth = -4, i, tag_not_present = 0;
     oskar_Binary* h = NULL;
     oskar_Mem* temp = 0;
-    size_t data_size = 0;
     char p = 'M'; /* Log entry priority */
 
     /* Check all inputs. */
@@ -81,19 +80,17 @@ void oskar_scan_binary_file(oskar_Log* log, const char* filename, int* status)
     oskar_log_message(log, p, 0, "File contains %d chunks.", h->num_chunks);
 
     /* Display the run log if it is present. */
-    oskar_binary_query(h, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
-                OSKAR_TAG_RUN_LOG, 0, &data_size, &tag_not_present);
+    temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
+    oskar_binary_read_mem(h, temp, OSKAR_TAG_GROUP_RUN,
+            OSKAR_TAG_RUN_LOG, 0, &tag_not_present);
+    oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, status);
+    oskar_mem_char(temp)[oskar_mem_length(temp) - 1] = 0; /* Null-terminate. */
     if (!tag_not_present)
     {
         oskar_log_section(log, p, "Run log:");
-        temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
-        oskar_binary_read_mem(h, temp, OSKAR_TAG_GROUP_RUN,
-                OSKAR_TAG_RUN_LOG, 0, status);
-        oskar_mem_realloc(temp, oskar_mem_length(temp) + 1, status);
-        oskar_mem_char(temp)[oskar_mem_length(temp) - 1] = 0; /* Null-terminate. */
-        oskar_log_message(log, p, depth, "\n%s", oskar_mem_char(temp));
-        oskar_mem_free(temp, status);
+        oskar_log_message(log, p, -1, "\n%s", oskar_mem_char(temp));
     }
+    oskar_mem_free(temp, status);
 
     /* Iterate all tags in index. */
     oskar_log_section(log, p, "Standard tags:");
