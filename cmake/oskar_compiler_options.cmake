@@ -57,8 +57,8 @@ endif()
 add_definitions(-DOSKAR_VERSION=${OSKAR_VERSION_ID})
 add_definitions(-DOSKAR_VERSION_STR="${OSKAR_VERSION_STR}")
 if (NOT WIN32)
-    # Common compiler options. Note C code is compiled as gnu89 in order to 
-    # allow for a number of non C89 compiler extensions such as sinf, powf, 
+    # Common compiler options. Note C code is compiled as gnu89 in order to
+    # allow for a number of non C89 compiler extensions such as sinf, powf,
     # strtok_r as well as gnu inline mode which is needed for CUDA Thurst with
     # some compilers.
     set(CMAKE_C_FLAGS "-fPIC -std=gnu89")
@@ -70,13 +70,13 @@ if (NOT WIN32)
     set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall")
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -Wall")
-    set(CMAKE_CXX_FLAGS_MINSIZEREL "-O1 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")  
+    set(CMAKE_CXX_FLAGS_MINSIZEREL "-O1 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
 
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # Using Clang or GNU compilers.
 
         # Treat CUDA, CASA, GTEST, and ezOptionParser headers as system headers.
-        # This avoids a number of warning supression flags. 
+        # This avoids a number of warning supression flags.
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${GTEST_INCLUDE_DIR}")
@@ -102,7 +102,7 @@ if (NOT WIN32)
 #        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wstrict-aliasing")
 #        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wdeclaration-after-statement")
         #############
-        # long-long is required for C as cfitsio headers pull this into OSKAR 
+        # long-long is required for C as cfitsio headers pull this into OSKAR
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-long-long")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-variadic-macros")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-unused-function")
@@ -128,7 +128,7 @@ if (NOT WIN32)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++")
         endif()
 
-        # Check GNU compiler version 
+        # Check GNU compiler version
         if (CMAKE_COMPILER_IS_GNUCC)
             execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
 #            if (GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)

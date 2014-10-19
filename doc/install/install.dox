@@ -26,13 +26,13 @@ http://www.oerc.ox.ac.uk/~ska/oskar
 
 OSKAR depends on a number of other libraries. The main components of OSKAR
 require an NVIDIA GPU with CUDA 4.0 (and associated NVIDIA driver) or later
-and Qt 4 (version 4.6 or later) to be installed on the target system, and 
-also CBLAS and LAPACK for full functionality. Additionally, the CFITSIO and 
-casacore libraries must be present if FITS images and Measurement Sets are to 
-be exported. The MATLAB interface will be built if MATLAB R2010b or later 
+and Qt 4 (version 4.6 or later) to be installed on the target system, and
+also CBLAS and LAPACK for full functionality. Additionally, the CFITSIO and
+casacore libraries must be present if FITS images and Measurement Sets are to
+be exported. The MATLAB interface will be built if MATLAB R2010b or later
 is found.
 
-The OSKAR CMake build system will compile and install as many components as 
+The OSKAR CMake build system will compile and install as many components as
 possible according to the following dependencies being satisfied:
 
 - NVIDIA CUDA (http://developer.nvidia.com/cuda-downloads), version >= 5.5
@@ -42,7 +42,7 @@ possible according to the following dependencies being satisfied:
   - Required for: liboskar_apps, Applications
   - Optional for: MATLAB interface (for manipulation of OSKAR settings files)
 - CBLAS (http://www.netlib.org/blas)
-  - Optional for: liboskar (to enable the use of extended sources) 
+  - Optional for: liboskar (to enable the use of extended sources)
   - Available as part of the GSL and ATLAS packages.
 - LAPACK  (http://www.netlib.org/lapack)
   - Optional for: liboskar (to enable the use of extended sources)
@@ -54,13 +54,13 @@ possible according to the following dependencies being satisfied:
   - Optional for: liboskar_apps, Application (for Measurement Sets export)
 - MATLAB (http://www.mathworks.co.uk/products/matlab), version >= R2010b
   - Required for: Matlab interface
-- CMake (http://www.cmake.org), version >= 2.8
+- CMake (http://www.cmake.org), version >= 2.8.3
   - Required for: Makefile generation
 
 \subsection install_ubuntu_packages Ubuntu Packages
 
-If you are running a recent version of the Ubuntu Linux distribution 
-(>= 10.04), then you can simply download and install the following packages 
+If you are running a recent version of the Ubuntu Linux distribution
+(>= 10.04), then you can simply download and install the following packages
 from the main distribution repository:
 - libqt4-dev
 - libatlas-base-dev
@@ -81,8 +81,8 @@ following commands:
 \code
 $ mkdir build
 $ cd build
-$ cmake [OPTIONS] ../top/level/source/folder  
-$ make 
+$ cmake [OPTIONS] ../top/level/source/folder
+$ make
 \endcode
 
 OSKAR can then be installed with:
@@ -91,7 +91,7 @@ OSKAR can then be installed with:
 $ make install
 \endcode
 
-You may need to run this command as root, unless you change the default 
+You may need to run this command as root, unless you change the default
 install location as described in the next section.
 
 \subsection install_build_options Build Options
@@ -109,7 +109,7 @@ These are as listed below.
 \subsubsection install_build_advanced Advanced Build Options
 
 - <tt><b>-DCMAKE_BUILD_TYPE=\<release, debug, or relwithdebinfo\></b></tt>  (default: release)
-  - Build OSKAR with release flags, debug flags, or release flags with 
+  - Build OSKAR with release flags, debug flags, or release flags with
     debugging symbols.
 
 - <tt><b>-DLAPACK_LIB_DIR=\<path\></b></tt> (default: searches the system library paths)
@@ -144,41 +144,41 @@ These are as listed below.
 The following environment variables affect the CMake build system:
 
 - MATLAB_ROOT
-  - The MATLAB root install directory used by CMake when searching for the 
-    MATLAB dependency. This directory should contain the MATLAB 'extern' 
-    directory. (Note that this variable should not normally need to be set, 
-    but can be used if the default CMake macros fail to find MATLAB on your 
+  - The MATLAB root install directory used by CMake when searching for the
+    MATLAB dependency. This directory should contain the MATLAB 'extern'
+    directory. (Note that this variable should not normally need to be set,
+    but can be used if the default CMake macros fail to find MATLAB on your
     system.)
-  
+
 \subsection install_build_qt4 Custom (Non-System) Qt4 Installations
 
-When searching for a valid Qt4 installation, the OSKAR CMake build system 
-queries the qmake binary in order to determine the location of the relevant 
-libraries and headers. Therefore, all that is required to use a specific 
-version of Qt4 is to add the location of the desired qmake binary to the 
+When searching for a valid Qt4 installation, the OSKAR CMake build system
+queries the qmake binary in order to determine the location of the relevant
+libraries and headers. Therefore, all that is required to use a specific
+version of Qt4 is to add the location of the desired qmake binary to the
 beginning of the system search path.
 
 \section install_test Testing the Installation
 
 \subsection install_unit_tests Unit Tests
 
-When building OSKAR from source, a number of unit test binaries will be 
-created. The tests can be run by typing the following command from the build 
+When building OSKAR from source, a number of unit test binaries will be
+created. The tests can be run by typing the following command from the build
 directory:
 
 \code
-$ make test
+$ ctest [--verbose]
 \endcode
 
-All the unit tests should pass. If any fail, please report this by copying 
-the terminal output and sending it, together with a description of the 
+All the unit tests should pass. If any fail, please report this by copying
+the terminal output and sending it, together with a description of the
 hardware in your machine and your version of OSKAR, to the email address
 oskar@oerc.ox.ac.uk.
 
 \subsection install_test_example Running the Example Simulation
 
-It is also advised, with any fresh install of OSKAR, to run the 
-\ref example "example simulation" to establish if a simple simulation 
+It is also advised, with any fresh install of OSKAR, to run the
+\ref example "example simulation" to establish if a simple simulation
 behaves as expected.
 
 \latexonly
@@ -191,17 +191,17 @@ behaves as expected.
 <tr><th>Revision</th><th>Date</th><th>Modification</th></tr>
 <tr><td>1</td><td>2012-04-23</td><td>Creation.</td></tr>
 <tr><td>2</td><td>2012-06-13</td>
-    <td>Added description of new CMAKE build flags specifying the location 
-    of custom library search paths for LAPACK, CBLAS and CFITSIO. 
+    <td>Added description of new CMAKE build flags specifying the location
+    of custom library search paths for LAPACK, CBLAS and CFITSIO.
     Added note on using custom (non-system) Qt4 installations.</td></tr>
 <tr><td>3</td><td>2012-06-19</td>
-    <td>Added description of new CMAKE flags for specifying the location of 
+    <td>Added description of new CMAKE flags for specifying the location of
     CPPUNIT and CasaCore added in OSKAR-2.0.3-beta.</td></tr>
 <tr><td>4</td><td>2013-04-12</td>
     <td>Added description of MATLAB_ROOT CMAKE variable.</td></tr>
 <tr><td>5</td><td>2013-11-14</td>
-    <td>Updated for version 2.3.0. Removed CppUnit dependency. 
-    Unit tests now use the Google testing framework, which is included in 
+    <td>Updated for version 2.3.0. Removed CppUnit dependency.
+    Unit tests now use the Google testing framework, which is included in
     the OSKAR source tree.</td></tr>
 <tr><td>6</td><td>2014-09-30</td>
     <td>Changed default CUDA_ARCH to all.</td></tr>

@@ -579,16 +579,23 @@ def recurse_tree(node, key=None, depth=0, count=0, latex_file=None):
 
 if __name__ == "__main__":
 
-    filename = '@PROJECT_BINARY_DIR@/settings/xml/oskar.xml'
+    #filename = '@PROJECT_BINARY_DIR@/settings/xml/oskar.xml'
     dox_filename = '@PROJECT_SOURCE_DIR@/doc/settings/settings_tables.txt'
     if os.path.isfile(dox_filename):
         os.remove(dox_filename)
 
-    xml = process_import_nodes(filename)
-    #print ET.tostring(xml)
-    # print type(xml)
-    #print '---------------------------------'
-    #print '<%s>' % xml.tag
+#     xml = process_import_nodes(filename)
+#     #print ET.tostring(xml)
+#     # print type(xml)
+#     #print '---------------------------------'
+#     #print '<%s>' % xml.tag
+#
+    filename = '@PROJECT_BINARY_DIR@/settings/xml/oskar_all.xml'
+    fh_ = open(filename, 'r')
+    xmlStr = fh_.read()
+    fh_.close()
+    xml = ET.fromstring(xmlStr)
+
     recurse_tree(xml)
 
     # Create the settings.dox file.
