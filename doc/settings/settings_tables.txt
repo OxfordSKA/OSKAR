@@ -55,6 +55,7 @@ All settings keys in this group are prefixed with <tt>interferometer/</tt>.
 
 <!-- ************************************* -->
 \subsection settings_beam_pattern Beam pattern settings
+These settings are used only when running the beam pattern simulation.
 
 All settings keys in this group are prefixed with <tt>beam_pattern/</tt>.
 
@@ -63,6 +64,7 @@ All settings keys in this group are prefixed with <tt>beam_pattern/</tt>.
 
 <!-- ************************************* -->
 \subsection settings_image Image settings
+These settings are used when running the OSKAR imager. Note that the OSKAR imager in its current form is not recommended for general use: visibilities should normally be written to a Measurement Set for imaging in CASA.
 
 All settings keys in this group are prefixed with <tt>image/</tt>.
 

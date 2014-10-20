@@ -2,7 +2,10 @@
 
 <s k="beam_pattern">
     <label>Beam pattern settings</label>
-
+    <desc>
+        These settings are used only when running the beam pattern simulation.
+    </desc>
+    
     <s k="station_id"><label>Station ID</label>
         <type name="uint" default="0"/>
         <desc>The station ID number (zero based) to select from the

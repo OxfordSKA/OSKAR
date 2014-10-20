@@ -3,6 +3,12 @@
 <s k="image">
     <label>Image settings</label>
     <apps>oskar_imager</apps>
+    <desc>
+        These settings are used when running the OSKAR imager. Note that the
+        OSKAR imager in its current form is not recommended for general use:
+        visibilities should normally be written to a Measurement Set for
+        imaging in CASA.
+    </desc>
 
     <s k="fov_deg"><label>Field-of-view [deg]</label>
         <type name="UnsignedDouble" default="2.0" />
@@ -78,9 +84,9 @@
         </type>
         <desc>Specifies the direction of the image phase centre.
             <ul>
-            <li>If <b>Observation direction</b> is selected, the image is 
+            <li>If <b>Observation direction</b> is selected, the image is
                 centred on the pointing direction of the primary beam.</li>
-            <li>If <b>RA, Dec.</b> is selected, the image is centred on the 
+            <li>If <b>RA, Dec.</b> is selected, the image is centred on the
                 values of RA and Dec. found below.</li>
             </ul>
         </desc>

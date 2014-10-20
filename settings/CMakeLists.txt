@@ -48,6 +48,14 @@ if (QT4_FOUND)
         ${QT_QTCORE_LIBRARY}
         ${QT_QTGUI_LIBRARY}
     )
+    #======================== XML settings unit test
+    include_directories(${CMAKE_CURRENT_BINARY_DIR}/xml)
+    include_directories(${PROJECT_SOURCE_DIR}/extern)
+    add_executable(test_oskar_settings_widgets
+        widgets/test/Test_oskar_SettingsModelXML.cpp
+    )
+    target_link_libraries(test_oskar_settings_widgets gtest_main)
+    #=========================
 endif (QT4_FOUND)
 
 
