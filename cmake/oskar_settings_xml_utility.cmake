@@ -66,4 +66,20 @@ ${import_node_}
     message(STATUS "Writing combined settings XML file: ${xml_file}")
     file(WRITE ${xml_file} "${xml_}")
 
+    # Write a C header with the combined xml as a string
+    set(xml_file ${CMAKE_CURRENT_BINARY_DIR}/${name_}_xml_all.h)
+    string(REPLACE "\"" "\\\"" xml_h_ "${xml_}")
+    string(REPLACE "\n" " \\\n" xml_h_ "${xml_h_}")
+    set(xml_h_
+"
+#ifndef OSKAR_XML_H_
+#define OSKAR_XML_H_
+
+#define OSKAR_XML_STR \\
+\"${xml_h_}\"
+
+#endif /* OSKAR_XML_H_ */
+")
+    file(WRITE ${xml_file} "${xml_h_}")
+
 endmacro()
