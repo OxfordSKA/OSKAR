@@ -41,6 +41,10 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
+#include <locale>
+
+#include <oskar_SettingsItem.h>
 
 using namespace std;
 
@@ -49,6 +53,11 @@ enum status_t
     AllOk = 0,
     MissingKey,
     InvalidNode
+};
+
+enum meta_type_id
+{
+    None = 0,
 };
 
 std::string str_replace(std::string& s, std::string toReplace, std::string replaceWith)
@@ -90,6 +99,24 @@ std::string str_reduce(const std::string& str,
     return result;
 }
 
+std::vector<std::string> str_get_options(const std::string& s)
+{
+    std::vector<std::string> opts;
+    std::stringstream sin(s);
+    std::string line;
+
+    while (std::getline(sin, line, '"')) {
+        std::stringstream ss(line);
+        while (std::getline(ss, line, ',')) {
+            if (!line.empty()) opts.push_back(line);
+        }
+        if (std::getline(sin, line, '"')) {
+            if (!line.empty()) opts.push_back(str_trim(line, " \n"));
+        }
+    }
+    return opts;
+}
+
 rapidxml::xml_node<>* get_child_node(rapidxml::xml_node<>* parent,
         const std::vector<std::string>& possible_names)
 {
@@ -105,7 +132,6 @@ rapidxml::xml_node<>* get_child_node(rapidxml::xml_node<>* parent,
 rapidxml::xml_attribute<>* get_attribute(rapidxml::xml_node<>* n,
         const std::vector<std::string>& possible_names)
 {
-    typedef rapidxml::xml_node<> node;
     typedef rapidxml::xml_attribute<> attr;
     for (size_t i = 0; i < possible_names.size(); ++i)
     {
@@ -124,6 +150,23 @@ std::string get_key(rapidxml::xml_node<>* n)
     attr* a = get_attribute(n, names);
     if (a) return a->value();
     return "";
+}
+
+bool is_required(rapidxml::xml_node<>* n)
+{
+    typedef rapidxml::xml_attribute<> attr;
+    std::vector<std::string> names;
+    names.push_back("required");
+    names.push_back("req");
+    names.push_back("r");
+    attr* a = get_attribute(n, names);
+    if (a) {
+        std::string req(a->value());
+        //std::transform(req.begin(), req.end(), req.begin(), std::toupper);
+        for (size_t i = 0; i < req.length(); ++i) req[i] = toupper(req[i]);
+        return req == "TRUE" || req == "YES";
+    }
+    return false;
 }
 
 std::string get_description(rapidxml::xml_node<>* s)
@@ -154,7 +197,132 @@ std::string get_description(rapidxml::xml_node<>* s)
     return desc;
 }
 
-static status_t declare_setting_(rapidxml::xml_node<>* s, int depth)
+std::string get_label(rapidxml::xml_node<>* s)
+{
+    typedef rapidxml::xml_node<> node;
+    // Obtain a pointer to the label node.
+    std::vector<std::string> names;
+    names.push_back("label");
+    names.push_back("l");
+    node* n = get_child_node(s, names);
+    if (!n) return "";
+
+    // Convert the node to a string.
+    stringstream ss;
+    ss << *n;
+    string label = ss.str();
+
+    // Remove the opening label tag and excess whitespace.
+    str_replace(label, "<label>", " ");
+    str_replace(label, "<l>", " ");
+    str_replace(label, "</label>", " ");
+    str_replace(label, "</l>", " ");
+    label = str_trim(label);
+    label = str_trim(label, " \n");
+    label = str_reduce(label);
+    label = str_reduce(label, " ", " \n");
+
+    return label;
+}
+
+//meta_type_id type_name_to_type_id(const std::string& name)
+//{
+//    std::string name_(name);
+//    for (size_t i = 0; i < name_.length(); ++i) name_[i] = toupper(name_[i]);
+//
+//    if (name_ == "BOOL")
+//
+//
+//    cout << name_ << endl;
+//
+//    return None;
+//}
+
+oskar_SettingsItem::type_id get_oskar_SettingsItem_type(
+        const std::string& name,
+        const std::vector<std::string>& params)
+{
+    std::string name_(name);
+    for (size_t i = 0; i < name_.length(); ++i) name_[i] = toupper(name_[i]);
+    oskar_SettingsItem::type_id tid = oskar_SettingsItem::UNDEF;
+
+    if      (name_ == "BOOL")           tid = oskar_SettingsItem::BOOL;
+    else if (name_ == "INT")            tid = oskar_SettingsItem::INT;
+    else if (name_ == "INTPOSITIVE")    tid = oskar_SettingsItem::INT_POSITIVE;
+    else if (name_ == "INTLISTEXT")     tid = oskar_SettingsItem::INT_CSV_LIST;
+
+    else if (name_ == "INTPUTFILELIST") tid = oskar_SettingsItem::INPUT_FILE_LIST;
+
+
+    else if (name_ == "DOUBLE")         tid = oskar_SettingsItem::DOUBLE;
+    else if (name_ == "DOUBLERANGE")    tid = oskar_SettingsItem::DOUBLE;
+    else if (name_ == "OPTIONLIST")     tid = oskar_SettingsItem::OPTIONS;
+    else if (name_ == "INPUTFILE")      tid = oskar_SettingsItem::INPUT_FILE_NAME;
+
+    else if (name_ == "DOUBLERANGEEXT") {
+        if (params.size() == 3) {
+            std::string special_value = params[2];
+            for (size_t i = 0; i < special_value.length(); ++i)
+                special_value[i] = toupper(special_value[i]);
+            if (special_value == "MAX")
+                tid = oskar_SettingsItem::DOUBLE_MAX;
+            else if (special_value == "MIN")
+                tid = oskar_SettingsItem::DOUBLE_MIN;
+            else
+                tid = oskar_SettingsItem::DOUBLE;
+        }
+        else
+            tid = oskar_SettingsItem::DOUBLE;
+    }
+
+
+    return tid;
+}
+
+
+std::string get_type(rapidxml::xml_node<>* s)
+{
+    typedef rapidxml::xml_node<> node;
+    typedef rapidxml::xml_attribute<> attr;
+
+    // Obtain a pointer to the type node.
+    std::vector<std::string> names;
+    names.push_back("type");
+    names.push_back("t");
+    node* n = get_child_node(s, names);
+    if (!n) return "";
+
+    // Obtain a pointer to the name attribute
+    names.clear();
+    names.push_back("name");
+    names.push_back("n");
+    attr* name = get_attribute(n, names);
+
+    // Types have to have a name to be valid.
+    if (!name) return "";
+    const std::string type_name(name->value());
+
+    // Obtain a pointer to the 'default' attribute
+    names.clear();
+    names.push_back("default");
+    names.push_back("d");
+    attr* def = get_attribute(n, names);
+
+    // Obtain any type parameters
+    std::string param(n->value());
+    std::vector<std::string> opts;
+    if (!param.empty()) {
+        param = str_trim(param);
+        opts = str_get_options(param);
+    }
+
+    // Convert type name to a mata_type_id
+    oskar_SettingsItem::type_id id = get_oskar_SettingsItem_type(type_name, opts);
+
+    return type_name;
+}
+
+static status_t declare_setting_(rapidxml::xml_node<>* s, int depth, const std::string& key_root)
 {
     typedef rapidxml::xml_node<> node;
     typedef rapidxml::xml_attribute<> attr;
@@ -164,29 +332,43 @@ static status_t declare_setting_(rapidxml::xml_node<>* s, int depth)
     // key
     std::string key = get_key(s);
     if (key.empty()) return MissingKey;
-    cout << "Key  : " << key << endl;
 
     // required
-    attr* required = s->first_attribute("required");
+    bool required = is_required(s);
 
     // label
-    node* label = s->first_node("label");
+    std::string label = get_label(s);
 
-    // description TODO also handle "desc"
+    // description
     std::string desc = get_description(s);
-    cout << "Desc : [" << desc << "]" <<endl << endl;
 
     // type
-    node* type = s->first_node("type");
+    std::string type = get_type(s);
 
     // dependencies
     node* deps = s->first_node("depends");
 
     // Group -----------------------------------------------------------------
     // Groups are at level 0 or have a key but no type.
-
+    if (depth == 0 && type.empty()) {
+        cout << endl;
+        cout << key;
+        cout << " [GROUP]";
+        cout << endl;
+    }
 
     // Setting ---------------------------------------------------------------
+    else {
+        //cout << key_root << key << endl;
+        cout << string(depth*4,' ');
+        cout << key;
+        cout << " [" << type << "]";
+        //if (required) cout << " [REQUIRED]" << endl;
+        //else cout << endl;
+        //    cout << "Desc  : [" << desc  << "]" << endl;
+        //cout << "Label : [" << label << "]" << endl;
+        cout << endl;
+    }
 
     return AllOk;
 }
@@ -194,24 +376,23 @@ static status_t declare_setting_(rapidxml::xml_node<>* s, int depth)
 static void parse_settings_(rapidxml::xml_node<>* n, int& depth, std::string& key_root)
 {
     typedef rapidxml::xml_node<> node;
-    typedef rapidxml::xml_attribute<> attr;
 
     for (node* s = n->first_node("s"); s; s = s->next_sibling())
     {
         std::string key = get_key(s);
         if (key.empty()) continue;
 
-        status_t status = declare_setting_(s, depth);
+        status_t status = declare_setting_(s, depth, key_root);
         if (status) {
             cout << "ERROR: Problem reading setting with key: " << key << endl;
         }
 
         // Read any child settings.
-//        if (s->first_node("s")) {
-//            std::string key_root_ = key_root + key + "/";
-//            int depth_ = depth + 1;
-//            parse_settings_(s, depth_, key_root_);
-//        }
+        if (s->first_node("s")) {
+            std::string key_root_ = key_root + key + "/";
+            int depth_ = depth + 1;
+            parse_settings_(s, depth_, key_root_);
+        }
     }
 }
 
@@ -220,7 +401,6 @@ TEST(oskar_SettingsModelXML, test1)
     typedef rapidxml::xml_document<> doc_t;
     typedef rapidxml::xml_node<> node_t;
     typedef rapidxml::xml_attribute<> attr_t;
-
 
     std::string xml(OSKAR_XML_STR);
     std::vector<char> xml_(xml.begin(), xml.end());

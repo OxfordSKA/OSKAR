@@ -42,7 +42,8 @@
 class oskar_SettingsItem
 {
 public:
-    enum {
+    enum type_id {
+        UNDEF,
         LABEL,              /**< Text label only (no data). */
         BOOL,               /**< Boolean data type (true or false). */
         INT,                /**< Generic integer data type. */
