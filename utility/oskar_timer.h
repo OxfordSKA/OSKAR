@@ -45,7 +45,8 @@ struct oskar_Timer;
 typedef struct oskar_Timer oskar_Timer;
 #endif /* OSKAR_TIMER_TYPEDEF_ */
 
-enum {
+enum OSKAR_TIMER_TYPE
+{
     OSKAR_TIMER_NATIVE,
     OSKAR_TIMER_CUDA,
     OSKAR_TIMER_OMP

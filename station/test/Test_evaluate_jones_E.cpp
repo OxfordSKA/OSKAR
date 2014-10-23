@@ -137,7 +137,7 @@ TEST(evaluate_jones_E, evaluate_e)
     // Evaluate Jones E.
     oskar_evaluate_jones_E(E, oskar_sky_num_sources(sky_gpu),
             oskar_sky_l(sky_gpu), oskar_sky_m(sky_gpu), oskar_sky_n(sky_gpu),
-            OSKAR_RELATIVE_DIRECTION_COSINES,
+            OSKAR_RELATIVE_DIRECTIONS,
             oskar_sky_reference_ra_rad(sky_gpu),
             oskar_sky_reference_dec_rad(sky_gpu),
             tel_gpu, gast, frequency, work, random_state, &error);

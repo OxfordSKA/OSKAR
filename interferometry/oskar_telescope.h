@@ -45,7 +45,8 @@ struct oskar_Telescope;
 typedef struct oskar_Telescope oskar_Telescope;
 #endif /* OSKAR_TELESCOPE_TYPEDEF_ */
 
-enum {
+enum OSKAR_POL_MODE_TYPE
+{
     OSKAR_POL_MODE_FULL,
     OSKAR_POL_MODE_SCALAR
 };

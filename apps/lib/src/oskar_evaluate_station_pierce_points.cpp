@@ -57,7 +57,8 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
     int status = 0;
 
     // Enum values used in writing time-freq data binary files
-    enum {
+    enum OSKAR_TIME_FREQ_TAGS
+    {
         TIME_IDX       = 0,
         FREQ_IDX       = 1,
         TIME_MJD_UTC   = 2,

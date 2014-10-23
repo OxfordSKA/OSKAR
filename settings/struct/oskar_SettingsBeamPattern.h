@@ -38,7 +38,8 @@
  * @brief
  * Enum describing the coordinates at which the beam pattern is evaluated.
  */
-enum {
+enum OSKAR_BEAM_PATTERN_COORDS
+{
     OSKAR_BEAM_PATTERN_COORDS_UNDEF,
     OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE,
     OSKAR_BEAM_PATTERN_COORDS_HEALPIX,
@@ -49,7 +50,8 @@ enum {
  * @brief
  * Enum describing the coordinates frame for which the beam pattern is evaluated.
  */
-enum {
+enum OSKAR_BEAM_PATTERN_FRAME
+{
     OSKAR_BEAM_PATTERN_FRAME_UNDEF,
     OSKAR_BEAM_PATTERN_FRAME_EQUATORIAL,
     OSKAR_BEAM_PATTERN_FRAME_HORIZON

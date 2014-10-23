@@ -43,7 +43,8 @@ typedef struct oskar_Image oskar_Image;
 
 /* To maintain binary compatibility, do not change the values
  * in the lists below. */
-enum {
+enum OSKAR_IMAGE_TAGS
+{
     OSKAR_IMAGE_TAG_IMAGE_DATA = 0,
     OSKAR_IMAGE_TAG_IMAGE_TYPE = 1,
     OSKAR_IMAGE_TAG_DATA_TYPE = 2,
@@ -73,7 +74,8 @@ enum {
 
 /* Do not change the values below - these are merely dimension labels, not the
  * actual dimension order. */
-enum {
+enum OSKAR_IMAGE_DIM
+{
     OSKAR_IMAGE_DIM_LONGITUDE = 0,
     OSKAR_IMAGE_DIM_LATITUDE = 1,
     OSKAR_IMAGE_DIM_POL = 2,
@@ -81,7 +83,8 @@ enum {
     OSKAR_IMAGE_DIM_CHANNEL = 4
 };
 
-enum {
+enum OSKAR_IMAGE_TYPE
+{
     OSKAR_IMAGE_TYPE_UNDEF = 0,
 
     OSKAR_IMAGE_TYPE_STOKES   = 1, /* IQUV */
@@ -106,7 +109,8 @@ enum {
  * @brief Enumerator describing the image pixel grid distribution.
  * NEW v2.4
  */
-enum {
+enum OSKAR_IMAGE_GRID_TYPE
+{
     OSKAR_IMAGE_GRID_TYPE_UNDEF = 0,
     OSKAR_IMAGE_GRID_TYPE_RECTILINEAR = 1,
     OSKAR_IMAGE_GRID_TYPE_HEALPIX = 2
@@ -116,7 +120,8 @@ enum {
  * @brief Enumerator describing the image coordinate frame.
  * NEW v2.4
  */
-enum {
+enum OSKAR_IMAGE_COORD_FRAME
+{
     OSKAR_IMAGE_COORD_FRAME_UNDEF = 0,
     OSKAR_IMAGE_COORD_FRAME_EQUATORIAL = 1,
     OSKAR_IMAGE_COORD_FRAME_HORIZON = 2

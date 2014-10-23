@@ -47,7 +47,8 @@ typedef struct oskar_Splines oskar_Splines;
 
 /* To maintain binary compatibility, do not change the values
  * in the lists below. */
-enum {
+enum OSKAR_SPLINES_TAGS
+{
     OSKAR_SPLINES_TAG_NUM_KNOTS_X_THETA = 1,
     OSKAR_SPLINES_TAG_NUM_KNOTS_Y_PHI = 2,
     OSKAR_SPLINES_TAG_KNOTS_X_THETA = 3,
@@ -56,7 +57,8 @@ enum {
     OSKAR_SPLINES_TAG_SMOOTHING_FACTOR = 6
 };
 
-enum {
+enum OSKAR_SPLINES_TYPE
+{
     OSKAR_SPLINES_LINEAR = 0,
     OSKAR_SPLINES_SPHERICAL = 1
 };

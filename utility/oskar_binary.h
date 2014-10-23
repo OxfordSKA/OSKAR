@@ -52,7 +52,8 @@ typedef struct oskar_Binary oskar_Binary;
  */
 
 /* Standard tag groups. */
-enum {
+enum OSKAR_TAG_GROUPS
+{
     OSKAR_TAG_GROUP_METADATA = 1,
     OSKAR_TAG_GROUP_SYSTEM_INFO = 2, /* Not yet used. */
     OSKAR_TAG_GROUP_SETTINGS = 3,
@@ -66,7 +67,8 @@ enum {
 };
 
 /* Standard metadata tags. */
-enum {
+enum OSKAR_TAG_METADATA
+{
     OSKAR_TAG_METADATA_DATE_TIME_STRING = 1,
     OSKAR_TAG_METADATA_OSKAR_VERSION_STRING = 2,
     OSKAR_TAG_METADATA_USERNAME = 3,
@@ -74,13 +76,15 @@ enum {
 };
 
 /* Standard settings tags. */
-enum {
+enum OSKAR_TAG_SETTINGS
+{
     OSKAR_TAG_SETTINGS_PATH = 1,
     OSKAR_TAG_SETTINGS = 2
 };
 
 /* Standard run info tags. */
-enum {
+enum OSKAR_TAG_RUN
+{
     OSKAR_TAG_RUN_LOG = 1,
     OSKAR_TAG_RUN_TIME = 2 /* (double; sec) */
 };

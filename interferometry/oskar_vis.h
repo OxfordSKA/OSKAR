@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,8 @@ typedef struct oskar_Vis oskar_Vis;
 
 /* To maintain binary compatibility, do not change the values
  * in the lists below. */
-enum {
+enum OSKAR_VIS_TAGS
+{
     OSKAR_VIS_TAG_NUM_CHANNELS = 1,
     OSKAR_VIS_TAG_NUM_TIMES = 2,
     OSKAR_VIS_TAG_NUM_BASELINES = 3,
@@ -88,23 +89,27 @@ enum {
 
 /* Do not change the values below - these are merely dimension labels, not the
  * actual dimension order. */
-enum {
+enum OSKAR_VIS_DIM
+{
     OSKAR_VIS_DIM_CHANNEL = 0,
     OSKAR_VIS_DIM_TIME = 1,
     OSKAR_VIS_DIM_BASELINE = 2,
     OSKAR_VIS_DIM_POLARISATION = 3
 };
 
-enum {
+enum OSKAR_VIS_POL_TYPE
+{
     OSKAR_VIS_POL_TYPE_NONE = 0,
     OSKAR_VIS_POL_TYPE_LINEAR = 1
 };
 
-enum {
+enum OSKAR_VIS_BASELINE_COORD_UNIT
+{
     OSKAR_VIS_BASELINE_COORD_UNIT_METRES = 1
 };
 
-enum {
+enum OSKAR_VIS_STATION_COORD_UNIT
+{
     OSKAR_VIS_STATION_COORD_UNIT_METRES = 1
 };
 

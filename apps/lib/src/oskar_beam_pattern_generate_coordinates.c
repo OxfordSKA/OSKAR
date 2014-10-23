@@ -93,14 +93,14 @@ size_t oskar_beam_pattern_generate_coordinates(int* coord_type, oskar_Mem* x,
     {
         generate_equatorial_coordinates(x, y, z, beam_lon, beam_lat,
                 beam_coord_type, settings, status);
-        *coord_type = OSKAR_RELATIVE_DIRECTION_COSINES;
+        *coord_type = OSKAR_RELATIVE_DIRECTIONS;
         *lon0 = beam_lon;
         *lat0 = beam_lat;
     }
     else if (coord_frame_type == OSKAR_BEAM_PATTERN_FRAME_HORIZON)
     {
         generate_horizon_coordinates(x, y, z, settings, status);
-        *coord_type = OSKAR_ENU_DIRECTION_COSINES;
+        *coord_type = OSKAR_ENU_DIRECTIONS;
         *lon0 = 0.0; /* TODO Hard-coded for now. */
         *lat0 = M_PI / 2.0; /* TODO Hard-coded for now. */
     }

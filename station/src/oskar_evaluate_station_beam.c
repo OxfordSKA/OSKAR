@@ -111,7 +111,7 @@ void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
         /* Get the beam direction in the appropriate coordinate system. */
         /* (Direction cosines are already set to the interferometer phase
          * centre for relative directions.) */
-        if (coord_type == OSKAR_ENU_DIRECTION_COSINES)
+        if (coord_type == OSKAR_ENU_DIRECTIONS)
         {
             double t_x, t_y, t_z, ha0;
             ha0 = (GAST + oskar_station_lon_rad(station)) - lon0_rad;
@@ -130,13 +130,13 @@ void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
     }
 
     /* Evaluate the station beam for the given directions. */
-    if (coord_type == OSKAR_ENU_DIRECTION_COSINES)
+    if (coord_type == OSKAR_ENU_DIRECTIONS)
     {
         evaluate_station_beam_enu_directions(op, num_points,
                 x, y, z, station, work, rand_state, frequency, GAST,
                 status);
     }
-    else if (coord_type == OSKAR_RELATIVE_DIRECTION_COSINES)
+    else if (coord_type == OSKAR_RELATIVE_DIRECTIONS)
     {
         evaluate_station_beam_relative_directions(op, num_points,
                 x, y, z, station, work, rand_state, frequency, GAST,

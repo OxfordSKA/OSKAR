@@ -47,7 +47,8 @@ typedef struct oskar_Sky oskar_Sky;
 
 /* To maintain binary compatibility, do not change the values
  * in the lists below. */
-enum {
+enum OSKAR_SKY_TAGS
+{
     OSKAR_SKY_TAG_NUM_SOURCES = 1,
     OSKAR_SKY_TAG_DATA_TYPE = 2,
     OSKAR_SKY_TAG_RA = 3,

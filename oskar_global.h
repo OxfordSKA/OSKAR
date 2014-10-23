@@ -65,7 +65,8 @@
  * All OSKAR error codes are negative.
  * Positive error codes indicate CUDA run-time execution errors.
  */
-enum OSKAR_ERROR_CODES {
+enum OSKAR_ERROR_CODES
+{
     /* Indicates that no error has occurred. */
     OSKAR_SUCCESS                      = 0,
 
@@ -239,7 +240,8 @@ enum OSKAR_ERROR_CODES {
  * @brief
  * Enumerator for use with bool flags.
  */
-enum {
+enum OSKAR_BOOL
+{
     OSKAR_FALSE = 0,
     OSKAR_TRUE  = 1
 };
@@ -248,7 +250,8 @@ enum {
  * @brief
  * Enumerator to specify length units (metres or wavelengths).
  */
-enum {
+enum OSKAR_LENGTH
+{
     OSKAR_METRES = 0,
     OSKAR_WAVELENGTHS = 1
 };
@@ -258,7 +261,8 @@ enum {
  * Enumerator to define type of spherical coordinate longitude and latitude
  * values.
  */
-enum {
+enum OSKAR_SPHERICAL_TYPE
+{
     OSKAR_SPHERICAL_TYPE_EQUATORIAL,
     OSKAR_SPHERICAL_TYPE_HORIZONTAL,
     OSKAR_SPHERICAL_TYPE_GALACTIC
@@ -270,13 +274,14 @@ enum {
  *
  * Used in beam pattern evaluation.
  */
-enum {
-    OSKAR_ENU_DIRECTION_COSINES,
-    OSKAR_RELATIVE_DIRECTION_COSINES
+enum OSKAR_DIRECTION_TYPE
+{
+    OSKAR_ENU_DIRECTIONS = 0,
+    OSKAR_RELATIVE_DIRECTIONS = 1
 };
 
-/* Macros used to prevent Eclipse from complaining about unknown CUDA syntax
- * and a few other things */
+/* Macros used to prevent Eclipse from complaining about unknown CUDA syntax,
+ * and a few other things. */
 #ifdef __CDT_PARSER__
     #define __global__
     #define __device__

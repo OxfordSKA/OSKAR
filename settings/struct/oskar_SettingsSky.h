@@ -137,7 +137,8 @@ struct oskar_SettingsSkyHealpixFits
 };
 typedef struct oskar_SettingsSkyHealpixFits oskar_SettingsSkyHealpixFits;
 
-enum {
+enum OSKAR_MAP_UNITS
+{
     OSKAR_MAP_UNITS_JY,
     OSKAR_MAP_UNITS_K_PER_SR,
     OSKAR_MAP_UNITS_MK_PER_SR

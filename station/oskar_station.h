@@ -45,7 +45,8 @@ struct oskar_Station;
 typedef struct oskar_Station oskar_Station;
 #endif /* OSKAR_STATION_TYPEDEF_ */
 
-enum {
+enum OSKAR_STATION_TYPE
+{
     OSKAR_STATION_TYPE_AA,
     OSKAR_STATION_TYPE_ISOTROPIC,
     OSKAR_STATION_TYPE_GAUSSIAN_BEAM,
