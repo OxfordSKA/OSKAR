@@ -82,7 +82,7 @@ struct oskar_BinaryHeader
 typedef struct oskar_BinaryHeader oskar_BinaryHeader;
 #endif /* OSKAR_BINARY_HEADER_TYPEDEF_ */
 
-enum
+enum OSKAR_BINARY_FORMAT
 {
     OSKAR_BINARY_FORMAT_VERSION = 2
 };

@@ -107,7 +107,6 @@ enum OSKAR_IMAGE_TYPE
 
 /**
  * @brief Enumerator describing the image pixel grid distribution.
- * NEW v2.4
  */
 enum OSKAR_IMAGE_GRID_TYPE
 {
@@ -118,7 +117,6 @@ enum OSKAR_IMAGE_GRID_TYPE
 
 /**
  * @brief Enumerator describing the image coordinate frame.
- * NEW v2.4
  */
 enum OSKAR_IMAGE_COORD_FRAME
 {

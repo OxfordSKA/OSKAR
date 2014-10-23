@@ -70,14 +70,14 @@ struct oskar_SettingsImage
 };
 typedef struct oskar_SettingsImage oskar_SettingsImage;
 
-enum
+enum OSKAR_IMAGE_TRANSFORM_TYPE
 {
     OSKAR_IMAGE_DFT_2D,
     OSKAR_IMAGE_DFT_3D,
     OSKAR_IMAGE_FFT
 };
 
-enum
+enum OSKAR_IMAGE_DIRECTION
 {
     OSKAR_IMAGE_DIRECTION_OBSERVATION, /* Observation (primary beam) direction */
     OSKAR_IMAGE_DIRECTION_RA_DEC

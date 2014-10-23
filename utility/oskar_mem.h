@@ -54,7 +54,7 @@ typedef struct oskar_Mem oskar_Mem;
  * 2. To maintain binary data compatibility, do not modify any numbers
  *    that appear in the list below!
  */
-enum
+enum OSKAR_MEM_TYPE
 {
     /* Byte (char): bit 0 set. */
     OSKAR_CHAR                   = 0x01,
@@ -87,7 +87,7 @@ enum
     OSKAR_DOUBLE_COMPLEX_MATRIX  = OSKAR_DOUBLE | OSKAR_COMPLEX | OSKAR_MATRIX
 };
 
-enum
+enum OSKAR_MEM_LOCATION
 {
     OSKAR_CPU = 0,
     OSKAR_GPU = 1

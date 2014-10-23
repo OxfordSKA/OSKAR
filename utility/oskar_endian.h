@@ -66,7 +66,7 @@ int oskar_endian(void);
 OSKAR_EXPORT
 void oskar_endian_swap(void* d, size_t size);
 
-enum
+enum OSKAR_ENDIAN_TYPE
 {
     OSKAR_LITTLE_ENDIAN = 0,
     OSKAR_BIG_ENDIAN = 1
