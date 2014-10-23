@@ -331,6 +331,58 @@
         </s>
     </s>
 
+    <!-- Apparent flux radial band filter -->
+    <!-- Not yet enabled.
+    <s k="apparent_flux_filter"><label>Apparent flux radial band filter</label>
+        <s k="enable"><label>Enable</label>
+            <type name="bool" default="false"/>
+            <desc>
+                Enable or disable the apparent flux radial filter.
+            </desc>
+        </s>
+        <s k="band_radii_deg"><label>Band radii [deg]</label>
+            <type name="DoubleList" default=""/>
+            <desc>
+                List of filter band outer radii from the phase centre, 
+                in degrees.
+            </desc>
+        </s>
+        <s k="band_fluxes_jy"><label>Band flux limits [Jy]</label>
+            <type name="DoubleList" default=""/>
+            <desc>
+                List of filter band fluxes, in Jy. Sources with apparent
+                fluxes brighter than these values that also lie within 
+                the given radii will not be included in the simulated
+                visibility.
+            </desc>
+        </s>
+        <s k="ref_freq_hz"><label>Reference frequency [Hz]</label>
+            <type name="double" default="0.0"/>
+            <desc>
+                Reference frequency for supplied filter parameters, in Hz.
+            </desc>
+        </s>
+        <s k="spectral_index">
+            <label>Spectral index for filter flux limits</label>
+            <type name="double" default="0.0"/>
+            <desc>
+                The spectral index for the given filter band flux limits.
+                Set to zero if the supplied limits should be used unmodified at
+                all frequencies.
+            </desc>
+        </s>
+        <s k="scale_radii_with_frequency">
+            <label>Scale filter radii with frequency</label>
+            <type name="bool" default="true"/>
+            <desc>
+                If true, the supplied filter radii will be scaled linearly
+                with frequency. If false, the supplied radii will be used at 
+                all frequencies.
+            </desc>
+        </s>
+    </s>
+    -->
+
     <!-- Advanced settings -->
     <s key="advanced"><label>Advanced settings</label>
         <s k="zero_failed_gaussians">

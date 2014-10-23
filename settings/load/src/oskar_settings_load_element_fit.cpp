@@ -71,14 +71,12 @@ void oskar_settings_load_element_fit(oskar_SettingsElementFit* settings,
         settings->output_directory = (char*)malloc(t.size() + 1);
         strcpy(settings->output_directory, t.constData());
     }
-#ifndef OSKAR_NO_FITS
     t = s.value("fits_image").toByteArray();
     if (t.size() > 0)
     {
         settings->fits_image = (char*)malloc(t.size() + 1);
         strcpy(settings->fits_image, t.constData());
     }
-#endif
     t = s.value("pol_type", "XY").toByteArray().toUpper();
     if (t == "X")
     {

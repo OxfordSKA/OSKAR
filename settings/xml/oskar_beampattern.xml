@@ -109,7 +109,7 @@
             based on the settings below.</desc>
     </s>
 
-
+    <!-- DEPRECATED
     <s k="oskar_image_file">
         <label>OSKAR image file options</label>
         <s k="save_voltage"><label>Voltage pattern</label>
@@ -133,6 +133,7 @@
             the Stokes I response of the beam pattern auto-correlation.</desc>
         </s>
     </s>
+    -->
 
     <s k="fits_file">
         <label>FITS image options</label>

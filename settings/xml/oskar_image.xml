@@ -121,10 +121,14 @@
         <type name="bool" default="true" />
         <desc>If true, save the image in FITS format.</desc>
     </s>
+    
+    <!-- DEPRECATED
     <s k="oskar_image"><label>Save OSKAR image</label>
         <type name="bool" default="true" />
         <desc>If true, save the image in OSKAR image binary format.</desc>
     </s>
+    -->
+    
     <s k="overwrite"><label>Overwrite existing images</label>
         <type name="bool" default="true" />
         <desc>

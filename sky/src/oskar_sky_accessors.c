@@ -253,6 +253,32 @@ const oskar_Mem* oskar_sky_gaussian_c_const(const oskar_Sky* sky)
     return sky->gaussian_c;
 }
 
+int oskar_sky_num_filter_bands(const oskar_Sky* sky)
+{
+    return sky->num_filter_bands;
+}
+
+oskar_Mem* oskar_sky_filter_band_radius_rad(oskar_Sky* sky)
+{
+    return sky->filter_band_radius_rad;
+}
+
+const oskar_Mem* oskar_sky_filter_band_radius_rad_const(const oskar_Sky* sky)
+{
+    return sky->filter_band_radius_rad;
+}
+
+oskar_Mem* oskar_sky_filter_band_flux_jy(oskar_Sky* sky)
+{
+    return sky->filter_band_flux_jy;
+}
+
+const oskar_Mem* oskar_sky_filter_band_flux_jy_const(const oskar_Sky* sky)
+{
+    return sky->filter_band_flux_jy;
+}
+
+
 #ifdef __cplusplus
 }
 #endif

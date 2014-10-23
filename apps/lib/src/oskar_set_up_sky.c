@@ -27,10 +27,8 @@
  */
 
 #include "apps/lib/oskar_set_up_sky.h"
-#ifndef OSKAR_NO_FITS
-#   include <fits/oskar_fits_healpix_to_sky_model.h>
-#   include <fits/oskar_fits_image_to_sky_model.h>
-#endif
+#include <fits/oskar_fits_healpix_to_sky_model.h>
+#include <fits/oskar_fits_image_to_sky_model.h>
 #include <oskar_healpix_nside_to_npix.h>
 #include <oskar_convert_healpix_ring_to_theta_phi.h>
 #include <oskar_random_gaussian.h>
@@ -49,9 +47,9 @@
 extern "C" {
 #endif
 
-/* Suppress warnings about unused function arguments when CFITSIO, LAPACK,
- * or CBLAS are not found */
-#if defined(OSKAR_NO_FITS) || defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK)
+/* Suppress warnings about unused function arguments when LAPACK or CBLAS
+ * are not found */
+#if defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK)
 #   if defined(__INTEL_COMPILER)
 #       pragma warning push
 /*#       pragma warning(disable:XXX)*/
@@ -297,7 +295,6 @@ static void set_up_fits_image(int* num_chunks, oskar_Sky*** sky_chunks,
         int max_per_chunk, int type, oskar_Log* log,
         const oskar_SettingsSkyFitsImage* s, int* status)
 {
-#ifndef OSKAR_NO_FITS
     int i;
     const char* filename;
     oskar_Sky* temp;
@@ -329,7 +326,6 @@ static void set_up_fits_image(int* num_chunks, oskar_Sky*** sky_chunks,
             oskar_log_message(log, 'M', 1, "done.");
         }
     }
-#endif
 }
 
 
@@ -338,7 +334,6 @@ static void set_up_healpix_fits(int* num_chunks, oskar_Sky*** sky_chunks,
         const oskar_SettingsSkyHealpixFits* s, double ra0, double dec0,
         int zero_failed, int* status)
 {
-#ifndef OSKAR_NO_FITS
     int i;
     const char* filename;
     oskar_Sky* temp;
@@ -368,7 +363,6 @@ static void set_up_healpix_fits(int* num_chunks, oskar_Sky*** sky_chunks,
             oskar_log_message(log, 'M', 1, "done.");
         }
     }
-#endif
 }
 
 
@@ -654,7 +648,7 @@ static void set_up_pol(oskar_Sky* sky,
             pol->std_pol_angle_rad, pol->seed, status);
 }
 
-#if defined(OSKAR_NO_FITS) || defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK)
+#if defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK)
 #   if defined(__INTEL_COMPILER)
 #       pragma warning pop
 #   elif defined(__GNUC__)

@@ -2,9 +2,7 @@
 # src/fits/CMakeLists.txt
 #
 
-if (CFITSIO_FOUND AND CUDA_FOUND)
-
-    include_directories(${CFITSIO_INCLUDE_DIR})
+if (CUDA_FOUND)
 
     # Fits source code.
     set(fits_SRC
@@ -20,10 +18,9 @@ if (CFITSIO_FOUND AND CUDA_FOUND)
     set(fits_SRC "${fits_SRC}" PARENT_SCOPE)
 
     # Build and install the oskar_fits library.
-    include_directories(${CFITSIO_INCLUDE_DIR})
     set(libname oskar_fits)
     add_library(${libname} ${fits_SRC})
-    target_link_libraries(${libname} ${CFITSIO_LIBRARIES} oskar)
+    target_link_libraries(${libname} cfitsio oskar)
     if (APPLE)
         set_target_properties(${libname} PROPERTIES
             INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
@@ -42,4 +39,4 @@ if (CFITSIO_FOUND AND CUDA_FOUND)
     # Unit tests.
     add_subdirectory(test)
 
-endif (CFITSIO_FOUND AND CUDA_FOUND)
+endif (CUDA_FOUND)

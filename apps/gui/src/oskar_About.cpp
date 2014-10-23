@@ -192,18 +192,16 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
                 "(<a href=\"http://netlib.org/dierckx/\">"
                 "http://netlib.org/dierckx/</a>)</li>");
     html.append("<li>The Qt cross-platform application framework "
-                "(<a href=\"http://qt.digia.com/\">"
-                "http://qt.digia.com/</a>)</li>");
+                "(<a href=\"http://qt.io/\">"
+                "http://qt.io/</a>)</li>");
 #ifndef OSKAR_NO_MS
     html.append("<li>casacore for Measurement Set export "
                 "(<a href=\"http://code.google.com/p/casacore/\">"
                 "http://code.google.com/p/casacore/</a>)</li>");
 #endif
-#ifndef OSKAR_NO_FITS
     html.append("<li>CFITSIO for FITS file export "
                 "(<a href=\"http://heasarc.gsfc.nasa.gov/fitsio/\">"
                 "http://heasarc.gsfc.nasa.gov/fitsio/</a>)</li>");
-#endif
     html.append("<li>ezOptionParser "
                 "(<a href=\"http://sourceforge.net/projects/ezoptionparser/\">"
                 "http://sourceforge.net/projects/ezoptionparser/</a>)</li>");

@@ -565,6 +565,61 @@ oskar_Mem* oskar_sky_gaussian_c(oskar_Sky* sky);
 OSKAR_EXPORT
 const oskar_Mem* oskar_sky_gaussian_c_const(const oskar_Sky* sky);
 
+/**
+ * @brief Returns the number of filter bands.
+ *
+ * @details
+ * Returns the number of filter bands.
+ *
+ * @param[in] sky Pointer to sky model.
+ */
+OSKAR_EXPORT
+int oskar_sky_num_filter_bands(const oskar_Sky* sky);
+
+/**
+ * @brief Returns a handle to the band filter radius values.
+ *
+ * @details
+ * Returns a handle to the band filter radius values.
+ *
+ * @param[in] sky Pointer to sky model.
+ */
+OSKAR_EXPORT
+oskar_Mem* oskar_sky_filter_band_radius_rad(oskar_Sky* sky);
+
+/**
+ * @brief Returns a handle to the band filter radius values.
+ *
+ * @details
+ * Returns a handle to the band filter radius values.
+ *
+ * @param[in] sky Pointer to sky model.
+ */
+OSKAR_EXPORT
+const oskar_Mem* oskar_sky_filter_band_radius_rad_const(const oskar_Sky* sky);
+
+/**
+ * @brief Returns a handle to the band filter flux values.
+ *
+ * @details
+ * Returns a handle to the band filter flux values.
+ *
+ * @param[in] sky Pointer to sky model.
+ */
+OSKAR_EXPORT
+oskar_Mem* oskar_sky_filter_band_flux_jy(oskar_Sky* sky);
+
+/**
+ * @brief Returns a handle to the band filter flux values.
+ *
+ * @details
+ * Returns a handle to the band filter flux values.
+ *
+ * @param[in] sky Pointer to sky model.
+ */
+OSKAR_EXPORT
+const oskar_Mem* oskar_sky_filter_band_flux_jy_const(const oskar_Sky* sky);
+
 #ifdef __cplusplus
 }
 #endif

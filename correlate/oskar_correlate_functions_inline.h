@@ -45,6 +45,44 @@
 extern "C" {
 #endif
 
+/* Construct source brightness matrix (ignoring c, as it's Hermitian). */
+#define OSKAR_CONSTRUCT_B_FLOAT(B, I, Q, U, V, S) { \
+        float s_I, s_Q; s_I = I[S]; s_Q = Q[S]; \
+        B.b.x = U[S]; \
+        B.b.y = V[S]; \
+        B.a.x = s_I + s_Q; \
+        B.d.x = s_I - s_Q; }
+
+/* Construct source brightness matrix (ignoring c, as it's Hermitian). */
+#define OSKAR_CONSTRUCT_B_DOUBLE(B, I, Q, U, V, S) { \
+        double s_I, s_Q; s_I = I[S]; s_Q = Q[S]; \
+        B.b.x = U[S]; \
+        B.b.y = V[S]; \
+        B.a.x = s_I + s_Q; \
+        B.d.x = s_I - s_Q; }
+
+#define OSKAR_ADD_TO_VIS_POL(V, M, F) \
+        V->a.x += M.a.x * F; \
+        V->a.y += M.a.y * F; \
+        V->b.x += M.b.x * F; \
+        V->b.y += M.b.y * F; \
+        V->c.x += M.c.x * F; \
+        V->c.y += M.c.y * F; \
+        V->d.x += M.d.x * F; \
+        V->d.y += M.d.y * F;
+
+#if defined(__CUDACC__) && __CUDA_ARCH__ >= 350
+/* Uses __ldg() instruction for global load via texture cache. */
+/* Available only from CUDA architecture 3.5. */
+#define OSKAR_LOAD_MATRIX(M, J, IDX) \
+        M.a = __ldg(&(J[IDX].a)); \
+        M.b = __ldg(&(J[IDX].b)); \
+        M.c = __ldg(&(J[IDX].c)); \
+        M.d = __ldg(&(J[IDX].d));
+#else
+#define OSKAR_LOAD_MATRIX(M, J, IDX) M = J[IDX];
+#endif
+
 /**
  * @brief
  * Function to evaluate sinc(x) (single precision).
@@ -125,54 +163,20 @@ void oskar_accumulate_baseline_visibility_for_source_inline_f(
 {
     float4c m1, m2;
 
-    /* Construct source brightness matrix (ignoring c, as it's Hermitian). */
-    {
-        float s_I, s_Q;
-        s_I = I[source_id];
-        s_Q = Q[source_id];
-        m2.b.x = U[source_id];
-        m2.b.y = V[source_id];
-        m2.a.x = s_I + s_Q;
-        m2.d.x = s_I - s_Q;
-    }
+    /* Construct source brightness matrix. */
+    OSKAR_CONSTRUCT_B_FLOAT(m2, I, Q, U, V, source_id)
 
-#if defined(__CUDACC__) && __CUDA_ARCH__ >= 350
-    /* Uses __ldg() instruction for global load via texture cache. */
-    /* Available only from CUDA architecture 3.5. */
-    
     /* Multiply first Jones matrix with source brightness matrix. */
-    m1.a = __ldg(&(J_p[source_id].a));
-    m1.b = __ldg(&(J_p[source_id].b));
-    m1.c = __ldg(&(J_p[source_id].c));
-    m1.d = __ldg(&(J_p[source_id].d));
+    OSKAR_LOAD_MATRIX(m1, J_p, source_id)
     oskar_multiply_complex_matrix_hermitian_in_place_f(&m1, &m2);
 
     /* Multiply result with second (Hermitian transposed) Jones matrix. */
-    m2.a = __ldg(&(J_q[source_id].a));
-    m2.b = __ldg(&(J_q[source_id].b));
-    m2.c = __ldg(&(J_q[source_id].c));
-    m2.d = __ldg(&(J_q[source_id].d));
+    OSKAR_LOAD_MATRIX(m2, J_q, source_id)
     oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&m1, &m2);
-#else
-    /* Multiply first Jones matrix with source brightness matrix. */
-    m1 = J_p[source_id];
-    oskar_multiply_complex_matrix_hermitian_in_place_f(&m1, &m2);
-
-    /* Multiply result with second (Hermitian transposed) Jones matrix. */
-    m2 = J_q[source_id];
-    oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&m1, &m2);
-#endif /* __CUDA_ARCH__ >= 350 */
 
 #ifdef __CUDACC__
     /* Multiply result by smearing term and accumulate. */
-    V_pq->a.x += m1.a.x * smear;
-    V_pq->a.y += m1.a.y * smear;
-    V_pq->b.x += m1.b.x * smear;
-    V_pq->b.y += m1.b.y * smear;
-    V_pq->c.x += m1.c.x * smear;
-    V_pq->c.y += m1.c.y * smear;
-    V_pq->d.x += m1.d.x * smear;
-    V_pq->d.y += m1.d.y * smear;
+    OSKAR_ADD_TO_VIS_POL(V_pq, m1, smear)
 #else
     oskar_kahan_sum_multiply_complex_matrix_f(V_pq, m1, smear, guard);
 #endif /* __CUDACC__ */
@@ -223,53 +227,19 @@ void oskar_accumulate_baseline_visibility_for_source_inline_d(
 {
     double4c m1, m2;
 
-    /* Construct source brightness matrix (ignoring c, as it's Hermitian). */
-    {
-        double s_I, s_Q;
-        s_I = I[source_id];
-        s_Q = Q[source_id];
-        m2.b.x = U[source_id];
-        m2.b.y = V[source_id];
-        m2.a.x = s_I + s_Q;
-        m2.d.x = s_I - s_Q;
-    }
-
-#if defined(__CUDACC__) && __CUDA_ARCH__ >= 350
-    /* Uses __ldg() instruction for global load via texture cache. */
-    /* Available only from CUDA architecture 3.5. */
+    /* Construct source brightness matrix. */
+    OSKAR_CONSTRUCT_B_DOUBLE(m2, I, Q, U, V, source_id)
 
     /* Multiply first Jones matrix with source brightness matrix. */
-    m1.a = __ldg(&(J_p[source_id].a));
-    m1.b = __ldg(&(J_p[source_id].b));
-    m1.c = __ldg(&(J_p[source_id].c));
-    m1.d = __ldg(&(J_p[source_id].d));
+    OSKAR_LOAD_MATRIX(m1, J_p, source_id)
     oskar_multiply_complex_matrix_hermitian_in_place_d(&m1, &m2);
 
     /* Multiply result with second (Hermitian transposed) Jones matrix. */
-    m2.a = __ldg(&(J_q[source_id].a));
-    m2.b = __ldg(&(J_q[source_id].b));
-    m2.c = __ldg(&(J_q[source_id].c));
-    m2.d = __ldg(&(J_q[source_id].d));
+    OSKAR_LOAD_MATRIX(m2, J_q, source_id)
     oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(&m1, &m2);
-#else
-    /* Multiply first Jones matrix with source brightness matrix. */
-    m1 = J_p[source_id];
-    oskar_multiply_complex_matrix_hermitian_in_place_d(&m1, &m2);
-
-    /* Multiply result with second (Hermitian transposed) Jones matrix. */
-    m2 = J_q[source_id];
-    oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(&m1, &m2);
-#endif
 
     /* Multiply result by smearing term and accumulate. */
-    V_pq->a.x += m1.a.x * smear;
-    V_pq->a.y += m1.a.y * smear;
-    V_pq->b.x += m1.b.x * smear;
-    V_pq->b.y += m1.b.y * smear;
-    V_pq->c.x += m1.c.x * smear;
-    V_pq->c.y += m1.c.y * smear;
-    V_pq->d.x += m1.d.x * smear;
-    V_pq->d.y += m1.d.y * smear;
+    OSKAR_ADD_TO_VIS_POL(V_pq, m1, smear)
 }
 
 /**

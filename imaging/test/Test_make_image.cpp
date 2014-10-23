@@ -39,9 +39,7 @@
 #include <oskar_binary.h>
 #include <oskar_cmath.h>
 
-#ifndef OSKAR_NO_FITS
 #include "fits/oskar_fits_image_write.h"
-#endif
 
 #include <cstdio>
 #include <cstdlib>
@@ -116,11 +114,9 @@ TEST(make_image, test)
     oskar_image_write(image, NULL, image_file, idx, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-#ifndef OSKAR_NO_FITS
     const char* fits_file = "temp_test_image.fits";
     oskar_fits_image_write(image, NULL, fits_file, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
-#endif
 
     const char* vis_file = "temp_test_make_image.dat";
     oskar_Binary* h = oskar_binary_create(vis_file, 'w', &error);
@@ -137,9 +133,7 @@ TEST(make_image, test)
 
     oskar_vis_free(vis, &error);
     oskar_image_free(image, &error);
-#ifndef OSKAR_NO_FITS
     remove(fits_file);
-#endif
     remove(image_file);
     remove(vis_file);
 }
@@ -168,11 +162,9 @@ TEST(make_image, image_lm_grid)
     memcpy((double*)ptr + num_pixels, oskar_mem_void(m),
             num_pixels * sizeof(double));
 
-#ifndef OSKAR_NO_FITS
     const char* fits_file = "test_lm_grid.fits";
     oskar_fits_image_write(im, NULL, fits_file, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
-#endif
     const char* image_file = "test_lm_grid.img";
     oskar_image_write(im, NULL, image_file, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
@@ -180,9 +172,7 @@ TEST(make_image, image_lm_grid)
     oskar_image_free(im, &error);
     oskar_mem_free(l, &error);
     oskar_mem_free(m, &error);
-#ifndef OSKAR_NO_FITS
     remove(fits_file);
-#endif
     remove(image_file);
 }
 

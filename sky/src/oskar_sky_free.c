@@ -63,6 +63,8 @@ void oskar_sky_free(oskar_Sky* model, int* status)
     oskar_mem_free(model->gaussian_a, status);
     oskar_mem_free(model->gaussian_b, status);
     oskar_mem_free(model->gaussian_c, status);
+    oskar_mem_free(model->filter_band_flux_jy, status);
+    oskar_mem_free(model->filter_band_radius_rad, status);
 
     /* Free the structure itself. */
     free(model);

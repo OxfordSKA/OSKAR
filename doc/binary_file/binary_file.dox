@@ -352,9 +352,14 @@ stations, there will be \f$ n(n-1)/2 \f$ baselines.
 \clearpage
 \endlatexonly
 
-\subsection binary_tag_image Image Data Tags
+\subsection binary_tag_image Image Data Tags (Deprecated)
 
 Tags in this group have a group ID of 6.
+
+\attention
+Note that all existing image data tags are now deprecated.
+Standard FITS image files should be used instead.
+This section is provided for historical reasons only.
 
 | Tag ID | Description                                                        
 | ------ | --------------------------------------------------------------------
@@ -538,10 +543,10 @@ following index values:
     group tag for rotation measure.</td></tr>
 <tr><td>5</td><td>2014-07-16</td>
     <td>[2.5.0] Added spline data and element data tag groups.</td></tr>
-<tr><td>6</td><td>2014-10-10</td>
+<tr><td>6</td><td>2014-10-22</td>
     <td>[2.6.0] Updated for binary format version 2, which includes 
     chunk CRC codes. Added new diagram and clarified description of the
-    data chunks.</td></tr>
+    data chunks. Marked existing image data tags as deprecated.</td></tr>
 </table>
 
 */

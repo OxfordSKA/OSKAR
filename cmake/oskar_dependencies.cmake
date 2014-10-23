@@ -12,7 +12,6 @@
 #   CBLAS           (oskar -> to enable extended sources)
 #   LAPACK          (oskar -> to enable extended sources)
 #   casacore        (oskar_ms)
-#   cfitsio         (oskar_fits)
 #   MATLAB          (for MATLAB interface fuctions)
 #
 # =============================================================================
@@ -44,7 +43,6 @@ endif()
 #    find_package(Qt5Core)
 #endif()
 find_package(CasaCore)               # liboskar_ms
-find_package(CFitsio)                # liboskar_fits
 find_package(Matlab)                 # mex functions
 #find_package(PNG QUIET)             # For writing PNG images
 find_package(PythonLibs 2.7)         # For python interface
@@ -124,14 +122,6 @@ if (NOT CASACORE_FOUND)
     add_definitions(-DOSKAR_NO_MS)
 endif()
 
-if (NOT CFITSIO_FOUND)
-    message("===============================================================================")
-    message("-- WARNING: CFITSIO not found: "
-           "Unable to build OSKAR FITS library.")
-    message("===============================================================================")
-    add_definitions(-DOSKAR_NO_FITS)
-endif ()
-
 if (NOT OPENMP_FOUND)
     message("===============================================================================")
     message("-- WARNING: OpenMP not found: Unable to use multiple GPUs.")
@@ -158,14 +148,11 @@ message("-- INFO: The following OSKAR components will be built:")
 set(component_count 0)
 if (CUDA_FOUND)
     message("-- INFO:   - liboskar")
-    math(EXPR component_count '${component_count}+1')
+    message("-- INFO:   - liboskar_fits")
+    math(EXPR component_count '${component_count}+2')
 endif ()
 if (CASACORE_FOUND)
     message("-- INFO:   - liboskar_ms")
-    math(EXPR component_count '${component_count}+1')
-endif ()
-if (CFITSIO_FOUND AND CUDA_FOUND)
-    message("-- INFO:   - liboskar_fits")
     math(EXPR component_count '${component_count}+1')
 endif ()
 if (QT4_FOUND AND CUDA_FOUND)
@@ -221,9 +208,6 @@ if (LAPACK_FOUND)
 endif ()
 if (CASACORE_FOUND)
     message("-- INFO: CASACORE : ${CASACORE_LIBRARIES}")
-endif()
-if (CFITSIO_FOUND)
-    message("-- INFO: CFITSIO  : ${CFITSIO_LIBRARIES}")
 endif()
 if (QT4_FOUND)
     message("-- INFO: QT4      : ${QT_QTCORE_LIBRARY}")

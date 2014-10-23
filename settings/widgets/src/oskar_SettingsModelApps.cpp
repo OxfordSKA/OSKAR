@@ -136,7 +136,6 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     add_filter_group(group + "/filter");
     add_extended_group(group + "/extended_sources");
 
-#ifndef OSKAR_NO_FITS
     // FITS file import settings.
     group = "sky/fits_image";
     setLabel(group, "FITS image file settings");
@@ -156,9 +155,7 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     k = group + "/spectral_index";
     declare(k, "Spectral index", oskar_SettingsItem::DOUBLE, 0.0);
     setTooltip(k, "The spectral index of each pixel.");
-#endif
 
-#ifndef OSKAR_NO_FITS
     // HEALPix FITS file import settings.
     group = "sky/healpix_fits";
     setLabel(group, "HEALPix FITS file settings");
@@ -179,7 +176,6 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     setTooltip(k, "The physical units of pixels in the input map.");
     add_filter_group(group + "/filter");
     add_extended_group(group + "/extended_sources");
-#endif
 
     // Sky model generator settings.
     setLabel("sky/generator", "Generators");
@@ -1209,6 +1205,7 @@ void oskar_SettingsModelApps::init_settings_beampattern()
             "Appropriate suffixes and extensions will be added to this, "
             "based on the settings below.");
 
+#if 0
     // OSKAR image file options.
     k = group + "/oskar_image_file";
     setLabel(k, "OSKAR image file options");
@@ -1228,8 +1225,8 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     declare(k, "Total intensity pattern", oskar_SettingsItem::BOOL, false);
     setTooltip(k, "If true, save the total intensity beam. This is evaluated as "
             "the Stokes I response of the beam pattern auto-correlation. ");
+#endif
 
-#ifndef OSKAR_NO_FITS
     // FITS file options.
     k = group + "/fits_file";
     setLabel(k, "FITS file options");
@@ -1245,7 +1242,6 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     declare(k, "Total intensity pattern", oskar_SettingsItem::BOOL, false);
     setTooltip(k, "If true, save the total intensity beam. This is evaluated as "
             "the Stokes-I response of the beam pattern auto-correlation. ");
-#endif
 }
 
 void oskar_SettingsModelApps::init_settings_image()
@@ -1355,15 +1351,15 @@ void oskar_SettingsModelApps::init_settings_image()
             "constructed as "
             "<code><b>&lt;root&gt;_&lt;image_type&gt;.&lt;extension&gt;</b></code>");
 
-#ifndef OSKAR_NO_FITS
     k = group + "/fits_image";
     declare(k, "Save FITS image", oskar_SettingsItem::BOOL, true);
     setTooltip(k, "If true, save the image in FITS format.");
-#endif
 
+#if 0
     k = group + "/oskar_image";
     declare(k, "Save OSKAR image", oskar_SettingsItem::BOOL, false);
     setTooltip(k, "If true, save the image in OSKAR image binary format.");
+#endif
 
     k = group + "/overwrite";
     declare(k, "Overwrite existing images", oskar_SettingsItem::BOOL, true);

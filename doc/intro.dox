@@ -171,9 +171,37 @@ adding missing features. The current items on the high-priority list include:
    during calibration
  - Inclusion of a simple ionosphere model.
 
-
 \latexonly
 \newpage
+\endlatexonly
+
+\section intro_ack Acknowledgements
+
+OSKAR 2 has been developed using hardware donated by NVIDIA UK.
+
+OSKAR 2 directly links against or uses the following software libraries:
+- NVIDIA CUDA (http://www.nvidia.com/object/cuda_home.html)
+- LAPACK (http://www.netlib.org/lapack/)
+- CBLAS (http://www.netlib.org/blas/)
+- DIERCKX for surface fitting using splines (http://netlib.org/dierckx/)
+- The Qt cross-platform application framework (http://qt.io/)
+- casacore for Measurement Set export (http://code.google.com/p/casacore/)
+- CFITSIO for FITS file export (http://heasarc.gsfc.nasa.gov/fitsio/)
+- ezOptionParser (http://sourceforge.net/projects/ezoptionparser/)
+
+The following tools have been used during the development of OSKAR 2:
+- The CMake cross-platform build system (http://www.cmake.org/)
+- The Google Test unit-testing framework (http://code.google.com/p/googletest/)
+- The Eclipse source-code IDE (http://www.eclipse.org/)
+- The Valgrind memory checker (http://valgrind.org/)
+- The GCC toolchain (http://gcc.gnu.org/)
+- MATLAB (http://www.mathworks.co.uk/products/matlab/)
+
+This research has made use of SAOImage DS9, developed by 
+Smithsonian Astrophysical Observatory.
+
+\latexonly
+\vskip 2cm
 \endlatexonly
 
 <b>Revision History</b>

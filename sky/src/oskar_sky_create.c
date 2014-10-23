@@ -98,6 +98,10 @@ oskar_Sky* oskar_sky_create(int type, int location, int num_sources,
     model->gaussian_b = oskar_mem_create(type, location, capacity, status);
     model->gaussian_c = oskar_mem_create(type, location, capacity, status);
 
+    model->num_filter_bands = 0;
+    model->filter_band_radius_rad = oskar_mem_create(type, location, 0, status);
+    model->filter_band_flux_jy = oskar_mem_create(type, location, 0, status);
+
     /* Return pointer to sky model. */
     return model;
 }

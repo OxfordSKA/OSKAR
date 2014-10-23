@@ -27,10 +27,7 @@
  */
 
 #include "apps/lib/oskar_OptionParser.h"
-
-#ifndef OSKAR_NO_FITS
 #include "fits/oskar_fits_image_to_sky_model.h"
-#endif
 
 #include <oskar_sky.h>
 #include <oskar_get_error_string.h>
@@ -42,7 +39,6 @@
 int main(int argc, char** argv)
 {
     // Check if built with FITS support.
-#ifndef OSKAR_NO_FITS
     int error = OSKAR_SUCCESS;
 
     oskar_OptionParser opt("oskar_fits_image_to_sky_model",
@@ -97,10 +93,4 @@ int main(int argc, char** argv)
 
     oskar_sky_free(sky, &error);
     return OSKAR_SUCCESS;
-
-#else
-    // No FITS support.
-    oskar_log_error(0, "OSKAR was not compiled with FITS support.");
-    return -1;
-#endif
 }

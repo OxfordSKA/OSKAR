@@ -10,10 +10,7 @@ if (CUDA_FOUND)
         Test_make_image.cpp
     )
     add_executable(${name} ${${name}_SRC})
-    target_link_libraries(${name} oskar gtest)
-    if(CFITSIO_FOUND)
-        target_link_libraries(${name} oskar_fits)
-    endif()
+    target_link_libraries(${name} oskar gtest oskar_fits)
     set_target_properties(${name} PROPERTIES
         COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
         LINK_FLAGS "${OpenMP_CXX_FLAGS}")

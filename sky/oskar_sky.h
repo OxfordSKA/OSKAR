@@ -73,6 +73,7 @@ enum {
 #include <oskar_sky_append.h>
 #include <oskar_sky_combine_set.h>
 #include <oskar_sky_copy_contents.h>
+#include <oskar_sky_copy_filter_bands.h>
 #include <oskar_sky_create.h>
 #include <oskar_sky_create_copy.h>
 #include <oskar_sky_evaluate_gaussian_source_parameters.h>
@@ -89,6 +90,7 @@ enum {
 #include <oskar_sky_rotate_to_position.h>
 #include <oskar_sky_save.h>
 #include <oskar_sky_scale_flux_with_frequency.h>
+#include <oskar_sky_set_filter_bands.h>
 #include <oskar_sky_set_gaussian_parameters.h>
 #include <oskar_sky_set_source.h>
 #include <oskar_sky_set_spectral_index.h>

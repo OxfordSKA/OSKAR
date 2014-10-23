@@ -3,7 +3,7 @@
 \page example Example
 
 \latexonly
-\def \docversion{10}
+\def \docversion{11}
 \endlatexonly
 
 \section example_intro Introduction
@@ -16,7 +16,7 @@ Note that all steps are intended to be followed in order.
 \section example_getting_started Getting Started
 
 This example assumes that OSKAR has been built successfully with the CUDA,
-Qt4, CBLAS, LAPACK, and CFITSIO dependencies satisfied (for details, see
+Qt4, CBLAS, and LAPACK dependencies satisfied (for details, see
 the install guide documentation).
 
 \subsection example_obtaining_setup_files Obtaining the Example Setup Files
@@ -352,5 +352,6 @@ pattern for the same time-step is \ref example_fit_beam_pattern "shown below".
 | 8        | 2013-11-13 | Updated for revised beam pattern settings in OSKAR 2.3.0
 | 9        | 2014-07-22 | Updated for new element pattern fitting procedure in OSKAR 2.5.0.
 | 10       | 2014-09-09 | Updated figures for revised default settings in OSKAR 2.5.1.
+| 11       | 2014-10-21 | Removed reference to CFITSIO.
 
 */

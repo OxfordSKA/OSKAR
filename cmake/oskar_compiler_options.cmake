@@ -27,6 +27,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/correlate
     ${PROJECT_SOURCE_DIR}/element
     ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include
+    ${PROJECT_SOURCE_DIR}/extern/cfitsio-3.37
     ${PROJECT_SOURCE_DIR}/imaging
     ${PROJECT_SOURCE_DIR}/interferometry
     ${PROJECT_SOURCE_DIR}/jones

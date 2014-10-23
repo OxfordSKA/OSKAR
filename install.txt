@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.5                                          Last update: 17 Sept 2014 |
+| OSKAR 2.6                                          Last update:  21 Oct 2014 |
 +------------------------------------------------------------------------------+
 
 1. Introduction
@@ -15,9 +15,8 @@ Microsoft Windows may be possible, but is not currently supported.
 OSKAR depends on a number of other libraries. The main components of OSKAR
 require CUDA 4.0 or later and Qt 4.6 or later to be installed on the target
 system, and also CBLAS and LAPACK for full functionality. Additionally, the
-CFITSIO and casacore libraries must be present if FITS images and Measurement
-Sets are to be exported. The MATLAB interface will be built if MATLAB R2010b
-or later is found.
+casacore libraries must be present if Measurement Sets are to be exported. 
+The MATLAB interface will be built if MATLAB R2010b or later is found.
 
 Please ensure that the required dependencies are installed before proceeding
 further.
@@ -34,9 +33,6 @@ possible according to the following dependencies being satisfied:
         - Optional for: liboskar (to enable the use of extended sources)
     * LAPACK
         - Optional for: liboskar (to enable the use of extended sources)
-    * CFITSIO
-        - Required for: liboskar_fits
-        - Optional for: liboskar_apps, Applications (for FITS file export)
     * casacore (>= 1.5.0)
         - Required for: liboskar_ms
         - Optional for: liboskar_apps, Applications (for Measurement Set export)
@@ -89,20 +85,6 @@ Advanced Build Options:
         NOTE: This should only be used in special cases, where the version
         of CBLAS installed in the system library path can't be used to build
         OSKAR.
-
-    * -DCFITSIO_LIB_DIR=<path> (default: searches the system library paths)
-        Specifies a custom path in which to look for the CFITSIO library
-        (libcfitsio.so).
-        NOTE: This should only be used in special cases, where the version
-        of CFITSIO installed in the system library path can't be used to build
-        OSKAR.
-
-    * -DCFITSIO_INC_DIR=<path> (default: searches the system include paths)
-        Specifies a custom path in which to look for the CFITSIO library
-        headers (fitsio.h and others).
-        NOTE: This should only be used in special cases, where the version
-        of CFITSIO headers installed in system include path can't be used to
-        build OSKAR.
 
     * -DCASACORE_LIB_DIR=<path> (default: searches the system library paths)
         Specifies a custom path in which to look for the CasaCore libraries
