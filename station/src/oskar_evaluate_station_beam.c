@@ -60,7 +60,7 @@ static void compute_relative_directions(oskar_Mem* l, oskar_Mem* m,
 
 void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
         oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int coord_type,
-        double ra0, double dec0, const oskar_Station* station,
+        double lon0_rad, double lat0_rad, const oskar_Station* station,
         oskar_StationWork* work, oskar_RandomState* rand_state,
         double frequency, double GAST, int* status)
 {
@@ -114,9 +114,9 @@ void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
         if (coord_type == OSKAR_ENU_DIRECTION_COSINES)
         {
             double t_x, t_y, t_z, ha0;
-            ha0 = (GAST + oskar_station_lon_rad(station)) - ra0;
+            ha0 = (GAST + oskar_station_lon_rad(station)) - lon0_rad;
             oskar_convert_relative_direction_cosines_to_enu_direction_cosines_d(
-                    &t_x, &t_y, &t_z, 1, &c_x, &c_y, &c_z, ha0, dec0,
+                    &t_x, &t_y, &t_z, 1, &c_x, &c_y, &c_z, ha0, lat0_rad,
                     oskar_station_lat_rad(station));
             c_x = t_x;
             c_y = t_y;

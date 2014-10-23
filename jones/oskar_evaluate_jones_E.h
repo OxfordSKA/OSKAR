@@ -45,28 +45,40 @@ extern "C" {
 #endif
 
 /**
- * @brief Evaluates a set of E-Jones matrices for a number of stations
- * and source directions.
+ * @brief
+ * Evaluates a set of E-Jones matrices for a number of stations and
+ * source positions.
  *
  * @details
- * Note: Processing in this function is performed on the GPU and therefore
- * the memory passed to and from this function must be allocated on the
- * GPU.
+ * Evaluates station beams for a telescope model at the specified source
+ * positions, storing the results in the Jones matrix data structure.
  *
- * @param[out] E            Output set of Jones matrices.
- * @param[in]  num_sources  Number of sources to use from the sky model.
- * @param[in]  sky          Input sky model.
- * @param[in]  telescope    Input telescope model.
- * @param[in]  gast         The Greenwich Apparent Sidereal Time, in radians.
- * @param[in]  frequency_hz The observing frequency, in Hz.
- * @param[in]  work         Pointer to structure holding work arrays.
- * @param[in]  random_state Structure holding curand states.
- * @param[in,out] status    Status return code.
+ * If all stations are marked as identical, the results for the first station
+ * are copied into the results for the others.
+ *
+ * @param[out] E              Output set of Jones matrices.
+ * @param[in]  num_points     Number of direction cosines given.
+ * @param[in]  x              Direction cosines (x direction).
+ * @param[in]  y              Direction cosines (y direction).
+ * @param[in]  z              Direction cosines (z direction).
+ * @param[in]  coord_type     Type of direction cosines
+ *                            (OSKAR_RELATIVE_DIRECTIONS or
+ *                            OSKAR_ENU_DIRECTIONS).
+ * @param[in]  lon0_rad       Longitude of phase centre, in radians.
+ * @param[in]  lat0_rad       Latitude of phase centre, in radians.
+ * @param[in]  telescope      Input telescope model.
+ * @param[in]  gast           The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in]  frequency_hz   The observing frequency, in Hz.
+ * @param[in]  work           Pointer to structure holding work arrays.
+ * @param[in]  random_state   Random state.
+ * @param[in,out] status      Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_jones_E(oskar_Jones* E, int num_sources, oskar_Sky* sky,
-        const oskar_Telescope* telescope, double gast, double frequency_hz,
-        oskar_StationWork* work, oskar_RandomState* random_state, int* status);
+void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, oskar_Mem* x,
+        oskar_Mem* y, oskar_Mem* z, int coord_type, double lon0_rad,
+        double lat0_rad, const oskar_Telescope* telescope, double gast,
+        double frequency_hz, oskar_StationWork* work,
+        oskar_RandomState* random_state, int* status);
 
 #ifdef __cplusplus
 }

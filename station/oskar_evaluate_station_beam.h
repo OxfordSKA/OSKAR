@@ -51,7 +51,7 @@ extern "C" {
  * This top-level function evaluates the beam pattern of a station at the
  * specified positions, given as direction cosines.
  *
- * The Right Ascension and Declination of the phase centre are used only
+ * The longitude and latitude of the phase centre are used only
  * when performing beam normalisation for ENU directions.
  *
  * @param[out] beam_pattern   Output beam pattern data.
@@ -60,10 +60,10 @@ extern "C" {
  * @param[in] y               Direction cosines (y direction).
  * @param[in] z               Direction cosines (z direction).
  * @param[in] coord_type      Type of direction cosines
- *                            (OSKAR_RELATIVE_DIRECTION_COSINES or
- *                            OSKAR_ENU_DIRECTION_COSINES).
- * @param[in] ra0             Right ascension of phase centre, in radians.
- * @param[in] dec0            Declination of phase centre, in radians.
+ *                            (OSKAR_RELATIVE_DIRECTIONS or
+ *                            OSKAR_ENU_DIRECTIONS).
+ * @param[in] lon0_rad        Longitude of phase centre, in radians.
+ * @param[in] lat0_rad        Latitude of phase centre, in radians.
  * @param[in] station         Station model.
  * @param[in] work            Station beam work arrays.
  * @param[in] rand_state      Random state.
@@ -73,7 +73,7 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
         oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int coord_type,
-        double ra0, double dec0, const oskar_Station* station,
+        double lon0_rad, double lat0_rad, const oskar_Station* station,
         oskar_StationWork* work, oskar_RandomState* rand_state,
         double frequency, double gast, int* status);
 

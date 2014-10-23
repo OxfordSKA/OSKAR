@@ -40,7 +40,7 @@ extern "C" {
 
 /* Single precision. */
 void oskar_evaluate_jones_R_f(float4c* jones, int num_sources,
-        const float* ra, const float* dec, float latitude_rad,
+        const float* ra_rad, const float* dec_rad, float latitude_rad,
         float lst_rad)
 {
     int i;
@@ -55,8 +55,8 @@ void oskar_evaluate_jones_R_f(float4c* jones, int num_sources,
         float4c J;
 
         /* Compute the source hour angle and parallactic angle. */
-        ha = lst_rad - ra[i]; /* HA = LST - RA. */
-        q = oskar_parallactic_angle_f(ha, dec[i], cos_lat, sin_lat);
+        ha = lst_rad - ra_rad[i]; /* HA = LST - RA. */
+        q = oskar_parallactic_angle_f(ha, dec_rad[i], cos_lat, sin_lat);
         cos_q = cosf(q);
         sin_q = sinf(q);
 
@@ -77,7 +77,7 @@ void oskar_evaluate_jones_R_f(float4c* jones, int num_sources,
 
 /* Double precision. */
 void oskar_evaluate_jones_R_d(double4c* jones, int num_sources,
-        const double* ra, const double* dec, double latitude_rad,
+        const double* ra_rad, const double* dec_rad, double latitude_rad,
         double lst_rad)
 {
     int i;
@@ -92,8 +92,8 @@ void oskar_evaluate_jones_R_d(double4c* jones, int num_sources,
         double4c J;
 
         /* Compute the source hour angle and parallactic angle. */
-        ha = lst_rad - ra[i]; /* HA = LST - RA. */
-        q = oskar_parallactic_angle_d(ha, dec[i], cos_lat, sin_lat);
+        ha = lst_rad - ra_rad[i]; /* HA = LST - RA. */
+        q = oskar_parallactic_angle_d(ha, dec_rad[i], cos_lat, sin_lat);
         cos_q = cos(q);
         sin_q = sin(q);
 
@@ -114,7 +114,7 @@ void oskar_evaluate_jones_R_d(double4c* jones, int num_sources,
 
 /* Wrapper. */
 void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
-        const oskar_Mem* ra, const oskar_Mem* dec,
+        const oskar_Mem* ra_rad, const oskar_Mem* dec_rad,
         const oskar_Telescope* telescope, double gast, int* status)
 {
     int i, n, num_stations, jones_type, base_type, location;
@@ -122,7 +122,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
     oskar_Mem *R_station;
 
     /* Check all inputs. */
-    if (!R || !ra || !dec || !telescope || !status)
+    if (!R || !ra_rad || !dec_rad || !telescope || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -139,8 +139,8 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
     n = (oskar_telescope_common_horizon(telescope) ? 1 : num_stations);
 
     /* Check that the data dimensions are OK. */
-    if (num_sources > (int)oskar_mem_length(ra) ||
-            num_sources > (int)oskar_mem_length(dec) ||
+    if (num_sources > (int)oskar_mem_length(ra_rad) ||
+            num_sources > (int)oskar_mem_length(dec_rad) ||
             num_sources > oskar_jones_num_sources(R) ||
             num_stations != oskar_telescope_num_stations(telescope))
     {
@@ -149,8 +149,8 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
     }
 
     /* Check that the data is in the right location. */
-    if (location != oskar_mem_location(ra) ||
-            location != oskar_mem_location(dec))
+    if (location != oskar_mem_location(ra_rad) ||
+            location != oskar_mem_location(dec_rad))
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
@@ -162,8 +162,8 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
         *status = OSKAR_ERR_BAD_JONES_TYPE;
         return;
     }
-    if (base_type != oskar_mem_precision(ra) ||
-            base_type != oskar_mem_precision(dec))
+    if (base_type != oskar_mem_precision(ra_rad) ||
+            base_type != oskar_mem_precision(dec_rad))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
@@ -189,16 +189,16 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
             {
                 oskar_evaluate_jones_R_cuda_f(
                         oskar_mem_float4c(R_station, status), num_sources,
-                        oskar_mem_float_const(ra, status),
-                        oskar_mem_float_const(dec, status),
+                        oskar_mem_float_const(ra_rad, status),
+                        oskar_mem_float_const(dec_rad, status),
                         (float)latitude, (float)lst);
             }
             else if (base_type == OSKAR_DOUBLE)
             {
                 oskar_evaluate_jones_R_cuda_d(
                         oskar_mem_double4c(R_station, status), num_sources,
-                        oskar_mem_double_const(ra, status),
-                        oskar_mem_double_const(dec, status),
+                        oskar_mem_double_const(ra_rad, status),
+                        oskar_mem_double_const(dec_rad, status),
                         latitude, lst);
             }
         }
@@ -224,16 +224,16 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
             {
                 oskar_evaluate_jones_R_f(
                         oskar_mem_float4c(R_station, status), num_sources,
-                        oskar_mem_float_const(ra, status),
-                        oskar_mem_float_const(dec, status),
+                        oskar_mem_float_const(ra_rad, status),
+                        oskar_mem_float_const(dec_rad, status),
                         (float)latitude, (float)lst);
             }
             else if (base_type == OSKAR_DOUBLE)
             {
                 oskar_evaluate_jones_R_d(
                         oskar_mem_double4c(R_station, status), num_sources,
-                        oskar_mem_double_const(ra, status),
-                        oskar_mem_double_const(dec, status),
+                        oskar_mem_double_const(ra_rad, status),
+                        oskar_mem_double_const(dec_rad, status),
                         latitude, lst);
             }
         }

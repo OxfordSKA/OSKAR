@@ -425,8 +425,13 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
             // Evaluate station beam (Jones E: may be matrix).
             oskar_timer_resume(timers->tmr_E);
-            oskar_evaluate_jones_E(E, n_src, local_sky, tel, gast, frequency,
-                    work, random_state, status);
+            oskar_evaluate_jones_E(E, n_src,
+                    oskar_sky_l(local_sky),
+                    oskar_sky_m(local_sky),
+                    oskar_sky_n(local_sky), OSKAR_RELATIVE_DIRECTION_COSINES,
+                    oskar_sky_reference_ra_rad(local_sky),
+                    oskar_sky_reference_dec_rad(local_sky),
+                    tel, gast, frequency, work, random_state, status);
             oskar_timer_pause(timers->tmr_E);
 
 #if 0

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ extern "C" {
 
 /* Single precision. */
 void oskar_evaluate_jones_R_cuda_f(float4c* d_jones, int num_sources,
-        const float* d_ra, const float* d_dec, float latitude_rad,
+        const float* d_ra_rad, const float* d_dec_rad, float latitude_rad,
         float lst_rad)
 {
     float cos_lat, sin_lat;
@@ -50,12 +50,13 @@ void oskar_evaluate_jones_R_cuda_f(float4c* d_jones, int num_sources,
     cos_lat = cos(latitude_rad);
     sin_lat = sin(latitude_rad);
     oskar_evaluate_jones_R_cudak_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (d_jones, num_sources, d_ra, d_dec, cos_lat, sin_lat, lst_rad);
+            (d_jones, num_sources, d_ra_rad, d_dec_rad, cos_lat, sin_lat,
+                    lst_rad);
 }
 
 /* Double precision. */
 void oskar_evaluate_jones_R_cuda_d(double4c* d_jones, int num_sources,
-        const double* d_ra, const double* d_dec, double latitude_rad,
+        const double* d_ra_rad, const double* d_dec_rad, double latitude_rad,
         double lst_rad)
 {
     double cos_lat, sin_lat;
@@ -68,7 +69,8 @@ void oskar_evaluate_jones_R_cuda_d(double4c* d_jones, int num_sources,
     cos_lat = cos(latitude_rad);
     sin_lat = sin(latitude_rad);
     oskar_evaluate_jones_R_cudak_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (d_jones, num_sources, d_ra, d_dec, cos_lat, sin_lat, lst_rad);
+            (d_jones, num_sources, d_ra_rad, d_dec_rad, cos_lat, sin_lat,
+                    lst_rad);
 }
 
 #ifdef __cplusplus
@@ -81,7 +83,7 @@ void oskar_evaluate_jones_R_cuda_d(double4c* d_jones, int num_sources,
 /* Single precision. */
 __global__
 void oskar_evaluate_jones_R_cudak_f(float4c* jones, const int num_sources,
-        const float* ra, const float* dec, const float cos_lat,
+        const float* ra_rad, const float* dec_rad, const float cos_lat,
         const float sin_lat, const float lst_rad)
 {
     float c_ha, c_dec, q, sin_q, cos_q;
@@ -92,8 +94,8 @@ void oskar_evaluate_jones_R_cudak_f(float4c* jones, const int num_sources,
     if (s >= num_sources) return;
 
     /* Copy the data from global memory. */
-    c_ha = ra[s]; /* Source RA, but will be source hour angle. */
-    c_dec = dec[s];
+    c_ha = ra_rad[s]; /* Source RA, but will be source hour angle. */
+    c_dec = dec_rad[s];
 
     /* Compute the source hour angle. */
     c_ha = lst_rad - c_ha; /* HA = LST - RA. */
@@ -115,7 +117,7 @@ void oskar_evaluate_jones_R_cudak_f(float4c* jones, const int num_sources,
 /* Double precision. */
 __global__
 void oskar_evaluate_jones_R_cudak_d(double4c* jones, int num_sources,
-        const double* ra, const double* dec, const double cos_lat,
+        const double* ra_rad, const double* dec_rad, const double cos_lat,
         const double sin_lat, const double lst_rad)
 {
     double c_ha, c_dec, q, sin_q, cos_q;
@@ -126,8 +128,8 @@ void oskar_evaluate_jones_R_cudak_d(double4c* jones, int num_sources,
     if (s >= num_sources) return;
 
     /* Copy the data from global memory. */
-    c_ha = ra[s]; /* Source RA, but will be source hour angle. */
-    c_dec = dec[s];
+    c_ha = ra_rad[s]; /* Source RA, but will be source hour angle. */
+    c_dec = dec_rad[s];
 
     /* Compute the source hour angle. */
     c_ha = lst_rad - c_ha; /* HA = LST - RA. */

@@ -98,9 +98,7 @@ TEST(evaluate_jones_E, evaluate_e)
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Construct a sky model.
-    int num_sources = 0;
-    oskar_Sky* sky_cpu = oskar_sky_create(OSKAR_SINGLE,
-            OSKAR_CPU, num_sources, &error);
+    oskar_Sky* sky_cpu = oskar_sky_create(OSKAR_SINGLE, OSKAR_CPU, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
     const float deg2rad = (float) M_PI / 180.0f;
     float centre_long = 180.0f * deg2rad;
@@ -119,33 +117,31 @@ TEST(evaluate_jones_E, evaluate_e)
             size_long, size_lat, sep_long, sep_lat, force_constant_sep,
             set_centre_after, rho, force_centre_point, force_to_edges,
             projection_type);
-    num_sources = positions.generate(0, 0);
+    int num_sources = positions.generate(0, 0);
     oskar_sky_resize(sky_cpu, num_sources, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
     positions.generate(oskar_mem_float(oskar_sky_ra_rad(sky_cpu), &error),
             oskar_mem_float(oskar_sky_dec_rad(sky_cpu), &error));
+    oskar_sky_evaluate_relative_direction_cosines(sky_cpu,
+            0.0, M_PI/2.0, &error);
 
-//    error = oskar_sky_write("temp_test_sky.txt", &sky_cpu);
-//    ASSERT_EQ(0, error) << oskar_get_error_string(error)
-
-    // Copy sky to the GPU
-    oskar_Sky* sky_gpu = oskar_sky_create_copy(sky_cpu,
-            OSKAR_GPU, &error);
-    ASSERT_EQ(0, error) << oskar_get_error_string(error);
-
+    // Set up GPU memory.
+    oskar_Sky* sky_gpu = oskar_sky_create_copy(sky_cpu, OSKAR_GPU, &error);
+    oskar_sky_free(sky_cpu, &error);
     oskar_Jones* E = oskar_jones_create(OSKAR_SINGLE_COMPLEX,
             OSKAR_GPU, num_stations, num_sources, &error);
-    ASSERT_EQ(0, error) << oskar_get_error_string(error);
-
     oskar_StationWork* work = oskar_station_work_create(OSKAR_SINGLE,
             OSKAR_GPU, &error);
-    oskar_evaluate_jones_E(E, oskar_sky_num_sources(sky_gpu), sky_gpu, tel_gpu,
-            gast, frequency, work, random_state, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    // Free the sky models.
-    oskar_sky_free(sky_cpu, &error);
-    oskar_sky_free(sky_gpu, &error);
+    // Evaluate Jones E.
+    oskar_evaluate_jones_E(E, oskar_sky_num_sources(sky_gpu),
+            oskar_sky_l(sky_gpu), oskar_sky_m(sky_gpu), oskar_sky_n(sky_gpu),
+            OSKAR_RELATIVE_DIRECTION_COSINES,
+            oskar_sky_reference_ra_rad(sky_gpu),
+            oskar_sky_reference_dec_rad(sky_gpu),
+            tel_gpu, gast, frequency, work, random_state, &error);
+    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Save to file for plotting.
     const char* filename = "temp_test_E_jones.txt";
@@ -161,6 +157,7 @@ TEST(evaluate_jones_E, evaluate_e)
                 oskar_station_work_enu_direction_z(work),
                 E_station);
     }
+    oskar_mem_free(E_station, &error);
     fclose(file);
     remove(filename);
 
@@ -182,9 +179,9 @@ TEST(evaluate_jones_E, evaluate_e)
      */
     oskar_random_state_free(random_state, &error);
     oskar_jones_free(E, &error);
+    oskar_sky_free(sky_gpu, &error);
     oskar_telescope_free(tel_gpu, &error);
     oskar_station_work_free(work, &error);
-    oskar_mem_free(E_station, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 }
 

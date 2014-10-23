@@ -59,8 +59,8 @@ extern "C" {
  *
  * @param[out] jones       Output set of Jones matrices.
  * @param[in] num_sources  Number of source positions.
- * @param[in] ra           Source Right Ascension coordinates, in radians.
- * @param[in] dec          Source Declination coordinates, in radians.
+ * @param[in] ra_rad       Source Right Ascension coordinates, in radians.
+ * @param[in] dec_rad      Source Declination coordinates, in radians.
  * @param[in] latitude_rad The observer's latitude, in radians.
  * @param[in] lst_rad      The Local Apparent Sidereal Time, in radians.
  */
@@ -85,14 +85,14 @@ void oskar_evaluate_jones_R_f(float4c* jones, int num_sources,
  *
  * @param[out] jones       Output set of Jones matrices.
  * @param[in] num_sources  Number of source positions.
- * @param[in] ra           Source Right Ascension coordinates, in radians.
- * @param[in] dec          Source Declination coordinates, in radians.
+ * @param[in] ra_rad       Source Right Ascension coordinates, in radians.
+ * @param[in] dec_rad      Source Declination coordinates, in radians.
  * @param[in] latitude_rad The observer's latitude, in radians.
  * @param[in] lst_rad      The Local Apparent Sidereal Time, in radians.
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_R_d(double4c* jones, int num_sources,
-        const double* ra, const double* dec, double latitude_rad,
+        const double* ra_rad, const double* dec_rad, double latitude_rad,
         double lst_rad);
 
 /**
@@ -112,15 +112,15 @@ void oskar_evaluate_jones_R_d(double4c* jones, int num_sources,
  *
  * @param[out] R          Output set of Jones matrices.
  * @param[in] num_sources Number of sources to use from coordinate arrays.
- * @param[in] ra          Input Right Ascension values, in radians.
- * @param[in] dec         Input Declination values, in radians.
+ * @param[in] ra_rad      Input Right Ascension values, in radians.
+ * @param[in] dec_rad     Input Declination values, in radians.
  * @param[in] telescope   Input telescope model.
  * @param[in] gast        The Greenwich Apparent Sidereal Time, in radians.
  * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
-        const oskar_Mem* ra, const oskar_Mem* dec,
+        const oskar_Mem* ra_rad, const oskar_Mem* dec_rad,
         const oskar_Telescope* telescope, double gast, int* status);
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,14 +58,14 @@ extern "C" {
  *
  * @param[out] d_jones     Output set of Jones matrices.
  * @param[in] num_sources  Number of source positions.
- * @param[in] d_ra         Source Right Ascension coordinates, in radians.
- * @param[in] d_dec        Source Declination coordinates, in radians.
+ * @param[in] d_ra_rad     Source Right Ascension coordinates, in radians.
+ * @param[in] d_dec_rad    Source Declination coordinates, in radians.
  * @param[in] latitude_rad The observer's latitude, in radians.
  * @param[in] lst_rad      The Local Apparent Sidereal Time, in radians.
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_R_cuda_f(float4c* d_jones, int num_sources,
-        const float* d_ra, const float* d_dec, float latitude_rad,
+        const float* d_ra_rad, const float* d_dec_rad, float latitude_rad,
         float lst_rad);
 
 /**
@@ -86,70 +86,28 @@ void oskar_evaluate_jones_R_cuda_f(float4c* d_jones, int num_sources,
  *
  * @param[out] d_jones     Output set of Jones matrices.
  * @param[in] num_sources  Number of source positions.
- * @param[in] d_ra         Source Right Ascension coordinates, in radians.
- * @param[in] d_dec        Source Declination coordinates, in radians.
+ * @param[in] d_ra_rad     Source Right Ascension coordinates, in radians.
+ * @param[in] d_dec_rad    Source Declination coordinates, in radians.
  * @param[in] latitude_rad The observer's latitude, in radians.
  * @param[in] lst_rad      The Local Apparent Sidereal Time, in radians.
  */
 OSKAR_EXPORT
 void oskar_evaluate_jones_R_cuda_d(double4c* d_jones, int num_sources,
-        const double* d_ra, const double* d_dec, double latitude_rad,
+        const double* d_ra_rad, const double* d_dec_rad, double latitude_rad,
         double lst_rad);
 
 #ifdef __CUDACC__
 
-/**
- * @brief
- * CUDA kernel to construct matrices for parallactic angle rotation
- * (single precision).
- *
- * @details
- * This CUDA kernel constructs a set of Jones matrices that will transform the
- * equatorial linear Stokes parameters into the local horizontal frame of the
- * station. This corresponds to a rotation by the parallactic angle (q) for
- * each source. The Jones matrix is:
- *
- * ( cos(q)  -sin(q) )
- * ( sin(q)   cos(q) )
- *
- * @param[out] jones      The output array of Jones matrices per source.
- * @param[in] num_sources The number of source positions.
- * @param[in] ra          The source Right Ascensions in radians.
- * @param[in] dec         The source Declinations in radians.
- * @param[in] cos_lat     The cosine of the geographic latitude.
- * @param[in] sin_lat     The sine of the geographic latitude.
- * @param[in] lst_rad     The local sidereal time in radians.
- */
+/* Kernels. */
+
 __global__
 void oskar_evaluate_jones_R_cudak_f(float4c* jones, const int num_sources,
-        const float* ra, const float* dec, const float cos_lat,
+        const float* ra_rad, const float* dec_rad, const float cos_lat,
         const float sin_lat, const float lst_rad);
 
-/**
- * @brief
- * CUDA kernel to construct matrices for parallactic angle rotation
- * (double precision).
- *
- * @details
- * This CUDA kernel constructs a set of Jones matrices that will transform the
- * equatorial linear Stokes parameters into the local horizontal frame of the
- * station. This corresponds to a rotation by the parallactic angle (q) for
- * each source. The Jones matrix is:
- *
- * ( cos(q)  -sin(q) )
- * ( sin(q)   cos(q) )
- *
- * @param[out] jones      The output array of Jones matrices per source.
- * @param[in] num_sources The number of source positions.
- * @param[in] ra          The source Right Ascensions in radians.
- * @param[in] dec         The source Declinations in radians.
- * @param[in] cos_lat     The cosine of the geographic latitude.
- * @param[in] sin_lat     The sine of the geographic latitude.
- * @param[in] lst_rad     The local sidereal time in radians.
- */
 __global__
 void oskar_evaluate_jones_R_cudak_d(double4c* jones, int num_sources,
-        const double* ra, const double* dec, const double cos_lat,
+        const double* ra_rad, const double* dec_rad, const double cos_lat,
         const double sin_lat, const double lst_rad);
 
 #endif /* __CUDACC__ */
