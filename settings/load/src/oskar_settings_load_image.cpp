@@ -52,7 +52,6 @@ void oskar_settings_load_image(oskar_SettingsImage* im,
 
     im->fov_deg = s.value("fov_deg", 2).toDouble();
     im->size = s.value("size", 256).toInt();
-
     im->channel_snapshots = s.value("channel_snapshots", true).toBool();
     im->channel_range[0] = s.value("channel_start", 0).toInt();
     temp = s.value("channel_end", "max").toString();

@@ -80,7 +80,7 @@
 
     <s k="direction"><label>Image centre direction</label>
         <type name="OptionList" default="Obs">
-            Observation direction, "RA, Dec."
+            Observation direction,"RA, Dec."
         </type>
         <desc>Specifies the direction of the image phase centre.
             <ul>
@@ -135,10 +135,9 @@
             If <b>true</b>, existing image files will be overwritten. If
             <b>false</b>, new image files of the same name will be created by
             appending an number to the existing filename with the pattern:
-            <br/><code>&amp;nbsp;&amp;nbsp;<b>
-            &amp;lt;filename&amp;gt;-&amp;lt;N&amp;gt;.&amp;lt;extension&amp;gt;,
-            </b></code><br/>
-            where N starts at 1 and is incremented for each new image created.
+            <br/>
+            <code>&amp;nbsp;&amp;nbsp;<b>&amp;lt;filename&amp;gt;&amp;#8209;&amp;lt;N&amp;gt;.&amp;lt;extension&amp;gt;</b></code>,
+            <br/>where N starts at 1 and is incremented for each new image created.
         </desc>
     </s>
 </s>

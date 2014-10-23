@@ -31,6 +31,7 @@ if (QT4_FOUND)
         ${dir_}/oskar_SettingsDelegate.h
         ${dir_}/oskar_SettingsModel.h
         ${dir_}/oskar_SettingsModelApps.h
+        #${dir_}/oskar_SettingsModelXML.h
         ${dir_}/oskar_SettingsView.h
     )
     set(dir_ widgets/src)
@@ -40,6 +41,7 @@ if (QT4_FOUND)
         ${dir_}/oskar_SettingsItem.cpp
         ${dir_}/oskar_SettingsModel.cpp
         ${dir_}/oskar_SettingsModelApps.cpp
+        ${dir_}/oskar_SettingsModelXML.cpp
         ${dir_}/oskar_SettingsView.cpp
     )
     qt4_wrap_cpp(${name}_SRC ${${name}_MOC_SRC})
@@ -50,11 +52,11 @@ if (QT4_FOUND)
     )
     #======================== XML settings unit test
     include_directories(${CMAKE_CURRENT_BINARY_DIR}/xml)
-    include_directories(${PROJECT_SOURCE_DIR}/extern)
     add_executable(test_oskar_settings_widgets
         widgets/test/Test_oskar_SettingsModelXML.cpp
     )
-    target_link_libraries(test_oskar_settings_widgets gtest_main)
+    target_link_libraries(test_oskar_settings_widgets
+        gtest_main oskar_settings_widgets)
     #=========================
 endif (QT4_FOUND)
 

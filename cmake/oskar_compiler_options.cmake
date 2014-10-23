@@ -27,6 +27,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/correlate
     ${PROJECT_SOURCE_DIR}/element
     ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include
+    ${PROJECT_SOURCE_DIR}/extern/rapidxml-1.13
     ${PROJECT_SOURCE_DIR}/extern/cfitsio-3.37
     ${PROJECT_SOURCE_DIR}/imaging
     ${PROJECT_SOURCE_DIR}/interferometry
@@ -44,15 +45,35 @@ include_directories(
 set(GTEST_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include/gtest)
 set(EZOPT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/ezOptionParser-0.2.0)
 
+# Find the subversion revision.
+if (CMAKE_BUILD_TYPE MATCHES debug)
+    include(FindSubversion)
+    set(PROJECT_ROOT ${PROJECT_SOURCE_DIR})
+    if (IS_SYMLINK ${PROJECT_ROOT})
+        get_filename_component(PROJECT_ROOT ${PROJECT_ROOT} REALPATH)
+    endif()
+    Subversion_WC_INFO(${PROJECT_ROOT} SVN)
+    if (SVN_WC_REVISION)
+        set(OSKAR_SVN_REVISION ${SVN_WC_REVISION})
+    endif()
+endif()
+
 # Build the various version strings to be passed to the code.
 set(OSKAR_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
 set(OSKAR_VERSION_STR "${OSKAR_VERSION}")
 if (OSKAR_VERSION_SUFFIX)
     set(OSKAR_VERSION_STR "${OSKAR_VERSION}-${OSKAR_VERSION_SUFFIX}")
+    if (OSKAR_SVN_REVISION)
+        set(OSKAR_VERSION_STR "${OSKAR_VERSION_STR} r${OSKAR_SVN_REVISION}")
+    endif()
+    if (CMAKE_BUILD_TYPE MATCHES debug)
+        set(OSKAR_VERSION_STR "${OSKAR_VERSION_STR} -- debug --")
+    endif()
 endif()
 if (CMAKE_VERSION VERSION_GREATER 2.8.11)
     string(TIMESTAMP OSKAR_BUILD_DATE "%Y-%m-%d %H:%M:%S")
 endif()
+
 
 # Set general compiler flags.
 add_definitions(-DOSKAR_VERSION=${OSKAR_VERSION_ID})

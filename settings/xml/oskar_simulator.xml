@@ -23,7 +23,7 @@
     </s>
 
     <s key="max_sources_per_chunk">
-        <label>Keep log file</label>
+        <label>Max. number of sources per chunk</label>
         <type name="IntPositive" default="16384" />
         <description>
             Maximum number of sources processed concurrently on a single GPU.

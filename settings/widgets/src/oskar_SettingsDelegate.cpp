@@ -150,9 +150,9 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
             editor = spinner;
             break;
         }
+        // Better name? (0 -> INT_MAX or max)
         case oskar_SettingsItem::AXIS_RANGE:
         {
-            // Random seed editors.
             QSpinBox* spinner = new QSpinBox(parent);
             spinner->setFrame(false);
             spinner->setRange(-1, INT_MAX);

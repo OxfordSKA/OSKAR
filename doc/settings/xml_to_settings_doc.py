@@ -494,6 +494,7 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
                     latex_desc_ = latex_desc_.replace(r'&amp;lt;', r'$<$')
                     latex_desc_ = latex_desc_.replace(r'&amp;le;', r'$\leq$')
                     latex_desc_ = latex_desc_.replace(r'&amp;gt;', r'$>$')
+                    latex_desc_ = latex_desc_.replace(r'&amp;#8209;', r'-')
                     latex_desc_ = latex_desc_.replace(r"<b>", r'\textbf{')
                     latex_desc_ = latex_desc_.replace(r"</b>", r'}')
                     latex_desc_ = latex_desc_.replace(r"<i>", r'\textit{')
@@ -514,17 +515,16 @@ def parse_setting_node(node, key, depth, count, latex_file=None):
                     latex_desc_ = latex_desc_.replace('</li>', r'}'+'\n')
                     latex_desc_ = latex_desc_.replace('</ul>', r'\vspace{8pt}'+'\n' \
                        +r'\end{itemize}}'+'\n')
-                    latex_desc_ = latex_desc_.replace('<br />', '\n'+r'\vspace{8pt}\par\noindent')
-                    latex_desc_ = latex_desc_.replace('<br/>', '\n'+r'\vspace{8pt}\par\noindent')
+                    latex_desc_ = latex_desc_.replace('<br />', '\n'+r'\vspace{8pt}\par\noindent ')
+                    latex_desc_ = latex_desc_.replace('<br/>', '\n'+r'\vspace{8pt}\par\noindent ')
 
                     #allowed_values_ += r'\vspace{-\baselineskip}\mbox{}'+'\n'
-
-
 
                     #latex_file.write(r'\begin{flushleft}'+'\n')
                     latex_file.write('{%s}\n' % latex_desc_)
                     #latex_file.write(r'\end{flushleft}'+'\n')
                     latex_file.write('&\n')
+                    
 
             # >>>>> Allowed values <<<<<<
             set_allowed_values_latex(node, latex_file)
@@ -589,7 +589,7 @@ if __name__ == "__main__":
 #     # print type(xml)
 #     #print '---------------------------------'
 #     #print '<%s>' % xml.tag
-#
+
     filename = '@PROJECT_BINARY_DIR@/settings/xml/oskar_all.xml'
     fh_ = open(filename, 'r')
     xmlStr = fh_.read()

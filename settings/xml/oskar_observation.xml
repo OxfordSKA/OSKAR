@@ -37,7 +37,7 @@
         <desc>The frequency at the midpoint of the first channel, in Hz.</desc>
     </s>
     <s k="num_channels"><label>Number of frequency channels</label>
-        <type name="IntRange" default="1">1,MAX</type>
+        <type name="IntPositive" default="1" />
         <desc>Number of frequency channels / bands to use.</desc>
     </s>
     <s k="frequency_inc_hz"><label>Frequency increment [Hz]</label>
@@ -59,7 +59,7 @@
     </s>
     <s k="num_time_steps">
         <label>Number of time steps</label>
-        <type name="IntRange" default="1">1,MAX</type>
+        <type name="IntPositive" default="1" />
         <desc>
             Number of time steps in the output data during the observation
             length. This corresponds to the number of correlator dumps

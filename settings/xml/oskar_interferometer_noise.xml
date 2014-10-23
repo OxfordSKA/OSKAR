@@ -16,7 +16,7 @@
     <s k="seed"><label>Noise seed</label>
         <type name="RandomSeed" default="1"/>
         <desc>Random number generator seed.</desc>
-        <depends k="interferomter/noise/enable" v="true"/>
+        <depends k="interferometer/noise/enable" v="true"/>
     </s>
 
     <!-- Frequency specification -->
@@ -41,26 +41,26 @@
                     parameters.</li>
             </ul>
         </desc>
-        <depends k="interferomter/noise/enable" v="true"/>
+        <depends k="interferometer/noise/enable" v="true"/>
         <s k="file"><label>Data file</label>
             <type name="InputFile" default=""/>
             <desc>Data file consisting of an ASCII list of frequencies.</desc>
-            <depends k="interferomter/noise/freq" v="Data file" />
+            <depends k="interferometer/noise/freq" v="Data file" />
         </s>
         <s k="number"><label>Number of frequencies</label>
             <type name="uint" default="0"/>
             <desc>Number of frequencies.</desc>
-            <depends k="interferomter/noise/freq" v="Range" />
+            <depends k="interferometer/noise/freq" v="Range" />
         </s>
         <s k="start"><label>Start frequency [Hz]</label>
             <type name="UnsignedDouble" default="0"/>
             <desc>Start frequency, in Hz.</desc>
-            <depends k="interferomter/noise/freq" v="Range" />
+            <depends k="interferometer/noise/freq" v="Range" />
         </s>
         <s k="inc"><label>Frequency increment [Hz]</label>
             <type name="UnsignedDouble" default="0"/>
             <desc>Frequency increment, in Hz.</desc>
-            <depends k="interferomter/noise/freq" v="Range" />
+            <depends k="interferometer/noise/freq" v="Range" />
         </s>
     </s> <!-- End of the frequency specification group -->
 
@@ -70,7 +70,7 @@
         <label>Noise values</label>
         <type name="OptionList" default="Telescope">
             Telescope model priority,
-            RMS flux density
+            RMS flux density,
             Sensitivity,
             "Temperature, area, and system efficiency"
         </type>
@@ -92,7 +92,7 @@
             correspond is based upon the value of the noise frequency
             specification.</i>.
         </desc>
-        <depends k="interferomter/noise/enable" v="true"/>
+        <depends k="interferometer/noise/enable" v="true"/>
 
         <!-- RMS flux density group -->
         <s k="rms" >
@@ -111,22 +111,22 @@
                 specified range parameters.</li>
                 </ul>
             </desc>
-            <depends k="interferomter/noise/values" v="RMS" />
+            <depends k="interferometer/noise/values" v="RMS" />
 
             <s k="file"><label>Data file</label>
                 <type name="InputFile" />
                 <desc>RMS flux density data file.</desc>
-                <depends k="interferomter/noise/values/rms" v="Data file" />
+                <depends k="interferometer/noise/values/rms" v="Data file" />
             </s>
             <s k="start"><label>Start [Jy]</label>
                 <type name="double" default="0"/>
                 <desc>RMS flux density range start value, in Jy.</desc>
-                <depends k="interferomter/noise/values/rms" v="Range" />
+                <depends k="interferometer/noise/values/rms" v="Range" />
             </s>
             <s k="end"><label>End [Jy]</label>
                 <type name="double" default="0"/>
                 <desc>RMS flux density range end value, in Jy.</desc>
-                <depends k="interferomter/noise/values/rms" v="Range" />
+                <depends k="interferometer/noise/values/rms" v="Range" />
             </s>
         </s> <!-- End of RMS flux density group -->
 
@@ -148,22 +148,22 @@
                         specified range parameters.</li>
                 </ul>
             </desc>
-            <depends k="interferomter/noise/value" v="Sensitivity" />
+            <depends k="interferometer/noise/values" v="Sensitivity" />
 
             <s k="file"><label>Data file</label>
                 <type name="InputFile" />
                 <desc>Data file containing system sensitivity value(s).</desc>
-                <depends k="interferomter/noise/values/sensitivity" v="Data file" />
+                <depends k="interferometer/noise/values/sensitivity" v="Data file" />
             </s>
             <s k="start"><label>Start [Jy]</label>
                 <type name="double" default="0"/>
                 <desc>Sensitivity range start value, in Jy.</desc>
-                <depends k="interferomter/noise/values/sensitivity" v="Range" />
+                <depends k="interferometer/noise/values/sensitivity" v="Range" />
             </s>
             <s k="end"><label>End [Jy]</label>
                 <type name="double" default="0"/>
                 <desc>Sensitivity range end value, in Jy.</desc>
-                <depends k="interferomter/noise/values/sensitivity" v="Range" />
+                <depends k="interferometer/noise/values/sensitivity" v="Range" />
             </s>
         </s> <!-- End of System sensitivity group. S = (2 k T) / (A eta) -->
 
@@ -171,7 +171,7 @@
         <!-- Temperature, effective area and efficiency. -->
         <s k="components">
             <label>Temperature, area, and efficiency</label>
-            <depends k="interferomter/noise/value" v="Temp" />
+            <depends k="interferometer/noise/values" v="Temp" />
 
             <!-- Temperature -->
             <s k="t_sys">
@@ -195,17 +195,17 @@
                 <s k="file"><label>Data file</label>
                     <type name="InputFile" />
                     <desc>Data file containing system temperature value(s).</desc>
-                    <depends k="interferomter/noise/values/components/t_sys" v="Data file" />
+                    <depends k="interferometer/noise/values/components/t_sys" v="Data file" />
                 </s>
                 <s k="start"><label>Start [K]</label>
                     <type name="double" default="0"/>
                     <desc>System temperature range start value, in K.</desc>
-                    <depends k="interferomter/noise/values/components/t_sys" v="Range" />
+                    <depends k="interferometer/noise/values/components/t_sys" v="Range" />
                 </s>
                 <s k="end"><label>End [K]</label>
                     <type name="double" default="0"/>
                     <desc>System temperature range end value, in K.</desc>
-                    <depends k="interferomter/noise/values/components/t_sys" v="Range" />
+                    <depends k="interferometer/noise/values/components/t_sys" v="Range" />
                 </s>
             </s> <!-- End of Temperature group -->
 
@@ -231,17 +231,17 @@
                 <s k="file"><label>Data file</label>
                     <type name="InputFile" />
                     <desc>Data file containing effective area value(s).</desc>
-                    <depends k="interferomter/noise/values/components/area" v="Data file" />
+                    <depends k="interferometer/noise/values/components/area" v="Data file" />
                 </s>
                 <s k="start"><label>Start [square metres]</label>
                     <type name="double" default="0"/>
                     <desc>Effective area range start value, in m<sup>2</sup>.</desc>
-                    <depends k="interferomter/noise/values/components/area" v="Range" />
+                    <depends k="interferometer/noise/values/components/area" v="Range" />
                 </s>
                 <s k="end"><label>End [square metres]</label>
                     <type name="double" default="0"/>
                     <desc>Effective area range end value, in m<sup>2</sup>.</desc>
-                    <depends k="interferomter/noise/values/components/area" v="Range" />
+                    <depends k="interferometer/noise/values/components/area" v="Range" />
                 </s>
             </s> <!-- End of Effective Area group -->
 
@@ -268,7 +268,7 @@
                 <s k="file"><label>Data file</label>
                     <type name="InputFile" />
                     <desc>Data file containing system efficiency value(s).</desc>
-                    <depends k="interferomter/noise/values/components/efficiency"
+                    <depends k="interferometer/noise/values/components/efficiency"
                         v="Data file" />
                 </s>
                 <s k="start"><label>Start</label>
@@ -277,7 +277,7 @@
                         System efficiency range start value (allowed range:
                         0.0 to 1.0).
                     </desc>
-                    <depends k="interferomter/noise/values/components/efficiency"
+                    <depends k="interferometer/noise/values/components/efficiency"
                         v="Range" />
                 </s>
                 <s k="end"><label>End</label>
@@ -286,7 +286,7 @@
                         System efficiency range end value (allowed range:
                         0.0 to 1.0).
                     </desc>
-                    <depends k="interferomter/noise/values/components/efficiency"
+                    <depends k="interferometer/noise/values/components/efficiency"
                         v="Range" />
                 </s>
             </s> <!-- End of system efficiency group -->

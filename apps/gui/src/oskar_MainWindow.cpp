@@ -36,6 +36,7 @@
 #include <oskar_SettingsDelegate.h>
 #include <oskar_SettingsItem.h>
 #include <oskar_SettingsModelApps.h>
+#include <oskar_SettingsModelXML.h>
 #include <oskar_SettingsView.h>
 
 #include <QtGui/QAction>
@@ -72,7 +73,8 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     QFormLayout* formLayout = new QFormLayout;
 
     // Create and set up the settings model.
-    model_ = new oskar_SettingsModelApps(widget_);
+    //model_ = new oskar_SettingsModelApps(widget_);
+    model_ = new oskar::SettingsModelXML(widget_);
     modelProxy_ = new oskar_SettingsModelFilter(widget_);
     modelProxy_->setSourceModel(model_);
 

@@ -45,7 +45,7 @@
             <desc>FITS file(s) to use as a sky model.</desc>
         </s>
         <s k="downsample_factor"><label>Downsample factor</label>
-            <type name="IntRange" default="1">1,MAX</type>
+            <type name="IntPositive" default="1" />
             <desc>The factor by which to downsample the pixel grid.</desc>
         </s>
         <s k="min_peak_fraction"><label>Minimum fraction of peak</label>
@@ -55,7 +55,7 @@
                 peak value in the image.
             </desc>
         </s>
-        <s k="noise_floor"><label>"Noise floor [Jy/PIXEL]</label>
+        <s k="noise_floor"><label>Noise floor [Jy/PIXEL]</label>
             <type name="UnsignedDouble" default="0.0" />
             <desc>The noise floor of the image, in Jy/PIXEL.</desc>
         </s>
@@ -110,21 +110,21 @@
                 </desc>
             </s>
             <s k="flux_min"><label>Flux density min [Jy]</label>
-                <type name="UnsignedDouble" default="0" />
+                <type name="UnsignedDouble" default="0.0" />
                 <desc>
                     Minimum flux density in the random distribution, in Jy
                     (before filtering).
                 </desc>
             </s>
             <s k="flux_max"><label>Flux density max [Jy]</label>
-                <type name="UnsignedDouble" default="0" />
+                <type name="UnsignedDouble" default="0.0" />
                 <desc>
                     Maximum flux density in the random distribution, in Jy
                     (before filtering).
                 </desc>
             </s>
             <s k="power"><label>Power law index</label>
-                <type name="double" default="0"/>
+                <type name="double" default="0.0"/>
                 <desc>
                     Power law exponent describing number per unit flux
                     density.
@@ -155,35 +155,35 @@
                 </desc>
             </s>
             <s k="flux_min"><label>Flux density min [Jy]</label>
-                <type name="UnsignedDouble" default="0" />
+                <type name="UnsignedDouble" default="0.0" />
                 <desc>
                     Minimum flux density in the random distribution, in Jy
                     (before filtering).
                 </desc>
             </s>
             <s k="flux_max"><label>Flux density max [Jy]</label>
-                <type name="UnsignedDouble" default="0" />
+                <type name="UnsignedDouble" default="0.0" />
                 <desc>
                     Maximum flux density in the random distribution, in Jy
                     (before filtering).
                 </desc>
             </s>
             <s k="power1"><label>Power law index 1</label>
-                <type name="double" default="0"/>
+                <type name="double" default="0.0"/>
                 <desc>
                     Power law exponent describing number per unit flux
                     density in region 1.
                 </desc>
             </s>
             <s k="power2"><label>Power law index 2</label>
-                <type name="double" default="0"/>
+                <type name="double" default="0.0"/>
                 <desc>
                     Power law exponent describing number per unit flux
                     density in region 2.
                 </desc>
             </s>
             <s k="threshold"><label>Threshold [Jy]</label>
-                <type name="double" default="0"/>
+                <type name="double" default="0.0"/>
                 <desc>
                     Threshold flux density for the intersection of region
                     1 and 2, in Jy. Region 1 is less than the threshold;
@@ -211,18 +211,18 @@
                 </desc>
             </s>
             <s k="fov_deg"><label>Field-of-view [deg]</label>
-                <type name="DoubleRange" default="0">0,180.0</type>
+                <type name="DoubleRange" default="0.0">0,180.0</type>
                 <desc>
                     Field-of-view spanned by the grid centre, in degrees.
                 </desc>
             </s>
             <s k="mean_flux_jy"><label>Mean Stokes I flux [Jy].</label>
-                <type name="UnsignedDouble" default="0" />
+                <type name="UnsignedDouble" default="0.0" />
                 <desc>The mean of generated Stokes I fluxes, in Jy.</desc>
             </s>
              <s k="std_flux_jy">
                 <label>Standard deviation of Stokes I flux [Jy].</label>
-                <type name="UnsignedDouble" default="0" />
+                <type name="UnsignedDouble" default="0.0" />
                 <desc>
                     The standard deviation of generated Stokes I fluxes,
                     in Jy.
@@ -276,7 +276,7 @@
         </s>
         <s k="ref_frequency_hz">
             <label>Reference frequency [Hz]</label>
-            <type name="UnsignedDouble" default="0" />
+            <type name="UnsignedDouble" default="0.0" />
             <desc>
                 Reference frequency of all sources in the final sky model.
             </desc>
@@ -284,7 +284,7 @@
         </s>
         <s k="mean">
             <label>Spectral index mean</label>
-            <type name="double" default="0"/>
+            <type name="double" default="0.0"/>
             <desc>
                 Mean spectral index of all sources in the final sky model.
             </desc>
@@ -292,7 +292,7 @@
         </s>
         <s k="std_dev">
             <label>Spectral index std. dev.</label>
-            <type name="double" default="0"/>
+            <type name="double" default="0.0"/>
             <desc>
                 Standard deviation of spectral index values for all sources in
                 the final sky model.
@@ -343,7 +343,7 @@
         <s k="band_radii_deg"><label>Band radii [deg]</label>
             <type name="DoubleList" default=""/>
             <desc>
-                List of filter band outer radii from the phase centre, 
+                List of filter band outer radii from the phase centre,
                 in degrees.
             </desc>
         </s>
@@ -351,7 +351,7 @@
             <type name="DoubleList" default=""/>
             <desc>
                 List of filter band fluxes, in Jy. Sources with apparent
-                fluxes brighter than these values that also lie within 
+                fluxes brighter than these values that also lie within
                 the given radii will not be included in the simulated
                 visibility.
             </desc>
@@ -376,7 +376,7 @@
             <type name="bool" default="true"/>
             <desc>
                 If true, the supplied filter radii will be scaled linearly
-                with frequency. If false, the supplied radii will be used at 
+                with frequency. If false, the supplied radii will be used at
                 all frequencies.
             </desc>
         </s>

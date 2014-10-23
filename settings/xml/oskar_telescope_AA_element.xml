@@ -64,7 +64,7 @@
                 If a cosine element taper is selected, this setting
                 gives the power of the cosine(theta) function.
             </desc>
-            <depends k="telescope/aperture_array/element_pattern/type"
+            <depends k="telescope/aperture_array/element_pattern/taper/type"
                 v="Cosine" />
         </s>
         <s k="gaussian_fwhm_deg"><label>Gaussian FWHM [deg]</label>
@@ -74,7 +74,7 @@
                 gives the full-width half maximum value of the
                 Gaussian, in degrees.
             </desc>
-            <depends k="telescope/aperture_array/element_pattern/type"
+            <depends k="telescope/aperture_array/element_pattern/taper/type"
                 v="Gaussian" />
         </s>
     </s> <!-- END taper group -->
