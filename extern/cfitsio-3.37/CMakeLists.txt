@@ -23,8 +23,8 @@ set(cfitsio_SRC
 )
 
 if (NOT WIN32)
-    set(CFITSIO_FLAGS_RELEASE "-O3 -DNDEBUG")
-    set(CFITSIO_FLAGS_DEBUG "-g")
+    set(CFITSIO_FLAGS_RELEASE "-O3 -DNDEBUG -fPIC")
+    set(CFITSIO_FLAGS_DEBUG "-g -fPIC")
 else()
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         set(CFITSIO_FLAGS_RELEASE "")
