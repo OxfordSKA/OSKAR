@@ -13,6 +13,9 @@ set(correlate_SRC
     src/oskar_correlate_scalar_point_omp.c
     src/oskar_correlate_scalar_point_time_smearing_omp.c
     src/oskar_correlate.c
+    src/oskar_evaluate_average_cross_power_beam.c
+    src/oskar_evaluate_average_cross_power_beam_omp.c
+    src/oskar_evaluate_average_scalar_cross_power_beam_omp.c
 )
 
 if (CUDA_FOUND)
@@ -25,6 +28,8 @@ if (CUDA_FOUND)
         src/oskar_correlate_scalar_gaussian_time_smearing_cuda.cu
         src/oskar_correlate_scalar_point_cuda.cu
         src/oskar_correlate_scalar_point_time_smearing_cuda.cu
+        src/oskar_evaluate_average_cross_power_beam_cuda.cu
+        src/oskar_evaluate_average_scalar_cross_power_beam_cuda.cu
     )
 endif()
 

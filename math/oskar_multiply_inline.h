@@ -44,6 +44,13 @@
 extern "C" {
 #endif
 
+/* OUT += P * CONJ(Q) */
+#define OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(OUT, P, Q) \
+    OUT.x += P.x * Q.x; \
+    OUT.x += P.y * Q.y; \
+    OUT.y += P.y * Q.x; \
+    OUT.y += -(P.x * Q.y);
+
 /**
  * @brief
  * Multiplies two complex numbers (single precision).
