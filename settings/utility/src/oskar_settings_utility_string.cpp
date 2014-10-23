@@ -1,0 +1,113 @@
+/*
+ * Copyright (c) 2014, The University of Oxford
+ * All rights reserved.
+ *
+ * This file is part of the OSKAR package.
+ * Contact: oskar at oerc.ox.ac.uk
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. Neither the name of the University of Oxford nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <oskar_settings_utility_string.hpp>
+
+#include <sstream>
+#include <climits>
+#include <cstdlib>
+#include <cerrno>
+
+#include <iostream> // for debugging FIXME
+
+
+std::string oskar_settings_utility_string_trim(const std::string& s,
+        const std::string& whitespace)
+{
+    // Find the first index that does not match whitespace.
+    size_t i0 = s.find_first_not_of(whitespace);
+    if (i0 == std::string::npos) return "";
+
+    // Find the last index that does not match whitespace.
+    size_t i1 = s.find_last_not_of(whitespace);
+
+    // Find the string with whitespace subtracted from each end.
+    return s.substr(i0, i1 - i0 + 1);
+}
+
+std::vector<std::string> oskar_settings_utility_string_get_type_params(
+        const std::string& s)
+{
+    std::vector<std::string> params;
+    std::stringstream ss_all(s);
+    std::string p;
+    while (std::getline(ss_all, p, '"')) {
+        std::stringstream ss(p);
+        while (std::getline(ss, p, ',')) {
+            p = oskar_settings_utility_string_trim(p);
+            if (!p.empty()) params.push_back(p);
+        }
+        if (std::getline(ss_all, p, '"')) {
+            if (!p.empty()) params.push_back(p);
+        }
+    }
+    return params;
+}
+
+
+int oskar_settings_utility_string_to_int(const std::string& s, bool *ok)
+{
+    int base = 10;
+    char *endptr;
+
+    errno = 0;  // To distinguish success/failure after call
+    long int val = strtol(s.c_str(), &endptr, base);
+
+    // If argument ok is not null, check for various possible errors.
+    if (ok) {
+        *ok = true;
+        //  Check for various possible errors
+        if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN))
+                || (errno != 0 && val == 0))
+            *ok = false;
+        // No digits found.
+        if (endptr == s.c_str()) *ok = false;
+        // Further characters found in the string
+        // NOTE this may not actually be an error ...
+        if (*endptr != '\0') *ok = false;
+    }
+
+    // Value not in the integer range, set to 0 set fail flag.
+    if (val > INT_MAX || val < -INT_MAX) {
+        val = 0L;
+        if (ok) *ok = false;
+    }
+
+    return static_cast<int>(val);
+}
+
+std::string oskar_settings_utility_int_to_string(int i)
+{
+    std::ostringstream ss;
+    ss << i;
+    return ss.str();
+}
+

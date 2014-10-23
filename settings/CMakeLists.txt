@@ -10,6 +10,10 @@
 
 add_subdirectory(xml)
 
+add_subdirectory(utility)
+#add_subdirectory(types)
+#add_subdirectory(list)
+
 #
 # Note this module is currently being built as a STATIC library. This may need
 # review...

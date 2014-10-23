@@ -26,6 +26,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/convert
     ${PROJECT_SOURCE_DIR}/correlate
     ${PROJECT_SOURCE_DIR}/element
+    ${PROJECT_SOURCE_DIR}/extern
     ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include
     ${PROJECT_SOURCE_DIR}/extern/rapidxml-1.13
     ${PROJECT_SOURCE_DIR}/extern/cfitsio-3.37
@@ -34,9 +35,12 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/jones
     ${PROJECT_SOURCE_DIR}/math
     ${PROJECT_SOURCE_DIR}/settings
+    ${PROJECT_SOURCE_DIR}/settings/list
     ${PROJECT_SOURCE_DIR}/settings/load
-    ${PROJECT_SOURCE_DIR}/settings/widgets
     ${PROJECT_SOURCE_DIR}/settings/struct
+    ${PROJECT_SOURCE_DIR}/settings/types
+    ${PROJECT_SOURCE_DIR}/settings/utility
+    ${PROJECT_SOURCE_DIR}/settings/widgets
     ${PROJECT_SOURCE_DIR}/sky
     ${PROJECT_SOURCE_DIR}/splines
     ${PROJECT_SOURCE_DIR}/station
