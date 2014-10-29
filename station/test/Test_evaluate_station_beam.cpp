@@ -40,9 +40,6 @@
 #include <oskar_binary.h>
 #include <oskar_cuda_check_error.h>
 
-#define TIMER_ENABLE 1
-#include "utility/timer.h"
-
 #include <oskar_cmath.h>
 #include <cstdio>
 #include <cstdlib>
@@ -126,22 +123,16 @@ TEST(evaluate_station_beam, test_array_pattern)
             num_pixels, &error);
 
     ASSERT_EQ(0, oskar_station_array_is_3d(station_gpu));
-    TIMER_START
     oskar_evaluate_station_beam_aperture_array(beam_pattern, station_gpu,
             num_pixels, d_l, d_m, d_n, gast, frequency, work, random_state,
             &error);
-    cudaDeviceSynchronize();
-    TIMER_STOP("Finished aperture array station beam (2D)");
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
     oskar_station_set_element_coords(station_gpu, 0, 0., 0., 1., 0., 0., 0., &error);
     oskar_station_set_element_coords(station_gpu, 0, 0., 0., 0., 0., 0., 0., &error);
     ASSERT_EQ(1, oskar_station_array_is_3d(station_gpu));
-    TIMER_START
     oskar_evaluate_station_beam_aperture_array(beam_pattern, station_gpu,
             num_pixels, d_l, d_m, d_n, gast, frequency, work, random_state,
             &error);
-    cudaDeviceSynchronize();
-    TIMER_STOP("Finished aperture array station beam (3D)");
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
     oskar_station_free(station_gpu, &error);
 

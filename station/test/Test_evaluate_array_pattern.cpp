@@ -40,9 +40,7 @@
 #include <oskar_evaluate_image_lon_lat_grid.h>
 #include <oskar_image.h>
 #include <oskar_get_error_string.h>
-
-#define TIMER_ENABLE 1
-#include "utility/timer.h"
+#include <oskar_timer.h>
 
 #include <oskar_cmath.h>
 #include <cstdio>
@@ -214,6 +212,7 @@ static void run_array_pattern(oskar_Image* bp,
     oskar_Mem *w, *x, *y, *z, *pattern;
     int num_pixels, location;
     double wavenumber;
+    oskar_Timer* timer;
 
     /* Get the meta-data. */
     num_pixels = (int)oskar_mem_length(lon);
@@ -226,11 +225,13 @@ static void run_array_pattern(oskar_Image* bp,
     ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
     set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, freq_hz, status);
     ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
-    TIMER_START
+    timer = oskar_timer_create(OSKAR_TIMER_CUDA);
+    oskar_timer_start(timer);
     oskar_evaluate_array_pattern(pattern, wavenumber, station, num_pixels,
             x, y, z, w, status);
     cudaDeviceSynchronize();
-    TIMER_STOP("%s", message)
+    printf("%s: %.6f\n", message, oskar_timer_elapsed(timer));
+    oskar_timer_free(timer);
     ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
     oskar_mem_free(w, status);
     oskar_mem_free(x, status);
@@ -251,6 +252,7 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
     oskar_Mem *w, *x, *y, *z, *ones, *pattern;
     int num_pixels, location;
     double wavenumber;
+    oskar_Timer* timer;
 
     /* Get the meta-data. */
     num_pixels = (int)oskar_mem_length(lon);
@@ -266,11 +268,13 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
             num_pixels * oskar_station_num_elements(station), status);
     oskar_mem_set_value_real(ones, 1.0, 0, 0, status);
     set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, freq_hz, status);
-    TIMER_START
+    timer = oskar_timer_create(OSKAR_TIMER_CUDA);
+    oskar_timer_start(timer);
     oskar_evaluate_array_pattern_hierarchical(pattern, wavenumber, station,
             num_pixels, x, y, z, ones, w, status);
     cudaDeviceSynchronize();
-    TIMER_STOP("%s", message)
+    printf("%s: %.6f\n", message, oskar_timer_elapsed(timer));
+    oskar_timer_free(timer);
     oskar_mem_free(w, status);
     oskar_mem_free(x, status);
     oskar_mem_free(y, status);
