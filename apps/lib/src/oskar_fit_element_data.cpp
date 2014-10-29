@@ -64,7 +64,8 @@ static string construct_element_pathname(const char* output_dir,
     stream << element_type_index << "_";
 
     // Append the frequency in MHz.
-    stream << std::fixed << std::setprecision(0) << frequency_hz / 1.0e6;
+    stream << std::fixed << std::setprecision(0)
+    << std::setfill('0') << std::setw(3) << frequency_hz / 1.0e6;
 
     // Append the file extension.
     stream << ".bin";
