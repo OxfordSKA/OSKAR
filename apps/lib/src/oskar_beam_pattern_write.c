@@ -68,7 +68,8 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
 
     image = oskar_image_create(type, OSKAR_CPU, status);
 
-    num_times = settings->obs.num_time_steps;
+    num_times = settings->beam_pattern.time_average_beam ? 1 :
+            settings->obs.num_time_steps;
     num_channels = settings->obs.num_channels;
     num_pols = settings->telescope.pol_mode == OSKAR_POL_MODE_FULL ? 4 : 1;
     if (settings->beam_pattern.coord_grid_type ==

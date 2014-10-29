@@ -28,17 +28,18 @@
 
 #include <private_mem.h>
 #include <oskar_mem.h>
+#include <oskar_mem_add_cuda.h>
+#include <oskar_cuda_check_error.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* a = b + c */
 void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
         int* status)
 {
+    int type, location;
     size_t i, num_elements;
 
     /* Check all inputs. */
@@ -51,62 +52,89 @@ void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check data types. */
-    if (b->type != c->type ||
-            a->type != b->type ||
-            a->type != c->type)
+    /* Get meta-data. */
+    location = oskar_mem_location(a);
+    type = oskar_mem_type(a);
+    num_elements = oskar_mem_length(a);
+
+    /* Check for empty array. */
+    if (num_elements == 0)
+        return;
+
+    /* Check data types, locations, and number of elements. */
+    if (type != oskar_mem_type(b) || type != oskar_mem_type(c))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
     }
-
-    /* Check number of elements. */
-    if (b->num_elements != c->num_elements ||
-            a->num_elements != b->num_elements ||
-            a->num_elements != c->num_elements)
-    {
-        *status = OSKAR_ERR_DIMENSION_MISMATCH;
-    }
-
-    /* Check locations. */
-    if (b->location != c->location ||
-            a->location != b->location ||
-            a->location != c->location)
+    if (location != oskar_mem_location(b) || location != oskar_mem_location(c))
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
+        return;
+    }
+    if (num_elements != oskar_mem_length(b) ||
+            num_elements != oskar_mem_length(c))
+    {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
     }
 
-    /* Note that device memory is not supported. */
-    if (a->location == OSKAR_GPU)
-        *status = OSKAR_ERR_BAD_LOCATION;
-
-    if (a->data == NULL || b->data == NULL || c->data == NULL)
-        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-
-    /* Get the total number of elements. */
-    num_elements = a->num_elements;
-    if (oskar_mem_type_is_matrix(a->type))
+    /* Get total number of elements. */
+    if (oskar_mem_type_is_matrix(type))
         num_elements *= 4;
-    if (oskar_mem_type_is_complex(a->type))
+    if (oskar_mem_type_is_complex(type))
         num_elements *= 2;
 
-    /* Check if safe to proceed. */
-    if (*status) return;
+    /* Switch on type and location. */
+    if (oskar_mem_type_is_double(type))
+    {
+        double *aa;
+        const double *bb, *cc;
+        aa = oskar_mem_double(a, status);
+        bb = oskar_mem_double_const(b, status);
+        cc = oskar_mem_double_const(c, status);
 
-    if (oskar_mem_type_is_double(a->type))
-    {
-        double *aa, *bb, *cc;
-        aa = (double*)a->data;
-        bb = (double*)b->data;
-        cc = (double*)c->data;
-        for (i = 0; i < num_elements; ++i) aa[i] = bb[i] + cc[i];
+        if (location == OSKAR_CPU)
+        {
+            for (i = 0; i < num_elements; ++i)
+                aa[i] = bb[i] + cc[i];
+        }
+        else if (location == OSKAR_GPU)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            oskar_mem_add_cuda_d(num_elements, bb, cc, aa);
+            oskar_cuda_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
+        else
+            *status = OSKAR_ERR_BAD_LOCATION;
     }
-    else if (oskar_mem_type_is_single(a->type))
+    else if (oskar_mem_type_is_single(type))
     {
-        float *aa, *bb, *cc;
-        aa = (float*)a->data;
-        bb = (float*)b->data;
-        cc = (float*)c->data;
-        for (i = 0; i < num_elements; ++i) aa[i] = bb[i] + cc[i];
+        float *aa;
+        const float *bb, *cc;
+        aa = oskar_mem_float(a, status);
+        bb = oskar_mem_float_const(b, status);
+        cc = oskar_mem_float_const(c, status);
+
+        if (location == OSKAR_CPU)
+        {
+            for (i = 0; i < num_elements; ++i)
+                aa[i] = bb[i] + cc[i];
+        }
+        else if (location == OSKAR_GPU)
+        {
+#ifdef OSKAR_HAVE_CUDA
+            oskar_mem_add_cuda_f(num_elements, bb, cc, aa);
+            oskar_cuda_check_error(status);
+#else
+            *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
+        }
+        else
+            *status = OSKAR_ERR_BAD_LOCATION;
     }
     else
     {

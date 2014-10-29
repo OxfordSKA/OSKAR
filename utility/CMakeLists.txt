@@ -63,6 +63,7 @@ if (CUDA_FOUND)
         src/oskar_cuda_info_free.c
         src/oskar_cuda_info_log.c
         src/oskar_cuda_mem_log.c
+        src/oskar_mem_add_cuda.cu
         src/oskar_mem_element_multiply_cuda.cu
         src/oskar_mem_scale_real_cuda.cu
         src/oskar_mem_set_value_real_cuda.cu

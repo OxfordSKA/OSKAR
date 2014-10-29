@@ -228,6 +228,13 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     if (settings->beam_pattern.average_cross_power_beam)
         jones = oskar_jones_create(beam_pattern_data_type, OSKAR_GPU,
                 num_stations, num_pixels, status);
+    oskar_Mem* d_beam_acc = 0;
+    if (settings->beam_pattern.time_average_beam)
+    {
+        d_beam_acc = oskar_mem_create(beam_pattern_data_type, OSKAR_GPU,
+                num_pixels + 1, status);
+        oskar_mem_clear_contents(d_beam_acc, status);
+    }
 
     // Begin beam pattern evaluation.
     oskar_log_section(log, 'M', "Starting simulation...");
@@ -269,12 +276,37 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
                         d_work, rand_state, frequency, GAST, status);
             }
 
+            // FIXME HACK Accumulate beam data.
+            if (d_beam_acc)
+            {
+                oskar_mem_add(d_beam_acc, d_beam_acc, d_beam_data, status);
+            }
+            else
+            {
+                // FIXME HACK Write raw beam data to ASCII file.
+                if (file)
+                    oskar_mem_save_ascii(file, 1, num_pixels, status,
+                            d_beam_data);
+                else
+                    accumulate_to_beam_cube(output_beam, beam_tmp, d_beam_data,
+                            num_times, num_pols, (int)num_pixels, t, c, status);
+            }
+        }
+
+        // FIXME HACK Deal with time-averaged beam.
+        if (d_beam_acc)
+        {
+            oskar_mem_scale_real(d_beam_acc, 1.0 / num_times, status);
+
             // FIXME HACK Write raw beam data to ASCII file.
             if (file)
-                oskar_mem_save_ascii(file, 1, num_pixels, status, d_beam_data);
+                oskar_mem_save_ascii(file, 1, num_pixels, status,
+                        d_beam_acc);
             else
-                accumulate_to_beam_cube(output_beam, beam_tmp, d_beam_data,
-                        num_times, num_pols, (int)num_pixels, t, c, status);
+                accumulate_to_beam_cube(output_beam, beam_tmp, d_beam_acc,
+                        1, num_pols, (int)num_pixels, 0, c, status);
+
+            oskar_mem_clear_contents(d_beam_acc, status);
         }
 
         // Record GPU memory usage.
@@ -287,6 +319,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     oskar_station_work_free(d_work, status);
     oskar_telescope_free(d_tel, status);
     oskar_mem_free(d_beam_data, status);
+    oskar_mem_free(d_beam_acc, status);
     oskar_mem_free(d_x, status);
     oskar_mem_free(d_y, status);
     oskar_mem_free(d_z, status);
@@ -381,7 +414,8 @@ static void init_beam_pattern_cube(oskar_Image* image,
         const oskar_Settings* settings, int* status)
 {
     int num_channels = settings->obs.num_channels;
-    int num_times = settings->obs.num_time_steps;
+    int num_times = settings->beam_pattern.time_average_beam ? 1 :
+            settings->obs.num_time_steps;
     int num_pols = settings->telescope.pol_mode == OSKAR_POL_MODE_FULL ? 4 : 1;
 
     if (settings->beam_pattern.coord_grid_type ==

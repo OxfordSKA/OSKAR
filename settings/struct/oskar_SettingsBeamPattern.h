@@ -69,6 +69,7 @@ enum OSKAR_BEAM_PATTERN_FRAME
 struct oskar_SettingsBeamPattern
 {
     int average_cross_power_beam;
+    int time_average_beam;
     int station_id;
 
     int coord_grid_type;  /* The type of beam pattern coordinates */

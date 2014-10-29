@@ -53,6 +53,7 @@ void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     bp->average_cross_power_beam =
             s.value("average_cross_power_beam", false).toBool();
     bp->station_id  = s.value("station_id").toUInt();
+    bp->time_average_beam = s.value("time_average_beam", false).toBool();
 
     QString temp = s.value("coordinate_type", "Beam image").toString().toUpper();
     if (temp.startsWith("B"))
