@@ -62,7 +62,7 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     telescope->max_station_size = src->max_station_size;
     telescope->max_station_depth = src->max_station_depth;
     telescope->identical_stations = src->identical_stations;
-    telescope->use_common_sky = src->use_common_sky;
+    telescope->allow_station_beam_duplication = src->allow_station_beam_duplication;
     telescope->seed_time_variable_station_element_errors =
             src->seed_time_variable_station_element_errors;
     telescope->lon_rad = src->lon_rad;

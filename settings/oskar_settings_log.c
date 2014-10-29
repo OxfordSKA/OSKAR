@@ -352,6 +352,8 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
             s->telescope.normalise_beams_at_phase_centre);
     LVS("Polarisation mode",
             s->telescope.pol_mode == OSKAR_POL_MODE_FULL ? "Full" : "Scalar");
+    LVB("Allow station beam duplication",
+            s->telescope.allow_station_beam_duplication);
 
     /* Aperture array settings. */
     if (s->telescope.station_type == OSKAR_STATION_TYPE_AA)
@@ -554,8 +556,6 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
             s->interferometer.uv_filter_max >= 0.0)
         LVS("UV range filter units", s->interferometer.uv_filter_units ==
                 OSKAR_METRES ? "Metres" : "Wavelengths");
-    LVB("Use common sky (short baseline approximation)",
-            s->interferometer.use_common_sky);
 
     /* Noise */
     LVB("System noise enabled", n->enable);
@@ -676,7 +676,10 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
     int depth = 0;
     oskar_log_message(log, 'M', depth, "Beam pattern settings");
     depth = 1;
-    LVI("Station ID", s->beam_pattern.station_id);
+    LVB("Produce average cross-power beam",
+            s->beam_pattern.average_cross_power_beam);
+    if (!s->beam_pattern.average_cross_power_beam)
+        LVI("Station ID", s->beam_pattern.station_id);
     switch (s->beam_pattern.coord_frame_type)
     {
         case OSKAR_BEAM_PATTERN_FRAME_EQUATORIAL:

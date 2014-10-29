@@ -260,17 +260,18 @@ int oskar_telescope_identical_stations(const oskar_Telescope* model);
 
 /**
  * @brief
- * Returns the flag specifying whether all stations share a common horizon.
+ * Returns the flag specifying whether station beam duplication is enabled.
  *
  * @details
- * Returns the flag specifying whether all stations share a common horizon.
+ * Returns the flag specifying whether station beam duplication is enabled.
  *
  * @param[in] model   Pointer to telescope model.
  *
  * @return The boolean flag value.
  */
 OSKAR_EXPORT
-int oskar_telescope_common_horizon(const oskar_Telescope* model);
+int oskar_telescope_allow_station_beam_duplication(
+        const oskar_Telescope* model);
 
 /**
  * @brief
@@ -595,16 +596,17 @@ void oskar_telescope_set_uv_filter(oskar_Telescope* model,
 
 /**
  * @brief
- * Sets the flag to specify whether stations should share a common horizon.
+ * Sets the flag to specify whether station beam duplication is enabled.
  *
  * @details
- * Sets the flag to specify whether stations should share a common horizon.
+ * Sets the flag to specify whether station beam duplication is enabled.
  *
  * @param[in] model    Pointer to telescope model.
  * @param[in] value    If true, stations will share common source positions.
  */
 OSKAR_EXPORT
-void oskar_telescope_set_common_horizon(oskar_Telescope* model, int value);
+void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model,
+        int value);
 
 /**
  * @brief

@@ -29,30 +29,8 @@
 #ifndef OSKAR_PRIVATE_STATION_WORK_H_
 #define OSKAR_PRIVATE_STATION_WORK_H_
 
-/**
- * @file private_station_work.h
- */
-
 #include <oskar_mem.h>
 
-/**
- * @brief
- * Structure to hold work buffers used for calculation of the station beam.
- *
- * @details
- * This structure holds work buffers used for calculation of the station beam.
- * This includes arrays to hold:
- *
- * - Horizon mask [integer].
- * - Modified source theta values [real scalar].
- * - Modified source phi values [real scalar].
- * - Beamforming weights [complex scalar].
- * - Beamforming weights error [complex scalar].
- * - Array pattern  [complex scalar].
- * - Hierarchy work array per beamforming level [complex matrix and complex scalar].
- *
- * Depending on the mode of operation, not all of these arrays will be used.
- */
 struct oskar_StationWork
 {
     oskar_Mem* horizon_mask;     /* Integer. */

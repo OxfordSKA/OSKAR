@@ -97,7 +97,7 @@ protected:
         int status = 0, type;
         oskar_Mem *beam1, *beam2;
         oskar_Timer *timer1, *timer2;
-        double time1, time2, frequency = 100e6;
+        double time1, time2;
 
         // Create the timers.
         timer1 = oskar_timer_create(loc1 == OSKAR_GPU ?

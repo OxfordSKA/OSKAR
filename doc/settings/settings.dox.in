@@ -101,11 +101,14 @@ SETTINGS_TABLES
     noise is specified for a single polarisation.  Changed all random 
     number seed integer ranges to start at 1 (rather than 0). Changed beam 
     normalization to be enabled by default.</td></tr>
-<tr><td>11</td><td>2014-10-13</td>
+<tr><td>11</td><td>2014-10-24</td>
     <td>Moved option to select polarisation mode into telescope model settings
     group, so that scalar mode can also be used for beam pattern 
-    simulations. Added the ability to use seconds (as well as hours, 
-    minutes and seconds) to specify observation length.</td></tr>
+    simulations. Moved and renamed option to allow station beam duplication
+    into telescope model group. Added option to produce the average 
+    cross-power beam to the beam pattern group. Added the ability to use 
+    seconds (as well as hours, minutes and seconds) to specify observation 
+    length. Removed options to write OSKAR image files.</td></tr>
 </table>
 
 */

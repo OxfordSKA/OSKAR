@@ -56,16 +56,6 @@
         <type name="OptionList" default="W">Wavelengths,Metres</type>
         <desc>The units of the baseline UV length filter values.</desc>
     </s>
-    <s k="use_common_sky">
-        <label>Use common sky (short baseline approximation)</label>
-        <type name="bool" default="true" />
-        <desc>
-            If <b>true</b>, then use a short baseline approximation
-            where source positions are the same relative to every station.
-            If <b>false</b>, then re-evaluate all source positions and all
-            station beams.
-        </desc>
-    </s>
 
     <import filename="oskar_interferometer_noise.xml" />
 

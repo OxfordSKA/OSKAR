@@ -234,7 +234,7 @@ void oskar_sim_interferometer(const char* settings_file, oskar_Log* log,
         // amplitude at the phase centre for each time and channel...
         if (have_sources > 0 && !amp_calibrated)
         {
-            log_warning_box(log, "WARNING: System noise is be added to "
+            log_warning_box(log, "WARNING: System noise is being added to "
                     "visibilities without station beam normalisation enabled. "
                     "This may lead to an invalid signal to noise ratio.");
         }

@@ -51,50 +51,50 @@ struct oskar_Station
     int mem_location;
 
     /* Data common to all station types -------------------------------------*/
-    int station_type;             /**< Type of the station (enumerator). */
-    int normalise_final_beam;     /**< Flag to specify whether the station beam should be completely normalised. */
-    double lon_rad;               /**< Geodetic east longitude of station, in radians. */
-    double lat_rad;               /**< Geodetic latitude of station, in radians. */
-    double alt_metres;            /**< Altitude of station above ellipsoid, in metres. */
-    double beam_lon_rad;          /**< Longitude of beam phase centre, in radians. */
-    double beam_lat_rad;          /**< Latitude of beam phase centre, in radians. */
-    int beam_coord_type;          /**< Enumerator describing beam spherical coordinate type (from oskar_global.h). */
-    oskar_Mem* noise_freq_hz;     /**< Frequency values, in Hz, at which noise RMS values are defined. */
-    oskar_Mem* noise_rms_jy;      /**< RMS noise values, in Jy, as a function of frequency. */
+    int station_type;             /* Type of the station (enumerator). */
+    int normalise_final_beam;     /* Flag to specify whether the station beam should be completely normalised. */
+    double lon_rad;               /* Geodetic east longitude of station, in radians. */
+    double lat_rad;               /* Geodetic latitude of station, in radians. */
+    double alt_metres;            /* Altitude of station above ellipsoid, in metres. */
+    double beam_lon_rad;          /* Longitude of beam phase centre, in radians. */
+    double beam_lat_rad;          /* Latitude of beam phase centre, in radians. */
+    int beam_coord_type;          /* Enumerator describing beam spherical coordinate type (from oskar_global.h). */
+    oskar_Mem* noise_freq_hz;     /* Frequency values, in Hz, at which noise RMS values are defined. */
+    oskar_Mem* noise_rms_jy;      /* RMS noise values, in Jy, as a function of frequency. */
 
     /* Data used only for Gaussian beam stations  ---------------------------*/
-    double gaussian_beam_fwhm_rad;   /**< FWHM of Gaussian station beam, in degrees. */
-    double gaussian_beam_reference_freq_hz; /**< Reference frequency of the FHWM, in Hz. */
+    double gaussian_beam_fwhm_rad;   /* FWHM of Gaussian station beam, in degrees. */
+    double gaussian_beam_reference_freq_hz; /* Reference frequency of the FHWM, in Hz. */
 
     /* Data used only for aperture array stations ---------------------------*/
-    int identical_children;       /**< True if all child stations are identical. */
-    int num_elements;             /**< Number of antenna elements in the station (auto determined). */
-    int num_element_types;        /**< Number of element types (this is the size of element_pattern array). */
-    int normalise_array_pattern;  /**< True if the station beam should be normalised by the number of antennas. */
-    int enable_array_pattern;     /**< True if the array factor should be evaluated. */
-    int common_element_orientation; /**< True if elements share a common orientation (auto determined). */
-    int array_is_3d;              /**< True if array is 3-dimensional (auto determined; default false). */
-    int apply_element_errors;     /**< True if element gain and phase errors should be applied (auto determined; default false). */
-    int apply_element_weight;     /**< True if weights should be modified by user-supplied complex beamforming weights (auto determined; default false). */
-    double nominal_orientation_x_rad;         /**< Azimuth of nominal x dipole axis, in radians. */
-    double nominal_orientation_y_rad;         /**< Azimuth of nominal y dipole axis, in radians. */
-    oskar_Mem* element_true_x_enu_metres;     /**< True horizon element x-coordinates, in metres, towards East. */
-    oskar_Mem* element_true_y_enu_metres;     /**< True horizon element y-coordinates, in metres, towards North. */
-    oskar_Mem* element_true_z_enu_metres;     /**< True horizon element z-coordinates, in metres, towards the zenith. */
-    oskar_Mem* element_measured_x_enu_metres; /**< Measured horizon element x-coordinates, in metres, towards East. */
-    oskar_Mem* element_measured_y_enu_metres; /**< Measured horizon element y-coordinates, in metres, towards North. */
-    oskar_Mem* element_measured_z_enu_metres; /**< Measured horizon element z-coordinates, in metres, towards the zenith. */
-    oskar_Mem* element_gain;                  /**< Per-element gain factor (default 1.0) */
-    oskar_Mem* element_gain_error;            /**< Standard deviation of per-element time-variable gain factor (default 0.0) */
-    oskar_Mem* element_phase_offset_rad;      /**< Per-element systematic phase offset, in radians (default 0.0) */
-    oskar_Mem* element_phase_error_rad;       /**< Standard deviation of per-element time-variable phase, in radians (default 0.0) */
-    oskar_Mem* element_weight;                /**< Element complex weight (set to 1.0, 0.0 unless using apodisation). */
-    oskar_Mem* element_orientation_x_rad_cpu; /**< Azimuth of x dipole axis, in radians, guaranteed to be in CPU memory (default pi/2). */
-    oskar_Mem* element_orientation_y_rad_cpu; /**< Azimuth of y dipole axis, in radians, guaranteed to be in CPU memory (default 0.0). */
-    oskar_Mem* element_types;     /**< Integer array of element types (default 0). */
-    oskar_Mem* element_types_cpu; /**< Integer array of element types guaranteed to be in CPU memory (default 0). */
-    oskar_Station** child;        /**< Array of child station handles (pointer is NULL if none). */
-    oskar_Element** element;      /**< Array of element models per element type (pointer is NULL if there are child stations). */
+    int identical_children;       /* True if all child stations are identical. */
+    int num_elements;             /* Number of antenna elements in the station (auto determined). */
+    int num_element_types;        /* Number of element types (this is the size of element_pattern array). */
+    int normalise_array_pattern;  /* True if the station beam should be normalised by the number of antennas. */
+    int enable_array_pattern;     /* True if the array factor should be evaluated. */
+    int common_element_orientation; /* True if elements share a common orientation (auto determined). */
+    int array_is_3d;              /* True if array is 3-dimensional (auto determined; default false). */
+    int apply_element_errors;     /* True if element gain and phase errors should be applied (auto determined; default false). */
+    int apply_element_weight;     /* True if weights should be modified by user-supplied complex beamforming weights (auto determined; default false). */
+    double nominal_orientation_x_rad;         /* Azimuth of nominal x dipole axis, in radians. */
+    double nominal_orientation_y_rad;         /* Azimuth of nominal y dipole axis, in radians. */
+    oskar_Mem* element_true_x_enu_metres;     /* True horizon element x-coordinates, in metres, towards East. */
+    oskar_Mem* element_true_y_enu_metres;     /* True horizon element y-coordinates, in metres, towards North. */
+    oskar_Mem* element_true_z_enu_metres;     /* True horizon element z-coordinates, in metres, towards the zenith. */
+    oskar_Mem* element_measured_x_enu_metres; /* Measured horizon element x-coordinates, in metres, towards East. */
+    oskar_Mem* element_measured_y_enu_metres; /* Measured horizon element y-coordinates, in metres, towards North. */
+    oskar_Mem* element_measured_z_enu_metres; /* Measured horizon element z-coordinates, in metres, towards the zenith. */
+    oskar_Mem* element_gain;                  /* Per-element gain factor (default 1.0) */
+    oskar_Mem* element_gain_error;            /* Standard deviation of per-element time-variable gain factor (default 0.0) */
+    oskar_Mem* element_phase_offset_rad;      /* Per-element systematic phase offset, in radians (default 0.0) */
+    oskar_Mem* element_phase_error_rad;       /* Standard deviation of per-element time-variable phase, in radians (default 0.0) */
+    oskar_Mem* element_weight;                /* Element complex weight (set to 1.0, 0.0 unless using apodisation). */
+    oskar_Mem* element_orientation_x_rad_cpu; /* Azimuth of x dipole axis, in radians, guaranteed to be in CPU memory (default pi/2). */
+    oskar_Mem* element_orientation_y_rad_cpu; /* Azimuth of y dipole axis, in radians, guaranteed to be in CPU memory (default 0.0). */
+    oskar_Mem* element_types;     /* Integer array of element types (default 0). */
+    oskar_Mem* element_types_cpu; /* Integer array of element types guaranteed to be in CPU memory (default 0). */
+    oskar_Station** child;        /* Array of child station handles (pointer is NULL if none). */
+    oskar_Element** element;      /* Array of element models per element type (pointer is NULL if there are child stations). */
 
     /* Data used only for aperture array stations with fixed beams. */
     int num_permitted_beams;

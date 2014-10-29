@@ -6,7 +6,14 @@
         These settings are used only when running the beam pattern simulation.
     </desc>
     
+    <s k="average_cross_power_beam">
+        <label>Produce average cross-power beam</label>
+        <type name="bool" default="false"/>
+        <desc>If enabled, the generated beam pattern will be the average
+        cross-power beam from all stations.</desc>
+    </s>
     <s k="station_id"><label>Station ID</label>
+        <depends k="beam_pattern/average_cross_power_beam" v="false" />
         <type name="uint" default="0"/>
         <desc>The station ID number (zero based) to select from the
             telescope model when generating the beam pattern.</desc>
@@ -39,7 +46,7 @@
     <s k="beam_image">
         <label>Beam image</label>
         <desc>Image of the beam, centred on the beam direction.</desc>
-        <!-- <depends k="beampattern/coordinate_type" v="Beam image"/> -->
+        <!-- <depends k="beam_pattern/coordinate_type" v="Beam image"/> -->
 
         <s k="size" >
             <label>Image dimensions [pixels]</label>
@@ -79,7 +86,7 @@
     <!--
     <s k="healpix">
         <label>HEALPix settings</label>
-        <depends k="beampattern/coordinate_type" v="HEALPix"/>
+        <depends k="beam_pattern/coordinate_type" v="HEALPix"/>
         <s k="nside"><label>Nside</label>
             <type name="uint" default="128" />
             <desc>HEALPix Nside parameter. The total number of points is
@@ -88,14 +95,14 @@
     </s>
     <s k="sky_model">
         <label>Sky model settings</label>
-        <depends k="beampattern/coordinate_type" v="Sky model"/>
+        <depends k="beam_pattern/coordinate_type" v="Sky model"/>
         <s k="file"><label>Input file</label>
             <type name="InputFile" />
             <desc>Path to an input sky model file.</desc>
         </s>
     </s>
     -->
-    <!--
+    <!-- PROPOSED NEW FEATURE
     <s k="horizon_clip"><label>Horizon clip</label>
         <type name="bool" default="true" />
         <desc>Zero the beam pattern below the horizon</desc>

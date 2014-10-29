@@ -101,6 +101,10 @@ void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     else if (temp.startsWith("S", Qt::CaseInsensitive))
         tel->pol_mode = OSKAR_POL_MODE_SCALAR;
 
+    // Duplicate first station beam if possible.
+    tel->allow_station_beam_duplication =
+            s.value("allow_station_beam_duplication", false).toBool();
+
     // Aperture array settings.
     s.beginGroup("aperture_array");
     {

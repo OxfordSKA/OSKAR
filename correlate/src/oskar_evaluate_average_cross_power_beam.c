@@ -31,6 +31,7 @@
 #include <oskar_evaluate_average_cross_power_beam_omp.h>
 #include <oskar_evaluate_average_scalar_cross_power_beam_cuda.h>
 #include <oskar_evaluate_average_scalar_cross_power_beam_omp.h>
+#include <oskar_cuda_check_error.h>
 
 #ifdef __cplusplus
 extern "C" {

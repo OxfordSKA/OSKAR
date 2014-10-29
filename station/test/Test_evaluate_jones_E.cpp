@@ -83,7 +83,7 @@ TEST(evaluate_jones_E, evaluate_e)
                 &x_pos[0], station_dim, &x_pos[0], station_dim);
     }
     oskar_telescope_analyse(tel_cpu, &error);
-    oskar_telescope_set_common_horizon(tel_cpu, OSKAR_TRUE);
+    oskar_telescope_set_allow_station_beam_duplication(tel_cpu, OSKAR_TRUE);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Copy telescope structure to the GPU, and free the CPU version.

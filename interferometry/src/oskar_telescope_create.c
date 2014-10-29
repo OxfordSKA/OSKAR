@@ -80,7 +80,7 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->max_station_size = 0;
     telescope->max_station_depth = 1;
     telescope->identical_stations = 0;
-    telescope->use_common_sky = 1;
+    telescope->allow_station_beam_duplication = 0;
     telescope->seed_time_variable_station_element_errors = 0;
     telescope->lon_rad = 0.0;
     telescope->lat_rad = 0.0;

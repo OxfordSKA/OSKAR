@@ -74,6 +74,18 @@
             faster.</b>
         </desc>
     </s>
+    <s k="allow_station_beam_duplication">
+        <label>Allow station beam duplication</label>
+        <type name="bool" default="false" />
+        <desc>
+            If enabled, and if all stations are identical, all station beam
+            responses will be copied from the first. This can reduce the 
+            simulation time, but <b>when using a telescope model with long 
+            baselines, source positions will not shift with respect to each 
+            station's horizon if this option is enabled.</b> This setting has
+            no effect if all stations are not identical.
+        </desc>
+    </s>
 
     <!-- Aperture array settings group -->
     <import filename="oskar_telescope_AA.xml"/>

@@ -26,38 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PRIVATE_IMAGE_H_
-#define OSKAR_PRIVATE_IMAGE_H_
+#include <cuda_runtime_api.h>
 
-#include <oskar_mem.h>
+#include <oskar_settings_load.h>
+#include <oskar_settings_log.h>
 
-struct oskar_Image
+#include <oskar_sim_beam_pattern.h>
+#include <oskar_set_up_telescope.h>
+#include <oskar_beam_pattern_generate_coordinates.h>
+
+#include <oskar_convert_mjd_to_gast_fast.h>
+#include <oskar_cuda_mem_log.h>
+#include <oskar_evaluate_average_cross_power_beam.h>
+#include <oskar_evaluate_station_beam.h>
+#include <oskar_evaluate_jones_E.h>
+#include <oskar_jones.h>
+#include <oskar_log.h>
+#include <oskar_random_state.h>
+#include <oskar_station_work.h>
+#include <oskar_telescope.h>
+#include <oskar_timer.h>
+
+#include <oskar_settings_free.h>
+
+#include <oskar_cmath.h>
+#include <cstring>
+#include <vector>
+
+using std::vector;
+
+#include <fitsio.h>
+struct oskar_PixelDataHandle
 {
-    oskar_Mem* data;
-    oskar_Mem* settings_path;
-    int grid_type;   /* NEW v2.4 */
-    int coord_frame; /* NEW v2.4 */
-    int dimension_order[5];
-    int image_type;
-    int width;
-    int height;
-    int num_pols;
-    int num_times;
-    int num_channels;
-    int healpix_nside; /* NEW v2.4 */
-    double centre_lon_deg;
-    double centre_lat_deg;
-    double fov_lon_deg;
-    double fov_lat_deg;
-    double time_start_mjd_utc;
-    double time_inc_sec;
-    double freq_start_hz;
-    double freq_inc_hz;
+    int num_dims;
+    int* dim;
+
+    int num_reorder_groups;
+    int num_handles;
+    int* data_type;
+    fitsfile** handle_fits;
+    FILE** handle_ascii;
 };
 
-#ifndef OSKAR_IMAGE_TYPEDEF_
-#define OSKAR_IMAGE_TYPEDEF_
-typedef struct oskar_Image oskar_Image;
-#endif /* OSKAR_IMAGE_TYPEDEF_ */
-
-#endif /* OSKAR_PRIVATE_IMAGE_H_ */
+/* TODO Write new version of oskar_sim_beam_pattern that doesn't use
+ * oskar_Image, and evaluates pixels in chunks. */

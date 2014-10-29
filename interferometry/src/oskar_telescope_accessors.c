@@ -111,9 +111,10 @@ int oskar_telescope_identical_stations(const oskar_Telescope* model)
     return model->identical_stations;
 }
 
-int oskar_telescope_common_horizon(const oskar_Telescope* model)
+int oskar_telescope_allow_station_beam_duplication(
+        const oskar_Telescope* model)
 {
-    return model->use_common_sky;
+    return model->allow_station_beam_duplication;
 }
 
 int oskar_telescope_max_station_size(const oskar_Telescope* model)
@@ -250,9 +251,9 @@ void oskar_telescope_set_uv_filter(oskar_Telescope* model,
     model->uv_filter_units = uv_filter_units;
 }
 
-void oskar_telescope_set_common_horizon(oskar_Telescope* model, int value)
+void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model, int value)
 {
-    model->use_common_sky = value;
+    model->allow_station_beam_duplication = value;
 }
 
 void oskar_telescope_set_random_seed(oskar_Telescope* model, int value)

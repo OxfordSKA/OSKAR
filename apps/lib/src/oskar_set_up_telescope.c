@@ -249,8 +249,8 @@ static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
 
     oskar_telescope_set_phase_centre(telescope,
             settings->obs.ra0_rad[0], settings->obs.dec0_rad[0]);
-    oskar_telescope_set_common_horizon(telescope,
-            settings->interferometer.use_common_sky);
+    oskar_telescope_set_allow_station_beam_duplication(telescope,
+            settings->telescope.allow_station_beam_duplication);
     oskar_telescope_set_smearing_values(telescope,
             settings->interferometer.channel_bandwidth_hz,
             settings->interferometer.time_average_sec);

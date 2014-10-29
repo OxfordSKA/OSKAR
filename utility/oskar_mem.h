@@ -31,6 +31,15 @@
 
 /**
  * @file oskar_mem.h
+ *
+ * @brief Structure to wrap a memory pointer either on the CPU or GPU.
+ *
+ * @details
+ * This structure holds a pointer to memory either on the CPU
+ * or GPU, and defines the type of the data to which it points.
+ *
+ * The structure will normally take ownership of the memory, so the
+ * memory will be released when the structure is freed.
  */
 
 #include <oskar_global.h>

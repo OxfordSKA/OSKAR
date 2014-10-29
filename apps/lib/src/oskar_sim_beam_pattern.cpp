@@ -36,16 +36,18 @@
 #include <oskar_beam_pattern_generate_coordinates.h>
 #include <oskar_beam_pattern_write.h>
 
-#include <oskar_evaluate_station_beam.h>
-
-#include <oskar_telescope.h>
-#include <oskar_image.h>
 #include <oskar_convert_mjd_to_gast_fast.h>
-#include <oskar_station_work.h>
 #include <oskar_cuda_mem_log.h>
-#include <oskar_random_state.h>
-#include <oskar_timer.h>
+#include <oskar_evaluate_average_cross_power_beam.h>
+#include <oskar_evaluate_station_beam.h>
+#include <oskar_evaluate_jones_E.h>
+#include <oskar_image.h>
+#include <oskar_jones.h>
 #include <oskar_log.h>
+#include <oskar_random_state.h>
+#include <oskar_station_work.h>
+#include <oskar_telescope.h>
+#include <oskar_timer.h>
 
 #include <oskar_settings_free.h>
 
@@ -131,10 +133,6 @@ static void load_settings(oskar_Settings* settings, const char* filename,
 
     // Check that an output data file has been specified.
     if (!(settings->beam_pattern.output_beam_text_file ||
-            settings->beam_pattern.oskar_image_voltage ||
-            settings->beam_pattern.oskar_image_phase ||
-            settings->beam_pattern.oskar_image_complex ||
-            settings->beam_pattern.oskar_image_total_intensity ||
             settings->beam_pattern.fits_image_voltage ||
             settings->beam_pattern.fits_image_phase ||
             settings->beam_pattern.fits_image_total_intensity))
@@ -161,12 +159,12 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     if (num_pols == 4) beam_pattern_data_type |= OSKAR_MATRIX;
 
     // Check the station ID is valid.
-    if (station_id < 0 || station_id >= oskar_telescope_num_stations(tel))
+    int num_stations = oskar_telescope_num_stations(tel);
+    if (station_id < 0 || station_id >= num_stations)
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }
-    const oskar_Station* st = oskar_telescope_station_const(tel, station_id);
 
     // FIXME HACK Open the output file list.
     FILE* file = 0;
@@ -186,11 +184,25 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     oskar_Mem* x = oskar_mem_create(type, OSKAR_CPU, 0, status);
     oskar_Mem* y = oskar_mem_create(type, OSKAR_CPU, 0, status);
     oskar_Mem* z = oskar_mem_create(type, OSKAR_CPU, 0, status);
-    num_pixels = oskar_beam_pattern_generate_coordinates(&coord_type, x, y, z,
-            &lon0, &lat0, oskar_station_beam_coord_type(st),
-            oskar_station_beam_lon_rad(st),
-            oskar_station_beam_lat_rad(st), &settings->beam_pattern,
-            status);
+
+    if (settings->beam_pattern.average_cross_power_beam)
+    {
+        num_pixels = oskar_beam_pattern_generate_coordinates(&coord_type,
+                x, y, z, &lon0, &lat0, OSKAR_SPHERICAL_TYPE_EQUATORIAL,
+                oskar_telescope_phase_centre_ra_rad(tel),
+                oskar_telescope_phase_centre_dec_rad(tel),
+                &settings->beam_pattern, status);
+    }
+    else
+    {
+        const oskar_Station* st = oskar_telescope_station_const(tel,
+                station_id);
+        num_pixels = oskar_beam_pattern_generate_coordinates(&coord_type,
+                x, y, z, &lon0, &lat0, oskar_station_beam_coord_type(st),
+                oskar_station_beam_lon_rad(st),
+                oskar_station_beam_lat_rad(st),
+                &settings->beam_pattern, status);
+    }
 
     // Resize coordinate arrays to allow space for a normalisation source.
     oskar_mem_realloc(x, num_pixels + 1, status);
@@ -203,7 +215,8 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
 
     // Set up GPU memory for station model, work arrays, coordinates and
     // beam pattern.
-    oskar_Station* d_st = oskar_station_create_copy(st, OSKAR_GPU, status);
+    oskar_Telescope* d_tel = oskar_telescope_create_copy(tel, OSKAR_GPU,
+            status);
     oskar_StationWork* d_work = oskar_station_work_create(type, OSKAR_GPU,
             status);
     oskar_Mem* d_beam_data = oskar_mem_create(beam_pattern_data_type,
@@ -211,6 +224,10 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     oskar_Mem* d_x = oskar_mem_create_copy(x, OSKAR_GPU, status);
     oskar_Mem* d_y = oskar_mem_create_copy(y, OSKAR_GPU, status);
     oskar_Mem* d_z = oskar_mem_create_copy(z, OSKAR_GPU, status);
+    oskar_Jones* jones = 0;
+    if (settings->beam_pattern.average_cross_power_beam)
+        jones = oskar_jones_create(beam_pattern_data_type, OSKAR_GPU,
+                num_stations, num_pixels, status);
 
     // Begin beam pattern evaluation.
     oskar_log_section(log, 'M', "Starting simulation...");
@@ -236,9 +253,21 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
             double t_dump = obs_start_mjd_utc + t * dt_dump;
             double GAST = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
-            oskar_evaluate_station_beam(d_beam_data, (int)num_pixels,
-                    d_x, d_y, d_z, coord_type, lon0, lat0, d_st, d_work,
-                    rand_state, frequency, GAST, status);
+            if (settings->beam_pattern.average_cross_power_beam)
+            {
+                oskar_evaluate_jones_E(jones, num_pixels, d_x, d_y, d_z,
+                        coord_type, lon0, lat0, d_tel, GAST, frequency,
+                        d_work, rand_state, status);
+                oskar_evaluate_average_cross_power_beam(num_pixels,
+                        num_stations, jones, d_beam_data, status);
+            }
+            else
+            {
+                oskar_evaluate_station_beam(d_beam_data, (int)num_pixels,
+                        d_x, d_y, d_z, coord_type, lon0, lat0,
+                        oskar_telescope_station_const(d_tel, station_id),
+                        d_work, rand_state, frequency, GAST, status);
+            }
 
             // FIXME HACK Write raw beam data to ASCII file.
             if (file)
@@ -254,8 +283,9 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
     }
 
     // Free memory.
+    oskar_jones_free(jones, status);
     oskar_station_work_free(d_work, status);
-    oskar_station_free(d_st, status);
+    oskar_telescope_free(d_tel, status);
     oskar_mem_free(d_beam_data, status);
     oskar_mem_free(d_x, status);
     oskar_mem_free(d_y, status);

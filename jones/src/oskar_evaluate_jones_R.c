@@ -136,7 +136,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
     base_type = oskar_mem_type_precision(jones_type);
     location = oskar_jones_mem_location(R);
     num_stations = oskar_jones_num_stations(R);
-    n = (oskar_telescope_common_horizon(telescope) ? 1 : num_stations);
+    n = (oskar_telescope_allow_station_beam_duplication(telescope) ? 1 : num_stations);
 
     /* Check that the data dimensions are OK. */
     if (num_sources > (int)oskar_mem_length(ra_rad) ||
@@ -240,7 +240,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
     }
 
     /* Copy data for station 0 to stations 1 to n, if using a common sky. */
-    if (oskar_telescope_common_horizon(telescope))
+    if (oskar_telescope_allow_station_beam_duplication(telescope))
     {
         oskar_Mem* R0;
         R0 = oskar_mem_create_alias(0, 0, 0, status);

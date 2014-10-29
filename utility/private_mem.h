@@ -29,31 +29,15 @@
 #ifndef OSKAR_PRIVATE_MEM_H_
 #define OSKAR_PRIVATE_MEM_H_
 
-/**
- * @file private_mem.h
- */
-
-#include <oskar_global.h>
 #include <stddef.h> /* For size_t */
 
-/**
- * @brief Structure to wrap a memory pointer either on the CPU or GPU.
- *
- * @details
- * This structure holds a pointer to memory either on the CPU
- * or GPU, and defines the type of the data to which it points.
- *
- * The structure will normally take ownership of the memory:
- * If the value of the \p owner variable is set to true, the memory will be
- * released when the structure is freed.
- */
 struct oskar_Mem
 {
-    int type;            /**< Enumerated element type of memory block. */
-    int location;        /**< Enumerated address space of data pointer. */
-    size_t num_elements; /**< Number of elements in memory block. */
-    int owner;           /**< Flag set if the structure owns the memory. */
-    void* data;          /**< Data pointer. */
+    int type;            /* Enumerated element type of memory block. */
+    int location;        /* Enumerated address space of data pointer. */
+    size_t num_elements; /* Number of elements in memory block. */
+    int owner;           /* Flag set if the structure owns the memory. */
+    void* data;          /* Data pointer. */
 };
 
 #ifndef OSKAR_MEM_TYPEDEF_

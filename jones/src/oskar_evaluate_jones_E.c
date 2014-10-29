@@ -64,7 +64,7 @@ void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, oskar_Mem* x,
 
     /* Evaluate the station beams. */
     E_station = oskar_mem_create_alias(0, 0, 0, status);
-    if (oskar_telescope_common_horizon(telescope) &&
+    if (oskar_telescope_allow_station_beam_duplication(telescope) &&
             oskar_telescope_identical_stations(telescope))
     {
         /* Identical stations. */

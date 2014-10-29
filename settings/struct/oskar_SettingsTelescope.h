@@ -162,6 +162,7 @@ struct oskar_SettingsTelescope
     int station_type;
     int normalise_beams_at_phase_centre;
     int pol_mode;
+    int allow_station_beam_duplication;
     oskar_SettingsApertureArray aperture_array;
     oskar_SettingsGaussianBeam gaussian_beam;
 };
