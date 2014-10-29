@@ -28,8 +28,6 @@
 
 #include <gtest/gtest.h>
 
-#include <cuda_runtime_api.h>
-
 #include <oskar_station.h>
 #include <oskar_evaluate_array_pattern.h>
 #include <oskar_evaluate_array_pattern_hierarchical.h>
@@ -229,7 +227,6 @@ static void run_array_pattern(oskar_Image* bp,
     oskar_timer_start(timer);
     oskar_evaluate_array_pattern(pattern, wavenumber, station, num_pixels,
             x, y, z, w, status);
-    cudaDeviceSynchronize();
     printf("%s: %.6f\n", message, oskar_timer_elapsed(timer));
     oskar_timer_free(timer);
     ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
@@ -272,7 +269,6 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
     oskar_timer_start(timer);
     oskar_evaluate_array_pattern_hierarchical(pattern, wavenumber, station,
             num_pixels, x, y, z, ones, w, status);
-    cudaDeviceSynchronize();
     printf("%s: %.6f\n", message, oskar_timer_elapsed(timer));
     oskar_timer_free(timer);
     oskar_mem_free(w, status);
