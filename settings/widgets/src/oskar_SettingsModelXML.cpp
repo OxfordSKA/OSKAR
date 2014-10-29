@@ -378,6 +378,7 @@ std::string SettingsModelXML::get_type_(rapidxml::xml_node<>* s,
 {
     typedef rapidxml::xml_node<> node;
     typedef rapidxml::xml_attribute<> attr;
+    id = oskar_SettingsItem::UNDEF;
 
     // Obtain a pointer to the type node.
     std::vector<std::string> names;
@@ -543,11 +544,6 @@ SettingsModelXML::Status SettingsModelXML::decalare_setting_(
     std::vector<std::string> options;
     oskar_SettingsItem::type_id id;
     std::string type = get_type_(s, id, defaultValue, options);
-    if (id == oskar_SettingsItem::UNDEF) {
-        cerr << "ERROR: Unknown oskar_SettingsItem type_id for xml type '";
-        cout << type << "'";
-        cerr << " [key = " << fullKey << "]" << endl;
-    }
 
     // Label, description & dependency
     std::string label = get_label_(s);
@@ -566,6 +562,13 @@ SettingsModelXML::Status SettingsModelXML::decalare_setting_(
 
     // Setting ---------------------------------------------------------------
     else {
+        if (id == oskar_SettingsItem::UNDEF)
+        {
+            cerr << "ERROR: Unknown oskar_SettingsItem type_id for XML type '";
+            cout << type << "'";
+            cerr << " [key = " << fullKey << "]" << endl;
+        }
+
         bool required = is_required_(s);
         if (id == oskar_SettingsItem::OPTIONS)
             declareOptionList_(fullKey, label, options, defaultValue, required);
