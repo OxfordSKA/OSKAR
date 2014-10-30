@@ -148,8 +148,7 @@ TEST(Mem, add_gpu)
     mem_B = oskar_mem_create_copy(mem_A, OSKAR_GPU, &status);
     mem_C = oskar_mem_create_copy(mem_A, OSKAR_GPU, &status);
     oskar_mem_add(mem_C, mem_A, mem_B, &status);
-    ASSERT_EQ((int)OSKAR_ERR_BAD_LOCATION, status);
-    status = 0;
+    ASSERT_EQ(0, status);
     oskar_mem_free(mem_A, &status);
     oskar_mem_free(mem_B, &status);
     oskar_mem_free(mem_C, &status);
