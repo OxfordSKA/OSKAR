@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,22 +42,23 @@ extern "C" {
 /**
  * @details
  * Return the angular distance between two points on a sphere.
- * This is implemented using the Haversin formula:
+ * This is implemented using the Haversine formula:
  *
  * \f{equation}{
  *     2\arcsin\left(\sqrt{\sin^2\left(\frac{\Delta\phi}{2}\right)
  *     +\cos{\phi_s}\cos{\phi_f}\sin^2\left(\frac{\Delta\lambda}{2}\right)}\right)
  * \f}
  *
- * @param[in] l1 Longitude of the first point, in radians.
- * @param[in] l2 Longitude of the second point, in radians.
- * @param[in] b1 Latitude of the first point, in radians.
- * @param[in] b2 Latitude of the second point, in radians.
+ * @param[in] lon1_rad Longitude of the first point, in radians.
+ * @param[in] lon2_rad Longitude of the second point, in radians.
+ * @param[in] lat1_rad Latitude of the first point, in radians.
+ * @param[in] lat2_rad Latitude of the second point, in radians.
  *
  * @return The angular distance in radians.
  */
 OSKAR_EXPORT
-double oskar_angular_distance(double l1, double l2, double b1, double b2);
+double oskar_angular_distance(double lon1_rad, double lon2_rad,
+        double lat1_rad, double lat2_rad);
 
 #ifdef __cplusplus
 }

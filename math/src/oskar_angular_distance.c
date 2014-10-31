@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,14 @@
 extern "C" {
 #endif
 
-double oskar_angular_distance(double l1, double l2, double b1, double b2)
+double oskar_angular_distance(double lon1_rad, double lon2_rad,
+        double lat1_rad, double lat2_rad)
 {
-    double delta_l, delta_b, sinDb, sinDl;
-    delta_l = (l2 - l1) / 2.0;
-    delta_b = (b2 - b1) / 2.0;
-    sinDb = sin(delta_b);
-    sinDl = sin(delta_l);
-    return 2.0 * asin( sqrt(sinDb*sinDb + cos(b1)*cos(b2) * sinDl*sinDl) );
+    double sin_delta_lat, sin_delta_lon;
+    sin_delta_lat = sin(0.5 * (lat2_rad - lat1_rad));
+    sin_delta_lon = sin(0.5 * (lon2_rad - lon1_rad));
+    return 2.0 * asin( sqrt(sin_delta_lat*sin_delta_lat +
+            cos(lat1_rad) * cos(lat2_rad) * sin_delta_lon*sin_delta_lon) );
 }
 
 #ifdef __cplusplus
