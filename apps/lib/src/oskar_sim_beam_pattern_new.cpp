@@ -205,8 +205,9 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
         oskar_log_message(log, 'M', 0, "Channel %3d/%d [%.4f MHz]",
                 c + 1, num_channels, frequency / 1e6);
 
-        // Create the random state structure: needed to ensure
-        // the same set of random numbers
+        // Create the random state structure.
+        // FIXME This isn't going to work with pixels in chunks,
+        // since we'll need the same set of random numbers for each chunk.
         oskar_RandomState* rand_state = oskar_random_state_create(
                 oskar_telescope_max_station_size(tel),
                 oskar_telescope_random_seed(tel), 0, 0, status);
