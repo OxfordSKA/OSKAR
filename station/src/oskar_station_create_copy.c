@@ -69,6 +69,8 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     model->lon_rad = src->lon_rad;
     model->lat_rad = src->lat_rad;
     model->alt_metres = src->alt_metres;
+    model->pm_x_rad = src->pm_x_rad;
+    model->pm_y_rad = src->pm_y_rad;
     model->beam_lon_rad = src->beam_lon_rad;
     model->beam_lat_rad = src->beam_lat_rad;
     model->beam_coord_type = src->beam_coord_type;

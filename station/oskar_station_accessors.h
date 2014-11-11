@@ -87,6 +87,12 @@ OSKAR_EXPORT
 double oskar_station_alt_metres(const oskar_Station* model);
 
 OSKAR_EXPORT
+double oskar_station_polar_motion_x_rad(const oskar_Station* model);
+
+OSKAR_EXPORT
+double oskar_station_polar_motion_y_rad(const oskar_Station* model);
+
+OSKAR_EXPORT
 double oskar_station_beam_lon_rad(const oskar_Station* model);
 
 OSKAR_EXPORT
@@ -336,6 +342,23 @@ void oskar_station_set_normalise_final_beam(oskar_Station* model, int value);
 OSKAR_EXPORT
 void oskar_station_set_position(oskar_Station* model,
         double longitude_rad, double latitude_rad, double altitude_m);
+
+/**
+ * @brief
+ * Sets the polar motion components.
+ *
+ * @details
+ * Sets the polar motion components for the station.
+ * This function operates recursively to set polar motion components for all
+ * child stations too.
+ *
+ * @param[in] model      Pointer to station model.
+ * @param[in] pm_x_rad   Polar motion x-component, in radians.
+ * @param[in] pm_y_rad   Polar motion y-component, in radians.
+ */
+OSKAR_EXPORT
+void oskar_station_set_polar_motion(oskar_Station* model,
+        double pm_x_rad, double pm_y_rad);
 
 /**
  * @brief

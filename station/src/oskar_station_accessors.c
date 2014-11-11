@@ -71,6 +71,16 @@ double oskar_station_alt_metres(const oskar_Station* model)
     return model->alt_metres;
 }
 
+double oskar_station_polar_motion_x_rad(const oskar_Station* model)
+{
+    return model->pm_x_rad;
+}
+
+double oskar_station_polar_motion_y_rad(const oskar_Station* model)
+{
+    return model->pm_y_rad;
+}
+
 double oskar_station_beam_lon_rad(const oskar_Station* model)
 {
     return model->beam_lon_rad;
@@ -420,6 +430,23 @@ void oskar_station_set_position(oskar_Station* model,
     model->lon_rad = longitude_rad;
     model->lat_rad = latitude_rad;
     model->alt_metres = altitude_m;
+}
+
+void oskar_station_set_polar_motion(oskar_Station* model,
+        double pm_x_rad, double pm_y_rad)
+{
+    int i;
+    model->pm_x_rad = pm_x_rad;
+    model->pm_y_rad = pm_y_rad;
+
+    /* Set recursively for all child stations. */
+    if (oskar_station_has_child(model))
+    {
+        for (i = 0; i < model->num_elements; ++i)
+        {
+            oskar_station_set_polar_motion(model->child[i], pm_x_rad, pm_y_rad);
+        }
+    }
 }
 
 void oskar_station_set_phase_centre(oskar_Station* model,

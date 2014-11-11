@@ -58,6 +58,8 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
             a->beam_coord_type != b->beam_coord_type ||
             a->beam_lon_rad != b->beam_lon_rad ||
             a->beam_lat_rad != b->beam_lat_rad ||
+            a->pm_x_rad != b->pm_x_rad ||
+            a->pm_y_rad != b->pm_y_rad ||
             a->identical_children != b->identical_children ||
             a->num_elements != b->num_elements ||
             a->num_element_types != b->num_element_types ||

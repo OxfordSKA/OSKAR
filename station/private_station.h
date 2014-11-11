@@ -56,6 +56,8 @@ struct oskar_Station
     double lon_rad;               /* Geodetic east longitude of station, in radians. */
     double lat_rad;               /* Geodetic latitude of station, in radians. */
     double alt_metres;            /* Altitude of station above ellipsoid, in metres. */
+    double pm_x_rad;              /* Polar motion (x-component) in radians. */
+    double pm_y_rad;              /* Polar motion (y-component) in radians. */
     double beam_lon_rad;          /* Longitude of beam phase centre, in radians. */
     double beam_lat_rad;          /* Latitude of beam phase centre, in radians. */
     int beam_coord_type;          /* Enumerator describing beam spherical coordinate type (from oskar_global.h). */

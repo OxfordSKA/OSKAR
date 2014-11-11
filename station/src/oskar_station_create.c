@@ -38,7 +38,6 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
         int* status)
 {
     oskar_Station* model;
-    int CPU = OSKAR_CPU;
 
     /* Check all inputs. */
     if (!status)
@@ -95,17 +94,17 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->element_phase_error_rad =
             oskar_mem_create(type, location, num_elements, status);
     model->element_orientation_x_rad_cpu =
-            oskar_mem_create(OSKAR_DOUBLE, CPU, num_elements, status);
+            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
     model->element_orientation_y_rad_cpu =
-            oskar_mem_create(OSKAR_DOUBLE, CPU, num_elements, status);
+            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
     model->element_types =
             oskar_mem_create(OSKAR_INT, location, num_elements, status);
     model->element_types_cpu =
-            oskar_mem_create(OSKAR_INT, CPU, num_elements, status);
+            oskar_mem_create(OSKAR_INT, OSKAR_CPU, num_elements, status);
     model->permitted_beam_az_rad =
-            oskar_mem_create(OSKAR_DOUBLE, CPU, 0, status);
+            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
     model->permitted_beam_el_rad =
-            oskar_mem_create(OSKAR_DOUBLE, CPU, 0, status);
+            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
 
     /* Initialise common data. */
     model->station_type = OSKAR_STATION_TYPE_AA;
@@ -113,6 +112,8 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->lon_rad = 0.0;
     model->lat_rad = 0.0;
     model->alt_metres = 0.0;
+    model->pm_x_rad = 0.0;
+    model->pm_y_rad = 0.0;
     model->beam_lon_rad = 0.0;
     model->beam_lat_rad = 0.0;
     model->beam_coord_type = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
