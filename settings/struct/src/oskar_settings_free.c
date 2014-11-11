@@ -42,10 +42,10 @@ void oskar_settings_free(oskar_Settings* settings)
     /* Free all settings arrays. */
     free(settings->sim.cuda_device_ids);
     settings->sim.cuda_device_ids = NULL;
-    free(settings->obs.ra0_rad);
-    settings->obs.ra0_rad = NULL;
-    free(settings->obs.dec0_rad);
-    settings->obs.dec0_rad = NULL;
+    free(settings->obs.phase_centre_lon_rad);
+    settings->obs.phase_centre_lon_rad = NULL;
+    free(settings->obs.phase_centre_lat_rad);
+    settings->obs.phase_centre_lat_rad = NULL;
 
     /* Free pointing file name. */
     free(settings->obs.pointing_file);

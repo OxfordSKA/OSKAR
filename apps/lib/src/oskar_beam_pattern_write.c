@@ -95,8 +95,9 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
     oskar_image_set_coord_frame(image, settings->beam_pattern.coord_frame_type);
     oskar_image_set_grid_type(image, settings->beam_pattern.coord_grid_type);
     oskar_image_set_healpix_nside(image, settings->beam_pattern.nside);
-    oskar_image_set_centre(image, settings->obs.ra0_rad[0] * 180.0 / M_PI,
-            settings->obs.dec0_rad[0] * 180.0 / M_PI);
+    oskar_image_set_centre(image,
+            settings->obs.phase_centre_lon_rad[0] * 180.0 / M_PI,
+            settings->obs.phase_centre_lat_rad[0] * 180.0 / M_PI);
     oskar_image_set_fov(image, settings->beam_pattern.fov_deg[0],
             settings->beam_pattern.fov_deg[1]);
     oskar_image_set_freq(image, settings->obs.start_frequency_hz,
@@ -290,8 +291,9 @@ static void save_total_intensity(const oskar_Image* complex_cube,
     oskar_image_set_grid_type(image, settings->beam_pattern.coord_grid_type);
     oskar_image_set_healpix_nside(image, settings->beam_pattern.nside);
     oskar_image_set_type(image, OSKAR_IMAGE_TYPE_BEAM_SCALAR);
-    oskar_image_set_centre(image, settings->obs.ra0_rad[0] * 180.0 / M_PI,
-            settings->obs.dec0_rad[0] * 180.0 / M_PI);
+    oskar_image_set_centre(image,
+            settings->obs.phase_centre_lon_rad[0] * 180.0 / M_PI,
+            settings->obs.phase_centre_lat_rad[0] * 180.0 / M_PI);
     oskar_image_set_fov(image, settings->beam_pattern.fov_deg[0],
             settings->beam_pattern.fov_deg[1]);
     oskar_image_set_freq(image, settings->obs.start_frequency_hz,

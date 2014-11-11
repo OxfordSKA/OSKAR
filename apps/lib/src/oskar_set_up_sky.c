@@ -127,8 +127,8 @@ oskar_Sky** oskar_set_up_sky(const oskar_Settings* settings, oskar_Log* log,
     type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     max_per_chunk = settings->sim.max_sources_per_chunk;
     zero_flag = settings->sky.zero_failed_gaussians;
-    ra0  = settings->obs.ra0_rad[0];
-    dec0 = settings->obs.dec0_rad[0];
+    ra0  = settings->obs.phase_centre_lon_rad[0];
+    dec0 = settings->obs.phase_centre_lat_rad[0];
 
     /* Load sky model data files. */
     set_up_osm(num_chunks, &sky_chunks, max_per_chunk, type, log,

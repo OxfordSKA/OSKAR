@@ -81,12 +81,12 @@ void oskar_settings_load_observation(oskar_SettingsObservation* obs,
 
         // Allocate memory for pointing data and copy to settings arrays.
         obs->num_pointing_levels = ra_list.size();
-        obs->ra0_rad  = (double*)malloc(ra_list.size() * sizeof(double));
-        obs->dec0_rad = (double*)malloc(dec_list.size() * sizeof(double));
+        obs->phase_centre_lon_rad = (double*)malloc(ra_list.size() * sizeof(double));
+        obs->phase_centre_lat_rad = (double*)malloc(dec_list.size() * sizeof(double));
         for (int i = 0; i < obs->num_pointing_levels; ++i)
         {
-            obs->ra0_rad[i] = ra_list[i].toDouble() * M_PI / 180.0;
-            obs->dec0_rad[i] = dec_list[i].toDouble() * M_PI / 180.0;
+            obs->phase_centre_lon_rad[i] = ra_list[i].toDouble() * M_PI / 180.0;
+            obs->phase_centre_lat_rad[i] = dec_list[i].toDouble() * M_PI / 180.0;
         }
 
         // Get station pointing file.

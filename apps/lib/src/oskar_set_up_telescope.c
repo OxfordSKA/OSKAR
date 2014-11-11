@@ -248,7 +248,8 @@ static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
     if (*status) return;
 
     oskar_telescope_set_phase_centre(telescope,
-            settings->obs.ra0_rad[0], settings->obs.dec0_rad[0]);
+            settings->obs.phase_centre_lon_rad[0],
+            settings->obs.phase_centre_lat_rad[0]);
     oskar_telescope_set_allow_station_beam_duplication(telescope,
             settings->telescope.allow_station_beam_duplication);
     oskar_telescope_set_smearing_values(telescope,
@@ -313,7 +314,8 @@ static void set_station_data(oskar_Station* station,
     i = (depth < settings->obs.num_pointing_levels) ? depth :
             settings->obs.num_pointing_levels - 1;
     oskar_station_set_phase_centre(station, OSKAR_SPHERICAL_TYPE_EQUATORIAL,
-            settings->obs.ra0_rad[i], settings->obs.dec0_rad[i]);
+            settings->obs.phase_centre_lon_rad[i],
+            settings->obs.phase_centre_lat_rad[i]);
 
     /* Recursively set data for child stations. */
     if (oskar_station_has_child(station))

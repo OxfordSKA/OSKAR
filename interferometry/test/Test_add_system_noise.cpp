@@ -143,10 +143,10 @@ TEST(add_system_noise, test_rms)
 
     // Evaluate baseline coordinates
     settings.obs.num_pointing_levels = 1;
-    settings.obs.ra0_rad = (double*) malloc(sizeof(double));
-    settings.obs.dec0_rad = (double*) malloc(sizeof(double));
-    settings.obs.ra0_rad[0] = ra0_rad;
-    settings.obs.dec0_rad[0] = dec0_rad;
+    settings.obs.phase_centre_lon_rad = (double*) malloc(sizeof(double));
+    settings.obs.phase_centre_lat_rad = (double*) malloc(sizeof(double));
+    settings.obs.phase_centre_lon_rad[0] = ra0_rad;
+    settings.obs.phase_centre_lat_rad[0] = dec0_rad;
     settings.obs.start_frequency_hz = oskar_vis_freq_start_hz(vis);
     settings.obs.num_channels = num_channels;
     settings.obs.frequency_inc_hz = oskar_vis_freq_inc_hz(vis);

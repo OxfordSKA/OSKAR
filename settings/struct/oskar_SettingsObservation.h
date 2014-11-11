@@ -44,8 +44,9 @@
 struct oskar_SettingsObservation
 {
     int num_pointing_levels;
-    double* ra0_rad;
-    double* dec0_rad;
+    int phase_centre_coord_type;
+    double* phase_centre_lon_rad;
+    double* phase_centre_lat_rad;
     char* pointing_file;
 
     double start_frequency_hz;
@@ -57,6 +58,12 @@ struct oskar_SettingsObservation
     double length_sec;
     double length_days;
     double dt_dump_days;
+
+    /* Advanced parameters. */
+    double delta_tai_utc_sec;
+    double delta_ut1_utc_sec;
+    double pm_x_arcsec;
+    double pm_y_arcsec;
 };
 typedef struct oskar_SettingsObservation oskar_SettingsObservation;
 

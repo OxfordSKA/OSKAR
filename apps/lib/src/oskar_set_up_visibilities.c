@@ -76,8 +76,9 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
             settings->interferometer.time_average_sec);
     oskar_vis_set_channel_bandwidth_hz(vis,
             settings->interferometer.channel_bandwidth_hz);
-    oskar_vis_set_phase_centre(vis, settings->obs.ra0_rad[0] * rad2deg,
-            settings->obs.dec0_rad[0] * rad2deg);
+    oskar_vis_set_phase_centre(vis,
+            settings->obs.phase_centre_lon_rad[0] * rad2deg,
+            settings->obs.phase_centre_lat_rad[0] * rad2deg);
     oskar_vis_set_telescope_position(vis,
             oskar_telescope_lon_rad(tel) * rad2deg,
             oskar_telescope_lat_rad(tel) * rad2deg,

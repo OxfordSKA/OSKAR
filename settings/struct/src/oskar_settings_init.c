@@ -40,8 +40,8 @@ void oskar_settings_init(oskar_Settings* settings)
 
     /* Initialise all array pointers to NULL. */
     settings->sim.cuda_device_ids = NULL;
-    settings->obs.ra0_rad = NULL;
-    settings->obs.dec0_rad = NULL;
+    settings->obs.phase_centre_lon_rad = NULL;
+    settings->obs.phase_centre_lat_rad = NULL;
     settings->obs.pointing_file = NULL;
     settings->sky.oskar_sky_model.num_files = 0;
     settings->sky.oskar_sky_model.file = NULL;

@@ -312,8 +312,8 @@ void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
     depth = 1;
     if (s->obs.num_pointing_levels == 1)
     {
-        LV("Phase centre RA [deg]", "%.3f", s->obs.ra0_rad[0] * R2D);
-        LV("Phase centre Dec [deg]", "%.3f", s->obs.dec0_rad[0] * R2D);
+        LV("Phase centre RA [deg]", "%.3f", s->obs.phase_centre_lon_rad[0] * R2D);
+        LV("Phase centre Dec [deg]", "%.3f", s->obs.phase_centre_lat_rad[0] * R2D);
     }
     else
     {
@@ -321,9 +321,9 @@ void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
         for (i = 0; i < s->obs.num_pointing_levels; ++i)
         {
             oskar_log_value(log, 'M', depth, "Phase centre RA [deg]", "(%d) %.3f",
-                    i, s->obs.ra0_rad[i] * R2D);
+                    i, s->obs.phase_centre_lon_rad[i] * R2D);
             oskar_log_value(log, 'M', depth, "Phase centre Dec [deg]", "(%d) %.3f",
-                    i, s->obs.dec0_rad[i] * R2D);
+                    i, s->obs.phase_centre_lat_rad[i] * R2D);
         }
     }
     if (s->obs.pointing_file)
