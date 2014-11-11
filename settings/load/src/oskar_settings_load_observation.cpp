@@ -105,8 +105,8 @@ void oskar_settings_load_observation(oskar_SettingsObservation* obs,
             return;
         }
 
-        obs->num_channels         = s.value("num_channels", 1).toInt();
-        obs->frequency_inc_hz     = s.value("frequency_inc_hz").toDouble();
+        obs->num_channels     = s.value("num_channels", 1).toInt();
+        obs->frequency_inc_hz = s.value("frequency_inc_hz").toDouble();
 
         // Get observation start time.
         QString str_st = s.value("start_time_utc", "01-01-2000 00:00:00.0").toString();
@@ -158,6 +158,13 @@ void oskar_settings_load_observation(oskar_SettingsObservation* obs,
         }
         obs->length_days = obs->length_sec / 86400.0;
 
+        // Get advanced observation parameters.
+        s.beginGroup("advanced");
+        obs->delta_tai_utc_sec = s.value("delta_tai_utc_sec", 35.0).toDouble();
+        obs->delta_ut1_utc_sec = s.value("delta_ut1_utc_sec", 0.0).toDouble();
+        obs->pm_x_arcsec = s.value("pm_x_arcsec", 0.0).toDouble();
+        obs->pm_y_arcsec = s.value("pm_y_arcsec", 0.0).toDouble();
+        s.endGroup();
     }
     s.endGroup();
 
