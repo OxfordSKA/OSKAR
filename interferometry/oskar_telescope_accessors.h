@@ -116,6 +116,48 @@ double oskar_telescope_alt_metres(const oskar_Telescope* model);
 
 /**
  * @brief
+ * Returns the x-component of polar motion.
+ *
+ * @details
+ * Returns the x-component of polar motion.
+ *
+ * @param[in] model   Pointer to telescope model.
+ *
+ * @return The x-component of polar motion in radians.
+ */
+OSKAR_EXPORT
+double oskar_telescope_polar_motion_x_rad(const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns the y-component of polar motion.
+ *
+ * @details
+ * Returns the y-component of polar motion.
+ *
+ * @param[in] model   Pointer to telescope model.
+ *
+ * @return The y-component of polar motion in radians.
+ */
+OSKAR_EXPORT
+double oskar_telescope_polar_motion_y_rad(const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns the enumerated phase centre coordinate type.
+ *
+ * @details
+ * Returns the enumerated phase centre coordinate type.
+ *
+ * @param[in] model   Pointer to telescope model.
+ *
+ * @return The enumerated phase centre coordinate type.
+ */
+OSKAR_EXPORT
+int oskar_telescope_phase_centre_coord_type(const oskar_Telescope* model);
+
+/**
+ * @brief
  * Returns the right ascension of the phase centre.
  *
  * @details
@@ -550,18 +592,36 @@ void oskar_telescope_set_position(oskar_Telescope* model,
 
 /**
  * @brief
+ * Sets the polar motion components.
+ *
+ * @details
+ * Sets the polar motion components into the telescope model.
+ * This function recursively sets polar motion components for all existing
+ * stations too.
+ *
+ * @param[in] model      Pointer to station model.
+ * @param[in] pm_x_rad   Polar motion x-component, in radians.
+ * @param[in] pm_y_rad   Polar motion y-component, in radians.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_polar_motion(oskar_Telescope* model,
+        double pm_x_rad, double pm_y_rad);
+
+/**
+ * @brief
  * Sets the coordinates of the phase centre.
  *
  * @details
  * Sets the right ascension and declination of the interferometer phase centre.
  *
- * @param[in] model   Pointer to telescope model.
- * @param[in] ra_rad  Right ascension in radians.
- * @param[in] dec_rad Declination in radians.
+ * @param[in] model       Pointer to telescope model.
+ * @param[in] coord_type  Coordinate type (ICRS or CIRS).
+ * @param[in] ra_rad      Right ascension in radians.
+ * @param[in] dec_rad     Declination in radians.
  */
 OSKAR_EXPORT
 void oskar_telescope_set_phase_centre(oskar_Telescope* model,
-        double ra_rad, double dec_rad);
+        int coord_type, double ra_rad, double dec_rad);
 
 /**
  * @brief

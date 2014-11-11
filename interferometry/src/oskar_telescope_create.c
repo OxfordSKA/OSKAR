@@ -85,6 +85,9 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->lon_rad = 0.0;
     telescope->lat_rad = 0.0;
     telescope->alt_metres = 0.0;
+    telescope->pm_x_rad = 0.0;
+    telescope->pm_y_rad = 0.0;
+    telescope->phase_centre_coord_type = 0;
     telescope->phase_centre_ra_rad = 0.0;
     telescope->phase_centre_dec_rad = 0.0;
     telescope->channel_bandwidth_hz = 0.0;

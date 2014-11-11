@@ -61,6 +61,21 @@ double oskar_telescope_alt_metres(const oskar_Telescope* model)
     return model->alt_metres;
 }
 
+double oskar_telescope_polar_motion_x_rad(const oskar_Telescope* model)
+{
+    return model->pm_x_rad;
+}
+
+double oskar_telescope_polar_motion_y_rad(const oskar_Telescope* model)
+{
+    return model->pm_y_rad;
+}
+
+int oskar_telescope_phase_centre_coord_type(const oskar_Telescope* model)
+{
+    return model->phase_centre_coord_type;
+}
+
 double oskar_telescope_phase_centre_ra_rad(const oskar_Telescope* model)
 {
     return model->phase_centre_ra_rad;
@@ -229,9 +244,24 @@ void oskar_telescope_set_position(oskar_Telescope* model,
     model->alt_metres = altitude_metres;
 }
 
-void oskar_telescope_set_phase_centre(oskar_Telescope* model,
-        double ra_rad, double dec_rad)
+void oskar_telescope_set_polar_motion(oskar_Telescope* model,
+        double pm_x_rad, double pm_y_rad)
 {
+    int i;
+    model->pm_x_rad = pm_x_rad;
+    model->pm_y_rad = pm_y_rad;
+
+    /* Set for all stations, too. */
+    for (i = 0; i < model->num_stations; ++i)
+    {
+        oskar_station_set_polar_motion(model->station[i], pm_x_rad, pm_y_rad);
+    }
+}
+
+void oskar_telescope_set_phase_centre(oskar_Telescope* model,
+        int coord_type, double ra_rad, double dec_rad)
+{
+    model->phase_centre_coord_type = coord_type;
     model->phase_centre_ra_rad = ra_rad;
     model->phase_centre_dec_rad = dec_rad;
 }

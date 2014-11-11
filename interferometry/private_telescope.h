@@ -42,6 +42,9 @@ struct oskar_Telescope
     double lon_rad;              /* Geodetic longitude of telescope, in radians. */
     double lat_rad;              /* Geodetic latitude of telescope, in radians. */
     double alt_metres;           /* Altitude of telescope above ellipsoid, in metres. */
+    double pm_x_rad;             /* Polar motion (x-component) in radians. */
+    double pm_y_rad;             /* Polar motion (y-component) in radians. */
+    int phase_centre_coord_type; /* Phase centre coordinate type. */
     double phase_centre_ra_rad;  /* Right Ascension of phase centre, in radians. */
     double phase_centre_dec_rad; /* Declination of phase centre, in radians. */
     double channel_bandwidth_hz; /* Channel bandwidth, in Hz. */

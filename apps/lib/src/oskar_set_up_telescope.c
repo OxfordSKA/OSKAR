@@ -100,6 +100,15 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
                 settings->obs.pointing_file, status);
     }
 
+    /* Convert all phase centre ICRS to CIRS coordinates at start time. */
+    /*oskar_telescope_convert_phase_centre_coords(telescope,
+            OSKAR_SPHERICAL_TYPE_EQUATORIAL_ICRS,
+            OSKAR_SPHERICAL_TYPE_EQUATORIAL_CIRS,
+            settings->obs.start_mjd_utc,
+            settings->obs.delta_tai_utc_sec,
+            settings->obs.delta_ut1_utc_sec, status);
+     */
+
     /* Analyse telescope model to determine whether stations are
      * identical, whether to apply element errors and/or weights. */
     oskar_telescope_analyse(telescope, status);
@@ -223,11 +232,16 @@ void oskar_station_log_summary(const oskar_Station* station,
                 for (i = 0; i < num_elements; ++i)
                 {
                     oskar_log_message(log, 'M', d1, "Station %d model summary", i);
-                    oskar_station_log_summary(oskar_station_child_const(station,
-                            i), log, d1, status);
+                    oskar_station_log_summary(
+                            oskar_station_child_const(station, i), log, d1,
+                            status);
                 }
             }
         }
+    }
+    else if (oskar_station_type(station) == OSKAR_STATION_TYPE_ISOTROPIC)
+    {
+        oskar_log_value(log, 'M', d1, "Station type", "Isotropic");
     }
     else if (oskar_station_type(station) == OSKAR_STATION_TYPE_VLA_PBCOR)
     {
@@ -248,8 +262,12 @@ static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
     if (*status) return;
 
     oskar_telescope_set_phase_centre(telescope,
+            OSKAR_SPHERICAL_TYPE_EQUATORIAL,
             settings->obs.phase_centre_lon_rad[0],
             settings->obs.phase_centre_lat_rad[0]);
+    oskar_telescope_set_polar_motion(telescope,
+            (settings->obs.pm_x_arcsec / 3600.0) * M_PI / 180.0,
+            (settings->obs.pm_y_arcsec / 3600.0) * M_PI / 180.0);
     oskar_telescope_set_allow_station_beam_duplication(telescope,
             settings->telescope.allow_station_beam_duplication);
     oskar_telescope_set_smearing_values(telescope,
@@ -313,7 +331,8 @@ static void set_station_data(oskar_Station* station,
     /* Set pointing data based on station depth in hierarchy. */
     i = (depth < settings->obs.num_pointing_levels) ? depth :
             settings->obs.num_pointing_levels - 1;
-    oskar_station_set_phase_centre(station, OSKAR_SPHERICAL_TYPE_EQUATORIAL,
+    oskar_station_set_phase_centre(station,
+            OSKAR_SPHERICAL_TYPE_EQUATORIAL_ICRS,
             settings->obs.phase_centre_lon_rad[i],
             settings->obs.phase_centre_lat_rad[i]);
 

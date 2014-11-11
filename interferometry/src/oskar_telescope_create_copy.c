@@ -30,7 +30,6 @@
 #include <oskar_telescope.h>
 
 #include <stdlib.h>
-#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,6 +67,9 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     telescope->lon_rad = src->lon_rad;
     telescope->lat_rad = src->lat_rad;
     telescope->alt_metres = src->alt_metres;
+    telescope->pm_x_rad = src->pm_x_rad;
+    telescope->pm_y_rad = src->pm_y_rad;
+    telescope->phase_centre_coord_type = src->phase_centre_coord_type;
     telescope->phase_centre_ra_rad = src->phase_centre_ra_rad;
     telescope->phase_centre_dec_rad = src->phase_centre_dec_rad;
     telescope->channel_bandwidth_hz = src->channel_bandwidth_hz;
