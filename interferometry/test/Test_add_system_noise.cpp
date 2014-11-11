@@ -121,7 +121,8 @@ TEST(add_system_noise, test_rms)
                 stddev_start, stddev_inc);
     }
 
-    oskar_telescope_set_phase_centre(tel, ra0_rad, dec0_rad);
+    oskar_telescope_set_phase_centre(tel,
+            OSKAR_SPHERICAL_TYPE_EQUATORIAL, ra0_rad, dec0_rad);
 
     // Setup the visibilities structure.
     oskar_Vis* vis;
