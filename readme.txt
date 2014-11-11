@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.5                                          Last update: 22 July 2014 |
+| OSKAR 2.6                                          Last update:  30 Oct 2014 |
 +------------------------------------------------------------------------------+
 
 1. OSKAR: Oxford's Square Kilometre Array Radio-telescope simulator
@@ -7,8 +7,8 @@
 
 The OSKAR package consists of a number of open source libraries and
 applications for the simulation of astronomical radio interferometers.
-OSKAR has been designed primarily to produce simulated data from large
-aperture arrays, such as those envisaged for the SKA.
+OSKAR has been designed primarily to produce simulated visibility data from
+large aperture arrays, such as those envisaged for the SKA.
 
 
 2. OSKAR Repository Structure
@@ -24,14 +24,18 @@ Top level folder structure for OSKAR.
  |   |                  functions.
  |   |-- gui          : GUI classes.
  |   |-- lib          : Application library. Utility functions used by OSKAR
- |                      applications.
+ |   |                  applications.
+ |   |-- log          : Functions for printing formatted log messages.
  |-- cmake            : Build system macros.
  |-- convert          : Functions for coordinate conversions.
  |-- correlate        : Cross-correlation functions.
+ |-- doc              : Doxygen user documentation.
  |-- element          : Element structure and related functions.
  |-- extern           : External libraries used by OSKAR.
+ |   |-- cfitsio-3.37 : CFITSIO library to export FITS files.
  |   |-- ezOptionParser-0.2.0: Library for command line option parsing.
  |   |-- gtest-1.7.0  : Google testing framework library.
+ |   |-- rapidxml-1.13: 
  |-- fits             : FITS format interface library.
  |-- imaging          : Image/imaging functions.
  |-- interferometry   : Visibility functions and telescope model functions.
@@ -44,19 +48,19 @@ Top level folder structure for OSKAR.
  |-- settings         : Functions, widgets and structures for settings.
  |   |-- load         : Functions for loading settings ini files.
  |   |-- struct       : Settings structures and functions for handling them.
- |   |-- widgets      : Settings widgets for use with the OSKAR GUI
+ |   |-- widgets      : Settings widgets for use with the OSKAR GUI.
+ |   |-- xml          : XML files defining application settings.
  |-- sky              : Horizon clipping and sky model functions.
  |-- splines          : Spline fitting functions.
  |-- station          : Evaluation of station beam pattern,
  |                      station level processing, antenna level processing.
  |-- utility          : Utility functions.
- |   |-- log          : Functions for printing formatted log messages.
 
 
 2.2 Sub-folder Structure
 --------------------------------------------------------------------------------
 
-Each of the top level module folders listed above will contain the following
+Most of the top level module folders listed above will contain the following
 folders.
 
 (module)

@@ -56,11 +56,11 @@ extern "C" {
         old_s = new_s; \
     }
 
-void oskar_mem_stats(const oskar_Mem* mem, double* min, double* max,
+void oskar_mem_stats(const oskar_Mem* mem, size_t n, double* min, double* max,
         double* mean, double* std_dev, int* status)
 {
     int type;
-    size_t i, n;
+    size_t i;
     double old_m = 0.0, new_m = 0.0, old_s = 0.0, new_s = 0.0;
 
     /* Check all inputs. */
@@ -95,7 +95,6 @@ void oskar_mem_stats(const oskar_Mem* mem, double* min, double* max,
     if (std_dev) *std_dev = 0.0;
 
     /* Gather statistics. */
-    n = oskar_mem_length(mem);
     if (type == OSKAR_SINGLE)
     {
         double val;

@@ -48,7 +48,8 @@ TEST(Mem, stats)
 
     // Compute minimum, maximum, mean and population standard deviation.
     double min, max, mean, std_dev;
-    oskar_mem_stats(values, &min, &max, &mean, &std_dev, &status);
+    oskar_mem_stats(values, oskar_mem_length(values), &min, &max, &mean,
+            &std_dev, &status);
 
     // Check values are correct.
     ASSERT_DOUBLE_EQ(3.0, mean);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_STATS_H_
-#define OSKAR_MEM_STATS_H_
+#ifndef OSKAR_BEARING_ANGLE_H_
+#define OSKAR_BEARING_ANGLE_H_
 
 /**
- * @file oskar_mem_stats.h
+ * @file oskar_bearing_angle.h
  */
 
 #include <oskar_global.h>
@@ -40,29 +40,22 @@ extern "C" {
 #endif
 
 /**
- * @brief
- * Analyses values in a block of memory and reports statistics on them.
- *
  * @details
- * This function analyses values in a block of memory and reports
- * statistics on them.
+ * Return the bearing angle between two points on a sphere.
  *
- * An error is returned if the data type of the memory block is unsupported.
+ * @param[in] lon1_rad Longitude of the first point, in radians.
+ * @param[in] lon2_rad Longitude of the second point, in radians.
+ * @param[in] lat1_rad Latitude of the first point, in radians.
+ * @param[in] lat2_rad Latitude of the second point, in radians.
  *
- * @param[in] mem         Pointer to memory block to analyse.
- * @param[in] n           Number of elements to analyse.
- * @param[out] min        The minimum value in the array.
- * @param[out] max        The maximum value in the array.
- * @param[out] mean       The mean value of elements the array.
- * @param[out] std_dev    The population standard deviation of values the array.
- * @param[in,out]  status Status return code.
+ * @return The bearing angle in radians.
  */
 OSKAR_EXPORT
-void oskar_mem_stats(const oskar_Mem* mem, size_t n, double* min, double* max,
-        double* mean, double* std_dev, int* status);
+double oskar_bearing_angle(double lon1_rad, double lon2_rad,
+        double lat1_rad, double lat2_rad);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_STATS_H_ */
+#endif /* OSKAR_BEARING_ANGLE_H_ */

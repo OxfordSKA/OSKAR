@@ -5,6 +5,7 @@
 # Add the source files in this directory.
 set(math_SRC
     src/oskar_angular_distance.c
+    src/oskar_bearing_angle.c
     src/oskar_dft_c2r_2d_omp.c
     src/oskar_dftw_c2c_2d_omp.c
     src/oskar_dftw_c2c_3d_omp.c
@@ -12,6 +13,7 @@ set(math_SRC
     src/oskar_dftw_m2m_3d_omp.c
     src/oskar_dftw_o2c_2d_omp.c
     src/oskar_dftw_o2c_3d_omp.c    
+    src/oskar_ellipse_radius.c
     src/oskar_find_closest_match.c
     src/oskar_fit_ellipse.c
     src/oskar_gaussian.c

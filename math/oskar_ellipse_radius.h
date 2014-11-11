@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_STATS_H_
-#define OSKAR_MEM_STATS_H_
+#ifndef OSKAR_ELLIPSE_RADIUS_H_
+#define OSKAR_ELLIPSE_RADIUS_H_
 
 /**
- * @file oskar_mem_stats.h
+ * @file oskar_ellipse_radius.h
  */
 
 #include <oskar_global.h>
@@ -40,29 +40,22 @@ extern "C" {
 #endif
 
 /**
- * @brief
- * Analyses values in a block of memory and reports statistics on them.
- *
  * @details
- * This function analyses values in a block of memory and reports
- * statistics on them.
+ * Return the radius at a specified point on an ellipse.
  *
- * An error is returned if the data type of the memory block is unsupported.
+ * @param[in] maj_axis         Major axis of ellipse.
+ * @param[in] min_axis         Minor axis of ellipse.
+ * @param[in] pa_ellipse_rad   Position angle of ellipse, in radians.
+ * @param[in] pa_point_rad     Position angle of point, in radians.
  *
- * @param[in] mem         Pointer to memory block to analyse.
- * @param[in] n           Number of elements to analyse.
- * @param[out] min        The minimum value in the array.
- * @param[out] max        The maximum value in the array.
- * @param[out] mean       The mean value of elements the array.
- * @param[out] std_dev    The population standard deviation of values the array.
- * @param[in,out]  status Status return code.
+ * @return The radius of the ellipse at the given point.
  */
 OSKAR_EXPORT
-void oskar_mem_stats(const oskar_Mem* mem, size_t n, double* min, double* max,
-        double* mean, double* std_dev, int* status);
+double oskar_ellipse_radius(double maj_axis, double min_axis,
+        double pa_ellipse_rad, double pa_point_rad);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_STATS_H_ */
+#endif /* OSKAR_ELLIPSE_RADIUS_H_ */

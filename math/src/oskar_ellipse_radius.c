@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,43 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_STATS_H_
-#define OSKAR_MEM_STATS_H_
-
-/**
- * @file oskar_mem_stats.h
- */
-
-#include <oskar_global.h>
+#include <oskar_ellipse_radius.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Analyses values in a block of memory and reports statistics on them.
- *
- * @details
- * This function analyses values in a block of memory and reports
- * statistics on them.
- *
- * An error is returned if the data type of the memory block is unsupported.
- *
- * @param[in] mem         Pointer to memory block to analyse.
- * @param[in] n           Number of elements to analyse.
- * @param[out] min        The minimum value in the array.
- * @param[out] max        The maximum value in the array.
- * @param[out] mean       The mean value of elements the array.
- * @param[out] std_dev    The population standard deviation of values the array.
- * @param[in,out]  status Status return code.
- */
-OSKAR_EXPORT
-void oskar_mem_stats(const oskar_Mem* mem, size_t n, double* min, double* max,
-        double* mean, double* std_dev, int* status);
+double oskar_ellipse_radius(double maj_axis, double min_axis,
+        double pa_ellipse_rad, double pa_point_rad)
+{
+    double sin_pa, cos_pa, sin_b, cos_b, l, m;
+    sin_pa = sin(pa_ellipse_rad);
+    cos_pa = cos(pa_ellipse_rad);
+    sin_b = sin(pa_point_rad - pa_ellipse_rad);
+    cos_b = cos(pa_point_rad - pa_ellipse_rad);
+    l = 0.5 * (maj_axis * cos_b * sin_pa + min_axis * sin_b * cos_pa);
+    m = 0.5 * (maj_axis * cos_b * cos_pa - min_axis * sin_b * sin_pa);
+    return sqrt(l*l + m*m);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_MEM_STATS_H_ */

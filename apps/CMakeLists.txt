@@ -50,6 +50,7 @@ if (CUDA_FOUND)
     declare_oskar_apps(
         oskar_cuda_system_info
         oskar_binary_file_query
+        oskar_filter_sky_model_clusters
         oskar_image_stats
         oskar_image_summary
         oskar_vis_add
