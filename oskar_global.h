@@ -138,6 +138,9 @@ enum OSKAR_ERROR_CODES
     /* Indicates a problem with FITS I/O. */
     OSKAR_ERR_FITS_IO                  = -22,
 
+    /* Indicates coordinate type mismatch. */
+    OSKAR_ERR_COORD_TYPE_MISMATCH      = -23,
+
     /* Indicates that the file is not a valid OSKAR binary file. */
     OSKAR_ERR_BINARY_FILE_INVALID      = -101,
 
@@ -263,9 +266,11 @@ enum OSKAR_LENGTH
  */
 enum OSKAR_SPHERICAL_TYPE
 {
-    OSKAR_SPHERICAL_TYPE_EQUATORIAL,
-    OSKAR_SPHERICAL_TYPE_HORIZONTAL,
-    OSKAR_SPHERICAL_TYPE_GALACTIC
+    OSKAR_SPHERICAL_TYPE_EQUATORIAL = 1000, /* deprecated */
+    OSKAR_SPHERICAL_TYPE_EQUATORIAL_ICRS = 0,
+    OSKAR_SPHERICAL_TYPE_EQUATORIAL_CIRS = 1,
+    OSKAR_SPHERICAL_TYPE_AZEL = 2,
+    OSKAR_SPHERICAL_TYPE_GALACTIC = 3
 };
 
 /**

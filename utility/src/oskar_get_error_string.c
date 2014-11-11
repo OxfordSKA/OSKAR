@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,6 +95,8 @@ const char* oskar_get_error_string(int error)
             return "invalid range";
         case OSKAR_ERR_FITS_IO:
             return "problem reading or writing FITS file";
+        case OSKAR_ERR_COORD_TYPE_MISMATCH:
+            return "coordinate type mismatch";
 
         /* -100 to -150: OSKAR binary file errors*/
         case OSKAR_ERR_BINARY_FILE_INVALID:
