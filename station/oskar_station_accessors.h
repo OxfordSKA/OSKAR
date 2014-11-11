@@ -370,7 +370,7 @@ void oskar_station_set_polar_motion(oskar_Station* model,
  * @param[in] model               Pointer to station model.
  * @param[in] beam_coord_type     Beam coordinate type (either
  *                                OSKAR_SPHERICAL_TYPE_EQUATORIAL or
- *                                OSKAR_SPHERICAL_TYPE_HORIZONTAL).
+ *                                OSKAR_SPHERICAL_TYPE_AZEL).
  * @param[in] beam_longitude_rad  Beam longitude in radians.
  * @param[in] beam_latitude_rad   Beam latitude in radians.
  */

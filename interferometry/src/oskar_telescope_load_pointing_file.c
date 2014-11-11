@@ -125,7 +125,7 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
         if (!par[i] || (par[i][0] != 'A' && par[i][0] != 'a'))
             coordsys = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
         else
-            coordsys = OSKAR_SPHERICAL_TYPE_HORIZONTAL;
+            coordsys = OSKAR_SPHERICAL_TYPE_AZEL;
 
         /* Get longitude and latitude values. */
         ++i;

@@ -67,7 +67,7 @@ void oskar_evaluate_beam_horizon_direction(double* x, double* y, double* z,
         oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(1, &beam_lon,
                 &beam_lat, last, lat, x, y, z);
     }
-    else if (beam_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)
+    else if (beam_coord_type == OSKAR_SPHERICAL_TYPE_AZEL)
     {
         /* Convert AZEL to direction cosines. */
         double cos_lat;

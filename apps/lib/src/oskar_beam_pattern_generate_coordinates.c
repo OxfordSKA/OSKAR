@@ -170,7 +170,7 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
                  ra0 = beam_lon;
                  dec0 = beam_lat;
              }
-             else if (beam_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)
+             else if (beam_coord_type == OSKAR_SPHERICAL_TYPE_AZEL)
              {
                  /* TODO convert from az0, el0 to ra0, dec0 */
                  /* TODO this will need further API changes to this and

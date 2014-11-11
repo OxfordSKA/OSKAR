@@ -68,7 +68,7 @@ extern "C" {
  * @param[in]  beam_coord_type Enumerator describing the beam phase centre
  *                             coordinate type, with possible values of:
  *                             OSKAR_SPHERICAL_TYPE_EQUATORIAL
- *                             OSKAR_SPHERICAL_TYPE_HORIZONTAL
+ *                             OSKAR_SPHERICAL_TYPE_AZEL
  * @param[in]  beam_lon  Longitude of the beam phase centre, in radians.
  * @param[in]  beam_lat  Longitude of the beam phase centre, in radians.
  * @param[in]  settings  Settings structure describing the specification

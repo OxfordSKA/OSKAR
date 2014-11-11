@@ -332,7 +332,7 @@ static void compute_enu_directions(oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
         ha0  = (GAST + oskar_station_lon_rad(station)) - ra0;
         dec0 = oskar_station_beam_lat_rad(station);
     }
-    else if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)
+    else if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_AZEL)
     {
         /* TODO convert from az0, el0 to ha0, dec0 */
         ha0 = 0.0;
@@ -377,7 +377,7 @@ static void compute_relative_directions(oskar_Mem* l, oskar_Mem* m,
         ha0  = (GAST + oskar_station_lon_rad(station)) - ra0;
         dec0 = oskar_station_beam_lat_rad(station);
     }
-    else if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_HORIZONTAL)
+    else if (pointing_coord_type == OSKAR_SPHERICAL_TYPE_AZEL)
     {
         /* TODO convert from az0, el0 to ha0, dec0 */
         ha0 = 0.0;
