@@ -332,7 +332,7 @@ static void set_station_data(oskar_Station* station,
     i = (depth < settings->obs.num_pointing_levels) ? depth :
             settings->obs.num_pointing_levels - 1;
     oskar_station_set_phase_centre(station,
-            OSKAR_SPHERICAL_TYPE_EQUATORIAL_ICRS,
+            OSKAR_SPHERICAL_TYPE_EQUATORIAL,
             settings->obs.phase_centre_lon_rad[i],
             settings->obs.phase_centre_lat_rad[i]);
 
