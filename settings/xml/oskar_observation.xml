@@ -67,4 +67,39 @@
             pattern snapshots for beam pattern simulations.
         </desc>
     </s>
+
+    <!-- Advanced settings: Not yet implemented    
+    <s k="advanced"><label>Advanced observation settings</label>
+        <s k="delta_tai_utc_sec"><label>TAI-UTC offset [sec]</label>
+            <type name="Double" default="35.0" />
+            <desc>
+                Difference between UTC and TAI, in seconds. This is the 
+                accumulated number of leap seconds added to UTC relative to TAI 
+                for the given observation date.
+            </desc>
+        </s>
+        <s k="delta_ut1_utc_sec"><label>UT1-UTC offset [sec]</label>
+            <type name="Double" default="0.0" />
+            <desc>
+                Difference between UTC and UT1, in seconds, for the given 
+                observation date. Set to zero if not known.
+            </desc>
+        </s>
+        <s k="pm_x_arcsec"><label>Polar motion x component [arcsec]</label>
+            <type name="Double" default="0.0" />
+            <desc>
+                The x-component of polar motion, in arcsec, for the given 
+                observation date. Set to zero if not known.
+            </desc>
+        </s>
+        <s k="pm_y_arcsec"><label>Polar motion y component [arcsec]</label>
+            <type name="Double" default="0.0" />
+            <desc>
+                The y-component of polar motion, in arcsec, for the given 
+                observation date. Set to zero if not known.
+            </desc>
+        </s>
+    </s>
+    -->
+
 </s>
