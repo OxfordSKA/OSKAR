@@ -29,7 +29,7 @@
 #include <apps/lib/oskar_beam_pattern_generate_coordinates.h>
 #include <oskar_evaluate_image_lmn_grid.h>
 #include <oskar_convert_healpix_ring_to_theta_phi.h>
-#include <oskar_convert_theta_phi_to_enu_direction_cosines.h>
+#include <oskar_convert_theta_phi_to_enu_directions.h>
 #include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
 #include <oskar_healpix_nside_to_npix.h>
 #include <oskar_getline.h>
@@ -239,8 +239,8 @@ static void generate_horizon_coordinates(oskar_Mem* x, oskar_Mem* y,
              theta = oskar_mem_create(type, OSKAR_CPU, np, status);
              phi = oskar_mem_create(type, OSKAR_CPU, np, status);
              oskar_convert_healpix_ring_to_theta_phi(theta, phi, nside, status);
-             oskar_convert_theta_phi_to_enu_direction_cosines(x, y, z, np,
-                     theta, phi, status);
+             oskar_convert_theta_phi_to_enu_directions(np, theta, phi, x, y, z,
+                     status);
              oskar_mem_free(theta, status);
              oskar_mem_free(phi, status);
              break;
