@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,17 +34,17 @@
 extern "C" {
 #endif
 
-void oskar_convert_enu_to_ecef(int n, const double* x, const double* y,
-        const double* z, double lon, double lat, double alt, double* ecef_x,
-        double* ecef_y, double* ecef_z)
+void oskar_convert_enu_to_ecef(int num_points, const double* x,
+        const double* y, const double* z, double lon_rad, double lat_rad,
+        double alt_metres, double* ecef_x, double* ecef_y, double* ecef_z)
 {
-    /* Horizon plane (ENU) to offset geocentric cartesian coordinates. */
-    oskar_convert_enu_to_offset_ecef_d(n, x, y, z, lon, lat, ecef_x,
-            ecef_y, ecef_z);
+    /* Horizon plane (ENU) to offset geocentric Cartesian coordinates. */
+    oskar_convert_enu_to_offset_ecef_d(num_points, x, y, z, lon_rad, lat_rad,
+            ecef_x, ecef_y, ecef_z);
 
     /* Offset ECEF to ECEF coordinates. */
-    oskar_convert_offset_ecef_to_ecef(n, ecef_x, ecef_y, ecef_z, lon, lat, alt,
-            ecef_x, ecef_y, ecef_z);
+    oskar_convert_offset_ecef_to_ecef(num_points, ecef_x, ecef_y, ecef_z,
+            lon_rad, lat_rad, alt_metres, ecef_x, ecef_y, ecef_z);
 }
 
 #ifdef __cplusplus

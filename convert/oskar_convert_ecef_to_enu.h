@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ extern "C" {
  * horizon system.
  *
  * @details
- * This function converts station positions from the geocentric cartesian
+ * This function converts station positions from the geocentric Cartesian
  * (Earth-Centred-Earth-Fixed, or ECEF) system to the local horizon plane
  * (East-North-Up, or ENU).
  *
@@ -61,21 +61,21 @@ extern "C" {
  * would be unable to represent points accurately on the Earth's surface
  * (more than 7 decimal digits are required for sub-metre precision).
  *
- * @param[in]  n         Number of points.
- * @param[in]  ecef_x    ECEF x-positions, in metres.
- * @param[in]  ecef_y    ECEF y-positions, in metres.
- * @param[in]  ecef_z    ECEF z-positions, in metres.
- * @param[in]  longitude Longitude of tangent point, in radians.
- * @param[in]  latitude  Latitude of tangent point, in radians.
- * @param[in]  altitude  Altitude above ellipsoid, in metres.
- * @param[out] x         Horizontal x-positions (east), in metres.
- * @param[out] y         Horizontal y-positions (north), in metres.
- * @param[out] z         Horizontal z-positions (up), in metres.
+ * @param[in]  num_points Number of points.
+ * @param[in]  ecef_x     ECEF x-positions, in metres.
+ * @param[in]  ecef_y     ECEF y-positions, in metres.
+ * @param[in]  ecef_z     ECEF z-positions, in metres.
+ * @param[in]  lon_rad    Longitude of reference point, in radians.
+ * @param[in]  lat_rad    Latitude of reference point, in radians.
+ * @param[in]  alt_metres Altitude of reference point from ellipsoid, in metres.
+ * @param[out] x          Horizontal x-positions (east), in metres.
+ * @param[out] y          Horizontal y-positions (north), in metres.
+ * @param[out] z          Horizontal z-positions (up), in metres.
  */
 OSKAR_EXPORT
-void oskar_convert_ecef_to_enu(int n, const double* ecef_x,
-        const double* ecef_y, const double* ecef_z, double longitude,
-        double latitude, double altitude, double* x, double* y, double* z);
+void oskar_convert_ecef_to_enu(int num_points, const double* ecef_x,
+        const double* ecef_y, const double* ecef_z, double lon_rad,
+        double lat_rad, double alt_metres, double* x, double* y, double* z);
 
 #ifdef __cplusplus
 }

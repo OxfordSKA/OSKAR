@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,20 +34,21 @@ extern "C" {
 #endif
 
 /* Double precision. */
-void oskar_convert_enu_to_offset_ecef_d(int n, const double* horizon_x,
-        const double* horizon_y, const double* horizon_z, double lon, double lat,
+void oskar_convert_enu_to_offset_ecef_d(int num_points,
+        const double* horizon_x, const double* horizon_y,
+        const double* horizon_z, double lon_rad, double lat_rad,
         double* offset_ecef_x, double* offset_ecef_y, double* offset_ecef_z)
 {
     /* Precompute some trig. */
-    double sin_l, cos_l, sin_p, cos_p;
+    double sin_lon, cos_lon, sin_lat, cos_lat;
     int i;
-    sin_l = sin(lon);
-    cos_l = cos(lon);
-    sin_p = sin(lat);
-    cos_p = cos(lat);
+    sin_lon = sin(lon_rad);
+    cos_lon = cos(lon_rad);
+    sin_lat = sin(lat_rad);
+    cos_lat = cos(lat_rad);
 
     /* Loop over points. */
-    for (i = 0; i < n; ++i)
+    for (i = 0; i < num_points; ++i)
     {
         double xi, yi, zi, xt, yt, zt;
 
@@ -57,9 +58,9 @@ void oskar_convert_enu_to_offset_ecef_d(int n, const double* horizon_x,
         zi = horizon_z[i];
 
         /* Apply rotation matrix. */
-        xt = -xi * sin_l - yi * sin_p * cos_l + zi * cos_p * cos_l;
-        yt =  xi * cos_l - yi * sin_p * sin_l + zi * cos_p * sin_l;
-        zt =  yi * cos_p + zi * sin_p;
+        xt = -xi * sin_lon - yi * sin_lat * cos_lon + zi * cos_lat * cos_lon;
+        yt =  xi * cos_lon - yi * sin_lat * sin_lon + zi * cos_lat * sin_lon;
+        zt =  yi * cos_lat + zi * sin_lat;
 
         /* Save the rotated values. */
         offset_ecef_x[i] = xt;
@@ -69,20 +70,21 @@ void oskar_convert_enu_to_offset_ecef_d(int n, const double* horizon_x,
 }
 
 /* Single precision. */
-void oskar_convert_enu_to_offset_ecef_f(int n, const float* horizon_x,
-        const float* horizon_y, const float* horizon_z, float lon, float lat,
+void oskar_convert_enu_to_offset_ecef_f(int num_points,
+        const float* horizon_x, const float* horizon_y,
+        const float* horizon_z, float lon_rad, float lat_rad,
         float* offset_ecef_x, float* offset_ecef_y, float* offsec_ecef_z)
 {
     /* Precompute some trig. */
-    double sin_l, cos_l, sin_p, cos_p;
+    double sin_lon, cos_lon, sin_lat, cos_lat;
     int i;
-    sin_l = sin(lon);
-    cos_l = cos(lon);
-    sin_p = sin(lat);
-    cos_p = cos(lat);
+    sin_lon = sin(lon_rad);
+    cos_lon = cos(lon_rad);
+    sin_lat = sin(lat_rad);
+    cos_lat = cos(lat_rad);
 
     /* Loop over points. */
-    for (i = 0; i < n; ++i)
+    for (i = 0; i < num_points; ++i)
     {
         double xi, yi, zi, xt, yt, zt;
 
@@ -92,9 +94,9 @@ void oskar_convert_enu_to_offset_ecef_f(int n, const float* horizon_x,
         zi = (double) (horizon_z[i]);
 
         /* Apply rotation matrix. */
-        xt = -xi * sin_l - yi * sin_p * cos_l + zi * cos_p * cos_l;
-        yt =  xi * cos_l - yi * sin_p * sin_l + zi * cos_p * sin_l;
-        zt =  yi * cos_p + zi * sin_p;
+        xt = -xi * sin_lon - yi * sin_lat * cos_lon + zi * cos_lat * cos_lon;
+        yt =  xi * cos_lon - yi * sin_lat * sin_lon + zi * cos_lat * sin_lon;
+        zt =  yi * cos_lat + zi * sin_lat;
 
         /* Save the rotated values. */
         offset_ecef_x[i] = (float)xt;

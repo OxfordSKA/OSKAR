@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,12 +41,12 @@ extern "C" {
 
 /**
  * @brief
- * Convert coordinates from horizon plane (ENU) to offset geocentric cartesian
+ * Convert coordinates from horizon plane (ENU) to offset geocentric Cartesian
  * (double precision).
  *
  * @details
  * This function converts station positions from the local horizon plane
- * (East-North-Up, or ENU) to an offset geocentric cartesian system.
+ * (East-North-Up, or ENU) to an offset geocentric Cartesian system.
  * The "offset" is because both systems share a common origin (not at the
  * centre of the Earth), thus preserving the precision of the input data.
  *
@@ -60,29 +60,30 @@ extern "C" {
  * x-axis pointing towards the meridian of zero longitude, the y-axis to +90
  * degrees East, and the z-axis to the North Celestial Pole.
  *
- * @param[in]  n             Number of points.
- * @param[in]  x             Horizontal x-positions (east), in metres.
- * @param[in]  y             Horizontal y-positions (north), in metres.
- * @param[in]  z             Horizontal z-positions (up), in metres.
- * @param[in]  lon           Longitude of tangent point, in radians.
- * @param[in]  lat           Latitude of tangent point, in radians.
+ * @param[in]  num_points    Number of points.
+ * @param[in]  horizon_x     Horizontal x-positions (east), in metres.
+ * @param[in]  horizon_y     Horizontal y-positions (north), in metres.
+ * @param[in]  horizon_z     Horizontal z-positions (up), in metres.
+ * @param[in]  lon_rad       Longitude of tangent point, in radians.
+ * @param[in]  lat_rad       Latitude of tangent point, in radians.
  * @param[out] offset_ecef_x Vector of output x-positions, in metres.
  * @param[out] offset_ecef_y Vector of output y-positions, in metres.
  * @param[out] offset_ecef_z Vector of output z-positions, in metres.
  */
 OSKAR_EXPORT
-void oskar_convert_enu_to_offset_ecef_d(int n, const double* x,
-        const double* y, const double* z, double lon, double lat,
+void oskar_convert_enu_to_offset_ecef_d(int num_points,
+        const double* horizon_x, const double* horizon_y,
+        const double* horizon_z, double lon_rad, double lat_rad,
         double* offset_ecef_x, double* offset_ecef_y, double* offset_ecef_z);
 
 /**
  * @brief
- * Convert coordinates from horizon plane (ENU) to offset geocentric cartesian
+ * Convert coordinates from horizon plane (ENU) to offset geocentric Cartesian
  * (single precision).
  *
  * @details
  * This function converts station positions from the local horizon plane
- * (East-North-Up, or ENU) to an offset geocentric cartesian system.
+ * (East-North-Up, or ENU) to an offset geocentric Cartesian system.
  * The "offset" is because both systems share a common origin (not at the
  * centre of the Earth), thus preserving the precision of the input data.
  *
@@ -96,21 +97,21 @@ void oskar_convert_enu_to_offset_ecef_d(int n, const double* x,
  * x-axis pointing towards the meridian of zero longitude, the y-axis to +90
  * degrees East, and the z-axis to the North Celestial Pole.
  *
- * @param[in]  n             Number of points.
- * @param[in]  x             Horizontal x-positions (east), in metres.
- * @param[in]  y             Horizontal y-positions (north), in metres.
- * @param[in]  z             Horizontal z-positions (up), in metres.
- * @param[in]  lon           Longitude of tangent point, in radians.
- * @param[in]  lat           Latitude of tangent point, in radians.
+ * @param[in]  num_points    Number of points.
+ * @param[in]  horizon_x     Horizontal x-positions (east), in metres.
+ * @param[in]  horizon_y     Horizontal y-positions (north), in metres.
+ * @param[in]  horizon_z     Horizontal z-positions (up), in metres.
+ * @param[in]  lon_rad       Longitude of tangent point, in radians.
+ * @param[in]  lat_rad       Latitude of tangent point, in radians.
  * @param[out] offset_ecef_x Vector of output x-positions, in metres.
  * @param[out] offset_ecef_y Vector of output y-positions, in metres.
  * @param[out] offset_ecef_z Vector of output z-positions, in metres.
  */
 OSKAR_EXPORT
-void oskar_convert_enu_to_offset_ecef_f(int n, const float* x,
-        const float* y, const float* z, float lon, float lat,
-        float* offset_ecef_x, float* offset_ecef_y, float* offset_ecef_z);
-
+void oskar_convert_enu_to_offset_ecef_f(int num_points,
+        const float* horizon_x, const float* horizon_y,
+        const float* horizon_z, float lon_rad, float lat_rad,
+        float* offset_ecef_x, float* offset_ecef_y, float* offsec_ecef_z);
 
 #ifdef __cplusplus
 }

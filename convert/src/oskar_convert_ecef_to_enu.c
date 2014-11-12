@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,29 +34,30 @@
 extern "C" {
 #endif
 
-void oskar_convert_ecef_to_enu(int n, const double* ecef_x,
-        const double* ecef_y, const double* ecef_z, double lon, double lat,
-        double alt, double* x, double* y, double* z)
+void oskar_convert_ecef_to_enu(int num_points, const double* ecef_x,
+        const double* ecef_y, const double* ecef_z, double lon_rad,
+        double lat_rad, double alt_metres, double* x, double* y, double* z)
 {
     int i;
     double x0, y0, z0, a, b, c, d;
     double sin_lon, cos_lon, sin_lat, cos_lat;
 
     /* Get ECEF coordinates of reference position. */
-    oskar_convert_geodetic_spherical_to_ecef(1, &lon, &lat, &alt, &x0, &y0, &z0);
+    oskar_convert_geodetic_spherical_to_ecef(1,
+            &lon_rad, &lat_rad, &alt_metres, &x0, &y0, &z0);
 
     /* Get rotation matrix elements. */
-    sin_lon = sin(lon);
-    cos_lon = cos(lon);
-    sin_lat = sin(lat);
-    cos_lat = cos(lat);
+    sin_lon = sin(lon_rad);
+    cos_lon = cos(lon_rad);
+    sin_lat = sin(lat_rad);
+    cos_lat = cos(lat_rad);
     a = -sin_lat * cos_lon;
     b = -sin_lat * sin_lon;
     c = cos_lat * cos_lon;
     d = cos_lat * sin_lon;
 
     /* Loop over points. */
-    for (i = 0; i < n; ++i)
+    for (i = 0; i < num_points; ++i)
     {
         /* Get deltas from reference point. */
         double dx, dy, dz;
