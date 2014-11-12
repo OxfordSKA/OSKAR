@@ -63,18 +63,18 @@ extern "C" {
  * The algorithm is from H. Vermeille (2002): Journal of Geodesy, 76, 451.
  * DOI 10.1007/s00190-002-0273-6
  *
- * @param[in]  n   Number of points.
- * @param[in]  x   Vector of ECEF x-positions, in metres.
- * @param[in]  y   Vector of ECEF y-positions, in metres.
- * @param[in]  z   Vector of ECEF z-positions, in metres.
- * @param[out] lon Vector of longitudes, in radians.
- * @param[out] lat Vector of latitudes, in radians.
- * @param[out] alt Vector of altitudes above ellipsoid, in metres.
+ * @param[in]  num_points Number of points.
+ * @param[in]  x       Vector of ECEF x-positions, in metres.
+ * @param[in]  y       Vector of ECEF y-positions, in metres.
+ * @param[in]  z       Vector of ECEF z-positions, in metres.
+ * @param[out] lon_rad Vector of longitudes, in radians.
+ * @param[out] lat_rad Vector of latitudes, in radians.
+ * @param[out] alt_m   Vector of altitudes above ellipsoid, in metres.
  */
 OSKAR_EXPORT
-void oskar_convert_ecef_to_geodetic_spherical_f(int n, const float* x,
-        const float* y, const float* z, float* lon, float* lat,
-        float* alt);
+void oskar_convert_ecef_to_geodetic_spherical_f(int num_points,
+        const float* x, const float* y, const float* z,
+        float* lon_rad, float* lat_rad, float* alt_m);
 
 /**
  * @brief
@@ -97,18 +97,18 @@ void oskar_convert_ecef_to_geodetic_spherical_f(int n, const float* x,
  * The algorithm is from H. Vermeille (2002): Journal of Geodesy, 76, 451.
  * DOI 10.1007/s00190-002-0273-6
  *
- * @param[in]  n   Number of points.
- * @param[in]  x   Vector of ECEF x-positions, in metres.
- * @param[in]  y   Vector of ECEF y-positions, in metres.
- * @param[in]  z   Vector of ECEF z-positions, in metres.
- * @param[out] lon Vector of longitudes, in radians.
- * @param[out] lat Vector of latitudes, in radians.
- * @param[out] alt Vector of altitudes above ellipsoid, in metres.
+ * @param[in]  num_points Number of points.
+ * @param[in]  x          Vector of ECEF x-positions, in metres.
+ * @param[in]  y          Vector of ECEF y-positions, in metres.
+ * @param[in]  z          Vector of ECEF z-positions, in metres.
+ * @param[out] lon_rad    Vector of longitudes, in radians.
+ * @param[out] lat_rad    Vector of latitudes, in radians.
+ * @param[out] alt_m      Vector of altitudes above ellipsoid, in metres.
  */
 OSKAR_EXPORT
-void oskar_convert_ecef_to_geodetic_spherical(int n, const double* x,
-        const double* y, const double* z, double* lon, double* lat,
-        double* alt);
+void oskar_convert_ecef_to_geodetic_spherical(int num_points,
+        const double* x, const double* y, const double* z,
+        double* lon_rad, double* lat_rad, double* alt_m);
 
 #ifdef __cplusplus
 }

@@ -33,19 +33,20 @@
 extern "C" {
 #endif
 
-void oskar_convert_geodetic_spherical_to_ecef(int n, const double* lon,
-        const double* lat,  const double* alt, double* x, double* y, double* z)
+void oskar_convert_geodetic_spherical_to_ecef(int num_points,
+        const double* lon_rad, const double* lat_rad, const double* alt_metres,
+        double* x, double* y, double* z)
 {
     const double a = 6378137.000; /* Equatorial radius (semi-major axis). */
     const double b = 6356752.314; /* Polar radius (semi-minor axis). */
     const double e2 = 1.0 - (b*b) / (a*a);
     int i;
-    for (i = 0; i < n; ++i)
+    for (i = 0; i < num_points; ++i)
     {
         double lat_, lon_, alt_, n_phi, sin_lat, cos_lat, sin_lon, cos_lon;
-        lat_ = lat[i];
-        lon_ = lon[i];
-        alt_ = alt[i];
+        lat_ = lat_rad[i];
+        lon_ = lon_rad[i];
+        alt_ = alt_metres[i];
         sin_lat = sin(lat_);
         cos_lat = cos(lat_);
         sin_lon = sin(lon_);

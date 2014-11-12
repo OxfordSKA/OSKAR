@@ -27,8 +27,8 @@
  */
 
 #include <oskar_evaluate_pierce_points.h>
-#include <oskar_convert_ecef_to_geodetic_spherical_inline.h>
 #include <oskar_cmath.h>
+#include <private_convert_ecef_to_geodetic_spherical_inline.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -27,34 +27,33 @@
  */
 
 #include <oskar_convert_ecef_to_geodetic_spherical.h>
-#include <oskar_convert_ecef_to_geodetic_spherical_inline.h>
-#include <oskar_cmath.h>
+#include <private_convert_ecef_to_geodetic_spherical_inline.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_convert_ecef_to_geodetic_spherical_f(int n, const float* x,
-        const float* y, const float* z, float* lon, float* lat,
-        float* alt)
+void oskar_convert_ecef_to_geodetic_spherical_f(int num_points,
+        const float* x, const float* y, const float* z,
+        float* lon_rad, float* lat_rad, float* alt_m)
 {
     int i;
-    for (i = 0; i < n; ++i)
+    for (i = 0; i < num_points; ++i)
     {
         oskar_convert_ecef_to_geodetic_spherical_inline_f(x[i], y[i], z[i],
-                &lon[i], &lat[i], &alt[i]);
+                &lon_rad[i], &lat_rad[i], &alt_m[i]);
     }
 }
 
-void oskar_convert_ecef_to_geodetic_spherical(int n, const double* x,
-        const double* y, const double* z, double* lon, double* lat,
-        double* alt)
+void oskar_convert_ecef_to_geodetic_spherical(int num_points,
+        const double* x, const double* y, const double* z,
+        double* lon_rad, double* lat_rad, double* alt_m)
 {
     int i;
-    for (i = 0; i < n; ++i)
+    for (i = 0; i < num_points; ++i)
     {
         oskar_convert_ecef_to_geodetic_spherical_inline_d(x[i], y[i], z[i],
-                &lon[i], &lat[i], &alt[i]);
+                &lon_rad[i], &lat_rad[i], &alt_m[i]);
     }
 }
 
