@@ -27,9 +27,9 @@
  */
 
 #include <oskar_convert_ludwig3_to_theta_phi_components.h>
-#include <oskar_convert_ludwig3_to_theta_phi_components_inline.h>
 #include <oskar_convert_ludwig3_to_theta_phi_components_cuda.h>
 #include <oskar_cuda_check_error.h>
+#include <private_convert_ludwig3_to_theta_phi_components_inline.h>
 
 #ifdef __cplusplus
 extern "C" {
