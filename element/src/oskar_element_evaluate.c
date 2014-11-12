@@ -33,7 +33,7 @@
 #include <oskar_apply_element_taper_gaussian.h>
 #include <oskar_evaluate_dipole_pattern.h>
 #include <oskar_evaluate_geometric_dipole_pattern.h>
-#include <oskar_convert_enu_direction_cosines_to_theta_phi.h>
+#include <oskar_convert_enu_directions_to_theta_phi.h>
 #include <oskar_convert_ludwig3_to_theta_phi_components.h>
 #include <oskar_find_closest_match.h>
 
@@ -92,8 +92,8 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
         oskar_mem_realloc(phi, num_points, status);
 
     /* Compute modified theta and phi coordinates for dipole X. */
-    oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-            M_PI_2 - orientation_x, num_points, x, y, z, status);
+    oskar_convert_enu_directions_to_theta_phi(num_points, x, y, z,
+            M_PI_2 - orientation_x, theta, phi, status);
 
     /* Evaluate polarised response if output array is matrix type. */
     if (oskar_mem_is_matrix(output))
@@ -134,8 +134,8 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
         }
 
         /* Compute modified theta and phi coordinates for dipole Y. */
-        oskar_convert_enu_direction_cosines_to_theta_phi(theta, phi,
-                M_PI_2 - orientation_y, num_points, x, y, z, status);
+        oskar_convert_enu_directions_to_theta_phi(num_points, x, y, z,
+                M_PI_2 - orientation_y, theta, phi, status);
 
         /* Check if spline data present for dipole Y. */
         if (oskar_element_has_y_spline_data(model))
