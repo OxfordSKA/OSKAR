@@ -370,7 +370,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
             oskar_telescope_max_station_size(tel),
             oskar_telescope_random_seed(tel), 0, 0, status);
 
-    // Get time increments.
+    // Get settings parameters.
+    int apply_horizon_clip   = settings->sky.apply_horizon_clip;
     int num_vis_dumps        = settings->obs.num_time_steps;
     int num_vis_ave          = settings->interferometer.num_vis_ave;
     int num_fringe_ave       = settings->interferometer.num_fringe_ave;
@@ -385,6 +386,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_timer_pause(timers->tmr_init_copy);
     for (int i = 0; i < num_vis_dumps; ++i)
     {
+        oskar_Sky* sky_ptr = sky_gpu;
+
         // Check status code.
         if (*status) break;
 
@@ -395,13 +398,17 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         // Initialise visibilities for the dump to zero.
         oskar_mem_clear_contents(vis, status);
 
-        // Compact sky model to temporary.
-        oskar_timer_resume(timers->tmr_clip);
-        oskar_sky_horizon_clip(local_sky, sky_gpu, tel, gast, work, status);
-        oskar_timer_pause(timers->tmr_clip);
+        // Compact sky model to temporary if requested.
+        if (apply_horizon_clip)
+        {
+            sky_ptr = local_sky;
+            oskar_timer_resume(timers->tmr_clip);
+            oskar_sky_horizon_clip(sky_ptr, sky_gpu, tel, gast, work, status);
+            oskar_timer_pause(timers->tmr_clip);
+        }
 
         // Record number of visible sources in this snapshot.
-        n_src = oskar_sky_num_sources(local_sky);
+        n_src = oskar_sky_num_sources(sky_ptr);
         oskar_log_message(log, 'M', 1, "Snapshot %4d/%d, chunk %4d/%d, "
                 "device %d [%d sources]", i+1, num_vis_dumps, chunk_index+1,
                 num_sky_chunks, device_id, n_src);
@@ -426,11 +433,11 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
             // Evaluate station beam (Jones E: may be matrix).
             oskar_timer_resume(timers->tmr_E);
             oskar_evaluate_jones_E(E, n_src,
-                    oskar_sky_l(local_sky),
-                    oskar_sky_m(local_sky),
-                    oskar_sky_n(local_sky), OSKAR_RELATIVE_DIRECTIONS,
-                    oskar_sky_reference_ra_rad(local_sky),
-                    oskar_sky_reference_dec_rad(local_sky),
+                    oskar_sky_l(sky_ptr),
+                    oskar_sky_m(sky_ptr),
+                    oskar_sky_n(sky_ptr), OSKAR_RELATIVE_DIRECTIONS,
+                    oskar_sky_reference_ra_rad(sky_ptr),
+                    oskar_sky_reference_dec_rad(sky_ptr),
                     tel, gast, frequency, work, random_state, status);
             oskar_timer_pause(timers->tmr_E);
 
@@ -440,7 +447,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
             // NOTE this is currently only a CPU implementation.
             if (Z)
             {
-                oskar_evaluate_jones_Z(Z, n_src, local_sky, tel,
+                oskar_evaluate_jones_Z(Z, n_src, sky_ptr, tel,
                         &settings->ionosphere, gast, frequency, &workJonesZ,
                         status);
                 oskar_timer_resume(timers->tmr_join);
@@ -455,8 +462,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
             {
                 oskar_timer_resume(timers->tmr_R);
                 oskar_evaluate_jones_R(R, n_src,
-                        oskar_sky_ra_rad_const(local_sky),
-                        oskar_sky_dec_rad_const(local_sky), tel, gast, status);
+                        oskar_sky_ra_rad_const(sky_ptr),
+                        oskar_sky_dec_rad_const(sky_ptr), tel, gast, status);
                 oskar_timer_pause(timers->tmr_R);
                 oskar_timer_resume(timers->tmr_join);
                 oskar_jones_join(R, E, R, status);
@@ -476,9 +483,9 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 // Evaluate interferometer phase (Jones K: scalar).
                 oskar_timer_resume(timers->tmr_K);
                 oskar_evaluate_jones_K(K, n_src,
-                        oskar_sky_l_const(local_sky),
-                        oskar_sky_m_const(local_sky),
-                        oskar_sky_n_const(local_sky), u, v, w, frequency,
+                        oskar_sky_l_const(sky_ptr),
+                        oskar_sky_m_const(sky_ptr),
+                        oskar_sky_n_const(sky_ptr), u, v, w, frequency,
                         status);
                 oskar_timer_pause(timers->tmr_K);
 
@@ -490,7 +497,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
                 // Correlate.
                 oskar_timer_resume(timers->tmr_correlate);
-                oskar_correlate(vis, n_src, J, local_sky, tel, u, v,
+                oskar_correlate(vis, n_src, J, sky_ptr, tel, u, v,
                         gast, frequency, status);
                 oskar_timer_pause(timers->tmr_correlate);
             }

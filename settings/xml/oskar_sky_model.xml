@@ -396,6 +396,19 @@
                 parameter solutions are modelled as point sources.
             </desc>
         </s>
+        <s k="apply_horizon_clip">
+            <label>Apply horizon clip</label>
+            <type name="bool" default="true"/>
+            <desc>
+                If <b>true</b>, clip sources below the horizon
+                of every station at each time step. This is a benefit for
+                all-sky models, where removing a large number of sources 
+                below the horizon can save a significant amount of time. 
+                However, to avoid a wasted check, set this to <b>false</b> 
+                if the sky model covers a small area which is known to be 
+                always above every station's horizon for the whole observation.
+            </desc>
+        </s>
     </s>
 
     <!-- Output files -->

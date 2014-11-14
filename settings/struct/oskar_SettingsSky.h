@@ -280,6 +280,7 @@ struct oskar_SettingsSky
     double common_flux_filter_min_jy;
     double common_flux_filter_max_jy;
     int zero_failed_gaussians; /**< Zero (remove) sources with failed Gaussian width solutions. */
+    int apply_horizon_clip;
 };
 typedef struct oskar_SettingsSky oskar_SettingsSky;
 

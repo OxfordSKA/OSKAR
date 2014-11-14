@@ -244,6 +244,7 @@ void oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename,
     s.endGroup();
 
     sky->zero_failed_gaussians = s.value("advanced/zero_failed_gaussians", false).toBool();
+    sky->apply_horizon_clip = s.value("advanced/apply_horizon_clip", true).toBool();
 }
 
 static void get_pol_params(QSettings& s, oskar_SettingsSkyPolarisation* pol)

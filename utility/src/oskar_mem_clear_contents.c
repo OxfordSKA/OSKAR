@@ -66,7 +66,6 @@ void oskar_mem_clear_contents(oskar_Mem* mem, int* status)
     {
 #ifdef OSKAR_HAVE_CUDA
         cudaMemset(mem->data, 0, size);
-        *status = cudaPeekAtLastError();
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
