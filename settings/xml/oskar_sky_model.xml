@@ -83,9 +83,9 @@
             </desc>
         </s>
         <s k="map_units"><label>Map units</label>
-            <type name="OptionList" default="mK/sr" >
-                mK/sr (Temperature per steradian),
-                K/sr (Temperature per steradian),
+            <type name="OptionList" default="Jy/pixel" >
+                <!-- mK/sr (Temperature per steradian),
+                K/sr (Temperature per steradian), -->
                 Jy/pixel (Jansky per pixel)
             </type>
             <desc>The physical units of pixels in the input map.</desc>

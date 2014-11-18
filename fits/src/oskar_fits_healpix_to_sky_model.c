@@ -199,6 +199,10 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
         if (settings->map_units == OSKAR_MAP_UNITS_K_PER_SR ||
                 settings->map_units == OSKAR_MAP_UNITS_MK_PER_SR)
         {
+            /* FIXME Error - needs to be fixed. */
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            break;
+
             /* Convert temperature per steradian to temperature per pixel. */
             /* Divide by number of pixels per steradian. */
             val /= (npixels / (4.0 * M_PI));
@@ -209,8 +213,8 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
 
             /* Convert temperature per pixel to Jansky per pixel. */
             /* Multiply by 2.0 * k_B * 10^26. */
-            /* Assume that any wavelength dependence is already
-             * in the input data! */
+            /* FIXME Assume that any wavelength dependence is already
+             * in the input data! - Not true: need wavelength here too. */
             val *= (2.0 * boltzmann * 1e26);
         }
 
@@ -229,8 +233,11 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
     }
 
     /* Append temporary sky model to input data. */
-    oskar_sky_append(sky, temp_sky, status);
-    oskar_log_message(ptr, 'M', 0, "Loaded %d pixels.", (int)npixels);
+    if (!(*status))
+    {
+        oskar_sky_append(sky, temp_sky, status);
+        oskar_log_message(ptr, 'M', 0, "Loaded %d pixels.", (int)npixels);
+    }
 
     /* Free memory. */
     if (data) free(data);

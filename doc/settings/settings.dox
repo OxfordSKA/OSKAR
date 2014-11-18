@@ -182,8 +182,9 @@ All settings keys in this group are prefixed with <tt>image/</tt>.
     cross-power beam and time-averaged beam to the beam pattern group. 
     Added the ability to use seconds (as well as hours, minutes and seconds) 
     to specify observation length. Removed options to write OSKAR image 
-    files. Removed ability to load GSM file directly, as the 
-    frequency-dependence was not treated correctly.</td></tr>
+    files. Removed ability to load a GSM file directly or use HEALPix
+    temperature maps, as the frequency scaling was not treated 
+    correctly.</td></tr>
 </table>
 
 */
