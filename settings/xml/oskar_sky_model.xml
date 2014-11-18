@@ -21,7 +21,7 @@
         <import filename="oskar_sky_model_extended_sources.xml" />
     </s>
 
-    <!-- GSM file group -->
+    <!-- GSM file group  NEEDS FIXING WITH FREQUENCY DEPENDENCE
     <s k="gsm"><label>Global Sky Model (GSM) file settings</label>
         <s k="file"><label>GSM file</label>
             <type name="InputFile" default="" />
@@ -33,9 +33,8 @@
                 http://space.mit.edu/~angelica/gsm/index.html
             </desc>
         </s>
-        <import filename="oskar_sky_model_filter.xml" />
-        <import filename="oskar_sky_model_extended_sources.xml" />
     </s>
+    -->
 
     <!-- FITS image group -->
     <s k="fits_image"><label>FITS image file settings</label>

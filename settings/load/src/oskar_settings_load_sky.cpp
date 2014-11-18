@@ -96,17 +96,17 @@ void oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename,
     get_extended_params(s, &sky->oskar_sky_model.extended_sources);
     s.endGroup();
 
-    // GSM file.
-    s.beginGroup("gsm");
-    t = s.value("file").toByteArray();
-    if (t.size() > 0)
-    {
-        sky->gsm.file = (char*)malloc(t.size() + 1);
-        strcpy(sky->gsm.file, t.constData());
-    }
-    get_filter_params(s, &sky->gsm.filter);
-    get_extended_params(s, &sky->gsm.extended_sources);
-    s.endGroup();
+    // FIXME GSM file - needs reference frequency.
+//    s.beginGroup("gsm");
+//    t = s.value("file").toByteArray();
+//    if (t.size() > 0)
+//    {
+//        sky->gsm.file = (char*)malloc(t.size() + 1);
+//        strcpy(sky->gsm.file, t.constData());
+//    }
+//    get_filter_params(s, &sky->gsm.filter);
+//    get_extended_params(s, &sky->gsm.extended_sources);
+//    s.endGroup();
 
     // Input FITS image files.
     s.beginGroup("fits_image");

@@ -50,6 +50,7 @@ void oskar_sky_load_gsm(oskar_Sky* sky, const char* filename, int* status)
     size_t bufsize = 0;
     oskar_Sky* temp_sky;
     double *temp = 0;
+    double pixel_area, lambda;
 
     /* Check all inputs. */
     if (!sky || !filename || !status)
@@ -126,20 +127,17 @@ void oskar_sky_load_gsm(oskar_Sky* sky, const char* filename, int* status)
     }
 
     /* Loop over pixels. */
+    pixel_area = (4.0 * M_PI) / n;
+    lambda = 1.0; /* FIXME Add map reference frequency to input arguments. */
     for (i = 0; i < n; ++i)
     {
-        double l, b, ra, dec;
+        double l, b, ra, dec, pixel_area;
 
-        /* Assume that input map is in Kelvin per steradian. */
-        /* Convert temperature per steradian to temperature per pixel. */
-        /* Divide by number of pixels per steradian. */
-        temp[i] = temp[i] / (n / (4 * M_PI));
-
-        /* Convert temperature per pixel to Jansky per pixel. */
+        /* Convert temperature to Jansky per pixel. */
+        /* Brightness temperature to flux density conversion:
+         * http://www.iram.fr/IRAMFR/IS/IS2002/html_1/node187.html */
         /* Multiply by 2.0 * k_B * 10^26. */
-        /* Assume that any wavelength dependence is already
-         * in the input data! */
-        temp[i] = temp[i] * 2.0 * boltzmann * 1e26;
+        temp[i] *= 2.0 * boltzmann * pixel_area * 1e26 / (lambda*lambda);
 
         /* Compute Galactic longitude and latitude from pixel index. */
         oskar_convert_healpix_ring_to_theta_phi_d(nside, i, &b, &l);
