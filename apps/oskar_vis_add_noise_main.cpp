@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 
     // Create the log.
     int file_priority = OSKAR_LOG_MESSAGE;
-    int term_priority = OSKAR_LOG_MESSAGE;
+    int term_priority = OSKAR_LOG_STATUS;
     if (quiet) term_priority = OSKAR_LOG_WARNING;
     if (verbose) term_priority = OSKAR_LOG_DEBUG;
     oskar_Log* log = oskar_log_create(file_priority, term_priority);

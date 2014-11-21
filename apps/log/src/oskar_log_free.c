@@ -44,6 +44,9 @@ void oskar_log_free(oskar_Log* log)
     oskar_log_section(log, 'M', "OSKAR-%s ending at %s.",
             OSKAR_VERSION_STR, oskar_log_system_clock_string(0));
 
+    /* If log is NULL, there's nothing more to do. */
+    if (!log) return;
+
     /* Close the file. */
     if (log->file) fclose(log->file);
 

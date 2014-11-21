@@ -336,7 +336,7 @@ int main(int argc, char** argv)
             oskar_sky_free(sky_as_filter, &status);
             return EXIT_FAILURE;
         }
-        if (num_input != components_removed.size())
+        if (num_input != (int)components_removed.size())
         {
             oskar_log_error(log, "Inconsistent component counts: %d input, "
                     "%d removed.",  num_input, components_removed.size());

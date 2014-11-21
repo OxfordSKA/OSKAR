@@ -62,6 +62,7 @@ void oskar_log_settings_simulator(oskar_Log* log, const oskar_Settings* s)
     depth = 1;
     LVB("Double precision", s->sim.double_precision);
     LVB("Keep log file", s->sim.keep_log_file);
+    LVB("Log progress status", s->sim.write_status_to_log_file);
     LVI("Num. CUDA devices", s->sim.num_cuda_devices);
     LVI("Max sources per chunk", s->sim.max_sources_per_chunk);
 }

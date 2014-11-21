@@ -100,7 +100,7 @@ int main(int argc, char** argv)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Create the log.
-    oskar_Log* log = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_MESSAGE);
+    oskar_Log* log = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_STATUS);
     oskar_log_list(log, 'M', 0, "Running binary %s", argv[0]);
 
     const char* settings_file = opt.getArg(0);

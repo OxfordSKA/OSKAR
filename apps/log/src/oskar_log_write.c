@@ -136,6 +136,8 @@ char oskar_log_get_entry_code(char priority)
     case 'M':
     case 'm':
     case ' ':
+    case 'S': /* Status */
+    case 's': /* Status */
         return ' ';
     case 'D':
     case 'd':
@@ -237,6 +239,9 @@ static int oskar_log_priority_level(char code)
     case 'm':
     case 'M':
         return OSKAR_LOG_MESSAGE;
+    case 's':
+    case 'S':
+        return OSKAR_LOG_STATUS;
     case 'd':
     case 'D':
         return OSKAR_LOG_DEBUG;

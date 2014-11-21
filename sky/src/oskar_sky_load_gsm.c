@@ -131,7 +131,7 @@ void oskar_sky_load_gsm(oskar_Sky* sky, const char* filename, int* status)
     lambda = 1.0; /* FIXME Add map reference frequency to input arguments. */
     for (i = 0; i < n; ++i)
     {
-        double l, b, ra, dec, pixel_area;
+        double l, b, ra, dec;
 
         /* Convert temperature to Jansky per pixel. */
         /* Brightness temperature to flux density conversion:

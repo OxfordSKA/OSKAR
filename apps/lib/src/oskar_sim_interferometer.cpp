@@ -102,6 +102,8 @@ void oskar_sim_interferometer(const char* settings_file, oskar_Log* log,
 
     // Log the relevant settings.
     oskar_log_set_keep_file(log, s.sim.keep_log_file);
+    oskar_log_set_file_priority(log,
+            s.sim.write_status_to_log_file ? OSKAR_LOG_STATUS : OSKAR_LOG_MESSAGE);
     oskar_log_settings_simulator(log, &s);
     oskar_log_settings_sky(log, &s);
     oskar_log_settings_observation(log, &s);
@@ -409,7 +411,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
         // Record number of visible sources in this snapshot.
         n_src = oskar_sky_num_sources(sky_ptr);
-        oskar_log_message(log, 'M', 1, "Snapshot %4d/%d, chunk %4d/%d, "
+        oskar_log_message(log, 'S', 1, "Snapshot %4d/%d, chunk %4d/%d, "
                 "device %d [%d sources]", i+1, num_vis_dumps, chunk_index+1,
                 num_sky_chunks, device_id, n_src);
 

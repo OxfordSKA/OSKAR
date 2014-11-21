@@ -126,6 +126,8 @@ static void load_settings(oskar_Settings* settings, const char* filename,
 
     // Log the relevant settings.
     oskar_log_set_keep_file(log, settings->sim.keep_log_file);
+    oskar_log_set_file_priority(log, settings->sim.write_status_to_log_file ?
+                    OSKAR_LOG_STATUS : OSKAR_LOG_MESSAGE);
     oskar_log_settings_simulator(log, settings);
     oskar_log_settings_observation(log, settings);
     oskar_log_settings_telescope(log, settings);
@@ -255,7 +257,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
         for (int t = 0; t < num_times; ++t)
         {
             if (*status) break;
-            oskar_log_message(log, 'M', 1, "Snapshot %4d/%d", t+1, num_times);
+            oskar_log_message(log, 'S', 1, "Snapshot %4d/%d", t+1, num_times);
 
             double t_dump = obs_start_mjd_utc + t * dt_dump;
             double GAST = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump / 2.0);

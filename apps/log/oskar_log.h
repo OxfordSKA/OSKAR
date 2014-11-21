@@ -49,7 +49,7 @@ typedef struct oskar_Log oskar_Log;
 }
 #endif
 
-#define OSKAR_LOG_DEFAULT_PRIORITY    2  /* 2 = OSKAR_LOG_MESSAGE (or code 'M') */
+#define OSKAR_LOG_DEFAULT_PRIORITY    3  /* 3 = OSKAR_LOG_STATUS (or code 'S') */
 #define OSKAR_LOG_DEFAULT_VALUE_WIDTH 40 /* Default width for value log entries */
 
 enum OSKAR_LOG_SPECIAL_DEPTH {
@@ -69,7 +69,8 @@ enum OSKAR_LOG_PRIORITY {
     OSKAR_LOG_ERROR   =  0,  /* == 'E' */
     OSKAR_LOG_WARNING =  1,  /* == 'W' */
     OSKAR_LOG_MESSAGE =  2,  /* == 'M' */
-    OSKAR_LOG_DEBUG   =  3   /* == 'D' */
+    OSKAR_LOG_STATUS  =  3,  /* == 'S' */
+    OSKAR_LOG_DEBUG   =  4   /* == 'D' */
 };
 
 #include <oskar_log_accessors.h>

@@ -22,6 +22,14 @@
         </description>
     </s>
 
+    <s key="write_status_to_log_file">
+        <label>Write status messages to log file</label>
+        <type name="bool" default="false" />
+        <description>
+            Write status (progress) messages to the log file.
+        </description>
+    </s>
+
     <s key="max_sources_per_chunk">
         <label>Max. number of sources per chunk</label>
         <type name="IntPositive" default="16384" />
