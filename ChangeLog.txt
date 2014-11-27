@@ -9,7 +9,9 @@
       group, so that scalar mode can also be used for beam pattern simulations.
 
     * Added the ability to use seconds (as well as hours, minutes and seconds)
-      to specify observation length.
+      to specify observation length, and the ability to use various 
+      date formats (including MJD number and CASA-style date strings) to 
+      specify the start time.
 
 2014-09-09  OSKAR-2.5.1
 

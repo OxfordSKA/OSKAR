@@ -108,27 +108,58 @@ void oskar_settings_load_observation(oskar_SettingsObservation* obs,
         obs->num_channels     = s.value("num_channels", 1).toInt();
         obs->frequency_inc_hz = s.value("frequency_inc_hz").toDouble();
 
-        // Get observation start time.
-        QString str_st = s.value("start_time_utc", "01-01-2000 00:00:00.0").toString();
-        QDateTime st = QDateTime::fromString(str_st, "d-M-yyyy h:m:s.z");
-        if (!st.isValid())
+        // Get observation start time as MJD(UTC).
+        QString str_st = s.value("start_time_utc").toString();
+        if (str_st.size() > 0 && !str_st.contains(":"))
         {
-            oskar_log_error(log, "Invalid date string for 'start_time_utc' "
-                    "(format must be: 'd-M-yyyy h:m:s.z').");
-            *status = OSKAR_ERR_SETTINGS_OBSERVATION;
-            return;
+            bool ok = false;
+            obs->start_mjd_utc = str_st.toDouble(&ok);
+            if (!ok)
+            {
+                oskar_log_error(log, "Invalid string for 'start_time_utc'.");
+                *status = OSKAR_ERR_SETTINGS_OBSERVATION;
+                return;
+            }
         }
-        int year   = st.date().year();
-        int month  = st.date().month();
-        int day    = st.date().day();
-        int hour   = st.time().hour();
-        int minute = st.time().minute();
-        double second = st.time().second() + st.time().msec() / 1000.0;
+        else
+        {
+            const char* format_strings[] = {
+                    "d-M-yyyy h:m:s.z", // British style
+                    "d-M-yyyy h:m:s",
+                    "yyyy/M/d/h:m:s.z", // CASA style
+                    "yyyy/M/d/h:m:s",
+                    "yyyy-MM-dd h:m:s.z", // International style
+                    "yyyy-MM-dd h:m:s",
+                    "yyyy-MM-ddTh:m:s.z", // ISO date style
+                    "yyyy-MM-ddTh:m:s",
+            };
+            QDateTime st;
+            int i = 0, num_formats = sizeof(format_strings) / sizeof(char*);
+            for (i = 0; i < num_formats; ++i)
+            {
+                st = QDateTime::fromString(str_st, format_strings[i]);
+                if (st.isValid())
+                    break;
+            }
+            if (i == num_formats)
+            {
+                oskar_log_error(log, "Invalid string for 'start_time_utc'.");
+                *status = OSKAR_ERR_SETTINGS_OBSERVATION;
+                return;
+            }
+            int year   = st.date().year();
+            int month  = st.date().month();
+            int day    = st.date().day();
+            int hour   = st.time().hour();
+            int minute = st.time().minute();
+            double second = st.time().second() + st.time().msec() / 1000.0;
 
-        // Compute start time as MJD(UTC).
-        double day_fraction = (hour + (minute / 60.0) + (second / 3600.0)) / 24.0;
-        obs->start_mjd_utc = oskar_settings_convert_date_time_to_mjd(year,
-                month, day, day_fraction);
+            // Compute start time as MJD(UTC).
+            double day_fraction = (hour + (minute / 60.0) +
+                    (second / 3600.0)) / 24.0;
+            obs->start_mjd_utc = oskar_settings_convert_date_time_to_mjd(year,
+                    month, day, day_fraction);
+        }
 
         // Get number of time steps.
         obs->num_time_steps  = s.value("num_time_steps", 1).toInt();
@@ -137,7 +168,14 @@ void oskar_settings_load_observation(oskar_SettingsObservation* obs,
         QString length = s.value("length").toString();
         if (length.size() > 0 && !length.contains(":"))
         {
-            obs->length_sec = length.toDouble();
+            bool ok = false;
+            obs->length_sec = length.toDouble(&ok);
+            if (!ok)
+            {
+                oskar_log_error(log, "Invalid time string for 'length'");
+                *status = OSKAR_ERR_SETTINGS_OBSERVATION;
+                return;
+            }
         }
         else
         {
