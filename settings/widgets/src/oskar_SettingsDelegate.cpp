@@ -121,11 +121,31 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
         case oskar_SettingsItem::DATE_TIME:
         {
             // Date and time editors.
-            QDateTimeEdit* spinner = new QDateTimeEdit(parent);
-            spinner->setFrame(false);
-            spinner->setDisplayFormat("dd-MM-yyyy hh:mm:ss.zzz");
-            spinner->setCalendarPopup(true);
-            editor = spinner;
+            QLineEdit* line = new QLineEdit(parent);
+            // Validate these strings...
+            //      d-M-yyyy h:m:s.z
+            //      yyyy/M/d/h:m:s.z
+            //      yyyy-M-d h:m:s.z
+            //      yyyy-M-dTh:m:s.z
+            //      MJD.fraction
+            QString h = "([01]?[0-9]|2[0-3])";       // 01-23
+            QString m = "[0-5]?[0-9]";               // 01-59
+            QString s = m;
+            QString z = "(\\.\\d{1,3})?";            // 000-999
+            QString d = "(0?[1-9]|[12][0-9]|3[01])"; // 00-31
+            QString M = "(|1[0-2]|0?[1-9]|)";        // 00-12
+            QString y = "\\d{4,4}";                  // yyyy
+            QString rtime  = h+":"+m+":"+s+z;        // h:m:s.zzz
+            QString rdate1 = "("+d+"-"+M+"-"+y+"\\s"+rtime+")";
+            QString rdate2 = "("+y+"/"+M+"/"+d+"/"+rtime+")";
+            QString rdate3 = "("+y+"-"+M+"-"+d+"\\s"+rtime+")";
+            QString rdate4 = "("+y+"-"+M+"-"+d+"T"+rtime+")";
+            QString rdate5 = "(\\d+\\.?\\d*)";
+            QString rdatetime = rdate1+"|"+rdate2+"|"+rdate3+"|"+rdate4+"|"+rdate5;
+            QValidator* validator = new QRegExpValidator(QRegExp(rdatetime), line);
+            line->setFrame(false);
+            line->setValidator(validator);
+            editor = line;
             break;
         }
         case oskar_SettingsItem::TIME:
@@ -133,7 +153,7 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
             // Time editors.
             QLineEdit* line = new QLineEdit(parent);
             QValidator* validator = new QRegExpValidator(
-                    QRegExp("(\\d+\\.?\\d*)|(\\d\\d:\\d\\d:\\d\\d(\\.\\d+)?)"),
+                    QRegExp("(\\d+\\.?\\d*)|(\\d{1,2}:[0-5]?[0-9]:[0-5]?[0-9](\\.\\d{1,3})?)"),
                     line);
             line->setFrame(false);
             line->setValidator(validator);
@@ -382,9 +402,10 @@ void oskar_SettingsDelegate::setEditorData(QWidget* editor,
         case oskar_SettingsItem::DATE_TIME:
         {
             // Date and time editors.
-            QDateTime date = QDateTime::fromString(value.toString(),
-                    "dd-MM-yyyy h:m:s.z");
-            static_cast<QDateTimeEdit*>(editor)->setDateTime(date);
+//            QDateTime date = QDateTime::fromString(value.toString(),
+//                    "dd-MM-yyyy h:m:s.z");
+//            static_cast<QDateTimeEdit*>(editor)->setDateTime(date);
+            static_cast<QLineEdit*>(editor)->setText(value.toString());
             break;
         }
         case oskar_SettingsItem::TIME:
@@ -475,8 +496,9 @@ void oskar_SettingsDelegate::setModelData(QWidget* editor,
         case oskar_SettingsItem::DATE_TIME:
         {
             // Date and time editors.
-            QDateTime date = static_cast<QDateTimeEdit*>(editor)->dateTime();
-            value = date.toString("dd-MM-yyyy hh:mm:ss.zzz");
+//            QDateTime date = static_cast<QDateTimeEdit*>(editor)->dateTime();
+//            value = date.toString("dd-MM-yyyy hh:mm:ss.zzz");
+            value = static_cast<QLineEdit*>(editor)->text();
             break;
         }
         case oskar_SettingsItem::TIME:
