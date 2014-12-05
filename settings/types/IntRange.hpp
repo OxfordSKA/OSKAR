@@ -67,7 +67,7 @@ public:
     virtual ~IntRange();
     void init(const std::string& s, bool* ok = 0);
     void set(const std::string& s, bool* ok = 0);
-    std::string toString(bool* ok = 0) const;
+    std::string toString() const;
 
 private:
     int min_, max_, value_;

@@ -29,43 +29,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPE_ABSTRACT_TYPE_HPP_
-#define OSKAR_SETTINGS_TYPE_ABSTRACT_TYPE_HPP_
+#include <RandomSeed.hpp>
 
-#ifdef __GNUC__
-#define DEPRECATED(func) func __attribute__ ((deprecated))
-#elif defined(_MSC_VER)
-#define DEPRECATED(func) __declspec(deprecated) func
-#else
-#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
-#define DEPRECATED(func) func
-#endif
+#include <oskar_settings_utility_string.hpp>
 
-/**
- * @file AbstractType.hpp
- */
-
-#include <string>
+#include <climits>
+#include <vector>
+#include <iostream> // for debugging FIXME
 
 namespace oskar {
 
-class AbstractType
+RandomSeed::RandomSeed() : value_(1)
 {
-public:
-    virtual ~AbstractType() {}
+}
 
-    /// Initialises the type from a CSV parameter string.
-    virtual void init(const std::string& s, bool* ok = 0) = 0;
+RandomSeed::~RandomSeed()
+{
+}
 
-    /// Sets the value from a std::string (overloaded set method for std::string)
-    virtual void set(const std::string& s, bool* ok = 0) = 0;
+void RandomSeed::init(const std::string& /*s*/, bool* ok)
+{
+    // Random seed does not require any initialisation
+    if (ok) *ok = true;
+}
 
-    /// Returns the value as a std::string
-    // Note there is no bool ok on toString as a type HAS to always
-    // be in a state where there is a valid toString() conversion even if
-    // this is a default value.
-    virtual std::string toString() const = 0;
-};
+void RandomSeed::set(const std::string& s, bool* ok)
+{
+    if (ok) *ok = true;
+    if (oskar_settings_utility_string_starts_with("TIME", s, false)) {
+        value_ = -1;
+        return;
+    }
+    int i = oskar_settings_utility_string_to_int(s, ok);
+    if (ok && !*ok) return;
+    if (i < 1) { if (ok) *ok = false; value_ = -1; }
+    value_ = i;
+}
+
+std::string RandomSeed::toString() const
+{
+    if (value_ < 1) return "time";
+    else return oskar_settings_utility_int_to_string(value_);
+}
 
 } // namespace oskar
-#endif /* OSKAR_SETTINGS_TYPE_ABSTRACT_TYPE_HPP_ */
+

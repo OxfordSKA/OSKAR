@@ -29,43 +29,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPE_ABSTRACT_TYPE_HPP_
-#define OSKAR_SETTINGS_TYPE_ABSTRACT_TYPE_HPP_
+#ifndef OSKAR_SETTINGS_TYPES_HPP_
+#define OSKAR_SETTINGS_TYPES_HPP_
 
-#ifdef __GNUC__
-#define DEPRECATED(func) func __attribute__ ((deprecated))
-#elif defined(_MSC_VER)
-#define DEPRECATED(func) __declspec(deprecated) func
-#else
-#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
-#define DEPRECATED(func) func
-#endif
+#include <IntPositive.hpp>
+#include <IntRange.hpp>
+#include <IntRangeExt.hpp>
+#include <RandomSeed.hpp>
 
-/**
- * @file AbstractType.hpp
- */
-
-#include <string>
-
-namespace oskar {
-
-class AbstractType
-{
-public:
-    virtual ~AbstractType() {}
-
-    /// Initialises the type from a CSV parameter string.
-    virtual void init(const std::string& s, bool* ok = 0) = 0;
-
-    /// Sets the value from a std::string (overloaded set method for std::string)
-    virtual void set(const std::string& s, bool* ok = 0) = 0;
-
-    /// Returns the value as a std::string
-    // Note there is no bool ok on toString as a type HAS to always
-    // be in a state where there is a valid toString() conversion even if
-    // this is a default value.
-    virtual std::string toString() const = 0;
-};
-
-} // namespace oskar
-#endif /* OSKAR_SETTINGS_TYPE_ABSTRACT_TYPE_HPP_ */
+#endif /* OSKAR_SETTINGS_TYPES_HPP_ */

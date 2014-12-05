@@ -29,43 +29,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPE_ABSTRACT_TYPE_HPP_
-#define OSKAR_SETTINGS_TYPE_ABSTRACT_TYPE_HPP_
+#include <IntPositive.hpp>
 
-#ifdef __GNUC__
-#define DEPRECATED(func) func __attribute__ ((deprecated))
-#elif defined(_MSC_VER)
-#define DEPRECATED(func) __declspec(deprecated) func
-#else
-#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
-#define DEPRECATED(func) func
-#endif
+#include <oskar_settings_utility_string.hpp>
 
-/**
- * @file AbstractType.hpp
- */
-
-#include <string>
+#include <climits>
+#include <vector>
 
 namespace oskar {
 
-class AbstractType
+IntPositive::IntPositive() : value_(1)
 {
-public:
-    virtual ~AbstractType() {}
+}
 
-    /// Initialises the type from a CSV parameter string.
-    virtual void init(const std::string& s, bool* ok = 0) = 0;
+IntPositive::~IntPositive()
+{
+}
 
-    /// Sets the value from a std::string (overloaded set method for std::string)
-    virtual void set(const std::string& s, bool* ok = 0) = 0;
+void IntPositive::init(const std::string& /*s*/, bool* ok)
+{
+    // No initialisation required.
+    if (ok) *ok = true;
 
-    /// Returns the value as a std::string
-    // Note there is no bool ok on toString as a type HAS to always
-    // be in a state where there is a valid toString() conversion even if
-    // this is a default value.
-    virtual std::string toString() const = 0;
-};
+}
+
+void IntPositive::set(const std::string& s, bool* ok)
+{
+    int i = oskar_settings_utility_string_to_int(s, ok);
+    if (ok && !*ok) return;
+    if (i >= 1) {
+        if (ok) *ok = true;
+        value_ = i;
+        return;
+    }
+    if (ok) *ok = false;
+}
+
+std::string IntPositive::toString() const
+{
+    return oskar_settings_utility_int_to_string(value_);
+}
 
 } // namespace oskar
-#endif /* OSKAR_SETTINGS_TYPE_ABSTRACT_TYPE_HPP_ */
+

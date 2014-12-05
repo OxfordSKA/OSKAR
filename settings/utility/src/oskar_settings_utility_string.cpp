@@ -32,9 +32,11 @@
 #include <oskar_settings_utility_string.hpp>
 
 #include <sstream>
+#include <iomanip>
 #include <climits>
 #include <cstdlib>
 #include <cerrno>
+#include <cmath>
 
 #include <iostream> // for debugging FIXME
 
@@ -72,7 +74,6 @@ std::vector<std::string> oskar_settings_utility_string_get_type_params(
     return params;
 }
 
-
 int oskar_settings_utility_string_to_int(const std::string& s, bool *ok)
 {
     int base = 10;
@@ -109,5 +110,67 @@ std::string oskar_settings_utility_int_to_string(int i)
     std::ostringstream ss;
     ss << i;
     return ss.str();
+}
+
+std::string oskar_settings_utility_string_to_upper(const std::string& s)
+{
+    std::string s_(s);
+    for (size_t i = 0; i < s_.length(); ++i) s_[i] = toupper(s_[i]);
+    return s_;
+}
+
+bool oskar_settings_utility_string_starts_with(const std::string& s1,
+        const std::string& s2, bool case_senstive)
+{
+    std::string s1_(s1), s2_(s2);
+    if (case_senstive == false) {
+        s1_ = oskar_settings_utility_string_to_upper(s1);
+        s2_ = oskar_settings_utility_string_to_upper(s2);
+    }
+    if (s1_.find(s2_) == 0) return true;
+    else return false;
+}
+
+
+std::string oskar_settings_utility_double_to_string(double d,
+        int precision /* = 0 */)
+{
+    std::ostringstream ss;
+
+//    ss.setf(std::ios_base::fmtflags(), std::ios_base::floatfield);
+//    ss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+//    ss.setf(std::ios_base::scientific, std::ios_base::floatfield);
+
+    if (precision > 0) {
+        ss.setf(std::ios_base::fixed);
+        ss << std::setprecision(precision);
+    }
+    ss << d;
+    return std::string(ss.str());
+}
+
+double oskar_settings_utility_string_to_double(const std::string& s, bool *ok)
+{
+    char *endptr;
+
+    errno = 0;  // To distinguish success/failure after call
+    double val = strtod(s.c_str(), &endptr);
+
+    // If argument ok is not null, check for various possible errors.
+    if (ok) {
+        *ok = true;
+        //  Check for various possible errors
+        if ((errno != 0 && val == 0.0) ||
+                (errno == ERANGE && (val == HUGE_VAL || val == -HUGE_VAL))) {
+            *ok = false;
+        }
+        // No digits found.
+        if (endptr == s.c_str()) *ok = false;
+        // Further characters found in the string
+        // NOTE this may not actually be an error ...
+        if (*endptr != '\0') *ok = false;
+    }
+
+    return val;
 }
 

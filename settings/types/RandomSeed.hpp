@@ -29,43 +29,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPE_ABSTRACT_TYPE_HPP_
-#define OSKAR_SETTINGS_TYPE_ABSTRACT_TYPE_HPP_
+#ifndef OSKAR_SETTINGS_TYPE_RANDOM_SEED_HPP_
+#define OSKAR_SETTINGS_TYPE_RANDOM_SEED_HPP_
 
-#ifdef __GNUC__
-#define DEPRECATED(func) func __attribute__ ((deprecated))
-#elif defined(_MSC_VER)
-#define DEPRECATED(func) __declspec(deprecated) func
-#else
-#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
-#define DEPRECATED(func) func
-#endif
-
-/**
- * @file AbstractType.hpp
- */
-
-#include <string>
+#include <AbstractType.hpp>
 
 namespace oskar {
 
-class AbstractType
+class RandomSeed : public AbstractType
 {
 public:
-    virtual ~AbstractType() {}
+    RandomSeed();
+    virtual ~RandomSeed();
+    void init(const std::string& s, bool* ok = 0);
+    void set(const std::string& s, bool* ok = 0);
+    std::string toString() const;
 
-    /// Initialises the type from a CSV parameter string.
-    virtual void init(const std::string& s, bool* ok = 0) = 0;
-
-    /// Sets the value from a std::string (overloaded set method for std::string)
-    virtual void set(const std::string& s, bool* ok = 0) = 0;
-
-    /// Returns the value as a std::string
-    // Note there is no bool ok on toString as a type HAS to always
-    // be in a state where there is a valid toString() conversion even if
-    // this is a default value.
-    virtual std::string toString() const = 0;
+private:
+    int value_;
 };
 
 } // namespace oskar
-#endif /* OSKAR_SETTINGS_TYPE_ABSTRACT_TYPE_HPP_ */
+#endif /* OSKAR_SETTINGS_TYPE_RANDOM_SEED_HPP_ */

@@ -53,5 +53,17 @@ int oskar_settings_utility_string_to_int(const std::string& s, bool* ok = 0);
 // Convert integer to a string
 std::string oskar_settings_utility_int_to_string(int i);
 
+// Convert a string to upper case
+std::string oskar_settings_utility_string_to_upper(const std::string& s);
+
+// Returns true if string s1 starts with the string s2
+bool oskar_settings_utility_string_starts_with(const std::string& s1,
+        const std::string& s2, bool case_senstive = false);
+
+// Convert double to a string
+std::string oskar_settings_utility_double_to_string(double d, int precision = 0);
+
+// Convert string to double
+double oskar_settings_utility_string_to_double(const std::string& s, bool *ok);
 
 #endif /* OSKAR_SETTINGS_UTILITY_STRING_HPP_ */

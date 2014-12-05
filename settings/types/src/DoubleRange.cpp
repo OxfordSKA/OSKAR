@@ -29,57 +29,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <IntRange.hpp>
+#include <DoubleRange.hpp>
 
 #include <oskar_settings_utility_string.hpp>
 
-#include <climits>
+#include <cfloat>
 #include <vector>
 
 #include <iostream>
 
 namespace oskar {
 
-IntRange::IntRange() : min_(-INT_MAX), max_(INT_MAX), value_(0)
+DoubleRange::DoubleRange() : min_(-DBL_MAX), max_(DBL_MAX), value_(0.0)
 {
 }
 
-IntRange::~IntRange()
+DoubleRange::~DoubleRange()
 {
 }
 
-void IntRange::init(const std::string& s, bool* ok)
+void DoubleRange::init(const std::string& s, bool* ok)
 {
     if (*ok) *ok = true;
 
-    min_ = -INT_MAX;
-    max_ =  INT_MAX;
+    min_ = -DBL_MAX;
+    max_ =  DBL_MAX;
+    value_ = 0.0;
 
     // Extract range from the parameter CSV string.
-    // Parameters, p, for IntRange should be length 0, 1 or 2.
-    //  - With 0 entries the range is unchanged (from -INT_MAX to INT_MAX)
-    //  - With 1 entry the range is (p[0] to INT_MAX)
+    // Parameters, p, for DoubleRange should be length 0, 1 or 2.
+    //  - With 0 entries the range is unchanged (from -DBL_MAX to DBL_MAX)
+    //  - With 1 entry the range is (p[0] to DBL_MAX)
     //  - With 2 entries the range is (p[0] to p[1])
     //
     // Notes: if p[0] is the string 'MIN' or p[1] is the string 'MAX'
-    // these will resolve as -INT_MAX and INT_MAX respectively.
-    //
+    // these will resolve as -DBL_MAX and DBL_MAX respectively.
     std::vector<std::string> p;
     p = oskar_settings_utility_string_get_type_params(s);
     if (p.size() == 0u) {
         return;
     }
     else if (p.size() == 1u) {
-        if (p[0] == "MIN") min_ = -INT_MAX;
-        else min_ = oskar_settings_utility_string_to_int(p[0], ok);
+        if (p[0] == "MIN") min_ = -DBL_MAX;
+        else min_ = oskar_settings_utility_string_to_double(p[0], ok);
         return;
     }
     else if (p.size() == 2u) {
-        if (p[0] == "MIN") min_ = -INT_MAX;
-        else min_ = oskar_settings_utility_string_to_int(p[0], ok);
+        if (p[0] == "MIN") min_ = -DBL_MAX;
+        else min_ = oskar_settings_utility_string_to_double(p[0], ok);
         if (ok && !*ok) return;
-        if (p[1] == "MAX") max_ = INT_MAX;
-        else max_ = oskar_settings_utility_string_to_int(p[1], ok);
+        if (p[1] == "MAX") max_ = DBL_MAX;
+        else max_ = oskar_settings_utility_string_to_double(p[1], ok);
         return;
     }
 
@@ -87,11 +87,11 @@ void IntRange::init(const std::string& s, bool* ok)
     if (*ok) *ok = false;
 }
 
-void IntRange::set(const std::string& s, bool* ok)
+void DoubleRange::set(const std::string& s, bool* ok)
 {
     if (ok) *ok = false;
 
-    int i = oskar_settings_utility_string_to_int(s, ok);
+    int i = oskar_settings_utility_string_to_double(s, ok);
     if (ok && !*ok) return;
 
     if (i >= min_ && i <= max_) {
@@ -102,9 +102,9 @@ void IntRange::set(const std::string& s, bool* ok)
     else if (i > max_) { if (ok) *ok = false; value_ = max_; }
 }
 
-std::string IntRange::toString() const
+std::string DoubleRange::toString() const
 {
-    return oskar_settings_utility_int_to_string(value_);
+    return oskar_settings_utility_double_to_string(value_);
 }
 
 } // namespace oskar

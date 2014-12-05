@@ -33,6 +33,7 @@
 
 #include <iostream>
 #include <climits>
+#include <limits>
 #include <oskar_settings_utility_string.hpp>
 
 using namespace std;
@@ -133,3 +134,117 @@ TEST(oskar_settings_utility, int_to_string)
     }
 }
 
+
+TEST(oskar_settings_utility, string_to_upper)
+{
+    std::string s = "hello there";
+    ASSERT_STREQ("HELLO THERE", oskar_settings_utility_string_to_upper(s).c_str());
+}
+
+TEST(oskar_settings_utility, string_starts_with)
+{
+    std::string s1 = "hello there";
+    std::string s2;
+    {
+        s2 = "hello";
+        ASSERT_TRUE(oskar_settings_utility_string_starts_with(s1, s2, true));
+    }
+    {
+        s2 = "foo";
+        ASSERT_FALSE(oskar_settings_utility_string_starts_with(s1, s2, true));
+    }
+    {
+        s2 = "H";
+        ASSERT_FALSE(oskar_settings_utility_string_starts_with(s1, s2, true));
+    }
+    {
+        s2 = "He";
+        ASSERT_TRUE(oskar_settings_utility_string_starts_with(s1, s2, false));
+    }
+    {
+        s1 = "TIME";
+        s2 = "T";
+        ASSERT_TRUE(oskar_settings_utility_string_starts_with(s1, s2, false));
+    }
+    {
+        s1 = "TIME";
+        s2 = "t";
+        ASSERT_TRUE(oskar_settings_utility_string_starts_with(s1, s2, false));
+    }
+}
+
+TEST(oskar_settings_utility, double_to_string)
+{
+    double d;
+    {
+        d = 0.1;
+        ASSERT_STREQ("0.1", oskar_settings_utility_double_to_string(d).c_str());
+    }
+    {
+        d = 1.2345678910;
+        ASSERT_STREQ("1.2345678910", oskar_settings_utility_double_to_string(d, 10).c_str());
+    }
+    {
+        d = -1.234;
+        ASSERT_STREQ("-1.234", oskar_settings_utility_double_to_string(d, 3).c_str());
+    }
+    {
+        d = 1.0000002e10;
+        ASSERT_STREQ("10000002000.0", oskar_settings_utility_double_to_string(d,1).c_str());
+    }
+}
+
+TEST(oskar_settings_utility, string_to_double)
+{
+    string s;
+    bool ok = false;
+    {
+        s = "123456789.0";
+        ASSERT_DOUBLE_EQ(123456789.0, oskar_settings_utility_string_to_double(s, &ok));
+        ASSERT_TRUE(ok);
+    }
+    {
+        s = "";
+        ASSERT_DOUBLE_EQ(0.0, oskar_settings_utility_string_to_double(s, &ok));
+        ASSERT_FALSE(ok);
+    }
+    {
+        s = "-123456789";
+        ASSERT_DOUBLE_EQ(-123456789.0, oskar_settings_utility_string_to_double(s, &ok));
+        ASSERT_TRUE(ok);
+    }
+    {
+        s = "1.79769313486231570815e+308";
+        ASSERT_DOUBLE_EQ(DBL_MAX, oskar_settings_utility_string_to_double(s, &ok));
+        ASSERT_TRUE(ok);
+    }
+    {
+        s = "1.79769313486231570815e+309";
+        ASSERT_DOUBLE_EQ(std::numeric_limits<double>::infinity(),
+                oskar_settings_utility_string_to_double(s, &ok));
+        ASSERT_FALSE(ok);
+    }
+
+    {
+        s = "-1.79769313486231570815e+308";
+        ASSERT_DOUBLE_EQ(-DBL_MAX, oskar_settings_utility_string_to_double(s, &ok));
+        ASSERT_TRUE(ok);
+    }
+    {
+        s = "-1.79769313486231570815e+309";
+        ASSERT_EQ(-std::numeric_limits<double>::infinity(),
+                oskar_settings_utility_string_to_double(s, &ok));
+        ASSERT_FALSE(ok);
+    }
+    {
+        s = "   1  ";
+        ASSERT_DOUBLE_EQ(1.0, oskar_settings_utility_string_to_double(s, &ok));
+        // Note this fails due to checking for trailing characters after the 1
+        ASSERT_FALSE(ok);
+    }
+    {
+        s = "hello";
+        ASSERT_DOUBLE_EQ(0.0, oskar_settings_utility_string_to_double(s, &ok));
+        ASSERT_FALSE(ok);
+    }
+}

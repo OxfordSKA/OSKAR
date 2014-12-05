@@ -33,10 +33,8 @@
 #define OSKAR_SETTINGS_TYPES_HPP_
 
 #include <IntRange.hpp>
-#include <DoubleRange.hpp>
 #include <DateTime.hpp>
 #include <DoubleList.hpp>
-#include <DoubleRange.hpp>
 #include <InputDirectory.hpp>
 #include <InputFile.hpp>
 #include <InputFileList.hpp>
@@ -45,5 +43,7 @@
 #include <OutputFile.hpp>
 #include <StringList.hpp>
 #include <Time.hpp>
+#include "XXXDoubleRange.hpp"
+#include "XXXDoubleRange.hpp"
 
 #endif /* OSKAR_SETTINGS_TYPES_HPP_ */

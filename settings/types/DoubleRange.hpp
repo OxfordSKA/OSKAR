@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -29,59 +29,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
+#ifndef OSKAR_SETTINGS_TYPE_DOUBLERANGE_HPP_
+#define OSKAR_SETTINGS_TYPE_DOUBLERANGE_HPP_
 
-#include <IntRange.hpp>
-#include <iostream>
-#include <climits>
+#include <AbstractType.hpp>
 
-using namespace oskar;
 
-TEST(IntRange, test1)
+/**
+ * @file DoubleRange.hpp
+ */
+
+namespace oskar {
+
+/**
+ * @class DoubleRange
+ *
+ * @brief
+ * Ranged double value.
+ *
+ * @details
+ * Initialised with a two entry CSV list consisting of the minimum and
+ * maximum range. The range of the allowed value is inclusive.
+ *
+ * e.g. a range of 3.0,10.0 allows any double x, in the range 3.0 >= x >= 10.0.
+ *
+ * Values outside the range are set to the closest extreme of the range.
+ *
+ * By default the range is initialised to a full range of allowed double
+ * values (i.e. from -DBL_MAX to DBL_MAX), with a value of 0.0
+ */
+
+class DoubleRange : public AbstractType
 {
-    IntRange r;
-}
+public:
+    DoubleRange();
+    virtual ~DoubleRange();
+    void init(const std::string& s, bool* ok = 0);
+    void set(const std::string& s, bool* ok = 0);
+    std::string toString() const;
 
-TEST(IntRange, test2)
-{
-    IntRange r(0, INT_MAX, "min");
-    ASSERT_EQ(0, r.min());
-    ASSERT_EQ(INT_MAX, r.max());
-    bool ok = false;
-    r.set(5, &ok);
-    ASSERT_TRUE(ok);
-    ASSERT_EQ(5, r.getInt(&ok));
-    ASSERT_TRUE(ok);
-    ASSERT_STREQ("5", r.toString(&ok).c_str());
-    ASSERT_TRUE(ok);
-    r.set(-1, &ok);
-    ASSERT_TRUE(ok);
-    ASSERT_STREQ("min", r.toString(&ok).c_str());
-}
+private:
+    double min_, max_, value_;
+};
 
-TEST(IntRange, RandomSeed)
-{
-    {
-        RandomSeed r;
-        bool ok = false;
-        ASSERT_STREQ("time", r.toString(&ok).c_str());
-        ASSERT_TRUE(ok);
-    }
-    {
-        bool ok = false;
-        RandomSeed r;
-        r.set("5", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_EQ(5, r.getInt(&ok));
-        ASSERT_TRUE(ok);
-    }
-}
-
-TEST(IntRange, IntRangeExt)
-{
-    IntRangeExt r;
-    bool ok = false;
-    r.set("2", &ok);
-    ASSERT_TRUE(ok);
-}
-
+} // namespace oskar
+#endif /* OSKAR_SETTINGS_TYPE_DOUBLERANGE_HPP_ */
