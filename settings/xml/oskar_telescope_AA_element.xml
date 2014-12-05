@@ -4,6 +4,16 @@
 <s k="element_pattern">
     <label>Element pattern settings</label>
 
+    <s k="enable_numerical">
+        <label>Enable numerical patterns if present</label>
+        <type name="bool" default="true" />
+        <desc>
+            If <b>true</b>, make use of any available numerical
+            element pattern files. If numerical pattern data are
+            missing, the functional type will be used instead.
+        </desc>
+    </s>
+
     <s k="functional_type">
         <label>Functional pattern type</label>
         <type name="OptionList" default="Dipole">
@@ -34,15 +44,6 @@
         <depends
             k="telescope/aperture_array/element_pattern/functional_type"
             value="Dipole"/>
-    </s>
-    <s k="enable_numerical">
-        <label>Enable numerical patterns if present</label>
-        <type name="bool" default="true" />
-        <desc>
-            If <b>true</b>, make use of any available numerical
-            element pattern files. If numerical pattern data are
-            missing, the functional type will be used instead.
-        </desc>
     </s>
 
     <!-- Element taper group -->
