@@ -23,7 +23,8 @@
             be divided by the number of antennas in the
             station; if false, then this normalisation is
             not performed. Note, however, that global beam
-            normalisation is still possible.
+            normalisation is still possible by enabling the option labeled
+            <i>'Normalise beams at phase centre'</i>.
         </desc>
         <!--
         This is horrible need a better way to to
