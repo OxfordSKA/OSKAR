@@ -129,7 +129,7 @@ true
 
 aperture\_array/array\_pattern/normalise
 &
-{If true, the amplitude of each station beam will be divided by the number of antennas in the station; if false, then this normalisation is not performed. Note, however, that global beam normalisation is still possible.}
+{If true, the amplitude of each station beam will be divided by the number of antennas in the station; if false, then this normalisation is not performed. Note, however, that global beam normalisation is still possible by enabling the option labeled \textit{'Normalise beams at phase centre'}.}
 &
 Bool
 &
@@ -277,6 +277,16 @@ Integer $\geq$ 1, or `time'
 \\
 \hline
 
+aperture\_array/element\_pattern/enable\_numerical
+&
+{If \textbf{true}, make use of any available numerical element pattern files. If numerical pattern data are missing, the functional type will be used instead.}
+&
+Bool
+&
+true
+\\
+\hline
+
 aperture\_array/element\_pattern/functional\_type
 &
 {The type of functional pattern to apply to the elements, if not using a numerically-defined pattern.}
@@ -315,16 +325,6 @@ aperture\_array/element\_pattern/dipole\_length\_units
 }
 &
 Wavelengths
-\\
-\hline
-
-aperture\_array/element\_pattern/enable\_numerical
-&
-{If \textbf{true}, make use of any available numerical element pattern files. If numerical pattern data are missing, the functional type will be used instead.}
-&
-Bool
-&
-true
 \\
 \hline
 

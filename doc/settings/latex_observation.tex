@@ -87,28 +87,30 @@ Unsigned double
 
 start\_time\_utc\textsuperscript{\textbf{\dag}}
 &
-{A string describing the start time and date for the observation.}
+{The start time and date for the observation. This can either be a MJD date value or a string with one of the following formats: 
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
+\vspace{8pt}
+ \item {\textbf{{\texttt{d-M-yyyy h:m:s.z}}}}
+ \item {\textbf{{\texttt{yyyy/M/d/h:m:s.z}}}}
+ \item {\textbf{{\texttt{yyyy-M-d h:m:s.z}}}}
+ \item {\textbf{{\texttt{yyyy-M-dTh:m:s.z}}}}
+ \vspace{8pt}
+\end{itemize}}
+ where: 
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
+\vspace{8pt}
+ \item {\textbf{d} is the day number (1 to 31)}
+ \item {\textbf{M} is the month (1 to 12)}
+ \item {\textbf{yyyy} is the year (4 digits)}
+ \item {\textbf{h} is the hour (0 to 23)}
+ \item {\textbf{m} is minutes (0 to 59)}
+ \item {\textbf{s} is seconds (0 to 59)}
+ \item {\textbf{z} is milliseconds (0 to 999)}
+ \vspace{8pt}
+\end{itemize}}
+ Note that date and time values support optional leading zeros in the format string.}
 &
-{\vspace{-3.5mm}{\begin{flushleft}
-Date-time string of format: \\
-\vspace{2pt}
-\hspace{2ex}\textbf{`d-M-yyyy h:m:s.z'} \\
-\vspace{2pt}
-where: \\
-\vspace{2pt}
-{
-\begin{tabular}{@{}p{2ex}@{} @{}p{4.8ex} @{}p{1.25ex}@{} l}
-~&\textbf{d}    &  & day number (1 to 31) \\[-0.9ex]
-~&\textbf{M}    &  & month (1 to 12)   \\[-0.9ex]
-~&\textbf{yyyy} &  & year (4 digits)   \\[-0.9ex]
-~&\textbf{h}    &  & hours (0 to 23)   \\[-0.9ex]
-~&\textbf{m}    &  & minutes (0 to 59) \\[-0.9ex]
-~&\textbf{s}    &  & seconds (0 to 59) \\[-0.9ex]
-~&\textbf{z}    &  & milliseconds (0 to 999) \\[-0.9ex]
-\end{tabular}
-}
-\end{flushleft}
-}}
+Double (if MJD), or formatted date-time string.
 &
 
 \\
@@ -116,27 +118,18 @@ where: \\
 
 length\textsuperscript{\textbf{\dag}}
 &
-{The observation length either in seconds, or in hours, minutes and seconds.}
+{The observation length either in seconds, or in hours, minutes and seconds as a formatted string with the syntax \textbf{{\texttt{h:m:s.z}}}. where: 
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
+\vspace{8pt}
+ \item {\textbf{h} is the hour (0 to 23)}
+ \item {\textbf{m} is minutes (0 to 59)}
+ \item {\textbf{s} is seconds (0 to 59)}
+ \item {\textbf{z} is milliseconds (0 to 999)}
+ \vspace{8pt}
+\end{itemize}}
+ Note that values support optional leading zeros in the format string.}
 &
-{\vspace{-6.5mm}{\begin{flushleft}
-Double (if length in seconds), or
-time string of format: \\
-\vspace{2pt}
-\hspace{2ex}\textbf{`h:m:s.z'} \\
-\vspace{2pt}
-where:\\
-\vspace{2pt}
-{
-\begin{tabular}{@{}p{2ex}@{} @{}p{4.8ex} @{}p{1.25ex}@{} l}
-~&\textbf{h} &  & hours (0 to 23)   \\[-0.9ex]
-~&\textbf{m} &  & minutes (0 to 59) \\[-0.9ex]
-~&\textbf{s} &  & seconds (0 to 59) \\[-0.9ex]
-~&\textbf{z} &  & milliseconds (0 to 999) \\[-0.9ex]
-\end{tabular}
-}
-\end{flushleft}
-}}
-
+Double (if length in seconds), or formatted time string.
 &
 
 \\

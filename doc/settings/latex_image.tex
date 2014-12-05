@@ -49,7 +49,8 @@ image\_type
 &
 {The type of image to generate. Note that the Stokes parameter images (if selected) are uncalibrated, and are formed simply using the standard combinations of the linear polarisations: 
 {\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
-\vspace{8pt} \item {I = 0.5 (XX + YY)}
+\vspace{8pt}
+ \item {I = 0.5 (XX + YY)}
  \item {Q = 0.5 (XX - YY)}
  \item {U = 0.5 (XY + YX)}
  \item {V = -0.5i (XY - YX)}
@@ -141,7 +142,8 @@ direction
 &
 {Specifies the direction of the image phase centre. 
 {\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
-\vspace{8pt} \item {If \textbf{Observation direction} is selected, the image is centred on the pointing direction of the primary beam.}
+\vspace{8pt}
+ \item {If \textbf{Observation direction} is selected, the image is centred on the pointing direction of the primary beam.}
  \item {If \textbf{RA, Dec.} is selected, the image is centred on the values of RA and Dec. found below.}
  \vspace{8pt}
 \end{itemize}}
@@ -190,7 +192,7 @@ None
 
 root\_path
 &
-{Path consisting of the root of the image filename used to save the output image. The full filename will be constructed as {\texttt{ \textbf{ $<$root$>$\_$<$image\_type$>$.$<$extension$>$ }}}}
+{Path consisting of the root of the image filename used to save the output image. The full filename will be constructed as {\texttt{\textbf{ $<$root$>$\_$<$image\_type$>$.$<$extension$>$ }}}}
 &
 Path name
 &
@@ -211,7 +213,7 @@ true
 overwrite
 &
 {If \textbf{true}, existing image files will be overwritten. If \textbf{false}, new image files of the same name will be created by appending an number to the existing filename with the pattern: 
-\vspace{8pt}\par\noindent  {\texttt{ \textbf{$<$filename$>$-$<$N$>$.$<$extension$>$}}}, 
+\vspace{8pt}\par\noindent  {\texttt{\textbf{$<$filename$>$-$<$N$>$.$<$extension$>$}}}, 
 \vspace{8pt}\par\noindent where N starts at 1 and is incremented for each new image created.}
 &
 Bool
