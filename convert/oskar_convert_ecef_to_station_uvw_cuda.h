@@ -48,20 +48,20 @@ extern "C" {
  * Given the hour angle and declination of the phase tracking centre, this CUDA
  * function transforms the station (x,y,z) coordinates to (u,v,w) coordinates.
  *
- * @param[out] d_u          Output station u coordinates.
- * @param[out] d_v          Output station v coordinates.
- * @param[out] d_w          Output station w coordinates.
  * @param[in]  num_stations The size of the station coordinate arrays.
  * @param[in]  d_x          Input station x coordinates (ECEF or related frame).
  * @param[in]  d_y          Input station y coordinates (ECEF or related frame).
  * @param[in]  d_z          Input station z coordinates (ECEF or related frame).
  * @param[in]  ha0_rad      The Hour Angle of the phase centre, in radians.
  * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
+ * @param[out] d_u          Output station u coordinates.
+ * @param[out] d_v          Output station v coordinates.
+ * @param[out] d_w          Output station w coordinates.
  */
 OSKAR_EXPORT
-void oskar_convert_ecef_to_station_uvw_cuda_f(float* d_u, float* d_v,
-        float* d_w, int num_stations, const float* d_x, const float* d_y,
-        const float* d_z, float ha0_rad, float dec0_rad);
+void oskar_convert_ecef_to_station_uvw_cuda_f(int num_stations,
+        const float* d_x, const float* d_y, const float* d_z,
+        float ha0_rad, float dec0_rad, float* d_u, float* d_v, float* d_w);
 
 /**
  * @brief
@@ -72,38 +72,38 @@ void oskar_convert_ecef_to_station_uvw_cuda_f(float* d_u, float* d_v,
  * Given the hour angle and declination of the phase tracking centre, this CUDA
  * function transforms the station (x,y,z) coordinates to (u,v,w) coordinates.
  *
- * @param[out] d_u          Output station u coordinates.
- * @param[out] d_v          Output station v coordinates.
- * @param[out] d_w          Output station w coordinates.
  * @param[in]  num_stations The size of the station coordinate arrays.
  * @param[in]  d_x          Input station x coordinates (ECEF or related frame).
  * @param[in]  d_y          Input station y coordinates (ECEF or related frame).
  * @param[in]  d_z          Input station z coordinates (ECEF or related frame).
  * @param[in]  ha0_rad      The Hour Angle of the phase centre, in radians.
  * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
+ * @param[out] d_u          Output station u coordinates.
+ * @param[out] d_v          Output station v coordinates.
+ * @param[out] d_w          Output station w coordinates.
  */
 OSKAR_EXPORT
-void oskar_convert_ecef_to_station_uvw_cuda_d(double* d_u, double* d_v,
-        double* d_w, int num_stations, const double* d_x, const double* d_y,
-        const double* d_z, double ha0_rad, double dec0_rad);
+void oskar_convert_ecef_to_station_uvw_cuda_d(int num_stations,
+        const double* d_x, const double* d_y, const double* d_z,
+        double ha0_rad, double dec0_rad, double* d_u, double* d_v, double* d_w);
 
 #ifdef __CUDACC__
 
 /* Kernels. */
 
 __global__
-void oskar_convert_ecef_to_station_uvw_cudak_f(float* __restrict__ u,
-        float* __restrict__ v, float* __restrict__ w, const int num_stations,
-        const float* __restrict__ x, const float* __restrict__ y,
-        const float* __restrict__ z, const float sin_ha0,
-        const float cos_ha0, const float sin_dec0, const float cos_dec0);
+void oskar_convert_ecef_to_station_uvw_cudak_f(const int num_stations,
+        const float* restrict x, const float* restrict y,
+        const float* restrict z, const float sin_ha0,
+        const float cos_ha0, const float sin_dec0, const float cos_dec0,
+        float* restrict u, float* restrict v, float* restrict w);
 
 __global__
-void oskar_convert_ecef_to_station_uvw_cudak_d(double* __restrict__ u,
-        double* __restrict__ v, double* __restrict__ w, const int num_stations,
-        const double* __restrict__ x, const double* __restrict__ y,
-        const double* __restrict__ z, const double sin_ha0,
-        const double cos_ha0, const double sin_dec0, const double cos_dec0);
+void oskar_convert_ecef_to_station_uvw_cudak_d(const int num_stations,
+        const double* restrict x, const double* restrict y,
+        const double* restrict z, const double sin_ha0,
+        const double cos_ha0, const double sin_dec0, const double cos_dec0,
+        double* restrict u, double* restrict v, double* restrict w);
 
 #endif /* __CUDACC__ */
 

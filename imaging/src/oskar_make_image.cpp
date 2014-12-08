@@ -35,8 +35,8 @@
 #include <oskar_get_image_stokes.h>
 #include <oskar_get_image_vis_amps.h>
 #include <oskar_set_up_image.h>
-#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
 #include <oskar_convert_ecef_to_baseline_uvw.h>
+#include <oskar_convert_lon_lat_to_relative_directions.h>
 #include <oskar_cmath.h>
 
 #include <stddef.h>
@@ -222,7 +222,7 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
         double l1, m1, n1;
         int num_elements = num_baselines * num_times;
 
-        oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(1,
+        oskar_convert_lon_lat_to_relative_directions_d(1,
                 &ra_rad, &dec_rad, ra0_rad, dec0_rad, &l1, &m1, &n1);
         delta_l = 0 - l1;
         delta_m = 0 - m1;
@@ -235,10 +235,11 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
         /* Work array for baseline evaluation. */
         oskar_Mem *work_uvw;
         work_uvw = oskar_mem_create(type, location, 3 * num_stations, status);
-        oskar_convert_ecef_to_baseline_uvw(uu_rot, vv_rot, ww_rot,
-                num_stations, station_ecef_x, station_ecef_y, station_ecef_z,
+        oskar_convert_ecef_to_baseline_uvw(num_stations,
+                station_ecef_x, station_ecef_y, station_ecef_z,
                 ra_rad, dec_rad, num_times, oskar_vis_time_start_mjd_utc(vis),
-                oskar_vis_time_inc_sec(vis) * SEC2DAYS, work_uvw, status);
+                oskar_vis_time_inc_sec(vis) * SEC2DAYS, uu_rot, vv_rot, ww_rot,
+                work_uvw, status);
         oskar_mem_free(work_uvw, status);
     }
 

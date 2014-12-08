@@ -29,10 +29,10 @@
 #include <gtest/gtest.h>
 
 #include <oskar_linspace.h>
-#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
-#include <oskar_convert_relative_direction_cosines_to_apparent_ra_dec.h>
-#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines.h>
+#include <oskar_convert_cirs_relative_directions_to_enu_directions.h>
+#include <oskar_convert_lon_lat_to_relative_directions.h>
 #include <oskar_convert_lon_lat_to_xyz.h>
+#include <oskar_convert_relative_directions_to_lon_lat.h>
 #include <oskar_convert_xyz_to_lon_lat.h>
 #include <oskar_evaluate_image_lm_grid.h>
 #include <oskar_get_error_string.h>
@@ -40,34 +40,41 @@
 #include <oskar_cmath.h>
 #include <cstdlib>
 #include <cstdio>
-#include <vector>
 
 #define D2R M_PI/180.0
 
 TEST(coordinate_conversions, lon_lat_to_xyz)
 {
     int num_pts = 1;
-    std::vector<double> x(num_pts), y(num_pts), z(num_pts);
-    std::vector<double> lon_in(num_pts), lat_in(num_pts);
-    std::vector<double> lon_out(num_pts), lat_out(num_pts);
+    double *x, *y, *z, *lon_in, *lat_in, *lon_out, *lat_out;
+    x = (double*)malloc(num_pts * sizeof(double));
+    y = (double*)malloc(num_pts * sizeof(double));
+    z = (double*)malloc(num_pts * sizeof(double));
+    lon_in = (double*)malloc(num_pts * sizeof(double));
+    lat_in = (double*)malloc(num_pts * sizeof(double));
+    lon_out = (double*)malloc(num_pts * sizeof(double));
+    lat_out = (double*)malloc(num_pts * sizeof(double));
     double delta = 1e-8;
 
     lon_in[0] = 50.0 * M_PI/180.0;
     lat_in[0] = 30.0 * M_PI/180.0;
 
-    oskar_convert_lon_lat_to_xyz_d(num_pts, &x[0], &y[0], &z[0], &lon_in[0],
-            &lat_in[0]);
-    oskar_convert_xyz_to_lon_lat_d(num_pts, &lon_out[0], &lat_out[0], &x[0],
-            &y[0], &z[0]);
+    oskar_convert_lon_lat_to_xyz_d(num_pts, lon_in, lat_in, x, y, z);
+    oskar_convert_xyz_to_lon_lat_d(num_pts, x, y, z, lon_out, lat_out);
 
     ASSERT_NEAR(lon_in[0], lon_out[0], delta);
     ASSERT_NEAR(lat_in[0], lat_out[0], delta);
+    free(x);
+    free(y);
+    free(z);
+    free(lon_in);
+    free(lat_in);
+    free(lon_out);
+    free(lat_out);
 }
 
-TEST(coordinate_conversions, ra_dec_to_direction_cosines)
+TEST(coordinate_conversions, ra_dec_to_directions)
 {
-    using std::vector;
-
     // Image size.
     int num_l = 10;
     int num_m = 10;
@@ -80,19 +87,24 @@ TEST(coordinate_conversions, ra_dec_to_direction_cosines)
 
     // Set up the grid.
     int num_points = num_l * num_m;
-    vector<double> l_1(num_points), m_1(num_points);
-    vector<double> ra(num_points), dec(num_points);
+    double *l_1, *m_1, *l_2, *m_2, *n_2, *ra, *dec;
+    l_1 = (double*)malloc(num_points * sizeof(double));
+    m_1 = (double*)malloc(num_points * sizeof(double));
+    l_2 = (double*)malloc(num_points * sizeof(double));
+    m_2 = (double*)malloc(num_points * sizeof(double));
+    n_2 = (double*)malloc(num_points * sizeof(double));
+    ra  = (double*)malloc(num_points * sizeof(double));
+    dec = (double*)malloc(num_points * sizeof(double));
     oskar_evaluate_image_lm_grid_d(num_l, num_m, fov_lon_deg * M_PI / 180.0,
-            fov_lat_deg * M_PI / 180.0, &l_1[0], &m_1[0]);
+            fov_lat_deg * M_PI / 180.0, l_1, m_1);
 
     // Convert from l,m grid to spherical coordinates.
-    oskar_convert_relative_direction_cosines_to_apparent_ra_dec_d(num_points, ra0, dec0,
-            &l_1[0], &m_1[0], &ra[0], &dec[0]);
+    oskar_convert_relative_directions_to_lon_lat_2d_d(num_points,
+            l_1, m_1, ra0, dec0, ra, dec);
 
     // Check reverse direction.
-    vector<double> l_2(num_points), m_2(num_points), n_2(num_points);
-    oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(num_points,
-            &ra[0], &dec[0], ra0, dec0, &l_2[0], &m_2[0], &n_2[0]);
+    oskar_convert_lon_lat_to_relative_directions_d(num_points,
+            ra, dec, ra0, dec0, l_2, m_2, n_2);
 
     for (int i = 0; i < num_points; ++i)
     {
@@ -101,22 +113,29 @@ TEST(coordinate_conversions, ra_dec_to_direction_cosines)
         double n_1 = sqrt(1.0 - l_1[i]*l_1[i] - m_1[i]*m_1[i]);
         ASSERT_NEAR(n_1, n_2[i], 1e-15);
     }
+    free(l_1);
+    free(m_1);
+    free(l_2);
+    free(m_2);
+    free(n_2);
+    free(ra);
+    free(dec);
 }
 
 
-TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines)
+TEST(coordinate_conversions, cirs_relative_directions_to_enu_directions)
 {
     int type, loc, num = 1, status = 0;
-    double lat, lst, ra0, ha0, dec0, tol;
+    double lon, lat, era, ra0, dec0, tol;
 
-    // Observer's location and LST.
+    // Observer's location and ERA.
+    lon = 0.0;
     lat = 73 * D2R;
-    lst = 12 * D2R;
+    era = 12 * D2R;
 
     // RA and Dec of phase centre.
     ra0  = 36 * D2R;
     dec0 = 60 * D2R;
-    ha0  = lst - ra0;
 
     // Single precision.
     {
@@ -141,13 +160,13 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute l, m, n directions.
-        oskar_convert_apparent_ra_dec_to_relative_direction_cosines(num,
+        oskar_convert_lon_lat_to_relative_directions(num,
                 ra, dec, ra0, dec0, l, m, n, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute ENU directions.
-        oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
-                x, y, z, num, l, m, n, ha0, dec0, lat, &status);
+        oskar_convert_cirs_relative_directions_to_enu_directions(num, l, m, n,
+                ra0, dec0, lon, lat, era, 0.0, 0.0, 0.0, x, y, z, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.
@@ -184,13 +203,14 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute l, m, n directions.
-        oskar_convert_apparent_ra_dec_to_relative_direction_cosines(num,
+        oskar_convert_lon_lat_to_relative_directions(num,
                 ra, dec, ra0, dec0, l, m, n, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute ENU directions.
-        oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
-                x_gpu, y_gpu, z_gpu, num, l, m, n, ha0, dec0, lat, &status);
+        oskar_convert_cirs_relative_directions_to_enu_directions(num, l, m, n,
+                ra0, dec0, lon, lat, era, 0.0, 0.0, 0.0, x_gpu, y_gpu, z_gpu,
+                &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.
@@ -247,13 +267,13 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute l, m, n directions.
-        oskar_convert_apparent_ra_dec_to_relative_direction_cosines(num,
+        oskar_convert_lon_lat_to_relative_directions(num,
                 ra, dec, ra0, dec0, l, m, n, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute ENU directions.
-        oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
-                x, y, z, num, l, m, n, ha0, dec0, lat, &status);
+        oskar_convert_cirs_relative_directions_to_enu_directions(num, l, m, n,
+                ra0, dec0, lon, lat, era, 0.0, 0.0, 0.0, x, y, z, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.
@@ -290,13 +310,14 @@ TEST(coordinate_conversions, relative_direction_cosines_to_enu_direction_cosines
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute l, m, n directions.
-        oskar_convert_apparent_ra_dec_to_relative_direction_cosines(num,
+        oskar_convert_lon_lat_to_relative_directions(num,
                 ra, dec, ra0, dec0, l, m, n, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Compute ENU directions.
-        oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
-                x_gpu, y_gpu, z_gpu, num, l, m, n, ha0, dec0, lat, &status);
+        oskar_convert_cirs_relative_directions_to_enu_directions(num, l, m, n,
+                ra0, dec0, lon, lat, era, 0.0, 0.0, 0.0, x_gpu, y_gpu, z_gpu,
+                &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Check values.

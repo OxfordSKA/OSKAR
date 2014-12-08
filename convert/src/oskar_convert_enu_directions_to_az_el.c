@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,47 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
-#include <oskar_convert_apparent_ha_dec_to_enu_direction_cosines.h>
-#include <oskar_cuda_check_error.h>
+#include <oskar_convert_enu_directions_to_az_el.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Single precision. */
-void oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(int n,
-        const float* ra, const float* dec, float lst, float lat, float* x,
-        float* y, float* z)
+OSKAR_EXPORT
+void oskar_convert_enu_directions_to_az_el_f(int n, const float* x,
+        const float* y, const float* z, float* az, float* el)
 {
-    /* Determine source Hour Angles (HA = LST - RA). */
-    float* ha = z; /* Temporary. */
-    int i;
+    int i = 0;
+    float x_, y_, z_, a;
     for (i = 0; i < n; ++i)
     {
-        ha[i] = lst - ra[i];
+        x_ = x[i];
+        y_ = y[i];
+        z_ = z[i];
+        a = atan2f(x_, y_); /* Azimuth */
+        x_ = sqrtf(x_*x_ + y_*y_);
+        y_ = atan2f(z_, x_); /* Elevation. */
+        az[i] = a;
+        el[i] = y_;
     }
-
-    /* Determine horizontal x,y,z directions (destroys contents of ha). */
-    oskar_convert_apparent_ha_dec_to_enu_direction_cosines_f(n, ha, dec, lat, x, y, z);
 }
 
-/* Double precision. */
-void oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(int n,
-        const double* ra, const double* dec, double lst, double lat,
-        double* x, double* y, double* z)
+OSKAR_EXPORT
+void oskar_convert_enu_directions_to_az_el_d(int n, const double* x,
+        const double* y, const double* z, double* az, double* el)
 {
-    /* Determine source Hour Angles (HA = LST - RA). */
-    double* ha = z; /* Temporary. */
-    int i;
+    int i = 0;
+    double x_, y_, z_, a;
     for (i = 0; i < n; ++i)
     {
-        ha[i] = lst - ra[i];
+        x_ = x[i];
+        y_ = y[i];
+        z_ = z[i];
+        a = atan2(x_, y_); /* Azimuth */
+        x_ = sqrt(x_*x_ + y_*y_);
+        y_ = atan2(z_, x_); /* Elevation. */
+        az[i] = a;
+        el[i] = y_;
     }
-
-    /* Determine horizontal x,y,z directions (destroys contents of ha). */
-    oskar_convert_apparent_ha_dec_to_enu_direction_cosines_d(n, ha, dec, lat, x, y, z);
 }
+
 
 #ifdef __cplusplus
 }

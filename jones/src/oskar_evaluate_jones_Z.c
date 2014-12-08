@@ -28,7 +28,7 @@
 
 #include <oskar_evaluate_jones_Z.h>
 
-#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines.h>
+#include <oskar_convert_relative_directions_to_enu_directions.h>
 #include <oskar_convert_offset_ecef_to_ecef.h>
 #include <oskar_evaluate_pierce_points.h>
 #include <oskar_evaluate_tec_tid.h>
@@ -115,7 +115,7 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
 
         /* Evaluate horizontal x,y,z source positions (for which to evaluate
          * pierce points) */
-        oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
+        oskar_convert_relative_directions_to_enu_directions(
                 work->hor_x, work->hor_y, work->hor_z, num_sources,
                 oskar_sky_l_const(sky_cpu), oskar_sky_m_const(sky_cpu),
                 oskar_sky_n_const(sky_cpu), last - oskar_sky_reference_ra_rad(sky_cpu),

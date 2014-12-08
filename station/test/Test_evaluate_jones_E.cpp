@@ -122,7 +122,7 @@ TEST(evaluate_jones_E, evaluate_e)
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
     positions.generate(oskar_mem_float(oskar_sky_ra_rad(sky_cpu), &error),
             oskar_mem_float(oskar_sky_dec_rad(sky_cpu), &error));
-    oskar_sky_evaluate_relative_direction_cosines(sky_cpu,
+    oskar_sky_evaluate_relative_directions(sky_cpu,
             0.0, M_PI/2.0, &error);
 
     // Set up GPU memory.

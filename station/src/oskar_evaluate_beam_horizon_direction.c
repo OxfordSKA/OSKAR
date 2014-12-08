@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
  */
 
 #include <oskar_evaluate_beam_horizon_direction.h>
-#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
+#include <oskar_convert_apparent_ra_dec_to_enu_directions.h>
 #include <oskar_angular_distance.h>
 #include <stdlib.h>
 #include <math.h>
@@ -64,7 +64,7 @@ void oskar_evaluate_beam_horizon_direction(double* x, double* y, double* z,
         lon = oskar_station_lon_rad(station);
         lat = oskar_station_lat_rad(station);
         last = gast + lon; /* Local Apparent Sidereal Time, in radians. */
-        oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(1, &beam_lon,
+        oskar_convert_apparent_ra_dec_to_enu_directions_d(1, &beam_lon,
                 &beam_lat, last, lat, x, y, z);
     }
     else if (beam_coord_type == OSKAR_SPHERICAL_TYPE_AZEL)

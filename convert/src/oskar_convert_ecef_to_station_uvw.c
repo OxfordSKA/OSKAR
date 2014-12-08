@@ -28,8 +28,8 @@
 
 #include <oskar_convert_ecef_to_station_uvw.h>
 #include <oskar_convert_ecef_to_station_uvw_cuda.h>
-#include <oskar_convert_ecef_to_station_uvw_inline.h>
 #include <oskar_cuda_check_error.h>
+#include <private_convert_ecef_to_station_uvw_inline.h>
 
 #include <math.h>
 
@@ -38,9 +38,9 @@ extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_convert_ecef_to_station_uvw_f(float* u, float* v, float* w,
-        int num_stations, const float* x, const float* y, const float* z,
-        double ha0_rad, double dec0_rad)
+void oskar_convert_ecef_to_station_uvw_f(int num_stations, const float* x,
+        const float* y, const float* z, double ha0_rad, double dec0_rad,
+        float* u, float* v, float* w)
 {
     int i;
     double sin_ha0, cos_ha0, sin_dec0, cos_dec0;
@@ -55,8 +55,8 @@ void oskar_convert_ecef_to_station_uvw_f(float* u, float* v, float* w,
     for (i = 0; i < num_stations; ++i)
     {
         double ut, vt, wt;
-        oskar_convert_ecef_to_station_uvw_inline_d(&ut, &vt, &wt,
-                x[i], y[i], z[i], sin_ha0, cos_ha0, sin_dec0, cos_dec0);
+        oskar_convert_ecef_to_station_uvw_inline_d(x[i], y[i], z[i],
+                sin_ha0, cos_ha0, sin_dec0, cos_dec0, &ut, &vt, &wt);
         u[i] = (float)ut;
         v[i] = (float)vt;
         w[i] = (float)wt;
@@ -64,9 +64,9 @@ void oskar_convert_ecef_to_station_uvw_f(float* u, float* v, float* w,
 }
 
 /* Double precision. */
-void oskar_convert_ecef_to_station_uvw_d(double* u, double* v, double* w,
-        int num_stations, const double* x, const double* y, const double* z,
-        double ha0_rad, double dec0_rad)
+void oskar_convert_ecef_to_station_uvw_d(int num_stations, const double* x,
+        const double* y, const double* z, double ha0_rad, double dec0_rad,
+        double* u, double* v, double* w)
 {
     int i;
     double sin_ha0, cos_ha0, sin_dec0, cos_dec0;
@@ -80,16 +80,16 @@ void oskar_convert_ecef_to_station_uvw_d(double* u, double* v, double* w,
     /* Loop over points. */
     for (i = 0; i < num_stations; ++i)
     {
-        oskar_convert_ecef_to_station_uvw_inline_d(&u[i], &v[i], &w[i],
-                x[i], y[i], z[i], sin_ha0, cos_ha0, sin_dec0, cos_dec0);
+        oskar_convert_ecef_to_station_uvw_inline_d(x[i], y[i], z[i], sin_ha0,
+                cos_ha0, sin_dec0, cos_dec0, &u[i], &v[i], &w[i]);
     }
 }
 
 /* Wrapper. */
-void oskar_convert_ecef_to_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
-        int num_stations, const oskar_Mem* x, const oskar_Mem* y,
-        const oskar_Mem* z, double ra0_rad, double dec0_rad, double gast,
-        int* status)
+void oskar_convert_ecef_to_station_uvw(int num_stations, const oskar_Mem* x,
+        const oskar_Mem* y, const oskar_Mem* z, double ra0_rad,
+        double dec0_rad, double gast, oskar_Mem* u, oskar_Mem* v,
+        oskar_Mem* w, int* status)
 {
     int type, location;
     double ha0_rad;
@@ -158,25 +158,25 @@ void oskar_convert_ecef_to_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
         {
-            oskar_convert_ecef_to_station_uvw_cuda_f(
-                    oskar_mem_float(u, status),
-                    oskar_mem_float(v, status),
-                    oskar_mem_float(w, status), num_stations,
+            oskar_convert_ecef_to_station_uvw_cuda_f(num_stations,
                     oskar_mem_float_const(x, status),
                     oskar_mem_float_const(y, status),
                     oskar_mem_float_const(z, status),
-                    (float)ha0_rad, (float)dec0_rad);
+                    (float)ha0_rad, (float)dec0_rad,
+                    oskar_mem_float(u, status),
+                    oskar_mem_float(v, status),
+                    oskar_mem_float(w, status));
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_convert_ecef_to_station_uvw_cuda_d(
-                    oskar_mem_double(u, status),
-                    oskar_mem_double(v, status),
-                    oskar_mem_double(w, status), num_stations,
+            oskar_convert_ecef_to_station_uvw_cuda_d(num_stations,
                     oskar_mem_double_const(x, status),
                     oskar_mem_double_const(y, status),
                     oskar_mem_double_const(z, status),
-                    ha0_rad, dec0_rad);
+                    ha0_rad, dec0_rad,
+                    oskar_mem_double(u, status),
+                    oskar_mem_double(v, status),
+                    oskar_mem_double(w, status));
         }
         else
         {
@@ -191,25 +191,25 @@ void oskar_convert_ecef_to_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
     {
         if (type == OSKAR_SINGLE)
         {
-            oskar_convert_ecef_to_station_uvw_f(
-                    oskar_mem_float(u, status),
-                    oskar_mem_float(v, status),
-                    oskar_mem_float(w, status), num_stations,
+            oskar_convert_ecef_to_station_uvw_f(num_stations,
                     oskar_mem_float_const(x, status),
                     oskar_mem_float_const(y, status),
                     oskar_mem_float_const(z, status),
-                    (float)ha0_rad, (float)dec0_rad);
+                    (float)ha0_rad, (float)dec0_rad,
+                    oskar_mem_float(u, status),
+                    oskar_mem_float(v, status),
+                    oskar_mem_float(w, status));
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_convert_ecef_to_station_uvw_d(
-                    oskar_mem_double(u, status),
-                    oskar_mem_double(v, status),
-                    oskar_mem_double(w, status), num_stations,
+            oskar_convert_ecef_to_station_uvw_d(num_stations,
                     oskar_mem_double_const(x, status),
                     oskar_mem_double_const(y, status),
                     oskar_mem_double_const(z, status),
-                    ha0_rad, dec0_rad);
+                    ha0_rad, dec0_rad,
+                    oskar_mem_double(u, status),
+                    oskar_mem_double(v, status),
+                    oskar_mem_double(w, status));
         }
         else
         {

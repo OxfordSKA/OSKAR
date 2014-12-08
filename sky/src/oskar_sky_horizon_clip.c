@@ -31,8 +31,8 @@
 
 #include <oskar_sky_copy_source_data.h>
 #include <oskar_sky_copy_source_data_cuda.h>
-#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines.h>
-#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda.h>
+#include <oskar_convert_relative_directions_to_enu_directions.h>
+#include <oskar_convert_relative_directions_to_enu_directions_cuda.h>
 #include <oskar_update_horizon_mask.h>
 #include <oskar_update_horizon_mask_cuda.h>
 #include <oskar_cuda_check_error.h>
@@ -228,7 +228,7 @@ static void horizon_clip_single(oskar_Sky* out, const oskar_Sky* in,
         {
             /* Evaluate source horizontal ENU direction cosines. */
             s = oskar_telescope_station_const(telescope, i);
-            oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_f(
+            oskar_convert_relative_directions_to_enu_directions_cuda_f(
                     x, y, z, num_in, l, m, n,
                     ha0(oskar_station_lon_rad(s), ra0, gast), dec0,
                     oskar_station_lat_rad(s));
@@ -254,7 +254,7 @@ static void horizon_clip_single(oskar_Sky* out, const oskar_Sky* in,
         {
             /* Evaluate source horizontal ENU direction cosines. */
             s = oskar_telescope_station_const(telescope, i);
-            oskar_convert_relative_direction_cosines_to_enu_direction_cosines_f(
+            oskar_convert_relative_directions_to_enu_directions_f(
                     x, y, z, num_in, l, m, n,
                     ha0(oskar_station_lon_rad(s), ra0, gast), dec0,
                     oskar_station_lat_rad(s));
@@ -348,7 +348,7 @@ static void horizon_clip_double(oskar_Sky* out, const oskar_Sky* in,
         {
             /* Evaluate source horizontal ENU direction cosines. */
             s = oskar_telescope_station_const(telescope, i);
-            oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_d(
+            oskar_convert_relative_directions_to_enu_directions_cuda_d(
                     x, y, z, num_in, l, m, n,
                     ha0(oskar_station_lon_rad(s), ra0, gast), dec0,
                     oskar_station_lat_rad(s));
@@ -374,7 +374,7 @@ static void horizon_clip_double(oskar_Sky* out, const oskar_Sky* in,
         {
             /* Evaluate source horizontal ENU direction cosines. */
             s = oskar_telescope_station_const(telescope, i);
-            oskar_convert_relative_direction_cosines_to_enu_direction_cosines_d(
+            oskar_convert_relative_directions_to_enu_directions_d(
                     x, y, z, num_in, l, m, n,
                     ha0(oskar_station_lon_rad(s), ra0, gast), dec0,
                     oskar_station_lat_rad(s));

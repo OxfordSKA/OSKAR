@@ -26,10 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_RELATIVE_DIRECTION_COSINES_INLINE_H_
-#define OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_RELATIVE_DIRECTION_COSINES_INLINE_H_
+#ifndef OSKAR_PRIVATE_CONVERT_LON_LAT_TO_RELATIVE_DIRECTIONS_INLINE_H_
+#define OSKAR_PRIVATE_CONVERT_LON_LAT_TO_RELATIVE_DIRECTIONS_INLINE_H_
 
 #include <oskar_global.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,23 +38,28 @@ extern "C" {
 
 /* Single precision. */
 OSKAR_INLINE
-void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_inline_f(
-        float* l, float* m, float* n, const float x, const float y,
-        const float z, const float cos_ha0, const float sin_ha0,
-        const float cos_dec0, const float sin_dec0, const float cos_lat,
-        const float sin_lat)
+void oskar_convert_lon_lat_to_relative_directions_inline_f(float lon_rad,
+        const float lat_rad, const float lon0_rad, const float cos_lat0,
+        const float sin_lat0, float* l, float* m, float* n)
 {
-    float l_, m_, n_, t;
+    float sin_lon, cos_lon, sin_lat, cos_lat, l_, m_, n_;
 
-    l_ = x * cos_ha0 - y * sin_ha0 * sin_lat + z * sin_ha0 * cos_lat;
-    t = sin_dec0 * cos_ha0;
-    m_ = x * sin_dec0 * sin_ha0 +
-            y * (cos_dec0 * cos_lat + t * sin_lat) +
-            z * (cos_dec0 * sin_lat - t * cos_lat);
-    t = cos_dec0 * cos_ha0;
-    n_ = -x * cos_dec0 * sin_ha0 +
-            y * (sin_dec0 * cos_lat - t * sin_lat) +
-            z * (sin_dec0 * sin_lat + t * cos_lat);
+    /* Convert from spherical to tangent-plane. */
+    lon_rad -= lon0_rad;
+#ifdef __CUDACC__
+    sincosf(lon_rad, &sin_lon, &cos_lon);
+    sincosf(lat_rad, &sin_lat, &cos_lat);
+#else
+    sin_lon = sinf(lon_rad);
+    cos_lon = cosf(lon_rad);
+    sin_lat = sinf(lat_rad);
+    cos_lat = cosf(lat_rad);
+#endif
+    l_ = cos_lat * sin_lon;
+    m_ = cos_lat0 * sin_lat - sin_lat0 * cos_lat * cos_lon;
+    n_ = sin_lat0 * sin_lat + cos_lat0 * cos_lat * cos_lon;
+
+    /* Store output data. */
     *l = l_;
     *m = m_;
     *n = n_;
@@ -61,23 +67,28 @@ void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_inline_f(
 
 /* Double precision. */
 OSKAR_INLINE
-void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_inline_d(
-        double* l, double* m, double* n, const double x, const double y,
-        const double z, const double cos_ha0, const double sin_ha0,
-        const double cos_dec0, const double sin_dec0, const double cos_lat,
-        const double sin_lat)
+void oskar_convert_lon_lat_to_relative_directions_inline_d(double lon_rad,
+        const double lat_rad, const double lon0_rad, const double cos_lat0,
+        const double sin_lat0, double* l, double* m, double* n)
 {
-    double l_, m_, n_, t;
+    double sin_lon, cos_lon, sin_lat, cos_lat, l_, m_, n_;
 
-    l_ = x * cos_ha0 - y * sin_ha0 * sin_lat + z * sin_ha0 * cos_lat;
-    t = sin_dec0 * cos_ha0;
-    m_ = x * sin_dec0 * sin_ha0 +
-            y * (cos_dec0 * cos_lat + t * sin_lat) +
-            z * (cos_dec0 * sin_lat - t * cos_lat);
-    t = cos_dec0 * cos_ha0;
-    n_ = -x * cos_dec0 * sin_ha0 +
-            y * (sin_dec0 * cos_lat - t * sin_lat) +
-            z * (sin_dec0 * sin_lat + t * cos_lat);
+    /* Convert from spherical to tangent-plane. */
+    lon_rad -= lon0_rad;
+#ifdef __CUDACC__
+    sincos(lon_rad, &sin_lon, &cos_lon);
+    sincos(lat_rad, &sin_lat, &cos_lat);
+#else
+    sin_lon = sin(lon_rad);
+    cos_lon = cos(lon_rad);
+    sin_lat = sin(lat_rad);
+    cos_lat = cos(lat_rad);
+#endif
+    l_ = cos_lat * sin_lon;
+    m_ = cos_lat0 * sin_lat - sin_lat0 * cos_lat * cos_lon;
+    n_ = sin_lat0 * sin_lat + cos_lat0 * cos_lat * cos_lon;
+
+    /* Store output data. */
     *l = l_;
     *m = m_;
     *n = n_;
@@ -87,4 +98,4 @@ void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_inline_d(
 }
 #endif
 
-#endif /* OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_RELATIVE_DIRECTION_COSINES_INLINE_H_ */
+#endif /* OSKAR_PRIVATE_CONVERT_LON_LAT_TO_RELATIVE_DIRECTIONS_INLINE_H_ */

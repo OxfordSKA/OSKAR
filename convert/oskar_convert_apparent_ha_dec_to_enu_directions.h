@@ -26,16 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_CONVERT_APPARENT_RA_DEC_TO_ENU_DIRECTION_COSINES_H_
-#define OSKAR_CONVERT_APPARENT_RA_DEC_TO_ENU_DIRECTION_COSINES_H_
+#ifndef OSKAR_CONVERT_APPARENT_HA_DEC_TO_ENU_DIRECTIONS_H_
+#define OSKAR_CONVERT_APPARENT_HA_DEC_TO_ENU_DIRECTIONS_H_
 
 /**
- * @file oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h
+ * @file oskar_convert_apparent_ha_dec_to_enu_directions.h
  */
 
 #include <oskar_global.h>
-#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,51 +44,49 @@ extern "C" {
  * Equatorial to horizontal 3D direction cosines (single precision).
  *
  * @details
- * This function computes the x,y,z direction cosines in the horizontal
- * coordinate system for points specified in an equatorial frame.
+ * This function computes the x,y,z direction cosines of the specified points
+ * in the horizontal coordinate system.
  *
  * Points where z is negative are below the local horizon.
  *
- * @param[in]  n   The number of points to convert.
- * @param[in]  ra  Right Ascensions in radians.
- * @param[in]  dec Declinations in radians.
- * @param[in]  lst The current local sidereal time in radians.
+ * @param[in]  n   The number points to convert.
+ * @param[in]  ha  The input source Hour Angles in radians.
+ * @param[in]  dec The input source Declinations in radians.
  * @param[in]  lat The geodetic latitude of the origin of the horizon frame.
- * @param[out] x   x-direction-cosines in the horizontal system.
- * @param[out] y   y-direction-cosines in the horizontal system.
- * @param[out] z   z-direction-cosines in the horizontal system.
+ * @param[out] x   The x-direction-cosines in the horizontal system.
+ * @param[out] y   The y-direction-cosines in the horizontal system.
+ * @param[out] z   The z-direction-cosines in the horizontal system.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(int n,
-        const float* ra, const float* dec, float lst, float lat, float* x,
-        float* y, float* z);
+void oskar_convert_apparent_ha_dec_to_enu_directions_f(int n,
+        const float* ha, const float* dec, float lat, float* x, float* y,
+        float* z);
 
 /**
  * @brief
  * Equatorial to horizontal 3D direction cosines (double precision).
  *
  * @details
- * This function computes the x,y,z direction cosines in the horizontal
- * coordinate system for points specified in an equatorial frame.
+ * This function computes the x,y,z direction cosines of the specified points
+ * in the horizontal coordinate system.
  *
  * Points where z is negative are below the local horizon.
  *
  * @param[in]  n   The number of points to convert.
- * @param[in]  ra  Right Ascensions in radians.
- * @param[in]  dec Declinations in radians.
- * @param[in]  lst The current local sidereal time in radians.
+ * @param[in]  ha  The input source Hour Angles in radians.
+ * @param[in]  dec The input source Declinations in radians.
  * @param[in]  lat The geodetic latitude of the origin of the horizon frame.
- * @param[out] x   x-direction-cosines in the horizontal system.
- * @param[out] y   y-direction-cosines in the horizontal system.
- * @param[out] z   z-direction-cosines in the horizontal system.
+ * @param[out] x   The x-direction-cosines in the horizontal system.
+ * @param[out] y   The y-direction-cosines in the horizontal system.
+ * @param[out] z   The z-direction-cosines in the horizontal system.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(int n,
-        const double* ra, const double* dec, double lst, double lat, double* x,
-        double* y, double* z);
+void oskar_convert_apparent_ha_dec_to_enu_directions_d(int n,
+        const double* ha, const double* dec, double lat, double* x, double* y,
+        double* z);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CONVERT_APPARENT_RA_DEC_TO_ENU_DIRECTION_COSINES_H_ */
+#endif /* OSKAR_CONVERT_APPARENT_HA_DEC_TO_ENU_DIRECTIONS_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,34 +35,34 @@ extern "C" {
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
-void oskar_convert_station_uvw_to_baseline_uvw_cuda_f(float* d_uu, float* d_vv,
-        float* d_ww, int num_stations, const float* d_u, const float* d_v,
-        const float* d_w)
+void oskar_convert_station_uvw_to_baseline_uvw_cuda_f(int num_stations,
+        const float* d_u, const float* d_v, const float* d_w, float* d_uu,
+        float* d_vv, float* d_ww)
 {
     int num_threads = 32;
     oskar_convert_station_uvw_to_baseline_uvw_cudak_f
         OSKAR_CUDAK_CONF(num_stations, num_threads)
-        (d_uu, d_vv, d_ww, num_stations, d_u, d_v, d_w);
+        (num_stations, d_u, d_v, d_w, d_uu, d_vv, d_ww);
 }
 
 /* Double precision. */
-void oskar_convert_station_uvw_to_baseline_uvw_cuda_d(double* d_uu,
-        double* d_vv, double* d_ww, int num_stations, const double* d_u,
-        const double* d_v, const double* d_w)
+void oskar_convert_station_uvw_to_baseline_uvw_cuda_d(int num_stations,
+        const double* d_u, const double* d_v, const double* d_w, double* d_uu,
+        double* d_vv, double* d_ww)
 {
     int num_threads = 32;
     oskar_convert_station_uvw_to_baseline_uvw_cudak_d
         OSKAR_CUDAK_CONF(num_stations, num_threads)
-        (d_uu, d_vv, d_ww, num_stations, d_u, d_v, d_w);
+        (num_stations, d_u, d_v, d_w, d_uu, d_vv, d_ww);
 }
 
 /* Kernels. ================================================================ */
 
 /* Single precision. */
 __global__
-void oskar_convert_station_uvw_to_baseline_uvw_cudak_f(float* uu, float* vv,
-        float* ww, int num_stations, const float* u, const float* v,
-        const float* w)
+void oskar_convert_station_uvw_to_baseline_uvw_cudak_f(int num_stations,
+        const float* u, const float* v, const float* w, float* uu,
+        float* vv, float* ww)
 {
     /* Get first station index from block ID. */
     int s1 = blockIdx.x;
@@ -82,9 +82,9 @@ void oskar_convert_station_uvw_to_baseline_uvw_cudak_f(float* uu, float* vv,
 
 /* Double precision. */
 __global__
-void oskar_convert_station_uvw_to_baseline_uvw_cudak_d(double* uu, double* vv,
-        double* ww, int num_stations, const double* u, const double* v,
-        const double* w)
+void oskar_convert_station_uvw_to_baseline_uvw_cudak_d(int num_stations,
+        const double* u, const double* v, const double* w, double* uu,
+        double* vv, double* ww)
 {
     /* Get first station index from block ID. */
     int s1 = blockIdx.x;

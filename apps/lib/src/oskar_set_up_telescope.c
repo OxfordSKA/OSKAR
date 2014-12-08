@@ -100,15 +100,6 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
                 settings->obs.pointing_file, status);
     }
 
-    /* Convert all phase centre ICRS to CIRS coordinates at start time. */
-    /*oskar_telescope_convert_phase_centre_coords(telescope,
-            OSKAR_SPHERICAL_TYPE_EQUATORIAL_ICRS,
-            OSKAR_SPHERICAL_TYPE_EQUATORIAL_CIRS,
-            settings->obs.start_mjd_utc,
-            settings->obs.delta_tai_utc_sec,
-            settings->obs.delta_ut1_utc_sec, status);
-     */
-
     /* Analyse telescope model to determine whether stations are
      * identical, whether to apply element errors and/or weights. */
     oskar_telescope_analyse(telescope, status);

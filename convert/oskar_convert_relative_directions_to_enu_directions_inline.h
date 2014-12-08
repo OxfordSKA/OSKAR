@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_RELATIVE_DIRECTION_COSINES_TO_ENU_DIRECTION_COSINES_INLINE_H_
-#define OSKAR_CONVERT_RELATIVE_DIRECTION_COSINES_TO_ENU_DIRECTION_COSINES_INLINE_H_
+#ifndef OSKAR_CONVERT_RELATIVE_DIRECTIONS_TO_ENU_DIRECTIONS_INLINE_H_
+#define OSKAR_CONVERT_RELATIVE_DIRECTIONS_TO_ENU_DIRECTIONS_INLINE_H_
 
 #include <oskar_global.h>
 
@@ -37,7 +37,7 @@ extern "C" {
 
 /* Single precision. */
 OSKAR_INLINE
-void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_inline_f(
+void oskar_convert_relative_directions_to_enu_directions_inline_f(
         float* x, float* y, float* z, const float l, const float m,
         const float n, const float cos_ha0, const float sin_ha0,
         const float cos_dec0, const float sin_dec0, const float cos_lat,
@@ -61,7 +61,7 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_inline_f(
 
 /* Double precision. */
 OSKAR_INLINE
-void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_inline_d(
+void oskar_convert_relative_directions_to_enu_directions_inline_d(
         double* x, double* y, double* z, const double l, const double m,
         const double n, const double cos_ha0, const double sin_ha0,
         const double cos_dec0, const double sin_dec0, const double cos_lat,
@@ -87,4 +87,4 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_inline_d(
 }
 #endif
 
-#endif /* OSKAR_CONVERT_RELATIVE_DIRECTION_COSINES_TO_ENU_DIRECTION_COSINES_INLINE_H_ */
+#endif /* OSKAR_CONVERT_RELATIVE_DIRECTIONS_TO_ENU_DIRECTIONS_INLINE_H_ */

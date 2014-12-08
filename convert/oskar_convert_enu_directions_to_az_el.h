@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,12 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_AZ_EL_H_
-#define OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_AZ_EL_H_
+#ifndef OSKAR_CONVERT_ENU_DIRECTIONS_TO_AZ_EL_H_
+#define OSKAR_CONVERT_ENU_DIRECTIONS_TO_AZ_EL_H_
 
 /**
- * @file oskar_convert_enu_direction_cosines_to_az_el.h
+ * @file oskar_convert_enu_directions_to_az_el.h
  */
 
 #include <oskar_global.h>
@@ -62,7 +61,7 @@ extern "C" {
  * @param[out] el The elevations, in radians.
  */
 OSKAR_EXPORT
-void oskar_convert_enu_direction_cosines_to_az_el_f(int n, const float* x,
+void oskar_convert_enu_directions_to_az_el_f(int n, const float* x,
         const float* y, const float* z, float* az, float* el);
 
 /**
@@ -87,11 +86,11 @@ void oskar_convert_enu_direction_cosines_to_az_el_f(int n, const float* x,
  * @param[out] el The elevations, in radians.
  */
 OSKAR_EXPORT
-void oskar_convert_enu_direction_cosines_to_az_el_d(int n, const double* x,
+void oskar_convert_enu_directions_to_az_el_d(int n, const double* x,
         const double* y, const double* z, double* az, double* el);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_AZ_EL_H_ */
+#endif /* OSKAR_CONVERT_ENU_DIRECTIONS_TO_AZ_EL_H_ */

@@ -78,7 +78,7 @@ enum OSKAR_SKY_TAGS
 #include <oskar_sky_create.h>
 #include <oskar_sky_create_copy.h>
 #include <oskar_sky_evaluate_gaussian_source_parameters.h>
-#include <oskar_sky_evaluate_relative_direction_cosines.h>
+#include <oskar_sky_evaluate_relative_directions.h>
 #include <oskar_sky_filter_by_flux.h>
 #include <oskar_sky_filter_by_radius.h>
 #include <oskar_sky_free.h>

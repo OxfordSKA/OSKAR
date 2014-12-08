@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda.h>
-#include <oskar_convert_enu_direction_cosines_to_relative_direction_cosines_inline.h>
+#include <oskar_convert_relative_directions_to_enu_directions_cuda.h>
+#include <oskar_convert_relative_directions_to_enu_directions_inline.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,9 +35,9 @@ extern "C" {
 
 /* Kernel wrappers. ======================================================== */
 
-void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda_f(
-        float* l, float* m, float* n, int num_points, const float* x,
-        const float* y, const float* z, float ha0, float dec0, float lat)
+void oskar_convert_relative_directions_to_enu_directions_cuda_f(
+        float* x, float* y, float* z, int num_points, const float* l,
+        const float* m, const float* n, float ha0, float dec0, float lat)
 {
     float sin_ha0, cos_ha0, sin_dec0, cos_dec0, sin_lat, cos_lat;
     int num_blocks, num_threads = 256;
@@ -53,14 +53,14 @@ void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda_f(
     cos_dec0 = (float) cos(dec0);
     sin_lat  = (float) sin(lat);
     cos_lat  = (float) cos(lat);
-    oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (l, m, n, num_points, x, y, z,
+    oskar_convert_relative_directions_to_enu_directions_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (x, y, z, num_points, l, m, n,
             cos_ha0, sin_ha0, cos_dec0, sin_dec0, cos_lat, sin_lat);
 }
 
-void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda_d(
-        double* l, double* m, double* n, int num_points, const double* x,
-        const double* y, const double* z, double ha0, double dec0, double lat)
+void oskar_convert_relative_directions_to_enu_directions_cuda_d(
+        double* x, double* y, double* z, int num_points, const double* l,
+        const double* m, const double* n, double ha0, double dec0, double lat)
 {
     double sin_ha0, cos_ha0, sin_dec0, cos_dec0, sin_lat, cos_lat;
     int num_blocks, num_threads = 256;
@@ -76,8 +76,8 @@ void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda_d(
     cos_dec0 = cos(dec0);
     sin_lat  = sin(lat);
     cos_lat  = cos(lat);
-    oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (l, m, n, num_points, x, y, z,
+    oskar_convert_relative_directions_to_enu_directions_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (x, y, z, num_points, l, m, n,
             cos_ha0, sin_ha0, cos_dec0, sin_dec0, cos_lat, sin_lat);
 }
 
@@ -86,35 +86,35 @@ void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cuda_d(
 
 /* Single precision. */
 __global__
-void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cudak_f(
-        float* __restrict__ l, float* __restrict__ m, float* __restrict__ n,
-        const int num_points, const float* __restrict__ x,
-        const float* __restrict__ y, const float* __restrict__ z,
+void oskar_convert_relative_directions_to_enu_directions_cudak_f(
+        float* __restrict__ x, float* __restrict__ y, float* __restrict__ z,
+        const int num_points, const float* __restrict__ l,
+        const float* __restrict__ m, const float* __restrict__ n,
         const float cos_ha0, const float sin_ha0, const float cos_dec0,
         const float sin_dec0, const float cos_lat, const float sin_lat)
 {
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_points) return;
 
-    oskar_convert_enu_direction_cosines_to_relative_direction_cosines_inline_f(
-            &l[i], &m[i], &n[i], x[i], y[i], z[i],
+    oskar_convert_relative_directions_to_enu_directions_inline_f(
+            &x[i], &y[i], &z[i], l[i], m[i], n[i],
             cos_ha0, sin_ha0, cos_dec0, sin_dec0, cos_lat, sin_lat);
 }
 
 /* Double precision. */
 __global__
-void oskar_convert_enu_direction_cosines_to_relative_direction_cosines_cudak_d(
-        double* __restrict__ l, double* __restrict__ m, double* __restrict__ n,
-        const int num_points, const double* __restrict__ x,
-        const double* __restrict__ y, const double* __restrict__ z,
+void oskar_convert_relative_directions_to_enu_directions_cudak_d(
+        double* __restrict__ x, double* __restrict__ y, double* __restrict__ z,
+        const int num_points, const double* __restrict__ l,
+        const double* __restrict__ m, const double* __restrict__ n,
         const double cos_ha0, const double sin_ha0, const double cos_dec0,
         const double sin_dec0, const double cos_lat, const double sin_lat)
 {
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_points) return;
 
-    oskar_convert_enu_direction_cosines_to_relative_direction_cosines_inline_d(
-            &l[i], &m[i], &n[i], x[i], y[i], z[i],
+    oskar_convert_relative_directions_to_enu_directions_inline_d(
+            &x[i], &y[i], &z[i], l[i], m[i], n[i],
             cos_ha0, sin_ha0, cos_dec0, sin_dec0, cos_lat, sin_lat);
 }
 

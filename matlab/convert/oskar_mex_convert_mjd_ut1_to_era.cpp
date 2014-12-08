@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,57 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_relative_direction_cosines_to_apparent_ra_dec.h>
-#include <math.h>
+#include <mex.h>
+#include "matlab/common/oskar_matlab_common.h"
+#include <oskar_convert_mjd_ut1_to_era.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Single precision. */
-void oskar_convert_relative_direction_cosines_to_apparent_ra_dec_f(int np,
-        float ra0, float dec0, const float* l, const float* m, float* ra,
-        float* dec)
+// MATLAB Entry function.
+void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    int i;
-    float sinDec0, cosDec0;
-    sinDec0 = sinf(dec0);
-    cosDec0 = cosf(dec0);
-
-    /* Loop over positions and evaluate the longitude and latitude values. */
-    for (i = 0; i < np; ++i)
+    // Parse Inputs.
+    if (num_in != 1 || num_out > 1)
     {
-        float l_, m_, n_;
-        l_ = l[i];
-        m_ = m[i];
-        n_ = sqrtf(1.0f - l_*l_ - m_*m_);
-        dec[i] = asinf(n_ * sinDec0 + m_ * cosDec0);
-        ra[i] = ra0 + atan2f(l_, cosDec0 * n_ - m_ * sinDec0);
+        oskar_matlab_usage("[ERA in radians]", "sky",
+                "mjd_ut1_to_era", "<MJD UT1>",
+                "Converts a MJD(UT1) to Earth Rotation Angle (ERA)");
     }
-}
 
-/* Double precision. */
-void oskar_convert_relative_direction_cosines_to_apparent_ra_dec_d(int np,
-        double ra0, double dec0, const double* l, const double* m, double* ra,
-        double* dec)
-{
-    int i;
-    double sinLat0, cosLat0;
-    sinLat0 = sin(dec0);
-    cosLat0 = cos(dec0);
+    // Get MATLAB inputs.
+    double mjd_ut1  = mxGetScalar(in[0]);
 
-    /* Loop over l, m positions and evaluate the longitude and latitude values. */
-    for (i = 0; i < np; ++i)
-    {
-        double l_, m_, n_;
-        l_ = l[i];
-        m_ = m[i];
-        n_ = sqrt(1.0 - l_*l_ - m_*m_);
-        dec[i] = asin(n_ * sinLat0 + m_ * cosLat0);
-        ra[i] = ra0 + atan2(l_, cosLat0 * n_ - m_ * sinLat0);
-    }
-}
+    out[0] = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
+    double* era_rad = (double*)mxGetPr(out[0]);
 
-#ifdef __cplusplus
+    *era_rad = oskar_convert_mjd_ut1_to_era(mjd_ut1);
 }
-#endif

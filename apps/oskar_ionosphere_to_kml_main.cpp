@@ -38,7 +38,7 @@
 #include <oskar_convert_offset_ecef_to_ecef.h>
 
 #include <oskar_convert_mjd_to_gast_fast.h>
-#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
+#include <oskar_convert_apparent_ra_dec_to_enu_directions.h>
 #include <oskar_sky.h>
 
 #include <oskar_get_error_string.h>
@@ -233,7 +233,7 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings& settings
 
             if (type == OSKAR_DOUBLE)
             {
-                oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(
+                oskar_convert_apparent_ra_dec_to_enu_directions_d(
                         oskar_sky_num_sources(chunk),
                         oskar_mem_double_const(
                                 oskar_sky_ra_rad_const(chunk), &status),
@@ -245,7 +245,7 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings& settings
             }
             else
             {
-                oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(
+                oskar_convert_apparent_ra_dec_to_enu_directions_f(
                         oskar_sky_num_sources(chunk),
                         oskar_mem_float_const(
                                 oskar_sky_ra_rad_const(chunk), &status),
@@ -412,7 +412,7 @@ void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
         double beam_dec = oskar_station_beam_lat_rad(station);
 
         // Obtain horizontal coordinates of beam p.p.
-        oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(1, &beam_ra,
+        oskar_convert_apparent_ra_dec_to_enu_directions_d(1, &beam_ra,
                 &beam_dec, last, st_lat, oskar_mem_double(hor_x, status),
                 oskar_mem_double(hor_y, status),
                 oskar_mem_double(hor_z, status));
@@ -430,7 +430,7 @@ void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
         float beam_dec = (float)oskar_station_beam_lat_rad(station);
 
         // Obtain horizontal coordinates of beam p.p.
-        oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(1, &beam_ra,
+        oskar_convert_apparent_ra_dec_to_enu_directions_f(1, &beam_ra,
                 &beam_dec, last, st_lat, oskar_mem_float(hor_x, status),
                 oskar_mem_float(hor_y, status),
                 oskar_mem_float(hor_z, status));

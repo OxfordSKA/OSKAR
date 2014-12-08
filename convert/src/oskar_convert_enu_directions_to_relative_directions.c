@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines.h>
-#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda.h>
-#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines_inline.h>
+#include <oskar_convert_enu_directions_to_relative_directions.h>
+#include <oskar_convert_enu_directions_to_relative_directions_cuda.h>
+#include <oskar_convert_enu_directions_to_relative_directions_inline.h>
 #include <math.h>
 
 #ifdef __cplusplus
@@ -36,9 +36,9 @@ extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_f(
-        float* x, float* y, float* z, int num_points, const float* l,
-        const float* m, const float* n, float ha0, float dec0, float lat)
+void oskar_convert_enu_directions_to_relative_directions_f(
+        float* l, float* m, float* n, int num_points, const float* x,
+        const float* y, const float* z, float ha0, float dec0, float lat)
 {
     int i;
     float sin_ha0, cos_ha0, sin_dec0, cos_dec0, sin_lat, cos_lat;
@@ -51,16 +51,16 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_f(
 
     for (i = 0; i < num_points; ++i)
     {
-        oskar_convert_relative_direction_cosines_to_enu_direction_cosines_inline_f(
-                &x[i], &y[i], &z[i], l[i], m[i], n[i],
+        oskar_convert_enu_directions_to_relative_directions_inline_f(
+                &l[i], &m[i], &n[i], x[i], y[i], z[i],
                 cos_ha0, sin_ha0, cos_dec0, sin_dec0, cos_lat, sin_lat);
     }
 }
 
 /* Double precision. */
-void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_d(
-        double* x, double* y, double* z, int num_points, const double* l,
-        const double* m, const double* n, double ha0, double dec0, double lat)
+void oskar_convert_enu_directions_to_relative_directions_d(
+        double* l, double* m, double* n, int num_points, const double* x,
+        const double* y, const double* z, double ha0, double dec0, double lat)
 {
     int i;
     double sin_ha0, cos_ha0, sin_dec0, cos_dec0, sin_lat, cos_lat;
@@ -73,24 +73,24 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines_d(
 
     for (i = 0; i < num_points; ++i)
     {
-        oskar_convert_relative_direction_cosines_to_enu_direction_cosines_inline_d(
-                &x[i], &y[i], &z[i], l[i], m[i], n[i],
+        oskar_convert_enu_directions_to_relative_directions_inline_d(
+                &l[i], &m[i], &n[i], x[i], y[i], z[i],
                 cos_ha0, sin_ha0, cos_dec0, sin_dec0, cos_lat, sin_lat);
     }
 }
 
 /* Wrapper. */
-void oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
-        oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int num_points,
-        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
+void oskar_convert_enu_directions_to_relative_directions(
+        oskar_Mem* l, oskar_Mem* m, oskar_Mem* n, int num_points,
+        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
         double ha0, double dec0, double lat, int* status)
 {
     int type, location;
 
     /* Check all inputs. */
-    if (!x || !y || !z || !l || !m || !n || !status)
+    if (!l || !m || !n || !x || !y || !z || !status)
     {
-        oskar_set_invalid_argument(status);
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
     }
 
@@ -144,25 +144,25 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
     /* Switch on type and location. */
     if (type == OSKAR_DOUBLE)
     {
-        double *x_, *y_, *z_;
-        const double *l_, *m_, *n_;
-        x_ = oskar_mem_double(x, status);
-        y_ = oskar_mem_double(y, status);
-        z_ = oskar_mem_double(z, status);
-        l_ = oskar_mem_double_const(l, status);
-        m_ = oskar_mem_double_const(m, status);
-        n_ = oskar_mem_double_const(n, status);
+        double *l_, *m_, *n_;
+        const double *x_, *y_, *z_;
+        l_ = oskar_mem_double(l, status);
+        m_ = oskar_mem_double(m, status);
+        n_ = oskar_mem_double(n, status);
+        x_ = oskar_mem_double_const(x, status);
+        y_ = oskar_mem_double_const(y, status);
+        z_ = oskar_mem_double_const(z, status);
 
         if (location == OSKAR_CPU)
         {
-            oskar_convert_relative_direction_cosines_to_enu_direction_cosines_d(
-                    x_, y_, z_, num_points, l_, m_, n_, ha0, dec0, lat);
+            oskar_convert_enu_directions_to_relative_directions_d(
+                    l_, m_, n_, num_points, x_, y_, z_, ha0, dec0, lat);
         }
         else if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_d(
-                    x_, y_, z_, num_points, l_, m_, n_, ha0, dec0, lat);
+            oskar_convert_enu_directions_to_relative_directions_cuda_d(
+                    l_, m_, n_, num_points, x_, y_, z_, ha0, dec0, lat);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -170,25 +170,25 @@ void oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
     }
     else
     {
-        float *x_, *y_, *z_;
-        const float *l_, *m_, *n_;
-        x_ = oskar_mem_float(x, status);
-        y_ = oskar_mem_float(y, status);
-        z_ = oskar_mem_float(z, status);
-        l_ = oskar_mem_float_const(l, status);
-        m_ = oskar_mem_float_const(m, status);
-        n_ = oskar_mem_float_const(n, status);
+        float *l_, *m_, *n_;
+        const float *x_, *y_, *z_;
+        l_ = oskar_mem_float(l, status);
+        m_ = oskar_mem_float(m, status);
+        n_ = oskar_mem_float(n, status);
+        x_ = oskar_mem_float_const(x, status);
+        y_ = oskar_mem_float_const(y, status);
+        z_ = oskar_mem_float_const(z, status);
 
         if (location == OSKAR_CPU)
         {
-            oskar_convert_relative_direction_cosines_to_enu_direction_cosines_f(
-                    x_, y_, z_, num_points, l_, m_, n_, ha0, dec0, lat);
+            oskar_convert_enu_directions_to_relative_directions_f(
+                    l_, m_, n_, num_points, x_, y_, z_, ha0, dec0, lat);
         }
         else if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_convert_relative_direction_cosines_to_enu_direction_cosines_cuda_f(
-                    x_, y_, z_, num_points, l_, m_, n_, ha0, dec0, lat);
+            oskar_convert_enu_directions_to_relative_directions_cuda_f(
+                    l_, m_, n_, num_points, x_, y_, z_, ha0, dec0, lat);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

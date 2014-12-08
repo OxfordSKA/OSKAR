@@ -30,7 +30,7 @@
 
 #include <oskar_telescope.h>
 #include <oskar_sky.h>
-#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
+#include <oskar_convert_lon_lat_to_relative_directions.h>
 #include <oskar_get_error_string.h>
 #include <oskar_timer.h>
 
@@ -134,7 +134,7 @@ TEST(SkyModel, compute_relative_lmn)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Compute direction cosines.
-    oskar_sky_evaluate_relative_direction_cosines(sky1, ra0, dec0, &status);
+    oskar_sky_evaluate_relative_directions(sky1, ra0, dec0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Copy data back to CPU.
@@ -528,7 +528,7 @@ TEST(SkyModel, horizon_clip)
     }
 
     // Evaluate relative direction cosines.
-    oskar_sky_evaluate_relative_direction_cosines(sky_in_cpu, 0.0, M_PI/2, &status);
+    oskar_sky_evaluate_relative_directions(sky_in_cpu, 0.0, M_PI/2, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     // Create a telescope model near the north pole.
@@ -1043,7 +1043,7 @@ TEST(SkyModel, test_gaussian_source)
 
     double l[4], m[4], n[4];
 
-    oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(4, lon, lat,
+    oskar_convert_lon_lat_to_relative_directions_d(4, lon, lat,
             ra0, dec0, l, m, n);
 
     printf("\n");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,18 +33,18 @@
 extern "C" {
 #endif
 
-void oskar_convert_offset_ecef_to_ecef(int n, const double* offset_x,
-        const double* offset_y, const double* offset_z, double lon, double lat,
-        double alt, double* x, double* y, double* z)
+void oskar_convert_offset_ecef_to_ecef(int num_points, const double* offset_x,
+        const double* offset_y, const double* offset_z, double lon_rad,
+        double lat_rad, double alt_metres, double* x, double* y, double* z)
 {
     /* Compute ECEF coordinates of reference point. */
     double x_r = 0.0, y_r = 0.0, z_r = 0.0;
     int i;
-    oskar_convert_geodetic_spherical_to_ecef(1, &lon, &lat, &alt, &x_r, &y_r,
-            &z_r);
+    oskar_convert_geodetic_spherical_to_ecef(1, &lon_rad, &lat_rad,
+            &alt_metres, &x_r, &y_r, &z_r);
 
     /* Add on the coordinates of the reference point. */
-    for (i = 0; i < n; ++i)
+    for (i = 0; i < num_points; ++i)
     {
         x[i] = offset_x[i] + x_r;
         y[i] = offset_y[i] + y_r;

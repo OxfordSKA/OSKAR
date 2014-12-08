@@ -190,7 +190,7 @@ oskar_Sky** oskar_set_up_sky(const oskar_Settings* settings, oskar_Log* log,
     for (i = 0; i < *num_chunks; ++i)
     {
         /* Compute source direction cosines relative to phase centre. */
-        oskar_sky_evaluate_relative_direction_cosines(sky_chunks[i], ra0, dec0, status);
+        oskar_sky_evaluate_relative_directions(sky_chunks[i], ra0, dec0, status);
 
         /* Gather statistics on chunk set. */
         total_sources += oskar_sky_num_sources(sky_chunks[i]);

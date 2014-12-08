@@ -5,12 +5,20 @@
 
 include_directories(${CUDA_INCLUDE_DIRS})
 
+#include_directories(${CASACORE_INCLUDE_DIR})
+#include_directories(${CASACORE_INCLUDE_DIR}/casacore)
+
 set(name convert_test)
 set(${name}_SRC
     main.cpp
     Test_coordinate_conversions.cpp
+    #Test_sofa.cpp
 )
-cuda_add_executable(${name} ${${name}_SRC})
-target_link_libraries(${name} oskar gtest ${CUDA_LIBRARIES})
+add_executable(${name} ${${name}_SRC})
+target_link_libraries(${name} 
+    #sofa_c 
+    oskar gtest ${CUDA_LIBRARIES} 
+    #${CASACORE_LIBRARIES}
+    )
 add_test(${name} ${name})
 

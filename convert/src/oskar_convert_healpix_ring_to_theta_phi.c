@@ -33,20 +33,19 @@
 extern "C" {
 #endif
 
-void oskar_convert_healpix_ring_to_theta_phi(oskar_Mem* theta, oskar_Mem* phi,
-        int nside, int* status)
+void oskar_convert_healpix_ring_to_theta_phi(int nside,
+        oskar_Mem* theta, oskar_Mem* phi, int* status)
 {
     int type, location;
     unsigned int num_pixels;
 
-    if (!status || *status != OSKAR_SUCCESS)
-        return;
-
-    if (!theta || !phi)
+    if (!theta || !phi || !status)
     {
-        *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
+
+    if (*status) return;
 
     type = oskar_mem_type(theta);
     if (oskar_mem_type(phi) != type)

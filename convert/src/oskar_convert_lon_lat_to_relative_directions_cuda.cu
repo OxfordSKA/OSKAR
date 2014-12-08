@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda.h>
-#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines_inline.h>
+#include <oskar_convert_lon_lat_to_relative_directions_cuda.h>
+#include <private_convert_lon_lat_to_relative_directions_inline.h>
 #include <math.h>
 
 #ifdef __cplusplus
@@ -37,39 +37,39 @@ extern "C" {
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_f(
-        int num_points, const float* d_ra, const float* d_dec, float ra0,
-        float dec0, float* d_l, float* d_m, float* d_n)
+void oskar_convert_lon_lat_to_relative_directions_cuda_f(int num_points,
+        const float* d_lon_rad, const float* d_dec_rad, float lon0_rad,
+        float lat0_rad, float* d_l, float* d_m, float* d_n)
 {
-    float cos_dec0, sin_dec0;
+    float cos_lat0, sin_lat0;
     int num_blocks, num_threads = 256;
 
-    /* Compute direction-cosines of RA, Dec relative to reference point. */
+    /* Compute direction cosines relative to reference point. */
     num_blocks = (num_points + num_threads - 1) / num_threads;
-    cos_dec0 = (float) cos(dec0);
-    sin_dec0 = (float) sin(dec0);
-
-    oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_f
+    cos_lat0 = (float) cos(lat0_rad);
+    sin_lat0 = (float) sin(lat0_rad);
+    oskar_convert_lon_lat_to_relative_directions_cudak_f
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (num_points, d_ra, d_dec, ra0, cos_dec0, sin_dec0, d_l, d_m, d_n);
+        (num_points, d_lon_rad, d_dec_rad, lon0_rad, cos_lat0, sin_lat0,
+                d_l, d_m, d_n);
 }
 
 /* Double precision. */
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_d(
-        int num_points, const double* d_ra, const double* d_dec, double ra0,
-        double dec0, double* d_l, double* d_m, double* d_n)
+void oskar_convert_lon_lat_to_relative_directions_cuda_d(int num_points,
+        const double* d_lon_rad, const double* d_lat_rad, double lon0_rad,
+        double lat0_rad, double* d_l, double* d_m, double* d_n)
 {
     double cos_dec0, sin_dec0;
     int num_blocks, num_threads = 256;
 
-    /* Compute direction-cosines of RA, Dec relative to reference point. */
+    /* Compute direction cosines relative to reference point. */
     num_blocks = (num_points + num_threads - 1) / num_threads;
-    cos_dec0 = cos(dec0);
-    sin_dec0 = sin(dec0);
-
-    oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_d
+    cos_dec0 = cos(lat0_rad);
+    sin_dec0 = sin(lat0_rad);
+    oskar_convert_lon_lat_to_relative_directions_cudak_d
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (num_points, d_ra, d_dec, ra0, cos_dec0, sin_dec0, d_l, d_m, d_n);
+        (num_points, d_lon_rad, d_lat_rad, lon0_rad, cos_dec0, sin_dec0,
+                d_l, d_m, d_n);
 }
 
 
@@ -77,34 +77,34 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_d(
 
 /* Single precision. */
 __global__
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_f(
-        const int num_points, const float* __restrict__ ra,
-        const float* __restrict__ dec, const float ra0, const float cos_dec0,
-        const float sin_dec0, float* __restrict__ l, float* __restrict__ m,
-        float* __restrict__ n)
+void oskar_convert_lon_lat_to_relative_directions_cudak_f(const int num_points,
+        const float* restrict lon_rad, const float* restrict lat_rad,
+        const float lon0_rad, const float cos_lat0, const float sin_lat0,
+        float* restrict l, float* restrict m, float* restrict n)
 {
     /* Get the position ID that this thread is working on. */
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_points) return;
 
-    oskar_convert_apparent_ra_dec_to_relative_direction_cosines_inline_f(
-            ra[i], dec[i], ra0, cos_dec0, sin_dec0, &l[i], &m[i], &n[i]);
+    oskar_convert_lon_lat_to_relative_directions_inline_f(
+            lon_rad[i], lat_rad[i], lon0_rad, cos_lat0, sin_lat0,
+            &l[i], &m[i], &n[i]);
 }
 
 /* Double precision. */
 __global__
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_d(
-        const int num_points, const double* __restrict__ ra,
-        const double* __restrict__ dec, const double ra0, const double cos_dec0,
-        const double sin_dec0, double* __restrict__ l, double* __restrict__ m,
-        double* __restrict__ n)
+void oskar_convert_lon_lat_to_relative_directions_cudak_d(const int num_points,
+        const double* restrict lon_rad, const double* restrict lat_rad,
+        const double lon0_rad, const double cos_lat0, const double sin_lat0,
+        double* restrict l, double* restrict m, double* restrict n)
 {
     /* Get the position ID that this thread is working on. */
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_points) return;
 
-    oskar_convert_apparent_ra_dec_to_relative_direction_cosines_inline_d(
-            ra[i], dec[i], ra0, cos_dec0, sin_dec0, &l[i], &m[i], &n[i]);
+    oskar_convert_lon_lat_to_relative_directions_inline_d(
+            lon_rad[i], lat_rad[i], lon0_rad, cos_lat0, sin_lat0,
+            &l[i], &m[i], &n[i]);
 }
 
 #ifdef __cplusplus

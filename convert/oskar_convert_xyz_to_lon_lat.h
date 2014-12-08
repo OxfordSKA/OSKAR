@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,39 +41,39 @@ extern "C" {
 
 /**
  * @brief
- * Transform Cartesian coordinates to spherical (single precision).
+ * Transform normalised Cartesian coordinates to spherical (single precision).
  *
  * @details
- * This function implicitly assumes the radius of the sphere is 1.
+ * Transform normalised Cartesian coordinates to spherical.
  *
  * @param[in]  num_points  Number of points.
- * @param[out] lon         Spherical longitude coordinate (phi), in radians.
- * @param[out] lat         Spherical latitude coordinate (theta), in radians.
  * @param[in]  x           Cartesian x coordinate of points.
  * @param[in]  y           Cartesian y coordinate of points.
  * @param[in]  z           Cartesian z coordinate of points.
+ * @param[out] lon_rad     Output longitude coordinates, in radians.
+ * @param[out] lat_rad     Output latitude coordinates, in radians.
  */
 OSKAR_EXPORT
-void oskar_convert_xyz_to_lon_lat_f(int num_points, float* lon, float* lat,
-        const float* x, const float* y, const float* z);
+void oskar_convert_xyz_to_lon_lat_f(int num_points, const float* x,
+        const float* y, const float* z, float* lon_rad, float* lat_rad);
 
 /**
  * @brief
- * Transform Cartesian coordinates to spherical (double precision).
+ * Transform normalised Cartesian coordinates to spherical (double precision).
  *
  * @details
- * This function implicitly assumes the radius of the sphere is 1.
+ * Transform normalised Cartesian coordinates to spherical.
  *
  * @param[in]  num_points  Number of points.
- * @param[out] lon         Spherical longitude coordinate (phi), in radians.
- * @param[out] lat         Spherical latitude coordinate (theta), in radians.
  * @param[in]  x           Cartesian x coordinate of points.
  * @param[in]  y           Cartesian y coordinate of points.
  * @param[in]  z           Cartesian z coordinate of points.
+ * @param[out] lon_rad     Output longitude coordinates, in radians.
+ * @param[out] lat_rad     Output latitude coordinates, in radians.
  */
 OSKAR_EXPORT
-void oskar_convert_xyz_to_lon_lat_d(int num_points, double* lon, double* lat,
-        const double* x, const double* y, const double* z);
+void oskar_convert_xyz_to_lon_lat_d(int num_points, const double* x,
+        const double* y, const double* z, double* lon_rad, double* lat_rad);
 
 #ifdef __cplusplus
 }

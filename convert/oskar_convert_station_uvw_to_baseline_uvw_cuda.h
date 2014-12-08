@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,18 +51,18 @@ extern "C" {
  * The output arrays must be pre-sized to length N * (N - 1) / 2, where N is
  * the number of stations.
  *
- * @param[out] d_uu           The baseline u-positions.
- * @param[out] d_vv           The baseline v-positions.
- * @param[out] d_ww           The baseline w-positions.
  * @param[in]  num_stations   The number of stations.
  * @param[in]  d_u            The station u-positions.
  * @param[in]  d_v            The station v-positions.
  * @param[in]  d_w            The station w-positions.
+ * @param[out] d_uu           The baseline u-positions.
+ * @param[out] d_vv           The baseline v-positions.
+ * @param[out] d_ww           The baseline w-positions.
  */
 OSKAR_EXPORT
-void oskar_convert_station_uvw_to_baseline_uvw_cuda_f(float* d_uu, float* d_vv,
-        float* d_ww, int num_stations, const float* d_u, const float* d_v,
-        const float* d_w);
+void oskar_convert_station_uvw_to_baseline_uvw_cuda_f(int num_stations,
+        const float* d_u, const float* d_v, const float* d_w, float* d_uu,
+        float* d_vv, float* d_ww);
 
 /**
  * @brief
@@ -76,70 +76,32 @@ void oskar_convert_station_uvw_to_baseline_uvw_cuda_f(float* d_uu, float* d_vv,
  * The output arrays must be pre-sized to length N * (N - 1) / 2, where N is
  * the number of stations.
  *
- * @param[out] d_uu           The baseline u-positions.
- * @param[out] d_vv           The baseline v-positions.
- * @param[out] d_ww           The baseline w-positions.
  * @param[in]  num_stations   The number of stations.
  * @param[in]  d_u            The station u-positions.
  * @param[in]  d_v            The station v-positions.
  * @param[in]  d_w            The station w-positions.
+ * @param[out] d_uu           The baseline u-positions.
+ * @param[out] d_vv           The baseline v-positions.
+ * @param[out] d_ww           The baseline w-positions.
  */
 OSKAR_EXPORT
-void oskar_convert_station_uvw_to_baseline_uvw_cuda_d(double* d_uu,
-        double* d_vv, double* d_ww, int num_stations, const double* d_u,
-        const double* d_v, const double* d_w);
+void oskar_convert_station_uvw_to_baseline_uvw_cuda_d(int num_stations,
+        const double* d_u, const double* d_v, const double* d_w, double* d_uu,
+        double* d_vv, double* d_ww);
 
 #ifdef __CUDACC__
 
-/**
- * @brief
- * CUDA kernel to compute baseline coordinates for all station pairs
- * (single precision).
- *
- * @details
- * Given the (u,v,w) coordinates for each station, this CUDA kernel computes
- * the baseline coordinates for all station pairs.
- *
- * The output arrays must be pre-sized to length N * (N - 1) / 2, where N is
- * the number of stations.
- *
- * @param[out] uu           The baseline u-positions.
- * @param[out] vv           The baseline v-positions.
- * @param[out] ww           The baseline w-positions.
- * @param[in]  num_stations The number of stations.
- * @param[in]  u            The station u-positions.
- * @param[in]  v            The station v-positions.
- * @param[in]  w            The station w-positions.
- */
-__global__
-void oskar_convert_station_uvw_to_baseline_uvw_cudak_f(float* uu, float* vv,
-        float* ww, int num_stations, const float* u, const float* v,
-        const float* w);
+/* Kernels. */
 
-/**
- * @brief
- * CUDA kernel to compute baseline coordinates for all station pairs
- * (double precision).
- *
- * @details
- * Given the (u,v,w) coordinates for each station, this CUDA kernel computes
- * the baseline coordinates for all station pairs.
- *
- * The output arrays must be pre-sized to length N * (N - 1) / 2, where N is
- * the number of stations.
- *
- * @param[out] uu           The baseline u-positions.
- * @param[out] vv           The baseline v-positions.
- * @param[out] ww           The baseline w-positions.
- * @param[in]  num_stations The number of stations.
- * @param[in]  u            The station u-positions.
- * @param[in]  v            The station v-positions.
- * @param[in]  w            The station w-positions.
- */
 __global__
-void oskar_convert_station_uvw_to_baseline_uvw_cudak_d(double* uu, double* vv,
-        double* ww, int num_stations, const double* u, const double* v,
-        const double* w);
+void oskar_convert_station_uvw_to_baseline_uvw_cudak_f(int num_stations,
+        const float* u, const float* v, const float* w, float* uu,
+        float* vv, float* ww);
+
+__global__
+void oskar_convert_station_uvw_to_baseline_uvw_cudak_d(int num_stations,
+        const double* u, const double* v, const double* w, double* uu,
+        double* vv, double* ww);
 
 #endif /* __CUDACC__ */
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 extern "C" {
 #endif
 
-void oskar_convert_xyz_to_lon_lat_f(int num_points, float* lon, float* lat,
-        const float* x, const float* y, const float* z)
+void oskar_convert_xyz_to_lon_lat_f(int num_points, const float* x,
+        const float* y, const float* z, float* lon_rad, float* lat_rad)
 {
     int i;
     float x_, y_, z_;
@@ -43,14 +43,13 @@ void oskar_convert_xyz_to_lon_lat_f(int num_points, float* lon, float* lat,
         x_ = x[i];
         y_ = y[i];
         z_ = z[i];
-
-        lon[i] = atan2f(y_, x_);
-        lat[i] = atan2f(z_, sqrtf(x_*x_ + y_*y_));
+        lon_rad[i] = atan2f(y_, x_);
+        lat_rad[i] = atan2f(z_, sqrtf(x_*x_ + y_*y_));
     }
 }
 
-void oskar_convert_xyz_to_lon_lat_d(int num_points, double* lon, double* lat,
-        const double* x, const double* y, const double* z)
+void oskar_convert_xyz_to_lon_lat_d(int num_points, const double* x,
+        const double* y, const double* z, double* lon_rad, double* lat_rad)
 {
     int i;
     double x_, y_, z_;
@@ -59,9 +58,8 @@ void oskar_convert_xyz_to_lon_lat_d(int num_points, double* lon, double* lat,
         x_ = x[i];
         y_ = y[i];
         z_ = z[i];
-
-        lon[i] = atan2(y_, x_);
-        lat[i] = atan2(z_, sqrt(x_*x_ + y_*y_));
+        lon_rad[i] = atan2(y_, x_);
+        lat_rad[i] = atan2(z_, sqrt(x_*x_ + y_*y_));
     }
 }
 

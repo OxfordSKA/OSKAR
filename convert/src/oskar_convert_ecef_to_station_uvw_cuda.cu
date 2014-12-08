@@ -27,16 +27,16 @@
  */
 
 #include <oskar_convert_ecef_to_station_uvw_cuda.h>
-#include <oskar_convert_ecef_to_station_uvw_inline.h>
+#include <private_convert_ecef_to_station_uvw_inline.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_convert_ecef_to_station_uvw_cuda_f(float* d_u, float* d_v,
-        float* d_w, int num_stations, const float* d_x, const float* d_y,
-        const float* d_z, float ha0_rad, float dec0_rad)
+void oskar_convert_ecef_to_station_uvw_cuda_f(int num_stations,
+        const float* d_x, const float* d_y, const float* d_z,
+        float ha0_rad, float dec0_rad, float* d_u, float* d_v, float* d_w)
 {
     float sin_ha0, cos_ha0, sin_dec0, cos_dec0;
 
@@ -52,14 +52,14 @@ void oskar_convert_ecef_to_station_uvw_cuda_f(float* d_u, float* d_v,
 
     oskar_convert_ecef_to_station_uvw_cudak_f
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (d_u, d_v, d_w, num_stations, d_x, d_y, d_z, sin_ha0,
-                cos_ha0, sin_dec0, cos_dec0);
+        (num_stations, d_x, d_y, d_z, sin_ha0, cos_ha0, sin_dec0, cos_dec0,
+                d_u, d_v, d_w);
 }
 
 /* Double precision. */
-void oskar_convert_ecef_to_station_uvw_cuda_d(double* d_u, double* d_v,
-        double* d_w, int num_stations, const double* d_x, const double* d_y,
-        const double* d_z, double ha0_rad, double dec0_rad)
+void oskar_convert_ecef_to_station_uvw_cuda_d(int num_stations,
+        const double* d_x, const double* d_y, const double* d_z,
+        double ha0_rad, double dec0_rad, double* d_u, double* d_v, double* d_w)
 {
     double sin_ha0, cos_ha0, sin_dec0, cos_dec0;
 
@@ -75,8 +75,8 @@ void oskar_convert_ecef_to_station_uvw_cuda_d(double* d_u, double* d_v,
 
     oskar_convert_ecef_to_station_uvw_cudak_d
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (d_u, d_v, d_w, num_stations, d_x, d_y, d_z, sin_ha0,
-                cos_ha0, sin_dec0, cos_dec0);
+        (num_stations, d_x, d_y, d_z, sin_ha0, cos_ha0, sin_dec0, cos_dec0,
+                d_u, d_v, d_w);
 }
 
 
@@ -84,34 +84,34 @@ void oskar_convert_ecef_to_station_uvw_cuda_d(double* d_u, double* d_v,
 
 /* Single precision. */
 __global__
-void oskar_convert_ecef_to_station_uvw_cudak_f(float* __restrict__ u,
-        float* __restrict__ v, float* __restrict__ w, const int num_stations,
-        const float* __restrict__ x, const float* __restrict__ y,
-        const float* __restrict__ z, const float sin_ha0,
-        const float cos_ha0, const float sin_dec0, const float cos_dec0)
+void oskar_convert_ecef_to_station_uvw_cudak_f(const int num_stations,
+        const float* restrict x, const float* restrict y,
+        const float* restrict z, const float sin_ha0,
+        const float cos_ha0, const float sin_dec0, const float cos_dec0,
+        float* restrict u, float* restrict v, float* restrict w)
 {
     /* Get station ID. */
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_stations) return;
 
-    oskar_convert_ecef_to_station_uvw_inline_f(&u[i], &v[i], &w[i],
-            x[i], y[i], z[i], sin_ha0, cos_ha0, sin_dec0, cos_dec0);
+    oskar_convert_ecef_to_station_uvw_inline_f(x[i], y[i], z[i],
+            sin_ha0, cos_ha0, sin_dec0, cos_dec0, &u[i], &v[i], &w[i]);
 }
 
 /* Double precision. */
 __global__
-void oskar_convert_ecef_to_station_uvw_cudak_d(double* __restrict__ u,
-        double* __restrict__ v, double* __restrict__ w, const int num_stations,
-        const double* __restrict__ x, const double* __restrict__ y,
-        const double* __restrict__ z, const double sin_ha0,
-        const double cos_ha0, const double sin_dec0, const double cos_dec0)
+void oskar_convert_ecef_to_station_uvw_cudak_d(const int num_stations,
+        const double* restrict x, const double* restrict y,
+        const double* restrict z, const double sin_ha0,
+        const double cos_ha0, const double sin_dec0, const double cos_dec0,
+        double* restrict u, double* restrict v, double* restrict w)
 {
     /* Get station ID. */
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= num_stations) return;
 
-    oskar_convert_ecef_to_station_uvw_inline_d(&u[i], &v[i], &w[i],
-            x[i], y[i], z[i], sin_ha0, cos_ha0, sin_dec0, cos_dec0);
+    oskar_convert_ecef_to_station_uvw_inline_d(x[i], y[i], z[i],
+            sin_ha0, cos_ha0, sin_dec0, cos_dec0, &u[i], &v[i], &w[i]);
 }
 
 #ifdef __cplusplus

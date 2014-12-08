@@ -32,8 +32,8 @@
 #include <oskar_evaluate_array_pattern.h>
 #include <oskar_evaluate_array_pattern_hierarchical.h>
 #include <oskar_evaluate_beam_horizon_direction.h>
-#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
-#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines.h>
+#include <oskar_convert_lon_lat_to_relative_directions.h>
+#include <oskar_convert_relative_directions_to_enu_directions.h>
 #include <oskar_evaluate_element_weights_dft.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
 #include <oskar_image.h>
@@ -188,9 +188,9 @@ static void set_up_pointing(oskar_Mem** weights, oskar_Mem** x, oskar_Mem** y,
     n = oskar_mem_create(type, location, num_points, status);
     oskar_evaluate_beam_horizon_direction(&beam_x, &beam_y, &beam_z, station,
             gast, status);
-    oskar_convert_apparent_ra_dec_to_relative_direction_cosines(num_points,
+    oskar_convert_lon_lat_to_relative_directions(num_points,
             lon, lat, 0.0, 0.0, l, m, n, status);
-    oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
+    oskar_convert_relative_directions_to_enu_directions(
             *x, *y, *z, num_points, l, m, n, last, 0.0, st_lat, status);
     oskar_evaluate_element_weights_dft(*weights, num_elements, wavenumber,
             oskar_station_element_measured_x_enu_metres_const(station),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 
 static void error_field(const char* msg);
 
-enum
+enum GRID_GENERATOR_TYPE
 {
     CIRCULAR = 0,
     SPIRAL_ARCHIMEDEAN = 1,

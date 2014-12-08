@@ -33,7 +33,7 @@
 #include <oskar_evaluate_tec_tid.h>
 #include <oskar_SettingsIonosphere.h>
 #include <oskar_convert_mjd_to_gast_fast.h>
-#include <oskar_convert_apparent_ra_dec_to_enu_direction_cosines.h>
+#include <oskar_convert_apparent_ra_dec_to_enu_directions.h>
 #include <oskar_Settings.h>
 #include <oskar_telescope.h>
 #include <oskar_convert_offset_ecef_to_ecef.h>
@@ -192,7 +192,7 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
         double beam_dec = oskar_station_beam_lat_rad(station);
 
         // Obtain horizontal coordinates of beam p.p.
-        oskar_convert_apparent_ra_dec_to_enu_direction_cosines_d(1, &beam_ra,
+        oskar_convert_apparent_ra_dec_to_enu_directions_d(1, &beam_ra,
                 &beam_dec, last, st_lat, oskar_mem_double(hor_x, status),
                 oskar_mem_double(hor_y, status),
                 oskar_mem_double(hor_z, status));
@@ -210,7 +210,7 @@ static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
         float beam_dec = (float)oskar_station_beam_lat_rad(station);
 
         // Obtain horizontal coordinates of beam p.p.
-        oskar_convert_apparent_ra_dec_to_enu_direction_cosines_f(1, &beam_ra,
+        oskar_convert_apparent_ra_dec_to_enu_directions_f(1, &beam_ra,
                 &beam_dec, last, st_lat, oskar_mem_float(hor_x, status),
                 oskar_mem_float(hor_y, status),
                 oskar_mem_float(hor_z, status));

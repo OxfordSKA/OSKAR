@@ -30,8 +30,8 @@
 #include <oskar_evaluate_station_beam_aperture_array.h>
 #include <oskar_evaluate_station_beam_gaussian.h>
 #include <oskar_evaluate_vla_beam_pbcor.h>
-#include <oskar_convert_relative_direction_cosines_to_enu_direction_cosines.h>
-#include <oskar_convert_enu_direction_cosines_to_relative_direction_cosines.h>
+#include <oskar_convert_relative_directions_to_enu_directions.h>
+#include <oskar_convert_enu_directions_to_relative_directions.h>
 
 #include <math.h>
 
@@ -115,7 +115,7 @@ void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
         {
             double t_x, t_y, t_z, ha0;
             ha0 = (GAST + oskar_station_lon_rad(station)) - lon0_rad;
-            oskar_convert_relative_direction_cosines_to_enu_direction_cosines_d(
+            oskar_convert_relative_directions_to_enu_directions_d(
                     &t_x, &t_y, &t_z, 1, &c_x, &c_y, &c_z, ha0, lat0_rad,
                     oskar_station_lat_rad(station));
             c_x = t_x;
@@ -347,7 +347,7 @@ static void compute_enu_directions(oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
     }
 
     /* Convert from phase-centre-relative to ENU directions. */
-    oskar_convert_relative_direction_cosines_to_enu_direction_cosines(
+    oskar_convert_relative_directions_to_enu_directions(
             x, y, z, np, l, m, n, ha0, dec0, lat, status);
 }
 
@@ -392,7 +392,7 @@ static void compute_relative_directions(oskar_Mem* l, oskar_Mem* m,
     }
 
     /* Convert from ENU to phase-centre-relative directions. */
-    oskar_convert_enu_direction_cosines_to_relative_direction_cosines(
+    oskar_convert_enu_directions_to_relative_directions(
             l, m, n, np, x, y, z, ha0, dec0, lat, status);
 }
 

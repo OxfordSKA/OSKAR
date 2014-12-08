@@ -35,9 +35,9 @@ extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_convert_station_uvw_to_baseline_uvw_f(float* uu, float* vv,
-        float* ww, int num_stations, const float* u, const float* v,
-        const float* w)
+void oskar_convert_station_uvw_to_baseline_uvw_f(int num_stations,
+        const float* u, const float* v, const float* w, float* uu,
+        float* vv, float* ww)
 {
     int s1, s2, b; /* Station and baseline indices. */
     for (s1 = 0, b = 0; s1 < num_stations; ++s1)
@@ -52,9 +52,9 @@ void oskar_convert_station_uvw_to_baseline_uvw_f(float* uu, float* vv,
 }
 
 /* Double precision. */
-void oskar_convert_station_uvw_to_baseline_uvw_d(double* uu, double* vv,
-        double* ww, int num_stations, const double* u, const double* v,
-        const double* w)
+void oskar_convert_station_uvw_to_baseline_uvw_d(int num_stations,
+        const double* u, const double* v, const double* w, double* uu,
+        double* vv, double* ww)
 {
     int s1, s2, b; /* Station and baseline indices. */
     for (s1 = 0, b = 0; s1 < num_stations; ++s1)
@@ -69,9 +69,9 @@ void oskar_convert_station_uvw_to_baseline_uvw_d(double* uu, double* vv,
 }
 
 /* Wrapper. */
-void oskar_convert_station_uvw_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
-        oskar_Mem* ww, const oskar_Mem* u, const oskar_Mem* v,
-        const oskar_Mem* w, int* status)
+void oskar_convert_station_uvw_to_baseline_uvw(const oskar_Mem* u,
+        const oskar_Mem* v, const oskar_Mem* w, oskar_Mem* uu, oskar_Mem* vv,
+        oskar_Mem* ww, int* status)
 {
     int type, location, num_stations, num_baselines;
 
@@ -135,23 +135,23 @@ void oskar_convert_station_uvw_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
     {
         if (type == OSKAR_SINGLE)
         {
-            oskar_convert_station_uvw_to_baseline_uvw_f(
-                    oskar_mem_float(uu, status),
-                    oskar_mem_float(vv, status),
-                    oskar_mem_float(ww, status), num_stations,
+            oskar_convert_station_uvw_to_baseline_uvw_f(num_stations,
                     oskar_mem_float_const(u, status),
                     oskar_mem_float_const(v, status),
-                    oskar_mem_float_const(w, status));
+                    oskar_mem_float_const(w, status),
+                    oskar_mem_float(uu, status),
+                    oskar_mem_float(vv, status),
+                    oskar_mem_float(ww, status));
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_convert_station_uvw_to_baseline_uvw_d(
-                    oskar_mem_double(uu, status),
-                    oskar_mem_double(vv, status),
-                    oskar_mem_double(ww, status), num_stations,
+            oskar_convert_station_uvw_to_baseline_uvw_d(num_stations,
                     oskar_mem_double_const(u, status),
                     oskar_mem_double_const(v, status),
-                    oskar_mem_double_const(w, status));
+                    oskar_mem_double_const(w, status),
+                    oskar_mem_double(uu, status),
+                    oskar_mem_double(vv, status),
+                    oskar_mem_double(ww, status));
         }
         else
         {
@@ -163,23 +163,23 @@ void oskar_convert_station_uvw_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
         {
-            oskar_convert_station_uvw_to_baseline_uvw_cuda_f(
-                    oskar_mem_float(uu, status),
-                    oskar_mem_float(vv, status),
-                    oskar_mem_float(ww, status), num_stations,
+            oskar_convert_station_uvw_to_baseline_uvw_cuda_f(num_stations,
                     oskar_mem_float_const(u, status),
                     oskar_mem_float_const(v, status),
-                    oskar_mem_float_const(w, status));
+                    oskar_mem_float_const(w, status),
+                    oskar_mem_float(uu, status),
+                    oskar_mem_float(vv, status),
+                    oskar_mem_float(ww, status));
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_convert_station_uvw_to_baseline_uvw_cuda_d(
-                    oskar_mem_double(uu, status),
-                    oskar_mem_double(vv, status),
-                    oskar_mem_double(ww, status), num_stations,
+            oskar_convert_station_uvw_to_baseline_uvw_cuda_d(num_stations,
                     oskar_mem_double_const(u, status),
                     oskar_mem_double_const(v, status),
-                    oskar_mem_double_const(w, status));
+                    oskar_mem_double_const(w, status),
+                    oskar_mem_double(uu, status),
+                    oskar_mem_double(vv, status),
+                    oskar_mem_double(ww, status));
         }
         else
         {

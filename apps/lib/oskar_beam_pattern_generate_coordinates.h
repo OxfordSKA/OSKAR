@@ -58,8 +58,8 @@ extern "C" {
  *
  * @param[out]  coord_type  Coordinate type of the returned direction cosines.
  *                          Possible values are:
- *                          OSKAR_RELATIVE_DIRECTION_COSINES or
- *                          OSKAR_ENU_DIRECTION_COSINES
+ *                          OSKAR_RELATIVE_DIRECTIONS or
+ *                          OSKAR_ENU_DIRECTIONS
  * @param[out]  x  Array of x direction cosines.
  * @param[out]  y  Array of y direction cosines.
  * @param[out]  z  Array of z direction cosines.

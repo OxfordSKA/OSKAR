@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,18 +51,18 @@ extern "C" {
  * The output arrays must be pre-sized to length N * (N - 1) / 2, where N is
  * the number of stations.
  *
- * @param[out] uu           The baseline u-positions.
- * @param[out] vv           The baseline v-positions.
- * @param[out] ww           The baseline w-positions.
  * @param[in]  num_stations The number of stations.
  * @param[in]  u            The station u-positions.
  * @param[in]  v            The station v-positions.
  * @param[in]  w            The station w-positions.
+ * @param[out] uu           The baseline u-positions.
+ * @param[out] vv           The baseline v-positions.
+ * @param[out] ww           The baseline w-positions.
  */
 OSKAR_EXPORT
-void oskar_convert_station_uvw_to_baseline_uvw_f(float* uu, float* vv,
-        float* ww, int num_stations, const float* u, const float* v,
-        const float* w);
+void oskar_convert_station_uvw_to_baseline_uvw_f(int num_stations,
+        const float* u, const float* v, const float* w, float* uu,
+        float* vv, float* ww);
 
 /**
  * @brief
@@ -75,18 +75,18 @@ void oskar_convert_station_uvw_to_baseline_uvw_f(float* uu, float* vv,
  * The output arrays must be pre-sized to length N * (N - 1) / 2, where N is
  * the number of stations.
  *
- * @param[out] uu           The baseline u-positions.
- * @param[out] vv           The baseline v-positions.
- * @param[out] ww           The baseline w-positions.
  * @param[in]  num_stations The number of stations.
  * @param[in]  u            The station u-positions.
  * @param[in]  v            The station v-positions.
  * @param[in]  w            The station w-positions.
+ * @param[out] uu           The baseline u-positions.
+ * @param[out] vv           The baseline v-positions.
+ * @param[out] ww           The baseline w-positions.
  */
 OSKAR_EXPORT
-void oskar_convert_station_uvw_to_baseline_uvw_d(double* uu, double* vv,
-        double* ww, int num_stations, const double* u, const double* v,
-        const double* w);
+void oskar_convert_station_uvw_to_baseline_uvw_d(int num_stations,
+        const double* u, const double* v, const double* w, double* uu,
+        double* vv, double* ww);
 
 /**
  * @brief
@@ -96,17 +96,17 @@ void oskar_convert_station_uvw_to_baseline_uvw_d(double* uu, double* vv,
  * Given the (u,v,w) coordinates for each station, this function computes
  * the baseline coordinates for all station pairs.
  *
- * @param[out] uu   Baseline u coordinates.
- * @param[out] vv   Baseline v coordinates.
- * @param[out] ww   Baseline w coordinates.
  * @param[in]  u    Station u coordinates.
  * @param[in]  v    Station v coordinates.
  * @param[in]  w    Station w coordinates.
+ * @param[out] uu   Baseline u coordinates.
+ * @param[out] vv   Baseline v coordinates.
+ * @param[out] ww   Baseline w coordinates.
  */
 OSKAR_EXPORT
-void oskar_convert_station_uvw_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
-        oskar_Mem* ww, const oskar_Mem* u, const oskar_Mem* v,
-        const oskar_Mem* w, int* status);
+void oskar_convert_station_uvw_to_baseline_uvw(const oskar_Mem* u,
+        const oskar_Mem* v, const oskar_Mem* w, oskar_Mem* uu, oskar_Mem* vv,
+        oskar_Mem* ww, int* status);
 
 #ifdef __cplusplus
 }

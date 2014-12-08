@@ -35,11 +35,11 @@
 extern "C" {
 #endif
 
-void oskar_convert_ecef_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
-        oskar_Mem* ww, int num_stations, const oskar_Mem* x, const oskar_Mem* y,
-        const oskar_Mem* z, double ra0_rad, double dec0_rad, int num_dumps,
-        double start_mjd_utc, double dt_dump_days, oskar_Mem* work,
-        int* status)
+void oskar_convert_ecef_to_baseline_uvw(int num_stations,
+        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        double ra0_rad, double dec0_rad, int num_dumps, double start_mjd_utc,
+        double dt_dump_days, oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
+        oskar_Mem* work, int* status)
 {
     oskar_Mem *u, *v, *w, *uu_dump, *vv_dump, *ww_dump; /* Aliases. */
     int i, type, location, num_baselines;
@@ -112,7 +112,7 @@ void oskar_convert_ecef_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
     vv_dump = oskar_mem_create_alias(0, 0, 0, status);
     ww_dump = oskar_mem_create_alias(0, 0, 0, status);
 
-    /* Loop over dumps. */
+    /* Loop over times. */
     for (i = 0; i < num_dumps; ++i)
     {
         double t_dump, gast;
@@ -121,8 +121,8 @@ void oskar_convert_ecef_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
         gast = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump_days / 2.0);
 
         /* Compute u,v,w coordinates of mid point. */
-        oskar_convert_ecef_to_station_uvw(u, v, w, num_stations, x, y, z,
-                ra0_rad, dec0_rad, gast, status);
+        oskar_convert_ecef_to_station_uvw(num_stations, x, y, z,
+                ra0_rad, dec0_rad, gast, u, v, w, status);
 
         /* Extract pointers to baseline u,v,w coordinates for this dump. */
         oskar_mem_set_alias(uu_dump, uu, i * num_baselines,
@@ -133,11 +133,11 @@ void oskar_convert_ecef_to_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv,
                 num_baselines, status);
 
         /* Compute baselines from station positions. */
-        oskar_convert_station_uvw_to_baseline_uvw(uu_dump, vv_dump, ww_dump,
-                u, v, w, status);
+        oskar_convert_station_uvw_to_baseline_uvw(u, v, w,
+                uu_dump, vv_dump, ww_dump, status);
     }
 
-    /* Free memory handles. */
+    /* Free memory. */
     oskar_mem_free(u, status);
     oskar_mem_free(v, status);
     oskar_mem_free(w, status);

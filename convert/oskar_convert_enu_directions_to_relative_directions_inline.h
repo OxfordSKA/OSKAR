@@ -26,11 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_THETA_PHI_INLINE_H_
-#define OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_THETA_PHI_INLINE_H_
+#ifndef OSKAR_CONVERT_ENU_DIRECTIONS_TO_RELATIVE_DIRECTIONS_INLINE_H_
+#define OSKAR_CONVERT_ENU_DIRECTIONS_TO_RELATIVE_DIRECTIONS_INLINE_H_
 
 #include <oskar_global.h>
-#include <oskar_cmath.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,42 +37,54 @@ extern "C" {
 
 /* Single precision. */
 OSKAR_INLINE
-void oskar_convert_enu_direction_cosines_to_theta_phi_inline_f(
-        float x, float y, const float z, const float delta_phi,
-        float* theta, float* phi)
+void oskar_convert_enu_directions_to_relative_directions_inline_f(
+        float* l, float* m, float* n, const float x, const float y,
+        const float z, const float cos_ha0, const float sin_ha0,
+        const float cos_dec0, const float sin_dec0, const float cos_lat,
+        const float sin_lat)
 {
-    float p;
+    float l_, m_, n_, t;
 
-    /* Cartesian to spherical (with orientation offset). */
-    p = atan2f(y, x) + delta_phi;
-    p = fmodf(p, 2.0f * M_PIf);
-    x = sqrtf(x*x + y*y);
-    y = atan2f(x, z); /* Theta. */
-    if (p < 0.0f) p += 2.0f * M_PIf; /* Get phi in range 0 to 2 pi. */
-    *phi = p;
-    *theta = y;
+    l_ = x * cos_ha0 - y * sin_ha0 * sin_lat + z * sin_ha0 * cos_lat;
+    t = sin_dec0 * cos_ha0;
+    m_ = x * sin_dec0 * sin_ha0 +
+            y * (cos_dec0 * cos_lat + t * sin_lat) +
+            z * (cos_dec0 * sin_lat - t * cos_lat);
+    t = cos_dec0 * cos_ha0;
+    n_ = -x * cos_dec0 * sin_ha0 +
+            y * (sin_dec0 * cos_lat - t * sin_lat) +
+            z * (sin_dec0 * sin_lat + t * cos_lat);
+    *l = l_;
+    *m = m_;
+    *n = n_;
 }
 
 /* Double precision. */
 OSKAR_INLINE
-void oskar_convert_enu_direction_cosines_to_theta_phi_inline_d(
-        double x, double y, const double z, const double delta_phi,
-        double* theta, double* phi)
+void oskar_convert_enu_directions_to_relative_directions_inline_d(
+        double* l, double* m, double* n, const double x, const double y,
+        const double z, const double cos_ha0, const double sin_ha0,
+        const double cos_dec0, const double sin_dec0, const double cos_lat,
+        const double sin_lat)
 {
-    double p;
+    double l_, m_, n_, t;
 
-    /* Cartesian to spherical (with orientation offset). */
-    p = atan2(y, x) + delta_phi;
-    p = fmod(p, 2.0 * M_PI);
-    x = sqrt(x*x + y*y);
-    y = atan2(x, z); /* Theta. */
-    if (p < 0.0) p += 2.0 * M_PI; /* Get phi in range 0 to 2 pi. */
-    *phi = p;
-    *theta = y;
+    l_ = x * cos_ha0 - y * sin_ha0 * sin_lat + z * sin_ha0 * cos_lat;
+    t = sin_dec0 * cos_ha0;
+    m_ = x * sin_dec0 * sin_ha0 +
+            y * (cos_dec0 * cos_lat + t * sin_lat) +
+            z * (cos_dec0 * sin_lat - t * cos_lat);
+    t = cos_dec0 * cos_ha0;
+    n_ = -x * cos_dec0 * sin_ha0 +
+            y * (sin_dec0 * cos_lat - t * sin_lat) +
+            z * (sin_dec0 * sin_lat + t * cos_lat);
+    *l = l_;
+    *m = m_;
+    *n = n_;
 }
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CONVERT_ENU_DIRECTION_COSINES_TO_THETA_PHI_INLINE_H_ */
+#endif /* OSKAR_CONVERT_ENU_DIRECTIONS_TO_RELATIVE_DIRECTIONS_INLINE_H_ */

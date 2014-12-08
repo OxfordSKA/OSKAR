@@ -30,7 +30,7 @@
 #include <oskar_evaluate_image_lmn_grid.h>
 #include <oskar_convert_healpix_ring_to_theta_phi.h>
 #include <oskar_convert_theta_phi_to_enu_directions.h>
-#include <oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h>
+#include <oskar_convert_lon_lat_to_relative_directions.h>
 #include <oskar_healpix_nside_to_npix.h>
 #include <oskar_getline.h>
 #include <oskar_string_to_array.h>
@@ -129,23 +129,23 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
          }
          case OSKAR_BEAM_PATTERN_COORDS_HEALPIX:
          {
-             int np, nside, type, i;
+             int num_points, nside, type, i;
              double ra0, dec0;
              oskar_Mem* theta, *phi;
 
              /* Generate theta and phi from nside. */
              nside = settings->nside;
-             np = oskar_healpix_nside_to_npix(nside);
+             num_points = oskar_healpix_nside_to_npix(nside);
              type = oskar_mem_type(l);
-             theta = oskar_mem_create(type, OSKAR_CPU, np, status);
-             phi = oskar_mem_create(type, OSKAR_CPU, np, status);
-             oskar_convert_healpix_ring_to_theta_phi(theta, phi, nside, status);
+             theta = oskar_mem_create(type, OSKAR_CPU, num_points, status);
+             phi = oskar_mem_create(type, OSKAR_CPU, num_points, status);
+             oskar_convert_healpix_ring_to_theta_phi(nside, theta, phi, status);
 
              /* Convert theta from polar angle to elevation. */
              if (type == OSKAR_DOUBLE)
              {
                  double* theta_ = oskar_mem_double(theta, status);
-                 for (i = 0; i < np; ++i)
+                 for (i = 0; i < num_points; ++i)
                  {
                      theta_[i] = 90.0 - theta_[i];
                  }
@@ -153,7 +153,7 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
              else if (type == OSKAR_SINGLE)
              {
                  float* theta_ = oskar_mem_float(theta, status);
-                 for (i = 0; i < np; ++i)
+                 for (i = 0; i < num_points; ++i)
                  {
                      theta_[i] = 90.0f - theta_[i];
                  }
@@ -184,7 +184,7 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
 
              /* Convert equatorial angles to direction cosines in the frame
               * of the beam phase centre. */
-             oskar_convert_apparent_ra_dec_to_relative_direction_cosines(np,
+             oskar_convert_lon_lat_to_relative_directions(num_points,
                      phi, theta, ra0, dec0, l, m, n, status);
 
              /* Free memory. */
@@ -204,7 +204,7 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
              oskar_mem_realloc(l, num_points, status);
              oskar_mem_realloc(m, num_points, status);
              oskar_mem_realloc(n, num_points, status);
-             oskar_convert_apparent_ra_dec_to_relative_direction_cosines(
+             oskar_convert_lon_lat_to_relative_directions(
                      num_points, ra, dec, beam_lon, beam_lat, l, m, n, status);
              oskar_mem_free(ra, status);
              oskar_mem_free(dec, status);
@@ -231,16 +231,16 @@ static void generate_horizon_coordinates(oskar_Mem* x, oskar_Mem* y,
          }
          case OSKAR_BEAM_PATTERN_COORDS_HEALPIX:
          {
-             int np, nside, type;
+             int num_points, nside, type;
              oskar_Mem *theta, *phi;
              nside = settings->nside;
-             np = oskar_healpix_nside_to_npix(nside);
+             num_points = oskar_healpix_nside_to_npix(nside);
              type = oskar_mem_type(x);
-             theta = oskar_mem_create(type, OSKAR_CPU, np, status);
-             phi = oskar_mem_create(type, OSKAR_CPU, np, status);
-             oskar_convert_healpix_ring_to_theta_phi(theta, phi, nside, status);
-             oskar_convert_theta_phi_to_enu_directions(np, theta, phi, x, y, z,
-                     status);
+             theta = oskar_mem_create(type, OSKAR_CPU, num_points, status);
+             phi = oskar_mem_create(type, OSKAR_CPU, num_points, status);
+             oskar_convert_healpix_ring_to_theta_phi(nside, theta, phi, status);
+             oskar_convert_theta_phi_to_enu_directions(num_points,
+                     theta, phi, x, y, z, status);
              oskar_mem_free(theta, status);
              oskar_mem_free(phi, status);
              break;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,51 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_convert_enu_direction_cosines_to_az_el.h>
-#include <math.h>
+#include <private_sky.h>
+#include <oskar_sky.h>
+
+#include <oskar_convert_lon_lat_to_relative_directions.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-OSKAR_EXPORT
-void oskar_convert_enu_direction_cosines_to_az_el_f(int n, const float* x,
-        const float* y, const float* z, float* az, float* el)
+void oskar_sky_evaluate_relative_directions(oskar_Sky* sky, double ra0_rad,
+        double dec0_rad, int* status)
 {
-    int i = 0;
-    float x_, y_, z_, a;
-    for (i = 0; i < n; ++i)
+    /* Check all inputs. */
+    if (!sky || !status)
     {
-        x_ = x[i];
-        y_ = y[i];
-        z_ = z[i];
-        a = atan2f(x_, y_); /* Azimuth */
-        x_ = sqrtf(x_*x_ + y_*y_);
-        y_ = atan2f(z_, x_); /* Elevation. */
-        az[i] = a;
-        el[i] = y_;
+        oskar_set_invalid_argument(status);
+        return;
     }
-}
 
-OSKAR_EXPORT
-void oskar_convert_enu_direction_cosines_to_az_el_d(int n, const double* x,
-        const double* y, const double* z, double* az, double* el)
-{
-    int i = 0;
-    double x_, y_, z_, a;
-    for (i = 0; i < n; ++i)
-    {
-        x_ = x[i];
-        y_ = y[i];
-        z_ = z[i];
-        a = atan2(x_, y_); /* Azimuth */
-        x_ = sqrt(x_*x_ + y_*y_);
-        y_ = atan2(z_, x_); /* Elevation. */
-        az[i] = a;
-        el[i] = y_;
-    }
-}
+    /* Check if safe to proceed. */
+    if (*status) return;
 
+    /* Convert coordinates. */
+    oskar_convert_lon_lat_to_relative_directions(sky->num_sources,
+            sky->ra_rad, sky->dec_rad, ra0_rad, dec0_rad,
+            sky->l, sky->m, sky->n, status);
+
+    /* Store the reference position. */
+    sky->reference_ra_rad = ra0_rad;
+    sky->reference_dec_rad = dec0_rad;
+}
 
 #ifdef __cplusplus
 }

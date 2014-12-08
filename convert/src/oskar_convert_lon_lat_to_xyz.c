@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,39 +33,39 @@
 extern "C" {
 #endif
 
-void oskar_convert_lon_lat_to_xyz_f(int num_points, float* x, float* y, float* z,
-        const float* lon, const float* lat)
+void oskar_convert_lon_lat_to_xyz_f(int num_points, const float* lon_rad,
+        const float* lat_rad, float* x, float* y, float* z)
 {
     int i;
-    float cosLon, sinLon, cosLat, sinLat;
+    float cos_lon, sin_lon, cos_lat, sin_lat;
     for (i = 0; i < num_points; ++i)
     {
-        cosLon = cosf(lon[i]);
-        sinLon = sinf(lon[i]);
-        cosLat = cosf(lat[i]);
-        sinLat = sinf(lat[i]);
+        cos_lon = cosf(lon_rad[i]);
+        sin_lon = sinf(lon_rad[i]);
+        cos_lat = cosf(lat_rad[i]);
+        sin_lat = sinf(lat_rad[i]);
 
-        x[i] = cosLat * cosLon;
-        y[i] = cosLat * sinLon;
-        z[i] = sinLat;
+        x[i] = cos_lat * cos_lon;
+        y[i] = cos_lat * sin_lon;
+        z[i] = sin_lat;
     }
 }
 
-void oskar_convert_lon_lat_to_xyz_d(int num_points, double* x, double* y, double* z,
-        const double* lon, const double* lat)
+void oskar_convert_lon_lat_to_xyz_d(int num_points, const double* lon_rad,
+        const double* lat_rad, double* x, double* y, double* z)
 {
     int i;
-    double cosLon, sinLon, cosLat, sinLat;
+    double cos_lon, sin_lon, cos_lat, sin_lat;
     for (i = 0; i < num_points; ++i)
     {
-        cosLon = cos(lon[i]);
-        sinLon = sin(lon[i]);
-        cosLat = cos(lat[i]);
-        sinLat = sin(lat[i]);
+        cos_lon = cos(lon_rad[i]);
+        sin_lon = sin(lon_rad[i]);
+        cos_lat = cos(lat_rad[i]);
+        sin_lat = sin(lat_rad[i]);
 
-        x[i] = cosLat * cosLon;
-        y[i] = cosLat * sinLon;
-        z[i] = sinLat;
+        x[i] = cos_lat * cos_lon;
+        y[i] = cos_lat * sin_lon;
+        z[i] = sin_lat;
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,8 @@ extern "C" {
  * Converts HEALPix pixel IDs to spherical angles for the HEALPix ring scheme.
  */
 OSKAR_EXPORT
-void oskar_convert_healpix_ring_to_theta_phi(oskar_Mem* theta, oskar_Mem* phi,
-        int nside, int* status);
+void oskar_convert_healpix_ring_to_theta_phi(int nside,
+        oskar_Mem* theta, oskar_Mem* phi, int* status);
 
 /**
  * @brief

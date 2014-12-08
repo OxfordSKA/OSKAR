@@ -160,15 +160,15 @@ TEST(add_system_noise, test_rms)
     oskar_Mem *work_uvw;
     work_uvw = oskar_mem_create(type, OSKAR_CPU, 3 * num_stations,
             &err);
-    oskar_convert_ecef_to_baseline_uvw(oskar_vis_baseline_uu_metres(vis),
-            oskar_vis_baseline_vv_metres(vis),
-            oskar_vis_baseline_ww_metres(vis), num_stations,
+    oskar_convert_ecef_to_baseline_uvw(num_stations,
             oskar_telescope_station_true_x_offset_ecef_metres_const(tel),
             oskar_telescope_station_true_y_offset_ecef_metres_const(tel),
             oskar_telescope_station_true_z_offset_ecef_metres_const(tel),
-            ra0_rad, dec0_rad,
-            settings.obs.num_time_steps, settings.obs.start_mjd_utc,
-            settings.obs.dt_dump_days, work_uvw, &err);
+            ra0_rad, dec0_rad, settings.obs.num_time_steps,
+            settings.obs.start_mjd_utc, settings.obs.dt_dump_days,
+            oskar_vis_baseline_uu_metres(vis),
+            oskar_vis_baseline_vv_metres(vis),
+            oskar_vis_baseline_ww_metres(vis), work_uvw, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
     oskar_Image* image;

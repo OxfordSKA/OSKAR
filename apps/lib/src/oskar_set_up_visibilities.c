@@ -91,9 +91,8 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
 
     /* Add telescope model path. */
     oskar_mem_append_raw(oskar_vis_telescope_path(vis),
-            settings->telescope.input_directory, OSKAR_CHAR,
-            OSKAR_CPU, 1 + strlen(settings->telescope.input_directory),
-            status);
+            settings->telescope.input_directory, OSKAR_CHAR, OSKAR_CPU,
+            1 + strlen(settings->telescope.input_directory), status);
 
     /* Add settings file contents. */
     {
@@ -126,9 +125,7 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
         oskar_Mem *work_uvw;
         work_uvw = oskar_mem_create(oskar_mem_type_precision(vis_type),
                 OSKAR_CPU, 3 * num_stations, status);
-        oskar_convert_ecef_to_baseline_uvw(oskar_vis_baseline_uu_metres(vis),
-                oskar_vis_baseline_vv_metres(vis),
-                oskar_vis_baseline_ww_metres(vis),
+        oskar_convert_ecef_to_baseline_uvw(
                 oskar_telescope_num_stations(tel),
                 oskar_telescope_station_true_x_offset_ecef_metres_const(tel),
                 oskar_telescope_station_true_y_offset_ecef_metres_const(tel),
@@ -136,7 +133,9 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
                 oskar_telescope_phase_centre_ra_rad(tel),
                 oskar_telescope_phase_centre_dec_rad(tel),
                 settings->obs.num_time_steps, settings->obs.start_mjd_utc,
-                settings->obs.dt_dump_days, work_uvw, status);
+                settings->obs.dt_dump_days, oskar_vis_baseline_uu_metres(vis),
+                oskar_vis_baseline_vv_metres(vis),
+                oskar_vis_baseline_ww_metres(vis), work_uvw, status);
         oskar_mem_free(work_uvw, status);
     }
 

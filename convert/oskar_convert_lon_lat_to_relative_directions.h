@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_APPARENT_RA_DEC_TO_RELATIVE_DIRECTION_COSINES_H_
-#define OSKAR_CONVERT_APPARENT_RA_DEC_TO_RELATIVE_DIRECTION_COSINES_H_
+#ifndef OSKAR_CONVERT_LON_LAT_TO_RELATIVE_DIRECTIONS_H_
+#define OSKAR_CONVERT_LON_LAT_TO_RELATIVE_DIRECTIONS_H_
 
 /**
- * @file oskar_convert_apparent_ra_dec_to_relative_direction_cosines.h
+ * @file oskar_convert_lon_lat_to_relative_directions.h
  */
 
 #include <oskar_global.h>
@@ -42,114 +42,114 @@ extern "C" {
 
 /**
  * @brief
- * Equatorial to relative 3D direction cosines (single precision).
+ * Spherical to relative 3D direction cosines (single precision).
  *
  * @details
  * This function computes the direction cosines of the specified points
  * relative to the reference point.
  *
  * @param[in]  num_points Number of points.
- * @param[in]  ra         Input position Right Ascensions in radians.
- * @param[in]  dec        Input position Declinations in radians.
- * @param[in]  ra0        Right Ascension of the reference point in radians.
- * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[in]  lon_rad    Input longitudes in radians.
+ * @param[in]  lat_rad    Input latitudes in radians.
+ * @param[in]  lon0_rad   Longitude of the reference point in radians.
+ * @param[in]  lat0_rad   Latitude of the reference point in radians.
  * @param[out] l          l-direction-cosines relative to the reference point.
  * @param[out] m          m-direction-cosines relative to the reference point.
  * @param[out] n          n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_f(
-        int num_points, const float* ra, const float* dec, float ra0,
-        float dec0, float* l, float* m, float* n);
+void oskar_convert_lon_lat_to_relative_directions_f(int num_points,
+        const float* lon_rad, const float* lat_rad, float lon0_rad,
+        float lat0_rad, float* l, float* m, float* n);
 
 /**
  * @brief
- * Equatorial to relative 3D direction cosines (double precision).
+ * Spherical to relative 3D direction cosines (double precision).
  *
  * @details
  * This function computes the direction cosines of the specified points
  * relative to the reference point.
  *
  * @param[in]  num_points Number of points.
- * @param[in]  ra         Input position Right Ascensions in radians.
- * @param[in]  dec        Input position Declinations in radians.
- * @param[in]  ra0        Right Ascension of the reference point in radians.
- * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[in]  lon_rad    Input longitudes in radians.
+ * @param[in]  lat_rad    Input latitudes in radians.
+ * @param[in]  lon0_rad   Longitude of the reference point in radians.
+ * @param[in]  lat0_rad   Latitude of the reference point in radians.
  * @param[out] l          l-direction-cosines relative to the reference point.
  * @param[out] m          m-direction-cosines relative to the reference point.
  * @param[out] n          n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_d(
-        int num_points, const double* ra, const double* dec, double ra0,
-        double dec0, double* l, double* m, double* n);
+void oskar_convert_lon_lat_to_relative_directions_d(int num_points,
+        const double* lon_rad, const double* lat_rad, double lon0_rad,
+        double lat0_rad, double* l, double* m, double* n);
 
 /**
  * @brief
- * Equatorial to relative 2D direction cosines (single precision).
+ * Spherical to relative 2D direction cosines (single precision).
  *
  * @details
  * This function computes the direction cosines of the specified points
  * relative to the reference point.
  *
  * @param[in]  num_points Number of points.
- * @param[in]  ra         Input position Right Ascensions in radians.
- * @param[in]  dec        Input position Declinations in radians.
- * @param[in]  ra0        Right Ascension of the reference point in radians.
- * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[in]  lon_rad    Input longitudes in radians.
+ * @param[in]  lat_rad    Input latitudes in radians.
+ * @param[in]  lon0_rad   Longitude of the reference point in radians.
+ * @param[in]  lat0_rad   Latitude of the reference point in radians.
  * @param[out] l          l-direction-cosines relative to the reference point.
  * @param[out] m          m-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_f(
-        int num_points, const float* ra, const float* dec, float ra0,
-        float dec0, float* l, float* m);
+void oskar_convert_lon_lat_to_relative_directions_2d_f(int num_points,
+        const float* lon_rad, const float* lat_rad, float lon0_rad,
+        float lat0_rad, float* l, float* m);
 
 /**
  * @brief
- * Equatorial to relative 2D direction cosines (double precision).
+ * Spherical to relative 2D direction cosines (double precision).
  *
  * @details
  * This function computes the direction cosines of the specified points
  * relative to the reference point.
  *
  * @param[in]  num_points Number of points.
- * @param[in]  ra         Input position Right Ascensions in radians.
- * @param[in]  dec        Input position Declinations in radians.
- * @param[in]  ra0        Right Ascension of the reference point in radians.
- * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[in]  lon_rad    Input longitudes in radians.
+ * @param[in]  lat_rad    Input latitudes in radians.
+ * @param[in]  lon0_rad   Longitude of the reference point in radians.
+ * @param[in]  lat0_rad   Latitude of the reference point in radians.
  * @param[out] l          l-direction-cosines relative to the reference point.
  * @param[out] m          m-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_2D_d(
-        int num_points, const double* ra, const double* dec, double ra0,
-        double dec0, double* l, double* m);
+void oskar_convert_lon_lat_to_relative_directions_2d_d(int num_points,
+        const double* lon_rad, const double* lat_rad, double lon0_rad,
+        double lat0_rad, double* l, double* m);
 
 /**
  * @brief
- * Equatorial to relative 3D direction cosines (wrapper function).
+ * Spherical to relative 3D direction cosines (wrapper function).
  *
  * @details
  * This function computes the direction cosines of the specified points
  * relative to the reference point.
  *
  * @param[in]  num_points Number of points.
- * @param[in]  ra         Input position Right Ascensions in radians.
- * @param[in]  dec        Input position Declinations in radians.
- * @param[in]  ra0        Right Ascension of the reference point in radians.
- * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[in]  lon_rad    Input longitudes in radians.
+ * @param[in]  lat_rad    Input latitudes in radians.
+ * @param[in]  lon0_rad   Longitude of the reference point in radians.
+ * @param[in]  lat0_rad   Latitude of the reference point in radians.
  * @param[out] l          l-direction-cosines relative to the reference point.
  * @param[out] m          m-direction-cosines relative to the reference point.
  * @param[out] n          n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines(int num_points,
-        const oskar_Mem* ra, const oskar_Mem* dec, double ra0_rad,
-        double dec0_rad, oskar_Mem* l, oskar_Mem* m, oskar_Mem* n, int* status);
+void oskar_convert_lon_lat_to_relative_directions(int num_points,
+        const oskar_Mem* lon_rad, const oskar_Mem* lat_rad, double lon0_rad,
+        double lat0_rad, oskar_Mem* l, oskar_Mem* m, oskar_Mem* n, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CONVERT_APPARENT_RA_DEC_TO_RELATIVE_DIRECTION_COSINES_H_ */
+#endif /* OSKAR_CONVERT_LON_LAT_TO_RELATIVE_DIRECTIONS_H_ */

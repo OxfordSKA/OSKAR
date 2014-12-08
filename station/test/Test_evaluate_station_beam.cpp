@@ -27,7 +27,6 @@
  */
 
 #include <gtest/gtest.h>
-#include <cuda_runtime_api.h>
 
 #include <oskar_station.h>
 #include <oskar_evaluate_station_beam_aperture_array.h>

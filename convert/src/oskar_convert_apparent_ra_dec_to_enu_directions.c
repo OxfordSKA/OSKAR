@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,41 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_EVALUATE_RELATIVE_DIRECTION_COSINES_H_
-#define OSKAR_SKY_EVALUATE_RELATIVE_DIRECTION_COSINES_H_
-
-/**
- * @file oskar_sky_evaluate_relative_direction_cosines.h
- */
-
-#include <oskar_global.h>
+#include <oskar_convert_apparent_ra_dec_to_enu_directions.h>
+#include <oskar_convert_apparent_ha_dec_to_enu_directions.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Evaluates 3D direction cosines of sources relative to phase centre.
- *
- * @details
- * This function populates the 3D direction cosines (l,m,n coordinates)
- * of all sources relative to the phase centre.
- *
- * It assumes that the source RA and Dec positions have already been filled,
- * and that the arrays have been preallocated to the correct length.
- *
- * @param[in,out] sky Pointer to sky model structure.
- * @param[in] ra0 Right Ascension of phase centre, in radians.
- * @param[in] dec0 Declination of phase centre, in radians.
- * @param[in,out] status Status return code.
- */
-OSKAR_EXPORT
-void oskar_sky_evaluate_relative_direction_cosines(oskar_Sky* sky, double ra0,
-        double dec0, int* status);
+/* Single precision. */
+void oskar_convert_apparent_ra_dec_to_enu_directions_f(int n,
+        const float* ra, const float* dec, float lst, float lat, float* x,
+        float* y, float* z)
+{
+    /* Determine source Hour Angles (HA = LST - RA). */
+    float* ha = z; /* Temporary. */
+    int i;
+    for (i = 0; i < n; ++i)
+    {
+        ha[i] = lst - ra[i];
+    }
+
+    /* Determine horizontal x,y,z directions (destroys contents of ha). */
+    oskar_convert_apparent_ha_dec_to_enu_directions_f(n, ha, dec, lat, x, y, z);
+}
+
+/* Double precision. */
+void oskar_convert_apparent_ra_dec_to_enu_directions_d(int n,
+        const double* ra, const double* dec, double lst, double lat,
+        double* x, double* y, double* z)
+{
+    /* Determine source Hour Angles (HA = LST - RA). */
+    double* ha = z; /* Temporary. */
+    int i;
+    for (i = 0; i < n; ++i)
+    {
+        ha[i] = lst - ra[i];
+    }
+
+    /* Determine horizontal x,y,z directions (destroys contents of ha). */
+    oskar_convert_apparent_ha_dec_to_enu_directions_d(n, ha, dec, lat, x, y, z);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SKY_EVALUATE_RELATIVE_DIRECTION_COSINES_H_ */

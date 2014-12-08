@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,12 +41,12 @@ extern "C" {
 
 /**
  * @brief
- * Convert coordinates from the offset geocentric cartesian to the geocentric
- * cartesian (ECEF) system.
+ * Convert coordinates from the offset geocentric Cartesian to the geocentric
+ * Cartesian (ECEF) system.
  *
  * @details
  * This function converts station positions from the offset geocentric
- * cartesian to the geocentric cartesian (Earth-Centred-Earth-Fixed, or ECEF)
+ * Cartesian to the geocentric Cartesian (Earth-Centred-Earth-Fixed, or ECEF)
  * system.
  *
  * The reference latitude is, strictly speaking, geodetic.
@@ -63,21 +63,21 @@ extern "C" {
  * would be unable to represent points accurately on the Earth's surface
  * (more than 7 decimal digits are required for sub-metre precision).
  *
- * @param[in]  n        Number of points.
- * @param[in]  offset_x Vector of offset x-positions, in metres.
- * @param[in]  offset_y Vector of offset y-positions, in metres.
- * @param[in]  offset_z Vector of offset z-positions, in metres.
- * @param[in]  lon      Longitude of tangent point, in radians.
- * @param[in]  lat      Latitude of tangent point, in radians.
- * @param[in]  alt      Altitude above ellipsoid, in metres.
- * @param[out] x        Vector of ECEF x-positions, in metres.
- * @param[out] y        Vector of ECEF y-positions, in metres.
- * @param[out] z        Vector of ECEF z-positions, in metres.
+ * @param[in]  num_points Number of points.
+ * @param[in]  offset_x   Vector of offset x-positions, in metres.
+ * @param[in]  offset_y   Vector of offset y-positions, in metres.
+ * @param[in]  offset_z   Vector of offset z-positions, in metres.
+ * @param[in]  lon_rad    Longitude of tangent point, in radians.
+ * @param[in]  lat_rad    Latitude of tangent point, in radians.
+ * @param[in]  alt_metres Altitude above ellipsoid, in metres.
+ * @param[out] x          Vector of ECEF x-positions, in metres.
+ * @param[out] y          Vector of ECEF y-positions, in metres.
+ * @param[out] z          Vector of ECEF z-positions, in metres.
  */
 OSKAR_EXPORT
-void oskar_convert_offset_ecef_to_ecef(int n, const double* offset_x,
-        const double* offset_y, const double* offset_z, double lon, double lat,
-        double alt, double* x, double* y, double* z);
+void oskar_convert_offset_ecef_to_ecef(int num_points, const double* offset_x,
+        const double* offset_y, const double* offset_z, double lon_rad,
+        double lat_rad, double alt_metres, double* x, double* y, double* z);
 
 #ifdef __cplusplus
 }

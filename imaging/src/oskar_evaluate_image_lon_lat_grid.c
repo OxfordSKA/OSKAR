@@ -28,7 +28,7 @@
 
 #include <oskar_evaluate_image_lm_grid.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
-#include <oskar_convert_relative_direction_cosines_to_apparent_ra_dec.h>
+#include <oskar_convert_relative_directions_to_lon_lat.h>
 #include <oskar_mem.h>
 #include <stdlib.h>
 
@@ -85,10 +85,10 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
             oskar_evaluate_image_lm_grid_f(image_size_l, image_size_m,
                     fov_rad_lon, fov_rad_lat, oskar_mem_float(lon_cpu, status),
                     oskar_mem_float(lat_cpu, status));
-            oskar_convert_relative_direction_cosines_to_apparent_ra_dec_f(
-                    num_pixels, lon_rad, lat_rad,
+            oskar_convert_relative_directions_to_lon_lat_2d_f(num_pixels,
                     oskar_mem_float_const(lon_cpu, status),
                     oskar_mem_float_const(lat_cpu, status),
+                    lon_rad, lat_rad,
                     oskar_mem_float(lon_cpu, status),
                     oskar_mem_float(lat_cpu, status));
         }
@@ -97,10 +97,10 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
             oskar_evaluate_image_lm_grid_d(image_size_l, image_size_m,
                     fov_rad_lon, fov_rad_lat, oskar_mem_double(lon_cpu, status),
                     oskar_mem_double(lat_cpu, status));
-            oskar_convert_relative_direction_cosines_to_apparent_ra_dec_d(
-                    num_pixels, lon_rad, lat_rad,
+            oskar_convert_relative_directions_to_lon_lat_2d_d(num_pixels,
                     oskar_mem_double_const(lon_cpu, status),
                     oskar_mem_double_const(lat_cpu, status),
+                    lon_rad, lat_rad,
                     oskar_mem_double(lon_cpu, status),
                     oskar_mem_double(lat_cpu, status));
         }

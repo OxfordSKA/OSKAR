@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_APPARENT_RA_DEC_TO_RELATIVE_DIRECTION_COSINES_CUDA_H_
-#define OSKAR_CONVERT_APPARENT_RA_DEC_TO_RELATIVE_DIRECTION_COSINES_CUDA_H_
+#ifndef OSKAR_CONVERT_LON_LAT_TO_RELATIVE_DIRECTIONS_CUDA_H_
+#define OSKAR_CONVERT_LON_LAT_TO_RELATIVE_DIRECTIONS_CUDA_H_
 
 /**
- * @file oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda.h
+ * @file oskar_convert_lon_lat_to_relative_directions_cuda.h
  */
 
 #include <oskar_global.h>
@@ -41,65 +41,63 @@ extern "C" {
 
 /**
  * @brief
- * Equatorial to relative 3D direction cosines (single precision).
+ * Spherical to relative 3D direction cosines (single precision).
  *
  * @details
  * This function computes the l,m,n direction cosines of the specified points
  * relative to the reference point.
  *
  * @param[in]  num_points Number of points.
- * @param[in]  d_ra       Input position Right Ascensions in radians.
- * @param[in]  d_dec      Input position Declinations in radians.
- * @param[in]  ra0        Right Ascension of the reference point in radians.
- * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[in]  d_lon_rad  Input longitudes in radians.
+ * @param[in]  d_lat_rad  Input latitudes in radians.
+ * @param[in]  lon0_rad   Longitude of the reference point in radians.
+ * @param[in]  lat0_rad   Latitude of the reference point in radians.
  * @param[out] d_l        l-direction-cosines relative to the reference point.
  * @param[out] d_m        m-direction-cosines relative to the reference point.
  * @param[out] d_n        n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_f(
-        int num_points, const float* d_ra, const float* d_dec, float ra0,
-        float dec0, float* d_l, float* d_m, float* d_n);
+void oskar_convert_lon_lat_to_relative_directions_cuda_f(int num_points,
+        const float* d_lon_rad, const float* d_lat_rad, float lon0_rad,
+        float lat0_rad, float* d_l, float* d_m, float* d_n);
 
 /**
  * @brief
- * Equatorial to relative 3D direction cosines (double precision).
+ * Spherical to relative 3D direction cosines (double precision).
  *
  * @details
  * This function computes the l,m,n direction cosines of the specified points
  * relative to the reference point.
  *
  * @param[in]  num_points Number of points.
- * @param[in]  d_ra       Input position Right Ascensions in radians.
- * @param[in]  d_dec      Input position Declinations in radians.
- * @param[in]  ra0        Right Ascension of the reference point in radians.
- * @param[in]  dec0       Declination of the reference point in radians.
+ * @param[in]  d_lon_rad  Input longitudes in radians.
+ * @param[in]  d_lat_rad  Input latitudes in radians.
+ * @param[in]  lon0_rad   Longitude of the reference point in radians.
+ * @param[in]  lat0_rad   Latitude of the reference point in radians.
  * @param[out] d_l        l-direction-cosines relative to the reference point.
  * @param[out] d_m        m-direction-cosines relative to the reference point.
  * @param[out] d_n        n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cuda_d(
-        int num_points, const double* d_ra, const double* d_dec, double ra0,
-        double dec0, double* d_l, double* d_m, double* d_n);
+void oskar_convert_lon_lat_to_relative_directions_cuda_d(int num_points,
+        const double* d_lon_rad, const double* d_lat_rad, double lon0_rad,
+        double lat0_rad, double* d_l, double* d_m, double* d_n);
 
 #ifdef __CUDACC__
 
 /* Kernels. */
 
 __global__
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_f(
-        const int num_points, const float* __restrict__ ra,
-        const float* __restrict__ dec, const float ra0, const float cos_dec0,
-        const float sin_dec0, float* __restrict__ l, float* __restrict__ m,
-        float* __restrict__ n);
+void oskar_convert_lon_lat_to_relative_directions_cudak_f(const int num_points,
+        const float* restrict lon_rad, const float* restrict lat_rad,
+        const float lon0_rad, const float cos_lat0, const float sin_lat0,
+        float* restrict l, float* restrict m, float* restrict n);
 
 __global__
-void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_d(
-        const int num_points, const double* __restrict__ ra,
-        const double* __restrict__ dec, const double ra0, const double cos_dec0,
-        const double sin_dec0, double* __restrict__ l, double* __restrict__ m,
-        double* __restrict__ n);
+void oskar_convert_lon_lat_to_relative_directions_cudak_d(const int num_points,
+        const double* restrict lon_rad, const double* restrict lat_rad,
+        const double lon0_rad, const double cos_lat0, const double sin_lat0,
+        double* restrict l, double* restrict m, double* restrict n);
 
 #endif /* __CUDACC__ */
 
@@ -107,4 +105,4 @@ void oskar_convert_apparent_ra_dec_to_relative_direction_cosines_cudak_d(
 }
 #endif
 
-#endif /* OSKAR_CONVERT_APPARENT_RA_DEC_TO_RELATIVE_DIRECTION_COSINES_CUDA_H_ */
+#endif /* OSKAR_CONVERT_LON_LAT_TO_RELATIVE_DIRECTIONS_CUDA_H_ */

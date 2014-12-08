@@ -479,8 +479,8 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 gast = oskar_convert_mjd_to_gast_fast(t_fringe + dt_fringe / 2);
 
                 // Evaluate station u,v,w coordinates.
-                oskar_convert_ecef_to_station_uvw(u, v, w, n_stations, x, y, z,
-                        ra0, dec0, gast, status);
+                oskar_convert_ecef_to_station_uvw(n_stations, x, y, z,
+                        ra0, dec0, gast, u, v, w, status);
 
                 // Evaluate interferometer phase (Jones K: scalar).
                 oskar_timer_resume(timers->tmr_K);

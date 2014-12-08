@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2011-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_ECEF_TO_STATION_UVW_INLINE_H_
-#define OSKAR_CONVERT_ECEF_TO_STATION_UVW_INLINE_H_
+#ifndef OSKAR_SKY_EVALUATE_RELATIVE_DIRECTIONS_H_
+#define OSKAR_SKY_EVALUATE_RELATIVE_DIRECTIONS_H_
+
+/**
+ * @file oskar_sky_evaluate_relative_directions.h
+ */
 
 #include <oskar_global.h>
 
@@ -35,52 +39,28 @@
 extern "C" {
 #endif
 
-/* Single precision. */
-OSKAR_INLINE
-void oskar_convert_ecef_to_station_uvw_inline_f(float* u, float* v, float* w,
-        const float x, const float y, const float z, const float sin_ha0,
-        const float cos_ha0, const float sin_dec0, const float cos_dec0)
-{
-    float v_, w_, t;
-
-    /* This is just the standard textbook rotation matrix. */
-    t = x * cos_ha0;
-    t -= y * sin_ha0;
-    v_ = z * cos_dec0;
-    v_ -= sin_dec0 * t;
-    w_ = cos_dec0 * t;
-    w_ += z * sin_dec0;
-    t =  x * sin_ha0;
-    t += y * cos_ha0;
-    *u = t;
-    *v = v_;
-    *w = w_;
-}
-
-/* Double precision. */
-OSKAR_INLINE
-void oskar_convert_ecef_to_station_uvw_inline_d(double* u, double* v, double* w,
-        const double x, const double y, const double z, const double sin_ha0,
-        const double cos_ha0, const double sin_dec0, const double cos_dec0)
-{
-    double v_, w_, t;
-
-    /* This is just the standard textbook rotation matrix. */
-    t = x * cos_ha0;
-    t -= y * sin_ha0;
-    v_ = z * cos_dec0;
-    v_ -= sin_dec0 * t;
-    w_ = cos_dec0 * t;
-    w_ += z * sin_dec0;
-    t =  x * sin_ha0;
-    t += y * cos_ha0;
-    *u = t;
-    *v = v_;
-    *w = w_;
-}
+/**
+ * @brief
+ * Evaluates 3D direction cosines of sources relative to phase centre.
+ *
+ * @details
+ * This function populates the 3D direction cosines (l,m,n coordinates)
+ * of all sources relative to the phase centre.
+ *
+ * It assumes that the source RA and Dec positions have already been filled,
+ * and that the arrays have been preallocated to the correct length.
+ *
+ * @param[in,out] sky    Pointer to sky model structure.
+ * @param[in] ra0_rad    Right Ascension of phase centre, in radians.
+ * @param[in] dec0_rad   Declination of phase centre, in radians.
+ * @param[in,out] status Status return code.
+ */
+OSKAR_EXPORT
+void oskar_sky_evaluate_relative_directions(oskar_Sky* sky, double ra0_rad,
+        double dec0_rad, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CONVERT_ECEF_TO_STATION_UVW_INLINE_H_ */
+#endif /* OSKAR_SKY_EVALUATE_RELATIVE_DIRECTIONS_H_ */

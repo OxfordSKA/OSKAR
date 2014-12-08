@@ -26,11 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CONVERT_LUDWIG3_TO_THETA_PHI_COMPONENTS_INLINE_H_
-#define OSKAR_CONVERT_LUDWIG3_TO_THETA_PHI_COMPONENTS_INLINE_H_
+#ifndef OSKAR_CONVERT_ECEF_TO_STATION_UVW_INLINE_H_
+#define OSKAR_CONVERT_ECEF_TO_STATION_UVW_INLINE_H_
 
 #include <oskar_global.h>
-#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,64 +37,52 @@ extern "C" {
 
 /* Single precision. */
 OSKAR_INLINE
-void oskar_convert_ludwig3_to_theta_phi_components_inline_f(
-        float2* h_theta, float2* v_phi, const float phi)
+void oskar_convert_ecef_to_station_uvw_inline_f(const float x, const float y,
+        const float z, const float sin_ha0, const float cos_ha0,
+        const float sin_dec0, const float cos_dec0, float* u, float* v,
+        float* w)
 {
-    float sin_p, cos_p;
-    float2 E_h, E_v;
+    float v_, w_, t;
 
-    /* Sine and cosine of phi. */
-#ifdef __CUDACC__
-    sincosf(phi, &sin_p, &cos_p);
-#else
-    sin_p = sinf(phi);
-    cos_p = cosf(phi);
-#endif
-
-    /* Copy input Ludwig-3 components. */
-    E_h.x = h_theta->x;
-    E_h.y = h_theta->y;
-    E_v.x = v_phi->x;
-    E_v.y = v_phi->y;
-
-    /* Matrix transform for both real and imaginary parts. */
-    h_theta->x = E_h.x * cos_p + E_v.x * sin_p;
-    h_theta->y = E_h.y * cos_p + E_v.y * sin_p;
-    v_phi->x = -E_h.x * sin_p + E_v.x * cos_p;
-    v_phi->y = -E_h.y * sin_p + E_v.y * cos_p;
+    /* This is just the standard textbook rotation matrix. */
+    t = x * cos_ha0;
+    t -= y * sin_ha0;
+    v_ = z * cos_dec0;
+    v_ -= sin_dec0 * t;
+    w_ = cos_dec0 * t;
+    w_ += z * sin_dec0;
+    t =  x * sin_ha0;
+    t += y * cos_ha0;
+    *u = t;
+    *v = v_;
+    *w = w_;
 }
 
 /* Double precision. */
 OSKAR_INLINE
-void oskar_convert_ludwig3_to_theta_phi_components_inline_d(
-        double2* h_theta, double2* v_phi, const double phi)
+void oskar_convert_ecef_to_station_uvw_inline_d(const double x, const double y,
+        const double z, const double sin_ha0, const double cos_ha0,
+        const double sin_dec0, const double cos_dec0, double* u, double* v,
+        double* w)
 {
-    double sin_p, cos_p;
-    double2 E_h, E_v;
+    double v_, w_, t;
 
-    /* Sine and cosine of phi. */
-#ifdef __CUDACC__
-    sincos(phi, &sin_p, &cos_p);
-#else
-    sin_p = sin(phi);
-    cos_p = cos(phi);
-#endif
-
-    /* Copy input Ludwig-3 components. */
-    E_h.x = h_theta->x;
-    E_h.y = h_theta->y;
-    E_v.x = v_phi->x;
-    E_v.y = v_phi->y;
-
-    /* Matrix transform for both real and imaginary parts. */
-    h_theta->x = E_h.x * cos_p + E_v.x * sin_p;
-    h_theta->y = E_h.y * cos_p + E_v.y * sin_p;
-    v_phi->x = -E_h.x * sin_p + E_v.x * cos_p;
-    v_phi->y = -E_h.y * sin_p + E_v.y * cos_p;
+    /* This is just the standard textbook rotation matrix. */
+    t = x * cos_ha0;
+    t -= y * sin_ha0;
+    v_ = z * cos_dec0;
+    v_ -= sin_dec0 * t;
+    w_ = cos_dec0 * t;
+    w_ += z * sin_dec0;
+    t =  x * sin_ha0;
+    t += y * cos_ha0;
+    *u = t;
+    *v = v_;
+    *w = w_;
 }
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CONVERT_LUDWIG3_TO_THETA_PHI_COMPONENTS_INLINE_H_ */
+#endif /* OSKAR_CONVERT_ECEF_TO_STATION_UVW_INLINE_H_ */
