@@ -3,7 +3,7 @@
 \page telescope_model Telescope Model
 
 \latexonly
-\def \docversion{6}
+\def \docversion{7}
 \endlatexonly
 
 \section telescope_intro Introduction
@@ -427,6 +427,16 @@ must contain eight columns, in the following order:
 
 (Columns marked * are ignored during the load, but must still be present.)
 
+Since version 2.6.0, "unpolarised" (scalar) numerical element pattern data
+files can be supplied, and these will be used if OSKAR is running in a scalar 
+or Stokes-I-only mode. Data files for scalar numerical element responses must 
+contain three or four columns, in the following order:
+
+-# Theta [deg]
+-# Phi [deg]
+-# Amplitude
+-# Phase [deg] (optional)
+
 Before being used in the simulation, the element pattern data must be fitted 
 with B-splines. The fitting procedure is performed using the 
 <tt>oskar_fit_element_data</tt> application which is built as part of the 
@@ -629,6 +639,9 @@ left to right.
 <tr><td>6</td><td>2014-07-16</td>
     <td>[2.5.0] Updated description of how numerically-defined element 
     patterns should be used.</td></tr>
+<tr><td>7</td><td>2014-12-08</td>
+    <td>[2.6.0] Updated description of numerical element pattern data to 
+    allow for scalar-only element responses.</td></tr>
 </table>
 
 */

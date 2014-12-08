@@ -173,13 +173,13 @@ All settings keys in this group are prefixed with <tt>image/</tt>.
     noise is specified for a single polarisation.  Changed all random 
     number seed integer ranges to start at 1 (rather than 0). Changed beam 
     normalization to be enabled by default.</td></tr>
-<tr><td>11</td><td>2014-11-18</td>
+<tr><td>11</td><td>2014-12-08</td>
     <td>Moved option to select polarisation mode into telescope model settings
     group, so that scalar mode can also be used for beam pattern 
     simulations. Moved and renamed option to allow station beam duplication
     into telescope model group. Added option to disable horizon clip in 
-    advanced sky model settings. Added options to produce the average 
-    cross-power beam and time-averaged beam to the beam pattern group. 
+    advanced sky model settings. Added option to produce the time-averaged 
+    beam to the beam pattern group. 
     Added the ability to use seconds (as well as hours, minutes and seconds) 
     to specify observation length. Removed options to write OSKAR image 
     files. Removed ability to load a GSM file directly or use HEALPix

@@ -13,16 +13,18 @@
             instead of a series of snapshots.
         </desc>
     </s>
-    
+
+    <!-- 
     <s k="average_cross_power_beam">
         <label>Produce average cross-power beam</label>
         <type name="bool" default="false"/>
         <desc>If enabled, the generated beam pattern will be the average
         cross-power beam from all stations.</desc>
     </s>
+    -->
     
     <s k="station_id"><label>Station ID</label>
-        <depends k="beam_pattern/average_cross_power_beam" v="false" />
+        <!-- <depends k="beam_pattern/average_cross_power_beam" v="false" /> -->
         <type name="uint" default="0"/>
         <desc>The station ID number (zero based) to select from the
             telescope model when generating the beam pattern.</desc>

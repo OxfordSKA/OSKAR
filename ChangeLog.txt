@@ -1,4 +1,4 @@
-2014-XX-XX  OSKAR-2.X.X
+2014-XX-XX  OSKAR-2.6.0
 
     * Fixed an issue which could result in repeated log entries.
 
@@ -12,6 +12,21 @@
       to specify observation length, and the ability to use various 
       date formats (including MJD number and CASA-style date strings) to 
       specify the start time.
+
+    * Moved and renamed option to allow station beam duplication into 
+      telescope model group.
+
+    * Added option to disable horizon clip in advanced sky model settings.
+      This can save a wasted check if sources are always above the horizon.
+
+    * Added option to produce a time-averaged station beam.
+
+    * Removed options to load GSM maps and HEALPix maps in K, as 
+      amplitude conversion to Jy was not performed correctly.
+
+    * Removed GUI options to write OSKAR image files, as these are deprecated.
+
+    * Added CRC codes to data chunks in binary files.
 
 2014-09-09  OSKAR-2.5.1
 
