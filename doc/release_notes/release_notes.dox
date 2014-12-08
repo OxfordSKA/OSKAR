@@ -24,7 +24,18 @@ please refer to older revisions of this document or the
 - Moved option to select polarisation mode into telescope model settings
   group, so that scalar mode can also be used for beam pattern simulations.
 - Added the ability to use seconds (as well as hours, minutes and seconds)
-  to specify observation length.
+  to specify observation length, and the ability to use various 
+  date formats (including MJD number and CASA-style date strings) to 
+  specify the start time.
+- Moved and renamed option to allow station beam duplication into 
+  telescope model group.
+- Added option to disable horizon clip in advanced sky model settings.
+  This can save a wasted check if sources are always above the horizon.
+- Added option to produce a time-averaged station beam.
+- Removed options to load GSM maps and HEALPix maps in K, as 
+  amplitude conversion to Jy was not performed correctly.
+- Removed GUI options to write OSKAR image files, as these are deprecated.
+- Added CRC codes to data chunks in binary files.
 
 \section known_issues Known Issues
 
