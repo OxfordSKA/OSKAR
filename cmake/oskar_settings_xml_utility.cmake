@@ -15,7 +15,7 @@ macro(process_import_nodes FILENAME)
 
         # Obtain a list and number of files to import.
         unset(import_files_)
-        string(REGEX MATCHALL "([-/A-Za-z0-9_]+.xml)" import_files_ "${xml_}")
+        string(REGEX MATCHALL "([-/A-Za-z0-9_\\.]+\\.xml)" import_files_ "${xml_}")
         list(LENGTH import_files_ n)
     
         if (${n} EQUAL 0)
