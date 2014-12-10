@@ -215,12 +215,12 @@
                     Field-of-view spanned by the grid centre, in degrees.
                 </desc>
             </s>
-            <s k="mean_flux_jy"><label>Mean Stokes I flux [Jy].</label>
+            <s k="mean_flux_jy"><label>Mean Stokes I flux [Jy]</label>
                 <type name="UnsignedDouble" default="0.0" />
                 <desc>The mean of generated Stokes I fluxes, in Jy.</desc>
             </s>
              <s k="std_flux_jy">
-                <label>Standard deviation of Stokes I flux [Jy].</label>
+                <label>Standard deviation of Stokes I flux [Jy]</label>
                 <type name="UnsignedDouble" default="0.0" />
                 <desc>
                     The standard deviation of generated Stokes I fluxes,
