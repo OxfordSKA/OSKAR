@@ -23,7 +23,7 @@
         </desc>
     </s>
     <s k="pointing_file"><label>Station pointing file</label>
-        <type name="InputFile" default="0"/>
+        <type name="InputFile" default=""/>
         <desc>
             Pathname to optional station pointing file, which can be
             used to override the beam direction for any or all stations in
