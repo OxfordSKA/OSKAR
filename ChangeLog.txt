@@ -2,6 +2,8 @@
 
     * Fixed an issue which could result in repeated log entries.
 
+    * Fixed time range start in Measurement Set observation table.
+
     * Added the ability to use numerically-defined element patterns in
       scalar mode.
 
