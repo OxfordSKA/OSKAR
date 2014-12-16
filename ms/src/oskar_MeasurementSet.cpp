@@ -36,6 +36,7 @@
 #include <sstream>
 #include <vector>
 #include <ctime>
+#include <cfloat>
 
 using namespace casa;
 
@@ -102,7 +103,7 @@ struct oskar_MeasurementSet
     oskar_MeasurementSet() : ms(0), msc(0), msmc(0),
             num_pols(0), num_channels(0), num_stations(0), num_receptors(2),
             ref_freq(0.0), phase_centre_ra(0.0), phase_centre_dec(0.0),
-            start_time(0.0), end_time(1.0) {}
+            start_time(DBL_MAX), end_time(-DBL_MAX) {}
     ~oskar_MeasurementSet();
 
     void add_band(int pol_id, int num_channels, double ref_freq,
@@ -751,7 +752,8 @@ void oskar_MeasurementSet::set_time_range()
 
     // Compute the new time range.
     Vector<Double> range(2, 0.0);
-    range[0] = (old_range[0] <= 0.0) ? start_time : old_range[0];
+    range[0] = (old_range[0] <= 0.0 || start_time < old_range[0]) ?
+            start_time : old_range[0];
     range[1] = (end_time > old_range[1]) ? end_time : old_range[1];
     double release_date = range[1] + 365.25 * 86400.0;
 
