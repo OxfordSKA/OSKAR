@@ -167,11 +167,8 @@ void oskar_evaluate_pierce_points_d(int num_directions, const double* hor_x,
         const double station_ecef_z)
 {
     int i;
-    double pp_lon, pp_lat, pp_alt, pp_sec, scale, x, y, z;
-    double diff_ecef_x, diff_ecef_y, diff_ecef_z;
     double norm_xyz, earth_radius_plus_screen_height_m;
-    double cos_l, sin_l, cos_b, sin_b;
-    double station_lon, station_lat, station_alt;
+    double cos_l, sin_l, cos_b, sin_b, station_lon, station_lat, station_alt;
 
     /* Get the station longitude and latitude from ECEF coordinates. */
     oskar_convert_ecef_to_geodetic_spherical_inline_d(station_ecef_x,
@@ -184,7 +181,7 @@ void oskar_evaluate_pierce_points_d(int num_directions, const double* hor_x,
     sin_b = sin(station_lat);
     cos_b = cos(station_lat);
 
-    /* Length of the vector from the centre of the earth to the station. */
+    /* Length of the vector from the centre of the Earth to the station. */
     norm_xyz = sqrt(station_ecef_x * station_ecef_x +
             station_ecef_y * station_ecef_y +
             station_ecef_z * station_ecef_z);
@@ -196,6 +193,9 @@ void oskar_evaluate_pierce_points_d(int num_directions, const double* hor_x,
     /* Loop over directions to evaluate pierce points. */
     for (i = 0; i < num_directions; ++i)
     {
+        double pp_lon, pp_lat, pp_sec, scale, x, y, z;
+        double diff_ecef_x, diff_ecef_y, diff_ecef_z;
+
         /* Unit vector describing the direction of the pierce point in the
          * ENU frame. Vector from station to pierce point. */
         x = hor_x[i];
@@ -232,10 +232,9 @@ void oskar_evaluate_pierce_points_d(int num_directions, const double* hor_x,
         y = station_ecef_y + diff_ecef_y * scale;
         z = station_ecef_z + diff_ecef_z * scale;
 
-        /* Convert ECEF x,y,z coordinates to long., lat. */
-        /* FIXME Probably use geocentric coordinates here for simplicity. */
-        oskar_convert_ecef_to_geodetic_spherical_inline_d(x, y, z,
-                &pp_lon, &pp_lat, &pp_alt);
+        /* Convert ECEF coordinates to geocentric longitude and latitude. */
+        pp_lon = atan2(y, x);
+        pp_lat = atan2(z, sqrt(x*x + y*y));
 
         /* Store data. */
         pp_lon_[i] = pp_lon;
