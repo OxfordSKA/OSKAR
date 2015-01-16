@@ -60,12 +60,12 @@
             for each time step. If false, then use time-synthesis to stack
             the times in the final image.</desc>
     </s>
-    <s k="time_start"><label>Channel start</label>
+    <s k="time_start"><label>Time start</label>
         <type name="uint" default="0" />
         <desc>The start time index to include in the image or image cube.</desc>
         <depends k="image/time_snapshots" v="true" />
     </s>
-    <s k="time_end"><label>Channel end</label>
+    <s k="time_end"><label>Time end</label>
         <type name="IntRangeExt" default="max" >0,MAX,max</type>
         <desc>The end time index to include in the image or image cube.</desc>
         <depends k="image/time_snapshots" v="true" />
