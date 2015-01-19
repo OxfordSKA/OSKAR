@@ -1,4 +1,8 @@
-2014-XX-XX  OSKAR-2.6.0
+2015-XX-XX  OSKAR-2.6.0
+
+    * Analytical time-average smearing was calculated incorrectly 
+      for sources greater than 90 degrees from the phase centre.
+      This has now been fixed.
 
     * Fixed an issue which could result in repeated log entries.
 

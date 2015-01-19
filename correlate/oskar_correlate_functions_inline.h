@@ -557,7 +557,7 @@ OSKAR_INLINE
 float oskar_evaluate_time_smearing_f(const float du_dt, const float dv_dt,
         const float dw_dt, const float l, const float m, const float n)
 {
-    return oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * (fabsf(n) - 1.0f));
+    return oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * (n - 1.0f));
 }
 
 /**
@@ -572,7 +572,7 @@ OSKAR_INLINE
 double oskar_evaluate_time_smearing_d(const double du_dt, const double dv_dt,
         const double dw_dt, const double l, const double m, const double n)
 {
-    return oskar_sinc_d(du_dt * l + dv_dt * m + dw_dt * (fabs(n) - 1.0));
+    return oskar_sinc_d(du_dt * l + dv_dt * m + dw_dt * (n - 1.0));
 }
 
 /**
