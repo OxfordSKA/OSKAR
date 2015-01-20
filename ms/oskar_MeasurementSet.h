@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,34 @@ void oskar_ms_add_log(oskar_MeasurementSet* p, const char* str, size_t size);
 OSKAR_MS_EXPORT
 void oskar_ms_add_settings(oskar_MeasurementSet* p,
         const char* str, size_t size);
+
+/**
+ * @brief Adds scratch columns CORRECTED_DATA and MODEL_DATA.
+ *
+ * @details
+ * Add the scratch columns CORRECTED_DATA and MODEL_DATA to the Measurement Set
+ * main table.
+ *
+ * @param[in] add_model     If true, add the MODEL_DATA column.
+ * @param[in] add_corrected If true, add the CORRECTED_DATA column.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_add_scratch_columns(oskar_MeasurementSet* p,
+        int add_model, int add_corrected);
+
+/**
+ * @brief Copies data from one column to another.
+ *
+ * @details
+ * Copies data from one column to another.
+ * Both columns must contain arrays of the same shape and data type.
+ *
+ * @param[in] source     Name of source column to copy.
+ * @param[in] dest       Name of destination column to copy into.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_copy_column(oskar_MeasurementSet* p,
+        const char* source, const char* dest);
 
 /**
  * @brief Adds station positions to the ANTENNA table.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ using namespace casa;
  * Local (static) functions
  *---------------------------------------------------------------------------*/
 
-static std::vector<std::string> split(const std::string& s, char delim)
+static std::vector<std::string> split_string(const std::string& s, char delim)
 {
     std::stringstream ss(s);
     std::string item;
@@ -113,13 +113,20 @@ struct oskar_MeasurementSet
     void add_history(String message, String origin, double time,
             Vector<String> app_params);
     void add_pol(int num_pols);
+    void add_scratch_cols(bool add_model, bool add_corrected);
+    void copy_column(String source, String dest);
     void create(const char* filename, double ra_rad, double dec_rad,
             int num_pols, int num_channels, double ref_freq,
             double chan_width, int num_stations);
     void close();
     void get_time_range();
+    static bool is_otf_model_defined(const int field,
+            const MeasurementSet& ms, String& key, int& source_row);
+    static bool is_otf_model_defined(const String& key, const MeasurementSet& ms);
     int num_rows() const;
     void open(const char* filename);
+    static void remove_otf_model(MeasurementSet& ms);
+    static void remove_record_by_key(MeasurementSet& ms, const String& key);
     void set_antenna_feeds();
     void set_num_rows(int num);
     void set_time_range();
@@ -134,7 +141,7 @@ void oskar_ms_add_log(oskar_MeasurementSet* p, const char* str, size_t size)
     if (!str || size == 0) return;
 
     // Construct a string from the char array and split on each newline.
-    std::vector<std::string> v = split(std::string(str, size), '\n');
+    std::vector<std::string> v = split_string(std::string(str, size), '\n');
 
     // Add to the HISTORY table.
     int num_lines = v.size();
@@ -151,7 +158,7 @@ void oskar_ms_add_settings(oskar_MeasurementSet* p,
     if (!str || size == 0) return;
 
     // Construct a string from the char array and split on each newline.
-    std::vector<std::string> v = split(std::string(str, size), '\n');
+    std::vector<std::string> v = split_string(std::string(str, size), '\n');
 
     // Fill a CASA vector with the settings file contents.
     int num_lines = v.size();
@@ -164,6 +171,18 @@ void oskar_ms_add_settings(oskar_MeasurementSet* p,
     // Add to the HISTORY table.
     p->add_history("OSKAR settings file", "SETTINGS",
             86400.0 * current_utc_to_mjd(), vec);
+}
+
+void oskar_ms_add_scratch_columns(oskar_MeasurementSet* p, int add_model,
+        int add_corrected)
+{
+    p->add_scratch_cols(add_model, add_corrected);
+}
+
+void oskar_ms_copy_column(oskar_MeasurementSet* p, const char* source,
+        const char* dest)
+{
+    p->copy_column(String(source), String(dest));
 }
 
 void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p, int num_stations,
@@ -518,6 +537,142 @@ void oskar_MeasurementSet::add_pol(int num_pols)
     msc->polarization().numCorr().put(row, num_pols);
 }
 
+// Method from CASA VisSetUtil.cc
+void oskar_MeasurementSet::add_scratch_cols(bool add_model, bool add_corrected)
+{
+    if (!ms) return;
+
+    // Check if columns need adding.
+    add_model = add_model &&
+            !(ms->tableDesc().isColumn("MODEL_DATA"));
+    add_corrected = add_corrected &&
+            !(ms->tableDesc().isColumn("CORRECTED_DATA"));
+
+    // Return if there's nothing to be done.
+    if (!add_model && !add_corrected)
+        return;
+
+    // Remove SORTED_TABLE, because old SORTED_TABLE won't see the new columns.
+    if (ms->keywordSet().isDefined("SORT_COLUMNS"))
+        ms->rwKeywordSet().removeField("SORT_COLUMNS");
+    if (ms->keywordSet().isDefined("SORTED_TABLE"))
+        ms->rwKeywordSet().removeField("SORTED_TABLE");
+
+    // Remove any OTF model data from the MS.
+    if (add_model)
+        remove_otf_model(*ms);
+
+    // Define a column accessor to the observed data.
+    ROTableColumn* data;
+    if (ms->tableDesc().isColumn(MS::columnName(MS::FLOAT_DATA)))
+        data = new ROArrayColumn<Float>(*ms, MS::columnName(MS::FLOAT_DATA));
+    else
+        data = new ROArrayColumn<Complex>(*ms, MS::columnName(MS::DATA));
+
+    // Check if the data column is tiled and, if so, get the tile shape used.
+    TableDesc td = ms->actualTableDesc();
+    const ColumnDesc& column_desc = td[data->columnDesc().name()];
+    String dataManType = column_desc.dataManagerType();
+    String dataManGroup = column_desc.dataManagerGroup();
+    IPosition dataTileShape;
+    bool tiled = dataManType.contains("Tiled");
+    bool simpleTiling = false;
+
+    if (tiled)
+    {
+        ROTiledStManAccessor tsm(*ms, dataManGroup);
+        unsigned int num_hypercubes = tsm.nhypercubes();
+
+        // Find tile shape.
+        int highestProduct = -INT_MAX, highestId = 0;
+        for (unsigned int i = 0; i < num_hypercubes; i++)
+        {
+            int product = tsm.getTileShape(i).product();
+            if (product > 0 && (product > highestProduct))
+            {
+                highestProduct = product;
+                highestId = i;
+            }
+        }
+        dataTileShape = tsm.getTileShape(highestId);
+        simpleTiling = (dataTileShape.nelements() == 3);
+    }
+
+    if (!tiled || !simpleTiling)
+    {
+        // Untiled, or tiled at a higher than expected dimensionality.
+        // Use a canonical tile shape of 1 MB size.
+        MSSpWindowColumns msspwcol(ms->spectralWindow());
+        int max_num_channels = max(msspwcol.numChan().getColumn());
+        int tileSize = max_num_channels / 10 + 1;
+        int nCorr = data->shape(0)(0);
+        dataTileShape = IPosition(3, nCorr,
+                tileSize, 131072/nCorr/tileSize + 1);
+    }
+    delete data;
+
+    if (add_model)
+    {
+        // Add the MODEL_DATA column.
+        TableDesc tdModel;
+        String col = MS::columnName(MS::MODEL_DATA);
+        tdModel.addColumn(ArrayColumnDesc<Complex>(col, "model data", 2));
+        td.addColumn(ArrayColumnDesc<Complex>(col, "model data", 2));
+        MeasurementSet::addColumnToDesc(tdModel,
+                MeasurementSet::MODEL_DATA, 2);
+        TiledShapeStMan tsm("ModelTiled", dataTileShape);
+        ms->addColumn(tdModel, tsm);
+    }
+    if (add_corrected)
+    {
+        // Add the CORRECTED_DATA column.
+        TableDesc tdCorr;
+        String col = MS::columnName(MS::CORRECTED_DATA);
+        tdCorr.addColumn(ArrayColumnDesc<Complex>(col, "corrected data", 2));
+        td.addColumn(ArrayColumnDesc<Complex>(col, "corrected data", 2));
+        MeasurementSet::addColumnToDesc(tdCorr,
+                MeasurementSet::CORRECTED_DATA, 2);
+        TiledShapeStMan tsm("CorrectedTiled", dataTileShape);
+        ms->addColumn(tdCorr, tsm);
+    }
+    ms->flush();
+}
+
+void oskar_MeasurementSet::copy_column(String source, String dest)
+{
+    if (!ms || !msmc) return;
+
+    int n_rows = num_rows();
+    ArrayColumn<Complex>* source_column;
+    ArrayColumn<Complex>* dest_column;
+
+    // Get the source column.
+    if (source == "DATA")
+        source_column = &msmc->data();
+    else if (source == "MODEL_DATA")
+        source_column = &msmc->modelData();
+    else if (source == "CORRECTED_DATA")
+        source_column = &msmc->correctedData();
+    else
+        return;
+
+    // Get the destination column.
+    if (dest == "DATA")
+        dest_column = &msmc->data();
+    else if (dest == "MODEL_DATA")
+        dest_column = &msmc->modelData();
+    else if (dest == "CORRECTED_DATA")
+        dest_column = &msmc->correctedData();
+    else
+        return;
+
+    // Copy the data.
+    for (int i = 0; i < n_rows; ++i)
+    {
+        dest_column->put(i, *source_column);
+    }
+}
+
 void oskar_MeasurementSet::close()
 {
     set_time_range();
@@ -650,6 +805,47 @@ void oskar_MeasurementSet::create(const char* filename,
     set_antenna_feeds();
 }
 
+// Method from CASA VisModelData.cc.
+bool oskar_MeasurementSet::is_otf_model_defined(const int field,
+        const MeasurementSet& ms, String& key, int& source_row)
+{
+    source_row = -1;
+    String mod_key = String("definedmodel_field_") + String::toString(field);
+    key = "";
+    if (Table::isReadable(ms.sourceTableName()) && ms.source().nrow() > 0)
+    {
+        if (ms.source().keywordSet().isDefined(mod_key))
+        {
+            key = ms.source().keywordSet().asString(mod_key);
+            if (ms.source().keywordSet().isDefined(key))
+                source_row = ms.source().keywordSet().asInt(key);
+        }
+    }
+    else
+    {
+        if (ms.keywordSet().isDefined(mod_key))
+            key = ms.keywordSet().asString(mod_key);
+    }
+    if (key != "")
+        return is_otf_model_defined(key, ms);
+    return false;
+}
+
+// Method from CASA VisModelData.cc.
+bool oskar_MeasurementSet::is_otf_model_defined(const String& key,
+        const MeasurementSet& ms)
+{
+    // Try the Source table.
+    if (Table::isReadable(ms.sourceTableName()) && ms.source().nrow() > 0 &&
+            ms.source().keywordSet().isDefined(key))
+        return true;
+
+    // Try the Main table.
+    if (ms.keywordSet().isDefined(key))
+        return true;
+    return false;
+}
+
 int oskar_MeasurementSet::num_rows() const
 {
     if (!ms) return 0;
@@ -696,6 +892,66 @@ void oskar_MeasurementSet::open(const char* filename)
 
     // Get the time range.
     get_time_range();
+}
+
+// Method from CASA VisModelData.cc.
+void oskar_MeasurementSet::remove_otf_model(MeasurementSet& ms)
+{
+    if (!ms.isWritable())
+        return;
+    Vector<String> parts(ms.getPartNames(True));
+    if (parts.nelements() > 1)
+    {
+        for (unsigned int k = 0; k < parts.nelements(); ++k)
+        {
+            MeasurementSet subms(parts[k], ms.lockOptions(), Table::Update);
+            remove_otf_model(subms);
+        }
+        return;
+    }
+
+    ROMSColumns msc(ms);
+    Vector<Int> fields = msc.fieldId().getColumn();
+    int num_fields = GenSort<Int>::sort(fields, Sort::Ascending,
+            Sort::HeapSort | Sort::NoDuplicates);
+    for (int k = 0; k < num_fields; ++k)
+    {
+        String key, mod_key;
+        int srow;
+        if (is_otf_model_defined(fields[k], ms, key, srow))
+        {
+            mod_key = String("definedmodel_field_") + String::toString(fields[k]);
+
+            // Remove from Source table.
+            remove_record_by_key(ms, key);
+            if (srow > -1 && ms.source().keywordSet().isDefined(mod_key))
+                ms.source().rwKeywordSet().removeField(mod_key);
+
+            // Remove from Main table.
+            if (ms.rwKeywordSet().isDefined(mod_key))
+                ms.rwKeywordSet().removeField(mod_key);
+        }
+    }
+}
+
+// Method from CASA VisModelData.cc.
+void oskar_MeasurementSet::remove_record_by_key(MeasurementSet& ms,
+        const String& key)
+{
+    if (Table::isReadable(ms.sourceTableName()) && ms.source().nrow() > 0 &&
+            ms.source().keywordSet().isDefined(key))
+    {
+        // Replace the source model with an empty record.
+        int row = ms.source().keywordSet().asInt(key);
+        TableRecord record;
+        MSSourceColumns srcCol(ms.source());
+        srcCol.sourceModel().put(row, record);
+        ms.source().rwKeywordSet().removeField(key);
+    }
+
+    // Remove from Main table.
+    if (ms.rwKeywordSet().isDefined(key))
+        ms.rwKeywordSet().removeField(key);
 }
 
 void oskar_MeasurementSet::set_antenna_feeds()
