@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@
 #include <oskar_get_error_string.h>
 #include <oskar_linspace.h>
 #include <oskar_meshgrid.h>
-#include <oskar_random_state.h>
 #include <oskar_binary.h>
 #include <oskar_cuda_check_error.h>
 
@@ -107,13 +106,7 @@ TEST(evaluate_station_beam, test_array_pattern)
     d_m = oskar_mem_create_copy(h_m, OSKAR_GPU, &error);
     d_n = oskar_mem_create_copy(h_n, OSKAR_GPU, &error);
 
-    // Initialise the random number generator.
-    int seed = 0;
-    oskar_RandomState* random_state = oskar_random_state_create(num_antennas,
-            seed, 0, 0, &error);
-    ASSERT_EQ(0, error) << oskar_get_error_string(error);
-
-    // Allocate weights work array.
+    // Allocate work buffers.
     oskar_StationWork* work = oskar_station_work_create(OSKAR_SINGLE,
             OSKAR_GPU, &error);
 
@@ -121,17 +114,18 @@ TEST(evaluate_station_beam, test_array_pattern)
     beam_pattern = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_GPU,
             num_pixels, &error);
 
+    int station_counter = 0;
     ASSERT_EQ(0, oskar_station_array_is_3d(station_gpu));
     oskar_evaluate_station_beam_aperture_array(beam_pattern, station_gpu,
-            num_pixels, d_l, d_m, d_n, gast, frequency, work, random_state,
-            &error);
+            num_pixels, d_l, d_m, d_n, gast, frequency, work, 0,
+            &station_counter, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
     oskar_station_set_element_coords(station_gpu, 0, 0., 0., 1., 0., 0., 0., &error);
     oskar_station_set_element_coords(station_gpu, 0, 0., 0., 0., 0., 0., 0., &error);
     ASSERT_EQ(1, oskar_station_array_is_3d(station_gpu));
     oskar_evaluate_station_beam_aperture_array(beam_pattern, station_gpu,
-            num_pixels, d_l, d_m, d_n, gast, frequency, work, random_state,
-            &error);
+            num_pixels, d_l, d_m, d_n, gast, frequency, work, 0,
+            &station_counter, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
     oskar_station_free(station_gpu, &error);
 
@@ -146,7 +140,6 @@ TEST(evaluate_station_beam, test_array_pattern)
         data = dlmread('temp_test_beam_pattern.txt');
         imagesc(log10(reshape(data(:,3), 301, 301).^2));
     --------------------------------------------------------------------------*/
-    oskar_random_state_free(random_state, &error);
     oskar_station_work_free(work, &error);
     oskar_mem_free(beam_pattern, &error);
     oskar_mem_free(h_l, &error);

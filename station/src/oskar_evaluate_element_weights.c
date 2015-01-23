@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,12 +37,12 @@ extern "C" {
 void oskar_evaluate_element_weights(oskar_Mem* weights,
         oskar_Mem* weights_error, double wavenumber,
         const oskar_Station* station, double x_beam, double y_beam,
-        double z_beam, oskar_RandomState* random_state, int* status)
+        double z_beam, int time_index, int* station_counter, int* status)
 {
     int num_elements;
 
     /* Check all inputs. */
-    if (!weights || !weights_error || !station || !status)
+    if (!weights || !weights_error || !station || !station_counter || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -69,12 +69,13 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
     if (oskar_station_apply_element_errors(station))
     {
         /* Generate weights errors. */
-        oskar_evaluate_element_weights_errors(weights_error, num_elements,
+        oskar_evaluate_element_weights_errors(num_elements,
                 oskar_station_element_gain_const(station),
                 oskar_station_element_gain_error_const(station),
                 oskar_station_element_phase_offset_rad_const(station),
                 oskar_station_element_phase_error_rad_const(station),
-                random_state, status);
+                oskar_station_seed_time_variable_errors(station),
+                time_index, station_counter, weights_error, status);
 
         /* Modify the weights (complex multiply with error vector). */
         oskar_mem_element_multiply(0, weights, weights_error,

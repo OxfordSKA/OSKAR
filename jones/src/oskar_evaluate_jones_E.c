@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,14 @@ void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, oskar_Mem* x,
         oskar_Mem* y, oskar_Mem* z, int coord_type, double lon0_rad,
         double lat0_rad, const oskar_Telescope* telescope, double gast,
         double frequency_hz, oskar_StationWork* work,
-        oskar_RandomState* random_state, int* status)
+        int time_index, int* station_counter, int* status)
 {
     int i, num_stations;
     oskar_Mem *E_station;
 
     /* Check all inputs. */
-    if (!E || !x || !y || !z || !telescope || !work || !random_state || !status)
+    if (!E || !x || !y || !z || !telescope || !work || !station_counter
+            || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -78,7 +79,7 @@ void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, oskar_Mem* x,
 
         oskar_evaluate_station_beam(E0, num_points, x, y, z,
                 coord_type, lon0_rad, lat0_rad, station0, work,
-                random_state, frequency_hz, gast, status);
+                time_index, station_counter, frequency_hz, gast, status);
 
         /* Copy E for station 0 into memory for other stations. */
         for (i = 1; i < num_stations; ++i)
@@ -99,7 +100,7 @@ void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, oskar_Mem* x,
             oskar_jones_get_station_pointer(E_station, E, i, status);
             oskar_evaluate_station_beam(E_station, num_points, x, y, z,
                     coord_type, lon0_rad, lat0_rad, station, work,
-                    random_state, frequency_hz, gast, status);
+                    time_index, station_counter, frequency_hz, gast, status);
         }
     }
     oskar_mem_free(E_station, status);

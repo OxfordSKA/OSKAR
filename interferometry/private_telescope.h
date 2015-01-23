@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,9 +66,6 @@ struct oskar_Telescope
     int max_station_depth;           /* Maximum station depth. */
     int identical_stations;          /* True if all stations are identical. */
     int allow_station_beam_duplication; /* True if station beam duplication is allowed. */
-
-    /* Random seed for time-variable station element errors (amplitude and phase). */
-    int seed_time_variable_station_element_errors;
 };
 
 #ifndef OSKAR_TELESCOPE_TYPEDEF_

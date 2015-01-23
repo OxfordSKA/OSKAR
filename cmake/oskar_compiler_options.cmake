@@ -30,6 +30,8 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include
     ${PROJECT_SOURCE_DIR}/extern/rapidxml-1.13
     ${PROJECT_SOURCE_DIR}/extern/cfitsio-3.37
+    ${PROJECT_SOURCE_DIR}/extern/Random123
+    ${PROJECT_SOURCE_DIR}/extern/Random123/features
     ${PROJECT_SOURCE_DIR}/imaging
     ${PROJECT_SOURCE_DIR}/interferometry
     ${PROJECT_SOURCE_DIR}/jones
@@ -103,7 +105,7 @@ if (NOT WIN32)
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # Using Clang or GNU compilers.
 
-        # Treat CUDA, CASA, GTEST, and ezOptionParser headers as system headers.
+        # Treat external code as system headers.
         # This avoids a number of warning supression flags.
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")

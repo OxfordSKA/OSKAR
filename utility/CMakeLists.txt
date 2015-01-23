@@ -37,7 +37,9 @@ set(utility_SRC
     src/oskar_mem_free.c
     src/oskar_mem_get_element.c
     src/oskar_mem_load_ascii.c
-    src/oskar_mem_random_fill.c
+    src/oskar_mem_random_gaussian.c
+    src/oskar_mem_random_range.c
+    src/oskar_mem_random_uniform.c
     src/oskar_mem_read_binary_raw.c
     src/oskar_mem_realloc.c
     src/oskar_mem_save_ascii.c
@@ -65,10 +67,10 @@ if (CUDA_FOUND)
         src/oskar_cuda_mem_log.c
         src/oskar_mem_add_cuda.cu
         src/oskar_mem_element_multiply_cuda.cu
+        src/oskar_mem_random_gaussian_cuda.cu
+        src/oskar_mem_random_uniform_cuda.cu
         src/oskar_mem_scale_real_cuda.cu
         src/oskar_mem_set_value_real_cuda.cu
-        src/oskar_random_state_create.cu
-        src/oskar_random_state_free.c
     )
 endif()
 

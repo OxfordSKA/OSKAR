@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,25 +26,84 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_random_state.h>
 #include <oskar_evaluate_element_weights_errors.h>
 #include <oskar_evaluate_element_weights_errors_cuda.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/* Single precision. */
+void oskar_evaluate_element_weights_errors_f(int num_elements,
+        const float* amp_gain, const float* amp_error,
+        const float* phase_offset, const float* phase_error,
+        float2* errors)
+{
+    int i;
+
+    for (i = 0; i < num_elements; ++i)
+    {
+        float2 r, t;
+
+        /* Get two random numbers from a normalised Gaussian distribution. */
+        r = errors[i];
+
+        /* Evaluate the real and imaginary components of the error weight
+         * for the antenna. */
+        r.x *= amp_error[i];
+        r.x += amp_gain[i]; /* Amplitude. */
+        r.y *= phase_error[i];
+        r.y += phase_offset[i]; /* Phase. */
+        t.x = cosf(r.y);
+        t.y = sinf(r.y);
+        t.x *= r.x; /* Real. */
+        t.y *= r.x; /* Imaginary. */
+        errors[i] = t; /* Store. */
+    }
+}
+
+/* Double precision. */
+void oskar_evaluate_element_weights_errors_d(int num_elements,
+        const double* amp_gain, const double* amp_error,
+        const double* phase_offset, const double* phase_error,
+        double2* errors)
+{
+    int i;
+
+    for (i = 0; i < num_elements; ++i)
+    {
+        double2 r, t;
+
+        /* Get two random numbers from a normalised Gaussian distribution. */
+        r = errors[i];
+
+        /* Evaluate the real and imaginary components of the error weight
+         * for the antenna. */
+        r.x *= amp_error[i];
+        r.x += amp_gain[i]; /* Amplitude. */
+        r.y *= phase_error[i];
+        r.y += phase_offset[i]; /* Phase. */
+        t.x = cos(r.y);
+        t.y = sin(r.y);
+        t.x *= r.x; /* Real. */
+        t.y *= r.x; /* Imaginary. */
+        errors[i] = t; /* Store. */
+    }
+}
+
 /* Wrapper. */
-void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
+void oskar_evaluate_element_weights_errors(int num_elements,
         const oskar_Mem* gain, const oskar_Mem* gain_error,
         const oskar_Mem* phase, const oskar_Mem* phase_error,
-        oskar_RandomState* random_states, int* status)
+        unsigned int random_seed, int time_index, int* station_counter,
+        oskar_Mem* errors, int* status)
 {
     int type, location;
 
     /* Check all inputs. */
     if (!errors || !gain || !gain_error || !phase || !phase_error ||
-            !random_states || !status)
+            !station_counter || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -90,6 +149,13 @@ void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         return;
     }
 
+    /* Generate Gaussian-distributed random numbers in output array. */
+    oskar_mem_random_gaussian(errors, random_seed, time_index,
+            *station_counter, 0x12345678, status);
+
+    /* Increment station counter ready for next time. */
+    (*station_counter)++;
+
     /* Generate weights errors: switch on type and location. */
     if (type == OSKAR_DOUBLE)
     {
@@ -104,16 +170,16 @@ void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_evaluate_element_weights_errors_cuda_d(errors_, num_elements,
-                    gain_, gain_error_, phase_, phase_error_,
-                    random_states->state);
+            oskar_evaluate_element_weights_errors_cuda_d(num_elements,
+                    gain_, gain_error_, phase_, phase_error_, errors_);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
         else if (location == OSKAR_CPU)
         {
-            *status = OSKAR_ERR_BAD_LOCATION;
+            oskar_evaluate_element_weights_errors_d(num_elements,
+                    gain_, gain_error_, phase_, phase_error_, errors_);
         }
     }
     else if (type == OSKAR_SINGLE)
@@ -129,16 +195,16 @@ void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_evaluate_element_weights_errors_cuda_f(errors_, num_elements,
-                    gain_, gain_error_, phase_, phase_error_,
-                    random_states->state);
+            oskar_evaluate_element_weights_errors_cuda_f(num_elements,
+                    gain_, gain_error_, phase_, phase_error_, errors_);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
         }
         else if (location == OSKAR_CPU)
         {
-            *status = OSKAR_ERR_BAD_LOCATION;
+            oskar_evaluate_element_weights_errors_f(num_elements,
+                    gain_, gain_error_, phase_, phase_error_, errors_);
         }
     }
     else

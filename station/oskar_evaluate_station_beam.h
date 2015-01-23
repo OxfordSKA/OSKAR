@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,7 @@
 
 #include <oskar_global.h>
 #include <oskar_station.h>
-#include <oskar_mem.h>
 #include <oskar_station_work.h>
-#include <oskar_random_state.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,6 +48,9 @@ extern "C" {
  * @details
  * This top-level function evaluates the beam pattern of a station at the
  * specified positions, given as direction cosines.
+ *
+ * The station counter must be unique for the given time index.
+ * It is updated automatically on exit.
  *
  * The longitude and latitude of the phase centre are used only
  * when performing beam normalisation for ENU directions.
@@ -66,15 +67,17 @@ extern "C" {
  * @param[in] lat0_rad        Latitude of phase centre, in radians.
  * @param[in] station         Station model.
  * @param[in] work            Station beam work arrays.
- * @param[in] rand_state      Random state.
+ * @param[in] time_index      Simulation time index.
+ * @param[in,out] station_counter Station counter. Must be unique for given time.
  * @param[in] frequency       The observing frequency in Hz.
  * @param[in] gast            The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in,out] status      Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
         oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int coord_type,
         double lon0_rad, double lat0_rad, const oskar_Station* station,
-        oskar_StationWork* work, oskar_RandomState* rand_state,
+        oskar_StationWork* work, int time_index, int* station_counter,
         double frequency, double gast, int* status);
 
 #ifdef __cplusplus

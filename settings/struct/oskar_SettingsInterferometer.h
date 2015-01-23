@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,8 +50,6 @@ struct oskar_SettingsInterferometer
     double uv_filter_min;
     double uv_filter_max;
     int uv_filter_units;
-    int num_vis_ave;
-    int num_fringe_ave;
 
     oskar_SettingsSystemNoise noise; /**< system noise model parameters. */
 

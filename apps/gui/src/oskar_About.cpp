@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -115,7 +115,7 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
         paragraph.setBottomMargin(10);
         QTextCursor cursor(licenseText);
         cursor.setBlockFormat(paragraph);
-        cursor.insertText("Copyright (c) 2011-2014, The University of Oxford. "
+        cursor.insertText("Copyright (c) 2011-2015, The University of Oxford. "
                 "\nAll rights reserved.");
         cursor.insertList(QTextListFormat::ListDecimal);
         cursor.insertText("Redistributions of source code must retain the "
@@ -202,6 +202,9 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
     html.append("<li>CFITSIO for FITS file export "
                 "(<a href=\"http://heasarc.gsfc.nasa.gov/fitsio/\">"
                 "http://heasarc.gsfc.nasa.gov/fitsio/</a>)</li>");
+    html.append("<li>Random123 for parallel random number generation "
+                "(<a href=\"http://www.deshawresearch.com/resources_random123.html\">"
+                "http://www.deshawresearch.com/resources_random123.html</a>)</li>");
     html.append("<li>ezOptionParser "
                 "(<a href=\"http://sourceforge.net/projects/ezoptionparser/\">"
                 "http://sourceforge.net/projects/ezoptionparser/</a>)</li>");
@@ -247,15 +250,15 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
             "developed at the University of Oxford.\"</i></blockquote>", this);
     ack2->setTextFormat(Qt::RichText);
     vLayoutAtt->addWidget(ack2);
-    QLabel* ack3 = new QLabel("and/or reference the following publication:",
-            this);
-    vLayoutAtt->addWidget(ack3);
-    QLabel* ack4 = new QLabel("<blockquote>Dulwich, F., Mort, B. J., Salvini, S., "
-            "\"<i>OSKAR: A software package to simulate data from radio "
-            "interferometers\"</i>,<br>"
-            "MNRAS 2014, in preparation.</blockquote>", this);
-    ack4->setTextFormat(Qt::RichText);
-    vLayoutAtt->addWidget(ack4);
+//    QLabel* ack3 = new QLabel("and/or reference the following publication:",
+//            this);
+//    vLayoutAtt->addWidget(ack3);
+//    QLabel* ack4 = new QLabel("<blockquote>Dulwich, F., Mort, B. J., Salvini, S., "
+//            "\"<i>OSKAR: A software package to simulate data from radio "
+//            "interferometers\"</i>,<br>"
+//            "MNRAS 2015, in preparation.</blockquote>", this);
+//    ack4->setTextFormat(Qt::RichText);
+//    vLayoutAtt->addWidget(ack4);
 
     // Add attribution group.
     vLayoutMain->addWidget(grpAtt);

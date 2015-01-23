@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@
 #include <gtest/gtest.h>
 
 #include <oskar_evaluate_element_weights_errors.h>
-#include <oskar_random_state.h>
 #include <oskar_get_error_string.h>
 #include <oskar_mem.h>
 
@@ -44,7 +43,8 @@ TEST(element_weights_errors, test_evaluate)
     double element_gain_error  = 0.0;
     double element_phase       = 0.0 * M_PI;
     double element_phase_error = 0.0  * M_PI;
-    int error = 0, seed = 0;
+    int error = 0;
+    unsigned int seed = 1;
 
     oskar_Mem *d_gain, *d_gain_error, *d_phase, *d_phase_error, *d_errors;
     d_gain = oskar_mem_create(OSKAR_DOUBLE, OSKAR_GPU,
@@ -66,14 +66,11 @@ TEST(element_weights_errors, test_evaluate)
     oskar_mem_set_value_real(d_errors, 0.0, 0, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    oskar_RandomState* random_state = oskar_random_state_create(num_elements,
-            seed, 0, 0, &error);
-    ASSERT_EQ(0, error) << oskar_get_error_string(error);
-
     // Evaluate weights errors.
-    oskar_evaluate_element_weights_errors(d_errors, num_elements,
-            d_gain, d_gain_error, d_phase, d_phase_error, random_state,
-            &error);
+    int counter = 0;
+    oskar_evaluate_element_weights_errors(num_elements,
+            d_gain, d_gain_error, d_phase, d_phase_error,
+            seed, 0, &counter, d_errors, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Write memory to file for inspection.
@@ -85,7 +82,6 @@ TEST(element_weights_errors, test_evaluate)
     remove(fname);
 
     // Free memory.
-    oskar_random_state_free(random_state, &error);
     oskar_mem_free(d_gain, &error);
     oskar_mem_free(d_gain_error, &error);
     oskar_mem_free(d_phase, &error);
@@ -142,11 +138,10 @@ TEST(element_weights_errors, test_apply)
     }
     d_weights = oskar_mem_create_copy(h_weights, OSKAR_GPU, &status);
 
-    oskar_RandomState* states = oskar_random_state_create(num_elements,
-            0, 0, 0, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_evaluate_element_weights_errors(d_errors, num_elements,
-            d_gain, d_gain_error, d_phase, d_phase_error, states, &status);
+    int counter = 0;
+    oskar_evaluate_element_weights_errors(num_elements,
+            d_gain, d_gain_error, d_phase, d_phase_error,
+            0, 0, &counter, d_errors, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_element_multiply(NULL, d_weights, d_errors, num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -161,7 +156,6 @@ TEST(element_weights_errors, test_apply)
     remove(fname);
 
     // Free memory.
-    oskar_random_state_free(states, &status);
     oskar_mem_free(d_gain, &status);
     oskar_mem_free(d_gain_error, &status);
     oskar_mem_free(d_phase, &status);
@@ -206,6 +200,7 @@ TEST(element_weights_errors, test_reinit)
     int num_chunks = 3;
     int num_stations = 5;
     int num_times = 3;
+    unsigned int seed = 1;
 
     const char* fname = "temp_test_weights_error_reinit.dat";
     FILE* file = fopen(fname, "w");
@@ -215,19 +210,18 @@ TEST(element_weights_errors, test_reinit)
         for (int chunk = 0; chunk < num_chunks; ++chunk)
         {
             fprintf(file, "  chunk: %i\n", chunk);
-            oskar_RandomState* states = oskar_random_state_create(num_elements,
-                    0, 0, 0, &status);
             ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
             for (int t = 0; t < num_times; ++t)
             {
                 fprintf(file, "    time: %i\n", t);
+                int station_counter = 0;
                 for (int s = 0; s < num_stations; ++s)
                 {
                     fprintf(file, "      station: %i  ==> ", s);
-                    oskar_evaluate_element_weights_errors(d_errors, num_elements,
+                    oskar_evaluate_element_weights_errors(num_elements,
                             d_gain, d_gain_error, d_phase, d_phase_error,
-                            states, &status);
+                            seed, t, &station_counter, d_errors, &status);
                     ASSERT_EQ(0, status) << oskar_get_error_string(status);
                     oskar_Mem *h_errors = oskar_mem_create_copy(d_errors,
                             OSKAR_CPU, &status);
@@ -241,12 +235,11 @@ TEST(element_weights_errors, test_reinit)
                     oskar_mem_free(h_errors, &status);
                 }
             }
-            oskar_random_state_free(states, &status);
             ASSERT_EQ(0, status) << oskar_get_error_string(status);
         }
     }
     fclose(file);
-    remove(fname);
+//    remove(fname);
 
     oskar_mem_free(d_gain, &status);
     oskar_mem_free(d_gain_error, &status);

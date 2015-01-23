@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -239,7 +239,9 @@ OSKAR_INLINE int oskar_mem_type_is_scalar(const int mem_type)
 #include <oskar_mem_free.h>
 #include <oskar_mem_get_element.h>
 #include <oskar_mem_load_ascii.h>
-#include <oskar_mem_random_fill.h>
+#include <oskar_mem_random_gaussian.h>
+#include <oskar_mem_random_range.h>
+#include <oskar_mem_random_uniform.h>
 #include <oskar_mem_read_binary_raw.h>
 #include <oskar_mem_realloc.h>
 #include <oskar_mem_save_ascii.h>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,6 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->max_station_depth = 1;
     telescope->identical_stations = 0;
     telescope->allow_station_beam_duplication = 0;
-    telescope->seed_time_variable_station_element_errors = 0;
     telescope->lon_rad = 0.0;
     telescope->lat_rad = 0.0;
     telescope->alt_metres = 0.0;

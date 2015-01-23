@@ -187,6 +187,8 @@ OSKAR 2 directly links against or uses the following software libraries:
 - The Qt cross-platform application framework (http://qt.io/)
 - casacore for Measurement Set export (http://code.google.com/p/casacore/)
 - CFITSIO for FITS file export (http://heasarc.gsfc.nasa.gov/fitsio/)
+- Random123 for parallel random number generation 
+  (http://www.deshawresearch.com/resources_random123.html)
 - ezOptionParser (http://sourceforge.net/projects/ezoptionparser/)
 
 The following tools have been used during the development of OSKAR 2:
@@ -222,6 +224,8 @@ Smithsonian Astrophysical Observatory.
     documents.</td></tr>
 <tr><td>6</td><td>2014-07-16</td>
     <td>Updated feature summary and roadmap for OSKAR 2.5.0.</td></tr>
+<tr><td>7</td><td>2015-01-23</td>
+    <td>Added attribution for use of Random123 library.</td></tr>
 </table>
 
 */

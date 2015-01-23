@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,6 +86,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     model->array_is_3d = src->array_is_3d;
     model->apply_element_errors = src->apply_element_errors;
     model->apply_element_weight = src->apply_element_weight;
+    model->seed_time_variable_errors = src->seed_time_variable_errors;
     model->nominal_orientation_x_rad = src->nominal_orientation_x_rad;
     model->nominal_orientation_y_rad = src->nominal_orientation_y_rad;
     model->num_permitted_beams = src->num_permitted_beams;

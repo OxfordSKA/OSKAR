@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -142,11 +142,6 @@ int oskar_telescope_max_station_depth(const oskar_Telescope* model)
     return model->max_station_depth;
 }
 
-int oskar_telescope_random_seed(const oskar_Telescope* model)
-{
-    return model->seed_time_variable_station_element_errors;
-}
-
 
 /* Station models. */
 
@@ -284,11 +279,6 @@ void oskar_telescope_set_uv_filter(oskar_Telescope* model,
 void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model, int value)
 {
     model->allow_station_beam_duplication = value;
-}
-
-void oskar_telescope_set_random_seed(oskar_Telescope* model, int value)
-{
-    model->seed_time_variable_station_element_errors = value;
 }
 
 

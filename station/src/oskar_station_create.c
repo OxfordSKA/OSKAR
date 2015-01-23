@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -134,6 +134,7 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->array_is_3d = OSKAR_FALSE;
     model->apply_element_errors = OSKAR_FALSE;
     model->apply_element_weight = OSKAR_FALSE;
+    model->seed_time_variable_errors = 1;
     model->nominal_orientation_x_rad = M_PI / 2.0;
     model->nominal_orientation_y_rad = 0.0;
     model->child = 0;

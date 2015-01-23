@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-void oskar_mem_random_fill(oskar_Mem* mem, double lo, double hi, int* status)
+void oskar_mem_random_range(oskar_Mem* mem, double lo, double hi, int* status)
 {
     oskar_Mem *temp, *ptr;
     size_t i, num_elements;

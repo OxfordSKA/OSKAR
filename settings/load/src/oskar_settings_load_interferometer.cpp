@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,8 +69,6 @@ void oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
     {
         settings->channel_bandwidth_hz = s.value("channel_bandwidth_hz").toDouble();
         settings->time_average_sec = s.value("time_average_sec", 0.0).toDouble();
-        settings->num_vis_ave      = s.value("num_vis_ave", 1).toInt();
-        settings->num_fringe_ave   = s.value("num_fringe_ave", 1).toInt();
 
         // Get UV filter parameters.
         temp = s.value("uv_filter_min", "min").toString().toUpper();
@@ -100,10 +98,6 @@ void oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
         }
     }
     s.endGroup();
-
-    // Range checks.
-    if (settings->num_vis_ave <= 0) settings->num_vis_ave = 1;
-    if (settings->num_fringe_ave <= 0) settings->num_fringe_ave = 1;
 
     load_noise(&settings->noise, filename, status);
 }

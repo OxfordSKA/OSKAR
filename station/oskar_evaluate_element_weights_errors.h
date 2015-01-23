@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,18 +34,80 @@
  */
 
 #include <oskar_global.h>
+#include <oskar_vector_types.h>
 #include <oskar_mem.h>
-#include <oskar_random_state.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * @brief
+ * Evaluates weights errors for antenna elements (single precision, CPU).
+ *
+ * @details
+ * Uses uniform random Gaussian values to generate weights errors for antennas.
+ *
+ * @param[in] num_elements The number of antenna elements.
+ * @param[in] gain         Element gain values.
+ * @param[in] gain_error   Standard deviation for time-variable element gains.
+ * @param[in] phase        Element phase offsets, in radians.
+ * @param[in] phase_error  Standard deviation for time-variable element phases.
+ * @param[in,out] errors   On input, normal random Gaussian values; on exit, complex error weights.
+ */
 OSKAR_EXPORT
-void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
+void oskar_evaluate_element_weights_errors_f(int num_elements,
+        const float* amp_gain, const float* amp_error,
+        const float* phase_offset, const float* phase_error,
+        float2* errors);
+
+/**
+ * @brief
+ * Evaluates weights errors for antenna elements (double precision, CPU).
+ *
+ * @details
+ * Uses uniform random Gaussian values to generate weights errors for antennas.
+ *
+ * @param[in] num_elements The number of antenna elements.
+ * @param[in] gain         Element gain values.
+ * @param[in] gain_error   Standard deviation for time-variable element gains.
+ * @param[in] phase        Element phase offsets, in radians.
+ * @param[in] phase_error  Standard deviation for time-variable element phases.
+ * @param[in,out] errors   On input, normal random Gaussian values; on exit, complex error weights.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_element_weights_errors_d(int num_elements,
+        const double* amp_gain, const double* amp_error,
+        const double* phase_offset, const double* phase_error,
+        double2* errors);
+
+/**
+ * @brief
+ * Evaluates weights errors for antenna elements.
+ *
+ * @details
+ * Weights errors are generated randomly from a Gaussian distribution.
+ *
+ * The station counter must be unique for the given time index.
+ * It will automatically increment on exit from this function.
+ *
+ * @param[in] num_elements The number of antenna elements.
+ * @param[in] gain         Element gain values.
+ * @param[in] gain_error   Standard deviation for time-variable element gains.
+ * @param[in] phase        Element phase offsets, in radians.
+ * @param[in] phase_error  Standard deviation for time-variable element phases.
+ * @param[in] random_seed  Random seed.
+ * @param[in] time_index   The simulation time index.
+ * @param[in,out] station_counter Station counter. Must be unique for the given time.
+ * @param[out] errors      Complex element errors for this time.
+ * @param[in,out] status   Status return code.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_element_weights_errors(int num_elements,
         const oskar_Mem* gain, const oskar_Mem* gain_error,
         const oskar_Mem* phase, const oskar_Mem* phase_error,
-        oskar_RandomState* states, int* status);
+        unsigned int random_seed, int time_index, int* station_counter,
+        oskar_Mem* errors, int* status);
 
 #ifdef __cplusplus
 }

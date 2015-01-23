@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,12 +42,12 @@ extern "C" {
 static void evaluate_station_beam_relative_directions(oskar_Mem* beam_pattern,
         int np, const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
         const oskar_Station* station, oskar_StationWork* work,
-        oskar_RandomState* rand_state, double frequency, double GAST,
+        int time_index, int* station_counter, double frequency, double GAST,
         int* status);
 static void evaluate_station_beam_enu_directions(oskar_Mem* beam_pattern,
         int np, const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
         const oskar_Station* station, oskar_StationWork* work,
-        oskar_RandomState* rand_state, double frequency, double GAST,
+        int time_index, int* station_counter, double frequency, double GAST,
         int* status);
 static void compute_enu_directions(oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
         int np, const oskar_Mem* l, const oskar_Mem* m,
@@ -61,15 +61,15 @@ static void compute_relative_directions(oskar_Mem* l, oskar_Mem* m,
 void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
         oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int coord_type,
         double lon0_rad, double lat0_rad, const oskar_Station* station,
-        oskar_StationWork* work, oskar_RandomState* rand_state,
+        oskar_StationWork* work, int time_index, int* station_counter,
         double frequency, double GAST, int* status)
 {
     int normalise_final_beam;
     oskar_Mem* op;
 
     /* Check all inputs. */
-    if (!beam_pattern || !x || !y || !z || !station || !work || !rand_state ||
-            !status)
+    if (!beam_pattern || !x || !y || !z || !station || !work ||
+            !station_counter || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -133,14 +133,14 @@ void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
     if (coord_type == OSKAR_ENU_DIRECTIONS)
     {
         evaluate_station_beam_enu_directions(op, num_points,
-                x, y, z, station, work, rand_state, frequency, GAST,
-                status);
+                x, y, z, station, work, time_index, station_counter,
+                frequency, GAST, status);
     }
     else if (coord_type == OSKAR_RELATIVE_DIRECTIONS)
     {
         evaluate_station_beam_relative_directions(op, num_points,
-                x, y, z, station, work, rand_state, frequency, GAST,
-                status);
+                x, y, z, station, work, time_index, station_counter,
+                frequency, GAST, status);
     }
     else
     {
@@ -200,7 +200,7 @@ void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
 static void evaluate_station_beam_relative_directions(oskar_Mem* beam_pattern,
         int np, const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
         const oskar_Station* station, oskar_StationWork* work,
-        oskar_RandomState* rand_state, double frequency, double GAST,
+        int time_index, int* station_counter, double frequency, double GAST,
         int* status)
 {
     oskar_Mem *x, *y, *z; /* ENU direction cosines */
@@ -218,7 +218,8 @@ static void evaluate_station_beam_relative_directions(oskar_Mem* beam_pattern,
         case OSKAR_STATION_TYPE_AA:
         {
             oskar_evaluate_station_beam_aperture_array(beam_pattern, station,
-                    np, x, y, z, GAST, frequency, work, rand_state, status);
+                    np, x, y, z, GAST, frequency, work, time_index,
+                    station_counter, status);
             break;
         }
         case OSKAR_STATION_TYPE_ISOTROPIC:
@@ -230,7 +231,7 @@ static void evaluate_station_beam_relative_directions(oskar_Mem* beam_pattern,
         {
             double fwhm, f0;
             fwhm = oskar_station_gaussian_beam_fwhm_rad(station);
-            f0 =oskar_station_gaussian_beam_reference_freq_hz(station);
+            f0 = oskar_station_gaussian_beam_reference_freq_hz(station);
             fwhm *= f0 / frequency;
             oskar_evaluate_station_beam_gaussian(beam_pattern, np, l, m, z,
                     fwhm, status);
@@ -253,7 +254,7 @@ static void evaluate_station_beam_relative_directions(oskar_Mem* beam_pattern,
 static void evaluate_station_beam_enu_directions(oskar_Mem* beam_pattern,
         int np, const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
         const oskar_Station* station, oskar_StationWork* work,
-        oskar_RandomState* rand_state, double frequency, double GAST,
+        int time_index, int* station_counter, double frequency, double GAST,
         int* status)
 {
     if (*status) return;
@@ -263,7 +264,8 @@ static void evaluate_station_beam_enu_directions(oskar_Mem* beam_pattern,
         case OSKAR_STATION_TYPE_AA:
         {
             oskar_evaluate_station_beam_aperture_array(beam_pattern, station,
-                    np, x, y, z, GAST, frequency, work, rand_state, status);
+                    np, x, y, z, GAST, frequency, work, time_index,
+                    station_counter, status);
             break;
         }
         case OSKAR_STATION_TYPE_ISOTROPIC:

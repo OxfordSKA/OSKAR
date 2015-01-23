@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -248,7 +248,6 @@ static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
         const oskar_Settings* settings, int* status)
 {
     int i, num_stations;
-    const oskar_SettingsApertureArray* aa = &settings->telescope.aperture_array;
 
     if (*status) return;
 
@@ -268,8 +267,6 @@ static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
             settings->interferometer.uv_filter_min,
             settings->interferometer.uv_filter_max,
             settings->interferometer.uv_filter_units);
-    oskar_telescope_set_random_seed(telescope,
-            aa->array_pattern.element.seed_time_variable_errors);
     num_stations = oskar_telescope_num_stations(telescope);
     for (i = 0; i < num_stations; ++i)
     {
@@ -300,6 +297,8 @@ static void set_station_data(oskar_Station* station,
     oskar_station_set_enable_array_pattern(station, aa->array_pattern.enable);
     oskar_station_set_normalise_array_pattern(station,
             aa->array_pattern.normalise);
+    oskar_station_set_seed_time_variable_errors(station,
+            aa->array_pattern.element.seed_time_variable_errors);
     oskar_station_set_gaussian_beam(station,
             settings->telescope.gaussian_beam.fwhm_deg * M_PI / 180.0,
             settings->telescope.gaussian_beam.ref_freq_hz);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,38 +36,33 @@
 #include <oskar_global.h>
 #include <oskar_vector_types.h>
 
-/* Forward declaration. */
-struct curandStateXORWOW;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 OSKAR_EXPORT
-void oskar_evaluate_element_weights_errors_cuda_f(float2* errors,
-        int num_elements, const float* amp_gain, const float* amp_error,
-        const float* phase_offset, const float* phase_error,
-        struct curandStateXORWOW* state);
+void oskar_evaluate_element_weights_errors_cuda_f(int num_elements,
+        const float* amp_gain, const float* amp_error,
+        const float* phase_offset, const float* phase_error, float2* errors);
 
 OSKAR_EXPORT
-void oskar_evaluate_element_weights_errors_cuda_d(double2* errors,
-        int num_elements, const double* amp_gain, const double* amp_error,
-        const double* phase_offset, const double* phase_error,
-        struct curandStateXORWOW* state);
+void oskar_evaluate_element_weights_errors_cuda_d(int num_elements,
+        const double* amp_gain, const double* amp_error,
+        const double* phase_offset, const double* phase_error, double2* errors);
 
 #ifdef __CUDACC__
 
 __global__
-void oskar_evaluate_element_weights_errors_cudak_f(float2* errors, int n,
-        const float* amp_gain, const float* amp_error,
-        const float* phase_offset, const float* phase_error,
-        struct curandStateXORWOW* state);
+void oskar_evaluate_element_weights_errors_cudak_f(int num_elements,
+        const float* restrict amp_gain, const float* restrict amp_error,
+        const float* restrict phase_offset, const float* restrict phase_error,
+        float2* errors);
 
 __global__
-void oskar_evaluate_element_weights_errors_cudak_d(double2* errors, int n,
-        const double* amp_gain, const double* amp_error,
-        const double* phase_offset, const double* phase_error,
-        struct curandStateXORWOW* state);
+void oskar_evaluate_element_weights_errors_cudak_d(int num_elements,
+        const double* restrict amp_gain, const double* restrict amp_error,
+        const double* restrict phase_offset, const double* restrict phase_error,
+        double2* errors);
 
 #endif /* __CUDACC__ */
 

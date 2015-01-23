@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -149,6 +149,9 @@ int oskar_station_apply_element_errors(const oskar_Station* model);
 
 OSKAR_EXPORT
 int oskar_station_apply_element_weight(const oskar_Station* model);
+
+OSKAR_EXPORT
+unsigned int oskar_station_seed_time_variable_errors(const oskar_Station* model);
 
 OSKAR_EXPORT
 double oskar_station_nominal_element_orientation_x_rad(
@@ -421,6 +424,17 @@ void oskar_station_set_normalise_array_pattern(oskar_Station* model, int value);
  */
 OSKAR_EXPORT
 void oskar_station_set_enable_array_pattern(oskar_Station* model, int value);
+
+/**
+ * @brief
+ * Sets the seed used to generate time-variable errors.
+ *
+ * @param[in] model  Pointer to station model.
+ * @param[in] value  Seed value.
+ */
+OSKAR_EXPORT
+void oskar_station_set_seed_time_variable_errors(oskar_Station* model,
+        unsigned int value);
 
 #ifdef __cplusplus
 }

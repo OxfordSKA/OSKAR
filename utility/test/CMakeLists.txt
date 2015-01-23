@@ -19,9 +19,11 @@ set(${name}_SRC
     Test_Mem_stats.cpp
     Test_Mem_to_type.cpp
     Test_Mem_type_check.cpp
+    Test_Mem_random.cpp
     Test_string_to_array.cpp
     Test_Timer.cpp
 )
+
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)
 set_target_properties(${name} PROPERTIES

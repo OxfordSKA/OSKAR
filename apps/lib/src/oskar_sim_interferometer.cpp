@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,6 @@
 #include <oskar_log.h>
 #include <oskar_jones.h>
 #include <oskar_convert_mjd_to_gast_fast.h>
-#include <oskar_random_state.h>
 #include <oskar_settings_free.h>
 #include <oskar_sky.h>
 #include <oskar_telescope.h>
@@ -364,23 +363,11 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     // Initialise work buffer for Z Jones evaluation.
     //oskar_work_jones_z_init(&workJonesZ, type, OSKAR_CPU, status);
 
-    // Initialise the CUDA random number generator.
-    // Note: This is reset to the same sequence per sky chunk and per channel.
-    // This is required so that when splitting the sky into chunks or channels,
-    // antennas still have the same error value for the given time and seed.
-    oskar_RandomState* random_state = oskar_random_state_create(
-            oskar_telescope_max_station_size(tel),
-            oskar_telescope_random_seed(tel), 0, 0, status);
-
     // Get settings parameters.
     int apply_horizon_clip   = settings->sky.apply_horizon_clip;
     int num_vis_dumps        = settings->obs.num_time_steps;
-    int num_vis_ave          = settings->interferometer.num_vis_ave;
-    int num_fringe_ave       = settings->interferometer.num_fringe_ave;
     double obs_start_mjd_utc = settings->obs.start_mjd_utc;
     double dt_dump           = settings->obs.dt_dump_days;
-    double dt_ave            = dt_dump / settings->interferometer.num_vis_ave;
-    double dt_fringe         = dt_ave / settings->interferometer.num_fringe_ave;
     double ra0               = oskar_telescope_phase_centre_ra_rad(tel);
     double dec0              = oskar_telescope_phase_centre_dec_rad(tel);
 
@@ -389,6 +376,7 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     for (int i = 0; i < num_vis_dumps; ++i)
     {
         oskar_Sky* sky_ptr = sky_gpu;
+        int station_counter = 0; // Reset for each time.
 
         // Check status code.
         if (*status) break;
@@ -425,89 +413,72 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         oskar_jones_set_size(E, n_stations, n_src, status);
         oskar_jones_set_size(K, n_stations, n_src, status);
 
-        // Average snapshot.
-        for (int j = 0; j < num_vis_ave; ++j)
-        {
-            // Evaluate Greenwich Apparent Sidereal Time.
-            double t_ave = t_dump + j * dt_ave;
-            gast = oskar_convert_mjd_to_gast_fast(t_ave + dt_ave / 2);
-
-            // Evaluate station beam (Jones E: may be matrix).
-            oskar_timer_resume(timers->tmr_E);
-            oskar_evaluate_jones_E(E, n_src,
-                    oskar_sky_l(sky_ptr),
-                    oskar_sky_m(sky_ptr),
-                    oskar_sky_n(sky_ptr), OSKAR_RELATIVE_DIRECTIONS,
-                    oskar_sky_reference_ra_rad(sky_ptr),
-                    oskar_sky_reference_dec_rad(sky_ptr),
-                    tel, gast, frequency, work, random_state, status);
-            oskar_timer_pause(timers->tmr_E);
+        // Evaluate station beam (Jones E: may be matrix).
+        oskar_timer_resume(timers->tmr_E);
+        oskar_evaluate_jones_E(E, n_src,
+                oskar_sky_l(sky_ptr),
+                oskar_sky_m(sky_ptr),
+                oskar_sky_n(sky_ptr), OSKAR_RELATIVE_DIRECTIONS,
+                oskar_sky_reference_ra_rad(sky_ptr),
+                oskar_sky_reference_dec_rad(sky_ptr),
+                tel, gast, frequency, work, i, &station_counter, status);
+        oskar_timer_pause(timers->tmr_E);
 
 #if 0
-            // Evaluate ionospheric phase screen (Jones Z: scalar),
-            // and join with Jones E.
-            // NOTE this is currently only a CPU implementation.
-            if (Z)
-            {
-                oskar_evaluate_jones_Z(Z, n_src, sky_ptr, tel,
-                        &settings->ionosphere, gast, frequency, &workJonesZ,
-                        status);
-                oskar_timer_resume(timers->tmr_join);
-                oskar_jones_join(E, Z, E, status);
-                oskar_timer_pause(timers->tmr_join);
-            }
+        // Evaluate ionospheric phase screen (Jones Z: scalar),
+        // and join with Jones E.
+        // NOTE this is currently only a CPU implementation.
+        if (Z)
+        {
+            oskar_evaluate_jones_Z(Z, n_src, sky_ptr, tel,
+                    &settings->ionosphere, gast, frequency, &workJonesZ,
+                    status);
+            oskar_timer_resume(timers->tmr_join);
+            oskar_jones_join(E, Z, E, status);
+            oskar_timer_pause(timers->tmr_join);
+        }
 #endif
 
-            // Evaluate parallactic angle (Jones R: matrix),
-            // and join with Jones Z*E.
-            if (R)
-            {
-                oskar_timer_resume(timers->tmr_R);
-                oskar_evaluate_jones_R(R, n_src,
-                        oskar_sky_ra_rad_const(sky_ptr),
-                        oskar_sky_dec_rad_const(sky_ptr), tel, gast, status);
-                oskar_timer_pause(timers->tmr_R);
-                oskar_timer_resume(timers->tmr_join);
-                oskar_jones_join(R, E, R, status);
-                oskar_timer_pause(timers->tmr_join);
-            }
-
-            for (int k = 0; k < num_fringe_ave; ++k)
-            {
-                // Evaluate Greenwich Apparent Sidereal Time.
-                double t_fringe = t_ave + k * dt_fringe;
-                gast = oskar_convert_mjd_to_gast_fast(t_fringe + dt_fringe / 2);
-
-                // Evaluate station u,v,w coordinates.
-                oskar_convert_ecef_to_station_uvw(n_stations, x, y, z,
-                        ra0, dec0, gast, u, v, w, status);
-
-                // Evaluate interferometer phase (Jones K: scalar).
-                oskar_timer_resume(timers->tmr_K);
-                oskar_evaluate_jones_K(K, n_src,
-                        oskar_sky_l_const(sky_ptr),
-                        oskar_sky_m_const(sky_ptr),
-                        oskar_sky_n_const(sky_ptr), u, v, w, frequency,
-                        status);
-                oskar_timer_pause(timers->tmr_K);
-
-                // Join Jones K with Jones Z*E*R (if it exists),
-                // otherwise with Jones Z*E
-                oskar_timer_resume(timers->tmr_join);
-                oskar_jones_join(J, K, R ? R : E, status);
-                oskar_timer_pause(timers->tmr_join);
-
-                // Correlate.
-                oskar_timer_resume(timers->tmr_correlate);
-                oskar_correlate(vis, n_src, J, sky_ptr, tel, u, v,
-                        gast, frequency, status);
-                oskar_timer_pause(timers->tmr_correlate);
-            }
+        // Evaluate parallactic angle (Jones R: matrix),
+        // and join with Jones Z*E.
+        if (R)
+        {
+            oskar_timer_resume(timers->tmr_R);
+            oskar_evaluate_jones_R(R, n_src,
+                    oskar_sky_ra_rad_const(sky_ptr),
+                    oskar_sky_dec_rad_const(sky_ptr), tel, gast, status);
+            oskar_timer_pause(timers->tmr_R);
+            oskar_timer_resume(timers->tmr_join);
+            oskar_jones_join(R, E, R, status);
+            oskar_timer_pause(timers->tmr_join);
         }
 
-        // Divide visibilities by number of averages, and add to global data.
+        // Evaluate station u,v,w coordinates.
+        oskar_convert_ecef_to_station_uvw(n_stations, x, y, z,
+                ra0, dec0, gast, u, v, w, status);
+
+        // Evaluate interferometer phase (Jones K: scalar).
+        oskar_timer_resume(timers->tmr_K);
+        oskar_evaluate_jones_K(K, n_src,
+                oskar_sky_l_const(sky_ptr),
+                oskar_sky_m_const(sky_ptr),
+                oskar_sky_n_const(sky_ptr), u, v, w, frequency, status);
+        oskar_timer_pause(timers->tmr_K);
+
+        // Join Jones K with Jones Z*E*R (if it exists),
+        // otherwise with Jones Z*E
+        oskar_timer_resume(timers->tmr_join);
+        oskar_jones_join(J, K, R ? R : E, status);
+        oskar_timer_pause(timers->tmr_join);
+
+        // Correlate.
+        oskar_timer_resume(timers->tmr_correlate);
+        oskar_correlate(vis, n_src, J, sky_ptr, tel, u, v,
+                gast, frequency, status);
+        oskar_timer_pause(timers->tmr_correlate);
+
+        // Insert into global visibility data.
         oskar_timer_resume(timers->tmr_init_copy);
-        oskar_mem_scale_real(vis, 1.0/(num_fringe_ave * num_vis_ave), status);
         oskar_mem_copy_contents(vis_amp, vis, i * n_baselines, 0,
                 oskar_mem_length(vis), status);
         oskar_timer_pause(timers->tmr_init_copy);
@@ -517,7 +488,6 @@ static void interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_cuda_mem_log(log, 1, device_id);
 
     // Free memory.
-    oskar_random_state_free(random_state, status);
     oskar_mem_free(u, status);
     oskar_mem_free(v, status);
     oskar_mem_free(w, status);

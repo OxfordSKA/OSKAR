@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@
 #include <oskar_meshgrid.h>
 #include <oskar_SphericalPositions.h>
 #include <oskar_evaluate_jones_E.h>
-#include <oskar_random_state.h>
 #include <oskar_get_error_string.h>
 
 #include <oskar_cmath.h>
@@ -92,11 +91,6 @@ TEST(evaluate_jones_E, evaluate_e)
     oskar_telescope_free(tel_cpu, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    // Initialise the random number generator.
-    oskar_RandomState* random_state = oskar_random_state_create(num_antennas,
-            0, 0, 0, &error);
-    ASSERT_EQ(0, error) << oskar_get_error_string(error);
-
     // Construct a sky model.
     oskar_Sky* sky_cpu = oskar_sky_create(OSKAR_SINGLE, OSKAR_CPU, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
@@ -135,12 +129,13 @@ TEST(evaluate_jones_E, evaluate_e)
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Evaluate Jones E.
+    int station_counter = 0;
     oskar_evaluate_jones_E(E, oskar_sky_num_sources(sky_gpu),
             oskar_sky_l(sky_gpu), oskar_sky_m(sky_gpu), oskar_sky_n(sky_gpu),
             OSKAR_RELATIVE_DIRECTIONS,
             oskar_sky_reference_ra_rad(sky_gpu),
             oskar_sky_reference_dec_rad(sky_gpu),
-            tel_gpu, gast, frequency, work, random_state, &error);
+            tel_gpu, gast, frequency, work, 0, &station_counter, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Save to file for plotting.
@@ -177,7 +172,6 @@ TEST(evaluate_jones_E, evaluate_e)
         station = 1;
         scatter3(l(:,station),m(:,station),n(:,station),2,amp(:,station));
      */
-    oskar_random_state_free(random_state, &error);
     oskar_jones_free(E, &error);
     oskar_sky_free(sky_gpu, &error);
     oskar_telescope_free(tel_gpu, &error);

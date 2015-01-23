@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -547,8 +547,6 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
 
     LV("Channel bandwidth [Hz]", "%.3e", s->interferometer.channel_bandwidth_hz);
     LV("Time average [sec]", "%.2f", s->interferometer.time_average_sec);
-    LVI("Num. visibility ave.", s->interferometer.num_vis_ave);
-    LVI("Num. fringe ave.", s->interferometer.num_fringe_ave);
     if (s->interferometer.uv_filter_min > 0.0)
         LV("UV range filter min", "%.3f", s->interferometer.uv_filter_min);
     if (s->interferometer.uv_filter_max >= 0.0)

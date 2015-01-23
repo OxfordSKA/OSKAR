@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@
 #include <oskar_mem.h>
 #include <oskar_station.h>
 #include <oskar_station_work.h>
-#include <oskar_random_state.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,8 +70,8 @@ extern "C" {
  * re-use the same work structure to ensure optimum performance and no needless
  * memory reallocation.
  *
- * The pointer to the structure holding random number states must be
- * initialised.
+ * The station counter must be unique for the given time index.
+ * It will be automatically incremented on exit from this function.
  *
  * @param[out]    beam          Station beam evaluated at x,y,z positions.
  * @param[in]     station       Fully populated station model structure.
@@ -88,17 +87,17 @@ extern "C" {
  * @param[in]     frequency_hz  The observing frequency, in Hz.
  * @param[in]     work          Initialised structure containing temporary work
  *                              buffers.
- * @param[in]     random_states Initialised structure of CURAND random-number
- *                              states used to model various errors at the
- *                              station-level.
+ * @param[in]     time_index    Simulation time index.
+ * @param[in,out] station_counter Station counter. Must be unique for the
+ *                                given time index. Automatically incremented.
  * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         const oskar_Station* station, int num_points, const oskar_Mem* x,
         const oskar_Mem* y, const oskar_Mem* z, double gast,
-        double frequency_hz, oskar_StationWork* work,
-        oskar_RandomState* random_states, int* status);
+        double frequency_hz, oskar_StationWork* work, int time_index,
+        int* station_counter, int* status);
 
 #ifdef __cplusplus
 }

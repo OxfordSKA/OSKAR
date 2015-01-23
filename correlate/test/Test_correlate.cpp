@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,30 +91,30 @@ protected:
 
         // Fill data structures with random data in sensible ranges.
         srand(0);
-        oskar_mem_random_fill(oskar_jones_mem(jones), 0.1, 100.0, &status);
-        oskar_mem_random_fill(u_, 500.0, 1000.0, &status);
-        oskar_mem_random_fill(v_, 500.0, 1000.0, &status);
-        oskar_mem_random_fill(
+        oskar_mem_random_range(oskar_jones_mem(jones), 0.1, 100.0, &status);
+        oskar_mem_random_range(u_, 500.0, 1000.0, &status);
+        oskar_mem_random_range(v_, 500.0, 1000.0, &status);
+        oskar_mem_random_range(
                 oskar_telescope_station_true_x_offset_ecef_metres(tel),
                 0.1, 1000.0, &status);
-        oskar_mem_random_fill(
+        oskar_mem_random_range(
                 oskar_telescope_station_true_y_offset_ecef_metres(tel),
                 0.1, 1000.0, &status);
-        oskar_mem_random_fill(
+        oskar_mem_random_range(
                 oskar_telescope_station_true_z_offset_ecef_metres(tel),
                 0.1, 1000.0, &status);
-        oskar_mem_random_fill(oskar_sky_I(sky), 2.0, 5.0, &status);
-        oskar_mem_random_fill(oskar_sky_Q(sky), 0.1, 1.0, &status);
-        oskar_mem_random_fill(oskar_sky_U(sky), 0.1, 0.5, &status);
-        oskar_mem_random_fill(oskar_sky_V(sky), 0.1, 0.2, &status);
-        oskar_mem_random_fill(oskar_sky_l(sky), 0.1, 0.9, &status);
-        oskar_mem_random_fill(oskar_sky_m(sky), 0.1, 0.9, &status);
-        oskar_mem_random_fill(oskar_sky_n(sky), 0.1, 0.9, &status);
-        oskar_mem_random_fill(oskar_sky_gaussian_a(sky), 0.1e-6, 0.2e-6,
+        oskar_mem_random_range(oskar_sky_I(sky), 2.0, 5.0, &status);
+        oskar_mem_random_range(oskar_sky_Q(sky), 0.1, 1.0, &status);
+        oskar_mem_random_range(oskar_sky_U(sky), 0.1, 0.5, &status);
+        oskar_mem_random_range(oskar_sky_V(sky), 0.1, 0.2, &status);
+        oskar_mem_random_range(oskar_sky_l(sky), 0.1, 0.9, &status);
+        oskar_mem_random_range(oskar_sky_m(sky), 0.1, 0.9, &status);
+        oskar_mem_random_range(oskar_sky_n(sky), 0.1, 0.9, &status);
+        oskar_mem_random_range(oskar_sky_gaussian_a(sky), 0.1e-6, 0.2e-6,
                 &status);
-        oskar_mem_random_fill(oskar_sky_gaussian_b(sky), 0.1e-6, 0.2e-6,
+        oskar_mem_random_range(oskar_sky_gaussian_b(sky), 0.1e-6, 0.2e-6,
                 &status);
-        oskar_mem_random_fill(oskar_sky_gaussian_c(sky), 0.1e-6, 0.2e-6,
+        oskar_mem_random_range(oskar_sky_gaussian_c(sky), 0.1e-6, 0.2e-6,
                 &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 

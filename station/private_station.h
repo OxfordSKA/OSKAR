@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,7 @@ struct oskar_Station
     int array_is_3d;              /* True if array is 3-dimensional (auto determined; default false). */
     int apply_element_errors;     /* True if element gain and phase errors should be applied (auto determined; default false). */
     int apply_element_weight;     /* True if weights should be modified by user-supplied complex beamforming weights (auto determined; default false). */
+    unsigned int seed_time_variable_errors;   /* Seed for time variable errors. */
     double nominal_orientation_x_rad;         /* Azimuth of nominal x dipole axis, in radians. */
     double nominal_orientation_y_rad;         /* Azimuth of nominal y dipole axis, in radians. */
     oskar_Mem* element_true_x_enu_metres;     /* True horizon element x-coordinates, in metres, towards East. */

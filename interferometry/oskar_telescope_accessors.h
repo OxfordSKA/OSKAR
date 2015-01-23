@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -343,20 +343,6 @@ int oskar_telescope_max_station_size(const oskar_Telescope* model);
 OSKAR_EXPORT
 int oskar_telescope_max_station_depth(const oskar_Telescope* model);
 
-/**
- * @brief
- * Returns the random seed for time-variable errors.
- *
- * @details
- * Returns the random seed for time-variable errors.
- *
- * @param[in] model   Pointer to telescope model.
- *
- * @return The random seed.
- */
-OSKAR_EXPORT
-int oskar_telescope_random_seed(const oskar_Telescope* model);
-
 
 /* Station models. */
 
@@ -667,19 +653,6 @@ void oskar_telescope_set_uv_filter(oskar_Telescope* model,
 OSKAR_EXPORT
 void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model,
         int value);
-
-/**
- * @brief
- * Sets the random seed used for time-variable station element errors.
- *
- * @details
- * Sets the random seed used for time-variable station element errors.
- *
- * @param[in] model    Pointer to telescope model.
- * @param[in] value    Random seed value.
- */
-OSKAR_EXPORT
-void oskar_telescope_set_random_seed(oskar_Telescope* model, int value);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_RANDOM_STATE_H_
-#define OSKAR_RANDOM_STATE_H_
+#ifndef OSKAR_MEM_RANDOM_RANGE_H_
+#define OSKAR_MEM_RANDOM_RANGE_H_
 
 /**
- * @file oskar_random_state.h
+ * @file oskar_mem_random_range.h
  */
 
-/* Public interface. */
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_RandomState;
-#ifndef OSKAR_RANDOM_STATE_TYPEDEF_
-#define OSKAR_RANDOM_STATE_TYPEDEF_
-typedef struct oskar_RandomState oskar_RandomState;
-#endif
+/**
+ * @brief
+ * Fills a block of memory with randomly generated floating-point numbers.
+ *
+ * @details
+ * This function fills a block of memory with randomly generated floating-point
+ * numbers. An error is returned if the base type of the memory block is not
+ * OSKAR_SINGLE or OSKAR_DOUBLE.
+ *
+ * Numbers are generated using the C rand() function. The random number
+ * generator can be reset prior to calling this function by a call to srand().
+ *
+ * This function is used primarily to generate data for unit tests.
+ *
+ * @param[in] mem        Pointer to memory block to fill.
+ * @param[in] lo         The minimum value of the random number.
+ * @param[in] hi         The maximum value of the random number.
+ * @param[in,out] status Status return code.
+ */
+OSKAR_EXPORT
+void oskar_mem_random_range(oskar_Mem* mem, double lo, double hi, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#include <oskar_random_state_create.h>
-#include <oskar_random_state_free.h>
-
-#endif /* OSKAR_RANDOM_STATE_H_ */
+#endif /* OSKAR_MEM_RANDOM_RANGE_H_ */

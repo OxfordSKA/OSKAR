@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,6 @@
 #include <oskar_image.h>
 #include <oskar_jones.h>
 #include <oskar_log.h>
-#include <oskar_random_state.h>
 #include <oskar_station_work.h>
 #include <oskar_telescope.h>
 #include <oskar_timer.h>
@@ -250,10 +249,6 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
         oskar_log_message(log, 'M', 0, "Channel %3d/%d [%.4f MHz]",
                 c + 1, num_channels, frequency / 1e6);
 
-        oskar_RandomState* rand_state = oskar_random_state_create(
-                oskar_telescope_max_station_size(tel),
-                oskar_telescope_random_seed(tel), 0, 0, status);
-
         for (int t = 0; t < num_times; ++t)
         {
             if (*status) break;
@@ -261,12 +256,13 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
 
             double t_dump = obs_start_mjd_utc + t * dt_dump;
             double GAST = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
+            int station_counter = 0; // Reset for each time.
 
             if (settings->beam_pattern.average_cross_power_beam)
             {
                 oskar_evaluate_jones_E(jones, num_pixels, d_x, d_y, d_z,
                         coord_type, lon0, lat0, d_tel, GAST, frequency,
-                        d_work, rand_state, status);
+                        d_work, t, &station_counter, status);
                 oskar_evaluate_average_cross_power_beam(num_pixels,
                         num_stations, jones, d_beam_data, status);
             }
@@ -275,7 +271,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
                 oskar_evaluate_station_beam(d_beam_data, (int)num_pixels,
                         d_x, d_y, d_z, coord_type, lon0, lat0,
                         oskar_telescope_station_const(d_tel, station_id),
-                        d_work, rand_state, frequency, GAST, status);
+                        d_work, t, &station_counter, frequency, GAST, status);
             }
 
             // FIXME HACK Accumulate beam data.
@@ -313,7 +309,6 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
 
         // Record GPU memory usage.
         oskar_cuda_mem_log(log, 1, 0);
-        oskar_random_state_free(rand_state, status);
     }
 
     // Free memory.

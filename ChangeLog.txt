@@ -27,10 +27,16 @@
 
     * Added option to produce a time-averaged station beam.
 
+    * Removed options to perform explicit time averaging using multiple 
+      snapshots, as this was very slow.
+
     * Removed options to load GSM maps and HEALPix maps in K, as 
       amplitude conversion to Jy was not performed correctly.
 
     * Removed GUI options to write OSKAR image files, as these are deprecated.
+
+    * Switched to using a counter-based pseudo-random number generator 
+      instead of cuRAND, for increased flexibility and performance.
 
     * Added CRC codes to data chunks in binary files.
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,6 @@
 
 #include <oskar_evaluate_element_weights_errors_cuda.h>
 
-#include <curand_kernel.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -37,29 +35,27 @@ extern "C" {
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
-void oskar_evaluate_element_weights_errors_cuda_f(float2* errors,
-        int num_elements, const float* amp_gain, const float* amp_error,
-        const float* phase_offset, const float* phase_error,
-        struct curandStateXORWOW* state)
+void oskar_evaluate_element_weights_errors_cuda_f(int num_elements,
+        const float* amp_gain, const float* amp_error,
+        const float* phase_offset, const float* phase_error, float2* errors)
 {
-    int num_blocks, num_threads = 128; /* Note: this might not be optimal! */
+    int num_blocks, num_threads = 256;
     num_blocks = (num_elements + num_threads - 1) / num_threads;
     oskar_evaluate_element_weights_errors_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (errors, num_elements,
-            amp_gain, amp_error, phase_offset, phase_error, state);
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_elements,
+            amp_gain, amp_error, phase_offset, phase_error, errors);
 }
 
 /* Double precision. */
-void oskar_evaluate_element_weights_errors_cuda_d(double2* errors,
-        int num_elements, const double* amp_gain, const double* amp_error,
-        const double* phase_offset, const double* phase_error,
-        struct curandStateXORWOW* state)
+void oskar_evaluate_element_weights_errors_cuda_d(int num_elements,
+        const double* amp_gain, const double* amp_error,
+        const double* phase_offset, const double* phase_error, double2* errors)
 {
-    int num_blocks, num_threads = 128; /* Note: this might not be optimal! */
+    int num_blocks, num_threads = 256;
     num_blocks = (num_elements + num_threads - 1) / num_threads;
     oskar_evaluate_element_weights_errors_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (errors, num_elements,
-            amp_gain, amp_error, phase_offset, phase_error, state);
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_elements,
+            amp_gain, amp_error, phase_offset, phase_error, errors);
 }
 
 
@@ -67,50 +63,58 @@ void oskar_evaluate_element_weights_errors_cuda_d(double2* errors,
 
 /* Single precision. */
 __global__
-void oskar_evaluate_element_weights_errors_cudak_f(float2* errors,
-        int num_elements, const float* amp_gain, const float* amp_error,
-        const float* phase_offset, const float* phase_error,
-        struct curandStateXORWOW* state)
+void oskar_evaluate_element_weights_errors_cudak_f(int num_elements,
+        const float* restrict amp_gain, const float* restrict amp_error,
+        const float* restrict phase_offset, const float* restrict phase_error,
+        float2* errors)
 {
-    float amp, arg;
-    float2 r;
+    float2 r, t;
 
-    /* Thread index == antenna element */
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx >= num_elements) return;
+    /* Thread index is antenna element. */
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= num_elements) return;
 
-    /* Generate 2 pseudo-random numbers with mean 0.0 and stddev 1.0 */
-    r = curand_normal2(&state[idx]);
+    /* Get two random numbers from a normalised Gaussian distribution. */
+    r = errors[i];
 
-    /* Evaluate the real and imag. components of the error weight for the antenna */
-    amp = amp_gain[idx] + r.x * amp_error[idx];
-    arg = phase_offset[idx] + r.y * phase_error[idx];
-    errors[idx].x = amp * cosf(arg);
-    errors[idx].y = amp * sinf(arg);
+    /* Evaluate the real and imaginary components of the error weight
+     * for the antenna. */
+    r.x *= amp_error[i];
+    r.x += amp_gain[i]; /* Amplitude. */
+    r.y *= phase_error[i];
+    r.y += phase_offset[i]; /* Phase. */
+    sincosf(r.y, &t.y, &t.x);
+    t.x *= r.x; /* Real. */
+    t.y *= r.x; /* Imaginary. */
+    errors[i] = t; /* Store. */
 }
 
 /* Double precision. */
 __global__
-void oskar_evaluate_element_weights_errors_cudak_d(double2* errors,
-        int num_elements, const double* amp_gain, const double* amp_error,
-        const double* phase_offset, const double* phase_error,
-        struct curandStateXORWOW* state)
+void oskar_evaluate_element_weights_errors_cudak_d(int num_elements,
+        const double* restrict amp_gain, const double* restrict amp_error,
+        const double* restrict phase_offset, const double* restrict phase_error,
+        double2* errors)
 {
-    double amp, arg;
-    double2 r;
+    double2 r, t;
 
-    /* Thread index == antenna element */
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx >= num_elements) return;
+    /* Thread index is antenna element. */
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= num_elements) return;
 
-    /* Generate 2 pseudo-random numbers with mean 0.0 and stddev 1.0 */
-    r = curand_normal2_double(&state[idx]);
+    /* Get two random numbers from a normalised Gaussian distribution. */
+    r = errors[i];
 
-    /* Evaluate the real and imag. components of the error weight for the antenna */
-    amp = amp_gain[idx] + (r.x * amp_error[idx]);
-    arg = phase_offset[idx] + (r.y * phase_error[idx]);
-    errors[idx].x = amp * cos(arg);
-    errors[idx].y = amp * sin(arg);
+    /* Evaluate the real and imaginary components of the error weight
+     * for the antenna. */
+    r.x *= amp_error[i];
+    r.x += amp_gain[i]; /* Amplitude. */
+    r.y *= phase_error[i];
+    r.y += phase_offset[i]; /* Phase. */
+    sincos(r.y, &t.y, &t.x);
+    t.x *= r.x; /* Real. */
+    t.y *= r.x; /* Imaginary. */
+    errors[i] = t; /* Store. */
 }
 
 #ifdef __cplusplus

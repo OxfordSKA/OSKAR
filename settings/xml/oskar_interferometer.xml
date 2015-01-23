@@ -22,20 +22,6 @@
             time averaging smearing.
         </desc>
     </s>
-    <s k="num_vis_ave"><label>Number of visibility averages</label>
-        <type name="IntPositive" default="1"/>
-        <desc>
-            Number of averaged evaluations of the full Measurement Equation
-            per visibility dump.
-        </desc>
-    </s>
-    <s k="num_fringe_ave"><label>Number of fringe averages</label>
-        <type name="IntPositive" default="1"/>
-        <desc>
-            Number of averaged evaluations of the K-Jones matrix per
-            Measurement Equation average.
-        </desc>
-    </s>
     <s k="uv_filter_min"><label>UV range filter min</label>
         <type name="DoubleRangeExt" default="min">0,MAX,min</type>
         <desc>

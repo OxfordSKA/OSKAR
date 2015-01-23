@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@
 #include <oskar_jones.h>
 #include <oskar_sky.h>
 #include <oskar_station_work.h>
-#include <oskar_random_state.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,6 +51,9 @@ extern "C" {
  * @details
  * Evaluates station beams for a telescope model at the specified source
  * positions, storing the results in the Jones matrix data structure.
+ *
+ * The station counter must be unique for the given time index.
+ * It is automatically updated on exit.
  *
  * If all stations are marked as identical, the results for the first station
  * are copied into the results for the others.
@@ -70,7 +72,8 @@ extern "C" {
  * @param[in]  gast           The Greenwich Apparent Sidereal Time, in radians.
  * @param[in]  frequency_hz   The observing frequency, in Hz.
  * @param[in]  work           Pointer to structure holding work arrays.
- * @param[in]  random_state   Random state.
+ * @param[in]  time_index     Simulation time index.
+ * @param[in,out] station_counter Station counter. Must be unique for given time.
  * @param[in,out] status      Status return code.
  */
 OSKAR_EXPORT
@@ -78,7 +81,7 @@ void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, oskar_Mem* x,
         oskar_Mem* y, oskar_Mem* z, int coord_type, double lon0_rad,
         double lat0_rad, const oskar_Telescope* telescope, double gast,
         double frequency_hz, oskar_StationWork* work,
-        oskar_RandomState* random_state, int* status);
+        int time_index, int* station_counter, int* status);
 
 #ifdef __cplusplus
 }

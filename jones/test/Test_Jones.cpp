@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,8 +96,8 @@ static void t_join(int out_typeA, int in_type1A, int in_type2A,
     in1 = oskar_jones_create(in_type1A, in_loc1A, stations, sources, &status);
     in2 = oskar_jones_create(in_type2A, in_loc2A, stations, sources, &status);
     srand(0);
-    oskar_mem_random_fill(oskar_jones_mem(in1), 0.1, 100.0, &status);
-    oskar_mem_random_fill(oskar_jones_mem(in2), 0.1, 100.0, &status);
+    oskar_mem_random_range(oskar_jones_mem(in1), 0.1, 100.0, &status);
+    oskar_mem_random_range(oskar_jones_mem(in2), 0.1, 100.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_timer_start(timerA);
     oskar_jones_join(outA, in1, in2, &status);
@@ -112,8 +112,8 @@ static void t_join(int out_typeA, int in_type1A, int in_type2A,
     in1 = oskar_jones_create(in_type1B, in_loc1B, stations, sources, &status);
     in2 = oskar_jones_create(in_type2B, in_loc2B, stations, sources, &status);
     srand(0);
-    oskar_mem_random_fill(oskar_jones_mem(in1), 0.1, 100.0, &status);
-    oskar_mem_random_fill(oskar_jones_mem(in2), 0.1, 100.0, &status);
+    oskar_mem_random_range(oskar_jones_mem(in1), 0.1, 100.0, &status);
+    oskar_mem_random_range(oskar_jones_mem(in2), 0.1, 100.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_timer_start(timerB);
     oskar_jones_join(outB, in1, in2, &status);
@@ -157,8 +157,8 @@ void t_join_in_place(int in_type1A, int in_type2A, int in_loc1A, int in_loc2A,
     in1A = oskar_jones_create(in_type1A, in_loc1A, stations, sources, &status);
     in2A = oskar_jones_create(in_type2A, in_loc2A, stations, sources, &status);
     srand(0);
-    oskar_mem_random_fill(oskar_jones_mem(in1A), 0.1, 100.0, &status);
-    oskar_mem_random_fill(oskar_jones_mem(in2A), 0.1, 100.0, &status);
+    oskar_mem_random_range(oskar_jones_mem(in1A), 0.1, 100.0, &status);
+    oskar_mem_random_range(oskar_jones_mem(in2A), 0.1, 100.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_timer_start(timerA);
     oskar_jones_join(in1A, in1A, in2A, &status);
@@ -172,8 +172,8 @@ void t_join_in_place(int in_type1A, int in_type2A, int in_loc1A, int in_loc2A,
     in1B = oskar_jones_create(in_type1B, in_loc1B, stations, sources, &status);
     in2B = oskar_jones_create(in_type2B, in_loc2B, stations, sources, &status);
     srand(0);
-    oskar_mem_random_fill(oskar_jones_mem(in1B), 0.1, 100.0, &status);
-    oskar_mem_random_fill(oskar_jones_mem(in2B), 0.1, 100.0, &status);
+    oskar_mem_random_range(oskar_jones_mem(in1B), 0.1, 100.0, &status);
+    oskar_mem_random_range(oskar_jones_mem(in2B), 0.1, 100.0, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_timer_start(timerB);
     oskar_jones_join(in1B, in1B, in2B, &status);
