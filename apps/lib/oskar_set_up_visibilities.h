@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ extern "C" {
  */
 OSKAR_APPS_EXPORT
 oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
-        const oskar_Telescope* tel, int vis_type, int* status);
+        const oskar_Telescope* tel, int* status);
 
 #ifdef __cplusplus
 }

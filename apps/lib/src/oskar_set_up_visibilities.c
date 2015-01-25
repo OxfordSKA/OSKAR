@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,9 @@ extern "C" {
 #endif
 
 oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
-        const oskar_Telescope* tel, int vis_type, int* status)
+        const oskar_Telescope* tel, int* status)
 {
-    int num_stations, num_channels, i;
+    int i, num_stations, num_channels, precision, vis_type;
     double rad2deg = 180.0/M_PI;
     oskar_Vis* vis = 0;
 
@@ -54,16 +54,13 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
     /* Check if safe to proceed. */
     if (*status) return 0;
 
-    /* Check the type. */
-    if (!oskar_mem_type_is_complex(vis_type))
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return 0;
-    }
-
     /* Initialise the global visibility structure on the CPU. */
     num_stations = oskar_telescope_num_stations(tel);
     num_channels = settings->obs.num_channels;
+    precision = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    vis_type = precision | OSKAR_COMPLEX;
+    if (oskar_telescope_pol_mode(tel) == OSKAR_POL_MODE_FULL)
+        vis_type |= OSKAR_MATRIX;
     vis = oskar_vis_create(vis_type, OSKAR_CPU,
             num_channels, settings->obs.num_time_steps, num_stations, status);
 
@@ -140,7 +137,7 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
     }
 
     /* Copy station lon/lat and nominal receptor orientations */
-    if (settings->sim.double_precision)
+    if (precision == OSKAR_DOUBLE)
     {
         double* lon = oskar_mem_double(oskar_vis_station_lon_deg(vis), status);
         double* lat = oskar_mem_double(oskar_vis_station_lat_deg(vis), status);
