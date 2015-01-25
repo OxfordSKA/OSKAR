@@ -267,6 +267,7 @@ static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
             settings->interferometer.uv_filter_min,
             settings->interferometer.uv_filter_max,
             settings->interferometer.uv_filter_units);
+    oskar_telescope_set_pol_mode(telescope, settings->telescope.pol_mode);
     num_stations = oskar_telescope_num_stations(telescope);
     for (i = 0; i < num_stations; ++i)
     {

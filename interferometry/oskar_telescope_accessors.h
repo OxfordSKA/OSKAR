@@ -257,6 +257,21 @@ int oskar_telescope_uv_filter_units(const oskar_Telescope* model);
 
 /**
  * @brief
+ * Returns the polarisation mode of the telescope (full or scalar).
+ *
+ * @details
+ * Returns the polarisation mode of the telescope
+ * (OSKAR_POL_MODE_FULL or OSKAR_POL_MODE_SCALAR).
+ *
+ * @param[in] model   Pointer to telescope model.
+ *
+ * @return The polarisation mode enumerator.
+ */
+OSKAR_EXPORT
+int oskar_telescope_pol_mode(const oskar_Telescope* model);
+
+/**
+ * @brief
  * Returns the number of unique baselines in the telescope model.
  *
  * @details
@@ -653,6 +668,20 @@ void oskar_telescope_set_uv_filter(oskar_Telescope* model,
 OSKAR_EXPORT
 void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model,
         int value);
+
+/**
+ * @brief
+ * Sets the polarisation mode of the telescope (full or scalar).
+ *
+ * @details
+ * Sets the polarisation mode of the telescope
+ * (OSKAR_POL_MODE_FULL or OSKAR_POL_MODE_SCALAR).
+ *
+ * @param[in] model   Pointer to telescope model.
+ * @param[in] value   Enumerated mode.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_pol_mode(oskar_Telescope* model, int value);
 
 #ifdef __cplusplus
 }

@@ -111,6 +111,11 @@ int oskar_telescope_uv_filter_units(const oskar_Telescope* model)
     return model->uv_filter_units;
 }
 
+int oskar_telescope_pol_mode(const oskar_Telescope* model)
+{
+    return model->pol_mode;
+}
+
 int oskar_telescope_num_baselines(const oskar_Telescope* model)
 {
     return ((model->num_stations * (model->num_stations - 1)) / 2);
@@ -281,6 +286,10 @@ void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model, 
     model->allow_station_beam_duplication = value;
 }
 
+void oskar_telescope_set_pol_mode(oskar_Telescope* model, int value)
+{
+    model->pol_mode = value;
+}
 
 #ifdef __cplusplus
 }
