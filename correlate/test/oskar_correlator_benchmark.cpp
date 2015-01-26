@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -224,17 +224,18 @@ int benchmark(int num_stations, int num_sources, int type,
     oskar_sky_set_use_extended(sky, use_extended);
 
     // Memory for visibility coordinates and output visibility slice.
-    oskar_Mem *vis, *u, *v;
+    oskar_Mem *vis, *u, *v, *w;
     vis = oskar_mem_create(jones_type, loc, num_vis, &status);
     u = oskar_mem_create(type, loc, num_stations, &status);
     v = oskar_mem_create(type, loc, num_stations, &status);
+    w = oskar_mem_create(type, loc, num_stations, &status);
 
     // Run benchmark.
     times.resize(niter);
     for (int i = 0; i < niter; ++i)
     {
         oskar_timer_start(timer);
-        oskar_correlate(vis, oskar_sky_num_sources(sky), J, sky, tel, u, v,
+        oskar_correlate(vis, oskar_sky_num_sources(sky), J, sky, tel, u, v, w,
                 0.0, 100e6, &status);
         times[i] = oskar_timer_elapsed(timer);
     }
@@ -242,6 +243,7 @@ int benchmark(int num_stations, int num_sources, int type,
     // Free memory.
     oskar_mem_free(u, &status);
     oskar_mem_free(v, &status);
+    oskar_mem_free(w, &status);
     oskar_mem_free(vis, &status);
     oskar_jones_free(J, &status);
     oskar_telescope_free(tel, &status);

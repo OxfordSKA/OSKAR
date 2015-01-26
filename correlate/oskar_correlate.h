@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,7 @@ extern "C" {
  * @param[in]  tel          Telescope model.
  * @param[in]  u            Station u coordinates, in metres.
  * @param[in]  v            Station v coordinates, in metres.
+ * @param[in]  w            Station w coordinates, in metres.
  * @param[in]  gast         Greenwich apparent sidereal time, in radians.
  * @param[in]  frequency_hz Current observation frequency, in Hz.
  * @param[in,out] status    Status return code.
@@ -68,7 +69,8 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
         const oskar_Sky* sky, const oskar_Telescope* tel, const oskar_Mem* u,
-        const oskar_Mem* v, double gast, double frequency_hz, int* status);
+        const oskar_Mem* v, const oskar_Mem* w, double gast,
+        double frequency_hz, int* status);
 
 #ifdef __cplusplus
 }

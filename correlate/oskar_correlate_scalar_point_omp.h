@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,8 +54,10 @@ extern "C" {
  * @param[in] source_I       Source Stokes I values, in Jy.
  * @param[in] source_l       Source l-direction cosines from phase centre.
  * @param[in] source_m       Source m-direction cosines from phase centre.
+ * @param[in] source_n       Source n-direction cosines from phase centre.
  * @param[in] station_u      Station u-coordinates, in metres.
  * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] station_w      Station w-coordinates, in metres.
  * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
  * @param[in] uv_max_lambda  Maximum allowed UV length, in wavelengths.
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
@@ -65,9 +67,10 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_correlate_scalar_point_omp_f(int num_sources, int num_stations,
         const float2* jones, const float* source_I, const float* source_l,
-        const float* source_m, const float* station_u,
-        const float* station_v, float uv_min_lambda, float uv_max_lambda,
-        float inv_wavelength, float frac_bandwidth, float2* vis);
+        const float* source_m, const float* source_n, const float* station_u,
+        const float* station_v, const float* station_w, float uv_min_lambda,
+        float uv_max_lambda, float inv_wavelength, float frac_bandwidth,
+        float2* vis);
 
 /**
  * @brief
@@ -83,8 +86,10 @@ void oskar_correlate_scalar_point_omp_f(int num_sources, int num_stations,
  * @param[in] source_I       Source Stokes I values, in Jy.
  * @param[in] source_l       Source l-direction cosines from phase centre.
  * @param[in] source_m       Source m-direction cosines from phase centre.
+ * @param[in] source_n       Source n-direction cosines from phase centre.
  * @param[in] station_u      Station u-coordinates, in metres.
  * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] station_w      Station w-coordinates, in metres.
  * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
  * @param[in] uv_max_lambda  Maximum allowed UV length, in wavelengths.
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
@@ -94,9 +99,10 @@ void oskar_correlate_scalar_point_omp_f(int num_sources, int num_stations,
 OSKAR_EXPORT
 void oskar_correlate_scalar_point_omp_d(int num_sources, int num_stations,
         const double2* jones, const double* source_I, const double* source_l,
-        const double* source_m, const double* station_u,
-        const double* station_v, double uv_min_lambda, double uv_max_lambda,
-        double inv_wavelength, double frac_bandwidth, double2* vis);
+        const double* source_m, const double* source_n, const double* station_u,
+        const double* station_v, const double* station_w, double uv_min_lambda,
+        double uv_max_lambda, double inv_wavelength, double frac_bandwidth,
+        double2* vis);
 
 #ifdef __cplusplus
 }

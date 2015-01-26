@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,6 +66,7 @@ extern "C" {
  * @param[in] source_c       Source Gaussian parameter c.
  * @param[in] station_u      Station u-coordinates, in metres.
  * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] station_w      Station w-coordinates, in metres.
  * @param[in] station_x      Station x-coordinates, in metres.
  * @param[in] station_y      Station y-coordinates, in metres.
  * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
@@ -82,11 +83,11 @@ void oskar_correlate_scalar_gaussian_time_smearing_omp_f(int num_sources,
         int num_stations, const float2* jones, const float* source_I,
         const float* source_l, const float* source_m, const float* source_n,
         const float* source_a, const float* source_b, const float* source_c,
-        const float* station_u, const float* station_v,
+        const float* station_u, const float* station_v, const float* station_w,
         const float* station_x, const float* station_y,
-        float uv_min_lambda, float uv_max_lambda,
-        float inv_wavelength, float frac_bandwidth, float time_int_sec,
-        float gha0_rad, float dec0_rad, float2* vis);
+        float uv_min_lambda, float uv_max_lambda, float inv_wavelength,
+        float frac_bandwidth, float time_int_sec, float gha0_rad,
+        float dec0_rad, float2* vis);
 
 /**
  * @brief
@@ -114,6 +115,7 @@ void oskar_correlate_scalar_gaussian_time_smearing_omp_f(int num_sources,
  * @param[in] source_c       Source Gaussian parameter c.
  * @param[in] station_u      Station u-coordinates, in metres.
  * @param[in] station_v      Station v-coordinates, in metres.
+ * @param[in] station_w      Station w-coordinates, in metres.
  * @param[in] station_x      Station x-coordinates, in metres.
  * @param[in] station_y      Station y-coordinates, in metres.
  * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
@@ -131,9 +133,9 @@ void oskar_correlate_scalar_gaussian_time_smearing_omp_d(int num_sources,
         const double* source_l, const double* source_m, const double* source_n,
         const double* source_a, const double* source_b, const double* source_c,
         const double* station_u, const double* station_v,
-        const double* station_x, const double* station_y,
-        double uv_min_lambda, double uv_max_lambda, double inv_wavelength,
-        double frac_bandwidth, double time_int_sec,
+        const double* station_w, const double* station_x,
+        const double* station_y, double uv_min_lambda, double uv_max_lambda,
+        double inv_wavelength, double frac_bandwidth, double time_int_sec,
         double gha0_rad, double dec0_rad, double2* vis);
 
 #ifdef __cplusplus

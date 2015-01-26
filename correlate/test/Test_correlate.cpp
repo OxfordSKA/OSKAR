@@ -67,7 +67,7 @@ protected:
     static const int num_stations = 7;
     static const int num_baselines = num_stations * (num_stations - 1) / 2;
     static const double bandwidth;
-    oskar_Mem *u_, *v_;
+    oskar_Mem *u_, *v_, *w_;
     oskar_Telescope* tel;
     oskar_Sky* sky;
     oskar_Jones* jones;
@@ -84,6 +84,7 @@ protected:
                 &status);
         u_ = oskar_mem_create(precision, location, num_stations, &status);
         v_ = oskar_mem_create(precision, location, num_stations, &status);
+        w_ = oskar_mem_create(precision, location, num_stations, &status);
         sky = oskar_sky_create(precision, location, num_sources, &status);
         tel = oskar_telescope_create(precision, location,
                 num_stations, &status);
@@ -94,6 +95,7 @@ protected:
         oskar_mem_random_range(oskar_jones_mem(jones), 0.1, 100.0, &status);
         oskar_mem_random_range(u_, 500.0, 1000.0, &status);
         oskar_mem_random_range(v_, 500.0, 1000.0, &status);
+        oskar_mem_random_range(w_, 500.0, 1000.0, &status);
         oskar_mem_random_range(
                 oskar_telescope_station_true_x_offset_ecef_metres(tel),
                 0.1, 1000.0, &status);
@@ -128,6 +130,7 @@ protected:
         oskar_jones_free(jones, &status);
         oskar_mem_free(u_, &status);
         oskar_mem_free(v_, &status);
+        oskar_mem_free(w_, &status);
         oskar_sky_free(sky, &status);
         oskar_telescope_free(tel, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -158,7 +161,7 @@ protected:
         oskar_telescope_set_smearing_values(tel, bandwidth, time_average);
         oskar_timer_start(timer1);
         oskar_correlate(vis1, oskar_sky_num_sources(sky), jones, sky,
-                tel, u_, v_, 1.0, frequency, &status);
+                tel, u_, v_, w_, 1.0, frequency, &status);
         time1 = oskar_timer_elapsed(timer1);
         destroyTestData();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -174,7 +177,7 @@ protected:
         oskar_telescope_set_smearing_values(tel, bandwidth, time_average);
         oskar_timer_start(timer2);
         oskar_correlate(vis2, oskar_sky_num_sources(sky), jones, sky,
-                tel, u_, v_, 1.0, frequency, &status);
+                tel, u_, v_, w_, 1.0, frequency, &status);
         time2 = oskar_timer_elapsed(timer2);
         destroyTestData();
         ASSERT_EQ(0, status) << oskar_get_error_string(status);

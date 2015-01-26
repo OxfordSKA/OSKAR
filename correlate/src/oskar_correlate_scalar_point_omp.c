@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,9 +37,10 @@ extern "C" {
 /* Single precision. */
 void oskar_correlate_scalar_point_omp_f(int num_sources, int num_stations,
         const float2* jones, const float* source_I, const float* source_l,
-        const float* source_m, const float* station_u,
-        const float* station_v, float uv_min_lambda, float uv_max_lambda,
-        float inv_wavelength, float frac_bandwidth, float2* vis)
+        const float* source_m, const float* source_n, const float* station_u,
+        const float* station_v, const float* station_w, float uv_min_lambda,
+        float uv_max_lambda, float inv_wavelength, float frac_bandwidth,
+        float2* vis)
 {
     int SQ;
 
@@ -56,7 +57,7 @@ void oskar_correlate_scalar_point_omp_f(int num_sources, int num_stations,
         /* Loop over baselines for this station. */
         for (SP = SQ + 1; SP < num_stations; ++SP)
         {
-            float uv_len, uu, vv, uu2, vv2, uuvv;
+            float uv_len, uu, vv, ww, uu2, vv2, uuvv;
             float2 sum, guard;
             sum.x = 0.0f;
             sum.y = 0.0f;
@@ -68,8 +69,9 @@ void oskar_correlate_scalar_point_omp_f(int num_sources, int num_stations,
 
             /* Get common baseline values. */
             oskar_evaluate_baseline_terms_inline_f(station_u[SP],
-                    station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                    frac_bandwidth, &uv_len, &uu, &vv, &uu2, &vv2, &uuvv);
+                    station_u[SQ], station_v[SP], station_v[SQ],
+                    station_w[SP], station_w[SQ], inv_wavelength,
+                    frac_bandwidth, &uv_len, &uu, &vv, &ww, &uu2, &vv2, &uuvv);
 
             /* Apply the baseline length filter. */
             if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
@@ -78,14 +80,15 @@ void oskar_correlate_scalar_point_omp_f(int num_sources, int num_stations,
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)
             {
-                float l, m, rb;
+                float l, m, n, rb;
 
                 /* Get source direction cosines. */
                 l = source_l[i];
                 m = source_m[i];
+                n = source_n[i];
 
                 /* Compute bandwidth-smearing term. */
-                rb = oskar_sinc_f(uu * l + vv * m);
+                rb = oskar_sinc_f(uu * l + vv * m + ww * (n - 1.0f));
 
                 /* Accumulate baseline visibility response for source. */
                 oskar_accumulate_baseline_visibility_for_source_scalar_inline_f(
@@ -103,9 +106,10 @@ void oskar_correlate_scalar_point_omp_f(int num_sources, int num_stations,
 /* Double precision. */
 void oskar_correlate_scalar_point_omp_d(int num_sources, int num_stations,
         const double2* jones, const double* source_I, const double* source_l,
-        const double* source_m, const double* station_u,
-        const double* station_v, double uv_min_lambda, double uv_max_lambda,
-        double inv_wavelength, double frac_bandwidth, double2* vis)
+        const double* source_m, const double* source_n, const double* station_u,
+        const double* station_v, const double* station_w, double uv_min_lambda,
+        double uv_max_lambda, double inv_wavelength, double frac_bandwidth,
+        double2* vis)
 {
     int SQ;
 
@@ -122,7 +126,7 @@ void oskar_correlate_scalar_point_omp_d(int num_sources, int num_stations,
         /* Loop over baselines for this station. */
         for (SP = SQ + 1; SP < num_stations; ++SP)
         {
-            double uv_len, uu, vv, uu2, vv2, uuvv;
+            double uv_len, uu, vv, ww, uu2, vv2, uuvv;
             double2 sum;
             sum.x = 0.0;
             sum.y = 0.0;
@@ -132,8 +136,9 @@ void oskar_correlate_scalar_point_omp_d(int num_sources, int num_stations,
 
             /* Get common baseline values. */
             oskar_evaluate_baseline_terms_inline_d(station_u[SP],
-                    station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                    frac_bandwidth, &uv_len, &uu, &vv, &uu2, &vv2, &uuvv);
+                    station_u[SQ], station_v[SP], station_v[SQ],
+                    station_w[SP], station_w[SQ], inv_wavelength,
+                    frac_bandwidth, &uv_len, &uu, &vv, &ww, &uu2, &vv2, &uuvv);
 
             /* Apply the baseline length filter. */
             if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
@@ -142,14 +147,15 @@ void oskar_correlate_scalar_point_omp_d(int num_sources, int num_stations,
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)
             {
-                double l, m, rb;
+                double l, m, n, rb;
 
                 /* Get source direction cosines. */
                 l = source_l[i];
                 m = source_m[i];
+                n = source_n[i];
 
                 /* Compute bandwidth-smearing term. */
-                rb = oskar_sinc_d(uu * l + vv * m);
+                rb = oskar_sinc_d(uu * l + vv * m + ww * (n - 1.0));
 
                 /* Accumulate baseline visibility response for source. */
                 oskar_accumulate_baseline_visibility_for_source_scalar_inline_d(

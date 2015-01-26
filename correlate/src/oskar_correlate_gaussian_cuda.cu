@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,61 +32,6 @@
 
 #include <math.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Kernel wrappers. ======================================================== */
-
-/* Single precision. */
-void oskar_correlate_gaussian_cuda_f(int num_sources,
-        int num_stations, const float4c* d_jones,
-        const float* d_source_I, const float* d_source_Q,
-        const float* d_source_U, const float* d_source_V,
-        const float* d_source_l, const float* d_source_m,
-        const float* d_source_a, const float* d_source_b,
-        const float* d_source_c, const float* d_station_u,
-        const float* d_station_v, float uv_min_lambda, float uv_max_lambda,
-        float inv_wavelength, float frac_bandwidth, float4c* d_vis)
-{
-    dim3 num_threads(128, 1);
-    dim3 num_blocks(num_stations, num_stations);
-    size_t shared_mem = num_threads.x * sizeof(float4c);
-    oskar_correlate_gaussian_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
-            d_source_V, d_source_l, d_source_m, d_source_a, d_source_b,
-            d_source_c, d_station_u, d_station_v, uv_min_lambda, uv_max_lambda,
-            inv_wavelength, frac_bandwidth, d_vis);
-}
-
-/* Double precision. */
-void oskar_correlate_gaussian_cuda_d(int num_sources,
-        int num_stations, const double4c* d_jones,
-        const double* d_source_I, const double* d_source_Q,
-        const double* d_source_U, const double* d_source_V,
-        const double* d_source_l, const double* d_source_m,
-        const double* d_source_a, const double* d_source_b,
-        const double* d_source_c, const double* d_station_u,
-        const double* d_station_v, double uv_min_lambda, double uv_max_lambda,
-        double inv_wavelength, double frac_bandwidth, double4c* d_vis)
-{
-    dim3 num_threads(128, 1);
-    dim3 num_blocks(num_stations, num_stations);
-    size_t shared_mem = num_threads.x * sizeof(double4c);
-    oskar_correlate_gaussian_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
-            d_source_V, d_source_l, d_source_m, d_source_a, d_source_b,
-            d_source_c, d_station_u, d_station_v, uv_min_lambda, uv_max_lambda,
-            inv_wavelength, frac_bandwidth, d_vis);
-}
-
-#ifdef __cplusplus
-}
-#endif
-
-
 /* Kernels. ================================================================ */
 
 /* Indices into the visibility/baseline matrix. */
@@ -104,13 +49,14 @@ void oskar_correlate_gaussian_cudak_f(const int num_sources,
         const float* restrict source_I, const float* restrict source_Q,
         const float* restrict source_U, const float* restrict source_V,
         const float* restrict source_l, const float* restrict source_m,
-        const float* restrict source_a, const float* restrict source_b,
-        const float* restrict source_c, const float* restrict station_u,
-        const float* restrict station_v, const float uv_min_lambda,
+        const float* restrict source_n, const float* restrict source_a,
+        const float* restrict source_b, const float* restrict source_c,
+        const float* restrict station_u, const float* restrict station_v,
+        const float* restrict station_w, const float uv_min_lambda,
         const float uv_max_lambda, const float inv_wavelength,
         const float frac_bandwidth, float4c* restrict vis)
 {
-    __shared__ float uv_len, uu, vv, uu2, vv2, uuvv;
+    __shared__ float uv_len, uu, vv, ww, uu2, vv2, uuvv;
     float4c sum;
     int i;
 
@@ -121,8 +67,9 @@ void oskar_correlate_gaussian_cudak_f(const int num_sources,
     if (threadIdx.x == 0)
     {
         oskar_evaluate_baseline_terms_inline_f(station_u[SP],
-                station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                frac_bandwidth, &uv_len, &uu, &vv, &uu2, &vv2, &uuvv);
+                station_u[SQ], station_v[SP], station_v[SQ],
+                station_w[SP], station_w[SQ], inv_wavelength,
+                frac_bandwidth, &uv_len, &uu, &vv, &ww, &uu2, &vv2, &uuvv);
     }
     __syncthreads();
 
@@ -139,7 +86,8 @@ void oskar_correlate_gaussian_cudak_f(const int num_sources,
     for (i = threadIdx.x; i < num_sources; i += blockDim.x)
     {
         /* Compute bandwidth-smearing term. */
-        float rb = oskar_sinc_f(uu * source_l[i] + vv * source_m[i]);
+        float rb = oskar_sinc_f(uu * source_l[i] + vv * source_m[i] +
+                ww * (source_n[i] - 1.0f));
 
         /* Evaluate gaussian source width term. */
         float f = expf(-(source_a[i] * uu2 +
@@ -177,13 +125,14 @@ void oskar_correlate_gaussian_cudak_d(const int num_sources,
         const double* restrict source_I, const double* restrict source_Q,
         const double* restrict source_U, const double* restrict source_V,
         const double* restrict source_l, const double* restrict source_m,
-        const double* restrict source_a, const double* restrict source_b,
-        const double* restrict source_c, const double* restrict station_u,
-        const double* restrict station_v, const double uv_min_lambda,
+        const double* restrict source_n, const double* restrict source_a,
+        const double* restrict source_b, const double* restrict source_c,
+        const double* restrict station_u, const double* restrict station_v,
+        const double* restrict station_w, const double uv_min_lambda,
         const double uv_max_lambda, const double inv_wavelength,
         const double frac_bandwidth, double4c* restrict vis)
 {
-    __shared__ double uv_len, uu, vv, uu2, vv2, uuvv;
+    __shared__ double uv_len, uu, vv, ww, uu2, vv2, uuvv;
     double4c sum;
     int i;
 
@@ -194,8 +143,9 @@ void oskar_correlate_gaussian_cudak_d(const int num_sources,
     if (threadIdx.x == 0)
     {
         oskar_evaluate_baseline_terms_inline_d(station_u[SP],
-                station_u[SQ], station_v[SP], station_v[SQ], inv_wavelength,
-                frac_bandwidth, &uv_len, &uu, &vv, &uu2, &vv2, &uuvv);
+                station_u[SQ], station_v[SP], station_v[SQ],
+                station_w[SP], station_w[SQ], inv_wavelength,
+                frac_bandwidth, &uv_len, &uu, &vv, &ww, &uu2, &vv2, &uuvv);
     }
     __syncthreads();
 
@@ -212,7 +162,8 @@ void oskar_correlate_gaussian_cudak_d(const int num_sources,
     for (i = threadIdx.x; i < num_sources; i += blockDim.x)
     {
         /* Compute bandwidth-smearing term. */
-        double rb = oskar_sinc_d(uu * source_l[i] + vv * source_m[i]);
+        double rb = oskar_sinc_d(uu * source_l[i] + vv * source_m[i] +
+                ww * (source_n[i] - 1.0));
 
         /* Evaluate gaussian source width term. */
         double f = exp(-(source_a[i] * uu2 +
@@ -242,3 +193,61 @@ void oskar_correlate_gaussian_cudak_d(const int num_sources,
         oskar_add_complex_matrix_in_place_d(&vis[i], &sum);
     }
 }
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Kernel wrappers. ======================================================== */
+
+/* Single precision. */
+void oskar_correlate_gaussian_cuda_f(int num_sources,
+        int num_stations, const float4c* d_jones,
+        const float* d_source_I, const float* d_source_Q,
+        const float* d_source_U, const float* d_source_V,
+        const float* d_source_l, const float* d_source_m,
+        const float* d_source_n, const float* d_source_a,
+        const float* d_source_b, const float* d_source_c,
+        const float* d_station_u, const float* d_station_v,
+        const float* d_station_w, float uv_min_lambda, float uv_max_lambda,
+        float inv_wavelength, float frac_bandwidth, float4c* d_vis)
+{
+    dim3 num_threads(128, 1);
+    dim3 num_blocks(num_stations, num_stations);
+    size_t shared_mem = num_threads.x * sizeof(float4c);
+    oskar_correlate_gaussian_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
+            d_source_V, d_source_l, d_source_m, d_source_n, d_source_a,
+            d_source_b, d_source_c, d_station_u, d_station_v, d_station_w,
+            uv_min_lambda, uv_max_lambda, inv_wavelength, frac_bandwidth,
+            d_vis);
+}
+
+/* Double precision. */
+void oskar_correlate_gaussian_cuda_d(int num_sources,
+        int num_stations, const double4c* d_jones,
+        const double* d_source_I, const double* d_source_Q,
+        const double* d_source_U, const double* d_source_V,
+        const double* d_source_l, const double* d_source_m,
+        const double* d_source_n, const double* d_source_a,
+        const double* d_source_b, const double* d_source_c,
+        const double* d_station_u, const double* d_station_v,
+        const double* d_station_w, double uv_min_lambda, double uv_max_lambda,
+        double inv_wavelength, double frac_bandwidth, double4c* d_vis)
+{
+    dim3 num_threads(128, 1);
+    dim3 num_blocks(num_stations, num_stations);
+    size_t shared_mem = num_threads.x * sizeof(double4c);
+    oskar_correlate_gaussian_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+    (num_sources, num_stations, d_jones, d_source_I, d_source_Q, d_source_U,
+            d_source_V, d_source_l, d_source_m, d_source_n, d_source_a,
+            d_source_b, d_source_c, d_station_u, d_station_v, d_station_w,
+            uv_min_lambda, uv_max_lambda, inv_wavelength, frac_bandwidth,
+            d_vis);
+}
+
+#ifdef __cplusplus
+}
+#endif

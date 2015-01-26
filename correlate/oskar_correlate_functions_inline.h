@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -462,11 +462,14 @@ void oskar_evaluate_baseline_derivatives_inline_d(const double station_xp,
  * @param[in] station_uq     Station u-coordinate of station q, in metres.
  * @param[in] station_vp     Station v-coordinate of station p, in metres.
  * @param[in] station_vq     Station v-coordinate of station q, in metres.
+ * @param[in] station_wp     Station w-coordinate of station p, in metres.
+ * @param[in] station_wq     Station w-coordinate of station q, in metres.
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[out] uv_len        The uv distance, in wavelengths.
  * @param[out] uu            Modified baseline u-coordinate.
  * @param[out] vv            Modified baseline v-coordinate.
+ * @param[out] ww            Modified baseline w-coordinate.
  * @param[out] uu2           Baseline length of u, in wavelengths, squared.
  * @param[out] vv2           Baseline length of v, in wavelengths, squared.
  * @param[out] uuvv          2.0 * u * v, with u and v in wavelengths.
@@ -474,15 +477,17 @@ void oskar_evaluate_baseline_derivatives_inline_d(const double station_xp,
 OSKAR_INLINE
 void oskar_evaluate_baseline_terms_inline_f(const float station_up,
         const float station_uq, const float station_vp,
-        const float station_vq, const float inv_wavelength,
+        const float station_vq, const float station_wp,
+        const float station_wq, const float inv_wavelength,
         const float frac_bandwidth, float* uv_len, float* uu, float* vv,
-        float* uu2, float* vv2, float* uuvv)
+        float* ww, float* uu2, float* vv2, float* uuvv)
 {
     float f;
 
-    /* Baseline UV-distance, in wavelengths. */
+    /* Baseline distance, in wavelengths. */
     *uu   = (station_up - station_uq) * inv_wavelength;
     *vv   = (station_vp - station_vq) * inv_wavelength;
+    *ww   = (station_wp - station_wq) * inv_wavelength;
 
     /* Quantities needed for evaluating response to a Gaussian source. */
     *uu2  = *uu * *uu;
@@ -490,11 +495,12 @@ void oskar_evaluate_baseline_terms_inline_f(const float station_up,
     *uv_len = sqrtf(*uu2 + *vv2);
     *uuvv = 2.0f * *uu * *vv;
 
-    /* Modify the baseline UV-distance to include the common components
+    /* Modify the baseline distance to include the common components
      * of the bandwidth smearing term. */
     f = M_PIf * frac_bandwidth;
     *uu *= f;
     *vv *= f;
+    *ww *= f;
 }
 
 /**
@@ -510,11 +516,14 @@ void oskar_evaluate_baseline_terms_inline_f(const float station_up,
  * @param[in] station_uq     Station u-coordinate of station q, in metres.
  * @param[in] station_vp     Station v-coordinate of station p, in metres.
  * @param[in] station_vq     Station v-coordinate of station q, in metres.
+ * @param[in] station_wp     Station w-coordinate of station p, in metres.
+ * @param[in] station_wq     Station w-coordinate of station q, in metres.
  * @param[in] inv_wavelength Inverse of the wavelength, in metres.
  * @param[in] frac_bandwidth Bandwidth divided by frequency.
  * @param[out] uv_len        The uv distance, in wavelengths.
  * @param[out] uu            Modified baseline u-coordinate.
  * @param[out] vv            Modified baseline v-coordinate.
+ * @param[out] ww            Modified baseline w-coordinate.
  * @param[out] uu2           Baseline length of u, in wavelengths, squared.
  * @param[out] vv2           Baseline length of v, in wavelengths, squared.
  * @param[out] uuvv          2.0 * u * v, with u and v in wavelengths.
@@ -522,15 +531,17 @@ void oskar_evaluate_baseline_terms_inline_f(const float station_up,
 OSKAR_INLINE
 void oskar_evaluate_baseline_terms_inline_d(const double station_up,
         const double station_uq, const double station_vp,
-        const double station_vq, const double inv_wavelength,
+        const double station_vq, const double station_wp,
+        const double station_wq, const double inv_wavelength,
         const double frac_bandwidth, double* uv_len, double* uu, double* vv,
-        double* uu2, double* vv2, double* uuvv)
+        double* ww, double* uu2, double* vv2, double* uuvv)
 {
     double f;
 
-    /* Baseline UV-distance, in wavelengths. */
+    /* Baseline distance, in wavelengths. */
     *uu   = (station_up - station_uq) * inv_wavelength;
     *vv   = (station_vp - station_vq) * inv_wavelength;
+    *ww   = (station_wp - station_wq) * inv_wavelength;
 
     /* Quantities needed for evaluating response to a Gaussian source. */
     *uu2  = *uu * *uu;
@@ -538,11 +549,12 @@ void oskar_evaluate_baseline_terms_inline_d(const double station_up,
     *uv_len = sqrt(*uu2 + *vv2);
     *uuvv = 2.0 * *uu * *vv;
 
-    /* Modify the baseline UV-distance to include the common components
+    /* Modify the baseline distance to include the common components
      * of the bandwidth smearing term. */
     f = M_PI * frac_bandwidth;
     *uu *= f;
     *vv *= f;
+    *ww *= f;
 }
 
 /**

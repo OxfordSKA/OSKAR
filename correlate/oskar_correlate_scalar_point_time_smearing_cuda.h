@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,6 +63,7 @@ extern "C" {
  * @param[in] d_source_n     Source n-direction cosines from phase centre.
  * @param[in] d_station_u    Station u-coordinates, in metres.
  * @param[in] d_station_v    Station v-coordinates, in metres.
+ * @param[in] d_station_w    Station w-coordinates, in metres.
  * @param[in] d_station_x    Station x-coordinates, in metres.
  * @param[in] d_station_y    Station y-coordinates, in metres.
  * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
@@ -80,9 +81,9 @@ void oskar_correlate_scalar_point_time_smearing_cuda_f(int num_sources,
         const float* d_source_I, const float* d_source_l,
         const float* d_source_m, const float* d_source_n,
         const float* d_station_u, const float* d_station_v,
-        const float* d_station_x, const float* d_station_y,
-        float uv_min_lambda, float uv_max_lambda, float inv_wavelength,
-        float frac_bandwidth, const float time_int_sec,
+        const float* d_station_w, const float* d_station_x,
+        const float* d_station_y, float uv_min_lambda, float uv_max_lambda,
+        float inv_wavelength, float frac_bandwidth, const float time_int_sec,
         const float gha0_rad, const float dec0_rad, float2* d_vis);
 
 /**
@@ -108,6 +109,7 @@ void oskar_correlate_scalar_point_time_smearing_cuda_f(int num_sources,
  * @param[in] d_source_n     Source n-direction cosines from phase centre.
  * @param[in] d_station_u    Station u-coordinates, in metres.
  * @param[in] d_station_v    Station v-coordinates, in metres.
+ * @param[in] d_station_w    Station w-coordinates, in metres.
  * @param[in] d_station_x    Station x-coordinates, in metres.
  * @param[in] d_station_y    Station y-coordinates, in metres.
  * @param[in] uv_min_lambda  Minimum allowed UV length, in wavelengths.
@@ -125,40 +127,10 @@ void oskar_correlate_scalar_point_time_smearing_cuda_d(int num_sources,
         const double* d_source_I, const double* d_source_l,
         const double* d_source_m, const double* d_source_n,
         const double* d_station_u, const double* d_station_v,
-        const double* d_station_x, const double* d_station_y,
-        double uv_min_lambda, double uv_max_lambda, double inv_wavelength,
-        double frac_bandwidth, const double time_int_sec,
+        const double* d_station_w, const double* d_station_x,
+        const double* d_station_y, double uv_min_lambda, double uv_max_lambda,
+        double inv_wavelength, double frac_bandwidth, const double time_int_sec,
         const double gha0_rad, const double dec0_rad, double2* d_vis);
-
-#ifdef __CUDACC__
-
-/* Kernels. */
-
-__global__
-void oskar_correlate_scalar_point_time_smearing_cudak_f(const int num_sources,
-        const int num_stations, const float2* restrict jones,
-        const float* restrict source_I, const float* restrict source_l,
-        const float* restrict source_m, const float* restrict source_n,
-        const float* restrict station_u, const float* restrict station_v,
-        const float* restrict station_x, const float* restrict station_y,
-        const float uv_min_lambda, const float uv_max_lambda,
-        const float inv_wavelength, const float frac_bandwidth,
-        const float time_int_sec, const float gha0_rad, const float dec0_rad,
-        float2* restrict vis);
-
-__global__
-void oskar_correlate_scalar_point_time_smearing_cudak_d(const int num_sources,
-        const int num_stations, const double2* restrict jones,
-        const double* restrict source_I, const double* restrict source_l,
-        const double* restrict source_m, const double* restrict source_n,
-        const double* restrict station_u, const double* restrict station_v,
-        const double* restrict station_x, const double* restrict station_y,
-        const double uv_min_lambda, const double uv_max_lambda,
-        const double inv_wavelength, const double frac_bandwidth,
-        const double time_int_sec, const double gha0_rad, const double dec0_rad,
-        double2* restrict vis);
-
-#endif /* __CUDACC__ */
 
 #ifdef __cplusplus
 }

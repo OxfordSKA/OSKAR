@@ -1,8 +1,13 @@
 2015-XX-XX  OSKAR-2.6.0
 
+    * Bandwidth smearing was calculated incorrectly, as contribution from 
+      the w-term was omitted. This has now been fixed, so the apparent
+      amplitudes of sources far from the phase centre are reduced.
+
     * Analytical time-average smearing was calculated incorrectly 
       for sources greater than 90 degrees from the phase centre.
-      This has now been fixed.
+      This has now been fixed, so the apparent amplitudes of sources far 
+      from the phase centre are reduced.
 
     * Fixed an issue which could result in repeated log entries.
 

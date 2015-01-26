@@ -266,6 +266,57 @@ void oskar_sim_interferometer(const char* settings_file, oskar_Log* log,
         oskar_mem_free(vis_amp, status);
     }
 
+#if 0
+    ///////////////////////////////////////////////////////////////////////////
+    DeviceData dd;
+
+    // Channel average test.
+    int n_averages = 10000;
+    s.obs.num_channels = 1; // For both tests.
+    s.obs.frequency_inc_hz = 1e2;
+    s.obs.start_frequency_hz = 100e6; // Centre frequency.
+
+    // Explicit average.
+    oskar_telescope_set_smearing_values(tel, 0.0, 0.0);
+    set_up_device_data(&dd, tel, 1000, 1, status);
+    oskar_mem_clear_contents(dd.vis_temp, status);
+    oskar_mem_clear_contents(dd.vis_acc, status);
+    oskar_Vis* vis1 = oskar_set_up_visibilities(&s, tel, status);
+    oskar_log_section(log, 'M', "Starting simulation 1...");
+    for (int c = 0; c < n_averages; ++c)
+    {
+        double freq_hz = (s.obs.start_frequency_hz -
+                (n_averages/2.0)*s.obs.frequency_inc_hz) +
+                c * s.obs.frequency_inc_hz;
+        oskar_log_message(log, 'M', 0, "Channel %3d/%d [%.4f MHz]",
+                c + 1, n_averages, freq_hz / 1e6);
+
+        interferometer(&dd, log, sky_chunks[0], &s, freq_hz, 0, 1, status);
+        oskar_mem_add(dd.vis_acc, dd.vis_acc, dd.vis_temp, status);
+    }
+    oskar_mem_scale_real(dd.vis_acc, 1.0 / n_averages, status);
+    oskar_mem_copy(oskar_vis_amplitude(vis1), dd.vis_acc, status);
+    oskar_mem_clear_contents(dd.vis_acc, status);
+    oskar_vis_write(vis1, log, "explicit_channel_average.vis", status);
+    oskar_vis_free(vis1, status);
+    free_device_data(&dd, status);
+
+    // Analytical average.
+    oskar_telescope_set_smearing_values(tel, n_averages * s.obs.frequency_inc_hz, 0.0);
+    set_up_device_data(&dd, tel, 1000, 1, status);
+    oskar_mem_clear_contents(dd.vis_temp, status);
+    oskar_mem_clear_contents(dd.vis_acc, status);
+    oskar_Vis* vis2 = oskar_set_up_visibilities(&s, tel, status);
+    oskar_log_section(log, 'M', "Starting simulation 2...");
+    interferometer(&dd, log, sky_chunks[0], &s, s.obs.start_frequency_hz, 0, 1, status);
+    oskar_mem_copy(oskar_vis_amplitude(vis2), dd.vis_temp, status);
+    oskar_vis_write(vis2, log, "analytic_channel_average.vis", status);
+    oskar_vis_free(vis2, status);
+    free_device_data(&dd, status);
+
+    ///////////////////////////////////////////////////////////////////////////
+#endif
+
     // Add uncorrelated system noise to the visibilities.
     if (s.interferometer.noise.enable)
     {
@@ -486,7 +537,7 @@ static void interferometer(DeviceData* d, oskar_Log* log, const oskar_Sky* sky,
         // Correlate.
         oskar_timer_resume(d->timers.tmr_correlate);
         oskar_correlate(d->vis_dmp, n_src, d->J, sky_ptr, d->tel, d->u, d->v,
-                gast, frequency, status);
+                d->w, gast, frequency, status);
         oskar_timer_pause(d->timers.tmr_correlate);
 
         // Insert into global visibility data.
@@ -498,6 +549,7 @@ static void interferometer(DeviceData* d, oskar_Log* log, const oskar_Sky* sky,
 
     // Record GPU memory usage.
     oskar_cuda_mem_log(log, 1, device_id);
+    oskar_sky_free(sky_gpu, status);
 }
 
 static void record_timing(int num_devices, int* cuda_device_ids,
