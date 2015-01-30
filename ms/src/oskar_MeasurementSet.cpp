@@ -37,6 +37,7 @@
 #include <vector>
 #include <ctime>
 #include <cfloat>
+#include <cstdlib>
 
 using namespace casa;
 
@@ -721,17 +722,16 @@ void oskar_MeasurementSet::create(const char* filename,
     newTab.bindColumn(MS::columnName(MS::ANTENNA2), stdStorageManager);
 
     // Create tiled column storage manager for UVW column.
-    IPosition uvwTileShape(2, 3, 2 * num_stations * (num_stations - 1) / 2);
+    int num_baselines = num_stations * (num_stations - 1) / 2;
+    IPosition uvwTileShape(2, 3, 2 * num_baselines);
     TiledColumnStMan uvwStorageManager("TiledUVW", uvwTileShape);
     newTab.bindColumn(MS::columnName(MS::UVW), uvwStorageManager);
 
     // Create tiled column storage managers for DATA and FLAG columns.
-    IPosition dataTileShape(3, num_pols, num_channels,
-            2 * num_stations * (num_stations - 1) / 2);
+    IPosition dataTileShape(3, num_pols, num_channels, 2 * num_baselines);
     TiledColumnStMan dataStorageManager("TiledData", dataTileShape);
     newTab.bindColumn(MS::columnName(MS::DATA), dataStorageManager);
-    IPosition flagTileShape(3, num_pols, num_channels,
-            16 * num_stations * (num_stations - 1) / 2);
+    IPosition flagTileShape(3, num_pols, num_channels, 16 * num_baselines);
     TiledColumnStMan flagStorageManager("TiledFlag", flagTileShape);
     newTab.bindColumn(MS::columnName(MS::FLAG), flagStorageManager);
 
@@ -755,11 +755,16 @@ void oskar_MeasurementSet::create(const char* filename,
     msmc = new MSMainColumns(*ms);
 
     // Add a row to the OBSERVATION subtable.
+    const char* username;
+    username = getenv("USERNAME");
+    if (!username)
+        username = getenv("USER");
     ms->observation().addRow();
     Vector<String> corrSchedule(1);
     Vector<Double> timeRange(2, 0.0);
     msc->observation().schedule().put(0, corrSchedule);
     msc->observation().project().put(0, "");
+    msc->observation().observer().put(0, username);
     msc->observation().telescopeName().put(0, "OSKAR " OSKAR_VERSION_STR);
     msc->observation().timeRange().put(0, timeRange);
     set_time_range();
