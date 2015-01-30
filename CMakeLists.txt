@@ -5,9 +5,11 @@
 # === Set the project name and specify the required CMAKE version.
 project(OSKAR CXX C)
 cmake_minimum_required(VERSION 2.8.3 FATAL_ERROR)
-# http://www.cmake.org/Wiki/CMake/Policies
-if("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" VERSION_GREATER 2.8)
-    cmake_policy(SET CMP0042 OLD) # Currently required for cmake-3.x
+# Set various policies to get old behviour with cmake 3.x
+if (POLICY CMP0042)
+    cmake_policy(SET CMP0042 OLD)
+endif()
+if (POLICY CMP0045)
     cmake_policy(SET CMP0045 OLD)
 endif()
 
@@ -23,7 +25,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake)
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake/modules)
 
 # === Setup install directory paths
-# Note: the install directory prefix is set by -DCMAKE_INSTALL_PRFEIX=<path>
 if (NOT OSKAR_LIB_INSTALL_DIR)
     set(OSKAR_LIB_INSTALL_DIR "lib")
 endif()
@@ -48,53 +49,27 @@ enable_testing()
 
 # === Build main OSKAR library.
 if (CUDA_FOUND)
-
-    add_subdirectory(convert)
-    add_subdirectory(correlate)
-    add_subdirectory(element)
-    add_subdirectory(imaging)
-    add_subdirectory(interferometry)
-    add_subdirectory(jones)
-    add_subdirectory(math)
-    add_subdirectory(sky)
-    add_subdirectory(splines)
-    add_subdirectory(station)
-    add_subdirectory(utility)
-
     set(libname oskar)
-    foreach (file ${correlate_SRC})
-        list(APPEND ${libname}_SRC correlate/${file})
-    endforeach ()
-    foreach (file ${element_SRC})
-        list(APPEND ${libname}_SRC element/${file})
-    endforeach ()
-    foreach (file ${convert_SRC})
-        list(APPEND ${libname}_SRC convert/${file})
-    endforeach ()
-    foreach (file ${imaging_SRC})
-        list(APPEND ${libname}_SRC imaging/${file})
-    endforeach ()
-    foreach (file ${interferometry_SRC})
-        list(APPEND ${libname}_SRC interferometry/${file})
-    endforeach ()
-    foreach (file ${jones_SRC})
-        list(APPEND ${libname}_SRC jones/${file})
-    endforeach ()
-    foreach (file ${math_SRC})
-        list(APPEND ${libname}_SRC math/${file})
-    endforeach ()
-    foreach (file ${sky_SRC})
-        list(APPEND ${libname}_SRC sky/${file})
-    endforeach ()
-    foreach (file ${splines_SRC})
-        list(APPEND ${libname}_SRC splines/${file})
-    endforeach ()
-    foreach (file ${station_SRC})
-        list(APPEND ${libname}_SRC station/${file})
-    endforeach ()
-    foreach (file ${utility_SRC})
-        list(APPEND ${libname}_SRC utility/${file})
-    endforeach ()
+    # List of source subfolder modules to be build into the oskar library.
+    set(${libname}_modules
+        correlate
+        element
+        convert
+        imaging
+        interferometry
+        jones
+        math
+        sky
+        splines
+        station
+        utility
+    )
+    foreach (module ${${libname}_modules})
+        add_subdirectory(${module})
+        foreach (file ${${module}_SRC})
+            list(APPEND ${libname}_SRC ${module}/${file})
+        endforeach()
+    endforeach()
 
     set(CUDA_GENERATED_OUTPUT_DIR
         ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${libname}.dir/src)

@@ -271,6 +271,12 @@ cmake_policy(PUSH)
 cmake_minimum_required(VERSION 2.6.3)
 cmake_policy(POP)
 
+if (POLICY CMP0054)
+    #cmake_policy(PUSH)
+    cmake_policy(SET CMP0054 OLD)
+    #cmake_policy(POP)
+endif()
+
 # This macro helps us find the location of helper files we will need the full path to
 macro(CUDA_FIND_HELPER_FILE _name _extension)
   set(_full_name "${_name}.${_extension}")
@@ -610,7 +616,7 @@ if(APPLE)
   else()
     get_filename_component(_cuda_path_to_cudart "${CUDA_CUDART_LIBRARY}" PATH)
   endif()
-  # 
+  #
   # EDIT 16/11/13 Removed in an attempt to fix install since XCode 5.0.x
   #if(_cuda_path_to_cudart)
   #  list(APPEND CUDA_LIBRARIES -Wl,-rpath "-Wl,${_cuda_path_to_cudart}")

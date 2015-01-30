@@ -54,6 +54,10 @@ if(NOT generated_file)
   message(FATAL_ERROR "You must specify generated_file on the command line")
 endif()
 
+if (POLICY CMP0054)
+    cmake_policy(SET CMP0054 NEW)
+endif()
+
 # Set these up as variables to make reading the generated file easier
 set(CMAKE_COMMAND "@CMAKE_COMMAND@") # path
 set(source_file "@source_file@") # path
@@ -163,6 +167,7 @@ if(CUDA_VERSION VERSION_LESS "3.0")
   list(REMOVE_ITEM depends_CUDA_NVCC_FLAGS "-G")
   cmake_policy(POP)
 endif()
+
 
 # nvcc doesn't define __CUDACC__ for some reason when generating dependency files.  This
 # can cause incorrect dependencies when #including files based on this macro which is
