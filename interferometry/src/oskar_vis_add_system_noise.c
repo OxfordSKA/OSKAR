@@ -124,14 +124,14 @@ void oskar_vis_add_system_noise(oskar_Vis* vis,
                         float2* amps_;
                         amps_ = oskar_mem_float2(vis_amp, status);
                         r1 = oskar_random_gaussian(&r2);
-                        /* As we are adding noise directly to stokes I
+                        /* As we are adding noise directly to Stokes-I
                          * and the noise is defined as single dipole noise
                          * we have to divide by sqrt(2) to take into the account
                          * of the two different dipoles that go into the
-                         * calculation of stokes-I. Note that for polarised mode
+                         * calculation of Stokes-I. Note that for polarised mode
                          * this is not required (npols == 4) as this falls out
                          * naturally when evaluating stokes-I from the
-                         * dipole correlations (ie. I = 0.5 (XX+YY) ).
+                         * dipole correlations (i.e. I = 0.5 (XX+YY) ).
                          */
                         std = std/sqrt(2);
                         amps_[idx].x += r1 * std + mean;

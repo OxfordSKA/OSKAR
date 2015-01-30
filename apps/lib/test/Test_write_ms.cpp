@@ -107,7 +107,7 @@ TEST(write_ms, test_write)
     const char* filename = "temp_test_write_ms.ms";
 
     const char log_line[] = "Log line";
-    oskar_vis_write_ms(vis, filename, OSKAR_TRUE,
+    oskar_vis_write_ms(vis, filename, OSKAR_TRUE, OSKAR_FALSE,
             log_line, sizeof(log_line), &status);
     oskar_vis_free(vis, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);

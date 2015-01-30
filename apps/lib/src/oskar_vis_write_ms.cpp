@@ -38,7 +38,8 @@
 
 extern "C"
 void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
-        int overwrite, const char* run_log, size_t run_log_length, int* status)
+        int overwrite, int force_polarised, const char* run_log,
+        size_t run_log_length, int* status)
 {
     const oskar_Mem *x_metres, *y_metres, *z_metres, *vis_amp, *uu, *vv, *ww;
     oskar_Mem *amp_tb_;
@@ -101,8 +102,14 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
         }
 
         // Create the Measurement Set.
-        ms = oskar_ms_create(ms_path, ra_rad, dec_rad, num_pols,
-                num_channels, ref_freq_hz, chan_width, num_stations);
+        if (force_polarised) {
+            ms = oskar_ms_create(ms_path, ra_rad, dec_rad, 4,
+                    num_channels, ref_freq_hz, chan_width, num_stations);
+        }
+        else {
+            ms = oskar_ms_create(ms_path, ra_rad, dec_rad, num_pols,
+                    num_channels, ref_freq_hz, chan_width, num_stations);
+        }
 
         // Set the station positions.
         if (oskar_mem_type(x_metres) == OSKAR_DOUBLE)
@@ -127,7 +134,8 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
 
         // Check the dimensions match.
         if (oskar_ms_num_channels(ms) != num_channels ||
-                oskar_ms_num_pols(ms) != num_pols ||
+                (!force_polarised && oskar_ms_num_pols(ms) != num_pols) ||
+                (force_polarised && oskar_ms_num_pols(ms) != 4) ||
                 oskar_ms_num_stations(ms) != num_stations)
         {
             *status = OSKAR_ERR_DIMENSION_MISMATCH;
@@ -171,8 +179,14 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
 
     // Add visibilities and u,v,w coordinates.
     amp = oskar_mem_void_const(vis_amp);
-    amp_tb_ = oskar_mem_create(precision | OSKAR_COMPLEX, OSKAR_CPU,
-            num_baselines * num_channels * num_pols, status);
+    if (force_polarised) {
+        amp_tb_ = oskar_mem_create(precision | OSKAR_COMPLEX, OSKAR_CPU,
+                num_baselines * num_channels * 4, status);
+    }
+    else {
+        amp_tb_ = oskar_mem_create(precision | OSKAR_COMPLEX, OSKAR_CPU,
+                num_baselines * num_channels * num_pols, status);
+    }
     if (precision == OSKAR_DOUBLE)
     {
         double2* amp_tb;
@@ -187,7 +201,7 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
             double vis_time = t_start_sec + (t * dt_dump);
 
             // Construct the amplitude data for the given time, baseline.
-            if (num_pols == 1)
+            if (num_pols == 1 && !force_polarised)
             {
                 for (b = 0; b < num_baselines; ++b)
                 {
@@ -205,13 +219,25 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
                 {
                     for (c = 0; c < num_channels; ++c)
                     {
-                        i_in = num_baselines * (num_times * c + t) + b;
                         i_out = 4 * (num_channels * b + c);
-                        double4c vis_amp = ((const double4c*)amp)[i_in];
-                        amp_tb[i_out + 0] = vis_amp.a; // XX
-                        amp_tb[i_out + 1] = vis_amp.b; // XY
-                        amp_tb[i_out + 2] = vis_amp.c; // YX
-                        amp_tb[i_out + 3] = vis_amp.d; // YY
+                        if (force_polarised && num_pols == 1) {
+                            i_in = num_baselines * (num_times * c + t) + b;
+                            double2 vis_amp = ((const double2*)amp)[i_in];
+                            amp_tb[i_out + 0] = vis_amp;         // XX
+                            amp_tb[i_out + 1].x = 0.0;           // XY
+                            amp_tb[i_out + 1].y = 0.0;           // XY
+                            amp_tb[i_out + 2].x = 0.0;           // YX
+                            amp_tb[i_out + 2].y = 0.0;           // YX
+                            amp_tb[i_out + 3] = vis_amp;         // YY
+                        }
+                        else {
+                            i_in = num_baselines * (num_times * c + t) + b;
+                            double4c vis_amp = ((const double4c*)amp)[i_in];
+                            amp_tb[i_out + 0] = vis_amp.a; // XX
+                            amp_tb[i_out + 1] = vis_amp.b; // XY
+                            amp_tb[i_out + 2] = vis_amp.c; // YX
+                            amp_tb[i_out + 3] = vis_amp.d; // YY
+                        }
                     }
                 }
             }
@@ -235,7 +261,7 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
             double vis_time = t_start_sec + (t * dt_dump);
 
             // Construct the amplitude data for the given time, baseline.
-            if (num_pols == 1)
+            if (num_pols == 1 && !force_polarised)
             {
                 for (b = 0; b < num_baselines; ++b)
                 {
@@ -253,13 +279,25 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
                 {
                     for (c = 0; c < num_channels; ++c)
                     {
-                        i_in = num_baselines * (num_times * c + t) + b;
                         i_out = 4 * (num_channels * b + c);
-                        float4c vis_amp = ((const float4c*)amp)[i_in];
-                        amp_tb[i_out + 0] = vis_amp.a; // XX
-                        amp_tb[i_out + 1] = vis_amp.b; // XY
-                        amp_tb[i_out + 2] = vis_amp.c; // YX
-                        amp_tb[i_out + 3] = vis_amp.d; // YY
+                        if (force_polarised && num_pols == 1) {
+                            i_in = num_baselines * (num_times * c + t) + b;
+                            float2 vis_amp = ((const float2*)amp)[i_in];
+                            amp_tb[i_out + 0] = vis_amp;        // XX
+                            amp_tb[i_out + 1].x = 0.0;          // XY
+                            amp_tb[i_out + 1].y = 0.0;          // XY
+                            amp_tb[i_out + 2].x = 0.0;          // YX
+                            amp_tb[i_out + 2].y = 0.0;          // YX
+                            amp_tb[i_out + 3] = vis_amp;        // YY
+                        }
+                        else {
+                            i_in = num_baselines * (num_times * c + t) + b;
+                            float4c vis_amp = ((const float4c*)amp)[i_in];
+                            amp_tb[i_out + 0] = vis_amp.a; // XX
+                            amp_tb[i_out + 1] = vis_amp.b; // XY
+                            amp_tb[i_out + 2] = vis_amp.c; // YX
+                            amp_tb[i_out + 3] = vis_amp.d; // YY
+                        }
                     }
                 }
             }

@@ -55,6 +55,8 @@ struct oskar_SettingsInterferometer
 
     char* oskar_vis_filename;
     char* ms_filename;
+
+    int force_polarised_ms;
 };
 typedef struct oskar_SettingsInterferometer oskar_SettingsInterferometer;
 

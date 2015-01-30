@@ -668,6 +668,8 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
 
     LVS0("Output OSKAR visibility file", s->interferometer.oskar_vis_filename);
     LVS0("Output Measurement Set name", s->interferometer.ms_filename);
+    if (s->interferometer.force_polarised_ms)
+        LVB("Force polarised MS", s->interferometer.force_polarised_ms);
 }
 
 void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)

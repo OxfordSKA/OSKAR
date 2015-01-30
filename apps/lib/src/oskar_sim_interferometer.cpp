@@ -368,7 +368,11 @@ void oskar_sim_interferometer(const char* settings_file, oskar_Log* log,
 
         // Get the log.
         char* log_data = oskar_log_file_data(log, &log_size);
-        oskar_vis_write_ms(vis, ms_name, true, log_data, log_size, status);
+        bool overwrite = true;
+
+        bool force_polarised = s.interferometer.force_polarised_ms;
+        oskar_vis_write_ms(vis, ms_name, overwrite, force_polarised,
+                log_data, log_size, status);
         free(log_data);
     }
 #endif

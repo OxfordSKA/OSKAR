@@ -55,6 +55,7 @@ int main(int argc, char** argv)
     opt.addRequired("OSKAR visibility files...");
     opt.addFlag("-o", "Output Measurement Set name", 1, "out.ms",
             false, "--output");
+    opt.addFlag("-p", "Force polarised MS format", false, "--force_polarised");
     opt.addExample("oskar_vis_to_ms file1.vis file2.vis");
     opt.addExample("oskar_vis_to_ms file1.vis file2.vis -o stitched.ms");
     opt.addExample("oskar_vis_to_ms *.vis");
@@ -66,6 +67,7 @@ int main(int argc, char** argv)
     opt.get("-o")->getString(out_path);
     vector<string> in_files = opt.getInputFiles(1);
     bool verbose = opt.isSet("-q") ? false : true;
+    bool force_polarised = opt.isSet("-p") ? true : false;
     int num_in_files = in_files.size();
 
     // Print if verbose.
@@ -102,7 +104,7 @@ int main(int argc, char** argv)
 
         // Write data to Measurement Set.
         int overwrite = (i == 0) ? 1 : 0;
-        oskar_vis_write_ms(vis, out_path.c_str(), overwrite,
+        oskar_vis_write_ms(vis, out_path.c_str(), overwrite, force_polarised,
                 oskar_mem_char_const(log), oskar_mem_length(log), &error);
 
         // Clean up.

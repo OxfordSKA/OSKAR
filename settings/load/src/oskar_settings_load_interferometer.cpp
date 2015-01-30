@@ -96,6 +96,8 @@ void oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
             settings->ms_filename = (char*)malloc(t.size() + 1);
             strcpy(settings->ms_filename, t.constData());
         }
+
+        settings->force_polarised_ms = s.value("force_polarised_ms", false).toBool();
     }
     s.endGroup();
 

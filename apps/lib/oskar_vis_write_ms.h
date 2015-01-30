@@ -51,13 +51,16 @@ extern "C" {
  * @param[in] vis             Pointer to visibility structure to write.
  * @param[in] ms_path         Pathname of the Measurement Set to write.
  * @param[in] overwrite       If true, then overwrite any existing Measurement Set.
+ * @param[in] force_polarised If true, write 'Scalar' visibility data in polarised
+ *                            format.
  * @param[in] run_log         Simulation run log, as a single string (optional).
  * @param[in] run_log_length  Length of run log in bytes.
  * @param[in,out] status      Status return code.
  */
 OSKAR_APPS_EXPORT
 void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
-        int overwrite, const char* run_log, size_t run_log_length, int* status);
+        int overwrite, int force_polarised, const char* run_log,
+        size_t run_log_length, int* status);
 
 #ifdef __cplusplus
 }
