@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,14 +36,25 @@
 extern "C" {
 #endif
 
-void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
+static size_t oskar_mem_total_elements(const oskar_Mem* x)
+{
+    size_t v;
+    v = oskar_mem_length(x);
+    if (oskar_mem_is_matrix(x))
+        v *= 4;
+    if (oskar_mem_is_complex(x))
+        v *= 2;
+    return v;
+}
+
+void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
         int* status)
 {
-    int type, location;
-    size_t i, num_elements;
+    int precision, location;
+    size_t i, num_elements_total_out, num_elements_total_in;
 
     /* Check all inputs. */
-    if (!a || !b || !c || !status)
+    if (!out || !in1 || !in2 || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -53,56 +64,57 @@ void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
     if (*status) return;
 
     /* Get meta-data. */
-    location = oskar_mem_location(a);
-    type = oskar_mem_type(a);
-    num_elements = oskar_mem_length(a);
+    precision = oskar_mem_precision(out);
+    location = oskar_mem_location(out);
+    num_elements_total_out = oskar_mem_total_elements(out);
+    num_elements_total_in = oskar_mem_total_elements(in1);
 
     /* Check for empty array. */
-    if (num_elements == 0)
+    if (oskar_mem_length(in1) == 0)
         return;
 
     /* Check data types, locations, and number of elements. */
-    if (type != oskar_mem_type(b) || type != oskar_mem_type(c))
+    if (precision != oskar_mem_precision(in1) ||
+            precision != oskar_mem_precision(in2))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
-    if (location != oskar_mem_location(b) || location != oskar_mem_location(c))
+    if (location != oskar_mem_location(in1) ||
+            location != oskar_mem_location(in2))
     {
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
-    if (num_elements != oskar_mem_length(b) ||
-            num_elements != oskar_mem_length(c))
+    if (num_elements_total_in != oskar_mem_total_elements(in2))
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
     }
-
-    /* Get total number of elements. */
-    if (oskar_mem_type_is_matrix(type))
-        num_elements *= 4;
-    if (oskar_mem_type_is_complex(type))
-        num_elements *= 2;
+    if (num_elements_total_out < num_elements_total_in)
+    {
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
 
     /* Switch on type and location. */
-    if (oskar_mem_type_is_double(type))
+    if (precision == OSKAR_DOUBLE)
     {
         double *aa;
         const double *bb, *cc;
-        aa = oskar_mem_double(a, status);
-        bb = oskar_mem_double_const(b, status);
-        cc = oskar_mem_double_const(c, status);
+        aa = oskar_mem_double(out, status);
+        bb = oskar_mem_double_const(in1, status);
+        cc = oskar_mem_double_const(in2, status);
 
         if (location == OSKAR_CPU)
         {
-            for (i = 0; i < num_elements; ++i)
+            for (i = 0; i < num_elements_total_out; ++i)
                 aa[i] = bb[i] + cc[i];
         }
         else if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_mem_add_cuda_d(num_elements, bb, cc, aa);
+            oskar_mem_add_cuda_d(num_elements_total_out, bb, cc, aa);
             oskar_cuda_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
@@ -111,23 +123,23 @@ void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
         else
             *status = OSKAR_ERR_BAD_LOCATION;
     }
-    else if (oskar_mem_type_is_single(type))
+    else if (precision == OSKAR_SINGLE)
     {
         float *aa;
         const float *bb, *cc;
-        aa = oskar_mem_float(a, status);
-        bb = oskar_mem_float_const(b, status);
-        cc = oskar_mem_float_const(c, status);
+        aa = oskar_mem_float(out, status);
+        bb = oskar_mem_float_const(in1, status);
+        cc = oskar_mem_float_const(in2, status);
 
         if (location == OSKAR_CPU)
         {
-            for (i = 0; i < num_elements; ++i)
+            for (i = 0; i < num_elements_total_out; ++i)
                 aa[i] = bb[i] + cc[i];
         }
         else if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_mem_add_cuda_f(num_elements, bb, cc, aa);
+            oskar_mem_add_cuda_f(num_elements_total_out, bb, cc, aa);
             oskar_cuda_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;

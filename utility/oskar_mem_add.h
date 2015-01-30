@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,20 +40,26 @@ extern "C" {
 #endif
 
 /**
- * @brief Element-wise add of the contents of the oskar_Mem arrays \p b and \p c
- * storing the result in \p a.
+ * @brief Element-wise add of the supplied arrays.
  *
  * @details
- * Note: Current this function is restricted to adding mem pointers
- * of the same type on the CPU.
+ * Performs element-wise addition of the contents of the
+ * arrays \p in1 and \p in2, storing the result in \p out.
  *
- * @param[out] a oskar_Mem pointer with the result of adding b and c.
- * @param[in]  b oskar_Mem pointer
- * @param[in]  c oskar_Mem pointer
+ * Addition can only be performed on arrays of the same numerical precision.
+ * However, the types need not match as long as the total number of elements
+ * in both inputs are the same; so for example, it is possible to add a scalar
+ * vector to a complex one of half the length.
+ *
+ * An error is returned if there is not enough space in the output array.
+ *
+ * @param[in,out]  out      Array containing the result of adding inputs.
+ * @param[in]      in1      First input array.
+ * @param[in]      in2      Second input array.
  * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
+void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
         int* status);
 
 #ifdef __cplusplus
