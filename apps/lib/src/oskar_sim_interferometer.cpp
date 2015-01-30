@@ -84,7 +84,7 @@ static void interferometer(DeviceData* d, oskar_Log* log, const oskar_Sky* sky,
         int chunk_index, int num_sky_chunks, int* status);
 
 static void record_timing(int num_devices, int* cuda_device_ids,
-        oskar_Timers* timers, oskar_Log* log);
+        DeviceData* dd, oskar_Log* log);
 
 static void log_warning_box(oskar_Log* log, const char* format, ...);
 
@@ -348,7 +348,7 @@ void oskar_sim_interferometer(const char* settings_file, oskar_Log* log,
     oskar_telescope_free(tel, status);
 
     // Record times.
-    record_timing(num_devices, s.sim.cuda_device_ids, &(d[0].timers), log);
+    record_timing(num_devices, s.sim.cuda_device_ids, &(d[0]), log);
 
     // Write visibilities to disk.
     if (fname && !*status)
@@ -557,27 +557,27 @@ static void interferometer(DeviceData* d, oskar_Log* log, const oskar_Sky* sky,
 }
 
 static void record_timing(int num_devices, int* cuda_device_ids,
-        oskar_Timers* timers, oskar_Log* log)
+        DeviceData* dd, oskar_Log* log)
 {
     double elapsed, t_init = 0.0, t_clip = 0.0, t_R = 0.0, t_E = 0.0, t_K = 0.0;
     double t_join = 0.0, t_correlate = 0.0;
 
     // Record time taken.
     cudaSetDevice(cuda_device_ids[0]);
-    elapsed = oskar_timer_elapsed(timers[0].tmr);
+    elapsed = oskar_timer_elapsed(dd[0].timers.tmr);
     oskar_log_section(log, 'M', "Simulation completed in %.3f sec.", elapsed);
 
     // Record percentage times.
     for (int i = 0; i < num_devices; ++i)
     {
         cudaSetDevice(cuda_device_ids[i]);
-        t_init += oskar_timer_elapsed(timers[i].tmr_init_copy);
-        t_clip += oskar_timer_elapsed(timers[i].tmr_clip);
-        t_R += oskar_timer_elapsed(timers[i].tmr_R);
-        t_E += oskar_timer_elapsed(timers[i].tmr_E);
-        t_K += oskar_timer_elapsed(timers[i].tmr_K);
-        t_join += oskar_timer_elapsed(timers[i].tmr_join);
-        t_correlate += oskar_timer_elapsed(timers[i].tmr_correlate);
+        t_init += oskar_timer_elapsed(dd[i].timers.tmr_init_copy);
+        t_clip += oskar_timer_elapsed(dd[i].timers.tmr_clip);
+        t_R += oskar_timer_elapsed(dd[i].timers.tmr_R);
+        t_E += oskar_timer_elapsed(dd[i].timers.tmr_E);
+        t_K += oskar_timer_elapsed(dd[i].timers.tmr_K);
+        t_join += oskar_timer_elapsed(dd[i].timers.tmr_join);
+        t_correlate += oskar_timer_elapsed(dd[i].timers.tmr_correlate);
     }
     t_init *= (100.0 / (num_devices * elapsed));
     t_clip *= (100.0 / (num_devices * elapsed));
@@ -586,7 +586,7 @@ static void record_timing(int num_devices, int* cuda_device_ids,
     t_K *= (100.0 / (num_devices * elapsed));
     t_join *= (100.0 / (num_devices * elapsed));
     t_correlate *= (100.0 / (num_devices * elapsed));
-    // Use depth = -1 for a line without a bullet.
+    // Using depth = -1 for a line without a bullet.
     oskar_log_message(log, 'M', -1, "%6.1f%% Chunk copy & initialise.", t_init);
     oskar_log_message(log, 'M', -1, "%6.1f%% Horizon clip.", t_clip);
     oskar_log_message(log, 'M', -1, "%6.1f%% Jones R.", t_R);
