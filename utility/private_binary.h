@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -200,6 +200,7 @@ struct oskar_Binary
     int oskar_ver_major;
     int oskar_ver_minor;
     int oskar_ver_patch;
+    int query_search_start;      /**< Index at which to start search query. */
     char open_mode;              /**< Mode in which file was opened (read/write). */
 
     /* Tag data. */

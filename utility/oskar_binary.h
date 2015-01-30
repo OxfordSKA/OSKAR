@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,12 +58,14 @@ enum OSKAR_TAG_GROUPS
     OSKAR_TAG_GROUP_SYSTEM_INFO = 2, /* Not yet used. */
     OSKAR_TAG_GROUP_SETTINGS = 3,
     OSKAR_TAG_GROUP_RUN = 4,
-    OSKAR_TAG_GROUP_VISIBILITY = 5,
-    OSKAR_TAG_GROUP_IMAGE = 6,
+    OSKAR_TAG_GROUP_VISIBILITY = 5, /* Deprecated. */
+    OSKAR_TAG_GROUP_IMAGE = 6, /* Deprecated. */
     OSKAR_TAG_GROUP_SKY_MODEL = 7,
     OSKAR_TAG_GROUP_TIME_FREQ_DATA = 8,
     OSKAR_TAG_GROUP_SPLINE_DATA = 9,
-    OSKAR_TAG_GROUP_ELEMENT_DATA = 10
+    OSKAR_TAG_GROUP_ELEMENT_DATA = 10,
+    OSKAR_TAG_GROUP_VIS_HEADER = 11,
+    OSKAR_TAG_GROUP_VIS_BLOCK = 12
 };
 
 /* Standard metadata tags. */

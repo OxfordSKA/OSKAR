@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,6 +87,20 @@ OSKAR_EXPORT
 int oskar_binary_query_ext(const oskar_Binary* handle,
         unsigned char data_type, const char* name_group, const char* name_tag,
         int user_index, size_t* payload_size, int* status);
+
+/**
+ * @brief Sets the index at which to start search query.
+ *
+ * @details
+ * This function sets the index at which to start search query.
+ *
+ * @param[in] handle        Binary data handle.
+ * @param[in] start         Index at which to start search query.
+ * @param[in,out] status    Status return code.
+ */
+OSKAR_EXPORT
+void oskar_binary_set_query_search_start(oskar_Binary* handle, int start,
+        int* status);
 
 #ifdef __cplusplus
 }

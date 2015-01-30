@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ int oskar_binary_query(const oskar_Binary* handle,
     if (*status) return 0;
 
     /* Find the tag in the index. */
-    for (i = 0; i < handle->num_chunks; ++i)
+    for (i = handle->query_search_start; i < handle->num_chunks; ++i)
     {
         if (!(handle->extended[i]) &&
                 handle->data_type[i] == (int) data_type &&
@@ -66,7 +66,7 @@ int oskar_binary_query(const oskar_Binary* handle,
     }
 
     /* Check if tag is not present. */
-    if (i == handle->num_chunks)
+    if (i >= handle->num_chunks)
     {
         *status = OSKAR_ERR_BINARY_TAG_NOT_FOUND;
         return -1;
@@ -102,7 +102,7 @@ int oskar_binary_query_ext(const oskar_Binary* handle,
     }
 
     /* Find the tag in the index. */
-    for (i = 0; i < handle->num_chunks; ++i)
+    for (i = handle->query_search_start; i < handle->num_chunks; ++i)
     {
         if (handle->extended[i] &&
                 handle->data_type[i] == (int) data_type &&
@@ -122,7 +122,7 @@ int oskar_binary_query_ext(const oskar_Binary* handle,
     }
 
     /* Check if tag is not present. */
-    if (i == handle->num_chunks)
+    if (i >= handle->num_chunks)
     {
         *status = OSKAR_ERR_BINARY_TAG_NOT_FOUND;
         return -1;
@@ -130,6 +130,17 @@ int oskar_binary_query_ext(const oskar_Binary* handle,
 
     *payload_size = handle->payload_size_bytes[i];
     return i;
+}
+
+void oskar_binary_set_query_search_start(oskar_Binary* handle, int start,
+        int* status)
+{
+    if (start >= handle->num_chunks)
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
+    handle->query_search_start = start;
 }
 
 #ifdef __cplusplus
