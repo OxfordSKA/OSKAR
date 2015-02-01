@@ -13,9 +13,6 @@ target_link_libraries(${name} oskar gtest ${CUDA_LIBRARIES})
 if (OSKAR_USE_LAPACK)
     target_link_libraries(${name} ${OSKAR_LAPACK})
 endif()
-if (OSKAR_USE_CBLAS)
-    target_link_libraries(${name} ${OSKAR_CBLAS})
-endif()
 set_target_properties(${name} PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}")

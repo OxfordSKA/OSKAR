@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,9 +47,8 @@
 extern "C" {
 #endif
 
-/* Suppress warnings about unused function arguments when LAPACK or CBLAS
- * are not found */
-#if defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK)
+/* Suppress warnings about unused function arguments when LAPACK not found. */
+#if defined(OSKAR_NO_LAPACK)
 #   if defined(__INTEL_COMPILER)
 #       pragma warning push
 /*#       pragma warning(disable:XXX)*/
@@ -204,9 +203,8 @@ oskar_Sky** oskar_set_up_sky(const oskar_Settings* settings, oskar_Log* log,
     oskar_log_value(log, 'M', 1, "Num. sources", "%d", total_sources);
     oskar_log_value(log, 'M', 1, "Num. chunks", "%d", *num_chunks);
     oskar_log_value(log, 'M', 1, "Num. extended source chunks", "%d", num_extended_chunks);
-#if (defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-    oskar_log_warning(log, "Extended sources disabled, as CBLAS and/or LAPACK "
-            "were not found.");
+#if defined(OSKAR_NO_LAPACK)
+    oskar_log_warning(log, "Extended sources disabled (LAPACK not found).");
 #endif
 
     /* Save final sky model set if required. */
@@ -607,7 +605,7 @@ static void set_up_extended(oskar_Sky* sky,
         const oskar_SettingsSkyExtendedSources* ext, oskar_Log* log,
         double ra0_rad, double dec0_rad, int zero_failed_sources, int* status)
 {
-#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
+#if !defined(OSKAR_NO_LAPACK)
     int num_failed = 0;
 
     /* Apply extended source over-ride. */
@@ -648,7 +646,7 @@ static void set_up_pol(oskar_Sky* sky,
             pol->std_pol_angle_rad, pol->seed, status);
 }
 
-#if defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK)
+#if defined(OSKAR_NO_LAPACK)
 #   if defined(__INTEL_COMPILER)
 #       pragma warning pop
 #   elif defined(__GNUC__)

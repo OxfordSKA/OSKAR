@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,115 +28,142 @@
 
 #include <oskar_matrix_multiply.h>
 
-#define MAX( a, b ) ( ((a) > (b)) ? (a) : (b) )
+#define SWAP_INT( a, b ) {int t; t = a; a = b; b = t;}
+
+/* M is number of rows of A, and number of rows of C.
+ * N is number of columns of B, and number of columns of C.
+ * K is number of columns of A, and number of rows of B. */
+#define MATRIX_MULTIPLY_MACRO \
+        M = !transpose_a ? rows_a : cols_a;                           \
+        N = !transpose_b ? cols_b : rows_b;                           \
+        K = !transpose_a ? cols_a : rows_a;                           \
+        if (K != (!transpose_b ? rows_b : cols_b))                    \
+        {                                                             \
+            *status = OSKAR_ERR_DIMENSION_MISMATCH;                   \
+            return;                                                   \
+        }                                                             \
+        if (row_major)                                                \
+        {                                                             \
+            A = b;                                                    \
+            B = a;                                                    \
+            SWAP_INT(transpose_a, transpose_b);                       \
+            SWAP_INT(M, N);                                           \
+        }                                                             \
+        else                                                          \
+        {                                                             \
+            A = a;                                                    \
+            B = b;                                                    \
+        }                                                             \
+        LDA = !transpose_a ? M : K;                                   \
+        LDB = !transpose_b ? K : N;                                   \
+        LDC = M;                                                      \
+        if (M == 0 || N == 0) return;                                 \
+        if (!transpose_b)                                             \
+        {                                                             \
+            if (!transpose_a)                                         \
+            {                                                         \
+                for (j = 0; j < N; ++j)                               \
+                {                                                     \
+                    for (i = 0; i < M; ++i) c[i + j * LDC] = zero;    \
+                    for (l = 0; l < K; ++l)                           \
+                    {                                                 \
+                        x = B[l + j * LDB];                           \
+                        if (x != zero)                                \
+                        {                                             \
+                            for (i = 0; i < M; ++i)                   \
+                            {                                         \
+                                c[i + j * LDC] += x * A[i + l * LDA]; \
+                            }                                         \
+                        }                                             \
+                    }                                                 \
+                }                                                     \
+                return;                                               \
+            }                                                         \
+            else                                                      \
+            {                                                         \
+                for (j = 0; j < N; ++j)                               \
+                {                                                     \
+                    for (i = 0; i < M; ++i)                           \
+                    {                                                 \
+                        x = zero;                                     \
+                        for (l = 0; l < K; ++l)                       \
+                        {                                             \
+                            x += A[l + i * LDA] * B[l + j * LDB];     \
+                        }                                             \
+                        c[i + j * LDC] = x;                           \
+                    }                                                 \
+                }                                                     \
+                return;                                               \
+            }                                                         \
+        }                                                             \
+        else                                                          \
+        {                                                             \
+            if (!transpose_a)                                         \
+            {                                                         \
+                for (j = 0; j < N; ++j)                               \
+                {                                                     \
+                    for (i = 0; i < M; ++i) c[i + j * LDC] = zero;    \
+                    for (l = 0; l < K; ++l)                           \
+                    {                                                 \
+                        x = B[j + l * LDB];                           \
+                        if (x != zero)                                \
+                        {                                             \
+                            for (i = 0; i < M; ++i)                   \
+                            {                                         \
+                                c[i + j * LDC] += x * A[i + l * LDA]; \
+                            }                                         \
+                        }                                             \
+                    }                                                 \
+                }                                                     \
+                return;                                               \
+            }                                                         \
+            else                                                      \
+            {                                                         \
+                for (j = 0; j < N; ++j)                               \
+                {                                                     \
+                    for (i = 0; i < M; ++i)                           \
+                    {                                                 \
+                        x = zero;                                     \
+                        for (l = 0; l < K; ++l)                       \
+                        {                                             \
+                            x += A[l + i * LDA] * B[j + l * LDB];     \
+                        }                                             \
+                        c[i + j * LDC] = x;                           \
+                    }                                                 \
+                }                                                     \
+                return;                                               \
+            }                                                         \
+        }
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-enum CBLAS_ORDER {CblasRowMajor=101, CblasColMajor=102};
-enum CBLAS_TRANSPOSE {CblasNoTrans=111, CblasTrans=112, CblasConjTrans=113};
-
-/*
-#ifndef OSKAR_NO_BLAS
-extern void sgemm_(const char* TransA, const char* TransB, const int M,
-        const int N, const int K, const float alpha, const float* A,
-        const int lda, const float* B, const int lbd, const float beta,
-        const float* C, const int ldc);
-
-extern void dgemm_(const char* TransA, const char* TransB, const int M,
-        const int N, const int K, const double alpha, const double* A,
-        const int lda, const double* B, const int lbd, const double beta,
-        const double* C, const int ldc);
-#endif
-*/
-
-void cblas_sgemm(const enum CBLAS_ORDER Order,
-        const enum CBLAS_TRANSPOSE TransA,
-        const enum CBLAS_TRANSPOSE TransB, const int M, const int N,
-        const int K, const float alpha, const float *A,
-        const int lda, const float *B, const int ldb,
-        const float beta, float *C, const int ldc);
-
-void cblas_dgemm(const enum CBLAS_ORDER Order,
-        const enum CBLAS_TRANSPOSE TransA,
-        const enum CBLAS_TRANSPOSE TransB, const int M, const int N,
-        const int K, const double alpha, const double *A,
-        const int lda, const double *B, const int ldb,
-        const double beta, double *C, const int ldc);
-
-
 /* Single precision. */
-void oskar_matrix_multiply_f(float* C,
-        int rows_A, int cols_A, int rows_B, int cols_B,
-        int transA, int transB, const float* A, const float* B, int* status)
+void oskar_matrix_multiply_f(float* c, int rows_a, int cols_a,
+        int rows_b, int cols_b, int transpose_a, int transpose_b,
+        const float* a, const float* b, int* status)
 {
-#ifdef OSKAR_NO_CBLAS
-    *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-    return;
-#else
-    int M, N, K, LDA, LDB, LDC;
-    enum CBLAS_TRANSPOSE tA, tB;
-    float alpha = 1.0f, beta = 0.0f;
+    int M, N, K, LDA, LDB, LDC, i, j, l;
+    float x;
+    const float *A, *B, zero = 0.f;
+    const int row_major = 1;
 
-    /* [ C = alpha * A * B + beta * C ] */
-    M = (!transA) ? rows_A : cols_A;
-    N = (!transB) ? cols_B : rows_B;
-    K = (!transA) ? cols_A : rows_A;
-
-    if (K != ((!transB)? rows_B : cols_B))
-    {
-        *status = OSKAR_ERR_DIMENSION_MISMATCH;
-        return;
-    }
-
-    tA = transA ? CblasTrans : CblasNoTrans;
-    tB = transB ? CblasTrans : CblasNoTrans;
-
-    LDA = (!transA) ? MAX(K, 1) : MAX(M, 1);
-    LDB = (!transB) ? MAX(N, 1) : MAX(K, 1);
-    LDC = MAX(N, 1);
-
-    cblas_sgemm(CblasRowMajor, tA, tB, M, N, K, alpha, A,
-            LDA, B, LDB, beta, C, LDC);
-#endif
+    MATRIX_MULTIPLY_MACRO
 }
 
-
 /* Double precision. */
-void oskar_matrix_multiply_d(double* C,
-        int rows_A, int cols_A, int rows_B, int cols_B,
-        int transA, int transB, const double* A, const double* B, int* status)
+void oskar_matrix_multiply_d(double* c, int rows_a, int cols_a,
+        int rows_b, int cols_b, int transpose_a, int transpose_b,
+        const double* a, const double* b, int* status)
 {
-#ifdef OSKAR_NO_CBLAS
-    *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-    return;
-#else
-    int M, N, K, LDA, LDB, LDC;
-    enum CBLAS_TRANSPOSE tA, tB;
-    double alpha = 1.0, beta = 0.0;
+    int M, N, K, LDA, LDB, LDC, i, j, l;
+    double x;
+    const double *A, *B, zero = 0.;
+    const int row_major = 1;
 
-    /* [ C = alpha * A * B + beta * C ] */
-    M = (!transA) ? rows_A : cols_A;
-    N = (!transB) ? cols_B : rows_B;
-    K = (!transA) ? cols_A : rows_A;
-
-    if (K != ((!transB)? rows_B : cols_B))
-    {
-        *status = OSKAR_ERR_DIMENSION_MISMATCH;
-        return;
-    }
-
-    tA = transA ? CblasTrans : CblasNoTrans;
-    tB = transB ? CblasTrans : CblasNoTrans;
-
-    LDA = (!transA) ? MAX(K, 1) : MAX(M, 1);
-    LDB = (!transB) ? MAX(N, 1) : MAX(K, 1);
-    LDC = MAX(N, 1);
-
-    cblas_dgemm(CblasRowMajor, tA, tB, M, N, K, alpha, A,
-            LDA, B, LDB, beta, C, LDC);
-#endif
+    MATRIX_MULTIPLY_MACRO
 }
 
 #ifdef __cplusplus

@@ -80,9 +80,6 @@ if (CUDA_FOUND)
         oskar_log
         ${CUDA_curand_LIBRARY})
 
-    if (OSKAR_USE_CBLAS)
-        target_link_libraries(${libname} ${OSKAR_CBLAS})
-    endif ()
     if (OSKAR_USE_LAPACK)
         target_link_libraries(${libname} ${OSKAR_LAPACK})
     endif ()

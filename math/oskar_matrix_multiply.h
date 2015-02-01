@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,23 +48,21 @@ extern "C" {
  *
  * Matrices must be in row-major order (C-style memory ordering).
  *
- * This function requires the CBLAS library function sgemm().
- *
- * @param[out] C         The output matrix.
- * @param[in] rows_A     The number of rows in matrix A.
- * @param[in] cols_A     The number of columns in matrix A.
- * @param[in] rows_B     The number of rows in matrix B.
- * @param[in] cols_B     The number of columns in matrix B.
- * @param[in] transA     Flag specifying whether matrix A should be transposed.
- * @param[in] transB     Flag specifying whether matrix B should be transposed.
- * @param[in] A          The input matrix A.
- * @param[in] B          The input matrix B.
- * @param[in,out] status Status return code.
+ * @param[out] c          The output matrix.
+ * @param[in] rows_a      The number of rows in matrix A.
+ * @param[in] cols_a      The number of columns in matrix A.
+ * @param[in] rows_b      The number of rows in matrix B.
+ * @param[in] cols_b      The number of columns in matrix B.
+ * @param[in] transpose_a Flag specifying whether matrix A should be transposed.
+ * @param[in] transpose_b Flag specifying whether matrix B should be transposed.
+ * @param[in] a           The input matrix A.
+ * @param[in] b           The input matrix B.
+ * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-void oskar_matrix_multiply_f(float* C,
-        int rows_A, int cols_A, int rows_B, int cols_B,
-        int transA, int transB, const float* A, const float* B, int* status);
+void oskar_matrix_multiply_f(float* c, int rows_a, int cols_a,
+        int rows_b, int cols_b, int transpose_a, int transpose_b,
+        const float* a, const float* b, int* status);
 
 /**
  * @brief
@@ -75,23 +73,21 @@ void oskar_matrix_multiply_f(float* C,
  *
  * Matrices must be in row-major order (C-style memory ordering).
  *
- * This function requires the CBLAS library function dgemm().
- *
- * @param[out] C         The output matrix.
- * @param[in] rows_A     The number of rows in matrix A.
- * @param[in] cols_A     The number of columns in matrix A.
- * @param[in] rows_B     The number of rows in matrix B.
- * @param[in] cols_B     The number of columns in matrix B.
- * @param[in] transA     Flag specifying whether matrix A should be transposed.
- * @param[in] transB     Flag specifying whether matrix B should be transposed.
- * @param[in] A          The input matrix A.
- * @param[in] B          The input matrix B.
- * @param[in,out] status Status return code.
+ * @param[out] c          The output matrix.
+ * @param[in] rows_a      The number of rows in matrix A.
+ * @param[in] cols_a      The number of columns in matrix A.
+ * @param[in] rows_b      The number of rows in matrix B.
+ * @param[in] cols_b      The number of columns in matrix B.
+ * @param[in] transpose_a Flag specifying whether matrix A should be transposed.
+ * @param[in] transpose_b Flag specifying whether matrix B should be transposed.
+ * @param[in] a           The input matrix A.
+ * @param[in] b           The input matrix B.
+ * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-void oskar_matrix_multiply_d(double* C,
-        int rows_A, int cols_A, int rows_B, int cols_B,
-        int transA, int transB, const double* A, const double* B, int* status);
+void oskar_matrix_multiply_d(double* c, int rows_a, int cols_a,
+        int rows_b, int cols_b, int transpose_a, int transpose_b,
+        const double* a, const double* b, int* status);
 
 #ifdef __cplusplus
 }

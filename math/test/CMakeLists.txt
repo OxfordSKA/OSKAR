@@ -7,17 +7,15 @@ set(${name}_SRC
     main.cpp
     Test_find_closest_match.cpp
     Test_linspace.cpp
+    Test_matrix_multiply.cpp
 )
-if (OSKAR_USE_LAPACK AND OSKAR_USE_CBLAS)
+if (OSKAR_USE_LAPACK)
     list(APPEND ${name}_SRC Test_fit_ellipse.cpp)
 endif ()
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)
 if (OSKAR_USE_LAPACK)
     target_link_libraries(${name} ${OSKAR_LAPACK})
-endif()
-if (OSKAR_USE_CBLAS)
-    target_link_libraries(${name} ${OSKAR_CBLAS})
 endif()
 set_target_properties(${name} PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"

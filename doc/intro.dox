@@ -182,7 +182,6 @@ OSKAR 2 has been developed using hardware donated by NVIDIA UK.
 OSKAR 2 directly links against or uses the following software libraries:
 - NVIDIA CUDA (http://www.nvidia.com/object/cuda_home.html)
 - LAPACK (http://www.netlib.org/lapack/)
-- CBLAS (http://www.netlib.org/blas/)
 - DIERCKX for surface fitting using splines (http://netlib.org/dierckx/)
 - The Qt cross-platform application framework (http://qt.io/)
 - casacore for Measurement Set export (http://code.google.com/p/casacore/)

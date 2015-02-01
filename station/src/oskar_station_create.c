@@ -117,8 +117,8 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->beam_lon_rad = 0.0;
     model->beam_lat_rad = 0.0;
     model->beam_coord_type = OSKAR_SPHERICAL_TYPE_EQUATORIAL;
-    model->noise_freq_hz = oskar_mem_create(type, location, 0, status);
-    model->noise_rms_jy = oskar_mem_create(type, location, 0, status);
+    model->noise_freq_hz = oskar_mem_create(type, OSKAR_CPU, 0, status);
+    model->noise_rms_jy = oskar_mem_create(type, OSKAR_CPU, 0, status);
 
     /* Initialise Gaussian beam station data. */
     model->gaussian_beam_fwhm_rad = 0.0;

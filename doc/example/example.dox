@@ -16,7 +16,7 @@ Note that all steps are intended to be followed in order.
 \section example_getting_started Getting Started
 
 This example assumes that OSKAR has been built successfully with the CUDA,
-Qt4, CBLAS, and LAPACK dependencies satisfied (for details, see
+Qt4, and LAPACK dependencies satisfied (for details, see
 the install guide documentation).
 
 \subsection example_obtaining_setup_files Obtaining the Example Setup Files

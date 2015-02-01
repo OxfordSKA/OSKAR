@@ -27,10 +27,9 @@ http://www.oerc.ox.ac.uk/~ska/oskar
 OSKAR depends on a number of other libraries. The main components of OSKAR
 require an NVIDIA GPU with CUDA 4.0 (and associated NVIDIA driver) or later
 and Qt 4 (version 4.6 or later) to be installed on the target system, and
-also CBLAS and LAPACK for full functionality. Additionally, the
-casacore libraries must be present if Measurement Sets are to
-be exported. The MATLAB interface will be built if MATLAB R2010b or later
-is found.
+also LAPACK for full functionality. Additionally, the casacore libraries 
+must be present if Measurement Sets are to be exported. The MATLAB 
+interface will be built if MATLAB R2010b or later is found.
 
 The OSKAR CMake build system will compile and install as many components as
 possible according to the following dependencies being satisfied:
@@ -41,9 +40,6 @@ possible according to the following dependencies being satisfied:
 - Qt4 (http://www.qt.io), version >= 4.6
   - Required for: liboskar_apps, Applications
   - Optional for: MATLAB interface (for manipulation of OSKAR settings files)
-- CBLAS (http://www.netlib.org/blas)
-  - Optional for: liboskar (to enable the use of extended sources)
-  - Available as part of the GSL and ATLAS packages.
 - LAPACK  (http://www.netlib.org/lapack)
   - Optional for: liboskar (to enable the use of extended sources)
 - casacore (http://code.google.com/p/casacore), version >= 1.5.0
@@ -60,7 +56,6 @@ If you are running a recent version of the Ubuntu Linux distribution
 (>= 10.04), then you can simply download and install the following packages
 from the main distribution repository:
 - libqt4-dev
-- libatlas-base-dev
 - liblapack-dev
 - g++
 - cmake
@@ -111,10 +106,6 @@ These are as listed below.
 - <tt><b>-DLAPACK_LIB_DIR=\<path\></b></tt> (default: searches the system library paths)
   - Specifies a custom path in which to look for the LAPACK library (liblapack.so).
   - Note: This should only be used in special cases, where the version of LAPACK installed in the system library path can't be used to build OSKAR.
-
-- <tt><b>-DCBLAS_LIB_DIR=\<path\></b></tt> (default: searches the system library paths)
-  - Specifies a custom path in which to look for the CBLAS library (ATLAS: libcblas.so; GSL: libgslcblas.so)
-  - Note: This should only be used in special cases, where the version of CBLAS installed in the system library path can't be used to build OSKAR.
 
 - <tt><b>-DCASACORE_LIB_DIR=\<path\></b></tt> (default: searches the system library paths)
   - Specifies a custom path in which to look for the CasaCore libraries (libcasa_ms.so and others).
@@ -194,8 +185,8 @@ behaves as expected.
     the OSKAR source tree.</td></tr>
 <tr><td>6</td><td>2014-09-30</td>
     <td>Changed default CUDA_ARCH to all.</td></tr>
-<tr><td>7</td><td>2014-10-21</td>
-    <td>Removed explicit CFITSIO dependency.</td></tr>
+<tr><td>7</td><td>2015-02-01</td>
+    <td>Removed explicit CFITSIO and CBLAS dependencies.</td></tr>
 </table>
 
 */

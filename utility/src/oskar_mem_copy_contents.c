@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,9 +42,10 @@ extern "C" {
 void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
         size_t offset_dst, size_t offset_src, size_t num_elements, int* status)
 {
-    int type_src, type_dst, location_src, location_dst;
-    size_t n_elements_src, n_elements_dst, bytes, start_dst, start_src;
-    void *destination, *source;
+    int location_src, location_dst;
+    size_t bytes, element_size, start_dst, start_src;
+    void *destination;
+    const void *source;
 
     /* Check all inputs. */
     if (!src || !dst || !status)
@@ -56,45 +57,34 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Get the meta-data. */
-    n_elements_src = src->num_elements;
-    n_elements_dst = dst->num_elements;
-    type_src = src->type;
-    type_dst = dst->type;
-    location_src = src->location;
-    location_dst = dst->location;
+    /* Return immediately if there is nothing to copy. */
+    if (src->data == NULL || src->num_elements == 0)
+        return;
 
     /* Check the data types. */
-    if (type_src != type_dst)
+    if (src->type != dst->type)
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
     }
 
-    /* Check that there are enough elements to copy. */
-    if (num_elements > n_elements_src)
-    {
-        *status = OSKAR_ERR_OUT_OF_RANGE;
-        return;
-    }
-
     /* Check the data dimensions. */
-    if (num_elements > (n_elements_dst - offset_dst))
+    if (num_elements > src->num_elements ||
+            num_elements > (dst->num_elements - offset_dst))
     {
         *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }
-
-    /* Return immediately if there is nothing to copy. */
-    if (src->data == NULL || n_elements_src == 0)
-        return;
 
     /* Get the number of bytes to copy. */
-    bytes       = oskar_mem_element_size(type_src) * num_elements;
-    start_dst   = oskar_mem_element_size(type_src) * offset_dst;
-    start_src   = oskar_mem_element_size(type_src) * offset_src;
-    destination = (void*)((char*)(dst->data) + start_dst);
-    source      = (void*)((char*)(src->data) + start_src);
+    element_size = oskar_mem_element_size(src->type);
+    bytes        = element_size * num_elements;
+    start_dst    = element_size * offset_dst;
+    start_src    = element_size * offset_src;
+    destination  = (void*)((char*)(dst->data) + start_dst);
+    source       = (const void*)((const char*)(src->data) + start_src);
+    location_src = src->location;
+    location_dst = dst->location;
 
     /* Host to host. */
     if (location_src == OSKAR_CPU && location_dst == OSKAR_CPU)

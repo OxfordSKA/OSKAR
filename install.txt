@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.6                                          Last update:  21 Oct 2014 |
+| OSKAR 2.6                                          Last update:  01 Feb 2015 |
 +------------------------------------------------------------------------------+
 
 1. Introduction
@@ -14,8 +14,8 @@ Microsoft Windows may be possible, but is not currently supported.
 --------------------------------------------------------------------------------
 OSKAR depends on a number of other libraries. The main components of OSKAR
 require CUDA 4.0 or later and Qt 4.6 or later to be installed on the target
-system, and also CBLAS and LAPACK for full functionality. Additionally, the
-casacore libraries must be present if Measurement Sets are to be exported. 
+system, and also LAPACK for full functionality. Additionally, the casacore
+libraries must be present if Measurement Sets are to be exported. 
 The MATLAB interface will be built if MATLAB R2010b or later is found.
 
 Please ensure that the required dependencies are installed before proceeding
@@ -29,8 +29,6 @@ possible according to the following dependencies being satisfied:
     * Qt (>=4.6)
         - Required for: liboskar_apps, Applications
         - Optional for: MATLAB interface (for manipulation of OSKAR setting files)
-    * CBLAS
-        - Optional for: liboskar (to enable the use of extended sources)
     * LAPACK
         - Optional for: liboskar (to enable the use of extended sources)
     * casacore (>= 1.5.0)
@@ -77,13 +75,6 @@ Advanced Build Options:
         (liblapack.so).
         NOTE: This should only be used in special cases, where the version
         of LAPACK installed in the system library path can't be used to build
-        OSKAR.
-
-    * -DCBLAS_LIB_DIR=<path> (default: searches the system library paths)
-        Specifies a custom path in which to look for the CBLAS library
-        (ATLAS: libcblas.so; GSL: libgslcblas.so).
-        NOTE: This should only be used in special cases, where the version
-        of CBLAS installed in the system library path can't be used to build
         OSKAR.
 
     * -DCASACORE_LIB_DIR=<path> (default: searches the system library paths)

@@ -183,11 +183,6 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
                 "(<a href=\"http://www.netlib.org/lapack/\">"
                 "http://www.netlib.org/lapack/</a>)</li>");
 #endif
-#ifndef OSKAR_NO_CBLAS
-    html.append("<li>CBLAS "
-                "(<a href=\"http://www.netlib.org/blas/\">"
-                "http://www.netlib.org/blas/</a>)</li>");
-#endif
     html.append("<li>DIERCKX for surface fitting using splines "
                 "(<a href=\"http://netlib.org/dierckx/\">"
                 "http://netlib.org/dierckx/</a>)</li>");
