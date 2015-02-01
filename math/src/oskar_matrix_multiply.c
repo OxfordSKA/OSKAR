@@ -34,6 +34,8 @@
  * N is number of columns of B, and number of columns of C.
  * K is number of columns of A, and number of rows of B. */
 #define MATRIX_MULTIPLY_MACRO \
+        int M, N, K, LDA, LDB, LDC, i, j, l;                          \
+        const int row_major = 1;                                      \
         M = !transpose_a ? rows_a : cols_a;                           \
         N = !transpose_b ? cols_b : rows_b;                           \
         K = !transpose_a ? cols_a : rows_a;                           \
@@ -145,10 +147,8 @@ void oskar_matrix_multiply_f(float* c, int rows_a, int cols_a,
         int rows_b, int cols_b, int transpose_a, int transpose_b,
         const float* a, const float* b, int* status)
 {
-    int M, N, K, LDA, LDB, LDC, i, j, l;
     float x;
     const float *A, *B, zero = 0.f;
-    const int row_major = 1;
 
     MATRIX_MULTIPLY_MACRO
 }
@@ -158,10 +158,8 @@ void oskar_matrix_multiply_d(double* c, int rows_a, int cols_a,
         int rows_b, int cols_b, int transpose_a, int transpose_b,
         const double* a, const double* b, int* status)
 {
-    int M, N, K, LDA, LDB, LDC, i, j, l;
     double x;
     const double *A, *B, zero = 0.;
-    const int row_major = 1;
 
     MATRIX_MULTIPLY_MACRO
 }
