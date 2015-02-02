@@ -63,14 +63,13 @@ extern "C" {
  * @param[in] y_beam            Beam direction cosine, horizontal y-component.
  * @param[in] z_beam            Beam direction cosine, horizontal z-component.
  * @param[in] time_index        Time index of simulation.
- * @param[in,out] station_counter Station counter: must be unique for given time index.
  * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_element_weights(oskar_Mem* weights,
         oskar_Mem* weights_error, double wavenumber,
         const oskar_Station* station, double x_beam, double y_beam,
-        double z_beam, int time_index, int* station_counter, int* status);
+        double z_beam, int time_index, int* status);
 
 #ifdef __cplusplus
 }

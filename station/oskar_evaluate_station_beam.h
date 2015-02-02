@@ -49,9 +49,6 @@ extern "C" {
  * This top-level function evaluates the beam pattern of a station at the
  * specified positions, given as direction cosines.
  *
- * The station counter must be unique for the given time index.
- * It is updated automatically on exit.
- *
  * The longitude and latitude of the phase centre are used only
  * when performing beam normalisation for ENU directions.
  *
@@ -68,7 +65,6 @@ extern "C" {
  * @param[in] station         Station model.
  * @param[in] work            Station beam work arrays.
  * @param[in] time_index      Simulation time index.
- * @param[in,out] station_counter Station counter. Must be unique for given time.
  * @param[in] frequency       The observing frequency in Hz.
  * @param[in] gast            The Greenwich Apparent Sidereal Time, in radians.
  * @param[in,out] status      Status return code.
@@ -77,8 +73,8 @@ OSKAR_EXPORT
 void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
         oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int coord_type,
         double lon0_rad, double lat0_rad, const oskar_Station* station,
-        oskar_StationWork* work, int time_index, int* station_counter,
-        double frequency, double gast, int* status);
+        oskar_StationWork* work, int time_index, double frequency,
+        double gast, int* status);
 
 #ifdef __cplusplus
 }

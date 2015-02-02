@@ -33,6 +33,7 @@
 #include <oskar_random_gaussian.h>
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 
 static const bool verbose = false;
 static const bool save = false;

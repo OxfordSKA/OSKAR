@@ -59,6 +59,7 @@ TEST(evaluate_jones_E, evaluate_e)
     for (int i = 0; i < num_stations; ++i)
     {
         oskar_Station* s = oskar_telescope_station(tel_cpu, i);
+        oskar_station_set_unique_id(s, i);
         oskar_station_resize(s, num_antennas, &error);
         oskar_station_resize_element_types(s, 1, &error);
         ASSERT_EQ(0, error) << oskar_get_error_string(error);
@@ -129,13 +130,12 @@ TEST(evaluate_jones_E, evaluate_e)
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Evaluate Jones E.
-    int station_counter = 0;
     oskar_evaluate_jones_E(E, oskar_sky_num_sources(sky_gpu),
             oskar_sky_l(sky_gpu), oskar_sky_m(sky_gpu), oskar_sky_n(sky_gpu),
             OSKAR_RELATIVE_DIRECTIONS,
             oskar_sky_reference_ra_rad(sky_gpu),
             oskar_sky_reference_dec_rad(sky_gpu),
-            tel_gpu, gast, frequency, work, 0, &station_counter, &error);
+            tel_gpu, gast, frequency, work, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Save to file for plotting.

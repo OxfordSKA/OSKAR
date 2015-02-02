@@ -256,13 +256,12 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
 
             double t_dump = obs_start_mjd_utc + t * dt_dump;
             double GAST = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
-            int station_counter = 0; // Reset for each time.
 
             if (settings->beam_pattern.average_cross_power_beam)
             {
                 oskar_evaluate_jones_E(jones, num_pixels, d_x, d_y, d_z,
                         coord_type, lon0, lat0, d_tel, GAST, frequency,
-                        d_work, t, &station_counter, status);
+                        d_work, t, status);
                 oskar_evaluate_average_cross_power_beam(num_pixels,
                         num_stations, jones, d_beam_data, status);
             }
@@ -271,7 +270,7 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
                 oskar_evaluate_station_beam(d_beam_data, (int)num_pixels,
                         d_x, d_y, d_z, coord_type, lon0, lat0,
                         oskar_telescope_station_const(d_tel, station_id),
-                        d_work, t, &station_counter, frequency, GAST, status);
+                        d_work, t, frequency, GAST, status);
             }
 
             // FIXME HACK Accumulate beam data.

@@ -114,18 +114,15 @@ TEST(evaluate_station_beam, test_array_pattern)
     beam_pattern = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_GPU,
             num_pixels, &error);
 
-    int station_counter = 0;
     ASSERT_EQ(0, oskar_station_array_is_3d(station_gpu));
     oskar_evaluate_station_beam_aperture_array(beam_pattern, station_gpu,
-            num_pixels, d_l, d_m, d_n, gast, frequency, work, 0,
-            &station_counter, &error);
+            num_pixels, d_l, d_m, d_n, gast, frequency, work, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
     oskar_station_set_element_coords(station_gpu, 0, 0., 0., 1., 0., 0., 0., &error);
     oskar_station_set_element_coords(station_gpu, 0, 0., 0., 0., 0., 0., 0., &error);
     ASSERT_EQ(1, oskar_station_array_is_3d(station_gpu));
     oskar_evaluate_station_beam_aperture_array(beam_pattern, station_gpu,
-            num_pixels, d_l, d_m, d_n, gast, frequency, work, 0,
-            &station_counter, &error);
+            num_pixels, d_l, d_m, d_n, gast, frequency, work, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
     oskar_station_free(station_gpu, &error);
 

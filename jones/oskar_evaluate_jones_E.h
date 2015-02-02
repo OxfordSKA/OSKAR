@@ -52,9 +52,6 @@ extern "C" {
  * Evaluates station beams for a telescope model at the specified source
  * positions, storing the results in the Jones matrix data structure.
  *
- * The station counter must be unique for the given time index.
- * It is automatically updated on exit.
- *
  * If all stations are marked as identical, the results for the first station
  * are copied into the results for the others.
  *
@@ -73,7 +70,6 @@ extern "C" {
  * @param[in]  frequency_hz   The observing frequency, in Hz.
  * @param[in]  work           Pointer to structure holding work arrays.
  * @param[in]  time_index     Simulation time index.
- * @param[in,out] station_counter Station counter. Must be unique for given time.
  * @param[in,out] status      Status return code.
  */
 OSKAR_EXPORT
@@ -81,7 +77,7 @@ void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, oskar_Mem* x,
         oskar_Mem* y, oskar_Mem* z, int coord_type, double lon0_rad,
         double lat0_rad, const oskar_Telescope* telescope, double gast,
         double frequency_hz, oskar_StationWork* work,
-        int time_index, int* station_counter, int* status);
+        int time_index, int* status);
 
 #ifdef __cplusplus
 }

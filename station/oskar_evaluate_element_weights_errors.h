@@ -88,9 +88,6 @@ void oskar_evaluate_element_weights_errors_d(int num_elements,
  * @details
  * Weights errors are generated randomly from a Gaussian distribution.
  *
- * The station counter must be unique for the given time index.
- * It will automatically increment on exit from this function.
- *
  * @param[in] num_elements The number of antenna elements.
  * @param[in] gain         Element gain values.
  * @param[in] gain_error   Standard deviation for time-variable element gains.
@@ -98,7 +95,7 @@ void oskar_evaluate_element_weights_errors_d(int num_elements,
  * @param[in] phase_error  Standard deviation for time-variable element phases.
  * @param[in] random_seed  Random seed.
  * @param[in] time_index   The simulation time index.
- * @param[in,out] station_counter Station counter. Must be unique for the given time.
+ * @param[in] station_id   Station ID. Must be unique for the given time.
  * @param[out] errors      Complex element errors for this time.
  * @param[in,out] status   Status return code.
  */
@@ -106,7 +103,7 @@ OSKAR_EXPORT
 void oskar_evaluate_element_weights_errors(int num_elements,
         const oskar_Mem* gain, const oskar_Mem* gain_error,
         const oskar_Mem* phase, const oskar_Mem* phase_error,
-        unsigned int random_seed, int time_index, int* station_counter,
+        unsigned int random_seed, int time_index, int station_id,
         oskar_Mem* errors, int* status);
 
 #ifdef __cplusplus

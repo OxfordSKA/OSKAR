@@ -37,12 +37,12 @@ extern "C" {
 void oskar_evaluate_element_weights(oskar_Mem* weights,
         oskar_Mem* weights_error, double wavenumber,
         const oskar_Station* station, double x_beam, double y_beam,
-        double z_beam, int time_index, int* station_counter, int* status)
+        double z_beam, int time_index, int* status)
 {
     int num_elements;
 
     /* Check all inputs. */
-    if (!weights || !weights_error || !station || !station_counter || !status)
+    if (!weights || !weights_error || !station || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -74,8 +74,8 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
                 oskar_station_element_gain_error_const(station),
                 oskar_station_element_phase_offset_rad_const(station),
                 oskar_station_element_phase_error_rad_const(station),
-                oskar_station_seed_time_variable_errors(station),
-                time_index, station_counter, weights_error, status);
+                oskar_station_seed_time_variable_errors(station), time_index,
+                oskar_station_unique_id(station), weights_error, status);
 
         /* Modify the weights (complex multiply with error vector). */
         oskar_mem_element_multiply(0, weights, weights_error,

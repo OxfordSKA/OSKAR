@@ -96,14 +96,13 @@ void oskar_evaluate_element_weights_errors_d(int num_elements,
 void oskar_evaluate_element_weights_errors(int num_elements,
         const oskar_Mem* gain, const oskar_Mem* gain_error,
         const oskar_Mem* phase, const oskar_Mem* phase_error,
-        unsigned int random_seed, int time_index, int* station_counter,
+        unsigned int random_seed, int time_index, int station_id,
         oskar_Mem* errors, int* status)
 {
     int type, location;
 
     /* Check all inputs. */
-    if (!errors || !gain || !gain_error || !phase || !phase_error ||
-            !station_counter || !status)
+    if (!errors || !gain || !gain_error || !phase || !phase_error || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -151,10 +150,7 @@ void oskar_evaluate_element_weights_errors(int num_elements,
 
     /* Generate Gaussian-distributed random numbers in output array. */
     oskar_mem_random_gaussian(errors, random_seed, time_index,
-            *station_counter, 0x12345678, 1.0, status);
-
-    /* Increment station counter ready for next time. */
-    (*station_counter)++;
+            station_id, 0x12345678, 1.0, status);
 
     /* Generate weights errors: switch on type and location. */
     if (type == OSKAR_DOUBLE)

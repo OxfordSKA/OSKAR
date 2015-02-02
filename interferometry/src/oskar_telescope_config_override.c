@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,11 +55,11 @@ void oskar_telescope_config_override(oskar_Telescope* telescope,
     /* Override station element systematic/fixed gain errors if required. */
     if (array_element->gain > 0.0 || array_element->gain_error_fixed > 0.0)
     {
-        srand(array_element->seed_gain_errors);
         for (i = 0; i < telescope->num_stations; ++i)
         {
             oskar_station_override_element_gains(
-                    oskar_telescope_station(telescope, i), array_element->gain,
+                    oskar_telescope_station(telescope, i),
+                    array_element->seed_gain_errors, array_element->gain,
                     array_element->gain_error_fixed, status);
         }
     }
@@ -78,11 +78,11 @@ void oskar_telescope_config_override(oskar_Telescope* telescope,
     /* Override station element systematic/fixed phase errors if required. */
     if (array_element->phase_error_fixed_rad > 0.0)
     {
-        srand(array_element->seed_phase_errors);
         for (i = 0; i < telescope->num_stations; ++i)
         {
             oskar_station_override_element_phases(
                     oskar_telescope_station(telescope, i),
+                    array_element->seed_phase_errors,
                     array_element->phase_error_fixed_rad, status);
         }
     }
@@ -101,11 +101,11 @@ void oskar_telescope_config_override(oskar_Telescope* telescope,
     /* Override station element position errors if required. */
     if (array_element->position_error_xy_m > 0.0)
     {
-        srand(array_element->seed_position_xy_errors);
         for (i = 0; i < telescope->num_stations; ++i)
         {
             oskar_station_override_element_xy_position_errors(
                     oskar_telescope_station(telescope, i),
+                    array_element->seed_position_xy_errors,
                     array_element->position_error_xy_m, status);
         }
     }
@@ -113,11 +113,11 @@ void oskar_telescope_config_override(oskar_Telescope* telescope,
     /* Add variation to x-dipole orientations if required. */
     if (array_element->x_orientation_error_rad > 0.0)
     {
-        srand(array_element->seed_x_orientation_error);
         for (i = 0; i < telescope->num_stations; ++i)
         {
             oskar_station_override_element_orientations(
-                    oskar_telescope_station(telescope, i), 1,
+                    oskar_telescope_station(telescope, i),
+                    array_element->seed_x_orientation_error, 1,
                     array_element->x_orientation_error_rad, status);
         }
     }
@@ -125,11 +125,11 @@ void oskar_telescope_config_override(oskar_Telescope* telescope,
     /* Add variation to y-dipole orientations if required. */
     if (array_element->y_orientation_error_rad > 0.0)
     {
-        srand(array_element->seed_y_orientation_error);
         for (i = 0; i < telescope->num_stations; ++i)
         {
             oskar_station_override_element_orientations(
-                    oskar_telescope_station(telescope, i), 0,
+                    oskar_telescope_station(telescope, i),
+                    array_element->seed_y_orientation_error, 0,
                     array_element->y_orientation_error_rad, status);
         }
     }

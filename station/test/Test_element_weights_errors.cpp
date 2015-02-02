@@ -67,10 +67,9 @@ TEST(element_weights_errors, test_evaluate)
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Evaluate weights errors.
-    int counter = 0;
     oskar_evaluate_element_weights_errors(num_elements,
             d_gain, d_gain_error, d_phase, d_phase_error,
-            seed, 0, &counter, d_errors, &error);
+            seed, 0, 0, d_errors, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Write memory to file for inspection.
@@ -138,10 +137,9 @@ TEST(element_weights_errors, test_apply)
     }
     d_weights = oskar_mem_create_copy(h_weights, OSKAR_GPU, &status);
 
-    int counter = 0;
     oskar_evaluate_element_weights_errors(num_elements,
             d_gain, d_gain_error, d_phase, d_phase_error,
-            0, 0, &counter, d_errors, &status);
+            0, 0, 0, d_errors, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_mem_element_multiply(NULL, d_weights, d_errors, num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
@@ -215,13 +213,12 @@ TEST(element_weights_errors, test_reinit)
             for (int t = 0; t < num_times; ++t)
             {
                 fprintf(file, "    time: %i\n", t);
-                int station_counter = 0;
                 for (int s = 0; s < num_stations; ++s)
                 {
                     fprintf(file, "      station: %i  ==> ", s);
                     oskar_evaluate_element_weights_errors(num_elements,
                             d_gain, d_gain_error, d_phase, d_phase_error,
-                            seed, t, &station_counter, d_errors, &status);
+                            seed, t, s, d_errors, &status);
                     ASSERT_EQ(0, status) << oskar_get_error_string(status);
                     oskar_Mem *h_errors = oskar_mem_create_copy(d_errors,
                             OSKAR_CPU, &status);

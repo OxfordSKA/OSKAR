@@ -444,7 +444,6 @@ static void interferometer(DeviceData* d, oskar_Log* log, const oskar_Sky* sky,
     for (int i = 0; i < num_time_steps; ++i)
     {
         oskar_Sky* sky_ptr = sky_gpu;
-        int station_counter = 0; // Reset for each time.
 
         // Check status code.
         if (*status) break;
@@ -489,7 +488,7 @@ static void interferometer(DeviceData* d, oskar_Log* log, const oskar_Sky* sky,
                 oskar_sky_n(sky_ptr), OSKAR_RELATIVE_DIRECTIONS,
                 oskar_sky_reference_ra_rad(sky_ptr),
                 oskar_sky_reference_dec_rad(sky_ptr),
-                d->tel, gast, frequency, d->work, i, &station_counter, status);
+                d->tel, gast, frequency, d->work, i, status);
         oskar_timer_pause(d->timers.tmr_E);
 
 #if 0
