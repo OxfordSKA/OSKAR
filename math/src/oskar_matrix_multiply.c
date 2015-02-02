@@ -34,7 +34,7 @@
  * N is number of columns of B, and number of columns of C.
  * K is number of columns of A, and number of rows of B. */
 #define MATRIX_MULTIPLY_MACRO \
-        int M, N, K, LDA, LDB, LDC, i, j, l;                          \
+        int M, N, K, LDA, LDB, i, j, l;                               \
         const int row_major = 1;                                      \
         M = !transpose_a ? rows_a : cols_a;                           \
         N = !transpose_b ? cols_b : rows_b;                           \
@@ -58,7 +58,6 @@
         }                                                             \
         LDA = !transpose_a ? M : K;                                   \
         LDB = !transpose_b ? K : N;                                   \
-        LDC = M;                                                      \
         if (M == 0 || N == 0) return;                                 \
         if (!transpose_b)                                             \
         {                                                             \
@@ -66,7 +65,7 @@
             {                                                         \
                 for (j = 0; j < N; ++j)                               \
                 {                                                     \
-                    for (i = 0; i < M; ++i) c[i + j * LDC] = zero;    \
+                    for (i = 0; i < M; ++i) c[i + j * M] = zero;      \
                     for (l = 0; l < K; ++l)                           \
                     {                                                 \
                         x = B[l + j * LDB];                           \
@@ -74,7 +73,7 @@
                         {                                             \
                             for (i = 0; i < M; ++i)                   \
                             {                                         \
-                                c[i + j * LDC] += x * A[i + l * LDA]; \
+                                c[i + j * M] += x * A[i + l * LDA];   \
                             }                                         \
                         }                                             \
                     }                                                 \
@@ -92,7 +91,7 @@
                         {                                             \
                             x += A[l + i * LDA] * B[l + j * LDB];     \
                         }                                             \
-                        c[i + j * LDC] = x;                           \
+                        c[i + j * M] = x;                             \
                     }                                                 \
                 }                                                     \
                 return;                                               \
@@ -104,7 +103,7 @@
             {                                                         \
                 for (j = 0; j < N; ++j)                               \
                 {                                                     \
-                    for (i = 0; i < M; ++i) c[i + j * LDC] = zero;    \
+                    for (i = 0; i < M; ++i) c[i + j * M] = zero;      \
                     for (l = 0; l < K; ++l)                           \
                     {                                                 \
                         x = B[j + l * LDB];                           \
@@ -112,7 +111,7 @@
                         {                                             \
                             for (i = 0; i < M; ++i)                   \
                             {                                         \
-                                c[i + j * LDC] += x * A[i + l * LDA]; \
+                                c[i + j * M] += x * A[i + l * LDA];   \
                             }                                         \
                         }                                             \
                     }                                                 \
@@ -130,7 +129,7 @@
                         {                                             \
                             x += A[l + i * LDA] * B[j + l * LDB];     \
                         }                                             \
-                        c[i + j * LDC] = x;                           \
+                        c[i + j * M] = x;                             \
                     }                                                 \
                 }                                                     \
                 return;                                               \
