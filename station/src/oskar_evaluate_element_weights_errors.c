@@ -151,7 +151,7 @@ void oskar_evaluate_element_weights_errors(int num_elements,
 
     /* Generate Gaussian-distributed random numbers in output array. */
     oskar_mem_random_gaussian(errors, random_seed, time_index,
-            *station_counter, 0x12345678, status);
+            *station_counter, 0x12345678, 1.0, status);
 
     /* Increment station counter ready for next time. */
     (*station_counter)++;

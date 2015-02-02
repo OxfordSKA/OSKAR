@@ -25,7 +25,6 @@ set(math_SRC
     src/oskar_random_broken_power_law.c
     src/oskar_random_gaussian.c
     src/oskar_random_power_law.c
-    src/oskar_random_uniform.c
     src/oskar_rotate.c
     #src/oskar_round_robin.c
     #src/oskar_sph_rotate_to_position.c

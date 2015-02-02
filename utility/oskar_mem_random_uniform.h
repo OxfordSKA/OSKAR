@@ -62,9 +62,9 @@ extern "C" {
  * @param[in]     num_elements Number of elements to fill.
  * @param[in,out] data         Pointer to memory block to fill.
  * @param[in]     seed         Random seed.
- * @param[in]     counter1     First user-defined counter.
- * @param[in]     counter2     Second user-defined counter.
- * @param[in]     counter3     Third user-defined counter.
+ * @param[in]     counter1     User-defined counter.
+ * @param[in]     counter2     User-defined counter.
+ * @param[in]     counter3     User-defined counter.
  */
 OSKAR_EXPORT
 void oskar_mem_random_uniform_f(
@@ -94,9 +94,9 @@ void oskar_mem_random_uniform_f(
  * @param[in]     num_elements Number of elements to fill.
  * @param[in,out] data         Pointer to memory block to fill.
  * @param[in]     seed         Random seed.
- * @param[in]     counter1     First user-defined counter.
- * @param[in]     counter2     Second user-defined counter.
- * @param[in]     counter3     Third user-defined counter.
+ * @param[in]     counter1     User-defined counter.
+ * @param[in]     counter2     User-defined counter.
+ * @param[in]     counter3     User-defined counter.
  */
 OSKAR_EXPORT
 void oskar_mem_random_uniform_d(
@@ -129,9 +129,9 @@ void oskar_mem_random_uniform_d(
  * @param[in]     num_elements Number of elements to fill.
  * @param[in,out] data         Pointer to memory block to fill.
  * @param[in]     seed         Random seed.
- * @param[in]     counter1     First user-defined counter.
- * @param[in]     counter2     Second user-defined counter.
- * @param[in]     counter3     Third user-defined counter.
+ * @param[in]     counter1     User-defined counter.
+ * @param[in]     counter2     User-defined counter.
+ * @param[in]     counter3     User-defined counter.
  */
 OSKAR_EXPORT
 void oskar_mem_random_uniform(oskar_Mem* data, unsigned int seed,

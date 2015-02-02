@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,16 +28,15 @@
 
 
 #include <mex.h>
-#include <math/oskar_GridPositions.h>
 #include "matlab/common/oskar_matlab_common.h"
+#include <cmath>
 
 static void error_field(const char* msg);
 
 enum GRID_GENERATOR_TYPE
 {
-    CIRCULAR = 0,
-    SPIRAL_ARCHIMEDEAN = 1,
-    SPIRAL_LOG = 2
+    SPIRAL_ARCHIMEDEAN,
+    SPIRAL_LOG
 };
 
 struct settings
@@ -51,6 +50,59 @@ struct settings
     double a;
 };
 
+/*
+ * Generates positions on a Archimedean spiral.
+ *
+ * @param[in] num_points  Number of points to generate.
+ * @param[out] x          Coordinate of points in the x direction.
+ * @param[out] y          Coordinate of points in the y direction
+ * @param[in] r_max       Maximum radius of the spiral (default 1.0)
+ * @param[in] r0          Minimum radius of the spiral (default 0.0)
+ * @param[in] num_revs    Number of revolutions of the spiral (default 1.0)
+ * @param[in] theta_start Start angle for spiral in rad (default 0.0)
+ */
+void spiral_archimedean(int num_points, double * x, double * y,
+        double r_max = 1.0, double r0 = 0.0, double num_revs = 1.0,
+        double theta_start = 0.0)
+{
+    double theta_inc = (2.0 * M_PI * num_revs) / (num_points - 1);
+    double theta_max = theta_start + theta_inc * (num_points - 1);
+    double b = (r_max - r0) / theta_max;
+    for (int i = 0; i < num_points; ++i)
+    {
+        double theta = theta_start + i * theta_inc;
+        double r = r0 + b * theta;
+        x[i] = r * cos(theta);
+        y[i] = r * sin(theta);
+    }
+}
+
+/*
+ * Generates positions in a log spiral.
+ *
+ * @param[in] num_points  Number of points to generate.
+ * @param[out] x          Coordinate of points in the x direction.
+ * @param[out] y          Coordinate of points in the y direction
+ * @param[in] r_max       Maximum radius of the spiral (default 1.0)
+ * @param[in] a
+ * @param[in] num_revs    Number of revolutions of the spiral (default 1.0)
+ * @param[in] theta_start Start angle for spiral in rad (default 0.0)
+ */
+void spiral_log(int num_points, double * x, double * y,
+        double r_max = 1.0, double a = 0.1, double num_revs = 1.0,
+        double theta_start = 0.0)
+{
+    double theta_inc = (2.0 * M_PI * num_revs) / (num_points - 1);
+    double theta_max = theta_start + theta_inc * (num_points - 1);
+    double b = log(r_max / a) / theta_max;
+    for (int i = 0; i < num_points; ++i)
+    {
+        double theta = theta_start + i * theta_inc;
+        double r = a * exp(b * theta);
+        x[i] = r * cos(theta);
+        y[i] = r * sin(theta);
+    }
+}
 
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
@@ -64,11 +116,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 "  - type (enum oskar.math.type)\n"
                 "  - num_points (int)\n"
                 "  - radius (double)\n"
-                "[Circular settings]:\n"
-                "  - x spacing (double)\n"
-                "  - y spacing (double)\n"
-                "  - x error, perturbation std.dev. (double)\n"
-                "  - y error, perturbation std.dev. (double)\n"
                 "[Spiral settings]:\n"
                 "  - num_revs (double)\n"
                 "  - theta_start (double)\n"
@@ -108,11 +155,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     if (!num_points) error_field("num_points");
     s.num_points = mxGetScalar(num_points);
 
-    // Circular only settings.
-    if (s.type == CIRCULAR)
-    {
-        oskar_matlab_error("Grid type unavailable");
-    }
     // Common spiral settings
     if (s.type == SPIRAL_ARCHIMEDEAN || s.type == SPIRAL_LOG)
     {
@@ -146,20 +188,15 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Run the generator.
     switch (s.type)
     {
-        case CIRCULAR:
-        {
-            oskar_matlab_error("Grid type unavailable");
-            break;
-        }
         case SPIRAL_ARCHIMEDEAN:
         {
-            oskar_GridPositions::spiralArchimedean<double>(s.num_points, x, y,
+            spiral_archimedean(s.num_points, x, y,
                     s.radius, s.radius_inner, s.num_revs, s.theta_start);
             break;
         }
         case SPIRAL_LOG:
         {
-            oskar_GridPositions::spiralLog<double>(s.num_points, x, y, s.radius,
+            spiral_log(s.num_points, x, y, s.radius,
                     s.a, s.num_revs, s.theta_start);
             break;
         }

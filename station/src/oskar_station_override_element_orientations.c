@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,8 @@ extern "C" {
 #endif
 
 void oskar_station_override_element_orientations(oskar_Station* s,
-        int x_pol, double orientation_error_rad, int* status)
+        unsigned int seed, int x_pol, double orientation_error_rad,
+        int* status)
 {
     int i;
 
@@ -57,27 +58,30 @@ void oskar_station_override_element_orientations(oskar_Station* s,
         for (i = 0; i < s->num_elements; ++i)
         {
             oskar_station_override_element_orientations(
-                    oskar_station_child(s, i), x_pol, orientation_error_rad,
-                    status);
+                    oskar_station_child(s, i), seed, x_pol,
+                    orientation_error_rad, status);
         }
     }
     else
     {
         /* Override element data at last level. */
-        double delta, *d;
+        int id;
+        double *d, r[2];
         oskar_Mem *mem;
 
         /* Get pointer to the X or Y element orientation data. */
         mem = x_pol ? s->element_orientation_x_rad_cpu :
                 s->element_orientation_y_rad_cpu;
         d = oskar_mem_double(mem, status);
+        id = oskar_station_unique_id(s);
         for (i = 0; i < s->num_elements; ++i)
         {
             /* Generate random number from Gaussian distribution. */
-            delta = orientation_error_rad * oskar_random_gaussian(0);
+            oskar_random_gaussian2(seed, i, id, r);
+            r[0] *= orientation_error_rad;
 
             /* Set the new angle. */
-            d[i] += delta;
+            d[i] += r[0];
         }
     }
 }

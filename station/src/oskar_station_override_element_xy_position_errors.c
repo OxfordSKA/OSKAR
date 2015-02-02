@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,8 @@
 extern "C" {
 #endif
 
-void oskar_station_override_element_xy_position_errors(
-        oskar_Station* s, double position_error_xy_m, int* status)
+void oskar_station_override_element_xy_position_errors(oskar_Station* s,
+        unsigned int seed, double position_error_xy_m, int* status)
 {
     int i;
 
@@ -63,15 +63,17 @@ void oskar_station_override_element_xy_position_errors(
         for (i = 0; i < s->num_elements; ++i)
         {
             oskar_station_override_element_xy_position_errors(
-                    oskar_station_child(s, i), position_error_xy_m, status);
+                    oskar_station_child(s, i), seed, position_error_xy_m,
+                    status);
         }
     }
     else
     {
         /* Override element data at last level. */
-        int type;
-        double delta_x, delta_y;
+        double r[2];
+        int type, id;
         type = oskar_station_precision(s);
+        id = oskar_station_unique_id(s);
         if (type == OSKAR_DOUBLE)
         {
             double *xs, *ys, *xw, *yw;
@@ -82,11 +84,11 @@ void oskar_station_override_element_xy_position_errors(
             for (i = 0; i < s->num_elements; ++i)
             {
                 /* Generate random numbers from Gaussian distribution. */
-                delta_x = oskar_random_gaussian(&delta_y);
-                delta_x *= position_error_xy_m;
-                delta_y *= position_error_xy_m;
-                xs[i] = xw[i] + delta_x;
-                ys[i] = yw[i] + delta_y;
+                oskar_random_gaussian2(seed, i, id, r);
+                r[0] *= position_error_xy_m;
+                r[1] *= position_error_xy_m;
+                xs[i] = xw[i] + r[0];
+                ys[i] = yw[i] + r[1];
             }
         }
         else if (type == OSKAR_SINGLE)
@@ -99,11 +101,11 @@ void oskar_station_override_element_xy_position_errors(
             for (i = 0; i < s->num_elements; ++i)
             {
                 /* Generate random numbers from Gaussian distribution. */
-                delta_x = oskar_random_gaussian(&delta_y);
-                delta_x *= position_error_xy_m;
-                delta_y *= position_error_xy_m;
-                xs[i] = xw[i] + delta_x;
-                ys[i] = yw[i] + delta_y;
+                oskar_random_gaussian2(seed, i, id, r);
+                r[0] *= position_error_xy_m;
+                r[1] *= position_error_xy_m;
+                xs[i] = xw[i] + r[0];
+                ys[i] = yw[i] + r[1];
             }
         }
     }

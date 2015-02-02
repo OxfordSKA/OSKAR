@@ -27,8 +27,6 @@
  */
 
 #include <oskar_mem_random_uniform_cuda.h>
-
-#include <Random123/philox.h>
 #include <private_random_helpers.h>
 
 #ifdef __cplusplus
@@ -45,7 +43,7 @@ void oskar_mem_random_uniform_cudak_f(
     const int i4 = i * 4;
     if (i4 >= num_elements) return;
 
-    OSKAR_R123_GENERATE_4(seed, counter1, counter2, counter3, i)
+    OSKAR_R123_GENERATE_4(seed, i, counter1, counter2, counter3)
 
     /* Convert to uniform float. */
     float4 r;
@@ -82,7 +80,7 @@ void oskar_mem_random_uniform_cudak_d(
     const int i4 = i * 4;
     if (i4 >= num_elements) return;
 
-    OSKAR_R123_GENERATE_4(seed, counter1, counter2, counter3, i)
+    OSKAR_R123_GENERATE_4(seed, i, counter1, counter2, counter3)
 
     /* Convert to uniform double. */
     double4 r;

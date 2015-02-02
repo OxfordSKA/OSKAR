@@ -8,6 +8,7 @@ set(${name}_SRC
     Test_find_closest_match.cpp
     Test_linspace.cpp
     Test_matrix_multiply.cpp
+    Test_random.cpp
 )
 if (OSKAR_USE_LAPACK)
     list(APPEND ${name}_SRC Test_fit_ellipse.cpp)

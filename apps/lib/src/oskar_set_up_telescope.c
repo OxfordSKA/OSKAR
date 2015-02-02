@@ -49,7 +49,7 @@ extern "C" {
 static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
         const oskar_Settings* settings, int* status);
 static void set_station_data(oskar_Station* station,
-        const oskar_Station* parent, int depth,
+        const oskar_Station* parent, int depth, int* counter,
         const oskar_Settings* settings);
 
 static void save_telescope(oskar_Telescope *telescope,
@@ -84,12 +84,16 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
     type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     telescope = oskar_telescope_create(type, OSKAR_CPU, 0, status);
 
-    /* Load the telescope model and then apply overrides. */
+    /* Load the telescope model. */
     oskar_telescope_load(telescope, log, settings, status);
-    oskar_telescope_config_override(telescope, &settings->telescope, status);
 
     /* Set telescope model meta-data, including global pointing settings. */
     oskar_telescope_set_metadata(telescope, settings, status);
+
+    /* Apply telescope model overrides.
+     * This must be done after setting meta-data, since the unique station IDs
+     * must be present for this to work. */
+    oskar_telescope_config_override(telescope, &settings->telescope, status);
 
     /* Apply pointing file override if set. */
     if (settings->obs.pointing_file)
@@ -247,7 +251,7 @@ void oskar_station_log_summary(const oskar_Station* station,
 static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
         const oskar_Settings* settings, int* status)
 {
-    int i, num_stations;
+    int i, num_stations, counter = 0;
 
     if (*status) return;
 
@@ -275,16 +279,17 @@ static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
 
         /* Set station data (recursively, for all child stations too). */
         station = oskar_telescope_station(telescope, i);
-        set_station_data(station, NULL, 0, settings);
+        set_station_data(station, NULL, 0, &counter, settings);
     }
 }
 
 static void set_station_data(oskar_Station* station,
-        const oskar_Station* parent, int depth,
+        const oskar_Station* parent, int depth, int* counter,
         const oskar_Settings* settings)
 {
     int i = 0;
     const oskar_SettingsApertureArray* aa = &settings->telescope.aperture_array;
+    oskar_station_set_unique_id(station, (*counter)++);
     oskar_station_set_station_type(station, settings->telescope.station_type);
     oskar_station_set_normalise_final_beam(station,
             settings->telescope.normalise_beams_at_phase_centre);
@@ -335,7 +340,7 @@ static void set_station_data(oskar_Station* station,
         for (i = 0; i < num_elements; ++i)
         {
             set_station_data(oskar_station_child(station, i), station,
-                    depth + 1, settings);
+                    depth + 1, counter, settings);
         }
     }
 }

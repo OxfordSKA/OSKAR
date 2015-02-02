@@ -29,8 +29,6 @@
 #include <oskar_mem_random_gaussian.h>
 #include <oskar_mem_random_gaussian_cuda.h>
 #include <oskar_cuda_check_error.h>
-
-#include <Random123/philox.h>
 #include <private_random_helpers.h>
 
 #ifdef __cplusplus
@@ -40,7 +38,8 @@ extern "C" {
 void oskar_mem_random_gaussian_f(
         const unsigned int num_elements, float* data,
         const unsigned int seed, const unsigned int counter1,
-        const unsigned int counter2, const unsigned int counter3)
+        const unsigned int counter2, const unsigned int counter3,
+        const float std)
 {
     unsigned int i, i4, n1;
 
@@ -48,23 +47,38 @@ void oskar_mem_random_gaussian_f(
 #pragma omp parallel for private(i, i4)
     for (i = 0; i < n1; ++i)
     {
-        OSKAR_R123_GENERATE_4(seed, counter1, counter2, counter3, i)
+        float t[4];
+        OSKAR_R123_GENERATE_4(seed, i, counter1, counter2, counter3)
 
         /* Convert to normalised Gaussian distribution. */
         i4 = i * 4;
-        oskar_box_muller_f(u.i[0], u.i[1], &data[i4], &data[i4 + 1]);
-        oskar_box_muller_f(u.i[2], u.i[3], &data[i4 + 2], &data[i4 + 3]);
+        oskar_box_muller_f(u.i[0], u.i[1], &t[0], &t[1]);
+        oskar_box_muller_f(u.i[2], u.i[3], &t[2], &t[3]);
+        t[0] = std * t[0];
+        t[1] = std * t[1];
+        t[2] = std * t[2];
+        t[3] = std * t[3];
+
+        /* Store. */
+        data[i4]     = t[0];
+        data[i4 + 1] = t[1];
+        data[i4 + 2] = t[2];
+        data[i4 + 3] = t[3];
     }
 
     if (num_elements % 4)
     {
         float t[4];
-        OSKAR_R123_GENERATE_4(seed, counter1, counter2, counter3, n1)
+        OSKAR_R123_GENERATE_4(seed, n1, counter1, counter2, counter3)
 
         /* Convert to normalised Gaussian distribution. */
         i4 = n1 * 4;
         oskar_box_muller_f(u.i[0], u.i[1], &t[0], &t[1]);
         oskar_box_muller_f(u.i[2], u.i[3], &t[2], &t[3]);
+        t[0] = std * t[0];
+        t[1] = std * t[1];
+        t[2] = std * t[2];
+        t[3] = std * t[3];
 
         /* Store. */
         data[i4]         = t[0];
@@ -80,7 +94,8 @@ void oskar_mem_random_gaussian_f(
 void oskar_mem_random_gaussian_d(
         const unsigned int num_elements, double* data,
         const unsigned int seed, const unsigned int counter1,
-        const unsigned int counter2, const unsigned int counter3)
+        const unsigned int counter2, const unsigned int counter3,
+        const double std)
 {
     unsigned int i, i4, n1;
 
@@ -88,23 +103,38 @@ void oskar_mem_random_gaussian_d(
 #pragma omp parallel for private(i, i4)
     for (i = 0; i < n1; ++i)
     {
-        OSKAR_R123_GENERATE_4(seed, counter1, counter2, counter3, i)
+        double t[4];
+        OSKAR_R123_GENERATE_4(seed, i, counter1, counter2, counter3)
 
         /* Convert to normalised Gaussian distribution. */
         i4 = i * 4;
-        oskar_box_muller_d(u.i[0], u.i[1], &data[i4], &data[i4 + 1]);
-        oskar_box_muller_d(u.i[2], u.i[3], &data[i4 + 2], &data[i4 + 3]);
+        oskar_box_muller_d(u.i[0], u.i[1], &t[0], &t[1]);
+        oskar_box_muller_d(u.i[2], u.i[3], &t[2], &t[3]);
+        t[0] = std * t[0];
+        t[1] = std * t[1];
+        t[2] = std * t[2];
+        t[3] = std * t[3];
+
+        /* Store. */
+        data[i4]     = t[0];
+        data[i4 + 1] = t[1];
+        data[i4 + 2] = t[2];
+        data[i4 + 3] = t[3];
     }
 
     if (num_elements % 4)
     {
         double t[4];
-        OSKAR_R123_GENERATE_4(seed, counter1, counter2, counter3, n1)
+        OSKAR_R123_GENERATE_4(seed, n1, counter1, counter2, counter3)
 
         /* Convert to normalised Gaussian distribution. */
         i4 = n1 * 4;
         oskar_box_muller_d(u.i[0], u.i[1], &t[0], &t[1]);
         oskar_box_muller_d(u.i[2], u.i[3], &t[2], &t[3]);
+        t[0] = std * t[0];
+        t[1] = std * t[1];
+        t[2] = std * t[2];
+        t[3] = std * t[3];
 
         /* Store. */
         data[i4]         = t[0];
@@ -119,7 +149,7 @@ void oskar_mem_random_gaussian_d(
 
 void oskar_mem_random_gaussian(oskar_Mem* data, unsigned int seed,
         unsigned int counter1, unsigned int counter2, unsigned int counter3,
-        int* status)
+        double std, int* status)
 {
     int type, location;
     size_t num_elements;
@@ -147,13 +177,13 @@ void oskar_mem_random_gaussian(oskar_Mem* data, unsigned int seed,
         {
             oskar_mem_random_gaussian_cuda_f(num_elements,
                     oskar_mem_float(data, status), seed,
-                    counter1, counter2, counter3);
+                    counter1, counter2, counter3, (float)std);
         }
         else if (type == OSKAR_DOUBLE)
         {
             oskar_mem_random_gaussian_cuda_d(num_elements,
                     oskar_mem_double(data, status), seed,
-                    counter1, counter2, counter3);
+                    counter1, counter2, counter3, std);
         }
         oskar_cuda_check_error(status);
 #else
@@ -166,13 +196,13 @@ void oskar_mem_random_gaussian(oskar_Mem* data, unsigned int seed,
         {
             oskar_mem_random_gaussian_f(num_elements,
                     oskar_mem_float(data, status), seed,
-                    counter1, counter2, counter3);
+                    counter1, counter2, counter3, (float)std);
         }
         else if (type == OSKAR_DOUBLE)
         {
             oskar_mem_random_gaussian_d(num_elements,
                     oskar_mem_double(data, status), seed,
-                    counter1, counter2, counter3);
+                    counter1, counter2, counter3, std);
         }
     }
 }

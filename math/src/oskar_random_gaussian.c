@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_random_gaussian.h"
-#include <math.h>
+#include <oskar_random_gaussian.h>
+#include <private_random_helpers.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+void oskar_random_gaussian2(unsigned int seed, unsigned int counter0,
+        unsigned int counter1, double rnd[2])
+{
+    OSKAR_R123_GENERATE_2(seed, counter0, counter1);
+    oskar_box_muller_d(u.i[0], u.i[1], &rnd[0], &rnd[1]);
+}
+
+void oskar_random_gaussian4(unsigned int seed, unsigned int counter0,
+        unsigned int counter1, unsigned int counter2, unsigned int counter3,
+        double rnd[4])
+{
+    OSKAR_R123_GENERATE_4(seed, counter0, counter1, counter2, counter3);
+    oskar_box_muller_d(u.i[0], u.i[1], &rnd[0], &rnd[1]);
+    oskar_box_muller_d(u.i[2], u.i[3], &rnd[2], &rnd[3]);
+}
 
 double oskar_random_gaussian(double* another)
 {

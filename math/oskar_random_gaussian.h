@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_random_gaussian.h
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,12 +41,73 @@ extern "C" {
 
 /**
  * @brief
+ * Generates two random numbers selected from a Gaussian distribution
+ * with a mean of zero and standard deviation of 1.
+ *
+ * @details
+ * Generates two random numbers selected from a Gaussian distribution
+ * with a mean of zero and standard deviation of 1.
+ *
+ * This function uses the counter-based stateless "Philox" random number
+ * generator from the Random123 library for high performance
+ * and crush-resistance.
+ *
+ * See John K. Salmon et al. "Parallel random numbers: as easy as 1, 2, 3"
+ * (doi:10.1145/2063384.2063405)
+ *
+ * Together, the seed and the counter values completely define the
+ * generated data. It is the caller's responsibility to increment the counter
+ * value(s) between calls.
+ *
+ * @param[in]     seed         Random seed.
+ * @param[in]     counter0     User-defined counter.
+ * @param[in]     counter1     User-defined counter.
+ * @param[out]    rnd          Array of two random numbers.
+ */
+OSKAR_EXPORT
+void oskar_random_gaussian2(unsigned int seed, unsigned int counter0,
+        unsigned int counter1, double rnd[2]);
+
+/**
+ * @brief
+ * Generates four random numbers selected from a Gaussian distribution
+ * with a mean of zero and standard deviation of 1.
+ *
+ * @details
+ * Generates four random numbers selected from a Gaussian distribution
+ * with a mean of zero and standard deviation of 1.
+ *
+ * This function uses the counter-based stateless "Philox" random number
+ * generator from the Random123 library for high performance
+ * and crush-resistance.
+ *
+ * See John K. Salmon et al. "Parallel random numbers: as easy as 1, 2, 3"
+ * (doi:10.1145/2063384.2063405)
+ *
+ * Together, the seed and the counter values completely define the
+ * generated data. It is the caller's responsibility to increment the counter
+ * value(s) between calls.
+ *
+ * @param[in]     seed         Random seed.
+ * @param[in]     counter0     User-defined counter.
+ * @param[in]     counter1     User-defined counter.
+ * @param[in]     counter2     User-defined counter.
+ * @param[in]     counter3     User-defined counter.
+ * @param[out]    rnd          Array of four random numbers.
+ */
+OSKAR_EXPORT
+void oskar_random_gaussian4(unsigned int seed, unsigned int counter0,
+        unsigned int counter1, unsigned int counter2, unsigned int counter3,
+        double rnd[4]);
+
+/**
+ * @brief
  * Generates a random number from a Gaussian distribution with zero mean
- * and unit variance.
+ * and unit variance (DEPRECATED).
  *
  * @details
  * This function returns a random number from a Gaussian distribution with
- * zero mean and unit variance.
+ * zero mean and unit variance (DEPRECATED).
  *
  * The random number generator may be seeded by calling srand() prior to this
  * function.

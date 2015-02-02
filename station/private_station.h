@@ -47,8 +47,9 @@ typedef struct oskar_Station oskar_Station;
 struct oskar_Station
 {
     /* Private structure meta-data. */
-    int precision;
-    int mem_location;
+    int unique_id;                /* Unique ID for station within telescope. */
+    int precision;                /* Numerical precision of most arrays. */
+    int mem_location;             /* Memory location of most arrays. */
 
     /* Data common to all station types -------------------------------------*/
     int station_type;             /* Type of the station (enumerator). */

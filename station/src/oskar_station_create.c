@@ -67,6 +67,7 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     }
 
     /* Initialise station meta data. */
+    model->unique_id = 0;
     model->precision = type;
     model->mem_location = location;
 

@@ -42,12 +42,11 @@ extern "C" {
 
 /**
  * @brief
- * Generates random numbers from a normalised Gaussian distribution
+ * Generates random numbers from a Gaussian distribution
  * (single precision, CPU version).
  *
  * @details
- * Generates random numbers selected from a Gaussian distribution
- * with a mean of zero and standard deviation of 1.
+ * Generates random numbers selected from a Gaussian distribution.
  *
  * This function uses the counter-based stateless "Philox" random number
  * generator from the Random123 library for high performance
@@ -63,24 +62,25 @@ extern "C" {
  * @param[in]     num_elements Number of elements to fill.
  * @param[in,out] data         Pointer to memory block to fill.
  * @param[in]     seed         Random seed.
- * @param[in]     counter1     First user-defined counter.
- * @param[in]     counter2     Second user-defined counter.
- * @param[in]     counter3     Third user-defined counter.
+ * @param[in]     counter1     User-defined counter.
+ * @param[in]     counter2     User-defined counter.
+ * @param[in]     counter3     User-defined counter.
+ * @param[in]     std          Standard deviation of distribution.
  */
 OSKAR_EXPORT
 void oskar_mem_random_gaussian_f(
         const unsigned int num_elements, float* data,
         const unsigned int seed, const unsigned int counter1,
-        const unsigned int counter2, const unsigned int counter3);
+        const unsigned int counter2, const unsigned int counter3,
+        const float std);
 
 /**
  * @brief
- * Generates random numbers from a normalised Gaussian distribution
+ * Generates random numbers from a Gaussian distribution
  * (double precision, CPU version).
  *
  * @details
- * Generates random numbers selected from a Gaussian distribution
- * with a mean of zero and standard deviation of 1.
+ * Generates random numbers selected from a Gaussian distribution.
  *
  * This function uses the counter-based stateless "Philox" random number
  * generator from the Random123 library for high performance
@@ -96,23 +96,24 @@ void oskar_mem_random_gaussian_f(
  * @param[in]     num_elements Number of elements to fill.
  * @param[in,out] data         Pointer to memory block to fill.
  * @param[in]     seed         Random seed.
- * @param[in]     counter1     First user-defined counter.
- * @param[in]     counter2     Second user-defined counter.
- * @param[in]     counter3     Third user-defined counter.
+ * @param[in]     counter1     User-defined counter.
+ * @param[in]     counter2     User-defined counter.
+ * @param[in]     counter3     User-defined counter.
+ * @param[in]     std          Standard deviation of distribution.
  */
 OSKAR_EXPORT
 void oskar_mem_random_gaussian_d(
         const unsigned int num_elements, double* data,
         const unsigned int seed, const unsigned int counter1,
-        const unsigned int counter2, const unsigned int counter3);
+        const unsigned int counter2, const unsigned int counter3,
+        const double std);
 
 /**
  * @brief
- * Generates random numbers from a normalised Gaussian distribution.
+ * Generates random numbers from a Gaussian distribution.
  *
  * @details
- * Generates random numbers selected from a Gaussian distribution
- * with a mean of zero and standard deviation of 1.
+ * Generates random numbers selected from a Gaussian distribution.
  *
  * This function uses the counter-based stateless "Philox" random number
  * generator from the Random123 library for high performance
@@ -131,15 +132,16 @@ void oskar_mem_random_gaussian_d(
  *
  * @param[in,out] data         Pointer to memory block to fill.
  * @param[in]     seed         Random seed.
- * @param[in]     counter1     First user-defined counter.
- * @param[in]     counter2     Second user-defined counter.
- * @param[in]     counter3     Third user-defined counter.
+ * @param[in]     counter1     User-defined counter.
+ * @param[in]     counter2     User-defined counter.
+ * @param[in]     counter3     User-defined counter.
+ * @param[in]     std          Standard deviation of distribution.
  * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
 void oskar_mem_random_gaussian(oskar_Mem* data, unsigned int seed,
         unsigned int counter1, unsigned int counter2, unsigned int counter3,
-        int* status);
+        double std, int* status);
 
 #ifdef __cplusplus
 }

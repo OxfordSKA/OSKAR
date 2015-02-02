@@ -29,8 +29,6 @@
 #include <oskar_mem_random_uniform.h>
 #include <oskar_mem_random_uniform_cuda.h>
 #include <oskar_cuda_check_error.h>
-
-#include <Random123/philox.h>
 #include <private_random_helpers.h>
 
 #ifdef __cplusplus
@@ -48,7 +46,7 @@ void oskar_mem_random_uniform_f(
 #pragma omp parallel for private(i, i4)
     for (i = 0; i < n1; ++i)
     {
-        OSKAR_R123_GENERATE_4(seed, counter1, counter2, counter3, i)
+        OSKAR_R123_GENERATE_4(seed, i, counter1, counter2, counter3)
 
         /* Convert to uniform float. */
         i4 = i * 4;
@@ -60,7 +58,7 @@ void oskar_mem_random_uniform_f(
 
     if (num_elements % 4)
     {
-        OSKAR_R123_GENERATE_4(seed, counter1, counter2, counter3, n1)
+        OSKAR_R123_GENERATE_4(seed, n1, counter1, counter2, counter3)
 
         /* Convert to uniform float. */
         i4 = n1 * 4;
@@ -85,7 +83,7 @@ void oskar_mem_random_uniform_d(
 #pragma omp parallel for private(i, i4)
     for (i = 0; i < n1; ++i)
     {
-        OSKAR_R123_GENERATE_4(seed, counter1, counter2, counter3, i)
+        OSKAR_R123_GENERATE_4(seed, i, counter1, counter2, counter3)
 
         /* Convert to uniform float. */
         i4 = i * 4;
@@ -97,7 +95,7 @@ void oskar_mem_random_uniform_d(
 
     if (num_elements % 4)
     {
-        OSKAR_R123_GENERATE_4(seed, counter1, counter2, counter3, n1)
+        OSKAR_R123_GENERATE_4(seed, n1, counter1, counter2, counter3)
 
         /* Convert to uniform float. */
         i4 = n1 * 4;

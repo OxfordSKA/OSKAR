@@ -27,8 +27,6 @@
  */
 
 #include <oskar_mem_random_gaussian_cuda.h>
-
-#include <Random123/philox.h>
 #include <private_random_helpers.h>
 
 #ifdef __cplusplus
@@ -39,18 +37,23 @@ __global__
 void oskar_mem_random_gaussian_cudak_f(
         const unsigned int num_elements, float* data,
         const unsigned int seed, const unsigned int counter1,
-        const unsigned int counter2, const unsigned int counter3)
+        const unsigned int counter2, const unsigned int counter3,
+        const float std)
 {
     const unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
     const unsigned int i4 = i * 4;
     if (i4 >= num_elements) return;
 
-    OSKAR_R123_GENERATE_4(seed, counter1, counter2, counter3, i)
+    OSKAR_R123_GENERATE_4(seed, i, counter1, counter2, counter3)
 
     /* Convert to normalised Gaussian distribution. */
     float4 r;
     oskar_box_muller_f(u.i[0], u.i[1], &r.x, &r.y);
     oskar_box_muller_f(u.i[2], u.i[3], &r.z, &r.w);
+    r.x = std * r.x;
+    r.y = std * r.y;
+    r.z = std * r.z;
+    r.w = std * r.w;
 
     /* Store random numbers. */
     if (i4 <= num_elements - 4)
@@ -74,18 +77,23 @@ __global__
 void oskar_mem_random_gaussian_cudak_d(
         const unsigned int num_elements, double* data,
         const unsigned int seed, const unsigned int counter1,
-        const unsigned int counter2, const unsigned int counter3)
+        const unsigned int counter2, const unsigned int counter3,
+        const double std)
 {
     const unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
     const unsigned int i4 = i * 4;
     if (i4 >= num_elements) return;
 
-    OSKAR_R123_GENERATE_4(seed, counter1, counter2, counter3, i)
+    OSKAR_R123_GENERATE_4(seed, i, counter1, counter2, counter3)
 
     /* Convert to normalised Gaussian distribution. */
     double4 r;
     oskar_box_muller_d(u.i[0], u.i[1], &r.x, &r.y);
     oskar_box_muller_d(u.i[2], u.i[3], &r.z, &r.w);
+    r.x = std * r.x;
+    r.y = std * r.y;
+    r.z = std * r.z;
+    r.w = std * r.w;
 
     /* Store random numbers. */
     if (i4 <= num_elements - 4)
@@ -107,22 +115,22 @@ void oskar_mem_random_gaussian_cudak_d(
 
 void oskar_mem_random_gaussian_cuda_f(unsigned int num_elements,
         float* d_data, unsigned int seed, unsigned int counter1,
-        unsigned int counter2, unsigned int counter3)
+        unsigned int counter2, unsigned int counter3, float std)
 {
     unsigned int num_blocks, num_threads = 256;
     num_blocks = (((num_elements + 3) / 4) + num_threads - 1) / num_threads;
     oskar_mem_random_gaussian_cudak_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_elements, d_data, seed, counter1, counter2, counter3);
+            (num_elements, d_data, seed, counter1, counter2, counter3, std);
 }
 
 void oskar_mem_random_gaussian_cuda_d(unsigned int num_elements,
         double* d_data, unsigned int seed, unsigned int counter1,
-        unsigned int counter2, unsigned int counter3)
+        unsigned int counter2, unsigned int counter3, double std)
 {
     unsigned int num_blocks, num_threads = 256;
     num_blocks = (((num_elements + 3) / 4) + num_threads - 1) / num_threads;
     oskar_mem_random_gaussian_cudak_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_elements, d_data, seed, counter1, counter2, counter3);
+            (num_elements, d_data, seed, counter1, counter2, counter3, std);
 }
 
 #ifdef __cplusplus

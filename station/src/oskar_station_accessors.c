@@ -36,6 +36,11 @@ extern "C" {
 
 /* Data common to all station types. */
 
+int oskar_station_unique_id(const oskar_Station* model)
+{
+    return model->unique_id;
+}
+
 int oskar_station_precision(const oskar_Station* model)
 {
     return model->precision;
@@ -418,6 +423,11 @@ const oskar_Mem* oskar_station_permitted_beam_el_rad_const(
 
 
 /* Setters. */
+
+void oskar_station_set_unique_id(oskar_Station* model, int id)
+{
+    model->unique_id = id;
+}
 
 void oskar_station_set_station_type(oskar_Station* model, int type)
 {

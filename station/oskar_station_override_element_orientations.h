@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,14 +51,16 @@ extern "C" {
  *
  * The station model must be in CPU-accessible memory.
  *
- * @param[in,out] station            Station model structure to modify.
+ * @param[in,out] s                  Station model structure to modify.
+ * @param[in] seed                   Random generator seed.
  * @param[in] x_pol                  If true, override X dipole orientation; else Y dipole.
  * @param[in] orientation_error_rad  Standard deviation of element orientation, in radians.
  * @param[in,out] status             Status return code.
  */
 OSKAR_EXPORT
 void oskar_station_override_element_orientations(oskar_Station* s,
-        int x_pol, double orientation_error_rad, int* status);
+        unsigned int seed, int x_pol, double orientation_error_rad,
+        int* status);
 
 #ifdef __cplusplus
 }

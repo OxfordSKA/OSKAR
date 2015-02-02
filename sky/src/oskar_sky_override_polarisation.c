@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@
 
 #include <oskar_random_gaussian.h>
 #include <math.h>
-#include <stdlib.h> /* For srand() */
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,10 +63,7 @@ void oskar_sky_override_polarisation(oskar_Sky* sky, double mean_pol_fraction,
     if (location == OSKAR_CPU)
     {
         int i;
-        double pol_fraction, pol_angle_rad;
-
-        /* Seed the random generator. */
-        srand(seed);
+        double r[2];
 
         if (type == OSKAR_DOUBLE)
         {
@@ -79,18 +75,15 @@ void oskar_sky_override_polarisation(oskar_Sky* sky, double mean_pol_fraction,
             for (i = 0; i < num_sources; ++i)
             {
                 /* Generate polarisation angle and polarisation fraction. */
-                pol_fraction = oskar_random_gaussian(&pol_angle_rad);
-                pol_angle_rad *= std_pol_angle_rad;
-                pol_angle_rad += mean_pol_angle_rad;
-                pol_fraction *= std_pol_fraction;
-                pol_fraction += mean_pol_fraction;
-                if (pol_fraction > 1.0) pol_fraction = 1.0; /* Clamp. */
-                if (pol_fraction < 0.0) pol_fraction = 0.0; /* Clamp. */
+                oskar_random_gaussian2(seed, i, 0, r);
+                r[0] = 2.0 * (std_pol_angle_rad * r[0] + mean_pol_angle_rad);
+                r[1] = std_pol_fraction * r[1] + mean_pol_fraction;
+                if (r[1] > 1.0) r[1] = 1.0; /* Clamp pol fraction. */
+                else if (r[1] < 0.0) r[1] = 0.0;
 
                 /* Generate Stokes Q and U values. */
-                pol_angle_rad *= 2.0;
-                Q_[i] = pol_fraction * I_[i] * cos(pol_angle_rad);
-                U_[i] = pol_fraction * I_[i] * sin(pol_angle_rad);
+                Q_[i] = r[1] * I_[i] * cos(r[0]);
+                U_[i] = r[1] * I_[i] * sin(r[0]);
             }
         }
         else if (type == OSKAR_SINGLE)
@@ -103,18 +96,15 @@ void oskar_sky_override_polarisation(oskar_Sky* sky, double mean_pol_fraction,
             for (i = 0; i < num_sources; ++i)
             {
                 /* Generate polarisation angle and polarisation fraction. */
-                pol_fraction = oskar_random_gaussian(&pol_angle_rad);
-                pol_angle_rad *= std_pol_angle_rad;
-                pol_angle_rad += mean_pol_angle_rad;
-                pol_fraction *= std_pol_fraction;
-                pol_fraction += mean_pol_fraction;
-                if (pol_fraction > 1.0) pol_fraction = 1.0; /* Clamp. */
-                if (pol_fraction < 0.0) pol_fraction = 0.0; /* Clamp. */
+                oskar_random_gaussian2(seed, i, 0, r);
+                r[0] = 2.0 * (std_pol_angle_rad * r[0] + mean_pol_angle_rad);
+                r[1] = std_pol_fraction * r[1] + mean_pol_fraction;
+                if (r[1] > 1.0) r[1] = 1.0; /* Clamp pol fraction. */
+                else if (r[1] < 0.0) r[1] = 0.0;
 
                 /* Generate Stokes Q and U values. */
-                pol_angle_rad *= 2.0;
-                Q_[i] = pol_fraction * I_[i] * cos(pol_angle_rad);
-                U_[i] = pol_fraction * I_[i] * sin(pol_angle_rad);
+                Q_[i] = r[1] * I_[i] * cos(r[0]);
+                U_[i] = r[1] * I_[i] * sin(r[0]);
             }
         }
         else

@@ -30,7 +30,8 @@
 #define OSKAR_PRIVATE_RANDOM_HELPERS_H_
 
 #include <oskar_global.h>
-#include <math.h>
+#include <oskar_cmath.h>
+#include <Random123/philox.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,36 +42,32 @@ extern "C" {
 OSKAR_INLINE
 float oskar_int_to_range_0_to_1_f(const unsigned long in)
 {
-    float factor, half_factor;
-    factor = 1.0f / (1.0f + 0xFFFFFFFFuL);
-    half_factor = 0.5f * factor;
+    const float factor = 1.0f / (1.0f + 0xFFFFFFFFuL);
+    const float half_factor = 0.5f * factor;
     return (in * factor) + half_factor;
 }
 
 OSKAR_INLINE
 double oskar_int_to_range_0_to_1_d(const unsigned long in)
 {
-    double factor, half_factor;
-    factor = 1.0 / (1.0 + 0xFFFFFFFFuL);
-    half_factor = 0.5 * factor;
+    const double factor = 1.0 / (1.0 + 0xFFFFFFFFuL);
+    const double half_factor = 0.5 * factor;
     return (in * factor) + half_factor;
 }
 
 OSKAR_INLINE
 float oskar_int_to_range_minus_1_to_1_f(const unsigned long in)
 {
-    float factor, half_factor;
-    factor = 1.0f / (1.0f + 0x7FFFFFFFuL);
-    half_factor = 0.5f * factor;
+    const float factor = 1.0f / (1.0f + 0x7FFFFFFFuL);
+    const float half_factor = 0.5f * factor;
     return (((long)in) * factor) + half_factor;
 }
 
 OSKAR_INLINE
 double oskar_int_to_range_minus_1_to_1_d(const unsigned long in)
 {
-    double factor, half_factor;
-    factor = 1.0 / (1.0 + 0x7FFFFFFFuL);
-    half_factor = 0.5 * factor;
+    const double factor = 1.0 / (1.0 + 0x7FFFFFFFuL);
+    const double half_factor = 0.5 * factor;
     return (((long)in) * factor) + half_factor;
 }
 
@@ -82,7 +79,7 @@ void oskar_box_muller_f(unsigned long u0, unsigned long u1,
 #ifdef __CUDACC__
     sincospif(oskar_int_to_range_minus_1_to_1_f(u0), f0, f1);
 #else
-    float t = 3.1415926535897932f;
+    float t = M_PIf;
     t *= oskar_int_to_range_minus_1_to_1_f(u0);
     *f0 = sinf(t);
     *f1 = cosf(t);
@@ -100,7 +97,7 @@ void oskar_box_muller_d(unsigned long u0, unsigned long u1,
 #ifdef __CUDACC__
     sincospi(oskar_int_to_range_minus_1_to_1_d(u0), f0, f1);
 #else
-    double t = 3.1415926535897932;
+    double t = M_PI;
     t *= oskar_int_to_range_minus_1_to_1_d(u0);
     *f0 = sin(t);
     *f1 = cos(t);
@@ -110,11 +107,27 @@ void oskar_box_muller_d(unsigned long u0, unsigned long u1,
     *f1 *= r;
 }
 
+/* Set up key and counter, and generate two random integers.
+ * Use 32-bit integers for both single and double floating-point precision:
+ * This preserves random sequences, and should be perfectly valid for both
+ * (a random integer is the same, regardless of precision!). */
+#define OSKAR_R123_GENERATE_2(S,C0,C1)           \
+        philox2x32_key_t k;                      \
+        philox2x32_ctr_t c;                      \
+        union {                                  \
+            philox2x32_ctr_t c;                  \
+            uint32_t i[2];                       \
+        } u;                                     \
+        k.v[0] = S;                              \
+        c.v[0] = C0;                             \
+        c.v[1] = C1;                             \
+        u.c = philox2x32(c, k);
+
 /* Set up key and counter, and generate four random integers.
  * Use 32-bit integers for both single and double floating-point precision:
  * This preserves random sequences, and should be perfectly valid for both
  * (a random integer is the same, regardless of precision!). */
-#define OSKAR_R123_GENERATE_4(S,C1,C2,C3,I)      \
+#define OSKAR_R123_GENERATE_4(S,C0,C1,C2,C3)     \
         philox4x32_key_t k;                      \
         philox4x32_ctr_t c;                      \
         union {                                  \
@@ -122,8 +135,8 @@ void oskar_box_muller_d(unsigned long u0, unsigned long u1,
             uint32_t i[4];                       \
         } u;                                     \
         k.v[0] = S;                              \
-        k.v[1] = 0xCAFEF00D;                     \
-        c.v[0] = I;                              \
+        k.v[1] = 0xCAFEF00DuL;                   \
+        c.v[0] = C0;                             \
         c.v[1] = C1;                             \
         c.v[2] = C2;                             \
         c.v[3] = C3;                             \

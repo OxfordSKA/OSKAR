@@ -45,6 +45,20 @@ extern "C" {
 
 /**
  * @brief
+ * Returns the unique identifier of the station within the telescope model.
+ *
+ * @details
+ * Returns the unique identifier of the station within the telescope model.
+ *
+ * @param[in] model   Pointer to station model.
+ *
+ * @return The unique identifier.
+ */
+OSKAR_EXPORT
+int oskar_station_unique_id(const oskar_Station* model);
+
+/**
+ * @brief
  * Returns the numerical precision of data stored in the station model.
  *
  * @details
@@ -301,6 +315,20 @@ const oskar_Mem* oskar_station_permitted_beam_el_rad_const(
 
 
 /* Setters. */
+
+/**
+ * @brief
+ * Sets the unique station identifier.
+ *
+ * @details
+ * Sets the unique station identifier.
+ * This should be set only when the telescope model is being initialised.
+ *
+ * @param[in] model Pointer to station model.
+ * @param[in] id    Identifier.
+ */
+OSKAR_EXPORT
+void oskar_station_set_unique_id(oskar_Station* model, int id);
 
 /**
  * @brief

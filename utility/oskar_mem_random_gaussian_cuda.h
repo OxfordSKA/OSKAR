@@ -62,14 +62,15 @@ extern "C" {
  * @param[in]     num_elements Number of elements to fill.
  * @param[in,out] d_data       Pointer to memory block to fill (on device).
  * @param[in]     seed         Random seed.
- * @param[in]     counter1     First user-defined counter.
- * @param[in]     counter2     Second user-defined counter.
- * @param[in]     counter3     Third user-defined counter.
+ * @param[in]     counter1     User-defined counter.
+ * @param[in]     counter2     User-defined counter.
+ * @param[in]     counter3     User-defined counter.
+ * @param[in]     std          Standard deviation of distribution.
  */
 OSKAR_EXPORT
 void oskar_mem_random_gaussian_cuda_f(unsigned int num_elements,
         float* d_data, unsigned int seed, unsigned int counter1,
-        unsigned int counter2, unsigned int counter3);
+        unsigned int counter2, unsigned int counter3, float std);
 
 /**
  * @brief
@@ -94,14 +95,15 @@ void oskar_mem_random_gaussian_cuda_f(unsigned int num_elements,
  * @param[in]     num_elements Number of elements to fill.
  * @param[in,out] d_data       Pointer to memory block to fill (on device).
  * @param[in]     seed         Random seed.
- * @param[in]     counter1     First user-defined counter.
- * @param[in]     counter2     Second user-defined counter.
- * @param[in]     counter3     Third user-defined counter.
+ * @param[in]     counter1     User-defined counter.
+ * @param[in]     counter2     User-defined counter.
+ * @param[in]     counter3     User-defined counter.
+ * @param[in]     std          Standard deviation of distribution.
  */
 OSKAR_EXPORT
 void oskar_mem_random_gaussian_cuda_d(unsigned int num_elements,
         double* d_data, unsigned int seed, unsigned int counter1,
-        unsigned int counter2, unsigned int counter3);
+        unsigned int counter2, unsigned int counter3, double std);
 
 #ifdef __cplusplus
 }

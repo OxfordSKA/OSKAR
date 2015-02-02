@@ -131,11 +131,11 @@ TEST(Mem, random_gaussian)
 
     // Run in single precision.
     oskar_timer_start(tmr);
-    oskar_mem_random_gaussian(v_cpu_f, seed, c1, c2, c3, &status);
+    oskar_mem_random_gaussian(v_cpu_f, seed, c1, c2, c3, 1.0, &status);
     report_time(n, "Gaussian", "single", "CPU", oskar_timer_elapsed(tmr));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_timer_start(tmr);
-    oskar_mem_random_gaussian(v_gpu_f, seed, c1, c2, c3, &status);
+    oskar_mem_random_gaussian(v_gpu_f, seed, c1, c2, c3, 1.0, &status);
     report_time(n, "Gaussian", "single", "GPU", oskar_timer_elapsed(tmr));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
@@ -146,11 +146,11 @@ TEST(Mem, random_gaussian)
 
     // Run in double precision.
     oskar_timer_start(tmr);
-    oskar_mem_random_gaussian(v_cpu_d, seed, c1, c2, c3, &status);
+    oskar_mem_random_gaussian(v_cpu_d, seed, c1, c2, c3, 1.0, &status);
     report_time(n, "Gaussian", "double", "CPU", oskar_timer_elapsed(tmr));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     oskar_timer_start(tmr);
-    oskar_mem_random_gaussian(v_gpu_d, seed, c1, c2, c3, &status);
+    oskar_mem_random_gaussian(v_gpu_d, seed, c1, c2, c3, 1.0, &status);
     report_time(n, "Gaussian", "double", "GPU", oskar_timer_elapsed(tmr));
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
@@ -193,7 +193,7 @@ TEST(Mem, random_gaussian_accum)
 
     for (int i = 0; i < rounds; ++i)
     {
-        oskar_mem_random_gaussian(block, seed, i, 0, 0, &status);
+        oskar_mem_random_gaussian(block, seed, i, 0, 0, 1.0, &status);
         oskar_mem_copy_contents(total, block,
                 i * blocksize, 0, blocksize, &status);
     }
@@ -209,41 +209,3 @@ TEST(Mem, random_gaussian_accum)
     oskar_mem_free(block, &status);
     oskar_mem_free(total, &status);
 }
-
-#if 0
-#include <oskar_random_gaussian.h>
-
-TEST(old_random_gaussian, test)
-{
-    int status = 0;
-    int seed = 1;
-    int n = 256 * 10240;
-    oskar_Mem* a = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, n, &status);
-    oskar_Mem* b = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, n, &status);
-    oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
-
-    srand(seed);
-    double* p = oskar_mem_double(a, &status);
-    oskar_timer_start(tmr);
-    for (int i = 0; i < n; i += 2)
-    {
-        double another;
-        p[i] = oskar_random_gaussian(&another);
-        p[i + 1] = another;
-    }
-    report_time(n, "Gaussian", "double", "CPU, OLD", oskar_timer_elapsed(tmr));
-
-    oskar_timer_start(tmr);
-    oskar_mem_random_gaussian(b, seed, 0, 0, 0, &status);
-    report_time(n, "Gaussian", "double", "CPU, NEW", oskar_timer_elapsed(tmr));
-
-    if (save)
-    {
-        FILE* fhan = fopen("random_gaussian_old.txt", "w");
-        oskar_mem_save_ascii(fhan, 2, n, &status, a, b);
-        fclose(fhan);
-    }
-    oskar_mem_free(a, &status);
-    oskar_mem_free(b, &status);
-}
-#endif

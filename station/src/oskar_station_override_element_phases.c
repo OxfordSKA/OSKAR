@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-void oskar_station_override_element_phases(oskar_Station* s,
+void oskar_station_override_element_phases(oskar_Station* s, unsigned int seed,
         double phase_std, int* status)
 {
     int i;
@@ -63,27 +63,35 @@ void oskar_station_override_element_phases(oskar_Station* s,
         for (i = 0; i < s->num_elements; ++i)
         {
             oskar_station_override_element_phases(oskar_station_child(s, i),
-                    phase_std, status);
+                    seed, phase_std, status);
         }
     }
     else
     {
         /* Override element data at last level. */
-        int type;
+        double r[2];
+        int type, id;
         type = oskar_station_precision(s);
+        id = oskar_station_unique_id(s);
         if (type == OSKAR_DOUBLE)
         {
             double* phase;
             phase = oskar_mem_double(s->element_phase_offset_rad, status);
             for (i = 0; i < s->num_elements; ++i)
-                phase[i] = phase_std * oskar_random_gaussian(0);
+            {
+                oskar_random_gaussian2(seed, i, id, r);
+                phase[i] = phase_std * r[0];
+            }
         }
         else if (type == OSKAR_SINGLE)
         {
             float* phase;
             phase = oskar_mem_float(s->element_phase_offset_rad, status);
             for (i = 0; i < s->num_elements; ++i)
-                phase[i] = phase_std * oskar_random_gaussian(0);
+            {
+                oskar_random_gaussian2(seed, i, id, r);
+                phase[i] = phase_std * r[0];
+            }
         }
     }
 }

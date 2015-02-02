@@ -60,6 +60,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
             oskar_station_num_elements(src), status);
 
     /* Set meta-data. */
+    model->unique_id = src->unique_id;
     model->precision = src->precision;
     model->mem_location = location;
 

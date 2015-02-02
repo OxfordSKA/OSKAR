@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,13 +51,14 @@ extern "C" {
  *
  * The station model must be in CPU-accessible memory.
  *
- * @param[in,out] station    Station model structure to modify.
+ * @param[in,out] s          Station model structure to modify.
+ * @param[in] seed           Random generator seed.
  * @param[in] gain_mean      Mean element gain.
  * @param[in] gain_std       Standard deviation of element gain.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_override_element_gains(oskar_Station* s,
+void oskar_station_override_element_gains(oskar_Station* s, unsigned int seed,
         double gain_mean, double gain_std, int* status);
 
 #ifdef __cplusplus
