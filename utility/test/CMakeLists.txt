@@ -7,6 +7,7 @@ set(${name}_SRC
     main.cpp
     Test_binary_file.cpp
     Test_crc.cpp
+    Test_get_memory_usage.cpp
     Test_getline.cpp
     Test_Mem_add.cpp
     Test_Mem_append.cpp

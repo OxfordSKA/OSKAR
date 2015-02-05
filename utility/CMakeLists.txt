@@ -17,6 +17,7 @@ set(utility_SRC
     src/oskar_endian.c
     src/oskar_file_exists.c
     src/oskar_get_error_string.c
+    src/oskar_get_memory_usage.c
     src/oskar_getline.c
     src/oskar_mem_accessors.c
     src/oskar_mem_add.c

@@ -315,8 +315,22 @@ enum OSKAR_DIRECTION_TYPE
 #    define OSKAR_OS_WIN64
 #endif
 
+/* http://goo.gl/OUEZfb */
 #if (defined(OSKAR_OS_WIN32) || defined(OSKAR_OS_WIN64))
-#    define OSKAR_OS_WIN
+    #define OSKAR_OS_WIN
+#elif defined __APPLE__
+    #include "TargetConditionals.h"
+    #if TARGET_OS_MAC
+        #define OSKAR_OS_MAC
+    #endif
+#elif __linux
+    #define OSKAR_OS_LINUX
+#elif __unix /* for all unixes not caught above */
+    /* Unix */
+#elif __posix
+    /* POSIX */
+#else
+    #error Unknown OS type detected!
 #endif
 
 /*
