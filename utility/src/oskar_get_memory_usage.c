@@ -32,6 +32,7 @@
 #include <oskar_get_memory_usage.h>
 
 #include <stdio.h>
+#include <stddef.h>
 
 #if defined(OSKAR_OS_LINUX)
 #   include <sys/types.h>
@@ -46,7 +47,6 @@
 #   include <mach/mach_types.h>
 #   include <mach/mach_init.h>
 #   include <mach/mach_host.h>
-#   include <stddef.h>
 #   include <sys/sysctl.h>
 #elif defined(OSKAR_OS_WIN)
 #   include <windows.h>
@@ -58,10 +58,10 @@
 extern "C" {
 #endif
 
-long long oskar_get_total_physical_memory(void)
+size_t oskar_get_total_physical_memory(void)
 {
 #ifdef OSKAR_OS_LINUX
-    long long totalPhysMem = 0;
+    size_t totalPhysMem = 0;
     struct sysinfo memInfo;
     sysinfo(&memInfo);
     totalPhysMem = memInfo.totalram;
@@ -75,20 +75,20 @@ long long oskar_get_total_physical_memory(void)
     mib[1] = HW_MEMSIZE;
     length = sizeof(int64_t);
     sysctl(mib, 2, &physical_memory, &length, NULL, 0);
-    return (long long)physical_memory;
+    return (size_t)physical_memory;
 #elif defined(OSKAR_OS_WIN)
     MEMORYSTATUSEX memInfo;
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
     GlobalMemoryStatusEx(&memInfo);
     DWORDLONG totalPhysMem = memInfo.ullTotalPhys;
-    return (long long)totalPhysMem;
+    return (size_t)totalPhysMem;
 #endif
 }
 
-long long oskar_get_free_physical_memory(void)
+size_t oskar_get_free_physical_memory(void)
 {
 #ifdef OSKAR_OS_LINUX
-    long long freePhysMem = 0;
+    size_t freePhysMem = 0;
     struct sysinfo memInfo;
     sysinfo(&memInfo);
     freePhysMem = memInfo.freeram;
@@ -107,7 +107,7 @@ long long oskar_get_free_physical_memory(void)
     {
         /* Note on OS X since 10.9, compressed memory makes this value somewhat
          * flexible. */
-        return (long long)((int64_t)vm_stats.free_count*(int64_t)page_size);
+        return (size_t)((int64_t)vm_stats.free_count*(int64_t)page_size);
     }
     return -1;
 #elif defined(OSKAR_OS_WIN)
@@ -115,21 +115,20 @@ long long oskar_get_free_physical_memory(void)
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
     GlobalMemoryStatusEx(&memInfo);
     DWORDLONG freePhysMem = memInfo.ullAvailPhys;
-    return (long long)freePhysMem;
+    return (size_t)freePhysMem;
 #endif
 }
 
-long long oskar_get_total_virtual_memory(void)
+size_t oskar_get_total_swap_memory(void)
 {
 #ifdef OSKAR_OS_LINUX
     struct sysinfo memInfo;
-    long long totalVirtualMem;
+    size_t totalSwapMem;
     sysinfo(&memInfo);
-    totalVirtualMem = memInfo.totalram;
-    totalVirtualMem += memInfo.totalswap;
-    totalVirtualMem *= memInfo.mem_unit;
-    return totalVirtualMem;
+    totalSwapMem = memInfo.totalswap;
+    return totalSwapMem * memInfo.mem_unit;
 #elif defined(OSKAR_OS_MAC)
+#if 0
     struct statfs stats;
     if (0 == statfs("/", &stats))
     {
@@ -137,49 +136,57 @@ long long oskar_get_total_virtual_memory(void)
         return myFreeSwap;
     }
     return -1;
+#endif
+    struct xsw_usage vmusage;
+    size_t size = sizeof(vmusage);
+    if (sysctlbyname("vm.swapusage", &vmusage, &size, NULL, 0)!=0)
+        return -1;
+    return (size_t)vmusage.xsu_total;
 #elif defined(OSKAR_OS_WIN)
     MEMORYSTATUSEX memInfo;
+    DWORDLONG totalSwap;
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
     GlobalMemoryStatusEx(&memInfo);
-    return (long long)memInfo.ullTotalPageFile;
+    totalSwap = memInfo.ullTotalPageFile - memInfo.ullTotalPhys;
+    return (size_t)totalSwap;
 #endif
 }
 
-long long oskar_get_free_virtual_memory(void)
+size_t oskar_get_free_swap_memory(void)
 {
 #ifdef OSKAR_OS_LINUX
     struct sysinfo memInfo;
-    long long freeVirtualMem;
+    size_t freeSwapMem;
     sysinfo(&memInfo);
-    freeVirtualMem = memInfo.freeram;
-    freeVirtualMem += memInfo.freeswap;
-    freeVirtualMem *= memInfo.mem_unit;
-    return freeVirtualMem;
+    freeSwapMem = memInfo.freeswap;
+    return freeSwapMem * memInfo.mem_unit;
 #elif defined(OSKAR_OS_MAC)
     struct xsw_usage vmusage;
     size_t size = sizeof(vmusage);
     if (sysctlbyname("vm.swapusage", &vmusage, &size, NULL, 0)!=0)
         return -1;
-    return (long long)vmusage.xsu_avail;
+    return (size_t)vmusage.xsu_avail;
 #elif defined(OSKAR_OS_WIN)
     MEMORYSTATUSEX memInfo;
+    DWORDLONG freeSwap;
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
     GlobalMemoryStatusEx(&memInfo);
-    return (long long)memInfo.ullAvailPageFile;
+    freeSwap = memInfo.ullAvailPageFile - memInfo.ullAvailPhys;
+    return (size_t)freeSwap;
 #endif
 }
 
 void oskar_print_memory_info(void)
 {
-    long long totalVirtualMem, freeVirtualMem, totalPhysMem, freePhysMem;
+    size_t totalSwapMem, freeSwapMem, totalPhysMem, freePhysMem;
     totalPhysMem = oskar_get_total_physical_memory();
     freePhysMem = oskar_get_free_physical_memory();
-    totalVirtualMem = oskar_get_total_virtual_memory();
-    freeVirtualMem = oskar_get_free_virtual_memory();
-    printf("Total physical memory = %lld MB\n", totalPhysMem/(1024*1024));
-    printf("Free physical memory  = %lld MB\n", freePhysMem/(1024*1024));
-    printf("Total virtual memory  = %lld MB\n", totalVirtualMem/(1024*1024));
-    printf("Free virtual memory   = %lld MB\n", freeVirtualMem/(1024*1024));
+    totalSwapMem = oskar_get_total_swap_memory();
+    freeSwapMem = oskar_get_free_swap_memory();
+    printf("Free physical memory: %ld MB (of %ld MB)\n",
+            freePhysMem/(1024*1024), totalPhysMem/(1024*1024));
+    printf("Free swap memory: %ld MB (of %ld MB)\n",
+            freeSwapMem/(1024*1024), totalSwapMem/(1024*1024));
 }
 
 #ifdef __cplusplus

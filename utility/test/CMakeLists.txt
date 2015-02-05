@@ -7,7 +7,6 @@ set(${name}_SRC
     main.cpp
     Test_binary_file.cpp
     Test_crc.cpp
-    Test_get_memory_usage.cpp
     Test_getline.cpp
     Test_Mem_add.cpp
     Test_Mem_append.cpp
@@ -31,3 +30,10 @@ set_target_properties(${name} PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 add_test(utility_test ${name})
+
+set(name memory_test)
+add_executable(${name} Test_get_memory_usage.cpp)
+target_link_libraries(${name} oskar gtest_main)
+set_target_properties(${name} PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}")

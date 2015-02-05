@@ -36,17 +36,12 @@
 TEST(get_memory_usage, test)
 {
     oskar_print_memory_info();
-
-    size_t mb = 12000;
-    float* mem = (float*)malloc(mb*1024*1024);
-    for (size_t i = 0; i < mb*1024*1024/sizeof(float); ++i) {
-        mem[i] = i;
-    }
-    printf("\nAllocated %li MB ... \n\n", mb);
-
+    size_t size = 40000ul*1024ul*1024ul;
+    float* mem = (float*)malloc(size);
+    memset((void*)mem, 1, size);
+    printf("** Allocated %li MB ** \n", size/(1024*1024));
     oskar_print_memory_info();
-
     free(mem);
-    printf("\n");
+    printf("** Released memory **\n");
     oskar_print_memory_info();
 }

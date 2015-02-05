@@ -37,6 +37,7 @@
  */
 
 #include <oskar_global.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,25 +47,25 @@ extern "C" {
  * @brief Returns the total physical system memory, in bytes.
  */
 OSKAR_EXPORT
-long long oskar_get_total_physical_memory(void);
+size_t oskar_get_total_physical_memory(void);
 
 /**
  * @brief Returns the free physical system memory, in bytes.
  */
 OSKAR_EXPORT
-long long oskar_get_free_physical_memory(void);
+size_t oskar_get_free_physical_memory(void);
 
 /**
- * @brief Returns the total virtual system memory, in bytes.
+ * @brief Returns the total swap memory, in bytes.
  */
 OSKAR_EXPORT
-long long oskar_get_total_virtual_memory(void);
+size_t oskar_get_total_swap_memory(void);
 
 /**
- * @brief Returns the free virtual system memory, in bytes.
+ * @brief Returns the free swap system, in bytes.
  */
 OSKAR_EXPORT
-long long oskar_get_free_virtual_memory(void);
+size_t oskar_get_free_swap_memory(void);
 
 /**
  * @brief Prints a summary of the current memory usage.
