@@ -43,13 +43,35 @@ extern "C" {
 #endif
 
 /**
- * @brief Returns the current system memory usage.
- *
- * @details
- * Test function to return the current system memory usage
+ * @brief Returns the total physical system memory, in bytes.
  */
 OSKAR_EXPORT
-void oskar_get_memory_usage(void);
+long long oskar_get_total_physical_memory(void);
+
+/**
+ * @brief Returns the free physical system memory, in bytes.
+ */
+OSKAR_EXPORT
+long long oskar_get_free_physical_memory(void);
+
+/**
+ * @brief Returns the total virtual system memory, in bytes.
+ */
+OSKAR_EXPORT
+long long oskar_get_total_virtual_memory(void);
+
+/**
+ * @brief Returns the free virtual system memory, in bytes.
+ */
+OSKAR_EXPORT
+long long oskar_get_free_virtual_memory(void);
+
+/**
+ * @brief Prints a summary of the current memory usage.
+ */
+OSKAR_EXPORT
+void oskar_print_memory_info(void);
+
 
 #ifdef __cplusplus
 }

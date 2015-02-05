@@ -35,8 +35,7 @@
 
 TEST(get_memory_usage, test)
 {
-    printf("1.---------------\n");
-    oskar_get_memory_usage();
+    oskar_print_memory_info();
 
     size_t mb = 12000;
     float* mem = (float*)malloc(mb*1024*1024);
@@ -45,10 +44,9 @@ TEST(get_memory_usage, test)
     }
     printf("\nAllocated %li MB ... \n\n", mb);
 
-    printf("2.---------------\n");
-    oskar_get_memory_usage();
+    oskar_print_memory_info();
 
     free(mem);
-    printf("3.---------------\n");
-    oskar_get_memory_usage();
+    printf("\n");
+    oskar_print_memory_info();
 }
