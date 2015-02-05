@@ -31,6 +31,8 @@
 
 #include <oskar_get_memory_usage.h>
 
+#include <stdio.h>
+
 #if defined(OSKAR_OS_LINUX)
 #   include <sys/types.h>
 #   include <sys/sysinfo.h>
@@ -45,7 +47,6 @@
 #   include <mach/mach_init.h>
 #   include <mach/mach_host.h>
 #   include <stddef.h>
-#   include <stdio.h>
 #elif defined(OSKAR_OS_WIN)
 #   include <windows.h>
 #endif
@@ -61,7 +62,7 @@ void oskar_get_memory_usage(void)
 #ifdef OSKAR_OS_LINUX
     struct sysinfo memInfo;
     long long totalVirtualMem, virtualMemUsed, totalPhysMem, physMemUsed;
-    sysinfo(&memInfo)
+    sysinfo(&memInfo);
     totalVirtualMem = memInfo.totalram;
 
     totalVirtualMem += memInfo.totalswap;
@@ -70,15 +71,15 @@ void oskar_get_memory_usage(void)
 
     virtualMemUsed = memInfo.totalram - memInfo.freeram;
     virtualMemUsed *= memInfo.mem_unit;
-    printf("Virtual mem used = %lld MB\n", totalVirtualUsed/(1024*1024));
+    printf("Virtual mem used = %lld MB\n", virtualMemUsed/(1024*1024));
 
     totalPhysMem = memInfo.totalram;
     totalPhysMem *= memInfo.mem_unit;
     printf("Total phys mem = %lld MB\n", totalPhysMem/(1024*1024));
 
-    physMemUsed = memInfo.totalram - memInf.freeram;
+    physMemUsed = memInfo.totalram - memInfo.freeram;
     physMemUsed *= memInfo.mem_unit;
-    printf("Phys mem used = %lld MB\n", PhysMemUsed/(1024*1024));
+    printf("Phys mem used = %lld MB\n", physMemUsed/(1024*1024));
 
 #elif defined(OSKAR_OS_MAC)
     /* Total virtual memory */
