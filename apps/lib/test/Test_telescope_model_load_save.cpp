@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 
 #include <gtest/gtest.h>
 
-#include "apps/lib/oskar_remove_dir.h"
+#include "apps/lib/oskar_dir.h"
 #include "apps/lib/oskar_telescope_save.h"
 #include "apps/lib/oskar_telescope_load.h"
 
@@ -96,7 +96,7 @@ TEST(telescope_model_load_save, test_0_level)
     }
 
     // Remove test directory.
-    oskar_remove_dir(path);
+    oskar_dir_remove(path);
 }
 
 
@@ -216,7 +216,7 @@ TEST(telescope_model_load_save, test_1_level)
     }
 
     // Remove test directory.
-    oskar_remove_dir(path);
+    oskar_dir_remove(path);
 
     // Free models.
     oskar_telescope_free(telescope, &err);
@@ -482,7 +482,7 @@ TEST(telescope_model_load_save, test_2_level)
     oskar_telescope_free(telescope3, &err);
 
     // Remove test directory.
-    oskar_remove_dir(path);
+    oskar_dir_remove(path);
 }
 
 //
@@ -578,7 +578,7 @@ TEST(telescope_model_load_save, test_load_telescope_noise_rms)
         }
     }
 
-    oskar_remove_dir(path.data());
+    oskar_dir_remove(path.data());
     oskar_telescope_free(telescope, &err);
 }
 
@@ -677,7 +677,7 @@ TEST(telescope_model_load_save, test_load_telescope_noise_sensitivity)
         }
     }
 
-    oskar_remove_dir(path.data());
+    oskar_dir_remove(path.data());
     oskar_telescope_free(telescope, &err);
 }
 
@@ -793,7 +793,7 @@ TEST(telescope_model_load_save, test_load_telescope_noise_t_sys)
         }
     }
 
-    oskar_remove_dir(path.data());
+    oskar_dir_remove(path.data());
     oskar_telescope_free(telescope, &err);
 }
 
@@ -807,7 +807,7 @@ static void generate_noisy_telescope(const QString& dir,
     if (root.exists())
     {
         QByteArray name_ = dir.toLatin1();
-        oskar_remove_dir(name_.data());
+        oskar_dir_remove(name_.data());
     }
 
     root.mkdir(root.absolutePath());

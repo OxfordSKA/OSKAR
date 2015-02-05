@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_Dir.h"
+#include "apps/lib/oskar_dir.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QString>
@@ -36,6 +36,19 @@
 
 using std::string;
 using std::vector;
+
+extern "C"
+int oskar_dir_remove(const char* dir_name)
+{
+    return (int) oskar_Dir::rmtree(std::string(dir_name));
+}
+
+extern "C"
+int oskar_dir_exists(const char* dir_name)
+{
+    oskar_Dir dir(dir_name);
+    return dir.exists();
+}
 
 struct oskar_Dir::oskar_DirPrivate
 {

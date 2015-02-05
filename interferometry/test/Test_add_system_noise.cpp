@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,38 +82,17 @@ TEST(add_system_noise, test_rms)
             location, num_stations, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
+    oskar_mem_random_gaussian(
+            oskar_telescope_station_true_x_offset_ecef_metres(tel),
+            seed, 0, 0, 0, r_stddev, &err);
+    oskar_mem_random_gaussian(
+            oskar_telescope_station_true_y_offset_ecef_metres(tel),
+            seed, 1, 0, 0, r_stddev, &err);
+    oskar_mem_clear_contents(
+            oskar_telescope_station_true_z_offset_ecef_metres(tel), &err);
+
     for (int i = 0; i < num_stations; ++i)
     {
-        if (type == OSKAR_DOUBLE)
-        {
-            double *x, *y, *z, r1, r2;
-            x = oskar_mem_double(
-                    oskar_telescope_station_true_x_offset_ecef_metres(tel), &err);
-            y = oskar_mem_double(
-                    oskar_telescope_station_true_y_offset_ecef_metres(tel), &err);
-            z = oskar_mem_double(
-                    oskar_telescope_station_true_z_offset_ecef_metres(tel), &err);
-            r1 = oskar_random_gaussian(&r2);
-            x[i] = r1 * r_stddev;
-            y[i] = r2 * r_stddev;
-            z[i] = 0.0;
-        }
-        else
-        {
-            float *x, *y, *z;
-            double r1, r2;
-            x = oskar_mem_float(
-                    oskar_telescope_station_true_x_offset_ecef_metres(tel), &err);
-            y = oskar_mem_float(
-                    oskar_telescope_station_true_y_offset_ecef_metres(tel), &err);
-            z = oskar_mem_float(
-                    oskar_telescope_station_true_z_offset_ecef_metres(tel), &err);
-            r1 = oskar_random_gaussian(&r2);
-            x[i] = r1 * r_stddev;
-            y[i] = r2 * r_stddev;
-            z[i] = 0.0;
-        }
-
         oskar_Station* st = oskar_telescope_station(tel, i);
         generate_range(oskar_station_noise_freq_hz(st), num_noise_values,
                 freq_start, freq_inc);

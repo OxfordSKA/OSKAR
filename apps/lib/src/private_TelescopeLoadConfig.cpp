@@ -27,7 +27,7 @@
  */
 
 #include "apps/lib/private_TelescopeLoadConfig.h"
-#include "apps/lib/oskar_Dir.h"
+#include "apps/lib/oskar_dir.h"
 #include <oskar_Settings.h>
 
 using std::map;

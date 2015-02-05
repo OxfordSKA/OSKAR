@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ms/oskar_MeasurementSet.h"
+#include "ms/oskar_measurement_set.h"
 
 #include <ms/MeasurementSets.h>
 #include <tables/Tables.h>
@@ -116,7 +116,7 @@ struct oskar_MeasurementSet
     void add_pol(int num_pols);
     void add_scratch_cols(bool add_model, bool add_corrected);
     void copy_column(String source, String dest);
-    void create(const char* filename, double ra_rad, double dec_rad,
+    bool create(const char* filename, double ra_rad, double dec_rad,
             int num_pols, int num_channels, double ref_freq,
             double chan_width, int num_stations);
     void close();
@@ -125,7 +125,7 @@ struct oskar_MeasurementSet
             const MeasurementSet& ms, String& key, int& source_row);
     static bool is_otf_model_defined(const String& key, const MeasurementSet& ms);
     int num_rows() const;
-    void open(const char* filename);
+    bool open(const char* filename);
     static void remove_otf_model(MeasurementSet& ms);
     static void remove_record_by_key(MeasurementSet& ms, const String& key);
     void set_antenna_feeds();
@@ -186,7 +186,7 @@ void oskar_ms_copy_column(oskar_MeasurementSet* p, const char* source,
     p->copy_column(String(source), String(dest));
 }
 
-void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p, int num_stations,
+void oskar_ms_set_station_coords(oskar_MeasurementSet* p, int num_stations,
         const double* x, const double* y, const double* z)
 {
     if (!p->ms || !p->msc) return;
@@ -230,9 +230,11 @@ oskar_MeasurementSet* oskar_ms_create(const char* filename, double ra_rad,
         double chan_width, int num_stations)
 {
     oskar_MeasurementSet* p = new oskar_MeasurementSet;
-    p->create(filename, ra_rad, dec_rad, num_pols,
-            num_channels, ref_freq, chan_width, num_stations);
-    return p;
+    if (p->create(filename, ra_rad, dec_rad, num_pols,
+            num_channels, ref_freq, chan_width, num_stations))
+        return p;
+    delete p;
+    return 0;
 }
 
 int oskar_ms_num_pols(const oskar_MeasurementSet* p)
@@ -258,8 +260,10 @@ int oskar_ms_num_stations(const oskar_MeasurementSet* p)
 oskar_MeasurementSet* oskar_ms_open(const char* filename)
 {
     oskar_MeasurementSet* p = new oskar_MeasurementSet;
-    p->open(filename);
-    return p;
+    if (p->open(filename))
+        return p;
+    delete p;
+    return 0;
 }
 
 double oskar_ms_phase_centre_ra_rad(const oskar_MeasurementSet* p)
@@ -538,7 +542,7 @@ void oskar_MeasurementSet::add_pol(int num_pols)
     msc->polarization().numCorr().put(row, num_pols);
 }
 
-// Method from CASA VisSetUtil.cc
+// Method based on CASA VisSetUtil.cc
 void oskar_MeasurementSet::add_scratch_cols(bool add_model, bool add_corrected)
 {
     if (!ms) return;
@@ -693,7 +697,7 @@ void oskar_MeasurementSet::close()
     phase_centre_dec = 0.0;
 }
 
-void oskar_MeasurementSet::create(const char* filename,
+bool oskar_MeasurementSet::create(const char* filename,
         double ra_rad, double dec_rad, int num_pols, int num_channels,
         double ref_freq, double chan_width, int num_stations)
 {
@@ -712,47 +716,58 @@ void oskar_MeasurementSet::create(const char* filename,
     desc.defineHypercolumn("TiledFlag", 3, tsmNames);
     tsmNames[0] = MS::columnName(MS::UVW);
     desc.defineHypercolumn("TiledUVW", 2, tsmNames);
-    SetupNewTable newTab(filename, desc, Table::New);
+    try
+    {
+        SetupNewTable newTab(filename, desc, Table::New);
 
-    // Create the default storage managers.
-    IncrementalStMan incrStorageManager("ISMData");
-    newTab.bindAll(incrStorageManager);
-    StandardStMan stdStorageManager("SSMData", 32768, 32768);
-    newTab.bindColumn(MS::columnName(MS::ANTENNA1), stdStorageManager);
-    newTab.bindColumn(MS::columnName(MS::ANTENNA2), stdStorageManager);
+        // Create the default storage managers.
+        IncrementalStMan incrStorageManager("ISMData");
+        newTab.bindAll(incrStorageManager);
+        StandardStMan stdStorageManager("SSMData", 32768, 32768);
+        newTab.bindColumn(MS::columnName(MS::ANTENNA1), stdStorageManager);
+        newTab.bindColumn(MS::columnName(MS::ANTENNA2), stdStorageManager);
 
-    // Create tiled column storage manager for UVW column.
-    int num_baselines = num_stations * (num_stations - 1) / 2;
-    IPosition uvwTileShape(2, 3, 2 * num_baselines);
-    TiledColumnStMan uvwStorageManager("TiledUVW", uvwTileShape);
-    newTab.bindColumn(MS::columnName(MS::UVW), uvwStorageManager);
+        // Create tiled column storage manager for UVW column.
+        int num_baselines = num_stations * (num_stations - 1) / 2;
+        IPosition uvwTileShape(2, 3, 2 * num_baselines);
+        TiledColumnStMan uvwStorageManager("TiledUVW", uvwTileShape);
+        newTab.bindColumn(MS::columnName(MS::UVW), uvwStorageManager);
 
-    // Create tiled column storage managers for DATA and FLAG columns.
-    IPosition dataTileShape(3, num_pols, num_channels, 2 * num_baselines);
-    TiledColumnStMan dataStorageManager("TiledData", dataTileShape);
-    newTab.bindColumn(MS::columnName(MS::DATA), dataStorageManager);
-    IPosition flagTileShape(3, num_pols, num_channels, 16 * num_baselines);
-    TiledColumnStMan flagStorageManager("TiledFlag", flagTileShape);
-    newTab.bindColumn(MS::columnName(MS::FLAG), flagStorageManager);
+        // Create tiled column storage managers for DATA and FLAG columns.
+        IPosition dataTileShape(3, num_pols, num_channels, 2 * num_baselines);
+        TiledColumnStMan dataStorageManager("TiledData", dataTileShape);
+        newTab.bindColumn(MS::columnName(MS::DATA), dataStorageManager);
+        IPosition flagTileShape(3, num_pols, num_channels, 16 * num_baselines);
+        TiledColumnStMan flagStorageManager("TiledFlag", flagTileShape);
+        newTab.bindColumn(MS::columnName(MS::FLAG), flagStorageManager);
 
-    // Create the MeasurementSet.
-    ms = new MeasurementSet(newTab, TableLock(TableLock::PermanentLocking));
+        // Create the Measurement Set.
+        ms = new MeasurementSet(newTab, TableLock(TableLock::PermanentLocking));
 
-    // Create SOURCE sub-table.
-    TableDesc descSource = MSSource::requiredTableDesc();
-    MSSource::addColumnToDesc(descSource, MSSource::REST_FREQUENCY);
-    MSSource::addColumnToDesc(descSource, MSSource::POSITION);
-    SetupNewTable sourceSetup(ms->sourceTableName(), descSource, Table::New);
-    ms->rwKeywordSet().defineTable(MS::keywordName(MS::SOURCE),
-                   Table(sourceSetup));
+        // Create SOURCE sub-table.
+        TableDesc descSource = MSSource::requiredTableDesc();
+        MSSource::addColumnToDesc(descSource, MSSource::REST_FREQUENCY);
+        MSSource::addColumnToDesc(descSource, MSSource::POSITION);
+        SetupNewTable sourceSetup(ms->sourceTableName(),
+                descSource, Table::New);
+        ms->rwKeywordSet().defineTable(MS::keywordName(MS::SOURCE),
+                Table(sourceSetup));
 
-    // Create all required default subtables.
-    ms->createDefaultSubtables(Table::New);
+        // Create all required default subtables.
+        ms->createDefaultSubtables(Table::New);
 
-    // Create the MSMainColumns and MSColumns objects for accessing data
-    // in the main table and subtables.
-    msc = new MSColumns(*ms);
-    msmc = new MSMainColumns(*ms);
+        // Create the MSMainColumns and MSColumns objects for accessing data
+        // in the main table and subtables.
+        msc = new MSColumns(*ms);
+        msmc = new MSMainColumns(*ms);
+    }
+    catch (...)
+    {
+        if (msmc) delete msmc; msmc = 0;
+        if (msc) delete msc; msc = 0;
+        if (ms) delete ms; ms = 0;
+        return false;
+    }
 
     // Add a row to the OBSERVATION subtable.
     const char* username;
@@ -808,9 +823,11 @@ void oskar_MeasurementSet::create(const char* filename,
     ms->antenna().addRow(num_stations);
     ms->feed().addRow(num_stations);
     set_antenna_feeds();
+
+    return true;
 }
 
-// Method from CASA VisModelData.cc.
+// Method based on CASA VisModelData.cc.
 bool oskar_MeasurementSet::is_otf_model_defined(const int field,
         const MeasurementSet& ms, String& key, int& source_row)
 {
@@ -836,7 +853,7 @@ bool oskar_MeasurementSet::is_otf_model_defined(const int field,
     return false;
 }
 
-// Method from CASA VisModelData.cc.
+// Method based on CASA VisModelData.cc.
 bool oskar_MeasurementSet::is_otf_model_defined(const String& key,
         const MeasurementSet& ms)
 {
@@ -857,16 +874,26 @@ int oskar_MeasurementSet::num_rows() const
     return ms->nrow();
 }
 
-void oskar_MeasurementSet::open(const char* filename)
+bool oskar_MeasurementSet::open(const char* filename)
 {
-    // Create the MeasurementSet. Storage managers are recreated as needed.
-    ms = new MeasurementSet(filename, TableLock(TableLock::PermanentLocking),
-            Table::Update);
+    try
+    {
+        // Create the MeasurementSet. Storage managers are recreated as needed.
+        ms = new MeasurementSet(filename,
+                TableLock(TableLock::PermanentLocking), Table::Update);
 
-    // Create the MSMainColumns and MSColumns objects for accessing data
-    // in the main table and subtables.
-    msc = new MSColumns(*ms);
-    msmc = new MSMainColumns(*ms);
+        // Create the MSMainColumns and MSColumns objects for accessing data
+        // in the main table and subtables.
+        msc = new MSColumns(*ms);
+        msmc = new MSMainColumns(*ms);
+    }
+    catch (...)
+    {
+        if (msmc) delete msmc; msmc = 0;
+        if (msc) delete msc; msc = 0;
+        if (ms) delete ms; ms = 0;
+        return false;
+    }
 
     // Get the data dimensions.
     num_pols = 0;
@@ -897,9 +924,10 @@ void oskar_MeasurementSet::open(const char* filename)
 
     // Get the time range.
     get_time_range();
+    return true;
 }
 
-// Method from CASA VisModelData.cc.
+// Method based on CASA VisModelData.cc.
 void oskar_MeasurementSet::remove_otf_model(MeasurementSet& ms)
 {
     if (!ms.isWritable())
@@ -939,7 +967,7 @@ void oskar_MeasurementSet::remove_otf_model(MeasurementSet& ms)
     }
 }
 
-// Method from CASA VisModelData.cc.
+// Method based on CASA VisModelData.cc.
 void oskar_MeasurementSet::remove_record_by_key(MeasurementSet& ms,
         const String& key)
 {

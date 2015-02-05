@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,35 +26,56 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VIS_RESIZE_H_
-#define OSKAR_VIS_RESIZE_H_
+#ifndef OSKAR_VIS_HEADER_H_
+#define OSKAR_VIS_HEADER_H_
 
 /**
- * @file oskar_vis_resize.h
+ * @file oskar_vis_header.h
  */
 
-#include <oskar_global.h>
+/* Public interface. */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Resize the memory in the visibility structure to the specified
- * dimensions.
- *
- * @param[in,out]  vis           The visibility structure to resize.
- * @param[in]      num_channels  Number of frequency channels.
- * @param[in]      num_times     Number of visibility time snapshots.
- * @param[in]      num_stations  Number of stations.
- * @param[in,out]  status        Status return code.
- */
-OSKAR_EXPORT
-void oskar_vis_resize(oskar_Vis* vis, int num_channels,
-        int num_times, int num_stations, int* status);
+struct oskar_VisHeader;
+#ifndef OSKAR_VIS_HEADER_TYPEDEF_
+#define OSKAR_VIS_HEADER_TYPEDEF_
+typedef struct oskar_VisHeader oskar_VisHeader;
+#endif /* OSKAR_VIS_HEADER_TYPEDEF_ */
+
+/* To maintain binary compatibility, do not change the values
+ * in the lists below. */
+enum OSKAR_VIS_HEADER_TAGS
+{
+    OSKAR_VIS_HEADER_TAG_TELESCOPE_PATH = 1,
+    OSKAR_VIS_HEADER_TAG_AMP_TYPE = 2,
+    OSKAR_VIS_HEADER_TAG_MAX_TIMES_PER_BLOCK = 3,
+    OSKAR_VIS_HEADER_TAG_NUM_TIMES_TOTAL = 4,
+    OSKAR_VIS_HEADER_TAG_NUM_CHANNELS = 5,
+    OSKAR_VIS_HEADER_TAG_NUM_STATIONS = 6,
+    OSKAR_VIS_HEADER_TAG_FREQ_START_HZ = 7,
+    OSKAR_VIS_HEADER_TAG_FREQ_INC_HZ = 8,
+    OSKAR_VIS_HEADER_TAG_CHANNEL_BANDWIDTH_HZ = 9,
+    OSKAR_VIS_HEADER_TAG_TIME_START_MJD_UTC = 10,
+    OSKAR_VIS_HEADER_TAG_TIME_INC_SEC = 11,
+    OSKAR_VIS_HEADER_TAG_TIME_AVERAGE_SEC = 12,
+    OSKAR_VIS_HEADER_TAG_PHASE_CENTRE = 13,
+    OSKAR_VIS_HEADER_TAG_TELESCOPE_CENTRE = 14,
+    OSKAR_VIS_HEADER_TAG_STATION_X_OFFSET_ECEF = 15,
+    OSKAR_VIS_HEADER_TAG_STATION_Y_OFFSET_ECEF = 16,
+    OSKAR_VIS_HEADER_TAG_STATION_Z_OFFSET_ECEF = 17
+};
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_VIS_RESIZE_H_ */
+#include <oskar_vis_header_accessors.h>
+#include <oskar_vis_header_create.h>
+#include <oskar_vis_header_free.h>
+#include <oskar_vis_header_read.h>
+#include <oskar_vis_header_write.h>
+
+#endif /* OSKAR_VIS_HEADER_H_ */

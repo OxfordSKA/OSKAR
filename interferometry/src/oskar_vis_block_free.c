@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_remove_dir.h"
-#include <oskar_Dir.h>
+#include <private_vis_block.h>
+#include <oskar_vis_block.h>
 
-extern "C"
-int oskar_remove_dir(const char* dir_name)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void oskar_vis_block_free(oskar_VisBlock* vis, int* status)
 {
-    return (int) oskar_Dir::rmtree(std::string(dir_name));
+    /* Check all inputs. */
+    if (!vis || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Free memory. */
+    oskar_mem_free(vis->baseline_uu_metres, status);
+    oskar_mem_free(vis->baseline_vv_metres, status);
+    oskar_mem_free(vis->baseline_ww_metres, status);
+    oskar_mem_free(vis->baseline_num_channel_averages, status);
+    oskar_mem_free(vis->baseline_num_time_averages, status);
+    oskar_mem_free(vis->amplitude, status);
+    oskar_mem_free(vis->a1, status);
+    oskar_mem_free(vis->a2, status);
+
+    /* Free the structure itself. */
+    free(vis);
 }
+
+#ifdef __cplusplus
+}
+#endif

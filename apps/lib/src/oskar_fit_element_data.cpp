@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 #include <oskar_settings_load_simulator.h>
 
 #include <apps/lib/oskar_fit_element_data.h>
-#include <apps/lib/oskar_Dir.h>
+#include <apps/lib/oskar_dir.h>
 #include <oskar_settings_log.h>
 
 #include <oskar_element.h>

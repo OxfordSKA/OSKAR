@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,10 +30,46 @@
 #define OSKAR_DIR_H_
 
 /**
- * @file oskar_Dir.h
+ * @file oskar_dir.h
  */
 
 #include <oskar_global.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief Removes a directory and its contents.
+ *
+ * @details
+ * This function recursively removes the named directory and its contents.
+ *
+ * @param[in] dir_name Name of the directory to remove.
+ */
+OSKAR_APPS_EXPORT
+int oskar_dir_remove(const char* dir_name);
+
+/**
+ * @brief Checks if the specified directory exists.
+ *
+ * @details
+ * This function returns true if the specified directory exists, false if not.
+ *
+ * @param[in] dir_name Name of the directory to check.
+ *
+ * @return Returns true if the specified directory exists, false if not
+ */
+OSKAR_APPS_EXPORT
+int oskar_dir_exists(const char* dir_name);
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#ifdef __cplusplus
+
 #include <string>
 #include <vector>
 
@@ -170,5 +206,7 @@ private:
     struct oskar_DirPrivate;
     oskar_DirPrivate* p;
 };
+
+#endif /* __cplusplus */
 
 #endif /* OSKAR_DIR_H_ */

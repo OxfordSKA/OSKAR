@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,34 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoadApodisation.h"
-#include "apps/lib/oskar_dir.h"
+#ifndef OSKAR_VIS_BLOCK_ADD_SYSTEM_NOISE_H_
+#define OSKAR_VIS_BLOCK_ADD_SYSTEM_NOISE_H_
 
-using std::map;
-using std::string;
+/**
+ * @file oskar_vis_block_add_system_noise.h
+ */
 
-const string TelescopeLoadApodisation::apodisation_file = "apodisation.txt";
+#include <oskar_global.h>
+#include <oskar_telescope.h>
 
-void TelescopeLoadApodisation::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
-{
-    // Nothing to do at the telescope level.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief Add a random Gaussian noise component to the visibilities.
+ *
+ * @param[in,out] vis             Visibility structure to which to add noise.
+ * @param[in]     telescope       Telescope model in use.
+ * @param[in]     seed            Seed for the random number generator.
+ * @param[in]     block_index     Simulation time index for the block.
+ * @param[in,out] random_work     Random number generator work buffer.
+ * @param[in,out] status          Status return code.
+ */
+OSKAR_EXPORT
+void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
+        const oskar_Telescope* telescope, unsigned int seed,
+        unsigned int block_index, oskar_Mem* random_work, int* status);
+
+#ifdef __cplusplus
 }
+#endif
 
-void TelescopeLoadApodisation::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
-        map<string, string>& /*filemap*/, int* status)
-{
-    // Check for presence of "apodisation.txt".
-    if (cwd.exists(apodisation_file))
-    {
-        oskar_station_load_apodisation(station,
-                cwd.absoluteFilePath(apodisation_file).c_str(), status);
-    }
-}
-
-string TelescopeLoadApodisation::name() const
-{
-    return string("element apodisation weight file loader");
-}
+#endif /* OSKAR_VIS_BLOCK_ADD_SYSTEM_NOISE_H_ */

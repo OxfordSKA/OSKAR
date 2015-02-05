@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,6 @@ enum OSKAR_POL_MODE_TYPE
 
 #include <oskar_telescope_accessors.h>
 #include <oskar_telescope_analyse.h>
-#include <oskar_telescope_config_override.h>
 #include <oskar_telescope_create.h>
 #include <oskar_telescope_create_copy.h>
 #include <oskar_telescope_duplicate_first_station.h>

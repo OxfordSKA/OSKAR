@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #include <gtest/gtest.h>
 
 #include <apps/lib/oskar_vis_write_ms.h>
-#include <apps/lib/oskar_remove_dir.h>
+#include <apps/lib/oskar_dir.h>
 
 #include <oskar_convert_date_time_to_mjd.h>
 #include <oskar_vis.h>
@@ -111,6 +111,6 @@ TEST(write_ms, test_write)
             log_line, sizeof(log_line), &status);
     oskar_vis_free(vis, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    oskar_remove_dir(filename);
+    oskar_dir_remove(filename);
 }
 

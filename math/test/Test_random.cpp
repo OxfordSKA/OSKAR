@@ -75,7 +75,7 @@ TEST(random_gaussian, random_gaussian24)
     int half = n / 2;
     int quarter = half / 2;
     int status = 0;
-    double max_err = 0.0, avg_err = 0.0, *t;
+    double *t;
     oskar_Mem* a     = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, n, &status);
     oskar_Mem* data2 = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, n, &status);
     oskar_Mem* data4 = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, n, &status);
@@ -103,13 +103,13 @@ TEST(random_gaussian, random_gaussian24)
 
     // Old method (can only be single threaded).
     srand(seed);
-    double* p = oskar_mem_double(a, &status);
+    t = oskar_mem_double(a, &status);
     oskar_timer_start(tmr);
     for (int i = 0; i < n; i += 2)
     {
         double another;
-        p[i] = random_gaussian_old(&another);
-        p[i + 1] = another;
+        t[i] = random_gaussian_old(&another);
+        t[i + 1] = another;
     }
     report_time(n, "Gaussian[2]", "double", "OLD", oskar_timer_elapsed(tmr));
 

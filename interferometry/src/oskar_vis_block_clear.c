@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,34 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoadApodisation.h"
-#include "apps/lib/oskar_dir.h"
+#include <private_vis_block.h>
+#include <oskar_vis_block.h>
+#include <oskar_mem.h>
 
-using std::map;
-using std::string;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-const string TelescopeLoadApodisation::apodisation_file = "apodisation.txt";
-
-void TelescopeLoadApodisation::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
+void oskar_vis_block_clear(oskar_VisBlock* vis, int* status)
 {
-    // Nothing to do at the telescope level.
-}
-
-void TelescopeLoadApodisation::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
-        map<string, string>& /*filemap*/, int* status)
-{
-    // Check for presence of "apodisation.txt".
-    if (cwd.exists(apodisation_file))
+    /* Check all inputs. */
+    if (!vis || !status)
     {
-        oskar_station_load_apodisation(station,
-                cwd.absoluteFilePath(apodisation_file).c_str(), status);
+        oskar_set_invalid_argument(status);
+        return;
     }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    oskar_mem_clear_contents(vis->amplitude, status);
+    oskar_mem_clear_contents(vis->baseline_num_channel_averages, status);
+    oskar_mem_clear_contents(vis->baseline_num_time_averages, status);
+    oskar_mem_clear_contents(vis->baseline_uu_metres, status);
+    oskar_mem_clear_contents(vis->baseline_vv_metres, status);
+    oskar_mem_clear_contents(vis->baseline_ww_metres, status);
 }
 
-string TelescopeLoadApodisation::name() const
-{
-    return string("element apodisation weight file loader");
+#ifdef __cplusplus
 }
+#endif

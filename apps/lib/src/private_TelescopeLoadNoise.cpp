@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
  */
 
 #include "apps/lib/private_TelescopeLoadNoise.h"
-#include "apps/lib/oskar_Dir.h"
+#include "apps/lib/oskar_dir.h"
 
 #include <oskar_Settings.h>
 #include <oskar_file_exists.h>

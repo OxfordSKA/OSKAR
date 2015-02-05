@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,34 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoadApodisation.h"
-#include "apps/lib/oskar_dir.h"
+#ifndef OSKAR_VIS_BLOCK_CLEAR_H_
+#define OSKAR_VIS_BLOCK_CLEAR_H_
 
-using std::map;
-using std::string;
+/**
+ * @file oskar_vis_block_clear.h
+ */
 
-const string TelescopeLoadApodisation::apodisation_file = "apodisation.txt";
+#include <oskar_global.h>
 
-void TelescopeLoadApodisation::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
-{
-    // Nothing to do at the telescope level.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Clears the contents of the specified visibility block.
+ *
+ * @details
+ * Clears the contents of the specified visibility block.
+ *
+ * The clear is limited to the contents of the u,v,w arrays and the amplitudes.
+ * Meta-data remain unchanged.
+ *
+ * @param[in,out] vis         The visibility block structure to clear.
+ * @param[in,out] status      Status return code.
+ */
+OSKAR_EXPORT
+void oskar_vis_block_clear(oskar_VisBlock* vis, int* status);
+
+#ifdef __cplusplus
 }
+#endif
 
-void TelescopeLoadApodisation::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
-        map<string, string>& /*filemap*/, int* status)
-{
-    // Check for presence of "apodisation.txt".
-    if (cwd.exists(apodisation_file))
-    {
-        oskar_station_load_apodisation(station,
-                cwd.absoluteFilePath(apodisation_file).c_str(), status);
-    }
-}
-
-string TelescopeLoadApodisation::name() const
-{
-    return string("element apodisation weight file loader");
-}
+#endif /* OSKAR_VIS_BLOCK_CLEAR_H_ */

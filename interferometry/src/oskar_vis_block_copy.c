@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_vis.h>
-#include <oskar_vis.h>
+#include <private_vis_block.h>
+#include <oskar_vis_block.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_vis_resize(oskar_Vis* vis, int num_channels,
-        int num_times, int num_stations, int* status)
+void oskar_vis_block_copy(oskar_VisBlock* dst, const oskar_VisBlock* src,
+        int* status)
 {
-    int num_amps, num_coords, num_baselines;
-
     /* Check all inputs. */
-    if (!vis || !status)
+    if (!dst || !src || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -48,28 +46,27 @@ void oskar_vis_resize(oskar_Vis* vis, int num_channels,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    num_baselines = num_stations * (num_stations - 1) / 2;
-    vis->num_stations  = num_stations;
-    vis->num_channels  = num_channels;
-    vis->num_times     = num_times;
-    vis->num_baselines = num_baselines;
-    num_amps   = num_channels * num_times * num_baselines;
-    num_coords = num_times * num_baselines;
+    /* Copy the meta-data. */
+    dst->dim_size[0] = src->dim_size[0];
+    dst->dim_size[1] = src->dim_size[1];
+    dst->dim_size[2] = src->dim_size[2];
+    dst->dim_size[3] = src->dim_size[3];
+    dst->freq_range_hz[0] = src->freq_range_hz[0];
+    dst->freq_range_hz[1] = src->freq_range_hz[1];
+    dst->time_range_mjd_utc_sec[0] = src->time_range_mjd_utc_sec[0];
+    dst->time_range_mjd_utc_sec[1] = src->time_range_mjd_utc_sec[1];
 
-    oskar_mem_realloc(vis->station_x_offset_ecef_metres, num_stations, status);
-    oskar_mem_realloc(vis->station_y_offset_ecef_metres, num_stations, status);
-    oskar_mem_realloc(vis->station_z_offset_ecef_metres, num_stations, status);
-    oskar_mem_realloc(vis->station_x_enu_metres, num_stations, status);
-    oskar_mem_realloc(vis->station_y_enu_metres, num_stations, status);
-    oskar_mem_realloc(vis->station_z_enu_metres, num_stations, status);
-    oskar_mem_realloc(vis->station_lon_deg, num_stations, status);
-    oskar_mem_realloc(vis->station_lat_deg, num_stations, status);
-    oskar_mem_realloc(vis->station_orientation_x_deg, num_stations, status);
-    oskar_mem_realloc(vis->station_orientation_y_deg, num_stations, status);
-    oskar_mem_realloc(vis->baseline_uu_metres, num_coords, status);
-    oskar_mem_realloc(vis->baseline_vv_metres, num_coords, status);
-    oskar_mem_realloc(vis->baseline_ww_metres, num_coords, status);
-    oskar_mem_realloc(vis->amplitude, num_amps, status);
+    /* Copy the memory. */
+    oskar_mem_copy(dst->baseline_uu_metres, src->baseline_uu_metres, status);
+    oskar_mem_copy(dst->baseline_vv_metres, src->baseline_vv_metres, status);
+    oskar_mem_copy(dst->baseline_ww_metres, src->baseline_ww_metres, status);
+    oskar_mem_copy(dst->baseline_num_channel_averages,
+            src->baseline_num_channel_averages, status);
+    oskar_mem_copy(dst->baseline_num_time_averages,
+            src->baseline_num_time_averages, status);
+    oskar_mem_copy(dst->amplitude, src->amplitude, status);
+    oskar_mem_copy(dst->a1, src->a1, status);
+    oskar_mem_copy(dst->a2, src->a2, status);
 }
 
 #ifdef __cplusplus

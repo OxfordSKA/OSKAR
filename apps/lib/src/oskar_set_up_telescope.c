@@ -65,8 +65,9 @@ void oskar_station_log_summary(const oskar_Station* station,
 oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
         oskar_Log* log, int* status)
 {
-    int type;
-    oskar_Telescope* telescope;
+    int i, num_stations, type;
+    oskar_Telescope* t;
+    const oskar_SettingsArrayElement* element;
 
     /* Check all inputs. */
     if (!settings || !status)
@@ -78,54 +79,119 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
     /* Check if safe to proceed. */
     if (*status) return 0;
 
-    oskar_log_section(log, 'M', "Telescope model");
-
-    /* Initialise the structure in CPU memory. */
+    /* Load telescope model into CPU memory and set meta-data,
+     * including global pointing settings. */
     type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    telescope = oskar_telescope_create(type, OSKAR_CPU, 0, status);
-
-    /* Load the telescope model. */
-    oskar_telescope_load(telescope, log, settings, status);
-
-    /* Set telescope model meta-data, including global pointing settings. */
-    oskar_telescope_set_metadata(telescope, settings, status);
+    t = oskar_telescope_create(type, OSKAR_CPU, 0, status);
+    oskar_log_section(log, 'M', "Telescope model");
+    oskar_telescope_load(t, log, settings, status);
+    oskar_telescope_set_metadata(t, settings, status);
+    num_stations = oskar_telescope_num_stations(t);
 
     /* Apply telescope model overrides.
      * This must be done after setting meta-data, since the unique station IDs
      * must be present for this to work. */
-    oskar_telescope_config_override(telescope, &settings->telescope, status);
+    element = &settings->telescope.aperture_array.array_pattern.element;
+
+    /* Override station element systematic/fixed gain errors if required. */
+    if (element->gain > 0.0 || element->gain_error_fixed > 0.0)
+    {
+        for (i = 0; i < num_stations; ++i)
+            oskar_station_override_element_gains(
+                    oskar_telescope_station(t, i),
+                    element->seed_gain_errors, element->gain,
+                    element->gain_error_fixed, status);
+    }
+
+    /* Override station element time-variable gain errors if required. */
+    if (element->gain_error_time > 0.0)
+    {
+        for (i = 0; i < num_stations; ++i)
+            oskar_station_override_element_time_variable_gains(
+                    oskar_telescope_station(t, i),
+                    element->gain_error_time, status);
+    }
+
+    /* Override station element systematic/fixed phase errors if required. */
+    if (element->phase_error_fixed_rad > 0.0)
+    {
+        for (i = 0; i < num_stations; ++i)
+            oskar_station_override_element_phases(
+                    oskar_telescope_station(t, i),
+                    element->seed_phase_errors,
+                    element->phase_error_fixed_rad, status);
+    }
+
+    /* Override station element time-variable phase errors if required. */
+    if (element->phase_error_time_rad > 0.0)
+    {
+        for (i = 0; i < num_stations; ++i)
+            oskar_station_override_element_time_variable_phases(
+                    oskar_telescope_station(t, i),
+                    element->phase_error_time_rad, status);
+    }
+
+    /* Override station element position errors if required. */
+    if (element->position_error_xy_m > 0.0)
+    {
+        for (i = 0; i < num_stations; ++i)
+            oskar_station_override_element_xy_position_errors(
+                    oskar_telescope_station(t, i),
+                    element->seed_position_xy_errors,
+                    element->position_error_xy_m, status);
+    }
+
+    /* Add variation to x-dipole orientations if required. */
+    if (element->x_orientation_error_rad > 0.0)
+    {
+        for (i = 0; i < num_stations; ++i)
+            oskar_station_override_element_orientations(
+                    oskar_telescope_station(t, i),
+                    element->seed_x_orientation_error, 1,
+                    element->x_orientation_error_rad, status);
+    }
+
+    /* Add variation to y-dipole orientations if required. */
+    if (element->y_orientation_error_rad > 0.0)
+    {
+        for (i = 0; i < num_stations; ++i)
+            oskar_station_override_element_orientations(
+                    oskar_telescope_station(t, i),
+                    element->seed_y_orientation_error, 0,
+                    element->y_orientation_error_rad, status);
+    }
 
     /* Apply pointing file override if set. */
     if (settings->obs.pointing_file)
     {
         oskar_log_message(log, 'M', 0, "Loading station pointing file "
                 "override '%s'...", settings->obs.pointing_file);
-        oskar_telescope_load_pointing_file(telescope,
+        oskar_telescope_load_pointing_file(t,
                 settings->obs.pointing_file, status);
     }
 
     /* Analyse telescope model to determine whether stations are
      * identical, whether to apply element errors and/or weights. */
-    oskar_telescope_analyse(telescope, status);
-    if (*status) return telescope;
+    oskar_telescope_analyse(t, status);
+    if (*status) return t;
 
     /* Set error flag if number of stations is less than 2. */
-    if (oskar_telescope_num_stations(telescope) < 2)
+    if (oskar_telescope_num_stations(t) < 2)
     {
         *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
         oskar_log_error(log, "Insufficient number of stations to form an "
                 "interferometer baseline (%d stations found).",
-                oskar_telescope_num_stations(telescope));
+                oskar_telescope_num_stations(t));
     }
 
     /* Print summary data. */
-    oskar_telescope_log_summary(telescope, log, status);
+    oskar_telescope_log_summary(t, log, status);
 
     /* Save the telescope configuration in a new directory, if required. */
-    save_telescope(telescope, &settings->telescope, log,
+    save_telescope(t, &settings->telescope, log,
             settings->telescope.output_directory, status);
 
-    return telescope;
+    return t;
 }
 
 

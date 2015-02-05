@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,37 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_CONFIG_OVERRIDE_H_
-#define OSKAR_TELESCOPE_CONFIG_OVERRIDE_H_
-
-/**
- * @file oskar_telescope_config_override.h
- */
-
-#include <oskar_global.h>
-#include <oskar_Settings.h>
+#include <private_vis_header.h>
+#include <oskar_vis_header.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Overrides telescope model data, based on values specified in the settings.
- *
- * @details
- * The telescope model must be in CPU memory.
- *
- * @param[out]    telescope  Pointer to telescope structure to modify.
- * @param[in]     settings   Pointer to an OSKAR telescope settings structure.
- * @param[in,out] status     Status return code.
- */
-OSKAR_EXPORT
-void oskar_telescope_config_override(oskar_Telescope* telescope,
-        const oskar_SettingsTelescope* settings, int* status);
+void oskar_vis_header_free(oskar_VisHeader* hdr, int* status)
+{
+    /* Check all inputs. */
+    if (!hdr || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Free memory. */
+    oskar_mem_free(hdr->telescope_path, status);
+    oskar_mem_free(hdr->settings, status);
+    oskar_mem_free(hdr->station_x_offset_ecef_metres, status);
+    oskar_mem_free(hdr->station_y_offset_ecef_metres, status);
+    oskar_mem_free(hdr->station_z_offset_ecef_metres, status);
+
+    /* Free the structure itself. */
+    free(hdr);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_TELESCOPE_CONFIG_OVERRIDE_H_ */

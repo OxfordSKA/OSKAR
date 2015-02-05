@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_REMOVE_DIR_H_
-#define OSKAR_REMOVE_DIR_H_
+#ifndef OSKAR_VIS_HEADER_READ_H_
+#define OSKAR_VIS_HEADER_READ_H_
 
 /**
- * @file oskar_remove_dir.h
+ * @file oskar_vis_header_read.h
  */
 
 #include <oskar_global.h>
@@ -40,18 +40,22 @@ extern "C" {
 #endif
 
 /**
- * @brief Removes a directory and its contents.
+ * @brief Returns a visibility structure by reading the specified file.
  *
  * @details
- * This function recursively removes the named directory and its contents.
+ * This function returns a visibility header structure by
+ * reading the specified file.
  *
- * @param[in] dir_name Name of the directory to remove.
+ * @param[in]  filename    The filename to read from.
+ * @param[in,out] status   Status return code.
+ *
+ * @return A handle to the new visibility header structure.
  */
-OSKAR_APPS_EXPORT
-int oskar_remove_dir(const char* dir_name);
+OSKAR_EXPORT
+oskar_VisHeader* oskar_vis_header_read(const char* filename, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_REMOVE_DIR_H_ */
+#endif /* OSKAR_VIS_HEADER_READ_H_ */

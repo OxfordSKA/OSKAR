@@ -8,7 +8,7 @@ if (CASACORE_FOUND)
     include_directories(${CASACORE_INCLUDE_DIR}/casacore)
 
     set(ms_SRC
-        src/oskar_MeasurementSet.cpp
+        src/oskar_measurement_set.cpp
     )
 
     # Build and install the oskar_ms library.

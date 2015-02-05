@@ -30,7 +30,7 @@
 #define OSKAR_MEASUREMENT_SET_H_
 
 /**
- * @file oskar_MeasurementSet.h
+ * @file oskar_measurement_set.h
  */
 
 #include <oskar_global.h>
@@ -119,7 +119,7 @@ void oskar_ms_copy_column(oskar_MeasurementSet* p,
  * @param[in] z             The station z positions.
  */
 OSKAR_MS_EXPORT
-void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p, int num_stations,
+void oskar_ms_set_station_coords(oskar_MeasurementSet* p, int num_stations,
         const double* x, const double* y, const double* z);
 
 /**

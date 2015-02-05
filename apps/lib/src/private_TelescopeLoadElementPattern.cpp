@@ -27,7 +27,7 @@
  */
 
 #include "apps/lib/private_TelescopeLoadElementPattern.h"
-#include "apps/lib/oskar_Dir.h"
+#include "apps/lib/oskar_dir.h"
 #include <oskar_log.h>
 #include <oskar_file_exists.h>
 #include <oskar_Settings.h>

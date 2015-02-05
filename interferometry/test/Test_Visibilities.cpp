@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -284,51 +284,6 @@ TEST(Visibilities, copy)
     oskar_vis_free(vis1, &status);
     oskar_vis_free(vis2, &status);
     oskar_vis_free(vis3, &status);
-}
-
-
-TEST(Visibilities, resize)
-{
-    int status = 0;
-    {
-        oskar_Vis* vis;
-        vis = oskar_vis_create(OSKAR_DOUBLE_COMPLEX,
-                OSKAR_CPU, 0, 0, 0, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ((int)OSKAR_CPU, oskar_vis_location(vis));
-        ASSERT_EQ(0, oskar_vis_num_channels(vis));
-        ASSERT_EQ(0, oskar_vis_num_times(vis));
-        ASSERT_EQ(0, oskar_vis_num_stations(vis));
-        ASSERT_EQ(0, oskar_vis_num_baselines(vis));
-        oskar_vis_resize(vis, 5, 10, 2, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ(5, oskar_vis_num_channels(vis));
-        ASSERT_EQ(10, oskar_vis_num_times(vis));
-        ASSERT_EQ(2, oskar_vis_num_stations(vis));
-        ASSERT_EQ(1, oskar_vis_num_baselines(vis));
-        oskar_vis_free(vis, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    }
-
-    {
-        oskar_Vis* vis;
-        vis = oskar_vis_create(OSKAR_SINGLE_COMPLEX,
-                OSKAR_GPU, 0, 0, 0, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ((int)OSKAR_GPU, oskar_vis_location(vis));
-        ASSERT_EQ(0, oskar_vis_num_channels(vis));
-        ASSERT_EQ(0, oskar_vis_num_times(vis));
-        ASSERT_EQ(0, oskar_vis_num_stations(vis));
-        ASSERT_EQ(0, oskar_vis_num_baselines(vis));
-        oskar_vis_resize(vis, 5, 10, 2, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ(5, oskar_vis_num_channels(vis));
-        ASSERT_EQ(10, oskar_vis_num_times(vis));
-        ASSERT_EQ(2, oskar_vis_num_stations(vis));
-        ASSERT_EQ(1, oskar_vis_num_baselines(vis));
-        oskar_vis_free(vis, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    }
 }
 
 

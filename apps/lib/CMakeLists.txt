@@ -5,11 +5,10 @@
 set(apps_SRC
     src/oskar_beam_pattern_generate_coordinates.c
     src/oskar_beam_pattern_write.c
-    src/oskar_Dir.cpp
+    src/oskar_dir.cpp
     src/oskar_evaluate_station_pierce_points.cpp
     src/oskar_fit_element_data.cpp
     src/oskar_imager.cpp
-    src/oskar_remove_dir.cpp
     src/oskar_set_up_sky.c
     src/oskar_set_up_telescope.c
     src/oskar_set_up_visibilities.c
@@ -29,7 +28,11 @@ set(apps_SRC
     src/private_TelescopeLoadPermittedBeams.cpp
 )
 if(CASACORE_FOUND)
-    list(APPEND apps_SRC src/oskar_vis_write_ms.cpp)
+    list(APPEND apps_SRC 
+        src/oskar_vis_write_ms.cpp 
+        src/oskar_vis_block_write_ms.c
+        src/oskar_vis_header_write_ms.c
+    )
 endif()
 
 set(apps_SRC "${apps_SRC}" PARENT_SCOPE)

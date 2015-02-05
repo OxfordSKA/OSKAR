@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,11 +27,9 @@
  */
 
 #include "apps/lib/oskar_vis_write_ms.h"
-#include "apps/lib/oskar_remove_dir.h"
+#include "apps/lib/oskar_dir.h"
 #include <oskar_vis.h>
-#include <oskar_Dir.h>
-
-#include "ms/oskar_MeasurementSet.h"
+#include <oskar_measurement_set.h>
 
 #include <oskar_cmath.h>
 #include <cstdlib>
@@ -90,11 +88,10 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
     // Check if overwriting.
     if (overwrite)
     {
-        oskar_Dir dir(ms_path);
-        if (dir.exists())
+        if (oskar_dir_exists(ms_path))
         {
             // Try to overwrite.
-            if (!oskar_remove_dir(ms_path))
+            if (!oskar_dir_remove(ms_path))
             {
                 *status = OSKAR_ERR_FILE_IO;
                 return;
@@ -114,7 +111,7 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
         // Set the station positions.
         if (oskar_mem_type(x_metres) == OSKAR_DOUBLE)
         {
-            oskar_ms_set_station_coords_d(ms, num_stations,
+            oskar_ms_set_station_coords(ms, num_stations,
                     oskar_mem_double_const(x_metres, status),
                     oskar_mem_double_const(y_metres, status),
                     oskar_mem_double_const(z_metres, status));

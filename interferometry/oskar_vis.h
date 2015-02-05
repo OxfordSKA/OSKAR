@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,7 +124,6 @@ enum OSKAR_VIS_STATION_COORD_UNIT
 #include <oskar_vis_free.h>
 #include <oskar_vis_get_channel_amps.h>
 #include <oskar_vis_read.h>
-#include <oskar_vis_resize.h>
 #include <oskar_vis_write.h>
 
 #endif /* OSKAR_VIS_H_ */

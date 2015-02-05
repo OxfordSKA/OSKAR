@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_remove_dir.h"
+#include "apps/lib/oskar_dir.h"
 #include "apps/lib/oskar_telescope_save.h"
+#include <apps/lib/oskar_dir.h>
 
 #include <QtCore/QDir>
 #include <QtCore/QStringList>
@@ -59,11 +60,9 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
     if (depth == 0)
     {
         // Check if directory already exists, and remove it if so.
-        QDir dir;
-        dir.setPath(dir_path);
-        if (dir.exists())
+        if (oskar_dir_exists(dir_path))
         {
-            if (!oskar_remove_dir(dir_path))
+            if (!oskar_dir_remove(dir_path))
             {
                 *status = OSKAR_ERR_FILE_IO;
                 return;

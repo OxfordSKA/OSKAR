@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,34 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoadApodisation.h"
-#include "apps/lib/oskar_dir.h"
+#ifndef OSKAR_VIS_BLOCK_READ_H_
+#define OSKAR_VIS_BLOCK_READ_H_
 
-using std::map;
-using std::string;
+/**
+ * @file oskar_vis_block_read.h
+ */
 
-const string TelescopeLoadApodisation::apodisation_file = "apodisation.txt";
+#include <oskar_global.h>
+#include <oskar_binary.h>
 
-void TelescopeLoadApodisation::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
-{
-    // Nothing to do at the telescope level.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Fills a visibility structure by reading from the specified file.
+ *
+ * @details
+ * This function fills an empty visibility structure by
+ * reading data using the specified file handle.
+ *
+ * @param[in,out] vis         The visibility block structure to fill.
+ * @param[in,out] h           The OSKAR binary file handle, opened for read.
+ * @param[in]     block_index The visibility block index.
+ * @param[in,out] status      Status return code.
+ */
+OSKAR_EXPORT
+void oskar_vis_block_read(oskar_VisBlock* vis, oskar_Binary* h,
+        int block_index, int* status);
+
+#ifdef __cplusplus
 }
+#endif
 
-void TelescopeLoadApodisation::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
-        map<string, string>& /*filemap*/, int* status)
-{
-    // Check for presence of "apodisation.txt".
-    if (cwd.exists(apodisation_file))
-    {
-        oskar_station_load_apodisation(station,
-                cwd.absoluteFilePath(apodisation_file).c_str(), status);
-    }
-}
-
-string TelescopeLoadApodisation::name() const
-{
-    return string("element apodisation weight file loader");
-}
+#endif /* OSKAR_VIS_BLOCK_READ_H_ */

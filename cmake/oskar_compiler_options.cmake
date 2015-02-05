@@ -36,6 +36,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/interferometry
     ${PROJECT_SOURCE_DIR}/jones
     ${PROJECT_SOURCE_DIR}/math
+    ${PROJECT_SOURCE_DIR}/ms
     ${PROJECT_SOURCE_DIR}/settings
     ${PROJECT_SOURCE_DIR}/settings/list
     ${PROJECT_SOURCE_DIR}/settings/load

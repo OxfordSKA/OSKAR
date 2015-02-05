@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,34 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/private_TelescopeLoadApodisation.h"
-#include "apps/lib/oskar_dir.h"
+#ifndef OSKAR_VIS_BLOCK_H_
+#define OSKAR_VIS_BLOCK_H_
 
-using std::map;
-using std::string;
+/**
+ * @file oskar_vis_block.h
+ */
 
-const string TelescopeLoadApodisation::apodisation_file = "apodisation.txt";
+/* Public interface. */
 
-void TelescopeLoadApodisation::load(oskar_Telescope* /*telescope*/,
-        const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
-        map<string, string>& /*filemap*/, int* /*status*/)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct oskar_VisBlock;
+#ifndef OSKAR_VIS_BLOCK_TYPEDEF_
+#define OSKAR_VIS_BLOCK_TYPEDEF_
+typedef struct oskar_VisBlock oskar_VisBlock;
+#endif /* OSKAR_VIS_BLOCK_TYPEDEF_ */
+
+/* To maintain binary compatibility, do not change the values
+ * in the lists below. */
+enum OSKAR_VIS_BLOCK_TAGS
 {
-    // Nothing to do at the telescope level.
-}
+    OSKAR_VIS_BLOCK_TAG_DIM_SIZE = 1,
+    OSKAR_VIS_BLOCK_TAG_FREQ_RANGE_HZ = 2,
+    OSKAR_VIS_BLOCK_TAG_TIME_RANGE_MJD_UTC_SEC = 3,
+    OSKAR_VIS_BLOCK_TAG_AMPLITUDE = 4,
+    OSKAR_VIS_BLOCK_TAG_BASELINE_UU = 5,
+    OSKAR_VIS_BLOCK_TAG_BASELINE_VV = 6,
+    OSKAR_VIS_BLOCK_TAG_BASELINE_WW = 7,
+    OSKAR_VIS_BLOCK_TAG_BASELINE_NUM_TIME_AVERAGES = 8,
+    OSKAR_VIS_BLOCK_TAG_BASELINE_NUM_CHANNEL_AVERAGES = 9
+};
 
-void TelescopeLoadApodisation::load(oskar_Station* station,
-        const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
-        map<string, string>& /*filemap*/, int* status)
-{
-    // Check for presence of "apodisation.txt".
-    if (cwd.exists(apodisation_file))
-    {
-        oskar_station_load_apodisation(station,
-                cwd.absoluteFilePath(apodisation_file).c_str(), status);
-    }
+#ifdef __cplusplus
 }
+#endif
 
-string TelescopeLoadApodisation::name() const
-{
-    return string("element apodisation weight file loader");
-}
+#include <oskar_vis_block_accessors.h>
+#include <oskar_vis_block_add_system_noise.h>
+#include <oskar_vis_block_clear.h>
+#include <oskar_vis_block_copy.h>
+#include <oskar_vis_block_create.h>
+#include <oskar_vis_block_free.h>
+#include <oskar_vis_block_read.h>
+#include <oskar_vis_block_write.h>
+
+#endif /* OSKAR_VIS_BLOCK_H_ */
