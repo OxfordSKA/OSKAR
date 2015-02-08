@@ -39,8 +39,8 @@
 
 static void run_test(int type, double tol)
 {
-    int num_sources = 10000;
-    int num_stations = 1000;
+    int num_sources = 1000;
+    int num_stations = 100;
     int n_tries = 30;
     int status = 0;
     double I_min = 0.8, I_max = 1.0;
