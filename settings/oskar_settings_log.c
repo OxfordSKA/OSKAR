@@ -547,6 +547,8 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
 
     LV("Channel bandwidth [Hz]", "%.3e", s->interferometer.channel_bandwidth_hz);
     LV("Time average [sec]", "%.2f", s->interferometer.time_average_sec);
+    LVI("Max. time samples per block",
+            s->interferometer.max_time_samples_per_block);
     if (s->interferometer.uv_filter_min > 0.0)
         LV("UV range filter min", "%.3f", s->interferometer.uv_filter_min);
     if (s->interferometer.uv_filter_max >= 0.0)

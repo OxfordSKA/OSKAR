@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,39 +26,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_INTERFEROMETER_H_
-#define OSKAR_SETTINGS_INTERFEROMETER_H_
+#ifndef OSKAR_SET_UP_VIS_H_
+#define OSKAR_SET_UP_VIS_H_
 
 /**
- * @file oskar_SettingsInterferometer.h
+ * @file oskar_set_up_vis.h
  */
 
-#include <oskar_SettingsSystemNoise.h>
+#include <oskar_global.h>
+#include <oskar_Settings.h>
+#include <oskar_telescope.h>
+#include <oskar_vis_block.h>
+#include <oskar_vis_header.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @struct oskar_SettingsInterferometer
- *
- * @brief Structure to hold interferometer settings.
+ * @brief
+ * Initialises a visibility header and visibility block in CPU memory.
  *
  * @details
- * This structure holds interferometer settings.
+ * This function creates a visibility data header and a visibility data
+ * block in CPU memory, which is filled during the simulation.
+ *
+ * @param[in] settings   A pointer to the settings structure.
+ * @param[in] tel        A pointer to the telescope model.
+ * @param[in,out] hdr    On exit, a pointer to a visibility header.
+ * @param[in,out] blk    On exit, a pointer to a visibility block.
+ * @param[in,out] status Status return code.
  */
-struct oskar_SettingsInterferometer
-{
-    double channel_bandwidth_hz;
-    double time_average_sec;
-    int max_time_samples_per_block;
-    double uv_filter_min;
-    double uv_filter_max;
-    int uv_filter_units;
+OSKAR_APPS_EXPORT
+void oskar_set_up_vis(const oskar_Settings* settings,
+        const oskar_Telescope* tel, oskar_VisHeader** hdr,
+        oskar_VisBlock** blk, int* status);
 
-    oskar_SettingsSystemNoise noise; /**< system noise model parameters. */
+#ifdef __cplusplus
+}
+#endif
 
-    char* oskar_vis_filename;
-    char* ms_filename;
-
-    int force_polarised_ms;
-};
-typedef struct oskar_SettingsInterferometer oskar_SettingsInterferometer;
-
-#endif /* OSKAR_SETTINGS_INTERFEROMETER_H_ */
+#endif /* OSKAR_SET_UP_VIS_H_ */

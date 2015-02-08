@@ -67,8 +67,12 @@ void oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
 
     s.beginGroup("interferometer");
     {
-        settings->channel_bandwidth_hz = s.value("channel_bandwidth_hz").toDouble();
-        settings->time_average_sec = s.value("time_average_sec", 0.0).toDouble();
+        settings->channel_bandwidth_hz =
+                s.value("channel_bandwidth_hz").toDouble();
+        settings->time_average_sec =
+                s.value("time_average_sec", 0.0).toDouble();
+        settings->max_time_samples_per_block =
+                s.value("max_time_samples_per_block", 10).toInt();
 
         // Get UV filter parameters.
         temp = s.value("uv_filter_min", "min").toString().toUpper();
