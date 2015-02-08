@@ -39,11 +39,13 @@ void oskar_evaluate_average_cross_power_beam_omp_f(const int num_sources,
         float4c* restrict beam)
 {
     int i = 0;
+    float norm;
+    norm = 2.0f / (num_stations * (num_stations - 1));
 
 #pragma omp parallel for private(i)
     for (i = 0; i < num_sources; ++i)
     {
-        int SP, SQ, num_baselines;
+        int SP, SQ;
         float4c val, p, q;
 
         /* Calculate cross-power beam at the source. */
@@ -71,16 +73,15 @@ void oskar_evaluate_average_cross_power_beam_omp_f(const int num_sources,
             }
         }
 
-        /* Calculate average. */
-        num_baselines = (num_stations * (num_stations - 1)) / 2;
-        val.a.x /= num_baselines;
-        val.a.y /= num_baselines;
-        val.b.x /= num_baselines;
-        val.b.y /= num_baselines;
-        val.c.x /= num_baselines;
-        val.c.y /= num_baselines;
-        val.d.x /= num_baselines;
-        val.d.y /= num_baselines;
+        /* Calculate average by dividing by number of baselines. */
+        val.a.x *= norm;
+        val.a.y *= norm;
+        val.b.x *= norm;
+        val.b.y *= norm;
+        val.c.x *= norm;
+        val.c.y *= norm;
+        val.d.x *= norm;
+        val.d.y *= norm;
 
         /* Store result. */
         beam[i] = val;
@@ -93,6 +94,8 @@ void oskar_evaluate_average_cross_power_beam_omp_d(const int num_sources,
         double4c* restrict beam)
 {
     int i = 0;
+    double norm;
+    norm = 2.0 / (num_stations * (num_stations - 1));
 
 #pragma omp parallel for private(i)
     for (i = 0; i < num_sources; ++i)
@@ -125,16 +128,15 @@ void oskar_evaluate_average_cross_power_beam_omp_d(const int num_sources,
             }
         }
 
-        /* Calculate average. */
-        num_baselines = (num_stations * (num_stations - 1)) / 2;
-        val.a.x /= num_baselines;
-        val.a.y /= num_baselines;
-        val.b.x /= num_baselines;
-        val.b.y /= num_baselines;
-        val.c.x /= num_baselines;
-        val.c.y /= num_baselines;
-        val.d.x /= num_baselines;
-        val.d.y /= num_baselines;
+        /* Calculate average by dividing by number of baselines. */
+        val.a.x *= norm;
+        val.a.y *= norm;
+        val.b.x *= norm;
+        val.b.y *= norm;
+        val.c.x *= norm;
+        val.c.y *= norm;
+        val.d.x *= norm;
+        val.d.y *= norm;
 
         /* Store result. */
         beam[i] = val;

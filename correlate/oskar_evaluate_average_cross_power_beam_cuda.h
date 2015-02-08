@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,22 +91,6 @@ void oskar_evaluate_average_cross_power_beam_cuda_f(int num_sources,
 OSKAR_EXPORT
 void oskar_evaluate_average_cross_power_beam_cuda_d(int num_sources,
         int num_stations, const double4c* d_jones, double4c* d_beam);
-
-#ifdef __CUDACC__
-
-/* Kernels. */
-
-__global__
-void oskar_evaluate_average_cross_power_beam_cudak_f(const int num_sources,
-        const int num_stations, const float4c* restrict jones,
-        float4c* restrict beam);
-
-__global__
-void oskar_evaluate_average_cross_power_beam_cudak_d(const int num_sources,
-        const int num_stations, const double4c* restrict jones,
-        double4c* restrict beam);
-
-#endif /* __CUDACC__ */
 
 #ifdef __cplusplus
 }
