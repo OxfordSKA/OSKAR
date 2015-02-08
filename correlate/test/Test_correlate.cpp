@@ -64,7 +64,6 @@ class correlate : public ::testing::Test
 protected:
     static const int num_sources = 277;
     static const int num_stations = 50;
-    static const int num_baselines = num_stations * (num_stations - 1) / 2;
     static const double bandwidth;
     oskar_Mem *u_, *v_, *w_;
     oskar_Telescope* tel;
@@ -118,9 +117,6 @@ protected:
         oskar_mem_random_range(oskar_sky_gaussian_c(sky), 0.1e-6, 0.2e-6,
                 &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-
-        // Set bandwidth.
-        oskar_telescope_set_smearing_values(tel, bandwidth, 0.0);
     }
 
     void destroyTestData()
@@ -138,7 +134,7 @@ protected:
     void runTest(int prec1, int prec2, int loc1, int loc2, int matrix,
             int extended, double time_average)
     {
-        int status = 0, type;
+        int num_baselines, status = 0, type;
         oskar_Mem *vis1, *vis2;
         oskar_Timer *timer1, *timer2;
         double time1, time2, frequency = 100e6;
@@ -150,12 +146,13 @@ protected:
                 OSKAR_TIMER_CUDA : OSKAR_TIMER_NATIVE);
 
         // Run first part.
+        createTestData(prec1, loc1, matrix);
+        num_baselines = oskar_telescope_num_baselines(tel);
         type = prec1 | OSKAR_COMPLEX;
         if (matrix) type |= OSKAR_MATRIX;
         vis1 = oskar_mem_create(type, loc1, num_baselines, &status);
         oskar_mem_clear_contents(vis1, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        createTestData(prec1, loc1, matrix);
         oskar_sky_set_use_extended(sky, extended);
         oskar_telescope_set_smearing_values(tel, bandwidth, time_average);
         oskar_timer_start(timer1);
@@ -166,12 +163,13 @@ protected:
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Run second part.
+        createTestData(prec2, loc2, matrix);
+        num_baselines = oskar_telescope_num_baselines(tel);
         type = prec2 | OSKAR_COMPLEX;
         if (matrix) type |= OSKAR_MATRIX;
         vis2 = oskar_mem_create(type, loc2, num_baselines, &status);
         oskar_mem_clear_contents(vis2, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        createTestData(prec2, loc2, matrix);
         oskar_sky_set_use_extended(sky, extended);
         oskar_telescope_set_smearing_values(tel, bandwidth, time_average);
         oskar_timer_start(timer2);
