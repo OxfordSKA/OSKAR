@@ -35,9 +35,6 @@
 #include <oskar_kahan_sum.h>
 #include <cstdlib>
 
-#define TOL_FLT 1e-6
-#define TOL_DBL 1e-12
-
 // Comment out this line to disable benchmark timer printing.
  #define ALLOW_PRINTING 1
 
@@ -49,11 +46,13 @@ static void check_values(const oskar_Mem* approx, const oskar_Mem* accurate)
             &max_rel_error, &avg_rel_error, &std_rel_error, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     tol = oskar_mem_is_double(approx) &&
-            oskar_mem_is_double(accurate) ? TOL_DBL : TOL_FLT;
+            oskar_mem_is_double(accurate) ? 1e-11 : 2e-3;
     EXPECT_LT(max_rel_error, tol) << std::setprecision(5) <<
             "RELATIVE ERROR" <<
             " MIN: " << min_rel_error << " MAX: " << max_rel_error <<
             " AVG: " << avg_rel_error << " STD: " << std_rel_error;
+    tol = oskar_mem_is_double(approx) &&
+            oskar_mem_is_double(accurate) ? 1e-12 : 1e-5;
     EXPECT_LT(avg_rel_error, tol) << std::setprecision(5) <<
             "RELATIVE ERROR" <<
             " MIN: " << min_rel_error << " MAX: " << max_rel_error <<
@@ -63,8 +62,8 @@ static void check_values(const oskar_Mem* approx, const oskar_Mem* accurate)
 class correlate : public ::testing::Test
 {
 protected:
-    static const int num_sources = 277;
-    static const int num_stations = 7;
+    static const int num_sources = 27700;
+    static const int num_stations = 50;
     static const int num_baselines = num_stations * (num_stations - 1) / 2;
     static const double bandwidth;
     oskar_Mem *u_, *v_, *w_;
@@ -91,11 +90,11 @@ protected:
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Fill data structures with random data in sensible ranges.
-        srand(0);
-        oskar_mem_random_range(oskar_jones_mem(jones), 0.1, 100.0, &status);
-        oskar_mem_random_range(u_, 500.0, 1000.0, &status);
-        oskar_mem_random_range(v_, 500.0, 1000.0, &status);
-        oskar_mem_random_range(w_, 500.0, 1000.0, &status);
+        srand(2);
+        oskar_mem_random_range(oskar_jones_mem(jones), 1.0, 5.0, &status);
+        oskar_mem_random_range(u_, 1.0, 5.0, &status);
+        oskar_mem_random_range(v_, 1.0, 5.0, &status);
+        oskar_mem_random_range(w_, 1.0, 5.0, &status);
         oskar_mem_random_range(
                 oskar_telescope_station_true_x_offset_ecef_metres(tel),
                 0.1, 1000.0, &status);
@@ -105,7 +104,7 @@ protected:
         oskar_mem_random_range(
                 oskar_telescope_station_true_z_offset_ecef_metres(tel),
                 0.1, 1000.0, &status);
-        oskar_mem_random_range(oskar_sky_I(sky), 2.0, 5.0, &status);
+        oskar_mem_random_range(oskar_sky_I(sky), 1.0, 2.0, &status);
         oskar_mem_random_range(oskar_sky_Q(sky), 0.1, 1.0, &status);
         oskar_mem_random_range(oskar_sky_U(sky), 0.1, 0.5, &status);
         oskar_mem_random_range(oskar_sky_V(sky), 0.1, 0.2, &status);

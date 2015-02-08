@@ -7,6 +7,7 @@ include_directories(${CUDA_INCLUDE_DIRS})
 set(${name}_SRC
     main.cpp
     Test_Jones.cpp
+    Test_evaluate_jones_K.cpp
 )
 cuda_add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest ${CUDA_LIBRARIES})

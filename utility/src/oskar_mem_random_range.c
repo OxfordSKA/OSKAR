@@ -38,6 +38,7 @@ void oskar_mem_random_range(oskar_Mem* mem, double lo, double hi, int* status)
     oskar_Mem *temp, *ptr;
     size_t i, num_elements;
     int location, precision, type;
+    double r;
 
     /* Check all inputs. */
     if (!mem || !status)
@@ -80,17 +81,17 @@ void oskar_mem_random_range(oskar_Mem* mem, double lo, double hi, int* status)
     /* Fill memory with random numbers. */
     if (precision == OSKAR_SINGLE)
     {
-        float r, *p;
+        float *p;
         p = oskar_mem_float(ptr, status);
         for (i = 0; i < num_elements; ++i)
         {
-            r = (float)lo + (float)(hi - lo) * rand() / (float)RAND_MAX;
-            p[i] = r;
+            r = lo + (hi - lo) * rand() / (double)RAND_MAX;
+            p[i] = (float)r;
         }
     }
     else if (precision == OSKAR_DOUBLE)
     {
-        double r, *p;
+        double *p;
         p = oskar_mem_double(ptr, status);
         for (i = 0; i < num_elements; ++i)
         {

@@ -53,6 +53,8 @@
 #include <oskar_timers.h>
 #include <oskar_timer.h>
 #include <oskar_vis.h>
+#include <oskar_vis_block.h>
+#include <oskar_vis_header.h>
 #include <oskar_station_work.h>
 
 #ifdef _OPENMP
@@ -366,13 +368,11 @@ static void interferometer(DeviceData* d, oskar_Log* log, const oskar_Sky* sky,
         return;
     }
 
-    // Copy sky model for frequency scaling and filter by flux.
+    // Copy sky chunk to GPU and scale fluxes with spectral index and
+    // rotation measure.
     oskar_timer_resume(d->timers.tmr_init_copy);
     oskar_Sky* sky_gpu = oskar_sky_create_copy(sky, OSKAR_GPU, status);
     oskar_sky_scale_flux_with_frequency(sky_gpu, frequency, status);
-    oskar_sky_filter_by_flux(sky_gpu,
-            settings->sky.common_flux_filter_min_jy,
-            settings->sky.common_flux_filter_max_jy, status);
 
     x = oskar_telescope_station_true_x_offset_ecef_metres_const(d->tel);
     y = oskar_telescope_station_true_y_offset_ecef_metres_const(d->tel);
@@ -409,7 +409,8 @@ static void interferometer(DeviceData* d, oskar_Log* log, const oskar_Sky* sky,
         {
             sky_ptr = d->local_sky;
             oskar_timer_resume(d->timers.tmr_clip);
-            oskar_sky_horizon_clip(sky_ptr, sky_gpu, d->tel, gast, d->work, status);
+            oskar_sky_horizon_clip(sky_ptr, sky_gpu, d->tel, gast,
+                    d->work, status);
             oskar_timer_pause(d->timers.tmr_clip);
         }
 
@@ -477,7 +478,9 @@ static void interferometer(DeviceData* d, oskar_Log* log, const oskar_Sky* sky,
         oskar_timer_resume(d->timers.tmr_K);
         oskar_evaluate_jones_K(d->K, n_src, oskar_sky_l_const(sky_ptr),
                 oskar_sky_m_const(sky_ptr), oskar_sky_n_const(sky_ptr),
-                d->u, d->v, d->w, frequency, status);
+                d->u, d->v, d->w, frequency, oskar_sky_I_const(sky_ptr),
+                settings->sky.common_flux_filter_min_jy,
+                settings->sky.common_flux_filter_max_jy, status);
         oskar_timer_pause(d->timers.tmr_K);
 
         // Join Jones K with Jones Z*E*R (if it exists),

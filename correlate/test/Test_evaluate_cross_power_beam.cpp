@@ -34,9 +34,6 @@
 #include <oskar_get_error_string.h>
 #include <cstdlib>
 
-#define TOL_FLT 2e-5
-#define TOL_DBL 1e-12
-
 // Comment out this line to disable benchmark timer printing.
  #define ALLOW_PRINTING 1
 
@@ -48,11 +45,13 @@ static void check_values(const oskar_Mem* approx, const oskar_Mem* accurate)
             &max_rel_error, &avg_rel_error, &std_rel_error, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     tol = oskar_mem_is_double(approx) &&
-            oskar_mem_is_double(accurate) ? TOL_DBL : TOL_FLT;
+            oskar_mem_is_double(accurate) ? 1e-11 : 1e-4;
     EXPECT_LT(max_rel_error, tol) << std::setprecision(5) <<
             "RELATIVE ERROR" <<
             " MIN: " << min_rel_error << " MAX: " << max_rel_error <<
             " AVG: " << avg_rel_error << " STD: " << std_rel_error;
+    tol = oskar_mem_is_double(approx) &&
+            oskar_mem_is_double(accurate) ? 1e-12 : 1e-5;
     EXPECT_LT(avg_rel_error, tol) << std::setprecision(5) <<
             "RELATIVE ERROR" <<
             " MIN: " << min_rel_error << " MAX: " << max_rel_error <<
@@ -64,7 +63,6 @@ class cross_power_beam : public ::testing::Test
 protected:
     static const int num_sources = 277;
     static const int num_stations = 7;
-    static const int num_baselines = num_stations * (num_stations - 1) / 2;
     oskar_Jones* jones;
 
 protected:
@@ -81,7 +79,7 @@ protected:
 
         // Fill data structures with random data in sensible ranges.
         srand(0);
-        oskar_mem_random_range(oskar_jones_mem(jones), 0.1, 100.0, &status);
+        oskar_mem_random_range(oskar_jones_mem(jones), 1.0, 10.0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
     }
 

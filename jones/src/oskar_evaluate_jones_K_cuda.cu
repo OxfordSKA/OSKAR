@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,110 @@
 
 #include <oskar_evaluate_jones_K_cuda.h>
 
+/* Kernels. ================================================================ */
+
+#define BLK_STATION 2
+#define BLK_SOURCE 128
+
+/* Single precision. */
+__global__
+void oskar_evaluate_jones_K_cudak_f(float2* restrict jones,
+        const int num_sources, const float* restrict l,
+        const float* restrict m, const float* restrict n,
+        const int num_stations, const float* restrict u,
+        const float* restrict v, const float* restrict w,
+        const float wavenumber, const float* restrict source_filter,
+        const float source_filter_min, const float source_filter_max)
+{
+    const int s = blockDim.x * blockIdx.x + threadIdx.x; /* Source index. */
+    const int a = blockDim.y * blockIdx.y + threadIdx.y; /* Station index. */
+
+    /* Cache source and station data from global memory. */
+    __shared__ float l_[BLK_SOURCE], m_[BLK_SOURCE], n_[BLK_SOURCE];
+    __shared__ float f_[BLK_SOURCE];
+    __shared__ float u_[BLK_STATION], v_[BLK_STATION], w_[BLK_STATION];
+    if (s < num_sources && threadIdx.y == 0)
+    {
+        l_[threadIdx.x] = l[s];
+        m_[threadIdx.x] = m[s];
+        n_[threadIdx.x] = n[s] - 1.0f;
+        f_[threadIdx.x] = source_filter[s];
+    }
+    if (a < num_stations && threadIdx.x == 0)
+    {
+        u_[threadIdx.y] = wavenumber * u[a];
+        v_[threadIdx.y] = wavenumber * v[a];
+        w_[threadIdx.y] = wavenumber * w[a];
+    }
+    __syncthreads();
+
+    /* Compute the geometric phase of the source direction. */
+    float2 weight = make_float2(0.0f, 0.0f);
+    if (f_[threadIdx.x] > source_filter_min &&
+            f_[threadIdx.x] <= source_filter_max)
+    {
+        float phase;
+        phase =  u_[threadIdx.y] * l_[threadIdx.x];
+        phase += v_[threadIdx.y] * m_[threadIdx.x];
+        phase += w_[threadIdx.y] * n_[threadIdx.x];
+        sincosf(phase, &weight.y, &weight.x);
+    }
+
+    /* Write result to global memory. */
+    if (s < num_sources && a < num_stations)
+        jones[s + num_sources * a] = weight;
+}
+
+/* Double precision. */
+__global__
+void oskar_evaluate_jones_K_cudak_d(double2* restrict jones,
+        const int num_sources, const double* restrict l,
+        const double* restrict m, const double* restrict n,
+        const int num_stations, const double* restrict u,
+        const double* restrict v, const double* restrict w,
+        const double wavenumber, const double* restrict source_filter,
+        const double source_filter_min, const double source_filter_max)
+{
+    const int s = blockDim.x * blockIdx.x + threadIdx.x; /* Source index. */
+    const int a = blockDim.y * blockIdx.y + threadIdx.y; /* Station index. */
+
+    /* Cache source and station data from global memory. */
+    __shared__ double l_[BLK_SOURCE], m_[BLK_SOURCE], n_[BLK_SOURCE];
+    __shared__ double f_[BLK_SOURCE];
+    __shared__ double u_[BLK_STATION], v_[BLK_STATION], w_[BLK_STATION];
+    if (s < num_sources && threadIdx.y == 0)
+    {
+        l_[threadIdx.x] = l[s];
+        m_[threadIdx.x] = m[s];
+        n_[threadIdx.x] = n[s] - 1.0;
+        f_[threadIdx.x] = source_filter[s];
+    }
+    if (a < num_stations && threadIdx.x == 0)
+    {
+        u_[threadIdx.y] = wavenumber * u[a];
+        v_[threadIdx.y] = wavenumber * v[a];
+        w_[threadIdx.y] = wavenumber * w[a];
+    }
+    __syncthreads();
+
+    /* Compute the geometric phase of the source direction. */
+    double2 weight = make_double2(0.0, 0.0);
+    if (f_[threadIdx.x] > source_filter_min &&
+            f_[threadIdx.x] <= source_filter_max)
+    {
+        double phase;
+        phase =  u_[threadIdx.y] * l_[threadIdx.x];
+        phase += v_[threadIdx.y] * m_[threadIdx.x];
+        phase += w_[threadIdx.y] * n_[threadIdx.x];
+        sincos(phase, &weight.y, &weight.x);
+    }
+
+    /* Write result to global memory. */
+    if (s < num_sources && a < num_stations)
+        jones[s + num_sources * a] = weight;
+}
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,142 +142,40 @@ extern "C" {
 void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_sources,
         const float* d_l, const float* d_m, const float* d_n,
         int num_stations, const float* d_u, const float* d_v,
-        const float* d_w, float wavenumber)
+        const float* d_w, float wavenumber, const float* d_source_filter,
+        float source_filter_min, float source_filter_max)
 {
     /* Define block and grid sizes. */
-    const dim3 num_threads(64, 4); /* Sources, stations. */
+    const dim3 num_threads(BLK_SOURCE, BLK_STATION);
     const dim3 num_blocks((num_sources + num_threads.x - 1) / num_threads.x,
             (num_stations + num_threads.y - 1) / num_threads.y);
-    const size_t s_mem = 3 * (num_threads.x + num_threads.y) * sizeof(float);
 
     /* Compute DFT phase weights for K. */
     oskar_evaluate_jones_K_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads, s_mem)
+    OSKAR_CUDAK_CONF(num_blocks, num_threads)
     (d_jones, num_sources, d_l, d_m, d_n, num_stations, d_u, d_v, d_w,
-            wavenumber);
+            wavenumber, d_source_filter, source_filter_min, source_filter_max);
 }
 
 /* Double precision. */
 void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_sources,
         const double* d_l, const double* d_m, const double* d_n,
         int num_stations, const double* d_u, const double* d_v,
-        const double* d_w, double wavenumber)
+        const double* d_w, double wavenumber, const double* d_source_filter,
+        double source_filter_min, double source_filter_max)
 {
     /* Define block and grid sizes. */
-    const dim3 num_threads(64, 4); /* Sources, stations. */
+    const dim3 num_threads(BLK_SOURCE, BLK_STATION);
     const dim3 num_blocks((num_sources + num_threads.x - 1) / num_threads.x,
             (num_stations + num_threads.y - 1) / num_threads.y);
-    const size_t s_mem = 3 * (num_threads.x + num_threads.y) * sizeof(double);
 
     /* Compute DFT phase weights for K. */
     oskar_evaluate_jones_K_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads, s_mem)
+    OSKAR_CUDAK_CONF(num_blocks, num_threads)
     (d_jones, num_sources, d_l, d_m, d_n, num_stations, d_u, d_v, d_w,
-            wavenumber);
-}
-
-
-/* Kernels. ================================================================ */
-
-/* Shared memory pointers used by the kernels. */
-extern __shared__ float smem_f[];
-extern __shared__ double smem_d[];
-
-/* Single precision. */
-__global__
-void oskar_evaluate_jones_K_cudak_f(float2* jones, const int num_sources,
-        const float* l, const float* m, const float* n,
-        const int num_stations, const float* u, const float* v,
-        const float* w, const float wavenumber)
-{
-    const int s = blockDim.x * blockIdx.x + threadIdx.x; /* Output index. */
-    const int a = blockDim.y * blockIdx.y + threadIdx.y; /* Input index. */
-
-    /* Cache input and output data from global memory. */
-    float* l_ = smem_f;
-    float* m_ = &l_[blockDim.x];
-    float* n_ = &m_[blockDim.x];
-    float* u_ = &n_[blockDim.x];
-    float* v_ = &u_[blockDim.y];
-    float* w_ = &v_[blockDim.y];
-    if (s < num_sources && threadIdx.y == 0)
-    {
-        l_[threadIdx.x] = l[s];
-        m_[threadIdx.x] = m[s];
-        n_[threadIdx.x] = n[s] - 1.0f;
-    }
-    if (a < num_stations && threadIdx.x == 0)
-    {
-        u_[threadIdx.y] = wavenumber * u[a];
-        v_[threadIdx.y] = wavenumber * v[a];
-        w_[threadIdx.y] = wavenumber * w[a];
-    }
-    __syncthreads();
-
-    /* Compute the geometric phase of the output direction. */
-    float phase;
-    phase =  u_[threadIdx.y] * l_[threadIdx.x];
-    phase += v_[threadIdx.y] * m_[threadIdx.x];
-    phase += w_[threadIdx.y] * n_[threadIdx.x];
-    float2 weight;
-    sincosf(phase, &weight.y, &weight.x);
-
-    /* Write result to global memory. */
-    if (s < num_sources && a < num_stations)
-    {
-        const int w = s + num_sources * a;
-        jones[w] = weight;
-    }
-}
-
-/* Double precision. */
-__global__
-void oskar_evaluate_jones_K_cudak_d(double2* jones, const int num_sources,
-        const double* l, const double* m, const double* n,
-        const int num_stations, const double* u, const double* v,
-        const double* w, const double wavenumber)
-{
-    const int s = blockDim.x * blockIdx.x + threadIdx.x; /* Output index. */
-    const int a = blockDim.y * blockIdx.y + threadIdx.y; /* Input index. */
-
-    /* Cache input and output data from global memory. */
-    double* l_ = smem_d;
-    double* m_ = &l_[blockDim.x];
-    double* n_ = &m_[blockDim.x];
-    double* u_ = &n_[blockDim.x];
-    double* v_ = &u_[blockDim.y];
-    double* w_ = &v_[blockDim.y];
-    if (s < num_sources && threadIdx.y == 0)
-    {
-        l_[threadIdx.x] = l[s];
-        m_[threadIdx.x] = m[s];
-        n_[threadIdx.x] = n[s] - 1.0;
-    }
-    if (a < num_stations && threadIdx.x == 0)
-    {
-        u_[threadIdx.y] = wavenumber * u[a];
-        v_[threadIdx.y] = wavenumber * v[a];
-        w_[threadIdx.y] = wavenumber * w[a];
-    }
-    __syncthreads();
-
-    /* Compute the geometric phase of the output direction. */
-    double phase;
-    phase =  u_[threadIdx.y] * l_[threadIdx.x];
-    phase += v_[threadIdx.y] * m_[threadIdx.x];
-    phase += w_[threadIdx.y] * n_[threadIdx.x];
-    double2 weight;
-    sincos(phase, &weight.y, &weight.x);
-
-    /* Write result to global memory. */
-    if (s < num_sources && a < num_stations)
-    {
-        const int w = s + num_sources * a;
-        jones[w] = weight;
-    }
+            wavenumber, d_source_filter, source_filter_min, source_filter_max);
 }
 
 #ifdef __cplusplus
 }
 #endif
-

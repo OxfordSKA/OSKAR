@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,8 @@ OSKAR_EXPORT
 void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_sources,
         const float* d_l, const float* d_m, const float* d_n,
         int num_stations, const float* d_u, const float* d_v,
-        const float* d_w, float wavenumber);
+        const float* d_w, float wavenumber, const float* d_source_filter,
+        float source_filter_min, float source_filter_max);
 
 /**
  * @brief
@@ -96,25 +97,8 @@ OSKAR_EXPORT
 void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_sources,
         const double* d_l, const double* d_m, const double* d_n,
         int num_stations, const double* d_u, const double* d_v,
-        const double* d_w, double wavenumber);
-
-#ifdef __CUDACC__
-
-/* Kernels. */
-
-__global__
-void oskar_evaluate_jones_K_cudak_f(float2* jones, const int num_sources,
-        const float* l, const float* m, const float* n,
-        const int num_stations, const float* u, const float* v,
-        const float* w, const float wavenumber);
-
-__global__
-void oskar_evaluate_jones_K_cudak_d(double2* jones, const int num_sources,
-        const double* l, const double* m, const double* n,
-        const int num_stations, const double* u, const double* v,
-        const double* w, const double wavenumber);
-
-#endif /* __CUDACC__ */
+        const double* d_w, double wavenumber, const double* d_source_filter,
+        double source_filter_min, double source_filter_max);
 
 #ifdef __cplusplus
 }

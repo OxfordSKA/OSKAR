@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,10 @@ extern "C" {
  * vol 2, 3rd edition, page 232 */
 #define RUNNING_STATS_KNUTH \
     if (max_rel_error && rel_error > *max_rel_error) \
+    { \
+        /*printf("%.8e, %.8e\n", abs_a, abs_b); */ \
         *max_rel_error = rel_error; \
+    } \
     if (min_rel_error && rel_error < *min_rel_error) \
         *min_rel_error = rel_error; \
     if (i == 0) \
@@ -55,28 +58,29 @@ extern "C" {
         old_s = new_s; \
     }
 
-#define CHECK_ELEMENTS_SCALAR \
+/* Switch to absolute error if the absolute difference is less than TOL. */
+#define CHECK_ELEMENTS(TOL) \
     for (i = 0; i < n; ++i) \
     { \
-        double rel_error; \
-        rel_error = fabs(approx[i] / accurate[i] - 1.0); \
-        if (approx[i] == 0.0 || accurate[i] == 0.0) \
+        double rel_error, abs_a, abs_b, diff; \
+        abs_a = fabs(approx[i]); \
+        abs_b = fabs(accurate[i]); \
+        diff = fabs(abs_a - abs_b); \
+        if (approx[i] == accurate[i] || \
+                (abs_a < FLT_EPSILON && abs_b < FLT_EPSILON)) \
+        { \
             rel_error = 0.0; \
+        } \
+        else if (diff < TOL) \
+        { \
+            rel_error = diff; \
+        } \
+        else \
+        { \
+            rel_error = diff / (abs_a + abs_b); \
+        } \
         RUNNING_STATS_KNUTH \
     }
-
-#define CHECK_ELEMENTS_COMPLEX \
-    for (i = 0; i < n; ++i) \
-    { \
-        double a_approx, a_accurate, rel_error; \
-        a_approx = sqrt(pow(approx[i].x, 2.0) + pow(approx[i].y, 2.0)); \
-        a_accurate = sqrt(pow(accurate[i].x, 2.0) + pow(accurate[i].y, 2.0)); \
-        rel_error = fabs(a_approx / a_accurate - 1.0); \
-        if (a_approx == 0.0 || a_accurate == 0.0) \
-            rel_error = 0.0; \
-        RUNNING_STATS_KNUTH \
-    }
-
 
 void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
         const oskar_Mem* val_accurate, double* min_rel_error,
@@ -163,71 +167,35 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     }
 
     /* Check numbers are the same, to appropriate precision. */
-    if (oskar_mem_is_complex(val_approx))
+    if (prec_approx == OSKAR_SINGLE && prec_accurate == OSKAR_SINGLE)
     {
-        if (prec_approx == OSKAR_SINGLE && prec_accurate == OSKAR_SINGLE)
-        {
-            const float2 *approx, *accurate;
-            approx = oskar_mem_float2_const(app_ptr, status);
-            accurate = oskar_mem_float2_const(acc_ptr, status);
-            CHECK_ELEMENTS_COMPLEX
-        }
-        else if (prec_approx == OSKAR_DOUBLE && prec_accurate == OSKAR_SINGLE)
-        {
-            const double2 *approx;
-            const float2 *accurate;
-            approx = oskar_mem_double2_const(app_ptr, status);
-            accurate = oskar_mem_float2_const(acc_ptr, status);
-            CHECK_ELEMENTS_COMPLEX
-        }
-        else if (prec_approx == OSKAR_SINGLE && prec_accurate == OSKAR_DOUBLE)
-        {
-            const float2 *approx;
-            const double2 *accurate;
-            approx = oskar_mem_float2_const(app_ptr, status);
-            accurate = oskar_mem_double2_const(acc_ptr, status);
-            CHECK_ELEMENTS_COMPLEX
-        }
-        else if (prec_approx == OSKAR_DOUBLE && prec_accurate == OSKAR_DOUBLE)
-        {
-            const double2 *approx, *accurate;
-            approx = oskar_mem_double2_const(app_ptr, status);
-            accurate = oskar_mem_double2_const(acc_ptr, status);
-            CHECK_ELEMENTS_COMPLEX
-        }
+        const float *approx, *accurate;
+        approx = oskar_mem_float_const(app_ptr, status);
+        accurate = oskar_mem_float_const(acc_ptr, status);
+        CHECK_ELEMENTS(1e-5)
     }
-    else
+    else if (prec_approx == OSKAR_DOUBLE && prec_accurate == OSKAR_SINGLE)
     {
-        if (prec_approx == OSKAR_SINGLE && prec_accurate == OSKAR_SINGLE)
-        {
-            const float *approx, *accurate;
-            approx = oskar_mem_float_const(app_ptr, status);
-            accurate = oskar_mem_float_const(acc_ptr, status);
-            CHECK_ELEMENTS_SCALAR
-        }
-        else if (prec_approx == OSKAR_DOUBLE && prec_accurate == OSKAR_SINGLE)
-        {
-            const double *approx;
-            const float *accurate;
-            approx = oskar_mem_double_const(app_ptr, status);
-            accurate = oskar_mem_float_const(acc_ptr, status);
-            CHECK_ELEMENTS_SCALAR
-        }
-        else if (prec_approx == OSKAR_SINGLE && prec_accurate == OSKAR_DOUBLE)
-        {
-            const float *approx;
-            const double *accurate;
-            approx = oskar_mem_float_const(app_ptr, status);
-            accurate = oskar_mem_double_const(acc_ptr, status);
-            CHECK_ELEMENTS_SCALAR
-        }
-        else if (prec_approx == OSKAR_DOUBLE && prec_accurate == OSKAR_DOUBLE)
-        {
-            const double *approx, *accurate;
-            approx = oskar_mem_double_const(app_ptr, status);
-            accurate = oskar_mem_double_const(acc_ptr, status);
-            CHECK_ELEMENTS_SCALAR
-        }
+        const double *approx;
+        const float *accurate;
+        approx = oskar_mem_double_const(app_ptr, status);
+        accurate = oskar_mem_float_const(acc_ptr, status);
+        CHECK_ELEMENTS(1e-5);
+    }
+    else if (prec_approx == OSKAR_SINGLE && prec_accurate == OSKAR_DOUBLE)
+    {
+        const float *approx;
+        const double *accurate;
+        approx = oskar_mem_float_const(app_ptr, status);
+        accurate = oskar_mem_double_const(acc_ptr, status);
+        CHECK_ELEMENTS(1e-5);
+    }
+    else if (prec_approx == OSKAR_DOUBLE && prec_accurate == OSKAR_DOUBLE)
+    {
+        const double *approx, *accurate;
+        approx = oskar_mem_double_const(app_ptr, status);
+        accurate = oskar_mem_double_const(acc_ptr, status);
+        CHECK_ELEMENTS(1e-15);
     }
 
     /* Set mean and standard deviation of relative error. */
