@@ -55,7 +55,6 @@ void oskar_correlate_point_time_smearing_new_cudak_f(const int num_sources,
     __shared__ float uv_len, uu, vv, ww, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
     __shared__ const float4c *restrict station_p, *restrict station_q;
     float4c sum;
-    float l, m, n, r1, r2;
     int i;
 
     /* Return immediately if in the wrong half of the visibility matrix. */
@@ -88,19 +87,24 @@ void oskar_correlate_point_time_smearing_new_cudak_f(const int num_sources,
     oskar_clear_complex_matrix_f(&sum); /* Partial sum per thread. */
     for (i = threadIdx.x; i < num_sources; i += blockDim.x)
     {
-        /* Get source direction cosines. */
-        l = source_l[i];
-        m = source_m[i];
-        n = source_n[i];
+        float r;
+        {
+            float l, m, n;
 
-        /* Compute bandwidth- and time-smearing terms. */
-        r1 = oskar_sinc_f(uu * l + vv * m + ww * (n - 1.0f));
-        r2 = oskar_evaluate_time_smearing_f(du_dt, dv_dt, dw_dt, l, m, n);
-        r1 *= r2;
+            /* Get source direction cosines. */
+            l = source_l[i];
+            m = source_m[i];
+            n = source_n[i];
+            n -= 1.0f;
+
+            /* Compute bandwidth- and time-smearing terms. */
+            r =  oskar_sinc_f(uu * l + vv * m + ww * n);
+            r *= oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * n);
+        }
 
         /* Accumulate baseline visibility response for source. */
         oskar_accumulate_baseline_visibility_for_source_inline_new_f(&sum, i,
-                station_p, station_q, r1);
+                station_p, station_q, r);
     }
 
     /* Store partial sum for the thread in shared memory and synchronise. */
@@ -138,7 +142,6 @@ void oskar_correlate_point_time_smearing_new_cudak_d(const int num_sources,
     __shared__ double uv_len, uu, vv, ww, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
     __shared__ const double4c *restrict station_p, *restrict station_q;
     double4c sum;
-    double l, m, n, r1, r2;
     int i;
 
     /* Return immediately if in the wrong half of the visibility matrix. */
@@ -171,19 +174,24 @@ void oskar_correlate_point_time_smearing_new_cudak_d(const int num_sources,
     oskar_clear_complex_matrix_d(&sum); /* Partial sum per thread. */
     for (i = threadIdx.x; i < num_sources; i += blockDim.x)
     {
-        /* Get source direction cosines. */
-        l = source_l[i];
-        m = source_m[i];
-        n = source_n[i];
+        double r;
+        {
+            double l, m, n;
 
-        /* Compute bandwidth- and time-smearing terms. */
-        r1 = oskar_sinc_d(uu * l + vv * m + ww * (n - 1.0));
-        r2 = oskar_evaluate_time_smearing_d(du_dt, dv_dt, dw_dt, l, m, n);
-        r1 *= r2;
+            /* Get source direction cosines. */
+            l = source_l[i];
+            m = source_m[i];
+            n = source_n[i];
+            n -= 1.0;
+
+            /* Compute bandwidth- and time-smearing terms. */
+            r =  oskar_sinc_d(uu * l + vv * m + ww * n);
+            r *= oskar_sinc_d(du_dt * l + dv_dt * m + dw_dt * n);
+        }
 
         /* Accumulate baseline visibility response for source. */
         oskar_accumulate_baseline_visibility_for_source_inline_new_d(&sum, i,
-                station_p, station_q, r1);
+                station_p, station_q, r);
     }
 
     /* Store partial sum for the thread in shared memory and synchronise. */
