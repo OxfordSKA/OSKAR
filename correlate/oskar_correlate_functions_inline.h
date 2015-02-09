@@ -185,6 +185,59 @@ void oskar_accumulate_baseline_visibility_for_source_inline_f(
 /**
  * @brief
  * Accumulates the visibility response on one baseline due to a single source
+ * (single precision).
+ *
+ * @details
+ * This function evaluates the visibility response for a single source on a
+ * single baseline between stations p and q, accumulating the result with
+ * the existing baseline visibility. It requires the final (collapsed)
+ * Jones matrices for the source for stations p and q.
+ *
+ * The output visibility on the baseline is updated according to:
+ *
+ * V_pq = V_pq + J_p * J_q^H
+ *
+ * Visibilities are updated for a single source, even though array pointers are
+ * passed to this function. The source is specified using the \p source_id
+ * index parameter.
+ *
+ * @param[in,out] V_pq  Running total of source visibilities on the baseline.
+ * @param[in] source_id Index of source in all arrays.
+ * @param[in] J_p       Array of source Jones matrices for station p.
+ * @param[in] J_q       Array of source Jones matrices for station q.
+ * @param[in] smear     Smearing factor by which to modify source visibility.
+ * @param[in,out] guard Updated guard value used in Kahan summation.
+ */
+OSKAR_INLINE
+void oskar_accumulate_baseline_visibility_for_source_inline_new_f(
+        float4c* restrict V_pq, const int source_id,
+        const float4c* restrict J_p, const float4c* restrict J_q,
+        const float smear
+#ifndef __CUDACC__
+        , float4c* restrict guard
+#endif
+        )
+{
+    float4c m1, m2;
+
+    /* Get Jones matrices. */
+    OSKAR_LOAD_MATRIX(m1, J_p, source_id)
+    OSKAR_LOAD_MATRIX(m2, J_q, source_id)
+
+    /* Multiply Jones matrices. */
+    oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&m1, &m2);
+
+#ifdef __CUDACC__
+    /* Multiply result by smearing term and accumulate. */
+    OSKAR_ADD_TO_VIS_POL(V_pq, m1, smear)
+#else
+    oskar_kahan_sum_multiply_complex_matrix_f(V_pq, m1, smear, guard);
+#endif /* __CUDACC__ */
+}
+
+/**
+ * @brief
+ * Accumulates the visibility response on one baseline due to a single source
  * (double precision).
  *
  * @details
@@ -236,6 +289,50 @@ void oskar_accumulate_baseline_visibility_for_source_inline_d(
 
     /* Multiply result with second (Hermitian transposed) Jones matrix. */
     OSKAR_LOAD_MATRIX(m2, J_q, source_id)
+    oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(&m1, &m2);
+
+    /* Multiply result by smearing term and accumulate. */
+    OSKAR_ADD_TO_VIS_POL(V_pq, m1, smear)
+}
+
+/**
+ * @brief
+ * Accumulates the visibility response on one baseline due to a single source
+ * (double precision).
+ *
+ * @details
+ * This function evaluates the visibility response for a single source on a
+ * single baseline between stations p and q, accumulating the result with
+ * the existing baseline visibility. It requires the final (collapsed)
+ * Jones matrices for the source for stations p and q.
+ *
+ * The output visibility on the baseline is updated according to:
+ *
+ * V_pq = V_pq + J_p * J_q^H
+ *
+ * Visibilities are updated for a single source, even though array pointers are
+ * passed to this function. The source is specified using the \p source_id
+ * index parameter.
+ *
+ * @param[in,out] V_pq  Running total of source visibilities on the baseline.
+ * @param[in] source_id Index of source in all arrays.
+ * @param[in] J_p       Array of source Jones matrices for station p.
+ * @param[in] J_q       Array of source Jones matrices for station q.
+ * @param[in] smear     Smearing factor by which to modify source visibility.
+ */
+OSKAR_INLINE
+void oskar_accumulate_baseline_visibility_for_source_inline_new_d(
+        double4c* restrict V_pq, const int source_id,
+        const double4c* restrict J_p, const double4c* restrict J_q,
+        const double smear)
+{
+    double4c m1, m2;
+
+    /* Get Jones matrices. */
+    OSKAR_LOAD_MATRIX(m1, J_p, source_id)
+    OSKAR_LOAD_MATRIX(m2, J_q, source_id)
+
+    /* Multiply Jones matrices. */
     oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(&m1, &m2);
 
     /* Multiply result by smearing term and accumulate. */

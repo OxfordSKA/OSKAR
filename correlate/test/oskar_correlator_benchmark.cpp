@@ -207,7 +207,6 @@ int benchmark(int num_stations, int num_sources, int type,
         std::vector<double>& times)
 {
     int status = 0;
-    int num_vis = num_stations * (num_stations-1) / 2;
 
     oskar_Timer* timer;
     timer = oskar_timer_create(loc == OSKAR_GPU ?
@@ -225,7 +224,8 @@ int benchmark(int num_stations, int num_sources, int type,
 
     // Memory for visibility coordinates and output visibility slice.
     oskar_Mem *vis, *u, *v, *w;
-    vis = oskar_mem_create(jones_type, loc, num_vis, &status);
+    vis = oskar_mem_create(jones_type, loc, oskar_telescope_num_baselines(tel),
+            &status);
     u = oskar_mem_create(type, loc, num_stations, &status);
     v = oskar_mem_create(type, loc, num_stations, &status);
     w = oskar_mem_create(type, loc, num_stations, &status);
