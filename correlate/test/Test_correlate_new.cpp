@@ -42,7 +42,7 @@ class correlate_new : public ::testing::Test
 {
 protected:
     static const int num_sources = 10000;
-    static const int num_stations = 50;
+    static const int num_stations = 200;
     static const double bandwidth;
     oskar_Mem *u_, *v_, *w_;
     oskar_Telescope* tel;
