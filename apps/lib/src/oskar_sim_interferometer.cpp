@@ -78,6 +78,7 @@ struct DeviceData
     oskar_Timers timers;
     oskar_Jones *J, *R, *E, *Z, *K;
     /* oskar_WorkJonesZ workJonesZ; */
+    oskar_VisBlock *vis_block[2];
 };
 typedef struct DeviceData DeviceData;
 
@@ -584,4 +585,106 @@ static void log_warning_box(oskar_Log* log, const char* format, ...)
     oskar_log_message(log, 'W', -1, "%s", line.c_str());
     oskar_log_line(log, 'W', '*');
     oskar_log_line(log, 'W', ' ');
+}
+
+
+static void simulate_block(DeviceData* d, oskar_Sky* sky,
+        const oskar_Settings* settings, int channel_index_block,
+        int time_index_block, int time_index_simulation,
+        int active_vis_block, double frequency, double gast, int* status)
+{
+    // Get a handle to the active visibility block.
+    oskar_VisBlock* blk = d->vis_block[active_vis_block];
+
+    // Get dimensions.
+    int n_channels = oskar_vis_block_num_channels(blk);
+    int n_baselines = oskar_telescope_num_baselines(d->tel);
+    int n_stations = oskar_telescope_num_stations(d->tel);
+    int n_src = oskar_sky_num_sources(sky);
+
+    // Pull pointers out for this time and channel.
+    oskar_Mem* u = oskar_mem_create_alias(
+            oskar_vis_block_baseline_uu_metres(blk),
+            n_baselines * time_index_block, n_baselines, status);
+    oskar_Mem* v = oskar_mem_create_alias(
+            oskar_vis_block_baseline_vv_metres(blk),
+            n_baselines * time_index_block, n_baselines, status);
+    oskar_Mem* w = oskar_mem_create_alias(
+            oskar_vis_block_baseline_ww_metres(blk),
+            n_baselines * time_index_block, n_baselines, status);
+    oskar_Mem* amp = oskar_mem_create_alias(
+            oskar_vis_block_amplitude(blk),
+            n_baselines * (n_channels * time_index_block + channel_index_block),
+            n_baselines, status);
+
+    // Set dimensions of Jones matrices (this is not a resize!).
+    if (d->R) oskar_jones_set_size(d->R, n_stations, n_src, status);
+    if (d->Z) oskar_jones_set_size(d->Z, n_stations, n_src, status);
+    oskar_jones_set_size(d->J, n_stations, n_src, status);
+    oskar_jones_set_size(d->E, n_stations, n_src, status);
+    oskar_jones_set_size(d->K, n_stations, n_src, status);
+
+    // Evaluate station beam (Jones E: may be matrix).
+    oskar_timer_resume(d->timers.tmr_E);
+    oskar_evaluate_jones_E(d->E, n_src, oskar_sky_l(sky), oskar_sky_m(sky),
+            oskar_sky_n(sky), OSKAR_RELATIVE_DIRECTIONS,
+            oskar_sky_reference_ra_rad(sky), oskar_sky_reference_dec_rad(sky),
+            d->tel, gast, frequency, d->work, time_index_simulation, status);
+    oskar_timer_pause(d->timers.tmr_E);
+
+#if 0
+    // Evaluate ionospheric phase screen (Jones Z: scalar),
+    // and join with Jones E.
+    // NOTE this is currently only a CPU implementation.
+    if (d->Z)
+    {
+        oskar_evaluate_jones_Z(d->Z, n_src, sky, d->tel,
+                &settings->ionosphere, gast, frequency, &(d->workJonesZ),
+                status);
+        oskar_timer_resume(d->timers.tmr_join);
+        oskar_jones_join(d->E, d->Z, d->E, status);
+        oskar_timer_pause(d->timers.tmr_join);
+    }
+#endif
+
+    // Evaluate parallactic angle (Jones R: matrix),
+    // and join with Jones Z*E.
+    // TODO Move this into station beam evaluation instead.
+    if (d->R)
+    {
+        oskar_timer_resume(d->timers.tmr_R);
+        oskar_evaluate_jones_R(d->R, n_src, oskar_sky_ra_rad_const(sky),
+                oskar_sky_dec_rad_const(sky), d->tel, gast, status);
+        oskar_timer_pause(d->timers.tmr_R);
+        oskar_timer_resume(d->timers.tmr_join);
+        oskar_jones_join(d->R, d->E, d->R, status);
+        oskar_timer_pause(d->timers.tmr_join);
+    }
+
+    // Evaluate interferometer phase (Jones K: scalar).
+    oskar_timer_resume(d->timers.tmr_K);
+    oskar_evaluate_jones_K(d->K, n_src, oskar_sky_l_const(sky),
+            oskar_sky_m_const(sky), oskar_sky_n_const(sky),
+            u, v, w, frequency, oskar_sky_I_const(sky),
+            settings->sky.common_flux_filter_min_jy,
+            settings->sky.common_flux_filter_max_jy, status);
+    oskar_timer_pause(d->timers.tmr_K);
+
+    // Join Jones K with Jones Z*E*R (if it exists),
+    // otherwise with Jones Z*E
+    oskar_timer_resume(d->timers.tmr_join);
+    oskar_jones_join(d->J, d->K, d->R ? d->R : d->E, status);
+    oskar_timer_pause(d->timers.tmr_join);
+
+    // Correlate.
+    oskar_timer_resume(d->timers.tmr_correlate);
+    oskar_correlate(amp, n_src, d->J, sky, d->tel, u, v, w,
+            gast, frequency, status);
+    oskar_timer_pause(d->timers.tmr_correlate);
+
+    // Free handles to aliased memory.
+    oskar_mem_free(u, status);
+    oskar_mem_free(v, status);
+    oskar_mem_free(w, status);
+    oskar_mem_free(amp, status);
 }
