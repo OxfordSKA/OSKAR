@@ -588,7 +588,7 @@ static void log_warning_box(oskar_Log* log, const char* format, ...)
 }
 
 
-static void simulate_block(DeviceData* d, oskar_Sky* sky,
+static void simulate_baselines(DeviceData* d, oskar_Sky* sky,
         const oskar_Settings* settings, int channel_index_block,
         int time_index_block, int time_index_simulation,
         int active_vis_block, double frequency, double gast, int* status)
