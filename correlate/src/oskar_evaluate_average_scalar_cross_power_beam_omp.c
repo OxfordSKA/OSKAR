@@ -45,7 +45,7 @@ void oskar_evaluate_average_scalar_cross_power_beam_omp_f(
 #pragma omp parallel for private(i)
     for (i = 0; i < num_sources; ++i)
     {
-        int SP, SQ, num_baselines;
+        int SP, SQ;
         float2 val1, val2, p, q;
 
         /* Calculate cross-power beam at the source. */
@@ -94,7 +94,7 @@ void oskar_evaluate_average_scalar_cross_power_beam_omp_d(
 #pragma omp parallel for private(i)
     for (i = 0; i < num_sources; ++i)
     {
-        int SP, SQ, num_baselines;
+        int SP, SQ;
         double2 val1, val2, p, q;
 
         /* Calculate cross-power beam at the source. */

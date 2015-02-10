@@ -100,7 +100,7 @@ void oskar_evaluate_average_cross_power_beam_omp_d(const int num_sources,
 #pragma omp parallel for private(i)
     for (i = 0; i < num_sources; ++i)
     {
-        int SP, SQ, num_baselines;
+        int SP, SQ;
         double4c val, p, q;
 
         /* Calculate cross-power beam at the source. */

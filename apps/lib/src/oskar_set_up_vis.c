@@ -39,7 +39,7 @@ void oskar_set_up_vis(const oskar_Settings* settings,
         const oskar_Telescope* tel, oskar_VisHeader** hdr,
         oskar_VisBlock** blk, int* status)
 {
-    int i, max_times_per_block, num_stations, num_channels;
+    int max_times_per_block, num_stations, num_channels;
     int precision, vis_type;
     const double rad2deg = 180.0/M_PI;
 
