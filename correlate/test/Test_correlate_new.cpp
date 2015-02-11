@@ -27,6 +27,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <cuda_runtime_api.h>
 
 #include <oskar_timer.h>
 
@@ -42,7 +43,7 @@ class correlate_new : public ::testing::Test
 {
 protected:
     static const int num_sources = 10000;
-    static const int num_stations = 200;
+    static const int num_stations = 48;
     static const double bandwidth;
     oskar_Mem *u_, *v_, *w_;
     oskar_Telescope* tel;
@@ -113,11 +114,11 @@ protected:
     void runTest(int prec1, int prec2)
     {
         int num_baselines, status = 0, type;
-        oskar_Mem *vis1, *vis2;
+        oskar_Mem *vis1 = 0, *vis2 = 0;
         const oskar_Mem *x, *y;
         oskar_Timer *timer1, *timer2;
-        double time1, time2, frequency = 100e6;
-        int N = 100;
+        double time1 = 0.0, time2 = 0.0;
+        int N = 40;
         int loc1 = OSKAR_GPU, loc2 = OSKAR_GPU, matrix = 1;
 
         // Create the timers.
@@ -136,6 +137,7 @@ protected:
         vis1 = oskar_mem_create(type, loc1, num_baselines, &status);
         oskar_mem_clear_contents(vis1, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
+        cudaDeviceSynchronize();
         oskar_timer_start(timer1);
 
         if (prec1 == OSKAR_SINGLE)
@@ -199,6 +201,7 @@ protected:
         vis2 = oskar_mem_create(type, loc2, num_baselines, &status);
         oskar_mem_clear_contents(vis2, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
+        cudaDeviceSynchronize();
         oskar_timer_start(timer2);
 
         if (prec2 == OSKAR_SINGLE)
@@ -216,7 +219,7 @@ protected:
                         oskar_mem_float_const(x, &status),
                         oskar_mem_float_const(y, &status),
                         0.0, 1e10, 0.5, 1.3, 5.0, 2.0, 1.1,
-                        oskar_mem_float4c(vis1, &status)
+                        oskar_mem_float4c(vis2, &status)
                 );
             }
         }
@@ -235,7 +238,7 @@ protected:
                         oskar_mem_double_const(x, &status),
                         oskar_mem_double_const(y, &status),
                         0.0, 1e10, 0.5, 1.3, 5.0, 2.0, 1.1,
-                        oskar_mem_double4c(vis1, &status)
+                        oskar_mem_double4c(vis2, &status)
                 );
             }
         }
@@ -276,7 +279,13 @@ TEST_F(correlate_new, single_precision)
     runTest(OSKAR_SINGLE, OSKAR_SINGLE);
 }
 
+TEST_F(correlate_new, single_precision2)
+{
+    runTest(OSKAR_SINGLE, OSKAR_SINGLE);
+}
+
 TEST_F(correlate_new, double_precision)
 {
     runTest(OSKAR_DOUBLE, OSKAR_DOUBLE);
 }
+

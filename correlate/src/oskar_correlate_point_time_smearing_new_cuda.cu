@@ -29,17 +29,18 @@
 #include <oskar_correlate_functions_inline.h>
 #include <oskar_correlate_point_time_smearing_new_cuda.h>
 #include <oskar_add_inline.h>
+#include <cstdio>
 
 /* Kernels. ================================================================ */
 
-/* Indices into the visibility/baseline matrix. */
-#define SP blockIdx.x /* Column index. */
-#define SQ blockIdx.y /* Row index. */
-
-extern __shared__ float4c  smem_f[];
-extern __shared__ double4c smem_d[];
+#define BLOCK_SINGLE 8
+#define BLOCK_DOUBLE 8
 
 /* Single precision. */
+
+#define ROW threadIdx.y
+#define COL threadIdx.x
+
 __global__
 void oskar_correlate_point_time_smearing_new_cudak_f(const int num_sources,
         const int num_stations, const float4c* restrict jones,
@@ -52,76 +53,101 @@ void oskar_correlate_point_time_smearing_new_cudak_f(const int num_sources,
         const float time_int_sec, const float gha0_rad, const float dec0_rad,
         float4c* restrict vis)
 {
-    __shared__ float uv_len, uu, vv, ww, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
-    __shared__ const float4c *restrict station_p, *restrict station_q;
+    __shared__ float4c As[BLOCK_SINGLE][BLOCK_SINGLE];
+    __shared__ float4c Bs[BLOCK_SINGLE][BLOCK_SINGLE];
+    __shared__ float ls[BLOCK_SINGLE], ms[BLOCK_SINGLE], ns[BLOCK_SINGLE];
+    float uv_len, uu, vv, ww, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
+
+    /* Exit if block is in the wrong half of the visibility matrix. */
+    if (blockIdx.y > blockIdx.x) return;
+
+    /* Each thread block computes one sub-matrix of the visibility matrix.
+     * Each thread computes visibilities for one baseline. */
     float4c sum;
-    int i;
+    oskar_clear_complex_matrix_f(&sum);
 
-    /* Return immediately if in the wrong half of the visibility matrix. */
-    if (SQ >= SP) return;
+    /* Get station indices. */
+    const int iSP = blockIdx.x * BLOCK_SINGLE + COL;
+    const int iSQ = blockIdx.y * BLOCK_SINGLE + ROW;
 
-    /* Get common baseline values per thread block. */
-    if (threadIdx.x == 0)
+    /* Evaluate per-baseline terms. */
+    if (iSP < num_stations && iSQ < num_stations)
     {
-        oskar_evaluate_baseline_terms_inline_f(station_u[SP],
-                station_u[SQ], station_v[SP], station_v[SQ],
-                station_w[SP], station_w[SQ], inv_wavelength,
+        oskar_evaluate_baseline_terms_inline_f(station_u[iSP],
+                station_u[iSQ], station_v[iSP], station_v[iSQ],
+                station_w[iSP], station_w[iSQ], inv_wavelength,
                 frac_bandwidth, &uv_len, &uu, &vv, &ww, &uu2, &vv2, &uuvv);
-
-        /* Compute the derivatives for time-average smearing. */
-        oskar_evaluate_baseline_derivatives_inline_f(station_x[SP],
-                station_x[SQ], station_y[SP], station_y[SQ], inv_wavelength,
+        oskar_evaluate_baseline_derivatives_inline_f(station_x[iSP],
+                station_x[iSQ], station_y[iSP], station_y[iSQ], inv_wavelength,
                 time_int_sec, gha0_rad, dec0_rad, &du_dt, &dv_dt, &dw_dt);
-
-        /* Get pointers to source vectors for both stations. */
-        station_p = &jones[num_sources * SP];
-        station_q = &jones[num_sources * SQ];
-    }
-    __syncthreads();
-
-    /* Apply the baseline length filter. */
-    if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
-        return;
-
-    /* Each thread loops over a subset of the sources. */
-    oskar_clear_complex_matrix_f(&sum); /* Partial sum per thread. */
-    for (i = threadIdx.x; i < num_sources; i += blockDim.x)
-    {
-        float r;
-        {
-            float l, m, n;
-
-            /* Get source direction cosines. */
-            l = source_l[i];
-            m = source_m[i];
-            n = source_n[i];
-            n -= 1.0f;
-
-            /* Compute bandwidth- and time-smearing terms. */
-            r =  oskar_sinc_f(uu * l + vv * m + ww * n);
-            r *= oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * n);
-        }
-
-        /* Accumulate baseline visibility response for source. */
-        oskar_accumulate_baseline_visibility_for_source_inline_new_f(&sum, i,
-                station_p, station_q, r);
     }
 
-    /* Store partial sum for the thread in shared memory and synchronise. */
-    smem_f[threadIdx.x] = sum;
-    __syncthreads();
-
-    /* Accumulate contents of shared memory. */
-    if (threadIdx.x == 0)
+    for (int src_start = 0; src_start < num_sources; src_start += BLOCK_SINGLE)
     {
-        /* Sum over all sources for this baseline. */
-        for (i = 1; i < blockDim.x; ++i)
+        /* Load parts of Jones matrix block into shared memory. */
+        if (iSQ < num_stations && src_start + COL < num_sources)
         {
-            oskar_add_complex_matrix_in_place_f(&sum, &smem_f[i]);
+            OSKAR_LOAD_MATRIX(As[ROW][COL], jones, iSQ * num_sources + src_start + COL);
+        }
+        if (iSP < num_stations && src_start + ROW < num_sources)
+        {
+            OSKAR_LOAD_MATRIX(Bs[COL][ROW], jones, iSP * num_sources + src_start + COL);
         }
 
-        /* Add result of this thread block to the baseline visibility. */
-        i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
+        /* Get per-source data. */
+        int i = src_start + ROW;
+        if (COL == 0 && i < num_sources)
+        {
+            ls[ROW] = source_l[i];
+            ms[ROW] = source_m[i];
+            ns[ROW] = source_n[i] - 1.0f;
+        }
+
+        /* Multiply the two sub-matrices together. */
+        __syncthreads();
+        if (iSP < num_stations && iSQ < num_stations)
+        {
+            for (int i = 0; i < BLOCK_SINGLE; ++i)
+            {
+                float r;
+                if (src_start + i >= num_sources) break;
+
+                /* Compute bandwidth- and time-smearing terms. */
+                {
+                    float l = ls[i];
+                    float m = ms[i];
+                    float n = ns[i];
+                    r =  oskar_sinc_f(uu * l + vv * m + ww * n);
+                    r *= oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * n);
+                }
+
+                /* Multiply Jones matrices. */
+                float4c m1 = As[ROW][i];
+                float4c m2 = Bs[i][COL];
+//                float4c m1, m2;
+//                OSKAR_LOAD_MATRIX(m1, jones, iSQ * num_sources + s);
+//                OSKAR_LOAD_MATRIX(m2, jones, iSP * num_sources + s);
+                oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(
+                        &m1, &m2);
+
+                /* Multiply result by smearing term and accumulate. */
+                sum.a.x += m1.a.x * r;
+                sum.a.y += m1.a.y * r;
+                sum.b.x += m1.b.x * r;
+                sum.b.y += m1.b.y * r;
+                sum.c.x += m1.c.x * r;
+                sum.c.y += m1.c.y * r;
+                sum.d.x += m1.d.x * r;
+                sum.d.y += m1.d.y * r;
+            }
+        }
+        __syncthreads();
+    }
+
+    /* Write result to global memory. */
+    if (iSP > iSQ && iSP < num_stations && iSQ < num_stations)
+    {
+        int i = oskar_evaluate_baseline_index_inline(num_stations, iSP, iSQ);
         oskar_add_complex_matrix_in_place_f(&vis[i], &sum);
     }
 }
@@ -139,79 +165,107 @@ void oskar_correlate_point_time_smearing_new_cudak_d(const int num_sources,
         const double time_int_sec, const double gha0_rad, const double dec0_rad,
         double4c* restrict vis)
 {
-    __shared__ double uv_len, uu, vv, ww, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
-    __shared__ const double4c *restrict station_p, *restrict station_q;
+//    __shared__ double4c As[BLOCK_DOUBLE][BLOCK_DOUBLE];
+//    __shared__ double4c Bs[BLOCK_DOUBLE][BLOCK_DOUBLE];
+    __shared__ double ls[BLOCK_DOUBLE], ms[BLOCK_DOUBLE], ns[BLOCK_DOUBLE];
+    double uv_len, uu, vv, ww, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
+
+    /* Exit if block is in the wrong half of the visibility matrix. */
+    if (blockIdx.y > blockIdx.x) return;
+
+    /* Each thread block computes one sub-matrix of the visibility matrix.
+     * Each thread computes visibilities for one baseline. */
     double4c sum;
-    int i;
+    oskar_clear_complex_matrix_d(&sum);
 
-    /* Return immediately if in the wrong half of the visibility matrix. */
-    if (SQ >= SP) return;
+    /* Get station indices. */
+    const int iSP = blockIdx.x * BLOCK_DOUBLE + COL;
+    const int iSQ = blockIdx.y * BLOCK_DOUBLE + ROW;
 
-    /* Get common baseline values per thread block. */
-    if (threadIdx.x == 0)
+//    if (iSP >= num_stations || iSQ >= num_stations || iSP <= iSQ)
+//        return;
+
+    /* Evaluate per-baseline terms. */
+    if (iSP < num_stations && iSQ < num_stations)
     {
-        oskar_evaluate_baseline_terms_inline_d(station_u[SP],
-                station_u[SQ], station_v[SP], station_v[SQ],
-                station_w[SP], station_w[SQ], inv_wavelength,
+        oskar_evaluate_baseline_terms_inline_d(station_u[iSP],
+                station_u[iSQ], station_v[iSP], station_v[iSQ],
+                station_w[iSP], station_w[iSQ], inv_wavelength,
                 frac_bandwidth, &uv_len, &uu, &vv, &ww, &uu2, &vv2, &uuvv);
-
-        /* Compute the derivatives for time-average smearing. */
-        oskar_evaluate_baseline_derivatives_inline_d(station_x[SP],
-                station_x[SQ], station_y[SP], station_y[SQ], inv_wavelength,
+        oskar_evaluate_baseline_derivatives_inline_d(station_x[iSP],
+                station_x[iSQ], station_y[iSP], station_y[iSQ], inv_wavelength,
                 time_int_sec, gha0_rad, dec0_rad, &du_dt, &dv_dt, &dw_dt);
-
-        /* Get pointers to source vectors for both stations. */
-        station_p = &jones[num_sources * SP];
-        station_q = &jones[num_sources * SQ];
-    }
-    __syncthreads();
-
-    /* Apply the baseline length filter. */
-    if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
-        return;
-
-    /* Each thread loops over a subset of the sources. */
-    oskar_clear_complex_matrix_d(&sum); /* Partial sum per thread. */
-    for (i = threadIdx.x; i < num_sources; i += blockDim.x)
-    {
-        double r;
-        {
-            double l, m, n;
-
-            /* Get source direction cosines. */
-            l = source_l[i];
-            m = source_m[i];
-            n = source_n[i];
-            n -= 1.0;
-
-            /* Compute bandwidth- and time-smearing terms. */
-            r =  oskar_sinc_d(uu * l + vv * m + ww * n);
-            r *= oskar_sinc_d(du_dt * l + dv_dt * m + dw_dt * n);
-        }
-
-        /* Accumulate baseline visibility response for source. */
-        oskar_accumulate_baseline_visibility_for_source_inline_new_d(&sum, i,
-                station_p, station_q, r);
     }
 
-    /* Store partial sum for the thread in shared memory and synchronise. */
-    smem_d[threadIdx.x] = sum;
-    __syncthreads();
-
-    /* Accumulate contents of shared memory. */
-    if (threadIdx.x == 0)
+    for (int src_start = 0; src_start < num_sources; src_start += BLOCK_DOUBLE)
     {
-        /* Sum over all sources for this baseline. */
-        for (i = 1; i < blockDim.x; ++i)
+        /* Load parts of Jones matrix block into shared memory. */
+//        if (iSQ < num_stations && src_start + COL < num_sources)
+//        {
+//            OSKAR_LOAD_MATRIX(As[ROW][COL], jones, iSQ * num_sources + src_start + COL);
+//        }
+//        if (iSP < num_stations && src_start + ROW < num_sources)
+//        {
+//            OSKAR_LOAD_MATRIX(Bs[COL][ROW], jones, iSP * num_sources + src_start + COL);
+//        }
+
+        /* Get per-source data. */
+        int i = src_start + ROW;
+        if (COL == 0 && i < num_sources)
         {
-            oskar_add_complex_matrix_in_place_d(&sum, &smem_d[i]);
+            ls[ROW] = source_l[i];
+            ms[ROW] = source_m[i];
+            ns[ROW] = source_n[i] - 1.0;
         }
 
-        /* Add result of this thread block to the baseline visibility. */
-        i = oskar_evaluate_baseline_index_inline(num_stations, SP, SQ);
+        /* Multiply the two sub-matrices together. */
+        __syncthreads();
+        if (iSP < num_stations && iSQ < num_stations)
+        {
+            for (int i = 0; i < BLOCK_DOUBLE; ++i)
+            {
+                double r;
+                const int s = src_start + i;
+                if (src_start + i >= num_sources) break;
+
+                /* Compute bandwidth- and time-smearing terms. */
+                {
+                    double l = ls[i];
+                    double m = ms[i];
+                    double n = ns[i];
+                    r =  oskar_sinc_d(uu * l + vv * m + ww * n);
+                    r *= oskar_sinc_d(du_dt * l + dv_dt * m + dw_dt * n);
+                }
+
+                /* Multiply Jones matrices. */
+                double4c m1, m2;
+                OSKAR_LOAD_MATRIX(m1, jones, iSQ * num_sources + s);
+                OSKAR_LOAD_MATRIX(m2, jones, iSP * num_sources + s);
+                oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(
+                        &m1, &m2);
+
+                /* Multiply result by smearing term and accumulate. */
+                sum.a.x += m1.a.x * r;
+                sum.a.y += m1.a.y * r;
+                sum.b.x += m1.b.x * r;
+                sum.b.y += m1.b.y * r;
+                sum.c.x += m1.c.x * r;
+                sum.c.y += m1.c.y * r;
+                sum.d.x += m1.d.x * r;
+                sum.d.y += m1.d.y * r;
+            }
+        }
+        __syncthreads();
+    }
+
+    /* Write result to global memory. */
+    if (iSP > iSQ && iSP < num_stations && iSQ < num_stations)
+    {
+        int i = oskar_evaluate_baseline_index_inline(num_stations, iSP, iSQ);
         oskar_add_complex_matrix_in_place_d(&vis[i], &sum);
     }
 }
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -230,11 +284,11 @@ void oskar_correlate_point_time_smearing_new_cuda_f(int num_sources,
         float frac_bandwidth, float time_int_sec, float gha0_rad,
         float dec0_rad, float4c* d_vis)
 {
-    dim3 num_threads(128, 1);
-    dim3 num_blocks(num_stations, num_stations);
-    size_t shared_mem = num_threads.x * sizeof(float4c);
+    dim3 num_threads(BLOCK_SINGLE, BLOCK_SINGLE);
+    dim3 num_blocks((num_stations + BLOCK_SINGLE - 1) / BLOCK_SINGLE,
+            (num_stations + BLOCK_SINGLE - 1) / BLOCK_SINGLE);
     oskar_correlate_point_time_smearing_new_cudak_f
-    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+    OSKAR_CUDAK_CONF(num_blocks, num_threads)
     (num_sources, num_stations, d_jones, d_source_l, d_source_m, d_source_n,
             d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
             uv_min_lambda, uv_max_lambda, inv_wavelength, frac_bandwidth,
@@ -252,11 +306,11 @@ void oskar_correlate_point_time_smearing_new_cuda_d(int num_sources,
         double frac_bandwidth, double time_int_sec, double gha0_rad,
         double dec0_rad, double4c* d_vis)
 {
-    dim3 num_threads(128, 1);
-    dim3 num_blocks(num_stations, num_stations);
-    size_t shared_mem = num_threads.x * sizeof(double4c);
+    dim3 num_threads(BLOCK_DOUBLE, BLOCK_DOUBLE);
+    dim3 num_blocks((num_stations + BLOCK_DOUBLE - 1) / BLOCK_DOUBLE,
+            (num_stations + BLOCK_DOUBLE - 1) / BLOCK_DOUBLE);
     oskar_correlate_point_time_smearing_new_cudak_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+    OSKAR_CUDAK_CONF(num_blocks, num_threads)
     (num_sources, num_stations, d_jones, d_source_l, d_source_m, d_source_n,
             d_station_u, d_station_v, d_station_w, d_station_x, d_station_y,
             uv_min_lambda, uv_max_lambda, inv_wavelength, frac_bandwidth,
