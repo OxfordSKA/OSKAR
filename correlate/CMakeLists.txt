@@ -24,7 +24,6 @@ if (CUDA_FOUND)
         src/oskar_correlate_gaussian_time_smearing_cuda.cu
         src/oskar_correlate_point_cuda.cu
         src/oskar_correlate_point_time_smearing_cuda.cu
-        src/oskar_correlate_point_time_smearing_new_cuda.cu
         src/oskar_correlate_scalar_gaussian_cuda.cu
         src/oskar_correlate_scalar_gaussian_time_smearing_cuda.cu
         src/oskar_correlate_scalar_point_cuda.cu
