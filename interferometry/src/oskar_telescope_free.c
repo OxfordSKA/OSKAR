@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,12 @@ void oskar_telescope_free(oskar_Telescope* telescope, int* status)
     oskar_mem_free(telescope->station_true_x_enu_metres, status);
     oskar_mem_free(telescope->station_true_y_enu_metres, status);
     oskar_mem_free(telescope->station_true_z_enu_metres, status);
+    oskar_mem_free(telescope->station_measured_x_offset_ecef_metres, status);
+    oskar_mem_free(telescope->station_measured_y_offset_ecef_metres, status);
+    oskar_mem_free(telescope->station_measured_z_offset_ecef_metres, status);
+    oskar_mem_free(telescope->station_measured_x_enu_metres, status);
+    oskar_mem_free(telescope->station_measured_y_enu_metres, status);
+    oskar_mem_free(telescope->station_measured_z_enu_metres, status);
 
     /* Free each station. */
     for (i = 0; i < telescope->num_stations; ++i)

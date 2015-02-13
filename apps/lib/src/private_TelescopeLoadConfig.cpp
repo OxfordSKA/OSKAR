@@ -67,11 +67,11 @@ void TelescopeLoadConfig::load(oskar_Telescope* telescope,
         int num_stations = oskar_telescope_num_stations(telescope);
         for (int i = 0; i < num_stations; ++i)
         {
+            double xyz[] = {0., 0., 0.};
             oskar_Station* station = oskar_telescope_station(telescope, i);
             oskar_station_resize(station, 1, status);
             oskar_station_resize_element_types(station, 1, status);
-            oskar_station_set_element_coords(station, 0,
-                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
+            oskar_station_set_element_coords(station, 0, xyz, xyz, status);
             oskar_station_set_element_errors(station, 0,
                     1.0, 0.0, 0.0, 0.0, status);
             oskar_station_set_element_orientation(station, 0,

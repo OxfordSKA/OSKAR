@@ -397,14 +397,191 @@ const oskar_Station* oskar_telescope_station_const(
 
 /**
  * @brief
- * Returns a handle to the station x positions.
+ * Returns a handle to the measured station x positions.
  *
  * @details
- * Returns a handle to the station x positions.
+ * Returns a handle to the measured station x positions.
  *
  * @param[in] model Pointer to telescope model.
  *
- * @return A handle to the station x positions.
+ * @return A handle to the measured station x positions.
+ */
+OSKAR_EXPORT
+oskar_Mem* oskar_telescope_station_measured_x_offset_ecef_metres(
+        oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns a constant handle to the measured station x positions.
+ *
+ * @details
+ * Returns a constant handle to the measured station x positions.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A constant handle to the measured station x positions.
+ */
+OSKAR_EXPORT
+const oskar_Mem* oskar_telescope_station_measured_x_offset_ecef_metres_const(
+        const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns a handle to the measured station y positions.
+ *
+ * @details
+ * Returns a handle to the measured station y positions.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A handle to the measured station y positions.
+ */
+OSKAR_EXPORT
+oskar_Mem* oskar_telescope_station_measured_y_offset_ecef_metres(
+        oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns a constant handle to the measured station y positions.
+ *
+ * @details
+ * Returns a constant handle to the measured station y positions.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A constant handle to the measured station y positions.
+ */
+OSKAR_EXPORT
+const oskar_Mem* oskar_telescope_station_measured_y_offset_ecef_metres_const(
+        const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns a handle to the measured station z positions.
+ *
+ * @details
+ * Returns a handle to the measured station z positions.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A handle to the measured station z positions.
+ */
+OSKAR_EXPORT
+oskar_Mem* oskar_telescope_station_measured_z_offset_ecef_metres(
+        oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns a constant handle to the measured station z positions.
+ *
+ * @details
+ * Returns a constant handle to the measured station z positions.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A constant handle to the measured station z positions.
+ */
+OSKAR_EXPORT
+const oskar_Mem* oskar_telescope_station_measured_z_offset_ecef_metres_const(
+        const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns a handle to the measured horizon plane station x positions.
+ *
+ * @details
+ * Returns a handle to the measured horizon plane station x positions.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A handle to the measured horizon plane station x positions.
+ */
+OSKAR_EXPORT
+oskar_Mem* oskar_telescope_station_measured_x_enu_metres(oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns a constant handle to the measured horizon plane station x positions.
+ *
+ * @details
+ * Returns a constant handle to the measured horizon plane station x positions.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A constant handle to the measured horizon plane station x positions.
+ */
+OSKAR_EXPORT
+const oskar_Mem* oskar_telescope_station_measured_x_enu_metres_const(
+        const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns a handle to the measured horizon plane station y positions.
+ *
+ * @details
+ * Returns a handle to the measured horizon plane station y positions.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A handle to the measured horizon plane station y positions.
+ */
+OSKAR_EXPORT
+oskar_Mem* oskar_telescope_station_measured_y_enu_metres(oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns a constant handle to the measured horizon plane station y positions.
+ *
+ * @details
+ * Returns a constant handle to the measured horizon plane station y positions.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A constant handle to the measured horizon plane station y positions.
+ */
+OSKAR_EXPORT
+const oskar_Mem* oskar_telescope_station_measured_y_enu_metres_const(
+        const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns a handle to the measured horizon plane station z positions.
+ *
+ * @details
+ * Returns a handle to the measured horizon plane station z positions.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A handle to the measured horizon plane station z positions.
+ */
+OSKAR_EXPORT
+oskar_Mem* oskar_telescope_station_measured_z_enu_metres(oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns a constant handle to the measured horizon plane station z positions.
+ *
+ * @details
+ * Returns a constant handle to the measured horizon plane station z positions.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A constant handle to the measured horizon plane station z positions.
+ */
+OSKAR_EXPORT
+const oskar_Mem* oskar_telescope_station_measured_z_enu_metres_const(
+        const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns a handle to the true station x positions.
+ *
+ * @details
+ * Returns a handle to the true station x positions.
+ *
+ * @param[in] model Pointer to telescope model.
+ *
+ * @return A handle to the true station x positions.
  */
 OSKAR_EXPORT
 oskar_Mem* oskar_telescope_station_true_x_offset_ecef_metres(
@@ -412,14 +589,14 @@ oskar_Mem* oskar_telescope_station_true_x_offset_ecef_metres(
 
 /**
  * @brief
- * Returns a constant handle to the station x positions.
+ * Returns a constant handle to the true station x positions.
  *
  * @details
- * Returns a constant handle to the station x positions.
+ * Returns a constant handle to the true station x positions.
  *
  * @param[in] model Pointer to telescope model.
  *
- * @return A constant handle to the station x positions.
+ * @return A constant handle to the true station x positions.
  */
 OSKAR_EXPORT
 const oskar_Mem* oskar_telescope_station_true_x_offset_ecef_metres_const(
@@ -427,14 +604,14 @@ const oskar_Mem* oskar_telescope_station_true_x_offset_ecef_metres_const(
 
 /**
  * @brief
- * Returns a handle to the station y positions.
+ * Returns a handle to the true station y positions.
  *
  * @details
- * Returns a handle to the station y positions.
+ * Returns a handle to the true station y positions.
  *
  * @param[in] model Pointer to telescope model.
  *
- * @return A handle to the station y positions.
+ * @return A handle to the true station y positions.
  */
 OSKAR_EXPORT
 oskar_Mem* oskar_telescope_station_true_y_offset_ecef_metres(
@@ -442,14 +619,14 @@ oskar_Mem* oskar_telescope_station_true_y_offset_ecef_metres(
 
 /**
  * @brief
- * Returns a constant handle to the station y positions.
+ * Returns a constant handle to the true station y positions.
  *
  * @details
- * Returns a constant handle to the station y positions.
+ * Returns a constant handle to the true station y positions.
  *
  * @param[in] model Pointer to telescope model.
  *
- * @return A constant handle to the station y positions.
+ * @return A constant handle to the true station y positions.
  */
 OSKAR_EXPORT
 const oskar_Mem* oskar_telescope_station_true_y_offset_ecef_metres_const(
@@ -457,14 +634,14 @@ const oskar_Mem* oskar_telescope_station_true_y_offset_ecef_metres_const(
 
 /**
  * @brief
- * Returns a handle to the station z positions.
+ * Returns a handle to the true station z positions.
  *
  * @details
- * Returns a handle to the station z positions.
+ * Returns a handle to the true station z positions.
  *
  * @param[in] model Pointer to telescope model.
  *
- * @return A handle to the station z positions.
+ * @return A handle to the true station z positions.
  */
 OSKAR_EXPORT
 oskar_Mem* oskar_telescope_station_true_z_offset_ecef_metres(
@@ -472,14 +649,14 @@ oskar_Mem* oskar_telescope_station_true_z_offset_ecef_metres(
 
 /**
  * @brief
- * Returns a constant handle to the station z positions.
+ * Returns a constant handle to the true station z positions.
  *
  * @details
- * Returns a constant handle to the station z positions.
+ * Returns a constant handle to the true station z positions.
  *
  * @param[in] model Pointer to telescope model.
  *
- * @return A constant handle to the station z positions.
+ * @return A constant handle to the true station z positions.
  */
 OSKAR_EXPORT
 const oskar_Mem* oskar_telescope_station_true_z_offset_ecef_metres_const(
@@ -487,28 +664,28 @@ const oskar_Mem* oskar_telescope_station_true_z_offset_ecef_metres_const(
 
 /**
  * @brief
- * Returns a handle to the horizon plane station x positions.
+ * Returns a handle to the true horizon plane station x positions.
  *
  * @details
- * Returns a handle to the horizon plane station x positions.
+ * Returns a handle to the true horizon plane station x positions.
  *
  * @param[in] model Pointer to telescope model.
  *
- * @return A handle to the horizon plane station x positions.
+ * @return A handle to the true horizon plane station x positions.
  */
 OSKAR_EXPORT
 oskar_Mem* oskar_telescope_station_true_x_enu_metres(oskar_Telescope* model);
 
 /**
  * @brief
- * Returns a constant handle to the horizon plane station x positions.
+ * Returns a constant handle to the true horizon plane station x positions.
  *
  * @details
- * Returns a constant handle to the horizon plane station x positions.
+ * Returns a constant handle to the true horizon plane station x positions.
  *
  * @param[in] model Pointer to telescope model.
  *
- * @return A constant handle to the horizon plane station x positions.
+ * @return A constant handle to the true horizon plane station x positions.
  */
 OSKAR_EXPORT
 const oskar_Mem* oskar_telescope_station_true_x_enu_metres_const(
@@ -516,28 +693,28 @@ const oskar_Mem* oskar_telescope_station_true_x_enu_metres_const(
 
 /**
  * @brief
- * Returns a handle to the horizon plane station y positions.
+ * Returns a handle to the true horizon plane station y positions.
  *
  * @details
- * Returns a handle to the horizon plane station y positions.
+ * Returns a handle to the true horizon plane station y positions.
  *
  * @param[in] model Pointer to telescope model.
  *
- * @return A handle to the horizon plane station y positions.
+ * @return A handle to the true horizon plane station y positions.
  */
 OSKAR_EXPORT
 oskar_Mem* oskar_telescope_station_true_y_enu_metres(oskar_Telescope* model);
 
 /**
  * @brief
- * Returns a constant handle to the horizon plane station y positions.
+ * Returns a constant handle to the true horizon plane station y positions.
  *
  * @details
- * Returns a constant handle to the horizon plane station y positions.
+ * Returns a constant handle to the true horizon plane station y positions.
  *
  * @param[in] model Pointer to telescope model.
  *
- * @return A constant handle to the horizon plane station y positions.
+ * @return A constant handle to the true horizon plane station y positions.
  */
 OSKAR_EXPORT
 const oskar_Mem* oskar_telescope_station_true_y_enu_metres_const(
@@ -545,28 +722,28 @@ const oskar_Mem* oskar_telescope_station_true_y_enu_metres_const(
 
 /**
  * @brief
- * Returns a handle to the horizon plane station z positions.
+ * Returns a handle to the true horizon plane station z positions.
  *
  * @details
- * Returns a handle to the horizon plane station z positions.
+ * Returns a handle to the true horizon plane station z positions.
  *
  * @param[in] model Pointer to telescope model.
  *
- * @return A handle to the horizon plane station z positions.
+ * @return A handle to the true horizon plane station z positions.
  */
 OSKAR_EXPORT
 oskar_Mem* oskar_telescope_station_true_z_enu_metres(oskar_Telescope* model);
 
 /**
  * @brief
- * Returns a constant handle to the horizon plane station z positions.
+ * Returns a constant handle to the true horizon plane station z positions.
  *
  * @details
- * Returns a constant handle to the horizon plane station z positions.
+ * Returns a constant handle to the true horizon plane station z positions.
  *
  * @param[in] model Pointer to telescope model.
  *
- * @return A constant handle to the horizon plane station z positions.
+ * @return A constant handle to the true horizon plane station z positions.
  */
 OSKAR_EXPORT
 const oskar_Mem* oskar_telescope_station_true_z_enu_metres_const(

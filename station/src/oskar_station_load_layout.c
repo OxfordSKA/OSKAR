@@ -95,9 +95,13 @@ void oskar_station_load_layout(oskar_Station* station, const char* filename,
             if (*status) break;
         }
 
+        /* Get "true" coordinates ([3, 4, 5]) from "measured" coordinates. */
+        par[3] += par[0];
+        par[4] += par[1];
+        par[5] += par[2];
+
         /* Store the data. */
-        oskar_station_set_element_coords(station, n,
-                par[0], par[1], par[2], par[3], par[4], par[5], status);
+        oskar_station_set_element_coords(station, n, &par[0], &par[3], status);
 
         /* Increment element counter. */
         ++n;

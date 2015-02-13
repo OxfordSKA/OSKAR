@@ -96,18 +96,30 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     telescope->uv_filter_units = OSKAR_METRES;
 
     /* Initialise the arrays. */
-    telescope->station_true_x_offset_ecef_metres = oskar_mem_create(type, location,
-            num_stations, status);
-    telescope->station_true_y_offset_ecef_metres = oskar_mem_create(type, location,
-            num_stations, status);
-    telescope->station_true_z_offset_ecef_metres = oskar_mem_create(type, location,
-            num_stations, status);
-    telescope->station_true_x_enu_metres = oskar_mem_create(type, location,
-            num_stations, status);
-    telescope->station_true_y_enu_metres = oskar_mem_create(type, location,
-            num_stations, status);
-    telescope->station_true_z_enu_metres = oskar_mem_create(type, location,
-            num_stations, status);
+    telescope->station_true_x_offset_ecef_metres =
+            oskar_mem_create(type, location, num_stations, status);
+    telescope->station_true_y_offset_ecef_metres =
+            oskar_mem_create(type, location, num_stations, status);
+    telescope->station_true_z_offset_ecef_metres =
+            oskar_mem_create(type, location, num_stations, status);
+    telescope->station_true_x_enu_metres =
+            oskar_mem_create(type, location, num_stations, status);
+    telescope->station_true_y_enu_metres =
+            oskar_mem_create(type, location, num_stations, status);
+    telescope->station_true_z_enu_metres =
+            oskar_mem_create(type, location, num_stations, status);
+    telescope->station_measured_x_offset_ecef_metres =
+            oskar_mem_create(type, location, num_stations, status);
+    telescope->station_measured_y_offset_ecef_metres =
+            oskar_mem_create(type, location, num_stations, status);
+    telescope->station_measured_z_offset_ecef_metres =
+            oskar_mem_create(type, location, num_stations, status);
+    telescope->station_measured_x_enu_metres =
+            oskar_mem_create(type, location, num_stations, status);
+    telescope->station_measured_y_enu_metres =
+            oskar_mem_create(type, location, num_stations, status);
+    telescope->station_measured_z_enu_metres =
+            oskar_mem_create(type, location, num_stations, status);
 
     /* Initialise the station structures. */
     telescope->station = NULL;

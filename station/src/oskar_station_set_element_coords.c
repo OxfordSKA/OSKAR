@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,11 +42,10 @@ extern "C" {
 #endif
 
 void oskar_station_set_element_coords(oskar_Station* dst,
-        int index, double x, double y, double z, double delta_x,
-        double delta_y, double delta_z, int* status)
+        int index, const double measured_enu[3], const double true_enu[3],
+        int* status)
 {
     int type, location;
-    double x_weights, y_weights, z_weights, x_signal, y_signal, z_signal;
     void *xw, *yw, *zw, *xs, *ys, *zs;
 
     /* Check all inputs. */
@@ -70,19 +69,11 @@ void oskar_station_set_element_coords(oskar_Station* dst,
     type = oskar_station_precision(dst);
     location = oskar_station_mem_location(dst);
 
-    /* Check if z or delta_z is nonzero, and set 3D flag if so. */
-    if (z != 0.0 || delta_z != 0.0)
+    /* Check if any z component is nonzero, and set 3D flag if so. */
+    if (measured_enu[2] != 0.0 || true_enu[2] != 0.0)
         dst->array_is_3d = OSKAR_TRUE;
 
-    /* Set up the data. */
-    x_weights = x;
-    y_weights = y;
-    z_weights = z;
-    x_signal = x + delta_x;
-    y_signal = y + delta_y;
-    z_signal = z + delta_z;
-
-    /* Get byte pointers. */
+    /* Get raw pointers. */
     xw = oskar_mem_void(dst->element_measured_x_enu_metres);
     yw = oskar_mem_void(dst->element_measured_y_enu_metres);
     zw = oskar_mem_void(dst->element_measured_z_enu_metres);
@@ -94,21 +85,21 @@ void oskar_station_set_element_coords(oskar_Station* dst,
     {
         if (type == OSKAR_DOUBLE)
         {
-            ((double*)xw)[index] = x_weights;
-            ((double*)yw)[index] = y_weights;
-            ((double*)zw)[index] = z_weights;
-            ((double*)xs)[index] = x_signal;
-            ((double*)ys)[index] = y_signal;
-            ((double*)zs)[index] = z_signal;
+            ((double*)xw)[index] = measured_enu[0];
+            ((double*)yw)[index] = measured_enu[1];
+            ((double*)zw)[index] = measured_enu[2];
+            ((double*)xs)[index] = true_enu[0];
+            ((double*)ys)[index] = true_enu[1];
+            ((double*)zs)[index] = true_enu[2];
         }
         else if (type == OSKAR_SINGLE)
         {
-            ((float*)xw)[index] = (float)x_weights;
-            ((float*)yw)[index] = (float)y_weights;
-            ((float*)zw)[index] = (float)z_weights;
-            ((float*)xs)[index] = (float)x_signal;
-            ((float*)ys)[index] = (float)y_signal;
-            ((float*)zs)[index] = (float)z_signal;
+            ((float*)xw)[index] = (float)measured_enu[0];
+            ((float*)yw)[index] = (float)measured_enu[1];
+            ((float*)zw)[index] = (float)measured_enu[2];
+            ((float*)xs)[index] = (float)true_enu[0];
+            ((float*)ys)[index] = (float)true_enu[1];
+            ((float*)zs)[index] = (float)true_enu[2];
         }
         else
             *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -121,22 +112,22 @@ void oskar_station_set_element_coords(oskar_Station* dst,
         offset_bytes = index * size;
         if (type == OSKAR_DOUBLE)
         {
-            cudaMemcpy((char*)xw + offset_bytes, &x_weights, size, H2D);
-            cudaMemcpy((char*)yw + offset_bytes, &y_weights, size, H2D);
-            cudaMemcpy((char*)zw + offset_bytes, &z_weights, size, H2D);
-            cudaMemcpy((char*)xs + offset_bytes, &x_signal, size, H2D);
-            cudaMemcpy((char*)ys + offset_bytes, &y_signal, size, H2D);
-            cudaMemcpy((char*)zs + offset_bytes, &z_signal, size, H2D);
+            cudaMemcpy((char*)xw + offset_bytes, &measured_enu[0], size, H2D);
+            cudaMemcpy((char*)yw + offset_bytes, &measured_enu[1], size, H2D);
+            cudaMemcpy((char*)zw + offset_bytes, &measured_enu[2], size, H2D);
+            cudaMemcpy((char*)xs + offset_bytes, &true_enu[0], size, H2D);
+            cudaMemcpy((char*)ys + offset_bytes, &true_enu[1], size, H2D);
+            cudaMemcpy((char*)zs + offset_bytes, &true_enu[2], size, H2D);
         }
         else if (type == OSKAR_SINGLE)
         {
             float txw, tyw, tzw, txs, tys, tzs;
-            txw = (float) x_weights;
-            tyw = (float) y_weights;
-            tzw = (float) z_weights;
-            txs = (float) x_signal;
-            tys = (float) y_signal;
-            tzs = (float) z_signal;
+            txw = (float) measured_enu[0];
+            tyw = (float) measured_enu[1];
+            tzw = (float) measured_enu[2];
+            txs = (float) true_enu[0];
+            tys = (float) true_enu[1];
+            tzs = (float) true_enu[2];
             cudaMemcpy((char*)xw + offset_bytes, &txw, size, H2D);
             cudaMemcpy((char*)yw + offset_bytes, &tyw, size, H2D);
             cudaMemcpy((char*)zw + offset_bytes, &tzw, size, H2D);

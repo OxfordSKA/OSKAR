@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef OSKAR_HAVE_CUDA
-/* Must include this first to avoid type conflict.*/
-#include <cuda_runtime_api.h>
-#define H2D cudaMemcpyHostToDevice
-#endif
-
-#include <stdlib.h>
-
 #include <private_telescope.h>
 #include <oskar_telescope.h>
 
@@ -42,103 +34,33 @@ extern "C" {
 #endif
 
 void oskar_telescope_set_station_coords(oskar_Telescope* dst, int index,
-        double x_offset_ecef, double y_offset_ecef, double z_offset_ecef,
-        double x_enu, double y_enu, double z_enu, int* status)
+        const double measured_offset_ecef[3], const double true_offset_ecef[3],
+        const double measured_enu[3], const double true_enu[3], int* status)
 {
-    int type, location;
-    void *xw, *yw, *zw, *xh, *yh, *zh;
-
-    /* Check all inputs. */
-    if (!dst || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Check range. */
-    if (index >= dst->num_stations)
-    {
-        *status = OSKAR_ERR_OUT_OF_RANGE;
-        return;
-    }
-
-    /* Get the data type and location. */
-    type = oskar_telescope_precision(dst);
-    location = oskar_telescope_mem_location(dst);
-
-    /* Get byte pointers. */
-    xw = oskar_mem_void(dst->station_true_x_offset_ecef_metres);
-    yw = oskar_mem_void(dst->station_true_y_offset_ecef_metres);
-    zw = oskar_mem_void(dst->station_true_z_offset_ecef_metres);
-    xh = oskar_mem_void(dst->station_true_x_enu_metres);
-    yh = oskar_mem_void(dst->station_true_y_enu_metres);
-    zh = oskar_mem_void(dst->station_true_z_enu_metres);
-
-    if (location == OSKAR_CPU)
-    {
-        if (type == OSKAR_DOUBLE)
-        {
-            ((double*)xw)[index] = x_offset_ecef;
-            ((double*)yw)[index] = y_offset_ecef;
-            ((double*)zw)[index] = z_offset_ecef;
-            ((double*)xh)[index] = x_enu;
-            ((double*)yh)[index] = y_enu;
-            ((double*)zh)[index] = z_enu;
-        }
-        else if (type == OSKAR_SINGLE)
-        {
-            ((float*)xw)[index] = (float)x_offset_ecef;
-            ((float*)yw)[index] = (float)y_offset_ecef;
-            ((float*)zw)[index] = (float)z_offset_ecef;
-            ((float*)xh)[index] = (float)x_enu;
-            ((float*)yh)[index] = (float)y_enu;
-            ((float*)zh)[index] = (float)z_enu;
-        }
-        else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-    }
-    else if (location == OSKAR_GPU)
-    {
-#ifdef OSKAR_HAVE_CUDA
-        size_t size, offset_bytes;
-        size = oskar_mem_element_size(type);
-        offset_bytes = index * size;
-        if (type == OSKAR_DOUBLE)
-        {
-            cudaMemcpy((char*)xw + offset_bytes, &x_offset_ecef, size, H2D);
-            cudaMemcpy((char*)yw + offset_bytes, &y_offset_ecef, size, H2D);
-            cudaMemcpy((char*)zw + offset_bytes, &z_offset_ecef, size, H2D);
-            cudaMemcpy((char*)xh + offset_bytes, &x_enu, size, H2D);
-            cudaMemcpy((char*)yh + offset_bytes, &y_enu, size, H2D);
-            cudaMemcpy((char*)zh + offset_bytes, &z_enu, size, H2D);
-        }
-        else if (type == OSKAR_SINGLE)
-        {
-            float tx, ty, tz, tx_hor, ty_hor, tz_hor;
-            tx = (float) x_offset_ecef;
-            ty = (float) y_offset_ecef;
-            tz = (float) z_offset_ecef;
-            tx_hor = (float) x_enu;
-            ty_hor = (float) y_enu;
-            tz_hor = (float) z_enu;
-            cudaMemcpy((char*)xw + offset_bytes, &tx, size, H2D);
-            cudaMemcpy((char*)yw + offset_bytes, &ty, size, H2D);
-            cudaMemcpy((char*)zw + offset_bytes, &tz, size, H2D);
-            cudaMemcpy((char*)xh + offset_bytes, &tx_hor, size, H2D);
-            cudaMemcpy((char*)yh + offset_bytes, &ty_hor, size, H2D);
-            cudaMemcpy((char*)zh + offset_bytes, &tz_hor, size, H2D);
-        }
-        else
-            *status = OSKAR_ERR_BAD_DATA_TYPE;
-#else
-        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
-#endif
-    }
-    else
-        *status = OSKAR_ERR_BAD_LOCATION;
+    oskar_mem_set_element_scalar_real(dst->station_measured_x_offset_ecef_metres,
+            index, measured_offset_ecef[0], status);
+    oskar_mem_set_element_scalar_real(dst->station_measured_y_offset_ecef_metres,
+            index, measured_offset_ecef[1], status);
+    oskar_mem_set_element_scalar_real(dst->station_measured_z_offset_ecef_metres,
+            index, measured_offset_ecef[2], status);
+    oskar_mem_set_element_scalar_real(dst->station_true_x_offset_ecef_metres,
+            index, true_offset_ecef[0], status);
+    oskar_mem_set_element_scalar_real(dst->station_true_y_offset_ecef_metres,
+            index, true_offset_ecef[1], status);
+    oskar_mem_set_element_scalar_real(dst->station_true_z_offset_ecef_metres,
+            index, true_offset_ecef[2], status);
+    oskar_mem_set_element_scalar_real(dst->station_measured_x_enu_metres,
+            index, measured_enu[0], status);
+    oskar_mem_set_element_scalar_real(dst->station_measured_y_enu_metres,
+            index, measured_enu[1], status);
+    oskar_mem_set_element_scalar_real(dst->station_measured_z_enu_metres,
+            index, measured_enu[2], status);
+    oskar_mem_set_element_scalar_real(dst->station_true_x_enu_metres,
+            index, true_enu[0], status);
+    oskar_mem_set_element_scalar_real(dst->station_true_y_enu_metres,
+            index, true_enu[1], status);
+    oskar_mem_set_element_scalar_real(dst->station_true_z_enu_metres,
+            index, true_enu[2], status);
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,20 +47,15 @@ extern "C" {
  * This function sets the coordinates of the specified element in the station
  * model, transferring data to the GPU if necessary.
  *
- * @param[in] dst        Station model structure to copy into.
- * @param[in] index      Element array index to set.
- * @param[in] x          Element x position.
- * @param[in] y          Element y position.
- * @param[in] z          Element z position.
- * @param[in] delta_x    Element x delta.
- * @param[in] delta_y    Element y delta.
- * @param[in] delta_z    Element z delta.
- * @param[in,out] status Status return code.
+ * @param[in] dst              Station model structure to update.
+ * @param[in] index            Element array index to set.
+ * @param[in] measured_enu[3]  Measured (x,y,z) of station (horizon).
+ * @param[in] true_enu[3]      True (x,y,z) of station (horizon).
+ * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_set_element_coords(oskar_Station* dst,
-        int index, double x, double y, double z, double delta_x,
-        double delta_y, double delta_z, int* status);
+void oskar_station_set_element_coords(oskar_Station* dst, int index,
+        const double measured_enu[3], const double true_enu[3], int* status);
 
 #ifdef __cplusplus
 }

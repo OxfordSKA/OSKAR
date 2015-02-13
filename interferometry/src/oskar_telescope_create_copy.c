@@ -89,6 +89,18 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
             src->station_true_y_enu_metres, status);
     oskar_mem_copy(telescope->station_true_z_enu_metres,
             src->station_true_z_enu_metres, status);
+    oskar_mem_copy(telescope->station_measured_x_offset_ecef_metres,
+            src->station_measured_x_offset_ecef_metres, status);
+    oskar_mem_copy(telescope->station_measured_y_offset_ecef_metres,
+            src->station_measured_y_offset_ecef_metres, status);
+    oskar_mem_copy(telescope->station_measured_z_offset_ecef_metres,
+            src->station_measured_z_offset_ecef_metres, status);
+    oskar_mem_copy(telescope->station_measured_x_enu_metres,
+            src->station_measured_x_enu_metres, status);
+    oskar_mem_copy(telescope->station_measured_y_enu_metres,
+            src->station_measured_y_enu_metres, status);
+    oskar_mem_copy(telescope->station_measured_z_enu_metres,
+            src->station_measured_z_enu_metres, status);
 
     /* Copy each station. */
     telescope->station = malloc(src->num_stations * sizeof(oskar_Station*));

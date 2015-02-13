@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,6 +101,18 @@ void oskar_telescope_resize(oskar_Telescope* telescope, int size, int* status)
     oskar_mem_realloc(telescope->station_true_y_enu_metres,
             size, status);
     oskar_mem_realloc(telescope->station_true_z_enu_metres,
+            size, status);
+    oskar_mem_realloc(telescope->station_measured_x_offset_ecef_metres,
+            size, status);
+    oskar_mem_realloc(telescope->station_measured_y_offset_ecef_metres,
+            size, status);
+    oskar_mem_realloc(telescope->station_measured_z_offset_ecef_metres,
+            size, status);
+    oskar_mem_realloc(telescope->station_measured_x_enu_metres,
+            size, status);
+    oskar_mem_realloc(telescope->station_measured_y_enu_metres,
+            size, status);
+    oskar_mem_realloc(telescope->station_measured_z_enu_metres,
             size, status);
 
     /* Store the new size. */

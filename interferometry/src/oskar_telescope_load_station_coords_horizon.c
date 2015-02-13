@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,12 +88,12 @@ void oskar_telescope_load_station_coords_horizon(oskar_Telescope* telescope,
     {
         double lon = 0.0, lat = 0.0, alt = 0.0;
 
-        /* Declare parameter array. */
-        double par[] = {0.0, 0.0, 0.0}; /* Horizon plane x, y, z */
-        double x = 0.0, y = 0.0, z = 0.0; /* (Offset) geocentric x, y, z */
+        /* x, y, z, delta x, delta y, delta z */
+        double hor[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        double ecef[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
         /* Load coordinates. */
-        if (oskar_string_to_array_d(line, 3, par) < 2) continue;
+        if (oskar_string_to_array_d(line, 6, hor) < 2) continue;
 
         /* Resize the telescope model to hold the station data.
          * We can't resize to more than needed, since we would then lose track
@@ -105,19 +105,27 @@ void oskar_telescope_load_station_coords_horizon(oskar_Telescope* telescope,
             if (*status) break;
         }
 
-        /* Convert horizon plane to offset geocentric cartesian coordinates. */
-        oskar_convert_enu_to_offset_ecef_d(1, &par[0], &par[1], &par[2],
-                longitude, latitude, &x, &y, &z);
+        /* Get "true" coordinates ([3, 4, 5]) from "measured" coordinates. */
+        hor[3] += hor[0];
+        hor[4] += hor[1];
+        hor[5] += hor[2];
+
+        /* Convert horizon plane to offset geocentric Cartesian coordinates. */
+        oskar_convert_enu_to_offset_ecef_d(1, &hor[0], &hor[1], &hor[2],
+                longitude, latitude, &ecef[0], &ecef[1], &ecef[2]);
+        oskar_convert_enu_to_offset_ecef_d(1, &hor[3], &hor[4], &hor[5],
+                longitude, latitude, &ecef[3], &ecef[4], &ecef[5]);
 
         /* Store the offset geocentric and horizon plane coordinates. */
-        oskar_telescope_set_station_coords(telescope, n, x, y, z,
-                par[0], par[1], par[2], status);
+        oskar_telescope_set_station_coords(telescope, n, &ecef[0], &ecef[3],
+                &hor[0], &hor[3], status);
         if (*status) break;
 
         /* Convert to ECEF, then to station longitude, latitude, altitude. */
-        oskar_convert_offset_ecef_to_ecef(1, &x, &y, &z, longitude, latitude,
-                altitude, &x, &y, &z);
-        oskar_convert_ecef_to_geodetic_spherical(1, &x, &y, &z, &lon, &lat, &alt);
+        oskar_convert_offset_ecef_to_ecef(1, &ecef[3], &ecef[4], &ecef[5],
+                longitude, latitude, altitude, &ecef[3], &ecef[4], &ecef[5]);
+        oskar_convert_ecef_to_geodetic_spherical(1, &ecef[3], &ecef[4],
+                &ecef[5], &lon, &lat, &alt);
         oskar_station_set_position(oskar_telescope_station(telescope, n),
                 lon, lat, alt);
 

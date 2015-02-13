@@ -164,6 +164,75 @@ const oskar_Station* oskar_telescope_station_const(
 
 /* Coordinate arrays. */
 
+oskar_Mem* oskar_telescope_station_measured_x_offset_ecef_metres(
+        oskar_Telescope* model)
+{
+    return model->station_measured_x_offset_ecef_metres;
+}
+
+const oskar_Mem* oskar_telescope_station_measured_x_offset_ecef_metres_const(
+        const oskar_Telescope* model)
+{
+    return model->station_measured_x_offset_ecef_metres;
+}
+
+oskar_Mem* oskar_telescope_station_measured_y_offset_ecef_metres(
+        oskar_Telescope* model)
+{
+    return model->station_measured_y_offset_ecef_metres;
+}
+
+const oskar_Mem* oskar_telescope_station_measured_y_offset_ecef_metres_const(
+        const oskar_Telescope* model)
+{
+    return model->station_measured_y_offset_ecef_metres;
+}
+
+oskar_Mem* oskar_telescope_station_measured_z_offset_ecef_metres(
+        oskar_Telescope* model)
+{
+    return model->station_measured_z_offset_ecef_metres;
+}
+
+const oskar_Mem* oskar_telescope_station_measured_z_offset_ecef_metres_const(
+        const oskar_Telescope* model)
+{
+    return model->station_measured_z_offset_ecef_metres;
+}
+
+oskar_Mem* oskar_telescope_station_measured_x_enu_metres(oskar_Telescope* model)
+{
+    return model->station_measured_x_enu_metres;
+}
+
+const oskar_Mem* oskar_telescope_station_measured_x_enu_metres_const(
+        const oskar_Telescope* model)
+{
+    return model->station_measured_x_enu_metres;
+}
+
+oskar_Mem* oskar_telescope_station_measured_y_enu_metres(oskar_Telescope* model)
+{
+    return model->station_measured_y_enu_metres;
+}
+
+const oskar_Mem* oskar_telescope_station_measured_y_enu_metres_const(
+        const oskar_Telescope* model)
+{
+    return model->station_measured_y_enu_metres;
+}
+
+oskar_Mem* oskar_telescope_station_measured_z_enu_metres(oskar_Telescope* model)
+{
+    return model->station_measured_z_enu_metres;
+}
+
+const oskar_Mem* oskar_telescope_station_measured_z_enu_metres_const(
+        const oskar_Telescope* model)
+{
+    return model->station_measured_z_enu_metres;
+}
+
 oskar_Mem* oskar_telescope_station_true_x_offset_ecef_metres(
         oskar_Telescope* model)
 {

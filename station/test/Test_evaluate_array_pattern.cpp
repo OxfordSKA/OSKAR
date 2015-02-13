@@ -138,12 +138,12 @@ static oskar_Station* set_up_station1(int num_x, int num_y,
     {
         for (ix = 0; ix < num_x; ++ix, ++i)
         {
-            float x, y;
-            x = ix * sep_m - (num_x - 1) * sep_m / 2;
-            y = iy * sep_m - (num_y - 1) * sep_m / 2;
+            double xyz[3];
+            xyz[0] = ix * sep_m - (num_x - 1) * sep_m / 2;
+            xyz[1] = iy * sep_m - (num_y - 1) * sep_m / 2;
+            xyz[2] = 0.0;
 
-            oskar_station_set_element_coords(station, i,
-                    x, y, 0.0, 0.0, 0.0, 0.0, status);
+            oskar_station_set_element_coords(station, i, xyz, xyz, status);
             oskar_station_set_element_errors(station, i,
                     1.0, 0.0, 0.0, 0.0, status);
             oskar_station_set_element_weight(station, i,
@@ -488,14 +488,11 @@ TEST(evaluate_array_pattern, test)
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Set 3D arrays. */
-    oskar_station_set_element_coords(station_cpu_f, 0,
-            0., 0., 1., 0., 0., 0., &status);
-    oskar_station_set_element_coords(station_gpu_f, 0,
-            0., 0., 1., 0., 0., 0., &status);
-    oskar_station_set_element_coords(station_cpu_f, 0,
-            0., 0., 0., 0., 0., 0., &status);
-    oskar_station_set_element_coords(station_gpu_f, 0,
-            0., 0., 0., 0., 0., 0., &status);
+    double xyz[] = {0., 0., 1.};
+    oskar_station_set_element_coords(station_cpu_f, 0, xyz, xyz, &status);
+    oskar_station_set_element_coords(station_gpu_f, 0, xyz, xyz, &status);
+    oskar_station_set_element_coords(station_cpu_f, 0, xyz, xyz, &status);
+    oskar_station_set_element_coords(station_gpu_f, 0, xyz, xyz, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
     ASSERT_EQ(1, oskar_station_array_is_3d(station_cpu_f));
     ASSERT_EQ(1, oskar_station_array_is_3d(station_gpu_f));

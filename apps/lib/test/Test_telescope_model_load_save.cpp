@@ -119,18 +119,23 @@ TEST(telescope_model_load_save, test_1_level)
     // Populate a telescope model.
     for (int i = 0; i < num_stations; ++i)
     {
+        double xyz[3];
+        xyz[0] = 1.0 * i;
+        xyz[1] = 2.0 * i;
+        xyz[2] = 3.0 * i;
         oskar_Station* st = oskar_telescope_station(telescope, i);
-        oskar_telescope_set_station_coords(telescope, i, 0.0, 0.0, 0.0,
-                (double) i, (double) (2 * i), (double) (3 * i), &err);
+        oskar_telescope_set_station_coords(telescope, i,
+                xyz, xyz, xyz, xyz, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
         oskar_station_resize(st, num_elements, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         for (int j = 0; j < num_elements; ++j)
         {
-            oskar_station_set_element_coords(st,
-                    j, (double) (10 * i + j), (double) (20 * i + j),
-                    (double) (30 * i + j), 0.0, 0.0, 0.0, &err);
+            xyz[0] = 10.0 * i + 1.0 * j;
+            xyz[1] = 20.0 * i + 1.0 * j;
+            xyz[2] = 30.0 * i + 1.0 * j;
+            oskar_station_set_element_coords(st, j, xyz, xyz, &err);
             ASSERT_EQ(0, err) << oskar_get_error_string(err);
         }
     }
@@ -244,9 +249,13 @@ TEST(telescope_model_load_save, test_2_level)
     // Populate a telescope model.
     for (int i = 0; i < num_stations; ++i)
     {
+        double xyz[3];
+        xyz[0] = 1.0 * i;
+        xyz[1] = 2.0 * i;
+        xyz[2] = 3.0 * i;
         oskar_Station* st = oskar_telescope_station(telescope, i);
-        oskar_telescope_set_station_coords(telescope, i, 0.0, 0.0, 0.0,
-                (double) i, (double) (2 * i), (double) (3 * i), &err);
+        oskar_telescope_set_station_coords(telescope, i,
+                xyz, xyz, xyz, xyz, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
         oskar_station_resize(st, num_tiles, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
@@ -255,19 +264,21 @@ TEST(telescope_model_load_save, test_2_level)
 
         for (int j = 0; j < num_tiles; ++j)
         {
-            oskar_station_set_element_coords(st,
-                    j, (double) (10 * i + j), (double) (20 * i + j),
-                    (double) (30 * i + j), 0.0, 0.0, 0.0, &err);
+            xyz[0] = 10.0 * i + 1.0 * j;
+            xyz[1] = 20.0 * i + 1.0 * j;
+            xyz[2] = 30.0 * i + 1.0 * j;
+            oskar_station_set_element_coords(st, j, xyz, xyz, &err);
             ASSERT_EQ(0, err) << oskar_get_error_string(err);
             oskar_station_resize(oskar_station_child(st, j), num_elements, &err);
             ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
             for (int k = 0; k < num_elements; ++k)
             {
+                xyz[0] = 100.0 * i + 10.0 * j + 1.0 * k;
+                xyz[1] = 200.0 * i + 10.0 * j + 1.0 * k;
+                xyz[2] = 300.0 * i + 10.0 * j + 1.0 * k;
                 oskar_station_set_element_coords(oskar_station_child(st, j),
-                        k, (double) (100 * i + 10 * j + k),
-                        (double) (200 * i + 20 * j + k),
-                        (double) (300 * i + 30 * j + k), 0.0, 0.0, 0.0, &err);
+                        k, xyz, xyz, &err);
                 ASSERT_EQ(0, err) << oskar_get_error_string(err);
             }
         }

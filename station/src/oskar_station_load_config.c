@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,9 +95,13 @@ void oskar_station_load_config(oskar_Station* station, const char* filename,
             if (*status) break;
         }
 
+        /* Get "true" coordinates ([3, 4, 5]) from "measured" coordinates. */
+        par[3] += par[0];
+        par[4] += par[1];
+        par[5] += par[2];
+
         /* Store the data. */
-        oskar_station_set_element_coords(station, n,
-                par[0], par[1], par[2], par[3], par[4], par[5], status);
+        oskar_station_set_element_coords(station, n, &par[0], &par[3], status);
         oskar_station_set_element_errors(station, n,
                 par[6], par[7], par[8], par[9], status);
         oskar_station_set_element_weight(station, n,

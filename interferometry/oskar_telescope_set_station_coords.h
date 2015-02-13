@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,24 +45,23 @@ extern "C" {
  *
  * @details
  * This function sets the coordinates of the specified station in the telescope
- * model, transferring data to the GPU if necessary.
+ * model. Both the offset ECEF (Earth-centred-Earth-fixed) and horizon
+ * frame coordinates must be supplied.
  *
- * All coordinates must be in metres.
+ * All coordinates are in metres.
  *
- * @param[in] dst           Telescope model structure to modify.
- * @param[in] index         Station array index to set.
- * @param[in] x_offset_ecef Station x position (ECEF).
- * @param[in] y_offset_ecef Station y position (ECEF).
- * @param[in] z_offset_ecef Station z position (ECEF).
- * @param[in] x_enu         Station x position (horizon).
- * @param[in] y_enu         Station y position (horizon).
- * @param[in] z_enu         Station z position (horizon).
- * @param[in,out] status    Status return code.
+ * @param[in] dst                     Telescope model structure to update.
+ * @param[in] index                   Station index to set.
+ * @param[in] measured_offset_ecef[3] Measured (x,y,z) of station (offset ECEF).
+ * @param[in] true_offset_ecef[3]     True (x,y,z) of station (offset ECEF).
+ * @param[in] measured_enu[3]         Measured (x,y,z) of station (horizon).
+ * @param[in] true_enu[3]             True (x,y,z) of station (horizon).
+ * @param[in,out] status              Status return code.
  */
 OSKAR_EXPORT
 void oskar_telescope_set_station_coords(oskar_Telescope* dst, int index,
-        double x_offset_ecef, double y_offset_ecef, double z_offset_ecef,
-        double x_enu, double y_enu, double z_enu, int* status);
+        const double measured_offset_ecef[3], const double true_offset_ecef[3],
+        const double measured_enu[3], const double true_enu[3], int* status);
 
 #ifdef __cplusplus
 }
