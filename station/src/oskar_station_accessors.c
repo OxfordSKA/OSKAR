@@ -371,6 +371,11 @@ const int* oskar_station_element_types_cpu_const(const oskar_Station* model)
     return (const int*) oskar_mem_void_const(model->element_types_cpu);
 }
 
+const char* oskar_station_element_mount_types_const(const oskar_Station* model)
+{
+    return oskar_mem_char_const(model->element_mount_types_cpu);
+}
+
 int oskar_station_has_child(const oskar_Station* model)
 {
     return model->child ? 1 : 0;

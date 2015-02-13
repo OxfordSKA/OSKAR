@@ -122,6 +122,7 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
             src->element_orientation_y_rad_cpu, status);
     oskar_mem_copy(model->element_types, src->element_types, status);
     oskar_mem_copy(model->element_types_cpu, src->element_types_cpu, status);
+    oskar_mem_copy(model->element_mount_types_cpu, src->element_mount_types_cpu, status);
     oskar_mem_copy(model->permitted_beam_az_rad, src->permitted_beam_az_rad, status);
     oskar_mem_copy(model->permitted_beam_el_rad, src->permitted_beam_el_rad, status);
 

@@ -97,6 +97,7 @@ struct oskar_Station
     oskar_Mem* element_orientation_y_rad_cpu; /* Azimuth of y dipole axis, in radians, guaranteed to be in CPU memory (default 0.0). */
     oskar_Mem* element_types;     /* Integer array of element types (default 0). */
     oskar_Mem* element_types_cpu; /* Integer array of element types guaranteed to be in CPU memory (default 0). */
+    oskar_Mem* element_mount_types_cpu; /* Char array of element mount types guaranteed to be in CPU memory. */
     oskar_Station** child;        /* Array of child station handles (pointer is NULL if none). */
     oskar_Element** element;      /* Array of element models per element type (pointer is NULL if there are child stations). */
 

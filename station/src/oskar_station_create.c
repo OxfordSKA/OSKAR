@@ -29,6 +29,7 @@
 #include <private_station.h>
 #include <oskar_station.h>
 #include <oskar_cmath.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -102,6 +103,8 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
             oskar_mem_create(OSKAR_INT, location, num_elements, status);
     model->element_types_cpu =
             oskar_mem_create(OSKAR_INT, OSKAR_CPU, num_elements, status);
+    model->element_mount_types_cpu =
+            oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, num_elements, status);
     model->permitted_beam_az_rad =
             oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
     model->permitted_beam_el_rad =
@@ -141,6 +144,9 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->child = 0;
     model->element = 0;
     model->num_permitted_beams = 0;
+    if (num_elements > 0)
+        memset(oskar_mem_void(model->element_mount_types_cpu), 'F',
+                num_elements);
 
     /* Return pointer to station model. */
     return model;

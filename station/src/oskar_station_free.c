@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,7 @@ void oskar_station_free(oskar_Station* model, int* status)
     oskar_mem_free(model->element_orientation_y_rad_cpu, status);
     oskar_mem_free(model->element_types, status);
     oskar_mem_free(model->element_types_cpu, status);
+    oskar_mem_free(model->element_mount_types_cpu, status);
     oskar_mem_free(model->permitted_beam_az_rad, status);
     oskar_mem_free(model->permitted_beam_el_rad, status);
 

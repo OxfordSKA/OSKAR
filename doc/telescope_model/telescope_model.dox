@@ -119,51 +119,57 @@ directories of the telescope model.
 The layout (in horizontal East-North-Up coordinates) of stations or elements 
 within stations.<br>
 <b>See</b> \ref telescope_layout_files <br>
-<b>Required?</b> Yes (but see below).<br>
-<b>Allowed locations?</b> All directories.
+<b>Required:</b> Yes (but see below).<br>
+<b>Allowed locations:</b> All directories.
 
 \par layout_ecef.txt
 The layout of stations in Earth-centred-Earth-fixed coordinates.<br>
 Can be used instead of "layout.txt" at top-level only, if required.<br>
 <b>See</b> \ref telescope_layout_ecef <br>
-<b>Required?</b> No, unless layout.txt is omitted.<br>
-<b>Allowed locations?</b> Telescope model root directory.
+<b>Required:</b> No, unless layout.txt is omitted.<br>
+<b>Allowed locations:</b> Telescope model root directory.
 
 \par gain_phase.txt
 Per-element gain and phase offsets and errors.<br>
 <b>See</b> \ref telescope_element_gain_phase_errors <br>
-<b>Required?</b> No.<br>
-<b>Allowed locations?</b> Station directory.
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Station directory.
 
 \par apodisation.txt
 Per-element complex apodisation weight.<br>
 <b>See</b> \ref telescope_element_apodisation <br>
-<b>Required?</b> No.<br>
-<b>Allowed locations?</b> Station directory.
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Station directory.
 
 \par orientation.txt
 Per-element X- and Y-dipole orientations.<br>
 <b>See</b> \ref telescope_element_orientation <br>
-<b>Required?</b> No.<br>
-<b>Allowed locations?</b> Station directory.
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Station directory.
 
 \par permitted_beams.txt
 Permitted station beam directions in local horizon frame.<br>
 <b>See</b> \ref telescope_permitted_beams <br>
-<b>Required?</b> No.<br>
-<b>Allowed locations?</b> Station directory.
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Station directory.
 
 \par element_types.txt
 Type index of each element in the station.<br>
 <b>See</b> \ref telescope_element_types <br>
-<b>Required?</b> No.<br>
-<b>Allowed locations?</b> Station directory.
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Station directory.
+
+\par mount_types.txt
+Mount type of each element in the station.<br>
+<b>See</b> \ref telescope_element_mount_types <br>
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Station directory.
 
 \par element_pattern_fit_*.bin
 Element X-or Y-dipole responses for the station, as a function of frequency.<br>
 <b>See</b> \ref telescope_element_patterns <br>
-<b>Required?</b> No.<br>
-<b>Allowed locations?</b> Any. (Inherited.)
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Any. (Inherited.)
 
 \par config.txt
 Deprecated.<br>
@@ -174,42 +180,42 @@ Deprecated.<br>
 \par noise_frequencies.txt
 Frequencies for which noise values are defined.<br>
 <b>See</b> \ref telescope_noise <br>
-<b>Required?</b> No, unless another noise file is present.<br>
-<b>Allowed locations?</b> Telescope model root directory. (Inherited.)
+<b>Required:</b> No, unless another noise file is present.<br>
+<b>Allowed locations:</b> Telescope model root directory. (Inherited.)
 
 \par rms.txt
 Flux density RMS noise values, in Jy, as a function of frequency.<br>
 <b>See</b> \ref telescope_noise <br>
-<b>Required?</b> No.<br>
-<b>Allowed locations?</b> Telescope model root directory, or top-level 
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Telescope model root directory, or top-level 
 station directory. (Inherited.)
 
 \par sensitivity.txt
 System sensitivities, in Jy, as a function of frequency.<br>
 <b>See</b> \ref telescope_noise <br>
-<b>Required?</b> No.<br>
-<b>Allowed locations?</b> Telescope model root directory, or top-level 
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Telescope model root directory, or top-level 
 station directory. (Inherited.)
 
 \par t_sys.txt
 System temperatures, in K, as a function of frequency.<br>
 <b>See</b> \ref telescope_noise <br>
-<b>Required?</b> No.<br>
-<b>Allowed locations?</b> Telescope model root directory, or top-level 
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Telescope model root directory, or top-level 
 station directory. (Inherited.)
 
 \par area.txt
 Effective areas, in \f$\mathrm{m}^2\f$, as a function of frequency.<br>
 <b>See</b> \ref telescope_noise <br>
-<b>Required?</b> No.<br>
-<b>Allowed locations?</b> Telescope model root directory, or top-level 
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Telescope model root directory, or top-level 
 station directory. (Inherited.)
 
 \par efficiency.txt
 System efficiencies, as a function of frequency.<br>
 <b>See</b> \ref telescope_noise <br>
-<b>Required?</b> No.<br>
-<b>Allowed locations?</b> Telescope model root directory, or top-level 
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Telescope model root directory, or top-level 
 station directory. (Inherited.)
 
 These files contain tables of ASCII-formatted values. For telescope and 
@@ -237,20 +243,28 @@ the telescope or station level.
 
 The top-level "layout.txt" file contains a table of ASCII text to represent 
 station positions relative to the centre of the interferometer array. 
-Each line contains three numeric values, which correspond to positions 
+Each line contains up to six values, which correspond to positions 
 represented as horizontal (x, y, z) coordinates in metres relative to a 
 horizon plane, where x is towards geographic east, y is towards geographic 
 north, and z is towards the local zenith. (The telescope centre position on 
 Earth is specified using longitude and latitude values in the main OSKAR 
 settings file, which is described in a separate document.)
 
+Coordinate errors can also be specified using optional columns. 
+The first three columns are the "measured" positions, while 
+the "true" positions are obtained by adding the supplied offsets to the 
+measured values.
+
 Coordinates are given in metres. In order, the parameter columns are:
 
-| Column | Description                      | Comment
-| ------ | -------------------------------- | --------------------------------
-| 1      | Horizontal x (east) coordinate   | Required
-| 2      | Horizontal y (north) coordinate  | Required
-| 3      | Horizontal z (up) coordinate     | Optional (default 0.0)
+| Column | Description                            | Comment
+| ------ | -------------------------------------- | ---------------------------
+| 1      | Horizontal x (east) coordinate         | Required
+| 2      | Horizontal y (north) coordinate        | Required
+| 3      | Horizontal z (up) coordinate           | Optional (default 0.0)
+| 4      | Horizontal x (east) coordinate error   | Optional (default 0.0)
+| 5      | Horizontal y (north) coordinate error  | Optional (default 0.0)
+| 6      | Horizontal z (up) coordinate error     | Optional (default 0.0)
 
 \subsubsection telescope_layout_ecef Telescope Level Earth-centred Coordinates
 
@@ -266,24 +280,19 @@ Coordinates are given in metres. In order, the parameter columns are:
 | 1      | ECEF x coordinate (towards longitude 0, latitude 0) | Required
 | 2      | ECEF y coordinate (towards the east)                | Required
 | 3      | ECEF z coordinate (towards the north pole)          | Required
+| 4      | ECEF x coordinate error                             | Optional (default 0.0)
+| 5      | ECEF y coordinate error                             | Optional (default 0.0)
+| 6      | ECEF z coordinate error                             | Optional (default 0.0)
 
 \subsection telescope_station_layout Station Level
 
-In each station directory, there should be a "layout.txt" file to specify 
+In each station directory, there must be a "layout.txt" file to specify 
 the element position in horizontal \f$(x, y, z)\f$ coordinates relative to 
 the station centre, and (optionally) the \f$(x, y, z)\f$ position errors.
 
-Coordinates are given in metres. In order, the parameter columns are:
-
-| Column | Description                            | Comment
-| ------ | -------------------------------------- | ---------------------------
-| 1      | Horizontal x (east) coordinate         | Required
-| 2      | Horizontal y (north) coordinate        | Required
-| 3      | Horizontal z (up) coordinate           | Optional (default 0.0)
-| 4      | Horizontal x (east) coordinate error   | Optional (default 0.0)
-| 5      | Horizontal y (north) coordinate error  | Optional (default 0.0)
-| 6      | Horizontal z (up) coordinate error     | Optional (default 0.0)
-
+The format of the element layout file is the same as that used for the 
+telescope-level station coordinates in the horizon frame. It is not possible 
+to use Earth-centred coordinates to specify element locations within a station.
 
 \section telescope_element_gain_phase_errors Element Gain & Phase Error Files
 
@@ -293,7 +302,7 @@ specify the per-element systematic and time-variable gain and phase errors.
 Phases are given in degrees. In order, the parameter columns are:
 
 | Column | Description                                                             | Comment
-| ------ | ----------------------------------------------------------------------- | ------------------------------
+| ------ | ----------------------------------------------------------------------- | ------------------------
 | 1      | Systematic gain factor, \f$G_0\f$                                       | Optional (default 1.0)
 | 2      | Systematic phase offset, \f$\phi_0\f$ [deg]                             | Optional (default 0.0)
 | 3      | Time-variable gain factor, \f$G_{\rm std}\f$, (std. deviation)          | Optional (default 0.0)
@@ -379,6 +388,22 @@ In order, the parameter columns are:
 | Column | Description                                           
 | ------ | --------------------------------------------------------------
 | 1      | Element type index (must be an integer). 
+
+\section telescope_element_mount_types  Mount Types
+
+In each station directory, there may be optionally a "mount_types.txt" 
+file to specify the mount type of each element in the station.
+
+Allowed types are 'Fixed' (a dipole fixed to the ground, as in an aperture 
+array), 'Alt-az', or 'Equatorial'. Only the first letter of each type is 
+checked. If the file is omitted, all elements have an implicit mount 
+type of 'Fixed'.
+
+In order, the parameter columns are:
+
+| Column | Description                                           
+| ------ | --------------------------------------------------------------
+| 1      | Element mount type (character: either 'F', 'A' or 'E'). 
 
 \section telescope_config_files Configuration Files (Deprecated)
 
@@ -639,9 +664,11 @@ left to right.
 <tr><td>6</td><td>2014-07-16</td>
     <td>[2.5.0] Updated description of how numerically-defined element 
     patterns should be used.</td></tr>
-<tr><td>7</td><td>2014-12-08</td>
+<tr><td>7</td><td>2015-02-13</td>
     <td>[2.6.0] Updated description of numerical element pattern data to 
-    allow for scalar-only element responses.</td></tr>
+    allow for scalar-only element responses. Updated description of 
+    telescope layout files to allow for station position errors. Added 
+    section to describe element mount types.</td></tr>
 </table>
 
 */

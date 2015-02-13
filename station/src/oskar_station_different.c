@@ -160,11 +160,14 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
     if (oskar_mem_different(a->element_types_cpu, b->element_types_cpu, n,
             status))
         return 1;
-    if (oskar_mem_different(a->permitted_beam_az_rad, b->permitted_beam_az_rad, n,
-            status))
+    if (oskar_mem_different(a->element_mount_types_cpu,
+            b->element_mount_types_cpu, n, status))
         return 1;
-    if (oskar_mem_different(a->permitted_beam_el_rad, b->permitted_beam_el_rad, n,
-            status))
+    if (oskar_mem_different(a->permitted_beam_az_rad,
+            b->permitted_beam_az_rad, n, status))
+        return 1;
+    if (oskar_mem_different(a->permitted_beam_el_rad,
+            b->permitted_beam_el_rad, n, status))
         return 1;
 
     /* Recursively check child stations. */

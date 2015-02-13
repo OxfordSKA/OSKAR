@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,6 +70,7 @@ enum OSKAR_STATION_TYPE
 #include <oskar_station_load_element_types.h>
 #include <oskar_station_load_gain_phase.h>
 #include <oskar_station_load_layout.h>
+#include <oskar_station_load_mount_types.h>
 #include <oskar_station_load_orientation.h>
 #include <oskar_station_load_permitted_beams.h>
 #include <oskar_station_override_element_gains.h>
@@ -84,10 +85,12 @@ enum OSKAR_STATION_TYPE
 #include <oskar_station_save_element_types.h>
 #include <oskar_station_save_gain_phase.h>
 #include <oskar_station_save_layout.h>
+#include <oskar_station_save_mount_types.h>
 #include <oskar_station_save_orientation.h>
 #include <oskar_station_save_permitted_beams.h>
 #include <oskar_station_set_element_coords.h>
 #include <oskar_station_set_element_errors.h>
+#include <oskar_station_set_element_mount_type.h>
 #include <oskar_station_set_element_orientation.h>
 #include <oskar_station_set_element_type.h>
 #include <oskar_station_set_element_weight.h>

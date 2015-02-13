@@ -24,6 +24,7 @@ set(apps_SRC
     src/private_TelescopeLoadElementTypes.cpp
     src/private_TelescopeLoadGainPhase.cpp
     src/private_TelescopeLoadLayout.cpp
+    src/private_TelescopeLoadMountTypes.cpp
     src/private_TelescopeLoadNoise.cpp
     src/private_TelescopeLoadOrientation.cpp
     src/private_TelescopeLoadPermittedBeams.cpp

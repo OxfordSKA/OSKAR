@@ -29,6 +29,7 @@ set(station_SRC
     src/oskar_station_load_element_types.c
     src/oskar_station_load_gain_phase.c
     src/oskar_station_load_layout.c
+    src/oskar_station_load_mount_types.c
     src/oskar_station_load_orientation.c
     src/oskar_station_load_permitted_beams.c
     src/oskar_station_override_element_gains.c
@@ -43,10 +44,12 @@ set(station_SRC
     src/oskar_station_save_element_types.c
     src/oskar_station_save_gain_phase.c
     src/oskar_station_save_layout.c
+    src/oskar_station_save_mount_types.c
     src/oskar_station_save_orientation.c
     src/oskar_station_save_permitted_beams.c
     src/oskar_station_set_element_coords.c
     src/oskar_station_set_element_errors.c
+    src/oskar_station_set_element_mount_type.c
     src/oskar_station_set_element_orientation.c
     src/oskar_station_set_element_type.c
     src/oskar_station_set_element_weight.c

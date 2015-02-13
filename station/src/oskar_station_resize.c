@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #include <private_station.h>
 #include <oskar_station.h>
 #include <oskar_cmath.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,6 +69,7 @@ void oskar_station_resize(oskar_Station* station, int num_elements,
             num_elements, status);
     oskar_mem_realloc(station->element_types, num_elements, status);
     oskar_mem_realloc(station->element_types_cpu, num_elements, status);
+    oskar_mem_realloc(station->element_mount_types_cpu, num_elements, status);
 
     /* Initialise any new elements with default values. */
     if (num_elements > station->num_elements)
@@ -83,6 +85,8 @@ void oskar_station_resize(oskar_Station* station, int num_elements,
                 M_PI / 2.0, offset, num_new, status);
         oskar_mem_set_value_real(station->element_weight,
                 1.0, offset, num_new, status);
+        memset(oskar_mem_char(station->element_mount_types_cpu) + offset,
+                'F', num_new);
     }
 
     /* Set the new number of elements. */

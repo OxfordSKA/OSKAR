@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@ void oskar_station_analyse(oskar_Station* station,
 {
     int i, type;
     double *orientation_x, *orientation_y;
+    char* mount_type;
 
     /* Check all inputs. */
     if (!station || !finished_identical_station_check || !status)
@@ -68,13 +69,15 @@ void oskar_station_analyse(oskar_Station* station,
     station->common_element_orientation = 1;
 
     /* Analyse orientations separately (always double precision). */
+    mount_type = oskar_mem_char(station->element_mount_types_cpu);
     orientation_x =
             oskar_mem_double(station->element_orientation_x_rad_cpu, status);
     orientation_y =
             oskar_mem_double(station->element_orientation_y_rad_cpu, status);
     for (i = 1; i < station->num_elements; ++i)
     {
-        if (orientation_x[i] != orientation_x[0] ||
+        if (mount_type[i] != mount_type[0] ||
+                orientation_x[i] != orientation_x[0] ||
                 orientation_y[i] != orientation_y[0])
         {
             station->common_element_orientation = 0;

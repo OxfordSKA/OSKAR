@@ -282,6 +282,9 @@ OSKAR_EXPORT
 const int* oskar_station_element_types_cpu_const(const oskar_Station* model);
 
 OSKAR_EXPORT
+const char* oskar_station_element_mount_types_const(const oskar_Station* model);
+
+OSKAR_EXPORT
 int oskar_station_has_child(const oskar_Station* model);
 
 OSKAR_EXPORT
