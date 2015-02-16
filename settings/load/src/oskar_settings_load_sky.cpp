@@ -33,6 +33,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <cfloat>
 #include <QtCore/QSettings>
 #include <QtCore/QByteArray>
 #include <QtCore/QStringList>
@@ -238,7 +239,7 @@ void oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename,
         sky->common_flux_filter_min_jy = temp.toDouble();
     temp = s.value("flux_max", "max").toString();
     if (temp.compare("max", Qt::CaseInsensitive) == 0)
-        sky->common_flux_filter_max_jy = 0.0;
+        sky->common_flux_filter_max_jy = FLT_MAX;
     else
         sky->common_flux_filter_max_jy = temp.toDouble();
     s.endGroup();
