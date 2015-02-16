@@ -47,13 +47,13 @@ extern "C" {
  * @param[in]     telescope       Telescope model in use.
  * @param[in]     seed            Seed for the random number generator.
  * @param[in]     block_index     Simulation time index for the block.
- * @param[in,out] random_work     Random number generator work buffer.
+ * @param[in,out] station_work    Work buffer of length num_stations.
  * @param[in,out] status          Status return code.
  */
 OSKAR_EXPORT
 void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
         const oskar_Telescope* telescope, unsigned int seed,
-        unsigned int block_index, oskar_Mem* random_work, int* status);
+        unsigned int block_index, oskar_Mem* station_work, int* status);
 
 #ifdef __cplusplus
 }

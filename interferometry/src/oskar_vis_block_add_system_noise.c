@@ -243,14 +243,14 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
 
 void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
         const oskar_Telescope* telescope, unsigned int seed,
-        unsigned int block_index, oskar_Mem* baseline_work, int* status)
+        unsigned int block_index, oskar_Mem* station_work, int* status)
 {
     int c, num_channels;
     double freq_hz, freq_start_hz, freq_inc_hz;
     double channel_bandwidth_hz, time_int_sec;
 
     /* Check all inputs. */
-    if (!vis || !telescope || !baseline_work || !status)
+    if (!vis || !telescope || !station_work || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -280,9 +280,9 @@ void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
     for (c = 0; c < num_channels; ++c)
     {
         freq_hz = freq_start_hz + c * freq_inc_hz;
-        oskar_get_station_std_dev_for_channel(baseline_work, freq_hz,
+        oskar_get_station_std_dev_for_channel(station_work, freq_hz,
                 telescope, status);
-        oskar_vis_block_apply_noise(vis, baseline_work, seed,
+        oskar_vis_block_apply_noise(vis, station_work, seed,
                 block_index, c, channel_bandwidth_hz, time_int_sec, status);
     }
 }
