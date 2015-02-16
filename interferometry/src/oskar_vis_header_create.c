@@ -37,6 +37,7 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int max_times_per_block,
         int num_times_total, int num_channels, int num_stations, int* status)
 {
     oskar_VisHeader* hdr = 0;
+    int precision;
 
     /* Check all inputs. */
     if (!status)
@@ -55,6 +56,7 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int max_times_per_block,
     /* Allocate the structure. */
     hdr = (oskar_VisHeader*) malloc(sizeof(oskar_VisHeader));
     hdr->amp_type = amp_type;
+    precision = oskar_mem_type_precision(amp_type);
 
     /* Set dimensions. */
     hdr->max_times_per_block = max_times_per_block;
@@ -78,11 +80,11 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int max_times_per_block,
     /* Initialise CPU memory. */
     hdr->telescope_path = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
     hdr->settings = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, status);
-    hdr->station_x_offset_ecef_metres = oskar_mem_create(OSKAR_DOUBLE,
+    hdr->station_x_offset_ecef_metres = oskar_mem_create(precision,
             OSKAR_CPU, num_stations, status);
-    hdr->station_y_offset_ecef_metres = oskar_mem_create(OSKAR_DOUBLE,
+    hdr->station_y_offset_ecef_metres = oskar_mem_create(precision,
             OSKAR_CPU, num_stations, status);
-    hdr->station_z_offset_ecef_metres = oskar_mem_create(OSKAR_DOUBLE,
+    hdr->station_z_offset_ecef_metres = oskar_mem_create(precision,
             OSKAR_CPU, num_stations, status);
 
     /* Return handle to structure. */
