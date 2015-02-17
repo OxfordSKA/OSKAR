@@ -48,6 +48,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     const int *baseline_s1, *baseline_s2;
     const void* in;
     void* out;
+    int write_autocorrelations = OSKAR_FALSE;  /* FIXME - this hack doesn't work ...*/
 
     /* Check all inputs. */
     if (!blk || !header || !ms || !status)
@@ -144,7 +145,8 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
             oskar_ms_write_all_for_time_d(ms, row + start_row,
                     num_baselines, &uu_[row], &vv_[row], &ww_[row],
                     (const double*)out, baseline_s1, baseline_s2,
-                    dt_dump, dt_dump, t_start_sec + (t * dt_dump));
+                    oskar_vis_header_time_average_sec(header),
+                    dt_dump, t_start_sec + (t * dt_dump));
         }
     }
     else if (precision == OSKAR_SINGLE)
@@ -199,7 +201,8 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
             oskar_ms_write_all_for_time_f(ms, row + start_row,
                     num_baselines, &uu_[row], &vv_[row], &ww_[row],
                     (const float*)out, baseline_s1, baseline_s2,
-                    dt_dump, dt_dump, t_start_sec + (t * dt_dump));
+                    oskar_vis_header_time_average_sec(header),
+                    dt_dump, t_start_sec + (t * dt_dump));
         }
     }
     else

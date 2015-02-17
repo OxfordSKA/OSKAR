@@ -73,6 +73,7 @@ enum OSKAR_SKY_TAGS
 #include <oskar_sky_append_to_set.h>
 #include <oskar_sky_append.h>
 #include <oskar_sky_combine_set.h>
+#include <oskar_sky_copy.h>
 #include <oskar_sky_copy_contents.h>
 #include <oskar_sky_copy_filter_bands.h>
 #include <oskar_sky_create.h>
@@ -96,5 +97,6 @@ enum OSKAR_SKY_TAGS
 #include <oskar_sky_set_source.h>
 #include <oskar_sky_set_spectral_index.h>
 #include <oskar_sky_write.h>
+
 
 #endif /* OSKAR_SKY_H_ */

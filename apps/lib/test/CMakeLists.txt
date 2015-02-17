@@ -5,6 +5,7 @@
 set(name apps_lib_test)
 set(${name}_SRC
     Test_telescope_model_load_save.cpp
+    Test_sim_interferometer.cpp
 )
 if (CASACORE_FOUND)
     list(APPEND ${name}_SRC Test_write_ms.cpp)

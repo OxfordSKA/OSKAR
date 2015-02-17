@@ -12,7 +12,7 @@ set(math_SRC
     src/oskar_dftw_m2m_2d_omp.c
     src/oskar_dftw_m2m_3d_omp.c
     src/oskar_dftw_o2c_2d_omp.c
-    src/oskar_dftw_o2c_3d_omp.c    
+    src/oskar_dftw_o2c_3d_omp.c
     src/oskar_ellipse_radius.c
     src/oskar_find_closest_match.c
     src/oskar_fit_ellipse.c
@@ -26,7 +26,7 @@ set(math_SRC
     src/oskar_random_gaussian.c
     src/oskar_random_power_law.c
     src/oskar_rotate.c
-    #src/oskar_round_robin.c
+    src/oskar_round_robin.c
     #src/oskar_sph_rotate_to_position.c
 )
 

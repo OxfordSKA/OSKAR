@@ -56,6 +56,9 @@ OSKAR_EXPORT
 int oskar_vis_block_num_times(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
+void oskar_vis_block_set_num_times(oskar_VisBlock* vis, int value, int* status);
+
+OSKAR_EXPORT
 int oskar_vis_block_num_pols(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT

@@ -241,7 +241,7 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
             oskar_ms_write_all_for_time_d(ms, row + start_row,
                     num_baselines, &uu_[row], &vv_[row], &ww_[row],
                     (const double*)amp_tb, baseline_s1, baseline_s2,
-                    dt_dump, dt_dump, vis_time);
+                    oskar_vis_time_average_sec(vis), dt_dump, vis_time);
         }
     }
     else if (precision == OSKAR_SINGLE)
@@ -301,7 +301,7 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
             oskar_ms_write_all_for_time_f(ms, row + start_row,
                     num_baselines, &uu_[row], &vv_[row], &ww_[row],
                     (const float*)amp_tb, baseline_s1, baseline_s2,
-                    dt_dump, dt_dump, vis_time);
+                    oskar_vis_time_average_sec(vis), dt_dump, vis_time);
         }
     }
     else

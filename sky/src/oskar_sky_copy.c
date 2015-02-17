@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,50 +26,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_sky.h>
 #include <oskar_sky.h>
+#include <private_sky.h>
 #include <oskar_mem.h>
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_sky_free(oskar_Sky* model, int* status)
+void oskar_sky_copy(oskar_Sky* dst, const oskar_Sky* src,
+        int* status)
 {
     /* Check all inputs. */
-    if (!model || !status)
+    if (!src || !dst || !status)
     {
         oskar_set_invalid_argument(status);
         return;
     }
 
-    /* Free the memory. */
-    oskar_mem_free(model->ra_rad, status);
-    oskar_mem_free(model->dec_rad, status);
-    oskar_mem_free(model->I, status);
-    oskar_mem_free(model->Q, status);
-    oskar_mem_free(model->U, status);
-    oskar_mem_free(model->V, status);
-    oskar_mem_free(model->reference_freq_hz, status);
-    oskar_mem_free(model->spectral_index, status);
-    oskar_mem_free(model->rm_rad, status);
-    oskar_mem_free(model->l, status);
-    oskar_mem_free(model->m, status);
-    oskar_mem_free(model->n, status);
-    oskar_mem_free(model->fwhm_major_rad, status);
-    oskar_mem_free(model->fwhm_minor_rad, status);
-    oskar_mem_free(model->pa_rad, status);
-    oskar_mem_free(model->gaussian_a, status);
-    oskar_mem_free(model->gaussian_b, status);
-    oskar_mem_free(model->gaussian_c, status);
-#if 0
-    oskar_mem_free(model->filter_band_flux_jy, status);
-    oskar_mem_free(model->filter_band_radius_rad, status);
-#endif
+    /* Check if safe to proceed. */
+    if (*status) return;
 
-    /* Free the structure itself. */
-    free(model);
+    if (oskar_sky_precision(dst) != oskar_sky_precision(src)) {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
+    if (oskar_sky_capacity(dst) < oskar_sky_capacity(src)) {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
+
+    /* Copy meta data */
+    dst->num_sources = src->num_sources;
+    dst->use_extended = src->use_extended;
+    dst->reference_ra_rad = src->reference_ra_rad;
+    dst->reference_dec_rad = src->reference_dec_rad;
+
+    /* Copy the memory blocks */
+    oskar_mem_copy(dst->ra_rad, src->ra_rad, status);
+    oskar_mem_copy(dst->dec_rad, src->dec_rad, status);
+    oskar_mem_copy(dst->I, src->I, status);
+    oskar_mem_copy(dst->Q, src->Q, status);
+    oskar_mem_copy(dst->U, src->U, status);
+    oskar_mem_copy(dst->V, src->V, status);
+    oskar_mem_copy(dst->reference_freq_hz, src->reference_freq_hz, status);
+    oskar_mem_copy(dst->spectral_index, src->spectral_index, status);
+    oskar_mem_copy(dst->rm_rad, src->rm_rad, status);
+    oskar_mem_copy(dst->l, src->l, status);
+    oskar_mem_copy(dst->m, src->m, status);
+    oskar_mem_copy(dst->n, src->n, status);
+    oskar_mem_copy(dst->fwhm_major_rad, src->fwhm_major_rad, status);
+    oskar_mem_copy(dst->fwhm_minor_rad, src->fwhm_minor_rad, status);
+    oskar_mem_copy(dst->pa_rad, src->pa_rad, status);
+    oskar_mem_copy(dst->gaussian_a, src->gaussian_a, status);
+    oskar_mem_copy(dst->gaussian_b, src->gaussian_b, status);
+    oskar_mem_copy(dst->gaussian_c, src->gaussian_c, status);
 }
 
 #ifdef __cplusplus

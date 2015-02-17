@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,52 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_sky.h>
-#include <oskar_sky.h>
-#include <oskar_mem.h>
-#include <stdlib.h>
+#ifndef OSKAR_SKY_COPY_H_
+#define OSKAR_SKY_COPY_H_
+
+/**
+ * @file oskar_sky_copy.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_sky_free(oskar_Sky* model, int* status)
-{
-    /* Check all inputs. */
-    if (!model || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Free the memory. */
-    oskar_mem_free(model->ra_rad, status);
-    oskar_mem_free(model->dec_rad, status);
-    oskar_mem_free(model->I, status);
-    oskar_mem_free(model->Q, status);
-    oskar_mem_free(model->U, status);
-    oskar_mem_free(model->V, status);
-    oskar_mem_free(model->reference_freq_hz, status);
-    oskar_mem_free(model->spectral_index, status);
-    oskar_mem_free(model->rm_rad, status);
-    oskar_mem_free(model->l, status);
-    oskar_mem_free(model->m, status);
-    oskar_mem_free(model->n, status);
-    oskar_mem_free(model->fwhm_major_rad, status);
-    oskar_mem_free(model->fwhm_minor_rad, status);
-    oskar_mem_free(model->pa_rad, status);
-    oskar_mem_free(model->gaussian_a, status);
-    oskar_mem_free(model->gaussian_b, status);
-    oskar_mem_free(model->gaussian_c, status);
-#if 0
-    oskar_mem_free(model->filter_band_flux_jy, status);
-    oskar_mem_free(model->filter_band_radius_rad, status);
-#endif
-
-    /* Free the structure itself. */
-    free(model);
-}
+/**
+ * @brief Make a copy of a sky model.
+ *
+ * @details
+ * Makes a copy of the supplied sky model.
+ *
+ * @note
+ * Note the destination model must be already allocated and large enough to
+ * hold the sky model being copied into it.
+ *
+ * @param[out] dst         Sky model to copy into.
+ * @param[in]  src         Sky model to copy from.
+ * @param[in,out] status   Status return code.
+*/
+OSKAR_EXPORT
+void oskar_sky_copy(oskar_Sky* dst, const oskar_Sky* src, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_SKY_COPY_H_ */

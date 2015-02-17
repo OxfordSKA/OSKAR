@@ -37,6 +37,67 @@
 #include <cstdlib>
 #include <oskar_cmath.h>
 
+TEST(oskar_Sky, copy)
+{
+    int status = OSKAR_SUCCESS;
+
+    // Create and fill sky model 1.
+    int sky1_num_sources = 50e3;
+    oskar_Sky* sky1 = oskar_sky_create(OSKAR_SINGLE,
+            OSKAR_CPU, sky1_num_sources, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    for (int i = 0; i < sky1_num_sources; ++i)
+    {
+        double value = (double)i;
+        oskar_sky_set_source(sky1, i, value, value,
+                value, value, value, value,
+                value, value, 0.0, 0.0, 0.0, 0.0, &status);
+    }
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+
+    // Create sky model 2
+    int sky2_num_sorces = 50e3;
+    oskar_Sky* sky2 = oskar_sky_create(OSKAR_SINGLE,
+            OSKAR_GPU, sky2_num_sorces, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+
+    // Copy sky model 1 into 2
+//    oskar_Timer *t = oskar_timer_create(OSKAR_TIMER_CUDA);
+//    oskar_timer_start(t);
+//    for (int i = 0; i < 200; ++i)
+//    {
+    oskar_sky_copy(sky2, sky1, &status);
+//    }
+//    printf("Time taken = %f ms\n", (oskar_timer_elapsed(t)/200.0)*1000.0);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+
+    // Copy back and check contents.
+    oskar_Sky* sky_temp = oskar_sky_create_copy(sky2,
+            OSKAR_CPU, &status);
+    ASSERT_EQ(0, status) << oskar_get_error_string(status);
+    ASSERT_EQ(sky1_num_sources, oskar_sky_num_sources(sky_temp));
+    for (int i = 0; i < oskar_sky_num_sources(sky_temp); ++i)
+    {
+        if (i < sky1_num_sources)
+        {
+            EXPECT_FLOAT_EQ((float)i,
+                    oskar_mem_float(oskar_sky_ra_rad(sky_temp), &status)[i]);
+        }
+        else
+        {
+            EXPECT_FLOAT_EQ((float)(i - sky1_num_sources) + 0.5,
+                    oskar_mem_float(oskar_sky_ra_rad(sky_temp), &status)[i]);
+        }
+    }
+
+    // Free memory.
+    oskar_sky_free(sky_temp, &status);
+    oskar_sky_free(sky1, &status);
+    oskar_sky_free(sky2, &status);
+
+}
+
+
 TEST(SkyModel, append)
 {
     int status = 0;

@@ -576,6 +576,7 @@ const oskar_Mem* oskar_sky_gaussian_c_const(const oskar_Sky* sky);
 OSKAR_EXPORT
 int oskar_sky_num_filter_bands(const oskar_Sky* sky);
 
+#if 0
 /**
  * @brief Returns a handle to the band filter radius values.
  *
@@ -619,6 +620,7 @@ oskar_Mem* oskar_sky_filter_band_flux_jy(oskar_Sky* sky);
  */
 OSKAR_EXPORT
 const oskar_Mem* oskar_sky_filter_band_flux_jy_const(const oskar_Sky* sky);
+#endif
 
 #ifdef __cplusplus
 }

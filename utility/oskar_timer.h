@@ -85,7 +85,7 @@ OSKAR_EXPORT
 void oskar_timer_free(oskar_Timer* timer);
 
 /**
- * @brief Returns the total elapsed time.
+ * @brief Returns the total elapsed time, in seconds.
  *
  * @details
  * Returns the number of seconds since the timer was started.

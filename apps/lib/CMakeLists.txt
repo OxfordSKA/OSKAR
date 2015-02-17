@@ -15,6 +15,7 @@ set(apps_SRC
     src/oskar_set_up_visibilities.c
     src/oskar_sim_beam_pattern.cpp
     src/oskar_sim_interferometer.cpp
+    src/oskar_sim_interferometer_new.cpp
     src/oskar_sim_tec_screen.cpp
     src/oskar_telescope_load.cpp
     src/oskar_telescope_save.cpp
@@ -30,8 +31,8 @@ set(apps_SRC
     src/private_TelescopeLoadPermittedBeams.cpp
 )
 if(CASACORE_FOUND)
-    list(APPEND apps_SRC 
-        src/oskar_vis_write_ms.cpp 
+    list(APPEND apps_SRC
+        src/oskar_vis_write_ms.cpp
         src/oskar_vis_block_write_ms.c
         src/oskar_vis_header_write_ms.c
     )
@@ -47,7 +48,7 @@ cuda_add_library(oskar_apps ${apps_SRC})
 set(settings_libs oskar_settings_load oskar_settings_log)
 if(CASACORE_FOUND)
     target_link_libraries(oskar_apps oskar oskar_ms oskar_fits
-        ${settings_libs} ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} 
+        ${settings_libs} ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY}
         ${CUDA_LIBRARIES})
 else()
     target_link_libraries(oskar_apps oskar oskar_fits ${settings_libs}

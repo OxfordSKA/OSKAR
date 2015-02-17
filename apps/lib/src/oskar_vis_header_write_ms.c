@@ -101,10 +101,18 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         }
 
         /* Set the station positions. */
-        oskar_ms_set_station_coords(ms, num_stations,
-                oskar_mem_double_const(x_metres, status),
-                oskar_mem_double_const(y_metres, status),
-                oskar_mem_double_const(z_metres, status));
+        if (oskar_mem_type(x_metres) == OSKAR_DOUBLE) {
+            oskar_ms_set_station_coords(ms, num_stations,
+                    oskar_mem_double_const(x_metres, status),
+                    oskar_mem_double_const(y_metres, status),
+                    oskar_mem_double_const(z_metres, status));
+        }
+        else {
+            oskar_ms_set_station_coords_f(ms, num_stations,
+                    oskar_mem_float_const(x_metres, status),
+                    oskar_mem_float_const(y_metres, status),
+                    oskar_mem_float_const(z_metres, status));
+        }
     }
     else
     {

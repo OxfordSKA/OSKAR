@@ -45,22 +45,18 @@ extern "C" {
 
 /**
  * @brief
- * Initialises a visibility header and visibility block in CPU memory.
+ * Initialises (creates?) a visibility header
  *
  * @details
- * This function creates a visibility data header and a visibility data
- * block in CPU memory, which is filled during the simulation.
+ * This function creates a visibility data header.
  *
  * @param[in] settings   A pointer to the settings structure.
  * @param[in] tel        A pointer to the telescope model.
- * @param[in,out] hdr    On exit, a pointer to a visibility header.
- * @param[in,out] blk    On exit, a pointer to a visibility block.
  * @param[in,out] status Status return code.
  */
 OSKAR_APPS_EXPORT
-void oskar_set_up_vis(const oskar_Settings* settings,
-        const oskar_Telescope* tel, oskar_VisHeader** hdr,
-        oskar_VisBlock** blk, int* status);
+oskar_VisHeader* oskar_set_up_vis_header(const oskar_Settings* settings,
+        const oskar_Telescope* tel, int* status);
 
 #ifdef __cplusplus
 }

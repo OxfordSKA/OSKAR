@@ -35,23 +35,23 @@
 extern "C" {
 #endif
 
-void oskar_set_up_vis(const oskar_Settings* settings,
-        const oskar_Telescope* tel, oskar_VisHeader** hdr,
-        oskar_VisBlock** blk, int* status)
+oskar_VisHeader* oskar_set_up_vis_header(const oskar_Settings* settings,
+        const oskar_Telescope* tel, int* status)
 {
     int max_times_per_block, num_stations, num_channels;
-    int precision, vis_type;
+    int precision, vis_type, i;
+    oskar_VisHeader* hdr;
     const double rad2deg = 180.0/M_PI;
 
     /* Check all inputs. */
-    if (!settings || !tel || !hdr || !blk || !status)
+    if (!settings || !tel || !status)
     {
         oskar_set_invalid_argument(status);
-        return;
+        return 0;
     }
 
     /* Check if safe to proceed. */
-    if (*status) return;
+    if (*status) return 0;
 
     /* Create visibility header and data block. */
     max_times_per_block = settings->interferometer.max_time_samples_per_block;
@@ -61,23 +61,21 @@ void oskar_set_up_vis(const oskar_Settings* settings,
     vis_type = precision | OSKAR_COMPLEX;
     if (oskar_telescope_pol_mode(tel) == OSKAR_POL_MODE_FULL)
         vis_type |= OSKAR_MATRIX;
-    *hdr = oskar_vis_header_create(vis_type, max_times_per_block,
+    hdr = oskar_vis_header_create(vis_type, max_times_per_block,
             settings->obs.num_time_steps, num_channels, num_stations, status);
-    *blk = oskar_vis_block_create(vis_type, OSKAR_CPU, max_times_per_block,
-            num_channels, num_stations, status);
 
     /* Add metadata from settings. */
-    oskar_vis_header_set_freq_start_hz(*hdr,
+    oskar_vis_header_set_freq_start_hz(hdr,
             settings->obs.start_frequency_hz);
-    oskar_vis_header_set_freq_inc_hz(*hdr,
+    oskar_vis_header_set_freq_inc_hz(hdr,
             settings->obs.frequency_inc_hz);
-    oskar_vis_header_set_time_start_mjd_utc(*hdr,
+    oskar_vis_header_set_time_start_mjd_utc(hdr,
             settings->obs.start_mjd_utc);
-    oskar_vis_header_set_time_inc_sec(*hdr,
+    oskar_vis_header_set_time_inc_sec(hdr,
             settings->obs.dt_dump_days * 86400.0);
 
     /* Add telescope model path. */
-    oskar_mem_append_raw(oskar_vis_header_telescope_path(*hdr),
+    oskar_mem_append_raw(oskar_vis_header_telescope_path(hdr),
             settings->telescope.input_directory, OSKAR_CHAR, OSKAR_CPU,
             1 + strlen(settings->telescope.input_directory), status);
 
@@ -86,31 +84,33 @@ void oskar_set_up_vis(const oskar_Settings* settings,
         oskar_Mem* temp;
         temp = oskar_mem_read_binary_raw(settings->settings_path,
                 OSKAR_CHAR, OSKAR_CPU, status);
-        oskar_mem_copy(oskar_vis_header_settings(*hdr), temp, status);
+        oskar_mem_copy(oskar_vis_header_settings(hdr), temp, status);
         oskar_mem_free(temp, status);
     }
 
     /* Copy other metadata from telescope model. */
-    oskar_vis_header_set_time_average_sec(*hdr,
+    oskar_vis_header_set_time_average_sec(hdr,
             oskar_telescope_time_average_sec(tel));
-    oskar_vis_header_set_channel_bandwidth_hz(*hdr,
+    oskar_vis_header_set_channel_bandwidth_hz(hdr,
             oskar_telescope_channel_bandwidth_hz(tel));
-    oskar_vis_header_set_phase_centre(*hdr,
+    oskar_vis_header_set_phase_centre(hdr,
             oskar_telescope_phase_centre_ra_rad(tel) * rad2deg,
             oskar_telescope_phase_centre_dec_rad(tel) * rad2deg);
-    oskar_vis_header_set_telescope_centre(*hdr,
+    oskar_vis_header_set_telescope_centre(hdr,
             oskar_telescope_lon_rad(tel) * rad2deg,
             oskar_telescope_lat_rad(tel) * rad2deg,
             oskar_telescope_alt_metres(tel));
-    oskar_mem_copy(oskar_vis_header_station_x_offset_ecef_metres(*hdr),
+    oskar_mem_copy(oskar_vis_header_station_x_offset_ecef_metres(hdr),
             oskar_telescope_station_true_x_offset_ecef_metres_const(tel),
             status);
-    oskar_mem_copy(oskar_vis_header_station_y_offset_ecef_metres(*hdr),
+    oskar_mem_copy(oskar_vis_header_station_y_offset_ecef_metres(hdr),
             oskar_telescope_station_true_y_offset_ecef_metres_const(tel),
             status);
-    oskar_mem_copy(oskar_vis_header_station_z_offset_ecef_metres(*hdr),
+    oskar_mem_copy(oskar_vis_header_station_z_offset_ecef_metres(hdr),
             oskar_telescope_station_true_z_offset_ecef_metres_const(tel),
             status);
+
+    return hdr;
 }
 
 #ifdef __cplusplus

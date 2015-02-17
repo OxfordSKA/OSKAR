@@ -346,8 +346,8 @@ void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p, int start_row,
     }
 
     // Check/update time range.
-    if (time < p->start_time) p->start_time = time;
-    if (time > p->end_time) p->end_time = time;
+    if (time < p->start_time) p->start_time = time - interval/2.0;
+    if (time > p->end_time) p->end_time = time + interval/2.0;
 }
 
 void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p, int start_row,
@@ -415,8 +415,8 @@ void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p, int start_row,
     }
 
     // Check/update time range.
-    if (time < p->start_time) p->start_time = time;
-    if (time > p->end_time) p->end_time = time;
+    if (time < p->start_time) p->start_time = time - interval/2.0;
+    if (time > p->end_time) p->end_time = time + interval/2.0;
 }
 
 void oskar_ms_set_num_rows(oskar_MeasurementSet* p, int num)

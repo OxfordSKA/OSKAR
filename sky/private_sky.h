@@ -74,9 +74,11 @@ struct oskar_Sky
     oskar_Mem* gaussian_b;     /**< Gaussian source width parameter */
     oskar_Mem* gaussian_c;     /**< Gaussian source width parameter */
 
-    int num_filter_bands;
-    oskar_Mem* filter_band_radius_rad;
-    oskar_Mem* filter_band_flux_jy;
+#if 0
+    int num_filter_bands;              /* TODO DEPRECATED */
+    oskar_Mem* filter_band_radius_rad; /* TODO DEPRECATED */
+    oskar_Mem* filter_band_flux_jy;    /* TODO DEPRECATED */
+#endif
 };
 
 #ifndef OSKAR_SKY_TYPEDEF_

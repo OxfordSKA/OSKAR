@@ -59,6 +59,23 @@ int oskar_vis_block_num_times(const oskar_VisBlock* vis)
     return vis->dim_size[0];
 }
 
+void oskar_vis_block_set_num_times(oskar_VisBlock* vis, int value, int* status)
+{
+    if (!status || *status != OSKAR_SUCCESS)
+        return;
+
+    /* Only allow shrinking of the dimension in order to avoid issues
+     * of the risk of having to resize the memory given the block capacity is
+     * not known.
+     */
+    if (value <= vis->dim_size[0]) {
+        vis->dim_size[0] = value;
+    }
+    else {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+    }
+}
+
 int oskar_vis_block_num_pols(const oskar_VisBlock* vis)
 {
     return oskar_mem_is_matrix(vis->amplitude) ? 4 : 1;
