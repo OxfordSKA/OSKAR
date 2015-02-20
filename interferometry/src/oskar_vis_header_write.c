@@ -78,6 +78,9 @@ oskar_Binary* oskar_vis_header_write(const oskar_VisHeader* hdr,
 
     /* Write dimensions. */
     oskar_binary_write_int(h, grp,
+            OSKAR_VIS_HEADER_TAG_WRITE_AUTOCORRELATIONS, 0,
+            hdr->write_autocorr, status);
+    oskar_binary_write_int(h, grp,
             OSKAR_VIS_HEADER_TAG_AMP_TYPE, 0,
             oskar_vis_header_amp_type(hdr), status);
     oskar_binary_write_int(h, grp,

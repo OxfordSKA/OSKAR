@@ -62,16 +62,19 @@ OSKAR_EXPORT
 int oskar_vis_block_num_pols(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
+int oskar_vis_block_has_auto_correlations(const oskar_VisBlock* vis);
+
+OSKAR_EXPORT
 double oskar_vis_block_freq_start_hz(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 double oskar_vis_block_freq_end_hz(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-double oskar_vis_block_time_start_mjd_utc_sec(const oskar_VisBlock* vis);
+double oskar_vis_block_time_start_mjd_utc(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-double oskar_vis_block_time_end_mjd_utc_sec(const oskar_VisBlock* vis);
+double oskar_vis_block_time_end_mjd_utc(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_block_baseline_uu_metres(oskar_VisBlock* vis);
@@ -92,10 +95,16 @@ OSKAR_EXPORT
 const oskar_Mem* oskar_vis_block_baseline_ww_metres_const(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-oskar_Mem* oskar_vis_block_amplitude(oskar_VisBlock* vis);
+oskar_Mem* oskar_vis_block_auto_correlations(oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_vis_block_amplitude_const(const oskar_VisBlock* vis);
+const oskar_Mem* oskar_vis_block_auto_correlations_const(const oskar_VisBlock* vis);
+
+OSKAR_EXPORT
+oskar_Mem* oskar_vis_block_cross_correlations(oskar_VisBlock* vis);
+
+OSKAR_EXPORT
+const oskar_Mem* oskar_vis_block_cross_correlations_const(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 const int* oskar_vis_block_baseline_station1_const(const oskar_VisBlock* vis);
@@ -110,7 +119,7 @@ void oskar_vis_block_set_freq_range_hz(oskar_VisBlock* vis,
         double start, double end);
 
 OSKAR_EXPORT
-void oskar_vis_block_set_time_range_mjd_utc_sec(oskar_VisBlock* vis,
+void oskar_vis_block_set_time_range_mjd_utc(oskar_VisBlock* vis,
         double start, double end);
 
 #ifdef __cplusplus

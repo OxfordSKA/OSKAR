@@ -40,9 +40,9 @@ TEST(MeasurementSet, test_create_simple)
     double ay[] = {0, 0, 0};
     double az[] = {0, 0, 0};
     int na = sizeof(ax) / sizeof(double);
-    ms = oskar_ms_create("simple.ms", 0.0, 1.570796, 1, 1, 400e6, 1.0, na);
+    ms = oskar_ms_create("simple.ms", 0.0, 1.570796, 1, 1, 400e6, 1.0, na, 0);
     ASSERT_TRUE(ms);
-    oskar_ms_set_station_coords(ms, na, ax, ay, az);
+    oskar_ms_set_station_coords_d(ms, na, ax, ay, az);
 
     // Add test visibilities (don't include conjugated versions).
     double u[] = {1000.0, 2000.01, 156.03};
@@ -78,7 +78,7 @@ TEST(MeasurementSet, test_multi_channel)
     // Create the Measurement Set.
     oskar_MeasurementSet* ms;
     ms = oskar_ms_create(filename, ra, dec,
-            n_pol, n_chan, freq, chan_width, n_ant);
+            n_pol, n_chan, freq, chan_width, n_ant, 0);
     ASSERT_TRUE(ms);
 
     // Add some dummy antenna positions.
@@ -89,7 +89,7 @@ TEST(MeasurementSet, test_multi_channel)
         ay[i] = i / 20.0;
         az[i] = i / 30.0;
     }
-    oskar_ms_set_station_coords(ms, n_ant, &ax[0], &ay[0], &az[0]);
+    oskar_ms_set_station_coords_d(ms, n_ant, &ax[0], &ay[0], &az[0]);
 
     // Create test data (without complex conjugate).
     int n_baselines = n_ant * (n_ant - 1) / 2;

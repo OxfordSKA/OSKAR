@@ -40,7 +40,7 @@ oskar_VisHeader* oskar_vis_header_read(const char* filename, int* status)
 {
     /* Visibility metadata. */
     int num_channels = 0, num_times_total = 0, num_stations = 0, tag_error = 0;
-    int amp_type = 0, max_times_per_block = 0;
+    int amp_type = 0, max_times_per_block = 0, write_autocorr = 0;
     oskar_Binary* h = 0;
     unsigned char grp = OSKAR_TAG_GROUP_VIS_HEADER;
     oskar_VisHeader* vis = 0;
@@ -59,6 +59,8 @@ oskar_VisHeader* oskar_vis_header_read(const char* filename, int* status)
     h = oskar_binary_create(filename, 'r', status);
 
     /* Read essential metadata. */
+    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_WRITE_AUTOCORRELATIONS, 0,
+            &write_autocorr, status);
     oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_AMP_TYPE, 0,
             &amp_type, status);
     oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_MAX_TIMES_PER_BLOCK, 0,
@@ -79,7 +81,8 @@ oskar_VisHeader* oskar_vis_header_read(const char* filename, int* status)
 
     /* Create the visibility header. */
     vis = oskar_vis_header_create(amp_type, max_times_per_block,
-            num_times_total, num_channels, num_stations, status);
+            num_times_total, num_channels, num_stations, write_autocorr,
+            status);
 
     /* Optionally read the settings data (ignore the error code). */
     tag_error = 0;

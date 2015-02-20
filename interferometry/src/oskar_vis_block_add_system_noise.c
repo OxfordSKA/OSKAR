@@ -65,14 +65,16 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
         unsigned int block_idx, unsigned int channel_idx,
         double channel_bandwidth_hz, double time_int_sec, int* status)
 {
-    int a1, a2, baseline_start, b, i, t;
+    int a1, a2, have_autocorr, block_start, b, c = 0, i, t;
     int num_baselines, num_channels, num_stations, num_times;
-    void* block_ptr;
+    void *acorr_ptr, *xcorr_ptr;
     double rnd[8], s, sefd_conversion;
     const double inv_sqrt2 = 1.0 / sqrt(2.0);
 
     /* Get pointer to start of block, and block dimensions. */
-    block_ptr     = oskar_mem_void(oskar_vis_block_amplitude(vis));
+    have_autocorr = oskar_vis_block_has_auto_correlations(vis);
+    acorr_ptr     = oskar_mem_void(oskar_vis_block_auto_correlations(vis));
+    xcorr_ptr     = oskar_mem_void(oskar_vis_block_cross_correlations(vis));
     num_baselines = oskar_vis_block_num_baselines(vis);
     num_channels  = oskar_vis_block_num_channels(vis);
     num_stations  = oskar_vis_block_num_stations(vis);
@@ -88,7 +90,7 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
      * falls out naturally when evaluating Stokes I from the dipole
      * correlations (i.e. I = 0.5 (XX+YY) ). */
 
-    switch (oskar_mem_type(oskar_vis_block_amplitude(vis)))
+    switch (oskar_mem_type(oskar_vis_block_cross_correlations(vis)))
     {
     case OSKAR_SINGLE_COMPLEX:
     {
@@ -97,26 +99,33 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
         std = oskar_mem_float_const(station_std_dev, status);
         for (t = 0; t < num_times; ++t)
         {
-            baseline_start = num_baselines * (num_channels * t + channel_idx);
-            data = (float2*) block_ptr + baseline_start;
+            /* Cross-correlation noise. */
+            block_start = num_baselines * (num_channels * t + channel_idx);
+            data = (float2*) xcorr_ptr + block_start;
             for (a1 = 0, b = 0; a1 < num_stations; ++a1)
             {
-                /* Autocorrelation noise.
-                 * Phases are all zero after autocorrelation,
-                 * so ignore the imaginary components. */
-                i = baseline_start + b++;
-                oskar_random_gaussian2(seed, i, block_idx, rnd);
-                s = std[a1] * inv_sqrt2;
-                data[i].x += s * (rnd[0] + sefd_conversion);
-
-                /* Cross-correlation noise. */
-                for (a2 = a1 + 1; a2 < num_stations; ++a2)
+                for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
                 {
-                    i = baseline_start + b++;
-                    oskar_random_gaussian2(seed, i, block_idx, rnd);
+                    i = block_start + b;
+                    oskar_random_gaussian2(seed, c++, block_idx, rnd);
                     s = sqrt(std[a1] * std[a2]) * inv_sqrt2;
                     data[i].x += s * rnd[0];
                     data[i].y += s * rnd[1];
+                }
+            }
+
+            if (have_autocorr)
+            {
+                /* Autocorrelation noise. Phases are all zero after
+                 * autocorrelation, so ignore the imaginary components. */
+                block_start = num_stations * (num_channels * t + channel_idx);
+                data = (float2*) acorr_ptr + block_start;
+                for (a1 = 0; a1 < num_stations; ++a1)
+                {
+                    i = block_start + a1;
+                    oskar_random_gaussian2(seed, c++, block_idx, rnd);
+                    s = std[a1] * inv_sqrt2;
+                    data[i].x += s * (rnd[0] + sefd_conversion);
                 }
             }
         }
@@ -129,27 +138,16 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
         std = oskar_mem_float_const(station_std_dev, status);
         for (t = 0; t < num_times; ++t)
         {
-            baseline_start = num_baselines * (num_channels * t + channel_idx);
-            data = (float4c*) block_ptr + baseline_start;
+            /* Cross-correlation noise. */
+            block_start = num_baselines * (num_channels * t + channel_idx);
+            data = (float4c*) xcorr_ptr + block_start;
             for (a1 = 0, b = 0; a1 < num_stations; ++a1)
             {
-                /* Autocorrelation noise.
-                 * Phases are all zero after autocorrelation,
-                 * so ignore the imaginary components. */
-                i = baseline_start + b++;
-                oskar_random_gaussian4(seed, i, block_idx, 0, 0, rnd);
-                s = std[a1];
-                data[i].a.x += s * (rnd[0] + sefd_conversion);
-                data[i].b.x += s * (rnd[1] + sefd_conversion);
-                data[i].c.x += s * (rnd[2] + sefd_conversion);
-                data[i].d.x += s * (rnd[3] + sefd_conversion);
-
-                /* Cross-correlation noise. */
-                for (a2 = a1 + 1; a2 < num_stations; ++a2)
+                for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
                 {
-                    i = baseline_start + b++;
-                    oskar_random_gaussian4(seed, i, block_idx, 0, 0, rnd);
-                    oskar_random_gaussian4(seed, i, block_idx, 1, 0, rnd + 4);
+                    i = block_start + b;
+                    oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd);
+                    oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd + 4);
                     s = sqrt(std[a1] * std[a2]);
                     data[i].a.x += s * rnd[0];
                     data[i].a.y += s * rnd[1];
@@ -159,6 +157,24 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
                     data[i].c.y += s * rnd[5];
                     data[i].d.x += s * rnd[6];
                     data[i].d.y += s * rnd[7];
+                }
+            }
+
+            if (have_autocorr)
+            {
+                /* Autocorrelation noise. Phases are all zero after
+                 * autocorrelation, so ignore the imaginary components. */
+                block_start = num_stations * (num_channels * t + channel_idx);
+                data = (float4c*) acorr_ptr + block_start;
+                for (a1 = 0; a1 < num_stations; ++a1)
+                {
+                    i = block_start + a1;
+                    oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd);
+                    s = std[a1];
+                    data[i].a.x += s * (rnd[0] + sefd_conversion);
+                    data[i].b.x += s * (rnd[1] + sefd_conversion);
+                    data[i].c.x += s * (rnd[2] + sefd_conversion);
+                    data[i].d.x += s * (rnd[3] + sefd_conversion);
                 }
             }
         }
@@ -171,26 +187,33 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
         std = oskar_mem_double_const(station_std_dev, status);
         for (t = 0; t < num_times; ++t)
         {
-            baseline_start = num_baselines * (num_channels * t + channel_idx);
-            data = (double2*) block_ptr + baseline_start;
+            /* Cross-correlation noise. */
+            block_start = num_baselines * (num_channels * t + channel_idx);
+            data = (double2*) xcorr_ptr + block_start;
             for (a1 = 0, b = 0; a1 < num_stations; ++a1)
             {
-                /* Autocorrelation noise.
-                 * Phases are all zero after autocorrelation,
-                 * so ignore the imaginary components. */
-                i = baseline_start + b++;
-                oskar_random_gaussian2(seed, i, block_idx, rnd);
-                s = std[a1] * inv_sqrt2;
-                data[i].x += s * (rnd[0] + sefd_conversion);
-
-                /* Cross-correlation noise. */
-                for (a2 = a1 + 1; a2 < num_stations; ++a2)
+                for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
                 {
-                    i = baseline_start + b++;
-                    oskar_random_gaussian2(seed, i, block_idx, rnd);
+                    i = block_start + b;
+                    oskar_random_gaussian2(seed, c++, block_idx, rnd);
                     s = sqrt(std[a1] * std[a2]) * inv_sqrt2;
                     data[i].x += s * rnd[0];
                     data[i].y += s * rnd[1];
+                }
+            }
+
+            if (have_autocorr)
+            {
+                /* Autocorrelation noise. Phases are all zero after
+                 * autocorrelation, so ignore the imaginary components. */
+                block_start = num_stations * (num_channels * t + channel_idx);
+                data = (double2*) acorr_ptr + block_start;
+                for (a1 = 0; a1 < num_stations; ++a1)
+                {
+                    i = block_start + a1;
+                    oskar_random_gaussian2(seed, c++, block_idx, rnd);
+                    s = std[a1] * inv_sqrt2;
+                    data[i].x += s * (rnd[0] + sefd_conversion);
                 }
             }
         }
@@ -203,27 +226,16 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
         std = oskar_mem_double_const(station_std_dev, status);
         for (t = 0; t < num_times; ++t)
         {
-            baseline_start = num_baselines * (num_channels * t + channel_idx);
-            data = (double4c*) block_ptr + baseline_start;
+            /* Cross-correlation noise. */
+            block_start = num_baselines * (num_channels * t + channel_idx);
+            data = (double4c*) xcorr_ptr + block_start;
             for (a1 = 0, b = 0; a1 < num_stations; ++a1)
             {
-                /* Autocorrelation noise.
-                 * Phases are all zero after autocorrelation,
-                 * so ignore the imaginary components. */
-                i = baseline_start + b++;
-                oskar_random_gaussian4(seed, i, block_idx, 0, 0, rnd);
-                s = std[a1];
-                data[i].a.x += s * (rnd[0] + sefd_conversion);
-                data[i].b.x += s * (rnd[1] + sefd_conversion);
-                data[i].c.x += s * (rnd[2] + sefd_conversion);
-                data[i].d.x += s * (rnd[3] + sefd_conversion);
-
-                /* Cross-correlation noise. */
-                for (a2 = a1 + 1; a2 < num_stations; ++a2)
+                for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
                 {
-                    i = baseline_start + b++;
-                    oskar_random_gaussian4(seed, i, block_idx, 0, 0, rnd);
-                    oskar_random_gaussian4(seed, i, block_idx, 1, 0, rnd + 4);
+                    i = block_start + b;
+                    oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd);
+                    oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd + 4);
                     s = sqrt(std[a1] * std[a2]);
                     data[i].a.x += s * rnd[0];
                     data[i].a.y += s * rnd[1];
@@ -233,6 +245,24 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
                     data[i].c.y += s * rnd[5];
                     data[i].d.x += s * rnd[6];
                     data[i].d.y += s * rnd[7];
+                }
+            }
+
+            if (have_autocorr)
+            {
+                /* Autocorrelation noise. Phases are all zero after
+                 * autocorrelation, so ignore the imaginary components. */
+                block_start = num_stations * (num_channels * t + channel_idx);
+                data = (double4c*) acorr_ptr + block_start;
+                for (a1 = 0; a1 < num_stations; ++a1)
+                {
+                    i = block_start + a1;
+                    oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd);
+                    s = std[a1];
+                    data[i].a.x += s * (rnd[0] + sefd_conversion);
+                    data[i].b.x += s * (rnd[1] + sefd_conversion);
+                    data[i].c.x += s * (rnd[2] + sefd_conversion);
+                    data[i].d.x += s * (rnd[3] + sefd_conversion);
                 }
             }
         }

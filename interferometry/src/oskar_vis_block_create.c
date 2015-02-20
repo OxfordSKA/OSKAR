@@ -34,10 +34,12 @@ extern "C" {
 #endif
 
 oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
-        int num_times, int num_channels, int num_stations, int* status)
+        int num_times, int num_channels, int num_stations, int create_autocorr,
+        int* status)
 {
     oskar_VisBlock* vis = 0;
-    int i, num_amps, num_baselines, num_coords, *b_s1, *b_s2, s1, s2, type;
+    int num_autocorr = 0, num_xcorr = 0, num_baselines = 0, num_coords = 0;
+    int *b_s1, *b_s2, i, s1, s2, type;
 
     /* Check all inputs. */
     if (!status)
@@ -66,19 +68,21 @@ oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
     vis = (oskar_VisBlock*) malloc(sizeof(oskar_VisBlock));
 
     /* Set dimensions. */
-    num_baselines = num_stations * (num_stations + 1) / 2;
+    num_baselines = num_stations * (num_stations - 1) / 2;
     vis->dim_size[0] = num_times;
     vis->dim_size[1] = num_channels;
     vis->dim_size[2] = num_baselines;
     vis->dim_size[3] = num_stations;
-    num_amps   = num_channels * num_times * num_baselines;
-    num_coords = num_times * num_baselines;
+    num_xcorr    = num_channels * num_times * num_baselines;
+    num_coords   = num_times * num_baselines;
+    if (create_autocorr)
+        num_autocorr = num_channels * num_times * num_stations;
 
     /* Initialise meta-data to zero. */
     vis->freq_range_hz[0] = 0.0;
     vis->freq_range_hz[1] = 0.0;
-    vis->time_range_mjd_utc_sec[0] = 0.0;
-    vis->time_range_mjd_utc_sec[1] = 0.0;
+    vis->time_range_mjd_utc[0] = 0.0;
+    vis->time_range_mjd_utc[1] = 0.0;
 
     /* Create arrays. */
     vis->baseline_uu_metres = oskar_mem_create(type, location,
@@ -91,16 +95,19 @@ oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
             num_baselines, status);
     vis->baseline_num_time_averages = oskar_mem_create(OSKAR_INT, location,
             num_baselines, status);
-    vis->amplitude = oskar_mem_create(amp_type, location, num_amps, status);
+    vis->auto_correlations  = oskar_mem_create(amp_type, location,
+            num_autocorr, status);
+    vis->cross_correlations = oskar_mem_create(amp_type, location,
+            num_xcorr, status);
     vis->a1 = oskar_mem_create(OSKAR_INT, OSKAR_CPU, num_baselines, status);
     vis->a2 = oskar_mem_create(OSKAR_INT, OSKAR_CPU, num_baselines, status);
 
-    /* Evaluate baseline index arrays. */
+    /* Evaluate baseline index arrays for Measurement Set export. */
     b_s1 = oskar_mem_int(vis->a1, status);
     b_s2 = oskar_mem_int(vis->a2, status);
     for (s1 = 0, i = 0; s1 < num_stations; ++s1)
     {
-        for (s2 = s1; s2 < num_stations; ++i, ++s2)
+        for (s2 = create_autocorr ? s1 : s1 + 1; s2 < num_stations; ++i, ++s2)
         {
             b_s1[i] = s1;
             b_s2[i] = s2;

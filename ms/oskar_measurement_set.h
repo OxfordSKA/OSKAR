@@ -119,7 +119,7 @@ void oskar_ms_copy_column(oskar_MeasurementSet* p,
  * @param[in] z             The station z positions.
  */
 OSKAR_MS_EXPORT
-void oskar_ms_set_station_coords(oskar_MeasurementSet* p, int num_stations,
+void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p, int num_stations,
         const double* x, const double* y, const double* z);
 
 /**
@@ -152,19 +152,20 @@ void oskar_ms_close(oskar_MeasurementSet* p);
  * @details
  * Creates a new, empty Measurement Set with the given name.
  *
- * @param[in] filename      The filename to use.
- * @param[in] ra_rad        The right ascension of the phase centre, in rad.
- * @param[in] dec_rad       The declination of the phase centre, in rad.
- * @param[in] num_pols      The number of polarisations (1, 2 or 4).
- * @param[in] num_channels  The number of channels in the band.
- * @param[in] ref_freq      The frequency at the centre of channel 0, in Hz.
- * @param[in] chan_width    The width of each channel in Hz.
- * @param[in] num_stations  The number of antennas/stations.
+ * @param[in] filename       The filename to use.
+ * @param[in] ra_rad         The right ascension of the phase centre, in rad.
+ * @param[in] dec_rad        The declination of the phase centre, in rad.
+ * @param[in] num_pols       The number of polarisations (1, 2 or 4).
+ * @param[in] num_channels   The number of channels in the band.
+ * @param[in] ref_freq       The frequency at the centre of channel 0, in Hz.
+ * @param[in] chan_width     The width of each channel in Hz.
+ * @param[in] num_stations   The number of antennas/stations.
+ * @param[in] write_autocorr If set, write autocorrelation data.
  */
 OSKAR_MS_EXPORT
 oskar_MeasurementSet* oskar_ms_create(const char* filename, double ra_rad,
         double dec_rad, int num_pols, int num_channels, double ref_freq,
-        double chan_width, int num_stations);
+        double chan_width, int num_stations, int write_autocorr);
 
 /**
  * @brief

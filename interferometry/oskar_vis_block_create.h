@@ -82,18 +82,20 @@ extern "C" {
  * The structure must be deallocated using oskar_vis_block_free() when it is
  * no longer required.
  *
- * @param[in] amp_type      OSKAR memory type for the visibility amplitudes.
- * @param[in] location      Memory location (OSKAR_CPU or OSKAR_GPU).
- * @param[in] num_times     Number of time samples.
- * @param[in] num_channels  Number of frequency channels.
- * @param[in] num_stations  Number of stations.
- * @param[in,out]  status   Status return code.
+ * @param[in] amp_type        OSKAR memory type for the visibility amplitudes.
+ * @param[in] location        Memory location (OSKAR_CPU or OSKAR_GPU).
+ * @param[in] num_times       Number of time samples.
+ * @param[in] num_channels    Number of frequency channels.
+ * @param[in] num_stations    Number of stations.
+ * @param[in] create_autocorr If set, create autocorrelation array.
+ * @param[in,out]  status     Status return code.
  *
  * @return A handle to the new data structure.
  */
 OSKAR_EXPORT
 oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
-        int num_times, int num_channels, int num_stations, int* status);
+        int num_times, int num_channels, int num_stations, int create_autocorr,
+        int* status);
 
 #ifdef __cplusplus
 }

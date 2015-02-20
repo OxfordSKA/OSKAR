@@ -54,6 +54,11 @@ const oskar_Mem* oskar_vis_header_settings_const(const oskar_VisHeader* vis)
     return vis->settings;
 }
 
+int oskar_vis_header_write_autocorrelations(const oskar_VisHeader* vis)
+{
+    return vis->write_autocorr;
+}
+
 int oskar_vis_header_amp_type(const oskar_VisHeader* vis)
 {
     return vis->amp_type;

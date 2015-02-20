@@ -91,6 +91,7 @@ struct oskar_MeasurementSet
     casa::MeasurementSet* ms;   // Pointer to the Measurement Set.
     casa::MSColumns* msc;       // Pointer to the sub-tables.
     casa::MSMainColumns* msmc;  // Pointer to the main columns.
+    bool write_autocorr;
     int num_pols;
     int num_channels;
     int num_stations;
@@ -118,7 +119,7 @@ struct oskar_MeasurementSet
     void copy_column(String source, String dest);
     bool create(const char* filename, double ra_rad, double dec_rad,
             int num_pols, int num_channels, double ref_freq,
-            double chan_width, int num_stations);
+            double chan_width, int num_stations, int write_autocorr);
     void close();
     void get_time_range();
     static bool is_otf_model_defined(const int field,
@@ -186,7 +187,7 @@ void oskar_ms_copy_column(oskar_MeasurementSet* p, const char* source,
     p->copy_column(String(source), String(dest));
 }
 
-void oskar_ms_set_station_coords(oskar_MeasurementSet* p, int num_stations,
+void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p, int num_stations,
         const double* x, const double* y, const double* z)
 {
     if (!p->ms || !p->msc) return;
@@ -222,16 +223,16 @@ void oskar_ms_set_station_coords_f(oskar_MeasurementSet* p, int num_stations,
 
 void oskar_ms_close(oskar_MeasurementSet* p)
 {
-    delete p; // Calls destructor, which closes everything.
+    if (p) delete p; // Calls destructor, which closes everything.
 }
 
 oskar_MeasurementSet* oskar_ms_create(const char* filename, double ra_rad,
         double dec_rad, int num_pols, int num_channels, double ref_freq,
-        double chan_width, int num_stations)
+        double chan_width, int num_stations, int write_autocorr)
 {
     oskar_MeasurementSet* p = new oskar_MeasurementSet;
     if (p->create(filename, ra_rad, dec_rad, num_pols,
-            num_channels, ref_freq, chan_width, num_stations))
+            num_channels, ref_freq, chan_width, num_stations, write_autocorr))
         return p;
     delete p;
     return 0;
@@ -699,7 +700,8 @@ void oskar_MeasurementSet::close()
 
 bool oskar_MeasurementSet::create(const char* filename,
         double ra_rad, double dec_rad, int num_pols, int num_channels,
-        double ref_freq, double chan_width, int num_stations)
+        double ref_freq, double chan_width, int num_stations,
+        int write_autocorr)
 {
     // Create the table descriptor and use it to set up a new main table.
     TableDesc desc = MS::requiredTableDesc();
@@ -718,6 +720,7 @@ bool oskar_MeasurementSet::create(const char* filename,
     desc.defineHypercolumn("TiledUVW", 2, tsmNames);
     try
     {
+        int num_baselines;
         SetupNewTable newTab(filename, desc, Table::New);
 
         // Create the default storage managers.
@@ -728,7 +731,10 @@ bool oskar_MeasurementSet::create(const char* filename,
         newTab.bindColumn(MS::columnName(MS::ANTENNA2), stdStorageManager);
 
         // Create tiled column storage manager for UVW column.
-        int num_baselines = num_stations * (num_stations - 1) / 2;
+        if (write_autocorr)
+            num_baselines = num_stations * (num_stations + 1) / 2;
+        else
+            num_baselines = num_stations * (num_stations - 1) / 2;
         IPosition uvwTileShape(2, 3, 2 * num_baselines);
         TiledColumnStMan uvwStorageManager("TiledUVW", uvwTileShape);
         newTab.bindColumn(MS::columnName(MS::UVW), uvwStorageManager);
@@ -813,6 +819,7 @@ bool oskar_MeasurementSet::create(const char* filename,
             Vector<String>());
 
     // Set the private data.
+    this->write_autocorr = (bool) write_autocorr;
     this->num_pols = num_pols;
     this->num_channels = num_channels;
     this->num_stations = num_stations;

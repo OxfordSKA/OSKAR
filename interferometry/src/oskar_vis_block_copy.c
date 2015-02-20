@@ -53,8 +53,8 @@ void oskar_vis_block_copy(oskar_VisBlock* dst, const oskar_VisBlock* src,
     dst->dim_size[3] = src->dim_size[3];
     dst->freq_range_hz[0] = src->freq_range_hz[0];
     dst->freq_range_hz[1] = src->freq_range_hz[1];
-    dst->time_range_mjd_utc_sec[0] = src->time_range_mjd_utc_sec[0];
-    dst->time_range_mjd_utc_sec[1] = src->time_range_mjd_utc_sec[1];
+    dst->time_range_mjd_utc[0] = src->time_range_mjd_utc[0];
+    dst->time_range_mjd_utc[1] = src->time_range_mjd_utc[1];
 
     /* Copy the memory. */
     oskar_mem_copy(dst->baseline_uu_metres, src->baseline_uu_metres, status);
@@ -64,7 +64,8 @@ void oskar_vis_block_copy(oskar_VisBlock* dst, const oskar_VisBlock* src,
             src->baseline_num_channel_averages, status);
     oskar_mem_copy(dst->baseline_num_time_averages,
             src->baseline_num_time_averages, status);
-    oskar_mem_copy(dst->amplitude, src->amplitude, status);
+    oskar_mem_copy(dst->auto_correlations, src->auto_correlations, status);
+    oskar_mem_copy(dst->cross_correlations, src->cross_correlations, status);
     oskar_mem_copy(dst->a1, src->a1, status);
     oskar_mem_copy(dst->a2, src->a2, status);
 }

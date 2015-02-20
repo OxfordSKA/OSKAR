@@ -36,7 +36,7 @@ extern "C" {
 
 int oskar_vis_block_location(const oskar_VisBlock* vis)
 {
-    return oskar_mem_location(vis->amplitude);
+    return oskar_mem_location(vis->cross_correlations);
 }
 
 int oskar_vis_block_num_baselines(const oskar_VisBlock* vis)
@@ -78,7 +78,12 @@ void oskar_vis_block_set_num_times(oskar_VisBlock* vis, int value, int* status)
 
 int oskar_vis_block_num_pols(const oskar_VisBlock* vis)
 {
-    return oskar_mem_is_matrix(vis->amplitude) ? 4 : 1;
+    return oskar_mem_is_matrix(vis->cross_correlations) ? 4 : 1;
+}
+
+int oskar_vis_block_has_auto_correlations(const oskar_VisBlock* vis)
+{
+    return (oskar_mem_length(vis->auto_correlations) > 0);
 }
 
 double oskar_vis_block_freq_start_hz(const oskar_VisBlock* vis)
@@ -91,14 +96,14 @@ double oskar_vis_block_freq_end_hz(const oskar_VisBlock* vis)
     return vis->freq_range_hz[1];
 }
 
-double oskar_vis_block_time_start_mjd_utc_sec(const oskar_VisBlock* vis)
+double oskar_vis_block_time_start_mjd_utc(const oskar_VisBlock* vis)
 {
-    return vis->time_range_mjd_utc_sec[0];
+    return vis->time_range_mjd_utc[0];
 }
 
-double oskar_vis_block_time_end_mjd_utc_sec(const oskar_VisBlock* vis)
+double oskar_vis_block_time_end_mjd_utc(const oskar_VisBlock* vis)
 {
-    return vis->time_range_mjd_utc_sec[1];
+    return vis->time_range_mjd_utc[1];
 }
 
 oskar_Mem* oskar_vis_block_baseline_uu_metres(oskar_VisBlock* vis)
@@ -131,14 +136,24 @@ const oskar_Mem* oskar_vis_block_baseline_ww_metres_const(const oskar_VisBlock* 
     return vis->baseline_ww_metres;
 }
 
-oskar_Mem* oskar_vis_block_amplitude(oskar_VisBlock* vis)
+oskar_Mem* oskar_vis_block_auto_correlations(oskar_VisBlock* vis)
 {
-    return vis->amplitude;
+    return vis->auto_correlations;
 }
 
-const oskar_Mem* oskar_vis_block_amplitude_const(const oskar_VisBlock* vis)
+const oskar_Mem* oskar_vis_block_auto_correlations_const(const oskar_VisBlock* vis)
 {
-    return vis->amplitude;
+    return vis->auto_correlations;
+}
+
+oskar_Mem* oskar_vis_block_cross_correlations(oskar_VisBlock* vis)
+{
+    return vis->cross_correlations;
+}
+
+const oskar_Mem* oskar_vis_block_cross_correlations_const(const oskar_VisBlock* vis)
+{
+    return vis->cross_correlations;
 }
 
 const int* oskar_vis_block_baseline_station1_const(const oskar_VisBlock* vis)
@@ -160,11 +175,11 @@ void oskar_vis_block_set_freq_range_hz(oskar_VisBlock* vis,
     vis->freq_range_hz[1] = end;
 }
 
-void oskar_vis_block_set_time_range_mjd_utc_sec(oskar_VisBlock* vis,
+void oskar_vis_block_set_time_range_mjd_utc(oskar_VisBlock* vis,
         double start, double end)
 {
-    vis->time_range_mjd_utc_sec[0] = start;
-    vis->time_range_mjd_utc_sec[1] = end;
+    vis->time_range_mjd_utc[0] = start;
+    vis->time_range_mjd_utc[1] = end;
 }
 
 #ifdef __cplusplus

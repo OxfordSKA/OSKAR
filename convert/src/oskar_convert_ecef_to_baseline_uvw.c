@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,34 +54,24 @@ void oskar_convert_ecef_to_baseline_uvw(int num_stations,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Get input data type and number of baselines. */
-    type = oskar_mem_type(x);
-    num_baselines = num_stations * (num_stations - 1) / 2;
-
-    /* Check that the memory is allocated. */
-    if (!oskar_mem_allocated(uu) || !oskar_mem_allocated(vv) ||
-            !oskar_mem_allocated(ww) || !oskar_mem_allocated(x) ||
-            !oskar_mem_allocated(y) || !oskar_mem_allocated(z) ||
-            !oskar_mem_allocated(work))
-    {
-        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-        return;
-    }
-
     /* Check that the data dimensions are OK. */
+    num_baselines = num_stations * (num_stations - 1) / 2;
     if ((int)oskar_mem_length(uu) < num_baselines * num_dumps ||
             (int)oskar_mem_length(vv) < num_baselines * num_dumps ||
             (int)oskar_mem_length(ww) < num_baselines * num_dumps ||
             (int)oskar_mem_length(x) < num_stations ||
             (int)oskar_mem_length(y) < num_stations ||
-            (int)oskar_mem_length(z) < num_stations ||
-            (int)oskar_mem_length(work) < 3 * num_stations)
+            (int)oskar_mem_length(z) < num_stations)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
     }
+    if ((int)oskar_mem_length(work) < 3 * num_stations)
+        oskar_mem_realloc(work, 3 * num_stations, status);
+    if (*status) return;
 
-    /* Check that the data is of the right type. */
+    /* Check that the data are of the right type. */
+    type = oskar_mem_type(x);
     if (oskar_mem_type(uu) != type || oskar_mem_type(vv) != type ||
             oskar_mem_type(ww) != type || oskar_mem_type(y) != type ||
             oskar_mem_type(z) != type || oskar_mem_type(work) != type)
@@ -90,7 +80,7 @@ void oskar_convert_ecef_to_baseline_uvw(int num_stations,
         return;
     }
 
-    /* Check that the data is in the right location. */
+    /* Check that the data are in the right location. */
     location = oskar_mem_location(x);
     if (oskar_mem_location(y) != location ||
             oskar_mem_location(z) != location ||
@@ -137,7 +127,7 @@ void oskar_convert_ecef_to_baseline_uvw(int num_stations,
                 uu_dump, vv_dump, ww_dump, status);
     }
 
-    /* Free memory. */
+    /* Free handles to aliased memory. */
     oskar_mem_free(u, status);
     oskar_mem_free(v, status);
     oskar_mem_free(w, status);

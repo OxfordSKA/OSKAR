@@ -42,7 +42,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
 {
     const oskar_Mem *x_metres, *y_metres, *z_metres;
     double ref_freq_hz, chan_width, ra_rad, dec_rad;
-    int amp_type, num_stations, num_pols, num_channels;
+    int amp_type, num_stations, num_pols, num_channels, autocorr;
     oskar_MeasurementSet* ms;
 
     /* Check all inputs. */
@@ -68,6 +68,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     x_metres     = oskar_vis_header_station_x_offset_ecef_metres_const(hdr);
     y_metres     = oskar_vis_header_station_y_offset_ecef_metres_const(hdr);
     z_metres     = oskar_vis_header_station_z_offset_ecef_metres_const(hdr);
+    autocorr     = oskar_vis_header_write_autocorrelations(hdr);
     num_pols     = oskar_mem_type_is_matrix(amp_type) ? 4 : 1;
 
     /* Force creation of polarised output data if flag is set. */
@@ -93,7 +94,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
 
         /* Create the Measurement Set. */
         ms = oskar_ms_create(ms_path, ra_rad, dec_rad, num_pols,
-                num_channels, ref_freq_hz, chan_width, num_stations);
+                num_channels, ref_freq_hz, chan_width, num_stations, autocorr);
         if (!ms)
         {
             *status = OSKAR_ERR_FILE_IO;
@@ -101,13 +102,15 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         }
 
         /* Set the station positions. */
-        if (oskar_mem_type(x_metres) == OSKAR_DOUBLE) {
-            oskar_ms_set_station_coords(ms, num_stations,
+        if (oskar_mem_type(x_metres) == OSKAR_DOUBLE)
+        {
+            oskar_ms_set_station_coords_d(ms, num_stations,
                     oskar_mem_double_const(x_metres, status),
                     oskar_mem_double_const(y_metres, status),
                     oskar_mem_double_const(z_metres, status));
         }
-        else {
+        else
+        {
             oskar_ms_set_station_coords_f(ms, num_stations,
                     oskar_mem_float_const(x_metres, status),
                     oskar_mem_float_const(y_metres, status),

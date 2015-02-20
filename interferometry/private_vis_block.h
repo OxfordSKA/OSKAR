@@ -35,9 +35,6 @@
  * This structure holds visibility data for all baselines, and a set of times
  * and channels.
  *
- * Space for autocorrelation data will always be available, but
- * autocorrelation values may be zero if they are not computed.
- *
  * The dimension order is fixed. The polarisation dimension is implicit in the
  * data type (matrix or scalar) and is therefore the fastest varying.
  * From slowest to fastest varying, the remaining dimensions are:
@@ -58,20 +55,24 @@
  */
 struct oskar_VisBlock
 {
-    int dim_size[4];                  /* Maximum dimension sizes: time, channel, baseline, station. */
-    double freq_range_hz[2];          /* Frequencies in the block, in Hz. */
-    double time_range_mjd_utc_sec[2]; /* Times in MJD(UTC) seconds. */
+    int dim_size[4];               /* Maximum dimension sizes: time, channel, baseline, station. */
+    double freq_range_hz[2];       /* Frequencies in the block, in Hz. */
+    double time_range_mjd_utc[2];  /* Times in MJD(UTC). */
 
-    /* Amplitude array has size num_baselines * num_times * num_channels. */
-    /* Polarisation dimension is implicit, and therefore fastest varying. */
+    /* Cross-correlation amplitude array has size:
+     *     num_baselines * num_times * num_channels.
+     * Autocorrelation amplitude array has size:
+     *     num_stations * num_times * num_channels.
+     * Polarisation dimension is implicit, and therefore fastest varying. */
     /* [complex / complex matrix] */
-    oskar_Mem* amplitude;             /* Visibility amplitude. */
+    oskar_Mem* cross_correlations; /* Cross-correlation visibility amplitudes. */
+    oskar_Mem* auto_correlations;  /* Autocorrelation visibility amplitudes. */
 
     /* Coordinate arrays have sizes num_baselines * num_times. */
     /* [real] */
-    oskar_Mem* baseline_uu_metres;    /* Baseline coordinates, in metres. */
-    oskar_Mem* baseline_vv_metres;    /* Baseline coordinates, in metres. */
-    oskar_Mem* baseline_ww_metres;    /* Baseline coordinates, in metres. */
+    oskar_Mem* baseline_uu_metres; /* Baseline coordinates, in metres. */
+    oskar_Mem* baseline_vv_metres; /* Baseline coordinates, in metres. */
+    oskar_Mem* baseline_ww_metres; /* Baseline coordinates, in metres. */
 
     /* Dimension arrays have sizes num_baselines. */
     /* [int] */

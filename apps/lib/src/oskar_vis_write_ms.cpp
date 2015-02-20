@@ -101,17 +101,17 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
         // Create the Measurement Set.
         if (force_polarised) {
             ms = oskar_ms_create(ms_path, ra_rad, dec_rad, 4,
-                    num_channels, ref_freq_hz, chan_width, num_stations);
+                    num_channels, ref_freq_hz, chan_width, num_stations, 0);
         }
         else {
             ms = oskar_ms_create(ms_path, ra_rad, dec_rad, num_pols,
-                    num_channels, ref_freq_hz, chan_width, num_stations);
+                    num_channels, ref_freq_hz, chan_width, num_stations, 0);
         }
 
         // Set the station positions.
         if (oskar_mem_type(x_metres) == OSKAR_DOUBLE)
         {
-            oskar_ms_set_station_coords(ms, num_stations,
+            oskar_ms_set_station_coords_d(ms, num_stations,
                     oskar_mem_double_const(x_metres, status),
                     oskar_mem_double_const(y_metres, status),
                     oskar_mem_double_const(z_metres, status));

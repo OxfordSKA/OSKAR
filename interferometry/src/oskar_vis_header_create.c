@@ -34,7 +34,8 @@ extern "C" {
 #endif
 
 oskar_VisHeader* oskar_vis_header_create(int amp_type, int max_times_per_block,
-        int num_times_total, int num_channels, int num_stations, int* status)
+        int num_times_total, int num_channels, int num_stations,
+        int write_autocorr, int* status)
 {
     oskar_VisHeader* hdr = 0;
     int precision;
@@ -65,6 +66,7 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int max_times_per_block,
     hdr->num_stations        = num_stations;
 
     /* Initialise meta-data. */
+    hdr->write_autocorr = write_autocorr;
     hdr->freq_start_hz = 0.0;
     hdr->freq_inc_hz = 0.0;
     hdr->channel_bandwidth_hz = 0.0;

@@ -39,9 +39,10 @@ oskar_VisHeader* oskar_set_up_vis_header(const oskar_Settings* settings,
         const oskar_Telescope* tel, int* status)
 {
     int max_times_per_block, num_stations, num_channels;
-    int precision, vis_type, i;
+    int precision, vis_type;
     oskar_VisHeader* hdr;
     const double rad2deg = 180.0/M_PI;
+    int write_autocorr = 0; /* FIXME Get this from settings. */
 
     /* Check all inputs. */
     if (!settings || !tel || !status)
@@ -62,7 +63,8 @@ oskar_VisHeader* oskar_set_up_vis_header(const oskar_Settings* settings,
     if (oskar_telescope_pol_mode(tel) == OSKAR_POL_MODE_FULL)
         vis_type |= OSKAR_MATRIX;
     hdr = oskar_vis_header_create(vis_type, max_times_per_block,
-            settings->obs.num_time_steps, num_channels, num_stations, status);
+            settings->obs.num_time_steps, num_channels, num_stations,
+            write_autocorr, status);
 
     /* Add metadata from settings. */
     oskar_vis_header_set_freq_start_hz(hdr,

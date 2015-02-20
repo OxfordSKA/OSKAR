@@ -394,8 +394,8 @@ In order, the parameter columns are:
 In each station directory, there may be optionally a "mount_types.txt" 
 file to specify the mount type of each element in the station.
 
-Allowed types are 'Fixed' (a dipole fixed to the ground, as in an aperture 
-array), 'Alt-az', or 'Equatorial'. Only the first letter of each type is 
+Allowed types are 'Alt-az' or 'Fixed' (where the dipole is fixed to the 
+ground, as in an aperture array). Only the first letter of each type is 
 checked. If the file is omitted, all elements have an implicit mount 
 type of 'Fixed'.
 
@@ -403,7 +403,7 @@ In order, the parameter columns are:
 
 | Column | Description                                           
 | ------ | --------------------------------------------------------------
-| 1      | Element mount type (character: either 'F', 'A' or 'E'). 
+| 1      | Element mount type (character: either 'A' or 'F'). 
 
 \section telescope_config_files Configuration Files (Deprecated)
 

@@ -48,7 +48,8 @@ void oskar_vis_block_free(oskar_VisBlock* vis, int* status)
     oskar_mem_free(vis->baseline_ww_metres, status);
     oskar_mem_free(vis->baseline_num_channel_averages, status);
     oskar_mem_free(vis->baseline_num_time_averages, status);
-    oskar_mem_free(vis->amplitude, status);
+    oskar_mem_free(vis->auto_correlations, status);
+    oskar_mem_free(vis->cross_correlations, status);
     oskar_mem_free(vis->a1, status);
     oskar_mem_free(vis->a2, status);
 

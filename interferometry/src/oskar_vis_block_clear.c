@@ -46,7 +46,8 @@ void oskar_vis_block_clear(oskar_VisBlock* vis, int* status)
     /* Check if safe to proceed. */
     if (*status) return;
 
-    oskar_mem_clear_contents(vis->amplitude, status);
+    oskar_mem_clear_contents(vis->auto_correlations, status);
+    oskar_mem_clear_contents(vis->cross_correlations, status);
     oskar_mem_clear_contents(vis->baseline_num_channel_averages, status);
     oskar_mem_clear_contents(vis->baseline_num_time_averages, status);
     oskar_mem_clear_contents(vis->baseline_uu_metres, status);

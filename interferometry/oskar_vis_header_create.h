@@ -55,13 +55,15 @@ extern "C" {
  * @param[in] num_times_total     Number of time samples in total.
  * @param[in] num_channels        Number of frequency channels.
  * @param[in] num_stations        Number of stations.
+ * @param[in] write_autocorr      Set if autocorrelations should be written.
  * @param[in,out]  status         Status return code.
  *
  * @return A handle to the new data structure.
  */
 OSKAR_EXPORT
 oskar_VisHeader* oskar_vis_header_create(int amp_type, int max_times_per_block,
-        int num_times_total, int num_channels, int num_stations, int* status);
+        int num_times_total, int num_channels, int num_stations,
+        int write_autocorr, int* status);
 
 #ifdef __cplusplus
 }
