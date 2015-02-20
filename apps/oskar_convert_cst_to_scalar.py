@@ -63,8 +63,12 @@ def convert(cst_file_in, scalar_file_out):
     Y[Y[:, 1] >= 360.0, 1] -= 360.0
 
     # Linked column sort by phi and then theta for both X and Y.
-    X = np.sort(X.view('f8,f8,f8,f8,f8,f8'), order=['f1','f0'], axis=0).view(np.double)
-    Y = np.sort(Y.view('f8,f8,f8,f8,f8,f8'), order=['f1','f0'], axis=0).view(np.double)
+    X = X[np.lexsort((X[:,1],X[:,0])),:]
+    Y = Y[np.lexsort((Y[:,1],Y[:,0])),:]
+    assert(np.sum(X[:,0] == Y[:,0]) == len(X[:,0]))
+    assert(np.sum(X[:,1] == Y[:,1]) == len(X[:,1]))
+    #X = np.sort(X.view('f8,f8,f8,f8,f8,f8'), order=['f1','f0'], axis=0).view(np.double)
+    #Y = np.sort(Y.view('f8,f8,f8,f8,f8,f8'), order=['f1','f0'], axis=0).view(np.double)
 
     # Generate scalar values from sorted data.
     X_theta = X[:, 2] * np.exp(1j * X[:, 3] * np.pi / 180.0)
