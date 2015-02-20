@@ -176,6 +176,7 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
     if (*status) return t;
 
     /* Set error flag if number of stations is less than 2. */
+    /* FIXME this condition is invalid and when making beam patterns of 1 station */
     if (oskar_telescope_num_stations(t) < 2)
     {
         *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
