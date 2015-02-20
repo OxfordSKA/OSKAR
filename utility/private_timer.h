@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,10 @@
 #include <cuda_runtime_api.h>
 #endif
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 /**
  * @struct oskar_Timer
  *
@@ -58,6 +62,9 @@ struct oskar_Timer
 #endif
 #ifdef OSKAR_OS_WIN
     double freq;
+#endif
+#ifdef _OPENMP
+    omp_lock_t mutex;
 #endif
 };
 

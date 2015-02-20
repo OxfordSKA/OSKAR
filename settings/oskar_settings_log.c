@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <oskar_cmath.h>
 #include <string.h>
+#include <float.h>
 
 #define R2D 180.0/M_PI
 
@@ -286,7 +287,7 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
     /* Common source flux filtering settings. */
     depth = 1;
     if (s->sky.common_flux_filter_min_jy != 0.0 ||
-            s->sky.common_flux_filter_max_jy != 0.0)
+            s->sky.common_flux_filter_max_jy != FLT_MAX)
     {
         oskar_log_message(log, 'M', depth, "Common source flux filtering settings");
         ++depth;

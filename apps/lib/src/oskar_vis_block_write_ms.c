@@ -77,7 +77,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     baseline_s2      = oskar_vis_block_baseline_station2_const(blk);
     have_autocorr    = oskar_vis_block_has_auto_correlations(blk);
     prec             = oskar_mem_precision(in_xcorr);
-    t_start_sec      = t_start_mjd * 86400.0;
+    t_start_sec      = t_start_mjd * 86400.0 + 0.5 * dt_dump;
 
     /* Get number of output baselines. */
     num_baselines_out = num_baselines_in;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,6 +137,9 @@ double oskar_timer_elapsed(oskar_Timer* timer)
     /* CUDA timer. */
     if (timer->type == OSKAR_TIMER_CUDA)
     {
+#ifdef _OPENMP
+        omp_set_lock(&timer->mutex); /* Lock the mutex */
+#endif
         /* Get elapsed time since start. */
         float millisec = 0.0f;
         cudaEventRecord(timer->end_cuda, 0);
@@ -148,10 +151,14 @@ double oskar_timer_elapsed(oskar_Timer* timer)
 
         /* Restart. */
         cudaEventRecord(timer->start_cuda, 0);
+#ifdef _OPENMP
+        omp_unset_lock(&timer->mutex); /* Unlock the mutex. */
+#endif
         return timer->elapsed;
     }
 #endif
 #ifdef _OPENMP
+    omp_set_lock(&timer->mutex); /* Lock the mutex */
     /* OpenMP timer. */
     if (timer->type == OSKAR_TIMER_OMP)
         now = omp_get_wtime();
@@ -163,6 +170,9 @@ double oskar_timer_elapsed(oskar_Timer* timer)
     /* Increment elapsed time and restart. */
     timer->elapsed += (now - timer->start);
     timer->start = now;
+#ifdef _OPENMP
+    omp_unset_lock(&timer->mutex); /* Unlock the mutex. */
+#endif
     return timer->elapsed;
 }
 
