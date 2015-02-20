@@ -1,18 +1,46 @@
 #!/usr/bin/python
 
+def load_cst_file(filename):
+    """"
+    Loads a CST element pattern file into a numpy matrix.
+
+    Parameters
+    ----------
+    filename : string
+        Path of the CST element pattern file to load.
+
+    Returns
+    -------
+    Matrix of values from the CST file.
+    """
+
+    import numpy as np
+
+    f = open(filename, 'r')
+    lines = f.readlines()
+    f.close()
+    X = []
+    for line in lines:
+        values = line.split()
+        if not len(values) == 8:
+            continue
+        else:
+            x_all = np.array(values, dtype=np.double)
+            X.append(x_all)
+    return np.array(X, dtype=np.double)
+
+
 def convert(cst_file_in, scalar_file_out):
     """
-    convert(cst_file_in, scalar_file_out)
-    
     Calculates a scalar element pattern file from a CST element pattern file
-    
+
     Parameters
     ----------
     cst_file_in : string
         Input CST format element pattern file
     scalar_file_out : string
         Output scalar format element pattern file
-    
+
     Notes
     -----
     This function is designed to be used to create scalar element input files
@@ -21,19 +49,22 @@ def convert(cst_file_in, scalar_file_out):
 
     import numpy as np
 
-    # Load the CST element pattern data for X.
-    X = np.loadtxt(cst_file_in, skiprows=2, usecols=(0, 1, 3, 4, 5, 6))
+    # Load the CST element pattern data for X. (Ignore lines that don't consist
+    # of 8 floats)
+    X = load_cst_file(cst_file_in)
+    # Only require a columns for:
+    # Theta, Phi, Abs(Theta), Phase(Theta), Abs(Phi), Phase(Phi)
+    X = np.copy(X[:, [0,1,3,4,5,6]])
 
-    # Generate the rotated data for Y from X.
+    # Generate the rotated data for Y from X by adding 90 degrees to the phi
+    # values
     Y = np.copy(X)
     Y[:, 1] += 90.0
     Y[Y[:, 1] >= 360.0, 1] -= 360.0
 
     # Linked column sort by phi and then theta for both X and Y.
-    X = np.sort(X.view('f8,f8,f8,f8,f8,f8'), \
-        order=['f1','f0'], axis=0).view(np.double)
-    Y = np.sort(Y.view('f8,f8,f8,f8,f8,f8'), \
-        order=['f1','f0'], axis=0).view(np.double)
+    X = np.sort(X.view('f8,f8,f8,f8,f8,f8'), order=['f1','f0'], axis=0).view(np.double)
+    Y = np.sort(Y.view('f8,f8,f8,f8,f8,f8'), order=['f1','f0'], axis=0).view(np.double)
 
     # Generate scalar values from sorted data.
     X_theta = X[:, 2] * np.exp(1j * X[:, 3] * np.pi / 180.0)
@@ -49,7 +80,7 @@ def convert(cst_file_in, scalar_file_out):
     s_amp   = np.absolute(s)
     s_phase = np.angle(s, deg=True)
 
-    # Write scalar values to file.
+    # Write scalar values to file Columns = (theta, phi, amp, phase).
     o = np.column_stack((X[:, 0], X[:, 1], s_amp, s_phase))
     np.savetxt(scalar_file_out, o, fmt=['%12.4f', '%12.4f', '%20.6e', '%12.4f'])
 
