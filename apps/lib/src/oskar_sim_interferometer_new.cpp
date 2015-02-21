@@ -730,16 +730,17 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
                     "This may lead to an invalid signal to noise ratio.");
     }
 
-    // Write simulation log file to the Measurement Set.
+    // Write simulation log to the output files.
+    size_t log_size = 0;
+    char* log_data = oskar_log_file_data(log, &log_size);
 #ifndef OSKAR_NO_MS
     if (out.ms)
-    {
-        size_t log_size = 0;
-        char* log_data = oskar_log_file_data(log, &log_size);
         oskar_ms_add_log(out.ms, log_data, log_size);
-        free(log_data);
-    }
 #endif
+    if (out.vis)
+        oskar_binary_write(out.vis, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
+                OSKAR_TAG_RUN_LOG, 0, log_size, log_data, status);
+    free(log_data);
 
     // Free device memory.
     for (int i = 0; i < num_gpus; ++i)
