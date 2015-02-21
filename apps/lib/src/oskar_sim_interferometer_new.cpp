@@ -189,12 +189,11 @@ static void log_warning_box_(oskar_Log* log, const char* format, ...)
 
 static void set_up_device_data_(DeviceData* d, const oskar_Settings* s,
         const oskar_Telescope* tel, int max_sources_per_chunk,
-        int num_times, int* status)
+        int num_times_per_block, int* status)
 {
     // Obtain local variables with data dimensions.
     int num_stations        = oskar_telescope_num_stations(tel);
     int num_src             = max_sources_per_chunk;
-    int num_times_per_block = num_times;
     int num_channels        = s->obs.num_channels;
     int write_autocorr      = 0; // TODO Get from settings.
 
@@ -300,7 +299,7 @@ static void sim_baselines_(DeviceData* d, oskar_Sky* sky,
     double end_time_block = oskar_vis_block_time_end_mjd_utc(blk);
     double time_inc_block = (end_time_block-start_time_block) / num_times_block;
     double t_mjd = start_time_block + time_index_block * time_inc_block;
-    double gast = oskar_convert_mjd_to_gast_fast(t_mjd + time_inc_block/2.0);
+    double gast = oskar_convert_mjd_to_gast_fast(t_mjd + time_inc_block / 2.0);
 
     double start_freq = oskar_vis_block_freq_start_hz(blk);
     double end_freq   = oskar_vis_block_freq_end_hz(blk);
@@ -326,7 +325,7 @@ static void sim_baselines_(DeviceData* d, oskar_Sky* sky,
     oskar_convert_ecef_to_station_uvw(num_stations, x, y, z, ra0, dec0, gast,
             d->u, d->v, d->w, status);
 
-    // Set dimensions of Jones matrices (this is not a resize!).
+    // Set dimensions of Jones matrices.
     if (d->R)
         oskar_jones_set_size(d->R, num_stations, num_src, status);
     if (d->Z)
@@ -410,12 +409,14 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
     double dt_dump = s->obs.dt_dump_days;
     int total_times = s->obs.num_time_steps;
     int block_start_time_index = block_index * block_length;
-    int block_end_time_index = block_start_time_index + block_length;
+    int block_end_time_index = block_start_time_index + block_length - 1;
     if (block_end_time_index >= total_times)
         block_end_time_index = total_times - 1;
-    int num_times_block = block_end_time_index-block_start_time_index;
-    double block_start_time_mjd = obs_start_mjd+block_start_time_index*dt_dump;
-    double block_end_time_mjd   = obs_start_mjd+block_end_time_index*dt_dump;
+    int num_times_block = 1 + block_end_time_index - block_start_time_index;
+    double block_start_time_mjd = obs_start_mjd +
+            block_start_time_index * dt_dump;
+    double block_end_time_mjd   = obs_start_mjd +
+            (block_end_time_index + 1) * dt_dump;
     int num_channels = s->obs.num_channels;
     double freq_inc = s->obs.frequency_inc_hz;
     double start_freq = s->obs.start_frequency_hz;
@@ -462,7 +463,7 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
 
         for (int t = start_time; t < (start_time + num_times); ++t)
         {
-            if (*status || t > num_times_block) break;
+            if (*status || t >= num_times_block) break;
             int time_idx = block_index * block_length + t;
             if (s->sky.apply_horizon_clip)
             {
@@ -625,6 +626,11 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
     // Check for errors to ensure there are no null pointers.
     if (*status) return;
 
+    // Work out how many time blocks have to be processed.
+    int total_times = s.obs.num_time_steps;
+    int block_length = s.interferometer.max_time_samples_per_block;
+    int num_time_blocks = (total_times + block_length - 1) / block_length;
+
     // Initialise each of the requested GPUs and set up per-GPU memory.
     std::vector<DeviceData> d(num_gpus);
     for (int i = 0; i < num_gpus; ++i)
@@ -633,13 +639,8 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
         if (*status) return;
         cudaDeviceSynchronize();
         set_up_device_data_(&d[i], &s, tel, s.sim.max_sources_per_chunk,
-                s.obs.num_time_steps, status);
+                block_length, status);
     }
-
-    // Work out how many time blocks have to be processed.
-    int total_times = s.obs.num_time_steps;
-    int block_length = s.interferometer.max_time_samples_per_block;
-    int num_time_blocks = (total_times + block_length - 1) / block_length;
 
     // Create output file-handle structure and visibility header.
     int prec = s.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
@@ -691,8 +692,9 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
             {
                 sim_vis_block_(&s, &d[gpu_id], num_gpus, gpu_id,
                         num_chunks, sky_chunks, b, iactive, log, status);
-                oskar_log_message(log, 'S', 0, "Block %d/%d completed "
-                        "after %.2f sec.", b+1, num_time_blocks,
+                oskar_log_message(log, 'S', 0, "Block %d/%d (%.1f%%) "
+                        "completed after %.2f sec.", b+1, num_time_blocks,
+                        (100.0 * (b + 1.0)) / num_time_blocks,
                         oskar_timer_elapsed(d[0].tmr));
                 oskar_cuda_mem_log(log, 0, gpu_id);
             }
