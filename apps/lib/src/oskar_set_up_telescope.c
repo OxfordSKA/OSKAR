@@ -175,14 +175,11 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
     oskar_telescope_analyse(t, status);
     if (*status) return t;
 
-    /* Set error flag if number of stations is less than 2. */
-    /* FIXME this condition is invalid and when making beam patterns of 1 station */
-    if (oskar_telescope_num_stations(t) < 2)
+    /* Set error flag if no stations were found. */
+    if (oskar_telescope_num_stations(t) < 1)
     {
         *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-        oskar_log_error(log, "Insufficient number of stations to form an "
-                "interferometer baseline (%d stations found).",
-                oskar_telescope_num_stations(t));
+        oskar_log_error(log, "No stations found.");
     }
 
     /* Print summary data. */
