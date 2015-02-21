@@ -137,11 +137,11 @@ double oskar_timer_elapsed(oskar_Timer* timer)
     /* CUDA timer. */
     if (timer->type == OSKAR_TIMER_CUDA)
     {
+        float millisec = 0.0f;
 #ifdef _OPENMP
         omp_set_lock(&timer->mutex); /* Lock the mutex */
 #endif
         /* Get elapsed time since start. */
-        float millisec = 0.0f;
         cudaEventRecord(timer->end_cuda, 0);
         cudaEventSynchronize(timer->end_cuda);
         cudaEventElapsedTime(&millisec, timer->start_cuda, timer->end_cuda);
