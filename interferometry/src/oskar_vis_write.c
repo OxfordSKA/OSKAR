@@ -42,7 +42,9 @@ extern "C" {
 void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
         const char* filename, int* status)
 {
-    int amp_type, i, num_blocks, num_channels, num_stations, num_times;
+    int amp_type, i, num_baselines, num_blocks, num_channels;
+    int num_stations, num_times;
+    double start_freq, end_freq, obs_start_mjd, dt_dump;
 #if 0
     int coord_type, *dim;
     unsigned char grp = OSKAR_TAG_GROUP_VISIBILITY;
@@ -110,9 +112,17 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     /* Write the header. */
     h = oskar_vis_header_write(hdr, filename, status);
 
+    /* Get the frequency range, start time and delta-t. */
+    start_freq = oskar_vis_freq_start_hz(vis);
+    end_freq = start_freq + num_channels * oskar_vis_freq_inc_hz(vis);
+    obs_start_mjd = oskar_vis_time_start_mjd_utc(vis);
+    dt_dump = oskar_vis_time_inc_sec(vis) / 86400.0;
+
     /* Create a visibility block to copy into. */
     blk = oskar_vis_block_create(amp_type, OSKAR_CPU,
             max_times_per_block, num_channels, num_stations, 0, status);
+    num_baselines = oskar_vis_block_num_baselines(blk);
+    oskar_vis_block_set_freq_range_hz(blk, start_freq, end_freq);
     amp = oskar_vis_amplitude_const(vis);
     xcorr = oskar_vis_block_cross_correlations(blk);
 
@@ -120,14 +130,24 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     num_blocks = (num_times + max_times_per_block - 1) / max_times_per_block;
     for (i = 0; i < num_blocks; ++i)
     {
-        int block_length, num_baselines, time_offset, total_baselines, t, c;
+        int block_length, time_offset, total_baselines, t, c;
+        int block_start_time_index, block_end_time_index;
+        double block_start_time_mjd, block_end_time_mjd;
 
         /* Set up the block. */
-        num_baselines = oskar_vis_block_num_baselines(blk);
-        if ((i + 1) * max_times_per_block > num_times)
-            oskar_vis_block_set_num_times(blk,
-                    num_times - i * max_times_per_block, status);
-        block_length = oskar_vis_block_num_times(blk);
+        block_start_time_index = i * max_times_per_block;
+        block_end_time_index = block_start_time_index +
+                max_times_per_block - 1;
+        if (block_end_time_index >= num_times)
+            block_end_time_index = num_times - 1;
+        block_length = 1 + block_end_time_index - block_start_time_index;
+        block_start_time_mjd = obs_start_mjd +
+                block_start_time_index * dt_dump;
+        block_end_time_mjd   = obs_start_mjd +
+                (block_end_time_index + 1) * dt_dump;
+        oskar_vis_block_set_num_times(blk, block_length, status);
+        oskar_vis_block_set_time_range_mjd_utc(blk,
+                block_start_time_mjd, block_end_time_mjd);
 
         /* Copy the baseline coordinate data. */
         time_offset = i * max_times_per_block * num_baselines;

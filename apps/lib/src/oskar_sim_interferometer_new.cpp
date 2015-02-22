@@ -297,13 +297,13 @@ static void sim_baselines_(DeviceData* d, oskar_Sky* sky,
     oskar_timer_resume(d->tmr_init_copy);
     double start_time_block = oskar_vis_block_time_start_mjd_utc(blk);
     double end_time_block = oskar_vis_block_time_end_mjd_utc(blk);
-    double time_inc_block = (end_time_block-start_time_block) / num_times_block;
-    double t_mjd = start_time_block + time_index_block * time_inc_block;
-    double gast = oskar_convert_mjd_to_gast_fast(t_mjd + time_inc_block / 2.0);
+    double time_inc = (end_time_block - start_time_block) / num_times_block;
+    double t_mjd = start_time_block + time_inc * (time_index_block + 0.5);
+    double gast = oskar_convert_mjd_to_gast_fast(t_mjd);
 
     double start_freq = oskar_vis_block_freq_start_hz(blk);
     double end_freq   = oskar_vis_block_freq_end_hz(blk);
-    double freq_inc   = (end_freq-start_freq) / num_channels;
+    double freq_inc   = (end_freq - start_freq) / num_channels;
     double frequency  = start_freq + channel_index_block * freq_inc;
 
     // Scale sky fluxes with spectral index and rotation measure.
@@ -467,7 +467,7 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
             int time_idx = block_index * block_length + t;
             if (s->sky.apply_horizon_clip)
             {
-                double mjd = obs_start_mjd + (time_idx * dt_dump) + dt_dump/2.0;
+                double mjd = obs_start_mjd + dt_dump * (time_idx + 0.5);
                 double gast = oskar_convert_mjd_to_gast_fast(mjd);
                 sky = d->local_sky;
                 oskar_timer_resume(d->tmr_clip);
