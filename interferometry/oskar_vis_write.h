@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,11 +42,12 @@ extern "C" {
 
 /**
  * @brief
- * Writes a visibility structure to an OSKAR binary file.
+ * DEPRECATED. Writes a visibility structure to an OSKAR binary file.
  *
  * @details
- * This function writes out the given visibility structure to an OSKAR
- * binary file of the given filename.
+ * @deprecated
+ * The oskar_Vis structure is deprecated.
+ * Do not use this function in new code.
 
  * @param[in] vis      The visibility structure to write.
  * @param[in,out] log  Pointer to log structure to use.

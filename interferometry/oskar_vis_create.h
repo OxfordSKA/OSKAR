@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,13 @@ extern "C" {
 
 /**
  * @brief
- * Creates a new visibility data structure.
+ * DEPRECATED. Creates a new visibility data structure.
  *
  * @details
+ * @deprecated
+ * The oskar_Vis structure is deprecated.
+ * Do not use this function in new code.
+
  * This function creates a new visibility data structure and returns a
  * handle to it.
  *

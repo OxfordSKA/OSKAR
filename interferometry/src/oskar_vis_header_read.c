@@ -28,7 +28,6 @@
 
 #include <private_vis_header.h>
 #include <oskar_vis_header.h>
-#include <oskar_binary.h>
 
 #include <math.h>
 
@@ -36,17 +35,16 @@
 extern "C" {
 #endif
 
-oskar_VisHeader* oskar_vis_header_read(const char* filename, int* status)
+oskar_VisHeader* oskar_vis_header_read(oskar_Binary* h, int* status)
 {
     /* Visibility metadata. */
     int num_channels = 0, num_times_total = 0, num_stations = 0, tag_error = 0;
     int amp_type = 0, max_times_per_block = 0, write_autocorr = 0;
-    oskar_Binary* h = 0;
     unsigned char grp = OSKAR_TAG_GROUP_VIS_HEADER;
     oskar_VisHeader* vis = 0;
 
     /* Check all inputs. */
-    if (!filename || !status)
+    if (!h || !status)
     {
         oskar_set_invalid_argument(status);
         return 0;
@@ -54,9 +52,6 @@ oskar_VisHeader* oskar_vis_header_read(const char* filename, int* status)
 
     /* Check if safe to proceed. */
     if (*status) return 0;
-
-    /* Create the handle. */
-    h = oskar_binary_create(filename, 'r', status);
 
     /* Read essential metadata. */
     oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_WRITE_AUTOCORRELATIONS, 0,
@@ -73,11 +68,7 @@ oskar_VisHeader* oskar_vis_header_read(const char* filename, int* status)
             &num_stations, status);
 
     /* Check if safe to proceed. */
-    if (*status)
-    {
-        oskar_binary_free(h);
-        return 0;
-    }
+    if (*status) return 0;
 
     /* Create the visibility header. */
     vis = oskar_vis_header_create(amp_type, max_times_per_block,
@@ -122,9 +113,6 @@ oskar_VisHeader* oskar_vis_header_read(const char* filename, int* status)
             grp, OSKAR_VIS_HEADER_TAG_STATION_Y_OFFSET_ECEF, 0, status);
     oskar_binary_read_mem(h, vis->station_z_offset_ecef_metres,
             grp, OSKAR_VIS_HEADER_TAG_STATION_Z_OFFSET_ECEF, 0, status);
-
-    /* Release the file handle. */
-    oskar_binary_free(h);
 
     /* Return a handle to the new structure. */
     return vis;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -236,10 +236,6 @@ oskar_Vis* oskar_mex_vis_from_matlab_struct(const mxArray* v_in)
     mxArray* station_x_ = mxGetField(v_in, 0, "station_x_metres");
     mxArray* station_y_ = mxGetField(v_in, 0, "station_y_metres");
     mxArray* station_z_ = mxGetField(v_in, 0, "station_z_metres");
-    mxArray* station_lon_ = mxGetField(v_in, 0, "station_lon_deg");
-    mxArray* station_lat_ = mxGetField(v_in, 0, "station_lat_deg");
-    mxArray* station_orientation_x_ = mxGetField(v_in, 0, "station_orientation_x_deg");
-    mxArray* station_orientation_y_ = mxGetField(v_in, 0, "station_orientation_y_deg");
 
     /* Other Baseline co-ordinates. uu, vv already checked as they are required */
     mxArray* ww_ = mxGetField(v_in, 0, "ww_metres");

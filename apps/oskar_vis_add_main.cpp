@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,10 @@ int main(int argc, char** argv)
     int status = 0;
 
     // Load the first visibility structure.
-    oskar_Vis* out = oskar_vis_read(in_files[0].c_str(), &status);
+    oskar_Binary* h;
+    h = oskar_binary_create(in_files[0].c_str(), 'r', &status);
+    oskar_Vis* out = oskar_vis_read(h, &status);
+    oskar_binary_free(h);
     if (status)
     {
         string msg = "Failed to read visibility data file " + in_files[0];
@@ -92,7 +95,9 @@ int main(int argc, char** argv)
     {
         if (status) break;
 
-        oskar_Vis* in = oskar_vis_read(in_files[i].c_str(), &status);
+        h = oskar_binary_create(in_files[i].c_str(), 'r', &status);
+        oskar_Vis* in = oskar_vis_read(h, &status);
+        oskar_binary_free(h);
         if (status)
         {
             string msg = "Failed to read visibility data file " + in_files[i];

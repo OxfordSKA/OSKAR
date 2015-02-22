@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,12 +35,7 @@ extern "C" {
 
 void oskar_vis_free(oskar_Vis* vis, int* status)
 {
-    /* Check all inputs. */
-    if (!vis || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+    if (!vis) return;
 
     /* Free memory. */
     oskar_mem_free(vis->settings_path, status);
@@ -49,13 +44,6 @@ void oskar_vis_free(oskar_Vis* vis, int* status)
     oskar_mem_free(vis->station_x_offset_ecef_metres, status);
     oskar_mem_free(vis->station_y_offset_ecef_metres, status);
     oskar_mem_free(vis->station_z_offset_ecef_metres, status);
-    oskar_mem_free(vis->station_x_enu_metres, status);
-    oskar_mem_free(vis->station_y_enu_metres, status);
-    oskar_mem_free(vis->station_z_enu_metres, status);
-    oskar_mem_free(vis->station_lon_deg, status);
-    oskar_mem_free(vis->station_lat_deg, status);
-    oskar_mem_free(vis->station_orientation_x_deg, status);
-    oskar_mem_free(vis->station_orientation_y_deg, status);
     oskar_mem_free(vis->baseline_uu_metres, status);
     oskar_mem_free(vis->baseline_vv_metres, status);
     oskar_mem_free(vis->baseline_ww_metres, status);

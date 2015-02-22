@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -130,7 +130,10 @@ int main(int argc, char** argv)
         oskar_log_value(log, 'D', -1, "Loading visibility file", "%s", vis_filename_in[i].c_str());
 
         // Load the visibility file
-        oskar_Vis* vis = oskar_vis_read(vis_filename_in[i].c_str(), &status);
+        oskar_Binary* h = oskar_binary_create(vis_filename_in[i].c_str(), 'r',
+                &status);
+        oskar_Vis* vis = oskar_vis_read(h, &status);
+        oskar_binary_free(h);
 
         // TODO Check that the visibility file was written with normalise
         // beam mode enabled. If not print a warning.

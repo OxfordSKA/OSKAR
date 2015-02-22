@@ -40,7 +40,6 @@
 #include <numpy/arrayobject.h>
 
 #include <oskar_vis.h>
-#include <oskar_mem.h>
 
 static const char* name = "oskar_Vis";
 
@@ -75,8 +74,10 @@ static PyObject* vis_read(PyObject* self, PyObject* args)
     const char* filename;
     if (!PyArg_ParseTuple(args, "s", &filename))
         return NULL;
-    int status = OSKAR_SUCCESS;
-    oskar_Vis* vis = oskar_vis_read(filename, &status);
+    int status = 0;
+    oskar_Binary* h = oskar_binary_create(filename, 'r', &status);
+    oskar_Vis* vis = oskar_vis_read(h, &status);
+    oskar_binary_free(h);
     PyObject* vis_ = PyCapsule_New((void*)vis, name, (PyCapsule_Destructor)vis_free);
     return Py_BuildValue("Ni", vis_, status);
 }
@@ -158,9 +159,9 @@ static inline PyArrayObject* mem_to_PyArrayObject(const oskar_Mem* mem)
 static PyObject* get_station_coords(PyObject* self, PyObject* args)
 {
     oskar_Vis* vis = tuple_to_vis(self, args);
-    PyArrayObject* x_ = mem_to_PyArrayObject(oskar_vis_station_x_enu_metres_const(vis));
-    PyArrayObject* y_ = mem_to_PyArrayObject(oskar_vis_station_y_enu_metres_const(vis));
-    PyArrayObject* z_ = mem_to_PyArrayObject(oskar_vis_station_z_enu_metres_const(vis));
+    PyArrayObject* x_ = mem_to_PyArrayObject(oskar_vis_station_x_offset_ecef_metres_const(vis));
+    PyArrayObject* y_ = mem_to_PyArrayObject(oskar_vis_station_y_offset_ecef_metres_const(vis));
+    PyArrayObject* z_ = mem_to_PyArrayObject(oskar_vis_station_z_offset_ecef_metres_const(vis));
     return Py_BuildValue("OOO", x_, y_, z_);
 }
 

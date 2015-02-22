@@ -31,9 +31,11 @@
 
 /**
  * @file oskar_vis.h
+ *
+ * @deprecated
+ * The oskar_Vis structure is deprecated.
+ * Do not use these functions or enumerators in new code.
  */
-
-/* Public interface. */
 
 #ifdef __cplusplus
 extern "C" {
@@ -120,7 +122,6 @@ enum OSKAR_VIS_STATION_COORD_UNIT
 #include <oskar_vis_accessors.h>
 #include <oskar_vis_add_system_noise.h>
 #include <oskar_vis_create.h>
-#include <oskar_vis_create_copy.h>
 #include <oskar_vis_free.h>
 #include <oskar_vis_get_channel_amps.h>
 #include <oskar_vis_read.h>

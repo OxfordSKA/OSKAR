@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 #include <apps/lib/oskar_OptionParser.h>
 #include <oskar_get_error_string.h>
 #include <oskar_vis.h>
+#include <oskar_binary.h>
 #include <oskar_vector_types.h>
 #include <oskar_version_string.h>
 #include <string>
@@ -98,13 +99,18 @@ int main(int argc, char** argv)
     bool verbose = opt.isSet("-v");
 
     // ===== Write table ======================================================
-    int status = OSKAR_SUCCESS;
-    oskar_Vis* vis = oskar_vis_read(vis_file, &status);
-    if (status != OSKAR_SUCCESS) {
+    int status = 0;
+    oskar_Binary* h = oskar_binary_create(vis_file, 'r', &status);
+    oskar_Vis* vis = oskar_vis_read(h, &status);
+    if (status)
+    {
         fprintf(stderr, "ERROR: Unable to read specified visibility file: %s\n",
                 vis_file);
+        oskar_vis_free(vis, &status);
+        oskar_binary_free(h);
         return status;
     }
+    oskar_binary_free(h);
 
     int num_chan = oskar_vis_num_channels(vis);
     int num_times = oskar_vis_num_times(vis);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,9 +40,14 @@ extern "C" {
 #endif
 
 /**
- * @brief Free memory held by a visibility structure.
+ * @brief
+ * DEPRECATED. Frees memory held by a visibility structure.
  *
  * @details
+ * @deprecated
+ * The oskar_Vis structure is deprecated.
+ * Do not use this function in new code.
+
  * This function will free memory held by a visibility structure.
  *
  * @param[in,out]  vis  Pointer to the visibility data structure to free.

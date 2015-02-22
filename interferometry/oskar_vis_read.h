@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,25 +34,28 @@
  */
 
 #include <oskar_global.h>
+#include <oskar_binary.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Fills a visibility structure by reading the specified file.
+ * @brief
+ * DEPRECATED. Fills a visibility structure by reading the specified file.
  *
  * @details
- * This function fills an empty or uninitialised visibility structure by
- * reading the specified file.
+ * @deprecated
+ * The oskar_Vis structure is deprecated.
+ * Do not use this function in new code.
  *
- * @param[in]  filename The filename to read from.
+ * @param[in]  h           Handle to OSKAR binary file opened for reading.
  * @param[in,out] status   Status return code.
  *
  * @return A handle to the new visibility structure.
  */
 OSKAR_EXPORT
-oskar_Vis* oskar_vis_read(const char* filename, int* status);
+oskar_Vis* oskar_vis_read(oskar_Binary* h, int* status);
 
 #ifdef __cplusplus
 }

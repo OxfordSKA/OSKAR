@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,11 +92,9 @@ int main(int argc, char** argv)
         // Get the name of the current input file.
         const char* in_file = in_files[i].c_str();
 
-        // Load the visibility file.
-        oskar_Vis* vis = oskar_vis_read(in_file, &error);
-
-        // Load the run log.
+        // Load the visibility file and run log.
         oskar_Binary* h = oskar_binary_create(in_file, 'r', &error);
+        oskar_Vis* vis = oskar_vis_read(h, &error);
         oskar_Mem* log = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &error);
         oskar_binary_read_mem(h, log, OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0,
                 &tag_error);

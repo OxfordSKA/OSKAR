@@ -65,7 +65,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     // Load the OSKAR visibilities structure from the specified file.
     int status = OSKAR_SUCCESS;
-    oskar_Vis* vis = oskar_vis_read(filename, &status);
+    oskar_Binary* index = oskar_binary_create(filename, 'r', &status);
+    oskar_Vis* vis = oskar_vis_read(index, &status);
     if (status != OSKAR_SUCCESS)
     {
         oskar_matlab_error("Failed reading OSKAR visibility data file: '%s' (%s)",
@@ -74,7 +75,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     /* Read date field from binary file */
     oskar_Mem *date = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &status);
-    oskar_Binary* index = oskar_binary_create(filename, 'r', &status);
     oskar_binary_read_mem(index, date, OSKAR_TAG_GROUP_METADATA,
             OSKAR_TAG_METADATA_DATE_TIME_STRING, 0, &status);
     oskar_binary_free(index);

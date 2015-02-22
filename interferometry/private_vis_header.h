@@ -56,7 +56,6 @@ struct oskar_VisHeader
     double phase_centre[2];      /* Phase centre RA, Dec coordinates, in degrees. */
     double telescope_centre[3];  /* Reference longitude [deg], latitude [deg] and altitude [m] of the telescope. */
 
-    /* Store station coordinates always in double precision. */
     oskar_Mem* station_x_offset_ecef_metres; /* Station x-coordinate, in metres (offset ECEF). */
     oskar_Mem* station_y_offset_ecef_metres; /* Station y-coordinate, in metres (offset ECEF). */
     oskar_Mem* station_z_offset_ecef_metres; /* Station z-coordinate, in metres (offset ECEF). */

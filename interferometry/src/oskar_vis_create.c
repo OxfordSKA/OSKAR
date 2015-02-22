@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,8 @@ oskar_Vis* oskar_vis_create(int amp_type, int location, int num_channels,
         int num_times, int num_stations, int* status)
 {
     oskar_Vis* vis = 0;
-    int type, num_amps, num_coords, num_baselines;
+    int type;
+    size_t num_amps, num_coords, num_baselines;
 
     /* Check all inputs. */
     if (!status)
@@ -101,13 +102,6 @@ oskar_Vis* oskar_vis_create(int amp_type, int location, int num_channels,
     vis->station_x_offset_ecef_metres = oskar_mem_create(type, location, num_stations, status);
     vis->station_y_offset_ecef_metres = oskar_mem_create(type, location, num_stations, status);
     vis->station_z_offset_ecef_metres = oskar_mem_create(type, location, num_stations, status);
-    vis->station_x_enu_metres = oskar_mem_create(type, location, num_stations, status);
-    vis->station_y_enu_metres = oskar_mem_create(type, location, num_stations, status);
-    vis->station_z_enu_metres = oskar_mem_create(type, location, num_stations, status);
-    vis->station_lon_deg = oskar_mem_create(type, location, num_stations, status);
-    vis->station_lat_deg = oskar_mem_create(type, location, num_stations, status);
-    vis->station_orientation_x_deg = oskar_mem_create(type, location, num_stations, status);
-    vis->station_orientation_y_deg = oskar_mem_create(type, location, num_stations, status);
     vis->baseline_uu_metres = oskar_mem_create(type, location, num_coords, status);
     vis->baseline_vv_metres = oskar_mem_create(type, location, num_coords, status);
     vis->baseline_ww_metres = oskar_mem_create(type, location, num_coords, status);

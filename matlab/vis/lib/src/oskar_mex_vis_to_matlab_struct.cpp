@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,10 +69,6 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
     mxArray* x_  = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
     mxArray* y_  = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
     mxArray* z_  = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
-    mxArray* stationLon_ = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
-    mxArray* stationLat_ = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
-    mxArray* stationOritentationX_ = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
-    mxArray* stationOritentationY_ = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
     mxArray* uu_ = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
     mxArray* vv_ = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
     mxArray* ww_ = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
@@ -222,14 +218,6 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
             oskar_vis_station_y_offset_ecef_metres_const(v_in)), mem_size);
     memcpy(mxGetData(z_), oskar_mem_void_const(
             oskar_vis_station_z_offset_ecef_metres_const(v_in)), mem_size);
-    memcpy(mxGetData(stationLon_), oskar_mem_void_const(
-            oskar_vis_station_lon_deg_const(v_in)), mem_size);
-    memcpy(mxGetData(stationLat_), oskar_mem_void_const(
-            oskar_vis_station_lat_deg_const(v_in)), mem_size);
-    memcpy(mxGetData(stationOritentationX_), oskar_mem_void_const(
-            oskar_vis_station_orientation_x_deg_const(v_in)), mem_size);
-    memcpy(mxGetData(stationOritentationY_), oskar_mem_void_const(
-            oskar_vis_station_orientation_y_deg_const(v_in)), mem_size);
 
     if (num_pols == 4) {
         const char* fields[] = {
@@ -262,10 +250,6 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
                 "station_x_metres",
                 "station_y_metres",
                 "station_z_metres",
-                "station_lon_deg",
-                "station_lat_deg",
-                "station_orientation_x_deg",
-                "station_orientation_y_deg",
 
                 "uu_metres",
                 "vv_metres",
@@ -313,10 +297,6 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
                 "station_x_metres",
                 "station_y_metres",
                 "station_z_metres",
-                "station_lon_deg",
-                "station_lat_deg",
-                "station_orientation_x_deg",
-                "station_orientation_y_deg",
 
                 "uu_metres",
                 "vv_metres",
@@ -388,10 +368,6 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Vis* v_in,
     mxSetField(v_out, 0, "station_x_metres", x_);
     mxSetField(v_out, 0, "station_y_metres", y_);
     mxSetField(v_out, 0, "station_z_metres", z_);
-    mxSetField(v_out, 0, "station_lon_deg", stationLon_);
-    mxSetField(v_out, 0, "station_lat_deg", stationLat_);
-    mxSetField(v_out, 0, "station_orientation_x_deg", stationOritentationX_);
-    mxSetField(v_out, 0, "station_orientation_y_deg", stationOritentationY_);
     mxSetField(v_out, 0, "uu_metres", uu_);
     mxSetField(v_out, 0, "vv_metres", vv_);
     mxSetField(v_out, 0, "ww_metres", ww_);

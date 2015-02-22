@@ -34,7 +34,6 @@ set(interferometry_SRC
     src/oskar_vis_accessors.c
     src/oskar_vis_add_system_noise.c
     src/oskar_vis_create.c
-    src/oskar_vis_create_copy.c
     src/oskar_vis_free.c
     src/oskar_vis_get_channel_amps.c
     src/oskar_vis_read.c

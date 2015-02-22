@@ -35,12 +35,7 @@ extern "C" {
 
 void oskar_vis_block_free(oskar_VisBlock* vis, int* status)
 {
-    /* Check all inputs. */
-    if (!vis || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+    if (!vis) return;
 
     /* Free memory. */
     oskar_mem_free(vis->baseline_uu_metres, status);

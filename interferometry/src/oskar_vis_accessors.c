@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -180,76 +180,6 @@ const oskar_Mem* oskar_vis_station_z_offset_ecef_metres_const(
         const oskar_Vis* vis)
 {
     return vis->station_z_offset_ecef_metres;
-}
-
-oskar_Mem* oskar_vis_station_x_enu_metres(oskar_Vis* vis)
-{
-    return vis->station_x_enu_metres;
-}
-
-const oskar_Mem* oskar_vis_station_x_enu_metres_const(const oskar_Vis* vis)
-{
-    return vis->station_x_enu_metres;
-}
-
-oskar_Mem* oskar_vis_station_y_enu_metres(oskar_Vis* vis)
-{
-    return vis->station_y_enu_metres;
-}
-
-const oskar_Mem* oskar_vis_station_y_enu_metres_const(const oskar_Vis* vis)
-{
-    return vis->station_y_enu_metres;
-}
-
-oskar_Mem* oskar_vis_station_z_enu_metres(oskar_Vis* vis)
-{
-    return vis->station_z_enu_metres;
-}
-
-const oskar_Mem* oskar_vis_station_z_enu_metres_const(const oskar_Vis* vis)
-{
-    return vis->station_z_enu_metres;
-}
-
-oskar_Mem* oskar_vis_station_lon_deg(oskar_Vis* vis)
-{
-    return vis->station_lon_deg;
-}
-
-const oskar_Mem* oskar_vis_station_lon_deg_const(const oskar_Vis* vis)
-{
-    return vis->station_lon_deg;
-}
-
-oskar_Mem* oskar_vis_station_lat_deg(oskar_Vis* vis)
-{
-    return vis->station_lat_deg;
-}
-
-const oskar_Mem* oskar_vis_station_lat_deg_const(const oskar_Vis* vis)
-{
-    return vis->station_lat_deg;
-}
-
-oskar_Mem* oskar_vis_station_orientation_x_deg(oskar_Vis* vis)
-{
-    return vis->station_orientation_x_deg;
-}
-
-const oskar_Mem* oskar_vis_station_orientation_x_deg_const(const oskar_Vis* vis)
-{
-    return vis->station_orientation_x_deg;
-}
-
-oskar_Mem* oskar_vis_station_orientation_y_deg(oskar_Vis* vis)
-{
-    return vis->station_orientation_y_deg;
-}
-
-const oskar_Mem* oskar_vis_station_orientation_y_deg_const(const oskar_Vis* vis)
-{
-    return vis->station_orientation_y_deg;
 }
 
 oskar_Mem* oskar_vis_baseline_uu_metres(oskar_Vis* vis)

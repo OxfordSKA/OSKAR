@@ -40,7 +40,7 @@ extern "C" {
 oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
         const oskar_Telescope* tel, int* status)
 {
-    int i, num_stations, num_channels, precision, vis_type;
+    int num_stations, num_channels, precision, vis_type;
     double rad2deg = 180.0/M_PI;
     oskar_Vis* vis = 0;
 
@@ -110,12 +110,6 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
     oskar_mem_copy(oskar_vis_station_z_offset_ecef_metres(vis),
             oskar_telescope_station_true_z_offset_ecef_metres_const(tel),
             status);
-    oskar_mem_copy(oskar_vis_station_x_enu_metres(vis),
-            oskar_telescope_station_true_x_enu_metres_const(tel), status);
-    oskar_mem_copy(oskar_vis_station_y_enu_metres(vis),
-            oskar_telescope_station_true_y_enu_metres_const(tel), status);
-    oskar_mem_copy(oskar_vis_station_z_enu_metres(vis),
-            oskar_telescope_station_true_z_enu_metres_const(tel), status);
 
     /* Compute baseline u,v,w coordinates for simulation. */
     {
@@ -136,47 +130,6 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
         oskar_mem_free(work_uvw, status);
     }
 
-    /* Copy station lon/lat and nominal receptor orientations */
-    if (precision == OSKAR_DOUBLE)
-    {
-        double* lon = oskar_mem_double(oskar_vis_station_lon_deg(vis), status);
-        double* lat = oskar_mem_double(oskar_vis_station_lat_deg(vis), status);
-        double* orientation_x = oskar_mem_double(
-                oskar_vis_station_orientation_x_deg(vis), status);
-        double* orientation_y = oskar_mem_double(
-                oskar_vis_station_orientation_y_deg(vis), status);
-        for (i = 0; i < num_stations; ++i)
-        {
-            const oskar_Station* s;
-            s = oskar_telescope_station_const(tel, i);
-            lon[i] = oskar_station_lon_rad(s) * rad2deg;
-            lat[i] = oskar_station_lat_rad(s) * rad2deg;
-            orientation_x[i] =
-                    oskar_station_nominal_element_orientation_x_rad(s) * rad2deg;
-            orientation_y[i] =
-                    oskar_station_nominal_element_orientation_y_rad(s) * rad2deg;
-        }
-    }
-    else
-    {
-        float* lon = oskar_mem_float(oskar_vis_station_lon_deg(vis), status);
-        float* lat = oskar_mem_float(oskar_vis_station_lat_deg(vis), status);
-        float* orientation_x = oskar_mem_float(
-                oskar_vis_station_orientation_x_deg(vis), status);
-        float* orientation_y = oskar_mem_float(
-                oskar_vis_station_orientation_y_deg(vis), status);
-        for (i = 0; i < num_stations; ++i)
-        {
-            const oskar_Station* s;
-            s = oskar_telescope_station_const(tel, i);
-            lon[i] = oskar_station_lon_rad(s) * rad2deg;
-            lat[i] = oskar_station_lat_rad(s) * rad2deg;
-            orientation_x[i] =
-                    oskar_station_nominal_element_orientation_x_rad(s) * rad2deg;
-            orientation_y[i] =
-                    oskar_station_nominal_element_orientation_y_rad(s) * rad2deg;
-        }
-    }
     return vis;
 }
 

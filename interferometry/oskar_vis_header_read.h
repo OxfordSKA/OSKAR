@@ -34,25 +34,29 @@
  */
 
 #include <oskar_global.h>
+#include <oskar_binary.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Returns a visibility structure by reading the specified file.
+ * @brief Returns a visibility structure by reading from the specified file.
  *
  * @details
- * This function returns a visibility header structure by
- * reading the specified file.
+ * This function returns a new visibility header structure by
+ * reading from the specified file.
  *
- * @param[in]  filename    The filename to read from.
+ * The structure must be freed by calling oskar_vis_header_free()
+ * when no longer required.
+ *
+ * @param[in]  h           Handle to an OSKAR binary file, opened for reading.
  * @param[in,out] status   Status return code.
  *
  * @return A handle to the new visibility header structure.
  */
 OSKAR_EXPORT
-oskar_VisHeader* oskar_vis_header_read(const char* filename, int* status);
+oskar_VisHeader* oskar_vis_header_read(oskar_Binary* h, int* status);
 
 #ifdef __cplusplus
 }

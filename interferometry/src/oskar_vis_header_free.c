@@ -35,12 +35,7 @@ extern "C" {
 
 void oskar_vis_header_free(oskar_VisHeader* hdr, int* status)
 {
-    /* Check all inputs. */
-    if (!hdr || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+    if (!hdr) return;
 
     /* Free memory. */
     oskar_mem_free(hdr->telescope_path, status);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,9 @@
 #include <private_vis.h>
 #include <oskar_vis.h>
 #include <oskar_binary.h>
-#include <oskar_file_exists.h>
 #include <oskar_log.h>
+#include <oskar_vis_header.h>
+#include <oskar_vis_block.h>
 
 #include <string.h>
 
@@ -41,15 +42,21 @@ extern "C" {
 void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
         const char* filename, int* status)
 {
-    oskar_Mem *temp;
-    int num_amps, num_coords;
-    int uu_elements, vv_elements, ww_elements, amp_elements;
-    int coord_type, amp_type, *dim;
+    int amp_type, i, num_blocks, num_channels, num_stations, num_times;
+#if 0
+    int coord_type, *dim;
     unsigned char grp = OSKAR_TAG_GROUP_VISIBILITY;
+    oskar_Mem *temp;
+    const char* settings;
+#endif
     oskar_Binary* h = 0;
     char* log_data = 0;
     size_t log_size = 0;
-    const char* settings;
+    oskar_VisHeader* hdr = 0;
+    oskar_VisBlock* blk = 0;
+    oskar_Mem* xcorr = 0;
+    const oskar_Mem* amp = 0;
+    int max_times_per_block = 10;
 
     /* Check all inputs. */
     if (!vis || !filename || !status)
@@ -61,24 +68,97 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Get the metadata. */
-    uu_elements = (int)oskar_mem_length(vis->baseline_uu_metres);
-    vv_elements = (int)oskar_mem_length(vis->baseline_vv_metres);
-    ww_elements = (int)oskar_mem_length(vis->baseline_ww_metres);
-    amp_elements = (int)oskar_mem_length(vis->amplitude);
-    amp_type = oskar_mem_type(vis->amplitude);
-    coord_type = oskar_mem_type(vis->baseline_uu_metres);
+    /* Create a header. */
+    amp_type = oskar_mem_type(oskar_vis_amplitude_const(vis));
+    num_channels = oskar_vis_num_channels(vis);
+    num_stations = oskar_vis_num_stations(vis);
+    num_times = oskar_vis_num_times(vis);
+    hdr = oskar_vis_header_create(amp_type, max_times_per_block,
+            num_times, num_channels, num_stations, 0, status);
 
-    /* Check dimensions. */
-    num_amps = vis->num_channels * vis->num_times * vis->num_baselines;
-    num_coords = vis->num_times * vis->num_baselines;
-    if (num_amps != amp_elements || num_coords != uu_elements ||
-            num_coords != vv_elements || num_coords != ww_elements)
+    /* Copy station coordinates and metadata. */
+    oskar_mem_copy(oskar_vis_header_station_x_offset_ecef_metres(hdr),
+            oskar_vis_station_x_offset_ecef_metres_const(vis), status);
+    oskar_mem_copy(oskar_vis_header_station_y_offset_ecef_metres(hdr),
+            oskar_vis_station_y_offset_ecef_metres_const(vis), status);
+    oskar_mem_copy(oskar_vis_header_station_z_offset_ecef_metres(hdr),
+            oskar_vis_station_z_offset_ecef_metres_const(vis), status);
+    oskar_mem_copy(oskar_vis_header_settings(hdr),
+            oskar_vis_settings_const(vis), status);
+    oskar_mem_copy(oskar_vis_header_telescope_path(hdr),
+            oskar_vis_telescope_path_const(vis), status);
+    oskar_vis_header_set_channel_bandwidth_hz(hdr,
+            oskar_vis_channel_bandwidth_hz(vis));
+    oskar_vis_header_set_freq_inc_hz(hdr,
+            oskar_vis_freq_inc_hz(vis));
+    oskar_vis_header_set_freq_start_hz(hdr,
+            oskar_vis_freq_start_hz(vis));
+    oskar_vis_header_set_phase_centre(hdr,
+            oskar_vis_phase_centre_ra_deg(vis),
+            oskar_vis_phase_centre_dec_deg(vis));
+    oskar_vis_header_set_telescope_centre(hdr,
+            oskar_vis_telescope_lon_deg(vis),
+            oskar_vis_telescope_lat_deg(vis),
+            oskar_vis_telescope_alt_metres(vis));
+    oskar_vis_header_set_time_average_sec(hdr,
+            oskar_vis_time_average_sec(vis));
+    oskar_vis_header_set_time_inc_sec(hdr,
+            oskar_vis_time_inc_sec(vis));
+    oskar_vis_header_set_time_start_mjd_utc(hdr,
+            oskar_vis_time_start_mjd_utc(vis));
+
+    /* Write the header. */
+    h = oskar_vis_header_write(hdr, filename, status);
+
+    /* Create a visibility block to copy into. */
+    blk = oskar_vis_block_create(amp_type, OSKAR_CPU,
+            max_times_per_block, num_channels, num_stations, 0, status);
+    amp = oskar_vis_amplitude_const(vis);
+    xcorr = oskar_vis_block_cross_correlations(blk);
+
+    /* Work out the number of blocks. */
+    num_blocks = (num_times + max_times_per_block - 1) / max_times_per_block;
+    for (i = 0; i < num_blocks; ++i)
     {
-        *status = OSKAR_ERR_DIMENSION_MISMATCH;
-        return;
+        int block_length, num_baselines, time_offset, total_baselines, t, c;
+
+        /* Set up the block. */
+        num_baselines = oskar_vis_block_num_baselines(blk);
+        if ((i + 1) * max_times_per_block > num_times)
+            oskar_vis_block_set_num_times(blk,
+                    num_times - i * max_times_per_block, status);
+        block_length = oskar_vis_block_num_times(blk);
+
+        /* Copy the baseline coordinate data. */
+        time_offset = i * max_times_per_block * num_baselines;
+        total_baselines = num_baselines * block_length;
+        oskar_mem_copy_contents(oskar_vis_block_baseline_uu_metres(blk),
+                oskar_vis_baseline_uu_metres_const(vis),
+                0, time_offset, total_baselines, status);
+        oskar_mem_copy_contents(oskar_vis_block_baseline_vv_metres(blk),
+                oskar_vis_baseline_vv_metres_const(vis),
+                0, time_offset, total_baselines, status);
+        oskar_mem_copy_contents(oskar_vis_block_baseline_ww_metres(blk),
+                oskar_vis_baseline_ww_metres_const(vis),
+                0, time_offset, total_baselines, status);
+
+        /* Fill the array from the old dimension order. */
+        for (t = 0; t < block_length; ++t)
+        {
+            for (c = 0; c < num_channels; ++c)
+            {
+                oskar_mem_copy_contents(xcorr, amp,
+                        num_baselines * (t * num_channels + c), num_baselines *
+                        (c * num_times + i * max_times_per_block + t),
+                        num_baselines, status);
+            }
+        }
+
+        /* Write the block. */
+        oskar_vis_block_write(blk, h, i, status);
     }
 
+#if 0
     /* Create the handle. */
     h = oskar_binary_create(filename, 'w', status);
     if (*status)
@@ -108,15 +188,6 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     {
         oskar_binary_write_mem(h, oskar_vis_settings_const(vis),
                 OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0, status);
-    }
-
-    /* If log exists, then write it out. */
-    log_data = oskar_log_file_data(log, &log_size);
-    if (log_data)
-    {
-        oskar_binary_write(h, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
-                OSKAR_TAG_RUN_LOG, 0, log_size, log_data, status);
-        free(log_data);
     }
 
     /* Write the telescope model path. */
@@ -203,23 +274,20 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
             grp, OSKAR_VIS_TAG_STATION_Y_OFFSET_ECEF, 0, 0, status);
     oskar_binary_write_mem(h, vis->station_z_offset_ecef_metres,
             grp, OSKAR_VIS_TAG_STATION_Z_OFFSET_ECEF, 0, 0, status);
-    oskar_binary_write_mem(h, vis->station_x_enu_metres,
-            grp, OSKAR_VIS_TAG_STATION_X_ENU, 0, 0, status);
-    oskar_binary_write_mem(h, vis->station_y_enu_metres,
-            grp, OSKAR_VIS_TAG_STATION_Y_ENU, 0, 0, status);
-    oskar_binary_write_mem(h, vis->station_z_enu_metres,
-            grp, OSKAR_VIS_TAG_STATION_Z_ENU, 0, 0, status);
+#endif
 
-    oskar_binary_write_mem(h, vis->station_lon_deg,  grp,
-            OSKAR_VIS_TAG_STATION_LON, 0, 0, status);
-    oskar_binary_write_mem(h, vis->station_lat_deg,  grp,
-            OSKAR_VIS_TAG_STATION_LAT, 0, 0, status);
-    oskar_binary_write_mem(h, vis->station_orientation_x_deg,  grp,
-            OSKAR_VIS_TAG_STATION_ORIENTATION_X, 0, 0, status);
-    oskar_binary_write_mem(h, vis->station_orientation_y_deg,  grp,
-            OSKAR_VIS_TAG_STATION_ORIENTATION_Y, 0, 0, status);
+    /* If log exists, then write it out. */
+    log_data = oskar_log_file_data(log, &log_size);
+    if (log_data)
+    {
+        oskar_binary_write(h, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
+                OSKAR_TAG_RUN_LOG, 0, log_size, log_data, status);
+        free(log_data);
+    }
 
-    /* Release the handle. */
+    /* Release the handles. */
+    oskar_vis_header_free(hdr, status);
+    oskar_vis_block_free(blk, status);
     oskar_binary_free(h);
 }
 

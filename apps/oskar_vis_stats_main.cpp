@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,10 @@ int main(int argc, char** argv)
         if (verbose)
             cout << "Loading visibility file: " << vis_filename[i] << endl;
 
-        oskar_Vis* vis = oskar_vis_read(vis_filename[i].c_str(), &status);
+        oskar_Binary* h = oskar_binary_create(vis_filename[i].c_str(), 'r',
+                &status);
+        oskar_Vis* vis = oskar_vis_read(h, &status);
+        oskar_binary_free(h);
         check_error(status);
         double min = DBL_MAX, max = -DBL_MAX;
         double mean = 0.0, rms = 0.0, var = 0.0, std = 0.0;
@@ -87,9 +90,9 @@ int main(int argc, char** argv)
         int num_vis = 0, num_zero = 0;
         if (verbose)
         {
-            cout << "  No. of baselines: " << oskar_vis_num_baselines(vis) << endl;
-            cout << "  No. of times: " << oskar_vis_num_times(vis) << endl;
-            cout << "  No. of channels: " << oskar_vis_num_channels(vis) << endl;
+            cout << "  No. baselines: " << oskar_vis_num_baselines(vis) << endl;
+            cout << "  No. times: " << oskar_vis_num_times(vis) << endl;
+            cout << "  No. channels: " << oskar_vis_num_channels(vis) << endl;
         }
         if (oskar_mem_type(oskar_vis_amplitude(vis)) ==
                 OSKAR_SINGLE_COMPLEX_MATRIX)

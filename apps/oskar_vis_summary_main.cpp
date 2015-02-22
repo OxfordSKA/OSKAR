@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,8 @@ int main(int argc, char **argv)
             &status);
 
     // Load visibilities into memory.
-    oskar_Vis* vis = oskar_vis_read(filename, &status);
+    oskar_Binary* h = oskar_binary_create(filename, 'r', &status);
+    oskar_Vis* vis = oskar_vis_read(h, &status);
     if (status)
     {
         fprintf(stderr, "ERROR [code %i]: Unable to read "
@@ -96,7 +97,6 @@ int main(int argc, char **argv)
 
     if (displayLog && !status)
     {
-        oskar_Binary* h = oskar_binary_create(filename, 'r', &status);
         oskar_Mem* temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 1, &status);
         oskar_binary_read_mem(h, temp,
                 OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &status);
@@ -106,12 +106,10 @@ int main(int argc, char **argv)
             printf("%s", oskar_mem_char(temp));
         status = 0;
         oskar_mem_free(temp, &status);
-        oskar_binary_free(h);
     }
 
     if (displaySettings && !status)
     {
-        oskar_Binary* h = oskar_binary_create(filename, 'r', &status);
         oskar_Mem* temp = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 1, &status);
         oskar_binary_read_mem(h, temp,
                 OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, &status);
@@ -121,9 +119,9 @@ int main(int argc, char **argv)
             printf("%s", oskar_mem_char(temp));
         status = 0;
         oskar_mem_free(temp, &status);
-        oskar_binary_free(h);
     }
 
+    oskar_binary_free(h);
     return status;
 }
 

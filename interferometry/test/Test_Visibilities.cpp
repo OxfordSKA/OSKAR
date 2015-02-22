@@ -199,94 +199,6 @@ TEST(Visibilities, create)
 }
 
 
-TEST(Visibilities, copy)
-{
-    double min_rel_error = 0.0, max_rel_error = 0.0;
-    double avg_rel_error = 0.0, std_rel_error = 0.0;
-    int num_channels = 2, num_times = 3, num_stations = 2, status = 0;
-
-    // Create and fill a visibility structure on the CPU.
-    oskar_Vis* vis1 = oskar_vis_create(OSKAR_SINGLE_COMPLEX, OSKAR_CPU,
-            num_channels, num_times, num_stations, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    float2* amp = oskar_mem_float2(oskar_vis_amplitude(vis1), &status);
-    float* uu = oskar_mem_float(oskar_vis_baseline_uu_metres(vis1), &status);
-    float* vv = oskar_mem_float(oskar_vis_baseline_vv_metres(vis1), &status);
-    float* ww = oskar_mem_float(oskar_vis_baseline_ww_metres(vis1), &status);
-    for (int i = 0, c = 0; c < oskar_vis_num_channels(vis1); ++c)
-    {
-        for (int t = 0; t < oskar_vis_num_times(vis1); ++t)
-        {
-            for (int b = 0; b < oskar_vis_num_baselines(vis1); ++b, ++i)
-            {
-                amp[i].x  = (float)i + 1.123f;
-                amp[i].y  = (float)i - 0.456f;
-            }
-        }
-    }
-    for (int i = 0, t = 0; t < oskar_vis_num_times(vis1); ++t)
-    {
-        for (int b = 0; b < oskar_vis_num_baselines(vis1); ++b, ++i)
-        {
-            uu[i] = (float)b + 0.1f;
-            vv[i] = (float)t + 0.2f;
-            ww[i] = (float)i + 0.3f;
-        }
-    }
-
-    // Copy to GPU.
-    oskar_Vis* vis2 = oskar_vis_create_copy(vis1, OSKAR_GPU, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ((int)OSKAR_GPU, oskar_vis_location(vis2));
-    ASSERT_EQ(oskar_vis_num_channels(vis1), oskar_vis_num_channels(vis2));
-    ASSERT_EQ(oskar_vis_num_times(vis1), oskar_vis_num_times(vis2));
-    ASSERT_EQ(oskar_vis_num_stations(vis1), oskar_vis_num_stations(vis2));
-    ASSERT_EQ(oskar_vis_num_baselines(vis1), oskar_vis_num_baselines(vis2));
-
-    // Copy back to CPU and check values.
-    oskar_Vis* vis3 = oskar_vis_create_copy(vis2, OSKAR_CPU, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_EQ((int)OSKAR_CPU, oskar_vis_location(vis3));
-    ASSERT_EQ(oskar_vis_num_channels(vis1), oskar_vis_num_channels(vis3));
-    ASSERT_EQ(oskar_vis_num_times(vis1), oskar_vis_num_times(vis3));
-    ASSERT_EQ(oskar_vis_num_stations(vis1), oskar_vis_num_stations(vis3));
-    ASSERT_EQ(oskar_vis_num_baselines(vis1), oskar_vis_num_baselines(vis3));
-    oskar_mem_evaluate_relative_error(oskar_vis_amplitude(vis3),
-            oskar_vis_amplitude(vis1),
-            &min_rel_error, &max_rel_error, &avg_rel_error, &std_rel_error,
-            &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_LT(max_rel_error, 1e-10);
-    ASSERT_LT(avg_rel_error, 1e-10);
-    oskar_mem_evaluate_relative_error(oskar_vis_baseline_uu_metres(vis3),
-            oskar_vis_baseline_uu_metres(vis1),
-            &min_rel_error, &max_rel_error, &avg_rel_error, &std_rel_error,
-            &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_LT(max_rel_error, 1e-10);
-    ASSERT_LT(avg_rel_error, 1e-10);
-    oskar_mem_evaluate_relative_error(oskar_vis_baseline_vv_metres(vis3),
-            oskar_vis_baseline_vv_metres(vis1),
-            &min_rel_error, &max_rel_error, &avg_rel_error, &std_rel_error,
-            &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_LT(max_rel_error, 1e-10);
-    ASSERT_LT(avg_rel_error, 1e-10);
-    oskar_mem_evaluate_relative_error(oskar_vis_baseline_ww_metres(vis3),
-            oskar_vis_baseline_ww_metres(vis1),
-            &min_rel_error, &max_rel_error, &avg_rel_error, &std_rel_error,
-            &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    ASSERT_LT(max_rel_error, 1e-10);
-    ASSERT_LT(avg_rel_error, 1e-10);
-
-    // Free memory.
-    oskar_vis_free(vis1, &status);
-    oskar_vis_free(vis2, &status);
-    oskar_vis_free(vis3, &status);
-}
-
-
 TEST(Visibilities, get_channel_amps)
 {
     int amp_type     = OSKAR_SINGLE_COMPLEX;
@@ -345,13 +257,13 @@ TEST(Visibilities, read_write)
 {
     int status = 0;
     int num_channels     = 10;
-    int num_times        = 10;
+    int num_times        = 77;
     int num_stations     = 20;
     double start_freq    = 200.0e6;
     double freq_inc      = 10.0e6;
     double time_start_mjd_utc = 10.0;
     double time_inc_seconds   = 1.5;
-    int precision        = OSKAR_SINGLE;
+    int precision        = OSKAR_DOUBLE;
     int amp_type         = precision | OSKAR_COMPLEX;
     const char* filename = "vis_temp.dat";
     oskar_Vis *vis1, *vis2;
@@ -369,10 +281,10 @@ TEST(Visibilities, read_write)
         oskar_mem_append_raw(oskar_vis_telescope_path(vis1), name,
                 OSKAR_CHAR, OSKAR_CPU, 1 + strlen(name), &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        float2* amp = oskar_mem_float2(oskar_vis_amplitude(vis1), &status);
-        float* uu = oskar_mem_float(oskar_vis_baseline_uu_metres(vis1), &status);
-        float* vv = oskar_mem_float(oskar_vis_baseline_vv_metres(vis1), &status);
-        float* ww = oskar_mem_float(oskar_vis_baseline_ww_metres(vis1), &status);
+        double2* amp = oskar_mem_double2(oskar_vis_amplitude(vis1), &status);
+        double* uu = oskar_mem_double(oskar_vis_baseline_uu_metres(vis1), &status);
+        double* vv = oskar_mem_double(oskar_vis_baseline_vv_metres(vis1), &status);
+        double* ww = oskar_mem_double(oskar_vis_baseline_ww_metres(vis1), &status);
 
         for (int i = 0, c = 0; c < oskar_vis_num_channels(vis1); ++c)
         {
@@ -380,8 +292,8 @@ TEST(Visibilities, read_write)
             {
                 for (int b = 0; b < oskar_vis_num_baselines(vis1); ++b, ++i)
                 {
-                    amp[i].x = (float)i + 1.123f;
-                    amp[i].y = (float)i - 0.456f;
+                    amp[i].x = (double)i + 1.123;
+                    amp[i].y = (double)i - 0.456;
                 }
             }
         }
@@ -389,9 +301,9 @@ TEST(Visibilities, read_write)
         {
             for (int b = 0; b < oskar_vis_num_baselines(vis1); ++b, ++i)
             {
-                uu[i] = (float)t + 0.1f;
-                vv[i] = (float)b + 0.2f;
-                ww[i] = (float)i + 0.3f;
+                uu[i] = (double)t + 0.1;
+                vv[i] = (double)b + 0.2;
+                ww[i] = (double)i + 0.3;
             }
         }
         oskar_vis_write(vis1, NULL, filename, &status);
@@ -400,7 +312,9 @@ TEST(Visibilities, read_write)
 
     // Load the visibility structure from file.
     {
-        vis2 = oskar_vis_read(filename, &status);
+        oskar_Binary* h = oskar_binary_create(filename, 'r', &status);
+        vis2 = oskar_vis_read(h, &status);
+        oskar_binary_free(h);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         ASSERT_EQ(amp_type, oskar_mem_type(oskar_vis_amplitude(vis2)));
         ASSERT_EQ(precision, oskar_mem_type(oskar_vis_baseline_uu_metres(vis2)));
@@ -415,10 +329,10 @@ TEST(Visibilities, read_write)
         ASSERT_EQ(freq_inc, oskar_vis_freq_inc_hz(vis2));
         ASSERT_EQ(time_start_mjd_utc, oskar_vis_time_start_mjd_utc(vis2));
         ASSERT_EQ(time_inc_seconds, oskar_vis_time_inc_sec(vis2));
-        float2* amp = oskar_mem_float2(oskar_vis_amplitude(vis2), &status);
-        float* uu = oskar_mem_float(oskar_vis_baseline_uu_metres(vis2), &status);
-        float* vv = oskar_mem_float(oskar_vis_baseline_vv_metres(vis2), &status);
-        float* ww = oskar_mem_float(oskar_vis_baseline_ww_metres(vis2), &status);
+        double2* amp = oskar_mem_double2(oskar_vis_amplitude(vis2), &status);
+        double* uu = oskar_mem_double(oskar_vis_baseline_uu_metres(vis2), &status);
+        double* vv = oskar_mem_double(oskar_vis_baseline_vv_metres(vis2), &status);
+        double* ww = oskar_mem_double(oskar_vis_baseline_ww_metres(vis2), &status);
 
         // Check the data loaded correctly.
         for (int i = 0, c = 0; c < oskar_vis_num_channels(vis2); ++c)
@@ -427,8 +341,8 @@ TEST(Visibilities, read_write)
             {
                 for (int b = 0; b < oskar_vis_num_baselines(vis2); ++b, ++i)
                 {
-                    ASSERT_FLOAT_EQ((float)i + 1.123f, amp[i].x);
-                    ASSERT_FLOAT_EQ((float)i - 0.456f, amp[i].y);
+                    ASSERT_FLOAT_EQ((double)i + 1.123, amp[i].x);
+                    ASSERT_FLOAT_EQ((double)i - 0.456, amp[i].y);
                 }
             }
         }
@@ -436,9 +350,9 @@ TEST(Visibilities, read_write)
         {
             for (int b = 0; b < oskar_vis_num_baselines(vis2); ++b, ++i)
             {
-                ASSERT_FLOAT_EQ((float)t + 0.10f, uu[i]);
-                ASSERT_FLOAT_EQ((float)b + 0.20f, vv[i]);
-                ASSERT_FLOAT_EQ((float)i + 0.30f, ww[i]);
+                ASSERT_FLOAT_EQ((double)t + 0.10, uu[i]);
+                ASSERT_FLOAT_EQ((double)b + 0.20, vv[i]);
+                ASSERT_FLOAT_EQ((double)i + 0.30, ww[i]);
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,14 @@ extern "C" {
 #endif
 
 /**
- * @brief Returns a non-owned pointer to the visibility amplitudes for the
- * specified channel.
+ * @brief
+ * DEPRECATED. Sets a non-owned pointer to the visibility
+ * amplitudes for the specified channel.
+ *
+ * @details
+ * @deprecated
+ * The oskar_Vis structure is deprecated.
+ * Do not use this function in new code.
  *
  * @param[out] vis_amp  oskar_Mem pointer to the visibility amplitudes for the
  *                      specified channel.

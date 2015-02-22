@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,27 +29,19 @@
 #ifndef OSKAR_PRIVATE_VIS_H_
 #define OSKAR_PRIVATE_VIS_H_
 
-/**
- * @file private_vis.h
- */
-
 #include <oskar_mem.h>
 
-/**
- * @brief Structure to hold visibility data.
+/*
+ * Deprecated structure to hold visibility data.
  *
- * @details
- * Visibility data consists of a number of samples each of which consist of
- * a set of baselines coordinates (u,v,w) in wave-numbers and one or more complex
- * visibility amplitudes.
+ * Visibility data consists of a set of baseline (u,v,w) coordinates and
+ * one or more complex visibility amplitudes.
  *
  * Baseline coordinates are stored as three separate arrays of length corresponding
  * to the number of visibility samples in the data set. Coordinates are real
  * valued and can be either double or single precision. Coordinates are ordered
  * by channel ID, time and baseline where channel is the slowest varying dimension
- * and baseline is the fastest varying. This is coordinate ordering is chosen
- * to for optimal memory write performance in OSKAR where channels are simulated
- * on the outer processing loop.
+ * and baseline is the fastest varying.
  *
  * Axis order: channel(slowest) -> time -> baseline (fastest)
  *
@@ -60,49 +52,37 @@
  * array determines the number of polarisations stored in the data. Scalar elements
  * represent a single polarisation axis whereas matrix elements store 4 polarisations
  * per data sample.
- *
- * Comments:
- * - Consider storing a coord_type_id for the baseline coordinates similar
- *   to the station model.
  */
 struct oskar_Vis
 {
-    oskar_Mem* settings_path;    /**< Path to settings file. */
-    oskar_Mem* telescope_path;   /**< Path to telescope model. */
-    oskar_Mem* settings;         /**< Settings file contents. */
+    oskar_Mem* settings_path;    /* Path to settings file. */
+    oskar_Mem* telescope_path;   /* Path to telescope model. */
+    oskar_Mem* settings;         /* Settings file contents. */
 
-    int num_channels;            /**< Number of frequency channels. */
-    int num_times;               /**< Number of time samples. */
-    int num_stations;            /**< Number of interferometer stations. */
-    int num_baselines;           /**< Number of interferometer baselines. */
+    int num_channels;            /* Number of frequency channels. */
+    int num_times;               /* Number of time samples. */
+    int num_stations;            /* Number of interferometer stations. */
+    int num_baselines;           /* Number of interferometer baselines. */
 
-    double freq_start_hz;        /**< Start frequency, in Hz. */
-    double freq_inc_hz;          /**< Frequency increment, in Hz. */
-    double channel_bandwidth_hz; /**< Frequency channel bandwidth, in Hz */
-    double time_start_mjd_utc;   /**< Start time in MJD, UTC. */
-    double time_inc_sec;         /**< Time increment, in seconds. */
-    double time_average_sec;     /**< Time average smearing duration, in seconds. */
-    double phase_centre_ra_deg;  /**< Pointing phase centre RA, in degrees. */
-    double phase_centre_dec_deg; /**< Pointing phase centre Dec, in degrees. */
-    double telescope_lon_deg;    /**< Reference longitude of the telescope, in degrees */
-    double telescope_lat_deg;    /**< Reference latitude of the telescope, in degrees */
-    double telescope_alt_metres; /**< Reference altitude of the telescope, in metres. */
+    double freq_start_hz;        /* Start frequency, in Hz. */
+    double freq_inc_hz;          /* Frequency increment, in Hz. */
+    double channel_bandwidth_hz; /* Frequency channel bandwidth, in Hz */
+    double time_start_mjd_utc;   /* Start time in MJD, UTC. */
+    double time_inc_sec;         /* Time increment, in seconds. */
+    double time_average_sec;     /* Time average smearing duration, in seconds. */
+    double phase_centre_ra_deg;  /* Pointing phase centre RA, in degrees. */
+    double phase_centre_dec_deg; /* Pointing phase centre Dec, in degrees. */
+    double telescope_lon_deg;    /* Reference longitude of the telescope, in degrees */
+    double telescope_lat_deg;    /* Reference latitude of the telescope, in degrees */
+    double telescope_alt_metres; /* Reference altitude of the telescope, in metres. */
 
-    /* TODO Store station coordinates always in double precision? */
-    oskar_Mem* station_x_offset_ecef_metres; /**< Station x-coordinate, in metres (offset ECEF). */
-    oskar_Mem* station_y_offset_ecef_metres; /**< Station y-coordinate, in metres (offset ECEF). */
-    oskar_Mem* station_z_offset_ecef_metres; /**< Station z-coordinate, in metres (offset ECEF). */
-    oskar_Mem* station_x_enu_metres;         /**< Station x-coordinate, in metres (horizon). */
-    oskar_Mem* station_y_enu_metres;         /**< Station y-coordinate, in metres (horizon). */
-    oskar_Mem* station_z_enu_metres;         /**< Station z-coordinate, in metres (horizon). */
-    oskar_Mem* station_lon_deg;              /**< Station longitudes, in degrees. */
-    oskar_Mem* station_lat_deg;              /**< Station latitudes, in degrees. */
-    oskar_Mem* station_orientation_x_deg;    /**< Orientation azimuth of nominal station x dipole axis, in degrees. */
-    oskar_Mem* station_orientation_y_deg;    /**< Orientation azimuth of nominal station y dipole axis, in degrees. */
-    oskar_Mem* baseline_uu_metres;           /**< Baseline coordinates, in metres. */
-    oskar_Mem* baseline_vv_metres;           /**< Baseline coordinates, in metres. */
-    oskar_Mem* baseline_ww_metres;           /**< Baseline coordinates, in metres. */
-    oskar_Mem* amplitude;                    /**< Complex visibility amplitude. */
+    oskar_Mem* station_x_offset_ecef_metres; /* Station x-coordinate, in metres (offset ECEF). */
+    oskar_Mem* station_y_offset_ecef_metres; /* Station y-coordinate, in metres (offset ECEF). */
+    oskar_Mem* station_z_offset_ecef_metres; /* Station z-coordinate, in metres (offset ECEF). */
+    oskar_Mem* baseline_uu_metres;           /* Baseline coordinates, in metres. */
+    oskar_Mem* baseline_vv_metres;           /* Baseline coordinates, in metres. */
+    oskar_Mem* baseline_ww_metres;           /* Baseline coordinates, in metres. */
+    oskar_Mem* amplitude;                    /* Complex visibility amplitude. */
 };
 
 #ifndef OSKAR_VIS_TYPEDEF_

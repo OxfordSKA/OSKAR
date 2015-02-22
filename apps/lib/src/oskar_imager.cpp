@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,11 +81,15 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
     }
 
     // Read the visibility data.
-    vis = oskar_vis_read(settings.image.input_vis_data, &error);
+    oskar_Binary* h = oskar_binary_create(settings.image.input_vis_data, 'r',
+            &error);
+    vis = oskar_vis_read(h, &error);
+    oskar_binary_free(h);
     if (error)
     {
         oskar_log_error(log, "Failure in oskar_vis_read() (%s).",
                 oskar_get_error_string(error));
+        oskar_vis_free(vis, &error);
         return error;
     }
 
