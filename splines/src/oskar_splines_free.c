@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,12 +36,7 @@ extern "C" {
 
 void oskar_splines_free(oskar_Splines* data, int* status)
 {
-    /* Check all inputs. */
-    if (!data || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+    if (!data) return;
 
     /* Free the arrays. */
     oskar_mem_free(data->knots_x_theta, status);

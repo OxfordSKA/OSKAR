@@ -41,13 +41,7 @@ extern "C" {
 void oskar_station_free(oskar_Station* model, int* status)
 {
     int i = 0;
-
-    /* Check all inputs. */
-    if (!model || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+    if (!model) return;
 
     /* Free the element data. */
     oskar_mem_free(model->element_true_x_enu_metres, status);

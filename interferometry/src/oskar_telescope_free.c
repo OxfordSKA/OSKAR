@@ -38,13 +38,7 @@ extern "C" {
 void oskar_telescope_free(oskar_Telescope* telescope, int* status)
 {
     int i = 0;
-
-    /* Check all inputs. */
-    if (!telescope || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+    if (!telescope) return;
 
     /* Free the arrays. */
     oskar_mem_free(telescope->station_true_x_offset_ecef_metres, status);

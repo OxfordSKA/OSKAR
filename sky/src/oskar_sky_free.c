@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,12 +37,7 @@ extern "C" {
 
 void oskar_sky_free(oskar_Sky* model, int* status)
 {
-    /* Check all inputs. */
-    if (!model || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+    if (!model) return;
 
     /* Free the memory. */
     oskar_mem_free(model->ra_rad, status);
