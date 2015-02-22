@@ -498,6 +498,9 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
     oskar_timer_resume(d[0].tmr_write);
 
     // Copy back vis blocks from each GPU.
+    // FIXME This won't work here when using multiple GPUs:
+    // FIXME cudaSetDevice() has not been called by host thread 0.
+    // FIXME Move to end of sim_vis_block() instead?
     for (int i = 0; i < num_gpus; ++i)
         oskar_vis_block_copy(d[i].vis_block_cpu, d[i].vis_block[!iactive],
                 status);
