@@ -72,10 +72,10 @@
 struct DeviceData
 {
     // Host memory.
-    oskar_VisBlock* vis_block_cpu; // On host, for copy back & write.
+    oskar_VisBlock* vis_block_cpu[2]; // On host, for copy back & write.
 
     // Device memory.
-    oskar_VisBlock* vis_block[2];  // Double buffered device memory blocks.
+    oskar_VisBlock* vis_block; // Device memory block.
     oskar_Mem *u, *v, *w;
     oskar_Sky* sky_chunk; // The unmodified sky chunk being processed.
     oskar_Sky* local_sky; // A copy of the sky chunk after horizon clipping.
@@ -205,15 +205,15 @@ static void set_up_device_data_(DeviceData* d, const oskar_Settings* s,
         vistype |= OSKAR_MATRIX;
 
     // Host memory.
-    d->vis_block_cpu = oskar_vis_block_create(vistype, OSKAR_CPU,
+    d->vis_block_cpu[0] = oskar_vis_block_create(vistype, OSKAR_CPU,
+            num_times_per_block, num_channels, num_stations, write_autocorr,
+            status);
+    d->vis_block_cpu[1] = oskar_vis_block_create(vistype, OSKAR_CPU,
             num_times_per_block, num_channels, num_stations, write_autocorr,
             status);
 
     // Device memory.
-    d->vis_block[0] = oskar_vis_block_create(vistype, OSKAR_GPU,
-            num_times_per_block, num_channels, num_stations, write_autocorr,
-            status);
-    d->vis_block[1] = oskar_vis_block_create(vistype, OSKAR_GPU,
+    d->vis_block = oskar_vis_block_create(vistype, OSKAR_GPU,
             num_times_per_block, num_channels, num_stations, write_autocorr,
             status);
     d->u = oskar_mem_create(prec, OSKAR_GPU, num_stations, status);
@@ -244,9 +244,9 @@ static void set_up_device_data_(DeviceData* d, const oskar_Settings* s,
 
 static void free_device_data_(DeviceData* d, int* status)
 {
-    oskar_vis_block_free(d->vis_block_cpu, status);
-    oskar_vis_block_free(d->vis_block[0], status);
-    oskar_vis_block_free(d->vis_block[1], status);
+    oskar_vis_block_free(d->vis_block_cpu[0], status);
+    oskar_vis_block_free(d->vis_block_cpu[1], status);
+    oskar_vis_block_free(d->vis_block, status);
     oskar_mem_free(d->u, status);
     oskar_mem_free(d->v, status);
     oskar_mem_free(d->w, status);
@@ -274,11 +274,10 @@ static void free_device_data_(DeviceData* d, int* status)
  */
 static void sim_baselines_(DeviceData* d, oskar_Sky* sky,
         const oskar_Settings* settings, int channel_index_block,
-        int time_index_block, int time_index_simulation, int active_vis_block,
-        int* status)
+        int time_index_block, int time_index_simulation, int* status)
 {
-    // Get a handle to the active visibility block.
-    oskar_VisBlock* blk = d->vis_block[active_vis_block];
+    // Get a handle to the visibility block.
+    oskar_VisBlock* blk = d->vis_block;
 
     // Get dimensions.
     int num_baselines   = oskar_telescope_num_baselines(d->tel);
@@ -400,7 +399,7 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
         oskar_Log* log, int* status)
 {
     // Clear the visibility block.
-    oskar_VisBlock* vis_block = d->vis_block[iactive];
+    oskar_VisBlock* vis_block = d->vis_block;
     oskar_vis_block_clear(vis_block, status);
 
     // Initialise the visibility block meta-data.
@@ -483,10 +482,15 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
                         "Chunk %3d/%d, Channel %4d/%d [dev.%d, %d sources]",
                         time_idx+1, total_times, c+1, num_chunks,
                         f+1, num_channels, gpu_id, oskar_sky_num_sources(sky));
-                sim_baselines_(d, sky, s, f, t, time_idx, iactive, status);
+                sim_baselines_(d, sky, s, f, t, time_idx, status);
             }
         }
     }
+
+    // Copy the visibility block to host memory.
+    oskar_timer_resume(d->tmr_init_copy);
+    oskar_vis_block_copy(d->vis_block_cpu[iactive], d->vis_block, status);
+    oskar_timer_pause(d->tmr_init_copy);
 }
 
 
@@ -494,33 +498,31 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
         int num_gpus, OutputHandles* out, const oskar_Telescope* tel,
         int block_index, int iactive, int* status)
 {
+    // Can't safely do GPU operations in here, even if cudaSetDevice()
+    // is called, because we don't want to block the default stream.
+    // CUDA streams could help here, but for now, ensure we do the copy back
+    // at the end of the block simulation.
+
     // Un-pause write timer.
     oskar_timer_resume(d[0].tmr_write);
 
-    // Copy back vis blocks from each GPU.
-    // FIXME This won't work here when using multiple GPUs:
-    // FIXME cudaSetDevice() has not been called by host thread 0.
-    // FIXME Move to end of sim_vis_block() instead?
-    for (int i = 0; i < num_gpus; ++i)
-        oskar_vis_block_copy(d[i].vis_block_cpu, d[i].vis_block[!iactive],
-                status);
-
     // Combine all vis blocks into the first one.
-    oskar_VisBlock* blk_cpu = d[0].vis_block_cpu;
-    oskar_Mem* xcorr0 = oskar_vis_block_cross_correlations(blk_cpu);
-    oskar_Mem* acorr0 = oskar_vis_block_auto_correlations(blk_cpu);
+    oskar_VisBlock* blk = d[0].vis_block_cpu[!iactive];
+    oskar_Mem* xcorr0 = oskar_vis_block_cross_correlations(blk);
+    oskar_Mem* acorr0 = oskar_vis_block_auto_correlations(blk);
     for (int i = 1; i < num_gpus; ++i)
     {
+        oskar_VisBlock* b = d[i].vis_block_cpu[!iactive];
         oskar_mem_add(xcorr0, xcorr0,
-                oskar_vis_block_cross_correlations(d[i].vis_block_cpu), status);
+                oskar_vis_block_cross_correlations(b), status);
         oskar_mem_add(acorr0, acorr0,
-                oskar_vis_block_auto_correlations(d[i].vis_block_cpu), status);
+                oskar_vis_block_auto_correlations(b), status);
     }
 
     // Calculate baseline uvw coordinates for vis block.
-    double t_start = oskar_vis_block_time_start_mjd_utc(blk_cpu);
-    double t_end = oskar_vis_block_time_end_mjd_utc(blk_cpu);
-    int num_times = oskar_vis_block_num_times(blk_cpu);
+    double t_start = oskar_vis_block_time_start_mjd_utc(blk);
+    double t_end = oskar_vis_block_time_end_mjd_utc(blk);
+    int num_times = oskar_vis_block_num_times(blk);
     double dt_dump_sec = (t_end - t_start) / num_times;
     oskar_convert_ecef_to_baseline_uvw(
             oskar_telescope_num_stations(tel),
@@ -530,13 +532,13 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
             oskar_telescope_phase_centre_ra_rad(tel),
             oskar_telescope_phase_centre_dec_rad(tel),
             num_times, t_start, dt_dump_sec,
-            oskar_vis_block_baseline_uu_metres(blk_cpu),
-            oskar_vis_block_baseline_vv_metres(blk_cpu),
-            oskar_vis_block_baseline_ww_metres(blk_cpu), out->temp, status);
+            oskar_vis_block_baseline_uu_metres(blk),
+            oskar_vis_block_baseline_vv_metres(blk),
+            oskar_vis_block_baseline_ww_metres(blk), out->temp, status);
 
     // Add uncorrelated system noise to the combined visibilities.
     if (s->interferometer.noise.enable)
-        oskar_vis_block_add_system_noise(blk_cpu, tel,
+        oskar_vis_block_add_system_noise(blk, tel,
                 s->interferometer.noise.seed, block_index, out->temp, status);
 
     // Write the combined vis block into the MS.
@@ -551,7 +553,7 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
             out->ms = oskar_vis_header_write_ms(out->header, ms_name,
                     overwrite, force_polarised, status);
         }
-        oskar_vis_block_write_ms(blk_cpu, out->header, out->ms, status);
+        oskar_vis_block_write_ms(blk, out->header, out->ms, status);
     }
 #endif
     // Write the combined vis block into the OSKAR vis binary file.
@@ -560,7 +562,7 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
     {
         if (block_index == 0)
             out->vis = oskar_vis_header_write(out->header, vis_name, status);
-        oskar_vis_block_write(blk_cpu, out->vis, block_index, status);
+        oskar_vis_block_write(blk, out->vis, block_index, status);
     }
 
     // Pause write timer.
