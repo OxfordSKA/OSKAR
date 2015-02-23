@@ -47,6 +47,9 @@ rm -rf splines
 rm -rf station
 rm -rf utility
 
+# Remove configured header file
+rm -f oskar_global.h
+
 # Remove the main OSKAR library
 rm -f  liboskar*
 

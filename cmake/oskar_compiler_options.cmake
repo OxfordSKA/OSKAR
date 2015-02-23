@@ -19,6 +19,7 @@ set(BUILD_SHARED_LIBS ON)
 # main oskar library.
 # ------------------------------------------------------------------------------
 include_directories(
+    ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/apps
     ${PROJECT_SOURCE_DIR}/apps/lib
@@ -65,7 +66,6 @@ if (SUBVERSION_FOUND)
     endif()
 endif()
 
-
 # Build the various version strings to be passed to the code.
 set(OSKAR_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
 set(OSKAR_VERSION_STR "${OSKAR_VERSION}")
@@ -82,11 +82,10 @@ if (CMAKE_VERSION VERSION_GREATER 2.8.11)
     string(TIMESTAMP OSKAR_BUILD_DATE "%Y-%m-%d %H:%M:%S")
 endif()
 
+configure_file(${PROJECT_SOURCE_DIR}/oskar_global.h.in
+    ${PROJECT_BINARY_DIR}/oskar_global.h @ONLY)
 
 # Set general compiler flags.
-add_definitions(-DOSKAR_VERSION=${OSKAR_VERSION_ID})
-add_definitions(-DOSKAR_VERSION_STR="${OSKAR_VERSION_STR}")
-#add_definitions(-DOSKAR_SVN_REVISION="${OSKAR_SVN_REVISION}")
 if (NOT WIN32)
     # Common compiler options. Note C code is compiled as gnu89 in order to
     # allow for a number of non C89 compiler extensions such as sinf, powf,
