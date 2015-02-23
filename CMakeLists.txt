@@ -136,7 +136,9 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/."
     PATTERN ${install_include_dir} EXCLUDE
     PATTERN build EXCLUDE
     PATTERN release EXCLUDE
+    PATTERN release* EXCLUDE
     PATTERN debug EXCLUDE
+    PATTERN debug* EXCLUDE
     PATTERN .settings EXCLUDE
     PATTERN cmake EXCLUDE
     PATTERN gui EXCLUDE
