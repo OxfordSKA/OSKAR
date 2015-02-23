@@ -430,16 +430,15 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
     if (*status) return;
 
     // Get time and chunk counter ranges for different parallelisation modes.
-    int parallelisation_type = SPLIT_CHUNK; // TODO Get from settings.
     int num_chunks, start_chunk, start_time, num_times;
-    if (parallelisation_type == SPLIT_CHUNK)
+    if (s->sim.splitting_mode == OSKAR_SPLIT_CHUNK)
     {
         start_time = 0;
         num_times = block_length;
         oskar_round_robin(total_chunks, num_gpus, gpu_id,
                 &num_chunks, &start_chunk);
     }
-    else if (parallelisation_type == SPLIT_TIME)
+    else
     {
         start_chunk = 0;
         num_chunks = total_chunks;

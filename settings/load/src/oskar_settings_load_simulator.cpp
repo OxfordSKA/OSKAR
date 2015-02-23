@@ -41,6 +41,7 @@ extern "C"
 void oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
         const char* filename, int* status)
 {
+    QString temp;
     QSettings s(QString(filename), QSettings::IniFormat);
 
     // Check if safe to proceed.
@@ -54,6 +55,11 @@ void oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
     sim->keep_log_file = s.value("keep_log_file", false).toBool();
     sim->write_status_to_log_file = s.value("write_status_to_log_file",
             false).toBool();
+    temp = s.value("splitting_mode", "Source chunk").toString();
+    if (temp.startsWith("S", Qt::CaseInsensitive))
+        sim->splitting_mode = OSKAR_SPLIT_CHUNK;
+    else if (temp.startsWith("T", Qt::CaseInsensitive))
+        sim->splitting_mode = OSKAR_SPLIT_TIME;
 
     // Get the device IDs to use.
     QStringList devsList;

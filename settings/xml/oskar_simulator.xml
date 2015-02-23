@@ -38,6 +38,15 @@
         </description>
     </s>
 
+    <s key="splitting_mode">
+        <label>Splitting mode</label>
+        <type name="OptionList" default="Source chunk">Source chunk, Time</type>
+        <description>
+            The splitting mode used for parallelisation when there are 
+            multiple GPUs per host.
+        </description>
+    </s>
+
     <s key="cuda_device_ids">
         <label>CUDA device IDs to use</label>
         <type name="IntListExt" default="all">all</type>

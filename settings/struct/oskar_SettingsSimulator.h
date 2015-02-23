@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,10 @@
  * @file oskar_SettingsSimulator.h
  */
 
-enum parallelisation_mode {
-    SPLIT_TIME, SPLIT_CHUNK
+enum OSKAR_SPLITTING_MODE
+{
+    OSKAR_SPLIT_TIME,
+    OSKAR_SPLIT_CHUNK
 };
 
 /**
@@ -49,7 +51,7 @@ struct oskar_SettingsSimulator
 {
     int double_precision;
     int max_sources_per_chunk;
-    int parallelisation_mode;
+    int splitting_mode;
     int num_cuda_devices;
     int keep_log_file;
     int write_status_to_log_file;
