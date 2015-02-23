@@ -304,10 +304,13 @@ static void sim_baselines_(DeviceData* d, oskar_Sky* sky,
     double t_dump = obs_start_mjd_utc + time_index_simulation * dt_dump;
     double gast = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump/2.0);
 
-    double start_freq = oskar_vis_block_freq_start_hz(blk);
-    double end_freq   = oskar_vis_block_freq_end_hz(blk);
-    double freq_inc   = (end_freq - start_freq) / num_channels;
-    double frequency  = start_freq + channel_index_block * freq_inc;
+//    double start_freq = oskar_vis_block_freq_start_hz(blk);
+//    double end_freq   = oskar_vis_block_freq_end_hz(blk);
+//    double freq_inc   = (end_freq - start_freq) / num_channels;
+//    double frequency  = start_freq + channel_index_block * freq_inc;
+    double frequency = settings->obs.start_frequency_hz +
+            channel_index_block * settings->obs.frequency_inc_hz;
+
 
     // Scale sky fluxes with spectral index and rotation measure.
     oskar_sky_scale_flux_with_frequency(sky, frequency, status);
