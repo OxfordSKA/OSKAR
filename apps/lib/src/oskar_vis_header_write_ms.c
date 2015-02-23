@@ -116,6 +116,11 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
                     oskar_mem_float_const(y_metres, status),
                     oskar_mem_float_const(z_metres, status));
         }
+
+        /* Add the settings. */
+        oskar_ms_add_settings(ms,
+                oskar_mem_char_const(oskar_vis_header_settings_const(hdr)),
+                oskar_mem_length(oskar_vis_header_settings_const(hdr)));
     }
     else
     {
