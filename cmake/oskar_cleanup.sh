@@ -16,7 +16,6 @@ if [[ ! "$PWD" == "@PROJECT_BINARY_DIR@" && "$1" != "--force" ]]; then
     exit 1
 fi
 
-
 # Remove files and directories created by CMake
 rm -rf CMake*
 rm -f  CPack*
@@ -63,6 +62,8 @@ rm -f  .DS_Store
 rm -f  *.log
 
 # Remove install folders (WARNING: Use this option with CARE!!)
+# Note can only remove the contents of the directories not the directories
+# themselves as they may contain non-OSKAR files.
 if [ "$1" == "-uninstall" ]; then
     rm -f  @CMAKE_INSTALL_PREFIX@/@OSKAR_BIN_INSTALL_DIR@/oskar*
     rm -f  @CMAKE_INSTALL_PREFIX@/@OSKAR_LIB_INSTALL_DIR@/liboskar*
