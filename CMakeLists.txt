@@ -130,6 +130,8 @@ if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")
 else()
     set(install_include_dir "${CMAKE_INSTALL_PREFIX}/include")
 endif ()
+# TODO move install command into subdirectories to make this more modular.
+# and give subdirectories control over what headers are installed.
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/."
     DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
     FILES_MATCHING PATTERN "oskar_*.h"
@@ -141,6 +143,7 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/."
     PATTERN debug* EXCLUDE
     PATTERN .settings EXCLUDE
     PATTERN cmake EXCLUDE
+    PATTERN doc EXCLUDE
     PATTERN gui EXCLUDE
     PATTERN matlab EXCLUDE
     PATTERN *dierckx* EXCLUDE

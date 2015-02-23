@@ -294,11 +294,15 @@ static void sim_baselines_(DeviceData* d, oskar_Sky* sky,
 
     // Get the time and frequency of the visibility slice being simulated.
     oskar_timer_resume(d->tmr_init_copy);
-    double start_time_block = oskar_vis_block_time_start_mjd_utc(blk);
-    double end_time_block = oskar_vis_block_time_end_mjd_utc(blk);
-    double time_inc = (end_time_block - start_time_block) / num_times_block;
-    double t_mjd = start_time_block + time_inc * (time_index_block + 0.5);
-    double gast = oskar_convert_mjd_to_gast_fast(t_mjd);
+//    double start_time_block = oskar_vis_block_time_start_mjd_utc(blk);
+//    double end_time_block = oskar_vis_block_time_end_mjd_utc(blk);
+//    double time_inc = (end_time_block - start_time_block) / num_times_block;
+//    double t_mjd = start_time_block + time_inc * (time_index_block + 0.5);
+//    double gast = oskar_convert_mjd_to_gast_fast(t_mjd);
+    double obs_start_mjd_utc = settings->obs.start_mjd_utc;
+    double dt_dump = settings->obs.dt_dump_days;
+    double t_dump = obs_start_mjd_utc + time_index_simulation * dt_dump;
+    double gast = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump/2.0);
 
     double start_freq = oskar_vis_block_freq_start_hz(blk);
     double end_freq   = oskar_vis_block_freq_end_hz(blk);
@@ -467,6 +471,7 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
             {
                 double mjd = obs_start_mjd + dt_dump * (time_idx + 0.5);
                 double gast = oskar_convert_mjd_to_gast_fast(mjd);
+
                 sky = d->local_sky;
                 oskar_timer_resume(d->tmr_clip);
                 oskar_sky_horizon_clip(sky, d->sky_chunk,
