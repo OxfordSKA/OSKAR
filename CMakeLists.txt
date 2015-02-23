@@ -130,8 +130,8 @@ if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")
 else()
     set(install_include_dir "${CMAKE_INSTALL_PREFIX}/include")
 endif ()
-# TODO move install command into subdirectories to make this more modular.
-# and give subdirectories control over what headers are installed.
+# TODO move install command into subdirectories to make this more modular,
+# and give subdirectories control over which headers are installed.
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/."
     DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
     FILES_MATCHING PATTERN "oskar_*.h"
@@ -151,8 +151,6 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/."
     PATTERN test EXCLUDE
     PATTERN extern EXCLUDE
     PATTERN .svn EXCLUDE)
-install(FILES "${PROJECT_BINARY_DIR}/oskar_global.h"
-    DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR})
 
 # === Copy cleanup bash script into the build directory
 configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_cleanup.sh

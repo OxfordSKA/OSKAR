@@ -19,7 +19,6 @@ set(BUILD_SHARED_LIBS ON)
 # main oskar library.
 # ------------------------------------------------------------------------------
 include_directories(
-    ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/apps
     ${PROJECT_SOURCE_DIR}/apps/lib
@@ -83,7 +82,7 @@ if (CMAKE_VERSION VERSION_GREATER 2.8.11)
 endif()
 
 configure_file(${PROJECT_SOURCE_DIR}/oskar_global.h.in
-    ${PROJECT_BINARY_DIR}/oskar_global.h @ONLY)
+    ${PROJECT_SOURCE_DIR}/oskar_global.h @ONLY)
 
 # Set general compiler flags.
 if (NOT WIN32)
