@@ -79,10 +79,10 @@ oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
         num_autocorr = num_channels * num_times * num_stations;
 
     /* Initialise meta-data to zero. */
-    vis->freq_range_hz[0] = 0.0;
-    vis->freq_range_hz[1] = 0.0;
-    vis->time_range_mjd_utc[0] = 0.0;
-    vis->time_range_mjd_utc[1] = 0.0;
+    vis->freq_start_inc_hz[0] = 0.0;
+    vis->freq_start_inc_hz[1] = 0.0;
+    vis->time_start_inc_mjd_utc[0] = 0.0;
+    vis->time_start_inc_mjd_utc[1] = 0.0;
 
     /* Create arrays. */
     vis->baseline_uu_metres = oskar_mem_create(type, location,

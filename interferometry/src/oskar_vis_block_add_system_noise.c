@@ -302,9 +302,7 @@ void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
     time_int_sec         = oskar_telescope_time_average_sec(telescope);
     num_channels         = oskar_vis_block_num_channels(vis);
     freq_start_hz        = oskar_vis_block_freq_start_hz(vis);
-    freq_inc_hz          = num_channels <= 1 ? 0 :
-            (oskar_vis_block_freq_end_hz(vis) - freq_start_hz) /
-            (num_channels - 1);
+    freq_inc_hz          = oskar_vis_block_freq_inc_hz(vis);
 
     /* Apply noise to each channel. */
     for (c = 0; c < num_channels; ++c)

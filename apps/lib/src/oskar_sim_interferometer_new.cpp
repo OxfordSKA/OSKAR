@@ -294,23 +294,11 @@ static void sim_baselines_(DeviceData* d, oskar_Sky* sky,
 
     // Get the time and frequency of the visibility slice being simulated.
     oskar_timer_resume(d->tmr_init_copy);
-//    double start_time_block = oskar_vis_block_time_start_mjd_utc(blk);
-//    double end_time_block = oskar_vis_block_time_end_mjd_utc(blk);
-//    double time_inc = (end_time_block - start_time_block) / num_times_block;
-//    double t_mjd = start_time_block + time_inc * (time_index_block + 0.5);
-//    double gast = oskar_convert_mjd_to_gast_fast(t_mjd);
-    double obs_start_mjd_utc = settings->obs.start_mjd_utc;
-    double dt_dump = settings->obs.dt_dump_days;
-    double t_dump = obs_start_mjd_utc + time_index_simulation * dt_dump;
-    double gast = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump/2.0);
-
-//    double start_freq = oskar_vis_block_freq_start_hz(blk);
-//    double end_freq   = oskar_vis_block_freq_end_hz(blk);
-//    double freq_inc   = (end_freq - start_freq) / num_channels;
-//    double frequency  = start_freq + channel_index_block * freq_inc;
-    double frequency = settings->obs.start_frequency_hz +
-            channel_index_block * settings->obs.frequency_inc_hz;
-
+    double t_dump = oskar_vis_block_time_start_mjd_utc(blk) +
+            oskar_vis_block_time_inc_mjd_utc(blk) * (time_index_block + 0.5);
+    double gast = oskar_convert_mjd_to_gast_fast(t_dump);
+    double frequency = oskar_vis_block_freq_start_hz(blk) +
+            channel_index_block * oskar_vis_block_freq_inc_hz(blk);
 
     // Scale sky fluxes with spectral index and rotation measure.
     oskar_sky_scale_flux_with_frequency(sky, frequency, status);
@@ -411,29 +399,25 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
 
     // Initialise the visibility block meta-data.
     int block_length = s->interferometer.max_time_samples_per_block;
+    int num_channels = s->obs.num_channels;
+    int total_times = s->obs.num_time_steps;
     double obs_start_mjd = s->obs.start_mjd_utc;
     double dt_dump = s->obs.dt_dump_days;
-    int total_times = s->obs.num_time_steps;
     int block_start_time_index = block_index * block_length;
     int block_end_time_index = block_start_time_index + block_length - 1;
     if (block_end_time_index >= total_times)
         block_end_time_index = total_times - 1;
     int num_times_block = 1 + block_end_time_index - block_start_time_index;
-    double block_start_time_mjd = obs_start_mjd +
+    double block_start_time_mjd_utc = obs_start_mjd +
             block_start_time_index * dt_dump;
-    double block_end_time_mjd   = obs_start_mjd +
-            (block_end_time_index + 1) * dt_dump;
-    int num_channels = s->obs.num_channels;
-    double freq_inc = s->obs.frequency_inc_hz;
-    double start_freq = s->obs.start_frequency_hz;
-    double end_freq = start_freq + num_channels * freq_inc;
     // Set the number of active times in the block
     oskar_vis_block_set_num_times(vis_block, num_times_block, status);
     // Set the time range of the block (of active times slices only)
-    oskar_vis_block_set_time_range_mjd_utc(vis_block,
-            block_start_time_mjd, block_end_time_mjd);
+    oskar_vis_block_set_time_start_inc_mjd_utc(vis_block,
+            block_start_time_mjd_utc, dt_dump);
     // Set the active frequency range of the block.
-    oskar_vis_block_set_freq_range_hz(vis_block, start_freq, end_freq);
+    oskar_vis_block_set_freq_start_inc_hz(vis_block,
+            s->obs.start_frequency_hz, s->obs.frequency_inc_hz);
     if (*status) return;
 
     // Get time and chunk counter ranges for different parallelisation modes.
@@ -528,9 +512,8 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
 
     // Calculate baseline uvw coordinates for vis block.
     double t_start = oskar_vis_block_time_start_mjd_utc(blk);
-    double t_end = oskar_vis_block_time_end_mjd_utc(blk);
     int num_times = oskar_vis_block_num_times(blk);
-    double dt_dump_sec = (t_end - t_start) / num_times;
+    double dt_dump = oskar_vis_block_time_inc_mjd_utc(blk);
     oskar_convert_ecef_to_baseline_uvw(
             oskar_telescope_num_stations(tel),
             oskar_telescope_station_measured_x_offset_ecef_metres_const(tel),
@@ -538,7 +521,7 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
             oskar_telescope_station_measured_z_offset_ecef_metres_const(tel),
             oskar_telescope_phase_centre_ra_rad(tel),
             oskar_telescope_phase_centre_dec_rad(tel),
-            num_times, t_start, dt_dump_sec,
+            num_times, t_start, dt_dump,
             oskar_vis_block_baseline_uu_metres(blk),
             oskar_vis_block_baseline_vv_metres(blk),
             oskar_vis_block_baseline_ww_metres(blk), out->temp, status);

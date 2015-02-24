@@ -51,10 +51,10 @@ void oskar_vis_block_copy(oskar_VisBlock* dst, const oskar_VisBlock* src,
     dst->dim_size[1] = src->dim_size[1];
     dst->dim_size[2] = src->dim_size[2];
     dst->dim_size[3] = src->dim_size[3];
-    dst->freq_range_hz[0] = src->freq_range_hz[0];
-    dst->freq_range_hz[1] = src->freq_range_hz[1];
-    dst->time_range_mjd_utc[0] = src->time_range_mjd_utc[0];
-    dst->time_range_mjd_utc[1] = src->time_range_mjd_utc[1];
+    dst->freq_start_inc_hz[0] = src->freq_start_inc_hz[0];
+    dst->freq_start_inc_hz[1] = src->freq_start_inc_hz[1];
+    dst->time_start_inc_mjd_utc[0] = src->time_start_inc_mjd_utc[0];
+    dst->time_start_inc_mjd_utc[1] = src->time_start_inc_mjd_utc[1];
 
     /* Copy the memory. */
     oskar_mem_copy(dst->baseline_uu_metres, src->baseline_uu_metres, status);
