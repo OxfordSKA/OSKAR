@@ -110,6 +110,9 @@ oskar_Timer* oskar_timer_create(int type)
         cudaEventCreate(&timer->end_cuda);
     }
 #endif
+#ifdef _OPENMP
+    omp_init_lock(&timer->mutex);
+#endif
     return timer;
 }
 
@@ -121,6 +124,9 @@ void oskar_timer_free(oskar_Timer* timer)
         cudaEventDestroy(timer->start_cuda);
         cudaEventDestroy(timer->end_cuda);
     }
+#endif
+#ifdef _OPENMP
+    omp_destroy_lock(&timer->mutex);
 #endif
     free(timer);
 }
