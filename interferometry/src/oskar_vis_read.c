@@ -179,6 +179,7 @@ oskar_Vis* oskar_vis_read_new(oskar_Binary* h, int* status)
     const oskar_Mem* xcorr = 0;
     int amp_type, max_times_per_block, num_channels, num_stations, num_times;
     int i, num_blocks;
+    double freq_ref_hz, freq_inc_hz, time_ref_mjd_utc, time_inc_sec;
 
     /* Try to read the new header. */
     hdr = oskar_vis_header_read(h, status);
@@ -204,6 +205,10 @@ oskar_Vis* oskar_vis_read_new(oskar_Binary* h, int* status)
     }
 
     /* Copy station coordinates and metadata. */
+    freq_ref_hz = oskar_vis_header_freq_start_hz(hdr);
+    freq_inc_hz = oskar_vis_header_freq_inc_hz(hdr);
+    time_ref_mjd_utc = oskar_vis_header_time_start_mjd_utc(hdr);
+    time_inc_sec = oskar_vis_header_time_inc_sec(hdr);
     oskar_mem_copy(oskar_vis_station_x_offset_ecef_metres(vis),
             oskar_vis_header_station_x_offset_ecef_metres_const(hdr), status);
     oskar_mem_copy(oskar_vis_station_y_offset_ecef_metres(vis),
@@ -216,10 +221,8 @@ oskar_Vis* oskar_vis_read_new(oskar_Binary* h, int* status)
             oskar_vis_header_telescope_path_const(hdr), status);
     oskar_vis_set_channel_bandwidth_hz(vis,
             oskar_vis_header_channel_bandwidth_hz(hdr));
-    oskar_vis_set_freq_inc_hz(vis,
-            oskar_vis_header_freq_inc_hz(hdr));
-    oskar_vis_set_freq_start_hz(vis,
-            oskar_vis_header_freq_start_hz(hdr));
+    oskar_vis_set_freq_inc_hz(vis, freq_inc_hz);
+    oskar_vis_set_freq_start_hz(vis, freq_ref_hz);
     oskar_vis_set_phase_centre(vis,
             oskar_vis_header_phase_centre_ra_deg(hdr),
             oskar_vis_header_phase_centre_dec_deg(hdr));
@@ -229,14 +232,13 @@ oskar_Vis* oskar_vis_read_new(oskar_Binary* h, int* status)
             oskar_vis_header_telescope_alt_metres(hdr));
     oskar_vis_set_time_average_sec(vis,
             oskar_vis_header_time_average_sec(hdr));
-    oskar_vis_set_time_inc_sec(vis,
-            oskar_vis_header_time_inc_sec(hdr));
-    oskar_vis_set_time_start_mjd_utc(vis,
-            oskar_vis_header_time_start_mjd_utc(hdr));
+    oskar_vis_set_time_inc_sec(vis, time_inc_sec);
+    oskar_vis_set_time_start_mjd_utc(vis, time_ref_mjd_utc);
 
     /* Create a visibility block to read into. */
     blk = oskar_vis_block_create(amp_type, OSKAR_CPU, max_times_per_block,
-            num_channels, num_stations, 0, status);
+            num_channels, num_stations, 0, freq_ref_hz, freq_inc_hz,
+            time_ref_mjd_utc, (time_inc_sec / 86400.0), status);
     amp = oskar_vis_amplitude(vis);
     xcorr = oskar_vis_block_cross_correlations_const(blk);
 

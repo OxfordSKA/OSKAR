@@ -1,13 +1,13 @@
 2015-XX-XX  OSKAR-2.6.0
 
-    * Bandwidth smearing was calculated incorrectly, as contribution from 
-      the w-term was omitted. This has now been fixed, so the apparent
-      amplitudes of sources far from the phase centre are reduced.
+    * Contribution from the w-term was omitted from the bandwidth smearing 
+      calculation. This has now been fixed, so the apparent
+      amplitudes of sources far from the phase centre are slightly reduced.
 
     * Analytical time-average smearing was calculated incorrectly 
       for sources greater than 90 degrees from the phase centre.
       This has now been fixed, so the apparent amplitudes of sources far 
-      from the phase centre are reduced.
+      from the phase centre are slightly reduced.
 
     * Fixed an issue which could result in repeated log entries.
 
@@ -38,7 +38,7 @@
     * Removed options to load GSM maps and HEALPix maps in K, as 
       amplitude conversion to Jy was not performed correctly.
 
-    * Removed GUI options to write OSKAR image files, as these are deprecated.
+    * Removed options to write OSKAR image files, as these are deprecated.
 
     * Switched to using a counter-based pseudo-random number generator 
       instead of cuRAND, for increased flexibility and performance.

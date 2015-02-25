@@ -35,7 +35,8 @@ extern "C" {
 
 oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
         int num_times, int num_channels, int num_stations, int create_autocorr,
-        int* status)
+        double freq_ref_hz, double freq_inc_hz, double time_ref_mjd_utc,
+        double time_inc_mjd_utc, int* status)
 {
     oskar_VisBlock* vis = 0;
     int num_autocorr = 0, num_xcorr = 0, num_baselines = 0, num_coords = 0;
@@ -69,20 +70,22 @@ oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
 
     /* Set dimensions. */
     num_baselines = num_stations * (num_stations - 1) / 2;
-    vis->dim_size[0] = num_times;
-    vis->dim_size[1] = num_channels;
-    vis->dim_size[2] = num_baselines;
-    vis->dim_size[3] = num_stations;
+    vis->dim_start_size[0] = 0; /* Global time index start of block. */
+    vis->dim_start_size[1] = 0; /* Global frequency index start of block. */
+    vis->dim_start_size[2] = num_times;
+    vis->dim_start_size[3] = num_channels;
+    vis->dim_start_size[4] = num_baselines;
+    vis->dim_start_size[5] = num_stations;
     num_xcorr    = num_channels * num_times * num_baselines;
     num_coords   = num_times * num_baselines;
     if (create_autocorr)
         num_autocorr = num_channels * num_times * num_stations;
 
-    /* Initialise meta-data to zero. */
-    vis->freq_start_inc_hz[0] = 0.0;
-    vis->freq_start_inc_hz[1] = 0.0;
-    vis->time_start_inc_mjd_utc[0] = 0.0;
-    vis->time_start_inc_mjd_utc[1] = 0.0;
+    /* Set meta-data. */
+    vis->freq_ref_inc_hz[0] = freq_ref_hz;
+    vis->freq_ref_inc_hz[1] = freq_inc_hz;
+    vis->time_ref_inc_mjd_utc[0] = time_ref_mjd_utc;
+    vis->time_ref_inc_mjd_utc[1] = time_inc_mjd_utc;
 
     /* Create arrays. */
     vis->baseline_uu_metres = oskar_mem_create(type, location,

@@ -191,13 +191,17 @@ static void set_up_device_data_(DeviceData* d, const oskar_Settings* s,
         const oskar_Telescope* tel, int max_sources_per_chunk,
         int num_times_per_block, int* status)
 {
-    // Obtain local variables with data dimensions.
+    // Obtain local variables from settings.
     int num_stations        = oskar_telescope_num_stations(tel);
     int num_src             = max_sources_per_chunk;
     int num_channels        = s->obs.num_channels;
     int write_autocorr      = 0; // TODO Get from settings.
+    double freq_ref_hz      = s->obs.start_frequency_hz;
+    double freq_inc_hz      = s->obs.frequency_inc_hz;
+    double time_ref_mjd_utc = s->obs.start_mjd_utc;
+    double time_inc_mjd_utc = s->obs.dt_dump_days;
 
-    // Obtain local variables for data type.
+    // Get data types.
     int prec    = oskar_telescope_precision(tel);
     int complx  = prec | OSKAR_COMPLEX;
     int vistype = complx;
@@ -207,14 +211,17 @@ static void set_up_device_data_(DeviceData* d, const oskar_Settings* s,
     // Host memory.
     d->vis_block_cpu[0] = oskar_vis_block_create(vistype, OSKAR_CPU,
             num_times_per_block, num_channels, num_stations, write_autocorr,
+            freq_ref_hz, freq_inc_hz, time_ref_mjd_utc, time_inc_mjd_utc,
             status);
     d->vis_block_cpu[1] = oskar_vis_block_create(vistype, OSKAR_CPU,
             num_times_per_block, num_channels, num_stations, write_autocorr,
+            freq_ref_hz, freq_inc_hz, time_ref_mjd_utc, time_inc_mjd_utc,
             status);
 
     // Device memory.
     d->vis_block = oskar_vis_block_create(vistype, OSKAR_GPU,
             num_times_per_block, num_channels, num_stations, write_autocorr,
+            freq_ref_hz, freq_inc_hz, time_ref_mjd_utc, time_inc_mjd_utc,
             status);
     d->u = oskar_mem_create(prec, OSKAR_GPU, num_stations, status);
     d->v = oskar_mem_create(prec, OSKAR_GPU, num_stations, status);
@@ -294,10 +301,11 @@ static void sim_baselines_(DeviceData* d, oskar_Sky* sky,
 
     // Get the time and frequency of the visibility slice being simulated.
     oskar_timer_resume(d->tmr_init_copy);
-    double t_dump = oskar_vis_block_time_start_mjd_utc(blk) +
-            oskar_vis_block_time_inc_mjd_utc(blk) * (time_index_block + 0.5);
+    double t_dump = oskar_vis_block_time_ref_mjd_utc(blk) +
+            oskar_vis_block_time_inc_mjd_utc(blk) *
+            (time_index_simulation + 0.5);
     double gast = oskar_convert_mjd_to_gast_fast(t_dump);
-    double frequency = oskar_vis_block_freq_start_hz(blk) +
+    double frequency = oskar_vis_block_freq_ref_hz(blk) +
             channel_index_block * oskar_vis_block_freq_inc_hz(blk);
 
     // Scale sky fluxes with spectral index and rotation measure.
@@ -397,7 +405,7 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
     oskar_VisBlock* vis_block = d->vis_block;
     oskar_vis_block_clear(vis_block, status);
 
-    // Initialise the visibility block meta-data.
+    // Set the visibility block meta-data.
     int block_length = s->interferometer.max_time_samples_per_block;
     int num_channels = s->obs.num_channels;
     int total_times = s->obs.num_time_steps;
@@ -408,16 +416,9 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
     if (block_end_time_index >= total_times)
         block_end_time_index = total_times - 1;
     int num_times_block = 1 + block_end_time_index - block_start_time_index;
-    double block_start_time_mjd_utc = obs_start_mjd +
-            block_start_time_index * dt_dump;
     // Set the number of active times in the block
     oskar_vis_block_set_num_times(vis_block, num_times_block, status);
-    // Set the time range of the block (of active times slices only)
-    oskar_vis_block_set_time_start_inc_mjd_utc(vis_block,
-            block_start_time_mjd_utc, dt_dump);
-    // Set the active frequency range of the block.
-    oskar_vis_block_set_freq_start_inc_hz(vis_block,
-            s->obs.start_frequency_hz, s->obs.frequency_inc_hz);
+    oskar_vis_block_set_start_time_index(vis_block, block_start_time_index);
     if (*status) return;
 
     // Get time and chunk counter ranges for different parallelisation modes.
@@ -453,7 +454,7 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
         for (int t = start_time; t < (start_time + num_times); ++t)
         {
             if (*status || t >= num_times_block) break;
-            int time_idx = block_index * block_length + t;
+            int time_idx = block_start_time_index + t;
             if (s->sky.apply_horizon_clip)
             {
                 double mjd = obs_start_mjd + dt_dump * (time_idx + 0.5);
@@ -489,10 +490,9 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
         int num_gpus, OutputHandles* out, const oskar_Telescope* tel,
         int block_index, int iactive, int* status)
 {
-    // Can't safely do GPU operations in here, even if cudaSetDevice()
-    // is called, because we don't want to block the default stream.
-    // CUDA streams could help here, but for now, ensure we do the copy back
-    // at the end of the block simulation.
+    // Can't safely do GPU operations in here (even if cudaSetDevice()
+    // is called) because we don't want to block the default stream, so we
+    // copy the visibilities back at the end of the block simulation.
 
     // Un-pause write timer.
     oskar_timer_resume(d[0].tmr_write);
@@ -511,9 +511,10 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
     }
 
     // Calculate baseline uvw coordinates for vis block.
-    double t_start = oskar_vis_block_time_start_mjd_utc(blk);
+    double time_inc = oskar_vis_block_time_inc_mjd_utc(blk);
+    double time_ref = oskar_vis_block_time_ref_mjd_utc(blk);
+    time_ref += time_inc * oskar_vis_block_start_time_index(blk);
     int num_times = oskar_vis_block_num_times(blk);
-    double dt_dump = oskar_vis_block_time_inc_mjd_utc(blk);
     oskar_convert_ecef_to_baseline_uvw(
             oskar_telescope_num_stations(tel),
             oskar_telescope_station_measured_x_offset_ecef_metres_const(tel),
@@ -521,7 +522,7 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
             oskar_telescope_station_measured_z_offset_ecef_metres_const(tel),
             oskar_telescope_phase_centre_ra_rad(tel),
             oskar_telescope_phase_centre_dec_rad(tel),
-            num_times, t_start, dt_dump,
+            num_times, time_ref, time_inc,
             oskar_vis_block_baseline_uu_metres(blk),
             oskar_vis_block_baseline_vv_metres(blk),
             oskar_vis_block_baseline_ww_metres(blk), out->temp, status);
@@ -627,7 +628,7 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
     int num_time_blocks = (total_times + block_length - 1) / block_length;
 
     // Initialise each of the requested GPUs and set up per-GPU memory.
-    std::vector<DeviceData> d(num_gpus);
+    DeviceData* d = (DeviceData*) malloc(num_gpus * sizeof(DeviceData));
     for (int i = 0; i < num_gpus; ++i)
     {
         *status = (int)cudaSetDevice(s.sim.cuda_device_ids[i]);
@@ -744,6 +745,7 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
         free_device_data_(&d[i], status);
         cudaDeviceReset();
     }
+    free(d);
 
     // Free host memory.
     for (int i = 0; i < num_chunks; ++i) oskar_sky_free(sky_chunks[i], status);

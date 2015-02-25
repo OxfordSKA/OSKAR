@@ -56,22 +56,25 @@ OSKAR_EXPORT
 int oskar_vis_block_num_times(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-void oskar_vis_block_set_num_times(oskar_VisBlock* vis, int value, int* status);
+int oskar_vis_block_num_pols(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-int oskar_vis_block_num_pols(const oskar_VisBlock* vis);
+int oskar_vis_block_start_channel_index(const oskar_VisBlock* vis);
+
+OSKAR_EXPORT
+int oskar_vis_block_start_time_index(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 int oskar_vis_block_has_auto_correlations(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-double oskar_vis_block_freq_start_hz(const oskar_VisBlock* vis);
+double oskar_vis_block_freq_ref_hz(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 double oskar_vis_block_freq_inc_hz(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-double oskar_vis_block_time_start_mjd_utc(const oskar_VisBlock* vis);
+double oskar_vis_block_time_ref_mjd_utc(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 double oskar_vis_block_time_inc_mjd_utc(const oskar_VisBlock* vis);
@@ -80,31 +83,36 @@ OSKAR_EXPORT
 oskar_Mem* oskar_vis_block_baseline_uu_metres(oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_vis_block_baseline_uu_metres_const(const oskar_VisBlock* vis);
+const oskar_Mem* oskar_vis_block_baseline_uu_metres_const(
+        const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_block_baseline_vv_metres(oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_vis_block_baseline_vv_metres_const(const oskar_VisBlock* vis);
+const oskar_Mem* oskar_vis_block_baseline_vv_metres_const(
+        const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_block_baseline_ww_metres(oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_vis_block_baseline_ww_metres_const(const oskar_VisBlock* vis);
+const oskar_Mem* oskar_vis_block_baseline_ww_metres_const(
+        const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_block_auto_correlations(oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_vis_block_auto_correlations_const(const oskar_VisBlock* vis);
+const oskar_Mem* oskar_vis_block_auto_correlations_const(
+        const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_block_cross_correlations(oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_vis_block_cross_correlations_const(const oskar_VisBlock* vis);
+const oskar_Mem* oskar_vis_block_cross_correlations_const(
+        const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 const int* oskar_vis_block_baseline_station1_const(const oskar_VisBlock* vis);
@@ -112,15 +120,16 @@ const int* oskar_vis_block_baseline_station1_const(const oskar_VisBlock* vis);
 OSKAR_EXPORT
 const int* oskar_vis_block_baseline_station2_const(const oskar_VisBlock* vis);
 
-
-/* Setters. */
 OSKAR_EXPORT
-void oskar_vis_block_set_freq_start_inc_hz(oskar_VisBlock* vis,
-        double start, double inc);
+void oskar_vis_block_set_num_times(oskar_VisBlock* vis, int value, int* status);
 
 OSKAR_EXPORT
-void oskar_vis_block_set_time_start_inc_mjd_utc(oskar_VisBlock* vis,
-        double start, double inc);
+void oskar_vis_block_set_start_channel_index(oskar_VisBlock* vis,
+        int global_index);
+
+OSKAR_EXPORT
+void oskar_vis_block_set_start_time_index(oskar_VisBlock* vis,
+        int global_index);
 
 #ifdef __cplusplus
 }

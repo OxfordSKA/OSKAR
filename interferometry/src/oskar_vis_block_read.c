@@ -53,16 +53,16 @@ void oskar_vis_block_read(oskar_VisBlock* vis, oskar_Binary* h,
     /* Read visibility metadata. */
     oskar_binary_read(h, OSKAR_INT,
             OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_DIM_SIZE, block_index,
-            sizeof(int) * 4, vis->dim_size, status);
+            OSKAR_VIS_BLOCK_TAG_DIM_START_AND_SIZE, block_index,
+            sizeof(int) * 6, vis->dim_start_size, status);
     oskar_binary_read(h, OSKAR_DOUBLE,
             OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_FREQ_START_INC_HZ, block_index,
-            sizeof(double) * 2, vis->freq_start_inc_hz, status);
+            OSKAR_VIS_BLOCK_TAG_FREQ_REF_INC_HZ, block_index,
+            sizeof(double) * 2, vis->freq_ref_inc_hz, status);
     oskar_binary_read(h, OSKAR_DOUBLE,
             OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_TIME_START_INC_MJD_UTC, block_index,
-            sizeof(double) * 2, vis->time_start_inc_mjd_utc, status);
+            OSKAR_VIS_BLOCK_TAG_TIME_REF_INC_MJD_UTC, block_index,
+            sizeof(double) * 2, vis->time_ref_inc_mjd_utc, status);
 
     /* Read the visibility data. */
     oskar_binary_read_mem(h, vis->auto_correlations,

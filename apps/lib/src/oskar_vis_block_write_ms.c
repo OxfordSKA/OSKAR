@@ -41,10 +41,10 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
 {
     const oskar_Mem *in_acorr, *in_xcorr, *in_uu, *in_vv, *in_ww;
     oskar_Mem *temp_vis = 0, *temp_uu = 0, *temp_vv = 0, *temp_ww = 0;
-    double dt_dump, t_start_mjd, t_start_sec;
+    double dt_dump_days, dt_dump_sec, t_start_mjd, t_start_sec;
     int a1, a2, num_baselines_in, num_baselines_out, num_pols_in, num_pols_out;
     int num_channels, num_stations, num_times;
-    int have_autocorr, b, c, i, i_out, prec, start_row, t;
+    int have_autocorr, b, c, i, i_out, prec, start_row, start_time_index, t;
     const int *baseline_s1, *baseline_s2;
     const void *xcorr, *acorr;
     void* out;
@@ -66,8 +66,8 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     num_baselines_in = oskar_vis_block_num_baselines(blk);
     num_channels     = oskar_vis_block_num_channels(blk);
     num_times        = oskar_vis_block_num_times(blk);
-    dt_dump          = oskar_vis_header_time_inc_sec(header);
-    t_start_mjd      = oskar_vis_block_time_start_mjd_utc(blk);
+    dt_dump_days     = oskar_vis_block_time_inc_mjd_utc(blk);
+    t_start_mjd      = oskar_vis_block_time_ref_mjd_utc(blk);
     in_acorr         = oskar_vis_block_auto_correlations_const(blk);
     in_xcorr         = oskar_vis_block_cross_correlations_const(blk);
     in_uu            = oskar_vis_block_baseline_uu_metres_const(blk);
@@ -76,8 +76,11 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     baseline_s1      = oskar_vis_block_baseline_station1_const(blk);
     baseline_s2      = oskar_vis_block_baseline_station2_const(blk);
     have_autocorr    = oskar_vis_block_has_auto_correlations(blk);
+    start_time_index = oskar_vis_block_start_time_index(blk);
     prec             = oskar_mem_precision(in_xcorr);
-    t_start_sec      = t_start_mjd * 86400.0 + 0.5 * dt_dump;
+    t_start_mjd      = t_start_mjd + dt_dump_days * (start_time_index + 0.5);
+    t_start_sec      = t_start_mjd * 86400.0;
+    dt_dump_sec      = dt_dump_days * 86400.0;
 
     /* Get number of output baselines. */
     num_baselines_out = num_baselines_in;
@@ -233,7 +236,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                     num_baselines_out, uu_out, vv_out, ww_out,
                     (const double*)out, baseline_s1, baseline_s2,
                     oskar_vis_header_time_average_sec(header),
-                    dt_dump, t_start_sec + (t * dt_dump));
+                    dt_dump_sec, t_start_sec + (t * dt_dump_sec));
         }
     }
     else if (prec == OSKAR_SINGLE)
@@ -364,7 +367,7 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                     num_baselines_out, uu_out, vv_out, ww_out,
                     (const float*)out, baseline_s1, baseline_s2,
                     oskar_vis_header_time_average_sec(header),
-                    dt_dump, t_start_sec + (t * dt_dump));
+                    dt_dump_sec, t_start_sec + (t * dt_dump_sec));
         }
     }
     else

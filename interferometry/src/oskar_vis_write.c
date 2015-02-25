@@ -44,7 +44,7 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
 {
     int amp_type, i, num_baselines, num_blocks, num_channels;
     int num_stations, num_times;
-    double obs_start_mjd, dt_dump;
+    double freq_ref_hz, freq_inc_hz, time_ref_mjd_utc, time_inc_sec;
 #if 0
     int coord_type, *dim;
     unsigned char grp = OSKAR_TAG_GROUP_VISIBILITY;
@@ -79,6 +79,10 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
             num_times, num_channels, num_stations, 0, status);
 
     /* Copy station coordinates and metadata. */
+    freq_ref_hz = oskar_vis_freq_start_hz(vis);
+    freq_inc_hz = oskar_vis_freq_inc_hz(vis);
+    time_ref_mjd_utc = oskar_vis_time_start_mjd_utc(vis);
+    time_inc_sec = oskar_vis_time_inc_sec(vis);
     oskar_mem_copy(oskar_vis_header_station_x_offset_ecef_metres(hdr),
             oskar_vis_station_x_offset_ecef_metres_const(vis), status);
     oskar_mem_copy(oskar_vis_header_station_y_offset_ecef_metres(hdr),
@@ -91,10 +95,8 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
             oskar_vis_telescope_path_const(vis), status);
     oskar_vis_header_set_channel_bandwidth_hz(hdr,
             oskar_vis_channel_bandwidth_hz(vis));
-    oskar_vis_header_set_freq_inc_hz(hdr,
-            oskar_vis_freq_inc_hz(vis));
-    oskar_vis_header_set_freq_start_hz(hdr,
-            oskar_vis_freq_start_hz(vis));
+    oskar_vis_header_set_freq_inc_hz(hdr, freq_inc_hz);
+    oskar_vis_header_set_freq_start_hz(hdr, freq_ref_hz);
     oskar_vis_header_set_phase_centre(hdr,
             oskar_vis_phase_centre_ra_deg(vis),
             oskar_vis_phase_centre_dec_deg(vis));
@@ -104,24 +106,17 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
             oskar_vis_telescope_alt_metres(vis));
     oskar_vis_header_set_time_average_sec(hdr,
             oskar_vis_time_average_sec(vis));
-    oskar_vis_header_set_time_inc_sec(hdr,
-            oskar_vis_time_inc_sec(vis));
-    oskar_vis_header_set_time_start_mjd_utc(hdr,
-            oskar_vis_time_start_mjd_utc(vis));
+    oskar_vis_header_set_time_inc_sec(hdr, time_inc_sec);
+    oskar_vis_header_set_time_start_mjd_utc(hdr, time_ref_mjd_utc);
 
     /* Write the header. */
     h = oskar_vis_header_write(hdr, filename, status);
 
-    /* Get the start time and delta-t. */
-    obs_start_mjd = oskar_vis_time_start_mjd_utc(vis);
-    dt_dump = oskar_vis_time_inc_sec(vis) / 86400.0;
-
     /* Create a visibility block to copy into. */
     blk = oskar_vis_block_create(amp_type, OSKAR_CPU,
-            max_times_per_block, num_channels, num_stations, 0, status);
+            max_times_per_block, num_channels, num_stations, 0, freq_ref_hz,
+            freq_inc_hz, time_ref_mjd_utc, (time_inc_sec / 86400.0), status);
     num_baselines = oskar_vis_block_num_baselines(blk);
-    oskar_vis_block_set_freq_start_inc_hz(blk,
-            oskar_vis_freq_start_hz(vis), oskar_vis_freq_inc_hz(vis));
     amp = oskar_vis_amplitude_const(vis);
     xcorr = oskar_vis_block_cross_correlations(blk);
 
@@ -140,8 +135,7 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
             block_end_time_index = num_times - 1;
         block_length = 1 + block_end_time_index - block_start_time_index;
         oskar_vis_block_set_num_times(blk, block_length, status);
-        oskar_vis_block_set_time_start_inc_mjd_utc(blk, obs_start_mjd +
-                block_start_time_index * dt_dump, dt_dump);
+        oskar_vis_block_set_start_time_index(blk, block_start_time_index);
 
         /* Copy the baseline coordinate data. */
         time_offset = i * max_times_per_block * num_baselines;

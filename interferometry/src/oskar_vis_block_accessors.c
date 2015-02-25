@@ -41,39 +41,22 @@ int oskar_vis_block_location(const oskar_VisBlock* vis)
 
 int oskar_vis_block_num_baselines(const oskar_VisBlock* vis)
 {
-    return vis->dim_size[2];
+    return vis->dim_start_size[4];
 }
 
 int oskar_vis_block_num_channels(const oskar_VisBlock* vis)
 {
-    return vis->dim_size[1];
+    return vis->dim_start_size[3];
 }
 
 int oskar_vis_block_num_stations(const oskar_VisBlock* vis)
 {
-    return vis->dim_size[3];
+    return vis->dim_start_size[5];
 }
 
 int oskar_vis_block_num_times(const oskar_VisBlock* vis)
 {
-    return vis->dim_size[0];
-}
-
-void oskar_vis_block_set_num_times(oskar_VisBlock* vis, int value, int* status)
-{
-    if (!status || *status != OSKAR_SUCCESS)
-        return;
-
-    /* Only allow shrinking of the dimension in order to avoid issues
-     * of the risk of having to resize the memory given the block capacity is
-     * not known.
-     */
-    if (value <= vis->dim_size[0]) {
-        vis->dim_size[0] = value;
-    }
-    else {
-        *status = OSKAR_ERR_DIMENSION_MISMATCH;
-    }
+    return vis->dim_start_size[2];
 }
 
 int oskar_vis_block_num_pols(const oskar_VisBlock* vis)
@@ -81,29 +64,39 @@ int oskar_vis_block_num_pols(const oskar_VisBlock* vis)
     return oskar_mem_is_matrix(vis->cross_correlations) ? 4 : 1;
 }
 
+int oskar_vis_block_start_channel_index(const oskar_VisBlock* vis)
+{
+    return vis->dim_start_size[1];
+}
+
+int oskar_vis_block_start_time_index(const oskar_VisBlock* vis)
+{
+    return vis->dim_start_size[0];
+}
+
 int oskar_vis_block_has_auto_correlations(const oskar_VisBlock* vis)
 {
     return (oskar_mem_length(vis->auto_correlations) > 0);
 }
 
-double oskar_vis_block_freq_start_hz(const oskar_VisBlock* vis)
+double oskar_vis_block_freq_ref_hz(const oskar_VisBlock* vis)
 {
-    return vis->freq_start_inc_hz[0];
+    return vis->freq_ref_inc_hz[0];
 }
 
 double oskar_vis_block_freq_inc_hz(const oskar_VisBlock* vis)
 {
-    return vis->freq_start_inc_hz[1];
+    return vis->freq_ref_inc_hz[1];
 }
 
-double oskar_vis_block_time_start_mjd_utc(const oskar_VisBlock* vis)
+double oskar_vis_block_time_ref_mjd_utc(const oskar_VisBlock* vis)
 {
-    return vis->time_start_inc_mjd_utc[0];
+    return vis->time_ref_inc_mjd_utc[0];
 }
 
 double oskar_vis_block_time_inc_mjd_utc(const oskar_VisBlock* vis)
 {
-    return vis->time_start_inc_mjd_utc[1];
+    return vis->time_ref_inc_mjd_utc[1];
 }
 
 oskar_Mem* oskar_vis_block_baseline_uu_metres(oskar_VisBlock* vis)
@@ -111,7 +104,8 @@ oskar_Mem* oskar_vis_block_baseline_uu_metres(oskar_VisBlock* vis)
     return vis->baseline_uu_metres;
 }
 
-const oskar_Mem* oskar_vis_block_baseline_uu_metres_const(const oskar_VisBlock* vis)
+const oskar_Mem* oskar_vis_block_baseline_uu_metres_const(
+        const oskar_VisBlock* vis)
 {
     return vis->baseline_uu_metres;
 }
@@ -121,7 +115,8 @@ oskar_Mem* oskar_vis_block_baseline_vv_metres(oskar_VisBlock* vis)
     return vis->baseline_vv_metres;
 }
 
-const oskar_Mem* oskar_vis_block_baseline_vv_metres_const(const oskar_VisBlock* vis)
+const oskar_Mem* oskar_vis_block_baseline_vv_metres_const(
+        const oskar_VisBlock* vis)
 {
     return vis->baseline_vv_metres;
 }
@@ -131,7 +126,8 @@ oskar_Mem* oskar_vis_block_baseline_ww_metres(oskar_VisBlock* vis)
     return vis->baseline_ww_metres;
 }
 
-const oskar_Mem* oskar_vis_block_baseline_ww_metres_const(const oskar_VisBlock* vis)
+const oskar_Mem* oskar_vis_block_baseline_ww_metres_const(
+        const oskar_VisBlock* vis)
 {
     return vis->baseline_ww_metres;
 }
@@ -141,7 +137,8 @@ oskar_Mem* oskar_vis_block_auto_correlations(oskar_VisBlock* vis)
     return vis->auto_correlations;
 }
 
-const oskar_Mem* oskar_vis_block_auto_correlations_const(const oskar_VisBlock* vis)
+const oskar_Mem* oskar_vis_block_auto_correlations_const(
+        const oskar_VisBlock* vis)
 {
     return vis->auto_correlations;
 }
@@ -151,7 +148,8 @@ oskar_Mem* oskar_vis_block_cross_correlations(oskar_VisBlock* vis)
     return vis->cross_correlations;
 }
 
-const oskar_Mem* oskar_vis_block_cross_correlations_const(const oskar_VisBlock* vis)
+const oskar_Mem* oskar_vis_block_cross_correlations_const(
+        const oskar_VisBlock* vis)
 {
     return vis->cross_correlations;
 }
@@ -168,18 +166,28 @@ const int* oskar_vis_block_baseline_station2_const(const oskar_VisBlock* vis)
     return oskar_mem_int_const(vis->a2, &status);
 }
 
-void oskar_vis_block_set_freq_start_inc_hz(oskar_VisBlock* vis,
-        double start, double inc)
+void oskar_vis_block_set_num_times(oskar_VisBlock* vis, int value, int* status)
 {
-    vis->freq_start_inc_hz[0] = start;
-    vis->freq_start_inc_hz[1] = inc;
+    if (!status || *status) return;
+
+    /* Only allow shrinking of the dimension, as the block capacity is
+     * not known. */
+    if (value <= vis->dim_start_size[2])
+        vis->dim_start_size[2] = value;
+    else
+        *status = OSKAR_ERR_OUT_OF_RANGE;
 }
 
-void oskar_vis_block_set_time_start_inc_mjd_utc(oskar_VisBlock* vis,
-        double start, double inc)
+void oskar_vis_block_set_start_channel_index(oskar_VisBlock* vis,
+        int global_index)
 {
-    vis->time_start_inc_mjd_utc[0] = start;
-    vis->time_start_inc_mjd_utc[1] = inc;
+    vis->dim_start_size[1] = global_index;
+}
+
+void oskar_vis_block_set_start_time_index(oskar_VisBlock* vis,
+        int global_index)
+{
+    vis->dim_start_size[0] = global_index;
 }
 
 #ifdef __cplusplus

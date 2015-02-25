@@ -55,9 +55,12 @@
  */
 struct oskar_VisBlock
 {
-    int dim_size[4];                  /* Maximum dimension sizes: time, channel, baseline, station. */
-    double freq_start_inc_hz[2];      /* Block frequency start and increment, in Hz. */
-    double time_start_inc_mjd_utc[2]; /* Block time start and increment in MJD(UTC). */
+    /* Global start time index, start channel index,
+     * and maximum dimension sizes: time, channel, baseline, station. */
+    int dim_start_size[6];
+
+    double freq_ref_inc_hz[2];      /* Global frequency start and increment, in Hz. */
+    double time_ref_inc_mjd_utc[2]; /* Global time start and increment in MJD(UTC). */
 
     /* Cross-correlation amplitude array has size:
      *     num_baselines * num_times * num_channels.
