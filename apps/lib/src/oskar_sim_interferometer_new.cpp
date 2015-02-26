@@ -146,7 +146,11 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
     // Check that an output data file has been specified.
     const char* vis_name = s.interferometer.oskar_vis_filename;
     const char* ms_name = s.interferometer.ms_filename;
+#ifdef OSKAR_NO_MS
+    if (!vis_name)
+#else
     if (!(vis_name || ms_name))
+#endif
     {
         oskar_log_error(log, "No output file specified.");
         *status = OSKAR_ERR_SETTINGS;
