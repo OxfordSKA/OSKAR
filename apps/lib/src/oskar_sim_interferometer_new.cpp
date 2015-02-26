@@ -256,6 +256,11 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
             {
                 sim_vis_block_(&s, &d[gpu_id], num_gpus, gpu_id,
                         num_chunks, sky_chunks, b, iactive, log, status);
+                if (num_gpus > 1) {
+                    oskar_log_message(log, 'S', 0,
+                            "Block %i/%i complete on GPU %i.", b+1,
+                            num_time_blocks, gpu_id);
+                }
             }
             if (thread_id == 0 && b > 0) {
                 // TODO Display free CPU ram?
