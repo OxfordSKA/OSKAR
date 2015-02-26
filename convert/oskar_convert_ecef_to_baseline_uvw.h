@@ -61,6 +61,7 @@ extern "C" {
  * @param[in]  num_times        Number of time steps to loop over.
  * @param[in]  time_ref_mjd_utc Start time of the observation.
  * @param[in]  time_inc_days    Time interval, in days.
+ * @param[in]  start_time_index Time index for the start of the block.
  * @param[out] uu               Output baseline u coordinates.
  * @param[out] vv               Output baseline v coordinates.
  * @param[out] ww               Output baseline w coordinates.
