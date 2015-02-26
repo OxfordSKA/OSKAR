@@ -523,9 +523,12 @@ static void sim_baselines_(DeviceData* d, oskar_Sky* sky,
 
     // Get the time and frequency of the visibility slice being simulated.
     oskar_timer_resume(d->tmr_init_copy);
-    double t_dump = oskar_vis_block_time_ref_mjd_utc(blk) +
-            oskar_vis_block_time_inc_mjd_utc(blk) *
-            (time_index_simulation + 0.5);
+//    double t_dump = oskar_vis_block_time_ref_mjd_utc(blk) +
+//            oskar_vis_block_time_inc_mjd_utc(blk) *
+//            (time_index_simulation + 0.5);
+    double dt_dump = oskar_vis_block_time_inc_mjd_utc(blk);
+    double t_start = oskar_vis_block_time_ref_mjd_utc(blk);
+    double t_dump = t_start + dt_dump * time_index_simulation + dt_dump/2.0;
     double gast = oskar_convert_mjd_to_gast_fast(t_dump);
     double frequency = oskar_vis_block_freq_ref_hz(blk) +
             channel_index_block * oskar_vis_block_freq_inc_hz(blk);
