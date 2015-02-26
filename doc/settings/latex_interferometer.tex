@@ -45,23 +45,13 @@ Double
 \\
 \hline
 
-num\_vis\_ave
+max\_time\_samples\_per\_block
 &
-{Number of averaged evaluations of the full Measurement Equation per visibility dump.}
+{The maximum number of time samples held in memory before being flushed to disk.}
 &
-Integer > 0
+Int
 &
-1
-\\
-\hline
-
-num\_fringe\_ave
-&
-{Number of averaged evaluations of the K-Jones matrix per Measurement Equation average.}
-&
-Integer > 0
-&
-1
+10
 \\
 \hline
 
@@ -499,6 +489,16 @@ ms\_filename
 Path name
 &
 
+\\
+\hline
+
+force\_polarised\_ms
+&
+{If \textbf{True}, always write the Measurment Set in polarised format even if the simulation was run in the single polarisation `Scalar' (or Stokes-I) mode. If \textbf{False}, the the size of the polarisation dimension in the the Measurement Set will be determined by the simulation mode.}
+&
+Bool
+&
+False
 \\
 \hline
 

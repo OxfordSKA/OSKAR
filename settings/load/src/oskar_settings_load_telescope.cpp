@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QVariant>
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 
 #define D2R (M_PI/180.0)
 
@@ -221,6 +222,21 @@ void oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     // Gaussian beam settings.
     s.beginGroup("gaussian_beam");
     {
+        // NOTE: this sort of error check should be automated and
+        // probably should use the log to ensure common formatting.
+        // **DONT FIX** until some design thought has been made to how to
+        // deal with settings functions and stdout messages / error codes.
+        QStringList keys = s.allKeys();
+        if (tel->station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM &&
+            (!keys.contains("fwhm_deg") || !keys.contains("ref_freq_hz")))
+        {
+            printf("E|\n");
+            printf("E|== ERROR: One or more required Gaussian Beam settings "
+                    "not set.\n");
+            printf("E|\n");
+            *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+            return;
+        }
         tel->gaussian_beam.fwhm_deg = s.value("fwhm_deg", 1.0).toDouble();
         tel->gaussian_beam.ref_freq_hz = s.value("ref_freq_hz", 0.0).toDouble();
     }

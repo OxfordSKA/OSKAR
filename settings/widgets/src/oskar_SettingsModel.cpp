@@ -78,7 +78,7 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     {
         if (item->hidden())
             return QColor(Qt::lightGray);
-        if (item->enabled())
+        else if (item->enabled())
         {
             if (item->critical())
                 return QColor(Qt::white);
@@ -87,12 +87,18 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
             else
                 return QColor(64, 64, 64);
         }
-        else
+        else if (item->required()) {
             return QColor(Qt::red);
+        }
+        else {
+            return QColor(Qt::green);
+        }
     }
     else if (role == Qt::BackgroundRole)
     {
-        if (item->critical())
+        // Only set the critical/required background colour for items which
+        // have their dependencies satisfied (and are therefore not hidden)
+        if (item->critical() && !item->hidden())
         {
             if (index.column() == 0)
                 return QColor(0, 48, 255, 160);

@@ -65,6 +65,21 @@ Integer > 0
 \\
 \hline
 
+splitting\_mode
+&
+{The splitting mode used for parallelisation when there are multiple GPUs per host.}
+&
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Source chunk}
+\item {Time}
+\end{itemize}
+}
+&
+Source
+\\
+\hline
+
 cuda\_device\_ids
 &
 {A comma-separated string containing device (GPU) IDs to use on a multi-GPU system, or `all' to use all devices.}
