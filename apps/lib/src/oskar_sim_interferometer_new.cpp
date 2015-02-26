@@ -257,9 +257,10 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
                 sim_vis_block_(&s, &d[gpu_id], num_gpus, gpu_id,
                         num_chunks, sky_chunks, b, iactive, log, status);
                 if (num_gpus > 1) {
-                    oskar_log_message(log, 'S', 0,
-                            "Block %i/%i complete on GPU %i.", b+1,
-                            num_time_blocks, gpu_id);
+                    oskar_log_message(log, 'S', 0, "Block %i/%i complete on "
+                            "GPU %i. Simulation time elapsed : %.3f s.", b+1,
+                            num_time_blocks, gpu_id,
+                            oskar_timer_elapsed(d[0].tmr_total));
                 }
             }
             if (thread_id == 0 && b > 0) {
@@ -767,7 +768,6 @@ static void record_timing_(int num_devices, int* cuda_device_ids,
     double p_join = (t_join * 100.0 / (num_devices * elapsed));
     double p_correlate = (t_correlate * 100.0 / (num_devices * elapsed));
 
-
     // Record time taken.
     int times_per_block = oskar_vis_block_num_times(d[0].vis_block_cpu[0]);
     oskar_log_section(log, 'M', "Simulation timing [%i blocks x %i times per block].", num_vis_blocks, times_per_block);
@@ -776,7 +776,6 @@ static void record_timing_(int num_devices, int* cuda_device_ids,
         cudaSetDevice(cuda_device_ids[i]);
         oskar_log_message(log, 'M', 0, "Compute [GPU%i]      : %.3fs", i, oskar_timer_elapsed(d[i].tmr_compute));
     }
-
     oskar_log_message(log, 'M', 0, "Write               : %.3fs", oskar_timer_elapsed(d[0].tmr_write));
     oskar_log_message(log, 'M', 0, "Compute components.");
     oskar_log_message(log, 'M', 1, "Initialise & copy : %4.1f%%", p_init);
