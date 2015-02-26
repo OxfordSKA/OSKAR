@@ -144,7 +144,7 @@ TEST(add_system_noise, test_rms)
             oskar_telescope_station_true_y_offset_ecef_metres_const(tel),
             oskar_telescope_station_true_z_offset_ecef_metres_const(tel),
             ra0_rad, dec0_rad, settings.obs.num_time_steps,
-            settings.obs.start_mjd_utc, settings.obs.dt_dump_days,
+            settings.obs.start_mjd_utc, settings.obs.dt_dump_days, 0,
             oskar_vis_baseline_uu_metres(vis),
             oskar_vis_baseline_vv_metres(vis),
             oskar_vis_baseline_ww_metres(vis), work_uvw, &err);

@@ -35,11 +35,11 @@
 extern "C" {
 #endif
 
-void oskar_convert_ecef_to_baseline_uvw(int num_stations,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        double ra0_rad, double dec0_rad, int num_dumps, double start_mjd_utc,
-        double dt_dump_days, oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
-        oskar_Mem* work, int* status)
+void oskar_convert_ecef_to_baseline_uvw(int num_stations, const oskar_Mem* x,
+        const oskar_Mem* y, const oskar_Mem* z, double ra0_rad,
+        double dec0_rad, int num_times, double time_ref_mjd_utc,
+        double time_inc_days, int start_time_index, oskar_Mem* uu,
+        oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* work, int* status)
 {
     oskar_Mem *u, *v, *w, *uu_dump, *vv_dump, *ww_dump; /* Aliases. */
     int i, type, location, num_baselines;
@@ -56,9 +56,9 @@ void oskar_convert_ecef_to_baseline_uvw(int num_stations,
 
     /* Check that the data dimensions are OK. */
     num_baselines = num_stations * (num_stations - 1) / 2;
-    if ((int)oskar_mem_length(uu) < num_baselines * num_dumps ||
-            (int)oskar_mem_length(vv) < num_baselines * num_dumps ||
-            (int)oskar_mem_length(ww) < num_baselines * num_dumps ||
+    if ((int)oskar_mem_length(uu) < num_baselines * num_times ||
+            (int)oskar_mem_length(vv) < num_baselines * num_times ||
+            (int)oskar_mem_length(ww) < num_baselines * num_times ||
             (int)oskar_mem_length(x) < num_stations ||
             (int)oskar_mem_length(y) < num_stations ||
             (int)oskar_mem_length(z) < num_stations)
@@ -103,12 +103,13 @@ void oskar_convert_ecef_to_baseline_uvw(int num_stations,
     ww_dump = oskar_mem_create_alias(0, 0, 0, status);
 
     /* Loop over times. */
-    for (i = 0; i < num_dumps; ++i)
+    for (i = 0; i < num_times; ++i)
     {
         double t_dump, gast;
 
-        t_dump = start_mjd_utc + i * dt_dump_days;
-        gast = oskar_convert_mjd_to_gast_fast(t_dump + dt_dump_days / 2.0);
+        t_dump = time_ref_mjd_utc +
+                time_inc_days * ((i + 0.5) + start_time_index);
+        gast = oskar_convert_mjd_to_gast_fast(t_dump);
 
         /* Compute u,v,w coordinates of mid point. */
         oskar_convert_ecef_to_station_uvw(num_stations, x, y, z,

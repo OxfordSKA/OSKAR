@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,37 +42,37 @@ extern "C" {
 
 /**
  * @brief
- * Evaluates the baseline (u,v,w) coordinates for the observation.
+ * Evaluates baseline (u,v,w) coordinates.
  *
  * @details
  * This function evaluates the baseline (u,v,w) coordinates from the beam phase
  * centre and station (x,y,z) coordinates in the telescope data structure,
  * and the supplied simulation time parameters.
  *
- * The output coordinates are for the whole observation, so the output arrays
- * must have dimension of (at least) num_baselines * num_vis_dumps.
+ * The output arrays must have dimension of (at least)
+ * num_baselines * num_times.
  *
- * @param[in]  num_stations The number of stations.
- * @param[in]  x            Station x coordinates (ECEF or related frame).
- * @param[in]  y            Station y coordinates (ECEF or related frame).
- * @param[in]  z            Station z coordinates (ECEF or related frame).
- * @param[in]  ra0_rad      The Right Ascension of the phase centre, in radians.
- * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
- * @param[in]  num_dumps    The number of visibility dumps in the observation.
- * @param[in]  start_mjd_ut1 The start time of the observation.
- * @param[in]  dt_dump_days The time interval between dumps, in days.
- * @param[out] uu           Output baseline u coordinates for whole observation.
- * @param[out] vv           Output baseline v coordinates for whole observation.
- * @param[out] ww           Output baseline w coordinates for whole observation.
- * @param[in,out]  work     Pointer to work buffer (>= 3 * num_stations).
- * @param[in,out]  status   Status return code.
+ * @param[in]  num_stations     The number of stations.
+ * @param[in]  x                Station x coordinates (ECEF or related frame).
+ * @param[in]  y                Station y coordinates (ECEF or related frame).
+ * @param[in]  z                Station z coordinates (ECEF or related frame).
+ * @param[in]  ra0_rad          Right Ascension of the phase centre, in radians.
+ * @param[in]  dec0_rad         Declination of the phase centre, in radians.
+ * @param[in]  num_times        Number of time steps to loop over.
+ * @param[in]  time_ref_mjd_utc Start time of the observation.
+ * @param[in]  time_inc_days    Time interval, in days.
+ * @param[out] uu               Output baseline u coordinates.
+ * @param[out] vv               Output baseline v coordinates.
+ * @param[out] ww               Output baseline w coordinates.
+ * @param[in,out]  work         Pointer to work buffer, resized as required.
+ * @param[in,out]  status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_convert_ecef_to_baseline_uvw(int num_stations,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        double ra0_rad, double dec0_rad, int num_dumps, double start_mjd_ut1,
-        double dt_dump_days, oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
-        oskar_Mem* work, int* status);
+void oskar_convert_ecef_to_baseline_uvw(int num_stations, const oskar_Mem* x,
+        const oskar_Mem* y, const oskar_Mem* z, double ra0_rad,
+        double dec0_rad, int num_times, double time_ref_mjd_utc,
+        double time_inc_days, int start_time_index, oskar_Mem* uu,
+        oskar_Mem* vv, oskar_Mem* ww, oskar_Mem* work, int* status);
 
 #ifdef __cplusplus
 }

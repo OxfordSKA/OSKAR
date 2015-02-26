@@ -238,8 +238,8 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
         oskar_convert_ecef_to_baseline_uvw(num_stations,
                 station_ecef_x, station_ecef_y, station_ecef_z,
                 ra_rad, dec_rad, num_times, oskar_vis_time_start_mjd_utc(vis),
-                oskar_vis_time_inc_sec(vis) * SEC2DAYS, uu_rot, vv_rot, ww_rot,
-                work_uvw, status);
+                oskar_vis_time_inc_sec(vis) * SEC2DAYS, 0,
+                uu_rot, vv_rot, ww_rot, work_uvw, status);
         oskar_mem_free(work_uvw, status);
     }
 

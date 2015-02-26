@@ -448,10 +448,6 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
     }
 
     // Calculate baseline uvw coordinates for vis block.
-    double time_inc = oskar_vis_block_time_inc_mjd_utc(blk);
-    double time_ref = oskar_vis_block_time_ref_mjd_utc(blk);
-    time_ref += time_inc * oskar_vis_block_start_time_index(blk);
-    int num_times = oskar_vis_block_num_times(blk);
     oskar_convert_ecef_to_baseline_uvw(
             oskar_telescope_num_stations(tel),
             oskar_telescope_station_measured_x_offset_ecef_metres_const(tel),
@@ -459,7 +455,10 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
             oskar_telescope_station_measured_z_offset_ecef_metres_const(tel),
             oskar_telescope_phase_centre_ra_rad(tel),
             oskar_telescope_phase_centre_dec_rad(tel),
-            num_times, time_ref, time_inc,
+            oskar_vis_block_num_times(blk),
+            oskar_vis_block_time_ref_mjd_utc(blk),
+            oskar_vis_block_time_inc_mjd_utc(blk),
+            oskar_vis_block_start_time_index(blk),
             oskar_vis_block_baseline_uu_metres(blk),
             oskar_vis_block_baseline_vv_metres(blk),
             oskar_vis_block_baseline_ww_metres(blk), out->temp, status);

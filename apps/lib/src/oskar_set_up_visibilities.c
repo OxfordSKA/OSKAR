@@ -124,7 +124,8 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
                 oskar_telescope_phase_centre_ra_rad(tel),
                 oskar_telescope_phase_centre_dec_rad(tel),
                 settings->obs.num_time_steps, settings->obs.start_mjd_utc,
-                settings->obs.dt_dump_days, oskar_vis_baseline_uu_metres(vis),
+                settings->obs.dt_dump_days, 0,
+                oskar_vis_baseline_uu_metres(vis),
                 oskar_vis_baseline_vv_metres(vis),
                 oskar_vis_baseline_ww_metres(vis), work_uvw, status);
         oskar_mem_free(work_uvw, status);

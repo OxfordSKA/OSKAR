@@ -106,7 +106,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             oskar_telescope_station_true_x_offset_ecef_metres_const(telescope),
             oskar_telescope_station_true_y_offset_ecef_metres_const(telescope),
             oskar_telescope_station_true_z_offset_ecef_metres_const(telescope),
-            ra, dec, num_times, start_mjd_utc, dt, uu, vv, ww, work_uvw, &err);
+            ra, dec, num_times, start_mjd_utc, dt, 0, uu, vv, ww, work_uvw,
+            &err);
     if (err)
     {
         mexErrMsgIdAndTxt("OSKAR:error",
