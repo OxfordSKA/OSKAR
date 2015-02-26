@@ -275,11 +275,11 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
                         "Simulation time elapsed : %.3f s.", b+1,
                         num_time_blocks, oskar_timer_elapsed(d[0].tmr_total));
             }
-            if ((thread_id > 0 || num_threads == 1) && b == num_time_blocks) {
-                oskar_log_line(log, 'M', ' ');
-                oskar_cuda_mem_log(log, 0, gpu_id);
-            }
             if (thread_id == 0 && b == num_time_blocks) {
+                oskar_log_line(log, 'M', ' ');
+                for (int i = 0; i < num_gpus; ++i) {
+                    oskar_cuda_mem_log(log, 0, i);
+                }
                 size_t mem_total = oskar_get_total_physical_memory();
                 size_t mem_free = oskar_get_free_physical_memory();
                 double mem_used = ((mem_total-mem_free)/(double)mem_total) * 100.;
