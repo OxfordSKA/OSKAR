@@ -256,9 +256,6 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
             {
                 sim_vis_block_(&s, &d[gpu_id], num_gpus, gpu_id,
                         num_chunks, sky_chunks, b, iactive, log, status);
-                oskar_log_message(log, 'S', 0, "Block %i/%i complete. "
-                        "Simulation time elapsed : %.3f s.", b+1,
-                        num_time_blocks, oskar_timer_elapsed(d[0].tmr_total));
             }
             if (thread_id == 0 && b > 0) {
                 // TODO Display free CPU ram?
@@ -268,6 +265,11 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
 
             // Barrier: Check sim and write are done before starting new block.
 #pragma omp barrier
+            if (thread_id == 0 && b < num_time_blocks) {
+                oskar_log_message(log, 'S', 0, "Block %i/%i complete. "
+                        "Simulation time elapsed : %.3f s.", b+1,
+                        num_time_blocks, oskar_timer_elapsed(d[0].tmr_total));
+            }
             if ((thread_id > 0 || num_threads == 1) && b == num_time_blocks) {
                 oskar_log_line(log, 'M', ' ');
                 oskar_cuda_mem_log(log, 0, gpu_id);
