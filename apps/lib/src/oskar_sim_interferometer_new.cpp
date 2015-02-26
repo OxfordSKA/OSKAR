@@ -390,7 +390,8 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
     // a number of source chunks to each GPU or a number of times within
     // the block to each GPU.
     int num_chunks, start_chunk, start_time, num_times;
-    if (s->sim.splitting_mode == OSKAR_SPLIT_CHUNK)
+    // TODO print some sort of warning about splitting?!
+    if (s->sim.splitting_mode == OSKAR_SPLIT_CHUNK || num_times_block == 1)
     {
         start_time = 0;
         num_times = block_length;
@@ -744,6 +745,7 @@ static void record_timing_(int num_devices, int* cuda_device_ids,
         DeviceData* d, oskar_Log* log, int num_vis_blocks)
 {
     // Get component times.
+    // TODO change to display mean (gpu) percent of compute time.
     double t_init = 0.0, t_clip = 0.0, t_E = 0.0, t_K = 0.0;
     double t_join = 0.0, t_correlate = 0.0;
     double elapsed = oskar_timer_elapsed(d[0].tmr_total);
