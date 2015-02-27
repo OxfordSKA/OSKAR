@@ -455,7 +455,7 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
      * Go though all possible work units in the block (a work unit is defined
      * as the simulation for one time and one sky chunk.
      */
-    oskar_Sky* sky = d->sky_chunk;
+
     while (1)
     {
         int i_chunk_time = 0;
@@ -470,6 +470,7 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
         int ichunk = int(i_chunk_time/num_times_block);
         int itime  = i_chunk_time - ichunk*num_times_block;
 
+        oskar_Sky* sky = d->sky_chunk;
         oskar_timer_resume(d->tmr_init_copy);
         oskar_sky_copy(sky, sky_chunks[ichunk], status);
         oskar_timer_pause(d->tmr_init_copy);
