@@ -257,33 +257,30 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
                 sim_vis_block_(&s, &d[gpu_id], num_gpus, gpu_id,
                         num_chunks, sky_chunks, b, iactive, &chunk_time_index,
                         log, status);
-                if (num_gpus > 1) {
+                if (num_gpus > 1)
                     oskar_log_message(log, 'S', 0, "Block %i/%i complete on "
                             "GPU %i. Simulation time elapsed : %.3f s.", b+1,
                             num_time_blocks, gpu_id,
                             oskar_timer_elapsed(d[0].tmr_total));
-                }
             }
-            if (thread_id == 0 && b > 0) {
+            if (thread_id == 0 && b > 0)
                 write_vis_block_(&s, &d[0], num_gpus, &out,
                         tel, b - 1, iactive, log, status);
-            }
 
             // Barrier: reset index into vis block for chunk-time work units.
 #pragma omp barrier
             if (thread_id == 0) chunk_time_index = 0;
             // Barrier: Check sim and write are done before starting new block.
 #pragma omp barrier
-            if (thread_id == 0 && b < num_time_blocks) {
+            if (thread_id == 0 && b < num_time_blocks)
                 oskar_log_message(log, 'S', 0, "Block %i/%i complete. "
                         "Simulation time elapsed : %.3f s.", b+1,
                         num_time_blocks, oskar_timer_elapsed(d[0].tmr_total));
-            }
-            if (thread_id == 0 && b == num_time_blocks) {
+            if (thread_id == 0 && b == num_time_blocks)
+            {
                 oskar_log_line(log, 'M', ' ');
-                for (int i = 0; i < num_gpus; ++i) {
+                for (int i = 0; i < num_gpus; ++i)
                     oskar_cuda_mem_log(log, 0, i);
-                }
                 size_t mem_total = oskar_get_total_physical_memory();
                 size_t mem_free = oskar_get_free_physical_memory();
                 double mem_used = ((mem_total-mem_free)/(double)mem_total) * 100.;
@@ -353,12 +350,14 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
     oskar_telescope_free(tel, status);
 
     if (!*status)
+    {
         oskar_log_section(log, 'M', "Simulation complete.");
         oskar_log_message(log, 'M', 0, "Output(s):");
         if (vis_name)
             oskar_log_message(log, 'M', 1, "OSKAR binary    : %s", vis_name);
         if (ms_name)
             oskar_log_message(log, 'M', 1, "Measurement Set : %s", ms_name);
+    }
 }
 
 static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
