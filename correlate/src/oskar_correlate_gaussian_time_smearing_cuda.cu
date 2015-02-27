@@ -271,7 +271,7 @@ void oskar_correlate_gaussian_time_smearing_cuda_d(int num_sources,
         double inv_wavelength, double frac_bandwidth, double time_int_sec,
         double gha0_rad, double dec0_rad, double4c* d_vis)
 {
-    dim3 num_threads(128, 1);
+    dim3 num_threads(64, 1);
     dim3 num_blocks(num_stations, num_stations);
     size_t shared_mem = num_threads.x * sizeof(double4c);
     oskar_correlate_gaussian_time_smearing_cudak_d
