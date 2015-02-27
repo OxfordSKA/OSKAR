@@ -265,13 +265,14 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
                 }
             }
             if (thread_id == 0 && b > 0) {
-                // TODO Display free CPU ram?
                 write_vis_block_(&s, &d[0], num_gpus, &out,
                         tel, b - 1, iactive, log, status);
             }
 
-            // Barrier: Check sim and write are done before starting new block.
+            // Barrier: reset index into vis block for chunk-time work units.
+#pragma omp barrier
             if (thread_id == 0) chunk_time_index = 0;
+            // Barrier: Check sim and write are done before starting new block.
 #pragma omp barrier
             if (thread_id == 0 && b < num_time_blocks) {
                 oskar_log_message(log, 'S', 0, "Block %i/%i complete. "
@@ -387,7 +388,7 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
     oskar_vis_block_set_start_time_index(vis_block, block_start_time_index);
     if (*status) return;
 
-#if 1
+#if 0
     // Get time and chunk counter ranges for different parallelisation modes.
     // The effort of block evaluation is split between GPUs either by giving
     // a number of source chunks to each GPU or a number of times within
@@ -463,14 +464,11 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
             i_chunk_time = *chunk_time_index;
             (*chunk_time_index)++;
         }
-
         if (i_chunk_time >= num_times_block*total_chunks) break;
 
         // Convert slice index to chunk/time index. FIXME what if a block isn't full?
         int ichunk = int(i_chunk_time/num_times_block);
         int itime  = i_chunk_time - ichunk*num_times_block;
-        printf("** GPU%i idx: %i/%i chunk: %i time: %i\n",
-                gpu_id, i_chunk_time, num_times_block*total_chunks, ichunk, itime);
 
         oskar_timer_resume(d->tmr_init_copy);
         oskar_sky_copy(sky, sky_chunks[ichunk], status);
@@ -488,6 +486,10 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
                     d->tel, gast, d->station_work, status);
             oskar_timer_pause(d->tmr_clip);
         }
+
+        printf("** GPU%i idx: %i/%i chunk: %i time: %i (%i)\n",
+                gpu_id, i_chunk_time, num_times_block*total_chunks,
+                ichunk, itime, time_idx);
 
         for (int i = 0; i < num_channels; ++i)
         {
