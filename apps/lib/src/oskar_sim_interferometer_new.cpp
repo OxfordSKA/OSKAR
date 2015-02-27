@@ -86,7 +86,7 @@ struct DeviceData
     oskar_StationWork* station_work;
 
     // Timers.
-    oskar_Timer* tmr_total;      /* The total time for the simulation (only used on GPU 0) */
+    oskar_Timer* tmr_sim;        /* The total time for the simulation (only used on GPU 0) */
     oskar_Timer* tmr_write;      /* The time spent writing vis blocks (per GPU)*/
     oskar_Timer* tmr_compute;    /* The total time spend in filling vis blocks */
 
@@ -107,7 +107,7 @@ struct OutputHandles
 };
 
 static void record_timing_(int num_devices, int* cuda_device_ids,
-        DeviceData* d, oskar_Log* log, int num_vis_blocks);
+        DeviceData* d, oskar_Timer* tmr_load, oskar_Log* log);
 static void log_warning_box_(oskar_Log* log, const char* format, ...);
 static void set_up_device_data_(DeviceData* d, const oskar_Settings* s,
         const oskar_Telescope* tel, int max_sources_per_chunk,
@@ -129,6 +129,9 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
 extern "C" void oskar_sim_interferometer_new(const char* settings_file,
         oskar_Log* log, int* status)
 {
+    oskar_Timer* tmr_load = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    oskar_timer_start(tmr_load);
+
     // Load the settings file.
     oskar_Settings s;
     oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
@@ -147,12 +150,11 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
 
     // Check that an output data file has been specified.
     const char* vis_name = s.interferometer.oskar_vis_filename;
-    const char* ms_name = s.interferometer.ms_filename;
+    const char* ms_name = 0;
 #ifdef OSKAR_NO_MS
-    if (!vis_name)
-#else
-    if (!(vis_name || ms_name))
+    ms_name = s.interferometer.ms_filename;
 #endif
+    if (!(vis_name || ms_name))
     {
         oskar_log_error(log, "No output file specified.");
         *status = OSKAR_ERR_SETTINGS;
@@ -193,7 +195,7 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
     // Work out how many time blocks have to be processed.
     int total_times = s.obs.num_time_steps;
     int block_length = s.interferometer.max_time_samples_per_block;
-    int num_time_blocks = (total_times + block_length - 1) / block_length;
+    int num_vis_blocks = (total_times + block_length - 1) / block_length;
 
     // Initialise each of the requested GPUs and set up per-GPU memory.
     DeviceData* d = (DeviceData*) malloc(num_gpus * sizeof(DeviceData));
@@ -214,9 +216,23 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
     out.header = oskar_set_up_vis_header(&s, tel, status);
     out.temp = oskar_mem_create(prec, OSKAR_CPU, 0, status);
 
-    // Start simulation timer.
+
+    //oskar_log_line(log, 'M', ' ');
+    oskar_log_section(log, 'M', "Memory usage");
+    for (int i = 0; i < num_gpus; ++i)
+        oskar_cuda_mem_log(log, 0, i);
+    size_t mem_total = oskar_get_total_physical_memory();
+    size_t mem_free = oskar_get_free_physical_memory();
+    double mem_used = ((mem_total-mem_free)/(double)mem_total) * 100.;
+    oskar_log_message(log, 'M', 0, "System memory is %.1f%% "
+            "(%.1f/%.1f GB) used.", mem_used,
+            (mem_total-mem_free)/(1024.*1024.*1024.),
+            mem_total/(1024.*1024.*1024.));
+
+    // Start simulation timer and stop the load timer.
+    oskar_timer_pause(tmr_load);
     oskar_log_section(log, 'M', "Starting simulation...");
-    oskar_timer_start(d[0].tmr_total);
+    oskar_timer_start(d[0].tmr_sim);
 
     //--------------------------------------------------------------------------
     //-- START OF MULTITHREADED SIMULATION CODE --------------------------------
@@ -248,11 +264,11 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
             cudaSetDevice(s.sim.cuda_device_ids[gpu_id]);
 
         // Loop over simulation time blocks (+1, for the last write).
-        for (int b = 0; b < num_time_blocks + 1; ++b)
+        for (int b = 0; b < num_vis_blocks + 1; ++b)
         {
             if (*status) continue;
             int iactive = b % 2; // Index of the active simulation vis block.
-            if ((thread_id > 0 || num_threads == 1) && b < num_time_blocks)
+            if ((thread_id > 0 || num_threads == 1) && b < num_vis_blocks)
             {
                 sim_vis_block_(&s, &d[gpu_id], gpu_id, num_chunks, sky_chunks,
                         b, iactive, &chunk_time_index, log, status);
@@ -266,11 +282,11 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
             if (thread_id == 0) chunk_time_index = 0;
             // Barrier2: Check sim and write are done before starting new block.
 #pragma omp barrier
-            if (thread_id == 0 && b < num_time_blocks)
+            if (thread_id == 0 && b < num_vis_blocks)
                 oskar_log_message(log, 'S', 0, "Block %i/%i complete. "
                         "Simulation time elapsed : %.3f s.", b+1,
-                        num_time_blocks, oskar_timer_elapsed(d[0].tmr_total));
-            if (thread_id == 0 && b == num_time_blocks)
+                        num_vis_blocks, oskar_timer_elapsed(d[0].tmr_sim));
+            if (thread_id == 0 && b == num_vis_blocks)
             {
                 oskar_log_line(log, 'M', ' ');
                 for (int i = 0; i < num_gpus; ++i)
@@ -278,8 +294,8 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
                 size_t mem_total = oskar_get_total_physical_memory();
                 size_t mem_free = oskar_get_free_physical_memory();
                 double mem_used = ((mem_total-mem_free)/(double)mem_total) * 100.;
-                oskar_log_message(log, 'M', 0, "System memory used is %.1f%% "
-                        "(%.1f/%.1f GB)", mem_used,
+                oskar_log_message(log, 'M', 0, "System memory is %.1f%% "
+                        "(%.1f/%.1f GB) used.", mem_used,
                         (mem_total-mem_free)/(1024.*1024.*1024.),
                         mem_total/(1024.*1024.*1024.));
             }
@@ -306,6 +322,20 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
                     "This may lead to an invalid signal to noise ratio.");
     }
 
+    // Record times.
+    record_timing_(num_gpus, s.sim.cuda_device_ids, &(d[0]), tmr_load, log);
+
+    // Summarise simulation output.
+    if (!*status)
+    {
+        oskar_log_section(log, 'M', "Simulation complete.");
+        oskar_log_message(log, 'M', 0, "Output(s):");
+        if (vis_name)
+            oskar_log_message(log, 'M', 1, "OSKAR binary    : %s", vis_name);
+        if (ms_name)
+            oskar_log_message(log, 'M', 1, "Measurement Set : %s", ms_name);
+    }
+
     // Write simulation log to the output files.
     size_t log_size = 0;
     char* log_data = oskar_log_file_data(log, &log_size);
@@ -317,9 +347,6 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
         oskar_binary_write(out.vis, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
                 OSKAR_TAG_RUN_LOG, 0, log_size, log_data, status);
     free(log_data);
-
-    // Record times.
-    record_timing_(num_gpus, s.sim.cuda_device_ids, &(d[0]), log, num_time_blocks);
 
     // Free/close output handles
     oskar_vis_header_free(out.header, status);
@@ -342,16 +369,7 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
     for (int i = 0; i < num_chunks; ++i) oskar_sky_free(sky_chunks[i], status);
     free(sky_chunks);
     oskar_telescope_free(tel, status);
-
-    if (!*status)
-    {
-        oskar_log_section(log, 'M', "Simulation complete.");
-        oskar_log_message(log, 'M', 0, "Output(s):");
-        if (vis_name)
-            oskar_log_message(log, 'M', 1, "OSKAR binary    : %s", vis_name);
-        if (ms_name)
-            oskar_log_message(log, 'M', 1, "Measurement Set : %s", ms_name);
-    }
+    oskar_timer_free(tmr_load);
 }
 
 static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
@@ -683,7 +701,7 @@ static void set_up_device_data_(DeviceData* d, const oskar_Settings* s,
     d->station_work = oskar_station_work_create(prec, OSKAR_GPU, status);
 
     // Timers.
-    d->tmr_total     = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    d->tmr_sim     = oskar_timer_create(OSKAR_TIMER_NATIVE);
     d->tmr_write     = oskar_timer_create(OSKAR_TIMER_NATIVE);
     d->tmr_compute   = oskar_timer_create(OSKAR_TIMER_NATIVE);
     d->tmr_init_copy = oskar_timer_create(OSKAR_TIMER_CUDA);
@@ -710,7 +728,7 @@ static void free_device_data_(DeviceData* d, int* status)
     oskar_jones_free(d->E, status);
     oskar_jones_free(d->K, status);
     oskar_jones_free(d->R, status);
-    oskar_timer_free(d->tmr_total);
+    oskar_timer_free(d->tmr_sim);
     oskar_timer_free(d->tmr_write);
     oskar_timer_free(d->tmr_compute);
     oskar_timer_free(d->tmr_init_copy);
@@ -722,7 +740,7 @@ static void free_device_data_(DeviceData* d, int* status)
 }
 
 static void record_timing_(int num_devices, int* cuda_device_ids,
-        DeviceData* d, oskar_Log* log, int num_vis_blocks)
+        DeviceData* d, oskar_Timer* tmr_load, oskar_Log* log)
 {
     // Retrieve per GPU timers
     double t_init = 0.0, t_clip = 0.0, t_E = 0.0, t_K = 0.0;
@@ -742,16 +760,16 @@ static void record_timing_(int num_devices, int* cuda_device_ids,
     double t_components = t_init+t_clip+t_E+t_K+t_join+t_correlate;
 
     // Record time taken.
-    int times_per_block = oskar_vis_block_num_times(d[0].vis_block_cpu[0]);
-    oskar_log_section(log, 'M', "Simulation timing.",
-            num_vis_blocks, times_per_block);
+    // TODO use oskar_log_value() ??
+    oskar_log_section(log, 'M', "Simulation timing");
     oskar_log_message(log, 'M', 0, "Total wall time     : %.3fs ",
-            oskar_timer_elapsed(d[0].tmr_total));
+            oskar_timer_elapsed(d[0].tmr_sim)+oskar_timer_elapsed(tmr_load));
+    oskar_log_message(log, 'M', 0, "Load                : %.3fs",
+            oskar_timer_elapsed(tmr_load));
     for (int i = 0; i < num_devices; ++i) {
         oskar_log_message(log, 'M', 0, "Compute [GPU%i]      : %.3fs", i,
                 compute_times[i]);
     }
-    // TODO use oskar_log_value() ??
     oskar_log_message(log, 'M', 0, "Write               : %.3fs",
             oskar_timer_elapsed(d[0].tmr_write));
     oskar_log_message(log, 'M', 0, "Compute components.");
@@ -784,10 +802,12 @@ static void log_warning_box_(oskar_Log* log, const char* format, ...)
     std::string word, line;
     oskar_log_line(log, 'W', ' ');
     oskar_log_line(log, 'W', '*');
-    while (std::getline(ss, word, ' ')) {
+    while (std::getline(ss, word, ' '))
+    {
         if (line.length() > 0)
             line += std::string(1, ' ');
-        if ((line.length() + word.length() + 4) >= max_len) {
+        if ((line.length() + word.length() + 4) >= max_len)
+        {
             int pad = max_len - line.length() - 1;
             int pad_l = (pad / 2) > 1 ? (pad / 2) : 1;
             int pad_r = (pad / 2) > 0 ? (pad / 2) : 0;
