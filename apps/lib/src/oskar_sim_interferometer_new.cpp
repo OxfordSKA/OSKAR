@@ -488,9 +488,9 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
             oskar_timer_pause(d->tmr_clip);
         }
 
-        printf("** GPU%i idx: %i/%i chunk: %i time: %i (%i)\n",
-                gpu_id, i_chunk_time, num_times_block*total_chunks,
-                ichunk, itime, time_idx);
+//        printf("** GPU%i idx: %i/%i chunk: %i time: %i (%i)\n",
+//                gpu_id, i_chunk_time, num_times_block*total_chunks,
+//                ichunk, itime, time_idx);
 
         for (int i = 0; i < num_channels; ++i)
         {
