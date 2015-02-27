@@ -119,7 +119,7 @@ static void sim_baselines_(DeviceData* d, oskar_Sky* sky,
 static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
         int num_gpus, int gpu_id, int total_chunks,
         const oskar_Sky* const* sky_chunks, int block_index, int iactive,
-        oskar_Log* log, int* status);
+        int* chunk_time_index, oskar_Log* log, int* status);
 static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
         int num_gpus, OutputHandles* out, const oskar_Telescope* tel,
         int block_index, int iactive, oskar_Log* log, int* status);
@@ -234,7 +234,8 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
      * counter (which corresponds to the last block + 1) as this iteration
      * simply writes the last block.
      */
-#pragma omp parallel
+    int chunk_time_index = 0;
+#pragma omp parallel shared(chunk_time_index)
     {
         int thread_id = 0, gpu_id = 0;
 
@@ -251,11 +252,11 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
         {
             if (*status) continue;
             int iactive = b % 2; // Index of the active simulation vis block.
-
             if ((thread_id > 0 || num_threads == 1) && b < num_time_blocks)
             {
                 sim_vis_block_(&s, &d[gpu_id], num_gpus, gpu_id,
-                        num_chunks, sky_chunks, b, iactive, log, status);
+                        num_chunks, sky_chunks, b, iactive, &chunk_time_index,
+                        log, status);
                 if (num_gpus > 1) {
                     oskar_log_message(log, 'S', 0, "Block %i/%i complete on "
                             "GPU %i. Simulation time elapsed : %.3f s.", b+1,
@@ -270,6 +271,7 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
             }
 
             // Barrier: Check sim and write are done before starting new block.
+            if (thread_id == 0) chunk_time_index = 0;
 #pragma omp barrier
             if (thread_id == 0 && b < num_time_blocks) {
                 oskar_log_message(log, 'S', 0, "Block %i/%i complete. "
@@ -361,7 +363,7 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
 static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
         int num_gpus, int gpu_id, int total_chunks,
         const oskar_Sky* const* sky_chunks, int block_index, int iactive,
-        oskar_Log* log, int* status)
+        int* chunk_time_index, oskar_Log* log, int* status)
 {
     oskar_timer_resume(d->tmr_compute);
 
@@ -385,6 +387,7 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
     oskar_vis_block_set_start_time_index(vis_block, block_start_time_index);
     if (*status) return;
 
+#if 1
     // Get time and chunk counter ranges for different parallelisation modes.
     // The effort of block evaluation is split between GPUs either by giving
     // a number of source chunks to each GPU or a number of times within
@@ -446,6 +449,59 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
             }
         }
     }
+#else
+    /*
+     * Go though all possible work units in the block (a work unit is defined
+     * as the simulation for one time and one sky chunk.
+     */
+    oskar_Sky* sky = d->sky_chunk;
+    while (1)
+    {
+        int i_chunk_time = 0;
+        #pragma omp critical (UnitIndexUpdate)
+        {
+            i_chunk_time = *chunk_time_index;
+            (*chunk_time_index)++;
+        }
+
+        if (i_chunk_time >= num_times_block*total_chunks) break;
+
+        // Convert slice index to chunk/time index. FIXME what if a block isn't full?
+        int ichunk = int(i_chunk_time/num_times_block);
+        int itime  = i_chunk_time - ichunk*num_times_block;
+        printf("** GPU%i idx: %i/%i chunk: %i time: %i\n",
+                gpu_id, i_chunk_time, num_times_block*total_chunks, ichunk, itime);
+
+        oskar_timer_resume(d->tmr_init_copy);
+        oskar_sky_copy(sky, sky_chunks[ichunk], status);
+        oskar_timer_pause(d->tmr_init_copy);
+
+        int time_idx = block_start_time_index + itime;
+        if (s->sky.apply_horizon_clip)
+        {
+            double mjd = obs_start_mjd + dt_dump * (time_idx + 0.5);
+            double gast = oskar_convert_mjd_to_gast_fast(mjd);
+
+            sky = d->local_sky;
+            oskar_timer_resume(d->tmr_clip);
+            oskar_sky_horizon_clip(sky, d->sky_chunk,
+                    d->tel, gast, d->station_work, status);
+            oskar_timer_pause(d->tmr_clip);
+        }
+
+        for (int i = 0; i < num_channels; ++i)
+        {
+            if (*status) break;
+            oskar_log_message(log, 'S', 1, "Time %6i/%i, "
+                    "Chunk %3i/%i, Channel %4i/%i [GPU%i, %i sources]",
+                    time_idx+1, total_times, ichunk+1, total_chunks,
+                    i+1, num_channels, gpu_id, oskar_sky_num_sources(sky));
+            sim_baselines_(d, sky, s, i, itime, time_idx, status);
+        }
+
+        if (*status) break;
+    }
+#endif
 
     // Copy the visibility block to host memory.
     oskar_timer_resume(d->tmr_init_copy);
@@ -475,10 +531,8 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
     for (int i = 1; i < num_gpus; ++i)
     {
         oskar_VisBlock* b = d[i].vis_block_cpu[!iactive];
-        oskar_mem_add(xcorr0, xcorr0,
-                oskar_vis_block_cross_correlations(b), status);
-        oskar_mem_add(acorr0, acorr0,
-                oskar_vis_block_auto_correlations(b), status);
+        oskar_mem_add(xcorr0, xcorr0, oskar_vis_block_cross_correlations(b), status);
+        oskar_mem_add(acorr0, acorr0, oskar_vis_block_auto_correlations(b), status);
     }
 
     // Calculate baseline uvw coordinates for vis block.
