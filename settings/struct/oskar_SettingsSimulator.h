@@ -33,11 +33,6 @@
  * @file oskar_SettingsSimulator.h
  */
 
-enum OSKAR_SPLITTING_MODE
-{
-    OSKAR_SPLIT_TIME,
-    OSKAR_SPLIT_CHUNK
-};
 
 /**
  * @struct oskar_SettingsSimulator
@@ -51,7 +46,6 @@ struct oskar_SettingsSimulator
 {
     int double_precision;
     int max_sources_per_chunk;
-    int splitting_mode;
     int num_cuda_devices;
     int keep_log_file;
     int write_status_to_log_file;

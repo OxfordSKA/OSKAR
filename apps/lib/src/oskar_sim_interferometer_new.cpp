@@ -117,12 +117,12 @@ static void sim_baselines_(DeviceData* d, oskar_Sky* sky,
         const oskar_Settings* settings, int channel_index_block,
         int time_index_block, int time_index_simulation, int* status);
 static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
-        int num_gpus, int gpu_id, int total_chunks,
-        const oskar_Sky* const* sky_chunks, int block_index, int iactive,
-        int* chunk_time_index, oskar_Log* log, int* status);
+        int gpu_id, int total_chunks, const oskar_Sky* const* sky_chunks,
+        int block_index, int iactive, int* chunk_time_index, oskar_Log* log,
+        int* status);
 static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
         int num_gpus, OutputHandles* out, const oskar_Telescope* tel,
-        int block_index, int iactive, oskar_Log* log, int* status);
+        int block_index, int iactive, int* status);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -254,23 +254,17 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
             int iactive = b % 2; // Index of the active simulation vis block.
             if ((thread_id > 0 || num_threads == 1) && b < num_time_blocks)
             {
-                sim_vis_block_(&s, &d[gpu_id], num_gpus, gpu_id,
-                        num_chunks, sky_chunks, b, iactive, &chunk_time_index,
-                        log, status);
-                if (num_gpus > 1)
-                    oskar_log_message(log, 'S', 0, "Block %i/%i complete on "
-                            "GPU %i. Simulation time elapsed : %.3f s.", b+1,
-                            num_time_blocks, gpu_id,
-                            oskar_timer_elapsed(d[0].tmr_total));
+                sim_vis_block_(&s, &d[gpu_id], gpu_id, num_chunks, sky_chunks,
+                        b, iactive, &chunk_time_index, log, status);
             }
             if (thread_id == 0 && b > 0)
-                write_vis_block_(&s, &d[0], num_gpus, &out,
-                        tel, b - 1, iactive, log, status);
+                write_vis_block_(&s, &d[0], num_gpus, &out, tel, b - 1,
+                        iactive, status);
 
-            // Barrier: reset index into vis block for chunk-time work units.
+            // Barrier1: reset index into vis block for chunk-time work units.
 #pragma omp barrier
             if (thread_id == 0) chunk_time_index = 0;
-            // Barrier: Check sim and write are done before starting new block.
+            // Barrier2: Check sim and write are done before starting new block.
 #pragma omp barrier
             if (thread_id == 0 && b < num_time_blocks)
                 oskar_log_message(log, 'S', 0, "Block %i/%i complete. "
@@ -361,9 +355,9 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
 }
 
 static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
-        int num_gpus, int gpu_id, int total_chunks,
-        const oskar_Sky* const* sky_chunks, int block_index, int iactive,
-        int* chunk_time_index, oskar_Log* log, int* status)
+        int gpu_id, int total_chunks, const oskar_Sky* const* sky_chunks,
+        int block_index, int iactive, int* chunk_time_index,
+        oskar_Log* log, int* status)
 {
     oskar_timer_resume(d->tmr_compute);
 
@@ -387,69 +381,6 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
     oskar_vis_block_set_start_time_index(vis_block, block_start_time_index);
     if (*status) return;
 
-#if 0
-    // Get time and chunk counter ranges for different parallelisation modes.
-    // The effort of block evaluation is split between GPUs either by giving
-    // a number of source chunks to each GPU or a number of times within
-    // the block to each GPU.
-    int num_chunks, start_chunk, start_time, num_times;
-    // TODO print some sort of warning about splitting?!
-    if (s->sim.splitting_mode == OSKAR_SPLIT_CHUNK || num_times_block == 1)
-    {
-        start_time = 0;
-        num_times = block_length;
-        oskar_round_robin(total_chunks, num_gpus, gpu_id,
-                &num_chunks, &start_chunk);
-    }
-    else // OSKAR_SPLIT_TIME
-    {
-        start_chunk = 0;
-        num_chunks = total_chunks;
-        oskar_round_robin(block_length, num_gpus, gpu_id,
-                &num_times, &start_time);
-    }
-
-    for (int c = start_chunk; c < start_chunk + num_chunks; ++c)
-    {
-        if (*status) break;
-        oskar_Sky* sky = d->sky_chunk;
-
-        // Copy the current sky chunk to the GPU.
-        // NOTE this is potentially a bit wasteful, as all relevant sky
-        // chunks are copied to the GPU for each vis block.
-        // Extra no. vis blocks memory copies of each sky chunk.
-        oskar_timer_resume(d->tmr_init_copy);
-        oskar_sky_copy(sky, sky_chunks[c], status);
-        oskar_timer_pause(d->tmr_init_copy);
-
-        for (int t = start_time; t < (start_time + num_times); ++t)
-        {
-            if (*status || t >= num_times_block) break;
-            int time_idx = block_start_time_index + t;
-            if (s->sky.apply_horizon_clip)
-            {
-                double mjd = obs_start_mjd + dt_dump * (time_idx + 0.5);
-                double gast = oskar_convert_mjd_to_gast_fast(mjd);
-
-                sky = d->local_sky;
-                oskar_timer_resume(d->tmr_clip);
-                oskar_sky_horizon_clip(sky, d->sky_chunk,
-                        d->tel, gast, d->station_work, status);
-                oskar_timer_pause(d->tmr_clip);
-            }
-
-            for (int f = 0; f < num_channels; ++f)
-            {
-                if (*status) break;
-                oskar_log_message(log, 'S', 1, "Time %6i/%i, "
-                        "Chunk %3i/%i, Channel %4i/%i [GPU%i, %i sources]",
-                        time_idx+1, total_times, c+1, num_chunks,
-                        f+1, num_channels, gpu_id, oskar_sky_num_sources(sky));
-                sim_baselines_(d, sky, s, f, t, time_idx, status);
-            }
-        }
-    }
-#else
     /*
      * Go though all possible work units in the block (a work unit is defined
      * as the simulation for one time and one sky chunk.
@@ -465,8 +396,8 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
         }
         if (i_chunk_time >= num_times_block*total_chunks) break;
 
-        // Convert slice index to chunk/time index. FIXME what if a block isn't full?
-        int ichunk = int(i_chunk_time/num_times_block);
+        // Convert slice index to chunk/time index.
+        int ichunk = i_chunk_time/num_times_block;
         int itime  = i_chunk_time - ichunk*num_times_block;
 
         oskar_Sky* sky = d->sky_chunk;
@@ -487,10 +418,6 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
             oskar_timer_pause(d->tmr_clip);
         }
 
-//        printf("** GPU%i idx: %i/%i chunk: %i time: %i (%i)\n",
-//                gpu_id, i_chunk_time, num_times_block*total_chunks,
-//                ichunk, itime, time_idx);
-
         for (int i = 0; i < num_channels; ++i)
         {
             if (*status) break;
@@ -503,7 +430,6 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
 
         if (*status) break;
     }
-#endif
 
     // Copy the visibility block to host memory.
     oskar_timer_resume(d->tmr_init_copy);
@@ -515,7 +441,7 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
 
 static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
         int num_gpus, OutputHandles* out, const oskar_Telescope* tel,
-        int block_index, int iactive, oskar_Log* log, int* status)
+        int block_index, int iactive, int* status)
 {
     // Can't safely do GPU operations in here (even if cudaSetDevice()
     // is called) because we don't want to block the default stream, so we
@@ -523,8 +449,6 @@ static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
 
     // Un-pause write timer.
     oskar_timer_resume(d[0].tmr_write);
-
-    oskar_log_message(log, 'S', 1, "Writing Block %i", block_index+1);
 
     // Combine all vis blocks into the first one.
     oskar_VisBlock* blk = d[0].vis_block_cpu[!iactive];
@@ -800,49 +724,51 @@ static void free_device_data_(DeviceData* d, int* status)
 static void record_timing_(int num_devices, int* cuda_device_ids,
         DeviceData* d, oskar_Log* log, int num_vis_blocks)
 {
-    // Get component times.
-    // TODO change to display mean (gpu) percent of compute time.
+    // Retrieve per GPU timers
     double t_init = 0.0, t_clip = 0.0, t_E = 0.0, t_K = 0.0;
-    double t_join = 0.0, t_correlate = 0.0;
-    double elapsed = oskar_timer_elapsed(d[0].tmr_total);
-    for (int i = 0; i < num_devices; ++i)
-    {
+    double t_join = 0.0, t_correlate = 0.0, t_compute = 0.0;
+    double* compute_times = (double*)malloc(num_devices*sizeof(double));
+    for (int i = 0; i < num_devices; ++i) {
         cudaSetDevice(cuda_device_ids[i]);
+        compute_times[i] = oskar_timer_elapsed(d[i].tmr_compute);
         t_init += oskar_timer_elapsed(d[i].tmr_init_copy);
         t_clip += oskar_timer_elapsed(d[i].tmr_clip);
         t_E += oskar_timer_elapsed(d[i].tmr_E);
         t_K += oskar_timer_elapsed(d[i].tmr_K);
         t_join += oskar_timer_elapsed(d[i].tmr_join);
         t_correlate += oskar_timer_elapsed(d[i].tmr_correlate);
+        t_compute += compute_times[i];
     }
-    double t_compute = t_init + t_clip + t_E + t_K + t_join + t_correlate;
-    t_compute /= num_devices;
-
-    // Calculate component percentage times.
-    double p_init = (t_init * 100.0 / (num_devices * elapsed));
-    double p_clip = (t_clip * 100.0 / (num_devices * elapsed));
-    double p_E = (t_E * 100.0 / (num_devices * elapsed));
-    double p_K = (t_K * 100.0 / (num_devices * elapsed));
-    double p_join = (t_join * 100.0 / (num_devices * elapsed));
-    double p_correlate = (t_correlate * 100.0 / (num_devices * elapsed));
+    double t_components = t_init+t_clip+t_E+t_K+t_join+t_correlate;
 
     // Record time taken.
     int times_per_block = oskar_vis_block_num_times(d[0].vis_block_cpu[0]);
-    oskar_log_section(log, 'M', "Simulation timing [%i blocks x %i times per block].", num_vis_blocks, times_per_block);
-    oskar_log_message(log, 'M', 0, "Total wall time     : %.3fs ", elapsed);
+    oskar_log_section(log, 'M', "Simulation timing.",
+            num_vis_blocks, times_per_block);
+    oskar_log_message(log, 'M', 0, "Total wall time     : %.3fs ",
+            oskar_timer_elapsed(d[0].tmr_total));
     for (int i = 0; i < num_devices; ++i) {
-        cudaSetDevice(cuda_device_ids[i]);
-        oskar_log_message(log, 'M', 0, "Compute [GPU%i]      : %.3fs", i, oskar_timer_elapsed(d[i].tmr_compute));
+        oskar_log_message(log, 'M', 0, "Compute [GPU%i]      : %.3fs", i,
+                compute_times[i]);
     }
-    oskar_log_message(log, 'M', 0, "Write               : %.3fs", oskar_timer_elapsed(d[0].tmr_write));
+    // TODO use oskar_log_value() ??
+    oskar_log_message(log, 'M', 0, "Write               : %.3fs",
+            oskar_timer_elapsed(d[0].tmr_write));
     oskar_log_message(log, 'M', 0, "Compute components.");
-    oskar_log_message(log, 'M', 1, "Initialise & copy : %4.1f%%", p_init);
-    oskar_log_message(log, 'M', 1, "Horizon clip      : %4.1f%%", p_clip);
-    oskar_log_message(log, 'M', 1, "Jones E           : %4.1f%%", p_E);
-    oskar_log_message(log, 'M', 1, "Jones K           : %4.1f%%", p_K);
-    oskar_log_message(log, 'M', 1, "Jones join        : %4.1f%%", p_join);
-    oskar_log_message(log, 'M', 1, "Jones correlate   : %4.1f%%", p_correlate);
-
+    oskar_log_message(log, 'M', 1, "Initialise & copy : %4.1f%%",
+            (t_init/t_compute)*100.0);
+    oskar_log_message(log, 'M', 1, "Horizon clip      : %4.1f%%",
+            (t_clip/t_compute)*100.0);
+    oskar_log_message(log, 'M', 1, "Jones E           : %4.1f%%",
+            (t_E/t_compute)*100.0);
+    oskar_log_message(log, 'M', 1, "Jones K           : %4.1f%%",
+            (t_K/t_compute)*100.0);
+    oskar_log_message(log, 'M', 1, "Jones join        : %4.1f%%",
+            (t_join/t_compute)*100.0);
+    oskar_log_message(log, 'M', 1, "Jones correlate   : %4.1f%%",
+            (t_correlate/t_compute)*100.0);
+    oskar_log_message(log, 'M', 1, "Other             : %4.1f%%",
+            ((t_compute-t_components)/t_compute)*100.0);
 }
 
 static void log_warning_box_(oskar_Log* log, const char* format, ...)

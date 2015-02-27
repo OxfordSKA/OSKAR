@@ -66,8 +66,6 @@ void oskar_log_settings_simulator(oskar_Log* log, const oskar_Settings* s)
     LVB("Log progress status", s->sim.write_status_to_log_file);
     LVI("Num. CUDA devices", s->sim.num_cuda_devices);
     LVI("Max sources per chunk", s->sim.max_sources_per_chunk);
-    LVS("Splitting mode", s->sim.splitting_mode == OSKAR_SPLIT_CHUNK ?
-            "Source chunk" : "Time");
 }
 
 static void oskar_log_settings_sky_polarisation(oskar_Log* log, int depth,
