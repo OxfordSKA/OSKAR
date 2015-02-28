@@ -9,14 +9,14 @@
 \section install_intro Introduction
 
 This document describes how to obtain, build and install the OSKAR simulation
-package. The current release is available as a source code distribution,
-targeted at Linux and Mac OS X operating systems. Microsoft Windows installs
-may be possible, but are not currently supported.
+package. The current version is available as a source code distribution,
+targeted at Linux and Mac OS X operating systems. Installation under 
+Microsoft Windows may be possible, but is not currently supported.
 
-\section install_obtain  Obtaining OSKAR
+\subsection install_obtain  Obtaining OSKAR
 
-The current release of OSKAR can be downloaded as a compressed zip archive
-from the following link:<br>
+The current version of OSKAR can be downloaded as an archive from the 
+following link:<br>
 http://www.oerc.ox.ac.uk/~ska/oskar/OSKAR-Source.zip
 
 Older versions (if available) are listed by version at:<br>
@@ -25,30 +25,25 @@ http://www.oerc.ox.ac.uk/~ska/oskar
 \section install_deps Dependencies
 
 OSKAR depends on a number of other libraries. The main components of OSKAR
-require an NVIDIA GPU with CUDA 4.0 (and associated NVIDIA driver) or later
-and Qt 4 (version 4.6 or later) to be installed on the target system, and
-also LAPACK for full functionality. Additionally, the casacore libraries 
-must be present if Measurement Sets are to be exported. The MATLAB 
-interface will be built if MATLAB R2010b or later is found.
+require an NVIDIA GPU with CUDA 5.5 (and associated NVIDIA driver) or later
+and Qt 4.6 or later to be installed on the target system, and also LAPACK for 
+full functionality. Additionally, the casacore libraries must be present if 
+Measurement Sets are to be exported. The MATLAB interface will be built 
+if MATLAB R2010b or later is found.
 
-The OSKAR CMake build system will compile and install as many components as
-possible according to the following dependencies being satisfied:
+The list below summarises the main dependencies:
 
-- NVIDIA CUDA (http://developer.nvidia.com/cuda-downloads), version >= 5.5
-  - Required for: liboskar, liboskar_apps, Applications, MATLAB interface
-  - (Make sure you install the CUDA toolkit.)
-- Qt4 (http://www.qt.io), version >= 4.6
-  - Required for: liboskar_apps, Applications
-  - Optional for: MATLAB interface (for manipulation of OSKAR settings files)
-- LAPACK  (http://www.netlib.org/lapack)
-  - Optional for: liboskar (to enable the use of extended sources)
-- casacore (http://code.google.com/p/casacore), version >= 1.5.0
-  - Required for: liboskar_ms
-  - Optional for: liboskar_apps, Application (for Measurement Set export)
-- MATLAB (http://www.mathworks.co.uk/products/matlab), version >= R2010b
-  - Required for: MATLAB interface
 - CMake (http://www.cmake.org), version >= 2.8.3
-  - Required for: Makefile generation
+    - Required for makefile generation.
+- NVIDIA CUDA (http://developer.nvidia.com/cuda-downloads), version >= 5.5
+    - Required for all OSKAR components.
+    - (Make sure you install the CUDA Toolkit.)
+- Qt4 (http://www.qt.io), version >= 4.6
+    - Required for OSKAR applications.
+- LAPACK (http://www.netlib.org/lapack)
+    - Optional. Required only if extended sources are to be used.
+- casacore (http://code.google.com/p/casacore), version >= 1.5.0
+    - Optional. Required only for Measurement Set export.
 
 \subsection install_ubuntu_packages Ubuntu Packages
 
@@ -95,7 +90,7 @@ These are as listed below.
   - ALL is for all Fermi and Kepler architectures (>= 2.0).
 
 - <tt><b>-DCMAKE_INSTALL_PREFIX=\<path\></b></tt>  (default: /usr/local/)
-  - Prefix install path used when installing OSKAR (with make install)
+  - Path prefix used to install OSKAR (with make install)
 
 \subsubsection install_build_advanced Advanced Build Options
 
@@ -113,11 +108,11 @@ These are as listed below.
 
 - <tt><b>-DCASACORE_INC_DIR=\<path\></b></tt> (default: searches the system include paths)
   - Specifies a custom path in which to look for the CasaCore library headers. This is the path to the top level casacore include folder.
-  - Note: This should only be used in special cases, where the version of CasaCore headers installed in system include path can't be used to build OSKAR.
+  - Note: This should only be used in special cases, where the version of CasaCore headers installed in the system include path can't be used to build OSKAR.
 
 - <tt><b>-DMATLAB_ROOT=\<path\></b></tt> (default: searches common system install locations)
-  - Specifies a custom root path, in which to search for MATLAB libraries and library headers.
-  - Note: This should only be used in special cases, where MATLAB is installed in a non-standard location, or, where several versions of MATLAB are installed, and a particular version is favoured.
+  - Specifies a custom path in which to search for MATLAB libraries and library headers.
+  - Note: This should only be used in special cases, where MATLAB is installed in a non-standard location, or where several versions of MATLAB are installed, and a particular version is favoured.
 
 \subsection install_build_env Environment Variables
 
@@ -142,9 +137,8 @@ beginning of the system search path.
 
 \subsection install_unit_tests Unit Tests
 
-When building OSKAR from source, a number of unit test binaries will be
-created. The tests can be run by typing the following command from the build
-directory:
+The unit test binaries can be run by typing the following command from the
+build directory:
 
 \code
 $ ctest [--verbose]
@@ -152,12 +146,12 @@ $ ctest [--verbose]
 
 All the unit tests should pass. If any fail, please report this by copying
 the terminal output and sending it, together with a description of the
-hardware in your machine and your version of OSKAR, to the email address
-oskar@oerc.ox.ac.uk.
+hardware in your machine, your operating system version and your version of 
+OSKAR, to the email address oskar@oerc.ox.ac.uk.
 
 \subsection install_test_example Running the Example Simulation
 
-It is also advised, with any fresh install of OSKAR, to run the
+With any fresh install of OSKAR, we recommend running the
 \ref example "example simulation" to establish if a simple simulation
 behaves as expected.
 
@@ -185,8 +179,9 @@ behaves as expected.
     the OSKAR source tree.</td></tr>
 <tr><td>6</td><td>2014-09-30</td>
     <td>Changed default CUDA_ARCH to all.</td></tr>
-<tr><td>7</td><td>2015-02-01</td>
-    <td>Removed explicit CFITSIO and CBLAS dependencies.</td></tr>
+<tr><td>7</td><td>2015-02-28</td>
+    <td>Removed explicit CFITSIO and CBLAS dependencies. 
+    Clarified dependency requirements.</td></tr>
 </table>
 
 */
