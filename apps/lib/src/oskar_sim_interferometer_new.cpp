@@ -123,6 +123,7 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
 static void write_vis_block_(const oskar_Settings* s, DeviceData* d,
         int num_gpus, OutputHandles* out, const oskar_Telescope* tel,
         int block_index, int iactive, int* status);
+static unsigned int disp_width_(unsigned int value);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -218,7 +219,7 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
 
 
     //oskar_log_line(log, 'M', ' ');
-    oskar_log_section(log, 'M', "Memory usage");
+    oskar_log_section(log, 'M', "Initial memory usage");
     for (int i = 0; i < num_gpus; ++i)
         oskar_cuda_mem_log(log, 0, i);
     size_t mem_total = oskar_get_total_physical_memory();
@@ -283,12 +284,13 @@ extern "C" void oskar_sim_interferometer_new(const char* settings_file,
             // Barrier2: Check sim and write are done before starting new block.
 #pragma omp barrier
             if (thread_id == 0 && b < num_vis_blocks)
-                oskar_log_message(log, 'S', 0, "Block %i/%i complete. "
-                        "Simulation time elapsed : %.3f s.", b+1,
-                        num_vis_blocks, oskar_timer_elapsed(d[0].tmr_sim));
+                oskar_log_message(log, 'S', 0, "Block %*i/%i complete. "
+                        "Simulation time elapsed : %.3f s",
+                        disp_width_(num_vis_blocks), b+1, num_vis_blocks,
+                        oskar_timer_elapsed(d[0].tmr_sim));
             if (thread_id == 0 && b == num_vis_blocks)
             {
-                oskar_log_line(log, 'M', ' ');
+                oskar_log_section(log, 'M', "Final memory usage");
                 for (int i = 0; i < num_gpus; ++i)
                     oskar_cuda_mem_log(log, 0, i);
                 size_t mem_total = oskar_get_total_physical_memory();
@@ -445,10 +447,12 @@ static void sim_vis_block_(const oskar_Settings* s, DeviceData* d,
         for (int i = 0; i < num_channels; ++i)
         {
             if (*status) break;
-            oskar_log_message(log, 'S', 1, "Time %6i/%i, "
-                    "Chunk %3i/%i, Channel %4i/%i [GPU %i, %i sources]",
-                    sim_time_idx+1, total_times, i_chunk+1, total_chunks,
-                    i+1, num_channels, gpu_id, oskar_sky_num_sources(sky));
+            oskar_log_message(log, 'S', 1, "Time %*i/%i, "
+                    "Chunk %*i/%i, Channel %*i/%i [GPU %i, %i sources]",
+                    disp_width_(total_times), sim_time_idx+1, total_times,
+                    disp_width_(total_chunks), i_chunk+1, total_chunks,
+                    disp_width_(num_channels), i+1, num_channels,
+                    gpu_id, oskar_sky_num_sources(sky));
             sim_baselines_(d, sky, s, i, i_time, sim_time_idx, status);
         }
     }
@@ -836,4 +840,15 @@ static void log_warning_box_(oskar_Log* log, const char* format, ...)
     oskar_log_message(log, 'W', -1, "%s", line.c_str());
     oskar_log_line(log, 'W', '*');
     oskar_log_line(log, 'W', ' ');
+}
+
+static unsigned int disp_width_(unsigned int v)
+{
+    return (v >= 100000u) ? 6 : (v >= 10000u) ? 5 : (v >= 1000u) ? 4 :
+            (v >= 100u) ? 3 : (v >= 10u) ? 2u : 1u;
+//    return (v >= 1000000000u) ? 10 : (v >= 100000000u) ? 9 :
+//        (v >= 10000000u) ? 8 : (v >= 1000000u) ? 7 :
+//        (v >= 100000u) ? 6 : (v >= 10000u) ? 5 :
+//        (v >= 1000u) ? 4 : (v >= 100u) ? 3 : (v >= 10u) ? 2u : 1u;
+    //return v == 1u ? 1u : (unsigned)log10(v)+1
 }
