@@ -61,25 +61,14 @@ int main(int argc, char** argv)
     // Retrieve options.
     vector<string> vis_filename = opt.getArgs();
     bool verbose = opt.isSet("-v") ? true : false;
-    int num_vis = (int)vis_filename.size();
-    int disp_width = (num_vis == 1) ? 1 : (int)log10(num_vis-1)+1;
+    int num_files = (int)vis_filename.size();
+    int disp_width = (num_files == 1) ? 1 : (int)log10(num_files)+1;
 
     oskar_Log* log = 0;
     oskar_log_section(log, 'M', "OSKAR-%s starting at %s.", OSKAR_VERSION_STR,
             oskar_log_system_clock_string(0));
 
-    if (verbose)
-    {
-        oskar_log_message(log, 'S', 0, "Number of visibility files = %i", num_vis);
-        for (int i = 0; i < num_vis; ++i)
-        {
-            oskar_log_message(log, 'S', 1, "[%0*i] %s", disp_width, i,
-                    vis_filename[0].c_str());
-        }
-    }
-
-    oskar_log_section(log, 'M', "Visibility statistics.");
-    for (int i = 0; i < num_vis; ++i)
+    for (int i = 0; i < num_files; ++i)
     {
         oskar_Binary* h = oskar_binary_create(vis_filename[i].c_str(), 'r',
                 &status);
@@ -204,7 +193,8 @@ int main(int argc, char** argv)
             oskar_log_error(log, "Incompatible or invalid visibility data type.");
             return OSKAR_ERR_BAD_DATA_TYPE;
         }
-        oskar_log_message(log, 'M', 0, "%s ", vis_filename[i].c_str());
+        oskar_log_message(log, 'M', 0, "%s [%0*i/%i]", vis_filename[i].c_str(),
+                disp_width, i+1, num_files);
         if (verbose)
         {
             oskar_log_message(log, 'S', 1, "No. baselines : %i",
