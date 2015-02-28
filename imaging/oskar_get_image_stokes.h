@@ -41,6 +41,19 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Creates an array of visibility amplitudes for images of Stokes
+ * polarisations.
+ *
+ * @details
+ * Converts visibilities from linear polarisations to Stokes form.
+ *
+ * @param vis       Visibility structure.
+ * @param settings  Image settings
+ * @param status    Status code.
+ *
+ * @return Array of visibility amplitudes.
+ */
 OSKAR_EXPORT
 oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
         const oskar_SettingsImage* settings, int* status);

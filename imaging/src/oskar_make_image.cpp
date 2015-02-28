@@ -142,7 +142,7 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
     if (num_vis_pols == 1 && !(im_type == OSKAR_IMAGE_TYPE_STOKES_I ||
             im_type == OSKAR_IMAGE_TYPE_PSF))
     {
-        *status = OSKAR_ERR_SETTINGS;
+        *status = OSKAR_ERR_SETTINGS_IMAGE;
         return 0;
     }
 
@@ -156,6 +156,7 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
         oskar_image_free(im, status);
         return 0;
     }
+    printf("STATUS %i [%i]\n", *status, __LINE__);
 
     /* Evaluate Stokes parameters (if required). */
     oskar_Mem* stokes = oskar_get_image_stokes(vis, settings, status);
@@ -187,7 +188,6 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
         vv_tmp = oskar_mem_create(type, location, num_vis, status);
         ww_tmp = oskar_mem_create(type, location, num_vis, status);
     }
-
     /* Allocate pixel coordinate grid required for the DFT imager. */
     l = oskar_mem_create(type, location, num_pixels, status);
     m = oskar_mem_create(type, location, num_pixels, status);

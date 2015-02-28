@@ -36,8 +36,8 @@ extern "C" {
 oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
         const oskar_SettingsImage* settings, int* status)
 {
-    int num_vis_pols, num_vis_amps, pol, type, i, location;
-    const oskar_Mem* amp;
+    int num_vis_pols, num_vis_amps, im_type, type, i, location;
+    const oskar_Mem* vis_amp;
     oskar_Mem* stokes = 0;
 
     if (!vis || !settings || !status)
@@ -48,23 +48,23 @@ oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
     if (*status) return 0;
 
     /* Local variables */
-    amp = oskar_vis_amplitude_const(vis);
-    num_vis_pols = oskar_mem_is_matrix(amp) ? 4 : 1;
-    pol = settings->image_type;
+    im_type = settings->image_type;
+    if (im_type == OSKAR_IMAGE_TYPE_PSF) return 0;
+    vis_amp = oskar_vis_amplitude_const(vis);
+    num_vis_pols = oskar_mem_is_matrix(vis_amp) ? 4 : 1;
     num_vis_amps = oskar_vis_num_baselines(vis) * oskar_vis_num_times(vis) *
             oskar_vis_num_channels(vis);
-    type = oskar_mem_precision(amp);
+    type = oskar_mem_precision(vis_amp);
     location = OSKAR_CPU;
 
-    /* If the input data is polarised and a single Stokes polarisation type
-     * is selected */
-    if (num_vis_pols == 4 && (pol == OSKAR_IMAGE_TYPE_STOKES_I ||
-            pol == OSKAR_IMAGE_TYPE_STOKES_Q ||
-            pol == OSKAR_IMAGE_TYPE_STOKES_U ||
-            pol == OSKAR_IMAGE_TYPE_STOKES_V))
+    /* CASE1: Polarised vis amplitudes, single Stokes output Image */
+    if (num_vis_pols == 4 && (im_type == OSKAR_IMAGE_TYPE_STOKES_I ||
+            im_type == OSKAR_IMAGE_TYPE_STOKES_Q ||
+            im_type == OSKAR_IMAGE_TYPE_STOKES_U ||
+            im_type == OSKAR_IMAGE_TYPE_STOKES_V))
     {
         /* I = 0.5 (XX + YY) */
-        switch (pol)
+        switch (im_type)
         {
             case OSKAR_IMAGE_TYPE_STOKES_I:
             {
@@ -75,14 +75,14 @@ oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
                 {
                     if (type == OSKAR_DOUBLE)
                     {
-                        const double4c* d_ = oskar_mem_double4c_const(amp, status);
+                        const double4c* d_ = oskar_mem_double4c_const(vis_amp, status);
                         double2* s_ = oskar_mem_double2(stokes, status);
                         s_[i].x = 0.5 * (d_[i].a.x + d_[i].d.x);
                         s_[i].y = 0.5 * (d_[i].a.y + d_[i].d.y);
                     }
                     else
                     {
-                        const float4c* d_ = oskar_mem_float4c_const(amp, status);
+                        const float4c* d_ = oskar_mem_float4c_const(vis_amp, status);
                         float2* s_ = oskar_mem_float2(stokes, status);
                         s_[i].x = 0.5 * (d_[i].a.x + d_[i].d.x);
                         s_[i].y = 0.5 * (d_[i].a.y + d_[i].d.y);
@@ -99,14 +99,14 @@ oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
                 {
                     if (type == OSKAR_DOUBLE)
                     {
-                        const double4c* d_ = oskar_mem_double4c_const(amp, status);
+                        const double4c* d_ = oskar_mem_double4c_const(vis_amp, status);
                         double2* s_ = oskar_mem_double2(stokes, status);
                         s_[i].x = 0.5 * (d_[i].a.x - d_[i].d.x);
                         s_[i].y = 0.5 * (d_[i].a.y - d_[i].d.y);
                     }
                     else
                     {
-                        const float4c* d_ = oskar_mem_float4c_const(amp, status);
+                        const float4c* d_ = oskar_mem_float4c_const(vis_amp, status);
                         float2* s_ = oskar_mem_float2(stokes, status);
                         s_[i].x = 0.5 * (d_[i].a.x - d_[i].d.x);
                         s_[i].y = 0.5 * (d_[i].a.y - d_[i].d.y);
@@ -123,14 +123,14 @@ oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
                 {
                     if (type == OSKAR_DOUBLE)
                     {
-                        const double4c* d_ = oskar_mem_double4c_const(amp, status);
+                        const double4c* d_ = oskar_mem_double4c_const(vis_amp, status);
                         double2* s_ = oskar_mem_double2(stokes, status);
                         s_[i].x = 0.5 * (d_[i].b.x + d_[i].c.x);
                         s_[i].y = 0.5 * (d_[i].b.y + d_[i].c.y);
                     }
                     else
                     {
-                        const float4c* d_ = oskar_mem_float4c_const(amp, status);
+                        const float4c* d_ = oskar_mem_float4c_const(vis_amp, status);
                         float2* s_ = oskar_mem_float2(stokes, status);
                         s_[i].x = 0.5 * (d_[i].b.x + d_[i].c.x);
                         s_[i].y = 0.5 * (d_[i].b.y + d_[i].c.y);
@@ -147,14 +147,14 @@ oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
                 {
                     if (type == OSKAR_DOUBLE)
                     {
-                        const double4c* d_ = oskar_mem_double4c_const(amp, status);
+                        const double4c* d_ = oskar_mem_double4c_const(vis_amp, status);
                         double2* s_ = oskar_mem_double2(stokes, status);
                         s_[i].x =  0.5 * (d_[i].b.y - d_[i].c.y);
                         s_[i].y = -0.5 * (d_[i].b.x - d_[i].c.x);
                     }
                     else
                     {
-                        const float4c* d_ = oskar_mem_float4c_const(amp, status);
+                        const float4c* d_ = oskar_mem_float4c_const(vis_amp, status);
                         float2* s_ = oskar_mem_float2(stokes, status);
                         s_[i].x =  0.5 * (d_[i].b.y - d_[i].c.y);
                         s_[i].y = -0.5 * (d_[i].b.x - d_[i].c.x);
@@ -169,16 +169,17 @@ oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
             }
         }; /* switch (pol_type) */
     }
-    else if (num_vis_pols == 4 && pol == OSKAR_IMAGE_TYPE_STOKES)
+    /* CASE2: Polarised vis amplitudes, image of all 4 stokes parameters */
+    else if (num_vis_pols == 4 && im_type == OSKAR_IMAGE_TYPE_STOKES)
     {
-        stokes = oskar_mem_create(oskar_mem_type(amp), location, num_vis_amps,
+        stokes = oskar_mem_create(oskar_mem_type(vis_amp), location, num_vis_amps,
                 status);
         if (*status) return 0;
         for (i = 0; i < num_vis_amps; ++i)
         {
             if (type == OSKAR_DOUBLE)
             {
-                const double4c* d_ = oskar_mem_double4c_const(amp, status);
+                const double4c* d_ = oskar_mem_double4c_const(vis_amp, status);
                 double4c* s_ = oskar_mem_double4c(stokes, status);
                 /* I = 0.5 (XX + YY) */
                 s_[i].a.x =  0.5 * (d_[i].a.x + d_[i].d.x);
@@ -195,7 +196,7 @@ oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
             }
             else
             {
-                const float4c* d_ = oskar_mem_float4c_const(amp, status);
+                const float4c* d_ = oskar_mem_float4c_const(vis_amp, status);
                 float4c* s_ = oskar_mem_float4c(stokes, status);
                 /* I */
                 s_[i].a.x =  0.5 * (d_[i].a.x + d_[i].d.x);
@@ -212,14 +213,17 @@ oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
             }
         }
     }
+    /* CASE3: Scalar (Stokes-I) vis amplitudes, require the output image
+     * to also be Stokes-I */
     else if (num_vis_pols == 1)
     {
-        if (pol != OSKAR_IMAGE_TYPE_STOKES_I)
+        /* TODO better logic for scalar mode vis? */
+        if (im_type != OSKAR_IMAGE_TYPE_STOKES_I)
         {
-            *status = OSKAR_ERR_UNKNOWN;
+            *status = OSKAR_ERR_SETTINGS_IMAGE;
             return 0;
         }
-        stokes = oskar_mem_create_alias(amp, 0, oskar_mem_length(amp), status);
+        stokes = oskar_mem_create_alias(vis_amp, 0, oskar_mem_length(vis_amp), status);
     }
 
     return stokes;

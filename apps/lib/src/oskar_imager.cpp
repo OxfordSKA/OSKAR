@@ -46,21 +46,17 @@ extern "C" {
 
 int oskar_imager(const char* settings_file, oskar_Log* log)
 {
-    int error = 0;
-    oskar_Settings settings;
-    oskar_Vis* vis;
-    oskar_Image* image;
-    oskar_Timer* tmr;
-    const char* filename;
+    int status = OSKAR_SUCCESS;
 
     // Load the settings file.
     oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
-    oskar_settings_load(&settings, log, settings_file, &error);
-    if (error)
+    oskar_Settings settings;
+    oskar_settings_load(&settings, log, settings_file, &status);
+    if (status)
     {
         oskar_log_error(log, "Failure in oskar_settings_load() (%s).",
-                oskar_get_error_string(error));
-        return error;
+                oskar_get_error_string(status));
+        return status;
     }
 
     // Log the relevant settings.
@@ -82,51 +78,63 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
 
     // Read the visibility data.
     oskar_Binary* h = oskar_binary_create(settings.image.input_vis_data, 'r',
-            &error);
-    vis = oskar_vis_read(h, &error);
+            &status);
+    oskar_Vis* vis = oskar_vis_read(h, &status);
     oskar_binary_free(h);
-    if (error)
+    if (status)
     {
         oskar_log_error(log, "Failure in oskar_vis_read() (%s).",
-                oskar_get_error_string(error));
-        oskar_vis_free(vis, &error);
-        return error;
+                oskar_get_error_string(status));
+        oskar_vis_free(vis, &status);
+        return status;
+    }
+
+    int im_type = settings.image.image_type;
+    bool image_is_scalar = (im_type == OSKAR_IMAGE_TYPE_STOKES_I ||
+            im_type == OSKAR_IMAGE_TYPE_PSF) ? true : false;
+    if (oskar_vis_num_pols(vis) == 1 && !image_is_scalar)
+    {
+        oskar_log_error(log, "Incompatible image type selected for scalar "
+                "(Stokes-I) visibility data.");
+        status = OSKAR_ERR_SETTINGS_IMAGE;
+        return status;
     }
 
     // Make the image.
-    tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
+    oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_CUDA);
     oskar_log_section(log, 'M', "Starting OSKAR imager...");
     oskar_timer_start(tmr);
-    image = oskar_make_image(log, vis, &settings.image, &error);
-    if (error)
+    oskar_Image* image;
+    image = oskar_make_image(log, vis, &settings.image, &status);
+    if (status)
         oskar_log_error(log, "Failure in oskar_make_image() [code: %i] (%s).",
-                error, oskar_get_error_string(error));
+                status, oskar_get_error_string(status));
     else
         oskar_log_section(log, 'M', "Imaging completed in %.3f sec.",
                 oskar_timer_elapsed(tmr));
-    oskar_vis_free(vis, &error);
+    oskar_vis_free(vis, &status);
     oskar_timer_free(tmr);
 
     // Write the image to files(s).
-    filename = settings.image.oskar_image;
-    if (filename && !error)
+    const char* filename = settings.image.oskar_image;
+    if (filename && !status)
     {
         oskar_log_message(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
-        oskar_image_write(image, log, filename, 0, &error);
+        oskar_image_write(image, log, filename, 0, &status);
     }
 
     filename = settings.image.fits_image;
-    if (filename && !error)
+    if (filename && !status)
     {
         oskar_log_message(log, 'M', 0, "Writing FITS image file: '%s'", filename);
-        oskar_fits_image_write(image, log, filename, &error);
+        oskar_fits_image_write(image, log, filename, &status);
     }
 
-    if (!error)
+    if (!status)
         oskar_log_section(log, 'M', "Run complete.");
-    oskar_image_free(image, &error);
+    oskar_image_free(image, &status);
     cudaDeviceReset();
-    return error;
+    return status;
 }
 
 #ifdef __cplusplus
