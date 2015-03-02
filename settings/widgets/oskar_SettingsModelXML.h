@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -37,90 +37,26 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_SettingsItem.h>
 #include <oskar_SettingsModel.h>
-
-#include <rapidxml.hpp>
-
-#include <string>
-#include <vector>
 
 namespace oskar {
 
+class SettingsModelXML_private;
+
 class SettingsModelXML : public oskar_SettingsModel
 {
-public:
-    enum Status {
-        AllOk = 0,
-        MissingKey,
-        InvalidNode
-    };
+    Q_OBJECT
 
 public:
     SettingsModelXML(QObject* parent = 0);
-    ~SettingsModelXML();
+    virtual ~SettingsModelXML();
 
     //static std::vector<std::pair<std::string, std::string> > get_defaults();
 
-
 private:
-    void index_settings_(rapidxml::xml_node<>* node, std::string& key_root);
-    int key_index_(const std::string& key) const;
-    std::string get_key_type_(const std::string& key);
-    std::vector<std::string> get_option_list_values_(const std::string& key);
-
-    void setLabel_(const std::string& key, const std::string& label);
-    void declare_(const std::string& key, const std::string& label,
-            const oskar_SettingsItem::type_id& type,
-            const std::string& defaultValue, bool required);
-    void declareOptionList_(const std::string& key, const std::string& label,
-            const std::vector<std::string>& options,
-            const std::string& defaultValue, bool required);
-    void setTooltip_(const std::string& key, const std::string& description);
-    void setDependency_(const std::string& key, const std::string& depends_key,
-            const std::string& depends_value);
-
-    SettingsModelXML::Status decalare_setting_(rapidxml::xml_node<>* s,
-            int depth, const std::string& key_root);
-
-    void iterate_settings_(rapidxml::xml_node<>* n,
-            int& depth, std::string& key_root);
-
-    std::string get_key_(rapidxml::xml_node<>* n) const;
-    std::string get_label_(rapidxml::xml_node<>* n) const;
-    std::string get_description_(rapidxml::xml_node<>* n) const;
-    bool is_required_(rapidxml::xml_node<>* n) const;
-    std::string get_type_(rapidxml::xml_node<>* n,
-            oskar_SettingsItem::type_id& id,
-            std::string& defaultValue, std::vector<std::string>& options) const;
-    bool get_dependency_(rapidxml::xml_node<>* n, std::string& key,
-            std::string& value) const;
-
-    oskar_SettingsItem::type_id get_oskar_SettingsItem_type_(
-            const std::string& name,
-            const std::vector<std::string>& params) const;
-
-    rapidxml::xml_node<>* get_child_node_(rapidxml::xml_node<>* parent,
-            const std::vector<std::string>& possible_names) const;
-    rapidxml::xml_attribute<>* get_attribute_(rapidxml::xml_node<>* n,
-            const std::vector<std::string>& possible_names) const;
-
-    std::vector<std::string> str_get_options_(const std::string& s) const;
-    std::string str_reduce_(const std::string& str,
-            const std::string& fill = " ",
-            const std::string& whitespace = " \t") const;
-    std::string str_trim_(const std::string& str,
-            const std::string& whitespace = " \t") const;
-    std::string str_replace_(std::string& s, std::string toReplace,
-            std::string replaceWith) const;
-
-    std::string str_to_upper_(const std::string& s) const;
-
-private:
-    std::vector<std::string> keys_;
-    std::vector<std::string> types_;
-    std::vector<std::vector<std::string> > type_params_;
+    SettingsModelXML_private *p;
 };
 
 } // namespace oskar
+
 #endif /* OSKAR_SETTINGS_MODEL_XML_H_ */

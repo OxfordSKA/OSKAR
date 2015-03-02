@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -35,137 +35,66 @@
 
 #include <rapidxml_print.hpp>
 
-#include <sstream>
 #include <iostream>
+#include <string>
+#include <sstream>
+#include <vector>
 
-using namespace std;
+using std::stringstream;
+using std::string;
+using std::vector;
+using std::cout;
+using std::cerr;
+using std::endl;
 
-namespace oskar {
+///////////////////////////////////////////////////////////////////////////////
 
-SettingsModelXML::SettingsModelXML(QObject* parent)
-: oskar_SettingsModel(parent)
+// Begin anonymous namespace for file-local helper functions.
+namespace {
+
+// File-local typedefs.
+typedef rapidxml::xml_document<> doc_t;
+typedef rapidxml::xml_node<> node;
+typedef rapidxml::xml_attribute<> attr;
+
+int key_index(const string& key, const vector<string>& keys)
 {
-    typedef rapidxml::xml_document<> doc_t;
-    typedef rapidxml::xml_node<> node_t;
-    typedef rapidxml::xml_attribute<> attr_t;
-
-    std::string xml(OSKAR_XML_STR);
-    std::vector<char> xml_(xml.begin(), xml.end());
-    xml_.push_back(0);
-
-    int depth = 0;
-    doc_t doc;
-    doc.parse<0>(&xml_[0]);
-
-    node_t* root_node = doc.first_node("root");
-    std::string temp;
-    index_settings_(root_node, temp);
-//    cout << "total number of keys = " << keys_.size() << endl;
-//    for (size_t i = 0; i < keys_.size(); ++i) {
-//        cout << i << " -- " << keys_[i];
-//        cout << " -- " << types_[i];
-//        cout << " -- " << type_params_[i].size();
-//        cout << endl;
-//    }
-
-    std::string version = "";
-    attr_t* ver = root_node->first_attribute("version");
-    if (ver) version = std::string(ver->value());
-
-    std::string key_root = "";
-    iterate_settings_(root_node, depth, key_root);
-}
-
-
-SettingsModelXML::~SettingsModelXML()
-{
-}
-
-void SettingsModelXML::index_settings_(rapidxml::xml_node<>* n, std::string& key_root)
-{
-    typedef rapidxml::xml_node<> node;
-    typedef rapidxml::xml_attribute<> attr;
-    std::vector<std::string> type_node_names;
-    type_node_names.push_back("type");
-    type_node_names.push_back("t");
-    std::vector<std::string> type_attr_names;
-    type_attr_names.push_back("name");
-    type_attr_names.push_back("n");
-
-    for (node* s = n->first_node("s"); s; s = s->next_sibling())
-    {
-        std::string key  = get_key_(s);
-        if (key.empty()) continue;
-
-        // Add the key to the keys list.
-        keys_.push_back(key_root + key);
-
-        // Obtain the type name (if defined) and add it to the type list.
-        std::string type = "GROUP";
-        node* type_node = get_child_node_(s, type_node_names);
-        if (type_node) {
-            attr* name = get_attribute_(type_node, type_attr_names);
-            if (name) type = std::string(name->value());
-        }
-        types_.push_back(type);
-
-        // Obtain any type parameters.
-        std::vector<std::string> params;
-        if (type_node) {
-            std::string type_node_text(type_node->value());
-            if (!type_node_text.empty()) {
-                type_node_text = str_trim_(type_node_text);
-                params = str_get_options_(type_node_text);
-            }
-        }
-        type_params_.push_back(params);
-
-        if (s->first_node("s")) {
-            std::string new_key_root = key_root + key + "/";
-            index_settings_(s, new_key_root);
-        }
-    }
-}
-
-int SettingsModelXML::key_index_(const std::string& key) const
-{
-    for (size_t i = 0; i < keys_.size(); ++i)
-        if (keys_[i] == key) return i;
+    for (size_t i = 0; i < keys.size(); ++i)
+        if (keys[i] == key) return i;
     return -1;
 }
 
-std::string SettingsModelXML::str_replace_(std::string& s,
-        std::string toReplace, std::string replaceWith) const
+string str_replace(string& s, string toReplace, string replaceWith)
 {
     // FIXME clean up this logic!
     size_t p = 0;
-    while (p != std::string::npos) {
+    while (p != string::npos)
+    {
         p = s.find(toReplace);
-        if (p != std::string::npos)
+        if (p != string::npos)
             s.replace(p, toReplace.length(), replaceWith);
     }
     return s;
 }
 
-std::string SettingsModelXML::str_trim_(const std::string& str,
-        const std::string& whitespace) const
+string str_trim(const string& str, const string& whitespace = " \t")
 {
     const size_t strBegin = str.find_first_not_of(whitespace);
-    if (strBegin == std::string::npos) return "";
+    if (strBegin == string::npos) return "";
     const size_t strEnd = str.find_last_not_of(whitespace);
     const size_t strRange = strEnd - strBegin + 1;
     return str.substr(strBegin, strRange);
 }
 
-std::string SettingsModelXML::str_reduce_(const std::string& str,
-                   const std::string& fill, const std::string& whitespace) const
+string str_reduce(const string& str, const string& fill = " ",
+        const string& whitespace = " \t")
 {
     // Trim first
-    std::string result = str_trim_(str, whitespace);
+    string result = str_trim(str, whitespace);
 
     // Replace sub ranges
     size_t beginSpace = result.find_first_of(whitespace);
-    while (beginSpace != std::string::npos)
+    while (beginSpace != string::npos)
     {
         const size_t endSpace = result.find_first_not_of(whitespace, beginSpace);
         const size_t range = endSpace-beginSpace;
@@ -177,16 +106,15 @@ std::string SettingsModelXML::str_reduce_(const std::string& str,
     return result;
 }
 
-std::vector<std::string> SettingsModelXML::str_get_options_(
-        const std::string& s) const
+vector<string> str_get_options(const string& s)
 {
-    std::vector<std::string> opts;
-    std::stringstream sin(s);
-    std::string line;
+    vector<string> opts;
+    stringstream sin(s);
+    string line;
     while (std::getline(sin, line, '"')) {
-        std::stringstream ss(line);
+        stringstream ss(line);
         while (std::getline(ss, line, ',')) {
-            line = str_trim_(line, " \t");
+            line = str_trim(line, " \t");
             if (!line.empty()) opts.push_back(line);
         }
         if (std::getline(sin, line, '"')) {
@@ -196,18 +124,15 @@ std::vector<std::string> SettingsModelXML::str_get_options_(
     return opts;
 }
 
-std::string SettingsModelXML::str_to_upper_(const std::string& s) const
+string str_to_upper(const string& s)
 {
-    std::string s_(s);
+    string s_(s);
     for (size_t i = 0; i < s_.length(); ++i) s_[i] = toupper(s_[i]);
     return s_;
 }
 
-rapidxml::xml_node<>* SettingsModelXML::get_child_node_(
-        rapidxml::xml_node<>* parent,
-        const std::vector<std::string>& possible_names) const
+node* get_child_node(node* parent, const vector<string>& possible_names)
 {
-    typedef rapidxml::xml_node<> node;
     for (size_t i = 0; i < possible_names.size(); ++i)
     {
         node* n = parent->first_node(possible_names[i].c_str());
@@ -216,11 +141,8 @@ rapidxml::xml_node<>* SettingsModelXML::get_child_node_(
     return 0;
 }
 
-rapidxml::xml_attribute<>* SettingsModelXML::get_attribute_(
-        rapidxml::xml_node<>* n,
-        const std::vector<std::string>& possible_names) const
+attr* get_attribute(node* n, const vector<string>& possible_names)
 {
-    typedef rapidxml::xml_attribute<> attr;
     for (size_t i = 0; i < possible_names.size(); ++i)
     {
         attr* a = n->first_attribute(possible_names[i].c_str());
@@ -229,11 +151,10 @@ rapidxml::xml_attribute<>* SettingsModelXML::get_attribute_(
     return 0;
 }
 
-
-oskar_SettingsItem::type_id SettingsModelXML::get_oskar_SettingsItem_type_(
-        const std::string& name, const std::vector<std::string>& params) const
+oskar_SettingsItem::type_id get_oskar_SettingsItem_type(const string& name,
+        const vector<string>& params)
 {
-    std::string name_(name);
+    string name_(name);
     for (size_t i = 0; i < name_.length(); ++i) name_[i] = toupper(name_[i]);
     oskar_SettingsItem::type_id tid = oskar_SettingsItem::UNDEF;
 
@@ -255,9 +176,11 @@ oskar_SettingsItem::type_id SettingsModelXML::get_oskar_SettingsItem_type_(
     else if (name_ == "INPUTDIRECTORY") tid = oskar_SettingsItem::TELESCOPE_DIR_NAME;
     else if (name_ == "DATETIME")       tid = oskar_SettingsItem::DATE_TIME;
     else if (name_ == "TIME")           tid = oskar_SettingsItem::TIME;
-    else if (name_ == "DOUBLERANGEEXT") {
-        if (params.size() == 3) {
-            std::string special_value = params[2];
+    else if (name_ == "DOUBLERANGEEXT")
+    {
+        if (params.size() == 3)
+        {
+            string special_value = params[2];
             for (size_t i = 0; i < special_value.length(); ++i)
                 special_value[i] = toupper(special_value[i]);
             if (special_value == "MAX") tid = oskar_SettingsItem::DOUBLE_MAX;
@@ -267,15 +190,16 @@ oskar_SettingsItem::type_id SettingsModelXML::get_oskar_SettingsItem_type_(
         else tid = oskar_SettingsItem::DOUBLE;
     }
     // Note IntRangeExtended currently only maps to AXIS_RANGE
-    else if (name_ == "INTRANGEEXT") {
-        if (params.size() == 3) {
-            std::string special_value = params[2];
+    else if (name_ == "INTRANGEEXT")
+    {
+        if (params.size() == 3)
+        {
+            string special_value = params[2];
             for (size_t i = 0; i < special_value.length(); ++i)
                 special_value[i] = toupper(special_value[i]);
             if (special_value == "MAX") tid = oskar_SettingsItem::AXIS_RANGE;
         }
     }
-
 //    else {
 //        tid = oskar_SettingsItem::UNDEF;
 //    }
@@ -283,27 +207,25 @@ oskar_SettingsItem::type_id SettingsModelXML::get_oskar_SettingsItem_type_(
     return tid;
 }
 
-std::string SettingsModelXML::get_key_(rapidxml::xml_node<>* n) const
+string get_key(node* n)
 {
-    typedef rapidxml::xml_attribute<> attr;
-    std::vector<std::string> names;
+    vector<string> names;
     names.push_back("key");
     names.push_back("k");
-    attr* a = get_attribute_(n, names);
+    attr* a = get_attribute(n, names);
     if (a) return a->value();
     return "";
 }
 
-bool SettingsModelXML::is_required_(rapidxml::xml_node<>* n) const
+bool is_required(node* n)
 {
-    typedef rapidxml::xml_attribute<> attr;
-    std::vector<std::string> names;
+    vector<string> names;
     names.push_back("required");
     names.push_back("req");
     names.push_back("r");
-    attr* a = get_attribute_(n, names);
+    attr* a = get_attribute(n, names);
     if (a) {
-        std::string req(a->value());
+        string req(a->value());
         //std::transform(req.begin(), req.end(), req.begin(), std::toupper);
         for (size_t i = 0; i < req.length(); ++i) req[i] = toupper(req[i]);
         return req == "TRUE" || req == "YES";
@@ -311,15 +233,13 @@ bool SettingsModelXML::is_required_(rapidxml::xml_node<>* n) const
     return false;
 }
 
-std::string SettingsModelXML::get_description_(rapidxml::xml_node<>* s) const
+string get_description(node* s)
 {
-    typedef rapidxml::xml_node<> node;
-
     // Obtain a pointer to the description node.
-    std::vector<std::string> names;
+    vector<string> names;
     names.push_back("description");
     names.push_back("desc");
-    node* n = get_child_node_(s, names);
+    node* n = get_child_node(s, names);
     if (!n) return "";
 
     // Convert the node to a string.
@@ -330,27 +250,26 @@ std::string SettingsModelXML::get_description_(rapidxml::xml_node<>* s) const
     //cout << "[" << desc << "]" << endl;
 
     // Remove the opening description tag and excess whitespace.
-    str_replace_(desc, "<description>", " ");
-    str_replace_(desc, "<desc>", " ");
-    str_replace_(desc, "</description>", " ");
-    str_replace_(desc, "</desc>", " ");
-    desc = str_trim_(desc);
-    desc = str_trim_(desc, " \n");
-    desc = str_reduce_(desc);
-    desc = str_reduce_(desc, " ", " \n");
-    str_replace_(desc, "&amp;", "&");
+    str_replace(desc, "<description>", " ");
+    str_replace(desc, "<desc>", " ");
+    str_replace(desc, "</description>", " ");
+    str_replace(desc, "</desc>", " ");
+    desc = str_trim(desc);
+    desc = str_trim(desc, " \n");
+    desc = str_reduce(desc);
+    desc = str_reduce(desc, " ", " \n");
+    str_replace(desc, "&amp;", "&");
 
     return desc;
 }
 
-std::string SettingsModelXML::get_label_(rapidxml::xml_node<>* s) const
+string get_label(node* s)
 {
-    typedef rapidxml::xml_node<> node;
     // Obtain a pointer to the label node.
-    std::vector<std::string> names;
+    vector<string> names;
     names.push_back("label");
     names.push_back("l");
-    node* n = get_child_node_(s, names);
+    node* n = get_child_node(s, names);
     if (!n) return "";
 
     // Convert the node to a string.
@@ -359,109 +278,144 @@ std::string SettingsModelXML::get_label_(rapidxml::xml_node<>* s) const
     string label = ss.str();
 
     // Remove the opening label tag and excess whitespace.
-    str_replace_(label, "<label>", " ");
-    str_replace_(label, "<l>", " ");
-    str_replace_(label, "</label>", " ");
-    str_replace_(label, "</l>", " ");
-    label = str_trim_(label);
-    label = str_trim_(label, " \n");
-    label = str_reduce_(label);
-    label = str_reduce_(label, " ", " \n");
+    str_replace(label, "<label>", " ");
+    str_replace(label, "<l>", " ");
+    str_replace(label, "</label>", " ");
+    str_replace(label, "</l>", " ");
+    label = str_trim(label);
+    label = str_trim(label, " \n");
+    label = str_reduce(label);
+    label = str_reduce(label, " ", " \n");
 
     return label;
 }
 
-std::string SettingsModelXML::get_type_(rapidxml::xml_node<>* s,
-        oskar_SettingsItem::type_id& id,
-        std::string& defaultValue,
-        std::vector<std::string>& options) const
+string get_type(node* s, oskar_SettingsItem::type_id& id,
+        string& defaultValue, vector<string>& options)
 {
-    typedef rapidxml::xml_node<> node;
-    typedef rapidxml::xml_attribute<> attr;
     id = oskar_SettingsItem::UNDEF;
 
     // Obtain a pointer to the type node.
-    std::vector<std::string> names;
+    vector<string> names;
     names.push_back("type");
     names.push_back("t");
-    node* n = get_child_node_(s, names);
+    node* n = get_child_node(s, names);
     if (!n) return "";
 
     // Obtain a pointer to the name attribute
     names.clear();
     names.push_back("name");
     names.push_back("n");
-    attr* name = get_attribute_(n, names);
+    attr* name = get_attribute(n, names);
 
     // Types have to have a name to be valid.
     if (!name) return "";
-    const std::string type_name(name->value());
+    const string type_name(name->value());
 
     // Obtain a pointer to the 'default' attribute.
     names.clear();
     names.push_back("default");
     names.push_back("d");
-    attr* def = get_attribute_(n, names);
-    if (def) defaultValue = std::string(def->value());
+    attr* def = get_attribute(n, names);
+    if (def) defaultValue = string(def->value());
 
     // Obtain any type parameters.
-    std::string param(n->value());
+    string param(n->value());
     if (!param.empty()) {
-        param = str_trim_(param);
-        options = str_get_options_(param);
+        param = str_trim(param);
+        options = str_get_options(param);
     }
 
     // Convert type name to a mata_type_id.
-    id = get_oskar_SettingsItem_type_(type_name, options);
+    id = get_oskar_SettingsItem_type(type_name, options);
 
     return type_name;
 }
 
-bool SettingsModelXML::get_dependency_(rapidxml::xml_node<>* s,
-        std::string& key, std::string& value) const
-{
-    typedef rapidxml::xml_node<> node;
-    typedef rapidxml::xml_attribute<> attr;
+} // End anonymous namespace.
 
+///////////////////////////////////////////////////////////////////////////////
+
+namespace oskar {
+
+// Private helper class.
+class SettingsModelXML_private
+{
+public:
+    enum Status {
+        AllOk = 0,
+        MissingKey,
+        InvalidNode
+    };
+
+    SettingsModelXML_private(SettingsModelXML* model) {this->model = model;}
+    //string get_key_type_(const string& key);
+    //vector<string> get_option_list_values_(const string& key);
+    void index_settings(node* n, string& key_root);
+    void iterate_settings(node* n, int& depth, string& key_root);
+    SettingsModelXML_private::Status declare_setting(node* s,
+            int depth, const string& key_root);
+    bool get_dependency(node* n, string& key, string& value) const;
+
+    void setLabel(const string& key, const string& label);
+    void declare(const string& key, const string& label,
+            const oskar_SettingsItem::type_id& type,
+            const string& defaultValue, bool required);
+    void declareOptionList(const string& key, const string& label,
+            const vector<string>& options,
+            const string& defaultValue, bool required);
+    void setTooltip(const string& key, const string& description);
+    void setDependency(const string& key, const string& depends_key,
+            const string& depends_value);
+
+    SettingsModelXML* model;
+    vector<string> keys;
+    vector<string> types;
+    vector<vector<string> > type_params;
+};
+
+bool SettingsModelXML_private::get_dependency(node* s, string& key,
+        string& value) const
+{
     // Obtain a pointer to the depends node.
-    std::vector<std::string> names;
+    vector<string> names;
     names.push_back("d");
     names.push_back("deps");
     names.push_back("depends");
-    node* n = get_child_node_(s, names);
+    node* n = get_child_node(s, names);
     if (!n) return false;
 
     // Obtain a pointer to the 'key' attribute.
     names.clear();
     names.push_back("key");
     names.push_back("k");
-    attr* aKey = get_attribute_(n, names);
+    attr* aKey = get_attribute(n, names);
 
     // Obtain a pointer to the 'value' attribute.
     names.clear();
     names.push_back("value");
     names.push_back("v");
-    attr* aValue = get_attribute_(n, names);
+    attr* aValue = get_attribute(n, names);
 
     if (!aKey || !aValue) return false;
 
     key   = aKey->value();
     value = aValue->value();
 
-    int iKey = key_index_(key);
+    int iKey = key_index(key, keys);
     if (iKey == -1) {
-        std::string skey = get_key_(s);
+        string skey = get_key(s);
         cerr << "ERROR: [" << skey << "] dependency key '";
         cerr << key << "' doesn't exist!" << endl;
     }
-    std::string key_type = str_to_upper_(types_[iKey]);
+    string key_type = str_to_upper(types[iKey]);
 
     // For option lists minimal match to the option value.
     if (key_type == "OPTIONLIST") {
 //        cout << "OptionList dependency!" << endl;
 //        cout << " -- xml declared value: " << value << endl;
         int optionIndex = -1;
-        std::vector<std::string> options = type_params_[iKey];
+        vector<string> options = type_params[iKey];
         for (size_t i = 0; i < options.size(); ++i) {
             if (options[i].find(value) == 0) {
                 optionIndex = i;
@@ -469,7 +423,7 @@ bool SettingsModelXML::get_dependency_(rapidxml::xml_node<>* s,
             }
         }
         if (optionIndex == -1) {
-            std::string skey = get_key_(s);
+            string skey = get_key(s);
             cerr << "ERROR: [" << skey << "] with dependency key '";
             cerr << key << "' has an invalid value!" << endl;
         }
@@ -482,78 +436,31 @@ bool SettingsModelXML::get_dependency_(rapidxml::xml_node<>* s,
     return true;
 }
 
-void SettingsModelXML::setLabel_(const std::string& key, const std::string& label)
+SettingsModelXML_private::Status SettingsModelXML_private::declare_setting(
+        node* s, int depth, const string& key_root)
 {
-    setLabel(QString::fromStdString(key), QString::fromStdString(label));
-}
-
-void SettingsModelXML::declare_(const std::string& key, const std::string& label,
-        const oskar_SettingsItem::type_id& type,
-        const std::string& defaultValue, bool required)
-{
-    declare(QString::fromStdString(key), QString::fromStdString(label),
-            static_cast<int>(type), QString::fromStdString(defaultValue),
-            required);
-}
-
-void SettingsModelXML::declareOptionList_(const std::string& key, const std::string& label,
-        const std::vector<std::string>& options,
-        const std::string& defaultValue, bool required)
-{
-    QStringList options_;
-    int defaultIndex_ = 0;
-    for (size_t i = 0; i < options.size(); ++i) {
-        options_ << QString::fromStdString(options[i]);
-    }
-    for (size_t i = 0; i < options.size(); ++i) {
-        if (options[i].find(defaultValue) == 0) {
-            defaultIndex_ = i;
-            break;
-        }
-    }
-    declare(QString::fromStdString(key), QString::fromStdString(label),
-            options_, defaultIndex_, required);
-}
-
-void SettingsModelXML::setTooltip_(const std::string& key,
-        const std::string& description)
-{
-    setTooltip(QString::fromStdString(key), QString::fromStdString(description));
-}
-
-void SettingsModelXML::setDependency_(const std::string& key,
-        const std::string& depends_key, const std::string& depends_value)
-{
-    setDependency(QString::fromStdString(key),
-            QString::fromStdString(depends_key),
-            QString::fromStdString(depends_value));
-}
-
-SettingsModelXML::Status SettingsModelXML::decalare_setting_(
-        rapidxml::xml_node<>* s, int depth, const std::string& key_root)
-{
-    if (!s || std::string(s->name()) != "s") return InvalidNode;
+    if (!s || string(s->name()) != "s") return InvalidNode;
 
     // Key
-    std::string key = get_key_(s);
-    std::string fullKey = key_root + key;
+    string key = get_key(s);
+    string fullKey = key_root + key;
     if (key.empty()) return MissingKey;
 
     // Type
-    std::string defaultValue;
-    std::vector<std::string> options;
+    string defaultValue;
+    vector<string> options;
     oskar_SettingsItem::type_id id;
-    std::string type = get_type_(s, id, defaultValue, options);
+    string type = get_type(s, id, defaultValue, options);
 
     // Label, description & dependency
-    std::string label = get_label_(s);
-    std::string desc = get_description_(s);
-    std::string dKey, dValue;
-    bool has_dependency = get_dependency_(s, dKey, dValue);
+    string label = get_label(s);
+    string desc = get_description(s);
+    string dKey, dValue;
+    bool has_dependency = get_dependency(s, dKey, dValue);
 
     // Group -----------------------------------------------------------------
     if (depth == 0 || type.empty()) {
-        setLabel_(fullKey, label);
+        setLabel(fullKey, label);
 #if 0
         else
             cout << "WARNING: Missing description for setting: " << fullKey << endl;
@@ -569,48 +476,173 @@ SettingsModelXML::Status SettingsModelXML::decalare_setting_(
             cerr << " [key = " << fullKey << "]" << endl;
         }
 
-        bool required = is_required_(s);
+        bool required = is_required(s);
         if (id == oskar_SettingsItem::OPTIONS)
-            declareOptionList_(fullKey, label, options, defaultValue, required);
+            declareOptionList(fullKey, label, options, defaultValue, required);
         else
-            declare_(fullKey, label, id, defaultValue, required);
+            declare(fullKey, label, id, defaultValue, required);
         if (desc.empty())
             cout << "WARNING: Missing description for setting: " << fullKey << endl;
     }
 
     // Common properties ------------------------------------------------------
     if (has_dependency)
-        setDependency_(fullKey, dKey, dValue);
+        setDependency(fullKey, dKey, dValue);
     if (!desc.empty())
-        setTooltip_(fullKey, desc);
+        setTooltip(fullKey, desc);
 
     return AllOk;
 }
 
-
-void SettingsModelXML::iterate_settings_(rapidxml::xml_node<>* n,
-        int& depth, std::string& key_root)
+void SettingsModelXML_private::index_settings(node* n, string& key_root)
 {
-    typedef rapidxml::xml_node<> node;
+    vector<string> type_node_names;
+    type_node_names.push_back("type");
+    type_node_names.push_back("t");
+    vector<string> type_attr_names;
+    type_attr_names.push_back("name");
+    type_attr_names.push_back("n");
 
     for (node* s = n->first_node("s"); s; s = s->next_sibling())
     {
-        std::string key = get_key_(s);
+        string key  = get_key(s);
         if (key.empty()) continue;
 
-        Status status = decalare_setting_(s, depth, key_root);
-        if (status) {
-            cout << "ERROR: Problem reading setting with key: " << key << endl;
-        }
+        // Add the key to the keys list.
+        keys.push_back(key_root + key);
 
-        // Read any child settings.
+        // Obtain the type name (if defined) and add it to the type list.
+        string type = "GROUP";
+        node* type_node = get_child_node(s, type_node_names);
+        if (type_node) {
+            attr* name = get_attribute(type_node, type_attr_names);
+            if (name) type = string(name->value());
+        }
+        types.push_back(type);
+
+        // Obtain any type parameters.
+        vector<string> params;
+        if (type_node) {
+            string type_node_text(type_node->value());
+            if (!type_node_text.empty()) {
+                type_node_text = str_trim(type_node_text);
+                params = str_get_options(type_node_text);
+            }
+        }
+        type_params.push_back(params);
+
         if (s->first_node("s")) {
-            std::string key_root_ = key_root + key + "/";
-            int depth_ = depth + 1;
-            iterate_settings_(s, depth_, key_root_);
+            string new_key_root = key_root + key + "/";
+            index_settings(s, new_key_root);
         }
     }
 }
 
-} // namespace oskar
+void SettingsModelXML_private::iterate_settings(node* n, int& depth,
+        string& key_root)
+{
+    for (node* s = n->first_node("s"); s; s = s->next_sibling())
+    {
+        string key = get_key(s);
+        if (key.empty()) continue;
 
+        Status status = declare_setting(s, depth, key_root);
+        if (status)
+            cout << "ERROR: Problem reading setting with key: " << key << endl;
+
+        // Read any child settings.
+        if (s->first_node("s")) {
+            string key_root_ = key_root + key + "/";
+            int depth_ = depth + 1;
+            iterate_settings(s, depth_, key_root_);
+        }
+    }
+}
+
+void SettingsModelXML_private::setLabel(const string& key, const string& label)
+{
+    model->setLabel(QString::fromStdString(key), QString::fromStdString(label));
+}
+
+void SettingsModelXML_private::declare(const string& key, const string& label,
+        const oskar_SettingsItem::type_id& type,
+        const string& defaultValue, bool required)
+{
+    model->declare(QString::fromStdString(key), QString::fromStdString(label),
+            static_cast<int>(type), QString::fromStdString(defaultValue),
+            required);
+}
+
+void SettingsModelXML_private::declareOptionList(const string& key,
+        const string& label, const vector<string>& options,
+        const string& defaultValue, bool required)
+{
+    QStringList options_;
+    int defaultIndex_ = 0;
+    for (size_t i = 0; i < options.size(); ++i)
+        options_ << QString::fromStdString(options[i]);
+    for (size_t i = 0; i < options.size(); ++i) {
+        if (options[i].find(defaultValue) == 0) {
+            defaultIndex_ = i;
+            break;
+        }
+    }
+    model->declare(QString::fromStdString(key), QString::fromStdString(label),
+            options_, defaultIndex_, required);
+}
+
+void SettingsModelXML_private::setTooltip(const string& key,
+        const string& description)
+{
+    model->setTooltip(QString::fromStdString(key),
+            QString::fromStdString(description));
+}
+
+void SettingsModelXML_private::setDependency(const string& key,
+        const string& depends_key, const string& depends_value)
+{
+    model->setDependency(QString::fromStdString(key),
+            QString::fromStdString(depends_key),
+            QString::fromStdString(depends_value));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+SettingsModelXML::SettingsModelXML(QObject* parent)
+: oskar_SettingsModel(parent)
+{
+    p = new SettingsModelXML_private(this);
+
+    string xml(OSKAR_XML_STR);
+    vector<char> xml_(xml.begin(), xml.end());
+    xml_.push_back(0);
+
+    int depth = 0;
+    doc_t doc;
+    doc.parse<0>(&xml_[0]);
+
+    node* root_node = doc.first_node("root");
+    string temp;
+    p->index_settings(root_node, temp);
+//    cout << "total number of keys = " << keys_.size() << endl;
+//    for (size_t i = 0; i < keys_.size(); ++i) {
+//        cout << i << " -- " << keys_[i];
+//        cout << " -- " << types_[i];
+//        cout << " -- " << type_params_[i].size();
+//        cout << endl;
+//    }
+
+    string version = "";
+    attr* ver = root_node->first_attribute("version");
+    if (ver) version = string(ver->value());
+
+    string key_root = "";
+    p->iterate_settings(root_node, depth, key_root);
+}
+
+SettingsModelXML::~SettingsModelXML()
+{
+    delete p;
+}
+
+} // namespace oskar

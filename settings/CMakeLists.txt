@@ -5,7 +5,7 @@
 #
 # Known issues:
 # 1. Log dependency of settings file I/O library
-# 2. log_settings function in untility (this is really an app function!)
+# 2. log_settings function in utility (this is really an app function!)
 #
 
 add_subdirectory(xml)
@@ -34,8 +34,8 @@ if (QT4_FOUND)
         ${dir_}/oskar_DoubleSpinBox.h
         ${dir_}/oskar_SettingsDelegate.h
         ${dir_}/oskar_SettingsModel.h
-        ${dir_}/oskar_SettingsModelApps.h
-        #${dir_}/oskar_SettingsModelXML.h
+        #${dir_}/oskar_SettingsModelApps.h
+        ${dir_}/oskar_SettingsModelXML.h
         ${dir_}/oskar_SettingsView.h
     )
     set(dir_ widgets/src)
@@ -44,7 +44,7 @@ if (QT4_FOUND)
         ${dir_}/oskar_SettingsDelegate.cpp
         ${dir_}/oskar_SettingsItem.cpp
         ${dir_}/oskar_SettingsModel.cpp
-        ${dir_}/oskar_SettingsModelApps.cpp
+        #${dir_}/oskar_SettingsModelApps.cpp
         ${dir_}/oskar_SettingsModelXML.cpp
         ${dir_}/oskar_SettingsView.cpp
     )
@@ -92,7 +92,7 @@ add_library(${name} ${lib_type} ${${name}_SRC})
 #
 # Changes from oskar library version
 #   1.  Removal of use of oskar_log This adds a library dependency that should
-#       be avoidided. Use error codes instead! (observation settings)
+#       be avoided. Use error codes instead! (observation settings)
 # -----------------------------------------------------------------------------
 if (QT4_FOUND)
     include_directories(${QT_INCLUDE_DIR})
@@ -126,7 +126,3 @@ if (QT4_FOUND)
         ${QT_QTCORE_LIBRARY}
         ${CUDA_LIBRARIES})
 endif (QT4_FOUND)
-
-
-
-
