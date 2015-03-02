@@ -35,7 +35,6 @@
 #include <apps/gui/oskar_RunDialog.h>
 #include <oskar_SettingsDelegate.h>
 #include <oskar_SettingsItem.h>
-#include <oskar_SettingsModelApps.h>
 #include <oskar_SettingsModelXML.h>
 #include <oskar_SettingsView.h>
 
