@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,23 +34,27 @@ extern "C" {
 
 size_t oskar_mem_element_size(int type)
 {
-    if (type == OSKAR_CHAR)
+    switch (type)
+    {
+    case OSKAR_CHAR:
         return sizeof(char);
-    else if (type == OSKAR_INT)
+    case OSKAR_INT:
         return sizeof(int);
-    else if (type == OSKAR_SINGLE)
+    case OSKAR_SINGLE:
         return sizeof(float);
-    else if (type == OSKAR_DOUBLE)
+    case OSKAR_DOUBLE:
         return sizeof(double);
-    else if (type == OSKAR_SINGLE_COMPLEX)
+    case OSKAR_SINGLE_COMPLEX:
         return sizeof(float2);
-    else if (type == OSKAR_DOUBLE_COMPLEX)
+    case OSKAR_DOUBLE_COMPLEX:
         return sizeof(double2);
-    else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+    case OSKAR_SINGLE_COMPLEX_MATRIX:
         return sizeof(float4c);
-    else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+    case OSKAR_DOUBLE_COMPLEX_MATRIX:
         return sizeof(double4c);
-    return 0;
+    default:
+        return 0;
+    }
 }
 
 #ifdef __cplusplus

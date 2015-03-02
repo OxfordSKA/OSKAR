@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,13 +45,6 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
     oskar_Mem* mem = 0;
     size_t element_size, bytes;
 
-    /* Check all inputs. */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Create the structure. */
     mem = (oskar_Mem*) malloc(sizeof(oskar_Mem));
 
@@ -59,12 +52,12 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
      * (This must happen regardless of the status code.) */
     mem->type = type;
     mem->location = location;
-    mem->num_elements = num_elements;
+    mem->num_elements = 0;
     mem->owner = 1;
     mem->data = NULL;
 
     /* Check if allocation should happen or not. */
-    if (*status || num_elements == 0)
+    if (!status || *status || num_elements == 0)
         return mem;
 
     /* Get the memory size. */
@@ -77,6 +70,7 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
     bytes = num_elements * element_size;
 
     /* Check whether the memory should be on the host or the device. */
+    mem->num_elements = num_elements;
     if (location == OSKAR_CPU)
     {
         /* Allocate host memory. */
@@ -87,9 +81,8 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
     else if (location == OSKAR_GPU)
     {
 #ifdef OSKAR_HAVE_CUDA
-        /* Allocate GPU memory. */
+        /* Allocate GPU memory. For efficiency, don't clear it. */
         cudaMalloc(&mem->data, bytes);
-        /*cudaMemset(mem->data, 0, bytes);*/ /* Shouldn't be needed. */
         *status = cudaPeekAtLastError();
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
