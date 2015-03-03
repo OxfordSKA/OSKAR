@@ -478,6 +478,9 @@ ds9 Equator_RA_1*.fits &
 <tr><td>9</td><td>2014-09-09</td>
     <td>[2.5.1] Updated description for oskar_vis_to_ms application, which
     now supports concatenation of visibility files.</td></tr>
+<tr><td>10</td><td>2015-03-03</td>
+    <td>[2.6.0] Updated description of the oskar_sim_interferometer application.
+    </td></tr>
 </table>
 
 */
