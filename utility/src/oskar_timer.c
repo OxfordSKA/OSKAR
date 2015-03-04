@@ -118,6 +118,7 @@ oskar_Timer* oskar_timer_create(int type)
 
 void oskar_timer_free(oskar_Timer* timer)
 {
+    if (!timer) return;
 #ifdef OSKAR_HAVE_CUDA
     if (timer->type == OSKAR_TIMER_CUDA)
     {
