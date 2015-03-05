@@ -14,8 +14,8 @@ set(apps_SRC
     src/oskar_set_up_vis.c
     src/oskar_set_up_visibilities.c
     src/oskar_sim_beam_pattern.cpp
-    src/oskar_sim_interferometer.cpp
-    src/oskar_sim_interferometer_new.cpp
+    #src/oskar_sim_interferometer.cpp
+    src/oskar_sim_interferometer_new.c
     src/oskar_sim_tec_screen.cpp
     src/oskar_telescope_load.cpp
     src/oskar_telescope_save.cpp
