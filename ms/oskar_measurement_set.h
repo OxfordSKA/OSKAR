@@ -119,8 +119,9 @@ void oskar_ms_copy_column(oskar_MeasurementSet* p,
  * @param[in] z             The station z positions.
  */
 OSKAR_MS_EXPORT
-void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p, int num_stations,
-        const double* x, const double* y, const double* z);
+void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p,
+        unsigned int num_stations, const double* x, const double* y,
+        const double* z);
 
 /**
  * @brief Adds station positions to the ANTENNA table.
@@ -134,8 +135,9 @@ void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p, int num_stations,
  * @param[in] z             The station z positions.
  */
 OSKAR_MS_EXPORT
-void oskar_ms_set_station_coords_f(oskar_MeasurementSet* p, int num_stations,
-        const float* x, const float* y, const float* z);
+void oskar_ms_set_station_coords_f(oskar_MeasurementSet* p,
+        unsigned int num_stations, const float* x, const float* y,
+        const float* z);
 
 /**
  * @brief Closes the Measurement Set.
@@ -164,8 +166,9 @@ void oskar_ms_close(oskar_MeasurementSet* p);
  */
 OSKAR_MS_EXPORT
 oskar_MeasurementSet* oskar_ms_create(const char* filename, double ra_rad,
-        double dec_rad, int num_pols, int num_channels, double ref_freq,
-        double chan_width, int num_stations, int write_autocorr);
+        double dec_rad, unsigned int num_pols, unsigned int num_channels,
+        double ref_freq, double chan_width, unsigned int num_stations,
+        int write_autocorr);
 
 /**
  * @brief
@@ -175,7 +178,7 @@ oskar_MeasurementSet* oskar_ms_create(const char* filename, double ra_rad,
  * Returns the number of polarisations in the Measurement Set.
  */
 OSKAR_MS_EXPORT
-int oskar_ms_num_pols(const oskar_MeasurementSet* p);
+unsigned int oskar_ms_num_pols(const oskar_MeasurementSet* p);
 
 /**
  * @brief
@@ -185,7 +188,7 @@ int oskar_ms_num_pols(const oskar_MeasurementSet* p);
  * Returns the number of channels in the Measurement Set.
  */
 OSKAR_MS_EXPORT
-int oskar_ms_num_channels(const oskar_MeasurementSet* p);
+unsigned int oskar_ms_num_channels(const oskar_MeasurementSet* p);
 
 /**
  * @brief
@@ -195,7 +198,7 @@ int oskar_ms_num_channels(const oskar_MeasurementSet* p);
  * Returns the number of rows in the main table.
  */
 OSKAR_MS_EXPORT
-int oskar_ms_num_rows(const oskar_MeasurementSet* p);
+unsigned int oskar_ms_num_rows(const oskar_MeasurementSet* p);
 
 /**
  * @brief
@@ -205,7 +208,7 @@ int oskar_ms_num_rows(const oskar_MeasurementSet* p);
  * Returns the number of stations in the Measurement Set.
  */
 OSKAR_MS_EXPORT
-int oskar_ms_num_stations(const oskar_MeasurementSet* p);
+unsigned int oskar_ms_num_stations(const oskar_MeasurementSet* p);
 
 /**
  * @brief Opens an existing Measurement Set.
@@ -288,10 +291,11 @@ double oskar_ms_ref_freq_hz(const oskar_MeasurementSet* p);
  * @param[in] time          Timestamp of visibility block.
  */
 OSKAR_MS_EXPORT
-void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p, int start_row,
-        int num_baselines, const double* u, const double* v, const double* w,
-        const double* vis, const int* ant1, const int* ant2,
-        double exposure, double interval, double time);
+void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p,
+        unsigned int start_row, unsigned int num_baselines,
+        const double* u, const double* v, const double* w, const double* vis,
+        const int* ant1, const int* ant2, double exposure, double interval,
+        double time);
 
 /**
  * @details
@@ -335,10 +339,11 @@ void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p, int start_row,
  * @param[in] time          Timestamp of visibility block.
  */
 OSKAR_MS_EXPORT
-void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p, int start_row,
-        int num_baselines, const float* u, const float* v, const float* w,
-        const float* vis, const int* ant1, const int* ant2,
-        double exposure, double interval, double time);
+void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p,
+        unsigned int start_row, unsigned int num_baselines,
+        const float* u, const float* v, const float* w, const float* vis,
+        const int* ant1, const int* ant2, double exposure, double interval,
+        double time);
 
 /**
  * @brief Sets the number of rows in the main table.
@@ -348,7 +353,7 @@ void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p, int start_row,
  * as the value given.
  */
 OSKAR_MS_EXPORT
-void oskar_ms_set_num_rows(oskar_MeasurementSet* p, int num);
+void oskar_ms_set_num_rows(oskar_MeasurementSet* p, unsigned int num);
 
 #ifdef __cplusplus
 }

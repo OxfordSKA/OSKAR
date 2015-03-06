@@ -92,10 +92,10 @@ struct oskar_MeasurementSet
     casa::MSColumns* msc;       // Pointer to the sub-tables.
     casa::MSMainColumns* msmc;  // Pointer to the main columns.
     bool write_autocorr;
-    int num_pols;
-    int num_channels;
-    int num_stations;
-    int num_receptors;
+    unsigned int num_pols;
+    unsigned int num_channels;
+    unsigned int num_stations;
+    unsigned int num_receptors;
     double ref_freq;
     double phase_centre_ra;
     double phase_centre_dec;
@@ -108,29 +108,29 @@ struct oskar_MeasurementSet
             start_time(DBL_MAX), end_time(-DBL_MAX) {}
     ~oskar_MeasurementSet();
 
-    void add_band(int pol_id, int num_channels, double ref_freq,
+    void add_band(int pol_id, unsigned int num_channels, double ref_freq,
             const Vector<double>& chan_freqs,
             const Vector<double>& chan_widths);
     void add_field(double ra_rad, double dec_rad);
     void add_history(String message, String origin, double time,
             Vector<String> app_params);
-    void add_pol(int num_pols);
+    void add_pol(unsigned int num_pols);
     void add_scratch_cols(bool add_model, bool add_corrected);
     void copy_column(String source, String dest);
     bool create(const char* filename, double ra_rad, double dec_rad,
-            int num_pols, int num_channels, double ref_freq,
-            double chan_width, int num_stations, int write_autocorr);
+            unsigned int num_pols, unsigned int num_channels, double ref_freq,
+            double chan_width, unsigned int num_stations, int write_autocorr);
     void close();
     void get_time_range();
     static bool is_otf_model_defined(const int field,
             const MeasurementSet& ms, String& key, int& source_row);
     static bool is_otf_model_defined(const String& key, const MeasurementSet& ms);
-    int num_rows() const;
+    unsigned int num_rows() const;
     bool open(const char* filename);
     static void remove_otf_model(MeasurementSet& ms);
     static void remove_record_by_key(MeasurementSet& ms, const String& key);
     void set_antenna_feeds();
-    void set_num_rows(int num);
+    void set_num_rows(unsigned int num);
     void set_time_range();
 };
 
@@ -187,14 +187,15 @@ void oskar_ms_copy_column(oskar_MeasurementSet* p, const char* source,
     p->copy_column(String(source), String(dest));
 }
 
-void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p, int num_stations,
-        const double* x, const double* y, const double* z)
+void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p,
+        unsigned int num_stations, const double* x, const double* y,
+        const double* z)
 {
     if (!p->ms || !p->msc) return;
     if (num_stations != p->num_stations) return;
 
     Vector<Double> pos(3, 0.0);
-    for (int a = 0; a < num_stations; ++a)
+    for (unsigned int a = 0; a < num_stations; ++a)
     {
         pos(0) = x[a]; pos(1) = y[a]; pos(2) = z[a];
         p->msc->antenna().position().put(a, pos);
@@ -204,14 +205,15 @@ void oskar_ms_set_station_coords_d(oskar_MeasurementSet* p, int num_stations,
     }
 }
 
-void oskar_ms_set_station_coords_f(oskar_MeasurementSet* p, int num_stations,
-        const float* x, const float* y, const float* z)
+void oskar_ms_set_station_coords_f(oskar_MeasurementSet* p,
+        unsigned int num_stations, const float* x, const float* y,
+        const float* z)
 {
     if (!p->ms || !p->msc) return;
     if (num_stations != p->num_stations) return;
 
     Vector<Double> pos(3, 0.0);
-    for (int a = 0; a < num_stations; ++a)
+    for (unsigned int a = 0; a < num_stations; ++a)
     {
         pos(0) = x[a]; pos(1) = y[a]; pos(2) = z[a];
         p->msc->antenna().position().put(a, pos);
@@ -227,8 +229,9 @@ void oskar_ms_close(oskar_MeasurementSet* p)
 }
 
 oskar_MeasurementSet* oskar_ms_create(const char* filename, double ra_rad,
-        double dec_rad, int num_pols, int num_channels, double ref_freq,
-        double chan_width, int num_stations, int write_autocorr)
+        double dec_rad, unsigned int num_pols, unsigned int num_channels,
+        double ref_freq, double chan_width, unsigned int num_stations,
+        int write_autocorr)
 {
     oskar_MeasurementSet* p = new oskar_MeasurementSet;
     if (p->create(filename, ra_rad, dec_rad, num_pols,
@@ -238,22 +241,22 @@ oskar_MeasurementSet* oskar_ms_create(const char* filename, double ra_rad,
     return 0;
 }
 
-int oskar_ms_num_pols(const oskar_MeasurementSet* p)
+unsigned int oskar_ms_num_pols(const oskar_MeasurementSet* p)
 {
     return p->num_pols;
 }
 
-int oskar_ms_num_channels(const oskar_MeasurementSet* p)
+unsigned int oskar_ms_num_channels(const oskar_MeasurementSet* p)
 {
     return p->num_channels;
 }
 
-int oskar_ms_num_rows(const oskar_MeasurementSet* p)
+unsigned int oskar_ms_num_rows(const oskar_MeasurementSet* p)
 {
     return p->num_rows();
 }
 
-int oskar_ms_num_stations(const oskar_MeasurementSet* p)
+unsigned int oskar_ms_num_stations(const oskar_MeasurementSet* p)
 {
     return p->num_stations;
 }
@@ -282,18 +285,19 @@ double oskar_ms_ref_freq_hz(const oskar_MeasurementSet* p)
     return p->ref_freq;
 }
 
-void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p, int start_row,
-        int num_baselines, const double* u, const double* v, const double* w,
-        const double* vis, const int* ant1, const int* ant2,
-        double exposure, double interval, double time)
+void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p,
+        unsigned int start_row, unsigned int num_baselines,
+        const double* u, const double* v, const double* w, const double* vis,
+        const int* ant1, const int* ant2, double exposure, double interval,
+        double time)
 {
     MSMainColumns* msmc = p->msmc;
     if (!msmc) return;
 
     // Allocate storage for a (u,v,w) coordinate,
     // a visibility matrix, a visibility weight, and a flag matrix.
-    int n_pols = p->num_pols;
-    int n_channels = p->num_channels;
+    unsigned int n_pols = p->num_pols;
+    unsigned int n_channels = p->num_channels;
     Vector<Double> uvw(3);
     Matrix<Complex> vis_data(n_pols, n_channels);
     Matrix<Bool> flag(n_pols, n_channels, false);
@@ -314,19 +318,19 @@ void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p, int start_row,
     ScalarColumn<Double>& col_timeCentroid = msmc->timeCentroid();
 
     // Loop over rows / visibilities.
-    for (int r = 0; r < num_baselines; ++r)
+    for (unsigned int r = 0; r < num_baselines; ++r)
     {
-        int row = r + start_row;
+        unsigned int row = r + start_row;
 
         // Get a pointer to the start of the visibility matrix for this row.
         const double* vis_row = vis + (2 * n_pols * n_channels) * r;
 
         // Fill the visibility matrix (polarisation and channel data).
-        for (int c = 0; c < n_channels; ++c)
+        for (unsigned int c = 0; c < n_channels; ++c)
         {
-            for (int p = 0; p < n_pols; ++p)
+            for (unsigned int p = 0; p < n_pols; ++p)
             {
-                int b = 2 * (p + c * n_pols);
+                unsigned int b = 2 * (p + c * n_pols);
                 vis_data(p, c) = Complex(vis_row[b], vis_row[b + 1]);
             }
         }
@@ -351,18 +355,19 @@ void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p, int start_row,
     if (time > p->end_time) p->end_time = time + interval/2.0;
 }
 
-void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p, int start_row,
-        int num_baselines, const float* u, const float* v, const float* w,
-        const float* vis, const int* ant1, const int* ant2,
-        double exposure, double interval, double time)
+void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p,
+        unsigned int start_row, unsigned int num_baselines,
+        const float* u, const float* v, const float* w, const float* vis,
+        const int* ant1, const int* ant2, double exposure, double interval,
+        double time)
 {
     MSMainColumns* msmc = p->msmc;
     if (!msmc) return;
 
     // Allocate storage for a (u,v,w) coordinate,
     // a visibility matrix, a visibility weight, and a flag matrix.
-    int n_pols = p->num_pols;
-    int n_channels = p->num_channels;
+    unsigned int n_pols = p->num_pols;
+    unsigned int n_channels = p->num_channels;
     Vector<Double> uvw(3);
     Matrix<Complex> vis_data(n_pols, n_channels);
     Matrix<Bool> flag(n_pols, n_channels, false);
@@ -383,19 +388,19 @@ void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p, int start_row,
     ScalarColumn<Double>& col_timeCentroid = msmc->timeCentroid();
 
     // Loop over rows / visibilities.
-    for (int r = 0; r < num_baselines; ++r)
+    for (unsigned int r = 0; r < num_baselines; ++r)
     {
-        int row = r + start_row;
+        unsigned int row = r + start_row;
 
         // Get a pointer to the start of the visibility matrix for this row.
         const float* vis_row = vis + (2 * n_pols * n_channels) * r;
 
         // Fill the visibility matrix (polarisation and channel data).
-        for (int c = 0; c < n_channels; ++c)
+        for (unsigned int c = 0; c < n_channels; ++c)
         {
-            for (int p = 0; p < n_pols; ++p)
+            for (unsigned int p = 0; p < n_pols; ++p)
             {
-                int b = 2 * (p + c * n_pols);
+                unsigned int b = 2 * (p + c * n_pols);
                 vis_data(p, c) = Complex(vis_row[b], vis_row[b + 1]);
             }
         }
@@ -420,7 +425,7 @@ void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p, int start_row,
     if (time > p->end_time) p->end_time = time + interval/2.0;
 }
 
-void oskar_ms_set_num_rows(oskar_MeasurementSet* p, int num)
+void oskar_ms_set_num_rows(oskar_MeasurementSet* p, unsigned int num)
 {
     p->set_num_rows(num);
 }
@@ -435,14 +440,14 @@ oskar_MeasurementSet::~oskar_MeasurementSet()
     close();
 }
 
-void oskar_MeasurementSet::add_band(int pol_id, int num_channels,
+void oskar_MeasurementSet::add_band(int pol_id, unsigned int num_channels,
         double ref_freq, const Vector<double>& chan_freqs,
         const Vector<double>& chan_widths)
 {
     if (!ms || !msc) return;
 
     // Add a row to the DATA_DESCRIPTION subtable.
-    int row = ms->dataDescription().nrow();
+    unsigned int row = ms->dataDescription().nrow();
     ms->dataDescription().addRow();
     msc->dataDescription().spectralWindowId().put(row, row);
     msc->dataDescription().polarizationId().put(row, pol_id);
@@ -509,7 +514,7 @@ void oskar_MeasurementSet::add_history(String message, String origin,
     c.cliCommand().put(row, Vector<String>()); // Required!
 }
 
-void oskar_MeasurementSet::add_pol(int num_pols)
+void oskar_MeasurementSet::add_pol(unsigned int num_pols)
 {
     if (!ms || !msc) return;
 
@@ -529,14 +534,14 @@ void oskar_MeasurementSet::add_pol(int num_pols)
 
     // Set up the correlation product, based on number of polarisations.
     Matrix<Int> corr_product(2, num_pols);
-    for (int i = 0; i < num_pols; ++i)
+    for (unsigned int i = 0; i < num_pols; ++i)
     {
         corr_product(0, i) = Stokes::receptor1(Stokes::type(corr_type(i)));
         corr_product(1, i) = Stokes::receptor2(Stokes::type(corr_type(i)));
     }
 
     // Create a new row, and fill the columns.
-    int row = ms->polarization().nrow();
+    unsigned int row = ms->polarization().nrow();
     ms->polarization().addRow();
     msc->polarization().corrType().put(row, corr_type);
     msc->polarization().corrProduct().put(row, corr_product);
@@ -648,7 +653,7 @@ void oskar_MeasurementSet::copy_column(String source, String dest)
 {
     if (!ms || !msmc) return;
 
-    int n_rows = num_rows();
+    unsigned int n_rows = num_rows();
     ArrayColumn<Complex>* source_column;
     ArrayColumn<Complex>* dest_column;
 
@@ -673,7 +678,7 @@ void oskar_MeasurementSet::copy_column(String source, String dest)
         return;
 
     // Copy the data.
-    for (int i = 0; i < n_rows; ++i)
+    for (unsigned int i = 0; i < n_rows; ++i)
     {
         dest_column->put(i, *source_column);
     }
@@ -698,9 +703,9 @@ void oskar_MeasurementSet::close()
     phase_centre_dec = 0.0;
 }
 
-bool oskar_MeasurementSet::create(const char* filename,
-        double ra_rad, double dec_rad, int num_pols, int num_channels,
-        double ref_freq, double chan_width, int num_stations,
+bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
+        double dec_rad, unsigned int num_pols, unsigned int num_channels,
+        double ref_freq, double chan_width, unsigned int num_stations,
         int write_autocorr)
 {
     // Create the table descriptor and use it to set up a new main table.
@@ -720,7 +725,7 @@ bool oskar_MeasurementSet::create(const char* filename,
     desc.defineHypercolumn("TiledUVW", 2, tsmNames);
     try
     {
-        int num_baselines;
+        unsigned int num_baselines;
         SetupNewTable newTab(filename, desc, Table::New);
 
         // Create the default storage managers.
@@ -800,7 +805,7 @@ bool oskar_MeasurementSet::create(const char* filename,
     Vector<double> chan_widths(num_channels, chan_width);
     Vector<double> chan_freqs(num_channels);
     //double start = ref_freq - (num_channels - 1) * chan_width / 2.0;
-    for (int c = 0; c < num_channels; ++c)
+    for (unsigned int c = 0; c < num_channels; ++c)
     {
         chan_freqs(c) = ref_freq + c * chan_width;
     }
@@ -875,7 +880,7 @@ bool oskar_MeasurementSet::is_otf_model_defined(const String& key,
     return false;
 }
 
-int oskar_MeasurementSet::num_rows() const
+unsigned int oskar_MeasurementSet::num_rows() const
 {
     if (!ms) return 0;
     return ms->nrow();
@@ -1007,7 +1012,7 @@ void oskar_MeasurementSet::set_antenna_feeds()
     Vector<Double> feedAngle(num_receptors, 0.0);
 
     // Fill the FEED subtable (required).
-    for (int a = 0; a < num_stations; ++a)
+    for (unsigned int a = 0; a < num_stations; ++a)
     {
         msc->feed().antennaId().put(a, a);
         msc->feed().beamOffset().put(a, feedOffset);
@@ -1018,13 +1023,13 @@ void oskar_MeasurementSet::set_antenna_feeds()
     }
 }
 
-void oskar_MeasurementSet::set_num_rows(int num)
+void oskar_MeasurementSet::set_num_rows(unsigned int num)
 {
     if (!ms) return;
 
-    int old_num_rows = num_rows();
-    int rows_to_add = num - old_num_rows;
-    if (rows_to_add <= 0) return;
+    unsigned int old_num_rows = num_rows();
+    unsigned int rows_to_add = num - old_num_rows;
+    if (rows_to_add == 0) return;
     ms->addRow(rows_to_add);
 }
 

@@ -42,7 +42,8 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
 {
     const oskar_Mem *x_metres, *y_metres, *z_metres;
     double ref_freq_hz, chan_width, ra_rad, dec_rad;
-    int amp_type, num_stations, num_pols, num_channels, autocorr;
+    int amp_type, autocorr;
+    unsigned int num_stations, num_pols, num_channels;
     oskar_MeasurementSet* ms;
 
     /* Check all inputs. */

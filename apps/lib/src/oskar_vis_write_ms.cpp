@@ -42,8 +42,9 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
     const oskar_Mem *x_metres, *y_metres, *z_metres, *vis_amp, *uu, *vv, *ww;
     oskar_Mem *amp_tb_;
     double dt_dump, t_start_sec, ref_freq_hz, chan_width, ra_rad, dec_rad;
-    int num_stations, num_baselines, num_pols, num_channels, num_times;
-    int precision, i, s1, s2, t, b, c, start_row, *baseline_s1, *baseline_s2;
+    unsigned int num_stations, num_baselines, num_pols, num_channels, num_times;
+    unsigned int precision, i, s1, s2, t, b, c, start_row;
+    int *baseline_s1, *baseline_s2;
     oskar_MeasurementSet* ms;
     const void* amp;
 
@@ -194,7 +195,7 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
         amp_tb = oskar_mem_double2(amp_tb_, status);
         for (t = 0; t < num_times; ++t)
         {
-            int i_in, i_out, row = t * num_baselines;
+            unsigned int i_in, i_out, row = t * num_baselines;
             double vis_time = t_start_sec + (t * dt_dump);
 
             // Construct the amplitude data for the given time, baseline.
@@ -254,7 +255,7 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
         amp_tb = oskar_mem_float2(amp_tb_, status);
         for (t = 0; t < num_times; ++t)
         {
-            int i_in, i_out, row = t * num_baselines;
+            unsigned int i_in, i_out, row = t * num_baselines;
             double vis_time = t_start_sec + (t * dt_dump);
 
             // Construct the amplitude data for the given time, baseline.

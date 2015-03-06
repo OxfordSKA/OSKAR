@@ -42,9 +42,9 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     const oskar_Mem *in_acorr, *in_xcorr, *in_uu, *in_vv, *in_ww;
     oskar_Mem *temp_vis = 0, *temp_uu = 0, *temp_vv = 0, *temp_ww = 0;
     double dt_dump_days, dt_dump_sec, t_start_mjd, t_start_sec;
-    int a1, a2, num_baselines_in, num_baselines_out, num_pols_in, num_pols_out;
-    int num_channels, num_stations, num_times;
-    int have_autocorr, b, c, i, i_out, prec, start_row, start_time_index, t;
+    unsigned int a1, a2, num_baselines_in, num_baselines_out, num_channels;
+    unsigned int num_pols_in, num_pols_out, num_stations, num_times, b, c, t;
+    unsigned int have_autocorr, i, i_out, prec, start_row, start_time_index;
     const int *baseline_s1, *baseline_s2;
     const void *xcorr, *acorr;
     void* out;
