@@ -26,42 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/lib/oskar_sim_beam_pattern.h>
-#include <apps/lib/oskar_sim_beam_pattern_new.h>
-#include <apps/lib/oskar_OptionParser.h>
+#ifndef OSKAR_SIM_BEAM_PATTERN_NEW_H_
+#define OSKAR_SIM_BEAM_PATTERN_NEW_H_
 
-#include <oskar_get_error_string.h>
+/**
+ * @file oskar_sim_beam_pattern.h
+ */
+
+#include <oskar_global.h>
 #include <oskar_log.h>
-#include <oskar_version_string.h>
 
-#include <cstdlib>
-#include <cstdio>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int main(int argc, char** argv)
-{
-    int error = 0;
+/**
+ * @brief
+ * Main OSKAR beam pattern simulation function.
+ *
+ * @details
+ * This function acts as though it were a stand-alone executable.
+ *
+ * @param[in]     settings_file Path to a settings file.
+ * @param[in,out] log           Pointer to a log structure to use.
+ * @param[in,out] status        Error status code.
+ */
+OSKAR_APPS_EXPORT
+void oskar_sim_beam_pattern_new(const char* settings_file, oskar_Log* log,
+        int* status);
 
-    oskar_OptionParser opt("oskar_sim_beam_pattern", oskar_version_string());
-    opt.addRequired("settings file");
-    opt.addFlag("-q", "Suppress printing.", false, "--quiet");
-    if (!opt.check_options(argc, argv))
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    // Create the log.
-    int file_priority = OSKAR_LOG_MESSAGE;
-    int term_priority = opt.isSet("-q") ? OSKAR_LOG_WARNING : OSKAR_LOG_STATUS;
-    oskar_Log* log = oskar_log_create(file_priority, term_priority);
-
-    oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
-
-    // Run simulation.
-    //oskar_sim_beam_pattern(opt.getArg(0), log, &error);
-    oskar_sim_beam_pattern_new(opt.getArg(0), log, &error);
-
-    // Check for errors.
-    if (error)
-        oskar_log_error(log, "Run failed: %s.", oskar_get_error_string(error));
-    oskar_log_free(log);
-
-    return error;
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_SIM_BEAM_PATTERN_NEW_H_ */
