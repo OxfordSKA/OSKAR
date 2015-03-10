@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2012-2014, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_READ_OSKAR_VERSION_H_
-#define OSKAR_BINARY_READ_OSKAR_VERSION_H_
+#ifndef OSKAR_BINARY_WRITE_METADATA_H_
+#define OSKAR_BINARY_WRITE_METADATA_H_
 
 /**
- * @file oskar_binary_read_oskar_version.h
+ * @file oskar_binary_write_metadata.h
  */
 
 #include <oskar_global.h>
@@ -40,24 +40,19 @@ extern "C" {
 #endif
 
 /**
- * @brief Reads the OSKAR version from a binary file.
+ * @brief Writes standard metadata to an output stream.
  *
  * @details
- * This function reads the version of the OSKAR library that created a
- * binary file.
+ * This function writes standard metadata to an output stream.
  *
- * @param[in] filename   Name of file to check.
- * @param[out]    maj    OSKAR version (major).
- * @param[out]    min    OSKAR version (minor).
- * @param[out]    patch  OSKAR version (patch).
+ * @param[in,out] handle Binary file handle.
  * @param[in,out] status Status return code.
  */
-OSKAR_EXPORT
-void oskar_binary_read_oskar_version(const char* filename,
-        int* major, int* minor, int* patch, int* status);
+OSKAR_BINARY_EXPORT
+void oskar_binary_write_metadata(oskar_Binary* handle, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_READ_OSKAR_VERSION_H_ */
+#endif /* OSKAR_BINARY_WRITE_METADATA_H_ */

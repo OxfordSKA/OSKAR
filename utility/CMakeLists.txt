@@ -2,19 +2,22 @@
 # src/utility/CMakeLists.txt
 #
 
+add_subdirectory(binary)
+
 set(utility_SRC
-    src/oskar_binary_create.c
-    src/oskar_binary_free.c
-    src/oskar_binary_query.c
+
+    #src/oskar_binary_create.c
+    #src/oskar_binary_free.c
+    #src/oskar_binary_query.c
+    #src/oskar_binary_read_oskar_version.c
+    #src/oskar_binary_read.c
+    #src/oskar_crc.c
+    #src/oskar_endian.c
+    #src/oskar_binary_write_metadata.c
+    #src/oskar_binary_write.c
     src/oskar_binary_read_mem.c
-    src/oskar_binary_read_oskar_version.c
-    src/oskar_binary_read.c
     src/oskar_binary_write_mem.c
-    src/oskar_binary_write_metadata.c
-    src/oskar_binary_write.c
     src/oskar_blank_parentheses.c
-    src/oskar_crc.c
-    src/oskar_endian.c
     src/oskar_file_exists.c
     src/oskar_get_error_string.c
     src/oskar_get_memory_usage.c
@@ -52,7 +55,6 @@ set(utility_SRC
     src/oskar_scan_binary_file.c
     src/oskar_string_to_array.c
     src/oskar_system_clock_data.c
-    src/oskar_system_clock_string.c
     src/oskar_timer.c
     src/oskar_version_string.c
 )
@@ -78,3 +80,4 @@ set(utility_SRC "${utility_SRC}" PARENT_SCOPE)
 
 # === Recurse into test directory.
 add_subdirectory(test)
+

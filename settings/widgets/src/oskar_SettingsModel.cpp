@@ -40,6 +40,8 @@
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
 #include <cfloat>
+#include <iostream>
+using namespace std;
 
 oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 : QAbstractItemModel(parent),
@@ -96,6 +98,26 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     }
     else if (role == Qt::BackgroundRole)
     {
+        // TODO only set background role if not hidden and if no child items
+        // are required and not set (if shown)
+
+        // FIXME Recursively iterate over child to establish if any are not set,
+        // required and not hidden... if so there is a critical child
+        // so the background colour should be set...
+
+        if (item->key() == "telescope") // IF == HACK TO AVOID TOO MUCH PRINTING
+        {
+            cout << item->key().toStdString() << endl;
+
+            // Loop over items that are children to this item and if they are
+            // unset, required and not hidden add 1 to the local critical counter.
+            for (int i = 0; i < item->childCount(); ++i)
+            {
+                oskar_SettingsItem* item_ = item->child(i);
+                cout << "   " << item_->key().toStdString() << " " << item_->critical() << endl;
+            }
+        }
+
         // Only set the critical/required background colour for items which
         // have their dependencies satisfied (and are therefore not hidden)
         if (item->critical() && !item->hidden())

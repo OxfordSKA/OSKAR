@@ -29,6 +29,7 @@
 #include <private_element.h>
 #include <oskar_element.h>
 #include <oskar_binary.h>
+#include <oskar_binary_write_mem.h>
 #include <oskar_find_closest_match.h>
 
 #ifdef __cplusplus

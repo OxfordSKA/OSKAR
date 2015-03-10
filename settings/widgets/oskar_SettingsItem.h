@@ -114,13 +114,13 @@ private:
 private:
     oskar_SettingsItem* parentItem_;
     QList<oskar_SettingsItem*> childItems_;
-    QString key_; // Full settings key for the item.
+    QString key_;    // Full settings key for the item.
     QString subkey_; // Short settings key.
-    int type_; // Enumerated type.
+    int type_;       // Enumerated type.
     int valueSet_;
-    bool enabled_;
-    bool hidden_;
-    bool required_;
+    bool enabled_;   // Flag to indicate an item is disabled, i.e. has default value even if set.
+    bool hidden_;    // Flag to indicate an item is hidden, e.g. dependencies are not satisfied.
+    bool required_;  // Flag to indicate an item is required, i.e. has no default and must be set.
     QString label_;
     QString tooltip_;
     QVariant value_;

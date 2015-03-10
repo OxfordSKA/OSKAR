@@ -50,7 +50,7 @@ extern "C" {
  * If the host system is little endian, this returns OSKAR_LITTLE_ENDIAN (0).
  * If the host system is big endian, this returns OSKAR_BIG_ENDIAN (1).
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 int oskar_endian(void);
 
 /**
@@ -63,7 +63,7 @@ int oskar_endian(void);
  * @param[in,out] data Pointer to value to convert.
  * @param[in]     size Size of value in bytes.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 void oskar_endian_swap(void* d, size_t size);
 
 enum OSKAR_ENDIAN_TYPE

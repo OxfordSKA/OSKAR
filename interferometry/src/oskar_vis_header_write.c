@@ -29,6 +29,7 @@
 #include <private_vis_header.h>
 #include <oskar_vis_header.h>
 #include <oskar_binary.h>
+#include <oskar_binary_write_mem.h>
 
 #include <string.h>
 

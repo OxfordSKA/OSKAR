@@ -726,6 +726,12 @@ bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
     try
     {
         unsigned int num_baselines;
+
+        if (write_autocorr)
+            num_baselines = num_stations * (num_stations + 1) / 2;
+        else
+            num_baselines = num_stations * (num_stations - 1) / 2;
+
         SetupNewTable newTab(filename, desc, Table::New);
 
         // Create the default storage managers.
@@ -736,10 +742,6 @@ bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
         newTab.bindColumn(MS::columnName(MS::ANTENNA2), stdStorageManager);
 
         // Create tiled column storage manager for UVW column.
-        if (write_autocorr)
-            num_baselines = num_stations * (num_stations + 1) / 2;
-        else
-            num_baselines = num_stations * (num_stations - 1) / 2;
         IPosition uvwTileShape(2, 3, 2 * num_baselines);
         TiledColumnStMan uvwStorageManager("TiledUVW", uvwTileShape);
         newTab.bindColumn(MS::columnName(MS::UVW), uvwStorageManager);
@@ -759,8 +761,7 @@ bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
         TableDesc descSource = MSSource::requiredTableDesc();
         MSSource::addColumnToDesc(descSource, MSSource::REST_FREQUENCY);
         MSSource::addColumnToDesc(descSource, MSSource::POSITION);
-        SetupNewTable sourceSetup(ms->sourceTableName(),
-                descSource, Table::New);
+        SetupNewTable sourceSetup(ms->sourceTableName(), descSource, Table::New);
         ms->rwKeywordSet().defineTable(MS::keywordName(MS::SOURCE),
                 Table(sourceSetup));
 

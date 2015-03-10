@@ -40,6 +40,7 @@
 #include <oskar_station.h>
 #include <oskar_telescope.h>
 #include <oskar_binary.h>
+#include <oskar_binary_write_mem.h>
 #include <oskar_convert_offset_ecef_to_ecef.h>
 #include <oskar_convert_mjd_to_gast_fast.h>
 #include <oskar_convert_apparent_ra_dec_to_enu_directions.h>

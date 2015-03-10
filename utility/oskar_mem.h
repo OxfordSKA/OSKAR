@@ -56,45 +56,7 @@ struct oskar_Mem;
 typedef struct oskar_Mem oskar_Mem;
 #endif /* OSKAR_MEM_TYPEDEF_ */
 
-/* Define an enumerator for the type.
- *
- * IMPORTANT:
- * 1. All these must be small enough to fit into one byte (8 bits) only.
- * 2. To maintain binary data compatibility, do not modify any numbers
- *    that appear in the list below!
- */
-enum OSKAR_MEM_TYPE
-{
-    /* Byte (char): bit 0 set. */
-    OSKAR_CHAR                   = 0x01,
-
-    /* Integer (int): bit 1 set. */
-    OSKAR_INT                    = 0x02,
-
-    /* Scalar single (float): bit 2 set. */
-    OSKAR_SINGLE                 = 0x04,
-
-    /* Scalar double (double): bit 3 set. */
-    OSKAR_DOUBLE                 = 0x08,
-
-    /* Complex flag: bit 5 set. */
-    OSKAR_COMPLEX                = 0x20,
-
-    /* Matrix flag: bit 6 set. */
-    OSKAR_MATRIX                 = 0x40,
-
-    /* Scalar complex single (float2). */
-    OSKAR_SINGLE_COMPLEX         = OSKAR_SINGLE | OSKAR_COMPLEX,
-
-    /* Scalar complex double (double2). */
-    OSKAR_DOUBLE_COMPLEX         = OSKAR_DOUBLE | OSKAR_COMPLEX,
-
-    /* Matrix complex float (float4c). */
-    OSKAR_SINGLE_COMPLEX_MATRIX  = OSKAR_SINGLE | OSKAR_COMPLEX | OSKAR_MATRIX,
-
-    /* Matrix complex double (double4c). */
-    OSKAR_DOUBLE_COMPLEX_MATRIX  = OSKAR_DOUBLE | OSKAR_COMPLEX | OSKAR_MATRIX
-};
+#include <oskar_binary_data_types.h>
 
 enum OSKAR_MEM_LOCATION
 {

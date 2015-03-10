@@ -36,6 +36,7 @@
 #include <oskar_linspace.h>
 #include <oskar_meshgrid.h>
 #include <oskar_binary.h>
+#include <oskar_binary_write_mem.h>
 #include <oskar_cuda_check_error.h>
 
 #include <oskar_cmath.h>

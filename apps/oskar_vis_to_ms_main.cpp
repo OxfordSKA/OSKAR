@@ -33,6 +33,7 @@
 #include <oskar_vis.h>
 #include <oskar_version_string.h>
 #include <oskar_binary.h>
+#include <oskar_binary_read_mem.h>
 #include <string>
 #include <cstdio>
 #include <vector>

@@ -36,6 +36,7 @@
 #include <oskar_convert_galactic_to_fk5.h>
 
 #include <oskar_binary.h>
+#include <oskar_binary_write_mem.h>
 #include <oskar_timer.h>
 
 #include <oskar_cmath.h>

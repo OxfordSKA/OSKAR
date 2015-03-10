@@ -59,7 +59,7 @@ extern "C" {
  *
  * @return Sequence index of the tag in the file, or -1 if not found.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 int oskar_binary_query(const oskar_Binary* handle,
         unsigned char data_type, unsigned char id_group, unsigned char id_tag,
         int user_index, size_t* payload_size, int* status);
@@ -83,7 +83,7 @@ int oskar_binary_query(const oskar_Binary* handle,
  *
  * @return Sequence index of the tag in the file, or -1 if not found.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 int oskar_binary_query_ext(const oskar_Binary* handle,
         unsigned char data_type, const char* name_group, const char* name_tag,
         int user_index, size_t* payload_size, int* status);
@@ -98,7 +98,7 @@ int oskar_binary_query_ext(const oskar_Binary* handle,
  * @param[in] start         Index at which to start search query.
  * @param[in,out] status    Status return code.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 void oskar_binary_set_query_search_start(oskar_Binary* handle, int start,
         int* status);
 

@@ -37,6 +37,7 @@
 #include <oskar_get_error_string.h>
 #include <oskar_vis.h>
 #include <oskar_binary.h>
+#include <oskar_binary_write_mem.h>
 #include <oskar_cmath.h>
 
 #include "fits/oskar_fits_image_write.h"

@@ -29,6 +29,7 @@
 #include <private_vis_block.h>
 #include <oskar_vis_block.h>
 #include <oskar_binary.h>
+#include <oskar_binary_read_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

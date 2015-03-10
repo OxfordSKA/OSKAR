@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,37 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_CREATE_H_
-#define OSKAR_BINARY_CREATE_H_
+#ifndef UTILITY_BINARY_OSKAR_BINARY_DATA_TYPES_H_
+#define UTILITY_BINARY_OSKAR_BINARY_DATA_TYPES_H_
 
-/**
- * @file oskar_binary_create.h
+/* Define an enumerator for the type.
+ *
+ * IMPORTANT:
+ * 1. All these must be small enough to fit into one byte (8 bits) only.
+ * 2. To maintain binary data compatibility, do not modify any numbers
+ *    that appear in the list below!
  */
+enum OSKAR_DATA_TYPE
+{
+    /* Byte (char): bit 0 set. */
+    OSKAR_CHAR                   = 0x01,
 
-#include <oskar_global.h>
+    /* Integer (int): bit 1 set. */
+    OSKAR_INT                    = 0x02,
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+    /* Scalar single (float): bit 2 set. */
+    OSKAR_SINGLE                 = 0x04,
 
-/**
- * @brief Create a handle to work with an OSKAR binary file.
- *
- * @details
- * This function creates a handle to work with an OSKAR binary file.
- *
- * The handle must be released by calling oskar_binary_free() when it has been
- * finished with.
- *
- * @param[in] filename    Filename to open.
- * @param[in] mode        Mode: either 'w' (write), 'r' (read) or 'a' (append).
- * @param[in,out] status  Status return code.
- */
-OSKAR_EXPORT
-oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status);
+    /* Scalar double (double): bit 3 set. */
+    OSKAR_DOUBLE                 = 0x08,
 
-#ifdef __cplusplus
-}
-#endif
+    /* Complex flag: bit 5 set. */
+    OSKAR_COMPLEX                = 0x20,
 
-#endif /* OSKAR_BINARY_CREATE_H_ */
+    /* Matrix flag: bit 6 set. */
+    OSKAR_MATRIX                 = 0x40,
+
+    /* Scalar complex single (float2). */
+    OSKAR_SINGLE_COMPLEX         = OSKAR_SINGLE | OSKAR_COMPLEX,
+
+    /* Scalar complex double (double2). */
+    OSKAR_DOUBLE_COMPLEX         = OSKAR_DOUBLE | OSKAR_COMPLEX,
+
+    /* Matrix complex float (float4c). */
+    OSKAR_SINGLE_COMPLEX_MATRIX  = OSKAR_SINGLE | OSKAR_COMPLEX | OSKAR_MATRIX,
+
+    /* Matrix complex double (double4c). */
+    OSKAR_DOUBLE_COMPLEX_MATRIX  = OSKAR_DOUBLE | OSKAR_COMPLEX | OSKAR_MATRIX
+};
+
+
+#endif /* UTILITY_BINARY_OSKAR_BINARY_DATA_TYPES_H_ */

@@ -34,6 +34,7 @@
 #include <oskar_binary.h>
 #include <oskar_get_error_string.h>
 #include <oskar_vector_types.h>
+#include <oskar_Mem.h>
 
 #include <string.h>
 

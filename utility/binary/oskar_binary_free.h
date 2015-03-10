@@ -47,7 +47,7 @@ extern "C" {
  *
  * @param[in,out] handle  Pointer to structure to free.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 void oskar_binary_free(oskar_Binary* handle);
 
 #ifdef __cplusplus

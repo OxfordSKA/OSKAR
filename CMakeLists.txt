@@ -79,6 +79,7 @@ if (CUDA_FOUND)
     target_link_libraries(${libname}
         oskar_settings_struct
         oskar_log
+        oskar_binary
         ${CUDA_curand_LIBRARY})
 
     if (OSKAR_USE_LAPACK)

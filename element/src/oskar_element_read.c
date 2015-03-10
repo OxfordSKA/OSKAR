@@ -30,6 +30,7 @@
 #include <private_element.h>
 #include <oskar_element.h>
 #include <oskar_binary.h>
+#include <oskar_binary_read_mem.h>
 
 #include <string.h>
 #include <float.h>

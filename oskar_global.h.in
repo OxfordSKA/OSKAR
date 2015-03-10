@@ -388,6 +388,12 @@ enum OSKAR_DIRECTION_TYPE
 #else
 #    define OSKAR_APPS_EXPORT OSKAR_DECL_IMPORT
 #endif
+#ifdef oskar_binary_EXPORTS
+#    define OSKAR_BINARY_EXPORT OSKAR_DECL_EXPORT
+#else
+#    define OSKAR_BINARY_EXPORT OSKAR_DECL_IMPORT
+#endif
+
 
 /**
  * @def OSKAR_INLINE

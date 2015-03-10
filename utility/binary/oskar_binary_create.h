@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_WRITE_METADATA_H_
-#define OSKAR_BINARY_WRITE_METADATA_H_
+#ifndef OSKAR_BINARY_CREATE_H_
+#define OSKAR_BINARY_CREATE_H_
 
 /**
- * @file oskar_binary_write_metadata.h
+ * @file oskar_binary_create.h
  */
 
 #include <oskar_global.h>
@@ -40,19 +40,23 @@ extern "C" {
 #endif
 
 /**
- * @brief Writes standard metadata to an output stream.
+ * @brief Create a handle to work with an OSKAR binary file.
  *
  * @details
- * This function writes standard metadata to an output stream.
+ * This function creates a handle to work with an OSKAR binary file.
  *
- * @param[in,out] handle Binary file handle.
- * @param[in,out] status Status return code.
+ * The handle must be released by calling oskar_binary_free() when it has been
+ * finished with.
+ *
+ * @param[in] filename    Filename to open.
+ * @param[in] mode        Mode: either 'w' (write), 'r' (read) or 'a' (append).
+ * @param[in,out] status  Status return code.
  */
-OSKAR_EXPORT
-void oskar_binary_write_metadata(oskar_Binary* handle, int* status);
+OSKAR_BINARY_EXPORT
+oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_WRITE_METADATA_H_ */
+#endif /* OSKAR_BINARY_CREATE_H_ */

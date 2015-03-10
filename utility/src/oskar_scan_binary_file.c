@@ -34,6 +34,7 @@
 #include <oskar_sky.h>
 #include <oskar_log.h>
 #include <oskar_binary.h>
+#include <oskar_binary_read_mem.h>
 
 #include <oskar_scan_binary_file.h>
 

@@ -31,6 +31,7 @@
 #include <apps/lib/oskar_OptionParser.h>
 #include <oskar_get_error_string.h>
 #include <oskar_binary.h>
+#include <oskar_binary_read_mem.h>
 #include <oskar_version_string.h>
 #include <oskar_log.h>
 

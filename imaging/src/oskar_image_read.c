@@ -29,6 +29,7 @@
 #include <private_image.h>
 #include <oskar_image.h>
 #include <oskar_binary.h>
+#include <oskar_binary_read_mem.h>
 #include <math.h>
 #include <stdlib.h>
 

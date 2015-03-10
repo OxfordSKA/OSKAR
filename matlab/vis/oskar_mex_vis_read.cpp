@@ -32,6 +32,7 @@
 
 #include <oskar_get_error_string.h>
 #include <oskar_binary.h>
+#include <oskar_binary_read_mem.h>
 
 #include "matlab/vis/lib/oskar_mex_vis_to_matlab_struct.h"
 #include "matlab/common/oskar_matlab_common.h"

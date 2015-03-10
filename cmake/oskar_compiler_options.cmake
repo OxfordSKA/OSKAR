@@ -1,3 +1,5 @@
+
+#! TODO remove the need to check this ....
 if (NOT CHECKED_DEPENDENCIES)
     message(FATAL_ERROR "Please include oskar_dependencies.cmake before this script!")
 endif ()
@@ -48,6 +50,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/splines
     ${PROJECT_SOURCE_DIR}/station
     ${PROJECT_SOURCE_DIR}/utility
+    ${PROJECT_SOURCE_DIR}/utility/binary
 )
 set(GTEST_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include/gtest)
 set(EZOPT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/ezOptionParser-0.2.0)
@@ -101,7 +104,7 @@ if (NOT WIN32)
     set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -Wall")
     set(CMAKE_CXX_FLAGS_MINSIZEREL "-O1 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
 
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
         # Using Clang or GNU compilers.
 
         # Treat external code as system headers.
@@ -169,7 +172,7 @@ if (NOT WIN32)
         # Using Intel compilers.
     endif()
 else()
-    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    if ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
         set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /D QT_NO_DEBUG /D QT_NO_DEBUG_OUTPUT")
 
         # Disable warning about loss of precision converting double to float.

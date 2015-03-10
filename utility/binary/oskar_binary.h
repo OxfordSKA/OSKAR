@@ -95,16 +95,12 @@ enum OSKAR_TAG_RUN
 }
 #endif
 
-/* Requires oskar_mem.h for type enumerator. */
-#include <oskar_mem.h>
-
+#include <oskar_binary_data_types.h>
 #include <oskar_binary_create.h>
 #include <oskar_binary_free.h>
 #include <oskar_binary_query.h>
-#include <oskar_binary_read_mem.h>
 #include <oskar_binary_read.h>
 #include <oskar_binary_read_oskar_version.h>
-#include <oskar_binary_write_mem.h>
 #include <oskar_binary_write_metadata.h>
 #include <oskar_binary_write.h>
 

@@ -5,7 +5,7 @@ set(name utility_test)
 include_directories(${CUDA_INCLUDE_DIRS})
 set(${name}_SRC
     main.cpp
-    Test_binary_file.cpp
+    Test_mem_binary.cpp
     Test_crc.cpp
     Test_getline.cpp
     Test_Mem_add.cpp

@@ -28,6 +28,7 @@
 
 #include <oskar_sky.h>
 #include <oskar_binary.h>
+#include <oskar_binary_read_mem.h>
 
 #ifdef __cplusplus
 extern "C" {

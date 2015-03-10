@@ -77,7 +77,7 @@ enum
  *
  * @param[in,out] type Enumerated CRC type.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 oskar_CRC* oskar_crc_create(int type);
 
 /**
@@ -89,7 +89,7 @@ oskar_CRC* oskar_crc_create(int type);
  *
  * @param[in] data Pointer to data structure to free.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 void oskar_crc_free(oskar_CRC* data);
 
 /**
@@ -111,7 +111,7 @@ void oskar_crc_free(oskar_CRC* data);
  *
  * @return The updated CRC value.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 unsigned long oskar_crc_update(const oskar_CRC* crc_data, unsigned long crc,
         const void* data, size_t num_bytes);
 
@@ -129,7 +129,7 @@ unsigned long oskar_crc_update(const oskar_CRC* crc_data, unsigned long crc,
  *
  * @return The computed CRC value.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 unsigned long oskar_crc_compute(const oskar_CRC* crc_data, const void* data,
         size_t num_bytes);
 

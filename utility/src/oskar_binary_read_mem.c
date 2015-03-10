@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_binary.h>
+#include <oskar_binary_read_mem.h>
 
 #include <stdlib.h>
 #include <math.h>

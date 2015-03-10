@@ -30,6 +30,7 @@
 
 #include <oskar_get_error_string.h>
 #include <oskar_binary.h>
+#include <oskar_binary_read_mem.h>
 
 #include <cstdlib>
 #include <cstring>

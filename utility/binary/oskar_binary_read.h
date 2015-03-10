@@ -58,7 +58,7 @@ extern "C" {
  * @param[out] data        Pointer to memory block to write into.
  * @param[in,out] status   Status return code.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 void oskar_binary_read(oskar_Binary* handle,
         unsigned char data_type, unsigned char id_group, unsigned char id_tag,
         int user_index, size_t data_size, void* data, int* status);
@@ -79,7 +79,7 @@ void oskar_binary_read(oskar_Binary* handle,
  * @param[out] value       Pointer to output value.
  * @param[in,out] status   Status return code.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 void oskar_binary_read_double(oskar_Binary* handle, unsigned char id_group,
         unsigned char id_tag, int user_index, double* value, int* status);
 
@@ -99,7 +99,7 @@ void oskar_binary_read_double(oskar_Binary* handle, unsigned char id_group,
  * @param[out] value       Pointer to output value.
  * @param[in,out] status   Status return code.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 void oskar_binary_read_int(oskar_Binary* handle, unsigned char id_group,
         unsigned char id_tag, int user_index, int* value, int* status);
 
@@ -122,7 +122,7 @@ void oskar_binary_read_int(oskar_Binary* handle, unsigned char id_group,
  * @param[out] data        Pointer to memory block to write into.
  * @param[in,out] status   Status return code.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 void oskar_binary_read_ext(oskar_Binary* handle,
         unsigned char data_type, const char* name_group, const char* name_tag,
         int user_index, size_t data_size, void* data, int* status);
@@ -143,7 +143,7 @@ void oskar_binary_read_ext(oskar_Binary* handle,
  * @param[out] value       Pointer to output value.
  * @param[in,out] status   Status return code.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 void oskar_binary_read_ext_double(oskar_Binary* handle, const char* name_group,
         const char* name_tag, int user_index, double* value, int* status);
 
@@ -163,7 +163,7 @@ void oskar_binary_read_ext_double(oskar_Binary* handle, const char* name_group,
  * @param[out] value       Pointer to output value.
  * @param[in,out] status   Status return code.
  */
-OSKAR_EXPORT
+OSKAR_BINARY_EXPORT
 void oskar_binary_read_ext_int(oskar_Binary* handle, const char* name_group,
         const char* name_tag, int user_index, int* value, int* status);
 

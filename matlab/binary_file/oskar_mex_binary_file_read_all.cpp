@@ -34,6 +34,7 @@
 #include <oskar_binary.h>
 #include <oskar_get_error_string.h>
 #include <oskar_vector_types.h>
+#include <oskar_Mem.h>
 
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)

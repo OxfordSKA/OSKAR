@@ -27,8 +27,8 @@
  */
 
 #include <private_binary.h>
+#include <oskar_binary_data_types.h>
 #include <oskar_binary_create.h>
-#include <oskar_mem.h>
 #include <oskar_crc.h>
 #include <oskar_endian.h>
 #include <string.h>
