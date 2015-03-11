@@ -47,10 +47,10 @@ if (STANDALONE_BUILD)
 
     #! Set install locations for standalone mode.
     if (NOT OSKAR_LIB_INSTALL_DIR)
-        set(OSKAR_LIB_INSTALL_DIR "oskar_binary/${OSKAR_BINARY_VERSION}/lib")
+        set(OSKAR_LIB_INSTALL_DIR "lib")
     endif()
     if (NOT OSKAR_INCLUDE_INSTALL_DIR)
-        set(OSKAR_INCLUDE_INSTALL_DIR "oskar_binary/${OSKAR_BINARY_VERSION}/include")
+        set(OSKAR_INCLUDE_INSTALL_DIR "include/oskar_binary")
     endif()
 
 endif(STANDALONE_BUILD)
