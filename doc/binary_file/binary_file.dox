@@ -546,23 +546,24 @@ Tags in this group have a group ID of 11.
 | Tag ID | Description                                                        
 | ------ | --------------------------------------------------------------------
 | 1      | Path to telescope model directory [string].
-| 2      | Flag set if autocorrelation data are present [int].
-| 3      | Data type of visibility arrays in Visibility Block [int]. (See \ref binary_data_type "Payload Data Type")
-| 4      | Maximum number of time samples in a Visibility Block [int].
-| 5      | Number of time samples in total [int].
-| 6      | Number of channels [int].
-| 7      | Number of stations [int].
-| 8      | Start frequency, in Hz [double].
-| 9      | Frequency increment, in Hz [double].
-| 10     | Channel bandwidth, in Hz [double].
-| 11     | Observation start time, as MJD(UTC) [double].
-| 12     | Time increment, in seconds [double].
-| 13     | Time integration per correlator dump, in seconds [double].
-| 14     | Phase centre Right Ascension (deg) and Declination (deg) [double[2]].
-| 15     | Telescope reference longitude (deg), latitude (deg) and altitude (m) [double[3]].
-| 16     | Station X-coordinates in offset ECEF frame [array].
-| 17     | Station Y-coordinates in offset ECEF frame [array].
-| 18     | Station Z-coordinates in offset ECEF frame [array].
+| 2      | Number of binary data tags per visibility block [int].
+| 3      | Flag set if autocorrelation data are present [int].
+| 4      | Data type of visibility arrays in Visibility Block [int]. (See \ref binary_data_type "Payload Data Type")
+| 5      | Maximum number of time samples in a Visibility Block [int].
+| 6      | Number of time samples in total [int].
+| 7      | Number of channels [int].
+| 8      | Number of stations [int].
+| 9      | Start frequency, in Hz [double].
+| 10     | Frequency increment, in Hz [double].
+| 11     | Channel bandwidth, in Hz [double].
+| 12     | Observation start time, as MJD(UTC) [double].
+| 13     | Time increment, in seconds [double].
+| 14     | Time integration per correlator dump, in seconds [double].
+| 15     | Phase centre Right Ascension (deg) and Declination (deg) [double[2]].
+| 16     | Telescope reference longitude (deg), latitude (deg) and altitude (m) [double[3]].
+| 17     | Station X-coordinates in offset ECEF frame [array].
+| 18     | Station Y-coordinates in offset ECEF frame [array].
+| 19     | Station Z-coordinates in offset ECEF frame [array].
 
 
 \htmlonly <hr /> \endhtmlonly
