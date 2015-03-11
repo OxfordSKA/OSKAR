@@ -3,7 +3,6 @@
 #
 
 # === Set the project name and specify the required CMAKE version.
-project(OSKAR CXX C)
 cmake_minimum_required(VERSION 2.8.3 FATAL_ERROR)
 # Set various policies to get old behviour with cmake 3.x
 if (POLICY CMP0042)
@@ -12,6 +11,7 @@ endif()
 if (POLICY CMP0045)
     cmake_policy(SET CMP0045 OLD)
 endif()
+project(OSKAR CXX C)
 
 # === Project version.
 set(OSKAR_VERSION_ID "0x020600")

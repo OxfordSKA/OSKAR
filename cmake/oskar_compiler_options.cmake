@@ -1,8 +1,8 @@
 
 #! TODO remove the need to check this ....
-if (NOT CHECKED_DEPENDENCIES)
-    message(FATAL_ERROR "Please include oskar_dependencies.cmake before this script!")
-endif ()
+#if (NOT CHECKED_DEPENDENCIES)
+#    message(FATAL_ERROR "Please include oskar_dependencies.cmake before this script!")
+#endif ()
 
 # Automatically set the build type to release or debug if not specified.
 if(NOT CMAKE_BUILD_TYPE)
@@ -58,13 +58,10 @@ set(EZOPT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/ezOptionParser-0.2.0)
 # Find the subversion revision.
 find_package(Subversion QUIET)
 if (SUBVERSION_FOUND)
-    set(PROJECT_ROOT ${PROJECT_SOURCE_DIR})
-    if (IS_SYMLINK ${PROJECT_ROOT})
-        get_filename_component(PROJECT_ROOT ${PROJECT_ROOT} REALPATH)
-    endif()
-    Subversion_WC_INFO(${PROJECT_ROOT} SVN)
-    if (SVN_WC_REVISION)
-        set(OSKAR_SVN_REVISION ${SVN_WC_REVISION})
+    get_filename_component(SVN_PATH ${PROJECT_SOURCE_DIR} REALPATH)
+    Subversion_WC_INFO(${SVN_PATH} OSKAR_SVN)
+    if (OSKAR_SVN_WC_REVISION)
+        set(OSKAR_SVN_REVISION ${OSKAR_SVN_WC_REVISION})
     endif()
 endif()
 
@@ -86,6 +83,8 @@ endif()
 
 configure_file(${PROJECT_SOURCE_DIR}/oskar_global.h.in
     ${PROJECT_SOURCE_DIR}/oskar_global.h @ONLY)
+configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_version.h.in
+    ${PROJECT_SOURCE_DIR}/oskar_version.h @ONLY)
 
 # Set general compiler flags.
 if (NOT WIN32)

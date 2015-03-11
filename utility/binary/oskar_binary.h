@@ -124,5 +124,6 @@ enum OSKAR_BINARY_ERROR_CODES
 #include <oskar_binary_query.h>
 #include <oskar_binary_read.h>
 #include <oskar_binary_write.h>
+#include <oskar_endian.h>
 
 #endif /* OSKAR_BINARY_H_ */

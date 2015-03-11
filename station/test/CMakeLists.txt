@@ -2,6 +2,8 @@
 # src/station/test/CMakeLists.txt
 #
 
+project(station_test)
+
 set(name station_test)
 set(${name}_SRC
     main.cpp
@@ -18,7 +20,6 @@ set_target_properties(${name} PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 add_test(station_test ${name})
-
 
 # Array pattern benchmark binary.
 include_directories(${CUDA_INCLUDE_DIRS})
