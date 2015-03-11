@@ -45,6 +45,8 @@ struct oskar_Binary;
 typedef struct oskar_Binary oskar_Binary;
 #endif /* OSKAR_BINARY_TYPEDEF_ */
 
+#define OSKAR_BINARY_FORMAT_VERSION 2
+
 /*
  * IMPORTANT:
  * To maintain binary data compatibility, do not modify any numbers

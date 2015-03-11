@@ -45,7 +45,7 @@ extern "C" {
 typedef struct oskar_CRC oskar_CRC;
 #endif /* OSKAR_CRC_TYPEDEF_ */
 
-enum
+enum OSKAR_CRC_TYPE
 {
     OSKAR_CRC_8_EBU,
     OSKAR_CRC_32,

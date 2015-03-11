@@ -28,6 +28,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <oskar_binary.h>
 
@@ -154,7 +155,7 @@ static void write_test_vis(const char* filename)
     h = oskar_binary_create(filename, 'w', &status);
     oskar_binary_write(h, OSKAR_CHAR, vis_header_group,
             OSKAR_VIS_HEADER_TAG_TELESCOPE_PATH, 0,
-            sizeof(telescope_model_path), telescope_model_path, &status);
+            1 + strlen(telescope_model_path), telescope_model_path, &status);
 
     /* Write number of tags per block. */
     oskar_binary_write_int(h, vis_header_group,
