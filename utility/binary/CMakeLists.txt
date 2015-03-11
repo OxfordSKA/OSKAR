@@ -31,6 +31,9 @@ if (STANDALONE_BUILD)
         endif()
     endif()
 
+    #! Enable the ctest framework.
+    enable_testing()
+
     #! Compiler options for standalone mode.
     set(CMAKE_C_FLAGS "-fPIC")
     set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
@@ -73,10 +76,12 @@ if (STANDALONE_BUILD)
     file(GLOB ${libname}_H oskar*.h) # Public headers only (start with oskar_)
     install(FILES ${${libname}_H} DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR})
 
+    set(CPACK_PACKAGE_NAME "OSKAR_binary")
     set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/readme.txt")
     set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OSKAR binary library (version ${OSKAR_BINARY_VERSION})")
     set(CPACK_PACKAGE_VENDOR "University of Oxford, Oxford e-Research Centre.")
-    #set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/copying.txt")
+    set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/copying.txt")
+    set(CPACK_PACKAGE_VERSION_MAJOR "${OSKAR_BINARY_VERSION}")
     set(CPACK_PACKAGE_VERSION "${OSKAR_BINARY_VERSION}")
     set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
     set(CPACK_GENERATOR "TGZ")
