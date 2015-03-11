@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ extern "C" {
  * that are both given as bytes.
  *
  * @param[in,out] handle   Binary file handle.
- * @param[in] data_type    Type of the memory (as in oskar_Mem).
+ * @param[in] data_type    Type of the memory.
  * @param[in] id_group     Tag group identifier.
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
@@ -114,7 +114,7 @@ void oskar_binary_read_int(oskar_Binary* handle, unsigned char id_group,
  * that are both given as strings.
  *
  * @param[in,out] handle   Binary file handle.
- * @param[in] data_type    Type of the memory (as in oskar_Mem).
+ * @param[in] data_type    Type of the memory.
  * @param[in] name_group   Tag group name.
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.

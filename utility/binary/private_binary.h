@@ -198,9 +198,6 @@ struct oskar_Binary
 {
     FILE* stream;                /**< File stream handle. */
     int bin_version;             /**< Binary format version number. */
-    int oskar_ver_major;
-    int oskar_ver_minor;
-    int oskar_ver_patch;
     int query_search_start;      /**< Index at which to start search query. */
     char open_mode;              /**< Mode in which file was opened (read/write). */
 

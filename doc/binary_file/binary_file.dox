@@ -91,7 +91,7 @@ Fields within the fixed-length tag, or block header (described in the
 the rest of the data should be interpreted.
 
 All bytes in the chunk that precede the payload are used to identify it, 
-so are classed as metadata. A
+so they are classed as metadata. A
 \ref binary_crc_code "CRC (cyclic redundancy check) code" may be present 
 after the payload to allow the chunk to be checked for data corruption if 
 the binary format version is 2 or greater. 
@@ -292,6 +292,8 @@ Tags in this group have a group ID of 4.
 
 \attention
 Note that visibility data tags in this group are deprecated.
+The OSKAR \ref binary_tag_vis_header "Visibility Header" and
+\ref binary_tag_vis_block "Visibility Block" should be used instead. 
 This section is provided for historical reasons only, 
 and will be removed in a future version.
 
@@ -539,6 +541,8 @@ following index values:
 \clearpage
 \endlatexonly
 
+\htmlonly <hr /> \endhtmlonly
+
 \subsection binary_tag_vis_header Visibility Header Data Tags
 
 Tags in this group have a group ID of 11.
@@ -546,7 +550,7 @@ Tags in this group have a group ID of 11.
 | Tag ID | Description                                                        
 | ------ | --------------------------------------------------------------------
 | 1      | Path to telescope model directory [string].
-| 2      | Number of binary data tags per visibility block [int].
+| 2      | Number of binary data tags written per \ref binary_tag_vis_block "Visibility Block" [int].
 | 3      | Flag set if autocorrelation data are present [int].
 | 4      | Data type of visibility arrays in Visibility Block [int]. (See \ref binary_data_type "Payload Data Type")
 | 5      | Maximum number of time samples in a Visibility Block [int].
@@ -565,6 +569,13 @@ Tags in this group have a group ID of 11.
 | 18     | Station Y-coordinates in offset ECEF frame [array].
 | 19     | Station Z-coordinates in offset ECEF frame [array].
 
+
+The type of the station coordinate arrays is the same as the precision of the
+visibility amplitude type.
+
+\latexonly
+\clearpage
+\endlatexonly
 
 \htmlonly <hr /> \endhtmlonly
 
@@ -590,26 +601,45 @@ The "dimension start and size" (Tag ID 1) is a 6-element integer array
 containing data in the following order:
 
 - [0] Global start time index for the first time in the block 
-      (relative to simulation start).
-- [1] Global start channel index for the first channel in the block 
-      (currently, always 0).
+      (relative to observation start).
+- [1] Global start channel index for the first channel in the block.
 - [2] Number of frequency channels in the block.
 - [3] Number of time samples in the block.
 - [4] Number of cross-correlated baselines.
 - [5] Number of stations.
 
-The dimension order of the visibility data is fixed. The polarisation 
-dimension is implicit in the data type (matrix or scalar) and is therefore 
-the fastest varying. From slowest to fastest varying, the remaining 
-dimensions are:
+The frequency and time reference values give the centre frequency of 
+global channel 0 and the observation start time, respectively.
+The frequency and time increment values give the difference between 
+frequency channels and time samples, respectively. 
+
+The dimension order of the visibility data in the autocorrelation and 
+cross-correlation arrays is fixed. The polarisation dimension is implicit 
+in the data type given by Tag ID 4 in the 
+\ref binary_tag_vis_header "Visibility Header" (matrix or scalar), and is 
+therefore the fastest varying. 
+From slowest to fastest varying, the remaining dimensions are:
 
 - Time (slowest)
 - Channel
-- Baseline (fastest)
+- Baseline (for cross-correlations) or Station (for autocorrelations) (fastest)
 
 The type and number of polarisations is determined by the choice of matrix or
 scalar amplitude types. Matrix amplitude types represent 4 polarisation
 dimensions, whereas scalar types represent Stokes-I only.
+
+Note that autocorrelation data may not always be present.
+
+The dimension order of the cross-correlated baseline coordinates is also fixed. 
+Each of the UU, VV and WW arrays is two dimensional, where the 
+dimension order is:
+
+- Time (slowest)
+- Baseline (fastest)
+
+The type of the baseline coordinate arrays is the same as the precision of the
+visibility amplitude type.
+
 
 \htmlonly <hr /> \endhtmlonly
 
@@ -637,7 +667,7 @@ dimensions, whereas scalar types represent Stokes-I only.
     chunk CRC codes. Added new diagram and clarified description of the
     data chunks. Marked existing image data tags and visibility data tags as 
     deprecated. Added new sections describing visibility header and 
-    visibility blocks.</td></tr>
+    visibility block.</td></tr>
 </table>
 
 */

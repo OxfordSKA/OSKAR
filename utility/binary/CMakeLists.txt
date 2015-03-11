@@ -1,19 +1,19 @@
-#! CMake initialisation
+#! CMake initialisation.
 cmake_minimum_required(VERSION 2.8.3)
 if (POLICY CMP0045)
     cmake_policy(SET CMP0045 OLD)
 endif()
 
-#! Declare the CMake project
+#! Declare the CMake project.
 project(oskar_binary C)
 
-#! Set the OSKAR binary version used to version dynaic libraries.
+#! Set the OSKAR binary version used to version dynamic libraries.
 set(OSKAR_BINARY_VERSION "2")
 
 #! Set the name of the library.
 set(libname ${PROJECT_NAME})
 
-#! If OSKAR_VERSION_STR is not defined, we are building as stand-alone libray.
+#! If OSKAR_VERSION_STR is not defined, we are building as stand-alone library.
 if (NOT OSKAR_VERSION_STR)
     set(STANDALONE_BUILD ON)
 endif()
@@ -65,7 +65,7 @@ set_target_properties(${libname} PROPERTIES
     VERSION ${OSKAR_BINARY_VERSION})
 install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
-#! Add unit tests / examples
+#! Add unit tests / examples.
 add_subdirectory(test)
 
 #! Install headers and packaging macros.
