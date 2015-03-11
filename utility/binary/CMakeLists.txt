@@ -35,11 +35,11 @@ if (BUILD_STANDALONE)
     include(oskar_version)
 
 #    include(oskar_compiler_options)
-    set(CMAKE_C_FLAGS "-fPIC -std=gnu89")
+    set(CMAKE_C_FLAGS "-fPIC")
     set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
     set(CMAKE_C_FLAGS_DEBUG "-O0 -g -Wall")
     set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g -Wall")
-    set(CMAKE_C_FLAGS_MINSIZEREL "-O1 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    set(CMAKE_C_FLAGS_MINSIZEREL "-O1 -DNDEBUG")
     if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-show-option")
@@ -65,9 +65,6 @@ if (BUILD_STANDALONE)
 
     include_directories(${PROJECT_SOURCE_DIR})
     include_directories(${PROJECT_BINARY_DIR})
-
-    include_directories(${PROJECT_SOURCE_DIR}/../../extern/gtest-1.7.0/include)
-    # TODO external project for gtest?
 
     message(STATUS "=================================================")
     message(STATUS "Building in standalone mode....")

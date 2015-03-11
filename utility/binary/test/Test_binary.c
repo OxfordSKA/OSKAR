@@ -28,11 +28,10 @@
 
 #include <oskar_binary.h>
 
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <vector>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define ASSERT_INT_EQ(V1, V2) \
     if (V1 != V2) \
@@ -51,38 +50,42 @@
 
 int main(void)
 {
-    char filename[] = "temp_test_binary_file.dat";
+    const char filename[] = "temp_test_binary_file.dat";
     int status = 0;
 
-    // Create some data.
+    /* Create some data. */
     int a1 = 65, b1 = 66, c1 = 67;
-    int a = 0, b = 0, c = 0;
+    int a = 0, b = 0, c = 0, i = 0;
     int num_elements_double = 22;
     int num_elements_int = 17;
-    size_t size_double = num_elements_double * sizeof(double);
-    size_t size_int = num_elements_int * sizeof(int);
+    size_t size_double, size_int;
+    oskar_Binary* h = 0;
+    double* data_double;
+    int* data_int;
+    size_double = num_elements_double * sizeof(double);
+    size_int = num_elements_int * sizeof(int);
 
-    // Create the handle.
-    oskar_Binary* h = oskar_binary_create(filename, 'w', &status);
+    /* Create the handle. */
+    h = oskar_binary_create(filename, 'w', &status);
 
-    // Write the file.
+    /* Write the file. */
     {
-        // Create some test data.
-        std::vector<double> data_double(num_elements_double);
-        std::vector<int> data_int(num_elements_int);
+        /* Create some test data. */
+        data_double = calloc(num_elements_double, sizeof(double));
+        data_int = calloc(num_elements_int, sizeof(int));
 
-        // Write data.
+        /* Write data. */
         oskar_binary_write_int(h, 0, 0, 12345, a1, &status);
         ASSERT_INT_EQ(0, status);
         {
-            for (int i = 0; i < num_elements_double; ++i)
+            for (i = 0; i < num_elements_double; ++i)
                 data_double[i] = i + 1000.0;
             oskar_binary_write(h, OSKAR_DOUBLE,
                     1, 10, 987654321, size_double, &data_double[0], &status);
             ASSERT_INT_EQ(0, status);
         }
         {
-            for (int i = 0; i < num_elements_int; ++i)
+            for (i = 0; i < num_elements_int; ++i)
                 data_int[i] = i * 10;
             oskar_binary_write(h, OSKAR_INT,
                     2, 20, 1, size_int, &data_int[0], &status);
@@ -91,7 +94,7 @@ int main(void)
         oskar_binary_write_int(h, 0, 0, 2, c1, &status);
         ASSERT_INT_EQ(0, status);
         {
-            for (int i = 0; i < num_elements_int; ++i)
+            for (i = 0; i < num_elements_int; ++i)
                 data_int[i] = i * 75;
             oskar_binary_write(h, OSKAR_INT,
                     14, 5, 6, size_int, &data_int[0], &status);
@@ -100,17 +103,22 @@ int main(void)
         oskar_binary_write_int(h, 12, 0, 0, b1, &status);
         ASSERT_INT_EQ(0, status);
         {
-            for (int i = 0; i < num_elements_double; ++i)
+            for (i = 0; i < num_elements_double; ++i)
                 data_double[i] = i * 1234.0;
             oskar_binary_write(h, OSKAR_DOUBLE,
                     4, 0, 3, size_double, &data_double[0], &status);
             ASSERT_INT_EQ(0, status);
         }
+
+        /* Free test data. */
+        free(data_double);
+        free(data_int);
     }
 
+    /* Free the handle. */
     oskar_binary_free(h);
 
-    // Read the single numbers back and check values.
+    /* Read the single numbers back and check values. */
     h = oskar_binary_create(filename, 'r', &status);
     oskar_binary_read_int(h, 0, 0, 12345, &a, &status);
     ASSERT_INT_EQ(0, status);
@@ -122,52 +130,55 @@ int main(void)
     ASSERT_INT_EQ(0, status);
     ASSERT_INT_EQ(c1, c);
 
-    // Read the arrays back and check values.
+    /* Read the arrays back and check values. */
     {
-        std::vector<double> data_double(num_elements_double);
-        std::vector<int> data_int(num_elements_int);
+        data_double = calloc(num_elements_double, sizeof(double));
+        data_int = calloc(num_elements_int, sizeof(int));
         oskar_binary_read(h, OSKAR_INT,
                 2, 20, 1, size_int, &data_int[0], &status);
         ASSERT_INT_EQ(0, status);
         oskar_binary_read(h, OSKAR_DOUBLE,
                 4, 0, 3, size_double, &data_double[0], &status);
         ASSERT_INT_EQ(0, status);
-        for (int i = 0; i < num_elements_double; ++i)
+        for (i = 0; i < num_elements_double; ++i)
             ASSERT_DOUBLE_EQ(i * 1234.0, data_double[i]);
-        for (int i = 0; i < num_elements_int; ++i)
+        for (i = 0; i < num_elements_int; ++i)
             ASSERT_INT_EQ(i * 10, data_int[i]);
+        free(data_double);
+        free(data_int);
     }
     {
-        std::vector<double> data_double(num_elements_double);
-        std::vector<int> data_int(num_elements_int);
+        data_double = calloc(num_elements_double, sizeof(double));
+        data_int = calloc(num_elements_int, sizeof(int));
         oskar_binary_read(h, OSKAR_INT,
                 14, 5, 6, size_int, &data_int[0], &status);
         ASSERT_INT_EQ(0, status);
         oskar_binary_read(h, OSKAR_DOUBLE,
                 1, 10, 987654321, size_double, &data_double[0], &status);
         ASSERT_INT_EQ(0, status);
-        for (int i = 0; i < num_elements_double; ++i)
+        for (i = 0; i < num_elements_double; ++i)
             ASSERT_DOUBLE_EQ(i + 1000.0, data_double[i]);
-        for (int i = 0; i < num_elements_int; ++i)
+        for (i = 0; i < num_elements_int; ++i)
             ASSERT_INT_EQ(i * 75, data_int[i]);
+        free(data_double);
+        free(data_int);
     }
 
-    // Look for a tag that isn't there.
+    /* Look for a tag that isn't there. */
     {
         double t;
         oskar_binary_read_double(h, 255, 0, 0, &t, &status);
-        ASSERT_INT_EQ((int)OSKAR_ERR_BINARY_TAG_NOT_FOUND, status);
+        ASSERT_INT_EQ((int) OSKAR_ERR_BINARY_TAG_NOT_FOUND, status);
         status = 0;
     }
 
-    // Free the handle.
+    /* Free the handle. */
     oskar_binary_free(h);
     ASSERT_INT_EQ(0, status);
 
-    // Remove the file.
+    /* Remove the file. */
     remove(filename);
 
     printf("PASS: Test_binary OK.\n");
     return 0;
 }
-
