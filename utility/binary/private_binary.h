@@ -59,7 +59,7 @@ extern "C" {
    13       1      v.1: Size of long int in bytes.
    14       1      v.1: Size of float in bytes.
    15       1      v.1: Size of double in bytes.
-   16       4      The OSKAR_VERSION as a little-endian, 4-byte integer.
+   16       4      v.1: The OSKAR_VERSION as a little-endian, 4-byte integer.
    20      44      Padding to 64 byte length (reserved for future use).
    @endverbatim
  */
@@ -67,6 +67,7 @@ struct oskar_BinaryHeader
 {
     char magic[9];              /* Start + 0 */
     char bin_version;           /* Start + 9 */
+    /* The rest of these (>= v.2) are now ignored. */
     char endian;                /* Start + 10 */
     char size_ptr;              /* Start + 11 */
     char size_int;              /* Start + 12 */

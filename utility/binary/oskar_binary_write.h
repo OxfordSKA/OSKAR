@@ -33,7 +33,7 @@
  * @file oskar_binary_write.h
  */
 
-#include <oskar_global.h>
+#include <oskar_binary_macros.h>
 #include <stddef.h>
 
 #ifdef __cplusplus

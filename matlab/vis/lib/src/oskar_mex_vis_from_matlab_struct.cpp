@@ -28,7 +28,6 @@
 
 #include "matlab/vis/lib/oskar_mex_vis_from_matlab_struct.h"
 #include <oskar_get_error_string.h>
-#include <oskar_system_clock_string.h>
 #include <cstdlib>
 #include <cstring>
 #include <cmath>

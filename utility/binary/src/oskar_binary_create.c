@@ -26,11 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_binary.h>
-#include <oskar_binary_data_types.h>
-#include <oskar_binary_create.h>
-#include <oskar_crc.h>
+#include <oskar_binary.h>
 #include <oskar_endian.h>
+#include <private_binary.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -55,20 +53,13 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
     FILE* stream;
     int i;
 
-    /* Check all inputs. */
-    if (!filename || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Open the file and check or write the header, depending on the mode. */
     if (mode == 'r')
     {
         stream = fopen(filename, "rb");
         if (!stream)
         {
-            *status = OSKAR_ERR_FILE_IO;
+            *status = OSKAR_ERR_BINARY_OPEN_FAIL;
             return 0;
         }
         oskar_binary_read_header(stream, &header, status);
@@ -79,7 +70,7 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         stream = fopen(filename, "wb");
         if (!stream)
         {
-            *status = OSKAR_ERR_FILE_IO;
+            *status = OSKAR_ERR_BINARY_OPEN_FAIL;
             return 0;
         }
         oskar_binary_write_header(stream, &header, status);
@@ -89,7 +80,7 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         stream = fopen(filename, "a+b");
         if (!stream)
         {
-            *status = OSKAR_ERR_FILE_IO;
+            *status = OSKAR_ERR_BINARY_OPEN_FAIL;
             return 0;
         }
 
@@ -100,7 +91,7 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
     }
     else
     {
-        oskar_set_invalid_argument(status);
+        *status = OSKAR_ERR_BINARY_OPEN_FAIL;
         return 0;
     }
 
@@ -129,17 +120,14 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
     handle->crc_header = 0;
 
     /* Store the contents of the header for later use. */
-    handle->bin_version     = header.bin_version;
-    handle->oskar_ver_major = header.version[2];
-    handle->oskar_ver_minor = header.version[1];
-    handle->oskar_ver_patch = header.version[0];
+    handle->bin_version = header.bin_version;
 
     /* Finish if writing. */
     if (mode == 'w')
         return handle;
 
     /* Read all tags in the stream. */
-    for (i = 0; OSKAR_TRUE; ++i)
+    for (i = 0;; ++i)
     {
         oskar_BinaryTag tag;
         unsigned long crc;
@@ -186,25 +174,25 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
             if (tag.data_type & OSKAR_CHAR)
             {
                 if (element_size != sizeof(char))
-                    *status = OSKAR_ERR_BAD_BINARY_FORMAT;
+                    *status = OSKAR_ERR_BINARY_FORMAT_BAD;
             }
             else if (tag.data_type & OSKAR_INT)
             {
                 if (element_size != sizeof(int))
-                    *status = OSKAR_ERR_BINARY_INT_MISMATCH;
+                    *status = OSKAR_ERR_BINARY_INT_UNKNOWN;
             }
             else if (tag.data_type & OSKAR_SINGLE)
             {
                 if (element_size != sizeof(float))
-                    *status = OSKAR_ERR_BINARY_FLOAT_MISMATCH;
+                    *status = OSKAR_ERR_BINARY_FLOAT_UNKNOWN;
             }
             else if (tag.data_type & OSKAR_DOUBLE)
             {
                 if (element_size != sizeof(double))
-                    *status = OSKAR_ERR_BINARY_DOUBLE_MISMATCH;
+                    *status = OSKAR_ERR_BINARY_DOUBLE_UNKNOWN;
             }
             else
-                *status = OSKAR_ERR_BAD_DATA_TYPE;
+                *status = OSKAR_ERR_BINARY_TYPE_UNKNOWN;
         }
 
         /* Check if we need to allocate more storage for the tag data. */
@@ -281,15 +269,21 @@ oskar_Binary* oskar_binary_create(const char* filename, char mode, int* status)
         handle->payload_offset_bytes[i] = ftell(stream);
 
         /* Increment stream pointer by payload size. */
-        fseek(stream, handle->payload_size_bytes[i], SEEK_CUR);
+        if (fseek(stream, handle->payload_size_bytes[i], SEEK_CUR) != 0)
+        {
+            *status = OSKAR_ERR_BINARY_FILE_INVALID;
+            break;
+        }
 
         /* Store header CRC code and get file CRC code in native byte order. */
         handle->crc_header[i] = crc;
         if (tag.flags & (1 << 6))
         {
             if (fread(&handle->crc[i], 4, 1, stream) != 1)
+            {
                 *status = OSKAR_ERR_BINARY_FILE_INVALID;
-            if (*status) break;
+                break;
+            }
 
             if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
                 oskar_endian_swap(&handle->crc[i], sizeof(unsigned long));
@@ -327,7 +321,6 @@ static void oskar_binary_resize(oskar_Binary* handle, int m)
 static void oskar_binary_write_header(FILE* stream, oskar_BinaryHeader* header,
         int* status)
 {
-    int version = OSKAR_VERSION;
     const char magic[] = "OSKARBIN";
 
     /* Construct binary header. */
@@ -335,15 +328,10 @@ static void oskar_binary_write_header(FILE* stream, oskar_BinaryHeader* header,
     strcpy(header->magic, magic);
     header->bin_version = OSKAR_BINARY_FORMAT_VERSION;
 
-    /* Write OSKAR version data in little-endian format. */
-    if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
-        oskar_endian_swap(&version, sizeof(int));
-    memcpy(header->version, &version, sizeof(header->version));
-
     /* Write header to stream. */
     rewind(stream);
     if (fwrite(header, sizeof(oskar_BinaryHeader), 1, stream) != 1)
-        *status = OSKAR_ERR_FILE_IO;
+        *status = OSKAR_ERR_BINARY_WRITE_FAIL;
 }
 
 
@@ -354,7 +342,7 @@ static void oskar_binary_read_header(FILE* stream, oskar_BinaryHeader* header,
     rewind(stream);
     if (fread(header, sizeof(oskar_BinaryHeader), 1, stream) != 1)
     {
-        *status = OSKAR_ERR_FILE_IO;
+        *status = OSKAR_ERR_BINARY_READ_FAIL;
         return;
     }
 
@@ -383,11 +371,11 @@ static void oskar_binary_read_header(FILE* stream, oskar_BinaryHeader* header,
 
         /* Check size of data types. */
         if (sizeof(int) != (size_t)(header->size_int))
-            *status = OSKAR_ERR_BINARY_INT_MISMATCH;
+            *status = OSKAR_ERR_BINARY_INT_UNKNOWN;
         if (sizeof(float) != (size_t)(header->size_float))
-            *status = OSKAR_ERR_BINARY_FLOAT_MISMATCH;
+            *status = OSKAR_ERR_BINARY_FLOAT_UNKNOWN;
         if (sizeof(double) != (size_t)(header->size_double))
-            *status = OSKAR_ERR_BINARY_DOUBLE_MISMATCH;
+            *status = OSKAR_ERR_BINARY_DOUBLE_UNKNOWN;
     }
 }
 

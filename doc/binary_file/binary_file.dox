@@ -36,7 +36,8 @@ file must be used to record the dimension sizes.
 
 \section binary_header File Header
 
-The file header is 64 bytes long, and is structured as follows:
+The file header is 64 bytes long. In binary format version 2 or above, 
+only the first 10 bytes are used: the remainder of the header is reserved.
 
 <table>
 <tr><th>Offset (bytes)</th> <th>Length (bytes)</th> <th>Description</th> </tr>
@@ -63,18 +64,14 @@ The file header is 64 bytes long, and is structured as follows:
     <td><i>Reserved. (In binary format version 1: Size of double 
     in bytes.)</i></td></tr>
 <tr><td>16</td><td>4</td>
-    <td>The OSKAR_VERSION as a little-endian, 4-byte integer.</td></tr>
+    <td><i>Reserved. (In binary format version 1: The OSKAR_VERSION as a 
+    little-endian, 4-byte integer.)</i></td></tr>
 <tr><td>20</td><td>44</td><td><i>Reserved. (Must be 0.)</i></td></tr>
 </table>
 
 The OSKAR binary format version (at byte offset 9) is currently 2.
 This version number will only change if the underlying header or chunk
 structure is modified.
-
-The OSKAR_VERSION (at byte offset 16) is given as a little-endian, 4-byte
-integer. It is a numeric value of the form 0xMMNNPP (MM = major, NN = minor, 
-PP = patch) that specifies the version number of the OSKAR library that 
-wrote the file. For example, in OSKAR version 2.1.3 this would be 0x020103.
 
 
 \section binary_chunk_structure Chunk Structure
@@ -291,7 +288,16 @@ Tags in this group have a group ID of 4.
 \clearpage
 \endlatexonly
 
-\subsection binary_tag_vis Visibility Data Tags
+\subsection binary_tag_vis Visibility Data Tags (Deprecated)
+
+\attention
+Note that visibility data tags in this group are deprecated.
+This section is provided for historical reasons only, 
+and will be removed in a future version.
+
+\latexonly
+{\color{gray}
+\endlatexonly
 
 Tags in this group have a group ID of 5.
 
@@ -346,20 +352,25 @@ Baselines are formed by cross-correlating stations 0-1, 0-2, 0-3...
 1-2, 1-3... etc. The autocorrelations are not computed, so for \f$n\f$
 stations, there will be \f$ n(n-1)/2 \f$ baselines.
 
-\htmlonly <hr /> \endhtmlonly
-
 \latexonly
-\clearpage
+} % end color{gray}
 \endlatexonly
+
+\htmlonly <hr /> \endhtmlonly
 
 \subsection binary_tag_image Image Data Tags (Deprecated)
 
 Tags in this group have a group ID of 6.
 
 \attention
-Note that all existing image data tags are now deprecated.
+Note that all existing image data tags are deprecated.
 Standard FITS image files should be used instead.
-This section is provided for historical reasons only.
+This section is provided for historical reasons only,
+and will be removed in a future version.
+
+\latexonly
+{\color{gray}
+\endlatexonly
 
 | Tag ID | Description                                                        
 | ------ | --------------------------------------------------------------------
@@ -453,6 +464,9 @@ The image type is given as an integer code from the following list:
 |  100 | Beam pattern, scalar.
 |  101 | Beam pattern, polarised.
 
+\latexonly
+} % end color{gray}
+\endlatexonly
 
 \htmlonly <hr /> \endhtmlonly
 
@@ -521,6 +535,80 @@ following index values:
 |    2 | V (real).
 |    3 | V (imag).
 
+\latexonly
+\clearpage
+\endlatexonly
+
+\subsection binary_tag_vis_header Visibility Header Data Tags
+
+Tags in this group have a group ID of 11.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Path to telescope model directory [string].
+| 2      | Flag set if autocorrelation data are present [int].
+| 3      | Data type of visibility arrays in Visibility Block [int]. (See \ref binary_data_type "Payload Data Type")
+| 4      | Maximum number of time samples in a Visibility Block [int].
+| 5      | Number of time samples in total [int].
+| 6      | Number of channels [int].
+| 7      | Number of stations [int].
+| 8      | Start frequency, in Hz [double].
+| 9      | Frequency increment, in Hz [double].
+| 10     | Channel bandwidth, in Hz [double].
+| 11     | Observation start time, as MJD(UTC) [double].
+| 12     | Time increment, in seconds [double].
+| 13     | Time integration per correlator dump, in seconds [double].
+| 14     | Phase centre Right Ascension (deg) and Declination (deg) [double[2]].
+| 15     | Telescope reference longitude (deg), latitude (deg) and altitude (m) [double[3]].
+| 16     | Station X-coordinates in offset ECEF frame [array].
+| 17     | Station Y-coordinates in offset ECEF frame [array].
+| 18     | Station Z-coordinates in offset ECEF frame [array].
+
+
+\htmlonly <hr /> \endhtmlonly
+
+\subsection binary_tag_vis_block Visibility Block Data Tags
+
+Tags in this group have a group ID of 12.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Dimension start and size [int[6]] (see \ref vis_block_dims "note", below).
+| 2      | Frequency reference and increment, in Hz [double[2]].
+| 3      | Time reference and increment, in MJD(UTC) [double[2]].
+| 4      | Autocorrelation data [array].
+| 5      | Cross-correlation data [array].
+| 6      | Baseline UU-coordinates, in metres [array].
+| 7      | Baseline VV-coordinates, in metres [array].
+| 8      | Baseline WW-coordinates, in metres [array].
+
+
+\anchor vis_block_dims
+
+The "dimension start and size" (Tag ID 1) is a 6-element integer array 
+containing data in the following order:
+
+- [0] Global start time index for the first time in the block 
+      (relative to simulation start).
+- [1] Global start channel index for the first channel in the block 
+      (currently, always 0).
+- [2] Number of frequency channels in the block.
+- [3] Number of time samples in the block.
+- [4] Number of cross-correlated baselines.
+- [5] Number of stations.
+
+The dimension order of the visibility data is fixed. The polarisation 
+dimension is implicit in the data type (matrix or scalar) and is therefore 
+the fastest varying. From slowest to fastest varying, the remaining 
+dimensions are:
+
+- Time (slowest)
+- Channel
+- Baseline (fastest)
+
+The type and number of polarisations is determined by the choice of matrix or
+scalar amplitude types. Matrix amplitude types represent 4 polarisation
+dimensions, whereas scalar types represent Stokes-I only.
 
 \htmlonly <hr /> \endhtmlonly
 
@@ -543,10 +631,12 @@ following index values:
     group tag for rotation measure.</td></tr>
 <tr><td>5</td><td>2014-07-16</td>
     <td>[2.5.0] Added spline data and element data tag groups.</td></tr>
-<tr><td>6</td><td>2014-10-22</td>
+<tr><td>6</td><td>2015-03-10</td>
     <td>[2.6.0] Updated for binary format version 2, which includes 
     chunk CRC codes. Added new diagram and clarified description of the
-    data chunks. Marked existing image data tags as deprecated.</td></tr>
+    data chunks. Marked existing image data tags and visibility data tags as 
+    deprecated. Added new sections describing visibility header and 
+    visibility blocks.</td></tr>
 </table>
 
 */

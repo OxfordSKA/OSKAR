@@ -30,7 +30,7 @@
 #define OSKAR_VIS_HEADER_WRITE_H_
 
 /**
- * @file oskar_vis_write.h
+ * @file oskar_vis_header_write.h
  */
 
 #include <oskar_global.h>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_binary.h>
 #include <oskar_binary.h>
-
+#include <private_binary.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -45,20 +44,13 @@ void oskar_binary_read(oskar_Binary* handle,
     int i;
     char* p;
 
-    /* Check all inputs. */
-    if (!handle || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 
     /* Check file was opened for reading. */
     if (handle->open_mode != 'r')
     {
-        *status = OSKAR_ERR_FILE_IO;
+        *status = OSKAR_ERR_BINARY_NOT_OPEN_FOR_READ;
         return;
     }
 
@@ -73,14 +65,14 @@ void oskar_binary_read(oskar_Binary* handle,
     /* Check that there is enough memory in the block. */
     if (!data || data_size < payload_size)
     {
-        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        *status = OSKAR_ERR_BINARY_MEMORY_NOT_ALLOCATED;
         return;
     }
 
     /* Copy the data out of the stream. */
     if (fseek(handle->stream, handle->payload_offset_bytes[i], SEEK_SET) != 0)
     {
-        *status = OSKAR_ERR_FILE_IO;
+        *status = OSKAR_ERR_BINARY_SEEK_FAIL;
         return;
     }
 
@@ -92,7 +84,7 @@ void oskar_binary_read(oskar_Binary* handle,
         if (bytes < chunk_size) chunk_size = bytes;
         if (fread(p, 1, chunk_size, handle->stream) != chunk_size)
         {
-            *status = OSKAR_ERR_FILE_IO;
+            *status = OSKAR_ERR_BINARY_READ_FAIL;
             return;
         }
         bytes -= chunk_size;
@@ -105,7 +97,7 @@ void oskar_binary_read(oskar_Binary* handle,
         crc = handle->crc_header[i];
         crc = oskar_crc_update(handle->crc_data, crc, data, payload_size);
         if (crc != handle->crc[i])
-            *status = OSKAR_ERR_CRC_FAIL;
+            *status = OSKAR_ERR_BINARY_CRC_FAIL;
     }
 }
 
@@ -131,20 +123,13 @@ void oskar_binary_read_ext(oskar_Binary* handle,
     int i;
     char* p;
 
-    /* Check all inputs. */
-    if (!handle || !name_group || !name_tag || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 
     /* Check file was opened for reading. */
     if (handle->open_mode != 'r')
     {
-        *status = OSKAR_ERR_FILE_IO;
+        *status = OSKAR_ERR_BINARY_NOT_OPEN_FOR_READ;
         return;
     }
 
@@ -159,14 +144,14 @@ void oskar_binary_read_ext(oskar_Binary* handle,
     /* Check that there is enough memory in the block. */
     if (!data || data_size < payload_size)
     {
-        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        *status = OSKAR_ERR_BINARY_MEMORY_NOT_ALLOCATED;
         return;
     }
 
     /* Copy the data out of the stream. */
     if (fseek(handle->stream, handle->payload_offset_bytes[i], SEEK_SET) != 0)
     {
-        *status = OSKAR_ERR_FILE_IO;
+        *status = OSKAR_ERR_BINARY_SEEK_FAIL;
         return;
     }
 
@@ -178,7 +163,7 @@ void oskar_binary_read_ext(oskar_Binary* handle,
         if (bytes < chunk_size) chunk_size = bytes;
         if (fread(p, 1, chunk_size, handle->stream) != chunk_size)
         {
-            *status = OSKAR_ERR_FILE_IO;
+            *status = OSKAR_ERR_BINARY_READ_FAIL;
             return;
         }
         bytes -= chunk_size;
@@ -191,7 +176,7 @@ void oskar_binary_read_ext(oskar_Binary* handle,
         crc = handle->crc_header[i];
         crc = oskar_crc_update(handle->crc_data, crc, data, payload_size);
         if (crc != handle->crc[i])
-            *status = OSKAR_ERR_CRC_FAIL;
+            *status = OSKAR_ERR_BINARY_CRC_FAIL;
     }
 }
 

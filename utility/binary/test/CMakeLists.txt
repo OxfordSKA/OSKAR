@@ -3,11 +3,10 @@
 #
 
 set(name binary_test)
-set(${name}_SRC
-    Test_binary.cpp
-)
+add_executable(${name} Test_binary.cpp)
+target_link_libraries(${name} oskar_binary)
+add_test(${name} ${name})
 
-add_executable(${name} ${${name}_SRC})
-target_link_libraries(${name} oskar_binary gtest_main)
-add_test(binary_test ${name})
-
+set(name test_vis_read_write)
+add_executable(${name} Test_binary_vis_read_write.c)
+target_link_libraries(${name} oskar_binary)

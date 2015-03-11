@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_binary_create.h
  */
 
-#include <oskar_global.h>
+#include <oskar_binary_macros.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,7 +49,7 @@ extern "C" {
  * finished with.
  *
  * @param[in] filename    Filename to open.
- * @param[in] mode        Mode: either 'w' (write), 'r' (read) or 'a' (append).
+ * @param[in] mode        Mode: either 'w' (write), or 'r' (read).
  * @param[in,out] status  Status return code.
  */
 OSKAR_BINARY_EXPORT

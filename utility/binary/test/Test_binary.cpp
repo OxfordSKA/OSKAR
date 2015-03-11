@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,19 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
-
-#include <private_binary.h>
 #include <oskar_binary.h>
-#include <oskar_endian.h>
-#include <oskar_file_exists.h>
 
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <vector>
 
-TEST(binary_file, test_file)
+#define ASSERT_INT_EQ(V1, V2) \
+    if (V1 != V2) \
+    { \
+        printf("Assert: %i != %i (%s:%i)\n", V1, V2, __FILE__, __LINE__); \
+        exit(1); \
+    }
+
+#define ASSERT_DOUBLE_EQ(V1, V2) \
+    if (fabs(V1 - V2) > 1e-15) \
+    { \
+        printf("Assert: %f != %f (%s:%i)\n", V1, V2, __FILE__, __LINE__); \
+        exit(1); \
+    }
+
+
+int main(int /*argc*/, char** /*argv*/)
 {
     char filename[] = "temp_test_binary_file.dat";
     int status = 0;
@@ -62,38 +73,38 @@ TEST(binary_file, test_file)
 
         // Write data.
         oskar_binary_write_int(h, 0, 0, 12345, a1, &status);
-        ASSERT_EQ(0, status);
+        ASSERT_INT_EQ(0, status);
         {
             for (int i = 0; i < num_elements_double; ++i)
                 data_double[i] = i + 1000.0;
             oskar_binary_write(h, OSKAR_DOUBLE,
                     1, 10, 987654321, size_double, &data_double[0], &status);
-            ASSERT_EQ(0, status);
+            ASSERT_INT_EQ(0, status);
         }
         {
             for (int i = 0; i < num_elements_int; ++i)
                 data_int[i] = i * 10;
             oskar_binary_write(h, OSKAR_INT,
                     2, 20, 1, size_int, &data_int[0], &status);
-            ASSERT_EQ(0, status);
+            ASSERT_INT_EQ(0, status);
         }
         oskar_binary_write_int(h, 0, 0, 2, c1, &status);
-        ASSERT_EQ(0, status);
+        ASSERT_INT_EQ(0, status);
         {
             for (int i = 0; i < num_elements_int; ++i)
                 data_int[i] = i * 75;
             oskar_binary_write(h, OSKAR_INT,
                     14, 5, 6, size_int, &data_int[0], &status);
-            ASSERT_EQ(0, status);
+            ASSERT_INT_EQ(0, status);
         }
         oskar_binary_write_int(h, 12, 0, 0, b1, &status);
-        ASSERT_EQ(0, status);
+        ASSERT_INT_EQ(0, status);
         {
             for (int i = 0; i < num_elements_double; ++i)
                 data_double[i] = i * 1234.0;
             oskar_binary_write(h, OSKAR_DOUBLE,
                     4, 0, 3, size_double, &data_double[0], &status);
-            ASSERT_EQ(0, status);
+            ASSERT_INT_EQ(0, status);
         }
     }
 
@@ -102,14 +113,14 @@ TEST(binary_file, test_file)
     // Read the single numbers back and check values.
     h = oskar_binary_create(filename, 'r', &status);
     oskar_binary_read_int(h, 0, 0, 12345, &a, &status);
-    ASSERT_EQ(0, status);
-    EXPECT_EQ(a1, a);
+    ASSERT_INT_EQ(0, status);
+    ASSERT_INT_EQ(a1, a);
     oskar_binary_read_int(h, 12, 0, 0, &b, &status);
-    ASSERT_EQ(0, status);
-    EXPECT_EQ(b1, b);
+    ASSERT_INT_EQ(0, status);
+    ASSERT_INT_EQ(b1, b);
     oskar_binary_read_int(h, 0, 0, 2, &c, &status);
-    ASSERT_EQ(0, status);
-    EXPECT_EQ(c1, c);
+    ASSERT_INT_EQ(0, status);
+    ASSERT_INT_EQ(c1, c);
 
     // Read the arrays back and check values.
     {
@@ -117,43 +128,46 @@ TEST(binary_file, test_file)
         std::vector<int> data_int(num_elements_int);
         oskar_binary_read(h, OSKAR_INT,
                 2, 20, 1, size_int, &data_int[0], &status);
-        ASSERT_EQ(0, status);
+        ASSERT_INT_EQ(0, status);
         oskar_binary_read(h, OSKAR_DOUBLE,
                 4, 0, 3, size_double, &data_double[0], &status);
-        ASSERT_EQ(0, status);
+        ASSERT_INT_EQ(0, status);
         for (int i = 0; i < num_elements_double; ++i)
-            EXPECT_DOUBLE_EQ(i * 1234.0, data_double[i]);
+            ASSERT_DOUBLE_EQ(i * 1234.0, data_double[i]);
         for (int i = 0; i < num_elements_int; ++i)
-            EXPECT_EQ(i * 10, data_int[i]);
+            ASSERT_INT_EQ(i * 10, data_int[i]);
     }
     {
         std::vector<double> data_double(num_elements_double);
         std::vector<int> data_int(num_elements_int);
         oskar_binary_read(h, OSKAR_INT,
                 14, 5, 6, size_int, &data_int[0], &status);
-        ASSERT_EQ(0, status);
+        ASSERT_INT_EQ(0, status);
         oskar_binary_read(h, OSKAR_DOUBLE,
                 1, 10, 987654321, size_double, &data_double[0], &status);
-        ASSERT_EQ(0, status);
+        ASSERT_INT_EQ(0, status);
         for (int i = 0; i < num_elements_double; ++i)
-            EXPECT_DOUBLE_EQ(i + 1000.0, data_double[i]);
+            ASSERT_DOUBLE_EQ(i + 1000.0, data_double[i]);
         for (int i = 0; i < num_elements_int; ++i)
-            EXPECT_EQ(i * 75, data_int[i]);
+            ASSERT_INT_EQ(i * 75, data_int[i]);
     }
 
     // Look for a tag that isn't there.
     {
         double t;
         oskar_binary_read_double(h, 255, 0, 0, &t, &status);
-        EXPECT_EQ((int)OSKAR_ERR_BINARY_TAG_NOT_FOUND, status);
+        ASSERT_INT_EQ((int)OSKAR_ERR_BINARY_TAG_NOT_FOUND, status);
         status = 0;
     }
 
     // Free the handle.
     oskar_binary_free(h);
-    ASSERT_EQ(0, status);
+    ASSERT_INT_EQ(0, status);
 
     // Remove the file.
     remove(filename);
+
+    printf("PASS: Test_binary OK.\n");
+    return 0;
 }
 

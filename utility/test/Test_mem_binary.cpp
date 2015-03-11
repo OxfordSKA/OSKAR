@@ -273,15 +273,6 @@ TEST(binary_file, binary_read_write_mem)
         oskar_mem_free(mem, &status);
     }
 
-    // Check header version.
-    {
-        int maj, min, patch;
-        oskar_binary_read_oskar_version(filename, &maj, &min, &patch, &status);
-        EXPECT_EQ(OSKAR_VERSION & 0xFF, patch);
-        EXPECT_EQ((OSKAR_VERSION & 0xFF00) >> 8, min);
-        EXPECT_EQ((OSKAR_VERSION & 0xFF0000) >> 16, maj);
-    }
-
     // Release the handle.
     oskar_binary_free(h);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);

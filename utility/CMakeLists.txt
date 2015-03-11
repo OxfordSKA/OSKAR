@@ -5,16 +5,7 @@
 add_subdirectory(binary)
 
 set(utility_SRC
-
-    #src/oskar_binary_create.c
-    #src/oskar_binary_free.c
-    #src/oskar_binary_query.c
-    #src/oskar_binary_read_oskar_version.c
-    #src/oskar_binary_read.c
-    #src/oskar_crc.c
-    #src/oskar_endian.c
-    #src/oskar_binary_write_metadata.c
-    #src/oskar_binary_write.c
+    src/oskar_binary_write_metadata.c
     src/oskar_binary_read_mem.c
     src/oskar_binary_write_mem.c
     src/oskar_blank_parentheses.c

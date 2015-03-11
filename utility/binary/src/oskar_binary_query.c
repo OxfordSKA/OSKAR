@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <oskar_binary.h>
 #include <private_binary.h>
-#include <oskar_binary_query.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -40,13 +40,6 @@ int oskar_binary_query(const oskar_Binary* handle,
         int user_index, size_t* payload_size, int* status)
 {
     int i;
-
-    /* Check all inputs. */
-    if (!handle || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return -1;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return 0;
@@ -81,13 +74,6 @@ int oskar_binary_query_ext(const oskar_Binary* handle,
         int user_index, size_t* payload_size, int* status)
 {
     int i, lgroup, ltag;
-
-    /* Check all inputs. */
-    if (!handle || !name_group || !name_tag || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return -1;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return 0;
@@ -137,7 +123,7 @@ void oskar_binary_set_query_search_start(oskar_Binary* handle, int start,
 {
     if (start >= handle->num_chunks)
     {
-        *status = OSKAR_ERR_OUT_OF_RANGE;
+        *status = OSKAR_ERR_BINARY_TAG_OUT_OF_RANGE;
         return;
     }
     handle->query_search_start = start;

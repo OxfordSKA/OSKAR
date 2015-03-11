@@ -139,7 +139,6 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
 
     const char* filename = settings.ionosphere.pierce_points.filename;
     oskar_Binary* h = oskar_binary_create(filename, 'w', &status);
-    oskar_binary_write_metadata(h, &status);
 
     double screen_height_m = settings.ionosphere.TID->height_km * 1000.0;
 

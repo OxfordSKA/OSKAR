@@ -143,35 +143,10 @@ enum OSKAR_ERROR_CODES
     /* Indicates coordinate type mismatch. */
     OSKAR_ERR_COORD_TYPE_MISMATCH      = -23,
 
-    /* Indicates that the file is not a valid OSKAR binary file. */
-    OSKAR_ERR_BINARY_FILE_INVALID      = -101,
-
-    /* Indicates that the binary file format is incompatible. */
-    OSKAR_ERR_BAD_BINARY_FORMAT        = -102,
-
-    /* Indicates that the binary format version is unknown. */
-    OSKAR_ERR_BINARY_VERSION_UNKNOWN   = -103,
-
-    /* Indicates that required data was not found in the binary file. */
-    OSKAR_ERR_BINARY_TAG_NOT_FOUND     = -104,
-
-    /* Indicates that the byte ordering is incompatible. */
-    OSKAR_ERR_BINARY_ENDIAN_MISMATCH   = -105,
-
-    /* Indicates that the binary representation of integers is incompatible. */
-    OSKAR_ERR_BINARY_INT_MISMATCH      = -106,
-
-    /* Indicates that the binary representation of floats is incompatible. */
-    OSKAR_ERR_BINARY_FLOAT_MISMATCH    = -107,
-
-    /* Indicates that the binary representation of floats is incompatible. */
-    OSKAR_ERR_BINARY_DOUBLE_MISMATCH   = -108,
-
-    /* Indicates that the extended binary tag name is too long. */
-    OSKAR_ERR_BINARY_TAG_TOO_LONG      = -109,
-
-    /* Indicates that a CRC did not match. */
-    OSKAR_ERR_CRC_FAIL                 = -110,
+    /*
+     * Codes -100 to -199 are reserved for binary file format errors.
+     * See oskar_binary.h
+     */
 
     /* Indicates that CUDA was not found by the build system. */
     OSKAR_ERR_CUDA_NOT_AVAILABLE       = -400,
@@ -387,11 +362,6 @@ enum OSKAR_DIRECTION_TYPE
 #    define OSKAR_APPS_EXPORT OSKAR_DECL_EXPORT
 #else
 #    define OSKAR_APPS_EXPORT OSKAR_DECL_IMPORT
-#endif
-#ifdef oskar_binary_EXPORTS
-#    define OSKAR_BINARY_EXPORT OSKAR_DECL_EXPORT
-#else
-#    define OSKAR_BINARY_EXPORT OSKAR_DECL_IMPORT
 #endif
 
 

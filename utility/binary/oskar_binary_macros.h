@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,33 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SYSTEM_CLOCK_STRING_H_
-#define OSKAR_SYSTEM_CLOCK_STRING_H_
+#ifndef OSKAR_BINARY_MACROS_H_
+#define OSKAR_BINARY_MACROS_H_
 
-/**
- * @file oskar_system_clock_string.h
- */
-
-#include <oskar_global.h>
-
-#ifdef __cplusplus
-extern "C" {
+#ifndef OSKAR_DECL_EXPORT
+#    ifdef _MSC_VER
+#        define OSKAR_DECL_EXPORT __declspec(dllexport)
+#    elif __GNUC__ >= 4
+#        define OSKAR_DECL_EXPORT __attribute__((visibility ("default")))
+#    else
+#        define OSKAR_DECL_EXPORT
+#    endif
+#endif
+#ifndef OSKAR_DECL_IMPORT
+#    ifdef _MSC_VER
+#        define OSKAR_DECL_IMPORT __declspec(dllimport)
+#    elif __GNUC__ >= 4
+#        define OSKAR_DECL_IMPORT __attribute__((visibility ("default")))
+#    else
+#        define OSKAR_DECL_IMPORT
+#    endif
 #endif
 
-/**
- * @brief Returns a string containing the system clock time.
- *
- * @details
- * This function returns a string containing the system date and time in
- * the format "yyyy-mm-dd, hh:mm:ss (timezone)".
- *
- * @param[in] utc    If set, return UTC time; else return local time.
- */
-OSKAR_EXPORT
-const char* oskar_system_clock_string(int utc);
 
-#ifdef __cplusplus
-}
+#ifdef oskar_binary_EXPORTS
+#    define OSKAR_BINARY_EXPORT OSKAR_DECL_EXPORT
+#else
+#    define OSKAR_BINARY_EXPORT OSKAR_DECL_IMPORT
 #endif
 
-#endif /* OSKAR_SYSTEM_CLOCK_STRING_H_ */
+
+#endif /* OSKAR_BINARY_MACROS_H_ */

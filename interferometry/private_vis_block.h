@@ -51,7 +51,7 @@
  *
  * The number of polarisations is determined by the choice of matrix or
  * scalar amplitude types. Matrix amplitude types represent 4 polarisation
- * dimensions whereas scalar types represent a single polarisation.
+ * dimensions, whereas scalar types represent Stokes-I only.
  */
 struct oskar_VisBlock
 {

@@ -58,18 +58,6 @@ int main(int argc, char** argv)
     bool displayLog = opt.isSet("-l") ? true : false;
     bool displaySettings = opt.isSet("-s") ? true : false;
 
-    // Get the version of OSKAR that created the file.
-    int vMajor, vMinor, vPatch;
-    oskar_binary_read_oskar_version(filename, &vMajor, &vMinor, &vPatch,
-            &status);
-    if (status)
-    {
-        fprintf(stderr, "ERROR: Failed to open specified file.\n");
-        return status;
-    }
-    // True if version 2.3 or older
-    bool v232 = (vMajor <= 2 && vMinor <= 3 && vPatch <= 3) ? true : false;
-
     // Load the image into memory.
     oskar_Image* image = oskar_image_read(filename, 0, &status);
 
@@ -78,7 +66,6 @@ int main(int argc, char** argv)
     {
         oskar_log_section(log, 'M', "Image summary");
         oskar_log_value(log, 'M', 0, "File", "%s", filename);
-        oskar_log_value(log, 'M', 0, "Created with OSKAR version", "%i.%i.%i", vMajor, vMinor, vPatch);
         oskar_log_value(log, 'M', 0, "Image type", "%s", oskar_get_image_type_string(oskar_image_type(image)));
         oskar_log_value(log, 'M', 0, "Data type", "%s", oskar_mem_data_type_string(oskar_mem_type(oskar_image_data(image))));
         oskar_log_value(log, 'M', 0, "Dimension order (fastest to slowest)", 0);
@@ -114,27 +101,7 @@ int main(int argc, char** argv)
         oskar_log_value(log, 'M', 0, "No. times", "%i", oskar_image_num_times(image));
         oskar_log_value(log, 'M', 0, "No. channels", "%i", oskar_image_num_channels(image));
 
-        if (v232 == false)
-        {
-            const char* grid_type = "Undefined";
-            const char* coord_frame = "Undefined";
-            if (oskar_image_grid_type(image) ==
-                    OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
-                grid_type = "Rectilinear";
-            else if (oskar_image_grid_type(image) ==
-                    OSKAR_IMAGE_GRID_TYPE_HEALPIX)
-                grid_type = "HEALPix";
-            if (oskar_image_coord_frame(image) ==
-                    OSKAR_IMAGE_COORD_FRAME_EQUATORIAL)
-                coord_frame = "Equatorial (RA, Dec)";
-            else if (oskar_image_coord_frame(image) ==
-                    OSKAR_IMAGE_COORD_FRAME_HORIZON)
-                coord_frame = "Horizon (phi, theta)";
-            oskar_log_value(log, 'M', 0, "Grid type", "%s", grid_type);
-            oskar_log_value(log, 'M', 0, "Coordinate frame", "%s", coord_frame);
-        }
-
-        if (v232 || oskar_image_grid_type(image) ==
+        if (oskar_image_grid_type(image) ==
                 OSKAR_IMAGE_GRID_TYPE_RECTILINEAR)
         {
             oskar_log_value(log, 'M', 0, "Field of view (deg)", "%.3f", oskar_image_fov_lat_deg(image));

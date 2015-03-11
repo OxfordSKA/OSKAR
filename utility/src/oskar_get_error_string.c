@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include <oskar_get_error_string.h>
+#include <oskar_binary.h>
 
 #ifdef OSKAR_HAVE_CUDA
 #include <cuda_runtime_api.h>
@@ -98,26 +99,44 @@ const char* oskar_get_error_string(int error)
         case OSKAR_ERR_COORD_TYPE_MISMATCH:
             return "coordinate type mismatch";
 
-        /* -100 to -150: OSKAR binary file errors*/
+        /* -100 to -199: OSKAR binary file errors*/
+        case OSKAR_ERR_BINARY_OPEN_FAIL:
+            return "binary file open failed";
+        case OSKAR_ERR_BINARY_SEEK_FAIL:
+            return "binary file seek failed";
+        case OSKAR_ERR_BINARY_READ_FAIL:
+            return "binary file read failed";
+        case OSKAR_ERR_BINARY_WRITE_FAIL:
+            return "binary file write failed";
+        case OSKAR_ERR_BINARY_NOT_OPEN_FOR_READ:
+            return "binary file is not open for read";
+        case OSKAR_ERR_BINARY_NOT_OPEN_FOR_WRITE:
+            return "binary file is not open for write";
         case OSKAR_ERR_BINARY_FILE_INVALID:
             return "not an OSKAR binary file";
-        case OSKAR_ERR_BAD_BINARY_FORMAT:
+        case OSKAR_ERR_BINARY_FORMAT_BAD:
             return "incompatible binary file format";
-        case OSKAR_ERR_BINARY_VERSION_UNKNOWN:
-            return "binary format version not known";
-        case OSKAR_ERR_BINARY_TAG_NOT_FOUND:
-            return "data tag not found in file";
         case OSKAR_ERR_BINARY_ENDIAN_MISMATCH:
             return "incompatible byte ordering";
-        case OSKAR_ERR_BINARY_INT_MISMATCH:
+        case OSKAR_ERR_BINARY_VERSION_UNKNOWN:
+            return "binary format version not known";
+        case OSKAR_ERR_BINARY_TYPE_UNKNOWN:
+            return "unknown binary data type";
+        case OSKAR_ERR_BINARY_INT_UNKNOWN:
             return "incompatible integer format";
-        case OSKAR_ERR_BINARY_FLOAT_MISMATCH:
+        case OSKAR_ERR_BINARY_FLOAT_UNKNOWN:
             return "incompatible float format";
-        case OSKAR_ERR_BINARY_DOUBLE_MISMATCH:
+        case OSKAR_ERR_BINARY_DOUBLE_UNKNOWN:
             return "incompatible double format";
+        case OSKAR_ERR_BINARY_MEMORY_NOT_ALLOCATED:
+            return "allocated memory is not big enough for binary chunk";
+        case OSKAR_ERR_BINARY_TAG_NOT_FOUND:
+            return "data tag not found in file";
         case OSKAR_ERR_BINARY_TAG_TOO_LONG:
             return "extended binary tag too long";
-        case OSKAR_ERR_CRC_FAIL:
+        case OSKAR_ERR_BINARY_TAG_OUT_OF_RANGE:
+            return "binary tag out of range";
+        case OSKAR_ERR_BINARY_CRC_FAIL:
             return "CRC code mismatch";
 
         case OSKAR_ERR_CUDA_NOT_AVAILABLE:

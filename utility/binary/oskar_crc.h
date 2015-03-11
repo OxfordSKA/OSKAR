@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
  * @file oskar_crc.h
  */
 
-#include <oskar_global.h>
+#include <oskar_binary_macros.h>
 #include <stddef.h>
 
 #ifdef __cplusplus

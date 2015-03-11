@@ -56,11 +56,6 @@ int main(int argc, char **argv)
     bool displayLog = opt.isSet("-l") ? true : false;
     bool displaySettings = opt.isSet("-s") ? true : false;
 
-    // Get the version of OSKAR that created the file.
-    int vMajor, vMinor, vPatch;
-    oskar_binary_read_oskar_version(filename, &vMajor, &vMinor, &vPatch,
-            &status);
-
     // Load visibilities into memory.
     oskar_Binary* h = oskar_binary_create(filename, 'r', &status);
     oskar_Vis* vis = oskar_vis_read(h, &status);
@@ -77,7 +72,6 @@ int main(int argc, char **argv)
     {
         oskar_log_section(log, 'M', "Visibilities summary");
         oskar_log_value(log, 'M', 0, "File", "%s", filename);
-        oskar_log_value(log, 'M', 0, "Created with OSKAR version", "%i.%i.%i", vMajor, vMinor, vPatch);
         oskar_log_value(log, 'M', 0, "Precision", "%s", oskar_mem_is_double(oskar_vis_amplitude_const(vis)) ? "double" : "single");
         oskar_log_value(log, 'M', 0, "Amplitude type", "%s", oskar_mem_data_type_string(oskar_mem_type(oskar_vis_amplitude_const(vis))));
         oskar_log_value(log, 'M', 0, "No. stations", "%d", oskar_vis_num_stations(vis));

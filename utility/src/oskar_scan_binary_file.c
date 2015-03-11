@@ -75,8 +75,6 @@ void oskar_scan_binary_file(oskar_Log* log, const char* filename, int* status)
     oskar_log_section(log, p, "File header in '%s'", filename);
     oskar_log_value(log, p, 1, "Binary file format version", "%d",
             h->bin_version);
-    oskar_log_value(log, p, 1, "Generated using OSKAR version", "%d.%d.%d",
-            h->oskar_ver_major, h->oskar_ver_minor, h->oskar_ver_patch);
     oskar_log_line(log, p, ' ');
     oskar_log_message(log, p, 0, "File contains %d chunks.", h->num_chunks);
 

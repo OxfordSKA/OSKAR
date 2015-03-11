@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,23 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_binary_read_oskar_version.h>
-#include <private_binary.h>
+#include <oskar_binary_write_metadata.h>
+
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_binary_read_oskar_version(const char* filename,
-        int* major, int* minor, int* patch, int* status)
+void oskar_binary_write_metadata(oskar_Binary* handle, int* status)
 {
-    oskar_BinaryHeader header;
-    FILE* file;
+    const char* str;
+    size_t len;
+    static char time_str[80];
+    time_t unix_time;
+    struct tm* timeinfo;
 
     /* Check all inputs. */
-    if (!filename || !major || !minor || !patch || !status)
+    if (!handle || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -51,35 +55,43 @@ void oskar_binary_read_oskar_version(const char* filename,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Open the file. */
-    file = fopen(filename, "rb");
-    if (!file)
+    /* Write the system date and time. */
+    unix_time = time(0);
+    timeinfo = localtime(&unix_time);
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo);
+    len = 1 + strlen(time_str);
+    oskar_binary_write(handle, OSKAR_CHAR,
+            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING,
+            0, len, time_str, status);
+
+    /* Write the OSKAR version string. */
+    len = 1 + strlen(OSKAR_VERSION_STR);
+    oskar_binary_write(handle, OSKAR_CHAR,
+            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_OSKAR_VERSION_STRING,
+            0, len, OSKAR_VERSION_STR, status);
+
+    /* Write the current working directory. */
+    str = getenv("PWD");
+    if (!str) str = getenv("CD");
+    if (str)
     {
-        *status = OSKAR_ERR_FILE_IO;
-        return;
+        len = 1 + strlen(str);
+        oskar_binary_write(handle, OSKAR_CHAR,
+                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_CWD,
+                0, len, str, status);
     }
 
-    /* Read the header from the stream. */
-    if (fread(&header, sizeof(oskar_BinaryHeader), 1, file) != 1)
+    /* Write the username. */
+    str = getenv("USERNAME");
+    if (!str)
+        str = getenv("USER");
+    if (str)
     {
-        *status = OSKAR_ERR_FILE_IO;
-        return;
+        len = 1 + strlen(str);
+        oskar_binary_write(handle, OSKAR_CHAR,
+                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_USERNAME,
+                0, len, str, status);
     }
-
-    /* Check if this is a valid header. */
-    if (strncmp("OSKARBIN", header.magic, 8) != 0)
-    {
-        *status = OSKAR_ERR_BINARY_FILE_INVALID;
-        return;
-    }
-
-    /* Read the OSKAR version. */
-    *major = header.version[2];
-    *minor = header.version[1];
-    *patch = header.version[0];
-
-    /* Close the file. */
-    fclose(file);
 }
 
 #ifdef __cplusplus

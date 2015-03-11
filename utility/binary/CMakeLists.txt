@@ -7,20 +7,12 @@
 # own build directory assoicated some work will need to be done:
 #   - install paths
 #   - compiler options ?!
-#   - oskar_global.h
 #   - packaging
 #
 # Some of this can be handled by moving cmake varialbes like
 # compliler options & install locations & oskar version to a common module
-# that everyone includes (e.g. oskar_version.cmake, oskar_install_dirs.cmake)
+# that everyone includes (e.g. oskar_install_dirs.cmake)
 # oskar compiler flags would just need some modification...
-#
-# oskar global is harder ... but by splitting out some of its code
-# into a generated/configured
-#    oskar_version.h
-# moving error codes out to be module specific?
-# auto generating much of the target export macros?
-# maybe this could not be a problem either...
 #
 
 #project(oskar_binary C)
@@ -43,28 +35,11 @@
 #    set(OSKAR_INC_INSTALL_DIR "include/oskar_binary")
 #endif()
 
-# mmm how to do version correctly for this sub-library...
-#if (OSKAR_VERSION)
-#    set(OSKAR_BINARY_VERSION ${OSKAR_VERSION})
-#else ()
-#    set(OSKAR_BINARY_VERSION "2.6.0")
-#endif ()
-#
-#if (NOT OSKAR_VERSION_ID)
-#    set(OSKAR_VERSION_ID "0x020600")
-#endif()
-#if (NOT OSKAR_VERSION_STRING)
-#    set(OSKAR_VERSION_STRING "2.6.0")
-#endif()
-#
-#configure_file(${PROJECT_SOURCE_DIR}/../../oskar_global.h.in
-#    ${PROJECT_SOURCE_DIR}/oskar_global.h @ONLY)
-#
 #include_directories(${PROJECT_SOURCE_DIR})
 
 set(name oskar_binary)
 file(GLOB ${name}_SRC src/*.c)
-file(GLOB ${name}_H *.h)
+file(GLOB ${name}_H oskar*.h)
 add_library(${name} STATIC ${${name}_SRC})
 set_target_properties(${name} PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
