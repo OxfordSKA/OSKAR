@@ -35,61 +35,59 @@
  * do not change the numbers in the lists below. */
 enum OSKAR_VIS_HEADER_TAGS
 {
-    OSKAR_VIS_HEADER_TAG_TELESCOPE_PATH = 1,
-    OSKAR_VIS_HEADER_TAG_WRITE_AUTOCORRELATIONS = 2,
-    OSKAR_VIS_HEADER_TAG_AMP_TYPE = 3,
-    OSKAR_VIS_HEADER_TAG_MAX_TIMES_PER_BLOCK = 4,
-    OSKAR_VIS_HEADER_TAG_NUM_TIMES_TOTAL = 5,
-    OSKAR_VIS_HEADER_TAG_NUM_CHANNELS = 6,
-    OSKAR_VIS_HEADER_TAG_NUM_STATIONS = 7,
-    OSKAR_VIS_HEADER_TAG_FREQ_START_HZ = 8,
-    OSKAR_VIS_HEADER_TAG_FREQ_INC_HZ = 9,
-    OSKAR_VIS_HEADER_TAG_CHANNEL_BANDWIDTH_HZ = 10,
-    OSKAR_VIS_HEADER_TAG_TIME_START_MJD_UTC = 11,
-    OSKAR_VIS_HEADER_TAG_TIME_INC_SEC = 12,
-    OSKAR_VIS_HEADER_TAG_TIME_AVERAGE_SEC = 13,
-    OSKAR_VIS_HEADER_TAG_PHASE_CENTRE = 14,
-    OSKAR_VIS_HEADER_TAG_TELESCOPE_CENTRE = 15,
-    OSKAR_VIS_HEADER_TAG_STATION_X_OFFSET_ECEF = 16,
-    OSKAR_VIS_HEADER_TAG_STATION_Y_OFFSET_ECEF = 17,
-    OSKAR_VIS_HEADER_TAG_STATION_Z_OFFSET_ECEF = 18
+    OSKAR_VIS_HEADER_TAG_TELESCOPE_PATH          = 1,
+    OSKAR_VIS_HEADER_TAG_NUM_TAGS_PER_BLOCK      = 2,
+    OSKAR_VIS_HEADER_TAG_WRITE_AUTOCORRELATIONS  = 3,
+    OSKAR_VIS_HEADER_TAG_AMP_TYPE                = 4,
+    OSKAR_VIS_HEADER_TAG_MAX_TIMES_PER_BLOCK     = 5,
+    OSKAR_VIS_HEADER_TAG_NUM_TIMES_TOTAL         = 6,
+    OSKAR_VIS_HEADER_TAG_NUM_CHANNELS            = 7,
+    OSKAR_VIS_HEADER_TAG_NUM_STATIONS            = 8,
+    OSKAR_VIS_HEADER_TAG_FREQ_START_HZ           = 9,
+    OSKAR_VIS_HEADER_TAG_FREQ_INC_HZ             = 10,
+    OSKAR_VIS_HEADER_TAG_CHANNEL_BANDWIDTH_HZ    = 11,
+    OSKAR_VIS_HEADER_TAG_TIME_START_MJD_UTC      = 12,
+    OSKAR_VIS_HEADER_TAG_TIME_INC_SEC            = 13,
+    OSKAR_VIS_HEADER_TAG_TIME_AVERAGE_SEC        = 14,
+    OSKAR_VIS_HEADER_TAG_PHASE_CENTRE            = 15,
+    OSKAR_VIS_HEADER_TAG_TELESCOPE_CENTRE        = 16,
+    OSKAR_VIS_HEADER_TAG_STATION_X_OFFSET_ECEF   = 17,
+    OSKAR_VIS_HEADER_TAG_STATION_Y_OFFSET_ECEF   = 18,
+    OSKAR_VIS_HEADER_TAG_STATION_Z_OFFSET_ECEF   = 19
 };
 
 enum OSKAR_VIS_BLOCK_TAGS
 {
-    OSKAR_VIS_BLOCK_TAG_DIM_START_AND_SIZE = 1,
-    OSKAR_VIS_BLOCK_TAG_FREQ_REF_INC_HZ = 2,
-    OSKAR_VIS_BLOCK_TAG_TIME_REF_INC_MJD_UTC = 3,
-    OSKAR_VIS_BLOCK_TAG_AUTO_CORRELATIONS = 4,
-    OSKAR_VIS_BLOCK_TAG_CROSS_CORRELATIONS = 5,
-    OSKAR_VIS_BLOCK_TAG_BASELINE_UU = 6,
-    OSKAR_VIS_BLOCK_TAG_BASELINE_VV = 7,
-    OSKAR_VIS_BLOCK_TAG_BASELINE_WW = 8
+    OSKAR_VIS_BLOCK_TAG_DIM_START_AND_SIZE    = 1,
+    OSKAR_VIS_BLOCK_TAG_FREQ_REF_INC_HZ       = 2,
+    OSKAR_VIS_BLOCK_TAG_TIME_REF_INC_MJD_UTC  = 3,
+    OSKAR_VIS_BLOCK_TAG_AUTO_CORRELATIONS     = 4,
+    OSKAR_VIS_BLOCK_TAG_CROSS_CORRELATIONS    = 5,
+    OSKAR_VIS_BLOCK_TAG_BASELINE_UU           = 6,
+    OSKAR_VIS_BLOCK_TAG_BASELINE_VV           = 7,
+    OSKAR_VIS_BLOCK_TAG_BASELINE_WW           = 8
 };
 
 #define FLT sizeof(float)
 #define DBL sizeof(double)
 #define INT sizeof(int)
 
-static const char* filename = "test.vis";
-
-#define DECLARE_COMMON_VARS \
-        int amp_type, max_times_per_block; \
-        int num_baselines, num_channels, num_stations, num_times_total; \
-        int num_blocks, num_times_baselines, dim_start_and_size[6]; \
-        double phase_centre[2], telescope_centre[3]; \
-        double freq_start_inc[2], time_start_inc[2]; \
-        double channel_bandwidth_hz, time_average_sec; \
-        void *station_x, *station_y, *station_z, *vis_block, *uu, *vv, *ww;
-
-static void write_test_vis(void)
+static void write_test_vis(const char* filename)
 {
     int i = 0, status = 0;
     oskar_Binary* h = 0;
     const unsigned char vis_header_group = OSKAR_TAG_GROUP_VIS_HEADER;
     const unsigned char vis_block_group = OSKAR_TAG_GROUP_VIS_BLOCK;
+
+    /* Data to write. */
     const char* telescope_model_path = "my_telescope_model";
-    DECLARE_COMMON_VARS
+    int amp_type, max_times_per_block, num_tags_per_block = 7;
+    int num_baselines, num_channels, num_stations, num_times_total;
+    int num_blocks, num_times_baselines, dim_start_and_size[6];
+    double phase_centre[2], telescope_centre[3];
+    double freq_start_inc[2], time_start_inc[2];
+    double channel_bandwidth_hz, time_average_sec;
+    void *station_x, *station_y, *station_z, *vis_block, *uu, *vv, *ww;
 
     /* Set input metadata. */
     amp_type = OSKAR_DOUBLE_COMPLEX_MATRIX;
@@ -157,6 +155,11 @@ static void write_test_vis(void)
     oskar_binary_write(h, OSKAR_CHAR, vis_header_group,
             OSKAR_VIS_HEADER_TAG_TELESCOPE_PATH, 0,
             sizeof(telescope_model_path), telescope_model_path, &status);
+
+    /* Write number of tags per block. */
+    oskar_binary_write_int(h, vis_header_group,
+            OSKAR_VIS_HEADER_TAG_NUM_TAGS_PER_BLOCK, 0, num_tags_per_block,
+            &status);
 
     /* Write dimensions. */
     oskar_binary_write_int(h, vis_header_group,
@@ -232,8 +235,6 @@ static void write_test_vis(void)
 
         /* Write the visibility data. */
         oskar_binary_write(h, amp_type, vis_block_group,
-                OSKAR_VIS_BLOCK_TAG_AUTO_CORRELATIONS, i, 0, 0, &status);
-        oskar_binary_write(h, amp_type, vis_block_group,
                 OSKAR_VIS_BLOCK_TAG_CROSS_CORRELATIONS, i,
                 DBL*8 * num_times_baselines * num_channels,
                 vis_block, &status);
@@ -271,17 +272,30 @@ static void write_test_vis(void)
 
 /*****************************************************************************/
 
-static void read_test_vis(void)
+static void read_test_vis(const char* filename)
 {
     int i, precision, element_size, status = 0;
     oskar_Binary* h;
     const unsigned char vis_header_group = OSKAR_TAG_GROUP_VIS_HEADER;
     const unsigned char vis_block_group = OSKAR_TAG_GROUP_VIS_BLOCK;
-    DECLARE_COMMON_VARS
+
+    /* Data to read. */
+    int amp_type, max_times_per_block, num_tags_per_block;
+    int num_baselines, num_channels, num_stations, num_times_total;
+    int num_blocks, num_times_baselines, dim_start_and_size[6];
+    double phase_centre[2], telescope_centre[3];
+    double freq_start_inc[2], time_start_inc[2];
+    double channel_bandwidth_hz, time_average_sec;
+    void *station_x, *station_y, *station_z, *vis_block, *uu, *vv, *ww;
 
     /* Open the test file for reading. */
     printf("Reading test file...\n");
     h = oskar_binary_create(filename, 'r', &status);
+
+    /* Read number of tags per block. */
+    oskar_binary_read_int(h, vis_header_group,
+            OSKAR_VIS_HEADER_TAG_NUM_TAGS_PER_BLOCK, 0, &num_tags_per_block,
+            &status);
 
     /* Read dimensions. */
     oskar_binary_read_int(h, vis_header_group,
@@ -382,6 +396,9 @@ static void read_test_vis(void)
     {
         int b, c, t, num_times, start_time_idx, start_channel_idx;
 
+        /* Set search start index. */
+        oskar_binary_set_query_search_start(h, i * num_tags_per_block, &status);
+
         /* Read block metadata. */
         oskar_binary_read(h, OSKAR_INT, vis_block_group,
                 OSKAR_VIS_BLOCK_TAG_DIM_START_AND_SIZE, i,
@@ -414,6 +431,9 @@ static void read_test_vis(void)
         oskar_binary_read(h, OSKAR_DOUBLE, vis_block_group,
                 OSKAR_VIS_BLOCK_TAG_BASELINE_WW, i,
                 element_size * num_times_baselines, ww, &status);
+
+        /* Check for errors. */
+        if (status) break;
 
         /* Print contents of the block. */
         for (t = 0; t < num_times; ++t)
@@ -505,11 +525,13 @@ static void read_test_vis(void)
 
 int main(void)
 {
+    const char* filename = "test.vis";
+
     /* Write a test visibility data file. */
-    write_test_vis();
+    write_test_vis(filename);
 
     /* Read the test visibility data file. */
-    read_test_vis();
+    read_test_vis(filename);
 
     return 0;
 }

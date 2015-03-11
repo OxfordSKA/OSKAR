@@ -78,6 +78,11 @@ oskar_Binary* oskar_vis_header_write(const oskar_VisHeader* hdr,
     oskar_binary_write_mem(h, hdr->telescope_path, grp,
             OSKAR_VIS_HEADER_TAG_TELESCOPE_PATH, 0, 0, status);
 
+    /* Write the number of binary tags per block. */
+    oskar_binary_write_int(h, grp,
+            OSKAR_VIS_HEADER_TAG_NUM_TAGS_PER_BLOCK, 0,
+            hdr->num_tags_per_block, status);
+
     /* Write dimensions. */
     oskar_binary_write_int(h, grp,
             OSKAR_VIS_HEADER_TAG_WRITE_AUTOCORRELATIONS, 0,

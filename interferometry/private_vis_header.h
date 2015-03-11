@@ -40,6 +40,7 @@ struct oskar_VisHeader
     oskar_Mem* telescope_path;   /* Path to telescope model. */
     oskar_Mem* settings;         /* Settings file contents. */
 
+    int num_tags_per_block;      /* Number of tags per block in binary file. */
     int write_autocorr;          /* Flag set if autocorrelations will be written. */
     int amp_type;                /* Memory type of the amplitudes. */
     int max_times_per_block;     /* Maximum number of time samples per block. */

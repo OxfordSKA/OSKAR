@@ -76,6 +76,10 @@ oskar_VisHeader* oskar_vis_header_read(oskar_Binary* h, int* status)
             num_times_total, num_channels, num_stations, write_autocorr,
             status);
 
+    /* Read the number of tags per block. */
+    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_NUM_TAGS_PER_BLOCK, 0,
+            &vis->num_tags_per_block, status);
+
     /* Optionally read the settings data (ignore the error code). */
     tag_error = 0;
     oskar_binary_read_mem(h, vis->settings,

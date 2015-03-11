@@ -59,6 +59,13 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int max_times_per_block,
     hdr->amp_type = amp_type;
     precision = oskar_mem_type_precision(amp_type);
 
+    /* Set number of tags per block in the binary file. */
+    /* This must be updated if the number of fields written to file from
+     * the oskar_VisBlock structure is changed. */
+    /* Basic meta-data (3), UVW coordinates (3) and cross-correlations (1). */
+    hdr->num_tags_per_block = 7;
+    if (write_autocorr) hdr->num_tags_per_block++;
+
     /* Set dimensions. */
     hdr->max_times_per_block = max_times_per_block;
     hdr->num_times_total     = num_times_total;

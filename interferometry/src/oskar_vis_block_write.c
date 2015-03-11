@@ -64,9 +64,12 @@ void oskar_vis_block_write(const oskar_VisBlock* vis, oskar_Binary* h,
             sizeof(double) * 2, vis->time_ref_inc_mjd_utc, status);
 
     /* Write the visibility data. */
-    oskar_binary_write_mem(h, vis->auto_correlations,
-            OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_AUTO_CORRELATIONS, block_index, 0, status);
+    if (oskar_vis_block_has_auto_correlations(vis))
+    {
+        oskar_binary_write_mem(h, vis->auto_correlations,
+                OSKAR_TAG_GROUP_VIS_BLOCK,
+                OSKAR_VIS_BLOCK_TAG_AUTO_CORRELATIONS, block_index, 0, status);
+    }
     oskar_binary_write_mem(h, vis->cross_correlations,
             OSKAR_TAG_GROUP_VIS_BLOCK,
             OSKAR_VIS_BLOCK_TAG_CROSS_CORRELATIONS, block_index, 0, status);
@@ -81,14 +84,6 @@ void oskar_vis_block_write(const oskar_VisBlock* vis, oskar_Binary* h,
     oskar_binary_write_mem(h, vis->baseline_ww_metres,
             OSKAR_TAG_GROUP_VIS_BLOCK,
             OSKAR_VIS_BLOCK_TAG_BASELINE_WW, block_index, 0, status);
-    oskar_binary_write_mem(h, vis->baseline_num_time_averages,
-            OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_BASELINE_NUM_TIME_AVERAGES,
-            block_index, 0, status);
-    oskar_binary_write_mem(h, vis->baseline_num_channel_averages,
-            OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_BASELINE_NUM_CHANNEL_AVERAGES,
-            block_index, 0, status);
 }
 
 #ifdef __cplusplus

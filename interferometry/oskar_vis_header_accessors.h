@@ -53,6 +53,9 @@ OSKAR_EXPORT
 const oskar_Mem* oskar_vis_header_settings_const(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
+int oskar_vis_header_num_tags_per_block(const oskar_VisHeader* vis);
+
+OSKAR_EXPORT
 int oskar_vis_header_write_autocorrelations(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT

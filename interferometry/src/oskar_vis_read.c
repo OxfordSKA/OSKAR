@@ -250,7 +250,7 @@ oskar_Vis* oskar_vis_read_new(oskar_Binary* h, int* status)
         int block_length, num_baselines, time_offset, total_baselines, t, c;
 
         /* Read the block. */
-        oskar_vis_block_read(blk, h, i, status);
+        oskar_vis_block_read(blk, hdr, h, i, status);
         num_baselines = oskar_vis_block_num_baselines(blk);
         block_length = oskar_vis_block_num_times(blk);
 

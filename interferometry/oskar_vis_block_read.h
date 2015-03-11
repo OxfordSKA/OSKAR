@@ -35,6 +35,7 @@
 
 #include <oskar_global.h>
 #include <oskar_binary.h>
+#include <oskar_vis_header.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,13 +50,14 @@ extern "C" {
  * reading data using the specified file handle.
  *
  * @param[in,out] vis         The visibility block structure to fill.
+ * @param[in,out] hdr         The visibility header.
  * @param[in,out] h           The OSKAR binary file handle, opened for read.
  * @param[in]     block_index The visibility block index.
  * @param[in,out] status      Status return code.
  */
 OSKAR_EXPORT
-void oskar_vis_block_read(oskar_VisBlock* vis, oskar_Binary* h,
-        int block_index, int* status);
+void oskar_vis_block_read(oskar_VisBlock* vis, const oskar_VisHeader* hdr,
+        oskar_Binary* h, int block_index, int* status);
 
 #ifdef __cplusplus
 }

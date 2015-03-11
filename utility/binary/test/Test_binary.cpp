@@ -49,7 +49,7 @@
     }
 
 
-int main(int /*argc*/, char** /*argv*/)
+int main(void)
 {
     char filename[] = "temp_test_binary_file.dat";
     int status = 0;

@@ -27,17 +27,20 @@
  */
 
 #include <private_vis_block.h>
-#include <oskar_vis_block.h>
 #include <oskar_binary.h>
 #include <oskar_binary_read_mem.h>
+#include <oskar_vis_block.h>
+#include <oskar_vis_header.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_vis_block_read(oskar_VisBlock* vis, oskar_Binary* h,
-        int block_index, int* status)
+void oskar_vis_block_read(oskar_VisBlock* vis, const oskar_VisHeader* hdr,
+        oskar_Binary* h, int block_index, int* status)
 {
+    int num_tags_per_block;
+
     /* Check all inputs. */
     if (!vis || !h || !status)
     {
@@ -49,7 +52,9 @@ void oskar_vis_block_read(oskar_VisBlock* vis, oskar_Binary* h,
     if (*status) return;
 
     /* Set query start index. */
-    oskar_binary_set_query_search_start(h, block_index * 10, status);
+    num_tags_per_block = oskar_vis_header_num_tags_per_block(hdr);
+    oskar_binary_set_query_search_start(h, block_index * num_tags_per_block,
+            status);
 
     /* Read visibility metadata. */
     oskar_binary_read(h, OSKAR_INT,
@@ -66,9 +71,12 @@ void oskar_vis_block_read(oskar_VisBlock* vis, oskar_Binary* h,
             sizeof(double) * 2, vis->time_ref_inc_mjd_utc, status);
 
     /* Read the visibility data. */
-    oskar_binary_read_mem(h, vis->auto_correlations,
-            OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_AUTO_CORRELATIONS, block_index, status);
+    if (oskar_vis_header_write_autocorrelations(hdr))
+    {
+        oskar_binary_read_mem(h, vis->auto_correlations,
+                OSKAR_TAG_GROUP_VIS_BLOCK,
+                OSKAR_VIS_BLOCK_TAG_AUTO_CORRELATIONS, block_index, status);
+    }
     oskar_binary_read_mem(h, vis->cross_correlations,
             OSKAR_TAG_GROUP_VIS_BLOCK,
             OSKAR_VIS_BLOCK_TAG_CROSS_CORRELATIONS, block_index, status);
@@ -83,14 +91,6 @@ void oskar_vis_block_read(oskar_VisBlock* vis, oskar_Binary* h,
     oskar_binary_read_mem(h, vis->baseline_ww_metres,
             OSKAR_TAG_GROUP_VIS_BLOCK,
             OSKAR_VIS_BLOCK_TAG_BASELINE_WW, block_index, status);
-    oskar_binary_read_mem(h, vis->baseline_num_time_averages,
-            OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_BASELINE_NUM_TIME_AVERAGES,
-            block_index, status);
-    oskar_binary_read_mem(h, vis->baseline_num_channel_averages,
-            OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_BASELINE_NUM_CHANNEL_AVERAGES,
-            block_index, status);
 }
 
 #ifdef __cplusplus
