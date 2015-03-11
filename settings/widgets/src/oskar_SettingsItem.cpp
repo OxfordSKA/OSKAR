@@ -38,8 +38,6 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
         const QVariant& value, bool required, const QVariant& defaultValue,
         const QStringList& options, oskar_SettingsItem* parent)
 {
-    cout << "CTOR " << key.toStdString() << endl;
-
     // Set default defaults.
     if (type == DOUBLE || type == DOUBLE_MAX || type == DOUBLE_MIN ||
             type == DOUBLE_CSV_LIST)
@@ -202,7 +200,6 @@ void oskar_SettingsItem::setTooltip(const QString& value)
 
 void oskar_SettingsItem::setValue(const QVariant& value)
 {
-    cout << "setValue() " << key_.toStdString() << endl;
     if (type_ == LABEL)
         return;
     bool nullValue = value.isNull();
@@ -267,10 +264,6 @@ void oskar_SettingsItem::setCritical(bool value)
         ++critical_;
     else
         --critical_;
-    if (!key_.isEmpty())
-        cout << "setCritial() [" << key_.toStdString() << "] hidden=" << (hidden_?"true":"false") << " c = " << critical_ << endl;
-    else
-        cout << endl;
 
     if (parentItem_)
         parentItem_->setCritical(value);

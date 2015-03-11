@@ -156,7 +156,6 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
         oskar_image_free(im, status);
         return 0;
     }
-    printf("STATUS %i [%i]\n", *status, __LINE__);
 
     /* Evaluate Stokes parameters (if required). */
     oskar_Mem* stokes = oskar_get_image_stokes(vis, settings, status);

@@ -107,14 +107,11 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
 
         if (item->key() == "telescope") // IF == HACK TO AVOID TOO MUCH PRINTING
         {
-            cout << item->key().toStdString() << endl;
-
             // Loop over items that are children to this item and if they are
             // unset, required and not hidden add 1 to the local critical counter.
             for (int i = 0; i < item->childCount(); ++i)
             {
                 oskar_SettingsItem* item_ = item->child(i);
-                cout << "   " << item_->key().toStdString() << " " << item_->critical() << endl;
             }
         }
 
