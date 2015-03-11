@@ -94,10 +94,10 @@ oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
             num_coords, status);
     vis->baseline_ww_metres = oskar_mem_create(type, location,
             num_coords, status);
-    vis->baseline_num_channel_averages = oskar_mem_create(OSKAR_INT, location,
-            num_baselines, status);
-    vis->baseline_num_time_averages = oskar_mem_create(OSKAR_INT, location,
-            num_baselines, status);
+    /*vis->baseline_num_channel_averages = oskar_mem_create(OSKAR_INT, location,
+            num_baselines, status);*/
+    /*vis->baseline_num_time_averages = oskar_mem_create(OSKAR_INT, location,
+            num_baselines, status);*/
     vis->auto_correlations  = oskar_mem_create(amp_type, location,
             num_autocorr, status);
     vis->cross_correlations = oskar_mem_create(amp_type, location,
@@ -118,8 +118,8 @@ oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
     }
 
     /* Clear index arrays. */
-    oskar_mem_clear_contents(vis->baseline_num_channel_averages, status);
-    oskar_mem_clear_contents(vis->baseline_num_time_averages, status);
+    /*oskar_mem_clear_contents(vis->baseline_num_channel_averages, status);*/
+    /*oskar_mem_clear_contents(vis->baseline_num_time_averages, status);*/
 
     /* Return handle to structure. */
     return vis;

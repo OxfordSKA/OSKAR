@@ -62,10 +62,10 @@ void oskar_vis_block_copy(oskar_VisBlock* dst, const oskar_VisBlock* src,
     oskar_mem_copy(dst->baseline_uu_metres, src->baseline_uu_metres, status);
     oskar_mem_copy(dst->baseline_vv_metres, src->baseline_vv_metres, status);
     oskar_mem_copy(dst->baseline_ww_metres, src->baseline_ww_metres, status);
-    oskar_mem_copy(dst->baseline_num_channel_averages,
-            src->baseline_num_channel_averages, status);
-    oskar_mem_copy(dst->baseline_num_time_averages,
-            src->baseline_num_time_averages, status);
+    /*oskar_mem_copy(dst->baseline_num_channel_averages,
+            src->baseline_num_channel_averages, status);*/
+    /*oskar_mem_copy(dst->baseline_num_time_averages,
+            src->baseline_num_time_averages, status);*/
     oskar_mem_copy(dst->auto_correlations, src->auto_correlations, status);
     oskar_mem_copy(dst->cross_correlations, src->cross_correlations, status);
     oskar_mem_copy(dst->a1, src->a1, status);

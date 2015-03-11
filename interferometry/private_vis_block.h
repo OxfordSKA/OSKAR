@@ -81,8 +81,8 @@ struct oskar_VisBlock
     /* [int] */
     /* These should be used to keep track of things for
      * baseline-dependent averaging. */
-    oskar_Mem* baseline_num_time_averages;    /* Number of times per baseline. */
-    oskar_Mem* baseline_num_channel_averages; /* Number of channels per baseline. */
+    /*oskar_Mem* baseline_num_time_averages;*/    /* Number of times per baseline. */
+    /*oskar_Mem* baseline_num_channel_averages;*/ /* Number of channels per baseline. */
 
     /* These arrays hold antenna/station indices for each baseline, and are
      * only used when writing data to a Measurement Set. They are
