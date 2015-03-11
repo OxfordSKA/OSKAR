@@ -47,10 +47,10 @@ if (STANDALONE_BUILD)
 
     #! Set install locations for standalone mode.
     if (NOT OSKAR_LIB_INSTALL_DIR)
-        set(OSKAR_LIB_INSTALL_DIR "lib")
+        set(OSKAR_LIB_INSTALL_DIR "oskar_binary/${OSKAR_BINARY_VERSION}/lib")
     endif()
     if (NOT OSKAR_INCLUDE_INSTALL_DIR)
-        set(OSKAR_INCLUDE_INSTALL_DIR "include/${libname}")
+        set(OSKAR_INCLUDE_INSTALL_DIR "oskar_binary/${OSKAR_BINARY_VERSION}/include")
     endif()
 
 endif(STANDALONE_BUILD)
@@ -70,11 +70,23 @@ add_subdirectory(test)
 
 #! Install headers and packaging macros.
 if (STANDALONE_BUILD)
-    #file(GLOB ${libname}_H oskar*.h) # Public headers only (start with oskar_)
-    #install(FILES ${${libname}_H} DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR})
-    #set(CPACK_SOURCE_GENERATOR "ZIP")
-    #set(CPACK_INSTALL_CMAKE_PROJECTS ${CMAKE_CURRENT_SOURCE_DIR};oskar_binary;oskar_binary;/)
-    #include(CPack)
+    file(GLOB ${libname}_H oskar*.h) # Public headers only (start with oskar_)
+    install(FILES ${${libname}_H} DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR})
+
+    set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/readme.txt")
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OSKAR binary library (version ${OSKAR_BINARY_VERSION})")
+    set(CPACK_PACKAGE_VENDOR "University of Oxford, Oxford e-Research Centre.")
+    #set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/copying.txt")
+    set(CPACK_PACKAGE_VERSION "${OSKAR_BINARY_VERSION}")
+    set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
+    set(CPACK_GENERATOR "TGZ")
+    set(CPACK_SOURCE_GENERATOR "ZIP")
+    set(CPACK_SOURCE_IGNORE_FILES "build;debug;release")
+    include(CPack)
+    add_custom_target(dist
+        COMMAND ${CMAKE_MAKE_PROGRAM} package_source
+        COMMENT "Packaging Source files"
+        VERBATIM)
 endif(STANDALONE_BUILD)
 
 
