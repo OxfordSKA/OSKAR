@@ -1,40 +1,37 @@
-#
-# src/utility/binary/CMakeLists.txt
-#
-
-#
-# TODO in order to make this into a full subproject which can have its
-# own build directory assoicated some work will need to be done:
-#   - install paths
-#   - compiler options ?!
-#   - packaging
-#
-# Some of this can be handled by moving cmake varialbes like
-# compliler options & install locations & oskar version to a common module
-# that everyone includes (e.g. oskar_install_dirs.cmake)
-# oskar compiler flags would just need some modification...
-#
-
-cmake_minimum_required(VERSION 2.8.3 FATAL_ERROR)
-# Set various policies to get old behviour with cmake 3.x
-if (POLICY CMP0042)
-    cmake_policy(SET CMP0042 OLD)
-endif()
+#! CMake initialisation
+cmake_minimum_required(VERSION 2.8.3)
 if (POLICY CMP0045)
     cmake_policy(SET CMP0045 OLD)
 endif()
+
+#! Declare the CMake project
 project(oskar_binary C)
 
-if (NOT BUILD_STANDALONE)
-    set(BUILD_STANDALONE OFF)
+#! Set the OSKAR binary version used to version dynaic libraries.
+set(OSKAR_BINARY_VERSION "2")
+
+#! Set the name of the library.
+set(libname ${PROJECT_NAME})
+
+#! If OSKAR_VERSION_STR is not defined, we are building as stand-alone libray.
+if (NOT OSKAR_VERSION_STR)
+    set(STANDALONE_BUILD ON)
 endif()
 
-if (BUILD_STANDALONE)
+#! Macros for building oskar_binary as a standalone library.
+if (STANDALONE_BUILD)
 
-    list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/../../cmake)
-    include(oskar_version)
+    #! Build type detection.
+    if(NOT CMAKE_BUILD_TYPE)
+        get_filename_component(dirname ${CMAKE_BINARY_DIR} NAME)
+        if (${dirname} MATCHES "dbg" OR ${dirname} MATCHES "debug")
+            set(CMAKE_BUILD_TYPE debug)
+        else()
+            set(CMAKE_BUILD_TYPE release)
+        endif()
+    endif()
 
-#    include(oskar_compiler_options) ???
+    #! Compiler options for standalone mode.
     set(CMAKE_C_FLAGS "-fPIC")
     set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
     set(CMAKE_C_FLAGS_DEBUG "-O0 -g -Wall")
@@ -46,45 +43,38 @@ if (BUILD_STANDALONE)
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wextra")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -pedantic")
     endif()
+    include_directories(${PROJECT_SOURCE_DIR})
 
+    #! Set install locations for standalone mode.
     if (NOT OSKAR_LIB_INSTALL_DIR)
         set(OSKAR_LIB_INSTALL_DIR "lib")
     endif()
     if (NOT OSKAR_INCLUDE_INSTALL_DIR)
-        set(OSKAR_INCLUDE_INSTALL_DIR "include/oskar_binary")
+        set(OSKAR_INCLUDE_INSTALL_DIR "include/${libname}")
     endif()
 
-    configure_file(${PROJECT_SOURCE_DIR}/../../cmake/oskar_version.h.in
-        ${PROJECT_BINARY_DIR}/oskar_version.h @ONLY)
+endif(STANDALONE_BUILD)
 
-    include_directories(${PROJECT_SOURCE_DIR})
-    include_directories(${PROJECT_BINARY_DIR})
-
-    message(STATUS "=================================================")
-    message(STATUS "Building in standalone mode....")
-    message(STATUS "OSKAR VERSION = ${OSKAR_VERSION_STR}")
-    message(STATUS "=================================================")
-endif()
-
-set(name oskar_binary)
-file(GLOB ${name}_SRC src/*.c)
-
-add_library(${name} STATIC ${${name}_SRC})
-set_target_properties(${name} PROPERTIES
+#! Declare build and install targets for the library.
+file(GLOB ${libname}_SRC src/*.c)
+add_library(${libname} STATIC ${${libname}_SRC})
+set_target_properties(${libname} PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
     INSTALL_RPATH_USE_LINK_PATH TRUE
-    SOVERSION ${OSKAR_VERSION}
-    VERSION ${OSKAR_VERSION})
-install(TARGETS ${name} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+    SOVERSION ${OSKAR_BINARY_VERSION}
+    VERSION ${OSKAR_BINARY_VERSION})
+install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
-#add_subdirectory(test EXCLUDE_FROM_ALL)
+#! Add unit tests / examples
 add_subdirectory(test)
-#add_subdirectory(examples EXCLUDE_FROM_ALL)
 
-if (BUILD_STANDALONE)
-    file(GLOB ${name}_H oskar*.h) # Only public headers!
-    install(FILES ${${name}_H} DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR})
+#! Install headers and packaging macros.
+if (STANDALONE_BUILD)
+    #file(GLOB ${libname}_H oskar*.h) # Public headers only (start with oskar_)
+    #install(FILES ${${libname}_H} DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR})
     #set(CPACK_SOURCE_GENERATOR "ZIP")
     #set(CPACK_INSTALL_CMAKE_PROJECTS ${CMAKE_CURRENT_SOURCE_DIR};oskar_binary;oskar_binary;/)
     #include(CPack)
-endif()
+endif(STANDALONE_BUILD)
+
+

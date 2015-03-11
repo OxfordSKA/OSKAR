@@ -105,15 +105,15 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         // required and not hidden... if so there is a critical child
         // so the background colour should be set...
 
-        if (item->key() == "telescope") // IF == HACK TO AVOID TOO MUCH PRINTING
-        {
-            // Loop over items that are children to this item and if they are
-            // unset, required and not hidden add 1 to the local critical counter.
-            for (int i = 0; i < item->childCount(); ++i)
-            {
-                oskar_SettingsItem* item_ = item->child(i);
-            }
-        }
+//        if (item->key() == "telescope") // IF == HACK TO AVOID TOO MUCH PRINTING
+//        {
+//            // Loop over items that are children to this item and if they are
+//            // unset, required and not hidden add 1 to the local critical counter.
+//            for (int i = 0; i < item->childCount(); ++i)
+//            {
+//                oskar_SettingsItem* item_ = item->child(i);
+//            }
+//        }
 
         // Only set the critical/required background colour for items which
         // have their dependencies satisfied (and are therefore not hidden)
