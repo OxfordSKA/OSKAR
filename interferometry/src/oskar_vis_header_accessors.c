@@ -59,14 +59,24 @@ int oskar_vis_header_num_tags_per_block(const oskar_VisHeader* vis)
     return vis->num_tags_per_block;
 }
 
-int oskar_vis_header_write_autocorrelations(const oskar_VisHeader* vis)
+int oskar_vis_header_write_auto_correlations(const oskar_VisHeader* vis)
 {
     return vis->write_autocorr;
+}
+
+int oskar_vis_header_write_cross_correlations(const oskar_VisHeader* vis)
+{
+    return vis->write_crosscorr;
 }
 
 int oskar_vis_header_amp_type(const oskar_VisHeader* vis)
 {
     return vis->amp_type;
+}
+
+int oskar_vis_header_coord_precision(const oskar_VisHeader* vis)
+{
+    return vis->coord_precision;
 }
 
 int oskar_vis_header_max_times_per_block(const oskar_VisHeader* vis)
@@ -87,6 +97,21 @@ int oskar_vis_header_num_times_total(const oskar_VisHeader* vis)
 int oskar_vis_header_num_stations(const oskar_VisHeader* vis)
 {
     return vis->num_stations;
+}
+
+int oskar_vis_header_phase_centre_coord_type(const oskar_VisHeader* vis)
+{
+    return vis->phase_centre_type;
+}
+
+double oskar_vis_header_phase_centre_ra_deg(const oskar_VisHeader* vis)
+{
+    return vis->phase_centre_deg[0];
+}
+
+double oskar_vis_header_phase_centre_dec_deg(const oskar_VisHeader* vis)
+{
+    return vis->phase_centre_deg[1];
 }
 
 double oskar_vis_header_freq_start_hz(const oskar_VisHeader* vis)
@@ -119,29 +144,19 @@ double oskar_vis_header_time_average_sec(const oskar_VisHeader* vis)
     return vis->time_average_sec;
 }
 
-double oskar_vis_header_phase_centre_ra_deg(const oskar_VisHeader* vis)
-{
-    return vis->phase_centre[0];
-}
-
-double oskar_vis_header_phase_centre_dec_deg(const oskar_VisHeader* vis)
-{
-    return vis->phase_centre[1];
-}
-
 double oskar_vis_header_telescope_lon_deg(const oskar_VisHeader* vis)
 {
-    return vis->telescope_centre[0];
+    return vis->telescope_centre_lon_deg;
 }
 
 double oskar_vis_header_telescope_lat_deg(const oskar_VisHeader* vis)
 {
-    return vis->telescope_centre[1];
+    return vis->telescope_centre_lat_deg;
 }
 
 double oskar_vis_header_telescope_alt_metres(const oskar_VisHeader* vis)
 {
-    return vis->telescope_centre[2];
+    return vis->telescope_centre_alt_m;
 }
 
 oskar_Mem* oskar_vis_header_station_x_offset_ecef_metres(oskar_VisHeader* vis)
@@ -212,18 +227,19 @@ void oskar_vis_header_set_time_average_sec(oskar_VisHeader* vis, double value)
 }
 
 void oskar_vis_header_set_phase_centre(oskar_VisHeader* vis,
-        double ra_deg, double dec_deg)
+        int coord_type, double ra_deg, double dec_deg)
 {
-    vis->phase_centre[0] = ra_deg;
-    vis->phase_centre[1] = dec_deg;
+    vis->phase_centre_type = coord_type;
+    vis->phase_centre_deg[0] = ra_deg;
+    vis->phase_centre_deg[1] = dec_deg;
 }
 
 void oskar_vis_header_set_telescope_centre(oskar_VisHeader* vis,
         double lon_deg, double lat_deg, double alt_metres)
 {
-    vis->telescope_centre[0] = lon_deg;
-    vis->telescope_centre[1] = lat_deg;
-    vis->telescope_centre[2] = alt_metres;
+    vis->telescope_centre_lon_deg = lon_deg;
+    vis->telescope_centre_lat_deg = lat_deg;
+    vis->telescope_centre_alt_m = alt_metres;
 }
 
 #ifdef __cplusplus

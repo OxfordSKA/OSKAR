@@ -40,7 +40,8 @@ oskar_VisHeader* oskar_vis_header_read(oskar_Binary* h, int* status)
 {
     /* Visibility metadata. */
     int num_channels = 0, num_times_total = 0, num_stations = 0, tag_error = 0;
-    int amp_type = 0, max_times_per_block = 0, write_autocorr = 0;
+    int amp_type = 0, coord_precision = 0, max_times_per_block = 0;
+    int write_crosscorr = 0, write_autocorr = 0;
     unsigned char grp = OSKAR_TAG_GROUP_VIS_HEADER;
     oskar_VisHeader* vis = 0;
 
@@ -55,10 +56,16 @@ oskar_VisHeader* oskar_vis_header_read(oskar_Binary* h, int* status)
     if (*status) return 0;
 
     /* Read essential metadata. */
-    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_WRITE_AUTOCORRELATIONS, 0,
+    oskar_binary_read_int(h, grp,
+            OSKAR_VIS_HEADER_TAG_WRITE_AUTO_CORRELATIONS, 0,
             &write_autocorr, status);
+    oskar_binary_read_int(h, grp,
+            OSKAR_VIS_HEADER_TAG_WRITE_CROSS_CORRELATIONS, 0,
+            &write_crosscorr, status);
     oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_AMP_TYPE, 0,
             &amp_type, status);
+    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_COORD_PRECISION, 0,
+            &coord_precision, status);
     oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_MAX_TIMES_PER_BLOCK, 0,
             &max_times_per_block, status);
     oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_NUM_TIMES_TOTAL, 0,
@@ -72,9 +79,9 @@ oskar_VisHeader* oskar_vis_header_read(oskar_Binary* h, int* status)
     if (*status) return 0;
 
     /* Create the visibility header. */
-    vis = oskar_vis_header_create(amp_type, max_times_per_block,
-            num_times_total, num_channels, num_stations, write_autocorr,
-            status);
+    vis = oskar_vis_header_create(amp_type, coord_precision,
+            max_times_per_block, num_times_total, num_channels, num_stations,
+            write_autocorr, write_crosscorr, status);
 
     /* Read the number of tags per block. */
     oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_NUM_TAGS_PER_BLOCK, 0,
@@ -90,6 +97,12 @@ oskar_VisHeader* oskar_vis_header_read(oskar_Binary* h, int* status)
             grp, OSKAR_VIS_HEADER_TAG_TELESCOPE_PATH, 0, status);
 
     /* Read other visibility metadata. */
+    oskar_binary_read_int(h, grp,
+            OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_COORD_TYPE, 0,
+            &vis->phase_centre_type, status);
+    oskar_binary_read(h, OSKAR_DOUBLE, grp,
+            OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_DEG, 0,
+            2 * sizeof(double), &vis->phase_centre_deg, status);
     oskar_binary_read_double(h, grp, OSKAR_VIS_HEADER_TAG_FREQ_START_HZ, 0,
             &vis->freq_start_hz, status);
     oskar_binary_read_double(h, grp, OSKAR_VIS_HEADER_TAG_FREQ_INC_HZ, 0,
@@ -104,12 +117,15 @@ oskar_VisHeader* oskar_vis_header_read(oskar_Binary* h, int* status)
     oskar_binary_read_double(h, grp,
             OSKAR_VIS_HEADER_TAG_TIME_AVERAGE_SEC, 0,
             &vis->time_average_sec, status);
-    oskar_binary_read(h, OSKAR_DOUBLE, grp,
-            OSKAR_VIS_HEADER_TAG_PHASE_CENTRE, 0,
-            2 * sizeof(double), &vis->phase_centre, status);
-    oskar_binary_read(h, OSKAR_DOUBLE, grp,
-            OSKAR_VIS_HEADER_TAG_TELESCOPE_CENTRE, 0,
-            3 * sizeof(double), vis->telescope_centre, status);
+    oskar_binary_read_double(h, grp,
+            OSKAR_VIS_HEADER_TAG_TELESCOPE_REF_LON_DEG, 0,
+            &vis->telescope_centre_lon_deg, status);
+    oskar_binary_read_double(h, grp,
+            OSKAR_VIS_HEADER_TAG_TELESCOPE_REF_LAT_DEG, 0,
+            &vis->telescope_centre_lat_deg, status);
+    oskar_binary_read_double(h, grp,
+            OSKAR_VIS_HEADER_TAG_TELESCOPE_REF_ALT_M, 0,
+            &vis->telescope_centre_alt_m, status);
 
     /* Read the station coordinates. */
     oskar_binary_read_mem(h, vis->station_x_offset_ecef_metres,

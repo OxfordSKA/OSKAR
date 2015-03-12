@@ -79,24 +79,9 @@ int oskar_vis_block_has_auto_correlations(const oskar_VisBlock* vis)
     return (oskar_mem_length(vis->auto_correlations) > 0);
 }
 
-double oskar_vis_block_freq_ref_hz(const oskar_VisBlock* vis)
+int oskar_vis_block_has_cross_correlations(const oskar_VisBlock* vis)
 {
-    return vis->freq_ref_inc_hz[0];
-}
-
-double oskar_vis_block_freq_inc_hz(const oskar_VisBlock* vis)
-{
-    return vis->freq_ref_inc_hz[1];
-}
-
-double oskar_vis_block_time_ref_mjd_utc(const oskar_VisBlock* vis)
-{
-    return vis->time_ref_inc_mjd_utc[0];
-}
-
-double oskar_vis_block_time_inc_mjd_utc(const oskar_VisBlock* vis)
-{
-    return vis->time_ref_inc_mjd_utc[1];
+    return (oskar_mem_length(vis->cross_correlations) > 0);
 }
 
 oskar_Mem* oskar_vis_block_baseline_uu_metres(oskar_VisBlock* vis)

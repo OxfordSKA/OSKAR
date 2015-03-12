@@ -69,7 +69,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     x_metres     = oskar_vis_header_station_x_offset_ecef_metres_const(hdr);
     y_metres     = oskar_vis_header_station_y_offset_ecef_metres_const(hdr);
     z_metres     = oskar_vis_header_station_z_offset_ecef_metres_const(hdr);
-    autocorr     = oskar_vis_header_write_autocorrelations(hdr);
+    autocorr     = oskar_vis_header_write_auto_correlations(hdr);
     num_pols     = oskar_mem_type_is_matrix(amp_type) ? 4 : 1;
 
     /* Force creation of polarised output data if flag is set. */

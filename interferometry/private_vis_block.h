@@ -59,9 +59,6 @@ struct oskar_VisBlock
      * and maximum dimension sizes: time, channel, baseline, station. */
     int dim_start_size[6];
 
-    double freq_ref_inc_hz[2];      /* Global frequency start and increment, in Hz. */
-    double time_ref_inc_mjd_utc[2]; /* Global time start and increment in MJD(UTC). */
-
     /* Cross-correlation amplitude array has size:
      *     num_baselines * num_times * num_channels.
      * Autocorrelation amplitude array has size:

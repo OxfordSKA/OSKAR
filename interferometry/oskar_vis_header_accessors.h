@@ -44,7 +44,8 @@ OSKAR_EXPORT
 oskar_Mem* oskar_vis_header_telescope_path(oskar_VisHeader* vis);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_vis_header_telescope_path_const(const oskar_VisHeader* vis);
+const oskar_Mem* oskar_vis_header_telescope_path_const(
+        const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_header_settings(oskar_VisHeader* vis);
@@ -56,10 +57,16 @@ OSKAR_EXPORT
 int oskar_vis_header_num_tags_per_block(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
-int oskar_vis_header_write_autocorrelations(const oskar_VisHeader* vis);
+int oskar_vis_header_write_auto_correlations(const oskar_VisHeader* vis);
+
+OSKAR_EXPORT
+int oskar_vis_header_write_cross_correlations(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
 int oskar_vis_header_amp_type(const oskar_VisHeader* vis);
+
+OSKAR_EXPORT
+int oskar_vis_header_coord_precision(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
 int oskar_vis_header_max_times_per_block(const oskar_VisHeader* vis);
@@ -72,6 +79,15 @@ int oskar_vis_header_num_times_total(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
 int oskar_vis_header_num_stations(const oskar_VisHeader* vis);
+
+OSKAR_EXPORT
+int oskar_vis_header_phase_centre_coord_type(const oskar_VisHeader* vis);
+
+OSKAR_EXPORT
+double oskar_vis_header_phase_centre_ra_deg(const oskar_VisHeader* vis);
+
+OSKAR_EXPORT
+double oskar_vis_header_phase_centre_dec_deg(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
 double oskar_vis_header_freq_start_hz(const oskar_VisHeader* vis);
@@ -92,12 +108,6 @@ OSKAR_EXPORT
 double oskar_vis_header_time_average_sec(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
-double oskar_vis_header_phase_centre_ra_deg(const oskar_VisHeader* vis);
-
-OSKAR_EXPORT
-double oskar_vis_header_phase_centre_dec_deg(const oskar_VisHeader* vis);
-
-OSKAR_EXPORT
 double oskar_vis_header_telescope_lon_deg(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
@@ -110,19 +120,22 @@ OSKAR_EXPORT
 oskar_Mem* oskar_vis_header_station_x_offset_ecef_metres(oskar_VisHeader* vis);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_vis_header_station_x_offset_ecef_metres_const(const oskar_VisHeader* vis);
+const oskar_Mem* oskar_vis_header_station_x_offset_ecef_metres_const(
+        const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_header_station_y_offset_ecef_metres(oskar_VisHeader* vis);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_vis_header_station_y_offset_ecef_metres_const(const oskar_VisHeader* vis);
+const oskar_Mem* oskar_vis_header_station_y_offset_ecef_metres_const(
+        const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_header_station_z_offset_ecef_metres(oskar_VisHeader* vis);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_vis_header_station_z_offset_ecef_metres_const(const oskar_VisHeader* vis);
+const oskar_Mem* oskar_vis_header_station_z_offset_ecef_metres_const(
+        const oskar_VisHeader* vis);
 
 
 /* Setters. */
@@ -133,10 +146,12 @@ OSKAR_EXPORT
 void oskar_vis_header_set_freq_inc_hz(oskar_VisHeader* vis, double value);
 
 OSKAR_EXPORT
-void oskar_vis_header_set_channel_bandwidth_hz(oskar_VisHeader* vis, double value);
+void oskar_vis_header_set_channel_bandwidth_hz(oskar_VisHeader* vis,
+        double value);
 
 OSKAR_EXPORT
-void oskar_vis_header_set_time_start_mjd_utc(oskar_VisHeader* vis, double value);
+void oskar_vis_header_set_time_start_mjd_utc(oskar_VisHeader* vis,
+        double value);
 
 OSKAR_EXPORT
 void oskar_vis_header_set_time_inc_sec(oskar_VisHeader* vis, double value);
@@ -145,11 +160,12 @@ OSKAR_EXPORT
 void oskar_vis_header_set_time_average_sec(oskar_VisHeader* vis, double value);
 
 OSKAR_EXPORT
-void oskar_vis_header_set_phase_centre(oskar_VisHeader* vis, double ra_deg, double dec_deg);
+void oskar_vis_header_set_phase_centre(oskar_VisHeader* vis,
+        int coord_type, double ra_deg, double dec_deg);
 
 OSKAR_EXPORT
-void oskar_vis_header_set_telescope_centre(oskar_VisHeader* vis, double lon_deg,
-        double lat_deg, double alt_metres);
+void oskar_vis_header_set_telescope_centre(oskar_VisHeader* vis,
+        double lon_deg, double lat_deg, double alt_metres);
 
 #ifdef __cplusplus
 }

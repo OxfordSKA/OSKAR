@@ -35,8 +35,7 @@ extern "C" {
 
 oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
         int num_times, int num_channels, int num_stations, int create_autocorr,
-        double freq_ref_hz, double freq_inc_hz, double time_ref_mjd_utc,
-        double time_inc_mjd_utc, int* status)
+        int create_crosscorr, int* status)
 {
     oskar_VisBlock* vis = 0;
     int num_autocorr = 0, num_xcorr = 0, num_baselines = 0, num_coords = 0;
@@ -69,23 +68,18 @@ oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
     vis = (oskar_VisBlock*) malloc(sizeof(oskar_VisBlock));
 
     /* Set dimensions. */
-    num_baselines = num_stations * (num_stations - 1) / 2;
+    if (create_crosscorr)
+        num_baselines = num_stations * (num_stations - 1) / 2;
     vis->dim_start_size[0] = 0; /* Global time index start of block. */
     vis->dim_start_size[1] = 0; /* Global frequency index start of block. */
     vis->dim_start_size[2] = num_times;
     vis->dim_start_size[3] = num_channels;
     vis->dim_start_size[4] = num_baselines;
     vis->dim_start_size[5] = num_stations;
-    num_xcorr    = num_channels * num_times * num_baselines;
-    num_coords   = num_times * num_baselines;
+    num_coords = num_times * num_baselines;
+    num_xcorr  = num_times * num_baselines * num_channels;
     if (create_autocorr)
         num_autocorr = num_channels * num_times * num_stations;
-
-    /* Set meta-data. */
-    vis->freq_ref_inc_hz[0] = freq_ref_hz;
-    vis->freq_ref_inc_hz[1] = freq_inc_hz;
-    vis->time_ref_inc_mjd_utc[0] = time_ref_mjd_utc;
-    vis->time_ref_inc_mjd_utc[1] = time_inc_mjd_utc;
 
     /* Create arrays. */
     vis->baseline_uu_metres = oskar_mem_create(type, location,
@@ -105,6 +99,7 @@ oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
     vis->a1 = oskar_mem_create(OSKAR_INT, OSKAR_CPU, num_baselines, status);
     vis->a2 = oskar_mem_create(OSKAR_INT, OSKAR_CPU, num_baselines, status);
 
+    /* TODO Move these to oskar_MeasurementSet. */
     /* Evaluate baseline index arrays for Measurement Set export. */
     b_s1 = oskar_mem_int(vis->a1, status);
     b_s2 = oskar_mem_int(vis->a2, status);

@@ -68,16 +68,7 @@ OSKAR_EXPORT
 int oskar_vis_block_has_auto_correlations(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
-double oskar_vis_block_freq_ref_hz(const oskar_VisBlock* vis);
-
-OSKAR_EXPORT
-double oskar_vis_block_freq_inc_hz(const oskar_VisBlock* vis);
-
-OSKAR_EXPORT
-double oskar_vis_block_time_ref_mjd_utc(const oskar_VisBlock* vis);
-
-OSKAR_EXPORT
-double oskar_vis_block_time_inc_mjd_utc(const oskar_VisBlock* vis);
+int oskar_vis_block_has_cross_correlations(const oskar_VisBlock* vis);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_vis_block_baseline_uu_metres(oskar_VisBlock* vis);

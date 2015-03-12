@@ -85,11 +85,17 @@ oskar_Binary* oskar_vis_header_write(const oskar_VisHeader* hdr,
 
     /* Write dimensions. */
     oskar_binary_write_int(h, grp,
-            OSKAR_VIS_HEADER_TAG_WRITE_AUTOCORRELATIONS, 0,
+            OSKAR_VIS_HEADER_TAG_WRITE_AUTO_CORRELATIONS, 0,
             hdr->write_autocorr, status);
     oskar_binary_write_int(h, grp,
+            OSKAR_VIS_HEADER_TAG_WRITE_CROSS_CORRELATIONS, 0,
+            hdr->write_crosscorr, status);
+    oskar_binary_write_int(h, grp,
             OSKAR_VIS_HEADER_TAG_AMP_TYPE, 0,
-            oskar_vis_header_amp_type(hdr), status);
+            hdr->amp_type, status);
+    oskar_binary_write_int(h, grp,
+            OSKAR_VIS_HEADER_TAG_COORD_PRECISION, 0,
+            hdr->coord_precision, status);
     oskar_binary_write_int(h, grp,
             OSKAR_VIS_HEADER_TAG_MAX_TIMES_PER_BLOCK, 0,
             hdr->max_times_per_block, status);
@@ -102,6 +108,12 @@ oskar_Binary* oskar_vis_header_write(const oskar_VisHeader* hdr,
             OSKAR_VIS_HEADER_TAG_NUM_STATIONS, 0, hdr->num_stations, status);
 
     /* Write other visibility metadata. */
+    oskar_binary_write_int(h, grp,
+            OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_COORD_TYPE, 0,
+            hdr->phase_centre_type, status);
+    oskar_binary_write(h, OSKAR_DOUBLE, grp,
+            OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_DEG, 0,
+            2 * sizeof(double), hdr->phase_centre_deg, status);
     oskar_binary_write_double(h, grp,
             OSKAR_VIS_HEADER_TAG_FREQ_START_HZ, 0, hdr->freq_start_hz, status);
     oskar_binary_write_double(h, grp,
@@ -117,12 +129,15 @@ oskar_Binary* oskar_vis_header_write(const oskar_VisHeader* hdr,
     oskar_binary_write_double(h, grp,
             OSKAR_VIS_HEADER_TAG_TIME_AVERAGE_SEC, 0,
             hdr->time_average_sec, status);
-    oskar_binary_write(h, OSKAR_DOUBLE, grp,
-            OSKAR_VIS_HEADER_TAG_PHASE_CENTRE, 0,
-            2 * sizeof(double), hdr->phase_centre, status);
-    oskar_binary_write(h, OSKAR_DOUBLE, grp,
-            OSKAR_VIS_HEADER_TAG_TELESCOPE_CENTRE, 0,
-            3 * sizeof(double), hdr->telescope_centre, status);
+    oskar_binary_write_double(h, grp,
+            OSKAR_VIS_HEADER_TAG_TELESCOPE_REF_LON_DEG, 0,
+            hdr->telescope_centre_lon_deg, status);
+    oskar_binary_write_double(h, grp,
+            OSKAR_VIS_HEADER_TAG_TELESCOPE_REF_LAT_DEG, 0,
+            hdr->telescope_centre_lat_deg, status);
+    oskar_binary_write_double(h, grp,
+            OSKAR_VIS_HEADER_TAG_TELESCOPE_REF_ALT_M, 0,
+            hdr->telescope_centre_alt_m, status);
 
     /* Write the station coordinates. */
     oskar_binary_write_mem(h, hdr->station_x_offset_ecef_metres, grp,

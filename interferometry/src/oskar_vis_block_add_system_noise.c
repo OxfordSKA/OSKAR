@@ -272,15 +272,16 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
 }
 
 void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
-        const oskar_Telescope* telescope, unsigned int seed,
-        unsigned int block_index, oskar_Mem* station_work, int* status)
+        const oskar_VisHeader* header, const oskar_Telescope* telescope,
+        unsigned int seed, unsigned int block_index, oskar_Mem* station_work,
+        int* status)
 {
     int c, num_channels;
     double freq_hz, freq_start_hz, freq_inc_hz;
     double channel_bandwidth_hz, time_int_sec;
 
     /* Check all inputs. */
-    if (!vis || !telescope || !station_work || !status)
+    if (!vis || !header || !telescope || !station_work || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -298,11 +299,11 @@ void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
     }
 
     /* Get frequency start and increment. */
-    channel_bandwidth_hz = oskar_telescope_channel_bandwidth_hz(telescope);
-    time_int_sec         = oskar_telescope_time_average_sec(telescope);
     num_channels         = oskar_vis_block_num_channels(vis);
-    freq_start_hz        = oskar_vis_block_freq_ref_hz(vis);
-    freq_inc_hz          = oskar_vis_block_freq_inc_hz(vis);
+    channel_bandwidth_hz = oskar_vis_header_channel_bandwidth_hz(header);
+    time_int_sec         = oskar_vis_header_time_average_sec(header);
+    freq_start_hz        = oskar_vis_header_freq_start_hz(header);
+    freq_inc_hz          = oskar_vis_header_freq_inc_hz(header);
 
     /* Apply noise to each channel. */
     for (c = 0; c < num_channels; ++c)

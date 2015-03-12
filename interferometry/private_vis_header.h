@@ -37,25 +37,30 @@
  */
 struct oskar_VisHeader
 {
-    oskar_Mem* telescope_path;   /* Path to telescope model. */
-    oskar_Mem* settings;         /* Settings file contents. */
+    oskar_Mem* settings;             /* Settings file contents. */
+    oskar_Mem* telescope_path;       /* Path to telescope model. */
 
-    int num_tags_per_block;      /* Number of tags per block in binary file. */
-    int write_autocorr;          /* Flag set if autocorrelations will be written. */
-    int amp_type;                /* Memory type of the amplitudes. */
-    int max_times_per_block;     /* Maximum number of time samples per block. */
-    int num_times_total;         /* Total number of time samples. */
-    int num_channels;            /* Total number of channels. */
-    int num_stations;            /* Number of interferometer stations. */
+    int num_tags_per_block;          /* Number of tags per block in binary file. */
+    int write_autocorr;              /* True if auto-correlations are written. */
+    int write_crosscorr;             /* True if cross-correlations are written. */
+    int amp_type;                    /* Memory type of the amplitudes. */
+    int coord_precision;             /* Memory type of the coordinates. */
+    int max_times_per_block;         /* Maximum no. time samples per block. */
+    int num_times_total;             /* Total no. time samples. */
+    int num_channels;                /* Total no. channels. */
+    int num_stations;                /* No. interferometer stations. */
 
-    double freq_start_hz;        /* Start frequency, in Hz. */
-    double freq_inc_hz;          /* Frequency increment, in Hz. */
-    double channel_bandwidth_hz; /* Frequency channel bandwidth, in Hz. */
-    double time_start_mjd_utc;   /* Start time in MJD, UTC. */
-    double time_inc_sec;         /* Smallest time increment, in seconds. */
-    double time_average_sec;     /* Time average smearing duration, in seconds. */
-    double phase_centre[2];      /* Phase centre RA, Dec coordinates, in degrees. */
-    double telescope_centre[3];  /* Reference longitude [deg], latitude [deg] and altitude [m] of the telescope. */
+    int phase_centre_type;           /* Phase centre coordinate type. */
+    double phase_centre_deg[2];      /* Phase centre coordinates [deg]. */
+    double freq_start_hz;            /* Start frequency [Hz]. */
+    double freq_inc_hz;              /* Frequency increment [Hz]. */
+    double channel_bandwidth_hz;     /* Frequency channel bandwidth [Hz]. */
+    double time_start_mjd_utc;       /* Start time [MJD(UTC)]. */
+    double time_inc_sec;             /* Smallest time increment [s]. */
+    double time_average_sec;         /* Time average smearing duration [s]. */
+    double telescope_centre_lon_deg; /* Telescope reference longitude [deg]. */
+    double telescope_centre_lat_deg; /* Telescope reference latitude [deg]. */
+    double telescope_centre_alt_m;   /* Telescope reference altitude [m]. */
 
     oskar_Mem* station_x_offset_ecef_metres; /* Station x-coordinate, in metres (offset ECEF). */
     oskar_Mem* station_y_offset_ecef_metres; /* Station y-coordinate, in metres (offset ECEF). */

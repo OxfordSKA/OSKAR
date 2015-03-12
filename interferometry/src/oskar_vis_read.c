@@ -238,8 +238,7 @@ oskar_Vis* oskar_vis_read_new(oskar_Binary* h, int* status)
 
     /* Create a visibility block to read into. */
     blk = oskar_vis_block_create(amp_type, OSKAR_CPU, max_times_per_block,
-            num_channels, num_stations, 0, freq_ref_hz, freq_inc_hz,
-            time_ref_mjd_utc, (time_inc_sec / 86400.0), status);
+            num_channels, num_stations, 0, 1, status);
     amp = oskar_vis_amplitude(vis);
     xcorr = oskar_vis_block_cross_correlations_const(blk);
 

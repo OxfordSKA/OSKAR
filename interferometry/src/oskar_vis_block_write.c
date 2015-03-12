@@ -54,36 +54,33 @@ void oskar_vis_block_write(const oskar_VisBlock* vis, oskar_Binary* h,
             OSKAR_TAG_GROUP_VIS_BLOCK,
             OSKAR_VIS_BLOCK_TAG_DIM_START_AND_SIZE, block_index,
             sizeof(int) * 6, vis->dim_start_size, status);
-    oskar_binary_write(h, OSKAR_DOUBLE,
-            OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_FREQ_REF_INC_HZ, block_index,
-            sizeof(double) * 2, vis->freq_ref_inc_hz, status);
-    oskar_binary_write(h, OSKAR_DOUBLE,
-            OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_TIME_REF_INC_MJD_UTC, block_index,
-            sizeof(double) * 2, vis->time_ref_inc_mjd_utc, status);
 
-    /* Write the visibility data. */
+    /* Write the auto-correlation data. */
     if (oskar_vis_block_has_auto_correlations(vis))
     {
         oskar_binary_write_mem(h, vis->auto_correlations,
                 OSKAR_TAG_GROUP_VIS_BLOCK,
                 OSKAR_VIS_BLOCK_TAG_AUTO_CORRELATIONS, block_index, 0, status);
     }
-    oskar_binary_write_mem(h, vis->cross_correlations,
-            OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_CROSS_CORRELATIONS, block_index, 0, status);
 
-    /* Write the baseline data. */
-    oskar_binary_write_mem(h, vis->baseline_uu_metres,
-            OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_BASELINE_UU, block_index, 0, status);
-    oskar_binary_write_mem(h, vis->baseline_vv_metres,
-            OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_BASELINE_VV, block_index, 0, status);
-    oskar_binary_write_mem(h, vis->baseline_ww_metres,
-            OSKAR_TAG_GROUP_VIS_BLOCK,
-            OSKAR_VIS_BLOCK_TAG_BASELINE_WW, block_index, 0, status);
+    /* Write the cross-correlation data. */
+    if (oskar_vis_block_has_cross_correlations(vis))
+    {
+        oskar_binary_write_mem(h, vis->cross_correlations,
+                OSKAR_TAG_GROUP_VIS_BLOCK,
+                OSKAR_VIS_BLOCK_TAG_CROSS_CORRELATIONS, block_index, 0, status);
+
+        /* Write the baseline coordinate data. */
+        oskar_binary_write_mem(h, vis->baseline_uu_metres,
+                OSKAR_TAG_GROUP_VIS_BLOCK,
+                OSKAR_VIS_BLOCK_TAG_BASELINE_UU, block_index, 0, status);
+        oskar_binary_write_mem(h, vis->baseline_vv_metres,
+                OSKAR_TAG_GROUP_VIS_BLOCK,
+                OSKAR_VIS_BLOCK_TAG_BASELINE_VV, block_index, 0, status);
+        oskar_binary_write_mem(h, vis->baseline_ww_metres,
+                OSKAR_TAG_GROUP_VIS_BLOCK,
+                OSKAR_VIS_BLOCK_TAG_BASELINE_WW, block_index, 0, status);
+    }
 }
 
 #ifdef __cplusplus

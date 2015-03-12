@@ -43,6 +43,7 @@ oskar_VisHeader* oskar_set_up_vis_header(const oskar_Settings* settings,
     oskar_VisHeader* hdr;
     const double rad2deg = 180.0/M_PI;
     int write_autocorr = 0; /* FIXME Get this from settings. */
+    int write_crosscorr = 0; /* FIXME Get this from settings. */
 
     /* Check all inputs. */
     if (!settings || !tel || !status)
@@ -62,9 +63,9 @@ oskar_VisHeader* oskar_set_up_vis_header(const oskar_Settings* settings,
     vis_type = precision | OSKAR_COMPLEX;
     if (oskar_telescope_pol_mode(tel) == OSKAR_POL_MODE_FULL)
         vis_type |= OSKAR_MATRIX;
-    hdr = oskar_vis_header_create(vis_type, max_times_per_block,
+    hdr = oskar_vis_header_create(vis_type, precision, max_times_per_block,
             settings->obs.num_time_steps, num_channels, num_stations,
-            write_autocorr, status);
+            write_autocorr, write_crosscorr, status);
 
     /* Add metadata from settings. */
     oskar_vis_header_set_freq_start_hz(hdr,
@@ -95,7 +96,7 @@ oskar_VisHeader* oskar_set_up_vis_header(const oskar_Settings* settings,
             oskar_telescope_time_average_sec(tel));
     oskar_vis_header_set_channel_bandwidth_hz(hdr,
             oskar_telescope_channel_bandwidth_hz(tel));
-    oskar_vis_header_set_phase_centre(hdr,
+    oskar_vis_header_set_phase_centre(hdr, 0,
             oskar_telescope_phase_centre_ra_rad(tel) * rad2deg,
             oskar_telescope_phase_centre_dec_rad(tel) * rad2deg);
     oskar_vis_header_set_telescope_centre(hdr,

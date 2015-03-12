@@ -42,7 +42,7 @@ extern "C" {
 void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
         const char* filename, int* status)
 {
-    int amp_type, i, num_baselines, num_blocks, num_channels;
+    int amp_type, coord_precision, i, num_baselines, num_blocks, num_channels;
     int num_stations, num_times;
     double freq_ref_hz, freq_inc_hz, time_ref_mjd_utc, time_inc_sec;
 #if 0
@@ -72,11 +72,13 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
 
     /* Create a header. */
     amp_type = oskar_mem_type(oskar_vis_amplitude_const(vis));
+    coord_precision = oskar_mem_type(oskar_vis_baseline_uu_metres_const(vis));
     num_channels = oskar_vis_num_channels(vis);
     num_stations = oskar_vis_num_stations(vis);
     num_times = oskar_vis_num_times(vis);
-    hdr = oskar_vis_header_create(amp_type, max_times_per_block,
-            num_times, num_channels, num_stations, 0, status);
+    hdr = oskar_vis_header_create(amp_type, coord_precision,
+            max_times_per_block, num_times, num_channels, num_stations,
+            0, 1, status);
 
     /* Copy station coordinates and metadata. */
     freq_ref_hz = oskar_vis_freq_start_hz(vis);
@@ -97,7 +99,7 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
             oskar_vis_channel_bandwidth_hz(vis));
     oskar_vis_header_set_freq_inc_hz(hdr, freq_inc_hz);
     oskar_vis_header_set_freq_start_hz(hdr, freq_ref_hz);
-    oskar_vis_header_set_phase_centre(hdr,
+    oskar_vis_header_set_phase_centre(hdr, 0,
             oskar_vis_phase_centre_ra_deg(vis),
             oskar_vis_phase_centre_dec_deg(vis));
     oskar_vis_header_set_telescope_centre(hdr,
@@ -114,8 +116,7 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
 
     /* Create a visibility block to copy into. */
     blk = oskar_vis_block_create(amp_type, OSKAR_CPU,
-            max_times_per_block, num_channels, num_stations, 0, freq_ref_hz,
-            freq_inc_hz, time_ref_mjd_utc, (time_inc_sec / 86400.0), status);
+            max_times_per_block, num_channels, num_stations, 0, 1, status);
     num_baselines = oskar_vis_block_num_baselines(blk);
     amp = oskar_vis_amplitude_const(vis);
     xcorr = oskar_vis_block_cross_correlations(blk);

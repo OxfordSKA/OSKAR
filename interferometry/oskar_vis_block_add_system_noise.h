@@ -35,6 +35,7 @@
 
 #include <oskar_global.h>
 #include <oskar_telescope.h>
+#include <oskar_vis_header.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,8 +53,9 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
-        const oskar_Telescope* telescope, unsigned int seed,
-        unsigned int block_index, oskar_Mem* station_work, int* status);
+        const oskar_VisHeader* header, const oskar_Telescope* telescope,
+        unsigned int seed, unsigned int block_index, oskar_Mem* station_work,
+        int* status);
 
 #ifdef __cplusplus
 }

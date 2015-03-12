@@ -515,8 +515,8 @@ static void write_vis_block(int num_gpus, DeviceData* d, HostData* h,
             oskar_telescope_phase_centre_ra_rad(h->tel),
             oskar_telescope_phase_centre_dec_rad(h->tel),
             oskar_vis_block_num_times(b0),
-            oskar_vis_block_time_ref_mjd_utc(b0),
-            oskar_vis_block_time_inc_mjd_utc(b0),
+            oskar_vis_header_time_start_mjd_utc(h->header),
+            oskar_vis_header_time_inc_sec(h->header) / 86400.0,
             oskar_vis_block_start_time_index(b0),
             oskar_vis_block_baseline_uu_metres(b0),
             oskar_vis_block_baseline_vv_metres(b0),
@@ -524,7 +524,7 @@ static void write_vis_block(int num_gpus, DeviceData* d, HostData* h,
 
     /* Add uncorrelated system noise to the combined visibilities. */
     if (h->s.interferometer.noise.enable)
-        oskar_vis_block_add_system_noise(b0, h->tel,
+        oskar_vis_block_add_system_noise(b0, h->header, h->tel,
                 h->s.interferometer.noise.seed, block_index, h->temp, status);
 
     /* Write the combined vis block to whichever file handles are open. */
@@ -557,17 +557,17 @@ static void sim_baselines(DeviceData* d, oskar_Sky* sky,
     if (num_src == 0 || time_index_block >= num_times_block) return;
 
     /* Get the time and frequency of the visibility slice being simulated. */
-    dt_dump = oskar_vis_block_time_inc_mjd_utc(d->vis_block);
-    t_start = oskar_vis_block_time_ref_mjd_utc(d->vis_block);
+    dt_dump = settings->obs.dt_dump_days;
+    t_start = settings->obs.start_mjd_utc;
     t_dump = t_start + dt_dump * (time_index_simulation + 0.5);
     gast = oskar_convert_mjd_to_gast_fast(t_dump);
-    frequency = oskar_vis_block_freq_ref_hz(d->vis_block) +
-            channel_index_block * oskar_vis_block_freq_inc_hz(d->vis_block);
+    frequency = settings->obs.start_frequency_hz +
+            channel_index_block * settings->obs.frequency_inc_hz;
 
     /* Scale sky fluxes with spectral index and rotation measure. */
     oskar_sky_scale_flux_with_frequency(sky, frequency, status);
 
-    /* Pull visibility pointer out for this time and channel. */
+    /* Pull out visibility pointer for this time and channel. */
     xcorr = oskar_mem_create_alias(
             oskar_vis_block_cross_correlations(d->vis_block), num_baselines *
             (num_channels * time_index_block + channel_index_block),
@@ -658,17 +658,13 @@ static void set_up_device_data(DeviceData* d, const oskar_Settings* s,
     int prec, complx, vistype;
     int num_stations, num_src, num_channels, num_times_block;
     int write_autocorr = 0; /* TODO Get from settings. */
-    double freq_ref_hz, freq_inc_hz, time_ref_mjd_utc, time_inc_mjd_utc;
+    int write_crosscorr = 1; /* TODO Get from settings. */
 
     /* Get local variables. */
     num_stations     = oskar_telescope_num_stations(tel);
     num_src          = s->sim.max_sources_per_chunk;
     num_channels     = s->obs.num_channels;
     num_times_block  = s->interferometer.max_time_samples_per_block;
-    freq_ref_hz      = s->obs.start_frequency_hz;
-    freq_inc_hz      = s->obs.frequency_inc_hz;
-    time_ref_mjd_utc = s->obs.start_mjd_utc;
-    time_inc_mjd_utc = s->obs.dt_dump_days;
     prec             = s->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     complx           = prec | OSKAR_COMPLEX;
     vistype          = complx;
@@ -677,19 +673,16 @@ static void set_up_device_data(DeviceData* d, const oskar_Settings* s,
 
     /* Host memory. */
     d->vis_block_cpu[0] = oskar_vis_block_create(vistype, OSKAR_CPU,
-            num_times_block, num_channels, num_stations, write_autocorr,
-            freq_ref_hz, freq_inc_hz, time_ref_mjd_utc, time_inc_mjd_utc,
-            status);
+            num_times_block, num_channels, num_stations,
+            write_autocorr, write_crosscorr, status);
     d->vis_block_cpu[1] = oskar_vis_block_create(vistype, OSKAR_CPU,
-            num_times_block, num_channels, num_stations, write_autocorr,
-            freq_ref_hz, freq_inc_hz, time_ref_mjd_utc, time_inc_mjd_utc,
-            status);
+            num_times_block, num_channels, num_stations,
+            write_autocorr, write_crosscorr, status);
 
     /* Device memory. */
     d->vis_block = oskar_vis_block_create(vistype, OSKAR_GPU,
-            num_times_block, num_channels, num_stations, write_autocorr,
-            freq_ref_hz, freq_inc_hz, time_ref_mjd_utc, time_inc_mjd_utc,
-            status);
+            num_times_block, num_channels, num_stations,
+            write_autocorr, write_crosscorr, status);
     d->u = oskar_mem_create(prec, OSKAR_GPU, num_stations, status);
     d->v = oskar_mem_create(prec, OSKAR_GPU, num_stations, status);
     d->w = oskar_mem_create(prec, OSKAR_GPU, num_stations, status);

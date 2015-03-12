@@ -51,19 +51,21 @@ extern "C" {
  * no longer required.
  *
  * @param[in] amp_type            OSKAR memory type for visibility amplitudes.
+ * @param[in] coord_precision     OSKAR memory type for coordinates.
  * @param[in] num_times_per_block Maximum number of time samples per block.
  * @param[in] num_times_total     Number of time samples in total.
  * @param[in] num_channels        Number of frequency channels.
  * @param[in] num_stations        Number of stations.
- * @param[in] write_autocorr      Set if autocorrelations should be written.
+ * @param[in] write_autocorr      Set if auto-correlations should be written.
+ * @param[in] write_crosscorr     Set if cross-correlations should be written.
  * @param[in,out]  status         Status return code.
  *
  * @return A handle to the new data structure.
  */
 OSKAR_EXPORT
-oskar_VisHeader* oskar_vis_header_create(int amp_type, int max_times_per_block,
-        int num_times_total, int num_channels, int num_stations,
-        int write_autocorr, int* status);
+oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
+        int max_times_per_block, int num_times_total, int num_channels,
+        int num_stations, int write_autocorr, int write_crossscor, int* status);
 
 #ifdef __cplusplus
 }
