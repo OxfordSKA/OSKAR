@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,7 @@
  * @file oskar_cuda_info_free.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_CudaInfo.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,10 +45,10 @@ extern "C" {
  * @details
  * This function frees memory held by a CUDA info structure.
  *
- * @param[in,out] info  Pointer to structure pointer to free.
+ * @param[in,out] info  Pointer to structure to free.
  */
 OSKAR_EXPORT
-int oskar_cuda_info_free(oskar_CudaInfo** info);
+void oskar_cuda_info_free(oskar_CudaInfo* info);
 
 #ifdef __cplusplus
 }

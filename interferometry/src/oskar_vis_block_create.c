@@ -49,16 +49,16 @@ oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
     }
 
     /* Check type. */
-    if (oskar_mem_type_is_double(amp_type))
+    if (oskar_type_is_double(amp_type))
         type = OSKAR_DOUBLE;
-    else if (oskar_mem_type_is_single(amp_type))
+    else if (oskar_type_is_single(amp_type))
         type = OSKAR_SINGLE;
     else
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return 0;
     }
-    if (!oskar_mem_type_is_complex(amp_type))
+    if (!oskar_type_is_complex(amp_type))
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return 0;

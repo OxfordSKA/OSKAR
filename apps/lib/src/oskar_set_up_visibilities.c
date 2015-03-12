@@ -114,7 +114,7 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
     /* Compute baseline u,v,w coordinates for simulation. */
     {
         oskar_Mem *work_uvw;
-        work_uvw = oskar_mem_create(oskar_mem_type_precision(vis_type),
+        work_uvw = oskar_mem_create(oskar_type_precision(vis_type),
                 OSKAR_CPU, 3 * num_stations, status);
         oskar_convert_ecef_to_baseline_uvw(
                 oskar_telescope_num_stations(tel),

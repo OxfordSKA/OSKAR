@@ -124,7 +124,7 @@ static void set_up_device_data(DeviceData* d, const oskar_Telescope* tel,
     d->E = oskar_jones_create(vistype, OSKAR_GPU, n_stations, n_src, status);
     d->K = oskar_jones_create(complx, OSKAR_GPU, n_stations, n_src, status);
     //d->Z = oskar_jones_create(complx, OSKAR_CPU, n_stations, n_src, status);
-    if (oskar_mem_type_is_matrix(vistype))
+    if (oskar_type_is_matrix(vistype))
         d->R = oskar_jones_create(vistype, OSKAR_GPU, n_stations, n_src,
                 status);
     //oskar_work_jones_z_init(&d->workJonesZ, type, OSKAR_CPU, status);

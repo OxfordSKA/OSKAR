@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <private_cuda_info.h>
 #include <oskar_cuda_info_log.h>
 #include <oskar_log.h>
 
@@ -33,7 +34,7 @@
 extern "C" {
 #endif
 
-int oskar_cuda_info_log(oskar_Log* log, const oskar_CudaInfo* info)
+void oskar_cuda_info_log(oskar_Log* log, const oskar_CudaInfo* info)
 {
     int i;
     char p = 'M'; /* Log entry priority = message */
@@ -92,8 +93,6 @@ int oskar_cuda_info_log(oskar_Log* log, const oskar_CudaInfo* info)
                 info->device[i].max_grid_size[1],
                 info->device[i].max_grid_size[2]);
     }
-
-    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

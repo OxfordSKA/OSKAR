@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,53 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_DEVICE_INFO_H_
-#define OSKAR_CUDA_DEVICE_INFO_H_
-
-/**
- * @file oskar_cuda_device_info.h
- */
+#ifndef OSKAR_PRIVATE_CUDA_INFO_H_
+#define OSKAR_PRIVATE_CUDA_INFO_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Structure to hold CUDA device information.
- *
- * @details
- * This structure holds information about a CUDA device.
- */
 struct oskar_CudaDeviceInfo
 {
-    char name[256];            /**< String holding device name. */
+    char name[256];            /* String holding device name. */
     union {
         struct {
-            int major;         /**< Compute capability, major version. */
-            int minor;         /**< Compute capability, minor version. */
+            int major;         /* Compute capability, major version. */
+            int minor;         /* Compute capability, minor version. */
         } capability;
         int version[2];
     } compute;
-    int supports_double;       /**< True if device supports double precision. */
-    int global_memory_size;    /**< Total size in kiB. */
-    int free_memory;           /**< Free memory in kiB. */
-    int num_multiprocessors;   /**< Number of multiprocessors. */
-    int num_cores;             /**< Number of CUDA cores. */
-    int gpu_clock;             /**< GPU clock speed in kHz. */
-    int memory_clock;          /**< Memory clock speed in kHz. */
-    int memory_bus_width;      /**< Memory bus width in bits. */
-    int level_2_cache_size;    /**< Cache size in bytes. */
-    int shared_memory_size;    /**< Shared memory per block in bytes. */
-    int num_registers;         /**< Number of registers per block. */
-    int warp_size;             /**< Warp size. */
-    int max_threads_per_block; /**< Maximum number of threads per block. */
-    int max_threads_dim[3];    /**< Maximum threads per dimension. */
-    int max_grid_size[3];      /**< Maximum grid size per dimension. */
+    int supports_double;       /* True if device supports double precision. */
+    int global_memory_size;    /* Total size in kiB. */
+    int free_memory;           /* Free memory in kiB. */
+    int num_multiprocessors;   /* Number of multiprocessors. */
+    int num_cores;             /* Number of CUDA cores. */
+    int gpu_clock;             /* GPU clock speed in kHz. */
+    int memory_clock;          /* Memory clock speed in kHz. */
+    int memory_bus_width;      /* Memory bus width in bits. */
+    int level_2_cache_size;    /* Cache size in bytes. */
+    int shared_memory_size;    /* Shared memory per block in bytes. */
+    int num_registers;         /* Number of registers per block. */
+    int warp_size;             /* Warp size. */
+    int max_threads_per_block; /* Maximum number of threads per block. */
+    int max_threads_dim[3];    /* Maximum threads per dimension. */
+    int max_grid_size[3];      /* Maximum grid size per dimension. */
 };
 typedef struct oskar_CudaDeviceInfo oskar_CudaDeviceInfo;
+
+struct oskar_CudaInfo
+{
+    int num_devices;              /* Number of installed CUDA devices. */
+    int driver_version;           /* CUDA driver version. */
+    int runtime_version;          /* CUDA runtime version. */
+    oskar_CudaDeviceInfo* device; /* Array of device info structures. */
+};
+typedef struct oskar_CudaInfo oskar_CudaInfo;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CUDA_DEVICE_INFO_H_ */
+#endif /* OSKAR_PRIVATE_CUDA_INFO_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,7 +82,7 @@ void oskar_mem_stats(const oskar_Mem* mem, size_t n, double* min, double* max,
 
     /* Check that the data type is single or double precision scalar. */
     type = oskar_mem_type(mem);
-    if (oskar_mem_type_is_complex(type) || oskar_mem_type_is_matrix(type))
+    if (oskar_type_is_complex(type) || oskar_type_is_matrix(type))
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;

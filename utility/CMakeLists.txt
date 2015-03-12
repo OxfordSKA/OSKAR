@@ -45,7 +45,6 @@ set(utility_SRC
     src/oskar_mem_stats.c
     src/oskar_scan_binary_file.c
     src/oskar_string_to_array.c
-    src/oskar_system_clock_data.c
     src/oskar_timer.c
     src/oskar_version_string.c
 )
@@ -53,7 +52,6 @@ set(utility_SRC
 if (CUDA_FOUND)
     list(APPEND utility_SRC
         src/oskar_cuda_check_error.c
-        src/oskar_cuda_device_info_scan.c
         src/oskar_cuda_info_create.c
         src/oskar_cuda_info_free.c
         src/oskar_cuda_info_log.c

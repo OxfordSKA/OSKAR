@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,7 +133,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
 
     /* Get the Jones matrix block meta-data. */
     jones_type = oskar_jones_type(R);
-    base_type = oskar_mem_type_precision(jones_type);
+    base_type = oskar_type_precision(jones_type);
     location = oskar_jones_mem_location(R);
     num_stations = oskar_jones_num_stations(R);
     n = (oskar_telescope_allow_station_beam_duplication(telescope) ? 1 : num_stations);
@@ -157,7 +157,7 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
     }
 
     /* Check that the data is of the right type. */
-    if (!oskar_mem_type_is_matrix(jones_type))
+    if (!oskar_type_is_matrix(jones_type))
     {
         *status = OSKAR_ERR_BAD_JONES_TYPE;
         return;

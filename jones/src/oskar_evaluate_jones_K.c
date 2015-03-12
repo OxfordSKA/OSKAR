@@ -154,7 +154,7 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
 
     /* Get the Jones matrix block meta-data. */
     jones_type = oskar_jones_type(K);
-    base_type = oskar_mem_type_precision(jones_type);
+    base_type = oskar_type_precision(jones_type);
     location = oskar_jones_mem_location(K);
     num_stations = oskar_jones_num_stations(K);
     wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
@@ -173,8 +173,8 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
     }
 
     /* Check that the data are of the right type. */
-    if (!oskar_mem_type_is_complex(jones_type) ||
-            oskar_mem_type_is_matrix(jones_type))
+    if (!oskar_type_is_complex(jones_type) ||
+            oskar_type_is_matrix(jones_type))
     {
         *status = OSKAR_ERR_BAD_JONES_TYPE;
         return;

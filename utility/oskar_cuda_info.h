@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,27 +33,23 @@
  * @file oskar_cuda_info.h
  */
 
-#include <oskar_CudaDeviceInfo.h>
+#include <oskar_global.h>
+
+/* Public interface. */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Structure to hold CUDA system information.
- *
- * @details
- * This structure holds information about the CUDA environment and
- * devices in the system.
- */
-struct oskar_CudaInfo
-{
-    int num_devices;              /**< Number of installed CUDA devices. */
-    int driver_version;           /**< CUDA driver version. */
-    int runtime_version;          /**< CUDA runtime version. */
-    oskar_CudaDeviceInfo* device; /**< Array of device info structures. */
-};
+struct oskar_CudaInfo;
+#ifndef OSKAR_CUDA_INFO_TYPEDEF_
+#define OSKAR_CUDA_INFO_TYPEDEF_
 typedef struct oskar_CudaInfo oskar_CudaInfo;
+#endif /* OSKAR_CUDA_INFO_TYPEDEF_ */
+
+#include <oskar_cuda_info_create.h>
+#include <oskar_cuda_info_free.h>
+#include <oskar_cuda_info_log.h>
 
 #ifdef __cplusplus
 }

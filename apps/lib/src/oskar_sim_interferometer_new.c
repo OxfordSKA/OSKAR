@@ -690,7 +690,7 @@ static void set_up_device_data(DeviceData* d, const oskar_Settings* s,
     d->local_sky = oskar_sky_create(prec, OSKAR_GPU, num_src, status);
     d->tel = oskar_telescope_create_copy(tel, OSKAR_GPU, status);
     d->J = oskar_jones_create(vistype, OSKAR_GPU, num_stations, num_src, status);
-    d->R = oskar_mem_type_is_matrix(vistype) ? oskar_jones_create(vistype,
+    d->R = oskar_type_is_matrix(vistype) ? oskar_jones_create(vistype,
             OSKAR_GPU, num_stations, num_src, status) : 0;
     d->E = oskar_jones_create(vistype, OSKAR_GPU, num_stations, num_src, status);
     d->K = oskar_jones_create(complx, OSKAR_GPU, num_stations, num_src, status);

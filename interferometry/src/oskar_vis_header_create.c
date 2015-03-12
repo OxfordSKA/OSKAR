@@ -47,7 +47,7 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
     }
 
     /* Check type. */
-    if (!oskar_mem_type_is_complex(amp_type))
+    if (!oskar_type_is_complex(amp_type))
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return 0;

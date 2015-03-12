@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_CudaInfo.h"
-#include "utility/oskar_cuda_info_create.h"
-#include "utility/oskar_cuda_device_info_scan.h"
+#include <private_cuda_info.h>
+#include <oskar_cuda_info_create.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -38,39 +37,154 @@
 extern "C" {
 #endif
 
-int oskar_cuda_info_create(oskar_CudaInfo** info)
+static void oskar_cuda_device_info_scan(oskar_CudaDeviceInfo* device, int id);
+
+oskar_CudaInfo* oskar_cuda_info_create(int* status)
 {
-    oskar_CudaInfo* inf;
+    oskar_CudaInfo* info;
     int error, i;
 
     /* Allocate index. */
-    inf = (oskar_CudaInfo*) malloc(sizeof(oskar_CudaInfo));
-    *info = inf;
+    info = (oskar_CudaInfo*) calloc(1, sizeof(oskar_CudaInfo));
 
     /* Get the runtime version and the driver version. */
-    cudaDriverGetVersion(&inf->driver_version);
-    cudaRuntimeGetVersion(&inf->runtime_version);
+    cudaDriverGetVersion(&info->driver_version);
+    cudaRuntimeGetVersion(&info->runtime_version);
 
     /* Query the number of devices in the system. */
-    error = cudaGetDeviceCount(&inf->num_devices);
-    if (error != cudaSuccess || inf->num_devices == 0)
+    *status = cudaGetDeviceCount(&info->num_devices);
+    if (*status != cudaSuccess || info->num_devices == 0)
     {
         fprintf(stderr, "Unable to determine number of CUDA devices: %s\n",
-                cudaGetErrorString((cudaError_t)error));
-        return error;
+                cudaGetErrorString((cudaError_t)(*status)));
+        return info;
     }
 
     /* Allocate array big enough. */
-    inf->device = (oskar_CudaDeviceInfo*) malloc(inf->num_devices *
+    info->device = (oskar_CudaDeviceInfo*) calloc(info->num_devices,
             sizeof(oskar_CudaDeviceInfo));
 
     /* Populate device array. */
-    for (i = 0; i < inf->num_devices; ++i)
+    for (i = 0; i < info->num_devices; ++i)
     {
-        oskar_cuda_device_info_scan(&(inf->device[i]), i);
+        oskar_cuda_device_info_scan(&(info->device[i]), i);
+    }
+    return info;
+}
+
+void oskar_cuda_device_info_scan(oskar_CudaDeviceInfo* device, int id)
+{
+    int arch, device_count = 0;
+    cudaError_t error;
+    struct cudaDeviceProp device_prop;
+    size_t total_memory = 0, free_memory = 0;
+
+    /* Set CUDA device. */
+    cudaSetDevice(id);
+
+    /* Set default values in case of errors. */
+    device->name[0] = 0;
+    device->compute.capability.major = 0;
+    device->compute.capability.minor = 0;
+    device->supports_double = 0;
+    device->global_memory_size = 0;
+    device->free_memory = 0;
+    device->num_multiprocessors = 0;
+    device->num_cores = 0;
+    device->gpu_clock = 0;
+    device->memory_clock = 0;
+    device->memory_bus_width = 0;
+    device->level_2_cache_size = 0;
+    device->shared_memory_size = 0;
+    device->num_registers = 0;
+    device->warp_size = 0;
+    device->max_threads_per_block = 0;
+    device->max_threads_dim[0] = 0;
+    device->max_threads_dim[1] = 0;
+    device->max_threads_dim[2] = 0;
+    device->max_grid_size[0] = 0;
+    device->max_grid_size[1] = 0;
+    device->max_grid_size[2] = 0;
+
+    /* Get device count. */
+    error = cudaGetDeviceCount(&device_count);
+    if (error != cudaSuccess || device_count == 0)
+    {
+        fprintf(stderr, "Unable to determine number of CUDA devices: %s\n",
+                cudaGetErrorString(error));
+        return;
     }
 
-    return OSKAR_SUCCESS;
+    /* Check device ID is within range. */
+    if (id > device_count - 1)
+    {
+        fprintf(stderr, "Error: Device ID out of range.\n");
+        return;
+    }
+
+    /* Get device properties. */
+    cudaGetDeviceProperties(&device_prop, id);
+    strcpy(device->name, device_prop.name);
+    device->compute.capability.major = device_prop.major;
+    device->compute.capability.minor = device_prop.minor;
+    device->supports_double = 0;
+    if (device_prop.major >= 2 || device_prop.minor >= 3)
+        device->supports_double = 1;
+    total_memory = device_prop.totalGlobalMem / 1024;
+    device->global_memory_size = total_memory;
+    device->num_multiprocessors = device_prop.multiProcessorCount;
+    arch = (device_prop.major << 4) + device_prop.minor;
+    switch (arch)
+    {
+    case 0x10:
+    case 0x11:
+    case 0x12:
+    case 0x13:
+        device->num_cores = 8;
+        break;
+    case 0x20:
+        device->num_cores = 32;
+        break;
+    case 0x21:
+        device->num_cores = 48;
+        break;
+    case 0x30:
+    case 0x35:
+        device->num_cores = 192;
+        break;
+    default:
+        device->num_cores = -1;
+        break;
+    }
+    if (device->num_cores > 0)
+        device->num_cores *= device->num_multiprocessors;
+    device->gpu_clock = device_prop.clockRate;
+#if CUDART_VERSION >= 4000
+    device->memory_clock = device_prop.memoryClockRate;
+    device->memory_bus_width = device_prop.memoryBusWidth;
+    device->level_2_cache_size = device_prop.l2CacheSize;
+#else
+    device->memory_clock = -1;
+    device->memory_bus_width = -1;
+    device->level_2_cache_size = -1;
+#endif
+
+    /* Get free memory size. */
+    cudaMemGetInfo(&free_memory, &total_memory);
+    free_memory /= 1024;
+    device->free_memory = free_memory;
+
+    /* Get block properties. */
+    device->shared_memory_size = device_prop.sharedMemPerBlock;
+    device->num_registers = device_prop.regsPerBlock;
+    device->warp_size = device_prop.warpSize;
+    device->max_threads_per_block = device_prop.maxThreadsPerBlock;
+    device->max_threads_dim[0] = device_prop.maxThreadsDim[0];
+    device->max_threads_dim[1] = device_prop.maxThreadsDim[1];
+    device->max_threads_dim[2] = device_prop.maxThreadsDim[2];
+    device->max_grid_size[0] = device_prop.maxGridSize[0];
+    device->max_grid_size[1] = device_prop.maxGridSize[1];
+    device->max_grid_size[2] = device_prop.maxGridSize[2];
 }
 
 #ifdef __cplusplus

@@ -54,7 +54,7 @@ void oskar_mem_random_range(oskar_Mem* mem, double lo, double hi, int* status)
     location = oskar_mem_location(mem);
     num_elements = oskar_mem_length(mem);
     type = oskar_mem_type(mem);
-    precision = oskar_mem_type_precision(type);
+    precision = oskar_type_precision(type);
     if (precision != OSKAR_SINGLE && precision != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -75,8 +75,8 @@ void oskar_mem_random_range(oskar_Mem* mem, double lo, double hi, int* status)
     }
 
     /* Get total number of elements. */
-    if (oskar_mem_type_is_matrix(type)) num_elements *= 4;
-    if (oskar_mem_type_is_complex(type)) num_elements *= 2;
+    if (oskar_type_is_matrix(type)) num_elements *= 4;
+    if (oskar_type_is_complex(type)) num_elements *= 2;
 
     /* Fill memory with random numbers. */
     if (precision == OSKAR_SINGLE)

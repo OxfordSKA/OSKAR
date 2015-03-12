@@ -29,6 +29,12 @@
 #ifndef UTILITY_BINARY_OSKAR_BINARY_DATA_TYPES_H_
 #define UTILITY_BINARY_OSKAR_BINARY_DATA_TYPES_H_
 
+#include <oskar_binary_macros.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Define an enumerator for the type.
  *
  * IMPORTANT:
@@ -69,5 +75,122 @@ enum OSKAR_DATA_TYPE
     OSKAR_DOUBLE_COMPLEX_MATRIX  = OSKAR_DOUBLE | OSKAR_COMPLEX | OSKAR_MATRIX
 };
 
+/**
+ * @brief
+ * Returns the base type (precision) of an OSKAR binary type enumerator.
+ *
+ * @details
+ * Returns the base type of an OSKAR binary type enumerator
+ * (OSKAR_SINGLE, OSKAR_DOUBLE, OSKAR_INT, or OSKAR_CHAR), ignoring complex
+ * or matrix types.
+ *
+ * @param[in] type Enumerated type.
+ *
+ * @return The base type.
+ */
+OSKAR_BINARY_INLINE int oskar_type_precision(const int type)
+{
+    return (type & 0x0F);
+}
+
+/**
+ * @brief
+ * Checks if the OSKAR binary type is double precision.
+ *
+ * @details
+ * Returns 1 (true) if the binary type is double precision, else 0 (false).
+ *
+ * @param[in] type Enumerated type.
+ *
+ * @return 1 if double, 0 if single.
+ */
+OSKAR_BINARY_INLINE int oskar_type_is_double(const int type)
+{
+    return ((type & 0x0F) == OSKAR_DOUBLE);
+}
+
+/**
+ * @brief
+ * Checks if the OSKAR binary type is single precision.
+ *
+ * @details
+ * Returns 1 (true) if the binary type is single precision, else 0 (false).
+ *
+ * @param[in] type Enumerated type.
+ *
+ * @return 1 if single, 0 if double.
+ */
+OSKAR_BINARY_INLINE int oskar_type_is_single(const int type)
+{
+    return ((type & 0x0F) == OSKAR_SINGLE);
+}
+
+/**
+ * @brief
+ * Checks if the OSKAR binary type is complex.
+ *
+ * @details
+ * Returns 1 (true) if the binary type is complex, else 0 (false).
+ *
+ * @param[in] type Enumerated type.
+ *
+ * @return 1 if complex, 0 if real.
+ */
+OSKAR_BINARY_INLINE int oskar_type_is_complex(const int type)
+{
+    return ((type & OSKAR_COMPLEX) == OSKAR_COMPLEX);
+}
+
+/**
+ * @brief
+ * Checks if the OSKAR binary type is real.
+ *
+ * @details
+ * Returns 1 (true) if the binary type is real, else 0 (false).
+ *
+ * @param[in] type Enumerated type.
+ *
+ * @return 1 if real, 0 if complex.
+ */
+OSKAR_BINARY_INLINE int oskar_type_is_real(const int type)
+{
+    return ((type & OSKAR_COMPLEX) == 0);
+}
+
+/**
+ * @brief
+ * Checks if the OSKAR binary type is matrix.
+ *
+ * @details
+ * Returns 1 (true) if the binary type is matrix, else 0 (false).
+ *
+ * @param[in] type Enumerated type.
+ *
+ * @return 1 if matrix, 0 if scalar.
+ */
+OSKAR_BINARY_INLINE int oskar_type_is_matrix(const int type)
+{
+    return ((type & OSKAR_MATRIX) == OSKAR_MATRIX);
+}
+
+/**
+ * @brief
+ * Checks if the OSKAR binary type is scalar.
+ *
+ * @details
+ * Returns 1 (true) if the binary type is scalar, else 0 (false).
+ *
+ * @param[in] type Enumerated type.
+ *
+ * @return 1 if scalar, 0 if matrix.
+ */
+OSKAR_BINARY_INLINE int oskar_type_is_scalar(const int type)
+{
+    return ((type & OSKAR_MATRIX) == 0);
+}
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* UTILITY_BINARY_OSKAR_BINARY_DATA_TYPES_H_ */

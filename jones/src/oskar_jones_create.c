@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,13 +51,13 @@ oskar_Jones* oskar_jones_create(int type, int location, int num_stations,
     }
 
     /* Check type and location. */
-    base_type = oskar_mem_type_precision(type);
+    base_type = oskar_type_precision(type);
     if (base_type != OSKAR_SINGLE && base_type != OSKAR_DOUBLE)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return 0;
     }
-    if (!oskar_mem_type_is_complex(type))
+    if (!oskar_type_is_complex(type))
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return 0;

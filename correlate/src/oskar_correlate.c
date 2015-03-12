@@ -113,10 +113,10 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
     /* Check for consistent data types. */
     jones_type = oskar_jones_type(J);
     base_type = oskar_sky_precision(sky);
-    matrix_type = oskar_mem_type_is_matrix(jones_type) &&
+    matrix_type = oskar_type_is_matrix(jones_type) &&
             oskar_mem_is_matrix(vis);
     if (oskar_mem_precision(vis) != base_type ||
-            oskar_mem_type_precision(jones_type) != base_type ||
+            oskar_type_precision(jones_type) != base_type ||
             oskar_mem_type(u) != base_type || oskar_mem_type(v) != base_type ||
             oskar_mem_type(w) != base_type)
     {

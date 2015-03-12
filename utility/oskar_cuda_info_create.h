@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,7 @@
  * @file oskar_cuda_info_create.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_CudaInfo.h"
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,24 +46,10 @@ extern "C" {
  * This function creates and populates a structure containing information
  * about the CUDA environment and devices on the system.
  *
- * The info structure pointer should be NULL on input.
- * Typical use would be:
- *
- * @code
- * oskar_CudaInfo* info = NULL;
- * oskar_cuda_info_create(&info);
- * @endcode
- *
- * The structure should be freed using
- *
- * @code
- * oskar_cuda_info_free(&info);
- * @endcode
- *
- * @param[in,out] info    Pointer to info structure pointer.
+ * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-int oskar_cuda_info_create(oskar_CudaInfo** info);
+oskar_CudaInfo* oskar_cuda_info_create(int* status);
 
 #ifdef __cplusplus
 }

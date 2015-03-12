@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,37 +55,37 @@ int oskar_mem_type(const oskar_Mem* mem)
 
 int oskar_mem_precision(const oskar_Mem* mem)
 {
-    return oskar_mem_type_precision(mem->type);
+    return oskar_type_precision(mem->type);
 }
 
 int oskar_mem_is_double(const oskar_Mem* mem)
 {
-    return oskar_mem_type_is_double(mem->type);
+    return oskar_type_is_double(mem->type);
 }
 
 int oskar_mem_is_single(const oskar_Mem* mem)
 {
-    return oskar_mem_type_is_single(mem->type);
+    return oskar_type_is_single(mem->type);
 }
 
 int oskar_mem_is_complex(const oskar_Mem* mem)
 {
-    return oskar_mem_type_is_complex(mem->type);
+    return oskar_type_is_complex(mem->type);
 }
 
 int oskar_mem_is_real(const oskar_Mem* mem)
 {
-    return oskar_mem_type_is_real(mem->type);
+    return oskar_type_is_real(mem->type);
 }
 
 int oskar_mem_is_matrix(const oskar_Mem* mem)
 {
-    return oskar_mem_type_is_matrix(mem->type);
+    return oskar_type_is_matrix(mem->type);
 }
 
 int oskar_mem_is_scalar(const oskar_Mem* mem)
 {
-    return oskar_mem_type_is_scalar(mem->type);
+    return oskar_type_is_scalar(mem->type);
 }
 
 /* Pointer conversion functions. */
@@ -113,7 +113,7 @@ const char* oskar_mem_char_const(const oskar_Mem* mem)
 int* oskar_mem_int(oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_INT)
+    if (oskar_type_precision(mem->type) != OSKAR_INT)
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */
@@ -123,7 +123,7 @@ int* oskar_mem_int(oskar_Mem* mem, int* status)
 const int* oskar_mem_int_const(const oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_INT)
+    if (oskar_type_precision(mem->type) != OSKAR_INT)
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */
@@ -133,7 +133,7 @@ const int* oskar_mem_int_const(const oskar_Mem* mem, int* status)
 float* oskar_mem_float(oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_SINGLE)
+    if (oskar_type_precision(mem->type) != OSKAR_SINGLE)
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */
@@ -143,7 +143,7 @@ float* oskar_mem_float(oskar_Mem* mem, int* status)
 const float* oskar_mem_float_const(const oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_SINGLE)
+    if (oskar_type_precision(mem->type) != OSKAR_SINGLE)
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */
@@ -153,8 +153,8 @@ const float* oskar_mem_float_const(const oskar_Mem* mem, int* status)
 float2* oskar_mem_float2(oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_SINGLE ||
-            !oskar_mem_type_is_complex(mem->type))
+    if (oskar_type_precision(mem->type) != OSKAR_SINGLE ||
+            !oskar_type_is_complex(mem->type))
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */
@@ -164,8 +164,8 @@ float2* oskar_mem_float2(oskar_Mem* mem, int* status)
 const float2* oskar_mem_float2_const(const oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_SINGLE ||
-            !oskar_mem_type_is_complex(mem->type))
+    if (oskar_type_precision(mem->type) != OSKAR_SINGLE ||
+            !oskar_type_is_complex(mem->type))
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */
@@ -175,9 +175,9 @@ const float2* oskar_mem_float2_const(const oskar_Mem* mem, int* status)
 float4c* oskar_mem_float4c(oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_SINGLE ||
-            !oskar_mem_type_is_complex(mem->type) ||
-            !oskar_mem_type_is_matrix(mem->type))
+    if (oskar_type_precision(mem->type) != OSKAR_SINGLE ||
+            !oskar_type_is_complex(mem->type) ||
+            !oskar_type_is_matrix(mem->type))
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */
@@ -187,9 +187,9 @@ float4c* oskar_mem_float4c(oskar_Mem* mem, int* status)
 const float4c* oskar_mem_float4c_const(const oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_SINGLE ||
-            !oskar_mem_type_is_complex(mem->type) ||
-            !oskar_mem_type_is_matrix(mem->type))
+    if (oskar_type_precision(mem->type) != OSKAR_SINGLE ||
+            !oskar_type_is_complex(mem->type) ||
+            !oskar_type_is_matrix(mem->type))
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */
@@ -199,7 +199,7 @@ const float4c* oskar_mem_float4c_const(const oskar_Mem* mem, int* status)
 double* oskar_mem_double(oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_DOUBLE)
+    if (oskar_type_precision(mem->type) != OSKAR_DOUBLE)
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */
@@ -209,7 +209,7 @@ double* oskar_mem_double(oskar_Mem* mem, int* status)
 const double* oskar_mem_double_const(const oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_DOUBLE)
+    if (oskar_type_precision(mem->type) != OSKAR_DOUBLE)
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */
@@ -219,8 +219,8 @@ const double* oskar_mem_double_const(const oskar_Mem* mem, int* status)
 double2* oskar_mem_double2(oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_DOUBLE ||
-            !oskar_mem_type_is_complex(mem->type))
+    if (oskar_type_precision(mem->type) != OSKAR_DOUBLE ||
+            !oskar_type_is_complex(mem->type))
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */
@@ -230,8 +230,8 @@ double2* oskar_mem_double2(oskar_Mem* mem, int* status)
 const double2* oskar_mem_double2_const(const oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_DOUBLE ||
-            !oskar_mem_type_is_complex(mem->type))
+    if (oskar_type_precision(mem->type) != OSKAR_DOUBLE ||
+            !oskar_type_is_complex(mem->type))
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */
@@ -241,9 +241,9 @@ const double2* oskar_mem_double2_const(const oskar_Mem* mem, int* status)
 double4c* oskar_mem_double4c(oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_DOUBLE ||
-            !oskar_mem_type_is_complex(mem->type) ||
-            !oskar_mem_type_is_matrix(mem->type))
+    if (oskar_type_precision(mem->type) != OSKAR_DOUBLE ||
+            !oskar_type_is_complex(mem->type) ||
+            !oskar_type_is_matrix(mem->type))
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */
@@ -253,9 +253,9 @@ double4c* oskar_mem_double4c(oskar_Mem* mem, int* status)
 const double4c* oskar_mem_double4c_const(const oskar_Mem* mem, int* status)
 {
     /* Check for type mismatch. */
-    if (oskar_mem_type_precision(mem->type) != OSKAR_DOUBLE ||
-            !oskar_mem_type_is_complex(mem->type) ||
-            !oskar_mem_type_is_matrix(mem->type))
+    if (oskar_type_precision(mem->type) != OSKAR_DOUBLE ||
+            !oskar_type_is_complex(mem->type) ||
+            !oskar_type_is_matrix(mem->type))
         *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Cast the pointer. */

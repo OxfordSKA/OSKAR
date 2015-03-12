@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,13 +35,6 @@
 
 #include <oskar_global.h>
 #include <oskar_log.h>
-#include <oskar_CudaInfo.h>
-
-#ifdef __cplusplus
-#include <cstdio>
-#else
-#include <stdio.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,10 +47,10 @@ extern "C" {
  * This function writes the contents of the supplied data structure to the log.
  *
  * @param[in,out] log Pointer to log structure to use.
- * @param[in] info    Pointer to info structure pointer.
+ * @param[in] info    Pointer to info structure.
  */
 OSKAR_EXPORT
-int oskar_cuda_info_log(oskar_Log* log, const oskar_CudaInfo* info);
+void oskar_cuda_info_log(oskar_Log* log, const oskar_CudaInfo* info);
 
 #ifdef __cplusplus
 }
