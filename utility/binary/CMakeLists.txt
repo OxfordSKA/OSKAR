@@ -86,7 +86,7 @@ if (STANDALONE_BUILD)
     set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
     set(CPACK_GENERATOR "TGZ")
     set(CPACK_SOURCE_GENERATOR "ZIP")
-    set(CPACK_SOURCE_IGNORE_FILES "build;debug;release")
+    set(CPACK_SOURCE_IGNORE_FILES "/build/;/debug/;/dbg/;/release/")
     include(CPack)
     add_custom_target(dist
         COMMAND ${CMAKE_MAKE_PROGRAM} package_source

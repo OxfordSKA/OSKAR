@@ -28,6 +28,7 @@
 
 #include "ms/oskar_measurement_set.h"
 
+#include <oskar_version.h>
 #include <ms/MeasurementSets.h>
 #include <tables/Tables.h>
 #include <casa/Arrays/Vector.h>

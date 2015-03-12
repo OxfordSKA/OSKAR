@@ -20,7 +20,6 @@ set(OSKAR_VERSION_MINOR 6)
 set(OSKAR_VERSION_PATCH 0)
 set(OSKAR_VERSION_SUFFIX "trunk")
 
-
 # === Add a local module path
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake)
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake/modules)

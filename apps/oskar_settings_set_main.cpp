@@ -26,7 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
+#include <oskar_global.h>
+#include <oskar_version.h>
 #include <QtCore/QSettings>
 #include <cstdio>
 #include <apps/lib/oskar_OptionParser.h>

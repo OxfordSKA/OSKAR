@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <oskar_version.h>
 
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QDateTime>

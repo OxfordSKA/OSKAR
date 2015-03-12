@@ -29,6 +29,7 @@
 #include <fits/oskar_fits_write.h>
 #include <fits/oskar_fits_write_axis_header.h>
 #include <oskar_mem.h>
+#include <oskar_version.h>
 
 #include <stdlib.h>
 #include <stdio.h>

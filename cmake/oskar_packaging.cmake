@@ -1,40 +1,6 @@
 #
-# OSKAR CMAKE packaging script
+# CMake Packaging macros for OSKAR.
 #
-# Description:
-# Adds tagets:
-#   1. dist (build the source package with included version file)
-#
-#   2. package (binary package)
-#   3. package_source (source package)
-#
-# Notes:
-#
-# http://www.cmake.org/Wiki/CMake:CPackConfiguration
-#
-# http://www.cmake.org/Wiki/CMakeUserUseDebian
-#
-# info: dpkg -I oskar-lib-0.0.0-Linux.deb
-#
-# http://wiki.clug.org.za/wiki/How_do_I_install_a_.deb_file_I_downloaded_without_compromising_dependencies%3F
-# dpkg-scanpackages . /dev/null | gzip -c -9 > Packages.gz
-# deb file:///home/debs /
-#
-
-# Macro to find the find the Subversion revision.
-macro(get_svn_revision dir variable)
-    find_program(SVN_EXECUTABLE svn DOC "subversion command line client")
-    if (SVN_EXECUTABLE AND EXISTS ${OSKAR_SOURCE_DIR}/.svn)
-        execute_process(COMMAND
-            ${SVN_EXECUTABLE} info ${dir}/oskar_global.h.in
-            OUTPUT_VARIABLE ${variable}
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-        string(REGEX REPLACE "^(.*\n)?Revision: ([^\n]+).*"
-            "\\2" ${variable} "${${variable}}")
-    endif()
-endmacro(get_svn_revision)
-
-get_svn_revision(${OSKAR_SOURCE_DIR} svn_revision)
 
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/readme.txt")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OSKAR-${OSKAR_VERSION}")
@@ -43,47 +9,15 @@ set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/copying.txt")
 set(CPACK_PACKAGE_VERSION_MAJOR "${OSKAR_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${OSKAR_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${OSKAR_VERSION_PATCH}")
-if (svn_revision)
-    set(CPACK_PACKAGE_VERSION "${OSKAR_VERSION}-r${svn_revision}")
-else()
-    set(CPACK_PACKAGE_VERSION "${OSKAR_VERSION}")
-endif()
+set(CPACK_PACKAGE_VERSION "${OSKAR_VERSION}")
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
+set(CPACK_SOURCE_IGNORE_FILES "/build/;/debug/;/dbg/;/release/")
+set(CPACK_GENERATOR "TGZ")
+set(CPACK_SOURCE_GENERATOR "ZIP")
 
-if (WIN32)
-    # http://www.itk.org/Wiki/CMake:Component_Install_With_CPack
-    set(CPACK_GENERATOR "NSIS")
-elseif (UNIX)
-    #set(CPACK_GENERATOR "DEB;TGZ")
-    set(CPACK_GENERATOR "TGZ")
-    #if (APPLE )
-    #    set(CPACK_GENERATOR "Bundle")
-    #    set(CPACK_BUNDLE_NAME "oskar")
-    #    set(CPACK_BUNDLE_PLIST
-    #endif()
-    set(CPACK_SOURCE_GENERATOR "ZIP")
-
-    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "OSKAR developer team.")
-    set(CPACK_DEBIAN_PACKAGE_VERSION "${OSKAR_VERSION}")
-    set(CPACK_DEBIAN_PACKAGE_SECTION "Science")
-    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
-    #set(CPACK_DEBIAN_PACKAGE_DEPENDS "libcfitsio3 (>=3.0), libqt4-dev (>=4.5) ")
-endif ()
 include(CPack)
-
-add_custom_target(write_version_file
-    COMMAND ${CMAKE_COMMAND}
-    ARGS
-    -DOSKAR_SOURCE_DIR=${OSKAR_SOURCE_DIR}
-    -DVERSION=${CPACK_PACKAGE_VERSION}
-    -P ${OSKAR_SOURCE_DIR}/cmake/oskar_write_version_file.cmake
-    COMMENT "Writing version file"
-    VERBATIM)
 
 add_custom_target(dist
     COMMAND ${CMAKE_MAKE_PROGRAM} package_source
     COMMENT "Packaging Source files"
     VERBATIM)
-
-add_dependencies(dist write_version_file)
-

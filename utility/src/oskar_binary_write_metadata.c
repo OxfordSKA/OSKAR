@@ -27,6 +27,7 @@
  */
 
 #include <oskar_binary_write_metadata.h>
+#include <oskar_version.h>
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -29,6 +29,7 @@
 #include <fits/oskar_fits_image_write.h>
 #include <fits/oskar_fits_write_axis_header.h>
 #include <fits/oskar_fits_healpix_write_image.h>
+#include <oskar_version.h>
 #include <oskar_file_exists.h>
 #include <oskar_getline.h>
 #include <oskar_log.h>

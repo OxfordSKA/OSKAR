@@ -34,6 +34,7 @@
 #include <oskar_file_exists.h>
 #include <oskar_mem.h>
 #include <oskar_cmath.h>
+#include <oskar_version.h>
 
 #include <cstdio>
 #include <cstdlib>

@@ -55,20 +55,30 @@ include_directories(
 set(GTEST_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/gtest-1.7.0/include/gtest)
 set(EZOPT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/ezOptionParser-0.2.0)
 
-# Find the subversion revision.
-find_package(Subversion QUIET)
-if (SUBVERSION_FOUND)
-    get_filename_component(SVN_PATH ${PROJECT_SOURCE_DIR} REALPATH)
-    Subversion_WC_INFO(${SVN_PATH} OSKAR_SVN)
-    if (OSKAR_SVN_WC_REVISION)
-        set(OSKAR_SVN_REVISION ${OSKAR_SVN_WC_REVISION})
-    endif()
-endif()
 
 # Build the various version strings to be passed to the code.
 set(OSKAR_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
 set(OSKAR_VERSION_STR "${OSKAR_VERSION}")
-if (OSKAR_VERSION_SUFFIX)
+if (OSKAR_VERSION_SUFFIX AND NOT OSKAR_VERSION_SUFFIX STREQUAL "")
+
+    # Find the subversion revision.
+    find_package(Subversion QUIET)
+    if (SUBVERSION_FOUND)
+        get_filename_component(SVN_PATH ${PROJECT_SOURCE_DIR} REALPATH)
+        # Check that svn info returns a valid result.
+        execute_process(COMMAND ${Subversion_SVN_EXECUTABLE} info ${SVN_PATH}
+            OUTPUT_VARIABLE ${prefix}_WC_INFO
+            ERROR_VARIABLE Subversion_svn_info_error
+            RESULT_VARIABLE Subversion_svn_info_result
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (${Subversion_svn_info_result} EQUAL 0)
+            Subversion_WC_INFO(${SVN_PATH} OSKAR_SVN)
+            if (OSKAR_SVN_WC_REVISION)
+                set(OSKAR_SVN_REVISION ${OSKAR_SVN_WC_REVISION})
+            endif()
+        endif()
+    endif()
+
     set(OSKAR_VERSION_STR "${OSKAR_VERSION}-${OSKAR_VERSION_SUFFIX}")
     if (OSKAR_SVN_REVISION)
         set(OSKAR_VERSION_STR "${OSKAR_VERSION_STR} r${OSKAR_SVN_REVISION}")
@@ -81,8 +91,6 @@ if (CMAKE_VERSION VERSION_GREATER 2.8.11)
     string(TIMESTAMP OSKAR_BUILD_DATE "%Y-%m-%d %H:%M:%S")
 endif()
 
-configure_file(${PROJECT_SOURCE_DIR}/oskar_global.h.in
-    ${PROJECT_SOURCE_DIR}/oskar_global.h @ONLY)
 configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_version.h.in
     ${PROJECT_SOURCE_DIR}/oskar_version.h @ONLY)
 

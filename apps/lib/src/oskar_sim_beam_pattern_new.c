@@ -47,6 +47,7 @@
 #include <oskar_station_work.h>
 #include <oskar_telescope.h>
 #include <oskar_timer.h>
+#include <oskar_version.h>
 
 #include <fits/oskar_fits_write_axis_header.h>
 #include <fitsio.h>

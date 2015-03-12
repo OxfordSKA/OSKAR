@@ -28,6 +28,7 @@
 
 #include <oskar_SettingsModel.h>
 #include <oskar_SettingsItem.h>
+#include <oskar_version.h>
 
 #include <QtGui/QApplication>
 #include <QtGui/QFontMetrics>

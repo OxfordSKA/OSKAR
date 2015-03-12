@@ -35,6 +35,7 @@
  */
 
 #include <oskar_global.h>
+#include <oskar_version.h>
 #include "extern/ezOptionParser-0.2.0/ezOptionParser.hpp"
 #include <vector>
 #include <string>

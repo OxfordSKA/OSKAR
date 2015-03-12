@@ -27,6 +27,7 @@
  */
 
 #include <oskar_global.h>
+#include <oskar_version.h>
 #include <apps/gui/oskar_About.h>
 
 #include <QtGui/QApplication>

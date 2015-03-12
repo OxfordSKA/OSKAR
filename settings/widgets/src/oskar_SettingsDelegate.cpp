@@ -30,6 +30,7 @@
 #include <oskar_SettingsDelegate.h>
 #include <oskar_SettingsItem.h>
 #include <oskar_SettingsModel.h>
+#include <oskar_version.h>
 
 #include <QtCore/QEvent>
 #include <QtCore/QModelIndex>

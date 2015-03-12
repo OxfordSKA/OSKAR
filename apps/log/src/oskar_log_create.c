@@ -29,6 +29,7 @@
 
 #include <private_log.h>
 #include <oskar_log.h>
+#include <oskar_version.h>
 
 #include <stdio.h>
 #include <stdlib.h>

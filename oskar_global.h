@@ -30,33 +30,6 @@
 #define OSKAR_GLOBAL_H_
 
 /**
- * @def OSKAR_VERSION
- *
- * @brief OSKAR_VERSION is a macro used to determine the version of OSKAR.
- *
- * @details
- * This macro expands to a numeric value of the form 0xMMNNPP (MM = major,
- * NN = minor, PP = patch) that specifies the version number of the OSKAR
- * library. For example, in OSKAR version 2.1.3 this would expand to
- * 0x020103.
- * NOTE this value is set in the CMake build system
- */
-#define OSKAR_VERSION @OSKAR_VERSION_ID@
-
-/**
- * @def OSKAR_VERSION_STR
- *
- * @brief OSKAR_VERSION_STR is a macro used to return the version of OSKAR as
- * a text string.
- *
- * @details
- * This macro expands to a string that specifies the OSKAR version number
- * (for example, "2.1.3").
- * NOTE this value is set in the CMake build system
- */
-#define OSKAR_VERSION_STR "@OSKAR_VERSION_STR@"
-
-/**
  * @brief
  * Enumerator to define OSKAR common error conditions.
  *
