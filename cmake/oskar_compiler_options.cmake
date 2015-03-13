@@ -23,6 +23,7 @@ set(BUILD_SHARED_LIBS ON)
 # ------------------------------------------------------------------------------
 include_directories(
     ${PROJECT_SOURCE_DIR}
+    ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/apps
     ${PROJECT_SOURCE_DIR}/apps/lib
     ${PROJECT_SOURCE_DIR}/apps/log
@@ -93,7 +94,7 @@ if (CMAKE_VERSION VERSION_GREATER 2.8.11)
 endif()
 
 configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_version.h.in
-    ${PROJECT_SOURCE_DIR}/oskar_version.h @ONLY)
+    ${PROJECT_BINARY_DIR}/oskar_version.h @ONLY)
 
 # Set general compiler flags.
 if (NOT WIN32)
