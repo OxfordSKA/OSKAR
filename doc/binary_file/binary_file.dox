@@ -585,6 +585,10 @@ Tags in this group have a group ID of 11.
 | 24     | Station Z-coordinates in offset ECEF frame, in metres [array].
 
 
+The Visibility Header contains static meta-data. It precedes a sequence of
+\ref binary_tag_vis_block "Visibility Blocks", which contain the actual
+cross-correlations and/or autocorrelations as a function of time and frequency.
+
 \latexonly
 \clearpage
 \endlatexonly
@@ -609,15 +613,17 @@ Tags in this group have a group ID of 12.
 The "dimension start and size" (Tag ID 1) is a 6-element integer array 
 containing data in the following order:
 
-- [0] Global start time index for the first time in the block 
-      (relative to observation start).
-- [1] Global start channel index for the first channel in the block (usually 0).
-- [2] Number frequency channels in the block (usually the total number).
+- [0] Global start time index for the first time in the block, relative to 
+      observation start.
+- [1] Global start channel index for the first channel in the block
+      (usually 0; reserved for future use).
+- [2] Number of frequency channels in the block
+      (usually the total number; reserved for future use).
 - [3] Number of <i>usable</i> time samples in the block.
 - [4] Number of cross-correlated baselines.
 - [5] Number of stations.
 
-The dimension order of the visibility data in the auto-correlation and 
+The dimension order of visibility data in the auto-correlation and 
 cross-correlation arrays is fixed. The polarisation dimension is implicit 
 in the data type given by Tag ID 4 in the 
 \ref binary_tag_vis_header "Visibility Header" (matrix or scalar), and is 
@@ -654,12 +660,17 @@ dimension order is:
 - Time (slowest)
 - Baseline (fastest)
 
+\subsubsection vis_block_sequence Block Sequence
+
+Multiple blocks are used to store data from long observations. 
+If there is more than one block in the file, zero-based tag index numbers will 
+be used to uniquely identify visibility data blocks within the stream.
+
+The expected number of visibility blocks can be found by using Tag IDs 7 and 8 
+in the \ref binary_tag_vis_header "Visibility Header", by rounding up the 
+result of the division (Tag ID 8) / (Tag ID 7).
 
 \htmlonly <hr /> \endhtmlonly
-
-\latexonly
-\clearpage
-\endlatexonly
 
 \latexonly
 \vskip 1cm
