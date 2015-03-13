@@ -68,7 +68,10 @@ struct oskar_CudaInfo
     int runtime_version;          /* CUDA runtime version. */
     oskar_CudaDeviceInfo* device; /* Array of device info structures. */
 };
+#ifndef OSKAR_CUDA_INFO_TYPEDEF_
+#define OSKAR_CUDA_INFO_TYPEDEF_
 typedef struct oskar_CudaInfo oskar_CudaInfo;
+#endif /* OSKAR_CUDA_INFO_TYPEDEF_ */
 
 #ifdef __cplusplus
 }
