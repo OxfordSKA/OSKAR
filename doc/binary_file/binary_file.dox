@@ -577,12 +577,12 @@ Tags in this group have a group ID of 11.
 | 16     | Observation start time, as MJD(UTC) [double].
 | 17     | Time increment, in seconds [double].
 | 18     | Time integration per correlator dump, in seconds [double].
-| 19     | Telescope reference longitude (deg) [double].
-| 20     | Telescope reference latitude (deg) [double].
-| 21     | Telescope reference altitude (m) [double].
-| 22     | Station X-coordinates in offset ECEF frame [array].
-| 23     | Station Y-coordinates in offset ECEF frame [array].
-| 24     | Station Z-coordinates in offset ECEF frame [array].
+| 19     | Telescope reference longitude, in degrees [double].
+| 20     | Telescope reference latitude, in degrees [double].
+| 21     | Telescope reference altitude, in metres [double].
+| 22     | Station X-coordinates in offset ECEF frame, in metres [array].
+| 23     | Station Y-coordinates in offset ECEF frame, in metres [array].
+| 24     | Station Z-coordinates in offset ECEF frame, in metres [array].
 
 
 \latexonly
@@ -598,8 +598,8 @@ Tags in this group have a group ID of 12.
 | Tag ID | Description                                                        
 | ------ | --------------------------------------------------------------------
 | 1      | Dimension start and size [int[6]] (see \ref vis_block_dims "note", below).
-| 2      | Auto-correlation data [array].
-| 3      | Cross-correlation data [array].
+| 2      | Auto-correlation data, in Jy [array].
+| 3      | Cross-correlation data, in Jy [array].
 | 4      | Baseline UU-coordinates, in metres [array].
 | 5      | Baseline VV-coordinates, in metres [array].
 | 6      | Baseline WW-coordinates, in metres [array].
