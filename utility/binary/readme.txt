@@ -1,7 +1,7 @@
 1. Introduction
 --------------------------------------------------------------------------------
 
-This module provides a basic API for reading and writing OSKAR binary files. 
+This module provides an API for reading and writing OSKAR binary files. 
 It can be built either as part of the OSKAR package, or as a stand-alone 
 library.
 
@@ -44,9 +44,12 @@ A number of options can be passed to the cmake command. Of note:
 3. Tests & examples
 --------------------------------------------------------------------------------
 
-Some tests and examples are provided in the test folder.
+Some tests and examples are provided in the test folder. An example showing
+how to read an OSKAR visibility format binary file is shown in:
 
-By default, these are built along with the module and can be run either 
+    Test_binary_vis_read_write.c.
+
+By default, the tests are built along with the module and can be run either 
 directly, or via the CMake test tool as follows:
 
     ctest [--verbose]

@@ -32,6 +32,23 @@
 
 #include <oskar_binary.h>
 
+static void write_test_vis(const char* filename);
+static void read_test_vis(const char* filename);
+
+int main(void)
+{
+    const char* filename = "test.vis";
+
+    /* Write a test visibility data file. */
+    write_test_vis(filename);
+
+    /* Read the test visibility data file. */
+    read_test_vis(filename);
+
+    return 0;
+}
+
+
 /* To maintain binary compatibility,
  * do not change the numbers in the lists below. */
 enum OSKAR_VIS_HEADER_TAGS
@@ -537,6 +554,7 @@ static void read_test_vis(const char* filename)
                 }
             }
         }
+        /* End printing of visibility block. */
     }
 
     /* Close the file. */
@@ -556,18 +574,5 @@ static void read_test_vis(const char* filename)
     free(vv);
     free(ww);
     free(vis_block);
-}
-
-int main(void)
-{
-    const char* filename = "test.vis";
-
-    /* Write a test visibility data file. */
-    write_test_vis(filename);
-
-    /* Read the test visibility data file. */
-    read_test_vis(filename);
-
-    return 0;
 }
 
