@@ -290,6 +290,10 @@ Tags in this group have a group ID of 4.
 
 \subsection binary_tag_vis Visibility Data Tags (Deprecated)
 
+\latexonly
+{\color{red}
+\endlatexonly
+
 \attention
 Note that visibility data tags in this group are deprecated.
 The OSKAR \ref binary_tag_vis_header "Visibility Header" and
@@ -298,6 +302,7 @@ This section is provided for historical reasons only,
 and will be removed in a future version.
 
 \latexonly
+} % end color{red}
 {\color{gray}
 \endlatexonly
 
@@ -364,6 +369,10 @@ stations, there will be \f$ n(n-1)/2 \f$ baselines.
 
 Tags in this group have a group ID of 6.
 
+\latexonly
+{\color{red}
+\endlatexonly
+
 \attention
 Note that all existing image data tags are deprecated.
 Standard FITS image files should be used instead.
@@ -371,6 +380,7 @@ This section is provided for historical reasons only,
 and will be removed in a future version.
 
 \latexonly
+} % end color{red}
 {\color{gray}
 \endlatexonly
 
@@ -551,27 +561,29 @@ Tags in this group have a group ID of 11.
 | ------ | --------------------------------------------------------------------
 | 1      | Path to telescope model directory [string].
 | 2      | Number of binary data tags written per \ref binary_tag_vis_block "Visibility Block" [int].
-| 3      | Flag set if autocorrelation data are present [int].
-| 4      | Data type of visibility arrays in Visibility Block [int]. (See \ref binary_data_type "Payload Data Type")
-| 5      | Maximum number of time samples in a Visibility Block [int].
-| 6      | Number of time samples in total [int].
-| 7      | Number of channels [int].
-| 8      | Number of stations [int].
-| 9      | Start frequency, in Hz [double].
-| 10     | Frequency increment, in Hz [double].
-| 11     | Channel bandwidth, in Hz [double].
-| 12     | Observation start time, as MJD(UTC) [double].
-| 13     | Time increment, in seconds [double].
-| 14     | Time integration per correlator dump, in seconds [double].
-| 15     | Phase centre Right Ascension (deg) and Declination (deg) [double[2]].
-| 16     | Telescope reference longitude (deg), latitude (deg) and altitude (m) [double[3]].
-| 17     | Station X-coordinates in offset ECEF frame [array].
-| 18     | Station Y-coordinates in offset ECEF frame [array].
-| 19     | Station Z-coordinates in offset ECEF frame [array].
+| 3      | Flag set if auto-correlation data are present [int].
+| 4      | Flag set if cross-correlation data are present [int].
+| 5      | Data type of visibility arrays in \ref binary_tag_vis_block "Visibility Block" [int]. (See \ref binary_data_type "Payload Data Type")
+| 6      | Precision of station and baseline coordinate arrays [int]. (See \ref binary_data_type "Payload Data Type")
+| 7      | Maximum number of time samples in a \ref binary_tag_vis_block "Visibility Block" [int].
+| 8      | Number of time samples in total, in all subsequent \ref binary_tag_vis_block "Visibility Blocks" [int].
+| 9      | Number of channels [int].
+| 10     | Number of stations [int].
+| 11     | Phase centre coordinate type, currently always 0 [int].
+| 12     | Phase centre longitude / Right Ascension (deg) and latitude / Declination (deg) [double[2]].
+| 13     | Start frequency, in Hz [double].
+| 14     | Frequency increment, in Hz [double].
+| 15     | Channel bandwidth, in Hz [double].
+| 16     | Observation start time, as MJD(UTC) [double].
+| 17     | Time increment, in seconds [double].
+| 18     | Time integration per correlator dump, in seconds [double].
+| 19     | Telescope reference longitude (deg) [double].
+| 20     | Telescope reference latitude (deg) [double].
+| 21     | Telescope reference altitude (m) [double].
+| 22     | Station X-coordinates in offset ECEF frame [array].
+| 23     | Station Y-coordinates in offset ECEF frame [array].
+| 24     | Station Z-coordinates in offset ECEF frame [array].
 
-
-The type of the station coordinate arrays is the same as the precision of the
-visibility amplitude type.
 
 \latexonly
 \clearpage
@@ -586,16 +598,13 @@ Tags in this group have a group ID of 12.
 | Tag ID | Description                                                        
 | ------ | --------------------------------------------------------------------
 | 1      | Dimension start and size [int[6]] (see \ref vis_block_dims "note", below).
-| 2      | Frequency reference and increment, in Hz [double[2]].
-| 3      | Time reference and increment, in MJD(UTC) [double[2]].
-| 4      | Autocorrelation data [array].
-| 5      | Cross-correlation data [array].
-| 6      | Baseline UU-coordinates, in metres [array].
-| 7      | Baseline VV-coordinates, in metres [array].
-| 8      | Baseline WW-coordinates, in metres [array].
+| 2      | Auto-correlation data [array].
+| 3      | Cross-correlation data [array].
+| 4      | Baseline UU-coordinates, in metres [array].
+| 5      | Baseline VV-coordinates, in metres [array].
+| 6      | Baseline WW-coordinates, in metres [array].
 
-
-\anchor vis_block_dims
+\subsubsection vis_block_dims Dimension Order & Start Indices
 
 The "dimension start and size" (Tag ID 1) is a 6-element integer array 
 containing data in the following order:
@@ -607,11 +616,6 @@ containing data in the following order:
 - [3] Number of time samples in the block.
 - [4] Number of cross-correlated baselines.
 - [5] Number of stations.
-
-The frequency and time reference values give the centre frequency of 
-global channel 0 and the observation start time, respectively.
-The frequency and time increment values give the difference between 
-frequency channels and time samples, respectively. 
 
 The dimension order of the visibility data in the autocorrelation and 
 cross-correlation arrays is fixed. The polarisation dimension is implicit 
@@ -628,7 +632,9 @@ The type and number of polarisations is determined by the choice of matrix or
 scalar amplitude types. Matrix amplitude types represent 4 polarisation
 dimensions, whereas scalar types represent Stokes-I only.
 
-Note that autocorrelation data may not always be present.
+Note that Tag IDs 2 to 6 may not always be present, depending on the values of
+Tag ID 3 and 4 in the \ref binary_tag_vis_header "Visibility Header".
+Baseline coordinates will exist only if cross-correlation data are present.
 
 The dimension order of the cross-correlated baseline coordinates is also fixed. 
 Each of the UU, VV and WW arrays is two dimensional, where the 
@@ -637,11 +643,12 @@ dimension order is:
 - Time (slowest)
 - Baseline (fastest)
 
-The type of the baseline coordinate arrays is the same as the precision of the
-visibility amplitude type.
-
 
 \htmlonly <hr /> \endhtmlonly
+
+\latexonly
+\clearpage
+\endlatexonly
 
 \latexonly
 \vskip 1cm
@@ -662,7 +669,7 @@ visibility amplitude type.
     group tag for rotation measure.</td></tr>
 <tr><td>5</td><td>2014-07-16</td>
     <td>[2.5.0] Added spline data and element data tag groups.</td></tr>
-<tr><td>6</td><td>2015-03-10</td>
+<tr><td>6</td><td>2015-03-13</td>
     <td>[2.6.0] Updated for binary format version 2, which includes 
     chunk CRC codes. Added new diagram and clarified description of the
     data chunks. Marked existing image data tags and visibility data tags as 
