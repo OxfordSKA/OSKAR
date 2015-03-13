@@ -48,7 +48,7 @@ rm -rf station
 rm -rf utility
 
 # Remove configured header file
-rm -f oskar_global.h
+rm -f oskar_version.h
 
 # Remove the main OSKAR library
 rm -f  liboskar*
