@@ -288,7 +288,7 @@ static void write_test_vis(const char* filename)
 
 static void read_test_vis(const char* filename)
 {
-    int i, coord_element_size, vis_element_size, vis_precision, status = 0;
+    int i, j, coord_element_size, vis_element_size, vis_precision, status = 0;
     oskar_Binary* h;
     const unsigned char vis_header_group = OSKAR_TAG_GROUP_VIS_HEADER;
     const unsigned char vis_block_group = OSKAR_TAG_GROUP_VIS_BLOCK;
@@ -368,7 +368,7 @@ static void read_test_vis(const char* filename)
             &telescope_ref_alt_m, &status);
 
     /* Get element sizes. */
-    vis_precision      = amp_type & 0x0F;
+    vis_precision      = oskar_type_precision(amp_type);
     vis_element_size   = (vis_precision == OSKAR_DOUBLE ? DBL : FLT);
     coord_element_size = (coord_precision == OSKAR_DOUBLE ? DBL : FLT);
 
@@ -471,58 +471,68 @@ static void read_test_vis(const char* filename)
             /* Get the actual time of the sample. */
             mjd_utc = time_start_mjd_utc +
                     time_inc_sec * (start_time_idx + t + 0.5) / 86400.0;
+            printf("-------- Time %d (%.5f)\n", t, mjd_utc);
+
+            if (coord_precision == OSKAR_DOUBLE)
+            {
+                const double *u, *v, *w;
+                u = (const double*) uu;
+                v = (const double*) vv;
+                w = (const double*) ww;
+                for (b = 0; b < num_baselines; ++b)
+                {
+                    j = b + num_baselines * t;
+                    printf("Baseline %d coordinates: (U, V, W) = "
+                            "(%.3f, %.3f, %.3f)\n", b, u[j], v[j], w[j]);
+                }
+            }
+            else if (coord_precision == OSKAR_SINGLE)
+            {
+                const float *u, *v, *w;
+                u = (const float*) uu;
+                v = (const float*) vv;
+                w = (const float*) ww;
+                for (b = 0; b < num_baselines; ++b)
+                {
+                    j = b + num_baselines * t;
+                    printf("Baseline %d coordinates: (U, V, W) = "
+                            "(%.3f, %.3f, %.3f)\n", b, u[j], v[j], w[j]);
+                }
+            }
 
             for (c = 0; c < num_channels; ++c)
             {
                 /* Get the actual frequency of the sample. */
                 freq_hz = freq_start_hz + freq_inc_hz * (start_channel_idx + c);
+                printf("---------------- Channel %d (%.3f MHz)\n",
+                        c, freq_hz / 1e6);
 
                 if (vis_precision == OSKAR_DOUBLE)
                 {
-                    const double *u, *v, *w, *d;
-                    u = (const double*) uu;
-                    v = (const double*) vv;
-                    w = (const double*) ww;
+                    const double *d;
                     d = (const double*) vis_block;
                     for (b = 0; b < num_baselines; ++b)
                     {
-                        int i, j;
-                        i = 8 * (b + num_baselines * (c + num_channels * t));
-                        j = b + num_baselines * t;
-                        printf("Time %d (%.5f), Channel %d (%.3f MHz), "
-                                "Baseline %d\n"
-                                "    (U, V, W) = (%.3f, %.3f, %.3f)\n"
+                        j = 8 * (b + num_baselines * (c + num_channels * t));
+                        printf("Baseline %d visibility:\n"
                                 "            [%.3f, %.3f] [%.3f, %.3f]\n"
-                                "            [%.3f, %.3f] [%.3f, %.3f]\n",
-                                start_time_idx + t, mjd_utc,
-                                start_channel_idx + c, freq_hz / 1e6, b,
-                                u[j], v[j], w[j],
-                                d[i + 0], d[i + 1], d[i + 2], d[i + 3],
-                                d[i + 4], d[i + 5], d[i + 6], d[i + 7]);
+                                "            [%.3f, %.3f] [%.3f, %.3f]\n", b,
+                                d[j + 0], d[j + 1], d[j + 2], d[j + 3],
+                                d[j + 4], d[j + 5], d[j + 6], d[j + 7]);
                     }
                 }
                 else if (vis_precision == OSKAR_SINGLE)
                 {
-                    const float *u, *v, *w, *d;
-                    u = (const float*) uu;
-                    v = (const float*) vv;
-                    w = (const float*) ww;
+                    const float *d;
                     d = (const float*) vis_block;
                     for (b = 0; b < num_baselines; ++b)
                     {
-                        int i, j;
-                        i = 8 * (b + num_baselines * (c + num_channels * t));
-                        j = b + num_baselines * t;
-                        printf("Time %d (%.5f), Channel %d (%.3f MHz), "
-                                "Baseline %d\n"
-                                "    (U, V, W) = (%.3f, %.3f, %.3f)\n"
+                        j = 8 * (b + num_baselines * (c + num_channels * t));
+                        printf("Baseline %d visibility:\n"
                                 "            [%.3f, %.3f] [%.3f, %.3f]\n"
-                                "            [%.3f, %.3f] [%.3f, %.3f]\n",
-                                start_time_idx + t, mjd_utc,
-                                start_channel_idx + c, freq_hz / 1e6, b,
-                                u[j], v[j], w[j],
-                                d[i + 0], d[i + 1], d[i + 2], d[i + 3],
-                                d[i + 4], d[i + 5], d[i + 6], d[i + 7]);
+                                "            [%.3f, %.3f] [%.3f, %.3f]\n", b,
+                                d[j + 0], d[j + 1], d[j + 2], d[j + 3],
+                                d[j + 4], d[j + 5], d[j + 6], d[j + 7]);
                     }
                 }
             }
