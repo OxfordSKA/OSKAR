@@ -146,11 +146,14 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/."
     PATTERN doc EXCLUDE
     PATTERN gui EXCLUDE
     PATTERN matlab EXCLUDE
+    PATTERN python EXCLUDE
     PATTERN *dierckx* EXCLUDE
     PATTERN src  EXCLUDE
     PATTERN test EXCLUDE
     PATTERN extern EXCLUDE
     PATTERN .svn EXCLUDE)
+install(FILES ${PROJECT_BINARY_DIR}/oskar_version.h
+    DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR})
 
 # === Copy cleanup bash script into the build directory
 configure_file(${PROJECT_SOURCE_DIR}/cmake/oskar_cleanup.sh
