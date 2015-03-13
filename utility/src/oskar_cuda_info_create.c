@@ -30,6 +30,7 @@
 #include <oskar_cuda_info_create.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <cuda_runtime_api.h>
 
@@ -42,7 +43,7 @@ static void oskar_cuda_device_info_scan(oskar_CudaDeviceInfo* device, int id);
 oskar_CudaInfo* oskar_cuda_info_create(int* status)
 {
     oskar_CudaInfo* info;
-    int error, i;
+    int i;
 
     /* Allocate index. */
     info = (oskar_CudaInfo*) calloc(1, sizeof(oskar_CudaInfo));
