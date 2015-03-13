@@ -29,10 +29,6 @@
 #ifndef OSKAR_PRIVATE_BINARY_H_
 #define OSKAR_PRIVATE_BINARY_H_
 
-/**
- * @file private_binary.h
- */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <oskar_crc.h>
@@ -41,27 +37,22 @@
 extern "C" {
 #endif
 
-/**
- * @brief Structure to hold a 64-byte header in an OSKAR binary file.
- *
- * @details
+/*
  * This structure holds header data for an OSKAR binary file.
- * The header is exactly 64 bytes long and contains the following data:
+ * The header is 64 bytes long and contains the following data:
  *
-   @verbatim
-   Offset  Length  Description
-   ----------------------------------------------------------------------------
-    0       9      The ASCII string "OSKARBIN", with trailing zero.
-    9       1      The OSKAR binary format version (enumerator).
-   10       1      v.1: If data blocks are written as little endian, 0; else 1.
-   11       1      v.1: Size of void* in bytes.
-   12       1      v.1: Size of int in bytes.
-   13       1      v.1: Size of long int in bytes.
-   14       1      v.1: Size of float in bytes.
-   15       1      v.1: Size of double in bytes.
-   16       4      v.1: The OSKAR_VERSION as a little-endian, 4-byte integer.
-   20      44      Padding to 64 byte length (reserved for future use).
-   @endverbatim
+ * Offset  Length  Description
+ * ----------------------------------------------------------------------------
+ *  0       9      The ASCII string "OSKARBIN", with trailing zero.
+ *  9       1      The OSKAR binary format version (enumerator).
+ * 10       1      v.1: If data blocks are written as little endian, 0; else 1.
+ * 11       1      v.1: Size of void* in bytes.
+ * 12       1      v.1: Size of int in bytes.
+ * 13       1      v.1: Size of long int in bytes.
+ * 14       1      v.1: Size of float in bytes.
+ * 15       1      v.1: Size of double in bytes.
+ * 16       4      v.1: The OSKAR_VERSION as a little-endian, 4-byte integer.
+ * 20      44      Padding to 64 byte length (reserved for future use).
  */
 struct oskar_BinaryHeader
 {
@@ -83,64 +74,55 @@ struct oskar_BinaryHeader
 typedef struct oskar_BinaryHeader oskar_BinaryHeader;
 #endif /* OSKAR_BINARY_HEADER_TYPEDEF_ */
 
-/**
- * @brief Structure to hold tag data from an OSKAR binary file.
- *
- * @details
+/*
  * This structure holds data for a single tag in an OSKAR binary file.
  * The tag is 20 bytes long and contains the following data:
  *
- * <table>
- * <tr><th>Offset (bytes)</th><th>Length (bytes)</th><th>Description</th></tr>
- * <tr><td>0</td><td>1</td>
- *     <td>0x54 (ASCII 'T')</td></tr>
- * <tr><td>1</td><td>1</td>
- *     <td>0x40 + \<OSKAR binary format version number\><br>
- *     (ASCII 'A', 'B', etc.)</td></tr>
- * <tr><td>2</td><td>1</td>
- *     <td>0x47 (ASCII 'G')</td></tr>
- * <tr><td>3</td><td>1</td>
- *     <td>Size of \ref binary_data_type "one element of payload data" in bytes.
- *     (<i>In binary format version 1, this byte was 0.</i>)</td></tr>
- * <tr><td>4</td><td>1</td>
- *     <td>\ref binary_chunk_flags "Chunk flags".</td></tr>
- * <tr><td>5</td><td>1</td>
- *     <td>\ref binary_data_type "Data type code" of the payload.</td></tr>
- * <tr><td>6</td><td>1</td>
- *     <td>The group ID, if not an extended tag;
- *     else the group name size in bytes.</td></tr>
- * <tr><td>7</td><td>1</td>
- *     <td>The tag ID, if not an extended tag;
- *     else the tag name size in bytes.</td></tr>
- * <tr><td>8</td><td>4</td>
- *     <td>User-specified index, as little-endian 4-byte integer.</td></tr>
- * <tr><td>12</td><td>8</td>
- *     <td>Block size in bytes, as little-endian 8-byte integer.
- *     This is the total number of bytes until the next tag.</td></tr>
- * </table>
+ * Offset  Length  Description
+ * ----------------------------------------------------------------------------
+ *  0      1       0x54 (ASCII 'T')
+ *  1      1       0x40 + <OSKAR binary format version number>
+ *                 (ASCII 'A', 'B', etc.)
+ *  2      1       0x47 (ASCII 'G')
+ *  3      1       Size of one element of payload data in bytes.
+ *                 (In binary format version 1, this byte was 0.)
+ *  4      1       Chunk flags.
+ *  5      1       Data type code of the payload.
+ *  6      1       The group ID, if not an extended tag;
+ *                 else the group name size in bytes.
+ *  7      1       The tag ID, if not an extended tag;
+ *                 else the tag name size in bytes.
+ *  8      4       User-specified index, as little-endian 4-byte integer.
+ * 12      8       Block size in bytes, as little-endian 8-byte integer.
+ *                 This is the total number of bytes until the next tag.
  *
- * Supported flags are:
+ * The bits of the chunk flags at byte offset 4 have the following meanings:
  *
- * <table>
- * <tr><th>Bit</th><th>Meaning when set</th></tr>
- * <tr><td>0</td><td>Char type (1 byte), used also for string data.</td></tr>
- * <tr><td>1</td><td>Integer type (normally 4 bytes).</td></tr>
- * <tr><td>2</td>
- *     <td>Single-precision floating point type (normally 4 bytes).</td></tr>
- * <tr><td>3</td>
- *     <td>Double-precision floating point type (normally 8 bytes).</td></tr>
- * <tr><td>4</td><td><i>Reserved. (Must be 0.)</i></td></tr>
- * <tr><td>5</td>
- *     <td>Complex flag: data consists of a pair of values that describe
- *     real and imaginary components. The real part is given first, then the
- *     imaginary part.</td></tr>
- * <tr><td>6</td>
- *     <td>Matrix flag: data consists of four values that describe a 2x2 matrix.
- *     For a matrix written as
- *     \f$ \left[\begin{array}{cc} a & b \\ c & d \\ \end{array} \right] \f$,
- *     the order of the values is a, b, c, d.</td></tr>
- * <tr><td>7</td><td><i>Reserved. (Must be 0.)</i></td></tr>
- * </table>
+ * Bit  Meaning when set
+ * ----------------------------------------------------------------------------
+ * 0-4  Reserved. (Must be 0.)
+ * 5    Payload data is in big-endian format.
+ *      (If clear, it is in little-endian format.)
+ * 6    A little-endian 4-byte CRC-32C code for the chunk is present
+ *      after the payload. (If clear, no CRC code is present.)
+ * 7    Tag is extended. (If clear, this is a standard tag.)
+ *
+ * The data type field at byte offset 5 is used to identify the type of data
+ * in each element of the payload array. The bits of this byte have the
+ * following meanings:
+ *
+ * Bit  Meaning when set
+ * ----------------------------------------------------------------------------
+ * 0    Char type (1 byte), used also for string data.
+ * 1    Integer type (normally 4 bytes).
+ * 2    Single-precision floating point type (normally 4 bytes).
+ * 3    Double-precision floating point type (normally 8 bytes).
+ * 4    Reserved. (Must be 0.)
+ * 5    Complex flag: data consists of a pair of values that describe
+ *      real and imaginary components. The real part is given first, then the
+ *      imaginary part.
+ * 6    Matrix flag: data consists of four values that describe a 2x2 matrix.
+ * 7    Reserved. (Must be 0.)
  *
  * If the tag is an extended tag, then the group name and tag name are
  * specified as strings rather than 8-bit codes: extended tags in an OSKAR
@@ -157,24 +139,24 @@ typedef struct oskar_BinaryHeader oskar_BinaryHeader;
  * chunk (including the tag) until the end of the payload, using
  * the "Castagnoli" CRC-32C reversed polynomial represented by 0x82F63B78.
  *
- * \note The block size in the tag is the total number of bytes until
+ * Note: The block size in the tag is the total number of bytes until
  * the next tag, including any extended tag names and CRC code.
  */
 struct oskar_BinaryTag
 {
-    char magic[4];           /**< Tag identifier and payload element size. */
-    unsigned char flags;     /**< Chunk flags. */
-    unsigned char data_type; /**< Payload data type. */
+    char magic[4];           /* Tag identifier and payload element size. */
+    unsigned char flags;     /* Chunk flags. */
+    unsigned char data_type; /* Payload data type. */
     union {
-        unsigned char id;    /**< The group ID, if not an extended tag. */
-        unsigned char bytes; /**< The group name size in bytes, if extended tag. */
+        unsigned char id;    /* The group ID, if not an extended tag. */
+        unsigned char bytes; /* The group name size in bytes, if extended tag. */
     } group;
     union {
-        unsigned char id;    /**< The tag ID, if not an extended tag. */
-        unsigned char bytes; /**< The tag name size in bytes, if extended tag. */
+        unsigned char id;    /* The tag ID, if not an extended tag. */
+        unsigned char bytes; /* The tag name size in bytes, if extended tag. */
     } tag;
-    char user_index[4];      /**< User index, as little-endian 4-byte integer. */
-    char size_bytes[8];      /**< Block size in bytes, as little-endian 8-byte integer. */
+    char user_index[4];      /* User index, as little-endian 4-byte integer. */
+    char size_bytes[8];      /* Block size in bytes, as little-endian 8-byte integer. */
 };
 
 #ifndef OSKAR_BINARY_TAG_TYPEDEF_
@@ -182,34 +164,31 @@ struct oskar_BinaryTag
 typedef struct oskar_BinaryTag oskar_BinaryTag;
 #endif /* OSKAR_BINARY_TAG_TYPEDEF_ */
 
-/**
- * @brief Structure to manage an OSKAR binary file.
- *
- * @details
+/*
  * This structure holds an index of tags found in an OSKAR binary file,
  * and the offset in bytes from the start of the file of each payload.
  */
 struct oskar_Binary
 {
-    FILE* stream;                /**< File stream handle. */
-    int bin_version;             /**< Binary format version number. */
-    int query_search_start;      /**< Index at which to start search query. */
-    char open_mode;              /**< Mode in which file was opened (read/write). */
+    FILE* stream;               /* File stream handle. */
+    int bin_version;            /* Binary format version number. */
+    int query_search_start;     /* Index at which to start search query. */
+    char open_mode;             /* Mode in which file was opened (read/write). */
 
     /* Tag data. */
-    int num_chunks;              /**< Number of tags in the index. */
-    int* extended;               /**< True if tag is extended. */
-    int* data_type;              /**< Tag data type. */
-    int* id_group;               /**< Tag group ID. */
-    int* id_tag;                 /**< Tag ID. */
-    char** name_group;           /**< Tag group name. */
-    char** name_tag;             /**< Tag name. */
-    int* user_index;             /**< Tag index. */
-    long* payload_offset_bytes;  /**< Payload offset from start of file. */
-    size_t* payload_size_bytes;  /**< Payload size.*/
-    size_t* block_size_bytes;    /**< Total block size. */
-    unsigned long* crc;          /**< CRC-32C code. */
-    unsigned long* crc_header;   /**< CRC-32C code of payload identifier. */
+    int num_chunks;             /* Number of tags in the index. */
+    int* extended;              /* True if tag is extended. */
+    int* data_type;             /* Tag data type. */
+    int* id_group;              /* Tag group ID. */
+    int* id_tag;                /* Tag ID. */
+    char** name_group;          /* Tag group name. */
+    char** name_tag;            /* Tag name. */
+    int* user_index;            /* Tag index. */
+    long* payload_offset_bytes; /* Payload offset from start of file. */
+    size_t* payload_size_bytes; /* Payload size.*/
+    size_t* block_size_bytes;   /* Total block size. */
+    unsigned long* crc;         /* CRC-32C code. */
+    unsigned long* crc_header;  /* CRC-32C code of payload identifier. */
 
     /* Data tables used for CRC computation. */
     oskar_CRC* crc_data;

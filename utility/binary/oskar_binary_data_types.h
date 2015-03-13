@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef UTILITY_BINARY_OSKAR_BINARY_DATA_TYPES_H_
-#define UTILITY_BINARY_OSKAR_BINARY_DATA_TYPES_H_
+#ifndef OSKAR_BINARY_DATA_TYPES_H_
+#define OSKAR_BINARY_DATA_TYPES_H_
 
 #include <oskar_binary_macros.h>
 
@@ -102,7 +102,7 @@ OSKAR_BINARY_INLINE int oskar_type_precision(const int type)
  *
  * @param[in] type Enumerated type.
  *
- * @return 1 if double, 0 if single.
+ * @return 1 if double, 0 otherwise.
  */
 OSKAR_BINARY_INLINE int oskar_type_is_double(const int type)
 {
@@ -118,7 +118,7 @@ OSKAR_BINARY_INLINE int oskar_type_is_double(const int type)
  *
  * @param[in] type Enumerated type.
  *
- * @return 1 if single, 0 if double.
+ * @return 1 if single, 0 otherwise.
  */
 OSKAR_BINARY_INLINE int oskar_type_is_single(const int type)
 {
@@ -193,4 +193,4 @@ OSKAR_BINARY_INLINE int oskar_type_is_scalar(const int type)
 }
 #endif
 
-#endif /* UTILITY_BINARY_OSKAR_BINARY_DATA_TYPES_H_ */
+#endif /* OSKAR_BINARY_DATA_TYPES_H_ */

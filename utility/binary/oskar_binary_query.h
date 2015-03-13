@@ -50,7 +50,7 @@ extern "C" {
  * that are both given as bytes.
  *
  * @param[in] handle        Binary data handle.
- * @param[in] data_type     Type of the memory (as in oskar_Mem).
+ * @param[in] data_type     Type of the memory.
  * @param[in] id_group      Tag group identifier.
  * @param[in] id_tag        Tag identifier.
  * @param[in] user_index    User-defined index.
@@ -74,7 +74,7 @@ int oskar_binary_query(const oskar_Binary* handle,
  * that are both given as strings.
  *
  * @param[in] handle        Binary data handle.
- * @param[in] data_type     Type of the memory (as in oskar_Mem).
+ * @param[in] data_type     Type of the memory.
  * @param[in] name_group    Tag group name.
  * @param[in] name_tag      Tag name.
  * @param[in] user_index    User-defined index.
