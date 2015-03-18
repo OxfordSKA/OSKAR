@@ -3,7 +3,7 @@
 \page apps Applications
 
 \latexonly
-\def \docversion{9}
+\def \docversion{10}
 \endlatexonly
 
 \section apps_intro Introduction
@@ -13,7 +13,7 @@ OSKAR package. It assumes that OSKAR has already been built and installed.
 
 \section apps_binaries Application Binaries
 
-Currently, there are 16 OSKAR application binaries available, listed below
+Currently, there are 14 OSKAR application binaries available, listed below
 in alphabetical order. Applications that can be used to perform simulations
 with OSKAR are marked with *.
 
@@ -22,8 +22,6 @@ with OSKAR are marked with *.
 -# \ref apps_oskar_cuda_system_info "oskar_cuda_system_info"
 -# \ref apps_oskar_fit_element_data "oskar_fit_element_data"
 -# \ref apps_oskar_fits_image_to_sky_model "oskar_fits_image_to_sky_model"
--# \ref apps_oskar_image_stats "oskar_image_stats"
--# \ref apps_oskar_image_summary "oskar_image_summary"
 -# \ref apps_oskar_imager "oskar_imager"
 -# \ref apps_oskar_settings_get "oskar_settings_get"
 -# \ref apps_oskar_settings_set "oskar_settings_set"
@@ -96,29 +94,6 @@ the following command line syntax:
 [OPTIONS] consists of flags to specify how much of the input image is
 converted. The downsample factor, noise floor, and minimum peak fraction can
 all be set here.
-
-\subsection apps_oskar_image_stats oskar_image_stats
-
-This utility will evaluate a number of statistics from one or more OSKAR
-binary image files. The minimum, maximum, mean, variance, standard deviation,
-and RMS pixel values for each image are output to the terminal. The
-application is run with the following syntax:
-
-\code
-    $ oskar_image_stats [OPTIONS] <image file(s)>
-\endcode
-
-[OPTIONS] consists of flags for specifying the time, channel and polarisation
-index of the image plane from which to obtain statistics.
-
-\subsection apps_oskar_image_summary oskar_image_summary
-
-This utility displays a summary of the contents of an OSKAR binary image in
-the terminal. The application is run with the following syntax:
-
-\code
-    $ oskar_image_summary <image file>
-\endcode
 
 \subsection apps_oskar_imager oskar_imager
 
@@ -479,7 +454,8 @@ ds9 Equator_RA_1*.fits &
     <td>[2.5.1] Updated description for oskar_vis_to_ms application, which
     now supports concatenation of visibility files.</td></tr>
 <tr><td>10</td><td>2015-03-03</td>
-    <td>[2.6.0] Updated description of the oskar_sim_interferometer application.
+    <td>[2.6.0] Updated description of the oskar_sim_interferometer 
+    application. Removed deprecated oskar_image_* applications.
     </td></tr>
 </table>
 

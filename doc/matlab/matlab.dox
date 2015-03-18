@@ -3,7 +3,7 @@
 \page matlab_interface MATLAB Interface
 
 \latexonly
-\def \docversion{4}
+\def \docversion{5}
 \endlatexonly
 
 \section matlab_intro Introduction
@@ -100,11 +100,6 @@ Enumeration class used for describing the image type.
 \par oskar.image.transform</b> (enumeration class)
 Enumeration class used for describing the image transform used when making 
 the image.
-
-\par [image] = oskar.image.read(\<filename\>, [index = 0])
-Function to read an OSKAR binary image file into a MATLAB structure.
-If more than one image is present in the binary file, the optional index 
-argument can be used to specify which one is loaded.
 
 \par oskar.image.plot(\<image data\>, \<FOV in deg.\>, [figure title])
 Function to create MATLAB image plot labelled according to the specified 
@@ -275,6 +270,8 @@ following steps:
     <td>Updated installation path. Fixed name of "vis" package. Added section 
     describing "convert" package, and moved some existing functions here 
     from "sky".</td></tr>
+<tr><td>5</td><td>2015-03-18</td>
+    <td>Removed deprecated function oskar.image.read().</td></tr>
 </table>
 
 */
