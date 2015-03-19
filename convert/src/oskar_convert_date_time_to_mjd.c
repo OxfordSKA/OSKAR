@@ -32,6 +32,9 @@
 extern "C" {
 #endif
 
+/* Note: consider returning separate day and day fraction to gain a bit more
+ * floating point accuracy.
+ */
 double oskar_convert_date_time_to_mjd(int year, int month, int day,
         double day_fraction)
 {
@@ -46,7 +49,7 @@ double oskar_convert_date_time_to_mjd(int year, int month, int day,
 
     /* Compute day fraction. */
     day_fraction -= 0.5;
-    return jdn + day_fraction - 2400000.5;
+    return (jdn - 2400000.5) + day_fraction;
 }
 
 #ifdef __cplusplus
