@@ -31,18 +31,26 @@
 #include <QtCore/QSettings>
 #include <cstdio>
 #include <apps/lib/oskar_OptionParser.h>
+#include <vector>
+#include <string>
+
+using namespace std;
 
 int main(int argc, char** argv)
 {
     oskar_OptionParser opt("oskar_settings_set");
     opt.addRequired("settings file");
     opt.addRequired("key");
-    opt.addRequired("value");
+    opt.addOptional("value");
     opt.addFlag("-q", "Suppress printing", false, "--quiet");
     if (!opt.check_options(argc, argv)) return OSKAR_ERR_INVALID_ARGUMENT;
 
-    const char* filename = opt.getArg(0);
-    const char* key      = opt.getArg(1);
+    vector<string> args = opt.getArgs();
+    int num_args = args.size();
+
+    const char* filename = args[0].c_str();
+    const char* key = args[1].c_str();
+
     const char* value    = opt.getArg(2);
     bool quiet = opt.isSet("-q") ? true : false;
 
@@ -55,7 +63,12 @@ int main(int argc, char** argv)
     QSettings settings(QString(filename), QSettings::IniFormat);
     if (!settings.contains("version"))
         settings.setValue("version", OSKAR_VERSION_STR);
-    settings.setValue(QString(key), QString(value));
+    if (num_args == 3) {
+        settings.setValue(QString(key), QString(value));
+    }
+    else {
+        settings.remove(QString(key));
+    }
 
     return OSKAR_SUCCESS;
 }

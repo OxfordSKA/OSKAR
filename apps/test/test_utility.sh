@@ -23,6 +23,7 @@
 #       - set_oskar_binaries                                                  #
 #   3. Functions for working with OSKAR.                                      #
 #       - set_setting                                                         #
+#       - del_setting                                                         #
 #       - run_sim_interferomer                                                #
 #       - run_beam_pattern                                                    #
 #       - run_imager                                                          #
@@ -56,7 +57,7 @@ function console_log()
 #   Prompts the user to enter some value with a default and saves the answer
 #   into $NEW_VALUE
 #
-# Usage: 
+# Usage:
 #   set_value ['Enter something'] ['defaultValue']
 #   VAR=$NEW_VALUE
 function set_value()
@@ -81,7 +82,7 @@ function set_value()
 #
 function example_data_script_usage() {
     echo ""
-    echo "Usage:"   
+    echo "Usage:"
     echo "  $0 [OSKAR example data version (major.minor)]"
     echo ""
     echo "Example:"
@@ -99,14 +100,14 @@ function example_data_script_usage() {
 #   ie. OSKAR 2.5.1 would have example version 2.5.
 #
 #   If no command line options are found, then the version defaults to the
-#   current OSKAR binary version.    
+#   current OSKAR binary version.
 #
 # Usage:
 #   getExampleVersion [Array of command line arguments]
 #
 # Example:
 #   getExampleVersion $@
-# 
+#
 function get_example_data_version() {
     local default_example_version="@OSKAR_VERSION_MAJOR@.@OSKAR_VERSION_MINOR@"
     # Parse command line arguments.
@@ -140,7 +141,7 @@ function download_example_data() {
     local file="${example_data_dir}.zip"
     example_data_url="${oskar_url}/${1}/data/${file}"
     # Download and unpack the example data, removing any existing data first.
-    if [ -f $file ]; then 
+    if [ -f $file ]; then
         rm -f $file
     fi
     if [ -d $example_data_dir ]; then
@@ -173,14 +174,14 @@ function download_example_data() {
 ###############################################################################
 
 # Description:
-#   Sets the specified setting into the specified *.ini file using the 
+#   Sets the specified setting into the specified *.ini file using the
 #   'oskar_set_setting' binary.
 #
 # Usage:
 #   set_setting [ini_file] [key] [value]
 #
 # Example
-#   set_setting test.ini sky/oskar_sky_model/file sky.osm 
+#   set_setting test.ini sky/oskar_sky_model/file sky.osm
 #
 function set_setting() {
     local bin=${oskar_app_path}/oskar_settings_set
@@ -195,6 +196,32 @@ function set_setting() {
     fi
     eval "${bin} -q $1 $2 $3"
 }
+
+# Description:
+#   Removes / deletes the specified setting in the specified *.ini file using the
+#   'oskar_set_setting' binary.
+#
+# Usage:
+#   del_setting [ini_file] [key]
+#
+# Example
+#   del_setting test.ini sky/oskar_sky_model/file
+#
+function del_setting() {
+    local bin=${oskar_app_path}/oskar_settings_set
+    if [ ! -x ${bin} ]; then
+        echo "ERROR: Unable to find required binary: $bin."
+        exit 1
+    fi
+    if [ ! $# -eq 2 ]; then
+        echo "ERROR: del_setting requires 2 input arguments got $#."
+        echo "usage: del_setting [ini_file] [key]"
+        exit 1
+    fi
+    eval "${bin} -q $1 $2"
+}
+
+
 
 # Description:
 #   Runs the specified OSKAR binary.
@@ -222,7 +249,7 @@ function run_oskar_bin() {
 }
 
 # Description:
-#   Runs the 'oskar_sim_interferometer' binary using the specified settings 
+#   Runs the 'oskar_sim_interferometer' binary using the specified settings
 #   file.
 #
 # Usage:
@@ -259,11 +286,11 @@ function run_sim_interferometer() {
     if [ $? != 0 ]; then
         echo "ERROR: $name. Failed."
         exit 1
-    fi 
+    fi
 }
 
 # Description:
-#   Runs the 'oskar_sim_beam_pattern' binary using the specified settings 
+#   Runs the 'oskar_sim_beam_pattern' binary using the specified settings
 #   file.
 #
 # Usage:
@@ -304,7 +331,7 @@ function run_beam_pattern() {
 }
 
 # Description:
-#   Runs the 'oskar_imager' binary using the specified settings 
+#   Runs the 'oskar_imager' binary using the specified settings
 #   file.
 #
 # Usage:
@@ -345,7 +372,7 @@ function run_imager() {
 }
 
 # Description:
-#   Runs the 'oskar_vis_add_noise' binary with the specified settings 
+#   Runs the 'oskar_vis_add_noise' binary with the specified settings
 #   file and visibility binary data file
 #
 # Usage:
