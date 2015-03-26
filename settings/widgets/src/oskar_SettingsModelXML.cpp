@@ -407,6 +407,7 @@ bool SettingsModelXML_private::get_dependency(node* s, string& key,
         string skey = get_key(s);
         cerr << "ERROR: [" << skey << "] dependency key '";
         cerr << key << "' doesn't exist!" << endl;
+        return false;
     }
     string key_type = str_to_upper(types[iKey]);
 
