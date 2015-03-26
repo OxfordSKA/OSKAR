@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -168,32 +168,6 @@ void oskar_settings_load_image(oskar_SettingsImage* im,
             }
             im->fits_image = (char*)malloc(filename.size() + 1);
             strcpy(im->fits_image, filename.constData());
-        }
-        // Construct OSKAR filename
-        if (s.value("oskar_image", false).toBool())
-        {
-            QByteArray filename = t;
-            if (!overwrite && QFile::exists(QString(filename) + ".img"))
-            {
-                int i = 1;
-                while (true)
-                {
-                    QString test = QString(filename) + "-" + QString::number(i);
-                    test += ".img";
-                    if (!QFile::exists(QString(test)))
-                    {
-                        filename = test.toLatin1();
-                        break;
-                    }
-                    ++i;
-                }
-            }
-            else
-            {
-                filename += ".img";
-            }
-            im->oskar_image = (char*)malloc(filename.size() + 1);
-            strcpy(im->oskar_image, filename.constData());
         }
     }
 }

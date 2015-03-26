@@ -110,19 +110,15 @@ void oskar_settings_free(oskar_Settings* settings)
     free(settings->interferometer.oskar_vis_filename);
     settings->interferometer.oskar_vis_filename = NULL;
 
-    /* Free beam pattern file names. */
+    /* Free beam pattern data. */
+    free(settings->beam_pattern.station_ids);
+    settings->beam_pattern.station_ids = NULL;
     free(settings->beam_pattern.sky_model);
     settings->beam_pattern.sky_model = NULL;
     free(settings->beam_pattern.output_beam_text_file);
     settings->beam_pattern.output_beam_text_file = NULL;
-    free(settings->beam_pattern.oskar_image_complex);
-    settings->beam_pattern.oskar_image_complex = NULL;
-    free(settings->beam_pattern.oskar_image_phase);
-    settings->beam_pattern.oskar_image_phase = NULL;
-    free(settings->beam_pattern.oskar_image_voltage);
-    settings->beam_pattern.oskar_image_voltage = NULL;
-    free(settings->beam_pattern.oskar_image_total_intensity);
-    settings->beam_pattern.oskar_image_total_intensity = NULL;
+    free(settings->beam_pattern.root_path);
+    settings->beam_pattern.root_path = NULL;
     free(settings->beam_pattern.fits_image_phase);
     settings->beam_pattern.fits_image_phase = NULL;
     free(settings->beam_pattern.fits_image_voltage);
@@ -133,8 +129,6 @@ void oskar_settings_free(oskar_Settings* settings)
     /* Free imager file names. */
     free(settings->image.input_vis_data);
     settings->image.input_vis_data = NULL;
-    free(settings->image.oskar_image);
-    settings->image.oskar_image = NULL;
     free(settings->image.fits_image);
     settings->image.fits_image = NULL;
 
@@ -172,8 +166,6 @@ void oskar_settings_free(oskar_Settings* settings)
     settings->ionosphere.TID_files = NULL;
     free(settings->ionosphere.TECImage.fits_file);
     settings->ionosphere.TECImage.fits_file = NULL;
-    free(settings->ionosphere.TECImage.img_file);
-    settings->ionosphere.TECImage.img_file = NULL;
     free(settings->ionosphere.pierce_points.filename);
     settings->ionosphere.pierce_points.filename = NULL;
 

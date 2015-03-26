@@ -111,10 +111,6 @@ TEST(make_image, test)
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     int idx = 0;
-    const char* image_file = "temp_test_image.img";
-    oskar_image_write(image, NULL, image_file, idx, &error);
-    ASSERT_EQ(0, error) << oskar_get_error_string(error);
-
     const char* fits_file = "temp_test_image.fits";
     oskar_fits_image_write(image, NULL, fits_file, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
@@ -135,7 +131,6 @@ TEST(make_image, test)
     oskar_vis_free(vis, &error);
     oskar_image_free(image, &error);
     remove(fits_file);
-    remove(image_file);
     remove(vis_file);
 }
 
@@ -166,15 +161,11 @@ TEST(make_image, image_lm_grid)
     const char* fits_file = "test_lm_grid.fits";
     oskar_fits_image_write(im, NULL, fits_file, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
-    const char* image_file = "test_lm_grid.img";
-    oskar_image_write(im, NULL, image_file, 0, &error);
-    ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     oskar_image_free(im, &error);
     oskar_mem_free(l, &error);
     oskar_mem_free(m, &error);
     remove(fits_file);
-    remove(image_file);
 }
 
 TEST(make_image, image_range)

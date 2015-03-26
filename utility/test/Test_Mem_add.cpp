@@ -66,7 +66,7 @@ TEST(Mem, add_matrix_cpu)
 
     out = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
             num_elements, &status);
-    oskar_mem_add(out, in1, in2, &status);
+    oskar_mem_add(out, in1, in2, num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     float4c* C = oskar_mem_float4c(out, &status);
@@ -119,7 +119,7 @@ TEST(Mem, add_in_place)
         EXPECT_FLOAT_EQ(0.0f, B[i].d.y);
     }
 
-    oskar_mem_add(in_out, in, in_out, &status);
+    oskar_mem_add(in_out, in, in_out, num_elements, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     for (int i = 0; i < num_elements; ++i)
@@ -147,7 +147,7 @@ TEST(Mem, add_gpu)
             num_elements, &status);
     in2 = oskar_mem_create_copy(in1, OSKAR_GPU, &status);
     out = oskar_mem_create_copy(in1, OSKAR_GPU, &status);
-    oskar_mem_add(out, in1, in2, &status);
+    oskar_mem_add(out, in1, in2, num_elements, &status);
     ASSERT_EQ(0, status);
     oskar_mem_free(in1, &status);
     oskar_mem_free(in2, &status);
@@ -165,8 +165,8 @@ TEST(Mem, not_enough_output_elements)
     in2 = oskar_mem_create_copy(in1, OSKAR_CPU, &status);
     out = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
             num_elements / 2, &status);
-    oskar_mem_add(out, in1, in2, &status);
-    ASSERT_EQ((int)OSKAR_ERR_MEMORY_NOT_ALLOCATED, status);
+    oskar_mem_add(out, in1, in2, num_elements, &status);
+    ASSERT_EQ((int)OSKAR_ERR_DIMENSION_MISMATCH, status);
     status = 0;
     oskar_mem_free(in1, &status);
     oskar_mem_free(in2, &status);
@@ -184,26 +184,9 @@ TEST(Mem, add_dimension_mismatch)
             num_elements / 2, &status);
     out = oskar_mem_create(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_CPU,
             num_elements, &status);
-    oskar_mem_add(out, in1, in2, &status);
+    oskar_mem_add(out, in1, in2, num_elements, &status);
     ASSERT_EQ((int)OSKAR_ERR_DIMENSION_MISMATCH, status);
     status = 0;
-    oskar_mem_free(in1, &status);
-    oskar_mem_free(in2, &status);
-    oskar_mem_free(out, &status);
-}
-
-TEST(Mem, add_mixed_types)
-{
-    // Use Case: Add arrays of different types, but same total elements.
-    int num_elements = 10, status = 0;
-    oskar_Mem *in1, *in2, *out;
-    in1 = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_CPU,
-            num_elements, &status);
-    in2 = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, 2 * num_elements, &status);
-    out = oskar_mem_create(OSKAR_SINGLE_COMPLEX, OSKAR_CPU,
-            num_elements, &status);
-    oskar_mem_add(out, in1, in2, &status);
-    ASSERT_EQ(0, status);
     oskar_mem_free(in1, &status);
     oskar_mem_free(in2, &status);
     oskar_mem_free(out, &status);

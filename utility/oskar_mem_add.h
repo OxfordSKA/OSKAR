@@ -46,21 +46,19 @@ extern "C" {
  * Performs element-wise addition of the contents of the
  * arrays \p in1 and \p in2, storing the result in \p out.
  *
- * Addition can only be performed on arrays of the same numerical precision.
- * However, the types need not match as long as the total number of elements
- * in both inputs are the same; so for example, it is possible to add a scalar
- * vector to a complex one of half the length.
+ * Addition can only be performed on arrays of the same data type.
  *
  * An error is returned if there is not enough space in the output array.
  *
- * @param[in,out]  out      Array containing the result of adding inputs.
- * @param[in]      in1      First input array.
- * @param[in]      in2      Second input array.
- * @param[in,out]  status   Status return code.
+ * @param[in,out]  out          Array containing the result of adding inputs.
+ * @param[in]      in1          First input array.
+ * @param[in]      in2          Second input array.
+ * @param[in]      num_elements Number of elements to add.
+ * @param[in,out]  status       Status return code.
  */
 OSKAR_EXPORT
 void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
-        int* status);
+        size_t num_elements, int* status);
 
 #ifdef __cplusplus
 }

@@ -51,8 +51,8 @@ if (CUDA_FOUND)
         oskar_cuda_system_info
         oskar_binary_file_query
         oskar_filter_sky_model_clusters
-        oskar_image_stats
-        oskar_image_summary
+        #oskar_image_stats
+        #oskar_image_summary
         oskar_vis_add
         oskar_vis_summary
         #oskar_rebin_sky

@@ -3,62 +3,47 @@
 <s k="beam_pattern">
     <label>Beam pattern settings</label>
     <desc>
-        These settings are used only when running the beam pattern simulation.
+        These settings are used only when running beam pattern simulations.
     </desc>
-    
-    <s k="time_average_beam"><label>Produce time-average beam</label>
+
+    <s k="all_stations"><label>All stations</label>
         <type name="bool" default="false" />
-        <desc>
-            If set, produce a single time-averaged beam for the observation,
-            instead of a series of snapshots.
-        </desc>
+        <desc>If set, produce beams for all stations in the telescope 
+            model; otherwise, for selected stations.</desc>
     </s>
 
-    <!-- 
-    <s k="average_cross_power_beam">
-        <label>Produce average cross-power beam</label>
-        <type name="bool" default="false"/>
-        <desc>If enabled, the generated beam pattern will be the average
-        cross-power beam from all stations.</desc>
+    <s k="station_ids"><label>Station ID(s)</label>
+        <depends k="beam_pattern/all_stations" v="false" />
+        <type name="IntList" default="0"/>
+        <desc>The zero-based station ID number(s) to select from the
+            telescope model when generating beam pattern(s).</desc>
     </s>
-    -->
-    
-    <s k="station_id"><label>Station ID</label>
-        <!-- <depends k="beam_pattern/average_cross_power_beam" v="false" /> -->
-        <type name="uint" default="0"/>
-        <desc>The station ID number (zero based) to select from the
-            telescope model when generating the beam pattern.</desc>
-    </s>
-    
-    <!--
-    <s k="coordinate_type"><label>Coordinate (grid) type</label>
-        <type name="OptionList" default="Beam image">
-            Beam image, HEALPix, Sky model
-        </type>
-        <desc>
-            Specification of coordinates at which to evaluate the beam pattern.
-            <ul>
-            <li><b>Beam image</b>: Tangent plane image, centred on the
-            beam pointing direction.</li>"
-            <li><b>HEALPix</b>: All-sky map on a HEALPix grid.</li>
-            <li><b>Sky model</b>: Evaluate beam only at the supplied
-            coordinates.</li>
-            </ul>
-        </desc>
-    </s>
-    -->
-    <!--
-    <s k="coordinate_frame">
-        <label>Coordinate frame</label>
+
+    <!-- PROPOSED NEW FEATURE
+    <s k="coordinate_frame"><label>Coordinate frame</label>
         <type name="OptionList" default="Equatorial">Equatorial, Horizon</type>
         <desc>Specification of the coordinate frame in which to evaluate
             the beam pattern.</desc>
     </s>
     -->
-    <s k="beam_image">
-        <label>Beam image</label>
-        <desc>Image of the beam, centred on the beam direction.</desc>
-        <!-- <depends k="beam_pattern/coordinate_type" v="Beam image"/> -->
+    <s k="coordinate_type"><label>Coordinate (grid) type</label>
+        <type name="OptionList" default="Beam image">
+            Beam image, Sky model
+        </type>
+        <desc>
+            Specification of coordinates at which to evaluate the beam pattern.
+            <ul>
+            <li><b>Beam image:</b> Tangent plane image, centred on the
+                phase centre direction.</li>
+            <li><b>Sky model:</b> Evaluate beam only at the supplied
+                coordinates.</li>
+            </ul>
+        </desc>
+    </s>
+
+    <s k="beam_image"><label>Beam image</label>
+        <desc>Image of the beam, centred on the phase centre.</desc>
+        <depends k="beam_pattern/coordinate_type" v="Beam image"/>
 
         <s k="size" >
             <label>Image dimensions [pixels]</label>
@@ -70,9 +55,10 @@
                 Example:
                 <ul>
                 <li>A value of '256' results in a square image of size 256 by
-                256 pixels.</li>
+                    256 pixels.</li>
                 <li>A value of '256,128' results in an image of 256 by 128
-                pixels, with 256 pixels along the Right Ascension direction.</li>
+                    pixels, with 256 pixels along the Right Ascension 
+                    direction.</li>
                 </ul>
             </desc>
         </s>
@@ -81,21 +67,29 @@
             <type name="DoubleList" default="2.0" />
             <desc>
                 Field-of-view (FOV) in degrees (max 180.0). If a single value
-                is specified, the image is assumed to have the same FOV along each
-                dimension. <br/>
+                is specified, the image is assumed to have the same FOV along 
+                each dimension.<br/>
                 Example:
                 <ul>
                 <li>A value of '2.0' results in an image with a FOV of 2.0
-                degrees in each dimension.</li>
+                    degrees in each dimension.</li>
                 <li>A value of '2.0,1.0' results in an image with a FOV of
-                2.0 degrees in Right Ascension, and 1.0 degrees in
-                Declination.</li>
+                    2.0 degrees in Right Ascension, and 1.0 degrees in
+                    Declination.</li>
                 </ul>
             </desc>
         </s>
     </s> <!-- End beam image group -->
 
-    <!--
+    <s k="sky_model"><label>Sky model</label>
+        <depends k="beam_pattern/coordinate_type" v="Sky model"/>
+        <s k="file"><label>Input file</label>
+            <type name="InputFile" />
+            <desc>Path to an input sky model file.</desc>
+        </s>
+    </s> <!-- End sky model group -->
+
+    <!-- PROPOSED NEW FEATURE
     <s k="healpix">
         <label>HEALPix settings</label>
         <depends k="beam_pattern/coordinate_type" v="HEALPix"/>
@@ -103,14 +97,6 @@
             <type name="uint" default="128" />
             <desc>HEALPix Nside parameter. The total number of points is
                 12 * Nside * Nside</desc>
-        </s>
-    </s>
-    <s k="sky_model">
-        <label>Sky model settings</label>
-        <depends k="beam_pattern/coordinate_type" v="Sky model"/>
-        <s k="file"><label>Input file</label>
-            <type name="InputFile" />
-            <desc>Path to an input sky model file.</desc>
         </s>
     </s>
     -->
@@ -128,34 +114,157 @@
             based on the settings below.</desc>
     </s>
 
-    <!-- DEPRECATED
-    <s k="oskar_image_file">
-        <label>OSKAR image file options</label>
-        <s k="save_voltage"><label>Voltage pattern</label>
-            <type name="bool" default="false" />
-            <desc>If true, save the voltage amplitude pattern in an OSKAR image
-                file. (This is given by the square root of the sum of the
-                squares of the real and imaginary values.)</desc>
+    <s k="output"><label>Output options</label>
+        <s k="separate_time_and_channel">
+            <label>Separate time and channel</label>
+            <type name="bool" default="true" />
+            <desc>Output files without performing any averaging over the 
+                time or channel dimensions.</desc>
         </s>
-        <s k="save_phase"><label>Phase pattern</label>
+        <s k="average_time_and_channel">
+            <label>Average time and channel</label>
             <type name="bool" default="false" />
-            <desc>If true, save the phase pattern in an OSKAR image file.</desc>
+            <desc>Output files after averaging over both the 
+                time and channel dimensions.</desc>
         </s>
-        <s k="save_complex"><label>Complex (voltage) pattern</label>
-            <type name="bool" default="false" />
-            <desc>If true, save the complex (real and imaginary) pattern in an
-                OSKAR image file.</desc>
-        </s>
-        <s k="save_total_intensity"><label>Total intensity pattern</label>
-            <type name="bool" default="false" />
-            <desc>If true, save the total intensity beam. This is evaluated as
-            the Stokes I response of the beam pattern auto-correlation.</desc>
+        <s k="average_single_axis">
+            <label>Average single axis</label>
+            <type name="OptionList" default="false">None, Time, Channel</type>
+            <desc>Output files after averaging over the selected 
+                dimension.</desc>
         </s>
     </s>
-    -->
+
+    <s k="station_outputs"><label>Per-station outputs</label>
+        <s k="text_file">
+            <label>Text file</label>
+            <s k="save_raw_complex"><label>Raw (complex) pattern</label>
+                <depends k="beam_pattern/output/separate_time_and_channel" 
+                    v="true"/>
+                <type name="bool" default="false" />
+                <desc>If true, save the raw complex pattern in text 
+                    files.</desc>
+            </s>
+            <s k="save_amp"><label>Amplitude pattern</label>
+                <depends k="beam_pattern/output/separate_time_and_channel" 
+                    v="true"/>
+                <type name="bool" default="false" />
+                <desc>If true, save each amplitude (voltage) pattern in text 
+                    files. This is given by the square root of the sum 
+                    of the squares of the real and imaginary values.</desc>
+            </s>
+            <s k="save_phase"><label>Phase pattern</label>
+                <depends k="beam_pattern/output/separate_time_and_channel" 
+                    v="true"/>
+                <type name="bool" default="false" />
+                <desc>If true, save each phase pattern in text files.</desc>
+            </s>
+            <s k="save_auto_power_stokes_i">
+                <label>Auto-correlation Stokes I power pattern</label>
+                <type name="bool" default="false" />
+                <desc>If true, save each total intensity beam in text
+                    files. This is evaluated as the Stokes I response of the 
+                    auto-correlation.</desc>
+            </s>
+            <!-- <s k="save_ixr">
+                <label>Intrinsic cross-polarisation ratio (IXR)</label>
+                <depends k="telescope/pol_mode" v="Full"/>
+                <depends k="beam_pattern/output/separate_time_and_channel" 
+                    v="true"/>
+                <type name="bool" default="false" />
+                <desc>If true, save the IXR map of the beam in text
+                    files (see Carozzi and Woan, 2011).</desc>
+            </s> -->
+        </s>
+        <s k="fits_image">
+            <label>FITS image</label>
+            <depends k="beam_pattern/coordinate_type" v="Beam image"/>
+            <s k="save_amp"><label>Amplitude pattern</label>
+                <depends k="beam_pattern/output/separate_time_and_channel" 
+                    v="true"/>
+                <type name="bool" default="false" />
+                <desc>If true, save each amplitude (voltage) pattern in FITS 
+                    image files. This is given by the square root of the sum 
+                    of the squares of the real and imaginary values.</desc>
+            </s>
+            <s k="save_phase"><label>Phase pattern</label>
+                <depends k="beam_pattern/output/separate_time_and_channel" 
+                    v="true"/>
+                <type name="bool" default="false" />
+                <desc>If true, save each phase pattern in FITS image 
+                    files.</desc>
+            </s>
+            <s k="save_auto_power_stokes_i">
+                <label>Auto-correlation Stokes I power pattern</label>
+                <type name="bool" default="false" />
+                <desc>If true, save each total intensity beam in FITS image 
+                    files. This is evaluated as the Stokes I response of the 
+                    auto-correlation.</desc>
+            </s>
+            <!-- <s k="save_ixr">
+                <label>Intrinsic cross-polarisation ratio (IXR)</label>
+                <depends k="telescope/pol_mode" v="Full"/>
+                <depends k="beam_pattern/output/separate_time_and_channel" 
+                    v="true"/>
+                <type name="bool" default="false" />
+                <desc>If true, save the IXR map of each beam in FITS 
+                    image files (see Carozzi and Woan, 2011).</desc>
+            </s> -->
+        </s>
+    </s>
+    <s k="telescope_outputs"><label>Telescope outputs</label>
+        <s k="text_file">
+            <label>Text file</label>
+            <s k="save_cross_power_stokes_i_raw_complex">
+                <label>Cross-correlation Stokes I raw power pattern</label>
+                <type name="bool" default="false" />
+                <desc>If true, save the average cross-power beam raw 
+                    response to Stokes I from all specified stations as a text 
+                    file.</desc>
+            </s>
+            <s k="save_cross_power_stokes_i_amp">
+                <label>Cross-correlation Stokes I amplitude power 
+                    pattern</label>
+                <type name="bool" default="false" />
+                <desc>If true, save the average cross-power beam amplitude 
+                    response to Stokes I from all specified stations as text 
+                    files.</desc>
+            </s>
+            <s k="save_cross_power_stokes_i_phase">
+                <label>Cross-correlation Stokes I phase power pattern</label>
+                <type name="bool" default="false" />
+                <desc>If true, save the average cross-power beam phase
+                    response to Stokes I from all specified stations as text 
+                    files.</desc>
+            </s>
+        </s>
+        <s k="fits_image">
+            <label>FITS image</label>
+            <depends k="beam_pattern/coordinate_type" v="Beam image"/>
+            <s k="save_cross_power_stokes_i_amp">
+                <label>Cross-correlation Stokes I amplitude power 
+                    pattern</label>
+                <type name="bool" default="false" />
+                <desc>If true, save the average cross-power beam amplitude 
+                    response to Stokes I from all specified stations in FITS 
+                    image files.</desc>
+            </s>
+            <s k="save_cross_power_stokes_i_phase">
+                <label>Cross-correlation Stokes I phase power pattern</label>
+                <type name="bool" default="false" />
+                <desc>If true, save the average cross-power beam phase 
+                    response to Stokes I from all specified stations in FITS 
+                    image files.</desc>
+            </s>
+        </s>
+    </s>
+
+
+
+
 
     <s k="fits_file">
-        <label>FITS image options</label>
+        <label>FITS image options (OLD)</label>
         <s k="save_voltage"><label>Voltage pattern</label>
             <type name="bool" default="false" />
             <desc>If true, save the voltage amplitude pattern in a FITS image

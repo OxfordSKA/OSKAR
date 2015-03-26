@@ -75,12 +75,6 @@ int main(int argc, char** argv)
             oskar_log_list(log, 'M', 0, "Writing FITS image file: '%s'", fname);
             oskar_fits_image_write(TEC_screen, log, fname, &error);
         }
-        fname = settings.ionosphere.TECImage.img_file;
-        if (fname && !error)
-        {
-            oskar_log_list(log, 'M', 0, "Writing OSKAR image file: '%s'", fname);
-            oskar_image_write(TEC_screen, log, fname, 0, &error);
-        }
     }
     oskar_image_free(TEC_screen, &error);
 

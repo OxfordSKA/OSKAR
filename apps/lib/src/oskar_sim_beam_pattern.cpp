@@ -38,7 +38,7 @@
 
 #include <oskar_convert_mjd_to_gast_fast.h>
 #include <oskar_cuda_mem_log.h>
-#include <oskar_evaluate_average_cross_power_beam.h>
+#include <oskar_evaluate_cross_power.h>
 #include <oskar_evaluate_station_beam.h>
 #include <oskar_evaluate_jones_E.h>
 #include <oskar_image.h>
@@ -262,8 +262,9 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
                 oskar_evaluate_jones_E(jones, num_pixels, d_x, d_y, d_z,
                         coord_type, lon0, lat0, d_tel, GAST, frequency,
                         d_work, t, status);
-                oskar_evaluate_average_cross_power_beam(num_pixels,
-                        num_stations, jones, d_beam_data, status);
+                oskar_evaluate_cross_power(num_pixels,
+                        num_stations, oskar_jones_mem(jones), d_beam_data,
+                        status);
             }
             else
             {
@@ -276,7 +277,8 @@ static void simulate_beam_pattern(oskar_Mem* output_beam,
             // FIXME HACK Accumulate beam data.
             if (d_beam_acc)
             {
-                oskar_mem_add(d_beam_acc, d_beam_acc, d_beam_data, status);
+                oskar_mem_add(d_beam_acc, d_beam_acc, d_beam_data,
+                        oskar_mem_length(d_beam_acc), status);
             }
             else
             {

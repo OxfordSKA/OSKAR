@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGE_WRITE_H_
-#define OSKAR_IMAGE_WRITE_H_
+#ifndef OSKAR_EVALUATE_AUTO_POWER_H_
+#define OSKAR_EVALUATE_AUTO_POWER_H_
 
 /**
- * @file oskar_image_write.h
+ * @file oskar_evaluate_auto_power.h
  */
 
 #include <oskar_global.h>
-#include <oskar_log.h>
+#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,24 +42,22 @@ extern "C" {
 
 /**
  * @brief
- * Write an OSKAR image structure to an OSKAR binary file.
+ * Function to evaluate the auto-power product.
  *
  * @details
- * This function writes (multi-dimensional) image data to an OSKAR binary file.
- * If the file already exists, it is overwritten.
+ * This function evaluates the auto-power product for the supplied sources.
  *
- * @param[in] image    Pointer to image structure to save.
- * @param[in,out] log  Pointer to log structure to use.
- * @param[in] filename Name of file to write.
- * @param[in] idx      Image index to write (set to 0 if unknown).
- * @param[in,out] status Status return code.
+ * @param[in] num_sources    The number of sources in the input arrays.
+ * @param[in] jones          Pointer to Jones matrix list.
+ * @param[out] out           Pointer to output auto-power product.
+ * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_image_write(const oskar_Image* image, oskar_Log* log,
-        const char* filename, int idx, int* status);
+void oskar_evaluate_auto_power(int num_sources, const oskar_Mem* jones,
+        oskar_Mem* out, int *status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_IMAGE_WRITE_H_ */
+#endif /* OSKAR_EVALUATE_AUTO_POWER_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,14 @@
 
 #ifndef OSKAR_IMAGE_H_
 #define OSKAR_IMAGE_H_
+
+/**
+ * @file oskar_image.h
+ *
+ * @deprecated
+ * The oskar_Image structure is deprecated.
+ * Do not use these functions or enumerators in new code.
+ */
 
 /* Public interface. */
 
@@ -132,9 +140,6 @@ enum OSKAR_IMAGE_COORD_FRAME
 #include <oskar_image_accessors.h>
 #include <oskar_image_create.h>
 #include <oskar_image_free.h>
-#include <oskar_image_get_stats.h>
-#include <oskar_image_read.h>
 #include <oskar_image_resize.h>
-#include <oskar_image_write.h>
 
 #endif /* OSKAR_IMAGE_H_ */

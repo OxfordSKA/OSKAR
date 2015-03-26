@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,6 @@
  */
 
 #include <oskar_settings_load_beam_pattern.h>
-#include <oskar_image.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -43,25 +42,46 @@ void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
 {
     QByteArray t;
     QSettings s(QString(filename), QSettings::IniFormat);
+    QStringList station_id_list;
+    QVariant station_ids;
+    QString temp;
 
     // Check if safe to proceed.
     if (*status) return;
 
     s.beginGroup("beam_pattern");
 
-    // Get station ID to use.
-    bp->average_cross_power_beam =
-            s.value("average_cross_power_beam", false).toBool();
-    bp->station_id  = s.value("station_id").toUInt();
-    bp->time_average_beam = s.value("time_average_beam", false).toBool();
+    // Get station ID(s) to use.
+    bp->station_id  = s.value("station_id", 0).toUInt(); // FIXME DEPRECATED.
+    bp->all_stations = s.value("all_stations", true).toBool();
+    bp->num_active_stations = 0;
+    bp->station_ids = 0;
+    if (!bp->all_stations)
+    {
+        station_ids = s.value("station_ids", "0");
+        if (station_ids.type() == QVariant::StringList)
+            station_id_list = station_ids.toStringList();
+        else if (station_ids.type() == QVariant::String)
+            station_id_list = station_ids.toString().split(",");
+        bp->num_active_stations = station_id_list.size();
+        bp->station_ids = (int*)malloc(station_id_list.size() * sizeof(int));
+        for (int i = 0; i < bp->num_active_stations; ++i)
+        {
+            bp->station_ids[i] = station_id_list[i].toInt();
+        }
+    }
 
-    QString temp = s.value("coordinate_type", "Beam image").toString().toUpper();
+    bp->time_average_beam = s.value("time_average_beam", false).toBool(); // FIXME DEPRECATED.
+    bp->average_cross_power_beam =
+            s.value("average_cross_power_beam", false).toBool(); // FIXME DEPRECATED.
+
+    temp = s.value("coordinate_type", "Beam image").toString().toUpper();
     if (temp.startsWith("B"))
         bp->coord_grid_type = OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE;
-    else if (temp.startsWith("H"))
-        bp->coord_grid_type = OSKAR_BEAM_PATTERN_COORDS_HEALPIX;
     else if (temp.startsWith("S"))
         bp->coord_grid_type = OSKAR_BEAM_PATTERN_COORDS_SKY_MODEL;
+    else if (temp.startsWith("H"))
+        bp->coord_grid_type = OSKAR_BEAM_PATTERN_COORDS_HEALPIX;
     else
     {
         *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
@@ -145,8 +165,75 @@ void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
 
     bp->horizon_clip = s.value("horizon_clip").toBool();
 
-    // Construct output file-names.
+    // Get output file root path.
     QString root = s.value("root_path", "").toString();
+    if (!root.isEmpty())
+    {
+        t = root.toLatin1();
+        bp->root_path = (char*)malloc(t.size() + 1);
+        strcpy(bp->root_path, t.constData());
+    }
+
+    // Get averaging options.
+    s.beginGroup("output");
+    bp->separate_time_and_channel =
+            s.value("separate_time_and_channel", true).toBool();
+    bp->average_time_and_channel =
+            s.value("average_time_and_channel", true).toBool();
+    temp = s.value("average_single_axis", "None").toString().toUpper();
+    if (temp.startsWith("N"))
+        bp->average_single_axis = OSKAR_BEAM_PATTERN_AVERAGE_NONE;
+    else if (temp.startsWith("T"))
+        bp->average_single_axis = OSKAR_BEAM_PATTERN_AVERAGE_TIME;
+    else if (temp.startsWith("C"))
+        bp->average_single_axis = OSKAR_BEAM_PATTERN_AVERAGE_CHANNEL;
+    s.endGroup();
+
+    // Get station output file options.
+    s.beginGroup("station_outputs");
+    s.beginGroup("text_file");
+    bp->station_text_raw_complex = s.value("save_raw_complex", false).toBool();
+    bp->station_text_amp = s.value("save_amp", false).toBool();
+    bp->station_text_phase = s.value("save_phase", false).toBool();
+    bp->station_text_auto_power_stokes_i =
+            s.value("save_auto_power_stokes_i", false).toBool();
+    bp->station_text_ixr = s.value("save_ixr", false).toBool();
+    s.endGroup(); // Text file.
+    if (bp->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
+    {
+        s.beginGroup("fits_image");
+        bp->station_fits_amp = s.value("save_amp", false).toBool();
+        bp->station_fits_phase = s.value("save_phase", false).toBool();
+        bp->station_fits_auto_power_stokes_i =
+                s.value("save_auto_power_stokes_i", false).toBool();
+        bp->station_fits_ixr = s.value("save_ixr", false).toBool();
+        s.endGroup(); // FITS image.
+    }
+    s.endGroup(); // Station outputs.
+
+    // Get telescope output file options.
+    s.beginGroup("telescope_outputs");
+    s.beginGroup("text_file");
+    bp->telescope_text_cross_power_stokes_i_raw_complex =
+            s.value("save_cross_power_stokes_i_raw_complex", false).toBool();
+    bp->telescope_text_cross_power_stokes_i_amp =
+            s.value("save_cross_power_stokes_i_amp", false).toBool();
+    bp->telescope_text_cross_power_stokes_i_phase =
+            s.value("save_cross_power_stokes_i_phase", false).toBool();
+    s.endGroup(); // Text file.
+    if (bp->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
+    {
+        s.beginGroup("fits_image");
+        bp->telescope_fits_cross_power_stokes_i_amp =
+                s.value("save_cross_power_stokes_i_amp", false).toBool();
+        bp->telescope_fits_cross_power_stokes_i_phase =
+                s.value("save_cross_power_stokes_i_phase", false).toBool();
+        s.endGroup(); // FITS image.
+    }
+    s.endGroup(); // Telescope outputs.
+
+
+    // FIXME Remaining options in this section are all deprecated.
     if (!root.isEmpty())
     {
         // ASCII list file.
@@ -156,34 +243,6 @@ void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
             bp->output_beam_text_file = (char*)malloc(t.size() + 1);
             strcpy(bp->output_beam_text_file, t.constData());
         }
-
-        // OSKAR image files.
-        s.beginGroup("oskar_image_file");
-        if (s.value("save_voltage", false).toBool())
-        {
-            t = QString(root + "_VOLTAGE.img").toLatin1();
-            bp->oskar_image_voltage = (char*)malloc(t.size() + 1);
-            strcpy(bp->oskar_image_voltage, t.constData());
-        }
-        if (s.value("save_phase", false).toBool())
-        {
-            t = QString(root + "_PHASE.img").toLatin1();
-            bp->oskar_image_phase = (char*)malloc(t.size() + 1);
-            strcpy(bp->oskar_image_phase, t.constData());
-        }
-        if (s.value("save_complex", false).toBool())
-        {
-            t = QString(root + "_COMPLEX.img").toLatin1();
-            bp->oskar_image_complex = (char*)malloc(t.size() + 1);
-            strcpy(bp->oskar_image_complex, t.constData());
-        }
-        if (s.value("save_total_intensity", false).toBool())
-        {
-            t = QString(root + "_TOTAL_INTENSITY.img").toLatin1();
-            bp->oskar_image_total_intensity = (char*)malloc(t.size() + 1);
-            strcpy(bp->oskar_image_total_intensity, t.constData());
-        }
-        s.endGroup();
 
         // FITS files.
         s.beginGroup("fits_file");

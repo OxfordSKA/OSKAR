@@ -60,19 +60,22 @@ void oskar_settings_init(oskar_Settings* settings)
     settings->element_fit.fits_image = NULL;
     settings->interferometer.ms_filename = NULL;
     settings->interferometer.oskar_vis_filename = NULL;
+    settings->beam_pattern.num_active_stations = 0;
+    settings->beam_pattern.station_ids = NULL;
     settings->beam_pattern.sky_model = NULL;
+    settings->beam_pattern.root_path = NULL;
+    settings->beam_pattern.station_fits_ixr = 0;
+    settings->beam_pattern.station_fits_phase = 0;
+    settings->beam_pattern.station_fits_auto_power_stokes_i = 0;
+    settings->beam_pattern.station_fits_amp = 0;
+    settings->beam_pattern.telescope_fits_cross_power_stokes_i_amp = 0;
     settings->beam_pattern.output_beam_text_file = NULL;
-    settings->beam_pattern.oskar_image_voltage = NULL;
-    settings->beam_pattern.oskar_image_phase = NULL;
-    settings->beam_pattern.oskar_image_complex = NULL;
-    settings->beam_pattern.oskar_image_total_intensity = NULL;
     settings->beam_pattern.fits_image_voltage = NULL;
     settings->beam_pattern.fits_image_phase = NULL;
     settings->beam_pattern.fits_image_total_intensity = NULL;
     settings->beam_pattern.size[0] = 0;
     settings->beam_pattern.size[1] = 0;
     settings->image.input_vis_data = NULL;
-    settings->image.oskar_image = NULL;
     settings->image.fits_image = NULL;
     noise->freq.file = NULL;
     noise->value.rms.file = NULL;
@@ -85,7 +88,6 @@ void oskar_settings_init(oskar_Settings* settings)
     settings->ionosphere.TID_files = NULL;
     settings->ionosphere.TID = NULL;
     settings->ionosphere.TECImage.fits_file = NULL;
-    settings->ionosphere.TECImage.img_file = NULL;
     settings->ionosphere.pierce_points.filename = NULL;
 
     /* Initialise pathname to settings file. */

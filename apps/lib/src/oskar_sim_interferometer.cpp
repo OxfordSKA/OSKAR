@@ -268,7 +268,8 @@ extern "C" void oskar_sim_interferometer(const char* settings_file,
                     status);
 
             oskar_timer_resume(dd->tmr_init_copy);
-            oskar_mem_add(dd->vis_acc, dd->vis_acc, dd->vis_temp, status);
+            oskar_mem_add(dd->vis_acc, dd->vis_acc, dd->vis_temp,
+                    oskar_mem_length(dd->vis_acc), status);
             oskar_timer_pause(dd->tmr_init_copy);
         }
 #pragma omp barrier

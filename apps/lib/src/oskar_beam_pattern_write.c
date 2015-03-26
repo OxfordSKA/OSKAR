@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,6 @@ extern "C" {
 #endif
 
 /* ========================================================================== */
-static void save_complex(const oskar_Image* complex_cube,
-        const oskar_Settings* settings, oskar_Log* log, int* status);
 static void save_voltage(oskar_Image* image_cube,
         const oskar_Image* complex_cube,
         const oskar_Settings* settings, int type, oskar_Log* log,
@@ -110,9 +108,6 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
 
     num_pixels_total = num_pixels * num_times * num_channels * num_pols;
 
-    /* Save the complex beam pattern. */
-    save_complex(complex_cube, settings, log, status);
-
     /* Save the power beam pattern. */
     save_voltage(image, complex_cube, settings, type, log, num_pixels_total,
             status);
@@ -127,18 +122,6 @@ void oskar_beam_pattern_write(const oskar_Image* complex_cube,
     oskar_image_free(image, status);
 }
 
-static void save_complex(const oskar_Image* complex_cube,
-        const oskar_Settings* settings, oskar_Log* log, int* status)
-{
-    const char* filename = settings->beam_pattern.oskar_image_complex;
-
-    /* Return if there is an error or the filename has not been set. */
-    if ((status && *status != OSKAR_SUCCESS) || !filename)
-        return;
-    oskar_log_message(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
-    oskar_image_write(complex_cube, log, filename, 0, status);
-}
-
 static void save_voltage(oskar_Image* image_cube,
         const oskar_Image* complex_cube, const oskar_Settings* settings,
         int type, oskar_Log* log,
@@ -148,8 +131,7 @@ static void save_voltage(oskar_Image* image_cube,
     int i;
 
     /* Write out power data if required. */
-    if (settings->beam_pattern.oskar_image_voltage ||
-            settings->beam_pattern.fits_image_voltage)
+    if (settings->beam_pattern.fits_image_voltage)
     {
         /* Convert complex values to power (amplitude of complex number). */
         if (type == OSKAR_SINGLE)
@@ -183,14 +165,6 @@ static void save_voltage(oskar_Image* image_cube,
             }
         }
 
-        /* Write OSKAR image. */
-        filename = settings->beam_pattern.oskar_image_voltage;
-        if (filename && !*status)
-        {
-            oskar_log_message(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
-            oskar_image_write(image_cube, log, filename, 0, status);
-        }
-
         /* Write FITS image. */
         filename = settings->beam_pattern.fits_image_voltage;
         if (filename && !*status)
@@ -209,8 +183,7 @@ static void save_phase(const oskar_Image* complex_cube,
     int i;
 
     /* Write out phase data if required. */
-    if (settings->beam_pattern.oskar_image_phase ||
-            settings->beam_pattern.fits_image_phase)
+    if (settings->beam_pattern.fits_image_phase)
     {
         /* Convert complex values to phase. */
         if (type == OSKAR_SINGLE)
@@ -238,14 +211,6 @@ static void save_phase(const oskar_Image* complex_cube,
             }
         }
 
-        /* Write OSKAR image. */
-        filename = settings->beam_pattern.oskar_image_phase;
-        if (filename && !*status)
-        {
-            oskar_log_message(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
-            oskar_image_write(image_cube, log, filename, 0, status);
-        }
-
         /* Write FITS image. */
         filename = settings->beam_pattern.fits_image_phase;
         if (filename && !*status)
@@ -268,8 +233,7 @@ static void save_total_intensity(const oskar_Image* complex_cube,
     if (*status) return;
 
     /* Return if a total intensity beam pattern has not been specified. */
-    if (!(settings->beam_pattern.oskar_image_total_intensity ||
-            settings->beam_pattern.fits_image_total_intensity))
+    if (!settings->beam_pattern.fits_image_total_intensity)
         return;
 
     /* Dimensions of input beam pattern image to be converted to total intensity. */
@@ -355,14 +319,6 @@ static void save_total_intensity(const oskar_Image* complex_cube,
                 }
             }
         }
-    }
-
-    /* Write OSKAR image. */
-    filename = settings->beam_pattern.oskar_image_total_intensity;
-    if (filename && !*status)
-    {
-        oskar_log_message(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
-        oskar_image_write(image, log, filename, 0, status);
     }
 
     /* Write FITS image. */

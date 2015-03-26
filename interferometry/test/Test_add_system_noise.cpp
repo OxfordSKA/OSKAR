@@ -163,21 +163,17 @@ TEST(add_system_noise, test_rms)
     settings.image.time_range[1] = -1;
     settings.image.transform_type = OSKAR_IMAGE_DFT_2D;
     settings.image.direction_type = OSKAR_IMAGE_DIRECTION_OBSERVATION;
-    std::string filename = "temp_test_image.img";
-    settings.image.oskar_image = (char*)malloc(filename.size() + 1);
-    strcpy(settings.image.oskar_image, filename.c_str());
-    settings.image.fits_image = NULL;
+    std::string filename = "temp_test_image.fits";
+    settings.image.fits_image = (char*)malloc(filename.size() + 1);
+    strcpy(settings.image.fits_image, filename.c_str());
 
 
     image = oskar_make_image(0, vis, &(settings.image), &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
-    //    err = oskar_image_write(&image, NULL, settings.image.oskar_image, 0);
-    //    ASSERT_EQ(0, err) << oskar_get_error_string(err);
-
 
 #if 0
-    check_image_stats(&image, telescope);
+    check_image_stats(image, telescope);
 #endif
 
     oskar_mem_free(work_uvw, &err);

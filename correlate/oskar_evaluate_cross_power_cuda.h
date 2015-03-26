@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_AVERAGE_SCALAR_CROSS_POWER_BEAM_CUDA_H_
-#define OSKAR_EVALUATE_AVERAGE_SCALAR_CROSS_POWER_BEAM_CUDA_H_
+#ifndef OSKAR_EVALUATE_CROSS_POWER_CUDA_H_
+#define OSKAR_EVALUATE_CROSS_POWER_CUDA_H_
 
 /**
- * @file oskar_evaluate_average_scalar_cross_power_beam_cuda.h
+ * @file oskar_evaluate_cross_power_cuda.h
  */
 
 #include <oskar_global.h>
@@ -42,11 +42,11 @@ extern "C" {
 
 /**
  * @brief
- * CUDA function to evaluate the cross-power beam from all stations
+ * CUDA function to evaluate the cross-power product from all stations
  * (single precision).
  *
  * @details
- * This function evaluates the average cross-power beam for the supplied
+ * This function evaluates the average cross-power product for the supplied
  * sources from all stations.
  *
  * The \p jones block is two dimensional, and the source dimension
@@ -59,20 +59,20 @@ extern "C" {
  * @param[in] num_stations   The number of stations in the input arrays.
  * @param[in] d_jones        Pointer to Jones matrix block
  *                           (length \p num_sources * \p num_stations).
- * @param[out] d_beam        Pointer to output average cross-power beam
+ * @param[out] d_out         Pointer to output average cross-power product
  *                           (length \p num_sources).
  */
 OSKAR_EXPORT
-void oskar_evaluate_average_scalar_cross_power_beam_cuda_f(int num_sources,
-        int num_stations, const float2* d_jones, float2* d_beam);
+void oskar_evaluate_cross_power_cuda_f(int num_sources,
+        int num_stations, const float4c* d_jones, float4c* d_out);
 
 /**
  * @brief
- * CUDA function to evaluate the cross-power beam from all stations
- * (double precision).
+ * CUDA function to evaluate the cross-power product from all stations
+ * (single precision).
  *
  * @details
- * This function evaluates the average cross-power beam for the supplied
+ * This function evaluates the average cross-power product for the supplied
  * sources from all stations.
  *
  * The \p jones block is two dimensional, and the source dimension
@@ -85,15 +85,67 @@ void oskar_evaluate_average_scalar_cross_power_beam_cuda_f(int num_sources,
  * @param[in] num_stations   The number of stations in the input arrays.
  * @param[in] d_jones        Pointer to Jones matrix block
  *                           (length \p num_sources * \p num_stations).
- * @param[out] d_beam        Pointer to output average cross-power beam
+ * @param[out] d_out         Pointer to output average cross-power product
  *                           (length \p num_sources).
  */
 OSKAR_EXPORT
-void oskar_evaluate_average_scalar_cross_power_beam_cuda_d(int num_sources,
-        int num_stations, const double2* d_jones, double2* d_beam);
+void oskar_evaluate_cross_power_scalar_cuda_f(int num_sources,
+        int num_stations, const float2* d_jones, float2* d_out);
+
+/**
+ * @brief
+ * CUDA function to evaluate the cross-power product from all stations
+ * (double precision).
+ *
+ * @details
+ * This function evaluates the average cross-power product for the supplied
+ * sources from all stations.
+ *
+ * The \p jones block is two dimensional, and the source dimension
+ * is the fastest varying.
+ *
+ * Note that all pointers are device pointers, and must not be dereferenced
+ * in host code.
+ *
+ * @param[in] num_sources    The number of sources in the input arrays.
+ * @param[in] num_stations   The number of stations in the input arrays.
+ * @param[in] d_jones        Pointer to Jones matrix block
+ *                           (length \p num_sources * \p num_stations).
+ * @param[out] d_out         Pointer to output average cross-power product
+ *                           (length \p num_sources).
+ */
+OSKAR_EXPORT
+void oskar_evaluate_cross_power_cuda_d(int num_sources,
+        int num_stations, const double4c* d_jones, double4c* d_out);
+
+/**
+ * @brief
+ * CUDA function to evaluate the cross-power product from all stations
+ * (double precision).
+ *
+ * @details
+ * This function evaluates the average cross-power product for the supplied
+ * sources from all stations.
+ *
+ * The \p jones block is two dimensional, and the source dimension
+ * is the fastest varying.
+ *
+ * Note that all pointers are device pointers, and must not be dereferenced
+ * in host code.
+ *
+ * @param[in] num_sources    The number of sources in the input arrays.
+ * @param[in] num_stations   The number of stations in the input arrays.
+ * @param[in] d_jones        Pointer to Jones matrix block
+ *                           (length \p num_sources * \p num_stations).
+ * @param[out] d_out         Pointer to output average cross-power product
+ *                           (length \p num_sources).
+ */
+OSKAR_EXPORT
+void oskar_evaluate_cross_power_scalar_cuda_d(int num_sources,
+        int num_stations, const double2* d_jones, double2* d_out);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_AVERAGE_SCALAR_CROSS_POWER_BEAM_CUDA_H_ */
+#endif /* OSKAR_EVALUATE_CROSS_POWER_CUDA_H_ */

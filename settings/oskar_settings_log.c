@@ -712,19 +712,6 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
         }
     };
 
-    if (s->beam_pattern.oskar_image_voltage || s->beam_pattern.oskar_image_phase ||
-            s->beam_pattern.oskar_image_complex)
-    {
-        oskar_log_message(log, 'M', --depth, "Output OSKAR image files:");
-    }
-    ++depth;
-    if (s->beam_pattern.oskar_image_voltage)
-        LVS0("Voltage", s->beam_pattern.oskar_image_voltage);
-    if (s->beam_pattern.oskar_image_phase)
-        LVS0("Phase", s->beam_pattern.oskar_image_phase);
-    if (s->beam_pattern.oskar_image_complex)
-        LVS0("Complex", s->beam_pattern.oskar_image_complex);
-
     if (s->beam_pattern.fits_image_voltage || s->beam_pattern.fits_image_phase)
     {
         oskar_log_message(log, 'M', --depth, "Output FITS image files:");
@@ -803,7 +790,6 @@ void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s)
 
     /* Output files. */
     LVS0("Input OSKAR visibility file", s->image.input_vis_data);
-    LVS0("Output OSKAR image file", s->image.oskar_image);
     LVS0("Output FITS image file", s->image.fits_image);
 }
 
@@ -817,7 +803,7 @@ void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s)
     LV("TEC0", "%.3f%", s->ionosphere.TEC0);
     LVI("Number of TID screens", s->ionosphere.num_TID_screens);
 
-    if (s->ionosphere.TECImage.fits_file || s->ionosphere.TECImage.img_file)
+    if (s->ionosphere.TECImage.fits_file)
     {
         oskar_log_message(log, 'M', depth, "TEC image settings");
         depth++;
@@ -827,8 +813,6 @@ void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s)
         LV("FOV (deg)", "%.3f", s->ionosphere.TECImage.fov_rad*(180./M_PI));
         if (s->ionosphere.TECImage.fits_file)
             LVS("FITS image", s->ionosphere.TECImage.fits_file);
-        if (s->ionosphere.TECImage.img_file)
-            LVB("OSKAR Image", s->ionosphere.TECImage.img_file);
     }
 }
 

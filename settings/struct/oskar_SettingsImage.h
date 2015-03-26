@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,6 @@ struct oskar_SettingsImage
     double ra_deg;         /* custom image pointing direction */
     double dec_deg;        /* custom image pointing direction */
 
-    char* oskar_image;     /* OSKAR binary file name path */
     char* fits_image;      /* FITS file name path */
 };
 typedef struct oskar_SettingsImage oskar_SettingsImage;

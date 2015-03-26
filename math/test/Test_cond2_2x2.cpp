@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,45 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_AVERAGE_CROSS_POWER_BEAM_H_
-#define OSKAR_EVALUATE_AVERAGE_CROSS_POWER_BEAM_H_
+#include <gtest/gtest.h>
 
-/**
- * @file oskar_evaluate_average_cross_power_beam.h
- */
+#include <private_cond2_2x2.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 
-#include <oskar_global.h>
-#include <oskar_jones.h>
+TEST(cond2_2x2, double_precision)
+{
+    double4c in;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief
- * Function to evaluate the cross-power beam from all stations.
- *
- * @details
- * This function evaluates the average cross-power beam for the supplied
- * sources from all stations.
- *
- * The \p jones block is two dimensional, and the source dimension
- * is the fastest varying.
- *
- * @param[in] num_sources    The number of sources in the input arrays.
- * @param[in] num_stations   The number of stations in the input arrays.
- * @param[in] jones          Pointer to Jones matrix block
- *                           (length \p num_sources * \p num_stations).
- * @param[out] beam          Pointer to output average cross-power beam
- *                           (length \p num_sources).
- */
-OSKAR_EXPORT
-void oskar_evaluate_average_cross_power_beam(int num_sources,
-        int num_stations, const oskar_Jones* jones, oskar_Mem* beam,
-        int *status);
-
-#ifdef __cplusplus
+    in.a.x = 0.8147;
+    in.a.y = 0.6324;
+    in.b.x = 0.1270;
+    in.b.y = 0.2785;
+    in.c.x = 0.9058;
+    in.c.y = 0.0975;
+    in.d.x = 0.9134;
+    in.d.y = 0.5469;
+    EXPECT_NEAR(3.5239, oskar_cond2_2x2_inline_d(&in), 1e-4);
 }
-#endif
 
-#endif /* OSKAR_EVALUATE_AVERAGE_CROSS_POWER_BEAM_H_ */
+TEST(cond2_2x2, single_precision)
+{
+    float4c in;
+
+    in.a.x = 0.8147;
+    in.a.y = 0.6324;
+    in.b.x = 0.1270;
+    in.b.y = 0.2785;
+    in.c.x = 0.9058;
+    in.c.y = 0.0975;
+    in.d.x = 0.9134;
+    in.d.y = 0.5469;
+    EXPECT_NEAR(3.5239, oskar_cond2_2x2_inline_f(&in), 1e-4);
+}

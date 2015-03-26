@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,6 @@ struct oskar_SettingsTECImage
     double fov_rad;   /* Image field of view, in radians */
     int size;         /* Image size along one dimension */
     char* fits_file;  /* File name for TEC image in FITS format */
-    char* img_file;   /* File name for TEC image in OSKAR format */
 };
 typedef struct oskar_SettingsTECImage oskar_SettingsTECImage;
 

@@ -65,7 +65,7 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
     oskar_log_settings_image(log, &settings);
 
     // Check filenames have been set.
-    if (!(settings.image.oskar_image || settings.image.fits_image))
+    if (!settings.image.fits_image)
     {
         oskar_log_error(log, "No output image file specified.");
         return OSKAR_ERR_SETTINGS;
@@ -116,14 +116,7 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
     oskar_timer_free(tmr);
 
     // Write the image to files(s).
-    const char* filename = settings.image.oskar_image;
-    if (filename && !status)
-    {
-        oskar_log_message(log, 'M', 0, "Writing OSKAR image file: '%s'", filename);
-        oskar_image_write(image, log, filename, 0, &status);
-    }
-
-    filename = settings.image.fits_image;
+    const char* filename = settings.image.fits_image;
     if (filename && !status)
     {
         oskar_log_message(log, 'M', 0, "Writing FITS image file: '%s'", filename);

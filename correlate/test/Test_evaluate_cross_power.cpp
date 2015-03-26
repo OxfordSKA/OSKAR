@@ -30,7 +30,7 @@
 
 #include <oskar_timer.h>
 
-#include <oskar_evaluate_average_cross_power_beam.h>
+#include <oskar_evaluate_cross_power.h>
 #include <oskar_get_error_string.h>
 #include <cstdlib>
 
@@ -58,12 +58,12 @@ static void check_values(const oskar_Mem* approx, const oskar_Mem* accurate)
             " AVG: " << avg_rel_error << " STD: " << std_rel_error;
 }
 
-class cross_power_beam : public ::testing::Test
+class cross_power : public ::testing::Test
 {
 protected:
     static const int num_sources = 277;
     static const int num_stations = 7;
-    oskar_Jones* jones;
+    oskar_Mem* jones;
 
 protected:
     void createTestData(int precision, int location, int matrix)
@@ -73,20 +73,20 @@ protected:
         // Allocate memory for data structures.
         type = precision | OSKAR_COMPLEX;
         if (matrix) type |= OSKAR_MATRIX;
-        jones = oskar_jones_create(type, location, num_stations, num_sources,
+        jones = oskar_mem_create(type, location, num_stations * num_sources,
                 &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
         // Fill data structures with random data in sensible ranges.
         srand(0);
-        oskar_mem_random_range(oskar_jones_mem(jones), 1.0, 10.0, &status);
+        oskar_mem_random_range(jones, 1.0, 10.0, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
     }
 
     void destroyTestData()
     {
         int status = 0;
-        oskar_jones_free(jones, &status);
+        oskar_mem_free(jones, &status);
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
     }
 
@@ -111,7 +111,7 @@ protected:
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         createTestData(prec1, loc1, matrix);
         oskar_timer_start(timer1);
-        oskar_evaluate_average_cross_power_beam(num_sources, num_stations,
+        oskar_evaluate_cross_power(num_sources, num_stations,
                 jones, beam1, &status);
         time1 = oskar_timer_elapsed(timer1);
         destroyTestData();
@@ -125,7 +125,7 @@ protected:
         ASSERT_EQ(0, status) << oskar_get_error_string(status);
         createTestData(prec2, loc2, matrix);
         oskar_timer_start(timer2);
-        oskar_evaluate_average_cross_power_beam(num_sources, num_stations,
+        oskar_evaluate_cross_power(num_sources, num_stations,
                 jones, beam2, &status);
         time2 = oskar_timer_elapsed(timer2);
         destroyTestData();
@@ -167,38 +167,38 @@ protected:
 };
 
 // CPU only.
-TEST_F(cross_power_beam, matrix_singleCPU_doubleCPU)
+TEST_F(cross_power, matrix_singleCPU_doubleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_CPU, 1);
 }
 
 #ifdef OSKAR_HAVE_CUDA
-TEST_F(cross_power_beam, matrix_singleGPU_doubleGPU)
+TEST_F(cross_power, matrix_singleGPU_doubleGPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_GPU, 1);
 }
 
-TEST_F(cross_power_beam, matrix_singleGPU_singleCPU)
+TEST_F(cross_power, matrix_singleGPU_singleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_SINGLE,
             OSKAR_GPU, OSKAR_CPU, 1);
 }
 
-TEST_F(cross_power_beam, matrix_doubleGPU_doubleCPU)
+TEST_F(cross_power, matrix_doubleGPU_doubleCPU)
 {
     runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 1);
 }
 
-TEST_F(cross_power_beam, matrix_singleGPU_doubleCPU)
+TEST_F(cross_power, matrix_singleGPU_doubleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 1);
 }
 
-TEST_F(cross_power_beam, matrix_singleCPU_doubleGPU)
+TEST_F(cross_power, matrix_singleCPU_doubleGPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_GPU, 1);
@@ -208,38 +208,38 @@ TEST_F(cross_power_beam, matrix_singleCPU_doubleGPU)
 // SCALAR VERSIONS.
 
 // CPU only.
-TEST_F(cross_power_beam, scalar_singleCPU_doubleCPU)
+TEST_F(cross_power, scalar_singleCPU_doubleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_CPU, 0);
 }
 
 #ifdef OSKAR_HAVE_CUDA
-TEST_F(cross_power_beam, scalar_singleGPU_doubleGPU)
+TEST_F(cross_power, scalar_singleGPU_doubleGPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_GPU, 0);
 }
 
-TEST_F(cross_power_beam, scalar_singleGPU_singleCPU)
+TEST_F(cross_power, scalar_singleGPU_singleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_SINGLE,
             OSKAR_GPU, OSKAR_CPU, 0);
 }
 
-TEST_F(cross_power_beam, scalar_doubleGPU_doubleCPU)
+TEST_F(cross_power, scalar_doubleGPU_doubleCPU)
 {
     runTest(OSKAR_DOUBLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 0);
 }
 
-TEST_F(cross_power_beam, scalar_singleGPU_doubleCPU)
+TEST_F(cross_power, scalar_singleGPU_doubleCPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_GPU, OSKAR_CPU, 0);
 }
 
-TEST_F(cross_power_beam, scalar_singleCPU_doubleGPU)
+TEST_F(cross_power, scalar_singleCPU_doubleGPU)
 {
     runTest(OSKAR_SINGLE, OSKAR_DOUBLE,
             OSKAR_CPU, OSKAR_GPU, 0);

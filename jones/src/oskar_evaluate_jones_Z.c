@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,7 +182,7 @@ static void oskar_evaluate_TEC(oskar_WorkJonesZ* work, int num_pp,
          * way TIDs are currently evaluated as TEC0 is added into both screens.
          */
         oskar_mem_add(work->total_TEC, work->total_TEC, work->screen_TEC,
-                status);
+                oskar_mem_length(work->total_TEC), status);
     }
 }
 

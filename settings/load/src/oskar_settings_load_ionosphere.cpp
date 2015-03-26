@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,15 +87,6 @@ void oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
         settings->TECImage.fits_file = (char*)malloc(t.size() + 1);
         strcpy(settings->TECImage.fits_file, t.constData());
     }
-
-    if (s.value("save_img", false).toBool())
-    {
-        QString temp_img = temp + ".img";
-        t = temp_img.toLatin1();
-        settings->TECImage.img_file = (char*)malloc(t.size() + 1);
-        strcpy(settings->TECImage.img_file, t.constData());
-    }
-
     s.endGroup(); // TECImage
 
     s.beginGroup("pierce_points");

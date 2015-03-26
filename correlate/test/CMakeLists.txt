@@ -6,7 +6,7 @@ set(name correlate_test)
 set(${name}_SRC
     main.cpp
     Test_correlate.cpp
-    Test_evaluate_cross_power_beam.cpp
+    Test_evaluate_cross_power.cpp
 )
 include_directories(${CUDA_INCLUDE_DIRS})
 add_executable(${name} ${${name}_SRC})

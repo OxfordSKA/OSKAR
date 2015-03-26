@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,31 +42,31 @@ extern "C" {
 
 /**
  * @brief
- * Generate a grid of direction cosines according to positions spaced evenly
- * on the tangent plane.
+ * Generate a grid of evenly spaced direction cosines on the tangent plane.
  *
  * @details
- * Note that n directions returned as n-1 (distance from the tangent plane).
+ * Note that n directions are returned as n-1 (distance from the tangent plane).
  *
- * @param[out] l       The output list of l-direction cosines.
- * @param[out] m       The output list of m-direction cosines.
- * @param[out] n       The output list of n-direction cosines.
- * @param[in]  nl      Number of required grid points in the longitude dimension.
- * @param[in]  nm      Number of required grid points in the latitude dimension.
- * @param[in]  fov_lon The field of view in longitude (image width) in radians.
- * @param[in]  fov_lat The field of view in latitude (image height) in radians.
+ * @param[in] num_l   Number of required grid points in the longitude dimension.
+ * @param[in] num_m   Number of required grid points in the latitude dimension.
+ * @param[in] fov_lon The field of view in longitude (image width) in radians.
+ * @param[in] fov_lat The field of view in latitude (image height) in radians.
+ * @param[out] grid_l The output list of l-direction cosines.
+ * @param[out] grid_m The output list of m-direction cosines.
+ * @param[out] grid_n The output list of n-direction cosines.
  */
 OSKAR_EXPORT
-void oskar_evaluate_image_lmn_grid(oskar_Mem* l, oskar_Mem* m, oskar_Mem* n,
-        int nl, int nm, double fov_lon, double fov_lat, int* status);
+void oskar_evaluate_image_lmn_grid(int num_l, int num_m, double fov_lon,
+        double fov_lat, oskar_Mem* grid_l, oskar_Mem* grid_m,
+        oskar_Mem* grid_n, int* status);
 
 /**
  * @brief
- * Generate a grid of direction cosines according to positions spaced evenly
- * on the tangent plane. (single precision)
+ * Generate a grid of evenly spaced direction cosines on the tangent plane
+ * (single precision).
  *
  * @details
- * Note that n directions returned as n-1 (distance from the tangent plane).
+ * Note that n directions are returned as n-1 (distance from the tangent plane).
  *
  * @param[in] num_l   Number of required grid points in the longitude dimension.
  * @param[in] num_m   Number of required grid points in the latitude dimension.
@@ -82,11 +82,11 @@ void oskar_evaluate_image_lmn_grid_f(int num_l, int num_m, float fov_lon,
 
 /**
  * @brief
- * Generate a grid of direction cosines according to positions spaced evenly
- * on the tangent plane. (single precision)
+ * Generate a grid of evenly spaced direction cosines on the tangent plane
+ * (double precision).
  *
  * @details
- * Note that n directions returned as n-1 (distance from the tangent plane).
+ * Note that n directions are returned as n-1 (distance from the tangent plane).
  *
  * @param[in] num_l   Number of required grid points in the longitude dimension.
  * @param[in] num_m   Number of required grid points in the latitude dimension.
@@ -97,9 +97,8 @@ void oskar_evaluate_image_lmn_grid_f(int num_l, int num_m, float fov_lon,
  * @param[out] grid_n The output list of n-direction cosines.
  */
 OSKAR_EXPORT
-void oskar_evaluate_image_lmn_grid_d(int num_l, int num_m,
-        double fov_lon, double fov_lat, double* grid_l, double* grid_m,
-        double* grid_n);
+void oskar_evaluate_image_lmn_grid_d(int num_l, int num_m, double fov_lon,
+        double fov_lat, double* grid_l, double* grid_m, double* grid_n);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,34 @@
 2015-XX-XX  OSKAR-2.6.0
 
+    * TODO Change definition of X and Y dipoles to match IAU axes on 
+      the sky when on an alt-az mount.
+
+    * Re-wrote oskar_sim_interferometer application and changed internal 
+      visibility format to allow long interferometer simulations to run 
+      without running out of host memory. A dedicated host thread is now 
+      used to write visibility data, so that computation and file writes are 
+      overlapped as much as possible.
+
+    * Re-wrote oskar_sim_beam_pattern application to allow use of multiple 
+      GPUs and to respect the maximum chunk size, so that large images can 
+      be made without running out of GPU memory. A dedicated host thread is now 
+      used to write image data, so that computation and file writes are 
+      overlapped as much as possible.
+
+    * Added options to generate beam patterns for specified stations,
+      or all stations in the telescope model.
+
+    * Added option to evaluate beam patterns for specified sky model positions, 
+      instead of an image grid.
+
+    * Added options to produce time-and/or-channel-averaged beam patterns.
+
+    * Added options to produce average cross-power Stokes I beam patterns 
+      for selected stations.
+
+    * Added options to save beam pattern data in plain text files instead of, 
+      or as well as, FITS images.
+
     * Contribution from the w-term was omitted from the bandwidth smearing
       calculation. This has now been fixed, so the apparent
       amplitudes of sources far from the phase centre are slightly reduced.
@@ -29,8 +58,6 @@
 
     * Added option to disable horizon clip in advanced sky model settings.
       This can save a wasted check if sources are always above the horizon.
-
-    * Added option to produce a time-averaged station beam.
 
     * Removed options to perform explicit time averaging using multiple
       snapshots, as this was very slow.

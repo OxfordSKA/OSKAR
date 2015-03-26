@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ extern "C" {
 #endif
 
 #define SDF "% .6e "
-#define SDD "% .12e "
+#define SDD "% .14e "
 
 void oskar_mem_save_ascii(FILE* file, size_t num_mem, size_t num_elements,
         int* status, ...)

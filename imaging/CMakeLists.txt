@@ -15,10 +15,9 @@ set(imaging_SRC
     src/oskar_image_accessors.c
     src/oskar_image_create.c
     src/oskar_image_free.c
-    src/oskar_image_get_stats.c
-    src/oskar_image_read.c
+    #src/oskar_image_get_stats.c
+    #src/oskar_image_read.c
     src/oskar_image_resize.c
-    src/oskar_image_write.c
     src/oskar_make_image_dft.c
     src/oskar_make_image.cpp
     src/oskar_set_up_image.c

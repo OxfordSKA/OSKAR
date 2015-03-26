@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
 #include <oskar_mem.h>
 #include <oskar_mem_add_cuda.h>
 #include <oskar_cuda_check_error.h>
@@ -36,46 +35,26 @@
 extern "C" {
 #endif
 
-static size_t oskar_mem_total_elements(const oskar_Mem* x)
-{
-    size_t v;
-    v = oskar_mem_length(x);
-    if (oskar_mem_is_matrix(x))
-        v *= 4;
-    if (oskar_mem_is_complex(x))
-        v *= 2;
-    return v;
-}
-
 void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
-        int* status)
+        size_t num_elements, int* status)
 {
-    int precision, location;
-    size_t i, num_elements_total_out, num_elements_total_in;
-
-    /* Check all inputs. */
-    if (!out || !in1 || !in2 || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+    int type, precision, location;
+    size_t i;
 
     /* Check if safe to proceed. */
     if (*status) return;
 
     /* Get meta-data. */
+    type = oskar_mem_type(out);
     precision = oskar_mem_precision(out);
     location = oskar_mem_location(out);
-    num_elements_total_out = oskar_mem_total_elements(out);
-    num_elements_total_in = oskar_mem_total_elements(in1);
 
     /* Check for empty array. */
     if (oskar_mem_length(in1) == 0)
         return;
 
     /* Check data types, locations, and number of elements. */
-    if (precision != oskar_mem_precision(in1) ||
-            precision != oskar_mem_precision(in2))
+    if (type != oskar_mem_type(in1) || type != oskar_mem_type(in2))
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
         return;
@@ -86,16 +65,19 @@ void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
         *status = OSKAR_ERR_LOCATION_MISMATCH;
         return;
     }
-    if (num_elements_total_in != oskar_mem_total_elements(in2))
+    if (oskar_mem_length(out) < num_elements ||
+            oskar_mem_length(in1) < num_elements ||
+            oskar_mem_length(in2) < num_elements)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
         return;
     }
-    if (num_elements_total_out < num_elements_total_in)
-    {
-        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-        return;
-    }
+
+    /* Get total number of elements to add. */
+    if (oskar_mem_is_matrix(out))
+        num_elements *= 4;
+    if (oskar_mem_is_complex(out))
+        num_elements *= 2;
 
     /* Switch on type and location. */
     if (precision == OSKAR_DOUBLE)
@@ -108,13 +90,13 @@ void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
 
         if (location == OSKAR_CPU)
         {
-            for (i = 0; i < num_elements_total_out; ++i)
+            for (i = 0; i < num_elements; ++i)
                 aa[i] = bb[i] + cc[i];
         }
         else if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_mem_add_cuda_d(num_elements_total_out, bb, cc, aa);
+            oskar_mem_add_cuda_d(num_elements, bb, cc, aa);
             oskar_cuda_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
@@ -133,13 +115,13 @@ void oskar_mem_add(oskar_Mem* out, const oskar_Mem* in1, const oskar_Mem* in2,
 
         if (location == OSKAR_CPU)
         {
-            for (i = 0; i < num_elements_total_out; ++i)
+            for (i = 0; i < num_elements; ++i)
                 aa[i] = bb[i] + cc[i];
         }
         else if (location == OSKAR_GPU)
         {
 #ifdef OSKAR_HAVE_CUDA
-            oskar_mem_add_cuda_f(num_elements_total_out, bb, cc, aa);
+            oskar_mem_add_cuda_f(num_elements, bb, cc, aa);
             oskar_cuda_check_error(status);
 #else
             *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;

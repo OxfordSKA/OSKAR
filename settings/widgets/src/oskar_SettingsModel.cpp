@@ -126,7 +126,7 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
                 return QColor(255, 64, 64, 255);
         }
         if (index.column() == 1)
-            return QColor(16, 16, 16, 16);
+            return QColor(0, 0, 192, 12);
     }
     else if (role == Qt::ToolTipRole)
     {

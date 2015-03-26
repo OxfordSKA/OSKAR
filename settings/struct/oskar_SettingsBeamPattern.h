@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,9 @@
  * @file oskar_SettingsBeamPattern.h
  */
 
-
 /**
  * @brief
- * Enum describing the coordinates at which the beam pattern is evaluated.
+ * Describes the coordinates at which the beam pattern is evaluated.
  */
 enum OSKAR_BEAM_PATTERN_COORDS
 {
@@ -48,7 +47,7 @@ enum OSKAR_BEAM_PATTERN_COORDS
 
 /**
  * @brief
- * Enum describing the coordinates frame for which the beam pattern is evaluated.
+ * Describes the coordinate frame in which the beam pattern is evaluated.
  */
 enum OSKAR_BEAM_PATTERN_FRAME
 {
@@ -57,6 +56,42 @@ enum OSKAR_BEAM_PATTERN_FRAME
     OSKAR_BEAM_PATTERN_FRAME_HORIZON
 };
 
+/**
+ * FIXME Remove.
+ * @brief
+ * Describes whether snapshots or time-averaged beam patterns are generated,
+ * or both.
+ */
+enum OSKAR_BEAM_PATTERN_TIME_AXIS
+{
+    OSKAR_BEAM_PATTERN_TIME_SEP,
+    OSKAR_BEAM_PATTERN_TIME_AVERAGE,
+    OSKAR_BEAM_PATTERN_TIME_SEP_AND_AVERAGE
+};
+
+/**
+ * FIXME Remove.
+ * @brief
+ * Describes whether single channels or channel-averaged beam patterns
+ * are generated, or both.
+ */
+enum OSKAR_BEAM_PATTERN_CHANNEL_AXIS
+{
+    OSKAR_BEAM_PATTERN_CHANNEL_SEP,
+    OSKAR_BEAM_PATTERN_CHANNEL_AVERAGE,
+    OSKAR_BEAM_PATTERN_CHANNEL_SEP_AND_AVERAGE
+};
+
+/**
+ * @brief
+ * Describes the option to average a single axis.
+ */
+enum OSKAR_BEAM_PATTERN_AVERAGE_SINGLE_AXIS
+{
+    OSKAR_BEAM_PATTERN_AVERAGE_NONE,
+    OSKAR_BEAM_PATTERN_AVERAGE_TIME,
+    OSKAR_BEAM_PATTERN_AVERAGE_CHANNEL
+};
 
 /**
  * @struct oskar_SettingsBeamPattern
@@ -68,9 +103,12 @@ enum OSKAR_BEAM_PATTERN_FRAME
  */
 struct oskar_SettingsBeamPattern
 {
-    int average_cross_power_beam;
-    int time_average_beam;
-    int station_id;
+    int all_stations;
+    int num_active_stations;
+    int* station_ids;
+    int time_average_beam; /* FIXME DEPRECATED. */
+    int station_id; /* FIXME DEPRECATED. */
+    int average_cross_power_beam; /* FIXME DEPRECATED. */
 
     int coord_grid_type;  /* The type of beam pattern coordinates */
     int coord_frame_type; /* Coordinate frame for beam pattern evaluation */
@@ -85,14 +123,33 @@ struct oskar_SettingsBeamPattern
     int horizon_clip;   /* Bool, to toggle horizon clip of the beam pattern */
 
     char* sky_model;
-    char* output_beam_text_file;
-    char* oskar_image_voltage;
-    char* oskar_image_phase;
-    char* oskar_image_complex;
-    char* oskar_image_total_intensity;
-    char* fits_image_voltage;
-    char* fits_image_phase;
-    char* fits_image_total_intensity;
+
+    /* Averaging options. */
+    int separate_time_and_channel;
+    int average_time_and_channel;
+    int average_single_axis;
+
+    /* Output file options. */
+    char* root_path;
+    int station_text_raw_complex;
+    int station_text_amp;
+    int station_text_phase;
+    int station_text_auto_power_stokes_i;
+    int station_text_ixr;
+    int station_fits_amp;
+    int station_fits_phase;
+    int station_fits_auto_power_stokes_i;
+    int station_fits_ixr;
+    int telescope_text_cross_power_stokes_i_raw_complex;
+    int telescope_text_cross_power_stokes_i_amp;
+    int telescope_text_cross_power_stokes_i_phase;
+    int telescope_fits_cross_power_stokes_i_amp;
+    int telescope_fits_cross_power_stokes_i_phase;
+
+    char* output_beam_text_file;       /* FIXME DEPRECATED. */
+    char* fits_image_voltage;          /* FIXME DEPRECATED. */
+    char* fits_image_phase;            /* FIXME DEPRECATED. */
+    char* fits_image_total_intensity;  /* FIXME DEPRECATED. */
 };
 typedef struct oskar_SettingsBeamPattern oskar_SettingsBeamPattern;
 

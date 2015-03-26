@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_evaluate_average_cross_power_beam_omp.h>
+#include <oskar_evaluate_cross_power_omp.h>
 #include <oskar_correlate_functions_inline.h>
 
 #ifdef __cplusplus
@@ -34,9 +34,9 @@ extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_evaluate_average_cross_power_beam_omp_f(const int num_sources,
+void oskar_evaluate_cross_power_omp_f(const int num_sources,
         const int num_stations, const float4c* restrict jones,
-        float4c* restrict beam)
+        float4c* restrict out)
 {
     int i = 0;
     float norm;
@@ -48,7 +48,7 @@ void oskar_evaluate_average_cross_power_beam_omp_f(const int num_sources,
         int SP, SQ;
         float4c val, p, q;
 
-        /* Calculate cross-power beam at the source. */
+        /* Calculate cross-power product at the source. */
         oskar_clear_complex_matrix_f(&val);
         for (SP = 0; SP < num_stations; ++SP)
         {
@@ -84,14 +84,62 @@ void oskar_evaluate_average_cross_power_beam_omp_f(const int num_sources,
         val.d.y *= norm;
 
         /* Store result. */
-        beam[i] = val;
+        out[i] = val;
+    }
+}
+
+void oskar_evaluate_cross_power_scalar_omp_f(
+        const int num_sources, const int num_stations,
+        const float2* restrict jones, float2* restrict out)
+{
+    int i = 0;
+    float norm;
+    norm = 2.0f / (num_stations * (num_stations - 1));
+
+#pragma omp parallel for private(i)
+    for (i = 0; i < num_sources; ++i)
+    {
+        int SP, SQ;
+        float2 val1, val2, p, q;
+
+        /* Calculate cross-power product at the source. */
+        val1.x = 0.0f;
+        val1.y = 0.0f;
+        for (SP = 0; SP < num_stations; ++SP)
+        {
+            /* Load data for first station into shared memory. */
+            p = jones[SP * num_sources + i];
+            val2.x = 0.0f;
+            val2.y = 0.0f;
+
+            /* Cross-correlate. */
+            for (SQ = SP + 1; SQ < num_stations; ++SQ)
+            {
+                /* Load data for second station into registers. */
+                q = jones[SQ * num_sources + i];
+
+                /* Multiply-add: val += p * conj(q). */
+                OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val2, p, q);
+            }
+
+            /* Accumulate partial sum (try to preserve numerical precision). */
+            val1.x += val2.x;
+            val1.y += val2.y;
+        }
+
+        /* Calculate average by dividing by number of baselines. */
+        val1.x *= norm;
+        val1.y *= norm;
+
+        /* Store result. */
+        out[i] = val1;
     }
 }
 
 /* Double precision. */
-void oskar_evaluate_average_cross_power_beam_omp_d(const int num_sources,
+void oskar_evaluate_cross_power_omp_d(const int num_sources,
         const int num_stations, const double4c* restrict jones,
-        double4c* restrict beam)
+        double4c* restrict out)
 {
     int i = 0;
     double norm;
@@ -103,7 +151,7 @@ void oskar_evaluate_average_cross_power_beam_omp_d(const int num_sources,
         int SP, SQ;
         double4c val, p, q;
 
-        /* Calculate cross-power beam at the source. */
+        /* Calculate cross-power product at the source. */
         oskar_clear_complex_matrix_d(&val);
         for (SP = 0; SP < num_stations; ++SP)
         {
@@ -139,7 +187,55 @@ void oskar_evaluate_average_cross_power_beam_omp_d(const int num_sources,
         val.d.y *= norm;
 
         /* Store result. */
-        beam[i] = val;
+        out[i] = val;
+    }
+}
+
+void oskar_evaluate_cross_power_scalar_omp_d(
+        const int num_sources, const int num_stations,
+        const double2* restrict jones, double2* restrict out)
+{
+    int i = 0;
+    double norm;
+    norm = 2.0 / (num_stations * (num_stations - 1));
+
+#pragma omp parallel for private(i)
+    for (i = 0; i < num_sources; ++i)
+    {
+        int SP, SQ;
+        double2 val1, val2, p, q;
+
+        /* Calculate cross-power product at the source. */
+        val1.x = 0.0;
+        val1.y = 0.0;
+        for (SP = 0; SP < num_stations; ++SP)
+        {
+            /* Load data for first station into shared memory. */
+            p = jones[SP * num_sources + i];
+            val2.x = 0.0;
+            val2.y = 0.0;
+
+            /* Cross-correlate. */
+            for (SQ = SP + 1; SQ < num_stations; ++SQ)
+            {
+                /* Load data for second station into registers. */
+                q = jones[SQ * num_sources + i];
+
+                /* Multiply-add: val += p * conj(q). */
+                OSKAR_MULTIPLY_ADD_COMPLEX_CONJUGATE(val2, p, q);
+            }
+
+            /* Accumulate partial sum (try to preserve numerical precision). */
+            val1.x += val2.x;
+            val1.y += val2.y;
+        }
+
+        /* Calculate average by dividing by number of baselines. */
+        val1.x *= norm;
+        val1.y *= norm;
+
+        /* Store result. */
+        out[i] = val1;
     }
 }
 

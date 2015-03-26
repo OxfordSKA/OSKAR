@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_AVERAGE_CROSS_POWER_BEAM_OMP_H_
-#define OSKAR_EVALUATE_AVERAGE_CROSS_POWER_BEAM_OMP_H_
+#ifndef OSKAR_EVALUATE_CROSS_POWER_OMP_H_
+#define OSKAR_EVALUATE_CROSS_POWER_OMP_H_
 
 /**
- * @file oskar_evaluate_average_cross_power_beam_omp.h
+ * @file oskar_evaluate_cross_power_omp.h
  */
 
 #include <oskar_global.h>
@@ -42,11 +42,11 @@ extern "C" {
 
 /**
  * @brief
- * Function to evaluate the cross-power beam from all stations
+ * Function to evaluate the cross-power product from all stations
  * (single precision).
  *
  * @details
- * This function evaluates the average cross-power beam for the supplied
+ * This function evaluates the average cross-power product for the supplied
  * sources from all stations.
  *
  * The \p jones block is two dimensional, and the source dimension
@@ -56,21 +56,21 @@ extern "C" {
  * @param[in] num_stations   The number of stations in the input arrays.
  * @param[in] jones          Pointer to Jones matrix block
  *                           (length \p num_sources * \p num_stations).
- * @param[out] beam          Pointer to output average cross-power beam
+ * @param[out] out           Pointer to output average cross-power product
  *                           (length \p num_sources).
  */
 OSKAR_EXPORT
-void oskar_evaluate_average_cross_power_beam_omp_f(const int num_sources,
+void oskar_evaluate_cross_power_omp_f(const int num_sources,
         const int num_stations, const float4c* restrict jones,
-        float4c* restrict beam);
+        float4c* restrict out);
 
 /**
  * @brief
- * Function to evaluate the cross-power beam from all stations
- * (double precision).
+ * Function to evaluate the cross-power product from all stations
+ * (single precision).
  *
  * @details
- * This function evaluates the average cross-power beam for the supplied
+ * This function evaluates the average cross-power product for the supplied
  * sources from all stations.
  *
  * The \p jones block is two dimensional, and the source dimension
@@ -80,16 +80,62 @@ void oskar_evaluate_average_cross_power_beam_omp_f(const int num_sources,
  * @param[in] num_stations   The number of stations in the input arrays.
  * @param[in] jones          Pointer to Jones matrix block
  *                           (length \p num_sources * \p num_stations).
- * @param[out] beam          Pointer to output average cross-power beam
+ * @param[out] out           Pointer to output average cross-power product
  *                           (length \p num_sources).
  */
 OSKAR_EXPORT
-void oskar_evaluate_average_cross_power_beam_omp_d(const int num_sources,
+void oskar_evaluate_cross_power_scalar_omp_f(int num_sources,
+        int num_stations, const float2* jones, float2* out);
+
+/**
+ * @brief
+ * Function to evaluate the cross-power product from all stations
+ * (double precision).
+ *
+ * @details
+ * This function evaluates the average cross-power product for the supplied
+ * sources from all stations.
+ *
+ * The \p jones block is two dimensional, and the source dimension
+ * is the fastest varying.
+ *
+ * @param[in] num_sources    The number of sources in the input arrays.
+ * @param[in] num_stations   The number of stations in the input arrays.
+ * @param[in] jones          Pointer to Jones matrix block
+ *                           (length \p num_sources * \p num_stations).
+ * @param[out] out           Pointer to output average cross-power product
+ *                           (length \p num_sources).
+ */
+OSKAR_EXPORT
+void oskar_evaluate_cross_power_omp_d(const int num_sources,
         const int num_stations, const double4c* restrict jones,
-        double4c* restrict beam);
+        double4c* restrict out);
+
+/**
+ * @brief
+ * Function to evaluate the cross-power product from all stations
+ * (double precision).
+ *
+ * @details
+ * This function evaluates the average cross-power product for the supplied
+ * sources from all stations.
+ *
+ * The \p jones block is two dimensional, and the source dimension
+ * is the fastest varying.
+ *
+ * @param[in] num_sources    The number of sources in the input arrays.
+ * @param[in] num_stations   The number of stations in the input arrays.
+ * @param[in] jones          Pointer to Jones matrix block
+ *                           (length \p num_sources * \p num_stations).
+ * @param[out] out           Pointer to output average cross-power product
+ *                           (length \p num_sources).
+ */
+OSKAR_EXPORT
+void oskar_evaluate_cross_power_scalar_omp_d(int num_sources,
+        int num_stations, const double2* jones, double2* out);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_AVERAGE_CROSS_POWER_BEAM_OMP_H_ */
+#endif /* OSKAR_EVALUATE_CROSS_POWER_OMP_H_ */

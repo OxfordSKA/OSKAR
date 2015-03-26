@@ -122,9 +122,9 @@ static void generate_equatorial_coordinates(oskar_Mem* l, oskar_Mem* m,
      {
          case OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE:
          {
-             oskar_evaluate_image_lmn_grid(l, m, n, settings->size[0],
+             oskar_evaluate_image_lmn_grid(settings->size[0],
                      settings->size[1], settings->fov_deg[0]*(M_PI/180.0),
-                     settings->fov_deg[1]*(M_PI/180.0), status);
+                     settings->fov_deg[1]*(M_PI/180.0), l, m, n, status);
              break;
          }
          case OSKAR_BEAM_PATTERN_COORDS_HEALPIX:
@@ -224,9 +224,9 @@ static void generate_horizon_coordinates(oskar_Mem* x, oskar_Mem* y,
          case OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE:
          {
              /* NOTE currently assumed to be an image centred at the zenith */
-             oskar_evaluate_image_lmn_grid(x, y, z, settings->size[0],
+             oskar_evaluate_image_lmn_grid(settings->size[0],
                      settings->size[1], settings->fov_deg[0]*(M_PI/180.0),
-                     settings->fov_deg[1]*(M_PI/180.0), status);
+                     settings->fov_deg[1]*(M_PI/180.0), x, y, z, status);
              break;
          }
          case OSKAR_BEAM_PATTERN_COORDS_HEALPIX:

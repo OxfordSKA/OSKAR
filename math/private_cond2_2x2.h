@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,53 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_mem.h>
-#include <oskar_mem_element_size.h>
-#include <oskar_mem_create_alias.h>
+#ifndef OSKAR_PRIVATE_COND2_2X2_H_
+#define OSKAR_PRIVATE_COND2_2X2_H_
 
-#include <stdlib.h>
+#include <oskar_global.h>
+#include <oskar_multiply_inline.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-oskar_Mem* oskar_mem_create_alias(const oskar_Mem* src, size_t offset,
-        size_t num_elements, int* status)
+/* Private inline functions. */
+
+OSKAR_INLINE
+float oskar_cond2_2x2_inline_f(const float4c* restrict in)
 {
-    oskar_Mem* mem = 0;
+    float sum, diff, t1, t2, a, b;
+    float4c p;
+    p = *in;
+    oskar_multiply_complex_matrix_conjugate_transpose_in_place_f(&p, in);
+    sum = p.a.x + p.d.x;
+    t1  = p.a.x - p.d.x;
+    t1  = t1 * t1;
+    t2  = 4.0f * ((p.b.x * p.b.x) + (p.b.y * p.b.y));
+    diff = sqrtf(t1 + t2);
+    a = sqrtf(0.5f * (sum + diff));
+    b = sqrtf(0.5f * (sum - diff));
+    return (a > b) ? a / b : b / a;
+}
 
-    /* Create the structure. */
-    mem = (oskar_Mem*) malloc(sizeof(oskar_Mem));
-    if (!mem)
-    {
-        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-        return 0;
-    }
-
-    /* Initialise meta-data.
-     * (This must happen regardless of the status code.) */
-    mem->owner = 0; /* Structure does not own the memory. */
-    if (src)
-    {
-        size_t offset_bytes;
-        offset_bytes = offset * oskar_mem_element_size(src->type);
-        mem->type = src->type;
-        mem->location = src->location;
-        mem->num_elements = num_elements;
-        mem->data = (void*)(((char*)(src->data)) + offset_bytes);
-    }
-    else
-    {
-        mem->type = 0;
-        mem->location = 0;
-        mem->num_elements = 0;
-        mem->data = 0;
-    }
-
-    /* Return a handle the new structure .*/
-    return mem;
+OSKAR_INLINE
+double oskar_cond2_2x2_inline_d(const double4c* restrict in)
+{
+    double sum, diff, t1, t2, a, b;
+    double4c p;
+    p = *in;
+    oskar_multiply_complex_matrix_conjugate_transpose_in_place_d(&p, in);
+    sum = p.a.x + p.d.x;
+    t1  = p.a.x - p.d.x;
+    t1  = t1 * t1;
+    t2  = 4.0 * ((p.b.x * p.b.x) + (p.b.y * p.b.y));
+    diff = sqrt(t1 + t2);
+    a = sqrt(0.5 * (sum + diff));
+    b = sqrt(0.5 * (sum - diff));
+    return (a > b) ? a / b : b / a;
 }
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_PRIVATE_COND2_2X2_H_ */

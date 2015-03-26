@@ -9,6 +9,7 @@ set(${name}_SRC
     Test_linspace.cpp
     Test_matrix_multiply.cpp
     Test_random.cpp
+    Test_cond2_2x2.cpp
 )
 if (OSKAR_USE_LAPACK)
     list(APPEND ${name}_SRC Test_fit_ellipse.cpp)

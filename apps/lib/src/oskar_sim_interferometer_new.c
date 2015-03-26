@@ -502,8 +502,10 @@ static void write_vis_block(int num_gpus, DeviceData* d, HostData* h,
     for (i = 1; i < num_gpus; ++i)
     {
         b = d[i].vis_block_cpu[!iactive];
-        oskar_mem_add(xc0, xc0, oskar_vis_block_cross_correlations(b), status);
-        oskar_mem_add(ac0, ac0, oskar_vis_block_auto_correlations(b), status);
+        oskar_mem_add(xc0, xc0, oskar_vis_block_cross_correlations(b),
+                oskar_mem_length(xc0), status);
+        oskar_mem_add(ac0, ac0, oskar_vis_block_auto_correlations(b),
+                oskar_mem_length(ac0), status);
     }
 
     /* Calculate baseline uvw coordinates for vis block. */
@@ -842,49 +844,3 @@ static void system_mem_log(oskar_Log* log)
 }
 #endif
 
-
-
-#if 0
-static void log_warning_box(oskar_Log* log, const char* format, ...)
-{
-    size_t max_len = 55; /* Controls the width of the box */
-
-    char buf[5000];
-    va_list args;
-    va_start(args, format);
-    vsprintf(buf, format, args);
-    std::string msg(buf);
-    std::istringstream ss(msg);
-    std::string word, line;
-    oskar_log_line(log, 'W', ' ');
-    oskar_log_line(log, 'W', '*');
-    while (std::getline(ss, word, ' '))
-    {
-        if (line.length() > 0)
-            line += std::string(1, ' ');
-        if ((line.length() + word.length() + 4) >= max_len)
-        {
-            int pad = max_len - line.length() - 1;
-            int pad_l = (pad / 2) > 1 ? (pad / 2) : 1;
-            int pad_r = (pad / 2) > 0 ? (pad / 2) : 0;
-            if (pad % 2 == 0)
-                pad_r -= 1;
-            line = "!" + std::string(pad_l, ' ') + line;
-            line += std::string(pad_r, ' ') + "!";
-            oskar_log_message(log, 'W', -1, "%s", line.c_str());
-            line.clear();
-        }
-        line += word;
-    }
-    int pad = max_len - line.length() - 1;
-    int pad_l = (pad / 2) > 1 ? (pad / 2) : 1;
-    int pad_r = (pad / 2) > 0 ? (pad / 2) : 0;
-    if (pad % 2 == 0)
-        pad_r -= 1;
-    line = "!" + std::string(pad_l, ' ') + line;
-    line += std::string(pad_r, ' ') + "!";
-    oskar_log_message(log, 'W', -1, "%s", line.c_str());
-    oskar_log_line(log, 'W', '*');
-    oskar_log_line(log, 'W', ' ');
-}
-#endif

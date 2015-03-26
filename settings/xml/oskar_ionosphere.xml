@@ -72,10 +72,6 @@
             <type name="bool" default="true" />
             <desc>Save the TEC image in FITS format.</desc>
         </s>
-        <s k="save_img"><label>Save image as OSKAR format</label>
-            <type name="bool" default="false" />
-            <desc>Save the TEC image in OSKAR binary image format.</desc>
-        </s>
     </s> <!-- end of TEC image settings -->
 
 

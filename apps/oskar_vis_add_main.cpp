@@ -110,7 +110,8 @@ int main(int argc, char** argv)
             status = OSKAR_ERR_TYPE_MISMATCH;
         }
         oskar_mem_add(oskar_vis_amplitude(out), oskar_vis_amplitude_const(out),
-                oskar_vis_amplitude_const(in), &status);
+                oskar_vis_amplitude_const(in),
+                oskar_mem_length(oskar_vis_amplitude(out)), &status);
         if (status)
             print_error(status, "Visibility amplitude addition failed.");
         oskar_vis_free(in, &status);

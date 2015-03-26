@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,7 @@ oskar_Image* oskar_sim_tec_screen(oskar_Settings* settings, oskar_Log* log,
 
     if (*status) return 0;
 
-    if (!MIM->TECImage.fits_file && !MIM->TECImage.img_file)
+    if (!MIM->TECImage.fits_file)
     {
         *status = OSKAR_ERR_SETTINGS_IONOSPHERE;
         return 0;
