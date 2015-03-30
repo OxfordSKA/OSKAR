@@ -35,7 +35,7 @@ extern "C" {
 
 void oskar_mem_random_range(oskar_Mem* mem, double lo, double hi, int* status)
 {
-    oskar_Mem *temp, *ptr;
+    oskar_Mem *temp = 0, *ptr = 0;
     size_t i, num_elements;
     int location, precision, type;
     double r;
@@ -102,10 +102,8 @@ void oskar_mem_random_range(oskar_Mem* mem, double lo, double hi, int* status)
 
     /* Copy and clean up if required. */
     if (location != OSKAR_CPU)
-    {
         oskar_mem_copy(mem, ptr, status);
-        oskar_mem_free(temp, status);
-    }
+    oskar_mem_free(temp, status);
 }
 
 #ifdef __cplusplus

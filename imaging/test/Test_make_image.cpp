@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -110,7 +110,6 @@ TEST(make_image, test)
     oskar_Image* image = oskar_make_image(NULL, vis, &settings, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
-    int idx = 0;
     const char* fits_file = "temp_test_image.fits";
     oskar_fits_image_write(image, NULL, fits_file, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
