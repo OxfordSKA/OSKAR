@@ -47,7 +47,8 @@ struct oskar_VisHeader
     int coord_precision;             /* Memory type of the coordinates. */
     int max_times_per_block;         /* Maximum no. time samples per block. */
     int num_times_total;             /* Total no. time samples. */
-    int num_channels;                /* Total no. channels. */
+    int max_channels_per_block;      /* Maximum no. channels per block. */
+    int num_channels_total;          /* Total no. channels. */
     int num_stations;                /* No. interferometer stations. */
 
     int phase_centre_type;           /* Phase centre coordinate type. */

@@ -39,48 +39,45 @@ extern "C" {
 oskar_VisHeader* oskar_vis_header_read(oskar_Binary* h, int* status)
 {
     /* Visibility metadata. */
-    int num_channels = 0, num_times_total = 0, num_stations = 0, tag_error = 0;
-    int amp_type = 0, coord_precision = 0, max_times_per_block = 0;
+    int num_channels_total = 0, num_times_total = 0, num_stations = 0;
+    int max_channels_per_block = 0, max_times_per_block = 0, tag_error = 0;
+    int amp_type = 0, coord_precision = 0;
     int write_crosscorr = 0, write_autocorr = 0;
     unsigned char grp = OSKAR_TAG_GROUP_VIS_HEADER;
     oskar_VisHeader* vis = 0;
-
-    /* Check all inputs. */
-    if (!h || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return 0;
 
     /* Read essential metadata. */
     oskar_binary_read_int(h, grp,
-            OSKAR_VIS_HEADER_TAG_WRITE_AUTO_CORRELATIONS, 0,
-            &write_autocorr, status);
+            OSKAR_VIS_HEADER_TAG_WRITE_AUTO_CORRELATIONS,
+            0, &write_autocorr, status);
     oskar_binary_read_int(h, grp,
-            OSKAR_VIS_HEADER_TAG_WRITE_CROSS_CORRELATIONS, 0,
-            &write_crosscorr, status);
-    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_AMP_TYPE, 0,
-            &amp_type, status);
-    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_COORD_PRECISION, 0,
-            &coord_precision, status);
-    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_MAX_TIMES_PER_BLOCK, 0,
-            &max_times_per_block, status);
-    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_NUM_TIMES_TOTAL, 0,
-            &num_times_total, status);
-    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_NUM_CHANNELS, 0,
-            &num_channels, status);
-    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_NUM_STATIONS, 0,
-            &num_stations, status);
+            OSKAR_VIS_HEADER_TAG_WRITE_CROSS_CORRELATIONS,
+            0, &write_crosscorr, status);
+    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_AMP_TYPE,
+            0, &amp_type, status);
+    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_COORD_PRECISION,
+            0, &coord_precision, status);
+    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_MAX_TIMES_PER_BLOCK,
+            0, &max_times_per_block, status);
+    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_NUM_TIMES_TOTAL,
+            0, &num_times_total, status);
+    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_MAX_CHANNELS_PER_BLOCK,
+            0, &max_channels_per_block, status);
+    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_NUM_CHANNELS_TOTAL,
+            0, &num_channels_total, status);
+    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_NUM_STATIONS,
+            0, &num_stations, status);
 
     /* Check if safe to proceed. */
     if (*status) return 0;
 
     /* Create the visibility header. */
     vis = oskar_vis_header_create(amp_type, coord_precision,
-            max_times_per_block, num_times_total, num_channels, num_stations,
+            max_times_per_block, num_times_total,
+            max_channels_per_block, num_channels_total, num_stations,
             write_autocorr, write_crosscorr, status);
 
     /* Read the number of tags per block. */

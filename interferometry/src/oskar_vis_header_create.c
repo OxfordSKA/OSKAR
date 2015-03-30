@@ -34,17 +34,14 @@ extern "C" {
 #endif
 
 oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
-        int max_times_per_block, int num_times_total, int num_channels,
-        int num_stations, int write_autocorr, int write_crosscor, int* status)
+        int max_times_per_block, int num_times_total,
+        int max_channels_per_block, int num_channels_total, int num_stations,
+        int write_autocorr, int write_crosscor, int* status)
 {
     oskar_VisHeader* hdr = 0;
 
-    /* Check all inputs. */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
+    /* Check if safe to proceed. */
+    if (*status) return 0;
 
     /* Check type. */
     if (!oskar_type_is_complex(amp_type))
@@ -66,10 +63,11 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
     if (write_autocorr) hdr->num_tags_per_block += 1;
 
     /* Set dimensions. */
-    hdr->max_times_per_block = max_times_per_block;
-    hdr->num_times_total     = num_times_total;
-    hdr->num_channels        = num_channels;
-    hdr->num_stations        = num_stations;
+    hdr->max_times_per_block    = max_times_per_block;
+    hdr->num_times_total        = num_times_total;
+    hdr->max_channels_per_block = max_channels_per_block;
+    hdr->num_channels_total     = num_channels_total;
+    hdr->num_stations           = num_stations;
 
     /* Initialise meta-data. */
     hdr->write_autocorr = write_autocorr;

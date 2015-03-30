@@ -122,8 +122,7 @@ static void write_vis_block(int num_gpus, DeviceData* d, HostData* h,
 static void sim_baselines(DeviceData* d, oskar_Sky* sky,
         const oskar_Settings* settings, int channel_index_block,
         int time_index_block, int time_index_simulation, int* status);
-static void set_up_device_data(DeviceData* d, const oskar_Settings* s,
-        const oskar_Telescope* tel, int* status);
+static void set_up_device_data(DeviceData* d, const HostData* h, int* status);
 static void free_device_data(int num_gpus, int* cuda_device_ids,
         DeviceData* d, int* status);
 static void free_host_data(HostData* h, int* status);
@@ -242,7 +241,7 @@ void oskar_sim_interferometer_new(const char* settings_file,
             free_host_data(h, status);
             return;
         }
-        set_up_device_data(&d[i], s, h->tel, status);
+        set_up_device_data(&d[i], h, status);
         cudaDeviceSynchronize();
     }
 
@@ -509,20 +508,24 @@ static void write_vis_block(int num_gpus, DeviceData* d, HostData* h,
     }
 
     /* Calculate baseline uvw coordinates for vis block. */
-    oskar_convert_ecef_to_baseline_uvw(
-            oskar_telescope_num_stations(h->tel),
-            oskar_telescope_station_measured_x_offset_ecef_metres_const(h->tel),
-            oskar_telescope_station_measured_y_offset_ecef_metres_const(h->tel),
-            oskar_telescope_station_measured_z_offset_ecef_metres_const(h->tel),
-            oskar_telescope_phase_centre_ra_rad(h->tel),
-            oskar_telescope_phase_centre_dec_rad(h->tel),
-            oskar_vis_block_num_times(b0),
-            oskar_vis_header_time_start_mjd_utc(h->header),
-            oskar_vis_header_time_inc_sec(h->header) / 86400.0,
-            oskar_vis_block_start_time_index(b0),
-            oskar_vis_block_baseline_uu_metres(b0),
-            oskar_vis_block_baseline_vv_metres(b0),
-            oskar_vis_block_baseline_ww_metres(b0), h->temp, status);
+    if (oskar_vis_block_has_cross_correlations(b0))
+    {
+        const oskar_Mem *x, *y, *z;
+        x = oskar_telescope_station_measured_x_offset_ecef_metres_const(h->tel);
+        y = oskar_telescope_station_measured_y_offset_ecef_metres_const(h->tel);
+        z = oskar_telescope_station_measured_z_offset_ecef_metres_const(h->tel);
+        oskar_convert_ecef_to_baseline_uvw(
+                oskar_telescope_num_stations(h->tel), x, y, z,
+                oskar_telescope_phase_centre_ra_rad(h->tel),
+                oskar_telescope_phase_centre_dec_rad(h->tel),
+                oskar_vis_block_num_times(b0),
+                oskar_vis_header_time_start_mjd_utc(h->header),
+                oskar_vis_header_time_inc_sec(h->header) / 86400.0,
+                oskar_vis_block_start_time_index(b0),
+                oskar_vis_block_baseline_uu_metres(b0),
+                oskar_vis_block_baseline_vv_metres(b0),
+                oskar_vis_block_baseline_ww_metres(b0), h->temp, status);
+    }
 
     /* Add uncorrelated system noise to the combined visibilities. */
     if (h->s.interferometer.noise.enable)
@@ -545,7 +548,6 @@ static void sim_baselines(DeviceData* d, oskar_Sky* sky,
     int num_baselines, num_stations, num_src, num_times_block, num_channels;
     double dt_dump, t_start, t_dump, gast, frequency, ra0, dec0;
     const oskar_Mem *x, *y, *z;
-    oskar_Mem* xcorr;
 
     /* Get dimensions. */
     num_baselines   = oskar_telescope_num_baselines(d->tel);
@@ -568,12 +570,6 @@ static void sim_baselines(DeviceData* d, oskar_Sky* sky,
 
     /* Scale sky fluxes with spectral index and rotation measure. */
     oskar_sky_scale_flux_with_frequency(sky, frequency, status);
-
-    /* Pull out visibility pointer for this time and channel. */
-    xcorr = oskar_mem_create_alias(
-            oskar_vis_block_cross_correlations(d->vis_block), num_baselines *
-            (num_channels * time_index_block + channel_index_block),
-            num_baselines, status);
 
     /* Evaluate station u,v,w coordinates. */
     ra0 = oskar_telescope_phase_centre_ra_rad(d->tel);
@@ -643,54 +639,49 @@ static void sim_baselines(DeviceData* d, oskar_Sky* sky,
     oskar_jones_join(d->J, d->K, d->R ? d->R : d->E, status);
     oskar_timer_pause(d->tmr_join);
 
-    /* Correlate. */
-    oskar_timer_resume(d->tmr_correlate);
-    oskar_correlate(xcorr, num_src, d->J, sky, d->tel, d->u, d->v, d->w,
-            gast, frequency, status);
-    oskar_timer_pause(d->tmr_correlate);
-
-    /* Free handle to aliased memory. */
-    oskar_mem_free(xcorr, status);
+    /* Cross-correlate for this time and channel. */
+    if (oskar_vis_block_has_cross_correlations(d->vis_block))
+    {
+        oskar_Mem* xcorr;
+        oskar_timer_resume(d->tmr_correlate);
+        xcorr = oskar_mem_create_alias(
+                oskar_vis_block_cross_correlations(d->vis_block),
+                num_baselines *
+                (num_channels * time_index_block + channel_index_block),
+                num_baselines, status);
+        oskar_correlate(xcorr, num_src, d->J, sky, d->tel, d->u, d->v, d->w,
+                gast, frequency, status);
+        oskar_mem_free(xcorr, status);
+        oskar_timer_pause(d->tmr_correlate);
+    }
 }
 
 
-static void set_up_device_data(DeviceData* d, const oskar_Settings* s,
-        const oskar_Telescope* tel, int* status)
+static void set_up_device_data(DeviceData* d, const HostData* h, int* status)
 {
-    int prec, complx, vistype;
-    int num_stations, num_src, num_channels, num_times_block;
-    int write_autocorr = 0; /* TODO Get from settings. */
-    int write_crosscorr = 1; /* TODO Get from settings. */
+    int prec, complx, vistype, num_stations, num_src;
 
     /* Get local variables. */
-    num_stations     = oskar_telescope_num_stations(tel);
-    num_src          = s->sim.max_sources_per_chunk;
-    num_channels     = s->obs.num_channels;
-    num_times_block  = s->interferometer.max_time_samples_per_block;
-    prec             = s->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    num_stations     = oskar_telescope_num_stations(h->tel);
+    num_src          = h->s.sim.max_sources_per_chunk;
+    prec             = h->s.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     complx           = prec | OSKAR_COMPLEX;
     vistype          = complx;
-    if (oskar_telescope_pol_mode(tel) == OSKAR_POL_MODE_FULL)
+    if (oskar_telescope_pol_mode(h->tel) == OSKAR_POL_MODE_FULL)
         vistype |= OSKAR_MATRIX;
 
     /* Host memory. */
-    d->vis_block_cpu[0] = oskar_vis_block_create(vistype, OSKAR_CPU,
-            num_times_block, num_channels, num_stations,
-            write_autocorr, write_crosscorr, status);
-    d->vis_block_cpu[1] = oskar_vis_block_create(vistype, OSKAR_CPU,
-            num_times_block, num_channels, num_stations,
-            write_autocorr, write_crosscorr, status);
+    d->vis_block_cpu[0] = oskar_vis_block_create(OSKAR_CPU, h->header, status);
+    d->vis_block_cpu[1] = oskar_vis_block_create(OSKAR_CPU, h->header, status);
 
     /* Device memory. */
-    d->vis_block = oskar_vis_block_create(vistype, OSKAR_GPU,
-            num_times_block, num_channels, num_stations,
-            write_autocorr, write_crosscorr, status);
+    d->vis_block = oskar_vis_block_create(OSKAR_GPU, h->header, status);
     d->u = oskar_mem_create(prec, OSKAR_GPU, num_stations, status);
     d->v = oskar_mem_create(prec, OSKAR_GPU, num_stations, status);
     d->w = oskar_mem_create(prec, OSKAR_GPU, num_stations, status);
     d->sky_chunk = oskar_sky_create(prec, OSKAR_GPU, num_src, status);
     d->local_sky = oskar_sky_create(prec, OSKAR_GPU, num_src, status);
-    d->tel = oskar_telescope_create_copy(tel, OSKAR_GPU, status);
+    d->tel = oskar_telescope_create_copy(h->tel, OSKAR_GPU, status);
     d->J = oskar_jones_create(vistype, OSKAR_GPU, num_stations, num_src, status);
     d->R = oskar_type_is_matrix(vistype) ? oskar_jones_create(vistype,
             OSKAR_GPU, num_stations, num_src, status) : 0;

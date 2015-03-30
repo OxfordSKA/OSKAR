@@ -61,22 +61,24 @@ enum OSKAR_VIS_HEADER_TAGS
     OSKAR_VIS_HEADER_TAG_COORD_PRECISION          = 6,
     OSKAR_VIS_HEADER_TAG_MAX_TIMES_PER_BLOCK      = 7,
     OSKAR_VIS_HEADER_TAG_NUM_TIMES_TOTAL          = 8,
-    OSKAR_VIS_HEADER_TAG_NUM_CHANNELS             = 9,
-    OSKAR_VIS_HEADER_TAG_NUM_STATIONS             = 10,
-    OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_COORD_TYPE  = 11,
-    OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_DEG         = 12,
-    OSKAR_VIS_HEADER_TAG_FREQ_START_HZ            = 13,
-    OSKAR_VIS_HEADER_TAG_FREQ_INC_HZ              = 14,
-    OSKAR_VIS_HEADER_TAG_CHANNEL_BANDWIDTH_HZ     = 15,
-    OSKAR_VIS_HEADER_TAG_TIME_START_MJD_UTC       = 16,
-    OSKAR_VIS_HEADER_TAG_TIME_INC_SEC             = 17,
-    OSKAR_VIS_HEADER_TAG_TIME_AVERAGE_SEC         = 18,
-    OSKAR_VIS_HEADER_TAG_TELESCOPE_REF_LON_DEG    = 19,
-    OSKAR_VIS_HEADER_TAG_TELESCOPE_REF_LAT_DEG    = 20,
-    OSKAR_VIS_HEADER_TAG_TELESCOPE_REF_ALT_M      = 21,
-    OSKAR_VIS_HEADER_TAG_STATION_X_OFFSET_ECEF    = 22,
-    OSKAR_VIS_HEADER_TAG_STATION_Y_OFFSET_ECEF    = 23,
-    OSKAR_VIS_HEADER_TAG_STATION_Z_OFFSET_ECEF    = 24
+    OSKAR_VIS_HEADER_TAG_MAX_CHANNELS_PER_BLOCK   = 9,
+    OSKAR_VIS_HEADER_TAG_NUM_CHANNELS_TOTAL       = 10,
+    OSKAR_VIS_HEADER_TAG_NUM_STATIONS             = 11,
+    /* Tags 12-20 are reserved for future use. */
+    OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_COORD_TYPE  = 21,
+    OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_DEG         = 22,
+    OSKAR_VIS_HEADER_TAG_FREQ_START_HZ            = 23,
+    OSKAR_VIS_HEADER_TAG_FREQ_INC_HZ              = 24,
+    OSKAR_VIS_HEADER_TAG_CHANNEL_BANDWIDTH_HZ     = 25,
+    OSKAR_VIS_HEADER_TAG_TIME_START_MJD_UTC       = 26,
+    OSKAR_VIS_HEADER_TAG_TIME_INC_SEC             = 27,
+    OSKAR_VIS_HEADER_TAG_TIME_AVERAGE_SEC         = 28,
+    OSKAR_VIS_HEADER_TAG_TELESCOPE_REF_LON_DEG    = 29,
+    OSKAR_VIS_HEADER_TAG_TELESCOPE_REF_LAT_DEG    = 30,
+    OSKAR_VIS_HEADER_TAG_TELESCOPE_REF_ALT_M      = 31,
+    OSKAR_VIS_HEADER_TAG_STATION_X_OFFSET_ECEF    = 32,
+    OSKAR_VIS_HEADER_TAG_STATION_Y_OFFSET_ECEF    = 33,
+    OSKAR_VIS_HEADER_TAG_STATION_Z_OFFSET_ECEF    = 34
 };
 
 enum OSKAR_VIS_BLOCK_TAGS
@@ -102,8 +104,8 @@ static void write_test_vis(const char* filename)
 
     /* Data to write. */
     const char* telescope_model_path = "my_telescope_model";
-    int amp_type, coord_precision, max_times_per_block, num_tags_per_block = 5;
-    int num_baselines, num_channels, num_stations, num_times_total;
+    int amp_type, coord_precision, num_tags_per_block = 5, max_times_per_block;
+    int num_baselines, num_channels_total, num_stations, num_times_total;
     int num_blocks, num_times_baselines, dim_start_and_size[6];
     int phase_centre_coord_type;
     double phase_centre_deg[2];
@@ -117,7 +119,7 @@ static void write_test_vis(const char* filename)
     coord_precision = OSKAR_DOUBLE;
     max_times_per_block = 10;
     num_times_total = 33;
-    num_channels = 2;
+    num_channels_total = 2;
     num_stations = 4;
     num_baselines = num_stations * (num_stations - 1) / 2;
     phase_centre_coord_type = 0;
@@ -138,7 +140,7 @@ static void write_test_vis(const char* filename)
     dim_start_and_size[0] = 0;
     dim_start_and_size[1] = 0;
     dim_start_and_size[2] = max_times_per_block;
-    dim_start_and_size[3] = num_channels;
+    dim_start_and_size[3] = num_channels_total;
     dim_start_and_size[4] = num_baselines;
     dim_start_and_size[5] = num_stations;
 
@@ -149,7 +151,7 @@ static void write_test_vis(const char* filename)
     uu        = calloc(num_times_baselines, DBL);
     vv        = calloc(num_times_baselines, DBL);
     ww        = calloc(num_times_baselines, DBL);
-    vis_block = calloc(num_times_baselines * num_channels, DBL*8);
+    vis_block = calloc(num_times_baselines * num_channels_total, DBL*8);
     for (i = 0; i < num_stations; ++i)
     {
         ((double*)station_x)[i] = i + 0.1;
@@ -162,7 +164,7 @@ static void write_test_vis(const char* filename)
         ((double*)vv)[i] = i + 0.22;
         ((double*)ww)[i] = i + 0.33;
     }
-    for (i = 0; i < num_times_baselines * num_channels; ++i)
+    for (i = 0; i < num_times_baselines * num_channels_total; ++i)
     {
         ((double*)vis_block)[8 * i + 0] = i + 0.111; /* XX.re */
         ((double*)vis_block)[8 * i + 1] = i + 0.222; /* XX.im */
@@ -201,7 +203,11 @@ static void write_test_vis(const char* filename)
     oskar_binary_write_int(h, vis_header_group,
             OSKAR_VIS_HEADER_TAG_NUM_TIMES_TOTAL, 0, num_times_total, &status);
     oskar_binary_write_int(h, vis_header_group,
-            OSKAR_VIS_HEADER_TAG_NUM_CHANNELS, 0, num_channels, &status);
+            OSKAR_VIS_HEADER_TAG_MAX_CHANNELS_PER_BLOCK, 0, num_channels_total,
+            &status);
+    oskar_binary_write_int(h, vis_header_group,
+            OSKAR_VIS_HEADER_TAG_NUM_CHANNELS_TOTAL, 0, num_channels_total,
+            &status);
     oskar_binary_write_int(h, vis_header_group,
             OSKAR_VIS_HEADER_TAG_NUM_STATIONS, 0, num_stations, &status);
 
@@ -267,7 +273,7 @@ static void write_test_vis(const char* filename)
         /* Write the visibility data. */
         oskar_binary_write(h, amp_type, vis_block_group,
                 OSKAR_VIS_BLOCK_TAG_CROSS_CORRELATIONS, i,
-                DBL*8 * num_times_baselines * num_channels,
+                DBL*8 * num_times_baselines * num_channels_total,
                 vis_block, &status);
 
         /* Write the baseline data. */
@@ -347,7 +353,7 @@ static void read_test_vis(const char* filename)
     oskar_binary_read_int(h, vis_header_group,
             OSKAR_VIS_HEADER_TAG_NUM_TIMES_TOTAL, 0, &num_times_total, &status);
     oskar_binary_read_int(h, vis_header_group,
-            OSKAR_VIS_HEADER_TAG_NUM_CHANNELS, 0, &num_channels, &status);
+            OSKAR_VIS_HEADER_TAG_NUM_CHANNELS_TOTAL, 0, &num_channels, &status);
     oskar_binary_read_int(h, vis_header_group,
             OSKAR_VIS_HEADER_TAG_NUM_STATIONS, 0, &num_stations, &status);
 

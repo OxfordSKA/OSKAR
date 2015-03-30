@@ -72,7 +72,10 @@ OSKAR_EXPORT
 int oskar_vis_header_max_times_per_block(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
-int oskar_vis_header_num_channels(const oskar_VisHeader* vis);
+int oskar_vis_header_max_channels_per_block(const oskar_VisHeader* vis);
+
+OSKAR_EXPORT
+int oskar_vis_header_num_channels_total(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
 int oskar_vis_header_num_times_total(const oskar_VisHeader* vis);

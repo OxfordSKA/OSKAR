@@ -153,7 +153,7 @@ const int* oskar_vis_block_baseline_station2_const(const oskar_VisBlock* vis)
 
 void oskar_vis_block_set_num_times(oskar_VisBlock* vis, int value, int* status)
 {
-    if (!status || *status) return;
+    if (*status) return;
 
     /* Only allow shrinking of the dimension, as the block capacity is
      * not known. */

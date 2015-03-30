@@ -59,7 +59,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     /* Pull data from visibility structure. */
     amp_type     = oskar_vis_header_amp_type(hdr);
     num_stations = oskar_vis_header_num_stations(hdr);
-    num_channels = oskar_vis_header_num_channels(hdr);
+    num_channels = oskar_vis_header_num_channels_total(hdr);
     ra_rad       = oskar_vis_header_phase_centre_ra_deg(hdr) * M_PI / 180.0;
     dec_rad      = oskar_vis_header_phase_centre_dec_deg(hdr) * M_PI / 180.0;
     ref_freq_hz  = oskar_vis_header_freq_start_hz(hdr);

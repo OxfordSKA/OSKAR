@@ -45,13 +45,6 @@ oskar_Binary* oskar_vis_header_write(const oskar_VisHeader* hdr,
     oskar_Binary* h = 0;
     const char* settings;
 
-    /* Check all inputs. */
-    if (!hdr || !filename || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return 0;
 
@@ -103,7 +96,11 @@ oskar_Binary* oskar_vis_header_write(const oskar_VisHeader* hdr,
             OSKAR_VIS_HEADER_TAG_NUM_TIMES_TOTAL, 0,
             hdr->num_times_total, status);
     oskar_binary_write_int(h, grp,
-            OSKAR_VIS_HEADER_TAG_NUM_CHANNELS, 0, hdr->num_channels, status);
+            OSKAR_VIS_HEADER_TAG_MAX_CHANNELS_PER_BLOCK, 0,
+            hdr->max_channels_per_block, status);
+    oskar_binary_write_int(h, grp,
+            OSKAR_VIS_HEADER_TAG_NUM_CHANNELS_TOTAL, 0,
+            hdr->num_channels_total, status);
     oskar_binary_write_int(h, grp,
             OSKAR_VIS_HEADER_TAG_NUM_STATIONS, 0, hdr->num_stations, status);
 

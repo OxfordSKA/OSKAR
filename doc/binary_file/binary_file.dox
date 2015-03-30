@@ -566,23 +566,25 @@ Tags in this group have a group ID of 11.
 | 5      | Data type of visibility arrays in \ref binary_tag_vis_block "Visibility Block" [int]. (See \ref binary_data_type "Payload Data Type")
 | 6      | Precision of station and baseline coordinate arrays [int]. (See \ref binary_data_type "Payload Data Type")
 | 7      | Maximum number of time samples in a \ref binary_tag_vis_block "Visibility Block" [int].
-| 8      | Number of usable time samples in total, from all subsequent \ref binary_tag_vis_block "Visibility Blocks" [int].
-| 9      | Number of channels [int].
-| 10     | Number of stations [int].
-| 11     | Phase centre coordinate type, currently always 0 [int].
-| 12     | Phase centre longitude / Right Ascension (deg) and latitude / Declination (deg) [double[2]].
-| 13     | Start frequency, in Hz [double].
-| 14     | Frequency increment, in Hz [double].
-| 15     | Channel bandwidth, in Hz [double].
-| 16     | Observation start time, as MJD(UTC) [double].
-| 17     | Time increment, in seconds [double].
-| 18     | Time integration per correlator dump, in seconds [double].
-| 19     | Telescope reference longitude, in degrees [double].
-| 20     | Telescope reference latitude, in degrees [double].
-| 21     | Telescope reference altitude, in metres [double].
-| 22     | Station X-coordinates in offset ECEF frame, in metres [array].
-| 23     | Station Y-coordinates in offset ECEF frame, in metres [array].
-| 24     | Station Z-coordinates in offset ECEF frame, in metres [array].
+| 8      | Total number of usable time samples, from all subsequent \ref binary_tag_vis_block "Visibility Blocks" [int].
+| 9      | Maximum number of channels in a \ref binary_tag_vis_block "Visibility Block" [int].
+| 10     | Total number of usable channels, from all subsequent \ref binary_tag_vis_block "Visibility Blocks" [int].
+| 11     | Number of stations [int].
+| 12-20  | <i>Reserved for future use.</i>
+| 21     | Phase centre coordinate type, currently always 0 [int].
+| 22     | Phase centre longitude / Right Ascension (deg) and latitude / Declination (deg) [double[2]].
+| 23     | Start frequency, in Hz [double].
+| 24     | Frequency increment, in Hz [double].
+| 25     | Channel bandwidth, in Hz [double].
+| 26     | Observation start time, as MJD(UTC) [double].
+| 27     | Time increment, in seconds [double].
+| 28     | Time integration per correlator dump, in seconds [double].
+| 29     | Telescope reference longitude, in degrees [double].
+| 30     | Telescope reference latitude, in degrees [double].
+| 31     | Telescope reference altitude, in metres [double].
+| 32     | Station X-coordinates in offset ECEF frame, in metres [array].
+| 33     | Station Y-coordinates in offset ECEF frame, in metres [array].
+| 34     | Station Z-coordinates in offset ECEF frame, in metres [array].
 
 
 The Visibility Header contains static meta-data. It precedes a sequence of
@@ -617,7 +619,7 @@ containing data in the following order:
       observation start.
 - [1] Global start channel index for the first channel in the block
       (usually 0; reserved for future use).
-- [2] Number of frequency channels in the block
+- [2] Number of <i>usable</i> frequency channels in the block
       (usually the total number; reserved for future use).
 - [3] Number of <i>usable</i> time samples in the block.
 - [4] Number of cross-correlated baselines.
@@ -691,7 +693,7 @@ result of the division (Tag ID 8) / (Tag ID 7).
     group tag for rotation measure.</td></tr>
 <tr><td>5</td><td>2014-07-16</td>
     <td>[2.5.0] Added spline data and element data tag groups.</td></tr>
-<tr><td>6</td><td>2015-03-13</td>
+<tr><td>6</td><td>2015-03-30</td>
     <td>[2.6.0] Updated for binary format version 2, which includes 
     chunk CRC codes. Added new diagram and clarified description of the
     data chunks. Marked existing image data tags and visibility data tags as 

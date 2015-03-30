@@ -47,25 +47,33 @@ extern "C" {
  * This function creates a new visibility header structure in memory and
  * returns a handle to it.
  *
+ * Allowed values of the \p amp_type parameter are
+ * - OSKAR_SINGLE_COMPLEX
+ * - OSKAR_DOUBLE_COMPLEX
+ * - OSKAR_SINGLE_COMPLEX_MATRIX
+ * - OSKAR_DOUBLE_COMPLEX_MATRIX
+ *
  * The structure must be deallocated using oskar_vis_header_free() when it is
  * no longer required.
  *
- * @param[in] amp_type            OSKAR memory type for visibility amplitudes.
- * @param[in] coord_precision     OSKAR memory type for coordinates.
- * @param[in] num_times_per_block Maximum number of time samples per block.
- * @param[in] num_times_total     Number of time samples in total.
- * @param[in] num_channels        Number of frequency channels.
- * @param[in] num_stations        Number of stations.
- * @param[in] write_autocorr      Set if auto-correlations should be written.
- * @param[in] write_crosscorr     Set if cross-correlations should be written.
- * @param[in,out]  status         Status return code.
+ * @param[in] amp_type               OSKAR memory type of visibility amplitudes.
+ * @param[in] coord_precision        OSKAR memory type of coordinates.
+ * @param[in] max_times_per_block    Maximum number of time samples per block.
+ * @param[in] num_times_total        Number of time samples in total.
+ * @param[in] max_channels_per_block Maximum number of channels per block.
+ * @param[in] num_channels_total     Number of channels in total.
+ * @param[in] num_stations           Number of stations.
+ * @param[in] write_autocorr         Set if auto-correlations must be written.
+ * @param[in] write_crosscorr        Set if cross-correlations must be written.
+ * @param[in,out]  status            Status return code.
  *
  * @return A handle to the new data structure.
  */
 OSKAR_EXPORT
 oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
-        int max_times_per_block, int num_times_total, int num_channels,
-        int num_stations, int write_autocorr, int write_crossscor, int* status);
+        int max_times_per_block, int num_times_total,
+        int max_channels_per_block, int num_channels_total, int num_stations,
+        int write_autocorr, int write_crossscor, int* status);
 
 #ifdef __cplusplus
 }

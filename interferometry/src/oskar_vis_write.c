@@ -60,13 +60,6 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     const oskar_Mem* amp = 0;
     int max_times_per_block = 10;
 
-    /* Check all inputs. */
-    if (!vis || !filename || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 
@@ -77,8 +70,8 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     num_stations = oskar_vis_num_stations(vis);
     num_times = oskar_vis_num_times(vis);
     hdr = oskar_vis_header_create(amp_type, coord_precision,
-            max_times_per_block, num_times, num_channels, num_stations,
-            0, 1, status);
+            max_times_per_block, num_times, num_channels, num_channels,
+            num_stations, 0, 1, status);
 
     /* Copy station coordinates and metadata. */
     freq_ref_hz = oskar_vis_freq_start_hz(vis);
@@ -115,8 +108,7 @@ void oskar_vis_write(const oskar_Vis* vis, oskar_Log* log,
     h = oskar_vis_header_write(hdr, filename, status);
 
     /* Create a visibility block to copy into. */
-    blk = oskar_vis_block_create(amp_type, OSKAR_CPU,
-            max_times_per_block, num_channels, num_stations, 0, 1, status);
+    blk = oskar_vis_block_create(OSKAR_CPU, hdr, status);
     num_baselines = oskar_vis_block_num_baselines(blk);
     amp = oskar_vis_amplitude_const(vis);
     xcorr = oskar_vis_block_cross_correlations(blk);

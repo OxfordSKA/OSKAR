@@ -34,6 +34,7 @@
  */
 
 #include <oskar_global.h>
+#include <oskar_vis_header.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,18 +49,9 @@ extern "C" {
  * handle to it. The structure holds visibility data for all baselines, and
  * a set of times and channels.
  *
- * Allowed values of the \p amp_type parameter are
- * - OSKAR_SINGLE_COMPLEX
- * - OSKAR_DOUBLE_COMPLEX
- * - OSKAR_SINGLE_COMPLEX_MATRIX
- * - OSKAR_DOUBLE_COMPLEX_MATRIX
- *
  * Allowed values of the \p location parameter are
  * - OSKAR_CPU
  * - OSKAR_GPU
- *
- * Space for autocorrelation data will always be available, but
- * autocorrelation values may be zero if they are not computed.
  *
  * The dimension order is fixed. The polarisation dimension is implicit in the
  * data type (matrix or scalar) and is therefore the fastest varying.
@@ -77,26 +69,20 @@ extern "C" {
  *
  * The number of polarisations is determined by the choice of matrix or
  * scalar amplitude types. Matrix amplitude types represent 4 polarisation
- * dimensions whereas scalar types represent a single polarisation.
+ * dimensions whereas scalar types represent Stokes I only.
  *
  * The structure must be deallocated using oskar_vis_block_free() when it is
  * no longer required.
  *
- * @param[in] amp_type         OSKAR memory type for the visibility amplitudes.
  * @param[in] location         Memory location (OSKAR_CPU or OSKAR_GPU).
- * @param[in] num_times        Number of time samples.
- * @param[in] num_channels     Number of frequency channels.
- * @param[in] num_stations     Number of stations.
- * @param[in] create_autocorr  If set, create auto-correlation array.
- * @param[in] create_crosscorr If set, create cross-correlation array.
+ * @param[in] hdr              Pointer to populated visibility header data.
  * @param[in,out]  status      Status return code.
  *
  * @return A handle to the new data structure.
  */
 OSKAR_EXPORT
-oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
-        int num_times, int num_channels, int num_stations, int create_autocorr,
-        int create_crosscorr, int* status);
+oskar_VisBlock* oskar_vis_block_create(int location,
+        const oskar_VisHeader* hdr, int* status);
 
 #ifdef __cplusplus
 }

@@ -193,7 +193,7 @@ oskar_Vis* oskar_vis_read_new(oskar_Binary* h, int* status)
     /* Create the old vis structure. */
     amp_type = oskar_vis_header_amp_type(hdr);
     max_times_per_block = oskar_vis_header_max_times_per_block(hdr);
-    num_channels = oskar_vis_header_num_channels(hdr);
+    num_channels = oskar_vis_header_num_channels_total(hdr);
     num_stations = oskar_vis_header_num_stations(hdr);
     num_times = oskar_vis_header_num_times_total(hdr);
     vis = oskar_vis_create(amp_type, OSKAR_CPU, num_channels, num_times,
@@ -237,8 +237,7 @@ oskar_Vis* oskar_vis_read_new(oskar_Binary* h, int* status)
     oskar_vis_set_time_start_mjd_utc(vis, time_ref_mjd_utc);
 
     /* Create a visibility block to read into. */
-    blk = oskar_vis_block_create(amp_type, OSKAR_CPU, max_times_per_block,
-            num_channels, num_stations, 0, 1, status);
+    blk = oskar_vis_block_create(OSKAR_CPU, hdr, status);
     amp = oskar_vis_amplitude(vis);
     xcorr = oskar_vis_block_cross_correlations_const(blk);
 

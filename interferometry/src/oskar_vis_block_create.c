@@ -33,20 +33,25 @@
 extern "C" {
 #endif
 
-oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
-        int num_times, int num_channels, int num_stations, int create_autocorr,
-        int create_crosscorr, int* status)
+oskar_VisBlock* oskar_vis_block_create(int location,
+        const oskar_VisHeader* hdr, int* status)
 {
     oskar_VisBlock* vis = 0;
+    int amp_type = 0, num_times = 0, num_channels = 0, num_stations = 0;
+    int create_crosscorr = 0, create_autocorr = 0;
     int num_autocorr = 0, num_xcorr = 0, num_baselines = 0, num_coords = 0;
     int *b_s1, *b_s2, i, s1, s2, type;
 
-    /* Check all inputs. */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
+    /* Check if safe to proceed. */
+    if (*status) return 0;
+
+    /* Get values from header. */
+    amp_type         = oskar_vis_header_amp_type(hdr);
+    num_times        = oskar_vis_header_max_times_per_block(hdr);
+    num_channels     = oskar_vis_header_num_channels_total(hdr);
+    num_stations     = oskar_vis_header_num_stations(hdr);
+    create_autocorr  = oskar_vis_header_write_auto_correlations(hdr);
+    create_crosscorr = oskar_vis_header_write_cross_correlations(hdr);
 
     /* Check type. */
     if (oskar_type_is_double(amp_type))
@@ -65,7 +70,7 @@ oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
     }
 
     /* Allocate the structure. */
-    vis = (oskar_VisBlock*) malloc(sizeof(oskar_VisBlock));
+    vis = (oskar_VisBlock*) calloc(1, sizeof(oskar_VisBlock));
 
     /* Set dimensions. */
     if (create_crosscorr)
@@ -96,19 +101,33 @@ oskar_VisBlock* oskar_vis_block_create(int amp_type, int location,
             num_autocorr, status);
     vis->cross_correlations = oskar_mem_create(amp_type, location,
             num_xcorr, status);
-    vis->a1 = oskar_mem_create(OSKAR_INT, OSKAR_CPU, num_baselines, status);
-    vis->a2 = oskar_mem_create(OSKAR_INT, OSKAR_CPU, num_baselines, status);
 
     /* TODO Move these to oskar_MeasurementSet. */
     /* Evaluate baseline index arrays for Measurement Set export. */
-    b_s1 = oskar_mem_int(vis->a1, status);
-    b_s2 = oskar_mem_int(vis->a2, status);
-    for (s1 = 0, i = 0; s1 < num_stations; ++s1)
+    vis->a1 = oskar_mem_create(OSKAR_INT, OSKAR_CPU,
+            num_baselines + num_stations, status);
+    vis->a2 = oskar_mem_create(OSKAR_INT, OSKAR_CPU,
+            num_baselines + num_stations, status);
+    if (create_crosscorr || create_autocorr)
     {
-        for (s2 = create_autocorr ? s1 : s1 + 1; s2 < num_stations; ++i, ++s2)
+        b_s1 = oskar_mem_int(vis->a1, status);
+        b_s2 = oskar_mem_int(vis->a2, status);
+        for (s1 = 0, i = 0; s1 < num_stations; ++s1)
         {
-            b_s1[i] = s1;
-            b_s2[i] = s2;
+            if (create_autocorr)
+            {
+                b_s1[i] = s1;
+                b_s2[i] = s1;
+                ++i;
+            }
+            if (create_crosscorr)
+            {
+                for (s2 = s1 + 1; s2 < num_stations; ++i, ++s2)
+                {
+                    b_s1[i] = s1;
+                    b_s2[i] = s2;
+                }
+            }
         }
     }
 
