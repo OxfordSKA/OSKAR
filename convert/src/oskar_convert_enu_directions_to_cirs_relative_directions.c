@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,13 +97,6 @@ void oskar_convert_enu_directions_to_cirs_relative_directions(
         int* status)
 {
     int type, location;
-
-    /* Check all inputs. */
-    if (!l || !m || !n || !x || !y || !z || !status)
-    {
-        *status = OSKAR_ERR_INVALID_ARGUMENT;
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

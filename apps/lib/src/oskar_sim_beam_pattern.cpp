@@ -107,12 +107,6 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
 static void load_settings(oskar_Settings* settings, const char* filename,
         oskar_Log* log, int* status)
 {
-    if (!settings || !filename || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     if (*status) return;
 
     oskar_log_section(log, 'M', "Loading settings file '%s'", filename);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,13 +40,6 @@ oskar_Sky* oskar_sky_read(const char* filename, int location, int* status)
     oskar_Binary* h = 0;
     unsigned char group = OSKAR_TAG_GROUP_SKY_MODEL;
     oskar_Sky* sky = 0;
-
-    /* Check all inputs. */
-    if (!filename || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return 0;

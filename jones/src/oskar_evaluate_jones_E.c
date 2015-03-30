@@ -44,13 +44,6 @@ void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, oskar_Mem* x,
     int i, num_stations;
     oskar_Mem *E_station;
 
-    /* Check all inputs. */
-    if (!E || !x || !y || !z || !telescope || !work || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

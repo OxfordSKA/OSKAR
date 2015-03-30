@@ -39,13 +39,6 @@ void oskar_station_override_element_phases(oskar_Station* s, unsigned int seed,
 {
     int i;
 
-    /* Check all inputs. */
-    if (!s || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

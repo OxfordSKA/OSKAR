@@ -47,13 +47,6 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem, size_t num_elements,
     va_list args;
     oskar_Mem** handles; /* Array of oskar_Mem pointers in CPU memory. */
 
-    /* Check all inputs. */
-    if (!file || !num_mem || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

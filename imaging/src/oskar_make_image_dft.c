@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,13 +45,6 @@ void oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     const oskar_Mem *p_l, *p_m, *p_amp;
     double wavenumber;
     int type, num_vis, num_pixels;
-
-    /* Check all inputs. */
-    if (!image || !uu_metres || !vv_metres || !amp || !l || !m || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

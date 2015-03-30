@@ -46,13 +46,6 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     unsigned int num_stations, num_pols, num_channels;
     oskar_MeasurementSet* ms;
 
-    /* Check all inputs. */
-    if (!hdr || !ms_path || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return 0;
 

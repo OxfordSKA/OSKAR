@@ -41,13 +41,6 @@ void oskar_evaluate_element_weights(oskar_Mem* weights,
 {
     int num_elements;
 
-    /* Check all inputs. */
-    if (!weights || !weights_error || !station || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

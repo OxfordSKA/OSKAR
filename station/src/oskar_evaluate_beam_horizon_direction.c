@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,13 +42,6 @@ void oskar_evaluate_beam_horizon_direction(double* x, double* y, double* z,
 {
     int beam_coord_type;
     double beam_lon, beam_lat;
-
-    /* Check all inputs. */
-    if (!x || !y || !z || !station || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

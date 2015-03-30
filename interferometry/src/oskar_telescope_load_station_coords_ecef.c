@@ -52,13 +52,6 @@ void oskar_telescope_load_station_coords_ecef(oskar_Telescope* telescope,
     int n = 0, type = 0;
     FILE* file;
 
-    /* Check all inputs. */
-    if (!telescope || !filename || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

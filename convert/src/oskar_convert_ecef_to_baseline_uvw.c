@@ -44,13 +44,6 @@ void oskar_convert_ecef_to_baseline_uvw(int num_stations, const oskar_Mem* x,
     oskar_Mem *u, *v, *w, *uu_dump, *vv_dump, *ww_dump; /* Aliases. */
     int i, type, location, num_baselines;
 
-    /* Check all inputs. */
-    if (!uu || !vv || !ww || !x || !y || !z || !work || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

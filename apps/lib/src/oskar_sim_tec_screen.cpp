@@ -57,12 +57,6 @@ oskar_Image* oskar_sim_tec_screen(oskar_Settings* settings, oskar_Log* log,
     oskar_Image* TEC_screen = 0;
     oskar_SettingsIonosphere* MIM = &settings->ionosphere;
 
-    if (!settings || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     if (*status) return 0;
 
     if (!MIM->TECImage.fits_file)

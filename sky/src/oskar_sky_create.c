@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,13 +40,6 @@ oskar_Sky* oskar_sky_create(int type, int location, int num_sources,
 {
     oskar_Sky* model = 0;
     int capacity;
-
-    /* Check all inputs. */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
 
     /* Check type and location. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)

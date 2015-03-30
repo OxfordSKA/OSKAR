@@ -63,13 +63,6 @@ void oskar_mem_stats(const oskar_Mem* mem, size_t n, double* min, double* max,
     size_t i;
     double old_m = 0.0, new_m = 0.0, old_s = 0.0, new_s = 0.0;
 
-    /* Check all inputs. */
-    if (!mem || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

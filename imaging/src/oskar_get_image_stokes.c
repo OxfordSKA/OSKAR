@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,6 @@ oskar_Mem* oskar_get_image_stokes(const oskar_Vis* vis,
     const oskar_Mem* vis_amp;
     oskar_Mem* stokes = 0;
 
-    if (!vis || !settings || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
     if (*status) return 0;
 
     /* Local variables */

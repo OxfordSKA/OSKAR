@@ -42,13 +42,6 @@ void oskar_station_analyse(oskar_Station* station,
     double *orientation_x, *orientation_y;
     char* mount_type;
 
-    /* Check all inputs. */
-    if (!station || !finished_identical_station_check || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

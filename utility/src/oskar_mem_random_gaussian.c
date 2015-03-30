@@ -154,13 +154,6 @@ void oskar_mem_random_gaussian(oskar_Mem* data, unsigned int seed,
     int type, location;
     size_t num_elements;
 
-    /* Check all inputs. */
-    if (!data || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

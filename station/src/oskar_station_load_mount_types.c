@@ -47,13 +47,6 @@ void oskar_station_load_mount_types(oskar_Station* station,
     int n = 0, type = 0, old_size = 0;
     FILE* file;
 
-    /* Check all inputs. */
-    if (!station || !filename || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

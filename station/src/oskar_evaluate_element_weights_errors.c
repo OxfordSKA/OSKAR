@@ -101,13 +101,6 @@ void oskar_evaluate_element_weights_errors(int num_elements,
 {
     int type, location;
 
-    /* Check all inputs. */
-    if (!errors || !gain || !gain_error || !phase || !phase_error || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

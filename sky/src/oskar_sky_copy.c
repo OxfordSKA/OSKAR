@@ -38,13 +38,6 @@ void oskar_sky_copy(oskar_Sky* dst, const oskar_Sky* src, int* status)
 {
     int num_sources;
 
-    /* Check all inputs. */
-    if (!src || !dst || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

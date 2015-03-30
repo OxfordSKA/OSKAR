@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,13 +37,6 @@ oskar_WorkJonesZ* oskar_work_jones_z_create(int type, int location, int* status)
 {
     oskar_WorkJonesZ* work = 0;
 
-    /* Check inputs */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Check the base type is correct */
     if (!(type == OSKAR_SINGLE || type == OSKAR_DOUBLE))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
@@ -65,12 +58,6 @@ oskar_WorkJonesZ* oskar_work_jones_z_create(int type, int location, int* status)
 
 void oskar_work_jones_z_free(oskar_WorkJonesZ* work, int* status)
 {
-    if (!work || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     oskar_mem_free(work->hor_x, status);
     oskar_mem_free(work->hor_y, status);
     oskar_mem_free(work->hor_z, status);
@@ -111,11 +98,6 @@ int oskar_work_jones_z_type(oskar_WorkJonesZ* work)
 
 void oskar_work_jones_z_resize(oskar_WorkJonesZ* work, int n, int* status)
 {
-    if (!work || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
     oskar_mem_realloc(work->hor_x, n, status);
     oskar_mem_realloc(work->hor_y, n, status);
     oskar_mem_realloc(work->hor_z, n, status);

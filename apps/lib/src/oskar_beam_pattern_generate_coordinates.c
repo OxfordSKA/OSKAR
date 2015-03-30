@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,13 +57,7 @@ size_t oskar_beam_pattern_generate_coordinates(int* coord_type, oskar_Mem* x,
     size_t num_pixels = 0;
     int coord_grid_type, coord_frame_type;
 
-    /* Check all inputs. */
-    if (!coord_type || !x || !y || !z || !lon0 || !lat0 || !settings ||
-            !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
+    /* Check if safe to proceed. */
     if (*status) return 0;
 
     /* Get coordinate grid type and frame type. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,13 +56,6 @@ static void max_station_size_and_depth(const oskar_Station* s,
 void oskar_telescope_analyse(oskar_Telescope* model, int* status)
 {
     int i = 0, finished_identical_station_check = 0, num_stations;
-
-    /* Check all inputs. */
-    if (!model || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

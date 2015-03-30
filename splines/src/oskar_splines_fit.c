@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,14 +62,6 @@ void oskar_splines_fit(oskar_Splines* spline, int num_points, double* x_theta,
     int err = 0, kwrk = 0, lwrk1 = 0, lwrk2 = 0, u = 0, v = 0, *iwrk = 0;
     double *coeff = 0, *wrk1 = 0, *wrk2 = 0;
     double avg_err = 0., peak_abs = 0., fp = 0., z_min = 0., z_max = 0.;
-
-    /* Check all inputs. */
-    if (!spline || !x_theta || !y_phi || !z_data || !weight ||
-            !avg_frac_err || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

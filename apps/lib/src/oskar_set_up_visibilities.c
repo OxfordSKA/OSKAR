@@ -44,13 +44,6 @@ oskar_Vis* oskar_set_up_visibilities(const oskar_Settings* settings,
     double rad2deg = 180.0/M_PI;
     oskar_Vis* vis = 0;
 
-    /* Check all inputs. */
-    if (!settings || !tel || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return 0;
 

@@ -121,13 +121,6 @@ void oskar_evaluate_jones_R(oskar_Jones* R, int num_sources,
     double latitude, lst;
     oskar_Mem *R_station;
 
-    /* Check all inputs. */
-    if (!R || !ra_rad || !dec_rad || !telescope || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

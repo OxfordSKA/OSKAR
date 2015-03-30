@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,13 +36,6 @@ extern "C" {
 oskar_Element* oskar_element_create(int precision, int location, int* status)
 {
     oskar_Element* data = 0;
-
-    /* Check all inputs. */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
 
     /* Allocate and initialise the structure. */
     data = (oskar_Element*) malloc(sizeof(oskar_Element));

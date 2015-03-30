@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,13 +47,6 @@ oskar_Sky* oskar_sky_load(const char* filename, int type, int* status)
     char* line = 0;
     size_t bufsize = 0;
     oskar_Sky* sky;
-
-    /* Check all inputs. */
-    if (!filename || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return 0;

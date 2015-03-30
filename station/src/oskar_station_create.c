@@ -40,13 +40,6 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
 {
     oskar_Station* model;
 
-    /* Check all inputs. */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Check the type and location. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {

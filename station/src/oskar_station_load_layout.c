@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,13 +47,6 @@ void oskar_station_load_layout(oskar_Station* station, const char* filename,
     size_t bufsize = 0;
     int n = 0, type = 0, old_size = 0;
     FILE* file;
-
-    /* Check all inputs. */
-    if (!station || !filename || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,6 @@ void oskar_sky_scale_flux_with_frequency(oskar_Sky* model, double frequency,
         int* status)
 {
     int type, location, num_sources;
-
-    /* Check all inputs. */
-    if (!model || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

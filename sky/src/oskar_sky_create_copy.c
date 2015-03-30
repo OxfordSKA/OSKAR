@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,6 @@ oskar_Sky* oskar_sky_create_copy(const oskar_Sky* src, int location,
         int* status)
 {
     oskar_Sky* model = 0;
-
-    /* Check all inputs. */
-    if (!src || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return model;

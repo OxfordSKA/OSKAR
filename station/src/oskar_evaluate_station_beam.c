@@ -65,13 +65,6 @@ void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
     int normalise_final_beam;
     oskar_Mem* op;
 
-    /* Check all inputs. */
-    if (!beam_pattern || !x || !y || !z || !station || !work || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

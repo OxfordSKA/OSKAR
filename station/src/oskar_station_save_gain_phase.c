@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,13 +44,6 @@ void oskar_station_save_gain_phase(const char* filename,
     int i, location, type, num_elements;
     FILE* file;
     const oskar_Mem *gain, *gain_error, *phase, *phase_error;
-
-    /* Check all inputs. */
-    if (!filename || !station || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -340,18 +340,11 @@ static void oskar_mem_element_multiply_select(oskar_Mem* c,
 void oskar_mem_element_multiply(oskar_Mem* c, oskar_Mem* a, const oskar_Mem* b,
         size_t num, int* status)
 {
-    /* Check all inputs. */
-    if (!c) c = a;
-    if (!a || !b || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 
     /* Check memory is allocated. */
+    if (!c) c = a;
     if (!a->data || !b->data || !c->data)
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;

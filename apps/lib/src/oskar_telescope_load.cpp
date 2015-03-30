@@ -62,13 +62,6 @@ extern "C"
 void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
         const oskar_Settings* settings, int* status)
 {
-    // Check all inputs.
-    if (!telescope || !settings || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     // Check if safe to proceed.
     if (*status) return;
 

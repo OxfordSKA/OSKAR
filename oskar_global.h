@@ -395,11 +395,4 @@ enum OSKAR_DIRECTION_TYPE
 #endif
 
 
-/* Function to set the status to invalid argument if not already set. */
-OSKAR_INLINE void oskar_set_invalid_argument(int* status)
-{
-    if (status && !(*status)) *status = OSKAR_ERR_INVALID_ARGUMENT;
-}
-
-
 #endif /* OSKAR_GLOBAL_H_ */

@@ -36,13 +36,6 @@ extern "C" {
 void oskar_vis_block_copy(oskar_VisBlock* dst, const oskar_VisBlock* src,
         int* status)
 {
-    /* Check all inputs. */
-    if (!dst || !src || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

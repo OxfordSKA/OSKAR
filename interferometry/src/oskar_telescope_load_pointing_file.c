@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,13 +55,6 @@ void oskar_telescope_load_pointing_file(oskar_Telescope* telescope,
     FILE* file;
     char** par = 0;
     int* id = 0;
-
-    /* Check all inputs. */
-    if (!telescope || !filename || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

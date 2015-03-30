@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,13 +52,6 @@ void oskar_scan_binary_file(oskar_Log* log, const char* filename, int* status)
     oskar_Binary* h = NULL;
     oskar_Mem* temp = 0;
     char p = 'M'; /* Log entry priority */
-
-    /* Check all inputs. */
-    if (!filename || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

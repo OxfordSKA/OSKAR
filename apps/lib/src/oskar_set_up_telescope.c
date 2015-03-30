@@ -69,13 +69,6 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
     oskar_Telescope* t;
     const oskar_SettingsArrayElement* element;
 
-    /* Check all inputs. */
-    if (!settings || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return 0;
 
@@ -198,13 +191,6 @@ void oskar_telescope_log_summary(const oskar_Telescope* telescope,
 {
     int num_stations = 0;
 
-    /* Check all inputs. */
-    if (!telescope || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 
@@ -247,13 +233,6 @@ void oskar_station_log_summary(const oskar_Station* station,
         oskar_Log* log, int depth, int* status)
 {
     int d1 = 0;
-
-    /* Check all inputs. */
-    if (!station || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,6 @@ void oskar_mem_set_alias(oskar_Mem* mem, const oskar_Mem* src, size_t offset,
         size_t num_elements, int* status)
 {
     size_t element_size = 0, offset_bytes = 0;
-
-    /* Check all inputs. */
-    if (!mem || !src || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* The destination structure must not own its memory.
      * The structure must have been created using oskar_mem_create_alias*(),

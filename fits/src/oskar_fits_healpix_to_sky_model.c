@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,13 +85,6 @@ void oskar_fits_healpix_to_sky_model(oskar_Log* ptr, const char* filename,
     double lat = 0.0, lon = 0.0, val = 0.0;
     char card1[FLEN_CARD], card2[FLEN_CARD];
     oskar_Sky* temp_sky;
-
-    /* Check inputs. */
-    if (!filename || !sky || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

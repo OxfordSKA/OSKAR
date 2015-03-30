@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,6 @@ extern "C" {
 void oskar_station_set_element_orientation(oskar_Station* dst,
         int index, double orientation_x, double orientation_y, int* status)
 {
-    /* Check all inputs. */
-    if (!dst || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

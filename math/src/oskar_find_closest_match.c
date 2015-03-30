@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,13 +75,6 @@ int oskar_find_closest_match(double value, const oskar_Mem* values,
         int* status)
 {
     int type, num_values, match_index = 0;
-
-    /* Check all inputs. */
-    if (!values || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return 0;

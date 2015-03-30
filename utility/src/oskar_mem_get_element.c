@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,13 +42,6 @@ double oskar_mem_get_element_scalar(const oskar_Mem* mem, size_t index,
 {
     size_t n;
     int type, location;
-
-    /* Check all inputs. */
-    if (!mem || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0.0;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return 0.0;
@@ -113,13 +106,6 @@ double2 oskar_mem_get_element_complex(const oskar_Mem* mem, size_t index,
     double2 val;
     val.x = 0.0;
     val.y = 0.0;
-
-    /* Check all inputs. */
-    if (!mem || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return val;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return val;
@@ -195,13 +181,6 @@ double4c oskar_mem_get_element_matrix(const oskar_Mem* mem, size_t index,
     val.c.y = 0.0;
     val.d.x = 0.0;
     val.d.y = 0.0;
-
-    /* Check all inputs. */
-    if (!mem || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return val;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return val;

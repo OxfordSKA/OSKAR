@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,12 +36,6 @@ extern "C" {
 void oskar_evaluate_image_range(int* range, int snapshots,
         const int* settings_range, int num_data_values, int* status)
 {
-    if (!range || !settings_range || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Fail if top of the range is > number of data values */
     if (settings_range[1] >= num_data_values)
     {
@@ -97,11 +91,6 @@ void oskar_evaluate_image_range(int* range, int snapshots,
 void oskar_evaluate_image_data_range(int* range, const int* settings_range,
         int num_data_values, int* status)
 {
-    if (!range || !settings_range || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
     if (*status) return;
 
     /* Fail if top of the range is > number of data values */

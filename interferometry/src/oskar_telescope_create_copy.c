@@ -41,13 +41,6 @@ oskar_Telescope* oskar_telescope_create_copy(const oskar_Telescope* src,
     int i = 0;
     oskar_Telescope* telescope;
 
-    /* Check all inputs. */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Create a new, empty model. */
     telescope = oskar_telescope_create(oskar_telescope_precision(src),
             location, 0, status);

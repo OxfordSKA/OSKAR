@@ -42,13 +42,6 @@ void oskar_station_save_mount_types(const char* filename,
     int i, num_elements;
     const char* type;
 
-    /* Check all inputs. */
-    if (!filename || !station || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

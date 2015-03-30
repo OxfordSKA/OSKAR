@@ -40,13 +40,6 @@ oskar_Vis* oskar_vis_create(int amp_type, int location, int num_channels,
     int type;
     size_t num_amps, num_coords, num_baselines;
 
-    /* Check all inputs. */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Check type. */
     if (oskar_type_is_double(amp_type))
         type = OSKAR_DOUBLE;

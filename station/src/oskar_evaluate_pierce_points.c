@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,13 +55,6 @@ void oskar_evaluate_pierce_points(
         int* status)
 {
     int type, location;
-
-    /* Check all inputs. */
-    if (!pierce_point_lon || !pierce_point_lat || !hor_x || !hor_y || !hor_z)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

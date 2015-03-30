@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,13 +48,6 @@ void oskar_station_set_element_errors(oskar_Station* dst,
 {
     int type, location;
     void *gain_, *gain_err_, *phase_, *phase_err_;
-
-    /* Check all inputs. */
-    if (!dst || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

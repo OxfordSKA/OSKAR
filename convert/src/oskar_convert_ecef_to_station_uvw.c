@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,13 +93,6 @@ void oskar_convert_ecef_to_station_uvw(int num_stations, const oskar_Mem* x,
 {
     int type, location;
     double ha0_rad;
-
-    /* Check all inputs. */
-    if (!u || !v || !w || !x || !y || !z || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

@@ -69,13 +69,6 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
     int type;
     oskar_Sky* sky_cpu; /* Copy of the sky model on the CPU */
 
-    /* Check all inputs. */
-    if (!Z || !sky || !telescope || !settings || !work || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 
@@ -232,13 +225,6 @@ static void evaluate_jones_Z_station(oskar_Mem* Z_station,
 {
     int i, type;
     double arg;
-
-    /* Check all inputs. */
-    if (!Z_station || !TEC || !hor_z || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

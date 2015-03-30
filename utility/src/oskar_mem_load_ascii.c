@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,13 +62,6 @@ size_t oskar_mem_load_ascii(const char* filename, size_t num_mem,
     double* row_defaults = 0;   /* Array to hold default data for one row. */
     char* line = 0;             /* Line buffer. */
     va_list args;               /* Variable argument list. */
-
-    /* Check all inputs. */
-    if (!filename || !num_mem || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return 0;

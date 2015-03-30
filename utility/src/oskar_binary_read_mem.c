@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,13 +44,6 @@ void oskar_binary_read_mem(oskar_Binary* handle, oskar_Mem* mem,
     oskar_Mem *temp = 0, *data = 0;
     size_t size_bytes = 0, element_size = 0;
 
-    /* Check all inputs. */
-    if (!mem || !handle || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 
@@ -90,13 +83,6 @@ void oskar_binary_read_mem_ext(oskar_Binary* handle, oskar_Mem* mem,
     int type;
     oskar_Mem *temp = 0, *data = 0;
     size_t size_bytes = 0, element_size = 0;
-
-    /* Check all inputs. */
-    if (!mem || !handle || !name_group || !name_tag || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

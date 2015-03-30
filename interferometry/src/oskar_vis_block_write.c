@@ -39,13 +39,6 @@ extern "C" {
 void oskar_vis_block_write(const oskar_VisBlock* vis, oskar_Binary* h,
         int block_index, int* status)
 {
-    /* Check all inputs. */
-    if (!vis || !h || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

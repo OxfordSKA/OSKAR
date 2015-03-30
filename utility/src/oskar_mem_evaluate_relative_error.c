@@ -93,13 +93,6 @@ void oskar_mem_evaluate_relative_error(const oskar_Mem* val_approx,
     oskar_Mem *approx_temp = 0, *accurate_temp = 0;
     double old_m = 0.0, new_m = 0.0, old_s = 0.0, new_s = 0.0;
 
-    /* Check all inputs. */
-    if (!val_approx || !val_accurate || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

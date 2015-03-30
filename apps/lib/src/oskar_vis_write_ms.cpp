@@ -48,13 +48,6 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
     oskar_MeasurementSet* ms;
     const void* amp;
 
-    // Check all inputs.
-    if (!vis || !ms_path || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     // Check if safe to proceed.
     if (*status) return;
 

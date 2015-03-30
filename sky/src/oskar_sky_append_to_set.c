@@ -48,13 +48,6 @@ void oskar_sky_append_to_set(int* set_size, oskar_Sky*** set_ptr,
     oskar_Sky **set;
     size_t new_size;
 
-    /* Check all inputs. */
-    if (!set_size || !set_ptr || !model || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

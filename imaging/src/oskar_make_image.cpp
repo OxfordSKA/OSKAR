@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,12 +61,6 @@ oskar_Image* oskar_make_image(oskar_Log* log, const oskar_Vis* vis,
 
     /* Location of temporary memory used by this function (needs to be CPU). */
     int location = OSKAR_CPU;
-
-    if (!vis || !settings || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return 0;

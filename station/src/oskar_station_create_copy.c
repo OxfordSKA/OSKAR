@@ -45,13 +45,6 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     int i = 0;
     oskar_Station* model = 0;
 
-    /* Check all inputs. */
-    if (!src || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return model;
 

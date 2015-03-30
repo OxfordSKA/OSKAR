@@ -41,13 +41,6 @@ void oskar_telescope_resize(oskar_Telescope* telescope, int size, int* status)
 {
     int i, old_size = 0;
 
-    /* Check all inputs. */
-    if (!telescope || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

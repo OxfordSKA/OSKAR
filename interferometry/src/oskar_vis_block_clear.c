@@ -36,13 +36,6 @@ extern "C" {
 
 void oskar_vis_block_clear(oskar_VisBlock* vis, int* status)
 {
-    /* Check all inputs. */
-    if (!vis || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

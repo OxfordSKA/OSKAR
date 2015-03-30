@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,12 +38,6 @@ void oskar_convert_theta_phi_to_enu_directions(unsigned int num,
         oskar_Mem* y, oskar_Mem* z, int* status)
 {
     int type, loc;
-
-    if (!x || !y || !z || !theta || !phi || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     if (*status) return;
 

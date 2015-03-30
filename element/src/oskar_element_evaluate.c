@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,13 +52,6 @@ void oskar_element_evaluate(const oskar_Element* model, oskar_Mem* output,
 {
     int element_type, taper_type, freq_id;
     double dipole_length_m;
-
-    /* Check all inputs. */
-    if (!model || !output || !x || !y || !z || !theta || !phi || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

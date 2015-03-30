@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -114,13 +114,6 @@ void oskar_apply_element_taper_cosine(oskar_Mem* jones, int num_sources,
         double cos_power, const oskar_Mem* theta, int* status)
 {
     int precision, type, location;
-
-    /* Check all inputs. */
-    if (!jones || !theta || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

@@ -38,13 +38,6 @@ void oskar_station_override_element_time_variable_gains(oskar_Station* s,
 {
     int i;
 
-    /* Check all inputs. */
-    if (!s || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

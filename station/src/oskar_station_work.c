@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,13 +40,6 @@ oskar_StationWork* oskar_station_work_create(int type,
         int location, int* status)
 {
     oskar_StationWork* work = 0;
-
-    /* Check all inputs. */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
 
     /* Allocate memory for the structure. */
     work = (oskar_StationWork*) malloc(sizeof(oskar_StationWork));

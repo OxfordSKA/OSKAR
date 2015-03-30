@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,18 +39,11 @@ void oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2,
     int num_elements, n_sources1, n_sources2, n_sources3;
     int n_stations1, n_stations2, n_stations3;
 
-    /* Check all inputs. */
-    if (!j3) j3 = j1;
-    if (!j1 || !j2 || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 
     /* Get the dimensions of the input data. */
+    if (!j3) j3 = j1;
     n_sources1 = j1->num_sources;
     n_sources2 = j2->num_sources;
     n_sources3 = j3->num_sources;

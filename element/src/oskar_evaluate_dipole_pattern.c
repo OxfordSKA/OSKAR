@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -160,13 +160,6 @@ void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
         double dipole_length_m, int offset, int stride, int* status)
 {
     int precision, type, location;
-
-    /* Check all inputs. */
-    if (!theta || !phi || !pattern || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

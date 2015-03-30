@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,13 +47,6 @@ void oskar_station_set_element_type(oskar_Station* dst,
 {
     int location, *t_;
     size_t offset_bytes;
-
-    /* Check all inputs. */
-    if (!dst || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

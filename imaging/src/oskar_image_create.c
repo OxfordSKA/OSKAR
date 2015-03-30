@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,13 +36,6 @@ extern "C" {
 oskar_Image* oskar_image_create(int type, int location, int* status)
 {
     oskar_Image* image = 0;
-
-    /* Check all inputs. */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
 
     /* Allocate the structure. */
     image = (oskar_Image*) malloc(sizeof(oskar_Image));

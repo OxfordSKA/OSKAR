@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,13 +40,6 @@ oskar_Mem* oskar_mem_convert_precision(const oskar_Mem* input,
     const oskar_Mem *in = 0;
     int input_precision, type;
     size_t num_elements, i;
-
-    /* Check all inputs. */
-    if (!input || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return 0;

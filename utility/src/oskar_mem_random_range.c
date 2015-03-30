@@ -40,13 +40,6 @@ void oskar_mem_random_range(oskar_Mem* mem, double lo, double hi, int* status)
     int location, precision, type;
     double r;
 
-    /* Check all inputs. */
-    if (!mem || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

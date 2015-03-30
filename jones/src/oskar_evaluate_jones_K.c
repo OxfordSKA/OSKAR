@@ -142,13 +142,6 @@ void oskar_evaluate_jones_K(oskar_Jones* K, int num_sources,
     int num_stations, jones_type, base_type, location;
     double wavenumber;
 
-    /* Check all inputs. */
-    if (!K || !l || !m || !n || !u || !v || !w || !source_filter || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

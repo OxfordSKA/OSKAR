@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,13 +63,6 @@ void oskar_sky_horizon_clip(oskar_Sky* out, const oskar_Sky* in,
     int *mask, type, location, num_in, num_out = 0;
     oskar_Mem *horizon_mask, *hor_x, *hor_y, *hor_z;
     double ra0, dec0;
-
-    /* Check all inputs. */
-    if (!out || !in || !telescope || !work || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

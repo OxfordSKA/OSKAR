@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,13 +45,6 @@ void oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
         int from_location, size_t num_elements, int* status)
 {
     size_t element_size, mem_size, offset_bytes;
-
-    /* Check all inputs. */
-    if (!to || !from || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

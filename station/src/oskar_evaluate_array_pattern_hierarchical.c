@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,13 +47,6 @@ void oskar_evaluate_array_pattern_hierarchical(oskar_Mem* beam,
         const oskar_Mem* signal, const oskar_Mem* weights, int* status)
 {
     int type, location, num_elements, matrix_type, scalar_type, array_is_3d;
-
-    /* Check all inputs. */
-    if (!beam || !station || !x || !y || !z || !signal || !weights || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

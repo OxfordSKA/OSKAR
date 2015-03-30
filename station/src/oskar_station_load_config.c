@@ -48,13 +48,6 @@ void oskar_station_load_config(oskar_Station* station, const char* filename,
     int n = 0, type = 0;
     FILE* file;
 
-    /* Check all inputs. */
-    if (!station || !filename || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

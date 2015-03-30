@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,12 +43,6 @@ void oskar_image_get_stats(oskar_ImageStats* stats, const oskar_Image* image,
     int slice_index, offset = 0, num_pixels = 0;
     const oskar_Mem* d_ = 0;
 
-    /* Check all inputs. */
-    if (!stats || !image || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
     if (*status) return;
 
     /* Check the image is in CPU memory. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,6 @@ void oskar_sky_set_filter_bands(oskar_Sky* sky, int num_bands,
         int* status)
 {
     int i;
-
-    /* Check all inputs. */
-    if (!sky || !band_radii_deg || !band_fluxes_jy || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

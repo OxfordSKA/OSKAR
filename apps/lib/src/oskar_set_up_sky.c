@@ -111,13 +111,6 @@ oskar_Sky** oskar_set_up_sky(const oskar_Settings* settings, oskar_Log* log,
     double ra0, dec0;
     oskar_Sky** sky_chunks = 0;
 
-    /* Check all inputs. */
-    if  (!num_chunks || !settings || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return 0;
 

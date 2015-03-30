@@ -280,13 +280,6 @@ void oskar_vis_block_add_system_noise(oskar_VisBlock* vis,
     double freq_hz, freq_start_hz, freq_inc_hz;
     double channel_bandwidth_hz, time_int_sec;
 
-    /* Check all inputs. */
-    if (!vis || !header || !telescope || !station_work || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

@@ -49,13 +49,6 @@ oskar_Vis* oskar_vis_read(oskar_Binary* h, int* status)
     unsigned char grp = OSKAR_TAG_GROUP_VISIBILITY;
     oskar_Vis* vis = 0;
 
-    /* Check all inputs. */
-    if (!h || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return 0;
 

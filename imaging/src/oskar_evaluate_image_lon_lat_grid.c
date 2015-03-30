@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,13 +42,6 @@ void oskar_evaluate_image_lon_lat_grid(oskar_Mem* lon, oskar_Mem* lat,
 {
     int num_pixels, type, location;
     oskar_Mem *lon_cpu, *lat_cpu;
-
-    /* Check all inputs. */
-    if (!lon || !lat || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Get meta-data. */
     type = oskar_mem_type(lon);

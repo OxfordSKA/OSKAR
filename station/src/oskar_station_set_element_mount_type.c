@@ -39,13 +39,6 @@ extern "C" {
 void oskar_station_set_element_mount_type(oskar_Station* dst,
         int index, char element_type, int* status)
 {
-    /* Check all inputs. */
-    if (!dst || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

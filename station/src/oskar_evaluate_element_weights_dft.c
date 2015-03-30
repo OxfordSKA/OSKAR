@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,13 +104,6 @@ void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
         int* status)
 {
     int type, location;
-
-    /* Check all inputs. */
-    if (!weights || !x || !y || !z || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

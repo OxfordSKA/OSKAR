@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,13 +60,6 @@ void oskar_element_load_scalar(oskar_Element* data, oskar_Log* log,
     char *line = NULL;
     size_t bufsize = 0;
     FILE* file;
-
-    /* Check all inputs. */
-    if (!data || !filename || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

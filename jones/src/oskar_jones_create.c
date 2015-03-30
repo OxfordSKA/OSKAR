@@ -43,13 +43,6 @@ oskar_Jones* oskar_jones_create(int type, int location, int num_stations,
     int base_type;
     size_t n_elements;
 
-    /* Check all inputs. */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Check type and location. */
     base_type = oskar_type_precision(type);
     if (base_type != OSKAR_SINGLE && base_type != OSKAR_DOUBLE)

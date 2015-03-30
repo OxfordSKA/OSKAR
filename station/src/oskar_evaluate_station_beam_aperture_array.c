@@ -60,13 +60,6 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
 {
     int start;
 
-    /* Check all inputs. */
-    if (!beam || !station || !x || !y || !z || !work || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

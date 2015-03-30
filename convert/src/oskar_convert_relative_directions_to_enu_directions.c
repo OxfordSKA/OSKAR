@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,13 +86,6 @@ void oskar_convert_relative_directions_to_enu_directions(
         double ha0, double dec0, double lat, int* status)
 {
     int type, location;
-
-    /* Check all inputs. */
-    if (!x || !y || !z || !l || !m || !n || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

@@ -41,13 +41,6 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
 {
     int i, j, n, num_element_types;
 
-    /* Check all inputs. */
-    if (!a || !b || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return 1;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return 1;
 

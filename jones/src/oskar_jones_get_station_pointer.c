@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,6 @@ void oskar_jones_get_station_pointer(oskar_Mem* J_station, const oskar_Jones* J,
         int station_index, int* status)
 {
     int num_sources, offset;
-
-    /* Check all inputs. */
-    if (!J_station || !J || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     num_sources = J->num_sources;
     offset = station_index * num_sources;

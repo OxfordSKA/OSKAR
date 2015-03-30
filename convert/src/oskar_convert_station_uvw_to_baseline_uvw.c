@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,13 +74,6 @@ void oskar_convert_station_uvw_to_baseline_uvw(const oskar_Mem* u,
         oskar_Mem* ww, int* status)
 {
     int type, location, num_stations, num_baselines;
-
-    /* Check all inputs. */
-    if (!uu || !vv || !ww || !u || !v || !w || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

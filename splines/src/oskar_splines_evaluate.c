@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,13 +40,6 @@ void oskar_splines_evaluate(oskar_Mem* output, int offset, int stride,
         const oskar_Mem* y, int* status)
 {
     int nx, ny, type, location;
-
-    /* Check all inputs. */
-    if (!output || !spline || !x || !y || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

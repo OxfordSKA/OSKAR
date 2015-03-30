@@ -38,13 +38,6 @@ extern "C" {
 void oskar_station_resize(oskar_Station* station, int num_elements,
         int* status)
 {
-    /* Check all inputs. */
-    if (!station || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

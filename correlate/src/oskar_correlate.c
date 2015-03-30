@@ -62,13 +62,6 @@ void oskar_correlate(oskar_Mem* vis, int n_sources, const oskar_Jones* J,
     double inv_wavelength, frac_bandwidth, time_avg, gha0, dec0;
     double uv_filter_max, uv_filter_min;
 
-    /* Check all inputs. */
-    if (!vis || !J || !tel || !sky || !u || !v || !w || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,13 +35,6 @@ extern "C" {
 void oskar_sky_append(oskar_Sky* dst, const oskar_Sky* src, int* status)
 {
     int num_dst, num_src;
-
-    /* Check all inputs. */
-    if (!dst || !src || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

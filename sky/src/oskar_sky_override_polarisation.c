@@ -41,13 +41,6 @@ void oskar_sky_override_polarisation(oskar_Sky* sky, double mean_pol_fraction,
 {
     int type, location, num_sources;
 
-    /* Check all inputs. */
-    if (!sky || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

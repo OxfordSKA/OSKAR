@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,6 @@ oskar_Mem* oskar_mem_create_alias_from_raw(void* ptr, int type, int location,
         size_t num_elements, int* status)
 {
     oskar_Mem* mem = 0;
-
-    /* Check all inputs. */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
 
     /* Create the structure. */
     mem = (oskar_Mem*) malloc(sizeof(oskar_Mem));

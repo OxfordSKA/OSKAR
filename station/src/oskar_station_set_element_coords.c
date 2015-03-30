@@ -48,13 +48,6 @@ void oskar_station_set_element_coords(oskar_Station* dst,
     int type, location;
     void *xw, *yw, *zw, *xs, *ys, *zs;
 
-    /* Check all inputs. */
-    if (!dst || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

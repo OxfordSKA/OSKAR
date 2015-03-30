@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,13 +139,6 @@ void oskar_evaluate_geometric_dipole_pattern(oskar_Mem* pattern, int num_points,
         int* status)
 {
     int precision, type, location;
-
-    /* Check all inputs. */
-    if (!theta || !phi || !pattern || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

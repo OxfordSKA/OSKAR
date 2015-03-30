@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,13 +47,6 @@ void oskar_sky_set_source(oskar_Sky* sky, int index, double ra_rad,
     int type, location;
     void *ra_, *dec_, *i_, *q_, *u_, *v_, *ref_, *spix_, *rm_;
     void *maj_, *min_, *pa_;
-
-    /* Check all inputs. */
-    if (!sky || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

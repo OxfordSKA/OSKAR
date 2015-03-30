@@ -44,13 +44,6 @@ oskar_Telescope* oskar_telescope_create(int type, int location,
     int i = 0;
     oskar_Telescope* telescope;
 
-    /* Check all inputs. */
-    if (!status)
-    {
-        oskar_set_invalid_argument(status);
-        return 0;
-    }
-
     /* Check type and location. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
     {

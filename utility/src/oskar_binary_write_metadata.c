@@ -46,13 +46,6 @@ void oskar_binary_write_metadata(oskar_Binary* handle, int* status)
     time_t unix_time;
     struct tm* timeinfo;
 
-    /* Check all inputs. */
-    if (!handle || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

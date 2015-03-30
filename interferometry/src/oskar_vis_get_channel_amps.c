@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,6 @@ void oskar_vis_get_channel_amps(oskar_Mem* vis_amp,
         const oskar_Vis* vis, int channel, int* status)
 {
     int num_elements, offset;
-
-    /* Check all inputs. */
-    if (!vis_amp || !vis || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

@@ -41,13 +41,6 @@ void oskar_sky_write(const char* filename, const oskar_Sky* sky, int* status)
     unsigned char group = OSKAR_TAG_GROUP_SKY_MODEL;
     oskar_Binary* h = 0;
 
-    /* Check all inputs. */
-    if (!filename || !sky || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

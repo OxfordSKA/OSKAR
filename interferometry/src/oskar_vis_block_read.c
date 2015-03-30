@@ -41,13 +41,6 @@ void oskar_vis_block_read(oskar_VisBlock* vis, const oskar_VisHeader* hdr,
 {
     int num_tags_per_block;
 
-    /* Check all inputs. */
-    if (!vis || !h || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 

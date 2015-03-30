@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,13 +65,6 @@ void oskar_convert_ludwig3_to_theta_phi_components(oskar_Mem* vec,
         int* status)
 {
     int type, location;
-
-    /* Check all inputs. */
-    if (!phi || !vec || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Check if safe to proceed. */
     if (*status) return;

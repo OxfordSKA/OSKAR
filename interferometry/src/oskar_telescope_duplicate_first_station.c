@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,13 +40,6 @@ void oskar_telescope_duplicate_first_station(oskar_Telescope* telescope,
         int* status)
 {
     int i = 0;
-
-    /* Check all inputs. */
-    if (!telescope || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
 
     /* Copy the first station to the others. */
     for (i = 1; i < telescope->num_stations; ++i)
