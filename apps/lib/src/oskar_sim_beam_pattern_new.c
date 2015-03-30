@@ -84,7 +84,7 @@ struct DeviceData
     /* Host memory. */
     /* Chunks have dimension max_chunk_size * num_active_stations. */
     /* Cross power beams have dimension max_chunk_size. */
-    oskar_Mem* chunk_cpu[2]; /* On host, for copy back & write. */
+    oskar_Mem* jones_data_cpu[2]; /* On host, for copy back & write. */
     oskar_Mem* auto_power_I_cpu[2]; /* On host, for copy back & write. */
     oskar_Mem* auto_power_I_time_avg;
     oskar_Mem* auto_power_I_channel_avg;
@@ -97,7 +97,7 @@ struct DeviceData
     /* Device memory. */
     oskar_Telescope* tel;
     oskar_StationWork* work;
-    oskar_Mem *x, *y, *z, *chunk, *auto_power_I, *cross_power_I;
+    oskar_Mem *x, *y, *z, *jones_data, *auto_power_I, *cross_power_I;
 
     /* Timers. */
     oskar_Timer* tmr_compute;   /* Total time spent calculating pixels. */
@@ -133,7 +133,7 @@ struct HostData
     int coord_type, max_chunk_size, num_times, num_channels, num_chunks;
     int precision, width, height, num_pixels;
     int num_active_stations, *station_ids;
-    int auto_power_I, cross_power_I; /* Flags. */
+    int auto_power_I, cross_power_I, raw_data; /* Flags. */
     int separate_time_and_channel, average_time_and_channel; /* Flags. */
     int average_single_axis;
     double lon0, lat0, phase_centre_deg[2], fov_deg[2];
@@ -181,7 +181,7 @@ enum OSKAR_BEAM_PATTERN_DATA_PRODUCT_TYPE
 
 enum OSKAR_BEAM_DATA_TYPE
 {
-    JONES_MATRIX_DATA,
+    JONES_DATA,
     AUTO_POWER_I,
     CROSS_POWER_I
 };
@@ -468,7 +468,7 @@ static void sim_chunks(int gpu_id, DeviceData* d, const HostData* h,
     output_alias = oskar_mem_create_alias(0, 0, 0, status);
     for (i = 0; i < h->num_active_stations; ++i)
     {
-        oskar_mem_set_alias(output_alias, d->chunk,
+        oskar_mem_set_alias(output_alias, d->jones_data,
                 i * chunk_size, chunk_size, status);
         oskar_evaluate_station_beam(output_alias, chunk_size,
                 d->x, d->y, d->z, h->coord_type, h->lon0, h->lat0,
@@ -479,7 +479,7 @@ static void sim_chunks(int gpu_id, DeviceData* d, const HostData* h,
     {
         for (i = 0; i < h->num_active_stations; ++i)
         {
-            oskar_mem_set_alias(input_alias, d->chunk,
+            oskar_mem_set_alias(input_alias, d->jones_data,
                     i * chunk_size, chunk_size, status);
             oskar_mem_set_alias(output_alias, d->auto_power_I,
                     i * chunk_size, chunk_size, status);
@@ -489,17 +489,17 @@ static void sim_chunks(int gpu_id, DeviceData* d, const HostData* h,
     }
     if (d->cross_power_I)
         oskar_evaluate_cross_power(chunk_size,
-                h->num_active_stations, d->chunk, d->cross_power_I, status);
+                h->num_active_stations, d->jones_data, d->cross_power_I, status);
     oskar_mem_free(input_alias, status);
     oskar_mem_free(output_alias, status);
 
     /* Copy the output data into host memory. */
-    oskar_mem_copy_contents(d->chunk_cpu[i_active],
-            d->chunk, 0, 0, chunk_size * h->num_active_stations, status);
+    if (d->jones_data_cpu[i_active])
+        oskar_mem_copy_contents(d->jones_data_cpu[i_active], d->jones_data,
+                0, 0, chunk_size * h->num_active_stations, status);
     if (d->auto_power_I)
-        oskar_mem_copy_contents(d->auto_power_I_cpu[i_active],
-                d->auto_power_I, 0, 0, chunk_size * h->num_active_stations,
-                status);
+        oskar_mem_copy_contents(d->auto_power_I_cpu[i_active], d->auto_power_I,
+                0, 0, chunk_size * h->num_active_stations, status);
     if (d->cross_power_I)
         oskar_mem_copy_contents(d->cross_power_I_cpu[i_active],
                 d->cross_power_I, 0, 0, chunk_size, status);
@@ -537,8 +537,9 @@ static void write_chunks(DeviceData* d, HostData* h, int i_chunk_start,
         chunk_size = chunk_sources * h->num_active_stations;
 
         /* Write non-averaged data, if required. */
-        write_pixels(h, i_chunk, i_time, i_channel, chunk_sources, 0, 0,
-                dd->chunk_cpu[!i_active], JONES_MATRIX_DATA, status);
+        if (dd->jones_data_cpu[!i_active])
+            write_pixels(h, i_chunk, i_time, i_channel, chunk_sources, 0, 0,
+                    dd->jones_data_cpu[!i_active], JONES_DATA, status);
         if (dd->auto_power_I_cpu[!i_active])
             write_pixels(h, i_chunk, i_time, i_channel, chunk_sources, 0, 0,
                     dd->auto_power_I_cpu[!i_active], AUTO_POWER_I, status);
@@ -673,7 +674,7 @@ static void write_pixels(HostData* h, int i_chunk, int i_time, int i_channel,
             continue;
 
         /* Treat raw data output as special case, as it doesn't go via tmp. */
-        if (dp == RAW_COMPLEX && chunk_desc == JONES_MATRIX_DATA && t)
+        if (dp == RAW_COMPLEX && chunk_desc == JONES_DATA && t)
         {
             oskar_Mem* station_data;
             station_data = oskar_mem_create_alias(in, i_station * num_pix,
@@ -692,7 +693,7 @@ static void write_pixels(HostData* h, int i_chunk, int i_time, int i_channel,
         /* Convert complex values to pixel data. */
         off = i_station * num_pix * num_pol; /* Station offset. */
         oskar_mem_clear_contents(h->pix, status);
-        if (chunk_desc == JONES_MATRIX_DATA)
+        if (chunk_desc == JONES_DATA)
         {
             if (dp == AMP_SCALAR)
                 complex_to_amp(in, off, num_pol, num_pix, h->pix, status);
@@ -1115,6 +1116,13 @@ static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
         for (i = 0; i < h->num_active_stations; ++i)
             h->station_ids[i] = s->beam_pattern.station_ids[i];
     }
+    h->raw_data = s->beam_pattern.station_text_raw_complex ||
+            s->beam_pattern.station_fits_amp ||
+            s->beam_pattern.station_text_amp ||
+            s->beam_pattern.station_fits_phase ||
+            s->beam_pattern.station_text_phase ||
+            s->beam_pattern.station_fits_ixr ||
+            s->beam_pattern.station_text_ixr;
     h->cross_power_I =
             s->beam_pattern.telescope_fits_cross_power_stokes_i_amp ||
             s->beam_pattern.telescope_fits_cross_power_stokes_i_phase ||
@@ -1560,23 +1568,31 @@ static void set_up_device_data(DeviceData* d, const HostData* h, int* status)
     if (oskar_telescope_pol_mode(h->tel) == OSKAR_POL_MODE_FULL)
         beam_type |= OSKAR_MATRIX;
 
-    /* Host memory. */
-    d->chunk_cpu[0] = oskar_mem_create(beam_type, OSKAR_CPU,
-            max_chunk_size, status);
-    d->chunk_cpu[1] = oskar_mem_create(beam_type, OSKAR_CPU,
-            max_chunk_size, status);
-
     /* Device memory. */
-    d->chunk = oskar_mem_create(beam_type, OSKAR_GPU, max_chunk_size, status);
+    d->jones_data = oskar_mem_create(beam_type, OSKAR_GPU, max_chunk_size,
+            status);
     d->x     = oskar_mem_create(prec, OSKAR_GPU, 1 + max_chunk_sources, status);
     d->y     = oskar_mem_create(prec, OSKAR_GPU, 1 + max_chunk_sources, status);
     d->z     = oskar_mem_create(prec, OSKAR_GPU, 1 + max_chunk_sources, status);
     d->tel   = oskar_telescope_create_copy(h->tel, OSKAR_GPU, status);
     d->work  = oskar_station_work_create(prec, OSKAR_GPU, status);
 
+    /* Host memory. */
+    if (h->raw_data)
+    {
+        d->jones_data_cpu[0] = oskar_mem_create(beam_type, OSKAR_CPU,
+                max_chunk_size, status);
+        d->jones_data_cpu[1] = oskar_mem_create(beam_type, OSKAR_CPU,
+                max_chunk_size, status);
+    }
+
     /* Auto-correlation beam output arrays. */
     if (h->auto_power_I)
     {
+        /* Device memory. */
+        d->auto_power_I = oskar_mem_create(beam_type, OSKAR_GPU,
+                max_chunk_size, status);
+
         /* Host memory. */
         d->auto_power_I_cpu[0] = oskar_mem_create(beam_type,
                 OSKAR_CPU, max_chunk_size, status);
@@ -1591,15 +1607,15 @@ static void set_up_device_data(DeviceData* d, const HostData* h, int* status)
         if (h->average_time_and_channel)
             d->auto_power_I_channel_and_time_avg = oskar_mem_create(beam_type,
                     OSKAR_CPU, max_chunk_size, status);
-
-        /* Device memory. */
-        d->auto_power_I = oskar_mem_create(beam_type, OSKAR_GPU,
-                max_chunk_size, status);
     }
 
     /* Cross-correlation beam output arrays. */
     if (h->cross_power_I)
     {
+        /* Device memory. */
+        d->cross_power_I = oskar_mem_create(beam_type, OSKAR_GPU,
+                max_chunk_sources, status);
+
         /* Host memory. */
         d->cross_power_I_cpu[0] = oskar_mem_create(beam_type,
                 OSKAR_CPU, max_chunk_sources, status);
@@ -1614,10 +1630,6 @@ static void set_up_device_data(DeviceData* d, const HostData* h, int* status)
         if (h->average_time_and_channel)
             d->cross_power_I_channel_and_time_avg = oskar_mem_create(beam_type,
                     OSKAR_CPU, max_chunk_sources, status);
-
-        /* Device memory. */
-        d->cross_power_I = oskar_mem_create(beam_type, OSKAR_GPU,
-                max_chunk_sources, status);
     }
 
     /* Timers. */
@@ -1635,9 +1647,9 @@ static void free_device_data(int num_gpus, int* cuda_device_ids,
         DeviceData* dd = &d[i];
         if (!dd) continue;
         cudaSetDevice(cuda_device_ids[i]);
-        oskar_mem_free(dd->chunk_cpu[0], status);
-        oskar_mem_free(dd->chunk_cpu[1], status);
-        oskar_mem_free(dd->chunk, status);
+        oskar_mem_free(dd->jones_data_cpu[0], status);
+        oskar_mem_free(dd->jones_data_cpu[1], status);
+        oskar_mem_free(dd->jones_data, status);
         oskar_mem_free(dd->x, status);
         oskar_mem_free(dd->y, status);
         oskar_mem_free(dd->z, status);
