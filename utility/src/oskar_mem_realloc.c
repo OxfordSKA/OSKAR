@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,9 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include <private_mem.h>
+#include <oskar_cuda_check_error.h>
 #include <oskar_mem.h>
+#include <private_mem.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -100,10 +101,15 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
     {
 #ifdef OSKAR_HAVE_CUDA
         /* Allocate and initialise a new block of memory. */
+        int cuda_error = 0;
         size_t copy_size;
         void* mem_new = NULL;
-        *status = cudaMalloc(&mem_new, new_size);
-        if (*status) return;
+        cuda_error = cudaMalloc(&mem_new, new_size);
+        if (cuda_error)
+        {
+            *status = cuda_error;
+            return;
+        }
         if (!mem_new)
         {
             *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
@@ -112,13 +118,17 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
 
         /* Copy contents of old block to new block. */
         copy_size = (old_size > new_size) ? new_size : old_size;
-        *status = cudaMemcpy(mem_new, mem->data, copy_size,
+        cuda_error = cudaMemcpy(mem_new, mem->data, copy_size,
                 cudaMemcpyDeviceToDevice);
-        if (*status) return;
+        if (cuda_error)
+        {
+            *status = cuda_error;
+            return;
+        }
 
         /* Free the old block. */
         cudaFree(mem->data);
-        *status = cudaPeekAtLastError();
+        oskar_cuda_check_error(status);
 
         /* Set the new meta-data. */
         mem->data = mem_new;

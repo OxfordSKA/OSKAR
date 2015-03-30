@@ -30,6 +30,7 @@
 #include <cuda_runtime_api.h>
 #endif
 
+#include <oskar_cuda_check_error.h>
 #include <oskar_mem.h>
 #include <private_mem.h>
 
@@ -83,7 +84,7 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
 #ifdef OSKAR_HAVE_CUDA
         /* Allocate GPU memory. For efficiency, don't clear it. */
         cudaMalloc(&mem->data, bytes);
-        *status = cudaPeekAtLastError();
+        oskar_cuda_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif

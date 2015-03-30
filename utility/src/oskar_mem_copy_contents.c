@@ -30,8 +30,9 @@
 #include <cuda_runtime_api.h>
 #endif
 
-#include <private_mem.h>
+#include <oskar_cuda_check_error.h>
 #include <oskar_mem.h>
+#include <private_mem.h>
 
 #include <string.h>
 
@@ -47,18 +48,11 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     void *destination;
     const void *source;
 
-    /* Check all inputs. */
-    if (!src || !dst || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 
     /* Return immediately if there is nothing to copy. */
-    if (src->data == NULL || src->num_elements == 0)
+    if (src->data == NULL || src->num_elements == 0 || num_elements == 0)
         return;
 
     /* Check the data types. */
@@ -98,7 +92,7 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     {
 #ifdef OSKAR_HAVE_CUDA
         cudaMemcpy(destination, source, bytes, cudaMemcpyHostToDevice);
-        *status = cudaPeekAtLastError();
+        oskar_cuda_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -110,7 +104,7 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     {
 #ifdef OSKAR_HAVE_CUDA
         cudaMemcpy(destination, source, bytes, cudaMemcpyDeviceToHost);
-        *status = cudaPeekAtLastError();
+        oskar_cuda_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
@@ -122,7 +116,7 @@ void oskar_mem_copy_contents(oskar_Mem* dst, const oskar_Mem* src,
     {
 #ifdef OSKAR_HAVE_CUDA
         cudaMemcpy(destination, source, bytes, cudaMemcpyDeviceToDevice);
-        *status = cudaPeekAtLastError();
+        oskar_cuda_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
 #endif
