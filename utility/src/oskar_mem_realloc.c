@@ -46,13 +46,6 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
 {
     size_t element_size, new_size, old_size;
 
-    /* Check all inputs. */
-    if (!mem || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
     /* Check if safe to proceed. */
     if (*status) return;
 
