@@ -28,6 +28,7 @@
 
 #include <private_vis_block.h>
 #include <oskar_vis_block.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,7 +71,12 @@ oskar_VisBlock* oskar_vis_block_create(int location,
     }
 
     /* Allocate the structure. */
-    vis = (oskar_VisBlock*) calloc(1, sizeof(oskar_VisBlock));
+    vis = (oskar_VisBlock*) malloc(sizeof(oskar_VisBlock));
+    if (!vis)
+    {
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        return 0;
+    }
 
     /* Set dimensions. */
     if (create_crosscorr)

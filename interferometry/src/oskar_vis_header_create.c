@@ -28,6 +28,7 @@
 
 #include <private_vis_header.h>
 #include <oskar_vis_header.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,6 +53,11 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
 
     /* Allocate the structure. */
     hdr = (oskar_VisHeader*) malloc(sizeof(oskar_VisHeader));
+    if (!hdr)
+    {
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        return 0;
+    }
     hdr->amp_type = amp_type;
     hdr->coord_precision = coord_precision;
 

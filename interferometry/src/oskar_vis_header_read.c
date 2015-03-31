@@ -79,6 +79,7 @@ oskar_VisHeader* oskar_vis_header_read(oskar_Binary* h, int* status)
             max_times_per_block, num_times_total,
             max_channels_per_block, num_channels_total, num_stations,
             write_autocorr, write_crosscorr, status);
+    if (*status) return vis;
 
     /* Read the number of tags per block. */
     oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_NUM_TAGS_PER_BLOCK, 0,

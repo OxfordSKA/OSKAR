@@ -48,6 +48,11 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
 
     /* Create the structure. */
     mem = (oskar_Mem*) malloc(sizeof(oskar_Mem));
+    if (!mem)
+    {
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        return 0;
+    }
 
     /* Initialise meta-data.
      * (This must happen regardless of the status code.) */

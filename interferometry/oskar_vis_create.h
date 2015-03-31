@@ -47,33 +47,16 @@ extern "C" {
  * @deprecated
  * The oskar_Vis structure is deprecated.
  * Do not use this function in new code.
-
- * This function creates a new visibility data structure and returns a
- * handle to it.
- *
- * Allowed values of the \p amp_type parameter are
- * - OSKAR_SINGLE_COMPLEX
- * - OSKAR_DOUBLE_COMPLEX
- * - OSKAR_SINGLE_COMPLEX_MATRIX
- * - OSKAR_DOUBLE_COMPLEX_MATRIX
- *
- * Allowed values of the \p location parameter are
- * - OSKAR_CPU
- * - OSKAR_GPU
- *
- * The number of polarisations is determined by the choice of matrix or
- * scalar amplitude types. Matrix amplitude types represent 4 polarisation
- * dimensions whereas scalar types represent a single polarisation.
  *
  * Note
- *  - Channels is the slowest varying dimension.
- *  - Baselines is the fastest varying dimension.
+ *  - Channel is the slowest varying dimension.
+ *  - Baseline is the fastest varying dimension.
  *
  * The structure must be deallocated using oskar_vis_free() when it is
  * no longer required.
  *
  * @param amp_type          OSKAR memory type for the visibility amplitudes.
- * @param location          Memory location (OSKAR_CPU or OSKAR_LOCAITON_GPU).
+ * @param location          Memory location (OSKAR_CPU or OSKAR_GPU).
  * @param num_channels      Number of frequency channels.
  * @param num_times         Number of time samples.
  * @param num_stations      Number of stations.
