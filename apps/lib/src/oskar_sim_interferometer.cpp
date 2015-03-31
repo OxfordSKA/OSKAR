@@ -37,7 +37,7 @@
 #include <oskar_sim_interferometer.h>
 #include <oskar_vis_write_ms.h>
 
-#include <oskar_correlate.h>
+#include <oskar_cross_correlate.h>
 #include <oskar_cuda_mem_log.h>
 #include <oskar_evaluate_jones_R.h>
 #include <oskar_evaluate_jones_Z.h>
@@ -509,7 +509,7 @@ static void interferometer(DeviceData* d, oskar_Log* log, const oskar_Sky* sky,
 
         // Correlate.
         oskar_timer_resume(d->tmr_correlate);
-        oskar_correlate(d->vis_dmp, n_src, d->J, sky_ptr, d->tel, d->u, d->v,
+        oskar_cross_correlate(d->vis_dmp, n_src, d->J, sky_ptr, d->tel, d->u, d->v,
                 d->w, gast, frequency, status);
         oskar_timer_pause(d->tmr_correlate);
 

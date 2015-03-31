@@ -95,11 +95,11 @@ void oskar_vis_write_ms(const oskar_Vis* vis, const char* ms_path,
         // Create the Measurement Set.
         if (force_polarised) {
             ms = oskar_ms_create(ms_path, ra_rad, dec_rad, 4,
-                    num_channels, ref_freq_hz, chan_width, num_stations, 0);
+                    num_channels, ref_freq_hz, chan_width, num_stations, 0, 1);
         }
         else {
             ms = oskar_ms_create(ms_path, ra_rad, dec_rad, num_pols,
-                    num_channels, ref_freq_hz, chan_width, num_stations, 0);
+                    num_channels, ref_freq_hz, chan_width, num_stations, 0, 1);
         }
 
         // Set the station positions.

@@ -33,7 +33,8 @@
 #include <oskar_convert_ecef_to_station_uvw.h>
 #include <oskar_convert_ecef_to_baseline_uvw.h>
 #include <oskar_convert_mjd_to_gast_fast.h>
-#include <oskar_correlate.h>
+#include <oskar_auto_correlate.h>
+#include <oskar_cross_correlate.h>
 #include <oskar_cuda_mem_log.h>
 #include <oskar_evaluate_jones_R.h>
 #include <oskar_evaluate_jones_Z.h>
@@ -548,6 +549,7 @@ static void sim_baselines(DeviceData* d, oskar_Sky* sky,
     int num_baselines, num_stations, num_src, num_times_block, num_channels;
     double dt_dump, t_start, t_dump, gast, frequency, ra0, dec0;
     const oskar_Mem *x, *y, *z;
+    oskar_Mem* alias = 0;
 
     /* Get dimensions. */
     num_baselines   = oskar_telescope_num_baselines(d->tel);
@@ -639,21 +641,36 @@ static void sim_baselines(DeviceData* d, oskar_Sky* sky,
     oskar_jones_join(d->J, d->K, d->R ? d->R : d->E, status);
     oskar_timer_pause(d->tmr_join);
 
+    /* Create alias for auto/cross-correlations. */
+    oskar_timer_resume(d->tmr_correlate);
+    alias = oskar_mem_create_alias(0, 0, 0, status);
+
+    /* Auto-correlate for this time and channel. */
+    if (oskar_vis_block_has_auto_correlations(d->vis_block))
+    {
+        oskar_mem_set_alias(alias,
+                oskar_vis_block_auto_correlations(d->vis_block),
+                num_stations *
+                (num_channels * time_index_block + channel_index_block),
+                num_stations, status);
+        oskar_auto_correlate(alias, num_src, d->J, sky, status);
+    }
+
     /* Cross-correlate for this time and channel. */
     if (oskar_vis_block_has_cross_correlations(d->vis_block))
     {
-        oskar_Mem* xcorr;
-        oskar_timer_resume(d->tmr_correlate);
-        xcorr = oskar_mem_create_alias(
+        oskar_mem_set_alias(alias,
                 oskar_vis_block_cross_correlations(d->vis_block),
                 num_baselines *
                 (num_channels * time_index_block + channel_index_block),
                 num_baselines, status);
-        oskar_correlate(xcorr, num_src, d->J, sky, d->tel, d->u, d->v, d->w,
-                gast, frequency, status);
-        oskar_mem_free(xcorr, status);
-        oskar_timer_pause(d->tmr_correlate);
+        oskar_cross_correlate(alias, num_src, d->J, sky, d->tel,
+                d->u, d->v, d->w, gast, frequency, status);
     }
+
+    /* Free alias for auto/cross-correlations. */
+    oskar_mem_free(alias, status);
+    oskar_timer_pause(d->tmr_correlate);
 }
 
 

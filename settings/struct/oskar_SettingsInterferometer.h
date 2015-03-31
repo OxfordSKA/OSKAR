@@ -35,6 +35,13 @@
 
 #include <oskar_SettingsSystemNoise.h>
 
+enum OSKAR_CORRELATION_TYPE
+{
+    OSKAR_CORRELATION_TYPE_CROSS,
+    OSKAR_CORRELATION_TYPE_AUTO,
+    OSKAR_CORRELATION_TYPE_BOTH
+};
+
 /**
  * @struct oskar_SettingsInterferometer
  *
@@ -48,6 +55,7 @@ struct oskar_SettingsInterferometer
     double channel_bandwidth_hz;
     double time_average_sec;
     int max_time_samples_per_block;
+    int correlation_type;
     double uv_filter_min;
     double uv_filter_max;
     int uv_filter_units;

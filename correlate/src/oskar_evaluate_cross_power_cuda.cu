@@ -27,7 +27,7 @@
  */
 
 #include <oskar_evaluate_cross_power_cuda.h>
-#include <oskar_correlate_functions_inline.h>
+#include <private_correlate_functions_inline.h>
 
 /* Kernels. ================================================================ */
 

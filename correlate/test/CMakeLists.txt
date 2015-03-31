@@ -5,7 +5,8 @@
 set(name correlate_test)
 set(${name}_SRC
     main.cpp
-    Test_correlate.cpp
+    Test_auto_correlate.cpp
+    Test_cross_correlate.cpp
     Test_evaluate_cross_power.cpp
 )
 include_directories(${CUDA_INCLUDE_DIRS})

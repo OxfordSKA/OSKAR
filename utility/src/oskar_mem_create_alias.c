@@ -41,8 +41,8 @@ oskar_Mem* oskar_mem_create_alias(const oskar_Mem* src, size_t offset,
 {
     oskar_Mem* mem = 0;
 
-    /* Create the structure. */
-    mem = (oskar_Mem*) malloc(sizeof(oskar_Mem));
+    /* Create the structure, initialised with all bits zero. */
+    mem = (oskar_Mem*) calloc(1, sizeof(oskar_Mem));
     if (!mem)
     {
         *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
@@ -60,13 +60,6 @@ oskar_Mem* oskar_mem_create_alias(const oskar_Mem* src, size_t offset,
         mem->location = src->location;
         mem->num_elements = num_elements;
         mem->data = (void*)(((char*)(src->data)) + offset_bytes);
-    }
-    else
-    {
-        mem->type = 0;
-        mem->location = 0;
-        mem->num_elements = 0;
-        mem->data = 0;
     }
 
     /* Return a handle the new structure .*/

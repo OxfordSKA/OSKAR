@@ -57,32 +57,6 @@ enum OSKAR_BEAM_PATTERN_FRAME
 };
 
 /**
- * FIXME Remove.
- * @brief
- * Describes whether snapshots or time-averaged beam patterns are generated,
- * or both.
- */
-enum OSKAR_BEAM_PATTERN_TIME_AXIS
-{
-    OSKAR_BEAM_PATTERN_TIME_SEP,
-    OSKAR_BEAM_PATTERN_TIME_AVERAGE,
-    OSKAR_BEAM_PATTERN_TIME_SEP_AND_AVERAGE
-};
-
-/**
- * FIXME Remove.
- * @brief
- * Describes whether single channels or channel-averaged beam patterns
- * are generated, or both.
- */
-enum OSKAR_BEAM_PATTERN_CHANNEL_AXIS
-{
-    OSKAR_BEAM_PATTERN_CHANNEL_SEP,
-    OSKAR_BEAM_PATTERN_CHANNEL_AVERAGE,
-    OSKAR_BEAM_PATTERN_CHANNEL_SEP_AND_AVERAGE
-};
-
-/**
  * @brief
  * Describes the option to average a single axis.
  */

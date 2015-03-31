@@ -29,6 +29,9 @@
     * Added options to save beam pattern data in plain text files instead of, 
       or as well as, FITS images.
 
+    * Added option to select whether cross-correlations or auto-correlations, 
+      or both, should be calculated.
+
     * Contribution from the w-term was omitted from the bandwidth smearing
       calculation. This has now been fixed, so the apparent
       amplitudes of sources far from the phase centre are slightly reduced.

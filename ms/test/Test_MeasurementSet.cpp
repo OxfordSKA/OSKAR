@@ -40,7 +40,8 @@ TEST(MeasurementSet, test_create_simple)
     double ay[] = {0, 0, 0};
     double az[] = {0, 0, 0};
     int na = sizeof(ax) / sizeof(double);
-    ms = oskar_ms_create("simple.ms", 0.0, 1.570796, 1, 1, 400e6, 1.0, na, 0);
+    ms = oskar_ms_create("simple.ms", 0.0, 1.570796, 1, 1, 400e6, 1.0, na,
+            0, 1);
     ASSERT_TRUE(ms);
     oskar_ms_set_station_coords_d(ms, na, ax, ay, az);
 
@@ -78,7 +79,7 @@ TEST(MeasurementSet, test_multi_channel)
     // Create the Measurement Set.
     oskar_MeasurementSet* ms;
     ms = oskar_ms_create(filename, ra, dec,
-            n_pol, n_chan, freq, chan_width, n_ant, 0);
+            n_pol, n_chan, freq, chan_width, n_ant, 0, 1);
     ASSERT_TRUE(ms);
 
     // Add some dummy antenna positions.

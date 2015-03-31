@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <oskar_correlate.h>
+#include <oskar_cross_correlate.h>
 #include <oskar_telescope.h>
 #include <oskar_sky.h>
 #include <oskar_jones.h>
@@ -235,7 +235,7 @@ int benchmark(int num_stations, int num_sources, int type,
     for (int i = 0; i < niter; ++i)
     {
         oskar_timer_start(timer);
-        oskar_correlate(vis, oskar_sky_num_sources(sky), J, sky, tel, u, v, w,
+        oskar_cross_correlate(vis, oskar_sky_num_sources(sky), J, sky, tel, u, v, w,
                 0.0, 100e6, &status);
         times[i] = oskar_timer_elapsed(timer);
     }

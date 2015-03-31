@@ -120,7 +120,8 @@ struct oskar_MeasurementSet
     void copy_column(String source, String dest);
     bool create(const char* filename, double ra_rad, double dec_rad,
             unsigned int num_pols, unsigned int num_channels, double ref_freq,
-            double chan_width, unsigned int num_stations, int write_autocorr);
+            double chan_width, unsigned int num_stations, int write_autocorr,
+            int write_crosscorr);
     void close();
     void get_time_range();
     static bool is_otf_model_defined(const int field,
@@ -232,11 +233,12 @@ void oskar_ms_close(oskar_MeasurementSet* p)
 oskar_MeasurementSet* oskar_ms_create(const char* filename, double ra_rad,
         double dec_rad, unsigned int num_pols, unsigned int num_channels,
         double ref_freq, double chan_width, unsigned int num_stations,
-        int write_autocorr)
+        int write_autocorr, int write_crosscorr)
 {
     oskar_MeasurementSet* p = new oskar_MeasurementSet;
     if (p->create(filename, ra_rad, dec_rad, num_pols,
-            num_channels, ref_freq, chan_width, num_stations, write_autocorr))
+            num_channels, ref_freq, chan_width, num_stations, write_autocorr,
+            write_crosscorr))
         return p;
     delete p;
     return 0;
@@ -707,7 +709,7 @@ void oskar_MeasurementSet::close()
 bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
         double dec_rad, unsigned int num_pols, unsigned int num_channels,
         double ref_freq, double chan_width, unsigned int num_stations,
-        int write_autocorr)
+        int write_autocorr, int write_crosscorr)
 {
     // Create the table descriptor and use it to set up a new main table.
     TableDesc desc = MS::requiredTableDesc();
@@ -726,12 +728,16 @@ bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
     desc.defineHypercolumn("TiledUVW", 2, tsmNames);
     try
     {
-        unsigned int num_baselines;
+        unsigned int num_baselines = 0;
 
-        if (write_autocorr)
+        if (write_autocorr && write_crosscorr)
             num_baselines = num_stations * (num_stations + 1) / 2;
-        else
+        else if (!write_autocorr && write_crosscorr)
             num_baselines = num_stations * (num_stations - 1) / 2;
+        else if (write_autocorr && !write_crosscorr)
+            num_baselines = num_stations;
+        else
+            return false;
 
         SetupNewTable newTab(filename, desc, Table::New);
 

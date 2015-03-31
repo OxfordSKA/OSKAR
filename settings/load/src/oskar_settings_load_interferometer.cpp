@@ -73,6 +73,15 @@ void oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
                 s.value("time_average_sec", 0.0).toDouble();
         settings->max_time_samples_per_block =
                 s.value("max_time_samples_per_block", 10).toInt();
+        temp = s.value("correlation_type", "Cross-correlations").toString().toUpper();
+        if (temp.startsWith("C"))
+            settings->correlation_type = OSKAR_CORRELATION_TYPE_CROSS;
+        else if (temp.startsWith("A"))
+            settings->correlation_type = OSKAR_CORRELATION_TYPE_AUTO;
+        else if (temp.startsWith("B"))
+            settings->correlation_type = OSKAR_CORRELATION_TYPE_BOTH;
+        else
+            *status = OSKAR_ERR_SETTINGS_INTERFEROMETER;
 
         // Get UV filter parameters.
         temp = s.value("uv_filter_min", "min").toString().toUpper();

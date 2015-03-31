@@ -27,7 +27,7 @@
  */
 
 #include <oskar_evaluate_auto_power_c.h>
-#include <oskar_correlate_functions_inline.h>
+#include <private_correlate_functions_inline.h>
 
 #ifdef __cplusplus
 extern "C" {

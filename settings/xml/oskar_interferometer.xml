@@ -54,6 +54,15 @@
             flushed to disk.
         </desc>
     </s>
+    <s k="correlation_type"><label>Correlation type</label>
+        <type name="OptionList" default="Cross-correlations">
+            Cross-correlations, Auto-correlations, Both
+        </type>
+        <desc>
+            The type of correlations to produce: either cross-correlations,
+            auto-correlations, or both. 
+        </desc>
+    </s>
     <s k="uv_filter_min"><label>UV range filter min</label>
         <type name="DoubleRangeExt" default="min">0,MAX,min</type>
         <desc>
