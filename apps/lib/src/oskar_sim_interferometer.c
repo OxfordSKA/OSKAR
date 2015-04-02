@@ -28,7 +28,7 @@
 
 #include <cuda_runtime_api.h>
 
-#include <oskar_sim_interferometer_new.h>
+#include <oskar_sim_interferometer.h>
 
 #include <oskar_convert_ecef_to_station_uvw.h>
 #include <oskar_convert_ecef_to_baseline_uvw.h>
@@ -76,6 +76,7 @@ struct DeviceData
     oskar_VisBlock* vis_block_cpu[2]; /* On host, for copy back & write. */
 
     /* Device memory. */
+    int previous_chunk_index;
     oskar_VisBlock* vis_block; /* Device memory block. */
     oskar_Mem *u, *v, *w;
     oskar_Sky* sky_chunk; /* The unmodified sky chunk being processed. */
@@ -132,7 +133,7 @@ static void record_timing(int num_gpus, int* cuda_device_ids,
 static unsigned int disp_width(unsigned int value);
 static void system_mem_log(oskar_Log* log);
 
-void oskar_sim_interferometer_new(const char* settings_file,
+void oskar_sim_interferometer(const char* settings_file,
         oskar_Log* log, int* status)
 {
     int i, num_gpus = 0, num_gpus_avail = 0, num_threads = 1, num_times = 0;
@@ -307,9 +308,10 @@ void oskar_sim_interferometer_new(const char* settings_file,
             /* Barrier2: Check sim and write are done before next block. */
 #pragma omp barrier
             if (thread_id == 0 && b < num_vis_blocks && !*status)
-                oskar_log_message(log, 'S', 0, "Block %*i/%i complete. "
-                        "Simulation time elapsed: %.3f s",
+                oskar_log_message(log, 'S', 0, "Block %*i/%i (%.0f%%) "
+                        "complete. Simulation time elapsed: %.3f s",
                         disp_width(num_vis_blocks), b+1, num_vis_blocks,
+                        (b+1) / (double)num_vis_blocks,
                         oskar_timer_elapsed(h->tmr_sim));
         }
     }
@@ -390,7 +392,7 @@ static void sim_vis_block(int gpu_id, DeviceData* d, const HostData* h,
         int* status)
 {
     double obs_start_mjd, dt_dump, gast, mjd;
-    int previous_chunk_index = -1, time_index_start, time_index_end;
+    int time_index_start, time_index_end;
     int block_length, num_channels, num_times_block, total_chunks, total_times;
     const oskar_Settings* s;
 
@@ -436,9 +438,9 @@ static void sim_vis_block(int gpu_id, DeviceData* d, const HostData* h,
         i_time  = i_chunk_time - i_chunk * num_times_block;
 
         /* Copy sky chunk to GPU only if different from the previous one. */
-        if (i_chunk != previous_chunk_index)
+        if (i_chunk != d->previous_chunk_index)
         {
-            previous_chunk_index = i_chunk;
+            d->previous_chunk_index = i_chunk;
             oskar_timer_resume(d->tmr_copy);
             oskar_sky_copy(d->sky_chunk, h->sky_chunks[i_chunk], status);
             oskar_timer_pause(d->tmr_copy);
@@ -692,6 +694,7 @@ static void set_up_device_data(DeviceData* d, const HostData* h, int* status)
     d->vis_block_cpu[1] = oskar_vis_block_create(OSKAR_CPU, h->header, status);
 
     /* Device memory. */
+    d->previous_chunk_index = -1;
     d->vis_block = oskar_vis_block_create(OSKAR_GPU, h->header, status);
     d->u = oskar_mem_create(prec, OSKAR_GPU, num_stations, status);
     d->v = oskar_mem_create(prec, OSKAR_GPU, num_stations, status);

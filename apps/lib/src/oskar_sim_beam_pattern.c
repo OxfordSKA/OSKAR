@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 
 #include <cuda_runtime_api.h>
 
-#include <oskar_sim_beam_pattern_new.h>
+#include <oskar_sim_beam_pattern.h>
 
 #include <oskar_beam_pattern_generate_coordinates.h>
 #include <oskar_cmath.h>
@@ -95,6 +95,7 @@ struct DeviceData
     oskar_Mem* cross_power_I_channel_and_time_avg;
 
     /* Device memory. */
+    int previous_chunk_index;
     oskar_Telescope* tel;
     oskar_StationWork* work;
     oskar_Mem *x, *y, *z, *jones_data, *auto_power_I, *cross_power_I;
@@ -237,8 +238,8 @@ static void record_timing(int num_gpus, int* cuda_device_ids,
 static unsigned int disp_width(unsigned int value);
 
 
-void oskar_sim_beam_pattern_new(const char* settings_file,
-        oskar_Log* log, int* status)
+void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
+        int* status)
 {
     int i = 0, i_global = 0, num_gpus_avail = 0, num_threads = 1;
     int cp = 0, tp = 0, fp = 0; /* Loop indices for previous iteration. */
@@ -333,7 +334,7 @@ void oskar_sim_beam_pattern_new(const char* settings_file,
      */
 #pragma omp parallel
     {
-        int c = 0, t = 0, f = 0; /* Loop indices. */
+        int i_inner, i_outer, num_inner, num_outer, c, t, f;
         int thread_id = 0, gpu_id = 0;
 
         /* Get host thread ID, and set CUDA device used by this thread. */
@@ -344,63 +345,55 @@ void oskar_sim_beam_pattern_new(const char* settings_file,
         if (gpu_id >= 0)
             cudaSetDevice(s->sim.cuda_device_ids[gpu_id]);
 
+        /* Set ranges of inner and outer loops based on averaging mode. */
+        if (h->average_single_axis != OSKAR_BEAM_PATTERN_AVERAGE_TIME)
+        {
+            num_outer = h->num_times;
+            num_inner = h->num_channels; /* Channel on inner loop. */
+        }
+        else
+        {
+            num_outer = h->num_channels;
+            num_inner = h->num_times; /* Time on inner loop. */
+        }
+
         /* Loop over chunks, times and channels. */
         for (c = 0; c < h->num_chunks; c += h->num_gpus)
         {
-            if (h->average_single_axis != OSKAR_BEAM_PATTERN_AVERAGE_TIME)
+            for (i_outer = 0; i_outer < num_outer; ++i_outer)
             {
-                /* Channel on inner loop. */
-                for (t = 0; t < h->num_times; ++t)
+                for (i_inner = 0; i_inner < num_inner; ++i_inner)
                 {
-                    for (f = 0; f < h->num_channels; ++f)
+                    /* Set time and channel indices based on averaging mode. */
+                    if (h->average_single_axis !=
+                            OSKAR_BEAM_PATTERN_AVERAGE_TIME)
                     {
-                        if (thread_id > 0 || num_threads == 1)
-                            sim_chunks(gpu_id, &d[gpu_id], h, c, t, f,
-                                    i_global & 1, log, status);
-                        if (thread_id == 0 && i_global > 0)
-                            write_chunks(d, h, cp, tp, fp,
-                                    i_global & 1, status);
-
-                        /* Barrier1: Set indices of the previous chunk(s). */
-#pragma omp barrier
-                        if (thread_id == 0)
-                        {
-                            cp = c;
-                            tp = t;
-                            fp = f;
-                            i_global++;
-                        }
-                        /* Barrier2: Check sim and write are done. */
-#pragma omp barrier
+                        t = i_outer;
+                        f = i_inner;
                     }
-                }
-            }
-            else
-            {
-                /* Time on inner loop. */
-                for (f = 0; f < h->num_channels; ++f)
-                {
-                    for (t = 0; t < h->num_times; ++t)
+                    else
                     {
-                        if (thread_id > 0 || num_threads == 1)
-                            sim_chunks(gpu_id, &d[gpu_id], h, c, t, f,
-                                    i_global & 1, log, status);
-                        if (thread_id == 0 && i_global > 0)
-                            write_chunks(d, h, cp, tp, fp,
-                                    i_global & 1, status);
-
-                        /* Barrier1: Set indices of the previous chunk(s). */
-#pragma omp barrier
-                        if (thread_id == 0)
-                        {
-                            cp = c;
-                            tp = t;
-                            fp = f;
-                            i_global++;
-                        }
-                        /* Barrier2: Check sim and write are done. */
-#pragma omp barrier
+                        f = i_outer;
+                        t = i_inner;
                     }
+                    if (thread_id > 0 || num_threads == 1)
+                        sim_chunks(gpu_id, &d[gpu_id], h, c, t, f,
+                                i_global & 1, log, status);
+                    if (thread_id == 0 && i_global > 0)
+                        write_chunks(d, h, cp, tp, fp,
+                                i_global & 1, status);
+
+                    /* Barrier1: Set indices of the previous chunk(s). */
+#pragma omp barrier
+                    if (thread_id == 0)
+                    {
+                        cp = c;
+                        tp = t;
+                        fp = f;
+                        i_global++;
+                    }
+                    /* Barrier2: Check sim and write are done. */
+#pragma omp barrier
                 }
             }
         }
@@ -452,16 +445,22 @@ static void sim_chunks(int gpu_id, DeviceData* d, const HostData* h,
     gast = oskar_convert_mjd_to_gast_fast(mjd);
     freq_hz = s->obs.start_frequency_hz + i_channel * s->obs.frequency_inc_hz;
 
-    /* Copy pixel chunk coordinate data to GPU. */
+    /* Work out the size of the chunk. */
     chunk_size = h->max_chunk_size;
     if ((i_chunk + 1) * h->max_chunk_size > h->num_pixels)
         chunk_size = h->num_pixels - i_chunk * h->max_chunk_size;
-    oskar_mem_copy_contents(d->x, h->x, 0,
-            i_chunk * h->max_chunk_size, chunk_size, status);
-    oskar_mem_copy_contents(d->y, h->y, 0,
-            i_chunk * h->max_chunk_size, chunk_size, status);
-    oskar_mem_copy_contents(d->z, h->z, 0,
-            i_chunk * h->max_chunk_size, chunk_size, status);
+
+    /* Copy pixel chunk coordinate data to GPU only if chunk is different. */
+    if (i_chunk != d->previous_chunk_index)
+    {
+        d->previous_chunk_index = i_chunk;
+        oskar_mem_copy_contents(d->x, h->x, 0,
+                i_chunk * h->max_chunk_size, chunk_size, status);
+        oskar_mem_copy_contents(d->y, h->y, 0,
+                i_chunk * h->max_chunk_size, chunk_size, status);
+        oskar_mem_copy_contents(d->z, h->z, 0,
+                i_chunk * h->max_chunk_size, chunk_size, status);
+    }
 
     /* Generate beam for this pixel chunk, for all active stations. */
     input_alias  = oskar_mem_create_alias(0, 0, 0, status);
@@ -1569,6 +1568,7 @@ static void set_up_device_data(DeviceData* d, const HostData* h, int* status)
         beam_type |= OSKAR_MATRIX;
 
     /* Device memory. */
+    d->previous_chunk_index = -1;
     d->jones_data = oskar_mem_create(beam_type, OSKAR_GPU, max_chunk_size,
             status);
     d->x     = oskar_mem_create(prec, OSKAR_GPU, 1 + max_chunk_sources, status);

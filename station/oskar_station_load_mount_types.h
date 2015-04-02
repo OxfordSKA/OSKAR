@@ -48,7 +48,7 @@ extern "C" {
  * Each line contains data for one element of the station.
  *
  * The file may contain one column:
- * - Element mount type (character: either 'F', 'A' or 'E'; default 'F').
+ * - Element mount type (character: either 'F' or 'A'; default 'F').
  *
  * @param[out] station   Pointer to destination data structure to fill.
  * @param[in] filename   Name of the data file to load.

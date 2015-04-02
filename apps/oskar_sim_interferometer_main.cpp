@@ -27,7 +27,6 @@
  */
 
 #include <apps/lib/oskar_sim_interferometer.h>
-#include <apps/lib/oskar_sim_interferometer_new.h>
 #include <apps/lib/oskar_OptionParser.h>
 
 #include <oskar_get_error_string.h>
@@ -54,8 +53,7 @@ int main(int argc, char** argv)
     oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
 
     // Run simulation.
-    //oskar_sim_interferometer(opt.getArg(0), log, &error);
-    oskar_sim_interferometer_new(opt.getArg(0), log, &error);
+    oskar_sim_interferometer(opt.getArg(0), log, &error);
 
     // Check for errors.
     if (error)

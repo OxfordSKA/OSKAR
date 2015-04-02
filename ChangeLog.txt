@@ -45,6 +45,8 @@
 
     * Fixed time range start in Measurement Set observation table.
 
+    * Added the ability to specify station position errors.
+
     * Added the ability to use numerically-defined element patterns in
       scalar mode.
 

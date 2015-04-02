@@ -75,7 +75,7 @@ void oskar_station_load_mount_types(oskar_Station* station,
         char type = '\0';
         if (bufsize > 0) type = line[0];
         type = toupper(type);
-        if (type != 'F' && type != 'A' && type != 'E')
+        if (type != 'F' && type != 'A')
             continue;
 
         /* Ensure the station model is big enough. */
