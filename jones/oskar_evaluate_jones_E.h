@@ -36,7 +36,6 @@
 #include <oskar_global.h>
 #include <oskar_telescope.h>
 #include <oskar_jones.h>
-#include <oskar_sky.h>
 #include <oskar_station_work.h>
 
 #ifdef __cplusplus
