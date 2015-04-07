@@ -678,49 +678,101 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
 void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
 {
     int depth = 0;
+    const oskar_SettingsBeamPattern* b = &s->beam_pattern;
     oskar_log_message(log, 'M', depth, "Beam pattern settings");
     depth = 1;
-    LVB("Produce average cross-power beam",
-            s->beam_pattern.average_cross_power_beam);
-    if (!s->beam_pattern.average_cross_power_beam)
-        LVI("Station ID", s->beam_pattern.station_id);
-    switch (s->beam_pattern.coord_frame_type)
+    LVB("All stations", b->all_stations);
+    if (!b->all_stations)
+        LVI("Number of stations to evaluate", b->num_active_stations);
+    LVS("Coordinate frame type",
+            b->coord_frame_type == OSKAR_BEAM_PATTERN_FRAME_HORIZON ?
+                    "Horizon" : "Equatorial");
+    switch (b->coord_grid_type)
     {
-        case OSKAR_BEAM_PATTERN_FRAME_EQUATORIAL:
-            LVS("Coordinate frame type", "Equatorial");
-            break;
-        case OSKAR_BEAM_PATTERN_FRAME_HORIZON:
-            LVS("Coordinate frame type", "Horizon");
-            break;
-    };
-    switch (s->beam_pattern.coord_grid_type) {
-        case OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE:
-        {
-            LVS("Coordinate (grid) type", "Beam image");
-            oskar_log_value(log, 'M', ++depth, "Dimensions [pixels]", "%i, %i",
-                    s->beam_pattern.size[0], s->beam_pattern.size[1]);
-            oskar_log_value(log, 'M', depth, "Field-of-view [deg]", "%.3f, %.3f",
-                    s->beam_pattern.fov_deg[0], s->beam_pattern.fov_deg[1]);
-            break;
-        }
-        case OSKAR_BEAM_PATTERN_COORDS_HEALPIX:
-        {
-            LVS("Coordinate (grid) type", "HEALPix");
-            LVI("Nside", s->beam_pattern.nside);
-            ++depth;
-            break;
-        }
+    case OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE:
+    {
+        LVS("Coordinate (grid) type", "Beam image");
+        oskar_log_value(log, 'M', ++depth, "Image dimensions [pixels]",
+                "%i, %i", b->size[0], b->size[1]);
+        if (b->coord_frame_type == OSKAR_BEAM_PATTERN_FRAME_EQUATORIAL)
+            oskar_log_value(log, 'M', depth, "Field-of-view [deg]",
+                    "%.3f, %.3f", b->fov_deg[0], b->fov_deg[1]);
+        break;
+    }
+    case OSKAR_BEAM_PATTERN_COORDS_SKY_MODEL:
+    {
+        LVS("Coordinate (grid) type", "Sky model");
+        ++depth;
+        LVS("Input file", b->sky_model);
+        break;
+    }
+    case OSKAR_BEAM_PATTERN_COORDS_HEALPIX:
+    {
+        LVS("Coordinate (grid) type", "HEALPix");
+        ++depth;
+        LVI("Nside", b->nside);
+        break;
+    }
     };
 
-    if (s->beam_pattern.fits_image_voltage || s->beam_pattern.fits_image_phase)
+    depth = 1;
+    LVS("Output root path name", b->root_path);
+    oskar_log_message(log, 'M', depth++, "Output options:");
+    LVB("Separate time and channel", b->separate_time_and_channel);
+    LVB("Average time and channel", b->average_time_and_channel);
+    switch (b->average_single_axis)
     {
-        oskar_log_message(log, 'M', --depth, "Output FITS image files:");
+    case OSKAR_BEAM_PATTERN_AVERAGE_CHANNEL:
+        LVS("Average single axis", "Channel");
+        break;
+    case OSKAR_BEAM_PATTERN_AVERAGE_TIME:
+        LVS("Average single axis", "Time");
+        break;
+    default:
+        LVS("Average single axis", "None");
+        break;
     }
-    ++depth;
-    if (s->beam_pattern.fits_image_voltage)
-        LVS0("Voltage", s->beam_pattern.fits_image_voltage);
-    if (s->beam_pattern.fits_image_phase)
-        LVS0("Phase", s->beam_pattern.fits_image_phase);
+    depth = 1;
+    oskar_log_message(log, 'M', depth++, "Per-station outputs:");
+    oskar_log_message(log, 'M', depth++, "Text file:");
+    if (b->separate_time_and_channel)
+    {
+        LVB("Raw (complex) pattern", b->station_text_raw_complex);
+        LVB("Amplitude pattern", b->station_text_amp);
+        LVB("Phase pattern", b->station_text_phase);
+    }
+    LVB("Auto-correlation Stokes I power pattern",
+            b->station_text_auto_power_stokes_i);
+    depth--;
+    if (b->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
+    {
+        oskar_log_message(log, 'M', depth++, "FITS image:");
+        if (b->separate_time_and_channel)
+        {
+            LVB("Amplitude pattern", b->station_fits_amp);
+            LVB("Phase pattern", b->station_fits_phase);
+        }
+        LVB("Auto-correlation Stokes I power pattern",
+                b->station_fits_auto_power_stokes_i);
+    }
+    depth = 1;
+    oskar_log_message(log, 'M', depth++, "Telescope outputs:");
+    oskar_log_message(log, 'M', depth++, "Text file:");
+    LVB("Cross-correlation Stokes I raw power pattern",
+            b->telescope_text_cross_power_stokes_i_raw_complex);
+    LVB("Cross-correlation Stokes I amplitude power pattern",
+            b->telescope_text_cross_power_stokes_i_amp);
+    LVB("Cross-correlation Stokes I phase power pattern",
+            b->telescope_text_cross_power_stokes_i_phase);
+    depth--;
+    if (b->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
+    {
+        oskar_log_message(log, 'M', depth++, "FITS image:");
+        LVB("Cross-correlation Stokes I amplitude power pattern",
+                b->telescope_fits_cross_power_stokes_i_amp);
+        LVB("Cross-correlation Stokes I phase power pattern",
+                b->telescope_fits_cross_power_stokes_i_phase);
+    }
 }
 
 void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s)

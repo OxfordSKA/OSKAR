@@ -4,7 +4,6 @@
 
 set(apps_SRC
     src/oskar_beam_pattern_generate_coordinates.c
-    #src/oskar_beam_pattern_write.c
     src/oskar_dir.cpp
     src/oskar_evaluate_station_pierce_points.cpp
     src/oskar_fit_element_data.cpp
@@ -12,10 +11,7 @@ set(apps_SRC
     src/oskar_set_up_sky.c
     src/oskar_set_up_telescope.c
     src/oskar_set_up_vis.c
-    #src/oskar_set_up_visibilities.c
-    #src/oskar_sim_beam_pattern_old.cpp
     src/oskar_sim_beam_pattern.c
-    #src/oskar_sim_interferometer_old.cpp
     src/oskar_sim_interferometer.c
     src/oskar_sim_tec_screen.cpp
     src/oskar_telescope_load.cpp

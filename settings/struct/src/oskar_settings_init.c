@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,10 +69,6 @@ void oskar_settings_init(oskar_Settings* settings)
     settings->beam_pattern.station_fits_auto_power_stokes_i = 0;
     settings->beam_pattern.station_fits_amp = 0;
     settings->beam_pattern.telescope_fits_cross_power_stokes_i_amp = 0;
-    settings->beam_pattern.output_beam_text_file = NULL;
-    settings->beam_pattern.fits_image_voltage = NULL;
-    settings->beam_pattern.fits_image_phase = NULL;
-    settings->beam_pattern.fits_image_total_intensity = NULL;
     settings->beam_pattern.size[0] = 0;
     settings->beam_pattern.size[1] = 0;
     settings->image.input_vis_data = NULL;

@@ -80,9 +80,6 @@ struct oskar_SettingsBeamPattern
     int all_stations;
     int num_active_stations;
     int* station_ids;
-    int time_average_beam; /* FIXME DEPRECATED. */
-    int station_id; /* FIXME DEPRECATED. */
-    int average_cross_power_beam; /* FIXME DEPRECATED. */
 
     int coord_grid_type;  /* The type of beam pattern coordinates */
     int coord_frame_type; /* Coordinate frame for beam pattern evaluation */
@@ -119,11 +116,6 @@ struct oskar_SettingsBeamPattern
     int telescope_text_cross_power_stokes_i_phase;
     int telescope_fits_cross_power_stokes_i_amp;
     int telescope_fits_cross_power_stokes_i_phase;
-
-    char* output_beam_text_file;       /* FIXME DEPRECATED. */
-    char* fits_image_voltage;          /* FIXME DEPRECATED. */
-    char* fits_image_phase;            /* FIXME DEPRECATED. */
-    char* fits_image_total_intensity;  /* FIXME DEPRECATED. */
 };
 typedef struct oskar_SettingsBeamPattern oskar_SettingsBeamPattern;
 

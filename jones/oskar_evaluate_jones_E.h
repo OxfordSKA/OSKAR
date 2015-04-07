@@ -55,28 +55,25 @@ extern "C" {
  * If all stations are marked as identical, the results for the first station
  * are copied into the results for the others.
  *
- * @param[out] E              Output set of Jones matrices.
- * @param[in]  num_points     Number of direction cosines given.
- * @param[in]  x              Direction cosines (x direction).
- * @param[in]  y              Direction cosines (y direction).
- * @param[in]  z              Direction cosines (z direction).
- * @param[in]  coord_type     Type of direction cosines
- *                            (OSKAR_RELATIVE_DIRECTIONS or
- *                            OSKAR_ENU_DIRECTIONS).
- * @param[in]  lon0_rad       Longitude of phase centre, in radians.
- * @param[in]  lat0_rad       Latitude of phase centre, in radians.
- * @param[in]  telescope      Input telescope model.
- * @param[in]  gast           The Greenwich Apparent Sidereal Time, in radians.
- * @param[in]  frequency_hz   The observing frequency, in Hz.
- * @param[in]  work           Pointer to structure holding work arrays.
- * @param[in]  time_index     Simulation time index.
- * @param[in,out] status      Status return code.
+ * @param[out] E            Output set of Jones matrices.
+ * @param[in]  num_points   Number of direction cosines given.
+ * @param[in]  coord_type   Type of direction cosines
+ *                          (OSKAR_RELATIVE_DIRECTIONS or
+ *                          OSKAR_ENU_DIRECTIONS).
+ * @param[in]  x            Direction cosines (x direction).
+ * @param[in]  y            Direction cosines (y direction).
+ * @param[in]  z            Direction cosines (z direction).
+ * @param[in]  tel          Input telescope model.
+ * @param[in]  gast         The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in]  frequency_hz The observing frequency, in Hz.
+ * @param[in]  work         Pointer to structure holding work arrays.
+ * @param[in]  time_index   Simulation time index.
+ * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, oskar_Mem* x,
-        oskar_Mem* y, oskar_Mem* z, int coord_type, double lon0_rad,
-        double lat0_rad, const oskar_Telescope* telescope, double gast,
-        double frequency_hz, oskar_StationWork* work,
+void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, int coord_type,
+        oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, const oskar_Telescope* tel,
+        double gast, double frequency_hz, oskar_StationWork* work,
         int time_index, int* status);
 
 #ifdef __cplusplus

@@ -115,7 +115,7 @@ const char* oskar_get_error_string(int error)
         case OSKAR_ERR_BINARY_FILE_INVALID:
             return "not an OSKAR binary file";
         case OSKAR_ERR_BINARY_FORMAT_BAD:
-            return "incompatible binary file format";
+            return "incompatible host binary format";
         case OSKAR_ERR_BINARY_ENDIAN_MISMATCH:
             return "incompatible byte ordering";
         case OSKAR_ERR_BINARY_VERSION_UNKNOWN:

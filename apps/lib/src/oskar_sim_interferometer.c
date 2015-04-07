@@ -595,9 +595,8 @@ static void sim_baselines(DeviceData* d, oskar_Sky* sky,
 
     /* Evaluate station beam (Jones E: may be matrix). */
     oskar_timer_resume(d->tmr_E);
-    oskar_evaluate_jones_E(d->E, num_src, oskar_sky_l(sky), oskar_sky_m(sky),
-            oskar_sky_n(sky), OSKAR_RELATIVE_DIRECTIONS,
-            oskar_sky_reference_ra_rad(sky), oskar_sky_reference_dec_rad(sky),
+    oskar_evaluate_jones_E(d->E, num_src, OSKAR_RELATIVE_DIRECTIONS,
+            oskar_sky_l(sky), oskar_sky_m(sky), oskar_sky_n(sky),
             d->tel, gast, frequency, d->station_work, time_index_simulation,
             status);
     oskar_timer_pause(d->tmr_E);

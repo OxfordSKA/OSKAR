@@ -28,7 +28,6 @@
 
 #include <oskar_convert_healpix_ring_to_theta_phi.h>
 #include <oskar_healpix_npix_to_nside.h>
-#include <oskar_healpix_nside_to_npix.h>
 #include <oskar_convert_galactic_to_fk5.h>
 #include <oskar_sky.h>
 #include <oskar_getline.h>
@@ -103,7 +102,7 @@ void oskar_sky_load_gsm(oskar_Sky* sky, const char* filename, int* status)
 
     /* Compute nside from npix. */
     nside = oskar_healpix_npix_to_nside(n);
-    if (oskar_healpix_nside_to_npix(nside) != n)
+    if (12 * nside * nside != n)
     {
         if (temp) free(temp);
         *status = OSKAR_ERR_BAD_GSM_FILE;

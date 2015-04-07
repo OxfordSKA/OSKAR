@@ -27,7 +27,6 @@
  */
 
 #include <oskar_evaluate_jones_E.h>
-
 #include <oskar_jones_get_station_pointer.h>
 #include <oskar_evaluate_station_beam.h>
 
@@ -35,20 +34,19 @@
 extern "C" {
 #endif
 
-void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, oskar_Mem* x,
-        oskar_Mem* y, oskar_Mem* z, int coord_type, double lon0_rad,
-        double lat0_rad, const oskar_Telescope* telescope, double gast,
-        double frequency_hz, oskar_StationWork* work,
+void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, int coord_type,
+        oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, const oskar_Telescope* tel,
+        double gast, double frequency_hz, oskar_StationWork* work,
         int time_index, int* status)
 {
     int i, num_stations;
-    oskar_Mem *E_station;
+    oskar_Mem *E_st;
 
     /* Check if safe to proceed. */
     if (*status) return;
 
     /* Check number of stations. */
-    num_stations = oskar_telescope_num_stations(telescope);
+    num_stations = oskar_telescope_num_stations(tel);
     if (num_stations == 0)
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
@@ -56,9 +54,9 @@ void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, oskar_Mem* x,
     }
 
     /* Evaluate the station beams. */
-    E_station = oskar_mem_create_alias(0, 0, 0, status);
-    if (oskar_telescope_allow_station_beam_duplication(telescope) &&
-            oskar_telescope_identical_stations(telescope))
+    E_st = oskar_mem_create_alias(0, 0, 0, status);
+    if (oskar_telescope_allow_station_beam_duplication(tel) &&
+            oskar_telescope_identical_stations(tel))
     {
         /* Identical stations. */
         oskar_Mem *E0; /* Pointer to row of E for station 0. */
@@ -66,18 +64,19 @@ void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, oskar_Mem* x,
 
         /* Evaluate the beam pattern for station 0 */
         E0 = oskar_mem_create_alias(0, 0, 0, status);
-        station0 = oskar_telescope_station_const(telescope, 0);
+        station0 = oskar_telescope_station_const(tel, 0);
         oskar_jones_get_station_pointer(E0, E, 0, status);
 
-        oskar_evaluate_station_beam(E0, num_points, x, y, z,
-                coord_type, lon0_rad, lat0_rad, station0, work,
-                time_index, frequency_hz, gast, status);
+        oskar_evaluate_station_beam(E0, num_points, coord_type, x, y, z,
+                oskar_telescope_phase_centre_ra_rad(tel),
+                oskar_telescope_phase_centre_dec_rad(tel),
+                station0, work, time_index, frequency_hz, gast, status);
 
         /* Copy E for station 0 into memory for other stations. */
         for (i = 1; i < num_stations; ++i)
         {
-            oskar_jones_get_station_pointer(E_station, E, i, status);
-            oskar_mem_copy_contents(E_station, E0, 0, 0,
+            oskar_jones_get_station_pointer(E_st, E, i, status);
+            oskar_mem_copy_contents(E_st, E0, 0, 0,
                     oskar_mem_length(E0), status);
         }
         oskar_mem_free(E0, status);
@@ -88,14 +87,15 @@ void oskar_evaluate_jones_E(oskar_Jones* E, int num_points, oskar_Mem* x,
         for (i = 0; i < num_stations; ++i)
         {
             const oskar_Station* station;
-            station = oskar_telescope_station_const(telescope, i);
-            oskar_jones_get_station_pointer(E_station, E, i, status);
-            oskar_evaluate_station_beam(E_station, num_points, x, y, z,
-                    coord_type, lon0_rad, lat0_rad, station, work,
-                    time_index, frequency_hz, gast, status);
+            station = oskar_telescope_station_const(tel, i);
+            oskar_jones_get_station_pointer(E_st, E, i, status);
+            oskar_evaluate_station_beam(E_st, num_points, coord_type, x, y, z,
+                    oskar_telescope_phase_centre_ra_rad(tel),
+                    oskar_telescope_phase_centre_dec_rad(tel),
+                    station, work, time_index, frequency_hz, gast, status);
         }
     }
-    oskar_mem_free(E_station, status);
+    oskar_mem_free(E_st, status);
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,15 +56,6 @@ extern "C" {
  * direction cosines or phase centre relative direction cosines according to
  * the value of @p coord_type.
  *
- * @param[out]  coord_type  Coordinate type of the returned direction cosines.
- *                          Possible values are:
- *                          OSKAR_RELATIVE_DIRECTIONS or
- *                          OSKAR_ENU_DIRECTIONS
- * @param[out]  x  Array of x direction cosines.
- * @param[out]  y  Array of y direction cosines.
- * @param[out]  z  Array of z direction cosines.
- * @param[out] lon0 Reference longitude of direction cosines.
- * @param[out] lat0 Reference latitude of direction cosines.
  * @param[in]  beam_coord_type Enumerator describing the beam phase centre
  *                             coordinate type, with possible values of:
  *                             OSKAR_SPHERICAL_TYPE_EQUATORIAL
@@ -73,15 +64,24 @@ extern "C" {
  * @param[in]  beam_lat  Longitude of the beam phase centre, in radians.
  * @param[in]  settings  Settings structure describing the specification
  *                            of coordinates to be generated.
+ * @param[out]  coord_type  Coordinate type of the returned direction cosines.
+ *                          Possible values are:
+ *                          OSKAR_RELATIVE_DIRECTIONS or
+ *                          OSKAR_ENU_DIRECTIONS
+ * @param[out] lon0 Reference longitude of direction cosines.
+ * @param[out] lat0 Reference latitude of direction cosines.
+ * @param[out]  x  Array of x direction cosines.
+ * @param[out]  y  Array of y direction cosines.
+ * @param[out]  z  Array of z direction cosines.
  * @param[in,out] status Error status code.
  *
  * @return The number of pixels generated.
  */
 OSKAR_APPS_EXPORT
-size_t oskar_beam_pattern_generate_coordinates(int* coord_type, oskar_Mem* x,
-        oskar_Mem* y, oskar_Mem* z, double* lon0, double* lat0,
-        int beam_coord_type, double beam_lon, double beam_lat,
-        const oskar_SettingsBeamPattern* settings, int* status);
+size_t oskar_beam_pattern_generate_coordinates(int beam_coord_type,
+        double beam_lon, double beam_lat, const oskar_SettingsBeamPattern* s,
+        int* coord_type, double* lon0, double* lat0,
+        oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int* status);
 
 #ifdef __cplusplus
 }

@@ -292,7 +292,7 @@ enum OSKAR_DIRECTION_TYPE
  *
  * Usage examples:
  *   OSKAR_EXPORT void foo();
- *   static OSKAR_EXPORT double add(double a, double b);
+ *   OSKAR_EXPORT double add(double a, double b);
  *
  * For more information see:
  *   http://msdn.microsoft.com/en-us/library/a90k134d(v=VS.90).aspx
@@ -368,30 +368,6 @@ enum OSKAR_DIRECTION_TYPE
     /*#define restrict __restrict*/
 #elif !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L
     #define restrict
-#endif
-
-
-/**
- * @def OSKAR_TLS
- *
- * @brief
- * Macro used to define a variable as having thread-local storage.
- *
- * @details
- * Macro used to specify a thread-local storage qualifier for a global variable.
- *
- * This macro expands to the __thread specifier on Linux/GCC platforms, and
- * __declspec(thread) on Windows.
- *
- * Usage examples:
- *   OSKAR_TLS int foo = 0;
- *   extern OSKAR_TLS struct state s;
- *   static OSKAR_TLS char *p;
- */
-#ifdef OSKAR_OS_WIN
-    #define OSKAR_TLS __declspec(thread)
-#else
-    #define OSKAR_TLS __thread
 #endif
 
 

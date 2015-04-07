@@ -49,31 +49,28 @@ extern "C" {
  * This top-level function evaluates the beam pattern of a station at the
  * specified positions, given as direction cosines.
  *
- * The longitude and latitude of the phase centre are used only
- * when performing beam normalisation for ENU directions.
- *
  * @param[out] beam_pattern   Output beam pattern data.
  * @param[in] num_points      Number of direction cosines given.
- * @param[in] x               Direction cosines (x direction).
- * @param[in] y               Direction cosines (y direction).
- * @param[in] z               Direction cosines (z direction).
  * @param[in] coord_type      Type of direction cosines
  *                            (OSKAR_RELATIVE_DIRECTIONS or
  *                            OSKAR_ENU_DIRECTIONS).
- * @param[in] lon0_rad        Longitude of phase centre, in radians.
- * @param[in] lat0_rad        Latitude of phase centre, in radians.
+ * @param[in] x               Direction cosines (x direction).
+ * @param[in] y               Direction cosines (y direction).
+ * @param[in] z               Direction cosines (z direction).
+ * @param[in] norm_ra_rad     RA used for beam normalisation, in radians.
+ * @param[in] norm_dec_rad    Dec used for beam normalisation, in radians.
  * @param[in] station         Station model.
  * @param[in] work            Station beam work arrays.
  * @param[in] time_index      Simulation time index.
- * @param[in] frequency       The observing frequency in Hz.
+ * @param[in] frequency_hz    The observing frequency in Hz.
  * @param[in] gast            The Greenwich Apparent Sidereal Time, in radians.
  * @param[in,out] status      Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_station_beam(oskar_Mem* beam_pattern, int num_points,
-        oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int coord_type,
-        double lon0_rad, double lat0_rad, const oskar_Station* station,
-        oskar_StationWork* work, int time_index, double frequency,
+        int coord_type, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
+        double norm_ra_rad, double norm_dec_rad, const oskar_Station* station,
+        oskar_StationWork* work, int time_index, double frequency_hz,
         double gast, int* status);
 
 #ifdef __cplusplus

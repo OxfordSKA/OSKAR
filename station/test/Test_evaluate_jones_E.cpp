@@ -82,6 +82,8 @@ TEST(evaluate_jones_E, evaluate_e)
                         oskar_station_element_measured_y_enu_metres(s), &error),
                 &x_pos[0], station_dim, &x_pos[0], station_dim);
     }
+    oskar_telescope_set_phase_centre(tel_cpu,
+            OSKAR_SPHERICAL_TYPE_EQUATORIAL, 0.0, M_PI/2.0);
     oskar_telescope_analyse(tel_cpu, &error);
     oskar_telescope_set_allow_station_beam_duplication(tel_cpu, OSKAR_TRUE);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
@@ -112,9 +114,8 @@ TEST(evaluate_jones_E, evaluate_e)
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Evaluate Jones E.
-    oskar_evaluate_jones_E(E, num_pts, l_gpu, m_gpu, n_gpu,
-            OSKAR_RELATIVE_DIRECTIONS, 0.0, M_PI / 2.0,
-            tel_gpu, gast, frequency, work, 0, &error);
+    oskar_evaluate_jones_E(E, num_pts, OSKAR_RELATIVE_DIRECTIONS,
+            l_gpu, m_gpu, n_gpu, tel_gpu, gast, frequency, work, 0, &error);
     ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
     // Save to file for plotting.

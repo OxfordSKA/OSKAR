@@ -52,7 +52,6 @@ void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     s.beginGroup("beam_pattern");
 
     // Get station ID(s) to use.
-    bp->station_id  = s.value("station_id", 0).toUInt(); // FIXME DEPRECATED.
     bp->all_stations = s.value("all_stations", true).toBool();
     bp->num_active_stations = 0;
     bp->station_ids = 0;
@@ -70,10 +69,6 @@ void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
             bp->station_ids[i] = station_id_list[i].toInt();
         }
     }
-
-    bp->time_average_beam = s.value("time_average_beam", false).toBool(); // FIXME DEPRECATED.
-    bp->average_cross_power_beam =
-            s.value("average_cross_power_beam", false).toBool(); // FIXME DEPRECATED.
 
     temp = s.value("coordinate_type", "Beam image").toString().toUpper();
     if (temp.startsWith("B"))
@@ -231,39 +226,4 @@ void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
         s.endGroup(); // FITS image.
     }
     s.endGroup(); // Telescope outputs.
-
-
-    // FIXME Remaining options in this section are all deprecated.
-    if (!root.isEmpty())
-    {
-        // ASCII list file.
-        if (bp->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_SKY_MODEL)
-        {
-            t = QString(root + "_RAW_BEAM.txt").toLatin1();
-            bp->output_beam_text_file = (char*)malloc(t.size() + 1);
-            strcpy(bp->output_beam_text_file, t.constData());
-        }
-
-        // FITS files.
-        s.beginGroup("fits_file");
-        if (s.value("save_voltage", false).toBool())
-        {
-            t = QString(root + "_VOLTAGE.fits").toLatin1();
-            bp->fits_image_voltage = (char*)malloc(t.size() + 1);
-            strcpy(bp->fits_image_voltage, t.constData());
-        }
-        if (s.value("save_phase", false).toBool())
-        {
-            t = QString(root + "_PHASE.fits").toLatin1();
-            bp->fits_image_phase = (char*)malloc(t.size() + 1);
-            strcpy(bp->fits_image_phase, t.constData());
-        }
-        if (s.value("save_total_intensity", false).toBool())
-        {
-            t = QString(root + "_TOTAL_INTENSITY.fits").toLatin1();
-            bp->fits_image_total_intensity = (char*)malloc(t.size() + 1);
-            strcpy(bp->fits_image_total_intensity, t.constData());
-        }
-        s.endGroup();
-    }
 }

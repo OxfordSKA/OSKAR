@@ -223,7 +223,7 @@ static fitsfile* create_fits_file(const char* filename, int precision,
         int width, int height, int num_times, int num_channels,
         double centre_deg[2], double fov_deg[2], double start_time_mjd,
         double delta_time_sec, double start_freq_hz, double delta_freq_hz,
-        int* status);
+        int horizon_mode, int* status);
 static int data_product_index(HostData* h, int data_product_type,
         int i_station, int time_average, int channel_average);
 static void new_fits_file(HostData* h, int data_product_type, int i_station,
@@ -470,7 +470,9 @@ static void sim_chunks(int gpu_id, DeviceData* d, const HostData* h,
         oskar_mem_set_alias(output_alias, d->jones_data,
                 i * chunk_size, chunk_size, status);
         oskar_evaluate_station_beam(output_alias, chunk_size,
-                d->x, d->y, d->z, h->coord_type, h->lon0, h->lat0,
+                h->coord_type, d->x, d->y, d->z,
+                oskar_telescope_phase_centre_ra_rad(d->tel),
+                oskar_telescope_phase_centre_dec_rad(d->tel),
                 oskar_telescope_station_const(d->tel, h->station_ids[i]),
                 d->work, i_time, freq_hz, gast, status);
     }
@@ -1137,11 +1139,11 @@ static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
     h->y = oskar_mem_create(h->precision, OSKAR_CPU, 0, status);
     h->z = oskar_mem_create(h->precision, OSKAR_CPU, 0, status);
     h->num_pixels = oskar_beam_pattern_generate_coordinates(
-            &h->coord_type, h->x, h->y, h->z, &h->lon0, &h->lat0,
             OSKAR_SPHERICAL_TYPE_EQUATORIAL,
             oskar_telescope_phase_centre_ra_rad(h->tel),
             oskar_telescope_phase_centre_dec_rad(h->tel),
-            &s->beam_pattern, status);
+            &s->beam_pattern,
+            &h->coord_type, &h->lon0, &h->lat0, h->x, h->y, h->z, status);
 
     /* Work out how many pixel chunks have to be processed. */
     h->num_chunks = (h->num_pixels + h->max_chunk_size - 1) / h->max_chunk_size;
@@ -1350,7 +1352,7 @@ static fitsfile* create_fits_file(const char* filename, int precision,
         int width, int height, int num_times, int num_channels,
         double centre_deg[2], double fov_deg[2], double start_time_mjd,
         double delta_time_sec, double start_freq_hz, double delta_freq_hz,
-        int* status)
+        int horizon_mode, int* status)
 {
     int imagetype;
     long naxes[4];
@@ -1371,12 +1373,24 @@ static fitsfile* create_fits_file(const char* filename, int precision,
             "OSKAR " OSKAR_VERSION_STR, NULL, status);
 
     /* Write axis headers. */
-    delta = fov_to_cellsize(fov_deg[0], width);
-    oskar_fits_write_axis_header(f, 1, "RA---SIN", "Right Ascension",
-            centre_deg[0], -delta, (width + 1) / 2.0, 0.0, status);
-    delta = fov_to_cellsize(fov_deg[1], height);
-    oskar_fits_write_axis_header(f, 2, "DEC--SIN", "Declination",
-            centre_deg[1], delta, (height + 1) / 2.0, 0.0, status);
+    if (horizon_mode)
+    {
+        delta = fov_to_cellsize(180.0, width);
+        oskar_fits_write_axis_header(f, 1, "-----SIN", "Azimuthal angle",
+                0.0, -delta, (width + 1) / 2.0, 0.0, status);
+        delta = fov_to_cellsize(180.0, height);
+        oskar_fits_write_axis_header(f, 2, "-----SIN", "Elevation",
+                90.0, delta, (height + 1) / 2.0, 0.0, status);
+    }
+    else
+    {
+        delta = fov_to_cellsize(fov_deg[0], width);
+        oskar_fits_write_axis_header(f, 1, "RA---SIN", "Right Ascension",
+                centre_deg[0], -delta, (width + 1) / 2.0, 0.0, status);
+        delta = fov_to_cellsize(fov_deg[1], height);
+        oskar_fits_write_axis_header(f, 2, "DEC--SIN", "Declination",
+                centre_deg[1], delta, (height + 1) / 2.0, 0.0, status);
+    }
     oskar_fits_write_axis_header(f, 3, "FREQ", "Frequency",
             start_freq_hz, delta_freq_hz, 1.0, 0.0, status);
     oskar_fits_write_axis_header(f, 4, "UTC", "Time",
@@ -1386,8 +1400,11 @@ static fitsfile* create_fits_file(const char* filename, int precision,
     fits_write_key_str(f, "TIMESYS", "UTC", NULL, status);
     fits_write_key_str(f, "TIMEUNIT", "s", "Time axis units", status);
     fits_write_key_dbl(f, "MJD-OBS", start_time_mjd, 10, "Start time", status);
-    fits_write_key_dbl(f, "OBSRA", centre_deg[0], 10, "RA", status);
-    fits_write_key_dbl(f, "OBSDEC", centre_deg[1], 10, "DEC", status);
+    if (!horizon_mode)
+    {
+        fits_write_key_dbl(f, "OBSRA", centre_deg[0], 10, "RA", status);
+        fits_write_key_dbl(f, "OBSDEC", centre_deg[1], 10, "DEC", status);
+    }
 
     return f;
 }
@@ -1449,7 +1466,9 @@ static void new_fits_file(HostData* h, int data_product_type, int i_station,
             (time_average ? 1 : h->num_times),
             (channel_average ? 1 : h->num_channels),
             h->phase_centre_deg, h->fov_deg, h->start_mjd_utc,
-            h->delta_t, h->start_freq_hz, h->delta_f, status);
+            h->delta_t, h->start_freq_hz, h->delta_f,
+            h->s.beam_pattern.coord_frame_type ==
+                    OSKAR_BEAM_PATTERN_FRAME_HORIZON, status);
     if (!f || *status)
     {
         *status = OSKAR_ERR_FILE_IO;

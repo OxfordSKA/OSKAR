@@ -29,7 +29,6 @@
 #include "apps/lib/oskar_set_up_sky.h"
 #include <fits/oskar_fits_healpix_to_sky_model.h>
 #include <fits/oskar_fits_image_to_sky_model.h>
-#include <oskar_healpix_nside_to_npix.h>
 #include <oskar_convert_healpix_ring_to_theta_phi.h>
 #include <oskar_random_gaussian.h>
 #include <oskar_random_power_law.h>
@@ -443,7 +442,7 @@ static void set_up_gen_healpix(int* num_chunks, oskar_Sky*** sky_chunks,
         return;
 
     /* Generate the new positions into a temporary sky model. */
-    npix = oskar_healpix_nside_to_npix(nside);
+    npix = 12 * nside * nside;
     temp = oskar_sky_create(type, OSKAR_CPU, npix, status);
     oskar_log_message(log, 'M', 0, "Generating HEALPix source positions...");
 #pragma omp parallel for private(i)

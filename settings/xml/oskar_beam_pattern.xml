@@ -11,21 +11,18 @@
         <desc>If set, produce beams for all stations in the telescope 
             model; otherwise, for selected stations.</desc>
     </s>
-
     <s k="station_ids"><label>Station ID(s)</label>
         <depends k="beam_pattern/all_stations" v="false" />
         <type name="IntList" default="0"/>
         <desc>The zero-based station ID number(s) to select from the
             telescope model when generating beam pattern(s).</desc>
     </s>
-
-    <!-- PROPOSED NEW FEATURE
     <s k="coordinate_frame"><label>Coordinate frame</label>
         <type name="OptionList" default="Equatorial">Equatorial, Horizon</type>
         <desc>Specification of the coordinate frame in which to evaluate
-            the beam pattern.</desc>
+            the beam pattern. Horizon-based beam patterns will cover the 
+            entire sky.</desc>
     </s>
-    -->
     <s k="coordinate_type"><label>Coordinate (grid) type</label>
         <type name="OptionList" default="Beam image">
             Beam image, Sky model
@@ -64,6 +61,7 @@
         </s>
         <s k="fov_deg" >
             <label>Field-of-view [deg]</label>
+            <depends k="beam_pattern/coordinate_frame" v="Equatorial" />
             <type name="DoubleList" default="2.0" />
             <desc>
                 Field-of-view (FOV) in degrees (max 180.0). If a single value
@@ -258,28 +256,4 @@
             </s>
         </s>
     </s>
-
-
-
-
-
-    <s k="fits_file">
-        <label>FITS image options (OLD)</label>
-        <s k="save_voltage"><label>Voltage pattern</label>
-            <type name="bool" default="false" />
-            <desc>If true, save the voltage amplitude pattern in a FITS image
-                file. (This is given by the square root of the sum of the
-                squares of the real and imaginary values.)</desc>
-        </s>
-        <s k="save_phase"><label>Phase pattern</label>
-            <type name="bool" default="false" />
-            <desc>If true, save the phase pattern in a FITS image file.</desc>
-        </s>
-        <s k="save_total_intensity"><label>Total intensity pattern</label>
-            <type name="bool" default="false" />
-            <desc>If true, save the total intensity beam. This is evaluated as
-            the Stokes-I response of the beam pattern auto-correlation.</desc>
-        </s>
-    </s>
-
 </s>

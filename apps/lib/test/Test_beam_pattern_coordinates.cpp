@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@
 
 // For HEALPix grids
 #include <oskar_convert_healpix_ring_to_theta_phi.h>
-#include <oskar_healpix_nside_to_npix.h>
 #include <oskar_convert_galactic_to_fk5.h>
 
 #include <oskar_binary.h>
@@ -93,7 +92,7 @@ TEST(beam_pattern_coordinates, HEALPix_horizontal)
     int status = 0;
 
     int nside = 12;
-    int num_pixels = oskar_healpix_nside_to_npix(nside);
+    int num_pixels = 12 * nside * nside;
     int loc = OSKAR_CPU;
     int type = OSKAR_DOUBLE;
 

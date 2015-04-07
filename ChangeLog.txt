@@ -21,7 +21,10 @@
     * Added option to evaluate beam patterns for specified sky model positions, 
       instead of an image grid.
 
-    * Added options to produce time-and/or-channel-averaged beam patterns.
+    * Added option to generate horizon-frame all-sky beam patterns, instead of
+      using equatorial image coordinates.
+
+    * Added options to produce time- and/or channel-averaged beam patterns.
 
     * Added options to produce average cross-power Stokes I beam patterns 
       for selected stations.
