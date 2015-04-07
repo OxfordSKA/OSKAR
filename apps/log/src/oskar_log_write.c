@@ -57,6 +57,10 @@ void oskar_log_write(oskar_Log* log, FILE* stream, char priority, char code,
     width = log ? log->value_width : OSKAR_LOG_DEFAULT_VALUE_WIDTH;
     is_file = (stream == stdout || stream == stderr) ? 0 : 1;
 
+#ifdef _OPENMP
+    omp_set_lock(&log->mutex); /* Lock the mutex. */
+#endif
+
     /* Write the entry to the terminal */
     if (!is_file && should_print_term_entry(log, priority))
     {
@@ -67,15 +71,13 @@ void oskar_log_write(oskar_Log* log, FILE* stream, char priority, char code,
     /* Write the entry to the log file */
     else if (is_file && log && log->file && should_print_file_entry(log, priority))
     {
-#ifdef _OPENMP
-        omp_set_lock(&log->mutex); /* lock the mutex */
-#endif
         print_entry(log->file, priority, code, depth, prefix, width, format, args);
         oskar_log_update_record(log, code);
+    }
+
 #ifdef _OPENMP
     omp_unset_lock(&log->mutex); /* Unlock the mutex. */
 #endif
-    }
 }
 
 /*
