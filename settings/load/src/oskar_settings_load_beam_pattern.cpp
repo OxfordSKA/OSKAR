@@ -174,7 +174,7 @@ void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     bp->separate_time_and_channel =
             s.value("separate_time_and_channel", true).toBool();
     bp->average_time_and_channel =
-            s.value("average_time_and_channel", true).toBool();
+            s.value("average_time_and_channel", false).toBool();
     temp = s.value("average_single_axis", "None").toString().toUpper();
     if (temp.startsWith("N"))
         bp->average_single_axis = OSKAR_BEAM_PATTERN_AVERAGE_NONE;
