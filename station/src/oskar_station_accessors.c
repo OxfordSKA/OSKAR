@@ -185,34 +185,46 @@ unsigned int oskar_station_seed_time_variable_errors(const oskar_Station* model)
     return model->seed_time_variable_errors;
 }
 
-double oskar_station_nominal_element_orientation_x_rad(
-        const oskar_Station* model)
-{
-    return model->nominal_orientation_x_rad;
-}
-
-double oskar_station_nominal_element_orientation_y_rad(
-        const oskar_Station* model)
-{
-    return model->nominal_orientation_y_rad;
-}
-
-double oskar_station_element_orientation_x_rad(const oskar_Station* model,
+double oskar_station_element_x_alpha_rad(const oskar_Station* model,
         int index)
 {
-    const double *p;
-    p = (const double*)
-            oskar_mem_void_const(model->element_orientation_x_rad_cpu);
-    return p[index];
+    return ((const double*)
+            oskar_mem_void_const(model->element_x_alpha_cpu))[index];
 }
 
-double oskar_station_element_orientation_y_rad(const oskar_Station* model,
+double oskar_station_element_x_beta_rad(const oskar_Station* model,
         int index)
 {
-    const double *p;
-    p = (const double*)
-            oskar_mem_void_const(model->element_orientation_y_rad_cpu);
-    return p[index];
+    return ((const double*)
+            oskar_mem_void_const(model->element_x_beta_cpu))[index];
+}
+
+double oskar_station_element_x_gamma_rad(const oskar_Station* model,
+        int index)
+{
+    return ((const double*)
+            oskar_mem_void_const(model->element_x_gamma_cpu))[index];
+}
+
+double oskar_station_element_y_alpha_rad(const oskar_Station* model,
+        int index)
+{
+    return ((const double*)
+            oskar_mem_void_const(model->element_y_alpha_cpu))[index];
+}
+
+double oskar_station_element_y_beta_rad(const oskar_Station* model,
+        int index)
+{
+    return ((const double*)
+            oskar_mem_void_const(model->element_y_beta_cpu))[index];
+}
+
+double oskar_station_element_y_gamma_rad(const oskar_Station* model,
+        int index)
+{
+    return ((const double*)
+            oskar_mem_void_const(model->element_y_gamma_cpu))[index];
 }
 
 oskar_Mem* oskar_station_element_true_x_enu_metres(oskar_Station* model)
@@ -332,28 +344,6 @@ oskar_Mem* oskar_station_element_weight(oskar_Station* model)
 const oskar_Mem* oskar_station_element_weight_const(const oskar_Station* model)
 {
     return model->element_weight;
-}
-
-oskar_Mem* oskar_station_element_orientation_x_rad_cpu(oskar_Station* model)
-{
-    return model->element_orientation_x_rad_cpu;
-}
-
-const oskar_Mem* oskar_station_element_orientation_x_rad_cpu_const(
-        const oskar_Station* model)
-{
-    return model->element_orientation_x_rad_cpu;
-}
-
-oskar_Mem* oskar_station_element_orientation_y_cpu(oskar_Station* model)
-{
-    return model->element_orientation_y_rad_cpu;
-}
-
-const oskar_Mem* oskar_station_element_orientation_y_rad_cpu_const(
-        const oskar_Station* model)
-{
-    return model->element_orientation_y_rad_cpu;
 }
 
 oskar_Mem* oskar_station_element_types(oskar_Station* model)

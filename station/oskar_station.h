@@ -66,15 +66,14 @@ enum OSKAR_STATION_TYPE
 #include <oskar_station_duplicate_first_child.h>
 #include <oskar_station_free.h>
 #include <oskar_station_load_apodisation.h>
-#include <oskar_station_load_config.h>
 #include <oskar_station_load_element_types.h>
+#include <oskar_station_load_feed_angle.h>
 #include <oskar_station_load_gain_phase.h>
 #include <oskar_station_load_layout.h>
 #include <oskar_station_load_mount_types.h>
-#include <oskar_station_load_orientation.h>
 #include <oskar_station_load_permitted_beams.h>
+#include <oskar_station_override_element_feed_angle.h>
 #include <oskar_station_override_element_gains.h>
-#include <oskar_station_override_element_orientations.h>
 #include <oskar_station_override_element_phases.h>
 #include <oskar_station_override_element_time_variable_gains.h>
 #include <oskar_station_override_element_time_variable_phases.h>
@@ -83,15 +82,15 @@ enum OSKAR_STATION_TYPE
 #include <oskar_station_resize_element_types.h>
 #include <oskar_station_save_apodisation.h>
 #include <oskar_station_save_element_types.h>
+#include <oskar_station_save_feed_angle.h>
 #include <oskar_station_save_gain_phase.h>
 #include <oskar_station_save_layout.h>
 #include <oskar_station_save_mount_types.h>
-#include <oskar_station_save_orientation.h>
 #include <oskar_station_save_permitted_beams.h>
 #include <oskar_station_set_element_coords.h>
 #include <oskar_station_set_element_errors.h>
+#include <oskar_station_set_element_feed_angle.h>
 #include <oskar_station_set_element_mount_type.h>
-#include <oskar_station_set_element_orientation.h>
 #include <oskar_station_set_element_type.h>
 #include <oskar_station_set_element_weight.h>
 

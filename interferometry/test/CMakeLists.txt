@@ -8,7 +8,6 @@ set(${name}_SRC
     Test_add_system_noise.cpp
     Test_evaluate_baselines.cpp
     Test_station_coord_transforms.cpp
-    Test_TelescopeModel.cpp
     Test_Visibilities.cpp
 )
 add_executable(${name} ${${name}_SRC})

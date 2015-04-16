@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,42 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_LOAD_ORIENTATION_H_
-#define OSKAR_STATION_LOAD_ORIENTATION_H_
+#ifndef OSKAR_TELESCOPE_LOAD_FEED_ANGLE_H_
+#define OSKAR_TELESCOPE_LOAD_FEED_ANGLE_H_
 
-/**
- * @file oskar_station_load_orientation.h
- */
+#include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-#include <oskar_global.h>
+class TelescopeLoadFeedAngle : public oskar_TelescopeLoadAbstract
+{
+public:
+    TelescopeLoadFeedAngle() {}
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+    virtual ~TelescopeLoadFeedAngle() {}
 
-/**
- * @brief
- * Loads station element orientation data from a text file.
- *
- * @details
- * This function loads station orientation data from a comma- or
- * space-separated text file. Each line contains data for one element
- * of the station.
- *
- * The file may have the following columns, in the following order:
- * - Element X dipole axis azimuth, in degrees (default 90).
- * - Element Y dipole axis azimuth, in degrees (default 0).
- *
- * @param[out] station   Pointer to destination data structure to fill.
- * @param[in] filename   Name of the data file to load.
- * @param[in,out] status Status return code.
- */
-OSKAR_EXPORT
-void oskar_station_load_orientation(oskar_Station* station,
-        const char* filename, int* status);
+    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
+            int num_subdirs, std::map<std::string, std::string>& filemap,
+            int* status);
 
-#ifdef __cplusplus
-}
-#endif
+    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
+            int num_subdirs, int depth,
+            std::map<std::string, std::string>& filemap, int* status);
 
-#endif /* OSKAR_STATION_LOAD_ORIENTATION_H_ */
+    virtual std::string name() const;
+
+private:
+    static const std::string feed_angle_file;
+    static const std::string feed_angle_file_x;
+    static const std::string feed_angle_file_y;
+};
+
+#endif /* OSKAR_TELESCOPE_LOAD_FEED_ANGLE_H_ */

@@ -168,19 +168,27 @@ OSKAR_EXPORT
 unsigned int oskar_station_seed_time_variable_errors(const oskar_Station* model);
 
 OSKAR_EXPORT
-double oskar_station_nominal_element_orientation_x_rad(
-        const oskar_Station* model);
-
-OSKAR_EXPORT
-double oskar_station_nominal_element_orientation_y_rad(
-        const oskar_Station* model);
-
-OSKAR_EXPORT
-double oskar_station_element_orientation_x_rad(const oskar_Station* model,
+double oskar_station_element_x_alpha_rad(const oskar_Station* model,
         int index);
 
 OSKAR_EXPORT
-double oskar_station_element_orientation_y_rad(const oskar_Station* model,
+double oskar_station_element_x_beta_rad(const oskar_Station* model,
+        int index);
+
+OSKAR_EXPORT
+double oskar_station_element_x_gamma_rad(const oskar_Station* model,
+        int index);
+
+OSKAR_EXPORT
+double oskar_station_element_y_alpha_rad(const oskar_Station* model,
+        int index);
+
+OSKAR_EXPORT
+double oskar_station_element_y_beta_rad(const oskar_Station* model,
+        int index);
+
+OSKAR_EXPORT
+double oskar_station_element_y_gamma_rad(const oskar_Station* model,
         int index);
 
 OSKAR_EXPORT
@@ -257,20 +265,6 @@ oskar_Mem* oskar_station_element_weight(oskar_Station* model);
 
 OSKAR_EXPORT
 const oskar_Mem* oskar_station_element_weight_const(const oskar_Station* model);
-
-OSKAR_EXPORT
-oskar_Mem* oskar_station_element_orientation_x_rad_cpu(oskar_Station* model);
-
-OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_orientation_x_rad_cpu_const(
-        const oskar_Station* model);
-
-OSKAR_EXPORT
-oskar_Mem* oskar_station_element_orientation_y_cpu(oskar_Station* model);
-
-OSKAR_EXPORT
-const oskar_Mem* oskar_station_element_orientation_y_rad_cpu_const(
-        const oskar_Station* model);
 
 OSKAR_EXPORT
 oskar_Mem* oskar_station_element_types(oskar_Station* model);

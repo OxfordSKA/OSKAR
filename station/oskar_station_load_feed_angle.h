@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_SAVE_ORIENTATION_H_
-#define OSKAR_STATION_SAVE_ORIENTATION_H_
+#ifndef OSKAR_STATION_LOAD_FEED_ANGLE_H_
+#define OSKAR_STATION_LOAD_FEED_ANGLE_H_
 
 /**
- * @file oskar_station_save_orientation.h
+ * @file oskar_station_load_feed_angle.h
  */
 
 #include <oskar_global.h>
@@ -40,22 +40,30 @@ extern "C" {
 #endif
 
 /**
- * @brief Writes OSKAR station model data to an ASCII file.
+ * @brief
+ * Loads station element feed angles from a text file.
  *
  * @details
- * This function writes element orientation data from the station model to an
- * ASCII file.
+ * This function loads station element feed angles from a comma- or
+ * space-separated text file. Each line contains data for one element
+ * of the station.
  *
- * @param[in] filename   Pathname of file to write.
- * @param[in] station    Station model to write.
+ * The file may have the following columns, in the following order:
+ * - Euler angle alpha, in degrees (default 0).
+ * - Euler angle beta, in degrees (default 0).
+ * - Euler angle gamma, in degrees (default 0).
+ *
+ * @param[out] station   Pointer to destination data structure to fill.
+ * @param[in] filename   Name of the data file to load.
+ * @param[in] x_pol      If set, load for x polarisation, else y polarisation.
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_save_orientation(const char* filename,
-        const oskar_Station* station, int* status);
+void oskar_station_load_feed_angle(oskar_Station* station,
+        const char* filename, int x_pol, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_SAVE_ORIENTATION_H_ */
+#endif /* OSKAR_STATION_LOAD_FEED_ANGLE_H_ */

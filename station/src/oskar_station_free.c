@@ -55,8 +55,12 @@ void oskar_station_free(oskar_Station* model, int* status)
     oskar_mem_free(model->element_gain_error, status);
     oskar_mem_free(model->element_phase_offset_rad, status);
     oskar_mem_free(model->element_phase_error_rad, status);
-    oskar_mem_free(model->element_orientation_x_rad_cpu, status);
-    oskar_mem_free(model->element_orientation_y_rad_cpu, status);
+    oskar_mem_free(model->element_x_alpha_cpu, status);
+    oskar_mem_free(model->element_x_beta_cpu, status);
+    oskar_mem_free(model->element_x_gamma_cpu, status);
+    oskar_mem_free(model->element_y_alpha_cpu, status);
+    oskar_mem_free(model->element_y_beta_cpu, status);
+    oskar_mem_free(model->element_y_gamma_cpu, status);
     oskar_mem_free(model->element_types, status);
     oskar_mem_free(model->element_types_cpu, status);
     oskar_mem_free(model->element_mount_types_cpu, status);

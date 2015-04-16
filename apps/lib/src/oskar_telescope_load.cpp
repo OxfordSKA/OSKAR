@@ -29,14 +29,13 @@
 #include "apps/lib/oskar_dir.h"
 #include "apps/lib/oskar_telescope_load.h"
 #include "apps/lib/private_TelescopeLoadApodisation.h"
-#include "apps/lib/private_TelescopeLoadConfig.h"
 #include "apps/lib/private_TelescopeLoadElementTypes.h"
 #include "apps/lib/private_TelescopeLoadElementPattern.h"
+#include "apps/lib/private_TelescopeLoadFeedAngle.h"
 #include "apps/lib/private_TelescopeLoadGainPhase.h"
 #include "apps/lib/private_TelescopeLoadLayout.h"
 #include "apps/lib/private_TelescopeLoadMountTypes.h"
 #include "apps/lib/private_TelescopeLoadNoise.h"
-#include "apps/lib/private_TelescopeLoadOrientation.h"
 #include "apps/lib/private_TelescopeLoadPermittedBeams.h"
 #include <oskar_log.h>
 #include <oskar_get_error_string.h>
@@ -89,13 +88,11 @@ void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
 
     // Create the loaders.
     vector<oskar_TelescopeLoadAbstract*> loaders;
-    // The config loader is now deprecated (but it must appear first!).
-    loaders.push_back(new TelescopeLoadConfig(settings));
-    // The layout loader must be the first after the config loader.
+    // The layout loader must be first.
     loaders.push_back(new TelescopeLoadLayout(settings));
     loaders.push_back(new TelescopeLoadGainPhase);
     loaders.push_back(new TelescopeLoadApodisation);
-    loaders.push_back(new TelescopeLoadOrientation);
+    loaders.push_back(new TelescopeLoadFeedAngle);
     loaders.push_back(new TelescopeLoadElementTypes);
     loaders.push_back(new TelescopeLoadMountTypes);
     loaders.push_back(new TelescopeLoadPermittedBeams);

@@ -56,10 +56,12 @@ void oskar_station_resize(oskar_Station* station, int num_elements,
     oskar_mem_realloc(station->element_gain_error, num_elements, status);
     oskar_mem_realloc(station->element_phase_offset_rad, num_elements, status);
     oskar_mem_realloc(station->element_phase_error_rad, num_elements, status);
-    oskar_mem_realloc(station->element_orientation_x_rad_cpu,
-            num_elements, status);
-    oskar_mem_realloc(station->element_orientation_y_rad_cpu,
-            num_elements, status);
+    oskar_mem_realloc(station->element_x_alpha_cpu, num_elements, status);
+    oskar_mem_realloc(station->element_x_beta_cpu, num_elements, status);
+    oskar_mem_realloc(station->element_x_gamma_cpu, num_elements, status);
+    oskar_mem_realloc(station->element_y_alpha_cpu, num_elements, status);
+    oskar_mem_realloc(station->element_y_beta_cpu, num_elements, status);
+    oskar_mem_realloc(station->element_y_gamma_cpu, num_elements, status);
     oskar_mem_realloc(station->element_types, num_elements, status);
     oskar_mem_realloc(station->element_types_cpu, num_elements, status);
     oskar_mem_realloc(station->element_mount_types_cpu, num_elements, status);
@@ -74,8 +76,6 @@ void oskar_station_resize(oskar_Station* station, int num_elements,
         /* Must set default element weight, gain and orientation. */
         oskar_mem_set_value_real(station->element_gain,
                 1.0, offset, num_new, status);
-        oskar_mem_set_value_real(station->element_orientation_x_rad_cpu,
-                M_PI / 2.0, offset, num_new, status);
         oskar_mem_set_value_real(station->element_weight,
                 1.0, offset, num_new, status);
         memset(oskar_mem_char(station->element_mount_types_cpu) + offset,

@@ -825,7 +825,7 @@ static void generate_noisy_telescope(const QString& dir,
 
     // Write top-level config file.
     {
-        QString config_file = "config.txt";
+        QString config_file = "layout.txt";
         QFile file(dir + QDir::separator() + config_file);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
             return;
@@ -874,7 +874,7 @@ static void generate_noisy_telescope(const QString& dir,
 
         // Write station config file.
         {
-            QString config_file = "config.txt";
+            QString config_file = "layout.txt";
             QFile file(station_name + QDir::separator() + config_file);
             if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
                 return;

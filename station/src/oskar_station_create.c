@@ -88,9 +88,17 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
             oskar_mem_create(type, location, num_elements, status);
     model->element_phase_error_rad =
             oskar_mem_create(type, location, num_elements, status);
-    model->element_orientation_x_rad_cpu =
+    model->element_x_alpha_cpu =
             oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
-    model->element_orientation_y_rad_cpu =
+    model->element_x_beta_cpu =
+            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
+    model->element_x_gamma_cpu =
+            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
+    model->element_y_alpha_cpu =
+            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
+    model->element_y_beta_cpu =
+            oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
+    model->element_y_gamma_cpu =
             oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_elements, status);
     model->element_types =
             oskar_mem_create(OSKAR_INT, location, num_elements, status);
@@ -132,8 +140,6 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
     model->apply_element_errors = OSKAR_FALSE;
     model->apply_element_weight = OSKAR_FALSE;
     model->seed_time_variable_errors = 1;
-    model->nominal_orientation_x_rad = M_PI / 2.0;
-    model->nominal_orientation_y_rad = 0.0;
     model->child = 0;
     model->element = 0;
     model->num_permitted_beams = 0;

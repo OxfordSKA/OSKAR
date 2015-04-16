@@ -39,7 +39,7 @@ void oskar_station_analyse(oskar_Station* station,
         int* finished_identical_station_check, int* status)
 {
     int i, type;
-    double *orientation_x, *orientation_y;
+    double *x_alpha, *x_beta, *x_gamma, *y_alpha, *y_beta, *y_gamma;
     char* mount_type;
 
     /* Check if safe to proceed. */
@@ -63,15 +63,21 @@ void oskar_station_analyse(oskar_Station* station,
 
     /* Analyse orientations separately (always double precision). */
     mount_type = oskar_mem_char(station->element_mount_types_cpu);
-    orientation_x =
-            oskar_mem_double(station->element_orientation_x_rad_cpu, status);
-    orientation_y =
-            oskar_mem_double(station->element_orientation_y_rad_cpu, status);
+    x_alpha = oskar_mem_double(station->element_x_alpha_cpu, status);
+    x_beta  = oskar_mem_double(station->element_x_beta_cpu, status);
+    x_gamma = oskar_mem_double(station->element_x_gamma_cpu, status);
+    y_alpha = oskar_mem_double(station->element_y_alpha_cpu, status);
+    y_beta  = oskar_mem_double(station->element_y_beta_cpu, status);
+    y_gamma = oskar_mem_double(station->element_y_gamma_cpu, status);
     for (i = 1; i < station->num_elements; ++i)
     {
         if (mount_type[i] != mount_type[0] ||
-                orientation_x[i] != orientation_x[0] ||
-                orientation_y[i] != orientation_y[0])
+                x_alpha[i] != x_alpha[0] ||
+                x_beta[i] != x_beta[0] ||
+                x_gamma[i] != x_gamma[0] ||
+                y_alpha[i] != y_alpha[0] ||
+                y_beta[i] != y_beta[0] ||
+                y_gamma[i] != y_gamma[0])
         {
             station->common_element_orientation = 0;
             break;

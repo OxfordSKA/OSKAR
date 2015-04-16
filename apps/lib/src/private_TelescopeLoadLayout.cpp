@@ -36,8 +36,7 @@ using std::string;
 const string TelescopeLoadLayout::layout_file = "layout.txt";
 const string TelescopeLoadLayout::layout_ecef_file = "layout_ecef.txt";
 
-TelescopeLoadLayout::TelescopeLoadLayout(
-        const oskar_Settings* settings)
+TelescopeLoadLayout::TelescopeLoadLayout(const oskar_Settings* settings)
 {
     settings_ = settings;
 }
@@ -71,8 +70,7 @@ void TelescopeLoadLayout::load(oskar_Telescope* telescope,
     }
     else
     {
-        // If telescope hasn't already been sized using a (deprecated)
-        // "config.txt" file, return an error.
+        // If telescope hasn't already been sized, return an error.
         if (oskar_telescope_num_stations(telescope) == 0)
             *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;
         return;
@@ -103,8 +101,7 @@ void TelescopeLoadLayout::load(oskar_Station* station,
     }
     else
     {
-        // If station hasn't already been sized using a (deprecated)
-        // "config.txt" file, return an error.
+        // If station hasn't already been sized, return an error.
         if (oskar_station_num_elements(station) == 0)
             *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE_CONFIG_FILE_MISSING;
         return;

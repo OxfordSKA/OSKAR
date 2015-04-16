@@ -35,7 +35,8 @@
 
 static const char layout_name[] = "layout.txt";
 static const char apodisaion_name[] = "apodisation.txt";
-static const char orientation_name[] = "orientation.txt";
+static const char feed_x_name[] = "feed_angle_x.txt";
+static const char feed_y_name[] = "feed_angle_y.txt";
 static const char element_types_name[] = "element_types.txt";
 static const char mount_types_name[] = "mount_types.txt";
 static const char gain_phase_name[] = "gain_phase.txt";
@@ -96,8 +97,10 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
         QByteArray path;
         path = dir.filePath(layout_name).toLatin1();
         oskar_station_save_layout(path, station, status);
-        path = dir.filePath(orientation_name).toLatin1();
-        oskar_station_save_orientation(path, station, status);
+        path = dir.filePath(feed_x_name).toLatin1();
+        oskar_station_save_feed_angle(path, station, 1, status);
+        path = dir.filePath(feed_y_name).toLatin1();
+        oskar_station_save_feed_angle(path, station, 0, status);
         path = dir.filePath(mount_types_name).toLatin1();
         oskar_station_save_mount_types(path, station, status);
         if (oskar_station_apply_element_errors(station))

@@ -138,20 +138,20 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
     if (element->x_orientation_error_rad > 0.0)
     {
         for (i = 0; i < num_stations; ++i)
-            oskar_station_override_element_orientations(
+            oskar_station_override_element_feed_angle(
                     oskar_telescope_station(t, i),
                     element->seed_x_orientation_error, 1,
-                    element->x_orientation_error_rad, status);
+                    element->x_orientation_error_rad, 0.0, 0.0, status);
     }
 
     /* Add variation to y-dipole orientations if required. */
     if (element->y_orientation_error_rad > 0.0)
     {
         for (i = 0; i < num_stations; ++i)
-            oskar_station_override_element_orientations(
+            oskar_station_override_element_feed_angle(
                     oskar_telescope_station(t, i),
                     element->seed_y_orientation_error, 0,
-                    element->y_orientation_error_rad, status);
+                    element->y_orientation_error_rad, 0.0, 0.0, status);
     }
 
     /* Apply pointing file override if set. */

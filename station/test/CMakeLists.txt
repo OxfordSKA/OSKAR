@@ -12,7 +12,6 @@ set(${name}_SRC
     Test_evaluate_jones_E.cpp
     Test_evaluate_pierce_points.cpp
     Test_evaluate_station_beam.cpp
-    Test_StationModel.cpp
 )
 add_executable(${name} ${${name}_SRC})
 target_link_libraries(${name} oskar gtest)

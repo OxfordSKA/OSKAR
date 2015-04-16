@@ -9,7 +9,7 @@
 \section telescope_intro Introduction
 
 This document describes the format of the telescope model used by OSKAR 
-versions >= 2.5. The telescope model includes a description of the position of 
+versions >= 2.6. The telescope model includes a description of the position of 
 each station in the interferometer, the configuration of each station, and a 
 custom element pattern for each station (if any).
 
@@ -141,9 +141,9 @@ Per-element complex apodisation weight.<br>
 <b>Required:</b> No.<br>
 <b>Allowed locations:</b> Station directory.
 
-\par orientation.txt
-Per-element X- and Y-dipole orientations.<br>
-<b>See</b> \ref telescope_element_orientation <br>
+\par feed_angle.txt | feed_angle_x.txt | feed_angle_y.txt
+Per-element and per-polarisation feed angles.<br>
+<b>See</b> \ref telescope_element_feed_angle <br>
 <b>Required:</b> No.<br>
 <b>Allowed locations:</b> Station directory.
 
@@ -170,10 +170,6 @@ Element X-or Y-dipole responses for the station, as a function of frequency.<br>
 <b>See</b> \ref telescope_element_patterns <br>
 <b>Required:</b> No.<br>
 <b>Allowed locations:</b> Any. (Inherited.)
-
-\par config.txt
-Deprecated.<br>
-<b>See</b> \ref telescope_config_files <br>
 
 \subsubsection telescope_noise_file_list Noise Configuration Files
 
@@ -343,21 +339,25 @@ In order, the parameter columns are:
 | 1      | Element multiplicative weight (real part)      | Optional (default 1.0)
 | 2      | Element multiplicative weight (imaginary part) | Optional (default 0.0)
 
-\section telescope_element_orientation Element Orientation Files
+\latexonly
+\newpage
+\endlatexonly
 
-In each station directory, there may be optionally an "orientation.txt" file 
-to specify north-through-east azimuth of the nominal X- and Y-dipole axes.
+\section telescope_element_feed_angle Element Feed Angle Files
+
+In each station directory, there may be optionally "feed_angle.txt", 
+"feed_angle_x.txt" and/or "feed_angle_y.txt" files 
+to specify the Euler angles of the feeds of the nominal X and Y dipoles.
+If only a single "feed_angle.txt" file is present, the same data are used
+for both the X and Y polarisations.
 
 In order, the parameter columns are:
 
 | Column | Description                                           | Comment
 | ------ | ----------------------------------------------------- | ------------------------ 
-| 1      | Nominal X dipole axis azimuth (East from North) [deg] | Optional (default 90.0)
-| 2      | Nominal Y dipole axis azimuth (East from North) [deg] | Optional (default 0.0)
-
-\latexonly
-\newpage
-\endlatexonly
+| 1      | Euler angle alpha around z-axis [deg]                 | Optional (default 0.0)
+| 2      | Euler angle beta around x-axis [deg]                  | Optional (default 0.0)
+| 3      | Euler angle gamma around z-axis [deg]                 | Optional (default 0.0)
 
 \section telescope_permitted_beams Permitted Beam Directions
 
@@ -404,35 +404,6 @@ In order, the parameter columns are:
 | Column | Description                                           
 | ------ | --------------------------------------------------------------
 | 1      | Element mount type (character: either 'A' or 'F'). 
-
-\section telescope_config_files Configuration Files (Deprecated)
-
-The "config.txt" file used for telescope models in OSKAR versions 2.0 to 2.2 
-is deprecated, but still supported. If any files named "config.txt" are 
-present in a telescope model directory, they are loaded first. Any other 
-parameter files present will override the contents of this file.
-
-Please do not use "config.txt" when constructing new telescope models -- 
-this description is provided only for reference with old telescope models. 
-(Note also that columns 7 to 9 are in a different order to those in 
-the "gain_phase.txt" file.)
-
-| Column |  Parameter                                                        | Unit    | Comment
-| ------ | ----------------------------------------------------------------- | ------  | ------------------------
-| 1      | Horizontal x (east) coordinate                                    | Metres  | Required
-| 2      | Horizontal y (north) coordinate                                   | Metres  | Required
-| 3      | Horizontal z (up) coordinate                                      | Metres  | Optional (default 0.0)
-| 4      | Horizontal x (east) coordinate error                              | Metres  | Optional (default 0.0)
-| 5      | Horizontal y (north) coordinate error                             | Metres  | Optional (default 0.0)
-| 6      | Horizontal z (up) coordinate error                                | Metres  | Optional (default 0.0)
-| 7      | Systematic gain factor, \f$G_0\f$                                 |         | Optional (default 1.0)
-| 8      | Time-variable gain factor, \f$G_{\rm std}\f$, (std. deviation)    |         | Optional (default 0.0)
-| 9      | Systematic phase offset, \f$\phi_0\f$                             | Degrees | Optional (default 0.0)
-| 10     | Time-variable phase error, \f$\phi_{\rm std}\f$, (std. deviation) | Degrees | Optional (default 0.0)
-| 11     | Element multiplicative weight (real part)                         |         | Optional (default 1.0)
-| 12     | Element multiplicative weight (imaginary part)                    |         | Optional (default 0.0)
-| 13     | Nominal X dipole axis azimuth (East from North)                   | Degrees | Optional (default 90.0)
-| 14     | Nominal Y dipole axis azimuth (East from North)                   | Degrees | Optional (default 0.0)
 
 \section telescope_element_patterns Embedded Element Pattern Files
 
@@ -664,11 +635,15 @@ left to right.
 <tr><td>6</td><td>2014-07-16</td>
     <td>[2.5.0] Updated description of how numerically-defined element 
     patterns should be used.</td></tr>
-<tr><td>7</td><td>2015-02-13</td>
+<tr><td>7</td><td>2015-04-16</td>
     <td>[2.6.0] Updated description of numerical element pattern data to 
     allow for scalar-only element responses. Updated description of 
     telescope layout files to allow for station position errors. Added 
-    section to describe element mount types.</td></tr>
+    section to describe element mount types. Added section to describe 
+    element feed angles and removed old "orientation.txt" file description. 
+    Removed old "config.txt" file description, as these files have 
+    been deprecated since version 2.3, and can no longer be 
+    supported.</td></tr>
 </table>
 
 */

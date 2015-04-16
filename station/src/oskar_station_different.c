@@ -142,11 +142,23 @@ int oskar_station_different(const oskar_Station* a, const oskar_Station* b,
         return 1;
     if (oskar_mem_different(a->element_weight, b->element_weight, n, status))
         return 1;
-    if (oskar_mem_different(a->element_orientation_x_rad_cpu,
-            b->element_orientation_x_rad_cpu, n, status))
+    if (oskar_mem_different(a->element_x_alpha_cpu,
+            b->element_x_alpha_cpu, n, status))
         return 1;
-    if (oskar_mem_different(a->element_orientation_y_rad_cpu,
-            b->element_orientation_y_rad_cpu, n, status))
+    if (oskar_mem_different(a->element_x_beta_cpu,
+            b->element_x_beta_cpu, n, status))
+        return 1;
+    if (oskar_mem_different(a->element_x_gamma_cpu,
+            b->element_x_gamma_cpu, n, status))
+        return 1;
+    if (oskar_mem_different(a->element_y_alpha_cpu,
+            b->element_y_alpha_cpu, n, status))
+        return 1;
+    if (oskar_mem_different(a->element_y_beta_cpu,
+            b->element_y_beta_cpu, n, status))
+        return 1;
+    if (oskar_mem_different(a->element_y_gamma_cpu,
+            b->element_y_gamma_cpu, n, status))
         return 1;
     if (oskar_mem_different(a->element_types, b->element_types, n, status))
         return 1;

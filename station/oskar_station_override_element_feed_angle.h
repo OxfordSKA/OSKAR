@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_SET_ELEMENT_ORIENTATION_H_
-#define OSKAR_STATION_SET_ELEMENT_ORIENTATION_H_
+#ifndef OSKAR_STATION_OVERRIDE_ELEMENT_FEED_ANGLE_H_
+#define OSKAR_STATION_OVERRIDE_ELEMENT_FEED_ANGLE_H_
 
 /**
- * @file oskar_station_set_element_orientation.h
+ * @file oskar_station_override_element_feed_angle.h
  */
 
 #include <oskar_global.h>
@@ -41,24 +41,31 @@ extern "C" {
 
 /**
  * @brief
- * Sets the orientation of the x- and y-dipole axes for an element.
+ * Overrides element dipole orientations in a station model.
  *
  * @details
- * This function sets the orientation of the specified element's dipoles in the
- * station model, transferring data to the GPU if necessary.
+ * This function overrides element orientations in a station model using the
+ * supplied standard deviation.
  *
- * @param[in] dst              Station model structure to copy into.
- * @param[in] index            Element array index to set.
- * @param[in] orientation_x    Azimuth of the element's x dipole axis, in degrees.
- * @param[in] orientation_y    Azimuth of the element's y dipole axis, in degrees.
+ * Only the orientations at the deepest (element) level are set.
+ *
+ * The station model must be in CPU-accessible memory.
+ *
+ * @param[in,out] s            Station model structure to modify.
+ * @param[in] seed             Random generator seed.
+ * @param[in] x_pol            If true, override X dipole angles; else Y dipole.
+ * @param[in] alpha_error_rad  Standard deviation of Euler angle, in radians.
+ * @param[in] beta_error_rad   Standard deviation of Euler angle, in radians.
+ * @param[in] gamma_error_rad  Standard deviation of Euler angle, in radians.
  * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-void oskar_station_set_element_orientation(oskar_Station* dst,
-        int index, double orientation_x, double orientation_y, int* status);
+void oskar_station_override_element_feed_angle(oskar_Station* s,
+        unsigned int seed, int x_pol, double alpha_error_rad,
+        double beta_error_rad, double gamma_error_rad, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_SET_ELEMENT_ORIENTATION_H_ */
+#endif /* OSKAR_STATION_OVERRIDE_ELEMENT_FEED_ANGLE_H_ */

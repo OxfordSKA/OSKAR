@@ -81,8 +81,6 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
     model->apply_element_errors = src->apply_element_errors;
     model->apply_element_weight = src->apply_element_weight;
     model->seed_time_variable_errors = src->seed_time_variable_errors;
-    model->nominal_orientation_x_rad = src->nominal_orientation_x_rad;
-    model->nominal_orientation_y_rad = src->nominal_orientation_y_rad;
     model->num_permitted_beams = src->num_permitted_beams;
 
     /* Copy Gaussian station beam data. */
@@ -109,10 +107,18 @@ oskar_Station* oskar_station_create_copy(const oskar_Station* src,
             src->element_phase_offset_rad, status);
     oskar_mem_copy(model->element_phase_error_rad,
             src->element_phase_error_rad, status);
-    oskar_mem_copy(model->element_orientation_x_rad_cpu,
-            src->element_orientation_x_rad_cpu, status);
-    oskar_mem_copy(model->element_orientation_y_rad_cpu,
-            src->element_orientation_y_rad_cpu, status);
+    oskar_mem_copy(model->element_x_alpha_cpu,
+            src->element_x_alpha_cpu, status);
+    oskar_mem_copy(model->element_x_beta_cpu,
+            src->element_x_beta_cpu, status);
+    oskar_mem_copy(model->element_x_gamma_cpu,
+            src->element_x_gamma_cpu, status);
+    oskar_mem_copy(model->element_y_alpha_cpu,
+            src->element_y_alpha_cpu, status);
+    oskar_mem_copy(model->element_y_beta_cpu,
+            src->element_y_beta_cpu, status);
+    oskar_mem_copy(model->element_y_gamma_cpu,
+            src->element_y_gamma_cpu, status);
     oskar_mem_copy(model->element_types, src->element_types, status);
     oskar_mem_copy(model->element_types_cpu, src->element_types_cpu, status);
     oskar_mem_copy(model->element_mount_types_cpu, src->element_mount_types_cpu, status);

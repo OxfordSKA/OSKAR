@@ -67,6 +67,12 @@
     * Added option to disable horizon clip in advanced sky model settings.
       This can save a wasted check if sources are always above the horizon.
 
+    * Removed deprecated config.txt telescope model file loader.
+
+    * Removed the old orientation.txt telescope model file loader. 
+      TODO Replace this with feed_angle.txt to allow specification of 
+      feeds in three dimensions.
+
     * Removed options to perform explicit time averaging using multiple
       snapshots, as this was very slow.
 

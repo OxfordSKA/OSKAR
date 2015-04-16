@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,33 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_CONFIG_H_
-#define OSKAR_TELESCOPE_LOAD_CONFIG_H_
+#ifndef OSKAR_STATION_SAVE_FEED_ANGLE_H_
+#define OSKAR_STATION_SAVE_FEED_ANGLE_H_
 
-#include "apps/lib/oskar_TelescopeLoadAbstract.h"
+/**
+ * @file oskar_station_save_feed_angle.h
+ */
 
-struct oskar_Settings;
+#include <oskar_global.h>
 
-class TelescopeLoadConfig : public oskar_TelescopeLoadAbstract
-{
-public:
-    TelescopeLoadConfig(const oskar_Settings* settings);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    virtual ~TelescopeLoadConfig();
+/**
+ * @brief Writes OSKAR station model data to an ASCII file.
+ *
+ * @details
+ * This function writes element orientation data from the station model to an
+ * ASCII file.
+ *
+ * @param[in] filename   Pathname of file to write.
+ * @param[in] station    Station model to write.
+ * @param[in] x_pol      If set, save x polarisation data.
+ * @param[in,out] status Status return code.
+ */
+OSKAR_EXPORT
+void oskar_station_save_feed_angle(const char* filename,
+        const oskar_Station* station, int x_pol, int* status);
 
-    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
-            int num_subdirs, std::map<std::string, std::string>& filemap,
-            int* status);
+#ifdef __cplusplus
+}
+#endif
 
-    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
-            int num_subdirs, int depth,
-            std::map<std::string, std::string>& filemap, int* status);
-
-    virtual std::string name() const;
-
-private:
-    static const std::string config_file;
-    const oskar_Settings* settings_;
-};
-
-#endif /* OSKAR_TELESCOPE_LOAD_CONFIG_H_ */
+#endif /* OSKAR_STATION_SAVE_FEED_ANGLE_H_ */

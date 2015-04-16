@@ -29,10 +29,6 @@
 #ifndef OSKAR_PRIVATE_STATION_H_
 #define OSKAR_PRIVATE_STATION_H_
 
-/**
- * @file private_station.h
- */
-
 #include <oskar_mem.h>
 #include <oskar_element.h>
 
@@ -80,8 +76,6 @@ struct oskar_Station
     int apply_element_errors;     /* True if element gain and phase errors should be applied (auto determined; default false). */
     int apply_element_weight;     /* True if weights should be modified by user-supplied complex beamforming weights (auto determined; default false). */
     unsigned int seed_time_variable_errors;   /* Seed for time variable errors. */
-    double nominal_orientation_x_rad;         /* Azimuth of nominal x dipole axis, in radians. */
-    double nominal_orientation_y_rad;         /* Azimuth of nominal y dipole axis, in radians. */
     oskar_Mem* element_true_x_enu_metres;     /* True horizon element x-coordinates, in metres, towards East. */
     oskar_Mem* element_true_y_enu_metres;     /* True horizon element y-coordinates, in metres, towards North. */
     oskar_Mem* element_true_z_enu_metres;     /* True horizon element z-coordinates, in metres, towards the zenith. */
@@ -93,11 +87,15 @@ struct oskar_Station
     oskar_Mem* element_phase_offset_rad;      /* Per-element systematic phase offset, in radians (default 0.0) */
     oskar_Mem* element_phase_error_rad;       /* Standard deviation of per-element time-variable phase, in radians (default 0.0) */
     oskar_Mem* element_weight;                /* Element complex weight (set to 1.0, 0.0 unless using apodisation). */
-    oskar_Mem* element_orientation_x_rad_cpu; /* Azimuth of x dipole axis, in radians, guaranteed to be in CPU memory (default pi/2). */
-    oskar_Mem* element_orientation_y_rad_cpu; /* Azimuth of y dipole axis, in radians, guaranteed to be in CPU memory (default 0.0). */
     oskar_Mem* element_types;     /* Integer array of element types (default 0). */
     oskar_Mem* element_types_cpu; /* Integer array of element types guaranteed to be in CPU memory (default 0). */
     oskar_Mem* element_mount_types_cpu; /* Char array of element mount types guaranteed to be in CPU memory. */
+    oskar_Mem* element_x_alpha_cpu; /* X element Euler angle orientation, guaranteed to be in CPU memory. */
+    oskar_Mem* element_x_beta_cpu;  /* X element Euler angle orientation, guaranteed to be in CPU memory. */
+    oskar_Mem* element_x_gamma_cpu; /* X element Euler angle orientation, guaranteed to be in CPU memory. */
+    oskar_Mem* element_y_alpha_cpu; /* Y element Euler angle orientation, guaranteed to be in CPU memory. */
+    oskar_Mem* element_y_beta_cpu;  /* Y element Euler angle orientation, guaranteed to be in CPU memory. */
+    oskar_Mem* element_y_gamma_cpu; /* Y element Euler angle orientation, guaranteed to be in CPU memory. */
     oskar_Station** child;        /* Array of child station handles (pointer is NULL if none). */
     oskar_Element** element;      /* Array of element models per element type (pointer is NULL if there are child stations). */
 

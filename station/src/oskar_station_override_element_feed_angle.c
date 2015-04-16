@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,9 @@
 extern "C" {
 #endif
 
-void oskar_station_override_element_orientations(oskar_Station* s,
-        unsigned int seed, int x_pol, double orientation_error_rad,
-        int* status)
+void oskar_station_override_element_feed_angle(oskar_Station* s,
+        unsigned int seed, int x_pol, double alpha_error_rad,
+        double beta_error_rad, double gamma_error_rad, int* status)
 {
     int i;
 
@@ -50,31 +50,38 @@ void oskar_station_override_element_orientations(oskar_Station* s,
         /* Recursive call to find the last level (i.e. the element data). */
         for (i = 0; i < s->num_elements; ++i)
         {
-            oskar_station_override_element_orientations(
+            oskar_station_override_element_feed_angle(
                     oskar_station_child(s, i), seed, x_pol,
-                    orientation_error_rad, status);
+                    alpha_error_rad, beta_error_rad, gamma_error_rad, status);
         }
     }
     else
     {
         /* Override element data at last level. */
         int id;
-        double *d, r[2];
-        oskar_Mem *mem;
+        double *a, *b, *c, r[4];
+        oskar_Mem *alpha, *beta, *gamma;
 
         /* Get pointer to the X or Y element orientation data. */
-        mem = x_pol ? s->element_orientation_x_rad_cpu :
-                s->element_orientation_y_rad_cpu;
-        d = oskar_mem_double(mem, status);
+        alpha = x_pol ? s->element_x_alpha_cpu : s->element_y_alpha_cpu;
+        beta  = x_pol ? s->element_x_beta_cpu : s->element_y_beta_cpu;
+        gamma = x_pol ? s->element_x_gamma_cpu : s->element_y_gamma_cpu;
+        a = oskar_mem_double(alpha, status);
+        b = oskar_mem_double(beta, status);
+        c = oskar_mem_double(gamma, status);
         id = oskar_station_unique_id(s);
         for (i = 0; i < s->num_elements; ++i)
         {
-            /* Generate random number from Gaussian distribution. */
-            oskar_random_gaussian2(seed, i, id, r);
-            r[0] *= orientation_error_rad;
+            /* Generate random numbers from Gaussian distribution. */
+            oskar_random_gaussian4(seed, i, id, 0, 0, r);
+            r[0] *= alpha_error_rad;
+            r[1] *= beta_error_rad;
+            r[2] *= gamma_error_rad;
 
             /* Set the new angle. */
-            d[i] += r[0];
+            a[i] += r[0];
+            b[i] += r[1];
+            c[i] += r[2];
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,43 +26,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdlib.h>
-#include <oskar_cmath.h>
-
 #include <private_station.h>
 #include <oskar_station.h>
+#include <oskar_cmath.h>
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_station_set_element_orientation(oskar_Station* dst,
-        int index, double orientation_x, double orientation_y, int* status)
+#define R2D (180.0 / M_PI)
+
+void oskar_station_save_feed_angle(const char* filename,
+        const oskar_Station* station, int x_pol, int* status)
 {
+    int i, num_elements;
+    FILE* file;
+    const double *a, *b, *c;
+
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check range. */
-    if (index >= dst->num_elements)
+    /* Get pointers to the arrays. */
+    if (x_pol)
     {
-        *status = OSKAR_ERR_OUT_OF_RANGE;
+        a = oskar_mem_double_const(station->element_x_alpha_cpu, status);
+        b = oskar_mem_double_const(station->element_x_beta_cpu, status);
+        c = oskar_mem_double_const(station->element_x_gamma_cpu, status);
+    }
+    else
+    {
+        a = oskar_mem_double_const(station->element_y_alpha_cpu, status);
+        b = oskar_mem_double_const(station->element_y_beta_cpu, status);
+        c = oskar_mem_double_const(station->element_y_gamma_cpu, status);
+    }
+
+    /* Open the file. */
+    file = fopen(filename, "w");
+    if (!file)
+    {
+        *status = OSKAR_ERR_FILE_IO;
         return;
     }
 
-    /* Convert orientations to radians. */
-    orientation_x *= M_PI / 180.0;
-    orientation_y *= M_PI / 180.0;
-    if (index == 0)
+    /* Save the data. */
+    num_elements = oskar_station_num_elements(station);
+    for (i = 0; i < num_elements; ++i)
     {
-        dst->nominal_orientation_x_rad = orientation_x;
-        dst->nominal_orientation_y_rad = orientation_y;
+        fprintf(file, "% 14.6f % 14.6f % 14.6f\n",
+                a[i] * R2D, b[i] * R2D, c[i] * R2D);
     }
 
-    /* Store the data. */
-    oskar_mem_double(dst->element_orientation_x_rad_cpu, status)[index] =
-            orientation_x;
-    oskar_mem_double(dst->element_orientation_y_rad_cpu, status)[index] =
-            orientation_y;
+    /* Close the file. */
+    fclose(file);
 }
 
 #ifdef __cplusplus

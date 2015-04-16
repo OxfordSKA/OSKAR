@@ -148,8 +148,6 @@ static oskar_Station* set_up_station1(int num_x, int num_y,
                     1.0, 0.0, 0.0, 0.0, status);
             oskar_station_set_element_weight(station, i,
                     1.0, 0.0, status);
-            oskar_station_set_element_orientation(station, i,
-                    90.0, 0.0, status);
         }
     }
 

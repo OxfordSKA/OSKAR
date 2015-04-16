@@ -17,14 +17,13 @@ set(apps_SRC
     src/oskar_telescope_load.cpp
     src/oskar_telescope_save.cpp
     src/private_TelescopeLoadApodisation.cpp
-    src/private_TelescopeLoadConfig.cpp
     src/private_TelescopeLoadElementPattern.cpp
     src/private_TelescopeLoadElementTypes.cpp
+    src/private_TelescopeLoadFeedAngle.cpp
     src/private_TelescopeLoadGainPhase.cpp
     src/private_TelescopeLoadLayout.cpp
     src/private_TelescopeLoadMountTypes.cpp
     src/private_TelescopeLoadNoise.cpp
-    src/private_TelescopeLoadOrientation.cpp
     src/private_TelescopeLoadPermittedBeams.cpp
 )
 if(CASACORE_FOUND)

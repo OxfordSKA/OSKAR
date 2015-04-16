@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,30 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_ORIENTATION_H_
-#define OSKAR_TELESCOPE_LOAD_ORIENTATION_H_
+#ifndef OSKAR_STATION_SET_ELEMENT_FEED_ANGLE_H_
+#define OSKAR_STATION_SET_ELEMENT_FEED_ANGLE_H_
 
-#include "apps/lib/oskar_TelescopeLoadAbstract.h"
+/**
+ * @file oskar_station_set_element_feed_angle.h
+ */
 
-class TelescopeLoadOrientation : public oskar_TelescopeLoadAbstract
-{
-public:
-    TelescopeLoadOrientation() {}
+#include <oskar_global.h>
 
-    virtual ~TelescopeLoadOrientation() {}
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
-            int num_subdirs, std::map<std::string, std::string>& filemap,
-            int* status);
+/**
+ * @brief
+ * Sets the feed angles for an element.
+ *
+ * @details
+ * This function sets the feed angle of the specified element in the
+ * station model.
+ *
+ * @param[in] dst        Station model structure to copy into.
+ * @param[in] x_pol      If set, set data for x polarisation, otherwise y.
+ * @param[in] index      Element array index to set.
+ * @param[in] alpha_deg  Euler angle, in degrees.
+ * @param[in] beta_deg   Euler angle, in degrees.
+ * @param[in] gamma_deg  Euler angle, in degrees.
+ * @param[in,out] status Status return code.
+ */
+OSKAR_EXPORT
+void oskar_station_set_element_feed_angle(oskar_Station* dst, int x_dipole,
+        int index, double alpha_deg, double beta_deg, double gamma_deg,
+        int* status);
 
-    virtual void load(oskar_Station* station, const oskar_Dir& cwd,
-            int num_subdirs, int depth,
-            std::map<std::string, std::string>& filemap, int* status);
+#ifdef __cplusplus
+}
+#endif
 
-    virtual std::string name() const;
-
-private:
-    static const std::string orientation_file;
-};
-
-#endif /* OSKAR_TELESCOPE_LOAD_ORIENTATION_H_ */
+#endif /* OSKAR_STATION_SET_ELEMENT_FEED_ANGLE_H_ */

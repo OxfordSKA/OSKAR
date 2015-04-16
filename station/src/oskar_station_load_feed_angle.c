@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,8 @@
 extern "C" {
 #endif
 
-void oskar_station_load_orientation(oskar_Station* station,
-        const char* filename, int* status)
+void oskar_station_load_feed_angle(oskar_Station* station,
+        const char* filename, int x_pol, int* status)
 {
     /* Declare the line buffer and counter. */
     char* line = NULL;
@@ -73,8 +73,7 @@ void oskar_station_load_orientation(oskar_Station* station,
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
         /* Declare parameter array. */
-        /* x_azimuth_deg, y_azimuth_deg */
-        double par[] = {90., 0.};
+        double par[] = {0.0, 0.0, 0.0};
         size_t num_par = sizeof(par) / sizeof(double);
 
         /* Load element data. */
@@ -88,8 +87,8 @@ void oskar_station_load_orientation(oskar_Station* station,
         }
 
         /* Store the data. */
-        oskar_station_set_element_orientation(station, n, par[0], par[1],
-                status);
+        oskar_station_set_element_feed_angle(station, x_pol, n,
+                par[0], par[1], par[2], status);
 
         /* Increment element counter. */
         ++n;
