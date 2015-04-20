@@ -131,9 +131,10 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                 {
                     for (a2 = a1 + 1; a2 < num_stations; ++a2, ++b, ++i_out)
                     {
-                        uu_out[i_out] = uu_in[b];
-                        vv_out[i_out] = vv_in[b];
-                        ww_out[i_out] = ww_in[b];
+                        i = num_baseln_in * t + b;
+                        uu_out[i_out] = uu_in[i];
+                        vv_out[i_out] = vv_in[i];
+                        ww_out[i_out] = ww_in[i];
                     }
                 }
             }
@@ -265,9 +266,10 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
                 {
                     for (a2 = a1 + 1; a2 < num_stations; ++a2, ++b, ++i_out)
                     {
-                        uu_out[i_out] = uu_in[b];
-                        vv_out[i_out] = vv_in[b];
-                        ww_out[i_out] = ww_in[b];
+                        i = num_baseln_in * t + b;
+                        uu_out[i_out] = uu_in[i];
+                        vv_out[i_out] = vv_in[i];
+                        ww_out[i_out] = ww_in[i];
                     }
                 }
             }
