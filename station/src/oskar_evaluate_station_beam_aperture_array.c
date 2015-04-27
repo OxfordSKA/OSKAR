@@ -146,10 +146,9 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
                         == OSKAR_ELEMENT_TYPE_ISOTROPIC) )
         {
             /* (Always) evaluate element pattern into the output beam array. */
-            oskar_element_evaluate(oskar_station_element_const(s, 0),
-                    beam,
-                    oskar_station_element_x_alpha_rad(s, 0),
-                    oskar_station_element_y_alpha_rad(s, 0) + M_PI/2.0, /* FIXME */
+            oskar_element_evaluate(oskar_station_element_const(s, 0), beam,
+                    oskar_station_element_x_alpha_rad(s, 0) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
+                    oskar_station_element_y_alpha_rad(s, 0),
                     num_points, x, y, z, frequency_hz, theta, phi, status);
 
             /* Check if array pattern is enabled. */
@@ -229,8 +228,8 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
                 oskar_element_evaluate(
                         oskar_station_element_const(s, element_type_idx),
                         element,
-                        oskar_station_element_x_alpha_rad(s, i),
-                        oskar_station_element_y_alpha_rad(s, i) + M_PI/2.0, /* FIXME */
+                        oskar_station_element_x_alpha_rad(s, i) + M_PI/2.0, /* FIXME Will change: This matches the old convention. */
+                        oskar_station_element_y_alpha_rad(s, i),
                         num_points, x, y, z, frequency_hz, theta, phi, status);
             }
 
