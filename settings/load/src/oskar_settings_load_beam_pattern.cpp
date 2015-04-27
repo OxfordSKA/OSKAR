@@ -52,7 +52,7 @@ void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     s.beginGroup("beam_pattern");
 
     // Get station ID(s) to use.
-    bp->all_stations = s.value("all_stations", true).toBool();
+    bp->all_stations = s.value("all_stations", false).toBool();
     bp->num_active_stations = 0;
     bp->station_ids = 0;
     if (!bp->all_stations)
