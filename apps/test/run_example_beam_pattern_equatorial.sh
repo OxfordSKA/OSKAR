@@ -21,20 +21,6 @@ cd ${example_data_dir}
 ini=setup.ini
 # Telescope model
 set_setting $ini telescope/input_directory telescope
-# Observation parameters
-set_setting $ini observation/num_channels 1
-set_setting $ini observation/num_time_steps 10
-# Beam pattern type options
-set_setting $ini beam_pattern/coordinate_type 'Beam image'
-set_setting $ini beam_pattern/coordinate_frame 'Equatorial'
-set_setting $ini beam_pattern/beam_image/size 256
-set_setting $ini beam_pattern/beam_image/fov_deg 180.0
-# Output options
-set_setting $ini beam_pattern/root_path example_beam_pattern
-set_setting $ini beam_pattern/fits_file/save_voltage true
-set_setting $ini beam_pattern/fits_file/save_total_intensity true
-set_setting $ini beam_pattern/oskar_image_file/save_voltage  false
-set_setting $ini beam_pattern/oskar_image_file/save_total_intensity false
 
 # Run the beam pattern simulation
 echo "Running beam pattern simulation"
