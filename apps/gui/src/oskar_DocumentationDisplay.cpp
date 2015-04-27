@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,10 +103,6 @@ oskar_DocumentationDisplay::oskar_DocumentationDisplay(QWidget *parent)
     add_doc(html, "OSKAR-Settings.pdf",
             "Settings",
             "Describes the format of the OSKAR settings files");
-    add_doc(html, "OSKAR-MATLAB-Interface.pdf",
-            "MATLAB Interface",
-            "Describes an experimental interface for accessing OSKAR data types "
-            "and making images of visibility data in MATLAB");
     add_doc(html, "OSKAR-Binary-File-Format.pdf",
             "Binary File Format",
             "Describes the format of binary files written by OSKAR applications");

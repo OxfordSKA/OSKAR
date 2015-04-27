@@ -1,8 +1,5 @@
 2015-XX-XX  OSKAR-2.6.0
 
-    * TODO Change definition of X and Y dipoles to match IAU axes on 
-      the sky when on an alt-az mount.
-
     * Re-wrote oskar_sim_interferometer application and changed internal 
       visibility format to allow long interferometer simulations to run 
       without running out of host memory. A dedicated host thread is now 
@@ -70,8 +67,8 @@
     * Removed deprecated config.txt telescope model file loader.
 
     * Removed the old orientation.txt telescope model file loader. 
-      TODO Replace this with feed_angle.txt to allow specification of 
-      feeds in three dimensions.
+      Replaced this with feed_angle.txt to allow for a more complete 
+      specification of feed angles in the future.
 
     * Removed options to perform explicit time averaging using multiple
       snapshots, as this was very slow.

@@ -131,7 +131,7 @@ static void free_host_data(HostData* h, int* status);
 static void record_timing(int num_gpus, int* cuda_device_ids,
         DeviceData* d, HostData* h, oskar_Log* log);
 static unsigned int disp_width(unsigned int value);
-static void system_mem_log(oskar_Log* log);
+/*static void system_mem_log(oskar_Log* log);*/
 
 void oskar_sim_interferometer(const char* settings_file,
         oskar_Log* log, int* status)
@@ -256,7 +256,7 @@ void oskar_sim_interferometer(const char* settings_file,
     oskar_log_section(log, 'M', "Initial memory usage");
     for (i = 0; i < num_gpus; ++i)
         oskar_cuda_mem_log(log, 0, s->sim.cuda_device_ids[i]);
-    system_mem_log(log);
+    /*system_mem_log(log);*/
 
     /* Start simulation timer and stop the load timer. */
     oskar_timer_pause(h->tmr_load);
@@ -311,7 +311,7 @@ void oskar_sim_interferometer(const char* settings_file,
                 oskar_log_message(log, 'S', 0, "Block %*i/%i (%.0f%%) "
                         "complete. Simulation time elapsed: %.3f s",
                         disp_width(num_vis_blocks), b+1, num_vis_blocks,
-                        (b+1) / (double)num_vis_blocks,
+                        100.0 * (b+1) / (double)num_vis_blocks,
                         oskar_timer_elapsed(h->tmr_sim));
         }
     }
@@ -324,9 +324,8 @@ void oskar_sim_interferometer(const char* settings_file,
     for (i = 0; i < num_gpus; ++i)
         oskar_cuda_mem_log(log, 0, s->sim.cuda_device_ids[i]);
 
-    /* TODO Remove system memory printing here?
-     * TODO Caching of output data files by the OS makes this not so useful. */
-    system_mem_log(log);
+    /* TODO Caching of output data files by the OS makes this not so useful. */
+    /*system_mem_log(log);*/
 
     /* If there are sources in the simulation and the station beam is not
      * normalised to 1.0 at the phase centre, the values of noise RMS
@@ -838,7 +837,7 @@ static unsigned int disp_width(unsigned int v)
     /* return v == 1u ? 1u : (unsigned)log10(v)+1 */
 }
 
-
+/*
 static void system_mem_log(oskar_Log* log)
 {
     size_t mem_total, mem_free, mem_used, gigabyte = 1024 * 1024 * 1024;
@@ -849,6 +848,7 @@ static void system_mem_log(oskar_Log* log)
             "(%.1f/%.1f GB) used.", 100. * (double) mem_used / mem_total,
             (double) mem_used / gigabyte, (double) mem_total / gigabyte);
 }
+*/
 
 #ifdef __cplusplus
 }

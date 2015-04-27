@@ -6,7 +6,7 @@
     <depends k="telescope/station_type" v="Gaussian beam" />
 
     <!-- Required IF the station type is 'Gaussian beam' -->
-    <s k="fwhm_deg" required="true">
+    <s k="fwhm_deg">
         <label>Gaussian FWHM [deg]</label>
         <type name="double" />
         <desc>
@@ -17,7 +17,7 @@
     </s>
 
     <!-- Required IF the station type is 'Gaussian beam' -->
-    <s k="ref_freq_hz" required="true">
+    <s k="ref_freq_hz">
         <label>Reference frequency [Hz]</label>
         <type name="double" />
         <desc>The reference frequency of the specified FWHM, in Hz.</desc>

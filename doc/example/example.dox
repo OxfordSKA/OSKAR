@@ -67,8 +67,8 @@ and interferometry simulations.
 Start the OSKAR GUI by running the <tt>oskar</tt> binary and load the
 <tt>setup.ini</tt> settings file. Settings files can be loaded into the GUI
 by specifying the settings file path as the first command line argument when 
-starting the OSKAR GUI, or by using the Open... action in the File menu once
-the GUI has started.
+starting the OSKAR GUI, or by using the **Open...** action in the **File** 
+menu once the GUI has started.
 
 \anchor fig_gui
 \image html oskar_gui_1.png "OSKAR GUI with example settings loaded"
@@ -160,28 +160,28 @@ the **Run** menu.
 While this is running, OSKAR will display a log indicating the current
 progress of the simulation. Once the simulation is complete, the results can 
 be found in the FITS image file called
-<tt>example_beam_pattern_VOLTAGE.fits</tt> (unless you changed it) found in
-the directory from which the simulator was run.
+<tt>example_beam_pattern_S0000_TIME_SEP_CHAN_SEP_AMP_XX.fits</tt> 
+(unless you changed it) found in the directory from which the simulator was run.
 
-The output file is a FITS image cube containing the beam pattern for the
-theta and phi voltage response of the X and Y dipoles, at the three
+The output files are four FITS image cubes containing the beam pattern for the
+theta and phi voltage amplitude response of the X and Y dipoles, at the three
 observation frequencies (100, 120, and 140 MHz), and 24 pointing centres
 corresponding to the 24 observation snapshots.
 
 \ref example_bp_fig "The figure below" shows the first plane of this
 FITS cube, which is the theta pattern voltage response (in Right Ascension
 and Declination) of the X dipole for the first frequency channel and first
-time snapshot. Note that the area of zero voltage on the left of the
+time snapshot. Note that the area of zero amplitude on the left of the
 pattern corresponds to parts of the pattern below the horizon (the pointing
 direction for this observation starts near the horizon).
+
+\anchor example_bp_fig
+\image html beam_pattern.png "FITS image showing the voltage amplitude pattern in theta for the X-dipoles, and plotted using the 'square root' scale in DS9. The beam pattern is for the first station, the first channel (100 MHz), at the first time snapshot."
+\image latex beam_pattern.png "FITS image showing the voltage amplitude pattern in theta for the X-dipoles, and plotted using the 'square root' scale in DS9. The beam pattern is for the first station, the first channel (100 MHz), at the first time snapshot." width=13cm
 
 \latexonly
 \newpage
 \endlatexonly
-
-\anchor example_bp_fig
-\image html beam_pattern.png "FITS image showing the voltage pattern response in theta for the X-dipoles, and plotted using the 'square root' scale in DS9. The beam pattern is for the first station, the first channel (100 MHz), at the first time snapshot."
-\image latex beam_pattern.png "FITS image showing the voltage pattern response in theta for the X-dipoles, and plotted using the 'square root' scale in DS9. The beam pattern is for the first station, the first channel (100 MHz), at the first time snapshot." width=13cm
 
 \subsection example_interferometer_sim Interferometry Simulation
 
@@ -200,10 +200,6 @@ Measurement Set for further post-processing in CASA. However, for this
 example, we will inspect the results of the simulation by making an image
 cube of the results with the OSKAR imager, which requires input in the form
 of an OSKAR visibility data file.
-
-\latexonly
-\newpage
-\endlatexonly
 
 \subsection example_imager The OSKAR Imager: Imaging Simulated Visibilities
 
@@ -236,10 +232,6 @@ the **Image type**, using the pattern
 <tt>\<root path\>_\<image type\>.fits</tt>. The image generated in this
 example can be found in the directory from which the OSKAR GUI was started
 with the name <tt>example_image_LINEAR.fits</tt>.
-
-\latexonly
-\newpage
-\endlatexonly
 
 The \ref example_image_fig "figure below" shows a slice of this generated
 FITS image cube for the XX polarisation and first frequency channel.
@@ -302,9 +294,9 @@ Your **Telescope model settings** should now appear
 \image latex oskar_gui_5.png "Telescope settings for plotting custom element pattern data." width=13cm
 
 Run the beam pattern simulation using the **Run Beam Pattern** action as
-before, and view the output file (<tt>example_beam_pattern_VOLTAGE.fits</tt>,
-unless you changed it) using DS9. The output of polarisation plane 1 (this
-is the theta response of the X dipole) and time slice 10 should appear
+before, and view the output file (<tt>example_beam_pattern_S0000_TIME_SEP_CHAN_SEP_AMP_XX.fits</tt>,
+unless you changed it) using DS9. This output file contains
+the theta response of the X dipole. At time slice 10 it should appear
 \ref example_fit_dipole_pattern "as shown below".
 
 \latexonly
@@ -312,8 +304,8 @@ is the theta response of the X dipole) and time slice 10 should appear
 \endlatexonly
 
 \anchor example_fit_dipole_pattern
-\image html custom_element.png "FITS image showing a custom element pattern (which happens to be for an ideal dipole) in polarisation plane 1 and time slice 10 of the data cube."
-\image latex custom_element.png "FITS image showing a custom element pattern (which happens to be for an ideal dipole) in polarisation plane 1 and time slice 10 of the data cube." width=13cm
+\image html custom_element.png "FITS image showing a custom element pattern (which happens to be for an ideal dipole) at time slice 10 of the data cube."
+\image latex custom_element.png "FITS image showing a custom element pattern (which happens to be for an ideal dipole) at time slice 10 of the data cube." width=13cm
 
 There is a slight difference between this output and that from an analytical
 dipole, because the element response in this case was generated by fitting
@@ -334,9 +326,11 @@ pattern for the same time-step is \ref example_fit_beam_pattern "shown below".
 \image html beam_pattern_with_custom_element.png "Beam pattern generated using a custom element pattern, displayed at the same time and polarisation index as shown previously."
 \image latex beam_pattern_with_custom_element.png "Beam pattern generated using a custom element pattern, displayed at the same time and polarisation index as shown previously." width=13cm
 
+<!--
 \latexonly
 \vskip 1cm
 \endlatexonly
+-->
 
 <b>Revision History</b>
 
@@ -352,6 +346,6 @@ pattern for the same time-step is \ref example_fit_beam_pattern "shown below".
 | 8        | 2013-11-13 | Updated for revised beam pattern settings in OSKAR 2.3.0
 | 9        | 2014-07-22 | Updated for new element pattern fitting procedure in OSKAR 2.5.0.
 | 10       | 2014-09-09 | Updated figures for revised default settings in OSKAR 2.5.1.
-| 11       | 2014-10-21 | Removed reference to CFITSIO.
+| 11       | 2015-04-27 | Updated for revised settings in OSKAR 2.6.0.
 
 */

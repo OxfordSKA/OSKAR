@@ -154,8 +154,8 @@ application, described above.
 \subsection apps_oskar_sim_interferometer    oskar_sim_interferometer
 
 This is a command line application for simulating interferometer data.
-Visibility data sets produced by the simulator are written in Measurement
-Set or OSKAR binary visibility format. The simulation is configured using a
+Visibility data sets produced by the simulator are written in CASA Measurement
+Set and/or OSKAR binary visibility format. The simulation is configured using a
 variety of options, which are specified in an OSKAR settings file provided as
 the first command line argument:
 
@@ -166,68 +166,67 @@ the first command line argument:
 Note that this application can be configured and run via the oskar GUI
 application, described above.
 
-\subsubsection apps_oskar_sim_interferometer_parrallel Parallelisation and multi-GPU usage.
+\subsubsection apps_oskar_sim_interferometer_parallel Parallelisation and multi-GPU usage
 
-Interferometric simulations operate on units of the compute known as a
+Interferometer simulations operate on units of computation known as a
 visibility block. This is a unit of the final output visibility data set
-consisting of all baselines and all channels but a limited number of times.
-Computation and writing of these visibility blocks is where, possible
-overlapped by the use of multiple CPU threads. In addition, if multiple GPUs
-are available and assigned in the simulation settings, they will cooperate on
-filling each visibility block. The division of work which results from this
-scheme for a system with two GPUs, simulating a data set split into a number of
-visibility blocks, is illustrated in the
+containing all baselines and all channels, but a limited number of times.
+Computation and writing of these visibility blocks is overlapped by using 
+multiple CPU threads. In addition, if multiple GPUs are available and assigned 
+in the simulation settings, they will cooperate on filling each visibility 
+block. The division of work which results by using this scheme to simulate a 
+data set on a system with two GPUs is illustrated in the
 \ref sim_interferometer_timing_fig "Figure" below. In this illustration, after
 a short period of loading the simulator settings and input model data (marked
-'Setup & load' in the Figure), three threads are launched to perform overlapping
-compute and write of blocks of visibility data. Note that in general the number
-of  threads used by the simulator will be one larger than the number of GPUs used
+'Setup & load'), three threads are launched to perform overlapping
+compute and write of blocks of visibility data. Note that the number of 
+threads used by the simulator will be one larger than the number of GPUs used
 for the computation. Computation within each visibility block is split between
-each of the available GPUs but sharing out independent units of the visibility
-block corresponding to the visibilities for a chunk of sources for one time.
-The size of the chunk of sources, which therefore has an impact on the number
-of compute units shared between the GPUs is configurable in the simulation
-settings. In order to achieve good performance, it is advisable to ensure
-that the number of source chunks multiplied by the number of times in a
-visibility block is large enough to hide any variation in compute times
-between the different compute units (while at the same time having enough
-sources in a chunk to fully occupy the GPU, i.e. >1000 sources in each chunk).
+each of the available GPUs, and proceeds by sharing out independent units of 
+the visibility block which correspond to the visibilities for one chunk of 
+sources for one time. The size of the chunk of sources, which has an impact 
+on the number of compute units shared between the GPUs, is configurable in 
+the simulation settings. In order to achieve good performance, it is 
+advisable to ensure that the number of source chunks multiplied by the number 
+of times in a visibility block is large enough to hide any variation in 
+compute times between the different compute units, while at the same time 
+having enough sources in a chunk to fully occupy the GPU (i.e. several 
+thousand sources in each chunk).
 
 \anchor sim_interferometer_timing_fig
-\image html sim_interferometer_timing.png "Figure showing the division of compute and write operations for a simulation running on a system with two GPUs evaluating a number of blocks of visibility data."
-\image latex sim_interferometer_timing.pdf "Figure showing the division of compute and write operations for a simulation running on a system with two GPUs evaluating a number of blocks of visibility data." width=10cm
+\image html sim_interferometer_timing.png "The division of compute and write operations for a simulation running on a system with two GPUs to evaluate a number of blocks of visibility data."
+\image latex sim_interferometer_timing.pdf "The division of compute and write operations for a simulation running on a system with two GPUs to evaluate a number of blocks of visibility data." width=10cm
 
 
 \subsubsection apps_oskar_sim_interferometer_timing Interpreting timing information
 
-Upon completion of an interferometric simulation, the log will contain the
+Upon completion of an interferometer simulation, the log will contain the
 results of a number of timers. These are the following:
 
 - <b>Total wall time</b> is the total execution time for the simulation. This
-is a combination of the time taken in loading input data, simulation compute,
-and writing output files. Where possible, compute and write operations are
-over-lapped so other than a constant overhead, attributed to setting up and
-loading simulation inputs, the total compute time will equal the largest of
-either write or compute, and the balance between these will give an indication
-if the simulation limited by available computing power or file-IO.
+is a combination of the time taken in loading input data, all computation,
+and writing the output files. Where possible, compute and write operations are
+overlapped, so the total compute time will equal the largest of either write 
+or compute, and the balance between these will give an indication of whether 
+the simulation is limited by available computing power or filesystem 
+performance.
 - <b>Load</b> is the time taken in loading the simulation input data. This time
 is always a contribution to the total wall time.
 - <b>Compute</b> time (displayed per GPU) is the total time taken simulating
-visibility blocks. This is usually the major component on the total simulation
+visibility blocks. This is usually the dominant part of the total simulation
 wall time, in which case the simulation performance is limited by available
 computing power.
 - <b>Write</b> time indicates the total time taken in writing visibility
-data files (Measurement Set and/ or OSKAR binary format). If the compute time
-is larger than this value, write operations will play very little impact on
-the overall simulation wall time. The only exception to this is writing the
-last visibility block which does not overlap with any compute operations.
+data files (CASA Measurement Set and/or OSKAR binary format). If the compute 
+time is larger than this value, write operations will have very little impact 
+on the overall simulation wall time. The only exception to this is writing the
+last visibility block, which cannot overlap with any compute operations.
 
-Notable components of the simulation compute time also listed their average
-percentage contribution to the total computing cost.
-- <b>Initialise & copy</b> represents the cost of setting up and moving
-  data to the GPU. ?? CHECK THIS
+Notable components of the simulation compute time are also listed, with 
+their average percentage contribution to the total computation cost.
+- <b>Copy</b> represents the cost of setting up and moving data to the GPU.
 - <b>Horizon clip</b> is the process of removing sources below the horizon as
-a function of time which, by default is performed station.
+a function of time.
 - <b>Jones E</b> is the evaluation of the station beam pattern as a function
 of station and source direction.
 - <b>Jones K</b> is the evaluation of the interferometric phase per station
@@ -235,7 +234,7 @@ and per source.
 - <b>Jones join</b> is the cost of combining individual Jones terms.
 - <b>Jones correlate</b> forms the visibility amplitudes as a function of
 baseline (station pair), time and frequency, by collapsing the source dimension
-and of the Jones matrices after combining with the source brightness matrix.
+of the Jones matrices after combining with the source brightness matrix.
 - <b>Other</b> is the cost of all other computing components and overheads
 that have not been individually timed.
 
@@ -453,7 +452,7 @@ ds9 Equator_RA_1*.fits &
 <tr><td>9</td><td>2014-09-09</td>
     <td>[2.5.1] Updated description for oskar_vis_to_ms application, which
     now supports concatenation of visibility files.</td></tr>
-<tr><td>10</td><td>2015-03-03</td>
+<tr><td>10</td><td>2015-04-27</td>
     <td>[2.6.0] Updated description of the oskar_sim_interferometer 
     application. Removed deprecated oskar_image_* applications.
     </td></tr>

@@ -18,7 +18,7 @@ set(OSKAR_VERSION_ID "0x020600")
 set(OSKAR_VERSION_MAJOR 2)
 set(OSKAR_VERSION_MINOR 6)
 set(OSKAR_VERSION_PATCH 0)
-set(OSKAR_VERSION_SUFFIX "trunk")
+set(OSKAR_VERSION_SUFFIX "")
 
 # === Add a local module path
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake)
@@ -34,12 +34,12 @@ endif()
 if (NOT OSKAR_BIN_INSTALL_DIR)
     set(OSKAR_BIN_INSTALL_DIR "bin")
 endif()
-if (NOT OSKAR_MATLAB_INSTALL_DIR)
-    set(OSKAR_MATLAB_INSTALL_DIR "share/oskar/matlab")
-endif()
-if (NOT OSKAR_PYTHON_INSTALL_DIR)
-    set(OSKAR_PYTHON_INSTALL_DIR "share/oskar/python")
-endif()
+#if (NOT OSKAR_MATLAB_INSTALL_DIR)
+#    set(OSKAR_MATLAB_INSTALL_DIR "share/oskar/matlab")
+#endif()
+#if (NOT OSKAR_PYTHON_INSTALL_DIR)
+#    set(OSKAR_PYTHON_INSTALL_DIR "share/oskar/python")
+#endif()
 
 # === Set dependencies and compiler options.
 include(oskar_dependencies)
@@ -106,15 +106,15 @@ endif (CUDA_FOUND)
 # === Build other oskar libraries.
 add_subdirectory(apps)
 add_subdirectory(fits)
-add_subdirectory(matlab)
+#add_subdirectory(matlab)
 add_subdirectory(ms)
-add_subdirectory(python)
+#add_subdirectory(python)
 add_subdirectory(settings)
 
-# === Build external libraries (gtest)
+# === Build external libraries.
 add_subdirectory(extern)
 
-# === Build documentation
+# === Build documentation.
 add_subdirectory(doc)
 
 # === Install header tree.

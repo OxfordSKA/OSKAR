@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.6                                          Last update:  30 Oct 2014 |
+| OSKAR 2.6                                          Last update:  27 Apr 2015 |
 +------------------------------------------------------------------------------+
 
 1. OSKAR: Oxford's Square Kilometre Array Radio-telescope simulator
@@ -32,19 +32,17 @@ Top level folder structure for OSKAR.
  |-- doc              : Doxygen user documentation.
  |-- element          : Element structure and related functions.
  |-- extern           : External libraries used by OSKAR.
- |   |-- cfitsio-3.37 : CFITSIO library to export FITS files.
+ |   |-- cfitsio-3.37 : NASA's CFITSIO library to export FITS files.
  |   |-- ezOptionParser-0.2.0: Library for command line option parsing.
  |   |-- gtest-1.7.0  : Google testing framework library.
- |   |-- rapidxml-1.13: 
+ |   |-- rapidxml-1.13: XML utility library.
  |-- fits             : FITS format interface library.
  |-- imaging          : Image/imaging functions.
  |-- interferometry   : Visibility functions and telescope model functions.
  |-- jones            : Jones data structure and jones matrix evaluation
  |                      functions.
  |-- math             : General math functions and DFT kernels.
- |-- matlab           : Experimental MATLAB interface.
  |-- ms               : Measurement Set writer.
- |-- python           : Experimental Python interface.
  |-- settings         : Functions, widgets and structures for settings.
  |   |-- load         : Functions for loading settings ini files.
  |   |-- struct       : Settings structures and functions for handling them.
@@ -99,8 +97,6 @@ Utility Applications:
 * oskar_cuda_system_info        : Displays information about the CUDA devices
                                   found on the system.
 * oskar_fits_image_to_sky_model : Creates an OSKAR sky model from a FITS image.
-* oskar_image_stats             : Displays statistics for an OSKAR image.
-* oskar_image_summary           : Displays a summary of an OSKAR image file.
 * oskar_settings_set            : Sets the value for the given key in an
                                   OSKAR settings file.
 * oskar_settings_get            : Returns the value of the given key in an
@@ -116,16 +112,7 @@ Utility Applications:
                                   Measurement Set.
 
 
-3.3 MATLAB Interface functions
---------------------------------------------------------------------------------
-An experimental MATLAB interface consisting of functions for:
-* Reading OSKAR visibility files
-* Reading OSKAR image files.
-* Making images by DFT.
-* Reading OSKAR source catalog files.
-* Reading OSKAR binary files.
-
-3.4 Unit tests
+3.3 Unit tests
 --------------------------------------------------------------------------------
 A number of unit test binaries are built, and can be found in the module/test
 directories.

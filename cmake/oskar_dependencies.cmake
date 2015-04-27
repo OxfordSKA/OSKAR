@@ -41,10 +41,10 @@ endif()
 #    find_package(Qt5Core)
 #endif()
 find_package(CasaCore)               # liboskar_ms
-find_package(Matlab)                 # mex functions
+#find_package(Matlab)                 # mex functions
 #find_package(PNG QUIET)             # For writing PNG images
-find_package(PythonLibs 2.7)         # For python interface
-find_package(NumPy 1.8)              # For python interface
+#find_package(PythonLibs 2.7)         # For python interface
+#find_package(NumPy 1.8)              # For python interface
 
 
 if (PYTHONLIBS_FOUND AND NUMPY_FOUND AND PYTHONINTERP_FOUND AND PYTHON_VERSION_MAJOR EQUAL 2)
@@ -93,7 +93,7 @@ endif()
 if (NOT QT4_FOUND)
     message("===============================================================================")
     message("-- WARNING: Qt4 not found: "
-            "Unable to build OSKAR widgets and applications.")
+            "Unable to build OSKAR applications or GUI.")
     message("===============================================================================")
 endif()
 
@@ -111,12 +111,12 @@ if (NOT OPENMP_FOUND)
     message("===============================================================================")
 endif ()
 
-if (NOT MATLAB_FOUND)
-    message("===============================================================================")
-    message("-- WARNING: MATLAB not found: "
-            "Unable to build the OSKAR MATLAB interface.")
-    message("===============================================================================")
-endif()
+#if (NOT MATLAB_FOUND)
+#    message("===============================================================================")
+#    message("-- WARNING: MATLAB not found: "
+#            "Unable to build the OSKAR MATLAB interface.")
+#    message("===============================================================================")
+#endif()
 
 #if (NOT PYTHON_FOUND)
 #    message("===============================================================================")
@@ -153,12 +153,12 @@ if ("${component_count}" EQUAL 0)
     message("===============================================================================")
     message(FATAL_ERROR "")
 endif()
-if (MATLAB_FOUND AND CUDA_FOUND)
-    message("-- INFO:   - OSKAR MATLAB interface functions")
-endif()
-if (PYTHON_FOUND AND CUDA_FOUND)
-    message("-- INFO:   - OSKAR Python interface functions (experimental)")
-endif()
+#if (MATLAB_FOUND AND CUDA_FOUND)
+#    message("-- INFO:   - OSKAR MATLAB interface functions")
+#endif()
+#if (PYTHON_FOUND AND CUDA_FOUND)
+#    message("-- INFO:   - OSKAR Python interface functions (experimental)")
+#endif()
 message("===============================================================================")
 
 message("===============================================================================")
@@ -168,12 +168,12 @@ message("-- INFO:   - Headers           ${CMAKE_INSTALL_PREFIX}/${OSKAR_INCLUDE_
 if (QT4_FOUND AND CUDA_FOUND)
 message("-- INFO:   - Applications      ${CMAKE_INSTALL_PREFIX}/${OSKAR_BIN_INSTALL_DIR}")
 endif()
-if (MATLAB_FOUND AND CUDA_FOUND)
-message("-- INFO:   - MATLAB interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_MATLAB_INSTALL_DIR}")
-endif()
-if (PYTHON_FOUND AND CUDA_FOUND)
-message("-- INFO:   - Python interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_PYTHON_INSTALL_DIR}")
-endif()
+#if (MATLAB_FOUND AND CUDA_FOUND)
+#message("-- INFO:   - MATLAB interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_MATLAB_INSTALL_DIR}")
+#endif()
+#if (PYTHON_FOUND AND CUDA_FOUND)
+#message("-- INFO:   - Python interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_PYTHON_INSTALL_DIR}")
+#endif()
 #message("-- NOTE: These paths can be changed using: '-DCMAKE_INSTALL_PREFIX=<path>'")
 message("===============================================================================")
 

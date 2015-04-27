@@ -349,15 +349,25 @@ In each station directory, there may be optionally "feed_angle.txt",
 "feed_angle_x.txt" and/or "feed_angle_y.txt" files 
 to specify the Euler angles of the feeds of the nominal X and Y dipoles.
 If only a single "feed_angle.txt" file is present, the same data are used
-for both the X and Y polarisations.
+for both the X and Y polarisations. Note that all the angles represent 
+differences from zero, which is the ideal case where both dipoles are
+orthogonal.
 
 In order, the parameter columns are:
 
-| Column | Description                                           | Comment
-| ------ | ----------------------------------------------------- | ------------------------ 
-| 1      | Euler angle alpha around z-axis [deg]                 | Optional (default 0.0)
-| 2      | Euler angle beta around x-axis [deg]                  | Optional (default 0.0)
-| 3      | Euler angle gamma around z-axis [deg]                 | Optional (default 0.0)
+| Column | Description                                           
+| ------ | --------------------------------------------------------------
+| 1      | Euler angle alpha around z-axis [deg]
+
+
+It will be possible to specify the remaining two Euler angles of 
+individual elements in OSKAR 2.7.
+
+
+<!--
+| 2      | Euler angle beta around x-axis [deg]
+| 3      | Euler angle gamma around z-axis [deg]
+-->
 
 \section telescope_permitted_beams Permitted Beam Directions
 

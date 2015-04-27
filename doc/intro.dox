@@ -3,13 +3,13 @@
 \mainpage Introduction
 
 \latexonly
-\def \docversion{6}
+\def \docversion{7}
 \endlatexonly
 
 \section intro_intro What is OSKAR?
 
-The OSKAR package consists of a number of open source libraries and
-applications for the simulation of astronomical radio interferometers.
+The OSKAR package consists of a number of open source applications for the 
+simulation of astronomical radio interferometers.
 OSKAR 2.x has been designed primarily to produce simulated data from large
 aperture arrays, such as those envisaged for the SKA.
 
@@ -18,29 +18,14 @@ aperture arrays, such as those envisaged for the SKA.
 Below is a summary of the current features of the OSKAR package.
 
 - **Simulation capability:**
-  - Evaluation of a fully polarised Measurement Equation accelerated using
-    NVIDIA GPU(s).
-  - Extensible framework using Jones matrix formalism. The following terms
-    are currently implemented (for baselines \f$p\f$,\f$q\f$ and all visible
-    sources, \f$s\f$):
-    \f[ \mathbf{V}_{p,q} = \sum_s
-        \mathbf{K}_{p,s} \mathbf{E}_{p,s} \mathbf{R}_{p,s}
-        \left< \mathbf{B}_{s} \right> 
-        \mathbf{R}_{q,s}^H \mathbf{E}_{q,s}^H \mathbf{K}_{q,s}^H \f]
-    - **B**: Source brightness matrix.
-    - **R**: Parallactic angle rotation.
-    - **E**: Station beam, including antenna element response(s).
-    - **K**: Interferometer phase.
-    - **V**: Complex visibility.
+  - Evaluation of a polarised Radio Interferometer Measurement Equation, 
+    accelerated using NVIDIA GPU(s).
+  - Extensible framework using Jones matrix formalism.
   - Optimised for simulation using very large source catalogues.
-  - Easily capable of simulating interferometers constructed from large
-    aperture arrays.
+  - Capable of simulating interferometers constructed from large aperture 
+    arrays.
   - Sky models:
-    - Catalogues of point and/or elliptical Gaussian sources.
-    - Imported from a number of data file formats:
-      - Simple custom ASCII or binary tables.
-      - HEALPix pixel grids, in ASCII list and/or FITS format.
-      - FITS images.
+    - Input catalogues of point and/or elliptical Gaussian sources.
     - Built-in sky model generators for random power-law,
       random broken-power-law and uniform HEALPix grid distributions.
   - Station beam response:
@@ -55,13 +40,14 @@ Below is a summary of the current features of the OSKAR package.
     - Inclusion of (embedded) antenna element patterns specified by an
       analytical dipole response or a numerically defined pattern, as a
       function of element type and frequency.
+    - Inclusion of parallactic angle rotation.
   - Interferometric response allows for:
     - Analytical time and bandwidth smearing.
     - Uncorrelated system noise.
     - Filtering as a function of baseline UV distance.
 - **An application to simulate interferometer data**
   - Configurable using INI format settings files.
-  - Export to Measurement Set format.
+  - Export to CASA Measurement Set format.
   - Capability to produce raw images of simulated visibility data in FITS
     format.
 - **An application to simulate aperture array beam patterns**
@@ -104,10 +90,6 @@ the order listed below.
 - \ref pointing_file "Pointing File"<br>
   Describes the format of OSKAR pointing files.
 
-- \ref matlab_interface "MATLAB interface"<br>
-  Describes an experimental interface for accessing OSKAR data types and
-  making images of visibility data in MATLAB.
-
 - \ref settings "Settings Files"<br>
   Describes the settings used by OSKAR and the format of the OSKAR settings
   files.
@@ -124,15 +106,10 @@ If you have a question that is not answered here, please send it to
 oskar@oerc.ox.ac.uk and we will do our best to respond.
 
 -# <b>Which operating systems/platforms are supported?</b><br>
-OSKAR has been tested on Ubuntu Linux 12.04, and 13.10, and we anticipate
-that it will work without problems with other recent Linux distributions.
-OSKAR has also been tested to compile and run correctly on Mac OS X 10.8
-and 10.9. If you encounter a problem with OSKAR while trying to compile or
+OSKAR has been tested to compile and run correctly on various recent Linux 
+distributions, and recent versions of Mac OS X.
+If you encounter a problem with OSKAR while trying to compile or
 run it on a Linux or Mac OS X system, please report it to oskar@oerc.ox.ac.uk.
-Since there is no known platform-specific code in OSKAR, it is likely that
-it will work on Microsoft Windows, but this platform is currently unsupported.
-However, depending on demand, support for this platform could be added in a
-future release.
 
 -# <b>Does OSKAR require an NVIDIA GPU to work?</b><br>
 Yes. The core parts of the code are currently written using NVIDIA's CUDA
@@ -167,9 +144,9 @@ that we can implement them.
 Releases in the immediate future will be mainly aimed at fixing bugs and
 adding missing features. The current items on the high-priority list include:
  - Interferometry simulations using dishes.
- - Inclusion of direction-independent gain and phase errors, to be corrected
-   during calibration
  - Inclusion of a simple ionosphere model.
+ - Inclusion of direction-independent gain and phase errors, to be corrected
+   during calibration.
 
 \latexonly
 \newpage
@@ -223,7 +200,7 @@ Smithsonian Astrophysical Observatory.
     documents.</td></tr>
 <tr><td>6</td><td>2014-07-16</td>
     <td>Updated feature summary and roadmap for OSKAR 2.5.0.</td></tr>
-<tr><td>7</td><td>2015-01-23</td>
+<tr><td>7</td><td>2015-04-27</td>
     <td>Added attribution for use of Random123 library.</td></tr>
 </table>
 
