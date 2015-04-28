@@ -297,8 +297,14 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
 
     /* Output OSKAR sky model file settings. */
     depth = 1;
-    LVS0("Output OSKAR sky model text file", s->sky.output_text_file);
-    LVS0("Output OSKAR sky model binary file", s->sky.output_binary_file);
+    if (s->sky.output_text_file)
+    {
+        LVS0("Output OSKAR sky model text file", s->sky.output_text_file);
+    }
+    if (s->sky.output_binary_file)
+    {
+        LVS0("Output OSKAR sky model binary file", s->sky.output_binary_file);
+    }
 
     /* Advanced settings. */
     if (s->sky.zero_failed_gaussians)
@@ -536,7 +542,10 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
 
     /* Telescope model output directory. */
     depth = 1;
-    LVS0("Output directory", s->telescope.output_directory);
+    if (s->telescope.output_directory)
+    {
+        LVS0("Output directory", s->telescope.output_directory);
+    }
 }
 
 void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
