@@ -77,6 +77,7 @@
       amplitude conversion to Jy was not performed correctly.
 
     * Removed options to write OSKAR image files, as these are deprecated.
+      (Use FITS files instead.)
 
     * Switched to using a counter-based pseudo-random number generator
       instead of cuRAND, for increased flexibility and performance.

@@ -72,17 +72,28 @@ please refer to older revisions of this document or the
 - Removed options to load GSM maps and HEALPix maps in K, as
       amplitude conversion to Jy was not performed correctly.
 - Removed options to write OSKAR image files, as these are deprecated.
+      (Use FITS files instead.)
 - Switched to using a counter-based pseudo-random number generator
       instead of cuRAND, for increased flexibility and performance.
 - Added CRC codes to data chunks in binary files.
 - Updated interface to oskar_settings_set binary to unset keys when the 
       value is left empty.
 
-\section version_2_7_0 Planned for version 2.7.0
+\section release_notes_roadmap Roadmap
+
+Features are expected to be implemented in future versions of OSKAR as 
+listed below.
+
+\subsection release_notes_version_2_7_0 Planned for OSKAR 2.7.0 (estimated Q2 2015)
 
 - Use of analytical and numerical dish patterns.
 - Swap of X and Y dipoles to match IAU polarisation axes on the sky.
-- Full 3D specification of individual element feeds.
+- Full 3D specification of individual element feed angles.
+- Full Stokes beam patterns.
+
+\subsection release_notes_version_2_8_0 Planned for OSKAR 2.8.0
+
+- A usable ionospheric model.
 
 \section known_issues Known Issues
 
