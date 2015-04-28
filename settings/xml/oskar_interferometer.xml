@@ -103,11 +103,11 @@
 
     <s k="force_polarised_ms">
         <label>Force polarised Measurement Set</label>
-        <type name="Bool" default="False" />
+        <type name="Bool" default="false" />
         <desc>
             If <b>True</b>, always write the Measurment Set in polarised format
             even if the simulation was run in the single polarisation
-            'Scalar' (or Stokes-I) mode. If <b>False</b>, the the size of the
+            'Scalar' (or Stokes-I) mode. If <b>False</b>, the size of the
             polarisation dimension in the the Measurement Set will be
             determined by the simulation mode.
         </desc>

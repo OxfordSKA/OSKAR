@@ -49,6 +49,8 @@ The following section describes the possible options that can be currently used
 in OSKAR settings files. The settings file is arranged into a number of groups,
 which are described in the subsections below.
 
+Required parameters are marked with a dagger symbol (\f$\dagger\f$).
+
 <!--
 \subsection settings_allowed_values A note on allowed values
 - MAX represents the maximum representable value for the type.
@@ -116,7 +118,7 @@ All settings keys in this group are prefixed with <tt>interferometer/</tt>.
 
 <!-- ************************************* -->
 \subsection settings_beam_pattern Beam pattern settings
-These settings are used only when running the beam pattern simulation.
+These settings are used only when running beam pattern simulations.
 
 All settings keys in this group are prefixed with <tt>beam_pattern/</tt>.
 
@@ -173,13 +175,13 @@ All settings keys in this group are prefixed with <tt>image/</tt>.
     noise is specified for a single polarisation.  Changed all random 
     number seed integer ranges to start at 1 (rather than 0). Changed beam 
     normalization to be enabled by default.</td></tr>
-<tr><td>11</td><td>2014-12-08</td>
+<tr><td>11</td><td>2015-04-28</td>
     <td>Moved option to select polarisation mode into telescope model settings
     group, so that scalar mode can also be used for beam pattern 
     simulations. Moved and renamed option to allow station beam duplication
     into telescope model group. Added option to disable horizon clip in 
-    advanced sky model settings. Added option to produce the time-averaged 
-    beam to the beam pattern group. 
+    advanced sky model settings. Re-wrote most of the beam pattern options to 
+    support the new output modes.
     Added the ability to use seconds (as well as hours, minutes and seconds) 
     to specify observation length. Removed options to write OSKAR image 
     files. Removed ability to load a GSM file directly or use HEALPix

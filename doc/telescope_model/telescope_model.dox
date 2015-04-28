@@ -159,11 +159,15 @@ Type index of each element in the station.<br>
 <b>Required:</b> No.<br>
 <b>Allowed locations:</b> Station directory.
 
+<!-- FEATURE FOR OSKAR 2.7
+
 \par mount_types.txt
 Mount type of each element in the station.<br>
 <b>See</b> \ref telescope_element_mount_types <br>
 <b>Required:</b> No.<br>
 <b>Allowed locations:</b> Station directory.
+
+-->
 
 \par element_pattern_fit_*.bin
 Element X-or Y-dipole responses for the station, as a function of frequency.<br>
@@ -399,6 +403,8 @@ In order, the parameter columns are:
 | ------ | --------------------------------------------------------------
 | 1      | Element type index (must be an integer). 
 
+<!-- FEATURE FOR OSKAR 2.7
+
 \section telescope_element_mount_types  Mount Types
 
 In each station directory, there may be optionally a "mount_types.txt" 
@@ -414,6 +420,8 @@ In order, the parameter columns are:
 | Column | Description                                           
 | ------ | --------------------------------------------------------------
 | 1      | Element mount type (character: either 'A' or 'F'). 
+
+-->
 
 \section telescope_element_patterns Embedded Element Pattern Files
 

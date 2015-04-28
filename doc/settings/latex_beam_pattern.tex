@@ -25,9 +25,9 @@
 \endfoot
  
 \endlastfoot
-time\_average\_beam
+all\_stations
 &
-{If set, produce a single time-averaged beam for the observation, instead of a series of snapshots.}
+{If set, produce beams for all stations in the telescope model; otherwise, for selected stations.}
 &
 Bool
 &
@@ -35,13 +35,50 @@ false
 \\
 \hline
 
-station\_id
+station\_ids
 &
-{The station ID number (zero based) to select from the telescope model when generating the beam pattern.}
+{The zero-based station ID number(s) to select from the telescope model when generating beam pattern(s).}
 &
-Unsigned integer
+CSV integer list
 &
 0
+\\
+\hline
+
+coordinate\_frame
+&
+{Specification of the coordinate frame in which to evaluate the beam pattern. Horizon-based beam patterns will cover the entire sky.}
+&
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Equatorial}
+\item {Horizon}
+\end{itemize}
+}
+&
+Equatorial
+\\
+\hline
+
+coordinate\_type
+&
+{Specification of coordinates at which to evaluate the beam pattern. 
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
+\vspace{8pt}
+ \item {\textbf{Beam image:} Tangent plane image, centred on the phase centre direction.}
+ \item {\textbf{Sky model:} Evaluate beam only at the supplied coordinates.}
+ \vspace{8pt}
+\end{itemize}}
+}
+&
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Beam image}
+\item {Sky model}
+\end{itemize}
+}
+&
+Beam
 \\
 \hline
 
@@ -65,7 +102,7 @@ CSV integer list
 
 beam\_image/fov\_deg
 &
-{Field-of-view (FOV) in degrees (max 180.0). If a single value is specified, the image is assumed to have the same FOV along each dimension. 
+{Field-of-view (FOV) in degrees (max 180.0). If a single value is specified, the image is assumed to have the same FOV along each dimension.
 \vspace{8pt}\par\noindent  Example: 
 {\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
 \vspace{8pt}
@@ -81,6 +118,16 @@ Double, or CSV list of doubles.
 \\
 \hline
 
+sky\_model/file
+&
+{Path to an input sky model file.}
+&
+Path name
+&
+None
+\\
+\hline
+
 root\_path
 &
 {Root path name of the generated data file. Appropriate suffixes and extensions will be added to this, based on the settings below.}
@@ -91,9 +138,19 @@ None
 \\
 \hline
 
-fits\_file/save\_voltage
+output/separate\_time\_and\_channel
 &
-{If true, save the voltage amplitude pattern in a FITS image file. (This is given by the square root of the sum of the squares of the real and imaginary values.)}
+{Output files without performing any averaging over the time or channel dimensions.}
+&
+Bool
+&
+true
+\\
+\hline
+
+output/average\_time\_and\_channel
+&
+{Output files after averaging over both the time and channel dimensions.}
 &
 Bool
 &
@@ -101,9 +158,25 @@ false
 \\
 \hline
 
-fits\_file/save\_phase
+output/average\_single\_axis
 &
-{If true, save the phase pattern in a FITS image file.}
+{Output files after averaging over the selected dimension.}
+&
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {None}
+\item {Time}
+\item {Channel}
+\end{itemize}
+}
+&
+false
+\\
+\hline
+
+station\_outputs/text\_file/save\_raw\_complex
+&
+{If true, save the raw complex pattern in text files.}
 &
 Bool
 &
@@ -111,9 +184,109 @@ false
 \\
 \hline
 
-fits\_file/save\_total\_intensity
+station\_outputs/text\_file/save\_amp
 &
-{If true, save the total intensity beam. This is evaluated as the Stokes-I response of the beam pattern auto-correlation.}
+{If true, save each amplitude (voltage) pattern in text files. This is given by the square root of the sum of the squares of the real and imaginary values.}
+&
+Bool
+&
+false
+\\
+\hline
+
+station\_outputs/text\_file/save\_phase
+&
+{If true, save each phase pattern in text files.}
+&
+Bool
+&
+false
+\\
+\hline
+
+station\_outputs/text\_file/save\_auto\_power\_stokes\_i
+&
+{If true, save each total intensity beam in text files. This is evaluated as the Stokes I response of the auto-correlation.}
+&
+Bool
+&
+false
+\\
+\hline
+
+station\_outputs/fits\_image/save\_amp
+&
+{If true, save each amplitude (voltage) pattern in FITS image files. This is given by the square root of the sum of the squares of the real and imaginary values.}
+&
+Bool
+&
+false
+\\
+\hline
+
+station\_outputs/fits\_image/save\_phase
+&
+{If true, save each phase pattern in FITS image files.}
+&
+Bool
+&
+false
+\\
+\hline
+
+station\_outputs/fits\_image/save\_auto\_power\_stokes\_i
+&
+{If true, save each total intensity beam in FITS image files. This is evaluated as the Stokes I response of the auto-correlation.}
+&
+Bool
+&
+false
+\\
+\hline
+
+telescope\_outputs/text\_file/save\_cross\_power\_stokes\_i\_raw\_complex
+&
+{If true, save the average cross-power beam raw response to Stokes I from all specified stations as a text file.}
+&
+Bool
+&
+false
+\\
+\hline
+
+telescope\_outputs/text\_file/save\_cross\_power\_stokes\_i\_amp
+&
+{If true, save the average cross-power beam amplitude response to Stokes I from all specified stations as text files.}
+&
+Bool
+&
+false
+\\
+\hline
+
+telescope\_outputs/text\_file/save\_cross\_power\_stokes\_i\_phase
+&
+{If true, save the average cross-power beam phase response to Stokes I from all specified stations as text files.}
+&
+Bool
+&
+false
+\\
+\hline
+
+telescope\_outputs/fits\_image/save\_cross\_power\_stokes\_i\_amp
+&
+{If true, save the average cross-power beam amplitude response to Stokes I from all specified stations in FITS image files.}
+&
+Bool
+&
+false
+\\
+\hline
+
+telescope\_outputs/fits\_image/save\_cross\_power\_stokes\_i\_phase
+&
+{If true, save the average cross-power beam phase response to Stokes I from all specified stations in FITS image files.}
 &
 Bool
 &

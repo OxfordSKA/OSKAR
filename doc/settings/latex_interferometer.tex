@@ -55,6 +55,22 @@ Int
 \\
 \hline
 
+correlation\_type
+&
+{The type of correlations to produce: either cross-correlations, auto-correlations, or both.}
+&
+{One of the following:}
+{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
+\vspace{4pt}\item {Cross-correlations}
+\item {Auto-correlations}
+\item {Both}
+\end{itemize}
+}
+&
+Cross-correlations
+\\
+\hline
+
 uv\_filter\_min
 &
 {The minimum value of the baseline UV length allowed by the filter. \textbf{Note that visibilities on baseline UV lengths outside this range will not be evaluated!}}
@@ -494,11 +510,11 @@ Path name
 
 force\_polarised\_ms
 &
-{If \textbf{True}, always write the Measurment Set in polarised format even if the simulation was run in the single polarisation `Scalar' (or Stokes-I) mode. If \textbf{False}, the the size of the polarisation dimension in the the Measurement Set will be determined by the simulation mode.}
+{If \textbf{True}, always write the Measurment Set in polarised format even if the simulation was run in the single polarisation `Scalar' (or Stokes-I) mode. If \textbf{False}, the size of the polarisation dimension in the the Measurement Set will be determined by the simulation mode.}
 &
 Bool
 &
-False
+false
 \\
 \hline
 

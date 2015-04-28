@@ -55,7 +55,7 @@ All settings keys in this group are prefixed with <tt>interferometer/</tt>.
 
 <!-- ************************************* -->
 \subsection settings_beam_pattern Beam pattern settings
-These settings are used only when running the beam pattern simulation.
+These settings are used only when running beam pattern simulations.
 
 All settings keys in this group are prefixed with <tt>beam_pattern/</tt>.
 
