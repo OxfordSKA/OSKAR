@@ -1134,6 +1134,15 @@ static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
             s->beam_pattern.station_fits_auto_power_stokes_i ||
             s->beam_pattern.station_text_auto_power_stokes_i;
 
+    /* Check settings make logical sense. */
+    if (h->cross_power_I && h->num_active_stations < 2)
+    {
+        oskar_log_error(log, "Cannot create cross-power beam "
+                "using less than two active stations.");
+        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        return;
+    }
+
     /* Set up pixel positions. */
     h->x = oskar_mem_create(h->precision, OSKAR_CPU, 0, status);
     h->y = oskar_mem_create(h->precision, OSKAR_CPU, 0, status);
