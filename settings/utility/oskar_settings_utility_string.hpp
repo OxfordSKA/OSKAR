@@ -61,9 +61,13 @@ bool oskar_settings_utility_string_starts_with(const std::string& s1,
         const std::string& s2, bool case_senstive = false);
 
 // Convert double to a string
-std::string oskar_settings_utility_double_to_string(double d, int precision = 0);
+std::string oskar_settings_utility_double_to_string(double d,
+        int precision = -17);
 
 // Convert string to double
 double oskar_settings_utility_string_to_double(const std::string& s, bool *ok);
+
+// Generate a formatted string
+std::string oskar_format_string(const std::string fmt, ...);
 
 #endif /* OSKAR_SETTINGS_UTILITY_STRING_HPP_ */

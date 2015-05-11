@@ -37,8 +37,10 @@
 #include <cstdlib>
 #include <cerrno>
 #include <cmath>
+#include <stdarg.h>
 
 #include <iostream> // for debugging FIXME
+#include <iomanip>
 
 
 std::string oskar_settings_utility_string_trim(const std::string& s,
@@ -133,7 +135,7 @@ bool oskar_settings_utility_string_starts_with(const std::string& s1,
 
 
 std::string oskar_settings_utility_double_to_string(double d,
-        int precision /* = 0 */)
+        int precision /* = -17 */)
 {
     std::ostringstream ss;
 
@@ -145,8 +147,36 @@ std::string oskar_settings_utility_double_to_string(double d,
         ss.setf(std::ios_base::fixed);
         ss << std::setprecision(precision);
     }
+
+    else if (precision < 0)
+    {
+        // Attempt to guess the number of decimal digits
+//        int count = 0;
+//        double num = std::abs(d);
+//        double prev = num;
+//        std::cout << "init: " << std::setprecision(12) << prev << std::endl;
+//        num -= int(num);
+//        while (std::abs(num) >= 1.0e-8 && count < 17) {
+//            num *= 10;
+//            num -= round(num);
+//            //num -= int(num);
+//            count++;
+//            std::cout << prev << " " << count << " " << num << std::endl;
+//            prev = num;
+//        }
+        //ss.setf(std::ios_base::fixed);
+        //ss << std::setprecision(std::min(count, precision*-1));
+        ss << std::setprecision(-precision);
+    }
+
     ss << d;
-    return std::string(ss.str());
+    std::string s = std::string(ss.str());
+
+//    if (strip_trailing_zeros) {
+//
+//    }
+
+    return s;
 }
 
 double oskar_settings_utility_string_to_double(const std::string& s, bool *ok)
@@ -174,3 +204,23 @@ double oskar_settings_utility_string_to_double(const std::string& s, bool *ok)
     return val;
 }
 
+// http://stackoverflow.com/questions/2342162/stdstring-formatting-like-sprintf
+std::string oskar_format_string(const std::string fmt, ...)
+{
+    int size = 512;
+    char* buffer = 0;
+    buffer = new char[size];
+    va_list vl;
+    va_start(vl, fmt);
+    int nsize = vsnprintf(buffer, size, fmt.c_str(), vl);
+    if(size <= nsize) { // fail? delete buffer and try again
+        delete[] buffer;
+        buffer = 0;
+        buffer = new char[nsize+1]; //+1 for /0
+        nsize = vsnprintf(buffer, size, fmt.c_str(), vl);
+    }
+    std::string ret(buffer);
+    va_end(vl);
+    delete[] buffer;
+    return ret;
+}
