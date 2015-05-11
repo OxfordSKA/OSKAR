@@ -98,26 +98,26 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem, size_t num_elements,
             case OSKAR_SINGLE:
             {
                 fprintf(file, SDF, ((const float*)data)[j]);
-                break;
+                continue;
             }
             case OSKAR_DOUBLE:
             {
                 fprintf(file, SDD, ((const double*)data)[j]);
-                break;
+                continue;
             }
             case OSKAR_SINGLE_COMPLEX:
             {
                 float2 d;
                 d = ((const float2*)data)[j];
                 fprintf(file, SDF SDF, d.x, d.y);
-                break;
+                continue;
             }
             case OSKAR_DOUBLE_COMPLEX:
             {
                 double2 d;
                 d = ((const double2*)data)[j];
                 fprintf(file, SDD SDD, d.x, d.y);
-                break;
+                continue;
             }
             case OSKAR_SINGLE_COMPLEX_MATRIX:
             {
@@ -125,7 +125,7 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem, size_t num_elements,
                 d = ((const float4c*)data)[j];
                 fprintf(file, SDF SDF SDF SDF SDF SDF SDF SDF,
                         d.a.x, d.a.y, d.b.x, d.b.y, d.c.x, d.c.y, d.d.x, d.d.y);
-                break;
+                continue;
             }
             case OSKAR_DOUBLE_COMPLEX_MATRIX:
             {
@@ -133,21 +133,26 @@ void oskar_mem_save_ascii(FILE* file, size_t num_mem, size_t num_elements,
                 d = ((const double4c*)data)[j];
                 fprintf(file, SDD SDD SDD SDD SDD SDD SDD SDD,
                         d.a.x, d.a.y, d.b.x, d.b.y, d.c.x, d.c.y, d.d.x, d.d.y);
-                break;
+                continue;
+            }
+            case OSKAR_CHAR:
+            {
+                putc(((const char*)data)[j], file);
+                continue;
             }
             case OSKAR_INT:
             {
                 fprintf(file, "%5d ", ((const int*)data)[j]);
-                break;
+                continue;
             }
             default:
             {
                 *status = OSKAR_ERR_BAD_DATA_TYPE;
-                break;
+                continue;
             }
             }
         }
-        fprintf(file, "\n");
+        putc('\n', file);
     }
 
     /* Free any temporary memory used by this function. */

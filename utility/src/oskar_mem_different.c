@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #include <private_mem.h>
 #include <oskar_mem.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,55 +38,32 @@ extern "C" {
 int oskar_mem_different(const oskar_Mem* one, const oskar_Mem* two,
         size_t num_elements, int* status)
 {
-    int type;
-    size_t bytes_to_check, i;
-
-    /* Check that both arrays exist. */
-    if ((!one && two) || (one && !two))
-    {
-        return OSKAR_TRUE;
-    }
-
-    /* If neither array exists, return false. */
-    if (!one && !two)
-    {
-        return OSKAR_FALSE;
-    }
+    size_t bytes_to_check;
 
     /* Check if safe to proceed. */
-    if (!status || *status) return OSKAR_TRUE;
+    if (*status) return OSKAR_TRUE;
+
+    /* Check that both arrays exist. */
+    if ((!one && two) || (one && !two)) return OSKAR_TRUE;
+
+    /* If neither array exists, return false. */
+    if (!one && !two) return OSKAR_FALSE;
 
     /* Check the data types. */
-    type = one->type;
-    if (type != two->type)
-        return OSKAR_TRUE;
+    if (one->type != two->type) return OSKAR_TRUE;
 
     /* Check the number of elements. */
     if (num_elements == 0 || num_elements > one->num_elements)
         num_elements = one->num_elements;
     if (num_elements > two->num_elements)
         return OSKAR_TRUE;
-    bytes_to_check = num_elements * oskar_mem_element_size(type);
+    bytes_to_check = num_elements * oskar_mem_element_size(one->type);
 
     /* Check data location. */
     if (one->location == OSKAR_CPU && two->location == OSKAR_CPU)
-    {
-        const char *p1, *p2;
+        return (memcmp(one->data, two->data, bytes_to_check) != 0);
 
-        /* Check contents of CPU memory (every byte). */
-        p1 = (const char*)(one->data);
-        p2 = (const char*)(two->data);
-        for (i = 0; i < bytes_to_check; ++i)
-        {
-            if (p1[i] != p2[i])
-                return OSKAR_TRUE;
-        }
-
-        /* Memory contents must be the same. */
-        return OSKAR_FALSE;
-    }
-
-    /* Data checks are currently only supported in CPU memory. */
+    /* Data checks are only supported in CPU memory. */
     *status = OSKAR_ERR_BAD_LOCATION;
     return OSKAR_TRUE;
 }
