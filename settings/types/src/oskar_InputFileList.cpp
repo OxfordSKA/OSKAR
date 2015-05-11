@@ -29,24 +29,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
-
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
+#include <oskar_settings_utility_string.hpp>
+#include <sstream>
 #include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+namespace oskar {
+
+InputFileList::InputFileList()
+: delimiter_(',')
+{
+}
+
+InputFileList::~InputFileList()
+{
+}
+
+void InputFileList::init(const std::string& /*s*/, bool* /*ok*/)
+{
+    /* Nothing to initialise */
+    /* Could use this to set the delimiter ... ?*/
+    filenames_.clear();
+}
+
+void InputFileList::fromString(const std::string& s, bool* /*ok*/)
+{
+    filenames_.clear();
+    filenames_ = oskar_settings_utility_string_get_type_params(s);
+}
+
+std::string InputFileList::toString() const
+{
+    std::ostringstream ss;
+    for (size_t i = 0u; i < filenames_.size(); ++i) {
+        ss << filenames_.at(i);
+        if (i < filenames_.size() - 1)
+            ss << delimiter_;
+    }
+    return ss.str();
+}
+
+
+} // namespace oskar
+

@@ -29,24 +29,56 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#include <gtest/gtest.h>
+#include <iostream>
+#include <climits>
+#include <oskar_settings_types.hpp>
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
+using namespace oskar;
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+TEST(settings_types, DoubleRange)
+{
+
+    DoubleRange r;
+//    {
+//        ASSERT_STREQ("0", r.toString().c_str());
+//    }
+//    {
+//        bool ok = true;
+//        r.init("2.0,5.0", &ok);
+//        ASSERT_TRUE(ok);
+//        ASSERT_STREQ("0", r.toString().c_str());
+//    }
+//    {
+//        bool ok = true;
+//        r.fromString("2.12345678", &ok);
+//        ASSERT_TRUE(ok);
+//        ASSERT_STREQ("2.12345678", r.toString().c_str());
+//        ASSERT_STREQ("2.12345678", r.toString("%.8f").c_str());
+//        ASSERT_STREQ("2.1235", r.toString("%.4f").c_str());
+//        ASSERT_STREQ("2.123457e+00", r.toString("%e").c_str());
+//        ASSERT_STREQ("0002.1", r.toString("%06.1f").c_str());
+//    }
+//    {
+//        bool ok = true;
+//        r.fromString("1.0", &ok);
+//        ASSERT_FALSE(ok);
+//        ASSERT_STREQ("2", r.toString().c_str());
+//    }
+//
+//    {
+//        bool ok = true;
+//        r.fromString("10.0", &ok);
+//        ASSERT_FALSE(ok);
+//        ASSERT_STREQ("5", r.toString().c_str());
+//    }
+    {
+        bool ok = true;
+        r.init("MIN,MAX", &ok);
+        ASSERT_TRUE(ok);
+        r.fromString("0.999999999999", &ok);
+        ASSERT_TRUE(ok);
+        //std::cout << r.toString() << std::endl;
+    }
+}
+

@@ -29,24 +29,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#include <oskar_settings_utility_string.hpp>
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
+#include <climits>
+#include <vector>
 #include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+namespace oskar {
+
+IntPositive::IntPositive() : value_(1)
+{
+}
+
+IntPositive::~IntPositive()
+{
+}
+
+void IntPositive::init(const std::string& /*s*/, bool* ok)
+{
+    // No initialisation required.
+    if (ok) *ok = true;
+
+}
+
+void IntPositive::fromString(const std::string& s, bool* ok)
+{
+    int i = oskar_settings_utility_string_to_int(s, ok);
+    if (ok && !*ok) return;
+    if (i >= 1) {
+        if (ok) *ok = true;
+        value_ = i;
+        return;
+    }
+    if (ok) *ok = false;
+}
+
+std::string IntPositive::toString() const
+{
+    return oskar_settings_utility_int_to_string(value_);
+}
+
+} // namespace oskar
+

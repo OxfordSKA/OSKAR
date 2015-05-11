@@ -29,24 +29,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#include <gtest/gtest.h>
+#include <oskar_settings_types.hpp>
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
+using namespace oskar;
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+TEST(settings_types, DateTime)
+{
+    /*
+     *  d-M-yyyy h:m:s[.z] - British style
+     *  yyyy/M/d/h:m:s[.z] - CASA style
+     *  yyyy-M-d h:m:s[.z] - International style
+     *  yyyy-M-dTh:m:s[.z] - ISO date style
+     *  MJD
+     */
+
+    bool ok = true;
+    DateTime t;
+    // British style
+    {
+        t.fromString("1-2-2015 10:05:23.2", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("01-02-2015 10:05:23.2", t.toString().c_str());
+    }
+    // CASA style
+    {
+        t.fromString("2015/1/2/03:04:05.6", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("2015/01/02/03:04:05.6", t.toString().c_str());
+    }
+    // International style
+    {
+        t.fromString("2015-2-3 04:05:06.7", &ok);
+        ASSERT_TRUE(ok);
+    }
+    // ISO style
+    {
+        t.fromString("2015-3-4T05:06:07.8910111213", &ok);
+        ASSERT_TRUE(ok);
+    }
+    // MJD
+    {
+        // TODO
+    }
+}
+

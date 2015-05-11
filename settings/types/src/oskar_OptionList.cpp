@@ -29,24 +29,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#include <oskar_settings_utility_string.hpp>
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
+#include <sstream>
 #include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+namespace oskar {
+
+OptionList::OptionList()
+{
+}
+
+OptionList::~OptionList()
+{
+}
+
+void OptionList::init(const std::string& s, bool* ok)
+{
+    if (ok) *ok = true;
+    options_.clear();
+    options_ = oskar_settings_utility_string_get_type_params(s);
+}
+
+void OptionList::fromString(const std::string& s, bool* ok)
+{
+    if (ok) *ok = false;
+    if (s.empty()) return;
+    for (size_t i = 0; i < options_.size(); ++i) {
+        if (oskar_settings_utility_string_starts_with(options_[i], s)) {
+            if (ok) *ok = true;
+            value_ = options_[i];
+            return;
+        }
+    }
+    return;
+}
+
+std::string OptionList::toString() const
+{
+    return value_;
+}
+
+std::vector<std::string> OptionList::options() const
+{
+    return options_;
+}
+
+} // namespace oskar
+

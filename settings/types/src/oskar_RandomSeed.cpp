@@ -29,24 +29,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
-
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
+#include <oskar_settings_utility_string.hpp>
+#include <climits>
+#include <vector>
 #include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+namespace oskar {
+
+RandomSeed::RandomSeed() : value_(1)
+{
+}
+
+RandomSeed::~RandomSeed()
+{
+}
+
+void RandomSeed::init(const std::string& /*s*/, bool* ok)
+{
+    // Random seed does not require any initialisation
+    if (ok) *ok = true;
+}
+
+void RandomSeed::fromString(const std::string& s, bool* ok)
+{
+    if (ok) *ok = true;
+    if (oskar_settings_utility_string_starts_with("TIME", s, false)) {
+        value_ = -1;
+        return;
+    }
+    int i = oskar_settings_utility_string_to_int(s, ok);
+    if (ok && !*ok) return;
+    if (i < 1) { if (ok) *ok = false; value_ = -1; }
+    value_ = i;
+}
+
+std::string RandomSeed::toString() const
+{
+    if (value_ < 1) return "time";
+    else return oskar_settings_utility_int_to_string(value_);
+}
+
+} // namespace oskar
+

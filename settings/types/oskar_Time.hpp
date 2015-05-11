@@ -29,24 +29,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#ifndef OSKAR_SETTINGS_TYPE_TIME_HPP_
+#define OSKAR_SETTINGS_TYPE_TIME_HPP_
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
+#include <vector>
+#include <oskar_AbstractType.hpp>
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+/**
+ * @file oskar_Time.hpp
+ */
+
+namespace oskar {
+
+/**
+ * @class Time
+ *
+ * @brief
+ *
+ * @details
+ * Can be set as a time string or a time in seconds.
+ * Accepted time strings:
+ *  hh:mm:ss.zzzzzz
+ *  s.zzzzzzzz
+ */
+
+class Time : public AbstractType
+{
+public:
+    Time();
+    virtual ~Time();
+    void init(const std::string& s, bool* ok = 0);
+    void fromString(const std::string& s, bool* ok = 0);
+    std::string toString() const;
+
+    int hours() const;
+    int minutes() const;
+    double seconds() const;
+
+    double in_seconds() const;
+
+private:
+    int hours_;
+    int minutes_;
+    double seconds_;
+};
+
+} // namespace oskar
+#endif /* OSKAR_SETTINGS_TYPE_TIME_HPP_ */

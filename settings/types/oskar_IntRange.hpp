@@ -29,24 +29,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#ifndef OSKAR_SETTINGS_TYPE_INTRANGE_HPP_
+#define OSKAR_SETTINGS_TYPE_INTRANGE_HPP_
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
+#include "oskar_AbstractType.hpp"
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+
+/**
+ * @file IntRange.hpp
+ */
+
+namespace oskar {
+
+/**
+ * @class IntRange
+ *
+ * @brief
+ * Ranged integer value.
+ *
+ * @details
+ * Initialised with a two entry CSV list consisting of the minimum and
+ * maximum range. The range of the allowed value is inclusive.
+ *
+ * e.g. a range of 3,10 allows any integers from 3 to 10, including the
+ * values 3 and 10.
+ *
+ * Values outside the range are set to the closest extreme of the range.
+ *
+ * By default the range is initialised to a full range of allowed integer
+ * values (i.e. from -INT_MAX to INT_MAX), with a value of 0.
+ */
+
+class IntRange : public AbstractType
+{
+public:
+    IntRange();
+    virtual ~IntRange();
+    void init(const std::string& s, bool* ok = 0);
+    void fromString(const std::string& s, bool* ok = 0);
+    std::string toString() const;
+
+private:
+    int min_, max_, value_;
+};
+
+} // namespace oskar
+#endif /* OSKAR_SETTINGS_TYPE_INTRANGE_HPP_ */

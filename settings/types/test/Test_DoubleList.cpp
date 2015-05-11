@@ -29,24 +29,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#include <gtest/gtest.h>
+#include <oskar_settings_types.hpp>
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
+using namespace oskar;
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+TEST(settings_types, DoubleList)
+{
+    bool ok = true;
+    DoubleList l;
+    {
+        l.fromString("0.0,1.1,2.2,3.3,4.4,5.5", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_EQ(6u, l.values().size());
+        for (int i = 0; i < (int)l.values().size(); ++i) {
+            ASSERT_EQ(double(i)+double(i)/10., l.values()[i]);
+        }
+        ASSERT_STREQ("0,1.1,2.2,3.3,4.4,5.5", l.toString().c_str());
+    }
+    {
+        l.fromString("0.01234567891011,  666.6", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_EQ(2u, l.values().size());
+        ASSERT_DOUBLE_EQ(0.01234567891011, l.values()[0]);
+        ASSERT_EQ(666.6, l.values()[1]);
+    }
+}
+

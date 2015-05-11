@@ -41,7 +41,7 @@ TEST(StringList, test1)
 {
     bool ok = false;
     StringList l;
-    l.set("1,2,3", &ok);
+    l.fromString("1,2,3", &ok);
     ASSERT_TRUE(ok);
     ASSERT_STREQ("1,2,3", l.toString(&ok).c_str());
     ASSERT_TRUE(ok);

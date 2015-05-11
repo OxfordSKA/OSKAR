@@ -30,10 +30,10 @@
  */
 
 #include <gtest/gtest.h>
-#include <DoubleRange.hpp>
 #include <iostream>
 #include <climits>
 #include <cfloat>
+#include "../../oskar_DoubleRange.hpp"
 
 using namespace oskar;
 using namespace std;

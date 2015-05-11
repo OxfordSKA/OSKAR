@@ -29,24 +29,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#include <gtest/gtest.h>
+#include <iostream>
+#include <climits>
+#include <cmath>
+#include <oskar_settings_types.hpp>
+#include <iostream>
+#include <iomanip>
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
+using namespace oskar;
+using namespace std;
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+TEST(settings_types, StringList)
+{
+    bool ok = true;
+    StringList l;
+    l.fromString("a,b,c", &ok);
+    ASSERT_TRUE(ok);
+    ASSERT_EQ(3u, l.values().size());
+    ASSERT_STREQ("a", l.values()[0].c_str());
+    ASSERT_STREQ("b", l.values()[1].c_str());
+    ASSERT_STREQ("c", l.values()[2].c_str());
+    ASSERT_STREQ("a,b,c", l.toString().c_str());
+    ASSERT_TRUE(ok);
+}
+

@@ -29,24 +29,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#include <gtest/gtest.h>
+#include <oskar_settings_types.hpp>
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
+using namespace oskar;
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+TEST(settings_types, IntList)
+{
+    bool ok = true;
+    IntList l;
+    {
+        l.fromString("1,2,3,4,5", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_EQ((unsigned)5, l.values().size());
+        for (int i = 0; i < (int)l.values().size(); ++i) {
+            ASSERT_EQ(i+1, l.values()[i]);
+        }
+        ASSERT_STREQ("1,2,3,4,5", l.toString().c_str());
+    }
+    {
+        l.fromString("555,666", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_EQ((unsigned)2, l.values().size());
+        ASSERT_EQ(555, l.values()[0]);
+        ASSERT_EQ(666, l.values()[1]);
+    }
+}
+

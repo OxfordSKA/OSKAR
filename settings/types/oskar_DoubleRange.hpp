@@ -29,24 +29,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#ifndef OSKAR_SETTINGS_TYPE_DOUBLERANGE_HPP_
+#define OSKAR_SETTINGS_TYPE_DOUBLERANGE_HPP_
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
+#include "oskar_AbstractType.hpp"
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+
+/**
+ * @file DoubleRange.hpp
+ */
+
+namespace oskar {
+
+/**
+ * @class DoubleRange
+ *
+ * @brief
+ * Ranged double value.
+ *
+ * @details
+ * Initialised with a two entry CSV list consisting of the minimum and
+ * maximum range. The range of the allowed value is inclusive.
+ *
+ * e.g. a range of 3.0,10.0 allows any double x, in the range 3.0 >= x >= 10.0.
+ *
+ * Values outside the range are set to the closest extreme of the range.
+ *
+ * By default the range is initialised to a full range of allowed double
+ * values (i.e. from -DBL_MAX to DBL_MAX), with a value of 0.0
+ */
+
+class DoubleRange : public AbstractType
+{
+public:
+    DoubleRange();
+    virtual ~DoubleRange();
+    void init(const std::string& s, bool* ok = 0);
+    void fromString(const std::string& s, bool* ok = 0);
+    std::string toString() const;
+    std::string toString(const std::string& fmt) const;
+
+    double range_min() const { return min_; }
+    double range_max() const { return max_; }
+
+private:
+    double min_, max_, value_;
+};
+
+} // namespace oskar
+#endif /* OSKAR_SETTINGS_TYPE_DOUBLERANGE_HPP_ */

@@ -55,7 +55,7 @@ TEST(OptionList, test1)
     // registered.
     ok = true;
     const char* value = "foo";
-    o.set(value, &ok);
+    o.fromString(value, &ok);
     ASSERT_FALSE(ok);
     std::cout << o.value() << std::endl;
     ASSERT_FALSE(o.isSet());
@@ -84,10 +84,10 @@ TEST(OptionList, test2)
         ASSERT_FALSE(o.isSet());
         ASSERT_EQ((int)allowed.size(), o.num_options());
         ASSERT_EQ(allowed.size(), o.options().size());
-        o.set(bad_value, &ok);
+        o.fromString(bad_value, &ok);
         ASSERT_FALSE(ok);
         ASSERT_FALSE(o.isSet());
-        o.set(value, &ok);
+        o.fromString(value, &ok);
         ASSERT_TRUE(ok);
         ASSERT_TRUE(o.isSet());
         ASSERT_EQ(0, o.valueIndex(&ok));
@@ -103,7 +103,7 @@ TEST(OptionList, test2)
         ASSERT_TRUE(o.isSet());
         ASSERT_STREQ(value, o.value().c_str());
         ASSERT_STREQ(value, o.toString().c_str());
-        o.set("t", &ok);
+        o.fromString("t", &ok);
         ASSERT_TRUE(ok);
         ASSERT_STREQ("two", o.value().c_str());
     }

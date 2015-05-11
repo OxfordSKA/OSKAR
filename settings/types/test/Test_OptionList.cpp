@@ -29,24 +29,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#include <gtest/gtest.h>
+#include <oskar_settings_types.hpp>
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
+using namespace oskar;
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+TEST(settings_types, OptionList)
+{
+    bool ok = false;
+    {
+        OptionList l;
+        l.init("a,    b,"
+                ""
+                "c", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_EQ((unsigned)3, l.options().size());
+        ASSERT_STREQ("a", l.options()[0].c_str());
+        ASSERT_STREQ("b", l.options()[1].c_str());
+        ASSERT_STREQ("c", l.options()[2].c_str());
+        ASSERT_STREQ("", l.toString().c_str());
+        l.fromString("z", &ok);
+        ASSERT_FALSE(ok);
+        ASSERT_STREQ("", l.toString().c_str());
+        l.fromString("b", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("b", l.toString().c_str());
+    }
+}
+

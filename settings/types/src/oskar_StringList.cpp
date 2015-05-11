@@ -29,24 +29,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#include <oskar_settings_utility_string.hpp>
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
+#include <sstream>
 #include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+namespace oskar {
+
+StringList::StringList()
+: delimiter_(',')
+{
+}
+
+StringList::~StringList()
+{
+}
+
+void StringList::init(const std::string& /*s*/, bool* /*ok*/)
+{
+     // TODO allow a a different delimiter via the init method?
+     values_.clear();
+}
+
+void StringList::fromString(const std::string& s, bool* /*ok*/)
+{
+    values_ = oskar_settings_utility_string_get_type_params(s);
+}
+
+std::string StringList::toString() const
+{
+    std::ostringstream ss;
+    for (size_t i = 0u; i < values_.size(); ++i) {
+        ss << values_.at(i);
+        if (i < values_.size() - 1)
+            ss << delimiter_;
+    }
+    return ss.str();
+}
+
+std::vector<std::string> StringList::values() const
+{
+    return values_;
+}
+
+} // namespace oskar
+

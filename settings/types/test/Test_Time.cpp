@@ -29,24 +29,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#include <gtest/gtest.h>
+#include <oskar_settings_types.hpp>
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
+using namespace oskar;
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+TEST(settings_types, Time)
+{
+    bool ok = true;
+    Time t;
+    {
+        t.fromString("1:2:3.45678", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_EQ(1, t.hours());
+        ASSERT_EQ(2, t.minutes());
+        ASSERT_DOUBLE_EQ(3.45678, t.seconds());
+        ASSERT_STREQ("01:02:03.45678", t.toString().c_str());
+    }
+    {
+        t.fromString("01:02:23.45678", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_EQ(1, t.hours());
+        ASSERT_EQ(2, t.minutes());
+        ASSERT_DOUBLE_EQ(23.45678, t.seconds());
+        ASSERT_STREQ("01:02:23.45678", t.toString().c_str());
+    }
+
+    {
+        t.fromString("123.4567891011", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_EQ(0, t.hours());
+        ASSERT_EQ(2, t.minutes());
+        ASSERT_NEAR(03.4567891011, t.seconds(), 1e-8);
+        ASSERT_DOUBLE_EQ(123.4567891011, t.in_seconds());
+        ASSERT_STREQ("00:02:03.456789101", t.toString().c_str());
+    }
+
+    {
+        t.fromString("1.2345678910111213e+04", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_EQ(3, t.hours());
+        ASSERT_EQ(25, t.minutes());
+        ASSERT_NEAR(45.6789101112, t.seconds(), 1e-8);
+        ASSERT_DOUBLE_EQ(1.2345678910111213e+04, t.in_seconds());
+        ASSERT_STREQ("03:25:45.67891011", t.toString().c_str());
+    }
+}
+

@@ -29,24 +29,72 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#ifndef OSKAR_SETTINGS_TYPE_DATETIME_HPP_
+#define OSKAR_SETTINGS_TYPE_DATETIME_HPP_
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
+#include <vector>
+#include <oskar_AbstractType.hpp>
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+/**
+ * @file oskar_DateTime.hpp
+ */
+
+namespace oskar {
+
+/**
+ * @class DateTime
+ *
+ * @brief
+ *
+ * @details
+ * TODO check leading zero behaviour in OSKAR ...
+ *     oskar_settings_load_observation.cpp
+ *
+ *  TODO also ready MJD
+ *
+ *  d-M-yyyy h:m:s[.z] - British style
+ *  yyyy/M/d/h:m:s[.z] - CASA style
+ *  yyyy-M-d h:m:s[.z] - International style
+ *  yyyy-M-dTh:m:s[.z] - ISO date style
+ *
+ *
+ */
+
+class DateTime : public AbstractType
+{
+public:
+    DateTime();
+    virtual ~DateTime();
+    void init(const std::string& s, bool* ok = 0);
+    void fromString(const std::string& s, bool* ok = 0);
+    std::string toString() const;
+
+    int year() const;
+    int month() const;
+    int day() const;
+    int hours() const;
+    int minutes() const;
+    double seconds() const;
+
+    //double mjd() const;
+
+private:
+    void parse_date_style_1_(const std::string& s, bool* ok = 0);
+    void parse_date_style_2_(const std::string& s, bool* ok = 0);
+    void parse_date_style_3_(const std::string& s, bool* ok = 0);
+    void parse_date_style_4_(const std::string& s, bool* ok = 0);
+    void parse_time_(const std::string& s, bool* ok = 0);
+
+private:
+    enum date_format { UNDEF, BRITISH, CASA, INTERNATIONAL, ISO, MJD };
+    int style_;
+    int year_;
+    int month_;
+    int day_;
+    int hours_;
+    int minutes_;
+    double seconds_;
+};
+
+} // namespace oskar
+#endif /* OSKAR_SETTINGS_TYPE_DATETIME_HPP_ */

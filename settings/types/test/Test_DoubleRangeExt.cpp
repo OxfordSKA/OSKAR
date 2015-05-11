@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -30,20 +30,72 @@
  */
 
 #include <gtest/gtest.h>
-
-#include <OutputFile.hpp>
 #include <iostream>
 #include <climits>
+#include <cmath>
+#include <oskar_settings_types.hpp>
+#include <iostream>
+#include <iomanip>
 
 using namespace oskar;
+using namespace std;
 
-TEST(OutputFile, test1)
+TEST(settings_types, DoubleRangeExt)
 {
     bool ok = false;
-    OutputFile r;
-    r.fromString("foo.dat", &ok);
-    ASSERT_TRUE(ok);
-    ASSERT_STREQ("foo.dat", r.toString(&ok).c_str());
-    ASSERT_TRUE(ok);
+    DoubleRangeExt r;
+    {
+       // ASSERT_STREQ("0", r.toString().c_str());
+    }
+    {
+        // This should fail as there is no extended string
+        r.init("2.0,5.0", &ok);
+        ASSERT_FALSE(ok);
+        ASSERT_STREQ("0", r.toString().c_str());
+    }
+
+    {
+        r.init("2.0,5.0,min", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("0", r.toString().c_str());
+
+        r.fromString("3.0", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("3", r.toString().c_str());
+
+        r.fromString("5.1", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("5", r.toString().c_str());
+
+        r.fromString("1.1", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("min", r.toString().c_str());
+
+        r.fromString("2.1234567891", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("2.1234567891", r.toString().c_str());
+    }
+
+    {
+        r.init("2.0,5.0,min, max", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("0", r.toString().c_str());
+
+        r.fromString("3.0", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("3", r.toString().c_str());
+
+        r.fromString("5.1", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("max", r.toString().c_str());
+
+        r.fromString("1.1", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("min", r.toString().c_str());
+
+        r.fromString("2.1234567891", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("2.1234567891", r.toString().c_str());
+    }
 }
 

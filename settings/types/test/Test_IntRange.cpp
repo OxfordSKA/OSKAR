@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2014, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -29,24 +29,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#include <gtest/gtest.h>
+#include <iostream>
+#include <climits>
+#include <oskar_settings_types.hpp>
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
+using namespace oskar;
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+TEST(settings_types, IntRange)
+{
+    bool ok = false;
+    IntRange r;
+    {
+        ASSERT_STREQ("0", r.toString().c_str());
+    }
+    {
+        r.init("2,5", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("0", r.toString().c_str());
+    }
+    {
+        r.fromString("2", &ok);
+        ASSERT_TRUE(ok);
+        ASSERT_STREQ("2", r.toString().c_str());
+    }
+    {
+        r.fromString("1", &ok);
+        ASSERT_FALSE(ok);
+        ASSERT_STREQ("2", r.toString().c_str());
+    }
+    {
+        r.fromString("10", &ok);
+        ASSERT_FALSE(ok);
+        ASSERT_STREQ("5", r.toString().c_str());
+    }
+}
+

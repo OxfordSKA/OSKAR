@@ -29,24 +29,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
+#ifndef OSKAR_SETTINGS_TYPE_DOUBLERANGEEXT_HPP_
+#define OSKAR_SETTINGS_TYPE_DOUBLERANGEEXT_HPP_
 
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
-#include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
+#include <oskar_AbstractType.hpp>
+#include <string>
+#include <ttl/var/variant.hpp>
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+/**
+ * @file DoubleRangeExt.hpp
+ */
+
+namespace oskar {
+
+/**
+ * @class DoubleRangeExt
+ *
+ * @brief
+ * Ranged double value.
+ *
+ * @details
+ * Initialised with a CSV list consisting of the minimum and
+ * maximum range and the extended string values.
+ *
+ * The range of the allowed value is inclusive.
+ *
+ * e.g. a range of 3.0,10.0,min,max allows any double x, in the range
+ * 3.0 >= x >= 10.0. For numbers less < 3.0 the string 'min' will be used and
+ * for numbers > 10.0 the string 'max' will be used.
+ *
+ * Values outside the range are set to the extended string value or
+ * the closest extreme of the range if the extreme value string for that side
+ * of the range is not set.
+ *
+ * By default the range is initialised to a full range of allowed double
+ * values (i.e. from -DBL_MAX to DBL_MAX), with a value of 0.0 and no extended
+ * string values.
+ */
+
+class DoubleRangeExt : public AbstractType
+{
+public:
+    DoubleRangeExt();
+    virtual ~DoubleRangeExt();
+    void init(const std::string& s, bool* ok = 0);
+    void fromString(const std::string& s, bool* ok = 0);
+    std::string toString() const;
+
+private:
+    double min_, max_;
+    std::string ext_min_, ext_max_;
+    enum value_types { DOUBLE, STRING };
+    ttl::var::variant<double, std::string> value_;
+};
+
+} // namespace oskar
+#endif /* OSKAR_SETTINGS_TYPE_DOUBLERANGEEXT_HPP_ */

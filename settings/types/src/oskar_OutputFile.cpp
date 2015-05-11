@@ -29,24 +29,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TYPES_HPP_
-#define OSKAR_SETTINGS_TYPES_HPP_
-
-#include <oskar_DateTime.hpp>
-#include <oskar_DoubleList.hpp>
-#include <oskar_DoubleRange.hpp>
-#include <oskar_DoubleRangeExt.hpp>
-#include <oskar_InputDirectory.hpp>
-#include <oskar_InputFile.hpp>
-#include <oskar_InputFileList.hpp>
-#include <oskar_IntList.hpp>
-#include <oskar_IntPositive.hpp>
-#include <oskar_IntRange.hpp>
-#include <oskar_IntRangeExt.hpp>
-#include <oskar_OptionList.hpp>
+#include <oskar_settings_utility_string.hpp>
+#include <sstream>
 #include <oskar_OutputFile.hpp>
-#include <oskar_RandomSeed.hpp>
-#include <oskar_StringList.hpp>
-#include <oskar_Time.hpp>
 
-#endif /* OSKAR_SETTINGS_TYPES_HPP_ */
+namespace oskar {
+
+OutputFile::OutputFile()
+{
+}
+
+OutputFile::~OutputFile()
+{
+}
+
+void OutputFile::init(const std::string& /*s*/, bool* /*ok*/)
+{
+    /* Nothing to initialise */
+}
+
+void OutputFile::fromString(const std::string& s, bool* ok)
+{
+    if (ok && !ok) return;
+    filename_ = oskar_settings_utility_string_trim(s);
+}
+
+std::string OutputFile::toString() const
+{
+    return filename_;
+}
+
+
+} // namespace oskar
+
