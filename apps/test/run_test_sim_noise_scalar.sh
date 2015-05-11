@@ -38,7 +38,8 @@ set_setting $ini simulator/double_precision false
 set_setting $ini telescope/input_directory telescope
 set_setting $ini telescope/normalise_beams_at_phase_centre false
 set_setting $ini telescope/pol_mode "Scalar"
-set_setting $ini interferometer/max_time_samples_per_block 2
+set_setting $ini interferometer/max_time_samples_per_block 3
+set_setting $ini interferometer/ms_filename example.ms
 #set_setting $ini telescope/pol_mode "Full"
 set_setting $ini observation/num_channels 1
 set_setting $ini observation/start_frequency_hz 200e6
@@ -58,8 +59,7 @@ set_setting $ini interferometer/noise/rms/end $rms
 # Run the interferometry simulation
 echo "Starting interferometry simulation (with no sources)"
 T0="$(date +%s)"
-#run_sim_interferometer -q $ini # &> /dev/null
-run_sim_interferometer $ini # &> /dev/null
+run_sim_interferometer -q $ini # &> /dev/null
 echo "  Finished in $(($(date +%s)-T0)) s"
 echo ""
 

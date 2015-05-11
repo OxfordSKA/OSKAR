@@ -308,7 +308,7 @@ void oskar_sim_interferometer(const char* settings_file,
             /* Barrier2: Check sim and write are done before next block. */
 #pragma omp barrier
             if (thread_id == 0 && b < num_vis_blocks && !*status)
-                oskar_log_message(log, 'S', 0, "Block %*i/%i (%.0f%%) "
+                oskar_log_message(log, 'S', 0, "Block %*i/%i (%3.0f%%) "
                         "complete. Simulation time elapsed: %.3f s",
                         disp_width(num_vis_blocks), b+1, num_vis_blocks,
                         100.0 * (b+1) / (double)num_vis_blocks,
