@@ -241,7 +241,7 @@ int main(int argc, char** argv)
                 mean.x, mean.y);
         oskar_log_message(log, 'M', 2, "RMS         : % 6.3e Jy", rms);
         oskar_log_message(log, 'M', 2, "Zeros       :  %i/%i (%.1f%%)",
-                num_zero, num_vis, (double)(num_zero/num_vis)*100.0);
+                num_zero, num_vis, ((double)num_zero/num_vis)*100.0);
 
         // Free visibility data.
         oskar_vis_free(vis, &status);
