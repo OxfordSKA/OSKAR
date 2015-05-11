@@ -503,10 +503,12 @@ static void write_vis_block(int num_gpus, DeviceData* d, HostData* h,
     for (i = 1; i < num_gpus; ++i)
     {
         b = d[i].vis_block_cpu[!iactive];
-        oskar_mem_add(xc0, xc0, oskar_vis_block_cross_correlations(b),
-                oskar_mem_length(xc0), status);
-        oskar_mem_add(ac0, ac0, oskar_vis_block_auto_correlations(b),
-                oskar_mem_length(ac0), status);
+        if (oskar_vis_block_has_cross_correlations(b))
+            oskar_mem_add(xc0, xc0, oskar_vis_block_cross_correlations(b),
+                    oskar_mem_length(xc0), status);
+        if (oskar_vis_block_has_auto_correlations(b))
+            oskar_mem_add(ac0, ac0, oskar_vis_block_auto_correlations(b),
+                    oskar_mem_length(ac0), status);
     }
 
     /* Calculate baseline uvw coordinates for vis block. */
