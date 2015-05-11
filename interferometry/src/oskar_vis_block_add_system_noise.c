@@ -174,10 +174,10 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
                 {
                     oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd);
                     s = std[a1];
-                    data[b].a.x += s * (rnd[0] + sefd_conversion);
-                    data[b].b.x += s * (rnd[1] + sefd_conversion);
-                    data[b].c.x += s * (rnd[2] + sefd_conversion);
-                    data[b].d.x += s * (rnd[3] + sefd_conversion);
+                    data[a1].a.x += s * (rnd[0] + sefd_conversion);
+                    data[a1].b.x += s * (rnd[1] + sefd_conversion);
+                    data[a1].c.x += s * (rnd[2] + sefd_conversion);
+                    data[a1].d.x += s * (rnd[3] + sefd_conversion);
                 }
             }
         }
@@ -264,10 +264,10 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
                 {
                     oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd);
                     s = std[a1];
-                    data[b].a.x += s * (rnd[0] + sefd_conversion);
-                    data[b].b.x += s * (rnd[1] + sefd_conversion);
-                    data[b].c.x += s * (rnd[2] + sefd_conversion);
-                    data[b].d.x += s * (rnd[3] + sefd_conversion);
+                    data[a1].a.x += s * (rnd[0] + sefd_conversion);
+                    data[a1].b.x += s * (rnd[1] + sefd_conversion);
+                    data[a1].c.x += s * (rnd[2] + sefd_conversion);
+                    data[a1].d.x += s * (rnd[3] + sefd_conversion);
                 }
             }
         }
