@@ -65,20 +65,21 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
         unsigned int block_idx, unsigned int channel_idx,
         double channel_bandwidth_hz, double time_int_sec, int* status)
 {
-    int a1, a2, have_autocorr, block_start, b, c = 0, i, t;
+    int a1, a2, have_autocorr, have_crosscorr, block_start, b, c = 0, i, t;
     int num_baselines, num_channels, num_stations, num_times;
     void *acorr_ptr, *xcorr_ptr;
     double rnd[8], s, sefd_conversion;
     const double inv_sqrt2 = 1.0 / sqrt(2.0);
 
     /* Get pointer to start of block, and block dimensions. */
-    have_autocorr = oskar_vis_block_has_auto_correlations(vis);
-    acorr_ptr     = oskar_mem_void(oskar_vis_block_auto_correlations(vis));
-    xcorr_ptr     = oskar_mem_void(oskar_vis_block_cross_correlations(vis));
-    num_baselines = oskar_vis_block_num_baselines(vis);
-    num_channels  = oskar_vis_block_num_channels(vis);
-    num_stations  = oskar_vis_block_num_stations(vis);
-    num_times     = oskar_vis_block_num_times(vis);
+    have_autocorr  = oskar_vis_block_has_auto_correlations(vis);
+    have_crosscorr = oskar_vis_block_has_cross_correlations(vis);
+    acorr_ptr      = oskar_mem_void(oskar_vis_block_auto_correlations(vis));
+    xcorr_ptr      = oskar_mem_void(oskar_vis_block_cross_correlations(vis));
+    num_baselines  = oskar_vis_block_num_baselines(vis);
+    num_channels   = oskar_vis_block_num_channels(vis);
+    num_stations   = oskar_vis_block_num_stations(vis);
+    num_times      = oskar_vis_block_num_times(vis);
 
     /* Get factor for conversion of sigma to SEFD. */
     sefd_conversion = sqrt(channel_bandwidth_hz * time_int_sec);
@@ -99,18 +100,21 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
         std = oskar_mem_float_const(station_std_dev, status);
         for (t = 0; t < num_times; ++t)
         {
-            /* Cross-correlation noise. */
-            block_start = num_baselines * (num_channels * t + channel_idx);
-            data = (float2*) xcorr_ptr + block_start;
-            for (a1 = 0, b = 0; a1 < num_stations; ++a1)
+            if (have_crosscorr)
             {
-                for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                /* Cross-correlation noise. */
+                block_start = num_baselines * (num_channels * t + channel_idx);
+                data = (float2*) xcorr_ptr + block_start;
+                for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                 {
-                    i = block_start + b;
-                    oskar_random_gaussian2(seed, c++, block_idx, rnd);
-                    s = sqrt(std[a1] * std[a2]) * inv_sqrt2;
-                    data[i].x += s * rnd[0];
-                    data[i].y += s * rnd[1];
+                    for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                    {
+                        i = block_start + b;
+                        oskar_random_gaussian2(seed, c++, block_idx, rnd);
+                        s = sqrt(std[a1] * std[a2]) * inv_sqrt2;
+                        data[i].x += s * rnd[0];
+                        data[i].y += s * rnd[1];
+                    }
                 }
             }
 
@@ -138,25 +142,28 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
         std = oskar_mem_float_const(station_std_dev, status);
         for (t = 0; t < num_times; ++t)
         {
-            /* Cross-correlation noise. */
-            block_start = num_baselines * (num_channels * t + channel_idx);
-            data = (float4c*) xcorr_ptr + block_start;
-            for (a1 = 0, b = 0; a1 < num_stations; ++a1)
+            if (have_crosscorr)
             {
-                for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                /* Cross-correlation noise. */
+                block_start = num_baselines * (num_channels * t + channel_idx);
+                data = (float4c*) xcorr_ptr + block_start;
+                for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                 {
-                    i = block_start + b;
-                    oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd);
-                    oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd + 4);
-                    s = sqrt(std[a1] * std[a2]);
-                    data[i].a.x += s * rnd[0];
-                    data[i].a.y += s * rnd[1];
-                    data[i].b.x += s * rnd[2];
-                    data[i].b.y += s * rnd[3];
-                    data[i].c.x += s * rnd[4];
-                    data[i].c.y += s * rnd[5];
-                    data[i].d.x += s * rnd[6];
-                    data[i].d.y += s * rnd[7];
+                    for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                    {
+                        i = block_start + b;
+                        oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd);
+                        oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd + 4);
+                        s = sqrt(std[a1] * std[a2]);
+                        data[i].a.x += s * rnd[0];
+                        data[i].a.y += s * rnd[1];
+                        data[i].b.x += s * rnd[2];
+                        data[i].b.y += s * rnd[3];
+                        data[i].c.x += s * rnd[4];
+                        data[i].c.y += s * rnd[5];
+                        data[i].d.x += s * rnd[6];
+                        data[i].d.y += s * rnd[7];
+                    }
                 }
             }
 
@@ -187,18 +194,21 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
         std = oskar_mem_double_const(station_std_dev, status);
         for (t = 0; t < num_times; ++t)
         {
-            /* Cross-correlation noise. */
-            block_start = num_baselines * (num_channels * t + channel_idx);
-            data = (double2*) xcorr_ptr + block_start;
-            for (a1 = 0, b = 0; a1 < num_stations; ++a1)
+            if (have_crosscorr)
             {
-                for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                /* Cross-correlation noise. */
+                block_start = num_baselines * (num_channels * t + channel_idx);
+                data = (double2*) xcorr_ptr + block_start;
+                for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                 {
-                    i = block_start + b;
-                    oskar_random_gaussian2(seed, c++, block_idx, rnd);
-                    s = sqrt(std[a1] * std[a2]) * inv_sqrt2;
-                    data[i].x += s * rnd[0];
-                    data[i].y += s * rnd[1];
+                    for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                    {
+                        i = block_start + b;
+                        oskar_random_gaussian2(seed, c++, block_idx, rnd);
+                        s = sqrt(std[a1] * std[a2]) * inv_sqrt2;
+                        data[i].x += s * rnd[0];
+                        data[i].y += s * rnd[1];
+                    }
                 }
             }
 
@@ -226,25 +236,28 @@ static void oskar_vis_block_apply_noise(oskar_VisBlock* vis,
         std = oskar_mem_double_const(station_std_dev, status);
         for (t = 0; t < num_times; ++t)
         {
-            /* Cross-correlation noise. */
-            block_start = num_baselines * (num_channels * t + channel_idx);
-            data = (double4c*) xcorr_ptr + block_start;
-            for (a1 = 0, b = 0; a1 < num_stations; ++a1)
+            if (have_crosscorr)
             {
-                for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                /* Cross-correlation noise. */
+                block_start = num_baselines * (num_channels * t + channel_idx);
+                data = (double4c*) xcorr_ptr + block_start;
+                for (a1 = 0, b = 0; a1 < num_stations; ++a1)
                 {
-                    i = block_start + b;
-                    oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd);
-                    oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd + 4);
-                    s = sqrt(std[a1] * std[a2]);
-                    data[i].a.x += s * rnd[0];
-                    data[i].a.y += s * rnd[1];
-                    data[i].b.x += s * rnd[2];
-                    data[i].b.y += s * rnd[3];
-                    data[i].c.x += s * rnd[4];
-                    data[i].c.y += s * rnd[5];
-                    data[i].d.x += s * rnd[6];
-                    data[i].d.y += s * rnd[7];
+                    for (a2 = a1 + 1; a2 < num_stations; ++b, ++a2)
+                    {
+                        i = block_start + b;
+                        oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd);
+                        oskar_random_gaussian4(seed, c++, block_idx, 0, 0, rnd + 4);
+                        s = sqrt(std[a1] * std[a2]);
+                        data[i].a.x += s * rnd[0];
+                        data[i].a.y += s * rnd[1];
+                        data[i].b.x += s * rnd[2];
+                        data[i].b.y += s * rnd[3];
+                        data[i].c.x += s * rnd[4];
+                        data[i].c.y += s * rnd[5];
+                        data[i].d.x += s * rnd[6];
+                        data[i].d.y += s * rnd[7];
+                    }
                 }
             }
 
