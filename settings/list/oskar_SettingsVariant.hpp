@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -35,7 +35,7 @@
 #include <ttl/var/variant.hpp>
 #include <string>
 #include <memory>
-#include "../types/oskar_settings_types.hpp"
+#include <oskar_settings_types.hpp>
 
 #ifdef __GNUC__
 #define DEPRECATED(func) func __attribute__ ((deprecated))
@@ -60,30 +60,31 @@ public:
     /* NOTE this list *HAS* to match the order of types in the variant */
     enum MetaTypeId
     {
-        Invalid = -999,
+        Invalid = -1,
+        // Fundamental types
         Bool = 0,
         Int,
         UInt,
         Double,
         String,
-        IntRange,
-        IntPositive,
-        IntRangeExt,
-        RandomSeed,
+        // Derived types
+        DateTime,
+        DoubleList,
         DoubleRange,
         DoubleRangeExt,
-        IntList,
-        DoubleList,
-        StringList,
-        OptionList,
-        DateTime,
-        Time,
+        InputDirectory,
         InputFile,
         InputFileList,
-        InputDirectory,
-        OutputFile
+        IntList,
+        IntPositive,
+        IntRange,
+        IntRangeExt,
+        OptionList,
+        OutputFile,
+        RandomSeed,
+        StringList,
+        Time
     };
-
 
 private:
         ttl::var::variant<
@@ -92,22 +93,22 @@ private:
                 unsigned int,
                 double,
                 std::string,
-                oskar::IntRange,
-                oskar::IntPositive,
-                oskar::IntRangeExt,
-                oskar::RandomSeed,
+                oskar::DateTime,
+                oskar::DoubleList,
                 oskar::DoubleRange,
                 oskar::DoubleRangeExt,
-                oskar::IntList,
-                oskar::DoubleList,
-                oskar::StringList,
-                oskar::OptionList,
-                oskar::DateTime,
-                oskar::Time,
+                oskar::InputDirectory,
                 oskar::InputFile,
                 oskar::InputFileList,
-                oskar::InputDirectory,
-                oskar::OutputFile
+                oskar::IntList,
+                oskar::IntPositive,
+                oskar::IntRange,
+                oskar::IntRangeExt,
+                oskar::OptionList,
+                oskar::OutputFile,
+                oskar::RandomSeed,
+                oskar::StringList,
+                oskar::Time
                 > value_;
         MetaTypeId type_;
 public:

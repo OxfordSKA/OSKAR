@@ -4,11 +4,10 @@
 
 set(name oskar_settings_list)
 add_library(${name} STATIC
-    src/Variant.cpp
-#    src/Version.cpp
-#    src/SettingsKey.cpp
-#    src/SettingsList.cpp
-#    src/SettingsItem.cpp
+#    src/oskar_SettingsVariant.cpp
+    src/oskar_SettingsKey.cpp
+#    src/oskar_SettingsList.cpp
+#    src/oskar_SettingsItem.cpp
 )
 target_link_libraries(${name} oskar_settings_types)
 

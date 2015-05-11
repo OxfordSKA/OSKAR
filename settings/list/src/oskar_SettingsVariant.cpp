@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -29,8 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <Variant.hpp>
-
 #include <iostream> // For debugging
 #include <cassert>
 #include <algorithm>
@@ -42,6 +40,8 @@
 
 #include <cstdio> // for debugging
 #include <iostream> // for debugging
+
+#include <oskar_SettingsVariant.hpp>
 
 using namespace std; // for debugging
 
@@ -244,14 +244,14 @@ void Variant::fromString(const std::string& s)
     case IntPositive:
     case IntRangeExt:
     {
-        VAR::get<oskar::IntRange>(value_).set(s, &ok);
+        VAR::get<oskar::IntRange>(value_).fromString(s, &ok);
         break;
     }
 
     case DoubleRange:
     case DoubleRangeExt:
     {
-        VAR::get<oskar::DoubleRange>(value_).set(s, &ok);
+        VAR::get<oskar::DoubleRange>(value_).fromString(s, &ok);
         break;
     }
 
@@ -262,7 +262,7 @@ void Variant::fromString(const std::string& s)
     }
     case StringList:
     {
-        VAR::get<oskar::StringList>(value_).set(s, &ok);
+        VAR::get<oskar::StringList>(value_).fromString(s, &ok);
         break;
     }
     case OptionList:
@@ -272,32 +272,32 @@ void Variant::fromString(const std::string& s)
     }
     case DateTime:
     {
-        VAR::get<oskar::DateTime>(value_).set(s, &ok);
+        VAR::get<oskar::DateTime>(value_).fromString(s, &ok);
         break;
     }
     case Time:
     {
-        VAR::get<oskar::Time>(value_).set(s, &ok);
+        VAR::get<oskar::Time>(value_).fromString(s, &ok);
         break;
     }
     case InputFile:
     {
-        VAR::get<oskar::InputFile>(value_).set(s, &ok);
+        VAR::get<oskar::InputFile>(value_).fromString(s, &ok);
         break;
     }
     case InputFileList:
     {
-        VAR::get<oskar::InputFileList>(value_).set(s, &ok);
+        VAR::get<oskar::InputFileList>(value_).fromString(s, &ok);
         break;
     }
     case InputDirectory:
     {
-        VAR::get<oskar::InputDirectory>(value_).set(s, &ok);
+        VAR::get<oskar::InputDirectory>(value_).fromString(s, &ok);
         break;
     }
     case OutputFile:
     {
-        VAR::get<oskar::OutputFile>(value_).set(s);
+        VAR::get<oskar::OutputFile>(value_).fromString(s);
         break;
     }
     default:

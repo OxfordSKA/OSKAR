@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -31,10 +31,11 @@
 
 #include <gtest/gtest.h>
 
-#include "Variant.hpp"
 #include <string>
 #include <vector>
 #include <iostream>
+
+#include "../oskar_SettingsVariant.hpp"
 
 using namespace oskar;
 using namespace std;
@@ -299,7 +300,7 @@ TEST(Variant, IntRangeExt)
     ASSERT_STREQ("", v.toString().c_str());
 
     ASSERT_TRUE(ok);
-    v.toIntRangeExt().set(smin, &ok);
+    v.toIntRangeExt().fromString(smin, &ok);
     ASSERT_TRUE(ok);
     ASSERT_EQ(min-1, v.toIntRangeExt().getInt(&ok));
     ASSERT_FALSE(ok);
@@ -331,7 +332,7 @@ TEST(Variant, DoubleRangeExt)
     ASSERT_DOUBLE_EQ(0.0, v.toDouble(&ok));
     ASSERT_TRUE(ok);
 
-    v.toDoubleRangeExt().set("all");
+    v.toDoubleRangeExt().fromString("all");
     ASSERT_DOUBLE_EQ(0.0-DBL_MIN, v.toDouble(&ok));
     ASSERT_TRUE(ok);
 }
@@ -388,7 +389,7 @@ TEST(Variant, IntList_extended)
     ASSERT_STREQ("-2,2,5", v.toIntList().toString().c_str());
 
     bool ok = true;
-    v.toIntList().set("hello", &ok);
+    v.toIntList().fromString("hello", &ok);
     ASSERT_TRUE(ok);
     ASSERT_FALSE(l.isText());
     ASSERT_STREQ("hello", v.toIntList().toString().c_str());
@@ -504,7 +505,7 @@ TEST(Variant, OptionList)
     ASSERT_EQ(3, v.toOptionList().num_options());
     ASSERT_EQ("two", v.toOptionList().option(1));
     bool ok = false;
-    v.toOptionList().set("three", &ok);
+    v.toOptionList().fromString("three", &ok);
     ASSERT_EQ(2, v.toOptionList().valueIndex());
     ASSERT_TRUE(ok);
     ASSERT_STREQ("three", v.toOptionList().toString().c_str());
