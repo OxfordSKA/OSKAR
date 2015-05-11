@@ -3,12 +3,11 @@
 ###############################################################################
 #
 # Description:
-#   Tests the addition of noise to visibilities.
+#   Tests the simulation of noise when producing visibilities.
 #
 # Method:
-#   1. Generate an OSKAR visibility binary file with no sources. This has
-#      visibility amplitudes which are all zero.
-#   2. Add noise using the oskar_vis_add_noise application.
+#   1. Generate an OSKAR visibility binary file with no sources with system
+#      noise simulation enabled.
 #   3. Report the noise on the Stokes-I visibilities.
 #   4. Report the noise on an image made using the oskar_imager application.
 #
@@ -39,22 +38,12 @@ set_setting $ini simulator/double_precision false
 set_setting $ini telescope/input_directory telescope
 set_setting $ini telescope/normalise_beams_at_phase_centre false
 set_setting $ini telescope/pol_mode "Scalar"
+set_setting $ini interferometer/max_time_samples_per_block 2
 #set_setting $ini telescope/pol_mode "Full"
 set_setting $ini observation/num_channels 1
 set_setting $ini observation/start_frequency_hz 200e6
 set_setting $ini observation/num_time_steps 20
 set_setting $ini observation/length "$(bc -l <<< 12.*3600.)"
-
-# Run the interferometry simulation
-echo "Starting interferometry simulation (with no sources)"
-T0="$(date +%s)"
-run_sim_interferometer -q $ini # &> /dev/null
-echo "  Finished in $(($(date +%s)-T0)) s"
-echo ""
-
-
-###############################################################################
-
 
 # Set settings which add noise.
 noise_seed=$((1 + RANDOM % 1000000))
@@ -66,16 +55,17 @@ set_setting $ini interferometer/noise/rms "Range"
 set_setting $ini interferometer/noise/rms/start $rms
 set_setting $ini interferometer/noise/rms/end $rms
 
-# Add noise to the visibilities.
-echo "Adding noise to visibilities, RMS specification."
-echo "  - RMS         : $(printf "%.2e" "$rms") Jy"
+# Run the interferometry simulation
+echo "Starting interferometry simulation (with no sources)"
 T0="$(date +%s)"
-vis=example.vis
-noise_vis=example_noise.vis
-cp $vis $noise_vis
-run_vis_add_noise -i -q $ini $noise_vis
+#run_sim_interferometer -q $ini # &> /dev/null
+run_sim_interferometer $ini # &> /dev/null
 echo "  Finished in $(($(date +%s)-T0)) s"
 echo ""
+
+
+###############################################################################
+noise_vis=example.vis
 
 # Print some stats from the visibilities after noise addition
 echo "Visibility stats [$noise_vis]"
