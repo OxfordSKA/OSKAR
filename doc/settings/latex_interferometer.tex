@@ -128,10 +128,10 @@ Integer $\geq$ 1, or `time'
 
 noise/freq
 &
-{Specification of the list of frequencies at which noise values are defined: 
+{Selection of the the list of frequencies for which noise values are defined: 
 {\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
 \vspace{8pt}
- \item {\textbf{Telescope model}: frequencies are loaded from the data file in the telescope model directory.}
+ \item {\textbf{Telescope model}: frequencies are loaded from a data file in the telescope model directory.}
  \item {\textbf{Observation settings}: frequencies are defined by the observation settings.}
  \item {\textbf{Data file}: frequencies are loaded from the specified data file.}
  \item {\textbf{Range}: frequencies are specified by the range parameters.}
@@ -154,7 +154,7 @@ Telescope
 
 noise/freq/file
 &
-{Data file consisting of an ASCII list of frequencies.}
+{Data file consisting of an ASCII list of frequencies, in Hz.}
 &
 Path name
 &
@@ -192,25 +192,23 @@ Unsigned double
 \\
 \hline
 
-noise/values
+noise/rms
 &
-{Single polarisation noise value specification type: 
+{RMS noise value specification: 
 {\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
 \vspace{8pt}
- \item {\textbf{Telescope model priority}: values are loaded from files in the telescope model directory, according to the default file type priority.}
- \item {\textbf{RMS flux density}: use values specified in terms of noise RMS flux density. }
- \item {\textbf{Sensitivity}: use values specified in terms of station sensitivity.}
- \item {\textbf{Temperature ...}: use values specified by the system temperature, effective area, and system efficiency.}
+ \item {\textbf{Telescope model}: values are loaded from files in the telescope model directory.}
+ \item {\textbf{Data file}: values are loaded from the specified file.}
+ \item {\textbf{Range}: values are evaluated according to the specified range parameters.}
  \vspace{8pt}
 \end{itemize}}
- \textit{Note: Noise values are interpreted as a function of frequency. The list of frequencies to which noise values correspond is based upon the value of the noise frequency specification.}.}
+ Noise values are specified in Jy and represent the RMS noise in terms of the flux of an unpolarised source measured in a single polarisation of the detector. \textit{Note that unless using the telescope model, the noise RMS will be the same for each station in the interferometer.}}
 &
 {One of the following:}
 {\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
-\vspace{4pt}\item {Telescope model priority}
-\item {RMS flux density}
-\item {Sensitivity}
-\item {Temperature, area, and system efficiency}
+\vspace{4pt}\item {Telescope model}
+\item {Data file}
+\item {Range}
 \end{itemize}
 }
 &
@@ -218,33 +216,9 @@ Telescope
 \\
 \hline
 
-noise/values/rms
+noise/rms/file
 &
-{Root mean square (RMS) flux density specification: 
-{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
-\vspace{8pt}
- \item {\textbf{No override}: values are loaded from RMS files found in the telescope model directory.}
- \item {\textbf{Data file}: values are loaded from the specified file.}
- \item {\textbf{Range}: values are evaluated according to the specified range parameters.}
- \vspace{8pt}
-\end{itemize}}
-}
-&
-{One of the following:}
-{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
-\vspace{4pt}\item {No override (telescope model)}
-\item {Data file}
-\item {Range}
-\end{itemize}
-}
-&
-No
-\\
-\hline
-
-noise/values/rms/file
-&
-{RMS flux density data file.}
+{Station RMS flux density data file. This is an ASCII file consisting of a list of noise RMS values as a function of frequency in Jy.}
 &
 Path name
 &
@@ -252,19 +226,9 @@ None
 \\
 \hline
 
-noise/values/rms/start
+noise/rms/start
 &
-{RMS flux density range start value, in Jy.}
-&
-Double
-&
-0.0
-\\
-\hline
-
-noise/values/rms/end
-&
-{RMS flux density range end value, in Jy.}
+{Station RMS flux density range start value, in Jy. The range is expanded linearly over the number of frequencies for which noise is defined.}
 &
 Double
 &
@@ -272,217 +236,11 @@ Double
 \\
 \hline
 
-noise/values/sensitivity
+noise/rms/end
 &
-{System sensitivity (or System Equivalent Flux density, SEFD) specification type: 
-{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
-\vspace{8pt}
- \item {\textbf{No override}: values are loaded from sensitivity files found in the telescope model directory.}
- \item {\textbf{Data file}: values are loaded from the specified file.}
- \item {\textbf{Range}: values are evaluated according to the specified range parameters.}
- \vspace{8pt}
-\end{itemize}}
-}
-&
-{One of the following:}
-{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
-\vspace{4pt}\item {No override (telescope model)}
-\item {Data file}
-\item {Range}
-\end{itemize}
-}
-&
-No
-\\
-\hline
-
-noise/values/sensitivity/file
-&
-{Data file containing system sensitivity value(s).}
-&
-Path name
-&
-None
-\\
-\hline
-
-noise/values/sensitivity/start
-&
-{Sensitivity range start value, in Jy.}
+{Station RMS flux density range end value, in Jy. The range is expanded linearly over the number of frequencies for which noise is defined.}
 &
 Double
-&
-0.0
-\\
-\hline
-
-noise/values/sensitivity/end
-&
-{Sensitivity range end value, in Jy.}
-&
-Double
-&
-0.0
-\\
-\hline
-
-noise/values/components/t\_sys
-&
-{System temperature specification type: 
-{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
-\vspace{8pt}
- \item {\textbf{No override}: values are loaded from system temperature files found in the telescope model directory.}
- \item {\textbf{Data file}: values are loaded from the specified file.}
- \item {\textbf{Range}: values are evaluated according to the specified range parameters.}
- \vspace{8pt}
-\end{itemize}}
-}
-&
-{One of the following:}
-{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
-\vspace{4pt}\item {No override (telescope model)}
-\item {Data file}
-\item {Range}
-\end{itemize}
-}
-&
-No
-\\
-\hline
-
-noise/values/components/t\_sys/file
-&
-{Data file containing system temperature value(s).}
-&
-Path name
-&
-None
-\\
-\hline
-
-noise/values/components/t\_sys/start
-&
-{System temperature range start value, in K.}
-&
-Double
-&
-0.0
-\\
-\hline
-
-noise/values/components/t\_sys/end
-&
-{System temperature range end value, in K.}
-&
-Double
-&
-0.0
-\\
-\hline
-
-noise/values/components/area
-&
-{Station effective area specification type 
-{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
-\vspace{8pt}
- \item {\textbf{No override}: values are loaded from system temperature files found in the telescope model directory.}
- \item {\textbf{Data file}: values are loaded from the specified file.}
- \item {\textbf{Range}: values are evaluated according to the specified range parameters.}
- \vspace{8pt}
-\end{itemize}}
-}
-&
-{One of the following:}
-{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
-\vspace{4pt}\item {No override (telescope model)}
-\item {Data file}
-\item {Range}
-\end{itemize}
-}
-&
-No
-\\
-\hline
-
-noise/values/components/area/file
-&
-{Data file containing effective area value(s).}
-&
-Path name
-&
-None
-\\
-\hline
-
-noise/values/components/area/start
-&
-{Effective area range start value, in m\textsuperscript{2}.}
-&
-Double
-&
-0.0
-\\
-\hline
-
-noise/values/components/area/end
-&
-{Effective area range end value, in m\textsuperscript{2}.}
-&
-Double
-&
-0.0
-\\
-\hline
-
-noise/values/components/efficiency
-&
-{Station system efficiency specification type: 
-{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=4pt, parsep=0pt]
-\vspace{8pt}
- \item {\textbf{No override}: values are loaded from system temperature files found in the telescope model directory.}
- \item {\textbf{Data file}: values are loaded from the specified file.}
- \item {\textbf{Range}: values are evaluated according to the specified range parameters.}
- \vspace{8pt}
-\end{itemize}}
-}
-&
-{One of the following:}
-{\begin{itemize}[leftmargin=5ex, topsep=0pt, partopsep=0pt, itemsep=2pt, parsep=0pt]
-\vspace{4pt}\item {No override (telescope model)}
-\item {Data file}
-\item {Range}
-\end{itemize}
-}
-&
-No
-\\
-\hline
-
-noise/values/components/efficiency/file
-&
-{Data file containing system efficiency value(s).}
-&
-Path name
-&
-None
-\\
-\hline
-
-noise/values/components/efficiency/start
-&
-{System efficiency range start value (allowed range: 0.0 to 1.0).}
-&
-Double in range 0 $\leq$ $x$ $\leq$ 1
-&
-0.0
-\\
-\hline
-
-noise/values/components/efficiency/end
-&
-{System efficiency range end value (allowed range: 0.0 to 1.0).}
-&
-Double in range 0 $\leq$ $x$ $\leq$ 1
 &
 0.0
 \\
