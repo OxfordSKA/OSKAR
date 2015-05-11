@@ -1,9 +1,8 @@
 #!/bin/bash
-. @OSKAR_BINARY_DIR@/apps/test/test_utility.sh
+source @OSKAR_BINARY_DIR@/apps/test/test_utility.sh
 
-run_dir=$PWD
-get_example_data_version $1
-download_example_data $version
+get_example_data_version "$@"
+download_example_data "$version"
 
 # Optional --verbose option to not hide the oskar run log.
 if [ "$2" == "--verbose" ]; then
@@ -21,7 +20,7 @@ echo "  * Example data directory = $example_data_dir"
 echo ""
 
 # Move into the example data directory
-cd ${example_data_dir}
+cd "${example_data_dir}"
 
 # Set settings
 ini=setup.ini
@@ -41,10 +40,10 @@ echo "Starting interferometry simulation [Single precision]"
 T0="$(date +%s)"
 run_sim_interferometer $verbose $ini
 echo " - Finished in ~$(($(date +%s)-T0)) s"
-oskar_log=`ls oskar*.log`
-mv ${oskar_log} SINGLE_${oskar_log}
+oskar_log=$(ls oskar*.log)
+mv "${oskar_log}" "SINGLE_${oskar_log}"
 echo "........................................................................."
-sed -n '130,141p' SINGLE_${oskar_log}
+sed -n '125,136p' "SINGLE_${oskar_log}"
 echo "........................................................................."
 echo ""
 
@@ -54,30 +53,28 @@ echo "Starting interferometry simulation [Double precision]"
 T0="$(date +%s)"
 run_sim_interferometer $verbose $ini
 echo " - Finished in ~$(($(date +%s)-T0)) s"
-oskar_log=`ls oskar*.log`
-mv ${oskar_log} DOUBLE_${oskar_log}
+oskar_log=$(ls oskar*.log)
+mv "$oskar_log" "DOUBLE_${oskar_log}"
 echo "........................................................................."
-sed -n '130,141p' DOUBLE_${oskar_log}
+sed -n '125,136p' "DOUBLE_${oskar_log}"
 echo "........................................................................."
 echo ""
-
 
 echo ""
 echo "-------------------------------------------------------------------------"
 echo "Run complete!"
 echo ""
-echo "Please inspect the OSKAR run logs for timing results. This benchmark has
-echo "generated the following log files:
+echo "Please inspect the OSKAR run logs for timing results. This benchmark has"
+echo "generated the following log files:"
 echo ""
-oskar_logs=`ls *.log`
+oskar_logs=$(ls ./*.log)
 idx=1
-for log in ${oskar_logs[@]}; do
+for log in ${oskar_logs[*]}; do
     echo "  ${idx}. ${log}"
-    idx=$(($idx+1))
+    idx=$((idx+1))
 done
 echo ""
 echo "Which can be found in the output directory:"
 echo "  ${PWD}/${example_data_dir}"
 echo "-------------------------------------------------------------------------"
 echo ""
-

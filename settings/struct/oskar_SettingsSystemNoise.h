@@ -34,13 +34,7 @@ enum OSKAR_SYSTEM_NOISE
     OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL,
     OSKAR_SYSTEM_NOISE_OBS_SETTINGS,
     OSKAR_SYSTEM_NOISE_DATA_FILE,
-    OSKAR_SYSTEM_NOISE_RANGE,
-
-    OSKAR_SYSTEM_NOISE_RMS,
-    OSKAR_SYSTEM_NOISE_SENSITIVITY,
-    OSKAR_SYSTEM_NOISE_SYS_TEMP,
-
-    OSKAR_SYSTEM_NOISE_NO_OVERRIDE
+    OSKAR_SYSTEM_NOISE_RANGE
 };
 
 /* System noise frequency settings structure */
@@ -54,26 +48,15 @@ struct oskar_SettingsSystemNoiseFreq
 };
 typedef struct oskar_SettingsSystemNoiseFreq oskar_SettingsSystemNoiseFreq;
 
-struct oskar_SettingsSystemNoiseType
+/* System noise RMS settings structure */
+struct oskar_SettingsSystemNoiseRMS
 {
-    int override;       /* override mode */
+    int specification; /* Specification / priority type */
     char* file;
     double start;
     double end;
 };
-typedef struct oskar_SettingsSystemNoiseType oskar_SettingsSystemNoiseType;
-
-/* System noise value settings structure */
-struct oskar_SettingsSystemNoiseValue
-{
-    int specification; /* Specification / priority type */
-    oskar_SettingsSystemNoiseType rms;
-    oskar_SettingsSystemNoiseType sensitivity;
-    oskar_SettingsSystemNoiseType t_sys;
-    oskar_SettingsSystemNoiseType area;
-    oskar_SettingsSystemNoiseType efficiency;
-};
-typedef struct oskar_SettingsSystemNoiseValue oskar_SettingsSystemNoiseValue;
+typedef struct oskar_SettingsSystemNoiseRMS oskar_SettingsSystemNoiseRMS;
 
 /**
  * @struct oskar_SettingsSystemNoise
@@ -92,7 +75,7 @@ struct oskar_SettingsSystemNoise
     oskar_SettingsSystemNoiseFreq freq;
 
     /* Values */
-    oskar_SettingsSystemNoiseValue value;
+    oskar_SettingsSystemNoiseRMS rms;
 };
 typedef struct oskar_SettingsSystemNoise oskar_SettingsSystemNoise;
 

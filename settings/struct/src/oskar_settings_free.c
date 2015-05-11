@@ -127,16 +127,6 @@ void oskar_settings_free(oskar_Settings* settings)
     /* Free noise settings pointers */
     free(noise->freq.file);
     noise->freq.file = NULL;
-    free(noise->value.rms.file);
-    noise->value.rms.file = NULL;
-    free(noise->value.sensitivity.file);
-    noise->value.sensitivity.file = NULL;
-    free(noise->value.t_sys.file);
-    noise->value.t_sys.file = NULL;
-    free(noise->value.area.file);
-    noise->value.area.file = NULL;
-    free(noise->value.efficiency.file);
-    noise->value.efficiency.file = NULL;
 
     /* Free ionosphere settings */
     for (i = 0; i < settings->ionosphere.num_TID_screens; ++i)

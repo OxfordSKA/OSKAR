@@ -573,7 +573,6 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
     depth++;
     if (n->enable)
     {
-        const char* value;
         LVI("Seed", n->seed);
         /* Noise frequency */
         switch (n->freq.specification)
@@ -606,75 +605,40 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
                 depth--;
                 break;
             }
-            default: { value = "ERROR INVALID VALUE"; break; }
-        };
-
-        /* Value */
-        switch (n->value.specification)
-        {
-            case OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL:
-            { value = "Telescope model (default priority)"; break; }
-            case OSKAR_SYSTEM_NOISE_RMS:
-            { value = "RMS flux density"; break; }
-            case OSKAR_SYSTEM_NOISE_SENSITIVITY:
-            { value = "Sensitivity"; break; }
-            case OSKAR_SYSTEM_NOISE_SYS_TEMP:
-            {
-                value = "System temperature, effective area & system efficiency";
-                break;
-            }
-            default:
-            { value = "ERROR INVALID VALUE"; break; }
-
-        };
-        LVS("Noise value specification", value);
-
-        /* Print any override setting */
-        depth++;
-        switch (n->value.specification)
-        {
-            case OSKAR_SYSTEM_NOISE_RMS:
-            {
-                const char* override = NULL;
-                switch (n->value.rms.override)
-                {
-                    case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-                    { override = "No override"; break;}
-                    case OSKAR_SYSTEM_NOISE_DATA_FILE:
-                    { override = "Data file"; break;}
-                    case OSKAR_SYSTEM_NOISE_RANGE:
-                    { override = "Range"; break;}
-                    default:
-                    { value = "ERROR INVALID VALUE"; break; }
-                };
-                LVS("Override", override);
-                break;
-            }
-            case OSKAR_SYSTEM_NOISE_SENSITIVITY:
-            {
-                const char* override = NULL;
-                switch (n->value.sensitivity.override)
-                {
-                    case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-                    { override = "No override"; break;}
-                    case OSKAR_SYSTEM_NOISE_DATA_FILE:
-                    { override = "Data file"; break;}
-                    case OSKAR_SYSTEM_NOISE_RANGE:
-                    { override = "Range"; break;}
-                    default:
-                    { value = "ERROR INVALID VALUE"; break; }
-                };
-                LVS("Override", override);
-                break;
-            }
-            case OSKAR_SYSTEM_NOISE_SYS_TEMP:
-            {
-                /* TODO */
-                break;
-            }
             default: { break; }
         };
-        depth--;
+
+        switch (n->rms.specification)
+        {
+        case OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL:
+        {
+            LVS("RMS specification", "Telescope model");
+            break;
+        }
+        case OSKAR_SYSTEM_NOISE_OBS_SETTINGS:
+        {
+            LVS("RMS specification", "Observation settings");
+            break;
+        }
+        case OSKAR_SYSTEM_NOISE_DATA_FILE:
+        {
+            LVS("RMS specification", "Data file");
+            depth++;
+            LVS("Filename", n->freq.file);
+            depth--;
+            break;
+        }
+        case OSKAR_SYSTEM_NOISE_RANGE:
+        {
+            LVS("RMS specification", "Range");
+            depth++;
+            LV("Start", "%.3f", n->rms.end);
+            LV("End", "%.3f", n->rms.end);
+            depth--;
+            break;
+        }
+        default: { break; }
+        }
     }
     depth--;
 

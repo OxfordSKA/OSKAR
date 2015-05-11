@@ -47,10 +47,8 @@ static void load_noise(oskar_SettingsSystemNoise* noise, const char* filename,
         int* status);
 static void load_noise_freqs(oskar_SettingsSystemNoiseFreq* freq, QSettings& s,
         int* status);
-static void load_noise_values(oskar_SettingsSystemNoiseValue* value,
-        QSettings& s, int* status);
-static void load_noise_type(oskar_SettingsSystemNoiseType* stddev, QSettings& s,
-        const QString& name, int* status);
+static void load_noise_rms(oskar_SettingsSystemNoiseRMS* value, QSettings& s,
+        int* status);
 static void get_filename(char** filename, const QSettings& s,
         const QString& key, const QString& defaultValue = "");
 
@@ -141,7 +139,7 @@ static void load_noise(oskar_SettingsSystemNoise* noise, const char* filename,
             load_noise_freqs(&noise->freq, s, status);
 
             /* Values */
-            load_noise_values(&noise->value, s, status);
+            load_noise_rms(&noise->rms, s, status);
         }
         s.endGroup(); // noise
     }
@@ -177,81 +175,31 @@ static void load_noise_freqs(oskar_SettingsSystemNoiseFreq* freq,
 }
 
 
-static void load_noise_values(oskar_SettingsSystemNoiseValue* value,
+static void load_noise_rms(oskar_SettingsSystemNoiseRMS* rms,
         QSettings& s, int* status)
-{
-    QString temp = s.value("values", "TEL").toString().toUpper();
-    if (temp.startsWith("TEL"))
-        value->specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
-    else if (temp.startsWith("R"))
-        value->specification = OSKAR_SYSTEM_NOISE_RMS;
-    else if (temp.startsWith("S"))
-        value->specification = OSKAR_SYSTEM_NOISE_SENSITIVITY;
-    else if(temp.startsWith("TEMP"))
-        value->specification = OSKAR_SYSTEM_NOISE_SYS_TEMP;
-    else
-    {
-        *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
-        return;
-    }
-
-    s.beginGroup("values");
-    {
-        load_noise_type(&value->rms, s, "rms", status);
-        load_noise_type(&value->sensitivity, s, "sensitivity", status);
-
-        s.beginGroup("components");
-        {
-            load_noise_type(&value->t_sys, s, "t_sys", status);
-            load_noise_type(&value->area, s, "area", status);
-            load_noise_type(&value->efficiency, s, "efficiency", status);
-            if (value->efficiency.start < 0.0 || value->efficiency.start > 1.0)
-            {
-                *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
-                return;
-            }
-            if (value->efficiency.end < 0.0 || value->efficiency.end > 1.0)
-            {
-                *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
-                return;
-            }
-            if (value->efficiency.start > value->efficiency.end)
-            {
-                *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
-                return;
-            }
-        }
-        s.endGroup();
-    }
-    s.endGroup(); // spec
-}
-
-
-static void load_noise_type(oskar_SettingsSystemNoiseType* type, QSettings& s,
-        const QString& name, int* status)
 {
     QString temp;
 
     if (*status) return;
 
-    temp = s.value(name, "N").toString().toUpper();
-    if (temp.startsWith("N"))
-        type->override = OSKAR_SYSTEM_NOISE_NO_OVERRIDE;
+    temp = s.value("rms", "T").toString().toUpper();
+    if (temp.startsWith("T"))
+        rms->specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     else if (temp.startsWith("D"))
-        type->override = OSKAR_SYSTEM_NOISE_DATA_FILE;
+        rms->specification = OSKAR_SYSTEM_NOISE_DATA_FILE;
     else if (temp.startsWith("R"))
-        type->override = OSKAR_SYSTEM_NOISE_RANGE;
+        rms->specification = OSKAR_SYSTEM_NOISE_RANGE;
     else
     {
         *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
         return;
     }
 
-    s.beginGroup(name);
+    s.beginGroup("rms");
     {
-        get_filename(&type->file, s, "file");
-        type->start  = s.value("start").toDouble();
-        type->end    = s.value("end").toDouble();
+        get_filename(&rms->file, s, "file");
+        rms->start  = s.value("start").toDouble();
+        rms->end    = s.value("end").toDouble();
     }
     s.endGroup();
 }

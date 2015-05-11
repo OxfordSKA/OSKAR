@@ -112,21 +112,17 @@ void oskar_vis_add_system_noise(oskar_Vis* vis,
                 /* Apply noise */
                 switch (oskar_mem_type(vis_amp))
                 {
-                    case OSKAR_SINGLE_COMPLEX: /* Scalar amps. = Stokes-I mode */
+                    /* Scalar amps. = Stokes-I mode */
+                    case OSKAR_SINGLE_COMPLEX:
                     {
                         float2* amps_;
                         amps_ = oskar_mem_float2(vis_amp, status);
                         r1 = oskar_random_gaussian(&r2);
-                        /* As we are adding noise directly to Stokes-I
-                         * and the noise is defined as single dipole noise
-                         * we have to divide by sqrt(2) to take into the account
-                         * of the two different dipoles that go into the
-                         * calculation of Stokes-I. Note that for polarised mode
-                         * this is not required (npols == 4) as this falls out
-                         * naturally when evaluating stokes-I from the
-                         * dipole correlations (i.e. I = 0.5 (XX+YY) ).
+                        /*
+                         * scale by 1/sqrt(2) as this is noise from a
+                         * combination of polarisations. ie. I = 0.5 (XX+YY)
                          */
-                        std = std/sqrt(2);
+                        std = std/sqrt(2.0);
                         amps_[idx].x += r1 * std + mean;
                         amps_[idx].y += r2 * std + mean;
                         break;
@@ -149,12 +145,17 @@ void oskar_vis_add_system_noise(oskar_Vis* vis,
                         amps_[idx].d.y += r2 * std + mean;
                         break;
                     }
-                    case OSKAR_DOUBLE_COMPLEX: /* Scalar amps. = Stokes-I mode */
+                    /* Scalar amps. = Stokes-I mode */
+                    case OSKAR_DOUBLE_COMPLEX:
                     {
                         double2* amps_;
                         amps_ = oskar_mem_double2(vis_amp, status);
                         r1 = oskar_random_gaussian(&r2);
-                        std = std/sqrt(2);
+                        /*
+                         * scale by 1/sqrt(2) as this is noise from a
+                         * combination of polarisations. ie. I = 0.5 (XX+YY)
+                         */
+                        std = std/sqrt(2.0);
                         amps_[idx].x += r1 * std + mean;
                         amps_[idx].y += r2 * std + mean;
                         break;

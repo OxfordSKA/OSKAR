@@ -185,31 +185,3 @@ void check_error(oskar_Log* log, int status)
         exit(status);
     }
 }
-
-//void vis_file_settings(oskar_Log* log, oskar_Vis* vis)
-//{
-//    oskar_Mem* s = oskar_vis_settings(vis);
-//    //printf("%s\n", oskar_mem_char(s));
-//    //oskar_log_message(log, 0, "Checking settings");
-//    // TODO load settings from a string rather than a file! (This isn't
-//    // possible with QSettings but should be a feature of the new settings interface)
-//}
-//
-//void log_noise_settings(oskar_Log* log, oskar_Settings* s)
-//{
-//    const oskar_SettingsSystemNoise* n = &s->interferometer.noise;
-//    const oskar_SettingsInterferometer* i = &s->interferometer;
-//    int width = 45; // Exactly how this this defined?
-//                    // Change to start column?
-//
-//    // Needs significant logic here to determine what should print
-//    // This can be handled automatically by the new settings.
-//    oskar_log_line(log, 'o');
-//    oskar_log_message(log, 0, "Noise settings");
-//    oskar_log_value(log, 1, width, "Enabled", "%s", (n->enable?"true":"false"));
-//    oskar_log_value(log, 1, width, "Seed", "%i", n->seed);
-//    oskar_log_value(log, 1, width, "Frequency specification", "%i", n->freq.specification);
-//    oskar_log_value(log, 1, width, "Value specification", "%i", n->value.specification);
-//    oskar_log_line(log, 'o');
-//
-//}

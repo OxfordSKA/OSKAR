@@ -853,4 +853,3 @@ static void system_mem_log(oskar_Log* log)
 #ifdef __cplusplus
 }
 #endif
-

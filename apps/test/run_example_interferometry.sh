@@ -2,8 +2,8 @@
 . @OSKAR_BINARY_DIR@/apps/test/test_utility.sh
 
 run_dir=$PWD
-get_example_data_version $@
-download_example_data $version
+get_example_data_version "$@"
+download_example_data "$version"
 
 echo "Running OSKAR example: Interferometry simulation and DFT imaging."
 echo ""
@@ -14,7 +14,7 @@ echo "  * Example data directory = $example_data_dir"
 echo ""
 
 # Move into the example data directory
-cd ${example_data_dir}
+cd "${example_data_dir}"
 
 # Set settings as specified in the OSKAR Example document section 3.1
 ini=setup.ini
@@ -37,9 +37,8 @@ echo " - Finished in $(($(date +%s)-T0)) s"
 echo ""
 echo "-------------------------------------------------------------------------"
 echo "Run complete!"
-echo "" 
+echo ""
 echo "Results can be found in the directory: "
 echo "  '$run_dir/$example_data_dir'"
 echo "-------------------------------------------------------------------------"
 echo ""
-

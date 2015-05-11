@@ -16,6 +16,7 @@
 #   1. General utility functions                                              #
 #       - console_log                                                         #
 #       - set_value                                                           #
+#       - exit_                                                               #
 #   2. Functions for working with OSKAR example data.                         #
 #       - example_data_script_usage                                           #
 #       - get_example_data_version                                            #
@@ -23,11 +24,14 @@
 #       - set_oskar_binaries                                                  #
 #   3. Functions for working with OSKAR.                                      #
 #       - set_setting                                                         #
+#       - get_setting                                                         #
 #       - del_setting                                                         #
 #       - run_sim_interferomer                                                #
 #       - run_beam_pattern                                                    #
 #       - run_imager                                                          #
 #       - run_vis_add_noise                                                   #
+#       - run_vis_stats                                                       #
+#       - run_fits_image_stats                                                #
 ###############################################################################
 
 
@@ -36,7 +40,7 @@
 # 0. Global variables                                                         #
 #                                                                             #
 ###############################################################################
-current_oskar_version="@OSKAR_VERSION_STR@"
+export current_oskar_version="@OSKAR_VERSION_STR@"
 oskar_app_path="@PROJECT_BINARY_DIR@/apps"
 oskar_url="http://oerc.ox.ac.uk/~ska/oskar"
 
@@ -50,7 +54,7 @@ oskar_url="http://oerc.ox.ac.uk/~ska/oskar"
 # Usage: console_log ['Hello World']
 function console_log()
 {
-    echo '['$(date +'%a %Y-%m-%d %H:%M:%S %z')']' $1
+    echo "[$(date +'%a %Y-%m-%d %H:%M:%S %z')]" "$1"
 }
 
 # Description:
@@ -62,11 +66,22 @@ function console_log()
 #   VAR=$NEW_VALUE
 function set_value()
 {
-    read -p "$1 ("$2"): " NEW_VALUE
-    if [ -z $NEW_VALUE ]; then
+    read -p "$1 ($2): " NEW_VALUE
+    if [ -z "$NEW_VALUE" ]; then
         NEW_VALUE=$2
     fi
 }
+# Description: Exits if not running an interactive shell
+# Usage: exit_ 99
+function exit_()
+{
+    if [ -z "${PS1+x}" ]; then
+        exit "$1"
+    fi
+}
+
+
+
 
 ###############################################################################
 #                                                                             #
@@ -113,7 +128,7 @@ function get_example_data_version() {
     # Parse command line arguments.
     if [[ $# -gt 1 || "$1" == "--help" || "$1" == "-h" || "$1" == "-?" ]]; then
         example_data_script_usage
-        exit 0
+        exit_ 0
     fi
     if [ $# -eq 1 ]; then
         version=$1
@@ -141,29 +156,29 @@ function download_example_data() {
     local file="${example_data_dir}.zip"
     example_data_url="${oskar_url}/${1}/data/${file}"
     # Download and unpack the example data, removing any existing data first.
-    if [ -f $file ]; then
-        rm -f $file
+    if [ -f "$file" ]; then
+        rm -f "$file"
     fi
-    if [ -d $example_data_dir ]; then
-        rm -rf $example_data_dir
+    if [ -d "$example_data_dir" ]; then
+        rm -rf "$example_data_dir"
     fi
-    wget -q $example_data_url
-    if [ ! -f $file ]; then
+    wget -q "$example_data_url"
+    if [ ! -f "$file" ]; then
         echo "Error: Failed to download example data from:"
         echo "  '$example_data_url'"
         echo ""
         echo "Please check the example data for OSKAR version '${version}' exists!"
         example_data_script_usage
-        exit 1
+        exit_ 1
     fi
-    unzip -q ${file}
-    if [ ! -d $example_data_dir ]; then
+    unzip -q "${file}"
+    if [ ! -d "$example_data_dir" ]; then
         echo "ERROR: Failed to unpack example data. ${file}"
-        exit 1
+        exit_ 1
     fi
     # Remove the zip file.
-    if [ -f $file ]; then
-        rm -f $file
+    if [ -f "$file" ]; then
+        rm -f "$file"
     fi
 }
 
@@ -187,14 +202,41 @@ function set_setting() {
     local bin=${oskar_app_path}/oskar_settings_set
     if [ ! -x ${bin} ]; then
         echo "ERROR: Unable to find required binary: $bin."
-        exit 1
+        exit_ 1
     fi
     if [ ! $# -eq 3 ]; then
         echo "ERROR: set_setting requires 3 input arguments got $#."
         echo "usage: set_setting [ini_file] [key] [value]"
-        exit 1
+        exit_ 1
     fi
-    eval "${bin} -q $1 $2 $3"
+    eval "$bin -q $1 $2 \"$3\""
+}
+
+# Description:
+#   Gets the specified setting into the specified *.ini file using the
+#   'oskar_get_setting' binary.
+#
+# Usage:
+#   get_setting [ini_file] [key]
+#
+# Example
+#   value=$(get_setting test.ini observation/num_time_steps)
+#
+function get_setting() {
+    local bin=${oskar_app_path}/oskar_settings_get
+    if [ ! -x ${bin} ]; then
+        echo "ERROR: Unable to find required binary: $bin."
+        exit_ 1
+        return
+    fi
+    if [ ! $# -eq 2 ]; then
+        echo "ERROR: get_setting requires 2 input arguments got $#."
+        echo "usage: get_setting [ini_file] [key]"
+        exit_ 1
+        return
+    fi
+    var=$($bin "$1" "$2")
+    echo "$var"
 }
 
 # Description:
@@ -211,14 +253,15 @@ function del_setting() {
     local bin=${oskar_app_path}/oskar_settings_set
     if [ ! -x ${bin} ]; then
         echo "ERROR: Unable to find required binary: $bin."
-        exit 1
+        exit_ 1
     fi
     if [ ! $# -eq 2 ]; then
         echo "ERROR: del_setting requires 2 input arguments got $#."
         echo "usage: del_setting [ini_file] [key]"
-        exit 1
+        exit_ 1
     fi
-    eval "${bin} -q $1 $2"
+    cmd="$bin -q $1 $2"
+    ($cmd)
 }
 
 
@@ -236,15 +279,15 @@ function run_oskar_bin() {
     local NOPTIONS=${#OPTIONS[@]}
     local name=${ARGS[0]}
     local bin=${oskar_app_path}/${name}
-    if [ ! -x ${bin} ]; then
+    if [ ! -x "$bin" ]; then
         echo "ERROR: Unable to find required binary: $bin."
-        exit 1
+        exit_ 1
     fi
     echo "--------------------------------------------------------------------"
     echo "  * name  : $name"
     echo "  * bin   : $bin"
     echo "  * NARGS : $NOPTIONS"
-    echo "  * ARGS  : ${OPTIONS[@]}"
+    echo "  * ARGS  : ${OPTIONS[*]}"
     echo "--------------------------------------------------------------------"
 }
 
@@ -268,24 +311,25 @@ function run_sim_interferometer() {
     local bin=${oskar_app_path}/oskar_sim_interferometer
     if [ ! -x ${bin} ]; then
         echo "ERROR: Unable to find required binary: $bin."
-        exit 1
+        exit_ 1
     fi
-    if [ ! -f $INI ]; then
+    if [ ! -f "$INI" ]; then
         echo "ERROR: $name. Specified INI file not found!"
         echo "       INI file = '$INI'"
         echo ""
         echo "usage: $name [OPTIONS] <ini_file>"
-        exit 1
+        exit_ 1
     fi
-    if [ $NARGS -lt 1 ]; then
+    if [ "$NARGS" -lt 1 ]; then
         echo "ERROR: $name requires at least 1 input argument(s), got $#."
         echo "usage: $name [OPTIONS] <ini_file>"
-        exit 1
+        exit_ 1
     fi
-    eval "${bin} ${OPTIONS[@]} $INI"
+    cmd="$bin ${OPTIONS[*]} $INI"
+    ($cmd)
     if [ $? != 0 ]; then
         echo "ERROR: $name. Failed."
-        exit 1
+        exit_ 1
     fi
 }
 
@@ -309,24 +353,25 @@ function run_beam_pattern() {
     local bin=${oskar_app_path}/oskar_sim_beam_pattern
     if [ ! -x ${bin} ]; then
         echo "ERROR: Unable to find required binary: $bin."
-        exit 1
+        exit_ 1
     fi
-    if [ ! -f $INI ]; then
+    if [ ! -f "$INI" ]; then
         echo "ERROR: $name. Specified INI file not found!"
         echo "       INI file = '$INI'"
         echo ""
         echo "usage: $name [OPTIONS] <ini_file>"
-        exit 1
+        exit_ 1
     fi
-    if [ $NARGS -lt 1 ]; then
+    if [ "$NARGS" -lt 1 ]; then
         echo "ERROR: $name requires at least 1 input argument(s), got $#."
         echo "usage: $name [OPTIONS] <ini_file>"
-        exit 1
+        exit_ 1
     fi
-    eval "${bin} ${OPTIONS[@]} $INI"
+    cmd="$bin ${OPTIONS[*]} $INI"
+    ($cmd)
     if [ $? != 0 ]; then
         echo "ERROR: $name. Failed."
-        exit 1
+        exit_ 1
     fi
 }
 
@@ -348,26 +393,27 @@ function run_imager() {
     local OPTIONS=("${ARGS[@]:0:${LAST}}")
     local name="run_imager"
     local bin=${oskar_app_path}/oskar_imager
-    if [ ! -x ${bin} ]; then
+    if [ ! -x "$bin" ]; then
         echo "ERROR: $1 unable to find required binary: $bin."
-        exit 1
+        exit_ 1
     fi
-    if [ ! -f $INI ]; then
+    if [ ! -f "$INI" ]; then
         echo "ERROR: $name. Specified INI file not found!"
         echo "       INI file = '$INI'"
         echo ""
         echo "usage: $name [OPTIONS] <ini_file>"
-        exit 1
+        exit_ 1
     fi
-    if [ $NARGS -lt 1 ]; then
+    if [ "$NARGS" -lt 1 ]; then
         echo "ERROR: $name requires at least 1 input argument(s), got $#."
         echo "usage: $name [OPTIONS] <ini_file>"
-        exit 1
+        exit_ 1
     fi
-    eval "${bin} ${OPTIONS[@]} $INI"
+    cmd="$bin ${OPTIONS[*]} $INI"
+    ($cmd)
     if [ $? != 0 ]; then
         echo "ERROR: $name. Failed."
-        exit 1
+        exit_ 1
     fi
 }
 
@@ -392,32 +438,102 @@ function run_vis_add_noise() {
     local OPTIONS=("${ARGS[@]:0:${IINI}}") # Options
     local name="oskar_vis_add_noise"
     local bin=${oskar_app_path}/oskar_vis_add_noise
-    if [ ! -x ${bin} ]; then
+    if [ ! -x "$bin" ]; then
         echo "ERROR: Unable to find required binary: $bin."
-        exit 1
+        exit_ 1
     fi
-    if [ ! -f $INI ]; then
+    if [ ! -f "$INI" ]; then
         echo "ERROR: $name. Specified INI file not found!"
         echo "       INI file = '$INI'"
         echo ""
         echo "usage: $name [OPTIONS] <ini_file> <vis file>"
-        exit 1
+        exit_ 1
     fi
-    if [ ! -f $VIS ]; then
+    if [ ! -f "$VIS" ]; then
         echo "ERROR: $name. Specified VIS file not found!"
         echo "       VIS file = '$VIS'"
         echo ""
         echo "usage: $name [OPTIONS] <ini_file> <vis file>"
-        exit 1
+        exit_ 1
     fi
-    if [ $NARGS -lt 2 ]; then
+    if [ "$NARGS" -lt 2 ]; then
         echo "ERROR: $name requires at least 2 input argument(s), got $#."
         echo "usage: $name [OPTIONS] <ini_file> <vis file>"
-        exit 1
+        exit_ 1
     fi
-    eval "${bin} ${OPTIONS[@]} -s $INI $VIS"
+    cmd="$bin ${OPTIONS[*]} -s $INI $VIS"
+    ($cmd)
     if [ $? != 0 ]; then
         echo "ERROR: $name. Failed."
-        exit 1
+        exit_ 1
+    fi
+}
+
+
+# Description:
+#   Runs the 'oskar_vis_stats' binary with the specified visibility binary
+#   data file
+#
+# Usage:
+#   run_vis_stats [OPTIONS] <vis file>
+#
+# Example
+#   run_vis_stats -v test.vis
+#
+function run_vis_stats() {
+    local ARGS=("$@")
+    local NARGS=${#ARGS[@]}
+    local name="oskar_vis_stats"
+    local bin=${oskar_app_path}/${name}
+    if [ ! -x "$bin" ]; then
+        echo "ERROR: Unable to find required binary: $bin."
+        exit_ 1
+    fi
+    if [ "$NARGS" -lt "1" ]; then
+        echo "ERROR: $name requires at least 1 input argument, got $#."
+        echo "usage: $name [OPTIONS] <vis file(s)>"
+        exit_ 1
+        return
+    fi
+    cmd="$bin ${ARGS[*]}"
+    ($cmd)
+    if [ $? != 0 ]; then
+        echo "ERROR: $name. Failed."
+        exit_ 1
+        return
+    fi
+}
+
+# Description:
+#   Runs the 'fits_image_stats' script with the specified FITS image
+#
+# Usage:
+#   run_fits_image_stats [OPTIONS] <FITS image>
+#
+# Example
+#   run_fits_image_stats -v test.fits
+#
+function run_fits_image_stats() {
+    local ARGS=("$@")
+    local NARGS=${#ARGS[@]}
+    local name="fits_image_stats.py"
+    local bin=${oskar_app_path}/test/${name}
+
+    if [ ! -x ${bin} ]; then
+        echo "ERROR: Unable to find required binary: $bin."
+        return
+    fi
+    if [ "$NARGS" -lt "1" ]; then
+        echo "ERROR: $name requires at least 1 input argument, got $#."
+        echo "Usage: $name [OPTIONS] <FITS image>"
+        exit_ 1
+        return
+    fi
+    cmd="python $bin ${ARGS[*]}"
+    ($cmd)
+    if [ $? != 0 ]; then
+        echo "ERROR: $name. Failed."
+        exit_ 1
+        return
     fi
 }

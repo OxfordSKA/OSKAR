@@ -106,10 +106,10 @@ endif (CUDA_FOUND)
 # === Build other oskar libraries.
 add_subdirectory(apps)
 add_subdirectory(fits)
-#add_subdirectory(matlab)
 add_subdirectory(ms)
-#add_subdirectory(python)
 add_subdirectory(settings)
+#add_subdirectory(matlab)
+#add_subdirectory(python)
 
 # === Build external libraries.
 add_subdirectory(extern)

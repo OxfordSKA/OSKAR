@@ -1,21 +1,21 @@
-2015-XX-XX  OSKAR-2.6.0
+2015-05-11  OSKAR-2.6.0
 
-    * Re-wrote oskar_sim_interferometer application and changed internal 
-      visibility format to allow long interferometer simulations to run 
-      without running out of host memory. A dedicated host thread is now 
-      used to write visibility data, so that computation and file writes are 
+    * Re-wrote oskar_sim_interferometer application and changed internal
+      visibility format to allow long interferometer simulations to run
+      without running out of host memory. A dedicated host thread is now
+      used to write visibility data, so that computation and file writes are
       overlapped as much as possible.
 
-    * Re-wrote oskar_sim_beam_pattern application to allow use of multiple 
-      GPUs and to respect the maximum chunk size, so that large images can 
-      be made without running out of GPU memory. A dedicated host thread is now 
-      used to write image data, so that computation and file writes are 
+    * Re-wrote oskar_sim_beam_pattern application to allow use of multiple
+      GPUs and to respect the maximum chunk size, so that large images can
+      be made without running out of GPU memory. A dedicated host thread is now
+      used to write image data, so that computation and file writes are
       overlapped as much as possible.
 
     * Added options to generate beam patterns for specified stations,
       or all stations in the telescope model.
 
-    * Added option to evaluate beam patterns for specified sky model positions, 
+    * Added option to evaluate beam patterns for specified sky model positions,
       instead of an image grid.
 
     * Added option to generate horizon-frame all-sky beam patterns, instead of
@@ -23,13 +23,13 @@
 
     * Added options to produce time- and/or channel-averaged beam patterns.
 
-    * Added options to produce average cross-power Stokes I beam patterns 
+    * Added options to produce average cross-power Stokes I beam patterns
       for selected stations.
 
-    * Added options to save beam pattern data in plain text files instead of, 
+    * Added options to save beam pattern data in plain text files instead of,
       or as well as, FITS images.
 
-    * Added option to select whether cross-correlations or auto-correlations, 
+    * Added option to select whether cross-correlations or auto-correlations,
       or both, should be calculated.
 
     * Contribution from the w-term was omitted from the bandwidth smearing
@@ -66,8 +66,8 @@
 
     * Removed deprecated config.txt telescope model file loader.
 
-    * Removed the old orientation.txt telescope model file loader. 
-      Replaced this with feed_angle.txt to allow for a more complete 
+    * Removed the old orientation.txt telescope model file loader.
+      Replaced this with feed_angle.txt to allow for a more complete
       specification of feed angles in the future.
 
     * Removed options to perform explicit time averaging using multiple
@@ -86,6 +86,8 @@
 
     * Updated interface to oskar_settings_set binary to unset keys when the
       value is left empty.
+
+    * Major simplification of system noise settings.
 
 2014-09-09  OSKAR-2.5.1
 

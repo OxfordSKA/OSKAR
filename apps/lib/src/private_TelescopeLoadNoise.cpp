@@ -39,16 +39,11 @@
 using std::map;
 using std::string;
 
-TelescopeLoadNoise::TelescopeLoadNoise(
-        const oskar_Settings* settings)
+TelescopeLoadNoise::TelescopeLoadNoise(const oskar_Settings* settings)
 : oskar_TelescopeLoadAbstract(), dataType_(0), freqs_(0)
 {
     files_[FREQ] = "noise_frequencies.txt";
     files_[RMS]  = "rms.txt";
-    files_[SENSITIVITY] = "sensitivity.txt";
-    files_[TSYS] = "t_sys.txt";
-    files_[AREA] = "area.txt";
-    files_[EFFICIENCY] = "efficiency.txt";
     settings_ = settings;
 }
 
@@ -62,9 +57,8 @@ TelescopeLoadNoise::~TelescopeLoadNoise()
 // Depth = 0
 // - Set up frequency data as this is the same for all stations
 //   and if defined by files these have to be at depth 0.
-void TelescopeLoadNoise::load(oskar_Telescope* telescope,
-        const oskar_Dir& cwd, int num_subdirs, map<string, string>& filemap,
-        int* status)
+void TelescopeLoadNoise::load(oskar_Telescope* telescope, const oskar_Dir& cwd,
+        int num_subdirs, map<string, string>& filemap, int* status)
 {
     if (*status || !settings_->interferometer.noise.enable)
         return;
@@ -214,123 +208,27 @@ void TelescopeLoadNoise::setNoiseRMS_(oskar_Station* model,
         const map<string, string>& filemap, int* status)
 {
     if (*status) return;
-
-    const oskar_SettingsSystemNoise& settings_noise = settings_->interferometer.noise;
     oskar_Mem* noise_rms = oskar_station_noise_rms_jy(model);
     int num_freqs = (int)oskar_mem_length(oskar_station_noise_freq_hz(model));
-    // Note: the previous noise loader implementation had integration time as
-    // obs_length / number of snapshots which was wrong!
-    double integration_time = settings_->interferometer.time_average_sec;
-    double bandwidth = settings_->interferometer.channel_bandwidth_hz;
-
-    if (settings_noise.value.specification != OSKAR_SYSTEM_NOISE_RMS &&
-            (bandwidth < DBL_MIN || integration_time < DBL_MIN))
-    {
-        *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
-        return;
-    }
-
-    switch (settings_noise.value.specification)
-    {
-        case OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL:
-            noiseSpecTelescopeModel_(noise_rms, num_freqs, bandwidth,
-                    integration_time, filemap, status);
-            break;
-        case OSKAR_SYSTEM_NOISE_RMS:
-            noiseSpecRMS_(noise_rms, num_freqs, filemap, status);
-            break;
-        case OSKAR_SYSTEM_NOISE_SENSITIVITY:
-            noiseSpecSensitivity_(noise_rms, num_freqs, bandwidth,
-                    integration_time, filemap, status);
-            break;
-        case OSKAR_SYSTEM_NOISE_SYS_TEMP:
-            noiseSpecTsys_(noise_rms, num_freqs, bandwidth, integration_time,
-                    filemap, status);
-            break;
-        default:
-            *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
-            return;
-    };
+    noiseSpecRMS_(noise_rms, num_freqs, filemap, status);
 }
 
-
-// Load noise files from the telescope model using default noise spec. priority.
-void TelescopeLoadNoise::noiseSpecTelescopeModel_(oskar_Mem* noise_rms,
-        int num_freqs, double bandwidth_hz, double integration_time_sec,
-        const map<string, string>& filemap, int* status)
-{
-    if (*status) return;
-
-    string f_rms, f_sensitivity, f_tsys, f_area, f_efficiency;
-    int loc = OSKAR_CPU;
-
-    // Get the filenames out of the map, if they are set.
-    if (filemap.count(files_[RMS]))
-        f_rms = filemap.at(files_[RMS]);
-    if (filemap.count(files_[SENSITIVITY]))
-        f_sensitivity = filemap.at(files_[SENSITIVITY]);
-    if (filemap.count(files_[TSYS]))
-        f_tsys = filemap.at(files_[TSYS]);
-    if (filemap.count(files_[AREA]))
-        f_area = filemap.at(files_[AREA]);
-    if (filemap.count(files_[EFFICIENCY]))
-        f_efficiency = filemap.at(files_[EFFICIENCY]);
-
-    // RMS
-    if (oskar_file_exists(f_rms.c_str()))
-    {
-        oskar_mem_load_ascii(f_rms.c_str(), 1, status, noise_rms, "");
-    }
-
-    // Sensitivity
-    else if (oskar_file_exists(f_sensitivity.c_str()))
-    {
-        oskar_Mem* sens = oskar_mem_create(dataType_, loc, num_freqs, status);
-        oskar_mem_load_ascii(f_sensitivity.c_str(), 1, status, sens, "");
-        sensitivity_to_rms_(noise_rms, sens, num_freqs, bandwidth_hz,
-                integration_time_sec, status);
-        oskar_mem_free(sens, status);
-    }
-
-    // T_sys, A_eff and efficiency
-    else if (oskar_file_exists(f_tsys.c_str()) &&
-            oskar_file_exists(f_area.c_str()) &&
-            oskar_file_exists(f_efficiency.c_str()))
-    {
-        oskar_Mem *t_sys, *area, *efficiency;
-        t_sys = oskar_mem_create(dataType_, loc, num_freqs, status);
-        area = oskar_mem_create(dataType_, loc, num_freqs, status);
-        efficiency = oskar_mem_create(dataType_, loc, num_freqs, status);
-        oskar_mem_load_ascii(f_tsys.c_str(), 1, status, t_sys, "");
-        oskar_mem_load_ascii(f_area.c_str(), 1, status, area, "");
-        oskar_mem_load_ascii(f_efficiency.c_str(), 1, status, efficiency, "");
-        t_sys_to_rms_(noise_rms, t_sys, area, efficiency,
-                num_freqs, bandwidth_hz, integration_time_sec, status);
-        oskar_mem_free(t_sys, status);
-        oskar_mem_free(area, status);
-        oskar_mem_free(efficiency, status);
-    }
-    else
-    {
-        *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-    }
-}
 
 void TelescopeLoadNoise::noiseSpecRMS_(oskar_Mem* rms, int num_freqs,
         const map<string, string>& filemap, int* status)
 {
     if (*status) return;
 
-    const oskar_SettingsSystemNoiseType& settingsRMS =
-            settings_->interferometer.noise.value.rms;
+    const oskar_SettingsSystemNoiseRMS& settingsRMS =
+            settings_->interferometer.noise.rms;
 
     string filename;
     if (filemap.count(files_[RMS]))
         filename = filemap.at(files_[RMS]);
 
-    switch (settingsRMS.override)
+    switch (settingsRMS.specification)
     {
-        case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
+        case OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL:
             oskar_mem_load_ascii(filename.c_str(), 1, status, rms, "");
             break;
         case OSKAR_SYSTEM_NOISE_DATA_FILE:
@@ -344,213 +242,6 @@ void TelescopeLoadNoise::noiseSpecRMS_(oskar_Mem* rms, int num_freqs,
             *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
             break;
     }
-}
-
-
-void TelescopeLoadNoise::noiseSpecSensitivity_(oskar_Mem* rms,
-        int num_freqs, double bandwidth_hz, double integration_time_sec,
-        const map<string, string>& filemap, int* status)
-{
-    if (*status) return;
-
-    const oskar_SettingsSystemNoiseType& s =
-            settings_->interferometer.noise.value.sensitivity;
-
-    string filename;
-    if (filemap.count(files_[SENSITIVITY]))
-        filename = filemap.at(files_[SENSITIVITY]);
-
-    oskar_Mem* sens = oskar_mem_create(dataType_, OSKAR_CPU, num_freqs, status);
-    switch (s.override)
-    {
-        case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-        {
-            oskar_mem_load_ascii(filename.c_str(), 1, status, sens, "");
-            break;
-        }
-        case OSKAR_SYSTEM_NOISE_DATA_FILE:
-        {
-            oskar_mem_load_ascii(s.file, 1, status, sens, "");
-            break;
-        }
-        case OSKAR_SYSTEM_NOISE_RANGE:
-            evaluate_range_(sens, num_freqs, s.start, s.end, status);
-            break;
-        default:
-            *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-            break;
-    };
-    sensitivity_to_rms_(rms, sens, num_freqs, bandwidth_hz,
-            integration_time_sec, status);
-    oskar_mem_free(sens, status);
-}
-
-void TelescopeLoadNoise::noiseSpecTsys_(oskar_Mem* rms, int num_freqs,
-        double bandwidth_hz, double integration_time_sec,
-        const map<string, string>& filemap, int* status)
-{
-    if (*status) return;
-
-    oskar_Mem *t_sys, *area, *efficiency;
-    int loc = OSKAR_CPU;
-    t_sys = oskar_mem_create(dataType_, loc, num_freqs, status);
-    area = oskar_mem_create(dataType_, loc, num_freqs, status);
-    efficiency = oskar_mem_create(dataType_, loc, num_freqs, status);
-
-    const oskar_SettingsSystemNoiseValue& s = settings_->interferometer.noise.value;
-
-    string f_tsys, f_area, f_efficiency;
-    if (filemap.count(files_[TSYS]))
-        f_tsys = filemap.at(files_[TSYS]);
-    if (filemap.count(files_[AREA]))
-        f_area = filemap.at(files_[AREA]);
-    if (filemap.count(files_[EFFICIENCY]))
-        f_efficiency = filemap.at(files_[EFFICIENCY]);
-
-    // Load/evaluate T_sys values.
-    switch (s.t_sys.override)
-    {
-        case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-            oskar_mem_load_ascii(f_tsys.c_str(), 1, status, t_sys, "");
-            break;
-        case OSKAR_SYSTEM_NOISE_DATA_FILE:
-            oskar_mem_load_ascii(s.t_sys.file, 1, status, t_sys, "");
-            break;
-        case OSKAR_SYSTEM_NOISE_RANGE:
-            evaluate_range_(t_sys, num_freqs, s.t_sys.start, s.t_sys.end, status);
-            break;
-        default:
-            *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-            break;
-    }
-
-    // Load/evaluate effective area values.
-    switch (s.area.override)
-    {
-        case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-            oskar_mem_load_ascii(f_area.c_str(), 1, status, area, "");
-            break;
-        case OSKAR_SYSTEM_NOISE_DATA_FILE:
-            oskar_mem_load_ascii(s.area.file, 1, status, area, "");
-            break;
-        case OSKAR_SYSTEM_NOISE_RANGE:
-            evaluate_range_(area, num_freqs, s.area.start, s.area.end, status);
-            break;
-        default:
-            *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-            break;
-    }
-
-    switch (s.efficiency.override)
-    {
-        case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-            oskar_mem_load_ascii(f_efficiency.c_str(), 1, status,
-                    efficiency, "");
-            break;
-        case OSKAR_SYSTEM_NOISE_DATA_FILE:
-            oskar_mem_load_ascii(s.efficiency.file, 1, status, efficiency, "");
-            break;
-        case OSKAR_SYSTEM_NOISE_RANGE:
-            evaluate_range_(efficiency, num_freqs, s.efficiency.start,
-                    s.efficiency.end, status);
-            break;
-        default:
-            *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-            break;
-    };
-
-    t_sys_to_rms_(rms, t_sys, area, efficiency, num_freqs, bandwidth_hz,
-            integration_time_sec, status);
-
-    oskar_mem_free(t_sys, status);
-    oskar_mem_free(area, status);
-    oskar_mem_free(efficiency, status);
-}
-
-void TelescopeLoadNoise::sensitivity_to_rms_(oskar_Mem* rms,
-        const oskar_Mem* sensitivity, int num_freqs, double bandwidth_hz,
-        double integration_time_sec, int* status)
-{
-    if (*status) return;
-
-    if ((int)oskar_mem_length(rms) != num_freqs)
-    {
-        oskar_mem_realloc(rms, num_freqs, status);
-        if (*status) return;
-    }
-
-    double factor = 1.0 / std::sqrt(2.0 * bandwidth_hz * integration_time_sec);
-    if (dataType_ == OSKAR_DOUBLE)
-    {
-        const double* sens_ = oskar_mem_double_const(sensitivity, status);
-        double* stddev_ = oskar_mem_double(rms, status);
-        for (int i = 0; i < num_freqs; ++i)
-            stddev_[i] = sens_[i] * factor;
-    }
-    else if (dataType_ == OSKAR_SINGLE)
-    {
-        const float* sens_ = oskar_mem_float_const(sensitivity, status);
-        float* stddev_ = oskar_mem_float(rms, status);
-        for (int i = 0; i < num_freqs; ++i)
-            stddev_[i] = sens_[i] * factor;
-    }
-    else
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-}
-
-
-void TelescopeLoadNoise::t_sys_to_rms_(oskar_Mem* rms,
-        const oskar_Mem* t_sys, const oskar_Mem* area,
-        const oskar_Mem* efficiency, int num_freqs, double bandwidth,
-        double integration_time, int* status)
-{
-    if (*status) return;
-
-    const double k_B = 1.3806488e-23;
-
-    /* Get type and check consistency. */
-    int type = oskar_mem_type(rms);
-    if (oskar_mem_type(t_sys) != type || oskar_mem_type(area) != type ||
-            oskar_mem_type(efficiency) != type)
-    {
-        *status = OSKAR_ERR_TYPE_MISMATCH;
-        return;
-    }
-    if ((int)oskar_mem_length(t_sys) != num_freqs ||
-            (int)oskar_mem_length(area) != num_freqs)
-    {
-        *status = OSKAR_ERR_DIMENSION_MISMATCH;
-        return;
-    }
-
-    if ((int)oskar_mem_length(rms) != num_freqs)
-    {
-        oskar_mem_realloc(rms, num_freqs, status);
-        if (*status) return;
-    }
-
-    double factor = (2.0 * k_B * 1.0e26) /
-            sqrt(2.0 * bandwidth * integration_time);
-    if (type == OSKAR_DOUBLE)
-    {
-        const double* t_sys_ = oskar_mem_double_const(t_sys, status);
-        const double* area_ = oskar_mem_double_const(area, status);
-        const double* eff_ = oskar_mem_double_const(efficiency, status);
-        double* rms_ = oskar_mem_double(rms, status);
-        for (int i = 0; i < num_freqs; ++i)
-            rms_[i] = (t_sys_[i] / (area_[i] * eff_[i])) * factor;
-    }
-    else if (type == OSKAR_SINGLE)
-    {
-        const float* t_sys_ = oskar_mem_float_const(t_sys, status);
-        const float* area_ = oskar_mem_float_const(area, status);
-        const float* eff_ = oskar_mem_float_const(efficiency, status);
-        float* rms_ = oskar_mem_float(rms, status);
-        for (int i = 0; i < num_freqs; ++i)
-            rms_[i] = (t_sys_[i] / (area_[i] * eff_[i])) * factor;
-    }
-    else
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
 }
 
 

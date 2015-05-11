@@ -74,11 +74,7 @@ void oskar_settings_init(oskar_Settings* settings)
     settings->image.input_vis_data = NULL;
     settings->image.fits_image = NULL;
     noise->freq.file = NULL;
-    noise->value.rms.file = NULL;
-    noise->value.sensitivity.file = NULL;
-    noise->value.t_sys.file = NULL;
-    noise->value.area.file = NULL;
-    noise->value.efficiency.file = NULL;
+    noise->rms.file = NULL;
     settings->ionosphere.enable = 0;
     settings->ionosphere.num_TID_screens = 0;
     settings->ionosphere.TID_files = NULL;

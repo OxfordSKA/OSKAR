@@ -35,10 +35,10 @@
 
 #include <string>
 #include <vector>
-#include <cfloat>
 #include <cmath>
 #include <iostream>
 #include <cstdio>
+#include <cfloat>
 
 using namespace std;
 
@@ -76,118 +76,145 @@ int main(int argc, char** argv)
         oskar_binary_free(h);
         check_error(status);
         int vis_type = oskar_mem_type(oskar_vis_amplitude(vis));
-        double min = DBL_MAX, max = -DBL_MAX;
-        double mean = 0.0, rms = 0.0, var = 0.0, std = 0.0;
-        double sum = 0.0, sumsq = 0.0;
-        int num_vis = 0, num_zero = 0;
+        int num_vis = (int)oskar_mem_length(oskar_vis_amplitude(vis));
+
+        double abs_min = DBL_MAX;
+        double abs_max = -DBL_MAX;
+        double2 min;
+        min.x = DBL_MAX;
+        min.y = DBL_MAX;
+        double2 max;
+        max.x = -DBL_MAX;
+        max.y = -DBL_MAX;
+        double2 sum;
+        sum.x = 0.0;
+        sum.y = 0.0;
+        double sumsq = 0.0;
+        size_t num_zero = 0;
+        double rms = 0.0;
+        double2 mean;
+        mean.x = 0.0;
+        mean.y = 0.0;
+
+
         if (vis_type == OSKAR_SINGLE_COMPLEX_MATRIX)
         {
             float4c* amp = oskar_mem_float4c(oskar_vis_amplitude(vis), &status);
-            for (int i = 0, c = 0; c < oskar_vis_num_channels(vis); ++c)
+            for (int i = 0; i < num_vis; ++i)
             {
-                for (int t = 0; t < oskar_vis_num_times(vis); ++t)
-                {
-                    for (int b = 0; b < oskar_vis_num_baselines(vis); ++b, ++i)
-                    {
-                        float2 xx = amp[i].a;
-                        float2 yy = amp[i].d;
-                        float2 I;
-                        I.x = 0.5 * (xx.x + yy.x);
-                        I.y = 0.5 * (xx.y + yy.y);
-                        float absI = sqrtf(I.x*I.x + I.y*I.y);
-                        if (absI < DBL_MIN) num_zero++;
-                        if (absI > max) max = absI;
-                        if (absI < min) min = absI;
-                        sum += absI;
-                        sumsq += absI * absI;
-                    }
+                double2 I; // I = 0.5 (XX + YY)
+                I.x = 0.5 * (amp[i].a.x + amp[i].d.x);
+                I.y = 0.5 * (amp[i].a.y + amp[i].d.y);
+                sum.x += I.x;
+                sum.y += I.y;
+                double absI = sqrt(I.x*I.x + I.y*I.y);
+                if (absI < DBL_MIN) num_zero++;
+                if (absI > abs_max) {
+                    abs_max = absI;
+                    max.x = I.x;
+                    max.y = I.y;
                 }
+                if (absI < abs_min) {
+                    abs_min = absI;
+                    min.x = I.x;
+                    min.y = I.y;
+                }
+                sumsq += absI * absI;
             }
-            num_vis = (int)oskar_mem_length(oskar_vis_amplitude(vis));
-            mean = sum / num_vis;
-            rms = sqrtf(sumsq / num_vis);
-            var = sumsq/num_vis - mean*mean;
-            std = sqrtf(var);
+            mean.x = sum.x / num_vis;
+            mean.y = sum.y / num_vis;
+            rms = sqrt(sumsq / num_vis);
         }
+
         else if (vis_type == OSKAR_DOUBLE_COMPLEX_MATRIX)
         {
             double4c* amp = oskar_mem_double4c(oskar_vis_amplitude(vis), &status);
-            for (int i = 0, c = 0; c < oskar_vis_num_channels(vis); ++c)
+
+            for (int i = 0; i < num_vis; ++i)
             {
-                for (int t = 0; t < oskar_vis_num_times(vis); ++t)
-                {
-                    for (int b = 0; b < oskar_vis_num_baselines(vis); ++b, ++i)
-                    {
-                        double2 xx = amp[i].a;
-                        double2 yy = amp[i].d;
-                        double2 I;
-                        I.x = 0.5 * (xx.x + yy.x);
-                        I.y = 0.5 * (xx.y + yy.y);
-                        double absI = std::sqrt(I.x*I.x + I.y*I.y);
-                        if (absI < DBL_MIN) num_zero++;
-                        if (absI > max) max = absI;
-                        if (absI < min) min = absI;
-                        sum += absI;
-                        sumsq += absI * absI;
-                    }
+                double2 I; // I = 0.5 (XX + YY)
+                I.x = 0.5 * (amp[i].a.x + amp[i].d.x);
+                I.y = 0.5 * (amp[i].a.y + amp[i].d.y);
+                sum.x += I.x;
+                sum.y += I.y;
+                double absI = sqrt(I.x*I.x + I.y*I.y);
+                if (absI < DBL_MIN) num_zero++;
+                if (absI > abs_max) {
+                    abs_max = absI;
+                    max.x = I.x;
+                    max.y = I.y;
                 }
+                if (absI < abs_min) {
+                    abs_min = absI;
+                    min.x = I.x;
+                    min.y = I.y;
+                }
+                sumsq += absI * absI;
             }
-            num_vis = (int)oskar_mem_length(oskar_vis_amplitude(vis));
-            mean = sum / num_vis;
-            rms = std::sqrt(sumsq / num_vis);
-            var = sumsq/num_vis - mean*mean;
-            std = std::sqrt(var);
+            mean.x = sum.x / num_vis;
+            mean.y = sum.y / num_vis;
+            rms = sqrt(sumsq / num_vis);
         }
+
         else if (vis_type == OSKAR_SINGLE_COMPLEX)
         {
             float2* amp = oskar_mem_float2(oskar_vis_amplitude(vis), &status);
-            for (int i = 0, c = 0; c < oskar_vis_num_channels(vis); ++c)
+
+            for (int i = 0; i < num_vis; ++i)
             {
-                for (int t = 0; t < oskar_vis_num_times(vis); ++t)
-                {
-                    for (int b = 0; b < oskar_vis_num_baselines(vis); ++b, ++i)
-                    {
-                        float2 I = amp[i];
-                        float absI = sqrtf(I.x*I.x + I.y*I.y);
-                        if (absI < DBL_MIN) num_zero++;
-                        if (absI > max) max = absI;
-                        if (absI < min) min = absI;
-                        sum += absI;
-                        sumsq += absI * absI;
-                    }
+                double2 I;
+                I.x = amp[i].x;
+                I.y = amp[i].y;
+                sum.x += I.x;
+                sum.y += I.y;
+                double absI = sqrt(I.x*I.x + I.y*I.y);
+                if (absI < DBL_MIN) num_zero++;
+                if (absI > abs_max) {
+                    abs_max = absI;
+                    max.x = I.x;
+                    max.y = I.y;
                 }
+                if (absI < abs_min) {
+                    abs_min = absI;
+                    min.x = I.x;
+                    min.y = I.y;
+                }
+                sumsq += absI * absI;
             }
-            num_vis = (int)oskar_mem_length(oskar_vis_amplitude(vis));
-            mean = sum / num_vis;
-            rms = sqrtf(sumsq / num_vis);
-            var = sumsq/num_vis - mean*mean;
-            std = sqrtf(var);
+            mean.x = sum.x / num_vis;
+            mean.y = sum.y / num_vis;
+            rms = sqrt(sumsq / num_vis);
         }
+
         else if (vis_type == OSKAR_DOUBLE_COMPLEX)
         {
             double2* amp = oskar_mem_double2(oskar_vis_amplitude(vis), &status);
-            for (int i = 0, c = 0; c < oskar_vis_num_channels(vis); ++c)
+            for (int i = 0; i < num_vis; ++i)
             {
-                for (int t = 0; t < oskar_vis_num_times(vis); ++t)
-                {
-                    for (int b = 0; b < oskar_vis_num_baselines(vis); ++b, ++i)
-                    {
-                        double2 I = amp[i];
-                        double absI = std::sqrt(I.x*I.x + I.y*I.y);
-                        if (absI < DBL_MIN) num_zero++;
-                        if (absI > max) max = absI;
-                        if (absI < min) min = absI;
-                        sum += absI;
-                        sumsq += absI * absI;
-                    }
+                double2 I;
+                I.x = amp[i].x;
+                I.y = amp[i].y;
+                sum.x += I.x;
+                sum.y += I.y;
+                double absI = sqrt(I.x*I.x + I.y*I.y);
+                if (absI < DBL_MIN) num_zero++;
+                if (absI > abs_max) {
+                    abs_max = absI;
+                    max.x = I.x;
+                    max.y = I.y;
                 }
+                if (absI < abs_min) {
+                    abs_min = absI;
+                    min.x = I.x;
+                    min.y = I.y;
+                }
+                sumsq += absI * absI;
             }
-            num_vis = (int)oskar_mem_length(oskar_vis_amplitude(vis));
-            mean = sum / num_vis;
-            rms = std::sqrt(sumsq / num_vis);
-            var = sumsq/num_vis - mean*mean;
-            std = std::sqrt(var);
+            mean.x = sum.x / num_vis;
+            mean.y = sum.y / num_vis;
+            rms = sqrt(sumsq / num_vis);
         }
+
         else
         {
             oskar_log_error(log, "Incompatible or invalid visibility data type.");
@@ -204,14 +231,17 @@ int main(int argc, char** argv)
             oskar_log_message(log, 'S', 1, "No. channels  : %i",
                     oskar_vis_num_channels(vis));
         }
-        oskar_log_message(log, 'M', 1, "Stokes-I amplitude:");
-        oskar_log_message(log, 'M', 2, "Min.  : %e", min);
-        oskar_log_message(log, 'M', 2, "Max.  : %e", max);
-        oskar_log_message(log, 'M', 2, "Mean  : %e", mean);
-        oskar_log_message(log, 'M', 2, "RMS   : %e", rms);
-        oskar_log_message(log, 'M', 2, "STD   : %e", std);
-        oskar_log_message(log, 'M', 2, "Zeros : %i/%i (%.1f%%)", num_zero,
-                num_vis, (double)(num_zero/num_vis)*100.0);
+
+        oskar_log_message(log, 'M', 1, "Stokes-I:");
+        oskar_log_message(log, 'M', 2, "Minimum     : % 6.3e % +6.3ej Jy",
+                min.x,  min.y);
+        oskar_log_message(log, 'M', 2, "Maximum     : % 6.3e % +6.3ej Jy",
+                max.x, max.y);
+        oskar_log_message(log, 'M', 2, "Mean        : % 6.3e % +6.3ej Jy",
+                mean.x, mean.y);
+        oskar_log_message(log, 'M', 2, "RMS         : % 6.3e Jy", rms);
+        oskar_log_message(log, 'M', 2, "Zeros       :  %i/%i (%.1f%%)",
+                num_zero, num_vis, (double)(num_zero/num_vis)*100.0);
 
         // Free visibility data.
         oskar_vis_free(vis, &status);
