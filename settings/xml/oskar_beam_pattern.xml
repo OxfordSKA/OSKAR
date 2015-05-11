@@ -8,19 +8,20 @@
 
     <s k="all_stations"><label>All stations</label>
         <type name="bool" default="false" />
-        <desc>If set, produce beams for all stations in the telescope 
+        <desc>If set, produce beams for all stations in the telescope
             model; otherwise, for selected stations.</desc>
     </s>
     <s k="station_ids"><label>Station ID(s)</label>
         <depends k="beam_pattern/all_stations" v="false" />
         <type name="IntList" default="0"/>
         <desc>The zero-based station ID number(s) to select from the
-            telescope model when generating beam pattern(s).</desc>
+            telescope model when generating beam pattern(s). More than one
+            station ID is specified using a CSV list.</desc>
     </s>
     <s k="coordinate_frame"><label>Coordinate frame</label>
         <type name="OptionList" default="Equatorial">Equatorial, Horizon</type>
         <desc>Specification of the coordinate frame in which to evaluate
-            the beam pattern. Horizon-based beam patterns will cover the 
+            the beam pattern. Horizon-based beam patterns will cover the
             entire sky.</desc>
     </s>
     <s k="coordinate_type"><label>Coordinate (grid) type</label>
@@ -55,7 +56,7 @@
                 <li>A value of '256' results in a square image of size 256 by
                     256 pixels.</li>
                 <li>A value of '256,128' results in an image of 256 by 128
-                    pixels, with 256 pixels along the Right Ascension 
+                    pixels, with 256 pixels along the Right Ascension
                     direction.</li>
                 </ul>
             </desc>
@@ -66,7 +67,7 @@
             <type name="DoubleList" default="2.0" />
             <desc>
                 Field-of-view (FOV) in degrees (max 180.0). If a single value
-                is specified, the image is assumed to have the same FOV along 
+                is specified, the image is assumed to have the same FOV along
                 each dimension.<br/>
                 Example:
                 <ul>
@@ -117,19 +118,19 @@
         <s k="separate_time_and_channel">
             <label>Separate time and channel</label>
             <type name="bool" default="true" />
-            <desc>Output files without performing any averaging over the 
+            <desc>Output files without performing any averaging over the
                 time or channel dimensions.</desc>
         </s>
         <s k="average_time_and_channel">
             <label>Average time and channel</label>
             <type name="bool" default="false" />
-            <desc>Output files after averaging over both the 
+            <desc>Output files after averaging over both the
                 time and channel dimensions.</desc>
         </s>
         <s k="average_single_axis">
             <label>Average single axis</label>
             <type name="OptionList" default="false">None, Time, Channel</type>
-            <desc>Output files after averaging over the selected 
+            <desc>Output files after averaging over the selected
                 dimension.</desc>
         </s>
     </s>
@@ -138,22 +139,22 @@
         <s k="text_file">
             <label>Text file</label>
             <s k="save_raw_complex"><label>Raw (complex) pattern</label>
-                <depends k="beam_pattern/output/separate_time_and_channel" 
+                <depends k="beam_pattern/output/separate_time_and_channel"
                     v="true"/>
                 <type name="bool" default="false" />
-                <desc>If true, save the raw complex pattern in text 
+                <desc>If true, save the raw complex pattern in text
                     files.</desc>
             </s>
             <s k="save_amp"><label>Amplitude pattern</label>
-                <depends k="beam_pattern/output/separate_time_and_channel" 
+                <depends k="beam_pattern/output/separate_time_and_channel"
                     v="true"/>
                 <type name="bool" default="false" />
-                <desc>If true, save each amplitude (voltage) pattern in text 
-                    files. This is given by the square root of the sum 
+                <desc>If true, save each amplitude (voltage) pattern in text
+                    files. This is given by the square root of the sum
                     of the squares of the real and imaginary values.</desc>
             </s>
             <s k="save_phase"><label>Phase pattern</label>
-                <depends k="beam_pattern/output/separate_time_and_channel" 
+                <depends k="beam_pattern/output/separate_time_and_channel"
                     v="true"/>
                 <type name="bool" default="false" />
                 <desc>If true, save each phase pattern in text files.</desc>
@@ -162,13 +163,13 @@
                 <label>Auto-correlation Stokes I power pattern</label>
                 <type name="bool" default="false" />
                 <desc>If true, save each total intensity beam in text
-                    files. This is evaluated as the Stokes I response of the 
+                    files. This is evaluated as the Stokes I response of the
                     auto-correlation.</desc>
             </s>
             <!-- <s k="save_ixr">
                 <label>Intrinsic cross-polarisation ratio (IXR)</label>
                 <depends k="telescope/pol_mode" v="Full"/>
-                <depends k="beam_pattern/output/separate_time_and_channel" 
+                <depends k="beam_pattern/output/separate_time_and_channel"
                     v="true"/>
                 <type name="bool" default="false" />
                 <desc>If true, save the IXR map of the beam in text
@@ -179,34 +180,34 @@
             <label>FITS image</label>
             <depends k="beam_pattern/coordinate_type" v="Beam image"/>
             <s k="save_amp"><label>Amplitude pattern</label>
-                <depends k="beam_pattern/output/separate_time_and_channel" 
+                <depends k="beam_pattern/output/separate_time_and_channel"
                     v="true"/>
                 <type name="bool" default="false" />
-                <desc>If true, save each amplitude (voltage) pattern in FITS 
-                    image files. This is given by the square root of the sum 
+                <desc>If true, save each amplitude (voltage) pattern in FITS
+                    image files. This is given by the square root of the sum
                     of the squares of the real and imaginary values.</desc>
             </s>
             <s k="save_phase"><label>Phase pattern</label>
-                <depends k="beam_pattern/output/separate_time_and_channel" 
+                <depends k="beam_pattern/output/separate_time_and_channel"
                     v="true"/>
                 <type name="bool" default="false" />
-                <desc>If true, save each phase pattern in FITS image 
+                <desc>If true, save each phase pattern in FITS image
                     files.</desc>
             </s>
             <s k="save_auto_power_stokes_i">
                 <label>Auto-correlation Stokes I power pattern</label>
                 <type name="bool" default="false" />
-                <desc>If true, save each total intensity beam in FITS image 
-                    files. This is evaluated as the Stokes I response of the 
+                <desc>If true, save each total intensity beam in FITS image
+                    files. This is evaluated as the Stokes I response of the
                     auto-correlation.</desc>
             </s>
             <!-- <s k="save_ixr">
                 <label>Intrinsic cross-polarisation ratio (IXR)</label>
                 <depends k="telescope/pol_mode" v="Full"/>
-                <depends k="beam_pattern/output/separate_time_and_channel" 
+                <depends k="beam_pattern/output/separate_time_and_channel"
                     v="true"/>
                 <type name="bool" default="false" />
-                <desc>If true, save the IXR map of each beam in FITS 
+                <desc>If true, save the IXR map of each beam in FITS
                     image files (see Carozzi and Woan, 2011).</desc>
             </s> -->
         </s>
@@ -217,23 +218,23 @@
             <s k="save_cross_power_stokes_i_raw_complex">
                 <label>Cross-correlation Stokes I raw power pattern</label>
                 <type name="bool" default="false" />
-                <desc>If true, save the average cross-power beam raw 
-                    response to Stokes I from all specified stations as a text 
+                <desc>If true, save the average cross-power beam raw
+                    response to Stokes I from all specified stations as a text
                     file.</desc>
             </s>
             <s k="save_cross_power_stokes_i_amp">
-                <label>Cross-correlation Stokes I amplitude power 
+                <label>Cross-correlation Stokes I amplitude power
                     pattern</label>
                 <type name="bool" default="false" />
-                <desc>If true, save the average cross-power beam amplitude 
-                    response to Stokes I from all specified stations as text 
+                <desc>If true, save the average cross-power beam amplitude
+                    response to Stokes I from all specified stations as text
                     files.</desc>
             </s>
             <s k="save_cross_power_stokes_i_phase">
                 <label>Cross-correlation Stokes I phase power pattern</label>
                 <type name="bool" default="false" />
                 <desc>If true, save the average cross-power beam phase
-                    response to Stokes I from all specified stations as text 
+                    response to Stokes I from all specified stations as text
                     files.</desc>
             </s>
         </s>
@@ -241,18 +242,18 @@
             <label>FITS image</label>
             <depends k="beam_pattern/coordinate_type" v="Beam image"/>
             <s k="save_cross_power_stokes_i_amp">
-                <label>Cross-correlation Stokes I amplitude power 
+                <label>Cross-correlation Stokes I amplitude power
                     pattern</label>
                 <type name="bool" default="false" />
-                <desc>If true, save the average cross-power beam amplitude 
-                    response to Stokes I from all specified stations in FITS 
+                <desc>If true, save the average cross-power beam amplitude
+                    response to Stokes I from all specified stations in FITS
                     image files.</desc>
             </s>
             <s k="save_cross_power_stokes_i_phase">
                 <label>Cross-correlation Stokes I phase power pattern</label>
                 <type name="bool" default="false" />
-                <desc>If true, save the average cross-power beam phase 
-                    response to Stokes I from all specified stations in FITS 
+                <desc>If true, save the average cross-power beam phase
+                    response to Stokes I from all specified stations in FITS
                     image files.</desc>
             </s>
         </s>

@@ -33,7 +33,7 @@
         <depends k="interferometer/enable_bda" v="true"/>
         <type name="double" default="10.0"/>
         <desc>
-            The maximum duration allowed, in seconds, 
+            The maximum duration allowed, in seconds,
             for baseline-dependent time averaging.
         </desc>
     </s>
@@ -41,7 +41,7 @@
         <depends k="interferometer/enable_bda" v="true"/>
         <type name="double" default="0.0"/>
         <desc>
-            The maximum distance a baseline is allowed to move, 
+            The maximum distance a baseline is allowed to move,
             in wavelengths, during an average.
         </desc>
     </s>
@@ -50,7 +50,7 @@
         <!-- <depends k="interferometer/enable_bda" v="false"/> -->
         <type name="int" default="10"/>
         <desc>
-            The maximum number of time samples held in memory before being 
+            The maximum number of time samples held in memory before being
             flushed to disk.
         </desc>
     </s>
@@ -60,7 +60,7 @@
         </type>
         <desc>
             The type of correlations to produce: either cross-correlations,
-            auto-correlations, or both. 
+            auto-correlations, or both.
         </desc>
     </s>
     <s k="uv_filter_min"><label>UV range filter min</label>
@@ -112,5 +112,5 @@
             determined by the simulation mode.
         </desc>
     </s>
-    
+
 </s>

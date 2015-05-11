@@ -3,9 +3,10 @@
 <s k="noise">
     <label>System noise</label>
     <desc>
-        Settings specifying additive uncorrelated, direction-independent,
-        Gaussian noise. Note all noise is specified for a single polarisation
-        of the antennas.
+        Settings specifying station based additive uncorrelated,
+        direction-independent, Gaussian noise. The noise RMS is specified
+        in terms of the flux density of an unpolarised source measured in a
+        single polarisation of the antennas.
     </desc>
 
     <s k="enable"><label>Enable</label>
@@ -20,7 +21,7 @@
     </s>
 
     <!-- Frequency specification -->
-    <s k="freq"><label>Frequency specification</label>
+    <s k="freq"><label>Frequency selection</label>
         <type name="OptionList" default="T">
             Telescope model,
             Observation settings,
@@ -28,23 +29,22 @@
             Range
         </type>
         <desc>
-            Specification of the list of frequencies at which noise values are
-            defined:
+            Selection of the the list of frequencies for which noise values are defined:
             <ul>
-                <li><b>Telescope model</b>: frequencies are loaded from the
-                    data file in the telescope model directory.</li>
+                <li><b>Telescope model</b>: frequencies are loaded from a data
+                file in the telescope model directory.</li>
                 <li><b>Observation settings</b>: frequencies are defined by the
-                    observation settings.</li>
+                observation settings.</li>
                 <li><b>Data file</b>: frequencies are loaded from the specified
-                    data file.</li>
+                data file.</li>
                 <li><b>Range</b>: frequencies are specified by the range
-                    parameters.</li>
+                parameters.</li>
             </ul>
         </desc>
         <depends k="interferometer/noise/enable" v="true"/>
         <s k="file"><label>Data file</label>
             <type name="InputFile" default=""/>
-            <desc>Data file consisting of an ASCII list of frequencies.</desc>
+            <desc>Data file consisting of an ASCII list of frequencies, in Hz.</desc>
             <depends k="interferometer/noise/freq" v="Data file" />
         </s>
         <s k="number"><label>Number of frequencies</label>
@@ -66,233 +66,53 @@
 
 
     <!-- Noise value specification group -->
-    <s k="values">
-        <label>Noise values</label>
+    <s k="rms">
+        <label>Noise RMS</label>
         <type name="OptionList" default="Telescope">
-            Telescope model priority,
-            RMS flux density,
-            Sensitivity,
-            "Temperature, area, and system efficiency"
+            Telescope model,
+            Data file,
+            Range
         </type>
         <desc>
-            Single polarisation noise value specification type:
+            RMS noise value specification:
             <ul>
-                <li><b>Telescope model priority</b>: values are loaded from
-                files in the telescope model directory, according to the
-                default file type priority.</li>
-                <li><b>RMS flux density</b>: use values specified in terms of
-                noise RMS flux density. </li>
-                <li><b>Sensitivity</b>: use values specified in terms of
-                station sensitivity.</li>
-                <li><b>Temperature ...</b>: use values specified by the
-                system temperature, effective area, and system efficiency.</li>
-            </ul>
-            <i>Note: Noise values are interpreted as a function of
-            frequency. The list of frequencies to which noise values
-            correspond is based upon the value of the noise frequency
-            specification.</i>.
-        </desc>
-        <depends k="interferometer/noise/enable" v="true"/>
-
-        <!-- RMS flux density group -->
-        <s k="rms" >
-            <label>RMS flux density</label>
-            <type name="OptionList" default="N">
-                No override (telescope model), Data file, Range
-            </type>
-            <desc>
-                Root mean square (RMS) flux density specification:
-                <ul>
-                <li><b>No override</b>: values are loaded from RMS files
-                found in the telescope model directory.</li>
+                <li><b>Telescope model</b>: values are loaded from files in the
+                telescope model directory.</li>
                 <li><b>Data file</b>: values are loaded from the specified
                 file.</li>
                 <li><b>Range</b>: values are evaluated according to the
                 specified range parameters.</li>
-                </ul>
-            </desc>
-            <depends k="interferometer/noise/values" v="RMS" />
+            </ul>
+            Noise values are specified in Jy and represent the RMS noise in
+            terms of the flux of an unpolarised source measured in a single
+            polarisation of the detector.
+            <i>Note that unless using the telescope model, the noise
+            RMS will be the same for each station in the interferometer.</i>
+        </desc>
+        <depends k="interferometer/noise/enable" v="true"/>
 
-            <s k="file"><label>Data file</label>
-                <type name="InputFile" />
-                <desc>RMS flux density data file.</desc>
-                <depends k="interferometer/noise/values/rms" v="Data file" />
-            </s>
-            <s k="start"><label>Start [Jy]</label>
-                <type name="double" default="0"/>
-                <desc>RMS flux density range start value, in Jy.</desc>
-                <depends k="interferometer/noise/values/rms" v="Range" />
-            </s>
-            <s k="end"><label>End [Jy]</label>
-                <type name="double" default="0"/>
-                <desc>RMS flux density range end value, in Jy.</desc>
-                <depends k="interferometer/noise/values/rms" v="Range" />
-            </s>
-        </s> <!-- End of RMS flux density group -->
+        <s k="file"><label>Data file</label>
+            <type name="InputFile" />
+            <desc>Station RMS flux density data file. This is an ASCII file
+            consisting of a list of noise RMS values as a function of frequency
+            in Jy.</desc>
+            <depends k="interferometer/noise/rms" v="Data file" />
+        </s>
+        <s k="start"><label>Start [Jy]</label>
+            <type name="double" default="0"/>
+            <desc>Station RMS flux density range start value, in Jy. The range is
+            expanded linearly over the number of frequencies for which noise is
+            defined.</desc>
+            <depends k="interferometer/noise/rms" v="Range" />
+        </s>
+        <s k="end"><label>End [Jy]</label>
+            <type name="double" default="0"/>
+            <desc>Station RMS flux density range end value, in Jy. The range is
+            expanded linearly over the number of frequencies for which noise is
+            defined.</desc>
+            <depends k="interferometer/noise/rms" v="Range" />
+        </s>
 
-        <!-- System sensitivity group. S = (2 k T) / (A eta) -->
-        <s k="sensitivity" >
-            <label>System sensitivity (SEFD)</label>
-            <type name="OptionList" default="N">
-                No override (telescope model), Data file, Range
-            </type>
-            <desc>
-                System sensitivity (or System Equivalent Flux density,
-                SEFD) specification type:
-                <ul>
-                    <li><b>No override</b>: values are loaded from sensitivity
-                        files found in the telescope model directory.</li>
-                    <li><b>Data file</b>: values are loaded from the specified
-                        file.</li>
-                    <li><b>Range</b>: values are evaluated according to the
-                        specified range parameters.</li>
-                </ul>
-            </desc>
-            <depends k="interferometer/noise/values" v="Sensitivity" />
-
-            <s k="file"><label>Data file</label>
-                <type name="InputFile" />
-                <desc>Data file containing system sensitivity value(s).</desc>
-                <depends k="interferometer/noise/values/sensitivity" v="Data file" />
-            </s>
-            <s k="start"><label>Start [Jy]</label>
-                <type name="double" default="0"/>
-                <desc>Sensitivity range start value, in Jy.</desc>
-                <depends k="interferometer/noise/values/sensitivity" v="Range" />
-            </s>
-            <s k="end"><label>End [Jy]</label>
-                <type name="double" default="0"/>
-                <desc>Sensitivity range end value, in Jy.</desc>
-                <depends k="interferometer/noise/values/sensitivity" v="Range" />
-            </s>
-        </s> <!-- End of System sensitivity group. S = (2 k T) / (A eta) -->
-
-
-        <!-- Temperature, effective area and efficiency. -->
-        <s k="components">
-            <label>Temperature, area, and efficiency</label>
-            <depends k="interferometer/noise/values" v="Temp" />
-
-            <!-- Temperature -->
-            <s k="t_sys">
-                <label>System temperature</label>
-                <type name="OptionList" default="N">
-                    No override (telescope model), Data file, Range
-                </type>
-                <desc>
-                    System temperature specification type:
-                    <ul>
-                        <li><b>No override</b>: values are loaded from system
-                            temperature files found in the telescope model
-                            directory.</li>
-                        <li><b>Data file</b>: values are loaded from the
-                            specified file.</li>
-                        <li><b>Range</b>: values are evaluated according to
-                            the specified range parameters.</li>
-                    </ul>
-                </desc>
-
-                <s k="file"><label>Data file</label>
-                    <type name="InputFile" />
-                    <desc>Data file containing system temperature value(s).</desc>
-                    <depends k="interferometer/noise/values/components/t_sys" v="Data file" />
-                </s>
-                <s k="start"><label>Start [K]</label>
-                    <type name="double" default="0"/>
-                    <desc>System temperature range start value, in K.</desc>
-                    <depends k="interferometer/noise/values/components/t_sys" v="Range" />
-                </s>
-                <s k="end"><label>End [K]</label>
-                    <type name="double" default="0"/>
-                    <desc>System temperature range end value, in K.</desc>
-                    <depends k="interferometer/noise/values/components/t_sys" v="Range" />
-                </s>
-            </s> <!-- End of Temperature group -->
-
-            <!-- Effective Area -->
-            <s k="area" >
-                <label>Effective Area</label>
-                <type name="OptionList" default="N">
-                    No override (telescope model), Data file, Range
-                </type>
-                <desc>
-                    Station effective area specification type
-                    <ul>
-                        <li><b>No override</b>: values are loaded from system
-                            temperature files found in the telescope model
-                            directory.</li>
-                        <li><b>Data file</b>: values are loaded from the
-                            specified file.</li>
-                        <li><b>Range</b>: values are evaluated according to
-                            the specified range parameters.</li>
-                    </ul>
-                </desc>
-
-                <s k="file"><label>Data file</label>
-                    <type name="InputFile" />
-                    <desc>Data file containing effective area value(s).</desc>
-                    <depends k="interferometer/noise/values/components/area" v="Data file" />
-                </s>
-                <s k="start"><label>Start [square metres]</label>
-                    <type name="double" default="0"/>
-                    <desc>Effective area range start value, in m<sup>2</sup>.</desc>
-                    <depends k="interferometer/noise/values/components/area" v="Range" />
-                </s>
-                <s k="end"><label>End [square metres]</label>
-                    <type name="double" default="0"/>
-                    <desc>Effective area range end value, in m<sup>2</sup>.</desc>
-                    <depends k="interferometer/noise/values/components/area" v="Range" />
-                </s>
-            </s> <!-- End of Effective Area group -->
-
-
-            <!-- System efficiency -->
-            <s k="efficiency" >
-                <label>System Efficiency</label>
-                <type name="OptionList" default="N">
-                    No override (telescope model), Data file, Range
-                </type>
-                <desc>
-                    Station system efficiency specification type:
-                    <ul>
-                        <li><b>No override</b>: values are loaded from system
-                            temperature files found in the telescope model
-                            directory.</li>
-                        <li><b>Data file</b>: values are loaded from the
-                            specified file.</li>
-                        <li><b>Range</b>: values are evaluated according to
-                            the specified range parameters.</li>
-                    </ul>
-                </desc>
-
-                <s k="file"><label>Data file</label>
-                    <type name="InputFile" />
-                    <desc>Data file containing system efficiency value(s).</desc>
-                    <depends k="interferometer/noise/values/components/efficiency"
-                        v="Data file" />
-                </s>
-                <s k="start"><label>Start</label>
-                    <type name="DoubleRange" default="0">0,1</type>
-                    <desc>
-                        System efficiency range start value (allowed range:
-                        0.0 to 1.0).
-                    </desc>
-                    <depends k="interferometer/noise/values/components/efficiency"
-                        v="Range" />
-                </s>
-                <s k="end"><label>End</label>
-                    <type name="DoubleRange" default="0">0,1</type>
-                    <desc>
-                        System efficiency range end value (allowed range:
-                        0.0 to 1.0).
-                    </desc>
-                    <depends k="interferometer/noise/values/components/efficiency"
-                        v="Range" />
-                </s>
-            </s> <!-- End of system efficiency group -->
-
-        </s> <!-- End of Temperature, effective area and efficiency. -->
-
-    </s> <!-- End of the noise values group -->
+    </s> <!-- End of the noise RMS group -->
 
 </s>
