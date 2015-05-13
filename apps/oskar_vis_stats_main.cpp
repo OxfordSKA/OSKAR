@@ -40,6 +40,7 @@
 #include <iostream>
 #include <cstdio>
 #include <cfloat>
+#include <cstdio>
 
 using namespace std;
 
@@ -48,8 +49,8 @@ static void set_options(oskar_OptionParser& opt);
 static bool check_options(oskar_OptionParser& opt, int argc, char** argv);
 static void check_error(int status);
 static void update_stats(oskar_Log* log, const oskar_Mem* vis, int num_vis,
-        size_t* counter, double2* min, double2* max, double2* sum,
-        double* sumsq, double* abs_min, double* abs_max, size_t* num_zero,
+        size_t* counter, double2* min, double2* max, double2* mean,
+        double2* m2, double* abs_min, double* abs_max, size_t* num_zero,
         int *status);
 //------------------------------------------------------------------------------
 
@@ -100,21 +101,26 @@ int main(int argc, char** argv)
         // Statistics for auto-correlations and cross-correlations.
         double ac_abs_min = DBL_MAX, ac_abs_max = -DBL_MAX;
         double xc_abs_min = DBL_MAX, xc_abs_max = -DBL_MAX;
-        double ac_sumsq = 0.0, xc_sumsq = 0.0;
-        double2 ac_min, ac_max, ac_sum, xc_min, xc_max, xc_sum;
+        double2 ac_m2, xc_m2;
+        double2 ac_min, ac_max, ac_mean, xc_min, xc_max, xc_mean;
         size_t ac_num_zero = 0, xc_num_zero = 0, ac_cntr = 0, xc_cntr = 0;
         ac_min.x = DBL_MAX;
         ac_min.y = DBL_MAX;
         ac_max.x = -DBL_MAX;
         ac_max.y = -DBL_MAX;
-        ac_sum.x = 0.0;
-        ac_sum.y = 0.0;
+        ac_mean.x = 0.0;
+        ac_mean.y = 0.0;
+        ac_m2.x = 0.0;
+        ac_m2.y = 0.0;
         xc_min.x = DBL_MAX;
         xc_min.y = DBL_MAX;
         xc_max.x = -DBL_MAX;
         xc_max.y = -DBL_MAX;
-        xc_sum.x = 0.0;
-        xc_sum.y = 0.0;
+        xc_mean.x = 0.0;
+        xc_mean.y = 0.0;
+        xc_m2.x = 0.0;
+        xc_m2.y = 0.0;
+
 
         // Create a visibility block to read into.
         oskar_VisBlock* blk = oskar_vis_block_create(OSKAR_CPU, hdr, &status);
@@ -132,7 +138,7 @@ int main(int argc, char** argv)
                         oskar_vis_block_num_baselines(blk);
                 update_stats(log, oskar_vis_block_cross_correlations_const(blk),
                         num_vis, &xc_cntr, &xc_min, &xc_max,
-                        &xc_sum, &xc_sumsq, &xc_abs_min,
+                        &xc_mean, &xc_m2, &xc_abs_min,
                         &xc_abs_max, &xc_num_zero, &status);
             }
             if (oskar_vis_block_has_auto_correlations(blk))
@@ -142,7 +148,7 @@ int main(int argc, char** argv)
                         oskar_vis_block_num_stations(blk);
                 update_stats(log, oskar_vis_block_auto_correlations_const(blk),
                         num_vis, &ac_cntr, &ac_min, &ac_max,
-                        &ac_sum, &ac_sumsq, &ac_abs_min,
+                        &ac_mean, &ac_m2, &ac_abs_min,
                         &ac_abs_max, &ac_num_zero, &status);
             }
         } // End loop over blocks within the file.
@@ -155,36 +161,30 @@ int main(int argc, char** argv)
         // Print statistics for the file.
         if (ac_cntr > 0)
         {
-            double2 acorr_mean;
-            acorr_mean.x = ac_sum.x / ac_cntr;
-            acorr_mean.y = ac_sum.y / ac_cntr;
             oskar_log_message(log, 'M', 1, "Stokes-I auto-correlations:");
             oskar_log_message(log, 'M', 2, "Minimum     : % 6.3e % +6.3ej Jy",
                     ac_min.x,  ac_min.y);
             oskar_log_message(log, 'M', 2, "Maximum     : % 6.3e % +6.3ej Jy",
                     ac_max.x, ac_max.y);
             oskar_log_message(log, 'M', 2, "Mean        : % 6.3e % +6.3ej Jy",
-                    acorr_mean.x, acorr_mean.y);
-            oskar_log_message(log, 'M', 2, "RMS         : % 6.3e Jy",
-                    sqrt(ac_sumsq / ac_cntr));
+                    ac_mean.x, ac_mean.y);
+            oskar_log_message(log, 'M', 2, "STD         : % 6.3e Jy",
+                    sqrt(ac_m2.x/ac_cntr));
             oskar_log_message(log, 'M', 2, "Zeros       :  %i/%i (%.1f%%)",
                     ac_num_zero, ac_cntr,
                     ((double)ac_num_zero/ac_cntr)*100.0);
         }
         if (xc_cntr > 0)
         {
-            double2 xcorr_mean;
-            xcorr_mean.x = xc_sum.x / xc_cntr;
-            xcorr_mean.y = xc_sum.y / xc_cntr;
             oskar_log_message(log, 'M', 1, "Stokes-I cross-correlations:");
             oskar_log_message(log, 'M', 2, "Minimum     : % 6.3e % +6.3ej Jy",
                     xc_min.x,  xc_min.y);
             oskar_log_message(log, 'M', 2, "Maximum     : % 6.3e % +6.3ej Jy",
                     xc_max.x, xc_max.y);
             oskar_log_message(log, 'M', 2, "Mean        : % 6.3e % +6.3ej Jy",
-                    xcorr_mean.x, xcorr_mean.y);
-            oskar_log_message(log, 'M', 2, "RMS         : % 6.3e Jy",
-                    sqrt(xc_sumsq / xc_cntr));
+                    xc_mean.x, xc_mean.y);
+            oskar_log_message(log, 'M', 2, "STD         : % 6.3e Jy",
+                    sqrt(xc_m2.x/xc_cntr));
             oskar_log_message(log, 'M', 2, "Zeros       :  %i/%i (%.1f%%)",
                     xc_num_zero, xc_cntr,
                     ((double)xc_num_zero/xc_cntr)*100.0);
@@ -225,11 +225,13 @@ void check_error(int status)
 }
 
 void update_stats(oskar_Log* log, const oskar_Mem* vis, int num_vis,
-        size_t* counter, double2* min, double2* max, double2* sum,
-        double* sumsq, double* abs_min, double* abs_max, size_t* num_zero,
+        size_t* counter, double2* min, double2* max, double2* mean,
+        double2* m2, double* abs_min, double* abs_max, size_t* num_zero,
         int *status)
 {
     double2 I; // I = 0.5 (XX + YY)
+    double2 tmp;
+    double2 delta;
     switch (oskar_mem_type(vis))
     {
     case OSKAR_SINGLE_COMPLEX_MATRIX:
@@ -237,10 +239,9 @@ void update_stats(oskar_Log* log, const oskar_Mem* vis, int num_vis,
         const float4c* amp = oskar_mem_float4c_const(vis, status);
         for (int i = 0; i < num_vis; ++i)
         {
+            ++(*counter);
             I.x = 0.5 * (amp[i].a.x + amp[i].d.x);
             I.y = 0.5 * (amp[i].a.y + amp[i].d.y);
-            sum->x += I.x;
-            sum->y += I.y;
             double absI = sqrt(I.x*I.x + I.y*I.y);
             if (absI < DBL_MIN) (*num_zero)++;
             if (absI > *abs_max) {
@@ -253,7 +254,14 @@ void update_stats(oskar_Log* log, const oskar_Mem* vis, int num_vis,
                 min->x = I.x;
                 min->y = I.y;
             }
-            *sumsq += absI * absI;
+            delta.x = I.x - mean->x;
+            delta.y = I.y - mean->y;
+            mean->x += delta.x/(*counter);
+            mean->y += delta.y/(*counter);
+            tmp.x = I.x - mean->x;
+            tmp.y = I.y - mean->y;
+            m2->x += (delta.x*tmp.x + delta.y*tmp.y);
+            m2->y += (delta.y*tmp.x - delta.x*tmp.y);
         }
         break;
     }
@@ -262,10 +270,9 @@ void update_stats(oskar_Log* log, const oskar_Mem* vis, int num_vis,
         const double4c* amp = oskar_mem_double4c_const(vis, status);
         for (int i = 0; i < num_vis; ++i)
         {
+            *counter += 1;
             I.x = 0.5 * (amp[i].a.x + amp[i].d.x);
             I.y = 0.5 * (amp[i].a.y + amp[i].d.y);
-            sum->x += I.x;
-            sum->y += I.y;
             double absI = sqrt(I.x*I.x + I.y*I.y);
             if (absI < DBL_MIN) (*num_zero)++;
             if (absI > *abs_max) {
@@ -278,7 +285,14 @@ void update_stats(oskar_Log* log, const oskar_Mem* vis, int num_vis,
                 min->x = I.x;
                 min->y = I.y;
             }
-            *sumsq += absI * absI;
+            delta.x = I.x - mean->x;
+            delta.y = I.y - mean->y;
+            mean->x += delta.x/(*counter);
+            mean->y += delta.y/(*counter);
+            tmp.x = I.x - mean->x;
+            tmp.y = I.y - mean->y;
+            m2->x += (delta.x*tmp.x + delta.y*tmp.y);
+            m2->y += (delta.y*tmp.x - delta.x*tmp.y);
         }
         break;
     }
@@ -287,10 +301,9 @@ void update_stats(oskar_Log* log, const oskar_Mem* vis, int num_vis,
         const float2* amp = oskar_mem_float2_const(vis, status);
         for (int i = 0; i < num_vis; ++i)
         {
+            ++(*counter);
             I.x = amp[i].x;
             I.y = amp[i].y;
-            sum->x += I.x;
-            sum->y += I.y;
             double absI = sqrt(I.x*I.x + I.y*I.y);
             if (absI < DBL_MIN) (*num_zero)++;
             if (absI > *abs_max) {
@@ -303,7 +316,14 @@ void update_stats(oskar_Log* log, const oskar_Mem* vis, int num_vis,
                 min->x = I.x;
                 min->y = I.y;
             }
-            *sumsq += absI * absI;
+            delta.x = I.x - mean->x;
+            delta.y = I.y - mean->y;
+            mean->x += delta.x/(*counter);
+            mean->y += delta.y/(*counter);
+            tmp.x = I.x - mean->x;
+            tmp.y = I.y - mean->y;
+            m2->x += (delta.x*tmp.x + delta.y*tmp.y);
+            m2->y += (delta.y*tmp.x - delta.x*tmp.y);
         }
         break;
     }
@@ -312,10 +332,9 @@ void update_stats(oskar_Log* log, const oskar_Mem* vis, int num_vis,
         const double2* amp = oskar_mem_double2_const(vis, status);
         for (int i = 0; i < num_vis; ++i)
         {
+            ++(*counter);
             I.x = amp[i].x;
             I.y = amp[i].y;
-            sum->x += I.x;
-            sum->y += I.y;
             double absI = sqrt(I.x*I.x + I.y*I.y);
             if (absI < DBL_MIN) (*num_zero)++;
             if (absI > *abs_max) {
@@ -328,7 +347,14 @@ void update_stats(oskar_Log* log, const oskar_Mem* vis, int num_vis,
                 min->x = I.x;
                 min->y = I.y;
             }
-            *sumsq += absI * absI;
+            delta.x = I.x - mean->x;
+            delta.y = I.y - mean->y;
+            mean->x += delta.x/(*counter);
+            mean->y += delta.y/(*counter);
+            tmp.x = I.x - mean->x;
+            tmp.y = I.y - mean->y;
+            m2->x += (delta.x*tmp.x + delta.y*tmp.y);
+            m2->y += (delta.y*tmp.x - delta.x*tmp.y);
         }
         break;
     }
@@ -339,5 +365,4 @@ void update_stats(oskar_Log* log, const oskar_Mem* vis, int num_vis,
         break;
     }
     }
-    *counter += num_vis;
 }

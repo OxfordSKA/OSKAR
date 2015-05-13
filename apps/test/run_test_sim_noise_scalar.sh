@@ -41,7 +41,7 @@ set_setting $ini telescope/pol_mode "Scalar"
 #set_setting $ini telescope/pol_mode "Full"
 set_setting $ini interferometer/max_time_samples_per_block 5
 #set_setting $ini interferometer/ms_filename example.ms
-#set_setting $ini interferometer/correlation_type Both
+set_setting $ini interferometer/correlation_type Both
 set_setting $ini observation/num_channels 1
 set_setting $ini observation/start_frequency_hz 200e6
 set_setting $ini observation/num_time_steps 20
@@ -50,6 +50,10 @@ set_setting $ini observation/length "$(bc -l <<< 12.*3600.)"
 # Set settings which add noise.
 noise_seed=$((1 + RANDOM % 1000000))
 rms=5
+Tacc=10.0
+bw=10.0
+set_setting $ini interferometer/channel_bandwidth_hz $bw
+set_setting $ini interferometer/time_average_sec $Tacc
 set_setting $ini interferometer/noise/enable true
 set_setting $ini interferometer/noise/seed $noise_seed
 set_setting $ini interferometer/noise/freq "Observation settings"
@@ -81,9 +85,15 @@ echo ""
 # Expect the RMS of Stokes parameters which combine pairs of polarisations
 # to be sqrt(2) smaller than the linear polarisation.
 #
-expected_1pol_rms=$(bc -l <<< "sqrt(2)*$rms")
-echo "+ Expected Linear polarisation RMS : $(printf "%.3f" "$expected_1pol_rms")"
-echo "+ Expected Stokes RMS              : $(printf "%.3f" "$rms")"
+expected_XX_rms=$(bc -l <<< "sqrt(2)*$rms")
+expected_I_rms=$(bc -l <<< "$expected_XX_rms/sqrt(2)")
+expected_XX_mean=$(bc -l <<< "$expected_XX_rms*sqrt(2.0*$bw*$Tacc)")
+echo "+ Channel bandwidth                : $bw Hz"
+echo "+ Correlator dump time             : $Tacc s"
+echo "+ Expected Linear polarisation STD : $(printf "%.3f Jy" "$expected_XX_rms")"
+echo "+ Expected Stokes STD              : $(printf "%.3f Jy" "$expected_I_rms")"
+echo "+ Expected cross-correlation mean  : 0+i0 Jy"
+echo "+ Expected auto-correlation mean   : $(printf "%.3f Jy" "$expected_XX_mean")"
 echo ""
 echo ""
 
