@@ -22,3 +22,4 @@ foreach (script ${test_scripts})
 endforeach()
 
 copy_test_file(fits_image_stats.py)
+copy_test_file(plot_beam_text_file.py)

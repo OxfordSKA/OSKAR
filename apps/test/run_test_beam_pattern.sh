@@ -36,58 +36,61 @@ del_setting $ini image/fits_image
 # Set settings for the BP test.
 set_setting $ini simulator/double_precision false
 set_setting $ini telescope/input_directory telescope.tm
-set_setting $ini observation/num_channels 3
+set_setting $ini observation/num_channels 2
 set_setting $ini observation/start_frequency_hz 100e6
 set_setting $ini observation/frequency_inc_hz 100e6
-set_setting $ini observation/num_time_steps 10
+set_setting $ini observation/num_time_steps 5
 set_setting $ini observation/start_time_utc "01-01-2000 12:00:00.000"
 set_setting $ini observation/length "12:00:00.000"
 
 # Beam "image" options
-set_setting $ini beam_pattern/root_path example
-set_setting $ini beam_pattern/size 256
-set_setting $ini beam_pattern/fov_deg 180.0
-set_setting $ini beam_pattern/coordinate_frame Equatorial
-set_setting $ini beam_pattern/coordinate_type "Beam image"
+group=beam_pattern
+set_setting $ini $group/root_path beam
+set_setting $ini $group/size 256
+set_setting $ini $group/fov_deg 180.0
+set_setting $ini $group/coordinate_frame Equatorial
+set_setting $ini $group/coordinate_type "Beam image"
 
 # Station selection
-set_setting $ini beam_pattern/all_stations false
-set_setting $ini beam_pattern/station_ids 0,1,2
+set_setting $ini $group/all_stations false
+set_setting $ini $group/station_ids 0,1,2
 
 # Averaging options
-set_setting $ini beam_pattern/output/separate_time_and_channel true
-set_setting $ini beam_pattern/output/average_time_and_channel true
-set_setting $ini beam_pattern/output/average_single_axis Time
-# set_setting $ini beam_pattern/output/average_single_axis Time
-# set_setting $ini beam_pattern/output/average_single_axis Channel
-# set_setting $ini beam_pattern/output/average_single_axis None
+group=beam_pattern/output
+set_setting $ini $group/separate_time_and_channel true
+set_setting $ini $group/average_time_and_channel true
+# allowed values = None, Time, or Channel
+set_setting $ini $group/average_single_axis Time
 
 # Station outputs : Text file (voltage, amp, phase, power)
-set_setting $ini beam_pattern/station_outputs/text_file/raw_complex true
-set_setting $ini beam_pattern/station_outputs/text_file/amp true
-set_setting $ini beam_pattern/station_outputs/text_file/phase true
-set_setting $ini beam_pattern/station_outputs/text_file/auto_power_stokes_i true
+group=beam_pattern/station_outputs/text_file
+set_setting $ini $group/raw_complex true
+set_setting $ini $group/amp true
+set_setting $ini $group/phase true
+set_setting $ini $group/auto_power_stokes_i true
 
 # Station outputs : FITS (amp, phase, power)
-set_setting $ini beam_pattern/station_outputs/fits_image/amp true
-set_setting $ini beam_pattern/station_outputs/fits_image/phase true
-set_setting $ini beam_pattern/station_outputs/fits_image/auto_power_stokes_i true
+group=beam_pattern/station_outputs/fits_image
+set_setting $ini $group/amp true
+set_setting $ini $group/phase true
+set_setting $ini $group/auto_power_stokes_i true
 
 # Telescope (Interferometer) outputs : Text file (complex, amp, phase)
-set_setting $ini beam_pattern/telescope_outputs/text_file/save_cross_power_stokes_i_raw_complex true
-set_setting $ini beam_pattern/telescope_outputs/text_file/save_cross_power_stokes_i_amp true
-set_setting $ini beam_pattern/telescope_outputs/text_file/save_cross_power_stokes_i_phase true
+group=beam_pattern/telescope_outputs/text_file
+set_setting $ini $group/cross_power_stokes_i_raw_complex true
+set_setting $ini $group/cross_power_stokes_i_amp true
+set_setting $ini $group/cross_power_stokes_i_phase true
 
 # Telescope (Interferometer) outputs : FITS (amp, phase)
-set_setting $ini beam_pattern/telescope_outputs/fits_image/save_cross_power_stokes_i_amp true
-set_setting $ini beam_pattern/telescope_outputs/fits_image/save_cross_power_stokes_i_phase true
-
+group=beam_pattern/telescope_outputs/fits_image
+set_setting $ini $group/cross_power_stokes_i_amp true
+set_setting $ini $group/cross_power_stokes_i_phase true
 
 # Run the beam pattern simulation
 echo "Running beam pattern simulation"
 T0="$(date +%s)"
-run_beam_pattern -q $ini
-#run_beam_pattern $ini
+#run_beam_pattern -q $ini
+run_beam_pattern $ini
 echo "  Finished in $(($(date +%s)-T0)) s"
 
 echo ""

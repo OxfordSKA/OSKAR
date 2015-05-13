@@ -1529,6 +1529,8 @@ static void new_text_file(HostData* h, int data_product_type, int i_station,
     if (i_station >= 0)
         fprintf(f, "# Beam pixel list for station %d\n",
                 h->station_ids[i_station]);
+    else
+        fprintf(f, "# Beam pixel list for telescope (interferometer)\n");
     fprintf(f, "# Filename is '%s'\n", name);
     fprintf(f, "# Dimension order (slowest to fastest) is:\n");
     if (h->average_single_axis != OSKAR_BEAM_PATTERN_AVERAGE_TIME)
