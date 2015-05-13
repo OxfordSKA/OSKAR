@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+
 def load_fits_image(filename):
     import pyfits
     import numpy as np
@@ -10,7 +11,6 @@ def load_fits_image(filename):
 
 if __name__ == '__main__':
 
-    import os
     import sys
     import numpy as np
 

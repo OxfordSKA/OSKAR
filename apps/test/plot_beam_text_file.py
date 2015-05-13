@@ -1,6 +1,12 @@
 #!/usr/bin/python
 
+"""
+Module to plot an OSKAR format beam pattern text file.
+"""
+
+
 def load_beam_file(filename):
+    """Load and OSKAR format beam pattern text file."""
     import numpy as np
     header = []
     fh = open(filename, 'r+')
@@ -37,40 +43,45 @@ def load_beam_file(filename):
                 ipix0 = chunk*chunk_size
                 ipix1 = ipix0+chunk_size
                 img[ipix0:ipix1, time, chan] = data[idata0:idata1]
-    img =  img.reshape((imsize, imsize, num_times, num_channels))
+    img = img.reshape((imsize, imsize, num_times, num_channels))
     return img
 
 if __name__ == '__main__':
 
-    import os
     import sys
     import numpy as np
     import matplotlib.pyplot as pp
     import matplotlib.cm as cm
     from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-    if len(sys.argv)-1 != 1:
-        print 'Usage: plot_beam_text_file.py <filename>'
+    if len(sys.argv)-1 < 1:
+        print 'Usage: plot_beam_text_file.py <filename> [channel=0] [time=0]'
         sys.exit(1)
 
     filename = sys.argv[1]
 
+    chan = 0
+    time = 0
+    print len(sys.argv)-1
+    if len(sys.argv)-1 >= 2:
+        chan = int(sys.argv[2])
+    if len(sys.argv)-1 == 3:
+        time = int(sys.argv[3])
+
     img = load_beam_file(filename)
 
-    fig = pp.figure(1, figsize=(10,10))
+    fig = pp.figure(1, figsize=(10, 10))
     pp.clf()
 
     ax = fig.add_subplot(111, aspect='equal')
-    chan = 0
-    time = 0
-    data = img[:,:, chan, time]
+    data = img[:, :, time, chan]
     data = np.flipud(data)
     data[data == 0.0] = 1e-10
     datamax = np.nanmax(data)
     absdata = np.abs(data)
     data = 10.0*np.log10(absdata/datamax)
     pp.imshow(data, interpolation='nearest', cmap=cm.seismic)
-    pp.clim([-60, 0]) # db range
+    pp.clim([-60, 0])  # db range
     ax.set_title('Beam time:%i channel:%i' % (time, chan))
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="2%", pad=0.05)
@@ -83,5 +94,4 @@ if __name__ == '__main__':
     ax.axes.get_yaxis().set_ticks([])
 
     pp.show()
-    #pp.savefig('beam.png', transparent=True, frameon=False)
-
+    # pp.savefig('beam.png', transparent=True, frameon=False)
