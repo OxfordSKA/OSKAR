@@ -35,7 +35,7 @@ del_setting $ini image/fits_image
 
 # Set settings for the BP test.
 set_setting $ini simulator/double_precision false
-set_setting $ini telescope/input_directory telescope
+set_setting $ini telescope/input_directory telescope.tm
 set_setting $ini observation/num_channels 3
 set_setting $ini observation/start_frequency_hz 100e6
 set_setting $ini observation/frequency_inc_hz 100e6
@@ -86,8 +86,8 @@ set_setting $ini beam_pattern/telescope_outputs/fits_image/save_cross_power_stok
 # Run the beam pattern simulation
 echo "Running beam pattern simulation"
 T0="$(date +%s)"
-#run_beam_pattern -q $ini
-run_beam_pattern $ini
+run_beam_pattern -q $ini
+#run_beam_pattern $ini
 echo "  Finished in $(($(date +%s)-T0)) s"
 
 echo ""

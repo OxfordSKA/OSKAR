@@ -11,6 +11,15 @@ function run_example() {
 }
 
 get_example_data_version $@
-run_example run_example_add_noise
+
+# Examples
 run_example run_example_beam_pattern_equatorial
 run_example run_example_interferometry
+
+# Tests
+# run_example run_test_add_noise_scalar
+# run_example run_test_sim_noise_scalar
+# run_example run_test_beam_pattern
+
+# Benchmarks
+#run_example run_benchmark_sim_interferometer

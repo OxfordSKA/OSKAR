@@ -25,7 +25,7 @@ cd "${example_data_dir}"
 # Set settings
 ini=setup.ini
 del_setting $ini sky/oskar_sky_model/file
-set_setting $ini telescope/input_directory telescope
+set_setting $ini telescope/input_directory telescope.tm
 set_setting $ini simulator/keep_log_file true
 set_setting $ini simulator/write_status_to_log_file true
 set_setting $ini observation/num_channels 1

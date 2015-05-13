@@ -30,7 +30,7 @@ This archive contains:
 | -------------- | ------------------------------------------------------------
 | setup.ini      | An OSKAR configuration file used to set up the example simulation.
 | sky.osm        | An OSKAR sky model file, containing 3 sources.
-| telescope/     | An OSKAR telescope configuration directory structure consisting of an interferometer with 30 aperture array stations, each with 2587 antenna elements.
+| telescope.tm/  | An OSKAR telescope configuration directory structure consisting of an interferometer with 30 aperture array stations, each with 2587 antenna elements.
 | dipole_CST.txt | A numerically-defined half-wavelength dipole pattern, as an example element pattern.
 
 
@@ -44,7 +44,7 @@ sections, should be launched by executing the <tt>oskar</tt> binary. This can
 be found in the <tt>build/apps</tt> directory after compiling the OSKAR
 package, and in the <tt>\<install prefix\>/bin</tt> directory after
 installing OSKAR using the <tt>make install</tt> command.
- 
+
 \subsection example_visualising Visualising Simulation Results
 
 The example simulations described in the following sections generate a number
@@ -66,8 +66,8 @@ and interferometry simulations.
 
 Start the OSKAR GUI by running the <tt>oskar</tt> binary and load the
 <tt>setup.ini</tt> settings file. Settings files can be loaded into the GUI
-by specifying the settings file path as the first command line argument when 
-starting the OSKAR GUI, or by using the **Open...** action in the **File** 
+by specifying the settings file path as the first command line argument when
+starting the OSKAR GUI, or by using the **Open...** action in the **File**
 menu once the GUI has started.
 
 \anchor fig_gui
@@ -81,9 +81,9 @@ simple simulation. The options can be
 The settings are arranged into a number of groups:
 
 - **Simulator settings**, for parameters which affect the operation of the
-  software. 
+  software.
 - **Sky model settings**, for parameters that are used to specify the content
-  of the sky model. 
+  of the sky model.
 - **Observation settings**, for parameters that are used to specify the
   observation.
 - **Telescope model settings**, for parameters that are used to specify the
@@ -118,9 +118,9 @@ directory found in the example settings
    found in the **Sky model settings group**. This will open a file dialog from
    where the path to the <tt>sky.osm</tt> file can be specified.
 -# The telescope model should be specified by adding the telescope directory
-   path to the **Input directory** setting found in the **Telescope model
-   settings** group, also by double clicking the value field and selecting it
-   from the directory browser dialog.
+   path (<tt>telescope.tm</tt>) to the **Input directory** setting found in
+   the **Telescope model settings** group, also by double clicking the value
+   field and selecting it from the directory browser dialog.
 
 The settings tree now contains all of the settings required to run a beam
 pattern and interferometry simulation. Of note:
@@ -130,8 +130,8 @@ pattern and interferometry simulation. Of note:
 - The sky model consists of three sources in a field centred at
   RA 20 deg, Dec. -30 deg.
 - The observation of this field is made at three frequency channels starting
-  at 100 MHz and increasing in increments of 20 MHz. 
-- The observation consists of 24 snapshots taken over a 12 hour period. 
+  at 100 MHz and increasing in increments of 20 MHz.
+- The observation consists of 24 snapshots taken over a 12 hour period.
 - The telescope model consists of an interferometer of 30 aperture array
   stations, each containing 2587 half-wavelength dipole antennas. Antennas
   within each station are arranged in a circular offset lattice pattern.
@@ -154,13 +154,13 @@ field-of-view of 180 degrees.
 \image latex oskar_gui_2.png "Beam pattern settings" width=13cm
 
 The beam pattern simulation is run by pressing the **Run Beam Pattern** button
-on the toolbar of the GUI, or by selecting the **Run Beam Pattern** option in 
+on the toolbar of the GUI, or by selecting the **Run Beam Pattern** option in
 the **Run** menu.
 
 While this is running, OSKAR will display a log indicating the current
-progress of the simulation. Once the simulation is complete, the results can 
+progress of the simulation. Once the simulation is complete, the results can
 be found in the FITS image file called
-<tt>example_beam_pattern_S0000_TIME_SEP_CHAN_SEP_AMP_XX.fits</tt> 
+<tt>example_beam_pattern_S0000_TIME_SEP_CHAN_SEP_AMP_XX.fits</tt>
 (unless you changed it) found in the directory from which the simulator was run.
 
 The output files are four FITS image cubes containing the beam pattern for the
@@ -191,9 +191,9 @@ observation settings, \ref example_config "as configured previously".
 To run the simulation, select the **Run Interferometer** action, either by
 pressing the button on the toolbar, or by selecting the option in the **Run**
 menu. While the interferometer simulation is running, a log will be shown.
- 
+
 Once the simulation has successfully completed, the results can be found in
-an OSKAR visibility binary file called <tt>example.vis</tt> (unless you 
+an OSKAR visibility binary file called <tt>example.vis</tt> (unless you
 changed it). This can be found in the directory from which the OSKAR GUI
 was started. OSKAR can also be configured to output visibilities to a
 Measurement Set for further post-processing in CASA. However, for this
@@ -258,7 +258,7 @@ example input CST-format file <tt>dipole_CST.txt</tt>, the frequency at which
 it is valid (we have chosen 100 MHz in this example), and the output telescope
 or station directory that the data files should be saved into. We want to use
 this data only for the first station, so we have selected the
-<tt>telescope/station000</tt> directory here. (If we wanted to use the same
+<tt>telescope.tm/station000</tt> directory here. (If we wanted to use the same
 element pattern data for all stations, then selecting the top-level telescope
 directory would be necessary instead.)
 

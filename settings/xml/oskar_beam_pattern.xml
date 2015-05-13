@@ -138,14 +138,14 @@
     <s k="station_outputs"><label>Per-station outputs</label>
         <s k="text_file">
             <label>Text file</label>
-            <s k="save_raw_complex"><label>Raw (complex) pattern</label>
+            <s k="raw_complex"><label>Raw (complex) pattern</label>
                 <depends k="beam_pattern/output/separate_time_and_channel"
                     v="true"/>
                 <type name="bool" default="false" />
                 <desc>If true, save the raw complex pattern in text
                     files.</desc>
             </s>
-            <s k="save_amp"><label>Amplitude pattern</label>
+            <s k="amp"><label>Amplitude pattern</label>
                 <depends k="beam_pattern/output/separate_time_and_channel"
                     v="true"/>
                 <type name="bool" default="false" />
@@ -153,20 +153,20 @@
                     files. This is given by the square root of the sum
                     of the squares of the real and imaginary values.</desc>
             </s>
-            <s k="save_phase"><label>Phase pattern</label>
+            <s k="phase"><label>Phase pattern</label>
                 <depends k="beam_pattern/output/separate_time_and_channel"
                     v="true"/>
                 <type name="bool" default="false" />
                 <desc>If true, save each phase pattern in text files.</desc>
             </s>
-            <s k="save_auto_power_stokes_i">
+            <s k="auto_power_stokes_i">
                 <label>Auto-correlation Stokes I power pattern</label>
                 <type name="bool" default="false" />
                 <desc>If true, save each total intensity beam in text
                     files. This is evaluated as the Stokes I response of the
                     auto-correlation.</desc>
             </s>
-            <!-- <s k="save_ixr">
+            <!-- <s k="ixr">
                 <label>Intrinsic cross-polarisation ratio (IXR)</label>
                 <depends k="telescope/pol_mode" v="Full"/>
                 <depends k="beam_pattern/output/separate_time_and_channel"
@@ -179,7 +179,7 @@
         <s k="fits_image">
             <label>FITS image</label>
             <depends k="beam_pattern/coordinate_type" v="Beam image"/>
-            <s k="save_amp"><label>Amplitude pattern</label>
+            <s k="amp"><label>Amplitude pattern</label>
                 <depends k="beam_pattern/output/separate_time_and_channel"
                     v="true"/>
                 <type name="bool" default="false" />
@@ -187,21 +187,21 @@
                     image files. This is given by the square root of the sum
                     of the squares of the real and imaginary values.</desc>
             </s>
-            <s k="save_phase"><label>Phase pattern</label>
+            <s k="phase"><label>Phase pattern</label>
                 <depends k="beam_pattern/output/separate_time_and_channel"
                     v="true"/>
                 <type name="bool" default="false" />
                 <desc>If true, save each phase pattern in FITS image
                     files.</desc>
             </s>
-            <s k="save_auto_power_stokes_i">
+            <s k="auto_power_stokes_i">
                 <label>Auto-correlation Stokes I power pattern</label>
                 <type name="bool" default="false" />
                 <desc>If true, save each total intensity beam in FITS image
                     files. This is evaluated as the Stokes I response of the
                     auto-correlation.</desc>
             </s>
-            <!-- <s k="save_ixr">
+            <!-- <s k="ixr">
                 <label>Intrinsic cross-polarisation ratio (IXR)</label>
                 <depends k="telescope/pol_mode" v="Full"/>
                 <depends k="beam_pattern/output/separate_time_and_channel"
@@ -215,14 +215,14 @@
     <s k="telescope_outputs"><label>Telescope outputs</label>
         <s k="text_file">
             <label>Text file</label>
-            <s k="save_cross_power_stokes_i_raw_complex">
+            <s k="cross_power_stokes_i_raw_complex">
                 <label>Cross-correlation Stokes I raw power pattern</label>
                 <type name="bool" default="false" />
                 <desc>If true, save the average cross-power beam raw
                     response to Stokes I from all specified stations as a text
                     file.</desc>
             </s>
-            <s k="save_cross_power_stokes_i_amp">
+            <s k="cross_power_stokes_i_amp">
                 <label>Cross-correlation Stokes I amplitude power
                     pattern</label>
                 <type name="bool" default="false" />
@@ -230,7 +230,7 @@
                     response to Stokes I from all specified stations as text
                     files.</desc>
             </s>
-            <s k="save_cross_power_stokes_i_phase">
+            <s k="cross_power_stokes_i_phase">
                 <label>Cross-correlation Stokes I phase power pattern</label>
                 <type name="bool" default="false" />
                 <desc>If true, save the average cross-power beam phase
@@ -241,7 +241,7 @@
         <s k="fits_image">
             <label>FITS image</label>
             <depends k="beam_pattern/coordinate_type" v="Beam image"/>
-            <s k="save_cross_power_stokes_i_amp">
+            <s k="cross_power_stokes_i_amp">
                 <label>Cross-correlation Stokes I amplitude power
                     pattern</label>
                 <type name="bool" default="false" />
@@ -249,7 +249,7 @@
                     response to Stokes I from all specified stations in FITS
                     image files.</desc>
             </s>
-            <s k="save_cross_power_stokes_i_phase">
+            <s k="cross_power_stokes_i_phase">
                 <label>Cross-correlation Stokes I phase power pattern</label>
                 <type name="bool" default="false" />
                 <desc>If true, save the average cross-power beam phase

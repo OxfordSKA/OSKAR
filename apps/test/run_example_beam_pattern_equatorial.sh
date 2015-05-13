@@ -20,7 +20,7 @@ cd "${example_data_dir}"
 # Set or overwrite a number of settings in the example data settings file.
 ini=setup.ini
 # Telescope model
-set_setting $ini telescope/input_directory telescope
+set_setting $ini telescope/input_directory telescope.tm
 
 # Run the beam pattern simulation
 echo "Running beam pattern simulation"

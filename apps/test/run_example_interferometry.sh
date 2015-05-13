@@ -19,7 +19,7 @@ cd "${example_data_dir}"
 # Set settings as specified in the OSKAR Example document section 3.1
 ini=setup.ini
 set_setting $ini sky/oskar_sky_model/file sky.osm
-set_setting $ini telescope/input_directory telescope
+set_setting $ini telescope/input_directory telescope.tm
 
 # Run the interferometry simulation
 echo "Starting interferometry simulation"

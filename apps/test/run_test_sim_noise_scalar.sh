@@ -35,7 +35,7 @@ del_setting $ini sky/oskar_sky_model/file
 set_setting $ini simulator/keep_log_file false
 set_setting $ini simulator/write_status_to_log_file true
 set_setting $ini simulator/double_precision false
-set_setting $ini telescope/input_directory telescope
+set_setting $ini telescope/input_directory telescope.tm
 set_setting $ini telescope/normalise_beams_at_phase_centre false
 set_setting $ini telescope/pol_mode "Scalar"
 #set_setting $ini telescope/pol_mode "Full"
