@@ -75,7 +75,7 @@ noise_vis=example.vis
 # Print some stats from the visibilities after noise addition
 echo "Visibility stats [$noise_vis]"
 echo "........................................................................."
-run_vis_stats -v $noise_vis
+run_vis_stats --header --stats $noise_vis
 echo "........................................................................."
 echo ""
 echo ""

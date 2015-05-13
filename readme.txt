@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.6                                          Last update:  27 Apr 2015 |
+| OSKAR 2.6                                          Last update:  13 May 2015 |
 +------------------------------------------------------------------------------+
 
 1. OSKAR: Oxford's Square Kilometre Array Radio-telescope simulator
@@ -104,10 +104,8 @@ Utility Applications:
 * oskar_vis_add                 : Adds two OSKAR visibility files together.
 * oskar_vis_add_noise           : Adds thermal noise to an OSKAR visibility
                                   file.
-* oskar_vis_stats               : Displays statistics for an OSKAR visibility
-                                  file.
-* oskar_vis_summary             : Displays a summary of an OSKAR visibility
-                                  file.
+* oskar_vis_summary             : Displays a summary and optional statistics 
+                                  of data within an OSKAR visibility file.
 * oskar_vis_to_ms               : Converts an OSKAR visibility file to a
                                   Measurement Set.
 

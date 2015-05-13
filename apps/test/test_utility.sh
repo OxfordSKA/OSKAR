@@ -471,19 +471,19 @@ function run_vis_add_noise() {
 
 
 # Description:
-#   Runs the 'oskar_vis_stats' binary with the specified visibility binary
+#   Runs the 'oskar_vis_summary' binary with the specified visibility binary
 #   data file
 #
 # Usage:
 #   run_vis_stats [OPTIONS] <vis file>
 #
 # Example
-#   run_vis_stats -v test.vis
+#   run_vis_stats --stats test.vis
 #
 function run_vis_stats() {
     local ARGS=("$@")
     local NARGS=${#ARGS[@]}
-    local name="oskar_vis_stats"
+    local name="oskar_vis_summary"
     local bin=${oskar_app_path}/${name}
     if [ ! -x "$bin" ]; then
         echo "ERROR: Unable to find required binary: $bin."

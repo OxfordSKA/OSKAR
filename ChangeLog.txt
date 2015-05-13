@@ -1,4 +1,4 @@
-2015-05-11  OSKAR-2.6.0
+2015-05-13  OSKAR-2.6.0
 
     * Re-wrote oskar_sim_interferometer application and changed internal
       visibility format to allow long interferometer simulations to run
@@ -86,6 +86,12 @@
 
     * Updated interface to oskar_settings_set binary to unset keys when the
       value is left empty.
+
+    * Added oskar_vis_upgrade_format application to upgrade visibility files 
+      written by older versions of OSKAR to the new file format.
+
+    * Removed oskar_vis_stats application. This functionality is now 
+      provided by oskar_vis_summary using the --stats option.
 
     * Major simplification of system noise settings.
 

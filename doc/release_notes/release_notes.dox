@@ -78,6 +78,12 @@ please refer to older revisions of this document or the
 - Added CRC codes to data chunks in binary files.
 - Updated interface to oskar_settings_set binary to unset keys when the 
       value is left empty.
+- Added oskar_vis_upgrade_format application to upgrade visibility files 
+      written by older versions of OSKAR to the new file format.
+- Removed oskar_vis_stats application. This functionality is now 
+      provided by oskar_vis_summary using the --stats option.
+- Major simplification of system noise settings.
+
 
 \section release_notes_roadmap Roadmap
 

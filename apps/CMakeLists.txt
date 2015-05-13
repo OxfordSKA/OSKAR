@@ -57,7 +57,6 @@ if (CUDA_FOUND)
         oskar_vis_summary
         oskar_vis_upgrade_format
         oskar_vis_to_ascii_table
-        oskar_vis_stats
         #oskar_rebin_sky
     )
 
