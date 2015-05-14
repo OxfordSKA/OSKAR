@@ -18,6 +18,7 @@ set(apps_SRC
     src/oskar_telescope_save.cpp
     src/private_TelescopeLoadApodisation.cpp
     src/private_TelescopeLoadElementPattern.cpp
+    #src/private_TelescopeLoadElementTaper.cpp
     src/private_TelescopeLoadElementTypes.cpp
     src/private_TelescopeLoadFeedAngle.cpp
     src/private_TelescopeLoadGainPhase.cpp
@@ -28,7 +29,6 @@ set(apps_SRC
 )
 if(CASACORE_FOUND)
     list(APPEND apps_SRC
-        src/oskar_vis_write_ms.cpp
         src/oskar_vis_block_write_ms.c
         src/oskar_vis_header_write_ms.c
     )

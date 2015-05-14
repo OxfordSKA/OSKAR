@@ -26,19 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/lib/oskar_vis_write_ms.h>
+#include <apps/lib/oskar_vis_block_write_ms.h>
+#include <apps/lib/oskar_vis_header_write_ms.h>
 #include <apps/lib/oskar_OptionParser.h>
 #include <oskar_get_error_string.h>
 #include <oskar_log.h>
-#include <oskar_vis.h>
+#include <oskar_vis_header.h>
+#include <oskar_vis_block.h>
+#include <oskar_measurement_set.h>
 #include <oskar_version_string.h>
 #include <oskar_binary.h>
 #include <oskar_binary_read_mem.h>
-#include <string>
 #include <cstdio>
+#include <string>
 #include <vector>
-#include <iostream>
-#include <iomanip>
 
 using namespace std;
 
@@ -74,13 +75,16 @@ int main(int argc, char** argv)
     // Print if verbose.
     if (verbose)
     {
-        cout << "Output Measurement Set: " << out_path << endl;
-        cout << "Using the " << num_in_files << " input files:" << endl;
+        printf("Output Measurement Set: %s\n", out_path.c_str());
+        printf("Using the %d input files:\n", num_in_files);
         for (int i = 0; i < num_in_files; ++i)
         {
-            cout << "  [" << setw(2) << i << "] " << in_files[i] << endl;
+            printf("  [%02d] %s\n", i, in_files[i].c_str());
         }
     }
+
+    // Handle to Measurement Set.
+    oskar_MeasurementSet* ms = 0;
 
     // Loop over input files.
     for (int i = 0; i < num_in_files; ++i)
@@ -90,27 +94,49 @@ int main(int argc, char** argv)
         // Break on error.
         if (error) break;
 
-        // Get the name of the current input file.
+        // Read the file header.
         const char* in_file = in_files[i].c_str();
-
-        // Load the visibility file and run log.
         oskar_Binary* h = oskar_binary_create(in_file, 'r', &error);
-        oskar_Vis* vis = oskar_vis_read(h, &error);
+        oskar_VisHeader* hdr = oskar_vis_header_read(h, &error);
+
+        // Create the Measurement Set using the header from the first file.
+        if (i == 0)
+        {
+            ms = oskar_vis_header_write_ms(hdr, out_path.c_str(), 1,
+                    force_polarised, &error);
+        }
+
+        // Work out the expected number of blocks in the file.
+        int max_times_per_block = oskar_vis_header_max_times_per_block(hdr);
+        int num_times = oskar_vis_header_num_times_total(hdr);
+        int num_blocks = (num_times + max_times_per_block - 1) /
+                max_times_per_block;
+
+        // Create a visibility block to read into.
+        oskar_VisBlock* blk = oskar_vis_block_create(OSKAR_CPU, hdr, &error);
+
+        // Loop over blocks and write them to the Measurement Set.
+        for (int b = 0; b < num_blocks; ++b)
+        {
+            oskar_vis_block_read(blk, hdr, h, b, &error);
+            oskar_vis_block_write_ms(blk, hdr, ms, &error);
+        }
+
+        // Add run log to Measurement Set.
         oskar_Mem* log = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &error);
         oskar_binary_read_mem(h, log, OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0,
                 &tag_error);
-        oskar_binary_free(h);
-
-        // Write data to Measurement Set.
-        int overwrite = (i == 0) ? 1 : 0;
-        oskar_vis_write_ms(vis, out_path.c_str(), overwrite, force_polarised,
-                oskar_mem_char_const(log), oskar_mem_length(log), &error);
+        oskar_ms_add_log(ms, oskar_mem_char_const(log), oskar_mem_length(log));
 
         // Clean up.
-        oskar_vis_free(vis, &error);
+        oskar_binary_free(h);
         oskar_mem_free(log, &error);
+        oskar_vis_header_free(hdr, &error);
+        oskar_vis_block_free(blk, &error);
     }
 
+    // Close the Measurement Set.
+    oskar_ms_close(ms);
     if (error)
         oskar_log_error(0, oskar_get_error_string(error));
     return error;

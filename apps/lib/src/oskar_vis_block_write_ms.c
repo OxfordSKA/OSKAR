@@ -31,17 +31,20 @@
 #include <oskar_measurement_set.h>
 #include <oskar_vis_block.h>
 #include <oskar_vis_header.h>
+#include <oskar_cmath.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define D2R (M_PI / 180.0)
 
 void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
         const oskar_VisHeader* header, oskar_MeasurementSet* ms, int* status)
 {
     const oskar_Mem *in_acorr, *in_xcorr, *in_uu, *in_vv, *in_ww;
     oskar_Mem *temp_vis = 0, *temp_uu = 0, *temp_vv = 0, *temp_ww = 0;
-    double dt_dump_sec, t_start_mjd, t_start_sec;
+    double dt_dump_sec, t_start_mjd, t_start_sec, ra_rad, dec_rad, ref_freq_hz;
     unsigned int a1, a2, num_baseln_in, num_baseln_out, num_channels;
     unsigned int num_pols_in, num_pols_out, num_stations, num_times, b, c, t;
     unsigned int i, i_out, prec, start_row, start_time_index;
@@ -53,15 +56,13 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Pull data from visibility structure. */
+    /* Pull data from visibility structures. */
     num_pols_out     = oskar_ms_num_pols(ms);
     num_pols_in      = oskar_vis_block_num_pols(blk);
     num_stations     = oskar_vis_block_num_stations(blk);
     num_baseln_in    = oskar_vis_block_num_baselines(blk);
     num_channels     = oskar_vis_block_num_channels(blk);
     num_times        = oskar_vis_block_num_times(blk);
-    dt_dump_sec      = oskar_vis_header_time_inc_sec(header);
-    t_start_mjd      = oskar_vis_header_time_start_mjd_utc(header);
     in_acorr         = oskar_vis_block_auto_correlations_const(blk);
     in_xcorr         = oskar_vis_block_cross_correlations_const(blk);
     in_uu            = oskar_vis_block_baseline_uu_metres_const(blk);
@@ -72,6 +73,11 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     have_autocorr    = oskar_vis_block_has_auto_correlations(blk);
     have_crosscorr   = oskar_vis_block_has_cross_correlations(blk);
     start_time_index = oskar_vis_block_start_time_index(blk);
+    ra_rad           = oskar_vis_header_phase_centre_ra_deg(header) * D2R;
+    dec_rad          = oskar_vis_header_phase_centre_dec_deg(header) * D2R;
+    dt_dump_sec      = oskar_vis_header_time_inc_sec(header);
+    t_start_mjd      = oskar_vis_header_time_start_mjd_utc(header);
+    ref_freq_hz      = oskar_vis_header_freq_start_hz(header);
     prec             = oskar_mem_precision(in_xcorr);
     t_start_sec      = t_start_mjd * 86400.0 +
             dt_dump_sec * (start_time_index + 0.5);
@@ -89,6 +95,30 @@ void oskar_vis_block_write_ms(const oskar_VisBlock* blk,
     if (num_pols_in > num_pols_out)
     {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
+
+    /* Check the dimensions match. */
+    if (oskar_ms_num_channels(ms) != num_channels ||
+            oskar_ms_num_pols(ms) != num_pols_out ||
+            oskar_ms_num_stations(ms) != num_stations)
+    {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
+
+    /* Check the reference frequencies match. */
+    if (fabs(oskar_ms_ref_freq_hz(ms) - ref_freq_hz) > 1e-10)
+    {
+        *status = OSKAR_ERR_REF_FREQ_MISMATCH;
+        return;
+    }
+
+    /* Check the phase centres are the same. */
+    if (fabs(oskar_ms_phase_centre_ra_rad(ms) - ra_rad) > 1e-10 ||
+            fabs(oskar_ms_phase_centre_dec_rad(ms) - dec_rad) > 1e-10)
+    {
+        *status = OSKAR_ERR_PHASE_CENTRE_MISMATCH;
         return;
     }
 

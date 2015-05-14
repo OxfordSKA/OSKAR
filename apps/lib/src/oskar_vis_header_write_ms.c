@@ -42,9 +42,9 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
 {
     const oskar_Mem *x_metres, *y_metres, *z_metres;
     double ref_freq_hz, chan_width, ra_rad, dec_rad;
-    int amp_type, autocorr, crosscorr;
+    int amp_type, autocorr, crosscorr, dir_exists;
     unsigned int num_stations, num_pols, num_channels;
-    oskar_MeasurementSet* ms;
+    oskar_MeasurementSet* ms = 0;
 
     /* Check if safe to proceed. */
     if (*status) return 0;
@@ -74,18 +74,14 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
     if (! (chan_width > 0.0))
         chan_width = 1.0;
 
-    /* Check if overwriting. */
-    if (overwrite)
+    /* If directory doesn't exist, or if overwrite flag is set,
+     * create a new one. */
+    dir_exists = oskar_dir_exists(ms_path);
+    if (!dir_exists || overwrite)
     {
-        if (oskar_dir_exists(ms_path))
-        {
-            /* Try to overwrite. */
-            if (!oskar_dir_remove(ms_path))
-            {
-                *status = OSKAR_ERR_FILE_IO;
-                return 0;
-            }
-        }
+        /* Remove any existing directory. */
+        if (dir_exists && overwrite)
+            oskar_dir_remove(ms_path);
 
         /* Create the Measurement Set. */
         ms = oskar_ms_create(ms_path, ra_rad, dec_rad, num_pols, num_channels,
@@ -117,6 +113,8 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
                 oskar_mem_char_const(oskar_vis_header_settings_const(hdr)),
                 oskar_mem_length(oskar_vis_header_settings_const(hdr)));
     }
+
+    /* If directory already exists and we're not overwriting, open it. */
     else
     {
         /* Open the Measurement Set. */
