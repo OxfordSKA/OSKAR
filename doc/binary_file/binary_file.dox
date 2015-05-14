@@ -570,7 +570,8 @@ Tags in this group have a group ID of 11.
 | 9      | Maximum number of channels in a \ref binary_tag_vis_block "Visibility Block" [int].
 | 10     | Total number of usable channels, from all subsequent \ref binary_tag_vis_block "Visibility Blocks" [int].
 | 11     | Number of stations [int].
-| 12-20  | <i>Reserved for future use.</i>
+| 12     | Polarisation type [int]. (See \ref vis_pol_type "below")
+| 13-20  | <i>Reserved for future use.</i>
 | 21     | Phase centre coordinate type, currently always 0 [int].
 | 22     | Phase centre longitude / Right Ascension (deg) and latitude / Declination (deg) [double[2]].
 | 23     | Start frequency, in Hz [double].
@@ -590,6 +591,22 @@ Tags in this group have a group ID of 11.
 The Visibility Header contains static meta-data. It precedes a sequence of
 \ref binary_tag_vis_block "Visibility Blocks", which contain the actual
 cross-correlations and/or autocorrelations as a function of time and frequency.
+
+\anchor vis_pol_type
+The polarisation type of the data is given by Tag ID 12, as follows:
+
+| Code | Meaning
+| ---- | --------------------------------------------------------------------
+|    0 | Full Stokes (in order: I, Q, U, V).
+|    1 | Stokes I.
+|    2 | Stokes Q.
+|    3 | Stokes U.
+|    4 | Stokes V.
+|   10 | All linear polarisations (in order: XX, XY, YX, YY).
+|   11 | Linear XX.
+|   12 | Linear XY.
+|   13 | Linear YX.
+|   14 | Linear YY.
 
 \latexonly
 \clearpage
@@ -636,12 +653,12 @@ From slowest to fastest varying, the remaining dimensions are:
 - Channel
 - Baseline (for cross-correlations) or Station (for auto-correlations) (fastest)
 
-The type and number of polarisations is determined by the choice of matrix or
-scalar amplitude types. Complex scalar types represent Stokes-I data only, 
-whereas complex matrix amplitude types represent 4 polarisation dimensions in 
-the order
-\f$ \left[\begin{array}{cc} a & b \\ c & d \\ \end{array} \right] = 
-\left[\begin{array}{cc} XX & XY \\ YX & YY \\ \end{array} \right] \f$.
+The number of polarisations is determined by the choice of matrix or 
+scalar amplitude types. Complex scalar types represent data for a single 
+polarisation, whereas complex matrix amplitude types represent four 
+polarisation dimensions in the order \f$I, Q, U, V\f$ or (usually) 
+\f$XX, XY, YX, YY\f$. The polarisation type is given by Tag ID 12 in the 
+\ref binary_tag_vis_header "Visibility Header".
 
 The number of time samples containing usable data is given by the dimension 
 size specified in Tag ID 1. This will only be different to the maximum number 

@@ -95,6 +95,8 @@ oskar_VisHeader* oskar_vis_header_read(oskar_Binary* h, int* status)
             grp, OSKAR_VIS_HEADER_TAG_TELESCOPE_PATH, 0, status);
 
     /* Read other visibility metadata. */
+    oskar_binary_read_int(h, grp, OSKAR_VIS_HEADER_TAG_POL_TYPE, 0,
+            &vis->pol_type, status);
     oskar_binary_read_int(h, grp,
             OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_COORD_TYPE, 0,
             &vis->phase_centre_type, status);

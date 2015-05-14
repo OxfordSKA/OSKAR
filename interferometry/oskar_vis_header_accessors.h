@@ -84,6 +84,9 @@ OSKAR_EXPORT
 int oskar_vis_header_num_stations(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
+int oskar_vis_header_pol_type(const oskar_VisHeader* vis);
+
+OSKAR_EXPORT
 int oskar_vis_header_phase_centre_coord_type(const oskar_VisHeader* vis);
 
 OSKAR_EXPORT
@@ -169,6 +172,10 @@ void oskar_vis_header_set_phase_centre(oskar_VisHeader* vis,
 OSKAR_EXPORT
 void oskar_vis_header_set_telescope_centre(oskar_VisHeader* vis,
         double lon_deg, double lat_deg, double alt_metres);
+
+OSKAR_EXPORT
+void oskar_vis_header_set_pol_type(oskar_VisHeader* vis, int value,
+        int* status);
 
 #ifdef __cplusplus
 }

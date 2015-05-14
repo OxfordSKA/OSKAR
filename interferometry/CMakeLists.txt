@@ -26,6 +26,7 @@ set(interferometry_SRC
     src/oskar_vis_block_write.c
     src/oskar_vis_header_accessors.c
     src/oskar_vis_header_create.c
+    src/oskar_vis_header_create_copy.c
     src/oskar_vis_header_free.c
     src/oskar_vis_header_read.c
     src/oskar_vis_header_write.c

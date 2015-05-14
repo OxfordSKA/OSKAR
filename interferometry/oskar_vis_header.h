@@ -60,7 +60,8 @@ enum OSKAR_VIS_HEADER_TAGS
     OSKAR_VIS_HEADER_TAG_MAX_CHANNELS_PER_BLOCK   = 9,
     OSKAR_VIS_HEADER_TAG_NUM_CHANNELS_TOTAL       = 10,
     OSKAR_VIS_HEADER_TAG_NUM_STATIONS             = 11,
-    /* Tags 12-20 are reserved for future use. */
+    OSKAR_VIS_HEADER_TAG_POL_TYPE                 = 12,
+    /* Tags 13-20 are reserved for future use. */
     OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_COORD_TYPE  = 21,
     OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_DEG         = 22,
     OSKAR_VIS_HEADER_TAG_FREQ_START_HZ            = 23,
@@ -77,12 +78,27 @@ enum OSKAR_VIS_HEADER_TAGS
     OSKAR_VIS_HEADER_TAG_STATION_Z_OFFSET_ECEF    = 34
 };
 
+enum OSKAR_VIS_HEADER_POL_TYPE
+{
+    OSKAR_VIS_POL_TYPE_STOKES_I_Q_U_V     =  0,
+    OSKAR_VIS_POL_TYPE_STOKES_I           =  1,
+    OSKAR_VIS_POL_TYPE_STOKES_Q           =  2,
+    OSKAR_VIS_POL_TYPE_STOKES_U           =  3,
+    OSKAR_VIS_POL_TYPE_STOKES_V           =  4,
+    OSKAR_VIS_POL_TYPE_LINEAR_XX_XY_YX_YY = 10,
+    OSKAR_VIS_POL_TYPE_LINEAR_XX          = 11,
+    OSKAR_VIS_POL_TYPE_LINEAR_XY          = 12,
+    OSKAR_VIS_POL_TYPE_LINEAR_YX          = 13,
+    OSKAR_VIS_POL_TYPE_LINEAR_YY          = 14
+};
+
 #ifdef __cplusplus
 }
 #endif
 
 #include <oskar_vis_header_accessors.h>
 #include <oskar_vis_header_create.h>
+#include <oskar_vis_header_create_copy.h>
 #include <oskar_vis_header_free.h>
 #include <oskar_vis_header_read.h>
 #include <oskar_vis_header_write.h>

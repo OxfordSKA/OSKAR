@@ -104,6 +104,11 @@ int oskar_vis_header_num_stations(const oskar_VisHeader* vis)
     return vis->num_stations;
 }
 
+int oskar_vis_header_pol_type(const oskar_VisHeader* vis)
+{
+    return vis->pol_type;
+}
+
 int oskar_vis_header_phase_centre_coord_type(const oskar_VisHeader* vis)
 {
     return vis->phase_centre_type;
@@ -245,6 +250,33 @@ void oskar_vis_header_set_telescope_centre(oskar_VisHeader* vis,
     vis->telescope_centre_lon_deg = lon_deg;
     vis->telescope_centre_lat_deg = lat_deg;
     vis->telescope_centre_alt_m = alt_metres;
+}
+
+void oskar_vis_header_set_pol_type(oskar_VisHeader* vis, int value,
+        int* status)
+{
+    if (oskar_type_is_matrix(vis->amp_type))
+    {
+        if (value == OSKAR_VIS_POL_TYPE_STOKES_I_Q_U_V ||
+                value == OSKAR_VIS_POL_TYPE_LINEAR_XX_XY_YX_YY)
+            vis->pol_type = value;
+        else
+            *status = OSKAR_ERR_TYPE_MISMATCH;
+    }
+    else
+    {
+        if (value == OSKAR_VIS_POL_TYPE_STOKES_I ||
+                value == OSKAR_VIS_POL_TYPE_STOKES_Q ||
+                value == OSKAR_VIS_POL_TYPE_STOKES_U ||
+                value == OSKAR_VIS_POL_TYPE_STOKES_V ||
+                value == OSKAR_VIS_POL_TYPE_LINEAR_XX ||
+                value == OSKAR_VIS_POL_TYPE_LINEAR_XY ||
+                value == OSKAR_VIS_POL_TYPE_LINEAR_YX ||
+                value == OSKAR_VIS_POL_TYPE_LINEAR_YY)
+            vis->pol_type = value;
+        else
+            *status = OSKAR_ERR_TYPE_MISMATCH;
+    }
 }
 
 #ifdef __cplusplus

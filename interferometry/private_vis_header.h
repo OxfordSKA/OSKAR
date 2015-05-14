@@ -50,6 +50,7 @@ struct oskar_VisHeader
     int max_channels_per_block;      /* Maximum no. channels per block. */
     int num_channels_total;          /* Total no. channels. */
     int num_stations;                /* No. interferometer stations. */
+    int pol_type;                    /* Polarisation type enumerator. */
 
     int phase_centre_type;           /* Phase centre coordinate type. */
     double phase_centre_deg[2];      /* Phase centre coordinates [deg]. */

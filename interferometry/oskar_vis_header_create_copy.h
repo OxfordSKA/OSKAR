@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VIS_BLOCK_CREATE_H_
-#define OSKAR_VIS_BLOCK_CREATE_H_
+#ifndef OSKAR_VIS_HEADER_CREATE_COPY_H_
+#define OSKAR_VIS_HEADER_CREATE_COPY_H_
 
 /**
- * @file oskar_vis_block_create.h
+ * @file oskar_vis_header_create_copy.h
  */
 
 #include <oskar_global.h>
-#include <oskar_vis_header.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,52 +41,26 @@ extern "C" {
 
 /**
  * @brief
- * Creates a new visibility block data structure.
+ * Creates a copy of a visibility header structure.
  *
  * @details
- * This function creates a new visibility block data structure and returns a
- * handle to it. The structure holds visibility data for all baselines, and
- * a set of times and channels.
+ * This function creates a copy of a visibility header structure and
+ * returns a handle to it.
  *
- * Allowed values of the \p location parameter are
- * - OSKAR_CPU
- * - OSKAR_GPU
- *
- * The dimension order is fixed. The polarisation dimension is implicit in the
- * data type (matrix or scalar) and is therefore the fastest varying.
- * From slowest to fastest varying, the remaining dimensions are:
- *
- * - Time (slowest)
- * - Channel
- * - Baseline (fastest)
- *
- * Note that it is different to that used by earlier versions of OSKAR,
- * where the order of the time and channel dimensions was swapped.
- * In addition, the Measurement Set format swaps the order of the channel
- * and baseline dimensions (so the dimension order there is
- * time, baseline, channel).
- *
- * The number of polarisations is determined by the choice of matrix or
- * scalar amplitude types. Matrix amplitude types represent 4 polarisation
- * dimensions, whereas scalar types represent one polarisation.
- * The polarisation type (linear or Stokes) is enumerated in the visibility
- * header.
- *
- * The structure must be deallocated using oskar_vis_block_free() when it is
+ * The structure must be deallocated using oskar_vis_header_free() when it is
  * no longer required.
  *
- * @param[in] location         Memory location (OSKAR_CPU or OSKAR_GPU).
- * @param[in] hdr              Pointer to populated visibility header data.
- * @param[in,out]  status      Status return code.
+ * @param[in] other                  Header structure to copy.
+ * @param[in,out]  status            Status return code.
  *
  * @return A handle to the new data structure.
  */
 OSKAR_EXPORT
-oskar_VisBlock* oskar_vis_block_create(int location,
-        const oskar_VisHeader* hdr, int* status);
+oskar_VisHeader* oskar_vis_header_create_copy(const oskar_VisHeader* other,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_VIS_BLOCK_CREATE_H_ */
+#endif /* OSKAR_VIS_HEADER_CREATE_COPY_H_ */

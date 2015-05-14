@@ -75,6 +75,12 @@ oskar_VisHeader* oskar_vis_header_create(int amp_type, int coord_precision,
     hdr->num_channels_total     = num_channels_total;
     hdr->num_stations           = num_stations;
 
+    /* Set default polarisation type. */
+    if (oskar_type_is_matrix(amp_type))
+        hdr->pol_type = OSKAR_VIS_POL_TYPE_LINEAR_XX_XY_YX_YY;
+    else
+        hdr->pol_type = OSKAR_VIS_POL_TYPE_STOKES_I;
+
     /* Initialise meta-data. */
     hdr->write_autocorr = write_autocorr;
     hdr->write_crosscorr = write_crosscor;
