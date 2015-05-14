@@ -75,7 +75,9 @@ noise_vis=example.vis
 # Print some stats from the visibilities after noise addition
 echo "Visibility stats [$noise_vis]"
 echo "........................................................................."
-run_vis_stats --header --stats $noise_vis
+run_vis_stats $noise_vis > stats.txt
+lines=$(wc -l < stats.txt)
+sed -n "7,$((lines-3))p" "stats.txt"
 echo "........................................................................."
 echo ""
 echo ""

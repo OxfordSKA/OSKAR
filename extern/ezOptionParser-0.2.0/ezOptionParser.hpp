@@ -2122,7 +2122,7 @@ void ezOptionParser::parse(int argc, char** argv)
 
     firstOptIndex = i;
 
-    //    printf("firstOptIndex = %i\n", firstOptIndex);
+    // printf("firstOptIndex = %i\n", firstOptIndex);
     // TODO change the concept of first and last args adding a arg list for
     // non-flag variables.
 
@@ -2146,7 +2146,7 @@ void ezOptionParser::parse(int argc, char** argv)
     for (; i < argc; ++i)
     {
         s = argv[i];
-        //        printf(">> %s\n", s.c_str());
+        // printf(">> %s\n", s.c_str());
 
         if (optionGroupIds.count(s))
         {
@@ -2164,8 +2164,8 @@ void ezOptionParser::parse(int argc, char** argv)
                 SplitDelim(argv[i], g->delim, g->args.back());
                 std::vector<std::string*> aa;
                 aa = *(g->args[0]);
-                std::string ss = *aa[0];
-                //                printf("  >> %s ==> %s\n", argv[i], ss.c_str());
+                // std::string ss = *aa[0];
+                // printf("  >> %s ==> %s\n", argv[i], ss.c_str());
             }
             lastOptIndex = i;
         }

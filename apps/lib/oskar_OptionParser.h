@@ -211,7 +211,6 @@ public:
         addFlag("--version", "Display the program name/version banner and exit.",
                 false);
         this->parse(argc, argv);
-        numArgs();
         if (isSet("--help")) {
             printUsage();
             return false;

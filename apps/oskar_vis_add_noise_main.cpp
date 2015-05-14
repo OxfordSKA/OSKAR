@@ -39,9 +39,11 @@
 #include <oskar_vis_block.h>
 #include <oskar_vis_header.h>
 #include <oskar_telescope.h>
+#include <oskar_file_exists.h>
 
 #include <oskar_binary.h>
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -57,16 +59,18 @@ int main(int argc, char** argv)
 
     // Obtain command line options & arguments.
     oskar_OptionParser opt("oskar_vis_add_noise", oskar_version_string());
-    opt.setDescription("Application to add noise to OSKAR binary visibility files.");
+    opt.setDescription("Application to add noise to OSKAR binary visibility "
+            "files.");
     opt.addRequired("OSKAR visibility file(s)...");
     opt.addFlag("-s", "OSKAR settings file (noise settings).", 1, "", true);
     opt.addFlag("-v", "Verbose logging.");
     opt.addFlag("-q", "Suppress all logging output.");
     if (!opt.check_options(argc, argv))
         return EXIT_FAILURE;
+
     string settings_file;
     opt.get("-s")->getString(settings_file);
-    vector<string> vis_filename_in = opt.getArgs();
+    vector<string> vis_filename_in = opt.getInputFiles();
     int num_files = vis_filename_in.size();
     bool verbose = opt.isSet("-v") ? true : false;
     bool quiet   = opt.isSet("-q") ? true : false;
@@ -81,18 +85,23 @@ int main(int argc, char** argv)
     oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
 
     // Load the settings file and telescope model.
-    oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file.c_str());
+    oskar_log_section(log, 'M', "Loading settings file '%s'",
+            settings_file.c_str());
     oskar_Settings settings;
     oskar_settings_load(&settings, 0, settings_file.c_str(), &status);
+    if (status != OSKAR_SUCCESS) {
+        oskar_log_error(log, "Failed to load settings from '%s'",
+                settings_file.c_str());
+        oskar_log_free(log);
+        return EXIT_FAILURE;
+    }
     if (!settings.interferometer.noise.enable)
     {
         oskar_log_error(log, "Noise addition disabled in the settings.");
         oskar_log_free(log);
         return EXIT_FAILURE;
     }
-    // FIXME these are not useful settings to print for this app!
-    //oskar_log_settings_interferometer(log, &settings);
-    //log_noise_settings(log, &settings);
+
     // FIXME oskar_set_up_telescope should not be printing log messages!
     oskar_Telescope* tel = oskar_set_up_telescope(&settings, log, &status);
     if (status)
@@ -108,6 +117,12 @@ int main(int argc, char** argv)
     for (int i = 0; i < (int)vis_filename_out.size(); ++i)
     {
         string str = vis_filename_in[i];
+        if (!oskar_file_exists(str.c_str())) {
+            oskar_log_error(log, "Visibility file %s not found.", str.c_str());
+            oskar_log_free(log);
+            return EXIT_FAILURE;
+        }
+        // TODO check if the file exists
         str.erase(str.end()-4, str.end());
         vis_filename_out[i] = str + "_noise.vis";
     }

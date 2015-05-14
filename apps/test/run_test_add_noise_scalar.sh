@@ -72,15 +72,16 @@ echo "  - RMS         : $(printf "%.2e" "$rms") Jy"
 T0="$(date +%s)"
 vis=example.vis
 noise_vis=example_noise.vis
-cp $vis $noise_vis
-run_vis_add_noise -i -q $ini $noise_vis
+run_vis_add_noise -q $ini $vis
 echo "  Finished in $(($(date +%s)-T0)) s"
 echo ""
 
 # Print some stats from the visibilities after noise addition
 echo "Visibility stats [$noise_vis]"
 echo "........................................................................."
-run_vis_stats -v $noise_vis
+run_vis_stats $noise_vis > stats.txt
+lines=$(wc -l < stats.txt)
+sed -n "7,$((lines-3))p" "stats.txt"
 echo "........................................................................."
 echo ""
 echo ""

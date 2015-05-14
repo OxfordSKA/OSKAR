@@ -495,7 +495,7 @@ function run_vis_stats() {
         exit_ 1
         return
     fi
-    cmd="$bin ${ARGS[*]}"
+    cmd="$bin --stats ${ARGS[*]}"
     ($cmd)
     if [ $? != 0 ]; then
         echo "ERROR: $name. Failed."
