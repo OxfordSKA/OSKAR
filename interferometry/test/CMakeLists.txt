@@ -5,7 +5,6 @@
 set(name interferometry_test)
 set(${name}_SRC
     main.cpp
-    Test_add_system_noise.cpp
     Test_evaluate_baselines.cpp
     Test_station_coord_transforms.cpp
     Test_Visibilities.cpp

@@ -199,60 +199,6 @@ TEST(Visibilities, create)
 }
 
 
-TEST(Visibilities, get_channel_amps)
-{
-    int amp_type     = OSKAR_SINGLE_COMPLEX;
-    int location     = OSKAR_CPU;
-    int num_channels = 5;
-    int num_times    = 4;
-    int num_stations = 3;
-    int status = 0;
-
-    oskar_Vis* vis = oskar_vis_create(amp_type, location,
-            num_channels, num_times, num_stations, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-    float2* amp = oskar_mem_float2(oskar_vis_amplitude(vis), &status);
-    int num_baselines = oskar_vis_num_baselines(vis);
-
-    for (int i = 0, c = 0; c < num_channels; ++c)
-    {
-        for (int t = 0; t < num_times; ++t)
-        {
-            for (int b = 0; b < num_baselines; ++b, ++i)
-            {
-                amp[i].x  = (float)c + 1.123;
-                amp[i].y  = ((float)(i + c) - 0.456);
-            }
-        }
-    }
-
-    for (int i = 0, c = 0; c < num_channels; ++c)
-    {
-        oskar_Mem* vis_amps = oskar_mem_create_alias(0, 0, 0, &status);
-        oskar_vis_get_channel_amps(vis_amps, vis, c, &status);
-        ASSERT_EQ(0, status) << oskar_get_error_string(status);
-        ASSERT_EQ(num_times * num_baselines, (int)oskar_mem_length(vis_amps));
-        ASSERT_EQ(amp_type, oskar_mem_type(vis_amps));
-        ASSERT_EQ(location, oskar_mem_location(vis_amps));
-        float2* vis_amps_data = oskar_mem_float2(vis_amps, &status);
-
-        for (int t = 0; t < num_times; ++t)
-        {
-            for (int b = 0; b < num_baselines; ++b, ++i)
-            {
-                ASSERT_FLOAT_EQ((float)c + 1.123,
-                        vis_amps_data[t * num_baselines + b].x);
-                ASSERT_FLOAT_EQ(((float)(i + c) - 0.456),
-                        vis_amps_data[t * num_baselines + b].y);
-            }
-        }
-        oskar_mem_free(vis_amps, &status);
-    }
-    oskar_vis_free(vis, &status);
-    ASSERT_EQ(0, status) << oskar_get_error_string(status);
-}
-
-
 TEST(Visibilities, read_write)
 {
     int status = 0;
