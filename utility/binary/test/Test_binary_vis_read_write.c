@@ -64,7 +64,8 @@ enum OSKAR_VIS_HEADER_TAGS
     OSKAR_VIS_HEADER_TAG_MAX_CHANNELS_PER_BLOCK   = 9,
     OSKAR_VIS_HEADER_TAG_NUM_CHANNELS_TOTAL       = 10,
     OSKAR_VIS_HEADER_TAG_NUM_STATIONS             = 11,
-    /* Tags 12-20 are reserved for future use. */
+    OSKAR_VIS_HEADER_TAG_POL_TYPE                 = 12,
+    /* Tags 13-20 are reserved for future use. */
     OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_COORD_TYPE  = 21,
     OSKAR_VIS_HEADER_TAG_PHASE_CENTRE_DEG         = 22,
     OSKAR_VIS_HEADER_TAG_FREQ_START_HZ            = 23,
