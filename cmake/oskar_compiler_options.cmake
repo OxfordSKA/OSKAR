@@ -220,6 +220,9 @@ if (CUDA_FOUND)
         set(CUDA_NVCC_FLAGS_MINSIZEREL -01)
 
         # Options passed to the compiler NVCC encapsulates.
+        if (APPLE)
+            list(APPEND CUDA_NVCC_FLAGS -Xcompiler;-stdlib=libstdc++;)
+        endif()
         list(APPEND CUDA_NVCC_FLAGS_RELEASE -Xcompiler;-O2)
         list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-O0)
         list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-g)
@@ -227,19 +230,18 @@ if (CUDA_FOUND)
         list(APPEND CUDA_NVCC_FLAGS_RELWIDTHDEBINFO -Xcompiler;-g)
         list(APPEND CUDA_NVCC_FLAGS_MINSIZEREL -Xcompiler;-01)
 
-        if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-            list(APPEND CUDA_NVCC_FLAGS -Xcompiler;-fvisibility=hidden;)
-            list(APPEND CUDA_NVCC_FLAGS -Xcompiler;-fPIC;)
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wall;)
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wextra;)
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-parameter;)
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-variadic-macros;)
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-long-long;)
-            # Disable warning about missing initializers (for CUDA Thrust).
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-missing-field-initializers;)
-            # Disable warning about "unsigned int* __get_precalculated_matrix(int) defined but not used".
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-function;)
-        endif()
+        list(APPEND CUDA_NVCC_FLAGS -Xcompiler;-fvisibility=hidden;)
+        list(APPEND CUDA_NVCC_FLAGS -Xcompiler;-fPIC;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wall;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wextra;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-private-field;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-parameter;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-variadic-macros;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-long-long;)
+        # Disable warning about missing initializers (for CUDA Thrust).
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-missing-field-initializers;)
+        # Disable warning about "unsigned int* __get_precalculated_matrix(int) defined but not used".
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-function;)
         # PTX compiler options
         #list(APPEND CUDA_NVCC_FLAGS_RELEASE --ptxas-options=-v;)
     endif ()
