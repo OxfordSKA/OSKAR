@@ -25,19 +25,18 @@ set(apps_SRC
     src/private_TelescopeLoadLayout.cpp
     src/private_TelescopeLoadMountTypes.cpp
     src/private_TelescopeLoadNoise.cpp
-    src/private_TelescopeLoadPermittedBeams.cpp
-)
+    src/private_TelescopeLoadPermittedBeams.cpp)
 if(CASACORE_FOUND)
     list(APPEND apps_SRC
         src/oskar_vis_block_write_ms.c
-        src/oskar_vis_header_write_ms.c
-    )
+        src/oskar_vis_header_write_ms.c)
 endif()
 
 set(apps_SRC "${apps_SRC}" PARENT_SCOPE)
 
 # ==== Macros to build the OSKAR apps module.
-set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_apps.dir/src)
+set(CUDA_GENERATED_OUTPUT_DIR
+    ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_apps.dir/src)
 cuda_add_library(oskar_apps ${apps_SRC})
 
 # Link in oskar_ms and oskar_fits if avaliable.

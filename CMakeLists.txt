@@ -62,8 +62,7 @@ if (CUDA_FOUND)
         sky
         splines
         station
-        utility
-    )
+        utility)
     foreach (module ${${libname}_modules})
         add_subdirectory(${module})
         foreach (file ${${module}_SRC})
@@ -96,12 +95,12 @@ if (CUDA_FOUND)
             LINK_FLAGS "${OpenMP_CXX_FLAGS}"
             SOVERSION ${OSKAR_VERSION}
             VERSION ${OSKAR_VERSION})
-    endif(MSVC)
+    endif()
 
     install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
     cuda_build_clean_target()
-endif (CUDA_FOUND)
+endif ()
 
 # === Build other oskar libraries.
 add_subdirectory(apps)
@@ -120,8 +119,10 @@ add_subdirectory(doc)
 # === Install header tree.
 if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")
     string(REGEX MATCH "[^/|\\][a-zA-z0-9|_|-]+$" bin_dir ${CMAKE_BINARY_DIR})
-    string(REGEX MATCH "[^/|\\]([a-zA-z0-9|_|-]+$)" install_dir ${CMAKE_INSTALL_PREFIX})
-    string(COMPARE EQUAL ${CMAKE_INSTALL_PREFIX} ${CMAKE_BINARY_DIR} install_in_build_dir)
+    string(REGEX MATCH "[^/|\\]([a-zA-z0-9|_|-]+$)" install_dir
+        ${CMAKE_INSTALL_PREFIX})
+    string(COMPARE EQUAL ${CMAKE_INSTALL_PREFIX} ${CMAKE_BINARY_DIR}
+        install_in_build_dir)
     if ($install_in_build_dir)
         set(install_include_dir "${bin_dir}/include")
     else ()

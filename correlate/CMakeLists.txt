@@ -19,8 +19,7 @@ set(correlate_SRC
     src/oskar_evaluate_auto_power.c
     src/oskar_evaluate_auto_power_c.c
     src/oskar_evaluate_cross_power.c
-    src/oskar_evaluate_cross_power_omp.c
-)
+    src/oskar_evaluate_cross_power_omp.c)
 
 if (CUDA_FOUND)
     list(APPEND correlate_SRC
@@ -35,8 +34,7 @@ if (CUDA_FOUND)
         src/oskar_cross_correlate_point_scalar_cuda.cu
         src/oskar_cross_correlate_point_time_smearing_scalar_cuda.cu
         src/oskar_evaluate_auto_power_cuda.cu
-        src/oskar_evaluate_cross_power_cuda.cu
-    )
+        src/oskar_evaluate_cross_power_cuda.cu)
 endif()
 
 set(correlate_SRC "${correlate_SRC}" PARENT_SCOPE)

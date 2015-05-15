@@ -32,12 +32,11 @@ if (QT4_FOUND)
     qt4_wrap_cpp(gui_SRC ${gui_MOC_SRC})
     qt4_add_resources(gui_SRC gui/icons/icons.qrc)
     qt_app(oskar oskar_main.cpp ${gui_SRC} ${gui_MOC_SRC}
-        EXTRA_LIBS 
-            oskar_settings_widgets 
+        EXTRA_LIBS
+            oskar_settings_widgets
             ${QT_QTCORE_LIBRARY}
             ${QT_QTGUI_LIBRARY}
-            ${QT_QTNETWORK_LIBRARY}
-    )
+            ${QT_QTNETWORK_LIBRARY})
 endif ()
 
 if (CUDA_FOUND)
@@ -45,20 +44,16 @@ if (CUDA_FOUND)
         foreach (name ${ARGN})
             oskar_app(${name} ${name}_main.cpp)
         endforeach()
-    endmacro(declare_oskar_apps)
+    endmacro()
 
     declare_oskar_apps(
         oskar_cuda_system_info
         oskar_binary_file_query
         oskar_filter_sky_model_clusters
-        #oskar_image_stats
-        #oskar_image_summary
         oskar_vis_add
         oskar_vis_summary
         oskar_vis_upgrade_format
-        oskar_vis_to_ascii_table
-        #oskar_rebin_sky
-    )
+        oskar_vis_to_ascii_table)
 
     set(name oskar_fits_image_to_sky_model)
     oskar_app(${name} ${name}_main.cpp EXTRA_LIBS oskar_fits)

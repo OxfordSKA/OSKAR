@@ -149,5 +149,3 @@ add_doc(
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/settings/xml_to_settings_doc.py
     ${CMAKE_CURRENT_BINARY_DIR}/settings/xml_to_settings_doc.py @ONLY)
-
-    
