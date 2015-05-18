@@ -42,6 +42,8 @@ void oskar_telescope_save_station_coords(
 {
     int i, type, location, num_stations;
     FILE* file;
+    const oskar_Mem *x_weights, *y_weights, *z_weights;
+    const oskar_Mem *x_signal, *y_signal, *z_signal;
 
     /* Check if safe to proceed. */
     if (*status) return;
@@ -61,6 +63,14 @@ void oskar_telescope_save_station_coords(
         return;
     }
 
+    /* Get pointers to the arrays. */
+    x_weights = oskar_telescope_station_measured_x_enu_metres_const(telescope);
+    y_weights = oskar_telescope_station_measured_y_enu_metres_const(telescope);
+    z_weights = oskar_telescope_station_measured_z_enu_metres_const(telescope);
+    x_signal = oskar_telescope_station_true_x_enu_metres_const(telescope);
+    y_signal = oskar_telescope_station_true_y_enu_metres_const(telescope);
+    z_signal = oskar_telescope_station_true_z_enu_metres_const(telescope);
+
     /* Open the file. */
     file = fopen(filename, "w");
     if (!file)
@@ -74,35 +84,42 @@ void oskar_telescope_save_station_coords(
     fprintf(file, "# Longitude [radians] = %f\n", telescope->lon_rad);
     fprintf(file, "# Latitude [radians]  = %f\n", telescope->lat_rad);
     fprintf(file, "# Altitude [metres]   = %f\n", telescope->alt_metres);
-    fprintf(file, "# Local horizontal x(east), y(north), z(up) [metres]\n");
-    if (type == OSKAR_SINGLE)
+    fprintf(file, "# Local horizontal x (east), y (north), z (up) [metres], "
+            "delta x, delta y, delta z [metres]\n");
+    if (type == OSKAR_DOUBLE)
     {
-        const float *x_hor, *y_hor, *z_hor;
-        x_hor = oskar_mem_float_const(
-                oskar_telescope_station_true_x_enu_metres_const(telescope), status);
-        y_hor = oskar_mem_float_const(
-                oskar_telescope_station_true_y_enu_metres_const(telescope), status);
-        z_hor = oskar_mem_float_const(
-                oskar_telescope_station_true_z_enu_metres_const(telescope), status);
+        const double *x_, *y_, *z_, *xs_, *ys_, *zs_;
+        x_ = oskar_mem_double_const(x_weights, status);
+        y_ = oskar_mem_double_const(y_weights, status);
+        z_ = oskar_mem_double_const(z_weights, status);
+        xs_ = oskar_mem_double_const(x_signal, status);
+        ys_ = oskar_mem_double_const(y_signal, status);
+        zs_ = oskar_mem_double_const(z_signal, status);
+
         for (i = 0; i < num_stations; ++i)
         {
-            fprintf(file, "% 14.6f % 14.6f % 14.6f\n",
-                    x_hor[i], y_hor[i], z_hor[i]);
+            double x, y, z;
+            x = x_[i]; y = y_[i]; z = z_[i];
+            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f % 14.6f\n",
+                    x, y, z, (xs_[i] - x), (ys_[i] - y), (zs_[i] - z));
         }
     }
-    else if (type == OSKAR_DOUBLE)
+    else if (type == OSKAR_SINGLE)
     {
-        const double *x_hor, *y_hor, *z_hor;
-        x_hor = oskar_mem_double_const(
-                oskar_telescope_station_true_x_enu_metres_const(telescope), status);
-        y_hor = oskar_mem_double_const(
-                oskar_telescope_station_true_y_enu_metres_const(telescope), status);
-        z_hor = oskar_mem_double_const(
-                oskar_telescope_station_true_z_enu_metres_const(telescope), status);
+        const float *x_, *y_, *z_, *xs_, *ys_, *zs_;
+        x_ = oskar_mem_float_const(x_weights, status);
+        y_ = oskar_mem_float_const(y_weights, status);
+        z_ = oskar_mem_float_const(z_weights, status);
+        xs_ = oskar_mem_float_const(x_signal, status);
+        ys_ = oskar_mem_float_const(y_signal, status);
+        zs_ = oskar_mem_float_const(z_signal, status);
+
         for (i = 0; i < num_stations; ++i)
         {
-            fprintf(file, "% 14.6f % 14.6f % 14.6f\n",
-                    x_hor[i], y_hor[i], z_hor[i]);
+            float x, y, z;
+            x = x_[i]; y = y_[i]; z = z_[i];
+            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f % 14.6f\n",
+                    x, y, z, (xs_[i] - x), (ys_[i] - y), (zs_[i] - z));
         }
     }
 
