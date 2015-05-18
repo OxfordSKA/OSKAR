@@ -14,7 +14,7 @@ set(interferometry_SRC
     src/oskar_telescope_load_station_coords_ecef.c
     src/oskar_telescope_load_station_coords_horizon.c
     src/oskar_telescope_resize.c
-    src/oskar_telescope_save_station_coords.c
+    src/oskar_telescope_save_layout.c
     src/oskar_telescope_set_station_coords.c
     src/oskar_vis_block_accessors.c
     src/oskar_vis_block_add_system_noise.c

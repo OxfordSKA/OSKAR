@@ -65,7 +65,7 @@ enum OSKAR_POL_MODE_TYPE
 #include <oskar_telescope_load_station_coords_ecef.h>
 #include <oskar_telescope_load_station_coords_horizon.h>
 #include <oskar_telescope_resize.h>
-#include <oskar_telescope_save_station_coords.h>
+#include <oskar_telescope_save_layout.h>
 #include <oskar_telescope_set_station_coords.h>
 
 #endif /* OSKAR_TELESCOPE_H_ */

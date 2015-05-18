@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_SAVE_STATION_COORDS_H_
-#define OSKAR_TELESCOPE_SAVE_STATION_COORDS_H_
+#ifndef OSKAR_TELESCOPE_SAVE_LAYOUT_H_
+#define OSKAR_TELESCOPE_SAVE_LAYOUT_H_
 
 /**
- * @file oskar_telescope_save_station_coords.h
+ * @file oskar_telescope_save_layout.h
  */
 
 #include <oskar_global.h>
@@ -61,12 +61,11 @@ extern "C" {
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_telescope_save_station_coords(
-        const oskar_Telescope* telescope, const char* filename,
-        int* status);
+void oskar_telescope_save_layout(const oskar_Telescope* telescope,
+        const char* filename, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_TELESCOPE_SAVE_STATION_COORDS_H_ */
+#endif /* OSKAR_TELESCOPE_SAVE_LAYOUT_H_ */

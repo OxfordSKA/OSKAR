@@ -29,16 +29,14 @@
 #include <private_telescope.h>
 #include <oskar_telescope.h>
 
-#include <oskar_telescope_save_station_coords.h>
 #include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_telescope_save_station_coords(
-        const oskar_Telescope* telescope, const char* filename,
-        int* status)
+void oskar_telescope_save_layout(const oskar_Telescope* telescope,
+        const char* filename, int* status)
 {
     int i, type, location, num_stations;
     FILE* file;

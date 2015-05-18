@@ -84,9 +84,8 @@ static void oskar_telescope_save_private(const oskar_Telescope* telescope,
     if (depth == 0)
     {
         // Write the station coordinates.
-        QByteArray coord_path = dir.filePath(layout_name).toLatin1();
-        oskar_telescope_save_station_coords(telescope, coord_path,
-                status);
+        QByteArray path = dir.filePath(layout_name).toLatin1();
+        oskar_telescope_save_layout(telescope, path, status);
 
         // Get the number of stations.
         num_stations = oskar_telescope_num_stations(telescope);
