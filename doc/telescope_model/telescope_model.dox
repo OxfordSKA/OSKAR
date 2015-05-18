@@ -315,9 +315,6 @@ In order, the parameter columns are:
 | 1      | Element multiplicative weight (real part)      | Optional (default 1.0)
 | 2      | Element multiplicative weight (imaginary part) | Optional (default 0.0)
 
-\latexonly
-\newpage
-\endlatexonly
 
 \section telescope_element_feed_angle Element Feed Angle Files
 
