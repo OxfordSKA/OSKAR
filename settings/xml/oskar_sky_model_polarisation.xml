@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<s k="pol"><label>Polarisation settings</label>
+    <s k="mean_pol_fraction"><label>Mean polarisation fraction</label>
+        <type name="DoubleRange" default="0.0">0,1</type>
+        <desc>
+            The mean polarisation fraction of generated source fluxes 
+            (range 0 to 1).
+        </desc>
+    </s>
+    <s k="std_pol_fraction">
+        <label>Standard deviation polarisation fraction</label>
+        <type name="DoubleRange" default="0.0">0,1</type>
+        <desc>
+            The standard deviation of polarisation fraction of 
+            generated source fluxes (range 0 to 1).
+        </desc>
+    </s>
+    <s k="mean_pol_angle_deg">
+        <label>Mean polarisation angle [deg]</label>
+        <type name="double" default="0.0"/>
+        <desc>
+            The mean polarisation angle of generated source fluxes, in degrees.
+        </desc>
+    </s>
+    <s k="std_pol_angle_deg">
+        <label>Standard deviation polarisation angle [deg]</label>
+        <type name="double" default="0.0"/>
+        <desc>
+            The standard deviation of polarisation angle of generated 
+            source fluxes, in degrees.
+        </desc>
+    </s>
+    <s k="seed"><label>Random seed</label>
+        <type name="RandomSeed" default="1"/>
+        <desc>
+            Random number generator seed used for random distributions.
+        </desc>
+    </s>
+</s>

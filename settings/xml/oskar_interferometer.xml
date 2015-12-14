@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<s k="interferometer"><label>Interferometer settings</label>
+    <apps></apps>
+    <desc>
+        These settings are used only when running the interferometer simulation.
+    </desc>
+
+    <s k="channel_bandwidth_hz"><label>Channel bandwidth [Hz]</label>
+        <type name="double" default="0"/>
+        <desc>
+            The channel width, in Hz, used to simulate bandwidth smearing.
+            (Note that this can be different to the frequency increment if
+            channels do not cover a contiguous frequency range.)
+        </desc>
+    </s>
+    <s k="time_average_sec"><label>Time average [sec]</label>
+        <type name="double" default="0"/>
+        <desc>
+            The correlator time-average duration, in seconds, used to simulate
+            time averaging smearing.
+        </desc>
+    </s>
+    <!--
+    <s k="enable_bda"><label>Enable baseline-dependent averaging</label>
+        <type name="bool" default="false"/>
+        <desc>
+            If true, enable baseline-dependent time averaging.
+        </desc>
+    </s>
+    <s k="max_average_duration_sec"><label>Maximum average duration [sec]</label>
+        <depends k="interferometer/enable_bda" v="true"/>
+        <type name="double" default="10.0"/>
+        <desc>
+            The maximum duration allowed, in seconds,
+            for baseline-dependent time averaging.
+        </desc>
+    </s>
+    <s k="max_uvw_distance"><label>Maximum UVW distance [wavelengths]</label>
+        <depends k="interferometer/enable_bda" v="true"/>
+        <type name="double" default="0.0"/>
+        <desc>
+            The maximum distance a baseline is allowed to move,
+            in wavelengths, during an average.
+        </desc>
+    </s>
+    -->
+    <s k="max_time_samples_per_block"><label>Max. time samples per block</label>
+        <!-- <depends k="interferometer/enable_bda" v="false"/> -->
+        <type name="int" default="10"/>
+        <desc>
+            The maximum number of time samples held in memory before being
+            flushed to disk.
+        </desc>
+    </s>
+    <s k="correlation_type"><label>Correlation type</label>
+        <type name="OptionList" default="Cross-correlations">
+            Cross-correlations, Auto-correlations, Both
+        </type>
+        <desc>
+            The type of correlations to produce: either cross-correlations,
+            auto-correlations, or both.
+        </desc>
+    </s>
+    <s k="uv_filter_min"><label>UV range filter min</label>
+        <type name="DoubleRangeExt" default="min">0,MAX,min</type>
+        <desc>
+            The minimum value of the baseline UV length allowed by the filter.
+            <b>Note that visibilities on baseline UV lengths outside this range
+            will not be evaluated!</b>
+        </desc>
+    </s>
+    <s k="uv_filter_max"><label>UV range filter max</label>
+        <type name="DoubleRangeExt" default="max">0,MAX,max</type>
+        <desc>
+            The maximum value of the baseline UV length allowed by the filter.
+            <b>Note that visibilities on baseline UV lengths outside this range
+            will not be evaluated!</b>
+        </desc>
+    </s>
+    <s k="uv_filter_units"><label>UV range filter units</label>
+        <type name="OptionList" default="W">Wavelengths,Metres</type>
+        <desc>The units of the baseline UV length filter values.</desc>
+    </s>
+
+    <import filename="oskar_interferometer_noise.xml" />
+
+    <s k="oskar_vis_filename"><label>Output OSKAR visibility file</label>
+        <type name="OutputFile" default="" />
+        <desc>
+            Path of the OSKAR visibility output file containing the results
+            of the simulation. Leave blank if not required.
+        </desc>
+    </s>
+    <s k="ms_filename"><label>Output Measurement Set</label>
+        <type name="OutputFile" default="" />
+        <desc>
+            Path of the Measurement Set containing the results of the
+            simulation. Leave blank if not required.
+        </desc>
+    </s>
+    <s k="force_polarised_ms">
+        <label>Force polarised Measurement Set</label>
+        <type name="Bool" default="false" />
+        <desc>
+            If <b>True</b>, always write the Measurment Set in polarised format
+            even if the simulation was run in the single polarisation
+            'Scalar' (or Stokes-I) mode. If <b>False</b>, the size of the
+            polarisation dimension in the the Measurement Set will be
+            determined by the simulation mode.
+        </desc>
+    </s>
+</s>

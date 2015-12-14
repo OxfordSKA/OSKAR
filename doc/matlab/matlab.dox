@@ -1,0 +1,277 @@
+/**
+
+\page matlab_interface MATLAB Interface
+
+\latexonly
+\def \docversion{5}
+\endlatexonly
+
+\section matlab_intro Introduction
+
+This document briefly summarises the **experimental** MATLAB interface
+functionality provided by OSKAR. It assumes that OSKAR has already been built
+and installed with the MATLAB build dependency satisfied. Please note that 
+if MATLAB is updated, the OSKAR installation procedure should be repeated to 
+ensure that the version of OSKAR is linked against the correct MATLAB libraries.
+
+\section matlab_config Configuring MATLAB
+
+The OSKAR MATLAB toolbox is a **very experimental** set of MATLAB functions 
+for interfacing with OSKAR data products in a MATLAB workspace.
+ 
+To import this toolbox into MATLAB all that is required is to add the OSKAR 
+toolbox directory to the MATLAB path. By default this toolbox is installed in 
+the following location:
+ 
+\code /usr/local/share/oskar/matlab \endcode
+
+Adding a new MATLAB path can be achieved by using the <b>Set Path...</b>
+option in the File menu of the MATAB interface, or by using the 
+<tt>addPath</tt> command from a MATLAB command window.
+
+Once the OSKAR toolbox has been successfully added, the MATLAB command
+
+\code
+>> what oskar
+\endcode
+
+can be used to list the packages which are available.
+
+In general, functions in the OSKAR toolbox can be run with the following syntax:
+
+\code
+    >> return_values = oskar.package.function(arguments)
+\endcode
+
+\subsection matlab_known_issues Known Issues
+
+\subsubsection matlab_compat Compatibility with MATLAB versions of libstdc++ & libgfortran
+
+On some Linux systems, including Ubuntu, the versions of libstdc++ and 
+libgfortan provided with MATLAB are incompatible to the versions linked by 
+the OSKAR MATLAB interface.
+
+As a temporary work-around, we suggest that the MATLAB installation is 
+modified by updating the symbolic links found in
+<tt>\<MATLAB_ROOT\>/sys/os/glnxa64</tt>, for 64-bit Linux installations 
+(or <tt>\<MATLAB_ROOT\>/sys/os/glnx86</tt>, for 32-bit Linux installations), to 
+the equivalent system installed versions of these libraries. If necessary, 
+this work-around can be easily reverted by changing the symbolic links back 
+to their original targets in the MATLAB installation.
+
+\section matlab_oskar OSKAR MATLAB Functions
+
+The OSKAR toolbox consists of a number of packages, each containing one or more 
+functions and/or classes, listed in the following sections. Usage information 
+for a function can be obtained from within MATLAB by running the function with 
+no arguments.
+
+\subsection matlab_binary_file OSKAR Binary Files
+
+\par [index, headers] = oskar.binary_file.query(\<filename\>) 
+Function to query the contents of an OSKAR binary file, returning a MATLAB 
+cell array index table (in the variable index) describing the contents of 
+the file, as well as an array of structures for each of the headers in the 
+binary file.
+
+\par [record] = oskar.binary_file.read_record(\<filename\>, \<group\>, \<tag\>, index = 0])
+Function to read a specified record from an OSKAR binary file, returning the
+record as a MATLAB structure.
+
+\par [records] = oskar.binary_file.read_group(\<filename\>, \<group\>)
+Function to read a group of records from an OSKAR binary file. The group is 
+returned as an array of record structures.
+
+\par [records] = oskar.binary_file.read_all(\<filename\>)
+Function to read the contents of an OSKAR binary file and return an array of 
+record structures.
+
+\subsection matlab_cuda CUDA Information
+
+\par [info] = oskar.cuda.device_info()
+Function to return a structure of basic information on the current state of
+CUDA devices.
+
+\subsection matlab_image Handling OSKAR Images
+
+\par oskar.image.type (enumeration class)
+Enumeration class used for describing the image type. 
+
+\par oskar.image.transform</b> (enumeration class)
+Enumeration class used for describing the image transform used when making 
+the image.
+
+\par oskar.image.plot(\<image data\>, \<FOV in deg.\>, [figure title])
+Function to create MATLAB image plot labelled according to the specified 
+field of view (FOV). Image data supplied to this function should be in the 
+  form of a square matrix.
+
+\par [settings] = oskar.image.init_settings()
+Initialise a MATLAB OSKAR image settings structure with default values.
+This structure is used to configure the OSKAR imager, run using the function 
+oskar.image.make().
+
+\par [image] = oskar.image.make(\<visibilities\>, \<image settings\>)
+Function to make an image or image cube from a set of visibilities. 
+Visibilities should be supplied in the form of an OSKAR MATLAB visibility 
+structure and image settings are represented as a structure of values as 
+created by oskar.image.init_settings(). The image or image cube returned is 
+in the form of an OSKAR image MATLAB structure.
+
+\par [image] = oskar.image.make(\<uu\>, \<vv\>, \<amps\>, \<frequency in Hz\>, \<no. pixels\>, \<FOV&nbsp;in&nbsp;deg.\>)
+Function to make an image from supplied visibility data. Input arguments 
+consist of the baseline coordinates (uu, vv), in metres, complex visibility 
+amplitudes, the frequency of the observation, in Hz, the number of pixels 
+along each side of the image and the field of view, in degrees. The image 
+created by this function is returned as an OSKAR image MATLAB structure.
+
+\subsection matlab_convert Coordinate Conversion
+
+\par [MJD UTC] = oskar.convert.date_time_to_mjd(\<year\>, \<month\>, \<day\>, \<day_fraction\>)
+Function to convert a date and time, in fractional days, to modified Julian 
+days (UTC).
+
+\par [GAST] = oskar.convert.mjd_to_gast_fast(\<MJD UT1\>)
+Function to convert a modified Julian date to Greenwich apparent sidereal 
+time (GAST).
+
+\subsection matlab_settings Settings Files
+
+\par oskar.settings.set(\<filename\>, \<key\>, \<value\>)
+Function to set the value of the specified settings key in the specified 
+settings file.
+
+\subsection matlab_sky Sky Models
+
+\par [sky] = oskar.sky.load(\<filename\>)
+Reads an ASCII format OSKAR sky model file into an OSKAR sky MATLAB structure.
+
+\par [sky] = oskar.sky.read(\<filename\>)
+Reads an OSKAR binary format sky model into an OSKAR sky MATLAB structure.
+
+\par oskar.sky.write(\<filename\>, \<sky\>)
+Function to write an OSKAR binary sky model file from an OSKAR sky MATLAB 
+structure.
+
+\par oskar.sky.save(\<filename\>, \<sky\>)
+Function to write an OSKAR ASCII sky model file from an OSKAR sky MATLAB 
+structure.
+
+\subsection matlab_vis Visibility Data
+
+\par [vis] = oskar.vis.read(\<file name\>)
+A function that reads an OSKAR visibility binary file into an OSKAR MATLAB 
+visibility workspace structure.
+
+\par oskar.vis.write(\<file name\>, \<vis\>)
+A function that writes an OSKAR visibility binary file from the specified 
+OSKAR MATLAB visibility workspace structure.
+
+\par oskar.vis.plot_amp(\<vis\>, [plot type], [polarisation], [time range], [channel], [baseline range])
+Plots the specified OSKAR MATLAB visibility workspace structure, according 
+to a number of options specified as function arguments.  The plot type 
+option takes a value of 1 or 2; if plot type = 1, a scatter plot of the 
+baseline coordinates (uu, vv) coloured by the absolute value of the complex 
+amplitude is generated; if plot type = 2, a scatter plot of uu-vv distance 
+against complex amplitude is plotted.  Polarisation is a string specifying 
+the polarisation to plot, with allowed values of xx, yy, yx, xy, 
+I, Q, U, or V. The time range, channel and baseline range allow selection 
+of the data to be plotted. By default, time range = [1 vis.num_times], 
+channel = 1, and baseline range = [1 vis.num_baselines].
+
+\par oskar.vis.plot_uv(\<vis\>, [time range], [baseline range])
+Plots the baseline (uu, vv) coordinates of the specified OSKAR MATLAB 
+visibility workspace structure. Command line options for time range and 
+baseline range are optional, and if not specified the entire data set is 
+plotted (i.e. time range = [1 vis.num_times], and 
+baseline range = [1 vis.num_baselines]).
+
+\par [uvw] = oskar.vis.evaluate_baseline_uvw(\<layout file\>, \<lon\>, \<lat\>, \<alt\>, \<RA\>, \<Dec\>, \<start time\>, \<no. times\>, \<dt\>)
+Generates the baseline coordinates for a given station and observation 
+parameters. The station is specified as an OSKAR station layout file at a 
+given longitude, latitude and altitude in degrees and metres respectively. 
+Observation parameters are specified as: right ascension and declination in 
+degrees; start time as a UTC modified Julian date; the number observation 
+steps; and the integration length of each step, in seconds.
+
+\latexonly
+\newpage
+\endlatexonly
+
+\section matlab_example Example: Loading & Imaging Visibility Data
+
+In order to load and image an OSKAR visibility data file, one can use the 
+following steps:
+
+<ol>
+<li>Load an OSKAR visibility data structure into MATLAB:
+
+\code
+>> vis = oskar.vis.read('example.vis');
+\endcode
+
+<li>Make a scatter plot of the baseline coordinates:
+
+\code
+>> scatter(vis.uu(:), vis.vv(:));
+\endcode
+
+\image html uvplot.png "Scatter plot of baseline coordinates."
+\image latex uvplot.png "Scatter plot of baseline coordinates." width=12cm
+
+<li>Create an image settings structure and modify the field-of-view, image size, 
+  and image type settings:
+
+\code
+>> settings = oskar.image.init_settings();
+>> settings.fov_deg = 4;
+>> settings.size = 256;
+>> settings.image_type = oskar.image.type.linear
+\endcode
+
+<li>Invoke the OSKAR imager to make an image cube:
+
+\code
+>> image = oskar.image.make(vis, settings);
+\endcode
+
+\latexonly
+\newpage
+\endlatexonly
+
+<li>Plot the XX dipole response for the first channel:
+
+\code
+>> oskar.image.plot(image.data(:,:,1,1,1), image.fov_ra_deg);
+\endcode
+
+</ol>
+
+\image html plot_image.png "Raw image of XX polarisation for channel 1."
+\image latex plot_image.png "Raw image of XX polarisation for channel 1." width=12cm
+
+\latexonly
+\vskip 1cm
+\endlatexonly
+
+<b>Revision History</b>
+
+<table>
+<tr><th>Revision</th><th>Date</th><th>Modification</th></tr>
+<tr><td>1</td><td>2013-03-04</td>
+    <td>Created from the description of the OSKAR MATLAB interface previously 
+    in the OSKAR Applications document.</td></tr>
+<tr><td>2</td><td>2013-03-05</td>
+    <td>Fixed typos in the syntax for four commands.</td></tr>
+<tr><td>3</td><td>2013-03-11</td>
+    <td>Added a number of comments addressing a number of issues of building 
+    and running the OSKAR MATLAB interface.</td></tr>
+<tr><td>4</td><td>2014-07-16</td>
+    <td>Updated installation path. Fixed name of "vis" package. Added section 
+    describing "convert" package, and moved some existing functions here 
+    from "sky".</td></tr>
+<tr><td>5</td><td>2015-03-18</td>
+    <td>Removed deprecated function oskar.image.read().</td></tr>
+</table>
+
+*/

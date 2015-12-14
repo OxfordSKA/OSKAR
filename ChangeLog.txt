@@ -1,0 +1,471 @@
+2015-06-24  OSKAR-2.6.1
+
+    * Changed Measurement Set WEIGHT and SIGMA columns to use a tiled storage 
+      manager, for an approximate 40% improvement in the write performance.
+
+    * Restored missing settings log to beam pattern FITS headers.
+
+2015-05-29  OSKAR-2.6.0
+
+    * Re-wrote oskar_sim_interferometer application and changed internal
+      visibility format to allow long interferometer simulations to run
+      without running out of host memory. A dedicated host thread is now
+      used to write visibility data, so that computation and file writes are
+      overlapped as much as possible.
+
+    * Re-wrote oskar_sim_beam_pattern application to allow use of multiple
+      GPUs and to respect the maximum chunk size, so that large images can
+      be made without running out of GPU memory. A dedicated host thread is now
+      used to write image data, so that computation and file writes are
+      overlapped as much as possible.
+
+    * Added options to generate beam patterns for specified stations,
+      or all stations in the telescope model.
+
+    * Added option to evaluate beam patterns for specified sky model positions,
+      instead of an image grid.
+
+    * Added option to generate horizon-frame all-sky beam patterns, instead of
+      using equatorial image coordinates.
+
+    * Added options to produce time- and/or channel-averaged beam patterns.
+
+    * Added options to produce average cross-power Stokes I beam patterns
+      for selected stations.
+
+    * Added options to save beam pattern data in plain text files instead of,
+      or as well as, FITS images.
+
+    * Added option to select whether cross-correlations or auto-correlations,
+      or both, should be calculated.
+
+    * Contribution from the w-term was omitted from the bandwidth smearing
+      calculation. This has now been fixed, so the apparent
+      amplitudes of sources far from the phase centre are slightly reduced.
+
+    * Analytical time-average smearing was calculated incorrectly
+      for sources greater than 90 degrees from the phase centre.
+      This has now been fixed, so the apparent amplitudes of sources far
+      from the phase centre are slightly reduced.
+
+    * Fixed an issue which could result in repeated log entries.
+
+    * Fixed time range start in Measurement Set observation table.
+
+    * Added the ability to specify station position errors.
+
+    * Added the ability to use numerically-defined element patterns in
+      scalar mode.
+
+    * Moved option to select polarisation mode into telescope model settings
+      group, so that scalar mode can also be used for beam pattern simulations.
+
+    * Added the ability to use seconds (as well as hours, minutes and seconds)
+      to specify observation length, and the ability to use various
+      date formats (including MJD number and CASA-style date strings) to
+      specify the start time.
+
+    * Moved and renamed option to allow station beam duplication into
+      telescope model group.
+
+    * Added option to disable horizon clip in advanced sky model settings.
+      This can save a wasted check if sources are always above the horizon.
+
+    * Removed deprecated config.txt telescope model file loader.
+
+    * Removed the old orientation.txt telescope model file loader.
+      Replaced this with feed_angle.txt to allow for a more complete
+      specification of feed angles in the future.
+
+    * Removed options to perform explicit time averaging using multiple
+      snapshots, as this was very slow.
+
+    * Removed options to load GSM maps and HEALPix maps in K, as
+      amplitude conversion to Jy was not performed correctly.
+
+    * Removed options to write OSKAR image files, as these are deprecated.
+      (Use FITS files instead.)
+
+    * Switched to using a counter-based pseudo-random number generator
+      instead of cuRAND, for increased flexibility and performance.
+
+    * Added CRC codes to data chunks in binary files.
+
+    * Updated interface to oskar_settings_set binary to unset keys when the
+      value is left empty.
+
+    * Added oskar_vis_upgrade_format application to upgrade visibility files
+      written by older versions of OSKAR to the new file format.
+
+    * Removed oskar_vis_stats application. This functionality is now
+      provided by oskar_vis_summary using the --stats option.
+
+    * Major simplification of system noise settings.
+
+2014-09-09  OSKAR-2.5.1
+
+    * Changed the integer range of random seeds to start at 1 (instead of 0).
+
+    * Changed settings so that beam normalisation is on by default.
+
+    * Further improved efficiency of Measurement Set export, using appropriate
+      storage managers. This has the additional benefit of making the CASA
+      imager faster.
+
+    * Added the ability to concatenate OSKAR visibility files for different
+      observation periods into one Measurement Set as an update to the
+      oskar_vis_to_ms app.
+
+    * Added a -q option to suppress command line output log messages for many
+      of the OSKAR apps.
+
+    * Fixed "out of range" error encountered when making a beam pattern with
+      isotropic elements.
+
+    * Fixed "dimension mismatch" error encountered sometimes when using
+      normalised beams.
+
+    * Fixed the scaling of uncorrelated system noise when used with the
+      Stokes-I only (scalar) mode added in 2.5.0.
+
+2014-07-22  OSKAR-2.5.0
+
+    * Changed settings to use a half-wavelength dipole by default,
+      instead of a geometric dipole.
+
+    * Fixed a problem in the telescope model noise loader that caused it to
+      incorrectly report an error in one situation.
+
+    * Removed option to image interferometer output at end of simulation.
+      (The OSKAR DFT imager is not recommended for general use.)
+
+    * Removed element pattern fitting parameters from telescope model settings.
+
+    * Created new application to fit element pattern data and write spline
+      coefficients to a telescope model in OSKAR binary format.
+      Added new settings group for this.
+
+    * Changed element pattern fitting procedure to use Ludwig-3 coordinate
+      system internally. This generally produces better quality fits for a
+      given number of knots, and eliminates instability near the zenith.
+
+    * Added the ability to specify element pattern data as a function of
+      frequency. The element data closest to the current observing frequency
+      is used.
+
+    * Added the ability to specify element orientations when using
+      numerical element pattern data.
+
+    * Added the ability to specify multiple element types within a station.
+
+    * Added option to use an analytic dipole with a definable length
+      (in metres or wavelengths) as an element pattern.
+
+    * Added option to completely normalise the centre of the station beam
+      to 1.0 each time it is evaluated. This will effectively perform an
+      amplitude calibration for a source at the phase centre.
+
+    * Added option to turn off the station beam completely
+      (use the "isotropic" station type for this).
+
+    * Added scalar mode option (Stokes I only) to interferometer simulator.
+
+    * Added UV range filter for visibility evaluation.
+
+    * Added polarised sky model grid generator.
+
+    * Added a reference frequency which is used to scale the FWHM of Gaussian
+      beams for Gaussian beam station types.
+
+    * Added run log and settings file to Measurement Set HISTORY table.
+      (Run log will now be propagated to images made with CASA.)
+
+    * Improved efficiency of Measurement Set export.
+
+2014-02-25  OSKAR-2.4.0
+
+    * Added ability to specify a set of horizon-based permitted beam directions
+      on a per-station basis.
+
+    * Added ability to save spline data for fitted element patterns back out
+      to the telescope model. Note, however, that the way numerical element
+      pattern data is used will change considerably in future versions.
+
+    * Fixed an issue building the Google unit test library.
+
+    * Changed the behaviour of sky model filters to include the upper bound in
+      flux, and the lower bound in radius. (Previously, both were excluded.)
+
+2013-11-28  OSKAR-2.3.1
+
+    * Fixed an issue building the OSKAR fits library.
+
+    * Updated to Google test framework version 1.7.0
+
+2013-11-26  OSKAR-2.3.0
+
+    * Renamed applications operating on OSKAR format visibility files
+      from oskar_visibilities_* to oskar_vis_*.
+
+    * Renamed MATLAB interface functions to OSKAR format visibility files
+      from oskar.visibilities.* to oskar.vis.*
+
+    * Fixed memory ordering in MATLAB OSKAR binary file interface for
+      COMPLEX_MATRIX types.
+
+    * Fixed a bug that prevented memory from being inserted correctly into
+      blocks greater than 2 GiB in size.
+
+    * Fixed a bug that prevented blocks of binary data larger than 2 GiB from
+      being loaded.
+
+    * Fixed display of large data blocks in oskar_binary_file_query.
+
+    * Fixed incorrect station beam evaluation when using polarised elements
+      in hierarchical stations.
+
+    * Fixed a bug that caused certain visibility noise settings to be ignored.
+
+    * Fixed telescope model loader to set element pattern and system noise data
+      correctly if using a single common station directory.
+
+    * Fixed presence of multiple incorrect rows in DATA_DESCRIPTION and
+      SPECTRAL_WINDOW tables for Measurement Set output.
+
+    * Fixed visibility phase for sources greater than 90 degrees from the
+      phase centre.
+
+    * Removed redundant CORRECTED_DATA and MODEL_DATA columns from
+      Measurement Set output.
+
+    * Added per-source rotation measure to sky model.
+
+    * Added additional meta-data to the OSKAR visibility structure to record
+      telescope and station longitudes and latitudes, as well as nominal
+      station receptor orientations.
+
+    * Added options to specify both image dimensions when making beam patterns.
+
+    * Added a total intensity (Stokes I auto-correlation) beam pattern output
+      mode.
+
+    * Added check for updates when GUI starts.
+
+    * Added warning message if settings file has been edited elsewhere
+      while simultaneously open in the GUI.
+
+    * Added telescope model name, channel bandwidth and time integration
+      values to visibility files.
+
+    * Added percentage time taken for various stages of the simulation to
+      the message log.
+
+    * Added a command line application (oskar_vis_add_noise) to
+      add uncorrelated noise to visibilities.
+
+    * Added application to display a summary of meta-data from an OSKAR
+      visibility binary file (oskar_vis_summary).
+
+    * Added the ability to use separate files to specify station element
+      positions, gain and phase values, apodisation weights and orientations
+      in the telescope model.
+
+    * Added the ability to use station positions in Earth-centred coordinates.
+
+    * Added station type for analytical scalar JVLA dishes, based on the AIPS
+      task PBCOR. (http://www.aips.nrao.edu/cgi-bin/ZXHLP2.PL?PBCOR)
+
+    * Updated options of oskar_image_summary to give the option to display the
+      settings used to create the image.
+
+    * Updated settings for beam pattern generation in order to support the
+      future addition of new beam pattern types.
+
+2013-03-11  OSKAR-2.2.1
+
+    * Fixed a problem that caused compilation to fail on CUDA 1.x architectures.
+
+2013-03-04  OSKAR-2.2.0
+
+    * Fixed a subtle bug that could cause element pattern data to be loaded
+      incorrectly in some telescope configurations, where element pattern data
+      are present for one station but not for others.
+
+    * Fixed incorrect 'power' filename suffix on voltage beam pattern images.
+
+    * Changed sky model input file settings to make better use of settings
+      groups.
+
+    * Changed minimum CMake version requirement from 2.8 to 2.6.
+
+    * Improved robustness of random-power-law source generators.
+
+    * Improved reported error message if visibility file cannot be opened.
+
+    * Improved reported error messages if telescope model cannot be loaded.
+
+    * Improved chunking of data for complex-to-real DFT, so CUDA kernels
+      should no longer time-out when imaging large visibility files.
+
+    * Added the ability to load a telescope model containing only one station
+      directory, which will be copied for all remaining stations. This also
+      applies recursively for sub-stations in sub-directories where relevant.
+
+    * Added support for hierarchical beamforming modes, using nested stations.
+
+    * Added support for a pointing file, which can be used to override station
+      beam directions.
+
+    * Added options to override reference frequency and spectral index
+      data for all sources in the sky model.
+
+    * Added options to load HEALPix-format FITS files (with RING ordering)
+      as a sky model component.
+
+    * Added (sky model) option to remove sources for which Gaussian width
+      solutions have failed.
+
+    * Added the ability to filter sky model source fluxes after the scale by
+      spectral index. This is done on a per-channel basis.
+
+    * Added the ability to specify the amplitude of points when specifying
+      generated HEALPix source grids.
+
+    * Updated the mex function which reads OSKAR binary tag groups so that
+      it is possible to specify a user index from which to load the group.
+
+    * Updated mex function log and usage messages.
+
+2012-11-20  OSKAR 2.1.1-beta
+
+    * Fixed a bug in the MATLAB sky model load and save functions which
+      caused the reference frequency and spectral index columns to be swapped.
+
+    * Fixed a bug which set the minimum flux for the random power law generator
+      filter to that used for the random broken power law generator filter.
+
+    * Added option to use all CUDA devices found on the system, instead of
+      specifying the list of device IDs. This is now the default behaviour.
+
+2012-10-23  OSKAR 2.1.0-beta
+
+    * Fixed a bug which caused visibility data from sky model chunks containing
+      no sources to be accumulated incorrectly.
+
+    * Fixed a bug which caused a list of CUDA device IDs to be ignored if
+      specified inside quotes.
+
+    * Fixed a bug in the OSKAR imager where selection of certain time and
+      channel ranges incorrectly resulted in an error message, making it
+      impossible to image a subset of the data cube.
+
+    * Fixed simulation of bandwidth smearing for extended sources.
+
+    * Added options to allow time-average smearing to be performed analytically.
+
+    * Added options and updated the telescope model to allow uncorrelated
+      noise to be added to the visibility data on a per-station basis.
+
+    * Added options to allow an image to be made away from the observation
+      phase centre.
+
+    * Added options to allow an element pattern to have a cosine or Gaussian
+      tapering function.
+
+    * Added MATLAB function for plotting of visibility data.
+
+    * Removed message printing when fitting ellipses to Gaussian sources, as
+      this could result in an unhelpful number of warning messages.
+
+    * Updated all telescope model settings for improved clarity.
+
+    * Updated options for writing image files.
+
+    * The settings GUI now allows for options to be disabled based on the
+      value of another option. The display of various settings has been updated
+      to make use of this facility.
+
+2012-07-27  OSKAR 2.0.4-beta
+
+    * Fixed a problem encountered when loading a Measurement Set in CASA
+      containing only one frequency channel.
+
+    * Fixed a problem encountered when attempting to load an invalid OSKAR
+      binary file.
+
+    * Fixed uncaught exceptions in simulation applications.
+
+    * Added the ability to load FITS images directly as a sky model.
+
+    * Added a binary utility to display CUDA system information.
+
+    * Added a view filter in the GUI to show and highlight only settings of
+      interest.
+
+    * Removed dependency on main OSKAR library from widgets library and GUI.
+
+2012-06-19  OSKAR 2.0.3-beta
+
+    * Fixed a bug that could be encountered when evaluating a station beam
+      using numerical element pattern data, with incorrect use of work
+      buffers.
+
+    * Fixed a build system bug related to finding CBLAS.
+
+    * Added extra parameters to the build system that can be used to override
+      the location of a number of library dependencies.
+
+    * Added a binary utility to convert an OSKAR visibility file to a
+      Measurement Set.
+
+    * Added a binary utility to query the contents of an OSKAR binary file.
+
+    * Added help dialog with link to documentation to the OSKAR GUI.
+
+    * Updated visibility structure and OSKAR binary file to hold station
+      coordinates, to be more self-contained.
+
+2012-06-13  OSKAR 2.0.2-beta
+
+    * Embedded simulation log in output files.
+
+    * Added run progress dialog to show log in GUI, from which simulations can
+      be cancelled.
+
+    * Improved spline fitting procedure and updated default fitting parameters.
+
+    * Updated simulation GUI close event behaviour to prompt if there are any
+      unsaved changes.
+
+    * Updated settings interface for the output of beam pattern images to
+      allow the output of power (amplitude), phase and complex (voltage)
+      patterns.
+
+    * Updated the colour and formatting of options in the settings model used
+      for the OSKAR GUI in order to highlight the various types of settings
+      (required options, user specified values and defaults).
+
+    * Improved the logic used in the display of the GUI (settings model)
+      right-click menu.
+
+    * Updated the CMake build system to improve compiler compatibility /
+      portability when building in the default (release) mode.
+
+2012-05-15  OSKAR 2.0.1-beta
+
+    * Fixed polarisation simulation by changing element order of R and G Jones
+      matrices. R is now a standard 2D rotation matrix, and G has elements
+      ordered theta-phi, rather than phi-theta.
+
+    * Fixed handling of settings parameters when using sky model flux filters.
+
+    * Fixed logic checks on simulation output file settings.
+
+    * Added binary utilities to modify and inspect settings files from
+      command line or shell scripts.
+
+    * Added message box in GUI to indicate when simulations are running.
+
+2012-04-25  OSKAR 2.0.0-beta
+
+    * First pre-release.

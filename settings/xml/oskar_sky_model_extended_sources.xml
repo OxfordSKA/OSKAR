@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<s k="extended_sources"><label>Extended source settings</label>
+    <s k="FWHM_major">
+        <label>Major axis FWHM [arcsec]</label>
+        <type name="double" default="0.0" />
+        <desc>
+            Major axis FWHM override of all sources in this group, 
+            in arc seconds.
+        </desc>
+    </s>
+    <s k="FWHM_minor">
+        <label>Minor axis FWHM [arcsec]</label>
+        <type name="double" default="0.0" />
+        <desc>
+            Minor axis FWHM override of all sources in this group, 
+            in arc seconds.
+        </desc>
+    </s>
+    <s k="position_angle">
+        <label>Position angle [deg]</label>
+        <type name="double" default="0.0" />
+        <desc>
+            Position angle override of all extended sources in this 
+            group (from North to East), in degrees.
+        </desc>
+    </s>
+</s>

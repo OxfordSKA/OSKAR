@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Array pattern settings -->
+<s k="array_pattern">
+    <label>Array pattern settings</label>
+
+    <s k="enable">
+        <label>Enable array pattern</label>
+        <type name="bool" default="true" />
+        <desc>
+            If true, then the contribution to the station
+            beam from the array pattern (given by beamforming
+            the antennas in the station) is evaluated. If
+            false, then the array pattern is ignored.
+        </desc>
+    </s>
+
+    <s k="normalise">
+        <label>Normalise array pattern</label>
+        <type name="bool" default="false" />
+        <desc>
+            If true, the amplitude of each station beam will
+            be divided by the number of antennas in the
+            station; if false, then this normalisation is
+            not performed. Note, however, that global beam
+            normalisation is still possible by enabling the option labeled
+            <i>'Normalise beams at phase centre'</i>.
+        </desc>
+        <!--
+        This is horrible need a better way to to
+        define depends key values...
+        - maybe have a ref attribute on items that can be used?
+        i.e.
+            <s k="..." ref="dep:tel1>
+            ...
+            ...
+            <s ...>
+                <depends r="dep:tel1" v="true"/>
+            </s>
+            Note r="" instead of k="" to signify a reference.
+        -->
+        <depends
+            k="telescope/aperture_array/array_pattern/enable"
+            v="true" />
+    </s>
+
+    <!-- Array element override settings. -->
+    <!--
+        FIXME: This keyword name is potentially very confusing given
+        the use of element in element pattern
+     -->
+    <s k="element">
+        <label>Element settings (overrides)</label>
+        <depends k="telescope/aperture_array/array_pattern/enable" v="true" />
+        <!--
+        <s k="apodisation_type"><label>Apodisation type</label>
+            <type name="OptionList">None</type>
+            <desc></desc>
+        </s>
+        -->
+        <!-- FIXME? Remove 'Element' from start of these labels -->
+        <!-- FIXME? double ... UnsignedDouble ? -->
+        <s k="gain">
+            <label>Element gain</label>
+            <type name="double" default="0.0" />
+            <desc>
+                Mean element amplitude gain factor. If set (and
+                &amp;gt; 0.0), this will override the contents of the
+                station files.
+            </desc>
+        </s>
+        <s k="gain_error_fixed">
+            <label>Element gain std.dev. (systematic)</label>
+            <type name="double" default="0.0" />
+            <desc>
+                Systematic element amplitude gain standard deviation.
+                If set, this will override the contents of the station
+                files.
+            </desc>
+        </s>
+        <s k="gain_error_time">
+            <label>Element gain std.dev. (time-variable)</label>
+            <type name="double" default="0.0" />
+            <desc>
+                Time-variable element amplitude gain standard
+                deviation. If set, this will override the contents of
+                the station files.
+            </desc>
+        </s>
+        <s k="phase_error_fixed_deg">
+            <label>Element phase std.dev. (systematic) [deg]</label>
+            <type name="double" default="0.0" />
+            <desc>
+                Systematic element phase standard deviation. If set,
+                this will override the contents of the station files.
+            </desc>
+        </s>
+        <s k="phase_error_time_deg">
+            <label>Element phase std.dev. (time-variable) [deg]</label>
+            <type name="double" default="0.0" />
+            <desc>
+                Time-variable element phase standard deviation. If set,
+                this will override the contents of the station files.
+            </desc>
+        </s>
+        <s k="position_error_xy_m">
+            <label>Element (x,y) position std.dev. [m]</label>
+            <type name="double" default="0.0" />
+            <desc>
+                The standard deviation of the antenna xy-position
+                uncertainties. If set, this will override the contents
+                of the station files.
+            </desc>
+        </s>
+        <s k="x_orientation_error_deg">
+            <label>Element X-dipole orientation std.dev. [deg]</label>
+            <type name="double" default="0.0" />
+            <desc>
+                The standard deviation of the antenna X-dipole
+                orientation error. If set, this will override the
+                contents of the station files.
+            </desc>
+        </s>
+        <s k="y_orientation_error_deg">
+            <label>Element Y-dipole orientation std.dev. [deg]</label>
+            <type name="double" default="0.0" />
+            <desc>
+                The standard deviation of the antenna Y-dipole
+                orientation error. If set, this will override the
+                contents of the station files.
+            </desc>
+        </s>
+        <s k="seed_gain_errors">
+            <label>Random seed (systematic gain errors)</label>
+            <type name="RandomSeed" default="1" />
+            <desc>
+                Random number generator seed used for systematic gain
+                error distribution.
+            </desc>
+        </s>
+        <s k="seed_phase_errors">
+            <label>Random seed (systematic phase errors)</label>
+            <type name="RandomSeed" default="1" />
+            <desc>
+                Random number generator seed used for systematic
+                phase error distribution.
+            </desc>
+        </s>
+        <s k="seed_time_variable_errors">
+            <label>Random seed (time-variable errors)</label>
+            <type name="RandomSeed" default="1" />
+            <desc>
+                Random number generator seed used for time variable
+                error distributions.
+            </desc>
+        </s>
+        <s k="seed_position_xy_errors">
+            <label>Random seed (x,y position errors)</label>
+            <type name="RandomSeed" default="1" />
+            <desc>
+                Random number generator seed used for antenna
+                xy-position error distribution.
+            </desc>
+        </s>
+        <s k="seed_x_orientation_error">
+            <label>Random seed (X-dipole orientation errors)</label>
+            <type name="RandomSeed" default="1" />
+            <desc>
+                Random number generator seed used for antenna X dipole
+                orientation error distribution.
+            </desc>
+        </s>
+        <s k="seed_y_orientation_error">
+            <label>Random seed (Y-dipole orientation errors)</label>
+            <type name="RandomSeed" default="1" />
+            <desc>
+                Random number generator seed used for antenna Y dipole
+                orientation error distribution.
+            </desc>
+        </s>
+    </s> <!-- END: Array element override settings -->
+</s>

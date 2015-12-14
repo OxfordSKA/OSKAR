@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Element pattern settings. -->
+<s k="element_pattern">
+    <label>Element pattern settings</label>
+
+    <s k="enable_numerical">
+        <label>Enable numerical patterns if present</label>
+        <type name="bool" default="true" />
+        <desc>
+            If <b>true</b>, make use of any available numerical
+            element pattern files. If numerical pattern data are
+            missing, the functional type will be used instead.
+        </desc>
+    </s>
+
+    <s k="functional_type">
+        <label>Functional pattern type</label>
+        <type name="OptionList" default="Dipole">
+            Dipole,
+            Geometric dipole,
+            Isotropic (unpolarised)
+        </type>
+        <desc>
+            The type of functional pattern to apply to the elements,
+            if not using a numerically-defined pattern.
+        </desc>
+    </s>
+    <s k="dipole_length"><label>Dipole length</label>
+        <type name="double" default="0.5" />
+        <desc>The length of the dipole, if using dipole elements.</desc>
+        <depends
+            k="telescope/aperture_array/element_pattern/functional_type"
+            value="Dipole"/>
+    </s>
+    <s k="dipole_length_units"><label>Dipole length units</label>
+        <type name="OptionList" default="Wavelengths" >
+            Wavelengths,Metres
+        </type>
+        <desc>
+            The units used to specify the dipole length (metres or
+            wavelengths), if using dipole elements.
+        </desc>
+        <depends
+            k="telescope/aperture_array/element_pattern/functional_type"
+            value="Dipole"/>
+    </s>
+
+    <!-- Element taper group -->
+    <s k="taper">
+        <label>Tapering options</label>
+
+        <s k="type"><label>Tapering type</label>
+            <type name="OptionList" default="None">
+                None,Cosine,Gaussian
+            </type>
+            <desc>
+                The type of tapering function to apply to the element
+                pattern.
+            </desc>
+        </s>
+        <s k="cosine_power"><label>Cosine power</label>
+            <type name="double" default="1.0"/>
+            <desc>
+                If a cosine element taper is selected, this setting
+                gives the power of the cosine(theta) function.
+            </desc>
+            <depends k="telescope/aperture_array/element_pattern/taper/type"
+                v="Cosine" />
+        </s>
+        <s k="gaussian_fwhm_deg"><label>Gaussian FWHM [deg]</label>
+            <type name="double" default="45.0"/>
+            <desc>
+                If a Gaussian element taper is selected, this setting
+                gives the full-width half maximum value of the
+                Gaussian, in degrees.
+            </desc>
+            <depends k="telescope/aperture_array/element_pattern/taper/type"
+                v="Gaussian" />
+        </s>
+    </s> <!-- END taper group -->
+
+</s> <!-- END element pattern group -->

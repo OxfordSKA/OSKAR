@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<s key="simulator">
+    <label>Simulator settings</label>
+    <desc>These parameters affect the operation of the software.</desc>
+
+    <s key="double_precision">
+        <label>Use double precision</label>
+        <type name="bool" default="true" />
+        <desc>Determines whether double precision arithmetic is used.</desc>
+    </s>
+    <s key="keep_log_file">
+        <label>Keep log file</label>
+        <type name="bool" default="false" />
+        <desc>
+            Determines whether a log file of the run will be kept on
+            disk. Note that even if this option is set to false, log files will
+            be stored in any OSKAR binary data files produced by the simulator.
+        </desc>
+    </s>
+    <s key="write_status_to_log_file">
+        <label>Write status messages to log file</label>
+        <type name="bool" default="false" />
+        <desc>If set, write status (progress) messages to the log file.</desc>
+    </s>
+    <s key="max_sources_per_chunk">
+        <label>Max. number of sources per chunk</label>
+        <type name="IntPositive" default="16384" />
+        <desc>
+            Maximum number of sources or pixels processed concurrently on a 
+            single GPU. Reduce this if simulations are running out of GPU 
+            memory.
+        </desc>
+    </s>
+    <s key="cuda_device_ids">
+        <label>CUDA device IDs to use</label>
+        <type name="IntListExt" default="all">all</type>
+        <desc>
+            A comma-separated string containing device (GPU) IDs to
+            use on a multi-GPU system, or 'all' to use all devices.
+        </desc>
+    </s>
+</s>

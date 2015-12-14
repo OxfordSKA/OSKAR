@@ -1,0 +1,30 @@
+
+TTL v1.1
+
+I. New
+
+New in this release is the tup namespace.
+Its semantic is very close to boost::tuples.
+The tup namespace contains following templates:
+	ttl::tup::tuple<>
+	ttl::tup::get<>
+	ttl::tup::length<>
+	ttl::tup::element<>
+	
+Usage:
+ttl::tup::tuple<int, double> my_tuple;
+
+my_tuple t(1, 2.3);
+int n = ttl::tup:get<0>(t);
+double x = ttl::tup:get<1>(t);
+int l = ttl::tup::length<my_tuple>::value;
+assert(l==2);
+
+ttl::tup::element<N, Tuple>::type //type of the Nth element in Tuple.
+
+
+II. Bug Fixes
+
+Fixed problems with 'const' modifiers in variant.
+Now if variant is const, the const modifier is
+propagated to the return types of the var::get<> function.

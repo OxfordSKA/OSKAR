@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<s k="ionosphere">
+    <label>Ionospheric model (Z-Jones) settings</label>
+    <desc>
+        Settings describing a simple, 2-dimensional ionospheric phase screen
+        model.
+    </desc>
+
+    <s k="enable"><label>Enable</label>
+        <type name="bool" default="false" />
+        <desc>Enable evaluation of the Z-Jones when performing interferometric
+            simulations.</desc>
+    </s>
+
+    <s k="min_elevation_deg"><label>Minimum elevation (deg)</label>
+        <type name="double" default="0.0" />
+        <desc>Minimum elevation for which ionospheric phase values are
+            evaluated. Below this specified elevation, no ionospheric phase
+            values are applied. This setting is provided as TEC screen
+            evaluation functions may be poorly defined very far away from
+            the phase centre.</desc>
+        <depends k="ionosphere/enable" v="true" />
+    </s>
+
+    <s k="TEC0"><label>Zero offset TEC value</label>
+        <type name="double" default="1.0" />
+        <desc>The underlying value of constant TEC. This is used to scale
+            the differential TEC values evaluated for the Z-Jones phase
+            calculation.</desc>
+        <depends k="ionosphere/enable" v="true" />
+    </s>
+
+    <s k="TID_file"><label>TID parameter file(s)</label>
+        <type name="InputFileList" default="" />
+        <desc>Comma separated list to filename paths of OSKAR TID parameter
+            files.</desc>
+        <depends k="ionosphere/enable" v="true" />
+    </s>
+
+    <!-- TEC image settings -->
+    <s k="TECImage">
+        <label>TEC image settings</label>
+        <desc>Settings for creating an image of the Ionospheric
+            TEC screen as defined by the Ionospheric model settings.</desc>
+        <depends k="ionosphere/enable" v="true" />
+        <s k="station_idx"><label>Station index</label>
+            <type name="UInt" default="0" />
+            <desc>Station Index for which to calculate the TEC screen.</desc>
+        </s>
+        <s k="beam_centred"><label>Centre TEC image on the beam direction</label>
+            <type name="bool" default="true" />
+            <desc>Centre the TEC image on the station (primary) beam
+                direction. This is the direction defined by the observation
+                settings.</desc>
+        </s>
+        <s k="fov_deg"><label>Image Field of view (deg)</label>
+            <type name="UnsignedDouble" default="0.0" />
+            <desc>Field of view of the TEC image, in degrees.</desc>
+        </s>
+        <s k="size"><label>Image size (number of pixels)</label>
+            <type name="UInt" default="0" />
+            <desc>Number of pixels along each dimension of the TEC image.</desc>
+        </s>
+        <s k="filename"><label>Output file name</label>
+            <type name="OutputFile" default="" />
+            <desc>The output file name path of the TEC image produced. In order
+                for the image file to be produced at least one of FITS or
+                OSKAR image format selections must be enabled.</desc>
+        </s>
+        <s k="save_fits"><label>Save image as FITS format</label>
+            <type name="bool" default="true" />
+            <desc>Save the TEC image in FITS format.</desc>
+        </s>
+    </s> <!-- end of TEC image settings -->
+
+
+    <!-- Pierce point output settings -->
+    <s k="pierce_points"><label>Pierce point settings</label>
+        <s k="filename"><label>Pierce point file name</label>
+            <type name="OutputFile" />
+            <desc>Pierce point file name.</desc>
+        </s>
+    </s>
+
+    <!-- KML ouput settings -->
+    <s k="KML"><label>KML settings</label>
+    </s>
+
+</s>

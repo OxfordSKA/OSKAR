@@ -1,0 +1,721 @@
+/**
+
+\page binary_file Binary File Format
+
+\latexonly
+\def \docversion{6}
+\endlatexonly
+
+\section binary_intro Introduction
+
+This document describes the binary file format used by OSKAR applications.
+It is intended to be used for reference only, since there are library
+functions to read and write data files in this format. 
+
+\section binary_desc Format Description
+
+An OSKAR binary file contains a fixed-length *file header*, and a sequence of
+variable-length data *blocks*, each of which has a fixed-length header *tag*
+to identify its contents and to record its length. The combination
+of a data block and its tag is labelled a *chunk*. These are 
+\ref binary_block_structure "shown in the diagram below".
+
+\anchor binary_block_structure
+\image html file_structure.png "Overall structure of data in an OSKAR binary file."
+\image latex file_structure.pdf "Overall structure of data in an OSKAR binary file." width=15cm
+
+The size of each data block is stored in the tag, so that any program
+reading such a file can simply skip over any data blocks which are not of
+interest. However, as blocks can appear in any order, it is sensible for the
+program reading the file to construct a local tag index first, to help 
+locate the required data. The *payload* within each data block can be a 
+single value, or an array of values in the native byte order of the system 
+that wrote the file, and the byte ordering is recorded in the block header. 
+If the payload array is multi-dimensional, other data chunks within the
+file must be used to record the dimension sizes.
+
+\section binary_header File Header
+
+The file header is 64 bytes long. In binary format version 2 or above, 
+only the first 10 bytes are used: the remainder of the header is reserved.
+
+<table>
+<tr><th>Offset (bytes)</th> <th>Length (bytes)</th> <th>Description</th> </tr>
+<tr><td>0</td><td>9</td>
+    <td>The ASCII string "OSKARBIN", with trailing zero.</td></tr>
+<tr><td>9</td><td>1</td>
+    <td>The OSKAR binary format version.</td></tr>
+<tr><td>10</td><td>1</td>
+    <td><i>Reserved. (In binary format version 1: If data blocks are written 
+    as little endian, 0; else 1.)</i></td></tr>
+<tr><td>11</td><td>1</td>
+    <td><i>Reserved. (In binary format version 1: Size of void*
+    in bytes.)</i></td></tr>
+<tr><td>12</td><td>1</td>
+    <td><i>Reserved. (In binary format version 1: Size of int 
+    in bytes.)</i></td></tr>
+<tr><td>13</td><td>1</td>
+    <td><i>Reserved. (In binary format version 1: Size of long int 
+    in bytes.)</i></td></tr>
+<tr><td>14</td><td>1</td>
+    <td><i>Reserved. (In binary format version 1: Size of float 
+    in bytes.)</i></td></tr>
+<tr><td>15</td><td>1</td>
+    <td><i>Reserved. (In binary format version 1: Size of double 
+    in bytes.)</i></td></tr>
+<tr><td>16</td><td>4</td>
+    <td><i>Reserved. (In binary format version 1: The OSKAR_VERSION as a 
+    little-endian, 4-byte integer.)</i></td></tr>
+<tr><td>20</td><td>44</td><td><i>Reserved. (Must be 0.)</i></td></tr>
+</table>
+
+The OSKAR binary format version (at byte offset 9) is currently 2.
+This version number will only change if the underlying header or chunk
+structure is modified.
+
+
+\section binary_chunk_structure Chunk Structure
+
+The \ref binary_chunk_structure_fig "diagram below" gives an overview of all 
+the possible elements that may be present within a chunk. 
+
+\anchor binary_chunk_structure_fig
+\image html chunk_structure.png "Structure of a data chunk, and its relation to the rest of the file."
+\image latex chunk_structure.pdf "Structure of a data chunk, and its relation to the rest of the file." width=16cm
+
+Essentially, the *payload* is the part of the chunk that contains the actual
+data. The payload is embedded within the variable-length data block.
+Fields within the fixed-length tag, or block header (described in the 
+\ref binary_tag "following section"), particularly the 
+\ref binary_chunk_flags "chunk flags" byte, determine how 
+the rest of the data should be interpreted.
+
+All bytes in the chunk that precede the payload are used to identify it, 
+so they are classed as metadata. A
+\ref binary_crc_code "CRC (cyclic redundancy check) code" may be present 
+after the payload to allow the chunk to be checked for data corruption if 
+the binary format version is 2 or greater. 
+The CRC code was not present in binary format version 1.
+
+As indicated in the diagram above, the total block length will be the same 
+as the length of the payload if the group name and tag name do not 
+exist, and if there is no CRC code present at the end of the chunk.
+
+\latexonly
+\newpage
+\endlatexonly
+
+\subsection binary_tag Tag (Block Header)
+
+Every data block in the file is preceded by a tag, which is a structure 20
+bytes long. The payload of the data block following the tag must be uniquely 
+identified within the file by a combination of the group ID, tag ID and index. 
+The two identifiers will take different forms depending on whether the tag 
+is "standard" or "extended," and this is specified by the 
+\ref binary_chunk_flags "chunk flags". A user-specified index can be used to 
+distinguish between multiple copies of the same tag type within a file, and 
+should be set to 0 if this is not required. The differences between the two 
+tag types are detailed in \ref binary_tag_standard and \ref binary_tag_extended.
+
+<table>
+<tr><th>Offset (bytes)</th><th>Length (bytes)</th><th>Description</th></tr>
+<tr><td>0</td><td>1</td>
+    <td>0x54 (ASCII 'T')</td></tr>
+<tr><td>1</td><td>1</td>
+    <td>0x40 + \<OSKAR binary format version number\><br>
+    (ASCII 'A', 'B', etc.)</td></tr>
+<tr><td>2</td><td>1</td>
+    <td>0x47 (ASCII 'G')</td></tr>
+<tr><td>3</td><td>1</td>
+    <td>Size of \ref binary_data_type "one element of payload data" in bytes.
+    (<i>In binary format version 1, this byte was 0.</i>)</td></tr>
+<tr><td>4</td><td>1</td>
+    <td>\ref binary_chunk_flags "Chunk flags".</td></tr>
+<tr><td>5</td><td>1</td>
+    <td>\ref binary_data_type "Data type code" of the payload.</td></tr>
+<tr><td>6</td><td>1</td>
+    <td>The group ID, if not an extended tag;
+    else the group name size in bytes.</td></tr>
+<tr><td>7</td><td>1</td>
+    <td>The tag ID, if not an extended tag; 
+    else the tag name size in bytes.</td></tr>
+<tr><td>8</td><td>4</td>
+    <td>User-specified index, as little-endian 4-byte integer.</td></tr>
+<tr><td>12</td><td>8</td>
+    <td>Block size in bytes, as little-endian 8-byte integer.
+    This is the total number of bytes until the next tag.</td></tr>
+</table>
+
+\subsubsection binary_tag_identifier Tag Identifier (Bytes 0-2)
+
+The first three bytes are used to identify the structure as a tag. The byte at
+offset 0 is 0x54 (ASCII 'T'), the byte at offset 1 may be 0x41 or 0x42
+(ASCII 'A' or 'B' in format versions 1 and 2, respectively), and the byte 
+at offset 2 is 0x47 (ASCII 'G'). In binary format version 1, 
+the byte at offset 3 was 0, but this has now been repurposed to hold the
+size of one element of payload data of the specified 
+\ref binary_data_type "data type".
+
+\subsubsection binary_chunk_flags Chunk Flags (Byte 4)
+
+The bits of the chunk flags at byte offset 4 have the following meanings:
+
+<table>
+<tr><th>Bit</th><th>Meaning when set</th></tr>
+<tr><td>0-4</td><td><i>Reserved. (Must be 0.)</i></td></tr>
+<tr><td>5</td>
+    <td>Payload data is in big-endian format.
+    (If clear, it is in little-endian format.)</td></tr>
+<tr><td>6</td>
+    <td>A little-endian 4-byte CRC-32C code for the chunk is present 
+    after the payload. (If clear, no CRC code is present.)</td></tr>
+<tr><td>7</td>
+    <td>Tag is extended. (If clear, this is a standard tag.)</td></tr>
+</table>
+
+\latexonly
+\newpage
+\endlatexonly
+
+\subsubsection binary_data_type Payload Data Type (Byte 5)
+
+The data type field at byte offset 5 is used to identify the type of data 
+in each element of the payload array. The bits of this byte have the 
+following meanings:
+
+<table>
+<tr><th>Bit</th><th>Meaning when set</th></tr>
+<tr><td>0</td><td>Char type (1 byte), used also for string data.</td></tr>
+<tr><td>1</td><td>Integer type (normally 4 bytes).</td></tr>
+<tr><td>2</td>
+    <td>Single-precision floating point type (normally 4 bytes).</td></tr>
+<tr><td>3</td>
+    <td>Double-precision floating point type (normally 8 bytes).</td></tr>
+<tr><td>4</td><td><i>Reserved. (Must be 0.)</i></td></tr>
+<tr><td>5</td>
+    <td>Complex flag: data consists of a pair of values that describe
+    real and imaginary components. The real part is given first, then the 
+    imaginary part.</td></tr>
+<tr><td>6</td>
+    <td>Matrix flag: data consists of four values that describe a 2x2 matrix.
+    For a matrix written as
+    \f$ \left[\begin{array}{cc} a & b \\ c & d \\ \end{array} \right] \f$, 
+    the order of the values is a, b, c, d.</td></tr>
+<tr><td>7</td><td><i>Reserved. (Must be 0.)</i></td></tr>
+</table>
+
+Note that bits 5-6 are used to specify compound types with bits 2-3: so, for 
+example, a double-precision complex matrix type would be represented as 
+(binary) 01101000 = (decimal) 104. If the binary format version is 2, the 
+byte at offset 3 will give the size in bytes of one (compound) element of 
+payload data.
+
+\subsection binary_tag_types Tag Types
+
+\subsubsection binary_tag_standard Standard Tags
+
+A standard tag has both the group ID and tag ID specified as 8-bit integer 
+values, which are found at byte offsets 6 and 7 in the tag or block header.
+The group name and tag name fields will not exist at the start of the 
+block in this case.
+
+There can be a maximum of 256 different group types, and a maximum of 256 
+tags per group, so the total number of unique tag types supported for 
+standard tags is 65536. All data files written by current versions of 
+OSKAR applications only use standard tag identifiers.
+
+\subsubsection binary_tag_extended Extended Tags
+
+If the tag is an extended tag, then the group ID and tag ID are specified 
+as strings rather than 8-bit codes: extended tags in an OSKAR binary file have 
+the group name and then the tag name written as ASCII 8-bit character strings 
+immediately after the main tag structure itself. Both strings must be less 
+than 255 characters long, and both will include a null terminator. The length of 
+the group ID string and tag ID string, including the null terminators, will be 
+available at (respectively) byte offsets 6 and 7 in the tag header.
+
+\subsection binary_crc_code CRC Code
+
+The little-endian 4-byte CRC code after the payload, present in binary 
+format versions greater than 1, should be used to check for data corruption 
+within the chunk. The CRC is computed using all bytes from the start of the 
+chunk (including the tag) until the end of the payload, using 
+the "Castagnoli" CRC-32C reversed polynomial represented by 0x82F63B78.
+
+\note The block size in the tag is the total number of bytes until 
+the next tag, including any extended tag names and CRC code.
+
+\section binary_standard_tags Standard Tag Groups
+
+This section lists the tag identifiers found in various OSKAR binary
+format files.
+
+\subsection binary_tag_metadata Standard Meta-Data Tags
+
+Tags in this group have a group ID of 1.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Date and time of file creation [string].
+| 2      | Version of OSKAR that created the file [string].
+| 3      | Username of user that created the file [string].
+| 4      | Current working directory for application that created the file [string].
+
+\htmlonly <hr /> \endhtmlonly
+
+\subsection binary_tag_settings Settings Tags
+
+Tags in this group have a group ID of 3.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Path to settings file [string].
+| 2      | Settings file contents [string].
+
+\htmlonly <hr /> \endhtmlonly
+
+\subsection binary_tag_run Run Information Tags
+
+Tags in this group have a group ID of 4.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Run log [string].
+
+\htmlonly <hr /> \endhtmlonly
+
+\latexonly
+\clearpage
+\endlatexonly
+
+\subsection binary_tag_vis Visibility Data Tags (Deprecated)
+
+\latexonly
+{\color{red}
+\endlatexonly
+
+\attention
+Note that visibility data tags in this group are deprecated.
+The OSKAR \ref binary_tag_vis_header "Visibility Header" and
+\ref binary_tag_vis_block "Visibility Block" should be used instead. 
+This section is provided for historical reasons only, 
+and will be removed in a future version.
+
+\latexonly
+} % end color{red}
+{\color{gray}
+\endlatexonly
+
+Tags in this group have a group ID of 5.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Number of channels [int].
+| 2      | Number of times [int].
+| 3      | Number of baselines [int].
+| 4      | Dimension order of visibility data [array, int(4)]. (See \ref vis_dim_order "Visibility Dimension Order", below.)
+| 5      | Data type of coordinate arrays [int]. (See \ref binary_data_type "Payload Data Type")
+| 6      | Data type of visibility data array [int]. (See \ref binary_data_type "Payload Data Type")
+| 7      | Start frequency, in Hz [double].
+| 8      | Frequency increment, in Hz [double].
+| 9      | Observation start time, as MJD(UTC) [double].
+| 10     | Time increment, in seconds [double].
+| 11     | Polarisation type [int]. (0 = none, 1 = linear)
+| 12     | Unit of baseline coordinates [int]. (1 = metres)
+| 13     | Baseline UU-coordinates [array; type given by tag ID 5].
+| 14     | Baseline VV-coordinates [array; type given by tag ID 5].
+| 15     | Baseline WW-coordinates [array; type given by tag ID 5].
+| 16     | Complex visibility amplitudes [array; type given by tag ID 6].
+| 17     | Phase centre Right Ascension [double].
+| 18     | Phase centre Declination [double].
+| 19     | Number of stations [int].
+| 20     | Unit of station coordinates [int]. (1 = metres)
+| 21     | Station X-coordinates in ECEF frame [array; type given by tag ID 5].
+| 22     | Station Y-coordinates in ECEF frame [array; type given by tag ID 5].
+| 23     | Station Z-coordinates in ECEF frame [array; type given by tag ID 5].
+| 24     | Channel bandwidth, in Hz [double].
+| 25     | Time integration per correlator dump, in seconds [double].
+| 26     | Path to telescope model directory [string].
+
+
+The visibility dimension order is given by tag ID 4, which is a four-element 
+array containing the following integer IDs:
+\anchor vis_dim_order 
+
+
+| Code | Meaning
+| ---- | ---------------------------------------------------------------------
+|    0 | Channel
+|    1 | Time
+|    2 | Baseline
+|    3 | Polarisation
+
+ - The order of the IDs gives the dimension order of the visibility data
+   array, from slowest- to fastest-varying. Current versions of OSKAR write
+   visibility data with polarisation varying fastest, then baseline, then 
+   time, then frequency channel.
+
+Baselines are formed by cross-correlating stations 0-1, 0-2, 0-3...
+1-2, 1-3... etc. The autocorrelations are not computed, so for \f$n\f$
+stations, there will be \f$ n(n-1)/2 \f$ baselines.
+
+\latexonly
+} % end color{gray}
+\endlatexonly
+
+\htmlonly <hr /> \endhtmlonly
+
+\subsection binary_tag_image Image Data Tags (Deprecated)
+
+Tags in this group have a group ID of 6.
+
+\latexonly
+{\color{red}
+\endlatexonly
+
+\attention
+Note that all existing image data tags are deprecated.
+Standard FITS image files should be used instead.
+This section is provided for historical reasons only,
+and will be removed in a future version.
+
+\latexonly
+} % end color{red}
+{\color{gray}
+\endlatexonly
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 0      | Image data [array; type given by tag ID 2].
+| 1      | Image type [int]. (See \ref image_type "Image Type", below.)
+| 2      | Data type of image data array [int]. (See \ref binary_data_type "Payload Data Type")
+| 3      | Dimension order of image data [array, int(5)]. (See \ref image_dim_order "Image Dimension Order", below.)
+| 4      | Number of pixels, width [int].
+| 5      | Number of pixels, height [int].
+| 6      | Number of polarisation planes [int].
+| 7      | Number of time slices [int].
+| 8      | Number of frequency channel planes [int].
+| 9      | Image centre Right Ascension (degrees) [double].
+| 10     | Image centre Declination (degrees) [double].
+| 11     | Field of view in Right Ascension (degrees) [double].
+| 12     | Field of view in Declination (degrees) [double].
+| 13     | Observation start time, as MJD(UTC) [double].
+| 14     | Time increment, in seconds [double].
+| 15     | Start frequency, in Hz [double].
+| 16     | Frequency increment, in Hz [double].
+| 17     | Mean image value [double].
+| 18     | Image variance [double].
+| 19     | Minimum image value [double].
+| 20     | Maximum image value [double].
+| 21     | Image RMS [double].
+| 22     | Grid type [int].
+| 23     | Coordinate frame [int].
+| 24     | HEALPix nside [int].
+
+
+The image dimension order is given by tag ID 3, which is a five-element array
+containing the following integer IDs:
+\anchor image_dim_order
+
+
+| Code | Meaning
+| ---- | ---------------------------------------------------------------------
+|    0 | RA
+|    1 | Dec
+|    2 | Polarisation
+|    3 | Time
+|    4 | Channel
+
+- The order of the IDs gives the dimension order of the image data array, 
+  from slowest- to fastest-varying. Current versions of OSKAR write image data 
+  with RA varying fastest, then Dec, then polarisation, then time, then 
+  frequency channel.
+
+The image grid type (tag ID 22) is given as an integer code from the 
+following list:
+
+
+| Code | Meaning
+| ---- | ---------------------------------------------------------------------
+|    0 | Undefined.
+|    1 | Rectilinear.
+|    2 | HEALPix Ring scheme.
+
+ - Rectilinear grid type images are made using an 
+   orthographic (-SIN, in FITS nomenclature) tangent-plane projection.
+
+
+The image coordinate frame (tag ID 23) is given as an integer code from 
+the following list:
+
+
+| Code | Meaning
+| ---- | ---------------------------------------------------------------------
+|    0 | Undefined.
+|    1 | Equatorial.
+|    2 | Horizontal.
+
+
+\anchor image_type
+The image type is given as an integer code from the following list:
+
+| Code | Meaning
+| ---- | ---------------------------------------------------------------------
+|    0 | Undefined.
+|    1 | Full Stokes (in order: I, Q, U, V).
+|    2 | Stokes I.
+|    3 | Stokes Q.
+|    4 | Stokes U.
+|    5 | Stokes V.
+|    6 | All linear polarisations (in order: XX, XY, YX, YY).
+|    7 | Linear XX.
+|    8 | Linear YY.
+|    9 | Linear XY.
+|   10 | Linear YX.
+|   50 | Point-spread function (PSF).
+|  100 | Beam pattern, scalar.
+|  101 | Beam pattern, polarised.
+
+\latexonly
+} % end color{gray}
+\endlatexonly
+
+\htmlonly <hr /> \endhtmlonly
+
+\latexonly
+\clearpage
+\endlatexonly
+
+\subsection binary_tag_sky_model Sky Model Data Tags
+
+Tags in this group have a group ID of 7.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Number of sources [int].
+| 2      | Data type of all arrays [int]. (See \ref binary_data_type "Payload Data Type")
+| 3      | Right Ascension values, in radians [array; type given by tag ID 2].
+| 4      | Declination values, in radians [array; type given by tag ID 2].
+| 5      | Stokes I values, in Jy [array; type given by tag ID 2].
+| 6      | Stokes Q values, in Jy [array; type given by tag ID 2].
+| 7      | Stokes U values, in Jy [array; type given by tag ID 2].
+| 8      | Stokes V values, in Jy [array; type given by tag ID 2].
+| 9      | Reference frequency values, in Hz [array; type given by tag ID 2].
+| 10     | Spectral index values [array; type given by tag ID 2].
+| 11     | FWHM (major axis), in radians [array; type given by tag ID 2].
+| 12     | FWHM (minor axis), in radians [array; type given by tag ID 2].
+| 13     | Position angle of major axis, in radians [array; type given by tag ID 2].
+| 14     | Rotation measure, in radians / \f$ \mathrm{m}^2 \f$ [array; type given by tag ID 2].
+
+\htmlonly <hr /> \endhtmlonly
+
+\subsection binary_tag_spline Spline Data Tags
+
+Tags in this group have a group ID of 9.
+Arrays will be present in both single and double precision.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Number of knots in X or theta coordinate [int].
+| 2      | Number of knots in Y or phi coordinate [int].
+| 3      | Knot positions in X or theta [real array].
+| 4      | Knot positions in Y or phi [real array].
+| 5      | Spline coefficients [real array].
+| 6      | Smoothing factor [double].
+
+\htmlonly <hr /> \endhtmlonly
+
+\subsection binary_tag_element Element Data Tags
+
+Tags in this group have a group ID of 10.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Surface type [int]. 1 = Ludwig-3
+
+
+Element data files will contain a number of spline data tag groups, which are
+identified by an index.
+
+For fitted coefficients in the Ludwig-3 system, the spline tags will have the
+following index values:
+
+| Code | Meaning
+| ---- | ---------------------------------------------------------------------
+|    0 | H (real).
+|    1 | H (imag).
+|    2 | V (real).
+|    3 | V (imag).
+
+\latexonly
+\clearpage
+\endlatexonly
+
+\htmlonly <hr /> \endhtmlonly
+
+\subsection binary_tag_vis_header Visibility Header Data Tags
+
+Tags in this group have a group ID of 11.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Path to telescope model directory [string].
+| 2      | Number of binary data tags written per \ref binary_tag_vis_block "Visibility Block" [int].
+| 3      | Flag set if auto-correlation data are present [int].
+| 4      | Flag set if cross-correlation data are present [int].
+| 5      | Data type of visibility arrays in \ref binary_tag_vis_block "Visibility Block" [int]. (See \ref binary_data_type "Payload Data Type")
+| 6      | Precision of station and baseline coordinate arrays [int]. (See \ref binary_data_type "Payload Data Type")
+| 7      | Maximum number of time samples in a \ref binary_tag_vis_block "Visibility Block" [int].
+| 8      | Total number of usable time samples, from all subsequent \ref binary_tag_vis_block "Visibility Blocks" [int].
+| 9      | Maximum number of channels in a \ref binary_tag_vis_block "Visibility Block" [int].
+| 10     | Total number of usable channels, from all subsequent \ref binary_tag_vis_block "Visibility Blocks" [int].
+| 11     | Number of stations [int].
+| 12     | Polarisation type [int]. (See \ref vis_pol_type "below")
+| 13-20  | <i>Reserved for future use.</i>
+| 21     | Phase centre coordinate type, currently always 0 [int].
+| 22     | Phase centre longitude / Right Ascension (deg) and latitude / Declination (deg) [double[2]].
+| 23     | Start frequency, in Hz [double].
+| 24     | Frequency increment, in Hz [double].
+| 25     | Channel bandwidth, in Hz [double].
+| 26     | Observation start time, as MJD(UTC) [double].
+| 27     | Time increment, in seconds [double].
+| 28     | Time integration per correlator dump, in seconds [double].
+| 29     | Telescope reference longitude, in degrees [double].
+| 30     | Telescope reference latitude, in degrees [double].
+| 31     | Telescope reference altitude, in metres [double].
+| 32     | Station X-coordinates in offset ECEF frame, in metres [array].
+| 33     | Station Y-coordinates in offset ECEF frame, in metres [array].
+| 34     | Station Z-coordinates in offset ECEF frame, in metres [array].
+
+
+The Visibility Header contains static meta-data. It precedes a sequence of
+\ref binary_tag_vis_block "Visibility Blocks", which contain the actual
+cross-correlations and/or autocorrelations as a function of time and frequency.
+
+\anchor vis_pol_type
+The polarisation type of the data is given by Tag ID 12, as follows:
+
+| Code | Meaning
+| ---- | --------------------------------------------------------------------
+|    0 | Full Stokes (in order: I, Q, U, V).
+|    1 | Stokes I.
+|    2 | Stokes Q.
+|    3 | Stokes U.
+|    4 | Stokes V.
+|   10 | All linear polarisations (in order: XX, XY, YX, YY).
+|   11 | Linear XX.
+|   12 | Linear XY.
+|   13 | Linear YX.
+|   14 | Linear YY.
+
+\latexonly
+\clearpage
+\endlatexonly
+
+\htmlonly <hr /> \endhtmlonly
+
+\subsection binary_tag_vis_block Visibility Block Data Tags
+
+Tags in this group have a group ID of 12.
+
+| Tag ID | Description                                                        
+| ------ | --------------------------------------------------------------------
+| 1      | Dimension start and size [int[6]] (see \ref vis_block_dims "note", below).
+| 2      | Auto-correlation data, in Jy [array].
+| 3      | Cross-correlation data, in Jy [array].
+| 4      | Baseline UU-coordinates, in metres [array].
+| 5      | Baseline VV-coordinates, in metres [array].
+| 6      | Baseline WW-coordinates, in metres [array].
+
+\subsubsection vis_block_dims Dimension Order & Start Indices
+
+The "dimension start and size" (Tag ID 1) is a 6-element integer array 
+containing data in the following order:
+
+- [0] Global start time index for the first time in the block, relative to 
+      observation start.
+- [1] Global start channel index for the first channel in the block
+      (usually 0; reserved for future use).
+- [2] Number of <i>usable</i> frequency channels in the block
+      (usually the total number; reserved for future use).
+- [3] Number of <i>usable</i> time samples in the block.
+- [4] Number of cross-correlated baselines.
+- [5] Number of stations.
+
+The dimension order of visibility data in the auto-correlation and 
+cross-correlation arrays is fixed. The polarisation dimension is implicit 
+in the data type given by Tag ID 4 in the 
+\ref binary_tag_vis_header "Visibility Header" (matrix or scalar), and is 
+therefore the fastest varying. 
+From slowest to fastest varying, the remaining dimensions are:
+
+- Time (slowest)
+- Channel
+- Baseline (for cross-correlations) or Station (for auto-correlations) (fastest)
+
+The number of polarisations is determined by the choice of matrix or 
+scalar amplitude types. Complex scalar types represent data for a single 
+polarisation, whereas complex matrix amplitude types represent four 
+polarisation dimensions in the order \f$I, Q, U, V\f$ or (usually) 
+\f$XX, XY, YX, YY\f$. The polarisation type is given by Tag ID 12 in the 
+\ref binary_tag_vis_header "Visibility Header".
+
+The number of time samples containing usable data is given by the dimension 
+size specified in Tag ID 1. This will only be different to the maximum number 
+of time samples in the block for the very last block in the sequence.
+
+Baselines are formed in order, by cross-correlating stations 0-1, 0-2, 0-3... 
+1-2, 1-3... etc. For \f$n\f$ stations, there will be \f$n (n - 1) / 2\f$ 
+baselines.
+
+Note that Tag IDs 2 to 6 may not always be present, depending on the values of
+Tag ID 3 and 4 in the \ref binary_tag_vis_header "Visibility Header".
+Baseline coordinates will exist only if cross-correlation data are present.
+
+The dimension order of the cross-correlated baseline coordinates is also fixed. 
+Each of the UU, VV and WW arrays is two dimensional, where the 
+dimension order is:
+
+- Time (slowest)
+- Baseline (fastest)
+
+\subsubsection vis_block_sequence Block Sequence
+
+Multiple blocks are used to store data from long observations. 
+If there is more than one block in the file, zero-based tag index numbers will 
+be used to uniquely identify visibility data blocks within the stream.
+
+The expected number of visibility blocks can be found by using Tag IDs 7 and 8 
+in the \ref binary_tag_vis_header "Visibility Header", by rounding up the 
+result of the division (Tag ID 8) / (Tag ID 7).
+
+\htmlonly <hr /> \endhtmlonly
+
+\latexonly
+\vskip 1cm
+\endlatexonly
+
+<b>Revision History</b>
+
+<table>
+<tr><th>Revision</th><th>Date</th><th>Modification</th></tr>
+<tr><td>1</td><td>2012-11-23</td><td>Creation.</td></tr>
+<tr><td>2</td><td>2013-03-04</td>
+    <td>Fixed description of image data tag.</td></tr>
+<tr><td>3</td><td>2013-04-18</td>
+    <td>Added telescope model path, channel bandwidth and time integration
+    tags to visibility data group.</td></tr>
+<tr><td>4</td><td>2013-11-29</td>
+    <td>Added image group tags for grid type and coordinate frame. Added sky 
+    group tag for rotation measure.</td></tr>
+<tr><td>5</td><td>2014-07-16</td>
+    <td>[2.5.0] Added spline data and element data tag groups.</td></tr>
+<tr><td>6</td><td>2015-03-30</td>
+    <td>[2.6.0] Updated for binary format version 2, which includes 
+    chunk CRC codes. Added new diagram and clarified description of the
+    data chunks. Marked existing image data tags and visibility data tags as 
+    deprecated. Added new sections describing visibility header and 
+    visibility block.</td></tr>
+</table>
+
+*/

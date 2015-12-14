@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Aperture array settings -->
+<s k="aperture_array">
+    <label>Aperture array settings</label>
+    <depends k="telescope/station_type" v="Aperture array" />
+
+    <import filename="oskar_telescope_AA_array.xml" />
+
+    <import filename="oskar_telescope_AA_element.xml" />
+
+</s> <!-- END aperture array settings group -->

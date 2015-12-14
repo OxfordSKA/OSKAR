@@ -1,0 +1,655 @@
+/**
+
+\page telescope_model Telescope Model
+
+\latexonly
+\def \docversion{8}
+\endlatexonly
+
+\section telescope_intro Introduction
+
+This document describes the format of the telescope model used by OSKAR
+versions >= 2.7. The telescope model includes a description of the position of
+each station in the interferometer, the configuration of each station, and a
+custom element pattern for each station (if any).
+
+\section telescope_dir Directory Structure
+
+\subsection telescope_overview Overview
+
+A telescope model is defined using a directory structure. The name of the
+top-level directory is arbitrary, but it must contain a special file to
+specify the position of each station, and a set of sub-directories (again,
+with arbitrary names), one for every station. Each of these sub-directories
+contains one or more special files to specify the configuration of that
+station.
+
+The \ref telescope_files "following section" shows the names of
+special files allowed at each level in the directory structure.
+
+Station directories may themselves contain further directories to describe
+the configuration of sub-stations (or "tiles") that will be beamformed
+hierarchically. For a two-level hierarchical station, the top station level
+describes the layout of the tiles with respect to the station centre, and
+files in the sub-directories describe the layout of each tile with respect
+to its own centre.
+
+The **alphabetical** order of the station directories corresponds to the order
+in which the station coordinates and element data appear in the layout and
+configuration files. (**Note that leading zeros must be used in directory
+names when necessary.**) With one exception, there must be the same number of
+directories as the number of rows in all configuration file(s) at that level.
+The exception is the case where all stations (or sub-stations) are identical,
+where it is sufficient to specify only one station directory: in this case,
+the configuration will be copied for all stations defined in the parent layout.
+
+\subsubsection tel_example_single_general  Example Telescope Model (single level beamforming; general case)
+
+An example telescope model directory might contain the following:
+
+- my_telescope_model/
+  - station001/
+    - [files describing the configuration of station 1]
+  - station002/
+    - [files describing the configuration of station 2]
+  - station003/
+    - [files describing the configuration of station 3]
+  - [other station directories]
+  - [file describing the layout of stations in the interferometer]
+
+\latexonly
+\newpage
+\endlatexonly
+
+\subsubsection tel_example_single_identical   Example Telescope Model (single level beamforming; all stations identical)
+
+For stations that are all identical, it is sufficient to specify only one
+top-level station directory as follows:
+
+- my_telescope_model/
+  - station/
+    - [files describing the configuration of all stations]
+  - [file describing the layout of stations in the interferometer]
+
+\subsubsection tel_example_hier_general Example Telescope Model (two-level beamforming; general case)
+
+An example telescope model directory where stations are composed of tiles
+could look like this:
+
+- my_telescope_model/
+  - station001/
+    - tile001/
+      - [files describing the configuration of tile 1 in station 1]
+    - tile002/
+      - [files describing the configuration of tile 2 in station 1]
+    - [other tile directories]
+    - [file describing the layout of tiles in station 1]
+  - station002/
+    - tile001/
+      - [files describing the configuration of tile 1 in station 2]
+    - tile002/
+      - [files describing the configuration of tile 2 in station 2]
+    - [other tile directories]
+    - [file describing the layout of tiles in station 2]
+  - [other station directories]
+  - [file describing the layout of stations in the interferometer]
+
+\subsubsection tel_example_hier_identical  Example Telescope Model (two-level beamforming; all tiles and stations identical)
+
+For hierarchical stations that are all identical, and made of identical tiles,
+it is sufficient to specify only one station directory at each level:
+
+- my_telescope_model/
+  - station/
+    - tile/
+      - [files describing the configuration of each tile]
+    - [file describing the layout of tiles in the station]
+  - [file describing the layout of stations in the interferometer]
+
+\latexonly
+\newpage
+\endlatexonly
+
+\subsection telescope_files Special Files
+
+This section shows the names of files that may be present in the various
+directories of the telescope model.
+
+\subsubsection telescope_element_data Element Data
+
+\par layout.txt
+The layout (in horizontal East-North-Up coordinates) of stations or elements
+within stations.<br>
+<b>See</b> \ref telescope_layout_files <br>
+<b>Required:</b> Yes (but see below).<br>
+<b>Allowed locations:</b> All directories.
+
+\par layout_ecef.txt
+The layout of stations in Earth-centred-Earth-fixed coordinates.<br>
+Can be used instead of "layout.txt" at top-level only, if required.<br>
+<b>See</b> \ref telescope_layout_ecef <br>
+<b>Required:</b> No, unless layout.txt is omitted.<br>
+<b>Allowed locations:</b> Telescope model root directory.
+
+\par element_types.txt
+Type index of each element in the station.<br>
+<b>See</b> \ref telescope_element_types <br>
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Station directory.
+
+\par gain_phase.txt
+Per-element gain and phase offsets and errors.<br>
+<b>See</b> \ref telescope_element_gain_phase_errors <br>
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Station directory.
+
+\par apodisation.txt | apodization.txt
+Per-element complex apodisation weight.<br>
+<b>See</b> \ref telescope_element_apodisation <br>
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Station directory.
+
+\par feed_angle.txt | feed_angle_x.txt | feed_angle_y.txt
+Per-element and per-polarisation feed angles.<br>
+<b>See</b> \ref telescope_element_feed_angle <br>
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Station directory.
+
+\subsubsection telescope_station_data Station Data
+
+\par mount_type.txt
+Mount type of station platform.<br>
+<b>See</b> \ref telescope_mount_type <br>
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Station directory.
+
+\par permitted_beams.txt
+Permitted station beam directions relative to mounting platform.<br>
+<b>See</b> \ref telescope_permitted_beams <br>
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Station directory.
+
+\subsubsection telescope_element_type_data Element Type Data
+
+\par element_pattern_fit_*.bin
+Fitted element X-or Y-dipole responses for the station, as a function of frequency.<br>
+<b>See</b> \ref telescope_element_patterns_numerical <br>
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Any. (Inherited.)
+
+\par element_pattern_*.txt
+Functional element X-or Y-dipole responses for the station.<br>
+<b>See</b> \ref telescope_element_patterns_functional <br>
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Any. (Inherited.)
+
+\subsubsection telescope_noise_file_list Noise Configuration Files
+
+\par noise_frequencies.txt
+Frequencies for which noise values are defined.<br>
+<b>See</b> \ref telescope_noise <br>
+<b>Required:</b> No, unless another noise file is present.<br>
+<b>Allowed locations:</b> Telescope model root directory. (Inherited.)
+
+\par rms.txt
+Flux density RMS noise values, in Jy, as a function of frequency.<br>
+<b>See</b> \ref telescope_noise <br>
+<b>Required:</b> No.<br>
+<b>Allowed locations:</b> Telescope model root directory, or top-level
+station directory. (Inherited.)
+
+Fields in text files can be space-separated and/or comma-separated. 
+Characters appearing after a hash ('#') symbol are treated as comments, 
+and any further characters on that line are ignored. 
+Empty lines are also ignored.
+
+\latexonly
+\newpage
+\endlatexonly
+
+\section telescope_layout_files Layout Files
+
+Layout files contain coordinates of stations or elements at (respectively)
+the telescope or station level.
+
+\subsection telescope_layout  Telescope Level
+
+The top-level "layout.txt" file contains a table of ASCII text to represent
+station positions relative to the centre of the interferometer array.
+Each line contains up to six values, which correspond to positions
+represented as horizontal (x, y, z) coordinates in metres relative to a
+local tangent (horizon) plane, where x is towards geographic east, y is towards 
+geographic north, and z is towards the local zenith. (The telescope centre 
+position on Earth is specified using longitude and latitude values in the 
+main OSKAR settings file, which is described in a separate document.)
+
+Coordinate errors can also be specified using optional columns.
+The first three columns are the "measured" positions, while
+the "true" positions are obtained by adding the supplied offsets to the
+measured values. Coordinates are given in metres. 
+In order, the parameter columns are:
+
+| Column | Description                            | Comment
+| ------ | -------------------------------------- | ---------------------------
+| 1      | Horizontal x (east) coordinate         | Required
+| 2      | Horizontal y (north) coordinate        | Required
+| 3      | Horizontal z (up) coordinate           | Optional (default 0.0)
+| 4      | Horizontal x (east) coordinate error   | Optional (default 0.0)
+| 5      | Horizontal y (north) coordinate error  | Optional (default 0.0)
+| 6      | Horizontal z (up) coordinate error     | Optional (default 0.0)
+
+\subsubsection telescope_layout_ecef Telescope Level Earth-centred Coordinates
+
+Many radio interferometers specify station positions in Earth-centred
+coordinates. It is possible to do the same in OSKAR by using a file
+named "layout_ecef.txt" instead of "layout.txt" in the top-level
+telescope directory. Coordinates are given in metres. 
+In order, the parameter columns are:
+
+| Column | Description                                         | Comment
+| ------ | --------------------------------------------------- | -------------
+| 1      | ECEF x coordinate (towards longitude 0, latitude 0) | Required
+| 2      | ECEF y coordinate (towards the east)                | Required
+| 3      | ECEF z coordinate (towards the north pole)          | Required
+| 4      | ECEF x coordinate error                             | Optional (default 0.0)
+| 5      | ECEF y coordinate error                             | Optional (default 0.0)
+| 6      | ECEF z coordinate error                             | Optional (default 0.0)
+
+\subsection telescope_station_layout Station Level
+
+In each station directory, there must be a "layout.txt" file to specify
+the element position in horizontal \f$(x, y, z)\f$ coordinates relative to
+the station centre, and (optionally) the \f$(x, y, z)\f$ position errors.
+
+The format of the element layout file is the same as that used for the
+telescope-level station coordinates in the horizon frame. It is not possible
+to use Earth-centred coordinates to specify element locations within a station.
+
+\note The station layouts are defined with respect to the plane of 
+the station platform. Use caution if the mount type of the station 
+platform is not 'Fixed', as these coordinates will then not correspond 
+to geographic directions.
+
+\section telescope_element_types  Element Types
+
+In each station directory, there may be optionally an "element_types.txt"
+file to specify the type of each element in the station. This type index is
+used in conjunction with element pattern data to select the correct file 
+of fitted coefficients or functional type. If the element types file is 
+omitted, all elements have an implicit type of 0.
+
+In order, the parameter columns are:
+
+| Column | Description
+| ------ | --------------------------------------------------------------
+| 1      | Element type index (must be an integer).
+
+\section telescope_element_gain_phase_errors Element Gain & Phase Error Files
+
+In each station directory, there may be optionally a "gain_phase.txt" file to
+specify the per-element systematic and time-variable gain and phase errors.
+
+Phases are given in degrees. In order, the parameter columns are:
+
+| Column | Description                                                             | Comment
+| ------ | ----------------------------------------------------------------------- | ------------------------
+| 1      | Systematic gain factor, \f$G_0\f$                                       | Optional (default 1.0)
+| 2      | Systematic phase offset, \f$\phi_0\f$ [deg]                             | Optional (default 0.0)
+| 3      | Time-variable gain factor, \f$G_{\rm std}\f$, (std. deviation)          | Optional (default 0.0)
+| 4      | Time-variable phase error, \f$\phi_{\rm std}\f$, (std. deviation) [deg] | Optional (default 0.0)
+
+
+Gain \f$(G_0, G_{\rm std})\f$ and phase \f$(\phi_0, \phi_{std})\f$ parameters
+define a complex multiplicative factor applied to each detector element.
+This complex factor is combined with the geometric beamforming weights (i.e.
+weights that define the Array Factor) to give a set of weights used to
+evaluate the station beam at each source direction.
+
+As a result, the beamforming weight, \f$W\f$, for a given beam direction
+\f$(\theta_b, \phi_b)\f$, detector position \f$(x,y,z)\f$ and time \f$t\f$ is
+given by:
+
+\f[
+W(\theta_b, \phi_b, x, y, z, t) =
+W_{\rm geometric} (\theta_b, \phi_b, x, y, z, t)
+(G_0 + G_{\rm error})  \exp\left\{ i (\phi_0 + \phi_{\rm error} )\right\}
+\f]
+
+where \f$ G_{\rm error} \f$ and \f$ \phi_{\rm error} \f$ are pseudo-random
+values picked, at each time-step, from Gaussian distributions with standard
+deviations \f$ G_{\rm std} \f$  and \f$ \phi_{\rm std} \f$ respectively.
+
+\section telescope_element_apodisation Element Apodisation Files
+
+In each station directory, there may be optionally an "apodisation.txt" 
+(or "apodization.txt") file to specify additional complex multiplicative 
+beamforming weights to modify the shape of the station beam. If present, 
+these weights are multiplied with the DFT weights calculated for the beam 
+direction required at each time-step.
+
+In order, the parameter columns are:
+
+| Column | Description                                    | Comment
+| ------ | ---------------------------------------------- | -----------------------
+| 1      | Element multiplicative weight (real part)      | Optional (default 1.0)
+| 2      | Element multiplicative weight (imaginary part) | Optional (default 0.0)
+
+\latexonly
+\newpage
+\endlatexonly
+
+
+\section telescope_element_feed_angle Element Feed Angle Files
+
+In each station directory, there may be optionally "feed_angle.txt",
+"feed_angle_x.txt" and/or "feed_angle_y.txt" files
+to specify the Euler angles of the feeds of the nominal X and Y dipoles.
+If only a single "feed_angle.txt" file is present, the same data are used
+for both the X and Y polarisations. Note that all the angles represent
+differences from zero, which is the ideal case where both dipoles are
+orthogonal and in the plane of the station platform.
+
+In order, the parameter columns are:
+
+| Column | Description
+| ------ | --------------------------------------------------------------
+| 1      | Euler angle alpha around z-axis [deg]
+| 2      | Euler angle beta around x-axis [deg]
+| 3      | Euler angle gamma around z-axis [deg]
+
+\section telescope_mount_type  Mount Type
+
+In each station directory, there may be optionally a "mount_type.txt"
+file to specify the mount type of the station platform.
+
+Allowed types are 'Fixed' (where the elements are fixed to the
+ground, as in an aperture array), 'Alt-az' (where the elements are mounted on 
+a platform that tracks the sky relative to the horizon) or 'Equatorial' (where 
+the elements are mounted on a platform that tracks the sky relative to the 
+equator). Only the first letter of each type is checked. 
+
+If the file is omitted, the station platform has a mount type of 'Fixed'.
+
+In order, the parameter columns are:
+
+| Column | Description
+| ------ | --------------------------------------------------------------
+| 1      | Station platform mount type (character: either 'A' 'E' or 'F').
+
+\section telescope_permitted_beams Permitted Beam Directions
+
+In each station directory, there may be optionally a "permitted_beams.txt"
+file to specify a list of azimuth and elevation coordinates for all local
+beam directions permitted at that station. If the file is omitted, it is
+assumed that the station can form a beam anywhere on the sky. If the file is
+present, then the nearest permitted direction to the computed phase centre
+will be selected for each time step.
+
+\note The permitted beam directions are defined with respect to the plane of 
+the station platform. Use caution if the mount type of the station 
+platform is not 'Fixed', as these angles will then not correspond to azimuth 
+and elevation in the normal sense.
+
+In order, the parameter columns are:
+
+| Column | Description
+| ------ | --------------------------------------------------------------
+| 1      | Azimuth coordinate of beam (local East from North) [deg]
+| 2      | Elevation coordinate of beam (relative to local horizon) [deg]
+
+\latexonly
+\newpage
+\endlatexonly
+
+\section telescope_element_patterns Element Pattern Files
+
+\subsection telescope_element_patterns_numerical Numerical Element Patterns
+
+Numerically-defined antenna element pattern data can be used for the
+simulation. OSKAR currently supports the loading of ASCII text files produced
+by the CST (Computer Simulation Technology) software package. These files
+must contain eight columns, in the following order:
+
+-# Theta [deg]
+-# Phi [deg]
+-# Abs dir *
+-# Abs theta
+-# Phase theta [deg]
+-# Abs phi
+-# Phase phi [deg]
+-# Ax. ratio *
+
+(Columns marked * are ignored during the load, but must still be present.)
+
+Since version 2.6.0, "unpolarised" (scalar) numerical element pattern data
+files can be supplied, and these will be used if OSKAR is running in a scalar
+or Stokes-I-only mode. Data files for scalar numerical element responses must
+contain three or four columns, in the following order:
+
+-# Theta [deg]
+-# Phi [deg]
+-# Amplitude
+-# Phase [deg] (optional)
+
+Before being used in the simulation, the element pattern data must be fitted
+with B-splines. The fitting procedure is performed using the
+<tt>oskar_fit_element_data</tt> application which is built as part of the
+OSKAR package. Please see the settings file documentation for a description
+of the options used by this application.
+
+To be recognised and loaded, the fitted element data must be supplied in
+files that use the following name pattern, which is created
+automatically by the fitting procedure:
+
+\verbatim
+element_pattern_fit_[x|y|scalar]_<element type index>_<frequency in MHz>.bin
+\endverbatim
+
+<b>The element type index should be 0 unless there is more than one type of
+element in the station</b> (as specified in the station's "element_types.txt"), 
+and the frequency is the frequency in MHz for which
+the element pattern data is valid: so, for example,
+<tt>element_pattern_fit_x_0_600.bin</tt> would contain fitted
+coefficients to the data for the first type of X-dipole at 600 MHz.
+The frequency nearest to the current observing frequency is used when
+evaluating the response.
+
+These files define the patterns used for the nominal X- and Y-dipoles.
+The location of these files defines their scope: if placed in the top-level
+directory, then they are used for all stations; if placed in a station
+directory, they are used only for that station. In this way, it is possible
+to specify different element patterns for each station.
+
+\attention
+Surfaces are fitted to the numerically-defined antenna data using bicubic
+B-splines. Since the quality of the fit depends critically on the fitting
+parameters (adjustable using the OSKAR settings file), <b>it is essential that
+each fitted surface is inspected graphically to ensure that there are no
+artefacts introduced by the fitting process</b>. This can be done by saving a
+FITS image of the element pattern (created by evaluating the fitted
+coefficients) by making an image of the station beam from a single-element 
+station.
+
+
+\subsection telescope_element_patterns_functional Functional Element Patterns
+
+Since version 2.7.0, functionally-defined element patterns can be specified
+for a given element type, so that functional and numerical elements can be 
+mixed within a station.
+
+To be recognised and loaded, the functional element data must be supplied in
+files that use the following name pattern:
+
+\verbatim
+element_pattern_[x|y]_<element type index>.txt
+\endverbatim
+
+<b>The element type index should be 0 unless there is more than one type of
+element in the station</b> (as specified in the station's "element_types.txt"): 
+so, for example, <tt>element_pattern_x_1.txt</tt> would contain the functional 
+pattern for the <i>second</i> type of X-dipole (and for this to actually be 
+used in this example, at least one element in the station would need to have 
+a type index of 1 rather than 0, if type 0 represented a different element 
+type).
+
+The content of the file must be a single line, which can contain 
+columns in the following order:
+
+- <b>Element base type code.</b> <br>
+  This is the base type of the element pattern. Currently supported type 
+  codes are 'I' (for isotropic) or 'D' (for dipole).
+- <b>(For a dipole element) The length of the dipole.</b>
+- <b>(For a dipole element) The dipole length unit code.</b><br>
+  Supported type codes are 'M' for metres or 'W' for wavelengths.
+- <b>Taper type code.</b><br>
+  This is the type of taper applied on top of the base type. Currently 
+  supported type codes are 'N' (no taper; the default), 'C' (cosine) 
+  or 'G' (Gaussian).
+- <b>(For a cosine taper) The power of the cosine.</b>
+- <b>(For a Gaussian taper) The FWHM of the Gaussian, in degrees, at the 
+  reference frequency.</b>
+- <b>(For a Gaussian taper) The reference frequency, in Hz.</b>
+
+<b> Note that if a column is not relevant for a particular option, it must be 
+omitted.</b>
+
+These files define the patterns used for the nominal X- and Y-dipoles.
+The location of these files defines their scope: if placed in the top-level
+directory, then they are used for all stations; if placed in a station
+directory, they are used only for that station.
+
+If no element pattern is specified for a station, the default behaviour is 
+to use an un-tapered half-wavelength dipole.
+
+\subsubsection telescope_element_patterns_examples Examples
+
+An isotropic (unpolarised) element pattern with a Gaussian FWHM taper 
+of 20 degrees at 100 MHz would specify <tt>I G 20.0 100e6</tt>, while a 
+half-wavelength dipole with a \f$\cos^{2}\f$ taper would specify 
+<tt>D&nbsp;0.5&nbsp;W&nbsp;C&nbsp;2.0</tt>.
+
+
+\section telescope_noise System Noise Configuration Files
+
+\subsection telescope_noise_intro Introduction
+
+OSKAR telescope models optionally contain files, which, if present, can be used
+to specify the addition of uncorrelated system noise to interferometry
+simulations.
+
+For details of how uncorrelated noise is added to interferometry simulations,
+please refer to the relevant section of the OSKAR Theory of Operation document.
+It should be noted that simulation settings files control the use and
+selection of noise files within a telescope model. A description of these
+settings can be found in the interferometry section of the OSKAR Settings
+Files documentation.
+
+\subsection telescope_noise_files Noise Files
+
+To allow for a different level of noise to be added to each station,
+telescope models can contain a number of plain text files which should be placed
+either in the station folders or top-level telescope model directory.
+
+The name and contents of each file type are described below.
+
+\par noise_frequencies.txt
+A list of frequencies, in Hz, for which noise values are defined. This file
+should be situated in the root of the telescope model directory structure.
+
+\par rms.txt
+A list of noise flux density RMS values, in Jy, as a function of frequency.
+The number of RMS values in the list should match the number of specified
+noise frequencies. Files can be situated in the root of the telescope model
+directory or in the top-level station folders. Files in station directories
+allow a different RMS values to be specified per station, and files in the
+root directory allow a quick way to specifying common RMS values for the
+entire array.
+
+These files take the form of a plain text file list with successive
+values in the list separated by a new line. As with all of the other
+OSKAR plain text format configuration files, lines starting with a hash '#'
+character are treated as comments, and empty lines are ignored.
+
+\subsubsection telescope_noise_examples Examples
+
+<b><tt>noise_frequencies.txt</tt></b>
+
+\verbatim
+# Example noise_frequencies.txt file
+#
+# This file contains a list of frequencies, in Hz, for which noise
+# files are defined.
+#
+
+50.0e6
+60.0e6
+70.0e6
+80.0e6
+\endverbatim
+
+\latexonly
+\newpage
+\endlatexonly
+
+<b><tt>rms.txt</tt></b>
+
+\verbatim
+# Example rms.txt file
+#
+# This file contains a list of Gaussian RMS values, in Jy, from which noise
+# amplitude values are evaluated. Entries in the list correspond to the noise
+# RMS value at the frequency defined either by the corresponding line in the
+# noise_frequencies.txt file or by the frequency specification in the noise
+# settings.
+#
+
+0.7
+0.5
+0.3
+0.2
+\endverbatim
+
+
+\latexonly
+\vskip 1cm
+\endlatexonly
+
+<b>Revision History</b>
+
+<table>
+<tr><th>Revision</th><th>Date</th><th>Modification</th></tr>
+<tr><td>1</td><td>2012-04-20</td><td>Creation.</td></tr>
+<tr><td>2</td><td>2012-10-23</td>
+    <td>[2.1.0] Added description of files specifying uncorrelated system
+    noise.</td></tr>
+<tr><td>3</td><td>2013-03-01</td>
+    <td>[2.2.0] Added comment in overview to describe the format of telescope
+    models containing hierarchical stations, and a description of an easier
+    way to create models where all stations are identical.
+    Updated examples.</td></tr>
+<tr><td>4</td><td>2013-11-20</td>
+    <td>[2.3.0] Re-wrote initial sections and restructured document to
+    describe revised telescope model files. The old configuration files are
+    deprecated, but still supported.</td></tr>
+<tr><td>5</td><td>2014-02-26</td>
+    <td>[2.4.0] Added section to describe file containing permitted beam
+    directions.</td></tr>
+<tr><td>6</td><td>2014-07-16</td>
+    <td>[2.5.0] Updated description of how numerically-defined element
+    patterns should be used.</td></tr>
+<tr><td>7</td><td>2015-05-16</td>
+    <td>[2.6.0] Updated description of numerical element pattern data to
+    allow for scalar-only element responses. Updated description of
+    telescope layout files to allow for station position errors. Added section 
+    to describe element feed angles and removed old "orientation.txt" file 
+    description. Removed old "config.txt" file description, as these files have
+    been deprecated since version 2.3, and can no longer be
+    supported. Updated description of system noise files which are now
+    greatly simplified.</td></tr>
+<tr><td>8</td><td>2015-06-15</td>
+    <td>[2.7.0] Updated description of feed angle specification to include 
+    the remaining two Euler angles. Added description of new "mount_type.txt" 
+    and "element_pattern*.txt" files.</td></tr>
+</table>
+
+*/

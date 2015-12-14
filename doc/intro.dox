@@ -1,0 +1,240 @@
+/**
+
+\mainpage Introduction
+
+\latexonly
+\def \docversion{7}
+\endlatexonly
+
+\section intro_intro What is OSKAR?
+
+The OSKAR package consists of a number of open source applications for the 
+simulation of astronomical radio interferometers.
+OSKAR 2.x has been designed primarily to produce simulated data from large
+aperture arrays, such as those envisaged for the SKA.
+
+\section intro_features Features
+
+Below is a summary of the current features of the OSKAR package.
+
+- **Simulation capability:**
+  - Evaluation of a polarised Radio Interferometer Measurement Equation, 
+    accelerated using NVIDIA GPU(s).
+  - Extensible framework using Jones matrix formalism.
+  - Optimised for simulation using very large source catalogues.
+  - Capable of simulating interferometers constructed from large aperture 
+    arrays.
+  - Sky models:
+    - Input catalogues of point and/or elliptical Gaussian sources.
+    - Built-in sky model generators for random power-law,
+      random broken-power-law, and gridded source distributions.
+  - Station beam response:
+    - Direct evaluation of aperture array station beams (E Jones) from
+      arbitrary telescope configurations (using either single level or
+      hierarchical beam forming schemes). Options include:
+      - Independent specification of pointing direction for each station or
+        tile.
+      - Apodisation weighting.
+      - Antenna element position and dipole orientation errors.
+      - Systematic and random element phase and gain errors.
+    - Inclusion of (embedded) antenna element patterns specified by an
+      analytical dipole response or a numerically defined pattern, as a
+      function of element type and frequency.
+    - Inclusion of parallactic angle rotation.
+  - Interferometric response allows for:
+    - Time and bandwidth smearing.
+    - Uncorrelated system noise.
+    - Filtering as a function of baseline UV distance.
+- **An application to simulate interferometer data**
+  - Configurable using INI format settings files.
+  - Export to CASA Measurement Set format.
+- **An application to simulate aperture array beam patterns**
+  - Configurable using INI format settings files. 
+  - Export to FITS image format.
+- **A simple graphical user interface application for setting up and running
+  simulations.**
+- **A number of utility applications to provide support for scripting of 
+  simulations.**
+- **Supported and tested on Linux and Apple Mac OS X.**
+
+\section intro_docs Getting Started
+
+The following documents are available, and we suggest that you read them in
+the order listed below.
+
+- \ref install_guide "Installation Guide"<br>
+  Describes how to build and install OSKAR.
+
+- \ref example "Example"<br>
+  Describes how to run an example simulation and test that your version of
+  OSKAR is working as intended.
+
+- \ref theory "Theory of Operation"<br>
+  Describes the theory of operation of OSKAR, its implementation of the
+  measurement equation and its treatment of polarisation. Please read this
+  document to verify that OSKAR works as you expect.
+
+- \ref apps "Apps"<br>
+  Describes the available OSKAR applications.
+
+- \ref sky_model "Sky Model"<br>
+  Describes the format of the OSKAR sky model files.
+
+- \ref telescope_model "Telescope Model"<br>
+  Describes the format of the OSKAR telescope model files and directories.
+
+- \ref pointing_file "Pointing File"<br>
+  Describes the format of OSKAR pointing files.
+
+- \ref settings "Settings Files"<br>
+  Describes the settings used by OSKAR and the format of the OSKAR settings
+  files.
+
+- \ref binary_file "Binary File Format"<br>
+  Describes the format of binary files written by OSKAR applications
+  (for reference only).
+
+
+\section intro_faq FAQ
+
+This section attempts to address some frequently asked questions about OSKAR.
+If you have a question that is not answered here, please send it to
+oskar@oerc.ox.ac.uk and we will do our best to respond.
+
+-# <b>Which operating systems/platforms are supported?</b><br>
+OSKAR has been tested to compile and run correctly on various recent Linux 
+distributions, and recent versions of Mac OS X.
+If you encounter a problem with OSKAR while trying to compile or
+run it on a Linux or Mac OS X system, please report it to oskar@oerc.ox.ac.uk.
+
+-# <b>Does OSKAR require an NVIDIA GPU to work?</b><br>
+Yes. The core parts of the code are currently written using NVIDIA's CUDA
+language for general-purpose computing on GPUs, and this is only supported on
+NVIDIA hardware. Systems that do not have a CUDA-capable NVIDIA graphics
+processor will not be able to run the current version of OSKAR.
+
+-# <b>Which GPU model should I use to run OSKAR simulations?</b><br>
+OSKAR should be able to run on an NVIDIA GPU with compute capability of 2.0 
+or higher. We would recommend using a dedicated compute card which has decent 
+double precision floating point performance, as consumer gaming models only 
+work well in single precision (the exception being the Kepler NVIDIA Titans). 
+Recent OSKAR simulations have been running successfully using NVIDIA's 
+K20 and K40 compute cards in HPC clusters.
+
+-# <b>I have multiple NVIDIA GPUs in my computer. 
+Can OSKAR make use of all of them to run faster?</b><br>
+Yes, normally, as the CUDA device(s) to use can be specified at 
+run-time, and computational work is shared between them by splitting up the 
+sky model and the number of times within a visibility block. 
+Make sure you have more host CPU cores than GPU cards in your system if you 
+intend to use multiple GPUs. However, see also the answer to the next question 
+to check if using multiple GPUs in this way will be worthwhile for you.
+
+-# <b>Why does OSKAR run at virtually the same speed regardless of whether I
+use a sky model containing 10 sources or 100 sources?</b><br>
+OSKAR was designed to run simulations efficiently for aperture-array-based 
+telescopes and use large sky models containing many thousands of sources across 
+the whole sky. This is done by assigning a GPU thread for every source. 
+However, as modern GPUs have thousands of processing cores, there must be 
+enough work to do to keep the GPU occupied in this way. If your sky model 
+contains only 100 sources, you may only be using less than 5 percent of the 
+available hardware, so performance will be relatively poor when using small 
+sky models like this.
+
+-# <b>Is OpenCL supported?</b><br>
+No. However, depending on demand, support for OpenCL could potentially be
+added in a future release.
+
+-# <b>Are pre-built binary packages of OSKAR available?</b><br>
+No. Currently we don't have the resources to produce or support pre-built
+binaries. Please compile OSKAR for your target system using the available
+source code.
+
+-# <b>I found a bug!</b><br>
+Please let us know by sending an email to oskar@oerc.ox.ac.uk.
+
+-# <b>I found a bug, but I managed to fix it in my copy!</b><br>
+Wonderful! Please send us your patch by sending an email to
+oskar@oerc.ox.ac.uk. We'll test it and integrate it back into the main code
+base.
+
+-# <b>Please could you add feature/capability X?</b><br>
+Please check first to see if it's something that's already on the list in the
+planned roadmap. We will certainly consider new features but can't guarantee
+that we can implement all of them.
+
+\section intro_roadmap Roadmap
+
+Features are expected to be implemented in future versions of OSKAR as 
+listed below.
+
+\subsection roadmap_version_2_7_0 Planned for OSKAR 2.7.0 (estimated summer 2015)
+
+- Use of analytical and numerical dish patterns.
+- Swap of X and Y dipoles to match IAU polarisation axes on the sky.
+- Full 3D specification of individual element feed angles.
+- Full Stokes beam patterns.
+
+\subsection roadmap_version_2_8_0 Planned for OSKAR 2.8.0
+
+- A usable ionospheric model.
+
+
+\latexonly
+\newpage
+\endlatexonly
+
+\section intro_ack Acknowledgements
+
+OSKAR 2 has been developed using hardware donated by NVIDIA UK.
+
+OSKAR 2 directly links against or uses the following software libraries:
+- NVIDIA CUDA (http://www.nvidia.com/object/cuda_home.html)
+- LAPACK (http://www.netlib.org/lapack/)
+- DIERCKX for surface fitting using splines (http://netlib.org/dierckx/)
+- The Qt cross-platform application framework (http://qt.io/)
+- casacore for Measurement Set export (http://code.google.com/p/casacore/)
+- CFITSIO for FITS file export (http://heasarc.gsfc.nasa.gov/fitsio/)
+- Random123 for parallel random number generation <br>
+  (http://www.deshawresearch.com/resources_random123.html)
+- ezOptionParser (http://sourceforge.net/projects/ezoptionparser/)
+
+The following tools have been used during the development of OSKAR 2:
+- The CMake cross-platform build system (http://www.cmake.org/)
+- The Google Test unit-testing framework (http://code.google.com/p/googletest/)
+- The Eclipse source-code IDE (http://www.eclipse.org/)
+- The Valgrind memory checker (http://valgrind.org/)
+- The GCC toolchain (http://gcc.gnu.org/)
+- MATLAB (http://www.mathworks.co.uk/products/matlab/)
+
+This research has made use of SAOImage DS9, developed by 
+Smithsonian Astrophysical Observatory.
+
+\latexonly
+\vskip 2cm
+\endlatexonly
+
+<b>Revision History</b>
+
+<table>
+<tr><th>Revision</th><th>Date</th><th>Modification</th></tr>
+<tr><td>1</td><td>2012-04-23</td><td>Creation.</td></tr>
+<tr><td>2</td><td>2012-04-27</td>
+    <td>Added reference to theory of operation document.</td></tr>
+<tr><td>3</td><td>2012-11-23</td>
+    <td>Added reference to binary file format description.</td></tr>
+<tr><td>4</td><td>2013-03-01</td>
+    <td>Added references to documents for pointing files and MATLAB interface 
+    for OSKAR 2.2.0.</td></tr>
+<tr><td>5</td><td>2013-11-26</td>
+    <td>Added summary of OSKAR features (moved from the release notes
+    document) and updated file names of settings and release notes 
+    documents.</td></tr>
+<tr><td>6</td><td>2014-07-16</td>
+    <td>Updated feature summary and roadmap for OSKAR 2.5.0.</td></tr>
+<tr><td>7</td><td>2015-04-27</td>
+    <td>Updated FAQ and roadmap. Added attribution for use of Random123 
+    library.</td></tr>
+</table>
+
+*/

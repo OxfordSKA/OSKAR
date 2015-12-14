@@ -1,0 +1,119 @@
+/**
+
+\page release_notes Release Notes
+
+\section release_notes_intro Introduction
+
+OSKAR 2.6.1 is the current version of the OSKAR interferometry and beamforming
+simulation package.
+
+The function of these release notes is to summarise changes and new 
+features, and highlight any known issues.
+
+\section release_notes_changes Changes
+
+The changes for the current release are listed below. For earlier releases 
+please refer to older revisions of this document or the 
+<tt>ChangeLog.txt</tt> file in the OSKAR source tree.
+
+\subsection version_2_6_1 Version 2.6.1
+
+- Changed Measurement Set WEIGHT and SIGMA columns to use a tiled storage 
+      manager, for an approximate 40% improvement in the write performance.
+- Restored missing settings log to beam pattern FITS headers.
+
+\subsection version_2_6_0 Version 2.6.0
+
+- Re-wrote oskar_sim_interferometer application and changed internal 
+      visibility format to allow long interferometer simulations to run 
+      without running out of host memory. A dedicated host thread is now 
+      used to write visibility data, so that computation and file writes are 
+      overlapped as much as possible.
+- Re-wrote oskar_sim_beam_pattern application to allow use of multiple 
+      GPUs and to respect the maximum chunk size, so that large images can 
+      be made without running out of GPU memory. A dedicated host thread is now 
+      used to write image data, so that computation and file writes are 
+      overlapped as much as possible.
+- Added options to generate beam patterns for specified stations,
+      or all stations in the telescope model.
+- Added option to evaluate beam patterns for specified sky model positions, 
+      instead of an image grid.
+- Added option to generate horizon-frame all-sky beam patterns, instead of
+      using equatorial image coordinates.
+- Added options to produce time- and/or channel-averaged beam patterns.
+- Added options to produce average cross-power Stokes I beam patterns 
+      for selected stations.
+- Added options to save beam pattern data in plain text files instead of, 
+      or as well as, FITS images.
+- Added option to select whether cross-correlations or auto-correlations, 
+      or both, should be calculated.
+- Contribution from the w-term was omitted from the bandwidth smearing
+      calculation. This has now been fixed, so the apparent
+      amplitudes of sources far from the phase centre are slightly reduced.
+- Analytical time-average smearing was calculated incorrectly
+      for sources greater than 90 degrees from the phase centre.
+      This has now been fixed, so the apparent amplitudes of sources far
+      from the phase centre are slightly reduced.
+- Fixed an issue which could result in repeated log entries.
+- Fixed time range start in Measurement Set observation table.
+- Added the ability to specify station position errors.
+- Added the ability to use numerically-defined element patterns in
+      scalar mode.
+- Moved option to select polarisation mode into telescope model settings
+      group, so that scalar mode can also be used for beam pattern simulations.
+- Added the ability to use seconds (as well as hours, minutes and seconds)
+      to specify observation length, and the ability to use various
+      date formats (including MJD number and CASA-style date strings) to
+      specify the start time.
+- Moved and renamed option to allow station beam duplication into
+      telescope model group.
+- Added option to disable horizon clip in advanced sky model settings.
+      This can save a wasted check if sources are always above the horizon.
+- Removed deprecated config.txt telescope model file loader.
+- Removed the old orientation.txt telescope model file loader. 
+      Replaced this with feed_angle.txt to allow for a more complete 
+      specification of feed angles in the future.
+- Removed options to perform explicit time averaging using multiple
+      snapshots, as this was very slow.
+- Removed options to load GSM maps and HEALPix maps in K, as
+      amplitude conversion to Jy was not performed correctly.
+- Removed options to write OSKAR image files, as these are deprecated.
+      (Use FITS files instead.)
+- Switched to using a counter-based pseudo-random number generator
+      instead of cuRAND, for increased flexibility and performance.
+- Added CRC codes to data chunks in binary files.
+- Updated interface to oskar_settings_set binary to unset keys when the 
+      value is left empty.
+- Added oskar_vis_upgrade_format application to upgrade visibility files 
+      written by older versions of OSKAR to the new file format.
+- Removed oskar_vis_stats application. This functionality is now 
+      provided by oskar_vis_summary using the --stats option.
+- Major simplification of system noise settings.
+
+
+\section release_notes_roadmap Roadmap
+
+Features are expected to be implemented in future versions of OSKAR as 
+listed below.
+
+\subsection release_notes_version_2_7_0 Planned for OSKAR 2.7.0 (estimated summer 2015)
+
+- Use of analytical and numerical dish patterns.
+- Swap of X and Y dipoles to match IAU polarisation axes on the sky.
+- Full 3D specification of individual element feed angles.
+- Full Stokes beam patterns.
+
+\subsection release_notes_version_2_8_0 Planned for OSKAR 2.8.0
+
+- A usable ionospheric model.
+
+\section known_issues Known Issues
+
+While every effort has been made to identify and fix problems through 
+extensive testing, some will undoubtedly remain. Please report any issues 
+you find to oskar@oerc.ox.ac.uk and include a description of the problem, 
+your terminal output, your version of OSKAR, and details of your operating 
+system and hardware configuration. If necessary, we may also require 
+settings and/or data files to replicate the problem.
+
+*/

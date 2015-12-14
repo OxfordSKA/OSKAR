@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<s k="image">
+    <label>Image settings</label>
+    <apps>oskar_imager</apps>
+    <desc>
+        These settings are used when running the OSKAR imager. Note that the
+        OSKAR imager in its current form is not recommended for general use:
+        visibilities should normally be written to a Measurement Set for
+        imaging in CASA or other software.
+    </desc>
+    <s k="fov_deg"><label>Field-of-view [deg]</label>
+        <type name="UnsignedDouble" default="2.0"/>
+        <desc>Total field of view in degrees.</desc>
+    </s>
+    <s k="size"><label>Image dimension [pixels]</label>
+        <type name="IntPositive" default="256"/>
+        <desc>Image width in one dimension (e.g. a value of 256 would give a
+            256 by 256 image).</desc>
+    </s>
+    <s k="image_type"><label>Image type</label>
+        <type name="OptionList" default="I">
+            "Linear (XX,XY,YX,YY)",XX,XY,YX,YY,"Stokes (I,Q,U,V)",I,Q,U,V,PSF
+        </type>
+        <desc>
+            The type of image to generate. Note that the Stokes parameter
+            images (if selected) are uncalibrated, and are formed simply using
+            the standard combinations of the linear polarisations:
+            <ul>
+            <li>I = 0.5 (XX + YY)</li>
+            <li>Q = 0.5 (XX - YY)</li>
+            <li>U = 0.5 (XY + YX)</li>
+            <li>V = -0.5i (XY - YX)</li>
+            </ul>
+            The point spread function of the observation can be
+            generated using the PSF option.
+        </desc>
+    </s>
+    <s k="channel_snapshots"><label>Channel snapshots</label>
+        <type name="bool" default="true"/>
+        <desc>If true, then produce an image cube containing snapshots for each
+            frequency channel. If false, then use frequency-synthesis to stack
+            the channels in the final image.</desc>
+    </s>
+    <s k="channel_start"><label>Channel start</label>
+        <type name="uint" default="0"/>
+        <desc>The start channel index to include in the image or image cube.</desc>
+        <depends k="image/channel_snapshots" v="true"/>
+    </s>
+    <s k="channel_end"><label>Channel end</label>
+        <type name="IntRangeExt" default="max" >0,MAX,max</type>
+        <desc>The end channel index to include in the image or image cube.</desc>
+        <depends k="image/channel_snapshots" v="true"/>
+    </s>
+    <s k="time_snapshots"><label>Time snapshots</label>
+        <type name="bool" default="true"/>
+        <desc>If true, then produce an image cube containing snapshots
+            for each time step. If false, then use time-synthesis to stack
+            the times in the final image.</desc>
+    </s>
+    <s k="time_start"><label>Time start</label>
+        <type name="uint" default="0"/>
+        <desc>The start time index to include in the image or image cube.</desc>
+        <depends k="image/time_snapshots" v="true"/>
+    </s>
+    <s k="time_end"><label>Time end</label>
+        <type name="IntRangeExt" default="max" >0,MAX,max</type>
+        <desc>The end time index to include in the image or image cube.</desc>
+        <depends k="image/time_snapshots" v="true"/>
+    </s>
+    <!--
+    <s k="transform_type"><label>Transform type</label>
+        <type name="OptionList" default="DFT 2D">DFT 2D, DFT 3D, FFT</type>
+        <desc>The type of transform used to generate the image. More options
+            may be available in a later release.</desc>
+    </s>
+    -->
+    <s k="direction"><label>Image centre direction</label>
+        <type name="OptionList" default="Obs">
+            Observation direction,"RA, Dec."
+        </type>
+        <desc>Specifies the direction of the image phase centre.
+            <ul>
+            <li>If <b>Observation direction</b> is selected, the image is
+                centred on the pointing direction of the primary beam.</li>
+            <li>If <b>RA, Dec.</b> is selected, the image is centred on the
+                values of RA and Dec. found below.</li>
+            </ul>
+        </desc>
+        <s k="ra_deg"><label>Image centre RA (degrees)</label>
+            <type name="double" default="0"/>
+            <desc>The Right Ascension of the image phase centre. This value is
+                used if the image centre direction is set to 'RA, Dec.'.</desc>
+            <depends k="image/direction" v="RA, Dec"/>
+        </s>
+        <s k="dec_deg"><label>Image centre Dec. (degrees)</label>
+            <type name="double" default="0"/>
+            <desc>The Declination of the image phase centre. This value is used
+                if the image centre direction is set to 'RA, Dec.'.</desc>
+            <depends k="image/direction" v="RA, Dec"/>
+        </s>
+    </s>
+    <s k="input_vis_data"><label>Input OSKAR visibility data file</label>
+        <type name="InputFile"/>
+        <desc>Path to the input OSKAR visibility data file.</desc>
+    </s>
+    <s k="root_path"><label>Output image root path</label>
+        <type name="OutputFile"/>
+        <desc>Path consisting of the root of the image filename used to save
+            the output image. The full filename will be constructed as <code><b>
+            &amp;lt;root&amp;gt;_&amp;lt;image_type&amp;gt;.&amp;lt;extension&amp;gt;
+            </b></code>
+        </desc>
+    </s>
+    <s k="fits_image"><label>Save FITS image</label>
+        <type name="bool" default="true"/>
+        <desc>If true, save the image in FITS format.</desc>
+    </s>
+    <s k="overwrite"><label>Overwrite existing images</label>
+        <type name="bool" default="true"/>
+        <desc>
+            If <b>true</b>, existing image files will be overwritten. If
+            <b>false</b>, new image files of the same name will be created by
+            appending an number to the existing filename with the pattern:
+            <br/>
+            <code>&amp;nbsp;&amp;nbsp;<b>&amp;lt;filename&amp;gt;&amp;#8209;&amp;lt;N&amp;gt;.&amp;lt;extension&amp;gt;</b></code>,
+            <br/>where N starts at 1 and is incremented for each new image created.
+        </desc>
+    </s>
+</s>
