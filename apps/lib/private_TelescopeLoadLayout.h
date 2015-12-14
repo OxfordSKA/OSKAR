@@ -31,12 +31,12 @@
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-struct oskar_Settings;
+struct oskar_Settings_old;
 
 class TelescopeLoadLayout : public oskar_TelescopeLoadAbstract
 {
 public:
-    TelescopeLoadLayout(const oskar_Settings* settings);
+    TelescopeLoadLayout(const oskar_Settings_old* settings);
 
     virtual ~TelescopeLoadLayout();
 
@@ -53,7 +53,7 @@ public:
 private:
     static const std::string layout_file;
     static const std::string layout_ecef_file;
-    const oskar_Settings* settings_;
+    const oskar_Settings_old* settings_;
 };
 
 #endif /* OSKAR_TELESCOPE_LOAD_LAYOUT_H_ */

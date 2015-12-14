@@ -40,7 +40,10 @@
 #include <oskar_file_exists.h>
 #include <oskar_log.h>
 #include <oskar_set_up_telescope.h>
-#include <oskar_settings_free.h>
+#include <oskar_SettingsTree.hpp>
+#include <oskar_SettingsDeclareXml.hpp>
+#include <oskar_SettingsFileHandlerQSettings.hpp>
+#include <oskar_settings_old_free.h>
 #include <oskar_settings_load.h>
 #include <oskar_settings_log.h>
 #include <oskar_station_work.h>
@@ -51,6 +54,8 @@
 
 #include <fits/oskar_fits_write_axis_header.h>
 #include <fitsio.h>
+
+#include "settings/xml/oskar_sim_beam_pattern_xml_all.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -124,21 +129,28 @@ struct HostData
     /* Input data (settings, pixel positions, telescope model). */
     oskar_Mem *x, *y, *z;
     oskar_Telescope* tel;
-    oskar_Settings s;
+    oskar_Settings_old s;
+    oskar_SettingsFileHandlerQSettings* handler;
+    oskar_Settings* s2;
 
     /* Temporary arrays. */
     oskar_Mem* pix; /* Real-valued pixel array to write to file. */
     oskar_Mem* ctemp; /* Complex-valued array used for reordering. */
 
     /* Metadata. */
-    int coord_type, max_chunk_size, num_times, num_channels, num_chunks;
+    int coord_type, max_chunk_size;
+    int num_times, num_channels, num_chunks;
     int precision, width, height, num_pixels;
     int num_active_stations, *station_ids;
     int auto_power_I, cross_power_I, raw_data; /* Flags. */
     int separate_time_and_channel, average_time_and_channel; /* Flags. */
-    int average_single_axis;
     double lon0, lat0, phase_centre_deg[2], fov_deg[2];
-    double start_mjd_utc, delta_t, start_freq_hz, delta_f;
+    double start_mjd_utc, length_sec, delta_t, start_freq_hz, delta_f;
+    char average_single_axis, coord_frame_type, coord_grid_type, *root_path;
+
+    /* Settings log data. */
+    char* settings_log;
+    size_t settings_log_length;
 
     /* Data product list. */
     int num_data_products;
@@ -212,8 +224,7 @@ static void power_to_stokes_U(const oskar_Mem* power_in, int num_points,
 static void power_to_stokes_V(const oskar_Mem* power_in, int num_points,
         oskar_Mem* output, int* status);
 static void set_up_host_data(HostData* h, oskar_Log* log, int *status);
-static void create_averaged_products(HostData* h, const oskar_Settings* s,
-        int ta, int ca, int* status);
+static void create_averaged_products(HostData* h, int ta, int ca, int* status);
 static void set_up_device_data(DeviceData* d, const HostData* h, int* status);
 static void free_device_data(int num_gpus, int* cuda_device_ids,
         DeviceData* d, int* status);
@@ -223,7 +234,8 @@ static fitsfile* create_fits_file(const char* filename, int precision,
         int width, int height, int num_times, int num_channels,
         double centre_deg[2], double fov_deg[2], double start_time_mjd,
         double delta_time_sec, double start_freq_hz, double delta_freq_hz,
-        int horizon_mode, int* status);
+        int horizon_mode, const char* settings_log, size_t settings_log_length,
+        int* status);
 static int data_product_index(HostData* h, int data_product_type,
         int i_station, int time_average, int channel_average);
 static void new_fits_file(HostData* h, int data_product_type, int i_station,
@@ -245,7 +257,9 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
     int cp = 0, tp = 0, fp = 0; /* Loop indices for previous iteration. */
     DeviceData* d = 0;
     HostData* h = 0;
-    oskar_Settings* s = 0;
+    oskar_Settings_old* s = 0;
+    int num_failed_keys = 0;
+    char** failed_keys = 0;
 
     /* Create the host data structure (initialised with all bits zero). */
     h = (HostData*) calloc(1, sizeof(HostData));
@@ -259,7 +273,23 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
 
     /* Load the settings file. */
     oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
-    oskar_settings_load(s, log, settings_file, status);
+    h->s2 = oskar_settings_create();
+    oskar_settings_declare_xml(h->s2, oskar_sim_beam_pattern_XML_STR);
+    h->handler = oskar_settings_file_handler_qsettings_create();
+    oskar_settings_set_file_handler(h->s2, h->handler);
+    oskar_settings_load(h->s2, settings_file, &num_failed_keys, &failed_keys,
+            status);
+    for (i = 0; i < num_failed_keys; ++i)
+    {
+        oskar_log_warning(log, "Unable to set key '%s'", failed_keys[i]);
+        free(failed_keys[i]);
+    }
+    free(failed_keys);
+    if (*status) { free_host_data(h, status); return; }
+
+    /* Load the settings file. */
+    oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
+    oskar_settings_old_load(s, log, settings_file, status);
     if (*status) { free_host_data(h, status); return; }
 
     /* Log the relevant settings. (TODO fix/automate these functions) */
@@ -346,7 +376,7 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
             cudaSetDevice(s->sim.cuda_device_ids[gpu_id]);
 
         /* Set ranges of inner and outer loops based on averaging mode. */
-        if (h->average_single_axis != OSKAR_BEAM_PATTERN_AVERAGE_TIME)
+        if (h->average_single_axis != 'T')
         {
             num_outer = h->num_times;
             num_inner = h->num_channels; /* Channel on inner loop. */
@@ -365,8 +395,7 @@ void oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log,
                 for (i_inner = 0; i_inner < num_inner; ++i_inner)
                 {
                     /* Set time and channel indices based on averaging mode. */
-                    if (h->average_single_axis !=
-                            OSKAR_BEAM_PATTERN_AVERAGE_TIME)
+                    if (h->average_single_axis != 'T')
                     {
                         t = i_outer;
                         f = i_inner;
@@ -426,7 +455,6 @@ static void sim_chunks(int gpu_id, DeviceData* d, const HostData* h,
 {
     int chunk_size, i_chunk, i;
     double dt_dump, mjd, gast, freq_hz;
-    const oskar_Settings* s = 0;
     oskar_Mem *input_alias, *output_alias;
 
     /* Check if safe to proceed. */
@@ -439,11 +467,10 @@ static void sim_chunks(int gpu_id, DeviceData* d, const HostData* h,
 
     /* Get time and frequency values. */
     oskar_timer_resume(d->tmr_compute);
-    s = &h->s;
-    dt_dump = s->obs.dt_dump_days;
+    dt_dump = h->delta_t / 86400.0;
     mjd = h->start_mjd_utc + dt_dump * (i_time + 0.5);
     gast = oskar_convert_mjd_to_gast_fast(mjd);
-    freq_hz = s->obs.start_frequency_hz + i_channel * s->obs.frequency_inc_hz;
+    freq_hz = h->start_freq_hz + i_channel * h->delta_f;
 
     /* Work out the size of the chunk. */
     chunk_size = h->max_chunk_size;
@@ -1073,16 +1100,87 @@ static void power_to_stokes_V(const oskar_Mem* power_in, int num_points,
 
 static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
 {
-    int i, pol_mode;
-    const oskar_Settings* s = 0;
+    int i, pol_mode, items = 0, *tmp_i;
+    size_t j;
     const char* r;
+    double *tmp_d;
 
     /* Set up telescope model. */
-    s = &h->s;
-    h->tel = oskar_set_up_telescope(s, log, status);
+    h->tel = oskar_set_up_telescope(&h->s, log, status);
     if (*status) return;
 
     /* Get values from settings. */
+    h->precision = oskar_settings_to_int(h->s2, "simulator/double_precision",
+            status) ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    h->max_chunk_size = oskar_settings_to_int(h->s2,
+            "simulator/max_sources_per_chunk", status);
+    oskar_settings_begin_group(h->s2, "beam_pattern");
+    h->root_path = oskar_settings_to_string(h->s2, "root_path", status);
+    r = h->root_path;
+    h->coord_frame_type =
+            oskar_settings_first_letter(h->s2, "coordinate_frame", status);
+    h->coord_grid_type =
+            oskar_settings_first_letter(h->s2, "coordinate_type", status);
+    oskar_settings_begin_group(h->s2, "beam_image");
+    tmp_i = oskar_settings_to_int_list(h->s2, "size", &items, status);
+    if (items == 1)
+    {
+        h->width = tmp_i[0];
+        h->height = tmp_i[0];
+    }
+    else if (items > 1)
+    {
+        h->width = tmp_i[0];
+        h->height = tmp_i[1];
+    }
+    free(tmp_i);
+    tmp_d = oskar_settings_to_double_list(h->s2, "fov_deg", &items, status);
+    if (items == 1)
+    {
+        h->fov_deg[0] = tmp_d[0];
+        h->fov_deg[1] = tmp_d[0];
+    }
+    else if (items > 1)
+    {
+        h->fov_deg[0] = tmp_d[0];
+        h->fov_deg[1] = tmp_d[1];
+    }
+    free(tmp_d);
+    oskar_settings_end_group(h->s2); /* End beam_image */
+    oskar_settings_begin_group(h->s2, "output");
+    h->separate_time_and_channel = oskar_settings_to_int(h->s2,
+            "separate_time_and_channel", status);
+    h->average_time_and_channel = oskar_settings_to_int(h->s2,
+            "average_time_and_channel", status);
+    h->average_single_axis = oskar_settings_first_letter(h->s2,
+            "average_single_axis", status);
+    oskar_settings_end_group(h->s2); /* End output */
+    oskar_settings_end_group(h->s2); /* End beam_pattern */
+
+    oskar_settings_begin_group(h->s2, "observation");
+    h->num_times = oskar_settings_to_int(h->s2, "num_time_steps", status);
+    h->num_channels = oskar_settings_to_int(h->s2, "num_channels", status);
+    h->start_mjd_utc = oskar_settings_to_double(h->s2,
+            "start_time_utc", status);
+    h->start_freq_hz = oskar_settings_to_double(h->s2,
+            "start_frequency_hz", status);
+    h->length_sec = oskar_settings_to_double(h->s2, "length", status);
+    h->delta_t = h->length_sec / h->num_times;
+    h->delta_f = oskar_settings_to_double(h->s2, "frequency_inc_hz", status);
+    h->phase_centre_deg[0] = oskar_settings_to_double(h->s2,
+            "phase_centre_ra_deg", status);
+    h->phase_centre_deg[1] = oskar_settings_to_double(h->s2,
+            "phase_centre_dec_deg", status);
+    oskar_settings_end_group(h->s2); /* End observation */
+
+    /* Check for settings errors. */
+    if (*status)
+    {
+        oskar_log_error(log, "Unable to read settings (code = %d).", *status);
+        return;
+    }
+
+    /*
     h->precision = s->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     h->width                     = s->beam_pattern.size[0];
     h->height                    = s->beam_pattern.size[1];
@@ -1101,10 +1199,19 @@ static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
     h->delta_f                   = s->obs.frequency_inc_hz;
     h->max_chunk_size            = s->sim.max_sources_per_chunk;
     r                            = s->beam_pattern.root_path;
+    */
     pol_mode                     = oskar_telescope_pol_mode(h->tel);
 
+    /* Check root name exists. */
+    if (!r)
+    {
+        oskar_log_error(log, "No output file name specified.");
+        *status = OSKAR_ERR_SETTINGS_BEAM_PATTERN;
+        return;
+    }
+
     /* Get station ID(s) and simulation flags. */
-    h->num_active_stations = s->beam_pattern.num_active_stations;
+    h->num_active_stations = h->s.beam_pattern.num_active_stations;
     if (h->num_active_stations <= 0)
     {
         h->num_active_stations = oskar_telescope_num_stations(h->tel);
@@ -1115,24 +1222,41 @@ static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
     {
         h->station_ids = calloc(h->num_active_stations, sizeof(int));
         for (i = 0; i < h->num_active_stations; ++i)
-            h->station_ids[i] = s->beam_pattern.station_ids[i];
+            h->station_ids[i] = h->s.beam_pattern.station_ids[i];
     }
-    h->raw_data = s->beam_pattern.station_text_raw_complex ||
-            s->beam_pattern.station_fits_amp ||
-            s->beam_pattern.station_text_amp ||
-            s->beam_pattern.station_fits_phase ||
-            s->beam_pattern.station_text_phase ||
-            s->beam_pattern.station_fits_ixr ||
-            s->beam_pattern.station_text_ixr;
+    oskar_settings_begin_group(h->s2, "beam_pattern/station_outputs");
+    h->raw_data =
+            oskar_settings_to_int(h->s2, "text_file/raw_complex", status) ||
+            oskar_settings_to_int(h->s2, "text_file/amp", status) ||
+            oskar_settings_to_int(h->s2, "text_file/phase", status) ||
+            oskar_settings_to_int(h->s2, "fits_image/amp", status) ||
+            oskar_settings_to_int(h->s2, "fits_image/phase", status);
+#ifdef ENABLE_IXR
+    h->raw_data |=
+            oskar_settings_to_int(h->s2, "text_file/ixr", status) ||
+            oskar_settings_to_int(h->s2, "fits_image/ixr", status);
+#endif
+    oskar_settings_end_group(h->s2);
+    oskar_settings_begin_group(h->s2, "beam_pattern/telescope_outputs");
     h->cross_power_I =
-            s->beam_pattern.telescope_fits_cross_power_stokes_i_amp ||
-            s->beam_pattern.telescope_fits_cross_power_stokes_i_phase ||
-            s->beam_pattern.telescope_text_cross_power_stokes_i_amp ||
-            s->beam_pattern.telescope_text_cross_power_stokes_i_phase ||
-            s->beam_pattern.telescope_text_cross_power_stokes_i_raw_complex;
+            oskar_settings_to_int(h->s2,
+                    "fits_image/cross_power_stokes_i_amp", status) ||
+            oskar_settings_to_int(h->s2,
+                    "fits_image/cross_power_stokes_i_phase", status) ||
+            oskar_settings_to_int(h->s2,
+                    "text_file/cross_power_stokes_i_amp", status) ||
+            oskar_settings_to_int(h->s2,
+                    "text_file/cross_power_stokes_i_phase", status) ||
+            oskar_settings_to_int(h->s2,
+                    "text_file/cross_power_stokes_i_raw_complex", status);
+    oskar_settings_end_group(h->s2);
+    oskar_settings_begin_group(h->s2, "beam_pattern/station_outputs");
     h->auto_power_I =
-            s->beam_pattern.station_fits_auto_power_stokes_i ||
-            s->beam_pattern.station_text_auto_power_stokes_i;
+            oskar_settings_to_int(h->s2,
+                    "fits_image/auto_power_stokes_i", status) ||
+            oskar_settings_to_int(h->s2,
+                    "text_file/auto_power_stokes_i", status);
+    oskar_settings_end_group(h->s2);
 
     /* Check settings make logical sense. */
     if (h->cross_power_I && h->num_active_stations < 2)
@@ -1151,8 +1275,8 @@ static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
             OSKAR_SPHERICAL_TYPE_EQUATORIAL,
             oskar_telescope_phase_centre_ra_rad(h->tel),
             oskar_telescope_phase_centre_dec_rad(h->tel),
-            &s->beam_pattern,
-            &h->coord_type, &h->lon0, &h->lat0, h->x, h->y, h->z, status);
+            h->s2, &h->coord_type, &h->lon0, &h->lat0,
+            h->x, h->y, h->z, status);
 
     /* Work out how many pixel chunks have to be processed. */
     h->num_chunks = (h->num_pixels + h->max_chunk_size - 1) / h->max_chunk_size;
@@ -1163,18 +1287,30 @@ static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
     h->ctemp = oskar_mem_create(h->precision | OSKAR_COMPLEX, OSKAR_CPU,
             h->max_chunk_size, status);
 
+    /* Get the contents of the log at this point so we can write a
+     * reasonable file header. Replace newlines with zeros. */
+    h->settings_log = oskar_log_file_data(log, &h->settings_log_length);
+    for (j = 0; j < h->settings_log_length; ++j)
+    {
+        if (h->settings_log[j] == '\n') h->settings_log[j] = 0;
+        if (h->settings_log[j] == '\r') h->settings_log[j] = ' ';
+    }
+
     /* Create a file for each requested data product. */
     /* Voltage amplitude and phase can only be generated if there is
      * no averaging. */
     if (h->separate_time_and_channel)
     {
         /* Create station-level data products. */
+        oskar_settings_begin_group(h->s2, "beam_pattern");
+        oskar_settings_begin_group(h->s2, "station_outputs");
         for (i = 0; i < h->num_active_stations; ++i)
         {
             /* Text file. */
-            if (s->beam_pattern.station_text_raw_complex)
+            oskar_settings_begin_group(h->s2, "text_file");
+            if (oskar_settings_to_int(h->s2, "raw_complex", status))
                 new_text_file(h, RAW_COMPLEX, i, 0, 0, r, status);
-            if (s->beam_pattern.station_text_amp)
+            if (oskar_settings_to_int(h->s2, "amp", status))
             {
                 if (pol_mode == OSKAR_POL_MODE_SCALAR)
                     new_text_file(h, AMP_SCALAR, i, 0, 0, r, status);
@@ -1186,7 +1322,7 @@ static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
                     new_text_file(h, AMP_YY, i, 0, 0, r, status);
                 }
             }
-            if (s->beam_pattern.station_text_phase)
+            if (oskar_settings_to_int(h->s2, "phase", status))
             {
                 if (pol_mode == OSKAR_POL_MODE_SCALAR)
                     new_text_file(h, PHASE_SCALAR, i, 0, 0, r, status);
@@ -1198,16 +1334,19 @@ static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
                     new_text_file(h, PHASE_YY, i, 0, 0, r, status);
                 }
             }
-            if (s->beam_pattern.station_text_ixr &&
+#ifdef ENABLE_IXR
+            if (oskar_settings_to_int(h->s2, "ixr", status) &&
                     pol_mode == OSKAR_POL_MODE_FULL)
                 new_text_file(h, IXR, i, 0, 0, r, status);
+#endif
+            oskar_settings_end_group(h->s2); /* End text_file */
 
             /* Can only create images if coordinates are on a grid. */
-            if (s->beam_pattern.coord_grid_type !=
-                    OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE) continue;
+            if (h->coord_grid_type != 'B') continue;
 
             /* FITS file. */
-            if (s->beam_pattern.station_fits_amp)
+            oskar_settings_begin_group(h->s2, "fits_image");
+            if (oskar_settings_to_int(h->s2, "amp", status))
             {
                 if (pol_mode == OSKAR_POL_MODE_SCALAR)
                     new_fits_file(h, AMP_SCALAR, i, 0, 0, r, status);
@@ -1219,7 +1358,7 @@ static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
                     new_fits_file(h, AMP_YY, i, 0, 0, r, status);
                 }
             }
-            if (s->beam_pattern.station_fits_phase)
+            if (oskar_settings_to_int(h->s2, "phase", status))
             {
                 if (pol_mode == OSKAR_POL_MODE_SCALAR)
                     new_fits_file(h, PHASE_SCALAR, i, 0, 0, r, status);
@@ -1231,21 +1370,26 @@ static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
                     new_fits_file(h, PHASE_YY, i, 0, 0, r, status);
                 }
             }
-            if (s->beam_pattern.station_fits_ixr &&
+#ifdef ENABLE_IXR
+            if (oskar_settings_to_int(h->s2, "ixr", status) &&
                     pol_mode == OSKAR_POL_MODE_FULL)
                 new_fits_file(h, IXR, i, 0, 0, r, status);
+#endif
+            oskar_settings_end_group(h->s2); /* End fits_image */
         } /* End loop over stations. */
+        oskar_settings_end_group(h->s2); /* End station_outputs */
+        oskar_settings_end_group(h->s2); /* End beam_pattern */
     } /* End check on averaging mode. */
 
     /* Create data products that can be averaged. */
     if (h->separate_time_and_channel)
-        create_averaged_products(h, s, 0, 0, status);
+        create_averaged_products(h, 0, 0, status);
     if (h->average_time_and_channel)
-        create_averaged_products(h, s, 1, 1, status);
-    if (h->average_single_axis == OSKAR_BEAM_PATTERN_AVERAGE_CHANNEL)
-        create_averaged_products(h, s, 0, 1, status);
-    else if (h->average_single_axis == OSKAR_BEAM_PATTERN_AVERAGE_TIME)
-        create_averaged_products(h, s, 1, 0, status);
+        create_averaged_products(h, 1, 1, status);
+    if (h->average_single_axis == 'C')
+        create_averaged_products(h, 0, 1, status);
+    else if (h->average_single_axis == 'T')
+        create_averaged_products(h, 1, 0, status);
 
     /* Check that at least one output file will be generated. */
     if (h->num_data_products == 0 && !*status)
@@ -1256,19 +1400,22 @@ static void set_up_host_data(HostData* h, oskar_Log* log, int *status)
 }
 
 
-static void create_averaged_products(HostData* h, const oskar_Settings* s,
-        int ta, int ca, int* status)
+static void create_averaged_products(HostData* h, int ta, int ca, int* status)
 {
     int i, pol_mode;
     const char* r;
 
     /* Create station-level data products that can be averaged. */
-    r = s->beam_pattern.root_path;
+    if (*status) return;
+    r = h->root_path;
     pol_mode = oskar_telescope_pol_mode(h->tel);
+    oskar_settings_begin_group(h->s2, "beam_pattern");
+    oskar_settings_begin_group(h->s2, "station_outputs");
     for (i = 0; i < h->num_active_stations; ++i)
     {
         /* Text file. */
-        if (s->beam_pattern.station_text_auto_power_stokes_i)
+        oskar_settings_begin_group(h->s2, "text_file");
+        if (oskar_settings_to_int(h->s2, "auto_power_stokes_i", status))
         {
             new_text_file(h, AUTO_POWER_I_I, i, ta, ca, r, status);
             if (pol_mode == OSKAR_POL_MODE_FULL)
@@ -1278,13 +1425,14 @@ static void create_averaged_products(HostData* h, const oskar_Settings* s,
                 new_text_file(h, AUTO_POWER_I_V, i, ta, ca, r, status);
             }
         }
+        oskar_settings_end_group(h->s2); /* End text_file */
 
         /* Can only create images if coordinates are on a grid. */
-        if (s->beam_pattern.coord_grid_type !=
-                OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE) continue;
+        if (h->coord_grid_type != 'B') continue;
 
         /* FITS file. */
-        if (s->beam_pattern.station_fits_auto_power_stokes_i)
+        oskar_settings_begin_group(h->s2, "fits_image");
+        if (oskar_settings_to_int(h->s2, "auto_power_stokes_i", status))
         {
             new_fits_file(h, AUTO_POWER_I_I, i, ta, ca, r, status);
             if (pol_mode == OSKAR_POL_MODE_FULL)
@@ -1294,12 +1442,17 @@ static void create_averaged_products(HostData* h, const oskar_Settings* s,
                 new_fits_file(h, AUTO_POWER_I_V, i, ta, ca, r, status);
             }
         }
+        oskar_settings_end_group(h->s2); /* End fits_image */
     } /* End loop over stations. */
+    oskar_settings_end_group(h->s2); /* End station_outputs */
 
     /* Text file. */
-    if (s->beam_pattern.telescope_text_cross_power_stokes_i_raw_complex)
+    oskar_settings_begin_group(h->s2, "telescope_outputs");
+    oskar_settings_begin_group(h->s2, "text_file");
+    if (oskar_settings_to_int(h->s2,
+            "cross_power_stokes_i_raw_complex", status))
         new_text_file(h, CROSS_POWER_I_RAW_COMPLEX, -1, ta, ca, r, status);
-    if (s->beam_pattern.telescope_text_cross_power_stokes_i_amp)
+    if (oskar_settings_to_int(h->s2, "cross_power_stokes_i_amp", status))
     {
         new_text_file(h, CROSS_POWER_I_I_AMP, -1, ta, ca, r, status);
         if (pol_mode == OSKAR_POL_MODE_FULL)
@@ -1309,7 +1462,7 @@ static void create_averaged_products(HostData* h, const oskar_Settings* s,
             new_text_file(h, CROSS_POWER_I_V_AMP, -1, ta, ca, r, status);
         }
     }
-    if (s->beam_pattern.telescope_text_cross_power_stokes_i_phase)
+    if (oskar_settings_to_int(h->s2, "cross_power_stokes_i_phase", status))
     {
         new_text_file(h, CROSS_POWER_I_I_PHASE, -1, ta, ca, r, status);
         if (pol_mode == OSKAR_POL_MODE_FULL)
@@ -1319,13 +1472,14 @@ static void create_averaged_products(HostData* h, const oskar_Settings* s,
             new_text_file(h, CROSS_POWER_I_V_PHASE, -1, ta, ca, r, status);
         }
     }
+    oskar_settings_end_group(h->s2); /* End text_file */
 
     /* Can only create images if coordinates are on a grid. */
-    if (s->beam_pattern.coord_grid_type !=
-            OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE) return;
+    if (h->coord_grid_type != 'B') return;
 
     /* FITS file. */
-    if (s->beam_pattern.telescope_fits_cross_power_stokes_i_amp)
+    oskar_settings_begin_group(h->s2, "fits_image");
+    if (oskar_settings_to_int(h->s2, "cross_power_stokes_i_amp", status))
     {
         new_fits_file(h, CROSS_POWER_I_I_AMP, -1, ta, ca, r, status);
         if (pol_mode == OSKAR_POL_MODE_FULL)
@@ -1335,7 +1489,7 @@ static void create_averaged_products(HostData* h, const oskar_Settings* s,
             new_fits_file(h, CROSS_POWER_I_V_AMP, -1, ta, ca, r, status);
         }
     }
-    if (s->beam_pattern.telescope_fits_cross_power_stokes_i_phase)
+    if (oskar_settings_to_int(h->s2, "cross_power_stokes_i_phase", status))
     {
         new_fits_file(h, CROSS_POWER_I_I_PHASE, -1, ta, ca, r, status);
         if (pol_mode == OSKAR_POL_MODE_FULL)
@@ -1345,6 +1499,9 @@ static void create_averaged_products(HostData* h, const oskar_Settings* s,
             new_fits_file(h, CROSS_POWER_I_V_PHASE, -1, ta, ca, r, status);
         }
     }
+    oskar_settings_end_group(h->s2); /* End fits_image */
+    oskar_settings_end_group(h->s2); /* End telescope_outputs */
+    oskar_settings_end_group(h->s2); /* End beam_pattern */
 }
 
 
@@ -1361,12 +1518,16 @@ static fitsfile* create_fits_file(const char* filename, int precision,
         int width, int height, int num_times, int num_channels,
         double centre_deg[2], double fov_deg[2], double start_time_mjd,
         double delta_time_sec, double start_freq_hz, double delta_freq_hz,
-        int horizon_mode, int* status)
+        int horizon_mode, const char* settings_log, size_t settings_log_length,
+        int* status)
 {
     int imagetype;
-    long naxes[4];
+    long naxes[4], naxes_dummy[4] = {1l, 1l, 1l, 1l};
     double delta;
     fitsfile* f = 0;
+    const char* line;
+    size_t length;
+    if (*status) return 0;
 
     /* Create a new FITS file and write the image headers. */
     if (oskar_file_exists(filename)) remove(filename);
@@ -1376,7 +1537,7 @@ static fitsfile* create_fits_file(const char* filename, int precision,
     naxes[2]  = num_channels;
     naxes[3]  = num_times;
     fits_create_file(&f, filename, status);
-    fits_create_img(f, imagetype, 4, naxes, status);
+    fits_create_img(f, imagetype, 4, naxes_dummy, status);
     fits_write_date(f, status);
     fits_write_key_str(f, "TELESCOP",
             "OSKAR " OSKAR_VERSION_STR, NULL, status);
@@ -1415,6 +1576,30 @@ static fitsfile* create_fits_file(const char* filename, int precision,
         fits_write_key_dbl(f, "OBSDEC", centre_deg[1], 10, "DEC", status);
     }
 
+    /* Write the settings log up to this point as HISTORY comments. */
+    line = settings_log;
+    length = settings_log_length;
+    for (;;)
+    {
+        const char* eol;
+        fits_write_history(f, line, status);
+        eol = (const char*) memchr(line, '\0', length);
+        if (!eol) break;
+        eol += 1;
+        length -= (eol - line);
+        line = eol;
+    }
+
+    /* Update header keywords with the correct axis lengths.
+     * Needs to be done here because CFITSIO doesn't let us write only the
+     * file header with the correct axis lengths to start with. This trick
+     * allows us to create a small dummy image block to write only the headers,
+     * and not waste effort moving a huge block of zeros within the file. */
+    fits_update_key_lng(f, "NAXIS1", naxes[0], 0, status);
+    fits_update_key_lng(f, "NAXIS2", naxes[1], 0, status);
+    fits_update_key_lng(f, "NAXIS3", naxes[2], 0, status);
+    fits_update_key_lng(f, "NAXIS4", naxes[3], 0, status);
+
     return f;
 }
 
@@ -1447,7 +1632,7 @@ static void new_fits_file(HostData* h, int data_product_type, int i_station,
         int time_average, int channel_average, const char* rootname,
         int* status)
 {
-    int i, buflen;
+    int i, buflen, horizon_mode;
     char* name = 0;
     fitsfile* f;
     if (*status) return;
@@ -1471,13 +1656,13 @@ static void new_fits_file(HostData* h, int data_product_type, int i_station,
     }
 
     /* Open the file. */
+    horizon_mode = h->coord_frame_type == 'H';
     f = create_fits_file(name, h->precision, h->width, h->height,
             (time_average ? 1 : h->num_times),
             (channel_average ? 1 : h->num_channels),
             h->phase_centre_deg, h->fov_deg, h->start_mjd_utc,
             h->delta_t, h->start_freq_hz, h->delta_f,
-            h->s.beam_pattern.coord_frame_type ==
-                    OSKAR_BEAM_PATTERN_FRAME_HORIZON, status);
+            horizon_mode, h->settings_log, h->settings_log_length, status);
     if (!f || *status)
     {
         *status = OSKAR_ERR_FILE_IO;
@@ -1533,7 +1718,7 @@ static void new_text_file(HostData* h, int data_product_type, int i_station,
         fprintf(f, "# Beam pixel list for telescope (interferometer)\n");
     fprintf(f, "# Filename is '%s'\n", name);
     fprintf(f, "# Dimension order (slowest to fastest) is:\n");
-    if (h->average_single_axis != OSKAR_BEAM_PATTERN_AVERAGE_TIME)
+    if (h->average_single_axis != 'T')
         fprintf(f, "#     [pixel chunk], [time], [channel], [pixel index]\n");
     else
         fprintf(f, "#     [pixel chunk], [channel], [time], [pixel index]\n");
@@ -1628,10 +1813,10 @@ static void set_up_device_data(DeviceData* d, const HostData* h, int* status)
                 OSKAR_CPU, max_chunk_size, status);
         d->auto_power_I_cpu[1] = oskar_mem_create(beam_type,
                 OSKAR_CPU, max_chunk_size, status);
-        if (h->average_single_axis == OSKAR_BEAM_PATTERN_AVERAGE_TIME)
+        if (h->average_single_axis == 'T')
             d->auto_power_I_time_avg = oskar_mem_create(beam_type,
                     OSKAR_CPU, max_chunk_size, status);
-        if (h->average_single_axis == OSKAR_BEAM_PATTERN_AVERAGE_CHANNEL)
+        if (h->average_single_axis == 'C')
             d->auto_power_I_channel_avg = oskar_mem_create(beam_type,
                     OSKAR_CPU, max_chunk_size, status);
         if (h->average_time_and_channel)
@@ -1651,10 +1836,10 @@ static void set_up_device_data(DeviceData* d, const HostData* h, int* status)
                 OSKAR_CPU, max_chunk_sources, status);
         d->cross_power_I_cpu[1] = oskar_mem_create(beam_type,
                 OSKAR_CPU, max_chunk_sources, status);
-        if (h->average_single_axis == OSKAR_BEAM_PATTERN_AVERAGE_TIME)
+        if (h->average_single_axis == 'T')
             d->cross_power_I_time_avg = oskar_mem_create(beam_type,
                     OSKAR_CPU, max_chunk_sources, status);
-        if (h->average_single_axis == OSKAR_BEAM_PATTERN_AVERAGE_CHANNEL)
+        if (h->average_single_axis == 'C')
             d->cross_power_I_channel_avg = oskar_mem_create(beam_type,
                     OSKAR_CPU, max_chunk_sources, status);
         if (h->average_time_and_channel)
@@ -1723,7 +1908,11 @@ static void free_host_data(HostData* h, int* status)
     oskar_timer_free(h->tmr_load);
     oskar_timer_free(h->tmr_sim);
     oskar_timer_free(h->tmr_write);
-    oskar_settings_free(&h->s);
+    oskar_settings_file_handler_qsettings_free(h->handler);
+    oskar_settings_free(h->s2);
+    oskar_settings_old_free(&h->s);
+    free(h->root_path);
+    free(h->settings_log);
     free(h->station_ids);
     free(h->data_products);
     free(h);

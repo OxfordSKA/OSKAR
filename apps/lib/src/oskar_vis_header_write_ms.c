@@ -29,6 +29,7 @@
 #include "apps/lib/oskar_vis_header_write_ms.h"
 #include "apps/lib/oskar_dir.h"
 
+#include <oskar_version.h>
 #include <oskar_cmath.h>
 #include <oskar_measurement_set.h>
 #include <oskar_vis_header.h>
@@ -84,8 +85,9 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
             oskar_dir_remove(ms_path);
 
         /* Create the Measurement Set. */
-        ms = oskar_ms_create(ms_path, ra_rad, dec_rad, num_pols, num_channels,
-                ref_freq_hz, chan_width, num_stations, autocorr, crosscorr);
+        ms = oskar_ms_create(ms_path, "OSKAR " OSKAR_VERSION_STR,
+                ra_rad, dec_rad, num_pols, num_channels, ref_freq_hz,
+                chan_width, num_stations, autocorr, crosscorr);
         if (!ms)
         {
             *status = OSKAR_ERR_FILE_IO;
@@ -109,7 +111,7 @@ oskar_MeasurementSet* oskar_vis_header_write_ms(const oskar_VisHeader* hdr,
         }
 
         /* Add the settings. */
-        oskar_ms_add_settings(ms,
+        oskar_ms_add_history(ms, "OSKAR_SETTINGS",
                 oskar_mem_char_const(oskar_vis_header_settings_const(hdr)),
                 oskar_mem_length(oskar_vis_header_settings_const(hdr)));
     }

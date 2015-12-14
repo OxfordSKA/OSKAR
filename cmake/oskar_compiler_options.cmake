@@ -42,7 +42,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/math
     ${PROJECT_SOURCE_DIR}/ms
     ${PROJECT_SOURCE_DIR}/settings
-    ${PROJECT_SOURCE_DIR}/settings/list
+    ${PROJECT_SOURCE_DIR}/settings/containers
     ${PROJECT_SOURCE_DIR}/settings/load
     ${PROJECT_SOURCE_DIR}/settings/struct
     ${PROJECT_SOURCE_DIR}/settings/types
@@ -248,15 +248,16 @@ if (CUDA_FOUND)
 
     message("===============================================================================")
     if (NOT DEFINED CUDA_ARCH OR CUDA_ARCH MATCHES ALL|[Aa]ll)
-        message("-- INFO: Building CUDA device code for all Fermi and Kepler architectures")
+        message("-- INFO: Building CUDA device code for Fermi, Kepler and Maxwell architectures")
         message("-- INFO: The target CUDA architecture can be specified by using the option:")
         message("-- INFO:   -DCUDA_ARCH=<arch>")
         message("-- INFO: where <arch> is one of:")
-        message("-- INFO:   1.3, 2.0, 2.1, 3.0, 3.5, or ALL.")
+        message("-- INFO:   1.3, 2.0, 2.1, 3.0, 3.5, 5.0 or ALL.")
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_20)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_21)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_30,code=sm_30)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_35,code=sm_35)
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_50,code=sm_50)
     elseif (CUDA_ARCH MATCHES 1.3)
         message("-- INFO: Building CUDA device code for architecture 1.3")
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_13,code=sm_13)
@@ -272,6 +273,9 @@ if (CUDA_FOUND)
     elseif (CUDA_ARCH MATCHES 3.5)
         message("-- INFO: Building CUDA device code for architecture 3.5")
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_35,code=sm_35)
+    elseif (CUDA_ARCH MATCHES 5.0)
+        message("-- INFO: Building CUDA device code for architecture 5.0")
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_50,code=sm_50)
     else()
         message(FATAL_ERROR "-- CUDA_ARCH ${CUDA_ARCH} not recognised!")
     endif()

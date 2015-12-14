@@ -53,8 +53,8 @@ int main(int argc, char** argv)
     oskar_log_list(log, 'M', 0, "Running binary %s", argv[0]);
 
     const char* settings_file = opt.getArg(0);
-    oskar_Settings settings;
-    oskar_settings_load(&settings, log, settings_file, &error);
+    oskar_Settings_old settings;
+    oskar_settings_old_load(&settings, log, settings_file, &error);
     oskar_log_set_keep_file(log, settings.sim.keep_log_file);
 
     oskar_log_settings_telescope(log, &settings);

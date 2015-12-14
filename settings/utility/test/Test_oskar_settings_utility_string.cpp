@@ -35,6 +35,7 @@
 #include <climits>
 #include <limits>
 #include <oskar_settings_utility_string.hpp>
+#include <cmath>
 
 using namespace std;
 
@@ -173,25 +174,70 @@ TEST(oskar_settings_utility, string_starts_with)
     }
 }
 
-TEST(oskar_settings_utility, double_to_string)
+static int get_precision(double value) {
+    int n = 17;
+    if (value != 0.0 && value > 1.0) {
+        n -= (floor(log10(value)) + 1);
+    }
+    return n;
+}
+
+TEST(oskar_settings_utility, double_to_string_2)
 {
-    double d;
     {
-        d = 0.1;
-        ASSERT_STREQ("0.1", oskar_settings_utility_double_to_string(d).c_str());
+        double value = 100.0000012341111;
+        cout << endl;
+        cout << "Input: " << setprecision(17) << value << " " << get_precision(value) << endl;
+        double d = value;
+        int n = get_precision(value);
+        cout << " f: " << oskar_settings_utility_double_to_string_2(d, 'f', n) << endl;
+        cout << " e: " << oskar_settings_utility_double_to_string_2(d, 'e', n) << endl;
+        cout << " g: " << oskar_settings_utility_double_to_string_2(d, 'g', n) << endl;
     }
     {
-        d = 1.2345678910;
-        ASSERT_STREQ("1.2345678910", oskar_settings_utility_double_to_string(d, 10).c_str());
+        double value = 0.000001234567891011;
+        cout << endl;
+        cout << "Input: " << setprecision(17) << value << " " << get_precision(value) << endl;
+        double d = value;
+        int n = get_precision(value);
+        cout << " f: " << oskar_settings_utility_double_to_string_2(d, 'f', n) << endl;
+        cout << " e: " << oskar_settings_utility_double_to_string_2(d, 'e', n) << endl;
+        cout << " g: " << oskar_settings_utility_double_to_string_2(d, 'g', n) << endl;
     }
     {
-        d = -1.234;
-        ASSERT_STREQ("-1.234", oskar_settings_utility_double_to_string(d, 3).c_str());
+        double value = 1.1234587891011100e8;
+        cout << endl;
+        cout << "Input: " << setprecision(17) << value << " " << get_precision(value) << endl;
+        double d = value;
+        int n = get_precision(value);
+        cout << " f: " << oskar_settings_utility_double_to_string_2(d, 'f', n) << endl;
+        n = 16;
+        cout << " e: " << oskar_settings_utility_double_to_string_2(d, 'e', n) << endl;
+        n = 17;
+        cout << " g: " << oskar_settings_utility_double_to_string_2(d, 'g', n) << endl;
     }
     {
-        d = 1.0000002e10;
-        ASSERT_STREQ("10000002000.0", oskar_settings_utility_double_to_string(d,1).c_str());
+        double value = 1.234e-6;
+        cout << endl;
+        cout << "Input: " << setprecision(17) << value << " " << get_precision(value) << endl;
+        double d = value;
+        int n = get_precision(value);
+        cout << " f: " << oskar_settings_utility_double_to_string_2(d, 'f', n) << endl;
+        n = 16;
+        cout << " e: " << oskar_settings_utility_double_to_string_2(d, 'e', n) << endl;
+        n = 17;
+        cout << " g: " << oskar_settings_utility_double_to_string_2(d, 'g', n) << endl;
     }
+    {
+        double value = 1.234e-5;
+        cout << endl;
+        cout << "Input: " << setprecision(17) << value << " " << get_precision(value) << endl;
+        double d = value;
+        cout << " f: " << oskar_settings_utility_double_to_string_2(d, 'f') << endl;
+        cout << " e: " << oskar_settings_utility_double_to_string_2(d, 'e') << endl;
+        cout << " g: " << oskar_settings_utility_double_to_string_2(d, 'g') << endl;
+    }
+
 }
 
 TEST(oskar_settings_utility, string_to_double)
@@ -239,12 +285,17 @@ TEST(oskar_settings_utility, string_to_double)
     {
         s = "   1  ";
         ASSERT_DOUBLE_EQ(1.0, oskar_settings_utility_string_to_double(s, &ok));
-        // Note this fails due to checking for trailing characters after the 1
         ASSERT_FALSE(ok);
     }
     {
         s = "hello";
         ASSERT_DOUBLE_EQ(0.0, oskar_settings_utility_string_to_double(s, &ok));
+        ASSERT_FALSE(ok);
+    }
+
+    {
+        s = "5.0foo";
+        ASSERT_DOUBLE_EQ(5.0, oskar_settings_utility_string_to_double(s, &ok));
         ASSERT_FALSE(ok);
     }
 }

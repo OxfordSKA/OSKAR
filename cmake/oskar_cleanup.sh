@@ -51,7 +51,7 @@ rm -rf utility
 rm -f oskar_version.h
 
 # Remove the main OSKAR library
-rm -f  liboskar*
+rm -rf liboskar*
 
 # Remove any example data (zip files or directories)
 rm -rf OSKAR-*-Example-Data
@@ -72,4 +72,3 @@ if [ "$1" == "-uninstall" ]; then
     rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_MATLAB_INSTALL_DIR@
     rm -rf @CMAKE_INSTALL_PREFIX@/@OSKAR_PYTHON_INSTALL_DIR@
 fi
-

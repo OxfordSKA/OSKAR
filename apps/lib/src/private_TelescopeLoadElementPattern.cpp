@@ -30,7 +30,7 @@
 #include "apps/lib/oskar_dir.h"
 #include <oskar_log.h>
 #include <oskar_file_exists.h>
-#include <oskar_Settings.h>
+#include <oskar_Settings_old.h>
 
 #include <sstream>
 
@@ -42,7 +42,7 @@ const string TelescopeLoadElementPattern::root_name =
         "element_pattern_fit_";
 
 TelescopeLoadElementPattern::TelescopeLoadElementPattern(
-        const oskar_Settings* settings, oskar_Log* log)
+        const oskar_Settings_old* settings, oskar_Log* log)
 {
     settings_ = settings;
     log_ = log;

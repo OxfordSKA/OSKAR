@@ -119,7 +119,8 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_Sky* sky,
                 telescope);
 
         /* Obtain the pierce points. */
-        /* FIXME this is current hard-coded to TID height screen 0 */
+        /* FIXME(BM) this is current hard-coded to TID height screen 0
+         * this fix is only needed to support multiple screen heights. */
         oskar_evaluate_pierce_points(work->pp_lon, work->pp_lat,
                 work->pp_rel_path, station_x, station_y,
                 station_z, settings->TID[0].height_km * 1000., num_sources,
@@ -152,7 +153,7 @@ static void oskar_evaluate_TEC(oskar_WorkJonesZ* work, int num_pp,
 {
     int i;
 
-    /* FIXME For now limit number of screens to 1, this can be removed
+    /* FIXME(BM) For now limit number of screens to 1, this can be removed
      * if a TEC model which is valid for multiple screens is implemented
      */
     if (settings->num_TID_screens > 1)
@@ -171,8 +172,9 @@ static void oskar_evaluate_TEC(oskar_WorkJonesZ* work, int num_pp,
                 &settings->TID[i], gast);
 
         /* Accumulate into total TEC */
-        /* FIXME addition is not physical for more than one TEC screen in the
-         * way TIDs are currently evaluated as TEC0 is added into both screens.
+        /* FIXME(BM) addition is not physical for more than one TEC screen in
+         * the way TIDs are currently evaluated as TEC0 is added into both
+         * screens.
          */
         oskar_mem_add(work->total_TEC, work->total_TEC, work->screen_TEC,
                 oskar_mem_length(work->total_TEC), status);

@@ -32,31 +32,23 @@
 #ifndef OSKAR_SETTINGS_MODEL_XML_H_
 #define OSKAR_SETTINGS_MODEL_XML_H_
 
-/**
- * @file oskar_SettingsModelXML.h
- */
-
-#include <oskar_global.h>
 #include <oskar_SettingsModel.h>
 
-namespace oskar {
+class oskar_SettingsModelXml_private;
 
-class SettingsModelXML_private;
-
-class SettingsModelXML : public oskar_SettingsModel
+class oskar_SettingsModelXml : public oskar_SettingsModel
 {
     Q_OBJECT
 
 public:
-    SettingsModelXML(QObject* parent = 0);
-    virtual ~SettingsModelXML();
+    oskar_SettingsModelXml(QObject* parent = 0);
+    virtual ~oskar_SettingsModelXml();
+    void setXmlString(const char* xml_string);
 
     //static std::vector<std::pair<std::string, std::string> > get_defaults();
 
 private:
-    SettingsModelXML_private *p;
+    oskar_SettingsModelXml_private *p;
 };
-
-} // namespace oskar
 
 #endif /* OSKAR_SETTINGS_MODEL_XML_H_ */

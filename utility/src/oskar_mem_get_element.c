@@ -56,7 +56,7 @@ double oskar_mem_get_element_scalar(const oskar_Mem* mem, size_t index,
         return 0.0;
     }
 
-    /* Set the data into the array element. */
+    /* Get the data. */
     if (location == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE)
@@ -120,7 +120,7 @@ double2 oskar_mem_get_element_complex(const oskar_Mem* mem, size_t index,
         return val;
     }
 
-    /* Set the data into the array element. */
+    /* Get the data. */
     if (location == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE_COMPLEX)
@@ -195,7 +195,7 @@ double4c oskar_mem_get_element_matrix(const oskar_Mem* mem, size_t index,
         return val;
     }
 
-    /* Set the data into the array element. */
+    /* Get the data. */
     if (location == OSKAR_CPU)
     {
         if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)

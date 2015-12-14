@@ -42,60 +42,47 @@ using namespace std;
 
 TEST(settings_types, DoubleRangeExt)
 {
-    bool ok = false;
     DoubleRangeExt r;
     {
-       // ASSERT_STREQ("0", r.toString().c_str());
-    }
-    {
         // This should fail as there is no extended string
-        r.init("2.0,5.0", &ok);
-        ASSERT_FALSE(ok);
-        ASSERT_STREQ("0", r.toString().c_str());
+        ASSERT_FALSE(r.init("2.0,5.0"));
+        ASSERT_STREQ("0.0", r.get_default().c_str());
     }
-
     {
-        r.init("2.0,5.0,min", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("0", r.toString().c_str());
-
-        r.fromString("3.0", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("3", r.toString().c_str());
-
-        r.fromString("5.1", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("5", r.toString().c_str());
-
-        r.fromString("1.1", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("min", r.toString().c_str());
-
-        r.fromString("2.1234567891", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("2.1234567891", r.toString().c_str());
+        ASSERT_TRUE(r.init("2.0,5.0,min"));
+        ASSERT_STREQ("0.0", r.get_default().c_str());
+        ASSERT_TRUE(r.set_default("3.2"));
+        ASSERT_TRUE(r.is_default());
+        // FIXME(BM) double to string printing...
+        EXPECT_STREQ("3.2", r.get_default().c_str());
+        EXPECT_STREQ("3.2", r.get_value().c_str());
+        ASSERT_DOUBLE_EQ(3.2, r.value());
+        ASSERT_DOUBLE_EQ(3.2, r.default_value());
+        ASSERT_TRUE(r.set_value("5.1"));
+        ASSERT_STREQ("5.0", r.get_value().c_str());
+        ASSERT_TRUE(r.set_value("1.1"));
+        ASSERT_STREQ("min", r.get_value().c_str());
+        ASSERT_TRUE(r.set_value("2.1234567891"));
+        ASSERT_STREQ("2.1234567891", r.get_value().c_str());
     }
-
     {
-        r.init("2.0,5.0,min, max", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("0", r.toString().c_str());
-
-        r.fromString("3.0", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("3", r.toString().c_str());
-
-        r.fromString("5.1", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("max", r.toString().c_str());
-
-        r.fromString("1.1", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("min", r.toString().c_str());
-
-        r.fromString("2.1234567891", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("2.1234567891", r.toString().c_str());
+        ASSERT_TRUE(r.init("2.0,5.0,min, max"));
+        ASSERT_STREQ("0.0", r.get_value().c_str());
+        ASSERT_STREQ("0.0", r.get_default().c_str());
+        ASSERT_TRUE(r.set_value("3.0"));
+        ASSERT_STREQ("3.0", r.get_value().c_str());
+        ASSERT_TRUE(r.set_value(3.53));
+        EXPECT_STREQ("3.53", r.get_value().c_str());
+        ASSERT_DOUBLE_EQ(3.53, r.value());
+        ASSERT_TRUE(r.set_value("5.1"));
+        ASSERT_STREQ("max", r.get_value().c_str());
+        ASSERT_TRUE(r.set_value("1.1"));
+        ASSERT_STREQ("min", r.get_value().c_str());
+        ASSERT_TRUE(r.set_value("2.1234567891"));
+        ASSERT_STREQ("2.1234567891", r.get_value().c_str());
+    }
+    {
+        ASSERT_TRUE(r.init("MIN,MAX,MAX"));
     }
 }
 

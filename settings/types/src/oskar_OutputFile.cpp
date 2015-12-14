@@ -43,22 +43,50 @@ OutputFile::~OutputFile()
 {
 }
 
-void OutputFile::init(const std::string& /*s*/, bool* /*ok*/)
+bool OutputFile::init(const std::string& /*s*/)
 {
-    /* Nothing to initialise */
+    default_.clear();
+    value_.clear();
+    return true;
 }
 
-void OutputFile::fromString(const std::string& s, bool* ok)
+bool OutputFile::set_default(const std::string& s)
 {
-    if (ok && !ok) return;
-    filename_ = oskar_settings_utility_string_trim(s);
+    default_ = oskar_settings_utility_string_trim(s);
+    value_ = default_;
+    return true;
 }
 
-std::string OutputFile::toString() const
+std::string OutputFile::get_default() const
 {
-    return filename_;
+    return default_;
 }
 
+bool OutputFile::set_value(const std::string& s)
+{
+    value_ = oskar_settings_utility_string_trim(s);
+    return true;
+}
+
+std::string OutputFile::get_value() const
+{
+    return value_;
+}
+
+bool OutputFile::is_default() const
+{
+    return value_ == default_;
+}
+
+bool OutputFile::operator==(const OutputFile& other) const
+{
+    return value_ == other.value_;
+}
+
+bool OutputFile::operator>(const OutputFile& ) const
+{
+    return false;
+}
 
 } // namespace oskar
 

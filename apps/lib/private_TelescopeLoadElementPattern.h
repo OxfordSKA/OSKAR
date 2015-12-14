@@ -31,7 +31,7 @@
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-struct oskar_Settings;
+struct oskar_Settings_old;
 struct oskar_Log;
 
 #include <vector>
@@ -39,7 +39,7 @@ struct oskar_Log;
 class TelescopeLoadElementPattern : public oskar_TelescopeLoadAbstract
 {
 public:
-    TelescopeLoadElementPattern(const oskar_Settings* settings,
+    TelescopeLoadElementPattern(const oskar_Settings_old* settings,
             oskar_Log* log);
 
     virtual ~TelescopeLoadElementPattern();
@@ -72,7 +72,7 @@ private:
     std::string root_x;
     std::string root_y;
     std::string root_scalar;
-    const oskar_Settings* settings_;
+    const oskar_Settings_old* settings_;
     oskar_Log* log_;
     std::map<std::string, int> models;
 };

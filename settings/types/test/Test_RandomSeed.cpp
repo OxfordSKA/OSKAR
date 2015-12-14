@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2015, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -38,33 +38,19 @@ using namespace oskar;
 
 TEST(settings_types, RandomSeed)
 {
-    bool ok = false;
     RandomSeed s;
-    {
-        ASSERT_STREQ("1", s.toString().c_str());
-    }
-    {
-        s.init("", &ok);
-        ASSERT_TRUE(ok);
-    }
-    {
-        s.fromString("0", &ok);
-        ASSERT_FALSE(ok);
-        ASSERT_STREQ("time", s.toString().c_str());
-    }
-    {
-        s.fromString("12345", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("12345", s.toString().c_str());
-    }
-    {
-        s.fromString("t", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("time", s.toString().c_str());
-    }
-    {
-        s.fromString("Time", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("time", s.toString().c_str());
-    }
+    ASSERT_STREQ("1", s.get_value().c_str());
+    ASSERT_TRUE(s.init(""));
+    ASSERT_FALSE(s.set_default("0"));
+    ASSERT_TRUE(s.set_default("time"));
+    ASSERT_TRUE(s.is_default());
+    ASSERT_STREQ("time", s.get_default().c_str());
+    ASSERT_TRUE(s.set_value("12345"));
+    ASSERT_FALSE(s.is_default());
+    ASSERT_STREQ("12345", s.get_value().c_str());
+    ASSERT_EQ(12345, s.value());
+    ASSERT_TRUE(s.set_value("t"));
+    ASSERT_STREQ("time", s.get_value().c_str());
+    ASSERT_TRUE(s.set_value("Time"));
+    ASSERT_STREQ("time", s.get_value().c_str());
 }

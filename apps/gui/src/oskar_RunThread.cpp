@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,8 +27,6 @@
  */
 
 #include <apps/gui/oskar_RunThread.h>
-#include <oskar_SettingsModel.h>
-#include <oskar_SettingsItem.h>
 
 #include <QtCore/QProcess>
 

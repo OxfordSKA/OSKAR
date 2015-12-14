@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,9 +95,18 @@ void oskar_settings_load_element_fit(oskar_SettingsElementFit* settings,
         *status = OSKAR_ERR_SETTINGS;
         return;
     }
+    settings->swap_h_v_data = s.value("swap_h_v_data", false).toBool();
 
     settings->element_type_index = s.value("element_type_index").toInt();
     settings->frequency_hz = s.value("frequency_hz").toDouble();
+    t = s.value("coordinate_system", "Spherical").toByteArray().toUpper();
+    if (t.startsWith('S'))
+        settings->coordinate_system = OSKAR_ELEMENT_COORD_SYS_SPHERICAL;
+    else if (t.startsWith('T'))
+        settings->coordinate_system = OSKAR_ELEMENT_COORD_SYS_TANGENT_PLANE;
+    else
+        *status = OSKAR_ERR_SETTINGS;
+    // FIXME(FD) Remove this one.
     settings->ignore_data_at_pole =
             s.value("ignore_data_at_pole", false).toBool();
     settings->ignore_data_below_horizon =

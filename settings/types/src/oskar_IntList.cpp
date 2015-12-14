@@ -44,16 +44,69 @@ IntList::~IntList()
 {
 }
 
-void IntList::init(const std::string& /*s*/, bool* /*ok*/)
+bool IntList::init(const std::string& /*s*/)
 {
-    /* Nothing to initialise */
-    /* Could use this to set the delimiter ... ?*/
+    // TODO(BM) Could use this to set the delimiter ... ?
+    return true;
 }
 
-void IntList::fromString(const std::string& s, bool* ok)
+bool IntList::set_default(const std::string& value)
+{
+    default_.clear();
+    value_.clear();
+    bool ok = from_string_(value, default_);
+    if (ok) {
+        for (unsigned int i = 0; i < default_.size(); ++i) {
+            value_.push_back(default_[i]);
+        }
+    }
+    return ok;
+}
+
+std::string IntList::get_default() const
+{
+    return to_string_(default_);
+}
+
+bool IntList::set_value(const std::string& value)
+{
+    return from_string_(value, value_);
+}
+
+std::string IntList::get_value() const
+{
+    return to_string_(value_);
+}
+
+bool IntList::is_default() const
+{
+    if (value_.size() != default_.size())
+        return false;
+    for (unsigned int i = 0; i < value_.size(); ++i) {
+        if (value_[i] != default_[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool IntList::operator==(const IntList& other) const
+{
+    if (value_.size() != other.value_.size()) return false;
+    for (unsigned int i = 0; i < value_.size(); ++i)
+        if (value_[i] != other.value_[i]) return false;
+    return true;
+}
+
+bool IntList::operator>(const IntList& ) const
+{
+    return false;
+}
+
+bool IntList::from_string_(const std::string& s, std::vector<int>& values) const
 {
     // Clear any existing values.
-    values_.clear();
+    values.clear();
 
     // Convert the string to a vector of ints.
     std::istringstream ss(s);
@@ -62,25 +115,24 @@ void IntList::fromString(const std::string& s, bool* ok)
     {
         bool valid = true;
         int v = oskar_settings_utility_string_to_int(token, &valid);
-        if (!valid && ok) { *ok = false; return; }
-        values_.push_back(v);
+        if (!valid) {
+            values.clear();
+            return false;
+        }
+        values.push_back(v);
     }
+    return true;
 }
 
-std::string IntList::toString() const
+std::string IntList::to_string_(const std::vector<int>& values) const
 {
     std::ostringstream ss;
-    for (size_t i = 0; i < values_.size(); ++i) {
-        ss << values_.at(i);
-        if (i < values_.size() - 1)
+    for (size_t i = 0; i < values.size(); ++i) {
+        ss << values.at(i);
+        if (i < values.size() - 1)
             ss << delimiter_;
     }
     return ss.str();
-}
-
-std::vector<int> IntList::values() const
-{
-    return values_;
 }
 
 } // namespace oskar

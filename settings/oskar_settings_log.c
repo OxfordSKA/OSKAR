@@ -32,7 +32,7 @@
 #include <oskar_log.h>
 #include <oskar_telescope.h>
 #include <oskar_image.h>
-#include <oskar_Settings.h>
+#include <oskar_Settings_old.h>
 
 #include <stdio.h>
 #include <oskar_cmath.h>
@@ -56,7 +56,7 @@ extern "C" {
 /* Width 0 value list message */
 #define LVS0(key, value) oskar_log_message(log, 'M', depth, "%s: %s", key, value)
 
-void oskar_log_settings_simulator(oskar_Log* log, const oskar_Settings* s)
+void oskar_log_settings_simulator(oskar_Log* log, const oskar_Settings_old* s)
 {
     int depth = 0;
     oskar_log_message(log, 'M', depth, "Simulator settings");
@@ -106,7 +106,7 @@ static void oskar_log_settings_sky_filter(oskar_Log* log, int depth,
     }
 }
 
-void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
+void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings_old* s)
 {
     int depth = 0, i = 0;
     oskar_log_message(log, 'M', depth, "Sky model settings");
@@ -313,7 +313,7 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
     }
 }
 
-void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
+void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings_old* s)
 {
     int depth = 0;
     oskar_log_message(log, 'M', depth, "Observation settings");
@@ -347,7 +347,7 @@ void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
 }
 
 
-void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
+void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings_old* s)
 {
     int depth = 0;
     oskar_log_message(log, 'M', depth, "Telescope model settings");
@@ -548,7 +548,7 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
     }
 }
 
-void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
+void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings_old* s)
 {
     int depth = 0;
     const oskar_SettingsSystemNoise* n = &s->interferometer.noise;
@@ -648,7 +648,7 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
         LVB("Force polarised MS", s->interferometer.force_polarised_ms);
 }
 
-void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
+void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings_old* s)
 {
     int depth = 0;
     const oskar_SettingsBeamPattern* b = &s->beam_pattern;
@@ -748,7 +748,7 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
     }
 }
 
-void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s)
+void oskar_log_settings_image(oskar_Log* log, const oskar_Settings_old* s)
 {
     int depth = 0;
     const char* option;
@@ -818,7 +818,7 @@ void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s)
     LVS0("Output FITS image file", s->image.fits_image);
 }
 
-void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s)
+void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings_old* s)
 {
     int depth = 0;
     oskar_log_message(log, 'M', depth, "Ionosphere (Z Jones) settings");
@@ -841,7 +841,7 @@ void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s)
     }
 }
 
-void oskar_log_settings_element_fit(oskar_Log* log, const oskar_Settings* s)
+void oskar_log_settings_element_fit(oskar_Log* log, const oskar_Settings_old* s)
 {
     int depth = 0;
     const oskar_SettingsElementFit* ef = &s->element_fit;

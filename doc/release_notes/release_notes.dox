@@ -4,7 +4,7 @@
 
 \section release_notes_intro Introduction
 
-OSKAR 2.6 is the current version of the OSKAR interferometry and beamforming
+OSKAR 2.6.1 is the current version of the OSKAR interferometry and beamforming
 simulation package.
 
 The function of these release notes is to summarise changes and new 
@@ -15,6 +15,12 @@ features, and highlight any known issues.
 The changes for the current release are listed below. For earlier releases 
 please refer to older revisions of this document or the 
 <tt>ChangeLog.txt</tt> file in the OSKAR source tree.
+
+\subsection version_2_6_1 Version 2.6.1
+
+- Changed Measurement Set WEIGHT and SIGMA columns to use a tiled storage 
+      manager, for an approximate 40% improvement in the write performance.
+- Restored missing settings log to beam pattern FITS headers.
 
 \subsection version_2_6_0 Version 2.6.0
 
@@ -90,7 +96,7 @@ please refer to older revisions of this document or the
 Features are expected to be implemented in future versions of OSKAR as 
 listed below.
 
-\subsection release_notes_version_2_7_0 Planned for OSKAR 2.7.0 (estimated Q2 2015)
+\subsection release_notes_version_2_7_0 Planned for OSKAR 2.7.0 (estimated summer 2015)
 
 - Use of analytical and numerical dish patterns.
 - Swap of X and Y dipoles to match IAU polarisation axes on the sky.

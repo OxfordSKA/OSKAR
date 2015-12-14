@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,7 @@
  * @file oskar_SettingsModel.h
  */
 
-#include <oskar_global.h>
 #include <oskar_version.h>
-
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QDateTime>
 #include <QtCore/QHash>
@@ -58,16 +56,15 @@ public:
         ValueRole,
         TypeRole,
         RequiredRole,
-        VisibleRole,
-        EnabledRole,
         LoadRole,
         OptionsRole,
         DefaultRole,
         DependencyKeyRole,
         DependencyValueRole,
         DependentKeyRole,
-        HiddenRole,
-        CheckExternalChangesRole
+        DisabledRole,
+        CheckExternalChangesRole,
+        DisplayKeysRole
     };
 
 public:
@@ -82,7 +79,7 @@ public:
             const QStringList& options, int defaultIndex = 0,
             bool required = false);
     Qt::ItemFlags flags(const QModelIndex& index) const;
-    const oskar_SettingsItem* getItem(const QString& key) const;
+    //const oskar_SettingsItem* getItem(const QString& key) const;
     QVariant headerData(int section, Qt::Orientation orientation,
             int role = Qt::DisplayRole) const;
     QModelIndex index(int row, int column,
@@ -91,6 +88,7 @@ public:
     bool isModified() const;
     void loadSettingsFile(const QString& filename);
     QModelIndex parent(const QModelIndex& index) const;
+    void reloadSettingsFile();
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     void saveSettingsFile(const QString& filename);
     bool setData(const QModelIndex& index, const QVariant& value,
@@ -117,7 +115,7 @@ private:
     oskar_SettingsItem* getItem(const QModelIndex& index) const;
     void loadFromParentIndex(const QModelIndex& parent);
     int numModified(const QModelIndex& parent) const;
-    void restoreAll(const QModelIndex& parent = QModelIndex());
+    void refreshAllIndexes(QModelIndex parent);
     void saveFromParentIndex(const QModelIndex& parent);
     void writeVersion();
 
@@ -127,6 +125,7 @@ private:
     QString version_;
     QString filename_;
     QDateTime lastModified_;
+    bool displayKey_;
 };
 
 class oskar_SettingsModelFilter : public QSortFilterProxyModel
@@ -137,11 +136,9 @@ public:
     oskar_SettingsModelFilter(QObject* parent = 0);
     virtual ~oskar_SettingsModelFilter();
     QVariant data(const QModelIndex& index, int role) const;
-    bool hideUnsetItems() const;
 
 public slots:
     void setFilterText(QString value);
-    void setHideUnsetItems(bool value);
 
 protected:
     bool filterAcceptsChildren(int sourceRow,
@@ -153,7 +150,6 @@ protected:
             const QModelIndex& sourceParent) const;
 
 private:
-    bool hideUnsetItems_;
     QString filterText_;
 };
 

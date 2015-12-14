@@ -10,9 +10,9 @@
 
 add_subdirectory(xml)
 
-#add_subdirectory(utility)
-#add_subdirectory(types)
-#add_subdirectory(list)
+add_subdirectory(utility)
+add_subdirectory(types)
+add_subdirectory(containers)
 
 #
 # Note this module is currently being built as a STATIC library. This may need
@@ -33,20 +33,24 @@ if (QT4_FOUND)
     set(${name}_MOC_SRC
         ${dir_}/oskar_DoubleSpinBox.h
         ${dir_}/oskar_SettingsDelegate.h
+        ${dir_}/oskar_SettingsDelegate_new.hpp
         ${dir_}/oskar_SettingsModel.h
-        #${dir_}/oskar_SettingsModelApps.h
+        ${dir_}/oskar_SettingsModel_new.hpp
         ${dir_}/oskar_SettingsModelXML.h
         ${dir_}/oskar_SettingsView.h
+        ${dir_}/oskar_SettingsView_old.h
     )
     set(dir_ widgets/src)
     set(${name}_SRC
         ${dir_}/oskar_DoubleSpinBox.cpp
         ${dir_}/oskar_SettingsDelegate.cpp
+        ${dir_}/oskar_SettingsDelegate_new.cpp
         ${dir_}/oskar_SettingsItem.cpp
         ${dir_}/oskar_SettingsModel.cpp
-        #${dir_}/oskar_SettingsModelApps.cpp
+        ${dir_}/oskar_SettingsModel_new.cpp
         ${dir_}/oskar_SettingsModelXML.cpp
         ${dir_}/oskar_SettingsView.cpp
+        ${dir_}/oskar_SettingsView_old.cpp
     )
     qt4_wrap_cpp(${name}_SRC ${${name}_MOC_SRC})
     add_library(${name} ${lib_type} ${${name}_SRC} ${${name}_MOC_SRC})
@@ -57,10 +61,13 @@ if (QT4_FOUND)
     #======================== XML settings unit test
     include_directories(${CMAKE_CURRENT_BINARY_DIR}/xml)
     add_executable(test_oskar_settings_widgets
-        widgets/test/Test_oskar_SettingsModelXML.cpp
+        # widgets/test/Test_oskar_SettingsModelXML.cpp
+        widgets/test/Test_oskar_SettingsModel_new.cpp
     )
     target_link_libraries(test_oskar_settings_widgets
-        gtest_main oskar_settings_widgets)
+        gtest_main 
+        oskar_settings_widgets
+        oskar_settings_containers)
     #=========================
 endif (QT4_FOUND)
 
@@ -70,9 +77,9 @@ endif (QT4_FOUND)
 set(name oskar_settings_struct)
 set(dir_ struct/src)
 set(${name}_SRC
-    ${dir_}/oskar_settings_init.c
-    ${dir_}/oskar_settings_free.c
-    ${dir_}/oskar_Settings.cpp
+    ${dir_}/oskar_settings_old_init.c
+    ${dir_}/oskar_settings_old_free.c
+    ${dir_}/oskar_Settings_old.cpp
 )
 add_library(${name} ${lib_type} ${${name}_SRC})
 

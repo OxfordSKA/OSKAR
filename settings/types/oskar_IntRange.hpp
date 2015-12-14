@@ -32,7 +32,7 @@
 #ifndef OSKAR_SETTINGS_TYPE_INTRANGE_HPP_
 #define OSKAR_SETTINGS_TYPE_INTRANGE_HPP_
 
-#include "oskar_AbstractType.hpp"
+#include "oskar_AbstractSettingsType.hpp"
 
 
 /**
@@ -60,17 +60,31 @@ namespace oskar {
  * values (i.e. from -INT_MAX to INT_MAX), with a value of 0.
  */
 
-class IntRange : public AbstractType
+class IntRange : public AbstractSettingsType
 {
 public:
     IntRange();
     virtual ~IntRange();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
+
+    bool init(const std::string& s);
+    bool set_default(const std::string& value);
+    std::string get_default() const;
+    bool set_value(const std::string& value);
+    std::string get_value() const;
+    bool is_default() const;
+
+    int value() const { return value_; }
+    int default_value() const { return default_; }
+    int min() const { return min_; }
+    int max() const { return max_; }
+
+    bool operator==(const IntRange& other) const;
+    bool operator>(const IntRange& other) const;
 
 private:
-    int min_, max_, value_;
+    bool from_string_(const std::string& s, int& value) const;
+
+    int min_, max_, default_, value_;
 };
 
 } // namespace oskar

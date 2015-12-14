@@ -18,7 +18,6 @@ set(apps_SRC
     src/oskar_telescope_save.cpp
     src/private_TelescopeLoadApodisation.cpp
     src/private_TelescopeLoadElementPattern.cpp
-    #src/private_TelescopeLoadElementTaper.cpp
     src/private_TelescopeLoadElementTypes.cpp
     src/private_TelescopeLoadFeedAngle.cpp
     src/private_TelescopeLoadGainPhase.cpp
@@ -40,7 +39,7 @@ set(CUDA_GENERATED_OUTPUT_DIR
 cuda_add_library(oskar_apps ${apps_SRC})
 
 # Link in oskar_ms and oskar_fits if avaliable.
-set(settings_libs oskar_settings_load oskar_settings_log)
+set(settings_libs oskar_settings_containers oskar_settings_load oskar_settings_log)
 if(CASACORE_FOUND)
     target_link_libraries(oskar_apps oskar oskar_ms oskar_fits
         ${settings_libs} ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY}

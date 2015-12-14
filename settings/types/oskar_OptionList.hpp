@@ -34,7 +34,8 @@
 
 #include <string>
 #include <vector>
-#include <oskar_AbstractType.hpp>
+
+#include "oskar_AbstractSettingsType.hpp"
 
 /**
  * @file OptionList.hpp
@@ -53,20 +54,30 @@ namespace oskar {
  * options.
  */
 
-class OptionList : public AbstractType
+class OptionList : public AbstractSettingsType
 {
 public:
     OptionList();
     virtual ~OptionList();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
 
-    std::vector<std::string> options() const;
+    bool init(const std::string& s);
+    bool set_default(const std::string& s);
+    std::string get_default() const;
+    bool set_value(const std::string& s);
+    std::string get_value() const;
+    bool is_default() const;
+
+    int size() const { return options_.size(); }
+    std::vector<std::string> options() const { return options_; }
+    std::string option(int i) const { return options_[i]; }
+
+    bool operator==(const OptionList& other) const;
+    bool operator>(const OptionList& other) const;
 
 private:
+    bool from_string_(std::string& value, const std::string& s) const;
     std::vector<std::string> options_;
-    std::string value_;
+    std::string default_, value_;
 };
 
 } // namespace oskar

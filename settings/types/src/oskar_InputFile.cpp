@@ -43,21 +43,48 @@ InputFile::~InputFile()
 {
 }
 
-void InputFile::init(const std::string& /*s*/, bool* /*ok*/)
+bool InputFile::init(const std::string& /*param*/)
 {
-    /* Nothing to initialise */
+    return true;
 }
 
-void InputFile::fromString(const std::string& s, bool* /*ok*/)
+bool InputFile::set_default(const std::string& value)
 {
-    filename_ = oskar_settings_utility_string_trim(s);
+    default_ = oskar_settings_utility_string_trim(value);
+    value_ = default_;
+    return true;
 }
 
-std::string InputFile::toString() const
+std::string InputFile::get_default() const
 {
-    return filename_;
+    return default_;
 }
 
+bool InputFile::set_value(const std::string& value)
+{
+    value_ = oskar_settings_utility_string_trim(value);
+    return true;
+}
+
+std::string InputFile::get_value() const
+{
+    return value_;
+}
+
+bool InputFile::is_default() const
+{
+    return value_ == default_;
+}
+
+bool InputFile::operator==(const InputFile& other) const
+{
+    return value_ == other.value_;
+}
+
+bool InputFile::operator>(const InputFile& ) const
+{
+    return false;
+}
 
 } // namespace oskar
 

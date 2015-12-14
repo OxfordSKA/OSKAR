@@ -44,30 +44,79 @@ InputFileList::~InputFileList()
 {
 }
 
-void InputFileList::init(const std::string& /*s*/, bool* /*ok*/)
+bool InputFileList::init(const std::string& /*s*/)
 {
-    /* Nothing to initialise */
-    /* Could use this to set the delimiter ... ?*/
-    filenames_.clear();
+    // TODO(BM) Could use this to set the delimiter ...
+    value_.clear();
+    default_.clear();
+    return true;
 }
 
-void InputFileList::fromString(const std::string& s, bool* /*ok*/)
+bool InputFileList::set_default(const std::string& value)
 {
-    filenames_.clear();
-    filenames_ = oskar_settings_utility_string_get_type_params(s);
+    value_.clear();
+    default_.clear();
+    default_ = oskar_settings_utility_string_get_type_params(value);
+    for (unsigned int i = 0; i < default_.size(); ++i) {
+        value_.push_back(default_.at(i));
+    }
+    return true;
 }
 
-std::string InputFileList::toString() const
+std::string InputFileList::get_default() const
+{
+    return to_string_(default_);
+}
+
+bool InputFileList::set_value(const std::string& value)
+{
+    value_.clear();
+    value_ = oskar_settings_utility_string_get_type_params(value);
+    return true;
+}
+
+std::string InputFileList::get_value() const
+{
+    return to_string_(value_);
+}
+
+bool InputFileList::is_default() const
+{
+    if (default_.size() != value_.size())
+        return false;
+    for (unsigned int i = 0; i < default_.size(); ++i) {
+        if (default_.at(i) != value_.at(i))
+            return false;
+    }
+    return true;
+}
+
+bool InputFileList::operator==(const InputFileList& other) const
+{
+    if (value_.size() != other.value_.size())
+        return false;
+    for (unsigned int i = 0; i < other.value_.size(); ++i) {
+        if (value_.at(i) != other.value_.at(i))
+            return false;
+    }
+    return true;
+}
+
+bool InputFileList::operator>(const InputFileList& ) const
+{
+    return false;
+}
+
+std::string InputFileList::to_string_(const std::vector<std::string>& values) const
 {
     std::ostringstream ss;
-    for (size_t i = 0u; i < filenames_.size(); ++i) {
-        ss << filenames_.at(i);
-        if (i < filenames_.size() - 1)
+    for (size_t i = 0u; i < values.size(); ++i) {
+        ss << values.at(i);
+        if (i < values.size() - 1)
             ss << delimiter_;
     }
     return ss.str();
 }
-
 
 } // namespace oskar
 

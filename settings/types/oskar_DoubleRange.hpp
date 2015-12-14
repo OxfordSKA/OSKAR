@@ -32,7 +32,7 @@
 #ifndef OSKAR_SETTINGS_TYPE_DOUBLERANGE_HPP_
 #define OSKAR_SETTINGS_TYPE_DOUBLERANGE_HPP_
 
-#include "oskar_AbstractType.hpp"
+#include "oskar_AbstractSettingsType.hpp"
 
 
 /**
@@ -59,21 +59,33 @@ namespace oskar {
  * values (i.e. from -DBL_MAX to DBL_MAX), with a value of 0.0
  */
 
-class DoubleRange : public AbstractType
+class DoubleRange : public AbstractSettingsType
 {
 public:
+    enum Format { AUTO, EXPONENT };
+
     DoubleRange();
     virtual ~DoubleRange();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
-    std::string toString(const std::string& fmt) const;
 
-    double range_min() const { return min_; }
-    double range_max() const { return max_; }
+    bool init(const std::string& s);
+    bool set_default(const std::string& s);
+    std::string get_default() const;
+    bool set_value(const std::string& s);
+    std::string get_value() const;
+    bool is_default() const;
+
+    double min() const { return min_; }
+    double max() const { return max_; }
+    double value() const { return value_; }
+    double default_value() const { return default_; }
+
+    bool operator==(const DoubleRange& other) const;
+    bool operator>(const DoubleRange& other) const;
 
 private:
-    double min_, max_, value_;
+    bool from_string_(double& value, const std::string& s) const;
+    Format format_;
+    double min_, max_, value_, default_;
 };
 
 } // namespace oskar

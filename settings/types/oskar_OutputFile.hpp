@@ -32,8 +32,8 @@
 #ifndef OSKAR_SETTINGS_TYPE_OUTPUT_FILE_HPP_
 #define OSKAR_SETTINGS_TYPE_OUTPUT_FILE_HPP_
 
-#include <oskar_AbstractType.hpp>
 #include <string>
+#include <oskar_AbstractSettingsType.hpp>
 
 /**
  * @file OutputFile.hpp
@@ -50,17 +50,25 @@ namespace oskar {
  *
  */
 
-class OutputFile : public AbstractType
+// TODO(BM) just inherit String?
+class OutputFile : public AbstractSettingsType
 {
 public:
     OutputFile();
     virtual ~OutputFile();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
+
+    bool init(const std::string& s);
+    bool set_default(const std::string& s);
+    std::string get_default() const;
+    bool set_value(const std::string& s);
+    std::string get_value() const;
+    bool is_default() const;
+
+    bool operator==(const OutputFile& other) const;
+    bool operator>(const OutputFile& other) const;
 
 private:
-    std::string filename_;
+    std::string default_, value_;
 };
 
 } // namespace oskar

@@ -192,6 +192,12 @@ void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     bp->station_text_phase = s.value("phase", false).toBool();
     bp->station_text_auto_power_stokes_i =
             s.value("auto_power_stokes_i", false).toBool();
+    bp->station_text_auto_power_stokes_q =
+            s.value("auto_power_stokes_q", false).toBool();
+    bp->station_text_auto_power_stokes_u =
+            s.value("auto_power_stokes_u", false).toBool();
+    bp->station_text_auto_power_stokes_v =
+            s.value("auto_power_stokes_v", false).toBool();
     bp->station_text_ixr = s.value("ixr", false).toBool();
     s.endGroup(); // Text file.
     if (bp->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
@@ -201,6 +207,12 @@ void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
         bp->station_fits_phase = s.value("phase", false).toBool();
         bp->station_fits_auto_power_stokes_i =
                 s.value("auto_power_stokes_i", false).toBool();
+        bp->station_fits_auto_power_stokes_q =
+                s.value("auto_power_stokes_q", false).toBool();
+        bp->station_fits_auto_power_stokes_u =
+                s.value("auto_power_stokes_u", false).toBool();
+        bp->station_fits_auto_power_stokes_v =
+                s.value("auto_power_stokes_v", false).toBool();
         bp->station_fits_ixr = s.value("ixr", false).toBool();
         s.endGroup(); // FITS image.
     }
@@ -215,6 +227,24 @@ void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
             s.value("cross_power_stokes_i_amp", false).toBool();
     bp->telescope_text_cross_power_stokes_i_phase =
             s.value("cross_power_stokes_i_phase", false).toBool();
+    bp->telescope_text_cross_power_stokes_q_raw_complex =
+            s.value("cross_power_stokes_q_raw_complex", false).toBool();
+    bp->telescope_text_cross_power_stokes_q_amp =
+            s.value("cross_power_stokes_q_amp", false).toBool();
+    bp->telescope_text_cross_power_stokes_q_phase =
+            s.value("cross_power_stokes_q_phase", false).toBool();
+    bp->telescope_text_cross_power_stokes_u_raw_complex =
+            s.value("cross_power_stokes_u_raw_complex", false).toBool();
+    bp->telescope_text_cross_power_stokes_u_amp =
+            s.value("cross_power_stokes_u_amp", false).toBool();
+    bp->telescope_text_cross_power_stokes_u_phase =
+            s.value("cross_power_stokes_u_phase", false).toBool();
+    bp->telescope_text_cross_power_stokes_v_raw_complex =
+            s.value("cross_power_stokes_v_raw_complex", false).toBool();
+    bp->telescope_text_cross_power_stokes_v_amp =
+            s.value("cross_power_stokes_v_amp", false).toBool();
+    bp->telescope_text_cross_power_stokes_v_phase =
+            s.value("cross_power_stokes_v_phase", false).toBool();
     s.endGroup(); // Text file.
     if (bp->coord_grid_type == OSKAR_BEAM_PATTERN_COORDS_BEAM_IMAGE)
     {
@@ -223,6 +253,18 @@ void oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
                 s.value("cross_power_stokes_i_amp", false).toBool();
         bp->telescope_fits_cross_power_stokes_i_phase =
                 s.value("cross_power_stokes_i_phase", false).toBool();
+        bp->telescope_fits_cross_power_stokes_q_amp =
+                s.value("cross_power_stokes_q_amp", false).toBool();
+        bp->telescope_fits_cross_power_stokes_q_phase =
+                s.value("cross_power_stokes_q_phase", false).toBool();
+        bp->telescope_fits_cross_power_stokes_u_amp =
+                s.value("cross_power_stokes_u_amp", false).toBool();
+        bp->telescope_fits_cross_power_stokes_u_phase =
+                s.value("cross_power_stokes_u_phase", false).toBool();
+        bp->telescope_fits_cross_power_stokes_v_amp =
+                s.value("cross_power_stokes_v_amp", false).toBool();
+        bp->telescope_fits_cross_power_stokes_v_phase =
+                s.value("cross_power_stokes_v_phase", false).toBool();
         s.endGroup(); // FITS image.
     }
     s.endGroup(); // Telescope outputs.

@@ -32,8 +32,8 @@
 #ifndef OSKAR_SETTINGS_TYPE_INPUT_FILE_HPP_
 #define OSKAR_SETTINGS_TYPE_INPUT_FILE_HPP_
 
-#include <oskar_AbstractType.hpp>
 #include <string>
+#include "oskar_AbstractSettingsType.hpp"
 
 /**
  * @file InputFile.hpp
@@ -50,17 +50,25 @@ namespace oskar {
  *
  */
 
-class InputFile : public AbstractType
+class InputFile : public AbstractSettingsType
 {
 public:
     InputFile();
     virtual ~InputFile();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
+
+    bool init(const std::string& param);
+    bool set_default(const std::string& value);
+    std::string get_default() const;
+    bool set_value(const std::string& value);
+    std::string get_value() const;
+    bool is_default() const;
+
+    bool operator==(const InputFile& other) const;
+    bool operator>(const InputFile& other) const;
 
 private:
-    std::string filename_;
+    std::string value_;
+    std::string default_;
 };
 
 } // namespace oskar

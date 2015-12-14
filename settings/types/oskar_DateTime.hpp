@@ -33,7 +33,8 @@
 #define OSKAR_SETTINGS_TYPE_DATETIME_HPP_
 
 #include <vector>
-#include <oskar_AbstractType.hpp>
+
+#include <oskar_AbstractSettingsType.hpp>
 
 /**
  * @file oskar_DateTime.hpp
@@ -60,40 +61,68 @@ namespace oskar {
  *
  */
 
-class DateTime : public AbstractType
+class DateTime : public AbstractSettingsType
 {
 public:
+    enum Format { UNDEF = -1, BRITISH, CASA, INTERNATIONAL, ISO, MJD };
+    class Value {
+     public:
+        Value()
+     : style(DateTime::UNDEF), year(0), month(0), day(0),
+       hours(0), minutes(0), seconds(0.0) {}
+        void clear() {
+            style = DateTime::UNDEF;
+            year = 0;
+            month = 0;
+            day = 0;
+            hours = 0;
+            minutes = 0;
+            seconds = 0.0;
+        }
+        DateTime::Format style;
+        int year, month, day, hours, minutes;
+        double seconds;
+    };
+
+ public:
     DateTime();
     virtual ~DateTime();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
 
-    int year() const;
-    int month() const;
-    int day() const;
-    int hours() const;
-    int minutes() const;
-    double seconds() const;
+    bool init(const std::string& s);
+    bool set_default(const std::string& value);
+    std::string get_default() const;
+    bool set_value(const std::string& value);
+    std::string get_value() const;
+    bool is_default() const;
 
-    //double mjd() const;
+    Value value() const { return value_; }
+    Value default_value() const { return default_; }
 
-private:
-    void parse_date_style_1_(const std::string& s, bool* ok = 0);
-    void parse_date_style_2_(const std::string& s, bool* ok = 0);
-    void parse_date_style_3_(const std::string& s, bool* ok = 0);
-    void parse_date_style_4_(const std::string& s, bool* ok = 0);
-    void parse_time_(const std::string& s, bool* ok = 0);
+    double to_mjd() const;
+    double to_mjd_2() const;
+    void from_mjd(double mjd);
+    DateTime::Format format() const { return value_.style; }
+    void set_format(DateTime::Format format) {
+        value_.style = format;
+        default_.style = format;
+    }
 
-private:
-    enum date_format { UNDEF, BRITISH, CASA, INTERNATIONAL, ISO, MJD };
-    int style_;
-    int year_;
-    int month_;
-    int day_;
-    int hours_;
-    int minutes_;
-    double seconds_;
+    bool operator==(const DateTime& other) const;
+    bool operator>(const DateTime& other) const;
+
+ private:
+    void from_mjd_(double mjd, Value& dateTime) const;
+    Value string_to_date_time_(const std::string& s, bool& ok) const;
+    std::string date_time_to_string(const Value& dateTime) const;
+    bool parse_date_style_1_(const std::string& s, Value& dateTime) const;
+    bool parse_date_style_2_(const std::string& s, Value& dateTime) const;
+    bool parse_date_style_3_(const std::string& s, Value& dateTime) const;
+    bool parse_date_style_4_(const std::string& s, Value& dateTime) const;
+    bool parse_time_(const std::string& s, Value& dateTime) const;
+
+ private:
+    Value value_;
+    Value default_;
 };
 
 } // namespace oskar

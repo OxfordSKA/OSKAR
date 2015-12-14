@@ -38,30 +38,19 @@ using namespace oskar;
 
 TEST(settings_types, IntRange)
 {
-    bool ok = false;
     IntRange r;
-    {
-        ASSERT_STREQ("0", r.toString().c_str());
-    }
-    {
-        r.init("2,5", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("0", r.toString().c_str());
-    }
-    {
-        r.fromString("2", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("2", r.toString().c_str());
-    }
-    {
-        r.fromString("1", &ok);
-        ASSERT_FALSE(ok);
-        ASSERT_STREQ("2", r.toString().c_str());
-    }
-    {
-        r.fromString("10", &ok);
-        ASSERT_FALSE(ok);
-        ASSERT_STREQ("5", r.toString().c_str());
-    }
+    ASSERT_STREQ("0", r.get_default().c_str());
+    ASSERT_STREQ("0", r.get_value().c_str());
+    ASSERT_TRUE(r.is_default());
+    ASSERT_TRUE(r.init("2,5"));
+    ASSERT_EQ(2, r.min());
+    ASSERT_EQ(5, r.max());
+    ASSERT_TRUE(r.set_default("2"));
+    ASSERT_EQ(2, r.default_value());
+    ASSERT_TRUE(r.is_default());
+    ASSERT_TRUE(r.set_value("4"));
+    ASSERT_EQ(4, r.value());
+    ASSERT_STREQ("4", r.get_value().c_str());
+    ASSERT_FALSE(r.is_default());
 }
 

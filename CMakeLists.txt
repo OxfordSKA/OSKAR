@@ -14,11 +14,11 @@ endif()
 project(OSKAR CXX C)
 
 # === Project version.
-set(OSKAR_VERSION_ID "0x020600")
+set(OSKAR_VERSION_ID "0x020601")
 set(OSKAR_VERSION_MAJOR 2)
 set(OSKAR_VERSION_MINOR 6)
-set(OSKAR_VERSION_PATCH 0)
-set(OSKAR_VERSION_SUFFIX "")
+set(OSKAR_VERSION_PATCH 1)
+set(OSKAR_VERSION_SUFFIX "trunk")
 
 # === Add a local module path
 list(INSERT CMAKE_MODULE_PATH 0 ${PROJECT_SOURCE_DIR}/cmake)
@@ -77,8 +77,7 @@ if (CUDA_FOUND)
     target_link_libraries(${libname}
         oskar_settings_struct
         oskar_log
-        oskar_binary
-        ${CUDA_curand_LIBRARY})
+        oskar_binary)
 
     if (OSKAR_USE_LAPACK)
         target_link_libraries(${libname} ${OSKAR_LAPACK})

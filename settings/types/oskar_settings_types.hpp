@@ -32,21 +32,28 @@
 #ifndef OSKAR_SETTINGS_TYPES_HPP_
 #define OSKAR_SETTINGS_TYPES_HPP_
 
+#include <oskar_Bool.hpp>
 #include <oskar_DateTime.hpp>
+#include <oskar_Double.hpp>
 #include <oskar_DoubleList.hpp>
 #include <oskar_DoubleRange.hpp>
 #include <oskar_DoubleRangeExt.hpp>
 #include <oskar_InputDirectory.hpp>
 #include <oskar_InputFile.hpp>
 #include <oskar_InputFileList.hpp>
+#include <oskar_Int.hpp>
 #include <oskar_IntList.hpp>
+#include <oskar_IntListExt.hpp>
 #include <oskar_IntPositive.hpp>
 #include <oskar_IntRange.hpp>
 #include <oskar_IntRangeExt.hpp>
 #include <oskar_OptionList.hpp>
 #include <oskar_OutputFile.hpp>
 #include <oskar_RandomSeed.hpp>
+#include <oskar_String.hpp>
 #include <oskar_StringList.hpp>
 #include <oskar_Time.hpp>
+#include <oskar_UnsignedDouble.hpp>
+#include <oskar_UnsignedInt.hpp>
 
 #endif /* OSKAR_SETTINGS_TYPES_HPP_ */

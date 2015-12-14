@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
  * @file oskar_DoubleSpinBox.h
  */
 
-#include <oskar_global.h>
 #include <QtGui/QAbstractSpinBox>
 
 class QDoubleValidator;
@@ -61,6 +60,7 @@ public:
 
 public Q_SLOTS:
     void setValue(double val);
+    void setValue(const QString& text);
 
 Q_SIGNALS:
     void valueChanged(double d);

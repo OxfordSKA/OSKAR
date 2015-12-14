@@ -32,9 +32,9 @@
 #ifndef OSKAR_SETTINGS_TYPE_INPUT_FILE_LIST_HPP_
 #define OSKAR_SETTINGS_TYPE_INPUT_FILE_LIST_HPP_
 
-#include <oskar_AbstractType.hpp>
 #include <string>
 #include <vector>
+#include "oskar_AbstractSettingsType.hpp"
 
 /**
  * @file InputFileList.hpp
@@ -51,17 +51,30 @@ namespace oskar {
  *
  */
 
-class InputFileList : public AbstractType
+class InputFileList : public AbstractSettingsType
 {
 public:
     InputFileList();
     virtual ~InputFileList();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
+
+    bool init(const std::string& s);
+    bool set_default(const std::string& value);
+    std::string get_default() const;
+    bool set_value(const std::string& value);
+    std::string get_value() const;
+    bool is_default() const;
+
+    std::vector<std::string> values() const { return value_; }
+    std::vector<std::string> default_values() const { return default_; }
+    int size() const { return value_.size(); }
+
+    bool operator==(const InputFileList& other) const;
+    bool operator>(const InputFileList& other) const;
 
 private:
-    std::vector<std::string> filenames_;
+    std::string to_string_(const std::vector<std::string>& values) const;
+    std::vector<std::string> default_;
+    std::vector<std::string> value_;
     char delimiter_;
 };
 

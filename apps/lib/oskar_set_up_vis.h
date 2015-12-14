@@ -34,7 +34,7 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_Settings.h>
+#include <oskar_Settings_old.h>
 #include <oskar_telescope.h>
 #include <oskar_vis_block.h>
 #include <oskar_vis_header.h>
@@ -55,7 +55,7 @@ extern "C" {
  * @param[in,out] status Status return code.
  */
 OSKAR_APPS_EXPORT
-oskar_VisHeader* oskar_set_up_vis_header(const oskar_Settings* settings,
+oskar_VisHeader* oskar_set_up_vis_header(const oskar_Settings_old* settings,
         const oskar_Telescope* tel, int* status);
 
 #ifdef __cplusplus

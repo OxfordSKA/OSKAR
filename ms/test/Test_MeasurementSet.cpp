@@ -40,8 +40,8 @@ TEST(MeasurementSet, test_create_simple)
     double ay[] = {0, 0, 0};
     double az[] = {0, 0, 0};
     int na = sizeof(ax) / sizeof(double);
-    ms = oskar_ms_create("simple.ms", 0.0, 1.570796, 1, 1, 400e6, 1.0, na,
-            0, 1);
+    ms = oskar_ms_create("simple.ms", "test", 0.0, 1.570796, 1, 1,
+            400e6, 1.0, na, 0, 1);
     ASSERT_TRUE(ms);
     oskar_ms_set_station_coords_d(ms, na, ax, ay, az);
 
@@ -61,6 +61,8 @@ TEST(MeasurementSet, test_create_simple)
 
 TEST(MeasurementSet, test_multi_channel)
 {
+    int status = 0;
+
     // Define the data dimensions.
     int n_ant = 3;           // Number of antennas.
     int n_pol = 4;           // Number of polarisations.
@@ -77,8 +79,7 @@ TEST(MeasurementSet, test_multi_channel)
     double chan_width = 25e3; // Channel width in Hz.
 
     // Create the Measurement Set.
-    oskar_MeasurementSet* ms;
-    ms = oskar_ms_create(filename, ra, dec,
+    oskar_MeasurementSet* ms = oskar_ms_create(filename, "test", ra, dec,
             n_pol, n_chan, freq, chan_width, n_ant, 0, 1);
     ASSERT_TRUE(ms);
 
@@ -140,5 +141,50 @@ TEST(MeasurementSet, test_multi_channel)
                 &ant2[start_row], exposure, interval, (double)d);
     }
 
+    // Read the data back again.
+    size_t vis_size = n_baselines * n_dumps * n_chan * n_pol *
+            sizeof(std::complex<float>);
+    size_t uvw_size = n_baselines * n_dumps * sizeof(double) * 3;
+    size_t required_vis_size = 0, required_uvw_size = 0;
+    void* vis = malloc(vis_size);
+    void* uvw = malloc(uvw_size);
+    oskar_ms_get_column(ms, "DATA", 0, n_baselines * n_dumps, vis_size, vis,
+            &required_vis_size, &status);
+    oskar_ms_get_column(ms, "UVW", 0, n_baselines * n_dumps, uvw_size, uvw,
+            &required_uvw_size, &status);
+    ASSERT_EQ(0, status);
+    ASSERT_EQ(required_vis_size, vis_size);
+    ASSERT_EQ(required_uvw_size, uvw_size);
+
+    // Check the data.
+    for (int d = 0, r = 0; d < n_dumps; ++d)
+    {
+        for (int ai = 0; ai < n_ant; ++ai)
+        {
+            for (int aj = ai+1; aj < n_ant; ++aj, ++r)
+            {
+                // Read the u,v,w coordinates.
+                ASSERT_EQ(((double*)uvw)[r*3 + 0], u[r]);
+                ASSERT_EQ(((double*)uvw)[r*3 + 1], v[r]);
+                ASSERT_EQ(((double*)uvw)[r*3 + 2], w[r]);
+
+                // Read the visibility data.
+                for (int c = 0; c < n_chan; ++c)
+                {
+                    for (int p = 0; p < n_pol; ++p)
+                    {
+                        int vi = r * n_pol * n_chan + c * n_pol + p;
+                        double re = (p + 1) * (c + 1) * 10.0;
+                        double im = (double)r;
+                        vis_data[vi] = std::complex<double>(re, im);
+                    }
+                }
+            }
+        }
+    }
+
+    // Free memory.
+    free(vis);
+    free(uvw);
     oskar_ms_close(ms);
 }

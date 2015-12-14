@@ -31,7 +31,9 @@
 
 #include <gtest/gtest.h>
 #include <oskar_settings_types.hpp>
+#include <cstdio>
 
+using namespace std;
 using namespace oskar;
 
 TEST(settings_types, DateTime)
@@ -43,34 +45,59 @@ TEST(settings_types, DateTime)
      *  yyyy-M-dTh:m:s[.z] - ISO date style
      *  MJD
      */
-
-    bool ok = true;
     DateTime t;
     // British style
     {
-        t.fromString("1-2-2015 10:05:23.2", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("01-02-2015 10:05:23.2", t.toString().c_str());
+        ASSERT_TRUE(t.set_default("1-2-2015 10:05:23.2"));
+        ASSERT_TRUE(t.is_default());
+        ASSERT_STREQ("01-02-2015 10:05:23.2", t.get_value().c_str());
     }
     // CASA style
     {
-        t.fromString("2015/1/2/03:04:05.6", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("2015/01/02/03:04:05.6", t.toString().c_str());
+        ASSERT_TRUE(t.set_value("2015/1/2/03:04:05.6"));
+        ASSERT_FALSE(t.is_default());
+        ASSERT_STREQ("2015/01/02/03:04:05.6", t.get_value().c_str());
     }
     // International style
     {
-        t.fromString("2015-2-3 04:05:06.7", &ok);
-        ASSERT_TRUE(ok);
+        ASSERT_TRUE(t.set_value("2015-2-3 04:05:06.7"));
+        ASSERT_FALSE(t.is_default());
+        ASSERT_DOUBLE_EQ(6.7, t.value().seconds);
+        ASSERT_DOUBLE_EQ(23.2, t.default_value().seconds);
+        ASSERT_STREQ("2015-02-03 04:05:06.7", t.get_value().c_str());
     }
     // ISO style
     {
-        t.fromString("2015-3-4T05:06:07.8910111213", &ok);
-        ASSERT_TRUE(ok);
+        ASSERT_TRUE(t.set_value("2015-3-4T05:06:07.8910111213"));
+        ASSERT_FALSE(t.is_default());
     }
-    // MJD
+    // MJD1
     {
-        // TODO
-    }
-}
+        double mjd = t.to_mjd();
+        double mjd2 = t.to_mjd_2();
+        ASSERT_DOUBLE_EQ(mjd, mjd2);
+        t.from_mjd(mjd);
+        ASSERT_DOUBLE_EQ(mjd, t.to_mjd());
 
+    }
+    // MJD2
+    {
+        double mjd = 46113.7511111;
+        t.from_mjd(mjd);
+        ASSERT_DOUBLE_EQ(mjd, t.to_mjd());
+        ASSERT_EQ(DateTime::MJD, t.format());
+    }
+    {
+        DateTime t1;
+        ASSERT_TRUE(t1.set_value("46113.7654321"));
+        ASSERT_EQ(DateTime::MJD, t1.format());
+        ASSERT_STREQ("46113.7654321", t1.get_value().c_str());
+        ASSERT_DOUBLE_EQ(46113.7654321, t1.to_mjd());
+    }
+    {
+        DateTime t1;
+        t1.set_value("45464844.54646541");
+        ASSERT_STREQ("45464844.546465", t1.get_value().c_str());
+    }
+
+}

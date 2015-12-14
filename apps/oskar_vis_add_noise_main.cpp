@@ -87,8 +87,8 @@ int main(int argc, char** argv)
     // Load the settings file and telescope model.
     oskar_log_section(log, 'M', "Loading settings file '%s'",
             settings_file.c_str());
-    oskar_Settings settings;
-    oskar_settings_load(&settings, 0, settings_file.c_str(), &status);
+    oskar_Settings_old settings;
+    oskar_settings_old_load(&settings, 0, settings_file.c_str(), &status);
     if (status != OSKAR_SUCCESS) {
         oskar_log_error(log, "Failed to load settings from '%s'",
                 settings_file.c_str());

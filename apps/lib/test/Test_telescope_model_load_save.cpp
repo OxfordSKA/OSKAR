@@ -35,8 +35,8 @@
 #include <oskar_SettingsTelescope.h>
 #include <oskar_telescope.h>
 #include <oskar_get_error_string.h>
-#include <oskar_settings_init.h>
-#include <oskar_settings_free.h>
+#include <oskar_settings_old_init.h>
+#include <oskar_settings_old_free.h>
 #include <oskar_mem.h>
 
 #include <QtCore/QtCore>
@@ -76,8 +76,8 @@ TEST(telescope_model_load_save, test_0_level)
 
     // Load it back again.
     {
-        oskar_Settings settings;
-        oskar_settings_init(&settings);
+        oskar_Settings_old settings;
+        oskar_settings_old_init(&settings);
         settings.telescope.altitude_m    = altitude_m;
         settings.telescope.latitude_rad  = latitude_rad;
         settings.telescope.longitude_rad = longitude_rad;
@@ -92,7 +92,7 @@ TEST(telescope_model_load_save, test_0_level)
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
         oskar_telescope_free(telescope, &err);
-        oskar_settings_free(&settings);
+        oskar_settings_old_free(&settings);
     }
 
     // Remove test directory.
@@ -145,8 +145,8 @@ TEST(telescope_model_load_save, test_1_level)
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
     // Load it back again.
-    oskar_Settings settings;
-    oskar_settings_init(&settings);
+    oskar_Settings_old settings;
+    oskar_settings_old_init(&settings);
     settings.telescope.altitude_m = altitude_m;
     settings.telescope.latitude_rad = latitude_rad;
     settings.telescope.longitude_rad = longitude_rad;
@@ -159,7 +159,7 @@ TEST(telescope_model_load_save, test_1_level)
                     OSKAR_CPU, 0, &err);
     oskar_telescope_load(telescope2, NULL, &settings, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    oskar_settings_free(&settings);
+    oskar_settings_old_free(&settings);
 
     // Check the contents.
     ASSERT_EQ(oskar_telescope_num_stations(telescope),
@@ -295,8 +295,8 @@ TEST(telescope_model_load_save, test_2_level)
     file.close();
 
     // Load it back again.
-    oskar_Settings settings;
-    oskar_settings_init(&settings);
+    oskar_Settings_old settings;
+    oskar_settings_old_init(&settings);
     settings.telescope.altitude_m = altitude_m;
     settings.telescope.latitude_rad = latitude_rad;
     settings.telescope.longitude_rad = longitude_rad;
@@ -310,7 +310,7 @@ TEST(telescope_model_load_save, test_2_level)
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
     oskar_telescope_load(telescope2, NULL, &settings, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    oskar_settings_free(&settings);
+    oskar_settings_old_free(&settings);
 
     // Check the contents.
     ASSERT_EQ(oskar_telescope_num_stations(telescope),
@@ -535,8 +535,8 @@ TEST(telescope_model_load_save, test_load_telescope_noise_rms)
 
     oskar_Telescope* telescope = oskar_telescope_create(type,
             location, 0, &err);
-    oskar_Settings settings;
-    oskar_settings_init(&settings);
+    oskar_Settings_old settings;
+    oskar_settings_old_init(&settings);
     settings.telescope.altitude_m = 0.0;
     settings.telescope.latitude_rad = 0.5;
     settings.telescope.longitude_rad = 0.1;

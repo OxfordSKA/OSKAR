@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
  * @file oskar_SettingsItem.h
  */
 
-#include <oskar_global.h>
 #include <QtCore/QList>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -81,19 +80,18 @@ public:
     int childNumber() const;
     int critical() const;
     const QVariant& defaultValue() const;
+    void deleteChildren();
     const QString& dependencyKey() const;
     const QVariant& dependencyValue() const;
     const QList<QString>& dependentKeys() const;
-    bool enabled() const;
-    bool hidden() const;
+    bool disabled() const;
     const QString& key() const;
     const QString& label() const;
     const QStringList& options() const;
     oskar_SettingsItem* parent();
     bool required() const;
     void setDefaultValue(const QVariant& value);
-    void setEnabled(bool value);
-    void setHidden(bool value);
+    void setDisabled(bool value);
     void setLabel(const QString& value);
     void setTooltip(const QString& value);
     void setValue(const QVariant& value);
@@ -118,8 +116,7 @@ private:
     QString subkey_; // Short settings key.
     int type_;       // Enumerated type.
     int valueSet_;
-    bool enabled_;   // Flag to indicate an item is disabled, i.e. has default value even if set.
-    bool hidden_;    // Flag to indicate an item is hidden, e.g. dependencies are not satisfied.
+    bool disabled_;  // Flag to indicate an item is disabled, e.g. dependencies are not satisfied.
     bool required_;  // Flag to indicate an item is required, i.e. has no default and must be set.
     QString label_;
     QString tooltip_;

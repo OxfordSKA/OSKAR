@@ -26,7 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apps/gui/oskar_MainWindow.h>
+#define USE_OLD 0
+
+#if USE_OLD
+#   include <apps/gui/oskar_MainWindow_old.h>
+#else
+#   include <apps/gui/oskar_MainWindow.h>
+#endif
 #include <apps/lib/oskar_OptionParser.h>
 
 #include <QtGui/QApplication>
@@ -50,7 +56,11 @@ int main(int argc, char** argv)
     app.setOrganizationName("OeRC");
 
     // Create the main window.
+#if USE_OLD
     oskar_MainWindow mainWindow;
+#else
+    oskar::MainWindow mainWindow;
+#endif
 
     // Show the main window.
     mainWindow.show();

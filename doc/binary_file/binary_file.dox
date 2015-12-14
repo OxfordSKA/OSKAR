@@ -3,7 +3,7 @@
 \page binary_file Binary File Format
 
 \latexonly
-\def \docversion{6}
+\def \docversion{7}
 \endlatexonly
 
 \section binary_intro Introduction
@@ -636,9 +636,9 @@ containing data in the following order:
       observation start.
 - [1] Global start channel index for the first channel in the block
       (usually 0; reserved for future use).
-- [2] Number of <i>usable</i> frequency channels in the block
+- [2] Number of <i>usable</i> time samples in the block.
+- [3] Number of <i>usable</i> frequency channels in the block
       (usually the total number; reserved for future use).
-- [3] Number of <i>usable</i> time samples in the block.
 - [4] Number of cross-correlated baselines.
 - [5] Number of stations.
 
@@ -716,6 +716,9 @@ result of the division (Tag ID 8) / (Tag ID 7).
     data chunks. Marked existing image data tags and visibility data tags as 
     deprecated. Added new sections describing visibility header and 
     visibility block.</td></tr>
+<tr><td>7</td><td>2015-07-13</td>
+    <td>Fixed incorrect description of Tag ID 1 in visibility block. 
+    The dimension order is now correct.</td></tr>
 </table>
 
 */

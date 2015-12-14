@@ -32,7 +32,7 @@
 #ifndef OSKAR_SETTINGS_TYPE_INPUT_DIRECTORY_HPP_
 #define OSKAR_SETTINGS_TYPE_INPUT_DIRECTORY_HPP_
 
-#include <oskar_AbstractType.hpp>
+#include <oskar_AbstractSettingsType.hpp>
 #include <string>
 
 /**
@@ -50,17 +50,25 @@ namespace oskar {
  *
  */
 
-class InputDirectory : public AbstractType
+class InputDirectory : public AbstractSettingsType
 {
 public:
     InputDirectory();
     virtual ~InputDirectory();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
+
+    bool init(const std::string& parameters);
+    bool set_default(const std::string& value);
+    std::string get_default() const;
+    bool set_value(const std::string& value);
+    std::string get_value() const;
+    bool is_default() const;
+
+    bool operator==(const InputDirectory& other) const;
+    bool operator>(const InputDirectory& other) const;
 
 private:
-    std::string directory_;
+    std::string value_;
+    std::string default_;
 };
 
 } // namespace oskar

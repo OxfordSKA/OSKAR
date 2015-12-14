@@ -678,12 +678,12 @@ void oskar_accumulate_station_visibility_for_source_scalar_inline_d(
 
 /**
  * @brief
- * Evaluates the rate of change of baseline coordinates with time
+ * Evaluates the change in baseline coordinates over time
  * (single precision).
  *
  * @details
- * This function evaluates the rate of change of the baseline coordinates
- * with time, due to Earth rotation.
+ * This function evaluates the change in baseline coordinates
+ * over time, due to Earth rotation.
  *
  * @param[in] station_xp     Offset ECEF x-coordinate of station p, in metres.
  * @param[in] station_xq     Offset ECEF x-coordinate of station q, in metres.
@@ -693,16 +693,16 @@ void oskar_accumulate_station_visibility_for_source_scalar_inline_d(
  * @param[in] time_int_sec   Time averaging interval, in seconds.
  * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
  * @param[in] dec0_rad       Declination of phase centre, in radians.
- * @param[out] du_dt         Rate of change of baseline u coordinate, in m/s.
- * @param[out] dv_dt         Rate of change of baseline v coordinate, in m/s.
- * @param[out] dw_dt         Rate of change of baseline w coordinate, in m/s.
+ * @param[out] du            Change of baseline u over interval, in wavelengths.
+ * @param[out] dv            Change of baseline v over interval, in wavelengths.
+ * @param[out] dw            Change of baseline w over interval, in wavelengths.
  */
 OSKAR_INLINE
-void oskar_evaluate_baseline_derivatives_inline_f(const float station_xp,
+void oskar_evaluate_baseline_deltas_inline_f(const float station_xp,
         const float station_xq, const float station_yp,
         const float station_yq, const float inv_wavelength,
         const float time_int_sec, const float gha0_rad,
-        const float dec0_rad, float* du_dt, float* dv_dt, float* dw_dt)
+        const float dec0_rad, float* du, float* dv, float* dw)
 {
     float xx, yy, rot_angle, temp, sin_HA, cos_HA, sin_Dec, cos_Dec;
 #ifdef __CUDACC__
@@ -719,19 +719,19 @@ void oskar_evaluate_baseline_derivatives_inline_f(const float station_xp,
     yy = (station_yp - station_yq) * temp;
     rot_angle = OMEGA_EARTHf * time_int_sec;
     temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
-    *du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
-    *dv_dt = temp * sin_Dec;
-    *dw_dt = -temp * cos_Dec;
+    *du = (xx * cos_HA - yy * sin_HA) * rot_angle;
+    *dv = temp * sin_Dec;
+    *dw = -temp * cos_Dec;
 }
 
 /**
  * @brief
- * Evaluates the rate of change of baseline coordinates with time
+ * Evaluates the change in baseline coordinates over time
  * (double precision).
  *
  * @details
- * This function evaluates the rate of change of the baseline coordinates
- * with time, due to Earth rotation.
+ * This function evaluates the change in baseline coordinates
+ * over time, due to Earth rotation.
  *
  * @param[in] station_xp     Offset ECEF x-coordinate of station p, in metres.
  * @param[in] station_xq     Offset ECEF x-coordinate of station q, in metres.
@@ -741,16 +741,16 @@ void oskar_evaluate_baseline_derivatives_inline_f(const float station_xp,
  * @param[in] time_int_sec   Time averaging interval, in seconds.
  * @param[in] gha0_rad       Greenwich Hour Angle of phase centre, in radians.
  * @param[in] dec0_rad       Declination of phase centre, in radians.
- * @param[out] du_dt         Rate of change of baseline u coordinate, in m/s.
- * @param[out] dv_dt         Rate of change of baseline v coordinate, in m/s.
- * @param[out] dw_dt         Rate of change of baseline w coordinate, in m/s.
+ * @param[out] du            Change of baseline u over interval, in wavelengths.
+ * @param[out] dv            Change of baseline v over interval, in wavelengths.
+ * @param[out] dw            Change of baseline w over interval, in wavelengths.
  */
 OSKAR_INLINE
-void oskar_evaluate_baseline_derivatives_inline_d(const double station_xp,
+void oskar_evaluate_baseline_deltas_inline_d(const double station_xp,
         const double station_xq, const double station_yp,
         const double station_yq, const double inv_wavelength,
         const double time_int_sec, const double gha0_rad,
-        const double dec0_rad, double* du_dt, double* dv_dt, double* dw_dt)
+        const double dec0_rad, double* du, double* dv, double* dw)
 {
     double xx, yy, rot_angle, temp, sin_HA, cos_HA, sin_Dec, cos_Dec;
 #ifdef __CUDACC__
@@ -767,9 +767,9 @@ void oskar_evaluate_baseline_derivatives_inline_d(const double station_xp,
     yy = (station_yp - station_yq) * temp;
     rot_angle = OMEGA_EARTH * time_int_sec;
     temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
-    *du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
-    *dv_dt = temp * sin_Dec;
-    *dw_dt = -temp * cos_Dec;
+    *du = (xx * cos_HA - yy * sin_HA) * rot_angle;
+    *dv = temp * sin_Dec;
+    *dw = -temp * cos_Dec;
 }
 
 /**
@@ -885,14 +885,14 @@ void oskar_evaluate_baseline_terms_inline_d(const double station_up,
  * Evaluates the time-smearing term (single precision).
  *
  * @brief
- * This function evaluates the time-smearing term, given the time derivatives
- * of the baseline coordinates, and the source direction cosines.
+ * This function evaluates the time-smearing term, given the baseline
+ * coordinates deltas, and the source direction cosines.
  */
 OSKAR_INLINE
-float oskar_evaluate_time_smearing_f(const float du_dt, const float dv_dt,
-        const float dw_dt, const float l, const float m, const float n)
+float oskar_evaluate_time_smearing_f(const float du, const float dv,
+        const float dw, const float l, const float m, const float n)
 {
-    return oskar_sinc_f(du_dt * l + dv_dt * m + dw_dt * (n - 1.0f));
+    return oskar_sinc_f(du * l + dv * m + dw * (n - 1.0f));
 }
 
 /**
@@ -900,14 +900,14 @@ float oskar_evaluate_time_smearing_f(const float du_dt, const float dv_dt,
  * Evaluates the time-smearing term (double precision).
  *
  * @brief
- * This function evaluates the time-smearing term, given the time derivatives
- * of the baseline coordinates, and the source direction cosines.
+ * This function evaluates the time-smearing term, given the baseline
+ * coordinates deltas, and the source direction cosines.
  */
 OSKAR_INLINE
-double oskar_evaluate_time_smearing_d(const double du_dt, const double dv_dt,
-        const double dw_dt, const double l, const double m, const double n)
+double oskar_evaluate_time_smearing_d(const double du, const double dv,
+        const double dw, const double l, const double m, const double n)
 {
-    return oskar_sinc_d(du_dt * l + dv_dt * m + dw_dt * (n - 1.0));
+    return oskar_sinc_d(du * l + dv * m + dw * (n - 1.0));
 }
 
 /**

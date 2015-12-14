@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2015, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -39,6 +39,14 @@
 #include <string>
 #include <vector>
 
+// Remove excess whitespace.
+std::string oskar_settings_utility_string_reduce(const std::string& str,
+        const std::string& fill = " ", const std::string& whitespace = " \t");
+
+// Replace all occurrences of a string inside another.
+std::string oskar_settings_utility_string_replace(std::string& s,
+        const std::string& to_replace, const std::string& replace_with);
+
 // Trim whitespace from each end of a string.
 std::string oskar_settings_utility_string_trim(const std::string& s,
         const std::string& whitespace = " \t");
@@ -57,17 +65,18 @@ std::string oskar_settings_utility_int_to_string(int i);
 std::string oskar_settings_utility_string_to_upper(const std::string& s);
 
 // Returns true if string s1 starts with the string s2
-bool oskar_settings_utility_string_starts_with(const std::string& s1,
-        const std::string& s2, bool case_senstive = false);
+bool oskar_settings_utility_string_starts_with(const std::string& full_string,
+        const std::string& fragment, bool case_senstive = false);
 
-// Convert double to a string
-std::string oskar_settings_utility_double_to_string(double d,
-        int precision = -17);
+std::string oskar_settings_utility_double_to_string_2(double d,
+                                                      char format = 'g',
+                                                      int precision = -1);
 
 // Convert string to double
 double oskar_settings_utility_string_to_double(const std::string& s, bool *ok);
 
 // Generate a formatted string
 std::string oskar_format_string(const std::string fmt, ...);
+
 
 #endif /* OSKAR_SETTINGS_UTILITY_STRING_HPP_ */

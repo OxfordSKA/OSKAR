@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,33 +41,40 @@ char* oskar_log_file_data(oskar_Log* log, size_t* size)
     char* data = 0;
     if (!size || !log) return 0;
 
-    /* If log exists, then write it out. */
+    /* If log exists, then read the whole file. */
 #ifdef _OPENMP
     /* Lock mutex. */
     omp_set_lock(&log->mutex);
 #endif
     if (log->file)
     {
+        FILE* temp_handle = 0;
+
         /* Determine the current size of the file. */
         fflush(log->file);
-        fseek(log->file, 0, SEEK_END);
-        *size = ftell(log->file);
-
-        /* Read the file into memory. */
-        if (*size != 0)
+        temp_handle = fopen(log->name, "rb");
+        if (temp_handle)
         {
-            size_t bytes_read = 0;
-            data = (char*) malloc(*size * sizeof(char));
-            if (data != 0)
+            fseek(temp_handle, 0, SEEK_END);
+            *size = ftell(temp_handle);
+
+            /* Read the file into memory. */
+            if (*size != 0)
             {
-                rewind(log->file);
-                bytes_read = fread(data, 1, *size, log->file);
-                if (bytes_read != *size)
+                size_t bytes_read = 0;
+                data = (char*) malloc(*size * sizeof(char));
+                if (data != 0)
                 {
-                    free(data);
-                    data = 0;
+                    rewind(temp_handle);
+                    bytes_read = fread(data, 1, *size, temp_handle);
+                    if (bytes_read != *size)
+                    {
+                        free(data);
+                        data = 0;
+                    }
                 }
             }
+            fclose(temp_handle);
         }
     }
 #ifdef _OPENMP

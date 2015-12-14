@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,21 +32,28 @@
 #include <QtGui/QMainWindow>
 #include <QtCore/QString>
 
-class oskar_SettingsModel;
-class oskar_SettingsModelFilter;
-class oskar_SettingsView;
 class QAction;
+class QComboBox;
+class QLineEdit;
 class QModelIndex;
 class QWidget;
 class QNetworkAccessManager;
 class QNetworkReply;
 
-class oskar_MainWindow : public QMainWindow
+namespace oskar {
+
+class SettingsModel;
+class SettingsView;
+class SettingsTree;
+class SettingsFileHandler;
+
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    oskar_MainWindow(QWidget* parent = 0);
+    MainWindow(QWidget* parent = 0);
+    ~MainWindow();
 
 protected:
     void closeEvent(QCloseEvent* event);
@@ -57,20 +64,17 @@ public slots:
 
 private slots:
     void about();
+    void binaryChanged(const QString& value);
     void binLocations();
     void checkForUpdate();
     void cudaInfo();
     void helpDoc();
     void openRecentFile();
     void processNetworkReply(QNetworkReply*);
-    void runBeamPattern();
-    void runInterferometer();
-    void runImager();
-    void runFitElementData();
-    void setHideUnsetItems(bool value);
+    void runButton();
 
 private:
-    void runButton();
+    void swapSettings(const char* xml);
 
     void createRecentFileActions();
     void updateRecentFileActions();
@@ -79,12 +83,14 @@ private:
 private:
     QString mainTitle_;
     QWidget* widget_;
-    oskar_SettingsModel* model_;
-    oskar_SettingsModelFilter* modelProxy_;
-    oskar_SettingsView* view_;
-    QAction* actHideUnset_;
+    QLineEdit* filterBox_;
+    QComboBox* selector_;
+    oskar::SettingsTree* settings_;
+    oskar::SettingsFileHandler* handler_;
+    oskar::SettingsView* view_;
+    oskar::SettingsModel* model_;
     QString settingsFile_;
-    QString run_binary_;
+    QString selectedBinary_;
 
     QMenuBar* menubar_;
     QMenu* menuFile_;
@@ -102,8 +108,8 @@ private:
     QString binary_imager_;
     QString binary_fit_element_data_;
     QString binary_cuda_info_;
-
-    bool isModified_;
 };
 
-#endif // OSKAR_MAIN_WINDOW_H_
+} /* namespace oskar */
+
+#endif /* OSKAR_MAIN_WINDOW_H_ */

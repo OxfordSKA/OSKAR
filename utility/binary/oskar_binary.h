@@ -92,7 +92,7 @@ enum OSKAR_TAG_RUN
     OSKAR_TAG_RUN_LOG  = 1
 };
 
-/* Binary file error codes are in the range -100 to -199. */
+/* Binary file error codes are in the range -100 to -149. */
 enum OSKAR_BINARY_ERROR_CODES
 {
     OSKAR_ERR_BINARY_OPEN_FAIL             = -100,

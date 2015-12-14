@@ -33,13 +33,15 @@
 
 #include <cfloat>
 #include <vector>
-
+#include <cmath>
+#include <cfloat>
 #include <iostream>
 #include <oskar_DoubleRange.hpp>
 
 namespace oskar {
 
-DoubleRange::DoubleRange() : min_(-DBL_MAX), max_(DBL_MAX), value_(0.0)
+DoubleRange::DoubleRange()
+: format_(AUTO), min_(-DBL_MAX), max_(DBL_MAX), value_(0.0), default_(0.0)
 {
 }
 
@@ -47,11 +49,13 @@ DoubleRange::~DoubleRange()
 {
 }
 
-void DoubleRange::init(const std::string& s, bool* ok)
+bool DoubleRange::init(const std::string& s)
 {
     min_   = -DBL_MAX;
     max_   =  DBL_MAX;
     value_ = 0.0;
+    default_ = 0.0;
+    format_ = AUTO;
 
     // Extract range from the parameter CSV string.
     // Parameters, p, for DoubleRange should be length 0, 1 or 2.
@@ -61,55 +65,94 @@ void DoubleRange::init(const std::string& s, bool* ok)
     //
     // Notes: if p[0] is the string 'MIN' or p[1] is the string 'MAX'
     // these will resolve as -DBL_MAX and DBL_MAX respectively.
+    bool ok = true;
     std::vector<std::string> p;
     p = oskar_settings_utility_string_get_type_params(s);
     if (p.size() == 0u) {
-        if (ok) *ok = false;
-        return;
+        return false;
     }
     else if (p.size() == 1u) {
         if (p[0] == "MIN") min_ = -DBL_MAX;
-        else min_ = oskar_settings_utility_string_to_double(p[0], ok);
+        else min_ = oskar_settings_utility_string_to_double(p[0], &ok);
     }
     else if (p.size() == 2u) {
         if (p[0] == "MIN")
             min_ = -DBL_MAX;
         else
-            min_ = oskar_settings_utility_string_to_double(p[0], ok);
+            min_ = oskar_settings_utility_string_to_double(p[0], &ok);
         if (p[1] == "MAX")
             max_ = DBL_MAX;
         else
-            max_ = oskar_settings_utility_string_to_double(p[1], ok);
+            max_ = oskar_settings_utility_string_to_double(p[1], &ok);
     }
     else {
-        if (ok) *ok = false;
+        return false;
     }
+    return ok;
 }
 
-void DoubleRange::fromString(const std::string& s, bool* ok)
+bool DoubleRange::set_default(const std::string& s)
 {
-    using namespace std;
-    if (ok) *ok = false;
+    format_ = (s.find_first_of('e') != std::string::npos) ? EXPONENT : AUTO;
+    bool ok = from_string_(default_, s);
+    if (ok) {
+        value_ = default_;
+    }
+    return ok;
+}
 
-    double d = oskar_settings_utility_string_to_double(s, ok);
-    if (ok && !*ok) return;
+std::string DoubleRange::get_default() const
+{
+    return oskar_settings_utility_double_to_string_2(default_,
+                                                     (format_==AUTO ? 'g' : 'e'));
+}
 
+bool DoubleRange::set_value(const std::string& s)
+{
+    format_ = (s.find_first_of('e') != std::string::npos) ? EXPONENT : AUTO;
+    return from_string_(value_, s);
+}
+
+std::string DoubleRange::get_value() const
+{
+    return oskar_settings_utility_double_to_string_2(value_,
+                                                     (format_ == AUTO ? 'g' : 'e'));
+}
+
+bool DoubleRange::is_default() const
+{
+    if (fabs(default_ - value_) < DBL_MIN) return true;
+    else return false;
+}
+
+bool DoubleRange::from_string_(double& value, const std::string& s) const
+{
+    bool ok = true;
+    double d = oskar_settings_utility_string_to_double(s, &ok);
+    if (!ok) return false;
     if (d >= min_ && d <= max_) {
-        if (ok) *ok = true;
-        value_ = d;
+        value = d;
+        return true;
     }
-    else if (d < min_) { if (ok) *ok = false; value_ = min_; }
-    else if (d > max_) { if (ok) *ok = false; value_ = max_; }
+    else if (d < min_) {
+        value = min_;
+        return false;
+    }
+    else if (d > max_) {
+        value = max_;
+        return false;
+    }
+    return false;
 }
 
-std::string DoubleRange::toString() const
+bool DoubleRange::operator==(const DoubleRange& other) const
 {
-    return oskar_settings_utility_double_to_string(value_, -17);
+    return (fabs(value_ - other.value_) < DBL_MIN);
 }
 
-std::string DoubleRange::toString(const std::string& fmt) const
+bool DoubleRange::operator>(const DoubleRange& other) const
 {
-    return oskar_format_string(fmt, value_);
+    return value_ > other.value_;
 }
 
 } // namespace oskar

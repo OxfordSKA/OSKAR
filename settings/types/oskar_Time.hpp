@@ -33,7 +33,8 @@
 #define OSKAR_SETTINGS_TYPE_TIME_HPP_
 
 #include <vector>
-#include <oskar_AbstractType.hpp>
+
+#include "oskar_AbstractSettingsType.hpp"
 
 /**
  * @file oskar_Time.hpp
@@ -53,25 +54,40 @@ namespace oskar {
  *  s.zzzzzzzz
  */
 
-class Time : public AbstractType
+class Time : public AbstractSettingsType
 {
 public:
+    enum Format { UNDEF = -1, TIME_STRING, SECONDS };
+    class Value {
+     public:
+        Value() : hours(0), minutes(0), seconds(0.0), format(UNDEF) {}
+        void clear() { hours = 0; minutes = 0; seconds = 0.0; format = UNDEF;}
+        int hours, minutes;
+        double seconds;
+        Time::Format format;
+    };
+
     Time();
     virtual ~Time();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
 
-    int hours() const;
-    int minutes() const;
-    double seconds() const;
+    bool init(const std::string& param);
+    bool set_default(const std::string& value);
+    std::string get_default() const;
+    bool set_value(const std::string& value);
+    std::string get_value() const;
+    bool is_default() const;
 
-    double in_seconds() const;
+    Value value() const { return value_; }
+    Value default_value() const { return default_; }
+    double to_seconds() const;
+
+    bool operator==(const Time& other) const;
+    bool operator>(const Time& other) const;
 
 private:
-    int hours_;
-    int minutes_;
-    double seconds_;
+    bool from_string_(const std::string& s, Value& value) const;
+    std::string to_string_(const Value& value) const;
+    Value default_, value_;
 };
 
 } // namespace oskar

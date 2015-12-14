@@ -9,4 +9,5 @@
     <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_interferometer.xml" />
     <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_beam_pattern.xml" />
     <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_image.xml" />
+    <import filename="@CMAKE_CURRENT_BINARY_DIR@/oskar_ionosphere.xml" />    
 </root>

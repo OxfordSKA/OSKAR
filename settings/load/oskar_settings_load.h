@@ -35,7 +35,7 @@
 
 #include <oskar_global.h>
 #include <oskar_log.h>
-#include <oskar_Settings.h>
+#include <oskar_Settings_old.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,7 +54,7 @@ extern "C" {
  * @param[in] filename  String containing name of settings file to read.
  * @param[in,out] status Status return code.
  */
-void oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
+void oskar_settings_old_load(oskar_Settings_old* settings, oskar_Log* log,
         const char* filename, int* status);
 
 #ifdef __cplusplus

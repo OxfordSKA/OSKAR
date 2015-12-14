@@ -30,8 +30,6 @@
  */
 
 #include <oskar_settings_utility_string.hpp>
-
-#include <sstream>
 #include <oskar_OptionList.hpp>
 
 namespace oskar {
@@ -44,35 +42,72 @@ OptionList::~OptionList()
 {
 }
 
-void OptionList::init(const std::string& s, bool* ok)
+bool OptionList::init(const std::string& s)
 {
-    if (ok) *ok = true;
     options_.clear();
     options_ = oskar_settings_utility_string_get_type_params(s);
+    return true;
 }
 
-void OptionList::fromString(const std::string& s, bool* ok)
+bool OptionList::set_default(const std::string& value)
 {
-    if (ok) *ok = false;
-    if (s.empty()) return;
-    for (size_t i = 0; i < options_.size(); ++i) {
-        if (oskar_settings_utility_string_starts_with(options_[i], s)) {
-            if (ok) *ok = true;
-            value_ = options_[i];
-            return;
-        }
+    bool ok = from_string_(default_, value);
+    if (ok) {
+        value_ = default_;
     }
-    return;
+    else {
+        value_.clear();
+        default_.clear();
+    }
+    return ok;
 }
 
-std::string OptionList::toString() const
+std::string OptionList::get_default() const
+{
+    return default_;
+}
+
+bool OptionList::set_value(const std::string& value)
+{
+    return from_string_(value_, value);
+}
+
+std::string OptionList::get_value() const
 {
     return value_;
 }
 
-std::vector<std::string> OptionList::options() const
+bool OptionList::is_default() const
 {
-    return options_;
+    return value_ == default_;
+}
+
+bool OptionList::operator==(const OptionList& other) const
+{
+    return value_ == other.value_;
+}
+
+bool OptionList::operator>(const OptionList& ) const
+{
+    return false;
+}
+
+bool OptionList::from_string_(std::string& value, const std::string& s) const
+{
+    if (s.empty() && !default_.empty()) {
+        return false;
+    }
+    if (default_.empty() && s.empty()) {
+        value = s;
+        return true;
+    }
+    for (size_t i = 0; i < options_.size(); ++i) {
+        if (oskar_settings_utility_string_starts_with(options_[i], s)) {
+            value = options_[i];
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace oskar

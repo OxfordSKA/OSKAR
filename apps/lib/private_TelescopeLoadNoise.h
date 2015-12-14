@@ -31,12 +31,12 @@
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-struct oskar_Settings;
+struct oskar_Settings_old;
 
 class TelescopeLoadNoise : public oskar_TelescopeLoadAbstract
 {
 public:
-    TelescopeLoadNoise(const oskar_Settings* settings);
+    TelescopeLoadNoise(const oskar_Settings_old* settings);
     ~TelescopeLoadNoise();
 
     void load(oskar_Telescope* telescope, const oskar_Dir& cwd, int num_subdirs,
@@ -61,33 +61,6 @@ private:
     void setNoiseRMS_(oskar_Station* model,
             const std::map<std::string, std::string>& filemap, int* status);
 
-    // Obtains noise RMS values for telescope model priority loading.
-    void noiseSpecTelescopeModel_(oskar_Mem* rms, int num_freqs,
-            double bandwidth_hz, double integration_time_sec,
-            const std::map<std::string, std::string>& filemap, int* status);
-
-    // Obtains noise RMS values for RMS specification.
-    void noiseSpecRMS_(oskar_Mem* rms, int num_freqs,
-            const std::map<std::string, std::string>& filemap, int* status);
-
-    // Obtains noise RMS values for sensitivity specification.
-    void noiseSpecSensitivity_(oskar_Mem* rms, int num_freqs,
-            double bandwidth_hz, double integration_time_sec,
-            const std::map<std::string, std::string>& filemap, int* status);
-
-    // Obtains noise RMS values for Tsys specification.
-    void noiseSpecTsys_(oskar_Mem* rms, int num_freqs,
-            double bandwidth_hz, double integration_time_sec,
-            const std::map<std::string, std::string>& filemap, int* status);
-
-    void sensitivity_to_rms_(oskar_Mem* rms, const oskar_Mem* sensitivity,
-            int num_freqs, double bandwidth_hz, double integration_time_sec,
-            int* status);
-
-    void t_sys_to_rms_(oskar_Mem* rms, const oskar_Mem* t_sys,
-            const oskar_Mem* area, const oskar_Mem* efficiency, int num_freqs,
-            double bandwidth, double integration_time, int* status);
-
     void evaluate_range_(oskar_Mem* values, int num_values, double start,
             double end, int* status);
 
@@ -96,7 +69,7 @@ private:
     int dataType_;  // OSKAR data type of the telescope model being loaded.
     std::map<FileIds_, std::string> files_;
     oskar_Mem* freqs_;
-    const oskar_Settings* settings_;
+    const oskar_Settings_old* settings_;
 };
 
 #endif /* OSKAR_TELESCOPE_LOAD_NOISE_H_ */

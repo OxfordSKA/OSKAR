@@ -16,4 +16,8 @@ endforeach()
 # Create a single combined oskar.xml file called 'oskar_all.xml'
 # found in the settings/xml folder of the build directory.
 process_import_nodes(${CMAKE_CURRENT_BINARY_DIR}/oskar.xml)
+process_import_nodes(${CMAKE_CURRENT_BINARY_DIR}/oskar_sim_interferometer.xml)
+process_import_nodes(${CMAKE_CURRENT_BINARY_DIR}/oskar_sim_beam_pattern.xml)
+process_import_nodes(${CMAKE_CURRENT_BINARY_DIR}/oskar_imager.xml)
+process_import_nodes(${CMAKE_CURRENT_BINARY_DIR}/oskar_fit_element_data.xml)
 

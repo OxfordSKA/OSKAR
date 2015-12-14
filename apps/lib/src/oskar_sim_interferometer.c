@@ -45,7 +45,10 @@
 #include <oskar_set_up_sky.h>
 #include <oskar_set_up_telescope.h>
 #include <oskar_set_up_vis.h>
-#include <oskar_settings_free.h>
+#include <oskar_SettingsTree.hpp>
+#include <oskar_SettingsDeclareXml.hpp>
+#include <oskar_SettingsFileHandlerQSettings.hpp>
+#include <oskar_settings_old_free.h>
 #include <oskar_settings_load.h>
 #include <oskar_settings_log.h>
 #include <oskar_sky.h>
@@ -56,6 +59,8 @@
 #include <oskar_vis_block_write_ms.h>
 #include <oskar_vis_header.h>
 #include <oskar_vis_header_write_ms.h>
+
+#include "settings/xml/oskar_sim_interferometer_xml_all.h"
 
 #include <oskar_get_memory_usage.h>
 
@@ -103,7 +108,9 @@ struct HostData
     int num_chunks;
     oskar_Sky** sky_chunks;
     oskar_Telescope* tel;
-    oskar_Settings s;
+    oskar_Settings_old s;
+    oskar_Settings* s2;
+    oskar_SettingsFileHandlerQSettings* handler;
     oskar_Timer* tmr_load;
     oskar_Timer* tmr_sim;   /* The total time for the simulation. */
     oskar_Timer* tmr_write; /* The time spent writing vis blocks. */
@@ -122,7 +129,7 @@ static void sim_vis_block(int gpu_id, DeviceData* d, const HostData* h,
 static void write_vis_block(int num_gpus, DeviceData* d, HostData* h,
         int block_index, int iactive, int* status);
 static void sim_baselines(DeviceData* d, oskar_Sky* sky,
-        const oskar_Settings* settings, int channel_index_block,
+        const oskar_Settings_old* settings, int channel_index_block,
         int time_index_block, int time_index_simulation, int* status);
 static void set_up_device_data(DeviceData* d, const HostData* h, int* status);
 static void free_device_data(int num_gpus, int* cuda_device_ids,
@@ -141,7 +148,9 @@ void oskar_sim_interferometer(const char* settings_file,
     const char *ms_name = 0, *vis_name = 0;
     DeviceData* d = 0;
     HostData* h = 0;
-    oskar_Settings* s = 0;
+    oskar_Settings_old* s = 0;
+    int num_failed_keys = 0;
+    char** failed_keys = 0;
 
     /* Create the host data structure (initialised with all bits zero). */
     h = (HostData*) calloc(1, sizeof(HostData));
@@ -155,12 +164,24 @@ void oskar_sim_interferometer(const char* settings_file,
 
     /* Load the settings file. */
     oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
-    oskar_settings_load(s, log, settings_file, status);
-    if (*status)
+    h->s2 = oskar_settings_create();
+    oskar_settings_declare_xml(h->s2, oskar_sim_interferometer_XML_STR);
+    h->handler = oskar_settings_file_handler_qsettings_create();
+    oskar_settings_set_file_handler(h->s2, h->handler);
+    oskar_settings_load(h->s2, settings_file, &num_failed_keys, &failed_keys,
+            status);
+    for (i = 0; i < num_failed_keys; ++i)
     {
-        free_host_data(h, status);
-        return;
+        oskar_log_warning(log, "Unable to set key '%s'", failed_keys[i]);
+        free(failed_keys[i]);
     }
+    free(failed_keys);
+    if (*status) { free_host_data(h, status); return; }
+
+    /* Load the settings file. */
+    oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
+    oskar_settings_old_load(s, log, settings_file, status);
+    if (*status) { free_host_data(h, status); return; }
 
     /* Log the relevant settings. (TODO fix/automate these functions) */
     oskar_log_set_keep_file(log, s->sim.keep_log_file);
@@ -198,11 +219,7 @@ void oskar_sim_interferometer(const char* settings_file,
 
     /* Find out how many GPUs are in the system. */
     *status = (int) cudaGetDeviceCount(&num_gpus_avail);
-    if (*status)
-    {
-        free_host_data(h, status);
-        return;
-    }
+    if (*status) { free_host_data(h, status); return; }
     if (num_gpus_avail < num_gpus)
     {
         oskar_log_error(log, "More CUDA devices were requested than found.");
@@ -226,11 +243,7 @@ void oskar_sim_interferometer(const char* settings_file,
 #endif
 
     /* Check for errors before setting up device data. */
-    if (*status)
-    {
-        free_host_data(h, status);
-        return;
-    }
+    if (*status) { free_host_data(h, status); return; }
 
     /* Initialise each of the requested GPUs and set up per-GPU memory. */
     d = (DeviceData*) calloc(num_gpus, sizeof(DeviceData));
@@ -372,7 +385,7 @@ void oskar_sim_interferometer(const char* settings_file,
         log_data = oskar_log_file_data(log, &log_size);
 #ifndef OSKAR_NO_MS
         if (h->ms)
-            oskar_ms_add_log(h->ms, log_data, log_size);
+            oskar_ms_add_history(h->ms, "OSKAR_LOG", log_data, log_size);
 #endif
         if (h->vis)
             oskar_binary_write(h->vis, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
@@ -393,7 +406,7 @@ static void sim_vis_block(int gpu_id, DeviceData* d, const HostData* h,
     double obs_start_mjd, dt_dump, gast, mjd;
     int time_index_start, time_index_end;
     int block_length, num_channels, num_times_block, total_chunks, total_times;
-    const oskar_Settings* s;
+    const oskar_Settings_old* s;
 
     /* Check if safe to proceed. */
     if (*status) return;
@@ -546,7 +559,7 @@ static void write_vis_block(int num_gpus, DeviceData* d, HostData* h,
 
 
 static void sim_baselines(DeviceData* d, oskar_Sky* sky,
-        const oskar_Settings* settings, int channel_index_block,
+        const oskar_Settings_old* settings, int channel_index_block,
         int time_index_block, int time_index_simulation, int* status)
 {
     int num_baselines, num_stations, num_src, num_times_block, num_channels;
@@ -774,7 +787,9 @@ static void free_host_data(HostData* h, int* status)
     oskar_timer_free(h->tmr_load);
     oskar_timer_free(h->tmr_sim);
     oskar_timer_free(h->tmr_write);
-    oskar_settings_free(&h->s);
+    oskar_settings_old_free(&h->s);
+    oskar_settings_file_handler_qsettings_free(h->handler);
+    oskar_settings_free(h->s2);
     free(h);
 }
 

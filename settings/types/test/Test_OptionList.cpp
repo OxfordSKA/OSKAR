@@ -36,24 +36,23 @@ using namespace oskar;
 
 TEST(settings_types, OptionList)
 {
-    bool ok = false;
-    {
-        OptionList l;
-        l.init("a,    b,"
-                ""
-                "c", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_EQ((unsigned)3, l.options().size());
-        ASSERT_STREQ("a", l.options()[0].c_str());
-        ASSERT_STREQ("b", l.options()[1].c_str());
-        ASSERT_STREQ("c", l.options()[2].c_str());
-        ASSERT_STREQ("", l.toString().c_str());
-        l.fromString("z", &ok);
-        ASSERT_FALSE(ok);
-        ASSERT_STREQ("", l.toString().c_str());
-        l.fromString("b", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_STREQ("b", l.toString().c_str());
-    }
+    OptionList l;
+    ASSERT_TRUE(l.init("a,    b,"
+                    ""
+                    "c"));
+    ASSERT_EQ(3u, l.options().size());
+    ASSERT_EQ(3, l.size());
+    ASSERT_STREQ("a", l.options()[0].c_str());
+    ASSERT_STREQ("b", l.options()[1].c_str());
+    ASSERT_STREQ("c", l.options()[2].c_str());
+    ASSERT_STREQ("", l.get_value().c_str());
+    ASSERT_TRUE(l.is_default());
+    ASSERT_FALSE(l.set_default("z"));
+    ASSERT_STREQ("", l.get_default().c_str());
+    ASSERT_TRUE(l.set_default("b"));
+    ASSERT_STREQ("b", l.get_default().c_str());
+    ASSERT_TRUE(l.set_value("a"));
+    ASSERT_FALSE(l.is_default());
+    ASSERT_STREQ("a", l.get_value().c_str());
 }
 

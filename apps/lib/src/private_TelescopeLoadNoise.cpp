@@ -29,7 +29,7 @@
 #include "apps/lib/private_TelescopeLoadNoise.h"
 #include "apps/lib/oskar_dir.h"
 
-#include <oskar_Settings.h>
+#include <oskar_Settings_old.h>
 #include <oskar_file_exists.h>
 
 #include <cfloat>
@@ -39,7 +39,7 @@
 using std::map;
 using std::string;
 
-TelescopeLoadNoise::TelescopeLoadNoise(const oskar_Settings* settings)
+TelescopeLoadNoise::TelescopeLoadNoise(const oskar_Settings_old* settings)
 : oskar_TelescopeLoadAbstract(), dataType_(0), freqs_(0)
 {
     files_[FREQ] = "noise_frequencies.txt";
@@ -210,14 +210,6 @@ void TelescopeLoadNoise::setNoiseRMS_(oskar_Station* model,
     if (*status) return;
     oskar_Mem* noise_rms = oskar_station_noise_rms_jy(model);
     int num_freqs = (int)oskar_mem_length(oskar_station_noise_freq_hz(model));
-    noiseSpecRMS_(noise_rms, num_freqs, filemap, status);
-}
-
-
-void TelescopeLoadNoise::noiseSpecRMS_(oskar_Mem* rms, int num_freqs,
-        const map<string, string>& filemap, int* status)
-{
-    if (*status) return;
 
     const oskar_SettingsSystemNoiseRMS& settingsRMS =
             settings_->interferometer.noise.rms;
@@ -229,14 +221,14 @@ void TelescopeLoadNoise::noiseSpecRMS_(oskar_Mem* rms, int num_freqs,
     switch (settingsRMS.specification)
     {
         case OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL:
-            oskar_mem_load_ascii(filename.c_str(), 1, status, rms, "");
+            oskar_mem_load_ascii(filename.c_str(), 1, status, noise_rms, "");
             break;
         case OSKAR_SYSTEM_NOISE_DATA_FILE:
-            oskar_mem_load_ascii(settingsRMS.file, 1, status, rms, "");
+            oskar_mem_load_ascii(settingsRMS.file, 1, status, noise_rms, "");
             break;
         case OSKAR_SYSTEM_NOISE_RANGE:
-            evaluate_range_(rms, num_freqs, settingsRMS.start, settingsRMS.end,
-                    status);
+            evaluate_range_(noise_rms, num_freqs,
+                    settingsRMS.start, settingsRMS.end, status);
             break;
         default:
             *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;

@@ -58,7 +58,7 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     oskar_Mem *theta, *phi, *h_re, *h_im, *v_re, *v_im, *weight;
 
     /* Declare the line buffer. */
-    char *line = NULL, *dbi = NULL;
+    char *line = 0, *dbi = 0, *ludwig3 = 0;
     size_t bufsize = 0;
     FILE* file;
 
@@ -127,7 +127,7 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         return;
     }
 
-    /* Read the first line and check if data is in logarithmic format. */
+    /* Read the first line to check units and coordinate system. */
     if (oskar_getline(&line, &bufsize, file) < 0)
     {
         *status = OSKAR_ERR_FILE_IO;
@@ -135,7 +135,12 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         fclose(file);
         return;
     }
-    dbi = strstr(line, "dBi"); /* Check for presence of "dBi". */
+
+    /* Check for presence of "dBi". */
+    dbi = strstr(line, "dBi");
+
+    /* Check for data in Ludwig-3 polarisation system. */
+    ludwig3 = strstr(line, "Horiz");
 
     /* Create local arrays to hold data for fitting. */
     theta  = oskar_mem_create(type, OSKAR_CPU, 0, status);
@@ -151,15 +156,17 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
     n = 0;
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
-        double t = 0., p = 0., abs_theta, phase_theta, abs_phi, phase_phi;
-        double phi_re, phi_im, theta_re, theta_im;
-        double cos_p, sin_p, h_re_, h_im_, v_re_, v_im_;
+        double t = 0., p = 0., abs_theta_horiz, phase_theta_horiz;
+        double abs_phi_verti, phase_phi_verti;
+        double theta_horiz_re, theta_horiz_im, phi_verti_re, phi_verti_im;
+        double h_re_, h_im_, v_re_, v_im_;
         void *p_theta = 0, *p_phi = 0, *p_h_re = 0, *p_h_im = 0, *p_v_re = 0;
         void *p_v_im = 0, *p_weight = 0;
 
         /* Parse the line, and skip if data were not read correctly. */
         if (sscanf(line, "%lf %lf %*f %lf %lf %lf %lf %*f", &t, &p,
-                    &abs_theta, &phase_theta, &abs_phi, &phase_phi) != 6)
+                    &abs_theta_horiz, &phase_theta_horiz,
+                    &abs_phi_verti, &phase_phi_verti) != 6)
             continue;
 
         /* Ignore data below horizon if requested. */
@@ -172,8 +179,8 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         /* Convert angular measures to radians. */
         t *= DEG2RAD;
         p *= DEG2RAD;
-        phase_theta *= DEG2RAD;
-        phase_phi *= DEG2RAD;
+        phase_theta_horiz *= DEG2RAD;
+        phase_phi_verti *= DEG2RAD;
 
         /* Ensure enough space in arrays. */
         if (n % 100 == 0)
@@ -200,23 +207,36 @@ void oskar_element_load_cst(oskar_Element* data, oskar_Log* log,
         /* Convert decibel to linear scale if necessary. */
         if (dbi)
         {
-            abs_theta = pow(10.0, abs_theta / 10.0);
-            abs_phi   = pow(10.0, abs_phi / 10.0);
+            abs_theta_horiz = pow(10.0, abs_theta_horiz / 10.0);
+            abs_phi_verti   = pow(10.0, abs_phi_verti / 10.0);
         }
 
         /* Amp,phase to real,imag conversion. */
-        theta_re = abs_theta * cos(phase_theta);
-        theta_im = abs_theta * sin(phase_theta);
-        phi_re = abs_phi * cos(phase_phi);
-        phi_im = abs_phi * sin(phase_phi);
+        theta_horiz_re = abs_theta_horiz * cos(phase_theta_horiz);
+        theta_horiz_im = abs_theta_horiz * sin(phase_theta_horiz);
+        phi_verti_re = abs_phi_verti * cos(phase_phi_verti);
+        phi_verti_im = abs_phi_verti * sin(phase_phi_verti);
 
-        /* Convert to Ludwig-3 polarisation system. */
-        sin_p = sin(p);
-        cos_p = cos(p);
-        h_re_ = theta_re * cos_p - phi_re * sin_p;
-        h_im_ = theta_im * cos_p - phi_im * sin_p;
-        v_re_ = theta_re * sin_p + phi_re * cos_p;
-        v_im_ = theta_im * sin_p + phi_im * cos_p;
+        /* Convert to Ludwig-3 polarisation system if required. */
+        if (ludwig3)
+        {
+            /* Already in Ludwig-3: No conversion required. */
+            h_re_ = theta_horiz_re;
+            h_im_ = theta_horiz_im;
+            v_re_ = phi_verti_re;
+            v_im_ = phi_verti_im;
+        }
+        else
+        {
+            /* Convert from theta/phi to Ludwig-3. */
+            double cos_p, sin_p;
+            sin_p = sin(p);
+            cos_p = cos(p);
+            h_re_ = theta_horiz_re * cos_p - phi_verti_re * sin_p;
+            h_im_ = theta_horiz_im * cos_p - phi_verti_im * sin_p;
+            v_re_ = theta_horiz_re * sin_p + phi_verti_re * cos_p;
+            v_im_ = theta_horiz_im * sin_p + phi_verti_im * cos_p;
+        }
 
         /* Store the surface data in Ludwig-3 format. */
         ((double*)p_theta)[n]  = t;

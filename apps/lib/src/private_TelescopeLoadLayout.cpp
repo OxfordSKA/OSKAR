@@ -28,7 +28,7 @@
 
 #include "apps/lib/private_TelescopeLoadLayout.h"
 #include "apps/lib/oskar_dir.h"
-#include <oskar_Settings.h>
+#include <oskar_Settings_old.h>
 
 using std::map;
 using std::string;
@@ -36,7 +36,7 @@ using std::string;
 const string TelescopeLoadLayout::layout_file = "layout.txt";
 const string TelescopeLoadLayout::layout_ecef_file = "layout_ecef.txt";
 
-TelescopeLoadLayout::TelescopeLoadLayout(const oskar_Settings* settings)
+TelescopeLoadLayout::TelescopeLoadLayout(const oskar_Settings_old* settings)
 {
     settings_ = settings;
 }

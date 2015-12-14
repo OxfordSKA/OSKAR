@@ -38,16 +38,17 @@
 #include <oskar_settings_load_element_fit.h>
 
 #include <oskar_settings_file_exists.h>
-#include <oskar_settings_init.h>
+#include <oskar_settings_old_init.h>
 
 #include <oskar_log.h>
 #include <string.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_settings_load(oskar_Settings* s, oskar_Log* log,
+void oskar_settings_old_load(oskar_Settings_old* s, oskar_Log* log,
         const char* filename, int* status)
 {
     /* Check if the settings file exists! */
@@ -58,7 +59,7 @@ void oskar_settings_load(oskar_Settings* s, oskar_Log* log,
     }
 
     /* Initialise the settings arrays. */
-    oskar_settings_init(s);
+    oskar_settings_old_init(s);
 
     /* Load observation settings first. */
     oskar_settings_load_observation(&s->obs, log, filename, status);

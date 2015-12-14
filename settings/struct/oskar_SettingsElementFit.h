@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,19 +29,6 @@
 #ifndef OSKAR_SETTINGS_ELEMENT_FIT_H_
 #define OSKAR_SETTINGS_ELEMENT_FIT_H_
 
-/**
- * @file oskar_SettingsElementFit.h
- */
-
-/**
- * @struct oskar_SettingsElementFit
- *
- * @brief Structure to hold element fit settings.
- *
- * @details
- * The structure holds fitting parameters used for the numerical element
- * pattern fitting procedure.
- */
 struct oskar_SettingsElementFit
 {
     char* input_cst_file;
@@ -49,12 +36,14 @@ struct oskar_SettingsElementFit
     char* output_directory;
     char* fits_image;
     int pol_type;
+    int swap_h_v_data;
     int element_type_index;
     double frequency_hz;
+    int coordinate_system;
     int ignore_data_below_horizon;
-    int ignore_data_at_pole;
-    double average_fractional_error; /**< Target average fractional error. */
-    double average_fractional_error_factor_increase; /**< In case of fitting failure, factor by which to increase allowed average fractional error. */
+    int ignore_data_at_pole; /* FIXME(FD) Remove this one. */
+    double average_fractional_error;
+    double average_fractional_error_factor_increase;
 };
 typedef struct oskar_SettingsElementFit oskar_SettingsElementFit;
 

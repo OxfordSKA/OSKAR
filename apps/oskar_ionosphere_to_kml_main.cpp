@@ -62,10 +62,10 @@
 #include <png.h>
 #include <cfloat>
 
-int get_lon_lat_quad_coords(double* coords, oskar_Settings* settings,
+int get_lon_lat_quad_coords(double* coords, oskar_Settings_old* settings,
         oskar_Log* log);
 void evalaute_station_beam_pp(double* pp_lon0, double* pp_lat0,
-        int stationID, oskar_Settings* settings,
+        int stationID, oskar_Settings_old* settings,
         oskar_Telescope* telescope, int* status);
 void write_kml(const char* kml_file, const char* image_file, double* coords,
         const oskar_Mem* pp_lon, const oskar_Mem* pp_lat);
@@ -77,7 +77,7 @@ inline void setRGB(png_byte *ptr, float val, float red_val, float blue_val);
 void abort_(const char* s, ...);
 void image_to_png(const char* filename, oskar_Image* image);
 int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat,
-        oskar_Settings& settings, oskar_Log* log);
+        oskar_Settings_old& settings, oskar_Log* log);
 
 // Add a KML settings group into the ionosphere settings ??
 // KML
@@ -104,8 +104,8 @@ int main(int argc, char** argv)
     oskar_log_list(log, 'M', 0, "Running binary %s", argv[0]);
 
     const char* settings_file = opt.getArg(0);
-    oskar_Settings settings;
-    oskar_settings_load(&settings, log, settings_file, &status);
+    oskar_Settings_old settings;
+    oskar_settings_old_load(&settings, log, settings_file, &status);
     oskar_log_set_keep_file(log, settings.sim.keep_log_file);
 
     oskar_log_settings_telescope(log, &settings);
@@ -145,7 +145,7 @@ int main(int argc, char** argv)
     oskar_log_free(log);
 }
 
-int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings& settings,
+int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings_old& settings,
         oskar_Log* log)
 {
     int status = OSKAR_SUCCESS;
@@ -288,7 +288,7 @@ int evaluate_pp(oskar_Mem** pp_lon, oskar_Mem** pp_lat, oskar_Settings& settings
 }
 
 
-int get_lon_lat_quad_coords(double* coords, oskar_Settings* settings,
+int get_lon_lat_quad_coords(double* coords, oskar_Settings_old* settings,
         oskar_Log* log)
 {
     int status = OSKAR_SUCCESS;
@@ -362,7 +362,7 @@ int get_lon_lat_quad_coords(double* coords, oskar_Settings* settings,
 }
 
 void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
-        int stationID, oskar_Settings* settings, oskar_Telescope* tel,
+        int stationID, oskar_Settings_old* settings, oskar_Telescope* tel,
         int* status)
 {
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;

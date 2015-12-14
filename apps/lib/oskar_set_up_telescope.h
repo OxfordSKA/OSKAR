@@ -36,7 +36,7 @@
 #include <oskar_global.h>
 #include <oskar_telescope.h>
 #include <oskar_log.h>
-#include <oskar_Settings.h>
+#include <oskar_Settings_old.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,7 +57,7 @@ extern "C" {
  * @return A handle to the new structure.
  */
 OSKAR_APPS_EXPORT
-oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
+oskar_Telescope* oskar_set_up_telescope(const oskar_Settings_old* settings,
         oskar_Log* log, int* status);
 
 #ifdef __cplusplus

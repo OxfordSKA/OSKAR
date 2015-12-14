@@ -42,15 +42,21 @@ using namespace std;
 
 TEST(settings_types, StringList)
 {
-    bool ok = true;
     StringList l;
-    l.fromString("a,b,c", &ok);
-    ASSERT_TRUE(ok);
+    ASSERT_TRUE(l.init(""));
+    ASSERT_TRUE(l.set_default("a,b,c"));
     ASSERT_EQ(3u, l.values().size());
     ASSERT_STREQ("a", l.values()[0].c_str());
     ASSERT_STREQ("b", l.values()[1].c_str());
     ASSERT_STREQ("c", l.values()[2].c_str());
-    ASSERT_STREQ("a,b,c", l.toString().c_str());
-    ASSERT_TRUE(ok);
+    ASSERT_STREQ("a,b,c", l.get_default().c_str());
+    ASSERT_TRUE(l.is_default());
+
+    ASSERT_TRUE(l.set_value("p, q"));
+    ASSERT_EQ(2, l.size());
+    ASSERT_STREQ("p", l.values()[0].c_str());
+    ASSERT_STREQ("q", l.values()[1].c_str());
+    ASSERT_STREQ("p,q", l.get_value().c_str());
+    ASSERT_FALSE(l.is_default());
 }
 

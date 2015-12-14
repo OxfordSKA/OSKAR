@@ -73,13 +73,8 @@ ${import_node_}
     string(REPLACE "\n" " \\\n" xml_h_ "${xml_h_}")
     set(xml_h_
 "
-#ifndef OSKAR_XML_H_
-#define OSKAR_XML_H_
-
-#define OSKAR_XML_STR \\
+#define ${name_}_XML_STR \\
 \"${xml_h_}\"
-
-#endif /* OSKAR_XML_H_ */
 ")
     message(STATUS "Writing settings XML header: ${xml_file}")
     file(WRITE ${xml_file} "${xml_h_}")

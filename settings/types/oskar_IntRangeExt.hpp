@@ -32,23 +32,59 @@
 #ifndef OSKAR_SETTINGS_TYPE_INTRANGEEXT_HPP_
 #define OSKAR_SETTINGS_TYPE_INTRANGEEXT_HPP_
 
-#include <oskar_AbstractType.hpp>
+#include <oskar_AbstractSettingsType.hpp>
+#include <ttl/var/variant.hpp>
+#include <string>
 
 namespace oskar {
 
-class IntRangeExt : public AbstractType
+class IntRangeExt : public AbstractSettingsType
 {
 public:
+    typedef ttl::var::variant<int, std::string> Value;
+
     IntRangeExt();
     virtual ~IntRangeExt();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
+
+    bool init(const std::string& s);
+    bool set_default(const std::string &value);
+    std::string get_default() const;
+    bool set_value(const std::string& value);
+    std::string get_value() const;
+    bool is_default() const;
+
+    bool set_value(int i);
+    bool set_default(int i);
+
+    // FIXME(BM) handle string types.
+    int value() const { return ttl::var::get<int>(value_); }
+    // FIXME(BM) handle string types.
+    int default_value() const { return ttl::var::get<int>(default_); }
+    int min() const { return min_; }
+    int max() const { return max_; }
+    std::string ext_min() const { return ext_min_; }
+    std::string ext_max() const { return ext_max_; }
+    bool is_max() const {
+        return (value_.which() == STRING &&
+                        ttl::var::get<std::string>(value_) == ext_max_);
+    }
+    bool is_min() const {
+        return (value_.which() == STRING &&
+                        ttl::var::get<std::string>(value_) == ext_min_);
+    }
+
+    bool operator==(const IntRangeExt& other) const;
+    bool operator>(const IntRangeExt& other) const;
 
 private:
+    bool from_string_(Value& value, const std::string& s) const;
+    bool from_int_(Value& value, int i) const;
+    std::string to_string_(const Value& value) const;
+
     int min_, max_;
-    std::string smin_, smax_;
-    int value_;
+    std::string ext_min_, ext_max_;
+    enum value_types { INT, STRING };
+    Value default_, value_;
 };
 
 } // namespace oskar

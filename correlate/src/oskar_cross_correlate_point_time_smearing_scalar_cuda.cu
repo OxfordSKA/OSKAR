@@ -52,7 +52,7 @@ void oskar_cross_correlate_point_time_smearing_scalar_cudak_f(
         const float time_int_sec, const float gha0_rad, const float dec0_rad,
         float2* restrict vis)
 {
-    __shared__ float uv_len, uu, vv, ww, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
+    __shared__ float uv_len, uu, vv, ww, uu2, vv2, uuvv, du, dv, dw;
     float2 sum;
     float l, m, n, r1, r2;
     int i;
@@ -68,10 +68,10 @@ void oskar_cross_correlate_point_time_smearing_scalar_cudak_f(
                 station_w[SP], station_w[SQ], inv_wavelength,
                 frac_bandwidth, &uv_len, &uu, &vv, &ww, &uu2, &vv2, &uuvv);
 
-        /* Compute the derivatives for time-average smearing. */
-        oskar_evaluate_baseline_derivatives_inline_f(station_x[SP],
+        /* Compute the deltas for time-average smearing. */
+        oskar_evaluate_baseline_deltas_inline_f(station_x[SP],
                 station_x[SQ], station_y[SP], station_y[SQ], inv_wavelength,
-                time_int_sec, gha0_rad, dec0_rad, &du_dt, &dv_dt, &dw_dt);
+                time_int_sec, gha0_rad, dec0_rad, &du, &dv, &dw);
     }
     __syncthreads();
 
@@ -94,7 +94,7 @@ void oskar_cross_correlate_point_time_smearing_scalar_cudak_f(
 
         /* Compute bandwidth- and time-smearing terms. */
         r1 = oskar_sinc_f(uu * l + vv * m + ww * (n - 1.0f));
-        r2 = oskar_evaluate_time_smearing_f(du_dt, dv_dt, dw_dt, l, m, n);
+        r2 = oskar_evaluate_time_smearing_f(du, dv, dw, l, m, n);
         r1 *= r2;
 
         /* Accumulate baseline visibility response for source. */
@@ -137,7 +137,7 @@ void oskar_cross_correlate_point_time_smearing_scalar_cudak_d(
         const double time_int_sec, const double gha0_rad,
         const double dec0_rad, double2* restrict vis)
 {
-    __shared__ double uv_len, uu, vv, ww, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
+    __shared__ double uv_len, uu, vv, ww, uu2, vv2, uuvv, du, dv, dw;
     double2 sum;
     double l, m, n, r1, r2;
     int i;
@@ -153,10 +153,10 @@ void oskar_cross_correlate_point_time_smearing_scalar_cudak_d(
                 station_w[SP], station_w[SQ], inv_wavelength,
                 frac_bandwidth, &uv_len, &uu, &vv, &ww, &uu2, &vv2, &uuvv);
 
-        /* Compute the derivatives for time-average smearing. */
-        oskar_evaluate_baseline_derivatives_inline_d(station_x[SP],
+        /* Compute the deltas for time-average smearing. */
+        oskar_evaluate_baseline_deltas_inline_d(station_x[SP],
                 station_x[SQ], station_y[SP], station_y[SQ], inv_wavelength,
-                time_int_sec, gha0_rad, dec0_rad, &du_dt, &dv_dt, &dw_dt);
+                time_int_sec, gha0_rad, dec0_rad, &du, &dv, &dw);
     }
     __syncthreads();
 
@@ -179,7 +179,7 @@ void oskar_cross_correlate_point_time_smearing_scalar_cudak_d(
 
         /* Compute bandwidth- and time-smearing terms. */
         r1 = oskar_sinc_d(uu * l + vv * m + ww * (n - 1.0));
-        r2 = oskar_evaluate_time_smearing_d(du_dt, dv_dt, dw_dt, l, m, n);
+        r2 = oskar_evaluate_time_smearing_d(du, dv, dw, l, m, n);
         r1 *= r2;
 
         /* Accumulate baseline visibility response for source. */

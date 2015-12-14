@@ -36,23 +36,22 @@ using namespace oskar;
 
 TEST(settings_types, IntList)
 {
-    bool ok = true;
     IntList l;
-    {
-        l.fromString("1,2,3,4,5", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_EQ((unsigned)5, l.values().size());
-        for (int i = 0; i < (int)l.values().size(); ++i) {
-            ASSERT_EQ(i+1, l.values()[i]);
-        }
-        ASSERT_STREQ("1,2,3,4,5", l.toString().c_str());
+    ASSERT_TRUE(l.set_default("1,2,3, 4,5"));
+    ASSERT_STREQ("1,2,3,4,5", l.get_default().c_str());
+    ASSERT_STREQ("1,2,3,4,5", l.get_value().c_str());
+    ASSERT_EQ(5, l.size());
+    for (int i = 0; i < (int)l.size(); ++i) {
+        ASSERT_EQ(i+1, l.default_values()[i]);
+        ASSERT_EQ(i+1, l.values()[i]);
     }
-    {
-        l.fromString("555,666", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_EQ((unsigned)2, l.values().size());
-        ASSERT_EQ(555, l.values()[0]);
-        ASSERT_EQ(666, l.values()[1]);
-    }
+    ASSERT_TRUE(l.is_default());
+    ASSERT_TRUE(l.set_value("9, 10, 11"));
+    ASSERT_FALSE(l.is_default());
+    ASSERT_EQ(3, l.size());
+    ASSERT_EQ(9, l.values()[0]);
+    ASSERT_EQ(10, l.values()[1]);
+    ASSERT_EQ(11, l.values()[2]);
+    ASSERT_STREQ("9,10,11", l.get_value().c_str());
 }
 

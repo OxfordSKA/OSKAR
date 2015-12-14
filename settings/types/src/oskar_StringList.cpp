@@ -45,31 +45,73 @@ StringList::~StringList()
 {
 }
 
-void StringList::init(const std::string& /*s*/, bool* /*ok*/)
+bool StringList::init(const std::string& /*s*/)
 {
-     // TODO allow a a different delimiter via the init method?
-     values_.clear();
+     // TODO(BM) allow a a different delimiter via the init method?
+     value_.clear();
+     default_.clear();
+     return true;
 }
 
-void StringList::fromString(const std::string& s, bool* /*ok*/)
+bool StringList::set_default(const std::string& s)
 {
-    values_ = oskar_settings_utility_string_get_type_params(s);
+    default_ = oskar_settings_utility_string_get_type_params(s);
+    value_.clear();
+    for (unsigned int i = 0; i < default_.size(); ++i) {
+        value_.push_back(default_.at(i));
+    }
+    return true;
 }
 
-std::string StringList::toString() const
+std::string StringList::get_default() const
+{
+    return to_string_(default_);
+}
+
+bool StringList::set_value(const std::string& s)
+{
+    value_ = oskar_settings_utility_string_get_type_params(s);
+    return true;
+}
+
+std::string StringList::get_value() const
+{
+    return to_string_(value_);
+}
+
+bool StringList::is_default() const
+{
+    if (value_.size() != default_.size()) return false;
+    for (unsigned int i = 0; i < default_.size(); ++i) {
+        if (value_[i] != default_[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+std::string StringList::to_string_(const std::vector<std::string>& values) const
 {
     std::ostringstream ss;
-    for (size_t i = 0u; i < values_.size(); ++i) {
-        ss << values_.at(i);
-        if (i < values_.size() - 1)
+    for (size_t i = 0u; i < values.size(); ++i) {
+        ss << values.at(i);
+        if (i < values.size() - 1)
             ss << delimiter_;
     }
     return ss.str();
 }
 
-std::vector<std::string> StringList::values() const
+bool StringList::operator==(const StringList& other) const
 {
-    return values_;
+    if (value_.size() != other.value_.size()) return false;
+    for (unsigned int i = 0; i < value_.size(); ++i)
+        if (value_[i] != other.value_[i]) return false;
+    return true;
+}
+
+bool StringList::operator>(const StringList& ) const
+{
+    return false;
 }
 
 } // namespace oskar

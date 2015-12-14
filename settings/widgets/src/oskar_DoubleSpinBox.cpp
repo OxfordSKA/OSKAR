@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,11 @@
 #include <cfloat>
 #include <cmath>
 #include <cstdio>
+#include <iostream>
+#include <iomanip>
+#include <oskar_settings_utility_string.hpp>
+
+using namespace std;
 
 oskar_DoubleSpinBox::oskar_DoubleSpinBox(QWidget* parent)
 : QAbstractSpinBox(parent)
@@ -41,7 +46,7 @@ oskar_DoubleSpinBox::oskar_DoubleSpinBox(QWidget* parent)
     value_ = 0.0;
     max_ = DBL_MAX;
     min_ = -DBL_MAX;
-    decimals_ = 3;
+    decimals_ = 16;
     singleStep_ = 1.0;
     v_ = new QDoubleValidator(this);
     connect(this, SIGNAL(editingFinished()), this, SLOT(setValue()));
@@ -172,18 +177,19 @@ void oskar_DoubleSpinBox::stepBy(int steps)
 QString oskar_DoubleSpinBox::textFromValue(double value) const
 {
     QString t;
-
     if (value <= min_ && !minText_.isEmpty())
     {
         t = minText_;
     }
     else if (text().contains('e', Qt::CaseInsensitive))
     {
-        t = QString::number(value, 'e', decimals());
+        std::string s = oskar_settings_utility_double_to_string_2(value, 'e');
+        t = QString::fromStdString(s);
     }
     else
     {
-        t = QString::number(value);
+        std::string s = oskar_settings_utility_double_to_string_2(value, 'g');
+        t = QString::fromStdString(s);
     }
 
     return t;
@@ -223,8 +229,10 @@ double oskar_DoubleSpinBox::valueFromText(const QString& text) const
 {
     if (!minText_.isEmpty() && text.compare(minText_, Qt::CaseInsensitive) == 0)
         return min_;
-    else
-        return text.toDouble();
+    else {
+        double value =  text.toDouble();
+        return value;
+    }
 }
 
 void oskar_DoubleSpinBox::setMinText(const QString& text)
@@ -244,6 +252,17 @@ void oskar_DoubleSpinBox::setValue(double val)
     lineEdit()->setText(t);
     emit valueChanged(val);
     emit valueChanged(t);
+}
+
+void oskar_DoubleSpinBox::setValue(const QString& text)
+{
+    QVariant var(text);
+    if (!var.canConvert(QVariant::Double) && text != minText_)
+        return;
+    lineEdit()->setText(text);
+    value_ = var.toDouble();
+    emit valueChanged(value_);
+    emit valueChanged(text);
 }
 
 void oskar_DoubleSpinBox::setValue()

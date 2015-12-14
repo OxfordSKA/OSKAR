@@ -35,7 +35,7 @@
 
 #include <oskar_global.h>
 #include <oskar_telescope.h>
-#include <oskar_Settings.h>
+#include <oskar_Settings_old.h>
 #include <oskar_log.h>
 
 #ifdef __cplusplus
@@ -57,7 +57,7 @@ extern "C" {
  */
 OSKAR_APPS_EXPORT
 void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
-        const oskar_Settings* settings, int* status);
+        const oskar_Settings_old* settings, int* status);
 
 #ifdef __cplusplus
 }

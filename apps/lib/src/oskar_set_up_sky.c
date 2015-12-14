@@ -102,7 +102,7 @@ static void set_up_pol(oskar_Sky* sky,
         const oskar_SettingsSkyPolarisation* pol, int* status);
 
 
-oskar_Sky** oskar_set_up_sky(const oskar_Settings* settings, oskar_Log* log,
+oskar_Sky** oskar_set_up_sky(const oskar_Settings_old* settings, oskar_Log* log,
         int* num_chunks, int* status)
 {
     int max_per_chunk, type, zero_flag, i, j;

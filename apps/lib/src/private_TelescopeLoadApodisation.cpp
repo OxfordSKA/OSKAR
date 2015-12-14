@@ -33,6 +33,7 @@ using std::map;
 using std::string;
 
 const string TelescopeLoadApodisation::apodisation_file = "apodisation.txt";
+const string TelescopeLoadApodisation::apodization_file = "apodization.txt";
 
 void TelescopeLoadApodisation::load(oskar_Telescope* /*telescope*/,
         const oskar_Dir& /*cwd*/, int /*num_subdirs*/,
@@ -45,11 +46,16 @@ void TelescopeLoadApodisation::load(oskar_Station* station,
         const oskar_Dir& cwd, int /*num_subdirs*/, int /*depth*/,
         map<string, string>& /*filemap*/, int* status)
 {
-    // Check for presence of "apodisation.txt".
+    // Check for presence of "apodisation.txt" or "apodization.txt".
     if (cwd.exists(apodisation_file))
     {
         oskar_station_load_apodisation(station,
                 cwd.absoluteFilePath(apodisation_file).c_str(), status);
+    }
+    else if (cwd.exists(apodization_file))
+    {
+        oskar_station_load_apodisation(station,
+                cwd.absoluteFilePath(apodization_file).c_str(), status);
     }
 }
 

@@ -36,7 +36,7 @@
 #include <oskar_global.h>
 #include <oskar_log.h>
 #include <oskar_image.h>
-#include <oskar_Settings.h>
+#include <oskar_Settings_old.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,7 +52,7 @@ extern "C" {
  * @param log        Pointer to a log structure to use.
  */
 OSKAR_APPS_EXPORT
-oskar_Image* oskar_sim_tec_screen(oskar_Settings* settings, oskar_Log* log,
+oskar_Image* oskar_sim_tec_screen(oskar_Settings_old* settings, oskar_Log* log,
         int* status);
 
 #ifdef __cplusplus

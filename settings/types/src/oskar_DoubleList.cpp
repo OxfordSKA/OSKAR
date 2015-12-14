@@ -32,6 +32,8 @@
 #include <oskar_settings_utility_string.hpp>
 #include <sstream>
 #include <oskar_DoubleList.hpp>
+#include <cmath>
+#include <iostream>
 
 namespace oskar {
 
@@ -44,15 +46,59 @@ DoubleList::~DoubleList()
 {
 }
 
-void DoubleList::init(const std::string& /*s*/, bool* /*ok*/)
+bool DoubleList::init(const std::string& /*s*/)
 {
-    /* Could use this to set the delimiter ... ?*/
+    // TODO(BM) Set the delimiter from an initialisation string.
+    delimiter_ = ',';
+    return true;
 }
 
-void DoubleList::fromString(const std::string& s, bool* ok)
+bool DoubleList::set_default(const std::string& s)
+{
+    bool ok = from_string_(default_, s);
+    if (ok) {
+        value_ = default_;
+    }
+    return ok;
+}
+
+std::string DoubleList::get_default() const
+{
+    return to_string_(default_);
+}
+
+bool DoubleList::set_value(const std::string& s)
+{
+    return from_string_(value_, s);
+}
+
+std::string DoubleList::get_value() const
+{
+    return to_string_(value_);
+}
+
+bool DoubleList::is_default() const
+{
+    if (value_.size() != default_.size())
+        return false;
+    for (unsigned i = 0; i < value_.size(); ++i) {
+        if (value_[i] != default_[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+std::vector<double> DoubleList::values() const
+{
+    return value_;
+}
+
+bool DoubleList::from_string_(std::vector<double>& values,
+                              const std::string& s) const
 {
     // Clear any existing values.
-    values_.clear();
+    values.clear();
 
     // Convert the string to a vector of doubles.
     std::istringstream ss(s);
@@ -61,26 +107,38 @@ void DoubleList::fromString(const std::string& s, bool* ok)
     {
         bool valid = true;
         double v = oskar_settings_utility_string_to_double(token, &valid);
-        if (!valid && ok) { *ok = false; return; }
-        values_.push_back(v);
+        if (!valid) return false;
+        values.push_back(v);
     }
+    return true;
 }
 
-std::string DoubleList::toString() const
+bool DoubleList::operator==(const DoubleList& other) const
 {
-    std::ostringstream ss;
-    for (size_t i = 0; i < values_.size(); ++i) {
-        ss << values_.at(i);
-        if (i < values_.size() - 1)
-            ss << delimiter_;
-    }
-    return ss.str();
+    if (value_.size() != other.value_.size()) return false;
+    for (unsigned i = 0; i < value_.size(); ++i)
+        if (value_[i] != other.value_[i]) return false;
+    return true;
 }
 
-std::vector<double> DoubleList::values() const
+bool DoubleList::operator>(const DoubleList& ) const
 {
-    return values_;
+    return false;
 }
+
+std::string DoubleList::to_string_(const std::vector<double>& values) const
+{
+    std::ostringstream oss;
+    for (size_t i = 0; i < values.size(); ++i) {
+        double f = values.at(i);
+        oss << oskar_settings_utility_double_to_string_2(f, 'g');
+        if (i < values.size() - 1)
+            oss << delimiter_;
+    }
+    return oss.str();
+}
+
+
 
 } // namespace oskar
 

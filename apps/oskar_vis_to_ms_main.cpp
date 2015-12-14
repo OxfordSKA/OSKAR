@@ -97,7 +97,9 @@ int main(int argc, char** argv)
         // Read the file header.
         const char* in_file = in_files[i].c_str();
         oskar_Binary* h = oskar_binary_create(in_file, 'r', &error);
+        if (error) break;
         oskar_VisHeader* hdr = oskar_vis_header_read(h, &error);
+        if (error) break;
 
         // Create the Measurement Set using the header from the first file.
         if (i == 0)
@@ -126,7 +128,8 @@ int main(int argc, char** argv)
         oskar_Mem* log = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0, &error);
         oskar_binary_read_mem(h, log, OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0,
                 &tag_error);
-        oskar_ms_add_log(ms, oskar_mem_char_const(log), oskar_mem_length(log));
+        oskar_ms_add_history(ms, "OSKAR_LOG",
+                oskar_mem_char_const(log), oskar_mem_length(log));
 
         // Clean up.
         oskar_binary_free(h);

@@ -36,8 +36,8 @@
 #include <oskar_element.h>
 #include <oskar_image.h>
 #include <oskar_log.h>
-#include <oskar_settings_init.h>
-#include <oskar_settings_free.h>
+#include <oskar_settings_old_init.h>
+#include <oskar_settings_old_free.h>
 #include <oskar_get_error_string.h>
 #include <fits/oskar_fits_image_write.h>
 
@@ -82,9 +82,9 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
     string output;
 
     // Load the settings.
-    oskar_Settings settings;
+    oskar_Settings_old settings;
     oskar_SettingsElementFit *fit = &settings.element_fit;
-    oskar_settings_init(&settings);
+    oskar_settings_old_init(&settings);
     oskar_settings_load_simulator(&settings.sim, settings_file, status);
     oskar_settings_load_element_fit(fit, settings_file, status);
     if (*status)
@@ -108,7 +108,7 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
     if ((!input_cst_file && !input_scalar_file) || !output_dir)
     {
         *status = OSKAR_ERR_FILE_IO;
-        oskar_settings_free(&settings);
+        oskar_settings_old_free(&settings);
         return;
     }
 
@@ -169,6 +169,6 @@ void oskar_fit_element_data(const char* settings_file, oskar_Log* log,
 
     // Free memory.
     oskar_element_free(element, status);
-    oskar_settings_free(&settings);
+    oskar_settings_old_free(&settings);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,14 +27,15 @@
  */
 
 #include <oskar_SettingsView.h>
-#include <oskar_SettingsModel.h>
+#include <oskar_SettingsModel_new.hpp>
 #include <QtGui/QApplication>
 #include <QtGui/QScrollBar>
 #include <QtGui/QMessageBox>
 #include <QtCore/QSettings>
 
-oskar_SettingsView::oskar_SettingsView(QWidget* parent)
-: QTreeView(parent)
+namespace oskar {
+
+SettingsView::SettingsView(QWidget* parent) : QTreeView(parent)
 {
     connect(this, SIGNAL(expanded(const QModelIndex&)),
             this, SLOT(resizeAfterExpand(const QModelIndex&)));
@@ -46,74 +47,88 @@ oskar_SettingsView::oskar_SettingsView(QWidget* parent)
     setUniformRowHeights(true);
 }
 
-void oskar_SettingsView::restoreExpanded()
+void SettingsView::displayLabels()
 {
-    QSettings settings;
-    QStringList expanded = settings.value("settings_view/expanded_items").
-            toStringList();
+    if (!model()) return;
+    model()->setData(QModelIndex(), false, SettingsModel::DisplayKeysRole);
+}
+
+void SettingsView::displayKeys()
+{
+    if (!model()) return;
+    model()->setData(QModelIndex(), true, SettingsModel::DisplayKeysRole);
+}
+
+void SettingsView::restoreExpanded(const QString& app)
+{
+    if (!model()) return;
+    QSettings s;
+    QStringList expanded =
+            s.value("settings_view/expanded_items/" + app).toStringList();
     saveRestoreExpanded(QModelIndex(), expanded, 1);
 }
 
-void oskar_SettingsView::restorePosition()
+void SettingsView::restorePosition()
 {
     QSettings settings;
     QScrollBar* verticalScroll = verticalScrollBar();
     verticalScroll->setValue(settings.value("settings_view/position").toInt());
 }
 
-void oskar_SettingsView::saveExpanded()
+void SettingsView::saveExpanded(const QString& app)
 {
-    QSettings settings;
+    if (!model()) return;
+    QSettings s;
     QStringList expanded;
     saveRestoreExpanded(QModelIndex(), expanded, 0);
-    settings.setValue("settings_view/expanded_items", expanded);
+    s.setValue("settings_view/expanded_items/" + app, expanded);
 }
 
-void oskar_SettingsView::savePosition()
+void SettingsView::savePosition()
 {
     QSettings settings;
     settings.setValue("settings_view/position", verticalScrollBar()->value());
 }
 
-void oskar_SettingsView::showFirstLevel()
+void SettingsView::showFirstLevel()
 {
     expandToDepth(0);
     resizeColumnToContents(0);
     update();
 }
 
-void oskar_SettingsView::expandSettingsTree()
+void SettingsView::expandSettingsTree()
 {
     expandAll();
     resizeColumnToContents(0);
     update();
 }
 
-void oskar_SettingsView::resizeAfterExpand(const QModelIndex& /*index*/)
+void SettingsView::resizeAfterExpand(const QModelIndex& /*index*/)
 {
     resizeColumnToContents(0);
     update();
 }
 
 
-void oskar_SettingsView::updateAfterCollapsed(const QModelIndex& /*index*/)
+void SettingsView::updateAfterCollapsed(const QModelIndex& /*index*/)
 {
     update();
 }
 
-void oskar_SettingsView::focusChanged(QWidget* old, QWidget* now)
+void SettingsView::focusChanged(QWidget* old, QWidget* now)
 {
-    if (!old && now)
+    if (!old && now && model())
     {
         // OSKAR has gained focus.
         // Check if the settings file has been modified more recently than the
         // last known modification date.
         model()->setData(QModelIndex(), QVariant(),
-                oskar_SettingsModel::CheckExternalChangesRole);
+                SettingsModel::CheckExternalChangesRole);
     }
 }
 
-void oskar_SettingsView::fileReloaded()
+void SettingsView::fileReloaded()
 {
     QMessageBox msgBox(this);
     msgBox.setWindowTitle(parentWidget()->windowTitle());
@@ -124,13 +139,14 @@ void oskar_SettingsView::fileReloaded()
     msgBox.exec();
 }
 
-void oskar_SettingsView::saveRestoreExpanded(const QModelIndex& parent,
+void SettingsView::saveRestoreExpanded(const QModelIndex& parent,
         QStringList& list, int restore)
 {
+    if (!model()) return;
     for (int i = 0; i < model()->rowCount(parent); ++i)
     {
         QModelIndex idx = model()->index(i, 0, parent);
-        QString key = idx.data(oskar_SettingsModel::KeyRole).toString();
+        QString key = idx.data(SettingsModel::KeyRole).toString();
         if (restore)
         {
             if (list.contains(key)) expand(idx);
@@ -145,3 +161,5 @@ void oskar_SettingsView::saveRestoreExpanded(const QModelIndex& parent,
             saveRestoreExpanded(idx, list, restore);
     }
 }
+
+} // namespace oskar

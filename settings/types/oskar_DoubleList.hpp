@@ -33,7 +33,8 @@
 #define OSKAR_SETTINGS_TYPE_DOUBLELIST_HPP_
 
 #include <vector>
-#include <oskar_AbstractType.hpp>
+
+#include "oskar_AbstractSettingsType.hpp"
 
 /**
  * @file DoubleList.hpp
@@ -52,19 +53,29 @@ namespace oskar {
  * Returns a CSV string list.
  */
 
-class DoubleList : public AbstractType
+class DoubleList : public AbstractSettingsType
 {
 public:
     DoubleList();
     virtual ~DoubleList();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
+
+    bool init(const std::string& s);
+    bool set_default(const std::string& s);
+    std::string get_default() const;
+    bool set_value(const std::string& s);
+    std::string get_value() const;
+    bool is_default() const;
 
     std::vector<double> values() const;
 
+    bool operator==(const DoubleList& other) const;
+    bool operator>(const DoubleList& other) const;
+
 private:
-    std::vector<double> values_;
+    bool from_string_(std::vector<double>& values, const std::string& s) const;
+    std::string to_string_(const std::vector<double>& values) const;
+    std::vector<double> value_;
+    std::vector<double> default_;
     char delimiter_;
 };
 

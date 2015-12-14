@@ -118,7 +118,7 @@ TEST(write_ms, test_write)
     oskar_MeasurementSet* ms = oskar_vis_header_write_ms(hdr, filename,
             OSKAR_TRUE, OSKAR_FALSE, &status);
     oskar_vis_block_write_ms(blk, hdr, ms, &status);
-    oskar_ms_add_log(ms, log_line, sizeof(log_line));
+    oskar_ms_add_history(ms, "OSKAR_LOG", log_line, sizeof(log_line));
     oskar_vis_header_free(hdr, &status);
     oskar_vis_block_free(blk, &status);
     oskar_ms_close(ms);

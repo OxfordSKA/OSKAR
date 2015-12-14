@@ -36,7 +36,7 @@
 #include <oskar_global.h>
 #include <oskar_sky.h>
 #include <oskar_log.h>
-#include <oskar_Settings.h>
+#include <oskar_Settings_old.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,7 +60,7 @@ extern "C" {
  * @return A pointer to the array of sky model handles.
  */
 OSKAR_APPS_EXPORT
-oskar_Sky** oskar_set_up_sky(const oskar_Settings* settings, oskar_Log* log,
+oskar_Sky** oskar_set_up_sky(const oskar_Settings_old* settings, oskar_Log* log,
         int* num_chunks, int* status);
 
 #ifdef __cplusplus

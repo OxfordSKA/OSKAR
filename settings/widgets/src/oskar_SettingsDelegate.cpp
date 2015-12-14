@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,10 +30,11 @@
 #include <oskar_SettingsDelegate.h>
 #include <oskar_SettingsItem.h>
 #include <oskar_SettingsModel.h>
-#include <oskar_version.h>
 
 #include <QtCore/QEvent>
 #include <QtCore/QModelIndex>
+#include <QtGui/QApplication>
+#include <QtGui/QClipboard>
 #include <QtGui/QMenu>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QFileDialog>
@@ -48,6 +49,7 @@
 #include <cstdio>
 #include <climits>
 #include <cfloat>
+#include <iostream>
 
 oskar_SettingsDelegate::oskar_SettingsDelegate(QWidget* view, QObject* parent)
 : QStyledItemDelegate(parent)
@@ -199,16 +201,12 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
         QAbstractItemModel* mod, const QStyleOptionViewItem& option,
         const QModelIndex& index)
 {
-    // Check for events only in column 1.
-    if (index.column() != 1)
-        return QStyledItemDelegate::editorEvent(event, mod, option, index);
-
     // Get item type and value.
     int type = index.model()->data(index, oskar_SettingsModel::TypeRole).toInt();
     QVariant value = index.model()->data(index, Qt::EditRole);
 
     // Check for mouse double-click events.
-    if (event->type() == QEvent::MouseButtonDblClick)
+    if (event->type() == QEvent::MouseButtonDblClick && index.column() == 1)
     {
         if (type == oskar_SettingsItem::TELESCOPE_DIR_NAME)
         {
@@ -278,52 +276,23 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
             // Set up the context menu.
             QMenu menu;
             QString strResetValue = "Reset";
-            QString strDisable = "Toggle Default On";
-            QString strEnable = "Toggle Default Off";
+            QString strCopyKey = "Copy setting key";
 
-            // Check if value is enabled.
-            bool enabled = mod->data(index,
-                    oskar_SettingsModel::EnabledRole).toBool();
-            if (!enabled)
-            {
-                // Add enable action only.
-                menu.addAction(strEnable);
-            }
-            else
-            {
-                // Add reset and disable actions if value is not null.
-                QVariant val = mod->data(index, oskar_SettingsModel::ValueRole);
-                if (!val.isNull())
-                {
-                    menu.addAction(strResetValue);
-
-                    // Add disable action only if value is not required.
-                    if (!mod->data(index,
-                            oskar_SettingsModel::RequiredRole).toBool())
-                        menu.addAction(strDisable);
-                }
-            }
-
-            // Return if the menu is empty.
-            if (menu.isEmpty())
-            {
-                return QStyledItemDelegate::editorEvent(event, mod,
-                        option, index);
-            }
+            // Add reset action if value is not null.
+            QVariant val = mod->data(index, oskar_SettingsModel::ValueRole);
+            if (!val.isNull() && index.column() == 1)
+                menu.addAction(strResetValue);
+            menu.addAction(strCopyKey);
 
             // Display the context menu.
             QAction* action = menu.exec(mouseEvent->globalPos());
 
             // Check which action was selected.
-            if (action)
-            {
-                if (action->text() == strResetValue)
-                    mod->setData(index, QVariant(), Qt::EditRole);
-                else if (action->text() == strDisable)
-                    mod->setData(index, false, oskar_SettingsModel::EnabledRole);
-                else if (action->text() == strEnable)
-                    mod->setData(index, true, oskar_SettingsModel::EnabledRole);
-            }
+            if (action && action->text() == strResetValue)
+                mod->setData(index, QVariant(), Qt::EditRole);
+            else if (action && action->text() == strCopyKey)
+                QApplication::clipboard()->setText(mod->data(index,
+                        oskar_SettingsModel::KeyRole).toString());
             event->accept();
             return true;
         }

@@ -34,7 +34,7 @@
 #include <oskar_SettingsIonosphere.h>
 #include <oskar_convert_mjd_to_gast_fast.h>
 #include <oskar_convert_apparent_ra_dec_to_enu_directions.h>
-#include <oskar_Settings.h>
+#include <oskar_Settings_old.h>
 #include <oskar_telescope.h>
 #include <oskar_convert_offset_ecef_to_ecef.h>
 #include <oskar_evaluate_image_lm_grid.h>
@@ -47,11 +47,11 @@
 #include <cstdio>
 
 static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
-        int stationID, oskar_Settings* settings,
+        int stationID, oskar_Settings_old* settings,
         oskar_Telescope* tel, int* status);
 
 extern "C"
-oskar_Image* oskar_sim_tec_screen(oskar_Settings* settings, oskar_Log* log,
+oskar_Image* oskar_sim_tec_screen(oskar_Settings_old* settings, oskar_Log* log,
         int* status)
 {
     oskar_Image* TEC_screen = 0;
@@ -136,7 +136,7 @@ oskar_Image* oskar_sim_tec_screen(oskar_Settings* settings, oskar_Log* log,
 
 
 static void evaluate_station_beam_pp(double* pp_lon0, double* pp_lat0,
-        int stationID, oskar_Settings* settings, oskar_Telescope* tel,
+        int stationID, oskar_Settings_old* settings, oskar_Telescope* tel,
         int* status)
 {
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;

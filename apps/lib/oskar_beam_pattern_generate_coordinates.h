@@ -35,10 +35,9 @@
 
 #include <oskar_global.h>
 #include <oskar_mem.h>
-#include <oskar_Settings.h>
 #include <oskar_station.h>
 #include <oskar_station_work.h>
-#include <oskar_SettingsBeamPattern.h>
+#include <oskar_SettingsTree.hpp>
 
 #include <stddef.h>
 
@@ -79,7 +78,7 @@ extern "C" {
  */
 OSKAR_APPS_EXPORT
 size_t oskar_beam_pattern_generate_coordinates(int beam_coord_type,
-        double beam_lon, double beam_lat, const oskar_SettingsBeamPattern* s,
+        double beam_lon, double beam_lat, oskar_Settings* s,
         int* coord_type, double* lon0, double* lat0,
         oskar_Mem* x, oskar_Mem* y, oskar_Mem* z, int* status);
 

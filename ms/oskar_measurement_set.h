@@ -48,35 +48,28 @@ struct oskar_MeasurementSet;
 typedef struct oskar_MeasurementSet oskar_MeasurementSet;
 #endif /* OSKAR_MEASUREMENT_SET_TYPEDEF_ */
 
-/**
- * @brief Adds the run log to the HISTORY table.
- *
- * @details
- * Adds the supplied run log string to the HISTORY table.
- * The log string is split into lines, and each is added as its own
- * HISTORY entry. The origin of each will be "LOG".
- *
- * @param[in] str   The log file, as a single string.
- * @param[in] size  The length of the string.
- */
-OSKAR_MS_EXPORT
-void oskar_ms_add_log(oskar_MeasurementSet* p, const char* str, size_t size);
+/* Binary file error codes are in the range -200 to -219. */
+enum OSKAR_MS_ERROR_CODES
+{
+    OSKAR_ERR_MS_COLUMN_NOT_FOUND        = -200,
+    OSKAR_ERR_MS_OUT_OF_RANGE            = -201,
+    OSKAR_ERR_MS_UNKNOWN_DATA_TYPE       = -202
+};
 
 /**
- * @brief Adds the contents of the settings file to the HISTORY table.
+ * @brief Adds messages to the HISTORY table.
  *
  * @details
- * Adds the supplied settings file string to the HISTORY table.
- * The settings string is split into lines, and these are entered to
- * the APP_PARAMS column as a single HISTORY entry.
- * The history message will read "OSKAR settings file", and the origin
- * will be "SETTINGS".
+ * Adds the supplied string to the HISTORY table.
+ * The string is split into lines, and each is added as its own
+ * HISTORY entry.
  *
- * @param[in] str   The settings file, as a single string.
- * @param[in] size  The length of the string.
+ * @param[in] origin The string written to the ORIGIN column.
+ * @param[in] str    The string to write, which may contain multiple lines.
+ * @param[in] size   The length of the string.
  */
 OSKAR_MS_EXPORT
-void oskar_ms_add_settings(oskar_MeasurementSet* p,
+void oskar_ms_add_history(oskar_MeasurementSet* p, const char* origin,
         const char* str, size_t size);
 
 /**
@@ -154,7 +147,8 @@ void oskar_ms_close(oskar_MeasurementSet* p);
  * @details
  * Creates a new, empty Measurement Set with the given name.
  *
- * @param[in] filename        The filename to use.
+ * @param[in] file_name       The file name to use.
+ * @param[in] app_name        The name of the application creating the MS.
  * @param[in] ra_rad          The right ascension of the phase centre, in rad.
  * @param[in] dec_rad         The declination of the phase centre, in rad.
  * @param[in] num_pols        The number of polarisations (1, 2 or 4).
@@ -166,10 +160,32 @@ void oskar_ms_close(oskar_MeasurementSet* p);
  * @param[in] write_crosscorr If set, write cross-correlation data.
  */
 OSKAR_MS_EXPORT
-oskar_MeasurementSet* oskar_ms_create(const char* filename, double ra_rad,
-        double dec_rad, unsigned int num_pols, unsigned int num_channels,
+oskar_MeasurementSet* oskar_ms_create(const char* filename,
+        const char* app_name, double ra_rad, double dec_rad,
+        unsigned int num_pols, unsigned int num_channels,
         double ref_freq, double chan_width, unsigned int num_stations,
         int write_autocorr, int write_crosscorr);
+
+/**
+ * @brief Gets data from one column in a Measurement Set.
+ *
+ * @details
+ * Gets data from one column in a Measurement Set.
+ *
+ * @param[in] p                     Pointer to opened Measurement Set.
+ * @param[in] column                Name of required column in main table.
+ * @param[in] start_row             Start row.
+ * @param[in] num_rows              Number of rows to return.
+ * @param[in] data_size_bytes       Data size of allocated block, in bytes.
+ * @param[in,out] data              Data block to fill.
+ * @param[out] required_size_bytes  Required size of the data block, in bytes.
+ * @param[in,out] status            Status return code.
+ */
+OSKAR_MS_EXPORT
+void oskar_ms_get_column(const oskar_MeasurementSet* p, const char* column,
+        unsigned int start_row, unsigned int num_rows,
+        size_t data_size_bytes, void* data, size_t* required_size_bytes,
+        int* status);
 
 /**
  * @brief

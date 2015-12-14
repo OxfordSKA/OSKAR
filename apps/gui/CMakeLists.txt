@@ -9,6 +9,7 @@ set(gui_MOC_SRC
     oskar_CudaInfoDisplay.h
     oskar_DocumentationDisplay.h
     oskar_MainWindow.h
+    oskar_MainWindow_old.h
     oskar_RunDialog.h
     oskar_RunThread.h
 )
@@ -18,6 +19,7 @@ set(gui_SRC
     src/oskar_CudaInfoDisplay.cpp
     src/oskar_DocumentationDisplay.cpp
     src/oskar_MainWindow.cpp
+    src/oskar_MainWindow_old.cpp
     src/oskar_RunDialog.cpp
     src/oskar_RunThread.cpp
 )

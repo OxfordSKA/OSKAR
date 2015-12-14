@@ -30,14 +30,11 @@
  */
 
 #include <oskar_settings_utility_string.hpp>
-
-#include <climits>
-#include <vector>
 #include <oskar_IntPositive.hpp>
 
 namespace oskar {
 
-IntPositive::IntPositive() : value_(1)
+IntPositive::IntPositive() : default_(1), value_(1)
 {
 }
 
@@ -45,28 +42,62 @@ IntPositive::~IntPositive()
 {
 }
 
-void IntPositive::init(const std::string& /*s*/, bool* ok)
+bool IntPositive::init(const std::string& /*s*/)
 {
-    // No initialisation required.
-    if (ok) *ok = true;
-
+    default_ = 1;
+    value_ = 1;
+    return true;
 }
 
-void IntPositive::fromString(const std::string& s, bool* ok)
+bool IntPositive::set_default(const std::string& value)
 {
-    int i = oskar_settings_utility_string_to_int(s, ok);
-    if (ok && !*ok) return;
-    if (i >= 1) {
-        if (ok) *ok = true;
-        value_ = i;
-        return;
+    bool ok = from_string_(value, default_);
+    if (ok) {
+        value_ = default_;
     }
-    if (ok) *ok = false;
+    return ok;
 }
 
-std::string IntPositive::toString() const
+std::string IntPositive::get_default() const
+{
+    return oskar_settings_utility_int_to_string(default_);
+}
+
+bool IntPositive::set_value(const std::string& value)
+{
+    return from_string_(value, value_);
+}
+
+std::string IntPositive::get_value() const
 {
     return oskar_settings_utility_int_to_string(value_);
+}
+
+bool IntPositive::is_default() const
+{
+    return default_ == value_;
+}
+
+bool IntPositive::from_string_(const std::string& s, int& value) const
+{
+    bool ok = true;
+    int i = oskar_settings_utility_string_to_int(s, &ok);
+    if (!ok) return false;
+    if (i >= 1) {
+        value = i;
+        return true;
+    }
+    return false;
+}
+
+bool IntPositive::operator==(const IntPositive& other) const
+{
+    return value_ == other.value_;
+}
+
+bool IntPositive::operator>(const IntPositive& other) const
+{
+    return value_ > other.value_;
 }
 
 } // namespace oskar

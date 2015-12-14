@@ -277,26 +277,26 @@ static void store_data(void* data, int type, size_t r, size_t* c,
     case OSKAR_SINGLE:
     {
         ((float*)data)[r] = (float) row_data[(*c)++];
-        break;
+        return;
     }
     case OSKAR_DOUBLE:
     {
         ((double*)data)[r] = row_data[(*c)++];
-        break;
+        return;
     }
     case OSKAR_SINGLE_COMPLEX:
     {
         float2* d = (float2*)data + r;
         d->x = (float) row_data[(*c)++];
         d->y = (float) row_data[(*c)++];
-        break;
+        return;
     }
     case OSKAR_DOUBLE_COMPLEX:
     {
         double2* d = (double2*)data + r;
         d->x = row_data[(*c)++];
         d->y = row_data[(*c)++];
-        break;
+        return;
     }
     case OSKAR_SINGLE_COMPLEX_MATRIX:
     {
@@ -309,7 +309,7 @@ static void store_data(void* data, int type, size_t r, size_t* c,
         d->c.y = (float) row_data[(*c)++];
         d->d.x = (float) row_data[(*c)++];
         d->d.y = (float) row_data[(*c)++];
-        break;
+        return;
     }
     case OSKAR_DOUBLE_COMPLEX_MATRIX:
     {
@@ -322,17 +322,17 @@ static void store_data(void* data, int type, size_t r, size_t* c,
         d->c.y = row_data[(*c)++];
         d->d.x = row_data[(*c)++];
         d->d.y = row_data[(*c)++];
-        break;
+        return;
     }
     case OSKAR_INT:
     {
         ((int*)data)[r] = (int) floor(row_data[(*c)++] + 0.5);
-        break;
+        return;
     }
     default:
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
-        break;
+        return;
     }
     }
 }

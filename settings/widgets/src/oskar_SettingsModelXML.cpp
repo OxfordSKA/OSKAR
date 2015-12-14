@@ -336,10 +336,8 @@ string get_type(node* s, oskar_SettingsItem::type_id& id,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace oskar {
-
 // Private helper class.
-class SettingsModelXML_private
+class oskar_SettingsModelXml_private
 {
 public:
     enum Status {
@@ -348,12 +346,15 @@ public:
         InvalidNode
     };
 
-    SettingsModelXML_private(SettingsModelXML* model) {this->model = model;}
+    oskar_SettingsModelXml_private(oskar_SettingsModelXml* model)
+    {
+        this->model = model;
+    }
     //string get_key_type_(const string& key);
     //vector<string> get_option_list_values_(const string& key);
     void index_settings(node* n, string& key_root);
     void iterate_settings(node* n, int& depth, string& key_root);
-    SettingsModelXML_private::Status declare_setting(node* s,
+    oskar_SettingsModelXml_private::Status declare_setting(node* s,
             int depth, const string& key_root);
     bool get_dependency(node* n, string& key, string& value) const;
 
@@ -368,13 +369,13 @@ public:
     void setDependency(const string& key, const string& depends_key,
             const string& depends_value);
 
-    SettingsModelXML* model;
+    oskar_SettingsModelXml* model;
     vector<string> keys;
     vector<string> types;
     vector<vector<string> > type_params;
 };
 
-bool SettingsModelXML_private::get_dependency(node* s, string& key,
+bool oskar_SettingsModelXml_private::get_dependency(node* s, string& key,
         string& value) const
 {
     // Obtain a pointer to the depends node.
@@ -437,7 +438,8 @@ bool SettingsModelXML_private::get_dependency(node* s, string& key,
     return true;
 }
 
-SettingsModelXML_private::Status SettingsModelXML_private::declare_setting(
+oskar_SettingsModelXml_private::Status
+oskar_SettingsModelXml_private::declare_setting(
         node* s, int depth, const string& key_root)
 {
     if (!s || string(s->name()) != "s") return InvalidNode;
@@ -495,7 +497,7 @@ SettingsModelXML_private::Status SettingsModelXML_private::declare_setting(
     return AllOk;
 }
 
-void SettingsModelXML_private::index_settings(node* n, string& key_root)
+void oskar_SettingsModelXml_private::index_settings(node* n, string& key_root)
 {
     vector<string> type_node_names;
     type_node_names.push_back("type");
@@ -539,7 +541,7 @@ void SettingsModelXML_private::index_settings(node* n, string& key_root)
     }
 }
 
-void SettingsModelXML_private::iterate_settings(node* n, int& depth,
+void oskar_SettingsModelXml_private::iterate_settings(node* n, int& depth,
         string& key_root)
 {
     for (node* s = n->first_node("s"); s; s = s->next_sibling())
@@ -560,13 +562,13 @@ void SettingsModelXML_private::iterate_settings(node* n, int& depth,
     }
 }
 
-void SettingsModelXML_private::setLabel(const string& key, const string& label)
+void oskar_SettingsModelXml_private::setLabel(const string& key, const string& label)
 {
     model->setLabel(QString::fromStdString(key), QString::fromStdString(label));
 }
 
-void SettingsModelXML_private::declare(const string& key, const string& label,
-        const oskar_SettingsItem::type_id& type,
+void oskar_SettingsModelXml_private::declare(const string& key,
+        const string& label, const oskar_SettingsItem::type_id& type,
         const string& defaultValue, bool required)
 {
     model->declare(QString::fromStdString(key), QString::fromStdString(label),
@@ -574,7 +576,7 @@ void SettingsModelXML_private::declare(const string& key, const string& label,
             required);
 }
 
-void SettingsModelXML_private::declareOptionList(const string& key,
+void oskar_SettingsModelXml_private::declareOptionList(const string& key,
         const string& label, const vector<string>& options,
         const string& defaultValue, bool required)
 {
@@ -592,14 +594,14 @@ void SettingsModelXML_private::declareOptionList(const string& key,
             options_, defaultIndex_, required);
 }
 
-void SettingsModelXML_private::setTooltip(const string& key,
+void oskar_SettingsModelXml_private::setTooltip(const string& key,
         const string& description)
 {
     model->setTooltip(QString::fromStdString(key),
             QString::fromStdString(description));
 }
 
-void SettingsModelXML_private::setDependency(const string& key,
+void oskar_SettingsModelXml_private::setDependency(const string& key,
         const string& depends_key, const string& depends_value)
 {
     model->setDependency(QString::fromStdString(key),
@@ -609,12 +611,20 @@ void SettingsModelXML_private::setDependency(const string& key,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SettingsModelXML::SettingsModelXML(QObject* parent)
+oskar_SettingsModelXml::oskar_SettingsModelXml(QObject* parent)
 : oskar_SettingsModel(parent)
 {
-    p = new SettingsModelXML_private(this);
+    p = new oskar_SettingsModelXml_private(this);
+}
 
-    string xml(OSKAR_XML_STR);
+oskar_SettingsModelXml::~oskar_SettingsModelXml()
+{
+    delete p;
+}
+
+void oskar_SettingsModelXml::setXmlString(const char* xml_string)
+{
+    string xml(xml_string);
     vector<char> xml_(xml.begin(), xml.end());
     xml_.push_back(0);
 
@@ -638,12 +648,9 @@ SettingsModelXML::SettingsModelXML(QObject* parent)
     if (ver) version = string(ver->value());
 
     string key_root = "";
+    beginResetModel();
     p->iterate_settings(root_node, depth, key_root);
+    endResetModel();
+    reloadSettingsFile();
 }
 
-SettingsModelXML::~SettingsModelXML()
-{
-    delete p;
-}
-
-} // namespace oskar

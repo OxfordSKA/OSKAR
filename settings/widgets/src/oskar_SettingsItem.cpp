@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,9 +29,6 @@
 #include <oskar_SettingsItem.h>
 
 #include <QtCore/QStringList>
-#include <cstdio>
-#include <iostream>
-using namespace std;
 
 oskar_SettingsItem::oskar_SettingsItem(const QString& key,
         const QString& subkey, int type, const QString& label,
@@ -65,8 +62,7 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
     // Initialise user-defined, runtime values.
     critical_ = 0;
     valueSet_ = 0;
-    enabled_ = true;
-    hidden_ = false;
+    disabled_ = false;
 
     // Set required flag of this and all parents if this option is required.
     required_ = false;
@@ -76,7 +72,7 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
 
 oskar_SettingsItem::~oskar_SettingsItem()
 {
-    qDeleteAll(childItems_);
+    deleteChildren();
 }
 
 void oskar_SettingsItem::addDependent(const QString& key)
@@ -116,6 +112,12 @@ const QVariant& oskar_SettingsItem::defaultValue() const
     return defaultValue_;
 }
 
+void oskar_SettingsItem::deleteChildren()
+{
+    dependentKeys_.clear();
+    qDeleteAll(childItems_);
+}
+
 const QString& oskar_SettingsItem::dependencyKey() const
 {
     return dependencyKey_;
@@ -131,17 +133,12 @@ const QList<QString>& oskar_SettingsItem::dependentKeys() const
     return dependentKeys_;
 }
 
-bool oskar_SettingsItem::enabled() const
+bool oskar_SettingsItem::disabled() const
 {
-    return enabled_;
-}
-
-bool oskar_SettingsItem::hidden() const
-{
-    if (parentItem_)
-        return hidden_ || parentItem_->hidden();
-    else
-        return hidden_;
+    if (!parentItem_) return disabled_;
+    return disabled_ || (parentItem_->type() == BOOL &&
+            parentItem_->valueOrDefault() == false) ||
+            parentItem_->disabled();
 }
 
 const QString& oskar_SettingsItem::key() const
@@ -178,14 +175,9 @@ void oskar_SettingsItem::setDefaultValue(const QVariant& value)
         defaultValue_.convert(QVariant::Double);
 }
 
-void oskar_SettingsItem::setEnabled(bool value)
+void oskar_SettingsItem::setDisabled(bool value)
 {
-    enabled_ = value;
-}
-
-void oskar_SettingsItem::setHidden(bool value)
-{
-    hidden_ = value;
+    disabled_ = value;
 }
 
 void oskar_SettingsItem::setLabel(const QString& value)
@@ -257,7 +249,7 @@ int oskar_SettingsItem::valueSet() const
 
 void oskar_SettingsItem::setCritical(bool value)
 {
-    // TODO don't increment critical for hidden settings
+    // TODO don't increment critical for disabled settings
     if (!required_)
         return;
     if (value)

@@ -32,7 +32,7 @@
 #ifndef OSKAR_SETTINGS_TYPE_DOUBLERANGEEXT_HPP_
 #define OSKAR_SETTINGS_TYPE_DOUBLERANGEEXT_HPP_
 
-#include <oskar_AbstractType.hpp>
+#include <oskar_AbstractSettingsType.hpp>
 #include <string>
 #include <ttl/var/variant.hpp>
 
@@ -67,20 +67,56 @@ namespace oskar {
  * string values.
  */
 
-class DoubleRangeExt : public AbstractType
+class DoubleRangeExt : public AbstractSettingsType
 {
 public:
+    typedef ttl::var::variant<double, std::string> Value;
+    enum Format { AUTO, EXPONENT };
+
     DoubleRangeExt();
     virtual ~DoubleRangeExt();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
+
+    bool init(const std::string& s);
+    bool set_default(const std::string& value);
+    std::string get_default() const;
+    bool set_value(const std::string& value);
+    std::string get_value() const;
+    bool is_default() const;
+
+    bool set_value(double d);
+    bool set_default(double d);
+
+    // FIXME(BM) handle string types.
+    double value() const { return ttl::var::get<double>(value_); }
+    // FIXME(BM) handle string types.
+    double default_value() const { return ttl::var::get<double>(default_); }
+    double min() const { return min_; }
+    double max() const { return max_; }
+    std::string ext_min() const { return ext_min_; }
+    std::string ext_max() const { return ext_max_; }
+    bool is_max() const {
+        return (value_.which() == STRING &&
+                        ttl::var::get<std::string>(value_) == ext_max_);
+    }
+    bool is_min() const {
+        return (value_.which() == STRING &&
+                        ttl::var::get<std::string>(value_) == ext_min_);
+    }
+
+    bool operator==(const DoubleRangeExt& other) const;
+    bool operator>(const DoubleRangeExt& other) const;
 
 private:
+    bool from_double_(Value& value, double d) const;
+    bool from_string_(Value& value, const std::string& s) const;
+    std::string to_string_(const Value& value) const;
+
     double min_, max_;
     std::string ext_min_, ext_max_;
     enum value_types { DOUBLE, STRING };
-    ttl::var::variant<double, std::string> value_;
+    Format format_;
+    Value value_;
+    Value default_;
 };
 
 } // namespace oskar

@@ -51,15 +51,14 @@ using std::vector;
 
 // Private function prototype.
 static void load_directories(oskar_Telescope* telescope,
-        const oskar_Settings* settings, const oskar_Dir& cwd,
-        oskar_Station* station, int depth,
+        const oskar_Dir& cwd, oskar_Station* station, int depth,
         const vector<oskar_TelescopeLoadAbstract*>& loaders,
         map<string, string> filemap, oskar_Log* log, int* status);
 
 
 extern "C"
 void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
-        const oskar_Settings* settings, int* status)
+        const oskar_Settings_old* settings, int* status)
 {
     // Check if safe to proceed.
     if (*status) return;
@@ -101,7 +100,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
 
     // Load everything recursively from the telescope directory tree.
     map<string, string> filemap;
-    load_directories(telescope, settings, telescope_dir, NULL, 0, loaders,
+    load_directories(telescope, telescope_dir, NULL, 0, loaders,
             filemap, log, status);
     if (*status)
     {
@@ -121,8 +120,7 @@ void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
 // Must pass filemap by value rather than by reference; otherwise, recursive
 // behaviour will not work as intended.
 static void load_directories(oskar_Telescope* telescope,
-        const oskar_Settings* settings, const oskar_Dir& cwd,
-        oskar_Station* station, int depth,
+        const oskar_Dir& cwd, oskar_Station* station, int depth,
         const vector<oskar_TelescopeLoadAbstract*>& loaders,
         map<string, string> filemap, oskar_Log* log, int* status)
 {
@@ -155,7 +153,7 @@ static void load_directories(oskar_Telescope* telescope,
             oskar_Dir child_dir(cwd.filePath(children[0]));
 
             // Recursive call to load the station.
-            load_directories(telescope, settings, child_dir,
+            load_directories(telescope, child_dir,
                     oskar_telescope_station(telescope, 0), depth + 1,
                     loaders, filemap, log, status);
 
@@ -178,7 +176,7 @@ static void load_directories(oskar_Telescope* telescope,
                 oskar_Dir child_dir(cwd.filePath(children[i]));
 
                 // Recursive call to load the station.
-                load_directories(telescope, settings, child_dir,
+                load_directories(telescope, child_dir,
                         oskar_telescope_station(telescope, i), depth + 1,
                         loaders, filemap, log, status);
             }
@@ -207,7 +205,7 @@ static void load_directories(oskar_Telescope* telescope,
             oskar_Dir child_dir(cwd.filePath(children[0]));
 
             // Recursive call to load the station.
-            load_directories(telescope, settings, child_dir,
+            load_directories(telescope, child_dir,
                     oskar_station_child(station, 0), depth + 1, loaders,
                     filemap, log, status);
 
@@ -230,7 +228,7 @@ static void load_directories(oskar_Telescope* telescope,
                 oskar_Dir child_dir(cwd.filePath(children[i]));
 
                 // Recursive call to load the station.
-                load_directories(telescope, settings, child_dir,
+                load_directories(telescope, child_dir,
                         oskar_station_child(station, i), depth + 1, loaders,
                         filemap, log, status);
             }

@@ -29,17 +29,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <oskar_Time.hpp>
 #include <oskar_settings_utility_string.hpp>
 #include <sstream>
 #include <iomanip>
 #include <iostream>
-#include <oskar_Time.hpp>
-
-
+#include <cmath>
+#include <cfloat>
+#include <iostream>
+using namespace std;
 namespace oskar {
 
 Time::Time()
-: hours_(0), minutes_(0), seconds_(0)
 {
 }
 
@@ -47,22 +48,82 @@ Time::~Time()
 {
 }
 
-void Time::init(const std::string& /*s*/, bool* /*ok*/)
+bool Time::init(const std::string& /*s*/)
 {
-    hours_ = 0;
-    minutes_ = 0;
-    seconds_ = 0.0;
+    default_.clear();
+    value_.clear();
+    return true;
 }
 
-void Time::fromString(const std::string& s, bool* ok)
+bool Time::set_default(const std::string& value)
 {
-    // s.zzzzzzzzz
-    if (s.find(":") == std::string::npos)
+    bool ok = from_string_(value, default_);
+    if (ok) {
+        value_ = default_;
+    }
+    else {
+        default_.clear();
+        value_.clear();
+    }
+    return ok;
+}
+
+std::string Time::get_default() const
+{
+    return to_string_(default_);
+}
+
+bool Time::set_value(const std::string& value)
+{
+    return from_string_(value, value_);
+}
+
+std::string Time::get_value() const
+{
+    return to_string_(value_);
+}
+
+bool Time::is_default() const
+{
+    bool answer = true;
+    answer &= (value_.hours == default_.hours);
+    answer &= (value_.minutes == default_.minutes);
+    answer &= (fabs(value_.seconds - default_.seconds) < DBL_MIN);
+    return answer;
+}
+
+double Time::to_seconds() const
+{
+    if (value_.seconds > 60.) return value_.seconds;
+    return (value_.hours * 3600.0) + (value_.minutes * 60.0) + value_.seconds;
+}
+
+bool Time::operator==(const Time& other) const
+{
+    return (fabs(to_seconds() - other.to_seconds()) < DBL_MIN);
+}
+
+bool Time::operator>(const Time& other) const
+{
+    return to_seconds() > other.to_seconds();
+}
+
+bool Time::from_string_(const std::string& s, Value& value) const
+{
+    bool ok = true;
+    if (s.empty())
     {
-        double seconds = oskar_settings_utility_string_to_double(s, ok);
-        seconds_ = seconds;
-        hours_ = 0;
-        minutes_ = 0;
+        value.clear();
+        return false;
+    }
+    // s.zzzzzzzzz
+    else if (s.find(":") == std::string::npos)
+    {
+        double seconds = oskar_settings_utility_string_to_double(s, &ok);
+        value.hours = floor(seconds / 3600.);
+        value.minutes = floor((seconds - (value.hours * 3600.)) / 60.);
+        value.seconds = seconds - (value.hours * 3600.) - (value.minutes * 60.);
+        value.format = SECONDS;
     }
     // hh:mm:ss.zzzzzzzzz
     else
@@ -70,67 +131,52 @@ void Time::fromString(const std::string& s, bool* ok)
         std::istringstream ss(s);
         std::string token;
         std::getline(ss, token, ':');
-        hours_ = oskar_settings_utility_string_to_int(token);
-        if (hours_ < 0 || hours_ >= 11) {
-            hours_ = 0;
-            if (ok) { *ok = false; return; }
+        value.hours = oskar_settings_utility_string_to_int(token);
+        if (value.hours < 0) {
+            value.hours = 0;
+            return false;
         }
         std::getline(ss, token, ':');
-        minutes_ = oskar_settings_utility_string_to_int(token);
-        if (minutes_ < 0 || minutes_ >= 59) {
-            minutes_ = 0;
-            if (ok) { *ok = false; return; }
+        value.minutes = oskar_settings_utility_string_to_int(token);
+        if (value.minutes < 0 || value.minutes >= 59) {
+            value.minutes = 0;
+            return false;
         }
         std::getline(ss, token);
-        seconds_ = oskar_settings_utility_string_to_double(token, ok);
-        if (minutes_ < 0.0 || minutes_ >= 60.0) {
-            seconds_ = 0.0;
-            if (ok) { *ok = false; return; }
+        value.seconds = oskar_settings_utility_string_to_double(token, &ok);
+        if (value.minutes < 0.0 || value.minutes >= 60.0) {
+            value.seconds = 0.0;
+            return false;
         }
+        value.format = TIME_STRING;
     }
+    return true;
 }
 
-std::string Time::toString() const
+std::string Time::to_string_(const Value& value) const
 {
     std::ostringstream ss;
-    char sep = ':';
-    ss << std::setfill('0') << std::setw(2) << hours() << sep;
-    ss << std::setfill('0') << std::setw(2) << minutes() << sep;
-    if (seconds() < 10.)
-        ss << 0;
-    ss << oskar_settings_utility_double_to_string(seconds(), -10);
+    if (value.format == UNDEF)
+    {
+        return std::string();
+    }
+    else if (value.format == TIME_STRING)
+    {
+        char sep = ':';
+        ss << std::setfill('0') << std::setw(2) << value.hours << sep;
+        ss << std::setfill('0') << std::setw(2) << value.minutes << sep;
+        if (value.seconds < 10.)
+            ss << 0;
+        ss << oskar_settings_utility_double_to_string_2(value.seconds, 'f', 12);
+    }
+    else if (value.format == SECONDS)
+    {
+        double seconds = value.hours * 3600. + value.minutes * 60.
+                        + value.seconds;
+        ss << oskar_settings_utility_double_to_string_2(seconds, 'f', 12);
+    }
     return ss.str();
 }
-
-int Time::hours() const
-{
-    if (seconds_ > 3600.0) return int(seconds_/3600.);
-    return hours_;
-}
-
-int Time::minutes() const
-{
-
-    if (seconds_ > 60.0) {
-        return int((seconds_-hours()*3600)/60.0);
-    }
-    return minutes_;
-}
-
-double Time::seconds() const
-{
-    if (seconds_ > 60.0) {
-        return seconds_ - hours()*3600 - minutes()*60;
-    }
-    return seconds_;
-}
-
-double Time::in_seconds() const
-{
-    if (seconds_ > 60.) return seconds_;
-    return (hours_*3600.0) + (minutes_*60.0) + seconds_;
-}
-
 
 } // namespace oskar
 

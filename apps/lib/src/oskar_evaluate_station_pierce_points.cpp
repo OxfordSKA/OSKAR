@@ -74,8 +74,8 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
         GRP            = OSKAR_TAG_GROUP_TIME_FREQ_DATA
     };
 
-    oskar_Settings settings;
-    oskar_settings_load(&settings, log, settings_file, &status);
+    oskar_Settings_old settings;
+    oskar_settings_old_load(&settings, log, settings_file, &status);
     oskar_log_set_keep_file(log, settings.sim.keep_log_file);
     if (status) return status;
 

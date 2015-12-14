@@ -36,43 +36,47 @@ using namespace oskar;
 
 TEST(settings_types, Time)
 {
-    bool ok = true;
     Time t;
-    {
-        t.fromString("1:2:3.45678", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_EQ(1, t.hours());
-        ASSERT_EQ(2, t.minutes());
-        ASSERT_DOUBLE_EQ(3.45678, t.seconds());
-        ASSERT_STREQ("01:02:03.45678", t.toString().c_str());
-    }
-    {
-        t.fromString("01:02:23.45678", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_EQ(1, t.hours());
-        ASSERT_EQ(2, t.minutes());
-        ASSERT_DOUBLE_EQ(23.45678, t.seconds());
-        ASSERT_STREQ("01:02:23.45678", t.toString().c_str());
-    }
+    ASSERT_TRUE(t.init(""));
+    ASSERT_STREQ("", t.get_value().c_str());
 
-    {
-        t.fromString("123.4567891011", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_EQ(0, t.hours());
-        ASSERT_EQ(2, t.minutes());
-        ASSERT_NEAR(03.4567891011, t.seconds(), 1e-8);
-        ASSERT_DOUBLE_EQ(123.4567891011, t.in_seconds());
-        ASSERT_STREQ("00:02:03.456789101", t.toString().c_str());
-    }
+    ASSERT_TRUE(t.set_value("0.1"));
+    ASSERT_STREQ("0.1", t.get_value().c_str());
+    ASSERT_DOUBLE_EQ(0.1, t.to_seconds());
 
-    {
-        t.fromString("1.2345678910111213e+04", &ok);
-        ASSERT_TRUE(ok);
-        ASSERT_EQ(3, t.hours());
-        ASSERT_EQ(25, t.minutes());
-        ASSERT_NEAR(45.6789101112, t.seconds(), 1e-8);
-        ASSERT_DOUBLE_EQ(1.2345678910111213e+04, t.in_seconds());
-        ASSERT_STREQ("03:25:45.67891011", t.toString().c_str());
-    }
+    ASSERT_TRUE(t.set_default("1:2:3.45678"));
+    ASSERT_EQ(1, t.value().hours);
+    ASSERT_EQ(2, t.value().minutes);
+    ASSERT_DOUBLE_EQ(3.45678, t.value().seconds);
+    ASSERT_STREQ("01:02:03.45678", t.get_default().c_str());
+    ASSERT_TRUE(t.is_default());
+
+    ASSERT_TRUE(t.set_value("01:02:23.45678"));
+    ASSERT_FALSE(t.is_default());
+    ASSERT_EQ(1, t.value().hours);
+    ASSERT_EQ(2, t.value().minutes);
+    ASSERT_DOUBLE_EQ(23.45678, t.value().seconds);
+    ASSERT_STREQ("01:02:23.45678", t.get_value().c_str());
+
+    ASSERT_TRUE(t.set_value("123.4567891011"));
+    ASSERT_FALSE(t.is_default());
+    ASSERT_EQ(0, t.value().hours);
+    EXPECT_EQ(2, t.value().minutes);
+    EXPECT_NEAR(03.4567891011, t.value().seconds, 1e-8);
+    EXPECT_DOUBLE_EQ(123.4567891011, t.to_seconds());
+    EXPECT_STREQ("123.4567891011", t.get_value().c_str());
+
+    // EXPECT_STREQ("00:02:03.4567891011", t.get_value().c_str());
+
+    ASSERT_TRUE(t.set_value("1.234567891011121e+04"));
+    ASSERT_EQ(3, t.value().hours);
+    ASSERT_EQ(25, t.value().minutes);
+    ASSERT_NEAR(45.67891011121, t.value().seconds, 1e-8);
+    ASSERT_DOUBLE_EQ(1.234567891011121e+04, t.to_seconds());
+    ASSERT_STREQ("12345.67891011121", t.get_value().c_str());
+    //ASSERT_STREQ("03:25:45.67891011121", t.get_value().c_str());
+
+    ASSERT_TRUE(t.set_value("23:02:23.45678"));
+
 }
 

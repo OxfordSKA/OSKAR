@@ -34,7 +34,8 @@
 
 #include <string>
 #include <vector>
-#include <oskar_AbstractType.hpp>
+
+#include "oskar_AbstractSettingsType.hpp"
 
 /**
  * @file StringList.hpp
@@ -53,19 +54,29 @@ namespace oskar {
  *
  */
 
-class StringList : public AbstractType
+class StringList : public AbstractSettingsType
 {
 public:
     StringList();
     virtual ~StringList();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
 
-    std::vector<std::string> values() const;
+    bool init(const std::string& param);
+    bool set_default(const std::string& value);
+    std::string get_default() const;
+    bool set_value(const std::string& value);
+    std::string get_value() const;
+    bool is_default() const;
+
+    int size() const { return value_.size(); }
+    std::vector<std::string> values() const { return value_; }
+    std::vector<std::string> default_values() const { return default_; }
+
+    bool operator==(const StringList& other) const;
+    bool operator>(const StringList& other) const;
 
 private:
-    std::vector<std::string> values_;
+    std::string to_string_(const std::vector<std::string>& values) const;
+    std::vector<std::string> default_, value_;
     char delimiter_;
 };
 

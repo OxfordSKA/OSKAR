@@ -62,7 +62,7 @@ void oskar_cross_correlate_gaussian_time_smearing_omp_f(int num_sources,
         /* Loop over baselines for this station. */
         for (SP = SQ + 1; SP < num_stations; ++SP)
         {
-            float uv_len, uu, vv, ww, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
+            float uv_len, uu, vv, ww, uu2, vv2, uuvv, du, dv, dw;
             float4c sum, guard;
             oskar_clear_complex_matrix_f(&sum);
             oskar_clear_complex_matrix_f(&guard);
@@ -80,11 +80,11 @@ void oskar_cross_correlate_gaussian_time_smearing_omp_f(int num_sources,
             if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
                 continue;
 
-            /* Compute the derivatives for time-average smearing. */
-            oskar_evaluate_baseline_derivatives_inline_f(station_x[SP],
+            /* Compute the deltas for time-average smearing. */
+            oskar_evaluate_baseline_deltas_inline_f(station_x[SP],
                     station_x[SQ], station_y[SP], station_y[SQ],
                     inv_wavelength, time_int_sec, gha0_rad, dec0_rad,
-                    &du_dt, &dv_dt, &dw_dt);
+                    &du, &dv, &dw);
 
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)
@@ -98,8 +98,7 @@ void oskar_cross_correlate_gaussian_time_smearing_omp_f(int num_sources,
 
                 /* Compute bandwidth- and time-smearing terms. */
                 r1 = oskar_sinc_f(uu * l + vv * m + ww * (n - 1.0f));
-                r2 = oskar_evaluate_time_smearing_f(du_dt, dv_dt, dw_dt,
-                        l, m, n);
+                r2 = oskar_evaluate_time_smearing_f(du, dv, dw, l, m, n);
                 r1 *= r2;
 
                 /* Evaluate Gaussian source width term. */
@@ -147,7 +146,7 @@ void oskar_cross_correlate_gaussian_time_smearing_omp_d(int num_sources,
         /* Loop over baselines for this station. */
         for (SP = SQ + 1; SP < num_stations; ++SP)
         {
-            double uv_len, uu, vv, ww, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
+            double uv_len, uu, vv, ww, uu2, vv2, uuvv, du, dv, dw;
             double4c sum;
             oskar_clear_complex_matrix_d(&sum);
 
@@ -164,11 +163,11 @@ void oskar_cross_correlate_gaussian_time_smearing_omp_d(int num_sources,
             if (uv_len < uv_min_lambda || uv_len > uv_max_lambda)
                 continue;
 
-            /* Compute the derivatives for time-average smearing. */
-            oskar_evaluate_baseline_derivatives_inline_d(station_x[SP],
+            /* Compute the deltas for time-average smearing. */
+            oskar_evaluate_baseline_deltas_inline_d(station_x[SP],
                     station_x[SQ], station_y[SP], station_y[SQ],
                     inv_wavelength, time_int_sec, gha0_rad, dec0_rad,
-                    &du_dt, &dv_dt, &dw_dt);
+                    &du, &dv, &dw);
 
             /* Loop over sources. */
             for (i = 0; i < num_sources; ++i)
@@ -182,8 +181,7 @@ void oskar_cross_correlate_gaussian_time_smearing_omp_d(int num_sources,
 
                 /* Compute bandwidth- and time-smearing terms. */
                 r1 = oskar_sinc_d(uu * l + vv * m + ww * (n - 1.0));
-                r2 = oskar_evaluate_time_smearing_d(du_dt, dv_dt, dw_dt,
-                        l, m, n);
+                r2 = oskar_evaluate_time_smearing_d(du, dv, dw, l, m, n);
                 r1 *= r2;
 
                 /* Evaluate Gaussian source width term. */

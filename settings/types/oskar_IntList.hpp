@@ -33,7 +33,8 @@
 #define OSKAR_SETTINGS_TYPE_INTLIST_HPP_
 
 #include <vector>
-#include <oskar_AbstractType.hpp>
+
+#include "oskar_AbstractSettingsType.hpp"
 
 /**
  * @file IntList.hpp
@@ -52,19 +53,31 @@ namespace oskar {
  * Returns a CSV string list.
  */
 
-class IntList : public AbstractType
+class IntList : public AbstractSettingsType
 {
 public:
     IntList();
     virtual ~IntList();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
 
-    std::vector<int> values() const;
+    bool init(const std::string& s);
+    bool set_default(const std::string& value);
+    std::string get_default() const;
+    bool set_value(const std::string& value);
+    std::string get_value() const;
+    bool is_default() const;
+
+    std::vector<int> values() const { return value_; }
+    std::vector<int> default_values() const { return default_; }
+    int size() const { return value_.size(); }
+
+    bool operator==(const IntList& other) const;
+    bool operator>(const IntList& other) const;
 
 private:
-    std::vector<int> values_;
+    bool from_string_(const std::string& s, std::vector<int>& values) const;
+    std::string to_string_(const std::vector<int>& values) const;
+    std::vector<int> default_;
+    std::vector<int> value_;
     char delimiter_;
 };
 

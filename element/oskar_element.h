@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,9 @@ typedef struct oskar_Element oskar_Element;
  * in the lists below. */
 enum OSKAR_ELEMENT_TAGS
 {
-    OSKAR_ELEMENT_TAG_SURFACE_TYPE = 1
+    OSKAR_ELEMENT_TAG_SURFACE_TYPE = 1,
+    OSKAR_ELEMENT_TAG_COORD_SYS = 2,
+    OSKAR_ELEMENT_TAG_MAX_RADIUS = 3
 };
 
 enum OSKAR_ELEMENT_SURFACE_TYPE
@@ -58,6 +60,13 @@ enum OSKAR_ELEMENT_SURFACE_TYPE
     OSKAR_ELEMENT_SURFACE_TYPE_LUDWIG_3 = 1
 };
 
+enum OSKAR_ELEMENT_COORD_SYS
+{
+    OSKAR_ELEMENT_COORD_SYS_SPHERICAL = 0,
+    OSKAR_ELEMENT_COORD_SYS_TANGENT_PLANE = 1
+};
+
+/* FIXME(FD) Deprecated. */
 enum OSKAR_ELEMENT_TYPE
 {
     OSKAR_ELEMENT_TYPE_DIPOLE,
@@ -65,6 +74,7 @@ enum OSKAR_ELEMENT_TYPE
     OSKAR_ELEMENT_TYPE_ISOTROPIC
 };
 
+/* FIXME(FD) Deprecated. */
 enum OSKAR_ELEMENT_TAPER
 {
     OSKAR_ELEMENT_TAPER_NONE,
@@ -79,12 +89,15 @@ enum OSKAR_ELEMENT_TAPER
 #include <oskar_element_accessors.h>
 #include <oskar_element_copy.h>
 #include <oskar_element_create.h>
+#include <oskar_element_different.h>
 #include <oskar_element_evaluate.h>
 #include <oskar_element_free.h>
+#include <oskar_element_load.h>
 #include <oskar_element_load_cst.h>
 #include <oskar_element_load_scalar.h>
 #include <oskar_element_resize_freq_data.h>
 #include <oskar_element_read.h>
+#include <oskar_element_save.h>
 #include <oskar_element_write.h>
 
 #endif /* OSKAR_ELEMENT_H_ */

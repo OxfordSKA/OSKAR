@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-oskar_VisHeader* oskar_set_up_vis_header(const oskar_Settings* s,
+oskar_VisHeader* oskar_set_up_vis_header(const oskar_Settings_old* s,
         const oskar_Telescope* tel, int* status)
 {
     int max_times_per_block, num_stations, num_channels, precision, vis_type;

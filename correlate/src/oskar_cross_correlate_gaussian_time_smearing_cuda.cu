@@ -55,7 +55,7 @@ void oskar_cross_correlate_gaussian_time_smearing_cudak_f(const int num_sources,
         const float frac_bandwidth, const float time_int_sec,
         const float gha0_rad, const float dec0_rad, float4c* restrict vis)
 {
-    __shared__ float uv_len, uu, vv, ww, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
+    __shared__ float uv_len, uu, vv, ww, uu2, vv2, uuvv, du, dv, dw;
     __shared__ const float4c *restrict station_p, *restrict station_q;
     float4c sum;
     float l, m, n, r1, r2;
@@ -72,10 +72,10 @@ void oskar_cross_correlate_gaussian_time_smearing_cudak_f(const int num_sources,
                 station_w[SP], station_w[SQ], inv_wavelength,
                 frac_bandwidth, &uv_len, &uu, &vv, &ww, &uu2, &vv2, &uuvv);
 
-        /* Compute the derivatives for time-average smearing. */
-        oskar_evaluate_baseline_derivatives_inline_f(station_x[SP],
+        /* Compute the deltas for time-average smearing. */
+        oskar_evaluate_baseline_deltas_inline_f(station_x[SP],
                 station_x[SQ], station_y[SP], station_y[SQ], inv_wavelength,
-                time_int_sec, gha0_rad, dec0_rad, &du_dt, &dv_dt, &dw_dt);
+                time_int_sec, gha0_rad, dec0_rad, &du, &dv, &dw);
 
         /* Get pointers to source vectors for both stations. */
         station_p = &jones[num_sources * SP];
@@ -98,7 +98,7 @@ void oskar_cross_correlate_gaussian_time_smearing_cudak_f(const int num_sources,
 
         /* Compute bandwidth- and time-smearing terms. */
         r1 = oskar_sinc_f(uu * l + vv * m + ww * (n - 1.0f));
-        r2 = oskar_evaluate_time_smearing_f(du_dt, dv_dt, dw_dt, l, m, n);
+        r2 = oskar_evaluate_time_smearing_f(du, dv, dw, l, m, n);
         r1 *= r2;
 
         /* Evaluate Gaussian source width term. */
@@ -147,7 +147,7 @@ void oskar_cross_correlate_gaussian_time_smearing_cudak_d(const int num_sources,
         const double frac_bandwidth, const double time_int_sec,
         const double gha0_rad, const double dec0_rad, double4c* restrict vis)
 {
-    __shared__ double uv_len, uu, vv, ww, uu2, vv2, uuvv, du_dt, dv_dt, dw_dt;
+    __shared__ double uv_len, uu, vv, ww, uu2, vv2, uuvv, du, dv, dw;
     __shared__ const double4c *restrict station_p, *restrict station_q;
     double4c sum;
     double l, m, n, r1, r2;
@@ -164,10 +164,10 @@ void oskar_cross_correlate_gaussian_time_smearing_cudak_d(const int num_sources,
                 station_w[SP], station_w[SQ], inv_wavelength,
                 frac_bandwidth, &uv_len, &uu, &vv, &ww, &uu2, &vv2, &uuvv);
 
-        /* Compute the derivatives for time-average smearing. */
-        oskar_evaluate_baseline_derivatives_inline_d(station_x[SP],
+        /* Compute the deltas for time-average smearing. */
+        oskar_evaluate_baseline_deltas_inline_d(station_x[SP],
                 station_x[SQ], station_y[SP], station_y[SQ], inv_wavelength,
-                time_int_sec, gha0_rad, dec0_rad, &du_dt, &dv_dt, &dw_dt);
+                time_int_sec, gha0_rad, dec0_rad, &du, &dv, &dw);
 
         /* Get pointers to source vectors for both stations. */
         station_p = &jones[num_sources * SP];
@@ -190,7 +190,7 @@ void oskar_cross_correlate_gaussian_time_smearing_cudak_d(const int num_sources,
 
         /* Compute bandwidth- and time-smearing terms. */
         r1 = oskar_sinc_d(uu * l + vv * m + ww * (n - 1.0));
-        r2 = oskar_evaluate_time_smearing_d(du_dt, dv_dt, dw_dt, l, m, n);
+        r2 = oskar_evaluate_time_smearing_d(du, dv, dw, l, m, n);
         r1 *= r2;
 
         /* Evaluate Gaussian source width term. */

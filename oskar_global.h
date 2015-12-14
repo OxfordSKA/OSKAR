@@ -117,8 +117,12 @@ enum OSKAR_ERROR_CODES
     OSKAR_ERR_COORD_TYPE_MISMATCH      = -23,
 
     /*
-     * Codes -100 to -199 are reserved for binary file format errors.
+     * Codes -100 to -149 are reserved for binary file format errors.
      * See oskar_binary.h
+     */
+
+    /*
+     * Codes -150 to -199 are reserved for settings errors.
      */
 
     /* Indicates that CUDA was not found by the build system. */

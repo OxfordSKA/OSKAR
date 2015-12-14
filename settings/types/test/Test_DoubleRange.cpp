@@ -38,47 +38,30 @@ using namespace oskar;
 
 TEST(settings_types, DoubleRange)
 {
-
     DoubleRange r;
-//    {
-//        ASSERT_STREQ("0", r.toString().c_str());
-//    }
-//    {
-//        bool ok = true;
-//        r.init("2.0,5.0", &ok);
-//        ASSERT_TRUE(ok);
-//        ASSERT_STREQ("0", r.toString().c_str());
-//    }
-//    {
-//        bool ok = true;
-//        r.fromString("2.12345678", &ok);
-//        ASSERT_TRUE(ok);
-//        ASSERT_STREQ("2.12345678", r.toString().c_str());
-//        ASSERT_STREQ("2.12345678", r.toString("%.8f").c_str());
-//        ASSERT_STREQ("2.1235", r.toString("%.4f").c_str());
-//        ASSERT_STREQ("2.123457e+00", r.toString("%e").c_str());
-//        ASSERT_STREQ("0002.1", r.toString("%06.1f").c_str());
-//    }
-//    {
-//        bool ok = true;
-//        r.fromString("1.0", &ok);
-//        ASSERT_FALSE(ok);
-//        ASSERT_STREQ("2", r.toString().c_str());
-//    }
-//
-//    {
-//        bool ok = true;
-//        r.fromString("10.0", &ok);
-//        ASSERT_FALSE(ok);
-//        ASSERT_STREQ("5", r.toString().c_str());
-//    }
     {
-        bool ok = true;
-        r.init("MIN,MAX", &ok);
-        ASSERT_TRUE(ok);
-        r.fromString("0.999999999999", &ok);
-        ASSERT_TRUE(ok);
-        //std::cout << r.toString() << std::endl;
+        ASSERT_TRUE(r.init("MIN,MAX"));
+        ASSERT_TRUE(r.set_default("0.999999999999"));
+        ASSERT_TRUE(r.is_default());
+        ASSERT_TRUE(r.set_value("2.3"));
+        // FIXME(BM) better double to string conversion.
+        EXPECT_STREQ("2.3", r.get_value().c_str());
+        ASSERT_DOUBLE_EQ(2.3, r.value());
+        ASSERT_DOUBLE_EQ(0.999999999999, r.default_value());
+        ASSERT_DOUBLE_EQ(-DBL_MAX, r.min());
+        ASSERT_DOUBLE_EQ(DBL_MAX, r.max());
+    }
+    {
+        ASSERT_TRUE(r.init("5.4, 10.0"));
+        ASSERT_DOUBLE_EQ(5.4, r.min());
+        ASSERT_DOUBLE_EQ(10.0, r.max());
+        ASSERT_FALSE(r.set_value("3.5"));
+        ASSERT_DOUBLE_EQ(5.4, r.value());
+        ASSERT_FALSE(r.set_value("311.5"));
+        ASSERT_DOUBLE_EQ(10.0, r.value());
+        ASSERT_TRUE(r.set_value("7.5"));
+        ASSERT_DOUBLE_EQ(7.5, r.value());
+        ASSERT_FALSE(r.is_default());
     }
 }
 

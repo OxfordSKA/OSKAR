@@ -32,20 +32,33 @@
 #ifndef OSKAR_SETTINGS_TYPE_INTPOSITIVE_HPP_
 #define OSKAR_SETTINGS_TYPE_INTPOSITIVE_HPP_
 
-#include "oskar_AbstractType.hpp"
+#include "oskar_AbstractSettingsType.hpp"
 
 namespace oskar {
 
 
-class IntPositive : public AbstractType
+class IntPositive : public AbstractSettingsType
 {
 public:
     IntPositive();
     virtual ~IntPositive();
-    void init(const std::string& s, bool* ok = 0);
-    void fromString(const std::string& s, bool* ok = 0);
-    std::string toString() const;
+
+    bool init(const std::string& s);
+    bool set_default(const std::string& value);
+    std::string get_default() const;
+    bool set_value(const std::string& value);
+    std::string get_value() const;
+    bool is_default() const;
+
+    int value() const { return value_; }
+    int default_value() const { return default_; }
+
+    bool operator==(const IntPositive& other) const;
+    bool operator>(const IntPositive& other) const;
+
 private:
+    bool from_string_(const std::string& s, int& value) const;
+    int default_;
     int value_;
 };
 

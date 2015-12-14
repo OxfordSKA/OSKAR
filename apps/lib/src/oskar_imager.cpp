@@ -35,7 +35,7 @@
 #include <oskar_vis.h>
 #include <oskar_log.h>
 #include <oskar_get_error_string.h>
-#include <oskar_settings_free.h>
+#include <oskar_settings_old_free.h>
 #include <oskar_timer.h>
 
 #include "fits/oskar_fits_image_write.h"
@@ -50,8 +50,8 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
 
     // Load the settings file.
     oskar_log_section(log, 'M', "Loading settings file '%s'", settings_file);
-    oskar_Settings settings;
-    oskar_settings_load(&settings, log, settings_file, &status);
+    oskar_Settings_old settings;
+    oskar_settings_old_load(&settings, log, settings_file, &status);
     if (status)
     {
         oskar_log_error(log, "Failure in oskar_settings_load() (%s).",

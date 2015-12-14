@@ -47,7 +47,7 @@ false
 
 write\_status\_to\_log\_file
 &
-{Write status (progress) messages to the log file.}
+{If set, write status (progress) messages to the log file.}
 &
 Bool
 &
@@ -57,7 +57,7 @@ false
 
 max\_sources\_per\_chunk
 &
-{Maximum number of sources processed concurrently on a single GPU.}
+{Maximum number of sources or pixels processed concurrently on a single GPU. Reduce this if simulations are running out of GPU memory.}
 &
 Integer > 0
 &

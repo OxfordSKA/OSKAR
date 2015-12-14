@@ -47,10 +47,10 @@ extern "C" {
 
 /* Private functions. */
 static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
-        const oskar_Settings* settings, int* status);
+        const oskar_Settings_old* settings, int* status);
 static void set_station_data(oskar_Station* station,
         const oskar_Station* parent, int depth, int* counter,
-        const oskar_Settings* settings);
+        const oskar_Settings_old* settings);
 
 static void save_telescope(oskar_Telescope *telescope,
         const oskar_SettingsTelescope* settings, oskar_Log* log,
@@ -62,7 +62,7 @@ void oskar_telescope_log_summary(const oskar_Telescope* telescope,
 void oskar_station_log_summary(const oskar_Station* station,
         oskar_Log* log, int depth, int* status);
 
-oskar_Telescope* oskar_set_up_telescope(const oskar_Settings* settings,
+oskar_Telescope* oskar_set_up_telescope(const oskar_Settings_old* settings,
         oskar_Log* log, int* status)
 {
     int i, num_stations, type;
@@ -292,7 +292,7 @@ void oskar_station_log_summary(const oskar_Station* station,
 }
 
 static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
-        const oskar_Settings* settings, int* status)
+        const oskar_Settings_old* settings, int* status)
 {
     int i, num_stations, counter = 0;
 
@@ -328,7 +328,7 @@ static void oskar_telescope_set_metadata(oskar_Telescope *telescope,
 
 static void set_station_data(oskar_Station* station,
         const oskar_Station* parent, int depth, int* counter,
-        const oskar_Settings* settings)
+        const oskar_Settings_old* settings)
 {
     int i = 0;
     const oskar_SettingsApertureArray* aa = &settings->telescope.aperture_array;

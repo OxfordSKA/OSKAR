@@ -36,7 +36,8 @@
 
 namespace oskar {
 
-RandomSeed::RandomSeed() : value_(1)
+RandomSeed::RandomSeed()
+: default_(1), value_(1)
 {
 }
 
@@ -44,29 +45,73 @@ RandomSeed::~RandomSeed()
 {
 }
 
-void RandomSeed::init(const std::string& /*s*/, bool* ok)
+bool RandomSeed::init(const std::string& /*s*/)
 {
-    // Random seed does not require any initialisation
-    if (ok) *ok = true;
+    default_ = 1;
+    value_ = 1;
+    return true;
 }
 
-void RandomSeed::fromString(const std::string& s, bool* ok)
+bool RandomSeed::set_default(const std::string& s)
 {
-    if (ok) *ok = true;
-    if (oskar_settings_utility_string_starts_with("TIME", s, false)) {
-        value_ = -1;
-        return;
+    bool ok = from_string_(s, default_);
+    if (ok) {
+        value_ = default_;
     }
-    int i = oskar_settings_utility_string_to_int(s, ok);
-    if (ok && !*ok) return;
-    if (i < 1) { if (ok) *ok = false; value_ = -1; }
-    value_ = i;
+    else {
+        default_ = 1;
+        value_ = 1;
+    }
+    return ok;
 }
 
-std::string RandomSeed::toString() const
+std::string RandomSeed::get_default() const
+{
+    if (default_ < 1) return "time";
+    else return oskar_settings_utility_int_to_string(default_);
+}
+
+bool RandomSeed::set_value(const std::string& s)
+{
+    return from_string_(s, value_);
+}
+
+std::string RandomSeed::get_value() const
 {
     if (value_ < 1) return "time";
     else return oskar_settings_utility_int_to_string(value_);
+}
+
+bool RandomSeed::is_default() const
+{
+    return value_ == default_;
+}
+
+bool RandomSeed::operator==(const RandomSeed& other) const
+{
+    return value_ == other.value_;
+}
+
+bool RandomSeed::operator>(const RandomSeed& other) const
+{
+    return value_ > other.value_;
+}
+
+bool RandomSeed::from_string_(const std::string& s, int& value) const
+{
+    if (oskar_settings_utility_string_starts_with("TIME", s, false)) {
+        value = -1;
+        return true;
+    }
+    bool ok = true;
+    int i = oskar_settings_utility_string_to_int(s, &ok);
+    if (!ok) return false;
+    if (i < 1) {
+        value = -1;
+        return false;
+    }
+    value = i;
+    return true;
 }
 
 } // namespace oskar

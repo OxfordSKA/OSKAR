@@ -43,22 +43,48 @@ InputDirectory::~InputDirectory()
 {
 }
 
-void InputDirectory::init(const std::string& /*s*/, bool* /*ok*/)
+bool InputDirectory::init(const std::string& /*parameters*/)
 {
-    /* Nothing to initialise */
-    /* Could use this to set the delimiter ... ?*/
+    return true;
 }
 
-void InputDirectory::fromString(const std::string& s, bool* /*ok*/)
+bool InputDirectory::set_default(const std::string& value)
 {
-    directory_ = oskar_settings_utility_string_trim(s);
+    default_ = oskar_settings_utility_string_trim(value);
+    value_ = default_;
+    return true;
 }
 
-std::string InputDirectory::toString() const
+std::string InputDirectory::get_default() const
 {
-    return directory_;
+    return default_;
 }
 
+bool InputDirectory::set_value(const std::string& value)
+{
+    value_ = oskar_settings_utility_string_trim(value);
+    return true;
+}
+
+std::string InputDirectory::get_value() const
+{
+    return value_;
+}
+
+bool InputDirectory::is_default() const
+{
+    return value_ == default_;
+}
+
+bool InputDirectory::operator==(const InputDirectory& other) const
+{
+    return value_ == other.value_;
+}
+
+bool InputDirectory::operator>(const InputDirectory& ) const
+{
+    return false;
+}
 
 } // namespace oskar
 

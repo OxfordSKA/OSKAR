@@ -39,7 +39,7 @@
 
 namespace oskar {
 
-IntRange::IntRange() : min_(-INT_MAX), max_(INT_MAX), value_(0)
+IntRange::IntRange() : min_(-INT_MAX), max_(INT_MAX), default_(0), value_(0)
 {
 }
 
@@ -47,12 +47,12 @@ IntRange::~IntRange()
 {
 }
 
-void IntRange::init(const std::string& s, bool* ok)
+bool IntRange::init(const std::string& s)
 {
-    if (*ok) *ok = true;
-
     min_ = -INT_MAX;
     max_ =  INT_MAX;
+    default_ = 0;
+    value_ = 0;
 
     // Extract range from the parameter CSV string.
     // Parameters, p, for IntRange should be length 0, 1 or 2.
@@ -63,47 +63,83 @@ void IntRange::init(const std::string& s, bool* ok)
     // Notes: if p[0] is the string 'MIN' or p[1] is the string 'MAX'
     // these will resolve as -INT_MAX and INT_MAX respectively.
     //
+    bool ok = true;
     std::vector<std::string> p;
     p = oskar_settings_utility_string_get_type_params(s);
     if (p.size() == 0u) {
-        return;
+        return true;
     }
     else if (p.size() == 1u) {
         if (p[0] == "MIN") min_ = -INT_MAX;
-        else min_ = oskar_settings_utility_string_to_int(p[0], ok);
-        return;
+        else min_ = oskar_settings_utility_string_to_int(p[0], &ok);
+        return true;
     }
     else if (p.size() == 2u) {
         if (p[0] == "MIN") min_ = -INT_MAX;
-        else min_ = oskar_settings_utility_string_to_int(p[0], ok);
-        if (ok && !*ok) return;
+        else min_ = oskar_settings_utility_string_to_int(p[0], &ok);
+        if (!ok) return false;
         if (p[1] == "MAX") max_ = INT_MAX;
-        else max_ = oskar_settings_utility_string_to_int(p[1], ok);
-        return;
+        else max_ = oskar_settings_utility_string_to_int(p[1], &ok);
+        return true;
     }
 
     // If more than 3 parameters, set the status to false.
-    if (*ok) *ok = false;
+    return false;
 }
 
-void IntRange::fromString(const std::string& s, bool* ok)
+
+bool IntRange::set_default(const std::string& value)
 {
-    if (ok) *ok = false;
-
-    int i = oskar_settings_utility_string_to_int(s, ok);
-    if (ok && !*ok) return;
-
-    if (i >= min_ && i <= max_) {
-        if (ok) *ok = true;
-        value_ = i;
+    bool ok = from_string_(value, default_);
+    if (ok) {
+        value_ = default_;
     }
-    else if (i < min_) { if (ok) *ok = false; value_ = min_; }
-    else if (i > max_) { if (ok) *ok = false; value_ = max_; }
+    return ok;
 }
 
-std::string IntRange::toString() const
+std::string IntRange::get_default() const
+{
+    return oskar_settings_utility_int_to_string(default_);
+}
+
+bool IntRange::set_value(const std::string& value)
+{
+    return from_string_(value, value_);
+}
+
+std::string IntRange::get_value() const
 {
     return oskar_settings_utility_int_to_string(value_);
+}
+
+bool IntRange::is_default() const
+{
+    return (value_ == default_);
+}
+
+bool IntRange::operator==(const IntRange& other) const
+{
+    return value_ == other.value_;
+}
+
+bool IntRange::operator>(const IntRange& other) const
+{
+    return value_ > other.value_;
+}
+
+bool IntRange::from_string_(const std::string& s, int& value) const
+{
+    bool ok = true;
+    int i = oskar_settings_utility_string_to_int(s, &ok);
+    if (!ok) return false;
+
+    if (i >= min_ && i <= max_) {
+        value = i;
+        return true;
+    }
+    else if (i < min_) value = min_;
+    else if (i > max_) value = max_;
+    return false;
 }
 
 } // namespace oskar

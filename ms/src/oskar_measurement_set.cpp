@@ -28,7 +28,6 @@
 
 #include "ms/oskar_measurement_set.h"
 
-#include <oskar_version.h>
 #include <ms/MeasurementSets.h>
 #include <tables/Tables.h>
 #include <casa/Arrays/Vector.h>
@@ -92,6 +91,7 @@ struct oskar_MeasurementSet
     casa::MeasurementSet* ms;   // Pointer to the Measurement Set.
     casa::MSColumns* msc;       // Pointer to the sub-tables.
     casa::MSMainColumns* msmc;  // Pointer to the main columns.
+    std::string app_name;
     bool write_autocorr;
     unsigned int num_pols;
     unsigned int num_channels;
@@ -103,7 +103,7 @@ struct oskar_MeasurementSet
     double start_time;
     double end_time;
 
-    oskar_MeasurementSet() : ms(0), msc(0), msmc(0),
+    oskar_MeasurementSet() : ms(0), msc(0), msmc(0), app_name(std::string()),
             num_pols(0), num_channels(0), num_stations(0), num_receptors(2),
             ref_freq(0.0), phase_centre_ra(0.0), phase_centre_dec(0.0),
             start_time(DBL_MAX), end_time(-DBL_MAX) {}
@@ -117,12 +117,15 @@ struct oskar_MeasurementSet
             Vector<String> app_params);
     void add_pol(unsigned int num_pols);
     void add_scratch_cols(bool add_model, bool add_corrected);
-    void copy_column(String source, String dest);
-    bool create(const char* filename, double ra_rad, double dec_rad,
-            unsigned int num_pols, unsigned int num_channels, double ref_freq,
-            double chan_width, unsigned int num_stations, int write_autocorr,
-            int write_crosscorr);
     void close();
+    void copy_column(String source, String dest);
+    bool create(const char* filename, const char* app_name,
+            double ra_rad, double dec_rad, unsigned int num_pols,
+            unsigned int num_channels, double ref_freq, double chan_width,
+            unsigned int num_stations, int write_autocorr, int write_crosscorr);
+    void get_column(const String& column, unsigned int start_row,
+            unsigned int num_rows, size_t data_size_bytes,
+            void* data, size_t* required_size, int* status) const;
     void get_time_range();
     static bool is_otf_model_defined(const int field,
             const MeasurementSet& ms, String& key, int& source_row);
@@ -140,7 +143,8 @@ struct oskar_MeasurementSet
  * Public interface
  *---------------------------------------------------------------------------*/
 
-void oskar_ms_add_log(oskar_MeasurementSet* p, const char* str, size_t size)
+void oskar_ms_add_history(oskar_MeasurementSet* p, const char* origin,
+        const char* str, size_t size)
 {
     if (!str || size == 0) return;
 
@@ -152,29 +156,9 @@ void oskar_ms_add_log(oskar_MeasurementSet* p, const char* str, size_t size)
     double current_utc = 86400.0 * current_utc_to_mjd();
     for (int i = 0; i < num_lines; ++i)
     {
-        p->add_history(String(v[i]), "LOG", current_utc, Vector<String>());
+        p->add_history(String(v[i]), String(origin), current_utc,
+                Vector<String>());
     }
-}
-
-void oskar_ms_add_settings(oskar_MeasurementSet* p,
-        const char* str, size_t size)
-{
-    if (!str || size == 0) return;
-
-    // Construct a string from the char array and split on each newline.
-    std::vector<std::string> v = split_string(std::string(str, size), '\n');
-
-    // Fill a CASA vector with the settings file contents.
-    int num_lines = v.size();
-    Vector<String> vec(num_lines);
-    for (int i = 0; i < num_lines; ++i)
-    {
-        vec(i) = v[i];
-    }
-
-    // Add to the HISTORY table.
-    p->add_history("OSKAR settings file", "SETTINGS",
-            86400.0 * current_utc_to_mjd(), vec);
 }
 
 void oskar_ms_add_scratch_columns(oskar_MeasurementSet* p, int add_model,
@@ -230,18 +214,28 @@ void oskar_ms_close(oskar_MeasurementSet* p)
     if (p) delete p; // Calls destructor, which closes everything.
 }
 
-oskar_MeasurementSet* oskar_ms_create(const char* filename, double ra_rad,
-        double dec_rad, unsigned int num_pols, unsigned int num_channels,
+oskar_MeasurementSet* oskar_ms_create(const char* filename,
+        const char* app_name, double ra_rad, double dec_rad,
+        unsigned int num_pols, unsigned int num_channels,
         double ref_freq, double chan_width, unsigned int num_stations,
         int write_autocorr, int write_crosscorr)
 {
     oskar_MeasurementSet* p = new oskar_MeasurementSet;
-    if (p->create(filename, ra_rad, dec_rad, num_pols,
+    if (p->create(filename, app_name, ra_rad, dec_rad, num_pols,
             num_channels, ref_freq, chan_width, num_stations, write_autocorr,
             write_crosscorr))
         return p;
     delete p;
     return 0;
+}
+
+void oskar_ms_get_column(const oskar_MeasurementSet* p, const char* column,
+        unsigned int start_row, unsigned int num_rows,
+        size_t data_size_bytes, void* data, size_t* required_size_bytes,
+        int* status)
+{
+    p->get_column(String(column), start_row, num_rows,
+            data_size_bytes, data, required_size_bytes, status);
 }
 
 unsigned int oskar_ms_num_pols(const oskar_MeasurementSet* p)
@@ -508,7 +502,7 @@ void oskar_MeasurementSet::add_history(String message, String origin,
     ms->history().addRow(1);
     MSHistoryColumns& c = msc->history();
     c.message().put(row, message);
-    c.application().put(row, "OSKAR " OSKAR_VERSION_STR);
+    c.application().put(row, app_name.c_str());
     c.priority().put(row, "INFO");
     c.origin().put(row, origin);
     c.time().put(row, time);
@@ -706,10 +700,10 @@ void oskar_MeasurementSet::close()
     phase_centre_dec = 0.0;
 }
 
-bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
-        double dec_rad, unsigned int num_pols, unsigned int num_channels,
-        double ref_freq, double chan_width, unsigned int num_stations,
-        int write_autocorr, int write_crosscorr)
+bool oskar_MeasurementSet::create(const char* filename, const char* app_name,
+        double ra_rad, double dec_rad, unsigned int num_pols,
+        unsigned int num_channels, double ref_freq, double chan_width,
+        unsigned int num_stations, int write_autocorr, int write_crosscorr)
 {
     // Create the table descriptor and use it to set up a new main table.
     TableDesc desc = MS::requiredTableDesc();
@@ -717,8 +711,11 @@ bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
     desc.rwColumnDesc(MS::columnName(MS::DATA)).
             rwKeywordSet().define("UNIT", "Jy");
     IPosition dataShape(2, num_pols, num_channels);
+    IPosition weightShape(1, num_pols);
     desc.rwColumnDesc(MS::columnName(MS::DATA)).setShape(dataShape);
     desc.rwColumnDesc(MS::columnName(MS::FLAG)).setShape(dataShape);
+    desc.rwColumnDesc(MS::columnName(MS::WEIGHT)).setShape(weightShape);
+    desc.rwColumnDesc(MS::columnName(MS::SIGMA)).setShape(weightShape);
     Vector<String> tsmNames(1);
     tsmNames[0] = MS::columnName(MS::DATA);
     desc.defineHypercolumn("TiledData", 3, tsmNames);
@@ -726,6 +723,10 @@ bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
     desc.defineHypercolumn("TiledFlag", 3, tsmNames);
     tsmNames[0] = MS::columnName(MS::UVW);
     desc.defineHypercolumn("TiledUVW", 2, tsmNames);
+    tsmNames[0] = MS::columnName(MS::WEIGHT);
+    desc.defineHypercolumn("TiledWeight", 2, tsmNames);
+    tsmNames[0] = MS::columnName(MS::SIGMA);
+    desc.defineHypercolumn("TiledSigma", 2, tsmNames);
     try
     {
         unsigned int num_baselines = 0;
@@ -753,6 +754,14 @@ bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
         TiledColumnStMan uvwStorageManager("TiledUVW", uvwTileShape);
         newTab.bindColumn(MS::columnName(MS::UVW), uvwStorageManager);
 
+        // Create tiled column storage managers for WEIGHT and SIGMA columns.
+        IPosition weightTileShape(2, num_pols, 2 * num_baselines);
+        TiledColumnStMan weightStorageManager("TiledWeight", weightTileShape);
+        newTab.bindColumn(MS::columnName(MS::WEIGHT), weightStorageManager);
+        IPosition sigmaTileShape(2, num_pols, 2 * num_baselines);
+        TiledColumnStMan sigmaStorageManager("TiledSigma", sigmaTileShape);
+        newTab.bindColumn(MS::columnName(MS::SIGMA), sigmaStorageManager);
+
         // Create tiled column storage managers for DATA and FLAG columns.
         IPosition dataTileShape(3, num_pols, num_channels, 2 * num_baselines);
         TiledColumnStMan dataStorageManager("TiledData", dataTileShape);
@@ -779,6 +788,7 @@ bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
         // in the main table and subtables.
         msc = new MSColumns(*ms);
         msmc = new MSMainColumns(*ms);
+        this->app_name = app_name;
     }
     catch (...)
     {
@@ -799,7 +809,7 @@ bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
     msc->observation().schedule().put(0, corrSchedule);
     msc->observation().project().put(0, "");
     msc->observation().observer().put(0, username);
-    msc->observation().telescopeName().put(0, "OSKAR " OSKAR_VERSION_STR);
+    msc->observation().telescopeName().put(0, app_name);
     msc->observation().timeRange().put(0, timeRange);
     set_time_range();
 
@@ -828,8 +838,7 @@ bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
 
     // Add a row to the HISTORY subtable.
     add_history(String("Measurement Set created at ") + String(time_str),
-            "OSKAR " OSKAR_VERSION_STR, 86400.0 * current_utc_to_mjd(),
-            Vector<String>());
+            app_name, 86400.0 * current_utc_to_mjd(), Vector<String>());
 
     // Set the private data.
     this->write_autocorr = (bool) write_autocorr;
@@ -846,6 +855,236 @@ bool oskar_MeasurementSet::create(const char* filename, double ra_rad,
 
     return true;
 }
+
+void oskar_MeasurementSet::get_column(const String& column,
+        unsigned int start_row, unsigned int num_rows,
+        size_t data_size_bytes, void* data, size_t* required_size,
+        int* status) const
+{
+    if (*status || !ms) return;
+
+    // Check that the column exists.
+    if (!ms->tableDesc().isColumn(column))
+        *status = OSKAR_ERR_MS_COLUMN_NOT_FOUND;
+
+    // Check that some data are selected.
+    if (num_rows == 0) return;
+
+    // Check that the row is within the table bounds.
+    unsigned int total_rows = ms->nrow();
+    if (start_row >= total_rows)
+        *status = OSKAR_ERR_MS_OUT_OF_RANGE;
+    if (start_row + num_rows > total_rows)
+        num_rows = total_rows - start_row;
+
+    // Get column description and data type.
+    const ColumnDesc& cdesc = ms->tableDesc().columnDesc(column);
+    Bool is_scalar = cdesc.isScalar();
+    DataType dtype = cdesc.dataType();
+
+    // Define a slice for the required rows.
+    Slice slice(start_row, num_rows, 1);
+
+    if (is_scalar)
+    {
+        switch (dtype)
+        {
+        case TpBool:
+        {
+            ROScalarColumn<Bool> ac(*ms, column);
+            Array<Bool> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(Bool);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpUChar:
+        {
+            ROScalarColumn<uChar> ac(*ms, column);
+            Array<uChar> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(uChar);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpShort:
+        {
+            ROScalarColumn<Short> ac(*ms, column);
+            Array<Short> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(Short);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpUShort:
+        {
+            ROScalarColumn<uShort> ac(*ms, column);
+            Array<uShort> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(uShort);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpInt:
+        {
+            ROScalarColumn<Int> ac(*ms, column);
+            Array<Int> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(Int);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpUInt:
+        {
+            ROScalarColumn<uInt> ac(*ms, column);
+            Array<uInt> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(uInt);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpFloat:
+        {
+            ROScalarColumn<Float> ac(*ms, column);
+            Array<Float> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(Float);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpDouble:
+        {
+            ROScalarColumn<Double> ac(*ms, column);
+            Array<Double> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(Double);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpComplex:
+        {
+            ROScalarColumn<Complex> ac(*ms, column);
+            Array<Complex> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(Complex);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpDComplex:
+        {
+            ROScalarColumn<DComplex> ac(*ms, column);
+            Array<DComplex> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(DComplex);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        default:
+            *status = OSKAR_ERR_MS_UNKNOWN_DATA_TYPE;
+            break;
+        }
+    }
+    else
+    {
+        switch (dtype)
+        {
+        case TpBool:
+        {
+            ROArrayColumn<Bool> ac(*ms, column);
+            Array<Bool> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(Bool);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpUChar:
+        {
+            ROArrayColumn<uChar> ac(*ms, column);
+            Array<uChar> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(uChar);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpShort:
+        {
+            ROArrayColumn<Short> ac(*ms, column);
+            Array<Short> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(Short);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpUShort:
+        {
+            ROArrayColumn<uShort> ac(*ms, column);
+            Array<uShort> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(uShort);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpInt:
+        {
+            ROArrayColumn<Int> ac(*ms, column);
+            Array<Int> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(Int);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpUInt:
+        {
+            ROArrayColumn<uInt> ac(*ms, column);
+            Array<uInt> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(uInt);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpFloat:
+        {
+            ROArrayColumn<Float> ac(*ms, column);
+            Array<Float> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(Float);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpDouble:
+        {
+            ROArrayColumn<Double> ac(*ms, column);
+            Array<Double> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(Double);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpComplex:
+        {
+            ROArrayColumn<Complex> ac(*ms, column);
+            Array<Complex> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(Complex);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        case TpDComplex:
+        {
+            ROArrayColumn<DComplex> ac(*ms, column);
+            Array<DComplex> a = ac.getColumnRange(slice);
+            *required_size = a.size() * sizeof(DComplex);
+            if (data_size_bytes >= *required_size)
+                memcpy(data, a.data(), *required_size);
+            break;
+        }
+        default:
+            *status = OSKAR_ERR_MS_UNKNOWN_DATA_TYPE;
+            break;
+        }
+    }
+}
+
 
 // Method based on CASA VisModelData.cc.
 bool oskar_MeasurementSet::is_otf_model_defined(const int field,
