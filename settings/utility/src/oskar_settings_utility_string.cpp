@@ -457,7 +457,8 @@ double oskar_settings_utility_string_to_double(const std::string& s, bool *ok)
         *ok = true;
         //  Check for various possible errors
         if ((errno != 0 && val == 0.0) ||
-                        (errno == ERANGE && (val == HUGE_VAL || val == -HUGE_VAL))) {
+                        (errno == ERANGE && (val == HUGE_VAL ||
+                            val == -HUGE_VAL))) {
             *ok = false;
         }
         // No digits found.
@@ -470,6 +471,7 @@ double oskar_settings_utility_string_to_double(const std::string& s, bool *ok)
     return val;
 }
 
+#if 0
 // http://stackoverflow.com/questions/2342162/stdstring-formatting-like-sprintf
 std::string oskar_format_string(const std::string fmt, ...)
 {
@@ -479,10 +481,10 @@ std::string oskar_format_string(const std::string fmt, ...)
     va_list vl;
     va_start(vl, fmt);
     int nsize = vsnprintf(buffer, size, fmt.c_str(), vl);
-    if (size <= nsize) { // fail? delete buffer and try again
+    if (size <= nsize) {  // fail? delete buffer and try again
         delete[] buffer;
         buffer = 0;
-        buffer = new char[nsize+1]; //+1 for /0
+        buffer = new char[nsize+1];  //+1 for /0
         nsize = vsnprintf(buffer, size, fmt.c_str(), vl);
     }
     std::string ret(buffer);
@@ -490,3 +492,4 @@ std::string oskar_format_string(const std::string fmt, ...)
     delete[] buffer;
     return ret;
 }
+#endif

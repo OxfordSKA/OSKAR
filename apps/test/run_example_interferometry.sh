@@ -14,17 +14,19 @@ echo "  * Example data directory = $example_data_dir"
 echo ""
 
 # Move into the example data directory
-cd "${example_data_dir}"
+cd "${example_data_dir}" || exit
 
 # Set settings as specified in the OSKAR Example document section 3.1
 ini=setup.ini
+set_setting $ini simulator/max_sources_per_chunk 1024
 set_setting $ini sky/oskar_sky_model/file sky.osm
 set_setting $ini telescope/input_directory telescope.tm
 
 # Run the interferometry simulation
 echo "Starting interferometry simulation"
 T0="$(date +%s)"
-run_sim_interferometer -q $ini
+# run_sim_interferometer -q $ini
+run_sim_interferometer $ini
 echo " - Finished in $(($(date +%s)-T0)) s"
 echo ""
 

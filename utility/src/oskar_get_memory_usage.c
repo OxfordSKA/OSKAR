@@ -37,6 +37,9 @@
 #if defined(OSKAR_OS_LINUX)
 #   include <sys/types.h>
 #   include <sys/sysinfo.h>
+#   include <stdlib.h>
+#   include <stdio.h>
+#   include <string.h>
 #elif defined(OSKAR_OS_MAC)
 #   include <sys/param.h>
 #   include <sys/mount.h>
@@ -50,6 +53,7 @@
 #   include <sys/sysctl.h>
 #elif defined(OSKAR_OS_WIN)
 #   include <windows.h>
+#   include <psapi.h>
 #endif
 
 /* http://goo.gl/iKnmd */
@@ -176,13 +180,58 @@ size_t oskar_get_free_swap_memory(void)
 #endif
 }
 
+#ifdef OSKAR_OS_LINUX
+static int parse_line(char* line)
+{
+    int i = strlen(line);
+    while (*line < '0' || *line > '9') line++;
+    line[i-3] = '\0';
+    i = atoi(line);
+    return i;
+}
+#endif
+
+size_t oskar_get_memory_usage(void)
+{
+#ifdef OSKAR_OS_LINUX
+    FILE* file = fopen("/proc/self/status", "r");
+    int result = -1;
+    char line[128];
+    while (fgets(line, 128, file) != NULL) {
+        if (strncmp(line, "VmRSS:", 6) == 0) {
+            result = parse_line(line);
+            break;
+        }
+    }
+    fclose(file);
+    return result;
+#elif defined(OSKAR_OS_MAC)
+    struct task_basic_info t_info;
+    mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
+    if (KERN_SUCCESS != task_info(mach_task_self(), TASK_BASIC_INFO,
+                                  (task_info_t)&t_info, &t_info_count))
+        return 0L;
+    return t_info.resident_size;
+#elif defined(OSKAR_OS_WIN)
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
+    SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
+    return (size_t)physMemUsedByMe;
+#else
+    return 0L;
+#endif
+}
+
 void oskar_print_memory_info(void)
 {
-    size_t totalSwapMem, freeSwapMem, totalPhysMem, freePhysMem;
+    size_t totalSwapMem, freeSwapMem, totalPhysMem, freePhysMem, usedMem;
     totalPhysMem = oskar_get_total_physical_memory();
     freePhysMem = oskar_get_free_physical_memory();
     totalSwapMem = oskar_get_total_swap_memory();
     freeSwapMem = oskar_get_free_swap_memory();
+    usedMem = oskar_get_memory_usage();
+    printf("Memory used by current process: %ld MB\n",
+           usedMem/(1024*1024));
     printf("Free physical memory: %ld MB (of %ld MB)\n",
             freePhysMem/(1024*1024), totalPhysMem/(1024*1024));
     printf("Free swap memory: %ld MB (of %ld MB)\n",

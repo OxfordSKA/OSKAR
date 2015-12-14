@@ -76,7 +76,8 @@ std::string oskar_settings_utility_double_to_string_2(double d,
 double oskar_settings_utility_string_to_double(const std::string& s, bool *ok);
 
 // Generate a formatted string
+#if 0
 std::string oskar_format_string(const std::string fmt, ...);
-
+#endif
 
 #endif /* OSKAR_SETTINGS_UTILITY_STRING_HPP_ */

@@ -36,7 +36,8 @@
 TEST(get_memory_usage, test)
 {
     oskar_print_memory_info();
-    size_t size = 40000ul*1024ul*1024ul; /* Allocate 40GB of memory */
+    // size_t size = 40000ul*1024ul*1024ul; /* Allocate 40GB of memory */
+    size_t size = 1000ul*1024ul*1024ul; /* Allocate 1GB of memory */
     float* mem = (float*)malloc(size);
     memset((void*)mem, 1, size);
     printf("** Allocated %li MB ** \n", size/(1024*1024));

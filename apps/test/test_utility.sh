@@ -133,7 +133,7 @@ function get_example_data_version() {
     if [ $# -eq 1 ]; then
         version=$1
     else
-        version=$default_example_version
+        version=${default_example_version}
     fi
 }
 
@@ -155,6 +155,7 @@ function download_example_data() {
     example_data_dir="OSKAR-${1}-Example-Data"
     local file="${example_data_dir}.zip"
     example_data_url="${oskar_url}/${1}/data/${file}"
+    example_data_url="https://www.dropbox.com/s/w05katzwp4cai30/OSKAR-2.6-Example-Data.zip"
     # Download and unpack the example data, removing any existing data first.
     if [ -f "$file" ]; then
         rm -f "$file"
@@ -162,7 +163,13 @@ function download_example_data() {
     if [ -d "$example_data_dir" ]; then
         rm -rf "$example_data_dir"
     fi
-    wget -q "$example_data_url"
+    # wget -q "$example_data_url"
+    cmd="wget --tries=2 --timeout=2 --quiet $example_data_url"
+    (${cmd})
+    if (( $? == 4 )); then
+        printf '%s\n' 'Error: Failed to download example data. network error.'
+        exit_ 1
+    fi
     if [ ! -f "$file" ]; then
         echo "Error: Failed to download example data from:"
         echo "  '$example_data_url'"

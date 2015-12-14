@@ -429,7 +429,17 @@ bool SettingsModel::setData(const QModelIndex& idx, const QVariant& value,
         if (idx.column() == 1) {
             reset_group_(node);
             lastModified_ = QDateTime::currentDateTime();
+            // TODO(BM) call dataChanged on all children and parents too.
+            // seems to work at the moment on the basis of luck or the right
+            // click action used to call reset calling a redraw.
             emit dataChanged(topLeft, bottomRight);
+//            QModelIndex i(idx);
+//            while (i.isValid())
+//            {
+//                emit dataChanged(i.sibling(i.row(), 0),
+//                                 i.sibling(i.row(), columnCount()-1));
+//                i = i.parent();
+//            }
             return true;
         }
     }
@@ -441,9 +451,6 @@ bool SettingsModel::setData(const QModelIndex& idx, const QVariant& value,
 
 void SettingsModel::reset_group_(const SettingsNode* node)
 {
-    // NOTE(BM) if there was a way to the Qt index of the child node
-    // could call setData() ...
-    // ... could work on the QModelIndex methods for this?
     for (int i = 0; i < node->num_children(); ++i) {
         const SettingsNode* child = node->child(i);
         settings_->set_value(child->key(), child->value().get_default());

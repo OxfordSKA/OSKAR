@@ -68,6 +68,12 @@ OSKAR_EXPORT
 size_t oskar_get_free_swap_memory(void);
 
 /**
+ * @brief Returns the memory used by the current process, in bytes.
+ */
+OSKAR_EXPORT
+size_t oskar_get_memory_usage(void);
+
+/**
  * @brief Prints a summary of the current memory usage.
  */
 OSKAR_EXPORT
