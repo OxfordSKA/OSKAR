@@ -1,0 +1,236 @@
+/**
+
+\page sky_model Sky Model
+
+\latexonly
+\def \docversion{3}
+\endlatexonly
+
+\section sky_intro Introduction
+
+This document describes the sky model file format used by OSKAR 2.x.
+
+OSKAR sky model files contain a simple catalogue to describe the source
+properties for a set of point sources or Gaussian sources.
+
+For each source in the model it is possible to specify:
+
+ - A position in equatorial coordinates (Right Ascension and Declination).
+ - Flux densities for all four Stokes parameters (I, Q, U, V), at a reference
+   frequency.
+ - Reference frequency, spectral index and rotation measure.
+ - Gaussian source width parameters (FWHM and position angle).
+
+\section sky_file Sky Model File
+
+The sky model file holds a table of ASCII text, where each row corresponds to 
+one source, and columns describe the source parameters. Most parameters are 
+optional, and will be set to a default value if not specified.
+
+In order, the parameter columns are:
+
+<table>
+<tr><th>Column</th><th>Parameter</th><th>Unit</th><th>Comment</th></tr>
+<tr><td>1</td><td>Right Ascension</td><td>deg</td>
+<td>Required. This is currently interpreted as the apparent rather than mean (J2000) Right Ascension.</td></tr>
+<tr><td>2</td><td>Declination</td><td>deg</td>
+<td>Required. This is currently interpreted as the apparent rather than mean (J2000) Declination.</td></tr>
+<tr><td>3</td><td>Stokes I flux density</td><td>Jy</td><td>Required.</td></tr>
+<tr><td>4</td><td>Stokes Q flux density</td><td>Jy</td><td>Optional (default 0.0)</td></tr>
+<tr><td>5</td><td>Stokes U flux density</td><td>Jy</td><td>Optional (default 0.0)</td></tr>
+<tr><td>6</td><td>Stokes V flux density</td><td>Jy</td><td>Optional (default 0.0)</td></tr>
+<tr><td>7</td><td>Reference frequency</td><td>Hz</td>
+<td>Optional (default 0.0). Frequency at which flux densities are given.</td></tr>
+<tr><td>8</td><td>Spectral index</td><td>N/A</td><td>Optional (default 0.0)</td></tr>
+<tr><td>9</td><td>Rotation measure</td><td>rad \f${\rm m}^{-2}\f$</td><td>Optional (default 0.0)</td></tr>
+<tr><td>10</td><td>Major axis FWHM</td><td>arcsec</td><td>Optional (default 0.0)</td></tr>
+<tr><td>11</td><td>Minor axis FWHM</td><td>arcsec</td><td>Optional (default 0.0)</td></tr>
+<tr><td>12</td><td>Position angle</td><td>deg</td><td>Optional (default 0.0). East of North.</td></tr>
+</table>
+
+\note
+- <i>In order for a source to be recognised as a Gaussian, all three of the
+  major axis FWHM, minor axis FWHM and position angle parameters must be
+  specified.</i>
+
+\note 
+- <i>When the file is read, parameters are assigned according to their column
+  position. In order to specify an optional parameter, all columns up to the 
+  designated column must be specified.</i>
+
+\note
+ - <i>The rotation measure column was added for OSKAR 2.3.0. To provide backwards
+   compatibility with older sky model files containing extended sources, a 
+   check is made on the number of columns on each line, and source data is 
+   loaded according to the following rules:</i>
+     -# Lines containing between 3 and 9 columns will set all parameters 
+        up to and including the rotation measure. Any missing parameters will 
+        be set to defaults.
+     -# Lines containing 11 columns set the first 8 parameters and the 
+        Gaussian source data (this is the old file format). The rotation 
+        measure will be set to zero.
+     -# Lines containing 12 columns set all parameters.
+     -# Lines containing 10, 13, or more columns will raise an error.
+
+The fields can be space-separated and/or comma-separated. Characters 
+appearing after a hash ('\#') symbol are treated as comments and will be 
+ignored. Empty lines are also ignored.
+
+
+\subsection sky_example Example
+
+The following is an example sky file describing three sources, making use of 
+a number of comment lines.
+
+\verbatim
+#
+# Required columns:
+# =================
+# RA(deg), Dec(deg), I(Jy)
+#
+# Optional columns:
+# =================
+# Q(Jy), U(Jy), V(Jy), freq0(Hz), spectral index, rotation measure,
+#           FWHM major (arcsec), FWHM minor (arcsec), position angle (deg)
+#
+#
+# Two fully-specified sources
+0.0 70.0 1.1 0.0 0.0 0.0 100e6 -0.7 0.0 200.0 150.0  23.0
+0.0 71.2 2.3 1.0 0.0 0.0 100e6 -0.7 0.0  90.0  40.0 -10.0   
+
+# A source where only Stokes I is defined (other columns take default values) 
+0.1 69.8 1.0
+\endverbatim
+
+\section sky_spix Spectral Index
+
+The spectral index \f$\alpha\f$ is defined according to the following equation:
+\f[ \mathbf{F} = \mathbf{F_0} (\nu/\nu_0 )^{\alpha} \f]
+where \f$\mathbf{F}\f$ is a 4-vector containing the Stokes (I,Q,U,V) fluxes 
+of the source at the current observing frequency \f$\nu\f$, and
+\f$\mathbf{F_0}\f$ is a 4-vector containing the fluxes at the reference
+frequency \f$\nu_0\f$. Negative values for \f$\alpha\f$ will cause the flux at
+frequencies higher than the reference frequency to be reduced relative to the
+reference flux.
+
+\latexonly
+\newpage
+\endlatexonly
+
+\section sky_rm Rotation Measure
+
+Faraday rotation will cause the plane of polarisation of radiation from a 
+source to be rotated, relative to a reference frequency, by an additional 
+angle \f$\beta\f$. This angle is defined in the normal right-handed sense 
+for radiation towards the observer (\f$\beta\f$ is positive as sketched below).
+
+\image html rotation_measure.png
+\image latex rotation_measure.pdf "" width=12cm
+
+The rotation angle is given by the expression
+\f$ \beta = RM (\lambda^2 - \lambda_0^2 ) \f$, where \f$\lambda_0\f$ is the 
+wavelength at the reference frequency, \f$\lambda\f$ is the wavelength at the 
+observing frequency, and RM is the rotation measure. The angle \f$\beta\f$ is 
+positive when RM is positive and the new wavelength is greater than the 
+reference wavelength.
+
+The source Stokes parameters are modified for the observing frequency using a 
+normal 2D rotation matrix, and its transpose:
+
+\f[
+
+\left[
+\begin{array}{cc}
+\cos\beta & -\sin\beta \\
+\sin\beta & \cos\beta
+\end{array}
+\right]
+
+\left[
+\begin{array}{cc}
+I_0 + Q_0   & U_0 + i V_0 \\
+U_0 - i V_0 & I_0 - Q_0
+\end{array}
+\right]
+
+\left[
+\begin{array}{cc}
+\cos\beta  & \sin\beta \\
+-\sin\beta & \cos\beta
+\end{array}
+\right]
+
+\f]
+
+Multiplying this out implies that
+
+- \f$Q_0\f$ transforms to \f$Q=Q_0 \cos(2\beta)-U_0 \sin(2\beta)\f$,
+- \f$U_0\f$ transforms to \f$U=Q_0 \sin(2\beta)+U_0 \cos(2\beta)\f$,
+- \f$I\f$ and \f$V\f$ remain unchanged, as expected.
+
+
+\section sky_gaussian Gaussian Sources
+
+Two-dimensional elliptical Gaussian sources are specified by the length of 
+their major and minor axes on the sky in terms of their full width at half 
+maximum (FWHM) and the position angle of the major axis \f$\theta\f$, 
+defined as the angle East of North.
+
+\image html gaussian.png
+\image latex gaussian.pdf "" width=7cm
+
+\latexonly
+\newpage
+\endlatexonly
+
+These three parameters define an elliptical Gaussian \f$f(x,y)\f$, given by
+the equation
+
+\f[ f(x,y)=\exp\left\{-(ax^2+2bxy+cy^2 ) \right\} \f]
+
+where
+
+\f{eqnarray*}{
+a &=& \frac{\cos^2 \theta}{2\sigma_x^2} + \frac{\sin^2 \theta}{2\sigma_y^2} \\
+b &=& -\frac{\sin2\theta}{4\sigma_x^2} + \frac{\cos2\theta}{4\sigma_y^2} \\
+c &=& \frac{sin^2 \theta}{2\sigma_x^2} + \frac{\cos^2 \theta}{2\sigma_y^2},
+\f}
+
+and \f$\sigma_x\f$  and \f$\sigma_y\f$ are related to the minor and major 
+FWHM respectively, according to
+
+\f[ \sigma = \frac{\rm FWHM}{ 2 \sqrt{2 \ln(2)}} . \f]
+
+OSKAR simulates Gaussian sources by multiplying the amplitude 
+response of the source on each baseline by the Gaussian response of the source 
+in the \f$(u,v)\f$ plane. This is possible in the limit where a Gaussian source 
+differs from a point source in its Fourier \f$(u,v)\f$ plane response only, 
+and assumes that any variation of Jones matrices across the extent of the 
+source can be ignored (e.g. a small taper due to the station beam changing 
+across the source).
+ 
+The Fourier response of an elliptical Gaussian source is another elliptical 
+Gaussian whose width is defined with respect to the width in the sky as
+
+\f[ \sigma_{uv} = \frac{1}{2 \pi \sigma_{\rm sky}} . \f]
+
+The required modification of the \f$(u, v)\f$ plane amplitude response of 
+each point source therefore takes the simple analytical form 
+\f$ V_{\rm extended} = f(u,v) \, V_{\rm point}, \f$
+where \f$f(u,v)\f$ is the equation for an elliptical Gaussian (defined above as 
+\f$f(x,y)\f$) evaluated in the \f$(u,v)\f$ plane according to the FWHM and 
+position angle of the source.
+
+\latexonly
+\vskip 1cm
+\endlatexonly
+
+<b>Revision History</b>
+
+| Revision | Date       | Modification
+| -------- | ---------- | -----------------------------------------------------
+| 1        | 2012-04-20 | Creation
+| 2        | 2012-11-02 | Fixed the order of table columns for reference frequency and spectral index (the examples were correct, though).
+| 3        | 2013-11-14 | Updated for rotation measure capability.
+
+*/

@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="icons">
+        <file>oerc-128x128.png</file>
+        <file>open.png</file>
+        <file>open_required.png</file>
+        <file>oskar.ico</file>
+        <file>oskar-16x16.png</file>
+        <file>oskar-20x20.png</file>
+        <file>oskar-24x24.png</file>
+        <file>oskar-32x32.png</file>
+        <file>oskar-48x48.png</file>
+        <file>oskar-64x64.png</file>
+        <file>oskar-128x128.png</file>
+        <file>oxford-128x128.png</file>
+        <file>required.png</file>
+        <file>save.png</file>
+    </qresource>
+</RCC>
+

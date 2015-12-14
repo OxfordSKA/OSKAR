@@ -1,0 +1,120 @@
+/**
+
+\page settings Settings
+
+\latexonly
+\def \docversion{11}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}p{#1}}
+\endlatexonly
+
+\section settings_intro Introduction
+This document describes the settings files used by OSKAR applications, which
+use the INI plain-text file format.
+
+<b>
+Note that if you are using the OSKAR GUI, the settings descriptions are
+available as tool-tips, and you should not need to refer to this document.
+</b>
+
+Settings are defined simply using key-value pairs, for example:
+
+\verbatim
+simulator/double_precision=true
+observation/start_time_utc=01-01-2000 12:01:02.000
+observation/length=06:00:00.000
+\endverbatim
+
+Settings can also be grouped into sections. For example, the above can also be
+written as:
+
+\verbatim
+[simulator]
+double_precision=true
+
+[observation]
+start_time_utc=01-01-2000 12:01:02.000
+length=06:00:00.000
+\endverbatim
+
+Settings files can be written or modified using any text editor, or by using the
+<tt>oskar_settings_set</tt> binary, or (the recommended method) by using the
+OSKAR GUI.
+
+The following section describes the currently available settings.
+
+\section settings_settings Settings used by OSKAR applications
+The following section describes the possible options that can be currently used
+in OSKAR settings files. The settings file is arranged into a number of groups,
+which are described in the subsections below.
+
+Required parameters are marked with a dagger symbol (\f$\dagger\f$).
+
+<!--
+\subsection settings_allowed_values A note on allowed values
+- MAX represents the maximum representable value for the type.
+- Bool types should be set as the strings, true or false.
+-->
+
+\latexonly
+\begin{landscape}
+\endlatexonly
+
+SETTINGS_TABLES
+
+\latexonly
+\end{landscape}
+\newpage
+\endlatexonly
+
+<b>Revision History</b>
+
+<table>
+<tr><th>Revision</th><th>Date</th><th>Modification</th></tr>
+<tr><td>1</td><td>2012-04-23</td><td>Creation.</td></tr>
+<tr><td>2</td><td>2012-05-08</td>
+    <td>Added default value column to settings tables.</td></tr>
+<tr><td>3</td><td>2012-06-13</td>
+    <td>Updated settings for version 2.0.2-beta.</td></tr>
+<tr><td>4</td><td>2012-07-27</td>
+    <td>Updated settings for version 2.0.4-beta.</td></tr>
+<tr><td>5</td><td>2012-10-22</td>
+    <td>Updated for revised settings in version 2.1.0-beta.</td></tr>
+<tr><td>6</td><td>2012-11-20</td>
+    <td>Updated for version 2.1.1-beta.</td></tr>
+<tr><td>7</td><td>2013-03-01</td>
+    <td>Updated settings for version 2.2.0. This includes changes to most 
+    settings in the sky model group, and changes to the settings that define 
+    the files saved from beam pattern simulations.</td></tr>
+<tr><td>8</td><td>2013-11-13</td>
+    <td>Updated settings for version 2.3.0. This consists of an update to 
+    the specification of beam pattern simulation settings.</td></tr>
+<tr><td>9</td><td>2014-07-17</td>
+    <td>Updated settings for version 2.5.0. Moved element pattern fitting 
+    parameters out of the telescope model group to the 
+    top-level 'element_fit' group. Added global beam normalization option. 
+    Added isotropic beam station type. Added Gaussian station beam reference 
+    frequency. Added dipole length options. Added UV range filtering 
+    parameters. Added scalar mode option. Removed option to make image 
+    after interferometer simulation.</td></tr>
+<tr><td>10</td><td>2014-09-08</td>
+    <td>Updated descriptions in system noise settings to clarify that the 
+    noise is specified for a single polarisation.  Changed all random 
+    number seed integer ranges to start at 1 (rather than 0). Changed beam 
+    normalization to be enabled by default.</td></tr>
+<tr><td>11</td><td>2015-04-28</td>
+    <td>Moved option to select polarisation mode into telescope model settings
+    group, so that scalar mode can also be used for beam pattern 
+    simulations. Moved and renamed option to allow station beam duplication
+    into telescope model group. Added option to disable horizon clip in 
+    advanced sky model settings. Re-wrote most of the beam pattern options to 
+    support the new output modes.
+    Added the ability to use seconds (as well as hours, minutes and seconds) 
+    to specify observation length. Removed options to write OSKAR image 
+    files. Removed ability to load a GSM file directly or use HEALPix
+    temperature maps, as the frequency scaling was not treated 
+    correctly.</td></tr>
+</table>
+
+*/

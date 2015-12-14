@@ -1,0 +1,351 @@
+/**
+
+\page example Example
+
+\latexonly
+\def \docversion{11}
+\endlatexonly
+
+\section example_intro Introduction
+
+This document will guide you through an example to perform a couple of simple
+simulations using OSKAR.
+
+Note that all steps are intended to be followed in order.
+
+\section example_getting_started Getting Started
+
+This example assumes that OSKAR has been built successfully with the CUDA,
+Qt4, and LAPACK dependencies satisfied (for details, see
+the install guide documentation).
+
+\subsection example_obtaining_setup_files Obtaining the Example Setup Files
+
+The data files used for this example can be downloaded from:<br>
+http://www.oerc.ox.ac.uk/~ska/oskar/OSKAR-Example-Data.zip
+
+This archive contains:
+
+| Item           | Description
+| -------------- | ------------------------------------------------------------
+| setup.ini      | An OSKAR configuration file used to set up the example simulation.
+| sky.osm        | An OSKAR sky model file, containing 3 sources.
+| telescope.tm/  | An OSKAR telescope configuration directory structure consisting of an interferometer with 30 aperture array stations, each with 2587 antenna elements.
+| dipole_CST.txt | A numerically-defined half-wavelength dipole pattern, as an example element pattern.
+
+
+Decompress the archive once you have downloaded it, and verify that it
+contains the above files.
+
+\subsection example_running Running the OSKAR GUI
+
+The OSKAR GUI, used to run the simulation examples described in the following
+sections, should be launched by executing the <tt>oskar</tt> binary. This can
+be found in the <tt>build/apps</tt> directory after compiling the OSKAR
+package, and in the <tt>\<install prefix\>/bin</tt> directory after
+installing OSKAR using the <tt>make install</tt> command.
+
+\subsection example_visualising Visualising Simulation Results
+
+The example simulations described in the following sections generate a number
+of FITS images. These are standard FITS images, and therefore any FITS viewer
+should be capable of visualising the results. The screenshots shown in this
+document use SAOImage DS9, an astronomical imaging and data visualization
+application, which can be downloaded from http://ds9.si.edu
+
+\latexonly
+\newpage
+\endlatexonly
+
+\section example_sims Example Simulations
+
+\subsection oskar_gui The OSKAR Simulator GUI
+
+The OSKAR GUI provides an interface for configuring and running beam pattern
+and interferometry simulations.
+
+Start the OSKAR GUI by running the <tt>oskar</tt> binary and load the
+<tt>setup.ini</tt> settings file. Settings files can be loaded into the GUI
+by specifying the settings file path as the first command line argument when
+starting the OSKAR GUI, or by using the **Open...** action in the **File**
+menu once the GUI has started.
+
+\anchor fig_gui
+\image html oskar_gui_1.png "OSKAR GUI with example settings loaded"
+\image latex oskar_gui_1.png "OSKAR GUI with example settings loaded" width=13cm
+
+The example settings file contains most of the options required to run a
+simple simulation. The options can be
+\ref fig_gui "inspected in the settings tree, as shown".
+
+The settings are arranged into a number of groups:
+
+- **Simulator settings**, for parameters which affect the operation of the
+  software.
+- **Sky model settings**, for parameters that are used to specify the content
+  of the sky model.
+- **Observation settings**, for parameters that are used to specify the
+  observation.
+- **Telescope model settings**, for parameters that are used to specify the
+  contents of the telescope model.
+- **Interferometer settings**, for parameters used only when running
+  interferometer simulations.
+- **Element pattern fitting settings**, for parameters used only when fitting
+  numerical element pattern data.
+- **Beam pattern settings**, for parameters used only when running beam pattern
+  simulations.
+- **Image settings**, for parameters used only when running the OSKAR imager.
+
+Most settings have a _default value_, which is indicated by black text in the
+settings tree. Options _set by the user_, which have been defined in the
+settings file, appear as blue text. Options which are _required_ to run the
+simulator, and have not yet been assigned, have their description and value
+backgrounds coloured blue and red respectively.
+
+Note that the settings file is updated automatically whenever any setting is
+modified, so you will never need to save the file explicitly.
+
+This example will run a beam pattern simulation, then an interferometer
+simulation, and then the OSKAR imager to inspect the results.
+
+\anchor example_config
+Before starting any simulations, the paths to the sky model file and telescope
+directory found in the example settings
+\ref example_obtaining_setup_files "data archive" must be set as follows:
+
+-# The sky model file (<tt>sky.osm</tt>) should be specified by double clicking
+   the value field to the right of the **OSKAR sky model file(s)** setting
+   found in the **Sky model settings group**. This will open a file dialog from
+   where the path to the <tt>sky.osm</tt> file can be specified.
+-# The telescope model should be specified by adding the telescope directory
+   path (<tt>telescope.tm</tt>) to the **Input directory** setting found in
+   the **Telescope model settings** group, also by double clicking the value
+   field and selecting it from the directory browser dialog.
+
+The settings tree now contains all of the settings required to run a beam
+pattern and interferometry simulation. Of note:
+
+- The settings define simulations using single precision arithmetic, as this
+  is much faster (the default is double precision).
+- The sky model consists of three sources in a field centred at
+  RA 20 deg, Dec. -30 deg.
+- The observation of this field is made at three frequency channels starting
+  at 100 MHz and increasing in increments of 20 MHz.
+- The observation consists of 24 snapshots taken over a 12 hour period.
+- The telescope model consists of an interferometer of 30 aperture array
+  stations, each containing 2587 half-wavelength dipole antennas. Antennas
+  within each station are arranged in a circular offset lattice pattern.
+
+\subsection example_bp_sim Beam Pattern Simulation
+
+This section describes how to perform a beam pattern simulation using the
+example observation settings, \ref example_config "as configured previously".
+
+The beam pattern settings group for this example is
+\ref example_bp_settings "shown below". The beam pattern simulation will
+generate an image of the beam pattern for the first station, centred on the
+observation phase centre, and specified by the field-of-view and image size
+settings. In this example, we will generate the primary beam response of
+station 0 of the telescope as a 256 by 256 pixel FITS image covering a
+field-of-view of 180 degrees.
+
+\anchor example_bp_settings
+\image html oskar_gui_2.png "Beam pattern settings"
+\image latex oskar_gui_2.png "Beam pattern settings" width=13cm
+
+The beam pattern simulation is run by pressing the **Run Beam Pattern** button
+on the toolbar of the GUI, or by selecting the **Run Beam Pattern** option in
+the **Run** menu.
+
+While this is running, OSKAR will display a log indicating the current
+progress of the simulation. Once the simulation is complete, the results can
+be found in the FITS image file called
+<tt>example_beam_pattern_S0000_TIME_SEP_CHAN_SEP_AMP_XX.fits</tt>
+(unless you changed it) found in the directory from which the simulator was run.
+
+The output files are four FITS image cubes containing the beam pattern for the
+theta and phi voltage amplitude response of the X and Y dipoles, at the three
+observation frequencies (100, 120, and 140 MHz), and 24 pointing centres
+corresponding to the 24 observation snapshots.
+
+\ref example_bp_fig "The figure below" shows the first plane of this
+FITS cube, which is the theta pattern voltage response (in Right Ascension
+and Declination) of the X dipole for the first frequency channel and first
+time snapshot. Note that the area of zero amplitude on the left of the
+pattern corresponds to parts of the pattern below the horizon (the pointing
+direction for this observation starts near the horizon).
+
+\anchor example_bp_fig
+\image html beam_pattern.png "FITS image showing the voltage amplitude pattern in theta for the X-dipoles, and plotted using the 'square root' scale in DS9. The beam pattern is for the first station, the first channel (100 MHz), at the first time snapshot."
+\image latex beam_pattern.png "FITS image showing the voltage amplitude pattern in theta for the X-dipoles, and plotted using the 'square root' scale in DS9. The beam pattern is for the first station, the first channel (100 MHz), at the first time snapshot." width=13cm
+
+\latexonly
+\newpage
+\endlatexonly
+
+\subsection example_interferometer_sim Interferometry Simulation
+
+This section describes how to run an interferometry simulation for the example
+observation settings, \ref example_config "as configured previously".
+
+To run the simulation, select the **Run Interferometer** action, either by
+pressing the button on the toolbar, or by selecting the option in the **Run**
+menu. While the interferometer simulation is running, a log will be shown.
+
+Once the simulation has successfully completed, the results can be found in
+an OSKAR visibility binary file called <tt>example.vis</tt> (unless you
+changed it). This can be found in the directory from which the OSKAR GUI
+was started. OSKAR can also be configured to output visibilities to a
+Measurement Set for further post-processing in CASA. However, for this
+example, we will inspect the results of the simulation by making an image
+cube of the results with the OSKAR imager, which requires input in the form
+of an OSKAR visibility data file.
+
+\subsection example_imager The OSKAR Imager: Imaging Simulated Visibilities
+
+This section demonstrates how the results of running the interferometry
+simulation, \ref example_interferometer_sim "described previously", can be
+imaged using the OSKAR imager.
+
+The OSKAR imager uses the configuration found in the **Image settings** group,
+\ref example_imager_settings "as shown below".
+
+For this example the imager is configured to generate a FITS image cube
+consisting of images of 256 by 256 pixels covering a field-of-view of 4
+degrees around the observation phase centre. The polarisation, time and
+frequency dimensions of the image cube depend on the image type, and whether
+time and channel snapshots have been selected. The settings in this example
+will generate an image cube with four linear polarisations, three channels,
+and (by the application of time synthesis) one time dimension.
+
+In order to run the imager, select the **Run Imager** action, either by
+pressing the button on the toolbar, or by selecting the option in
+the **Run** menu.
+
+\anchor example_imager_settings
+\image html oskar_gui_3.png "Imager settings"
+\image latex oskar_gui_3.png "Imager settings" width=13cm
+
+While the imager is running, a progress log will be shown. The file name of
+the image cube is generated from the **Output image root path** setting and
+the **Image type**, using the pattern
+<tt>\<root path\>_\<image type\>.fits</tt>. The image generated in this
+example can be found in the directory from which the OSKAR GUI was started
+with the name <tt>example_image_LINEAR.fits</tt>.
+
+The \ref example_image_fig "figure below" shows a slice of this generated
+FITS image cube for the XX polarisation and first frequency channel.
+
+\anchor example_image_fig
+\image html raw_image.png "FITS image showing the raw (dirty) image formed by imaging the example simulated visibilities with the OSKAR imager. The image shows the XX polarisation response for channel 0 (100 MHz) for the 12 hour observation."
+\image latex raw_image.png "FITS image showing the raw (dirty) image formed by imaging the example simulated visibilities with the OSKAR imager. The image shows the XX polarisation response for channel 0 (100 MHz) for the 12 hour observation." width=13cm
+
+\latexonly
+\newpage
+\endlatexonly
+
+\subsection example_custom_element Using a Custom Element Pattern
+
+This section describes how to plot a custom element pattern, and run a beam
+pattern simulation using it. Note that this procedure was different in OSKAR
+versions prior to 2.5.0.
+
+First, splines must be fitted to the numerical element pattern data, and the
+fitted coefficients saved out to the telescope model. This can be done using
+the options in the **Element pattern fitting settings** group. Set these
+options \ref example_fit_settings "as shown below". We have selected the
+example input CST-format file <tt>dipole_CST.txt</tt>, the frequency at which
+it is valid (we have chosen 100 MHz in this example), and the output telescope
+or station directory that the data files should be saved into. We want to use
+this data only for the first station, so we have selected the
+<tt>telescope.tm/station000</tt> directory here. (If we wanted to use the same
+element pattern data for all stations, then selecting the top-level telescope
+directory would be necessary instead.)
+
+\anchor example_fit_settings
+\image html oskar_gui_4.png "Settings for the element pattern fitting procedure."
+\image latex oskar_gui_4.png "Settings for the element pattern fitting procedure." width=13cm
+
+Select the **Run Element Data Fit** action to run the application to fit the
+element data with these parameters, and save the fit to the telescope model.
+Note that this fitting procedure only needs to be performed if the element
+pattern itself has been updated.
+
+In order to make use of this data, the option **Enable numerical patterns
+if present** (in the **Telescope model settings**) must be set to **true**.
+To look at the response of the element, perform the following steps in
+the **Telescope model settings** and then **Aperture array settings** group:
+
+- Enable the option to use custom element patterns by ticking **Enable
+  numerical patterns if present** in the **Element pattern settings**
+  group.
+- Disable the option to evaluate the array pattern of the station by
+  un-ticking **Enable array pattern** in the **Array pattern settings** group.
+
+Your **Telescope model settings** should now appear
+\ref example_fit_telescope_model "as shown below".
+
+\latexonly
+\newpage
+\endlatexonly
+
+\anchor example_fit_telescope_model
+\image html oskar_gui_5.png "Telescope settings for plotting custom element pattern data."
+\image latex oskar_gui_5.png "Telescope settings for plotting custom element pattern data." width=13cm
+
+Run the beam pattern simulation using the **Run Beam Pattern** action as
+before, and view the output file (<tt>example_beam_pattern_S0000_TIME_SEP_CHAN_SEP_AMP_XX.fits</tt>,
+unless you changed it) using DS9. This output file contains
+the theta response of the X dipole. At time slice 10 it should appear
+\ref example_fit_dipole_pattern "as shown below".
+
+\latexonly
+\newpage
+\endlatexonly
+
+\anchor example_fit_dipole_pattern
+\image html custom_element.png "FITS image showing a custom element pattern (which happens to be for an ideal dipole) at time slice 10 of the data cube."
+\image latex custom_element.png "FITS image showing a custom element pattern (which happens to be for an ideal dipole) at time slice 10 of the data cube." width=13cm
+
+There is a slight difference between this output and that from an analytical
+dipole, because the element response in this case was generated by fitting
+B-splines to the numerical input data. You can try reducing the **Average
+fractional error** setting in the **Element pattern fitting settings**
+section if you want to try obtaining a closer fit: Using 0.0005 here will
+give noticeably better results for a dipole.
+
+Try running a full beam pattern simulation by re-selecting the **Enable
+array pattern** option and then **Run Beam Pattern** again. The new beam
+pattern for the same time-step is \ref example_fit_beam_pattern "shown below".
+
+\latexonly
+\newpage
+\endlatexonly
+
+\anchor example_fit_beam_pattern
+\image html beam_pattern_with_custom_element.png "Beam pattern generated using a custom element pattern, displayed at the same time and polarisation index as shown previously."
+\image latex beam_pattern_with_custom_element.png "Beam pattern generated using a custom element pattern, displayed at the same time and polarisation index as shown previously." width=13cm
+
+<!--
+\latexonly
+\vskip 1cm
+\endlatexonly
+-->
+
+<b>Revision History</b>
+
+| Revision | Date       | Modification
+| -------- | ---------- | -----------------------------------------------------------
+| 1        | 2012-04-24 | Creation
+| 2        | 2012-05-15 | Updated figures and text for correct polarisation order.
+| 3        | 2012-06-13 | Updated figures and text to reflect changes to the output options for the beam pattern images and the GUI colour settings introduced in OSKAR 2.0.2-beta.
+| 4        | 2012-06-19 | Updated figures for OSKAR 2.0.3-beta.
+| 5        | 2012-07-27 | Updated figures for OSKAR 2.0.4-beta
+| 6        | 2012-10-22 | Updated for revised settings in OSKAR 2.1-beta.
+| 7        | 2013-03-04 | Updated for revised settings in OSKAR 2.2.0.
+| 8        | 2013-11-13 | Updated for revised beam pattern settings in OSKAR 2.3.0
+| 9        | 2014-07-22 | Updated for new element pattern fitting procedure in OSKAR 2.5.0.
+| 10       | 2014-09-09 | Updated figures for revised default settings in OSKAR 2.5.1.
+| 11       | 2015-04-27 | Updated for revised settings in OSKAR 2.6.0.
+
+*/

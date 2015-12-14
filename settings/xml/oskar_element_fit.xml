@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<s k="element_fit"><label>Element pattern fitting settings</label>
+    <desc>
+        These settings are used when running the 'oskar_fit_element_data' 
+        application binary to fit splines to numerically-defined element 
+        pattern data.
+    </desc>
+    <s k="input_cst_file"><label>Input CST file</label>
+        <type name="InputFile" default=""/>
+        <desc>
+            Pathname to a file containing an ASCII data table of the 
+            directional element pattern response, as exported by the CST 
+            software package in (theta, phi) coordinates. See the Telescope 
+            Model documentation for a description of the required columns.
+        </desc>
+    </s>
+    <s k="input_scalar_file"><label>Input scalar file</label>
+        <type name="InputFile" default=""/>
+        <desc>
+            Pathname to a file containing an ASCII data table of the 
+            scalar directional element pattern response. See the Telescope 
+            Model documentation for a description of the required columns.
+        </desc>
+    </s>
+    <s k="frequency_hz"><label>Frequency [Hz]</label>
+        <type name="UnsignedDouble" default="0.0"/>
+        <desc>
+            Observing frequency at which numerical element pattern 
+            data is applicable, in Hz.
+        </desc>
+    </s>
+    <s k="pol_type"><label>Polarisation type</label>
+        <type name="OptionList" default="XY">XY,X,Y</type>
+        <desc>
+            Specify whether the input data is to be used for the 
+            X or Y dipole, or both. (This is ignored for scalar data.)
+        </desc>
+    </s>
+    <s k="element_type_index"><label>Element type index</label>
+        <type name="uint" default="0"/>
+        <desc>
+            The type index of the element. Leave this at zero if there 
+            is only one type of element per station.
+        </desc>
+    </s>
+    <s k="ignore_data_at_pole"><label>Ignore data at poles</label>
+        <type name="bool" default="false"/>
+        <desc>
+            If <b>true</b>, then numerical element pattern data points at 
+            theta = 0 and theta = 180 degrees are ignored.
+        </desc>
+    </s>
+    <s k="ignore_data_below_horizon"><label>Ignore data below horizon</label>
+        <type name="bool" default="true"/>
+        <desc>
+            If <b>true</b>, then numerical element pattern data points at 
+            theta &amp;gt; 90 degrees are ignored.
+        </desc>
+    </s>
+    <s k="average_fractional_error"><label>Average fractional error</label>
+        <type name="UnsignedDouble" default="0.005"/>
+        <desc>
+            The target average fractional error between the fitted 
+            surface and the numerical element pattern input data. 
+            Choose this value carefully. A value that is too small may 
+            introduce fitting artifacts, or may cause the fitting procedure 
+            to fail. A value that is too large will cause detail to be lost 
+            in the fitted surface.
+        </desc>
+    </s>
+    <s k="average_fractional_error_factor_increase">
+        <label>Average fractional error factor increase</label>
+        <type name="UnsignedDouble" default="1.1"/>
+        <desc>
+            If the fitting procedure fails, this value gives the 
+            factor by which to increase the allowed average fractional 
+            error between the fitted surface and the numerical element 
+            pattern input data, before trying again. Must be &amp;gt; 1.0.
+        </desc>
+    </s>
+    <s k="output_directory"><label>Telescope or station directory</label>
+        <type name="InputDirectory" default=""/>
+        <desc>
+            Path to the telescope or station directory in which to 
+            save the fitted coefficients.
+        </desc>
+    </s>
+</s>

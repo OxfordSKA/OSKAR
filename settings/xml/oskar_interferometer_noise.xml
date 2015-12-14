@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<s k="noise">
+    <label>System noise</label>
+    <desc>
+        Settings specifying station based additive uncorrelated,
+        direction-independent, Gaussian noise. The noise RMS is specified
+        in terms of the flux density of an unpolarised source measured in a
+        single polarisation of the antennas.
+    </desc>
+    <s k="enable"><label>Enable</label>
+        <type name="bool" default="false"/>
+        <desc>If <b>true</b>, noise addition is enabled.</desc>
+    </s>
+    <s k="seed"><label>Noise seed</label>
+        <type name="RandomSeed" default="1"/>
+        <desc>Random number generator seed.</desc>
+        <depends k="interferometer/noise/enable" v="true"/>
+    </s>
+    <s k="freq"><label>Frequency selection</label>
+        <type name="OptionList" default="T">
+            Telescope model,Observation settings,Data file,Range
+        </type>
+        <desc>
+            Selection of the the list of frequencies for which noise values are defined:
+            <ul>
+                <li><b>Telescope model</b>: frequencies are loaded from a data
+                file in the telescope model directory.</li>
+                <li><b>Observation settings</b>: frequencies are defined by the
+                observation settings.</li>
+                <li><b>Data file</b>: frequencies are loaded from the specified
+                data file.</li>
+                <li><b>Range</b>: frequencies are specified by the range
+                parameters.</li>
+            </ul>
+        </desc>
+        <depends k="interferometer/noise/enable" v="true"/>
+        <s k="file"><label>Data file</label>
+            <type name="InputFile" default=""/>
+            <desc>Data file consisting of an ASCII list of frequencies, in Hz.</desc>
+            <depends k="interferometer/noise/freq" v="Data file"/>
+        </s>
+        <s k="number"><label>Number of frequencies</label>
+            <type name="uint" default="0"/>
+            <desc>Number of frequencies.</desc>
+            <depends k="interferometer/noise/freq" v="Range"/>
+        </s>
+        <s k="start"><label>Start frequency [Hz]</label>
+            <type name="UnsignedDouble" default="0"/>
+            <desc>Start frequency, in Hz.</desc>
+            <depends k="interferometer/noise/freq" v="Range"/>
+        </s>
+        <s k="inc"><label>Frequency increment [Hz]</label>
+            <type name="UnsignedDouble" default="0"/>
+            <desc>Frequency increment, in Hz.</desc>
+            <depends k="interferometer/noise/freq" v="Range"/>
+        </s>
+    </s>
+   <s k="rms"><label>Noise RMS</label>
+        <type name="OptionList" default="T">
+            Telescope model,Data file,Range
+        </type>
+        <desc>RMS noise value specification:
+            <ul>
+                <li><b>Telescope model</b>: values are loaded from files in the
+                telescope model directory.</li>
+                <li><b>Data file</b>: values are loaded from the specified
+                file.</li>
+                <li><b>Range</b>: values are evaluated according to the
+                specified range parameters.</li>
+            </ul>
+            Noise values are specified in Jy and represent the RMS noise in
+            terms of the flux of an unpolarised source measured in a single
+            polarisation of the detector.
+            <i>Note that unless using the telescope model, the noise
+            RMS will be the same for each station in the interferometer.</i>
+        </desc>
+        <depends k="interferometer/noise/enable" v="true"/>
+        <s k="file"><label>Data file</label>
+            <type name="InputFile"/>
+            <desc>Station RMS flux density data file. This is an ASCII file
+            consisting of a list of noise RMS values as a function of frequency
+            in Jy.</desc>
+            <depends k="interferometer/noise/rms" v="Data file"/>
+        </s>
+        <s k="start"><label>Start [Jy]</label>
+            <type name="double" default="0"/>
+            <desc>Station RMS flux density range start value, in Jy. The range is
+            expanded linearly over the number of frequencies for which noise is
+            defined.</desc>
+            <depends k="interferometer/noise/rms" v="Range"/>
+        </s>
+        <s k="end"><label>End [Jy]</label>
+            <type name="double" default="0"/>
+            <desc>Station RMS flux density range end value, in Jy. The range is
+            expanded linearly over the number of frequencies for which noise is
+            defined.</desc>
+            <depends k="interferometer/noise/rms" v="Range"/>
+        </s>
+    </s>
+</s>

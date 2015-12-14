@@ -1,0 +1,1040 @@
+/**
+
+\page theory Theory of Operation
+
+\latexonly
+\def \docversion{6}
+\endlatexonly
+
+\section theory_intro Introduction
+
+This document describes the methods that OSKAR uses to perform simulations,
+and all users of the software should read it carefully. If there are any
+problems, please notify us by sending an email to oskar@oerc.ox.ac.uk so
+that the simulation software can be updated.
+
+\subsection theory_interferometer_sim Interferometer Simulation
+
+OSKAR 2 uses the Radio Interferometer Measurement Equation of
+Hamaker, Bregman & Sault (1996) to produce simulated visibility data.
+This equation describes the effect due to all visible sources
+(indexed by \f$s\f$) on the complex, polarised visibility \f$V_{p,q}\f$ for
+a baseline between stations \f$p\f$ and \f$q\f$.
+
+The main terms in the Measurement Equation are Jones matrices: these are
+two-by-two complex quantities that effectively modify the original signal
+from each radio source, to give the signal that would be produced from each
+station due to that source. Each source has an additive effect on the
+measured visibilities, so the observed visibility on baseline \f$p,q\f$ is
+given by the sum over all visible sources of the product of each set of
+Jones matrices with the source coherency matrix \f$\mathbf{B}\f$.
+The Measurement Equation currently implemented in OSKAR takes the form
+
+\f[
+\mathbf{V}_{p,q} = \sum_s
+    \mathbf{K}_{p,s} \mathbf{E}_{p,s} \mathbf{G}_{p,s} \mathbf{R}_{p,s}
+    \left< \mathbf{B}_{s} \right>
+    \mathbf{R}_{q,s}^H \mathbf{G}_{q,s}^H \mathbf{E}_{q,s}^H \mathbf{K}_{q,s}^H
+\f]
+
+where the superscript-H denotes Hermitian transpose.
+
+The Jones matrices currently included in OSKAR are:
+- Parallactic angle rotation matrix \f$\mathbf{R}\f$.
+- Element factor, or antenna field pattern matrix \f$\mathbf{G}\f$.
+  This is factorised out where possible, but is strictly part of the station
+  beam response.
+- Array factor, or station beamforming matrix \f$\mathbf{E}\f$.
+- Interferometer phase matrix \f$\mathbf{K}\f$.
+
+For the following sections, in which the Jones terms are described, it will
+be helpful to introduce the coordinate systems used.
+
+\section theory_coordinates Coordinate Systems
+
+Sources are specified in the equatorial system and have positions Right
+Ascension \f$\alpha\f$ and Declination \f$\delta\f$.
+This spherical system has Cartesian \f$(x',y',z')\f$ axes, where
+the \f$x'\f$ axis points towards \f$\alpha=0\f$, the \f$z'\f$ axis points
+towards the North Celestial Pole (NCP) and the \f$y'\f$ axis is perpendicular
+to both to make a right-handed system. The angle \f$\alpha\f$ increases
+from \f$x'\f$ towards \f$y'\f$, and the angle \f$\delta\f$ increases
+from the \f$x'\,y'\f$-plane towards \f$z'\f$.
+The equatorial system is shown in dashed black in
+the \ref theory_coord_fig "figure below".
+
+Antennas are specified in the local horizontal coordinate system.
+This spherical system has Cartesian \f$(x,y,z)\f$ axes, where the x-axis
+points to the observer's geographic East, the y-axis points to
+geographic North, and the z-axis points to the observer's zenith.
+The local horizon is therefore in the xy-plane. The angle \f$\phi\f$ is
+the co-azimuth, and increases from \f$x\f$ towards \f$y\f$, and the
+angle \f$\theta\f$ is the polar angle, zenith distance, or co-elevation,
+which increases from z towards the xy-plane. The horizontal system is shown
+in red in the \ref theory_coord_fig "figure below".
+
+\anchor theory_coord_fig
+\image html coordsys_small.png ""
+\image latex coordsys.png "" width=13cm
+
+\subsection theory_brightness_matrix Source Brightness Matrix (B)
+
+The source brightness (or coherency) matrix represents the intrinsic,
+unmodified radiation from an astronomical source. It is constructed using
+the source Stokes parameters \f$(I,Q,U,V)\f$, which completely describe the
+polarisation state of the radiation. Using the standard polarisation
+convention adopted by the International Astronomical Union for radio
+astronomy (IAU, 1974; see \ref theory_fig_pol_axes "figure below"), the
+polarisation axes are defined using the tangent plane to the sphere at a
+point in the equatorial system. The polarisation angle is measured due
+east (counter-clockwise) from the direction to the North Celestial Pole,
+so that 100% Stokes +Q corresponds to North-to-South polarisation, 100%
+Stokes +U corresponds to North-East-to-South-West polarisation,
+and 100% Stokes +V corresponds to right-handed circular polarisation.
+
+\anchor theory_fig_pol_axes
+\image html sketch_pol.png ""
+\image latex sketch_pol.pdf "" width=10cm
+
+Using this convention, Hamaker & Bregman (1996) show that
+
+\f[
+\left< \mathbf{B} \right> =
+\left[
+\begin{array}{cc}
+I + Q   & U + i V \\
+U - i V & I - Q
+\end{array}
+\right]
+\f]
+
+\subsection theory_par_angle Parallactic Angle Rotation (R)
+
+The emission from each source must ultimately be expressed in the
+antenna frame, so the equatorial Stokes parameters must be transformed
+from components along the
+\f$(\mathbf{\hat{e}}_{\delta}, \mathbf{\hat{e}}_{\alpha})\f$
+directions to components along the
+\f$(\mathbf{\hat{e}}_{\theta}, \mathbf{\hat{e}}_{\phi})\f$ directions.
+This involves a rotation (intermixing) of only the Stokes Q and U parameters,
+using the parallactic angle at the position of the source:
+Stokes I and V remain unchanged.
+
+The parallactic angle at a source position is defined as the angle between
+the direction of the North Celestial Pole and the local vertical on the sky
+(measured from north toward east), and depends on the observer's
+latitude \f$\varphi\f$ and the source hour angle \f$H\f$ and
+declination \f$\delta\f$. The parallactic angle is
+
+\f[
+\psi_p = \arctan\left(
+\frac{\cos\varphi \sin H}
+{\sin\varphi \cos\delta - \cos\varphi \sin\delta \cos H}
+\right)
+\f]
+
+and the \f$\mathbf{R}\f$ matrix corresponds to a normal 2D rotation
+by the parallactic angle.
+
+\f[
+\mathbf{R} =
+\left[
+\begin{array}{cc}
+\cos\psi_p & -\sin\psi_p \\
+\sin\psi_p & \cos\psi_p
+\end{array}
+\right]
+\f]
+
+\subsection theory_element_factor Element Factor, or Antenna Field Pattern (G)
+
+The polarisation response of each antenna is the main component of the
+system that will corrupt the true source polarisation. Assuming two dipoles
+labelled X and Y, which have their respective axes nominally along
+the x and y axes shown in the \ref theory_coord_fig "figure above", then
+the matrix consists of four complex values that correspond to the average
+response of the X and Y dipoles in the \f$\theta\f$ and \f$\phi\f$
+directions for all the antennas in the station. These four values are
+obtained by evaluating the fitted antenna patterns at
+the \f$\theta\f$ and \f$\phi\f$ positions of the source.
+
+\f[
+\mathbf{G} =
+\left[
+\begin{array}{cc}
+g_{\theta}^X & g_{\phi}^X \\
+g_{\theta}^Y & g_{\phi}^Y
+\end{array}
+\right]
+\f]
+
+The \f$\theta\f$-coordinate appears first here, since in the limit
+of \f$\theta=\phi=\psi_p=0\f$ (near the zenith of the Earth's North Pole,
+where the equatorial and horizontal systems are effectively aligned),
+the \f$\mathbf{\hat{e}}_{\theta}\f$-direction is parallel to a dipole on
+the ground oriented along the x-axis, and at this point
+the \f$\mathbf{\hat{e}}_{\theta}\f$-direction is also anti-parallel to
+the \f$\mathbf{\hat{e}}_{\delta}\f$-direction, which is the axis of zero
+polarisation according to the IAU (1974) definition.
+See the
+\ref theory_interferometer_pol_examples "examples later in this document"
+for further discussion on this topic.
+
+\subsection theory_array_factor Array Factor (E)
+
+The shape of the station beam is primarily governed by the projected spacing
+between individual antennas (the array factor), which is
+polarisation-independent. The E-Jones matrix in this case is a scalar
+matrix, which corresponds to the required value of the complex beam pattern:
+this is given by the weighted (beam-formed) sum of all antennas in the
+station, evaluated at the source position.
+
+\f[
+\mathbf{E} =
+e
+\left[
+\begin{array}{cc}
+1 & 0 \\
+0 & 1
+\end{array}
+\right]
+\f]
+
+Using all antennas \f$a\f$, the complex scalar value \f$e\f$ at the source
+position is given by the sum of the complex beamforming weights \f$w\f$
+multiplied by the complex antenna signals \f$S\f$ due to the test source:
+
+\f[
+e = \sum_a w_a S_a
+\f]
+
+If the antennas in the station cannot be described by an average element
+pattern, then the \f$\mathbf{G}\f$ matrix cannot be treated separately, and
+it is absorbed in the computation of \f$\mathbf{E}\f$.
+
+\subsection theory_interferometer_phase Interferometer Phase (K)
+
+The interferometer phase matrix depends only on the projected spacing
+between stations. This is polarisation-independent, so \f$\mathbf{K}\f$ is
+a scalar matrix.
+
+\f[
+\mathbf{K} =
+k
+\left[
+\begin{array}{cc}
+1 & 0 \\
+0 & 1
+\end{array}
+\right]
+\f]
+
+The phase \f$k\f$ is (e.g. Thompson, Moran & Swenson, 2001)
+
+\f[
+k = \exp\left\{-2\pi i \left[ul + vm + w(n - 1)\right]\right\}
+\f]
+
+where \f$(u,v,w)\f$ are the *station* coordinates in the plane perpendicular
+to the phase centre, and \f$(l,m,n)\f$ are the direction cosines of the source
+relative to the phase centre. Using the normal conventions in radio
+astronomy, the \f$u\f$ and \f$l\f$ directions increase towards the East,
+the \f$v\f$ and \f$m\f$ directions increase towards the North, and
+the \f$w\f$ and \f$n\f$ directions increase towards the phase centre.
+
+\subsection theory_vis_to_stokes Visibilities to Stokes Parameters
+
+Having obtained the simulated visibility correlation matrix
+
+\f[
+\mathbf{V_{p,q}} =
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+=
+\left[
+\begin{array}{cc}
+I + Q   & U + i V \\
+U - i V & I - Q
+\end{array}
+\right]
+\f]
+
+the Stokes parameters can then be recovered for the purposes of making
+images by rearranging the diagonal and off-diagonal elements:
+
+\f{eqnarray*}{
+I &=& \frac{1}{2}(XX+YY) \\
+Q &=& \frac{1}{2}(XX-YY) \\
+U &=& \frac{1}{2}(XY+YX) \\
+V &=& -\frac{1}{2} i(XY-YX)
+\f}
+
+Note, however, that this conversion does not involve polarisation
+calibration in any way: additional corrections for the parallactic angle and
+antenna response would need to be made in order to recover the true source
+polarisation in the equatorial frame.
+
+\subsection theory_interferometer_pol_examples Interferometer Polarisation Example
+
+To test that the polarisation simulation behaves as expected, we describe
+some simple examples where the geometry of the system is known in advance.
+In all cases, we choose the telescope longitude to be 0 degrees, and the
+simulation date to be close to the autumnal equinox (21 September 2000), so
+that the local sidereal time is approximately equal to the solar time.
+For these examples, we observe at midnight UTC, so that objects with zero
+right ascension will be on the local meridian.
+
+At a selection of points in the sky and on the Earth, we simulate the
+observation of four different sources, emitting in
+pure (100% polarised) +Q, -Q, +U and -U directions in the equatorial (IAU)
+frame. We then make images of these sources in Stokes Q and U to show how
+the simulator will corrupt the source polarisation, even when using
+ideal dipoles.
+
+
+\subsubsection theory_pol_example_1 Telescope near North Pole, observing towards (RA, Dec) = (90, 87)
+
+Let the telescope be sited at latitude 89.9 degrees, observing in the
+direction of RA = 90 degrees, Dec = 87 degrees. (These numbers were chosen
+to be close to the pole and the zenith, but not precisely at these points,
+so that all directions remain well-defined.) Almost everywhere in the sky at
+this latitude, the parallactic angle is very close to zero: for a source at
+this declination, \f$\mathbf{R}\f$ is almost an identity matrix, so it can
+be ignored safely. The source at RA = 90 degrees lies in the Easterly
+direction at this point in time, or along the x-axis in the horizontal
+frame. This is shown in the \ref theory_sketch1 "figure below" which shows the
+geometry looking towards the zenith and pole from the observer's location.
+The shaded grey square shows an area of the sky that will be imaged using
+the normal conventions, and the blue arrow shows the direction that would
+actually appear as 'up' in the image (and hence defines the IAU axis of
+polarisation for the source, corresponding to Stokes +Q).
+
+\anchor theory_sketch1
+\image html sketch1.png ""
+\image latex sketch1.pdf "" width=15cm
+
+When making an image of this source, the usual conventions apply:
+The direction to the North Celestial Pole will be 'up' and
+the direction of increasing right ascension will be 'left,' so
+using \ref theory_sketch1 "the figure" as a guideline, the marked x-axis
+would be pointing 'down,' and the blue arrow would be pointing 'up.'
+(The marked x-axis is in the horizon plane, and is unrelated to the
+image l-coordinate or baseline u-coordinate.)
+
+Ignoring all except the G-Jones term, the measurement equation for this
+source is given by:
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+=
+\left[
+\begin{array}{cc}
+g_{\theta}^X & g_{\phi}^X \\
+g_{\theta}^Y & g_{\phi}^Y
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+I + Q   & U + i V \\
+U - i V & I - Q
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+g_{\theta}^X & g_{\theta}^Y \\
+g_{\phi}^X   & g_{\phi}^Y
+\end{array}
+\right]
+\f]
+
+At this source position, the \f$\mathbf{G}\f$ matrix is approximately:
+
+\f[
+\mathbf{G} \approx
+\left[
+\begin{array}{cc}
+1 & 0 \\
+0 & 1
+\end{array}
+\right]
+\f]
+
+The \f$\mathbf{G}\f$ matrix is almost an identity matrix here, because the
+dipole oriented along the x-axis will respond maximally to radiation
+polarised in the \f$\theta\f$-direction (which is essentially parallel to x
+for this source), and the dipole oriented along the y-axis will respond
+maximally to radiation polarised in the \f$\phi\f$-direction (parallel to y
+for this source).
+
+If the source emits in pure Stokes +Q (\f$I=1\f$,\f$Q=1\f$, IAU frame of
+the sky), then the measured values will be
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) = \frac{1}{2} (I+Q-(I-Q)) \approx \frac{1}{2} (1+1-(1-1)) \approx 1 \\
+U_m &=& \frac{1}{2} (XY+YX) \approx \frac{1}{2} (0+0) \approx 0
+\f}
+
+If the source emits in pure Stokes -Q (\f$I=1\f$,\f$Q=-1\f$, IAU frame of
+the sky), then the measured values will be
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) = \frac{1}{2} (I+Q-(I-Q)) \approx \frac{1}{2} (1-1-(1-(-1))) \approx -1 \\
+U_m &=& \frac{1}{2} (XY+YX) \approx \frac{1}{2} (0+0) \approx 0
+\f}
+
+If the source emits in pure Stokes +U (\f$I=1\f$,\f$U=1\f$, IAU frame of
+the sky), then the measured values will be
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) = \frac{1}{2} (I+Q-(I-Q)) \approx \frac{1}{2} (1-1) \approx 0 \\
+U_m &=& \frac{1}{2} (XY+YX) = \frac{1}{2} (U+U) \approx \frac{1}{2} (1+1) \approx 1
+\f}
+
+If the source emits in pure Stokes -U (\f$I=1\f$,\f$U=-1\f$, IAU frame of
+the sky), then the measured values will be
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) = \frac{1}{2} (I+Q-(I-Q)) \approx \frac{1}{2} (1-1) \approx 0 \\
+U_m &=& \frac{1}{2} (XY+YX) = \frac{1}{2} (U+U) \approx \frac{1}{2} (-1-1) \approx -1
+\f}
+
+This is one of the few examples where the \f$\mathbf{G}\f$-matrix is almost an
+identity matrix, and the instrumental response closely corresponds to the
+intrinsic polarisation properties of the source.
+
+The \ref theory_fig_pole_ra_90 "figure below" shows images of a source
+at (RA, Dec) = (90, 87) for an observer near the North Pole.
+The four non-zero polarisations in the images correspond closely to the
+intrinsic source polarisation, labelled in the top-right of each panel.
+
+\anchor theory_fig_pole_ra_90
+\image html Pole_RA_90.png ""
+\image latex Pole_RA_90.png "" width=12cm
+
+\subsubsection theory_pol_example_2 Telescope near North Pole, observing towards (RA, Dec) = (0, 87)
+
+Now let the telescope be placed at the same latitude of 89.9 degrees, but
+observing in the direction of RA = 0 degrees, Dec = 87 degrees.
+The source at RA = 0 degrees now lies in the Southerly direction, or along
+the -y-axis in the horizontal frame. The orientation of each dipole has
+not changed, but the axis of polarisation angle (as defined by the IAU in
+the tangent plane to the sky) has now been effectively rotated by 90
+degrees with respect to the antennas, so the response of the instrument
+will no longer correspond to the intrinsic source polarisation.
+This is shown in the \ref theory_sketch2 "figure below" which shows the
+geometry looking towards the zenith and pole from the observer's location.
+The shaded grey square shows an area of the sky that will be imaged using the
+normal conventions, and the blue arrow shows the direction that would actually
+appear as 'up' in the image (and hence defines the IAU axis of polarisation
+for the source, corresponding to Stokes +Q).
+
+\anchor theory_sketch2
+\image html sketch2.png ""
+\image latex sketch2.pdf "" width=15cm
+
+Ignoring all except the G-Jones term, the measurement equation for this
+source is given by:
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+=
+\left[
+\begin{array}{cc}
+g_{\theta}^X & g_{\phi}^X \\
+g_{\theta}^Y & g_{\phi}^Y
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+I + Q   & U + i V \\
+U - i V & I - Q
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+g_{\theta}^X & g_{\theta}^Y \\
+g_{\phi}^X   & g_{\phi}^Y
+\end{array}
+\right]
+\f]
+
+At this source position, the \f$\mathbf{G}\f$ matrix is approximately:
+
+\f[
+\mathbf{G} \approx
+\left[
+\begin{array}{cc}
+0 & 1 \\
+-1 & 0
+\end{array}
+\right]
+\f]
+
+The \f$\mathbf{G}\f$ matrix takes this form at this point, because the
+dipole oriented along the x-axis will respond maximally to radiation
+polarised in the \f$\phi\f$-direction (which is essentially parallel to x
+for this source), and the dipole oriented along the y-axis will respond
+maximally to radiation polarised in the \f$\theta\f$-direction (anti-parallel
+to y for this source, hence the negative sign).
+
+If the source emits in pure Stokes +Q (\f$I=1\f$,\f$Q=1\f$, IAU frame
+of the sky), then the measured values will be
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 1 \\
+-1 & 0
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+1+1 & 0 \\
+0 & 1-1
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 0 \\
+-2 & 0
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 0 \\
+0 & 2
+\end{array}
+\right]
+
+\f]
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) \approx \frac{1}{2} (0-2) \approx -1 \\
+U_m &=& \frac{1}{2} (XY+YX) \approx 0
+\f}
+
+If the source emits in pure Stokes -Q (\f$I=1\f$,\f$Q=-1\f$, IAU frame
+of the sky), then the measured values will be
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 1 \\
+-1 & 0
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+1+-1 & 0 \\
+0 & 1- -1
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 2 \\
+0 & 0
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+2 & 0 \\
+0 & 0
+\end{array}
+\right]
+
+\f]
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) \approx \frac{1}{2} (2-0) \approx 1 \\
+U_m &=& \frac{1}{2} (XY+YX) \approx 0
+\f}
+
+If the source emits in pure Stokes +U (\f$I=1\f$,\f$U=1\f$, IAU frame
+of the sky), then the measured values will be
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 1 \\
+-1 & 0
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+1 & 1 \\
+1 & 1
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+1 & 1 \\
+-1 & -1
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+1 & -1 \\
+-1 & 1
+\end{array}
+\right]
+
+\f]
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) \approx \frac{1}{2} (1-1) \approx 0 \\
+U_m &=& \frac{1}{2} (XY+YX) \approx \frac{1}{2} (-1 -1) \approx -1
+\f}
+
+If the source emits in pure Stokes -U (\f$I=1\f$,\f$U=-1\f$, IAU frame
+of the sky), then the measured values will be
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+0 & 1 \\
+-1 & 0
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+1 & -1 \\
+-1 & 1
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+-1 & 1 \\
+-1 & 1
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+0 & -1 \\
+1 & 0
+\end{array}
+\right]
+
+\approx
+
+\left[
+\begin{array}{cc}
+1 & 1 \\
+1 & 1
+\end{array}
+\right]
+
+\f]
+
+\f{eqnarray*}{
+Q_m &=& \frac{1}{2} (XX-YY) \approx \frac{1}{2} (1-1) \approx 0 \\
+U_m &=& \frac{1}{2} (XY+YX) \approx \frac{1}{2} (1 + 1) \approx 1
+\f}
+
+\latexonly
+\newpage
+\endlatexonly
+
+The \ref theory_fig_pole_ra_0 "figure below" shows images of a source
+at (RA, Dec) = (0, 87) for an observer near the North Pole. The four
+non-zero polarisations in the images show a sign change with respect to the
+intrinsic source polarisation, labelled in the top-right of each panel.
+
+\anchor theory_fig_pole_ra_0
+\image html Pole_RA_0.png ""
+\image latex Pole_RA_0.png "" width=12cm
+
+
+\subsubsection theory_pol_example_3 Telescope on Equator, observing towards (RA, Dec) = (1, 0)
+
+In this final example, the telescope is at latitude 0 degrees (on the
+Earth's equator), observing in the direction of RA = 1 degree,
+Dec = 0 degrees (again, almost directly overhead). The source at
+RA = 1 degree again lies in the Easterly direction, or along the x-axis
+in the horizontal frame. The main difference between this example and
+\ref theory_pol_example_1 "the first example" is that the parallactic angle
+is no longer nearly zero, but is now -90 degrees.
+
+This is shown in the \ref theory_sketch2 "figure below" which shows the
+geometry looking towards the zenith from the observer's location.
+The shaded grey square shows an area of the sky that will be imaged using
+the normal conventions, and the blue arrow shows the direction that would
+actually appear as 'up' in the image (and hence defines the IAU axis of
+polarisation for the source, corresponding to Stokes +Q).
+
+\image html sketch3.png ""
+\image latex sketch3.pdf "" width=15cm
+
+Ignoring all except the R- and G-Jones terms, the measurement equation for
+this source is given by:
+
+\f[
+\left[
+\begin{array}{cc}
+XX & XY \\
+YX & YY
+\end{array}
+\right]
+=
+\left[
+\begin{array}{cc}
+g_{\theta}^X & g_{\phi}^X \\
+g_{\theta}^Y & g_{\phi}^Y
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+\cos\psi_p & -\sin\psi_p \\
+\sin\psi_p & \cos\psi_p
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+I + Q   & U + i V \\
+U - i V & I - Q
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+\cos\psi_p & \sin\psi_p \\
+-\sin\psi_p & \cos\psi_p
+\end{array}
+\right]
+\left[
+\begin{array}{cc}
+g_{\theta}^X & g_{\theta}^Y \\
+g_{\phi}^X   & g_{\phi}^Y
+\end{array}
+\right]
+\f]
+
+While the \f$\mathbf{G}\f$ matrix is almost equal to the identity matrix for
+the same reasons as described in the
+\ref theory_pol_example_1 "first example", the \f$\mathbf{R}\f$ matrix is
+now given by:
+
+\f[
+\mathbf{R} \approx
+\left[
+\begin{array}{cc}
+0 & 1 \\
+-1 & 0
+\end{array}
+\right]
+\f]
+
+Since \f$\mathbf{R}\f$ in this case is equal to \f$\mathbf{G}\f$ in
+the \ref theory_pol_example_2 "second example", it follows that the source
+polarisation will be modified in the same way.
+
+The \ref theory_fig_equator_ra_1 "figure below" shows images of a source
+at (RA, Dec) = (1, 0) for an observer on the Equator. The four non-zero
+polarisations in the images show a sign change with respect to the intrinsic
+source polarisation, labelled in the top-right of each panel.
+
+\anchor theory_fig_equator_ra_1
+\image html Equator_RA_1.png ""
+\image latex Equator_RA_1.png "" width=12cm
+
+\latexonly
+\newpage
+\endlatexonly
+
+
+\section theory_beam_pattern_pol_order Beam Pattern Polarisation Order
+
+When computing a station beam pattern, the result returned by OSKAR is the
+combination of the array factor and the element factor.
+The four polarisation planes in the image cube are in the same order as that
+used to construct the \f$\mathbf{G}\f$  matrix, so the order is
+\f$X_{\theta}, X_{\phi}, Y_{\theta}, Y_{\phi}\f$.
+
+\f[
+\left[
+\begin{array}{cc}
+a & b \\
+c & d
+\end{array}
+\right]
+=
+\left[
+\begin{array}{cc}
+e \cdot g_{\theta}^X & e \cdot g_{\phi}^X \\
+e \cdot g_{\theta}^Y & e \cdot g_{\phi}^Y
+\end{array}
+\right]
+\f]
+
+\section theory_noise  Addition of Uncorrelated System Noise
+
+When performing interferometer simulations, OSKAR provides the option of
+adding uncorrelated Gaussian noise, \f$\varepsilon\f$, to the
+simulated visibilities, \f$\textbf{V}_0\f$.
+
+\f[
+\textbf{V} = \textbf{V}_0 + \varepsilon
+\f]
+
+This is achieved by adding randomly generated values, drawn from a zero-mean
+Gaussian distribution, to the complex visibility amplitudes for each baseline,
+time integration, frequency channel and polarisation. Gaussian distributions
+are defined as a function of frequency, and can be given a different value for
+each station in the interferometer. Noise values are expressed as the RMS flux
+level of an unresolved, unpolarised source measured in a single polarisation of
+the receiver.
+
+<!--
+As such, if one measures the noise statistics of visibilities
+expressed in terms of Stokes parameters, the RMS obtained will be smaller by a
+factor of \f$\sqrt{2}\f$ than visibilities expressed as linear polarisations
+(XX,XY,YX, and YY).
+-->
+
+While OSKAR requires that the the noise is expressed as a RMS in Jy,
+one can easily convert to this value from a measure of the noise in terms of
+system sensitivity or system temperature and effective area using the standard
+formulae described by Thompson, Moran & Swenson and Wrobel & Walker.
+
+The noise power per unit bandwidth, received in one polarisation of an
+antenna from an unpolarised source of system equivalent flux density
+\f$S_{\rm sys}\f$, is given by
+
+\f[
+k_{\rm B} T_{\rm sys} = \frac{S_{\rm sys} A_{\rm eff} \eta} {2}
+\f]
+
+Here, \f$T_{\rm sys}\f$  is the system temperature, \f$A_{\rm eff}\f$ is
+the effective area of the antenna, \f$\eta\f$ is the system efficiency,
+and \f$k_{\rm B}\f$ is the Boltzmann constant.
+
+The RMS noise on a given baseline can then be expressed in terms of the
+system equivalent flux densities \f$S_p\f$ and \f$S_q\f$ of antennas
+(or stations) \f$p\f$ and \f$q\f$ that make up the baseline by
+
+\f[
+\sigma_{p,q} =
+\sqrt{\frac{S_p S_q}
+           {2\, \Delta\nu\, \tau_{\rm acc}}}
+\f]
+
+Here, \f$\Delta\nu\f$ is the bandwidth and \f$\tau_{\rm acc}\f$ is the
+correlator accumulation time. Note the
+term \f$2\, \Delta\nu\, \tau_{\rm acc}\f$ represents the number of
+independent samples of the signal for a band-limited signal sampled at
+the Nyquist rate.
+
+This equation can be re-expressed in terms of the individual system
+temperatures \f$T_p\f$ and \f$T_q\f$, effective areas \f$A_p\f$
+and \f$A_q\f$ and system efficiencies \f$\eta_p\f$ and \f$\eta_q\f$ of
+antennas (or stations) which make up the baseline as
+
+\f[
+\sigma_{p,q} = k_{\rm B}
+        \sqrt{\frac{2 \, T_p T_q}
+             {A_p A_q \, \eta_p \eta_q \, \Delta\nu\, \tau_{\rm acc}}}
+\f]
+
+Equally, given values of the RMS on individual baselines \f$\sigma_p\f$
+and \f$\sigma_q\f$, the baseline RMS is given by
+
+\f[
+\sigma_{p,q} = \sqrt{\sigma_p \sigma_q}
+\f]
+
+Noise fluctuations in the real and imaginary parts of the complex correlator
+outputs are uncorrelated. The RMS uncertainty in the visibility,
+\f$\varepsilon_{p,q}\f$, obtained from combining the real and imaginary
+outputs of the correlator will therefore be
+
+\f[
+\varepsilon_{p,q} =
+\sqrt{\left \langle  \varepsilon\cdot\varepsilon\right \rangle} =
+\sqrt{2}\sigma_{p,q}.
+\f]
+
+\subsection theory_noise_map Noise in the Synthesised Map
+
+For an array with \f$n_b\f$ antenna pairs which observes for a length of
+total observation time \f$\tau_0\f$, the total number of independent data
+points in the \f$(u,v)\f$ plane for a single polarisation is
+
+\f[
+n_d = n_b \frac{\tau_0}{\tau_{\rm acc}}
+\f]
+
+and therefore the noise in the image or map will decrease by a
+factor \f$\sqrt{n_d}\f$.
+
+If we consider the special case where the system temperature, effective area,
+and system efficiency are the same for an array of \f$n_a\f$ antennas
+observing for total time \f$\tau_0\f$, the following equation describes
+the total noise in the image plane of a single polarisation image.
+
+\f[
+\sigma_{\rm im} = \frac{2 \, k_{\rm B} \, T_{\rm sys}}
+                       {A_{\rm eff} \eta \sqrt{n_a (n_a - 1) \Delta\nu \tau_0}}
+\f]
+
+This can be expressed in terms of the RMS noise on a given baseline as
+
+\f[
+\sigma_{\rm im} =
+    \frac{\sigma_{p,q}}
+         {\sqrt{  \frac{n_a (n_a-1)}{2} \frac{\tau_0}{\tau_{\rm acc}}  } }
+=  \frac{\sigma_{p,q}}
+        {\sqrt{n_d}}
+\f]
+
+Note that for measurements comprised of combinations of single polarisation
+data (such as Stokes-I,Q,U,V) the RMS will be reduced by a further factor of
+\f$\sqrt{2}\f$.
+
+\latexonly
+\vskip 1cm
+\endlatexonly
+
+\section theory_references References
+
+- Hamaker, J. P., Bregman, J. D. & Sault, R. J., 1996, A&AS, 117, 137
+- Hamaker, J. P., Bregman, J. D., 1996, A&AS, 117, 161
+- IAU, 1974, Transactions of the IAU Vol. 15B (1973) 166
+- Thompson, A. R., Moran, J. M., & Swenson, G.W., 2001,
+  <i>"Interferometry and Synthesis in Radio Astronomy"</i>
+- Wrobel, J.M., & Walker, R. C., 1999,
+  <i>"Synthesis Imaging in Radio Astronomy II"</i>, p. 171
+
+
+<b>Revision History</b>
+
+<table>
+<tr><th>Revision</th><th>Date</th><th>Modification</th></tr>
+<tr><td>1</td><td>2012-04-27</td><td>Creation.</td></tr>
+<tr><td>2</td><td>2012-05-03</td>
+    <td>Clarified polarisation convention, updated definition of R and G
+    matrices.</td></tr>
+<tr><td>3</td><td>2012-05-14</td>
+    <td>Added polarisation examples.</td></tr>
+<tr><td>4</td><td>2012-10-22</td>
+    <td>Added description of the addition of uncorrelated system
+    noise.</td></tr>
+<tr><td>5</td><td>2013-11-26</td>
+    <td>Fixed description of interferometer phase term.</td></tr>
+<tr><td>6</td><td>2014-08-12</td>
+    <td>Updated description of addition of uncorrelated noise.</td></tr>
+<tr><td>7</td><td>2015-05-11</td>
+    <td>Revised description of addition of uncorrelated noise.</td></tr>
+</table>
+
+*/

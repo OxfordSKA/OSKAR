@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<s k="observation"><label>Observation settings</label>
+    <desc>These parameters are used to specify the observation.</desc>
+    <s k="phase_centre_ra_deg"><label>Phase centre RA [deg]</label>
+        <type name="DoubleList" default="0"/>
+        <desc>
+            Right Ascension of the observation pointing (phase centre),
+            in degrees.
+        </desc>
+    </s>
+    <s k="phase_centre_dec_deg"><label>Phase centre Dec [deg]</label>
+        <type name="DoubleList" default="0"/>
+        <desc>
+            Declination of the observation pointing (phase centre), in degrees.
+        </desc>
+    </s>
+    <s k="pointing_file"><label>Station pointing file</label>
+        <type name="InputFile" default=""/>
+        <desc>
+            Pathname to optional station pointing file, which can be
+            used to override the beam direction for any or all stations in
+            the telescope model. See the accompanying documentation for a
+            description of a station pointing file.
+        </desc>
+    </s>
+    <s k="start_frequency_hz" required="true">
+        <label>Start frequency [Hz]</label>
+        <type name="UnsignedDouble" />
+        <desc>The frequency at the midpoint of the first channel, in Hz.</desc>
+    </s>
+    <s k="num_channels"><label>Number of frequency channels</label>
+        <type name="IntPositive" default="1" />
+        <desc>Number of frequency channels / bands to use.</desc>
+    </s>
+    <s k="frequency_inc_hz"><label>Frequency increment [Hz]</label>
+        <type name="UnsignedDouble" default="0" />
+        <desc>The frequency increment between successive channels, in Hz.</desc>
+    </s>
+    <s k="start_time_utc" required="true"><label>Start time (UTC)</label>
+        <type name="DateTime" />
+        <desc>
+            The start time and date for the observation. This can either be a
+            MJD value or a string with one of the following formats:
+            <ul>
+              <li><b><code>d-M-yyyy h:m:s.z</code></b></li>
+              <li><b><code>yyyy/M/d/h:m:s.z</code></b></li>
+              <li><b><code>yyyy-M-d h:m:s.z</code></b></li>
+              <li><b><code>yyyy-M-dTh:m:s.z</code></b></li>
+            </ul>
+            where:
+            <ul>
+              <li><b>d</b> is the day number (1 to 31)</li>
+              <li><b>M</b> is the month (1 to 12)</li>
+              <li><b>yyyy</b> is the year (4 digits)</li>
+              <li><b>h</b> is the hour (0 to 23)</li>
+              <li><b>m</b> is minutes (0 to 59)</li>
+              <li><b>s</b> is seconds (0 to 59)</li>
+              <li><b>z</b> is milliseconds (0 to 999)</li>
+            </ul>
+            Note that date and time values support optional leading zeros in the
+            format string.
+        </desc>
+    </s>
+    <s k="length" required="true">
+        <label>Observation length [sec, or hh:mm:ss]</label>
+        <type name="Time" />
+        <desc>
+            The observation length either in seconds, or in hours, minutes and
+            seconds as a formatted string with the syntax <b><code>h:m:s.z</code></b>.
+            where:
+            <ul>
+              <li><b>h</b> is the hour (0 to 23)</li>
+              <li><b>m</b> is minutes (0 to 59)</li>
+              <li><b>s</b> is seconds (0 to 59)</li>
+              <li><b>z</b> is milliseconds (0 to 999)</li>
+            </ul>
+            Note that values support optional leading zeros in the format string.
+        </desc>
+    </s>
+    <s k="num_time_steps">
+        <label>Number of time steps</label>
+        <type name="IntPositive" default="1" />
+        <desc>
+            Number of time steps in the output data during the observation
+            length. This corresponds to the number of correlator dumps
+            for interferometer simulations, and the number of beam
+            pattern snapshots for beam pattern simulations.
+        </desc>
+    </s>
+    <!-- Advanced settings: Not yet implemented
+    <s k="advanced"><label>Advanced observation settings</label>
+        <s k="delta_tai_utc_sec"><label>TAI-UTC offset [sec]</label>
+            <type name="Double" default="35.0" />
+            <desc>
+                Difference between UTC and TAI, in seconds. This is the
+                accumulated number of leap seconds added to UTC relative to TAI
+                for the given observation date.
+            </desc>
+        </s>
+        <s k="delta_ut1_utc_sec"><label>UT1-UTC offset [sec]</label>
+            <type name="Double" default="0.0" />
+            <desc>
+                Difference between UTC and UT1, in seconds, for the given
+                observation date. Set to zero if not known.
+            </desc>
+        </s>
+        <s k="pm_x_arcsec"><label>Polar motion x component [arcsec]</label>
+            <type name="Double" default="0.0" />
+            <desc>
+                The x-component of polar motion, in arcsec, for the given
+                observation date. Set to zero if not known.
+            </desc>
+        </s>
+        <s k="pm_y_arcsec"><label>Polar motion y component [arcsec]</label>
+            <type name="Double" default="0.0" />
+            <desc>
+                The y-component of polar motion, in arcsec, for the given
+                observation date. Set to zero if not known.
+            </desc>
+        </s>
+    </s>
+    -->
+</s>

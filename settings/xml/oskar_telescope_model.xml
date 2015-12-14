@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<s k="telescope">
+    <label>Telescope model settings</label>
+    <desc>
+        These parameters are used to specify the contents of the
+        telescope model.
+    </desc>
+
+    <s k="input_directory" required="true">
+        <label>Input directory</label>
+        <type name="InputDirectory"/>
+        <desc>
+            Path to a directory containing the telescope configuration
+            data. See the accompanying documentation for a description
+            of an OSKAR telescope model directory.
+        </desc>
+    </s>
+    <s k="longitude_deg">
+        <label>Longitude [deg]</label>
+        <type name="double" default="0.0"/>
+        <desc>Telescope centre (east) longitude, in degrees.</desc>
+    </s>
+    <s k="latitude_deg">
+        <label>Latitude [deg]</label>
+        <type name="double" default="0.0"/>
+        <desc>Telescope centre latitude, in degrees.</desc>
+    </s>
+    <s k="altitude_m">
+        <label>Altitude [m]</label>
+        <type name="double" default="0.0"/>
+        <desc>Telescope centre altitude, in metres.</desc>
+    </s>
+    <s k="station_type">
+        <label>Station type</label>
+        <type name="OptionList" default="A">
+            Aperture array,
+            Isotropic beam,
+            Gaussian beam,
+            VLA (PBCOR)
+        </type>
+        <desc>
+            The type of each station in the interferometer. A simple,
+            time-invariant Gaussian station beam can be used instead
+            of an aperture array beam if required for testing.
+            All station beam effects can be disabled by selecting
+            'Isotropic beam'.
+        </desc>
+    </s>
+    <s k="normalise_beams_at_phase_centre">
+        <label>Normalise beams at phase centre</label>
+        <type name="bool" default="true"/>
+        <desc>
+            If <b>true</b>, then scale the amplitude of every station
+            beam at the interferometer phase centre to precisely
+            1.0 for each time snapshot. This effectively performs
+            an amplitude calibration for a source at the phase
+            centre.
+        </desc>
+    </s>
+    <s k="pol_mode">
+        <label>Polarisation mode</label>
+        <type name="OptionList" default="Full">
+            Full, Scalar
+        </type>
+        <desc>
+            The polarisation mode of simulations which use the
+            telescope model. If this is <b>Scalar</b>, then only
+            Stokes I visibility data will be simulated, and scalar
+            element responses will be used when evaluating station
+            beams. If this is <b>Full</b> (the default) then
+            correlation products from both polarisations will be
+            simulated. <b>Note that scalar mode can be significantly
+            faster.</b>
+        </desc>
+    </s>
+    <s k="allow_station_beam_duplication">
+        <label>Allow station beam duplication</label>
+        <type name="bool" default="false" />
+        <desc>
+            If enabled, and if all stations are identical, all station beam
+            responses will be copied from the first. This can reduce the 
+            simulation time, but <b>when using a telescope model with long 
+            baselines, source positions will not shift with respect to each 
+            station's horizon if this option is enabled.</b> This setting has
+            no effect if all stations are not identical.
+        </desc>
+    </s>
+
+    <!-- Aperture array settings group -->
+    <import filename="oskar_telescope_AA.xml"/>
+
+    <!-- Gaussian beam telescope settings group -->
+    <import filename="oskar_telescope_gaussian.xml"/>
+
+    <s k="output_directory">
+        <label>Output directory</label>
+        <type name="OutputFile" default=""/>
+        <desc>
+            Path used to save the final telescope model directory,
+            excluding any element pattern data (useful for debugging).
+            Leave blank if not required.
+        </desc>
+    </s>
+</s>
