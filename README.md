@@ -1,6 +1,14 @@
-OSKAR
-=====
+# OSKAR: A GPU accelerated simulator for the Square Kilometre Array
 
-SKA Radio Telescope Simulator
+OSKAR has been designed to produce simulated visibility data from radio 
+telescopes containing aperture arrays, such as those envisaged for the 
+Square Kilometre Array.
 
-This is currently a placeholder project.
+In order to run OSKAR, you will need a CUDA-capable NVIDIA graphics 
+processing unit (GPU). Please see INSTALL.md for a quick installation guide.
+
+Full documentation can be found at http://oskar.oerc.ox.ac.uk
+
+OSKAR is licensed under the terms of the Modified BSD License.
+Please see COPYING.md for details. 
+

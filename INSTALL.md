@@ -1,17 +1,14 @@
-+------------------------------------------------------------------------------+
-| OSKAR 2.6                                           Last update: 27 Apr 2015 |
-+------------------------------------------------------------------------------+
 
-1. Introduction
---------------------------------------------------------------------------------
+# 1. Introduction
+
 The OSKAR simulation package can be built and installed by following the steps 
 described below. The current version is available as a source code distribution,
-targeted at Linux and Mac OS X operating systems. Installation under 
+targeted at Linux and Mac OS X operating systems. Partial installation under 
 Microsoft Windows may be possible, but is not currently supported.
 
 
-2. Dependencies
---------------------------------------------------------------------------------
+# 2. Dependencies
+
 OSKAR depends on a number of other libraries. The main components of OSKAR
 require CUDA 5.5 or later and Qt 4.6 or later to be installed on the target
 system, and also LAPACK for full functionality. Additionally, the casacore
@@ -22,21 +19,15 @@ further.
 
 The list below summarises the main dependencies:
 
-    - CMake (http://www.cmake.org), version >= 2.8.3
-        - Required for makefile generation.
-    - NVIDIA CUDA (http://developer.nvidia.com/cuda-downloads), version >= 5.5
-        - Required for all OSKAR components.
-        - (Make sure you install the CUDA Toolkit.)
-    - Qt4 (http://www.qt.io), version >= 4.6
-        - Required for OSKAR applications.
-    - LAPACK (http://www.netlib.org/lapack)
-        - Optional. Required only if extended sources are to be used.
-    - casacore (http://code.google.com/p/casacore), version >= 1.5.0
-        - Optional. Required only for Measurement Set export.
+* CMake (http://www.cmake.org), version >= 2.8.3
+* NVIDIA CUDA (http://developer.nvidia.com/cuda-downloads), version >= 5.5
+* Qt4 (http://www.qt.io), version >= 4.6
+* LAPACK (http://www.netlib.org/lapack)
+* casacore (https://github.com/casacore/casacore), version >= 1.5.0
 
 
-3. Building OSKAR
---------------------------------------------------------------------------------
+# 3. Building OSKAR
+
 OSKAR can be built by issuing the following commands:
 
     $ mkdir build
@@ -48,8 +39,9 @@ OSKAR can then be installed with:
 
     $ make install
 
-3.1. Build Options
---------------------------------------------------------------------------------
+
+## 3.1. Build Options
+
 When running the 'cmake' command a number of build options can be specified.
 These are listed below.
 
@@ -87,8 +79,8 @@ Advanced Build Options:
         CasaCore headers installed in the system include path can't be used to
         build OSKAR.
 
-3.2. Custom (Non-System) Qt4 Installations
---------------------------------------------------------------------------------
+## 3.2. Custom (Non-System) Qt4 Installations
+
 When searching for a valid Qt4 installation, the OSKAR CMake build system
 queries the qmake binary in order to determine the location of the relevant
 libraries and headers. Therefore, all that is required to use a specific 
@@ -96,11 +88,10 @@ version of Qt4 is to add the location of the desired qmake binary to the
 beginning of the system search path.
 
 
-4. Testing the Installation
---------------------------------------------------------------------------------
+# 4. Testing the Installation
 
-4.1 Unit Tests
---------------------------------------------------------------------------------
+## 4.1 Unit Tests
+
 The unit test binaries can be run by typing the following command from the
 build directory:
 
@@ -113,11 +104,11 @@ OSKAR, to the following email address:
 
     oskar@oerc.ox.ac.uk
 
-4.2 Running the Example Simulation
---------------------------------------------------------------------------------
+## 4.2 Running the Example Simulation
+
 With any fresh install of OSKAR, we recommend running the
 example simulation described in the documentation found at
 
-    http://www.oerc.ox.ac.uk/~ska/oskar
+    http://oskar.oerc.ox.ac.uk/
 
 to establish if a simple simulation behaves as expected.
