@@ -104,9 +104,10 @@ struct oskar_MeasurementSet
     double end_time;
 
     oskar_MeasurementSet() : ms(0), msc(0), msmc(0), app_name(std::string()),
-            num_pols(0), num_channels(0), num_stations(0), num_receptors(2),
-            ref_freq(0.0), phase_centre_ra(0.0), phase_centre_dec(0.0),
-            start_time(DBL_MAX), end_time(-DBL_MAX) {}
+    		write_autocorr(false), num_pols(0), num_channels(0),
+			num_stations(0), num_receptors(2), ref_freq(0.0),
+			phase_centre_ra(0.0), phase_centre_dec(0.0), start_time(DBL_MAX),
+			end_time(-DBL_MAX) {}
     ~oskar_MeasurementSet();
 
     void add_band(int pol_id, unsigned int num_channels, double ref_freq,
@@ -865,7 +866,10 @@ void oskar_MeasurementSet::get_column(const String& column,
 
     // Check that the column exists.
     if (!ms->tableDesc().isColumn(column))
+    {
         *status = OSKAR_ERR_MS_COLUMN_NOT_FOUND;
+        return;
+    }
 
     // Check that some data are selected.
     if (num_rows == 0) return;
@@ -873,7 +877,10 @@ void oskar_MeasurementSet::get_column(const String& column,
     // Check that the row is within the table bounds.
     unsigned int total_rows = ms->nrow();
     if (start_row >= total_rows)
+    {
         *status = OSKAR_ERR_MS_OUT_OF_RANGE;
+        return;
+    }
     if (start_row + num_rows > total_rows)
         num_rows = total_rows - start_row;
 
