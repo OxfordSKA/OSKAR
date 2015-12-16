@@ -51,25 +51,90 @@ class SettingsDependencyGroup;
  *
  * @details
  * High level representation of a tree of OSKAR application settings in memory.
+ * Each node in the tree consists of a SettingsItem which is
  *
- * TODO: rename from tree to Settings? Yes please!
+ * By attaching a file handler with the method @fn set_file_handler settings
+ * can be read from a designated settings file.
+ *
+ * Settings within the tree are addressed with a key which takes the form of a
+ * delimited string using the separator specified in the constructor.
+ *
+ * Example:
+ * @code{.cpp}
+ * @endcode
  */
 
 class SettingsTree
 {
  public:
+    //! Constructor
     SettingsTree(char key_separator = '/');
+
+    //! Destructor
     ~SettingsTree();
 
-    void set_file_handler(SettingsFileHandler*,
-            const std::string& name = std::string());
+    //! Attach a settings file handler.
+    /*!
+     * Assign a settings file handler which will give the SettingsTree object
+     * the ability to read and write settings files.
+     * Note that ownership of the handler is not transferred to this object.
+     *
+     * @param handler SettingsFileHandler object to attach.
+     * @param name    Path of the settings file to use.
+     */
+    void set_file_handler(SettingsFileHandler* handler,
+                          const std::string& name = std::string());
+
+    //! Set or update the file name path of the associated settings file.
     void set_file_name(const std::string& name);
+
+    //! Set all of the settings in the tree to their default value.
     void set_defaults();
 
+    //! A new entry to the end of the current settings key group prefix.
+    /*!
+     * Convenience method for working with settings keys. When working with
+     * settings through accessor methods which take a key as the first
+     * argument, the specified key will be prefixed with the set of groups
+     * registered though this function.
+     *
+     * @param name Name of the group to add.
+     */
     void begin_group(const std::string& name);
+
+    //! Removes the last level from the current settings key group prefix.
+    /*!
+     * Convenience method for working with settings keys to be used in
+     * conjunction with @fn begin_group.
+     */
     void end_group();
+
+    //! Returns the current group prefix.
+    /*!
+     * Returns the current group prefix defined by the @fn being_group and
+     * @fn end_group functions.
+     *
+     * @return The group prefix string.
+     */
     std::string group_prefix() const;
 
+    //! Add a setting to the Tree, specified by a key and optional meta-data.
+    /*!
+     * Adds a setting to the tree at the position defined by the specified
+     * @p key modified by the current group prefix.
+     *
+     * @param key          The settings key.
+     * @param label        Brief label given to the setting.
+     * @param description  A more detailed description of the setting.
+     * @param type_name    String name of the settings type. This should be the
+     *                     name of type handled by the SettingsValue class.
+     * @param type_default String containing the default value for the type.
+     * @param type_parameters String containing any initialisation parameters
+     *                        for the type.
+     * @param required     If true, mark the setting as required.
+     *
+     * @return True if successfully added, otherwise false.
+     */
     bool add_setting(const std::string& key,
                      const std::string& label = std::string(),
                      const std::string& description = std::string(),
@@ -78,37 +143,155 @@ class SettingsTree
                      const std::string& type_parameters = std::string(),
                      bool required = false);
 
+    //! Begin a logical group of dependencies attached to the current setting.
+    /*!
+     * @param logic Combination logic of dependencies in the group.
+     * @return True if successful, otherwise false.
+     */
     bool begin_dependency_group(const std::string& logic = "AND");
+
+    //! Closes the current logical group of dependencies.
     void end_dependency_group();
 
+    //! Adds a dependency to the current setting.
+    /*!
+     * Adds a dependency to the current setting based on the value of
+     * another setting specified by the @p dependency_key. Settings are
+     * enabled or disabled based on their dependencies. A dependency is
+     * satisfied if the value of the setting at the key specified by
+     * @p dependency_key evaluated with the specified @p condition found to be
+     * True. A setting can have multiple dependencies by calling this function
+     * multiple times and the combination of multiple dependencies can be
+     * controlled though the functions @p begin_dependency_group and
+     * @p end_dependency_group.
+     *
+     * Allowed conditions are: EQ, NE, GT, GE, LT, LE.
+     *
+     * @param dependency_key Full settings key which the current key is
+     *                       dependent on.
+     * @param value          The required value for the dependency to be
+     *                       satisfied.
+     * @param condition      The condition logic to be satisfied.
+     * @return True if successfully added, otherwise false.
+     */
     bool add_dependency(const std::string& dependency_key,
                         const std::string& value,
                         const std::string& condition = "EQ");
 
-    /* TODO(BM) set value for other intrinsic types?! (needed for GUI) */
+    //! Set the value of the setting at the specified @p key.
+    /*!
+     * Sets the value of the setting at the specified key. The current group
+     * prefix, if defined will be appended to the key.
+     *
+     * @param key Settings key.
+     * @param value Value of the setting.
+     * @param write If true and a SettingsFileHandler has been set, update
+     *              the settings file on setting the value.
+     * @return True is successful, otherwise false.
+     *
+     * TODO-BM: implement alternative versions of this function with
+     * typed value arguments?
+     */
     bool set_value(const std::string& key, const std::string& value,
-            bool write = true);
+                   bool write = true);
+
+    //! Return a pointer to SettingsItem object at the specified @p key.
+    /*!
+     * Method to give access to the item at the specified @p key. Note the
+     * settings key given to this function will be modified by the
+     * current group prefix.
+     *
+     * @param key The settings key.
+     * @return SettingsItem pointer.
+     */
     const SettingsItem* item(const std::string& key) const;
+
+    //! Return a pointer to SettingsValue object at the specified @p key.
+    /*!
+     * Method to give access to the value of the item at the specified @p key.
+     * Note the settings key given to this function will be modified by the
+     * current group prefix.
+     *
+     * @param key The settings key.
+     * @return SettingsValue pointer.
+     */
     const SettingsValue* value(const std::string& key) const;
+
+    //! Operator overload of the @p value method.
+    /*!
+     * Operator to give access to the value of the item at the specified @p key.
+     * Note the settings key given to this function will be modified by the
+     * current group prefix.
+     *
+     * @param key The settings key.
+     * @return SettingsValue pointer.
+     */
     const SettingsValue* operator[](const std::string& key) const;
 
+    //! Returns the total number of settings items in the tree.
     int num_items() const;
+
+    //! Returns the number of settings items in the tree which have a value.
     int num_settings() const;
+
+    //! Utility method which prints a formatted summary of the settings tree.
     void print() const;
+
+    //! Clears the tree, removing all items.
     void clear();
+
+    //! Saves the settings tree to a settings file.
+    /*!
+     * Saves the settings tree to a settings file. This function requires
+     * that a SettingsFileHandler has already been specified via the
+     * @fn set_file_handler method. If the @p file_name is specified
+     * it will be used, however if left empty (the default argument) the
+     * existing setting file will be used if it has previously been specified.
+     *
+     * @param file_name File name of the settings file.
+     * @return True if successful, otherwise false.
+     */
     bool save(const std::string& file_name = std::string()) const;
-    bool load(std::vector<std::pair<std::string, std::string> >& failed,
+
+    //! Loads settings values from a settings file.
+    /*!
+     * Loads values from a settings file into the settings tree. This function
+     * requires that a SettingsFileHandler has already been specified via the
+     * @fn set_file_handler method. If the @p file_name is specified it will
+     * be used, however if left empty (the default argument) the existing
+     * settings file will be used if previously specified.
+     *
+     * The function also returns a vector of the key, value pairs of settings
+     * that have been identified as failed to load by the file handler.
+     *
+     * @param invalid   Vector of key, value pairs of settings that have
+     *                  not been recognised as valid settings.
+     * @param file_name Settings file path name from which to load.
+     * @return True if successful, otherwise false.
+     */
+    bool load(std::vector<std::pair<std::string, std::string> >& invalid,
             const std::string& file_name = std::string());
+
+    //! Return the (application) version string in the settings file.
     std::string file_version() const;
 
+    //! Returns true if the a setting with the specified key exists.
     bool contains(const std::string &key) const;
+
+    //! Returns true if dependencies of the specified key are satisfied.
     bool dependencies_satisfied(const std::string& key) const;
+
+    //! Returns true if the setting is required and has dependencies satisfied.
     bool is_critical(const std::string& key) const;
+
+    //! Returns true if the setting has been modified, ie. not at default value.
     bool is_modified() const;
 
+    //! Returns the root node of the settings tree.
     const SettingsNode* root_node() const;
 
  private:
+    // Recursive print method.
     void print_(const SettingsNode* node, int depth = 0) const;
     const SettingsNode* find_(const SettingsNode* node,
                               const SettingsKey& full_key, int depth) const;
@@ -135,6 +318,11 @@ class SettingsTree
 } /* namespace oskar */
 
 #endif /* __cplusplus */
+
+
+
+
+
 
 #ifdef __cplusplus
 extern "C" {

@@ -70,7 +70,7 @@ public:
     virtual ~SettingsFileHandlerQSettings();
 
     virtual bool read_all(SettingsTree* tree,
-            std::vector<std::pair<std::string, std::string> >& failed);
+            std::vector<std::pair<std::string, std::string> >& invalid);
     virtual bool write_all(const SettingsTree* tree);
     virtual void set_file_name(const std::string& name);
     virtual std::string file_version() const;

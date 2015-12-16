@@ -58,7 +58,7 @@ SettingsFileHandlerQSettings::~SettingsFileHandlerQSettings()
 }
 
 bool SettingsFileHandlerQSettings::read_all(SettingsTree* tree,
-        vector<pair<string, string> >& failed)
+        vector<pair<string, string> >& invalid)
 {
     if (!p || !p->s) return false;
 
@@ -79,7 +79,7 @@ bool SettingsFileHandlerQSettings::read_all(SettingsTree* tree,
 
         // Try to set the item, and record if it fails.
         if (!tree->set_value(k, v, false))
-            failed.push_back(make_pair(k, v));
+            invalid.push_back(make_pair(k, v));
     }
     return true;
 }

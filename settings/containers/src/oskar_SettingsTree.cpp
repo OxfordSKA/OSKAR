@@ -242,13 +242,13 @@ bool SettingsTree::save(const string& file_name) const
     return ok;
 }
 
-bool SettingsTree::load(vector<pair<string, string> >& failed,
+bool SettingsTree::load(vector<pair<string, string> >& invalid,
         const string& file_name)
 {
     if (!file_handler_) return false;
     if (!file_name.empty()) file_handler_->set_file_name(file_name);
     set_defaults();
-    bool ok = file_handler_->read_all(this, failed);
+    bool ok = file_handler_->read_all(this, invalid);
     if (ok) modified_ = false;
     return ok;
 }
