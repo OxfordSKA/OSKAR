@@ -45,6 +45,16 @@
 
 namespace oskar {
 
+/**
+ * @class SettingsNode
+ *
+ * @brief A node with the settings tree, inherits @class SettingsItem.
+ *
+ * @details
+ * Settings tree node class which specialises a settings item for use within
+ * a tree-like structure.
+ */
+
 class SettingsNode : public SettingsItem
 {
  public:

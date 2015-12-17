@@ -351,12 +351,12 @@ enum OSKAR_DIRECTION_TYPE
  * @details
  * This macro expands to compiler directives to indicate that a function
  * should be inlined. In CUDA code, this is "__device__ __forceinline__", in
- * C99 and C++ code, this is "inline", otherwise this is "static".
+ * C99 and C++ code, this is "static inline", otherwise this is "static".
  */
 #ifdef __CUDA_ARCH__
     #define OSKAR_INLINE __device__ __forceinline__
 #elif __STDC_VERSION__ >= 199901L || defined(__cplusplus)
-    #define OSKAR_INLINE inline
+    #define OSKAR_INLINE static inline
 #else
     #define OSKAR_INLINE static
 #endif
