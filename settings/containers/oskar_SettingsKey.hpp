@@ -44,34 +44,67 @@
 
 namespace oskar {
 
+/*!
+ * @class SettingsKey
+ *
+ * @brief Class to store and provide utility for settings keys.
+ *
+ * @details
+ * Settings keys in general are a series of delimited keywords.
+ */
+
 class SettingsKey
 {
 public:
+    /*! Default constructor */
     SettingsKey(char separator = '/');
+
+    /*! Constructor */
     SettingsKey(const std::string& key, char separator = '/');
+
+    /*! Destructor */
     ~SettingsKey();
 
+    /*! Copy constructor */
     SettingsKey(const SettingsKey&);
 
+    /*! Set the key separator */
     void set_separator(char s = '/');
+
+    /*! Return the key separator */
     char separator() const;
 
+    /*! Returns true if the key is empty */
     bool empty() const;
+
+    /*! Return the depth of the key (depth = size - 1). */
     int depth() const;
+
+    /*! Return the number of separated items in the key */
     int size() const;
 
+    /*! Equality operator */
     bool operator==(const SettingsKey& other) const;
 
-    /* Implicit conversion operators. */
+    /*! Implicit conversion operator. */
     operator std::string() const;
+
+    /*! Operator to access sub-elements of the key. */
     std::string operator[](int i) const;
 
+    /*! Return the first element of the key. */
     std::string front() const;
+
+    /*! Return the last element of the key. */
     std::string back() const;
+
+    /*! Return the group key string of the key */
     std::string group() const;
 
+    /*! Convert the key to a const char array */
     const char* c_str() const;
 
+    /*! Stream insertion operator */
     friend std::ostream& operator<<(std::ostream& stream, const SettingsKey& k);
 
 private:
