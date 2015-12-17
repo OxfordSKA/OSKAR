@@ -45,29 +45,63 @@
 
 namespace oskar {
 
+/*!
+ * @class SettingsDependencyGroup
+
+ * @brief Store groups of settings dependencies in a tree-like structure
+
+ * @details
+ * Stores groups of dependencies in a tree-like structure. This class
+ * has the role of a node in the tree storing dependencies and combination
+ * logic for dependencies associated with the node.
+ */
+
 /* Dependency tree node. */
 class SettingsDependencyGroup
 {
  public:
+    /*! Enum defining logic with which to combine dependencies in the group */
     enum GroupLogic { UNDEF = -1, AND, OR };
 
+    /*! Constructor */
     SettingsDependencyGroup(const std::string& group_logic,
                             SettingsDependencyGroup* parent = 0);
+
+    /*! Destructor */
     ~SettingsDependencyGroup();
 
+    /*! Return the number of child groups. */
     int num_children() const;
+
+    /*! Add a child group. */
     SettingsDependencyGroup* add_child(const std::string& logic = "AND");
+
+    /*! Return a pointer to the child group with index @p i */
     SettingsDependencyGroup* get_child(int i);
+
+    /*! Return a const pointer to the child group with index @p i */
     const SettingsDependencyGroup* get_child(int i) const;
+
+    /*! Return group's parent node. */
     SettingsDependencyGroup* parent();
 
+    /*! Return the number of dependencies in the group */
     int num_dependencies() const;
+
+    /*! Return the group logic enumerator */
     GroupLogic group_logic() const;
+
+    /*! Add a dependency to the group */
     void add_dependency(const std::string& key, const std::string& value,
                         const std::string& logic = std::string());
+
+    /*! Add a dependency to the group */
     void add_dependency(const SettingsDependency& dep);
+
+    /*! Get the group dependency with index @p i */
     const SettingsDependency* get_dependency(unsigned int i) const;
 
+    /*! Convert a group logic string a group logic enum value. */
     static SettingsDependencyGroup::GroupLogic string_to_group_logic(
                     const std::string& s);
 
@@ -75,7 +109,7 @@ class SettingsDependencyGroup
     SettingsDependencyGroup* parent_;
     std::vector<SettingsDependencyGroup*> children_;
 
-    /* Node payload combination logic and dependencies. */
+    /* Node pay-load combination logic and dependencies. */
     SettingsKey group_key_;
     SettingsDependencyGroup::GroupLogic logic_;
     std::vector<SettingsDependency> dependencies_;

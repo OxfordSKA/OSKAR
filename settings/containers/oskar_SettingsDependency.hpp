@@ -40,23 +40,51 @@
 
 namespace oskar {
 
+/*!
+ * @class SettingsDependency
+ *
+ * @brief Class used to store the dependency between settings.
+ *
+ * @details
+ * Container class used to represent dependencies between settings.
+ *
+ * A dependency is an association between settings which makes a requirement
+ * on the value of another setting for the current setting to be enabled.
+ *
+ * Dependencies are therefore specified by a key used to retrieve the value
+ * of the setting to be check, the required value and value logic.
+ */
+
 class SettingsDependency
 {
 public:
+    /*! Value logic enum. */
     enum Logic { UNDEF, EQ, NE, GT, GE, LT, LE };
 
+    /*! Constructor. */
     SettingsDependency(const std::string& key,
-               const std::string& value,
-               const std::string& logic = "EQ");
+                       const std::string& value,
+                       const std::string& logic = "EQ");
 
+    /*! Return the dependency key */
     const std::string& key() const { return key_; }
+
+    /*! Return the dependency value */
     const std::string& value() const { return value_; }
+
+    /*! Return the dependency value logic */
     SettingsDependency::Logic logic() const { return logic_; }
+
+    /*! Return the dependency value logic string */
     const char* logic_string() const;
 
+    /*! Returns true if the dependency has valid key, logic and value. */
     bool is_valid() const;
 
+    /*! Static method to convert logic enum to a string. */
     static const char* logic_to_string(const SettingsDependency::Logic&);
+
+    /*! Static method to convert logic string to logic enum. */
     static SettingsDependency::Logic string_to_logic(const std::string&);
 
 private:
