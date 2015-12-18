@@ -37,7 +37,6 @@
 
 #include <oskar_global.h>
 #include <oskar_mem.h>
-#include <oskar_image.h>
 #include <oskar_evaluate_image_lm_grid.h>
 #include <oskar_make_image_dft.h>
 
@@ -55,45 +54,34 @@ typedef struct {
 static void make_image_dft_(double* image, int num_vis, const double* uu,
     const double* vv, const dComplex* amp, double freq, int size, double fov)
 {
-    int err = OSKAR_SUCCESS;
-    int location = OSKAR_CPU;
+    int err = 0;
+    oskar_Mem *uu_, *vv_, *amp_, *l_, *m_, *image_;
     int num_pixels = size * size;
-    int type = OSKAR_DOUBLE; // Note Also allow OSKAR_SINGLE?
 
-    oskar_Mem *uu_, *vv_, *amp_;
-    uu_ = oskar_mem_create(type, location, num_vis, &err);
-    vv_ = oskar_mem_create(type, location, num_vis, &err);
-    amp_ = oskar_mem_create(type | OSKAR_COMPLEX, location, num_vis, &err);
+    uu_ = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_vis, &err);
+    vv_ = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_vis, &err);
+    amp_ = oskar_mem_create(OSKAR_DOUBLE_COMPLEX, OSKAR_CPU, num_vis, &err);
     memcpy(oskar_mem_double(uu_, &err), uu, num_vis*sizeof(double));
     memcpy(oskar_mem_double(vv_, &err), vv, num_vis*sizeof(double));
     memcpy(oskar_mem_double2(amp_, &err), amp, num_vis*sizeof(dComplex));
 
-    oskar_Image* image_ = NULL;
-    image_ = oskar_image_create(type, location, &err);
-    oskar_image_resize(image_, size, size, 1, 1, 1, &err);
-    oskar_image_set_centre(image_, 0.0, 0.0);
-    oskar_image_set_fov(image_, fov*(180.0/M_PI), fov*(180.0/M_PI));
-    oskar_image_set_time(image_, 0.0, 0.0);
-    oskar_image_set_freq(image_, 0.0, 0.0);
-    oskar_image_set_type(image_, 0);
-
-    oskar_Mem *l_, *m_;
-    l_ = oskar_mem_create(type, location, num_pixels, &err);
-    m_ = oskar_mem_create(type, location, num_pixels, &err);
+    l_ = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_pixels, &err);
+    m_ = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_pixels, &err);
+    image_ = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_pixels, &err);
 
     oskar_evaluate_image_lm_grid_d(size, size, fov, fov,
         oskar_mem_double(l_, &err), oskar_mem_double(m_, &err));
 
-    oskar_make_image_dft(oskar_image_data(image_), uu_, vv_, amp_, l_, m_, freq, &err);
+    oskar_make_image_dft(image_, uu_, vv_, amp_, l_, m_, freq, &err);
 
-    double* image_ptr_ = oskar_mem_double(oskar_image_data(image_), &err);
-    memcpy(image, image_ptr_, num_pixels*sizeof(double));
+    memcpy(image, oskar_mem_void_const(image_), num_pixels*sizeof(double));
 
     oskar_mem_free(uu_, &err);
     oskar_mem_free(vv_, &err);
     oskar_mem_free(amp_, &err);
     oskar_mem_free(l_, &err);
     oskar_mem_free(m_, &err);
+    oskar_mem_free(image_, &err);
 
     //printf("status = %i\n", err);
 }

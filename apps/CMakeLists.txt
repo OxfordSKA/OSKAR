@@ -124,15 +124,6 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
     PATTERN "test" EXCLUDE
 )
 
-#if (CUDA_FOUND AND PNG_FOUND)
-#    include_directories(${PNG_INCLUDE_DIRS})
-#
-#    set(name oskar_image_to_png)
-#    oskar_app(${name} ${name}_main.cpp
-#        EXTRA_LIBS ${PNG_LIBRARY}
-#        NO_INSTALL)
-#endif ()
-
 #if (CUDA_FOUND AND PNG_FOUND AND QT4_FOUND)
 #    include_directories(${PNG_INCLUDE_DIRS})
 #    set(name oskar_ionosphere_to_kml)

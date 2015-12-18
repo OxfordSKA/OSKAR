@@ -48,11 +48,6 @@ oskar_Mem* oskar_image_settings_path(oskar_Image* image)
     return image->settings_path;
 }
 
-const oskar_Mem* oskar_image_settings_path_const(const oskar_Image* image)
-{
-    return image->settings_path;
-}
-
 int oskar_image_grid_type(const oskar_Image* image)
 {
     return image->grid_type;

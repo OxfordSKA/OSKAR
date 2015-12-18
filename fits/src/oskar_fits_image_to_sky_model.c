@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,6 @@
  */
 
 #include "fits/oskar_fits_image_to_sky_model.h"
-#include "fits/oskar_fits_check_status.h"
 #include <oskar_convert_relative_directions_to_lon_lat.h>
 #include <oskar_log.h>
 #include <oskar_sky.h>
@@ -52,7 +51,7 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
     int err = 0, i = 0, j = 0, num_pix = 0, status = 0, status2 = 0;
     int naxis = 0, type = 0, imagetype = 0, anynul = 0, jy_beam = 0;
     int x = 0, y = 0, xx = 0, yy = 0, ix = 0, iy = 0, width = 0, height = 0;
-    fitsfile* fptr = NULL;
+    fitsfile* fptr = 0;
     long naxes[MAX_AXES];
     char card[FLEN_CARD], *ctype[MAX_AXES], ctype_str[MAX_AXES][FLEN_VALUE];
     double crval[MAX_AXES], crpix[MAX_AXES], cdelt[MAX_AXES];
@@ -62,18 +61,16 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
     oskar_Sky* temp_sky = 0;
 
     /* Check inputs. */
-    if (filename == NULL || sky == NULL)
+    if (!filename || !sky)
         return OSKAR_ERR_INVALID_ARGUMENT;
     if (downsample_factor < 1) downsample_factor = 1;
 
     /* Open the FITS file. */
     fits_open_file(&fptr, filename, READONLY, &status);
-    oskar_fits_check_status(ptr, status, "Opening file");
     if (status) return OSKAR_ERR_FITS_IO;
 
     /* Get the image parameters. */
     fits_get_img_param(fptr, MAX_AXES, &imagetype, &naxis, naxes, &status);
-    oskar_fits_check_status(ptr, status, "Reading image parameters");
     if (status) return OSKAR_ERR_FITS_IO;
 
     /* Set the data type. */
@@ -95,7 +92,6 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
     for (i = 0; i < MAX_AXES; ++i)
         ctype[i] = ctype_str[i];
     fits_read_keys_str(fptr, "CTYPE", 1, naxis, ctype, &i, &status);
-    oskar_fits_check_status(ptr, status, "Reading CTYPE");
     if (status || i == 0) return OSKAR_ERR_FITS_IO;
 
     /* Check CTYPE1 and CTYPE2. */
@@ -112,7 +108,6 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
 
     /* Read all CDELT values. */
     fits_read_keys_dbl(fptr, "CDELT", 1, naxis, cdelt, &i, &status);
-    oskar_fits_check_status(ptr, status, "Reading CDELT");
     if (status || i == 0) return OSKAR_ERR_FITS_IO;
     if (fabs(fabs(cdelt[0]) - fabs(cdelt[1])) > 1e-5)
     {
@@ -122,12 +117,10 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
 
     /* Read all CRPIX values. */
     fits_read_keys_dbl(fptr, "CRPIX", 1, naxis, crpix, &i, &status);
-    oskar_fits_check_status(ptr, status, "Reading CRPIX");
     if (status || i == 0) return OSKAR_ERR_FITS_IO;
 
     /* Read all CRVAL values. */
     fits_read_keys_dbl(fptr, "CRVAL", 1, naxis, crval, &i, &status);
-    oskar_fits_check_status(ptr, status, "Reading CRVAL");
     if (status || i == 0) return OSKAR_ERR_FITS_IO;
 
     /* Check if there are multiple image planes. */
@@ -141,8 +134,7 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
     }
 
     /* Read and check map units. */
-    fits_read_key(fptr, TSTRING, "BUNIT", card, NULL, &status);
-    oskar_fits_check_status(ptr, status, "Reading BUNIT");
+    fits_read_key(fptr, TSTRING, "BUNIT", card, 0, &status);
     if (status)
     {
         oskar_log_error(ptr, "Could not determine map units.");
@@ -172,16 +164,15 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
     }
 
     /* Search for beam size in header keywords first. */
-    fits_read_key(fptr, TDOUBLE, "BMAJ", &bmaj, NULL, &status);
-    fits_read_key(fptr, TDOUBLE, "BMIN", &bmin, NULL, &status2);
+    fits_read_key(fptr, TDOUBLE, "BMAJ", &bmaj, 0, &status);
+    fits_read_key(fptr, TDOUBLE, "BMIN", &bmin, 0, &status2);
     if (status || status2)
     {
         int cards = 0;
         status = 0; status2 = 0;
 
         /* If header keywords don't exist, search all the history cards. */
-        fits_get_hdrspace(fptr, &cards, NULL, &status);
-        oskar_fits_check_status(ptr, status, "Determining header size");
+        fits_get_hdrspace(fptr, &cards, 0, &status);
         if (status) return OSKAR_ERR_FITS_IO;
         for (i = 0; i < cards; ++i)
         {
@@ -217,7 +208,7 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
 
     /* Allocate memory for image data. */
     data = malloc((type == TFLOAT ? sizeof(float) : sizeof(double)) * num_pix);
-    if (data == NULL)
+    if (!data)
     {
         err = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
         goto cleanup;
@@ -225,7 +216,6 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
 
     /* Read image data. */
     fits_read_img(fptr, type, 1, num_pix, &nul, data, &anynul, &status);
-    oskar_fits_check_status(ptr, status, "Reading image data");
     if (status) goto cleanup;
 
     /* Create a temporary sky model. */
@@ -376,8 +366,8 @@ int oskar_fits_image_to_sky_model(oskar_Log* ptr, const char* filename,
     /* Close the FITS file and free memory. */
     cleanup:
     fits_close_file(fptr, &status);
-    if (data) free(data);
-    if (temp_sky) oskar_sky_free(temp_sky, &err);
+    free(data);
+    oskar_sky_free(temp_sky, &err);
     if (status) return OSKAR_ERR_FITS_IO;
     return err;
 }

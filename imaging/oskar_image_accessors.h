@@ -50,9 +50,6 @@ OSKAR_EXPORT
 oskar_Mem* oskar_image_settings_path(oskar_Image* image);
 
 OSKAR_EXPORT
-const oskar_Mem* oskar_image_settings_path_const(const oskar_Image* image);
-
-OSKAR_EXPORT
 int oskar_image_grid_type(const oskar_Image* image);
 
 OSKAR_EXPORT

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2015, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,18 +28,16 @@
 
 #include <gtest/gtest.h>
 
-#include "fits/oskar_fits_write.h"
 #include "fits/oskar_fits_write_axis_header.h"
 #include <fitsio.h>
-#include <oskar_file_exists.h>
 #include <oskar_mem.h>
 #include <oskar_cmath.h>
-#include <oskar_version.h>
 
 #include <cstdio>
 #include <cstdlib>
 
-static double fov_to_cellsize(double fov_deg, int num_pixels)
+static
+double fov_to_cellsize(double fov_deg, int num_pixels)
 {
     double max, inc;
     max = sin(fov_deg * M_PI / 360.0); /* Divide by 2. */
@@ -57,9 +55,16 @@ fitsfile* create_fits_file(const char* filename, int precision, int width,
     long naxes[4];
     double delta;
     fitsfile* f = 0;
+    FILE* file = 0;
+
+    /* If the file exists, remove it. */
+    if ((file = fopen(filename, "r")) != NULL)
+    {
+        fclose(file);
+        remove(filename);
+    }
 
     /* Create a new FITS file and write the image headers. */
-    if (oskar_file_exists(filename)) remove(filename);
     imagetype = (precision == OSKAR_DOUBLE ? DOUBLE_IMG : FLOAT_IMG);
     naxes[0]  = width;
     naxes[1]  = height;
@@ -68,9 +73,6 @@ fitsfile* create_fits_file(const char* filename, int precision, int width,
     fits_create_file(&f, filename, status);
     fits_create_img(f, imagetype, 4, naxes, status);
     fits_write_date(f, status);
-    fits_write_key_str(f, "TELESCOP",
-            "OSKAR " OSKAR_VERSION_STR, NULL, status);
-    fits_write_history(f, "Created using OSKAR " OSKAR_VERSION_STR, status);
 
     /* Write axis headers. */
     delta = fov_to_cellsize(fov_deg[0], width);
@@ -93,6 +95,61 @@ fitsfile* create_fits_file(const char* filename, int precision, int width,
 
     return f;
 }
+
+static
+void fits_write(const char* filename, int type, int naxis,
+        long* naxes, void* data, const char** ctype, const char** ctype_desc,
+        const double* crval, const double* cdelt, const double* crpix,
+        const double* crota, int* status)
+{
+    int i, num_elements = 1;
+    int datatype = TFLOAT, imagetype = FLOAT_IMG;
+    fitsfile* fptr = NULL;
+    FILE* file;
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* If the file exists, remove it. */
+    if ((file = fopen(filename, "r")) != NULL)
+    {
+        fclose(file);
+        remove(filename);
+    }
+
+    /* Set the type data. */
+    if (type == OSKAR_SINGLE)
+    {
+        datatype = TFLOAT;
+        imagetype = FLOAT_IMG;
+    }
+    else if (type == OSKAR_DOUBLE)
+    {
+        datatype = TDOUBLE;
+        imagetype = DOUBLE_IMG;
+    }
+
+    /* Create a new empty output FITS file. */
+    fits_create_file(&fptr, filename, status);
+
+    /* Create the new image. */
+    fits_create_img(fptr, imagetype, naxis, naxes, status);
+
+    /* Axis description headers. */
+    for (i = 0; i < naxis; ++i)
+        oskar_fits_write_axis_header(fptr, i + 1, ctype[i], ctype_desc[i],
+                crval[i], cdelt[i], crpix[i], crota[i], status);
+
+    /* Write image data into primary array. */
+    for (i = 0; i < naxis; ++i)
+        num_elements *= naxes[i];
+    fits_write_img(fptr, datatype, 1, num_elements, data, status);
+
+    /* Close the FITS file. */
+    fits_close_file(fptr, status);
+    if (*status) *status = OSKAR_ERR_FITS_IO;
+}
+
 
 
 TEST(fits_write, test_planes)
@@ -250,7 +307,7 @@ TEST(fits_write, test)
     crota[3] = 0.0;
 
     /* Write multi-dimensional image data. */
-    oskar_fits_write(filename, oskar_mem_type(data), 4, naxes,
+    fits_write(filename, oskar_mem_type(data), 4, naxes,
             oskar_mem_void(data), ctype, ctype_comment,
             crval, cdelt, crpix, crota, &status);
     oskar_mem_free(data, &status);
