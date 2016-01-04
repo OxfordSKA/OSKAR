@@ -67,25 +67,25 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     // Make sure visibility data array is complex.
     if (!mxIsComplex(in[2]))
-    	oskar_matlab_error("Input visibility amplitude array must be complex");
+        oskar_matlab_error("Input visibility amplitude array must be complex");
 
     // Check consistency of data precision.
     int type = 0;
     if (mxGetClassID(in[0]) == mxDOUBLE_CLASS &&
-    		mxGetClassID(in[1]) == mxDOUBLE_CLASS &&
-			mxGetClassID(in[2]) == mxDOUBLE_CLASS)
+            mxGetClassID(in[1]) == mxDOUBLE_CLASS &&
+            mxGetClassID(in[2]) == mxDOUBLE_CLASS)
     {
-    	type = OSKAR_DOUBLE;
+        type = OSKAR_DOUBLE;
     }
     else if (mxGetClassID(in[0]) == mxSINGLE_CLASS &&
-    		mxGetClassID(in[1]) == mxSINGLE_CLASS &&
-			mxGetClassID(in[2]) == mxSINGLE_CLASS)
+            mxGetClassID(in[1]) == mxSINGLE_CLASS &&
+            mxGetClassID(in[2]) == mxSINGLE_CLASS)
     {
-    	type = OSKAR_SINGLE;
+        type = OSKAR_SINGLE;
     }
     else
     {
-    	oskar_matlab_error("uu, vv, and amplitudes must be of the same type");
+        oskar_matlab_error("uu, vv, and amplitudes must be of the same type");
     }
 
     // Retrieve input arguments.
@@ -105,75 +105,75 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     img_data = oskar_mem_create(type, OSKAR_CPU, size * size, &err);
 
     // Set up imaging data.
-	if (type == OSKAR_DOUBLE)
-	{
-		oskar_evaluate_image_lm_grid_d(size, size, fov, fov,
-				oskar_mem_double(l, &err), oskar_mem_double(m, &err));
-		double* uu_ = (double*)mxGetData(in[0]);
-		double* vv_ = (double*)mxGetData(in[1]);
-		double* re_ = (double*)mxGetPr(in[2]);
-		double* im_ = (double*)mxGetPi(in[2]);
-		double* uuc = oskar_mem_double(uu, &err);
-		double* vvc = oskar_mem_double(vv, &err);
-		double2* amp_ = oskar_mem_double2(amp, &err);
-		for (int i = 0; i < num_samples; ++i)
-		{
-			double2 t;
-			t.x = re_[i];
-			t.y = im_[i];
-			amp_[i] = t;
-			uuc[i] = uu_[i];
-			vvc[i] = vv_[i];
-		}
-	}
-	else
-	{
-		oskar_evaluate_image_lm_grid_f(size, size, fov, fov,
-				oskar_mem_float(l, &err), oskar_mem_float(m, &err));
-		float* uu_ = (float*)mxGetData(in[0]);
-		float* vv_ = (float*)mxGetData(in[1]);
-		float* re_ = (float*)mxGetPr(in[2]);
-		float* im_ = (float*)mxGetPi(in[2]);
-		float* uuc = oskar_mem_float(uu, &err);
-		float* vvc = oskar_mem_float(vv, &err);
-		float2* amp_ = oskar_mem_float2(amp, &err);
-		for (int i = 0; i < num_samples; ++i)
-		{
-			float2 t;
-			t.x = re_[i];
-			t.y = im_[i];
-			amp_[i] = t;
-			uuc[i] = uu_[i];
-			vvc[i] = vv_[i];
-		}
-	}
+    if (type == OSKAR_DOUBLE)
+    {
+        oskar_evaluate_image_lm_grid_d(size, size, fov, fov,
+                oskar_mem_double(l, &err), oskar_mem_double(m, &err));
+        double* uu_ = (double*)mxGetData(in[0]);
+        double* vv_ = (double*)mxGetData(in[1]);
+        double* re_ = (double*)mxGetPr(in[2]);
+        double* im_ = (double*)mxGetPi(in[2]);
+        double* uuc = oskar_mem_double(uu, &err);
+        double* vvc = oskar_mem_double(vv, &err);
+        double2* amp_ = oskar_mem_double2(amp, &err);
+        for (int i = 0; i < num_samples; ++i)
+        {
+            double2 t;
+            t.x = re_[i];
+            t.y = im_[i];
+            amp_[i] = t;
+            uuc[i] = uu_[i];
+            vvc[i] = vv_[i];
+        }
+    }
+    else
+    {
+        oskar_evaluate_image_lm_grid_f(size, size, fov, fov,
+                oskar_mem_float(l, &err), oskar_mem_float(m, &err));
+        float* uu_ = (float*)mxGetData(in[0]);
+        float* vv_ = (float*)mxGetData(in[1]);
+        float* re_ = (float*)mxGetPr(in[2]);
+        float* im_ = (float*)mxGetPi(in[2]);
+        float* uuc = oskar_mem_float(uu, &err);
+        float* vvc = oskar_mem_float(vv, &err);
+        float2* amp_ = oskar_mem_float2(amp, &err);
+        for (int i = 0; i < num_samples; ++i)
+        {
+            float2 t;
+            t.x = re_[i];
+            t.y = im_[i];
+            amp_[i] = t;
+            uuc[i] = uu_[i];
+            vvc[i] = vv_[i];
+        }
+    }
 
-	/* Make the image. */
-	mexPrintf("= Making image...\n");
-	oskar_make_image_dft(img_data, uu, vv, amp, l, m, freq, &err);
-	if (err)
-	{
-		oskar_matlab_error("oskar_make_image_dft() failed with code %i: %s",
-				err, oskar_get_error_string(err));
-	}
-	mexPrintf("= Make image complete\n");
-	oskar_mem_free(uu, &err);
-	oskar_mem_free(vv, &err);
-	oskar_mem_free(amp, &err);
-	oskar_mem_free(l, &err);
-	oskar_mem_free(m, &err);
+    /* Make the image. */
+    mexPrintf("= Making image...\n");
+    oskar_make_image_dft(img_data, uu, vv, amp, l, m, freq, &err);
+    if (err)
+    {
+        oskar_matlab_error("oskar_make_image_dft() failed with code %i: %s",
+                err, oskar_get_error_string(err));
+    }
+    mexPrintf("= Make image complete\n");
+    oskar_mem_free(uu, &err);
+    oskar_mem_free(vv, &err);
+    oskar_mem_free(amp, &err);
+    oskar_mem_free(l, &err);
+    oskar_mem_free(m, &err);
 
 
     /* Construct a MATLAB array to store the image data. */
     mxClassID class_id =
-    		(type == OSKAR_DOUBLE ? mxDOUBLE_CLASS : mxSINGLE_CLASS);
+            (type == OSKAR_DOUBLE ? mxDOUBLE_CLASS : mxSINGLE_CLASS);
     mwSize im_dims[2] = { size, size };
     mxArray* data_ = mxCreateNumericArray(2, im_dims, class_id, mxREAL);
 
     /* Copy the image data into the MATLAB data array */
-	size_t mem_size = oskar_mem_length(img_data);
-	mem_size *= (type == OSKAR_DOUBLE) ? sizeof(double) : sizeof(float);
-	memcpy(mxGetData(data_), oskar_mem_void_const(img_data), mem_size);
+    size_t mem_size = oskar_mem_length(img_data);
+    mem_size *= (type == OSKAR_DOUBLE) ? sizeof(double) : sizeof(float);
+    memcpy(mxGetData(data_), oskar_mem_void_const(img_data), mem_size);
     oskar_mem_free(img_data, &err);
 
     /* Populate output structure */
@@ -181,7 +181,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             "data", "width", "height", "fov_deg", "freq_hz",
     };
     out[0] = mxCreateStructMatrix(1, 1,
-    		sizeof(fields) / sizeof(char*), fields);
+            sizeof(fields) / sizeof(char*), fields);
     mxSetField(out[0], 0, "data", data_);
     mxSetField(out[0], 0, "width", mxCreateDoubleScalar((double)size));
     mxSetField(out[0], 0, "height", mxCreateDoubleScalar((double)size));
