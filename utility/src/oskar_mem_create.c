@@ -89,6 +89,8 @@ oskar_Mem* oskar_mem_create(int type, int location, size_t num_elements,
 #ifdef OSKAR_HAVE_CUDA
         /* Allocate GPU memory. For efficiency, don't clear it. */
         cudaMalloc(&mem->data, bytes);
+        if (mem->data == NULL)
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
         oskar_cuda_check_error(status);
 #else
         *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
