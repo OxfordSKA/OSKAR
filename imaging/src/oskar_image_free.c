@@ -40,7 +40,6 @@ void oskar_image_free(oskar_Image* image, int* status)
 
     /* Free memory. */
     oskar_mem_free(image->data, status);
-    oskar_mem_free(image->settings_path, status);
 
     /* Free the structure itself. */
     free(image);

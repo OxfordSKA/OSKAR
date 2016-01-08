@@ -8,9 +8,6 @@ set(imaging_SRC
     src/oskar_evaluate_image_lm_grid.c
     src/oskar_evaluate_image_lmn_grid.c
     src/oskar_evaluate_image_ranges.c
-    src/oskar_get_image_vis_amps.cpp
-    src/oskar_get_image_baseline_coords.cpp
-    src/oskar_get_image_stokes.c
     src/oskar_image_accessors.c
     src/oskar_image_create.c
     src/oskar_image_free.c

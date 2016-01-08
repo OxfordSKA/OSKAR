@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,8 +68,7 @@ int main(int argc, char** argv)
     // Write TEC screen image.
     if (!error)
     {
-        const char* fname;
-        fname = settings.ionosphere.TECImage.fits_file;
+        const char* fname = settings.ionosphere.TECImage.fits_file;
         if (fname && !error)
         {
             oskar_log_list(log, 'M', 0, "Writing FITS image file: '%s'", fname);

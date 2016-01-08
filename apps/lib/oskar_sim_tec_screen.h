@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,8 @@ extern "C" {
  * @param log        Pointer to a log structure to use.
  */
 OSKAR_APPS_EXPORT
-oskar_Image* oskar_sim_tec_screen(oskar_Settings_old* settings, oskar_Log* log,
-        int* status);
+oskar_Image* oskar_sim_tec_screen(const oskar_Settings_old* settings,
+        oskar_Log* log, int* status);
 
 #ifdef __cplusplus
 }

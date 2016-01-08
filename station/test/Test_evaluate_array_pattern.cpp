@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,6 @@
 #include <oskar_convert_relative_directions_to_enu_directions.h>
 #include <oskar_evaluate_element_weights_dft.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
-#include <oskar_image.h>
 #include <oskar_get_error_string.h>
 #include <oskar_timer.h>
 
@@ -46,77 +45,28 @@
 
 using namespace std;
 
-static void check_images(const oskar_Image* image1, const oskar_Image* image2)
+static void check_images(const oskar_Mem* image1, const oskar_Mem* image2)
 {
     int status = 0;
-
-    if (oskar_image_width(image1) != oskar_image_width(image2) ||
-            oskar_image_height(image1) != oskar_image_height(image2))
-    {
-        FAIL() << "Inconsistent image dimensions.";
-        return;
-    }
-    if (oskar_image_num_pols(image1) != oskar_image_num_pols(image2))
-    {
-        FAIL() << "Inconsistent polarisation dimensions.";
-        return;
-    }
-    if (oskar_image_num_times(image1) != oskar_image_num_times(image2))
-    {
-        FAIL() << "Inconsistent time dimensions.";
-        return;
-    }
-    if (oskar_image_num_channels(image1) != oskar_image_num_channels(image2))
-    {
-        FAIL() << "Inconsistent frequency dimensions.";
-        return;
-    }
-    if ((oskar_mem_type(oskar_image_data_const(image1)) & OSKAR_COMPLEX) !=
-            (oskar_mem_type(oskar_image_data_const(image2)) & OSKAR_COMPLEX))
-    {
-        FAIL() << "Inconsistent data types (complex flag).";
-        return;
-    }
-    if ((oskar_mem_type(oskar_image_data_const(image1)) & OSKAR_MATRIX) !=
-            (oskar_mem_type(oskar_image_data_const(image1)) & OSKAR_MATRIX))
-    {
-        FAIL() << "Inconsistent data types (matrix flag).";
-        return;
-    }
 
     /* Check image contents are the same, to appropriate precision. */
     double min_rel_error = 0., max_rel_error = 0.;
     double avg_rel_error = 0., std_rel_error = 0.;
-    oskar_mem_evaluate_relative_error(oskar_image_data_const(image1),
-            oskar_image_data_const(image2), &min_rel_error, &max_rel_error,
+    oskar_mem_evaluate_relative_error(image1, image2,
+            &min_rel_error, &max_rel_error,
             &avg_rel_error, &std_rel_error, &status);
     ASSERT_EQ(0, status);
     EXPECT_LT(max_rel_error, 1e-5);
     EXPECT_LT(avg_rel_error, 1e-5);
 }
 
-static oskar_Image* set_up_beam_pattern(int type, bool polarised,
-        int image_size, double fov_deg, double ra_deg, double dec_deg,
-        double freq_hz, double mjd, int* status)
+static oskar_Mem* set_up_beam_pattern(int type, bool polarised,
+        int image_size, int* status)
 {
-    oskar_Image* bp;
-    int num_times, num_channels, num_pols;
-    num_times    = 1;
-    num_channels = 1;
-    num_pols     = polarised ? 4 : 1;
-
-    /* Initialise complex image cube. */
-    bp = oskar_image_create(type | OSKAR_COMPLEX, OSKAR_CPU, status);
-    oskar_image_resize(bp, image_size, image_size, num_pols, num_times,
-            num_channels, status);
-
-    /* Set beam pattern meta-data. */
-    oskar_image_set_type(bp, (num_pols == 1) ?
-            OSKAR_IMAGE_TYPE_BEAM_SCALAR : OSKAR_IMAGE_TYPE_BEAM_POLARISED);
-    oskar_image_set_centre(bp, ra_deg, dec_deg);
-    oskar_image_set_fov(bp, fov_deg, fov_deg);
-    oskar_image_set_freq(bp, freq_hz, 1.0);
-    oskar_image_set_time(bp, mjd, 1.0);
+    oskar_Mem* bp;
+    int num_pols = polarised ? 4 : 1;
+    bp = oskar_mem_create(type | OSKAR_COMPLEX, OSKAR_CPU,
+            image_size * image_size * num_pols, status);
     return bp;
 }
 
@@ -200,7 +150,7 @@ static void set_up_pointing(oskar_Mem** weights, oskar_Mem** x, oskar_Mem** y,
     oskar_mem_free(n, status);
 }
 
-static void run_array_pattern(oskar_Image* bp,
+static void run_array_pattern(oskar_Mem* bp,
         const oskar_Station* station, const oskar_Mem* lon,
         const oskar_Mem* lat, double gast, double freq_hz,
         const char* message, int* status)
@@ -216,7 +166,7 @@ static void run_array_pattern(oskar_Image* bp,
     wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
 
     /* Initialise temporary arrays. */
-    pattern = oskar_mem_create(oskar_mem_type(oskar_image_data(bp)), location,
+    pattern = oskar_mem_create(oskar_mem_type(bp), location,
             num_pixels, status);
     ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
     set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, freq_hz, status);
@@ -233,13 +183,13 @@ static void run_array_pattern(oskar_Image* bp,
     oskar_mem_free(y, status);
     oskar_mem_free(z, status);
 
-    oskar_mem_copy_contents(oskar_image_data(bp), pattern, 0, 0,
+    oskar_mem_copy_contents(bp, pattern, 0, 0,
             oskar_mem_length(pattern), status);
     ASSERT_EQ(0, *status) << oskar_get_error_string(*status);
     oskar_mem_free(pattern, status);
 }
 
-static void run_array_pattern_hierarchical(oskar_Image* bp,
+static void run_array_pattern_hierarchical(oskar_Mem* bp,
         const oskar_Station* station, const oskar_Mem* lon,
         const oskar_Mem* lat, double gast, double freq_hz,
         const char* message, int* status)
@@ -255,11 +205,11 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
     wavenumber = 2.0 * M_PI * freq_hz / 299792458.0;
 
     /* Initialise temporary array. */
-    pattern = oskar_mem_create(oskar_mem_type(oskar_image_data(bp)), location,
+    pattern = oskar_mem_create(oskar_mem_type(bp), location,
             num_pixels, status);
 
     /* Create a fake complex "signal" vector of ones. */
-    ones = oskar_mem_create(oskar_mem_type(oskar_image_data(bp)), location,
+    ones = oskar_mem_create(oskar_mem_type(bp), location,
             num_pixels * oskar_station_num_elements(station), status);
     oskar_mem_set_value_real(ones, 1.0, 0, 0, status);
     set_up_pointing(&w, &x, &y, &z, station, lon, lat, gast, freq_hz, status);
@@ -277,7 +227,7 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
 
     if (oskar_mem_is_scalar(pattern))
     {
-        oskar_mem_copy_contents(oskar_image_data(bp), pattern, 0, 0,
+        oskar_mem_copy_contents(bp, pattern, 0, 0,
                 oskar_mem_length(pattern), status);
     }
     else
@@ -290,7 +240,7 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
         /* Re-order the polarisation data. */
         if (oskar_mem_precision(pattern) == OSKAR_SINGLE)
         {
-            float2* p = oskar_mem_float2(oskar_image_data(bp), status);
+            float2* p = oskar_mem_float2(bp, status);
             float4c* tc = oskar_mem_float4c(pattern_temp, status);
             for (int i = 0; i < num_pixels; ++i)
             {
@@ -302,7 +252,7 @@ static void run_array_pattern_hierarchical(oskar_Image* bp,
         }
         else if (oskar_mem_precision(pattern) == OSKAR_DOUBLE)
         {
-            double2* p = oskar_mem_double2(oskar_image_data(bp), status);
+            double2* p = oskar_mem_double2(bp, status);
             double4c* tc = oskar_mem_double4c(pattern_temp, status);
             for (int i = 0; i < num_pixels; ++i)
             {
@@ -328,7 +278,6 @@ TEST(evaluate_array_pattern, test)
     double fov_deg = 10.0;
     double freq_hz = 100e6;
     double gast = 0.0;
-    double mjd = 0.0;
 
     bool polarised;
     int status = 0, type = 0;
@@ -336,18 +285,19 @@ TEST(evaluate_array_pattern, test)
     oskar_Station *station_gpu_f, *station_gpu_d;
     oskar_Mem *lon_cpu_f, *lat_cpu_f, *lon_cpu_d, *lat_cpu_d;
     oskar_Mem *lon_gpu_f, *lat_gpu_f, *lon_gpu_d, *lat_gpu_d;
-    oskar_Image *bp_o2c_2d_cpu_f, *bp_o2c_2d_cpu_d;
-    oskar_Image *bp_o2c_2d_gpu_f, *bp_o2c_2d_gpu_d;
-    oskar_Image *bp_o2c_3d_cpu_f, *bp_o2c_3d_cpu_d;
-    oskar_Image *bp_o2c_3d_gpu_f, *bp_o2c_3d_gpu_d;
-    oskar_Image *bp_c2c_2d_cpu_f, *bp_c2c_2d_cpu_d;
-    oskar_Image *bp_c2c_2d_gpu_f, *bp_c2c_2d_gpu_d;
-    oskar_Image *bp_c2c_3d_cpu_f, *bp_c2c_3d_cpu_d;
-    oskar_Image *bp_c2c_3d_gpu_f, *bp_c2c_3d_gpu_d;
-    oskar_Image *bp_m2m_2d_cpu_f, *bp_m2m_2d_cpu_d;
-    oskar_Image *bp_m2m_2d_gpu_f, *bp_m2m_2d_gpu_d;
-    oskar_Image *bp_m2m_3d_cpu_f, *bp_m2m_3d_cpu_d;
-    oskar_Image *bp_m2m_3d_gpu_f, *bp_m2m_3d_gpu_d;
+
+    oskar_Mem *bp_o2c_2d_cpu_f, *bp_o2c_2d_cpu_d;
+    oskar_Mem *bp_o2c_2d_gpu_f, *bp_o2c_2d_gpu_d;
+    oskar_Mem *bp_o2c_3d_cpu_f, *bp_o2c_3d_cpu_d;
+    oskar_Mem *bp_o2c_3d_gpu_f, *bp_o2c_3d_gpu_d;
+    oskar_Mem *bp_c2c_2d_cpu_f, *bp_c2c_2d_cpu_d;
+    oskar_Mem *bp_c2c_2d_gpu_f, *bp_c2c_2d_gpu_d;
+    oskar_Mem *bp_c2c_3d_cpu_f, *bp_c2c_3d_cpu_d;
+    oskar_Mem *bp_c2c_3d_gpu_f, *bp_c2c_3d_gpu_d;
+    oskar_Mem *bp_m2m_2d_cpu_f, *bp_m2m_2d_cpu_d;
+    oskar_Mem *bp_m2m_2d_gpu_f, *bp_m2m_2d_gpu_d;
+    oskar_Mem *bp_m2m_3d_cpu_f, *bp_m2m_3d_cpu_d;
+    oskar_Mem *bp_m2m_3d_gpu_f, *bp_m2m_3d_gpu_d;
 
     /* Convert inputs. */
     double ra_rad  = ra_deg  * M_PI / 180.0;
@@ -389,60 +339,36 @@ TEST(evaluate_array_pattern, test)
     /* Set up beam patterns. */
     type = OSKAR_SINGLE_COMPLEX;
     polarised = false;
-    bp_o2c_2d_cpu_f = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_o2c_2d_gpu_f = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_o2c_3d_cpu_f = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_o2c_3d_gpu_f = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_c2c_2d_cpu_f = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_c2c_2d_gpu_f = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_c2c_3d_cpu_f = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_c2c_3d_gpu_f = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
+    bp_o2c_2d_cpu_f = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_o2c_2d_gpu_f = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_o2c_3d_cpu_f = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_o2c_3d_gpu_f = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_c2c_2d_cpu_f = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_c2c_2d_gpu_f = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_c2c_3d_cpu_f = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_c2c_3d_gpu_f = set_up_beam_pattern(type, polarised, image_side, &status);
     polarised = true;
     type = OSKAR_SINGLE_COMPLEX_MATRIX;
-    bp_m2m_2d_cpu_f = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_m2m_2d_gpu_f = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_m2m_3d_cpu_f = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_m2m_3d_gpu_f = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
+    bp_m2m_2d_cpu_f = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_m2m_2d_gpu_f = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_m2m_3d_cpu_f = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_m2m_3d_gpu_f = set_up_beam_pattern(type, polarised, image_side, &status);
     type = OSKAR_DOUBLE_COMPLEX;
     polarised = false;
-    bp_o2c_2d_cpu_d = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_o2c_2d_gpu_d = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_o2c_3d_cpu_d = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_o2c_3d_gpu_d = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_c2c_2d_cpu_d = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_c2c_2d_gpu_d = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_c2c_3d_cpu_d = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_c2c_3d_gpu_d = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
+    bp_o2c_2d_cpu_d = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_o2c_2d_gpu_d = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_o2c_3d_cpu_d = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_o2c_3d_gpu_d = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_c2c_2d_cpu_d = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_c2c_2d_gpu_d = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_c2c_3d_cpu_d = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_c2c_3d_gpu_d = set_up_beam_pattern(type, polarised, image_side, &status);
     polarised = true;
     type = OSKAR_DOUBLE_COMPLEX_MATRIX;
-    bp_m2m_2d_cpu_d = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_m2m_2d_gpu_d = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_m2m_3d_cpu_d = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
-    bp_m2m_3d_gpu_d = set_up_beam_pattern(type, polarised, image_side, fov_deg,
-            ra_deg, dec_deg, freq_hz, mjd, &status);
+    bp_m2m_2d_cpu_d = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_m2m_2d_gpu_d = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_m2m_3d_cpu_d = set_up_beam_pattern(type, polarised, image_side, &status);
+    bp_m2m_3d_gpu_d = set_up_beam_pattern(type, polarised, image_side, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Run the tests... */
@@ -560,30 +486,30 @@ TEST(evaluate_array_pattern, test)
 
 
     /* Free images. */
-    oskar_image_free(bp_o2c_2d_cpu_f, &status);
-    oskar_image_free(bp_o2c_2d_gpu_f, &status);
-    oskar_image_free(bp_o2c_3d_cpu_f, &status);
-    oskar_image_free(bp_o2c_3d_gpu_f, &status);
-    oskar_image_free(bp_c2c_2d_cpu_f, &status);
-    oskar_image_free(bp_c2c_2d_gpu_f, &status);
-    oskar_image_free(bp_c2c_3d_cpu_f, &status);
-    oskar_image_free(bp_c2c_3d_gpu_f, &status);
-    oskar_image_free(bp_m2m_2d_cpu_f, &status);
-    oskar_image_free(bp_m2m_2d_gpu_f, &status);
-    oskar_image_free(bp_m2m_3d_cpu_f, &status);
-    oskar_image_free(bp_m2m_3d_gpu_f, &status);
-    oskar_image_free(bp_o2c_2d_cpu_d, &status);
-    oskar_image_free(bp_o2c_2d_gpu_d, &status);
-    oskar_image_free(bp_o2c_3d_cpu_d, &status);
-    oskar_image_free(bp_o2c_3d_gpu_d, &status);
-    oskar_image_free(bp_c2c_2d_cpu_d, &status);
-    oskar_image_free(bp_c2c_2d_gpu_d, &status);
-    oskar_image_free(bp_c2c_3d_cpu_d, &status);
-    oskar_image_free(bp_c2c_3d_gpu_d, &status);
-    oskar_image_free(bp_m2m_2d_cpu_d, &status);
-    oskar_image_free(bp_m2m_2d_gpu_d, &status);
-    oskar_image_free(bp_m2m_3d_cpu_d, &status);
-    oskar_image_free(bp_m2m_3d_gpu_d, &status);
+    oskar_mem_free(bp_o2c_2d_cpu_f, &status);
+    oskar_mem_free(bp_o2c_2d_gpu_f, &status);
+    oskar_mem_free(bp_o2c_3d_cpu_f, &status);
+    oskar_mem_free(bp_o2c_3d_gpu_f, &status);
+    oskar_mem_free(bp_c2c_2d_cpu_f, &status);
+    oskar_mem_free(bp_c2c_2d_gpu_f, &status);
+    oskar_mem_free(bp_c2c_3d_cpu_f, &status);
+    oskar_mem_free(bp_c2c_3d_gpu_f, &status);
+    oskar_mem_free(bp_m2m_2d_cpu_f, &status);
+    oskar_mem_free(bp_m2m_2d_gpu_f, &status);
+    oskar_mem_free(bp_m2m_3d_cpu_f, &status);
+    oskar_mem_free(bp_m2m_3d_gpu_f, &status);
+    oskar_mem_free(bp_o2c_2d_cpu_d, &status);
+    oskar_mem_free(bp_o2c_2d_gpu_d, &status);
+    oskar_mem_free(bp_o2c_3d_cpu_d, &status);
+    oskar_mem_free(bp_o2c_3d_gpu_d, &status);
+    oskar_mem_free(bp_c2c_2d_cpu_d, &status);
+    oskar_mem_free(bp_c2c_2d_gpu_d, &status);
+    oskar_mem_free(bp_c2c_3d_cpu_d, &status);
+    oskar_mem_free(bp_c2c_3d_gpu_d, &status);
+    oskar_mem_free(bp_m2m_2d_cpu_d, &status);
+    oskar_mem_free(bp_m2m_2d_gpu_d, &status);
+    oskar_mem_free(bp_m2m_3d_cpu_d, &status);
+    oskar_mem_free(bp_m2m_3d_gpu_d, &status);
     ASSERT_EQ(0, status) << oskar_get_error_string(status);
 
     /* Free longitude/latitude points. */

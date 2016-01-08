@@ -97,8 +97,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_Mem *uu, *vv, *amp, *l, *m, *img_data;
     int num_samples = mxGetN(in[2]) * mxGetM(in[2]);
     int err = 0;
-    uu = oskar_mem_create(type, OSKAR_CPU, num_samples, &err);
-    vv = oskar_mem_create(type, OSKAR_CPU, num_samples, &err);
+    uu = oskar_mem_create_alias_from_raw(mxGetData(in[0]),
+            type, OSKAR_CPU, num_samples, &err);
+    vv = oskar_mem_create_alias_from_raw(mxGetData(in[1]),
+            type, OSKAR_CPU, num_samples, &err);
     amp = oskar_mem_create(type | OSKAR_COMPLEX, OSKAR_CPU, num_samples, &err);
     l = oskar_mem_create(type, OSKAR_CPU, size * size, &err);
     m = oskar_mem_create(type, OSKAR_CPU, size * size, &err);
@@ -109,12 +111,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         oskar_evaluate_image_lm_grid_d(size, size, fov, fov,
                 oskar_mem_double(l, &err), oskar_mem_double(m, &err));
-        double* uu_ = (double*)mxGetData(in[0]);
-        double* vv_ = (double*)mxGetData(in[1]);
         double* re_ = (double*)mxGetPr(in[2]);
         double* im_ = (double*)mxGetPi(in[2]);
-        double* uuc = oskar_mem_double(uu, &err);
-        double* vvc = oskar_mem_double(vv, &err);
         double2* amp_ = oskar_mem_double2(amp, &err);
         for (int i = 0; i < num_samples; ++i)
         {
@@ -122,20 +120,14 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             t.x = re_[i];
             t.y = im_[i];
             amp_[i] = t;
-            uuc[i] = uu_[i];
-            vvc[i] = vv_[i];
         }
     }
     else
     {
         oskar_evaluate_image_lm_grid_f(size, size, fov, fov,
                 oskar_mem_float(l, &err), oskar_mem_float(m, &err));
-        float* uu_ = (float*)mxGetData(in[0]);
-        float* vv_ = (float*)mxGetData(in[1]);
         float* re_ = (float*)mxGetPr(in[2]);
         float* im_ = (float*)mxGetPi(in[2]);
-        float* uuc = oskar_mem_float(uu, &err);
-        float* vvc = oskar_mem_float(vv, &err);
         float2* amp_ = oskar_mem_float2(amp, &err);
         for (int i = 0; i < num_samples; ++i)
         {
@@ -143,8 +135,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             t.x = re_[i];
             t.y = im_[i];
             amp_[i] = t;
-            uuc[i] = uu_[i];
-            vvc[i] = vv_[i];
         }
     }
 
@@ -177,9 +167,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_mem_free(img_data, &err);
 
     /* Populate output structure */
-    const char* fields[] = {
-            "data", "width", "height", "fov_deg", "freq_hz",
-    };
+    const char* fields[] = {"data", "width", "height", "fov_deg", "freq_hz"};
     out[0] = mxCreateStructMatrix(1, 1,
             sizeof(fields) / sizeof(char*), fields);
     mxSetField(out[0], 0, "data", data_);

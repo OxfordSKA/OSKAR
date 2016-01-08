@@ -42,19 +42,8 @@ oskar_Image* oskar_image_create(int type, int location, int* status)
 
     /* Initialise memory. */
     image->data = oskar_mem_create(type, location, 0, status);
-    image->settings_path = oskar_mem_create(OSKAR_CHAR, OSKAR_CPU, 0,
-            status);
-
-    /* Set default dimension order. */
-    image->dimension_order[0] = OSKAR_IMAGE_DIM_LONGITUDE;
-    image->dimension_order[1] = OSKAR_IMAGE_DIM_LATITUDE;
-    image->dimension_order[2] = OSKAR_IMAGE_DIM_POL;
-    image->dimension_order[3] = OSKAR_IMAGE_DIM_TIME;
-    image->dimension_order[4] = OSKAR_IMAGE_DIM_CHANNEL;
 
     /* Initialise meta-data. */
-    image->grid_type = OSKAR_IMAGE_GRID_TYPE_RECTILINEAR;
-    image->coord_frame = OSKAR_IMAGE_COORD_FRAME_UNDEF;
     image->image_type = OSKAR_IMAGE_TYPE_UNDEF;
     image->centre_lat_deg = 0.0;
     image->centre_lon_deg = 0.0;

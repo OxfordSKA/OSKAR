@@ -43,26 +43,6 @@ const oskar_Mem* oskar_image_data_const(const oskar_Image* image)
     return image->data;
 }
 
-oskar_Mem* oskar_image_settings_path(oskar_Image* image)
-{
-    return image->settings_path;
-}
-
-int oskar_image_grid_type(const oskar_Image* image)
-{
-    return image->grid_type;
-}
-
-int oskar_image_coord_frame(const oskar_Image* image)
-{
-    return image->coord_frame;
-}
-
-const int* oskar_image_dimension_order(const oskar_Image* image)
-{
-    return image->dimension_order;
-}
-
 int oskar_image_type(const oskar_Image* image)
 {
     return image->image_type;
@@ -91,11 +71,6 @@ int oskar_image_num_times(const oskar_Image* image)
 int oskar_image_num_channels(const oskar_Image* image)
 {
     return image->num_channels;
-}
-
-int oskar_image_healpix_nside(const oskar_Image* image)
-{
-    return image->healpix_nside;
 }
 
 double oskar_image_centre_lon_deg(const oskar_Image* image)
@@ -141,21 +116,6 @@ double oskar_image_freq_inc_hz(const oskar_Image* image)
 void oskar_image_set_type(oskar_Image* image, int image_type)
 {
     image->image_type = image_type;
-}
-
-void oskar_image_set_coord_frame(oskar_Image* image, int coord_frame)
-{
-    image->coord_frame = coord_frame;
-}
-
-void oskar_image_set_grid_type(oskar_Image* image, int grid_type)
-{
-    image->grid_type = grid_type;
-}
-
-void oskar_image_set_healpix_nside(oskar_Image* image, int nside)
-{
-    image->healpix_nside = nside;
 }
 
 void oskar_image_set_centre(oskar_Image* image, double centre_lon_deg,

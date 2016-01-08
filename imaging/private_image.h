@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,17 +34,12 @@
 struct oskar_Image
 {
     oskar_Mem* data;
-    oskar_Mem* settings_path;
-    int grid_type;   /* NEW v2.4 */
-    int coord_frame; /* NEW v2.4 */
-    int dimension_order[5];
     int image_type;
     int width;
     int height;
     int num_pols;
     int num_times;
     int num_channels;
-    int healpix_nside; /* NEW v2.4 */
     double centre_lon_deg;
     double centre_lat_deg;
     double fov_lon_deg;

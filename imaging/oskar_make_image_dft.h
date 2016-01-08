@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,8 +53,8 @@ extern "C" {
  * input l,m positions.
  *
  * @param[out] image        Output image.
- * @param[in]  uu_metres    Baseline u co-ordinates, in metres.
- * @param[in]  vv_metres    Baseline v co-ordinates, in metres.
+ * @param[in]  uu_metres    Baseline u coordinates, in metres.
+ * @param[in]  vv_metres    Baseline v coordinates, in metres.
  * @param[in]  amp          Complex visibility amplitude.
  * @param[in]  l            Array of image l coordinates.
  * @param[in]  m            Array of image m coordinates.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, The University of Oxford
+ * Copyright (c) 2014-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ extern "C" {
  * which it points, so it must have been created using an
  * oskar_mem_create_alias*() function.
  *
- * @param[in] src           Handle to destination memory block.
+ * @param[in] mem           Handle to destination memory block.
  * @param[in] src           Handle to source memory block.
  * @param[in] offset        Offset number of elements from start of source memory block.
  * @param[in] num_elements  Number of elements in the returned array.

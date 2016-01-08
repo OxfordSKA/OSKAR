@@ -7,7 +7,7 @@ set(apps_SRC
     src/oskar_dir.cpp
     src/oskar_evaluate_station_pierce_points.cpp
     src/oskar_fit_element_data.cpp
-    src/oskar_imager.cpp
+    src/oskar_imager.c
     src/oskar_set_up_sky.c
     src/oskar_set_up_telescope.c
     src/oskar_set_up_vis.c
