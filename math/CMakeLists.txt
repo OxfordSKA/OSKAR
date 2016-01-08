@@ -7,6 +7,7 @@ set(math_SRC
     src/oskar_angular_distance.c
     src/oskar_bearing_angle.c
     src/oskar_dft_c2r_2d_omp.c
+    src/oskar_dft_c2r_3d_omp.c
     src/oskar_dftw_c2c_2d_omp.c
     src/oskar_dftw_c2c_3d_omp.c
     src/oskar_dftw_m2m_2d_omp.c
@@ -32,6 +33,7 @@ set(math_SRC
 if (CUDA_FOUND)
     list(APPEND math_SRC
         src/oskar_dft_c2r_2d_cuda.cu
+        src/oskar_dft_c2r_3d_cuda.cu
         src/oskar_dftw_c2c_2d_cuda.cu
         src/oskar_dftw_c2c_3d_cuda.cu
         src/oskar_dftw_m2m_2d_cuda.cu
