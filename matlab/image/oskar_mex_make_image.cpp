@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,11 @@
 #include <mex.h>
 #include <cuda_runtime_api.h>
 #include <oskar_get_error_string.h>
-#include <oskar_make_image_dft.h>
-#include <oskar_evaluate_image_lm_grid.h>
+#include <oskar_dft_c2r_3d_cuda.h>
+#include <oskar_evaluate_image_lmn_grid.h>
 
 #include "matlab/common/oskar_matlab_common.h"
 
-#include <cstdio>
 #include <cstdlib>
 #include <oskar_cmath.h>
 
@@ -46,9 +45,15 @@ void cleanup(void)
 
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    if (num_in != 6 && num_out != 1)
+    oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *l_c, *m_c, *n_c, *im_c;
+    oskar_Mem *uu_g, *vv_g, *ww_g, *amp_g, *l_g, *m_g, *n_g, *im_g;
+    int size, err = 0;
+    double fov, fov_deg, freq, wavenumber;
+    int i, num_vis, num_pixels, type;
+
+    if (num_in != 7 && num_out != 1)
     {
-        const char* args = "<uu>, <vv>, <amps>, <frequency in Hz>, "
+        const char* args = "<uu>, <vv>, <ww>, <amps>, <frequency in Hz>, "
                 "<no. pixels>, <FOV in deg>";
         const char* desc = "Function to make an image from a set "
                 "of visibilities.";
@@ -65,56 +70,79 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 args, desc);
     }
 
-    // Make sure visibility data array is complex.
-    if (!mxIsComplex(in[2]))
+    /* Make sure visibility data array is complex. */
+    if (!mxIsComplex(in[3]))
         oskar_matlab_error("Input visibility amplitude array must be complex");
 
-    // Check consistency of data precision.
-    int type = 0;
+    /* Check consistency of data precision. */
     if (mxGetClassID(in[0]) == mxDOUBLE_CLASS &&
             mxGetClassID(in[1]) == mxDOUBLE_CLASS &&
-            mxGetClassID(in[2]) == mxDOUBLE_CLASS)
+            mxGetClassID(in[2]) == mxDOUBLE_CLASS &&
+            mxGetClassID(in[3]) == mxDOUBLE_CLASS)
     {
         type = OSKAR_DOUBLE;
     }
     else if (mxGetClassID(in[0]) == mxSINGLE_CLASS &&
             mxGetClassID(in[1]) == mxSINGLE_CLASS &&
-            mxGetClassID(in[2]) == mxSINGLE_CLASS)
+            mxGetClassID(in[2]) == mxSINGLE_CLASS &&
+            mxGetClassID(in[3]) == mxSINGLE_CLASS)
     {
         type = OSKAR_SINGLE;
     }
     else
     {
-        oskar_matlab_error("uu, vv, and amplitudes must be of the same type");
+        oskar_matlab_error("uu, vv, ww and amplitudes must be of the same type");
     }
 
-    // Retrieve input arguments.
-    double freq = mxGetScalar(in[3]);
-    int size    = (int)mxGetScalar(in[4]);
-    double fov_deg = mxGetScalar(in[5]);
-    double fov  = fov_deg * M_PI/180.0;
+    /* Read inputs. */
+    freq       = mxGetScalar(in[4]);
+    size       = (int)mxGetScalar(in[5]);
+    fov_deg    = mxGetScalar(in[6]);
+    fov        = fov_deg * M_PI/180.0;
+    num_pixels = size * size;
 
-    oskar_Mem *uu, *vv, *amp, *l, *m, *img_data;
-    int num_samples = mxGetN(in[2]) * mxGetM(in[2]);
-    int err = 0;
-    uu = oskar_mem_create_alias_from_raw(mxGetData(in[0]),
-            type, OSKAR_CPU, num_samples, &err);
-    vv = oskar_mem_create_alias_from_raw(mxGetData(in[1]),
-            type, OSKAR_CPU, num_samples, &err);
-    amp = oskar_mem_create(type | OSKAR_COMPLEX, OSKAR_CPU, num_samples, &err);
-    l = oskar_mem_create(type, OSKAR_CPU, size * size, &err);
-    m = oskar_mem_create(type, OSKAR_CPU, size * size, &err);
-    img_data = oskar_mem_create(type, OSKAR_CPU, size * size, &err);
+    /* Create a MATLAB array to store the image data. */
+    mxClassID class_id =
+            (type == OSKAR_DOUBLE ? mxDOUBLE_CLASS : mxSINGLE_CLASS);
+    mwSize im_dims[2] = { size, size };
+    mxArray* data_ = mxCreateNumericArray(2, im_dims, class_id, mxREAL);
 
-    // Set up imaging data.
+    /* Pointers to input/output arrays. */
+    num_vis = mxGetN(in[3]) * mxGetM(in[3]);
+    uu_c = oskar_mem_create_alias_from_raw(mxGetData(in[0]), type, OSKAR_CPU,
+            num_vis, &err);
+    vv_c = oskar_mem_create_alias_from_raw(mxGetData(in[1]), type, OSKAR_CPU,
+            num_vis, &err);
+    ww_c = oskar_mem_create_alias_from_raw(mxGetData(in[2]), type, OSKAR_CPU,
+            num_vis, &err);
+    im_c = oskar_mem_create_alias_from_raw(mxGetData(data_), type, OSKAR_CPU,
+            num_pixels, &err);
+    amp_c = oskar_mem_create(type | OSKAR_COMPLEX, OSKAR_CPU,
+            num_vis, &err);
+
+    /* Create the image grid. */
+    l_c = oskar_mem_create(type, OSKAR_CPU, num_pixels, &err);
+    m_c = oskar_mem_create(type, OSKAR_CPU, num_pixels, &err);
+    n_c = oskar_mem_create(type, OSKAR_CPU, num_pixels, &err);
+    oskar_evaluate_image_lmn_grid(size, size, fov, fov, l_c, m_c, n_c, &err);
+    if (type == OSKAR_SINGLE)
+    {
+        float* n = oskar_mem_float(n_c, &err);
+        for (i = 0; i < num_pixels; ++i) n[i] -= 1.0;
+    }
+    else
+    {
+        double* n = oskar_mem_double(n_c, &err);
+        for (i = 0; i < num_pixels; ++i) n[i] -= 1.0;
+    }
+
+    /* Convert amplitude array from MATLAB format to standard complex. */
     if (type == OSKAR_DOUBLE)
     {
-        oskar_evaluate_image_lm_grid_d(size, size, fov, fov,
-                oskar_mem_double(l, &err), oskar_mem_double(m, &err));
-        double* re_ = (double*)mxGetPr(in[2]);
-        double* im_ = (double*)mxGetPi(in[2]);
-        double2* amp_ = oskar_mem_double2(amp, &err);
-        for (int i = 0; i < num_samples; ++i)
+        double* re_ = (double*)mxGetPr(in[3]);
+        double* im_ = (double*)mxGetPi(in[3]);
+        double2* amp_ = oskar_mem_double2(amp_c, &err);
+        for (i = 0; i < num_vis; ++i)
         {
             double2 t;
             t.x = re_[i];
@@ -124,12 +152,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
     else
     {
-        oskar_evaluate_image_lm_grid_f(size, size, fov, fov,
-                oskar_mem_float(l, &err), oskar_mem_float(m, &err));
-        float* re_ = (float*)mxGetPr(in[2]);
-        float* im_ = (float*)mxGetPi(in[2]);
-        float2* amp_ = oskar_mem_float2(amp, &err);
-        for (int i = 0; i < num_samples; ++i)
+        float* re_ = (float*)mxGetPr(in[3]);
+        float* im_ = (float*)mxGetPi(in[3]);
+        float2* amp_ = oskar_mem_float2(amp_c, &err);
+        for (i = 0; i < num_vis; ++i)
         {
             float2 t;
             t.x = re_[i];
@@ -138,33 +164,72 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
     }
 
+    /* Copy input data to the GPU. */
+    uu_g = oskar_mem_create_copy(uu_c, OSKAR_GPU, &err);
+    vv_g = oskar_mem_create_copy(vv_c, OSKAR_GPU, &err);
+    ww_g = oskar_mem_create_copy(ww_c, OSKAR_GPU, &err);
+    amp_g = oskar_mem_create_copy(amp_c, OSKAR_GPU, &err);
+    l_g = oskar_mem_create_copy(l_c, OSKAR_GPU, &err);
+    m_g = oskar_mem_create_copy(m_c, OSKAR_GPU, &err);
+    n_g = oskar_mem_create_copy(n_c, OSKAR_GPU, &err);
+
     /* Make the image. */
     mexPrintf("= Making image...\n");
-    oskar_make_image_dft(img_data, uu, vv, amp, l, m, freq, &err);
+    im_g = oskar_mem_create(type, OSKAR_GPU, num_pixels, &err);
+    wavenumber = 2.0 * M_PI * freq / 299792458.0;
+    if (!err)
+    {
+        if (type == OSKAR_SINGLE)
+            oskar_dft_c2r_3d_cuda_f(num_vis, wavenumber,
+                    oskar_mem_float_const(uu_g, &err),
+                    oskar_mem_float_const(vv_g, &err),
+                    oskar_mem_float_const(ww_g, &err),
+                    oskar_mem_float2_const(amp_g, &err), num_pixels,
+                    oskar_mem_float_const(l_g, &err),
+                    oskar_mem_float_const(m_g, &err),
+                    oskar_mem_float_const(n_g, &err),
+                    oskar_mem_float(im_g, &err));
+        else
+            oskar_dft_c2r_3d_cuda_d(num_vis, wavenumber,
+                    oskar_mem_double_const(uu_g, &err),
+                    oskar_mem_double_const(vv_g, &err),
+                    oskar_mem_double_const(ww_g, &err),
+                    oskar_mem_double2_const(amp_g, &err), num_pixels,
+                    oskar_mem_double_const(l_g, &err),
+                    oskar_mem_double_const(m_g, &err),
+                    oskar_mem_double_const(n_g, &err),
+                    oskar_mem_double(im_g, &err));
+    }
+    oskar_cuda_check_error(&err);
+    oskar_mem_scale_real(im_g, 1.0 / num_vis, &err);
+
+    /* Copy image data back from GPU. */
+    oskar_mem_copy(im_c, im_g, &err);
+
+    /* Free memory. */
+    oskar_mem_free(uu_c, &err);
+    oskar_mem_free(uu_g, &err);
+    oskar_mem_free(vv_c, &err);
+    oskar_mem_free(vv_g, &err);
+    oskar_mem_free(ww_c, &err);
+    oskar_mem_free(ww_g, &err);
+    oskar_mem_free(amp_c, &err);
+    oskar_mem_free(amp_g, &err);
+    oskar_mem_free(l_c, &err);
+    oskar_mem_free(l_g, &err);
+    oskar_mem_free(m_c, &err);
+    oskar_mem_free(m_g, &err);
+    oskar_mem_free(n_c, &err);
+    oskar_mem_free(n_g, &err);
+    oskar_mem_free(im_c, &err);
+    oskar_mem_free(im_g, &err);
+
     if (err)
     {
-        oskar_matlab_error("oskar_make_image_dft() failed with code %i: %s",
+        oskar_matlab_error("Failed with code %i: %s",
                 err, oskar_get_error_string(err));
     }
     mexPrintf("= Make image complete\n");
-    oskar_mem_free(uu, &err);
-    oskar_mem_free(vv, &err);
-    oskar_mem_free(amp, &err);
-    oskar_mem_free(l, &err);
-    oskar_mem_free(m, &err);
-
-
-    /* Construct a MATLAB array to store the image data. */
-    mxClassID class_id =
-            (type == OSKAR_DOUBLE ? mxDOUBLE_CLASS : mxSINGLE_CLASS);
-    mwSize im_dims[2] = { size, size };
-    mxArray* data_ = mxCreateNumericArray(2, im_dims, class_id, mxREAL);
-
-    /* Copy the image data into the MATLAB data array */
-    size_t mem_size = oskar_mem_length(img_data);
-    mem_size *= (type == OSKAR_DOUBLE) ? sizeof(double) : sizeof(float);
-    memcpy(mxGetData(data_), oskar_mem_void_const(img_data), mem_size);
-    oskar_mem_free(img_data, &err);
 
     /* Populate output structure */
     const char* fields[] = {"data", "width", "height", "fov_deg", "freq_hz"};

@@ -31,7 +31,6 @@
 #include <private_log.h>
 #include <oskar_log.h>
 #include <oskar_telescope.h>
-#include <oskar_image.h>
 #include <oskar_Settings_old.h>
 
 #include <stdio.h>
@@ -815,7 +814,7 @@ void oskar_log_settings_image(oskar_Log* log, const oskar_Settings_old* s)
 
     /* Output files. */
     LVS0("Input OSKAR visibility file", s->image.input_vis_data);
-    LVS0("Output FITS image file", s->image.fits_image);
+    LVS0("Output image root path", s->image.root_path);
 }
 
 void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings_old* s)

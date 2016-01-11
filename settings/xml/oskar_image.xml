@@ -38,13 +38,13 @@
     </s>
     <s k="channel_start"><label>Channel start</label>
         <type name="uint" default="0"/>
-        <desc>The start channel index to include in the image or image 
+        <desc>The start channel index to include in the image or image
             cube.</desc>
         <depends k="image/channel_snapshots" v="true"/>
     </s>
     <s k="channel_end"><label>Channel end</label>
         <type name="IntRangeExt" default="max" >0,MAX,max</type>
-        <desc>The end channel index to include in the image or image 
+        <desc>The end channel index to include in the image or image
             cube.</desc>
         <depends k="image/channel_snapshots" v="true"/>
     </s>
@@ -64,13 +64,10 @@
         <desc>The end time index to include in the image or image cube.</desc>
         <depends k="image/time_snapshots" v="true"/>
     </s>
-    <!--
     <s k="transform_type"><label>Transform type</label>
-        <type name="OptionList" default="DFT 2D">DFT 2D, DFT 3D, FFT</type>
-        <desc>The type of transform used to generate the image. More options
-            may be available in a later release.</desc>
+        <type name="OptionList" default="DFT 2D">DFT 2D, DFT 3D</type>
+        <desc>The type of transform used to generate the image.</desc>
     </s>
-    -->
     <s k="direction"><label>Image centre direction</label>
         <type name="OptionList" default="Obs">
             Observation direction,"RA, Dec."
@@ -101,24 +98,10 @@
     </s>
     <s k="root_path"><label>Output image root path</label>
         <type name="OutputFile"/>
-        <desc>Path consisting of the root of the image filename used to save
-            the output image. The full filename will be constructed as <code><b>
-            &amp;lt;root&amp;gt;_&amp;lt;image_type&amp;gt;.&amp;lt;extension&amp;gt;
+        <desc>The root filename used to save the output image. The full
+            filename will be constructed as
+            <code><b>&amp;lt;root&amp;gt;_&amp;lt;image_type&amp;gt;.fits
             </b></code>
         </desc>
-    </s>
-    <s k="fits_image"><label>Save FITS image</label>
-        <type name="bool" default="true"/>
-        <desc>If true, save the image in FITS format.</desc>
-    </s>
-    <s k="overwrite"><label>Overwrite existing images</label>
-        <type name="bool" default="true"/>
-        <desc>If <b>true</b>, existing image files will be overwritten. If
-            <b>false</b>, new image files of the same name will be created by
-            appending an number to the existing filename with the pattern:
-            <br/>
-            <code>&amp;nbsp;&amp;nbsp;<b>&amp;lt;filename&amp;gt;&amp;#8209;&amp;lt;N&amp;gt;.&amp;lt;extension&amp;gt;</b></code>,
-            <br/>where N starts at 1 and is incremented for each new image 
-            created.</desc>
     </s>
 </s>

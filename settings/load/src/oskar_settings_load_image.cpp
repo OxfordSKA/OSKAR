@@ -27,7 +27,6 @@
  */
 
 #include <oskar_settings_load_image.h>
-#include <oskar_image.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -138,36 +137,10 @@ void oskar_settings_load_image(oskar_SettingsImage* im,
         strcpy(im->input_vis_data, t.constData());
     }
 
-    bool overwrite = s.value("overwrite", true).toBool();
     t = s.value("root_path").toByteArray();
     if (t.size() > 0)
     {
-        t += "_" + type;
-        // Construct FITS filename
-        if (s.value("fits_image", true).toBool())
-        {
-            QByteArray filename = t;
-            if (!overwrite && QFile::exists(QString(filename) + ".fits"))
-            {
-                int i = 1;
-                while (true)
-                {
-                    QString test = QString(t) + "-" + QString::number(i);
-                    test += ".fits";
-                    if (!QFile::exists(QString(test)))
-                    {
-                        filename = test.toLatin1();
-                        break;
-                    }
-                    ++i;
-                }
-            }
-            else
-            {
-                filename += ".fits";
-            }
-            im->fits_image = (char*)malloc(filename.size() + 1);
-            strcpy(im->fits_image, filename.constData());
-        }
+        im->root_path = (char*)malloc(t.size() + 1);
+        strcpy(im->root_path, t.constData());
     }
 }

@@ -48,17 +48,9 @@ int main(int argc, char** argv)
 
     // Create the log.
     oskar_Log* log = oskar_log_create(OSKAR_LOG_MESSAGE, OSKAR_LOG_STATUS);
-    oskar_log_list(log, 'M', 0, "Running binary %s", argv[0]);
+    oskar_log_message(log, 'M', 0, "Running binary %s", argv[0]);
 
-    int error = OSKAR_SUCCESS;
-    try
-    {
-        error = oskar_evaluate_station_pierce_points(filename, log);
-    }
-    catch (int code)
-    {
-        error = code;
-    }
+    int error = oskar_evaluate_station_pierce_points(filename, log);
 
     // Check for errors.
     if (error)

@@ -121,8 +121,8 @@ void oskar_settings_old_free(oskar_Settings_old* settings)
     /* Free imager file names. */
     free(settings->image.input_vis_data);
     settings->image.input_vis_data = NULL;
-    free(settings->image.fits_image);
-    settings->image.fits_image = NULL;
+    free(settings->image.root_path);
+    settings->image.root_path = NULL;
 
     /* Free noise settings pointers */
     free(noise->freq.file);

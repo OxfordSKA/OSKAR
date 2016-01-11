@@ -29,7 +29,6 @@
 /* FIXME Remove? */
 #include <private_binary.h>
 
-#include <oskar_image.h>
 #include <oskar_vis.h>
 #include <oskar_sky.h>
 #include <oskar_log.h>

@@ -65,9 +65,24 @@ struct oskar_SettingsImage
     double ra_deg;         /* custom image pointing direction */
     double dec_deg;        /* custom image pointing direction */
 
-    char* fits_image;      /* FITS file name path */
+    char* root_path;       /* Output root path name */
 };
 typedef struct oskar_SettingsImage oskar_SettingsImage;
+
+enum OSKAR_IMAGE_TYPE
+{
+    OSKAR_IMAGE_TYPE_STOKES, /* IQUV */
+    OSKAR_IMAGE_TYPE_STOKES_I,
+    OSKAR_IMAGE_TYPE_STOKES_Q,
+    OSKAR_IMAGE_TYPE_STOKES_U,
+    OSKAR_IMAGE_TYPE_STOKES_V,
+    OSKAR_IMAGE_TYPE_POL_LINEAR, /* all linear polarisations XX,XY,YX,YY */
+    OSKAR_IMAGE_TYPE_POL_XX,
+    OSKAR_IMAGE_TYPE_POL_YY,
+    OSKAR_IMAGE_TYPE_POL_XY,
+    OSKAR_IMAGE_TYPE_POL_YX,
+    OSKAR_IMAGE_TYPE_PSF
+};
 
 enum OSKAR_IMAGE_TRANSFORM_TYPE
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, The University of Oxford
+ * Copyright (c) 2014-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,12 +34,10 @@
 #include <oskar_settings_log.h>
 
 #include <oskar_element.h>
-#include <oskar_image.h>
 #include <oskar_log.h>
 #include <oskar_settings_old_init.h>
 #include <oskar_settings_old_free.h>
 #include <oskar_get_error_string.h>
-#include <fits/oskar_fits_image_write.h>
 
 #include <string>
 #include <sstream>

@@ -7,7 +7,6 @@ if (CUDA_FOUND)
     # Fits source code.
     set(fits_SRC
         src/oskar_fits_healpix_write_mem.c
-        src/oskar_fits_image_write.c
         src/oskar_fits_image_to_sky_model.c
         src/oskar_fits_healpix_to_sky_model.c
         src/oskar_fits_write_axis_header.c

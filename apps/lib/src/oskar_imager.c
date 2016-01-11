@@ -30,14 +30,14 @@
 #include <oskar_cmath.h>
 #include <oskar_convert_ecef_to_baseline_uvw.h>
 #include <oskar_convert_lon_lat_to_relative_directions.h>
+#include <oskar_cuda_check_error.h>
 #include <oskar_dft_c2r_2d_cuda.h>
+#include <oskar_dft_c2r_3d_cuda.h>
 #include <oskar_evaluate_image_lmn_grid.h>
 #include <oskar_evaluate_image_ranges.h>
 #include <oskar_get_error_string.h>
 #include <oskar_imager.h>
-#include <oskar_image.h>
 #include <oskar_log.h>
-#include <oskar_make_image_dft.h>
 #include <oskar_settings_log.h>
 #include <oskar_settings_load.h>
 #include <oskar_settings_old_free.h>
@@ -49,11 +49,16 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "fits/oskar_fits_image_write.h"
-
 #define DEG2RAD M_PI/180.0
 
 #define SEC2DAYS 1.15740740740740740740741e-5
+
+#if __STDC_VERSION__ >= 199901L
+#define SNPRINTF(BUF, SIZE, FMT, ...) snprintf(BUF, SIZE, FMT, __VA_ARGS__);
+#else
+#define SNPRINTF(BUF, SIZE, FMT, ...) sprintf(BUF, FMT, __VA_ARGS__);
+#endif
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,7 +69,7 @@ struct DeviceData
 {
     oskar_Mem *l, *m, *n; /* Direction cosines for DFT imager. */
     oskar_Mem *uu, *vv, *ww, *amp;
-    oskar_Mem *slice_gpu, *slice_cpu;
+    oskar_Mem *chunk_gpu, *chunk_cpu;
 };
 typedef struct DeviceData DeviceData;
 
@@ -82,14 +87,14 @@ struct HostData
     int im_num_chan, im_num_times, im_num_pols;
     int vis_num_channels, vis_num_times, vis_num_pols;
     int size, num_pixels, im_type, transform_type, direction_type, num_vis;
-    double im_ra_deg, im_dec_deg, vis_ra_deg, vis_dec_deg;
+    double im_centre_deg[2], vis_ra_deg, vis_dec_deg;
     double vis_freq_start_hz, im_freq_start_hz, freq_inc_hz;
     double vis_time_start_mjd_utc, im_time_start_mjd_utc, time_inc_sec;
-    double delta_l, delta_m, delta_n, fov_deg, fov_rad;
-    char *image_name, *vis_name;
+    double delta_l, delta_m, delta_n;
+    char *image_root, *vis_name;
     oskar_Settings_old s;
     oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im;
-    oskar_Mem *uu_tmp, *vv_tmp, *ww_tmp, *l, *m, *n, *im_slice, *stokes;
+    oskar_Mem *uu_tmp, *vv_tmp, *ww_tmp, *l, *m, *n, *stokes, *chunk_tmp;
     oskar_Mem *uu_rot, *vv_rot, *ww_rot, *work_uvw;
     const oskar_Mem *st_ecef_x, *st_ecef_y, *st_ecef_z;
     const oskar_Mem *baseline_uu, *baseline_vv, *baseline_ww;
@@ -97,7 +102,6 @@ struct HostData
     oskar_Vis* vis; /* FIXME Remove. */
     oskar_VisHeader* hdr;
     oskar_VisBlock* blk;
-    oskar_Image* im; /* FIXME Remove. */
     fitsfile* fits_file[4];
 };
 typedef struct HostData HostData;
@@ -107,10 +111,12 @@ static fitsfile* create_fits_file(const char* filename, int precision,
         int width, int height, int num_times, int num_channels,
         double centre_deg[2], double fov_deg[2], double start_time_mjd,
         double delta_time_sec, double start_freq_hz, double delta_freq_hz,
-        const char* settings_log, size_t settings_log_length, int* status);
+        int* status);
 static void write_axis_header(fitsfile* fptr, int axis_id,
         const char* ctype, const char* ctype_comment, double crval,
         double cdelt, double crpix, double crota, int* status);
+static void write_chunk(HostData* h, const DeviceData* d, int t, int c, int p,
+        int* status);
 static void phase_rotate_vis_amps(oskar_Mem* amps, int num_vis, int type,
         double delta_l, double delta_m, double delta_n, const oskar_Mem* uu,
         const oskar_Mem* vv, const oskar_Mem* ww, double freq);
@@ -140,7 +146,7 @@ static double fov_to_cellsize(double fov_deg, int num_pixels)
 void oskar_imager(const char* settings_file, oskar_Log* log, int* status)
 {
     int i, c, t, p;
-    DeviceData* d = 0;
+    DeviceData *d = 0, *dd = 0;
     HostData* h = 0;
 
     /* Create the host data structure (initialised with all bits zero). */
@@ -173,57 +179,62 @@ void oskar_imager(const char* settings_file, oskar_Log* log, int* status)
         set_up_device_data(&d[i], h, status);
     }
 
+    /* Make the images. */
+    oskar_log_section(log, 'M', "Starting imager...");
+
     /* Convert linear polarisations to Stokes parameters if required. */
     if (h->use_stokes)
         get_stokes(oskar_vis_amplitude_const(h->vis), h->stokes, status);
 
-    /* Make the image. */
-    oskar_log_section(log, 'M', "Starting imager...");
-
-    for (i = 0, c = 0; c < h->im_num_chan; ++c)
+    dd = &d[0]; /* GPU ID. */
+    for (c = 0; c < h->im_num_chan; ++c)
     {
-        int vis_chan, vis_time, slice_offset;
-        double im_freq;
+        int vis_chan, vis_time;
+        double im_freq, wavenumber;
 
         if (*status) break;
         vis_chan = h->im_chan_range[0] + c;
         im_freq = h->im_freq_start_hz + c * h->freq_inc_hz;
+        wavenumber = 2.0 * M_PI * im_freq / 299792458.0;
 
         for (t = 0; t < h->im_num_times; ++t)
         {
             if (*status) break;
             vis_time = h->im_time_range[0] + t;
 
-            /* Evaluate baseline coordinates needed for imaging. */
-            if (h->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
+            /* Get the baseline coordinates needed for imaging. */
+            if (h->direction_type == OSKAR_IMAGE_DIRECTION_OBSERVATION)
+                get_baseline_coords(h->num_baselines, h->baseline_uu,
+                        h->baseline_vv, h->baseline_ww, h->vis_time_range,
+                        h->vis_chan_range, vis_time, h->vis_freq_start_hz,
+                        h->freq_inc_hz, im_freq, h->time_snapshots,
+                        h->channel_snapshots, h->uu_im, h->vv_im,
+                        h->ww_im, status);
+            else
             {
                 /* Rotated coordinates (used for imaging) */
                 get_baseline_coords(h->num_baselines, h->uu_rot,
                         h->vv_rot, h->ww_rot, h->vis_time_range,
                         h->vis_chan_range, vis_time, h->vis_freq_start_hz,
                         h->freq_inc_hz, im_freq, h->time_snapshots,
-                        h->channel_snapshots, h->uu_im, h->vv_im, h->ww_im,
-                        status);
+                        h->channel_snapshots, h->uu_im, h->vv_im,
+                        h->ww_im, status);
 
                 /* Unrotated coordinates (used for phase rotation) */
                 get_baseline_coords(h->num_baselines, h->baseline_uu,
                         h->baseline_vv, h->baseline_ww, h->vis_time_range,
                         h->vis_chan_range, vis_time, h->vis_freq_start_hz,
                         h->freq_inc_hz, im_freq, h->time_snapshots,
-                        h->channel_snapshots, h->uu_tmp, h->vv_tmp, h->ww_tmp,
-                        status);
-            }
-            else
-            {
-                get_baseline_coords(h->num_baselines, h->baseline_uu,
-                        h->baseline_vv, h->baseline_ww, h->vis_time_range,
-                        h->vis_chan_range, vis_time, h->vis_freq_start_hz,
-                        h->freq_inc_hz, im_freq, h->time_snapshots,
-                        h->channel_snapshots, h->uu_im, h->vv_im, h->ww_im,
-                        status);
+                        h->channel_snapshots, h->uu_tmp, h->vv_tmp,
+                        h->ww_tmp, status);
             }
 
-            for (p = 0; p < h->im_num_pols; ++p, ++i)
+            /* Copy baseline coordinates to GPU. */
+            oskar_mem_copy(dd->uu, h->uu_im, status);
+            oskar_mem_copy(dd->vv, h->vv_im, status);
+            oskar_mem_copy(dd->ww, h->ww_im, status);
+
+            for (p = 0; p < h->im_num_pols; ++p)
             {
                 if (*status) break;
 
@@ -244,36 +255,101 @@ void oskar_imager(const char* settings_file, oskar_Log* log, int* status)
                                 h->uu_tmp, h->vv_tmp, h->ww_tmp, im_freq);
                 }
 
-                /* Get pointer to slice of the image cube. */
-                slice_offset = h->num_pixels *
-                        ((c * h->im_num_times + t) * h->im_num_pols + p);
-                oskar_mem_set_alias(h->im_slice, oskar_image_data(h->im),
-                        slice_offset, h->num_pixels, status);
+                /* Copy visibility amplitude data to GPU. */
+                oskar_mem_copy(dd->amp, h->vis_im, status);
 
-                /* Make the image */
+                /* Make the (partial) image slice. */
                 if (h->transform_type == OSKAR_IMAGE_DFT_2D)
                 {
-                    oskar_make_image_dft(h->im_slice, h->uu_im, h->vv_im,
-                            h->vis_im, d[0].l, d[0].m, im_freq, status);
+                    if (h->prec == OSKAR_DOUBLE)
+                        oskar_dft_c2r_2d_cuda_d(h->num_vis, wavenumber,
+                                oskar_mem_double_const(dd->uu, status),
+                                oskar_mem_double_const(dd->vv, status),
+                                oskar_mem_double2_const(dd->amp, status),
+                                h->num_pixels,
+                                oskar_mem_double_const(dd->l, status),
+                                oskar_mem_double_const(dd->m, status),
+                                oskar_mem_double(dd->chunk_gpu, status));
+                    else
+                        oskar_dft_c2r_2d_cuda_f(h->num_vis, wavenumber,
+                                oskar_mem_float_const(dd->uu, status),
+                                oskar_mem_float_const(dd->vv, status),
+                                oskar_mem_float2_const(dd->amp, status),
+                                h->num_pixels,
+                                oskar_mem_float_const(dd->l, status),
+                                oskar_mem_float_const(dd->m, status),
+                                oskar_mem_float(dd->chunk_gpu, status));
+                    oskar_cuda_check_error(status);
+                    oskar_mem_scale_real(dd->chunk_gpu,
+                            1.0 / h->num_vis, status);
+                    write_chunk(h, dd, t, c, p, status);
+                }
+                else if (h->transform_type == OSKAR_IMAGE_DFT_3D)
+                {
+                    if (h->prec == OSKAR_DOUBLE)
+                        oskar_dft_c2r_3d_cuda_d(h->num_vis, wavenumber,
+                                oskar_mem_double_const(dd->uu, status),
+                                oskar_mem_double_const(dd->vv, status),
+                                oskar_mem_double_const(dd->ww, status),
+                                oskar_mem_double2_const(dd->amp, status),
+                                h->num_pixels,
+                                oskar_mem_double_const(dd->l, status),
+                                oskar_mem_double_const(dd->m, status),
+                                oskar_mem_double_const(dd->n, status),
+                                oskar_mem_double(dd->chunk_gpu, status));
+                    else
+                        oskar_dft_c2r_3d_cuda_f(h->num_vis, wavenumber,
+                                oskar_mem_float_const(dd->uu, status),
+                                oskar_mem_float_const(dd->vv, status),
+                                oskar_mem_float_const(dd->ww, status),
+                                oskar_mem_float2_const(dd->amp, status),
+                                h->num_pixels,
+                                oskar_mem_float_const(dd->l, status),
+                                oskar_mem_float_const(dd->m, status),
+                                oskar_mem_float_const(dd->n, status),
+                                oskar_mem_float(dd->chunk_gpu, status));
+                    oskar_cuda_check_error(status);
+                    oskar_mem_scale_real(dd->chunk_gpu,
+                            1.0 / h->num_vis, status);
+                    write_chunk(h, dd, t, c, p, status);
                 }
                 else
                     *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-            }
-        }
-    }
-
-    /* Write the image to file. */
-    if (h->image_name && !*status)
-    {
-        oskar_log_message(log, 'M', 0, "Writing FITS image file: '%s'",
-                h->image_name);
-        oskar_fits_image_write(h->im, log, h->image_name, status);
-    }
+            } /* end pol */
+        } /* end time */
+    } /* end channel */
 
     if (!*status)
         oskar_log_section(log, 'M', "Run complete.");
     free_device_data(h->num_gpus, h->cuda_device_ids, d, status);
     free_host_data(h, status);
+}
+
+
+void write_chunk(HostData* h, const DeviceData* d, int t, int c, int p,
+        int* status)
+{
+    int datatype, anynul = 0;
+    long firstpix[4];
+    if (*status) return;
+
+    /* Copy pixels from the GPU to the host. */
+    oskar_mem_copy(d->chunk_cpu, d->chunk_gpu, status);
+
+    /* Read existing pixel chunk from file. */
+    datatype = (h->prec == OSKAR_DOUBLE ? TDOUBLE : TFLOAT);
+    firstpix[0] = 1;
+    firstpix[1] = 1;
+    firstpix[2] = 1 + c;
+    firstpix[3] = 1 + t;
+    fits_read_pix(h->fits_file[p], datatype, firstpix, h->num_pixels, NULL,
+            oskar_mem_void(h->chunk_tmp), &anynul, status);
+
+    /* Add pixel data and write the result back out to file. */
+    oskar_mem_add(h->chunk_tmp, h->chunk_tmp, d->chunk_cpu,
+            h->num_pixels, status);
+    fits_write_pix(h->fits_file[p], datatype, firstpix, h->num_pixels,
+            oskar_mem_void(h->chunk_tmp), status);
 }
 
 
@@ -345,14 +421,16 @@ void phase_rotate_vis_amps(oskar_Mem* amps, int num_vis, int type,
 
 void set_up_host_data(HostData* h, oskar_Log* log, int *status)
 {
-    int amp_type;
+    int amp_type, i;
+    double fov_deg[2], fov_rad;
+    char fname[512];
 
     /* Get settings. */
     const oskar_SettingsImage* settings = &h->s.image;
-    h->fov_deg = settings->fov_deg;
-    h->fov_rad = h->fov_deg * DEG2RAD;
-    h->im_ra_deg = settings->ra_deg;
-    h->im_dec_deg = settings->dec_deg;
+    fov_deg[0] = fov_deg[1] = settings->fov_deg;
+    fov_rad = fov_deg[0] * DEG2RAD;
+    h->im_centre_deg[0] = settings->ra_deg;
+    h->im_centre_deg[1] = settings->dec_deg;
     h->num_gpus = 1;
     h->channel_range[0] = settings->channel_range[0];
     h->channel_range[1] = settings->channel_range[1];
@@ -365,7 +443,7 @@ void set_up_host_data(HostData* h, oskar_Log* log, int *status)
     h->im_type = settings->image_type;
     h->direction_type = settings->direction_type;
     h->transform_type = settings->transform_type;
-    h->image_name = settings->fits_image;
+    h->image_root = settings->root_path;
     h->vis_name = settings->input_vis_data;
     h->use_stokes = (h->im_type == OSKAR_IMAGE_TYPE_STOKES ||
             h->im_type == OSKAR_IMAGE_TYPE_STOKES_I ||
@@ -374,7 +452,7 @@ void set_up_host_data(HostData* h, oskar_Log* log, int *status)
             h->im_type == OSKAR_IMAGE_TYPE_STOKES_V);
 
     /* Check filenames have been set. */
-    if (!h->image_name)
+    if (!h->image_root)
     {
         oskar_log_error(log, "No output image file specified.");
         *status = OSKAR_ERR_SETTINGS_IMAGE;
@@ -422,19 +500,26 @@ void set_up_host_data(HostData* h, oskar_Log* log, int *status)
     h->baseline_vv = oskar_vis_baseline_vv_metres_const(h->vis);
     h->baseline_ww = oskar_vis_baseline_ww_metres_const(h->vis);
 
-    if (h->direction_type == OSKAR_IMAGE_DIRECTION_OBSERVATION)
+    if (h->vis_num_pols == 1 && !(h->im_type == OSKAR_IMAGE_TYPE_STOKES_I ||
+            h->im_type == OSKAR_IMAGE_TYPE_PSF))
     {
-        h->im_ra_deg = h->vis_ra_deg;
-        h->im_dec_deg = h->vis_dec_deg;
+        oskar_log_error(log, "Incompatible image type selected for scalar "
+                "(Stokes-I) visibility data.");
+        *status = OSKAR_ERR_SETTINGS_IMAGE;
+        return;
     }
 
-    /* Time and channel range for data. */
+    if (h->direction_type == OSKAR_IMAGE_DIRECTION_OBSERVATION)
+    {
+        h->im_centre_deg[0] = h->vis_ra_deg;
+        h->im_centre_deg[1] = h->vis_dec_deg;
+    }
+
+    /* Time and channel range for input and output data. */
     oskar_evaluate_image_data_range(h->vis_chan_range, h->channel_range,
             h->vis_num_channels, status);
     oskar_evaluate_image_data_range(h->vis_time_range, h->time_range,
             h->vis_num_times, status);
-
-    /* Time and channel range for image cube [output range]. */
     oskar_evaluate_image_range(h->im_time_range, h->time_snapshots,
             h->time_range, h->vis_num_times, status);
     oskar_evaluate_image_range(h->im_chan_range, h->channel_snapshots,
@@ -455,24 +540,58 @@ void set_up_host_data(HostData* h, oskar_Log* log, int *status)
     }
     if (*status) return;
 
-    if (h->vis_num_pols == 1 && !(h->im_type == OSKAR_IMAGE_TYPE_STOKES_I ||
-            h->im_type == OSKAR_IMAGE_TYPE_PSF))
+    /* Create the image file(s). */
+    for (i = 0; i < h->im_num_pols; ++i)
     {
-        oskar_log_error(log, "Incompatible image type selected for scalar "
-                "(Stokes-I) visibility data.");
-        *status = OSKAR_ERR_SETTINGS_IMAGE;
-        return;
-    }
+        const char* a[] = {"I", "Q", "U", "V"};
+        const char* b[] = {"XX", "XY", "YX", "YY"};
 
-    /* Create the image and size it. */
-    h->im = oskar_image_create(h->prec, OSKAR_CPU, status);
-    oskar_image_resize(h->im, h->size, h->size,
-            h->im_num_pols, h->im_num_times, h->im_num_chan, status);
-    if (*status) return;
-    oskar_image_set_fov(h->im, h->fov_deg, h->fov_deg);
-    oskar_image_set_centre(h->im, h->im_ra_deg, h->im_dec_deg);
-    oskar_image_set_time(h->im, h->im_time_start_mjd_utc, h->time_inc_sec);
-    oskar_image_set_freq(h->im, h->im_freq_start_hz, h->freq_inc_hz);
+        /* Construct filename based on image type. */
+        switch (h->im_type)
+        {
+        case OSKAR_IMAGE_TYPE_STOKES:
+            SNPRINTF(fname, sizeof(fname), "%s_%s.fits", h->image_root, a[i]);
+            break;
+        case OSKAR_IMAGE_TYPE_STOKES_I:
+            SNPRINTF(fname, sizeof(fname), "%s_I.fits", h->image_root);
+            break;
+        case OSKAR_IMAGE_TYPE_STOKES_Q:
+            SNPRINTF(fname, sizeof(fname), "%s_Q.fits", h->image_root);
+            break;
+        case OSKAR_IMAGE_TYPE_STOKES_U:
+            SNPRINTF(fname, sizeof(fname), "%s_U.fits", h->image_root);
+            break;
+        case OSKAR_IMAGE_TYPE_STOKES_V:
+            SNPRINTF(fname, sizeof(fname), "%s_V.fits", h->image_root);
+            break;
+        case OSKAR_IMAGE_TYPE_POL_LINEAR:
+            SNPRINTF(fname, sizeof(fname), "%s_%s.fits", h->image_root, b[i]);
+            break;
+        case OSKAR_IMAGE_TYPE_POL_XX:
+            SNPRINTF(fname, sizeof(fname), "%s_XX.fits", h->image_root);
+            break;
+        case OSKAR_IMAGE_TYPE_POL_XY:
+            SNPRINTF(fname, sizeof(fname), "%s_XY.fits", h->image_root);
+            break;
+        case OSKAR_IMAGE_TYPE_POL_YX:
+            SNPRINTF(fname, sizeof(fname), "%s_YX.fits", h->image_root);
+            break;
+        case OSKAR_IMAGE_TYPE_POL_YY:
+            SNPRINTF(fname, sizeof(fname), "%s_YY.fits", h->image_root);
+            break;
+        case OSKAR_IMAGE_TYPE_PSF:
+            SNPRINTF(fname, sizeof(fname), "%s_PSF.fits", h->image_root);
+            break;
+        default:
+            *status = OSKAR_ERR_UNKNOWN;
+            break;
+        }
+
+        h->fits_file[i] = create_fits_file(fname, h->prec, h->size, h->size,
+                h->im_num_times, h->im_num_chan, h->im_centre_deg, fov_deg,
+                h->im_time_start_mjd_utc, h->time_inc_sec,
+                h->im_freq_start_hz, h->freq_inc_hz, status);
+    }
 
     if (h->time_snapshots && h->channel_snapshots)
         h->num_vis = h->num_baselines;
@@ -485,7 +604,8 @@ void set_up_host_data(HostData* h, oskar_Log* log, int *status)
     h->uu_im = oskar_mem_create(h->prec, OSKAR_CPU, h->num_vis, status);
     h->vv_im = oskar_mem_create(h->prec, OSKAR_CPU, h->num_vis, status);
     h->ww_im = oskar_mem_create(h->prec, OSKAR_CPU, h->num_vis, status);
-    h->vis_im = oskar_mem_create(h->prec | OSKAR_COMPLEX, OSKAR_CPU, h->num_vis, status);
+    h->vis_im = oskar_mem_create(h->prec | OSKAR_COMPLEX, OSKAR_CPU,
+            h->num_vis, status);
     h->stokes = oskar_mem_create(h->prec, OSKAR_CPU, h->num_vis, status);
     if (h->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
     {
@@ -498,11 +618,19 @@ void set_up_host_data(HostData* h, oskar_Log* log, int *status)
     h->l = oskar_mem_create(h->prec, OSKAR_CPU, h->num_pixels, status);
     h->m = oskar_mem_create(h->prec, OSKAR_CPU, h->num_pixels, status);
     h->n = oskar_mem_create(h->prec, OSKAR_CPU, h->num_pixels, status);
-    oskar_evaluate_image_lmn_grid(h->size, h->size, h->fov_rad, h->fov_rad,
+    h->chunk_tmp = oskar_mem_create(h->prec, OSKAR_CPU, h->num_pixels, status);
+    oskar_evaluate_image_lmn_grid(h->size, h->size, fov_rad, fov_rad,
             h->l, h->m, h->n, status);
-
-    /* Pointer to slice of the image cube. */
-    h->im_slice = oskar_mem_create_alias(0, 0, 0, status);
+    if (h->prec == OSKAR_SINGLE)
+    {
+        float* n = oskar_mem_float(h->n, status);
+        for (i = 0; i < h->num_pixels; ++i) n[i] -= 1.0;
+    }
+    else
+    {
+        double* n = oskar_mem_double(h->n, status);
+        for (i = 0; i < h->num_pixels; ++i) n[i] -= 1.0;
+    }
 
     /* If imaging away from the beam direction, evaluate l0-l, m0-m, n0-n
      * for the new pointing centre as well as a set of baseline coordinates
@@ -512,8 +640,8 @@ void set_up_host_data(HostData* h, oskar_Log* log, int *status)
         double l1, m1, n1, ra_rad, dec_rad, ra0_rad, dec0_rad;
         int num_elements;
 
-        ra_rad = h->im_ra_deg * DEG2RAD;
-        dec_rad = h->im_dec_deg * DEG2RAD;
+        ra_rad = h->im_centre_deg[0] * DEG2RAD;
+        dec_rad = h->im_centre_deg[1] * DEG2RAD;
         ra0_rad = h->vis_ra_deg * DEG2RAD;
         dec0_rad = h->vis_dec_deg * DEG2RAD;
         num_elements = h->num_baselines * h->vis_num_times;
@@ -548,14 +676,15 @@ void set_up_device_data(DeviceData* d, const HostData* h, int* status)
     d->vv = oskar_mem_create(h->prec, OSKAR_GPU, 0, status);
     d->ww = oskar_mem_create(h->prec, OSKAR_GPU, 0, status);
     d->amp = oskar_mem_create(h->prec | OSKAR_COMPLEX, OSKAR_GPU, 0, status);
-    d->slice_gpu = oskar_mem_create(h->prec, OSKAR_GPU, h->num_pixels, status);
-    d->slice_cpu = oskar_mem_create(h->prec, OSKAR_CPU, h->num_pixels, status);
+    d->chunk_gpu = oskar_mem_create(h->prec, OSKAR_GPU, h->num_pixels, status);
+    d->chunk_cpu = oskar_mem_create(h->prec, OSKAR_CPU, h->num_pixels, status);
     cudaDeviceSynchronize();
 }
 
 
 void free_host_data(HostData* h, int* status)
 {
+    int i;
     oskar_mem_free(h->uu_rot, status);
     oskar_mem_free(h->vv_rot, status);
     oskar_mem_free(h->ww_rot, status);
@@ -570,14 +699,15 @@ void free_host_data(HostData* h, int* status)
     oskar_mem_free(h->l, status);
     oskar_mem_free(h->m, status);
     oskar_mem_free(h->n, status);
-    oskar_mem_free(h->im_slice, status);
     oskar_mem_free(h->stokes, status);
+    oskar_mem_free(h->chunk_tmp, status);
     oskar_binary_free(h->vis_file);
     oskar_vis_free(h->vis, status);
     oskar_vis_header_free(h->hdr, status);
     oskar_vis_block_free(h->blk, status);
-    oskar_image_free(h->im, status);
     oskar_settings_old_free(&h->s);
+    for (i = 0; i < h->im_num_pols; ++i)
+        ffclos(h->fits_file[i], status);
     free(h);
 }
 
@@ -599,8 +729,8 @@ void free_device_data(int num_gpus, int* cuda_device_ids,
         oskar_mem_free(dd->vv, status);
         oskar_mem_free(dd->ww, status);
         oskar_mem_free(dd->amp, status);
-        oskar_mem_free(dd->slice_gpu, status);
-        oskar_mem_free(dd->slice_cpu, status);
+        oskar_mem_free(dd->chunk_gpu, status);
+        oskar_mem_free(dd->chunk_cpu, status);
         cudaDeviceReset();
     }
     free(d);
@@ -611,7 +741,7 @@ fitsfile* create_fits_file(const char* filename, int precision,
         int width, int height, int num_times, int num_channels,
         double centre_deg[2], double fov_deg[2], double start_time_mjd,
         double delta_time_sec, double start_freq_hz, double delta_freq_hz,
-        const char* settings_log, size_t settings_log_length, int* status)
+        int* status)
 {
     int imagetype;
     long naxes[4];
@@ -656,20 +786,7 @@ fitsfile* create_fits_file(const char* filename, int precision,
     fits_write_key_dbl(f, "MJD-OBS", start_time_mjd, 10, "Start time", status);
     fits_write_key_dbl(f, "OBSRA", centre_deg[0], 10, "RA", status);
     fits_write_key_dbl(f, "OBSDEC", centre_deg[1], 10, "DEC", status);
-
-    /* Write the settings log up to this point as HISTORY comments. */
-    line = settings_log;
-    length = settings_log_length;
-    for (;;)
-    {
-        const char* eol;
-        fits_write_history(f, line, status);
-        eol = (const char*) memchr(line, '\0', length);
-        if (!eol) break;
-        eol += 1;
-        length -= (eol - line);
-        line = eol;
-    }
+    fits_flush_file(f, status);
 
     return f;
 }
@@ -708,14 +825,8 @@ void get_baseline_coords(int num_baselines, const oskar_Mem* vis_uu,
     int c = 0, t = 0, i = 0;
     double freq, scaling;
     size_t offset1, offset2;
-    oskar_Mem *uu_, *vv_, *ww_;
 
-    /* Pointers into visibility coordinate arrays. */
-    uu_ = oskar_mem_create_alias(0, 0, 0, status);
-    vv_ = oskar_mem_create_alias(0, 0, 0, status);
-    ww_ = oskar_mem_create_alias(0, 0, 0, status);
-
-    /* Check whether time and/or frequency synthesis is being done. */
+    /* Check whether using time and/or frequency synthesis. */
     if (time_snapshots && channel_snapshots)
     {
         offset2 = num_baselines * vis_time;
@@ -725,6 +836,10 @@ void get_baseline_coords(int num_baselines, const oskar_Mem* vis_uu,
     }
     else if (time_snapshots && !channel_snapshots) /* Freq synthesis */
     {
+        oskar_Mem *uu_, *vv_, *ww_;
+        uu_ = oskar_mem_create_alias(0, 0, 0, status);
+        vv_ = oskar_mem_create_alias(0, 0, 0, status);
+        ww_ = oskar_mem_create_alias(0, 0, 0, status);
         for (c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c, ++i)
         {
             /* Copy the baseline coordinates for the selected time. */
@@ -747,6 +862,9 @@ void get_baseline_coords(int num_baselines, const oskar_Mem* vis_uu,
             oskar_mem_scale_real(vv_, scaling, status);
             oskar_mem_scale_real(ww_, scaling, status);
         }
+        oskar_mem_free(uu_, status);
+        oskar_mem_free(vv_, status);
+        oskar_mem_free(ww_, status);
     }
     else if (!time_snapshots && channel_snapshots) /* Time synthesis */
     {
@@ -765,6 +883,10 @@ void get_baseline_coords(int num_baselines, const oskar_Mem* vis_uu,
     }
     else /* Time and frequency synthesis */
     {
+        oskar_Mem *uu_, *vv_, *ww_;
+        uu_ = oskar_mem_create_alias(0, 0, 0, status);
+        vv_ = oskar_mem_create_alias(0, 0, 0, status);
+        ww_ = oskar_mem_create_alias(0, 0, 0, status);
         /* TODO These loops will need to be swapped. */
         for (c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
         {
@@ -792,10 +914,10 @@ void get_baseline_coords(int num_baselines, const oskar_Mem* vis_uu,
                 oskar_mem_scale_real(ww_, scaling, status);
             }
         }
+        oskar_mem_free(uu_, status);
+        oskar_mem_free(vv_, status);
+        oskar_mem_free(ww_, status);
     }
-    oskar_mem_free(uu_, status);
-    oskar_mem_free(vv_, status);
-    oskar_mem_free(ww_, status);
 }
 
 

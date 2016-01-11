@@ -72,7 +72,7 @@ void oskar_settings_old_init(oskar_Settings_old* settings)
     settings->beam_pattern.size[0] = 0;
     settings->beam_pattern.size[1] = 0;
     settings->image.input_vis_data = NULL;
-    settings->image.fits_image = NULL;
+    settings->image.root_path = NULL;
     noise->freq.file = NULL;
     noise->rms.file = NULL;
     settings->ionosphere.enable = 0;
