@@ -62,32 +62,30 @@ set(EZOPT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/extern/ezOptionParser-0.2.0)
 set(OSKAR_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
 set(OSKAR_VERSION_STR "${OSKAR_VERSION}")
 if (OSKAR_VERSION_SUFFIX AND NOT OSKAR_VERSION_SUFFIX STREQUAL "")
-
-    # Find the subversion revision.
-    find_package(Subversion QUIET)
-    if (SUBVERSION_FOUND)
-        get_filename_component(SVN_PATH ${PROJECT_SOURCE_DIR} REALPATH)
-        # Check that svn info returns a valid result.
-        execute_process(COMMAND ${Subversion_SVN_EXECUTABLE} info ${SVN_PATH}
-            OUTPUT_VARIABLE ${prefix}_WC_INFO
-            ERROR_VARIABLE Subversion_svn_info_error
-            RESULT_VARIABLE Subversion_svn_info_result
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-        if (${Subversion_svn_info_result} EQUAL 0)
-            Subversion_WC_INFO(${SVN_PATH} OSKAR_SVN)
-            if (OSKAR_SVN_WC_REVISION)
-                set(OSKAR_SVN_REVISION ${OSKAR_SVN_WC_REVISION})
-            endif()
-        endif()
+    find_package(Git QUIET)
+    if (GIT_FOUND)
+        execute_process(
+          COMMAND git log -1 --format=%h
+          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+          OUTPUT_VARIABLE GIT_COMMIT_HASH
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        execute_process(
+          COMMAND git log -1 --format=%cd --date=short
+          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+          OUTPUT_VARIABLE GIT_COMMIT_DATE
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        set(GIT_COMMIT_INFO "${GIT_COMMIT_DATE} ${GIT_COMMIT_HASH}")
     endif()
-
     set(OSKAR_VERSION_STR "${OSKAR_VERSION}-${OSKAR_VERSION_SUFFIX}")
-    if (OSKAR_SVN_REVISION)
-        set(OSKAR_VERSION_STR "${OSKAR_VERSION_STR} r${OSKAR_SVN_REVISION}")
+    if (GIT_COMMIT_INFO)
+        set(OSKAR_VERSION_STR "${OSKAR_VERSION_STR} ${GIT_COMMIT_INFO}")
     endif()
-    if (CMAKE_BUILD_TYPE MATCHES Debug)
-        set(OSKAR_VERSION_STR "${OSKAR_VERSION_STR} -- debug --")
+    if (CMAKE_BUILD_TYPE MATCHES [dD]ebug)
+        set(OSKAR_VERSION_STR "${OSKAR_VERSION_STR} -debug-")
     endif()
+
 endif()
 if (CMAKE_VERSION VERSION_GREATER 2.8.11)
     string(TIMESTAMP OSKAR_BUILD_DATE "%Y-%m-%d %H:%M:%S")
@@ -103,6 +101,8 @@ if (NOT WIN32)
     # strtok_r as well as gnu inline mode which is needed for CUDA Thurst with
     # some compilers.
     set(CMAKE_C_FLAGS "-fPIC -std=gnu89")
+    # TODO-BM: could probably change to c99 now MSVC 2015 is complient?
+    # set(CMAKE_C_FLAGS "-fPIC -std=c99")
     set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
     set(CMAKE_C_FLAGS_DEBUG "-O0 -g -Wall")
     set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g -Wall")
@@ -118,7 +118,7 @@ if (NOT WIN32)
 
         # Treat external code as system headers.
         # This avoids a number of warning supression flags.
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
+        set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -isystem ${CUDA_INCLUDE_DIRS}")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${GTEST_INCLUDE_DIR}")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${GTEST_INCLUDE_DIR}/internal")
@@ -242,6 +242,7 @@ if (CUDA_FOUND)
         list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-missing-field-initializers;)
         # Disable warning about "unsigned int* __get_precalculated_matrix(int) defined but not used".
         list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-function;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG -Xcompiler;-Wno-unused-local-typedef;)
         # PTX compiler options
         #list(APPEND CUDA_NVCC_FLAGS_RELEASE --ptxas-options=-v;)
     endif ()

@@ -56,7 +56,7 @@
 #endif
 
 #if __STDC_VERSION__ >= 199901L || defined(__cplusplus)
-    #define OSKAR_BINARY_INLINE inline
+    #define OSKAR_BINARY_INLINE static inline
 #else
     #define OSKAR_BINARY_INLINE static
 #endif

@@ -40,6 +40,7 @@
 
 namespace oskar {
 
+/*! Populates a settings tree from the specified @p xml string */
 bool settings_declare_xml(SettingsTree* settings, std::string xml);
 
 } /* namespace oskar */
@@ -50,6 +51,7 @@ bool settings_declare_xml(SettingsTree* settings, std::string xml);
 extern "C" {
 #endif
 
+/*! Populates a settings tree from the specified @p xml string */
 int oskar_settings_declare_xml(oskar_Settings* settings, const char* xml);
 
 #ifdef __cplusplus

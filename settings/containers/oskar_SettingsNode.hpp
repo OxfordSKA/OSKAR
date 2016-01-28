@@ -45,11 +45,26 @@
 
 namespace oskar {
 
+/*!
+ * @class SettingsNode
+ *
+ * @brief A node with the settings tree, inherits @class SettingsItem.
+ *
+ * @details
+ * Settings tree node class which specialises a settings item for use within
+ * a tree-like structure.
+ */
+
 class SettingsNode : public SettingsItem
 {
  public:
+    /*! Default constructor */
     SettingsNode();
+
+    /*! Constructor */
     SettingsNode(const SettingsNode& node, SettingsNode* parent = 0);
+
+    /*! Constructor */
     SettingsNode(const std::string& key,
                  const std::string& label = std::string(),
                  const std::string& description = std::string(),
@@ -58,18 +73,38 @@ class SettingsNode : public SettingsItem
                  const std::string& type_parameters = std::string(),
                  bool is_required = false,
                  const std::string& priority = "DEFAULT");
+
+    /*! Destructor */
     virtual ~SettingsNode();
 
+    /*! Return the number of child nodes */
     int num_children() const;
+
+    /*! Add a child node */
     SettingsNode* add_child(const SettingsNode& node);
+
+    /*! Return a pointer to the child node with index @p i */
     SettingsNode* child(int i);
+
+    /*! Return a const pointer to the child node with index @p i */
     const SettingsNode* child(int i) const;
+
+    /*! Return a pointer to the child node with key @p key */
     SettingsNode* child(const std::string& key);
+
+    /*! Return a const pointer to the child node with key @p key */
     const SettingsNode* child(const std::string& key) const;
+
+    /*! Return a pointer to the node's parent */
     const SettingsNode* parent() const;
+
+    /*! Return the child index of the node */
     int child_number() const;
-    /* Returns true, if the item or one its children has a non-default value. */
+
+    /*! Return true, if the item or one its children has a non-default value. */
     bool value_or_child_set() const;
+
+    /*! Set the value field of the node. */
     bool set_value(const std::string& value);
 
  private:

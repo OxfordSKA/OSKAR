@@ -56,7 +56,7 @@ class SettingsFileHandler
 
     void set_write_defaults(bool value) { write_defaults_ = value; }
     virtual bool read_all(SettingsTree* tree,
-            std::vector<std::pair<std::string, std::string> >& failed) = 0;
+            std::vector<std::pair<std::string, std::string> >& invalid) = 0;
     virtual bool write_all(const SettingsTree* tree) = 0;
     virtual void set_file_name(const std::string& name) = 0;
     virtual std::string file_version() const = 0;

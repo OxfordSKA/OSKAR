@@ -45,14 +45,48 @@
 
 namespace oskar {
 
+/*!
+ * @class SettingsItem
+ *
+ * @brief SettingsItem container class.
+ *
+ * @details
+ * Container class for a setting.
+ *
+ * A setting has the following parameters:
+ * - key: Key used to identify a setting.
+ * - label: Brief description of the setting.
+ * - description: Detailed description of the setting.
+ * - value: The value of the setting.
+ * - required flag: Flag indicating that the setting is required.
+ * - priority flag: Used to mark high priority settings.
+ * - dependencies: Dependency tree used to determine if the setting is active.
+ *
+ * The settings value is a object of @class SettingsValue, this is a stack-
+ * based discriminated union container which holds the value and default value
+ * of the setting as a well defined type.
+ *
+ * Settings priority can be used to mark a setting as important. This can be
+ * used for example to control if a setting which has not been set should
+ * be written to the log or appear in the settings file.
+ *
+ * SettingsItem can depend on other settings items as specified by the
+ * dependency tree.
+ */
+
 class SettingsItem
 {
 public:
+    /*! Settings type enum. */
     enum ItemType { INVALID = -1, LABEL, SETTING };
+
+    /*! Settings priority enum. */
     enum Priority { DEFAULT = 0, IMPORTANT = 1 };
 
+    /*! Default constructor. */
     SettingsItem();
 
+    /*! Constructor. */
     SettingsItem(const std::string& key,
                  const std::string& label = std::string(),
                  const std::string& description = std::string(),
@@ -62,28 +96,51 @@ public:
                  bool is_required = false,
                  const std::string& priority = "DEFAULT");
 
+    /*! Destructor. */
     virtual ~SettingsItem();
 
+    /*! Begin a dependency group with a specified combination @p logic */
     bool begin_dependency_group(const std::string& logic);
+
+    /*! Close the current dependency group. */
     void end_dependency_group();
-    /* Pushes into the vector of dependencies in the dependency node
-     * specified by the current group vector. */
+
+    /*! Adds a dependency to the current group */
     bool add_dependency(const std::string& dependency_key,
                         const std::string& value,
                         const std::string& logic = "EQ");
 
+    /*! Return the settings item type, label or setting. */
     SettingsItem::ItemType item_type() const;
 
+    /*! Return the setting key */
     const SettingsKey& key() const { return key_; }
+
+    /*! Return the setting label (short description) */
     const std::string& label() const { return label_; }
+
+    /*! Return the setting description */
     const std::string& description() const { return description_; }
+
+    /*! Return true if the setting is required. */
     bool is_required() const { return required_; }
+
+    /*! Set the value of the setting. */
     bool set_value(const std::string& value);
+
+    /*! Return a reference to the settings value object. */
     const SettingsValue& value() const { return value_; }
+
+    /*! Return the priority of the setting. */
     SettingsItem::Priority priority() const { return priority_; }
 
+    /*! Return the number of dependencies of the setting */
     int num_dependencies() const { return num_dependencies_; }
+
+    /*! Return the number of dependency groups of the setting */
     int num_dependency_groups() const { return num_dependency_groups_; }
+
+    /*! Return the root of the settings dependency tree. */
     const SettingsDependencyGroup* dependency_tree() const { return root_; }
 
 protected:
