@@ -1,0 +1,97 @@
+/*
+ * Copyright (c) 2016, The University of Oxford
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. Neither the name of the University of Oxford nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <oskar_fftphase.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void oskar_fftphase_cf(const int num_x, const int num_y, float* complex_data)
+{
+    int iy;
+    for (iy = 0; iy < num_y; ++iy)
+    {
+        int ix, i, x;
+        for (ix = 0; ix < num_x; ++ix)
+        {
+            i = 2 * (iy * num_x + ix);
+            x = 1 - 2 * ((ix + iy) & 1);
+            complex_data[i+0] *= x;
+            complex_data[i+1] *= x;
+        }
+    }
+}
+
+void oskar_fftphase_f(const int num_x, const int num_y, float* data)
+{
+    int iy;
+    for (iy = 0; iy < num_y; ++iy)
+    {
+        int ix, i;
+        for (ix = 0; ix < num_x; ++ix)
+        {
+            i = iy * num_x + ix;
+            data[i] *= (1 - 2 * ((ix + iy) & 1));
+        }
+    }
+}
+
+void oskar_fftphase_cd(const int num_x, const int num_y, double* complex_data)
+{
+    int iy;
+    for (iy = 0; iy < num_y; ++iy)
+    {
+        int ix, i, x;
+        for (ix = 0; ix < num_x; ++ix)
+        {
+            i = 2 * (iy * num_x + ix);
+            x = 1 - 2 * ((ix + iy) & 1);
+            complex_data[i+0] *= x;
+            complex_data[i+1] *= x;
+        }
+    }
+}
+
+void oskar_fftphase_d(const int num_x, const int num_y, double* data)
+{
+    int iy;
+    for (iy = 0; iy < num_y; ++iy)
+    {
+        int ix, i;
+        for (ix = 0; ix < num_x; ++ix)
+        {
+            i = iy * num_x + ix;
+            data[i] *= (1 - 2 * ((ix + iy) & 1));
+        }
+    }
+}
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<s key="simulator"><label>Simulator settings</label>
+<s k="simulator"><label>Simulator settings</label>
     <desc>These parameters affect the operation of the software.</desc>
-    <s key="double_precision"><label>Use double precision</label>
+    <s k="double_precision"><label>Use double precision</label>
         <type name="bool" default="true"/>
         <desc>Determines whether double precision arithmetic is used.</desc>
     </s>
-    <s key="keep_log_file"><label>Keep log file</label>
+    <s k="keep_log_file"><label>Keep log file</label>
         <type name="bool" default="false"/>
-        <desc>Determines whether a log file of the run will remain on disk. 
-            Note that even if this option is set to false, logs will be stored 
+        <desc>Determines whether a log file of the run will remain on disk.
+            Note that even if this option is set to false, logs will be stored
             in any visibility data files produced by the simulator.</desc>
     </s>
-    <s key="write_status_to_log_file">
+    <s k="write_status_to_log_file">
         <label>Write status messages to log file</label>
         <type name="bool" default="false"/>
         <desc>If set, write status (progress) messages to the log file.</desc>
     </s>
-    <s key="max_sources_per_chunk">
+    <s k="max_sources_per_chunk">
         <label>Max. number of sources per chunk</label>
         <type name="IntPositive" default="16384"/>
-        <desc>Maximum number of sources or pixels processed concurrently on a 
+        <desc>Maximum number of sources or pixels processed concurrently on a
             single GPU. Reduce if simulations run out of GPU memory.</desc>
     </s>
-    <s key="cuda_device_ids"><label>CUDA device IDs to use</label>
+    <s k="cuda_device_ids"><label>CUDA device IDs to use</label>
         <type name="IntListExt" default="all">all</type>
-        <desc>A comma-separated string containing device (GPU) IDs to use on 
+        <desc>A comma-separated string containing device (GPU) IDs to use on
             a multi-GPU system, or 'all' to use all devices.</desc>
     </s>
 </s>

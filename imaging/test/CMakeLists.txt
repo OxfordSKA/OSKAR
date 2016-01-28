@@ -7,10 +7,9 @@ if (CUDA_FOUND)
     include_directories(${CUDA_INCLUDE_DIRS})
     set(${name}_SRC
         main.cpp
-        Test_make_image.cpp
     )
     add_executable(${name} ${${name}_SRC})
-    target_link_libraries(${name} oskar gtest oskar_fits)
+    target_link_libraries(${name} oskar_imager gtest)
     set_target_properties(${name} PROPERTIES
         COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
         LINK_FLAGS "${OpenMP_CXX_FLAGS}")

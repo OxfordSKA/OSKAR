@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <oskar_convert_relative_directions_to_lon_lat.h>
 #include <oskar_evaluate_image_lm_grid.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
-#include <oskar_convert_relative_directions_to_lon_lat.h>
 #include <oskar_mem.h>
+
 #include <stdlib.h>
 
 #ifdef __cplusplus

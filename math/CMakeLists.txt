@@ -15,6 +15,9 @@ set(math_SRC
     src/oskar_dftw_o2c_2d_omp.c
     src/oskar_dftw_o2c_3d_omp.c
     src/oskar_ellipse_radius.c
+    src/oskar_evaluate_image_lon_lat_grid.c
+    src/oskar_evaluate_image_lm_grid.c
+    src/oskar_evaluate_image_lmn_grid.c
     src/oskar_find_closest_match.c
     src/oskar_fit_ellipse.c
     src/oskar_gaussian.c

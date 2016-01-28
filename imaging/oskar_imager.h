@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,36 +26,63 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_LOAD_IMAGE_H_
-#define OSKAR_SETTINGS_LOAD_IMAGE_H_
+#ifndef OSKAR_IMAGER_H_
+#define OSKAR_IMAGER_H_
 
 /**
- * @file oskar_settings_load_image.h
+ * @file oskar_imager.h
  */
 
-#include <oskar_global.h>
-#include <oskar_SettingsImage.h>
+/* Public interface. */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Populates image settings from the given settings file.
- *
- * @details
- * This function populates an image settings structure from the given
- * settings file.
- *
- * @param[out] settings A pointer to a settings structure to populate.
- * @param[in] filename  String containing name of settings file to read.
- */
-void oskar_settings_load_image(oskar_SettingsImage* settings,
-        const char* filename, int* status);
+struct oskar_Imager;
+#ifndef OSKAR_IMAGER_TYPEDEF_
+#define OSKAR_IMAGER_TYPEDEF_
+typedef struct oskar_Imager oskar_Imager;
+#endif /* OSKAR_IMAGER_TYPEDEF_ */
+
+enum OSKAR_IMAGE_TYPE
+{
+    OSKAR_IMAGE_TYPE_STOKES, /* IQUV */
+    OSKAR_IMAGE_TYPE_I,
+    OSKAR_IMAGE_TYPE_Q,
+    OSKAR_IMAGE_TYPE_U,
+    OSKAR_IMAGE_TYPE_V,
+    OSKAR_IMAGE_TYPE_LINEAR, /* all linear polarisations XX,XY,YX,YY */
+    OSKAR_IMAGE_TYPE_XX,
+    OSKAR_IMAGE_TYPE_YY,
+    OSKAR_IMAGE_TYPE_XY,
+    OSKAR_IMAGE_TYPE_YX,
+    OSKAR_IMAGE_TYPE_PSF
+};
+
+enum OSKAR_IMAGE_ALGORITHM
+{
+    OSKAR_ALGORITHM_FFT,
+    OSKAR_ALGORITHM_DFT_2D,
+    OSKAR_ALGORITHM_DFT_3D,
+    OSKAR_ALGORITHM_WPROJ,
+    OSKAR_ALGORITHM_AWPROJ
+};
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SETTINGS_LOAD_IMAGE_H_ */
+#include <oskar_imager_create.h>
+#include <oskar_imager_finalise.h>
+#include <oskar_imager_free.h>
+#include <oskar_imager_linear_to_stokes.h>
+#include <oskar_imager_phase_rotate.h>
+#include <oskar_imager_reset_cache.h>
+#include <oskar_imager_run.h>
+#include <oskar_imager_select_coords.h>
+#include <oskar_imager_select_vis.h>
+#include <oskar_imager_set_options.h>
+#include <oskar_imager_update.h>
+
+#endif /* OSKAR_IMAGER_H_ */

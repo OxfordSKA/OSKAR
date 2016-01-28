@@ -28,11 +28,9 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_evaluate_image_lon_lat_grid.h>
-
-// For HEALPix grids
 #include <oskar_convert_healpix_ring_to_theta_phi.h>
 #include <oskar_convert_galactic_to_fk5.h>
+#include <oskar_evaluate_image_lon_lat_grid.h>
 
 #include <oskar_binary.h>
 #include <oskar_binary_write_mem.h>

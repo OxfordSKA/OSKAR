@@ -28,7 +28,6 @@
 
 #include <oskar_settings_load.h>
 #include <oskar_settings_load_beam_pattern.h>
-#include <oskar_settings_load_image.h>
 #include <oskar_settings_load_interferometer.h>
 #include <oskar_settings_load_ionosphere.h>
 #include <oskar_settings_load_observation.h>
@@ -69,7 +68,6 @@ void oskar_settings_old_load(oskar_Settings_old* s, oskar_Log* log,
     oskar_settings_load_telescope(&s->telescope, filename, status);
     oskar_settings_load_beam_pattern(&s->beam_pattern, filename, status);
     oskar_settings_load_interferometer(&s->interferometer, filename, status);
-    oskar_settings_load_image(&s->image, filename, status);
     oskar_settings_load_element_fit(&s->element_fit, filename, status);
     /* oskar_settings_load_ionosphere(&s->ionosphere, filename, status); */
 

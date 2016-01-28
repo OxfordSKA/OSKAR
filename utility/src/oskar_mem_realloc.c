@@ -97,22 +97,28 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         int cuda_error = 0;
         size_t copy_size;
         void* mem_new = NULL;
-        cuda_error = cudaMalloc(&mem_new, new_size);
-        if (cuda_error)
+        if (new_size > 0)
         {
-            *status = cuda_error;
-            return;
-        }
-        if (!mem_new)
-        {
-            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-            return;
+            cuda_error = cudaMalloc(&mem_new, new_size);
+            if (cuda_error)
+            {
+                *status = cuda_error;
+                return;
+            }
+            if (!mem_new)
+            {
+                *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+                return;
+            }
         }
 
         /* Copy contents of old block to new block. */
         copy_size = (old_size > new_size) ? new_size : old_size;
-        cuda_error = cudaMemcpy(mem_new, mem->data, copy_size,
-                cudaMemcpyDeviceToDevice);
+        if (copy_size > 0)
+        {
+            cuda_error = cudaMemcpy(mem_new, mem->data, copy_size,
+                    cudaMemcpyDeviceToDevice);
+        }
         if (cuda_error)
         {
             *status = cuda_error;

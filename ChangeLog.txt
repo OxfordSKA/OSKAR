@@ -1,6 +1,28 @@
+2016-XX-YY  OSKAR-2.7.0
+
+    * Re-wrote oskar_imager application to allow use of multiple GPUs
+      when using a DFT. Visibility data are now loaded in blocks to reduce
+      memory usage.
+
+    * Added option to use a 3D DFT to make images.
+
+    * Added option to use gridding and FFT to make images that are
+      consistent with those from CASA.
+
+    * Fix to ensure pixel coordinates are consistent between
+      the DFT and FFT algorithms.
+
+    * Added options to specify grid kernel parameters.
+
+    * Added option to perform imaging in single or double precision,
+      regardless of the precision of the input data.
+
+    * Allowed visibility data to be read from a specified column of a
+      Measurement Set.
+
 2015-06-24  OSKAR-2.6.1
 
-    * Changed Measurement Set WEIGHT and SIGMA columns to use a tiled storage 
+    * Changed Measurement Set WEIGHT and SIGMA columns to use a tiled storage
       manager, for an approximate 40% improvement in the write performance.
 
     * Restored missing settings log to beam pattern FITS headers.

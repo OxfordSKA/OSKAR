@@ -45,16 +45,13 @@ class SettingsFileHandler;
 class SettingsDependencyGroup;
 
 /**
- * @class SettingsTree
- *
- * @brief Tree of settings for use with OSKAR applications.
+ * @brief Settings container for use with OSKAR applications.
  *
  * @details
  * High level representation of a tree of OSKAR application settings in memory.
  *
  * TODO: rename from tree to Settings? Yes please!
  */
-
 class SettingsTree
 {
  public:
@@ -100,6 +97,18 @@ class SettingsTree
     bool load(std::vector<std::pair<std::string, std::string> >& failed,
             const std::string& file_name = std::string());
     std::string file_version() const;
+
+    bool starts_with(const std::string& key,
+            const std::string& str, int* status) const;
+    char first_letter(const std::string& key, int* status) const;
+    std::string to_string(const std::string& key, int* status) const;
+    int to_int(const std::string& key, int* status) const;
+    double to_double(const std::string& key, int* status) const;
+    std::vector<std::string> to_string_list(const std::string& key,
+            int* status) const;
+    std::vector<int> to_int_list(const std::string& key, int* status) const;
+    std::vector<double> to_double_list(const std::string& key,
+            int* status) const;
 
     bool contains(const std::string &key) const;
     bool dependencies_satisfied(const std::string& key) const;

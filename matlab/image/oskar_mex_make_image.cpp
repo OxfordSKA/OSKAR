@@ -31,7 +31,6 @@
 #include <oskar_get_error_string.h>
 #include <oskar_dft_c2r_3d_cuda.h>
 #include <oskar_evaluate_image_lmn_grid.h>
-
 #include "matlab/common/oskar_matlab_common.h"
 
 #include <cstdlib>
@@ -124,17 +123,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     l_c = oskar_mem_create(type, OSKAR_CPU, num_pixels, &err);
     m_c = oskar_mem_create(type, OSKAR_CPU, num_pixels, &err);
     n_c = oskar_mem_create(type, OSKAR_CPU, num_pixels, &err);
-    oskar_evaluate_image_lmn_grid(size, size, fov, fov, l_c, m_c, n_c, &err);
-    if (type == OSKAR_SINGLE)
-    {
-        float* n = oskar_mem_float(n_c, &err);
-        for (i = 0; i < num_pixels; ++i) n[i] -= 1.0;
-    }
-    else
-    {
-        double* n = oskar_mem_double(n_c, &err);
-        for (i = 0; i < num_pixels; ++i) n[i] -= 1.0;
-    }
+    oskar_evaluate_image_lmn_grid(size, size, fov, fov, 0, l_c, m_c, n_c, &err);
+    oskar_mem_add_real(n_c, -1.0, &err);
 
     /* Convert amplitude array from MATLAB format to standard complex. */
     if (type == OSKAR_DOUBLE)

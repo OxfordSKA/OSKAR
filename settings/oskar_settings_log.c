@@ -747,6 +747,7 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings_old* s
     }
 }
 
+#if 0
 void oskar_log_settings_image(oskar_Log* log, const oskar_Settings_old* s)
 {
     int depth = 0;
@@ -816,6 +817,7 @@ void oskar_log_settings_image(oskar_Log* log, const oskar_Settings_old* s)
     LVS0("Input OSKAR visibility file", s->image.input_vis_data);
     LVS0("Output image root path", s->image.root_path);
 }
+#endif
 
 void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings_old* s)
 {

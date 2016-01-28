@@ -55,7 +55,6 @@ if (CUDA_FOUND)
         correlate
         element
         convert
-        imaging
         interferometry
         jones
         math
@@ -106,6 +105,7 @@ add_subdirectory(apps)
 add_subdirectory(fits)
 add_subdirectory(ms)
 add_subdirectory(settings)
+add_subdirectory(imaging)
 #add_subdirectory(matlab)
 #add_subdirectory(python)
 

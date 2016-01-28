@@ -31,7 +31,6 @@
 
 #include <oskar_SettingsBeamPattern.h>
 #include <oskar_SettingsElementFit.h>
-#include <oskar_SettingsImage.h>
 #include <oskar_SettingsInterferometer.h>
 #include <oskar_SettingsIonosphere.h>
 #include <oskar_SettingsObservation.h>
@@ -57,7 +56,6 @@ struct oskar_Settings_old
     oskar_SettingsElementFit element_fit;
     oskar_SettingsInterferometer interferometer;
     oskar_SettingsBeamPattern beam_pattern;
-    oskar_SettingsImage image;
     oskar_SettingsIonosphere ionosphere;
 
 #ifdef __cplusplus

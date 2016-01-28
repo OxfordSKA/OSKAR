@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,13 +51,14 @@ extern "C" {
  * @param[in] num_m   Number of required grid points in the latitude dimension.
  * @param[in] fov_lon The field of view in longitude (image width) in radians.
  * @param[in] fov_lat The field of view in latitude (image height) in radians.
+ * @param[in] centred If true, the grid will be symmetric about zero.
  * @param[out] grid_l The output list of l-direction cosines.
  * @param[out] grid_m The output list of m-direction cosines.
  * @param[out] grid_n The output list of n-direction cosines.
  */
 OSKAR_EXPORT
 void oskar_evaluate_image_lmn_grid(int num_l, int num_m, double fov_lon,
-        double fov_lat, oskar_Mem* grid_l, oskar_Mem* grid_m,
+        double fov_lat, int centred, oskar_Mem* grid_l, oskar_Mem* grid_m,
         oskar_Mem* grid_n, int* status);
 
 /**
@@ -72,13 +73,15 @@ void oskar_evaluate_image_lmn_grid(int num_l, int num_m, double fov_lon,
  * @param[in] num_m   Number of required grid points in the latitude dimension.
  * @param[in] fov_lon The field of view in longitude (image width) in radians.
  * @param[in] fov_lat The field of view in latitude (image height) in radians.
+ * @param[in] centred If true, the grid will be symmetric about zero.
  * @param[out] grid_l The output list of l-direction cosines.
  * @param[out] grid_m The output list of m-direction cosines.
  * @param[out] grid_n The output list of n-direction cosines.
  */
 OSKAR_EXPORT
 void oskar_evaluate_image_lmn_grid_f(int num_l, int num_m, float fov_lon,
-        float fov_lat, float* grid_l, float* grid_m, float* grid_n);
+        float fov_lat, int centred, float* grid_l, float* grid_m,
+        float* grid_n);
 
 /**
  * @brief
@@ -92,13 +95,15 @@ void oskar_evaluate_image_lmn_grid_f(int num_l, int num_m, float fov_lon,
  * @param[in] num_m   Number of required grid points in the latitude dimension.
  * @param[in] fov_lon The field of view in longitude (image width) in radians.
  * @param[in] fov_lat The field of view in latitude (image height) in radians.
+ * @param[in] centred If true, the grid will be symmetric about zero.
  * @param[out] grid_l The output list of l-direction cosines.
  * @param[out] grid_m The output list of m-direction cosines.
  * @param[out] grid_n The output list of n-direction cosines.
  */
 OSKAR_EXPORT
 void oskar_evaluate_image_lmn_grid_d(int num_l, int num_m, double fov_lon,
-        double fov_lat, double* grid_l, double* grid_m, double* grid_n);
+        double fov_lat, int centred, double* grid_l, double* grid_m,
+        double* grid_n);
 
 #ifdef __cplusplus
 }

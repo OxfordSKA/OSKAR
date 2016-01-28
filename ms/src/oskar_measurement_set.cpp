@@ -98,16 +98,18 @@ struct oskar_MeasurementSet
     unsigned int num_stations;
     unsigned int num_receptors;
     double ref_freq;
+    double chan_width;
     double phase_centre_ra;
     double phase_centre_dec;
     double start_time;
     double end_time;
+    double time_inc_sec;
 
     oskar_MeasurementSet() : ms(0), msc(0), msmc(0), app_name(std::string()),
-    		write_autocorr(false), num_pols(0), num_channels(0),
-			num_stations(0), num_receptors(2), ref_freq(0.0),
-			phase_centre_ra(0.0), phase_centre_dec(0.0), start_time(DBL_MAX),
-			end_time(-DBL_MAX) {}
+            write_autocorr(false), num_pols(0), num_channels(0),
+            num_stations(0), num_receptors(2), ref_freq(0.0), chan_width(0.0),
+            phase_centre_ra(0.0), phase_centre_dec(0.0), start_time(DBL_MAX),
+            end_time(-DBL_MAX), time_inc_sec(0.0) {}
     ~oskar_MeasurementSet();
 
     void add_band(int pol_id, unsigned int num_channels, double ref_freq,
@@ -124,6 +126,14 @@ struct oskar_MeasurementSet
             double ra_rad, double dec_rad, unsigned int num_pols,
             unsigned int num_channels, double ref_freq, double chan_width,
             unsigned int num_stations, int write_autocorr, int write_crosscorr);
+    template<typename T> void copy_scalar(const String& column,
+            unsigned int start_row, unsigned int num_rows,
+            size_t data_size_bytes, void* data, size_t* required_size,
+            int* status) const;
+    template<typename T> void copy_array(const String& column,
+            unsigned int start_row, unsigned int num_rows,
+            size_t data_size_bytes, void* data, size_t* required_size,
+            int* status) const;
     void get_column(const String& column, unsigned int start_row,
             unsigned int num_rows, size_t data_size_bytes,
             void* data, size_t* required_size, int* status) const;
@@ -283,6 +293,21 @@ double oskar_ms_ref_freq_hz(const oskar_MeasurementSet* p)
     return p->ref_freq;
 }
 
+double oskar_ms_channel_width_hz(const oskar_MeasurementSet* p)
+{
+    return p->chan_width;
+}
+
+double oskar_ms_start_time_mjd(const oskar_MeasurementSet* p)
+{
+    return p->start_time / 86400.0;
+}
+
+double oskar_ms_time_inc_sec(const oskar_MeasurementSet* p)
+{
+    return p->time_inc_sec;
+}
+
 void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p,
         unsigned int start_row, unsigned int num_baselines,
         const double* u, const double* v, const double* w, const double* vis,
@@ -351,6 +376,7 @@ void oskar_ms_write_all_for_time_d(oskar_MeasurementSet* p,
     // Check/update time range.
     if (time < p->start_time) p->start_time = time - interval/2.0;
     if (time > p->end_time) p->end_time = time + interval/2.0;
+    p->time_inc_sec = interval;
 }
 
 void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p,
@@ -421,6 +447,7 @@ void oskar_ms_write_all_for_time_f(oskar_MeasurementSet* p,
     // Check/update time range.
     if (time < p->start_time) p->start_time = time - interval/2.0;
     if (time > p->end_time) p->end_time = time + interval/2.0;
+    p->time_inc_sec = interval;
 }
 
 void oskar_ms_set_num_rows(oskar_MeasurementSet* p, unsigned int num)
@@ -848,6 +875,7 @@ bool oskar_MeasurementSet::create(const char* filename, const char* app_name,
     this->num_stations = num_stations;
     this->num_receptors = 2; // By default.
     this->ref_freq = ref_freq;
+    this->chan_width = chan_width;
 
     // Size the ANTENNA and FEED tables.
     ms->antenna().addRow(num_stations);
@@ -856,6 +884,40 @@ bool oskar_MeasurementSet::create(const char* filename, const char* app_name,
 
     return true;
 }
+
+
+template<typename T>
+void oskar_MeasurementSet::copy_scalar(const String& column,
+        unsigned int start_row, unsigned int num_rows,
+        size_t data_size_bytes, void* data, size_t* required_size,
+        int* status) const
+{
+    Slice slice(start_row, num_rows, 1);
+    ROScalarColumn<T> ac(*ms, column);
+    Array<T> a = ac.getColumnRange(slice);
+    *required_size = a.size() * sizeof(T);
+    if (data_size_bytes >= *required_size)
+        memcpy(data, a.data(), *required_size);
+    else
+        *status = OSKAR_ERR_MS_OUT_OF_RANGE;
+}
+
+template<typename T>
+void oskar_MeasurementSet::copy_array(const String& column,
+        unsigned int start_row, unsigned int num_rows,
+        size_t data_size_bytes, void* data, size_t* required_size,
+        int* status) const
+{
+    Slice slice(start_row, num_rows, 1);
+    ROArrayColumn<T> ac(*ms, column);
+    Array<T> a = ac.getColumnRange(slice);
+    *required_size = a.size() * sizeof(T);
+    if (data_size_bytes >= *required_size)
+        memcpy(data, a.data(), *required_size);
+    else
+        *status = OSKAR_ERR_MS_OUT_OF_RANGE;
+}
+
 
 void oskar_MeasurementSet::get_column(const String& column,
         unsigned int start_row, unsigned int num_rows,
@@ -886,109 +948,44 @@ void oskar_MeasurementSet::get_column(const String& column,
 
     // Get column description and data type.
     const ColumnDesc& cdesc = ms->tableDesc().columnDesc(column);
-    Bool is_scalar = cdesc.isScalar();
     DataType dtype = cdesc.dataType();
 
-    // Define a slice for the required rows.
-    Slice slice(start_row, num_rows, 1);
-
-    if (is_scalar)
+    if (cdesc.isScalar())
     {
         switch (dtype)
         {
         case TpBool:
-        {
-            ROScalarColumn<Bool> ac(*ms, column);
-            Array<Bool> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(Bool);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_scalar<Bool>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpUChar:
-        {
-            ROScalarColumn<uChar> ac(*ms, column);
-            Array<uChar> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(uChar);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_scalar<uChar>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpShort:
-        {
-            ROScalarColumn<Short> ac(*ms, column);
-            Array<Short> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(Short);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_scalar<Short>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpUShort:
-        {
-            ROScalarColumn<uShort> ac(*ms, column);
-            Array<uShort> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(uShort);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_scalar<uShort>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpInt:
-        {
-            ROScalarColumn<Int> ac(*ms, column);
-            Array<Int> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(Int);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_scalar<Int>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpUInt:
-        {
-            ROScalarColumn<uInt> ac(*ms, column);
-            Array<uInt> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(uInt);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_scalar<uInt>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpFloat:
-        {
-            ROScalarColumn<Float> ac(*ms, column);
-            Array<Float> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(Float);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_scalar<Float>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpDouble:
-        {
-            ROScalarColumn<Double> ac(*ms, column);
-            Array<Double> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(Double);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_scalar<Double>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpComplex:
-        {
-            ROScalarColumn<Complex> ac(*ms, column);
-            Array<Complex> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(Complex);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_scalar<Complex>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpDComplex:
-        {
-            ROScalarColumn<DComplex> ac(*ms, column);
-            Array<DComplex> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(DComplex);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_scalar<DComplex>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         default:
-            *status = OSKAR_ERR_MS_UNKNOWN_DATA_TYPE;
-            break;
+            *status = OSKAR_ERR_MS_UNKNOWN_DATA_TYPE; break;
         }
     }
     else
@@ -996,98 +993,37 @@ void oskar_MeasurementSet::get_column(const String& column,
         switch (dtype)
         {
         case TpBool:
-        {
-            ROArrayColumn<Bool> ac(*ms, column);
-            Array<Bool> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(Bool);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_array<Bool>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpUChar:
-        {
-            ROArrayColumn<uChar> ac(*ms, column);
-            Array<uChar> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(uChar);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_array<uChar>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpShort:
-        {
-            ROArrayColumn<Short> ac(*ms, column);
-            Array<Short> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(Short);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_array<Short>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpUShort:
-        {
-            ROArrayColumn<uShort> ac(*ms, column);
-            Array<uShort> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(uShort);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_array<uShort>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpInt:
-        {
-            ROArrayColumn<Int> ac(*ms, column);
-            Array<Int> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(Int);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_array<Int>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpUInt:
-        {
-            ROArrayColumn<uInt> ac(*ms, column);
-            Array<uInt> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(uInt);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_array<uInt>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpFloat:
-        {
-            ROArrayColumn<Float> ac(*ms, column);
-            Array<Float> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(Float);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_array<Float>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpDouble:
-        {
-            ROArrayColumn<Double> ac(*ms, column);
-            Array<Double> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(Double);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_array<Double>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpComplex:
-        {
-            ROArrayColumn<Complex> ac(*ms, column);
-            Array<Complex> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(Complex);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_array<Complex>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         case TpDComplex:
-        {
-            ROArrayColumn<DComplex> ac(*ms, column);
-            Array<DComplex> a = ac.getColumnRange(slice);
-            *required_size = a.size() * sizeof(DComplex);
-            if (data_size_bytes >= *required_size)
-                memcpy(data, a.data(), *required_size);
-            break;
-        }
+            copy_array<DComplex>(column, start_row, num_rows,
+                    data_size_bytes, data, required_size, status); break;
         default:
-            *status = OSKAR_ERR_MS_UNKNOWN_DATA_TYPE;
-            break;
+            *status = OSKAR_ERR_MS_UNKNOWN_DATA_TYPE; break;
         }
     }
 }
@@ -1170,8 +1106,11 @@ bool oskar_MeasurementSet::open(const char* filename)
     {
         num_channels = msc->spectralWindow().numChan().get(0);
         ref_freq = msc->spectralWindow().refFrequency().get(0);
+        chan_width = (msc->spectralWindow().chanWidth().get(0))(IPosition(1, 0));
     }
     num_stations = ms->antenna().nrow();
+    if (ms->nrow() > 0)
+        time_inc_sec = msc->interval().get(0);
 
     // Get the phase centre.
     phase_centre_ra = 0.0;

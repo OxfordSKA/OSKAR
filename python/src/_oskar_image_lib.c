@@ -102,17 +102,8 @@ static PyObject* make_image_dft(PyObject* self, PyObject* args, PyObject* keywds
     l_c = oskar_mem_create(type, OSKAR_CPU, num_pixels, &err);
     m_c = oskar_mem_create(type, OSKAR_CPU, num_pixels, &err);
     n_c = oskar_mem_create(type, OSKAR_CPU, num_pixels, &err);
-    oskar_evaluate_image_lmn_grid(size, size, fov, fov, l_c, m_c, n_c, &err);
-    if (type == OSKAR_SINGLE)
-    {
-        float* n = oskar_mem_float(n_c, &err);
-        for (i = 0; i < num_pixels; ++i) n[i] -= 1.0;
-    }
-    else
-    {
-        double* n = oskar_mem_double(n_c, &err);
-        for (i = 0; i < num_pixels; ++i) n[i] -= 1.0;
-    }
+    oskar_evaluate_image_lmn_grid(size, size, fov, fov, 0, l_c, m_c, n_c, &err);
+    oskar_mem_add_real(n_c, -1.0, &err);
 
     /* Copy input data to GPU. */
     uu_g = oskar_mem_create_copy(uu_c, OSKAR_GPU, &err);

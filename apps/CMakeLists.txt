@@ -77,7 +77,7 @@ if (QT4_FOUND AND CUDA_FOUND)
 
     # BINARY: oskar_imager
     set(name oskar_imager)
-    oskar_qt_app(${name} ${name}_main.cpp)
+    oskar_qt_app(${name} ${name}_main.cpp EXTRA_LIBS oskar_imager)
 
     # BINARY: oskar_fit_element_data
     set(name oskar_fit_element_data)

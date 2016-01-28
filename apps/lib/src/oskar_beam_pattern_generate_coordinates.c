@@ -27,10 +27,10 @@
  */
 
 #include <apps/lib/oskar_beam_pattern_generate_coordinates.h>
-#include <oskar_evaluate_image_lmn_grid.h>
 #include <oskar_convert_healpix_ring_to_theta_phi.h>
 #include <oskar_convert_theta_phi_to_enu_directions.h>
 #include <oskar_convert_lon_lat_to_relative_directions.h>
+#include <oskar_evaluate_image_lmn_grid.h>
 #include <oskar_getline.h>
 #include <oskar_string_to_array.h>
 #include <oskar_cmath.h>
@@ -125,7 +125,7 @@ size_t oskar_beam_pattern_generate_coordinates(int beam_coord_type,
         case 'B': /* Beam image */
         {
             oskar_evaluate_image_lmn_grid(size[0], size[1],
-                    fov_deg[0]*(M_PI/180.0), fov_deg[1]*(M_PI/180.0),
+                    fov_deg[0]*(M_PI/180.0), fov_deg[1]*(M_PI/180.0), 1,
                     x, y, z, status);
             break;
         }
@@ -229,7 +229,7 @@ size_t oskar_beam_pattern_generate_coordinates(int beam_coord_type,
         {
             /* NOTE: This is for an all-sky image centred on the zenith. */
             oskar_evaluate_image_lmn_grid(size[0], size[1],
-                    M_PI, M_PI, x, y, z, status);
+                    M_PI, M_PI, 1, x, y, z, status);
             break;
         }
         case 'H': /* Healpix */

@@ -265,6 +265,97 @@ bool SettingsTree::contains(const string& key) const
     return find_(root_, k, 0) ? true : false;
 }
 
+bool SettingsTree::starts_with(const string& key, const string& str,
+        int* status) const
+{
+    if (*status) return false;
+    const SettingsValue* v = value(key);
+    if (!v) {*status = OSKAR_ERR_SETTINGS_NO_VALUE; return false;}
+    string s = v->to_string();
+    return oskar_settings_utility_string_starts_with(s, str, false);
+}
+
+char SettingsTree::first_letter(const string& key, int* status) const
+{
+    if (*status) return 0;
+    const SettingsValue* v = value(key);
+    if (!v) {*status = OSKAR_ERR_SETTINGS_NO_VALUE; return 0;}
+    string s = v->to_string();
+    return s.size() > 0 ? toupper(s[0]) : 0;
+}
+
+string SettingsTree::to_string(const string& key, int* status) const
+{
+    if (*status) return string();
+    const SettingsValue* v = value(key);
+    if (!v) {*status = OSKAR_ERR_SETTINGS_NO_VALUE; return string();}
+    return v->to_string();
+}
+
+int SettingsTree::to_int(const string& key, int* status) const
+{
+    int t = 0;
+    if (*status) return t;
+    bool ok = false;
+    const SettingsValue* v = value(key);
+    if (!v) {*status = OSKAR_ERR_SETTINGS_NO_VALUE; return t;}
+    t = v->to_int(ok);
+    if (!ok) *status = OSKAR_ERR_SETTINGS_INT_CONVERSION_FAIL;
+    return t;
+}
+
+double SettingsTree::to_double(const string& key, int* status) const
+{
+    double t = 0.0;
+    if (*status) return t;
+    bool ok = false;
+    const SettingsValue* v = value(key);
+    if (!v) {*status = OSKAR_ERR_SETTINGS_NO_VALUE; return t;}
+    t = v->to_double(ok);
+    if (!ok) *status = OSKAR_ERR_SETTINGS_DOUBLE_CONVERSION_FAIL;
+    return t;
+}
+
+vector<string> SettingsTree::to_string_list(const string& key,
+        int* status) const
+{
+    vector<string> t;
+    if (*status) return t;
+    bool ok = false;
+    const SettingsValue* v = value(key);
+    if (!v) {*status = OSKAR_ERR_SETTINGS_NO_VALUE; return t;}
+    t = v->to_string_list(ok);
+    if (!ok) *status = OSKAR_ERR_SETTINGS_STRING_LIST_CONVERSION_FAIL;
+    return t;
+}
+
+vector<int> SettingsTree::to_int_list(const string& key,
+        int* status) const
+{
+    vector<int> t;
+    if (*status) return t;
+    bool ok = false;
+    const SettingsValue* v = value(key);
+    if (!v) {*status = OSKAR_ERR_SETTINGS_NO_VALUE; return t;}
+    t = v->to_int_list(ok);
+    if (!ok) *status = OSKAR_ERR_SETTINGS_INT_LIST_CONVERSION_FAIL;
+    return t;
+}
+
+vector<double> SettingsTree::to_double_list(const string& key,
+        int* status) const
+{
+    vector<double> t;
+    if (*status) return t;
+    bool ok = false;
+    const SettingsValue* v = value(key);
+    if (!v) {*status = OSKAR_ERR_SETTINGS_NO_VALUE; return t;}
+    t = v->to_double_list(ok);
+    if (!ok) *status = OSKAR_ERR_SETTINGS_DOUBLE_LIST_CONVERSION_FAIL;
+    return t;
+}
+
+
 bool SettingsTree::dependency_satisfied_(const SettingsDependency* dep) const
 {
     SettingsKey key(dep->key()); // key pointed to.

@@ -21,6 +21,7 @@ set(${name}_SRC
     src/oskar_convert_enu_directions_to_theta_phi.c
     src/oskar_convert_enu_to_ecef.c
     src/oskar_convert_enu_to_offset_ecef.c
+    src/oskar_convert_fov_to_cellsize.c
     src/oskar_convert_galactic_to_fk5.c
     src/oskar_convert_geodetic_spherical_to_ecef.c
     src/oskar_convert_healpix_ring_to_theta_phi.c

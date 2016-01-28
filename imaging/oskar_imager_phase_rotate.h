@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,31 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_H_
-#define OSKAR_IMAGER_H_
+#ifndef OSKAR_IMAGER_PHASE_ROTATE_H_
+#define OSKAR_IMAGER_PHASE_ROTATE_H_
 
 /**
- * @file oskar_imager.h
+ * @file oskar_imager_phase_rotate.h
  */
 
 #include <oskar_global.h>
-#include <oskar_log.h>
+#include <oskar_mem.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Main OSKAR imager function.
+ * @brief
+ * Performs visibility amplitude phase rotation.
  *
- * @param[in] settings_file Path to a settings file.
- * @param[in,out] log  Pointer to a log structure to use.
+ * @details
+ * Note that the coordinates uu, vv, ww are in wavelengths.
+ *
+ * Ref:
+ * Cornwell, T.J., & Perley, R.A., 1992,
+ * "Radio-interferometric imaging of very large fields"
  */
-OSKAR_APPS_EXPORT
-void oskar_imager(const char* settings_file, oskar_Log* log, int* status);
+OSKAR_EXPORT
+void oskar_imager_phase_rotate(size_t num_vis, const oskar_Mem* uu,
+        const oskar_Mem* vv, const oskar_Mem* ww, oskar_Mem* amps,
+        double delta_l, double delta_m, double delta_n);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_IMAGER_H_ */
+#endif /* OSKAR_IMAGER_PHASE_ROTATE_H_ */

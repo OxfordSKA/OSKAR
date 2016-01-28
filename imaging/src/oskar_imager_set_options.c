@@ -1,0 +1,221 @@
+/*
+ * Copyright (c) 2016, The University of Oxford
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. Neither the name of the University of Oxford nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <cuda_runtime_api.h>
+#include <private_imager.h>
+
+#include <oskar_imager.h>
+#include <private_imager_free_gpu_data.h>
+
+#include <stdio.h>
+#include <string.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
+        int* status)
+{
+    if (*status) return;
+    if (!strncmp(type, "FFT", 3)) h->algorithm = OSKAR_ALGORITHM_FFT;
+    else if (!strncmp(type, "DFT 2", 5)) h->algorithm = OSKAR_ALGORITHM_DFT_2D;
+    else if (!strncmp(type, "DFT 3", 5)) h->algorithm = OSKAR_ALGORITHM_DFT_3D;
+    /*else if (!strncmp(type, "W", 1)) h->algorithm = OSKAR_ALGORITHM_WPROJ;*/
+    /*else if (!strncmp(type, "A", 1)) h->algorithm = OSKAR_ALGORITHM_AWPROJ;*/
+    else *status = OSKAR_ERR_SETTINGS_IMAGE;
+}
+
+
+void oskar_imager_set_channel_range(oskar_Imager* h, int start, int end,
+        int snapshots)
+{
+    h->chan_range[0] = start;
+    h->chan_range[1] = end;
+    h->chan_snaps = snapshots;
+}
+
+
+void oskar_imager_set_default_direction(oskar_Imager* h)
+{
+    h->direction_type = 'O';
+}
+
+
+void oskar_imager_set_direction(oskar_Imager* h, double ra_deg, double dec_deg)
+{
+    h->direction_type = 'R';
+    h->im_centre_deg[0] = ra_deg;
+    h->im_centre_deg[1] = dec_deg;
+}
+
+
+void oskar_imager_set_fov(oskar_Imager* h, double fov_deg)
+{
+    h->fov_deg = fov_deg;
+}
+
+
+void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
+        int* status)
+{
+    int i;
+    oskar_imager_free_gpu_data(h, status);
+    h->num_gpus = num;
+    h->cuda_device_ids = (int*) calloc(h->num_gpus, sizeof(int));
+    h->d = (DeviceData*) calloc(h->num_gpus, sizeof(DeviceData));
+    for (i = 0; i < h->num_gpus; ++i)
+    {
+        h->cuda_device_ids[i] = ids[i];
+
+        *status = (int) cudaSetDevice(h->cuda_device_ids[i]);
+        if (*status) return;
+        h->d[i].uu = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
+        h->d[i].vv = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
+        h->d[i].ww = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
+        h->d[i].amp = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
+                OSKAR_GPU, 0, status);
+        h->d[i].l = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
+        h->d[i].m = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
+        h->d[i].n = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
+        h->d[i].block_gpu = oskar_mem_create(h->imager_prec,
+                OSKAR_GPU, 0, status);
+        h->d[i].block_cpu = oskar_mem_create(h->imager_prec,
+                OSKAR_CPU, 0, status);
+        h->d[i].plane_gpu = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
+                OSKAR_GPU, 0, status);
+        cudaDeviceSynchronize();
+    }
+}
+
+
+void oskar_imager_set_image_type(oskar_Imager* h, const char* type,
+        int* status)
+{
+    if (*status) return;
+    if (!strncmp(type, "S", 1)) h->im_type = OSKAR_IMAGE_TYPE_STOKES;
+    else if (!strncmp(type, "I",  1)) h->im_type = OSKAR_IMAGE_TYPE_I;
+    else if (!strncmp(type, "Q",  1)) h->im_type = OSKAR_IMAGE_TYPE_Q;
+    else if (!strncmp(type, "U",  1)) h->im_type = OSKAR_IMAGE_TYPE_U;
+    else if (!strncmp(type, "V",  1)) h->im_type = OSKAR_IMAGE_TYPE_V;
+    else if (!strncmp(type, "P",  1)) h->im_type = OSKAR_IMAGE_TYPE_PSF;
+    else if (!strncmp(type, "L",  1)) h->im_type = OSKAR_IMAGE_TYPE_LINEAR;
+    else if (!strncmp(type, "XX", 2)) h->im_type = OSKAR_IMAGE_TYPE_XX;
+    else if (!strncmp(type, "XY", 2)) h->im_type = OSKAR_IMAGE_TYPE_XY;
+    else if (!strncmp(type, "YX", 2)) h->im_type = OSKAR_IMAGE_TYPE_YX;
+    else if (!strncmp(type, "YY", 2)) h->im_type = OSKAR_IMAGE_TYPE_YY;
+    else *status = OSKAR_ERR_SETTINGS_IMAGE;
+    h->use_stokes = (h->im_type == OSKAR_IMAGE_TYPE_STOKES ||
+            h->im_type == OSKAR_IMAGE_TYPE_I ||
+            h->im_type == OSKAR_IMAGE_TYPE_Q ||
+            h->im_type == OSKAR_IMAGE_TYPE_U ||
+            h->im_type == OSKAR_IMAGE_TYPE_V);
+    h->im_num_pols = (h->im_type == OSKAR_IMAGE_TYPE_STOKES ||
+            h->im_type == OSKAR_IMAGE_TYPE_LINEAR) ? 4 : 1;
+    if (h->im_type == OSKAR_IMAGE_TYPE_I || h->im_type == OSKAR_IMAGE_TYPE_XX)
+        h->pol_offset = 0;
+    if (h->im_type == OSKAR_IMAGE_TYPE_Q || h->im_type == OSKAR_IMAGE_TYPE_XY)
+        h->pol_offset = 1;
+    if (h->im_type == OSKAR_IMAGE_TYPE_U || h->im_type == OSKAR_IMAGE_TYPE_YX)
+        h->pol_offset = 2;
+    if (h->im_type == OSKAR_IMAGE_TYPE_V || h->im_type == OSKAR_IMAGE_TYPE_YY)
+        h->pol_offset = 3;
+}
+
+
+void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
+        int support, int oversample, int* status)
+{
+    h->support = support;
+    h->oversample = oversample;
+    if (!strncmp(type, "S", 1)) h->kernel_type = 'S';
+    else if (!strncmp(type, "G", 1)) h->kernel_type = 'G';
+    else *status = OSKAR_ERR_SETTINGS_IMAGE;
+}
+
+
+void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
+        int* status)
+{
+    int len;
+    if (*status) return;
+    len = strlen(column);
+    if (len == 0) { *status = OSKAR_ERR_FILE_IO; return; }
+    free(h->ms_column);
+    h->ms_column = calloc(1 + len, 1);
+    strcpy(h->ms_column, column);
+}
+
+
+void oskar_imager_set_output_root(oskar_Imager* h, const char* filename,
+        int* status)
+{
+    int len;
+    if (*status) return;
+    len = strlen(filename);
+    if (len == 0) { *status = OSKAR_ERR_FILE_IO; return; }
+    free(h->image_root);
+    h->image_root = calloc(1 + len, 1);
+    strcpy(h->image_root, filename);
+}
+
+
+void oskar_imager_set_size(oskar_Imager* h, int size)
+{
+    h->size = size;
+    h->num_pixels = size * size;
+}
+
+
+void oskar_imager_set_station_coords(oskar_Imager* h, int num_stations,
+        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        int* status)
+{
+    if (*status) return;
+    h->num_stations = num_stations;
+    oskar_mem_free(h->st_x, status);
+    oskar_mem_free(h->st_y, status);
+    oskar_mem_free(h->st_z, status);
+    h->st_x = oskar_mem_convert_precision(x, h->imager_prec, status);
+    h->st_y = oskar_mem_convert_precision(y, h->imager_prec, status);
+    h->st_z = oskar_mem_convert_precision(z, h->imager_prec, status);
+}
+
+
+void oskar_imager_set_time_range(oskar_Imager* h, int start, int end,
+        int snapshots)
+{
+    h->time_range[0] = start;
+    h->time_range[1] = end;
+    h->time_snaps = snapshots;
+}
+
+
+#ifdef __cplusplus
+}
+#endif

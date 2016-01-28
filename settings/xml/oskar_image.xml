@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <s k="image"><label>Image settings</label>
-    <desc>These settings are used when running the OSKAR imager. Note that the
-        OSKAR imager in its current form is not recommended for general use:
-        visibilities should normally be written to a Measurement Set for
-        imaging in CASA or other software.</desc>
+    <desc>These settings are used when running the OSKAR imager.</desc>
+    <s k="double_precision"><label>Use double precision</label>
+        <type name="bool" default="true"/>
+        <desc>Determines whether double precision arithmetic is used.</desc>
+    </s>
+    <s k="cuda_device_ids"><label>CUDA device IDs to use</label>
+        <type name="IntListExt" default="all">all</type>
+        <desc>A comma-separated string containing device (GPU) IDs to use on
+            a multi-GPU system, or 'all' to use all devices.</desc>
+    </s>
     <s k="fov_deg"><label>Field-of-view [deg]</label>
         <type name="UnsignedDouble" default="2.0"/>
         <desc>Total field of view in degrees.</desc>
@@ -40,13 +46,11 @@
         <type name="uint" default="0"/>
         <desc>The start channel index to include in the image or image
             cube.</desc>
-        <depends k="image/channel_snapshots" v="true"/>
     </s>
     <s k="channel_end"><label>Channel end</label>
-        <type name="IntRangeExt" default="max" >0,MAX,max</type>
+        <type name="IntRangeExt" default="max">0,MAX,max</type>
         <desc>The end channel index to include in the image or image
             cube.</desc>
-        <depends k="image/channel_snapshots" v="true"/>
     </s>
     <s k="time_snapshots"><label>Time snapshots</label>
         <type name="bool" default="true"/>
@@ -57,16 +61,29 @@
     <s k="time_start"><label>Time start</label>
         <type name="uint" default="0"/>
         <desc>The start time index to include in the image or image cube.</desc>
-        <depends k="image/time_snapshots" v="true"/>
     </s>
     <s k="time_end"><label>Time end</label>
-        <type name="IntRangeExt" default="max" >0,MAX,max</type>
+        <type name="IntRangeExt" default="max">0,MAX,max</type>
         <desc>The end time index to include in the image or image cube.</desc>
-        <depends k="image/time_snapshots" v="true"/>
     </s>
-    <s k="transform_type"><label>Transform type</label>
-        <type name="OptionList" default="DFT 2D">DFT 2D, DFT 3D</type>
+    <s k="algorithm"><label>Algorithm</label>
+        <type name="OptionList" default="FFT">FFT, DFT 2D, DFT 3D</type>
         <desc>The type of transform used to generate the image.</desc>
+    </s>
+    <s k="fft"><label>FFT options</label>
+        <s k="kernel_type"><label>Convolution kernel type</label>
+        <type name="OptionList" default="Spheroidal">Spheroidal</type>
+            <desc>The type of gridding kernel to use.</desc>
+        </s>
+        <s k="support"><label>Support size</label>
+            <type name="int" default="3"/>
+            <desc>The support size used for the gridding kernel.</desc>
+        </s>
+        <s k="oversample"><label>Oversample factor</label>
+            <type name="int" default="100"/>
+            <desc>The oversample factor used for the gridding kernel.</desc>
+        </s>
+        <depends k="image/algorithm" v="FFT"/>
     </s>
     <s k="direction"><label>Image centre direction</label>
         <type name="OptionList" default="Obs">
@@ -92,9 +109,15 @@
             <depends k="image/direction" v="RA, Dec"/>
         </s>
     </s>
-    <s k="input_vis_data"><label>Input OSKAR visibility data file</label>
+    <s k="input_vis_data"><label>Input visibility data file</label>
         <type name="InputFile"/>
-        <desc>Path to the input OSKAR visibility data file.</desc>
+        <desc>Path to the input OSKAR visibility data file or
+            Measurement Set.</desc>
+    </s>
+    <s k="ms_column"><label>Measurement Set column</label>
+        <type name="OptionList" default="DATA">DATA,MODEL_DATA,CORRECTED_DATA</type>
+        <desc>The name of the column in the Measurement Set to use,
+            if applicable.</desc>
     </s>
     <s k="root_path"><label>Output image root path</label>
         <type name="OutputFile"/>

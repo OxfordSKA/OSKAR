@@ -28,18 +28,18 @@
 
 #include <gtest/gtest.h>
 
-#include <oskar_station.h>
+#include <oskar_cmath.h>
+#include <oskar_convert_lon_lat_to_relative_directions.h>
+#include <oskar_convert_relative_directions_to_enu_directions.h>
 #include <oskar_evaluate_array_pattern.h>
 #include <oskar_evaluate_array_pattern_hierarchical.h>
 #include <oskar_evaluate_beam_horizon_direction.h>
-#include <oskar_convert_lon_lat_to_relative_directions.h>
-#include <oskar_convert_relative_directions_to_enu_directions.h>
 #include <oskar_evaluate_element_weights_dft.h>
 #include <oskar_evaluate_image_lon_lat_grid.h>
 #include <oskar_get_error_string.h>
+#include <oskar_station.h>
 #include <oskar_timer.h>
 
-#include <oskar_cmath.h>
 #include <cstdio>
 #include <cstdlib>
 

@@ -65,7 +65,7 @@ if (QT4_FOUND)
         widgets/test/Test_oskar_SettingsModel_new.cpp
     )
     target_link_libraries(test_oskar_settings_widgets
-        gtest_main 
+        gtest_main
         oskar_settings_widgets
         oskar_settings_containers)
     #=========================
@@ -118,7 +118,6 @@ if (QT4_FOUND)
     set(${name}_CXX_SRC
         ${dir_}/oskar_settings_load_beam_pattern.cpp
         ${dir_}/oskar_settings_load_element_fit.cpp
-        ${dir_}/oskar_settings_load_image.cpp
         ${dir_}/oskar_settings_load_interferometer.cpp
         ${dir_}/oskar_settings_load_ionosphere.cpp
         ${dir_}/oskar_settings_load_observation.cpp

@@ -30,9 +30,9 @@
 
 #include <oskar_telescope.h>
 #include <oskar_jones.h>
-#include <oskar_evaluate_image_lmn_grid.h>
 #include <oskar_linspace.h>
 #include <oskar_meshgrid.h>
+#include <oskar_evaluate_image_lmn_grid.h>
 #include <oskar_evaluate_jones_E.h>
 #include <oskar_get_error_string.h>
 
@@ -101,7 +101,7 @@ TEST(evaluate_jones_E, evaluate_e)
     oskar_Mem* m = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pts, &error);
     oskar_Mem* n = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU, num_pts, &error);
     oskar_evaluate_image_lmn_grid(num_l, num_m, 90.0 * D2R, 90.0 * D2R,
-            l, m, n, &error);
+            1, l, m, n, &error);
 
     // Set up GPU memory.
     oskar_Mem* l_gpu = oskar_mem_create_copy(l, OSKAR_GPU, &error);

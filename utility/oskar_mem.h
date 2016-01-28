@@ -69,6 +69,7 @@ enum OSKAR_MEM_LOCATION
 #include <oskar_binary_data_types.h>
 #include <oskar_mem_accessors.h>
 #include <oskar_mem_add.h>
+#include <oskar_mem_add_real.h>
 #include <oskar_mem_append_raw.h>
 #include <oskar_mem_clear_contents.h>
 #include <oskar_mem_copy.h>

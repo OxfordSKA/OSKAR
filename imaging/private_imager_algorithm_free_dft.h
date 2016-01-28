@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,29 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGE_EVALUATE_RANGES_H_
-#define OSKAR_IMAGE_EVALUATE_RANGES_H_
-
-/**
- * @file oskar_image_evaluate_ranges.h
- */
-
-#include <oskar_global.h>
+#ifndef OSKAR_IMAGER_ALGORITHM_FREE_DFT_H_
+#define OSKAR_IMAGER_ALGORITHM_FREE_DFT_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-OSKAR_EXPORT
-void oskar_evaluate_image_range(int* range, int snapshots,
-        const int* settings_range, int num_vis_times, int* status);
-
-OSKAR_EXPORT
-void oskar_evaluate_image_data_range(int* range, const int* settings_range,
-        int num_data_values, int* status);
+void oskar_imager_algorithm_free_dft(oskar_Imager* h, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_IMAGE_EVALUATE_RANGES_H_ */
+#endif /* OSKAR_IMAGER_ALGORITHM_FREE_DFT_H_ */

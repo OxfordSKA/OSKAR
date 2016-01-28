@@ -267,6 +267,36 @@ OSKAR_MS_EXPORT
 double oskar_ms_ref_freq_hz(const oskar_MeasurementSet* p);
 
 /**
+ * @brief
+ * Returns the channel width in the Measurement Set.
+ *
+ * @details
+ * Returns the channel width in the Measurement Set.
+ */
+OSKAR_MS_EXPORT
+double oskar_ms_channel_width_hz(const oskar_MeasurementSet* p);
+
+/**
+ * @brief
+ * Returns the start time in the Measurement Set.
+ *
+ * @details
+ * Returns the start time in the Measurement Set.
+ */
+OSKAR_MS_EXPORT
+double oskar_ms_start_time_mjd(const oskar_MeasurementSet* p);
+
+/**
+ * @brief
+ * Returns the time increment in the Measurement Set.
+ *
+ * @details
+ * Returns the time increment in the Measurement Set.
+ */
+OSKAR_MS_EXPORT
+double oskar_ms_time_inc_sec(const oskar_MeasurementSet* p);
+
+/**
  * @details
  * Writes visibility data to the main table.
  *
