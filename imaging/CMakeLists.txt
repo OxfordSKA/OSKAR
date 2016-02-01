@@ -33,6 +33,7 @@ if (CUDA_FOUND)
         src/oskar_imager_update.c
         src/private_imager_algorithm_free_dft.c
         src/private_imager_algorithm_free_fft.c
+        src/private_imager_algorithm_free_wproj.c
         src/private_imager_algorithm_init_dft.c
         src/private_imager_algorithm_init_fft.c
         src/private_imager_create_fits_files.c

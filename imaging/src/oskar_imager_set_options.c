@@ -84,15 +84,34 @@ void oskar_imager_set_fov(oskar_Imager* h, double fov_deg)
 void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
         int* status)
 {
-    int i;
+    int i, num_gpus_avail;
+    if (*status) return;
     oskar_imager_free_gpu_data(h, status);
-    h->num_gpus = num;
-    h->cuda_device_ids = (int*) calloc(h->num_gpus, sizeof(int));
+    *status = (int) cudaGetDeviceCount(&num_gpus_avail);
+    if (*status) return;
+    if (num > num_gpus_avail)
+    {
+        *status = OSKAR_ERR_CUDA_DEVICES;
+        return;
+    }
+    if (num < 0)
+    {
+        h->num_gpus = num_gpus_avail;
+        h->cuda_device_ids = (int*) calloc(h->num_gpus, sizeof(int));
+        for (i = 0; i < h->num_gpus; ++i)
+            h->cuda_device_ids[i] = i;
+    }
+    else if (num > 0)
+    {
+        h->num_gpus = num;
+        h->cuda_device_ids = (int*) calloc(h->num_gpus, sizeof(int));
+        for (i = 0; i < h->num_gpus; ++i)
+            h->cuda_device_ids[i] = ids[i];
+    }
+    else return;
     h->d = (DeviceData*) calloc(h->num_gpus, sizeof(DeviceData));
     for (i = 0; i < h->num_gpus; ++i)
     {
-        h->cuda_device_ids[i] = ids[i];
-
         *status = (int) cudaSetDevice(h->cuda_device_ids[i]);
         if (*status) return;
         h->d[i].uu = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);

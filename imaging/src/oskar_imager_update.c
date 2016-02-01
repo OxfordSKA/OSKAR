@@ -31,14 +31,9 @@
 #include <oskar_convert_ecef_to_baseline_uvw.h>
 #include <oskar_convert_lon_lat_to_relative_directions.h>
 #include <oskar_imager.h>
-#include <oskar_imager_linear_to_stokes.h>
-#include <oskar_imager_phase_rotate.h>
-#include <oskar_imager_reset_cache.h>
-#include <oskar_imager_select_coords.h>
-#include <oskar_imager_select_vis.h>
-#include <oskar_imager_update.h>
 #include <private_imager_algorithm_init_dft.h>
 #include <private_imager_algorithm_init_fft.h>
+#include <private_imager_algorithm_init_wproj.h>
 #include <private_imager_create_fits_files.h>
 #include <private_imager_update_plane_dft.h>
 #include <private_imager_update_plane_fft.h>
@@ -287,7 +282,7 @@ void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
     }
     else if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
     {
-        /* if () oskar_imager_algorithm_init_wproj(h, status); */
+        /* if (!h->w_kernels) oskar_imager_algorithm_init_wproj(h, status); */
         /* *plane_norm += (double) num_vis; */
         /* oskar_imager_update_plane_wproj(h, num_vis, pu, pv, pw, pa,
                 plane, status); */

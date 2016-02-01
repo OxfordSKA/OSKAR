@@ -107,6 +107,11 @@ int main(int argc, char** argv)
         oskar_imager_set_direction(h,
                 s.to_double("direction/ra_deg", &e),
                 s.to_double("direction/dec_deg", &e));
+    if (!s.starts_with("cuda_device_ids", "all", &e))
+    {
+        vector<int> ids = s.to_int_list("cuda_device_ids", &e);
+        if (ids.size() > 0) oskar_imager_set_gpus(h, ids.size(), &ids[0], &e);
+    }
 
     // Make the images.
     oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);

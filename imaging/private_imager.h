@@ -79,6 +79,9 @@ struct oskar_Imager
     cufftHandle cufft_plan_imager;
 
     /* W-projection imager data. */
+    int num_w_kernels, *w_support;
+    double w_min, w_max;
+    oskar_Mem **w_kernels;
 
     /* Memory allocated per GPU (array of DeviceData structures). */
     DeviceData* d;
