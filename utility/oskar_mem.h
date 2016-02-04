@@ -78,6 +78,7 @@ enum OSKAR_MEM_LOCATION
 #include <oskar_mem_create.h>
 #include <oskar_mem_create_alias.h>
 #include <oskar_mem_create_alias_from_raw.h>
+#include <oskar_mem_create_copy_from_raw.h>
 #include <oskar_mem_create_copy.h>
 #include <oskar_mem_data_type_string.h>
 #include <oskar_mem_different.h>

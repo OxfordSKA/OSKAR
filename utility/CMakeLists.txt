@@ -22,6 +22,7 @@ set(utility_SRC
     src/oskar_mem_copy_contents.c
     src/oskar_mem_create_alias_from_raw.c
     src/oskar_mem_create_alias.c
+    src/oskar_mem_create_copy_from_raw.c
     src/oskar_mem_create_copy.c
     src/oskar_mem_create.c
     src/oskar_mem_data_type_string.c
