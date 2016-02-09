@@ -11,7 +11,6 @@
 #   MKL             (oskar -> to enable extended sources)
 #   LAPACK          (oskar -> to enable extended sources)
 #   casacore        (oskar_ms)
-#   MATLAB          (for MATLAB interface fuctions)
 #
 # =============================================================================
 
@@ -43,8 +42,8 @@ endif()
 find_package(CasaCore)               # liboskar_ms
 #find_package(Matlab)                 # mex functions
 #find_package(PNG QUIET)             # For writing PNG images
-#find_package(PythonLibs 2.7)         # For python interface
-#find_package(NumPy 1.8)              # For python interface
+find_package(PythonLibs 2.7)         # For python interface
+find_package(NumPy 1.8)              # For python interface
 
 
 if (PYTHONLIBS_FOUND AND NUMPY_FOUND AND PYTHONINTERP_FOUND AND PYTHON_VERSION_MAJOR EQUAL 2)
@@ -57,9 +56,9 @@ if (NOT CUDA_FOUND)
     message("-- WARNING: CUDA toolkit not found: Unable to build main OSKAR library.")
     message("===============================================================================")
 elseif (NOT CUDA_CUDA_LIBRARY)
-    # Leave this as a warning only, as drivers may not be installed
+    # Leave this as a note only, as drivers may not be installed
     # on cluster head nodes.
-    message("-- WARNING: CUDA driver library not found.")
+    message("-- NOTE: CUDA driver library not found.")
 endif ()
 
 if (CUDA_FOUND)
@@ -171,9 +170,9 @@ endif()
 #if (MATLAB_FOUND AND CUDA_FOUND)
 #message("-- INFO:   - MATLAB interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_MATLAB_INSTALL_DIR}")
 #endif()
-#if (PYTHON_FOUND AND CUDA_FOUND)
-#message("-- INFO:   - Python interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_PYTHON_INSTALL_DIR}")
-#endif()
+if (PYTHON_FOUND AND CUDA_FOUND)
+message("-- INFO:   - Python interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_PYTHON_INSTALL_DIR}")
+endif()
 #message("-- NOTE: These paths can be changed using: '-DCMAKE_INSTALL_PREFIX=<path>'")
 message("===============================================================================")
 

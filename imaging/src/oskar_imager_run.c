@@ -49,8 +49,6 @@ static void oskar_imager_run_ms(oskar_Imager* h, const char* filename,
         int* status);
 static void oskar_imager_run_vis(oskar_Imager* h, const char* filename,
         int* status);
-static void oskar_imager_data_range(const int settings_range[2],
-        int num_data_values, int range[2], int* status);
 
 void oskar_imager_run(oskar_Imager* h, const char* filename, int* status)
 {
@@ -81,6 +79,8 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
     int start_time, end_time, start_chan, end_chan;
     int num_times, num_channels, percent_done = 0, percent_next = 10;
     int dim_start_and_size[6];
+    if (h->log) oskar_log_message(h->log, 'M', 0,
+            "Opening OSKAR visibility file '%s'", filename);
     vis_file = oskar_binary_create(filename, 'r', status);
     hdr = oskar_vis_header_read(vis_file, status);
     if (*status)
@@ -98,10 +98,17 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
             status);
     num_times = oskar_vis_header_num_times_total(hdr);
     num_channels = oskar_vis_header_num_channels_total(hdr);
-    oskar_imager_data_range(h->chan_range, num_channels,
-            h->vis_chan_range, status);
-    oskar_imager_data_range(h->time_range, num_times,
-            h->vis_time_range, status);
+
+    /* Set visibility meta-data. */
+    oskar_imager_set_vis_frequency(h,
+            oskar_vis_header_freq_start_hz(hdr),
+            oskar_vis_header_freq_inc_hz(hdr), num_channels, status);
+    oskar_imager_set_vis_time(h,
+            oskar_vis_header_time_start_mjd_utc(hdr),
+            oskar_vis_header_time_inc_sec(hdr), num_times, status);
+    oskar_imager_set_vis_phase_centre(h,
+            oskar_vis_header_phase_centre_ra_deg(hdr),
+            oskar_vis_header_phase_centre_dec_deg(hdr));
     if (*status)
     {
         oskar_vis_header_free(hdr, status);
@@ -109,19 +116,15 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
         return;
     }
 
-    /* Set visibility meta-data. */
-    h->vis_freq_start_hz = oskar_vis_header_freq_start_hz(hdr);
-    h->freq_inc_hz = oskar_vis_header_freq_inc_hz(hdr);
-    h->vis_time_start_mjd_utc = oskar_vis_header_time_start_mjd_utc(hdr);
-    h->time_inc_sec = oskar_vis_header_time_inc_sec(hdr);
-    h->vis_centre_deg[0] = oskar_vis_header_phase_centre_ra_deg(hdr);
-    h->vis_centre_deg[1] = oskar_vis_header_phase_centre_dec_deg(hdr);
-
     /* Loop over visibility blocks. */
     blk = oskar_vis_block_create(OSKAR_CPU, hdr, status);
     num_blocks = (num_times + max_times_per_block - 1) /
             max_times_per_block;
-    printf(" |   0%%..."); fflush(stdout);
+    if (h->log)
+    {
+        oskar_log_message(h->log, 'S', -2, "");
+        oskar_log_message(h->log, 'S', -2, "%3d%% ...", 0);
+    }
     for (i_block = 0; i_block < num_blocks; ++i_block)
     {
         if (*status) break;
@@ -156,12 +159,12 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
         percent_done = 100 * (i_block + 1) / (double)num_blocks;
         if (percent_done >= percent_next)
         {
-            printf("%d%%", percent_next);
-            if (percent_next < 100) printf("..."); else printf("\n |\n");
-            fflush(stdout);
+            if (h->log) oskar_log_message(h->log, 'S', -2, "%3d%% ...",
+                    percent_next);
             percent_next += 10;
         }
     }
+    if (h->log) oskar_log_message(h->log, 'S', -2, "");
     oskar_vis_block_free(blk, status);
     oskar_vis_header_free(hdr, status);
     oskar_binary_free(vis_file);
@@ -178,6 +181,8 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     int num_times, num_channels, percent_done = 0, percent_next = 10;
     int i, block_size, start_row, type;
     double *uvw_, *u_, *v_, *w_;
+    if (h->log) oskar_log_message(h->log, 'M', 0,
+            "Opening Measurement Set '%s'", filename);
     ms = oskar_ms_open(filename);
     if (!ms)
     {
@@ -196,27 +201,26 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     /* Check for irregular data and override synthesis mode if required. */
     if (num_rows % num_baselines != 0)
     {
-        printf(" | WARNING: Irregular data detected. "
-                "Using full time synthesis.\n");
+        oskar_log_warning(h->log,
+                "Irregular data detected. Using full time synthesis.");
         oskar_imager_set_time_range(h, 0, -1, 0);
     }
-    oskar_imager_data_range(h->chan_range, num_channels,
-            h->vis_chan_range, status);
-    oskar_imager_data_range(h->time_range, num_times,
-            h->vis_time_range, status);
+
+    /* Set visibility meta-data. */
+    oskar_imager_set_vis_frequency(h,
+            oskar_ms_ref_freq_hz(ms),
+            oskar_ms_channel_width_hz(ms), num_channels, status);
+    oskar_imager_set_vis_time(h,
+            oskar_ms_start_time_mjd(ms),
+            oskar_ms_time_inc_sec(ms), num_times, status);
+    oskar_imager_set_vis_phase_centre(h,
+            oskar_ms_phase_centre_ra_rad(ms) * 180/M_PI,
+            oskar_ms_phase_centre_dec_rad(ms) * 180/M_PI);
     if (*status)
     {
         oskar_ms_close(ms);
         return;
     }
-
-    /* Set visibility meta-data. */
-    h->vis_freq_start_hz = oskar_ms_ref_freq_hz(ms);
-    h->freq_inc_hz = oskar_ms_channel_width_hz(ms);
-    h->vis_time_start_mjd_utc = oskar_ms_start_time_mjd(ms);
-    h->time_inc_sec = oskar_ms_time_inc_sec(ms);
-    h->vis_centre_deg[0] = oskar_ms_phase_centre_ra_rad(ms) * 180/M_PI;
-    h->vis_centre_deg[1] = oskar_ms_phase_centre_dec_rad(ms) * 180/M_PI;
 
     /* Create arrays. */
     uvw = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
@@ -234,7 +238,11 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
             num_baselines * num_channels, status);
 
     /* Loop over visibility blocks. */
-    printf(" |   0%%..."); fflush(stdout);
+    if (h->log)
+    {
+        oskar_log_message(h->log, 'S', -2, "");
+        oskar_log_message(h->log, 'S', -2, "%3d%% ...", 0);
+    }
     for (start_row = 0; start_row < num_rows; start_row += num_baselines)
     {
         size_t allocated, required;
@@ -256,6 +264,8 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
         /* TODO(FD) Swap baseline and channel dimensions. */
         if (num_channels != 1)
         {
+            oskar_log_error(h->log,
+                    "oskar_imager currently works with only one channel.");
             *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
             break;
         }
@@ -278,12 +288,12 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
         percent_done = 100 * (start_row + num_baselines) / (double)num_rows;
         if (percent_done >= percent_next)
         {
-            printf("%d%%", percent_next);
-            if (percent_next < 100) printf("..."); else printf("\n |\n");
-            fflush(stdout);
+            if (h->log) oskar_log_message(h->log, 'S', -2, "%3d%% ...",
+                    percent_next);
             percent_next += 10;
         }
     }
+    if (h->log) oskar_log_message(h->log, 'S', -2, "");
     oskar_mem_free(uvw, status);
     oskar_mem_free(u, status);
     oskar_mem_free(v, status);
@@ -291,30 +301,10 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     oskar_mem_free(data, status);
     oskar_ms_close(ms);
 #else
-    fprintf(stderr, "ERROR: OSKAR was compiled without "
-            "Measurement Set support.\n");
+    oskar_log_error(log, "OSKAR was compiled without Measurement Set support.");
 #endif
 }
 
-
-void oskar_imager_data_range(const int settings_range[2],
-        int num_data_values, int range[2], int* status)
-{
-    if (*status) return;
-    if (settings_range[0] >= num_data_values ||
-            settings_range[1] >= num_data_values)
-    {
-        *status = OSKAR_ERR_INVALID_RANGE;
-        return;
-    }
-    range[0] = settings_range[0] < 0 ? 0 : settings_range[0];
-    range[1] = settings_range[1] < 0 ? num_data_values - 1 : settings_range[1];
-    if (range[0] > range[1])
-    {
-        *status = OSKAR_ERR_INVALID_RANGE;
-        return;
-    }
-}
 
 #ifdef __cplusplus
 }

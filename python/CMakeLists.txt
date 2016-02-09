@@ -8,7 +8,7 @@ if (PYTHON_FOUND AND CUDA_FOUND)
     include_directories(${NUMPY_INCLUDE_DIRS})
 
     set(OSKAR_PYTHON_INSTALL_DIR "${OSKAR_PYTHON_INSTALL_DIR}/oskar")
-    oskar_py_module(_image_lib src/_oskar_image_lib.c LIBS oskar)
+    oskar_py_module(_image_lib src/_oskar_image_lib.c LIBS oskar oskar_imager)
     oskar_py_module(_mem_lib src/_oskar_mem_lib.c LIBS oskar)
     oskar_py_module(_vis_lib src/_oskar_vis_lib.c LIBS oskar)
 

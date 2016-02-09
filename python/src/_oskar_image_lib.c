@@ -31,11 +31,9 @@
 
 #include <Python.h>
 
-#include <oskar_cmath.h>
-#include <oskar_cuda_check_error.h>
-#include <oskar_dft_c2r_3d_cuda.h>
-#include <oskar_evaluate_image_lmn_grid.h>
-#include <oskar_mem.h>
+#include <oskar_imager.h>
+#include <oskar_get_error_string.h>
+#include <string.h>
 
 /* http://docs.scipy.org/doc/numpy-dev/reference/c-api.deprecations.html */
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
@@ -43,27 +41,19 @@
 
 static PyObject* OskarError;
 
-typedef struct {
-    double re;
-    double im;
-} dComplex;
-
-static PyObject* make_image_dft(PyObject* self, PyObject* args, PyObject* keywds)
+static PyObject* make_image(PyObject* self, PyObject* args, PyObject* keywds)
 {
     PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amp = 0, *im = 0;
-    int size = 128, err = 0;
-    double fov = 2.0, freq, wavenumber;
-    int i, num_vis, num_pixels, type = OSKAR_DOUBLE;
-    oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *l_c, *m_c, *n_c, *im_c;
-    oskar_Mem *uu_g, *vv_g, *ww_g, *amp_g, *l_g, *m_g, *n_g, *im_g;
+    int i = 0, err = 0, num_vis, num_pixels, size = 0, type = OSKAR_DOUBLE;
+    double fov = 0.0, norm = 0.0;
+    oskar_Imager* imager;
+    oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *plane;
 
     /* Parse inputs. */
-    char* keywords[] = {"uu", "vv", "ww", "amp", "freq", "fov", "size",
-            NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OOOOd|di", keywords,
-            &uu, &vv, &ww, &amp, &freq, &fov, &size))
+    char* keywords[] = {"uu", "vv", "ww", "amp", "fov", "size", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OOOOdi", keywords,
+            &uu, &vv, &ww, &amp, &fov, &size))
         return NULL;
-    fov *= (M_PI / 180.0);
 
     /* Check dimensions. */
     if (PyArray_NDIM(uu) != 1 || PyArray_NDIM(vv) != 1 ||
@@ -83,8 +73,13 @@ static PyObject* make_image_dft(PyObject* self, PyObject* args, PyObject* keywds
 
     /* Create the output image array. */
     num_pixels = size * size;
-    npy_intp dims = num_pixels;
-    im = (PyArrayObject*)PyArray_SimpleNew(1, &dims, NPY_DOUBLE);
+    npy_intp dims[] = {size, size};
+    im = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_DOUBLE);
+
+    /* Create and set up the imager. */
+    imager = oskar_imager_create(type, &err);
+    oskar_imager_set_fov(imager, fov);
+    oskar_imager_set_size(imager, size);
 
     /* Pointers to input/output arrays. */
     uu_c = oskar_mem_create_alias_from_raw(PyArray_DATA(uu), type, OSKAR_CPU,
@@ -93,76 +88,26 @@ static PyObject* make_image_dft(PyObject* self, PyObject* args, PyObject* keywds
             num_vis, &err);
     ww_c = oskar_mem_create_alias_from_raw(PyArray_DATA(ww), type, OSKAR_CPU,
             num_vis, &err);
-    im_c = oskar_mem_create_alias_from_raw(PyArray_DATA(im), type, OSKAR_CPU,
-            num_pixels, &err);
     amp_c = oskar_mem_create_alias_from_raw(PyArray_DATA(amp), type, OSKAR_CPU,
             num_vis, &err);
 
-    /* Create the image grid. */
-    l_c = oskar_mem_create(type, OSKAR_CPU, num_pixels, &err);
-    m_c = oskar_mem_create(type, OSKAR_CPU, num_pixels, &err);
-    n_c = oskar_mem_create(type, OSKAR_CPU, num_pixels, &err);
-    oskar_evaluate_image_lmn_grid(size, size, fov, fov, 0, l_c, m_c, n_c, &err);
-    oskar_mem_add_real(n_c, -1.0, &err);
-
-    /* Copy input data to GPU. */
-    uu_g = oskar_mem_create_copy(uu_c, OSKAR_GPU, &err);
-    vv_g = oskar_mem_create_copy(vv_c, OSKAR_GPU, &err);
-    ww_g = oskar_mem_create_copy(ww_c, OSKAR_GPU, &err);
-    amp_g = oskar_mem_create_copy(amp_c, OSKAR_GPU, &err);
-    l_g = oskar_mem_create_copy(l_c, OSKAR_GPU, &err);
-    m_g = oskar_mem_create_copy(m_c, OSKAR_GPU, &err);
-    n_g = oskar_mem_create_copy(n_c, OSKAR_GPU, &err);
-
     /* Make the image. */
-    im_g = oskar_mem_create(type, OSKAR_GPU, num_pixels, &err);
-    wavenumber = 2.0 * M_PI * freq / 299792458.0;
-    if (!err)
-    {
-        if (type == OSKAR_SINGLE)
-            oskar_dft_c2r_3d_cuda_f(num_vis, wavenumber,
-                    oskar_mem_float_const(uu_g, &err),
-                    oskar_mem_float_const(vv_g, &err),
-                    oskar_mem_float_const(ww_g, &err),
-                    oskar_mem_float2_const(amp_g, &err), num_pixels,
-                    oskar_mem_float_const(l_g, &err),
-                    oskar_mem_float_const(m_g, &err),
-                    oskar_mem_float_const(n_g, &err),
-                    oskar_mem_float(im_g, &err));
-        else
-            oskar_dft_c2r_3d_cuda_d(num_vis, wavenumber,
-                    oskar_mem_double_const(uu_g, &err),
-                    oskar_mem_double_const(vv_g, &err),
-                    oskar_mem_double_const(ww_g, &err),
-                    oskar_mem_double2_const(amp_g, &err), num_pixels,
-                    oskar_mem_double_const(l_g, &err),
-                    oskar_mem_double_const(m_g, &err),
-                    oskar_mem_double_const(n_g, &err),
-                    oskar_mem_double(im_g, &err));
-    }
-    oskar_cuda_check_error(&err);
-    oskar_mem_scale_real(im_g, 1.0 / num_vis, &err);
-
-    /* Copy image data back from GPU. */
-    oskar_mem_copy(im_c, im_g, &err);
+    plane = oskar_mem_create(type | OSKAR_COMPLEX, OSKAR_CPU, num_pixels, &err);
+    oskar_imager_update_plane(imager, num_vis, uu_c, vv_c, ww_c, amp_c,
+            plane, &norm, &err);
+    oskar_imager_finalise_plane(imager, plane, norm, &err);
+    memcpy(PyArray_DATA(im), oskar_mem_void_const(plane),
+            num_pixels * sizeof(double));
+    if (err)
+        fprintf(stderr, "Error in imager: code %d (%s)\n",
+                err, oskar_get_error_string(err));
 
     /* Free memory. */
     oskar_mem_free(uu_c, &err);
-    oskar_mem_free(uu_g, &err);
     oskar_mem_free(vv_c, &err);
-    oskar_mem_free(vv_g, &err);
     oskar_mem_free(ww_c, &err);
-    oskar_mem_free(ww_g, &err);
     oskar_mem_free(amp_c, &err);
-    oskar_mem_free(amp_g, &err);
-    oskar_mem_free(l_c, &err);
-    oskar_mem_free(l_g, &err);
-    oskar_mem_free(m_c, &err);
-    oskar_mem_free(m_g, &err);
-    oskar_mem_free(n_c, &err);
-    oskar_mem_free(n_g, &err);
-    oskar_mem_free(im_c, &err);
-    oskar_mem_free(im_g, &err);
+    oskar_imager_free(imager, &err);
 
     /* Return image to the python workspace. */
     return Py_BuildValue("O", im);
@@ -171,24 +116,22 @@ static PyObject* make_image_dft(PyObject* self, PyObject* args, PyObject* keywds
 /* Method table. */
 static PyMethodDef oskar_image_lib_methods[] =
 {
-    {"make", (PyCFunction)make_image_dft, METH_VARARGS | METH_KEYWORDS,
-            "make(uu, vv, ww, amp, freq, fov=2.0, size=128)\n\n"
-            "Makes an image from visibility data using a DFT.\n\n"
+    {"make", (PyCFunction)make_image, METH_VARARGS | METH_KEYWORDS,
+            "make(uu, vv, ww, amp, fov, size)\n\n"
+            "Makes an image from visibility data.\n\n"
             "Parameters\n"
             "----------\n"
             "uu : array like, shape (n,)\n"
-            "   Input baseline u coordinates, in metres.\n\n"
+            "   Input baseline u coordinates, in wavelengths.\n\n"
             "vv : array like, shape (n,)\n"
-            "   Input baseline v coordinates, in metres.\n\n"
+            "   Input baseline v coordinates, in wavelengths.\n\n"
             "ww : array like, shape (n,)\n"
-            "   Input baseline w coordinates, in metres.\n\n"
+            "   Input baseline w coordinates, in wavelengths.\n\n"
             "amp : array like, shape (n,), complex\n"
             "   Input baseline amplitudes.\n\n"
-            "freq : scalar\n"
-            "   Frequency, in Hz.\n\n"
-            "fov : scalar, default=2.0\n"
+            "fov : scalar\n"
             "   Image field of view, in degrees.\n\n"
-            "size : integer, default=128\n"
+            "size : integer\n"
             "   Image size along one dimension, in pixels.\n\n"
     },
     {NULL, NULL, 0, NULL}

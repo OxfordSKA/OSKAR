@@ -44,8 +44,6 @@ void oskar_log_message(oskar_Log* log, char priority, int depth,
     const char* prefix = 0;
     FILE* stream = 0;
     char code = oskar_log_get_entry_code(priority);
-    /* Only depth codes > -1 are valid for message log entries */
-    if (depth < -1) return;
     stream = (priority == 'E') ? stderr : stdout;
     va_start(args, format);
     oskar_log_write(log, stream, priority, code, depth, prefix, format, args);

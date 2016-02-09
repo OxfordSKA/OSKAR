@@ -45,6 +45,7 @@ if (CUDA_FOUND)
     add_library(${libname} ${${libname}_SRC})
     target_link_libraries(${libname}
         cfitsio
+        oskar_log
         oskar_binary
         oskar
         ${CUDA_CUFFT_LIBRARIES})
@@ -66,6 +67,8 @@ if (CUDA_FOUND)
             SOVERSION ${OSKAR_VERSION}
             VERSION ${OSKAR_VERSION})
     endif()
+
+    install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
     add_subdirectory(test)
 endif()

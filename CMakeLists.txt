@@ -37,9 +37,9 @@ endif()
 #if (NOT OSKAR_MATLAB_INSTALL_DIR)
 #    set(OSKAR_MATLAB_INSTALL_DIR "share/oskar/matlab")
 #endif()
-#if (NOT OSKAR_PYTHON_INSTALL_DIR)
-#    set(OSKAR_PYTHON_INSTALL_DIR "share/oskar/python")
-#endif()
+if (NOT OSKAR_PYTHON_INSTALL_DIR)
+    set(OSKAR_PYTHON_INSTALL_DIR "share/oskar/python")
+endif()
 
 # === Set dependencies and compiler options.
 include(oskar_dependencies)
@@ -107,7 +107,7 @@ add_subdirectory(ms)
 add_subdirectory(settings)
 add_subdirectory(imaging)
 #add_subdirectory(matlab)
-#add_subdirectory(python)
+add_subdirectory(python)
 
 # === Build external libraries.
 add_subdirectory(extern)

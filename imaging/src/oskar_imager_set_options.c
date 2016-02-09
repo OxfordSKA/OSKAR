@@ -39,6 +39,10 @@
 extern "C" {
 #endif
 
+static void oskar_imager_data_range(const int settings_range[2],
+        int num_data_values, int range[2], int* status);
+
+
 void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
         int* status)
 {
@@ -178,6 +182,12 @@ void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
 }
 
 
+void oskar_imager_set_log(oskar_Imager* h, oskar_Log* log)
+{
+    h->log = log;
+}
+
+
 void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
         int* status)
 {
@@ -232,6 +242,54 @@ void oskar_imager_set_time_range(oskar_Imager* h, int start, int end,
     h->time_range[0] = start;
     h->time_range[1] = end;
     h->time_snaps = snapshots;
+}
+
+
+void oskar_imager_set_vis_frequency(oskar_Imager* h,
+        double ref_hz, double inc_hz, int num, int* status)
+{
+    h->vis_freq_start_hz = ref_hz;
+    h->freq_inc_hz = inc_hz;
+    oskar_imager_data_range(h->chan_range, num,
+            h->vis_chan_range, status);
+}
+
+
+void oskar_imager_set_vis_phase_centre(oskar_Imager* h,
+        double ra_deg, double dec_deg)
+{
+    h->vis_centre_deg[0] = ra_deg;
+    h->vis_centre_deg[1] = dec_deg;
+}
+
+
+void oskar_imager_set_vis_time(oskar_Imager* h,
+        double ref_mjd_utc, double inc_sec, int num, int* status)
+{
+    h->vis_time_start_mjd_utc = ref_mjd_utc;
+    h->time_inc_sec = inc_sec;
+    oskar_imager_data_range(h->time_range, num,
+            h->vis_time_range, status);
+}
+
+
+void oskar_imager_data_range(const int settings_range[2],
+        int num_data_values, int range[2], int* status)
+{
+    if (*status) return;
+    if (settings_range[0] >= num_data_values ||
+            settings_range[1] >= num_data_values)
+    {
+        *status = OSKAR_ERR_INVALID_RANGE;
+        return;
+    }
+    range[0] = settings_range[0] < 0 ? 0 : settings_range[0];
+    range[1] = settings_range[1] < 0 ? num_data_values - 1 : settings_range[1];
+    if (range[0] > range[1])
+    {
+        *status = OSKAR_ERR_INVALID_RANGE;
+        return;
+    }
 }
 
 

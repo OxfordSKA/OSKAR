@@ -154,7 +154,6 @@ static void print_entry(FILE* stream, char priority, char code, int depth,
         const char* prefix, int width, const char* format, va_list args)
 {
     int i;
-    const char* sym;
 
     /* Ensure code is a printable character. */
     if (code < 32) code += 48;
@@ -182,18 +181,13 @@ static void print_entry(FILE* stream, char priority, char code, int depth,
         /* Negative depth codes with special meaning */
         switch (depth)
         {
-        case OSKAR_LOG_NO_LIST_MARKER:
-            sym = " ";
-            break;
         case OSKAR_LOG_INFO_PREFIX:
         case OSKAR_LOG_SECTION:
-            sym = "";
             break;
         default: /* Negative depth means no symbol. */
-            sym = "   ";
+            for (i = 0; i < abs(depth); ++i) fprintf(stream, "  ");
             break;
         }
-        fprintf(stream, "%s", sym);
     }
 
     /* Check if a prefix string is present. */

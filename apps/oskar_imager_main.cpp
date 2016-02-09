@@ -85,6 +85,7 @@ int main(int argc, char** argv)
     s.begin_group("image");
     prec = s.to_int("double_precision", &e) ? OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_Imager* h = oskar_imager_create(prec, &e);
+    oskar_imager_set_log(h, log);
     oskar_imager_set_ms_column(h, s.to_string("ms_column", &e).c_str(), &e);
     oskar_imager_set_output_root(h, s.to_string("root_path", &e).c_str(), &e);
     oskar_imager_set_image_type(h, s.to_string("image_type", &e).c_str(), &e);

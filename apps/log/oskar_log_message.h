@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * This file is part of the OSKAR package.
@@ -49,11 +49,9 @@ extern "C" {
  * @details
  * This function writes a message log entry.
  *
- * Message log entries have a depth which, if positive, will indent the message
- * by 2 spaces per depth value and prefix the message with a list bullet.
- *
- * If the depth value is set to -1 the list bullet will be omitted and
- * no indent is applied.
+ * Message log entries have a depth which will indent the message
+ * by 2 spaces per depth value and, if positive, prefix the message with a
+ * list bullet. If the depth value is negative the list bullet will be omitted.
  *
  * Log entries are created with a priority code which is used to determine
  * which log are printed in the log and also sets a letter code with which
@@ -77,4 +75,4 @@ void oskar_log_message(oskar_Log* log, char priority, int depth,
 }
 #endif
 
-#endif /* OSKAR_LOG_LIST_H_ */
+#endif /* OSKAR_LOG_MESSAGE_H_ */

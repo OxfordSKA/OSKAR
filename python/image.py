@@ -1,7 +1,7 @@
 # 
 #  This file is part of OSKAR.
 # 
-# Copyright (c) 2014, The University of Oxford
+# Copyright (c) 2014-2016, The University of Oxford
 # All rights reserved.
 #
 #  This file is part of the OSKAR package.
@@ -40,7 +40,7 @@ This module provides functions related to OSKAR images.
 Image creation
 ----------------------------------
 
-- :func:`make` makes an image of visibility data by DFT on the GPU
+- :func:`make` makes an image of visibility data
 
 """
 
@@ -50,28 +50,27 @@ import _image_lib as image_lib
 
 __all__ = ['make']
 
-def make(uu,vv,amp,freq,fov,size):
-    """make(uu,vv,amp,freq,fov=2.0,size=128)
+def make(uu,vv,ww,amp,fov,size):
+    """make(uu,vv,amp,fov,size)
     
-    Makes an image from visibility data. Computation is performed using a 
-    DFT implemented on the GPU using CUDA.
+    Makes an image from visibility data.
     
     Parameters
     ----------
     uu : array like, shape (n,), float64
-        Input baseline uu coordinates, in metres.
+        Input baseline uu coordinates, in wavelengths.
     vv : array like, shape (n,), float64
-        Input baseline vv coordinates, in metres.
+        Input baseline vv coordinates, in wavelengths.
+    ww : array like, shape (n,), float64
+        Input baseline ww coordinates, in wavelengths.
     amp : array like, shape (n,), complex128
         Input baseline amplitudes.
-    freq : scalar, float64
-        Frequency, in Hz.
-    fov : scalar, default = 2.0
+    fov : scalar, float64
         Image field of view, in degrees.
-    size : integer, default=128
+    size : scalar, int
         Image size along one dimension, in pixels.
     """
-    return image_lib.make(uu,vv,amp,freq,fov,size)
+    return image_lib.make(uu,vv,ww,amp,fov,size)
 
 
 def fov_to_cellsize(fov_deg, size):

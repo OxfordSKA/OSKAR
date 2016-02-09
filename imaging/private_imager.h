@@ -29,6 +29,7 @@
 #include <fitsio.h>
 #include <cufft.h>
 #include <oskar_mem.h>
+#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,6 +47,7 @@ typedef struct DeviceData DeviceData;
 struct oskar_Imager
 {
     fitsfile* fits_file[4];
+    oskar_Log* log;
 
     /* Settings parameters. */
     int imager_prec, num_gpus, *cuda_device_ids;

@@ -183,6 +183,20 @@ void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
 
 /**
  * @brief
+ * Sets the log to use for the imager.
+ *
+ * @details
+ * Sets the log to use for the imager.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     log        Handle to log.
+ * @param[in,out] status     Status return code.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_log(oskar_Imager* h, oskar_Log* log);
+
+/**
+ * @brief
  * Sets the data column to use from a Measurement Set.
  *
  * @details
@@ -262,6 +276,61 @@ void oskar_imager_set_station_coords(oskar_Imager* h, int num_stations,
 OSKAR_EXPORT
 void oskar_imager_set_time_range(oskar_Imager* h, int start, int end,
         int snapshots);
+
+/**
+ * @brief
+ * Sets the visibility start frequency.
+ *
+ * @details
+ * Sets the frequency of channel index 0, and the frequency increment.
+ * This is required even if not applying phase rotation or channel selection,
+ * to ensure the FITS headers are written correctly.
+ *
+ * @param[in,out] h       Handle to imager.
+ * @param[in]     ref_hz  Frequency of index 0, in Hz.
+ * @param[in]     inc_hz  Frequency increment, in Hz.
+ * @param[in]     num     Number of channels in visibility data.
+ * @param[in,out] status  Status return code.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_vis_frequency(oskar_Imager* h,
+        double ref_hz, double inc_hz, int num, int* status);
+
+/**
+ * @brief
+ * Sets the coordinates of the visibility phase centre.
+ *
+ * @details
+ * Sets the coordinates of the visibility phase centre.
+ * This is required even if not applying phase rotation, to ensure the
+ * FITS headers are written correctly.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     ra_deg     Right Ascension of phase centre, in degrees.
+ * @param[in]     dec_deg    Declination of phase centre, in degrees.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_vis_phase_centre(oskar_Imager* h,
+        double ra_deg, double dec_deg);
+
+/**
+ * @brief
+ * Sets the visibility start time.
+ *
+ * @details
+ * Sets the time of time index 0, and the time increment.
+ * This is required even if not applying phase rotation or time selection,
+ * to ensure the FITS headers are written correctly.
+ *
+ * @param[in,out] h            Handle to imager.
+ * @param[in]     ref_mjd_utc  Time of index 0, as MJD(UTC).
+ * @param[in]     inc_sec      Time increment, in seconds.
+ * @param[in]     num          Number of time steps in visibility data.
+ * @param[in,out] status       Status return code.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_vis_time(oskar_Imager* h,
+        double ref_mjd_utc, double inc_sec, int num, int* status);
 
 #ifdef __cplusplus
 }
