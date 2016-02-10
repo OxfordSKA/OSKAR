@@ -32,26 +32,25 @@
 # 
 """
 =====================================================
-image.py : OSKAR image related functions
+imager.py : OSKAR imager functions
 =====================================================
 
-This module provides functions related to OSKAR images.
+This module provides an interface to the OSKAR imager.
 
 Image creation
 ----------------------------------
 
-- :func:`make` makes an image of visibility data
+- :func:`make_image` makes an image of visibility data
 
 """
 
-import numpy as np
-import exceptions
-import _image_lib as image_lib
+import math
+import _imager_lib
 
-__all__ = ['make']
+__all__ = ['make_image']
 
-def make(uu,vv,ww,amp,fov,size):
-    """make(uu,vv,amp,fov,size)
+def make_image(uu, vv, ww, amp, fov, size):
+    """make_image(uu, vv, ww, amp, fov, size)
     
     Makes an image from visibility data.
     
@@ -70,26 +69,23 @@ def make(uu,vv,ww,amp,fov,size):
     size : scalar, int
         Image size along one dimension, in pixels.
     """
-    return image_lib.make(uu,vv,ww,amp,fov,size)
+    return _imager_lib.make_image(uu, vv, ww, amp, fov, size)
 
 
-def fov_to_cellsize(fov_deg, size):
+def fov_to_cellsize(fov_rad, size):
     """
-    fov_to_cellsize(fov_deg, size)
+    fov_to_cellsize(fov_rad, size)
     
-    Convert image FoV and size along one dimension in pixels to cellsize in arcseconds.
+    Convert image FoV and size along one dimension in pixels to cellsize.
 
     Arguments:
-    fov_deg -- Image FoV, in degrees
+    fov_deg -- Image FoV, in radians
     size    -- Image size in one dimension in pixels
 
     Return:
-    Image cellsize, in arcseconds
+    Image cellsize, in radians.
     """
-    import numpy as np
-    rmax = np.sin(fov_deg/2.0*(np.pi/180.0))
-    inc = rmax / (0.5 * size)
-    return np.arcsin(inc)*((180.0*3600.0)/np.pi)
-
-    
+    rmax = math.sin(0.5 * fov_rad)
+    inc = 2.0 * rmax / size
+    return math.asin(inc)
 

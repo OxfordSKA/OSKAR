@@ -114,10 +114,10 @@ static PyObject* make_image(PyObject* self, PyObject* args, PyObject* keywds)
 }
 
 /* Method table. */
-static PyMethodDef oskar_image_lib_methods[] =
+static PyMethodDef oskar_imager_lib_methods[] =
 {
-    {"make", (PyCFunction)make_image, METH_VARARGS | METH_KEYWORDS,
-            "make(uu, vv, ww, amp, fov, size)\n\n"
+    {"make_image", (PyCFunction)make_image, METH_VARARGS | METH_KEYWORDS,
+            "make_image(uu, vv, ww, amp, fov, size)\n\n"
             "Makes an image from visibility data.\n\n"
             "Parameters\n"
             "----------\n"
@@ -139,10 +139,10 @@ static PyMethodDef oskar_image_lib_methods[] =
 
 /* Initialisation function (called init[filename] where filename = name of *.so)
  * http://docs.python.org/2/extending/extending.html */
-PyMODINIT_FUNC init_image_lib(void)
+PyMODINIT_FUNC init_imager_lib(void)
 {
     PyObject* m = NULL;
-    m = Py_InitModule3("_image_lib", oskar_image_lib_methods, "TODO: docstring...");
+    m = Py_InitModule3("_imager_lib", oskar_imager_lib_methods, "TODO: docstring...");
     if (m == NULL)
         return;
     OskarError = PyErr_NewException("oskar.error", NULL, NULL);

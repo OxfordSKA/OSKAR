@@ -36,9 +36,8 @@
 from version import __version__
 
 import binary_file
-import image
+import imager
 import mem
 import settings
 import sim
-import vis
 from mem import (mloc, mtype)
