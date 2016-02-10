@@ -39,6 +39,7 @@ extern "C" {
 
 void oskar_imager_free(oskar_Imager* h, int* status)
 {
+    if (!h) return;
     oskar_imager_reset_cache(h, status);
     oskar_mem_free(h->uu_im, status);
     oskar_mem_free(h->vv_im, status);
