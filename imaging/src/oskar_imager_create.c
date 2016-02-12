@@ -64,7 +64,6 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
     oskar_imager_set_image_type(h, "I", status);
     oskar_imager_set_algorithm(h, "FFT", status);
     oskar_imager_set_ms_column(h, "DATA", status);
-    oskar_imager_set_output_root(h, "image", status);
     oskar_imager_set_grid_kernel(h, "Spheroidal", 3, 100, status);
     oskar_imager_set_default_direction(h);
     return h;

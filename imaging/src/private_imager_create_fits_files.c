@@ -60,6 +60,7 @@ void oskar_imager_create_fits_files(oskar_Imager* h, int* status)
 {
     int i;
     if (*status) return;
+    if (!h->image_root) return;
     for (i = 0; i < h->im_num_pols; ++i)
     {
         double fov_deg[2];

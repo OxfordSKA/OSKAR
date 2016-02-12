@@ -70,20 +70,10 @@ void oskar_imager_finalise(oskar_Imager* h, oskar_Mem* output_plane,
     }
 
     /* Write to files if required. */
-    if (h->fits_file[0])
-    {
-        for (t = 0, i = 0; t < h->im_num_times; ++t)
-        {
-            for (c = 0; c < h->im_num_channels; ++c)
-            {
-                for (p = 0; p < h->im_num_pols; ++p, ++i)
-                {
-                    write_plane(h, h->planes[i], t, c, p, status);
-                    h->plane_norm[i] = 0.0;
-                }
-            }
-        }
-    }
+    for (t = 0, i = 0; t < h->im_num_times; ++t)
+        for (c = 0; c < h->im_num_channels; ++c)
+            for (p = 0; p < h->im_num_pols; ++p, ++i)
+                write_plane(h, h->planes[i], t, c, p, status);
 
     /* Reset imager memory. */
     oskar_imager_reset_cache(h, status);
@@ -149,6 +139,7 @@ void write_plane(oskar_Imager* h, oskar_Mem* plane,
     int datatype;
     long firstpix[4];
     if (*status) return;
+    if (!h->fits_file[p]) return;
     datatype = (oskar_mem_is_double(plane) ? TDOUBLE : TFLOAT);
     firstpix[0] = 1;
     firstpix[1] = 1;
