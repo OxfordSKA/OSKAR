@@ -10,6 +10,7 @@ if (PYTHON_FOUND AND CUDA_FOUND)
     set(OSKAR_PYTHON_INSTALL_DIR "${OSKAR_PYTHON_INSTALL_DIR}/oskar")
     oskar_py_module(_imager_lib src/oskar_imager_lib.c LIBS oskar oskar_imager)
     oskar_py_module(_mem_lib src/_oskar_mem_lib.c LIBS oskar)
+    oskar_py_module(_bda_utils src/oskar_bda_utils.c)
 
     configure_file(${PROJECT_SOURCE_DIR}/python/version.py.in
         ${PROJECT_BINARY_DIR}/python/version.py @ONLY)
