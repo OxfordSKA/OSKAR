@@ -26,39 +26,65 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_PHASE_ROTATE_H_
-#define OSKAR_IMAGER_PHASE_ROTATE_H_
+#include <oskar_cmath.h>
+#include <oskar_imager_rotate_vis.h>
 
-/**
- * @file oskar_imager_phase_rotate.h
- */
-
-#include <oskar_global.h>
-#include <oskar_mem.h>
 #include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Performs visibility amplitude phase rotation.
- *
- * @details
- * Note that the coordinates uu, vv, ww are in wavelengths.
- *
- * Ref:
- * Cornwell, T.J., & Perley, R.A., 1992,
- * "Radio-interferometric imaging of very large fields"
- */
-OSKAR_EXPORT
-void oskar_imager_phase_rotate(size_t num_vis, const oskar_Mem* uu,
+void oskar_imager_rotate_vis(size_t num_vis, const oskar_Mem* uu,
         const oskar_Mem* vv, const oskar_Mem* ww, oskar_Mem* amps,
-        double delta_l, double delta_m, double delta_n);
+        const double delta_l, const double delta_m, const double delta_n)
+{
+    size_t i;
+
+    if (oskar_mem_precision(amps) == OSKAR_DOUBLE)
+    {
+        const double *u, *v, *w;
+        double2* a;
+        u = (const double*)oskar_mem_void_const(uu);
+        v = (const double*)oskar_mem_void_const(vv);
+        w = (const double*)oskar_mem_void_const(ww);
+        a = (double2*)oskar_mem_void(amps);
+
+        for (i = 0; i < num_vis; ++i)
+        {
+            double arg, phase_re, phase_im, re, im;
+            arg = 2.0*M_PI * (u[i] * delta_l + v[i] * delta_m + w[i] * delta_n);
+            phase_re = cos(arg);
+            phase_im = sin(arg);
+            re = a[i].x * phase_re - a[i].y * phase_im;
+            im = a[i].x * phase_im + a[i].y * phase_re;
+            a[i].x = re;
+            a[i].y = im;
+        }
+    }
+    else
+    {
+        const float *u, *v, *w;
+        float2* a;
+        u = (const float*)oskar_mem_void_const(uu);
+        v = (const float*)oskar_mem_void_const(vv);
+        w = (const float*)oskar_mem_void_const(ww);
+        a = (float2*)oskar_mem_void(amps);
+
+        for (i = 0; i < num_vis; ++i)
+        {
+            float arg, phase_re, phase_im, re, im;
+            arg = 2.0*M_PI * (u[i] * delta_l + v[i] * delta_m + w[i] * delta_n);
+            phase_re = cos(arg);
+            phase_im = sin(arg);
+            re = a[i].x * phase_re - a[i].y * phase_im;
+            im = a[i].x * phase_im + a[i].y * phase_re;
+            a[i].x = re;
+            a[i].y = im;
+        }
+    }
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_IMAGER_PHASE_ROTATE_H_ */

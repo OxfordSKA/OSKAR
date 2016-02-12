@@ -47,16 +47,9 @@ void oskar_imager_free(oskar_Imager* h, int* status)
     oskar_mem_free(h->uu_tmp, status);
     oskar_mem_free(h->vv_tmp, status);
     oskar_mem_free(h->ww_tmp, status);
-    oskar_mem_free(h->uu_rot, status);
-    oskar_mem_free(h->vv_rot, status);
-    oskar_mem_free(h->ww_rot, status);
-    oskar_mem_free(h->work_uvw, status);
     oskar_mem_free(h->vis_im, status);
     oskar_mem_free(h->stokes, status);
 
-    oskar_mem_free(h->st_x, status);
-    oskar_mem_free(h->st_y, status);
-    oskar_mem_free(h->st_z, status);
     oskar_imager_free_gpu_data(h, status);
     free(h->image_root);
     free(h->ms_column);

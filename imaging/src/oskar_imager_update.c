@@ -57,7 +57,8 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
 {
     int t, c, p, plane, num_times, num_channels, max_num_vis;
     oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0;
-    const oskar_Mem *data, *pu, *pv, *pw, *pa;
+    const oskar_Mem *data, *u_in, *v_in, *w_in, *amp_in;
+    oskar_Mem *pu, *pv, *pw;
 
     /* Set dimensions. */
     num_times = 1 + end_time - start_time;
@@ -80,33 +81,33 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
     }
 
     /* Convert precision of input data if required. */
-    pu = uu; pv = vv; pw = ww; pa = amps;
+    u_in = uu; v_in = vv; w_in = ww; amp_in = amps;
     if (oskar_mem_precision(uu) != h->imager_prec)
     {
         tu = oskar_mem_convert_precision(uu, h->imager_prec, status);
-        pu = tu;
+        u_in = tu;
     }
     if (oskar_mem_precision(vv) != h->imager_prec)
     {
         tv = oskar_mem_convert_precision(vv, h->imager_prec, status);
-        pv = tv;
+        v_in = tv;
     }
     if (oskar_mem_precision(ww) != h->imager_prec)
     {
         tw = oskar_mem_convert_precision(ww, h->imager_prec, status);
-        pw = tw;
+        w_in = tw;
     }
     if (oskar_mem_precision(amps) != h->imager_prec)
     {
         ta = oskar_mem_convert_precision(amps, h->imager_prec, status);
-        pa = ta;
+        amp_in = ta;
     }
 
     /* Convert linear polarisations to Stokes parameters if required. */
-    data = pa;
+    data = amp_in;
     if (h->use_stokes)
     {
-        oskar_imager_linear_to_stokes(pa, h->stokes, status);
+        oskar_imager_linear_to_stokes(amp_in, h->stokes, status);
         data = h->stokes;
     }
 
@@ -122,31 +123,11 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
     oskar_mem_realloc(h->vv_im, max_num_vis, status);
     oskar_mem_realloc(h->ww_im, max_num_vis, status);
     oskar_mem_realloc(h->vis_im, max_num_vis, status);
-
-    /* Get rotated station coordinates if required. */
     if (h->direction_type == 'R')
     {
-        if (h->num_stations > 0 && h->st_x && h->st_y && h->st_z)
-        {
-            oskar_mem_realloc(h->uu_tmp, max_num_vis, status);
-            oskar_mem_realloc(h->vv_tmp, max_num_vis, status);
-            oskar_mem_realloc(h->ww_tmp, max_num_vis, status);
-            oskar_mem_realloc(h->uu_rot, num_times * num_baselines, status);
-            oskar_mem_realloc(h->vv_rot, num_times * num_baselines, status);
-            oskar_mem_realloc(h->ww_rot, num_times * num_baselines, status);
-            oskar_convert_ecef_to_baseline_uvw(h->num_stations,
-                    h->st_x, h->st_y, h->st_z,
-                    h->im_centre_deg[0] * DEG2RAD,
-                    h->im_centre_deg[1] * DEG2RAD,
-                    num_times, h->vis_time_start_mjd_utc,
-                    h->time_inc_sec * SEC2DAYS, start_time,
-                    h->uu_rot, h->vv_rot, h->ww_rot, h->work_uvw, status);
-        }
-        else
-        {
-            *status = OSKAR_ERR_UNKNOWN;
-            return;
-        }
+        oskar_mem_realloc(h->uu_tmp, max_num_vis, status);
+        oskar_mem_realloc(h->vv_tmp, max_num_vis, status);
+        oskar_mem_realloc(h->ww_tmp, max_num_vis, status);
     }
 
     /* Loop over each image plane being made. */
@@ -159,26 +140,23 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
             if (*status) break;
 
             /* Get all the baseline coordinates needed to update this plane. */
-            if (h->direction_type != 'R')
-                oskar_imager_select_coords(h, start_time, end_time,
-                        start_chan, end_chan, num_baselines, pu, pv, pw, t, c,
-                        h->uu_im, h->vv_im, h->ww_im, &num_coords, status);
-            else
+            pu = h->uu_im; pv = h->vv_im; pw = h->ww_im;
+            if (h->direction_type == 'R')
             {
-                /* Rotated coordinates (used for imaging) */
-                oskar_imager_select_coords(h, start_time, end_time,
-                        start_chan, end_chan, num_baselines,
-                        h->uu_rot, h->vv_rot, h->ww_rot, t, c,
-                        h->uu_im, h->vv_im, h->ww_im, &num_coords, status);
-
-                /* Unrotated coordinates (used for phase rotation) */
-                oskar_imager_select_coords(h, start_time, end_time,
-                        start_chan, end_chan, num_baselines, pu, pv, pw, t, c,
-                        h->uu_tmp, h->vv_tmp, h->ww_tmp, &num_coords, status);
+                pu = h->uu_tmp; pv = h->vv_tmp; pw = h->ww_tmp;
             }
+            oskar_imager_select_coords(h, start_time, end_time,
+                    start_chan, end_chan, num_baselines, u_in, v_in, w_in,
+                    t, c, pu, pv, pw, &num_coords, status);
 
             /* Check if any baselines were selected. */
             if (num_coords == 0) continue;
+
+            /* Rotate baseline coordinates if required. */
+            if (h->direction_type == 'R')
+                oskar_imager_rotate_coords((int)num_coords,
+                        h->uu_tmp, h->vv_tmp, h->ww_tmp, h->M,
+                        h->uu_im, h->vv_im, h->ww_im);
 
             for (p = 0; p < h->im_num_pols; ++p)
             {
@@ -199,7 +177,7 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
 
                     /* Phase rotate the visibilities if required. */
                     if (h->direction_type == 'R')
-                        oskar_imager_phase_rotate(num_vis,
+                        oskar_imager_rotate_vis(num_vis,
                                 h->uu_tmp, h->vv_tmp, h->ww_tmp, h->vis_im,
                                 h->delta_l, h->delta_m, h->delta_n);
                 }
@@ -345,16 +323,25 @@ void oskar_imager_allocate_image_planes(oskar_Imager* h, int *status)
     h->plane_norm = calloc(h->num_planes, sizeof(double));
 
     /* If imaging away from the beam direction, evaluate l0-l, m0-m, n0-n
-     * for the new pointing centre as well as a set of baseline coordinates
-     * corresponding to the user specified imaging direction. */
+     * for the new pointing centre, and a rotation matrix to generate the
+     * rotated baseline coordinates. */
     if (h->direction_type == 'R')
     {
         double l1, m1, n1, ra_rad, dec_rad, ra0_rad, dec0_rad;
+        double d_a, d_d, *M;
 
         ra_rad = h->im_centre_deg[0] * DEG2RAD;
         dec_rad = h->im_centre_deg[1] * DEG2RAD;
         ra0_rad = h->vis_centre_deg[0] * DEG2RAD;
         dec0_rad = h->vis_centre_deg[1] * DEG2RAD;
+        d_a = ra0_rad - ra_rad; /* It's OK, these are meant to be swapped. */
+        d_d = dec_rad - dec0_rad;
+
+        /* Rotate by -delta_ra around v, then delta_dec around u. */
+        M = h->M;
+        M[0] = cos(d_a);           M[1] = 0.0;      M[2] = sin(d_a);
+        M[3] = sin(d_a)*sin(d_d);  M[4] = cos(d_d); M[5] = -cos(d_a)*sin(d_d);
+        M[6] = -sin(d_a)*cos(d_d); M[7] = sin(d_a); M[8] = cos(d_a)*cos(d_d);
 
         oskar_convert_lon_lat_to_relative_directions_d(1,
                 &ra_rad, &dec_rad, ra0_rad, dec0_rad, &l1, &m1, &n1);

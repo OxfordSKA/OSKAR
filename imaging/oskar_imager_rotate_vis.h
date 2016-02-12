@@ -26,50 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
-#include <private_imager_algorithm_free_dft.h>
-#include <private_imager_algorithm_free_fft.h>
-#include <private_imager_algorithm_free_wproj.h>
-#include <oskar_imager_reset_cache.h>
-#include <fitsio.h>
+#ifndef OSKAR_IMAGER_ROTATE_VIS_H_
+#define OSKAR_IMAGER_ROTATE_VIS_H_
 
-#include <stdlib.h>
+/**
+ * @file oskar_imager_rotate_vis.h
+ */
+
+#include <oskar_global.h>
+#include <oskar_mem.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_reset_cache(oskar_Imager* h, int* status)
-{
-    int i;
-    oskar_imager_algorithm_free_dft(h, status);
-    oskar_imager_algorithm_free_fft(h, status);
-    oskar_imager_algorithm_free_wproj(h, status);
-    oskar_mem_free(h->plane_tmp, status);
-    free(h->plane_norm);
-    for (i = 0; i < h->num_planes; ++i)
-        oskar_mem_free(h->planes[i], status);
-    free(h->planes);
-    oskar_mem_realloc(h->uu_im, 0, status);
-    oskar_mem_realloc(h->vv_im, 0, status);
-    oskar_mem_realloc(h->ww_im, 0, status);
-    oskar_mem_realloc(h->uu_tmp, 0, status);
-    oskar_mem_realloc(h->vv_tmp, 0, status);
-    oskar_mem_realloc(h->ww_tmp, 0, status);
-    oskar_mem_realloc(h->vis_im, 0, status);
-    oskar_mem_realloc(h->stokes, 0, status);
-    for (i = 0; i < h->im_num_pols; ++i)
-    {
-        if (h->fits_file[i])
-            ffclos(h->fits_file[i], status);
-        h->fits_file[i] = 0;
-    }
-    h->plane_tmp = 0;
-    h->plane_norm = 0;
-    h->num_planes = 0;
-    h->planes = 0;
-}
+/**
+ * @brief
+ * Performs visibility amplitude phase rotation.
+ *
+ * @details
+ * Note that the coordinates uu, vv, ww are in wavelengths.
+ *
+ * Ref:
+ * Cornwell, T.J., & Perley, R.A., 1992,
+ * "Radio-interferometric imaging of very large fields"
+ */
+OSKAR_EXPORT
+void oskar_imager_rotate_vis(size_t num_vis, const oskar_Mem* uu,
+        const oskar_Mem* vv, const oskar_Mem* ww, oskar_Mem* amps,
+        const double delta_l, const double delta_m, const double delta_n);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_IMAGER_ROTATE_VIS_H_ */

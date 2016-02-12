@@ -62,14 +62,12 @@ struct oskar_Imager
     double vis_centre_deg[2];
     double vis_freq_start_hz, im_freq_start_hz, freq_inc_hz;
     double vis_time_start_mjd_utc, im_time_start_mjd_utc, time_inc_sec;
-    oskar_Mem *st_x, *st_y, *st_z; /* Station coordinates. */
 
     /* Scratch data. */
     oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im;
     oskar_Mem *uu_tmp, *vv_tmp, *ww_tmp, *stokes;
-    oskar_Mem *uu_rot, *vv_rot, *ww_rot, *work_uvw;
     int num_planes; /* for each time, channel and polarisation. */
-    double* plane_norm, delta_l, delta_m, delta_n;
+    double* plane_norm, delta_l, delta_m, delta_n, M[9];
     oskar_Mem **planes, *plane_tmp;
 
     /* DFT imager data. */

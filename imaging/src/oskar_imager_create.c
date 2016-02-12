@@ -50,10 +50,6 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
     h->uu_tmp      = oskar_mem_create(imager_precision, OSKAR_CPU, 0, status);
     h->vv_tmp      = oskar_mem_create(imager_precision, OSKAR_CPU, 0, status);
     h->ww_tmp      = oskar_mem_create(imager_precision, OSKAR_CPU, 0, status);
-    h->uu_rot      = oskar_mem_create(imager_precision, OSKAR_CPU, 0, status);
-    h->vv_rot      = oskar_mem_create(imager_precision, OSKAR_CPU, 0, status);
-    h->ww_rot      = oskar_mem_create(imager_precision, OSKAR_CPU, 0, status);
-    h->work_uvw    = oskar_mem_create(imager_precision, OSKAR_CPU, 0, status);
     h->vis_im      = oskar_mem_create(imager_precision | OSKAR_COMPLEX,
             OSKAR_CPU, 0, status);
     h->stokes      = oskar_mem_create(imager_precision | OSKAR_COMPLEX,

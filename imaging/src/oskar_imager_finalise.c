@@ -39,6 +39,7 @@
 #include <oskar_mem.h>
 #include <fitsio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,7 +50,8 @@ static void write_plane(oskar_Imager* h, oskar_Mem* plane,
 static void oskar_imager_fft(oskar_Imager* h, oskar_Mem* plane, int* status);
 
 
-void oskar_imager_finalise(oskar_Imager* h, int* status)
+void oskar_imager_finalise(oskar_Imager* h, oskar_Mem* output_plane,
+        int* status)
 {
     int t, c, p, i = 0;
     if (*status) return;
@@ -57,6 +59,15 @@ void oskar_imager_finalise(oskar_Imager* h, int* status)
     /* Finalise all the planes. */
     for (i = 0; i < h->num_planes; ++i)
         oskar_imager_finalise_plane(h, h->planes[i], h->plane_norm[i], status);
+
+    /* Copy plane 0 to output plane if given. */
+    if (output_plane && h->num_planes > 0)
+    {
+        size_t bytes;
+        bytes = h->num_pixels * oskar_mem_element_size(h->imager_prec);
+        memcpy(oskar_mem_void(output_plane),
+                oskar_mem_void_const(h->planes[0]), bytes);
+    }
 
     /* Write to files if required. */
     if (h->fits_file[0])
@@ -68,7 +79,6 @@ void oskar_imager_finalise(oskar_Imager* h, int* status)
                 for (p = 0; p < h->im_num_pols; ++p, ++i)
                 {
                     write_plane(h, h->planes[i], t, c, p, status);
-                    oskar_mem_clear_contents(h->planes[i], status);
                     h->plane_norm[i] = 0.0;
                 }
             }

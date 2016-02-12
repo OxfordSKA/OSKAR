@@ -24,8 +24,9 @@ if (CUDA_FOUND)
         src/oskar_imager_finalise.c
         src/oskar_imager_free.c
         src/oskar_imager_linear_to_stokes.c
-        src/oskar_imager_phase_rotate.c
         src/oskar_imager_reset_cache.c
+        src/oskar_imager_rotate_coords.c
+        src/oskar_imager_rotate_vis.c
         src/oskar_imager_run.c
         src/oskar_imager_select_coords.c
         src/oskar_imager_select_vis.c

@@ -34,7 +34,6 @@
  */
 
 #include <oskar_global.h>
-#include <oskar_mem.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -238,26 +237,6 @@ void oskar_imager_set_output_root(oskar_Imager* h, const char* filename,
  */
 OSKAR_EXPORT
 void oskar_imager_set_size(oskar_Imager* h, int size);
-
-/**
- * @brief
- * Set the station coordinates used by the imager.
- *
- * @details
- * Set the station coordinates used by the imager.
- * These are used only if imaging away from the default phase centre.
- *
- * @param[in,out] h            Handle to imager.
- * @param[in]     num_stations The number of stations.
- * @param[in]     x            Station x coordinates in ECEF frame, in metres.
- * @param[in]     y            Station y coordinates in ECEF frame, in metres.
- * @param[in]     z            Station z coordinates in ECEF frame, in metres.
- * @param[in,out] status       Status return code.
- */
-OSKAR_EXPORT
-void oskar_imager_set_station_coords(oskar_Imager* h, int num_stations,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        int* status);
 
 /**
  * @brief

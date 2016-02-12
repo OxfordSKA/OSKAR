@@ -221,21 +221,6 @@ void oskar_imager_set_size(oskar_Imager* h, int size)
 }
 
 
-void oskar_imager_set_station_coords(oskar_Imager* h, int num_stations,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        int* status)
-{
-    if (*status) return;
-    h->num_stations = num_stations;
-    oskar_mem_free(h->st_x, status);
-    oskar_mem_free(h->st_y, status);
-    oskar_mem_free(h->st_z, status);
-    h->st_x = oskar_mem_convert_precision(x, h->imager_prec, status);
-    h->st_y = oskar_mem_convert_precision(y, h->imager_prec, status);
-    h->st_z = oskar_mem_convert_precision(z, h->imager_prec, status);
-}
-
-
 void oskar_imager_set_time_range(oskar_Imager* h, int start, int end,
         int snapshots)
 {

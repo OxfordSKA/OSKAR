@@ -77,8 +77,9 @@ enum OSKAR_IMAGE_ALGORITHM
 #include <oskar_imager_finalise.h>
 #include <oskar_imager_free.h>
 #include <oskar_imager_linear_to_stokes.h>
-#include <oskar_imager_phase_rotate.h>
 #include <oskar_imager_reset_cache.h>
+#include <oskar_imager_rotate_coords.h>
+#include <oskar_imager_rotate_vis.h>
 #include <oskar_imager_run.h>
 #include <oskar_imager_select_coords.h>
 #include <oskar_imager_select_vis.h>

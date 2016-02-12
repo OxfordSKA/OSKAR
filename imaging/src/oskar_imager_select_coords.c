@@ -42,7 +42,7 @@ void oskar_imager_select_coords(const oskar_Imager* h,
 {
     int c, t;
     double freq, scaling, c0 = 299792458.0;
-    oskar_Mem *uu_, *vv_, *ww_;
+    oskar_Mem *uu_ = 0, *vv_ = 0, *ww_ = 0;
     size_t src;
     if (*status) return;
     *num = 0;
@@ -103,33 +103,38 @@ void oskar_imager_select_coords(const oskar_Imager* h,
             oskar_mem_scale_real(ww_, scaling, status);
             *num += num_baselines;
         }
-        oskar_mem_free(uu_, status);
-        oskar_mem_free(vv_, status);
-        oskar_mem_free(ww_, status);
     }
     else if (!h->time_snaps && h->chan_snaps) /* Time synthesis */
     {
+        /* Get the channel for the image and check if out of range. */
         c = im_chan_idx + h->vis_chan_range[0];
         if (c < start_chan || c > end_chan) return;
+
+        /* Copy the baseline coordinates for all times. */
+        uu_ = oskar_mem_create_alias(0, 0, 0, status);
+        vv_ = oskar_mem_create_alias(0, 0, 0, status);
+        ww_ = oskar_mem_create_alias(0, 0, 0, status);
         for (t = h->vis_time_range[0]; t <= h->vis_time_range[1]; ++t)
         {
             if (t < start_time || t > end_time) continue;
 
-            /* Copy the baseline coordinates for the current time. */
             src = num_baselines * (t - start_time);
-            oskar_mem_copy_contents(uu, vis_uu, *num, src,
+            oskar_mem_set_alias(uu_, uu, *num, num_baselines, status);
+            oskar_mem_set_alias(vv_, vv, *num, num_baselines, status);
+            oskar_mem_set_alias(ww_, ww, *num, num_baselines, status);
+            oskar_mem_copy_contents(uu_, vis_uu, 0, src,
                     num_baselines, status);
-            oskar_mem_copy_contents(vv, vis_vv, *num, src,
+            oskar_mem_copy_contents(vv_, vis_vv, 0, src,
                     num_baselines, status);
-            oskar_mem_copy_contents(ww, vis_ww, *num, src,
+            oskar_mem_copy_contents(ww_, vis_ww, 0, src,
                     num_baselines, status);
 
             /* Divide coordinates by the wavelength. */
             freq = h->vis_freq_start_hz + c * h->freq_inc_hz;
             scaling = freq / c0;
-            oskar_mem_scale_real(uu, scaling, status);
-            oskar_mem_scale_real(vv, scaling, status);
-            oskar_mem_scale_real(ww, scaling, status);
+            oskar_mem_scale_real(uu_, scaling, status);
+            oskar_mem_scale_real(vv_, scaling, status);
+            oskar_mem_scale_real(ww_, scaling, status);
             *num += num_baselines;
         }
     }
@@ -167,10 +172,10 @@ void oskar_imager_select_coords(const oskar_Imager* h,
                 *num += num_baselines;
             }
         }
-        oskar_mem_free(uu_, status);
-        oskar_mem_free(vv_, status);
-        oskar_mem_free(ww_, status);
     }
+    oskar_mem_free(uu_, status);
+    oskar_mem_free(vv_, status);
+    oskar_mem_free(ww_, status);
 }
 
 #ifdef __cplusplus

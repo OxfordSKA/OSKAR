@@ -67,7 +67,7 @@ void oskar_imager_run(oskar_Imager* h, const char* filename, int* status)
         oskar_imager_run_vis(h, filename, status);
 
     /* Finalise the image plane(s) and write them out. */
-    oskar_imager_finalise(h, status);
+    oskar_imager_finalise(h, 0, status);
 }
 
 void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
@@ -91,11 +91,6 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
     }
     max_times_per_block = oskar_vis_header_max_times_per_block(hdr);
     tags_per_block = oskar_vis_header_num_tags_per_block(hdr);
-    oskar_imager_set_station_coords(h, oskar_vis_header_num_stations(hdr),
-            oskar_vis_header_station_x_offset_ecef_metres_const(hdr),
-            oskar_vis_header_station_y_offset_ecef_metres_const(hdr),
-            oskar_vis_header_station_z_offset_ecef_metres_const(hdr),
-            status);
     num_times = oskar_vis_header_num_times_total(hdr);
     num_channels = oskar_vis_header_num_channels_total(hdr);
 
