@@ -32,25 +32,25 @@ if (QT4_FOUND)
     set(dir_ widgets)
     set(${name}_MOC_SRC
         ${dir_}/oskar_DoubleSpinBox.h
-        ${dir_}/oskar_SettingsDelegate.h
+        #${dir_}/oskar_SettingsDelegate.h
         ${dir_}/oskar_SettingsDelegate_new.hpp
-        ${dir_}/oskar_SettingsModel.h
+        #${dir_}/oskar_SettingsModel.h
         ${dir_}/oskar_SettingsModel_new.hpp
-        ${dir_}/oskar_SettingsModelXML.h
+        #${dir_}/oskar_SettingsModelXML.h
         ${dir_}/oskar_SettingsView.h
-        ${dir_}/oskar_SettingsView_old.h
+        #${dir_}/oskar_SettingsView_old.h
     )
     set(dir_ widgets/src)
     set(${name}_SRC
         ${dir_}/oskar_DoubleSpinBox.cpp
-        ${dir_}/oskar_SettingsDelegate.cpp
+        #${dir_}/oskar_SettingsDelegate.cpp
         ${dir_}/oskar_SettingsDelegate_new.cpp
         ${dir_}/oskar_SettingsItem.cpp
-        ${dir_}/oskar_SettingsModel.cpp
+        #${dir_}/oskar_SettingsModel.cpp
         ${dir_}/oskar_SettingsModel_new.cpp
-        ${dir_}/oskar_SettingsModelXML.cpp
+        #${dir_}/oskar_SettingsModelXML.cpp
         ${dir_}/oskar_SettingsView.cpp
-        ${dir_}/oskar_SettingsView_old.cpp
+        #${dir_}/oskar_SettingsView_old.cpp
     )
     qt4_wrap_cpp(${name}_SRC ${${name}_MOC_SRC})
     add_library(${name} ${lib_type} ${${name}_SRC} ${${name}_MOC_SRC})
