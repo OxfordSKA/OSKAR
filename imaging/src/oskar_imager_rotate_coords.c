@@ -36,8 +36,8 @@ void oskar_imager_rotate_coords(size_t num_coords, const oskar_Mem* uu_in,
         const oskar_Mem* vv_in, const oskar_Mem* ww_in, const double M[9],
         oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww)
 {
-    register size_t i;
-    register double s[3], t[3];
+    size_t i;
+    double s[3], t[3];
     if (oskar_mem_precision(uu_in) == OSKAR_SINGLE)
     {
         float *uu_o, *vv_o, *ww_o;

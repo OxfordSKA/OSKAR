@@ -58,7 +58,7 @@ struct oskar_Imager
     double fov_deg, im_centre_deg[2];
 
     /* Visibility meta-data. */
-    int vis_time_range[2], vis_chan_range[2], num_stations;
+    int vis_time_range[2], vis_chan_range[2];
     double vis_centre_deg[2];
     double vis_freq_start_hz, im_freq_start_hz, freq_inc_hz;
     double vis_time_start_mjd_utc, im_time_start_mjd_utc, time_inc_sec;
