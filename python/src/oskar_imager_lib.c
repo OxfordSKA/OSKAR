@@ -375,8 +375,8 @@ static PyObject* make_image(PyObject* self, PyObject* args, PyObject* keywds)
 
     /* Parse inputs. */
     char* keywords[] = {"uu", "vv", "ww", "amp", "weight", "fov", "size", 0};
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OOOOdi", keywords,
-            &uu, &vv, &ww, &amp, &fov, &size))
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OOOOOdi", keywords,
+            &uu, &vv, &ww, &amp, &weight, &fov, &size))
         return 0;
 
     /* Check dimensions. */
