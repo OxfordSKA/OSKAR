@@ -53,11 +53,11 @@ static void oskar_imager_allocate_image_planes(oskar_Imager* h, int *status);
 void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
         int start_chan, int end_chan, int num_pols, int num_baselines,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
-        const oskar_Mem* amps, int* status)
+        const oskar_Mem* amps, const oskar_Mem* weight, int* status)
 {
     int t, c, p, plane, num_times, num_channels, max_num_vis;
-    oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0;
-    const oskar_Mem *data, *u_in, *v_in, *w_in, *amp_in;
+    oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0, *th = 0;
+    const oskar_Mem *data, *u_in, *v_in, *w_in, *amp_in, *weight_in;
     oskar_Mem *pu, *pv, *pw;
 
     /* Set dimensions. */
@@ -81,7 +81,7 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
     }
 
     /* Convert precision of input data if required. */
-    u_in = uu; v_in = vv; w_in = ww; amp_in = amps;
+    u_in = uu; v_in = vv; w_in = ww; amp_in = amps; weight_in = weight;
     if (oskar_mem_precision(uu) != h->imager_prec)
     {
         tu = oskar_mem_convert_precision(uu, h->imager_prec, status);
@@ -101,6 +101,11 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
     {
         ta = oskar_mem_convert_precision(amps, h->imager_prec, status);
         amp_in = ta;
+    }
+    if (oskar_mem_precision(weight) != h->imager_prec)
+    {
+        th = oskar_mem_convert_precision(weight, h->imager_prec, status);
+        weight_in = th;
     }
 
     /* Convert linear polarisations to Stokes parameters if required. */
@@ -123,6 +128,7 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
     oskar_mem_realloc(h->vv_im, max_num_vis, status);
     oskar_mem_realloc(h->ww_im, max_num_vis, status);
     oskar_mem_realloc(h->vis_im, max_num_vis, status);
+    oskar_mem_realloc(h->weight_im, max_num_vis, status);
     if (h->direction_type == 'R')
     {
         oskar_mem_realloc(h->uu_tmp, max_num_vis, status);
@@ -172,8 +178,8 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
                 {
                     oskar_imager_select_vis(h,
                             start_time, end_time, start_chan, end_chan,
-                            num_baselines, num_pols, data, t, c, p,
-                            h->vis_im, &num_vis, status);
+                            num_baselines, num_pols, data, weight_in, t, c, p,
+                            h->vis_im, h->weight_im, &num_vis, status);
 
                     /* Phase rotate the visibilities if required. */
                     if (h->direction_type == 'R')
@@ -194,7 +200,7 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
                 /* Update this image plane with the visibilities. */
                 plane = h->im_num_pols * (t * h->im_num_channels + c) + p;
                 oskar_imager_update_plane(h, num_vis, h->uu_im, h->vv_im,
-                        h->ww_im, h->vis_im, h->planes[plane],
+                        h->ww_im, h->vis_im, h->weight_im, h->planes[plane],
                         &h->plane_norm[plane], status);
             } /* End image pol */
         } /* End image channel */
@@ -204,16 +210,17 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
     oskar_mem_free(tv, status);
     oskar_mem_free(tw, status);
     oskar_mem_free(ta, status);
+    oskar_mem_free(th, status);
 }
 
 
 void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
-        const oskar_Mem* amps, oskar_Mem* plane, double* plane_norm,
-        int* status)
+        const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
+        double* plane_norm, int* status)
 {
-    oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0;
-    const oskar_Mem *pu, *pv, *pw, *pa;
+    oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0, *th = 0;
+    const oskar_Mem *pu, *pv, *pw, *pa, *ph;
     if (oskar_mem_precision(plane) != h->imager_prec)
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;
@@ -221,7 +228,7 @@ void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
     }
 
     /* Convert precision of input data if required. */
-    pu = uu; pv = vv; pw = ww; pa = amps;
+    pu = uu; pv = vv; pw = ww; pa = amps; ph = weight;
     if (oskar_mem_precision(uu) != h->imager_prec)
     {
         tu = oskar_mem_convert_precision(uu, h->imager_prec, status);
@@ -242,27 +249,31 @@ void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
         ta = oskar_mem_convert_precision(amps, h->imager_prec, status);
         pa = ta;
     }
+    if (oskar_mem_precision(weight) != h->imager_prec)
+    {
+        th = oskar_mem_convert_precision(weight, h->imager_prec, status);
+        ph = th;
+    }
 
     /* Update the supplied plane with the supplied visibilities. */
     if (h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
             h->algorithm == OSKAR_ALGORITHM_DFT_3D)
     {
         if (!h->l) oskar_imager_algorithm_init_dft(h, status);
-        *plane_norm += (double) num_vis;
-        oskar_imager_update_plane_dft(h, num_vis, pu, pv, pw, pa,
-                plane, status);
+        oskar_imager_update_plane_dft(h, num_vis, pu, pv, pw, pa, ph,
+                plane, plane_norm, status);
     }
     else if (h->algorithm == OSKAR_ALGORITHM_FFT)
     {
         if (!h->conv_func) oskar_imager_algorithm_init_fft(h, status);
-        oskar_imager_update_plane_fft(h, num_vis, pu, pv, pa,
+        oskar_imager_update_plane_fft(h, num_vis, pu, pv, pa, ph,
                 plane, plane_norm, status);
     }
     else if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
     {
         /* if (!h->w_kernels) oskar_imager_algorithm_init_wproj(h, status); */
         /* *plane_norm += (double) num_vis; */
-        /* oskar_imager_update_plane_wproj(h, num_vis, pu, pv, pw, pa,
+        /* oskar_imager_update_plane_wproj(h, num_vis, pu, pv, pw, pa, ph,
                 plane, status); */
         *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
     }
@@ -274,6 +285,7 @@ void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
     oskar_mem_free(tv, status);
     oskar_mem_free(tw, status);
     oskar_mem_free(ta, status);
+    oskar_mem_free(th, status);
 }
 
 

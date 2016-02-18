@@ -121,6 +121,7 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
         h->d[i].uu = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
         h->d[i].vv = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
         h->d[i].ww = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
+        h->d[i].weight = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);
         h->d[i].amp = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
                 OSKAR_GPU, 0, status);
         h->d[i].l = oskar_mem_create(h->imager_prec, OSKAR_GPU, 0, status);

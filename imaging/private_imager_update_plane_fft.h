@@ -37,7 +37,8 @@ extern "C" {
 
 void oskar_imager_update_plane_fft(oskar_Imager* h, int num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* amps,
-        oskar_Mem* plane, double* plane_norm, int* status);
+        const oskar_Mem* weight, oskar_Mem* plane, double* plane_norm,
+        int* status);
 
 #ifdef __cplusplus
 }

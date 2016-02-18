@@ -47,10 +47,11 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_imager_select_vis(const oskar_Imager* h,
-        int start_time, int end_time, int start_channel, int end_channel,
+        int start_time, int end_time, int start_chan, int end_chan,
         int num_baselines, int num_pols, const oskar_Mem* data,
-        int im_time_idx, int im_chan_idx, int im_pol,
-        oskar_Mem* out, size_t* num, int* status);
+        const oskar_Mem* weight_in, int im_time_idx, int im_chan_idx,
+        int im_pol, oskar_Mem* data_out, oskar_Mem* weight_out,
+        size_t* num, int* status);
 
 #ifdef __cplusplus
 }

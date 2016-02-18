@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,8 @@ extern "C" {
  * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
- * @param[in] data_in      Array of complex input data (length 2 * n_in).
+ * @param[in] data_in      Array of complex input data.
+ * @param[in] weight_in    Array of input data weights.
  * @param[in] num_out      Number of output points.
  * @param[in] x_out        Array of output 1/x positions.
  * @param[in] y_out        Array of output 1/y positions.
@@ -71,8 +72,8 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_dft_c2r_2d_omp_f(const int num_in, const float wavenumber,
         const float* x_in, const float* y_in, const float2* data_in,
-        const int num_out, const float* x_out, const float* y_out,
-        float* output);
+        const float* weight_in, const int num_out, const float* x_out,
+        const float* y_out, float* output);
 
 /**
  * @brief
@@ -96,7 +97,8 @@ void oskar_dft_c2r_2d_omp_f(const int num_in, const float wavenumber,
  * @param[in] wavenumber   Wavenumber (2 pi / wavelength).
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
- * @param[in] data_in      Array of complex input data (length 2 * n_in).
+ * @param[in] data_in      Array of complex input data.
+ * @param[in] weight_in    Array of input data weights.
  * @param[in] num_out      Number of output points.
  * @param[in] x_out        Array of output 1/x positions.
  * @param[in] y_out        Array of output 1/y positions.
@@ -105,8 +107,8 @@ void oskar_dft_c2r_2d_omp_f(const int num_in, const float wavenumber,
 OSKAR_EXPORT
 void oskar_dft_c2r_2d_omp_d(const int num_in, const double wavenumber,
         const double* x_in, const double* y_in, const double2* data_in,
-        const int num_out, const double* x_out, const double* y_out,
-        double* output);
+        const double* weight_in, const int num_out, const double* x_out,
+        const double* y_out, double* output);
 
 #ifdef __cplusplus
 }

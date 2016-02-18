@@ -37,16 +37,18 @@
 extern "C" {
 #endif
 
-static void copy_vis_pol(oskar_Mem* amps, int amps_offset,
-        const oskar_Mem* vis, int vis_offset, int num_baselines,
-        int stride, int pol_offset, int* status);
+static void copy_vis_pol(oskar_Mem* amps, oskar_Mem* wt, int amps_offset,
+        const oskar_Mem* vis, const oskar_Mem* weight, int vis_offset,
+        int weight_offset, int num_baselines, int stride, int pol_offset,
+        int* status);
 
 /* Get a set of visibility amplitudes for a single polarisation. */
 void oskar_imager_select_vis(const oskar_Imager* h,
         int start_time, int end_time, int start_chan, int end_chan,
         int num_baselines, int num_pols, const oskar_Mem* data,
-        int im_time_idx, int im_chan_idx, int im_pol,
-        oskar_Mem* out, size_t* num, int* status)
+        const oskar_Mem* weight_in, int im_time_idx, int im_chan_idx,
+        int im_pol, oskar_Mem* data_out, oskar_Mem* weight_out,
+        size_t* num, int* status)
 {
     int t, c, nb, num_chan, pol_offset;
     num_chan = 1 + end_chan - start_chan;
@@ -67,8 +69,9 @@ void oskar_imager_select_vis(const oskar_Imager* h,
         if (t < start_time || t > end_time) return;
         c = im_chan_idx + h->vis_chan_range[0];
         if (c < start_chan || c > end_chan) return;
-        copy_vis_pol(out, *num, data,
+        copy_vis_pol(data_out, weight_out, *num, data, weight_in,
                 ((t - start_time) * num_chan + (c - start_chan)) * nb,
+                (t - start_time) * nb,
                 nb, num_pols, pol_offset, status);
         *num += nb;
     }
@@ -80,8 +83,9 @@ void oskar_imager_select_vis(const oskar_Imager* h,
         for (c = h->vis_chan_range[0]; c <= h->vis_chan_range[1]; ++c)
         {
             if (c < start_chan || c > end_chan) continue;
-            copy_vis_pol(out, *num, data,
+            copy_vis_pol(data_out, weight_out, *num, data, weight_in,
                     ((t - start_time) * num_chan + (c - start_chan)) * nb,
+                    (t - start_time) * nb,
                     nb, num_pols, pol_offset, status);
             *num += nb;
         }
@@ -94,8 +98,9 @@ void oskar_imager_select_vis(const oskar_Imager* h,
         for (t = h->vis_time_range[0]; t <= h->vis_time_range[1]; ++t)
         {
             if (t < start_time || t > end_time) continue;
-            copy_vis_pol(out, *num, data,
+            copy_vis_pol(data_out, weight_out, *num, data, weight_in,
                     ((t - start_time) * num_chan + (c - start_chan)) * nb,
+                    (t - start_time) * nb,
                     nb, num_pols, pol_offset, status);
             *num += nb;
         }
@@ -109,8 +114,9 @@ void oskar_imager_select_vis(const oskar_Imager* h,
             for (c = h->vis_chan_range[0]; c <= h->vis_chan_range[1]; ++c)
             {
                 if (c < start_chan || c > end_chan) continue;
-                copy_vis_pol(out, *num, data,
+                copy_vis_pol(data_out, weight_out, *num, data, weight_in,
                         ((t - start_time) * num_chan + (c - start_chan)) * nb,
+                        (t - start_time) * nb,
                         nb, num_pols, pol_offset, status);
                 *num += nb;
             }
@@ -118,9 +124,10 @@ void oskar_imager_select_vis(const oskar_Imager* h,
     }
 }
 
-void copy_vis_pol(oskar_Mem* amps, int amps_offset,
-        const oskar_Mem* vis, int vis_offset, int num_baselines,
-        int stride, int pol_offset, int* status)
+void copy_vis_pol(oskar_Mem* amps, oskar_Mem* wt, int amps_offset,
+        const oskar_Mem* vis, const oskar_Mem* weight, int vis_offset,
+        int weight_offset, int num_baselines, int stride, int pol_offset,
+        int* status)
 {
     int i;
     if (*status) return;
@@ -128,19 +135,33 @@ void copy_vis_pol(oskar_Mem* amps, int amps_offset,
     {
         float2* a;
         const float2* v;
+        float* w_out;
+        const float* w_in;
         a = oskar_mem_float2(amps, status) + amps_offset;
         v = oskar_mem_float2_const(vis, status);
+        w_out = oskar_mem_float(wt, status) + amps_offset;
+        w_in = oskar_mem_float_const(weight, status);
         for (i = 0; i < num_baselines; ++i)
+        {
             a[i] = v[stride * (vis_offset + i) + pol_offset];
+            w_out[i] = w_in[stride * (weight_offset + i) + pol_offset];
+        }
     }
     else
     {
         double2* a;
         const double2* v;
+        double* w_out;
+        const double* w_in;
         a = oskar_mem_double2(amps, status) + amps_offset;
         v = oskar_mem_double2_const(vis, status);
+        w_out = oskar_mem_double(wt, status) + amps_offset;
+        w_in = oskar_mem_double_const(weight, status);
         for (i = 0; i < num_baselines; ++i)
+        {
             a[i] = v[stride * (vis_offset + i) + pol_offset];
+            w_out[i] = w_in[stride * (weight_offset + i) + pol_offset];
+        }
     }
 }
 

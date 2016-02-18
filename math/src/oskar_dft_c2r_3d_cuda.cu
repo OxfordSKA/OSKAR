@@ -43,6 +43,7 @@ void oskar_dft_c2r_3d_cudak_f(int n_in,
         const float* __restrict__ y_in,
         const float* __restrict__ z_in,
         const float2* __restrict__ data_in,
+        const float* __restrict__ weight_in,
         const int n_out,
         const float* __restrict__ x_out,
         const float* __restrict__ y_out,
@@ -85,6 +86,8 @@ void oskar_dft_c2r_3d_cudak_f(int n_in,
             cp[t].x = x_in[g];
             cp[t].y = y_in[g];
             cz[t] = z_in[g];
+            cd[t].x *= weight_in[g];
+            cd[t].y *= weight_in[g];
         }
 
         // Must synchronise before computing partial output for these inputs.
@@ -121,6 +124,7 @@ void oskar_dft_c2r_3d_cudak_d(int n_in,
         const double* __restrict__ y_in,
         const double* __restrict__ z_in,
         const double2* __restrict__ data_in,
+        const double* __restrict__ weight_in,
         const int n_out,
         const double* __restrict__ x_out,
         const double* __restrict__ y_out,
@@ -163,6 +167,8 @@ void oskar_dft_c2r_3d_cudak_d(int n_in,
             cp[t].x = x_in[g];
             cp[t].y = y_in[g];
             cz[t] = z_in[g];
+            cd[t].x *= weight_in[g];
+            cd[t].y *= weight_in[g];
         }
 
         // Must synchronise before computing partial output for these inputs.
@@ -210,13 +216,14 @@ static int oskar_int_range_clamp(int value, int minimum, int maximum)
    return value;
 }
 
+
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
 void oskar_dft_c2r_3d_cuda_f(int num_in, float wavenumber, const float* x_in,
         const float* y_in, const float* z_in, const float2* data_in,
-        int num_out, const float* x_out, const float* y_out,
-        const float* z_out, float* output)
+        const float* weight_in, int num_out, const float* x_out,
+        const float* y_out, const float* z_out, float* output)
 {
     const int threads = 384;     /* Should be multiple of 32. */
     const int max_in_size = 800; /* Should be multiple of 16. */
@@ -242,7 +249,7 @@ void oskar_dft_c2r_3d_cuda_f(int num_in, float wavenumber, const float* x_in,
         blocks = (out_size + threads - 1) / threads;
         oskar_dft_c2r_3d_cudak_f
         OSKAR_CUDAK_CONF(blocks, threads, shared_mem_size) (num_in, wavenumber,
-                x_in, y_in, z_in, data_in, out_size, x_out + start,
+                x_in, y_in, z_in, data_in, weight_in, out_size, x_out + start,
                 y_out + start, z_out + start, max_in_size, output + start);
     }
 }
@@ -250,8 +257,8 @@ void oskar_dft_c2r_3d_cuda_f(int num_in, float wavenumber, const float* x_in,
 /* Double precision. */
 void oskar_dft_c2r_3d_cuda_d(int num_in, double wavenumber, const double* x_in,
         const double* y_in, const double* z_in, const double2* data_in,
-        int num_out, const double* x_out, const double* y_out,
-        const double* z_out, double* output)
+        const double* weight_in, int num_out, const double* x_out,
+        const double* y_out, const double* z_out, double* output)
 {
     const int threads = 384;     /* Should be multiple of 32. */
     const int max_in_size = 384; /* Should be multiple of 16. */
@@ -277,7 +284,7 @@ void oskar_dft_c2r_3d_cuda_d(int num_in, double wavenumber, const double* x_in,
         blocks = (out_size + threads - 1) / threads;
         oskar_dft_c2r_3d_cudak_d
         OSKAR_CUDAK_CONF(blocks, threads, shared_mem_size) (num_in, wavenumber,
-                x_in, y_in, z_in, data_in, out_size, x_out + start,
+                x_in, y_in, z_in, data_in, weight_in, out_size, x_out + start,
                 y_out + start, z_out + start, max_in_size, output + start);
     }
 }

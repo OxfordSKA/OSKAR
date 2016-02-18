@@ -39,7 +39,8 @@ extern "C" {
 
 void oskar_imager_update_plane_fft(oskar_Imager* h, int num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* amps,
-        oskar_Mem* plane, double* plane_norm, int* status)
+        const oskar_Mem* weight, oskar_Mem* plane, double* plane_norm,
+        int* status)
 {
     int num_skipped = 0;
     if (*status) return;
@@ -48,7 +49,8 @@ void oskar_imager_update_plane_fft(oskar_Imager* h, int num_vis,
                 oskar_mem_double_const(h->conv_func, status), num_vis,
                 oskar_mem_double_const(uu, status),
                 oskar_mem_double_const(vv, status),
-                oskar_mem_double_const(amps, status), h->cellsize_rad,
+                oskar_mem_double_const(amps, status),
+                oskar_mem_double_const(weight, status), h->cellsize_rad,
                 h->size, &num_skipped, plane_norm,
                 oskar_mem_double(plane, status));
     else
@@ -56,7 +58,8 @@ void oskar_imager_update_plane_fft(oskar_Imager* h, int num_vis,
                 oskar_mem_double_const(h->conv_func, status), num_vis,
                 oskar_mem_float_const(uu, status),
                 oskar_mem_float_const(vv, status),
-                oskar_mem_float_const(amps, status), h->cellsize_rad,
+                oskar_mem_float_const(amps, status),
+                oskar_mem_float_const(weight, status), h->cellsize_rad,
                 h->size, &num_skipped, plane_norm,
                 oskar_mem_float(plane, status));
     if (num_skipped > 0)

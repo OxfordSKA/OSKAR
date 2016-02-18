@@ -39,7 +39,7 @@ extern "C" {
 struct DeviceData
 {
     oskar_Mem *l, *m, *n;
-    oskar_Mem *uu, *vv, *ww, *amp;
+    oskar_Mem *uu, *vv, *ww, *amp, *weight;
     oskar_Mem *block_gpu, *block_cpu, *plane_gpu;
 };
 typedef struct DeviceData DeviceData;
@@ -64,7 +64,7 @@ struct oskar_Imager
     double vis_time_start_mjd_utc, im_time_start_mjd_utc, time_inc_sec;
 
     /* Scratch data. */
-    oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im;
+    oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im, *weight_im;
     oskar_Mem *uu_tmp, *vv_tmp, *ww_tmp, *stokes;
     int num_planes; /* for each time, channel and polarisation. */
     double* plane_norm, delta_l, delta_m, delta_n, M[9];

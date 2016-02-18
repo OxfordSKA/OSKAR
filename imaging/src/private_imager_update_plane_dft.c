@@ -48,13 +48,15 @@ extern "C" {
 
 void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
-        const oskar_Mem* amps, oskar_Mem* plane, int* status)
+        const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
+        double* plane_norm, int* status)
 {
-    int i, num_blocks, max_block_size = 65536;
+    int i, num_blocks, max_block_size = 65536, prec;
     oskar_Mem** t;
     if (*status) return;
 
     /* Check the image plane. */
+    prec = oskar_mem_precision(amps);
     if (oskar_mem_is_complex(plane) || oskar_mem_is_matrix(plane))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
     if ((int)oskar_mem_length(plane) < h->num_pixels)
@@ -69,6 +71,7 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
         oskar_mem_copy(h->d[i].uu, uu, status);
         oskar_mem_copy(h->d[i].vv, vv, status);
         oskar_mem_copy(h->d[i].amp, amps, status);
+        oskar_mem_copy(h->d[i].weight, weight, status);
         if (h->algorithm == OSKAR_ALGORITHM_DFT_3D)
             oskar_mem_copy(h->d[i].ww, ww, status);
         t[i] = oskar_mem_create_alias(0, 0, 0, status);
@@ -111,11 +114,12 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
 
         if (h->algorithm == OSKAR_ALGORITHM_DFT_2D)
         {
-            if (oskar_mem_precision(d->amp) == OSKAR_DOUBLE)
+            if (prec == OSKAR_DOUBLE)
                 oskar_dft_c2r_2d_cuda_d(num_vis, 2.0 * M_PI,
                         oskar_mem_double_const(d->uu, status),
                         oskar_mem_double_const(d->vv, status),
-                        oskar_mem_double2_const(d->amp, status), block_size,
+                        oskar_mem_double2_const(d->amp, status),
+                        oskar_mem_double_const(d->weight, status), block_size,
                         oskar_mem_double_const(d->l, status),
                         oskar_mem_double_const(d->m, status),
                         oskar_mem_double(d->block_gpu, status));
@@ -123,7 +127,8 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
                 oskar_dft_c2r_2d_cuda_f(num_vis, 2.0 * M_PI,
                         oskar_mem_float_const(d->uu, status),
                         oskar_mem_float_const(d->vv, status),
-                        oskar_mem_float2_const(d->amp, status), block_size,
+                        oskar_mem_float2_const(d->amp, status),
+                        oskar_mem_float_const(d->weight, status), block_size,
                         oskar_mem_float_const(d->l, status),
                         oskar_mem_float_const(d->m, status),
                         oskar_mem_float(d->block_gpu, status));
@@ -134,12 +139,13 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
                 oskar_mem_realloc(d->n, block_size, status);
             oskar_mem_copy_contents(d->n, h->n, 0, block_start,
                     block_size, status);
-            if (oskar_mem_precision(d->amp) == OSKAR_DOUBLE)
+            if (prec == OSKAR_DOUBLE)
                 oskar_dft_c2r_3d_cuda_d(num_vis, 2.0 * M_PI,
                         oskar_mem_double_const(d->uu, status),
                         oskar_mem_double_const(d->vv, status),
                         oskar_mem_double_const(d->ww, status),
-                        oskar_mem_double2_const(d->amp, status), block_size,
+                        oskar_mem_double2_const(d->amp, status),
+                        oskar_mem_double_const(d->weight, status), block_size,
                         oskar_mem_double_const(d->l, status),
                         oskar_mem_double_const(d->m, status),
                         oskar_mem_double_const(d->n, status),
@@ -149,7 +155,8 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
                         oskar_mem_float_const(d->uu, status),
                         oskar_mem_float_const(d->vv, status),
                         oskar_mem_float_const(d->ww, status),
-                        oskar_mem_float2_const(d->amp, status), block_size,
+                        oskar_mem_float2_const(d->amp, status),
+                        oskar_mem_float_const(d->weight, status), block_size,
                         oskar_mem_float_const(d->l, status),
                         oskar_mem_float_const(d->m, status),
                         oskar_mem_float_const(d->n, status),
@@ -164,6 +171,20 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
         oskar_mem_add(t[thread_id], t[thread_id], d->block_cpu,
                 block_size, status);
     } /* End parallel loop over blocks. */
+
+    /* Update normalisation. */
+    if (prec == OSKAR_DOUBLE)
+    {
+        const double* w;
+        w = oskar_mem_double_const(weight, status);
+        for (i = 0; i < num_vis; ++i) *plane_norm += w[i];
+    }
+    else
+    {
+        const float* w;
+        w = oskar_mem_float_const(weight, status);
+        for (i = 0; i < num_vis; ++i) *plane_norm += w[i];
+    }
 
     for (i = 0; i < h->num_gpus; ++i)
         oskar_mem_free(t[i], status);

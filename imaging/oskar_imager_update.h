@@ -68,13 +68,14 @@ extern "C" {
  * @param[in]     vv            Time-baseline ordered V-coordinates, in metres.
  * @param[in]     ww            Time-baseline ordered W-coordinates, in metres.
  * @param[in]     amps          Complex visibility amplitudes.
+ * @param[in]     weight        Visibility weights.
  * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
 void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
         int start_chan, int end_chan, int num_pols, int num_baselines,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
-        const oskar_Mem* amps, int* status);
+        const oskar_Mem* amps, const oskar_Mem* weight, int* status);
 
 /**
  * @brief
@@ -98,6 +99,7 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
  * @param[in]     vv         Baseline vv coordinates, in wavelengths.
  * @param[in]     ww         Baseline ww coordinates, in wavelengths.
  * @param[in]     amps       Input complex visibilities.
+ * @param[in]     weight     Visibility weights.
  * @param[in,out] plane      Updated image or visibility plane.
  * @param[in,out] plane_norm Updated required normalisation of plane.
  * @param[in,out] status     Status return code.
@@ -105,8 +107,8 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
 OSKAR_EXPORT
 void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
-        const oskar_Mem* amps, oskar_Mem* plane, double* plane_norm,
-        int* status);
+        const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
+        double* plane_norm, int* status);
 
 #ifdef __cplusplus
 }

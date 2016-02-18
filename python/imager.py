@@ -104,16 +104,17 @@ class Imager(object):
     def set_vis_time(self, ref_mjd_utc, inc_sec, num_times):
         _imager_lib.set_vis_time(self._capsule, ref_mjd_utc, inc_sec, num_times)
 
-    def update(self, num_baselines, uu, vv, ww, \
-        amps, num_pols = 1, start_time = 0, end_time = 0, \
+    def update(self, num_baselines, uu, vv, ww, amps, weight, 
+        num_pols = 1, start_time = 0, end_time = 0, 
         start_channel = 0, end_channel = 0):
-        _imager_lib.update(self._capsule, num_baselines, uu, vv, ww, \
-            amps, num_pols, start_time, end_time, start_channel, end_channel)
+        _imager_lib.update(self._capsule, num_baselines, uu, vv, ww, 
+            amps, weight, num_pols, start_time, end_time, 
+            start_channel, end_channel)
 
     @staticmethod
-    def make_image(uu, vv, ww, amp, fov, size):
+    def make_image(uu, vv, ww, amp, weight, fov, size):
         """
-        make_image(uu, vv, ww, amp, fov, size)
+        make_image(uu, vv, ww, amp, weight, fov, size)
         
         Makes an image from visibility data.
         
@@ -126,13 +127,15 @@ class Imager(object):
         ww : array like, shape (n,), float64
             Input baseline ww coordinates, in wavelengths.
         amp : array like, shape (n,), complex128
-            Input baseline amplitudes.
+            Input baseline visibility amplitudes.
+        weight : array like, shape (n,), float64
+            Input visibility weights.
         fov : scalar, float64
             Image field of view, in degrees.
         size : scalar, int
             Image size along one dimension, in pixels.
         """
-        return _imager_lib.make_image(uu, vv, ww, amp, fov, size)
+        return _imager_lib.make_image(uu, vv, ww, amp, weight, fov, size)
 
     @staticmethod
     def fov_to_cellsize(fov_rad, size):

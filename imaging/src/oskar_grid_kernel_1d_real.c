@@ -36,21 +36,24 @@ extern "C" {
 
 static void oskar_grid_kernel_1d_real_3_100_d(const double* restrict conv_func,
         const int num_vis, const double* restrict uu, const double* restrict vv,
-        const double* restrict vis, const double cell_size_rad,
-        const int image_size, int* restrict num_skipped,
-        double* restrict norm, double* restrict grid);
+        const double* restrict vis, const double* restrict weight,
+        const double cell_size_rad, const int image_size,
+        int* restrict num_skipped, double* restrict norm,
+        double* restrict grid);
 static void oskar_grid_kernel_1d_real_3_100_f(const double* restrict conv_func,
         const int num_vis, const float* restrict uu, const float* restrict vv,
-        const float* restrict vis, const double cell_size_rad,
-        const int image_size, int* restrict num_skipped,
-        double* restrict norm, float* restrict grid);
+        const float* restrict vis, const float* restrict weight,
+        const double cell_size_rad, const int image_size,
+        int* restrict num_skipped, double* restrict norm,
+        float* restrict grid);
 
 void oskar_grid_kernel_1d_real_d(const int support, const int oversample,
         const double* restrict conv_func, const int num_vis,
         const double* restrict uu, const double* restrict vv,
-        const double* restrict vis, const double cell_size_rad,
-        const int image_size, int* restrict num_skipped,
-        double* restrict norm, double* restrict grid)
+        const double* restrict vis, const double* restrict weight,
+        const double cell_size_rad, const int image_size,
+        int* restrict num_skipped, double* restrict norm,
+        double* restrict grid)
 {
     int i, j, k, p, grid_x, grid_y, off_x, off_y;
     const int g_centre = image_size / 2;
@@ -60,7 +63,7 @@ void oskar_grid_kernel_1d_real_d(const int support, const int oversample,
     if (support == 3 && oversample == 100)
     {
         oskar_grid_kernel_1d_real_3_100_d(conv_func, num_vis, uu, vv, vis,
-                cell_size_rad, image_size, num_skipped, norm, grid);
+                weight, cell_size_rad, image_size, num_skipped, norm, grid);
         return;
     }
 
@@ -68,11 +71,12 @@ void oskar_grid_kernel_1d_real_d(const int support, const int oversample,
     *num_skipped = 0;
     for (i = 0; i < num_vis; ++i)
     {
-        double cxy, cx, cy, pos_x, pos_y, val[2];
+        double cxy, cx, cy, pos_x, pos_y, val[2], sum, w;
 
         /* Convert UV coordinates to grid coordinates. */
-        val[0] = vis[2 * i + 0];
-        val[1] = vis[2 * i + 1];
+        w = weight[i];
+        val[0] = vis[2 * i + 0] * w;
+        val[1] = vis[2 * i + 1] * w;
         pos_x = -uu[i] * scale;
         pos_y = vv[i] * scale;
         grid_x = (int)round(pos_x) + g_centre;
@@ -91,6 +95,7 @@ void oskar_grid_kernel_1d_real_d(const int support, const int oversample,
         off_y = (int)round((grid_y - g_centre - pos_y) * oversample);
 
         /* Convolve this point. */
+        sum = 0.0;
         for (j = -support; j <= support; ++j)
         {
             cy = conv_func[abs(off_y + j * oversample)];
@@ -98,12 +103,13 @@ void oskar_grid_kernel_1d_real_d(const int support, const int oversample,
             {
                 cx = conv_func[abs(off_x + k * oversample)];
                 cxy = cx * cy;
-                *norm += cxy;
+                sum += cxy;
                 p = 2 * (((grid_y + j) * image_size) + grid_x + k);
                 grid[p + 0] += val[0] * cxy;
                 grid[p + 1] += val[1] * cxy;
             }
         }
+        *norm += sum * w;
     }
 }
 
@@ -111,9 +117,10 @@ void oskar_grid_kernel_1d_real_d(const int support, const int oversample,
 void oskar_grid_kernel_1d_real_f(const int support, const int oversample,
         const double* restrict conv_func, const int num_vis,
         const float* restrict uu, const float* restrict vv,
-        const float* restrict vis, const double cell_size_rad,
-        const int image_size, int* restrict num_skipped,
-        double* restrict norm, float* restrict grid)
+        const float* restrict vis, const float* restrict weight,
+        const double cell_size_rad, const int image_size,
+        int* restrict num_skipped, double* restrict norm,
+        float* restrict grid)
 {
     int i, j, k, p, grid_x, grid_y, off_x, off_y;
     const int g_centre = image_size / 2;
@@ -123,7 +130,7 @@ void oskar_grid_kernel_1d_real_f(const int support, const int oversample,
     if (support == 3 && oversample == 100)
     {
         oskar_grid_kernel_1d_real_3_100_f(conv_func, num_vis, uu, vv, vis,
-                cell_size_rad, image_size, num_skipped, norm, grid);
+                weight, cell_size_rad, image_size, num_skipped, norm, grid);
         return;
     }
 
@@ -131,11 +138,12 @@ void oskar_grid_kernel_1d_real_f(const int support, const int oversample,
     *num_skipped = 0;
     for (i = 0; i < num_vis; ++i)
     {
-        double cxy, cx, cy, pos_x, pos_y, val[2];
+        double cxy, cx, cy, pos_x, pos_y, val[2], sum, w;
 
         /* Convert UV coordinates to grid coordinates. */
-        val[0] = vis[2 * i + 0];
-        val[1] = vis[2 * i + 1];
+        w = weight[i];
+        val[0] = vis[2 * i + 0] * w;
+        val[1] = vis[2 * i + 1] * w;
         pos_x = -uu[i] * scale;
         pos_y = vv[i] * scale;
         grid_x = (int)round(pos_x) + g_centre;
@@ -154,6 +162,7 @@ void oskar_grid_kernel_1d_real_f(const int support, const int oversample,
         off_y = (int)round((grid_y - g_centre - pos_y) * oversample);
 
         /* Convolve this point. */
+        sum = 0.0;
         for (j = -support; j <= support; ++j)
         {
             cy = conv_func[abs(off_y + j * oversample)];
@@ -161,21 +170,23 @@ void oskar_grid_kernel_1d_real_f(const int support, const int oversample,
             {
                 cx = conv_func[abs(off_x + k * oversample)];
                 cxy = cx * cy;
-                *norm += cxy;
+                sum += cxy;
                 p = 2 * (((grid_y + j) * image_size) + grid_x + k);
                 grid[p + 0] += val[0] * cxy;
                 grid[p + 1] += val[1] * cxy;
             }
         }
+        *norm += sum * w;
     }
 }
 
 
 void oskar_grid_kernel_1d_real_3_100_d(const double* restrict conv_func,
         const int num_vis, const double* restrict uu, const double* restrict vv,
-        const double* restrict vis, const double cell_size_rad,
-        const int image_size, int* restrict num_skipped,
-        double* restrict norm, double* restrict grid)
+        const double* restrict vis, const double* restrict weight,
+        const double cell_size_rad, const int image_size,
+        int* restrict num_skipped, double* restrict norm,
+        double* restrict grid)
 {
     int i, j, k, p, grid_x, grid_y, off_x, off_y;
     const int g_centre = image_size / 2;
@@ -185,11 +196,12 @@ void oskar_grid_kernel_1d_real_3_100_d(const double* restrict conv_func,
     *num_skipped = 0;
     for (i = 0; i < num_vis; ++i)
     {
-        double cxy, cx, cy, pos_x, pos_y, val[2];
+        double cxy, cx, cy, pos_x, pos_y, val[2], sum, w;
 
         /* Convert UV coordinates to grid coordinates. */
-        val[0] = vis[2 * i + 0];
-        val[1] = vis[2 * i + 1];
+        w = weight[i];
+        val[0] = vis[2 * i + 0] * w;
+        val[1] = vis[2 * i + 1] * w;
         pos_x = -uu[i] * scale;
         pos_y = vv[i] * scale;
         grid_x = (int)round(pos_x) + g_centre;
@@ -208,6 +220,7 @@ void oskar_grid_kernel_1d_real_3_100_d(const double* restrict conv_func,
         off_y = (int)round((grid_y - g_centre - pos_y) * 100);
 
         /* Convolve this point. */
+        sum = 0.0;
         for (j = -3; j <= 3; ++j)
         {
             cy = conv_func[abs(off_y + j * 100)];
@@ -215,21 +228,23 @@ void oskar_grid_kernel_1d_real_3_100_d(const double* restrict conv_func,
             {
                 cx = conv_func[abs(off_x + k * 100)];
                 cxy = cx * cy;
-                *norm += cxy;
+                sum += cxy;
                 p = 2 * (((grid_y + j) * image_size) + grid_x + k);
                 grid[p + 0] += val[0] * cxy;
                 grid[p + 1] += val[1] * cxy;
             }
         }
+        *norm += sum * w;
     }
 }
 
 
 void oskar_grid_kernel_1d_real_3_100_f(const double* restrict conv_func,
         const int num_vis, const float* restrict uu, const float* restrict vv,
-        const float* restrict vis, const double cell_size_rad,
-        const int image_size, int* restrict num_skipped,
-        double* restrict norm, float* restrict grid)
+        const float* restrict vis, const float* restrict weight,
+        const double cell_size_rad, const int image_size,
+        int* restrict num_skipped, double* restrict norm,
+        float* restrict grid)
 {
     int i, j, k, p, grid_x, grid_y, off_x, off_y;
     const int g_centre = image_size / 2;
@@ -239,11 +254,12 @@ void oskar_grid_kernel_1d_real_3_100_f(const double* restrict conv_func,
     *num_skipped = 0;
     for (i = 0; i < num_vis; ++i)
     {
-        double cxy, cx, cy, pos_x, pos_y, val[2];
+        double cxy, cx, cy, pos_x, pos_y, val[2], sum, w;
 
         /* Convert UV coordinates to grid coordinates. */
-        val[0] = vis[2 * i + 0];
-        val[1] = vis[2 * i + 1];
+        w = weight[i];
+        val[0] = vis[2 * i + 0] * w;
+        val[1] = vis[2 * i + 1] * w;
         pos_x = -uu[i] * scale;
         pos_y = vv[i] * scale;
         grid_x = (int)round(pos_x) + g_centre;
@@ -262,6 +278,7 @@ void oskar_grid_kernel_1d_real_3_100_f(const double* restrict conv_func,
         off_y = (int)round((grid_y - g_centre - pos_y) * 100);
 
         /* Convolve this point. */
+        sum = 0.0;
         for (j = -3; j <= 3; ++j)
         {
             cy = conv_func[abs(off_y + j * 100)];
@@ -269,12 +286,13 @@ void oskar_grid_kernel_1d_real_3_100_f(const double* restrict conv_func,
             {
                 cx = conv_func[abs(off_x + k * 100)];
                 cxy = cx * cy;
-                *norm += cxy;
+                sum += cxy;
                 p = 2 * (((grid_y + j) * image_size) + grid_x + k);
                 grid[p + 0] += val[0] * cxy;
                 grid[p + 1] += val[1] * cxy;
             }
         }
+        *norm += sum * w;
     }
 }
 

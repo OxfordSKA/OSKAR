@@ -308,18 +308,19 @@ static PyObject* set_vis_time(PyObject* self, PyObject* args)
 static PyObject* update(PyObject* self, PyObject* args, PyObject* keywds)
 {
     oskar_Imager* h = 0;
-    oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c;
+    oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *weight_c;
     PyObject* capsule = 0;
-    PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0;
+    PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0;
     int start_time = 0, end_time = 0, start_chan = 0, end_chan = 0;
     int num_pols = 1, num_baselines = 0, vis_type, type = OSKAR_DOUBLE;
     int num_times, num_chan, num_coords, num_vis, status = 0;
 
     /* Parse inputs. */
     char* keywords[] = {"_capsule", "num_baselines", "uu", "vv", "ww", "amps",
-            "num_pols", "start_time", "end_time", "start_chan", "end_chan", 0};
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OiOOOO|iiiii", keywords,
-            &capsule, &num_baselines, &uu, &vv, &ww, &amps,
+            "weight", "num_pols", "start_time", "end_time",
+            "start_chan", "end_chan", 0};
+    if (!PyArg_ParseTupleAndKeywords(args, keywds, "OiOOOOO|iiiii", keywords,
+            &capsule, &num_baselines, &uu, &vv, &ww, &amps, &weight,
             &num_pols, &start_time, &end_time, &start_chan, &end_chan))
         return 0;
     if (!(h = get_handle(capsule))) return 0;
@@ -341,13 +342,17 @@ static PyObject* update(PyObject* self, PyObject* args, PyObject* keywds)
             OSKAR_CPU, num_coords, &status);
     amp_c = oskar_mem_create_alias_from_raw(PyArray_DATA(amps), vis_type,
             OSKAR_CPU, num_vis, &status);
+    weight_c = oskar_mem_create_alias_from_raw(PyArray_DATA(weight), type,
+            OSKAR_CPU, num_vis, &status);
 
     oskar_imager_update(h, start_time, end_time, start_chan, end_chan,
-            num_pols, num_baselines, uu_c, vv_c, ww_c, amp_c, &status);
+            num_pols, num_baselines, uu_c, vv_c, ww_c, amp_c, weight_c,
+            &status);
     oskar_mem_free(uu_c, &status);
     oskar_mem_free(vv_c, &status);
     oskar_mem_free(ww_c, &status);
     oskar_mem_free(amp_c, &status);
+    oskar_mem_free(weight_c, &status);
 
     /* Check for errors. */
     if (status)
@@ -362,21 +367,22 @@ static PyObject* update(PyObject* self, PyObject* args, PyObject* keywds)
 
 static PyObject* make_image(PyObject* self, PyObject* args, PyObject* keywds)
 {
-    PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amp = 0, *im = 0;
+    PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amp = 0, *weight = 0, *im = 0;
     int i = 0, status = 0, num_vis, num_pixels, size = 0, type = OSKAR_DOUBLE;
     double fov = 0.0, norm = 0.0;
     oskar_Imager* imager;
-    oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *plane;
+    oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *weight_c, *plane;
 
     /* Parse inputs. */
-    char* keywords[] = {"uu", "vv", "ww", "amp", "fov", "size", 0};
+    char* keywords[] = {"uu", "vv", "ww", "amp", "weight", "fov", "size", 0};
     if (!PyArg_ParseTupleAndKeywords(args, keywds, "OOOOdi", keywords,
             &uu, &vv, &ww, &amp, &fov, &size))
         return 0;
 
     /* Check dimensions. */
     if (PyArray_NDIM(uu) != 1 || PyArray_NDIM(vv) != 1 ||
-            PyArray_NDIM(ww) != 1 || PyArray_NDIM(amp) != 1)
+            PyArray_NDIM(ww) != 1 || PyArray_NDIM(amp) != 1 ||
+            PyArray_NDIM(weight) != 1)
     {
         PyErr_SetString(PyExc_RuntimeError, "Input data arrays must be 1D.");
         return 0;
@@ -384,7 +390,8 @@ static PyObject* make_image(PyObject* self, PyObject* args, PyObject* keywds)
     num_vis = (int)*PyArray_DIMS(uu);
     if (num_vis != (int)*PyArray_DIMS(vv) ||
             num_vis != (int)*PyArray_DIMS(ww) ||
-            num_vis != (int)*PyArray_DIMS(amp))
+            num_vis != (int)*PyArray_DIMS(amp) ||
+            num_vis != (int)*PyArray_DIMS(weight))
     {
         PyErr_SetString(PyExc_RuntimeError, "Input data dimension mismatch.");
         return 0;
@@ -401,20 +408,22 @@ static PyObject* make_image(PyObject* self, PyObject* args, PyObject* keywds)
     oskar_imager_set_size(imager, size);
 
     /* Pointers to input/output arrays. */
-    uu_c = oskar_mem_create_alias_from_raw(PyArray_DATA(uu), type, OSKAR_CPU,
-            num_vis, &status);
-    vv_c = oskar_mem_create_alias_from_raw(PyArray_DATA(vv), type, OSKAR_CPU,
-            num_vis, &status);
-    ww_c = oskar_mem_create_alias_from_raw(PyArray_DATA(ww), type, OSKAR_CPU,
-            num_vis, &status);
-    amp_c = oskar_mem_create_alias_from_raw(PyArray_DATA(amp), type, OSKAR_CPU,
-            num_vis, &status);
+    uu_c = oskar_mem_create_alias_from_raw(PyArray_DATA(uu), type,
+            OSKAR_CPU, num_vis, &status);
+    vv_c = oskar_mem_create_alias_from_raw(PyArray_DATA(vv), type,
+            OSKAR_CPU, num_vis, &status);
+    ww_c = oskar_mem_create_alias_from_raw(PyArray_DATA(ww), type,
+            OSKAR_CPU, num_vis, &status);
+    amp_c = oskar_mem_create_alias_from_raw(PyArray_DATA(amp), type,
+            OSKAR_CPU, num_vis, &status);
+    weight_c = oskar_mem_create_alias_from_raw(PyArray_DATA(weight), type,
+            OSKAR_CPU, num_vis, &status);
 
     /* Make the image. */
     plane = oskar_mem_create(type | OSKAR_COMPLEX, OSKAR_CPU, num_pixels,
             &status);
     oskar_imager_update_plane(imager, num_vis, uu_c, vv_c, ww_c, amp_c,
-            plane, &norm, &status);
+            weight_c, plane, &norm, &status);
     oskar_imager_finalise_plane(imager, plane, norm, &status);
     memcpy(PyArray_DATA(im), oskar_mem_void_const(plane),
             num_pixels * sizeof(double));
@@ -424,6 +433,7 @@ static PyObject* make_image(PyObject* self, PyObject* args, PyObject* keywds)
     oskar_mem_free(vv_c, &status);
     oskar_mem_free(ww_c, &status);
     oskar_mem_free(amp_c, &status);
+    oskar_mem_free(weight_c, &status);
     oskar_imager_free(imager, &status);
 
     /* Check for errors. */
@@ -459,7 +469,7 @@ static PyMethodDef oskar_imager_methods[] =
                 "   If given, the output image is returned in this array.\n\n"
         },
         {"make_image", (PyCFunction)make_image, METH_VARARGS | METH_KEYWORDS,
-                "make_image(uu, vv, ww, amp, fov, size)\n\n"
+                "make_image(uu, vv, ww, amp, weight, fov, size)\n\n"
                 "Makes an image from visibility data.\n\n"
                 "Parameters\n"
                 "----------\n"
@@ -470,7 +480,9 @@ static PyMethodDef oskar_imager_methods[] =
                 "ww : array like, shape (n,)\n"
                 "   Input baseline w coordinates, in wavelengths.\n\n"
                 "amp : array like, shape (n,), complex\n"
-                "   Input baseline amplitudes.\n\n"
+                "   Input baseline visibility amplitudes.\n\n"
+                "weight : array like, shape (n,)\n"
+                "   Input baseline visibility weights.\n\n"
                 "fov : scalar\n"
                 "   Image field of view, in degrees.\n\n"
                 "size : integer\n"
@@ -626,7 +638,7 @@ static PyMethodDef oskar_imager_methods[] =
                 "   Number of time steps in visibility data.\n\n"
         },
         {"update", (PyCFunction)update, METH_VARARGS | METH_KEYWORDS,
-                "update(num_baselines, uu, vv, ww, amps, "
+                "update(num_baselines, uu, vv, ww, amps, weight, "
                 "num_pols, start_time, end_time, start_chan, end_chan)\n\n"
                 "Runs the imager using data in memory, and applies "
                 "visibility selection.\n\n"
@@ -644,6 +656,8 @@ static PyMethodDef oskar_imager_methods[] =
                 "   Time-baseline ordered W-coordinates, in metres.\n\n"
                 "amps : array like (n,)\n"
                 "   Complex visibility amplitudes.\n\n"
+                "weight : array like (n,)\n"
+                "   Visibility weights.\n\n"
                 "num_pols (default 1) : integer\n"
                 "   Number of polarisations in the visibility block.\n\n"
                 "start_time (default 0) : integer\n"

@@ -53,6 +53,7 @@ extern "C" {
  * @param[in] uu            Baseline UU coordinates, in wavelengths.
  * @param[in] vv            Baseline VV coordinates, in wavelengths.
  * @param[in] vis           Complex visibilities for each baseline.
+ * @param[in] weight        Visibility weight for each baseline.
  * @param[in] cell_size_rad Cell size, in radians.
  * @param[in] image_size    Side length of image and grid.
  * @param[out] num_skipped  Number of visibilities that fell outside the grid.
@@ -63,9 +64,10 @@ OSKAR_EXPORT
 void oskar_grid_kernel_1d_real_d(const int support, const int oversample,
         const double* restrict conv_func, const int num_vis,
         const double* restrict uu, const double* restrict vv,
-        const double* restrict vis, const double cell_size_rad,
-        const int image_size, int* restrict num_skipped,
-        double* restrict norm, double* restrict grid);
+        const double* restrict vis, const double* restrict weight,
+        const double cell_size_rad, const int image_size,
+        int* restrict num_skipped, double* restrict norm,
+        double* restrict grid);
 
 /**
  * @brief
@@ -81,6 +83,7 @@ void oskar_grid_kernel_1d_real_d(const int support, const int oversample,
  * @param[in] uu            Baseline UU coordinates, in wavelengths.
  * @param[in] vv            Baseline VV coordinates, in wavelengths.
  * @param[in] vis           Complex visibilities for each baseline.
+ * @param[in] weight        Visibility weight for each baseline.
  * @param[in] cell_size_rad Cell size, in radians.
  * @param[in] image_size    Side length of image and grid.
  * @param[out] num_skipped  Number of visibilities that fell outside the grid.
@@ -91,9 +94,10 @@ OSKAR_EXPORT
 void oskar_grid_kernel_1d_real_f(const int support, const int oversample,
         const double* restrict conv_func, const int num_vis,
         const float* restrict uu, const float* restrict vv,
-        const float* restrict vis, const double cell_size_rad,
-        const int image_size, int* restrict num_skipped,
-        double* restrict norm, float* restrict grid);
+        const float* restrict vis, const float* restrict weight,
+        const double cell_size_rad, const int image_size,
+        int* restrict num_skipped, double* restrict norm,
+        float* restrict grid);
 
 #ifdef __cplusplus
 }

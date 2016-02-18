@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@ extern "C" {
 /* Single precision. */
 void oskar_dft_c2r_2d_omp_f(const int num_in, const float wavenumber,
         const float* x_in, const float* y_in, const float2* data_in,
-        const int num_out, const float* x_out, const float* y_out,
-        float* output)
+        const float* weight_in, const int num_out, const float* x_out,
+        const float* y_out, float* output)
 {
     int i_out = 0;
 
@@ -63,8 +63,8 @@ void oskar_dft_c2r_2d_omp_f(const int num_in, const float wavenumber,
 
             /* Perform complex multiply-accumulate.
              * Output is real, so only evaluate the real part. */
-            out += data_in[i].x * weight_x; /* RE*RE */
-            out -= data_in[i].y * weight_y; /* IM*IM */
+            out += data_in[i].x * weight_x * weight_in[i]; /* RE*RE */
+            out -= data_in[i].y * weight_y * weight_in[i]; /* IM*IM */
         }
 
         /* Store the output point. */
@@ -75,8 +75,8 @@ void oskar_dft_c2r_2d_omp_f(const int num_in, const float wavenumber,
 /* Double precision. */
 void oskar_dft_c2r_2d_omp_d(const int num_in, const double wavenumber,
         const double* x_in, const double* y_in, const double2* data_in,
-        const int num_out, const double* x_out, const double* y_out,
-        double* output)
+        const double* weight_in, const int num_out, const double* x_out,
+        const double* y_out, double* output)
 {
     int i_out = 0;
 
@@ -102,8 +102,8 @@ void oskar_dft_c2r_2d_omp_d(const int num_in, const double wavenumber,
 
             /* Perform complex multiply-accumulate.
              * Output is real, so only evaluate the real part. */
-            out += data_in[i].x * weight_x; /* RE*RE */
-            out -= data_in[i].y * weight_y; /* IM*IM */
+            out += data_in[i].x * weight_x * weight_in[i]; /* RE*RE */
+            out -= data_in[i].y * weight_y * weight_in[i]; /* IM*IM */
         }
 
         /* Store the output point. */

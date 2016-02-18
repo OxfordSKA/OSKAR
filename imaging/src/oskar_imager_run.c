@@ -75,9 +75,11 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
     oskar_Binary* vis_file;
     oskar_VisBlock* blk;
     oskar_VisHeader* hdr;
+    oskar_Mem* weight;
     int max_times_per_block, tags_per_block, i_block, num_blocks;
     int start_time, end_time, start_chan, end_chan;
-    int num_times, num_channels, percent_done = 0, percent_next = 10;
+    int num_times, num_channels, num_stations, num_baselines, num_pols;
+    int percent_done = 0, percent_next = 10;
     int dim_start_and_size[6];
     if (h->log) oskar_log_message(h->log, 'M', 0,
             "Opening OSKAR visibility file '%s'", filename);
@@ -93,6 +95,9 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
     tags_per_block = oskar_vis_header_num_tags_per_block(hdr);
     num_times = oskar_vis_header_num_times_total(hdr);
     num_channels = oskar_vis_header_num_channels_total(hdr);
+    num_stations = oskar_vis_header_num_stations(hdr);
+    num_baselines = num_stations * (num_stations - 1) / 2;
+    num_pols = oskar_vis_header_amp_type(hdr) | OSKAR_MATRIX ? 4 : 1;
 
     /* Set visibility meta-data. */
     oskar_imager_set_vis_frequency(h,
@@ -110,6 +115,12 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
         oskar_binary_free(vis_file);
         return;
     }
+
+    /* Create weights array and set all to 1. */
+    weight = oskar_mem_create(
+            oskar_type_precision(oskar_vis_header_amp_type(hdr)),
+            OSKAR_CPU, num_baselines * num_pols, status);
+    oskar_mem_set_value_real(weight, 1.0, 0, num_baselines * num_pols, status);
 
     /* Loop over visibility blocks. */
     blk = oskar_vis_block_create(OSKAR_CPU, hdr, status);
@@ -147,7 +158,7 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
                     oskar_vis_block_baseline_uu_metres(blk),
                     oskar_vis_block_baseline_vv_metres(blk),
                     oskar_vis_block_baseline_ww_metres(blk),
-                    oskar_vis_block_cross_correlations(blk), status);
+                    oskar_vis_block_cross_correlations(blk), weight, status);
         }
 
         /* Update progress. */
@@ -160,6 +171,7 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
         }
     }
     if (h->log) oskar_log_message(h->log, 'S', -2, "");
+    oskar_mem_free(weight, status);
     oskar_vis_block_free(blk, status);
     oskar_vis_header_free(hdr, status);
     oskar_binary_free(vis_file);
@@ -170,7 +182,7 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
 {
 #ifndef OSKAR_NO_MS
     oskar_MeasurementSet* ms;
-    oskar_Mem *uvw, *u, *v, *w, *data;
+    oskar_Mem *uvw, *u, *v, *w, *data, *weight;
     int num_rows, num_stations, num_baselines, num_pols;
     int start_time, end_time, start_chan, end_chan;
     int num_times, num_channels, percent_done = 0, percent_next = 10;
@@ -223,6 +235,8 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     u = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_baselines, status);
     v = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_baselines, status);
     w = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, num_baselines, status);
+    weight = oskar_mem_create(OSKAR_SINGLE, OSKAR_CPU,
+            num_baselines * num_pols, status);
     uvw_ = oskar_mem_double(uvw, status);
     u_ = oskar_mem_double(u, status);
     v_ = oskar_mem_double(v, status);
@@ -250,6 +264,10 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
                 oskar_mem_element_size(oskar_mem_type(uvw));
         oskar_ms_get_column(ms, "UVW", start_row, block_size,
                 allocated, oskar_mem_void(uvw), &required, status);
+        allocated = oskar_mem_length(weight) *
+                oskar_mem_element_size(oskar_mem_type(weight));
+        oskar_ms_get_column(ms, "WEIGHT", start_row, block_size,
+                allocated, oskar_mem_void(weight), &required, status);
         allocated = oskar_mem_length(data) *
                 oskar_mem_element_size(oskar_mem_type(data));
         oskar_ms_get_column(ms, h->ms_column, start_row, block_size,
@@ -275,7 +293,7 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
 
         /* Add the baseline data. */
         oskar_imager_update(h, start_time, end_time, start_chan, end_chan,
-                num_pols, num_baselines, u, v, w, data, status);
+                num_pols, num_baselines, u, v, w, data, weight, status);
         start_time += 1;
         end_time += 1;
 
@@ -294,6 +312,7 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     oskar_mem_free(v, status);
     oskar_mem_free(w, status);
     oskar_mem_free(data, status);
+    oskar_mem_free(weight, status);
     oskar_ms_close(ms);
 #else
     oskar_log_error(log, "OSKAR was compiled without Measurement Set support.");
