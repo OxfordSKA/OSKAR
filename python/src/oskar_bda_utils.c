@@ -165,6 +165,491 @@ static PyObject* check_ref_count(PyObject* self, PyObject* args)
     return Py_BuildValue("ii", PyArray_REFCOUNT(obj), Py_REFCNT(obj));
 }
 
+
+
+
+struct oskar_BDA
+{
+    /* Options. */
+    int num_antennas, num_baselines, num_pols, num_times;
+    double duvw_max, dt_max, max_fact, fov_deg, delta_t;
+
+    /* Output data. */
+    int bda_row, output_size, *ant1, *ant2;
+    double *u, *v, *w, *data, *time, *exposure, *sigma, *weight;
+
+    /* Current UVW coordinates. */
+    double *uu_current, *vv_current, *ww_current;
+
+    /* Buffers of deltas along the baseline in the current average. */
+    double *duvw, *dt;
+
+    /* Buffers of the current average along the baseline. */
+    double *ave_uu, *ave_vv, *ave_ww, *ave_data;
+    int *ave_count;
+};
+typedef struct oskar_BDA oskar_BDA;
+
+static const char* name = "oskar_BDA";
+
+#define INT sizeof(int)
+#define DBL sizeof(double)
+
+static void oskar_bda_clear(oskar_BDA* h)
+{
+    /* Clear averages. */
+    memset(h->uu_current, '\0', h->num_baselines * DBL);
+    memset(h->vv_current, '\0', h->num_baselines * DBL);
+    memset(h->ww_current, '\0', h->num_baselines * DBL);
+    memset(h->duvw, '\0', h->num_baselines * DBL);
+    memset(h->dt, '\0', h->num_baselines * DBL);
+    memset(h->ave_uu, '\0', h->num_baselines * DBL);
+    memset(h->ave_vv, '\0', h->num_baselines * DBL);
+    memset(h->ave_ww, '\0', h->num_baselines * DBL);
+    memset(h->ave_count, '\0', h->num_baselines * INT);
+    memset(h->ave_data, '\0', h->num_baselines * h->num_pols * 2*DBL);
+
+    /* Free the output data. */
+    h->output_size = 0;
+    h->bda_row = 0;
+    free(h->ant1);
+    free(h->ant2);
+    free(h->u);
+    free(h->v);
+    free(h->w);
+    free(h->data);
+    free(h->time);
+    free(h->exposure);
+    free(h->sigma);
+    free(h->weight);
+    h->ant1 = 0;
+    h->ant2 = 0;
+    h->u = 0;
+    h->v = 0;
+    h->w = 0;
+    h->data = 0;
+    h->time = 0;
+    h->exposure = 0;
+    h->sigma = 0;
+    h->weight = 0;
+}
+
+
+static void oskar_bda_free(oskar_BDA* h)
+{
+    oskar_bda_clear(h);
+    free(h->uu_current);
+    free(h->vv_current);
+    free(h->ww_current);
+    free(h->duvw);
+    free(h->dt);
+    free(h->ave_uu);
+    free(h->ave_vv);
+    free(h->ave_ww);
+    free(h->ave_data);
+    free(h->ave_count);
+    free(h);
+}
+
+
+/* arcsinc(x) function from Obit. Uses Newton-Raphson method.  */
+static double inv_sinc(double value)
+{
+    double x1 = 0.001;
+    for (int i = 0; i < 1000; ++i)
+    {
+        double x0 = x1;
+        double a = x0 * M_PI;
+        x1 = x0 - ((sin(a) / a) - value) /
+                        ((a * cos(a) - M_PI * sin(a)) / (a * a));
+        if (fabs(x1 - x0) < 1.0e-6)
+            break;
+    }
+    return x1;
+}
+
+
+static void bda_free(PyObject* capsule)
+{
+    int status = 0;
+    oskar_BDA* h = (oskar_BDA*) PyCapsule_GetPointer(capsule, name);
+    oskar_bda_free(h);
+}
+
+
+static oskar_BDA* get_handle(PyObject* capsule)
+{
+    oskar_BDA* h = 0;
+    if (!PyCapsule_CheckExact(capsule))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Input is not a PyCapsule object!");
+        return 0;
+    }
+    h = (oskar_BDA*) PyCapsule_GetPointer(capsule, name);
+    if (!h)
+    {
+        PyErr_SetString(PyExc_RuntimeError,
+                "Unable to convert PyCapsule object to pointer.");
+        return 0;
+    }
+    return h;
+}
+
+
+static PyObject* bda_create(PyObject* self, PyObject* args)
+{
+    oskar_BDA* h = 0;
+    PyObject* capsule = 0;
+    int num_antennas, num_baselines, num_pols;
+    if (!PyArg_ParseTuple(args, "ii", &num_antennas, &num_pols))
+        return 0;
+
+    /* Create and initialise the BDA object. */
+    h = (oskar_BDA*) calloc(1, sizeof(oskar_BDA));
+    num_baselines = num_antennas * (num_antennas - 1) / 2;
+    h->num_antennas  = num_antennas;
+    h->num_baselines = num_baselines;
+    h->num_pols      = num_pols;
+    h->uu_current    = (double*) calloc(num_baselines, DBL);
+    h->vv_current    = (double*) calloc(num_baselines, DBL);
+    h->ww_current    = (double*) calloc(num_baselines, DBL);
+    h->duvw          = (double*) calloc(num_baselines, DBL);
+    h->dt            = (double*) calloc(num_baselines, DBL);
+    h->ave_uu        = (double*) calloc(num_baselines, DBL);
+    h->ave_vv        = (double*) calloc(num_baselines, DBL);
+    h->ave_ww        = (double*) calloc(num_baselines, DBL);
+    h->ave_count     = (int*)    calloc(num_baselines, INT);
+    h->ave_data      = (double*) calloc(num_baselines * num_pols, 2*DBL);
+
+    /* Initialise and return the PyCapsule. */
+    capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)bda_free);
+    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
+}
+
+
+static PyObject* bda_set_compression(PyObject* self, PyObject* args)
+{
+    oskar_BDA* h = 0;
+    PyObject* capsule = 0;
+    double max_fact = 0.0, fov_deg = 0.0, wavelength = 0.0, dt_max = 0.0;
+    if (!PyArg_ParseTuple(args, "Odddd",
+            &capsule, &max_fact, &fov_deg, &wavelength, &dt_max))
+        return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    h->max_fact = max_fact;
+    h->fov_deg = fov_deg;
+    h->duvw_max = inv_sinc(1.0 / max_fact) / (fov_deg * (M_PI / 180.0));
+    h->duvw_max *= wavelength;
+    h->dt_max = dt_max;
+    return Py_BuildValue("");
+}
+
+
+static PyObject* bda_set_delta_t(PyObject* self, PyObject* args)
+{
+    oskar_BDA* h = 0;
+    PyObject* capsule = 0;
+    double delta_t = 0.0;
+    if (!PyArg_ParseTuple(args, "Od", &capsule, &delta_t)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    h->delta_t = delta_t;
+    return Py_BuildValue("");
+}
+
+
+static PyObject* bda_set_num_times(PyObject* self, PyObject* args)
+{
+    oskar_BDA* h = 0;
+    PyObject* capsule = 0;
+    int num_times = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &num_times)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    h->num_times = num_times;
+    return Py_BuildValue("");
+}
+
+
+static PyObject* bda_set_initial_coords(PyObject* self, PyObject* args)
+{
+    oskar_BDA* h = 0;
+    PyObject *obj[] = {0, 0, 0, 0};
+    PyArrayObject *uu_ = 0, *vv_ = 0, *ww_ = 0;
+    if (!PyArg_ParseTuple(args, "OOOO",
+            &obj[0], &obj[1], &obj[2], &obj[3]))
+        return 0;
+    if (!(h = get_handle(obj[0]))) return 0;
+
+    /* Make sure input objects are arrays. Convert if required. */
+    uu_ = (PyArrayObject*) PyArray_FROM_OTF(obj[1],
+            NPY_DOUBLE, NPY_ARRAY_IN_ARRAY | NPY_ARRAY_FORCECAST);
+    if (!uu_) goto fail;
+    vv_ = (PyArrayObject*) PyArray_FROM_OTF(obj[2],
+            NPY_DOUBLE, NPY_ARRAY_IN_ARRAY | NPY_ARRAY_FORCECAST);
+    if (!vv_) goto fail;
+    ww_ = (PyArrayObject*) PyArray_FROM_OTF(obj[3],
+            NPY_DOUBLE, NPY_ARRAY_IN_ARRAY | NPY_ARRAY_FORCECAST);
+    if (!ww_) goto fail;
+
+    /* Check dimensions. */
+    if (PyArray_NDIM(uu_) != 1 || PyArray_NDIM(vv_) != 1 ||
+            PyArray_NDIM(ww_) != 1)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Coordinate arrays must be 1D.");
+        goto fail;
+    }
+    if (h->num_baselines != (int)*PyArray_DIMS(uu_) ||
+            h->num_baselines != (int)*PyArray_DIMS(vv_) ||
+            h->num_baselines != (int)*PyArray_DIMS(ww_))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Input data dimension mismatch.");
+        goto fail;
+    }
+
+    /* Copy the data. */
+    memcpy(h->uu_current, PyArray_DATA(uu_), h->num_baselines * DBL);
+    memcpy(h->vv_current, PyArray_DATA(vv_), h->num_baselines * DBL);
+    memcpy(h->ww_current, PyArray_DATA(ww_), h->num_baselines * DBL);
+
+    Py_XDECREF(uu_);
+    Py_XDECREF(vv_);
+    Py_XDECREF(ww_);
+    return Py_BuildValue("");
+
+fail:
+    Py_XDECREF(uu_);
+    Py_XDECREF(vv_);
+    Py_XDECREF(ww_);
+    return 0;
+}
+
+
+static PyObject* bda_add_data(PyObject* self, PyObject* args)
+{
+    oskar_BDA* h = 0;
+    PyObject *obj[] = {0, 0, 0, 0, 0};
+    PyArrayObject *amp_current_ = 0;
+    PyArrayObject *uu_next_ = 0, *vv_next_ = 0, *ww_next_ = 0;
+    int a1, a2, b, i, j, p, t = 0;
+    double *uu_next = 0, *vv_next = 0, *ww_next = 0, *data;
+    if (!PyArg_ParseTuple(args, "OiOOOO", &obj[0], &t, &obj[1],
+            &obj[2], &obj[3], &obj[4])) return 0;
+    if (!(h = get_handle(obj[0]))) return 0;
+
+    /* Get array handles. */
+    amp_current_ = (PyArrayObject*) PyArray_FROM_OTF(obj[1],
+            NPY_CDOUBLE, NPY_ARRAY_IN_ARRAY | NPY_ARRAY_FORCECAST);
+    if (!amp_current_) goto fail;
+    if ((obj[2] != Py_None) && (obj[3] != Py_None) && (obj[4] != Py_None))
+    {
+        /* Make sure input objects are arrays. Convert if required. */
+        uu_next_ = (PyArrayObject*) PyArray_FROM_OTF(obj[2],
+                NPY_DOUBLE, NPY_ARRAY_IN_ARRAY | NPY_ARRAY_FORCECAST);
+        if (!uu_next_) goto fail;
+        vv_next_ = (PyArrayObject*) PyArray_FROM_OTF(obj[3],
+                NPY_DOUBLE, NPY_ARRAY_IN_ARRAY | NPY_ARRAY_FORCECAST);
+        if (!vv_next_) goto fail;
+        ww_next_ = (PyArrayObject*) PyArray_FROM_OTF(obj[4],
+                NPY_DOUBLE, NPY_ARRAY_IN_ARRAY | NPY_ARRAY_FORCECAST);
+        if (!ww_next_) goto fail;
+
+        /* Check dimensions. */
+        if (PyArray_NDIM(uu_next_) != 1 ||
+                PyArray_NDIM(vv_next_) != 1 ||
+                PyArray_NDIM(ww_next_) != 1)
+        {
+            PyErr_SetString(PyExc_RuntimeError,
+                    "Coordinate arrays must be 1D.");
+            goto fail;
+        }
+        if (h->num_baselines != (int)*PyArray_DIMS(uu_next_) ||
+                h->num_baselines != (int)*PyArray_DIMS(vv_next_) ||
+                h->num_baselines != (int)*PyArray_DIMS(ww_next_))
+        {
+            PyErr_SetString(PyExc_RuntimeError,
+                    "Input data dimension mismatch.");
+            goto fail;
+        }
+    }
+
+    if (uu_next_) uu_next = (double*) PyArray_DATA(uu_next_);
+    if (vv_next_) vv_next = (double*) PyArray_DATA(vv_next_);
+    if (ww_next_) ww_next = (double*) PyArray_DATA(ww_next_);
+    data                  = (double*) PyArray_DATA(amp_current_);
+    for (a1 = 0, b = 0; a1 < h->num_antennas; ++a1)
+    {
+        for (a2 = a1 + 1; a2 < h->num_antennas; ++a2, ++b)
+        {
+            double du, dv, dw, b_duvw = 0.0, s;
+
+            /* Accumulate into averages. */
+            h->ave_count[b] += 1;
+            h->ave_uu[b]    += h->uu_current[b];
+            h->ave_vv[b]    += h->vv_current[b];
+            h->ave_ww[b]    += h->ww_current[b];
+            for (p = 0; p < h->num_pols; ++p)
+            {
+                i = b * h->num_pols + p;
+                h->ave_data[2*i + 0] += data[2*i + 0];
+                h->ave_data[2*i + 1] += data[2*i + 1];
+            }
+
+            /* Look ahead to the next point on the baseline and see if
+             * this is also in the average. */
+             if ((t < h->num_times - 1) && uu_next && vv_next && ww_next)
+             {
+                 du = uu_next[b] - h->uu_current[b];
+                 dv = vv_next[b] - h->vv_current[b];
+                 dw = ww_next[b] - h->ww_current[b];
+                 b_duvw = sqrt(du*du + dv*dv + dw*dw);
+             }
+
+             /* If last time or if next point extends beyond average,
+              * save out averaged data and reset,
+              * else accumulate current average lengths. */
+             if (t == h->num_times - 1 ||
+                     h->duvw[b] + b_duvw > h->duvw_max ||
+                     h->dt[b] + h->delta_t > h->dt_max)
+             {
+                 s = 1.0 / h->ave_count[b];
+                 h->ave_uu[b] *= s;
+                 h->ave_vv[b] *= s;
+                 h->ave_ww[b] *= s;
+                 for (p = 0; p < h->num_pols; ++p)
+                 {
+                     i = b * h->num_pols + p;
+                     h->ave_data[2*i + 0] *= s;
+                     h->ave_data[2*i + 1] *= s;
+                 }
+
+                 /* Store the averaged data. */
+                 if (h->output_size < h->bda_row + 1)
+                 {
+                     h->output_size += h->num_baselines;
+                     h->ant1     = realloc(h->ant1, h->output_size * INT);
+                     h->ant2     = realloc(h->ant2, h->output_size * INT);
+                     h->u        = realloc(h->u, h->output_size * DBL);
+                     h->v        = realloc(h->v, h->output_size * DBL);
+                     h->w        = realloc(h->w, h->output_size * DBL);
+                     h->exposure = realloc(h->exposure, h->output_size * DBL);
+                     h->sigma    = realloc(h->sigma, h->output_size * DBL);
+                     h->weight   = realloc(h->weight, h->output_size * DBL);
+                     h->data     = realloc(h->data,
+                             h->num_pols * h->output_size * 2*DBL);
+                 }
+                 h->ant1[h->bda_row] = a1;
+                 h->ant2[h->bda_row] = a2;
+                 h->u[h->bda_row] = h->ave_uu[b];
+                 h->v[h->bda_row] = h->ave_vv[b];
+                 h->w[h->bda_row] = h->ave_ww[b];
+                 h->exposure[h->bda_row] = h->ave_count[b] * h->delta_t;
+                 h->sigma[h->bda_row] = sqrt(s);
+                 h->weight[h->bda_row] = h->ave_count[b];
+                 for (p = 0; p < h->num_pols; ++p)
+                 {
+                     i = b * h->num_pols + p;
+                     j = h->bda_row * h->num_pols + p;
+                     h->data[2*j + 0] = h->ave_data[2*i + 0];
+                     h->data[2*j + 1] = h->ave_data[2*i + 1];
+                 }
+
+                 /* Reset baseline accumulation buffers. */
+                 h->duvw[b] = 0.0;
+                 h->dt[b] = 0.0;
+                 h->ave_count[b] = 0;
+                 h->ave_uu[b] = 0.0;
+                 h->ave_vv[b] = 0.0;
+                 h->ave_ww[b] = 0.0;
+                 for (p = 0; p < h->num_pols; ++p)
+                 {
+                     i = b * h->num_pols + p;
+                     h->ave_data[2*i + 0] = 0.0;
+                     h->ave_data[2*i + 1] = 0.0;
+                 }
+
+                 /* Update baseline average row counter for next output. */
+                 h->bda_row += 1;
+             }
+             else
+             {
+                 /* Accumulate distance and time on current baseline. */
+                 h->duvw[b] += b_duvw;
+                 h->dt[b] += h->delta_t;
+             }
+        }
+    } /* end baseline loop */
+
+    /* Copy "next" to "current" for the next time block. */
+    if (uu_next) memcpy(h->uu_current, uu_next, h->num_baselines * DBL);
+    if (vv_next) memcpy(h->vv_current, vv_next, h->num_baselines * DBL);
+    if (ww_next) memcpy(h->ww_current, ww_next, h->num_baselines * DBL);
+
+    Py_XDECREF(amp_current_);
+    Py_XDECREF(uu_next_);
+    Py_XDECREF(vv_next_);
+    Py_XDECREF(ww_next_);
+    return Py_BuildValue("");
+
+fail:
+    Py_XDECREF(amp_current_);
+    Py_XDECREF(uu_next_);
+    Py_XDECREF(vv_next_);
+    Py_XDECREF(ww_next_);
+    return 0;
+}
+
+
+static PyObject* bda_finalise(PyObject* self, PyObject* args)
+{
+    oskar_BDA* h = 0;
+    PyObject* capsule = 0, *dict;
+    PyArrayObject *ant1, *ant2, *uu, *vv, *ww, *data;
+    PyArrayObject *expo, *sigma, *weight;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+
+    /* Create arrays that will be returned to Python. */
+    npy_intp dims1[] = {h->bda_row};
+    npy_intp dims2[] = {h->bda_row * h->num_pols};
+    ant1   = (PyArrayObject*)PyArray_SimpleNew(1, dims1, NPY_INT);
+    ant2   = (PyArrayObject*)PyArray_SimpleNew(1, dims1, NPY_INT);
+    uu     = (PyArrayObject*)PyArray_SimpleNew(1, dims1, NPY_DOUBLE);
+    vv     = (PyArrayObject*)PyArray_SimpleNew(1, dims1, NPY_DOUBLE);
+    ww     = (PyArrayObject*)PyArray_SimpleNew(1, dims1, NPY_DOUBLE);
+    data   = (PyArrayObject*)PyArray_SimpleNew(1, dims2, NPY_CDOUBLE);
+    expo   = (PyArrayObject*)PyArray_SimpleNew(1, dims1, NPY_DOUBLE);
+    sigma  = (PyArrayObject*)PyArray_SimpleNew(1, dims1, NPY_DOUBLE);
+    weight = (PyArrayObject*)PyArray_SimpleNew(1, dims1, NPY_DOUBLE);
+
+    /* Copy the data into the arrays. */
+    memcpy(PyArray_DATA(ant1), h->ant1, h->bda_row * INT);
+    memcpy(PyArray_DATA(ant2), h->ant2, h->bda_row * INT);
+    memcpy(PyArray_DATA(uu), h->u, h->bda_row * DBL);
+    memcpy(PyArray_DATA(vv), h->v, h->bda_row * DBL);
+    memcpy(PyArray_DATA(ww), h->w, h->bda_row * DBL);
+    memcpy(PyArray_DATA(data), h->data, h->bda_row * h->num_pols * 2*DBL);
+    memcpy(PyArray_DATA(expo), h->exposure, h->bda_row * DBL);
+    memcpy(PyArray_DATA(sigma), h->sigma, h->bda_row * DBL);
+    memcpy(PyArray_DATA(weight), h->weight, h->bda_row * DBL);
+
+    /* Create a dictionary and return the data in it. */
+    dict = PyDict_New();
+    PyDict_SetItemString(dict, "antenna1", (PyObject*)ant1);
+    PyDict_SetItemString(dict, "antenna2", (PyObject*)ant2);
+    PyDict_SetItemString(dict, "uu", (PyObject*)uu);
+    PyDict_SetItemString(dict, "vv", (PyObject*)vv);
+    PyDict_SetItemString(dict, "ww", (PyObject*)ww);
+    PyDict_SetItemString(dict, "data", (PyObject*)data);
+    PyDict_SetItemString(dict, "exposure", (PyObject*)expo);
+    PyDict_SetItemString(dict, "sigma", (PyObject*)sigma);
+    PyDict_SetItemString(dict, "weight", (PyObject*)weight);
+
+    /* Clear all current averages. */
+    oskar_bda_clear(h);
+
+    return Py_BuildValue("N", dict); /* Don't increment refcount. */
+}
+
+
 /* Method table. */
 static PyMethodDef methods[] =
 {
@@ -185,6 +670,48 @@ static PyMethodDef methods[] =
         (PyCFunction)check_ref_count, METH_VARARGS,
         "count = check_ref_count(PyObject)\n"
         "Check the reference count of a python object\n"
+    },
+    {
+        "bda_create",
+        (PyCFunction)bda_create, METH_VARARGS,
+        "handle = bda_create(num_antennas, num_pols)\n"
+        "Creates the BDA object.\n"
+    },
+    {
+        "bda_set_compression",
+        (PyCFunction)bda_set_compression, METH_VARARGS,
+        "bda_set_max_fact(max_fact, fov_deg, wavelength_m, max_avg_time_s)\n"
+        "Sets compression parameters.\n"
+    },
+    {
+        "bda_set_delta_t",
+        (PyCFunction)bda_set_delta_t, METH_VARARGS,
+        "bda_set_delta_t(value)\n"
+        "Sets time interval of input data.\n"
+    },
+    {
+        "bda_set_num_times",
+        (PyCFunction)bda_set_num_times, METH_VARARGS,
+        "bda_set_num_times(value)\n"
+        "Sets number of times in the input data.\n"
+    },
+    {
+        "bda_set_initial_coords",
+        (PyCFunction)bda_set_initial_coords, METH_VARARGS,
+        "bda_set_initial_coords(uu, vv, ww)\n"
+        "Sets initial baseline coordinates.\n"
+    },
+    {
+        "bda_add_data",
+        (PyCFunction)bda_add_data, METH_VARARGS,
+        "bda_add_data(time_index, vis, uu_next, vv_next, ww_next)\n"
+        "Supplies visibility data to be averaged.\n"
+    },
+    {
+        "bda_finalise",
+        (PyCFunction)bda_finalise, METH_VARARGS,
+        "averaged_data = bda_finalise()\n"
+        "Returns averaged visibility data as a dictionary of arrays.\n"
     },
     {NULL, NULL, 0, NULL}
 };
