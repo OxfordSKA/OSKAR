@@ -794,6 +794,11 @@ static void write_pixels(HostData* h, int i_chunk, int i_time, int i_channel,
         {
             off = i_station * num_pix; /* Station offset. */
             if (off < 0 || chunk_desc == CROSS_POWER_DATA) off = 0;
+            if (chunk_desc == CROSS_POWER_DATA && dp == AUTO_POWER)
+                continue;
+            if (chunk_desc == AUTO_POWER_DATA &&
+                    (dp == CROSS_POWER_AMP || dp == CROSS_POWER_PHASE))
+                continue;
             if (stokes_out == I)
                 power_to_stokes_I(in, off, num_pix, h->ctemp, status);
             else if (stokes_out == Q)
