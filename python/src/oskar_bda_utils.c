@@ -166,7 +166,51 @@ static PyObject* check_ref_count(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* expand(PyObject* self, PyObject* args)
+{
+    PyObject *vis_in_comp = 0, *vis_out_orig = 0;
+    PyArrayObject *ant1_, *ant2_, *weight_, *data_in_, *data_out_;
+    int num_antennas = 0, num_baselines = 0, num_input_vis = 0;
+    int *ant1, *ant2, a1, a2, b, t, row_in, row_out, *out_time_idx = 0, w;
+    double *data_in, *data_out, *weight, d[2];
+    const char *input_name, *output_name;
+    if (!PyArg_ParseTuple(args, "iOsOs", &num_antennas,
+            &vis_in_comp, &input_name, &vis_out_orig, &output_name))
+        return 0;
+    num_baselines = num_antennas * (num_antennas - 1) / 2;
+    ant1_     = (PyArrayObject*)PyDict_GetItemString(vis_in_comp, "antenna1");
+    ant2_     = (PyArrayObject*)PyDict_GetItemString(vis_in_comp, "antenna2");
+    weight_   = (PyArrayObject*)PyDict_GetItemString(vis_in_comp, "weight");
+    data_in_  = (PyArrayObject*)PyDict_GetItemString(vis_in_comp, input_name);
+    data_out_ = (PyArrayObject*)PyDict_GetItemString(vis_out_orig, output_name);
+    num_input_vis = (int)*PyArray_DIMS(data_in_);
+    ant1     = (int*) PyArray_DATA(ant1_);
+    ant2     = (int*) PyArray_DATA(ant2_);
+    weight   = (double*) PyArray_DATA(weight_);
+    data_in  = (double*) PyArray_DATA(data_in_);
+    data_out = (double*) PyArray_DATA(data_out_);
+    out_time_idx = (int*) calloc(num_baselines, sizeof(int));
 
+    for (row_in = 0; row_in < num_input_vis; ++row_in)
+    {
+        a1 = ant1[row_in];
+        a2 = ant2[row_in];
+        w = (int) round(weight[row_in]);
+        d[0] = data_in[2*row_in + 0];
+        d[1] = data_in[2*row_in + 1];
+        b = a1 * (num_antennas - 1) - (a1 - 1) * a1 / 2 + a2 - a1 - 1;
+        for (t = out_time_idx[b]; t < out_time_idx[b] + w; ++t)
+        {
+            row_out = t * num_baselines + b;
+            data_out[2*row_out + 0] = d[0];
+            data_out[2*row_out + 1] = d[1];
+        }
+        out_time_idx[b] += w;
+    }
+
+    free(out_time_idx);
+    return Py_BuildValue("");
+}
 
 struct oskar_BDA
 {
@@ -670,6 +714,12 @@ static PyMethodDef methods[] =
         (PyCFunction)check_ref_count, METH_VARARGS,
         "count = check_ref_count(PyObject)\n"
         "Check the reference count of a python object\n"
+    },
+    {
+        "expand",
+        (PyCFunction)expand, METH_VARARGS,
+        "expand(num_antennas)\n"
+        "Expands BDA data.\n"
     },
     {
         "bda_create",
