@@ -84,7 +84,8 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
         double plane_norm, int* status)
 {
     if (*status) return;
-    oskar_mem_scale_real(plane, 1.0/plane_norm, status);
+    if (plane_norm > 0.0 || plane_norm < 0.0)
+        oskar_mem_scale_real(plane, 1.0/plane_norm, status);
     if (h->algorithm == OSKAR_ALGORITHM_FFT)
         oskar_imager_fft(h, plane, status);
 }
