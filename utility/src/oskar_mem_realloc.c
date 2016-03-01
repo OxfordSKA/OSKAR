@@ -76,7 +76,7 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
         /* Reallocate the memory. */
         void* mem_new = NULL;
         mem_new = realloc(mem->data, new_size);
-        if (!mem_new)
+        if (!mem_new && (new_size > 0))
         {
             *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
             return;
@@ -87,7 +87,7 @@ void oskar_mem_realloc(oskar_Mem* mem, size_t num_elements, int* status)
             memset((char*)mem_new + old_size, 0, new_size - old_size);
 
         /* Set the new meta-data. */
-        mem->data = mem_new;
+        mem->data = (new_size > 0) ? mem_new : 0;
         mem->num_elements = num_elements;
     }
     else if (mem->location == OSKAR_GPU)
