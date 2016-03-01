@@ -119,8 +119,8 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
     /* Create weights array and set all to 1. */
     weight = oskar_mem_create(
             oskar_type_precision(oskar_vis_header_amp_type(hdr)),
-            OSKAR_CPU, num_baselines * num_pols, status);
-    oskar_mem_set_value_real(weight, 1.0, 0, num_baselines * num_pols, status);
+            OSKAR_CPU, num_baselines * num_pols * max_times_per_block, status);
+    oskar_mem_set_value_real(weight, 1.0, 0, 0, status);
 
     /* Loop over visibility blocks. */
     blk = oskar_vis_block_create(OSKAR_CPU, hdr, status);
@@ -166,7 +166,7 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
         if (percent_done >= percent_next)
         {
             if (h->log) oskar_log_message(h->log, 'S', -2, "%3d%% ...",
-                    percent_next);
+                    percent_done);
             percent_next += 10;
         }
     }
@@ -302,7 +302,7 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
         if (percent_done >= percent_next)
         {
             if (h->log) oskar_log_message(h->log, 'S', -2, "%3d%% ...",
-                    percent_next);
+                    percent_done);
             percent_next += 10;
         }
     }
