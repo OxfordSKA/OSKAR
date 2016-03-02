@@ -385,7 +385,7 @@ static PyObject* bda_set_compression(PyObject* self, PyObject* args)
     h->duvw_max = inv_sinc(1.0 / max_fact) / (fov_deg * (M_PI / 180.0));
     h->duvw_max *= wavelength;
     h->dt_max = dt_max;
-    return Py_BuildValue("");
+    return Py_BuildValue("d", h->duvw_max);
 }
 
 
