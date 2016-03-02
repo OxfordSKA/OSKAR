@@ -449,7 +449,7 @@ static PyObject* make_image(PyObject* self, PyObject* args, PyObject* keywds)
 }
 
 /* Method table. */
-static PyMethodDef oskar_imager_methods[] =
+static PyMethodDef methods[] =
 {
         {"create", (PyCFunction)create, METH_VARARGS,
                 "create(type)\n\n"
@@ -672,12 +672,43 @@ static PyMethodDef oskar_imager_methods[] =
         {NULL, NULL, 0, NULL}
 };
 
-/* Initialisation function (called init[filename] where filename = name of *.so)
- * http://docs.python.org/2/extending/extending.html */
+
+#if PY_MAJOR_VERSION >= 3
+static PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "_imager_lib",      /* m_name */
+        NULL,               /* m_doc */
+        -1,                 /* m_size */
+        methods             /* m_methods */
+};
+#endif
+
+
+static PyObject* moduleinit(void)
+{
+    PyObject* m;
+#if PY_MAJOR_VERSION >= 3
+    m = PyModule_Create(&moduledef);
+#else
+    m = Py_InitModule3("_imager_lib", methods, "docstring ...");
+#endif
+    return m;
+}
+
+#if PY_MAJOR_VERSION >= 3
+PyMODINIT_FUNC PyInit__imager_lib(void)
+{
+    import_array();
+    return moduleinit();
+}
+#else
+/* The init function name has to match that of the compiled module
+ * with the pattern 'init<module name>'. This module is called '_imager_lib' */
 PyMODINIT_FUNC init_imager_lib(void)
 {
-    Py_InitModule3("_imager_lib", oskar_imager_methods, "docstring...");
-
-    /* Import the use of numpy array objects. */
     import_array();
+    moduleinit();
+    return;
 }
+#endif
+
