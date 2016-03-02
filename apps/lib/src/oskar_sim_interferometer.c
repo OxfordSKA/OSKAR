@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -864,7 +864,7 @@ static void system_mem_log(oskar_Log* log)
     mem_free = oskar_get_free_physical_memory();
     mem_used = mem_total - mem_free;
     oskar_log_message(log, 'M', 0, "System memory usage %.1f%% "
-            "(%.1f MB/%.1f GB) used.",
+            "(%.1f GB/%.1f GB) used.",
             100. * (double) mem_used / mem_total,
             (double) mem_used / gigabyte,
             (double) mem_total / gigabyte);
