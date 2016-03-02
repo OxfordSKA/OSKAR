@@ -46,7 +46,7 @@ class BDA(object):
         self._capsule = _bda_utils.bda_create(num_antennas, num_pols)
 
     def set_compression(self, max_fact, fov_deg, wavelength_m, max_avg_time_s):
-        _bda_utils.bda_set_compression(self._capsule, max_fact, fov_deg,
+        return _bda_utils.bda_set_compression(self._capsule, max_fact, fov_deg,
             wavelength_m, max_avg_time_s)
 
     def set_delta_t(self, value_s):
