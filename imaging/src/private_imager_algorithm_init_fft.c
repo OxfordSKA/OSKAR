@@ -33,6 +33,8 @@
 
 #include <oskar_cmath.h>
 #include <oskar_convert_fov_to_cellsize.h>
+#include <oskar_fftpack_cfft.h>
+#include <oskar_fftpack_cfft_f.h>
 #include <oskar_grid_functions_spheroidal.h>
 
 #ifdef __cplusplus
@@ -58,11 +60,31 @@ void oskar_imager_algorithm_init_fft(oskar_Imager* h, int* status)
     oskar_grid_correction_function_spheroidal(h->size,
             oskar_mem_double(h->corr_func, status));
 
-    /* Generate FFT plan. */
-    if (h->imager_prec == OSKAR_DOUBLE)
-        cufftPlan2d(&h->cufft_plan_imager, h->size, h->size, CUFFT_Z2Z);
+    /* Set up the FFT. */
+    if (h->fft_on_gpu)
+    {
+        /* Generate FFT plan. */
+        if (h->imager_prec == OSKAR_DOUBLE)
+            cufftPlan2d(&h->cufft_plan_imager, h->size, h->size, CUFFT_Z2Z);
+        else
+            cufftPlan2d(&h->cufft_plan_imager, h->size, h->size, CUFFT_C2C);
+    }
     else
-        cufftPlan2d(&h->cufft_plan_imager, h->size, h->size, CUFFT_C2C);
+    {
+        /* Initialise workspaces for CPU FFT algorithm. */
+        int len_save = 4 * h->size +
+                2 * (int)(log((double)h->size) / log(2.0)) + 8;
+        h->wsave = oskar_mem_create(h->imager_prec, OSKAR_CPU,
+                len_save, status);
+        h->work = oskar_mem_create(h->imager_prec, OSKAR_CPU,
+                2 * h->size * h->size, status);
+        if (h->imager_prec == OSKAR_SINGLE)
+            oskar_fftpack_cfft2i_f(h->size, h->size,
+                    oskar_mem_float(h->wsave, status));
+        else
+            oskar_fftpack_cfft2i(h->size, h->size,
+                    oskar_mem_double(h->wsave, status));
+    }
 }
 
 #ifdef __cplusplus

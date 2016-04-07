@@ -31,6 +31,8 @@
 
 #include <private_imager.h>
 
+#include <oskar_fftpack_cfft.h>
+#include <oskar_fftpack_cfft_f.h>
 #include <oskar_fftphase.h>
 #include <oskar_grid_correction.h>
 #include <oskar_imager.h>
@@ -99,7 +101,6 @@ void oskar_imager_fft(oskar_Imager* h, oskar_Mem* plane, int* status)
 
     size = h->size;
     num_pixels = size * size;
-    cudaSetDevice(h->cuda_device_ids[0]);
     d = &h->d[0];
 
     /* Make image using FFT. */
@@ -107,10 +108,22 @@ void oskar_imager_fft(oskar_Imager* h, oskar_Mem* plane, int* status)
     {
         double *t;
         oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
-        oskar_mem_copy(d->plane_gpu, plane, status);
-        cufftExecZ2Z(h->cufft_plan_imager, oskar_mem_void(d->plane_gpu),
-                oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
-        oskar_mem_copy(plane, d->plane_gpu, status);
+        if (h->fft_on_gpu)
+        {
+            cudaSetDevice(h->cuda_device_ids[0]);
+            oskar_mem_copy(d->plane_gpu, plane, status);
+            cufftExecZ2Z(h->cufft_plan_imager, oskar_mem_void(d->plane_gpu),
+                    oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
+            oskar_mem_copy(plane, d->plane_gpu, status);
+        }
+        else
+        {
+            oskar_fftpack_cfft2f(size, size, size,
+                    oskar_mem_double(plane, status),
+                    oskar_mem_double(h->wsave, status),
+                    oskar_mem_double(h->work, status));
+            oskar_mem_scale_real(plane, (double)num_pixels, status);
+        }
         oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
         t = oskar_mem_double(plane, status); /* Get the real part. */
         for (i = 0; i < num_pixels; ++i) t[i] = t[2 * i];
@@ -121,10 +134,22 @@ void oskar_imager_fft(oskar_Imager* h, oskar_Mem* plane, int* status)
     {
         float *t;
         oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
-        oskar_mem_copy(d->plane_gpu, plane, status);
-        cufftExecC2C(h->cufft_plan_imager, oskar_mem_void(d->plane_gpu),
-                oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
-        oskar_mem_copy(plane, d->plane_gpu, status);
+        if (h->fft_on_gpu)
+        {
+            cudaSetDevice(h->cuda_device_ids[0]);
+            oskar_mem_copy(d->plane_gpu, plane, status);
+            cufftExecC2C(h->cufft_plan_imager, oskar_mem_void(d->plane_gpu),
+                    oskar_mem_void(d->plane_gpu), CUFFT_FORWARD);
+            oskar_mem_copy(plane, d->plane_gpu, status);
+        }
+        else
+        {
+            oskar_fftpack_cfft2f_f(size, size, size,
+                    oskar_mem_float(plane, status),
+                    oskar_mem_float(h->wsave, status),
+                    oskar_mem_float(h->work, status));
+            oskar_mem_scale_real(plane, (double)num_pixels, status);
+        }
         oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
         t = oskar_mem_float(plane, status); /* Get the real part. */
         for (i = 0; i < num_pixels; ++i) t[i] = t[2 * i];

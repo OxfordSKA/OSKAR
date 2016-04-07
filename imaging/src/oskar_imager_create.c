@@ -58,6 +58,7 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
 
     /* Set sensible defaults. */
     oskar_imager_set_gpus(h, -1, 0, status);
+    oskar_imager_set_fft_on_gpu(h, 1);
     oskar_imager_set_size(h, 256);
     oskar_imager_set_fov(h, 1.0);
     oskar_imager_set_time_range(h, 0, -1, 0); /* Time synthesis. */

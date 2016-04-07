@@ -104,6 +104,7 @@ int main(int argc, char** argv)
             s.to_string("fft/kernel_type", &e).c_str(),
             s.to_int("fft/support", &e),
             s.to_int("fft/oversample", &e), &e);
+    oskar_imager_set_fft_on_gpu(h, s.to_int("fft/use_gpu", &e));
     if (s.first_letter("direction", &e) == 'R')
         oskar_imager_set_direction(h,
                 s.to_double("direction/ra_deg", &e),

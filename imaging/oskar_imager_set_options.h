@@ -118,6 +118,19 @@ void oskar_imager_set_fov(oskar_Imager* h, double fov_deg);
 
 /**
  * @brief
+ * Sets whether to use the GPU for FFTs.
+ *
+ * @details
+ * Sets whether to use the GPU for FFTs.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      If true, use the GPU; if false, use the CPU.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_fft_on_gpu(oskar_Imager* h, int value);
+
+/**
+ * @brief
  * Sets which GPUs will be used by the imager.
  *
  * @details

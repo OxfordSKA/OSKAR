@@ -50,7 +50,7 @@ struct oskar_Imager
     oskar_Log* log;
 
     /* Settings parameters. */
-    int imager_prec, num_gpus, *cuda_device_ids;
+    int imager_prec, num_gpus, *cuda_device_ids, fft_on_gpu;
     int chan_snaps, time_snaps, chan_range[2], time_range[2];
     int im_type, im_num_times, im_num_channels, im_num_pols, pol_offset;
     int algorithm, size, num_pixels, use_ms, use_stokes, support, oversample;
@@ -62,12 +62,13 @@ struct oskar_Imager
     double vis_centre_deg[2];
     double vis_freq_start_hz, im_freq_start_hz, freq_inc_hz;
     double vis_time_start_mjd_utc, im_time_start_mjd_utc, time_inc_sec;
+    double ww_min, ww_max, ww_rms; /* In wavelengths. */
 
     /* Scratch data. */
     oskar_Mem *uu_im, *vv_im, *ww_im, *vis_im, *weight_im;
     oskar_Mem *uu_tmp, *vv_tmp, *ww_tmp, *stokes;
-    int num_planes; /* for each time, channel and polarisation. */
-    double* plane_norm, delta_l, delta_m, delta_n, M[9];
+    int num_planes; /* for each output time, channel and polarisation. */
+    double *plane_norm, delta_l, delta_m, delta_n, M[9];
     oskar_Mem **planes, *plane_tmp;
 
     /* DFT imager data. */
@@ -75,13 +76,13 @@ struct oskar_Imager
 
     /* FFT imager data. */
     double cellsize_rad;
-    oskar_Mem *conv_func, *corr_func;
+    oskar_Mem *conv_func, *corr_func, *wsave, *work;
     cufftHandle cufft_plan_imager;
 
     /* W-projection imager data. */
-    int num_w_kernels, *w_support;
-    double w_min, w_max;
-    oskar_Mem **w_kernels;
+    int num_w_planes, conv_size, conv_size_half;
+    double max_uvw, w_scale;
+    oskar_Mem *w_kernels, *w_support;
 
     /* Memory allocated per GPU (array of DeviceData structures). */
     DeviceData* d;

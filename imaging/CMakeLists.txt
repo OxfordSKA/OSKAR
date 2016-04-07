@@ -16,8 +16,10 @@ if (CUDA_FOUND)
 
     # Add the source files.
     set(${libname}_SRC
+        src/oskar_fftpack_cfft.c
+        src/oskar_fftpack_cfft_f.c
         src/oskar_fftphase.c
-        src/oskar_grid_kernel_1d_real.c
+        src/oskar_grid_simple.c
         src/oskar_grid_correction.c
         src/oskar_grid_functions_spheroidal.c
         src/oskar_imager_create.c
@@ -37,6 +39,7 @@ if (CUDA_FOUND)
         src/private_imager_algorithm_free_wproj.c
         src/private_imager_algorithm_init_dft.c
         src/private_imager_algorithm_init_fft.c
+        src/private_imager_algorithm_init_wproj.c
         src/private_imager_create_fits_files.c
         src/private_imager_free_gpu_data.c
         src/private_imager_update_plane_dft.c

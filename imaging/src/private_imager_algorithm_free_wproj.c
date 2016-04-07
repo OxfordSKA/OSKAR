@@ -35,11 +35,11 @@ extern "C" {
 
 void oskar_imager_algorithm_free_wproj(oskar_Imager* h, int* status)
 {
-    int i;
-    for (i = 0; i < h->num_w_kernels; ++i)
-        oskar_mem_free(h->w_kernels[i], status);
-    free(h->w_kernels);
-    free(h->w_support);
+    oskar_mem_free(h->w_kernels, status);
+    oskar_mem_free(h->w_support, status);
+    cufftDestroy(h->cufft_plan_imager);
+    h->w_kernels = 0;
+    h->w_support = 0;
 }
 
 #ifdef __cplusplus

@@ -50,7 +50,7 @@ void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
     if (!strncmp(type, "FFT", 3)) h->algorithm = OSKAR_ALGORITHM_FFT;
     else if (!strncmp(type, "DFT 2", 5)) h->algorithm = OSKAR_ALGORITHM_DFT_2D;
     else if (!strncmp(type, "DFT 3", 5)) h->algorithm = OSKAR_ALGORITHM_DFT_3D;
-    /*else if (!strncmp(type, "W", 1)) h->algorithm = OSKAR_ALGORITHM_WPROJ;*/
+    else if (!strncmp(type, "W", 1)) h->algorithm = OSKAR_ALGORITHM_WPROJ;
     /*else if (!strncmp(type, "A", 1)) h->algorithm = OSKAR_ALGORITHM_AWPROJ;*/
     else *status = OSKAR_ERR_SETTINGS_IMAGE;
 }
@@ -82,6 +82,12 @@ void oskar_imager_set_direction(oskar_Imager* h, double ra_deg, double dec_deg)
 void oskar_imager_set_fov(oskar_Imager* h, double fov_deg)
 {
     h->fov_deg = fov_deg;
+}
+
+
+void oskar_imager_set_fft_on_gpu(oskar_Imager* h, int value)
+{
+    h->fft_on_gpu = value;
 }
 
 

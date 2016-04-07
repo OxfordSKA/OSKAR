@@ -34,8 +34,6 @@
 extern "C" {
 #endif
 
-static double grdsf(const double nu);
-
 void oskar_grid_convolution_function_spheroidal(const int support,
         const int oversample, double* fn)
 {
@@ -46,7 +44,7 @@ void oskar_grid_convolution_function_spheroidal(const int support,
     for (i = 0; i < gcf_size; ++i)
     {
         nu = (double)i / (double)extent;
-        fn[i] = (1.0 - nu*nu) * grdsf(nu);
+        fn[i] = (1.0 - nu*nu) * oskar_grid_function_spheroidal(nu);
     }
 }
 
@@ -60,14 +58,14 @@ void oskar_grid_correction_function_spheroidal(const int image_size,
     for (i = 0; i < image_size; ++i)
     {
         nu = (double)(i - extent) / (double)extent;
-        val = grdsf(fabs(nu));
+        val = oskar_grid_function_spheroidal(fabs(nu));
         fn[i] = (val != 0.0) ? 1.0 / val : 1.0;
     }
 }
 
 
 /* Translated from FORTRAN routine in casacore/scimath_f/grdsf.f */
-double grdsf(const double nu)
+double oskar_grid_function_spheroidal(const double nu)
 {
     int i, row, sp, sq;
     double numer, denom, end, delta;

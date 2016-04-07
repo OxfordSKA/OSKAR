@@ -271,11 +271,9 @@ void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
     }
     else if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
     {
-        /* if (!h->w_kernels) oskar_imager_algorithm_init_wproj(h, status); */
-        /* *plane_norm += (double) num_vis; */
+        if (!h->w_kernels) oskar_imager_algorithm_init_wproj(h, status);
         /* oskar_imager_update_plane_wproj(h, num_vis, pu, pv, pw, pa, ph,
-                plane, status); */
-        *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+                plane, plane_norm, status); */
     }
     else
     {
@@ -325,11 +323,12 @@ void oskar_imager_allocate_image_planes(oskar_Imager* h, int *status)
     h->plane_tmp = oskar_mem_create(h->imager_prec, OSKAR_CPU,
             h->num_pixels, status);
     for (i = 0; i < h->num_planes; ++i)
-        if (h->algorithm == OSKAR_ALGORITHM_FFT)
-            h->planes[i] = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
+        if (h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
+                h->algorithm == OSKAR_ALGORITHM_DFT_3D)
+            h->planes[i] = oskar_mem_create(h->imager_prec,
                     OSKAR_CPU, h->num_pixels, status);
         else
-            h->planes[i] = oskar_mem_create(h->imager_prec,
+            h->planes[i] = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
                     OSKAR_CPU, h->num_pixels, status);
     if (*status) return;
     h->plane_norm = calloc(h->num_planes, sizeof(double));

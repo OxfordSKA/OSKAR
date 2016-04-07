@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_GRID_FUNCTIONS_SPHEROIDAL_H_
-#define OSKAR_GRID_FUNCTIONS_SPHEROIDAL_H_
+#ifndef OSKAR_FFTPACK_CFFT_F_H_
+#define OSKAR_FFTPACK_CFFT_F_H_
 
 /**
- * @file oskar_grid_functions_spheroidal.h
+ * @file oskar_fftpack_cfft_f.h
  */
 
 #include <oskar_global.h>
@@ -39,40 +39,19 @@
 extern "C" {
 #endif
 
-/**
- * @brief
- * Generates spheroidal grid convolution function (GCF) consistent with CASA.
- *
- * @details
- * Generates spheroidal grid convolution function (GCF) consistent with CASA.
- *
- * @param[in] support    GCF support size (typ. 3; width = 2 * support + 1).
- * @param[in] oversample GCF oversample factor, or values per grid cell.
- * @param[in,out] fn     GCF array, length oversample * (support + 1).
- */
 OSKAR_EXPORT
-void oskar_grid_convolution_function_spheroidal(const int support,
-        const int oversample, double* fn);
+void oskar_fftpack_cfft2b_f(const int ldim, const int l, const int m,
+        float *c, float *wsave, float *work);
 
-/**
- * Generates grid correction function for spheroidal convolution function.
- *
- * @param[in] image_size Side length of image.
- * @param[in,out] fn     Array holding correction function, length image_size.
- */
 OSKAR_EXPORT
-void oskar_grid_correction_function_spheroidal(const int image_size,
-        double* fn);
+void oskar_fftpack_cfft2f_f(const int ldim, const int l, const int m,
+        float *c, float *wsave, float *work);
 
-/**
- * @brief
- * Internal function.
- */
 OSKAR_EXPORT
-double oskar_grid_function_spheroidal(const double nu);
+void oskar_fftpack_cfft2i_f(const int l, const int m, float *wsave);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_GRID_FUNCTIONS_SPHEROIDAL_H_ */
+#endif /* OSKAR_FFTPACK_CFFT_F_H_ */

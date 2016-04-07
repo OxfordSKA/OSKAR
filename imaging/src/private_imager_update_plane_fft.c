@@ -29,7 +29,7 @@
 #include <private_imager.h>
 
 #include <private_imager_update_plane_fft.h>
-#include <oskar_grid_kernel_1d_real.h>
+#include <oskar_grid_simple.h>
 
 #include <stdlib.h>
 
@@ -45,7 +45,7 @@ void oskar_imager_update_plane_fft(oskar_Imager* h, int num_vis,
     int num_skipped = 0;
     if (*status) return;
     if (h->imager_prec == OSKAR_DOUBLE)
-        oskar_grid_kernel_1d_real_d(h->support, h->oversample,
+        oskar_grid_simple_d(h->support, h->oversample,
                 oskar_mem_double_const(h->conv_func, status), num_vis,
                 oskar_mem_double_const(uu, status),
                 oskar_mem_double_const(vv, status),
@@ -54,7 +54,7 @@ void oskar_imager_update_plane_fft(oskar_Imager* h, int num_vis,
                 h->size, &num_skipped, plane_norm,
                 oskar_mem_double(plane, status));
     else
-        oskar_grid_kernel_1d_real_f(h->support, h->oversample,
+        oskar_grid_simple_f(h->support, h->oversample,
                 oskar_mem_double_const(h->conv_func, status), num_vis,
                 oskar_mem_float_const(uu, status),
                 oskar_mem_float_const(vv, status),

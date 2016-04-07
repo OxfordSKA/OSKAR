@@ -38,9 +38,13 @@ void oskar_imager_algorithm_free_fft(oskar_Imager* h, int* status)
 {
     oskar_mem_free(h->conv_func, status);
     oskar_mem_free(h->corr_func, status);
+    oskar_mem_free(h->wsave, status);
+    oskar_mem_free(h->work, status);
     cufftDestroy(h->cufft_plan_imager);
     h->conv_func = 0;
     h->corr_func = 0;
+    h->wsave = 0;
+    h->work = 0;
     h->cufft_plan_imager = 0;
 }
 
