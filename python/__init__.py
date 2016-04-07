@@ -35,9 +35,9 @@
 
 from version import __version__
 
-import binary_file
+import bda
 import imager
-import mem
+# import mem
 import settings
 import sim
-from mem import (mloc, mtype)
+# from mem import (mloc, mtype)
