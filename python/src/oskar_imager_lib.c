@@ -189,6 +189,18 @@ static PyObject* set_fov(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* set_fft_on_gpu(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    int value = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    oskar_imager_set_fft_on_gpu(h, value);
+    return Py_BuildValue("");
+}
+
+
 static PyObject* set_image_type(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -565,6 +577,14 @@ static PyMethodDef methods[] =
                 "----------\n"
                 "value : scalar\n"
                 "   Field-of-view, in degrees.\n\n"
+        },
+        {"set_fft_on_gpu", (PyCFunction)set_fft_on_gpu, METH_VARARGS,
+                "set_fft_on_gpu(value)\n\n"
+                "Sets whether to use the GPU for FFTs.\n\n"
+                "Parameters\n"
+                "----------\n"
+                "value : integer\n"
+                "   If true, use the GPU for FFTs.\n\n"
         },
         {"set_ms_column", (PyCFunction)set_ms_column, METH_VARARGS,
                 "set_ms_column(column)\n\n"

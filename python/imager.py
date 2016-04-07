@@ -79,6 +79,9 @@ class Imager(object):
     def set_image_type(self, image_type):
         _imager_lib.set_image_type(self._capsule, image_type)
 
+    def set_fft_on_gpu(self, value):
+        _imager_lib.set_fft_on_gpu(self._capsule, value)
+
     def set_fov(self, fov_deg):
         _imager_lib.set_fov(self._capsule, fov_deg)
 
