@@ -72,7 +72,7 @@
     </s>
     <s k="fft"><label>FFT options</label>
         <s k="use_gpu"><label>Use GPU for FFT</label>
-        <type name="bool" default="true"/>
+        <type name="bool" default="false"/>
             <desc>If true, use the GPU to perform the FFT.</desc>
         </s>
         <s k="kernel_type"><label>Convolution kernel type</label>
