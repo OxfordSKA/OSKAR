@@ -320,8 +320,6 @@ void oskar_imager_allocate_image_planes(oskar_Imager* h, int *status)
     oskar_imager_reset_cache(h, status);
     h->num_planes = h->im_num_times * h->im_num_channels * h->im_num_pols;
     h->planes = calloc(h->num_planes, sizeof(oskar_Mem*));
-    h->plane_tmp = oskar_mem_create(h->imager_prec, OSKAR_CPU,
-            h->num_pixels, status);
     for (i = 0; i < h->num_planes; ++i)
         if (h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
                 h->algorithm == OSKAR_ALGORITHM_DFT_3D)

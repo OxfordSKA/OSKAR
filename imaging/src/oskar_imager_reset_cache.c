@@ -45,7 +45,6 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
     oskar_imager_algorithm_free_dft(h, status);
     oskar_imager_algorithm_free_fft(h, status);
     oskar_imager_algorithm_free_wproj(h, status);
-    oskar_mem_free(h->plane_tmp, status);
     free(h->plane_norm);
     for (i = 0; i < h->num_planes; ++i)
         oskar_mem_free(h->planes[i], status);
@@ -64,7 +63,6 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
             ffclos(h->fits_file[i], status);
         h->fits_file[i] = 0;
     }
-    h->plane_tmp = 0;
     h->plane_norm = 0;
     h->num_planes = 0;
     h->planes = 0;

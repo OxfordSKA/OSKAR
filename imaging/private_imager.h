@@ -69,7 +69,7 @@ struct oskar_Imager
     oskar_Mem *uu_tmp, *vv_tmp, *ww_tmp, *stokes;
     int num_planes; /* for each output time, channel and polarisation. */
     double *plane_norm, delta_l, delta_m, delta_n, M[9];
-    oskar_Mem **planes, *plane_tmp;
+    oskar_Mem **planes;
 
     /* DFT imager data. */
     oskar_Mem *l, *m, *n;
