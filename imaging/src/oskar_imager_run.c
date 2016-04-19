@@ -97,7 +97,7 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
     num_channels = oskar_vis_header_num_channels_total(hdr);
     num_stations = oskar_vis_header_num_stations(hdr);
     num_baselines = num_stations * (num_stations - 1) / 2;
-    num_pols = oskar_vis_header_amp_type(hdr) | OSKAR_MATRIX ? 4 : 1;
+    num_pols = oskar_type_is_matrix(oskar_vis_header_amp_type(hdr)) ? 4 : 1;
 
     /* Set visibility meta-data. */
     oskar_imager_set_vis_frequency(h,
