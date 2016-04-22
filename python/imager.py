@@ -208,5 +208,5 @@ class Imager(object):
         Returns:
             float: UV cellsize, in wavelengths.
         """
-        return 1.0 / (size * fov_to_cellsize(fov_rad, size))
+        return 1.0 / (size * Imager.fov_to_cellsize(fov_rad, size))
 
