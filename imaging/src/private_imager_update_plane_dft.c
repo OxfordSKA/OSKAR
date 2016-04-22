@@ -51,16 +51,17 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
         const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
         double* plane_norm, int* status)
 {
-    int i, num_blocks, max_block_size = 65536, prec;
+    int i, num_blocks, max_block_size = 65536, prec, num_pixels;
     oskar_Mem** t;
     if (*status) return;
 
     /* Check the image plane. */
+    num_pixels = h->size * h->size;
     prec = oskar_mem_precision(amps);
     if (oskar_mem_is_complex(plane) || oskar_mem_is_matrix(plane))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
-    if ((int)oskar_mem_length(plane) < h->num_pixels)
-        oskar_mem_realloc(plane, h->num_pixels, status);
+    if ((int)oskar_mem_length(plane) < num_pixels)
+        oskar_mem_realloc(plane, num_pixels, status);
     if (*status) return;
 
     /* Copy visibility data to each GPU. */
@@ -82,7 +83,7 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
 #endif
 
     /* Loop over pixel blocks. */
-    num_blocks = (h->num_pixels + max_block_size - 1) / max_block_size;
+    num_blocks = (num_pixels + max_block_size - 1) / max_block_size;
 #pragma omp parallel for private(i)
     for (i = 0; i < num_blocks; ++i)
     {
@@ -97,7 +98,7 @@ void oskar_imager_update_plane_dft(oskar_Imager* h, int num_vis,
 
         /* Calculate the block size. */
         block_start = i * max_block_size;
-        block_size = h->num_pixels - block_start;
+        block_size = num_pixels - block_start;
         if (block_size > max_block_size) block_size = max_block_size;
 
         /* Ensure blocks are big enough. */

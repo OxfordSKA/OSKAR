@@ -76,7 +76,7 @@
             <desc>If true, use the GPU to perform the FFT.</desc>
         </s>
         <s k="kernel_type"><label>Convolution kernel type</label>
-        <type name="OptionList" default="Spheroidal">Spheroidal</type>
+        <type name="OptionList" default="Spheroidal">Spheroidal,Pillbox</type>
             <desc>The type of gridding kernel to use.</desc>
         </s>
         <s k="support"><label>Support size</label>

@@ -185,6 +185,7 @@ void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
     h->oversample = oversample;
     if (!strncmp(type, "S", 1)) h->kernel_type = 'S';
     else if (!strncmp(type, "G", 1)) h->kernel_type = 'G';
+    else if (!strncmp(type, "P", 1)) h->kernel_type = 'P';
     else *status = OSKAR_ERR_SETTINGS_IMAGE;
 }
 
@@ -224,7 +225,6 @@ void oskar_imager_set_output_root(oskar_Imager* h, const char* filename,
 void oskar_imager_set_size(oskar_Imager* h, int size)
 {
     h->size = size;
-    h->num_pixels = size * size;
 }
 
 

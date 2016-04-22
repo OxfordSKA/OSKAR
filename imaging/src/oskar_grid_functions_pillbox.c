@@ -26,10 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
-#include <private_imager_algorithm_free_dft.h>
-#include <private_imager_algorithm_init_dft.h>
-#include <oskar_evaluate_image_lmn_grid.h>
+#include <oskar_grid_functions_pillbox.h>
 
 #include <oskar_cmath.h>
 
@@ -37,22 +34,35 @@
 extern "C" {
 #endif
 
-void oskar_imager_algorithm_init_dft(oskar_Imager* h, int* status)
+void oskar_grid_convolution_function_pillbox(const int support,
+        const int oversample, double* fn)
 {
-    int num_pixels;
-    oskar_imager_algorithm_free_dft(h, status);
-    if (*status) return;
-
-    /* Calculate pixel coordinate grid required for the DFT imager. */
-    num_pixels = h->size * h->size;
-    h->l = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
-    h->m = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
-    h->n = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
-    oskar_evaluate_image_lmn_grid(h->size, h->size,
-            h->fov_deg * M_PI/180, h->fov_deg * M_PI/180, 0,
-            h->l, h->m, h->n, status);
-    oskar_mem_add_real(h->n, -1.0, status); /* n-1 */
+    int i, extent, gcf_size;
+    double nu;
+    gcf_size = oversample * (support + 1);
+    extent = support * oversample;
+    for (i = 0; i < gcf_size; ++i)
+    {
+        nu = (double)i / (double)extent;
+        fn[i] = (nu < 0.5) ? 1.0 : 0.0;
+    }
 }
+
+
+void oskar_grid_correction_function_pillbox(const int image_size,
+        double* fn)
+{
+    int i, extent;
+    double val;
+    extent = image_size / 2;
+    for (i = 0; i < image_size; ++i)
+    {
+        val = 1.0; /* No correction! */
+        fn[i] = (val != 0.0) ? 1.0 / val : 1.0;
+    }
+}
+
+
 
 #ifdef __cplusplus
 }

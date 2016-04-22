@@ -291,6 +291,7 @@ void oskar_imager_allocate_image_planes(oskar_Imager* h, int *status)
 {
     int i;
     if (*status) return;
+    oskar_imager_reset_cache(h, status);
 
     /* Set image meta-data. */
     h->im_num_channels = (h->chan_snaps ?
@@ -309,27 +310,36 @@ void oskar_imager_allocate_image_planes(oskar_Imager* h, int *status)
         double chan0 = 0.5 * (h->vis_chan_range[1] - h->vis_chan_range[0]);
         h->im_freq_start_hz = h->vis_freq_start_hz + chan0 * h->freq_inc_hz;
     }
-    if (h->direction_type != 'R')
-    {
-        h->im_centre_deg[0] = h->vis_centre_deg[0];
-        h->im_centre_deg[1] = h->vis_centre_deg[1];
-    }
+    h->num_planes = h->im_num_times * h->im_num_channels * h->im_num_pols;
 
     /*************************************************************************/
     /* Allocate the image or visibility planes. */
-    oskar_imager_reset_cache(h, status);
-    h->num_planes = h->im_num_times * h->im_num_channels * h->im_num_pols;
     h->planes = calloc(h->num_planes, sizeof(oskar_Mem*));
-    for (i = 0; i < h->num_planes; ++i)
-        if (h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
-                h->algorithm == OSKAR_ALGORITHM_DFT_3D)
+    if (h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
+            h->algorithm == OSKAR_ALGORITHM_DFT_3D)
+    {
+        for (i = 0; i < h->num_planes; ++i)
             h->planes[i] = oskar_mem_create(h->imager_prec,
-                    OSKAR_CPU, h->num_pixels, status);
-        else
+                    OSKAR_CPU, h->size * h->size, status);
+    }
+    else if (h->algorithm == OSKAR_ALGORITHM_FFT)
+    {
+        for (i = 0; i < h->num_planes; ++i)
             h->planes[i] = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
-                    OSKAR_CPU, h->num_pixels, status);
+                    OSKAR_CPU, h->size * h->size, status);
+    }
+    else if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
+    {
+        for (i = 0; i < h->num_planes; ++i)
+            h->planes[i] = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
+                    OSKAR_CPU, h->size * h->size, status);
+    }
+    else
+    {
+        *status = OSKAR_ERR_UNKNOWN;
+    }
     if (*status) return;
-    h->plane_norm = calloc(h->num_planes, sizeof(double));
+    h->plane_norm = (double*) calloc(h->num_planes, sizeof(double));
 
     /* If imaging away from the beam direction, evaluate l0-l, m0-m, n0-n
      * for the new pointing centre, and a rotation matrix to generate the
@@ -357,6 +367,11 @@ void oskar_imager_allocate_image_planes(oskar_Imager* h, int *status)
         h->delta_l = 0 - l1;
         h->delta_m = 0 - m1;
         h->delta_n = 1 - n1;
+    }
+    else
+    {
+        h->im_centre_deg[0] = h->vis_centre_deg[0];
+        h->im_centre_deg[1] = h->vis_centre_deg[1];
     }
 }
 

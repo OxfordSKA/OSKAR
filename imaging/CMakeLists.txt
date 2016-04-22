@@ -22,6 +22,7 @@ if (CUDA_FOUND)
         src/oskar_grid_simple.c
         src/oskar_grid_correction.c
         src/oskar_grid_functions_spheroidal.c
+        src/oskar_grid_functions_pillbox.c
         src/oskar_imager_create.c
         src/oskar_imager_finalise.c
         src/oskar_imager_free.c

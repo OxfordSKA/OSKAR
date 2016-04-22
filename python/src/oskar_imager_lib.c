@@ -377,6 +377,80 @@ static PyObject* update(PyObject* self, PyObject* args, PyObject* keywds)
 }
 
 
+static PyObject* update_plane(PyObject* self, PyObject* args, PyObject* keywds)
+{
+    oskar_Imager* h = 0;
+    oskar_Mem *uu_c, *vv_c, *ww_c, *amp_c, *weight_c, *plane_c;
+    PyObject* capsule = 0;
+    PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0, *plane = 0;
+    double plane_norm = 0.0;
+    int type = OSKAR_DOUBLE, num_cells, num_vis, status = 0;
+
+    /* Parse inputs. */
+    if (!PyArg_ParseTuple(args, "OOOOOOOd",
+            &capsule, &uu, &vv, &ww, &amps, &weight, &plane, &plane_norm))
+        return 0;
+    if (!(h = get_handle(capsule))) return 0;
+
+    /* Check dimensions. */
+    if (PyArray_NDIM(uu) != 1 || PyArray_NDIM(vv) != 1 ||
+            PyArray_NDIM(ww) != 1 || PyArray_NDIM(amps) != 1 ||
+            PyArray_NDIM(weight) != 1)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Input data arrays must be 1D.");
+        return 0;
+    }
+    if (PyArray_NDIM(plane) != 2)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Plane must be 2D.");
+        return 0;
+    }
+    num_cells = (PyArray_DIMS(plane))[0] * (PyArray_DIMS(plane))[1];
+    if (PyArray_ISCOMPLEX(plane)) num_cells *= 2;
+    num_vis = (int)*PyArray_DIMS(uu);
+    if (num_vis != (int)*PyArray_DIMS(vv) ||
+            num_vis != (int)*PyArray_DIMS(ww) ||
+            num_vis != (int)*PyArray_DIMS(amps) ||
+            num_vis != (int)*PyArray_DIMS(weight))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Input data dimension mismatch.");
+        return 0;
+    }
+
+    /* Pointers to input arrays. */
+    uu_c = oskar_mem_create_alias_from_raw(PyArray_DATA(uu),
+            type, OSKAR_CPU, num_vis, &status);
+    vv_c = oskar_mem_create_alias_from_raw(PyArray_DATA(vv),
+            type, OSKAR_CPU, num_vis, &status);
+    ww_c = oskar_mem_create_alias_from_raw(PyArray_DATA(ww),
+            type, OSKAR_CPU, num_vis, &status);
+    amp_c = oskar_mem_create_alias_from_raw(PyArray_DATA(amps),
+            type | OSKAR_COMPLEX, OSKAR_CPU, num_vis, &status);
+    weight_c = oskar_mem_create_alias_from_raw(PyArray_DATA(weight),
+            type, OSKAR_CPU, num_vis, &status);
+    plane_c = oskar_mem_create_alias_from_raw(PyArray_DATA(plane),
+            type, OSKAR_CPU, num_cells, &status);
+
+    oskar_imager_update_plane(h, num_vis, uu_c, vv_c, ww_c, amp_c,
+            weight_c, plane_c, &plane_norm, &status);
+    oskar_mem_free(uu_c, &status);
+    oskar_mem_free(vv_c, &status);
+    oskar_mem_free(ww_c, &status);
+    oskar_mem_free(amp_c, &status);
+    oskar_mem_free(weight_c, &status);
+    oskar_mem_free(plane_c, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError, "Imager failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("d", plane_norm);
+}
+
+
 static PyObject* make_image(PyObject* self, PyObject* args, PyObject* keywds)
 {
     PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amp = 0, *weight = 0, *im = 0;
@@ -659,35 +733,10 @@ static PyMethodDef methods[] =
         },
         {"update", (PyCFunction)update, METH_VARARGS | METH_KEYWORDS,
                 "update(num_baselines, uu, vv, ww, amps, weight, "
-                "num_pols, start_time, end_time, start_chan, end_chan)\n\n"
-                "Runs the imager using data in memory, and applies "
-                "visibility selection.\n\n"
-                "The visibility amplitude data dimension order must be:\n"
-                "(slowest) time, channel, baseline, polarisation (fastest).\n\n"
-                "Parameters\n"
-                "----------\n"
-                "num_baselines : integer\n"
-                "   Number of baselines in the visibility block.\n\n"
-                "uu : array like (n,)\n"
-                "   Time-baseline ordered U-coordinates, in metres.\n\n"
-                "vv : array like (n,)\n"
-                "   Time-baseline ordered V-coordinates, in metres.\n\n"
-                "ww : array like (n,)\n"
-                "   Time-baseline ordered W-coordinates, in metres.\n\n"
-                "amps : array like (n,)\n"
-                "   Complex visibility amplitudes.\n\n"
-                "weight : array like (n,)\n"
-                "   Visibility weights.\n\n"
-                "num_pols (default 1) : integer\n"
-                "   Number of polarisations in the visibility block.\n\n"
-                "start_time (default 0) : integer\n"
-                "   Start time index of the visibility block.\n\n"
-                "end_time (default 0) : integer\n"
-                "   End time index of the visibility block.\n\n"
-                "start_chan (default 0) : integer\n"
-                "   Start channel index of the visibility block.\n\n"
-                "end_chan (default 0) : integer\n"
-                "   End channel index of the visibility block.\n\n"
+                "num_pols, start_time, end_time, start_chan, end_chan)"
+        },
+        {"update_plane", (PyCFunction)update_plane, METH_VARARGS,
+                "update_plane(uu, vv, ww, amps, weight, plane, plane_norm)"
         },
         {NULL, NULL, 0, NULL}
 };

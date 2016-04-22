@@ -36,6 +36,7 @@
 #include <oskar_fftpack_cfft.h>
 #include <oskar_fftpack_cfft_f.h>
 #include <oskar_grid_functions_spheroidal.h>
+#include <oskar_grid_functions_pillbox.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,10 +56,20 @@ void oskar_imager_algorithm_init_fft(oskar_Imager* h, int* status)
             h->oversample * (h->support + 1), status);
     h->corr_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
             h->size, status);
-    oskar_grid_convolution_function_spheroidal(h->support, h->oversample,
-            oskar_mem_double(h->conv_func, status));
-    oskar_grid_correction_function_spheroidal(h->size,
-            oskar_mem_double(h->corr_func, status));
+    if (h->kernel_type == 'S')
+    {
+        oskar_grid_convolution_function_spheroidal(h->support, h->oversample,
+                oskar_mem_double(h->conv_func, status));
+        oskar_grid_correction_function_spheroidal(h->size,
+                oskar_mem_double(h->corr_func, status));
+    }
+    else if (h->kernel_type == 'P')
+    {
+        oskar_grid_convolution_function_pillbox(h->support, h->oversample,
+                oskar_mem_double(h->conv_func, status));
+        oskar_grid_correction_function_pillbox(h->size,
+                oskar_mem_double(h->corr_func, status));
+    }
 
     /* Set up the FFT. */
     if (h->fft_on_gpu)
@@ -74,16 +85,16 @@ void oskar_imager_algorithm_init_fft(oskar_Imager* h, int* status)
         /* Initialise workspaces for CPU FFT algorithm. */
         int len_save = 4 * h->size +
                 2 * (int)(log((double)h->size) / log(2.0)) + 8;
-        h->wsave = oskar_mem_create(h->imager_prec, OSKAR_CPU,
+        h->fftpack_wsave = oskar_mem_create(h->imager_prec, OSKAR_CPU,
                 len_save, status);
-        h->work = oskar_mem_create(h->imager_prec, OSKAR_CPU,
+        h->fftpack_work = oskar_mem_create(h->imager_prec, OSKAR_CPU,
                 2 * h->size * h->size, status);
-        if (h->imager_prec == OSKAR_SINGLE)
-            oskar_fftpack_cfft2i_f(h->size, h->size,
-                    oskar_mem_float(h->wsave, status));
-        else
+        if (h->imager_prec == OSKAR_DOUBLE)
             oskar_fftpack_cfft2i(h->size, h->size,
-                    oskar_mem_double(h->wsave, status));
+                    oskar_mem_double(h->fftpack_wsave, status));
+        else
+            oskar_fftpack_cfft2i_f(h->size, h->size,
+                    oskar_mem_float(h->fftpack_wsave, status));
     }
 }
 

@@ -30,24 +30,14 @@
 #  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
 # 
-"""
-=====================================================
-imager.py : OSKAR imager functions
-=====================================================
-
-This module provides an interface to the OSKAR imager.
-
-Image creation
-----------------------------------
-
-- :func:`make_image` makes an image of visibility data
-
-"""
 
 import math
 import _imager_lib
 
 class Imager(object):
+    """This class provides an interface to the OSKAR imager.
+    """
+
     def __init__(self, precision="double"):
         self._capsule, _ = _imager_lib.create(precision)
 
@@ -110,49 +100,98 @@ class Imager(object):
     def update(self, num_baselines, uu, vv, ww, amps, weight, 
         num_pols = 1, start_time = 0, end_time = 0, 
         start_channel = 0, end_channel = 0):
+        """Runs imager for supplied visibilities, applying optional selection.
+
+        The visibility amplitude data dimension order must be:
+        (slowest) time, channel, baseline, polarisation (fastest).
+
+        Args:
+            num_baselines (int):
+                Number of baselines in the visibility block.
+            uu (float, array like, shape (n,)):
+                Time-baseline ordered uu coordinates, in metres.
+            vv (float, array like, shape (n,)):
+                Time-baseline ordered vv coordinates, in metres.
+            ww (float, array like, shape (n,)):
+                Time-baseline ordered ww coordinates, in metres.
+            amp (complex float, array like, shape (n,)):
+                Baseline visibility amplitudes.
+            weight (float, array like, shape (n,)):
+                Visibility weights.
+            num_pols (Optional[int]):
+               Number of polarisations in the visibility block. Default 1.
+            start_time (Optional[int]):
+               Start time index of the visibility block. Default 0.
+            end_time (Optional[int]):
+               End time index of the visibility block. Default 0.
+            start_chan (Optional[int]):
+               Start channel index of the visibility block. Default 0.
+            end_chan (Optional[int]):
+               End channel index of the visibility block. Default 0.
+        """
         _imager_lib.update(self._capsule, num_baselines, uu, vv, ww, 
             amps, weight, num_pols, start_time, end_time, 
             start_channel, end_channel)
 
+    def update_plane(self, uu, vv, ww, amps, weight, 
+        plane, plane_norm):
+        """Updates the supplied plane with the supplied visibilities.
+
+        Args:
+            uu (float, array like, shape (n,)):
+                Baseline uu coordinates, in wavelengths.
+            vv (float, array like, shape (n,)):
+                Baseline vv coordinates, in wavelengths.
+            ww (float, array like, shape (n,)):
+                Baseline ww coordinates, in wavelengths.
+            amps (complex float, array like, shape (n,)):
+                Baseline visibility amplitudes.
+            weight (float, array like, shape (n,)):
+                Visibility weights.
+            plane (float, array like):
+                Plane to update.
+            plane_norm (float):
+                Current plane normalisation.
+
+        Returns:
+            float: Updated plane normalisation.
+        """
+        return _imager_lib.update_plane(self._capsule, uu, vv, ww, 
+            amps, weight, plane, plane_norm)
+
     @staticmethod
-    def make_image(uu, vv, ww, amp, weight, fov, size):
+    def make_image(uu, vv, ww, amps, weight, fov, size):
+        """Makes an image from visibility data.
+
+        Args:
+            uu (float, array like, shape (n,)):
+                Baseline uu coordinates, in wavelengths.
+            vv (float, array like, shape (n,)):
+                Baseline vv coordinates, in wavelengths.
+            ww (float, array like, shape (n,)):
+                Baseline ww coordinates, in wavelengths.
+            amps (complex float, array like, shape (n,)):
+                Baseline visibility amplitudes.
+            weight (float, array like, shape (n,)):
+                Visibility weights.
+            fov (float): Image field of view, in degrees.
+            size (int):  Image size along one dimension, in pixels.
+
+        Returns:
+            array: Image as a 2D numpy array. Data are ordered as in FITS image.
         """
-        make_image(uu, vv, ww, amp, weight, fov, size)
-        
-        Makes an image from visibility data.
-        
-        Parameters
-        ----------
-        uu : array like, shape (n,), float64
-            Input baseline uu coordinates, in wavelengths.
-        vv : array like, shape (n,), float64
-            Input baseline vv coordinates, in wavelengths.
-        ww : array like, shape (n,), float64
-            Input baseline ww coordinates, in wavelengths.
-        amp : array like, shape (n,), complex128
-            Input baseline visibility amplitudes.
-        weight : array like, shape (n,), float64
-            Input visibility weights.
-        fov : scalar, float64
-            Image field of view, in degrees.
-        size : scalar, int
-            Image size along one dimension, in pixels.
-        """
-        return _imager_lib.make_image(uu, vv, ww, amp, weight, fov, size)
+        return _imager_lib.make_image(uu, vv, ww, amps, weight, fov, size)
 
     @staticmethod
     def fov_to_cellsize(fov_rad, size):
-        """
-        fov_to_cellsize(fov_rad, size)
-        
-        Convert image FoV and size along one dimension in pixels to cellsize.
+        """Convert image FoV and size along one dimension in pixels to cellsize.
 
-        Arguments:
-        fov_deg -- Image FoV, in radians
-        size    -- Image size in one dimension in pixels
+        Args:
+            fov_rad (float): Image field-of-view, in radians.
+            size (int):      Image size in one dimension in pixels.
 
-        Return:
-        Image cellsize, in radians.
+        Returns:
+            float: Image cellsize, in radians.
         """
         rmax = math.sin(0.5 * fov_rad)
         inc = 2.0 * rmax / size

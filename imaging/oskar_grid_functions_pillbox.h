@@ -26,34 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
-#include <private_imager_algorithm_free_dft.h>
-#include <private_imager_algorithm_init_dft.h>
-#include <oskar_evaluate_image_lmn_grid.h>
+#ifndef OSKAR_GRID_FUNCTIONS_PILLBOX_H_
+#define OSKAR_GRID_FUNCTIONS_PILLBOX_H_
 
-#include <oskar_cmath.h>
+/**
+ * @file oskar_grid_functions_pillbox.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_algorithm_init_dft(oskar_Imager* h, int* status)
-{
-    int num_pixels;
-    oskar_imager_algorithm_free_dft(h, status);
-    if (*status) return;
+/**
+ * @brief
+ * Generates pillbox grid convolution function (GCF).
+ *
+ * @details
+ * Generates pillbox grid convolution function (GCF) consistent with CASA.
+ *
+ * @param[in] support    GCF support size (typ. 3; width = 2 * support + 1).
+ * @param[in] oversample GCF oversample factor, or values per grid cell.
+ * @param[in,out] fn     GCF array, length oversample * (support + 1).
+ */
+OSKAR_EXPORT
+void oskar_grid_convolution_function_pillbox(const int support,
+        const int oversample, double* fn);
 
-    /* Calculate pixel coordinate grid required for the DFT imager. */
-    num_pixels = h->size * h->size;
-    h->l = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
-    h->m = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
-    h->n = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
-    oskar_evaluate_image_lmn_grid(h->size, h->size,
-            h->fov_deg * M_PI/180, h->fov_deg * M_PI/180, 0,
-            h->l, h->m, h->n, status);
-    oskar_mem_add_real(h->n, -1.0, status); /* n-1 */
-}
+/**
+ * Generates grid correction function for pillbox convolution function.
+ *
+ * @param[in] image_size Side length of image.
+ * @param[in,out] fn     Array holding correction function, length image_size.
+ */
+OSKAR_EXPORT
+void oskar_grid_correction_function_pillbox(const int image_size,
+        double* fn);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_GRID_FUNCTIONS_PILLBOX_H_ */
