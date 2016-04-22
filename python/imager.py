@@ -197,3 +197,16 @@ class Imager(object):
         inc = 2.0 * rmax / size
         return math.asin(inc)
 
+    @staticmethod
+    def fov_to_uv_cellsize(fov_rad, size):
+        """Convert image FoV and size along one dimension in pixels to cellsize.
+
+        Args:
+            fov_rad (float): Image field-of-view, in radians.
+            size (int):      Image size in one dimension in pixels.
+
+        Returns:
+            float: UV cellsize, in wavelengths.
+        """
+        return 1.0 / (size * fov_to_cellsize(fov_rad, size))
+
