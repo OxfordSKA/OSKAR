@@ -45,14 +45,16 @@ extern "C" {
  *
  * @details
  * Applies grid correction to an image, given the correction function to use.
+ * This correction should be applied to the complex image,
+ * immediately after taking the FFT.
  *
- * @param[in] image_size      Side length of image.
- * @param[in] corr_func       Correction function to use, length \p image_size.
- * @param[in,out] image       Image array.
+ * @param[in] image_size        Side length of image.
+ * @param[in] corr_func         Correction function, length \p image_size.
+ * @param[in,out] complex_image Complex image array.
  */
 OSKAR_EXPORT
 void oskar_grid_correction_d(const int image_size,
-        const double* corr_func, double* image);
+        const double* corr_func, double* complex_image);
 
 /**
  * @brief
@@ -60,14 +62,16 @@ void oskar_grid_correction_d(const int image_size,
  *
  * @details
  * Applies grid correction to an image, given the correction function to use.
+ * This correction should be applied to the complex image,
+ * immediately after taking the FFT.
  *
- * @param[in] image_size      Side length of image.
- * @param[in] corr_func       Correction function to use, length \p image_size.
- * @param[in,out] image       Image array.
+ * @param[in] image_size        Side length of image.
+ * @param[in] corr_func         Correction function, length \p image_size.
+ * @param[in,out] complex_image Complex image array.
  */
 OSKAR_EXPORT
 void oskar_grid_correction_f(const int image_size,
-        const double* corr_func, float* image);
+        const double* corr_func, float* complex_image);
 
 #ifdef __cplusplus
 }

@@ -67,6 +67,8 @@ void oskar_imager_run(oskar_Imager* h, const char* filename, int* status)
         oskar_imager_run_vis(h, filename, status);
 
     /* Finalise the image plane(s) and write them out. */
+    if (h->log)
+        oskar_log_message(h->log, 'M', 0, "Finalising image plane(s)...");
     oskar_imager_finalise(h, 0, status);
 }
 

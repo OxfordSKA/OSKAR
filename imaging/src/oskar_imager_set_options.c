@@ -47,11 +47,14 @@ void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
         int* status)
 {
     if (*status) return;
-    if (!strncmp(type, "FFT", 3)) h->algorithm = OSKAR_ALGORITHM_FFT;
-    else if (!strncmp(type, "DFT 2", 5)) h->algorithm = OSKAR_ALGORITHM_DFT_2D;
-    else if (!strncmp(type, "DFT 3", 5)) h->algorithm = OSKAR_ALGORITHM_DFT_3D;
-    else if (!strncmp(type, "W", 1)) h->algorithm = OSKAR_ALGORITHM_WPROJ;
-    /*else if (!strncmp(type, "A", 1)) h->algorithm = OSKAR_ALGORITHM_AWPROJ;*/
+    if (!strncmp(type, "FFT", 3) || !strncmp(type, "fft", 3))
+        h->algorithm = OSKAR_ALGORITHM_FFT;
+    else if (!strncmp(type, "DFT 2", 5) || !strncmp(type, "dft 2", 5))
+        h->algorithm = OSKAR_ALGORITHM_DFT_2D;
+    else if (!strncmp(type, "DFT 3", 5) || !strncmp(type, "dft 3", 5))
+        h->algorithm = OSKAR_ALGORITHM_DFT_3D;
+    else if (!strncmp(type, "W", 1) || !strncmp(type, "w", 1))
+        h->algorithm = OSKAR_ALGORITHM_WPROJ;
     else *status = OSKAR_ERR_SETTINGS_IMAGE;
 }
 
@@ -148,17 +151,28 @@ void oskar_imager_set_image_type(oskar_Imager* h, const char* type,
         int* status)
 {
     if (*status) return;
-    if (!strncmp(type, "S", 1)) h->im_type = OSKAR_IMAGE_TYPE_STOKES;
-    else if (!strncmp(type, "I",  1)) h->im_type = OSKAR_IMAGE_TYPE_I;
-    else if (!strncmp(type, "Q",  1)) h->im_type = OSKAR_IMAGE_TYPE_Q;
-    else if (!strncmp(type, "U",  1)) h->im_type = OSKAR_IMAGE_TYPE_U;
-    else if (!strncmp(type, "V",  1)) h->im_type = OSKAR_IMAGE_TYPE_V;
-    else if (!strncmp(type, "P",  1)) h->im_type = OSKAR_IMAGE_TYPE_PSF;
-    else if (!strncmp(type, "L",  1)) h->im_type = OSKAR_IMAGE_TYPE_LINEAR;
-    else if (!strncmp(type, "XX", 2)) h->im_type = OSKAR_IMAGE_TYPE_XX;
-    else if (!strncmp(type, "XY", 2)) h->im_type = OSKAR_IMAGE_TYPE_XY;
-    else if (!strncmp(type, "YX", 2)) h->im_type = OSKAR_IMAGE_TYPE_YX;
-    else if (!strncmp(type, "YY", 2)) h->im_type = OSKAR_IMAGE_TYPE_YY;
+    if (!strncmp(type, "S", 1) || !strncmp(type, "s", 1))
+        h->im_type = OSKAR_IMAGE_TYPE_STOKES;
+    else if (!strncmp(type, "I",  1) || !strncmp(type, "i",  1))
+        h->im_type = OSKAR_IMAGE_TYPE_I;
+    else if (!strncmp(type, "Q",  1) || !strncmp(type, "q",  1))
+        h->im_type = OSKAR_IMAGE_TYPE_Q;
+    else if (!strncmp(type, "U",  1) || !strncmp(type, "u",  1))
+        h->im_type = OSKAR_IMAGE_TYPE_U;
+    else if (!strncmp(type, "V",  1) || !strncmp(type, "v",  1))
+        h->im_type = OSKAR_IMAGE_TYPE_V;
+    else if (!strncmp(type, "P",  1) || !strncmp(type, "p",  1))
+        h->im_type = OSKAR_IMAGE_TYPE_PSF;
+    else if (!strncmp(type, "L",  1) || !strncmp(type, "l",  1))
+        h->im_type = OSKAR_IMAGE_TYPE_LINEAR;
+    else if (!strncmp(type, "XX", 2) || !strncmp(type, "xx", 2))
+        h->im_type = OSKAR_IMAGE_TYPE_XX;
+    else if (!strncmp(type, "XY", 2) || !strncmp(type, "xy", 2))
+        h->im_type = OSKAR_IMAGE_TYPE_XY;
+    else if (!strncmp(type, "YX", 2) || !strncmp(type, "yx", 2))
+        h->im_type = OSKAR_IMAGE_TYPE_YX;
+    else if (!strncmp(type, "YY", 2) || !strncmp(type, "yy", 2))
+        h->im_type = OSKAR_IMAGE_TYPE_YY;
     else *status = OSKAR_ERR_SETTINGS_IMAGE;
     h->use_stokes = (h->im_type == OSKAR_IMAGE_TYPE_STOKES ||
             h->im_type == OSKAR_IMAGE_TYPE_I ||
@@ -183,9 +197,12 @@ void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
 {
     h->support = support;
     h->oversample = oversample;
-    if (!strncmp(type, "S", 1)) h->kernel_type = 'S';
-    else if (!strncmp(type, "G", 1)) h->kernel_type = 'G';
-    else if (!strncmp(type, "P", 1)) h->kernel_type = 'P';
+    if (!strncmp(type, "S", 1) || !strncmp(type, "s", 1))
+        h->kernel_type = 'S';
+    else if (!strncmp(type, "G", 1) || !strncmp(type, "g", 1))
+        h->kernel_type = 'G';
+    else if (!strncmp(type, "P", 1) || !strncmp(type, "p", 1))
+        h->kernel_type = 'P';
     else *status = OSKAR_ERR_SETTINGS_IMAGE;
 }
 

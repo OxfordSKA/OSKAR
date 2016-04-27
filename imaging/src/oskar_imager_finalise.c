@@ -54,18 +54,33 @@ static void write_plane(oskar_Imager* h, oskar_Mem* plane,
 void oskar_imager_finalise(oskar_Imager* h, oskar_Mem* output_plane,
         int* status)
 {
-    int t, c, p, i = 0;
+    int t, c, p, i, j, num_pixels;
     if (*status) return;
 
     /* Finalise all the planes. */
+    num_pixels = h->size * h->size;
     for (i = 0; i < h->num_planes; ++i)
+    {
         oskar_imager_finalise_plane(h, h->planes[i], h->plane_norm[i], status);
 
-    /* Copy plane 0 to output plane if given. */
+        /* Get the real part only. */
+        if (oskar_mem_precision(h->planes[i]) == OSKAR_DOUBLE)
+        {
+            double *t = oskar_mem_double(h->planes[i], status);
+            for (j = 0; j < num_pixels; ++j) t[j] = t[2 * j];
+        }
+        else
+        {
+            float *t = oskar_mem_float(h->planes[i], status);
+            for (j = 0; j < num_pixels; ++j) t[j] = t[2 * j];
+        }
+    }
+
+    /* Copy plane 0 to output image plane if given. */
     if (output_plane && h->num_planes > 0)
     {
         size_t bytes;
-        bytes = h->size * h->size * oskar_mem_element_size(h->imager_prec);
+        bytes = num_pixels * oskar_mem_element_size(h->imager_prec);
         memcpy(oskar_mem_void(output_plane),
                 oskar_mem_void_const(h->planes[0]), bytes);
     }
@@ -84,7 +99,7 @@ void oskar_imager_finalise(oskar_Imager* h, oskar_Mem* output_plane,
 void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
         double plane_norm, int* status)
 {
-    int i, size, num_pixels;
+    int size, num_pixels;
     DeviceData* d;
     if (*status) return;
     if (plane_norm > 0.0 || plane_norm < 0.0)
@@ -95,10 +110,16 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
         num_pixels = size * size;
         d = &h->d[0];
 
-        /* Make image using FFT. */
+        /* Check plane is complex type. */
+        if (!oskar_mem_is_complex(plane))
+        {
+            *status = OSKAR_ERR_TYPE_MISMATCH;
+            return;
+        }
+
+        /* Make image using FFT and apply grid correction. */
         if (oskar_mem_precision(plane) == OSKAR_DOUBLE)
         {
-            double *t;
             oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
             if (h->fft_on_gpu)
             {
@@ -117,18 +138,12 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
                 oskar_mem_scale_real(plane, (double)num_pixels, status);
             }
             oskar_fftphase_cd(size, size, oskar_mem_double(plane, status));
-
-            /* Get the real part. */
-            t = oskar_mem_double(plane, status);
-            for (i = 0; i < num_pixels; ++i) t[i] = t[2 * i];
-
-            /* Apply grid correction. */
             oskar_grid_correction_d(size,
-                    oskar_mem_double(h->corr_func, status), t);
+                    oskar_mem_double(h->corr_func, status),
+                    oskar_mem_double(plane, status));
         }
         else
         {
-            float *t;
             oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
             if (h->fft_on_gpu)
             {
@@ -147,14 +162,9 @@ void oskar_imager_finalise_plane(oskar_Imager* h, oskar_Mem* plane,
                 oskar_mem_scale_real(plane, (double)num_pixels, status);
             }
             oskar_fftphase_cf(size, size, oskar_mem_float(plane, status));
-
-            /* Get the real part. */
-            t = oskar_mem_float(plane, status);
-            for (i = 0; i < num_pixels; ++i) t[i] = t[2 * i];
-
-            /* Apply grid correction. */
             oskar_grid_correction_f(size,
-                    oskar_mem_double(h->corr_func, status), t);
+                    oskar_mem_double(h->corr_func, status),
+                    oskar_mem_float(plane, status));
         }
     }
 }

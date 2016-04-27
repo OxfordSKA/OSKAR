@@ -59,6 +59,7 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
     oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0, *th = 0;
     const oskar_Mem *data, *u_in, *v_in, *w_in, *amp_in, *weight_in;
     oskar_Mem *pu, *pv, *pw;
+    if (*status) return;
 
     /* Set dimensions. */
     num_times = 1 + end_time - start_time;
@@ -221,6 +222,7 @@ void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
 {
     oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0, *th = 0;
     const oskar_Mem *pu, *pv, *pw, *pa, *ph;
+    if (*status) return;
     if (oskar_mem_precision(plane) != h->imager_prec)
     {
         *status = OSKAR_ERR_TYPE_MISMATCH;

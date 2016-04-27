@@ -33,6 +33,8 @@
 #include <private_imager_algorithm_free_wproj.h>
 #include <private_imager_algorithm_init_wproj.h>
 #include <oskar_convert_fov_to_cellsize.h>
+#include <oskar_fftpack_cfft.h>
+#include <oskar_fftpack_cfft_f.h>
 #include <oskar_get_memory_usage.h>
 #include <oskar_grid_functions_spheroidal.h>
 #include <oskar_timer.h>
@@ -99,7 +101,7 @@ static int composite_nearest_even(int value, int* smaller, int *larger)
 }
 
 
-void oskar_generate_w_phase_screen(const int iw, const int conv_size,
+static void oskar_generate_w_phase_screen(const int iw, const int conv_size,
         const int inner, const double sampling, const double w_scale,
         const double* taper_func, oskar_Mem* screen, int* status)
 {

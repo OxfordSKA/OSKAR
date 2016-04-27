@@ -33,34 +33,38 @@ extern "C" {
 #endif
 
 void oskar_grid_correction_d(const int image_size,
-        const double* corr_func, double* image)
+        const double* corr_func, double* complex_image)
 {
     int i, j, k;
-    double cj;
+    double cj, t;
     for (j = 0; j < image_size; ++j)
     {
         cj = corr_func[j];
         for (i = 0; i < image_size; ++i)
         {
-            k = i + j * image_size;
-            image[k] *= (corr_func[i] * cj);
+            k = 2 * (i + j * image_size);
+            t = corr_func[i] * cj;
+            complex_image[k] *= t;
+            complex_image[k + 1] *= t;
         }
     }
 }
 
 
 void oskar_grid_correction_f(const int image_size,
-        const double* corr_func, float* image)
+        const double* corr_func, float* complex_image)
 {
     int i, j, k;
-    double cj;
+    double cj, t;
     for (j = 0; j < image_size; ++j)
     {
         cj = corr_func[j];
         for (i = 0; i < image_size; ++i)
         {
-            k = i + j * image_size;
-            image[k] *= (corr_func[i] * cj);
+            k = 2 * (i + j * image_size);
+            t = corr_func[i] * cj;
+            complex_image[k] *= t;
+            complex_image[k + 1] *= t;
         }
     }
 }

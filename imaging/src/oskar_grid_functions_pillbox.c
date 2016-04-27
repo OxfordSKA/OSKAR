@@ -52,9 +52,8 @@ void oskar_grid_convolution_function_pillbox(const int support,
 void oskar_grid_correction_function_pillbox(const int image_size,
         double* fn)
 {
-    int i, extent;
+    int i;
     double val;
-    extent = image_size / 2;
     for (i = 0; i < image_size; ++i)
     {
         val = 1.0; /* No correction! */

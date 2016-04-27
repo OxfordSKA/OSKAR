@@ -56,6 +56,13 @@ oskar_Imager* oskar_imager_create(int imager_precision, int* status)
     h->stokes      = oskar_mem_create(imager_precision | OSKAR_COMPLEX,
             OSKAR_CPU, 0, status);
 
+    /* Check data type. */
+    if (imager_precision != OSKAR_SINGLE && imager_precision != OSKAR_DOUBLE)
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return h;
+    }
+
     /* Set sensible defaults. */
     oskar_imager_set_gpus(h, -1, 0, status);
     oskar_imager_set_fft_on_gpu(h, 0);
