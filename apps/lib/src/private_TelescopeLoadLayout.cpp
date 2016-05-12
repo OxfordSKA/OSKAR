@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,9 @@ using std::map;
 using std::string;
 
 const string TelescopeLoadLayout::layout_file = "layout.txt";
+const string TelescopeLoadLayout::layout_enu_file = "layout_enu.txt";
 const string TelescopeLoadLayout::layout_ecef_file = "layout_ecef.txt";
+const string TelescopeLoadLayout::layout_wgs84_file = "layout_wgs84.txt";
 
 TelescopeLoadLayout::TelescopeLoadLayout(const oskar_Settings_old* settings)
 {
@@ -49,7 +51,7 @@ void TelescopeLoadLayout::load(oskar_Telescope* telescope,
         const oskar_Dir& cwd, int num_subdirs,
         map<string, string>& /*filemap*/, int* status)
 {
-    // Check for presence of top-level "layout.txt" or "layout_ecef.txt".
+    // Check for presence of top-level layout files.
     if (cwd.exists(layout_file))
     {
         // Load the interferometer layout (horizon plane).
@@ -59,11 +61,29 @@ void TelescopeLoadLayout::load(oskar_Telescope* telescope,
                 settings_->telescope.latitude_rad,
                 settings_->telescope.altitude_m, status);
     }
+    else if (cwd.exists(layout_enu_file))
+    {
+        // Load the interferometer layout (horizon plane).
+        oskar_telescope_load_station_coords_horizon(telescope,
+                cwd.absoluteFilePath(layout_enu_file).c_str(),
+                settings_->telescope.longitude_rad,
+                settings_->telescope.latitude_rad,
+                settings_->telescope.altitude_m, status);
+    }
     else if (cwd.exists(layout_ecef_file))
     {
         // Load the interferometer layout (ECEF system).
         oskar_telescope_load_station_coords_ecef(telescope,
                 cwd.absoluteFilePath(layout_ecef_file).c_str(),
+                settings_->telescope.longitude_rad,
+                settings_->telescope.latitude_rad,
+                settings_->telescope.altitude_m, status);
+    }
+    else if (cwd.exists(layout_wgs84_file))
+    {
+        // Load the interferometer layout (WGS84 system).
+        oskar_telescope_load_station_coords_wgs84(telescope,
+                cwd.absoluteFilePath(layout_wgs84_file).c_str(),
                 settings_->telescope.longitude_rad,
                 settings_->telescope.latitude_rad,
                 settings_->telescope.altitude_m, status);
@@ -93,11 +113,16 @@ void TelescopeLoadLayout::load(oskar_Station* station,
         const oskar_Dir& cwd, int num_subdirs, int /*depth*/,
         map<string, string>& /*filemap*/, int* status)
 {
-    // Check for presence of "layout.txt".
+    // Check for presence of station layout file.
     if (cwd.exists(layout_file))
     {
         oskar_station_load_layout(station,
                 cwd.absoluteFilePath(layout_file).c_str(), status);
+    }
+    else if (cwd.exists(layout_enu_file))
+    {
+        oskar_station_load_layout(station,
+                cwd.absoluteFilePath(layout_enu_file).c_str(), status);
     }
     else
     {

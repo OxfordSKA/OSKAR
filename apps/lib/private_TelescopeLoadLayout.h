@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,8 @@ public:
 
 private:
     static const std::string layout_file;
+    static const std::string layout_enu_file;
+    static const std::string layout_wgs84_file;
     static const std::string layout_ecef_file;
     const oskar_Settings_old* settings_;
 };

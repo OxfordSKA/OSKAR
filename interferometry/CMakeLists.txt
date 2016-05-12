@@ -13,6 +13,7 @@ set(interferometry_SRC
     src/oskar_telescope_load_pointing_file.c
     src/oskar_telescope_load_station_coords_ecef.c
     src/oskar_telescope_load_station_coords_horizon.c
+    src/oskar_telescope_load_station_coords_wgs84.c
     src/oskar_telescope_resize.c
     src/oskar_telescope_save_layout.c
     src/oskar_telescope_set_station_coords.c
@@ -37,7 +38,7 @@ set(interferometry_SRC
     src/oskar_vis_free.c
     src/oskar_vis_read.c
     src/oskar_vis_write.c
-    
+
 )
 
 set(interferometry_SRC "${interferometry_SRC}" PARENT_SCOPE)

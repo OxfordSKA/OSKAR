@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,47 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_H_
-#define OSKAR_TELESCOPE_H_
+#ifndef OSKAR_TELESCOPE_LOAD_STATION_COORDS_WGS84_H_
+#define OSKAR_TELESCOPE_LOAD_STATION_COORDS_WGS84_H_
 
 /**
- * @file oskar_telescope.h
+ * @file oskar_telescope_load_station_coords_wgs84.h
  */
 
-/* Public interface. */
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_Telescope;
-#ifndef OSKAR_TELESCOPE_TYPEDEF_
-#define OSKAR_TELESCOPE_TYPEDEF_
-typedef struct oskar_Telescope oskar_Telescope;
-#endif /* OSKAR_TELESCOPE_TYPEDEF_ */
-
-enum OSKAR_POL_MODE_TYPE
-{
-    OSKAR_POL_MODE_FULL,
-    OSKAR_POL_MODE_SCALAR
-};
+/**
+ * @brief
+ * Loads a telescope coordinate file that specifies the station locations
+ * with respect to the centre of the Earth.
+ *
+ * @details
+ * A telescope station coordinate file is an ASCII text file containing
+ * three columns of comma- or space-separated values that represent the station
+ * (x,y,z) coordinates in the WGS84 (longitude, latitude) system.
+ *
+ * @param[in,out] telescope  Telescope model structure to be populated.
+ * @param[in] filename       File name path to a telescope coordinate file.
+ * @param[in] longitude      Telescope centre longitude, in radians.
+ * @param[in] latitude       Telescope centre latitude, in radians.
+ * @param[in] altitude       Telescope centre altitude, in metres.
+ * @param[in,out] status     Status return code.
+ */
+OSKAR_EXPORT
+void oskar_telescope_load_station_coords_wgs84(oskar_Telescope* telescope,
+        const char* filename, double longitude, double latitude,
+        double altitude, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#include <oskar_telescope_accessors.h>
-#include <oskar_telescope_analyse.h>
-#include <oskar_telescope_create.h>
-#include <oskar_telescope_create_copy.h>
-#include <oskar_telescope_duplicate_first_station.h>
-#include <oskar_telescope_free.h>
-#include <oskar_telescope_load_pointing_file.h>
-#include <oskar_telescope_load_station_coords_ecef.h>
-#include <oskar_telescope_load_station_coords_horizon.h>
-#include <oskar_telescope_load_station_coords_wgs84.h>
-#include <oskar_telescope_resize.h>
-#include <oskar_telescope_save_layout.h>
-#include <oskar_telescope_set_station_coords.h>
-
-#endif /* OSKAR_TELESCOPE_H_ */
+#endif /* OSKAR_TELESCOPE_LOAD_STATION_COORDS_WGS84_H_ */
