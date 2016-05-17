@@ -53,7 +53,7 @@
             cube.</desc>
     </s>
     <s k="time_snapshots"><label>Time snapshots</label>
-        <type name="bool" default="true"/>
+        <type name="bool" default="false"/>
         <desc>If true, then produce an image cube containing snapshots
             for each time step. If false, then use time-synthesis to stack
             the times in the final image.</desc>
