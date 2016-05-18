@@ -26,17 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_ALGORITHM_INIT_FFT_H_
-#define OSKAR_IMAGER_ALGORITHM_INIT_FFT_H_
+#ifndef OSKAR_IMAGER_INIT_DFT_H_
+#define OSKAR_IMAGER_INIT_DFT_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_algorithm_init_fft(oskar_Imager* h, int* status);
+void oskar_imager_init_dft(oskar_Imager* h, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_IMAGER_ALGORITHM_INIT_FFT_H_ */
+#endif /* OSKAR_IMAGER_INIT_DFT_H_ */

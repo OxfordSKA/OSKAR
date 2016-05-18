@@ -31,12 +31,10 @@
 #include <oskar_convert_ecef_to_baseline_uvw.h>
 #include <oskar_convert_lon_lat_to_relative_directions.h>
 #include <oskar_imager.h>
-#include <private_imager_algorithm_init_dft.h>
-#include <private_imager_algorithm_init_fft.h>
-#include <private_imager_algorithm_init_wproj.h>
 #include <private_imager_create_fits_files.h>
 #include <private_imager_update_plane_dft.h>
 #include <private_imager_update_plane_fft.h>
+#include <private_imager_update_plane_wproj.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -48,7 +46,7 @@
 extern "C" {
 #endif
 
-static void oskar_imager_allocate_image_planes(oskar_Imager* h, int *status);
+static void oskar_imager_allocate_planes(oskar_Imager* h, int *status);
 
 void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
         int start_chan, int end_chan, int num_pols, int num_baselines,
@@ -58,7 +56,6 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
     int t, c, p, plane, num_times, num_channels, max_num_vis;
     oskar_Mem *tu = 0, *tv = 0, *tw = 0, *ta = 0, *th = 0;
     const oskar_Mem *data, *u_in, *v_in, *w_in, *amp_in, *weight_in;
-    oskar_Mem *pu, *pv, *pw;
     if (*status) return;
 
     /* Set dimensions. */
@@ -73,10 +70,11 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
         return;
     }
 
-    /* Ensure post-initialisation steps have been done. */
+    /* Ensure image/grid planes exist and algorithm has been initialised. */
     if (!h->planes)
     {
-        oskar_imager_allocate_image_planes(h, status);
+        oskar_imager_check_init(h, status);
+        oskar_imager_allocate_planes(h, status);
         oskar_imager_create_fits_files(h, status);
         if (*status) return;
     }
@@ -143,6 +141,7 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
         if (*status) break;
         for (c = 0; c < h->im_num_channels; ++c)
         {
+            oskar_Mem *pu, *pv, *pw;
             size_t num_coords = 0, num_vis = 0;
             if (*status) break;
 
@@ -170,24 +169,19 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
                 if (*status) break;
 
                 /* Get visibility amplitudes for imaging. */
-                if (h->im_type == OSKAR_IMAGE_TYPE_PSF)
-                {
-                    oskar_mem_set_value_real(h->vis_im, 1.0, 0, 0, status);
-                    num_vis = num_coords;
-                }
-                else
-                {
-                    oskar_imager_select_vis(h,
-                            start_time, end_time, start_chan, end_chan,
-                            num_baselines, num_pols, data, weight_in, t, c, p,
-                            h->vis_im, h->weight_im, &num_vis, status);
+                /* Always need to select weights. */
+                oskar_imager_select_vis(h,
+                        start_time, end_time, start_chan, end_chan,
+                        num_baselines, num_pols, data, weight_in, t, c, p,
+                        h->vis_im, h->weight_im, &num_vis, status);
 
-                    /* Phase rotate the visibilities if required. */
-                    if (h->direction_type == 'R')
-                        oskar_imager_rotate_vis(num_vis,
-                                h->uu_tmp, h->vv_tmp, h->ww_tmp, h->vis_im,
-                                h->delta_l, h->delta_m, h->delta_n);
-                }
+                /* Overwrite visibilities if making PSF, or phase rotate. */
+                if (h->im_type == OSKAR_IMAGE_TYPE_PSF)
+                    oskar_mem_set_value_real(h->vis_im, 1.0, 0, 0, status);
+                else if (h->direction_type == 'R')
+                    oskar_imager_rotate_vis(num_vis,
+                            h->uu_tmp, h->vv_tmp, h->ww_tmp, h->vis_im,
+                            h->delta_l, h->delta_m, h->delta_n);
 
                 /* Check consistency. */
                 if (num_coords != num_vis)
@@ -258,29 +252,32 @@ void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
     }
 
     /* Update the supplied plane with the supplied visibilities. */
-    if (h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
-            h->algorithm == OSKAR_ALGORITHM_DFT_3D)
+    oskar_imager_check_init(h, status);
+    switch (h->algorithm)
     {
-        if (!h->l) oskar_imager_algorithm_init_dft(h, status);
+    case OSKAR_ALGORITHM_DFT_2D:
+    case OSKAR_ALGORITHM_DFT_3D:
+    {
         oskar_imager_update_plane_dft(h, num_vis, pu, pv, pw, pa, ph,
                 plane, plane_norm, status);
+        break;
     }
-    else if (h->algorithm == OSKAR_ALGORITHM_FFT)
+    case OSKAR_ALGORITHM_FFT:
     {
-        if (!h->conv_func) oskar_imager_algorithm_init_fft(h, status);
         oskar_imager_update_plane_fft(h, num_vis, pu, pv, pa, ph,
                 plane, plane_norm, status);
+        break;
     }
-    else if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
+    case OSKAR_ALGORITHM_WPROJ:
     {
-        if (!h->w_kernels) oskar_imager_algorithm_init_wproj(h, status);
-        /* oskar_imager_update_plane_wproj(h, num_vis, pu, pv, pw, pa, ph,
-                plane, plane_norm, status); */
+        oskar_imager_update_plane_wproj(h, num_vis, pu, pv, pw, pa, ph,
+                plane, plane_norm, status);
+        break;
     }
-    else
-    {
+    default:
         *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
     }
+
     oskar_mem_free(tu, status);
     oskar_mem_free(tv, status);
     oskar_mem_free(tw, status);
@@ -289,11 +286,10 @@ void oskar_imager_update_plane(oskar_Imager* h, int num_vis,
 }
 
 
-void oskar_imager_allocate_image_planes(oskar_Imager* h, int *status)
+void oskar_imager_allocate_planes(oskar_Imager* h, int *status)
 {
     int i;
     if (*status) return;
-    oskar_imager_reset_cache(h, status);
 
     /* Set image meta-data. */
     h->im_num_channels = (h->chan_snaps ?
@@ -317,28 +313,30 @@ void oskar_imager_allocate_image_planes(oskar_Imager* h, int *status)
     /*************************************************************************/
     /* Allocate the image or visibility planes. */
     h->planes = calloc(h->num_planes, sizeof(oskar_Mem*));
-    if (h->algorithm == OSKAR_ALGORITHM_DFT_2D ||
-            h->algorithm == OSKAR_ALGORITHM_DFT_3D)
+    switch (h->algorithm)
+    {
+    case OSKAR_ALGORITHM_DFT_2D:
+    case OSKAR_ALGORITHM_DFT_3D:
     {
         for (i = 0; i < h->num_planes; ++i)
+        {
             h->planes[i] = oskar_mem_create(h->imager_prec,
-                    OSKAR_CPU, h->size * h->size, status);
+                    OSKAR_CPU, h->image_size * h->image_size, status);
+        }
+        break;
     }
-    else if (h->algorithm == OSKAR_ALGORITHM_FFT)
+    case OSKAR_ALGORITHM_FFT:
+    case OSKAR_ALGORITHM_WPROJ:
     {
         for (i = 0; i < h->num_planes; ++i)
+        {
             h->planes[i] = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
-                    OSKAR_CPU, h->size * h->size, status);
+                    OSKAR_CPU, h->grid_size * h->grid_size, status);
+        }
+        break;
     }
-    else if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
-    {
-        for (i = 0; i < h->num_planes; ++i)
-            h->planes[i] = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
-                    OSKAR_CPU, h->size * h->size, status);
-    }
-    else
-    {
-        *status = OSKAR_ERR_UNKNOWN;
+    default:
+        *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
     }
     if (*status) return;
     h->plane_norm = (double*) calloc(h->num_planes, sizeof(double));

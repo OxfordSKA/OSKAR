@@ -62,7 +62,7 @@ void oskar_grid_convolution_function_spheroidal(const int support,
  */
 OSKAR_EXPORT
 void oskar_grid_correction_function_spheroidal(const int image_size,
-        double* fn);
+        const int padding_gcf, double* fn);
 
 /**
  * @brief

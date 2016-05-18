@@ -324,6 +324,37 @@ OSKAR_EXPORT
 void oskar_imager_set_vis_time(oskar_Imager* h,
         double ref_mjd_utc, double inc_sec, int num, int* status);
 
+/**
+ * @brief
+ * Sets the number of W planes to use.
+ *
+ * @details
+ * Sets the number of W planes, used only for W-projection.
+ * A value of 0 or less means 'automatic'.
+ *
+ * @param[in,out] h            Handle to imager.
+ * @param[in] value            Number of W planes to use.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_w_planes(oskar_Imager* h, int value);
+
+/**
+ * @brief
+ * Sets the visibility W-coordinate range.
+ *
+ * @details
+ * Sets the visibility W-coordinate range, used only for W-projection.
+ * Note that the values must be in wavelengths.
+ *
+ * @param[in,out] h            Handle to imager.
+ * @param[in] w_min            Minimum value of W, in wavelengths.
+ * @param[in] w_max            Maximum value of W, in wavelengths.
+ * @param[in] w_rms            RMS value of W, in wavelengths.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_w_range(oskar_Imager* h,
+        double w_min, double w_max, double w_rms);
+
 #ifdef __cplusplus
 }
 #endif

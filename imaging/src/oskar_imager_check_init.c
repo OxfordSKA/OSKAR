@@ -26,26 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cufft.h>
 #include <private_imager.h>
-#include <private_imager_algorithm_free_fft.h>
+#include <oskar_imager.h>
+
+#include <oskar_imager_check_init.h>
+#include <private_imager_init_dft.h>
+#include <private_imager_init_fft.h>
+#include <private_imager_init_wproj.h>
+
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_algorithm_free_fft(oskar_Imager* h, int* status)
+void oskar_imager_check_init(oskar_Imager* h, int* status)
 {
-    oskar_mem_free(h->conv_func, status);
-    oskar_mem_free(h->corr_func, status);
-    oskar_mem_free(h->fftpack_wsave, status);
-    oskar_mem_free(h->fftpack_work, status);
-    cufftDestroy(h->cufft_plan_imager);
-    h->conv_func = 0;
-    h->corr_func = 0;
-    h->fftpack_wsave = 0;
-    h->fftpack_work = 0;
-    h->cufft_plan_imager = 0;
+    switch (h->algorithm)
+    {
+    case OSKAR_ALGORITHM_DFT_2D:
+    case OSKAR_ALGORITHM_DFT_3D:
+    {
+        if (!h->l)
+            oskar_imager_init_dft(h, status);
+        break;
+    }
+    case OSKAR_ALGORITHM_FFT:
+    {
+        if (!h->conv_func)
+            oskar_imager_init_fft(h, status);
+        break;
+    }
+    case OSKAR_ALGORITHM_WPROJ:
+    {
+        if (!h->w_kernels)
+            oskar_imager_init_wproj(h, status);
+        break;
+    }
+    default:
+        *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+    }
 }
 
 #ifdef __cplusplus

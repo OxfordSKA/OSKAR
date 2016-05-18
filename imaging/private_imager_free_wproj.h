@@ -26,22 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
-#include <private_imager_algorithm_free_wproj.h>
+#ifndef OSKAR_IMAGER_FREE_WPROJ_H_
+#define OSKAR_IMAGER_FREE_WPROJ_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_algorithm_free_wproj(oskar_Imager* h, int* status)
-{
-    oskar_mem_free(h->w_kernels, status);
-    oskar_mem_free(h->w_support, status);
-    cufftDestroy(h->cufft_plan_imager);
-    h->w_kernels = 0;
-    h->w_support = 0;
-}
+void oskar_imager_free_wproj(oskar_Imager* h, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_IMAGER_FREE_WPROJ_H_ */

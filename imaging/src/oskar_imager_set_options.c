@@ -241,7 +241,8 @@ void oskar_imager_set_output_root(oskar_Imager* h, const char* filename,
 
 void oskar_imager_set_size(oskar_Imager* h, int size)
 {
-    h->size = size;
+    h->image_size = size;
+    h->grid_size = size;
 }
 
 
@@ -279,6 +280,21 @@ void oskar_imager_set_vis_time(oskar_Imager* h,
     h->time_inc_sec = inc_sec;
     oskar_imager_data_range(h->time_range, num,
             h->vis_time_range, status);
+}
+
+
+void oskar_imager_set_w_planes(oskar_Imager* h, int value)
+{
+    h->num_w_planes = value;
+}
+
+
+void oskar_imager_set_w_range(oskar_Imager* h,
+        double w_min, double w_max, double w_rms)
+{
+    h->ww_min = w_min;
+    h->ww_max = w_max;
+    h->ww_rms = w_rms;
 }
 
 

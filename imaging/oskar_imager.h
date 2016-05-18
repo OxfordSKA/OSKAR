@@ -73,6 +73,7 @@ enum OSKAR_IMAGE_ALGORITHM
 }
 #endif
 
+#include <oskar_imager_check_init.h>
 #include <oskar_imager_create.h>
 #include <oskar_imager_finalise.h>
 #include <oskar_imager_free.h>

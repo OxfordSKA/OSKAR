@@ -28,8 +28,8 @@
 
 #include <private_imager.h>
 
-#include <private_imager_update_plane_fft.h>
-#include <oskar_grid_simple.h>
+#include <private_imager_update_plane_wproj.h>
+#include <oskar_grid_wproj.h>
 
 #include <stdlib.h>
 
@@ -37,10 +37,10 @@
 extern "C" {
 #endif
 
-void oskar_imager_update_plane_fft(oskar_Imager* h, int num_vis,
-        const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* amps,
-        const oskar_Mem* weight, oskar_Mem* plane, double* plane_norm,
-        int* status)
+void oskar_imager_update_plane_wproj(oskar_Imager* h, int num_vis,
+        const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
+        const oskar_Mem* amps, const oskar_Mem* weight, oskar_Mem* plane,
+        double* plane_norm, int* status)
 {
     int num_cells, num_skipped = 0;
     if (*status) return;
@@ -49,22 +49,28 @@ void oskar_imager_update_plane_fft(oskar_Imager* h, int num_vis,
         oskar_mem_realloc(plane, num_cells, status);
     if (*status) return;
     if (h->imager_prec == OSKAR_DOUBLE)
-        oskar_grid_simple_d(h->support, h->oversample,
-                oskar_mem_double_const(h->conv_func, status), num_vis,
+        oskar_grid_wproj_d(h->num_w_planes,
+                oskar_mem_int_const(h->w_support, status),
+                h->gcf_padding, h->conv_size_half,
+                oskar_mem_double_const(h->w_kernels, status), num_vis,
                 oskar_mem_double_const(uu, status),
                 oskar_mem_double_const(vv, status),
+                oskar_mem_double_const(ww, status),
                 oskar_mem_double_const(amps, status),
                 oskar_mem_double_const(weight, status), h->cellsize_rad,
-                h->grid_size, &num_skipped, plane_norm,
+                h->w_scale, h->grid_size, &num_skipped, plane_norm,
                 oskar_mem_double(plane, status));
     else
-        oskar_grid_simple_f(h->support, h->oversample,
-                oskar_mem_double_const(h->conv_func, status), num_vis,
+        oskar_grid_wproj_f(h->num_w_planes,
+                oskar_mem_int_const(h->w_support, status),
+                h->gcf_padding, h->conv_size_half,
+                oskar_mem_float_const(h->w_kernels, status), num_vis,
                 oskar_mem_float_const(uu, status),
                 oskar_mem_float_const(vv, status),
+                oskar_mem_float_const(ww, status),
                 oskar_mem_float_const(amps, status),
                 oskar_mem_float_const(weight, status), h->cellsize_rad,
-                h->grid_size, &num_skipped, plane_norm,
+                h->w_scale, h->grid_size, &num_skipped, plane_norm,
                 oskar_mem_float(plane, status));
     if (num_skipped > 0)
         printf("WARNING: Skipped %d visibility points.\n", num_skipped);

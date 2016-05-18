@@ -26,17 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_ALGORITHM_FREE_WPROJ_H_
-#define OSKAR_IMAGER_ALGORITHM_FREE_WPROJ_H_
+#ifndef OSKAR_IMAGER_CHECK_INIT_H_
+#define OSKAR_IMAGER_CHECK_INIT_H_
+
+/**
+ * @file oskar_imager_check_init.h
+ */
+
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_algorithm_free_wproj(oskar_Imager* h, int* status);
+/**
+ * @brief
+ * Ensures the imager is initialised after setting options.
+ *
+ * @details
+ * Ensures the imager is initialised after setting options.
+ *
+ * Note that this does not perform a re-initialisation.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in,out] status     Status return code.
+ */
+OSKAR_EXPORT
+void oskar_imager_check_init(oskar_Imager* h, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_IMAGER_ALGORITHM_FREE_WPROJ_H_ */
+#endif /* OSKAR_IMAGER_CHECK_INIT_H_ */

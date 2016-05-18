@@ -28,8 +28,8 @@
 
 #include <cufft.h>
 #include <private_imager.h>
-#include <private_imager_algorithm_free_fft.h>
-#include <private_imager_algorithm_init_fft.h>
+#include <private_imager_init_fft.h>
+#include <private_imager_free_fft.h>
 
 #include <oskar_cmath.h>
 #include <oskar_convert_fov_to_cellsize.h>
@@ -42,32 +42,32 @@
 extern "C" {
 #endif
 
-void oskar_imager_algorithm_init_fft(oskar_Imager* h, int* status)
+void oskar_imager_init_fft(oskar_Imager* h, int* status)
 {
-    oskar_imager_algorithm_free_fft(h, status);
+    oskar_imager_free_fft(h, status);
     if (*status) return;
 
     /* Calculate cellsize. */
     h->cellsize_rad = oskar_convert_fov_to_cellsize(h->fov_deg * M_PI/180,
-            h->size);
+            h->image_size);
 
     /* Generate the convolution function. */
     h->conv_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
             h->oversample * (h->support + 1), status);
     h->corr_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
-            h->size, status);
+            h->grid_size, status);
     if (h->kernel_type == 'S')
     {
         oskar_grid_convolution_function_spheroidal(h->support, h->oversample,
                 oskar_mem_double(h->conv_func, status));
-        oskar_grid_correction_function_spheroidal(h->size,
+        oskar_grid_correction_function_spheroidal(h->grid_size, 0,
                 oskar_mem_double(h->corr_func, status));
     }
     else if (h->kernel_type == 'P')
     {
         oskar_grid_convolution_function_pillbox(h->support, h->oversample,
                 oskar_mem_double(h->conv_func, status));
-        oskar_grid_correction_function_pillbox(h->size,
+        oskar_grid_correction_function_pillbox(h->grid_size,
                 oskar_mem_double(h->corr_func, status));
     }
 
@@ -76,24 +76,24 @@ void oskar_imager_algorithm_init_fft(oskar_Imager* h, int* status)
     {
         /* Generate FFT plan. */
         if (h->imager_prec == OSKAR_DOUBLE)
-            cufftPlan2d(&h->cufft_plan_imager, h->size, h->size, CUFFT_Z2Z);
+            cufftPlan2d(&h->cufft_plan, h->grid_size, h->grid_size, CUFFT_Z2Z);
         else
-            cufftPlan2d(&h->cufft_plan_imager, h->size, h->size, CUFFT_C2C);
+            cufftPlan2d(&h->cufft_plan, h->grid_size, h->grid_size, CUFFT_C2C);
     }
     else
     {
         /* Initialise workspaces for CPU FFT algorithm. */
-        int len_save = 4 * h->size +
-                2 * (int)(log((double)h->size) / log(2.0)) + 8;
+        int len_save = 4 * h->grid_size +
+                2 * (int)(log((double)h->grid_size) / log(2.0)) + 8;
         h->fftpack_wsave = oskar_mem_create(h->imager_prec, OSKAR_CPU,
                 len_save, status);
         h->fftpack_work = oskar_mem_create(h->imager_prec, OSKAR_CPU,
-                2 * h->size * h->size, status);
+                2 * h->grid_size * h->grid_size, status);
         if (h->imager_prec == OSKAR_DOUBLE)
-            oskar_fftpack_cfft2i(h->size, h->size,
+            oskar_fftpack_cfft2i(h->grid_size, h->grid_size,
                     oskar_mem_double(h->fftpack_wsave, status));
         else
-            oskar_fftpack_cfft2i_f(h->size, h->size,
+            oskar_fftpack_cfft2i_f(h->grid_size, h->grid_size,
                     oskar_mem_float(h->fftpack_wsave, status));
     }
 }

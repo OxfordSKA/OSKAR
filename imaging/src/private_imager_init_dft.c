@@ -28,44 +28,30 @@
 
 #include <private_imager.h>
 #include <private_imager_free_dft.h>
-#include <private_imager_free_fft.h>
-#include <private_imager_free_wproj.h>
-#include <oskar_imager_reset_cache.h>
-#include <fitsio.h>
+#include <private_imager_init_dft.h>
+#include <oskar_evaluate_image_lmn_grid.h>
 
-#include <stdlib.h>
+#include <oskar_cmath.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_reset_cache(oskar_Imager* h, int* status)
+void oskar_imager_init_dft(oskar_Imager* h, int* status)
 {
-    int i;
+    int num_pixels;
     oskar_imager_free_dft(h, status);
-    oskar_imager_free_fft(h, status);
-    oskar_imager_free_wproj(h, status);
-    free(h->plane_norm);
-    for (i = 0; i < h->num_planes; ++i)
-        oskar_mem_free(h->planes[i], status);
-    free(h->planes);
-    oskar_mem_realloc(h->uu_im, 0, status);
-    oskar_mem_realloc(h->vv_im, 0, status);
-    oskar_mem_realloc(h->ww_im, 0, status);
-    oskar_mem_realloc(h->uu_tmp, 0, status);
-    oskar_mem_realloc(h->vv_tmp, 0, status);
-    oskar_mem_realloc(h->ww_tmp, 0, status);
-    oskar_mem_realloc(h->vis_im, 0, status);
-    oskar_mem_realloc(h->stokes, 0, status);
-    for (i = 0; i < h->im_num_pols; ++i)
-    {
-        if (h->fits_file[i])
-            ffclos(h->fits_file[i], status);
-        h->fits_file[i] = 0;
-    }
-    h->plane_norm = 0;
-    h->num_planes = 0;
-    h->planes = 0;
+    if (*status) return;
+
+    /* Calculate pixel coordinate grid required for the DFT imager. */
+    num_pixels = h->image_size * h->image_size;
+    h->l = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
+    h->m = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
+    h->n = oskar_mem_create(h->imager_prec, OSKAR_CPU, num_pixels, status);
+    oskar_evaluate_image_lmn_grid(h->image_size, h->image_size,
+            h->fov_deg * M_PI/180, h->fov_deg * M_PI/180, 0,
+            h->l, h->m, h->n, status);
+    oskar_mem_add_real(h->n, -1.0, status); /* n-1 */
 }
 
 #ifdef __cplusplus

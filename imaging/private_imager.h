@@ -53,7 +53,7 @@ struct oskar_Imager
     int imager_prec, num_gpus, *cuda_device_ids, fft_on_gpu;
     int chan_snaps, time_snaps, chan_range[2], time_range[2];
     int im_type, im_num_times, im_num_channels, im_num_pols, pol_offset;
-    int algorithm, size, use_ms, use_stokes, support, oversample;
+    int algorithm, image_size, use_ms, use_stokes, support, oversample;
     char direction_type, kernel_type, *image_root, *ms_column;
     double fov_deg, im_centre_deg[2];
 
@@ -76,12 +76,13 @@ struct oskar_Imager
 
     /* FFT imager data. */
     double cellsize_rad;
+    int grid_size;
     oskar_Mem *conv_func, *corr_func, *fftpack_wsave, *fftpack_work;
-    cufftHandle cufft_plan_imager;
+    cufftHandle cufft_plan;
 
     /* W-projection imager data. */
-    int num_w_planes, conv_size, conv_size_half;
-    double max_uvw, w_scale;
+    int num_w_planes, conv_size_half, gcf_padding;
+    double w_scale;
     oskar_Mem *w_kernels, *w_support;
 
     /* Memory allocated per GPU (array of DeviceData structures). */

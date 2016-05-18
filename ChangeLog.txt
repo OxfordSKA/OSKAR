@@ -9,6 +9,9 @@
     * Added option to use gridding and FFT to make images that are
       consistent with those from CASA.
 
+    * Added option to use W-projection to make images that are
+      consistent with those from CASA.
+
     * Fix to ensure pixel coordinates are consistent between
       the DFT and FFT algorithms.
 

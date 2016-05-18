@@ -20,9 +20,11 @@ if (CUDA_FOUND)
         src/oskar_fftpack_cfft_f.c
         src/oskar_fftphase.c
         src/oskar_grid_simple.c
+        src/oskar_grid_wproj.c
         src/oskar_grid_correction.c
         src/oskar_grid_functions_spheroidal.c
         src/oskar_grid_functions_pillbox.c
+        src/oskar_imager_check_init.c
         src/oskar_imager_create.c
         src/oskar_imager_finalise.c
         src/oskar_imager_free.c
@@ -35,16 +37,17 @@ if (CUDA_FOUND)
         src/oskar_imager_select_vis.c
         src/oskar_imager_set_options.c
         src/oskar_imager_update.c
-        src/private_imager_algorithm_free_dft.c
-        src/private_imager_algorithm_free_fft.c
-        src/private_imager_algorithm_free_wproj.c
-        src/private_imager_algorithm_init_dft.c
-        src/private_imager_algorithm_init_fft.c
-        src/private_imager_algorithm_init_wproj.c
-        src/private_imager_create_fits_files.c
+        src/private_imager_free_dft.c
+        src/private_imager_free_fft.c
         src/private_imager_free_gpu_data.c
+        src/private_imager_free_wproj.c
+        src/private_imager_init_dft.c
+        src/private_imager_init_fft.c
+        src/private_imager_init_wproj.c
+        src/private_imager_create_fits_files.c
         src/private_imager_update_plane_dft.c
         src/private_imager_update_plane_fft.c
+        src/private_imager_update_plane_wproj.c
     )
 
     add_library(${libname} ${${libname}_SRC})

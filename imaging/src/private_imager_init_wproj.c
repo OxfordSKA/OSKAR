@@ -30,14 +30,13 @@
 #include <cuda_runtime_api.h>
 
 #include <private_imager.h>
-#include <private_imager_algorithm_free_wproj.h>
-#include <private_imager_algorithm_init_wproj.h>
+#include <private_imager_free_wproj.h>
+#include <private_imager_init_wproj.h>
 #include <oskar_convert_fov_to_cellsize.h>
 #include <oskar_fftpack_cfft.h>
 #include <oskar_fftpack_cfft_f.h>
 #include <oskar_get_memory_usage.h>
 #include <oskar_grid_functions_spheroidal.h>
-#include <oskar_timer.h>
 
 #include <oskar_cmath.h>
 #include <stdlib.h>
@@ -50,173 +49,68 @@ extern "C" {
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
-static int cmpfunc(const void* a, const void* b)
-{
-    return (*(const int*)a - *(const int*)b);
-}
-
-static int composite_nearest_even(int value, int* smaller, int *larger)
-{
-    double x;
-    int i = 0, i2, i3, i5, n2, n3, n5, nt, *values, up, down;
-    x = (double) value;
-    n2 = 1 + (int) (log(x) / log(2.0) + 1.0);
-    n3 = 1 + (int) (log(x) / log(3.0) + 1.0);
-    n5 = 1 + (int) (log(x) / log(5.0) + 1.0);
-    nt = n2 * n3 * n5;
-    values = (int*) malloc(nt * sizeof(int));
-    for (i2 = 0; i2 < n2; ++i2)
-    {
-        for (i3 = 0; i3 < n3; ++i3)
-        {
-            for (i5 = 0; i5 < n5; ++i5, ++i)
-            {
-                values[i] = (int) round(
-                        pow(2.0, (double) i2) *
-                        pow(3.0, (double) i3) *
-                        pow(5.0, (double) i5));
-            }
-        }
-    }
-    qsort(values, nt, sizeof(int), cmpfunc);
-
-    /* Get next larger even. */
-    for (i = 0; i < nt; ++i)
-    {
-        up = values[i];
-        if ((up > value) && (up % 2 == 0)) break;
-    }
-
-    /* Get next smaller even. */
-    for (i = nt - 1; i >= 0; --i)
-    {
-        down = values[i];
-        if ((down < value) && (down % 2 == 0)) break;
-    }
-
-    free(values);
-    if (smaller) *smaller = down;
-    if (larger) *larger = up;
-    return (abs(up - value) < abs(down - value) ? up : down);
-}
-
-
-static void oskar_generate_w_phase_screen(const int iw, const int conv_size,
+static int oskar_composite_nearest_even(int value, int* smaller, int *larger);
+static void generate_w_phase_screen(const int iw, const int conv_size,
         const int inner, const double sampling, const double w_scale,
-        const double* taper_func, oskar_Mem* screen, int* status)
-{
-    int ix, iy, ind, offset, inner_half;
-    double l, m, msq, phase, rsq, f, sval, cval, taper, taper_x, taper_y;
+        const double* taper_func, oskar_Mem* screen, int* status);
 
-    oskar_mem_clear_contents(screen, status);
-    if (*status) return;
-    f = (2.0 * M_PI * iw * iw) / w_scale;
-    inner_half = inner / 2;
-    if (oskar_mem_precision(screen) == OSKAR_SINGLE)
-    {
-        float* scr = oskar_mem_float(screen, status);
-        for (iy = -inner_half; iy < inner_half; ++iy)
-        {
-            taper_y = taper_func[iy + inner_half];
-            m = sampling * (double)iy;
-            msq = m*m;
-            offset = (iy > -1 ? iy : (iy + conv_size)) * conv_size;
-            for (ix = -inner_half; ix < inner_half; ++ix)
-            {
-                l = sampling * (double)ix;
-                rsq = l*l + msq;
-                if (rsq < 1.0)
-                {
-                    taper_x = taper_func[ix + inner_half];
-                    taper = taper_x * taper_y;
-                    ind = 2 * (offset + (ix > -1 ? ix : (ix + conv_size)));
-                    phase = f * (sqrt(1.0 - rsq) - 1.0);
-                    sval = sin(phase);
-                    cval = cos(phase);
-                    scr[ind]     = taper * cval;
-                    scr[ind + 1] = taper * sval;
-                }
-            }
-        }
-    }
-    else
-    {
-        double* scr = oskar_mem_double(screen, status);
-        for (iy = -inner_half; iy < inner_half; ++iy)
-        {
-            taper_y = taper_func[iy + inner_half];
-            m = sampling * (double)iy;
-            msq = m*m;
-            offset = (iy > -1 ? iy : (iy + conv_size)) * conv_size;
-            for (ix = -inner_half; ix < inner_half; ++ix)
-            {
-                l = sampling * (double)ix;
-                rsq = l*l + msq;
-                if (rsq < 1.0)
-                {
-                    taper_x = taper_func[ix + inner_half];
-                    taper = taper_x * taper_y;
-                    ind = 2 * (offset + (ix > -1 ? ix : (ix + conv_size)));
-                    phase = f * (sqrt(1.0 - rsq) - 1.0);
-                    sval = sin(phase);
-                    cval = cos(phase);
-                    scr[ind]     = taper * cval;
-                    scr[ind + 1] = taper * sval;
-                }
-            }
-        }
-    }
-}
-
-
-void oskar_imager_algorithm_init_wproj(oskar_Imager* h, int* status)
+/*
+ * W-kernel generation is based on CASA implementation
+ * in code/synthesis/TransformMachines/WPConvFunc.cc
+ */
+void oskar_imager_init_wproj(oskar_Imager* h, int* status)
 {
     size_t max_mem_bytes, max_bytes_per_plane;
-    int i, iw, ix, iy, *supp, new_conv_size, size_padded, gcf_padding = 4;
-    int conv_size, conv_size_half, inner, nearest, next_larger;
-    double l_max, max_val, max_conv_size_considered, sampling, ww_mid;
-    double *taper_func, *maxes, sum;
+    int i, iw, ix, iy, *supp, new_conv_size, gcf_padding;
+    int conv_size, conv_size_half, inner, nearest;
+    double l_max, max_conv_size, max_uvw, max_val, sampling, sum, ww_mid;
+    double *taper_func, *maxes;
     double image_padding = 1.2;
     cufftHandle cufft_plan = 0;
     oskar_Mem *screen = 0, *screen_gpu = 0, *wsave = 0, *work = 0;
     int fft_on_gpu = 1;
-    /*oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);*/
 
     /* Clear old kernels. */
-    oskar_imager_algorithm_free_wproj(h, status);
+    oskar_imager_free_wproj(h, status);
     if (*status) return;
 
-    /* FIXME TEST VALUES FOR fov_deg = 6.0 deg, size = 8192 */
-    h->ww_max = 1874.87798018102921560;
-    h->ww_min = 0.69882997322217733;
-    h->ww_rms = 457.57269726837921553;
+    /* Define GCF padding. */
+    gcf_padding = h->gcf_padding = 4;
 
     /* Calculate cellsize. */
     h->cellsize_rad = oskar_convert_fov_to_cellsize(h->fov_deg * M_PI/180,
-            h->size);
+            h->image_size);
 
-    /* Get number of w-planes required. */
-    h->max_uvw = 1.05 * h->ww_max;
-    ww_mid = 0.5 * (h->ww_min + h->ww_max);
-    if (h->ww_rms > ww_mid)
-        h->max_uvw *= h->ww_rms / ww_mid;
-    h->num_w_planes = (int)(h->max_uvw *
-            fabs(sin(h->cellsize_rad * h->size / 2.0)));
+    /* Calculate number of w-planes if not set. */
+    if (h->num_w_planes < 1)
+    {
+        max_uvw = 1.05 * h->ww_max;
+        ww_mid = 0.5 * (h->ww_min + h->ww_max);
+        if (h->ww_rms > ww_mid)
+            max_uvw *= h->ww_rms / ww_mid;
+        h->num_w_planes = (int)(max_uvw *
+                fabs(sin(h->cellsize_rad * h->image_size / 2.0)));
+    }
+    else
+    {
+        if (h->ww_max > 0.0)
+            max_uvw = 1.05 * h->ww_max;
+        else
+            max_uvw = 0.25 / fabs(h->cellsize_rad);
+    }
 
-    /* Get convolution kernel size. */
-    h->w_scale = pow(h->num_w_planes - 1, 2.0) / h->max_uvw;
+    /* Calculate convolution kernel size. */
+    h->w_scale = pow(h->num_w_planes - 1, 2.0) / max_uvw;
     max_mem_bytes = oskar_get_total_physical_memory();
-    max_bytes_per_plane = 64 * 1024*1024; /* 64 MB per plane */
+    max_bytes_per_plane = 64 * 1024 * 1024; /* 64 MB per plane */
     max_mem_bytes = MIN(max_mem_bytes, max_bytes_per_plane * h->num_w_planes);
-    max_conv_size_considered = sqrt(max_mem_bytes / (16.0 * h->num_w_planes));
-    nearest = composite_nearest_even(
-            2 * (int)(max_conv_size_considered / 2.0), 0, 0);
-    conv_size = MIN((int)(h->size * image_padding), nearest);
+    max_conv_size = sqrt(max_mem_bytes / (16.0 * h->num_w_planes));
+    nearest = oskar_composite_nearest_even(2 * (int)(max_conv_size / 2.0), 0, 0);
+    conv_size = MIN((int)(h->image_size * image_padding), nearest);
     conv_size_half = conv_size / 2 - 1;
-    h->conv_size = conv_size;
     h->conv_size_half = conv_size_half;
 
-    /* Allocate w-kernels and support array. */
+    /* Allocate kernels and support array. */
     h->w_support = oskar_mem_create(OSKAR_INT, OSKAR_CPU,
             h->num_w_planes, status);
     h->w_kernels = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX, OSKAR_CPU,
@@ -225,14 +119,14 @@ void oskar_imager_algorithm_init_wproj(oskar_Imager* h, int* status)
     supp = oskar_mem_int(h->w_support, status);
     if (*status) return;
 
-    /* Get size of inner region of kernel. */
+    /* Get size of inner region of kernel and padded grid size. */
     inner = conv_size / gcf_padding;
     l_max = sin(0.5 * h->fov_deg * M_PI/180.0);
-    sampling = (2.0 * l_max) / h->size;
+    sampling = (2.0 * l_max) / h->image_size;
     sampling *= gcf_padding;
-    nearest = composite_nearest_even(
-            image_padding * ((double)(h->size)) - 0.5, 0, &next_larger);
-    sampling *= ((double) next_larger) / ((double) conv_size);
+    (void) oskar_composite_nearest_even(
+            image_padding * ((double)(h->image_size)) - 0.5, 0, &h->grid_size);
+    sampling *= ((double) h->grid_size) / ((double) conv_size);
 
     /* Create scratch arrays and FFT plan for the phase screens. */
     screen = oskar_mem_create(h->imager_prec | OSKAR_COMPLEX,
@@ -270,14 +164,14 @@ void oskar_imager_algorithm_init_wproj(oskar_Imager* h, int* status)
         taper_func[i] = oskar_grid_function_spheroidal(fabs(nu));
     }
 
-    /* Evaluate w-kernels. */
+    /* Evaluate kernels. */
     maxes = (double*) calloc(h->num_w_planes, sizeof(double));
     for (iw = 0; iw < h->num_w_planes; ++iw)
     {
         int ind1, ind2, offset;
 
         /* Generate the tapered phase screen. */
-        oskar_generate_w_phase_screen(iw, conv_size, inner, sampling,
+        generate_w_phase_screen(iw, conv_size, inner, sampling,
                 h->w_scale, taper_func, screen, status);
 
         /* Perform the FFT to get the kernel. No shifts are required. */
@@ -430,20 +324,28 @@ void oskar_imager_algorithm_init_wproj(oskar_Imager* h, int* status)
                 out += copy_len;
             }
         }
-        h->conv_size = conv_size = new_conv_size;
+        conv_size = new_conv_size;
         h->conv_size_half = conv_size_half = new_conv_size_half;
         oskar_mem_realloc(h->w_kernels,
                 ((size_t) h->num_w_planes) * ((size_t) new_conv_size_half) *
                 ((size_t) new_conv_size_half), status);
     }
 
+#if 0
+    /* Print kernel support sizes. */
+    for (iw = 0; iw < h->num_w_planes; ++iw)
+    {
+        int *supp = oskar_mem_int(h->w_support, status);
+        printf("Plane %d, support: %d\n", iw, supp[iw] * gcf_padding);
+    }
+#endif
+
     /* Normalise so that kernel 0 sums to 1,
      * when jumping in steps of gcf_padding. */
     sum = 0.0; /* Real part only. */
     if (oskar_mem_precision(h->w_kernels) == OSKAR_DOUBLE)
     {
-        double *ptr;
-        ptr = oskar_mem_double(h->w_kernels, status);
+        double *ptr = oskar_mem_double(h->w_kernels, status);
         for (iy = -supp[0]; iy <= supp[0]; ++iy)
             for (ix = -supp[0]; ix <= supp[0]; ++ix)
                 sum += ptr[2 * (abs(ix) * gcf_padding +
@@ -451,8 +353,7 @@ void oskar_imager_algorithm_init_wproj(oskar_Imager* h, int* status)
     }
     else
     {
-        float *ptr;
-        ptr = oskar_mem_float(h->w_kernels, status);
+        float *ptr = oskar_mem_float(h->w_kernels, status);
         for (iy = -supp[0]; iy <= supp[0]; ++iy)
             for (ix = -supp[0]; ix <= supp[0]; ++ix)
                 sum += ptr[2 * (abs(ix) * gcf_padding +
@@ -460,22 +361,155 @@ void oskar_imager_algorithm_init_wproj(oskar_Imager* h, int* status)
     }
     oskar_mem_scale_real(h->w_kernels, 1.0 / sum, status);
 
-    /* Generate FFT plan. */
-    nearest = composite_nearest_even(image_padding * h->size, 0,
-            &size_padded);
-    if (h->imager_prec == OSKAR_DOUBLE)
-        cufftPlan2d(&h->cufft_plan_imager, size_padded, size_padded, CUFFT_Z2Z);
-    else
-        cufftPlan2d(&h->cufft_plan_imager, size_padded, size_padded, CUFFT_C2C);
+    /* Generate grid correction function. */
+    h->corr_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
+            h->grid_size, status);
+    oskar_grid_correction_function_spheroidal(h->grid_size, gcf_padding,
+            oskar_mem_double(h->corr_func, status));
 
-    /* Print support sizes. */
-    for (iw = 0; iw < h->num_w_planes; ++iw)
+    /* Set up the FFT. */
+    if (h->fft_on_gpu)
     {
-        int *supp;
-        supp = oskar_mem_int(h->w_support, status);
-        printf("Plane %d, support: %d\n", iw, supp[iw] * gcf_padding);
+        /* Generate FFT plan. */
+        if (h->imager_prec == OSKAR_DOUBLE)
+            cufftPlan2d(&h->cufft_plan, h->grid_size, h->grid_size, CUFFT_Z2Z);
+        else
+            cufftPlan2d(&h->cufft_plan, h->grid_size, h->grid_size, CUFFT_C2C);
+    }
+    else
+    {
+        /* Initialise workspaces for CPU FFT algorithm. */
+        int len_save = 4 * h->grid_size +
+                2 * (int)(log((double)h->grid_size) / log(2.0)) + 8;
+        h->fftpack_wsave = oskar_mem_create(h->imager_prec, OSKAR_CPU,
+                len_save, status);
+        h->fftpack_work = oskar_mem_create(h->imager_prec, OSKAR_CPU,
+                2 * h->grid_size * h->grid_size, status);
+        if (h->imager_prec == OSKAR_DOUBLE)
+            oskar_fftpack_cfft2i(h->grid_size, h->grid_size,
+                    oskar_mem_double(h->fftpack_wsave, status));
+        else
+            oskar_fftpack_cfft2i_f(h->grid_size, h->grid_size,
+                    oskar_mem_float(h->fftpack_wsave, status));
     }
 }
+
+
+static void generate_w_phase_screen(const int iw, const int conv_size,
+        const int inner, const double sampling, const double w_scale,
+        const double* taper_func, oskar_Mem* screen, int* status)
+{
+    int ix, iy, ind, offset, inner_half;
+    double l, m, msq, phase, rsq, f, taper, taper_x, taper_y;
+
+    oskar_mem_clear_contents(screen, status);
+    if (*status) return;
+    f = (2.0 * M_PI * iw * iw) / w_scale;
+    inner_half = inner / 2;
+    if (oskar_mem_precision(screen) == OSKAR_SINGLE)
+    {
+        float* scr = oskar_mem_float(screen, status);
+        for (iy = -inner_half; iy < inner_half; ++iy)
+        {
+            taper_y = taper_func[iy + inner_half];
+            m = sampling * (double)iy;
+            msq = m*m;
+            offset = (iy > -1 ? iy : (iy + conv_size)) * conv_size;
+            for (ix = -inner_half; ix < inner_half; ++ix)
+            {
+                l = sampling * (double)ix;
+                rsq = l*l + msq;
+                if (rsq < 1.0)
+                {
+                    taper_x = taper_func[ix + inner_half];
+                    taper = taper_x * taper_y;
+                    ind = 2 * (offset + (ix > -1 ? ix : (ix + conv_size)));
+                    phase = f * (sqrt(1.0 - rsq) - 1.0);
+                    scr[ind]     = taper * cos(phase);
+                    scr[ind + 1] = taper * sin(phase);
+                }
+            }
+        }
+    }
+    else
+    {
+        double* scr = oskar_mem_double(screen, status);
+        for (iy = -inner_half; iy < inner_half; ++iy)
+        {
+            taper_y = taper_func[iy + inner_half];
+            m = sampling * (double)iy;
+            msq = m*m;
+            offset = (iy > -1 ? iy : (iy + conv_size)) * conv_size;
+            for (ix = -inner_half; ix < inner_half; ++ix)
+            {
+                l = sampling * (double)ix;
+                rsq = l*l + msq;
+                if (rsq < 1.0)
+                {
+                    taper_x = taper_func[ix + inner_half];
+                    taper = taper_x * taper_y;
+                    ind = 2 * (offset + (ix > -1 ? ix : (ix + conv_size)));
+                    phase = f * (sqrt(1.0 - rsq) - 1.0);
+                    scr[ind]     = taper * cos(phase);
+                    scr[ind + 1] = taper * sin(phase);
+                }
+            }
+        }
+    }
+}
+
+
+static int cmpfunc(const void* a, const void* b)
+{
+    return (*(const int*)a - *(const int*)b);
+}
+
+
+static int oskar_composite_nearest_even(int value, int* smaller, int *larger)
+{
+    double x;
+    int i = 0, i2, i3, i5, n2, n3, n5, nt, *values, up, down;
+    x = (double) value;
+    n2 = 1 + (int) (log(x) / log(2.0) + 1.0);
+    n3 = 1 + (int) (log(x) / log(3.0) + 1.0);
+    n5 = 1 + (int) (log(x) / log(5.0) + 1.0);
+    nt = n2 * n3 * n5;
+    values = (int*) malloc(nt * sizeof(int));
+    for (i2 = 0; i2 < n2; ++i2)
+    {
+        for (i3 = 0; i3 < n3; ++i3)
+        {
+            for (i5 = 0; i5 < n5; ++i5, ++i)
+            {
+                values[i] = (int) round(
+                        pow(2.0, (double) i2) *
+                        pow(3.0, (double) i3) *
+                        pow(5.0, (double) i5));
+            }
+        }
+    }
+    qsort(values, nt, sizeof(int), cmpfunc);
+
+    /* Get next larger even. */
+    for (i = 0; i < nt; ++i)
+    {
+        up = values[i];
+        if ((up > value) && (up % 2 == 0)) break;
+    }
+
+    /* Get next smaller even. */
+    for (i = nt - 1; i >= 0; --i)
+    {
+        down = values[i];
+        if ((down < value) && (down % 2 == 0)) break;
+    }
+
+    free(values);
+    if (smaller) *smaller = down;
+    if (larger) *larger = up;
+    return (abs(up - value) < abs(down - value) ? up : down);
+}
+
 
 #ifdef __cplusplus
 }

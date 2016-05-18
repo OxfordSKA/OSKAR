@@ -50,15 +50,23 @@ void oskar_grid_convolution_function_spheroidal(const int support,
 
 
 void oskar_grid_correction_function_spheroidal(const int image_size,
-        double* fn)
+        const int padding_gcf, double* fn)
 {
     int i, extent;
-    double nu, val;
+    double nu, val, inc = 0.0, sinc_cor, x;
     extent = image_size / 2;
+    if (padding_gcf > 0)
+        inc = 1.0 / (image_size * padding_gcf);
     for (i = 0; i < image_size; ++i)
     {
+        sinc_cor = 1.0;
         nu = (double)(i - extent) / (double)extent;
-        val = oskar_grid_function_spheroidal(fabs(nu));
+        if (padding_gcf > 0 && i != extent)
+        {
+            x = M_PI * (i - extent) * inc;
+            sinc_cor = sin(x) / x;
+        }
+        val = oskar_grid_function_spheroidal(fabs(nu)) * (sinc_cor * sinc_cor);
         fn[i] = (val != 0.0) ? 1.0 / val : 1.0;
     }
 }

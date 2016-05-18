@@ -53,14 +53,8 @@ void oskar_grid_correction_function_pillbox(const int image_size,
         double* fn)
 {
     int i;
-    double val;
-    for (i = 0; i < image_size; ++i)
-    {
-        val = 1.0; /* No correction! */
-        fn[i] = (val != 0.0) ? 1.0 / val : 1.0;
-    }
+    for (i = 0; i < image_size; ++i) fn[i] = 1.0; /* No correction! */
 }
-
 
 
 #ifdef __cplusplus

@@ -72,16 +72,15 @@ static oskar_Imager* get_handle(PyObject* capsule)
 
 static int oskar_type_from_numpy(PyArrayObject* arr)
 {
-    int type = 0;
     switch (PyArray_TYPE(arr))
     {
-    case NPY_INT:     type = OSKAR_INT; break;
-    case NPY_FLOAT:   type = OSKAR_SINGLE; break;
-    case NPY_DOUBLE:  type = OSKAR_DOUBLE; break;
-    case NPY_CFLOAT:  type = OSKAR_SINGLE_COMPLEX; break;
-    case NPY_CDOUBLE: type = OSKAR_DOUBLE_COMPLEX; break;
+    case NPY_INT:     return OSKAR_INT;
+    case NPY_FLOAT:   return OSKAR_SINGLE;
+    case NPY_DOUBLE:  return OSKAR_DOUBLE;
+    case NPY_CFLOAT:  return OSKAR_SINGLE_COMPLEX;
+    case NPY_CDOUBLE: return OSKAR_DOUBLE_COMPLEX;
     }
-    return type;
+    return 0;
 }
 
 

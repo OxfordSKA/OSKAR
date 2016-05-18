@@ -29,10 +29,8 @@
 #include <private_imager.h>
 
 #include <oskar_binary.h>
-#include <oskar_imager_set_options.h>
-#include <oskar_imager_run.h>
-#include <oskar_imager_finalise.h>
-#include <oskar_imager_update.h>
+#include <oskar_binary_read_mem.h>
+#include <oskar_imager.h>
 #include <oskar_vis_block.h>
 #include <oskar_vis_header.h>
 
@@ -40,6 +38,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,6 +48,7 @@ static void oskar_imager_run_ms(oskar_Imager* h, const char* filename,
         int* status);
 static void oskar_imager_run_vis(oskar_Imager* h, const char* filename,
         int* status);
+
 
 void oskar_imager_run(oskar_Imager* h, const char* filename, int* status)
 {
@@ -68,9 +68,11 @@ void oskar_imager_run(oskar_Imager* h, const char* filename, int* status)
 
     /* Finalise the image plane(s) and write them out. */
     if (h->log)
-        oskar_log_message(h->log, 'M', 0, "Finalising image plane(s)...");
+        oskar_log_message(h->log, 'M', 0, "Finalising %d image plane(s)...",
+                h->num_planes);
     oskar_imager_finalise(h, 0, status);
 }
+
 
 void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
 {
@@ -100,6 +102,8 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
     num_stations = oskar_vis_header_num_stations(hdr);
     num_baselines = num_stations * (num_stations - 1) / 2;
     num_pols = oskar_type_is_matrix(oskar_vis_header_amp_type(hdr)) ? 4 : 1;
+    num_blocks = (num_times + max_times_per_block - 1) /
+            max_times_per_block;
 
     /* Set visibility meta-data. */
     oskar_imager_set_vis_frequency(h,
@@ -118,18 +122,85 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
         return;
     }
 
+    /* Get range of W values if using W-projection. */
+    if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
+    {
+        int j = 0, n = 0, length = 0;
+        double ww_min = DBL_MAX, ww_max = -DBL_MAX, ww_rms = 0.0;
+        double val, min_wavelength, max_wavelength, freq_start_hz;
+        const double c_0 = 299792458.0;
+        oskar_Mem* ww = oskar_mem_create(oskar_vis_header_coord_precision(hdr),
+                OSKAR_CPU, 0, status);
+
+        /* Get wavelength ranges. */
+        freq_start_hz = oskar_vis_header_freq_start_hz(hdr);
+        max_wavelength = c_0 / freq_start_hz;
+        min_wavelength = c_0 / (freq_start_hz +
+                num_channels * oskar_vis_header_freq_inc_hz(hdr));
+
+        /* Loop over blocks. */
+        for (i_block = 0; i_block < num_blocks; ++i_block)
+        {
+            if (*status) break;
+
+            /* Read baseline W coordinates. */
+            oskar_binary_set_query_search_start(vis_file,
+                    i_block * tags_per_block, status);
+            oskar_binary_read_mem(vis_file, ww, OSKAR_TAG_GROUP_VIS_BLOCK,
+                    OSKAR_VIS_BLOCK_TAG_BASELINE_WW, i_block, status);
+            length = oskar_mem_length(ww);
+
+            /* Update baseline W minimum, maximum and RMS. */
+            if (oskar_mem_precision(ww) == OSKAR_DOUBLE)
+            {
+                const double *p = oskar_mem_double_const(ww, status);
+                for (j = 0; j < length; ++j)
+                {
+                    val = fabs(p[j]);
+                    ww_rms += pow(val / min_wavelength, 2.0);
+                    if (val < ww_min) ww_min = val;
+                    if (val > ww_max) ww_max = val;
+                }
+            }
+            else
+            {
+                const float *p = oskar_mem_float_const(ww, status);
+                for (j = 0; j < length; ++j)
+                {
+                    val = fabs((double) (p[j]));
+                    ww_rms += pow(val / min_wavelength, 2.0);
+                    if (val < ww_min) ww_min = val;
+                    if (val > ww_max) ww_max = val;
+                }
+            }
+            n += length;
+        }
+
+        /* Finish off and set W ranges. */
+        ww_rms = sqrt(ww_rms / n);
+        ww_min /= max_wavelength;
+        ww_max /= min_wavelength;
+        oskar_imager_set_w_range(h, ww_min, ww_max, ww_rms);
+        oskar_mem_free(ww, status);
+    }
+
     /* Create weights array and set all to 1. */
     weight = oskar_mem_create(
             oskar_type_precision(oskar_vis_header_amp_type(hdr)),
             OSKAR_CPU, num_baselines * num_pols * max_times_per_block, status);
     oskar_mem_set_value_real(weight, 1.0, 0, 0, status);
 
+    /* Clear cache and initialise the algorithm. */
+    if (h->log)
+        oskar_log_message(h->log, 'M', 0, "Initialising algorithm...");
+    oskar_imager_reset_cache(h, status);
+    oskar_imager_check_init(h, status);
+
     /* Loop over visibility blocks. */
     blk = oskar_vis_block_create(OSKAR_CPU, hdr, status);
-    num_blocks = (num_times + max_times_per_block - 1) /
-            max_times_per_block;
     if (h->log)
     {
+        oskar_log_message(h->log, 'M', 0, "Reading visibility data...");
         oskar_log_message(h->log, 'S', -2, "");
         oskar_log_message(h->log, 'S', -2, "%3d%% ...", 0);
     }
@@ -248,9 +319,16 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     data = oskar_mem_create(type, OSKAR_CPU,
             num_baselines * num_channels, status);
 
+    /* Clear cache and initialise the algorithm. */
+    if (h->log)
+        oskar_log_message(h->log, 'M', 0, "Initialising algorithm...");
+    oskar_imager_reset_cache(h, status);
+    oskar_imager_check_init(h, status);
+
     /* Loop over visibility blocks. */
     if (h->log)
     {
+        oskar_log_message(h->log, 'M', 0, "Reading visibility data...");
         oskar_log_message(h->log, 'S', -2, "");
         oskar_log_message(h->log, 'S', -2, "%3d%% ...", 0);
     }

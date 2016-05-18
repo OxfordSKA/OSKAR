@@ -26,23 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_imager.h>
-#include <private_imager_algorithm_free_dft.h>
+#ifndef OSKAR_IMAGER_FREE_DFT_H_
+#define OSKAR_IMAGER_FREE_DFT_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_algorithm_free_dft(oskar_Imager* h, int* status)
-{
-    oskar_mem_free(h->l, status);
-    oskar_mem_free(h->m, status);
-    oskar_mem_free(h->n, status);
-    h->l = 0;
-    h->m = 0;
-    h->n = 0;
-}
+void oskar_imager_free_dft(oskar_Imager* h, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_IMAGER_FREE_DFT_H_ */

@@ -28,44 +28,19 @@
 
 #include <private_imager.h>
 #include <private_imager_free_dft.h>
-#include <private_imager_free_fft.h>
-#include <private_imager_free_wproj.h>
-#include <oskar_imager_reset_cache.h>
-#include <fitsio.h>
-
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_imager_reset_cache(oskar_Imager* h, int* status)
+void oskar_imager_free_dft(oskar_Imager* h, int* status)
 {
-    int i;
-    oskar_imager_free_dft(h, status);
-    oskar_imager_free_fft(h, status);
-    oskar_imager_free_wproj(h, status);
-    free(h->plane_norm);
-    for (i = 0; i < h->num_planes; ++i)
-        oskar_mem_free(h->planes[i], status);
-    free(h->planes);
-    oskar_mem_realloc(h->uu_im, 0, status);
-    oskar_mem_realloc(h->vv_im, 0, status);
-    oskar_mem_realloc(h->ww_im, 0, status);
-    oskar_mem_realloc(h->uu_tmp, 0, status);
-    oskar_mem_realloc(h->vv_tmp, 0, status);
-    oskar_mem_realloc(h->ww_tmp, 0, status);
-    oskar_mem_realloc(h->vis_im, 0, status);
-    oskar_mem_realloc(h->stokes, 0, status);
-    for (i = 0; i < h->im_num_pols; ++i)
-    {
-        if (h->fits_file[i])
-            ffclos(h->fits_file[i], status);
-        h->fits_file[i] = 0;
-    }
-    h->plane_norm = 0;
-    h->num_planes = 0;
-    h->planes = 0;
+    oskar_mem_free(h->l, status);
+    oskar_mem_free(h->m, status);
+    oskar_mem_free(h->n, status);
+    h->l = 0;
+    h->m = 0;
+    h->n = 0;
 }
 
 #ifdef __cplusplus
