@@ -319,6 +319,52 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     data = oskar_mem_create(type, OSKAR_CPU,
             num_baselines * num_channels, status);
 
+    /* Get range of W values if using W-projection. */
+    if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
+    {
+        int n = 0;
+        double ww_min = DBL_MAX, ww_max = -DBL_MAX, ww_rms = 0.0;
+        double val, min_wavelength, max_wavelength, freq_start_hz;
+        const double c_0 = 299792458.0;
+
+        /* Get wavelength ranges. */
+        freq_start_hz = oskar_ms_ref_freq_hz(ms);
+        max_wavelength = c_0 / freq_start_hz;
+        min_wavelength = c_0 / (freq_start_hz +
+                num_channels * oskar_ms_channel_width_hz(ms));
+
+        /* Loop over visibility blocks. */
+        for (start_row = 0; start_row < num_rows; start_row += num_baselines)
+        {
+            size_t allocated, required;
+            if (*status) break;
+
+            /* Read rows from Measurement Set. */
+            block_size = num_rows - start_row;
+            if (block_size > num_baselines) block_size = num_baselines;
+            allocated = oskar_mem_length(uvw) *
+                    oskar_mem_element_size(oskar_mem_type(uvw));
+            oskar_ms_get_column(ms, "UVW", start_row, block_size,
+                    allocated, oskar_mem_void(uvw), &required, status);
+
+            /* Update baseline W minimum, maximum and RMS. */
+            for (i = 0; i < block_size; ++i)
+            {
+                val = fabs(uvw_[3*i + 2]);
+                ww_rms += pow(val / min_wavelength, 2.0);
+                if (val < ww_min) ww_min = val;
+                if (val > ww_max) ww_max = val;
+            }
+            n += block_size;
+        }
+
+        /* Finish off and set W ranges. */
+        ww_rms = sqrt(ww_rms / n);
+        ww_min /= max_wavelength;
+        ww_max /= min_wavelength;
+        oskar_imager_set_w_range(h, ww_min, ww_max, ww_rms);
+    }
+
     /* Clear cache and initialise the algorithm. */
     if (h->log)
         oskar_log_message(h->log, 'M', 0, "Initialising algorithm...");
