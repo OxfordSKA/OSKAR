@@ -28,8 +28,8 @@
 
 #include <private_imager.h>
 
+#include <oskar_imager_accessors.h>
 #include <oskar_imager_create.h>
-#include <oskar_imager_set_options.h>
 
 #include <stdlib.h>
 

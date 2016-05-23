@@ -26,18 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_SET_OPTIONS_H_
-#define OSKAR_IMAGER_SET_OPTIONS_H_
+#ifndef OSKAR_IMAGER_ACCESSORS_H_
+#define OSKAR_IMAGER_ACCESSORS_H_
 
 /**
- * @file oskar_imager_set_options.h
+ * @file oskar_imager_accessors.h
  */
 
 #include <oskar_global.h>
+#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief
+ * Returns the grid size required by the algorithm.
+ *
+ * @details
+ * Returns the grid size required by the algorithm.
+ * This will be different to the image size when using W-projection.
+ */
+OSKAR_EXPORT
+int oskar_imager_grid_size(oskar_Imager* h);
+
+/**
+ * @brief
+ * Returns the number of W-planes in use.
+ *
+ * @details
+ * Returns the number of W-planes in use.
+ */
+OSKAR_EXPORT
+int oskar_imager_w_planes(oskar_Imager* h);
 
 /**
  * @brief
@@ -359,4 +381,4 @@ void oskar_imager_set_w_range(oskar_Imager* h,
 }
 #endif
 
-#endif /* OSKAR_IMAGER_SET_OPTIONS_H_ */
+#endif /* OSKAR_IMAGER_ACCESSORS_H_ */

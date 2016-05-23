@@ -84,6 +84,18 @@ static int oskar_type_from_numpy(PyArrayObject* arr)
 }
 
 
+static PyObject* check_init(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    oskar_imager_check_init(h, &status);
+    return Py_BuildValue("i", status);
+}
+
+
 static PyObject* create(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -178,6 +190,16 @@ static PyObject* finalise_plane(PyObject* self, PyObject* args)
 fail:
     Py_XDECREF(plane);
     return 0;
+}
+
+
+static PyObject* grid_size(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    return Py_BuildValue("i", oskar_imager_grid_size(h));
 }
 
 
@@ -428,6 +450,31 @@ static PyObject* set_vis_time(PyObject* self, PyObject* args)
     if (!(h = get_handle(capsule))) return 0;
     oskar_imager_set_vis_time(h, ref, inc, num, &status);
     return Py_BuildValue("i", status);
+}
+
+
+static PyObject* set_w_planes(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    int num = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &num)) return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    oskar_imager_set_w_planes(h, num);
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_w_range(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    double w_min = 0.0, w_max = 0.0, w_rms = 0.0;
+    if (!PyArg_ParseTuple(args, "Oddd", &capsule, &w_min, &w_max, &w_rms))
+        return 0;
+    if (!(h = get_handle(capsule))) return 0;
+    oskar_imager_set_w_range(h, w_min, w_max, w_rms);
+    return Py_BuildValue("");
 }
 
 
@@ -762,11 +809,13 @@ fail:
 /* Method table. */
 static PyMethodDef methods[] =
 {
+        {"check_init", (PyCFunction)check_init, METH_VARARGS, "check_init()"},
         {"create", (PyCFunction)create, METH_VARARGS, "create(type)"},
         {"finalise", (PyCFunction)finalise, METH_VARARGS,
                 "finalise(image)"},
         {"finalise_plane", (PyCFunction)finalise_plane, METH_VARARGS,
                 "finalise_plane(plane, plane_norm)"},
+        {"grid_size", (PyCFunction)grid_size, METH_VARARGS, "grid_size()"},
         {"make_image", (PyCFunction)make_image, METH_VARARGS,
                 "make_image(uu, vv, ww, amp, weight, fov_deg, size)"},
         {"reset_cache", (PyCFunction)reset_cache, METH_VARARGS,
@@ -800,6 +849,10 @@ static PyMethodDef methods[] =
                 "set_vis_phase_centre(ra_deg, dec_deg)"},
         {"set_vis_time", (PyCFunction)set_vis_time, METH_VARARGS,
                 "set_vis_time(ref_mjd_utc, inc_sec, num_times)"},
+        {"set_w_planes", (PyCFunction)set_w_planes, METH_VARARGS,
+                "set_w_planes(num_planes)"},
+        {"set_w_range", (PyCFunction)set_w_range, METH_VARARGS,
+                "set_w_range(w_min, w_max, w_rms)"},
         {"update", (PyCFunction)update, METH_VARARGS,
                 "update(num_baselines, uu, vv, ww, amps, weight, "
                 "num_pols, start_time, end_time, start_chan, end_chan)"},

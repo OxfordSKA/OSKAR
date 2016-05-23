@@ -195,6 +195,14 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
         oskar_log_message(h->log, 'M', 0, "Initialising algorithm...");
     oskar_imager_reset_cache(h, status);
     oskar_imager_check_init(h, status);
+    if (h->log)
+    {
+        oskar_log_message(h->log, 'M', 1, "Grid size is %d x %d.",
+                oskar_imager_grid_size(h), oskar_imager_grid_size(h));
+        if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
+            oskar_log_message(h->log, 'M', 1, "Using %d W-planes.",
+                    oskar_imager_w_planes(h));
+    }
 
     /* Loop over visibility blocks. */
     blk = oskar_vis_block_create(OSKAR_CPU, hdr, status);
@@ -370,6 +378,14 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
         oskar_log_message(h->log, 'M', 0, "Initialising algorithm...");
     oskar_imager_reset_cache(h, status);
     oskar_imager_check_init(h, status);
+    if (h->log)
+    {
+        oskar_log_message(h->log, 'M', 1, "Grid size is %d x %d.",
+                oskar_imager_grid_size(h), oskar_imager_grid_size(h));
+        if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
+            oskar_log_message(h->log, 'M', 1, "Using %d W-planes.",
+                    oskar_imager_w_planes(h));
+    }
 
     /* Loop over visibility blocks. */
     if (h->log)

@@ -72,22 +72,24 @@
     </s>
     <s k="fft"><label>FFT options</label>
         <s k="use_gpu"><label>Use GPU for FFT</label>
-        <type name="bool" default="false"/>
+            <type name="bool" default="false"/>
             <desc>If true, use the GPU to perform the FFT.</desc>
         </s>
         <s k="kernel_type"><label>Convolution kernel type</label>
         <type name="OptionList" default="Spheroidal">Spheroidal,Pillbox</type>
             <desc>The type of gridding kernel to use.</desc>
+            <depends k="image/algorithm" v="FFT"/>
         </s>
         <s k="support"><label>Support size</label>
             <type name="int" default="3"/>
             <desc>The support size used for the gridding kernel.</desc>
+            <depends k="image/algorithm" v="FFT"/>
         </s>
         <s k="oversample"><label>Oversample factor</label>
             <type name="int" default="100"/>
             <desc>The oversample factor used for the gridding kernel.</desc>
+            <depends k="image/algorithm" v="FFT"/>
         </s>
-        <depends k="image/algorithm" v="FFT"/>
     </s>
     <s k="direction"><label>Image centre direction</label>
         <type name="OptionList" default="Obs">

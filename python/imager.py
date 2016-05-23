@@ -47,6 +47,15 @@ class Imager(object):
         self._capsule, _ = _imager_lib.create(precision)
 
 
+    def check_init(self):
+        """Initialises the imager algorithm if it has not already been done.
+
+        All imager options and data must have been set appropriately 
+        before calling this function.
+        """
+        _imager_lib.check_init(self._capsule)
+
+
     def finalise(self, image=None):
         """Finalises the image or images and writes them to file.
 
@@ -72,6 +81,18 @@ class Imager(object):
             plane_norm (float): Plane normalisation to apply.
         """
         _imager_lib.finalise_plane(self._capsule, plane, plane_norm)
+
+
+    def grid_size(self):
+        """Returns the required grid size.
+
+        This may be different to the image size, for example if using 
+        W-projection. It will only be valid after a call to check_init().
+
+        Returns:
+            int: Grid side length.
+        """
+        return _imager_lib.grid_size(self._capsule)
 
 
     def reset_cache(self):
@@ -240,6 +261,28 @@ class Imager(object):
             num_times (int): Number of time steps in visibility data.
         """
         _imager_lib.set_vis_time(self._capsule, ref_mjd_utc, inc_sec, num_times)
+
+
+    def set_w_planes(self, num_planes):
+        """Sets the number of W-planes to use, if using W-projection.
+
+        A number less than or equal to zero means 'automatic'.
+
+        Args:
+            num_planes (int): Number of W-planes to use.
+        """
+        _imager_lib.set_w_planes(self._capsule, num_planes)
+
+
+    def set_w_range(self, w_min, w_max, w_rms):
+        """Sets the range of W values, if using W-projection.
+
+        Args:
+            w_min (float): Minimum value of w, in wavelengths.
+            w_max (float): Maximum value of w, in wavelengths.
+            w_rms (float): RMS value of w, in wavelengths.
+        """
+        _imager_lib.set_w_range(self._capsule, w_min, w_max, w_rms)
 
 
     def update(self, num_baselines, uu, vv, ww, amps, weight, 

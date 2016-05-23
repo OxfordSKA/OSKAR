@@ -24,6 +24,7 @@ if (CUDA_FOUND)
         src/oskar_grid_correction.c
         src/oskar_grid_functions_spheroidal.c
         src/oskar_grid_functions_pillbox.c
+        src/oskar_imager_accessors.c
         src/oskar_imager_check_init.c
         src/oskar_imager_create.c
         src/oskar_imager_finalise.c
@@ -35,7 +36,6 @@ if (CUDA_FOUND)
         src/oskar_imager_run.c
         src/oskar_imager_select_coords.c
         src/oskar_imager_select_vis.c
-        src/oskar_imager_set_options.c
         src/oskar_imager_update.c
         src/private_imager_free_dft.c
         src/private_imager_free_fft.c
