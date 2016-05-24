@@ -43,7 +43,7 @@ static void oskar_imager_data_range(const int settings_range[2],
         int num_data_values, int range[2], int* status);
 
 
-int oskar_imager_grid_size(oskar_Imager* h)
+int oskar_imager_plane_size(oskar_Imager* h)
 {
     return h->grid_size;
 }

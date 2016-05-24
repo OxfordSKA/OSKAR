@@ -193,13 +193,13 @@ fail:
 }
 
 
-static PyObject* grid_size(PyObject* self, PyObject* args)
+static PyObject* plane_size(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
     if (!(h = get_handle(capsule))) return 0;
-    return Py_BuildValue("i", oskar_imager_grid_size(h));
+    return Py_BuildValue("i", oskar_imager_plane_size(h));
 }
 
 
@@ -815,7 +815,7 @@ static PyMethodDef methods[] =
                 "finalise(image)"},
         {"finalise_plane", (PyCFunction)finalise_plane, METH_VARARGS,
                 "finalise_plane(plane, plane_norm)"},
-        {"grid_size", (PyCFunction)grid_size, METH_VARARGS, "grid_size()"},
+        {"plane_size", (PyCFunction)plane_size, METH_VARARGS, "plane_size()"},
         {"make_image", (PyCFunction)make_image, METH_VARARGS,
                 "make_image(uu, vv, ww, amp, weight, fov_deg, size)"},
         {"reset_cache", (PyCFunction)reset_cache, METH_VARARGS,

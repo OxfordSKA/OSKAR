@@ -56,7 +56,7 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
     oskar_mem_realloc(h->vv_tmp, 0, status);
     oskar_mem_realloc(h->ww_tmp, 0, status);
     oskar_mem_realloc(h->vis_im, 0, status);
-    oskar_mem_realloc(h->stokes, 0, status);
+    oskar_mem_free(h->stokes, status);
     for (i = 0; i < h->im_num_pols; ++i)
     {
         if (h->fits_file[i])
@@ -66,6 +66,7 @@ void oskar_imager_reset_cache(oskar_Imager* h, int* status)
     h->plane_norm = 0;
     h->num_planes = 0;
     h->planes = 0;
+    h->stokes = 0;
 }
 
 #ifdef __cplusplus

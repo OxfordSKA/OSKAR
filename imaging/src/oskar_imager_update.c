@@ -111,7 +111,7 @@ void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
     data = amp_in;
     if (h->use_stokes)
     {
-        oskar_imager_linear_to_stokes(amp_in, h->stokes, status);
+        oskar_imager_linear_to_stokes(amp_in, &h->stokes, status);
         data = h->stokes;
     }
 

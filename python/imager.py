@@ -83,16 +83,16 @@ class Imager(object):
         _imager_lib.finalise_plane(self._capsule, plane, plane_norm)
 
 
-    def grid_size(self):
-        """Returns the required grid size.
+    def plane_size(self):
+        """Returns the required plane size.
 
         This may be different to the image size, for example if using 
         W-projection. It will only be valid after a call to check_init().
 
         Returns:
-            int: Grid side length.
+            int: Plane side length.
         """
-        return _imager_lib.grid_size(self._capsule)
+        return _imager_lib.plane_size(self._capsule)
 
 
     def reset_cache(self):

@@ -52,7 +52,7 @@ extern "C" {
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_linear_to_stokes(const oskar_Mem* in, oskar_Mem* out,
+void oskar_imager_linear_to_stokes(const oskar_Mem* in, oskar_Mem** out,
         int* status);
 
 #ifdef __cplusplus

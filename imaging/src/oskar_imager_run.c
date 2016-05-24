@@ -197,8 +197,8 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
     oskar_imager_check_init(h, status);
     if (h->log)
     {
-        oskar_log_message(h->log, 'M', 1, "Grid size is %d x %d.",
-                oskar_imager_grid_size(h), oskar_imager_grid_size(h));
+        oskar_log_message(h->log, 'M', 1, "Plane size is %d x %d.",
+                oskar_imager_plane_size(h), oskar_imager_plane_size(h));
         if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
             oskar_log_message(h->log, 'M', 1, "Using %d W-planes.",
                     oskar_imager_w_planes(h));
@@ -263,7 +263,7 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
 {
 #ifndef OSKAR_NO_MS
     oskar_MeasurementSet* ms;
-    oskar_Mem *uvw, *u, *v, *w, *data, *weight;
+    oskar_Mem *uvw, *u, *v, *w, *data = 0, *scratch = 0, *weight = 0, *ptr;
     int num_rows, num_stations, num_baselines, num_pols;
     int start_time, end_time, start_chan, end_chan;
     int num_times, num_channels, percent_done = 0, percent_next = 10;
@@ -326,6 +326,9 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     if (num_pols == 4) type |= OSKAR_MATRIX;
     data = oskar_mem_create(type, OSKAR_CPU,
             num_baselines * num_channels, status);
+    if (num_channels > 1)
+        scratch = oskar_mem_create(type, OSKAR_CPU,
+                num_baselines * num_channels, status);
 
     /* Get range of W values if using W-projection. */
     if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
@@ -380,8 +383,8 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     oskar_imager_check_init(h, status);
     if (h->log)
     {
-        oskar_log_message(h->log, 'M', 1, "Grid size is %d x %d.",
-                oskar_imager_grid_size(h), oskar_imager_grid_size(h));
+        oskar_log_message(h->log, 'M', 1, "Plane size is %d x %d.",
+                oskar_imager_plane_size(h), oskar_imager_plane_size(h));
         if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
             oskar_log_message(h->log, 'M', 1, "Using %d W-planes.",
                     oskar_imager_w_planes(h));
@@ -414,15 +417,30 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
                 oskar_mem_element_size(oskar_mem_type(data));
         oskar_ms_get_column(ms, h->ms_column, start_row, block_size,
                 allocated, oskar_mem_void(data), &required, status);
+        ptr = data;
         if (*status) break;
 
-        /* TODO(FD) Swap baseline and channel dimensions. */
+        /* Swap baseline and channel dimensions. */
         if (num_channels != 1)
         {
-            oskar_log_error(h->log,
-                    "oskar_imager currently works with only one channel.");
-            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-            break;
+            int b, c, p, k, l;
+            float *in, *out;
+            ptr = scratch;
+            in  = oskar_mem_float(data, status);
+            out = oskar_mem_float(ptr, status);
+            for (c = 0; c < num_channels; ++c)
+            {
+                for (b = 0; b < block_size; ++b)
+                {
+                    for (p = 0; p < num_pols; ++p)
+                    {
+                        k = (num_pols * (c * block_size + b) + p) << 1;
+                        l = (num_pols * (b * num_channels + c) + p) << 1;
+                        out[k] = in[l];
+                        out[k + 1] = in[l + 1];
+                    }
+                }
+            }
         }
 
         /* Split up baseline coordinates. */
@@ -435,7 +453,7 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
 
         /* Add the baseline data. */
         oskar_imager_update(h, start_time, end_time, start_chan, end_chan,
-                num_pols, num_baselines, u, v, w, data, weight, status);
+                num_pols, block_size, u, v, w, ptr, weight, status);
         start_time += 1;
         end_time += 1;
 
@@ -454,6 +472,7 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
     oskar_mem_free(v, status);
     oskar_mem_free(w, status);
     oskar_mem_free(data, status);
+    oskar_mem_free(scratch, status);
     oskar_mem_free(weight, status);
     oskar_ms_close(ms);
 #else

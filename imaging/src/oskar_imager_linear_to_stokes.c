@@ -34,22 +34,28 @@
 extern "C" {
 #endif
 
-void oskar_imager_linear_to_stokes(const oskar_Mem* in, oskar_Mem* out,
+void oskar_imager_linear_to_stokes(const oskar_Mem* in, oskar_Mem** out,
         int* status)
 {
     size_t i, num;
     if (*status) return;
     num = oskar_mem_length(in);
-    if (oskar_mem_length(out) < num)
-        oskar_mem_realloc(out, num, status);
+
+    /* Create output array or resize if required. */
+    if (!*out)
+        *out = oskar_mem_create(oskar_mem_type(in), OSKAR_CPU, num, status);
+    else if (oskar_mem_length(*out) < num)
+        oskar_mem_realloc(*out, num, status);
+
+    /* Copy or convert if required. */
     if (!oskar_mem_is_matrix(in)) /* Already Stokes I. */
-        oskar_mem_copy_contents(out, in, 0, 0, num, status);
+        oskar_mem_copy_contents(*out, in, 0, 0, num, status);
     else
     {
         if (oskar_mem_precision(in) == OSKAR_DOUBLE)
         {
             const double4c* d_ = oskar_mem_double4c_const(in, status);
-            double4c* s_ = oskar_mem_double4c(out, status);
+            double4c* s_ = oskar_mem_double4c(*out, status);
             for (i = 0; i < num; ++i)
             {
                 /* I = 0.5 (XX + YY) */
@@ -69,7 +75,7 @@ void oskar_imager_linear_to_stokes(const oskar_Mem* in, oskar_Mem* out,
         else
         {
             const float4c* d_ = oskar_mem_float4c_const(in, status);
-            float4c* s_ = oskar_mem_float4c(out, status);
+            float4c* s_ = oskar_mem_float4c(*out, status);
             for (i = 0; i < num; ++i)
             {
                 /* I = 0.5 (XX + YY) */
