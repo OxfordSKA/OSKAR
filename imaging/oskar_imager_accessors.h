@@ -69,9 +69,14 @@ int oskar_imager_w_planes(oskar_Imager* h);
  * Sets the algorithm used by the imager.
  *
  * The \p type string can be:
- * - "FFT" to use gridding followed by a FFT.
+ * - "FFT" to use standard gridding followed by a FFT.
+ * - "W-projection" to use W-projection gridding followed by a FFT.
  * - "DFT 2D" to use a 2D Direct Fourier Transform, without gridding.
  * - "DFT 3D" to use a 3D Direct Fourier Transform, without gridding.
+ *
+ * This function also sets the default gridding parameters.
+ * Call oskar_imager_set_grid_kernel() or oskar_imager_set_oversample()
+ * afterwards to override these if required.
  *
  * @param[in,out] h          Handle to imager.
  * @param[in]     type       The algorithm to use (see description).
@@ -259,6 +264,19 @@ void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
 OSKAR_EXPORT
 void oskar_imager_set_output_root(oskar_Imager* h, const char* filename,
         int* status);
+
+/**
+ * @brief
+ * Sets kernel oversample factor.
+ *
+ * @details
+ * Sets the kernel oversample factor.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     value      Kernel oversample factor.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_oversample(oskar_Imager* h, int value);
 
 /**
  * @brief

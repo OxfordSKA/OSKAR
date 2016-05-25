@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 void oskar_grid_wproj_d(const int num_w_planes, const int* restrict support,
-        const int gcf_padding, const int conv_size_half,
+        const int oversample, const int conv_size_half,
         const double* restrict conv_func, const int num_vis,
         const double* restrict uu, const double* restrict vv,
         const double* restrict ww, const double* restrict vis,
@@ -75,8 +75,8 @@ void oskar_grid_wproj_d(const int num_w_planes, const int* restrict support,
         }
 
         /* Scaled distance from nearest grid point. */
-        off_u = (int)round((grid_u - g_centre - pos_u) * gcf_padding);
-        off_v = (int)round((grid_v - g_centre - pos_v) * gcf_padding);
+        off_u = (int)round((grid_u - g_centre - pos_u) * oversample);
+        off_v = (int)round((grid_v - g_centre - pos_v) * oversample);
 
         /* Convolve this point. */
         kernel_start = grid_w * kernel_dim;
@@ -88,10 +88,10 @@ void oskar_grid_wproj_d(const int num_w_planes, const int* restrict support,
         {
             for (j = -wsupport; j <= wsupport; ++j)
             {
-                iy = abs(off_v + j * gcf_padding);
+                iy = abs(off_v + j * oversample);
                 for (k = -wsupport; k <= wsupport; ++k)
                 {
-                    ix = abs(off_u + k * gcf_padding);
+                    ix = abs(off_u + k * oversample);
                     p = 2 * (kernel_start + iy * conv_size_half + ix);
                     cwt[0] = conv_func[p];
                     cwt[1] = -conv_func[p + 1]; /* Conjugate. */
@@ -106,10 +106,10 @@ void oskar_grid_wproj_d(const int num_w_planes, const int* restrict support,
         {
             for (j = -wsupport; j <= wsupport; ++j)
             {
-                iy = abs(off_v + j * gcf_padding);
+                iy = abs(off_v + j * oversample);
                 for (k = -wsupport; k <= wsupport; ++k)
                 {
-                    ix = abs(off_u + k * gcf_padding);
+                    ix = abs(off_u + k * oversample);
                     p = 2 * (kernel_start + iy * conv_size_half + ix);
                     cwt[0] = conv_func[p];
                     cwt[1] = conv_func[p + 1];
@@ -126,7 +126,7 @@ void oskar_grid_wproj_d(const int num_w_planes, const int* restrict support,
 
 
 void oskar_grid_wproj_f(const int num_w_planes, const int* restrict support,
-        const int gcf_padding, const int conv_size_half,
+        const int oversample, const int conv_size_half,
         const float* restrict conv_func, const int num_vis,
         const float* restrict uu, const float* restrict vv,
         const float* restrict ww, const float* restrict vis,
@@ -166,8 +166,8 @@ void oskar_grid_wproj_f(const int num_w_planes, const int* restrict support,
         }
 
         /* Scaled distance from nearest grid point. */
-        off_u = (int)round((grid_u - g_centre - pos_u) * gcf_padding);
-        off_v = (int)round((grid_v - g_centre - pos_v) * gcf_padding);
+        off_u = (int)round((grid_u - g_centre - pos_u) * oversample);
+        off_v = (int)round((grid_v - g_centre - pos_v) * oversample);
 
         /* Convolve this point. */
         kernel_start = grid_w * kernel_dim;
@@ -179,10 +179,10 @@ void oskar_grid_wproj_f(const int num_w_planes, const int* restrict support,
         {
             for (j = -wsupport; j <= wsupport; ++j)
             {
-                iy = abs(off_v + j * gcf_padding);
+                iy = abs(off_v + j * oversample);
                 for (k = -wsupport; k <= wsupport; ++k)
                 {
-                    ix = abs(off_u + k * gcf_padding);
+                    ix = abs(off_u + k * oversample);
                     p = 2 * (kernel_start + iy * conv_size_half + ix);
                     cwt[0] = conv_func[p];
                     cwt[1] = -conv_func[p + 1]; /* Conjugate. */
@@ -197,10 +197,10 @@ void oskar_grid_wproj_f(const int num_w_planes, const int* restrict support,
         {
             for (j = -wsupport; j <= wsupport; ++j)
             {
-                iy = abs(off_v + j * gcf_padding);
+                iy = abs(off_v + j * oversample);
                 for (k = -wsupport; k <= wsupport; ++k)
                 {
-                    ix = abs(off_u + k * gcf_padding);
+                    ix = abs(off_u + k * oversample);
                     p = 2 * (kernel_start + iy * conv_size_half + ix);
                     cwt[0] = conv_func[p];
                     cwt[1] = conv_func[p + 1];

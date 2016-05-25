@@ -90,6 +90,18 @@
             <desc>The oversample factor used for the gridding kernel.</desc>
             <depends k="image/algorithm" v="FFT"/>
         </s>
+        <logic group="OR">
+            <depends k="image/algorithm" v="FFT"/>
+            <depends k="image/algorithm" v="W-projection"/>
+        </logic>
+    </s>
+    <s k="wproj"><label>W-projection options</label>
+        <s k="w_planes"><label>Number of W-planes</label>
+            <type name="int" default="0"/>
+            <desc>The number of W-planes to use.
+            Values less than 1 mean "auto".</desc>
+        </s>
+        <depends k="image/algorithm" v="W-projection"/>
     </s>
     <s k="direction"><label>Image centre direction</label>
         <type name="OptionList" default="Obs">

@@ -48,7 +48,7 @@ extern "C" {
  *
  * @param[in] num_w_planes   Number of W-projection planes.
  * @param[in] support        GCF support size per W-plane.
- * @param[in] gcf_padding    GCF oversample factor.
+ * @param[in] oversample     GCF oversample factor.
  * @param[in] conv_size_half Side length of W-kernel cube.
  * @param[in] conv_func      GCF cube (W-kernels).
  * @param[in] num_vis        Number of visibility points.
@@ -66,7 +66,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 void oskar_grid_wproj_d(const int num_w_planes, const int* restrict support,
-        const int gcf_padding, const int conv_size_half,
+        const int oversample, const int conv_size_half,
         const double* restrict conv_func, const int num_vis,
         const double* restrict uu, const double* restrict vv,
         const double* restrict ww, const double* restrict vis,
@@ -83,7 +83,7 @@ void oskar_grid_wproj_d(const int num_w_planes, const int* restrict support,
  *
  * @param[in] num_w_planes   Number of W-projection planes.
  * @param[in] support        GCF support size per W-plane.
- * @param[in] gcf_padding    GCF oversample factor.
+ * @param[in] oversample    GCF oversample factor.
  * @param[in] conv_size_half Side length of W-kernel cube.
  * @param[in] conv_func      GCF cube (W-kernels).
  * @param[in] num_vis        Number of visibility points.
@@ -101,7 +101,7 @@ void oskar_grid_wproj_d(const int num_w_planes, const int* restrict support,
  */
 OSKAR_EXPORT
 void oskar_grid_wproj_f(const int num_w_planes, const int* restrict support,
-        const int gcf_padding, const int conv_size_half,
+        const int oversample, const int conv_size_half,
         const float* restrict conv_func, const int num_vis,
         const float* restrict uu, const float* restrict vv,
         const float* restrict ww, const float* restrict vis,

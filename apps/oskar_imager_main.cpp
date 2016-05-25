@@ -85,11 +85,15 @@ int main(int argc, char** argv)
     s.begin_group("image");
     prec = s.to_int("double_precision", &e) ? OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_Imager* h = oskar_imager_create(prec, &e);
+    if (!s.starts_with("cuda_device_ids", "all", &e))
+    {
+        vector<int> ids = s.to_int_list("cuda_device_ids", &e);
+        if (ids.size() > 0) oskar_imager_set_gpus(h, ids.size(), &ids[0], &e);
+    }
     oskar_imager_set_log(h, log);
     oskar_imager_set_ms_column(h, s.to_string("ms_column", &e).c_str(), &e);
     oskar_imager_set_output_root(h, s.to_string("root_path", &e).c_str(), &e);
     oskar_imager_set_image_type(h, s.to_string("image_type", &e).c_str(), &e);
-    oskar_imager_set_algorithm(h, s.to_string("algorithm", &e).c_str(), &e);
     oskar_imager_set_fov(h, s.to_double("fov_deg", &e));
     oskar_imager_set_size(h, s.to_int("size", &e));
     end = s.starts_with("channel_end", "max", &e) ? -1 :
@@ -100,19 +104,23 @@ int main(int argc, char** argv)
             s.to_int("time_end", &e);
     oskar_imager_set_time_range(h, s.to_int("time_start", &e), end,
             s.to_int("time_snapshots", &e));
-    oskar_imager_set_grid_kernel(h,
-            s.to_string("fft/kernel_type", &e).c_str(),
-            s.to_int("fft/support", &e),
-            s.to_int("fft/oversample", &e), &e);
+    oskar_imager_set_algorithm(h, s.to_string("algorithm", &e).c_str(), &e);
+    if (s.starts_with("algorithm", "FFT", &e) ||
+            s.starts_with("algorithm", "fft", &e))
+    {
+        oskar_imager_set_grid_kernel(h,
+                s.to_string("fft/kernel_type", &e).c_str(),
+                s.to_int("fft/support", &e),
+                s.to_int("fft/oversample", &e), &e);
+    }
+    if (!s.starts_with("wproj/w_planes", "auto", &e))
+        oskar_imager_set_w_planes(h, s.to_int("wproj/w_planes", &e));
     oskar_imager_set_fft_on_gpu(h, s.to_int("fft/use_gpu", &e));
     if (s.first_letter("direction", &e) == 'R')
+    {
         oskar_imager_set_direction(h,
                 s.to_double("direction/ra_deg", &e),
                 s.to_double("direction/dec_deg", &e));
-    if (!s.starts_with("cuda_device_ids", "all", &e))
-    {
-        vector<int> ids = s.to_int_list("cuda_device_ids", &e);
-        if (ids.size() > 0) oskar_imager_set_gpus(h, ids.size(), &ids[0], &e);
     }
 
     // Make the images.

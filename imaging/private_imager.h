@@ -81,7 +81,7 @@ struct oskar_Imager
     cufftHandle cufft_plan;
 
     /* W-projection imager data. */
-    int num_w_planes, conv_size_half, gcf_padding;
+    int num_w_planes, conv_size_half;
     double w_scale;
     oskar_Mem *w_kernels, *w_support;
 

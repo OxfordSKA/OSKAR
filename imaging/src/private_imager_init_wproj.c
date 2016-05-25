@@ -61,7 +61,7 @@ static void generate_w_phase_screen(const int iw, const int conv_size,
 void oskar_imager_init_wproj(oskar_Imager* h, int* status)
 {
     size_t max_mem_bytes, max_bytes_per_plane;
-    int i, iw, ix, iy, *supp, new_conv_size, gcf_padding;
+    int i, iw, ix, iy, *supp, new_conv_size, oversample;
     int conv_size, conv_size_half, inner, nearest;
     double l_max, max_conv_size, max_uvw, max_val, sampling, sum, ww_mid;
     double *taper_func, *maxes;
@@ -74,8 +74,8 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     oskar_imager_free_wproj(h, status);
     if (*status) return;
 
-    /* Define GCF padding. */
-    gcf_padding = h->gcf_padding = 4;
+    /* Get GCF padding oversample factor. */
+    oversample = h->oversample;
 
     /* Calculate cellsize. */
     h->cellsize_rad = oskar_convert_fov_to_cellsize(h->fov_deg * M_PI/180,
@@ -120,10 +120,10 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     if (*status) return;
 
     /* Get size of inner region of kernel and padded grid size. */
-    inner = conv_size / gcf_padding;
+    inner = conv_size / oversample;
     l_max = sin(0.5 * h->fov_deg * M_PI/180.0);
     sampling = (2.0 * l_max) / h->image_size;
-    sampling *= gcf_padding;
+    sampling *= oversample;
     (void) oskar_composite_nearest_even(
             image_padding * ((double)(h->image_size)) - 0.5, 0, &h->grid_size);
     sampling *= ((double) h->grid_size) / ((double) conv_size);
@@ -293,16 +293,16 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
         }
         if (found)
         {
-            supp[iw] = 1 + (int)(0.5 + (double)trial / (double)gcf_padding);
-            if (supp[iw] * gcf_padding * 2 >= conv_size)
-                supp[iw] = conv_size / 2 / gcf_padding - 1;
+            supp[iw] = 1 + (int)(0.5 + (double)trial / (double)oversample);
+            if (supp[iw] * oversample * 2 >= conv_size)
+                supp[iw] = conv_size / 2 / oversample - 1;
         }
     }
 
     /* Compact the kernels if we can. */
     max_val = -INT_MAX;
     for (iw = 0; iw < h->num_w_planes; ++iw) max_val = MAX(max_val, supp[iw]);
-    new_conv_size = 2 * (max_val + 2) * gcf_padding;
+    new_conv_size = 2 * (max_val + 2) * oversample;
     if (new_conv_size < conv_size)
     {
         char *ptr;
@@ -336,35 +336,35 @@ void oskar_imager_init_wproj(oskar_Imager* h, int* status)
     for (iw = 0; iw < h->num_w_planes; ++iw)
     {
         int *supp = oskar_mem_int(h->w_support, status);
-        printf("Plane %d, support: %d\n", iw, supp[iw] * gcf_padding);
+        printf("Plane %d, support: %d\n", iw, supp[iw] * oversample);
     }
 #endif
 
     /* Normalise so that kernel 0 sums to 1,
-     * when jumping in steps of gcf_padding. */
+     * when jumping in steps of oversample. */
     sum = 0.0; /* Real part only. */
     if (oskar_mem_precision(h->w_kernels) == OSKAR_DOUBLE)
     {
         double *ptr = oskar_mem_double(h->w_kernels, status);
         for (iy = -supp[0]; iy <= supp[0]; ++iy)
             for (ix = -supp[0]; ix <= supp[0]; ++ix)
-                sum += ptr[2 * (abs(ix) * gcf_padding +
-                        conv_size_half * (abs(iy) * gcf_padding))];
+                sum += ptr[2 * (abs(ix) * oversample +
+                        conv_size_half * (abs(iy) * oversample))];
     }
     else
     {
         float *ptr = oskar_mem_float(h->w_kernels, status);
         for (iy = -supp[0]; iy <= supp[0]; ++iy)
             for (ix = -supp[0]; ix <= supp[0]; ++ix)
-                sum += ptr[2 * (abs(ix) * gcf_padding +
-                        conv_size_half * (abs(iy) * gcf_padding))];
+                sum += ptr[2 * (abs(ix) * oversample +
+                        conv_size_half * (abs(iy) * oversample))];
     }
     oskar_mem_scale_real(h->w_kernels, 1.0 / sum, status);
 
     /* Generate grid correction function. */
     h->corr_func = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU,
             h->grid_size, status);
-    oskar_grid_correction_function_spheroidal(h->grid_size, gcf_padding,
+    oskar_grid_correction_function_spheroidal(h->grid_size, oversample,
             oskar_mem_double(h->corr_func, status));
 
     /* Set up the FFT. */

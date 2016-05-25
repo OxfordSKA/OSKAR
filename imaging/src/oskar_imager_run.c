@@ -458,7 +458,7 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
         end_time += 1;
 
         /* Update progress. */
-        percent_done = 100 * (start_row + num_baselines) / (double)num_rows;
+        percent_done = 100 * (start_row + block_size) / (double)num_rows;
         if (percent_done >= percent_next)
         {
             if (h->log) oskar_log_message(h->log, 'S', -2, "%3d%% ...",

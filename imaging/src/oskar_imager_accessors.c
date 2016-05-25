@@ -60,13 +60,21 @@ void oskar_imager_set_algorithm(oskar_Imager* h, const char* type,
 {
     if (*status) return;
     if (!strncmp(type, "FFT", 3) || !strncmp(type, "fft", 3))
+    {
         h->algorithm = OSKAR_ALGORITHM_FFT;
+        h->kernel_type = 'S';
+        h->support = 3;
+        h->oversample = 100;
+    }
+    else if (!strncmp(type, "W", 1) || !strncmp(type, "w", 1))
+    {
+        h->algorithm = OSKAR_ALGORITHM_WPROJ;
+        h->oversample = 4;
+    }
     else if (!strncmp(type, "DFT 2", 5) || !strncmp(type, "dft 2", 5))
         h->algorithm = OSKAR_ALGORITHM_DFT_2D;
     else if (!strncmp(type, "DFT 3", 5) || !strncmp(type, "dft 3", 5))
         h->algorithm = OSKAR_ALGORITHM_DFT_3D;
-    else if (!strncmp(type, "W", 1) || !strncmp(type, "w", 1))
-        h->algorithm = OSKAR_ALGORITHM_WPROJ;
     else *status = OSKAR_ERR_SETTINGS_IMAGE;
 }
 
@@ -248,6 +256,12 @@ void oskar_imager_set_output_root(oskar_Imager* h, const char* filename,
     free(h->image_root);
     h->image_root = calloc(1 + len, 1);
     strcpy(h->image_root, filename);
+}
+
+
+void oskar_imager_set_oversample(oskar_Imager* h, int value)
+{
+    h->oversample = value;
 }
 
 
