@@ -9,7 +9,6 @@ set(apps_SRC
     src/oskar_fit_element_data.cpp
     src/oskar_set_up_sky.c
     src/oskar_set_up_telescope.c
-    src/oskar_set_up_vis.c
     src/oskar_sim_beam_pattern.c
     src/oskar_sim_interferometer.c
     src/oskar_sim_tec_screen.cpp
