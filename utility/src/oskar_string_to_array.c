@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2014, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ extern "C" {
 #define strtok_r(s,d,p) strtok_s(s,d,p)
 #endif
 
-#define DELIMITERS ", "
+#define DELIMITERS ", \t"
 
 /* Integer. */
 size_t oskar_string_to_array_i(char* str, size_t n, int* data)
