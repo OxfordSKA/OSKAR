@@ -113,7 +113,7 @@ oskar_Station* oskar_station_create(int type, int location, int num_elements,
 
     /* Initialise common data. */
     model->station_type = OSKAR_STATION_TYPE_AA;
-    model->normalise_final_beam = OSKAR_FALSE;
+    model->normalise_final_beam = OSKAR_TRUE;
     model->lon_rad = 0.0;
     model->lat_rad = 0.0;
     model->alt_metres = 0.0;
