@@ -85,13 +85,7 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
     oskar_log_settings_observation(log, &settings);
     oskar_log_settings_ionosphere(log, &settings);
 
-    oskar_Sky** sky = NULL;
-    int num_sky_chunks = 0;
-    sky = oskar_set_up_sky(&settings, log, &num_sky_chunks, &status);
-
-    // FIXME remove this restriction ... (loop over chunks)
-    if (num_sky_chunks != 1)
-        return OSKAR_ERR_SETUP_FAIL_SKY;
+    oskar_Sky* sky = oskar_set_up_sky(&settings, log, &status);
 
     // FIXME remove this restriction ... (see evaluate Z)
     if (settings.ionosphere.num_TID_screens != 1)
@@ -100,8 +94,7 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     int loc = OSKAR_CPU;
 
-    oskar_Sky* chunk = sky[0];
-    int num_sources = oskar_sky_num_sources(chunk);
+    int num_sources = oskar_sky_num_sources(sky);
     oskar_Mem *hor_x, *hor_y, *hor_z;
     hor_x = oskar_mem_create(type, loc, num_sources, &status);
     hor_y = oskar_mem_create(type, loc, num_sources, &status);
@@ -184,8 +177,8 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
             if (type == OSKAR_DOUBLE)
             {
                 oskar_convert_apparent_ra_dec_to_enu_directions_d(num_sources,
-                        oskar_mem_double_const(oskar_sky_ra_rad_const(chunk), &status),
-                        oskar_mem_double_const(oskar_sky_dec_rad_const(chunk), &status),
+                        oskar_mem_double_const(oskar_sky_ra_rad_const(sky), &status),
+                        oskar_mem_double_const(oskar_sky_dec_rad_const(sky), &status),
                         last, lat, oskar_mem_double(hor_x, &status),
                         oskar_mem_double(hor_y, &status),
                         oskar_mem_double(hor_z, &status));
@@ -193,8 +186,8 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
             else
             {
                 oskar_convert_apparent_ra_dec_to_enu_directions_f(num_sources,
-                        oskar_mem_float_const(oskar_sky_ra_rad_const(chunk), &status),
-                        oskar_mem_float_const(oskar_sky_dec_rad_const(chunk), &status),
+                        oskar_mem_float_const(oskar_sky_ra_rad_const(sky), &status),
+                        oskar_mem_float_const(oskar_sky_dec_rad_const(sky), &status),
                         last, lat, oskar_mem_float(hor_x, &status),
                         oskar_mem_float(hor_y, &status),
                         oskar_mem_float(hor_z, &status));
@@ -279,8 +272,7 @@ int oskar_evaluate_station_pierce_points(const char* settings_file, oskar_Log* l
     oskar_mem_free(pp_st_rel_path, &status);
     oskar_mem_free(dims, &status);
     oskar_telescope_free(tel, &status);
-    oskar_sky_free(sky[0], &status);
-    free(sky);
+    oskar_sky_free(sky, &status);
 
     return status;
 }

@@ -318,14 +318,14 @@ const oskar_Mem* oskar_station_permitted_beam_el_rad_const(
  * Sets the unique station identifier.
  *
  * @details
- * Sets the unique station identifier.
+ * Sets the unique station identifier, recursively if necessary.
  * This should be set only when the telescope model is being initialised.
  *
- * @param[in] model Pointer to station model.
- * @param[in] id    Identifier.
+ * @param[in] model   Pointer to station model.
+ * @param[in] counter Updated identifier.
  */
 OSKAR_EXPORT
-void oskar_station_set_unique_id(oskar_Station* model, int id);
+void oskar_station_set_unique_ids(oskar_Station* model, int* counter);
 
 /**
  * @brief

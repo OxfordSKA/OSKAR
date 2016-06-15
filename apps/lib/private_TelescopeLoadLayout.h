@@ -31,14 +31,12 @@
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-struct oskar_Settings_old;
-
 class TelescopeLoadLayout : public oskar_TelescopeLoadAbstract
 {
 public:
-    TelescopeLoadLayout(const oskar_Settings_old* settings);
+    TelescopeLoadLayout() {}
 
-    virtual ~TelescopeLoadLayout();
+    virtual ~TelescopeLoadLayout() {}
 
     virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
             int num_subdirs, std::map<std::string, std::string>& filemap,
@@ -55,7 +53,6 @@ private:
     static const std::string layout_enu_file;
     static const std::string layout_wgs84_file;
     static const std::string layout_ecef_file;
-    const oskar_Settings_old* settings_;
 };
 
 #endif /* OSKAR_TELESCOPE_LOAD_LAYOUT_H_ */

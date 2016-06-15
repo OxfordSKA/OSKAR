@@ -79,9 +79,9 @@
         <type name="bool" default="false" />
         <desc>
             If enabled, and if all stations are identical, all station beam
-            responses will be copied from the first. This can reduce the 
-            simulation time, but <b>when using a telescope model with long 
-            baselines, source positions will not shift with respect to each 
+            responses will be copied from the first. This can reduce the
+            simulation time, but <b>when using a telescope model with long
+            baselines, source positions will not shift with respect to each
             station's horizon if this option is enabled.</b> This setting has
             no effect if all stations are not identical.
         </desc>
@@ -92,14 +92,4 @@
 
     <!-- Gaussian beam telescope settings group -->
     <import filename="oskar_telescope_gaussian.xml"/>
-
-    <s k="output_directory">
-        <label>Output directory</label>
-        <type name="OutputFile" default=""/>
-        <desc>
-            Path used to save the final telescope model directory,
-            excluding any element pattern data (useful for debugging).
-            Leave blank if not required.
-        </desc>
-    </s>
 </s>

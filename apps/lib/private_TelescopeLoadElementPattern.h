@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
 
 #include "apps/lib/oskar_TelescopeLoadAbstract.h"
 
-struct oskar_Settings_old;
 struct oskar_Log;
 
 #include <vector>
@@ -39,8 +38,7 @@ struct oskar_Log;
 class TelescopeLoadElementPattern : public oskar_TelescopeLoadAbstract
 {
 public:
-    TelescopeLoadElementPattern(const oskar_Settings_old* settings,
-            oskar_Log* log);
+    TelescopeLoadElementPattern();
 
     virtual ~TelescopeLoadElementPattern();
 
@@ -72,8 +70,7 @@ private:
     std::string root_x;
     std::string root_y;
     std::string root_scalar;
-    const oskar_Settings_old* settings_;
-    oskar_Log* log_;
+    oskar_Telescope* telescope_;
     std::map<std::string, int> models;
 };
 

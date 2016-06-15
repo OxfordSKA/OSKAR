@@ -419,9 +419,15 @@ const oskar_Mem* oskar_station_permitted_beam_el_rad_const(
 
 /* Setters. */
 
-void oskar_station_set_unique_id(oskar_Station* model, int id)
+void oskar_station_set_unique_ids(oskar_Station* model, int* counter)
 {
-    model->unique_id = id;
+    model->unique_id = (*counter)++;
+    if (model->child)
+    {
+        int i;
+        for (i = 0; i < model->num_elements; ++i)
+            oskar_station_set_unique_ids(model->child[i], counter);
+    }
 }
 
 void oskar_station_set_station_type(oskar_Station* model, int type)

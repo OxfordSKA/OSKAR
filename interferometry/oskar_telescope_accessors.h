@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -329,6 +329,20 @@ int oskar_telescope_identical_stations(const oskar_Telescope* model);
 OSKAR_EXPORT
 int oskar_telescope_allow_station_beam_duplication(
         const oskar_Telescope* model);
+
+/**
+ * @brief
+ * Returns the flag specifying whether numerical element patterns are enabled.
+ *
+ * @details
+ * Returns the flag specifying whether numerical element patterns are enabled.
+ *
+ * @param[in] model   Pointer to telescope model.
+ *
+ * @return The boolean flag value.
+ */
+OSKAR_EXPORT
+int oskar_telescope_enable_numerical_patterns(const oskar_Telescope* model);
 
 /**
  * @brief
@@ -818,6 +832,47 @@ void oskar_telescope_set_smearing_values(oskar_Telescope* model,
 
 /**
  * @brief
+ * Sets the channel bandwidth, used for bandwidth smearing.
+ *
+ * @details
+ * Sets the channel bandwidth, used for bandwidth smearing.
+ *
+ * @param[in] model            Pointer to telescope model.
+ * @param[in] bandwidth_hz     Channel bandwidth, in Hz.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_channel_bandwidth(oskar_Telescope* model,
+        double bandwidth_hz);
+
+/**
+ * @brief
+ * Sets the time average interval, used for time-average smearing.
+ *
+ * @details
+ * Sets the time average interval, used for time-average smearing.
+ *
+ * @param[in] model            Pointer to telescope model.
+ * @param[in] time_average_sec Time averaging interval, in seconds.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_time_average(oskar_Telescope* model,
+        double time_average_sec);
+
+/**
+ * @brief
+ * Sets unique station IDs in a telescope model.
+ *
+ * @details
+ * This function sets unique station IDs in a telescope model,
+ * recursively if necessary.
+ *
+ * @param[in] model            Pointer to telescope model.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_station_ids(oskar_Telescope* model);
+
+/**
+ * @brief
  * Sets the values of the smearing parameters.
  *
  * @details
@@ -844,6 +899,20 @@ void oskar_telescope_set_uv_filter(oskar_Telescope* model,
  */
 OSKAR_EXPORT
 void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model,
+        int value);
+
+/**
+ * @brief
+ * Sets the flag to specify whether numerical element patterns are enabled.
+ *
+ * @details
+ * Sets the flag to specify whether numerical element patterns are enabled.
+ *
+ * @param[in] model    Pointer to telescope model.
+ * @param[in] value    If true, numerical element patterns will be enabled.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_enable_numerical_patterns(oskar_Telescope* model,
         int value);
 
 /**

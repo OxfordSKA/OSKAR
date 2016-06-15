@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2014, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,31 +48,12 @@ struct oskar_Simulator;
 typedef struct oskar_Simulator oskar_Simulator;
 #endif
 
-/**
- * @brief
- * Main OSKAR interferometer simulation function.
- *
- * @details
- * This function acts as though it were a stand-alone executable.
- *
- * @param[in] settings_file Path to a settings file.
- * @param[in,out] log       Pointer to a log structure to use.
- * @param[in,out] status    Status return code.
- */
-OSKAR_APPS_EXPORT
-void oskar_sim_interferometer(const char* settings_file, oskar_Log* log,
-        int* status);
-
 OSKAR_APPS_EXPORT
 void oskar_simulator_set_correlation_type(oskar_Simulator* h,
         const char* type, int* status);
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_set_force_polarised_ms(oskar_Simulator* h, int value);
-
-OSKAR_APPS_EXPORT
-void oskar_simulator_set_frequency(oskar_Simulator* h,
-        double start_hz, double inc_hz, int num_channels);
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_set_gpus(oskar_Simulator* h, int num_gpus,
@@ -85,26 +66,27 @@ OSKAR_APPS_EXPORT
 void oskar_simulator_set_log(oskar_Simulator* h, oskar_Log* log);
 
 OSKAR_APPS_EXPORT
-void oskar_simulator_set_max_sources_per_chunk(oskar_Simulator* h, int value);
+void oskar_simulator_set_max_times_per_block(oskar_Simulator* h, int value);
 
 OSKAR_APPS_EXPORT
-void oskar_simulator_set_max_times_per_block(oskar_Simulator* h, int value);
+void oskar_simulator_set_observation_frequency(oskar_Simulator* h,
+        double start_hz, double inc_hz, int num_channels);
+
+OSKAR_APPS_EXPORT
+void oskar_simulator_set_observation_time(oskar_Simulator* h,
+        double time_start_mjd_utc, double inc_sec, int num_time_steps);
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_set_settings_path(oskar_Simulator* h,
         const char* filename);
 
 OSKAR_APPS_EXPORT
-void oskar_simulator_set_sky_chunks(oskar_Simulator* h,
-        int num_chunks, oskar_Sky** chunks);
-
-OSKAR_APPS_EXPORT
-void oskar_simulator_set_time(oskar_Simulator* h,
-        double time_start_mjd_utc, double inc_sec, int num_time_steps);
+void oskar_simulator_set_sky_model(oskar_Simulator* h, const oskar_Sky* sky,
+        int max_sources_per_chunk, int* status);
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_set_telescope_model(oskar_Simulator* h,
-        oskar_Telescope* model);
+        oskar_Telescope* model, int* status);
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_set_thermal_noise(oskar_Simulator* h,
@@ -123,7 +105,16 @@ void oskar_simulator_set_source_flux_range(oskar_Simulator* h,
         double min_jy, double max_jy);
 
 OSKAR_APPS_EXPORT
+void oskar_simulator_set_zero_failed_gaussians(oskar_Simulator* h, int value);
+
+OSKAR_APPS_EXPORT
+void oskar_simulator_check_init(oskar_Simulator* h, int* status);
+
+OSKAR_APPS_EXPORT
 oskar_Simulator* oskar_simulator_create(int precision, int* status);
+
+OSKAR_APPS_EXPORT
+void oskar_simulator_reset_cache(oskar_Simulator* h, int* status);
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_run(oskar_Simulator* h, int* status);

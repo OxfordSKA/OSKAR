@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,6 +73,7 @@ struct oskar_Telescope
     int max_station_depth;                            /* Maximum station depth. */
     int identical_stations;                           /* True if all stations are identical. */
     int allow_station_beam_duplication;               /* True if station beam duplication is allowed. */
+    int enable_numerical_patterns;                    /* True if numerical element patterns are enabled. */
 };
 
 #ifndef OSKAR_TELESCOPE_TYPEDEF_

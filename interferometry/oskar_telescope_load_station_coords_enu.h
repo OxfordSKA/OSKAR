@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_LOAD_H_
-#define OSKAR_TELESCOPE_LOAD_H_
+#ifndef OSKAR_TELESCOPE_LOAD_STATION_COORDS_ENU_H_
+#define OSKAR_TELESCOPE_LOAD_STATION_COORDS_ENU_H_
 
 /**
- * @file oskar_telescope_load.h
+ * @file oskar_telescope_load_station_coords_enu.h
  */
 
 #include <oskar_global.h>
-#include <oskar_telescope.h>
-#include <oskar_Settings_old.h>
-#include <oskar_log.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,24 +41,37 @@ extern "C" {
 
 /**
  * @brief
- * Loads all configuration files from a telescope model directory,
- * populating the relevant parts of an OSKAR telescope model structure.
+ * Loads a telescope coordinate file that specifies the station locations
+ * with respect to the local tangent plane.
  *
  * @details
- * The telescope model must be initialised and in CPU memory.
+ * A telescope station coordinate file is an ASCII text file containing two or
+ * three columns of comma- or space-separated values that represent the station
+ * (x,y,z) coordinates in the local tangent plane. Each line corresponds to the
+ * position of one station, and the z coordinate is assumed to be zero if
+ * omitted.
  *
- * @param[in,out] telescope  Pointer to telescope model to fill.
- * @param[in]     path       Pathname of telescope model directory to load.
- * @param[in,out] log        Pointer to log.
- * @param[in]     settings   FIXME Shouldn't be here, grrr...!
+ * The coordinate system (ENU, or East-North-Up) is aligned so that the x-axis
+ * points to the local geographic East, the y-axis to local geographic North,
+ * and the z-axis to the local zenith. The origin is the tangent point with the
+ * Earth's ellipsoid.
+ *
+ * The geodetic longitude and latitude of the origin must also be supplied.
+ *
+ * @param[in,out] telescope  Telescope model structure to be populated.
+ * @param[in] filename       File name path to a telescope coordinate file.
+ * @param[in] longitude      Telescope centre longitude, in radians.
+ * @param[in] latitude       Telescope centre latitude, in radians.
+ * @param[in] altitude       Telescope centre altitude, in metres.
  * @param[in,out] status     Status return code.
  */
-OSKAR_APPS_EXPORT
-void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
-        oskar_Log* log, const oskar_Settings_old* settings, int* status);
+OSKAR_EXPORT
+void oskar_telescope_load_station_coords_enu(oskar_Telescope* telescope,
+        const char* filename, double longitude, double latitude,
+        double altitude, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_TELESCOPE_LOAD_H_ */
+#endif /* OSKAR_TELESCOPE_LOAD_STATION_COORDS_ENU_H_ */

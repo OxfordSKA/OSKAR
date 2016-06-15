@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@
 #include "apps/lib/oskar_dir.h"
 #include <oskar_log.h>
 #include <oskar_file_exists.h>
-#include <oskar_Settings_old.h>
 
 #include <sstream>
 
@@ -41,11 +40,9 @@ using std::string;
 const string TelescopeLoadElementPattern::root_name =
         "element_pattern_fit_";
 
-TelescopeLoadElementPattern::TelescopeLoadElementPattern(
-        const oskar_Settings_old* settings, oskar_Log* log)
+TelescopeLoadElementPattern::TelescopeLoadElementPattern()
 {
-    settings_ = settings;
-    log_ = log;
+    telescope_ = 0;
     root_x = root_name + "x_";
     root_y = root_name + "y_";
     root_scalar = root_name + "scalar_";
@@ -59,6 +56,7 @@ void TelescopeLoadElementPattern::load(oskar_Telescope* telescope,
         const oskar_Dir& cwd, int num_subdirs, map<string, string>& filemap,
         int* status)
 {
+    telescope_ = telescope;
     update_map(filemap, cwd);
 
     // Load element pattern data for stations only at the deepest level!
@@ -180,8 +178,7 @@ void TelescopeLoadElementPattern::load_element_patterns(
     if (*status) return;
 
     // Return if element patterns are disabled.
-    if (!settings_->telescope.aperture_array.element_pattern.
-            enable_numerical_patterns)
+    if (!oskar_telescope_enable_numerical_patterns(telescope_))
         return;
 
     // Get lists of all paths in the map that have keys starting with the
@@ -210,7 +207,7 @@ void TelescopeLoadElementPattern::load_element_patterns(
     }
 
     // Load X, Y or scalar data.
-    if (settings_->telescope.pol_mode == OSKAR_POL_MODE_FULL)
+    if (oskar_telescope_pol_mode(telescope_) == OSKAR_POL_MODE_FULL)
     {
         load(1, station, keys_x, paths_x, status);
         load(2, station, keys_y, paths_y, status);
@@ -223,7 +220,6 @@ void TelescopeLoadElementPattern::load(int port, oskar_Station* station,
         const vector<string>& keys, const vector<string>& paths, int* status)
 {
     if (*status) return;
-    const char* s = port == 0 ? "SCALAR" : port == 1 ? "X" : "Y";
     for (size_t i = 0; i < keys.size(); ++i)
     {
         string key = keys[i];
@@ -236,9 +232,6 @@ void TelescopeLoadElementPattern::load(int port, oskar_Station* station,
         // Load the file.
         if (models.count(path) == 0)
         {
-            oskar_log_message(log_, 'M', 0,
-                    "Loading fitted element pattern %s[%d] at %.0f MHz: %s",
-                    s, ind, freq / 1.0e6, path.c_str());
             models[path] = 1;
         }
         if (*status) break;

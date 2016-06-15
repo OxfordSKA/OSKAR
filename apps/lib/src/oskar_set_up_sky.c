@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,69 +46,44 @@
 extern "C" {
 #endif
 
-/* Suppress warnings about unused function arguments when LAPACK not found. */
-#if defined(OSKAR_NO_LAPACK)
-#   if defined(__INTEL_COMPILER)
-#       pragma warning push
-/*#       pragma warning(disable:XXX)*/
-#   elif defined(__GNUC__)
-#       pragma GCC diagnostic push
-#       pragma GCC diagnostic ignored "-Wunused-parameter"
-#   endif
-#endif
-
-static void set_up_osm(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
-        const oskar_SettingsSkyOskar* s, double ra0, double dec0,
-        int zero_failed, int* status);
-static void set_up_gsm(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
-        const oskar_SettingsSkyGsm* s, double ra0, double dec0,
-        int zero_failed, int* status);
-static void set_up_fits_image(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
+static void set_up_osm(oskar_Sky* sky, oskar_Log* log,
+        const oskar_SettingsSkyOskar* s, double ra0, double dec0, int* status);
+static void set_up_gsm(oskar_Sky* sky, oskar_Log* log,
+        const oskar_SettingsSkyGsm* s, double ra0, double dec0, int* status);
+static void set_up_fits_image(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyFitsImage* s, int* status);
-static void set_up_healpix_fits(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
+static void set_up_healpix_fits(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyHealpixFits* s, double ra0, double dec0,
-        int zero_failed, int* status);
+        int* status);
 
-static void set_up_gen_grid(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
+static void set_up_gen_grid(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyGeneratorGrid* s, double ra0, double dec0,
-        int zero_failed, int* status);
-static void set_up_gen_healpix(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
+        int* status);
+static void set_up_gen_healpix(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyGeneratorHealpix* s, double ra0, double dec0,
-        int zero_failed, int* status);
-static void set_up_gen_rpl(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
+        int* status);
+static void set_up_gen_rpl(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyGeneratorRandomPowerLaw* s, double ra0,
-        double dec0, int zero_failed, int* status);
-static void set_up_gen_rbpl(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
+        double dec0, int* status);
+static void set_up_gen_rbpl(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyGeneratorRandomBrokenPowerLaw* s, double ra0,
-        double dec0, int zero_failed, int* status);
-
-static void write_sky_model(int num_chunks, oskar_Sky* const* chunks,
-        const oskar_SettingsSky* s, oskar_Log* log, int* status);
+        double dec0, int* status);
 
 static void set_up_filter(oskar_Sky* sky, const oskar_SettingsSkyFilter* f,
         double ra0_rad, double dec0_rad, int* status);
 static void set_up_extended(oskar_Sky* sky,
-        const oskar_SettingsSkyExtendedSources* ext, oskar_Log* log,
-        double ra0_rad, double dec0_rad, int zero_failed_sources, int* status);
+        const oskar_SettingsSkyExtendedSources* ext, int* status);
 static void set_up_pol(oskar_Sky* sky,
         const oskar_SettingsSkyPolarisation* pol, int* status);
 
 
-oskar_Sky** oskar_set_up_sky(const oskar_Settings_old* settings, oskar_Log* log,
-        int* num_chunks, int* status)
+oskar_Sky* oskar_set_up_sky(const oskar_Settings_old* settings, oskar_Log* log,
+        int* status)
 {
-    int max_per_chunk, type, zero_flag, i, j;
-    int total_sources = 0, num_extended_chunks = 0;
+    int type, i, num_sources;
     double ra0, dec0;
-    oskar_Sky** sky_chunks = 0;
+    oskar_Sky* sky = 0;
+    const char* filename;
 
     /* Check if safe to proceed. */
     if (*status) return 0;
@@ -116,108 +91,94 @@ oskar_Sky** oskar_set_up_sky(const oskar_Settings_old* settings, oskar_Log* log,
     /* Sky model data type and settings. */
     oskar_log_section(log, 'M', "Sky model");
     type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    max_per_chunk = settings->sim.max_sources_per_chunk;
-    zero_flag = settings->sky.zero_failed_gaussians;
+    sky = oskar_sky_create(type, OSKAR_CPU, 0, status);
     ra0  = settings->obs.phase_centre_lon_rad[0];
     dec0 = settings->obs.phase_centre_lat_rad[0];
 
     /* Load sky model data files. */
-    set_up_osm(num_chunks, &sky_chunks, max_per_chunk, type, log,
-            &settings->sky.oskar_sky_model, ra0, dec0, zero_flag, status);
-    set_up_gsm(num_chunks, &sky_chunks, max_per_chunk, type, log,
-            &settings->sky.gsm, ra0, dec0, zero_flag, status);
-    set_up_fits_image(num_chunks, &sky_chunks, max_per_chunk, type, log,
-            &settings->sky.fits_image, status);
-    set_up_healpix_fits(num_chunks, &sky_chunks, max_per_chunk, type, log,
-            &settings->sky.healpix_fits, ra0, dec0, zero_flag, status);
+    set_up_osm(sky, log, &settings->sky.oskar_sky_model, ra0, dec0, status);
+    set_up_gsm(sky, log, &settings->sky.gsm, ra0, dec0, status);
+    set_up_fits_image(sky, log, &settings->sky.fits_image, status);
+    set_up_healpix_fits(sky, log, &settings->sky.healpix_fits,
+            ra0, dec0, status);
 
     /* Generate sky models from generator parameters. */
-    set_up_gen_grid(num_chunks, &sky_chunks, max_per_chunk, type, log,
-            &settings->sky.generator.grid, ra0, dec0, zero_flag, status);
-    set_up_gen_healpix(num_chunks, &sky_chunks, max_per_chunk, type, log,
-            &settings->sky.generator.healpix, ra0, dec0, zero_flag, status);
-    set_up_gen_rpl(num_chunks, &sky_chunks, max_per_chunk, type, log,
-            &settings->sky.generator.random_power_law, ra0, dec0, zero_flag,
-            status);
-    set_up_gen_rbpl(num_chunks, &sky_chunks, max_per_chunk, type, log,
-            &settings->sky.generator.random_broken_power_law, ra0, dec0,
-            zero_flag, status);
+    set_up_gen_grid(sky, log, &settings->sky.generator.grid,
+            ra0, dec0, status);
+    set_up_gen_healpix(sky, log, &settings->sky.generator.healpix,
+            ra0, dec0, status);
+    set_up_gen_rpl(sky, log, &settings->sky.generator.random_power_law,
+            ra0, dec0, status);
+    set_up_gen_rbpl(sky, log, &settings->sky.generator.random_broken_power_law,
+            ra0, dec0, status);
 
     /* Return if sky model contains no sources. */
-    if (*num_chunks == 0)
+    num_sources = oskar_sky_num_sources(sky);
+    if (num_sources == 0)
     {
         oskar_log_warning(log, "Sky model contains no sources.");
-        return sky_chunks;
+        return sky;
     }
 
-    /* Perform final pre-processing on chunk set. */
+    /* Perform final overrides. */
     if (settings->sky.spectral_index.override)
     {
         double mean, std_dev, ref_freq, val[2];
         mean = settings->sky.spectral_index.mean;
         std_dev = settings->sky.spectral_index.std_dev;
         ref_freq = settings->sky.spectral_index.ref_frequency_hz;
-        oskar_log_message(log, 'M', 0, "Overriding source spectral index values...");
-        for (i = 0; i < *num_chunks; ++i)
-        {
-            int num_sources;
-            num_sources = oskar_sky_num_sources(sky_chunks[i]);
 
-            /* Override source spectral index values. */
-            for (j = 0; j < num_sources; ++j)
-            {
-                oskar_random_gaussian2(settings->sky.spectral_index.seed,
-                        j, i, val);
-                val[0] = std_dev * val[0] + mean;
-                oskar_sky_set_spectral_index(sky_chunks[i], j,
-                        ref_freq, val[0], status);
-            }
+        /* Override source spectral index values. */
+        oskar_log_message(log, 'M', 0, "Overriding source spectral index values...");
+        for (i = 0; i < num_sources; ++i)
+        {
+            oskar_random_gaussian2(settings->sky.spectral_index.seed,
+                    i, 0, val);
+            val[0] = std_dev * val[0] + mean;
+            oskar_sky_set_spectral_index(sky, i, ref_freq, val[0], status);
         }
         oskar_log_message(log, 'M', 1, "done.");
     }
 
-    if (*status) return sky_chunks;
-
-    oskar_log_message(log, 'M', 0, "Computing source direction cosines...");
-    for (i = 0; i < *num_chunks; ++i)
-    {
-        /* Compute source direction cosines relative to phase centre. */
-        oskar_sky_evaluate_relative_directions(sky_chunks[i], ra0, dec0, status);
-
-        /* Gather statistics on chunk set. */
-        total_sources += oskar_sky_num_sources(sky_chunks[i]);
-        if (oskar_sky_use_extended(sky_chunks[i]))
-            ++num_extended_chunks;
-    }
-    oskar_log_message(log, 'M', 1, "done.");
+    if (*status) return sky;
 
     /* Print summary data. */
     oskar_log_message(log, 'M', 0, "Sky model summary");
-    oskar_log_value(log, 'M', 1, "Num. sources", "%d", total_sources);
-    oskar_log_value(log, 'M', 1, "Num. chunks", "%d", *num_chunks);
-    oskar_log_value(log, 'M', 1, "Num. extended source chunks", "%d", num_extended_chunks);
+    oskar_log_value(log, 'M', 1, "Num. sources", "%d", num_sources);
 #if defined(OSKAR_NO_LAPACK)
     oskar_log_warning(log, "Extended sources disabled (LAPACK not found).");
 #endif
 
-    /* Save final sky model set if required. */
-    write_sky_model(*num_chunks, sky_chunks, &settings->sky, log, status);
+    /* Write text file. */
+    filename = settings->sky.output_text_file;
+    if (filename && strlen(filename) && !*status)
+    {
+        oskar_log_message(log, 'M', 1, "Writing sky model text file: %s", filename);
+        oskar_sky_save(filename, sky, status);
+    }
 
-    return sky_chunks;
+    /* Write binary file. */
+    filename = settings->sky.output_binary_file;
+    if (filename && strlen(filename) && !*status)
+    {
+        oskar_log_message(log, 'M', 1, "Writing sky model binary file: %s", filename);
+        oskar_sky_write(filename, sky, status);
+    }
+
+    return sky;
 }
 
 
-static void set_up_osm(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
-        const oskar_SettingsSkyOskar* s, double ra0, double dec0,
-        int zero_failed, int* status)
+static void set_up_osm(oskar_Sky* sky, oskar_Log* log,
+        const oskar_SettingsSkyOskar* s, double ra0, double dec0, int* status)
 {
-    int i;
+    int i, type;
     const char* filename;
-    oskar_Sky* temp;
+    oskar_Sky* t;
 
     /* Load OSKAR sky model files. */
     if (*status) return;
+    type = oskar_sky_precision(sky);
     for (i = 0; i < s->num_files; ++i)
     {
         filename = s->file[i];
@@ -225,38 +186,34 @@ static void set_up_osm(int* num_chunks, oskar_Sky*** sky_chunks,
         {
             int binary_file_error = 0;
 
-            /* Load into a temporary structure. */
-            oskar_log_message(log, 'M', 0, "Loading OSKAR sky model file '%s' ...",
-                    filename);
+            /* Load into a temporary sky model. */
+            oskar_log_message(log, 'M', 0,
+                    "Loading OSKAR sky model file '%s' ...", filename);
 
             /* Try to read sky model as a binary file first. */
             /* If this fails, read it as an ASCII file. */
-            temp = oskar_sky_read(filename, OSKAR_CPU, &binary_file_error);
+            t = oskar_sky_read(filename, OSKAR_CPU, &binary_file_error);
             if (binary_file_error)
-                temp = oskar_sky_load(filename, type, status);
+                t = oskar_sky_load(filename, type, status);
 
             /* Apply filters and extended source over-ride. */
-            set_up_filter(temp, &s->filter, ra0, dec0, status);
-            set_up_extended(temp, &s->extended_sources, log, ra0, dec0,
-                    zero_failed, status);
+            set_up_filter(t, &s->filter, ra0, dec0, status);
+            set_up_extended(t, &s->extended_sources, status);
 
-            /* Append to chunks. */
-            oskar_sky_append_to_set(num_chunks, sky_chunks,
-                    max_per_chunk, temp, status);
-            oskar_sky_free(temp, status);
+            /* Append to sky model. */
+            oskar_sky_append(sky, t, status);
+            oskar_sky_free(t, status);
             oskar_log_message(log, 'M', 1, "done.");
         }
     }
 }
 
 
-static void set_up_gsm(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
-        const oskar_SettingsSkyGsm* s, double ra0, double dec0,
-        int zero_failed, int* status)
+static void set_up_gsm(oskar_Sky* sky, oskar_Log* log,
+        const oskar_SettingsSkyGsm* s, double ra0, double dec0, int* status)
 {
     const char* filename;
-    oskar_Sky* temp;
+    oskar_Sky* t;
 
     /* GSM sky model file. */
     if (*status) return;
@@ -264,107 +221,101 @@ static void set_up_gsm(int* num_chunks, oskar_Sky*** sky_chunks,
     if (filename && strlen(filename) > 0)
     {
         /* Load the sky model data into a temporary sky model. */
-        temp = oskar_sky_create(type, OSKAR_CPU, 0, status);
+        t = oskar_sky_create(oskar_sky_precision(sky), OSKAR_CPU, 0, status);
         oskar_log_message(log, 'M', 0, "Loading GSM data...");
-        oskar_sky_load_gsm(temp, filename, status);
+        oskar_sky_load_gsm(t, filename, status);
 
         /* Apply filters and extended source over-ride. */
-        set_up_filter(temp, &s->filter, ra0, dec0, status);
-        set_up_extended(temp, &s->extended_sources, log, ra0, dec0,
-                zero_failed, status);
+        set_up_filter(t, &s->filter, ra0, dec0, status);
+        set_up_extended(t, &s->extended_sources, status);
 
-        /* Append to chunks. */
-        oskar_sky_append_to_set(num_chunks, sky_chunks,
-                max_per_chunk, temp, status);
-        oskar_sky_free(temp, status);
+        /* Append to sky model. */
+        oskar_sky_append(sky, t, status);
+        oskar_sky_free(t, status);
         oskar_log_message(log, 'M', 1, "done.");
     }
 }
 
 
-static void set_up_fits_image(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
+static void set_up_fits_image(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyFitsImage* s, int* status)
 {
-    int i;
+    int i, type;
     const char* filename;
-    oskar_Sky* temp;
+    oskar_Sky* t;
 
     /* Load FITS image files. */
     if (*status) return;
+    type = oskar_sky_precision(sky);
     for (i = 0; i < s->num_files; ++i)
     {
         filename = s->file[i];
         if (filename && strlen(filename) > 0)
         {
             /* Load into a temporary structure. */
-            temp = oskar_sky_create(type, OSKAR_CPU, 0, status);
+            t = oskar_sky_create(type, OSKAR_CPU, 0, status);
             oskar_log_message(log, 'M', 0, "Loading FITS file '%s' ...",
                     filename);
-            *status = oskar_fits_image_to_sky_model(log, filename, temp,
+            *status = oskar_fits_image_to_sky_model(log, filename, t,
                     s->spectral_index, s->min_peak_fraction, s->noise_floor,
                     s->downsample_factor);
             if (*status)
             {
-                oskar_sky_free(temp, status);
+                oskar_sky_free(t, status);
                 return;
             }
 
-            /* Append to chunks. */
-            oskar_sky_append_to_set(num_chunks, sky_chunks,
-                    max_per_chunk, temp, status);
-            oskar_sky_free(temp, status);
+            /* Append to sky model. */
+            oskar_sky_append(sky, t, status);
+            oskar_sky_free(t, status);
             oskar_log_message(log, 'M', 1, "done.");
         }
     }
 }
 
 
-static void set_up_healpix_fits(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
+static void set_up_healpix_fits(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyHealpixFits* s, double ra0, double dec0,
-        int zero_failed, int* status)
+        int* status)
 {
-    int i;
+    int i, type;
     const char* filename;
-    oskar_Sky* temp;
+    oskar_Sky* t;
 
     /* Load HEALPix FITS image files. */
     if (*status) return;
+    type = oskar_sky_precision(sky);
     for (i = 0; i < s->num_files; ++i)
     {
         filename = s->file[i];
         if (filename && strlen(filename) > 0)
         {
-            /* Load into a temporary structure. */
-            temp = oskar_sky_create(type, OSKAR_CPU, 0, status);
+            /* Load into a temporary sky model. */
+            t = oskar_sky_create(type, OSKAR_CPU, 0, status);
             oskar_log_message(log, 'M', 0, "Loading HEALPix FITS file '%s' ...",
                     filename);
-            oskar_fits_healpix_to_sky_model(log, filename, s, temp, status);
+            oskar_fits_healpix_to_sky_model(log, filename, s, t, status);
 
             /* Apply filters and extended source over-ride. */
-            set_up_filter(temp, &s->filter, ra0, dec0, status);
-            set_up_extended(temp, &s->extended_sources, log, ra0, dec0,
-                    zero_failed, status);
+            set_up_filter(t, &s->filter, ra0, dec0, status);
+            set_up_extended(t, &s->extended_sources, status);
 
-            /* Append to chunks. */
-            oskar_sky_append_to_set(num_chunks, sky_chunks,
-                    max_per_chunk, temp, status);
-            oskar_sky_free(temp, status);
+            /* Append to sky model. */
+            oskar_sky_append(sky, t, status);
+            oskar_sky_free(t, status);
             oskar_log_message(log, 'M', 1, "done.");
         }
     }
 }
 
 
-static void set_up_gen_grid(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
+static void set_up_gen_grid(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyGeneratorGrid* s, double ra0, double dec0,
-        int zero_failed, int* status)
+        int* status)
 {
-    int i, j, k, num_points, side_length;
+    int i, j, k, num_points, side_length, type;
     double fov_rad, mean_flux, std_flux, r[2];
-    oskar_Sky* temp;
+    oskar_Sky* t;
 
     /* Get the grid generator parameters. */
     side_length = s->side_length;
@@ -376,7 +327,8 @@ static void set_up_gen_grid(int* num_chunks, oskar_Sky*** sky_chunks,
 
     /* Create a temporary sky model. */
     num_points = side_length * side_length;
-    temp = oskar_sky_create(type, OSKAR_CPU, num_points, status);
+    type = oskar_sky_precision(sky);
+    t = oskar_sky_create(type, OSKAR_CPU, num_points, status);
     oskar_log_message(log, 'M', 0, "Generating source grid positions...");
 
     /* Side length of 1 is a special case. */
@@ -385,7 +337,7 @@ static void set_up_gen_grid(int* num_chunks, oskar_Sky*** sky_chunks,
         /* Generate the Stokes I flux and store the value. */
         oskar_random_gaussian2(s->seed, 0, 0, r);
         r[0] = mean_flux + std_flux * r[0];
-        oskar_sky_set_source(temp, 0, ra0, dec0, r[0], 0.0, 0.0,
+        oskar_sky_set_source(t, 0, ra0, dec0, r[0], 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
     }
     else
@@ -409,32 +361,29 @@ static void set_up_gen_grid(int* num_chunks, oskar_Sky*** sky_chunks,
                 /* Generate the Stokes I flux and store the value. */
                 oskar_random_gaussian2(s->seed, i, j, r);
                 r[0] = mean_flux + std_flux * r[0];
-                oskar_sky_set_source(temp, k, ra, dec, r[0], 0.0, 0.0,
+                oskar_sky_set_source(t, k, ra, dec, r[0], 0.0, 0.0,
                         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
             }
         }
     }
 
     /* Apply polarisation and extended source over-ride. */
-    set_up_pol(temp, &s->pol, status);
-    set_up_extended(temp, &s->extended_sources, log, ra0, dec0, zero_failed,
-            status);
+    set_up_pol(t, &s->pol, status);
+    set_up_extended(t, &s->extended_sources, status);
 
-    /* Append to chunks. */
-    oskar_sky_append_to_set(num_chunks, sky_chunks, max_per_chunk, temp,
-            status);
-    oskar_sky_free(temp, status);
+    /* Append to sky model. */
+    oskar_sky_append(sky, t, status);
+    oskar_sky_free(t, status);
     oskar_log_message(log, 'M', 1, "done.");
 }
 
 
-static void set_up_gen_healpix(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
+static void set_up_gen_healpix(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyGeneratorHealpix* s, double ra0, double dec0,
-        int zero_failed, int* status)
+        int* status)
 {
-    int i, nside, npix;
-    oskar_Sky* temp;
+    int i, nside, npix, type;
+    oskar_Sky* t;
 
     /* Get the HEALPix generator parameters. */
     nside = s->nside;
@@ -443,7 +392,8 @@ static void set_up_gen_healpix(int* num_chunks, oskar_Sky*** sky_chunks,
 
     /* Generate the new positions into a temporary sky model. */
     npix = 12 * nside * nside;
-    temp = oskar_sky_create(type, OSKAR_CPU, npix, status);
+    type = oskar_sky_precision(sky);
+    t = oskar_sky_create(type, OSKAR_CPU, npix, status);
     oskar_log_message(log, 'M', 0, "Generating HEALPix source positions...");
 #pragma omp parallel for private(i)
     for (i = 0; i < npix; ++i)
@@ -451,30 +401,27 @@ static void set_up_gen_healpix(int* num_chunks, oskar_Sky*** sky_chunks,
         double ra, dec;
         oskar_convert_healpix_ring_to_theta_phi_d(nside, i, &dec, &ra);
         dec = M_PI / 2.0 - dec;
-        oskar_sky_set_source(temp, i, ra, dec, s->amplitude, 0.0, 0.0,
+        oskar_sky_set_source(t, i, ra, dec, s->amplitude, 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
     }
 
     /* Apply filters and extended source over-ride. */
-    set_up_filter(temp, &s->filter, ra0, dec0, status);
-    set_up_extended(temp, &s->extended_sources, log, ra0, dec0, zero_failed,
-            status);
+    set_up_filter(t, &s->filter, ra0, dec0, status);
+    set_up_extended(t, &s->extended_sources, status);
 
-    /* Append to chunks. */
-    oskar_sky_append_to_set(num_chunks, sky_chunks, max_per_chunk, temp,
-            status);
-    oskar_sky_free(temp, status);
+    /* Append to sky model. */
+    oskar_sky_append(sky, t, status);
+    oskar_sky_free(t, status);
     oskar_log_message(log, 'M', 1, "done.");
 }
 
 
-static void set_up_gen_rpl(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
+static void set_up_gen_rpl(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyGeneratorRandomPowerLaw* s, double ra0,
-        double dec0, int zero_failed, int* status)
+        double dec0, int* status)
 {
-    int i, num_sources;
-    oskar_Sky* temp;
+    int i, num_sources, type;
+    oskar_Sky* t;
 
     /* Random power-law generator. */
     num_sources = s->num_sources;
@@ -482,7 +429,8 @@ static void set_up_gen_rpl(int* num_chunks, oskar_Sky*** sky_chunks,
         return;
 
     /* Generate the new positions into a temporary sky model. */
-    temp = oskar_sky_create(type, OSKAR_CPU, num_sources, status);
+    type = oskar_sky_precision(sky);
+    t = oskar_sky_create(type, OSKAR_CPU, num_sources, status);
     oskar_log_message(log, 'M', 0, "Generating random power law source distribution...");
 
     /* Cannot parallelise here, since rand() is not thread safe. */
@@ -492,30 +440,27 @@ static void set_up_gen_rpl(int* num_chunks, oskar_Sky*** sky_chunks,
         double ra, dec, b;
         oskar_generate_random_coordinate(&ra, &dec);
         b = oskar_random_power_law(s->flux_min, s->flux_max, s->power);
-        oskar_sky_set_source(temp, i, ra, dec, b, 0.0, 0.0, 0.0,
+        oskar_sky_set_source(t, i, ra, dec, b, 0.0, 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
     }
 
     /* Apply filters and extended source over-ride. */
-    set_up_filter(temp, &s->filter, ra0, dec0, status);
-    set_up_extended(temp, &s->extended_sources, log, ra0, dec0, zero_failed,
-            status);
+    set_up_filter(t, &s->filter, ra0, dec0, status);
+    set_up_extended(t, &s->extended_sources, status);
 
-    /* Append to chunks. */
-    oskar_sky_append_to_set(num_chunks, sky_chunks, max_per_chunk, temp,
-            status);
-    oskar_sky_free(temp, status);
+    /* Append to sky model. */
+    oskar_sky_append(sky, t, status);
+    oskar_sky_free(t, status);
     oskar_log_message(log, 'M', 1, "done.");
 }
 
 
-static void set_up_gen_rbpl(int* num_chunks, oskar_Sky*** sky_chunks,
-        int max_per_chunk, int type, oskar_Log* log,
+static void set_up_gen_rbpl(oskar_Sky* sky, oskar_Log* log,
         const oskar_SettingsSkyGeneratorRandomBrokenPowerLaw* s, double ra0,
-        double dec0, int zero_failed, int* status)
+        double dec0, int* status)
 {
-    int i, num_sources;
-    oskar_Sky* temp;
+    int i, num_sources, type;
+    oskar_Sky* t;
 
     /* Random broken power-law generator. */
     num_sources = s->num_sources;
@@ -523,7 +468,8 @@ static void set_up_gen_rbpl(int* num_chunks, oskar_Sky*** sky_chunks,
         return;
 
     /* Generate the new positions into a temporary sky model. */
-    temp = oskar_sky_create(type, OSKAR_CPU, num_sources, status);
+    type = oskar_sky_precision(sky);
+    t = oskar_sky_create(type, OSKAR_CPU, num_sources, status);
     oskar_log_message(log, 'M', 0, "Generating random broken power law source distribution...");
 
     /* Cannot parallelise here, since rand() is not thread safe. */
@@ -534,55 +480,18 @@ static void set_up_gen_rbpl(int* num_chunks, oskar_Sky*** sky_chunks,
         oskar_generate_random_coordinate(&ra, &dec);
         b = oskar_random_broken_power_law(s->flux_min, s->flux_max,
                 s->threshold, s->power1, s->power2);
-        oskar_sky_set_source(temp, i, ra, dec, b, 0.0, 0.0, 0.0,
+        oskar_sky_set_source(t, i, ra, dec, b, 0.0, 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, status);
     }
 
     /* Apply filters and extended source over-ride. */
-    set_up_filter(temp, &s->filter, ra0, dec0, status);
-    set_up_extended(temp, &s->extended_sources, log, ra0, dec0, zero_failed,
-            status);
+    set_up_filter(t, &s->filter, ra0, dec0, status);
+    set_up_extended(t, &s->extended_sources, status);
 
-    /* Append to chunks. */
-    oskar_sky_append_to_set(num_chunks, sky_chunks, max_per_chunk, temp,
-            status);
-    oskar_sky_free(temp, status);
+    /* Append to sky model. */
+    oskar_sky_append(sky, t, status);
+    oskar_sky_free(t, status);
     oskar_log_message(log, 'M', 1, "done.");
-}
-
-
-static void write_sky_model(int num_chunks, oskar_Sky* const* chunks,
-        const oskar_SettingsSky* s, oskar_Log* log, int* status)
-{
-    const char* filename;
-    oskar_Sky* temp;
-
-    /* Write out sky model if needed. */
-    if (*status) return;
-    if (!s->output_binary_file && !s->output_text_file)
-        return;
-
-    /* Concatenate chunks into a single sky model. */
-    temp = oskar_sky_combine_set(chunks, num_chunks, status);
-
-    /* Write text file. */
-    filename = s->output_text_file;
-    if (filename && strlen(filename))
-    {
-        oskar_log_message(log, 'M', 1, "Writing sky model text file: %s", filename);
-        oskar_sky_save(filename, temp, status);
-    }
-
-    /* Write binary file. */
-    filename = s->output_binary_file;
-    if (filename && strlen(filename))
-    {
-        oskar_log_message(log, 'M', 1, "Writing sky model binary file: %s", filename);
-        oskar_sky_write(filename, temp, status);
-    }
-
-    /* Free memory. */
-    oskar_sky_free(temp, status);
 }
 
 
@@ -596,39 +505,14 @@ static void set_up_filter(oskar_Sky* sky, const oskar_SettingsSkyFilter* f,
 
 
 static void set_up_extended(oskar_Sky* sky,
-        const oskar_SettingsSkyExtendedSources* ext, oskar_Log* log,
-        double ra0_rad, double dec0_rad, int zero_failed_sources, int* status)
+        const oskar_SettingsSkyExtendedSources* ext, int* status)
 {
-#if !defined(OSKAR_NO_LAPACK)
-    int num_failed = 0;
-
     /* Apply extended source over-ride. */
     if (ext->FWHM_major_rad > 0.0 || ext->FWHM_minor_rad > 0.0)
     {
         oskar_sky_set_gaussian_parameters(sky, ext->FWHM_major_rad,
                 ext->FWHM_minor_rad, ext->position_angle_rad, status);
     }
-
-    /* Evaluate extended source parameters. */
-    oskar_sky_evaluate_gaussian_source_parameters(sky,
-            zero_failed_sources, ra0_rad, dec0_rad, &num_failed, status);
-
-    if (num_failed > 0)
-    {
-        if (zero_failed_sources)
-        {
-            oskar_log_warning(log, "Gaussian ellipse solution failed for %i "
-                    "sources. These sources will have their flux values set "
-                    "to zero.",  num_failed);
-        }
-        else
-        {
-            oskar_log_warning(log, "Gaussian ellipse solution failed for %i "
-                    "sources. These sources will be simulated as point objects.",
-                    num_failed);
-        }
-    }
-#endif
 }
 
 
@@ -639,14 +523,6 @@ static void set_up_pol(oskar_Sky* sky,
             pol->std_pol_fraction, pol->mean_pol_angle_rad,
             pol->std_pol_angle_rad, pol->seed, status);
 }
-
-#if defined(OSKAR_NO_LAPACK)
-#   if defined(__INTEL_COMPILER)
-#       pragma warning pop
-#   elif defined(__GNUC__)
-#       pragma GCC diagnostic pop
-#   endif
-#endif
 
 #ifdef __cplusplus
 }

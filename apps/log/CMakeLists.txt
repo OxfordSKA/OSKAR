@@ -20,6 +20,6 @@ set(${name}_SRC
     src/oskar_log_warning.c
     src/oskar_log_write.c
 )
-add_library(${name} ${lib_type} ${${name}_SRC} ${${name}_MOC_SRC})
+add_library(${name} ${lib_type} ${${name}_SRC})
 
 add_subdirectory(test)

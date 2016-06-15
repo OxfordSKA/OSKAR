@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,22 +57,14 @@ static void load_directories(oskar_Telescope* telescope,
 
 
 extern "C"
-void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
-        const oskar_Settings_old* settings, int* status)
+void oskar_telescope_load(oskar_Telescope* telescope, const char* path,
+        oskar_Log* log, const oskar_Settings_old* settings, int* status)
 {
     // Check if safe to proceed.
     if (*status) return;
 
-    // Check that the telescope directory has been set.
-    if (!settings->telescope.input_directory)
-    {
-        *status = OSKAR_ERR_FILE_IO;
-        return;
-    }
-
-    // Check that the directory exists.
-    oskar_Dir telescope_dir(string(settings->telescope.input_directory));
-    if (!telescope_dir.exists())
+    // Check that the telescope directory has been set and exists.
+    if (!path || !oskar_dir_exists(path))
     {
         *status = OSKAR_ERR_FILE_IO;
         return;
@@ -88,18 +80,20 @@ void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
     // Create the loaders.
     vector<oskar_TelescopeLoadAbstract*> loaders;
     // The layout loader must be first.
-    loaders.push_back(new TelescopeLoadLayout(settings));
+    loaders.push_back(new TelescopeLoadLayout);
     loaders.push_back(new TelescopeLoadGainPhase);
     loaders.push_back(new TelescopeLoadApodisation);
     loaders.push_back(new TelescopeLoadFeedAngle);
     loaders.push_back(new TelescopeLoadElementTypes);
     loaders.push_back(new TelescopeLoadMountTypes);
     loaders.push_back(new TelescopeLoadPermittedBeams);
-    loaders.push_back(new TelescopeLoadElementPattern(settings, log));
+    loaders.push_back(new TelescopeLoadElementPattern);
     loaders.push_back(new TelescopeLoadNoise(settings));
 
     // Load everything recursively from the telescope directory tree.
     map<string, string> filemap;
+    string path_str = string(path);
+    oskar_Dir telescope_dir(path_str);
     load_directories(telescope, telescope_dir, NULL, 0, loaders,
             filemap, log, status);
     if (*status)
@@ -113,6 +107,9 @@ void oskar_telescope_load(oskar_Telescope* telescope, oskar_Log* log,
     {
         delete loaders[i];
     }
+
+    // (Re-)Set unique station IDs.
+    oskar_telescope_set_station_ids(telescope);
 }
 
 // Private functions.

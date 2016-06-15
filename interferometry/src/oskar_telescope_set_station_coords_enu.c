@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,58 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <private_telescope.h>
-
 #include <oskar_convert_ecef_to_geodetic_spherical.h>
 #include <oskar_convert_enu_to_offset_ecef.h>
 #include <oskar_convert_offset_ecef_to_ecef.h>
 #include <oskar_telescope.h>
-#include <oskar_getline.h>
-#include <oskar_string_to_array.h>
-
-#include <stdio.h>
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_telescope_load_station_coords_horizon(oskar_Telescope* telescope,
-        const char* filename, double longitude, double latitude,
-        double altitude, int* status)
+void oskar_telescope_set_station_coords_enu(oskar_Telescope* telescope,
+        double longitude_rad, double latitude_rad, double altitude_m,
+        int num_stations, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, const oskar_Mem* x_err, const oskar_Mem* y_err,
+        const oskar_Mem* z_err, int* status)
 {
-    /* Declare the line buffer and counter. */
-    char* line = NULL;
-    size_t bufsize = 0;
-    int n = 0, type = 0;
-    FILE* file;
+    int i;
 
-    /* Check if safe to proceed. */
+    /* Check lengths. */
+    if ((int)oskar_mem_length(x) < num_stations ||
+            (int)oskar_mem_length(y) < num_stations ||
+            (int)oskar_mem_length(z) < num_stations ||
+            (int)oskar_mem_length(x_err) < num_stations ||
+            (int)oskar_mem_length(y_err) < num_stations ||
+            (int)oskar_mem_length(z_err) < num_stations)
+    {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
+
+    /* Resize the telescope model to hold the station data. */
+    oskar_telescope_resize(telescope, num_stations, status);
     if (*status) return;
 
-    /* Check type. */
-    type = oskar_telescope_precision(telescope);
-    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-        return;
-    }
-
-    /* Open the file. */
-    file = fopen(filename, "r");
-    if (!file)
-    {
-        *status = OSKAR_ERR_FILE_IO;
-        return;
-    }
-
     /* Store the telescope centre longitude, latitude, and altitude. */
-    telescope->lon_rad = longitude;
-    telescope->lat_rad = latitude;
-    telescope->alt_metres = altitude;
+    oskar_telescope_set_position(telescope,
+            longitude_rad, latitude_rad, altitude_m);
 
-    /* Loop over each line in the file. */
-    while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
+    /* Loop over station coordinates. */
+    for (i = 0; i < num_stations; ++i)
     {
         double lon = 0.0, lat = 0.0, alt = 0.0;
 
@@ -85,18 +72,13 @@ void oskar_telescope_load_station_coords_horizon(oskar_Telescope* telescope,
         double hor[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         double ecef[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
-        /* Load coordinates. */
-        if (oskar_string_to_array_d(line, 6, hor) < 2) continue;
-
-        /* Resize the telescope model to hold the station data.
-         * We can't resize to more than needed, since we would then lose track
-         * of the actual allocated size of the model when
-         * telescope->num_stations = n is finally set. */
-        if (telescope->num_stations <= n)
-        {
-            oskar_telescope_resize(telescope, n + 1, status);
-            if (*status) break;
-        }
+        /* Get coordinates from input arrays. */
+        hor[0] = oskar_mem_get_element_scalar(x, i, status);
+        hor[1] = oskar_mem_get_element_scalar(y, i, status);
+        hor[2] = oskar_mem_get_element_scalar(z, i, status);
+        hor[3] = oskar_mem_get_element_scalar(x_err, i, status);
+        hor[4] = oskar_mem_get_element_scalar(y_err, i, status);
+        hor[5] = oskar_mem_get_element_scalar(z_err, i, status);
 
         /* Get "true" coordinates ([3, 4, 5]) from "measured" coordinates. */
         hor[3] += hor[0];
@@ -105,33 +87,27 @@ void oskar_telescope_load_station_coords_horizon(oskar_Telescope* telescope,
 
         /* Convert horizon plane to offset geocentric Cartesian coordinates. */
         oskar_convert_enu_to_offset_ecef_d(1, &hor[0], &hor[1], &hor[2],
-                longitude, latitude, &ecef[0], &ecef[1], &ecef[2]);
+                longitude_rad, latitude_rad, &ecef[0], &ecef[1], &ecef[2]);
         oskar_convert_enu_to_offset_ecef_d(1, &hor[3], &hor[4], &hor[5],
-                longitude, latitude, &ecef[3], &ecef[4], &ecef[5]);
+                longitude_rad, latitude_rad, &ecef[3], &ecef[4], &ecef[5]);
 
         /* Store the offset geocentric and horizon plane coordinates. */
-        oskar_telescope_set_station_coords(telescope, n, &ecef[0], &ecef[3],
+        oskar_telescope_set_station_coords(telescope, i, &ecef[0], &ecef[3],
                 &hor[0], &hor[3], status);
         if (*status) break;
 
         /* Convert to ECEF, then to station longitude, latitude, altitude. */
         oskar_convert_offset_ecef_to_ecef(1, &ecef[3], &ecef[4], &ecef[5],
-                longitude, latitude, altitude, &ecef[3], &ecef[4], &ecef[5]);
+                longitude_rad, latitude_rad, altitude_m,
+                &ecef[3], &ecef[4], &ecef[5]);
         oskar_convert_ecef_to_geodetic_spherical(1, &ecef[3], &ecef[4],
                 &ecef[5], &lon, &lat, &alt);
-        oskar_station_set_position(oskar_telescope_station(telescope, n),
+        oskar_station_set_position(oskar_telescope_station(telescope, i),
                 lon, lat, alt);
-
-        /* Increment counter. */
-        ++n;
     }
 
-    /* Record the number of station positions loaded. */
-    telescope->num_stations = n;
-
-    /* Free the line buffer and close the file. */
-    if (line) free(line);
-    fclose(file);
+    /* (Re-)Set unique station IDs. */
+    oskar_telescope_set_station_ids(telescope);
 }
 
 #ifdef __cplusplus

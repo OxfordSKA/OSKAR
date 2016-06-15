@@ -59,15 +59,12 @@ TEST(evaluate_jones_E, evaluate_e)
     for (int i = 0; i < num_stations; ++i)
     {
         oskar_Station* s = oskar_telescope_station(tel_cpu, i);
-        oskar_station_set_unique_id(s, i);
         oskar_station_resize(s, num_antennas, &error);
         oskar_station_resize_element_types(s, 1, &error);
         ASSERT_EQ(0, error) << oskar_get_error_string(error);
 
         // Set the station meta-data.
         oskar_station_set_position(s, 0.0, M_PI / 2.0, 0.0);
-        oskar_station_set_phase_centre(s,
-                OSKAR_SPHERICAL_TYPE_EQUATORIAL, 0.0, M_PI/2.0);
         oskar_Element* element = oskar_station_element(s, 0);
         oskar_element_set_element_type(element, OSKAR_ELEMENT_TYPE_ISOTROPIC);
 
@@ -82,6 +79,7 @@ TEST(evaluate_jones_E, evaluate_e)
                         oskar_station_element_measured_y_enu_metres(s), &error),
                 &x_pos[0], station_dim, &x_pos[0], station_dim);
     }
+    oskar_telescope_set_station_ids(tel_cpu);
     oskar_telescope_set_phase_centre(tel_cpu,
             OSKAR_SPHERICAL_TYPE_EQUATORIAL, 0.0, M_PI/2.0);
     oskar_telescope_analyse(tel_cpu, &error);

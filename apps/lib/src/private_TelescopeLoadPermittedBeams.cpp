@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,13 +34,6 @@ using std::string;
 
 const string TelescopeLoadPermittedBeams::permitted_beams_file = "permitted_beams.txt";
 
-TelescopeLoadPermittedBeams::TelescopeLoadPermittedBeams()
-{
-}
-
-TelescopeLoadPermittedBeams::~TelescopeLoadPermittedBeams()
-{
-}
 
 void TelescopeLoadPermittedBeams::load(oskar_Telescope* /*telescope*/,
         const oskar_Dir& /*cwd*/, int /*num_subdirs*/,

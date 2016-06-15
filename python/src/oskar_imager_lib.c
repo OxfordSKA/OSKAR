@@ -106,7 +106,7 @@ static PyObject* create(PyObject* self, PyObject* args)
     prec = (type[0] == 'S' || type[0] == 's') ? OSKAR_SINGLE : OSKAR_DOUBLE;
     h = oskar_imager_create(prec, &status);
     capsule = PyCapsule_New((void*)h, name, (PyCapsule_Destructor)imager_free);
-    return Py_BuildValue("Ni", capsule, status); /* Don't increment refcount. */
+    return Py_BuildValue("N", capsule); /* Don't increment refcount. */
 }
 
 

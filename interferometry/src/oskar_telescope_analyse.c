@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ extern "C" {
 static void max_station_size_and_depth(const oskar_Station* s,
         int* max_elements, int* max_depth, int depth)
 {
-    int i = 0, num_elements;
+    int i, num_elements;
     num_elements = oskar_station_num_elements(s);
     *max_elements = num_elements > *max_elements ? num_elements : *max_elements;
     *max_depth = depth > *max_depth ? depth : *max_depth;
@@ -52,6 +52,29 @@ static void max_station_size_and_depth(const oskar_Station* s,
         }
     }
 }
+
+
+static void set_child_station_locations(oskar_Station* s,
+        const oskar_Station* parent)
+{
+    if (parent)
+    {
+        oskar_station_set_position(s,
+                oskar_station_lon_rad(parent),
+                oskar_station_lat_rad(parent),
+                oskar_station_alt_metres(parent));
+    }
+
+    /* Recursively set data for child stations. */
+    if (oskar_station_has_child(s))
+    {
+        int i, num_elements;
+        num_elements = oskar_station_num_elements(s);
+        for (i = 0; i < num_elements; ++i)
+            set_child_station_locations(oskar_station_child(s, i), s);
+    }
+}
+
 
 void oskar_telescope_analyse(oskar_Telescope* model, int* status)
 {
@@ -68,6 +91,7 @@ void oskar_telescope_analyse(oskar_Telescope* model, int* status)
     model->max_station_size = 0;
     for (i = 0; i < num_stations; ++i)
     {
+        set_child_station_locations(oskar_telescope_station(model, i), 0);
         max_station_size_and_depth(oskar_telescope_station_const(model, i),
                 &model->max_station_size, &model->max_station_depth, 1);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
+#include <oskar_telescope.h>
 
-#include <oskar_sim_interferometer.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <cstdio>
-
-TEST(sim_new, test)
+void oskar_telescope_log_summary(const oskar_Telescope* telescope,
+        oskar_Log* log, int* status)
 {
-    //oskar_sim_interferometer_new();
+    if (*status) return;
+    oskar_log_message(log, 'M', 0, "Telescope model summary");
+    oskar_log_value(log, 'M', 1, "Num. stations", "%d",
+            oskar_telescope_num_stations(telescope));
+    oskar_log_value(log, 'M', 1, "Max station size", "%d",
+            oskar_telescope_max_station_size(telescope));
+    oskar_log_value(log, 'M', 1, "Max station depth", "%d",
+            oskar_telescope_max_station_depth(telescope));
+    oskar_log_value(log, 'M', 1, "Identical stations", "%s",
+            oskar_telescope_identical_stations(telescope) ? "true" : "false");
 }
 
+#ifdef __cplusplus
+}
+#endif

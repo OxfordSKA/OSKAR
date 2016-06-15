@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2011-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,51 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_H_
-#define OSKAR_TELESCOPE_H_
-
-/**
- * @file oskar_telescope.h
- */
-
-/* Public interface. */
+#include <oskar_telescope.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_Telescope;
-#ifndef OSKAR_TELESCOPE_TYPEDEF_
-#define OSKAR_TELESCOPE_TYPEDEF_
-typedef struct oskar_Telescope oskar_Telescope;
-#endif /* OSKAR_TELESCOPE_TYPEDEF_ */
-
-enum OSKAR_POL_MODE_TYPE
+void oskar_telescope_load_station_coords_enu(oskar_Telescope* telescope,
+        const char* filename, double longitude, double latitude,
+        double altitude, int* status)
 {
-    OSKAR_POL_MODE_FULL,
-    OSKAR_POL_MODE_SCALAR
-};
+    int num_stations;
+    oskar_Mem *x, *y, *z, *x_err, *y_err, *z_err;
+
+    /* Load columns from file into memory. */
+    x     = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    y     = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    z     = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    x_err = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    y_err = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    z_err = oskar_mem_create(OSKAR_DOUBLE, OSKAR_CPU, 0, status);
+    num_stations = (int) oskar_mem_load_ascii(filename, 6, status,
+            x, "", y, "", z, "0.0", x_err, "0.0", y_err, "0.0", z_err, "0.0");
+
+    /* Set the station coordinates. */
+    oskar_telescope_set_station_coords_enu(telescope, longitude, latitude,
+            altitude, num_stations, x, y, z, x_err, y_err, z_err, status);
+
+    /* Free memory. */
+    oskar_mem_free(x, status);
+    oskar_mem_free(y, status);
+    oskar_mem_free(z, status);
+    oskar_mem_free(x_err, status);
+    oskar_mem_free(y_err, status);
+    oskar_mem_free(z_err, status);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#include <oskar_telescope_accessors.h>
-#include <oskar_telescope_analyse.h>
-#include <oskar_telescope_create.h>
-#include <oskar_telescope_create_copy.h>
-#include <oskar_telescope_duplicate_first_station.h>
-#include <oskar_telescope_free.h>
-#include <oskar_telescope_load_pointing_file.h>
-#include <oskar_telescope_load_station_coords_ecef.h>
-#include <oskar_telescope_load_station_coords_enu.h>
-#include <oskar_telescope_load_station_coords_wgs84.h>
-#include <oskar_telescope_log_summary.h>
-#include <oskar_telescope_resize.h>
-#include <oskar_telescope_save_layout.h>
-#include <oskar_telescope_set_station_coords.h>
-#include <oskar_telescope_set_station_coords_ecef.h>
-#include <oskar_telescope_set_station_coords_enu.h>
-#include <oskar_telescope_set_station_coords_wgs84.h>
-
-#endif /* OSKAR_TELESCOPE_H_ */

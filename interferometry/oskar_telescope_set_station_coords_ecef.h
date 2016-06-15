@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2016, The University of Oxford
+ * Copyright (c) 2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,51 +26,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_H_
-#define OSKAR_TELESCOPE_H_
+#ifndef OSKAR_TELESCOPE_SET_STATION_COORDS_ECEF_H_
+#define OSKAR_TELESCOPE_SET_STATION_COORDS_ECEF_H_
 
 /**
- * @file oskar_telescope.h
+ * @file oskar_telescope_set_station_coords_ecef.h
  */
 
-/* Public interface. */
+#include <oskar_global.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_Telescope;
-#ifndef OSKAR_TELESCOPE_TYPEDEF_
-#define OSKAR_TELESCOPE_TYPEDEF_
-typedef struct oskar_Telescope oskar_Telescope;
-#endif /* OSKAR_TELESCOPE_TYPEDEF_ */
-
-enum OSKAR_POL_MODE_TYPE
-{
-    OSKAR_POL_MODE_FULL,
-    OSKAR_POL_MODE_SCALAR
-};
+/**
+ * @brief
+ * Sets station locations with respect to the centre of the Earth.
+ *
+ * @details
+ * The station (x,y,z) coordinates must be given in the
+ * Earth-centred-Earth-fixed frame (ECEF).
+ *
+ * @param[in,out] telescope  Telescope model structure to be populated.
+ * @param[in] longitude_rad  Telescope centre longitude, in radians.
+ * @param[in] latitude_rad   Telescope centre latitude, in radians.
+ * @param[in] altitude_m     Telescope centre altitude, in metres.
+ * @param[in] num_stations   The number of stations.
+ * @param[in] x              Station x coordinates, in metres.
+ * @param[in] y              Station y coordinates, in metres.
+ * @param[in] z              Station z coordinates, in metres.
+ * @param[in] x_err          Station x coordinate error, in metres.
+ * @param[in] y_err          Station y coordinate error, in metres.
+ * @param[in] z_err          Station z coordinate error, in metres.
+ * @param[in,out] status     Status return code.
+ */
+OSKAR_EXPORT
+void oskar_telescope_set_station_coords_ecef(oskar_Telescope* telescope,
+        double longitude_rad, double latitude_rad, double altitude_m,
+        int num_stations, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, const oskar_Mem* x_err, const oskar_Mem* y_err,
+        const oskar_Mem* z_err, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#include <oskar_telescope_accessors.h>
-#include <oskar_telescope_analyse.h>
-#include <oskar_telescope_create.h>
-#include <oskar_telescope_create_copy.h>
-#include <oskar_telescope_duplicate_first_station.h>
-#include <oskar_telescope_free.h>
-#include <oskar_telescope_load_pointing_file.h>
-#include <oskar_telescope_load_station_coords_ecef.h>
-#include <oskar_telescope_load_station_coords_enu.h>
-#include <oskar_telescope_load_station_coords_wgs84.h>
-#include <oskar_telescope_log_summary.h>
-#include <oskar_telescope_resize.h>
-#include <oskar_telescope_save_layout.h>
-#include <oskar_telescope_set_station_coords.h>
-#include <oskar_telescope_set_station_coords_ecef.h>
-#include <oskar_telescope_set_station_coords_enu.h>
-#include <oskar_telescope_set_station_coords_wgs84.h>
-
-#endif /* OSKAR_TELESCOPE_H_ */
+#endif /* OSKAR_TELESCOPE_SET_STATION_COORDS_ECEF_H_ */

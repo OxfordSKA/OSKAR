@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2014, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,9 @@
 class TelescopeLoadPermittedBeams : public oskar_TelescopeLoadAbstract
 {
 public:
-    TelescopeLoadPermittedBeams();
+    TelescopeLoadPermittedBeams() {}
 
-    virtual ~TelescopeLoadPermittedBeams();
+    virtual ~TelescopeLoadPermittedBeams() {}
 
     virtual void load(oskar_Telescope* telescope, const oskar_Dir& cwd,
             int num_subdirs, std::map<std::string, std::string>& filemap,

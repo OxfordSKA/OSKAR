@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015, The University of Oxford
+ * Copyright (c) 2013-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -135,6 +135,11 @@ int oskar_telescope_allow_station_beam_duplication(
         const oskar_Telescope* model)
 {
     return model->allow_station_beam_duplication;
+}
+
+int oskar_telescope_enable_numerical_patterns(const oskar_Telescope* model)
+{
+    return model->enable_numerical_patterns;
 }
 
 int oskar_telescope_max_station_size(const oskar_Telescope* model)
@@ -327,12 +332,35 @@ void oskar_telescope_set_polar_motion(oskar_Telescope* model,
     }
 }
 
+static void oskar_telescope_set_station_phase_centre(oskar_Station* station,
+        int coord_type, double ra_rad, double dec_rad)
+{
+    oskar_station_set_phase_centre(station, coord_type, ra_rad, dec_rad);
+    if (oskar_station_has_child(station))
+    {
+        int i, num_elements;
+        num_elements = oskar_station_num_elements(station);
+        for (i = 0; i < num_elements; ++i)
+        {
+            oskar_telescope_set_station_phase_centre(
+                    oskar_station_child(station, i),
+                    coord_type, ra_rad, dec_rad);
+        }
+    }
+}
+
 void oskar_telescope_set_phase_centre(oskar_Telescope* model,
         int coord_type, double ra_rad, double dec_rad)
 {
+    int i;
     model->phase_centre_coord_type = coord_type;
     model->phase_centre_ra_rad = ra_rad;
     model->phase_centre_dec_rad = dec_rad;
+    for (i = 0; i < model->num_stations; ++i)
+    {
+        oskar_telescope_set_station_phase_centre(model->station[i],
+                coord_type, ra_rad, dec_rad);
+    }
 }
 
 void oskar_telescope_set_smearing_values(oskar_Telescope* model,
@@ -340,6 +368,25 @@ void oskar_telescope_set_smearing_values(oskar_Telescope* model,
 {
     model->channel_bandwidth_hz = bandwidth_hz;
     model->time_average_sec = time_average_sec;
+}
+
+void oskar_telescope_set_channel_bandwidth(oskar_Telescope* model,
+        double bandwidth_hz)
+{
+    model->channel_bandwidth_hz = bandwidth_hz;
+}
+
+void oskar_telescope_set_time_average(oskar_Telescope* model,
+        double time_average_sec)
+{
+    model->time_average_sec = time_average_sec;
+}
+
+void oskar_telescope_set_station_ids(oskar_Telescope* model)
+{
+    int i, counter = 0;
+    for (i = 0; i < model->num_stations; ++i)
+        oskar_station_set_unique_ids(model->station[i], &counter);
 }
 
 void oskar_telescope_set_uv_filter(oskar_Telescope* model,
@@ -350,9 +397,16 @@ void oskar_telescope_set_uv_filter(oskar_Telescope* model,
     model->uv_filter_units = uv_filter_units;
 }
 
-void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model, int value)
+void oskar_telescope_set_allow_station_beam_duplication(oskar_Telescope* model,
+        int value)
 {
     model->allow_station_beam_duplication = value;
+}
+
+void oskar_telescope_set_enable_numerical_patterns(oskar_Telescope* model,
+        int value)
+{
+    model->enable_numerical_patterns = value;
 }
 
 void oskar_telescope_set_pol_mode(oskar_Telescope* model, int value)

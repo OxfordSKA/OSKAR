@@ -91,21 +91,13 @@ int main(int argc, char** argv)
     oskar_log_settings_telescope(log, &s_old);
     oskar_log_settings_interferometer(log, &s_old);
 
-    // Set up sky model and telescope model.
-    int num_chunks = 0;
-    oskar_Sky** sky_chunks = oskar_set_up_sky(&s_old, log, &num_chunks, &e);
-    oskar_Telescope *tel = oskar_set_up_telescope(&s_old, log, &e);
-
     // Create simulator and set values from settings.
     s.begin_group("simulator");
     int prec = s.to_int("double_precision", &e) ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    int max_sources_per_chunk = s.to_int("max_sources_per_chunk", &e);
     oskar_Simulator* h = oskar_simulator_create(prec, &e);
     oskar_simulator_set_log(h, log);
     oskar_simulator_set_settings_path(h, settings_file);
-    oskar_simulator_set_telescope_model(h, tel);
-    oskar_simulator_set_sky_chunks(h, num_chunks, sky_chunks);
-    oskar_simulator_set_max_sources_per_chunk(h,
-            s.to_int("max_sources_per_chunk", &e));
     if (!s.starts_with("cuda_device_ids", "all", &e))
     {
         vector<int> ids = s.to_int_list("cuda_device_ids", &e);
@@ -121,6 +113,8 @@ int main(int argc, char** argv)
     s.begin_group("sky");
     oskar_simulator_set_horizon_clip(h,
             s.to_int("advanced/apply_horizon_clip", &e));
+    oskar_simulator_set_zero_failed_gaussians(h,
+            s.to_int("advanced/zero_failed_gaussians", &e));
     /* FIXME oskar_simulator_set_source_flux_range(h,
             s.to_double("common_flux_filter_min_jy", &e),
             s.to_double("common_flux_filter_max_jy", &e));*/
@@ -130,10 +124,12 @@ int main(int argc, char** argv)
     s.begin_group("observation");
     int num_time_steps = s.to_int("num_time_steps", &e);
     double inc_sec = s.to_double("length", &e) / num_time_steps;
-    oskar_simulator_set_time(h, s.to_double("start_time_utc", &e),
+    oskar_simulator_set_observation_time(h, s.to_double("start_time_utc", &e),
             inc_sec, num_time_steps);
-    oskar_simulator_set_frequency(h, s.to_double("start_frequency_hz", &e),
-            s.to_double("frequency_inc_hz", &e), s.to_int("num_channels", &e));
+    oskar_simulator_set_observation_frequency(h,
+            s.to_double("start_frequency_hz", &e),
+            s.to_double("frequency_inc_hz", &e),
+            s.to_int("num_channels", &e));
     s.end_group();
 
     // Set interferometer settings.
@@ -154,6 +150,15 @@ int main(int argc, char** argv)
 #endif
     s.end_group();
 
+    // Set up sky model. A copy is made, so the original can be freed.
+    oskar_Sky* sky = oskar_set_up_sky(&s_old, log, &e);
+    oskar_simulator_set_sky_model(h, sky, max_sources_per_chunk, &e);
+    oskar_sky_free(sky, &e);
+
+    // Set up telescope model.
+    oskar_Telescope* tel = oskar_set_up_telescope(&s_old, log, &e);
+    oskar_simulator_set_telescope_model(h, tel, &e);
+
     // Run simulation.
     oskar_Timer* tmr = oskar_timer_create(OSKAR_TIMER_NATIVE);
     oskar_timer_resume(tmr);
@@ -168,13 +173,10 @@ int main(int argc, char** argv)
                 oskar_get_error_string(e));
 
     // Free memory.
-    oskar_telescope_free(tel, &e);
     oskar_timer_free(tmr);
     oskar_simulator_free(h, &e);
+    oskar_telescope_free(tel, &e);
     oskar_log_free(log);
-    for (int i = 0; i < num_chunks; ++i)
-        oskar_sky_free(sky_chunks[i], &e);
-    free(sky_chunks);
 
     return e;
 }

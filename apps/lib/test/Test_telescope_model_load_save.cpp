@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015, The University of Oxford
+ * Copyright (c) 2012-2016, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,19 +78,13 @@ TEST(telescope_model_load_save, test_0_level)
     {
         oskar_Settings_old settings;
         oskar_settings_old_init(&settings);
-        settings.telescope.altitude_m    = altitude_m;
-        settings.telescope.latitude_rad  = latitude_rad;
-        settings.telescope.longitude_rad = longitude_rad;
-        settings.telescope.input_directory = (char*)malloc(1 + strlen(path));
-        settings.telescope.aperture_array.element_pattern.enable_numerical_patterns = false;
-        settings.interferometer.noise.enable = false;
-        strcpy(settings.telescope.input_directory, path);
-
         oskar_Telescope* telescope = oskar_telescope_create(OSKAR_DOUBLE,
                         OSKAR_CPU, 0, &err);
-        oskar_telescope_load(telescope, NULL, &settings, &err);
+        oskar_telescope_set_position(telescope,
+                longitude_rad, latitude_rad, altitude_m);
+        oskar_telescope_set_enable_numerical_patterns(telescope, 0);
+        oskar_telescope_load(telescope, path, NULL, &settings, &err);
         ASSERT_EQ(0, err) << oskar_get_error_string(err);
-
         oskar_telescope_free(telescope, &err);
         oskar_settings_old_free(&settings);
     }
@@ -147,17 +141,12 @@ TEST(telescope_model_load_save, test_1_level)
     // Load it back again.
     oskar_Settings_old settings;
     oskar_settings_old_init(&settings);
-    settings.telescope.altitude_m = altitude_m;
-    settings.telescope.latitude_rad = latitude_rad;
-    settings.telescope.longitude_rad = longitude_rad;
-    settings.telescope.input_directory = (char*)malloc(1 + strlen(path));
-    settings.telescope.aperture_array.element_pattern.enable_numerical_patterns = false;
-    settings.interferometer.noise.enable = false;
-    strcpy(settings.telescope.input_directory, path);
-    oskar_Telescope* telescope2 =
-            oskar_telescope_create(OSKAR_SINGLE,
+    oskar_Telescope* telescope2 = oskar_telescope_create(OSKAR_SINGLE,
                     OSKAR_CPU, 0, &err);
-    oskar_telescope_load(telescope2, NULL, &settings, &err);
+    oskar_telescope_set_position(telescope2,
+            longitude_rad, latitude_rad, altitude_m);
+    oskar_telescope_set_enable_numerical_patterns(telescope, 0);
+    oskar_telescope_load(telescope2, path, NULL, &settings, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
     oskar_settings_old_free(&settings);
 
@@ -297,18 +286,13 @@ TEST(telescope_model_load_save, test_2_level)
     // Load it back again.
     oskar_Settings_old settings;
     oskar_settings_old_init(&settings);
-    settings.telescope.altitude_m = altitude_m;
-    settings.telescope.latitude_rad = latitude_rad;
-    settings.telescope.longitude_rad = longitude_rad;
-    settings.telescope.input_directory = (char*)malloc(1 + strlen(path));
-    settings.telescope.aperture_array.element_pattern.enable_numerical_patterns = false;
-    settings.interferometer.noise.enable = false;
-    strcpy(settings.telescope.input_directory, path);
-    oskar_Telescope* telescope2 =
-            oskar_telescope_create(OSKAR_SINGLE,
+    oskar_Telescope* telescope2 = oskar_telescope_create(OSKAR_SINGLE,
                     OSKAR_CPU, 0, &err);
+    oskar_telescope_set_position(telescope2,
+            longitude_rad, latitude_rad, altitude_m);
+    oskar_telescope_set_enable_numerical_patterns(telescope, 0);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
-    oskar_telescope_load(telescope2, NULL, &settings, &err);
+    oskar_telescope_load(telescope2, path, NULL, &settings, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
     oskar_settings_old_free(&settings);
 
@@ -535,16 +519,12 @@ TEST(telescope_model_load_save, test_load_telescope_noise_rms)
 
     oskar_Telescope* telescope = oskar_telescope_create(type,
             location, 0, &err);
+    oskar_telescope_set_position(telescope, 0.1, 0.5, 0.0);
+    oskar_telescope_set_enable_numerical_patterns(telescope, 0);
     oskar_Settings_old settings;
     oskar_settings_old_init(&settings);
-    settings.telescope.altitude_m = 0.0;
-    settings.telescope.latitude_rad = 0.5;
-    settings.telescope.longitude_rad = 0.1;
     settings.sim.double_precision = (type == OSKAR_DOUBLE) ? OSKAR_TRUE : OSKAR_FALSE;
     QByteArray path = root.toLatin1();
-    settings.telescope.input_directory = (char*)malloc(root.size() + 1);
-    strcpy(settings.telescope.input_directory, path.constData());
-    settings.telescope.aperture_array.element_pattern.enable_numerical_patterns = false;
     oskar_SettingsSystemNoise* noise = &settings.interferometer.noise;
     noise->enable = OSKAR_TRUE;
     noise->seed = 0;
@@ -555,7 +535,7 @@ TEST(telescope_model_load_save, test_load_telescope_noise_rms)
     settings.interferometer.channel_bandwidth_hz = 1;
     settings.interferometer.time_average_sec = 1;
 
-    oskar_telescope_load(telescope, NULL, &settings, &err);
+    oskar_telescope_load(telescope, path.constData(), NULL, &settings, &err);
     ASSERT_EQ(0, err) << oskar_get_error_string(err);
 
     ASSERT_EQ(oskar_telescope_num_stations(telescope), num_stations);

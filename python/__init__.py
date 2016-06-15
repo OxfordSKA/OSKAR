@@ -1,7 +1,7 @@
 #
 #  This file is part of OSKAR.
 #
-# Copyright (c) 2014, The University of Oxford
+# Copyright (c) 2014-2016, The University of Oxford
 # All rights reserved.
 #
 #  This file is part of the OSKAR package.
@@ -30,14 +30,20 @@
 #  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
 #
-"""OSKAR is a package to simulate interferometric visibility data ....
+
+"""OSKAR is a package to simulate interferometric visibility data.
 """
 
 from version import __version__
 
+from sky import Sky
+from telescope import Telescope
+from simulator import Simulator
+from imager import Imager
 import bda
-import imager
-# import mem
-import settings
-import sim
-# from mem import (mloc, mtype)
+
+#import sky
+#import telescope
+#import simulator
+#import imager
+#import bda

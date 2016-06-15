@@ -41,16 +41,16 @@ class Imager(object):
         """Creates a handle to an OSKAR imager.
 
         Args:
-            type (str): Either 'double' or 'single' to specify 
+            type (str): Either 'double' or 'single' to specify
                 the numerical precision of the images.
         """
-        self._capsule, _ = _imager_lib.create(precision)
+        self._capsule = _imager_lib.create(precision)
 
 
     def check_init(self):
         """Initialises the imager algorithm if it has not already been done.
 
-        All imager options and data must have been set appropriately 
+        All imager options and data must have been set appropriately
         before calling this function.
         """
         _imager_lib.check_init(self._capsule)
@@ -60,7 +60,7 @@ class Imager(object):
         """Finalises the image or images and writes them to file.
 
         Args:
-            image (Optional[float, array like]): 
+            image (Optional[float, array-like]):
                 If given, the output image is returned in this array.
         """
         _imager_lib.finalise(self._capsule, image)
@@ -69,14 +69,14 @@ class Imager(object):
     def finalise_plane(self, plane, plane_norm):
         """Finalises an image plane.
 
-        This is a low-level function that is used to finalise 
+        This is a low-level function that is used to finalise
         gridded visibilities when used in conjunction with update_plane().
 
-        The image can be obtained by taking the real part of the plane after 
+        The image can be obtained by taking the real part of the plane after
         this function returns.
 
         Args:
-            plane (complex float, array like): 
+            plane (complex float, array-like):
                 On input, the plane to finalise; on output, the image plane.
             plane_norm (float): Plane normalisation to apply.
         """
@@ -159,7 +159,7 @@ class Imager(object):
                 The kernel width is 2 * support + 1.
             oversample (int): Oversample factor used for look-up table.
         """
-        _imager_lib.set_grid_kernel(self._capsule, kernel_type, \
+        _imager_lib.set_grid_kernel(self._capsule, kernel_type,
             support, oversample)
 
 
@@ -238,7 +238,7 @@ class Imager(object):
             inc_hz (float): Frequency increment, in Hz.
             num_channels (int): Number of channels in visibility data.
         """
-        _imager_lib.set_vis_frequency(self._capsule, \
+        _imager_lib.set_vis_frequency(self._capsule,
             ref_hz, inc_hz, num_channels)
 
 
@@ -298,15 +298,15 @@ class Imager(object):
         Args:
             num_baselines (int):
                 Number of baselines in the visibility block.
-            uu (float, array like, shape (n,)):
+            uu (float, array-like, shape (n,)):
                 Time-baseline ordered uu coordinates, in metres.
-            vv (float, array like, shape (n,)):
+            vv (float, array-like, shape (n,)):
                 Time-baseline ordered vv coordinates, in metres.
-            ww (float, array like, shape (n,)):
+            ww (float, array-like, shape (n,)):
                 Time-baseline ordered ww coordinates, in metres.
-            amp (complex float, array like, shape (n,)):
+            amp (complex float, array-like, shape (n,)):
                 Baseline visibility amplitudes.
-            weight (float, array like, shape (n,)):
+            weight (float, array-like, shape (n,)):
                 Visibility weights.
             num_pols (Optional[int]):
                Number of polarisations in the visibility block. Default 1.
@@ -333,17 +333,17 @@ class Imager(object):
         Call finalise_plane() to finalise the image after calling this function.
 
         Args:
-            uu (float, array like, shape (n,)):
+            uu (float, array-like, shape (n,)):
                 Baseline uu coordinates, in wavelengths.
-            vv (float, array like, shape (n,)):
+            vv (float, array-like, shape (n,)):
                 Baseline vv coordinates, in wavelengths.
-            ww (float, array like, shape (n,)):
+            ww (float, array-like, shape (n,)):
                 Baseline ww coordinates, in wavelengths.
-            amps (complex float, array like, shape (n,)):
+            amps (complex float, array-like, shape (n,)):
                 Baseline visibility amplitudes.
-            weight (float, array like, shape (n,)):
+            weight (float, array-like, shape (n,)):
                 Visibility weights.
-            plane (float, array like):
+            plane (float, array-like):
                 Plane to update.
             plane_norm (float):
                 Current plane normalisation.
@@ -360,15 +360,15 @@ class Imager(object):
         """Makes an image from visibility data.
 
         Args:
-            uu (float, array like, shape (n,)):
+            uu (float, array-like, shape (n,)):
                 Baseline uu coordinates, in wavelengths.
-            vv (float, array like, shape (n,)):
+            vv (float, array-like, shape (n,)):
                 Baseline vv coordinates, in wavelengths.
-            ww (float, array like, shape (n,)):
+            ww (float, array-like, shape (n,)):
                 Baseline ww coordinates, in wavelengths.
-            amps (complex float, array like, shape (n,)):
+            amps (complex float, array-like, shape (n,)):
                 Baseline visibility amplitudes.
-            weight (float, array like, shape (n,)):
+            weight (float, array-like, shape (n,)):
                 Visibility weights.
             fov_deg (float): Image field of view, in degrees.
             size (int):      Image size along one dimension, in pixels.
