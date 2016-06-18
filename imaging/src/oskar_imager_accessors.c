@@ -43,15 +43,15 @@ static void oskar_imager_data_range(const int settings_range[2],
         int num_data_values, int range[2], int* status);
 
 
-int oskar_imager_plane_size(oskar_Imager* h)
+int oskar_imager_num_w_planes(oskar_Imager* h)
 {
-    return h->grid_size;
+    return h->num_w_planes;
 }
 
 
-int oskar_imager_w_planes(oskar_Imager* h)
+int oskar_imager_plane_size(oskar_Imager* h)
 {
-    return h->num_w_planes;
+    return h->grid_size;
 }
 
 
@@ -167,6 +167,21 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
 }
 
 
+void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
+        int support, int oversample, int* status)
+{
+    h->support = support;
+    h->oversample = oversample;
+    if (!strncmp(type, "S", 1) || !strncmp(type, "s", 1))
+        h->kernel_type = 'S';
+    else if (!strncmp(type, "G", 1) || !strncmp(type, "g", 1))
+        h->kernel_type = 'G';
+    else if (!strncmp(type, "P", 1) || !strncmp(type, "p", 1))
+        h->kernel_type = 'P';
+    else *status = OSKAR_ERR_SETTINGS_IMAGE;
+}
+
+
 void oskar_imager_set_image_type(oskar_Imager* h, const char* type,
         int* status)
 {
@@ -212,18 +227,19 @@ void oskar_imager_set_image_type(oskar_Imager* h, const char* type,
 }
 
 
-void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
-        int support, int oversample, int* status)
+void oskar_imager_set_input_file(oskar_Imager* h, const char* filename,
+        int* status)
 {
-    h->support = support;
-    h->oversample = oversample;
-    if (!strncmp(type, "S", 1) || !strncmp(type, "s", 1))
-        h->kernel_type = 'S';
-    else if (!strncmp(type, "G", 1) || !strncmp(type, "g", 1))
-        h->kernel_type = 'G';
-    else if (!strncmp(type, "P", 1) || !strncmp(type, "p", 1))
-        h->kernel_type = 'P';
-    else *status = OSKAR_ERR_SETTINGS_IMAGE;
+    int len = 0;
+    if (*status) return;
+    free(h->input_file);
+    h->input_file = 0;
+    if (filename) len = strlen(filename);
+    if (len > 0)
+    {
+        h->input_file = calloc(1 + len, 1);
+        strcpy(h->input_file, filename);
+    }
 }
 
 
@@ -236,7 +252,7 @@ void oskar_imager_set_log(oskar_Imager* h, oskar_Log* log)
 void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
         int* status)
 {
-    int len;
+    int len = 0;
     if (*status) return;
     len = strlen(column);
     if (len == 0) { *status = OSKAR_ERR_FILE_IO; return; }
@@ -249,13 +265,16 @@ void oskar_imager_set_ms_column(oskar_Imager* h, const char* column,
 void oskar_imager_set_output_root(oskar_Imager* h, const char* filename,
         int* status)
 {
-    int len;
+    int len = 0;
     if (*status) return;
-    len = strlen(filename);
-    if (len == 0) { *status = OSKAR_ERR_FILE_IO; return; }
     free(h->image_root);
-    h->image_root = calloc(1 + len, 1);
-    strcpy(h->image_root, filename);
+    h->image_root = 0;
+    if (filename) len = strlen(filename);
+    if (len > 0)
+    {
+        h->image_root = calloc(1 + len, 1);
+        strcpy(h->image_root, filename);
+    }
 }
 
 
@@ -309,7 +328,7 @@ void oskar_imager_set_vis_time(oskar_Imager* h,
 }
 
 
-void oskar_imager_set_w_planes(oskar_Imager* h, int value)
+void oskar_imager_set_num_w_planes(oskar_Imager* h, int value)
 {
     h->num_w_planes = value;
 }

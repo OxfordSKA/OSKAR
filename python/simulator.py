@@ -32,6 +32,7 @@
 # 
 
 import _simulator_lib
+from vis_block import VisBlock
 
 class Simulator(object):
     """This class provides a Python interface to the OSKAR simulator."""
@@ -55,18 +56,116 @@ class Simulator(object):
         _simulator_lib.check_init(self._capsule)
 
 
-    def run(self):
-        """Runs the simulator.
+    def finalise_block(self, block_index):
+        """Finalises a visibility block.
 
-        Call this method only after setting all required options.
+        This method should be called after all prior calls to run_block() 
+        have completed for a given simulation block.
+
+        Args:
+            block_index (int): The simulation block index to finalise.
+
+        Returns:
+            block (oskar.VisBlock): A temporary handle to the finalised block.
+                This is only valid until the next block is simulated.
         """
-        _simulator_lib.run(self._capsule)
+        block = VisBlock()
+        block._capsule = _simulator_lib.finalise_block(self._capsule, 
+            block_index)
+        return block
+
+
+    def finalise(self):
+        """Finalises the simulator.
+
+        This method should be called after all blocks have been simulated.
+        It is not necessary to call this if using the run() method.
+        """
+        _simulator_lib.finalise(self._capsule)
+
+
+    def num_gpus(self):
+        """Returns the number of GPUs selected.
+
+        Returns:
+            int: The number of GPUs selected.
+        """
+        return _simulator_lib.num_gpus(self._capsule)
+
+
+    def num_vis_blocks(self):
+        """Returns the number of visibility blocks required for the simulation.
+
+        Returns:
+            int: The number of visibility blocks required for the simulation.
+        """
+        return _simulator_lib.num_vis_blocks(self._capsule)
 
 
     def reset_cache(self):
         """Low-level function to reset the simulator's internal memory.
         """
         _simulator_lib.reset_cache(self._capsule)
+
+
+    def reset_work_unit_index(self):
+        """Low-level function to reset the work unit index.
+
+        This must be called after run_block() has returned, for each block.
+        """
+        _simulator_lib.reset_work_unit_index(self._capsule)
+
+
+    def run_block(self, block_index, gpu_id=0):
+        """Runs the simulator for one visibility block.
+
+        Multiple GPUs can be used to simulate each block.
+        For multi-GPU simulations, the method should be called multiple times
+        using different GPU IDs from different threads, but with the same
+        block index.
+
+        GPU IDs are zero-based. They correspond to the indices of the array
+        used in the call to set_gpus(), NOT directly to CUDA device IDs.
+
+        This method should be called only after setting all required options.
+
+        Call finalise_block() with the same block ID to finalise the block 
+        after calling this method.
+
+        Args:
+            block_index (int): The simulation block index.
+            gpu_id (Optional[int]): The GPU ID to use for this call.
+        """
+        _simulator_lib.run_block(self._capsule, block_index, gpu_id)
+
+
+    def run(self):
+        """Runs the simulator.
+
+        This method should be called only after setting all required options.
+
+        Call finalise() to finalise the simulator after calling this method.
+        """
+        _simulator_lib.run(self._capsule)
+
+
+    def set_gpus(self, device_ids):
+        """Sets the GPU device IDs to use.
+
+        Args:
+            device_ids (int, array-like): 
+                A list of the GPU IDs to use, or -1 to use all.
+        """
+        _simulator_lib.set_gpus(self._capsule, device_ids)
+
+
+    def set_max_times_per_block(self, value):
+        """Sets the maximum number of times in a visibility block.
+
+        Args:
+            value (int): Number of time samples per block.
+        """
+        _simulator_lib.set_max_times_per_block(self._capsule, value)
 
 
     def set_observation_frequency(self, start_frequency_hz, 
@@ -132,4 +231,25 @@ class Simulator(object):
         """
         _simulator_lib.set_telescope_model(self._capsule, 
             telescope_model._capsule)
+
+
+    def write_block(self, block, block_index):
+        """Writes a finalised visibility block.
+
+        This method should be called after a call to finalise_block()
+        with the same block index.
+
+        Args:
+            block (oskar.VisBlock): The block to write.
+            block_index (int): The simulation block index to write.
+        """
+        _simulator_lib.write_block(self._capsule, block._capsule, block_index)
+
+
+    def write_headers(self):
+        """Writes visibility headers.
+
+        This method should be called before the first call to write_block().
+        """
+        _simulator_lib.write_headers(self._capsule)
 

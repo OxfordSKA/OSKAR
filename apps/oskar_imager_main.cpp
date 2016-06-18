@@ -91,6 +91,8 @@ int main(int argc, char** argv)
         vector<int> ids = s.to_int_list("cuda_device_ids", &e);
         if (ids.size() > 0) oskar_imager_set_gpus(h, ids.size(), &ids[0], &e);
     }
+    oskar_imager_set_input_file(h,
+            s.to_string("input_vis_data", &e).c_str(), &e);
     oskar_imager_set_ms_column(h, s.to_string("ms_column", &e).c_str(), &e);
     oskar_imager_set_output_root(h, s.to_string("root_path", &e).c_str(), &e);
     oskar_imager_set_image_type(h, s.to_string("image_type", &e).c_str(), &e);
@@ -114,7 +116,7 @@ int main(int argc, char** argv)
                 s.to_int("fft/oversample", &e), &e);
     }
     if (!s.starts_with("wproj/w_planes", "auto", &e))
-        oskar_imager_set_w_planes(h, s.to_int("wproj/w_planes", &e));
+        oskar_imager_set_num_w_planes(h, s.to_int("wproj/w_planes", &e));
     oskar_imager_set_fft_on_gpu(h, s.to_int("fft/use_gpu", &e));
     if (s.first_letter("direction", &e) == 'R')
     {
@@ -129,7 +131,7 @@ int main(int argc, char** argv)
     {
         oskar_log_section(log, 'M', "Starting imager...");
         oskar_timer_resume(tmr);
-        oskar_imager_run(h, s.to_string("input_vis_data", &e).c_str(), &e);
+        oskar_imager_run(h, &e);
     }
 
     // Check for errors.

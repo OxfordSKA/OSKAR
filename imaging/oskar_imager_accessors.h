@@ -42,6 +42,16 @@ extern "C" {
 
 /**
  * @brief
+ * Returns the number of W-planes in use.
+ *
+ * @details
+ * Returns the number of W-planes in use.
+ */
+OSKAR_EXPORT
+int oskar_imager_num_w_planes(oskar_Imager* h);
+
+/**
+ * @brief
  * Returns the grid size required by the algorithm.
  *
  * @details
@@ -50,16 +60,6 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_imager_plane_size(oskar_Imager* h);
-
-/**
- * @brief
- * Returns the number of W-planes in use.
- *
- * @details
- * Returns the number of W-planes in use.
- */
-OSKAR_EXPORT
-int oskar_imager_w_planes(oskar_Imager* h);
 
 /**
  * @brief
@@ -174,6 +174,26 @@ void oskar_imager_set_gpus(oskar_Imager* h, int num, const int* ids,
 
 /**
  * @brief
+ * Sets the convolution kernel used for gridding visibilities.
+ *
+ * @details
+ * Sets the convolution kernel used for gridding visibilities.
+ *
+ * The \p type string can be:
+ * - "Spheroidal" to use the spheroidal kernel from CASA.
+ *
+ * @param[in,out] h          Handle to imager.
+ * @param[in]     type       Type of kernel to use.
+ * @param[in]     support    Support size of kernel.
+ * @param[in]     oversample Oversampling factor used for look-up table.
+ * @param[in,out] status     Status return code.
+ */
+OSKAR_EXPORT
+void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
+        int support, int oversample, int* status);
+
+/**
+ * @brief
  * Sets the image (polarisation) type
  *
  * @details
@@ -202,23 +222,19 @@ void oskar_imager_set_image_type(oskar_Imager* h, const char* type,
 
 /**
  * @brief
- * Sets the convolution kernel used for gridding visibilities.
+ * Sets the input file or Measurement Set.
  *
  * @details
- * Sets the convolution kernel used for gridding visibilities.
- *
- * The \p type string can be:
- * - "Spheroidal" to use the spheroidal kernel from CASA.
+ * Sets the input file or Measurement Set.
+ * This is used when calling oskar_imager_run().
  *
  * @param[in,out] h          Handle to imager.
- * @param[in]     type       Type of kernel to use.
- * @param[in]     support    Support size of kernel.
- * @param[in]     oversample Oversampling factor used for look-up table.
+ * @param[in]     filename   Input path.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_set_grid_kernel(oskar_Imager* h, const char* type,
-        int support, int oversample, int* status);
+void oskar_imager_set_input_file(oskar_Imager* h, const char* filename,
+        int* status);
 
 /**
  * @brief
@@ -376,7 +392,7 @@ void oskar_imager_set_vis_time(oskar_Imager* h,
  * @param[in] value            Number of W planes to use.
  */
 OSKAR_EXPORT
-void oskar_imager_set_w_planes(oskar_Imager* h, int value);
+void oskar_imager_set_num_w_planes(oskar_Imager* h, int value);
 
 /**
  * @brief

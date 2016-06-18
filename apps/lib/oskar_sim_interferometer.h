@@ -37,6 +37,7 @@
 #include <oskar_log.h>
 #include <oskar_sky.h>
 #include <oskar_telescope.h>
+#include <oskar_vis_block.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,6 +48,41 @@ struct oskar_Simulator;
 #define OSKAR_SIMULATOR_TYPEDEF_
 typedef struct oskar_Simulator oskar_Simulator;
 #endif
+
+OSKAR_APPS_EXPORT
+void oskar_simulator_check_init(oskar_Simulator* h, int* status);
+
+OSKAR_APPS_EXPORT
+oskar_Simulator* oskar_simulator_create(int precision, int* status);
+
+OSKAR_APPS_EXPORT
+oskar_VisBlock* oskar_simulator_finalise_block(oskar_Simulator* h,
+        int block_index, int* status);
+
+OSKAR_APPS_EXPORT
+void oskar_simulator_finalise(oskar_Simulator* h, int* status);
+
+OSKAR_APPS_EXPORT
+void oskar_simulator_free(oskar_Simulator* h, int* status);
+
+OSKAR_APPS_EXPORT
+int oskar_simulator_num_gpus(const oskar_Simulator* h);
+
+OSKAR_APPS_EXPORT
+int oskar_simulator_num_vis_blocks(const oskar_Simulator* h);
+
+OSKAR_APPS_EXPORT
+void oskar_simulator_reset_cache(oskar_Simulator* h, int* status);
+
+OSKAR_APPS_EXPORT
+void oskar_simulator_reset_work_unit_index(oskar_Simulator* h);
+
+OSKAR_APPS_EXPORT
+void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
+        int gpu_id, int* status);
+
+OSKAR_APPS_EXPORT
+void oskar_simulator_run(oskar_Simulator* h, int* status);
 
 OSKAR_APPS_EXPORT
 void oskar_simulator_set_correlation_type(oskar_Simulator* h,
@@ -77,6 +113,14 @@ void oskar_simulator_set_observation_time(oskar_Simulator* h,
         double time_start_mjd_utc, double inc_sec, int num_time_steps);
 
 OSKAR_APPS_EXPORT
+void oskar_simulator_set_output_measurement_set(oskar_Simulator* h,
+        const char* filename);
+
+OSKAR_APPS_EXPORT
+void oskar_simulator_set_output_vis_file(oskar_Simulator* h,
+        const char* filename);
+
+OSKAR_APPS_EXPORT
 void oskar_simulator_set_settings_path(oskar_Simulator* h,
         const char* filename);
 
@@ -93,14 +137,6 @@ void oskar_simulator_set_thermal_noise(oskar_Simulator* h,
         int enabled, int seed);
 
 OSKAR_APPS_EXPORT
-void oskar_simulator_set_output_vis_file(oskar_Simulator* h,
-        const char* filename);
-
-OSKAR_APPS_EXPORT
-void oskar_simulator_set_output_measurement_set(oskar_Simulator* h,
-        const char* filename);
-
-OSKAR_APPS_EXPORT
 void oskar_simulator_set_source_flux_range(oskar_Simulator* h,
         double min_jy, double max_jy);
 
@@ -108,20 +144,11 @@ OSKAR_APPS_EXPORT
 void oskar_simulator_set_zero_failed_gaussians(oskar_Simulator* h, int value);
 
 OSKAR_APPS_EXPORT
-void oskar_simulator_check_init(oskar_Simulator* h, int* status);
+void oskar_simulator_write_block(oskar_Simulator* h,
+        const oskar_VisBlock* block, int block_index, int* status);
 
 OSKAR_APPS_EXPORT
-oskar_Simulator* oskar_simulator_create(int precision, int* status);
-
-OSKAR_APPS_EXPORT
-void oskar_simulator_reset_cache(oskar_Simulator* h, int* status);
-
-OSKAR_APPS_EXPORT
-void oskar_simulator_run(oskar_Simulator* h, int* status);
-
-OSKAR_APPS_EXPORT
-void oskar_simulator_free(oskar_Simulator* h, int* status);
-
+void oskar_simulator_write_headers(oskar_Simulator* h, int* status);
 
 #ifdef __cplusplus
 }

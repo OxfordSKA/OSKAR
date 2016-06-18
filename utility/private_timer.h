@@ -58,7 +58,8 @@ struct oskar_Timer
     double elapsed;
     double start;
 #ifdef OSKAR_HAVE_CUDA
-    cudaEvent_t start_cuda, end_cuda;
+    cudaEvent_t start_cuda;
+    cudaEvent_t end_cuda;
 #endif
 #ifdef OSKAR_OS_WIN
     double freq;

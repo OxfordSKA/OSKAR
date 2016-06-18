@@ -123,6 +123,10 @@ struct oskar_Simulator
 
     /* Array of DeviceData structures, one per GPU. */
     DeviceData* d;
+
+#ifdef _OPENMP
+    omp_lock_t mutex;
+#endif
 };
 #ifndef OSKAR_SIMULATOR_TYPEDEF_
 #define OSKAR_SIMULATOR_TYPEDEF_
@@ -132,10 +136,6 @@ typedef struct oskar_Simulator oskar_Simulator;
 
 /* Private method prototypes. */
 
-static void sim_vis_block(oskar_Simulator* h, int gpu_id,
-        int block_index, int iactive, int* status);
-static void write_vis_block(oskar_Simulator* h,
-        int block_index, int iactive, int* status);
 static void sim_baselines(oskar_Simulator* h, DeviceData* d, oskar_Sky* sky,
         int channel_index_block, int time_index_block,
         int time_index_simulation, int* status);
@@ -147,7 +147,473 @@ static unsigned int disp_width(unsigned int value);
 static void system_mem_log(oskar_Log* log);
 
 
-/* Accessors. */
+/* Public methods. */
+
+void oskar_simulator_check_init(oskar_Simulator* h, int* status)
+{
+    int i, num_failed = 0;
+    double ra0, dec0;
+
+    /* Check if initialisation needs to happen. */
+    if (*status || h->header) return;
+
+    /* Check that the telescope model has been set. */
+    if (!h->tel)
+    {
+        oskar_log_error(h->log, "Telescope model not set.");
+        *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+        return;
+    }
+
+    /* Create the visibility header. */
+    set_up_vis_header(h, status);
+
+    /* Compute source direction cosines relative to phase centre. */
+    ra0 = oskar_telescope_phase_centre_ra_rad(h->tel);
+    dec0 = oskar_telescope_phase_centre_dec_rad(h->tel);
+    for (i = 0; i < h->num_chunks; ++i)
+    {
+        oskar_sky_evaluate_relative_directions(h->sky_chunks[i],
+                ra0, dec0, status);
+
+#if !defined(OSKAR_NO_LAPACK)
+        /* Evaluate extended source parameters. */
+        oskar_sky_evaluate_gaussian_source_parameters(h->sky_chunks[i],
+                h->zero_failed_gaussians, ra0, dec0, &num_failed, status);
+#endif
+    }
+
+    if (num_failed > 0)
+    {
+        if (h->zero_failed_gaussians)
+            oskar_log_warning(h->log, "Gaussian ellipse solution failed for %i "
+                    "sources. These will have their fluxes set to zero.",
+                    num_failed);
+        else
+            oskar_log_warning(h->log, "Gaussian ellipse solution failed for %i "
+                    "sources. These will be simulated as point sources.",
+                    num_failed);
+    }
+
+    /* Set up each of the GPUs. */
+    set_up_gpu_data(h, status);
+}
+
+
+oskar_Simulator* oskar_simulator_create(int precision, int* status)
+{
+    oskar_Simulator* h = 0;
+    h = (oskar_Simulator*) calloc(1, sizeof(oskar_Simulator));
+    h->prec      = precision;
+    h->tmr_sim   = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    h->tmr_write = oskar_timer_create(OSKAR_TIMER_NATIVE);
+    h->temp      = oskar_mem_create(precision, OSKAR_CPU, 0, status);
+#ifdef _OPENMP
+    omp_init_lock(&h->mutex);
+#endif
+
+    /* Set sensible defaults. */
+    h->max_sources_per_chunk = 16384;
+    oskar_simulator_set_gpus(h, -1, 0, status);
+    oskar_simulator_set_correlation_type(h, "Cross-correlations", status);
+    oskar_simulator_set_horizon_clip(h, 1);
+    oskar_simulator_set_source_flux_range(h, 0.0, DBL_MAX);
+    oskar_simulator_set_max_times_per_block(h, 10);
+    return h;
+}
+
+
+oskar_VisBlock* oskar_simulator_finalise_block(oskar_Simulator* h,
+        int block_index, int* status)
+{
+    int i, i_active;
+    oskar_Mem *xc0 = 0, *ac0 = 0;
+    oskar_VisBlock *b0 = 0, *b = 0;
+    if (*status) return 0;
+
+    /* Can't safely do GPU operations in here (even if cudaSetDevice()
+     * is called) because we don't want to block the default stream, so we
+     * copy the visibilities back at the end of the block simulation. */
+
+    /* Combine all vis blocks into the first one. */
+    i_active = (block_index + 1) % 2;
+    b0 = h->d[0].vis_block_cpu[!i_active];
+    xc0 = oskar_vis_block_cross_correlations(b0);
+    ac0 = oskar_vis_block_auto_correlations(b0);
+    for (i = 1; i < h->num_gpus; ++i)
+    {
+        b = h->d[i].vis_block_cpu[!i_active];
+        if (oskar_vis_block_has_cross_correlations(b))
+            oskar_mem_add(xc0, xc0, oskar_vis_block_cross_correlations(b),
+                    oskar_mem_length(xc0), status);
+        if (oskar_vis_block_has_auto_correlations(b))
+            oskar_mem_add(ac0, ac0, oskar_vis_block_auto_correlations(b),
+                    oskar_mem_length(ac0), status);
+    }
+
+    /* Calculate baseline uvw coordinates for the block. */
+    if (oskar_vis_block_has_cross_correlations(b0))
+    {
+        const oskar_Mem *x, *y, *z;
+        x = oskar_telescope_station_measured_x_offset_ecef_metres_const(h->tel);
+        y = oskar_telescope_station_measured_y_offset_ecef_metres_const(h->tel);
+        z = oskar_telescope_station_measured_z_offset_ecef_metres_const(h->tel);
+        oskar_convert_ecef_to_baseline_uvw(
+                oskar_telescope_num_stations(h->tel), x, y, z,
+                oskar_telescope_phase_centre_ra_rad(h->tel),
+                oskar_telescope_phase_centre_dec_rad(h->tel),
+                oskar_vis_block_num_times(b0),
+                oskar_vis_header_time_start_mjd_utc(h->header),
+                oskar_vis_header_time_inc_sec(h->header) / 86400.0,
+                oskar_vis_block_start_time_index(b0),
+                oskar_vis_block_baseline_uu_metres(b0),
+                oskar_vis_block_baseline_vv_metres(b0),
+                oskar_vis_block_baseline_ww_metres(b0), h->temp, status);
+    }
+
+    /* Add uncorrelated system noise to the combined visibilities. */
+    if (h->noise_enabled)
+        oskar_vis_block_add_system_noise(b0, h->header, h->tel,
+                h->noise_seed, block_index, h->temp, status);
+
+    /* Return a pointer to the block. */
+    return b0;
+}
+
+
+void oskar_simulator_finalise(oskar_Simulator* h, int* status)
+{
+    oskar_simulator_reset_cache(h, status);
+}
+
+
+void oskar_simulator_free(oskar_Simulator* h, int* status)
+{
+    int i;
+    oskar_simulator_reset_cache(h, status);
+    for (i = 0; i < h->num_chunks; ++i)
+        oskar_sky_free(h->sky_chunks[i], status);
+    oskar_mem_free(h->temp, status);
+    oskar_timer_free(h->tmr_sim);
+    oskar_timer_free(h->tmr_write);
+    free(h->sky_chunks);
+    free(h->cuda_device_ids);
+    free(h->vis_name);
+    free(h->ms_name);
+    free(h->settings_path);
+    free(h->d);
+#ifdef _OPENMP
+    omp_destroy_lock(&h->mutex);
+#endif
+    free(h);
+}
+
+
+int oskar_simulator_num_gpus(const oskar_Simulator* h)
+{
+    return h->num_gpus;
+}
+
+
+int oskar_simulator_num_vis_blocks(const oskar_Simulator* h)
+{
+    return (h->num_time_steps + h->max_times_per_block - 1) /
+            h->max_times_per_block;
+}
+
+
+void oskar_simulator_reset_cache(oskar_Simulator* h, int* status)
+{
+    free_gpu_data(h, status);
+    oskar_binary_free(h->vis);
+    oskar_vis_header_free(h->header, status);
+#ifndef OSKAR_NO_MS
+    oskar_ms_close(h->ms);
+#endif
+    h->vis = 0;
+    h->header = 0;
+    h->ms = 0;
+}
+
+
+void oskar_simulator_reset_work_unit_index(oskar_Simulator* h)
+{
+    h->chunk_time_index = 0;
+}
+
+
+void oskar_simulator_run_block(oskar_Simulator* h, int block_index,
+        int gpu_id, int* status)
+{
+    double obs_start_mjd, dt_dump_days, gast, mjd;
+    int i_active, time_index_start, time_index_end;
+    int block_length, num_channels, num_times_block, total_chunks, total_times;
+    DeviceData* d;
+    if (*status) return;
+
+    /* Check that initialisation has happened. We can't initialise here,
+     * as we're already multi-threaded at this point. */
+    if (!h->header)
+    {
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        oskar_log_error(h->log, "Simulator not initalised. "
+                "Call oskar_simulator_check_init() first.");
+        return;
+    }
+
+    /* Set the GPU to use. This is supposed to be a very low-overhead call. */
+    if (gpu_id < 0 || gpu_id >= h->num_gpus)
+    {
+        *status = OSKAR_ERR_CUDA_DEVICES;
+        return;
+    }
+    cudaSetDevice(h->cuda_device_ids[gpu_id]);
+
+    /* Clear the visibility block. */
+    i_active = block_index % 2; /* Index of the active buffer. */
+    d = &(h->d[gpu_id]);
+    oskar_timer_resume(d->tmr_compute);
+    oskar_vis_block_clear(d->vis_block, status);
+
+    /* Set the visibility block meta-data. */
+    total_chunks = h->num_chunks;
+    block_length = h->max_times_per_block;
+    num_channels = h->num_channels;
+    total_times = h->num_time_steps;
+    obs_start_mjd = h->time_start_mjd_utc;
+    dt_dump_days = h->time_inc_sec / 86400.0;
+    time_index_start = block_index * block_length;
+    time_index_end = time_index_start + block_length - 1;
+    if (time_index_end >= total_times)
+        time_index_end = total_times - 1;
+    num_times_block = 1 + time_index_end - time_index_start;
+
+    /* Set the number of active times in the block. */
+    oskar_vis_block_set_num_times(d->vis_block, num_times_block, status);
+    oskar_vis_block_set_start_time_index(d->vis_block, time_index_start);
+
+    /* Go though all possible work units in the block. A work unit is defined
+     * as the simulation for one time and one sky chunk. */
+    while (1)
+    {
+        oskar_Sky* sky;
+        int i_chunk_time, i_chunk, i_time, i_channel, sim_time_idx;
+
+#ifdef _OPENMP
+        omp_set_lock(&h->mutex); /* Lock the mutex */
+#endif
+        i_chunk_time = (h->chunk_time_index)++;
+#ifdef _OPENMP
+        omp_unset_lock(&h->mutex); /* Unlock the mutex. */
+#endif
+        if ((i_chunk_time >= num_times_block * total_chunks) || *status) break;
+
+        /* Convert slice index to chunk/time index. */
+        i_chunk = i_chunk_time / num_times_block;
+        i_time  = i_chunk_time - i_chunk * num_times_block;
+
+        /* Copy sky chunk to GPU only if different from the previous one. */
+        if (i_chunk != d->previous_chunk_index)
+        {
+            d->previous_chunk_index = i_chunk;
+            oskar_timer_resume(d->tmr_copy);
+            oskar_sky_copy(d->sky_chunk, h->sky_chunks[i_chunk], status);
+            oskar_timer_pause(d->tmr_copy);
+        }
+
+        /* Apply horizon clip, if enabled. */
+        sim_time_idx = time_index_start + i_time;
+        sky = d->sky_chunk;
+        if (h->apply_horizon_clip)
+        {
+            mjd = obs_start_mjd + dt_dump_days * (sim_time_idx + 0.5);
+            gast = oskar_convert_mjd_to_gast_fast(mjd);
+            sky = d->local_sky;
+            oskar_timer_resume(d->tmr_clip);
+            oskar_sky_horizon_clip(sky, d->sky_chunk, d->tel, gast,
+                    d->station_work, status);
+            oskar_timer_pause(d->tmr_clip);
+        }
+
+        /* Simulate all baselines for all channels for this time and chunk. */
+        for (i_channel = 0; i_channel < num_channels; ++i_channel)
+        {
+            if (*status) break;
+            if (h->log)
+                oskar_log_message(h->log, 'S', 1, "Time %*i/%i, "
+                        "Chunk %*i/%i, Channel %*i/%i [GPU %i, %i sources]",
+                        disp_width(total_times), sim_time_idx + 1, total_times,
+                        disp_width(total_chunks), i_chunk + 1, total_chunks,
+                        disp_width(num_channels), i_channel + 1, num_channels,
+                        gpu_id, oskar_sky_num_sources(sky));
+            sim_baselines(h, d, sky, i_channel, i_time, sim_time_idx, status);
+        }
+    }
+
+    /* Copy the visibility block to host memory. */
+    oskar_timer_resume(d->tmr_copy);
+    oskar_vis_block_copy(d->vis_block_cpu[i_active], d->vis_block, status);
+    oskar_timer_pause(d->tmr_copy);
+    oskar_timer_pause(d->tmr_compute);
+}
+
+
+void oskar_simulator_run(oskar_Simulator* h, int* status)
+{
+    int i, num_threads = 1, num_vis_blocks;
+    if (*status) return;
+
+    /* Write file headers. */
+    oskar_simulator_write_headers(h, status);
+
+    /* Get the number of visibility blocks to be processed. */
+    num_vis_blocks = oskar_simulator_num_vis_blocks(h);
+
+    /* Record memory usage. */
+    if (h->log && !*status)
+    {
+        oskar_log_section(h->log, 'M', "Initial memory usage");
+        for (i = 0; i < h->num_gpus; ++i)
+            oskar_cuda_mem_log(h->log, 0, h->cuda_device_ids[i]);
+        system_mem_log(h->log);
+        oskar_log_section(h->log, 'M', "Starting simulation...");
+    }
+
+    /* Start simulation timer. */
+    oskar_timer_start(h->tmr_sim);
+
+    /*-----------------------------------------------------------------------
+     *-- START OF MULTITHREADED SIMULATION CODE -----------------------------
+     *-----------------------------------------------------------------------*/
+    /* Loop over blocks of observation time, running simulation and file
+     * writing one block at a time. Simulation and file output are overlapped
+     * by using double buffering, and a dedicated thread is used for file
+     * output.
+     *
+     * Thread 0 is used for file writes.
+     * Threads 1 to n (mapped to GPUs) do the simulation.
+     *
+     * Note that no write is launched on the first loop counter (as no
+     * data are ready yet) and no simulation is performed for the last loop
+     * counter (which corresponds to the last block + 1) as this iteration
+     * simply writes the last block.
+     */
+#ifdef _OPENMP
+    num_threads = h->num_gpus + 1;
+    omp_set_num_threads(num_threads);
+#else
+    oskar_log_warning(h->log, "OpenMP not found: Using only the first GPU.");
+#endif
+
+    oskar_simulator_reset_work_unit_index(h);
+#pragma omp parallel
+    {
+        int b, thread_id = 0, gpu_id = 0;
+
+        /* Get host thread ID and GPU ID. */
+#ifdef _OPENMP
+        thread_id = omp_get_thread_num();
+        gpu_id = thread_id - 1;
+#endif
+
+        /* Loop over simulation time blocks (+1, for the last write). */
+        for (b = 0; b < num_vis_blocks + 1; ++b)
+        {
+            if ((thread_id > 0 || num_threads == 1) && b < num_vis_blocks)
+                oskar_simulator_run_block(h, b, gpu_id, status);
+            if (thread_id == 0 && b > 0)
+            {
+                oskar_VisBlock* block;
+                block = oskar_simulator_finalise_block(h, b - 1, status);
+                oskar_simulator_write_block(h, block, b - 1, status);
+            }
+
+            /* Barrier1: Reset chunk / time work unit index. */
+#pragma omp barrier
+            if (thread_id == 0)
+                oskar_simulator_reset_work_unit_index(h);
+
+            /* Barrier2: Synchronise before moving to the next block. */
+#pragma omp barrier
+            if (thread_id == 0 && b < num_vis_blocks && h->log && !*status)
+                oskar_log_message(h->log, 'S', 0, "Block %*i/%i (%3.0f%%) "
+                        "complete. Simulation time elapsed: %.3f s",
+                        disp_width(num_vis_blocks), b+1, num_vis_blocks,
+                        100.0 * (b+1) / (double)num_vis_blocks,
+                        oskar_timer_elapsed(h->tmr_sim));
+        }
+    }
+    /*-----------------------------------------------------------------------
+     *-- END OF MULTITHREADED SIMULATION CODE -------------------------------
+     *-----------------------------------------------------------------------*/
+
+    /* Record memory usage. */
+    if (h->log && !*status)
+    {
+        oskar_log_section(h->log, 'M', "Final memory usage");
+        for (i = 0; i < h->num_gpus; ++i)
+            oskar_cuda_mem_log(h->log, 0, h->cuda_device_ids[i]);
+        system_mem_log(h->log);
+    }
+
+    /* If there are sources in the simulation and the station beam is not
+     * normalised to 1.0 at the phase centre, the values of noise RMS
+     * may give a very unexpected S/N ratio!
+     * The alternative would be to scale the noise to match the station
+     * beam gain but that would require knowledge of the station beam
+     * amplitude at the phase centre for each time and channel. */
+    if (h->log && h->noise_enabled && !*status)
+    {
+        int have_sources, amp_calibrated;
+        have_sources = (h->num_chunks > 0 &&
+                oskar_sky_num_sources(h->sky_chunks[0]) > 0);
+        amp_calibrated = oskar_station_normalise_final_beam(
+                oskar_telescope_station_const(h->tel, 0));
+        if (have_sources && !amp_calibrated)
+        {
+            const char* a = "WARNING: System noise added to visibilities";
+            const char* b = "without station beam normalisation enabled.";
+            const char* c = "This will give an invalid signal to noise ratio.";
+            oskar_log_line(h->log, 'W', ' '); oskar_log_line(h->log, 'W', '*');
+            oskar_log_message(h->log, 'W', -1, a);
+            oskar_log_message(h->log, 'W', -1, b);
+            oskar_log_message(h->log, 'W', -1, c);
+            oskar_log_line(h->log, 'W', '*'); oskar_log_line(h->log, 'W', ' ');
+        }
+    }
+
+    /* Record times and summarise output files. */
+    if (h->log && !*status)
+    {
+        size_t log_size = 0;
+        char* log_data;
+        oskar_log_set_value_width(h->log, 25);
+        record_timing(h);
+        oskar_log_section(h->log, 'M', "Simulation complete");
+        oskar_log_message(h->log, 'M', 0, "Output(s):");
+        if (h->vis_name)
+            oskar_log_value(h->log, 'M', 1,
+                    "OSKAR binary file", "%s", h->vis_name);
+        if (h->ms_name)
+            oskar_log_value(h->log, 'M', 1,
+                    "Measurement Set", "%s", h->ms_name);
+
+        /* Write simulation log to the output files. */
+        log_data = oskar_log_file_data(h->log, &log_size);
+#ifndef OSKAR_NO_MS
+        if (h->ms)
+            oskar_ms_add_history(h->ms, "OSKAR_LOG", log_data, log_size);
+#endif
+        if (h->vis)
+            oskar_binary_write(h->vis, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
+                    OSKAR_TAG_RUN_LOG, 0, log_size, log_data, status);
+        free(log_data);
+    }
+
+    /* Finalise. */
+    oskar_simulator_finalise(h, status);
+}
+
 
 void oskar_simulator_set_correlation_type(oskar_Simulator* h,
         const char* type, int* status)
@@ -343,125 +809,36 @@ void oskar_simulator_set_zero_failed_gaussians(oskar_Simulator* h, int value)
 }
 
 
-/* Public methods. */
-
-void oskar_simulator_check_init(oskar_Simulator* h, int* status)
+void oskar_simulator_write_block(oskar_Simulator* h,
+        const oskar_VisBlock* block, int block_index, int* status)
 {
-    int i, num_failed = 0;
-    double ra0, dec0;
+    if (*status) return;
 
-    /* Check if initialisation needs to happen. */
-    if (*status || h->header) return;
-
-    /* Check that the telescope model has been set. */
-    if (!h->tel)
+    /* Check at least one file handle is open. */
+    if (!h->ms && !h->vis)
     {
-        oskar_log_error(h->log, "Telescope model not set.");
-        *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+        *status = OSKAR_ERR_FILE_IO;
         return;
     }
 
-    /* Create the visibility header. */
-    set_up_vis_header(h, status);
-
-    /* Compute source direction cosines relative to phase centre. */
-    ra0 = oskar_telescope_phase_centre_ra_rad(h->tel);
-    dec0 = oskar_telescope_phase_centre_dec_rad(h->tel);
-    for (i = 0; i < h->num_chunks; ++i)
-    {
-        oskar_sky_evaluate_relative_directions(h->sky_chunks[i],
-                ra0, dec0, status);
-
-#if !defined(OSKAR_NO_LAPACK)
-        /* Evaluate extended source parameters. */
-        oskar_sky_evaluate_gaussian_source_parameters(h->sky_chunks[i],
-                h->zero_failed_gaussians, ra0, dec0, &num_failed, status);
-#endif
-    }
-
-    if (num_failed > 0)
-    {
-        if (h->zero_failed_gaussians)
-            oskar_log_warning(h->log, "Gaussian ellipse solution failed for %i "
-                    "sources. These will have their fluxes set to zero.",
-                    num_failed);
-        else
-            oskar_log_warning(h->log, "Gaussian ellipse solution failed for %i "
-                    "sources. These will be simulated as point sources.",
-                    num_failed);
-    }
-
-    /* Set up each of the GPUs. */
-    set_up_gpu_data(h, status);
-}
-
-
-oskar_Simulator* oskar_simulator_create(int precision, int* status)
-{
-    oskar_Simulator* h = 0;
-    h = (oskar_Simulator*) calloc(1, sizeof(oskar_Simulator));
-    h->prec      = precision;
-    h->tmr_sim   = oskar_timer_create(OSKAR_TIMER_NATIVE);
-    h->tmr_write = oskar_timer_create(OSKAR_TIMER_NATIVE);
-    h->temp      = oskar_mem_create(precision, OSKAR_CPU, 0, status);
-
-    /* Set sensible defaults. */
-    h->max_sources_per_chunk = 16384;
-    oskar_simulator_set_gpus(h, -1, 0, status);
-    oskar_simulator_set_correlation_type(h, "Cross-correlations", status);
-    oskar_simulator_set_horizon_clip(h, 1);
-    oskar_simulator_set_source_flux_range(h, 0.0, DBL_MAX);
-    oskar_simulator_set_max_times_per_block(h, 10);
-    return h;
-}
-
-
-void oskar_simulator_free(oskar_Simulator* h, int* status)
-{
-    int i;
-    oskar_simulator_reset_cache(h, status);
-    for (i = 0; i < h->num_chunks; ++i)
-        oskar_sky_free(h->sky_chunks[i], status);
-    oskar_mem_free(h->temp, status);
-    oskar_timer_free(h->tmr_sim);
-    oskar_timer_free(h->tmr_write);
-    free(h->sky_chunks);
-    free(h->cuda_device_ids);
-    free(h->vis_name);
-    free(h->ms_name);
-    free(h->settings_path);
-    free(h->d);
-    free(h);
-}
-
-
-void oskar_simulator_reset_cache(oskar_Simulator* h, int* status)
-{
-    free_gpu_data(h, status);
-    oskar_binary_free(h->vis);
-    oskar_vis_header_free(h->header, status);
+    /* Write the block to whichever file handles are open. */
+    oskar_timer_resume(h->tmr_write);
 #ifndef OSKAR_NO_MS
-    oskar_ms_close(h->ms);
+    if (h->ms) oskar_vis_block_write_ms(block, h->header, h->ms, status);
 #endif
-    h->vis = 0;
-    h->header = 0;
-    h->ms = 0;
+    if (h->vis) oskar_vis_block_write(block, h->vis, block_index, status);
+    oskar_timer_pause(h->tmr_write);
 }
 
 
-void oskar_simulator_run(oskar_Simulator* h, int* status)
+void oskar_simulator_write_headers(oskar_Simulator* h, int* status)
 {
-    int i, num_threads = 1, num_vis_blocks;
-    if (*status) return;
-
-    /* Initialise. */
-    oskar_simulator_check_init(h, status);
-
     /* Set up output file handles. */
+    oskar_simulator_check_init(h, status);
+    if (*status) return;
     if (!(h->vis_name || h->ms_name))
     {
         oskar_log_error(h->log, "No output file specified.");
-        oskar_simulator_reset_cache(h, status);
         *status = OSKAR_ERR_SETTINGS_INTERFEROMETER;
         return;
     }
@@ -472,315 +849,10 @@ void oskar_simulator_run(oskar_Simulator* h, int* status)
         h->ms = oskar_vis_header_write_ms(h->header, h->ms_name, OSKAR_TRUE,
                 h->force_polarised_ms, status);
 #endif
-
-    /* Work out how many time blocks have to be processed. */
-    num_vis_blocks = (h->num_time_steps + h->max_times_per_block - 1) /
-            h->max_times_per_block;
-
-    /* Record memory usage. */
-    if (h->log && !*status)
-    {
-        oskar_log_section(h->log, 'M', "Initial memory usage");
-        for (i = 0; i < h->num_gpus; ++i)
-            oskar_cuda_mem_log(h->log, 0, h->cuda_device_ids[i]);
-        system_mem_log(h->log);
-        oskar_log_section(h->log, 'M', "Starting simulation...");
-    }
-
-    /* Start simulation timer. */
-    oskar_timer_start(h->tmr_sim);
-
-    /*-----------------------------------------------------------------------
-     *-- START OF MULTITHREADED SIMULATION CODE -----------------------------
-     *-----------------------------------------------------------------------*/
-    /* Loop over blocks of observation time, running simulation and file
-     * writing one block at a time. Simulation and file output are overlapped
-     * by using double buffering, and a dedicated thread is used for file
-     * output.
-     *
-     * Thread 0 is used for file writes.
-     * Threads 1 to n (mapped to GPUs) do the simulation.
-     *
-     * Note that no write is launched on the first loop counter (as no
-     * data are ready yet) and no simulation is performed for the last loop
-     * counter (which corresponds to the last block + 1) as this iteration
-     * simply writes the last block.
-     */
-#ifdef _OPENMP
-    num_threads = h->num_gpus + 1;
-    omp_set_num_threads(num_threads);
-#else
-    oskar_log_warning(h->log, "OpenMP not found: Using only the first GPU.");
-#endif
-
-    h->chunk_time_index = 0;
-#pragma omp parallel
-    {
-        int b, i_active, thread_id = 0, gpu_id = 0;
-
-        /* Get host thread ID, and set CUDA device used by this thread. */
-#ifdef _OPENMP
-        thread_id = omp_get_thread_num();
-        gpu_id = thread_id - 1;
-#endif
-        if (gpu_id >= 0)
-            cudaSetDevice(h->cuda_device_ids[gpu_id]);
-
-        /* Loop over simulation time blocks (+1, for the last write). */
-        for (b = 0; b < num_vis_blocks + 1; ++b)
-        {
-            i_active = b % 2; /* Index of the active buffer. */
-            if ((thread_id > 0 || num_threads == 1) && b < num_vis_blocks)
-                sim_vis_block(h, gpu_id, b, i_active, status);
-            if (thread_id == 0 && b > 0)
-                write_vis_block(h, b - 1, i_active, status);
-
-            /* Barrier1: Reset chunk / time work unit index. */
-#pragma omp barrier
-            if (thread_id == 0) h->chunk_time_index = 0;
-
-            /* Barrier2: Check sim and write are done before next block. */
-#pragma omp barrier
-            if (thread_id == 0 && b < num_vis_blocks && h->log && !*status)
-                oskar_log_message(h->log, 'S', 0, "Block %*i/%i (%3.0f%%) "
-                        "complete. Simulation time elapsed: %.3f s",
-                        disp_width(num_vis_blocks), b+1, num_vis_blocks,
-                        100.0 * (b+1) / (double)num_vis_blocks,
-                        oskar_timer_elapsed(h->tmr_sim));
-        }
-    }
-    /*-----------------------------------------------------------------------
-     *-- END OF MULTITHREADED SIMULATION CODE -------------------------------
-     *-----------------------------------------------------------------------*/
-
-    /* Record memory usage. */
-    if (h->log && !*status)
-    {
-        oskar_log_section(h->log, 'M', "Final memory usage");
-        for (i = 0; i < h->num_gpus; ++i)
-            oskar_cuda_mem_log(h->log, 0, h->cuda_device_ids[i]);
-        system_mem_log(h->log);
-    }
-
-    /* If there are sources in the simulation and the station beam is not
-     * normalised to 1.0 at the phase centre, the values of noise RMS
-     * may give a very unexpected S/N ratio!
-     * The alternative would be to scale the noise to match the station
-     * beam gain but that would require knowledge of the station beam
-     * amplitude at the phase centre for each time and channel. */
-    if (h->noise_enabled && h->log)
-    {
-        int have_sources, amp_calibrated;
-        have_sources = (h->num_chunks > 0 &&
-                oskar_sky_num_sources(h->sky_chunks[0]) > 0);
-        amp_calibrated = oskar_station_normalise_final_beam(
-                oskar_telescope_station_const(h->tel, 0));
-        if (have_sources && !amp_calibrated)
-        {
-            const char* a = "WARNING: System noise added to visibilities";
-            const char* b = "without station beam normalisation enabled.";
-            const char* c = "This will give an invalid signal to noise ratio.";
-            oskar_log_line(h->log, 'W', ' '); oskar_log_line(h->log, 'W', '*');
-            oskar_log_message(h->log, 'W', -1, a);
-            oskar_log_message(h->log, 'W', -1, b);
-            oskar_log_message(h->log, 'W', -1, c);
-            oskar_log_line(h->log, 'W', '*'); oskar_log_line(h->log, 'W', ' ');
-        }
-    }
-
-    /* Record times and summarise output files. */
-    if (h->log && !*status)
-    {
-        size_t log_size = 0;
-        char* log_data;
-        oskar_log_set_value_width(h->log, 25);
-        record_timing(h);
-        oskar_log_section(h->log, 'M', "Simulation complete");
-        oskar_log_message(h->log, 'M', 0, "Output(s):");
-        if (h->vis_name)
-            oskar_log_value(h->log, 'M', 1,
-                    "OSKAR binary file", "%s", h->vis_name);
-        if (h->ms_name)
-            oskar_log_value(h->log, 'M', 1,
-                    "Measurement Set", "%s", h->ms_name);
-
-        /* Write simulation log to the output files. */
-        log_data = oskar_log_file_data(h->log, &log_size);
-#ifndef OSKAR_NO_MS
-        if (h->ms)
-            oskar_ms_add_history(h->ms, "OSKAR_LOG", log_data, log_size);
-#endif
-        if (h->vis)
-            oskar_binary_write(h->vis, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
-                    OSKAR_TAG_RUN_LOG, 0, log_size, log_data, status);
-        free(log_data);
-    }
-
-    /* Free memory. */
-    oskar_simulator_reset_cache(h, status);
 }
 
 
 /* Private methods. */
-
-static void sim_vis_block(oskar_Simulator* h, int gpu_id,
-        int block_index, int iactive, int* status)
-{
-    double obs_start_mjd, dt_dump_days, gast, mjd;
-    int time_index_start, time_index_end;
-    int block_length, num_channels, num_times_block, total_chunks, total_times;
-    DeviceData* d;
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Clear the visibility block. */
-    d = &(h->d[gpu_id]);
-    oskar_timer_resume(d->tmr_compute);
-    oskar_vis_block_clear(d->vis_block, status);
-
-    /* Set the visibility block meta-data. */
-    total_chunks = h->num_chunks;
-    block_length = h->max_times_per_block;
-    num_channels = h->num_channels;
-    total_times = h->num_time_steps;
-    obs_start_mjd = h->time_start_mjd_utc;
-    dt_dump_days = h->time_inc_sec / 86400.0;
-    time_index_start = block_index * block_length;
-    time_index_end = time_index_start + block_length - 1;
-    if (time_index_end >= total_times)
-        time_index_end = total_times - 1;
-    num_times_block = 1 + time_index_end - time_index_start;
-
-    /* Set the number of active times in the block. */
-    oskar_vis_block_set_num_times(d->vis_block, num_times_block, status);
-    oskar_vis_block_set_start_time_index(d->vis_block, time_index_start);
-
-    /* Go though all possible work units in the block. A work unit is defined
-     * as the simulation for one time and one sky chunk. */
-    while (1)
-    {
-        oskar_Sky* sky;
-        int i_chunk_time, i_chunk, i_time, i_channel, sim_time_idx;
-        #pragma omp critical (UnitIndexUpdate)
-        {
-            i_chunk_time = (h->chunk_time_index)++;
-        }
-        if ((i_chunk_time >= num_times_block * total_chunks) || *status) break;
-
-        /* Convert slice index to chunk/time index. */
-        i_chunk = i_chunk_time / num_times_block;
-        i_time  = i_chunk_time - i_chunk * num_times_block;
-
-        /* Copy sky chunk to GPU only if different from the previous one. */
-        if (i_chunk != d->previous_chunk_index)
-        {
-            d->previous_chunk_index = i_chunk;
-            oskar_timer_resume(d->tmr_copy);
-            oskar_sky_copy(d->sky_chunk, h->sky_chunks[i_chunk], status);
-            oskar_timer_pause(d->tmr_copy);
-        }
-
-        /* Apply horizon clip, if enabled. */
-        sim_time_idx = time_index_start + i_time;
-        sky = d->sky_chunk;
-        if (h->apply_horizon_clip)
-        {
-            mjd = obs_start_mjd + dt_dump_days * (sim_time_idx + 0.5);
-            gast = oskar_convert_mjd_to_gast_fast(mjd);
-            sky = d->local_sky;
-            oskar_timer_resume(d->tmr_clip);
-            oskar_sky_horizon_clip(sky, d->sky_chunk, d->tel, gast,
-                    d->station_work, status);
-            oskar_timer_pause(d->tmr_clip);
-        }
-
-        /* Simulate all baselines for all channels for this time and chunk. */
-        for (i_channel = 0; i_channel < num_channels; ++i_channel)
-        {
-            if (*status) break;
-            if (h->log)
-                oskar_log_message(h->log, 'S', 1, "Time %*i/%i, "
-                        "Chunk %*i/%i, Channel %*i/%i [GPU %i, %i sources]",
-                        disp_width(total_times), sim_time_idx + 1, total_times,
-                        disp_width(total_chunks), i_chunk + 1, total_chunks,
-                        disp_width(num_channels), i_channel + 1, num_channels,
-                        gpu_id, oskar_sky_num_sources(sky));
-            sim_baselines(h, d, sky, i_channel, i_time, sim_time_idx, status);
-        }
-    }
-
-    /* Copy the visibility block to host memory. */
-    oskar_timer_resume(d->tmr_copy);
-    oskar_vis_block_copy(d->vis_block_cpu[iactive], d->vis_block, status);
-    oskar_timer_pause(d->tmr_copy);
-    oskar_timer_pause(d->tmr_compute);
-}
-
-
-static void write_vis_block(oskar_Simulator* h, int block_index, int iactive,
-        int* status)
-{
-    int i;
-    oskar_Mem *xc0 = 0, *ac0 = 0;
-    oskar_VisBlock *b0 = 0, *b = 0;
-
-    /* Check if safe to proceed. */
-    if (*status) return;
-
-    /* Can't safely do GPU operations in here (even if cudaSetDevice()
-     * is called) because we don't want to block the default stream, so we
-     * copy the visibilities back at the end of the block simulation. */
-
-    /* Combine all vis blocks into the first one. */
-    oskar_timer_resume(h->tmr_write);
-    b0 = h->d[0].vis_block_cpu[!iactive];
-    xc0 = oskar_vis_block_cross_correlations(b0);
-    ac0 = oskar_vis_block_auto_correlations(b0);
-    for (i = 1; i < h->num_gpus; ++i)
-    {
-        b = h->d[i].vis_block_cpu[!iactive];
-        if (oskar_vis_block_has_cross_correlations(b))
-            oskar_mem_add(xc0, xc0, oskar_vis_block_cross_correlations(b),
-                    oskar_mem_length(xc0), status);
-        if (oskar_vis_block_has_auto_correlations(b))
-            oskar_mem_add(ac0, ac0, oskar_vis_block_auto_correlations(b),
-                    oskar_mem_length(ac0), status);
-    }
-
-    /* Calculate baseline uvw coordinates for vis block. */
-    if (oskar_vis_block_has_cross_correlations(b0))
-    {
-        const oskar_Mem *x, *y, *z;
-        x = oskar_telescope_station_measured_x_offset_ecef_metres_const(h->tel);
-        y = oskar_telescope_station_measured_y_offset_ecef_metres_const(h->tel);
-        z = oskar_telescope_station_measured_z_offset_ecef_metres_const(h->tel);
-        oskar_convert_ecef_to_baseline_uvw(
-                oskar_telescope_num_stations(h->tel), x, y, z,
-                oskar_telescope_phase_centre_ra_rad(h->tel),
-                oskar_telescope_phase_centre_dec_rad(h->tel),
-                oskar_vis_block_num_times(b0),
-                oskar_vis_header_time_start_mjd_utc(h->header),
-                oskar_vis_header_time_inc_sec(h->header) / 86400.0,
-                oskar_vis_block_start_time_index(b0),
-                oskar_vis_block_baseline_uu_metres(b0),
-                oskar_vis_block_baseline_vv_metres(b0),
-                oskar_vis_block_baseline_ww_metres(b0), h->temp, status);
-    }
-
-    /* Add uncorrelated system noise to the combined visibilities. */
-    if (h->noise_enabled)
-        oskar_vis_block_add_system_noise(b0, h->header, h->tel,
-                h->noise_seed, block_index, h->temp, status);
-
-    /* Write the combined vis block to whichever file handles are open. */
-#ifndef OSKAR_NO_MS
-    if (h->ms) oskar_vis_block_write_ms(b0, h->header, h->ms, status);
-#endif
-    if (h->vis) oskar_vis_block_write(b0, h->vis, block_index, status);
-    oskar_timer_pause(h->tmr_write);
-}
-
 
 static void sim_baselines(oskar_Simulator* h, DeviceData* d, oskar_Sky* sky,
         int channel_index_block, int time_index_block,
@@ -911,7 +983,7 @@ static void sim_baselines(oskar_Simulator* h, DeviceData* d, oskar_Sky* sky,
 }
 
 
-void set_up_vis_header(oskar_Simulator* h, int* status)
+static void set_up_vis_header(oskar_Simulator* h, int* status)
 {
     int num_stations, vis_type;
     const double rad2deg = 180.0/M_PI;
@@ -979,7 +1051,7 @@ void set_up_vis_header(oskar_Simulator* h, int* status)
 }
 
 
-void set_up_gpu_data(oskar_Simulator* h, int* status)
+static void set_up_gpu_data(oskar_Simulator* h, int* status)
 {
     int i, complx, vistype, num_stations, num_src;
     if (*status) return;
@@ -1025,6 +1097,11 @@ void set_up_gpu_data(oskar_Simulator* h, int* status)
         d->station_work = oskar_station_work_create(h->prec, OSKAR_GPU,
                 status);
 
+        /* Clear all visibility blocks. */
+        oskar_vis_block_clear(d->vis_block, status);
+        oskar_vis_block_clear(d->vis_block_cpu[0], status);
+        oskar_vis_block_clear(d->vis_block_cpu[1], status);
+
         /* Timers. */
         d->tmr_compute   = oskar_timer_create(OSKAR_TIMER_NATIVE);
         d->tmr_copy      = oskar_timer_create(OSKAR_TIMER_CUDA);
@@ -1038,7 +1115,7 @@ void set_up_gpu_data(oskar_Simulator* h, int* status)
 }
 
 
-void free_gpu_data(oskar_Simulator* h, int* status)
+static void free_gpu_data(oskar_Simulator* h, int* status)
 {
     int i;
     if (!h->d) return;

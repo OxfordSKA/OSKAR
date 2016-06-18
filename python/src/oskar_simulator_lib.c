@@ -108,6 +108,25 @@ static oskar_Telescope* get_handle_telescope(PyObject* capsule)
 }
 
 
+static oskar_VisBlock* get_handle_block(PyObject* capsule)
+{
+    oskar_VisBlock* h = 0;
+    if (!PyCapsule_CheckExact(capsule))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Input is not a PyCapsule object!");
+        return 0;
+    }
+    h = (oskar_VisBlock*) PyCapsule_GetPointer(capsule, "oskar_VisBlock");
+    if (!h)
+    {
+        PyErr_SetString(PyExc_RuntimeError,
+                "Unable to convert PyCapsule object to oskar_VisBlock.");
+        return 0;
+    }
+    return h;
+}
+
+
 static PyObject* check_init(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
@@ -141,6 +160,240 @@ static PyObject* create(PyObject* self, PyObject* args)
     capsule = PyCapsule_New((void*)h, name,
             (PyCapsule_Destructor)simulator_free);
     return Py_BuildValue("N", capsule); /* Don't increment refcount. */
+}
+
+
+static PyObject* finalise_block(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    oskar_VisBlock* b = 0;
+    PyObject *capsule = 0, *block = 0;
+    int block_index = 0, status = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &block_index)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+
+    Py_BEGIN_ALLOW_THREADS
+    b = oskar_simulator_finalise_block(h, block_index, &status);
+    Py_END_ALLOW_THREADS
+    block = PyCapsule_New((void*)b, "oskar_VisBlock", NULL);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_simulator_finalise_block() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("N", block); /* Don't increment refcount. */
+}
+
+
+static PyObject* finalise(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    oskar_simulator_finalise(h, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_simulator_finalise() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
+static PyObject* num_gpus(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    return Py_BuildValue("i", oskar_simulator_num_gpus(h));
+}
+
+
+static PyObject* num_vis_blocks(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    return Py_BuildValue("i", oskar_simulator_num_vis_blocks(h));
+}
+
+
+static PyObject* reset_cache(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    oskar_simulator_reset_cache(h, &status);
+    return Py_BuildValue("");
+}
+
+
+static PyObject* reset_work_unit_index(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    oskar_simulator_reset_work_unit_index(h);
+    return Py_BuildValue("");
+}
+
+
+static PyObject* run_block(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int block_index = 0, gpu_id = 0, status = 0;
+    if (!PyArg_ParseTuple(args, "Oii", &capsule, &block_index, &gpu_id))
+        return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+
+    Py_BEGIN_ALLOW_THREADS
+    oskar_simulator_run_block(h, block_index, gpu_id, &status);
+    Py_END_ALLOW_THREADS
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_simulator_run_block() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
+static PyObject* run(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    oskar_simulator_run(h, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_simulator_run() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_correlation_type(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    const char* type;
+    if (!PyArg_ParseTuple(args, "Os", &capsule, &type)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    oskar_simulator_set_correlation_type(h, type, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_simulator_set_correlation_type() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_force_polarised_ms(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int value = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    oskar_simulator_set_force_polarised_ms(h, value);
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_gpus(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject *capsule = 0, *array = 0;
+    PyArrayObject *gpus = 0;
+    int flags, num_gpus, status = 0;
+    if (!PyArg_ParseTuple(args, "OO", &capsule, &array)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+
+    /* Get the list of GPUs. */
+    flags = NPY_ARRAY_FORCECAST | NPY_ARRAY_IN_ARRAY;
+    gpus = (PyArrayObject*) PyArray_FROM_OTF(array, NPY_INT, flags);
+    if (!gpus) goto fail;
+
+    /* Set the GPUs to use. */
+    num_gpus = (int) PyArray_SIZE(gpus);
+    if (num_gpus > 0 && ((int*) PyArray_DATA(gpus))[0] < 0)
+        num_gpus = -1;
+    oskar_simulator_set_gpus(h, num_gpus, (int*) PyArray_DATA(gpus), &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_simulator_set_gpus() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+
+    Py_XDECREF(gpus);
+    return Py_BuildValue("");
+
+fail:
+    Py_XDECREF(gpus);
+    return 0;
+}
+
+
+static PyObject* set_horizon_clip(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int value = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    oskar_simulator_set_horizon_clip(h, value);
+    return Py_BuildValue("");
+}
+
+
+static PyObject* set_max_times_per_block(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int value = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    oskar_simulator_set_max_times_per_block(h, value);
+    return Py_BuildValue("");
 }
 
 
@@ -246,32 +499,59 @@ static PyObject* set_telescope_model(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* reset_cache(PyObject* self, PyObject* args)
+static PyObject* set_zero_failed_gaussians(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
     PyObject* capsule = 0;
-    int status = 0;
-    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    int value = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
     if (!(h = get_handle_simulator(capsule))) return 0;
-    oskar_simulator_reset_cache(h, &status);
+    oskar_simulator_set_zero_failed_gaussians(h, value);
     return Py_BuildValue("");
 }
 
 
-static PyObject* run(PyObject* self, PyObject* args)
+static PyObject* write_block(PyObject* self, PyObject* args)
 {
     oskar_Simulator* h = 0;
-    PyObject* capsule = 0;
-    int status = 0;
-    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    oskar_VisBlock* b = 0;
+    PyObject *capsule = 0, *block = 0;
+    int block_index = 0, status = 0;
+    if (!PyArg_ParseTuple(args, "OOi", &capsule, &block, &block_index))
+        return 0;
     if (!(h = get_handle_simulator(capsule))) return 0;
-    oskar_simulator_run(h, &status);
+    if (!(b = get_handle_block(block))) return 0;
+
+    Py_BEGIN_ALLOW_THREADS
+    oskar_simulator_write_block(h, b, block_index, &status);
+    Py_END_ALLOW_THREADS
 
     /* Check for errors. */
     if (status)
     {
         PyErr_Format(PyExc_RuntimeError,
-                "oskar_simulator_run() failed with code %d (%s).",
+                "oskar_simulator_write_block() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
+}
+
+
+static PyObject* write_headers(PyObject* self, PyObject* args)
+{
+    oskar_Simulator* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_simulator(capsule))) return 0;
+    oskar_simulator_write_headers(h, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_simulator_write_headers() failed with code %d (%s).",
                 status, oskar_get_error_string(status));
         return 0;
     }
@@ -284,27 +564,51 @@ static PyMethodDef methods[] =
 {
         {"check_init", (PyCFunction)check_init, METH_VARARGS, "check_init()"},
         {"create", (PyCFunction)create, METH_VARARGS, "create(type)"},
+        {"finalise_block", (PyCFunction)finalise_block,
+                METH_VARARGS, "finalise_block(block_index)"},
+        {"finalise", (PyCFunction)finalise, METH_VARARGS, "finalise()"},
+        {"num_gpus", (PyCFunction)num_gpus, METH_VARARGS, "num_gpus()"},
+        {"num_vis_blocks", (PyCFunction)num_vis_blocks,
+                METH_VARARGS, "num_vis_blocks()"},
+        {"reset_cache", (PyCFunction)reset_cache,
+                METH_VARARGS, "reset_cache()"},
+        {"reset_work_unit_index", (PyCFunction)reset_work_unit_index,
+                METH_VARARGS, "reset_work_unit_index()"},
+        {"run_block", (PyCFunction)run_block,
+                METH_VARARGS, "run_block(block_index, gpu_id)"},
         {"run", (PyCFunction)run, METH_VARARGS, "run()"},
-        {"reset_cache", (PyCFunction)reset_cache, METH_VARARGS,
-                "reset_cache()"},
+        {"set_correlation_type", (PyCFunction)set_correlation_type,
+                METH_VARARGS, "set_correlation_type(type)"},
+        {"set_force_polarised_ms", (PyCFunction)set_force_polarised_ms,
+                METH_VARARGS, "set_force_polarised_ms(value)"},
+        {"set_gpus", (PyCFunction)set_gpus,
+                METH_VARARGS, "set_gpus(device_ids)"},
+        {"set_horizon_clip", (PyCFunction)set_horizon_clip,
+                METH_VARARGS, "set_horizon_clip(value)"},
+        {"set_max_times_per_block", (PyCFunction)set_max_times_per_block,
+                METH_VARARGS, "set_max_times_per_block(value)"},
         {"set_observation_frequency", (PyCFunction)set_observation_frequency,
                 METH_VARARGS,
                 "set_observation_frequency(start_freq_hz, inc_hz, "
                 "num_channels)"},
-        {"set_output_measurement_set",
-                (PyCFunction)set_output_measurement_set, METH_VARARGS,
-                "set_output_measurement_set(filename)"},
-        {"set_output_vis_file",
-                (PyCFunction)set_output_vis_file, METH_VARARGS,
-                "set_output_vis_file(filename)"},
-        {"set_sky_model", (PyCFunction)set_sky_model, METH_VARARGS,
-                "set_sky_model(sky, max_sources_per_chunk)"},
-        {"set_telescope_model", (PyCFunction)set_telescope_model, METH_VARARGS,
-                "set_telescope_model(telescope)"},
         {"set_observation_time", (PyCFunction)set_observation_time,
                 METH_VARARGS,
                 "set_observation_time(start_time_mjd_utc, length_sec, "
                 "num_time_steps)"},
+        {"set_output_measurement_set", (PyCFunction)set_output_measurement_set,
+                METH_VARARGS, "set_output_measurement_set(filename)"},
+        {"set_output_vis_file", (PyCFunction)set_output_vis_file,
+                METH_VARARGS, "set_output_vis_file(filename)"},
+        {"set_sky_model", (PyCFunction)set_sky_model,
+                METH_VARARGS, "set_sky_model(sky, max_sources_per_chunk)"},
+        {"set_telescope_model", (PyCFunction)set_telescope_model,
+                METH_VARARGS, "set_telescope_model(telescope)"},
+        {"set_zero_failed_gaussians", (PyCFunction)set_zero_failed_gaussians,
+                METH_VARARGS, "set_zero_failed_gaussians(value)"},
+        {"write_block", (PyCFunction)write_block,
+                METH_VARARGS, "write_block(block_index)"},
+        {"write_headers", (PyCFunction)write_headers,
+                METH_VARARGS, "write_headers()"},
         {NULL, NULL, 0, NULL}
 };
 

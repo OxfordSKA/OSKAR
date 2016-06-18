@@ -94,7 +94,7 @@ oskar_Telescope* oskar_set_up_telescope(const oskar_Settings_old* settings,
     }
 
     /* Set remaining options from settings. */
-    /* This must be done after the stations have been defined. */
+    /* These must be done after the stations have been defined. */
     oskar_telescope_set_phase_centre(t,
             OSKAR_SPHERICAL_TYPE_EQUATORIAL,
             settings->obs.phase_centre_lon_rad[0],

@@ -93,7 +93,7 @@ oskar_Timer* oskar_timer_create(int type)
 #endif
 
     /* Create the structure. */
-    timer = malloc(sizeof(oskar_Timer));
+    timer = (oskar_Timer*) calloc(1, sizeof(oskar_Timer));
 
 #ifdef OSKAR_OS_WIN
     QueryPerformanceFrequency(&freq);

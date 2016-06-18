@@ -51,6 +51,7 @@ void oskar_imager_free(oskar_Imager* h, int* status)
     oskar_mem_free(h->weight_im, status);
 
     oskar_imager_free_gpu_data(h, status);
+    free(h->input_file);
     free(h->image_root);
     free(h->ms_column);
     free(h);

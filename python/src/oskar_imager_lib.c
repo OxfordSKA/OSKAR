@@ -32,6 +32,7 @@
 #include <Python.h>
 
 #include <oskar_imager.h>
+#include <oskar_vis_block.h>
 #include <oskar_get_error_string.h>
 #include <string.h>
 
@@ -51,7 +52,7 @@ static void imager_free(PyObject* capsule)
 }
 
 
-static oskar_Imager* get_handle(PyObject* capsule)
+static oskar_Imager* get_handle_imager(PyObject* capsule)
 {
     oskar_Imager* h = 0;
     if (!PyCapsule_CheckExact(capsule))
@@ -63,7 +64,26 @@ static oskar_Imager* get_handle(PyObject* capsule)
     if (!h)
     {
         PyErr_SetString(PyExc_RuntimeError,
-                "Unable to convert PyCapsule object to pointer.");
+                "Unable to convert PyCapsule object to oskar_Imager.");
+        return 0;
+    }
+    return h;
+}
+
+
+static oskar_VisBlock* get_handle_vis_block(PyObject* capsule)
+{
+    oskar_VisBlock* h = 0;
+    if (!PyCapsule_CheckExact(capsule))
+    {
+        PyErr_SetString(PyExc_RuntimeError, "Input is not a PyCapsule object!");
+        return 0;
+    }
+    h = (oskar_VisBlock*) PyCapsule_GetPointer(capsule, "oskar_VisBlock");
+    if (!h)
+    {
+        PyErr_SetString(PyExc_RuntimeError,
+                "Unable to convert PyCapsule object to oskar_VisBlock.");
         return 0;
     }
     return h;
@@ -90,7 +110,7 @@ static PyObject* check_init(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     int status = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_check_init(h, &status);
     return Py_BuildValue("i", status);
 }
@@ -118,7 +138,7 @@ static PyObject* finalise(PyObject* self, PyObject* args)
     oskar_Mem* plane_c = 0;
     int status = 0;
     if (!PyArg_ParseTuple(args, "OO", &obj[0], &obj[1])) return 0;
-    if (!(h = get_handle(obj[0]))) return 0;
+    if (!(h = get_handle_imager(obj[0]))) return 0;
 
     /* Check if an output image plane was given. */
     if (obj[1] != Py_None)
@@ -145,7 +165,7 @@ static PyObject* finalise(PyObject* self, PyObject* args)
         goto fail;
     }
     Py_XDECREF(plane);
-    return Py_BuildValue("i", status);
+    return Py_BuildValue("");
 
 fail:
     Py_XDECREF(plane);
@@ -163,7 +183,7 @@ static PyObject* finalise_plane(PyObject* self, PyObject* args)
     double plane_norm = 0.0;
     if (!PyArg_ParseTuple(args, "OOd", &obj[0], &obj[1], &plane_norm))
         return 0;
-    if (!(h = get_handle(obj[0]))) return 0;
+    if (!(h = get_handle_imager(obj[0]))) return 0;
 
     /* Get the supplied plane. */
     plane = (PyArrayObject*) PyArray_FROM_OF(obj[1], NPY_ARRAY_OUT_ARRAY);
@@ -185,11 +205,21 @@ static PyObject* finalise_plane(PyObject* self, PyObject* args)
         goto fail;
     }
     Py_XDECREF(plane);
-    return Py_BuildValue("i", status);
+    return Py_BuildValue("");
 
 fail:
     Py_XDECREF(plane);
     return 0;
+}
+
+
+static PyObject* num_w_planes(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    return Py_BuildValue("i", oskar_imager_num_w_planes(h));
 }
 
 
@@ -198,7 +228,7 @@ static PyObject* plane_size(PyObject* self, PyObject* args)
     oskar_Imager* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     return Py_BuildValue("i", oskar_imager_plane_size(h));
 }
 
@@ -209,7 +239,7 @@ static PyObject* reset_cache(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     int status = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_reset_cache(h, &status);
     return Py_BuildValue("i", status);
 }
@@ -220,10 +250,9 @@ static PyObject* run(PyObject* self, PyObject* args)
     oskar_Imager* h = 0;
     PyObject* capsule = 0;
     int status = 0;
-    const char* filename = 0;
-    if (!PyArg_ParseTuple(args, "Os", &capsule, &filename)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
-    oskar_imager_run(h, filename, &status);
+    if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    oskar_imager_run(h, &status);
 
     /* Check for errors. */
     if (status)
@@ -233,7 +262,7 @@ static PyObject* run(PyObject* self, PyObject* args)
                 status, oskar_get_error_string(status));
         return 0;
     }
-    return Py_BuildValue("i", status);
+    return Py_BuildValue("");
 }
 
 
@@ -244,7 +273,7 @@ static PyObject* set_algorithm(PyObject* self, PyObject* args)
     int status = 0;
     const char* type = 0;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &type)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_algorithm(h, type, &status);
 
     /* Check for errors. */
@@ -255,7 +284,7 @@ static PyObject* set_algorithm(PyObject* self, PyObject* args)
                 status, oskar_get_error_string(status));
         return 0;
     }
-    return Py_BuildValue("i", status);
+    return Py_BuildValue("");
 }
 
 
@@ -266,7 +295,7 @@ static PyObject* set_channel_range(PyObject* self, PyObject* args)
     int start = 0, end = 0, snapshots = 0;
     if (!PyArg_ParseTuple(args, "Oiii", &capsule, &start, &end, &snapshots))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_channel_range(h, start, end, snapshots);
     return Py_BuildValue("");
 }
@@ -277,7 +306,7 @@ static PyObject* set_default_direction(PyObject* self, PyObject* args)
     oskar_Imager* h = 0;
     PyObject* capsule = 0;
     if (!PyArg_ParseTuple(args, "O", &capsule)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_default_direction(h);
     return Py_BuildValue("");
 }
@@ -289,20 +318,8 @@ static PyObject* set_direction(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     double ra = 0.0, dec = 0.0;
     if (!PyArg_ParseTuple(args, "Odd", &capsule, &ra, &dec)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_direction(h, ra, dec);
-    return Py_BuildValue("");
-}
-
-
-static PyObject* set_fov(PyObject* self, PyObject* args)
-{
-    oskar_Imager* h = 0;
-    PyObject* capsule = 0;
-    double fov = 0.0;
-    if (!PyArg_ParseTuple(args, "Od", &capsule, &fov)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
-    oskar_imager_set_fov(h, fov);
     return Py_BuildValue("");
 }
 
@@ -313,31 +330,21 @@ static PyObject* set_fft_on_gpu(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     int value = 0;
     if (!PyArg_ParseTuple(args, "Oi", &capsule, &value)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_fft_on_gpu(h, value);
     return Py_BuildValue("");
 }
 
 
-static PyObject* set_image_type(PyObject* self, PyObject* args)
+static PyObject* set_fov(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
     PyObject* capsule = 0;
-    int status = 0;
-    const char* type = 0;
-    if (!PyArg_ParseTuple(args, "Os", &capsule, &type)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
-    oskar_imager_set_image_type(h, type, &status);
-
-    /* Check for errors. */
-    if (status)
-    {
-        PyErr_Format(PyExc_RuntimeError,
-                "oskar_imager_set_image_type() failed with code %d (%s).",
-                status, oskar_get_error_string(status));
-        return 0;
-    }
-    return Py_BuildValue("i", status);
+    double fov = 0.0;
+    if (!PyArg_ParseTuple(args, "Od", &capsule, &fov)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    oskar_imager_set_fov(h, fov);
+    return Py_BuildValue("");
 }
 
 
@@ -349,7 +356,7 @@ static PyObject* set_grid_kernel(PyObject* self, PyObject* args)
     const char* type = 0;
     if (!PyArg_ParseTuple(args, "Osii", &capsule, &type, &support, &oversample))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_grid_kernel(h, type, support, oversample, &status);
 
     /* Check for errors. */
@@ -364,6 +371,41 @@ static PyObject* set_grid_kernel(PyObject* self, PyObject* args)
 }
 
 
+static PyObject* set_image_type(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    const char* type = 0;
+    if (!PyArg_ParseTuple(args, "Os", &capsule, &type)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    oskar_imager_set_image_type(h, type, &status);
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_imager_set_image_type() failed with code %d (%s).",
+                status, oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("i", status);
+}
+
+
+static PyObject* set_input_file(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    int status = 0;
+    const char* filename = 0;
+    if (!PyArg_ParseTuple(args, "Os", &capsule, &filename)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    oskar_imager_set_input_file(h, filename, &status);
+    return Py_BuildValue("i", status);
+}
+
+
 static PyObject* set_ms_column(PyObject* self, PyObject* args)
 {
     oskar_Imager* h = 0;
@@ -371,9 +413,21 @@ static PyObject* set_ms_column(PyObject* self, PyObject* args)
     int status = 0;
     const char* column = 0;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &column)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_ms_column(h, column, &status);
     return Py_BuildValue("i", status);
+}
+
+
+static PyObject* set_num_w_planes(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    PyObject* capsule = 0;
+    int num = 0;
+    if (!PyArg_ParseTuple(args, "Oi", &capsule, &num)) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
+    oskar_imager_set_num_w_planes(h, num);
+    return Py_BuildValue("");
 }
 
 
@@ -384,7 +438,7 @@ static PyObject* set_output_root(PyObject* self, PyObject* args)
     int status = 0;
     const char* filename = 0;
     if (!PyArg_ParseTuple(args, "Os", &capsule, &filename)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_output_root(h, filename, &status);
     return Py_BuildValue("i", status);
 }
@@ -396,7 +450,7 @@ static PyObject* set_size(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     int size = 0;
     if (!PyArg_ParseTuple(args, "Oi", &capsule, &size)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_size(h, size);
     return Py_BuildValue("");
 }
@@ -409,7 +463,7 @@ static PyObject* set_time_range(PyObject* self, PyObject* args)
     int start = 0, end = 0, snapshots = 0;
     if (!PyArg_ParseTuple(args, "Oiii", &capsule, &start, &end, &snapshots))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_time_range(h, start, end, snapshots);
     return Py_BuildValue("");
 }
@@ -422,7 +476,7 @@ static PyObject* set_vis_frequency(PyObject* self, PyObject* args)
     int status = 0, num = 0;
     double ref = 0.0, inc = 0.0;
     if (!PyArg_ParseTuple(args, "Oddi", &capsule, &ref, &inc, &num)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_vis_frequency(h, ref, inc, num, &status);
     return Py_BuildValue("i", status);
 }
@@ -434,7 +488,7 @@ static PyObject* set_vis_phase_centre(PyObject* self, PyObject* args)
     PyObject* capsule = 0;
     double ra = 0.0, dec = 0.0;
     if (!PyArg_ParseTuple(args, "Odd", &capsule, &ra, &dec)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_vis_phase_centre(h, ra, dec);
     return Py_BuildValue("");
 }
@@ -447,21 +501,9 @@ static PyObject* set_vis_time(PyObject* self, PyObject* args)
     int status = 0, num = 0;
     double ref = 0.0, inc = 0.0;
     if (!PyArg_ParseTuple(args, "Oddi", &capsule, &ref, &inc, &num)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_vis_time(h, ref, inc, num, &status);
     return Py_BuildValue("i", status);
-}
-
-
-static PyObject* set_w_planes(PyObject* self, PyObject* args)
-{
-    oskar_Imager* h = 0;
-    PyObject* capsule = 0;
-    int num = 0;
-    if (!PyArg_ParseTuple(args, "Oi", &capsule, &num)) return 0;
-    if (!(h = get_handle(capsule))) return 0;
-    oskar_imager_set_w_planes(h, num);
-    return Py_BuildValue("");
 }
 
 
@@ -472,7 +514,7 @@ static PyObject* set_w_range(PyObject* self, PyObject* args)
     double w_min = 0.0, w_max = 0.0, w_rms = 0.0;
     if (!PyArg_ParseTuple(args, "Oddd", &capsule, &w_min, &w_max, &w_rms))
         return 0;
-    if (!(h = get_handle(capsule))) return 0;
+    if (!(h = get_handle_imager(capsule))) return 0;
     oskar_imager_set_w_range(h, w_min, w_max, w_rms);
     return Py_BuildValue("");
 }
@@ -486,14 +528,14 @@ static PyObject* update(PyObject* self, PyObject* args)
     PyArrayObject *uu = 0, *vv = 0, *ww = 0, *amps = 0, *weight = 0;
     int start_time = 0, end_time = 0, start_chan = 0, end_chan = 0;
     int num_pols = 1, num_baselines = 0, vis_type;
-    int num_times, num_chan, num_coords, num_vis, status = 0;
+    int num_times, num_chan, num_coords, num_vis, num_weights, status = 0;
 
     /* Parse inputs. */
     if (!PyArg_ParseTuple(args, "OiOOOOOiiiii", &obj[0],
             &num_baselines, &obj[1], &obj[2], &obj[3], &obj[4], &obj[5],
             &num_pols, &start_time, &end_time, &start_chan, &end_chan))
         return 0;
-    if (!(h = get_handle(obj[0]))) return 0;
+    if (!(h = get_handle_imager(obj[0]))) return 0;
 
     /* Make sure input objects are arrays. Convert if required. */
     uu     = (PyArrayObject*) PyArray_FROM_OF(obj[1], NPY_ARRAY_IN_ARRAY);
@@ -517,6 +559,7 @@ static PyObject* update(PyObject* self, PyObject* args)
     num_chan = 1 + end_chan - start_chan;
     num_coords = num_times * num_baselines;
     num_vis = num_coords * num_chan;
+    num_weights = num_coords * num_pols;
     vis_type = oskar_type_from_numpy(amps);
     if (num_pols == 4) vis_type |= OSKAR_MATRIX;
 
@@ -530,12 +573,14 @@ static PyObject* update(PyObject* self, PyObject* args)
     amp_c = oskar_mem_create_alias_from_raw(PyArray_DATA(amps),
             vis_type, OSKAR_CPU, num_vis, &status);
     weight_c = oskar_mem_create_alias_from_raw(PyArray_DATA(weight),
-            oskar_type_from_numpy(weight), OSKAR_CPU, num_vis, &status);
+            oskar_type_from_numpy(weight), OSKAR_CPU, num_weights, &status);
 
     /* Update the imager with the supplied visibility data. */
+    Py_BEGIN_ALLOW_THREADS
     oskar_imager_update(h, start_time, end_time, start_chan, end_chan,
             num_pols, num_baselines, uu_c, vv_c, ww_c, amp_c, weight_c,
             &status);
+    Py_END_ALLOW_THREADS
     oskar_mem_free(uu_c, &status);
     oskar_mem_free(vv_c, &status);
     oskar_mem_free(ww_c, &status);
@@ -555,7 +600,7 @@ static PyObject* update(PyObject* self, PyObject* args)
     Py_XDECREF(ww);
     Py_XDECREF(amps);
     Py_XDECREF(weight);
-    return Py_BuildValue("i", status);
+    return Py_BuildValue("");
 
 fail:
     Py_XDECREF(uu);
@@ -564,6 +609,36 @@ fail:
     Py_XDECREF(amps);
     Py_XDECREF(weight);
     return 0;
+}
+
+
+static PyObject* update_block(PyObject* self, PyObject* args)
+{
+    oskar_Imager* h = 0;
+    oskar_VisBlock* b = 0;
+    PyObject *obj[] = {0, 0};
+    int status = 0;
+
+    /* Parse inputs. */
+    if (!PyArg_ParseTuple(args, "OO", &obj[0], &obj[1]))
+        return 0;
+    if (!(h = get_handle_imager(obj[0]))) return 0;
+    if (!(b = get_handle_vis_block(obj[1]))) return 0;
+
+    /* Update the imager with the supplied visibility data. */
+    Py_BEGIN_ALLOW_THREADS
+    oskar_imager_update_block(h, b, &status);
+    Py_END_ALLOW_THREADS
+
+    /* Check for errors. */
+    if (status)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+                "oskar_imager_update_block() failed with code %d (%s).", status,
+                oskar_get_error_string(status));
+        return 0;
+    }
+    return Py_BuildValue("");
 }
 
 
@@ -580,7 +655,7 @@ static PyObject* update_plane(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "OOOOOOOd", &obj[0],
             &obj[1], &obj[2], &obj[3], &obj[4], &obj[5], &obj[6], &plane_norm))
         return 0;
-    if (!(h = get_handle(obj[0]))) return 0;
+    if (!(h = get_handle_imager(obj[0]))) return 0;
 
     /* Make sure input objects are arrays. Convert if required. */
     uu     = (PyArrayObject*) PyArray_FROM_OF(obj[1], NPY_ARRAY_IN_ARRAY);
@@ -794,7 +869,7 @@ static PyObject* make_image(PyObject* self, PyObject* args)
     Py_XDECREF(ww);
     Py_XDECREF(amps);
     Py_XDECREF(weight);
-    return Py_BuildValue("O", im);
+    return Py_BuildValue("N", im); /* Don't increment refcount. */
 
 fail:
     Py_XDECREF(uu);
@@ -815,29 +890,35 @@ static PyMethodDef methods[] =
                 "finalise(image)"},
         {"finalise_plane", (PyCFunction)finalise_plane, METH_VARARGS,
                 "finalise_plane(plane, plane_norm)"},
-        {"plane_size", (PyCFunction)plane_size, METH_VARARGS, "plane_size()"},
         {"make_image", (PyCFunction)make_image, METH_VARARGS,
                 "make_image(uu, vv, ww, amp, weight, fov_deg, size)"},
+        {"num_w_planes", (PyCFunction)num_w_planes, METH_VARARGS,
+                "num_w_planes()"},
+        {"plane_size", (PyCFunction)plane_size, METH_VARARGS, "plane_size()"},
         {"reset_cache", (PyCFunction)reset_cache, METH_VARARGS,
                 "reset_cache()"},
-        {"run", (PyCFunction)run, METH_VARARGS, "run(filename)"},
+        {"run", (PyCFunction)run, METH_VARARGS, "run()"},
         {"set_algorithm", (PyCFunction)set_algorithm, METH_VARARGS,
                 "set_algorithm(type)"},
+        {"set_channel_range", (PyCFunction)set_channel_range, METH_VARARGS,
+                "set_channel_range(start, end, snapshots)"},
         {"set_default_direction", (PyCFunction)set_default_direction, METH_VARARGS,
                 "set_default_direction()"},
         {"set_direction", (PyCFunction)set_direction, METH_VARARGS,
                 "set_direction(ra_deg, dec_deg)"},
-        {"set_channel_range", (PyCFunction)set_channel_range, METH_VARARGS,
-                "set_channel_range(start, end, snapshots)"},
+        {"set_fft_on_gpu", (PyCFunction)set_fft_on_gpu, METH_VARARGS,
+                "set_fft_on_gpu(value)"},
+        {"set_fov", (PyCFunction)set_fov, METH_VARARGS, "set_fov(value)"},
         {"set_grid_kernel", (PyCFunction)set_grid_kernel, METH_VARARGS,
                 "set_grid_kernel(type, support, oversample)"},
         {"set_image_type", (PyCFunction)set_image_type, METH_VARARGS,
                 "set_image_type(type)"},
-        {"set_fft_on_gpu", (PyCFunction)set_fft_on_gpu, METH_VARARGS,
-                "set_fft_on_gpu(value)"},
-        {"set_fov", (PyCFunction)set_fov, METH_VARARGS, "set_fov(value)"},
+        {"set_input_file", (PyCFunction)set_input_file, METH_VARARGS,
+                "set_input_file(filename)"},
         {"set_ms_column", (PyCFunction)set_ms_column, METH_VARARGS,
                 "set_ms_column(column)"},
+        {"set_num_w_planes", (PyCFunction)set_num_w_planes, METH_VARARGS,
+                "set_num_w_planes(num_planes)"},
         {"set_output_root", (PyCFunction)set_output_root, METH_VARARGS,
                 "set_output_root(filename)"},
         {"set_size", (PyCFunction)set_size, METH_VARARGS, "set_size(value)"},
@@ -849,13 +930,13 @@ static PyMethodDef methods[] =
                 "set_vis_phase_centre(ra_deg, dec_deg)"},
         {"set_vis_time", (PyCFunction)set_vis_time, METH_VARARGS,
                 "set_vis_time(ref_mjd_utc, inc_sec, num_times)"},
-        {"set_w_planes", (PyCFunction)set_w_planes, METH_VARARGS,
-                "set_w_planes(num_planes)"},
         {"set_w_range", (PyCFunction)set_w_range, METH_VARARGS,
                 "set_w_range(w_min, w_max, w_rms)"},
         {"update", (PyCFunction)update, METH_VARARGS,
                 "update(num_baselines, uu, vv, ww, amps, weight, "
                 "num_pols, start_time, end_time, start_chan, end_chan)"},
+        {"update_block", (PyCFunction)update_block, METH_VARARGS,
+                "update_block(vis_block)"},
         {"update_plane", (PyCFunction)update_plane, METH_VARARGS,
                 "update_plane(uu, vv, ww, amps, weight, plane, plane_norm)"},
         {NULL, NULL, 0, NULL}

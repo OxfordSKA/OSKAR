@@ -83,6 +83,15 @@ class Imager(object):
         _imager_lib.finalise_plane(self._capsule, plane, plane_norm)
 
 
+    def num_w_planes(self):
+        """Returns the number of W-planes in use.
+
+        Returns:
+            int: The number of W-planes in use.
+        """
+        return _imager_lib.num_w_planes(self._capsule)
+
+
     def plane_size(self):
         """Returns the required plane size.
 
@@ -103,14 +112,12 @@ class Imager(object):
         _imager_lib.reset_cache(self._capsule)
 
 
-    def run(self, filename):
+    def run(self):
         """Runs the imager on a visibility file.
 
-        Args:
-            filename (str): 
-                Path to input Measurement Set or OSKAR visibility file.
+        The input filename must be set using set_input_file().
         """
-        _imager_lib.run(self._capsule, filename)
+        _imager_lib.run(self._capsule)
 
 
     def set_algorithm(self, algorithm_type):
@@ -120,6 +127,18 @@ class Imager(object):
             type (str): Either 'FFT', 'DFT 2D', 'DFT 3D' or 'W-projection'.
         """
         _imager_lib.set_algorithm(self._capsule, algorithm_type)
+
+
+    def set_channel_range(self, start, end, snapshots):
+        """Sets the visibility channel range used by the imager.
+
+        Args:
+            start (int): Start channel index.
+            end (int):   End channel index (-1 for all channels).
+            snapshots (boolean): If true, image each channel separately; 
+                if false, use frequency synthesis.
+        """
+        _imager_lib.set_channel_range(self._capsule, start, end, snapshots)
 
 
     def set_default_direction(self):
@@ -137,16 +156,22 @@ class Imager(object):
         _imager_lib.set_direction(self._capsule, ra_deg, dec_deg)
 
 
-    def set_channel_range(self, start, end, snapshots):
-        """Sets the visibility channel range used by the imager.
+    def set_fft_on_gpu(self, value):
+        """Sets whether to use the GPU for FFTs.
 
         Args:
-            start (int): Start channel index.
-            end (int):   End channel index (-1 for all channels).
-            snapshots (boolean): If true, image each channel separately; 
-                if false, use frequency synthesis.
+            value (boolean): If true, use the GPU for FFTs.
         """
-        _imager_lib.set_channel_range(self._capsule, start, end, snapshots)
+        _imager_lib.set_fft_on_gpu(self._capsule, value)
+
+
+    def set_fov(self, fov_deg):
+        """Sets the field of view to image.
+
+        Args:
+            fov_deg (float): Field of view, in degrees.
+        """
+        _imager_lib.set_fov(self._capsule, fov_deg)
 
 
     def set_grid_kernel(self, kernel_type, support, oversample):
@@ -173,22 +198,14 @@ class Imager(object):
         _imager_lib.set_image_type(self._capsule, image_type)
 
 
-    def set_fft_on_gpu(self, value):
-        """Sets whether to use the GPU for FFTs.
+    def set_input_file(self, filename):
+        """Sets the input visibility file or Measurement Set.
 
         Args:
-            value (boolean): If true, use the GPU for FFTs.
+            filename (str): 
+                Path to input Measurement Set or OSKAR visibility file.
         """
-        _imager_lib.set_fft_on_gpu(self._capsule, value)
-
-
-    def set_fov(self, fov_deg):
-        """Sets the field of view to image.
-
-        Args:
-            fov_deg (float): Field of view, in degrees.
-        """
-        _imager_lib.set_fov(self._capsule, fov_deg)
+        _imager_lib.set_input_file(self._capsule, filename)
 
 
     def set_ms_column(self, column):
@@ -198,6 +215,17 @@ class Imager(object):
             column (str): Name of the column to use.
         """
         _imager_lib.set_ms_column(self._capsule, column)
+
+
+    def set_num_w_planes(self, num_planes):
+        """Sets the number of W-planes to use, if using W-projection.
+
+        A number less than or equal to zero means 'automatic'.
+
+        Args:
+            num_planes (int): Number of W-planes to use.
+        """
+        _imager_lib.set_num_w_planes(self._capsule, num_planes)
 
 
     def set_output_root(self, filename):
@@ -230,13 +258,16 @@ class Imager(object):
         _imager_lib.set_time_range(self._capsule, start, end, snapshots)
 
 
-    def set_vis_frequency(self, ref_hz, inc_hz, num_channels):
+    def set_vis_frequency(self, ref_hz, inc_hz=0.0, num_channels=1):
         """Sets the visibility start frequency.
 
         Args:
-            ref_hz (float): Frequency of index 0, in Hz.
-            inc_hz (float): Frequency increment, in Hz.
-            num_channels (int): Number of channels in visibility data.
+            ref_hz (float):
+                Frequency of index 0, in Hz.
+            inc_hz (Optional[float]):
+                Frequency increment, in Hz. Default 0.0.
+            num_channels (Optional[int]):
+                Number of channels in visibility data. Default 1.
         """
         _imager_lib.set_vis_frequency(self._capsule,
             ref_hz, inc_hz, num_channels)
@@ -252,26 +283,18 @@ class Imager(object):
         _imager_lib.set_vis_phase_centre(self._capsule, ra_deg, dec_deg)
 
 
-    def set_vis_time(self, ref_mjd_utc, inc_sec, num_times):
+    def set_vis_time(self, ref_mjd_utc, inc_sec=0.0, num_times=1):
         """Sets the visibility start time.
 
         Args:
-            ref_mjd_utc (float): Time of index 0, as MJD(UTC).
-            inc_sec (float): Time increment, in seconds.
-            num_times (int): Number of time steps in visibility data.
+            ref_mjd_utc (float):
+                Time of index 0, as MJD(UTC).
+            inc_sec (Optional[float]):
+                Time increment, in seconds. Default 0.0.
+            num_times (Optional[int]):
+                Number of time steps in visibility data.
         """
         _imager_lib.set_vis_time(self._capsule, ref_mjd_utc, inc_sec, num_times)
-
-
-    def set_w_planes(self, num_planes):
-        """Sets the number of W-planes to use, if using W-projection.
-
-        A number less than or equal to zero means 'automatic'.
-
-        Args:
-            num_planes (int): Number of W-planes to use.
-        """
-        _imager_lib.set_w_planes(self._capsule, num_planes)
 
 
     def set_w_range(self, w_min, w_max, w_rms):
@@ -293,6 +316,9 @@ class Imager(object):
         The visibility amplitude data dimension order must be:
         (slowest) time, channel, baseline, polarisation (fastest).
 
+        The visibility weight data dimension order must be:
+        (slowest) time, baseline, polarisation (fastest).
+
         Call finalise() to finalise the images after calling this function.
 
         Args:
@@ -305,23 +331,35 @@ class Imager(object):
             ww (float, array-like, shape (n,)):
                 Time-baseline ordered ww coordinates, in metres.
             amp (complex float, array-like, shape (n,)):
-                Baseline visibility amplitudes.
+                Baseline visibility amplitudes. Length as described above.
             weight (float, array-like, shape (n,)):
-                Visibility weights.
+                Visibility weights. Length as described above.
             num_pols (Optional[int]):
-               Number of polarisations in the visibility block. Default 1.
+                Number of polarisations in the visibility block. Default 1.
             start_time (Optional[int]):
-               Start time index of the visibility block. Default 0.
+                Start time index of the visibility block. Default 0.
             end_time (Optional[int]):
-               End time index of the visibility block. Default 0.
+                End time index of the visibility block. Default 0.
             start_chan (Optional[int]):
-               Start channel index of the visibility block. Default 0.
+                Start channel index of the visibility block. Default 0.
             end_chan (Optional[int]):
-               End channel index of the visibility block. Default 0.
+                End channel index of the visibility block. Default 0.
         """
         _imager_lib.update(self._capsule, num_baselines, uu, vv, ww, 
             amps, weight, num_pols, start_time, end_time, 
             start_channel, end_channel)
+
+
+    def update_block(self, block):
+        """Runs imager for supplied visibilities, applying optional selection.
+
+        Call finalise() to finalise the images after calling this function.
+
+        Args:
+            block (oskar.VisBlock):
+                Handle to an OSKAR visibility block.
+        """
+        _imager_lib.update_block(self._capsule, block._capsule)
 
 
     def update_plane(self, uu, vv, ww, amps, weight, plane, plane_norm):

@@ -50,21 +50,32 @@ static void oskar_imager_run_vis(oskar_Imager* h, const char* filename,
         int* status);
 
 
-void oskar_imager_run(oskar_Imager* h, const char* filename, int* status)
+void oskar_imager_run(oskar_Imager* h, int* status)
 {
     int len, use_ms;
-    if (*status || !filename) return;
+    if (*status) return;
+
+    /* Check input file has been set. */
+    if (!h->input_file)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     /* Check filename for Measurement Set. */
-    len = strlen(filename);
-    if (len == 0) { *status = OSKAR_ERR_FILE_IO; return; }
+    len = strlen(h->input_file);
+    if (len == 0)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
     use_ms = (len >= 3) && (
-            !strcmp(&filename[len-3], ".MS") ||
-            !strcmp(&filename[len-3], ".ms") ) ? 1 : 0;
+            !strcmp(&(h->input_file[len-3]), ".MS") ||
+            !strcmp(&(h->input_file[len-3]), ".ms") ) ? 1 : 0;
     if (use_ms)
-        oskar_imager_run_ms(h, filename, status);
+        oskar_imager_run_ms(h, h->input_file, status);
     else
-        oskar_imager_run_vis(h, filename, status);
+        oskar_imager_run_vis(h, h->input_file, status);
 
     /* Finalise the image plane(s) and write them out. */
     if (h->log)
@@ -201,7 +212,7 @@ void oskar_imager_run_vis(oskar_Imager* h, const char* filename, int* status)
                 oskar_imager_plane_size(h), oskar_imager_plane_size(h));
         if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
             oskar_log_message(h->log, 'M', 1, "Using %d W-planes.",
-                    oskar_imager_w_planes(h));
+                    oskar_imager_num_w_planes(h));
     }
 
     /* Loop over visibility blocks. */
@@ -387,7 +398,7 @@ void oskar_imager_run_ms(oskar_Imager* h, const char* filename, int* status)
                 oskar_imager_plane_size(h), oskar_imager_plane_size(h));
         if (h->algorithm == OSKAR_ALGORITHM_WPROJ)
             oskar_log_message(h->log, 'M', 1, "Using %d W-planes.",
-                    oskar_imager_w_planes(h));
+                    oskar_imager_num_w_planes(h));
     }
 
     /* Loop over visibility blocks. */

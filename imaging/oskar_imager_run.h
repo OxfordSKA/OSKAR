@@ -48,14 +48,14 @@ extern "C" {
  * one or more images from visibility data in an OSKAR visibility file or
  * (if compiled with casacore) a Measurement Set.
  *
+ * Call oskar_imager_set_input_file() to set the filename.
  * When using Measurement Sets, the filename must end with ".ms" or ".MS".
  *
  * @param[in,out] h          Handle to imager.
- * @param[in]     filename   Filename of visibility data.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_imager_run(oskar_Imager* h, const char* filename, int* status);
+void oskar_imager_run(oskar_Imager* h, int* status);
 
 #ifdef __cplusplus
 }

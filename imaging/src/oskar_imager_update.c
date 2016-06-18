@@ -48,6 +48,46 @@ extern "C" {
 
 static void oskar_imager_allocate_planes(oskar_Imager* h, int *status);
 
+void oskar_imager_update_block(oskar_Imager* h, const oskar_VisBlock* b,
+        int* status)
+{
+    int start_time, end_time, start_chan, end_chan;
+    int num_baselines, num_channels, num_pols, num_times;
+    oskar_Mem *weight_ptr = 0, *weight = 0;
+    if (*status) return;
+
+    /* Get dimensions from the block. */
+    num_baselines = oskar_vis_block_num_baselines(b);
+    num_channels  = oskar_vis_block_num_channels(b);
+    num_pols      = oskar_vis_block_num_pols(b);
+    num_times     = oskar_vis_block_num_times(b);
+    start_time    = oskar_vis_block_start_time_index(b);
+    start_chan    = oskar_vis_block_start_channel_index(b);
+    end_time      = start_time + num_times - 1;
+    end_chan      = start_chan + num_channels - 1;
+
+    /* Deal with the lack of weights. */
+    if (!weight)
+    {
+        int weight_len = num_times * num_baselines * num_pols;
+        weight = oskar_mem_create(oskar_mem_precision(
+                oskar_vis_block_cross_correlations_const(b)),
+                OSKAR_CPU, weight_len, status);
+        oskar_mem_set_value_real(weight, 1.0, 0, weight_len, status);
+        weight_ptr = weight;
+    }
+
+    /* Update the imager with the block data. */
+    oskar_imager_update(h, start_time, end_time, start_chan, end_chan,
+            num_pols, num_baselines,
+            oskar_vis_block_baseline_uu_metres_const(b),
+            oskar_vis_block_baseline_vv_metres_const(b),
+            oskar_vis_block_baseline_ww_metres_const(b),
+            oskar_vis_block_cross_correlations_const(b), weight_ptr, status);
+    oskar_mem_free(weight, status);
+}
+
+
 void oskar_imager_update(oskar_Imager* h, int start_time, int end_time,
         int start_chan, int end_chan, int num_pols, int num_baselines,
         const oskar_Mem* uu, const oskar_Mem* vv, const oskar_Mem* ww,
